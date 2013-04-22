@@ -120,25 +120,25 @@ Ext.onReady( function() {
 		util.dimension = {
 			panel: {
 				setHeight: function(mx) {
-					var panelHeight = pt.cmp.dimension.panels.length * 28,
+					var panelHeight = dv.cmp.dimension.panels.length * 28,
 						height;
 
-					if (pt.viewport.westRegion.hasScrollbar) {
+					if (dv.viewport.westRegion.hasScrollbar) {
 						height = panelHeight + mx;
-						pt.viewport.accordion.setHeight(pt.viewport.getHeight() - 2);
-						pt.viewport.accordionBody.setHeight(height - 2);
+						dv.viewport.accordion.setHeight(dv.viewport.getHeight() - 2);
+						dv.viewport.accordionBody.setHeight(height - 2);
 					}
 					else {
-						height = pt.viewport.westRegion.getHeight() - pt.conf.layout.west_fill;
+						height = dv.viewport.westRegion.getHeight() - dv.conf.layout.west_fill;
 						mx += panelHeight;
-						pt.viewport.accordion.setHeight((height > mx ? mx : height) - 2);
-						pt.viewport.accordionBody.setHeight((height > mx ? mx : height) - 2);
+						dv.viewport.accordion.setHeight((height > mx ? mx : height) - 2);
+						dv.viewport.accordionBody.setHeight((height > mx ? mx : height) - 2);
 					}
 				},
 
 				getExpanded: function() {
-					for (var i = 0, panel; i < pt.cmp.dimension.panels.length; i++) {
-						panel = pt.cmp.dimension.panels[i];
+					for (var i = 0, panel; i < dv.cmp.dimension.panels.length; i++) {
+						panel = dv.cmp.dimension.panels[i];
 
 						if (!panel.collapsed) {
 							return panel;
@@ -152,7 +152,7 @@ Ext.onReady( function() {
 
 		util.window = {
 			setAnchorPosition: function(w, target) {
-				var vpw = pt.viewport.getWidth(),
+				var vpw = dv.viewport.getWidth(),
 					targetx = target ? target.getPosition()[0] : 4,
 					winw = w.getWidth(),
 					y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
@@ -304,24 +304,24 @@ Ext.onReady( function() {
 
 		util.mask = {
 			showMask: function(cmp, msg) {
-				cmp = cmp || pt.viewport;
+				cmp = cmp || dv.viewport;
 				msg = msg || 'Loading..';
 
-				if (pt.viewport.mask) {
-					pt.viewport.mask.destroy();
+				if (dv.viewport.mask) {
+					dv.viewport.mask.destroy();
 				}
-				pt.viewport.mask = new Ext.create('Ext.LoadMask', cmp, {
-					id: 'pt-loadmask',
+				dv.viewport.mask = new Ext.create('Ext.LoadMask', cmp, {
+					id: 'dv-loadmask',
 					shadow: false,
 					msg: msg,
 					style: 'box-shadow:0',
 					bodyStyle: 'box-shadow:0'
 				});
-				pt.viewport.mask.show();
+				dv.viewport.mask.show();
 			},
 			hideMask: function() {
-				if (pt.viewport.mask) {
-					pt.viewport.mask.hide();
+				if (dv.viewport.mask) {
+					dv.viewport.mask.hide();
 				}
 			}
 		};
@@ -397,7 +397,7 @@ Ext.onReady( function() {
 				}
 
 				if (Ext.isNumber(x) && Ext.isNumber(fix)) {
-					var dec = pt.util.number.getNumberOfDecimals(x);
+					var dec = dv.util.number.getNumberOfDecimals(x);
 					return parseFloat(dec > fix ? x.toFixed(fix) : x);
 				}
 				return x;
@@ -410,7 +410,7 @@ Ext.onReady( function() {
 					return x;
 				}
 
-				return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, pt.conf.pivot.digitGroupSeparator[nf]);
+				return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, dv.conf.pivot.digitGroupSeparator[nf]);
 			}
 		};
 
@@ -1473,7 +1473,7 @@ Ext.onReady( function() {
 				combo = Ext.create('Ext.form.field.ComboBox', {
 					fieldLabel: isPublicAccess ? 'Public access' : obj.name, //i18n
 					labelStyle: 'color:#333',
-					cls: 'pt-combo',
+					cls: 'dv-combo',
 					fieldStyle: 'padding-left:5px',
 					width: 380,
 					labelWidth: 250,
@@ -1929,7 +1929,7 @@ Ext.onReady( function() {
 			});
 
 			indicatorAvailable = Ext.create('Ext.ux.form.MultiSelect', {
-				cls: 'pt-toolbar-multiselect-left',
+				cls: 'dv-toolbar-multiselect-left',
 				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
 				valueField: 'id',
 				displayField: 'name',
@@ -1938,7 +1938,7 @@ Ext.onReady( function() {
 					{
 						xtype: 'label',
 						text: DV.i18n.available,
-						cls: 'pt-toolbar-multiselect-left-label'
+						cls: 'dv-toolbar-multiselect-left-label'
 					},
 					'->',
 					{
@@ -1968,7 +1968,7 @@ Ext.onReady( function() {
 			});
 
 			indicatorSelected = Ext.create('Ext.ux.form.MultiSelect', {
-				cls: 'pt-toolbar-multiselect-right',
+				cls: 'dv-toolbar-multiselect-right',
 				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
 				valueField: 'id',
 				displayField: 'name',
@@ -1995,7 +1995,7 @@ Ext.onReady( function() {
 					{
 						xtype: 'label',
 						text: DV.i18n.selected,
-						cls: 'pt-toolbar-multiselect-right-label'
+						cls: 'dv-toolbar-multiselect-right-label'
 					}
 				],
 				listeners: {
@@ -2009,7 +2009,7 @@ Ext.onReady( function() {
 
 			indicator = {
 				xtype: 'panel',
-				title: '<div class="pt-panel-title-data">' + DV.i18n.indicators + '</div>',
+				title: '<div class="dv-panel-title-data">' + DV.i18n.indicators + '</div>',
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
@@ -2037,7 +2037,7 @@ Ext.onReady( function() {
 				items: [
 					{
 						xtype: 'combobox',
-						cls: 'pt-combo',
+						cls: 'dv-combo',
 						style: 'margin-bottom:2px; margin-top:0px',
 						width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding,
 						valueField: 'id',
@@ -2118,7 +2118,7 @@ Ext.onReady( function() {
 			};
 
 			dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
-				cls: 'pt-toolbar-multiselect-left',
+				cls: 'dv-toolbar-multiselect-left',
 				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
 				valueField: 'id',
 				displayField: 'name',
@@ -2127,7 +2127,7 @@ Ext.onReady( function() {
 					{
 						xtype: 'label',
 						text: DV.i18n.available,
-						cls: 'pt-toolbar-multiselect-left-label'
+						cls: 'dv-toolbar-multiselect-left-label'
 					},
 					'->',
 					{
@@ -2157,7 +2157,7 @@ Ext.onReady( function() {
 			});
 
 			dataElementSelected = Ext.create('Ext.ux.form.MultiSelect', {
-				cls: 'pt-toolbar-multiselect-right',
+				cls: 'dv-toolbar-multiselect-right',
 				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
 				valueField: 'id',
 				displayField: 'name',
@@ -2184,7 +2184,7 @@ Ext.onReady( function() {
 					{
 						xtype: 'label',
 						text: DV.i18n.selected,
-						cls: 'pt-toolbar-multiselect-right-label'
+						cls: 'dv-toolbar-multiselect-right-label'
 					}
 				],
 				listeners: {
@@ -2198,7 +2198,7 @@ Ext.onReady( function() {
 
 			dataElement = {
 				xtype: 'panel',
-				title: '<div class="pt-panel-title-data">' + DV.i18n.data_elements + '</div>',
+				title: '<div class="dv-panel-title-data">' + DV.i18n.data_elements + '</div>',
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
@@ -2226,7 +2226,7 @@ Ext.onReady( function() {
 				items: [
 					{
 						xtype: 'combobox',
-						cls: 'pt-combo',
+						cls: 'dv-combo',
 						style: 'margin-bottom:2px; margin-top:0px',
 						width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding,
 						valueField: 'id',
@@ -2307,7 +2307,7 @@ Ext.onReady( function() {
 			};
 
 			dataSetAvailable = Ext.create('Ext.ux.form.MultiSelect', {
-				cls: 'pt-toolbar-multiselect-left',
+				cls: 'dv-toolbar-multiselect-left',
 				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
 				valueField: 'id',
 				displayField: 'name',
@@ -2316,7 +2316,7 @@ Ext.onReady( function() {
 					{
 						xtype: 'label',
 						text: DV.i18n.available,
-						cls: 'pt-toolbar-multiselect-left-label'
+						cls: 'dv-toolbar-multiselect-left-label'
 					},
 					'->',
 					{
@@ -2346,7 +2346,7 @@ Ext.onReady( function() {
 			});
 
 			dataSetSelected = Ext.create('Ext.ux.form.MultiSelect', {
-				cls: 'pt-toolbar-multiselect-right',
+				cls: 'dv-toolbar-multiselect-right',
 				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
 				valueField: 'id',
 				displayField: 'name',
@@ -2373,7 +2373,7 @@ Ext.onReady( function() {
 					{
 						xtype: 'label',
 						text: DV.i18n.selected,
-						cls: 'pt-toolbar-multiselect-right-label'
+						cls: 'dv-toolbar-multiselect-right-label'
 					}
 				],
 				listeners: {
@@ -2387,7 +2387,7 @@ Ext.onReady( function() {
 
 			dataSet = {
 				xtype: 'panel',
-				title: '<div class="pt-panel-title-data">' + DV.i18n.reporting_rates + '</div>',
+				title: '<div class="dv-panel-title-data">' + DV.i18n.reporting_rates + '</div>',
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
@@ -2480,7 +2480,7 @@ Ext.onReady( function() {
 									{
 										xtype: 'label',
 										text: DV.i18n.weeks,
-										cls: 'pt-label-period-heading'
+										cls: 'dv-label-period-heading'
 									},
 									{
 										xtype: 'checkbox',
@@ -2522,7 +2522,7 @@ Ext.onReady( function() {
 									{
 										xtype: 'label',
 										text: DV.i18n.months,
-										cls: 'pt-label-period-heading'
+										cls: 'dv-label-period-heading'
 									},
 									{
 										xtype: 'checkbox',
@@ -2565,7 +2565,7 @@ Ext.onReady( function() {
 									{
 										xtype: 'label',
 										text: DV.i18n.bimonths,
-										cls: 'pt-label-period-heading'
+										cls: 'dv-label-period-heading'
 									},
 									{
 										xtype: 'checkbox',
@@ -2609,7 +2609,7 @@ Ext.onReady( function() {
 									{
 										xtype: 'label',
 										text: DV.i18n.quarters,
-										cls: 'pt-label-period-heading'
+										cls: 'dv-label-period-heading'
 									},
 									{
 										xtype: 'checkbox',
@@ -2646,7 +2646,7 @@ Ext.onReady( function() {
 									{
 										xtype: 'label',
 										text: DV.i18n.sixmonths,
-										cls: 'pt-label-period-heading'
+										cls: 'dv-label-period-heading'
 									},
 									{
 										xtype: 'checkbox',
@@ -2683,7 +2683,7 @@ Ext.onReady( function() {
 									{
 										xtype: 'label',
 										text: DV.i18n.financial_years,
-										cls: 'pt-label-period-heading'
+										cls: 'dv-label-period-heading'
 									},
 									{
 										xtype: 'checkbox',
@@ -2710,7 +2710,7 @@ Ext.onReady( function() {
 									//{
 										//xtype: 'label',
 										//text: 'Options',
-										//cls: 'pt-label-period-heading-options'
+										//cls: 'dv-label-period-heading-options'
 									//},
 									//rewind
 								//]
@@ -2745,7 +2745,7 @@ Ext.onReady( function() {
 									{
 										xtype: 'label',
 										text: DV.i18n.years,
-										cls: 'pt-label-period-heading'
+										cls: 'dv-label-period-heading'
 									},
 									{
 										xtype: 'checkbox',
@@ -2770,7 +2770,7 @@ Ext.onReady( function() {
 			};
 
 			fixedPeriodAvailable = Ext.create('Ext.ux.form.MultiSelect', {
-				cls: 'pt-toolbar-multiselect-left',
+				cls: 'dv-toolbar-multiselect-left',
 				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
 				height: 180,
 				valueField: 'id',
@@ -2780,7 +2780,7 @@ Ext.onReady( function() {
 					{
 						xtype: 'label',
 						text: DV.i18n.available,
-						cls: 'pt-toolbar-multiselect-left-label'
+						cls: 'dv-toolbar-multiselect-left-label'
 					},
 					'->',
 					{
@@ -2811,7 +2811,7 @@ Ext.onReady( function() {
 			});
 
 			fixedPeriodSelected = Ext.create('Ext.ux.form.MultiSelect', {
-				cls: 'pt-toolbar-multiselect-right',
+				cls: 'dv-toolbar-multiselect-right',
 				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
 				height: 180,
 				valueField: 'id',
@@ -2840,7 +2840,7 @@ Ext.onReady( function() {
 					{
 						xtype: 'label',
 						text: DV.i18n.selected,
-						cls: 'pt-toolbar-multiselect-right-label'
+						cls: 'dv-toolbar-multiselect-right-label'
 					}
 				],
 				listeners: {
@@ -2972,7 +2972,7 @@ Ext.onReady( function() {
 			};
 
 			treePanel = Ext.create('Ext.tree.Panel', {
-				cls: 'pt-tree',
+				cls: 'dv-tree',
 				style: 'border-top: 1px solid #ddd; padding-top: 1px',
 				width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding,
 				rootVisible: false,
@@ -3147,7 +3147,7 @@ Ext.onReady( function() {
 
 			organisationUnit = {
 				xtype: 'panel',
-				title: '<div class="pt-panel-title-organisationunit">' + DV.i18n.organisation_units + '</div>',
+				title: '<div class="dv-panel-title-organisationunit">' + DV.i18n.organisation_units + '</div>',
 				bodyStyle: 'padding-top:5px',
 				hideCollapseTool: true,
 				collapsed: false,
@@ -3245,7 +3245,7 @@ Ext.onReady( function() {
 
 					getAvailable = function(availableStore) {
 						return Ext.create('Ext.ux.form.MultiSelect', {
-							cls: 'pt-toolbar-multiselect-left',
+							cls: 'dv-toolbar-multiselect-left',
 							width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
 							valueField: 'id',
 							displayField: 'name',
@@ -3254,7 +3254,7 @@ Ext.onReady( function() {
 								{
 									xtype: 'label',
 									text: DV.i18n.available,
-									cls: 'pt-toolbar-multiselect-left-label'
+									cls: 'dv-toolbar-multiselect-left-label'
 								},
 								'->',
 								{
@@ -3286,7 +3286,7 @@ Ext.onReady( function() {
 
 					getSelected = function(selectedStore) {
 						return Ext.create('Ext.ux.form.MultiSelect', {
-							cls: 'pt-toolbar-multiselect-right',
+							cls: 'dv-toolbar-multiselect-right',
 							width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
 							valueField: 'id',
 							displayField: 'name',
@@ -3313,7 +3313,7 @@ Ext.onReady( function() {
 								{
 									xtype: 'label',
 									text: DV.i18n.selected,
-									cls: 'pt-toolbar-multiselect-right-label'
+									cls: 'dv-toolbar-multiselect-right-label'
 								}
 							],
 							listeners: {
@@ -3472,7 +3472,7 @@ Ext.onReady( function() {
 			accordionBody = Ext.create('Ext.panel.Panel', {
 				layout: 'accordion',
 				activeOnTop: true,
-				cls: 'pt-accordion',
+				cls: 'dv-accordion',
 				bodyStyle: 'border:0 none; margin-bottom:2px',
 				height: 700,
 				items: function() {
@@ -3489,11 +3489,11 @@ Ext.onReady( function() {
 					dv.util.array.sortObjectsByString(ougs);
 					dv.util.array.sortObjectsByString(degs);
 
-					panels = panels.concat(getGroupSetPanels(ougs, dv.conf.finals.dimension.organisationUnitGroupSet.objectName, 'pt-panel-title-organisationunitgroupset'));
-					panels = panels.concat(getGroupSetPanels(degs, dv.conf.finals.dimension.dataElementGroupSet.objectName, 'pt-panel-title-dataelementgroupset'));
+					panels = panels.concat(getGroupSetPanels(ougs, dv.conf.finals.dimension.organisationUnitGroupSet.objectName, 'dv-panel-title-organisationunitgroupset'));
+					panels = panels.concat(getGroupSetPanels(degs, dv.conf.finals.dimension.dataElementGroupSet.objectName, 'dv-panel-title-dataelementgroupset'));
 
 					last = panels[panels.length - 1];
-					last.cls = 'pt-accordion-last';
+					last.cls = 'dv-accordion-last';
 
 					return panels;
 				}()
@@ -3561,14 +3561,14 @@ Ext.onReady( function() {
 				text: 'Download',
 				disabled: true,
 				menu: {
-					cls: 'pt-menu',
+					cls: 'dv-menu',
 					width: 105,
 					shadow: false,
 					showSeparator: false,
 					items: [
 						{
 							text: 'Excel (XLS)',
-							iconCls: 'pt-menu-item-xls',
+							iconCls: 'dv-menu-item-xls',
 							handler: function() {
 								if (dv.baseUrl && dv.paramString) {
 									window.location.href = dv.baseUrl + '/api/analytics.xls' + dv.paramString;
@@ -3577,7 +3577,7 @@ Ext.onReady( function() {
 						},
 						{
 							text: 'CSV',
-							iconCls: 'pt-menu-item-csv',
+							iconCls: 'dv-menu-item-csv',
 							handler: function() {
 								if (dv.baseUrl && dv.paramString) {
 									window.location.href = dv.baseUrl + '/api/analytics.csv' + dv.paramString;
@@ -3586,7 +3586,7 @@ Ext.onReady( function() {
 						},
 						{
 							text: 'JSON',
-							iconCls: 'pt-menu-item-csv',
+							iconCls: 'dv-menu-item-csv',
 							handler: function() {
 								if (dv.baseUrl && dv.paramString) {
 									window.open(dv.baseUrl + '/api/analytics.json' + dv.paramString);
@@ -3595,7 +3595,7 @@ Ext.onReady( function() {
 						},
 						{
 							text: 'XML',
-							iconCls: 'pt-menu-item-csv',
+							iconCls: 'dv-menu-item-csv',
 							handler: function() {
 								if (dv.baseUrl && dv.paramString) {
 									window.open(dv.baseUrl + '/api/analytics.xml' + dv.paramString);
@@ -3605,7 +3605,7 @@ Ext.onReady( function() {
 					],
 					listeners: {
 						afterrender: function() {
-							this.getEl().addCls('pt-toolbar-btn-menu');
+							this.getEl().addCls('dv-toolbar-btn-menu');
 						}
 					}
 				}
@@ -3636,7 +3636,6 @@ Ext.onReady( function() {
 								update();
 							}
 						},
-						layoutButton,
 						optionsButton,
 						{
 							xtype: 'tbseparator',
