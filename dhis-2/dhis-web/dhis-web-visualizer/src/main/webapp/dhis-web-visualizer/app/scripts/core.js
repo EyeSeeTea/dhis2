@@ -224,27 +224,65 @@ DV.core.getConfig = function() {
 	dim.objectNameMap[dim.organisationUnitGroupSet.objectName] = dim.organisationUnitGroupSet;
 	dim.objectNameMap[dim.dataElementGroupSet.objectName] = dim.dataElementGroupSet;
 
-    conf.period = {
+	conf.period = {
 		relativePeriods: {
-			'lastWeek': 1,
-			'last4Weeks': 4,
-			'last12Weeks': 12,
-			'lastMonth': 1,
-			'last3Months': 3,
-			'last12Months': 12,
-			'lastQuarter': 1,
-			'last4Quarters': 4,
-			'lastSixMonth': 1,
-			'last2SixMonths': 2,
-			'thisYear': 1,
-			'lastYear': 1,
-			'last5Years': 5
+			'LAST_WEEK': 1,
+			'LAST_4_WEEKS': 4,
+			'LAST_12_WEEKS': 12,
+			'LAST_MONTH': 1,
+			'LAST_3_MONTHS': 3,
+			'LAST_BIMONTH': 1,
+			'LAST_6_BIMONTHS': 6,
+			'LAST_12_MONTHS': 12,
+			'LAST_QUARTER': 1,
+			'LAST_4_QUARTERS': 4,
+			'LAST_SIX_MONTH': 1,
+			'LAST_2_SIXMONTHS': 2,
+			'LAST_FINANCIAL_YEAR': 1,
+			'LAST_5_FINANCIAL_YEARS': 6,
+			'THIS_YEAR': 1,
+			'LAST_YEAR': 1,
+			'LAST_5_YEARS': 5
 		},
-		relativePeriodsUrl: {
-			'lastMonth': 'reportingMonth',
-			'lastQuarter': 'reportingQuarter'
+		relativePeriodValueKeys: {
+			'LAST_WEEK': 'lastWeek',
+			'LAST_4_WEEKS': 'last4Weeks',
+			'LAST_12_WEEKS': 'last12Weeks',
+			'LAST_MONTH': 'lastMonth',
+			'LAST_3_MONTHS': 'last3Months',
+			'LAST_12_MONTHS': 'last12Months',
+			'LAST_BIMONTH': 'lastBimonth',
+			'LAST_6_BIMONTHS': 'last6BiMonths',
+			'LAST_QUARTER': 'lastQuarter',
+			'LAST_4_QUARTERS': 'last4Quarters',
+			'LAST_SIX_MONTH': 'lastSixMonth',
+			'LAST_2_SIXMONTHS': 'last2SixMonths',
+			'LAST_FINANCIAL_YEAR': 'lastFinancialYear',
+			'LAST_5_FINANCIAL_YEARS': 'last5FinancialYears',
+			'THIS_YEAR': 'thisYear',
+			'LAST_YEAR': 'lastYear',
+			'LAST_5_YEARS': 'last5Years'
 		},
-		periodtypes: [
+		relativePeriodParamKeys: {
+			'lastWeek': 'LAST_WEEK',
+			'last4Weeks': 'LAST_4_WEEKS',
+			'last12Weeks': 'LAST_12_WEEKS',
+			'lastMonth': 'LAST_MONTH',
+			'last3Months': 'LAST_3_MONTHS',
+			'last12Months': 'LAST_12_MONTHS',
+			'lastBimonth': 'LAST_BIMONTH',
+			'last6BiMonths': 'LAST_6_BIMONTHS',
+			'lastQuarter': 'LAST_QUARTER',
+			'last4Quarters': 'LAST_4_QUARTERS',
+			'lastSixMonth': 'LAST_SIX_MONTH',
+			'last2SixMonths': 'LAST_2_SIXMONTHS',
+			'lastFinancialYear': 'LAST_FINANCIAL_YEAR',
+			'last5FinancialYears': 'LAST_5_FINANCIAL_YEARS',
+			'thisYear': 'THIS_YEAR',
+			'lastYear': 'LAST_YEAR',
+			'last5Years': 'LAST_5_YEARS'
+		},
+		periodTypes: [
 			{id: 'Daily', name: 'Daily'},
 			{id: 'Weekly', name: 'Weekly'},
 			{id: 'Monthly', name: 'Monthly'},

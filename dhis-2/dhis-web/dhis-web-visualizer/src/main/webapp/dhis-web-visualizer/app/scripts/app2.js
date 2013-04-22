@@ -2854,7 +2854,7 @@ Ext.onReady( function() {
 
 			period = {
 				xtype: 'panel',
-				title: '<div class="pt-panel-title-period">Periods</div>',
+				title: '<div class="dv-panel-title-period">Periods</div>',
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
@@ -2895,7 +2895,7 @@ Ext.onReady( function() {
 						items: [
 							{
 								xtype: 'combobox',
-								cls: 'pt-combo',
+								cls: 'dv-combo',
 								style: 'margin-bottom:2px',
 								width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding - 62 - 62 - 4,
 								valueField: 'id',
@@ -2921,45 +2921,45 @@ Ext.onReady( function() {
 										dv.util.multiselect.filterAvailable(fixedPeriodAvailable, fixedPeriodSelected);
 									}
 								}
-							},
-							{
-								xtype: 'button',
-								text: DV.i18n.prev_year,
-								style: 'margin-left:2px; border-radius:2px',
-								height: 24,
-								handler: function() {
-									var cb = this.up('panel').down('combobox');
-									if (cb.getValue()) {
-										cb.periodOffset--;
-										cb.fireEvent('select');
-									}
-								}
-							},
-							{
-								xtype: 'button',
-								text: DV.i18n.next_year,
-								style: 'margin-left:2px; border-radius:2px',
-								height: 24,
-								handler: function() {
-									var cb = this.up('panel').down('combobox');
-									if (cb.getValue() && cb.periodOffset < 0) {
-										cb.periodOffset++;
-										cb.fireEvent('select');
-									}
-								}
 							}
+							//{
+								//xtype: 'button',
+								//text: DV.i18n.prev_year,
+								//style: 'margin-left:2px; border-radius:2px',
+								//height: 24,
+								//handler: function() {
+									//var cb = this.up('panel').down('combobox');
+									//if (cb.getValue()) {
+										//cb.periodOffset--;
+										//cb.fireEvent('select');
+									//}
+								//}
+							//},
+							//{
+								//xtype: 'button',
+								//text: DV.i18n.next_year,
+								//style: 'margin-left:2px; border-radius:2px',
+								//height: 24,
+								//handler: function() {
+									//var cb = this.up('panel').down('combobox');
+									//if (cb.getValue() && cb.periodOffset < 0) {
+										//cb.periodOffset++;
+										//cb.fireEvent('select');
+									//}
+								//}
+							//}
 						]
-					},
-					{
-						xtype: 'panel',
-						layout: 'column',
-						bodyStyle: 'border-style:none; padding-bottom:2px',
-						items: [
-							fixedPeriodAvailable,
-							fixedPeriodSelected
-						]
-					},
-					relativePeriod
+					}
+					//{
+						//xtype: 'panel',
+						//layout: 'column',
+						//bodyStyle: 'border-style:none; padding-bottom:2px',
+						//items: [
+							//fixedPeriodAvailable,
+							//fixedPeriodSelected
+						//]
+					//}
+					//relativePeriod
 				],
 				listeners: {
 					added: function() {
@@ -3868,7 +3868,6 @@ Ext.onReady( function() {
 				westRegion: westRegion,
 				centerRegion: centerRegion,
 				updateViewport: update,
-				layoutButton: layoutButton,
 				optionsButton: optionsButton,
 				favoriteButton: favoriteButton,
 				downloadButton: downloadButton,
