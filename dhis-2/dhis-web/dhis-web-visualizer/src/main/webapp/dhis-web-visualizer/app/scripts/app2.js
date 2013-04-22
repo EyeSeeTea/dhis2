@@ -577,8 +577,8 @@ Ext.onReady( function() {
 							{id: dimConf.organisationUnit.value, name: dimConf.organisationUnit.name}
 						];
 
-					data.push(Ext.clone(dv.init.ougs));
-					data.push(Ext.clone(dv.init.degs));
+					data = data.concat(Ext.clone(dv.init.ougs));
+					data = data.concat(Ext.clone(dv.init.degs));
 
 					return data;
 				}()
@@ -608,7 +608,7 @@ Ext.onReady( function() {
 
 		showTrendLine = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: DV.i18n.trend_line,
-			style: 'margin-bottom:4px',
+			style: 'margin-bottom:6px',
 			checked: true
 		});
 		dv.viewport.showTrendLine = showTrendLine;
@@ -617,7 +617,6 @@ Ext.onReady( function() {
 			//cls: 'gis-numberfield',
 			width: 60,
 			height: 18,
-			fieldLabel: 'Target line value/title', //i18n
 			listeners: {
 				change: function(nf) {
 					targetLineTitle.xable();
@@ -628,11 +627,14 @@ Ext.onReady( function() {
 
 		targetLineTitle = Ext.create('Ext.form.field.Text', {
 			//cls: 'dv-textfield-alt1',
-			style: 'margin-left:2px',
+			style: 'margin-left:2px; margin-bottom:2px',
+			fieldStyle: 'padding-left:3px',
+			width: 120,
 			maxLength: 100,
 			enforceMaxLength: true,
+			disabled: true,
 			xable: function() {
-				this.setDisabled(!targetLineValue.getValue());
+				this.setDisabled(!targetLineValue.getValue() && !Ext.isNumber(targetLineValue.getValue()));
 			}
 		});
 		dv.viewport.targetLineTitle = targetLineTitle;
@@ -641,7 +643,6 @@ Ext.onReady( function() {
 			//cls: 'gis-numberfield',
 			width: 60,
 			height: 18,
-			fieldLabel: 'Base line value/title', //i18n
 			listeners: {
 				change: function(nf) {
 					baseLineTitle.xable();
@@ -653,10 +654,13 @@ Ext.onReady( function() {
 		baseLineTitle = Ext.create('Ext.form.field.Text', {
 			//cls: 'dv-textfield-alt1',
 			style: 'margin-left:2px',
+			fieldStyle: 'padding-left:3px',
+			width: 120,
 			maxLength: 100,
 			enforceMaxLength: true,
+			disabled: true,
 			xable: function() {
-				this.setDisabled(!baseLineValue.getValue());
+				this.setDisabled(!baseLineValue.getValue() && !Ext.isNumber(baseLineValue.getValue()));
 			}
 		});
 		dv.viewport.baseLineTitle = baseLineTitle;
@@ -669,23 +673,26 @@ Ext.onReady( function() {
 		dv.viewport.showValues = showValues;
 
 		hideChartLegend = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: DV.i18n.hide_chart_legend,
+			boxLabel: DV.i18n.hide_legend,
 			style: 'margin-bottom:4px',
 			checked: true
 		});
 		dv.viewport.hideChartLegend = hideChartLegend;
 
 		hideChartSubtitle = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: DV.i18n.hide_chart_subtitle,
-			style: 'margin-bottom:4px',
+			boxLabel: DV.i18n.hide_subtitle,
+			style: 'margin-bottom:6px',
 			checked: true
 		});
 		dv.viewport.hideChartSubtitle = hideChartSubtitle;
 
 		domainAxisTitle = Ext.create('Ext.form.field.Text', {
 			//cls: 'dv-textfield-alt1',
-			style: 'margin-left:2px',
+			style: 'margin-bottom:2px; margin-left:2px',
+			width: 310,
 			fieldLabel: DV.i18n.domain_axis_label,
+			labelStyle: 'padding-left:16px',
+			labelWidth: 123,
 			maxLength: 100,
 			enforceMaxLength: true
 		});
@@ -693,28 +700,46 @@ Ext.onReady( function() {
 
 		rangeAxisTitle = Ext.create('Ext.form.field.Text', {
 			//cls: 'dv-textfield-alt1',
-			style: 'margin-left:2px',
+			style: 'margin-bottom:0; margin-left:2px',
+			width: 310,
 			fieldLabel: DV.i18n.domain_axis_label,
+			labelStyle: 'padding-left:16px',
+			labelWidth: 123,
 			maxLength: 100,
 			enforceMaxLength: true
 		});
 		dv.viewport.rangeAxisTitle = rangeAxisTitle;
 
 		data = {
+			xtype: 'container',
 			bodyStyle: 'border:0 none',
 			style: 'margin-left:14px',
 			items: [
 				showTrendLine,
 				{
+					xtype: 'container',
 					layout: 'column',
+					bodyStyle: 'border:0 none',
 					items: [
+						{
+							bodyStyle: 'border:0 none; padding-top:3px; padding-left:18px; margin-right:5px',
+							width: 130,
+							html: 'Target value / title:'
+						},
 						targetLineValue,
 						targetLineTitle
 					]
 				},
 				{
+					xtype: 'container',
 					layout: 'column',
+					bodyStyle: 'border:0 none',
 					items: [
+						{
+							bodyStyle: 'border:0 none; padding-top:3px; padding-left:18px; margin-right:5px',
+							width: 130,
+							html: 'Base value / title:'
+						},
 						baseLineValue,
 						baseLineTitle
 					]
