@@ -2929,7 +2929,7 @@ Ext.onReady( function() {
 								xtype: 'combobox',
 								cls: 'dv-combo',
 								style: 'margin-bottom:2px',
-								width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding - 62 - 62 - 4,
+								width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding - 67 - 67 - 4,
 								valueField: 'id',
 								displayField: 'name',
 								emptyText: DV.i18n.select_period_type,
@@ -2953,45 +2953,47 @@ Ext.onReady( function() {
 										dv.util.multiselect.filterAvailable(fixedPeriodAvailable, fixedPeriodSelected);
 									}
 								}
+							},
+							{
+								xtype: 'button',
+								text: DV.i18n.prev_year,
+								style: 'margin-left:2px; border-radius:2px',
+								width: 67,
+								height: 24,
+								handler: function() {
+									var cb = this.up('panel').down('combobox');
+									if (cb.getValue()) {
+										cb.periodOffset--;
+										cb.fireEvent('select');
+									}
+								}
+							},
+							{
+								xtype: 'button',
+								text: DV.i18n.next_year,
+								style: 'margin-left:2px; border-radius:2px',
+								width: 67,
+								height: 24,
+								handler: function() {
+									var cb = this.up('panel').down('combobox');
+									if (cb.getValue() && cb.periodOffset < 0) {
+										cb.periodOffset++;
+										cb.fireEvent('select');
+									}
+								}
 							}
-							//{
-								//xtype: 'button',
-								//text: DV.i18n.prev_year,
-								//style: 'margin-left:2px; border-radius:2px',
-								//height: 24,
-								//handler: function() {
-									//var cb = this.up('panel').down('combobox');
-									//if (cb.getValue()) {
-										//cb.periodOffset--;
-										//cb.fireEvent('select');
-									//}
-								//}
-							//},
-							//{
-								//xtype: 'button',
-								//text: DV.i18n.next_year,
-								//style: 'margin-left:2px; border-radius:2px',
-								//height: 24,
-								//handler: function() {
-									//var cb = this.up('panel').down('combobox');
-									//if (cb.getValue() && cb.periodOffset < 0) {
-										//cb.periodOffset++;
-										//cb.fireEvent('select');
-									//}
-								//}
-							//}
 						]
-					}
-					//{
-						//xtype: 'panel',
-						//layout: 'column',
-						//bodyStyle: 'border-style:none; padding-bottom:2px',
-						//items: [
-							//fixedPeriodAvailable,
-							//fixedPeriodSelected
-						//]
-					//}
-					//relativePeriod
+					},
+					{
+						xtype: 'panel',
+						layout: 'column',
+						bodyStyle: 'border-style:none; padding-bottom:2px',
+						items: [
+							fixedPeriodAvailable,
+							fixedPeriodSelected
+						]
+					},
+					relativePeriod
 				],
 				listeners: {
 					added: function() {
