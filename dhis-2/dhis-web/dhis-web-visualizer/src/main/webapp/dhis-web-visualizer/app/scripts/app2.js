@@ -271,6 +271,25 @@ Ext.onReady( function() {
 			}
 		});
 
+		store.getDimensionStore = function() {
+			return Ext.create('Ext.data.Store', {
+				fields: ['id', 'name'],
+				data: function() {
+					var dimConf = dv.conf.finals.dimension,
+						data = [
+							{id: dimConf.data.value, name: dimConf.data.name},
+							{id: dimConf.period.value, name: dimConf.period.name},
+							{id: dimConf.organisationUnit.value, name: dimConf.organisationUnit.name}
+						];
+
+					data.push(dv.init.ougs);
+					data.push(dv.init.degs);
+
+					return data;
+				}()
+			});
+		};
+
 		return store;
 	};
 
@@ -1383,6 +1402,9 @@ Ext.onReady( function() {
 				pie,
 				chartType,
 
+				seriesStore,
+				categoryStore,
+				filterStore,
 				series,
 				category,
 				filter,
@@ -1506,6 +1528,10 @@ Ext.onReady( function() {
 				]
 			});
 
+			seriesStore = dv.store.getDimensionStore();
+			categoryStore = dv.store.getDimensionStore();
+			filterStore = dv.store.getDimensionStore();
+
 			series = Ext.create('Ext.form.field.ComboBox', {
 				cls: 'dv-combo',
 				baseBodyCls: 'small',
@@ -1516,8 +1542,8 @@ Ext.onReady( function() {
 				valueField: 'id',
 				displayField: 'name',
 				width: (dv.conf.layout.west_fieldset_width / 3) - 1,
-				store: dv.store.dimension(),
 				value: dv.conf.finals.dimension.data.value,
+				store: seriesStore,
 				listeners: {
 					select: function() {
 						dv.util.combobox.filter.category();
@@ -1536,8 +1562,8 @@ Ext.onReady( function() {
 				valueField: 'id',
 				displayField: 'name',
 				width: (dv.conf.layout.west_fieldset_width / 3) - 1,
-				store: dv.store.dimension(),
 				value: dv.conf.finals.dimension.period.value,
+				store: categoryStore,
 				listeners: {
 					select: function(cb) {
 						dv.util.combobox.filter.filter();
@@ -1556,8 +1582,8 @@ Ext.onReady( function() {
 				valueField: 'id',
 				displayField: 'name',
 				width: (dv.conf.layout.west_fieldset_width / 3) - 1,
-				store: dv.store.dimension(),
-				value: dv.conf.finals.dimension.organisationunit.value
+				value: dv.conf.finals.dimension.organisationunit.value,
+				store: filterStore
 			});
 
 			layout = Ext.create('Ext.toolbar.Toolbar', {
@@ -3591,7 +3617,7 @@ Ext.onReady( function() {
 
 		dv.cmp = DV.app.getCmp();
 		//dv.util = DV.app.getUtil();
-		//dv.store = DV.app.getStore();
+		dv.store = DV.app.getStores();
 
 		dv.viewport = createViewport();
 		dv.viewport.optionsWindow = DV.app.OptionsWindow();
