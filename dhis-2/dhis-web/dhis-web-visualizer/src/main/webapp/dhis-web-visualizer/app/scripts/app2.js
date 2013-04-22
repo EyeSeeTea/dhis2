@@ -1744,6 +1744,7 @@ Ext.onReady( function() {
 				addListeners;
 
 			column = Ext.create('Ext.button.Button', {
+				xtype: 'button',
 				icon: 'images/column.png',
 				name: dv.conf.finals.chart.column,
 				tooltipText: DV.i18n.column_chart,
@@ -1751,36 +1752,42 @@ Ext.onReady( function() {
 			});
 
 			stackedColumn = Ext.create('Ext.button.Button', {
+				xtype: 'button',
 				icon: 'images/column-stacked.png',
 				name: dv.conf.finals.chart.stackedcolumn,
 				tooltipText: DV.i18n.stacked_column_chart
 			});
 
 			bar = Ext.create('Ext.button.Button', {
+				xtype: 'button',
 				icon: 'images/bar.png',
 				name: dv.conf.finals.chart.bar,
 				tooltipText: DV.i18n.bar_chart
 			});
 
 			stackedBar = Ext.create('Ext.button.Button', {
+				xtype: 'button',
 				icon: 'images/bar-stacked.png',
 				name: dv.conf.finals.chart.stackedbar,
 				tooltipText: DV.i18n.stacked_bar_chart
 			});
 
 			line = Ext.create('Ext.button.Button', {
+				xtype: 'button',
 				icon: 'images/line.png',
 				name: dv.conf.finals.chart.line,
 				tooltipText: DV.i18n.line_chart
 			});
 
 			area = Ext.create('Ext.button.Button', {
+				xtype: 'button',
 				icon: 'images/area.png',
 				name: dv.conf.finals.chart.area,
 				tooltipText: DV.i18n.area_chart
 			});
 
 			pie = Ext.create('Ext.button.Button', {
+				xtype: 'button',
 				icon: 'images/pie.png',
 				name: dv.conf.finals.chart.pie,
 				tooltipText: DV.i18n.pie_chart
@@ -1795,8 +1802,6 @@ Ext.onReady( function() {
 					handler: dv.util.button.type.toggleHandler,
 					listeners: {
 						afterrender: function(b) {
-							console.log(b);
-							alert(b.xtype);
 							if (b.xtype === 'button') {
 								Ext.create('Ext.tip.ToolTip', {
 									target: b.getEl(),
@@ -3677,25 +3682,6 @@ Ext.onReady( function() {
                             }
                         }
 					]
-				},
-				listeners: {
-					afterrender: function(p) {
-						var liStyle = 'padding:3px 10px; color:#333',
-							html = '';
-
-						html += '<div style="padding:20px">';
-						html += '<div style="font-size:14px; padding-bottom:8px">' + DV.i18n.example1 + '</div>';
-						html += '<div style="' + liStyle + '">- ' + DV.i18n.example2 + '</div>';
-						html += '<div style="' + liStyle + '">- ' + DV.i18n.example3 + '</div>';
-						html += '<div style="' + liStyle + '">- ' + DV.i18n.example4 + '</div>';
-						html += '<div style="font-size:14px; padding-top:20px; padding-bottom:8px">' + DV.i18n.example5 + '</div>';
-						html += '<div style="' + liStyle + '">- ' + DV.i18n.example6 + '</div>';
-						html += '<div style="' + liStyle + '">- ' + DV.i18n.example7 + '</div>';
-						html += '<div style="' + liStyle + '">- ' + DV.i18n.example8 + '</div>';
-						html += '</div>';
-
-						p.update(html);
-					}
 				}
 			});
 
