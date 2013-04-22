@@ -1428,44 +1428,44 @@ Ext.onReady( function() {
 
 			column = Ext.create('Ext.button.Button', {
 				icon: 'images/column.png',
-				name: DV.conf.finals.chart.column,
+				name: dv.conf.finals.chart.column,
 				tooltipText: DV.i18n.column_chart,
 				pressed: true
 			});
 
 			stackedColumn = Ext.create('Ext.button.Button', {
 				icon: 'images/column-stacked.png',
-				name: DV.conf.finals.chart.stackedcolumn,
+				name: dv.conf.finals.chart.stackedcolumn,
 				tooltipText: DV.i18n.stacked_column_chart
 			});
 
 			bar = Ext.create('Ext.button.Button', {
 				icon: 'images/bar.png',
-				name: DV.conf.finals.chart.bar,
+				name: dv.conf.finals.chart.bar,
 				tooltipText: DV.i18n.bar_chart
 			});
 
 			stackedBar = Ext.create('Ext.button.Button', {
 				icon: 'images/bar-stacked.png',
-				name: DV.conf.finals.chart.stackedbar,
+				name: dv.conf.finals.chart.stackedbar,
 				tooltipText: DV.i18n.stacked_bar_chart
 			});
 
 			line = Ext.create('Ext.button.Button', {
 				icon: 'images/line.png',
-				name: DV.conf.finals.chart.line,
+				name: dv.conf.finals.chart.line,
 				tooltipText: DV.i18n.line_chart
 			});
 
 			area = Ext.create('Ext.button.Button', {
 				icon: 'images/area.png',
-				name: DV.conf.finals.chart.area,
+				name: dv.conf.finals.chart.area,
 				tooltipText: DV.i18n.area_chart
 			});
 
 			pie = Ext.create('Ext.button.Button', {
 				icon: 'images/pie.png',
-				name: DV.conf.finals.chart.pie,
+				name: dv.conf.finals.chart.pie,
 				tooltipText: DV.i18n.pie_chart
 			});
 
@@ -1508,15 +1508,15 @@ Ext.onReady( function() {
 			series = Ext.create('Ext.form.field.ComboBox', {
 				cls: 'dv-combo',
 				baseBodyCls: 'small',
-				name: DV.conf.finals.chart.series,
+				name: dv.conf.finals.chart.series,
 				emptyText: DV.i18n.series,
 				queryMode: 'local',
 				editable: false,
 				valueField: 'id',
 				displayField: 'name',
-				width: (DV.conf.layout.west_fieldset_width / 3) - 1,
+				width: (dv.conf.layout.west_fieldset_width / 3) - 1,
 				store: DV.store.dimension(),
-				value: DV.conf.finals.dimension.data.value,
+				value: dv.conf.finals.dimension.data.value,
 				listeners: {
 					select: function() {
 						DV.util.combobox.filter.category();
@@ -3585,25 +3585,12 @@ Ext.onReady( function() {
 			return viewport;
 		};
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 		dv.init = DV.app.getInit(r);
 		dv.baseUrl = dv.init.contextPath;
 
-		dv.util = DV.app.getUtil();
-		dv.store = DV.app.getStore();
+		dv.cmp = DV.app.getCmp();
+		//dv.util = DV.app.getUtil();
+		//dv.store = DV.app.getStore();
 
 		dv.viewport = createViewport();
 		dv.viewport.optionsWindow = DV.app.OptionsWindow();

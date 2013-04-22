@@ -124,10 +124,7 @@ DV.core.getConfig = function() {
                 value: 'data',
                 name: DV.i18n.data,
                 dimensionName: 'dx',
-                objectName: 'dx',
-                warning: {
-					filter: DV.i18n.wm_multiple_filter_ind_de
-				}
+                objectName: 'dx'
             },
             category: {
 				name: DV.i18n.categories,
@@ -136,36 +133,50 @@ DV.core.getConfig = function() {
 			},
             indicator: {
                 value: 'indicator',
-                rawvalue: DV.i18n.indicator,
-                paramname: 'in'
+                name: DV.i18n.indicator,
+                dimensionName: 'dx',
+                objectName: 'in'
             },
-            dataelement: {
+            dataElement: {
                 value: 'dataelement',
-                rawvalue: DV.i18n.data_element,
-                paramname: 'de'
+                name: DV.i18n.data_element,
+                dimensionName: 'dx',
+                objectName: 'de'
             },
-            dataset: {
+            dataSet: {
 				value: 'dataset',
-                rawvalue: DV.i18n.dataset,
-                paramname: 'ds'
+                name: DV.i18n.dataset,
+                dimensionName: 'dx',
+                objectName: 'ds'
 			},
             period: {
                 value: 'period',
-                rawvalue: DV.i18n.period,
-                warning: {
-					filter: DV.i18n.wm_multiple_filter_period
-				}
+                name: DV.i18n.period,
+                dimensionName: 'pe',
+                objectName: 'pe',
             },
-            organisationunit: {
-                value: 'organisationunit',
-                rawvalue: DV.i18n.organisation_unit,
-                paramname: 'ou',
-                warning: {
-					filter: DV.i18n.wm_multiple_filter_orgunit
-				}
+            fixedPeriod: {
+				value: 'periods'
+			},
+			relativePeriod: {
+				value: 'relativePeriods'
+			},
+            organisationUnit: {
+                value: 'organisationUnits',
+                name: DV.i18n.organisation_units,
+                dimensionName: 'ou',
+                objectName: 'ou',
             },
-            organisationunitgroup: {
-				value: 'organisationunitgroup'
+            organisationUnitGroupSet: {
+				value: 'organisationUnitGroupSets',
+				objectName: 'ougs'
+			},
+            dataElementGroupSet: {
+				value: 'dataElementGroupSets',
+				objectName: 'degs'
+			},
+			value: {
+				value: 'value'
 			}
         },
         chart: {
@@ -199,6 +210,19 @@ DV.core.getConfig = function() {
 			id: 'root'
 		}
     };
+
+	dim = conf.finals.dimension;
+
+	dim.objectNameMap = {};
+	dim.objectNameMap[dim.data.objectName] = dim.data;
+	dim.objectNameMap[dim.indicator.objectName] = dim.indicator;
+	dim.objectNameMap[dim.dataElement.objectName] = dim.dataElement;
+	dim.objectNameMap[dim.dataSet.objectName] = dim.dataSet;
+	dim.objectNameMap[dim.category.objectName] = dim.category;
+	dim.objectNameMap[dim.period.objectName] = dim.period;
+	dim.objectNameMap[dim.organisationUnit.objectName] = dim.organisationUnit;
+	dim.objectNameMap[dim.organisationUnitGroupSet.objectName] = dim.organisationUnitGroupSet;
+	dim.objectNameMap[dim.dataElementGroupSet.objectName] = dim.dataElementGroupSet;
 
     conf.period = {
 		relativePeriods: {
@@ -1340,7 +1364,6 @@ DV.core.getInstance = function(config) {
 	dv.el = config && config.el ? config.el : 'app';
 
 	dv.conf = DV.core.getConfig();
-	dv.cmp = DV.core.getCmp();
 	dv.util = DV.core.getUtil(dv);
 	//dv.api = DV.core.getAPI(dv);
 
