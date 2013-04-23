@@ -138,7 +138,7 @@ Ext.onReady( function() {
 
 				for (var i = 0, dimObj, value; i < values.length; i++) {
 					value = values[i];
-					dimObj = dv.conf.finals.dimension[value];
+					dimObj = dv.conf.finals.dimension.objectNameMap[value];
 
 					if (value && dimObj) {
 						a.push(dimObj.dimensionName);
@@ -147,7 +147,6 @@ Ext.onReady( function() {
 
 				return a;
 			};
-
 			setup = {
 				col: getDimensionNames([dv.cmp.layout.series.getValue()]),
 				row: getDimensionNames([dv.cmp.layout.category.getValue()]),
@@ -721,9 +720,9 @@ Ext.onReady( function() {
 				data: function() {
 					var dimConf = dv.conf.finals.dimension,
 						data = [
-							{id: dimConf.data.value, name: dimConf.data.name},
-							{id: dimConf.period.value, name: dimConf.period.name},
-							{id: dimConf.organisationUnit.value, name: dimConf.organisationUnit.name}
+							{id: dimConf.data.dimensionName, name: dimConf.data.name},
+							{id: dimConf.period.dimensionName, name: dimConf.period.name},
+							{id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name}
 						];
 
 					data = data.concat(Ext.clone(dv.init.ougs));
@@ -2015,7 +2014,7 @@ Ext.onReady( function() {
 				valueField: 'id',
 				displayField: 'name',
 				width: (dv.conf.layout.west_fieldset_width / 3) - 1,
-				value: dv.conf.finals.dimension.data.value,
+				value: dv.conf.finals.dimension.data.dimensionName,
 				filterNext: function() {
 					category.filter(this.getValue());
 					filter.filter([this.getValue(), category.getValue()]);
@@ -2043,7 +2042,7 @@ Ext.onReady( function() {
 				valueField: 'id',
 				displayField: 'name',
 				width: (dv.conf.layout.west_fieldset_width / 3) - 1,
-				value: dv.conf.finals.dimension.period.value,
+				value: dv.conf.finals.dimension.period.dimensionName,
 				filter: function(value) {
 					if (Ext.isString(value)) {
 						if (value === this.getValue()) {
@@ -2084,7 +2083,7 @@ Ext.onReady( function() {
 				valueField: 'id',
 				displayField: 'name',
 				width: (dv.conf.layout.west_fieldset_width / 3) - 1,
-				value: dv.conf.finals.dimension.organisationUnit.value,
+				value: dv.conf.finals.dimension.organisationUnit.dimensionName,
 				filter: function(values) {
 					var a = Ext.clone(this.getValue()),
 						b = [];
