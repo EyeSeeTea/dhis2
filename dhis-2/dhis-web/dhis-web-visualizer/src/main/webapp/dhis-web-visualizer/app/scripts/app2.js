@@ -147,6 +147,7 @@ Ext.onReady( function() {
 
 				return a;
 			};
+
 			setup = {
 				col: getDimensionNames([dv.cmp.layout.series.getValue()]),
 				row: getDimensionNames([dv.cmp.layout.category.getValue()]),
