@@ -33,6 +33,8 @@ import java.util.List;
 
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.api.utils.ContextUtils;
+import org.hisp.dhis.common.DimensionalObject;
+import org.hisp.dhis.common.DimensionService;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.i18n.I18nFormat;
@@ -85,6 +87,13 @@ public class InitializeAction
     public void setPeriodService( PeriodService periodService )
     {
         this.periodService = periodService;
+    }
+    
+    private DimensionService dimensionService;
+
+    public void setDimensionService( DimensionService dimensionService )
+    {
+        this.dimensionService = dimensionService;
     }
 
     private I18nFormat format;
@@ -194,6 +203,13 @@ public class InitializeAction
     public List<Period> getLast5Years()
     {
         return last5Years;
+    }
+    
+    private Collection<DimensionalObject> dimensions;
+
+    public Collection<DimensionalObject> getDimensions()
+    {
+        return dimensions;
     }
 
     private Collection<MapLegendSet> legendSets;
