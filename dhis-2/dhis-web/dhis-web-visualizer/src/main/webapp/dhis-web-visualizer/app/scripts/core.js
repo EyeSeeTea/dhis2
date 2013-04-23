@@ -169,13 +169,9 @@ DV.core.getConfig = function() {
                 dimensionName: 'ou',
                 objectName: 'ou',
             },
-            organisationUnitGroupSet: {
-				value: 'organisationUnitGroupSets',
-				objectName: 'ougs'
-			},
-            dataElementGroupSet: {
-				value: 'dataElementGroupSets',
-				objectName: 'degs'
+            dimension: {
+				value: 'dimension',
+				objectName: 'dim'
 			},
 			value: {
 				value: 'value'
@@ -223,8 +219,7 @@ DV.core.getConfig = function() {
 	dim.objectNameMap[dim.category.objectName] = dim.category;
 	dim.objectNameMap[dim.period.objectName] = dim.period;
 	dim.objectNameMap[dim.organisationUnit.objectName] = dim.organisationUnit;
-	dim.objectNameMap[dim.organisationUnitGroupSet.objectName] = dim.organisationUnitGroupSet;
-	dim.objectNameMap[dim.dataElementGroupSet.objectName] = dim.dataElementGroupSet;
+	dim.objectNameMap[dim.dimension.objectName] = dim.dimension;
 
 	conf.period = {
 		relativePeriods: {

@@ -35,14 +35,9 @@ import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DimensionService;
-import org.hisp.dhis.dataelement.DataElementGroupSet;
-import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.mapping.MapLegendSet;
-import org.hisp.dhis.mapping.MappingService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
@@ -66,20 +61,6 @@ public class InitializeAction
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
-    }
-
-    private OrganisationUnitGroupService organisationUnitGroupService;
-
-    public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
-    {
-        this.organisationUnitGroupService = organisationUnitGroupService;
-    }
-    
-    private DataElementService dataElementService;
-
-    public void setDataElementService( DataElementService dataElementService )
-    {
-        this.dataElementService = dataElementService;
     }
 
     private PeriodService periodService;
@@ -119,20 +100,6 @@ public class InitializeAction
     public Collection<OrganisationUnit> getRootNodes()
     {
         return rootNodes;
-    }
-
-    private Collection<OrganisationUnitGroupSet> organisationUnitGroupSets;
-
-    public Collection<OrganisationUnitGroupSet> getOrganisationUnitGroupSets()
-    {
-        return organisationUnitGroupSets;
-    }
-
-    private Collection<DataElementGroupSet> dataElementGroupSets;
-
-    public Collection<DataElementGroupSet> getDataElementGroupSets()
-    {
-        return dataElementGroupSets;
     }
 
     private List<Period> lastMonth;
@@ -235,10 +202,6 @@ public class InitializeAction
             rootNodes.add( new OrganisationUnit() );
         }
 
-        organisationUnitGroupSets = organisationUnitGroupService.getAllOrganisationUnitGroupSets();
-        
-        dataElementGroupSets = dataElementService.getAllDataElementGroupSets();
-
         RelativePeriods rp = new RelativePeriods();
 
         rp.clear().setReportingMonth( true );
@@ -270,6 +233,8 @@ public class InitializeAction
 
         rp.clear().setLast5Years( true );
         last5Years = periodService.reloadPeriods( setNames( rp.getRelativePeriods() ) );
+        
+        dimensions = dimensionService.getAllDimensions();
 
         return SUCCESS;
     }

@@ -27,20 +27,12 @@ Ext.onReady( function() {
 			init.rootNodes[i].path = '/' + dv.conf.finals.root.id + '/' + init.rootNodes[i].id;
 		}
 
-		// Ougs
-		for (var i = 0, dim = dv.conf.finals.dimension, oug; i < init.ougs.length; i++) {
-			oug = init.ougs[i];
-			oug.dimensionName = oug.id;
-			oug.objectName = dv.conf.finals.dimension.organisationUnitGroupSet.objectName;
-			dim.objectNameMap[oug.id] = oug;
-		}
-
-		// Degs
-		for (var i = 0, dim = dv.conf.finals.dimension, deg; i < init.degs.length; i++) {
-			deg = init.degs[i];
-			deg.dimensionName = deg.id;
-			deg.objectName = dv.conf.finals.dimension.dataElementGroupSet.objectName;
-			dim.objectNameMap[deg.id] = deg;
+		// Dynamic dimensions
+		for (var i = 0, dim; i < init.dimensions.length; i++) {
+			dim = init.dimensions[i];
+			dim.dimensionName = dim.id;
+			dim.objectName = dv.conf.finals.dimension.dimension.objectName;
+			dv.conf.finals.dimension.objectNameMap[dim.id] = dim;
 		}
 
 		init.afterRender = function() {
@@ -56,7 +48,7 @@ Ext.onReady( function() {
 
 			// Left gui
 			var viewportHeight = dv.viewport.westRegion.getHeight(),
-				numberOfTabs = dv.init.ougs.length + dv.init.degs.length + 5,
+				numberOfTabs = dv.init.dimensions.length + 5,
 				tabHeight = 28,
 				minPeriodHeight = 380,
 				settingsHeight = 91;
@@ -726,10 +718,7 @@ Ext.onReady( function() {
 							{id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name}
 						];
 
-					data = data.concat(Ext.clone(dv.init.ougs));
-					data = data.concat(Ext.clone(dv.init.degs));
-
-					return data;
+					return data.concat(Ext.clone(dv.init.dimensions));
 				}()
 			});
 		};
@@ -757,8 +746,7 @@ Ext.onReady( function() {
 
 		showTrendLine = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: DV.i18n.trend_line,
-			style: 'margin-bottom:6px',
-			checked: true
+			style: 'margin-bottom:6px'
 		});
 		dv.viewport.showTrendLine = showTrendLine;
 
@@ -816,22 +804,19 @@ Ext.onReady( function() {
 
 		showValues = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: DV.i18n.show_values,
-			style: 'margin-bottom:4px',
-			checked: true
+			style: 'margin-bottom:4px'
 		});
 		dv.viewport.showValues = showValues;
 
 		hideChartLegend = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: DV.i18n.hide_legend,
-			style: 'margin-bottom:4px',
-			checked: true
+			style: 'margin-bottom:4px'
 		});
 		dv.viewport.hideChartLegend = hideChartLegend;
 
 		hideChartSubtitle = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: DV.i18n.hide_subtitle,
-			style: 'margin-bottom:6px',
-			checked: true
+			style: 'margin-bottom:6px'
 		});
 		dv.viewport.hideChartSubtitle = hideChartSubtitle;
 
@@ -3414,17 +3399,17 @@ Ext.onReady( function() {
 				}
 			};
 
-			getGroupSetPanels = function(groupSets, objectName, iconCls) {
+			getDimensionPanels = function(dimensions, objectName, iconCls) {
 				var	getAvailableStore,
 					getSelectedStore,
 
 					createPanel,
 					getPanels;
 
-				getAvailableStore = function(groupSet) {
+				getAvailableStore = function(dimension) {
 					return Ext.create('Ext.data.Store', {
 						fields: ['id', 'name'],
-						data: groupSet.items,
+						data: dimension.items,
 						isLoaded: false,
 						storage: {},
 						sortStore: function() {
@@ -3433,7 +3418,7 @@ Ext.onReady( function() {
 						reload: function() {
 							this.removeAll();
 							this.storage = {};
-							this.loadData(groupSet.items);
+							this.loadData(dimension.items);
 						},
 						listeners: {
 							load: function(s) {
@@ -3451,7 +3436,7 @@ Ext.onReady( function() {
 					});
 				};
 
-				createPanel = function(groupSet) {
+				createPanel = function(dimension) {
 					var getAvailable,
 						getSelected,
 
@@ -3545,11 +3530,11 @@ Ext.onReady( function() {
 						});
 					};
 
-					availableStore = getAvailableStore(groupSet);
+					availableStore = getAvailableStore(dimension);
 					selectedStore = getSelectedStore();
 
-					groupSetIdAvailableStoreMap[groupSet.id] = availableStore;
-					groupSetIdSelectedStoreMap[groupSet.id] = selectedStore;
+					dimensionIdAvailableStoreMap[dimension.id] = availableStore;
+					dimensionIdSelectedStoreMap[dimension.id] = selectedStore;
 
 					available = getAvailable(availableStore);
 					selected = getSelected(selectedStore);
@@ -3560,11 +3545,11 @@ Ext.onReady( function() {
 
 					panel = {
 						xtype: 'panel',
-						title: '<div class="' + iconCls + '">' + groupSet.name + '</div>',
+						title: '<div class="' + iconCls + '">' + dimension.name + '</div>',
 						hideCollapseTool: true,
 						getData: function() {
 							var data = {
-								dimensionName: groupSet.id,
+								dimensionName: dimension.id,
 								objectName: objectName,
 								items: []
 							};
@@ -3615,14 +3600,10 @@ Ext.onReady( function() {
 				};
 
 				getPanels = function() {
-					var panels = [],
-						groupSet,
-						last;
+					var panels = [];
 
-					for (var i = 0, panel; i < groupSets.length; i++) {
-						groupSet = groupSets[i];
-
-						panel = createPanel(groupSet);
+					for (var i = 0, panel; i < dimensions.length; i++) {
+						panel = createPanel(dimensions[i]);
 
 						panels.push(panel);
 					}
@@ -3660,21 +3641,21 @@ Ext.onReady( function() {
 				}
 
 				// Degs and datasets in the same query
-				if (Ext.Array.contains(dimensionNames, dimConf.data.dimensionName) && dv.store.dataSetSelected.data.length) {
-					for (var i = 0; i < dv.init.degs.length; i++) {
-						if (Ext.Array.contains(dimensionNames, dv.init.degs[i].id)) {
-							alert(DV.i18n.data_element_group_sets_cannot_be_specified_together_with_data_sets);
-							return;
-						}
-					}
-				}
+				//if (Ext.Array.contains(dimensionNames, dimConf.data.dimensionName) && dv.store.dataSetSelected.data.length) {
+					//for (var i = 0; i < dv.init.degs.length; i++) {
+						//if (Ext.Array.contains(dimensionNames, dv.init.degs[i].id)) {
+							//alert(DV.i18n.data_element_group_sets_cannot_be_specified_together_with_data_sets);
+							//return;
+						//}
+					//}
+				//}
 
 				return true;
 			};
 
 			update = function() {
 				var config = dv.util.chart.getLayoutConfig();
-console.log(config);
+console.log(config);return;
 				var	layout = dv.api.Layout(config);
 
 				if (!layout) {
@@ -3703,14 +3684,11 @@ console.log(config);
 						period,
 						organisationUnit
 					],
-					ougs = Ext.clone(dv.init.ougs),
-					degs = Ext.clone(dv.init.degs);
+					dims = Ext.clone(dv.init.dimensions);
 
-					dv.util.array.sortObjectsByString(ougs);
-					dv.util.array.sortObjectsByString(degs);
+					dv.util.array.sortObjectsByString(dims);
 
-					panels = panels.concat(getGroupSetPanels(ougs, dv.conf.finals.dimension.organisationUnitGroupSet.objectName, 'dv-panel-title-organisationunitgroupset'));
-					panels = panels.concat(getGroupSetPanels(degs, dv.conf.finals.dimension.dataElementGroupSet.objectName, 'dv-panel-title-dataelementgroupset'));
+					panels = panels.concat(getGroupSetPanels(dims, dv.conf.finals.dimension.dimension.objectName, 'dv-panel-title-dimension'));
 
 					last = panels[panels.length - 1];
 					last.cls = 'dv-accordion-last';

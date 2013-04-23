@@ -119,8 +119,7 @@ body.x-windows {
 .dv-panel-title-data,
 .dv-panel-title-period,
 .dv-panel-title-organisationunit,
-.dv-panel-title-organisationunitgroupset,
-.dv-panel-title-dataelementgroupset {
+.dv-panel-title-dimension {
 	height: 17px;
 	background-repeat: no-repeat;
 	padding-left: 20px
@@ -135,10 +134,7 @@ body.x-windows {
 .dv-panel-title-organisationunit {
 	background-image: url(../images/organisationunit.png);
 }
-.dv-panel-title-organisationunitgroupset {
-	background-image: url(../images/organisationunitgroupset.png);
-}
-.dv-panel-title-dataelementgroupset {
+.dv-panel-title-dimension {
 	background-image: url(../images/dataelementgroupset.png);
 }
 
