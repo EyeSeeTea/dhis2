@@ -151,41 +151,39 @@ Ext.onReady( function() {
 			}
 		};
 
-		util.window = {
-			setAnchorPosition: function(w, target) {
-				var vpw = dv.viewport.getWidth(),
-					targetx = target ? target.getPosition()[0] : 4,
-					winw = w.getWidth(),
-					y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
-
-				if ((targetx + winw) > vpw) {
-					w.setPosition((vpw - winw - 2), y);
-				}
-				else {
-					w.setPosition(targetx, y);
-				}
-			},
-			addHideOnBlurHandler: function(w) {
-				var el = Ext.get(Ext.query('.x-mask')[0]);
-
-				el.on('click', function() {
-					if (w.hideOnBlur) {
-						w.hide();
+		util.store = {
+			addToStorage: function(s, records) {
+				s.each( function(r) {
+					if (!s.storage[r.data.id]) {
+						s.storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: s.parent};
 					}
 				});
-
-				w.hasHideOnBlurHandler = true;
+				if (records) {
+					Ext.Array.each(records, function(r) {
+						if (!s.storage[r.data.id]) {
+							s.storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: s.parent};
+						}
+					});
+				}
 			},
-			addDestroyOnBlurHandler: function(w) {
-				var el = Ext.get(Ext.query('.x-mask')[0]);
-
-				el.on('click', function() {
-					if (w.destroyOnBlur) {
-						w.destroy();
+			loadFromStorage: function(s) {
+				var items = [];
+				s.removeAll();
+				for (var obj in s.storage) {
+					if (s.storage[obj].parent === s.parent) {
+						items.push(s.storage[obj]);
 					}
-				});
-
-				w.hasDestroyOnBlurHandler = true;
+				}
+				s.add(items);
+				s.sort('name', 'ASC');
+			},
+			containsParent: function(s) {
+				for (var obj in s.storage) {
+					if (s.storage[obj].parent === s.parent) {
+						return true;
+					}
+				}
+				return false;
 			}
 		};
 
@@ -264,6 +262,61 @@ Ext.onReady( function() {
 				for (var i = 0; i < ms.length; i++) {
 					ms[i].setHeight(panel.getHeight() - fill);
 				}
+			}
+		};
+
+		util.checkbox = {
+			setRelativePeriods: function(rp) {
+				if (rp) {
+					for (var key in rp) {
+						var cmp = DV.util.getCmp('checkbox[relativePeriodId="' + key + '"]');
+						if (cmp) {
+							cmp.setValue(rp[key]);
+						}
+					}
+				}
+				else {
+					DV.util.checkbox.setAllFalse();
+				}
+			},
+			setAllFalse: function() {
+				var a = DV.cmp.dimension.relativeperiod.checkbox;
+				for (var i = 0; i < a.length; i++) {
+					a[i].setValue(false);
+				}
+			},
+			isAllFalse: function() {
+				var a = DV.cmp.dimension.relativeperiod.checkbox;
+				for (var i = 0; i < a.length; i++) {
+					if (a[i].getValue()) {
+						return false;
+					}
+				}
+				return true;
+			}
+		};
+
+		util.toolbar = {
+			separator: {
+				xtype: 'tbseparator',
+				height: 26,
+				style: 'border-left: 1px solid #d1d1d1; border-right: 1px solid #f1f1f1'
+			}
+		};
+
+		util.window = dv.util.window || {};
+
+		util.window.setAnchorPosition = function(w, target) {
+			var vpw = dv.viewport.getWidth(),
+				targetx = target ? target.getPosition()[0] : 4,
+				winw = w.getWidth(),
+				y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
+
+			if ((targetx + winw) > vpw) {
+				w.setPosition((vpw - winw - 2), y);
+			}
+			else {
+				w.setPosition(targetx, y);
 			}
 		};
 
