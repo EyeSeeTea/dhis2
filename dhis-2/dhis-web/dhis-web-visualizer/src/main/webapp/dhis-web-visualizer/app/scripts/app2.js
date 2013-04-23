@@ -1868,14 +1868,18 @@ Ext.onReady( function() {
 				displayField: 'name',
 				width: (dv.conf.layout.west_fieldset_width / 3) - 1,
 				value: dv.conf.finals.dimension.data.value,
+				filterNext: function() {
+					category.filter(this.getValue());
+					filter.filter([this.getValue(), category.getValue()]);
+				},
 				store: seriesStore,
 				listeners: {
-					added: function() {
+					added: function(cb) {
 						dv.cmp.layout.series = this;
+						cb.filterNext();
 					},
 					select: function(cb) {
-						category.filter(cb.getValue());
-						filter.filter([cb.getValue(), category.getValue()]);
+						cb.filterNext();
 					}
 				}
 			});
@@ -1905,13 +1909,17 @@ Ext.onReady( function() {
 						});
 					}
 				},
+				filterNext: function() {
+					filter.filter([series.getValue(), this.getValue()]);
+				},
 				store: categoryStore,
 				listeners: {
-					added: function() {
+					added: function(cb) {
 						dv.cmp.layout.category = this;
+						cb.filterNext();
 					},
 					select: function(cb) {
-						filter.filter([series.getValue(), cb.getValue()]);
+						cb.filterNext();
 					}
 				}
 			});
@@ -1954,7 +1962,6 @@ Ext.onReady( function() {
 					},
 					select: function(cb) {
 						var len = cb.getValue().length;
-console.log(cb.getValue());
 
 						if (!len) {
 							cb.setValue(cb.selection);
