@@ -1697,7 +1697,6 @@ PT.core.getAPI = function(pt) {
 		};
 
 		getValidatedAxis = function(axis) {
-
 			if (!(axis && Ext.isArray(axis) && axis.length)) {
 				return;
 			}

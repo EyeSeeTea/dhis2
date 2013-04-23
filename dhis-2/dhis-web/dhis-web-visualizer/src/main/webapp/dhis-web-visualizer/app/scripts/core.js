@@ -1154,6 +1154,26 @@ DV.core.getUtil = function() {
 DV.core.getAPI = function(pt) {
 	var api = {};
 
+	api.Layout = function(config) {
+		var col,
+			row,
+			filter,
+
+			defaultOptions = {
+				showTrendLine: false,
+				targetLineValue: null,
+				targetLineTitle: null,
+				baseLineValue: null,
+				baseLineTitle: null,
+				showValues: false,
+				hideChartLegend: false,
+				hideChartSubtitle: false,
+				domainAxisTitle: null,
+				rangeAxisTitle: null
+			};
+
+
+
 	return api;
 };
 

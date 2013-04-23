@@ -4019,6 +4019,7 @@ Ext.onReady( function() {
 		dv.store = DV.app.getStores();
 
 		dv.viewport = createViewport();
+
 		dv.viewport.optionsWindow = DV.app.OptionsWindow();
 		dv.viewport.optionsWindow.hide();
 	};
