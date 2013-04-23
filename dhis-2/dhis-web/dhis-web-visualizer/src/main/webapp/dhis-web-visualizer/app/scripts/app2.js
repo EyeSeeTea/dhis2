@@ -95,7 +95,7 @@ Ext.onReady( function() {
 		var cmp = {
 			region: {},
 			charttype: [],
-			settings: {},
+			layout: {},
 			dimension: {
 				panels: [],
 
@@ -186,6 +186,79 @@ Ext.onReady( function() {
 				});
 
 				w.hasDestroyOnBlurHandler = true;
+			}
+		};
+
+		util.combobox = {
+			filter: {
+				category: function() {
+					var cbs = dv.cmp.layout.series,
+						cbc = dv.cmp.layout.category,
+						cbf = dv.cmp.layout.filter,
+						v = cbs.getValue(),
+						index = 0;
+
+					if (v === cbc.getValue()) {
+						cbc.clearValue();
+					}
+					if (v === cbf.getValue()) {
+						cbf.clearValue();
+					}
+
+
+
+					this.clearValue(v, cbc);
+					this.clearValue(v, cbf);
+
+					cbc.filterArray = [!(v === d), !(v === p), !(v === o)];
+					cbc.store.filterBy( function(r) {
+						return cbc.filterArray[index++];
+					});
+
+					if (!cbc.getValue() && cbf.getValue()) {
+						cbc.setValue(this.getAutoSelectOption(cbs.getValue(), cbf.getValue()));
+					}
+
+					this.filter();
+				},
+				filter: function() {
+					var cbs = DV.cmp.settings.series,
+						cbc = DV.cmp.settings.category,
+						cbf = DV.cmp.settings.filter,
+						v = cbc.getValue(),
+						d = DV.conf.finals.dimension.data.value,
+						p = DV.conf.finals.dimension.period.value,
+						o = DV.conf.finals.dimension.organisationunit.value,
+						index = 0;
+
+					this.clearValue(v, cbf);
+
+					cbf.filterArray = Ext.Array.clone(cbc.filterArray);
+					cbf.filterArray[0] = cbf.filterArray[0] ? !(v === d) : false;
+					cbf.filterArray[1] = cbf.filterArray[1] ? !(v === p) : false;
+					cbf.filterArray[2] = cbf.filterArray[2] ? !(v === o) : false;
+
+					cbf.store.filterBy( function(r) {
+						return cbf.filterArray[index++];
+					});
+
+					if (!cbf.getValue()) {
+						cbf.setValue(this.getAutoSelectOption(cbs.getValue(), cbc.getValue()));
+					}
+				},
+				clearValue: function(v, cb, i, d) {
+					if (v === cb.getValue()) {
+						cb.clearValue();
+					}
+				},
+				getAutoSelectOption: function(o1, o2) {
+					var a = [DV.conf.finals.dimension.data.value, DV.conf.finals.dimension.period.value, DV.conf.finals.dimension.organisationunit.value];
+					for (var i = 0; i < a.length; i++) {
+						if (a[i] != o1 && a[i] != o2) {
+							return a[i];
+						}
+					}
+				}
 			}
 		};
 
@@ -1862,7 +1935,6 @@ Ext.onReady( function() {
 				baseBodyCls: 'small',
 				style: 'margin-bottom:0',
 				name: dv.conf.finals.chart.series,
-				emptyText: DV.i18n.series,
 				queryMode: 'local',
 				editable: false,
 				valueField: 'id',
@@ -1871,8 +1943,12 @@ Ext.onReady( function() {
 				value: dv.conf.finals.dimension.data.value,
 				store: seriesStore,
 				listeners: {
-					select: function() {
-						dv.util.combobox.filter.category();
+					added: function() {
+						dv.cmp.layout.series = this;
+					},
+					select: function(cb) {
+						category.filter(cb.getValue());
+						filter.filter([cb.getValue(), category.getValue()]);
 					}
 				}
 			});
@@ -1882,7 +1958,6 @@ Ext.onReady( function() {
 				baseBodyCls: 'small',
 				style: 'margin-bottom:0',
 				name: dv.conf.finals.chart.category,
-				emptyText: DV.i18n.category,
 				queryMode: 'local',
 				editable: false,
 				lastQuery: '',
@@ -1890,10 +1965,26 @@ Ext.onReady( function() {
 				displayField: 'name',
 				width: (dv.conf.layout.west_fieldset_width / 3) - 1,
 				value: dv.conf.finals.dimension.period.value,
+				filter: function(value) {
+					if (Ext.isString(value)) {
+						if (value === this.getValue()) {
+							this.clearValue();
+						}
+
+						this.store.clearFilter();
+
+						this.store.filterBy(function(record, id) {
+							return id !== value;
+						});
+					}
+				},
 				store: categoryStore,
 				listeners: {
+					added: function() {
+						dv.cmp.layout.category = this;
+					},
 					select: function(cb) {
-						dv.util.combobox.filter.filter();
+						filter.filter([series.getValue(), cb.getValue()]);
 					}
 				}
 			});
@@ -1904,7 +1995,6 @@ Ext.onReady( function() {
 				baseBodyCls: 'small',
 				style: 'margin-bottom:0',
 				name: dv.conf.finals.chart.filter,
-				emptyText: DV.i18n.filter,
 				queryMode: 'local',
 				editable: false,
 				lastQuery: '',
@@ -1912,8 +2002,28 @@ Ext.onReady( function() {
 				displayField: 'name',
 				width: (dv.conf.layout.west_fieldset_width / 3) - 1,
 				value: dv.conf.finals.dimension.organisationUnit.value,
+				filter: function(values) {
+					var a = Ext.clone(this.getValue()),
+						b = [];
+
+					for (var i = 0; i < a.length; i++) {
+						if (!Ext.Array.contains(values, a[i])) {
+							b.push(a[i]);
+						}
+					}
+
+					this.clearValue();
+					this.setValue(b);
+
+					this.store.filterBy(function(record, id) {
+						return !Ext.Array.contains(values, id);
+					});
+				},
 				store: filterStore,
 				listeners: {
+					added: function() {
+						dv.cmp.layout.filter = this;
+					},
 					beforedeselect: function(cb) {
 						if (cb.getValue().length === 1) {
 							return false;
@@ -1959,7 +2069,7 @@ Ext.onReady( function() {
 						items: [
 							{
 								xtype: 'label',
-								text: 'Filter',
+								text: DV.i18n.filters,
 								style: 'font-size:11px; font-weight:bold; padding:0 4px'
 							},
 							{ bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
