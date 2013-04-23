@@ -1271,6 +1271,11 @@ DV.core.getUtil = function() {
 	return util;
 };
 
+DV.core.getAPI = function(pt) {
+	var api = {};
+
+	api.Layout = function(config) {
+
 DV.core.getInstance = function(config) {
 	var dv = {};
 
