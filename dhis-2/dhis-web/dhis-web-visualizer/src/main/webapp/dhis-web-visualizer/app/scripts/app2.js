@@ -1937,7 +1937,6 @@ Ext.onReady( function() {
 				displayField: 'name',
 				width: (dv.conf.layout.west_fieldset_width / 3) - 1,
 				value: dv.conf.finals.dimension.organisationUnit.value,
-				selection: [],
 				filter: function(values) {
 					var a = Ext.clone(this.getValue()),
 						b = [];
@@ -1960,19 +1959,8 @@ Ext.onReady( function() {
 					added: function() {
 						dv.cmp.layout.filter = this;
 					},
-					select: function(cb) {
-						var len = cb.getValue().length;
-
-						if (!len) {
-							cb.setValue(cb.selection);
-						}
-						else {
-							cb.selection = cb.getValue();
-
-							if (len > 1) {
-								cb.setRawValue(len + ' selected');
-							}
-						}
+					beforedeselect: function(cb) {
+						return cb.getValue().length !== 1;
 					}
 				}
 			});
