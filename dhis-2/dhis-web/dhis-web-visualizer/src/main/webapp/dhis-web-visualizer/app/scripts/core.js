@@ -1,4 +1,6 @@
-DV.core = {};
+DV.core = {
+	instances: []
+};
 
 Ext.onReady( function() {
 
@@ -1172,9 +1174,8 @@ DV.core.getAPI = function(pt) {
 				rangeAxisTitle: null
 			};
 
-
-
-	return api;
+		return api;
+	};
 };
 
 DV.core.getInstance = function(config) {

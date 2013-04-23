@@ -177,7 +177,9 @@ Ext.onReady( function() {
 				col: [],
 				row: [],
 				filter: [],
-				objects: []
+				objects: [],
+				userOrganisationUnit: false,
+				userOrganisationUnitChildren: false
 			};
 
 			getData = function() {
