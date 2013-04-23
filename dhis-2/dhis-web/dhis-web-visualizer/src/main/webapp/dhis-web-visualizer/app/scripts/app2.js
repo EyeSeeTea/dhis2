@@ -1900,6 +1900,7 @@ Ext.onReady( function() {
 
 			filter = Ext.create('Ext.form.field.ComboBox', {
 				cls: 'dv-combo',
+				multiSelect: true,
 				baseBodyCls: 'small',
 				style: 'margin-bottom:0',
 				name: dv.conf.finals.chart.filter,
@@ -1911,7 +1912,14 @@ Ext.onReady( function() {
 				displayField: 'name',
 				width: (dv.conf.layout.west_fieldset_width / 3) - 1,
 				value: dv.conf.finals.dimension.organisationUnit.value,
-				store: filterStore
+				store: filterStore,
+				listeners: {
+					beforedeselect: function(cb) {
+						if (cb.getValue().length === 1) {
+							return false;
+						}
+					}
+				}
 			});
 
 			layout = Ext.create('Ext.toolbar.Toolbar', {

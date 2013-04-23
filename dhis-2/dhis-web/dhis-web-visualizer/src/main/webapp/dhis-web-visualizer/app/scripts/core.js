@@ -1274,7 +1274,8 @@ DV.core.getUtil = function() {
 DV.core.getAPI = function(pt) {
 	var api = {};
 
-	api.Layout = function(config) {
+	return api;
+};
 
 DV.core.getInstance = function(config) {
 	var dv = {};
@@ -1284,7 +1285,7 @@ DV.core.getInstance = function(config) {
 
 	dv.conf = DV.core.getConfig();
 	dv.util = DV.core.getUtil(dv);
-	//dv.api = DV.core.getAPI(dv);
+	dv.api = DV.core.getAPI(dv);
 
 	return dv;
 };

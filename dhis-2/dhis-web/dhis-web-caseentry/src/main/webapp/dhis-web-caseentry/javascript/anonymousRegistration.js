@@ -351,9 +351,9 @@ function getDataElements() {
 
             jQuery( '[name=searchObjectId]' ).append( '<option value="" >[' + i18n_please_select + ']</option>' );
             for ( i in json.programStageDataElements ) {
-                jQuery( '[name=searchObjectId]' ).append( '<option value="' + json.programStageDataElements[i].id + '" type="' + json.programStageDataElements[i].type + '">' + json.programStageDataElements[i].name + '</option>' );
+                jQuery( '[name=searchObjectId]' ).append( '<option value="' + json.programStageDataElements[i].id + '" uid="' + json.programStageDataElements[i].uid + '" type="' + json.programStageDataElements[i].type + '">' + json.programStageDataElements[i].name + '</option>' );
                 if ( json.programStageDataElements[i].displayInReports == 'true' ) {
-                    jQuery( '#displayInReports' ).append( '<option value="' + json.programStageDataElements[i].id + '"></option>' );
+                    jQuery( '#displayInReports' ).append( '<option value="' + json.programStageDataElements[i].id + '" uid="' + json.programStageDataElements[i].uid + '" ></option>' );
                 }
             }
 
@@ -383,10 +383,10 @@ function dataElementOnChange( this_ ) {
         }
         else if ( valueType == 'optionset' ) {
             element.replaceWith( searchTextBox );
-            autocompletedFilterField( container + " [id=searchText]", jQuery( this_ ).val() );
+            autocompletedFilterField( container + " [id=searchText]", jQuery(this_).find("option:selected").attr('uid') );
         }
         else if ( valueType == 'username' ) {
-            autocompletedUsernameField( jQuery( this ).attr( 'id' ) );
+            autocompletedUsernameField( jQuery( this_ ).attr( 'id' ) );
         }
         else {
             element.replaceWith( searchTextBox );
@@ -590,7 +590,7 @@ function searchEvents( listAll ) {
     hideById( 'dataEntryInfor' );
     hideById( 'listDiv' );
 
-    var params = '';
+    var params = 'anonynousEntryForm=true';
     jQuery( '#displayInReports option' ).each( function ( i, item ) {
         var input = jQuery( item );
         params += '&searchingValues=de_' + input.val() + '_false_';
@@ -647,11 +647,18 @@ function searchEvents( listAll ) {
         type: "POST",
         url: 'searchProgramStageInstances.action',
         data: params,
-        success: function ( html ) {
-            hideById( 'dataEntryInfor' );
-            setInnerHTML( 'listDiv', html );
+        dataType: 'text',
+        success: function ( data ) {
+            if ( data.indexOf( "<!DOCTYPE" ) != 0 ) {
+                hideById( 'dataEntryInfor' );
+                setInnerHTML( 'listDiv', data );
+            }
+
+            hideLoader();
         }
-    } ).complete(function() {
+    } ).fail(function() {
+        hideById( 'dataEntryInfor' );
+    } ).always(function() {
         var searchInfor = (listAll) ? i18n_list_all_events : i18n_search_events_by_dataelements;
         setInnerHTML( 'searchInforTD', searchInfor );
 
@@ -666,7 +673,7 @@ function searchEvents( listAll ) {
         }
 
         showById( 'listDiv' );
-        hideById( 'loaderDiv' );
+        hideLoader();
     });
 }
 

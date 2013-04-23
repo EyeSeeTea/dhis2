@@ -38,7 +38,7 @@ function saveVal( dataElementUid )
 
                 return;
             }
-            else if ( type == 'number' && !isRealNumber( fieldValue ) ) {
+            else if ( type == 'number' && !isNumber( fieldValue ) ) {
                 field.style.backgroundColor = '#ffcc00';
                 window.alert( i18n_value_must_number + '\n\n' + dataElementName );
                 field.focus();
@@ -730,7 +730,7 @@ function loadProgramStageInstance( programStageInstanceId, always ) {
                         var field = $('#' + fieldId);
 
                         if ( field ) {
-                            field.val( obj.values[key].value );
+                            field.val( decodeURI( obj.values[key].value ) );
                         }
                     });
                 }
@@ -809,7 +809,7 @@ function loadProgramStageInstance( programStageInstanceId, always ) {
                 var field = $('#' + fieldId);
 
                 if ( field ) {
-                    field.val( value.value );
+                    field.val( decodeURI( value.value ));
                 }
             } );
 
