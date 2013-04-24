@@ -3667,9 +3667,6 @@ Ext.onReady( function() {
 			update = function() {
 				var config = dv.util.chart.getLayoutConfig(),
 					layout = dv.api.Layout(config);
-console.log(config);
-console.log(layout);
-return;
 
 				if (!layout) {
 					return;
@@ -3679,7 +3676,7 @@ return;
 				}
 
 				if (layout) {
-					dv.util.chart.getTable(layout, pt);
+					dv.util.chart.getChart(layout, dv);
 				}
 			};
 
