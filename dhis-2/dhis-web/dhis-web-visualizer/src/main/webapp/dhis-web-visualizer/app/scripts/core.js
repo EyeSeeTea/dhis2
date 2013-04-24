@@ -817,12 +817,14 @@ DV.core.getUtil = function() {
 							return;
 						}
 
-						xLayout = getSyncronizedXLayout(xLayout, response);
+						//xLayout = getSyncronizedXLayout(xLayout, response);
 
 						if (!xLayout) {
 							dv.util.mask.hideMask();
 							return;
 						}
+console.log(response);
+						return;
 
 						xResponse = extendResponse(response, xLayout);
 

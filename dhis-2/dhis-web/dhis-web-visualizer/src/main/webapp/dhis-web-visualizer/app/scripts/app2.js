@@ -355,15 +355,15 @@ Ext.onReady( function() {
 		util.button = {
 			type: {
 				getValue: function() {
-					for (var i = 0; i < DV.cmp.charttype.length; i++) {
-						if (DV.cmp.charttype[i].pressed) {
-							return DV.cmp.charttype[i].name;
+					for (var i = 0; i < dv.cmp.charttype.length; i++) {
+						if (dv.cmp.charttype[i].pressed) {
+							return dv.cmp.charttype[i].name;
 						}
 					}
 				},
 				setValue: function(type) {
-					for (var i = 0; i < DV.cmp.charttype.length; i++) {
-						DV.cmp.charttype[i].toggle(DV.cmp.charttype[i].name === type);
+					for (var i = 0; i < dv.cmp.charttype.length; i++) {
+						dv.cmp.charttype[i].toggle(dv.cmp.charttype[i].name === type);
 					}
 				},
 				toggleHandler: function(b) {
@@ -378,24 +378,24 @@ Ext.onReady( function() {
 			setRelativePeriods: function(rp) {
 				if (rp) {
 					for (var key in rp) {
-						var cmp = DV.util.getCmp('checkbox[relativePeriodId="' + key + '"]');
+						var cmp = dv.util.getCmp('checkbox[relativePeriodId="' + key + '"]');
 						if (cmp) {
 							cmp.setValue(rp[key]);
 						}
 					}
 				}
 				else {
-					DV.util.checkbox.setAllFalse();
+					dv.util.checkbox.setAllFalse();
 				}
 			},
 			setAllFalse: function() {
-				var a = DV.cmp.dimension.relativeperiod.checkbox;
+				var a = dv.cmp.dimension.relativeperiod.checkbox;
 				for (var i = 0; i < a.length; i++) {
 					a[i].setValue(false);
 				}
 			},
 			isAllFalse: function() {
-				var a = DV.cmp.dimension.relativeperiod.checkbox;
+				var a = dv.cmp.dimension.relativePeriod.checkbox;
 				for (var i = 0; i < a.length; i++) {
 					if (a[i].getValue()) {
 						return false;
