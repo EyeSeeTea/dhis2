@@ -829,6 +829,195 @@ DV.core.getUtil = function() {
 				return response;
 			};
 
+			extendAxis = function(type, axis, xResponse) {
+				if (!axis || (Ext.isArray(axis) && !axis.length)) {
+					return;
+				}
+
+				var axis = Ext.clone(axis),
+					spanType = type === 'col' ? 'colSpan' : 'rowSpan',
+					nCols = 1,
+					aNumCols = [],
+					aAccNumCols = [],
+					aSpan = [],
+					aGuiItems = [],
+					aAllItems = [],
+					aColIds = [],
+					aAllObjects = [],
+					aUniqueIds;
+
+				aUniqueIds = function() {
+					var a = [];
+
+					for (var i = 0, dim; i < axis.length; i++) {
+						dim = axis[i];
+
+						a.push(xResponse.nameHeaderMap[dim.dimensionName].items);
+					}
+
+					return a;
+				}();
+//aUniqueIds	= [ [de1, de2, de3],
+//					[p1],
+//					[ou1, ou2, ou3, ou4] ]
+
+
+				for (var i = 0, dim; i < aUniqueIds.length; i++) {
+					nNumCols = aUniqueIds[i].length;
+
+					aNumCols.push(nNumCols);
+					nCols = nCols * nNumCols;
+					aAccNumCols.push(nCols);
+				}
+	//aNumCols		= [3, 1, 4]
+	//nCols			= (12) [3, 3, 12] (3 * 1 * 4)
+	//aAccNumCols	= [3, 3, 12]
+
+	//nCols			= 12
+
+				for (var i = 0; i < aUniqueIds.length; i++) {
+					if (aNumCols[i] === 1) {
+						if (i === 0) {
+							aSpan.push(nCols); //if just one item and top level, span all
+						}
+						else {
+							if (options.hideEmptyRows && type === 'row') {
+								aSpan.push(nCols / aAccNumCols[i]);
+							}
+							else {
+								aSpan.push(aSpan[0]); //if just one item and not top level, span same as top level
+							}
+						}
+					}
+					else {
+						aSpan.push(nCols / aAccNumCols[i]);
+					}
+				}
+	//aSpan			= [4, 12, 1]
+
+
+				aGuiItems.push(aUniqueIds[0]);
+
+				if (aUniqueIds.length > 1) {
+					for (var i = 1, a, n; i < aUniqueIds.length; i++) {
+						a = [];
+						n = aNumCols[i] === 1 ? aNumCols[0] : aAccNumCols[i-1];
+
+						for (var j = 0; j < n; j++) {
+							a = a.concat(aUniqueIds[i]);
+						}
+
+						aGuiItems.push(a);
+					}
+				}
+	//aGuiItems	= [ [d1, d2, d3], (3)
+	//				[p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5], (15)
+	//				[o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2...] (30)
+	//		  	  ]
+
+
+				for (var i = 0, aAllRow, aUniqueRow, span, factor; i < aUniqueIds.length; i++) {
+					aAllRow = [];
+					aUniqueRow = aUniqueIds[i];
+					span = aSpan[i];
+					factor = nCols / (span * aUniqueRow.length);
+
+					for (var j = 0; j < factor; j++) {
+						for (var k = 0; k < aUniqueRow.length; k++) {
+							for (var l = 0; l < span; l++) {
+								aAllRow.push(aUniqueRow[k]);
+							}
+						}
+					}
+
+					aAllItems.push(aAllRow);
+				}
+	//aAllItems	= [ [d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d2, d2, d2, d2, d2, d2, d2, d2, d2, d2, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3], (30)
+	//				[p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5], (30)
+	//				[o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2] (30)
+	//		  	  ]
+
+
+				for (var i = 0, id; i < nCols; i++) {
+					id = '';
+
+					for (var j = 0; j < aAllItems.length; j++) {
+						id += aAllItems[j][i];
+					}
+
+					aColIds.push(id);
+				}
+	//aColIds	= [ aaaaaaaaBBBBBBBBccccccc, aaaaaaaaaccccccccccbbbbbbbbbb, ... ]
+
+
+
+				// allObjects
+
+				for (var i = 0, allRow; i < aAllItems.length; i++) {
+					allRow = [];
+
+					for (var j = 0; j < aAllItems[i].length; j++) {
+						allRow.push({
+							id: aAllItems[i][j]
+						});
+					}
+
+					aAllObjects.push(allRow);
+				}
+
+				// add span and children
+				for (var i = 0; i < aAllObjects.length; i++) {
+					for (var j = 0, obj; j < aAllObjects[i].length; j += aSpan[i]) {
+						obj = aAllObjects[i][j];
+
+						// span
+						obj[spanType] = aSpan[i];
+
+						// children
+						obj.children = Ext.isDefined(aSpan[i + 1]) ? aSpan[i] / aSpan[i + 1] : 0;
+
+						if (i === 0) {
+							obj.root = true;
+						}
+					}
+				}
+
+				// add parents
+				if (aAllObjects.length > 1) {
+					for (var i = 1, allRow; i < aAllObjects.length; i++) {
+						allRow = aAllObjects[i];
+
+						for (var j = 0, obj, sizeCount = 0, span = aSpan[i - 1], parentObj = aAllObjects[i - 1][0]; j < allRow.length; j++) {
+							obj = allRow[j];
+							obj.parent = parentObj;
+							sizeCount++;
+
+							if (sizeCount === span) {
+								parentObj = aAllObjects[i - 1][j + 1];
+								sizeCount = 0;
+							}
+						}
+					}
+				}
+
+				return {
+					type: type,
+					items: axis,
+					xItems: {
+						unique: aUniqueIds,
+						gui: aGuiItems,
+						all: aAllItems
+					},
+					objects: {
+						all: aAllObjects
+					},
+					ids: aColIds,
+					span: aSpan,
+					dims: aUniqueIds.length,
+					size: nCols
+				};
+			};
+
 			validateUrl = function(url) {
 				if (!Ext.isString(url) || url.length > 2000) {
 					var percent = ((url.length - 2000) / url.length) * 100;
