@@ -766,6 +766,69 @@ DV.core.getUtil = function() {
 				return true;
 			};
 
+			extendResponse = function(response, xLayout) {
+				response.nameHeaderMap = {};
+				response.idValueMap = {};
+
+				var extendHeaders = function() {
+
+					// Extend headers: index, items, size
+					for (var i = 0, header; i < response.headers.length; i++) {
+						header = response.headers[i];
+						header.index = i;
+
+						if (header.meta) {
+
+							// categories
+							if (header.name === dv.conf.finals.dimension.category.dimensionName) {
+								header.items = [].concat(response.metaData[dv.conf.finals.dimension.category.dimensionName]);
+							}
+							// periods
+							else if (header.name === dv.conf.finals.dimension.period.dimensionName) {
+								header.items = [].concat(response.metaData[dv.conf.finals.dimension.period.dimensionName]);
+							}
+							else {
+								header.items = xLayout.nameItemsMap[header.name];
+							}
+
+							header.size = header.items.length;
+						}
+					}
+
+					// nameHeaderMap (headerName: header)
+					for (var i = 0, header; i < response.headers.length; i++) {
+						header = response.headers[i];
+
+						response.nameHeaderMap[header.name] = header;
+					}
+				}();
+
+				var createValueIds = function() {
+					var valueHeaderIndex = response.nameHeaderMap[dv.conf.finals.dimension.value.value].index,
+						dimensionNames = xLayout.dimensionNames,
+						idIndexOrder = [];
+
+					// idIndexOrder
+					for (var i = 0; i < dimensionNames.length; i++) {
+						idIndexOrder.push(response.nameHeaderMap[dimensionNames[i]].index);
+					}
+
+					// idValueMap
+					for (var i = 0, row, id; i < response.rows.length; i++) {
+						row = response.rows[i];
+						id = '';
+
+						for (var j = 0; j < idIndexOrder.length; j++) {
+							id += row[idIndexOrder[j]];
+						}
+
+						response.idValueMap[id] = row[valueHeaderIndex];
+					}
+				}();
+
+				return response;
+			};
+
 			validateUrl = function(url) {
 				if (!Ext.isString(url) || url.length > 2000) {
 					var percent = ((url.length - 2000) / url.length) * 100;
@@ -823,10 +886,10 @@ DV.core.getUtil = function() {
 							dv.util.mask.hideMask();
 							return;
 						}
-console.log(response);
-						return;
 
 						xResponse = extendResponse(response, xLayout);
+console.log(xResponse);
+						return;
 
 						xColAxis = extendAxis('col', xLayout.col, xResponse);
 						xRowAxis = extendAxis('row', xLayout.row, xResponse);
