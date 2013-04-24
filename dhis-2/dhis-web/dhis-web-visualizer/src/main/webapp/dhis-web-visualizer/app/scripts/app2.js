@@ -1881,9 +1881,9 @@ Ext.onReady( function() {
 				userOrganisationUnitChildren,
 				treePanel,
 				organisationUnit,
-				groupSetIdAvailableStoreMap = {},
-				groupSetIdSelectedStoreMap = {},
-				getGroupSetPanels,
+				dimensionIdAvailableStoreMap = {},
+				dimensionIdSelectedStoreMap = {},
+				getDimensionPanels,
 				validateSpecialCases,
 				update,
 
@@ -3688,7 +3688,7 @@ console.log(config);return;
 
 					dv.util.array.sortObjectsByString(dims);
 
-					panels = panels.concat(getGroupSetPanels(dims, dv.conf.finals.dimension.dimension.objectName, 'dv-panel-title-dimension'));
+					panels = panels.concat(getDimensionPanels(dims, dv.conf.finals.dimension.dimension.objectName, 'dv-panel-title-dimension'));
 
 					last = panels[panels.length - 1];
 					last.cls = 'dv-accordion-last';
@@ -3924,8 +3924,8 @@ console.log(config);return;
 				// Reset groupset stores
 				for (var key in groupSetIdSelectedStoreMap) {
 					if (groupSetIdSelectedStoreMap.hasOwnProperty(key)) {
-						var a = groupSetIdAvailableStoreMap[key],
-							s = groupSetIdSelectedStoreMap[key];
+						var a = dimensionIdAvailableStoreMap[key],
+							s = dimensionIdSelectedStoreMap[key];
 
 						if (s.getCount() > 0) {
 							a.reload();
@@ -3939,7 +3939,7 @@ console.log(config);return;
 					for (var key in r.organisationUnitGroupSets) {
 						if (r.organisationUnitGroupSets.hasOwnProperty(key)) {
 							groupSetIdSelectedStoreMap[key].add(r.organisationUnitGroupSets[key]);
-							dv.util.multiselect.filterAvailable({store: groupSetIdAvailableStoreMap[key]}, {store: groupSetIdSelectedStoreMap[key]});
+							dv.util.multiselect.filterAvailable({store: dimensionIdAvailableStoreMap[key]}, {store: dimensionIdSelectedStoreMap[key]});
 						}
 					}
 				}
