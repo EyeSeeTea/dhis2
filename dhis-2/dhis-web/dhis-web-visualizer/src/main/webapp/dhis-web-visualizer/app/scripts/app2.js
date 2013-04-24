@@ -3665,9 +3665,11 @@ Ext.onReady( function() {
 			};
 
 			update = function() {
-				var config = dv.util.chart.getLayoutConfig();
-console.log(config);return;
-				var	layout = dv.api.Layout(config);
+				var config = dv.util.chart.getLayoutConfig(),
+					layout = dv.api.Layout(config);
+console.log(config);
+console.log(layout);
+return;
 
 				if (!layout) {
 					return;

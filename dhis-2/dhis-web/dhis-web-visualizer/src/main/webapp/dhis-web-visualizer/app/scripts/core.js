@@ -1148,13 +1148,18 @@ DV.core.getUtil = function() {
 	return util;
 };
 
-DV.core.getAPI = function(pt) {
+DV.core.getAPI = function(dv) {
 	var api = {};
 
 	api.Layout = function(config) {
 		var col,
 			row,
 			filter,
+
+			removeEmptyDimensions,
+			getValidatedAxis,
+			getValidatedOptions,
+			validateLayout,
 
 			defaultOptions = {
 				showTrendLine: false,
@@ -1169,8 +1174,134 @@ DV.core.getAPI = function(pt) {
 				rangeAxisTitle: null
 			};
 
-		return api;
+		removeEmptyDimensions = function(axis) {
+			if (!axis) {
+				return;
+			}
+
+			for (var i = 0, dimension, remove; i < axis.length; i++) {
+				remove = false;
+				dimension = axis[i];
+
+				if (dimension.dimensionName !== dv.conf.finals.dimension.category.dimensionName) {
+					if (!(Ext.isArray(dimension.items) && dimension.items.length)) {
+						remove = true;
+					}
+					else {
+						for (var j = 0; j < dimension.items.length; j++) {
+							if (!Ext.isString(dimension.items[j])) {
+								remove = true;
+							}
+						}
+					}
+				}
+
+				if (remove) {
+					axis = Ext.Array.erase(axis, i, 1);
+					i = i - 1;
+				}
+			}
+
+			return axis;
+		};
+
+		getValidatedAxis = function(axis) {
+			if (!(axis && Ext.isArray(axis) && axis.length)) {
+				return;
+			}
+
+			for (var i = 0, dimension; i < axis.length; i++) {
+				dimension = axis[i];
+
+				if (!(Ext.isObject(dimension) && Ext.isString(dimension.dimensionName))) {
+					return;
+				}
+			}
+
+			axis = removeEmptyDimensions(axis);
+
+			return axis.length ? axis : null;
+		};
+
+		getValidatedOptions = function(options) {
+			if (!(options && Ext.isObject(options))) {
+				return defaultOptions;
+			}
+
+			options.showTrendLine = Ext.isDefined(options.showTrendLine) ? options.showTrendLine : defaultOptions.showTrendLine;
+			options.targetLineValue = options.targetLineValue || defaultOptions.targetLineValue;
+			options.targetLineTitle = options.targetLineTitle || defaultOptions.targetLineTitle;
+			options.baseLineValue = options.baseLineValue || defaultOptions.baseLineValue;
+			options.baseLineTitle = options.baseLineTitle || defaultOptions.baseLineTitle;
+			options.showValues = Ext.isDefined(options.showValues) ? options.showValues : defaultOptions.showValues;
+			options.hideChartLegend = Ext.isDefined(options.hideChartLegend) ? options.hideChartLegend : defaultOptions.hideChartLegend;
+			options.hideChartSubtitle = Ext.isDefined(options.hideChartSubtitle) ? options.hideChartSubtitle : defaultOptions.hideChartSubtitle;
+			options.domainAxisTitle = options.domainAxisTitle || defaultOptions.domainAxisTitle;
+			options.rangeAxisTitle = options.rangeAxisTitle || defaultOptions.rangeAxisTitle;
+
+			return options;
+		};
+
+		validateLayout = function() {
+			var a = [].concat(Ext.clone(col), Ext.clone(row), Ext.clone(filter)),
+				dimensionNames = [],
+				dimConf = dv.conf.finals.dimension;
+
+			if (!(col || row)) {
+				alert(DV.i18n.at_least_one_dimension_must_be_specified_as_row_or_column);
+				return;
+			}
+
+			// Selected dimension names
+			for (var i = 0; i < a.length; i++) {
+				if (a[i]) {
+					dimensionNames.push(a[i].dimensionName);
+				}
+			}
+
+			if (!Ext.Array.contains(dimensionNames, dimConf.period.dimensionName)) {
+				alert(DV.i18n.at_least_one_period_must_be_specified_as_column_row_or_filter);
+				return;
+			}
+
+			return true;
+		};
+
+		return function() {
+			var obj = {};
+
+			if (!(config && Ext.isObject(config))) {
+				console.log('Layout config is not an object');
+				return;
+			}
+
+			col = getValidatedAxis(config.col);
+			row = getValidatedAxis(config.row);
+			filter = getValidatedAxis(config.filter);
+
+			if (!validateLayout()) {
+				return;
+			}
+
+			if (col) {
+				obj.col = col;
+			}
+			if (row) {
+				obj.row = row;
+			}
+			if (filter) {
+				obj.filter = filter;
+			}
+
+			obj.objects = config.objects;
+
+			obj.options = getValidatedOptions(config.options);
+
+			return obj;
+		}();
 	};
+
+	return api;
 };
 
 DV.core.getInstance = function(config) {
