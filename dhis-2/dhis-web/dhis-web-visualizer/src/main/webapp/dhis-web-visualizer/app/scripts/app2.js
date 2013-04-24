@@ -3409,16 +3409,25 @@ Ext.onReady( function() {
 				getAvailableStore = function(dimension) {
 					return Ext.create('Ext.data.Store', {
 						fields: ['id', 'name'],
-						data: dimension.items,
+						proxy: {
+							type: 'ajax',
+							url: dv.baseUrl + '/api/dimensions/' + dimension.id + '.json',
+							reader: {
+								type: 'json',
+								root: 'items'
+							}
+						},
 						isLoaded: false,
 						storage: {},
 						sortStore: function() {
 							this.sort('name', 'ASC');
 						},
-						reload: function() {
-							this.removeAll();
-							this.storage = {};
-							this.loadData(dimension.items);
+						reset: function() {
+							if (this.isLoaded) {
+								this.removeAll();
+								dv.util.store.loadFromStorage(this);
+								this.sortStore();
+							}
 						},
 						listeners: {
 							load: function(s) {
@@ -3547,6 +3556,8 @@ Ext.onReady( function() {
 						xtype: 'panel',
 						title: '<div class="' + iconCls + '">' + dimension.name + '</div>',
 						hideCollapseTool: true,
+						availableStore: availableStore,
+						selectedStore: selectedStore,
 						getData: function() {
 							var data = {
 								dimensionName: dimension.id,
