@@ -358,28 +358,6 @@ DV.core.getConfig = function() {
 DV.core.getUtil = function() {
 	var util = {};
 
-	util.button = {
-		type: {
-			getValue: function() {
-				for (var i = 0; i < DV.cmp.charttype.length; i++) {
-					if (DV.cmp.charttype[i].pressed) {
-						return DV.cmp.charttype[i].name;
-					}
-				}
-			},
-			setValue: function(type) {
-				for (var i = 0; i < DV.cmp.charttype.length; i++) {
-					DV.cmp.charttype[i].toggle(DV.cmp.charttype[i].name === type);
-				}
-			},
-			toggleHandler: function(b) {
-				if (!b.pressed) {
-					b.toggle();
-				}
-			}
-		}
-	};
-
 	util.window = {
 		setAnchorPosition: function(w, target) {
 			var vpw = dv.viewport.getWidth(),
@@ -418,207 +396,207 @@ DV.core.getUtil = function() {
 		}
 	};
 
-	util.dimension = {
-		indicator: {
-			getRecords: function() {
-				var a = [];
-				DV.cmp.dimension.indicator.selected.store.each( function(r) {
-					a.push({id: r.data.id, name: r.data.name});
-				});
-				return a;
-			},
-			getIds: function() {
-				var obj = DV.c.indicator.records,
-					a = [];
-				for (var i = 0; i < obj.length; i++) {
-					a.push(obj[i].id);
-				}
-				return a;
-			}
-		},
-		dataelement: {
-			getRecords: function() {
-				var a = [];
-				DV.cmp.dimension.dataelement.selected.store.each( function(r) {
-					a.push({id: r.data.id, name: r.data.name});
-				});
-				return a;
-			},
-			getIds: function() {
-				var obj = DV.c.dataelement.records,
-					a = [];
-				for (var i = 0; i < obj.length; i++) {
-					a.push(obj[i].id);
-				}
-				return a;
-			}
-		},
-		dataset: {
-			getRecords: function() {
-				var a = [];
-				DV.cmp.dimension.dataset.selected.store.each( function(r) {
-					a.push({id: r.data.id, name: r.data.name});
-				});
-				return a;
-			},
-			getIds: function() {
-				var obj = DV.c.dataset.records,
-					a = [];
-				for (var i = 0; i < obj.length; i++) {
-					a.push(obj[i].id);
-				}
-				return a;
-			}
-		},
-		data: {
-			getRecords: function() {
-				var records = DV.c.indicator.records;
-				records = records.concat(DV.c.dataelement.records);
-				records = records.concat(DV.c.dataset.records);
-				return records;
-			},
-			getUrl: function(isFilter) {
-				var obj = DV.c.indicator.records,
-					a = [];
-				for (var i = 0; i < obj.length; i++) {
-					a.push(DV.conf.finals.dimension.indicator.paramname + '=' + obj[i].id);
-				}
-				obj = DV.c.dataelement.records;
-				for (var i = 0; i < obj.length; i++) {
-					a.push(DV.conf.finals.dimension.dataelement.paramname + '=' + obj[i].id);
-				}
-				obj = DV.c.dataset.records;
-				for (var i = 0; i < obj.length; i++) {
-					a.push(DV.conf.finals.dimension.dataset.paramname + '=' + obj[i].id);
-				}
-				return (isFilter && a.length > 1) ? a.slice(0,1) : a;
-			}
-		},
-		relativeperiod: {
-			getRecordsByRelativePeriods: function(rp) {
-				var a = [],
-					count = 0;
-				for (var key in rp) {
-					if (rp[key] && Ext.isNumber(DV.conf.period.relativePeriods[key])) {
-						count += DV.conf.period.relativePeriods[key];
-					}
-				}
-				for (var i = 0; i < count; i++) {
-					a.push({});
-				}
-				return a;
-			},
-			getIds: function() {
-				var obj = DV.c.relativeperiod.records,
-					a = [];
-				for (var i = 0; i < obj.length; i++) {
-					a.push(obj[i].id);
-				}
-				return a;
-			},
-			getRelativePeriodObject: function() {
-				var a = {},
-					cmp = DV.cmp.dimension.relativeperiod.checkbox;
-				Ext.Array.each(cmp, function(item) {
-					a[item.relativePeriodId] = item.getValue();
-				});
-				return a;
-			},
-			relativePeriodObjectIsValid: function(obj) {
-				for (var rp in obj) {
-					if (obj[rp]) {
-						return true;
-					}
-				}
-				return false;
-			}
-		},
-		fixedperiod: {
-			getRecords: function() {
-				var a = [];
-				DV.cmp.dimension.fixedperiod.selected.store.each( function(r) {
-					a.push({id: r.data.id, name: r.data.name});
-				});
-				return a;
-			},
-			getIds: function() {
-				var obj = DV.c.fixedperiod.records,
-					a = [];
-				for (var i = 0; i < obj.length; i++) {
-					a.push(obj[i].id);
-				}
-				return a;
-			}
-		},
-		period: {
-			getRecords: function() {
-				var a = DV.util.dimension.relativeperiod.getRecordsByRelativePeriods(DV.c.relativeperiod.rp);
-				return a.concat(DV.c.fixedperiod.records);
-			},
-			getUrl: function() {
-				var a = [],
-					rp = DV.c.relativeperiod.rp,
-					param;
-				for (var key in rp) {
-					if (rp.hasOwnProperty(key) && rp[key]) {
-						key = DV.conf.period.relativePeriodsUrl[key] ? DV.conf.period.relativePeriodsUrl[key] : key;
-						a.push(key + '=true');
-					}
-				}
+	//util.dimension = {
+		//indicator: {
+			//getRecords: function() {
+				//var a = [];
+				//DV.cmp.dimension.indicator.selected.store.each( function(r) {
+					//a.push({id: r.data.id, name: r.data.name});
+				//});
+				//return a;
+			//},
+			//getIds: function() {
+				//var obj = DV.c.indicator.records,
+					//a = [];
+				//for (var i = 0; i < obj.length; i++) {
+					//a.push(obj[i].id);
+				//}
+				//return a;
+			//}
+		//},
+		//dataelement: {
+			//getRecords: function() {
+				//var a = [];
+				//DV.cmp.dimension.dataelement.selected.store.each( function(r) {
+					//a.push({id: r.data.id, name: r.data.name});
+				//});
+				//return a;
+			//},
+			//getIds: function() {
+				//var obj = DV.c.dataelement.records,
+					//a = [];
+				//for (var i = 0; i < obj.length; i++) {
+					//a.push(obj[i].id);
+				//}
+				//return a;
+			//}
+		//},
+		//dataset: {
+			//getRecords: function() {
+				//var a = [];
+				//DV.cmp.dimension.dataset.selected.store.each( function(r) {
+					//a.push({id: r.data.id, name: r.data.name});
+				//});
+				//return a;
+			//},
+			//getIds: function() {
+				//var obj = DV.c.dataset.records,
+					//a = [];
+				//for (var i = 0; i < obj.length; i++) {
+					//a.push(obj[i].id);
+				//}
+				//return a;
+			//}
+		//},
+		//data: {
+			//getRecords: function() {
+				//var records = DV.c.indicator.records;
+				//records = records.concat(DV.c.dataelement.records);
+				//records = records.concat(DV.c.dataset.records);
+				//return records;
+			//},
+			//getUrl: function(isFilter) {
+				//var obj = DV.c.indicator.records,
+					//a = [];
+				//for (var i = 0; i < obj.length; i++) {
+					//a.push(DV.conf.finals.dimension.indicator.paramname + '=' + obj[i].id);
+				//}
+				//obj = DV.c.dataelement.records;
+				//for (var i = 0; i < obj.length; i++) {
+					//a.push(DV.conf.finals.dimension.dataelement.paramname + '=' + obj[i].id);
+				//}
+				//obj = DV.c.dataset.records;
+				//for (var i = 0; i < obj.length; i++) {
+					//a.push(DV.conf.finals.dimension.dataset.paramname + '=' + obj[i].id);
+				//}
+				//return (isFilter && a.length > 1) ? a.slice(0,1) : a;
+			//}
+		//},
+		//relativeperiod: {
+			//getRecordsByRelativePeriods: function(rp) {
+				//var a = [],
+					//count = 0;
+				//for (var key in rp) {
+					//if (rp[key] && Ext.isNumber(DV.conf.period.relativePeriods[key])) {
+						//count += DV.conf.period.relativePeriods[key];
+					//}
+				//}
+				//for (var i = 0; i < count; i++) {
+					//a.push({});
+				//}
+				//return a;
+			//},
+			//getIds: function() {
+				//var obj = DV.c.relativeperiod.records,
+					//a = [];
+				//for (var i = 0; i < obj.length; i++) {
+					//a.push(obj[i].id);
+				//}
+				//return a;
+			//},
+			//getRelativePeriodObject: function() {
+				//var a = {},
+					//cmp = DV.cmp.dimension.relativeperiod.checkbox;
+				//Ext.Array.each(cmp, function(item) {
+					//a[item.relativePeriodId] = item.getValue();
+				//});
+				//return a;
+			//},
+			//relativePeriodObjectIsValid: function(obj) {
+				//for (var rp in obj) {
+					//if (obj[rp]) {
+						//return true;
+					//}
+				//}
+				//return false;
+			//}
+		//},
+		//fixedperiod: {
+			//getRecords: function() {
+				//var a = [];
+				//DV.cmp.dimension.fixedperiod.selected.store.each( function(r) {
+					//a.push({id: r.data.id, name: r.data.name});
+				//});
+				//return a;
+			//},
+			//getIds: function() {
+				//var obj = DV.c.fixedperiod.records,
+					//a = [];
+				//for (var i = 0; i < obj.length; i++) {
+					//a.push(obj[i].id);
+				//}
+				//return a;
+			//}
+		//},
+		//period: {
+			//getRecords: function() {
+				//var a = DV.util.dimension.relativeperiod.getRecordsByRelativePeriods(DV.c.relativeperiod.rp);
+				//return a.concat(DV.c.fixedperiod.records);
+			//},
+			//getUrl: function() {
+				//var a = [],
+					//rp = DV.c.relativeperiod.rp,
+					//param;
+				//for (var key in rp) {
+					//if (rp.hasOwnProperty(key) && rp[key]) {
+						//key = DV.conf.period.relativePeriodsUrl[key] ? DV.conf.period.relativePeriodsUrl[key] : key;
+						//a.push(key + '=true');
+					//}
+				//}
 
-				var array = DV.c.fixedperiod.records;
-				for (var i = 0; i < array.length; i++) {
-					a.push('p=' + array[i].id);
-				}
+				//var array = DV.c.fixedperiod.records;
+				//for (var i = 0; i < array.length; i++) {
+					//a.push('p=' + array[i].id);
+				//}
 
-				return a;
-			}
-		},
-		organisationunit: {
-			getRecords: function() {
-				var a = [],
-				tp = DV.cmp.dimension.organisationunit.treepanel,
-				selection = tp.getSelectionModel().getSelection();
-				if (!selection.length) {
-					var root = tp.selectRootIf();
-					selection = [root];
-				}
-				Ext.Array.each(selection, function(r) {
-					a.push({id: r.data.id, name: r.data.text});
-				});
-				return a;
-			},
-			getUrl: function(isFilter) {
-				var ou = DV.c.organisationunit,
-					a = [];
-				for (var i = 0; i < ou.records.length; i++) {
-					a.push(DV.conf.finals.dimension.organisationunit.paramname + '=' + ou.records[i].id);
-				}
-				if (isFilter && a.length > 1) {
-					a = a.slice(0,1);
-				}
-				return a;
-			},
-			getIds: function() {
-				var obj = DV.c.organisationunit.records,
-					a = [];
-				for (var i = 0; i < obj.length; i++) {
-					a.push(obj[i].id);
-				}
-				return a;
-			},
-			getGroupSetId: function() {
-				var value = DV.cmp.dimension.organisationunitgroup.panel.groupsets.getValue();
-				return !value || value === DV.i18n.none || value === DV.conf.finals.cmd.none ? null : value;
-			}
-		},
-		panel: {
-			setHeight: function(mx) {
-				var h = DV.cmp.region.west.getHeight() - DV.conf.layout.west_fill;
-				DV.cmp.dimension.panel.setHeight(h > mx ? mx : h);
-			}
-		}
-	};
+				//return a;
+			//}
+		//},
+		//organisationunit: {
+			//getRecords: function() {
+				//var a = [],
+				//tp = DV.cmp.dimension.organisationunit.treepanel,
+				//selection = tp.getSelectionModel().getSelection();
+				//if (!selection.length) {
+					//var root = tp.selectRootIf();
+					//selection = [root];
+				//}
+				//Ext.Array.each(selection, function(r) {
+					//a.push({id: r.data.id, name: r.data.text});
+				//});
+				//return a;
+			//},
+			//getUrl: function(isFilter) {
+				//var ou = DV.c.organisationunit,
+					//a = [];
+				//for (var i = 0; i < ou.records.length; i++) {
+					//a.push(DV.conf.finals.dimension.organisationunit.paramname + '=' + ou.records[i].id);
+				//}
+				//if (isFilter && a.length > 1) {
+					//a = a.slice(0,1);
+				//}
+				//return a;
+			//},
+			//getIds: function() {
+				//var obj = DV.c.organisationunit.records,
+					//a = [];
+				//for (var i = 0; i < obj.length; i++) {
+					//a.push(obj[i].id);
+				//}
+				//return a;
+			//},
+			//getGroupSetId: function() {
+				//var value = DV.cmp.dimension.organisationunitgroup.panel.groupsets.getValue();
+				//return !value || value === DV.i18n.none || value === DV.conf.finals.cmd.none ? null : value;
+			//}
+		//},
+		//panel: {
+			//setHeight: function(mx) {
+				//var h = DV.cmp.region.west.getHeight() - DV.conf.layout.west_fill;
+				//DV.cmp.dimension.panel.setHeight(h > mx ? mx : h);
+			//}
+		//}
+	//};
 
 	util.notification = {
 		error: function(title, text) {
@@ -670,6 +648,210 @@ DV.core.getUtil = function() {
 			}
 		}
 	};
+
+	util.tmp = {
+		createChart: function(settings, dv) {
+			var options = settings.options,
+				extendLayout,
+				getSyncronizedXLayout,
+				getParamString,
+				validateResponse,
+				extendResponse,
+				extendAxis,
+				validateUrl,
+				getTableHtml,
+				initialize,
+
+				dimConf = dv.conf.finals.dimension;
+
+			extendLayout = function(settings) {
+				var xLayout = Ext.clone(settings),
+					addDimensions,
+					addDimensionNames,
+					addSortedDimensions,
+					addSortedFilterDimensions;
+
+				addDimensions = function() {
+					xLayout.dimensions = [].concat(Ext.clone(xLayout.col) || [], Ext.clone(xLayout.row) || []);
+				}();
+
+				addDimensionNames = function() {
+					var a = [],
+						dimensions = Ext.clone(xLayout.dimensions) || [];
+
+					for (var i = 0; i < dimensions.length; i++) {
+						a.push(dimensions[i].dimensionName);
+					}
+
+					xLayout.dimensionNames = a;
+				}();
+
+				addSortedDimensions = function() {
+					xLayout.sortedDimensions = dv.util.array.sortDimensions(Ext.clone(xLayout.dimensions) || []);
+				}();
+
+				addSortedFilterDimensions = function() {
+						xLayout.sortedFilterDimensions = dv.util.array.sortDimensions(Ext.clone(xLayout.filter) || []);
+				}();
+
+				addNameItemsMap = function() {
+					var map = {},
+						dimensions = Ext.clone(xLayout.dimensions) || [];
+
+					for (var i = 0, dim; i < dimensions.length; i++) {
+						dim = dimensions[i];
+
+						map[dim.dimensionName] = dim.items || [];
+					}
+
+					xLayout.nameItemsMap = map;
+				}();
+
+				return xLayout;
+			};
+
+			getParamString = function(xLayout) {
+				var sortedDimensions = xLayout.sortedDimensions,
+					sortedFilterDimensions = xLayout.sortedFilterDimensions,
+					paramString = '?';
+
+				for (var i = 0, sortedDim; i < sortedDimensions.length; i++) {
+					sortedDim = sortedDimensions[i];
+
+					paramString += 'dimension=' + sortedDim.dimensionName;
+
+					if (sortedDim.dimensionName !== dv.conf.finals.dimension.category.dimensionName) {
+						paramString += ':' + sortedDim.items.join(';');
+					}
+
+					if (i < (sortedDimensions.length - 1)) {
+						paramString += '&';
+					}
+				}
+
+				if (sortedFilterDimensions) {
+					for (var i = 0, sortedFilterDim; i < sortedFilterDimensions.length; i++) {
+						sortedFilterDim = sortedFilterDimensions[i];
+
+						paramString += '&filter=' + sortedFilterDim.dimensionName + ':' + sortedFilterDim.items.join(';');
+					}
+				}
+
+				return paramString;
+			};
+
+			validateResponse = function(response) {
+				if (!(response && Ext.isObject(response))) {
+					alert('Data invalid');
+					return false;
+				}
+
+				if (!(response.headers && Ext.isArray(response.headers) && response.headers.length)) {
+					alert('Data invalid');
+					return false;
+				}
+
+				if (!(Ext.isNumber(response.width) && response.width > 0 &&
+					  Ext.isNumber(response.height) && response.height > 0 &&
+					  Ext.isArray(response.rows) && response.rows.length > 0)) {
+					alert('No values found');
+					return false;
+				}
+
+				if (response.headers.length !== response.rows[0].length) {
+					alert('Data invalid');
+					return false;
+				}
+
+				return true;
+			};
+
+			validateUrl = function(url) {
+				if (!Ext.isString(url) || url.length > 2000) {
+					var percent = ((url.length - 2000) / url.length) * 100;
+					alert('Too many parameters selected. Please reduce the number of parameters by at least ' + percent.toFixed(0) + '%.');
+					return;
+				}
+
+				return true;
+			};
+
+			initialize = function() {
+				var url,
+					xLayout,
+					xResponse,
+					xColAxis,
+					xRowAxis;
+
+				xLayout = extendLayout(settings);
+
+				dv.paramString = getParamString(xLayout);
+				url = dv.init.contextPath + '/api/analytics.json' + dv.paramString;
+
+				if (!validateUrl(url)) {
+					return;
+				}
+
+				dv.util.mask.showMask(dv.viewport);
+
+				Ext.Ajax.request({
+					method: 'GET',
+					url: url,
+					callbackName: 'analytics',
+					timeout: 60000,
+					headers: {
+						'Content-Type': 'application/json',
+						'Accept': 'application/json'
+					},
+					disableCaching: false,
+					failure: function(r) {
+						dv.util.mask.hideMask();
+						alert(r.responseText);
+					},
+					success: function(r) {
+						var html,
+							response = Ext.decode(r.responseText);
+
+						if (!validateResponse(response)) {
+							dv.util.mask.hideMask();
+							return;
+						}
+
+						xLayout = getSyncronizedXLayout(xLayout, response);
+
+						if (!xLayout) {
+							dv.util.mask.hideMask();
+							return;
+						}
+
+						xResponse = extendResponse(response, xLayout);
+
+						xColAxis = extendAxis('col', xLayout.col, xResponse);
+						xRowAxis = extendAxis('row', xLayout.row, xResponse);
+
+						html = getTableHtml(xColAxis, xRowAxis, xResponse);
+
+						dv.viewport.centerRegion.removeAll(true);
+						dv.viewport.centerRegion.update(html);
+
+						// After table success
+						dv.util.mask.hideMask();
+
+						if (dv.viewport.downloadButton) {
+							dv.viewport.downloadButton.enable();
+						}
+
+						dv.xLayout = xLayout;
+						dv.xResponse = xResponse;
+					}
+				});
+
+			}();
+		}
+	};
+
+
+
 
 	util.chart = {
 		def: {

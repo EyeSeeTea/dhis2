@@ -352,6 +352,28 @@ Ext.onReady( function() {
 			}
 		};
 
+		util.button = {
+			type: {
+				getValue: function() {
+					for (var i = 0; i < DV.cmp.charttype.length; i++) {
+						if (DV.cmp.charttype[i].pressed) {
+							return DV.cmp.charttype[i].name;
+						}
+					}
+				},
+				setValue: function(type) {
+					for (var i = 0; i < DV.cmp.charttype.length; i++) {
+						DV.cmp.charttype[i].toggle(DV.cmp.charttype[i].name === type);
+					}
+				},
+				toggleHandler: function(b) {
+					if (!b.pressed) {
+						b.toggle();
+					}
+				}
+			}
+		};
+
 		util.checkbox = {
 			setRelativePeriods: function(rp) {
 				if (rp) {
@@ -3646,10 +3668,10 @@ Ext.onReady( function() {
 				}
 
 				// Categories as filter
-				if (layout.filter && dv.viewport.layoutWindow.filterStore.getById(dimConf.category.dimensionName)) {
-					alert(DV.i18n.categories_cannot_be_specified_as_filter);
-					return;
-				}
+				//if (layout.filter && dv.viewport.layoutWindow.filterStore.getById(dimConf.category.dimensionName)) {
+					//alert(DV.i18n.categories_cannot_be_specified_as_filter);
+					//return;
+				//}
 
 				// Degs and datasets in the same query
 				//if (Ext.Array.contains(dimensionNames, dimConf.data.dimensionName) && dv.store.dataSetSelected.data.length) {
@@ -3676,7 +3698,7 @@ Ext.onReady( function() {
 				}
 
 				if (layout) {
-					dv.util.chart.getChart(layout, dv);
+					dv.util.tmp.createChart(layout, dv);
 				}
 			};
 
