@@ -429,6 +429,42 @@ Ext.onReady( function() {
 			}
 		};
 
+        util.notification = {
+            error: function(title, text) {
+                title = title || '';
+                text = text || '';
+                Ext.create('Ext.window.Window', {
+                    title: title,
+                    cls: 'dv-messagebox',
+                    iconCls: 'dv-window-title-messagebox',
+                    modal: true,
+                    width: 300,
+                    items: [
+                        {
+                            xtype: 'label',
+                            width: 40,
+                            text: text
+                        }
+                    ]
+                }).show();
+                dv.cmp.statusbar.panel.setWidth(dv.cmp.region.center.getWidth());
+                dv.cmp.statusbar.panel.update('<img src="' + dv.conf.finals.ajax.path_images + dv.conf.statusbar.icon.error + '" style="padding:0 5px 0 0"/>' + text);
+            },
+            warning: function(text) {
+                text = text || '';
+                dv.cmp.statusbar.panel.setWidth(dv.cmp.region.center.getWidth());
+                dv.cmp.statusbar.panel.update('<img src="' + dv.conf.finals.ajax.path_images + dv.conf.statusbar.icon.warning + '" style="padding:0 5px 0 0"/>' + text);
+            },
+            ok: function() {
+                dv.cmp.statusbar.panel.setWidth(dv.cmp.region.center.getWidth());
+                dv.cmp.statusbar.panel.update('<img src="' + dv.conf.finals.ajax.path_images + dv.conf.statusbar.icon.ok + '" style="padding:0 5px 0 0"/>&nbsp;&nbsp;');
+            },
+            interpretation: function(text) {
+                dv.cmp.statusbar.panel.setWidth(dv.cmp.region.center.getWidth());
+                dv.cmp.statusbar.panel.update('<img src="' + dv.conf.finals.ajax.path_images + dv.conf.statusbar.icon.ok + '" style="padding:0 5px 0 0"/>' + text);
+            }
+        };
+
 		util.store = {
 			addToStorage: function(s, records) {
 				s.each( function(r) {

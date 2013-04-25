@@ -396,42 +396,6 @@ DV.core.getUtil = function() {
 		}
 	};
 
-	util.notification = {
-		error: function(title, text) {
-			title = title || '';
-			text = text || '';
-			Ext.create('Ext.window.Window', {
-				title: title,
-				cls: 'dv-messagebox',
-				iconCls: 'dv-window-title-messagebox',
-				modal: true,
-				width: 300,
-				items: [
-					{
-						xtype: 'label',
-						width: 40,
-						text: text
-					}
-				]
-			}).show();
-			DV.cmp.statusbar.panel.setWidth(DV.cmp.region.center.getWidth());
-			DV.cmp.statusbar.panel.update('<img src="' + DV.conf.finals.ajax.path_images + DV.conf.statusbar.icon.error + '" style="padding:0 5px 0 0"/>' + text);
-		},
-		warning: function(text) {
-			text = text || '';
-			DV.cmp.statusbar.panel.setWidth(DV.cmp.region.center.getWidth());
-			DV.cmp.statusbar.panel.update('<img src="' + DV.conf.finals.ajax.path_images + DV.conf.statusbar.icon.warning + '" style="padding:0 5px 0 0"/>' + text);
-		},
-		ok: function() {
-			DV.cmp.statusbar.panel.setWidth(DV.cmp.region.center.getWidth());
-			DV.cmp.statusbar.panel.update('<img src="' + DV.conf.finals.ajax.path_images + DV.conf.statusbar.icon.ok + '" style="padding:0 5px 0 0"/>&nbsp;&nbsp;');
-		},
-		interpretation: function(text) {
-			DV.cmp.statusbar.panel.setWidth(DV.cmp.region.center.getWidth());
-			DV.cmp.statusbar.panel.update('<img src="' + DV.conf.finals.ajax.path_images + DV.conf.statusbar.icon.ok + '" style="padding:0 5px 0 0"/>' + text);
-		}
-	};
-
 	util.mask = {
 		showMask: function(cmp, str) {
 			if (DV.mask) {
@@ -825,6 +789,7 @@ DV.core.getUtil = function() {
 
 						xResponse = extendResponse(response, xLayout);
 console.log(xResponse);
+console.log(xLayout);
 						return;
 
 						xColAxis = extendAxis('col', xLayout.col, xResponse);
