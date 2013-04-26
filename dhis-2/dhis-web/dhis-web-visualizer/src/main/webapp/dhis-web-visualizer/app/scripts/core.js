@@ -419,7 +419,10 @@ DV.core.getUtil = function() {
 				getParamString,
 				validateResponse,
 				extendResponse,
-				extendAxis,
+				getStore,
+				getAxes,
+				getSeries,
+				getChart,
 				validateUrl,
 				getTableHtml,
 				initialize,
@@ -584,149 +587,108 @@ DV.core.getUtil = function() {
 							id += row[idIndexOrder[j]];
 						}
 
-						response.idValueMap[id] = row[valueHeaderIndex];
+						response.idValueMap[id] = parseFloat(row[valueHeaderIndex]);
 					}
 				}();
 
 				return response;
 			};
 
-			extendAxis = function(type, axis, xResponse) {
-				if (!axis || (Ext.isArray(axis) && !axis.length)) {
-					return;
-				}
+			getStore = function(xResponse, xLayout) {
+				var pe = dv.conf.finals.dimension.period.dimensionName,
 
-				var axis = Ext.clone(axis),
-					spanType = type === 'col' ? 'colSpan' : 'rowSpan',
-					nCols = 1,
-					aNumCols = [],
-					aAccNumCols = [],
-					aSpan = [],
-					aGuiItems = [],
-					aAllItems = [],
-					aColIds = [],
-					aAllObjects = [],
-					aUniqueIds;
+					data = [],
+					series = xLayout.col[0].dimensionName === pe ? xResponse.metaData.pe : xLayout.col[0].items,
+					categories = xLayout.row[0].dimensionName === pe ? xResponse.metaData.pe : xLayout.row[0].items,
+					store;
 
-				aUniqueIds = function() {
-					var a = [];
+				for (var i = 0, obj; i < categories.length; i++) {
+					obj = {};
+					obj[dv.conf.finals.data.domain] = categories[i];
 
-					for (var i = 0, dim; i < axis.length; i++) {
-						dim = axis[i];
-
-						a.push(xResponse.nameHeaderMap[dim.dimensionName].items);
+					for (var j = 0, id; j < series.length; j++) {
+						id = series[j] + categories[i];
+						obj[series[j]] = xResponse.idValueMap[id];
 					}
 
-					return a;
-				}();
-//aUniqueIds	= [ [de1, de2, de3],
-//					[p1],
-//					[ou1, ou2, ou3, ou4] ]
-
-
-				for (var i = 0, dim; i < aUniqueIds.length; i++) {
-					nNumCols = aUniqueIds[i].length;
-
-					aNumCols.push(nNumCols);
-					nCols = nCols * nNumCols;
-					aAccNumCols.push(nCols);
+					data.push(obj);
 				}
-	//aNumCols		= [3, 1, 4]
-	//nCols			= (12) [3, 3, 12] (3 * 1 * 4)
-	//aAccNumCols	= [3, 3, 12]
 
-	//nCols			= 12
+				store = Ext.create('Ext.data.Store', {
+					fields: function() {
+						var fields = Ext.clone(series);
+						fields.push(dv.conf.finals.data.domain);
+						return fields;
+					}(),
+					data: data
+				});
 
-				for (var i = 0; i < aUniqueIds.length; i++) {
-					if (aNumCols[i] === 1) {
-						if (i === 0) {
-							aSpan.push(nCols); //if just one item and top level, span all
-						}
-						else {
-							if (options.hideEmptyRows && type === 'row') {
-								aSpan.push(nCols / aAccNumCols[i]);
-							}
-							else {
-								aSpan.push(aSpan[0]); //if just one item and not top level, span same as top level
-							}
-						}
+				store.rangeFields = series;
+				store.domainFields = [dv.conf.finals.data.domain];
+console.log("data + fields", data, store.rangeFields, store.domainFields);
+
+				return store;
+			};
+
+			getAxes = function(store) {
+				var numericAxis,
+					categoryAxis;
+
+				numericAxis = {
+					type: 'Numeric',
+					position: 'left',
+					fields: store.rangeFields,
+					label: {
+						renderer: Ext.util.Format.numberRenderer('0,0')
 					}
-					else {
-						aSpan.push(nCols / aAccNumCols[i]);
-					}
-				}
-	//aSpan			= [4, 12, 1]
-
-
-				aGuiItems.push(aUniqueIds[0]);
-
-				if (aUniqueIds.length > 1) {
-					for (var i = 1, a, n; i < aUniqueIds.length; i++) {
-						a = [];
-						n = aNumCols[i] === 1 ? aNumCols[0] : aAccNumCols[i-1];
-
-						for (var j = 0; j < n; j++) {
-							a = a.concat(aUniqueIds[i]);
-						}
-
-						aGuiItems.push(a);
-					}
-				}
-	//aGuiItems	= [ [d1, d2, d3], (3)
-	//				[p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5], (15)
-	//				[o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2...] (30)
-	//		  	  ]
-
-				for (var i = 0, aAllRow, aUniqueRow, span, factor; i < aUniqueIds.length; i++) {
-					aAllRow = [];
-					aUniqueRow = aUniqueIds[i];
-					span = aSpan[i];
-					factor = nCols / (span * aUniqueRow.length);
-
-					for (var j = 0; j < factor; j++) {
-						for (var k = 0; k < aUniqueRow.length; k++) {
-							for (var l = 0; l < span; l++) {
-								aAllRow.push(aUniqueRow[k]);
-							}
-						}
-					}
-
-					aAllItems.push(aAllRow);
-				}
-	//aAllItems	= [ [d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d2, d2, d2, d2, d2, d2, d2, d2, d2, d2, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3], (30)
-	//				[p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5], (30)
-	//				[o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2] (30)
-	//		  	  ]
-
-				for (var i = 0, id; i < nCols; i++) {
-					id = '';
-
-					for (var j = 0; j < aAllItems.length; j++) {
-						id += aAllItems[j][i];
-					}
-
-					aColIds.push(id);
-				}
-	//aColIds	= [ aaaaaaaaBBBBBBBBccccccc, aaaaaaaaaccccccccccbbbbbbbbbb, ... ]
-
-
-
-                return {
-					type: type,
-					items: axis,
-					xItems: {
-						unique: aUniqueIds,
-						gui: aGuiItems,
-						all: aAllItems
-					},
-					objects: {
-						all: aAllObjects
-					},
-					ids: aColIds,
-					span: aSpan,
-					dims: aUniqueIds.length,
-					size: nCols
 				};
+
+				categoryAxis = {
+					type: 'Category',
+					position: 'bottom',
+					fields: store.domainFields
+				};
+
+				return [numericAxis, categoryAxis];
+			};
+
+			getSeries = function(store, config) {
+				var main = {
+					type: 'column',
+					axis: 'left',
+					xField: store.domainFields,
+					yField: store.rangeFields,
+					style: {
+						opacity: 0.8,
+						lineWidth: 3
+					},
+					markerConfig: {
+						type: 'circle',
+						radius: 4
+					}
+				};
+
+				return [main];
+			};
+
+			getChart = function(store, axes, series) {
+				return Ext.create('Ext.chart.Chart', {
+					store: store,
+					axes: axes,
+					series: series,
+					legend: {
+						position: 'top',
+						labelFont: '15px Arial',
+						boxStroke: '#ffffff',
+						boxStrokeWidth: 0,
+						padding: 0
+					},
+					animate: true,
+					shadow: false,
+					insetPadding: 20,
+					width: dv.viewport.centerRegion.getWidth(),
+					height: dv.viewport.centerRegion.getHeight()
+				});
 			};
 
 			validateUrl = function(url) {
@@ -743,8 +705,10 @@ DV.core.getUtil = function() {
 				var url,
 					xLayout,
 					xResponse,
-					xColAxis,
-					xRowAxis;
+					store,
+					axes,
+					series,
+					chart;
 
 				xLayout = extendLayout(settings);
 
@@ -788,17 +752,27 @@ DV.core.getUtil = function() {
 						}
 
 						xResponse = extendResponse(response, xLayout);
-console.log(xResponse);
-console.log(xLayout);
-						return;
+console.log("xResponse", xResponse);
+console.log("xLayout", xLayout);
 
-						xColAxis = extendAxis('col', xLayout.col, xResponse);
-						xRowAxis = extendAxis('row', xLayout.row, xResponse);
-
-						html = getTableHtml(xColAxis, xRowAxis, xResponse);
-
+						store = getStore(xResponse, xLayout);
+						axes = getAxes(store);
+						series = getSeries(store);
+						chart = getChart(store, axes, series);
+console.log("axes", axes);
+console.log("series", series);
+console.log("chart", chart);
 						dv.viewport.centerRegion.removeAll(true);
-						dv.viewport.centerRegion.update(html);
+						dv.viewport.centerRegion.add(
+							{
+								xtype: 'panel',
+								width: '100%',
+								bodyStyle: 'border:0 none; background-color:yellow; text-align:center',
+								style: 'margin:0',
+								html: 'nissa danslion'
+							},
+							chart
+						);
 
 						// After table success
 						dv.util.mask.hideMask();
@@ -815,9 +789,6 @@ console.log(xLayout);
 			}();
 		}
 	};
-
-
-
 
 	util.chart = {
 		def: {

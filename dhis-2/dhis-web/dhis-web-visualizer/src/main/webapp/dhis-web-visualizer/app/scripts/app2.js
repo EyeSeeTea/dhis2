@@ -2334,7 +2334,7 @@ Ext.onReady( function() {
 								load: function(s) {
 									s.add({
 										id: 0,
-										name: DV.i18n.all_indicator_groups,
+										name: '[ ' + DV.i18n.all_indicator_groups + ' ]',
 										index: -1
 									});
 									s.sort([
@@ -2523,7 +2523,7 @@ Ext.onReady( function() {
 								load: function(s) {
 									s.add({
 										id: 0,
-										name: DV.i18n.all_data_element_groups,
+										name: '[ ' + DV.i18n.all_data_element_groups + ' ]',
 										index: -1
 									});
 									s.sort([
@@ -3879,14 +3879,25 @@ Ext.onReady( function() {
 
 			centerRegion = Ext.create('Ext.panel.Panel', {
 				region: 'center',
-				bodyStyle: 'padding:1px',
+				bodyStyle: 'padding:0',
 				autoScroll: true,
 				tbar: {
                     defaults: {
                         height: 26
                     },
-					items: [
-						{
+					items: function() {
+						var items = [],
+							getSeparator;
+
+						getSeparator = function() {
+							return {
+								xtype: 'tbseparator',
+								height: 18,
+								style: 'border-color:transparent; border-right-color:#d1d1d1; margin-right:4px'
+							};
+						};
+
+						items.push({
 							text: '<<<',
 							handler: function(b) {
 								var text = b.getText();
@@ -3903,47 +3914,41 @@ Ext.onReady( function() {
 							}
 						},
 						optionsButton,
-						{
-							xtype: 'tbseparator',
-							height: 18,
-							style: 'border-color: transparent #d1d1d1 transparent transparent; margin-right: 4px',
-						},
+						getSeparator(),
 						favoriteButton,
 						downloadButton,
-                        '->',
+						'->',
 						{
 							text: DV.i18n.table,
-                            toggleGroup: 'module',
+							toggleGroup: 'module',
 							handler: function(b) {
-                                window.location.href = '../../dhis-web-pivot/app/index.html';
+								window.location.href = '../../dhis-web-pivot/app/index.html';
 							}
 						},
 						{
 							text: DV.i18n.chart,
-                            toggleGroup: 'module',
+							toggleGroup: 'module',
 							pressed: true,
 							handler: dv.util.button.type.toggleHandler
 						},
 						{
 							text: DV.i18n.map,
-                            toggleGroup: 'module',
+							toggleGroup: 'module',
 							handler: function(b) {
-                                window.location.href = '../../dhis-web-mapping/app/index.html';
+								window.location.href = '../../dhis-web-mapping/app/index.html';
 							}
 						},
+						getSeparator(),
 						{
-							xtype: 'tbseparator',
-							height: 18,
-							style: 'border-color: transparent #d1d1d1 transparent transparent; margin-right: 6px; margin-left: 3px',
-						},
-                        {
-                            xtype: 'button',
-                            text: DV.i18n.home,
-                            handler: function() {
-                                window.location.href = '../../dhis-web-commons-about/redirect.action';
-                            }
-                        }
-					]
+							xtype: 'button',
+							text: DV.i18n.home,
+							handler: function() {
+								window.location.href = '../../dhis-web-commons-about/redirect.action';
+							}
+						});
+
+						return items;
+					}()
 				}
 			});
 
