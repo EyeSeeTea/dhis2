@@ -602,9 +602,11 @@ DV.core.getUtil = function() {
 					categories = xLayout.row[0].dimensionName === pe ? xResponse.metaData.pe : xLayout.row[0].items,
 					store;
 
-				for (var i = 0, obj; i < categories.length; i++) {
+				for (var i = 0, obj, category; i < categories.length; i++) {
 					obj = {};
-					obj[dv.conf.finals.data.domain] = categories[i];
+					category = categories[i];
+
+					obj[dv.conf.finals.data.domain] = xResponse.metaData.names[category];
 
 					for (var j = 0, id; j < series.length; j++) {
 						id = series[j] + categories[i];
@@ -652,12 +654,23 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 				return [numericAxis, categoryAxis];
 			};
 
-			getSeries = function(store, config) {
+			getSeries = function(store, xResponse, config) {
 				var main = {
 					type: 'column',
 					axis: 'left',
 					xField: store.domainFields,
 					yField: store.rangeFields,
+					title: function() {
+						var a = [];
+
+						for (var i = 0, id; i < store.rangeFields.length; i++) {
+							id = store.rangeFields[i];
+
+							a.push(xResponse.metaData.names[id]);
+						}
+
+						return a;
+					}(),
 					style: {
 						opacity: 0.8,
 						lineWidth: 3
@@ -672,22 +685,22 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 			};
 
 			getChart = function(store, axes, series) {
+				alert(dv.viewport.centerRegion.getHeight());
 				return Ext.create('Ext.chart.Chart', {
 					store: store,
 					axes: axes,
 					series: series,
 					legend: {
 						position: 'top',
-						labelFont: '15px Arial',
+						labelFont: '14px Arial',
 						boxStroke: '#ffffff',
 						boxStrokeWidth: 0,
 						padding: 0
 					},
 					animate: true,
 					shadow: false,
-					insetPadding: 20,
-					width: dv.viewport.centerRegion.getWidth(),
-					height: dv.viewport.centerRegion.getHeight()
+					width: dv.viewport.centerRegion.getWidth() - 20,
+					height: dv.viewport.centerRegion.getHeight() - 75
 				});
 			};
 
@@ -752,24 +765,25 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 						}
 
 						xResponse = extendResponse(response, xLayout);
+
 console.log("xResponse", xResponse);
 console.log("xLayout", xLayout);
 
 						store = getStore(xResponse, xLayout);
 						axes = getAxes(store);
-						series = getSeries(store);
+						series = getSeries(store, xResponse);
 						chart = getChart(store, axes, series);
+
 console.log("axes", axes);
 console.log("series", series);
-console.log("chart", chart);
+
 						dv.viewport.centerRegion.removeAll(true);
 						dv.viewport.centerRegion.add(
 							{
 								xtype: 'panel',
 								width: '100%',
-								bodyStyle: 'border:0 none; background-color:yellow; text-align:center',
-								style: 'margin:0',
-								html: 'nissa danslion'
+								bodyStyle: 'padding-top:10px; border:0 none; text-align:center; font-weight:bold; font-size:20px',
+								html: 'Chart title'
 							},
 							chart
 						);
