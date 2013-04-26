@@ -648,7 +648,12 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 				categoryAxis = {
 					type: 'Category',
 					position: 'bottom',
-					fields: store.domainFields
+					fields: store.domainFields,
+					label: {
+						rotate: {
+							degrees: 330
+						}
+					}
 				};
 
 				return [numericAxis, categoryAxis];
