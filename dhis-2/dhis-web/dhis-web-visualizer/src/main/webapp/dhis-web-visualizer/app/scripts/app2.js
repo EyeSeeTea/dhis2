@@ -3880,7 +3880,6 @@ Ext.onReady( function() {
 			centerRegion = Ext.create('Ext.panel.Panel', {
 				region: 'center',
 				bodyStyle: 'padding:0',
-				autoScroll: true,
 				tbar: {
                     defaults: {
                         height: 26

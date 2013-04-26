@@ -685,23 +685,32 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 			};
 
 			getChart = function(store, axes, series) {
-				alert(dv.viewport.centerRegion.getHeight());
 				return Ext.create('Ext.chart.Chart', {
 					store: store,
 					axes: axes,
 					series: series,
 					legend: {
 						position: 'top',
-						labelFont: '14px Arial',
+						labelFont: '13px Arial',
 						boxStroke: '#ffffff',
 						boxStrokeWidth: 0,
 						padding: 0
 					},
 					animate: true,
 					shadow: false,
-					width: dv.viewport.centerRegion.getWidth() - 20,
+					insetPadding: 0,
+					width: dv.viewport.centerRegion.getWidth(),
 					height: dv.viewport.centerRegion.getHeight() - 75
 				});
+			};
+
+			getTitle = function() {
+				return {
+					xtype: 'panel',
+					width: '100%',
+					bodyStyle: 'padding:10px 0 5px 20px; border:0 none; text-align:center; font-weight:bold; font-size:20px',
+					html: 'My chart title'
+				};
 			};
 
 			validateUrl = function(url) {
@@ -778,15 +787,13 @@ console.log("axes", axes);
 console.log("series", series);
 
 						dv.viewport.centerRegion.removeAll(true);
-						dv.viewport.centerRegion.add(
-							{
-								xtype: 'panel',
-								width: '100%',
-								bodyStyle: 'padding-top:10px; border:0 none; text-align:center; font-weight:bold; font-size:20px',
-								html: 'Chart title'
-							},
-							chart
-						);
+						dv.viewport.centerRegion.add([getTitle(), chart]);
+
+						dv.viewport.centerRegion.on('resize', function() {
+							chart.setWidth(dv.viewport.centerRegion.getWidth());
+							chart.setHeight(dv.viewport.centerRegion.getHeight() - 75);
+							chart.redraw(true);
+						});
 
 						// After table success
 						dv.util.mask.hideMask();
