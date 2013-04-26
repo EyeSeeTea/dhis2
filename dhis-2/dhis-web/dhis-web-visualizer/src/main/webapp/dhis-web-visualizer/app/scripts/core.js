@@ -642,6 +642,20 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 					fields: store.rangeFields,
 					label: {
 						renderer: Ext.util.Format.numberRenderer('0,0')
+					},
+					grid: {
+						odd: {
+							opacity: 1,
+							//fill: '#fefefe',
+							stroke: '#aaa',
+							'stroke-width': 0.1
+						},
+						even: {
+							opacity: 1,
+							//fill: '#f1f1f1',
+							stroke: '#aaa',
+							'stroke-width': 0.1
+						}
 					}
 				};
 
@@ -703,7 +717,7 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 					},
 					animate: true,
 					shadow: false,
-					insetPadding: 0,
+					insetPadding: 1,
 					width: dv.viewport.centerRegion.getWidth(),
 					height: dv.viewport.centerRegion.getHeight() - 75
 				});
@@ -713,7 +727,7 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 				return {
 					xtype: 'panel',
 					width: '100%',
-					bodyStyle: 'padding:10px 0 5px 20px; border:0 none; text-align:center; font-weight:bold; font-size:20px',
+					bodyStyle: 'padding:10px 0 4px 20px; border:0 none; text-align:center; font-weight:bold; font-size:20px',
 					html: 'My chart title'
 				};
 			};
@@ -795,8 +809,10 @@ console.log("series", series);
 						dv.viewport.centerRegion.add([getTitle(), chart]);
 
 						dv.viewport.centerRegion.on('resize', function() {
+							chart.animate = false;
 							chart.setWidth(dv.viewport.centerRegion.getWidth());
 							chart.setHeight(dv.viewport.centerRegion.getHeight() - 75);
+
 							chart.redraw(true);
 						});
 
