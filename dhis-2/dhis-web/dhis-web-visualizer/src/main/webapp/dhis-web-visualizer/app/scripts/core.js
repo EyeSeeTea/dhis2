@@ -423,6 +423,9 @@ DV.core.getUtil = function() {
 				getDefaultNumericAxis,
 				getDefaultCategoryAxis,
 				getDefaultSeries,
+				getDefaultTrendLines,
+				getDefaultTargetLine,
+				getDefaultBaseLine,
 				getDefaultChart,
 				validateUrl,
 				generator = {},
@@ -603,6 +606,18 @@ DV.core.getUtil = function() {
 					}
 				}();
 
+				var getMinMax = function() {
+					var valueIndex = response.nameHeaderMap.value.index,
+						values = [];
+
+					for (var i = 0; i < response.rows.length; i++) {
+						values.push(parseFloat(response.rows[i][valueIndex]));
+					}
+
+					response.min = Ext.Array.min(values);
+					response.max = Ext.Array.max(values);
+				}();
+
 				return response;
 			};
 
@@ -673,7 +688,7 @@ DV.core.getUtil = function() {
 					fields: function() {
 						var fields = Ext.clone(series);
 						fields.push(dv.conf.finals.data.domain);
-						fields = fields.concat(trendLineFields);
+						fields = fields.concat(trendLineFields, targetLineFields, baseLineFields);
 
 						return fields;
 					}(),
@@ -686,6 +701,8 @@ DV.core.getUtil = function() {
 				store.targetLineFields = targetLineFields;
 				store.baseLineFields = baseLineFields;
 
+				store.numericFields = [].concat(store.rangeFields, store.trendLineFields, store.targetLineFields, store.baseLineFields);
+
 console.log("data", data);
 console.log("rangeFields", store.rangeFields);
 console.log("domainFields", store.domainFields);
@@ -696,11 +713,12 @@ console.log("baseLineFields", store.baseLineFields);
 				return store;
 			};
 
-			getDefaultNumericAxis = function(store) {
+			getDefaultNumericAxis = function(store, xResponse) {
 				return  {
 					type: 'Numeric',
 					position: 'left',
-					fields: store.rangeFields,
+					fields: store.numericFields,
+					minimum: xResponse.min < 0 ? xResponse.min : 0,
 					label: {
 						renderer: Ext.util.Format.numberRenderer('0,0')
 					},
@@ -763,6 +781,53 @@ console.log("baseLineFields", store.baseLineFields);
 			};
 
 			getDefaultTrendLines = function(store, xResponse) {
+				var a = [];
+
+				for (var i = 0; i < store.trendLineFields.length; i++) {
+					a.push({
+						type: 'line',
+						axis: 'left',
+						xField: store.domainFields,
+						yField: store.trendLineFields[i],
+						style: {
+							opacity: 0.8,
+							lineWidth: 3,
+							'stroke-dasharray': 8
+						},
+						markerConfig: {
+							type: 'circle',
+							radius: 0
+						},
+						//tips: DV.util.chart.def.series.getTips(),
+						title: xResponse.metaData.names[store.trendLineFields[i]]
+					});
+				}
+
+				return a;
+			};
+
+			getDefaultTargetLine = function(store, xLayout) {
+				return {
+					type: 'line',
+					axis: 'left',
+					xField: store.domainFields,
+					yField: store.targetLineFields,
+					style: {
+						opacity: 1,
+						lineWidth: 2,
+						'stroke-width': 1,
+						stroke: '#041423'
+					},
+					markerConfig: {
+						type: 'circle',
+						radius: 0
+					},
+					//tips: DV.util.chart.def.series.getTips(),
+					title: Ext.isString(xLayout.options.targetLineTitle) ? xLayout.options.targetLineTitle : DV.i18n.target
+				};
+			};
+
+			getDefaultBaseLine = function(store, xResponse) {
 				var a = [];
 
 				for (var i = 0; i < store.trendLineFields.length; i++) {
@@ -854,7 +919,7 @@ console.log("baseLineFields", store.baseLineFields);
 
 			generator.column = function(xResponse, xLayout) {
 				var store = getDefaultStore(xResponse, xLayout),
-					numericAxis = getDefaultNumericAxis(store),
+					numericAxis = getDefaultNumericAxis(store, xResponse),
 					categoryAxis = getDefaultCategoryAxis(store),
 					axes = [numericAxis, categoryAxis],
 					series = [getDefaultSeries(store, xResponse)];
@@ -863,22 +928,38 @@ console.log("baseLineFields", store.baseLineFields);
 					series = getDefaultTrendLines(store, xResponse).concat(series);
 				}
 
+				if (xLayout.options.targetLineValue) {
+					series = series.concat(getDefaultTargetLine(store, xLayout));
+				}
+
+				if (xLayout.options.baseLineValue) {
+					series = series.concat(getDefaultBaseLine(store, xLayout));
+				}
+
 				return getDefaultChart(store, axes, series);
 			};
 
 			generator.stackedColumn = function(xResponse, xLayout) {
 				var chart = this.column(xResponse, xLayout);
-				chart.series.items[0].stacked = true;
+
+				for (var i = 0, item; i < chart.series.items.length; i++) {
+					item = chart.series.items[i];
+
+					if (item.type === dv.conf.finals.chart.column) {
+						item.stacked = true;
+					}
+				}
 
 				return chart;
 			};
 
 			generator.bar = function(xResponse, xLayout) {
 				var store = getDefaultStore(xResponse, xLayout),
-					numericAxis = getDefaultNumericAxis(store),
+					numericAxis = getDefaultNumericAxis(store, xResponse),
 					categoryAxis = getDefaultCategoryAxis(store),
 					axes,
 					series = getDefaultSeries(store, xResponse),
+					trendLines,
 					chart;
 
 				numericAxis.position = 'bottom';
@@ -889,19 +970,38 @@ console.log("baseLineFields", store.baseLineFields);
 				series.axis = 'bottom';
 				series = [series];
 
+				if (xLayout.options.showTrendLine) {
+					trendLines = getDefaultTrendLines(store, xResponse);
+
+					for (var i = 0; i < trendLines.length; i++) {
+						trendLines[i].axis = 'bottom';
+						trendLines[i].xField = store.trendLineFields[i];
+						trendLines[i].yField = store.domainFields;
+					}
+
+					series = trendLines.concat(series);
+				}
+
 				return getDefaultChart(store, axes, series);
 			};
 
 			generator.stackedBar = function(xResponse, xLayout) {
 				var chart = this.bar(xResponse, xLayout);
-				chart.series.items[0].stacked = true;
+
+				for (var i = 0, item; i < chart.series.items.length; i++) {
+					item = chart.series.items[i];
+
+					if (item.type === dv.conf.finals.chart.bar) {
+						item.stacked = true;
+					}
+				}
 
 				return chart;
 			};
 
 			generator.line = function(xResponse, xLayout) {
 				var store = getDefaultStore(xResponse, xLayout),
-					numericAxis = getDefaultNumericAxis(store),
+					numericAxis = getDefaultNumericAxis(store, xResponse),
 					categoryAxis = getDefaultCategoryAxis(store),
 					axes = [numericAxis, categoryAxis],
 					series = [],
@@ -935,7 +1035,7 @@ console.log("baseLineFields", store.baseLineFields);
 
 			generator.area = function(xResponse, xLayout) {
 				var store = getDefaultStore(xResponse, xLayout),
-					numericAxis = getDefaultNumericAxis(store),
+					numericAxis = getDefaultNumericAxis(store, xResponse),
 					categoryAxis = getDefaultCategoryAxis(store),
 					axes = [numericAxis, categoryAxis],
 					series = getDefaultSeries(store, xResponse);
