@@ -649,6 +649,20 @@ DV.core.getUtil = function() {
 					}
 				}
 
+				// Target line
+				if (Ext.isNumber(xLayout.options.targetLineValue) || Ext.isNumber(parseFloat(xLayout.options.targetLineValue))) {
+					for (var i = 0; i < data.length; i++) {
+						data[i][dv.conf.finals.data.targetLine] = parseFloat(xLayout.options.targetLineValue);
+					}
+				}
+
+				// Base line
+				if (Ext.isNumber(xLayout.options.baseLineValue) || Ext.isNumber(parseFloat(xLayout.options.baseLineValue))) {
+					for (var i = 0; i < data.length; i++) {
+						data[i][dv.conf.finals.data.baseLine] = parseFloat(xLayout.options.baseLineValue);
+					}
+				}
+
 				store = Ext.create('Ext.data.Store', {
 					fields: function() {
 						var fields = Ext.clone(series);
