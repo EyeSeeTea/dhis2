@@ -945,11 +945,11 @@ console.log("baseLineFields", store.baseLineFields);
 				}
 
 				if (xLayout.options.targetLineValue) {
-					series = series.concat(getDefaultTargetLine(store, xLayout));
+					series.push(getDefaultTargetLine(store, xLayout));
 				}
 
 				if (xLayout.options.baseLineValue) {
-					series = series.concat(getDefaultBaseLine(store, xLayout));
+					series.push(getDefaultBaseLine(store, xLayout));
 				}
 
 				return getDefaultChart(store, axes, series);
@@ -1064,6 +1064,14 @@ console.log("baseLineFields", store.baseLineFields);
 
 				if (xLayout.options.showTrendLine) {
 					series = getDefaultTrendLines(store, xResponse).concat(series);
+				}
+
+				if (xLayout.options.targetLineValue) {
+					series.push(getDefaultTargetLine(store, xLayout));
+				}
+
+				if (xLayout.options.baseLineValue) {
+					series.push(getDefaultBaseLine(store, xLayout));
 				}
 
 				return getDefaultChart(store, axes, series);
