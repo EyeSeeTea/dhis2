@@ -912,24 +912,29 @@ console.log("baseLineFields", store.baseLineFields);
 				};
 			};
 
-			getDefaultChart = function(store, axes, series) {
-				return Ext.create('Ext.chart.Chart', {
+			getDefaultChart = function(store, axes, series, xLayout) {
+				var config = {
 					store: store,
 					axes: axes,
 					series: series,
-					legend: {
-						position: 'top',
-						labelFont: '13px Arial',
-						boxStroke: '#ffffff',
-						boxStrokeWidth: 0,
-						padding: 0
-					},
 					animate: true,
 					shadow: false,
 					insetPadding: 1,
 					width: dv.viewport.centerRegion.getWidth(),
 					height: dv.viewport.centerRegion.getHeight() - 75
-				});
+				};
+
+				if (!xLayout.options.hideChartLegend) {
+					config.legend = {
+						position: 'top',
+						labelFont: '13px Arial',
+						boxStroke: '#ffffff',
+						boxStrokeWidth: 0,
+						padding: 0
+					};
+				}
+
+				return Ext.create('Ext.chart.Chart', config);
 			};
 
 			getTitle = function(store, xResponse, xLayout) {
@@ -944,6 +949,10 @@ console.log("baseLineFields", store.baseLineFields);
 				}
 				else if (xLayout.type === typeConf.pie) {
 					textAlign = 'left';
+				}
+
+				if (xLayout.options.hideChartLegend) {
+					paddingLeft = '0';
 				}
 
 				// Text
@@ -962,7 +971,7 @@ console.log("baseLineFields", store.baseLineFields);
 					xtype: 'panel',
 					width: '100%',
 					bodyStyle: 'padding:10px 0 4px ' + paddingLeft + '; border:0 none; text-align:' + textAlign + '; font-weight:bold; font-size:20px',
-					html: html
+					html: !xLayout.options.hideChartSubtitle ? html : ''
 				};
 			};
 
@@ -995,7 +1004,7 @@ console.log("baseLineFields", store.baseLineFields);
 					series.push(getDefaultBaseLine(store, xLayout));
 				}
 
-				return getDefaultChart(store, axes, series);
+				return getDefaultChart(store, axes, series, xLayout);
 			};
 
 			generator.stackedColumn = function(xResponse, xLayout) {
@@ -1061,7 +1070,7 @@ console.log("baseLineFields", store.baseLineFields);
 					series.push(baseLine);
 				}
 
-				return getDefaultChart(store, axes, series);
+				return getDefaultChart(store, axes, series, xLayout);
 			};
 
 			generator.stackedBar = function(xResponse, xLayout) {
@@ -1117,7 +1126,7 @@ console.log("baseLineFields", store.baseLineFields);
 					series.push(getDefaultBaseLine(store, xLayout));
 				}
 
-				return getDefaultChart(store, axes, series);
+				return getDefaultChart(store, axes, series, xLayout);
 			};
 
 			generator.area = function(xResponse, xLayout) {
@@ -1144,7 +1153,7 @@ console.log("baseLineFields", store.baseLineFields);
 					series.push(getDefaultBaseLine(store, xLayout));
 				}
 
-				return getDefaultChart(store, axes, series);
+				return getDefaultChart(store, axes, series, xLayout);
 			};
 
 			generator.pie = function(xResponse, xLayout) {
@@ -1167,7 +1176,7 @@ console.log("baseLineFields", store.baseLineFields);
 						}
 						//tips: DV.util.chart.pie.series.getTips()
 					}],
-					chart = getDefaultChart(store, null, series);
+					chart = getDefaultChart(store, null, series, xLayout);
 
 				chart.legend.position = 'right';
 				chart.legend.isVertical = true;
@@ -1231,11 +1240,7 @@ console.log("baseLineFields", store.baseLineFields);
 
 						xResponse = extendResponse(response, xLayout);
 
-console.log("xResponse", xResponse);
-console.log("xLayout", xLayout);
-
 						chart = generator[xLayout.type](xResponse, xLayout);
-console.log("chart", chart);
 						title = getTitle(chart.store, xResponse, xLayout);
 
 						dv.viewport.centerRegion.removeAll(true);
@@ -1251,6 +1256,10 @@ console.log("chart", chart);
 						dv.chart = chart;
 						dv.xLayout = xLayout;
 						dv.xResponse = xResponse;
+
+console.log("xResponse", xResponse);
+console.log("xLayout", xLayout);
+console.log("chart", chart);
 					}
 				});
 
