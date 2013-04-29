@@ -612,8 +612,10 @@ DV.core.getUtil = function() {
 					data = [],
 					series = xLayout.col[0].dimensionName === pe ? xResponse.metaData.pe : xLayout.col[0].items,
 					categories = xLayout.row[0].dimensionName === pe ? xResponse.metaData.pe : xLayout.row[0].items,
+					trendLineFields = [],
 					store;
 
+				// Data
 				for (var i = 0, obj, category; i < categories.length; i++) {
 					obj = {};
 					category = categories[i];
@@ -628,6 +630,25 @@ DV.core.getUtil = function() {
 					data.push(obj);
 				}
 
+				// Trend lines
+				if (xLayout.options.showTrendLine) {
+					for (var i = 0, regression, key; i < series.length; i++) {
+						regression = new SimpleRegression();
+						key = 'trendline_' + series[i];
+
+						for (var j = 0; j < data.length; j++) {
+							regression.addData(j, data[j][series[i]]);
+						}
+
+						for (var j = 0; j < data.length; j++) {
+							data[j][key] = parseFloat(regression.predict(j).toFixed(1));
+						}
+
+						trendLineFields.push(key);
+						xResponse.metaData.names[key] = DV.i18n.trend + ' (' + xResponse.metaData.names[series[i]] + ')';
+					}
+				}
+
 				store = Ext.create('Ext.data.Store', {
 					fields: function() {
 						var fields = Ext.clone(series);
@@ -639,7 +660,12 @@ DV.core.getUtil = function() {
 
 				store.rangeFields = series;
 				store.domainFields = [dv.conf.finals.data.domain];
-console.log("data + fields", data, store.rangeFields, store.domainFields);
+				store.trendLineFields = trendLineFields;
+
+console.log("data", data);
+console.log("rangeFields", store.rangeFields);
+console.log("domainFields", store.domainFields)
+console.log("trendLineFields", store.trendLineFields);
 
 				return store;
 			};
@@ -708,6 +734,32 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 				};
 
 				return main;
+			};
+
+			getDefaultTrendLines = function(store, xResponse) {
+				var a = [];
+
+				for (var i = 0; i < store.trendLineFields.length; i++) {
+					a.push({
+						type: 'line',
+						axis: 'left',
+						xField: store.domainFields,
+						yField: store.trendLineFields[i],
+						style: {
+							opacity: 0.8,
+							lineWidth: 3,
+							'stroke-dasharray': 8
+						},
+						markerConfig: {
+							type: 'circle',
+							radius: 0
+						},
+						//tips: DV.util.chart.def.series.getTips(),
+						title: xResponse.metaData.names[store.trendLineFields[i]]
+					});
+				}
+
+				return a;
 			};
 
 			getDefaultChart = function(store, axes, series) {
@@ -781,6 +833,12 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 					axes = [numericAxis, categoryAxis],
 					series = [getDefaultSeries(store, xResponse)];
 
+				if (xLayout.options.showTrendLine) {
+					//series = series.concat(getDefaultTrendLines(store, xResponse));
+
+					series = getDefaultTrendLines(store, xResponse);
+				}
+
 				return getDefaultChart(store, axes, series);
 			};
 
@@ -829,16 +887,8 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 					series.push({
 						type: 'line',
 						axis: 'left',
-						xField: dv.conf.finals.data.domain,
+						xField: store.domainFields,
 						yField: store.rangeFields[i],
-						title: function() {
-							var a = [],
-								id = store.rangeFields[i];
-
-							a.push(xResponse.metaData.names[id]);
-
-							return a;
-						}(),
 						style: {
 							opacity: 0.8,
 							lineWidth: 3
@@ -846,8 +896,9 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 						markerConfig: {
 							type: 'circle',
 							radius: 4
-						}
+						},
 						//tips: DV.util.chart.def.series.getTips()
+						title: xResponse.metaData.names[store.rangeFields[i]]
 					});
 				}
 
