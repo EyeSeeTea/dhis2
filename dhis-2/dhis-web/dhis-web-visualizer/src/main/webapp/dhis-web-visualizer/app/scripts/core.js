@@ -1188,6 +1188,7 @@ console.log("baseLineFields", store.baseLineFields);
 					series = [{
 						type: 'pie',
 						field: store.rangeFields[0],
+						lengthField: store.rangeFields[0],
 						showInLegend: true,
 						label: {
 							field: dv.conf.finals.data.domain
@@ -1215,10 +1216,9 @@ console.log("baseLineFields", store.baseLineFields);
 				chart.legend.isVertical = true;
 
 				chart.insetPadding = 20;
-				chart.margin = '50 0 0 50';
 				chart.shadow = true;
 				chart.width = dv.viewport.centerRegion.getWidth() - 100;
-				chart.height = dv.viewport.centerRegion.getHeight() - 200;
+				chart.height = dv.viewport.centerRegion.getHeight() - 120;
 
 				return chart;
 			};
