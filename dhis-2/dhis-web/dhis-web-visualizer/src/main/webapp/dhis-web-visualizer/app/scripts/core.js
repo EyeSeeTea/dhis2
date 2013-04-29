@@ -700,8 +700,27 @@ DV.core.getUtil = function() {
 				store.trendLineFields = trendLineFields;
 				store.targetLineFields = targetLineFields;
 				store.baseLineFields = baseLineFields;
-
 				store.numericFields = [].concat(store.rangeFields, store.trendLineFields, store.targetLineFields, store.baseLineFields);
+
+				store.getMaximum = function() {
+					var maximums = [];
+
+					for (var i = 0; i < store.numericFields.length; i++) {
+						maximums.push(store.max(store.numericFields[i]));
+					}
+
+					return Ext.Array.max(maximums);
+				};
+
+				store.getMinimum = function() {
+					var minimums = [];
+
+					for (var i = 0; i < store.numericFields.length; i++) {
+						minimums.push(store.max(store.numericFields[i]));
+					}
+
+					return Ext.Array.min(minimums);
+				};
 
 console.log("data", data);
 console.log("rangeFields", store.rangeFields);
@@ -714,11 +733,13 @@ console.log("baseLineFields", store.baseLineFields);
 			};
 
 			getDefaultNumericAxis = function(store, xResponse) {
+				var minimum = store.getMinimum();
+
 				return  {
 					type: 'Numeric',
 					position: 'left',
 					fields: store.numericFields,
-					minimum: xResponse.min < 0 ? xResponse.min : 0,
+					minimum: minimum < 0 ? minimum : 0,
 					label: {
 						renderer: Ext.util.Format.numberRenderer('0,0')
 					},
