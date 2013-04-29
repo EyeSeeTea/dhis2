@@ -191,9 +191,9 @@ DV.core.getConfig = function() {
         },
         data: {
 			domain: 'domain_',
-			targetline: 'targetline_',
-			baseline: 'baseline_',
-			trendline: 'trendline_'
+			targetLine: 'targetline_',
+			baseLine: 'baseline_',
+			trendLine: 'trendline_'
 		},
         image: {
             png: 'png',
@@ -634,7 +634,7 @@ DV.core.getUtil = function() {
 				if (xLayout.options.showTrendLine) {
 					for (var i = 0, regression, key; i < series.length; i++) {
 						regression = new SimpleRegression();
-						key = 'trendline_' + series[i];
+						key = dv.conf.finals.data.trendLine + series[i];
 
 						for (var j = 0; j < data.length; j++) {
 							regression.addData(j, data[j][series[i]]);
