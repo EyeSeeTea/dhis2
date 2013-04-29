@@ -831,6 +831,14 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 						axis: 'left',
 						xField: dv.conf.finals.data.domain,
 						yField: store.rangeFields[i],
+						title: function() {
+							var a = [],
+								id = store.rangeFields[i];
+
+							a.push(xResponse.metaData.names[id]);
+
+							return a;
+						}(),
 						style: {
 							opacity: 0.8,
 							lineWidth: 3
@@ -854,7 +862,7 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 					series = getDefaultSeries(store, xResponse);
 
 				series.type = 'area';
-				series.style.opacity = 0.5;
+				series.style.opacity = 0.55;
 				series.style.lineWidth = 0;
 				series = [series];
 
