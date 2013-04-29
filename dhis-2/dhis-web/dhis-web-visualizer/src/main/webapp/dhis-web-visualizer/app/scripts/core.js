@@ -806,12 +806,20 @@ console.log("baseLineFields", store.baseLineFields);
 				};
 			};
 
-			getDefaultSeries = function(store, xResponse) {
+			getDefaultSeries = function(store, xResponse, xLayout) {
 				var main = {
 					type: 'column',
 					axis: 'left',
 					xField: store.domainFields,
 					yField: store.rangeFields,
+					style: {
+						opacity: 0.8,
+						lineWidth: 3
+					},
+					markerConfig: {
+						type: 'circle',
+						radius: 4
+					},
 					title: function() {
 						var a = [];
 
@@ -822,16 +830,16 @@ console.log("baseLineFields", store.baseLineFields);
 						}
 
 						return a;
-					}(),
-					style: {
-						opacity: 0.8,
-						lineWidth: 3
-					},
-					markerConfig: {
-						type: 'circle',
-						radius: 4
-					}
+					}()
 				};
+
+				if (xLayout.options.showValues) {
+					main.label = {
+						display: 'outside',
+						'text-anchor': 'middle',
+						field: store.rangeFields
+					};
+				}
 
 				return main;
 			};
@@ -973,7 +981,7 @@ console.log("baseLineFields", store.baseLineFields);
 					numericAxis = getDefaultNumericAxis(store, xResponse, xLayout),
 					categoryAxis = getDefaultCategoryAxis(store),
 					axes = [numericAxis, categoryAxis],
-					series = [getDefaultSeries(store, xResponse)];
+					series = [getDefaultSeries(store, xResponse, xLayout)];
 
 				if (xLayout.options.showTrendLine) {
 					series = getDefaultTrendLines(store, xResponse).concat(series);
@@ -1009,7 +1017,7 @@ console.log("baseLineFields", store.baseLineFields);
 					numericAxis = getDefaultNumericAxis(store, xResponse, xLayout),
 					categoryAxis = getDefaultCategoryAxis(store),
 					axes,
-					series = getDefaultSeries(store, xResponse),
+					series = getDefaultSeries(store, xResponse, xLayout),
 					trendLines,
 					targetLine,
 					baseLine,
@@ -1117,7 +1125,7 @@ console.log("baseLineFields", store.baseLineFields);
 					numericAxis = getDefaultNumericAxis(store, xResponse, xLayout),
 					categoryAxis = getDefaultCategoryAxis(store),
 					axes = [numericAxis, categoryAxis],
-					series = getDefaultSeries(store, xResponse);
+					series = getDefaultSeries(store, xResponse, xLayout);
 
 				series.type = 'area';
 				series.style.opacity = 0.55;
