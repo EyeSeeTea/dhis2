@@ -196,6 +196,8 @@ Ext.onReady( function() {
 				}
 			}();
 
+
+			config.type = dv.viewport.chartType.getChartType();
 			config.options = dv.viewport.optionsWindow.getOptions();
 
 			config.options.userOrganisationUnit = dv.viewport.userOrganisationUnit.getValue();
@@ -1905,13 +1907,17 @@ Ext.onReady( function() {
 		var createViewport;
 
 		createViewport = function() {
-			var column,
+			var buttons = [],
+				buttonAddedListener,
+				column,
 				stackedColumn,
 				bar,
 				stackedBar,
 				line,
 				area,
 				pie,
+				buttons = [],
+				buttonAddedListener,
 				chartType,
 				seriesStore,
 				categoryStore,
@@ -1959,59 +1965,98 @@ Ext.onReady( function() {
 				viewport,
 				addListeners;
 
+			buttonAddedListener = function(b) {
+				buttons.push(b);
+			};
+
 			column = Ext.create('Ext.button.Button', {
 				xtype: 'button',
+				chartType: dv.conf.finals.chart.column,
 				icon: 'images/column.png',
 				name: dv.conf.finals.chart.column,
 				tooltipText: DV.i18n.column_chart,
-				pressed: true
+				pressed: true,
+				listeners: {
+					added: buttonAddedListener
+				}
 			});
 
 			stackedColumn = Ext.create('Ext.button.Button', {
 				xtype: 'button',
+				chartType: dv.conf.finals.chart.stackedColumn,
 				icon: 'images/column-stacked.png',
 				name: dv.conf.finals.chart.stackedcolumn,
-				tooltipText: DV.i18n.stacked_column_chart
+				tooltipText: DV.i18n.stacked_column_chart,
+				listeners: {
+					added: buttonAddedListener
+				}
 			});
 
 			bar = Ext.create('Ext.button.Button', {
 				xtype: 'button',
+				chartType: dv.conf.finals.chart.bar,
 				icon: 'images/bar.png',
 				name: dv.conf.finals.chart.bar,
-				tooltipText: DV.i18n.bar_chart
+				tooltipText: DV.i18n.bar_chart,
+				listeners: {
+					added: buttonAddedListener
+				}
 			});
 
 			stackedBar = Ext.create('Ext.button.Button', {
 				xtype: 'button',
+				chartType: dv.conf.finals.chart.stackedBar,
 				icon: 'images/bar-stacked.png',
 				name: dv.conf.finals.chart.stackedbar,
-				tooltipText: DV.i18n.stacked_bar_chart
+				tooltipText: DV.i18n.stacked_bar_chart,
+				listeners: {
+					added: buttonAddedListener
+				}
 			});
 
 			line = Ext.create('Ext.button.Button', {
 				xtype: 'button',
+				chartType: dv.conf.finals.chart.line,
 				icon: 'images/line.png',
 				name: dv.conf.finals.chart.line,
-				tooltipText: DV.i18n.line_chart
+				tooltipText: DV.i18n.line_chart,
+				listeners: {
+					added: buttonAddedListener
+				}
 			});
 
 			area = Ext.create('Ext.button.Button', {
 				xtype: 'button',
+				chartType: dv.conf.finals.chart.area,
 				icon: 'images/area.png',
 				name: dv.conf.finals.chart.area,
-				tooltipText: DV.i18n.area_chart
+				tooltipText: DV.i18n.area_chart,
+				listeners: {
+					added: buttonAddedListener
+				}
 			});
 
 			pie = Ext.create('Ext.button.Button', {
 				xtype: 'button',
+				chartType: dv.conf.finals.chart.pie,
 				icon: 'images/pie.png',
 				name: dv.conf.finals.chart.pie,
-				tooltipText: DV.i18n.pie_chart
+				tooltipText: DV.i18n.pie_chart,
+				listeners: {
+					added: buttonAddedListener
+				}
 			});
 
 			chartType = Ext.create('Ext.toolbar.Toolbar', {
 				height: 45,
 				style: 'padding-top:0px; border-style:none',
+				getChartType: function() {
+					for (var i = 0; i < buttons.length; i++) {
+						if (buttons[i].pressed) {
+							return buttons[i].chartType;
+						}
+					}
+				},
 				defaults: {
 					height: 40,
 					toggleGroup: 'charttype',
@@ -3723,8 +3768,8 @@ Ext.onReady( function() {
 			};
 
 			update = function() {
-				var config = dv.util.chart.getLayoutConfig(),
-					layout = dv.api.Layout(config);
+				var layoutConfig = dv.util.chart.getLayoutConfig(),
+					layout = dv.api.Layout(layoutConfig);
 
 				if (!layout) {
 					return;
@@ -4114,6 +4159,7 @@ Ext.onReady( function() {
 
 			viewport = Ext.create('Ext.container.Viewport', {
 				layout: 'border',
+				chartType: chartType,
 				accordion: accordion,
 				accordionBody: accordionBody,
 				westRegion: westRegion,

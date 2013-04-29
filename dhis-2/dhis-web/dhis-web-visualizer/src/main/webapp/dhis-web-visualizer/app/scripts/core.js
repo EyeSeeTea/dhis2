@@ -182,9 +182,9 @@ DV.core.getConfig = function() {
             category: 'category',
             filter: 'filter',
             column: 'column',
-            stackedcolumn: 'stackedcolumn',
+            stackedColumn: 'stackedColumn',
             bar: 'bar',
-            stackedbar: 'stackedbar',
+            stackedBar: 'stackedBar',
             line: 'line',
             area: 'area',
             pie: 'pie'
@@ -412,25 +412,26 @@ DV.core.getUtil = function() {
 	};
 
 	util.tmp = {
-		createChart: function(settings, dv) {
-			var options = settings.options,
+		createChart: function(layout, dv) {
+			var options = layout.options,
 				extendLayout,
 				getSyncronizedXLayout,
 				getParamString,
 				validateResponse,
 				extendResponse,
-				getStore,
-				getAxes,
-				getSeries,
-				getChart,
+				getDefaultStore,
+				getDefaultNumericAxis,
+				getDefaultCategoryAxis,
+				getDefaultSeries,
+				getDefaultChart,
 				validateUrl,
-				getTableHtml,
+				generator = {},
 				initialize,
 
 				dimConf = dv.conf.finals.dimension;
 
-			extendLayout = function(settings) {
-				var xLayout = Ext.clone(settings),
+			extendLayout = function(layout) {
+				var xLayout = Ext.clone(layout),
 					addDimensions,
 					addDimensionNames,
 					addSortedDimensions,
@@ -594,7 +595,7 @@ DV.core.getUtil = function() {
 				return response;
 			};
 
-			getStore = function(xResponse, xLayout) {
+			getDefaultStore = function(xResponse, xLayout) {
 				var pe = dv.conf.finals.dimension.period.dimensionName,
 
 					data = [],
@@ -632,11 +633,8 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 				return store;
 			};
 
-			getAxes = function(store) {
-				var numericAxis,
-					categoryAxis;
-
-				numericAxis = {
+			getDefaultNumericAxis = function(store) {
+				return  {
 					type: 'Numeric',
 					position: 'left',
 					fields: store.rangeFields,
@@ -646,20 +644,20 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 					grid: {
 						odd: {
 							opacity: 1,
-							//fill: '#fefefe',
 							stroke: '#aaa',
 							'stroke-width': 0.1
 						},
 						even: {
 							opacity: 1,
-							//fill: '#f1f1f1',
 							stroke: '#aaa',
 							'stroke-width': 0.1
 						}
 					}
 				};
+			};
 
-				categoryAxis = {
+			getDefaultCategoryAxis = function(store) {
+				return {
 					type: 'Category',
 					position: 'bottom',
 					fields: store.domainFields,
@@ -669,11 +667,9 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 						}
 					}
 				};
-
-				return [numericAxis, categoryAxis];
 			};
 
-			getSeries = function(store, xResponse, config) {
+			getDefaultSeries = function(store, xResponse) {
 				var main = {
 					type: 'column',
 					axis: 'left',
@@ -700,10 +696,10 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 					}
 				};
 
-				return [main];
+				return main;
 			};
 
-			getChart = function(store, axes, series) {
+			getDefaultChart = function(store, axes, series) {
 				return Ext.create('Ext.chart.Chart', {
 					store: store,
 					axes: axes,
@@ -723,11 +719,14 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 				});
 			};
 
-			getTitle = function() {
+			getTitle = function(xLayout) {
+				var typeConf = dv.conf.finals.chart,
+					paddingLeft = xLayout.type === typeConf.bar || xLayout.type === typeConf.stackedBar ? '85px' : '30px';
+
 				return {
 					xtype: 'panel',
 					width: '100%',
-					bodyStyle: 'padding:10px 0 4px 20px; border:0 none; text-align:center; font-weight:bold; font-size:20px',
+					bodyStyle: 'padding:10px 0 4px ' + paddingLeft + '; border:0 none; text-align:center; font-weight:bold; font-size:20px',
 					html: 'My chart title'
 				};
 			};
@@ -742,16 +741,86 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 				return true;
 			};
 
+			generator.column = function(xResponse, xLayout) {
+				var store = getDefaultStore(xResponse, xLayout),
+					numericAxis = getDefaultNumericAxis(store),
+					categoryAxis = getDefaultCategoryAxis(store),
+					axes = [numericAxis, categoryAxis],
+					series = [getDefaultSeries(store, xResponse)];
+
+				return getDefaultChart(store, axes, series);
+			};
+
+			generator.stackedColumn = function(xResponse, xLayout) {
+				var chart = this.column(xResponse, xLayout);
+				chart.series.items[0].stacked = true;
+
+				return chart;
+			};
+
+			generator.bar = function(xResponse, xLayout) {
+				var store = getDefaultStore(xResponse, xLayout),
+					numericAxis = getDefaultNumericAxis(store),
+					categoryAxis = getDefaultCategoryAxis(store),
+					axes,
+					series = getDefaultSeries(store, xResponse),
+					chart;
+
+				numericAxis.position = 'bottom';
+				categoryAxis.position = 'left';
+				axes = [numericAxis, categoryAxis];
+
+				series.type = 'bar';
+				series.axis = 'bottom';
+				series = [series];
+
+				return getDefaultChart(store, axes, series);
+			};
+
+			generator.stackedBar = function(xResponse, xLayout) {
+				var chart = this.bar(xResponse, xLayout);
+				chart.series.items[0].stacked = true;
+
+				return chart;
+			};
+
+			generator.line = function(xResponse, xLayout) {
+				var store = getDefaultStore(xResponse, xLayout),
+					numericAxis = getDefaultNumericAxis(store),
+					categoryAxis = getDefaultCategoryAxis(store),
+					axes = [numericAxis, categoryAxis],
+					series = [],
+					chart;
+
+				for (var i = 0; i < store.rangeFields.length; i++) {
+					series.push({
+						type: 'line',
+						axis: 'left',
+						xField: dv.conf.finals.data.domain,
+						yField: store.rangeFields[i],
+						style: {
+							opacity: 0.8,
+							lineWidth: 3
+						},
+						markerConfig: {
+							type: 'circle',
+							radius: 4
+						}
+						//tips: DV.util.chart.def.series.getTips()
+					});
+				}
+
+				return getDefaultChart(store, axes, series);
+			};
+
 			initialize = function() {
 				var url,
 					xLayout,
 					xResponse,
-					store,
-					axes,
-					series,
-					chart;
+					chart,
+					title;
 
-				xLayout = extendLayout(settings);
+				xLayout = extendLayout(layout);
 
 				dv.paramString = getParamString(xLayout);
 				url = dv.init.contextPath + '/api/analytics.json' + dv.paramString;
@@ -797,23 +866,18 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 console.log("xResponse", xResponse);
 console.log("xLayout", xLayout);
 
-						store = getStore(xResponse, xLayout);
-						axes = getAxes(store);
-						series = getSeries(store, xResponse);
-						chart = getChart(store, axes, series);
-
-console.log("axes", axes);
-console.log("series", series);
+						chart = generator[xLayout.type](xResponse, xLayout);
+console.log(chart);
+						title = getTitle(xLayout);
 
 						dv.viewport.centerRegion.removeAll(true);
-						dv.viewport.centerRegion.add([getTitle(), chart]);
+						dv.viewport.centerRegion.add([title, chart]);
 
 						dv.viewport.centerRegion.on('resize', function() {
 							chart.animate = false;
 							chart.setWidth(dv.viewport.centerRegion.getWidth());
 							chart.setHeight(dv.viewport.centerRegion.getHeight() - 75);
-
-							chart.redraw(true);
+							chart.animate = true;
 						});
 
 						// After table success
@@ -1454,6 +1518,7 @@ DV.core.getAPI = function(dv) {
 				obj.filter = filter;
 			}
 
+			obj.type = config.type;
 			obj.objects = config.objects;
 
 			obj.options = getValidatedOptions(config.options);
