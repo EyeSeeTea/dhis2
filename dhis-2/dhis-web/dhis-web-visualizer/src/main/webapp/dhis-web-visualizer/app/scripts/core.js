@@ -820,6 +820,14 @@ console.log("baseLineFields", store.baseLineFields);
 						type: 'circle',
 						radius: 4
 					},
+					tips: {
+						trackMouse: true,
+						cls: 'dv-chart-tips',
+						renderer: function(si, item) {
+							console.log(arguments);
+							//this.update('<span style="font-size:11px">' + si.data[dv.conf.finals.data.domain] + '</span>' + '<br/>' + '<b>' + item.value[1] + '</b>');
+						}
+					},
 					title: function() {
 						var a = [];
 
@@ -858,11 +866,7 @@ console.log("baseLineFields", store.baseLineFields);
 							lineWidth: 3,
 							'stroke-dasharray': 8
 						},
-						markerConfig: {
-							type: 'circle',
-							radius: 0
-						},
-						//tips: DV.util.chart.def.series.getTips(),
+						showMarkers: false,
 						title: xResponse.metaData.names[store.trendLineFields[i]]
 					});
 				}
@@ -1095,8 +1099,8 @@ console.log("baseLineFields", store.baseLineFields);
 					series = [],
 					chart;
 
-				for (var i = 0; i < store.rangeFields.length; i++) {
-					series.push({
+				for (var i = 0, line; i < store.rangeFields.length; i++) {
+					line = {
 						type: 'line',
 						axis: 'left',
 						xField: store.domainFields,
@@ -1109,9 +1113,32 @@ console.log("baseLineFields", store.baseLineFields);
 							type: 'circle',
 							radius: 4
 						},
+						label: {
+							display: 'outside',
+							'text-anchor': 'middle',
+							field: store.rangeFields
+						},
+						tips: {
+							trackMouse: true,
+							cls: 'dv-chart-tips',
+							renderer: function(si, item) {
+								console.log(arguments);
+								//this.update('<span style="font-size:11px">' + si.data[dv.conf.finals.data.domain] + '</span>' + '<br/>' + '<b>' + item.value[1] + '</b>');
+							}
+						},
 						//tips: DV.util.chart.def.series.getTips()
 						title: xResponse.metaData.names[store.rangeFields[i]]
-					});
+					};
+
+					if (xLayout.options.showValues) {
+						line.label = {
+							display: 'rotate',
+							'text-anchor': 'middle',
+							field: store.rangeFields[i]
+						};
+					}
+
+					series.push(line);
 				}
 
 				if (xLayout.options.showTrendLine) {
