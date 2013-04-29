@@ -1189,17 +1189,33 @@ console.log("baseLineFields", store.baseLineFields);
 						type: 'pie',
 						field: store.rangeFields[0],
 						lengthField: store.rangeFields[0],
+						donut: 7,
 						showInLegend: true,
-						label: {
-							field: dv.conf.finals.data.domain
-						},
 						highlight: {
 							segment: {
 								margin: 8
 							}
 						},
+						label: {
+							field: dv.conf.finals.data.domain,
+							display: 'middle',
+							contrast: true,
+							font: '14px Arial',
+							renderer: function(value) {
+								var record = store.getAt(store.findExact(dv.conf.finals.data.domain, value));
+
+								return record.data[store.rangeFields[0]];
+							}
+						},
+						legend: {
+							position: 'right',
+							labelFont: '13px Arial',
+							boxStroke: '#ffffff',
+							boxStrokeWidth: 0,
+							padding: 0
+						},
 						style: {
-							opacity: 0.9,
+							opacity: 0.8,
 							stroke: '#555'
 						},
 						tips: {
