@@ -622,6 +622,16 @@ DV.core.getUtil = function() {
 				return response;
 			};
 
+			validateUrl = function(url) {
+				if (!Ext.isString(url) || url.length > 2000) {
+					var percent = ((url.length - 2000) / url.length) * 100;
+					alert('Too many parameters selected. Please reduce the number of parameters by at least ' + percent.toFixed(0) + '%.');
+					return;
+				}
+
+				return true;
+			};
+
 			getDefaultStore = function(xResponse, xLayout) {
 				var pe = dv.conf.finals.dimension.period.dimensionName,
 
@@ -791,11 +801,15 @@ console.log("baseLineFields", store.baseLineFields);
 					axis.maximum = maximum;
 				}
 
+				if (xLayout.options.rangeAxisTitle) {
+					axis.title = xLayout.options.rangeAxisTitle;
+				}
+
 				return axis;
 			};
 
-			getDefaultCategoryAxis = function(store) {
-				return {
+			getDefaultCategoryAxis = function(store, xLayout) {
+				var axis = {
 					type: 'Category',
 					position: 'bottom',
 					fields: store.domainFields,
@@ -805,6 +819,12 @@ console.log("baseLineFields", store.baseLineFields);
 						}
 					}
 				};
+
+				if (xLayout.options.domainAxisTitle) {
+					axis.title = xLayout.options.domainAxisTitle;
+				}
+
+				return axis;
 			};
 
 			getDefaultSeries = function(store, xResponse, xLayout) {
@@ -945,20 +965,30 @@ console.log("baseLineFields", store.baseLineFields);
 
 			getTitle = function(store, xResponse, xLayout) {
 				var typeConf = dv.conf.finals.chart,
-					paddingLeft = '30px',
+					paddingLeft = 35,
 					textAlign = 'center',
 					html = '';
 
 				// Style
 				if (xLayout.type === typeConf.bar || xLayout.type === typeConf.stackedBar) {
-					paddingLeft = '85px';
+					paddingLeft = 85;
+
+					if (xLayout.options.domainAxisTitle) {
+						paddingLeft += 40;
+					}
 				}
-				else if (xLayout.type === typeConf.pie) {
-					textAlign = 'left';
+				else {
+					if (xLayout.options.rangeAxisTitle) {
+						paddingLeft += 30;
+					}
+
+					if (xLayout.type === typeConf.pie) {
+						textAlign = 'left';
+					}
 				}
 
 				if (xLayout.options.hideChartLegend) {
-					paddingLeft = '0';
+					paddingLeft = 0;
 				}
 
 				// Text
@@ -973,28 +1003,21 @@ console.log("baseLineFields", store.baseLineFields);
 					html += '<span style="font-size:18px; font-weight:normal"> - ' + xResponse.metaData.names[store.rangeFields[0]] + '</span>';
 				}
 
+				var bs = 'padding:10px 0 4px ' + (paddingLeft + 'px') + '; border:0 none; text-align:' + textAlign + '; font-weight:bold; font-size:20px';
+				console.log(bs);
+
 				return {
 					xtype: 'panel',
 					width: '100%',
-					bodyStyle: 'padding:10px 0 4px ' + paddingLeft + '; border:0 none; text-align:' + textAlign + '; font-weight:bold; font-size:20px',
+					bodyStyle: bs,
 					html: !xLayout.options.hideChartSubtitle ? html : ''
 				};
-			};
-
-			validateUrl = function(url) {
-				if (!Ext.isString(url) || url.length > 2000) {
-					var percent = ((url.length - 2000) / url.length) * 100;
-					alert('Too many parameters selected. Please reduce the number of parameters by at least ' + percent.toFixed(0) + '%.');
-					return;
-				}
-
-				return true;
 			};
 
 			generator.column = function(xResponse, xLayout) {
 				var store = getDefaultStore(xResponse, xLayout),
 					numericAxis = getDefaultNumericAxis(store, xResponse, xLayout),
-					categoryAxis = getDefaultCategoryAxis(store),
+					categoryAxis = getDefaultCategoryAxis(store, xLayout),
 					axes = [numericAxis, categoryAxis],
 					series = [getDefaultSeries(store, xResponse, xLayout)];
 
@@ -1030,7 +1053,7 @@ console.log("baseLineFields", store.baseLineFields);
 			generator.bar = function(xResponse, xLayout) {
 				var store = getDefaultStore(xResponse, xLayout),
 					numericAxis = getDefaultNumericAxis(store, xResponse, xLayout),
-					categoryAxis = getDefaultCategoryAxis(store),
+					categoryAxis = getDefaultCategoryAxis(store, xLayout),
 					axes,
 					series = getDefaultSeries(store, xResponse, xLayout),
 					trendLines,
@@ -1105,7 +1128,7 @@ console.log("baseLineFields", store.baseLineFields);
 			generator.line = function(xResponse, xLayout) {
 				var store = getDefaultStore(xResponse, xLayout),
 					numericAxis = getDefaultNumericAxis(store, xResponse, xLayout),
-					categoryAxis = getDefaultCategoryAxis(store),
+					categoryAxis = getDefaultCategoryAxis(store, xLayout),
 					axes = [numericAxis, categoryAxis],
 					series = [],
 					chart;
@@ -1157,7 +1180,7 @@ console.log("baseLineFields", store.baseLineFields);
 			generator.area = function(xResponse, xLayout) {
 				var store = getDefaultStore(xResponse, xLayout),
 					numericAxis = getDefaultNumericAxis(store, xResponse, xLayout),
-					categoryAxis = getDefaultCategoryAxis(store),
+					categoryAxis = getDefaultCategoryAxis(store, xLayout),
 					axes = [numericAxis, categoryAxis],
 					series = getDefaultSeries(store, xResponse, xLayout);
 
