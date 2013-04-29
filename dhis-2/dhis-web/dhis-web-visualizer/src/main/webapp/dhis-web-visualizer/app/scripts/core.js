@@ -825,10 +825,8 @@ console.log("baseLineFields", store.baseLineFields);
 					title: function() {
 						var a = [];
 
-						for (var i = 0, id; i < store.rangeFields.length; i++) {
-							id = store.rangeFields[i];
-
-							a.push(xResponse.metaData.names[id]);
+						for (var i = 0; i < store.rangeFields.length; i++) {
+							a.push(xResponse.metaData.names[store.rangeFields[i]]);
 						}
 
 						return a;
@@ -915,6 +913,7 @@ console.log("baseLineFields", store.baseLineFields);
 					trackMouse: true,
 					cls: 'dv-chart-tips',
 					renderer: function(si, item) {
+						console.log(arguments);
 						this.update('<span style="font-size:14px"><b>' + item.value[1] + '</b> (' + si.data[dv.conf.finals.data.domain] + ')</span>');
 					}
 				};
@@ -1046,6 +1045,15 @@ console.log("baseLineFields", store.baseLineFields);
 
 				series.type = 'bar';
 				series.axis = 'bottom';
+
+				if (xLayout.options.showValues) {
+					series.label = {
+						display: 'outside',
+						'text-anchor': 'middle',
+						field: store.rangeFields
+					};
+				}
+
 				series = [series];
 
 				if (xLayout.options.showTrendLine) {
@@ -1117,11 +1125,6 @@ console.log("baseLineFields", store.baseLineFields);
 							type: 'circle',
 							radius: 4
 						},
-						label: {
-							display: 'outside',
-							'text-anchor': 'left',
-							field: store.rangeFields
-						},
 						tips: getDefaultTips(),
 						title: xResponse.metaData.names[store.rangeFields[i]]
 					};
@@ -1162,6 +1165,8 @@ console.log("baseLineFields", store.baseLineFields);
 				series.type = 'area';
 				series.style.opacity = 0.55;
 				series.style.lineWidth = 0;
+				delete series.label;
+				delete series.tips;
 				series = [series];
 
 				if (xLayout.options.showTrendLine) {
