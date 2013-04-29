@@ -426,6 +426,7 @@ DV.core.getUtil = function() {
 				getDefaultTrendLines,
 				getDefaultTargetLine,
 				getDefaultBaseLine,
+				getDefaultTips,
 				getDefaultChart,
 				validateUrl,
 				generator = {},
@@ -820,14 +821,7 @@ console.log("baseLineFields", store.baseLineFields);
 						type: 'circle',
 						radius: 4
 					},
-					tips: {
-						trackMouse: true,
-						cls: 'dv-chart-tips',
-						renderer: function(si, item) {
-							console.log(arguments);
-							//this.update('<span style="font-size:11px">' + si.data[dv.conf.finals.data.domain] + '</span>' + '<br/>' + '<b>' + item.value[1] + '</b>');
-						}
-					},
+					tips: getDefaultTips(),
 					title: function() {
 						var a = [];
 
@@ -913,6 +907,16 @@ console.log("baseLineFields", store.baseLineFields);
 					},
 					//tips: DV.util.chart.def.series.getTips(),
 					title: (Ext.isString(xLayout.options.baseLineTitle) ? xLayout.options.baseLineTitle : DV.i18n.base) + ' (' + xLayout.options.baseLineValue + ')'
+				};
+			};
+
+			getDefaultTips = function() {
+				return {
+					trackMouse: true,
+					cls: 'dv-chart-tips',
+					renderer: function(si, item) {
+						this.update('<span style="font-size:14px"><b>' + item.value[1] + '</b> (' + si.data[dv.conf.finals.data.domain] + ')</span>');
+					}
 				};
 			};
 
@@ -1115,18 +1119,10 @@ console.log("baseLineFields", store.baseLineFields);
 						},
 						label: {
 							display: 'outside',
-							'text-anchor': 'middle',
+							'text-anchor': 'left',
 							field: store.rangeFields
 						},
-						tips: {
-							trackMouse: true,
-							cls: 'dv-chart-tips',
-							renderer: function(si, item) {
-								console.log(arguments);
-								//this.update('<span style="font-size:11px">' + si.data[dv.conf.finals.data.domain] + '</span>' + '<br/>' + '<b>' + item.value[1] + '</b>');
-							}
-						},
-						//tips: DV.util.chart.def.series.getTips()
+						tips: getDefaultTips(),
 						title: xResponse.metaData.names[store.rangeFields[i]]
 					};
 
