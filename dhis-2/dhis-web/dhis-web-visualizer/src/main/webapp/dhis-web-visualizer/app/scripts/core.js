@@ -613,6 +613,8 @@ DV.core.getUtil = function() {
 					series = xLayout.col[0].dimensionName === pe ? xResponse.metaData.pe : xLayout.col[0].items,
 					categories = xLayout.row[0].dimensionName === pe ? xResponse.metaData.pe : xLayout.row[0].items,
 					trendLineFields = [],
+					targetLineFields = [],
+					baseLineFields = [],
 					store;
 
 				// Data
@@ -654,6 +656,8 @@ DV.core.getUtil = function() {
 					for (var i = 0; i < data.length; i++) {
 						data[i][dv.conf.finals.data.targetLine] = parseFloat(xLayout.options.targetLineValue);
 					}
+
+					targetLineFields.push(dv.conf.finals.data.targetLine);
 				}
 
 				// Base line
@@ -661,6 +665,8 @@ DV.core.getUtil = function() {
 					for (var i = 0; i < data.length; i++) {
 						data[i][dv.conf.finals.data.baseLine] = parseFloat(xLayout.options.baseLineValue);
 					}
+
+					baseLineFields.push(dv.conf.finals.data.baseLine);
 				}
 
 				store = Ext.create('Ext.data.Store', {
@@ -677,11 +683,15 @@ DV.core.getUtil = function() {
 				store.rangeFields = series;
 				store.domainFields = [dv.conf.finals.data.domain];
 				store.trendLineFields = trendLineFields;
+				store.targetLineFields = targetLineFields;
+				store.baseLineFields = baseLineFields;
 
 console.log("data", data);
 console.log("rangeFields", store.rangeFields);
-console.log("domainFields", store.domainFields)
+console.log("domainFields", store.domainFields);
 console.log("trendLineFields", store.trendLineFields);
+console.log("targetLineFields", store.targetLineFields);
+console.log("baseLineFields", store.baseLineFields);
 
 				return store;
 			};
@@ -852,7 +862,6 @@ console.log("trendLineFields", store.trendLineFields);
 				if (xLayout.options.showTrendLine) {
 					series = getDefaultTrendLines(store, xResponse).concat(series);
 				}
-console.log("series", series);
 
 				return getDefaultChart(store, axes, series);
 			};
@@ -920,7 +929,6 @@ console.log("series", series);
 				if (xLayout.options.showTrendLine) {
 					series = getDefaultTrendLines(store, xResponse).concat(series);
 				}
-console.log("series", series);
 
 				return getDefaultChart(store, axes, series);
 			};
