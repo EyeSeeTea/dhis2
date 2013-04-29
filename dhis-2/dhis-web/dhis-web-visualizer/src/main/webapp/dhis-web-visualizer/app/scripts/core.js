@@ -722,6 +722,24 @@ DV.core.getUtil = function() {
 					return Ext.Array.min(minimums);
 				};
 
+				store.getMaximumSum = function() {
+					var sums = [],
+						recordSum = 0;
+
+					store.each(function(record) {
+						recordSum = 0;
+
+						for (var i = 0; i < store.rangeFields.length; i++) {
+							recordSum += record.data[store.rangeFields[i]];
+						}
+
+						sums.push(recordSum);
+					});
+
+					return Ext.Array.max(sums);
+				};
+
+
 console.log("data", data);
 console.log("rangeFields", store.rangeFields);
 console.log("domainFields", store.domainFields);
@@ -732,10 +750,21 @@ console.log("baseLineFields", store.baseLineFields);
 				return store;
 			};
 
-			getDefaultNumericAxis = function(store, xResponse) {
-				var minimum = store.getMinimum();
+			getDefaultNumericAxis = function(store, xResponse, xLayout) {
+				var typeConf = dv.conf.finals.chart,
+					minimum = store.getMinimum(),
+					maximum,
+					axis;
 
-				return  {
+				// Set maximum if stacked + extra line
+				if ((xLayout.type === typeConf.stackedColumn || xLayout.type === typeConf.stackedBar) &&
+					(xLayout.options.showTrendLine || xLayout.options.targetLineValue || xLayout.options.baseLineValue)) {
+					var a = [store.getMaximum(), store.getMaximumSum()];
+					maximum = Math.ceil(Ext.Array.max(a) * 1.1);
+					maximum = Math.floor(maximum / 10) * 10;
+				}
+
+				axis = {
 					type: 'Numeric',
 					position: 'left',
 					fields: store.numericFields,
@@ -756,6 +785,12 @@ console.log("baseLineFields", store.baseLineFields);
 						}
 					}
 				};
+
+				if (maximum) {
+					axis.maximum = maximum;
+				}
+
+				return axis;
 			};
 
 			getDefaultCategoryAxis = function(store) {
@@ -935,7 +970,7 @@ console.log("baseLineFields", store.baseLineFields);
 
 			generator.column = function(xResponse, xLayout) {
 				var store = getDefaultStore(xResponse, xLayout),
-					numericAxis = getDefaultNumericAxis(store, xResponse),
+					numericAxis = getDefaultNumericAxis(store, xResponse, xLayout),
 					categoryAxis = getDefaultCategoryAxis(store),
 					axes = [numericAxis, categoryAxis],
 					series = [getDefaultSeries(store, xResponse)];
@@ -971,7 +1006,7 @@ console.log("baseLineFields", store.baseLineFields);
 
 			generator.bar = function(xResponse, xLayout) {
 				var store = getDefaultStore(xResponse, xLayout),
-					numericAxis = getDefaultNumericAxis(store, xResponse),
+					numericAxis = getDefaultNumericAxis(store, xResponse, xLayout),
 					categoryAxis = getDefaultCategoryAxis(store),
 					axes,
 					series = getDefaultSeries(store, xResponse),
@@ -1037,7 +1072,7 @@ console.log("baseLineFields", store.baseLineFields);
 
 			generator.line = function(xResponse, xLayout) {
 				var store = getDefaultStore(xResponse, xLayout),
-					numericAxis = getDefaultNumericAxis(store, xResponse),
+					numericAxis = getDefaultNumericAxis(store, xResponse, xLayout),
 					categoryAxis = getDefaultCategoryAxis(store),
 					axes = [numericAxis, categoryAxis],
 					series = [],
@@ -1079,7 +1114,7 @@ console.log("baseLineFields", store.baseLineFields);
 
 			generator.area = function(xResponse, xLayout) {
 				var store = getDefaultStore(xResponse, xLayout),
-					numericAxis = getDefaultNumericAxis(store, xResponse),
+					numericAxis = getDefaultNumericAxis(store, xResponse, xLayout),
 					categoryAxis = getDefaultCategoryAxis(store),
 					axes = [numericAxis, categoryAxis],
 					series = getDefaultSeries(store, xResponse);
