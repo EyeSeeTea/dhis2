@@ -653,6 +653,8 @@ DV.core.getUtil = function() {
 					fields: function() {
 						var fields = Ext.clone(series);
 						fields.push(dv.conf.finals.data.domain);
+						fields = fields.concat(trendLineFields);
+
 						return fields;
 					}(),
 					data: data
@@ -834,10 +836,9 @@ console.log("trendLineFields", store.trendLineFields);
 					series = [getDefaultSeries(store, xResponse)];
 
 				if (xLayout.options.showTrendLine) {
-					//series = series.concat(getDefaultTrendLines(store, xResponse));
-
-					series = getDefaultTrendLines(store, xResponse);
+					series = getDefaultTrendLines(store, xResponse).concat(series);
 				}
+console.log("series", series);
 
 				return getDefaultChart(store, axes, series);
 			};
@@ -901,6 +902,11 @@ console.log("trendLineFields", store.trendLineFields);
 						title: xResponse.metaData.names[store.rangeFields[i]]
 					});
 				}
+
+				if (xLayout.options.showTrendLine) {
+					series = getDefaultTrendLines(store, xResponse).concat(series);
+				}
+console.log("series", series);
 
 				return getDefaultChart(store, axes, series);
 			};
