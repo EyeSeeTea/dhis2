@@ -3924,7 +3924,7 @@ Ext.onReady( function() {
 
 			centerRegion = Ext.create('Ext.panel.Panel', {
 				region: 'center',
-				bodyStyle: 'padding:0',
+				bodyStyle: 'padding:0; text-align:center',
 				tbar: {
                     defaults: {
                         height: 26
@@ -3993,6 +3993,18 @@ Ext.onReady( function() {
 
 						return items;
 					}()
+				},
+				listeners: {
+					resize: function(p) {
+						if (dv.chart) {
+							if (dv.xLayout && dv.xLayout.type !== dv.conf.finals.chart.pie) {
+								dv.chart.animate = false;
+								dv.chart.setWidth(dv.viewport.centerRegion.getWidth());
+								dv.chart.setHeight(dv.viewport.centerRegion.getHeight() - 75);
+								dv.chart.animate = true;
+							}
+						}
+					}
 				}
 			});
 

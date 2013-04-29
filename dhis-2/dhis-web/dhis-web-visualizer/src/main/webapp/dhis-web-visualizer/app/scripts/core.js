@@ -435,7 +435,8 @@ DV.core.getUtil = function() {
 					addDimensions,
 					addDimensionNames,
 					addSortedDimensions,
-					addSortedFilterDimensions;
+					addSortedFilterDimensions,
+					addFilterItems;
 
 				addDimensions = function() {
 					xLayout.dimensions = [].concat(Ext.clone(xLayout.col) || [], Ext.clone(xLayout.row) || []);
@@ -471,6 +472,16 @@ DV.core.getUtil = function() {
 					}
 
 					xLayout.nameItemsMap = map;
+				}();
+
+				addFilterItems = function() {
+					if (Ext.isArray(xLayout.filter) && xLayout.filter.length) {
+						xLayout.filterItems = [];
+
+						for (var i = 0; i < xLayout.filter.length; i++) {
+							xLayout.filterItems = xLayout.filterItems.concat(xLayout.filter[i].items);
+						}
+					}
 				}();
 
 				return xLayout;
@@ -719,15 +730,37 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 				});
 			};
 
-			getTitle = function(xLayout) {
+			getTitle = function(store, xResponse, xLayout) {
 				var typeConf = dv.conf.finals.chart,
-					paddingLeft = xLayout.type === typeConf.bar || xLayout.type === typeConf.stackedBar ? '85px' : '30px';
+					paddingLeft = '30px',
+					textAlign = 'center',
+					html = '';
+
+				// Style
+				if (xLayout.type === typeConf.bar || xLayout.type === typeConf.stackedBar) {
+					paddingLeft = '85px';
+				}
+				else if (xLayout.type === typeConf.pie) {
+					textAlign = 'left';
+				}
+
+				// Text
+				if (Ext.isArray(xLayout.filterItems) && xLayout.filterItems.length) {
+					for (var i = 0; i < xLayout.filterItems.length; i++) {
+						html += xResponse.metaData.names[xLayout.filterItems[i]];
+						html += i < xLayout.filterItems.length - 1 ? ', ' : '';
+					}
+				}
+
+				if (xLayout.type === typeConf.pie) {
+					html += ', ' + xResponse.metaData.names[xLayout.col[0].items[0]];
+				}
 
 				return {
 					xtype: 'panel',
 					width: '100%',
-					bodyStyle: 'padding:10px 0 4px ' + paddingLeft + '; border:0 none; text-align:center; font-weight:bold; font-size:20px',
-					html: 'My chart title'
+					bodyStyle: 'padding:10px 0 4px ' + paddingLeft + '; border:0 none; text-align:' + textAlign + '; font-weight:bold; font-size:20px',
+					html: html
 				};
 			};
 
@@ -813,6 +846,55 @@ console.log("data + fields", data, store.rangeFields, store.domainFields);
 				return getDefaultChart(store, axes, series);
 			};
 
+			generator.area = function(xResponse, xLayout) {
+				var store = getDefaultStore(xResponse, xLayout),
+					numericAxis = getDefaultNumericAxis(store),
+					categoryAxis = getDefaultCategoryAxis(store),
+					axes = [numericAxis, categoryAxis],
+					series = getDefaultSeries(store, xResponse);
+
+				series.type = 'area';
+				series.style.opacity = 0.5;
+				series.style.lineWidth = 0;
+				series = [series];
+
+				return getDefaultChart(store, axes, series);
+			};
+
+			generator.pie = function(xResponse, xLayout) {
+				var store = getDefaultStore(xResponse, xLayout),
+					series = [{
+						type: 'pie',
+						field: store.rangeFields[0],
+						showInLegend: true,
+						label: {
+							field: dv.conf.finals.data.domain
+						},
+						highlight: {
+							segment: {
+								margin: 8
+							}
+						},
+						style: {
+							opacity: 0.9,
+							stroke: '#555'
+						}
+						//tips: DV.util.chart.pie.series.getTips()
+					}],
+					chart = getDefaultChart(store, null, series);
+
+				chart.legend.position = 'right';
+				chart.legend.isVertical = true;
+
+				chart.insetPadding = 20;
+				chart.margin = '50 0 0 50';
+				chart.shadow = true;
+				chart.width = dv.viewport.centerRegion.getWidth() - 100;
+				chart.height = dv.viewport.centerRegion.getHeight() - 200;
+
+				return chart;
+			};
+
 			initialize = function() {
 				var url,
 					xLayout,
@@ -867,18 +949,11 @@ console.log("xResponse", xResponse);
 console.log("xLayout", xLayout);
 
 						chart = generator[xLayout.type](xResponse, xLayout);
-console.log(chart);
-						title = getTitle(xLayout);
+console.log("chart", chart);
+						title = getTitle(chart.store, xResponse, xLayout);
 
 						dv.viewport.centerRegion.removeAll(true);
 						dv.viewport.centerRegion.add([title, chart]);
-
-						dv.viewport.centerRegion.on('resize', function() {
-							chart.animate = false;
-							chart.setWidth(dv.viewport.centerRegion.getWidth());
-							chart.setHeight(dv.viewport.centerRegion.getHeight() - 75);
-							chart.animate = true;
-						});
 
 						// After table success
 						dv.util.mask.hideMask();
@@ -887,6 +962,7 @@ console.log(chart);
 							dv.viewport.downloadButton.enable();
 						}
 
+						dv.chart = chart;
 						dv.xLayout = xLayout;
 						dv.xResponse = xResponse;
 					}
