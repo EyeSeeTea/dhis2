@@ -685,7 +685,6 @@ body.x-windows {
  * DV Tips
  *--------------------------------------------------------------------------*/
 
-/*
 .dv-chart-tips, .dv-chart-tips-pie {
     border-radius: 2px;
     padding: 1px 4px 2px;
@@ -706,7 +705,6 @@ body.x-windows {
 .dv-chart-tips-pie .x-tip-body {
 	font-size: 13px;
 }
-*/
 
 
 

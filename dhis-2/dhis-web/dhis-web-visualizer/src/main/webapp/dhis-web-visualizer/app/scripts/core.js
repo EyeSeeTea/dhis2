@@ -913,8 +913,7 @@ console.log("baseLineFields", store.baseLineFields);
 					trackMouse: true,
 					cls: 'dv-chart-tips',
 					renderer: function(si, item) {
-						console.log(arguments);
-						this.update('<span style="font-size:14px"><b>' + item.value[1] + '</b> (' + si.data[dv.conf.finals.data.domain] + ')</span>');
+						this.update('<div style="text-align:center"><div style="font-size:17px; font-weight:bold">' + item.value[1] + '</div><div style="font-size:10px">' + si.data[dv.conf.finals.data.domain] + '</div></div>');
 					}
 				};
 			};
