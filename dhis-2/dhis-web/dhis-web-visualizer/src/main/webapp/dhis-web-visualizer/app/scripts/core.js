@@ -976,6 +976,8 @@ console.log("baseLineFields", store.baseLineFields);
 					axes,
 					series = getDefaultSeries(store, xResponse),
 					trendLines,
+					targetLine,
+					baseLine,
 					chart;
 
 				numericAxis.position = 'bottom';
@@ -996,6 +998,24 @@ console.log("baseLineFields", store.baseLineFields);
 					}
 
 					series = trendLines.concat(series);
+				}
+
+				if (xLayout.options.targetLineValue) {
+					targetLine = getDefaultTargetLine(store, xLayout);
+					targetLine.axis = 'bottom';
+					targetLine.xField = store.targetLineFields;
+					targetLine.yField = store.domainFields;
+
+					series.push(targetLine);
+				}
+
+				if (xLayout.options.baseLineValue) {
+					baseLine = getDefaultBaseLine(store, xLayout);
+					baseLine.axis = 'bottom';
+					baseLine.xField = store.baseLineFields;
+					baseLine.yField = store.domainFields;
+
+					series.push(baseLine);
 				}
 
 				return getDefaultChart(store, axes, series);
@@ -1060,6 +1080,10 @@ console.log("baseLineFields", store.baseLineFields);
 				series.style.opacity = 0.55;
 				series.style.lineWidth = 0;
 				series = [series];
+
+				if (xLayout.options.showTrendLine) {
+					series = getDefaultTrendLines(store, xResponse).concat(series);
+				}
 
 				return getDefaultChart(store, axes, series);
 			};
