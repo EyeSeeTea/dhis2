@@ -1193,7 +1193,7 @@ console.log("baseLineFields", store.baseLineFields);
 						showInLegend: true,
 						highlight: {
 							segment: {
-								margin: 8
+								margin: 5
 							}
 						},
 						label: {
@@ -1206,13 +1206,6 @@ console.log("baseLineFields", store.baseLineFields);
 
 								return record.data[store.rangeFields[0]];
 							}
-						},
-						legend: {
-							position: 'right',
-							labelFont: '13px Arial',
-							boxStroke: '#ffffff',
-							boxStrokeWidth: 0,
-							padding: 0
 						},
 						style: {
 							opacity: 0.8,
