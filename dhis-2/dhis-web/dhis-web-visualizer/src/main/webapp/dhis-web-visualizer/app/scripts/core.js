@@ -1128,6 +1128,14 @@ console.log("baseLineFields", store.baseLineFields);
 					series = getDefaultTrendLines(store, xResponse).concat(series);
 				}
 
+				if (xLayout.options.targetLineValue) {
+					series.push(getDefaultTargetLine(store, xLayout));
+				}
+
+				if (xLayout.options.baseLineValue) {
+					series.push(getDefaultBaseLine(store, xLayout));
+				}
+
 				return getDefaultChart(store, axes, series);
 			};
 
