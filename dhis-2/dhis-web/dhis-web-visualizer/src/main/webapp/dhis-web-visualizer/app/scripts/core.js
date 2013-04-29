@@ -844,34 +844,29 @@ console.log("baseLineFields", store.baseLineFields);
 						radius: 0
 					},
 					//tips: DV.util.chart.def.series.getTips(),
-					title: Ext.isString(xLayout.options.targetLineTitle) ? xLayout.options.targetLineTitle : DV.i18n.target
+					title: (Ext.isString(xLayout.options.targetLineTitle) ? xLayout.options.targetLineTitle : DV.i18n.target) + ' (' + xLayout.options.targetLineValue + ')'
 				};
 			};
 
-			getDefaultBaseLine = function(store, xResponse) {
-				var a = [];
-
-				for (var i = 0; i < store.trendLineFields.length; i++) {
-					a.push({
-						type: 'line',
-						axis: 'left',
-						xField: store.domainFields,
-						yField: store.trendLineFields[i],
-						style: {
-							opacity: 0.8,
-							lineWidth: 3,
-							'stroke-dasharray': 8
-						},
-						markerConfig: {
-							type: 'circle',
-							radius: 0
-						},
-						//tips: DV.util.chart.def.series.getTips(),
-						title: xResponse.metaData.names[store.trendLineFields[i]]
-					});
-				}
-
-				return a;
+			getDefaultBaseLine = function(store, xLayout) {
+				return {
+					type: 'line',
+					axis: 'left',
+					xField: store.domainFields,
+					yField: store.baseLineFields,
+					style: {
+						opacity: 1,
+						lineWidth: 2,
+						'stroke-width': 1,
+						stroke: '#041423'
+					},
+					markerConfig: {
+						type: 'circle',
+						radius: 0
+					},
+					//tips: DV.util.chart.def.series.getTips(),
+					title: (Ext.isString(xLayout.options.baseLineTitle) ? xLayout.options.baseLineTitle : DV.i18n.base) + ' (' + xLayout.options.baseLineValue + ')'
+				};
 			};
 
 			getDefaultChart = function(store, axes, series) {
