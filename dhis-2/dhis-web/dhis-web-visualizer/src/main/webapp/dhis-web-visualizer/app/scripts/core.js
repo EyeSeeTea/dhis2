@@ -1213,7 +1213,7 @@ console.log("baseLineFields", store.baseLineFields);
 						},
 						tips: {
 							trackMouse: true,
-							cls: 'dv-chart-tips-pie',
+							cls: 'dv-chart-tips',
 							renderer: function(item) {
 								this.update('<div style="text-align:center"><div style="font-size:17px; font-weight:bold">' + item.data[store.rangeFields[0]] + '</div><div style="font-size:10px">' + item.data[dv.conf.finals.data.domain] + '</div></div>');
 							}
