@@ -970,7 +970,7 @@ console.log("baseLineFields", store.baseLineFields);
 				}
 
 				if (xLayout.type === typeConf.pie) {
-					html += ', ' + xResponse.metaData.names[xLayout.col[0].items[0]];
+					html += '<span style="font-size:18px; font-weight:normal"> - ' + xResponse.metaData.names[store.rangeFields[0]] + '</span>';
 				}
 
 				return {
