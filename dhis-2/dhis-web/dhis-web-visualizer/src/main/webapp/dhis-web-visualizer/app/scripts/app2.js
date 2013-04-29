@@ -866,7 +866,8 @@ Ext.onReady( function() {
 
 		showValues = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: DV.i18n.show_values,
-			style: 'margin-bottom:4px'
+			style: 'margin-bottom:4px',
+			checked: true
 		});
 		dv.viewport.showValues = showValues;
 
