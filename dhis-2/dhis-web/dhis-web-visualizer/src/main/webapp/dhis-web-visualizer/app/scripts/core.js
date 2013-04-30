@@ -741,6 +741,31 @@ console.log("baseLineFields", store.baseLineFields);
 				return axis;
 			};
 
+			setDefaultTheme = function(store, xLayout) {
+				var colors = dv.conf.chart.theme.dv1.slice(0, store.rangeFields.length);
+
+				if (xLayout.options.targetLineValue || xLayout.options.baseLineValue) {
+					colors.push('#051a2e');
+				}
+
+				if (xLayout.options.targetLineValue) {
+					colors.push('#051a2e');
+				}
+
+				if (xLayout.options.baseLineValue) {
+					colors.push('#051a2e');
+				}
+
+				Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
+					constructor: function(config) {
+						Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
+							seriesThemes: colors,
+							colors: colors
+						}, config));
+					}
+				});
+			};
+
 			getDefaultSeries = function(store, xResponse, xLayout) {
 				var main = {
 					type: 'column',
@@ -792,7 +817,10 @@ console.log("baseLineFields", store.baseLineFields);
 							lineWidth: 3,
 							'stroke-dasharray': 8
 						},
-						showMarkers: false,
+						markerConfig: {
+							type: 'circle',
+							radius: 0
+						},
 						title: xResponse.metaData.names[store.trendLineFields[i]]
 					});
 				}
@@ -812,11 +840,7 @@ console.log("baseLineFields", store.baseLineFields);
 						'stroke-width': 1,
 						stroke: '#041423'
 					},
-					markerConfig: {
-						type: 'circle',
-						radius: 0
-					},
-					//tips: DV.util.chart.def.series.getTips(),
+					showMarkers: false,
 					title: (Ext.isString(xLayout.options.targetLineTitle) ? xLayout.options.targetLineTitle : DV.i18n.target) + ' (' + xLayout.options.targetLineValue + ')'
 				};
 			};
@@ -833,11 +857,7 @@ console.log("baseLineFields", store.baseLineFields);
 						'stroke-width': 1,
 						stroke: '#041423'
 					},
-					markerConfig: {
-						type: 'circle',
-						radius: 0
-					},
-					//tips: DV.util.chart.def.series.getTips(),
+					showMarkers: false,
 					title: (Ext.isString(xLayout.options.baseLineTitle) ? xLayout.options.baseLineTitle : DV.i18n.base) + ' (' + xLayout.options.baseLineValue + ')'
 				};
 			};
@@ -861,7 +881,8 @@ console.log("baseLineFields", store.baseLineFields);
 					shadow: false,
 					insetPadding: 1,
 					width: dv.viewport.centerRegion.getWidth(),
-					height: dv.viewport.centerRegion.getHeight() - 75
+					height: dv.viewport.centerRegion.getHeight() - 75,
+					theme: 'dv1'
 				};
 
 				if (!xLayout.options.hideChartLegend) {
@@ -947,6 +968,8 @@ console.log("baseLineFields", store.baseLineFields);
 					series.push(getDefaultBaseLine(store, xLayout));
 				}
 
+				setDefaultTheme(store, xLayout);
+
 				return getDefaultChart(store, axes, series, xLayout);
 			};
 
@@ -1022,6 +1045,8 @@ console.log("baseLineFields", store.baseLineFields);
 					series.push(baseLine);
 				}
 
+				setDefaultTheme(store, xLayout);
+
 				return getDefaultChart(store, axes, series, xLayout);
 			};
 
@@ -1045,7 +1070,7 @@ console.log("baseLineFields", store.baseLineFields);
 					categoryAxis = getDefaultCategoryAxis(store, xLayout),
 					axes = [numericAxis, categoryAxis],
 					series = [],
-					chart;
+					colors = dv.conf.chart.theme.dv1.slice(0, store.rangeFields.length);
 
 				for (var i = 0, line; i < store.rangeFields.length; i++) {
 					line = {
@@ -1065,28 +1090,47 @@ console.log("baseLineFields", store.baseLineFields);
 						title: xResponse.metaData.names[store.rangeFields[i]]
 					};
 
-					if (xLayout.options.showValues) {
-						line.label = {
-							display: 'rotate',
-							'text-anchor': 'middle',
-							field: store.rangeFields[i]
-						};
-					}
+					//if (xLayout.options.showValues) {
+						//line.label = {
+							//display: 'rotate',
+							//'text-anchor': 'middle',
+							//field: store.rangeFields[i]
+						//};
+					//}
 
 					series.push(line);
 				}
 
+				// Options, theme colors
+
 				if (xLayout.options.showTrendLine) {
 					series = getDefaultTrendLines(store, xResponse).concat(series);
+
+					colors = colors.concat(colors);
 				}
 
 				if (xLayout.options.targetLineValue) {
 					series.push(getDefaultTargetLine(store, xLayout));
+
+					colors.push('#051a2e');
 				}
 
 				if (xLayout.options.baseLineValue) {
 					series.push(getDefaultBaseLine(store, xLayout));
+
+					colors.push('#051a2e');
 				}
+
+				// Theme
+
+				Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
+					constructor: function(config) {
+						Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
+							seriesThemes: colors,
+							colors: colors
+						}, config));
+					}
+				});
 
 				return getDefaultChart(store, axes, series, xLayout);
 			};
@@ -1116,6 +1160,8 @@ console.log("baseLineFields", store.baseLineFields);
 				if (xLayout.options.baseLineValue) {
 					series.push(getDefaultBaseLine(store, xLayout));
 				}
+
+				setDefaultTheme(store, xLayout);
 
 				return getDefaultChart(store, axes, series, xLayout);
 			};
@@ -1156,7 +1202,10 @@ console.log("baseLineFields", store.baseLineFields);
 							}
 						}
 					}],
+					colors = dv.conf.chart.theme.dv1.slice(0, store.rangeFields.length),
 					chart = getDefaultChart(store, null, series, xLayout);
+
+				// Chart
 
 				chart.legend.position = 'right';
 				chart.legend.isVertical = true;
@@ -1165,6 +1214,17 @@ console.log("baseLineFields", store.baseLineFields);
 				chart.shadow = true;
 				chart.width = dv.viewport.centerRegion.getWidth() - 100;
 				chart.height = dv.viewport.centerRegion.getHeight() - 120;
+
+				// Theme
+
+				Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
+					constructor: function(config) {
+						Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
+							seriesThemes: colors,
+							colors: colors
+						}, config));
+					}
+				});
 
 				return chart;
 			};
