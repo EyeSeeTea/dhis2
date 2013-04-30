@@ -875,7 +875,7 @@ console.log("baseLineFields", store.baseLineFields);
 
 			getDefaultLegend = function(store, xResponse) {
 				var itemLength = 30,
-					charLength = 5.85,
+					charLength = 7,
 					numberOfItems = store.rangeFields.length,
 					numberOfChars = 0,
 					str = '',
@@ -890,7 +890,7 @@ console.log("baseLineFields", store.baseLineFields);
 				numberOfChars = str.length;
 
 				width = (numberOfItems * itemLength) + (numberOfChars * charLength);
-
+alert(width);alert(dv.viewport.centerRegion.getWidth() - 50);
 				if (width > dv.viewport.centerRegion.getWidth() - 50) {
 					isVertical = true;
 					position = 'right';
