@@ -968,7 +968,7 @@ console.log("baseLineFields", store.baseLineFields);
 							legendMiddleX,
 							titleX;
 
-						if (chart.legend.position === 'top') {
+						if (chart.legend.position === 'top' && xLayout.type !== dv.conf.finals.chart.pie) {
 							legendMiddleX = legend.x + (legend.width / 2);
 							titleX = legendMiddleX - (title.el.getWidth() / 2);
 						}
