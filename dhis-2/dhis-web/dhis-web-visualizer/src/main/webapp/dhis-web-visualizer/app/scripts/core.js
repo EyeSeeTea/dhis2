@@ -945,7 +945,7 @@ console.log("baseLineFields", store.baseLineFields);
 					xtype: 'panel',
 					width: '100%',
 					bodyStyle: bs,
-					html: !xLayout.options.hideChartSubtitle ? html : ''
+					html: !xLayout.options.hideChartTitle ? html : ''
 				};
 			};
 
@@ -1449,7 +1449,7 @@ DV.core.getAPI = function(dv) {
 				baseLineTitle: null,
 				showValues: false,
 				hideChartLegend: false,
-				hideChartSubtitle: false,
+				hideChartTitle: false,
 				domainAxisTitle: null,
 				rangeAxisTitle: null
 			};
@@ -1515,7 +1515,7 @@ DV.core.getAPI = function(dv) {
 			options.baseLineTitle = options.baseLineTitle || defaultOptions.baseLineTitle;
 			options.showValues = Ext.isDefined(options.showValues) ? options.showValues : defaultOptions.showValues;
 			options.hideChartLegend = Ext.isDefined(options.hideChartLegend) ? options.hideChartLegend : defaultOptions.hideChartLegend;
-			options.hideChartSubtitle = Ext.isDefined(options.hideChartSubtitle) ? options.hideChartSubtitle : defaultOptions.hideChartSubtitle;
+			options.hideChartTitle = Ext.isDefined(options.hideChartTitle) ? options.hideChartTitle : defaultOptions.hideChartTitle;
 			options.domainAxisTitle = options.domainAxisTitle || defaultOptions.domainAxisTitle;
 			options.rangeAxisTitle = options.rangeAxisTitle || defaultOptions.rangeAxisTitle;
 

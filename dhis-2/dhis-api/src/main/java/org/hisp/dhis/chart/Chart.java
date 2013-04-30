@@ -189,7 +189,7 @@ public class Chart
         return list != null && !list.isEmpty() ? list.iterator().next() : null;
     }
 
-    public String getTitle()
+    public String generateTitle()
     {
         if ( DIMENSION_PERIOD.equals( filter ) )
         {
@@ -557,6 +557,19 @@ public class Chart
     public void setHideTitle( Boolean hideTitle )
     {
         this.hideTitle = hideTitle;
+    }
+    
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public String getTitle()
+    {
+        return this.title;
+    }
+
+    public void setTitle( String title )
+    {
+        this.title = title;
     }
 
     @JsonProperty

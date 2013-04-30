@@ -795,7 +795,7 @@ Ext.onReady( function() {
 
 			showValues,
 			hideChartLegend,
-			hideChartSubtitle,
+			hideChartTitle,
 			chartTitle,
 			domainAxisTitle,
 			rangeAxisTitle,
@@ -878,8 +878,8 @@ Ext.onReady( function() {
 		});
 		dv.viewport.hideChartLegend = hideChartLegend;
 
-		hideChartSubtitle = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: DV.i18n.hide_subtitle,
+		hideChartTitle = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: DV.i18n.hide_chart_title,
 			style: 'margin-bottom:6px',
 			listeners: {
 				change: function() {
@@ -887,7 +887,7 @@ Ext.onReady( function() {
 				}
 			}
 		});
-		dv.viewport.hideChartSubtitle = hideChartSubtitle;
+		dv.viewport.hideChartTitle = hideChartTitle;
 
 		chartTitle = Ext.create('Ext.form.field.Text', {
 			//cls: 'dv-textfield-alt1',
@@ -900,7 +900,7 @@ Ext.onReady( function() {
 			maxLength: 100,
 			enforceMaxLength: true,
 			xable: function() {
-				this.setDisabled(hideChartSubtitle.getValue());
+				this.setDisabled(hideChartTitle.getValue());
 			}
 		});
 		dv.viewport.chartTitle = chartTitle;
@@ -972,7 +972,7 @@ Ext.onReady( function() {
 			items: [
 				showValues,
 				hideChartLegend,
-				hideChartSubtitle,
+				hideChartTitle,
 				chartTitle,
 				domainAxisTitle,
 				rangeAxisTitle
@@ -996,7 +996,7 @@ Ext.onReady( function() {
 					baseLineTitle: baseLineTitle.getValue(),
 					showValues: showValues.getValue(),
 					hideChartLegend: hideChartLegend.getValue(),
-					hideChartSubtitle: hideChartSubtitle.getValue(),
+					hideChartTitle: hideChartTitle.getValue(),
 					chartTitle: chartTitle.getValue(),
 					domainAxisTitle: domainAxisTitle.getValue(),
 					rangeAxisTitle: rangeAxisTitle.getValue()
@@ -1107,7 +1107,7 @@ Ext.onReady( function() {
 				favorite.category = dv.c.dimension.category;
 				favorite.filter = dv.c.dimension.filter;
 				favorite.hideLegend = dv.c.hidelegend;
-				favorite.hideSubtitle = dv.c.hidesubtitle;
+				favorite.hideChartTitle = dv.c.hideChartTitle;
 				favorite.showData = dv.c.showdata;
 				favorite.regression = dv.c.trendline;
 				favorite.userOrganisationUnit = dv.c.userorganisationunit;
