@@ -2845,7 +2845,7 @@ Ext.onReady( function() {
 				resizable: false,
 				modal: true,
 				items: nameTextfield,
-				//destroyOnBlur: true,
+				destroyOnBlur: true,
 				bbar: [
 					cancelButton,
 					'->',
@@ -2855,14 +2855,14 @@ Ext.onReady( function() {
 					show: function(w) {
 						DV.util.window.setAnchorPosition(w, addButton);
 
-						//if (!w.hasDestroyBlurHandler) {
-							//pt.util.window.addDestroyOnBlurHandler(w);
-						//}
+						if (!w.hasDestroyBlurHandler) {
+							dv.util.window.addDestroyOnBlurHandler(w);
+						}
 
-						//pt.viewport.favoriteWindow.destroyOnBlur = false;
+						dv.viewport.favoriteWindow.destroyOnBlur = false;
 					},
 					destroy: function() {
-						//pt.viewport.favoriteWindow.destroyOnBlur = true;
+						dv.viewport.favoriteWindow.destroyOnBlur = true;
 					}
 				}
 			});
@@ -3201,9 +3201,9 @@ Ext.onReady( function() {
 				show: function(w) {
 					DV.util.window.setAnchorPosition(w, DV.cmp.toolbar.favorite);
 
-					//if (!w.hasDestroyOnBlurHandler) {
-						//pt.util.window.addDestroyOnBlurHandler(w);
-					//}
+					if (!w.hasDestroyOnBlurHandler) {
+						dv.util.window.addDestroyOnBlurHandler(w);
+					}
 				}
 			}
 		});
@@ -3455,14 +3455,14 @@ Ext.onReady( function() {
 					var pos = DV.cmp.favorite.window.getPosition();
 					w.setPosition(pos[0] + 5, pos[1] + 5);
 
-					//if (!w.hasDestroyOnBlurHandler) {
-						//pt.util.window.addDestroyOnBlurHandler(w);
-					//}
+					if (!w.hasDestroyOnBlurHandler) {
+						dv.util.window.addDestroyOnBlurHandler(w);
+					}
 
-					//pt.viewport.favoriteWindow.destroyOnBlur = false;
+					dv.viewport.favoriteWindow.destroyOnBlur = false;
 				},
 				destroy: function() {
-					//pt.viewport.favoriteWindow.destroyOnBlur = true;
+					dv.viewport.favoriteWindow.destroyOnBlur = true;
 				}
 			}
 		});

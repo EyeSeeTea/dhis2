@@ -1099,28 +1099,28 @@ Ext.onReady( function() {
 		getBody = function() {
 			var favorite;
 
-			if (pt.xLayout) {
-				favorite = Ext.clone(pt.xLayout.options);
+			if (dv.xLayout) {
+				favorite = Ext.clone(dv.xLayout.options);
 
 				// Dimensions
-				for (var i = 0, obj, key, items; i < pt.xLayout.objects.length; i++) {
-					obj = pt.xLayout.objects[i];
+				for (var i = 0, obj, key, items; i < dv.xLayout.objects.length; i++) {
+					obj = dv.xLayout.objects[i];
 
-					if (obj.objectName === pt.conf.finals.dimension.period.objectName) {
+					if (obj.objectName === dv.conf.finals.dimension.period.objectName) {
 						for (var j = 0, item; j < obj.items.length; j++) {
 							item = obj.items[j];
 
-							if (pt.conf.period.relativePeriodValueKeys[item]) {
-								key = pt.conf.finals.dimension.relativePeriod.value;
+							if (dv.conf.period.relativePeriodValueKeys[item]) {
+								key = dv.conf.finals.dimension.relativePeriod.value;
 
 								if (!favorite[key]) {
 									favorite[key] = {};
 								}
 
-								favorite[key][pt.conf.period.relativePeriodValueKeys[item]] = true;
+								favorite[key][dv.conf.period.relativePeriodValueKeys[item]] = true;
 							}
 							else {
-								key = pt.conf.finals.dimension.fixedPeriod.value;
+								key = dv.conf.finals.dimension.fixedPeriod.value;
 
 								if (!favorite[key]) {
 									favorite[key] = [];
@@ -1132,8 +1132,8 @@ Ext.onReady( function() {
 							}
 						}
 					}
-					else if (obj.objectName === pt.conf.finals.dimension.dimension.objectName) {
-						key = pt.conf.finals.dimension.objectNameMap[obj.objectName].value;
+					else if (obj.objectName === dv.conf.finals.dimension.dimension.objectName) {
+						key = dv.conf.finals.dimension.objectNameMap[obj.objectName].value;
 
 						if (!favorite[key]) {
 							favorite[key] = {};
@@ -1150,7 +1150,7 @@ Ext.onReady( function() {
 						}
 					}
 					else {
-						key = pt.conf.finals.dimension.objectNameMap[obj.objectName].value;
+						key = dv.conf.finals.dimension.objectNameMap[obj.objectName].value;
 						favorite[key] = [];
 
 						for (var j = 0, item; j < obj.items.length; j++) {
@@ -1171,31 +1171,31 @@ Ext.onReady( function() {
 				// Layout
 				favorite.type = xLayout.type;
 
-				if (pt.xLayout.col) {
+				if (dv.xLayout.col) {
 					var a = [];
 
-					for (var i = 0; i < pt.xLayout.col.length; i++) {
-						a.push(pt.xLayout.col[i].dimensionName);
+					for (var i = 0; i < dv.xLayout.col.length; i++) {
+						a.push(dv.xLayout.col[i].dimensionName);
 					}
 
 					favorite.columnDimensions = a;
 				}
 
-				if (pt.xLayout.row) {
+				if (dv.xLayout.row) {
 					var a = [];
 
-					for (var i = 0; i < pt.xLayout.row.length; i++) {
-						a.push(pt.xLayout.row[i].dimensionName);
+					for (var i = 0; i < dv.xLayout.row.length; i++) {
+						a.push(dv.xLayout.row[i].dimensionName);
 					}
 
 					favorite.rowDimensions = a;
 				}
 
-				if (pt.xLayout.filter) {
+				if (dv.xLayout.filter) {
 					var a = [];
 
-					for (var i = 0; i < pt.xLayout.filter.length; i++) {
-						a.push(pt.xLayout.filter[i].dimensionName);
+					for (var i = 0; i < dv.xLayout.filter.length; i++) {
+						a.push(dv.xLayout.filter[i].dimensionName);
 					}
 
 					favorite.filterDimensions = a;
@@ -1207,7 +1207,7 @@ Ext.onReady( function() {
 
 		NameWindow = function(id) {
 			var window,
-				record = dv.store.favorite.getById(id);
+				record = dv.store.charts.getById(id);
 
 			nameTextfield = Ext.create('Ext.form.field.Text', {
 				height: 26,
@@ -1283,7 +1283,7 @@ Ext.onReady( function() {
 										alert(r.responseText);
 									},
 									success: function(r) {
-										dv.store.favorite.loadStore();
+										dv.store.charts.loadStore();
 										window.destroy();
 									}
 								});
@@ -1471,7 +1471,7 @@ Ext.onReady( function() {
 												params: Ext.encode(favorite),
 												success: function() {
 													dv.favorite = favorite;
-													//pt.viewport.interpretationButton.enable();
+													//dv.viewport.interpretationButton.enable();
 													dv.store.charts.loadStore();
 												}
 											});
@@ -1556,7 +1556,7 @@ Ext.onReady( function() {
 					this.store.page = 1;
 					this.store.loadStore();
 
-					dv.store.favorite.on('load', function() {
+					dv.store.charts.on('load', function() {
 						if (this.isVisible()) {
 							this.fireEvent('afterrender');
 						}
@@ -1659,7 +1659,7 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function(w) {
-					dv.util.window.setAnchorPosition(w, dv.cmp.toolbar.favorite);
+					dv.util.window.setAnchorPosition(w, dv.viewport.favoriteButton);
 
 					if (!w.hasDestroyOnBlurHandler) {
 						dv.util.window.addDestroyOnBlurHandler(w);
@@ -1912,17 +1912,17 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function(w) {
-					var pos = dv.cmp.favorite.window.getPosition();
+					var pos = dv.viewport.favoriteWindow.getPosition();
 					w.setPosition(pos[0] + 5, pos[1] + 5);
 
-					//if (!w.hasDestroyOnBlurHandler) {
-						//dv.util.window.addDestroyOnBlurHandler(w);
-					//}
+					if (!w.hasDestroyOnBlurHandler) {
+						dv.util.window.addDestroyOnBlurHandler(w);
+					}
 
-					//dv.viewport.favoriteWindow.destroyOnBlur = false;
+					dv.viewport.favoriteWindow.destroyOnBlur = false;
 				},
 				destroy: function() {
-					//dv.viewport.favoriteWindow.destroyOnBlur = true;
+					dv.viewport.favoriteWindow.destroyOnBlur = true;
 				}
 			}
 		});
