@@ -938,14 +938,19 @@ console.log("baseLineFields", store.baseLineFields);
 					html += '<span style="font-size:18px; font-weight:normal"> - ' + xResponse.metaData.names[store.rangeFields[0]] + '</span>';
 				}
 
-				var bs = 'padding:10px 0 4px ' + (paddingLeft + 'px') + '; border:0 none; text-align:' + textAlign + '; font-weight:bold; font-size:20px';
-				console.log(bs);
+				if (xLayout.options.chartTitle) {
+					html = xLayout.options.chartTitle;
+				}
+
+				if (xLayout.options.hideChartTitle) {
+					html = '';
+				}
 
 				return {
 					xtype: 'panel',
 					width: '100%',
-					bodyStyle: bs,
-					html: !xLayout.options.hideChartTitle ? html : ''
+					bodyStyle: 'padding:10px 0 4px ' + (paddingLeft + 'px') + '; border:0 none; text-align:' + textAlign + '; font-weight:bold; font-size:20px',
+					html: html
 				};
 			};
 
@@ -1450,6 +1455,7 @@ DV.core.getAPI = function(dv) {
 				showValues: false,
 				hideChartLegend: false,
 				hideChartTitle: false,
+				chartTitle: null,
 				domainAxisTitle: null,
 				rangeAxisTitle: null
 			};
@@ -1516,6 +1522,7 @@ DV.core.getAPI = function(dv) {
 			options.showValues = Ext.isDefined(options.showValues) ? options.showValues : defaultOptions.showValues;
 			options.hideChartLegend = Ext.isDefined(options.hideChartLegend) ? options.hideChartLegend : defaultOptions.hideChartLegend;
 			options.hideChartTitle = Ext.isDefined(options.hideChartTitle) ? options.hideChartTitle : defaultOptions.hideChartTitle;
+			options.chartTitle = options.chartTitle || defaultOptions.chartTitle;
 			options.domainAxisTitle = options.domainAxisTitle || defaultOptions.domainAxisTitle;
 			options.rangeAxisTitle = options.rangeAxisTitle || defaultOptions.rangeAxisTitle;
 

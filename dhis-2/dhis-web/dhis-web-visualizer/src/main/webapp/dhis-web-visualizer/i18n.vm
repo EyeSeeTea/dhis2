@@ -173,5 +173,6 @@ DV.i18n = {
 	options: '$encoder.jsEscape($i18n.getString( 'options' ) , "'")',
 	download: '$encoder.jsEscape($i18n.getString( 'download' ) , "'")',
 	favorites: '$encoder.jsEscape($i18n.getString( 'favorites' ) , "'")',
-	chart_title: '$encoder.jsEscape($i18n.getString( 'chart_title' ) , "'")'
+	chart_title: '$encoder.jsEscape($i18n.getString( 'chart_title' ) , "'")',
+	hide_chart_title: '$encoder.jsEscape($i18n.getString( 'hide_chart_title' ) , "'")'
 };
