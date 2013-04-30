@@ -741,31 +741,6 @@ console.log("baseLineFields", store.baseLineFields);
 				return axis;
 			};
 
-			setDefaultTheme = function(store, xLayout) {
-				var colors = dv.conf.chart.theme.dv1.slice(0, store.rangeFields.length);
-
-				if (xLayout.options.targetLineValue || xLayout.options.baseLineValue) {
-					colors.push('#051a2e');
-				}
-
-				if (xLayout.options.targetLineValue) {
-					colors.push('#051a2e');
-				}
-
-				if (xLayout.options.baseLineValue) {
-					colors.push('#051a2e');
-				}
-
-				Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
-					constructor: function(config) {
-						Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
-							seriesThemes: colors,
-							colors: colors
-						}, config));
-					}
-				});
-			};
-
 			getDefaultSeries = function(store, xResponse, xLayout) {
 				var main = {
 					type: 'column',
@@ -872,7 +847,65 @@ console.log("baseLineFields", store.baseLineFields);
 				};
 			};
 
-			getDefaultChart = function(store, axes, series, xLayout) {
+			setDefaultTheme = function(store, xLayout) {
+				var colors = dv.conf.chart.theme.dv1.slice(0, store.rangeFields.length);
+
+				if (xLayout.options.targetLineValue || xLayout.options.baseLineValue) {
+					colors.push('#051a2e');
+				}
+
+				if (xLayout.options.targetLineValue) {
+					colors.push('#051a2e');
+				}
+
+				if (xLayout.options.baseLineValue) {
+					colors.push('#051a2e');
+				}
+
+				Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
+					constructor: function(config) {
+						Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
+							seriesThemes: colors,
+							colors: colors
+						}, config));
+					}
+				});
+			};
+
+			getDefaultLegend = function(store, xResponse) {
+				var itemLength = 30,
+					charLength = 5.85,
+					numberOfItems = store.rangeFields.length,
+					numberOfChars = 0,
+					str = '',
+					width,
+					isVertical = false,
+					position = 'top';
+
+				for (var i = 0; i < store.rangeFields.length; i++) {
+					str += xResponse.metaData.names[store.rangeFields[i]];
+				}
+
+				numberOfChars = str.length;
+
+				width = (numberOfItems * itemLength) + (numberOfChars * charLength);
+
+				if (width > dv.viewport.centerRegion.getWidth() - 50) {
+					isVertical = true;
+					position = 'right';
+				}
+
+				return {
+					position: position,
+					isVertica: isVertical,
+					labelFont: '13px Arial',
+					boxStroke: '#ffffff',
+					boxStrokeWidth: 0,
+					padding: position === 'right' ? 5 : 0
+				};
+			};
+
+			getDefaultChart = function(store, axes, series, xResponse, xLayout) {
 				var config = {
 					store: store,
 					axes: axes,
@@ -886,13 +919,11 @@ console.log("baseLineFields", store.baseLineFields);
 				};
 
 				if (!xLayout.options.hideChartLegend) {
-					config.legend = {
-						position: 'top',
-						labelFont: '13px Arial',
-						boxStroke: '#ffffff',
-						boxStrokeWidth: 0,
-						padding: 0
-					};
+					config.legend = getDefaultLegend(store, xResponse);
+
+					if (config.legend.position === 'right') {
+						config.insetPadding = 5;
+					}
 				}
 
 				return Ext.create('Ext.chart.Chart', config);
@@ -975,7 +1006,7 @@ console.log("baseLineFields", store.baseLineFields);
 
 				setDefaultTheme(store, xLayout);
 
-				return getDefaultChart(store, axes, series, xLayout);
+				return getDefaultChart(store, axes, series, xResponse, xLayout);
 			};
 
 			generator.stackedColumn = function(xResponse, xLayout) {
@@ -1052,7 +1083,7 @@ console.log("baseLineFields", store.baseLineFields);
 
 				setDefaultTheme(store, xLayout);
 
-				return getDefaultChart(store, axes, series, xLayout);
+				return getDefaultChart(store, axes, series, xResponse, xLayout);
 			};
 
 			generator.stackedBar = function(xResponse, xLayout) {
@@ -1137,7 +1168,7 @@ console.log("baseLineFields", store.baseLineFields);
 					}
 				});
 
-				return getDefaultChart(store, axes, series, xLayout);
+				return getDefaultChart(store, axes, series, xResponse, xLayout);
 			};
 
 			generator.area = function(xResponse, xLayout) {
@@ -1168,7 +1199,7 @@ console.log("baseLineFields", store.baseLineFields);
 
 				setDefaultTheme(store, xLayout);
 
-				return getDefaultChart(store, axes, series, xLayout);
+				return getDefaultChart(store, axes, series, xResponse, xLayout);
 			};
 
 			generator.pie = function(xResponse, xLayout) {
@@ -1208,7 +1239,7 @@ console.log("baseLineFields", store.baseLineFields);
 						}
 					}],
 					colors = dv.conf.chart.theme.dv1.slice(0, store.rangeFields.length),
-					chart = getDefaultChart(store, null, series, xLayout);
+					chart = getDefaultChart(store, null, series, xResponse, xLayout);
 
 				// Chart
 

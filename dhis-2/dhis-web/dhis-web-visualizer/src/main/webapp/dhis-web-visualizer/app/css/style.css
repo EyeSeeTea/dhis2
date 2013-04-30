@@ -601,6 +601,9 @@ body.x-windows {
     border-style: solid;
     border-color: #ddd;
 }
+#treepanel-contextmenu .x-menu-item-link {
+	padding: 4px 2px 4px 28px;
+}
 
 
 /*----------------------------------------------------------------------------
