@@ -86,8 +86,8 @@ public class Chart
 
     public static final String DIMENSION_DATA = "data";
     public static final String DIMENSION_PERIOD = "period";
-    public static final String DIMENSION_ORGANISATIONUNIT = "organisationunit";
-
+    public static final String DIMENSION_ORGANISATIONUNIT = "organisationunit"; 
+    
     private String domainAxisLabel;
 
     private String rangeAxisLabel;

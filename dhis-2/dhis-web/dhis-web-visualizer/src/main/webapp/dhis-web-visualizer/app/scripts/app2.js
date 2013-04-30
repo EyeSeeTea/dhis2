@@ -796,6 +796,7 @@ Ext.onReady( function() {
 			showValues,
 			hideChartLegend,
 			hideChartSubtitle,
+			chartTitle,
 			domainAxisTitle,
 			rangeAxisTitle,
 
@@ -879,9 +880,30 @@ Ext.onReady( function() {
 
 		hideChartSubtitle = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: DV.i18n.hide_subtitle,
-			style: 'margin-bottom:6px'
+			style: 'margin-bottom:6px',
+			listeners: {
+				change: function() {
+					chartTitle.xable();
+				}
+			}
 		});
 		dv.viewport.hideChartSubtitle = hideChartSubtitle;
+
+		chartTitle = Ext.create('Ext.form.field.Text', {
+			//cls: 'dv-textfield-alt1',
+			style: 'margin-bottom:2px; margin-left:2px',
+			width: 310,
+			fieldLabel: DV.i18n.chart_title,
+			fieldLabel: 'Chart title',
+			labelStyle: 'padding-left:16px',
+			labelWidth: 123,
+			maxLength: 100,
+			enforceMaxLength: true,
+			xable: function() {
+				this.setDisabled(hideChartSubtitle.getValue());
+			}
+		});
+		dv.viewport.chartTitle = chartTitle;
 
 		domainAxisTitle = Ext.create('Ext.form.field.Text', {
 			//cls: 'dv-textfield-alt1',
@@ -951,6 +973,7 @@ Ext.onReady( function() {
 				showValues,
 				hideChartLegend,
 				hideChartSubtitle,
+				chartTitle,
 				domainAxisTitle,
 				rangeAxisTitle
 			]
@@ -974,6 +997,7 @@ Ext.onReady( function() {
 					showValues: showValues.getValue(),
 					hideChartLegend: hideChartLegend.getValue(),
 					hideChartSubtitle: hideChartSubtitle.getValue(),
+					chartTitle: chartTitle.getValue(),
 					domainAxisTitle: domainAxisTitle.getValue(),
 					rangeAxisTitle: rangeAxisTitle.getValue()
 				};
