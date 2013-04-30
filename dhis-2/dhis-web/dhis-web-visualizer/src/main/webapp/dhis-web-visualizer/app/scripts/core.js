@@ -949,7 +949,7 @@ console.log("baseLineFields", store.baseLineFields);
 				return {
 					xtype: 'panel',
 					width: '100%',
-					bodyStyle: 'padding:10px 0 4px ' + (paddingLeft + 'px') + '; border:0 none; text-align:' + textAlign + '; font-weight:bold; font-size:20px',
+					bodyStyle: 'padding:10px 0 4px ' + (paddingLeft + 'px') + '; border:0 none; text-align:' + textAlign + '; font-weight:bold; font-size:19px; -webkit-text-stroke:0.2px #555;',
 					html: html
 				};
 			};
