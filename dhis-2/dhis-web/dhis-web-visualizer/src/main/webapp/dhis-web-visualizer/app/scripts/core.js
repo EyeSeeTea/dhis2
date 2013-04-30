@@ -1339,7 +1339,28 @@ console.log("chart", chart);
 				});
 
 			}();
+		},
+
+		loadChart: function(id) {
+			if (!Ext.isString(id)) {
+				alert('Invalid id');
+				return;
+			}
+
+			Ext.Ajax.request({
+				url: dv.baseUrl + '/api/charts/' + id + '.json?links=false',
+				method: 'GET',
+				failure: function(r) {
+					dv.util.mask.hideMask();
+					alert(r.responseText);
+				},
+				success: function(r) {
+					var response = Ext.decode(r.responseText);
+					dv.viewport.setFavorite(response);
+				}
+			});
 		}
+
 	};
 
 	util.number = {

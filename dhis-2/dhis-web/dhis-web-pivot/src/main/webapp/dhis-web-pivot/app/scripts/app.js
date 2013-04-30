@@ -3479,7 +3479,7 @@ Ext.onReady( function() {
 				}
 
 				if (layout) {
-					pt.util.pivot.getTable(layout, pt);
+					pt.util.pivot.createTable(layout, pt);
 				}
 			};
 

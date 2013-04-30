@@ -507,7 +507,7 @@ PT.core.getUtils = function(pt) {
 	};
 
 	util.pivot = {
-		getTable: function(settings, pt) {
+		createTable: function(settings, pt) {
 			var options = settings.options,
 				extendLayout,
 				getSyncronizedXLayout,
