@@ -3847,7 +3847,7 @@ Ext.onReady( function() {
 			});
 
 			optionsButton = Ext.create('Ext.button.Button', {
-				text: 'Options',
+				text: DV.i18n.options,
 				menu: {},
 				handler: function() {
 					if (!dv.viewport.optionsWindow) {
@@ -3859,7 +3859,7 @@ Ext.onReady( function() {
 			});
 
 			favoriteButton = Ext.create('Ext.button.Button', {
-				text: 'Favorites',
+				text: DV.i18n.favorites,
 				menu: {},
 				handler: function() {
 					if (dv.viewport.favoriteWindow) {
@@ -3872,7 +3872,7 @@ Ext.onReady( function() {
 			});
 
 			downloadButton = Ext.create('Ext.button.Button', {
-				text: 'Download',
+				text: DV.i18n.download,
 				disabled: true,
 				menu: {
 					cls: 'dv-menu',
