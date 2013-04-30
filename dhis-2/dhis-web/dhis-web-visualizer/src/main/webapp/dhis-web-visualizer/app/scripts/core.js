@@ -890,7 +890,7 @@ console.log("baseLineFields", store.baseLineFields);
 				numberOfChars = str.length;
 
 				width = (numberOfItems * itemLength) + (numberOfChars * charLength);
-alert(width);alert(dv.viewport.centerRegion.getWidth() - 50);
+
 				if (width > dv.viewport.centerRegion.getWidth() - 50) {
 					isVertical = true;
 					position = 'right';
@@ -967,7 +967,8 @@ alert(width);alert(dv.viewport.centerRegion.getWidth() - 50);
 						titleX = legendMiddleX - (title.el.getWidth() / 2);
 					}
 					else {
-						titleX = ((dv.viewport.centerRegion.getWidth() - legend.width) / 2) - (title.el.getWidth() / 2);
+						var legendWidth = legend ? legend.width : 0;
+						titleX = ((dv.viewport.centerRegion.getWidth() - legendWidth) / 2) - (title.el.getWidth() / 2);
 					}
 
 					title.setAttributes({
