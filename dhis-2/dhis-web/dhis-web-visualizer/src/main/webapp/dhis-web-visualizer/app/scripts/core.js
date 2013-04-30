@@ -990,62 +990,6 @@ console.log("baseLineFields", store.baseLineFields);
 				return chart;
 			};
 
-			getTitle = function(store, xResponse, xLayout) {
-				var typeConf = dv.conf.finals.chart,
-					paddingLeft = 35,
-					textAlign = 'center',
-					html = '';
-
-				// Style
-				if (xLayout.type === typeConf.bar || xLayout.type === typeConf.stackedBar) {
-					paddingLeft = 85;
-
-					if (xLayout.options.domainAxisTitle) {
-						paddingLeft += 40;
-					}
-				}
-				else {
-					if (xLayout.options.rangeAxisTitle) {
-						paddingLeft += 30;
-					}
-
-					if (xLayout.type === typeConf.pie) {
-						textAlign = 'left';
-					}
-				}
-
-				if (xLayout.options.hideChartLegend) {
-					paddingLeft = 0;
-				}
-
-				// Text
-				if (Ext.isArray(xLayout.filterItems) && xLayout.filterItems.length) {
-					for (var i = 0; i < xLayout.filterItems.length; i++) {
-						html += xResponse.metaData.names[xLayout.filterItems[i]];
-						html += i < xLayout.filterItems.length - 1 ? ', ' : '';
-					}
-				}
-
-				if (xLayout.type === typeConf.pie) {
-					html += '<span style="font-size:18px; font-weight:normal"> - ' + xResponse.metaData.names[store.rangeFields[0]] + '</span>';
-				}
-
-				if (xLayout.options.chartTitle) {
-					html = xLayout.options.chartTitle;
-				}
-
-				if (xLayout.options.hideChartTitle) {
-					html = '';
-				}
-
-				return {
-					xtype: 'panel',
-					width: '100%',
-					bodyStyle: 'padding:10px 0 4px ' + (paddingLeft + 'px') + '; border:0 none; text-align:' + textAlign + '; font-weight:bold; font-size:19px; -webkit-text-stroke:0.2px #555;',
-					html: html
-				};
-			};
-
 			generator.column = function(xResponse, xLayout) {
 				var store = getDefaultStore(xResponse, xLayout),
 					numericAxis = getDefaultNumericAxis(store, xResponse, xLayout),
@@ -1330,8 +1274,7 @@ console.log("baseLineFields", store.baseLineFields);
 				var url,
 					xLayout,
 					xResponse,
-					chart,
-					title;
+					chart;
 
 				xLayout = extendLayout(layout);
 
@@ -1377,10 +1320,9 @@ console.log("baseLineFields", store.baseLineFields);
 						xResponse = extendResponse(response, xLayout);
 
 						chart = generator[xLayout.type](xResponse, xLayout);
-						title = getTitle(chart.store, xResponse, xLayout);
 
 						dv.viewport.centerRegion.removeAll(true);
-						dv.viewport.centerRegion.add([chart]);
+						dv.viewport.centerRegion.add(chart);
 
 						// After table success
 						dv.util.mask.hideMask();
