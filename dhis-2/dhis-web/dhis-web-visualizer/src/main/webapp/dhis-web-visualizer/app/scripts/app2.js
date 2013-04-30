@@ -4027,7 +4027,8 @@ Ext.onReady( function() {
 							if (dv.xLayout && dv.xLayout.type !== dv.conf.finals.chart.pie) {
 								dv.chart.animate = false;
 								dv.chart.setWidth(dv.viewport.centerRegion.getWidth());
-								dv.chart.setHeight(dv.viewport.centerRegion.getHeight() - 75);
+								dv.chart.setHeight(dv.viewport.centerRegion.getHeight() - 25);
+								dv.chart.setTitlePosition();
 								dv.chart.animate = true;
 							}
 						}

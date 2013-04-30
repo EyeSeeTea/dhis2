@@ -341,6 +341,7 @@ DV.core.getUtil = function(dv) {
 				getDefaultTargetLine,
 				getDefaultBaseLine,
 				getDefaultTips,
+				getDefaultTitle,
 				getDefaultChart,
 				validateUrl,
 				generator = {},
@@ -895,28 +896,55 @@ console.log("baseLineFields", store.baseLineFields);
 					position = 'right';
 				}
 
-				return {
+				return Ext.create('Ext.chart.Legend', {
 					position: position,
-					isVertica: isVertical,
+					isVertical: isVertical,
 					labelFont: '13px Arial',
 					boxStroke: '#ffffff',
 					boxStrokeWidth: 0,
 					padding: position === 'right' ? 5 : 0
-				};
+				});
+			};
+
+			getDefaultTitle = function(store, xResponse, xLayout) {
+				var text = '';
+					//charLength = 9.75,
+					//chartMargin = 15,
+					//x;
+
+				if (Ext.isArray(xLayout.filterItems) && xLayout.filterItems.length) {
+					for (var i = 0; i < xLayout.filterItems.length; i++) {
+						text += xResponse.metaData.names[xLayout.filterItems[i]];
+						text += i < xLayout.filterItems.length - 1 ? ', ' : '';
+					}
+				}
+
+				//x = (dv.viewport.centerRegion.getWidth() / 2) - ((text.length / 2) * charLength) + chartMargin;
+
+				return Ext.create('Ext.draw.Sprite', {
+					type: 'text',
+					text: text,
+					font: 'bold 19px Arial',
+					fill: '#111',
+					height: 20,
+					y: 	20
+				});
 			};
 
 			getDefaultChart = function(store, axes, series, xResponse, xLayout) {
-				var config = {
-					store: store,
-					axes: axes,
-					series: series,
-					animate: true,
-					shadow: false,
-					insetPadding: 1,
-					width: dv.viewport.centerRegion.getWidth(),
-					height: dv.viewport.centerRegion.getHeight() - 75,
-					theme: 'dv1'
-				};
+				var chart,
+					config = {
+						store: store,
+						axes: axes,
+						series: series,
+						animate: true,
+						shadow: false,
+						insetPadding: 35,
+						items: [getDefaultTitle(store, xResponse, xLayout)],
+						width: dv.viewport.centerRegion.getWidth(),
+						height: dv.viewport.centerRegion.getHeight() - 25,
+						theme: 'dv1'
+					};
 
 				if (!xLayout.options.hideChartLegend) {
 					config.legend = getDefaultLegend(store, xResponse);
@@ -926,7 +954,32 @@ console.log("baseLineFields", store.baseLineFields);
 					}
 				}
 
-				return Ext.create('Ext.chart.Chart', config);
+				chart = Ext.create('Ext.chart.Chart', config);
+
+				chart.setTitlePosition = function() {
+					var title = chart.items[0],
+						legend = chart.legend,
+						legendMiddleX,
+						titleX;
+
+					if (chart.legend.position === 'top') {
+						legendMiddleX = legend.x + (legend.width / 2);
+						titleX = legendMiddleX - (title.el.getWidth() / 2);
+					}
+					else {
+						titleX = ((dv.viewport.centerRegion.getWidth() - legend.width) / 2) - (title.el.getWidth() / 2);
+					}
+
+					title.setAttributes({
+						x: titleX
+					}, true);
+				};
+
+				chart.on('afterrender', function() {
+					chart.setTitlePosition();
+				});
+
+				return chart;
 			};
 
 			getTitle = function(store, xResponse, xLayout) {
@@ -1319,7 +1372,7 @@ console.log("baseLineFields", store.baseLineFields);
 						title = getTitle(chart.store, xResponse, xLayout);
 
 						dv.viewport.centerRegion.removeAll(true);
-						dv.viewport.centerRegion.add([title, chart]);
+						dv.viewport.centerRegion.add([chart]);
 
 						// After table success
 						dv.util.mask.hideMask();
