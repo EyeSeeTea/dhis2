@@ -269,7 +269,7 @@ DV.core.getConfig = function() {
 	return conf;
 };
 
-DV.core.getUtil = function() {
+DV.core.getUtil = function(dv) {
 	var util = {};
 
 	util.window = {
@@ -1360,7 +1360,6 @@ console.log("chart", chart);
 				}
 			});
 		}
-
 	};
 
 	util.number = {

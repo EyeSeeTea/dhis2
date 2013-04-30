@@ -1169,7 +1169,7 @@ Ext.onReady( function() {
 				}
 
 				// Layout
-				favorite.type = xLayout.type;
+				favorite.type = dv.xLayout.type;
 
 				if (dv.xLayout.col) {
 					var a = [];
@@ -4078,8 +4078,8 @@ Ext.onReady( function() {
 				userOrganisationUnitChildren.setValue(r.userOrganisationUnitChildren);
 
 				// Reset groupset stores
-				for (var key in groupSetIdSelectedStoreMap) {
-					if (groupSetIdSelectedStoreMap.hasOwnProperty(key)) {
+				for (var key in dimensionIdSelectedStoreMap) {
+					if (dimensionIdSelectedStoreMap.hasOwnProperty(key)) {
 						var a = dimensionIdAvailableStoreMap[key],
 							s = dimensionIdSelectedStoreMap[key];
 
@@ -4094,7 +4094,7 @@ Ext.onReady( function() {
 				if (Ext.isObject(r.organisationUnitGroupSets)) {
 					for (var key in r.organisationUnitGroupSets) {
 						if (r.organisationUnitGroupSets.hasOwnProperty(key)) {
-							groupSetIdSelectedStoreMap[key].add(r.organisationUnitGroupSets[key]);
+							dimensionIdSelectedStoreMap[key].add(r.organisationUnitGroupSets[key]);
 							dv.util.multiselect.filterAvailable({store: dimensionIdAvailableStoreMap[key]}, {store: dimensionIdSelectedStoreMap[key]});
 						}
 					}
@@ -4104,8 +4104,8 @@ Ext.onReady( function() {
 				if (Ext.isObject(r.dataElementGroupSets)) {
 					for (var key in r.dataElementGroupSets) {
 						if (r.dataElementGroupSets.hasOwnProperty(key)) {
-							groupSetIdSelectedStoreMap[key].add(r.dataElementGroupSets[key]);
-							dv.util.multiselect.filterAvailable({store: groupSetIdAvailableStoreMap[key]}, {store: groupSetIdSelectedStoreMap[key]});
+							dimensionIdSelectedStoreMap[key].add(r.dataElementGroupSets[key]);
+							dv.util.multiselect.filterAvailable({store: dimensionIdAvailableStoreMap[key]}, {store: dimensionIdSelectedStoreMap[key]});
 						}
 					}
 				}
