@@ -908,9 +908,6 @@ console.log("baseLineFields", store.baseLineFields);
 
 			getDefaultTitle = function(store, xResponse, xLayout) {
 				var text = '';
-					//charLength = 9.75,
-					//chartMargin = 15,
-					//x;
 
 				if (Ext.isArray(xLayout.filterItems) && xLayout.filterItems.length) {
 					for (var i = 0; i < xLayout.filterItems.length; i++) {
@@ -919,7 +916,9 @@ console.log("baseLineFields", store.baseLineFields);
 					}
 				}
 
-				//x = (dv.viewport.centerRegion.getWidth() / 2) - ((text.length / 2) * charLength) + chartMargin;
+				if (xLayout.options.chartTitle) {
+					html = xLayout.options.chartTitle;
+				}
 
 				return Ext.create('Ext.draw.Sprite', {
 					type: 'text',
@@ -940,7 +939,6 @@ console.log("baseLineFields", store.baseLineFields);
 						animate: true,
 						shadow: false,
 						insetPadding: 35,
-						items: [getDefaultTitle(store, xResponse, xLayout)],
 						width: dv.viewport.centerRegion.getWidth(),
 						height: dv.viewport.centerRegion.getHeight() - 25,
 						theme: 'dv1'
@@ -950,30 +948,39 @@ console.log("baseLineFields", store.baseLineFields);
 					config.legend = getDefaultLegend(store, xResponse);
 
 					if (config.legend.position === 'right') {
-						config.insetPadding = 5;
+						config.insetPadding = 40;
 					}
+				}
+
+				if (!xLayout.options.hideChartTitle) {
+					config.items = [getDefaultTitle(store, xResponse, xLayout)];
+				}
+				else {
+					config.insetPadding = 10;
 				}
 
 				chart = Ext.create('Ext.chart.Chart', config);
 
 				chart.setTitlePosition = function() {
-					var title = chart.items[0],
-						legend = chart.legend,
-						legendMiddleX,
-						titleX;
+					if (chart.items) {
+						var title = chart.items[0],
+							legend = chart.legend,
+							legendMiddleX,
+							titleX;
 
-					if (chart.legend.position === 'top') {
-						legendMiddleX = legend.x + (legend.width / 2);
-						titleX = legendMiddleX - (title.el.getWidth() / 2);
-					}
-					else {
-						var legendWidth = legend ? legend.width : 0;
-						titleX = ((dv.viewport.centerRegion.getWidth() - legendWidth) / 2) - (title.el.getWidth() / 2);
-					}
+						if (chart.legend.position === 'top') {
+							legendMiddleX = legend.x + (legend.width / 2);
+							titleX = legendMiddleX - (title.el.getWidth() / 2);
+						}
+						else {
+							var legendWidth = legend ? legend.width : 0;
+							titleX = ((dv.viewport.centerRegion.getWidth() - legendWidth) / 2) - (title.el.getWidth() / 2);
+						}
 
-					title.setAttributes({
-						x: titleX
-					}, true);
+						title.setAttributes({
+							x: titleX
+						}, true);
+					}
 				};
 
 				chart.on('afterrender', function() {
