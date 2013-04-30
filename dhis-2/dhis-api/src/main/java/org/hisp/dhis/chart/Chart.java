@@ -105,6 +105,10 @@ public class Chart
     private boolean regression;
 
     private boolean hideSubtitle;
+    
+    private boolean hideTitle;
+    
+    private String title;
 
     private Double targetLineValue;
 
@@ -543,6 +547,19 @@ public class Chart
     }
 
     @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public boolean isHideTitle()
+    {
+        return hideTitle;
+    }
+
+    public void setHideTitle( Boolean hideTitle )
+    {
+        this.hideTitle = hideTitle;
+    }
+
+    @JsonProperty
     @JsonSerialize( contentAs = BaseNameableObject.class )
     @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "indicators", namespace = DxfNamespaces.DXF_2_0)
@@ -752,6 +769,8 @@ public class Chart
             hideLegend = chart.isHideLegend();
             regression = chart.isRegression();
             hideSubtitle = chart.isHideSubtitle();
+            hideTitle = chart.isHideTitle();
+            title = chart.getTitle() == null ? title : chart.getTitle();
             targetLineValue = chart.getTargetLineValue() == null ? targetLineValue : chart.getTargetLineValue();
             targetLineLabel = chart.getTargetLineLabel() == null ? targetLineLabel : chart.getTargetLineLabel();
             baseLineValue = chart.getBaseLineValue() == null ? baseLineValue : chart.getBaseLineValue();
