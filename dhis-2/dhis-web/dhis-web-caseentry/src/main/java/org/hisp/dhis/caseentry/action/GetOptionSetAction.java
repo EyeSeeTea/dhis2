@@ -30,7 +30,6 @@ package org.hisp.dhis.caseentry.action;
 import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.option.OptionService;
 import org.hisp.dhis.option.OptionSet;
 import org.springframework.beans.factory.annotation.Autowired;
 

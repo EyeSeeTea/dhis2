@@ -115,7 +115,6 @@
     <tr id="tr<%= programStageInstanceId %>" class="listRow">
         <td><%= index %></td>
         <td><%= executionDate %></td>
-        <td><%= organisationUnit %></td>
 
         <td align="right" style="padding-right:20px;">
             <% if( !completed ) { %>
@@ -124,6 +123,12 @@
             <a href="javascript:showUpdateEvent( '<%= programStageInstanceId %>' )" title="Data entry"><img src="images/data_entry.png" alt="Data entry"></a>
             <a href="javascript:removeEvent( '<%= programStageInstanceId %>' )" title="Remove"><img src="../images/delete.png" alt="Remove"></a>
         </td>
+    </tr>
+</script>
+
+<script id="no-offline-event-template" type="text/template">
+    <tr class="listRow">
+        <td colspan="3">No offline events</td>
     </tr>
 </script>
 
@@ -138,7 +143,6 @@
         <tr>
             <th>#</th>
             <th>Report date</th>
-            <th>Organisation Unit</th>
             <th style="width:100px">Operations</th>
         </tr>
         </thead>
@@ -151,7 +155,7 @@
 <div id='listDiv'></div>
 
 <div id='dataEntryInfor' class='hidden'>
-	<table style="width:600px;" class="listTable">
+	<table style="width:600px; margin-bottom: 0;" class="listTable">
 			<tr>
 				<th style='width:220px' colspan='2'><span id="reportDateDescriptionField2">$i18n.getString( "report_date" )</span> <em title="$i18n.getString( "required" )" class="required">*</em> </th>
 				<th colspan="2"><input type="text" id="executionDate" name="executionDate" onchange="addNewEvent();" style="margin-left:10px;width:300px;" ></th>

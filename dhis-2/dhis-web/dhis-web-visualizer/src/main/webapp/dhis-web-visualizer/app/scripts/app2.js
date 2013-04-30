@@ -3782,7 +3782,7 @@ Ext.onReady( function() {
 				}
 
 				if (layout) {
-					dv.util.tmp.createChart(layout, dv);
+					dv.util.chart.createChart(layout, dv);
 				}
 			};
 

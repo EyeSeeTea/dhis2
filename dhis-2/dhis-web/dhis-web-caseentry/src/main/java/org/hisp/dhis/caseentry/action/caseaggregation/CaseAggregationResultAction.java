@@ -52,7 +52,6 @@ import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.period.CalendarPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.program.ProgramStageInstanceService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -102,13 +101,6 @@ public class CaseAggregationResultAction
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
-    }
-
-    private ProgramStageInstanceService programStageInstanceService;
-
-    public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
-    {
-        this.programStageInstanceService = programStageInstanceService;
     }
 
     private I18nFormat format;
@@ -261,15 +253,13 @@ public class CaseAggregationResultAction
                 selectedOrgunit.getId() ) );
         }
 
-        orgunitIds.retainAll( programStageInstanceService.getOrganisationUnitIds( sDate, eDate ) );
-        
         // ---------------------------------------------------------------------
         // Aggregation
         // ---------------------------------------------------------------------
-
         for ( Integer orgUnitId : orgunitIds )
         {
             OrganisationUnit orgUnit = organisationUnitService.getOrganisationUnit( orgUnitId );
+
             for ( CaseAggregationCondition condition : aggregationConditions )
             {
                 DataElement dElement = condition.getAggregationDataElement();

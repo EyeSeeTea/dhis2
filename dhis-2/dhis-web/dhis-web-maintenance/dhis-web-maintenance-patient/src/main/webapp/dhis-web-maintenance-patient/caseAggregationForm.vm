@@ -1,6 +1,7 @@
 <div id="tabs">
 	<ul>
 		<li><a href="#tab-1">$i18n.getString("dataelements")</a></li>
+		<li><a href="#tab-2">$i18n.getString("patient_attributes")</a></li>
 		<li><a href="#tab-3">$i18n.getString("program")</a></li>
 	</ul>	
 	
@@ -72,6 +73,7 @@
 				<td>
 					<select multiple id="programStageProperty" size="10" name="programStageProperty" ondblclick="insertInfo(this, true);" disabled >
 						<option value="[PS:*]">$i18n.getString( "visit_selected_program_stage" )</option>
+						<option value="[PSIC:*]">$i18n.getString( "completed" )</option>
 						<option value="[PS:*.COUNT]" name="multiProgram">$i18n.getString( "visit_selected_program_stage_x_th_time" )</option>
 						<option value="[PS:*] AND [PSP:DATE@executionDate#-DATE@dueDate#]" name="multiProgram">$i18n.getString( "report_date" ) - $i18n.getString( "due_date" )</option>
 						<option value="[PS:*] AND [PC:DATE@executionDate#-DATE@birthDate#]" name="multiProgram">$i18n.getString( "age_at_visit_days_since_birth" )</option>
@@ -81,7 +83,6 @@
 			</tr>
 		</table>
 	</div>
-	
 </div>
 
 <p></p>
@@ -106,6 +107,7 @@
 			&nbsp;&nbsp;&nbsp;
 			<input type='button' style="width:45px;" alt="$i18n.getString( 'and' )" onclick='insertOperator( "AND" );' value="AND" />
 			<input type='button' style="width:45px;" alt="$i18n.getString( 'or' )" onclick='insertOperator( "OR" );' value="OR" />
+			<input type='button' style="width:45px;" alt="$i18n.getString( 'combine' )" onclick='insertOperator( "COMBINE" );' value="COMBINE" />
 			&nbsp;&nbsp;&nbsp;
 			<input type='button' style="width:45px;" align="right" alt="$i18n.getString( 'clear' )" onclick="byId('aggregationCondition').value='';" value="$i18n.getString('clear')" />
 		</td>

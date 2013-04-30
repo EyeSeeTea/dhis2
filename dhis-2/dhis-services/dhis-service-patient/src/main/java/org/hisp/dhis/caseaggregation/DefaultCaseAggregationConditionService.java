@@ -30,15 +30,13 @@ package org.hisp.dhis.caseaggregation;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.AGGRERATION_SUM;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PATIENT;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PATIENT_ATTRIBUTE;
-import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PATIENT_PROGRAM_STAGE_PROPERTY;
-import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PATIENT_PROPERTY;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PROGRAM;
-import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PROGRAM_PROPERTY;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PROGRAM_STAGE;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PROGRAM_STAGE_DATAELEMENT;
-import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PROGRAM_STAGE_PROPERTY;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.SEPARATOR_ID;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.SEPARATOR_OBJECT;
+import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_ORGUNIT_COMPLETE_PROGRAM_STAGE;
+
 import static org.hisp.dhis.i18n.I18nUtils.i18n;
 
 import java.util.ArrayList;
@@ -80,12 +78,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultCaseAggregationConditionService
     implements CaseAggregationConditionService
 {
-    private final String regExp = "\\[(" + OBJECT_PATIENT + "|" + OBJECT_PROGRAM + "|" + OBJECT_PROGRAM_STAGE + "|"
-        + OBJECT_PROGRAM_STAGE_PROPERTY + "|" + OBJECT_PATIENT_PROGRAM_STAGE_PROPERTY + "|"
-        + OBJECT_PROGRAM_STAGE_DATAELEMENT + "|" + OBJECT_PATIENT_ATTRIBUTE + "|" + OBJECT_PATIENT_PROPERTY + "|"
-        + OBJECT_PROGRAM_PROPERTY + ")" + SEPARATOR_OBJECT + "([a-zA-Z0-9@#\\- ]+[" + SEPARATOR_ID + "[a-zA-Z0-9]*]*)"
-        + "\\]";
-
     private final String INVALID_CONDITION = "Invalid condition";
 
     private final String TOTAL_OF_PATIENTS_REGISTERED = "Total of patient registration";
@@ -361,7 +353,7 @@ public class DefaultCaseAggregationConditionService
     {
         StringBuffer description = new StringBuffer();
 
-        Pattern patternCondition = Pattern.compile( regExp );
+        Pattern patternCondition = Pattern.compile( CaseAggregationCondition.regExp );
 
         Matcher matcher = patternCondition.matcher( condition );
 
@@ -436,7 +428,8 @@ public class DefaultCaseAggregationConditionService
                     }
                     matcher.appendReplacement( description, "[" + programDes + "]" );
                 }
-                else if ( info[0].equalsIgnoreCase( OBJECT_PROGRAM_STAGE ) )
+                else if ( info[0].equalsIgnoreCase( OBJECT_PROGRAM_STAGE ) 
+                        || info[0].equalsIgnoreCase( OBJECT_ORGUNIT_COMPLETE_PROGRAM_STAGE ) )
                 {
                     int objectId = Integer.parseInt( ids[0] );
                     ProgramStage programStage = programStageService.getProgramStage( objectId );
@@ -447,7 +440,7 @@ public class DefaultCaseAggregationConditionService
                     }
 
                     String count = (ids.length == 2) ? SEPARATOR_ID + ids[1] : "";
-                    matcher.appendReplacement( description, "[" + OBJECT_PROGRAM_STAGE + SEPARATOR_OBJECT
+                    matcher.appendReplacement( description, "[" + info[0] + SEPARATOR_OBJECT
                         + programStage.getDisplayName() + count + "]" );
                 }
             }
@@ -571,6 +564,11 @@ public class DefaultCaseAggregationConditionService
         }
 
         ConcurrentUtils.waitForCompletion( futures );
+    }
+
+    public boolean hasOrgunitProgramStageCompleted( String expresstion )
+    {
+        return aggregationConditionManager.hasOrgunitProgramStageCompleted( expresstion );
     }
 
     // -------------------------------------------------------------------------

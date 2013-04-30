@@ -1,7 +1,7 @@
-package org.hisp.dhis.patient.action.dataentryform;
+package org.hisp.dhis.caseentry.action;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,85 +27,49 @@ package org.hisp.dhis.patient.action.dataentryform;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataentryform.DataEntryForm;
-import org.hisp.dhis.dataentryform.DataEntryFormService;
-import org.hisp.dhis.i18n.I18n;
-
 import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
- * @author Bharath Kumar
- * @version $Id$
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class ValidateDataEntryFormAction
-    implements Action
+public class GetUsernamesAction implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependency
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataEntryFormService dataEntryFormService;
+    @Autowired
+    private UserService userService;
 
-    public void setDataEntryFormService( DataEntryFormService dataEntryFormService )
+    // -------------------------------------------------------------------------
+    // Input & Output
+    // -------------------------------------------------------------------------
+
+    private SortedSet<String> usernames = new TreeSet<String>();
+
+    public Set<String> getUsernames()
     {
-        this.dataEntryFormService = dataEntryFormService;
+        return usernames;
     }
 
     // -------------------------------------------------------------------------
-    // I18n
+    // Action Impl
     // -------------------------------------------------------------------------
 
-    private I18n i18n;
-
-    public void setI18n( I18n i18n )
+    @Override
+    public String execute() throws Exception
     {
-        this.i18n = i18n;
-    }
-
-    // -------------------------------------------------------------------------
-    // Getters & Setters
-    // -------------------------------------------------------------------------
-
-    private String name;
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
-    private Integer dataEntryFormId;
-
-    public void setDataEntryFormId( Integer dataEntryFormId )
-    {
-        this.dataEntryFormId = dataEntryFormId;
-    }
-
-    private String message;
-
-    public String getMessage()
-    {
-        return message;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
-        throws Exception
-    {
-        name = name.trim();
-
-        DataEntryForm match = dataEntryFormService.getDataEntryFormByName( name );
-
-        if ( match != null && (dataEntryFormId == null || match.getId() != dataEntryFormId ) )
+        for ( User user : userService.getAllUsers() )
         {
-            message = i18n.getString( "duplicate_names" );
-
-            return ERROR;
+            usernames.add( user.getUsername() );
         }
-
-        message = i18n.getString( "everything_is_ok" );
 
         return SUCCESS;
     }
