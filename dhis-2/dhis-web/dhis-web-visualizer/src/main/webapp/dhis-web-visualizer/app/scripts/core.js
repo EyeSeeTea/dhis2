@@ -1297,10 +1297,8 @@ console.log("baseLineFields", store.baseLineFields);
 
 				chart.legend.position = 'right';
 				chart.legend.isVertical = true;
-				chart.insetPadding = 20;
+				chart.insetPadding = 40;
 				chart.shadow = true;
-				chart.setWidth(dv.viewport.centerRegion.getWidth() - 50);
-				//chart.setHeight(dv.viewport.centerRegion.getHeight() - 50);
 
 				return chart;
 			};
