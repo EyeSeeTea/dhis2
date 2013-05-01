@@ -206,6 +206,26 @@ Ext.onReady( function() {
 			return config;
 		};
 
+		util.chart.submitSvgForm = function(type) {
+			var svg = Ext.query('svg'),
+				form = Ext.query('#exportForm')[0];
+
+			if (!(Ext.isArray(svg) && svg.length)) {
+				alert('Browser does not support SVG');
+				return;
+			}
+
+			svg = Ext.get(svg[0]);
+			svg = svg.parent().dom.innerHTML;
+
+			Ext.query('#svgField')[0].value = svg;
+			Ext.query('#typeField')[0].value = type;
+			Ext.query('#nameField')[0].value = 'test';
+
+			form.action = '../exportImage.action';
+			form.submit();
+		};
+
 		util.dimension = {
 			panel: {
 				setHeight: function(mx) {
@@ -3908,14 +3928,14 @@ Ext.onReady( function() {
 							text: 'PNG',
 							iconCls: 'dv-menu-item-image',
 							handler: function() {
-
+								dv.util.chart.submitSvgForm('png');
 							}
 						},
 						{
 							text: 'PDF',
 							iconCls: 'dv-menu-item-image',
 							handler: function() {
-
+								dv.util.chart.submitSvgForm('pdf');
 							}
 						},
 						{
