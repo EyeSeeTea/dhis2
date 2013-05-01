@@ -21,6 +21,7 @@
  * DV Accordion
  * DV Textarea
  * DV Tips
+ * DV Menu
 */
 
 /* General */
@@ -706,6 +707,21 @@ body.x-windows {
     font-weight: normal;
     color: #444;
 	-webkit-text-stroke: 0;
+}
+
+
+/*----------------------------------------------------------------------------
+ * DV Menu
+ *--------------------------------------------------------------------------*/
+
+	/* Menu item icon */
+.dv-menu-item-data {
+    background-image:url('../images/pdf.png');
+    padding-left: 18px;
+}
+.dv-menu-item-image {
+    background-image:url('../images/png.png');
+    padding-left: 18px;
 }
 
 

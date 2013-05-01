@@ -3906,7 +3906,7 @@ Ext.onReady( function() {
 					items: [
 						{
 							text: 'Excel (XLS)',
-							iconCls: 'dv-menu-item-xls',
+							iconCls: 'dv-menu-item-data',
 							handler: function() {
 								if (dv.baseUrl && dv.paramString) {
 									window.location.href = dv.baseUrl + '/api/analytics.xls' + dv.paramString;
@@ -3915,7 +3915,7 @@ Ext.onReady( function() {
 						},
 						{
 							text: 'CSV',
-							iconCls: 'dv-menu-item-csv',
+							iconCls: 'dv-menu-item-data',
 							handler: function() {
 								if (dv.baseUrl && dv.paramString) {
 									window.location.href = dv.baseUrl + '/api/analytics.csv' + dv.paramString;
@@ -3924,7 +3924,7 @@ Ext.onReady( function() {
 						},
 						{
 							text: 'JSON',
-							iconCls: 'dv-menu-item-csv',
+							iconCls: 'dv-menu-item-data',
 							handler: function() {
 								if (dv.baseUrl && dv.paramString) {
 									window.open(dv.baseUrl + '/api/analytics.json' + dv.paramString);
@@ -3933,11 +3933,25 @@ Ext.onReady( function() {
 						},
 						{
 							text: 'XML',
-							iconCls: 'dv-menu-item-csv',
+							iconCls: 'dv-menu-item-data',
 							handler: function() {
 								if (dv.baseUrl && dv.paramString) {
 									window.open(dv.baseUrl + '/api/analytics.xml' + dv.paramString);
 								}
+							}
+						},
+						{
+							text: 'PNG',
+							iconCls: 'dv-menu-item-image',
+							handler: function() {
+
+							}
+						},
+						{
+							text: 'PDF',
+							iconCls: 'dv-menu-item-image',
+							handler: function() {
+
 							}
 						}
 					],
