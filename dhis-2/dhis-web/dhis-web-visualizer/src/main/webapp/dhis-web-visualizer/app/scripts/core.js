@@ -1004,6 +1004,7 @@ console.log("baseLineFields", store.baseLineFields);
 					axes = [numericAxis, categoryAxis],
 					series = [getDefaultSeries(store, xResponse, xLayout)];
 
+				// Options
 				if (xLayout.options.showTrendLine) {
 					series = getDefaultTrendLines(store, xResponse).concat(series);
 				}
@@ -1016,6 +1017,7 @@ console.log("baseLineFields", store.baseLineFields);
 					series.push(getDefaultBaseLine(store, xLayout));
 				}
 
+				// Theme
 				setDefaultTheme(store, xLayout);
 
 				return getDefaultChart(store, axes, series, xResponse, xLayout);
@@ -1046,13 +1048,16 @@ console.log("baseLineFields", store.baseLineFields);
 					baseLine,
 					chart;
 
+				// Axes
 				numericAxis.position = 'bottom';
 				categoryAxis.position = 'left';
 				axes = [numericAxis, categoryAxis];
 
+				// Series
 				series.type = 'bar';
 				series.axis = 'bottom';
 
+				// Options
 				if (xLayout.options.showValues) {
 					series.label = {
 						display: 'outside',
@@ -1093,6 +1098,7 @@ console.log("baseLineFields", store.baseLineFields);
 					series.push(baseLine);
 				}
 
+				// Theme
 				setDefaultTheme(store, xLayout);
 
 				return getDefaultChart(store, axes, series, xResponse, xLayout);
@@ -1120,6 +1126,7 @@ console.log("baseLineFields", store.baseLineFields);
 					series = [],
 					colors = dv.conf.chart.theme.dv1.slice(0, store.rangeFields.length);
 
+				// Series
 				for (var i = 0, line; i < store.rangeFields.length; i++) {
 					line = {
 						type: 'line',
@@ -1150,7 +1157,6 @@ console.log("baseLineFields", store.baseLineFields);
 				}
 
 				// Options, theme colors
-
 				if (xLayout.options.showTrendLine) {
 					series = getDefaultTrendLines(store, xResponse).concat(series);
 
@@ -1170,7 +1176,6 @@ console.log("baseLineFields", store.baseLineFields);
 				}
 
 				// Theme
-
 				Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
 					constructor: function(config) {
 						Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
@@ -1197,6 +1202,7 @@ console.log("baseLineFields", store.baseLineFields);
 				delete series.tips;
 				series = [series];
 
+				// Options
 				if (xLayout.options.showTrendLine) {
 					series = getDefaultTrendLines(store, xResponse).concat(series);
 				}
@@ -1209,6 +1215,7 @@ console.log("baseLineFields", store.baseLineFields);
 					series.push(getDefaultBaseLine(store, xLayout));
 				}
 
+				// Theme
 				setDefaultTheme(store, xLayout);
 
 				return getDefaultChart(store, axes, series, xResponse, xLayout);
@@ -1254,7 +1261,6 @@ console.log("baseLineFields", store.baseLineFields);
 					chart = getDefaultChart(store, null, series, xResponse, xLayout);
 
 				// Chart
-
 				chart.legend.position = 'right';
 				chart.legend.isVertical = true;
 
@@ -1264,15 +1270,7 @@ console.log("baseLineFields", store.baseLineFields);
 				chart.height = dv.viewport.centerRegion.getHeight() - 120;
 
 				// Theme
-
-				Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
-					constructor: function(config) {
-						Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
-							seriesThemes: colors,
-							colors: colors
-						}, config));
-					}
-				});
+				setDefaultTheme(store, xLayout);
 
 				return chart;
 			};
