@@ -4023,14 +4023,9 @@ Ext.onReady( function() {
 				},
 				listeners: {
 					resize: function(p) {
-						if (dv.chart) {
-							if (dv.xLayout && dv.xLayout.type !== dv.conf.finals.chart.pie) {
-								dv.chart.animate = false;
-								dv.chart.setWidth(dv.viewport.centerRegion.getWidth());
-								dv.chart.setHeight(dv.viewport.centerRegion.getHeight() - 25);
-								dv.chart.setTitlePosition();
-								dv.chart.animate = true;
-							}
+						if (dv.xLayout && dv.chart) {
+							alert(1);
+							dv.chart.onViewportResize();
 						}
 					}
 				}

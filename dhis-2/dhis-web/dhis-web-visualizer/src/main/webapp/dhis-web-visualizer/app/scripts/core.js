@@ -935,6 +935,39 @@ console.log("baseLineFields", store.baseLineFields);
 				});
 			};
 
+			getDefaultChartSizeHandler = function() {
+				return function() {
+					this.animate = false;
+					this.setWidth(dv.viewport.centerRegion.getWidth());
+					this.setHeight(dv.viewport.centerRegion.getHeight() - 25);
+					this.animate = true;
+				};
+			};
+
+			getDefaultTitlePositionHandler = function() {
+				return function() {
+					if (this.items) {
+						var title = this.items[0],
+							legend = this.legend,
+							legendCenterX,
+							titleX;
+
+						if (this.legend.position === 'top') {
+							legendCenterX = legend.x + (legend.width / 2);
+							titleX = legendCenterX - (title.el.getWidth() / 2);
+						}
+						else {
+							var legendWidth = legend ? legend.width : 0;
+							titleX = (this.width / 2) - (title.el.getWidth() / 2);
+						}
+
+						title.setAttributes({
+							x: titleX
+						}, true);
+					}
+				};
+			};
+
 			getDefaultChart = function(store, axes, series, xResponse, xLayout) {
 				var chart,
 					config = {
@@ -968,26 +1001,12 @@ console.log("baseLineFields", store.baseLineFields);
 
 				chart = Ext.create('Ext.chart.Chart', config);
 
-				chart.setTitlePosition = function() {
-					if (chart.items) {
-						var title = chart.items[0],
-							legend = chart.legend,
-							legendCenterX,
-							titleX;
+				chart.setChartSize = getDefaultChartSizeHandler();
+				chart.setTitlePosition = getDefaultTitlePositionHandler();
 
-						if (chart.legend.position === 'top') {
-							legendCenterX = legend.x + (legend.width / 2);
-							titleX = legendCenterX - (title.el.getWidth() / 2);
-						}
-						else {
-							var legendWidth = legend ? legend.width : 0;
-							titleX = (dv.viewport.centerRegion.getWidth() / 2) - (title.el.getWidth() / 2);
-						}
-
-						title.setAttributes({
-							x: titleX
-						}, true);
-					}
+				chart.onViewportResize = function() {
+					chart.setSize();
+					chart.setTitlePosition();
 				};
 
 				chart.on('afterrender', function() {
@@ -1257,20 +1276,30 @@ console.log("baseLineFields", store.baseLineFields);
 							}
 						}
 					}],
-					colors = dv.conf.chart.theme.dv1.slice(0, store.rangeFields.length),
-					chart = getDefaultChart(store, null, series, xResponse, xLayout);
-
-				// Chart
-				chart.legend.position = 'right';
-				chart.legend.isVertical = true;
-
-				chart.insetPadding = 20;
-				chart.shadow = true;
-				chart.width = dv.viewport.centerRegion.getWidth() - 100;
-				chart.height = dv.viewport.centerRegion.getHeight() - 120;
+					colors,
+					chart;
 
 				// Theme
-				setDefaultTheme(store, xLayout);
+				colors = dv.conf.chart.theme.dv1.slice(0, xResponse.nameHeaderMap[xLayout.row[0].dimensionName].items.length);
+
+				Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
+					constructor: function(config) {
+						Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
+							seriesThemes: colors,
+							colors: colors
+						}, config));
+					}
+				});
+
+				// Chart
+				chart = getDefaultChart(store, null, series, xResponse, xLayout);
+
+				chart.legend.position = 'right';
+				chart.legend.isVertical = true;
+				chart.insetPadding = 20;
+				chart.shadow = true;
+				chart.width = dv.viewport.centerRegion.getWidth() - 80;
+				chart.height = dv.viewport.centerRegion.getHeight() - 80;
 
 				return chart;
 			};
