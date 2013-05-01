@@ -21,6 +21,7 @@
  * DV Accordion
  * DV Textarea
  * DV Tips
+ * Menu
  * DV Menu
 */
 
@@ -602,7 +603,7 @@ body.x-windows {
     border-style: solid;
     border-color: #ddd;
 }
-#treepanel-contextmenu .x-menu-item-link {
+.x-menu-item-link {
 	padding: 4px 2px 4px 28px;
 }
 
@@ -707,6 +708,35 @@ body.x-windows {
     font-weight: normal;
     color: #444;
 	-webkit-text-stroke: 0;
+}
+
+
+/*----------------------------------------------------------------------------
+ * Menu
+ *--------------------------------------------------------------------------*/
+
+.x-menu-body {
+    border-color: #bbb;
+    border-radius: 2px;
+}
+
+.x-menu-item-active .x-menu-item-link {
+	border-radius: 0;
+	border-color: #e1e1e1;
+	background-color: #e1e1e1;
+	background-image: none;
+}
+.x-menu-body {
+	padding: 0;
+}
+
+	/* Menu item */
+.x-menu-item-link {
+    padding: 4px 5px 4px 28px;
+}
+	/* Menu item color */
+.x-menu-item-text {
+    color: #111;
 }
 
 

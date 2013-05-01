@@ -3905,6 +3905,20 @@ Ext.onReady( function() {
 					showSeparator: false,
 					items: [
 						{
+							text: 'PNG',
+							iconCls: 'dv-menu-item-image',
+							handler: function() {
+
+							}
+						},
+						{
+							text: 'PDF',
+							iconCls: 'dv-menu-item-image',
+							handler: function() {
+
+							}
+						},
+						{
 							text: 'Excel (XLS)',
 							iconCls: 'dv-menu-item-data',
 							handler: function() {
@@ -3938,20 +3952,6 @@ Ext.onReady( function() {
 								if (dv.baseUrl && dv.paramString) {
 									window.open(dv.baseUrl + '/api/analytics.xml' + dv.paramString);
 								}
-							}
-						},
-						{
-							text: 'PNG',
-							iconCls: 'dv-menu-item-image',
-							handler: function() {
-
-							}
-						},
-						{
-							text: 'PDF',
-							iconCls: 'dv-menu-item-image',
-							handler: function() {
-
 							}
 						}
 					],
