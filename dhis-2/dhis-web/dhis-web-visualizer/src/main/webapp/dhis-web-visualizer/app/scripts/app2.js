@@ -4024,7 +4024,6 @@ Ext.onReady( function() {
 				listeners: {
 					resize: function(p) {
 						if (dv.xLayout && dv.chart) {
-							alert(1);
 							dv.chart.onViewportResize();
 						}
 					}

@@ -1005,7 +1005,8 @@ console.log("baseLineFields", store.baseLineFields);
 				chart.setTitlePosition = getDefaultTitlePositionHandler();
 
 				chart.onViewportResize = function() {
-					chart.setSize();
+					chart.setChartSize();
+					chart.redraw();
 					chart.setTitlePosition();
 				};
 
@@ -1298,8 +1299,8 @@ console.log("baseLineFields", store.baseLineFields);
 				chart.legend.isVertical = true;
 				chart.insetPadding = 20;
 				chart.shadow = true;
-				chart.width = dv.viewport.centerRegion.getWidth() - 80;
-				chart.height = dv.viewport.centerRegion.getHeight() - 80;
+				chart.setWidth(dv.viewport.centerRegion.getWidth() - 50);
+				//chart.setHeight(dv.viewport.centerRegion.getHeight() - 50);
 
 				return chart;
 			};
