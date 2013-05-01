@@ -210,7 +210,7 @@ DV.core.getConfig = function() {
     conf.chart = {
         style: {
             inset: 30,
-            font: 'arial,sans-serif,ubuntu,consolas'
+            fontFamily: 'Arial,Sans-serif,Lucida Grande,Ubuntu'
         },
         theme: {
             dv1: ['#94ae0a', '#0b3b68', '#a61120', '#ff8809', '#7c7474', '#a61187', '#ffd13e', '#24ad9a', '#a66111', '#414141', '#4500c4', '#1d5700']
@@ -881,7 +881,8 @@ console.log("baseLineFields", store.baseLineFields);
 					str = '',
 					width,
 					isVertical = false,
-					position = 'top';
+					position = 'top',
+					padding = 0;
 
 				for (var i = 0; i < store.rangeFields.length; i++) {
 					str += xResponse.metaData.names[store.rangeFields[i]];
@@ -896,13 +897,17 @@ console.log("baseLineFields", store.baseLineFields);
 					position = 'right';
 				}
 
+				if (position === 'right') {
+					padding = 5;
+				}
+
 				return Ext.create('Ext.chart.Legend', {
 					position: position,
 					isVertical: isVertical,
-					labelFont: '13px Arial',
+					labelFont: '13px ' + dv.conf.chart.style.fontFamily,
 					boxStroke: '#ffffff',
 					boxStrokeWidth: 0,
-					padding: position === 'right' ? 5 : 0
+					padding: padding
 				});
 			};
 
@@ -917,13 +922,13 @@ console.log("baseLineFields", store.baseLineFields);
 				}
 
 				if (xLayout.options.chartTitle) {
-					html = xLayout.options.chartTitle;
+					text = xLayout.options.chartTitle;
 				}
 
 				return Ext.create('Ext.draw.Sprite', {
 					type: 'text',
 					text: text,
-					font: 'bold 19px Arial',
+					font: 'bold 19px ' + dv.conf.chart.style.fontFamily,
 					fill: '#111',
 					height: 20,
 					y: 	20
@@ -944,6 +949,7 @@ console.log("baseLineFields", store.baseLineFields);
 						theme: 'dv1'
 					};
 
+				// Legend
 				if (!xLayout.options.hideChartLegend) {
 					config.legend = getDefaultLegend(store, xResponse);
 
@@ -952,6 +958,7 @@ console.log("baseLineFields", store.baseLineFields);
 					}
 				}
 
+				// Title
 				if (!xLayout.options.hideChartTitle) {
 					config.items = [getDefaultTitle(store, xResponse, xLayout)];
 				}
@@ -965,16 +972,16 @@ console.log("baseLineFields", store.baseLineFields);
 					if (chart.items) {
 						var title = chart.items[0],
 							legend = chart.legend,
-							legendMiddleX,
+							legendCenterX,
 							titleX;
 
-						if (chart.legend.position === 'top' && xLayout.type !== dv.conf.finals.chart.pie) {
-							legendMiddleX = legend.x + (legend.width / 2);
-							titleX = legendMiddleX - (title.el.getWidth() / 2);
+						if (chart.legend.position === 'top') {
+							legendCenterX = legend.x + (legend.width / 2);
+							titleX = legendCenterX - (title.el.getWidth() / 2);
 						}
 						else {
 							var legendWidth = legend ? legend.width : 0;
-							titleX = ((dv.viewport.centerRegion.getWidth() - legendWidth) / 2) - (title.el.getWidth() / 2);
+							titleX = (dv.viewport.centerRegion.getWidth() / 2) - (title.el.getWidth() / 2);
 						}
 
 						title.setAttributes({
@@ -1224,7 +1231,7 @@ console.log("baseLineFields", store.baseLineFields);
 							field: dv.conf.finals.data.domain,
 							display: 'middle',
 							contrast: true,
-							font: '14px Arial',
+							font: '14px ' + dv.conf.chart.style.fontFamily,
 							renderer: function(value) {
 								var record = store.getAt(store.findExact(dv.conf.finals.data.domain, value));
 
