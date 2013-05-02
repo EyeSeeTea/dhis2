@@ -112,6 +112,7 @@ Ext.onReady( function() {
 
 		util.chart.getLayoutConfig = function() {
 			var data = {},
+				optionComboIds = [],
 				setup,
 				getData,
 				extendLayout,
@@ -195,7 +196,6 @@ Ext.onReady( function() {
 					});
 				}
 			}();
-
 
 			config.type = dv.viewport.chartType.getChartType();
 			config.options = dv.viewport.optionsWindow.getOptions();
@@ -704,7 +704,12 @@ Ext.onReady( function() {
 					}
 				});
 
-				this.load();
+				this.load({
+					scope: this,
+					callback: function() {
+						this.sortStore();
+					}
+				});
 			},
 			setDetailsProxy: function(uid) {
 				if (Ext.isString(uid)) {
@@ -724,6 +729,8 @@ Ext.onReady( function() {
 								record.set('id', record.data.dataElementId);
 								record.set('name', record.data.operandName);
 							});
+
+							this.sortStore();
 						}
 					});
 				}
@@ -732,6 +739,7 @@ Ext.onReady( function() {
 				}
 			}
 		});
+		nissa = store.dataElementAvailable;
 
 		store.dataElementSelected = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
@@ -2703,6 +2711,7 @@ Ext.onReady( function() {
 						}
 
 						dataElementGroupComboBox.loadAvailable();
+						dv.store.dataElementSelected.removeAll();
 					}
 				}
 			});
@@ -2712,15 +2721,24 @@ Ext.onReady( function() {
 				title: '<div class="dv-panel-title-data">' + DV.i18n.data_elements + '</div>',
 				hideCollapseTool: true,
 				getData: function() {
-					var data = {
-						dimensionName: dv.conf.finals.dimension.dataElement.dimensionName,
-						objectName: dv.conf.finals.dimension.dataElement.objectName,
-						items: []
-					};
+					var optionComboIds = [],
+						data = {
+							dimensionName: dv.conf.finals.dimension.dataElement.dimensionName,
+							objectName: dv.conf.finals.dimension.dataElement.objectName,
+							items: []
+						};
 
 					dv.store.dataElementSelected.each( function(r) {
 						data.items.push(r.data.id);
+
+						if (dataElementDetailLevel.getValue() === dv.conf.finals.gui.details) {
+							optionComboIds.push(r.data.optionComboId);
+						}
 					});
+
+					if (optionComboIds.length) {
+						data.optionComboIds = optionComboIds;
+					}
 
 					return data.items.length ? data : null;
 				},
