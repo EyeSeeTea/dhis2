@@ -2598,8 +2598,8 @@ Ext.onReady( function() {
 							{
 								xtype: 'combobox',
 								cls: 'dv-combo',
-								style: 'margin-bottom:2px; margin-top:0px',
-								width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding,
+								style: 'margin:0 2px 2px 0',
+								width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding - 110,
 								valueField: 'id',
 								displayField: 'name',
 								emptyText: DV.i18n.select_data_element_group,
@@ -2660,28 +2660,24 @@ Ext.onReady( function() {
 							{
 								xtype: 'combobox',
 								cls: 'dv-combo',
+								style: 'margin-bottom:2px',
 								baseBodyCls: 'small',
 								queryMode: 'local',
 								editable: false,
 								valueField: 'id',
-								displayField: 'name',
-								width: (dv.conf.layout.west_fieldset_width / 3) - 1,
-								value: dv.conf.finals.dimension.data.dimensionName,
-								filterNext: function() {
-									category.filter(this.getValue());
-									filter.filter([this.getValue(), category.getValue()]);
-								},
-								store: seriesStore,
-								listeners: {
-									added: function(cb) {
-										dv.cmp.layout.series = this;
-										cb.filterNext();
-									},
-									select: function(cb) {
-										cb.filterNext();
-									}
+								displayField: 'text',
+								width: 110 - 2,
+								value: 'totals',
+								store: {
+									fields: ['id', 'text'],
+									data: [
+										{id: 'totals', text: DV.i18n.totals},
+										{id: 'details', text: DV.i18n.details}
+									]
 								}
-							});
+							}
+						]
+					},
 					{
 						xtype: 'panel',
 						layout: 'column',

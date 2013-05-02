@@ -180,5 +180,7 @@ DV.i18n = {
 	overwrite_favorite: '$encoder.jsEscape($i18n.getString( 'overwrite_favorite' ) , "'")',
 	please_create_a_table_first: '$encoder.jsEscape($i18n.getString( 'please_create_a_table_first' ) , "'")',
 	delete_: '$encoder.jsEscape($i18n.getString( 'delete_' ) , "'")',
-	share_with_other_people: '$encoder.jsEscape($i18n.getString( 'share_with_other_people' ) , "'")'
+	share_with_other_people: '$encoder.jsEscape($i18n.getString( 'share_with_other_people' ) , "'")',
+	totals: '$encoder.jsEscape($i18n.getString( 'totals' ) , "'")',
+	details: '$encoder.jsEscape($i18n.getString( 'details' ) , "'")'
 };
