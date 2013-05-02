@@ -11,6 +11,7 @@ DV.core.getConfig = function() {
         ajax: {
             path_visualizer: '../',
             path_api: '../../api/',
+            path_commons: '../../dhis-web-commons-ajax-json/',
             initialize: 'initialize.action',
             redirect: 'dhis-web-commons-about/redirect.action',
             data_get: 'chartValues.json',
