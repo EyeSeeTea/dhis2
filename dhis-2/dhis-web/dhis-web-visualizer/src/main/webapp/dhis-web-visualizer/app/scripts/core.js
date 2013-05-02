@@ -772,7 +772,8 @@ console.log("baseLineFields", store.baseLineFields);
 					main.label = {
 						display: 'outside',
 						'text-anchor': 'middle',
-						field: store.rangeFields
+						field: store.rangeFields,
+						font: dv.conf.chart.style.fontFamily
 					};
 				}
 

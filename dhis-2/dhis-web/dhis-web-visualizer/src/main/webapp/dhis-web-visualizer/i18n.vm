@@ -167,6 +167,7 @@ DV.i18n = {
 	filters: '$encoder.jsEscape($i18n.getString( 'filters' ) , "'")',
 	at_least_one_dimension_must_be_specified_as_row_or_column: '$encoder.jsEscape($i18n.getString( 'at_least_one_dimension_must_be_specified_as_row_or_column' ) , "'")',
 	at_least_one_period_must_be_specified_as_column_row_or_filter: '$encoder.jsEscape($i18n.getString( 'at_least_one_period_must_be_specified_as_column_row_or_filter' ) , "'")',
+	indicators_cannot_be_specified_as_filter: '$encoder.jsEscape($i18n.getString( 'indicators_cannot_be_specified_as_filter' ) , "'")',
 	all_data_element_groups: '$encoder.jsEscape($i18n.getString( 'all_data_element_groups' ) , "'")',
 	hide: '$encoder.jsEscape($i18n.getString( 'hide' ) , "'")',
 	layout: '$encoder.jsEscape($i18n.getString( 'layout' ) , "'")',

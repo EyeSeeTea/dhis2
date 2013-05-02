@@ -2592,67 +2592,96 @@ Ext.onReady( function() {
 				},
 				items: [
 					{
-						xtype: 'combobox',
-						cls: 'dv-combo',
-						style: 'margin-bottom:2px; margin-top:0px',
-						width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding,
-						valueField: 'id',
-						displayField: 'name',
-						emptyText: DV.i18n.select_data_element_group,
-						editable: false,
-						store: {
-							xtype: 'store',
-							fields: ['id', 'name', 'index'],
-							proxy: {
-								type: 'ajax',
-								url: dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.dataelementgroup_get,
-								reader: {
-									type: 'json',
-									root: 'dataElementGroups'
+						xtype: 'container',
+						layout: 'column',
+						items: [
+							{
+								xtype: 'combobox',
+								cls: 'dv-combo',
+								style: 'margin-bottom:2px; margin-top:0px',
+								width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding,
+								valueField: 'id',
+								displayField: 'name',
+								emptyText: DV.i18n.select_data_element_group,
+								editable: false,
+								store: {
+									xtype: 'store',
+									fields: ['id', 'name', 'index'],
+									proxy: {
+										type: 'ajax',
+										url: dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.dataelementgroup_get,
+										reader: {
+											type: 'json',
+											root: 'dataElementGroups'
+										}
+									},
+									listeners: {
+										load: function(s) {
+											s.add({
+												id: 0,
+												name: '[ ' + DV.i18n.all_data_element_groups + ' ]',
+												index: -1
+											});
+											s.sort([
+												{
+													property: 'index',
+													direction: 'ASC'
+												},
+												{
+													property: 'name',
+													direction: 'ASC'
+												}
+											]);
+										}
+									}
+								},
+								listeners: {
+									select: function(cb) {
+										var store = dv.store.dataElementAvailable;
+										store.parent = cb.getValue();
+
+										if (dv.util.store.containsParent(store)) {
+											dv.util.store.loadFromStorage(store);
+											dv.util.multiselect.filterAvailable(dataElementAvailable, dataElementSelected);
+										}
+										else {
+											if (cb.getValue() === 0) {
+												store.proxy.url = dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.dataelement_getall;
+												store.load();
+											}
+											else {
+												store.proxy.url = dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.dataelement_get + cb.getValue() + '.json';
+												store.load();
+											}
+										}
+									}
 								}
 							},
-							listeners: {
-								load: function(s) {
-									s.add({
-										id: 0,
-										name: '[ ' + DV.i18n.all_data_element_groups + ' ]',
-										index: -1
-									});
-									s.sort([
-										{
-											property: 'index',
-											direction: 'ASC'
-										},
-										{
-											property: 'name',
-											direction: 'ASC'
-										}
-									]);
-								}
-							}
-						},
-						listeners: {
-							select: function(cb) {
-								var store = dv.store.dataElementAvailable;
-								store.parent = cb.getValue();
-
-								if (dv.util.store.containsParent(store)) {
-									dv.util.store.loadFromStorage(store);
-									dv.util.multiselect.filterAvailable(dataElementAvailable, dataElementSelected);
-								}
-								else {
-									if (cb.getValue() === 0) {
-										store.proxy.url = dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.dataelement_getall;
-										store.load();
-									}
-									else {
-										store.proxy.url = dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.dataelement_get + cb.getValue() + '.json';
-										store.load();
+							{
+								xtype: 'combobox',
+								cls: 'dv-combo',
+								baseBodyCls: 'small',
+								queryMode: 'local',
+								editable: false,
+								valueField: 'id',
+								displayField: 'name',
+								width: (dv.conf.layout.west_fieldset_width / 3) - 1,
+								value: dv.conf.finals.dimension.data.dimensionName,
+								filterNext: function() {
+									category.filter(this.getValue());
+									filter.filter([this.getValue(), category.getValue()]);
+								},
+								store: seriesStore,
+								listeners: {
+									added: function(cb) {
+										dv.cmp.layout.series = this;
+										cb.filterNext();
+									},
+									select: function(cb) {
+										cb.filterNext();
 									}
 								}
-							}
-						}
-					},
+							});
 					{
 						xtype: 'panel',
 						layout: 'column',

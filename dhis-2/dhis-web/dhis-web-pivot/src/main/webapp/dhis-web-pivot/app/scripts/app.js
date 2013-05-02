@@ -3663,7 +3663,7 @@ Ext.onReady( function() {
 						{
 							xtype: 'tbseparator',
 							height: 18,
-							style: 'border-color: transparent #d1d1d1 transparent transparent; margin-right: 4px',
+							style: 'border-color:transparent; border-right-color:#d1d1d1; margin-right:4px',
 						},
 						favoriteButton,
 						downloadButton,
@@ -3690,7 +3690,7 @@ Ext.onReady( function() {
 						{
 							xtype: 'tbseparator',
 							height: 18,
-							style: 'border-color: transparent #d1d1d1 transparent transparent; margin-right: 6px; margin-left: 3px',
+							style: 'border-color:transparent; border-right-color:#d1d1d1; margin-right:4px',
 						},
                         {
                             xtype: 'button',
