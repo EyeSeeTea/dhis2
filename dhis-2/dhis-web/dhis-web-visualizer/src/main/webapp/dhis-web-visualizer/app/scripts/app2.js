@@ -732,7 +732,6 @@ Ext.onReady( function() {
 				}
 			}
 		});
-		nissa = store.dataElementAvailable;
 
 		store.dataElementSelected = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
@@ -2025,6 +2024,9 @@ Ext.onReady( function() {
 				indicator,
 				dataElementAvailable,
 				dataElementSelected,
+				dataElementGroupStore,
+				dataElementGroupComboBox,
+				dataElementDetailLevel,
 				dataElement,
 				dataSetAvailable,
 				dataSetSelected,
@@ -2609,6 +2611,34 @@ Ext.onReady( function() {
 				}
 			});
 
+			dataElementGroupStore = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name', 'index'],
+				proxy: {
+					type: 'ajax',
+					url: dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.dataelementgroup_get,
+					reader: {
+						type: 'json',
+						root: 'dataElementGroups'
+					}
+				},
+				listeners: {
+					load: function(s) {
+						if (dataElementDetailLevel.getValue() === dv.conf.finals.gui.totals) {
+							s.add({
+								id: 0,
+								name: '[ ' + DV.i18n.all_data_element_groups + ' ]',
+								index: -1
+							});
+						}
+
+						s.sort([
+							{property: 'index', direction: 'ASC'},
+							{property: 'name', direction: 'ASC'}
+						]);
+					}
+				}
+			});
+
 			dataElementGroupComboBox = Ext.create('Ext.form.field.ComboBox', {
 				cls: 'dv-combo',
 				style: 'margin:0 2px 2px 0',
@@ -2617,34 +2647,7 @@ Ext.onReady( function() {
 				displayField: 'name',
 				emptyText: DV.i18n.select_data_element_group,
 				editable: false,
-				store: {
-					xtype: 'store',
-					fields: ['id', 'name', 'index'],
-					proxy: {
-						type: 'ajax',
-						url: dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.dataelementgroup_get,
-						reader: {
-							type: 'json',
-							root: 'dataElementGroups'
-						}
-					},
-					listeners: {
-						load: function(s) {
-							if (dataElementDetailLevel.getValue() === dv.conf.finals.gui.totals) {
-								s.add({
-									id: 0,
-									name: '[ ' + DV.i18n.all_data_element_groups + ' ]',
-									index: -1
-								});
-							}
-
-							s.sort([
-								{property: 'index', direction: 'ASC'},
-								{property: 'name', direction: 'ASC'}
-							]);
-						}
-					}
-				},
+				store: dataElementGroupStore,
 				loadAvailable: function() {
 					var store = dv.store.dataElementAvailable,
 						detailLevel = dataElementDetailLevel.getValue(),
@@ -2685,6 +2688,20 @@ Ext.onReady( function() {
 				},
 				listeners: {
 					select: function(cb) {
+						var record = dataElementGroupStore.getById(0);
+
+						if (cb.getValue() === dv.conf.finals.gui.details && record) {
+							dataElementGroupStore.remove(record);
+						}
+
+						if (cb.getValue() === dv.conf.finals.gui.totals && !record) {
+							dataElementGroupStore.insert(0, {
+								id: 0,
+								name: '[ ' + DV.i18n.all_data_element_groups + ' ]',
+								index: -1
+							});
+						}
+
 						dataElementGroupComboBox.loadAvailable();
 					}
 				}
