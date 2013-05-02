@@ -668,7 +668,7 @@ Ext.onReady( function() {
 		});
 
 		store.dataElementAvailable = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
+			fields: ['id', 'name', 'dataElementId', 'optionComboId', 'operandName'],
 			proxy: {
 				type: 'ajax',
 				reader: {
@@ -680,13 +680,44 @@ Ext.onReady( function() {
 			sortStore: function() {
 				this.sort('name', 'ASC');
 			},
-			listeners: {
-				load: function(s) {
-					dv.util.store.addToStorage(s);
-					dv.util.multiselect.filterAvailable({store: s}, {store: store.dataElementSelected});
+			setTotalsProxy: function(uid) {
+				var path = uid ? dv.conf.finals.ajax.dataelement_get + uid + '.json?links=false&paging=false' : dv.conf.finals.ajax.dataelement_getall;
+
+				this.setProxy({
+					type: 'ajax',
+					url: dv.conf.finals.ajax.path_api + path,
+					reader: {
+						type: 'json',
+						root: 'dataElements'
+					}
+				});
+
+				this.load();
+			},
+			setDetailsProxy: function(uid) {
+				if (uid) {
+					this.setProxy({
+						type: 'ajax',
+						url: dv.conf.finals.ajax.path_commons + 'getOperands.action?uid=' + uid,
+						reader: {
+							type: 'json',
+							root: 'operands'
+						}
+					});
+
+					this.load({
+						scope: this,
+						callback: function() {
+							this.each(function(record) {
+								record.set('id', record.data.dataElementId);
+								record.set('name', record.data.operandName);
+							});
+						}
+					});
 				}
 			}
 		});
+		nissa = store.dataElementAvailable;
 
 		store.dataElementSelected = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
@@ -2563,6 +2594,85 @@ Ext.onReady( function() {
 				}
 			});
 
+			dataElementGroupComboBox = Ext.create('Ext.form.field.ComboBox', {
+				cls: 'dv-combo',
+				style: 'margin:0 2px 2px 0',
+				width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding - 110,
+				valueField: 'id',
+				displayField: 'name',
+				emptyText: DV.i18n.select_data_element_group,
+				editable: false,
+				store: {
+					xtype: 'store',
+					fields: ['id', 'name', 'index'],
+					proxy: {
+						type: 'ajax',
+						url: dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.dataelementgroup_get,
+						reader: {
+							type: 'json',
+							root: 'dataElementGroups'
+						}
+					},
+					listeners: {
+						load: function(s) {
+							s.add({
+								id: 0,
+								name: '[ ' + DV.i18n.all_data_element_groups + ' ]',
+								index: -1
+							});
+							s.sort([
+								{
+									property: 'index',
+									direction: 'ASC'
+								},
+								{
+									property: 'name',
+									direction: 'ASC'
+								}
+							]);
+						}
+					}
+				},
+				listeners: {
+					select: function(cb) {
+						var store = dv.store.dataElementAvailable,
+							detailLevel = dataElementDetailLevel.getValue(),
+							value = cb.getValue();
+
+						if (detailLevel === 'totals') {
+							store.setTotalsProxy(value);
+						}
+						else {
+							store.setDetailsProxy(value);
+						}
+					}
+				}
+			});
+
+			dataElementDetailLevel = Ext.create('Ext.form.field.ComboBox', {
+				cls: 'dv-combo',
+				style: 'margin-bottom:2px',
+				baseBodyCls: 'small',
+				queryMode: 'local',
+				editable: false,
+				valueField: 'id',
+				displayField: 'text',
+				width: 110 - 2,
+				value: 'totals',
+				store: {
+					fields: ['id', 'text'],
+					data: [
+						{id: 'totals', text: DV.i18n.totals},
+						{id: 'details', text: DV.i18n.details}
+					]
+				},
+				listeners: {
+					select: function() {
+						console.log(dataElementGroupComboBox.getValue());
+					}
+				}
+			});
+
 			dataElement = {
 				xtype: 'panel',
 				title: '<div class="dv-panel-title-data">' + DV.i18n.data_elements + '</div>',
@@ -2595,87 +2705,8 @@ Ext.onReady( function() {
 						xtype: 'container',
 						layout: 'column',
 						items: [
-							{
-								xtype: 'combobox',
-								cls: 'dv-combo',
-								style: 'margin:0 2px 2px 0',
-								width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding - 110,
-								valueField: 'id',
-								displayField: 'name',
-								emptyText: DV.i18n.select_data_element_group,
-								editable: false,
-								store: {
-									xtype: 'store',
-									fields: ['id', 'name', 'index'],
-									proxy: {
-										type: 'ajax',
-										url: dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.dataelementgroup_get,
-										reader: {
-											type: 'json',
-											root: 'dataElementGroups'
-										}
-									},
-									listeners: {
-										load: function(s) {
-											s.add({
-												id: 0,
-												name: '[ ' + DV.i18n.all_data_element_groups + ' ]',
-												index: -1
-											});
-											s.sort([
-												{
-													property: 'index',
-													direction: 'ASC'
-												},
-												{
-													property: 'name',
-													direction: 'ASC'
-												}
-											]);
-										}
-									}
-								},
-								listeners: {
-									select: function(cb) {
-										var store = dv.store.dataElementAvailable;
-										store.parent = cb.getValue();
-
-										if (dv.util.store.containsParent(store)) {
-											dv.util.store.loadFromStorage(store);
-											dv.util.multiselect.filterAvailable(dataElementAvailable, dataElementSelected);
-										}
-										else {
-											if (cb.getValue() === 0) {
-												store.proxy.url = dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.dataelement_getall;
-												store.load();
-											}
-											else {
-												store.proxy.url = dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.dataelement_get + cb.getValue() + '.json';
-												store.load();
-											}
-										}
-									}
-								}
-							},
-							{
-								xtype: 'combobox',
-								cls: 'dv-combo',
-								style: 'margin-bottom:2px',
-								baseBodyCls: 'small',
-								queryMode: 'local',
-								editable: false,
-								valueField: 'id',
-								displayField: 'text',
-								width: 110 - 2,
-								value: 'totals',
-								store: {
-									fields: ['id', 'text'],
-									data: [
-										{id: 'totals', text: DV.i18n.totals},
-										{id: 'details', text: DV.i18n.details}
-									]
-								}
-							}
+							dataElementGroupComboBox,
+							dataElementDetailLevel
 						]
 					},
 					{
