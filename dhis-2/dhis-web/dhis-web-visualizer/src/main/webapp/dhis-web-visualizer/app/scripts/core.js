@@ -277,59 +277,6 @@ DV.core.getConfig = function() {
 DV.core.getUtil = function(dv) {
 	var util = {};
 
-	util.window = {
-		setAnchorPosition: function(w, target) {
-			var vpw = dv.viewport.getWidth(),
-				targetx = target ? target.getPosition()[0] : 4,
-				winw = w.getWidth(),
-				y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
-
-			if ((targetx + winw) > vpw) {
-				w.setPosition((vpw - winw - 2), y);
-			}
-			else {
-				w.setPosition(targetx, y);
-			}
-		},
-		addHideOnBlurHandler: function(w) {
-			var el = Ext.get(Ext.query('.x-mask')[0]);
-
-			el.on('click', function() {
-				if (w.hideOnBlur) {
-					w.hide();
-				}
-			});
-
-			w.hasHideOnBlurHandler = true;
-		},
-		addDestroyOnBlurHandler: function(w) {
-			var el = Ext.get(Ext.query('.x-mask')[0]);
-
-			el.on('click', function() {
-				if (w.destroyOnBlur) {
-					w.destroy();
-				}
-			});
-
-			w.hasDestroyOnBlurHandler = true;
-		}
-	};
-
-	util.mask = {
-		showMask: function(cmp, str) {
-			if (DV.mask) {
-				DV.mask.destroy();
-			}
-			DV.mask = new Ext.LoadMask(cmp, {msg: str});
-			DV.mask.show();
-		},
-		hideMask: function() {
-			if (DV.mask) {
-				DV.mask.hide();
-			}
-		}
-	};
-
 	util.chart = {
 		createChart: function(layout, dv) {
 			var options = layout.options,
@@ -1401,6 +1348,59 @@ console.log("chart", chart);
 					dv.viewport.setFavorite(response);
 				}
 			});
+		}
+	};
+
+	util.window = {
+		setAnchorPosition: function(w, target) {
+			var vpw = dv.viewport.getWidth(),
+				targetx = target ? target.getPosition()[0] : 4,
+				winw = w.getWidth(),
+				y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
+
+			if ((targetx + winw) > vpw) {
+				w.setPosition((vpw - winw - 2), y);
+			}
+			else {
+				w.setPosition(targetx, y);
+			}
+		},
+		addHideOnBlurHandler: function(w) {
+			var el = Ext.get(Ext.query('.x-mask')[0]);
+
+			el.on('click', function() {
+				if (w.hideOnBlur) {
+					w.hide();
+				}
+			});
+
+			w.hasHideOnBlurHandler = true;
+		},
+		addDestroyOnBlurHandler: function(w) {
+			var el = Ext.get(Ext.query('.x-mask')[0]);
+
+			el.on('click', function() {
+				if (w.destroyOnBlur) {
+					w.destroy();
+				}
+			});
+
+			w.hasDestroyOnBlurHandler = true;
+		}
+	};
+
+	util.mask = {
+		showMask: function(cmp, str) {
+			if (DV.mask) {
+				DV.mask.destroy();
+			}
+			DV.mask = new Ext.LoadMask(cmp, {msg: str});
+			DV.mask.show();
+		},
+		hideMask: function() {
+			if (DV.mask) {
+				DV.mask.hide();
+			}
 		}
 	};
 
