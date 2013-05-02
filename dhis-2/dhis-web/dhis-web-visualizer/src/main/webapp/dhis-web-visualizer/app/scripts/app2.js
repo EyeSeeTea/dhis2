@@ -681,7 +681,19 @@ Ext.onReady( function() {
 				this.sort('name', 'ASC');
 			},
 			setTotalsProxy: function(uid) {
-				var path = uid ? dv.conf.finals.ajax.dataelement_get + uid + '.json?links=false&paging=false' : dv.conf.finals.ajax.dataelement_getall;
+				var path;
+
+				if (Ext.isString(uid)) {
+					path = dv.conf.finals.ajax.dataelement_get + uid + '.json?links=false&paging=false';
+				}
+				else if (uid === 0) {
+					path = dv.conf.finals.ajax.dataelement_getall;
+				}
+
+				if (!path) {
+					alert('Invalid parameter');
+					return;
+				}
 
 				this.setProxy({
 					type: 'ajax',
@@ -695,7 +707,7 @@ Ext.onReady( function() {
 				this.load();
 			},
 			setDetailsProxy: function(uid) {
-				if (uid) {
+				if (Ext.isString(uid)) {
 					this.setProxy({
 						type: 'ajax',
 						url: dv.conf.finals.ajax.path_commons + 'getOperands.action?uid=' + uid,
@@ -714,6 +726,9 @@ Ext.onReady( function() {
 							});
 						}
 					});
+				}
+				else {
+					alert('Invalid parameter');
 				}
 			}
 		});
@@ -2615,36 +2630,38 @@ Ext.onReady( function() {
 					},
 					listeners: {
 						load: function(s) {
-							s.add({
-								id: 0,
-								name: '[ ' + DV.i18n.all_data_element_groups + ' ]',
-								index: -1
-							});
+							if (dataElementDetailLevel.getValue() === dv.conf.finals.gui.totals) {
+								s.add({
+									id: 0,
+									name: '[ ' + DV.i18n.all_data_element_groups + ' ]',
+									index: -1
+								});
+							}
+
 							s.sort([
-								{
-									property: 'index',
-									direction: 'ASC'
-								},
-								{
-									property: 'name',
-									direction: 'ASC'
-								}
+								{property: 'index', direction: 'ASC'},
+								{property: 'name', direction: 'ASC'}
 							]);
 						}
 					}
 				},
-				listeners: {
-					select: function(cb) {
-						var store = dv.store.dataElementAvailable,
-							detailLevel = dataElementDetailLevel.getValue(),
-							value = cb.getValue();
+				loadAvailable: function() {
+					var store = dv.store.dataElementAvailable,
+						detailLevel = dataElementDetailLevel.getValue(),
+						value = this.getValue();
 
-						if (detailLevel === 'totals') {
+					if (value !== null) {
+						if (detailLevel === dv.conf.finals.gui.totals) {
 							store.setTotalsProxy(value);
 						}
 						else {
 							store.setDetailsProxy(value);
 						}
+					}
+				},
+				listeners: {
+					select: function(cb) {
+						cb.loadAvailable();
 					}
 				}
 			});
@@ -2658,17 +2675,17 @@ Ext.onReady( function() {
 				valueField: 'id',
 				displayField: 'text',
 				width: 110 - 2,
-				value: 'totals',
+				value: dv.conf.finals.gui.totals,
 				store: {
 					fields: ['id', 'text'],
 					data: [
-						{id: 'totals', text: DV.i18n.totals},
-						{id: 'details', text: DV.i18n.details}
+						{id: dv.conf.finals.gui.totals, text: DV.i18n.totals},
+						{id: dv.conf.finals.gui.details, text: DV.i18n.details}
 					]
 				},
 				listeners: {
-					select: function() {
-						console.log(dataElementGroupComboBox.getValue());
+					select: function(cb) {
+						dataElementGroupComboBox.loadAvailable();
 					}
 				}
 			});

@@ -110,6 +110,10 @@ DV.core.getConfig = function() {
 			baseLine: 'baseline_',
 			trendLine: 'trendline_'
 		},
+		gui: {
+			totals: 'totals',
+			details: 'details'
+		},
         image: {
             png: 'png',
             pdf: 'pdf'
