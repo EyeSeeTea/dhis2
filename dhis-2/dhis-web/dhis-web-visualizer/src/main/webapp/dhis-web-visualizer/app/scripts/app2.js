@@ -2665,11 +2665,11 @@ Ext.onReady( function() {
 								queryMode: 'local',
 								editable: false,
 								valueField: 'id',
-								displayField: 'text',
+								displayField: 'name',
 								width: 110 - 2,
 								value: 'totals',
 								store: {
-									fields: ['id', 'text'],
+									fields: ['id', 'name'],
 									data: [
 										{id: 'totals', text: DV.i18n.totals},
 										{id: 'details', text: DV.i18n.details}
