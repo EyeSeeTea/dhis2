@@ -119,6 +119,7 @@ Ext.onReady( function() {
 					row: [],
 					filter: [],
 					objects: [],
+					objectNames: [],
 					userOrganisationUnit: false,
 					userOrganisationUnitChildren: false
 				};
@@ -147,6 +148,7 @@ Ext.onReady( function() {
 
 					if (dim) {
 						config.objects.push(dim);
+						config.objectNames.push(dim.objectName);
 
 						if (dim.dimensionName === dv.conf.finals.dimension.data.dimensionName) {
 							dxItems = dxItems.concat(dim.items);
