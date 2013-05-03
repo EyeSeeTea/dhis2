@@ -469,12 +469,18 @@ DV.core.getUtil = function(dv) {
 
 				var createValueIds = function() {
 					var valueHeaderIndex = response.nameHeaderMap[dv.conf.finals.dimension.value.value].index,
+						coDim = response.nameHeaderMap[dv.conf.finals.dimension.category.dimensionName],
 						dimensionNames = xLayout.dimensionNames,
 						idIndexOrder = [];
 
 					// idIndexOrder
 					for (var i = 0; i < dimensionNames.length; i++) {
 						idIndexOrder.push(response.nameHeaderMap[dimensionNames[i]].index);
+
+						// If co exists, add co after dx
+						if (coDim && dimensionNames[i] === dv.conf.finals.dimension.data.dimensionName) {
+							idIndexOrder.push(coDim.index);
+						}
 					}
 
 					// idValueMap
@@ -534,7 +540,7 @@ DV.core.getUtil = function(dv) {
 					obj[dv.conf.finals.data.domain] = xResponse.metaData.names[category];
 
 					for (var j = 0, id; j < series.length; j++) {
-						id = series[j] + categories[i];
+						id = dv.util.str.replaceAll(series[j], '-', '') + categories[i];
 						obj[series[j]] = xResponse.idValueMap[id];
 					}
 
@@ -726,10 +732,26 @@ console.log("baseLineFields", store.baseLineFields);
 					},
 					tips: getDefaultTips(),
 					title: function() {
-						var a = [];
+						var a = [],
+							ids;
 
-						for (var i = 0; i < store.rangeFields.length; i++) {
-							a.push(xResponse.metaData.names[store.rangeFields[i]]);
+						for (var i = 0, id; i < store.rangeFields.length; i++) {
+							id = store.rangeFields[i];
+
+							if (id.indexOf('-') !== -1) {
+								ids = id.split('-');
+								id = '';
+
+								for (var j = 0; j < ids.length; j++) {
+									id += j !== 0 ? ' ' : '';
+									id += xResponse.metaData.names[ids[j]];
+								}
+
+								a.push(id);
+							}
+							else {
+								a.push(xResponse.metaData.names[id]);
+							}
 						}
 
 						return a;
