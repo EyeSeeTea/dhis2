@@ -111,11 +111,9 @@ Ext.onReady( function() {
 		var util = dv.util || {};
 
 		util.chart.getLayoutConfig = function() {
-			var dimensionNameItemsMap,
-				optionComboIds = [],
+			var getDimensionNames,
 				getDimensionNameItemsMap,
 				extendConfig,
-				getDimensionName,
 				config = {
 					col: [],
 					row: [],
@@ -142,7 +140,7 @@ Ext.onReady( function() {
 			getDimensionNameItemsMap = function() {
 				var panels = dv.cmp.dimension.panels,
 					dxItems = [],
-					map;
+					map = {};
 
 				for (var i = 0, dim; i < panels.length; i++) {
 					dim = panels[i].getData();
@@ -166,7 +164,7 @@ Ext.onReady( function() {
 				return map;
 			};
 
-			extendConfig = function(config, dimensionNameItemsMap) {
+			extendConfig = function(dimensionNameItemsMap) {
 				var dimensionNames = getDimensionNames([dv.cmp.layout.series.getValue()]);
 
 				for (var i = 0, dimensionName; i < dimensionNames.length; i++) {
@@ -204,9 +202,7 @@ Ext.onReady( function() {
 				config.options.userOrganisationUnitChildren = dv.viewport.userOrganisationUnitChildren.getValue();
 			};
 
-			dimensionNameItemsMap = getDimensionNameItemsMap();
-
-			config = extendConfig(config, dimensionNameItemsMap);
+			extendConfig(getDimensionNameItemsMap());
 
 			return config;
 		};
@@ -3927,8 +3923,7 @@ Ext.onReady( function() {
 			};
 
 			update = function() {
-				var layoutConfig = dv.util.chart.getLayoutConfig(),
-					layout = dv.api.Layout(layoutConfig);
+				var layout = dv.api.Layout(dv.util.chart.getLayoutConfig());
 
 				if (!layout) {
 					return;

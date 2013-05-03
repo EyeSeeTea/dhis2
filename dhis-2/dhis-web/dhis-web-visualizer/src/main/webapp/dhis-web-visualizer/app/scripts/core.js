@@ -1657,7 +1657,7 @@ DV.core.getAPI = function(dv) {
 
 		return function() {
 			var obj = {};
-
+console.log(config);
 			if (!(config && Ext.isObject(config))) {
 				console.log('Layout config is not an object');
 				return;
