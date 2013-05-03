@@ -725,9 +725,9 @@ Ext.onReady( function() {
 					this.load({
 						scope: this,
 						callback: function() {
-							this.each(function(record) {
-								record.set('id', record.data.dataElementId);
-								record.set('name', record.data.operandName);
+							this.each(function(r) {
+								r.set('id', r.data.dataElementId + '-' + r.data.optionComboId);
+								r.set('name', r.data.operandName);
 							});
 
 							this.sortStore();
@@ -739,7 +739,6 @@ Ext.onReady( function() {
 				}
 			}
 		});
-		nissa = store.dataElementAvailable;
 
 		store.dataElementSelected = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
