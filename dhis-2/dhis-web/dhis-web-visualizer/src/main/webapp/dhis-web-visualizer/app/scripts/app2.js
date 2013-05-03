@@ -1074,7 +1074,8 @@ Ext.onReady( function() {
 					hideChartTitle: hideChartTitle.getValue(),
 					chartTitle: chartTitle.getValue(),
 					domainAxisTitle: domainAxisTitle.getValue(),
-					rangeAxisTitle: rangeAxisTitle.getValue()
+					rangeAxisTitle: rangeAxisTitle.getValue(),
+					dataElementDetailLevel: dv.viewport.dataElementDetailLevel.getValue()
 				};
 			},
 			items: [
@@ -4347,6 +4348,7 @@ Ext.onReady( function() {
 				downloadButton: downloadButton,
 				userOrganisationUnit: userOrganisationUnit,
 				userOrganisationUnitChildren: userOrganisationUnitChildren,
+				dataElementDetailLevel: dataElementDetailLevel,
 				setFavorite: setFavorite,
 				items: [
 					westRegion,

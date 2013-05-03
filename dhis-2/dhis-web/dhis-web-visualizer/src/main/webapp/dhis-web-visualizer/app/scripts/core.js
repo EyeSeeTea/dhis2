@@ -370,9 +370,12 @@ DV.core.getUtil = function(dv) {
 					paramString += 'dimension=' + sortedDim.dimensionName;
 
 					if (sortedDim.dimensionName === dv.conf.finals.dimension.dataElement.dimensionName) {
-						for (var j = 0, id; j < sortedDim.items.length; j++) {
-							id = sortedDim.items[j];
-							id = id.substr(0, id.indexOf('-'));
+						for (var j = 0, index; j < sortedDim.items.length; j++) {
+							index = sortedDim.items[j].indexOf('-');
+
+							if (index > 0) {
+								sortedDim.items[j] = sortedDim.items[j].substr(0, index);
+							}
 						}
 
 						sortedDim.items = Ext.Array.unique(sortedDim.items);
@@ -383,6 +386,11 @@ DV.core.getUtil = function(dv) {
 					if (i < (sortedDimensions.length - 1)) {
 						paramString += '&';
 					}
+				}
+
+				if (Ext.Array.contains(xLayout.objectNames, dv.conf.finals.dimension.dataElement.objectName) &&
+					xLayout.options.dataElementDetailLevel === dv.conf.finals.gui.details) {
+					paramString += '&dimension=' + dv.conf.finals.dimension.category.dimensionName;
 				}
 
 				if (sortedFilterDimensions) {
@@ -398,12 +406,12 @@ DV.core.getUtil = function(dv) {
 
 			validateResponse = function(response) {
 				if (!(response && Ext.isObject(response))) {
-					alert('Data invalid');
+					alert('Data response invalid');
 					return false;
 				}
 
 				if (!(response.headers && Ext.isArray(response.headers) && response.headers.length)) {
-					alert('Data invalid');
+					alert('Data response invalid');
 					return false;
 				}
 
@@ -415,7 +423,7 @@ DV.core.getUtil = function(dv) {
 				}
 
 				if (response.headers.length !== response.rows[0].length) {
-					alert('Data invalid');
+					alert('Data response invalid');
 					return false;
 				}
 
@@ -1683,6 +1691,7 @@ DV.core.getAPI = function(dv) {
 
 			obj.type = config.type;
 			obj.objects = config.objects;
+			obj.objectNames = config.objectNames;
 
 			obj.options = getValidatedOptions(config.options);
 
