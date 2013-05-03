@@ -111,11 +111,10 @@ Ext.onReady( function() {
 		var util = dv.util || {};
 
 		util.chart.getLayoutConfig = function() {
-			var data = {},
+			var dimensionNameItemsMap,
 				optionComboIds = [],
-				setup,
-				getData,
-				extendLayout,
+				getDimensionNameItemsMap,
+				extendConfig,
 				getDimensionName,
 				config = {
 					col: [],
@@ -129,27 +128,21 @@ Ext.onReady( function() {
 			getDimensionNames = function(values) {
 				var a = [];
 
-				for (var i = 0, dimObj, value; i < values.length; i++) {
-					value = values[i];
-					dimObj = dv.conf.finals.dimension.objectNameMap[value];
+				for (var i = 0, dimConfObj; i < values.length; i++) {
+					dimConfObj = dv.conf.finals.dimension.objectNameMap[values[i]];
 
-					if (value && dimObj) {
-						a.push(dimObj.dimensionName);
+					if (values[i] && dimConfObj) {
+						a.push(dimConfObj.dimensionName);
 					}
 				}
 
 				return a;
 			};
 
-			setup = {
-				col: getDimensionNames([dv.cmp.layout.series.getValue()]),
-				row: getDimensionNames([dv.cmp.layout.category.getValue()]),
-				filter: getDimensionNames(dv.cmp.layout.filter.getValue())
-			};
-
-			getData = function() {
+			getDimensionNameItemsMap = function() {
 				var panels = dv.cmp.dimension.panels,
-					dxItems = [];
+					dxItems = [],
+					map;
 
 				for (var i = 0, dim; i < panels.length; i++) {
 					dim = panels[i].getData();
@@ -161,47 +154,59 @@ Ext.onReady( function() {
 							dxItems = dxItems.concat(dim.items);
 						}
 						else {
-							data[dim.dimensionName] = dim.items;
+							map[dim.dimensionName] = dim.items;
 						}
 					}
 				}
 
 				if (dxItems.length) {
-					data[dv.conf.finals.dimension.data.dimensionName] = dxItems;
+					map[dv.conf.finals.dimension.data.dimensionName] = dxItems;
 				}
-			}();
 
-			extendLayout = function() {
-				for (var i = 0, dimensionName; i < setup.col.length; i++) {
-					dimensionName = setup.col[i];
+				return map;
+			};
+
+			extendConfig = function(config, dimensionNameItemsMap) {
+				var dimensionNames = getDimensionNames([dv.cmp.layout.series.getValue()]);
+
+				for (var i = 0, dimensionName; i < dimensionNames.length; i++) {
+					dimensionName = dimensionNames[i];
 					config.col.push({
 						dimensionName: dimensionName,
-						items: data[dimensionName]
+						items: dimensionNameItemsMap[dimensionName]
 					});
 				}
 
-				for (var i = 0, dimensionName; i < setup.row.length; i++) {
-					dimensionName = setup.row[i];
+				dimensionNames = getDimensionNames([dv.cmp.layout.category.getValue()]);
+
+				for (var i = 0, dimensionName; i < dimensionNames.length; i++) {
+					dimensionName = dimensionNames[i];
 					config.row.push({
 						dimensionName: dimensionName,
-						items: data[dimensionName]
+						items: dimensionNameItemsMap[dimensionName]
 					});
 				}
 
-				for (var i = 0, dimensionName; i < setup.filter.length; i++) {
-					dimensionName = setup.filter[i];
+				dimensionNames = getDimensionNames(dv.cmp.layout.filter.getValue());
+
+				for (var i = 0, dimensionName; i < dimensionNames.length; i++) {
+					dimensionName = dimensionNames[i];
 					config.filter.push({
 						dimensionName: dimensionName,
-						items: data[dimensionName]
+						items: dimensionNameItemsMap[dimensionName]
 					});
 				}
-			}();
 
-			config.type = dv.viewport.chartType.getChartType();
-			config.options = dv.viewport.optionsWindow.getOptions();
+				config.type = dv.viewport.chartType.getChartType();
+				config.options = dv.viewport.optionsWindow.getOptions();
 
-			config.options.userOrganisationUnit = dv.viewport.userOrganisationUnit.getValue();
-			config.options.userOrganisationUnitChildren = dv.viewport.userOrganisationUnitChildren.getValue();
+				config.options.userOrganisationUnit = dv.viewport.userOrganisationUnit.getValue();
+				config.options.userOrganisationUnitChildren = dv.viewport.userOrganisationUnitChildren.getValue();
+			};
+
+			dimensionNameItemsMap = getDimensionNameItemsMap();
+
+			config = extendConfig(config, dimensionNameItemsMap);
 
 			return config;
 		};

@@ -361,16 +361,24 @@ DV.core.getUtil = function(dv) {
 			getParamString = function(xLayout) {
 				var sortedDimensions = xLayout.sortedDimensions,
 					sortedFilterDimensions = xLayout.sortedFilterDimensions,
-					paramString = '?';
+					paramString = '?',
+					items;
 
 				for (var i = 0, sortedDim; i < sortedDimensions.length; i++) {
 					sortedDim = sortedDimensions[i];
 
 					paramString += 'dimension=' + sortedDim.dimensionName;
 
-					if (sortedDim.dimensionName !== dv.conf.finals.dimension.category.dimensionName) {
-						paramString += ':' + sortedDim.items.join(';');
+					if (sortedDim.dimensionName === dv.conf.finals.dimension.dataElement.dimensionName) {
+						for (var j = 0, id; j < sortedDim.items.length; j++) {
+							id = sortedDim.items[j];
+							id = id.substr(0, id.indexOf('-'));
+						}
+
+						sortedDim.items = Ext.Array.unique(sortedDim.items);
 					}
+
+					paramString += ':' + sortedDim.items.join(';');
 
 					if (i < (sortedDimensions.length - 1)) {
 						paramString += '&';
