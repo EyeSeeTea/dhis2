@@ -293,7 +293,7 @@ DV.core.getUtil = function(dv) {
 				getDefaultTargetLine,
 				getDefaultBaseLine,
 				getDefaultTips,
-				getDefaultTitle,
+				getDefaultChartTitle,
 				getDefaultChart,
 				validateUrl,
 				generator = {},
@@ -716,6 +716,32 @@ console.log("baseLineFields", store.baseLineFields);
 				return axis;
 			};
 
+			getDefaultSeriesTitle = function(store, xResponse) {
+				var a = [],
+					ids;
+
+				for (var i = 0, id; i < store.rangeFields.length; i++) {
+					id = store.rangeFields[i];
+
+					if (id.indexOf('-') !== -1) {
+						ids = id.split('-');
+						id = '';
+
+						for (var j = 0; j < ids.length; j++) {
+							id += j !== 0 ? ' ' : '';
+							id += xResponse.metaData.names[ids[j]];
+						}
+
+						a.push(id);
+					}
+					else {
+						a.push(xResponse.metaData.names[id]);
+					}
+				}
+
+				return a;
+			};
+
 			getDefaultSeries = function(store, xResponse, xLayout) {
 				var main = {
 					type: 'column',
@@ -731,31 +757,7 @@ console.log("baseLineFields", store.baseLineFields);
 						radius: 4
 					},
 					tips: getDefaultTips(),
-					title: function() {
-						var a = [],
-							ids;
-
-						for (var i = 0, id; i < store.rangeFields.length; i++) {
-							id = store.rangeFields[i];
-
-							if (id.indexOf('-') !== -1) {
-								ids = id.split('-');
-								id = '';
-
-								for (var j = 0; j < ids.length; j++) {
-									id += j !== 0 ? ' ' : '';
-									id += xResponse.metaData.names[ids[j]];
-								}
-
-								a.push(id);
-							}
-							else {
-								a.push(xResponse.metaData.names[id]);
-							}
-						}
-
-						return a;
-					}()
+					title: getDefaultSeriesTitle(store, xResponse)
 				};
 
 				if (xLayout.options.showValues) {
@@ -902,7 +904,7 @@ console.log("baseLineFields", store.baseLineFields);
 				});
 			};
 
-			getDefaultTitle = function(store, xResponse, xLayout) {
+			getDefaultChartTitle = function(store, xResponse, xLayout) {
 				var text = '';
 
 				if (Ext.isArray(xLayout.filterItems) && xLayout.filterItems.length) {
@@ -935,7 +937,7 @@ console.log("baseLineFields", store.baseLineFields);
 				};
 			};
 
-			getDefaultTitlePositionHandler = function() {
+			getDefaultChartTitlePositionHandler = function() {
 				return function() {
 					if (this.items) {
 						var title = this.items[0],
@@ -984,7 +986,7 @@ console.log("baseLineFields", store.baseLineFields);
 
 				// Title
 				if (!xLayout.options.hideChartTitle) {
-					config.items = [getDefaultTitle(store, xResponse, xLayout)];
+					config.items = [getDefaultChartTitle(store, xResponse, xLayout)];
 				}
 				else {
 					config.insetPadding = 10;
@@ -993,7 +995,7 @@ console.log("baseLineFields", store.baseLineFields);
 				chart = Ext.create('Ext.chart.Chart', config);
 
 				chart.setChartSize = getDefaultChartSizeHandler();
-				chart.setTitlePosition = getDefaultTitlePositionHandler();
+				chart.setTitlePosition = getDefaultChartTitlePositionHandler();
 
 				chart.onViewportResize = function() {
 					chart.setChartSize();
@@ -1153,7 +1155,7 @@ console.log("baseLineFields", store.baseLineFields);
 							radius: 4
 						},
 						tips: getDefaultTips(),
-						title: xResponse.metaData.names[store.rangeFields[i]]
+						title: getDefaultSeriesTitle(store, xResponse)
 					};
 
 					//if (xLayout.options.showValues) {
