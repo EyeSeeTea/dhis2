@@ -112,115 +112,44 @@ Ext.onReady( function() {
 
 		util.chart.getLayoutConfig = function() {
 			var panels = dv.cmp.dimension.panels,
-				dimConf = dv.conf.finals.dimension,
+				seriesDimensionName = dv.viewport.series.getValue(),
+				categoryDimensionName = dv.viewport.category.getValue(),
+				filterDimensionNames = dv.viewport.filter.getValue(),
+				config = dv.viewport.optionsWindow.getOptions();
 
-				dimensionNameItemsMap,
-				objectNameItemsMap,
-				col,
-				row,
-				filter,
+			config.columns = [];
+			config.rows = [];
+			config.filters = [];
 
-				getDimensionNames,
-				extendConfig,
-				config = {};
-
-			// dimensionNameItemsMap, objectNameItemsMap, objects
+			// Columns, rows, filters
 			for (var i = 0, dxItems = [], dim; i < panels.length; i++) {
 				dim = panels[i].getData();
 
 				if (dim) {
-
-					// Object names
-					objectNames.push(dim.objectName);
-					objectNameItemsMap[dim.objectName] = dim.items;
-
-					// Dimension names
-					dimensionNames.push(dim.dimensionName);
-
-					if (dim.dimensionName === dimConf.data.dimensionName) {
-						dxItems = dxItems.concat(dim.items);
+					if (dim.dimensionName === seriesDimensionName) {
+						config.columns.push({
+							dimension: dim.objectName,
+							items: dim.items
+						});
 					}
-					else {
-						dimensionNameItemsMap[dim.dimensionName] = dim.items;
+					else if (dim.dimensionName === categoryDimensionName) {
+						config.rows.push({
+							dimension: dim.objectName,
+							items: dim.items
+						});
 					}
-
-					// Objects
-					objects.push(dim);
-				}
-
-				dimensionNames = Ext.Array.unqiue(dimensionNames);
-
-				if (dxItems.length) {
-					dimensionNameItemsMap[dimConf.data.dimensionName] = dxItems;
+					else if (Ext.Array.contains(filterDimensionNames, dim.dimensionName)) {
+						config.filters.push({
+							dimension: dim.objectName,
+							items: dim.items
+						});
+					}
 				}
 			}
 
-
-
-
-			extendConfig = function(dimensionNameItemsMap) {
-				var objectNames,
-					dimensionNames,
-					getDimensionNames;
-
-				getDimensionNames = function(values) {
-					var a = [];
-
-					for (var i = 0, dimConfObj; i < values.length; i++) {
-						dimConfObj = dv.conf.finals.dimension.objectNameMap[values[i]];
-
-						if (values[i] && dimConfObj) {
-							a.push(dimConfObj.dimensionName);
-						}
-					}
-
-					return a;
-				};
-
-				// Column
-				objectNames = [dv.cmp.layout.series.getValue()];
-				dimensionNames = getDimensionNames(objectNames);
-
-				for (var i = 0; i < dimensionNames.length; i++) {
-					config.col.push({
-						dimensionName: dimensionNames[i],
-						objectName: objectNames[i],
-						items: dimensionNameItemsMap[dimensionNames[i]]
-					});
-				}
-
-				// Row
-				objectNames = [dv.cmp.layout.category.getValue()];
-				dimensionNames = getDimensionNames(objectNames);
-
-				for (var i = 0; i < dimensionNames.length; i++) {
-					config.row.push({
-						dimensionName: dimensionNames[i],
-						objectName: objectNames[i],
-						items: dimensionNameItemsMap[dimensionNames[i]]
-					});
-				}
-
-				// Filters
-				objectNames = dv.cmp.layout.category.getValue();
-				dimensionNames = getDimensionNames(objectNames);
-
-				for (var i = 0; i < dimensionNames.length; i++) {
-					config.filter.push({
-						dimensionName: dimensionNames[i],
-						objectName: objectNames[i],
-						items: dimensionNameItemsMap[dimensionNames[i]]
-					});
-				}
-
-				config.type = dv.viewport.chartType.getChartType();
-				config.options = dv.viewport.optionsWindow.getOptions();
-
-				config.options.userOrganisationUnit = dv.viewport.userOrganisationUnit.getValue();
-				config.options.userOrganisationUnitChildren = dv.viewport.userOrganisationUnitChildren.getValue();
-			};
-
-			extendConfig(getDimensionNameItemsMap());
+			config.type = dv.viewport.chartType.getChartType();
+			config.userOrganisationUnit = dv.viewport.userOrganisationUnit.getValue();
+			config.userOrganisationUnitChildren = dv.viewport.userOrganisationUnitChildren.getValue();
 
 			return config;
 		};
@@ -3957,7 +3886,7 @@ Ext.onReady( function() {
 
 			update = function() {
 				var layout = dv.api.Layout(dv.util.chart.getLayoutConfig());
-
+console.log(layout);
 				if (!layout) {
 					return;
 				}
@@ -4368,6 +4297,9 @@ Ext.onReady( function() {
 			viewport = Ext.create('Ext.container.Viewport', {
 				layout: 'border',
 				chartType: chartType,
+				series: series,
+				category: category,
+				filter: filter,
 				accordion: accordion,
 				accordionBody: accordionBody,
 				westRegion: westRegion,

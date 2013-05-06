@@ -1611,7 +1611,7 @@ DV.core.getAPI = function(dv) {
 		var validateConfig = function() {
 			var validateAxis;
 
-			validateAxis = function() {
+			validateAxis = function(axis) {
 				if (!(axis && Ext.isArray(axis) && axis.length)) {
 					return;
 				}
@@ -1651,13 +1651,13 @@ DV.core.getAPI = function(dv) {
 			if (!Ext.isNumber(config.targetLineValue)) {
 				delete config.targetLineValue;
 			}
-			if (!Ext.isString(config.targetLineTitle)) {
+			if (!Ext.isString(config.targetLineTitle) || Ext.isEmpty(config.targetLineTitle)) {
 				delete config.targetLineTitle;
 			}
 			if (!Ext.isNumber(config.baseLineValue)) {
 				delete config.baseLineValue;
 			}
-			if (!Ext.isString(config.baseLineTitle)) {
+			if (!Ext.isString(config.baseLineTitle) || Ext.isEmpty(config.baseLineTitle)) {
 				delete config.baseLineTitle;
 			}
 			if (!Ext.isBoolean(config.showValues)) {
@@ -1669,13 +1669,13 @@ DV.core.getAPI = function(dv) {
 			if (!Ext.isBoolean(config.hideTitle)) {
 				delete config.hideTitle;
 			}
-			if (!Ext.isString(config.title)) {
+			if (!Ext.isString(config.title) || Ext.isEmpty(config.title)) {
 				delete config.title;
 			}
-			if (!Ext.isString(config.domainAxisTitle)) {
+			if (!Ext.isString(config.domainAxisTitle) || Ext.isEmpty(config.domainAxisTitle)) {
 				delete config.domainAxisTitle;
 			}
-			if (!Ext.isString(config.rangeAxisTitle)) {
+			if (!Ext.isString(config.rangeAxisTitle) || cExt.isEmpty(config.rangeAxisTitle)) {
 				delete config.rangeAxisTitle;
 			}
 			if (!Ext.isBoolean(config.userOrganisationUnit)) {
