@@ -92,7 +92,7 @@ DV.core.getConfig = function() {
             },
             dimension: {
 				value: 'dimension',
-				objectName: 'dim'
+				objectName: 'di'
 			},
 			value: {
 				value: 'value'
@@ -136,6 +136,7 @@ DV.core.getConfig = function() {
 	dim.objectNameMap[dim.data.objectName] = dim.data;
 	dim.objectNameMap[dim.indicator.objectName] = dim.indicator;
 	dim.objectNameMap[dim.dataElement.objectName] = dim.dataElement;
+	dim.objectNameMap[dim.operand.objectName] = dim.operand;
 	dim.objectNameMap[dim.dataSet.objectName] = dim.dataSet;
 	dim.objectNameMap[dim.category.objectName] = dim.category;
 	dim.objectNameMap[dim.period.objectName] = dim.period;
@@ -281,7 +282,8 @@ DV.core.getUtil = function(dv) {
 
 	util.chart = {
 		createChart: function(layout, dv) {
-			var options = layout.options,
+			var dimConf = dv.conf.finals.dimension,
+				//options = layout.options,
 				extendLayout,
 				getSyncronizedXLayout,
 				getParamString,
@@ -299,9 +301,7 @@ DV.core.getUtil = function(dv) {
 				getDefaultChart,
 				validateUrl,
 				generator = {},
-				initialize,
-
-				dimConf = dv.conf.finals.dimension;
+				initialize;
 
 			extendLayout = function(layout) {
 				var xLayout = Ext.clone(layout),
@@ -311,49 +311,94 @@ DV.core.getUtil = function(dv) {
 					addSortedFilterDimensions,
 					addFilterItems;
 
+				xLayout.extended = {};
+
 				addDimensions = function() {
-					xLayout.dimensions = [].concat(Ext.clone(xLayout.col) || [], Ext.clone(xLayout.row) || []);
+					var a = [].concat(Ext.clone(xLayout.columns) || [], Ext.clone(xLayout.rows) || []),
+						b = Ext.clone(xLayout.filters),
+						objectNameMap = dv.conf.finals.dimension.objectNameMap;
+
+					for (var i = 0, dim, items; i < a.length; i++) {
+						dim = a[i];
+						items = [];
+
+						dim.dimensionName = objectNameMap[dim.dimension].dimensionName;
+						dim.objectName = dim.dimension;
+
+						for (var j = 0; j < dim.items.length; j++) {
+							items.push(dim.items[j].id);
+						}
+
+						dim.items = items;
+					}
+
+					for (var i = 0, dim, items; i < b.length; i++) {
+						dim = b[i];
+						items = [];
+
+						dim.dimensionName = objectNameMap[dim.dimension].dimensionName;
+						dim.objectName = dim.dimension;
+
+						for (var j = 0; j < dim.items.length; j++) {
+							items.push(dim.items[j].id);
+						}
+
+						dim.items = items;
+					}
+
+					xLayout.extended.dimensions = a;
+					xLayout.extended.filterDimensions = b;
 				}();
 
 				addDimensionNames = function() {
 					var a = [],
-						dimensions = Ext.clone(xLayout.dimensions) || [];
+						dimensions = Ext.clone(xLayout.extended.dimensions) || [],
+						b = [],
+						filterDimensions = Ext.clone(xLayout.extended.filterDimensions) || [];
 
 					for (var i = 0; i < dimensions.length; i++) {
 						a.push(dimensions[i].dimensionName);
 					}
 
-					xLayout.dimensionNames = a;
+					for (var i = 0; i < filterDimensions.length; i++) {
+						b.push(filterDimensions[i].dimensionName);
+					}
+
+					xLayout.extended.dimensionNames = a;
+					xLayout.extended.filterDimensionNames = b;
 				}();
 
 				addSortedDimensions = function() {
-					xLayout.sortedDimensions = dv.util.array.sortDimensions(Ext.clone(xLayout.dimensions) || []);
-				}();
-
-				addSortedFilterDimensions = function() {
-						xLayout.sortedFilterDimensions = dv.util.array.sortDimensions(Ext.clone(xLayout.filter) || []);
+					xLayout.extended.sortedDimensions = dv.util.array.sortDimensions(Ext.clone(xLayout.extended.dimensions) || []);
+					xLayout.extended.sortedFilterDimensions = dv.util.array.sortDimensions(Ext.clone(xLayout.extended.filterDimensions) || []);
 				}();
 
 				addNameItemsMap = function() {
-					var map = {},
-						dimensions = Ext.clone(xLayout.dimensions) || [];
+					var dimensionMap = {},
+						filterDimensionMap = {},
+						dimensions = Ext.clone(xLayout.extended.dimensions) || [],
+						filterDimensions = Ext.clone(xLayout.extended.filterDimensions) || [];
 
 					for (var i = 0, dim; i < dimensions.length; i++) {
 						dim = dimensions[i];
-
-						map[dim.dimensionName] = dim.items || [];
+						dimensionMap[dim.dimensionName] = dim.items || [];
 					}
 
-					xLayout.nameItemsMap = map;
+					for (var i = 0, dim; i < filterDimensions.length; i++) {
+						dim = filterDimensions[i];
+						filterDimensionMap[dim.dimensionName] = dim.items || [];
+					}
+
+					xLayout.extended.nameItemsMap = dimensionMap;
+					xLayout.extended.filterNameItemsMap = filterDimensionMap;
 				}();
 
 				addFilterItems = function() {
-					if (Ext.isArray(xLayout.filter) && xLayout.filter.length) {
-						xLayout.filterItems = [];
+					xLayout.extended.filterItems = [];
 
-						for (var i = 0; i < xLayout.filter.length; i++) {
-							xLayout.filterItems = xLayout.filterItems.concat(xLayout.filter[i].items);
-						}
+					for (var i = 0, filterDim; i < xLayout.extended.filterDimensions.length; i++) {
+						filterDim = Ext.clone(xLayout.extended.filterDimensions[i]);
+						xLayout.extended.filterItems = xLayout.extended.filterItems.concat(filterDim.items);
 					}
 				}();
 
