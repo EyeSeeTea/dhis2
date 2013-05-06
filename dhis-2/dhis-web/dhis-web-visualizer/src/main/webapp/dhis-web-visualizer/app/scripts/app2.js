@@ -2404,7 +2404,7 @@ Ext.onReady( function() {
 					};
 
 					dv.store.indicatorSelected.each( function(r) {
-						data.items.push(r.data.id);
+						data.items.push({id: r.data.id});
 					});
 
 					return data.items.length ? data : null;
@@ -2691,7 +2691,7 @@ Ext.onReady( function() {
 						};
 
 					dv.store.dataElementSelected.each( function(r) {
-						data.items.push(r.data.id);
+						data.items.push({id: r.data.id});
 
 						if (dataElementDetailLevel.getValue() === dv.conf.finals.dimension.operand.objectName) {
 							optionComboIds.push(r.data.optionComboId);
@@ -2834,7 +2834,7 @@ Ext.onReady( function() {
 					};
 
 					dv.store.dataSetSelected.each( function(r) {
-						data.items.push(r.data.id);
+						data.items.push({id: r.data.id});
 					});
 
 					return data.items.length ? data : null;
@@ -3302,12 +3302,12 @@ Ext.onReady( function() {
 						chb = dv.cmp.dimension.relativePeriod.checkbox;
 
 					dv.store.fixedPeriodSelected.each( function(r) {
-						data.items.push(r.data.id);
+						data.items.push({id: r.data.id});
 					});
 
 					for (var i = 0; i < chb.length; i++) {
 						if (chb[i].getValue()) {
-							data.items.push(chb[i].relativePeriodId);
+							data.items.push({id: chb[i].relativePeriodId});
 						}
 					}
 
@@ -3579,15 +3579,15 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				collapsed: false,
 				getData: function() {
-					var records = treePanel.getSelectionModel().getSelection(),
+					var r = treePanel.getSelectionModel().getSelection(),
 						data = {
 							dimensionName: dv.conf.finals.dimension.organisationUnit.dimensionName,
 							objectName: dv.conf.finals.dimension.organisationUnit.objectName,
 							items: []
 						};
 
-					for (var i = 0; i < records.length; i++) {
-						data.items.push(records[i].data.id);
+					for (var i = 0; i < r.length; i++) {
+						data.items.push({id: r[i].data.id});
 					}
 
 					return data.items.length ? data : null;
@@ -3786,7 +3786,7 @@ Ext.onReady( function() {
 							};
 
 							selectedStore.each( function(r) {
-								data.items.push(r.data.id);
+								data.items.push({id: r.data.id});
 							});
 
 							return data.items.length ? data : null;
@@ -3885,8 +3885,9 @@ Ext.onReady( function() {
 			};
 
 			update = function() {
-				var layout = dv.api.Layout(dv.util.chart.getLayoutConfig());
-console.log(layout);
+				var config = dv.util.chart.getLayoutConfig(),
+					layout = dv.api.Layout(config);
+console.log(layout);return;
 				if (!layout) {
 					return;
 				}

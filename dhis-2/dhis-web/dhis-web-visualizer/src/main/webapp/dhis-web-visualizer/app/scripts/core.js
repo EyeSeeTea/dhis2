@@ -916,8 +916,8 @@ console.log("baseLineFields", store.baseLineFields);
 					}
 				}
 
-				if (xLayout.options.chartTitle) {
-					text = xLayout.options.chartTitle;
+				if (xLayout.options.title) {
+					text = xLayout.options.title;
 				}
 
 				return Ext.create('Ext.draw.Sprite', {
@@ -1583,9 +1583,9 @@ DV.core.getAPI = function(dv) {
 
 			showTrendLine: false, // boolean
 
-			targetLineValue: false, // string
+			targetLineValue: null, // number
 
-			targetLineTitle: false, // boolean
+			targetLineTitle: null, // string
 
 			baseLineValue: null, // number
 
@@ -1699,7 +1699,7 @@ DV.core.getAPI = function(dv) {
 				}
 			}
 
-			return layout;
+			return Ext.clone(layout);
 		}();
 	};
 
