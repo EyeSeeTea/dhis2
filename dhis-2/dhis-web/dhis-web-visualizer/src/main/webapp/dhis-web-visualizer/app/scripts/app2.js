@@ -2664,7 +2664,7 @@ Ext.onReady( function() {
 				},
 				listeners: {
 					load: function(s) {
-						if (dataElementDetailLevel.getValue() === dv.conf.finals.gui.totals) {
+						if (dataElementDetailLevel.getValue() === dv.conf.finals.dimension.dataElement.objectName) {
 							s.add({
 								id: 0,
 								name: '[ ' + DV.i18n.all_data_element_groups + ' ]',
@@ -2695,7 +2695,7 @@ Ext.onReady( function() {
 						value = this.getValue();
 
 					if (value !== null) {
-						if (detailLevel === dv.conf.finals.gui.totals) {
+						if (detailLevel === dv.conf.finals.dimension.dataElement.objectName) {
 							store.setTotalsProxy(value);
 						}
 						else {
@@ -2719,23 +2719,23 @@ Ext.onReady( function() {
 				valueField: 'id',
 				displayField: 'text',
 				width: 110 - 2,
-				value: dv.conf.finals.gui.totals,
+				value: dv.conf.finals.dimension.dataElement.objectName,
 				store: {
 					fields: ['id', 'text'],
 					data: [
-						{id: dv.conf.finals.gui.totals, text: DV.i18n.totals},
-						{id: dv.conf.finals.gui.details, text: DV.i18n.details}
+						{id: dv.conf.finals.dimension.dataElement.objectName, text: DV.i18n.totals},
+						{id: dv.conf.finals.dimension.operand.objectName, text: DV.i18n.details}
 					]
 				},
 				listeners: {
 					select: function(cb) {
 						var record = dataElementGroupStore.getById(0);
 
-						if (cb.getValue() === dv.conf.finals.gui.details && record) {
+						if (cb.getValue() === dv.conf.finals.dimension.operand.objectName && record) {
 							dataElementGroupStore.remove(record);
 						}
 
-						if (cb.getValue() === dv.conf.finals.gui.totals && !record) {
+						if (cb.getValue() === dv.conf.finals.dimension.dataElement.objectName && !record) {
 							dataElementGroupStore.insert(0, {
 								id: 0,
 								name: '[ ' + DV.i18n.all_data_element_groups + ' ]',
@@ -2757,14 +2757,14 @@ Ext.onReady( function() {
 					var optionComboIds = [],
 						data = {
 							dimensionName: dv.conf.finals.dimension.dataElement.dimensionName,
-							objectName: dv.conf.finals.dimension.dataElement.objectName,
+							objectName: dataElementDetailLevel.getValue(),
 							items: []
 						};
 
 					dv.store.dataElementSelected.each( function(r) {
 						data.items.push(r.data.id);
 
-						if (dataElementDetailLevel.getValue() === dv.conf.finals.gui.details) {
+						if (dataElementDetailLevel.getValue() === dv.conf.finals.dimension.operand.objectName) {
 							optionComboIds.push(r.data.optionComboId);
 						}
 					});

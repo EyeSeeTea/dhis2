@@ -116,10 +116,6 @@ DV.core.getConfig = function() {
 			baseLine: 'baseline_',
 			trendLine: 'trendline_'
 		},
-		gui: {
-			totals: 'totals',
-			details: 'details'
-		},
         image: {
             png: 'png',
             pdf: 'pdf'
@@ -395,7 +391,7 @@ DV.core.getUtil = function(dv) {
 				}
 
 				if (Ext.Array.contains(xLayout.objectNames, dv.conf.finals.dimension.dataElement.objectName) &&
-					xLayout.options.dataElementDetailLevel === dv.conf.finals.gui.details) {
+					xLayout.options.dataElementDetailLevel === dv.conf.finals.dimension.operand.objectName) {
 					paramString += '&dimension=' + dv.conf.finals.dimension.category.dimensionName;
 				}
 
