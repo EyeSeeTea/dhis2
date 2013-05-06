@@ -306,6 +306,7 @@ DV.core.getUtil = function(dv) {
 			extendLayout = function(layout) {
 				var xLayout = Ext.clone(layout),
 					addDimensions,
+
 					addDimensionNames,
 					addSortedDimensions,
 					addSortedFilterDimensions,
@@ -314,13 +315,20 @@ DV.core.getUtil = function(dv) {
 				xLayout.extended = {};
 
 				addDimensions = function() {
-					var a = [].concat(Ext.clone(xLayout.columns) || [], Ext.clone(xLayout.rows) || []),
-						b = Ext.clone(xLayout.filters),
+					var axisDimensions = [].concat(Ext.clone(xLayout.columns) || [], Ext.clone(xLayout.rows) || []),
+						axisDimensionNames = [],
+						axisObjectNames = [],
+						filterDimensions = Ext.clone(xLayout.filters),
+						filterDimensionNames = [],
+						filterObjectNames = [],
 						objectNameMap = dv.conf.finals.dimension.objectNameMap;
 
-					for (var i = 0, dim, items; i < a.length; i++) {
-						dim = a[i];
+					for (var i = 0, dim, items; i < axisDimensions.length; i++) {
+						dim = axisDimensions[i];
 						items = [];
+
+						axisDimensionNames.push(dim.dimensionName);
+						axisObjectNames.push(dim.objectName);
 
 						dim.dimensionName = objectNameMap[dim.dimension].dimensionName;
 						dim.objectName = dim.dimension;
@@ -332,9 +340,12 @@ DV.core.getUtil = function(dv) {
 						dim.items = items;
 					}
 
-					for (var i = 0, dim, items; i < b.length; i++) {
-						dim = b[i];
+					for (var i = 0, dim, items; i < filterDimensions.length; i++) {
+						dim = filterDimensions[i];
 						items = [];
+
+						filterDimensionNames.push(dim.dimensionName);
+						filterObjectNames.push(dim.objectName);
 
 						dim.dimensionName = objectNameMap[dim.dimension].dimensionName;
 						dim.objectName = dim.dimension;
@@ -346,31 +357,29 @@ DV.core.getUtil = function(dv) {
 						dim.items = items;
 					}
 
-					xLayout.extended.dimensions = a;
-					xLayout.extended.filterDimensions = b;
-				}();
+					xLayout.extended.axisDimensions = axisDimensions;
+					xLayout.extended.axisDimensionNames = axisDimensionNames;
+					xLayout.extended.axisObjectNames = axisObjectNames;
 
-				addDimensionNames = function() {
-					var a = [],
-						dimensions = Ext.clone(xLayout.extended.dimensions) || [],
-						b = [],
-						filterDimensions = Ext.clone(xLayout.extended.filterDimensions) || [];
+					xLayout.extended.filterDimensions = filterDimensions;
+					xLayout.extended.filterDimensionNames = filterDimensionNames;
+					xLayout.extended.filterObjectNames = filterObjectNames;
 
-					for (var i = 0; i < dimensions.length; i++) {
-						a.push(dimensions[i].dimensionName);
-					}
-
-					for (var i = 0; i < filterDimensions.length; i++) {
-						b.push(filterDimensions[i].dimensionName);
-					}
-
-					xLayout.extended.dimensionNames = a;
-					xLayout.extended.filterDimensionNames = b;
+					xLayout.extended.dimensionNames = [].concat(axisDimensionNames, filterDimensionNames);
+					xLayout.extended.objectNames = [].concat(axisObjectNames, filterObjectNames);
 				}();
 
 				addSortedDimensions = function() {
-					xLayout.extended.sortedDimensions = dv.util.array.sortDimensions(Ext.clone(xLayout.extended.dimensions) || []);
-					xLayout.extended.sortedFilterDimensions = dv.util.array.sortDimensions(Ext.clone(xLayout.extended.filterDimensions) || []);
+					xLayout.extend.sortedAxisDimensions = dv.util.array.sortDimensions(Ext.clone(xLayout.extended.axisDimensions));
+					xLayout.extended.sortedAxisDimensionNames = Ext.clone(xLayout.extended.axisDimensionNames).sort();
+					xLayout.extended.sortedAxisObjectNames = Ext.clone(xLayout.extended.axisObjectNames).sort();
+
+					xLayout.extended.sortedFilterDimensions = dv.util.array.sortDimensions(Ext.clone(xLayout.extended.filterDimensions));
+					xLayout.extended.sortedFilterDimensionNames = Ext.clone(xLayout.extended.filterDimensionNames).sort();
+					xLayout.extended.sortedFilterObjectNames = Ext.clone(xLayout.extended.filterObjectNames).sort();
+
+					xLayout.extended.sortedDimensionNames = Ext.clone(xLayout.extended.dimensionNames).sort();
+					xLayout.extended.sortedObjectNames = Ext.clone(xLayout.extended.objectNames).sort();
 				}();
 
 				addNameItemsMap = function() {
@@ -406,8 +415,8 @@ DV.core.getUtil = function(dv) {
 			};
 
 			getParamString = function(xLayout) {
-				var sortedDimensions = xLayout.sortedDimensions,
-					sortedFilterDimensions = xLayout.sortedFilterDimensions,
+				var sortedDimensions = xLayout.extended.sortedDimensions,
+					sortedFilterDimensions = xLayout.extended.sortedFilterDimensions,
 					paramString = '?',
 					items;
 
