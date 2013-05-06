@@ -1675,7 +1675,7 @@ DV.core.getAPI = function(dv) {
 			if (!Ext.isString(config.domainAxisTitle) || Ext.isEmpty(config.domainAxisTitle)) {
 				delete config.domainAxisTitle;
 			}
-			if (!Ext.isString(config.rangeAxisTitle) || cExt.isEmpty(config.rangeAxisTitle)) {
+			if (!Ext.isString(config.rangeAxisTitle) || Ext.isEmpty(config.rangeAxisTitle)) {
 				delete config.rangeAxisTitle;
 			}
 			if (!Ext.isBoolean(config.userOrganisationUnit)) {

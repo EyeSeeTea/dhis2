@@ -822,7 +822,7 @@ Ext.onReady( function() {
 			showValues,
 			hideLegend,
 			hideTitle,
-			chartTitle,
+			title,
 			domainAxisTitle,
 			rangeAxisTitle,
 
@@ -909,13 +909,13 @@ Ext.onReady( function() {
 			style: 'margin-bottom:6px',
 			listeners: {
 				change: function() {
-					chartTitle.xable();
+					title.xable();
 				}
 			}
 		});
 		dv.viewport.hideTitle = hideTitle;
 
-		chartTitle = Ext.create('Ext.form.field.Text', {
+		title = Ext.create('Ext.form.field.Text', {
 			//cls: 'dv-textfield-alt1',
 			style: 'margin-bottom:2px; margin-left:2px',
 			width: 310,
@@ -929,7 +929,7 @@ Ext.onReady( function() {
 				this.setDisabled(hideTitle.getValue());
 			}
 		});
-		dv.viewport.chartTitle = chartTitle;
+		dv.viewport.title = title;
 
 		domainAxisTitle = Ext.create('Ext.form.field.Text', {
 			//cls: 'dv-textfield-alt1',
@@ -999,7 +999,7 @@ Ext.onReady( function() {
 				showValues,
 				hideLegend,
 				hideTitle,
-				chartTitle,
+				title,
 				domainAxisTitle,
 				rangeAxisTitle
 			]
@@ -1023,7 +1023,7 @@ Ext.onReady( function() {
 					showValues: showValues.getValue(),
 					hideLegend: hideLegend.getValue(),
 					hideTitle: hideTitle.getValue(),
-					chartTitle: chartTitle.getValue(),
+					title: title.getValue(),
 					domainAxisTitle: domainAxisTitle.getValue(),
 					rangeAxisTitle: rangeAxisTitle.getValue(),
 					dataElementDetailLevel: dv.viewport.dataElementDetailLevel.getValue()
