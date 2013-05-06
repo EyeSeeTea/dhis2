@@ -1290,7 +1290,7 @@ console.log("baseLineFields", store.baseLineFields);
 
 				chart.legend.position = 'right';
 				chart.legend.isVertical = true;
-				chart.insetPadding = 40;
+				chart.insetPadding = 20;
 				chart.shadow = true;
 
 				return chart;
