@@ -111,89 +111,105 @@ Ext.onReady( function() {
 		var util = dv.util || {};
 
 		util.chart.getLayoutConfig = function() {
-			var getDimensionNames,
-				getDimensionNameItemsMap,
+			var panels = dv.cmp.dimension.panels,
+				dimConf = dv.conf.finals.dimension,
+
+				dimensionNameItemsMap,
+				objectNameItemsMap,
+				col,
+				row,
+				filter,
+
+				getDimensionNames,
 				extendConfig,
-				config = {
-					col: [],
-					row: [],
-					filter: [],
-					objects: [],
-					objectNames: [],
-					userOrganisationUnit: false,
-					userOrganisationUnitChildren: false
-				};
+				config = {};
 
-			getDimensionNames = function(values) {
-				var a = [];
+			// dimensionNameItemsMap, objectNameItemsMap, objects
+			for (var i = 0, dxItems = [], dim; i < panels.length; i++) {
+				dim = panels[i].getData();
 
-				for (var i = 0, dimConfObj; i < values.length; i++) {
-					dimConfObj = dv.conf.finals.dimension.objectNameMap[values[i]];
+				if (dim) {
 
-					if (values[i] && dimConfObj) {
-						a.push(dimConfObj.dimensionName);
+					// Object names
+					objectNames.push(dim.objectName);
+					objectNameItemsMap[dim.objectName] = dim.items;
+
+					// Dimension names
+					dimensionNames.push(dim.dimensionName);
+
+					if (dim.dimensionName === dimConf.data.dimensionName) {
+						dxItems = dxItems.concat(dim.items);
 					}
+					else {
+						dimensionNameItemsMap[dim.dimensionName] = dim.items;
+					}
+
+					// Objects
+					objects.push(dim);
 				}
 
-				return a;
-			};
-
-			getDimensionNameItemsMap = function() {
-				var panels = dv.cmp.dimension.panels,
-					dxItems = [],
-					map = {};
-
-				for (var i = 0, dim; i < panels.length; i++) {
-					dim = panels[i].getData();
-
-					if (dim) {
-						config.objects.push(dim);
-						config.objectNames.push(dim.objectName);
-
-						if (dim.dimensionName === dv.conf.finals.dimension.data.dimensionName) {
-							dxItems = dxItems.concat(dim.items);
-						}
-						else {
-							map[dim.dimensionName] = dim.items;
-						}
-					}
-				}
+				dimensionNames = Ext.Array.unqiue(dimensionNames);
 
 				if (dxItems.length) {
-					map[dv.conf.finals.dimension.data.dimensionName] = dxItems;
+					dimensionNameItemsMap[dimConf.data.dimensionName] = dxItems;
 				}
+			}
 
-				return map;
-			};
+
+
 
 			extendConfig = function(dimensionNameItemsMap) {
-				var dimensionNames = getDimensionNames([dv.cmp.layout.series.getValue()]);
+				var objectNames,
+					dimensionNames,
+					getDimensionNames;
 
-				for (var i = 0, dimensionName; i < dimensionNames.length; i++) {
-					dimensionName = dimensionNames[i];
+				getDimensionNames = function(values) {
+					var a = [];
+
+					for (var i = 0, dimConfObj; i < values.length; i++) {
+						dimConfObj = dv.conf.finals.dimension.objectNameMap[values[i]];
+
+						if (values[i] && dimConfObj) {
+							a.push(dimConfObj.dimensionName);
+						}
+					}
+
+					return a;
+				};
+
+				// Column
+				objectNames = [dv.cmp.layout.series.getValue()];
+				dimensionNames = getDimensionNames(objectNames);
+
+				for (var i = 0; i < dimensionNames.length; i++) {
 					config.col.push({
-						dimensionName: dimensionName,
-						items: dimensionNameItemsMap[dimensionName]
+						dimensionName: dimensionNames[i],
+						objectName: objectNames[i],
+						items: dimensionNameItemsMap[dimensionNames[i]]
 					});
 				}
 
-				dimensionNames = getDimensionNames([dv.cmp.layout.category.getValue()]);
+				// Row
+				objectNames = [dv.cmp.layout.category.getValue()];
+				dimensionNames = getDimensionNames(objectNames);
 
-				for (var i = 0, dimensionName; i < dimensionNames.length; i++) {
-					dimensionName = dimensionNames[i];
+				for (var i = 0; i < dimensionNames.length; i++) {
 					config.row.push({
-						dimensionName: dimensionName,
-						items: dimensionNameItemsMap[dimensionName]
+						dimensionName: dimensionNames[i],
+						objectName: objectNames[i],
+						items: dimensionNameItemsMap[dimensionNames[i]]
 					});
 				}
 
-				dimensionNames = getDimensionNames(dv.cmp.layout.filter.getValue());
+				// Filters
+				objectNames = dv.cmp.layout.category.getValue();
+				dimensionNames = getDimensionNames(objectNames);
 
-				for (var i = 0, dimensionName; i < dimensionNames.length; i++) {
-					dimensionName = dimensionNames[i];
+				for (var i = 0; i < dimensionNames.length; i++) {
 					config.filter.push({
-						dimensionName: dimensionName,
-						items: dimensionNameItemsMap[dimensionName]
+						dimensionName: dimensionNames[i],
+						objectName: objectNames[i],
+						items: dimensionNameItemsMap[dimensionNames[i]]
 					});
 				}
 
@@ -875,8 +891,8 @@ Ext.onReady( function() {
 			baseLineTitle,
 
 			showValues,
-			hideChartLegend,
-			hideChartTitle,
+			hideLegend,
+			hideTitle,
 			chartTitle,
 			domainAxisTitle,
 			rangeAxisTitle,
@@ -953,13 +969,13 @@ Ext.onReady( function() {
 		});
 		dv.viewport.showValues = showValues;
 
-		hideChartLegend = Ext.create('Ext.form.field.Checkbox', {
+		hideLegend = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: DV.i18n.hide_legend,
 			style: 'margin-bottom:4px'
 		});
-		dv.viewport.hideChartLegend = hideChartLegend;
+		dv.viewport.hideLegend = hideLegend;
 
-		hideChartTitle = Ext.create('Ext.form.field.Checkbox', {
+		hideTitle = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: DV.i18n.hide_chart_title,
 			style: 'margin-bottom:6px',
 			listeners: {
@@ -968,7 +984,7 @@ Ext.onReady( function() {
 				}
 			}
 		});
-		dv.viewport.hideChartTitle = hideChartTitle;
+		dv.viewport.hideTitle = hideTitle;
 
 		chartTitle = Ext.create('Ext.form.field.Text', {
 			//cls: 'dv-textfield-alt1',
@@ -981,7 +997,7 @@ Ext.onReady( function() {
 			maxLength: 100,
 			enforceMaxLength: true,
 			xable: function() {
-				this.setDisabled(hideChartTitle.getValue());
+				this.setDisabled(hideTitle.getValue());
 			}
 		});
 		dv.viewport.chartTitle = chartTitle;
@@ -1052,8 +1068,8 @@ Ext.onReady( function() {
 			style: 'margin-left:14px',
 			items: [
 				showValues,
-				hideChartLegend,
-				hideChartTitle,
+				hideLegend,
+				hideTitle,
 				chartTitle,
 				domainAxisTitle,
 				rangeAxisTitle
@@ -1076,8 +1092,8 @@ Ext.onReady( function() {
 					baseLineValue: baseLineValue.getValue(),
 					baseLineTitle: baseLineTitle.getValue(),
 					showValues: showValues.getValue(),
-					hideChartLegend: hideChartLegend.getValue(),
-					hideChartTitle: hideChartTitle.getValue(),
+					hideLegend: hideLegend.getValue(),
+					hideTitle: hideTitle.getValue(),
 					chartTitle: chartTitle.getValue(),
 					domainAxisTitle: domainAxisTitle.getValue(),
 					rangeAxisTitle: rangeAxisTitle.getValue(),
@@ -1183,6 +1199,14 @@ Ext.onReady( function() {
 
 			if (dv.xLayout) {
 				favorite = Ext.clone(dv.xLayout.options);
+
+				// Server sync
+				favorite.regression = favorite.showTrendLine;
+				favorite.targetLineLabel = favorite.targetLineTitle;
+				favorite.baseLineLabel = favorite.baseLineTitle;
+				favorite.showValues = favorite.showData;
+				favorite.rangeAxisLabel = favorite.rangeAxisTitle;
+				favorite.domainAxisLabel = favorite.domainAxisTitle;
 
 				// Dimensions
 				for (var i = 0, obj, key, items; i < dv.xLayout.objects.length; i++) {
@@ -1310,7 +1334,7 @@ Ext.onReady( function() {
 				handler: function() {
 					var favorite = getBody();
 					favorite.name = nameTextfield.getValue();
-
+//console.log(favorite);return;
 					if (favorite && favorite.name) {
 						Ext.Ajax.request({
 							url: dv.init.contextPath + '/api/charts/',

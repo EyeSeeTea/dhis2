@@ -43,11 +43,6 @@ DV.core.getConfig = function() {
                 dimensionName: 'dx',
                 objectName: 'dx'
             },
-            category: {
-				name: DV.i18n.categories,
-				dimensionName: 'co',
-                objectName: 'co',
-			},
             indicator: {
                 value: 'indicator',
                 name: DV.i18n.indicator,
@@ -60,11 +55,22 @@ DV.core.getConfig = function() {
                 dimensionName: 'dx',
                 objectName: 'de'
             },
+            operand: {
+				value: 'operand',
+				name: 'Operand',
+				dimensionName: 'dx',
+				objectName: 'dc'
+			},
             dataSet: {
 				value: 'dataset',
                 name: DV.i18n.dataset,
                 dimensionName: 'dx',
                 objectName: 'ds'
+			},
+            category: {
+				name: DV.i18n.categories,
+				dimensionName: 'co',
+                objectName: 'co',
 			},
             period: {
                 value: 'period',
@@ -976,7 +982,7 @@ console.log("baseLineFields", store.baseLineFields);
 					};
 
 				// Legend
-				if (!xLayout.options.hideChartLegend) {
+				if (!xLayout.options.hideLegend) {
 					config.legend = getDefaultLegend(store, xResponse);
 
 					if (config.legend.position === 'right') {
@@ -985,7 +991,7 @@ console.log("baseLineFields", store.baseLineFields);
 				}
 
 				// Title
-				if (!xLayout.options.hideChartTitle) {
+				if (!xLayout.options.hideTitle) {
 					config.items = [getDefaultChartTitle(store, xResponse, xLayout)];
 				}
 				else {
@@ -1570,156 +1576,134 @@ DV.core.getAPI = function(dv) {
 	var api = {};
 
 	api.Layout = function(config) {
-		var col,
-			row,
-			filter,
+		var layout = {
+			type: 'column', // string
 
-			removeEmptyDimensions,
-			getValidatedAxis,
-			getValidatedOptions,
-			validateLayout,
+			columns: null, // array of {dimension: <objectName>, items: [{id, name, code}]}
 
-			defaultOptions = {
-				showTrendLine: false,
-				targetLineValue: null,
-				targetLineTitle: null,
-				baseLineValue: null,
-				baseLineTitle: null,
-				showValues: false,
-				hideChartLegend: false,
-				hideChartTitle: false,
-				chartTitle: null,
-				domainAxisTitle: null,
-				rangeAxisTitle: null
-			};
+			rows: null, // array of {dimension: <objectName>, items: [{id, name, code}]}
 
-		removeEmptyDimensions = function(axis) {
-			if (!axis) {
-				return;
-			}
+			filters: null, // array of {dimension: <objectName>, items: [{id, name, code}]}
 
-			for (var i = 0, dimension, remove; i < axis.length; i++) {
-				remove = false;
-				dimension = axis[i];
+			showTrendLine: false, // boolean
 
-				if (dimension.dimensionName !== dv.conf.finals.dimension.category.dimensionName) {
-					if (!(Ext.isArray(dimension.items) && dimension.items.length)) {
-						remove = true;
-					}
-					else {
-						for (var j = 0; j < dimension.items.length; j++) {
-							if (!Ext.isString(dimension.items[j])) {
-								remove = true;
-							}
-						}
-					}
-				}
+			targetLineValue: false, // string
 
-				if (remove) {
-					axis = Ext.Array.erase(axis, i, 1);
-					i = i - 1;
-				}
-			}
+			targetLineTitle: false, // boolean
 
-			return axis;
+			baseLineValue: null, // number
+
+			baseLineTitle: null, // string
+
+			showValues: true, // boolean
+
+			hideLegend: false, // boolean
+
+			hideTitle: false, // boolean
+
+			title: null, // string
+
+			domainAxisTitle: null, // string
+
+			rangeAxisTitle: null, // string
+
+			userOrganisationUnit: false, // boolean
+
+			userOrganisationUnitChildren: false // boolean
 		};
 
-		getValidatedAxis = function(axis) {
-			if (!(axis && Ext.isArray(axis) && axis.length)) {
-				return;
-			}
+		var validateConfig = function() {
+			var validateAxis;
 
-			for (var i = 0, dimension; i < axis.length; i++) {
-				dimension = axis[i];
-
-				if (!(Ext.isObject(dimension) && Ext.isString(dimension.dimensionName))) {
+			validateAxis = function() {
+				if (!(axis && Ext.isArray(axis) && axis.length)) {
 					return;
 				}
-			}
 
-			axis = removeEmptyDimensions(axis);
+				for (var i = 0, dim; i < axis.length; i++) {
+					dim = axis[i];
 
-			return axis.length ? axis : null;
-		};
-
-		getValidatedOptions = function(options) {
-			if (!(options && Ext.isObject(options))) {
-				return defaultOptions;
-			}
-
-			options.showTrendLine = Ext.isDefined(options.showTrendLine) ? options.showTrendLine : defaultOptions.showTrendLine;
-			options.targetLineValue = options.targetLineValue || defaultOptions.targetLineValue;
-			options.targetLineTitle = options.targetLineTitle || defaultOptions.targetLineTitle;
-			options.baseLineValue = options.baseLineValue || defaultOptions.baseLineValue;
-			options.baseLineTitle = options.baseLineTitle || defaultOptions.baseLineTitle;
-			options.showValues = Ext.isDefined(options.showValues) ? options.showValues : defaultOptions.showValues;
-			options.hideChartLegend = Ext.isDefined(options.hideChartLegend) ? options.hideChartLegend : defaultOptions.hideChartLegend;
-			options.hideChartTitle = Ext.isDefined(options.hideChartTitle) ? options.hideChartTitle : defaultOptions.hideChartTitle;
-			options.chartTitle = options.chartTitle || defaultOptions.chartTitle;
-			options.domainAxisTitle = options.domainAxisTitle || defaultOptions.domainAxisTitle;
-			options.rangeAxisTitle = options.rangeAxisTitle || defaultOptions.rangeAxisTitle;
-
-			return options;
-		};
-
-		validateLayout = function() {
-			var a = [].concat(Ext.clone(col), Ext.clone(row), Ext.clone(filter)),
-				dimensionNames = [],
-				dimConf = dv.conf.finals.dimension;
-
-			if (!(col || row)) {
-				alert(DV.i18n.at_least_one_dimension_must_be_specified_as_row_or_column);
-				return;
-			}
-
-			// Selected dimension names
-			for (var i = 0; i < a.length; i++) {
-				if (a[i]) {
-					dimensionNames.push(a[i].dimensionName);
+					if (!(Ext.isObject(dim) && Ext.isString(dim.dimension) && Ext.isArray(dim.items) && dim.items.length)) {
+						return;
+					}
 				}
+
+				return true;
+			};
+
+			if (!(config && Ext.isObject(config))) {
+				alert(dv.el + ': Layout config is not an object');
+				return;
 			}
 
-			if (!Ext.Array.contains(dimensionNames, dimConf.period.dimensionName)) {
-				alert(DV.i18n.at_least_one_period_must_be_specified_as_column_row_or_filter);
+			if (!(validateAxis(config.columns))) {
+				alert(dv.el + ': Columns config is invalid');
 				return;
+			}
+			if (!(validateAxis(config.rows))) {
+				alert(dv.el + ': Rows config is invalid');
+				return;
+			}
+			if (!(validateAxis(config.filters))) {
+				alert(dv.el + ': Filters config is invalid');
+				return;
+			}
+
+			if (!Ext.isBoolean(config.showTrendLine)) {
+				delete config.showTrendLine;
+			}
+			if (!Ext.isNumber(config.targetLineValue)) {
+				delete config.targetLineValue;
+			}
+			if (!Ext.isString(config.targetLineTitle)) {
+				delete config.targetLineTitle;
+			}
+			if (!Ext.isNumber(config.baseLineValue)) {
+				delete config.baseLineValue;
+			}
+			if (!Ext.isString(config.baseLineTitle)) {
+				delete config.baseLineTitle;
+			}
+			if (!Ext.isBoolean(config.showValues)) {
+				delete config.showValues;
+			}
+			if (!Ext.isBoolean(config.hideLegend)) {
+				delete config.hideLegend;
+			}
+			if (!Ext.isBoolean(config.hideTitle)) {
+				delete config.hideTitle;
+			}
+			if (!Ext.isString(config.title)) {
+				delete config.title;
+			}
+			if (!Ext.isString(config.domainAxisTitle)) {
+				delete config.domainAxisTitle;
+			}
+			if (!Ext.isString(config.rangeAxisTitle)) {
+				delete config.rangeAxisTitle;
+			}
+			if (!Ext.isBoolean(config.userOrganisationUnit)) {
+				delete config.userOrganisationUnit;
+			}
+			if (!Ext.isBoolean(config.userOrganisationUnitChildren)) {
+				delete config.userOrganisationUnitChildren;
 			}
 
 			return true;
 		};
 
 		return function() {
-			var obj = {};
-
-			if (!(config && Ext.isObject(config))) {
-				console.log('Layout config is not an object');
+			if (!validateConfig()) {
 				return;
 			}
 
-			col = getValidatedAxis(config.col);
-			row = getValidatedAxis(config.row);
-			filter = getValidatedAxis(config.filter);
-
-			if (!validateLayout()) {
-				return;
+			for (var key in config) {
+				if (config.hasOwnProperty(key)) {
+					layout[key] = config[key];
+				}
 			}
 
-			if (col) {
-				obj.col = col;
-			}
-			if (row) {
-				obj.row = row;
-			}
-			if (filter) {
-				obj.filter = filter;
-			}
-
-			obj.type = config.type;
-			obj.objects = config.objects;
-			obj.objectNames = config.objectNames;
-
-			obj.options = getValidatedOptions(config.options);
-
-			return obj;
+			return layout;
 		}();
 	};
 
