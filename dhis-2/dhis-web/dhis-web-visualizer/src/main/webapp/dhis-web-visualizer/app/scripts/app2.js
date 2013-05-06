@@ -3846,22 +3846,13 @@ Ext.onReady( function() {
 			};
 
 			validateSpecialCases = function(layout) {
-				var dimConf = dv.conf.finals.dimension,
-					dimensionNames = [],
-					layoutObjects = [].concat(Ext.clone(layout.col || []), Ext.clone(layout.row || []), Ext.clone(layout.filter || []));
-
-				// Layout names
-				for (var i = 0; i < layoutObjects.length; i++) {
-					dimensionNames.push(layoutObjects[i].dimensionName);
-				}
+				var dimConf = dv.conf.finals.dimension;
 
 				// Indicator as filter
-				if (layout.filter && dv.store.indicatorSelected.data.length) {
-					for (var i = 0; i < layout.filter.length; i++) {
-						if (layout.filter[i].dimensionName === dimConf.data.dimensionName) {
-							alert(DV.i18n.indicators_cannot_be_specified_as_filter);
-							return;
-						}
+				for (var i = 0; i < layout.filters.length; i++) {
+					if (layout.filters[i].dimension === dimConf.indicator.objectName) {
+						alert(DV.i18n.indicators_cannot_be_specified_as_filter);
+						return;
 					}
 				}
 
@@ -3887,7 +3878,7 @@ Ext.onReady( function() {
 			update = function() {
 				var config = dv.util.chart.getLayoutConfig(),
 					layout = dv.api.Layout(config);
-console.log(layout);return;
+
 				if (!layout) {
 					return;
 				}
@@ -3895,9 +3886,7 @@ console.log(layout);return;
 					return;
 				}
 
-				if (layout) {
-					dv.util.chart.createChart(layout, dv);
-				}
+				dv.util.chart.createChart(layout, dv);
 			};
 
 			accordionBody = Ext.create('Ext.panel.Panel', {
