@@ -416,87 +416,6 @@ DV.core.getUtil = function(dv) {
 		}
 	};
 
-	util.crud = {
-		favorite: {
-			create: function(fn, isupdate) {
-				DV.util.mask.showMask(DV.cmp.favorite.window, DV.i18n.saving + '...');
-
-				var p = DV.state.getParams();
-				p.name = DV.cmp.favorite.name.getValue();
-
-				if (isupdate) {
-					p.uid = DV.store.favorite.getAt(DV.store.favorite.findExact('name', p.name)).data.id;
-				}
-
-				var url = DV.cmp.favorite.system.getValue() ? DV.conf.finals.ajax.favorite_addorupdatesystem : DV.conf.finals.ajax.favorite_addorupdate;
-				Ext.Ajax.request({
-					url: DV.conf.finals.ajax.path_visualizer + url,
-					method: 'POST',
-					params: p,
-					success: function(r) {
-						DV.store.favorite.load({callback: function() {
-							var id = r.responseText;
-							var name = DV.store.favorite.getAt(DV.store.favorite.findExact('id', id)).data.name;
-							DV.c.currentFavorite = {
-								id: id,
-								name: name
-							};
-							DV.cmp.toolbar.share.xable();
-							DV.util.mask.hideMask();
-							if (fn) {
-								fn();
-							}
-						}});
-					}
-				});
-			},
-			update: function(fn) {
-				DV.util.crud.favorite.create(fn, true);
-			},
-			updateName: function(name) {
-				if (DV.store.favorite.findExact('name', name) != -1) {
-					return;
-				}
-				DV.util.mask.showMask(DV.cmp.favorite.window, DV.i18n.renaming + '...');
-				var r = DV.cmp.favorite.grid.getSelectionModel().getSelection()[0];
-				var url = DV.cmp.favorite.system.getValue() ? DV.conf.finals.ajax.favorite_addorupdatesystem : DV.conf.finals.ajax.favorite_addorupdate;
-				Ext.Ajax.request({
-					url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_updatename,
-					method: 'POST',
-					params: {uid: r.data.id, name: name},
-					success: function() {
-						DV.store.favorite.load({callback: function() {
-							DV.cmp.favorite.rename.window.close();
-							DV.util.mask.hideMask();
-							DV.cmp.favorite.grid.getSelectionModel().select(DV.store.favorite.getAt(DV.store.favorite.findExact('name', name)));
-							DV.cmp.favorite.name.setValue(name);
-						}});
-					}
-				});
-			},
-			del: function(fn) {
-				DV.util.mask.showMask(DV.cmp.favorite.window, DV.i18n.deleting + '...');
-				var baseurl = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_delete,
-					selection = DV.cmp.favorite.grid.getSelectionModel().getSelection();
-				Ext.Array.each(selection, function(item) {
-					baseurl = Ext.String.urlAppend(baseurl, 'uids=' + item.data.id);
-				});
-				Ext.Ajax.request({
-					url: baseurl,
-					method: 'POST',
-					success: function() {
-						DV.store.favorite.load({callback: function() {
-							DV.util.mask.hideMask();
-							if (fn) {
-								fn();
-							}
-						}});
-					}
-				});
-			}
-		}
-	};
-
 	util.chart = {
 		createChart: function(layout, dv) {
 			var dimConf = dv.conf.finals.dimension,
@@ -519,36 +438,42 @@ DV.core.getUtil = function(dv) {
 				initialize;
 
 			getParamString = function(xLayout) {
-				var sortedAxisDimensions = xLayout.extended.sortedAxisDimensions,
+				var sortedAxisDimensionNames = xLayout.extended.sortedAxisDimensionNames,
 					sortedFilterDimensions = xLayout.extended.sortedFilterDimensions,
 					paramString = '?',
+					dimConf = dv.conf.finals.dimension,
+					addCategoryDimension = false,
+					map = xLayout.extended.dimensionNameItemsMap,
 					items;
 
-				for (var i = 0, dim; i < sortedAxisDimensions.length; i++) {
-					dim = sortedAxisDimensions[i];
+				for (var i = 0, dimensionName; i < sortedAxisDimensionNames.length; i++) {
+					dimensionName = sortedAxisDimensionNames[i];
 
-					paramString += 'dimension=' + dim.dimensionName;
+					paramString += 'dimension=' + dimensionName;
 
-					if (dim.objectName === dv.conf.finals.dimension.operand.objectName) {
-						for (var j = 0, index; j < dim.items.length; j++) {
-							index = dim.items[j].indexOf('-');
+					items = xLayout.extended.dimensionNameItemsMap[dimensionName].sort();
+
+					if (dimensionName === dimConf.dataElement.dimensionName) {
+						for (var j = 0, index; j < items.length; j++) {
+							index = items[j].indexOf('-');
 
 							if (index > 0) {
-								dim.items[j] = dim.items[j].substr(0, index);
+								addCategoryDimension = true;
+								items[j] = items[j].substr(0, index);
 							}
 						}
 
-						dim.items = Ext.Array.unique(dim.items);
+						items = Ext.Array.unique(items);
 					}
 
-					paramString += ':' + dim.items.join(';');
+					paramString += ':' + items.join(';');
 
-					if (i < (sortedAxisDimensions.length - 1)) {
+					if (i < (sortedAxisDimensionNames.length - 1)) {
 						paramString += '&';
 					}
 				}
 
-				if (Ext.Array.contains(xLayout.extended.axisObjectNames, dv.conf.finals.dimension.operand.objectName)) {
+				if (addCategoryDimension) {
 					paramString += '&dimension=' + dv.conf.finals.dimension.category.dimensionName;
 				}
 
@@ -1631,31 +1556,31 @@ console.log("chart", chart);
 
 			// Axis
 			xLayout.extended.axisDimensions = axisDimensions;
-			xLayout.extended.axisDimensionNames = axisDimensionNames;
+			xLayout.extended.axisDimensionNames = Ext.Array.unique(axisDimensionNames);
 			xLayout.extended.axisObjectNames = axisObjectNames;
 			xLayout.extended.axisItems = axisItems;
 
 			// Filter
 			xLayout.extended.filterDimensions = filterDimensions;
-			xLayout.extended.filterDimensionNames = filterDimensionNames;
+			xLayout.extended.filterDimensionNames = Ext.Array.unique(filterDimensionNames);
 			xLayout.extended.filterObjectNames = filterObjectNames;
 			xLayout.extended.filterItems = filterItems;
 
 			// All
 			xLayout.extended.dimensions = [].concat(axisDimensions, filterDimensions);
-			xLayout.extended.dimensionNames = [].concat(axisDimensionNames, filterDimensionNames);
+			xLayout.extended.dimensionNames = Ext.Array.unique([].concat(axisDimensionNames, filterDimensionNames));
 			xLayout.extended.objectNames = [].concat(axisObjectNames, filterObjectNames);
 			xLayout.extended.items = [].concat(axisItems, filterItems);
 
 			// Sorted axis
 			xLayout.extended.sortedAxisDimensions = dv.util.array.sortDimensions(Ext.clone(axisDimensions));
-			xLayout.extended.sortedAxisDimensionNames = Ext.clone(axisDimensionNames).sort();
+			xLayout.extended.sortedAxisDimensionNames = Ext.Array.unique(Ext.clone(axisDimensionNames).sort());
 			xLayout.extended.sortedAxisObjectNames = Ext.clone(axisObjectNames).sort();
 			xLayout.extended.sortedAxisItems = Ext.clone(axisItems).sort();
 
 			// Sorted filter
 			xLayout.extended.sortedFilterDimensions = dv.util.array.sortDimensions(Ext.clone(filterDimensions));
-			xLayout.extended.sortedFilterDimensionNames = Ext.clone(filterDimensionNames).sort();
+			xLayout.extended.sortedFilterDimensionNames = Ext.Array.unique(Ext.clone(filterDimensionNames).sort());
 			xLayout.extended.sortedFilterObjectNames = Ext.clone(filterObjectNames).sort();
 			xLayout.extended.sortedFilterItems = Ext.clone(filterItems).sort();
 
