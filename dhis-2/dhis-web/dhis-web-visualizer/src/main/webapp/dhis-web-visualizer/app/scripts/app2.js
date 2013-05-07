@@ -1260,9 +1260,9 @@ Ext.onReady( function() {
 			createButton = Ext.create('Ext.button.Button', {
 				text: 'Create', //i18n
 				handler: function() {
-					var favorite = getBody();
+					var favorite = Ext.clone(dv.xLayout);
 					favorite.name = nameTextfield.getValue();
-//console.log(favorite);return;
+
 					if (favorite && favorite.name) {
 						Ext.Ajax.request({
 							url: dv.init.contextPath + '/api/charts/',
@@ -3983,7 +3983,7 @@ Ext.onReady( function() {
 					showSeparator: false,
 					items: [
 						{
-							text: 'PNG',
+							text: 'Image (PNG)',
 							iconCls: 'dv-menu-item-image',
 							handler: function() {
 								dv.util.chart.submitSvgForm('png');
