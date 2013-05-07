@@ -1366,7 +1366,9 @@ console.log("chart", chart);
 				rows,
 				rowsDimensionNames = [],
 				filters,
-				filtersDimensionNames = [];
+				filtersDimensionNames = [],
+
+				objectNameRecordsMap = {};
 
 			xLayout.extended = {};
 
@@ -1474,7 +1476,10 @@ console.log("chart", chart);
 				dim = columns[i];
 				dim.objectName = dim.dimension;
 				dim.dimensionName = dimConf.objectNameMap[dim.objectName].dimensionName;
+				dim.records = Ext.clone(dim.items);
 				dim.items = xLayout.extended.objectNameDimensionMap[dim.objectName].items;
+
+				objectNameRecordsMap[dim.objectName] = dim.records;
 			}
 
 			rows = Ext.clone(xLayout.rows);
@@ -1482,7 +1487,10 @@ console.log("chart", chart);
 				dim = rows[i];
 				dim.objectName = dim.dimension;
 				dim.dimensionName = dimConf.objectNameMap[dim.objectName].dimensionName;
+				dim.records = Ext.clone(dim.items);
 				dim.items = xLayout.extended.objectNameDimensionMap[dim.objectName].items;
+
+				objectNameRecordsMap[dim.objectName] = dim.records;
 			}
 
 			filters = Ext.clone(xLayout.filters);
@@ -1490,12 +1498,16 @@ console.log("chart", chart);
 				dim = filters[i];
 				dim.objectName = dim.dimension;
 				dim.dimensionName = dimConf.objectNameMap[dim.objectName].dimensionName;
+				dim.records = Ext.clone(dim.items);
 				dim.items = xLayout.extended.objectNameDimensionMap[dim.objectName].items;
+
+				objectNameRecordsMap[dim.objectName] = dim.records;
 			}
 
 			xLayout.extended.columns = columns;
 			xLayout.extended.rows = rows;
 			xLayout.extended.filters = filters;
+			xLayout.extended.objectNameRecordsMap = objectNameRecordsMap;
 
 			// columnsDimensionNames, rowsDimensionNames, filtersDimensionNames
 			for (var i = 0; i < xLayout.extended.columns.length; i++) {

@@ -2005,6 +2005,13 @@ console.log(dim);
 						}
 					}
 				},
+				setChartType: function(type) {
+					for (var i = 0; i < buttons.length; i++) {
+						if (buttons[i].chartType === type) {
+							buttons[i].toggle(true);
+						}
+					}
+				},
 				defaults: {
 					height: 40,
 					toggleGroup: 'charttype',
@@ -4007,21 +4014,28 @@ console.log(dim);
 			});
 
 			setFavorite = function(xLayout) {
-				var seriesId,
-					categoryId,
-					filterIds;
+				var seriesId = xLayout.extended.columnsDimensionNames[0],
+					categoryId = xLayout.extended.rowsDimensionNames[0],
+					filterIds = xLayout.extended.filtersDimensionNames,
+					dimMap = xLayout.extended.objectNameDimensionMap,
+					dimConf = dv.conf.finals.dimension;
 
-				// Settings
-				seriesId = xLayout.columns[0].dimensionName;
-				categoryId = xLayout.rows[0].dimensionName;
-				filterIds = xLayout.extended.filterItems;
+				// Type
+				dv.viewport.chartType.setChartType(xLayout.type);
 
+				// Series, category, filter
+				dv.viewport.series.setValue(seriesId);
+				dv.viewport.category.setValue(categoryId);
+				dv.viewport.filter.setValue(filterIds);
 
 				// Indicators
 				dv.store.indicatorSelected.removeAll();
-				if (Ext.isArray(r.indicators)) {
+				if (dimMap[dimConf.indicator.objectName]) {
 					dv.store.indicatorSelected.add(r.indicators);
 				}
+
+
+
 
 				// Data elements
 				dv.store.dataElementSelected.removeAll();
