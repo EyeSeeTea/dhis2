@@ -91,8 +91,8 @@ DV.core.getConfig = function() {
                 objectName: 'ou',
             },
             dimension: {
-				value: 'dimension',
-				objectName: 'di'
+				value: 'dimension'
+				//objectName: 'di'
 			},
 			value: {
 				value: 'value'

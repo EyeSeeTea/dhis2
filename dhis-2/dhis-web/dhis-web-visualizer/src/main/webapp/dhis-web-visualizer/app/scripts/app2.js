@@ -121,11 +121,12 @@ Ext.onReady( function() {
 			config.rows = [];
 			config.filters = [];
 
+console.log(filterDimensionNames);
 			// Columns, rows, filters
 			for (var i = 0, dxItems = [], dim; i < panels.length; i++) {
 				dim = panels[i].getData();
-
 				if (dim) {
+console.log(dim);
 					if (dim.dimensionName === seriesDimensionName) {
 						config.columns.push({
 							dimension: dim.objectName,
@@ -3662,7 +3663,8 @@ Ext.onReady( function() {
 						selectedStore: selectedStore,
 						getData: function() {
 							var data = {
-								dimension: dimension.id,
+								dimensionName: dimension.id,
+								objectName: dimension.id,
 								items: []
 							};
 
