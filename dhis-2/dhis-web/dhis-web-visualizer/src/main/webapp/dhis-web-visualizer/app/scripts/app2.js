@@ -1122,123 +1122,6 @@ Ext.onReady( function() {
 			}
 		});
 
-		getBody = function() {
-			var favorite;
-
-			if (dv.xLayout) {
-				favorite = Ext.clone(dv.xLayout.options);
-
-				// Server sync
-				favorite.regression = favorite.showTrendLine;
-				favorite.targetLineLabel = favorite.targetLineTitle;
-				favorite.baseLineLabel = favorite.baseLineTitle;
-				favorite.showValues = favorite.showData;
-				favorite.rangeAxisLabel = favorite.rangeAxisTitle;
-				favorite.domainAxisLabel = favorite.domainAxisTitle;
-
-				// Dimensions
-				for (var i = 0, obj, key, items; i < dv.xLayout.objects.length; i++) {
-					obj = dv.xLayout.objects[i];
-
-					if (obj.objectName === dv.conf.finals.dimension.period.objectName) {
-						for (var j = 0, item; j < obj.items.length; j++) {
-							item = obj.items[j];
-
-							if (dv.conf.period.relativePeriodValueKeys[item]) {
-								key = dv.conf.finals.dimension.relativePeriod.value;
-
-								if (!favorite[key]) {
-									favorite[key] = {};
-								}
-
-								favorite[key][dv.conf.period.relativePeriodValueKeys[item]] = true;
-							}
-							else {
-								key = dv.conf.finals.dimension.fixedPeriod.value;
-
-								if (!favorite[key]) {
-									favorite[key] = [];
-								}
-
-								favorite[key].push({
-									id: item
-								});
-							}
-						}
-					}
-					else if (obj.objectName === dv.conf.finals.dimension.dimension.objectName) {
-						key = dv.conf.finals.dimension.objectNameMap[obj.objectName].value;
-
-						if (!favorite[key]) {
-							favorite[key] = {};
-						}
-
-						favorite[key][obj.dimensionName] = [];
-
-						for (var j = 0, item; j < obj.items.length; j++) {
-							item = obj.items[j];
-
-							favorite[key][obj.dimensionName].push({
-								id: item
-							});
-						}
-					}
-					else {
-						key = dv.conf.finals.dimension.objectNameMap[obj.objectName].value;
-						favorite[key] = [];
-
-						for (var j = 0, item; j < obj.items.length; j++) {
-							item = obj.items[j];
-
-							favorite[key].push({
-								id: item
-							});
-						}
-					}
-				}
-
-				// Relative periods PUT workaround
-				if (!favorite.relativePeriods) {
-					favorite.relativePeriods = {};
-				}
-
-				// Layout
-				favorite.type = dv.xLayout.type;
-
-				if (dv.xLayout.col) {
-					var a = [];
-
-					for (var i = 0; i < dv.xLayout.col.length; i++) {
-						a.push(dv.xLayout.col[i].dimensionName);
-					}
-
-					favorite.columnDimensions = a;
-				}
-
-				if (dv.xLayout.row) {
-					var a = [];
-
-					for (var i = 0; i < dv.xLayout.row.length; i++) {
-						a.push(dv.xLayout.row[i].dimensionName);
-					}
-
-					favorite.rowDimensions = a;
-				}
-
-				if (dv.xLayout.filter) {
-					var a = [];
-
-					for (var i = 0; i < dv.xLayout.filter.length; i++) {
-						a.push(dv.xLayout.filter[i].dimensionName);
-					}
-
-					favorite.filterDimensions = a;
-				}
-			}
-
-			return favorite;
-		};
-
 		NameWindow = function(id) {
 			var window,
 				record = dv.store.charts.getById(id);
@@ -3983,7 +3866,7 @@ Ext.onReady( function() {
 					showSeparator: false,
 					items: [
 						{
-							text: 'Image (PNG)',
+							text: DV.i18n.image_png,
 							iconCls: 'dv-menu-item-image',
 							handler: function() {
 								dv.util.chart.submitSvgForm('png');
@@ -4122,7 +4005,16 @@ Ext.onReady( function() {
 				}
 			});
 
-			setFavorite = function(r) {
+			setFavorite = function(xLayout) {
+				var seriesId,
+					categoryId,
+					filterIds;
+
+				// Settings
+				seriesId = xLayout.columns[0].dimensionName;
+				categoryId = xLayout.rows[0].dimensionName;
+				filterIds = xLayout.extended.filterItems;
+
 
 				// Indicators
 				dv.store.indicatorSelected.removeAll();
