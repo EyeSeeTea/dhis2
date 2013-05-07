@@ -1025,8 +1025,7 @@ Ext.onReady( function() {
 					hideTitle: hideTitle.getValue(),
 					title: title.getValue(),
 					domainAxisTitle: domainAxisTitle.getValue(),
-					rangeAxisTitle: rangeAxisTitle.getValue(),
-					dataElementDetailLevel: dv.viewport.dataElementDetailLevel.getValue()
+					rangeAxisTitle: rangeAxisTitle.getValue()
 				};
 			},
 			items: [
