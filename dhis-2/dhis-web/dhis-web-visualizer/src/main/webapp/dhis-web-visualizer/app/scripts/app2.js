@@ -121,12 +121,10 @@ Ext.onReady( function() {
 			config.rows = [];
 			config.filters = [];
 
-console.log(filterDimensionNames);
 			// Columns, rows, filters
 			for (var i = 0, dxItems = [], dim; i < panels.length; i++) {
 				dim = panels[i].getData();
 				if (dim) {
-console.log(dim);
 					if (dim.dimensionName === seriesDimensionName) {
 						config.columns.push({
 							dimension: dim.objectName,
@@ -507,51 +505,6 @@ console.log(dim);
 				}
 
 				return size;
-			}
-		};
-
-		util.array = {
-			sortDimensions: function(dimensions, key) {
-				key = key || 'dimensionName';
-
-				// Sort object order
-				Ext.Array.sort(dimensions, function(a,b) {
-					if (a[key] < b[key]) {
-						return -1;
-					}
-					if (a[key] > b[key]) {
-						return 1;
-					}
-					return 0;
-				});
-
-				// Sort object items order
-				for (var i = 0, dim; i < dimensions.length; i++) {
-					dim = dimensions[i];
-
-					if (dim.items) {
-						dimensions[i].items.sort();
-					}
-				}
-
-				return dimensions;
-			},
-
-			sortObjectsByString: function(array, key) {
-				key = key || 'name';
-				array.sort( function(a, b) {
-					var nameA = a[key].toLowerCase(),
-						nameB = b[key].toLowerCase();
-
-					if (nameA < nameB) {
-						return -1;
-					}
-					if (nameA > nameB) {
-						return 1;
-					}
-					return 0;
-				});
-				return array;
 			}
 		};
 

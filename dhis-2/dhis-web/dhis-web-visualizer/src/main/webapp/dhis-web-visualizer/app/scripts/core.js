@@ -280,6 +280,223 @@ DV.core.getConfig = function() {
 DV.core.getUtil = function(dv) {
 	var util = {};
 
+	util.array = {
+		sortDimensions: function(dimensions, key) {
+			key = key || 'dimensionName';
+
+			// Sort object order
+			Ext.Array.sort(dimensions, function(a,b) {
+				if (a[key] < b[key]) {
+					return -1;
+				}
+				if (a[key] > b[key]) {
+					return 1;
+				}
+				return 0;
+			});
+
+			// Sort object items order
+			for (var i = 0, dim; i < dimensions.length; i++) {
+				dim = dimensions[i];
+
+				if (dim.items) {
+					dimensions[i].items.sort();
+				}
+			}
+
+			return dimensions;
+		},
+
+		sortObjectsByString: function(array, key) {
+			key = key || 'name';
+			array.sort( function(a, b) {
+				var nameA = a[key].toLowerCase(),
+					nameB = b[key].toLowerCase();
+
+				if (nameA < nameB) {
+					return -1;
+				}
+				if (nameA > nameB) {
+					return 1;
+				}
+				return 0;
+			});
+			return array;
+		}
+	};
+
+	util.window = {
+		setAnchorPosition: function(w, target) {
+			var vpw = dv.viewport.getWidth(),
+				targetx = target ? target.getPosition()[0] : 4,
+				winw = w.getWidth(),
+				y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
+
+			if ((targetx + winw) > vpw) {
+				w.setPosition((vpw - winw - 2), y);
+			}
+			else {
+				w.setPosition(targetx, y);
+			}
+		},
+		addHideOnBlurHandler: function(w) {
+			var el = Ext.get(Ext.query('.x-mask')[0]);
+
+			el.on('click', function() {
+				if (w.hideOnBlur) {
+					w.hide();
+				}
+			});
+
+			w.hasHideOnBlurHandler = true;
+		},
+		addDestroyOnBlurHandler: function(w) {
+			var el = Ext.get(Ext.query('.x-mask')[0]);
+
+			el.on('click', function() {
+				if (w.destroyOnBlur) {
+					w.destroy();
+				}
+			});
+
+			w.hasDestroyOnBlurHandler = true;
+		}
+	};
+
+	util.mask = {
+		showMask: function(cmp, str) {
+			if (DV.mask) {
+				DV.mask.destroy();
+			}
+			DV.mask = new Ext.LoadMask(cmp, {msg: str});
+			DV.mask.show();
+		},
+		hideMask: function() {
+			if (DV.mask) {
+				DV.mask.hide();
+			}
+		}
+	};
+
+	util.number = {
+		isInteger: function(n) {
+			var str = new String(n);
+			if (str.indexOf('.') > -1) {
+				var d = str.substr(str.indexOf('.') + 1);
+				return (d.length === 1 && d == '0');
+			}
+			return false;
+		},
+		allValuesAreIntegers: function(values) {
+			for (var i = 0; i < values.length; i++) {
+				if (!this.isInteger(values[i].value)) {
+					return false;
+				}
+			}
+			return true;
+		},
+		getChartAxisFormatRenderer: function() {
+			return this.allValuesAreIntegers(DV.value.values) ? '0' : '0.0';
+		}
+	};
+
+	util.value = {
+		jsonfy: function(values) {
+			var a = [];
+			for (var i = 0; i < values.length; i++) {
+				var v = {
+					value: parseFloat(values[i][0]),
+					data: values[i][1],
+					period: values[i][2],
+					organisationunit: values[i][3]
+				};
+				a.push(v);
+			}
+			return a;
+		}
+	};
+
+	util.crud = {
+		favorite: {
+			create: function(fn, isupdate) {
+				DV.util.mask.showMask(DV.cmp.favorite.window, DV.i18n.saving + '...');
+
+				var p = DV.state.getParams();
+				p.name = DV.cmp.favorite.name.getValue();
+
+				if (isupdate) {
+					p.uid = DV.store.favorite.getAt(DV.store.favorite.findExact('name', p.name)).data.id;
+				}
+
+				var url = DV.cmp.favorite.system.getValue() ? DV.conf.finals.ajax.favorite_addorupdatesystem : DV.conf.finals.ajax.favorite_addorupdate;
+				Ext.Ajax.request({
+					url: DV.conf.finals.ajax.path_visualizer + url,
+					method: 'POST',
+					params: p,
+					success: function(r) {
+						DV.store.favorite.load({callback: function() {
+							var id = r.responseText;
+							var name = DV.store.favorite.getAt(DV.store.favorite.findExact('id', id)).data.name;
+							DV.c.currentFavorite = {
+								id: id,
+								name: name
+							};
+							DV.cmp.toolbar.share.xable();
+							DV.util.mask.hideMask();
+							if (fn) {
+								fn();
+							}
+						}});
+					}
+				});
+			},
+			update: function(fn) {
+				DV.util.crud.favorite.create(fn, true);
+			},
+			updateName: function(name) {
+				if (DV.store.favorite.findExact('name', name) != -1) {
+					return;
+				}
+				DV.util.mask.showMask(DV.cmp.favorite.window, DV.i18n.renaming + '...');
+				var r = DV.cmp.favorite.grid.getSelectionModel().getSelection()[0];
+				var url = DV.cmp.favorite.system.getValue() ? DV.conf.finals.ajax.favorite_addorupdatesystem : DV.conf.finals.ajax.favorite_addorupdate;
+				Ext.Ajax.request({
+					url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_updatename,
+					method: 'POST',
+					params: {uid: r.data.id, name: name},
+					success: function() {
+						DV.store.favorite.load({callback: function() {
+							DV.cmp.favorite.rename.window.close();
+							DV.util.mask.hideMask();
+							DV.cmp.favorite.grid.getSelectionModel().select(DV.store.favorite.getAt(DV.store.favorite.findExact('name', name)));
+							DV.cmp.favorite.name.setValue(name);
+						}});
+					}
+				});
+			},
+			del: function(fn) {
+				DV.util.mask.showMask(DV.cmp.favorite.window, DV.i18n.deleting + '...');
+				var baseurl = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_delete,
+					selection = DV.cmp.favorite.grid.getSelectionModel().getSelection();
+				Ext.Array.each(selection, function(item) {
+					baseurl = Ext.String.urlAppend(baseurl, 'uids=' + item.data.id);
+				});
+				Ext.Ajax.request({
+					url: baseurl,
+					method: 'POST',
+					success: function() {
+						DV.store.favorite.load({callback: function() {
+							DV.util.mask.hideMask();
+							if (fn) {
+								fn();
+							}
+						}});
+					}
+				});
+			}
+		}
+	};
+
 	util.chart = {
 		createChart: function(layout, dv) {
 			var dimConf = dv.conf.finals.dimension,
@@ -1444,7 +1661,7 @@ console.log("chart", chart);
 
 			// Sorted all
 			xLayout.extended.sortedDimensions = [].concat(xLayout.extended.sortedAxisDimensions, xLayout.extended.sortedFilterDimensions);
-			xLayout.extended.sortedDimensionNames = [].concat(xLayout.extended.sortedAxisDimensionNames, xLayout.extended.sortedFilterDimensionNames);
+			xLayout.extended.sortedDimensionNames = Ext.Array.unique([].concat(xLayout.extended.sortedAxisDimensionNames, xLayout.extended.sortedFilterDimensionNames));
 			xLayout.extended.sortedObjectNames = [].concat(xLayout.extended.sortedAxisObjectNames, xLayout.extended.sortedFilterObjectNames);
 			xLayout.extended.sortedItems = [].concat(xLayout.extended.sortedAxisItems, xLayout.extended.sortedFilterItems);
 
@@ -1528,178 +1745,6 @@ console.log("chart", chart);
 			xLayout.extended.filtersDimensionNames = filtersDimensionNames;
 
 			return xLayout;
-		}
-	};
-
-	util.window = {
-		setAnchorPosition: function(w, target) {
-			var vpw = dv.viewport.getWidth(),
-				targetx = target ? target.getPosition()[0] : 4,
-				winw = w.getWidth(),
-				y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
-
-			if ((targetx + winw) > vpw) {
-				w.setPosition((vpw - winw - 2), y);
-			}
-			else {
-				w.setPosition(targetx, y);
-			}
-		},
-		addHideOnBlurHandler: function(w) {
-			var el = Ext.get(Ext.query('.x-mask')[0]);
-
-			el.on('click', function() {
-				if (w.hideOnBlur) {
-					w.hide();
-				}
-			});
-
-			w.hasHideOnBlurHandler = true;
-		},
-		addDestroyOnBlurHandler: function(w) {
-			var el = Ext.get(Ext.query('.x-mask')[0]);
-
-			el.on('click', function() {
-				if (w.destroyOnBlur) {
-					w.destroy();
-				}
-			});
-
-			w.hasDestroyOnBlurHandler = true;
-		}
-	};
-
-	util.mask = {
-		showMask: function(cmp, str) {
-			if (DV.mask) {
-				DV.mask.destroy();
-			}
-			DV.mask = new Ext.LoadMask(cmp, {msg: str});
-			DV.mask.show();
-		},
-		hideMask: function() {
-			if (DV.mask) {
-				DV.mask.hide();
-			}
-		}
-	};
-
-	util.number = {
-		isInteger: function(n) {
-			var str = new String(n);
-			if (str.indexOf('.') > -1) {
-				var d = str.substr(str.indexOf('.') + 1);
-				return (d.length === 1 && d == '0');
-			}
-			return false;
-		},
-		allValuesAreIntegers: function(values) {
-			for (var i = 0; i < values.length; i++) {
-				if (!this.isInteger(values[i].value)) {
-					return false;
-				}
-			}
-			return true;
-		},
-		getChartAxisFormatRenderer: function() {
-			return this.allValuesAreIntegers(DV.value.values) ? '0' : '0.0';
-		}
-	};
-
-	util.value = {
-		jsonfy: function(values) {
-			var a = [];
-			for (var i = 0; i < values.length; i++) {
-				var v = {
-					value: parseFloat(values[i][0]),
-					data: values[i][1],
-					period: values[i][2],
-					organisationunit: values[i][3]
-				};
-				a.push(v);
-			}
-			return a;
-		}
-	};
-
-	util.crud = {
-		favorite: {
-			create: function(fn, isupdate) {
-				DV.util.mask.showMask(DV.cmp.favorite.window, DV.i18n.saving + '...');
-
-				var p = DV.state.getParams();
-				p.name = DV.cmp.favorite.name.getValue();
-
-				if (isupdate) {
-					p.uid = DV.store.favorite.getAt(DV.store.favorite.findExact('name', p.name)).data.id;
-				}
-
-				var url = DV.cmp.favorite.system.getValue() ? DV.conf.finals.ajax.favorite_addorupdatesystem : DV.conf.finals.ajax.favorite_addorupdate;
-				Ext.Ajax.request({
-					url: DV.conf.finals.ajax.path_visualizer + url,
-					method: 'POST',
-					params: p,
-					success: function(r) {
-						DV.store.favorite.load({callback: function() {
-							var id = r.responseText;
-							var name = DV.store.favorite.getAt(DV.store.favorite.findExact('id', id)).data.name;
-							DV.c.currentFavorite = {
-								id: id,
-								name: name
-							};
-							DV.cmp.toolbar.share.xable();
-							DV.util.mask.hideMask();
-							if (fn) {
-								fn();
-							}
-						}});
-					}
-				});
-			},
-			update: function(fn) {
-				DV.util.crud.favorite.create(fn, true);
-			},
-			updateName: function(name) {
-				if (DV.store.favorite.findExact('name', name) != -1) {
-					return;
-				}
-				DV.util.mask.showMask(DV.cmp.favorite.window, DV.i18n.renaming + '...');
-				var r = DV.cmp.favorite.grid.getSelectionModel().getSelection()[0];
-				var url = DV.cmp.favorite.system.getValue() ? DV.conf.finals.ajax.favorite_addorupdatesystem : DV.conf.finals.ajax.favorite_addorupdate;
-				Ext.Ajax.request({
-					url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_updatename,
-					method: 'POST',
-					params: {uid: r.data.id, name: name},
-					success: function() {
-						DV.store.favorite.load({callback: function() {
-							DV.cmp.favorite.rename.window.close();
-							DV.util.mask.hideMask();
-							DV.cmp.favorite.grid.getSelectionModel().select(DV.store.favorite.getAt(DV.store.favorite.findExact('name', name)));
-							DV.cmp.favorite.name.setValue(name);
-						}});
-					}
-				});
-			},
-			del: function(fn) {
-				DV.util.mask.showMask(DV.cmp.favorite.window, DV.i18n.deleting + '...');
-				var baseurl = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_delete,
-					selection = DV.cmp.favorite.grid.getSelectionModel().getSelection();
-				Ext.Array.each(selection, function(item) {
-					baseurl = Ext.String.urlAppend(baseurl, 'uids=' + item.data.id);
-				});
-				Ext.Ajax.request({
-					url: baseurl,
-					method: 'POST',
-					success: function() {
-						DV.store.favorite.load({callback: function() {
-							DV.util.mask.hideMask();
-							if (fn) {
-								fn();
-							}
-						}});
-					}
-				});
-			}
 		}
 	};
 
