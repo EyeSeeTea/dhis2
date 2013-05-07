@@ -305,6 +305,7 @@ DV.core.getUtil = function(dv) {
 
 			extendLayout = function(layout) {
 				var xLayout = Ext.clone(layout),
+					dimConf = dv.conf.finals.dimension,
 
 					axisDimensions = [].concat(Ext.clone(xLayout.columns) || [], Ext.clone(xLayout.rows) || []),
 					axisDimensionNames = [],
@@ -321,6 +322,24 @@ DV.core.getUtil = function(dv) {
 
 				xLayout.extended = {};
 
+				// Modify layout
+				for (var i = 0, objectName; i < xLayout.columns.length; i++) {
+					objectName = xLayout.columns[i].dimension;
+					xLayout.columns[i].objectName = objectName;
+					xLayout.columns[i].dimensionName = dimConf.objectNameMap[objectName].dimensionName;
+				}
+				for (var i = 0, objectName; i < xLayout.rows.length; i++) {
+					objectName = xLayout.columns[i].dimension;
+					xLayout.columns[i].objectName = objectName;
+					xLayout.columns[i].dimensionName = dimConf.objectNameMap[objectName].dimensionName;
+				}
+				for (var i = 0, objectName; i < xLayout.filters.length; i++) {
+					objectName = xLayout.columns[i].dimension;
+					xLayout.columns[i].objectName = objectName;
+					xLayout.columns[i].dimensionName = dimConf.objectNameMap[objectName].dimensionName;
+				}
+
+				// Axis
 				for (var i = 0, dim, items; i < axisDimensions.length; i++) {
 					dim = axisDimensions[i];
 					items = [];
@@ -340,6 +359,7 @@ DV.core.getUtil = function(dv) {
 					axisItems = axisItems.concat(items);
 				}
 
+				// Filter
 				for (var i = 0, dim, items; i < filterDimensions.length; i++) {
 					dim = filterDimensions[i];
 					items = [];
@@ -583,39 +603,42 @@ DV.core.getUtil = function(dv) {
 			};
 
 			getDefaultStore = function(xResponse, xLayout) {
-				var pe = dv.conf.finals.dimension.period.dimensionName,
+				var dimConf = dv.conf.finals.dimension,
+					pe = dimConf.period.dimensionName,
+					columnDimensionName = dimConf.objectNameMap[xLayout.columns[0].dimension].dimensionName,
+					rowDimensionName = dimConf.objectNameMap[xLayout.rows[0].dimension].dimensionName,
 
 					data = [],
-					series = xLayout.col[0].dimensionName === pe ? xResponse.metaData.pe : xLayout.col[0].items,
-					categories = xLayout.row[0].dimensionName === pe ? xResponse.metaData.pe : xLayout.row[0].items,
+					columnIds = columnDimensionName === pe ? xResponse.metaData.pe : xLayout.extended.dimensionNameItemsMap[columnDimensionName],
+					rowIds = rowDimensionName === pe ? xResponse.metaData.pe : xLayout.extended.dimensionNameItemsMap[rowDimensionName],
 					trendLineFields = [],
 					targetLineFields = [],
 					baseLineFields = [],
 					store;
 
 				// Data
-				for (var i = 0, obj, category; i < categories.length; i++) {
+				for (var i = 0, obj, category; i < rowIds.length; i++) {
 					obj = {};
-					category = categories[i];
+					category = rowIds[i];
 
 					obj[dv.conf.finals.data.domain] = xResponse.metaData.names[category];
 
-					for (var j = 0, id; j < series.length; j++) {
-						id = dv.util.str.replaceAll(series[j], '-', '') + categories[i];
-						obj[series[j]] = xResponse.idValueMap[id];
+					for (var j = 0, id; j < columnIds.length; j++) {
+						id = dv.util.str.replaceAll(columnIds[j], '-', '') + rowIds[i];
+						obj[columnIds[j]] = xResponse.idValueMap[id];
 					}
 
 					data.push(obj);
 				}
 
 				// Trend lines
-				if (xLayout.options.showTrendLine) {
-					for (var i = 0, regression, key; i < series.length; i++) {
+				if (xLayout.showTrendLine) {
+					for (var i = 0, regression, key; i < columnIds.length; i++) {
 						regression = new SimpleRegression();
-						key = dv.conf.finals.data.trendLine + series[i];
+						key = dv.conf.finals.data.trendLine + columnIds[i];
 
 						for (var j = 0; j < data.length; j++) {
-							regression.addData(j, data[j][series[i]]);
+							regression.addData(j, data[j][columnIds[i]]);
 						}
 
 						for (var j = 0; j < data.length; j++) {
@@ -623,23 +646,23 @@ DV.core.getUtil = function(dv) {
 						}
 
 						trendLineFields.push(key);
-						xResponse.metaData.names[key] = DV.i18n.trend + ' (' + xResponse.metaData.names[series[i]] + ')';
+						xResponse.metaData.names[key] = DV.i18n.trend + ' (' + xResponse.metaData.names[columnIds[i]] + ')';
 					}
 				}
 
 				// Target line
-				if (Ext.isNumber(xLayout.options.targetLineValue) || Ext.isNumber(parseFloat(xLayout.options.targetLineValue))) {
+				if (Ext.isNumber(xLayout.targetLineValue) || Ext.isNumber(parseFloat(xLayout.targetLineValue))) {
 					for (var i = 0; i < data.length; i++) {
-						data[i][dv.conf.finals.data.targetLine] = parseFloat(xLayout.options.targetLineValue);
+						data[i][dv.conf.finals.data.targetLine] = parseFloat(xLayout.targetLineValue);
 					}
 
 					targetLineFields.push(dv.conf.finals.data.targetLine);
 				}
 
 				// Base line
-				if (Ext.isNumber(xLayout.options.baseLineValue) || Ext.isNumber(parseFloat(xLayout.options.baseLineValue))) {
+				if (Ext.isNumber(xLayout.baseLineValue) || Ext.isNumber(parseFloat(xLayout.baseLineValue))) {
 					for (var i = 0; i < data.length; i++) {
-						data[i][dv.conf.finals.data.baseLine] = parseFloat(xLayout.options.baseLineValue);
+						data[i][dv.conf.finals.data.baseLine] = parseFloat(xLayout.baseLineValue);
 					}
 
 					baseLineFields.push(dv.conf.finals.data.baseLine);
@@ -647,7 +670,7 @@ DV.core.getUtil = function(dv) {
 
 				store = Ext.create('Ext.data.Store', {
 					fields: function() {
-						var fields = Ext.clone(series);
+						var fields = Ext.clone(columnIds);
 						fields.push(dv.conf.finals.data.domain);
 						fields = fields.concat(trendLineFields, targetLineFields, baseLineFields);
 
@@ -656,7 +679,7 @@ DV.core.getUtil = function(dv) {
 					data: data
 				});
 
-				store.rangeFields = series;
+				store.rangeFields = columnIds;
 				store.domainFields = [dv.conf.finals.data.domain];
 				store.trendLineFields = trendLineFields;
 				store.targetLineFields = targetLineFields;
@@ -719,7 +742,7 @@ console.log("baseLineFields", store.baseLineFields);
 
 				// Set maximum if stacked + extra line
 				if ((xLayout.type === typeConf.stackedColumn || xLayout.type === typeConf.stackedBar) &&
-					(xLayout.options.showTrendLine || xLayout.options.targetLineValue || xLayout.options.baseLineValue)) {
+					(xLayout.showTrendLine || xLayout.targetLineValue || xLayout.baseLineValue)) {
 					var a = [store.getMaximum(), store.getMaximumSum()];
 					maximum = Math.ceil(Ext.Array.max(a) * 1.1);
 					maximum = Math.floor(maximum / 10) * 10;
@@ -751,8 +774,8 @@ console.log("baseLineFields", store.baseLineFields);
 					axis.maximum = maximum;
 				}
 
-				if (xLayout.options.rangeAxisTitle) {
-					axis.title = xLayout.options.rangeAxisTitle;
+				if (xLayout.rangeAxisTitle) {
+					axis.title = xLayout.rangeAxisTitle;
 				}
 
 				return axis;
@@ -770,8 +793,8 @@ console.log("baseLineFields", store.baseLineFields);
 					}
 				};
 
-				if (xLayout.options.domainAxisTitle) {
-					axis.title = xLayout.options.domainAxisTitle;
+				if (xLayout.domainAxisTitle) {
+					axis.title = xLayout.domainAxisTitle;
 				}
 
 				return axis;
@@ -821,7 +844,7 @@ console.log("baseLineFields", store.baseLineFields);
 					title: getDefaultSeriesTitle(store, xResponse)
 				};
 
-				if (xLayout.options.showValues) {
+				if (xLayout.showValues) {
 					main.label = {
 						display: 'outside',
 						'text-anchor': 'middle',
@@ -871,7 +894,7 @@ console.log("baseLineFields", store.baseLineFields);
 						stroke: '#041423'
 					},
 					showMarkers: false,
-					title: (Ext.isString(xLayout.options.targetLineTitle) ? xLayout.options.targetLineTitle : DV.i18n.target) + ' (' + xLayout.options.targetLineValue + ')'
+					title: (Ext.isString(xLayout.targetLineTitle) ? xLayout.targetLineTitle : DV.i18n.target) + ' (' + xLayout.targetLineValue + ')'
 				};
 			};
 
@@ -888,7 +911,7 @@ console.log("baseLineFields", store.baseLineFields);
 						stroke: '#041423'
 					},
 					showMarkers: false,
-					title: (Ext.isString(xLayout.options.baseLineTitle) ? xLayout.options.baseLineTitle : DV.i18n.base) + ' (' + xLayout.options.baseLineValue + ')'
+					title: (Ext.isString(xLayout.baseLineTitle) ? xLayout.baseLineTitle : DV.i18n.base) + ' (' + xLayout.baseLineValue + ')'
 				};
 			};
 
@@ -905,15 +928,15 @@ console.log("baseLineFields", store.baseLineFields);
 			setDefaultTheme = function(store, xLayout) {
 				var colors = dv.conf.chart.theme.dv1.slice(0, store.rangeFields.length);
 
-				if (xLayout.options.targetLineValue || xLayout.options.baseLineValue) {
+				if (xLayout.targetLineValue || xLayout.baseLineValue) {
 					colors.push('#051a2e');
 				}
 
-				if (xLayout.options.targetLineValue) {
+				if (xLayout.targetLineValue) {
 					colors.push('#051a2e');
 				}
 
-				if (xLayout.options.baseLineValue) {
+				if (xLayout.baseLineValue) {
 					colors.push('#051a2e');
 				}
 
@@ -966,17 +989,18 @@ console.log("baseLineFields", store.baseLineFields);
 			};
 
 			getDefaultChartTitle = function(store, xResponse, xLayout) {
-				var text = '';
+				var filterItems = xLayout.extended.filterItems,
+					text = '';
 
-				if (Ext.isArray(xLayout.filterItems) && xLayout.filterItems.length) {
-					for (var i = 0; i < xLayout.filterItems.length; i++) {
-						text += xResponse.metaData.names[xLayout.filterItems[i]];
-						text += i < xLayout.filterItems.length - 1 ? ', ' : '';
+				if (Ext.isArray(filterItems) && filterItems.length) {
+					for (var i = 0; i < filterItems.length; i++) {
+						text += xResponse.metaData.names[filterItems[i]];
+						text += i < filterItems.length - 1 ? ', ' : '';
 					}
 				}
 
-				if (xLayout.options.title) {
-					text = xLayout.options.title;
+				if (xLayout.title) {
+					text = xLayout.title;
 				}
 
 				return Ext.create('Ext.draw.Sprite', {
@@ -1037,7 +1061,7 @@ console.log("baseLineFields", store.baseLineFields);
 					};
 
 				// Legend
-				if (!xLayout.options.hideLegend) {
+				if (!xLayout.hideLegend) {
 					config.legend = getDefaultLegend(store, xResponse);
 
 					if (config.legend.position === 'right') {
@@ -1046,7 +1070,7 @@ console.log("baseLineFields", store.baseLineFields);
 				}
 
 				// Title
-				if (!xLayout.options.hideTitle) {
+				if (!xLayout.hideTitle) {
 					config.items = [getDefaultChartTitle(store, xResponse, xLayout)];
 				}
 				else {
@@ -1079,15 +1103,15 @@ console.log("baseLineFields", store.baseLineFields);
 					series = [getDefaultSeries(store, xResponse, xLayout)];
 
 				// Options
-				if (xLayout.options.showTrendLine) {
+				if (xLayout.showTrendLine) {
 					series = getDefaultTrendLines(store, xResponse).concat(series);
 				}
 
-				if (xLayout.options.targetLineValue) {
+				if (xLayout.targetLineValue) {
 					series.push(getDefaultTargetLine(store, xLayout));
 				}
 
-				if (xLayout.options.baseLineValue) {
+				if (xLayout.baseLineValue) {
 					series.push(getDefaultBaseLine(store, xLayout));
 				}
 
@@ -1132,7 +1156,7 @@ console.log("baseLineFields", store.baseLineFields);
 				series.axis = 'bottom';
 
 				// Options
-				if (xLayout.options.showValues) {
+				if (xLayout.showValues) {
 					series.label = {
 						display: 'outside',
 						'text-anchor': 'middle',
@@ -1142,7 +1166,7 @@ console.log("baseLineFields", store.baseLineFields);
 
 				series = [series];
 
-				if (xLayout.options.showTrendLine) {
+				if (xLayout.showTrendLine) {
 					trendLines = getDefaultTrendLines(store, xResponse);
 
 					for (var i = 0; i < trendLines.length; i++) {
@@ -1154,7 +1178,7 @@ console.log("baseLineFields", store.baseLineFields);
 					series = trendLines.concat(series);
 				}
 
-				if (xLayout.options.targetLineValue) {
+				if (xLayout.targetLineValue) {
 					targetLine = getDefaultTargetLine(store, xLayout);
 					targetLine.axis = 'bottom';
 					targetLine.xField = store.targetLineFields;
@@ -1163,7 +1187,7 @@ console.log("baseLineFields", store.baseLineFields);
 					series.push(targetLine);
 				}
 
-				if (xLayout.options.baseLineValue) {
+				if (xLayout.baseLineValue) {
 					baseLine = getDefaultBaseLine(store, xLayout);
 					baseLine.axis = 'bottom';
 					baseLine.xField = store.baseLineFields;
@@ -1277,15 +1301,15 @@ console.log("baseLineFields", store.baseLineFields);
 				series = [series];
 
 				// Options
-				if (xLayout.options.showTrendLine) {
+				if (xLayout.showTrendLine) {
 					series = getDefaultTrendLines(store, xResponse).concat(series);
 				}
 
-				if (xLayout.options.targetLineValue) {
+				if (xLayout.targetLineValue) {
 					series.push(getDefaultTargetLine(store, xLayout));
 				}
 
-				if (xLayout.options.baseLineValue) {
+				if (xLayout.baseLineValue) {
 					series.push(getDefaultBaseLine(store, xLayout));
 				}
 
@@ -1335,7 +1359,7 @@ console.log("baseLineFields", store.baseLineFields);
 					chart;
 
 				// Theme
-				colors = dv.conf.chart.theme.dv1.slice(0, xResponse.nameHeaderMap[xLayout.row[0].dimensionName].items.length);
+				colors = dv.conf.chart.theme.dv1.slice(0, xResponse.nameHeaderMap[xLayout.rows[0].dimension].items.length);
 
 				Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
 					constructor: function(config) {
