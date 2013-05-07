@@ -249,13 +249,15 @@ public class Chart
             
             if ( hasRelativePeriods() )
             {
-                for ( RelativePeriodEnum period : relatives.getRelativePeriodEnums() )
+                List<RelativePeriodEnum> list = relatives.getRelativePeriodEnums();
+
+                for ( RelativePeriodEnum period : list )
                 {
                     periodList.add( new ConfigurablePeriod( period.toString(), null, null ) );
                 }
             }
             
-            objects.add( new BaseDimensionalObject( dimension, periods ) );
+            objects.add( new BaseDimensionalObject( dimension, periodList ) );
         }        
         else if ( ORGUNIT_DIM_ID.equals( dimension ) && !organisationUnits.isEmpty() )
         {
@@ -742,6 +744,26 @@ public class Chart
     public void setRelatives( RelativePeriods relatives )
     {
         this.relatives = relatives;
+    }
+
+    public List<DataElementGroup> getDataElementGroups()
+    {
+        return dataElementGroups;
+    }
+
+    public void setDataElementGroups( List<DataElementGroup> dataElementGroups )
+    {
+        this.dataElementGroups = dataElementGroups;
+    }
+
+    public List<OrganisationUnitGroup> getOrganisationUnitGroups()
+    {
+        return organisationUnitGroups;
+    }
+
+    public void setOrganisationUnitGroups( List<OrganisationUnitGroup> organisationUnitGroups )
+    {
+        this.organisationUnitGroups = organisationUnitGroups;
     }
 
     @JsonProperty

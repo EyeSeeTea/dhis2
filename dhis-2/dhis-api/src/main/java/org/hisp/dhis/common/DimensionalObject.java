@@ -43,9 +43,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 * @author Lars Helge Overland
 */
 @JacksonXmlRootElement( localName = "dimension", namespace = DxfNamespaces.DXF_2_0)
-@JsonSerialize( contentAs = DimensionalObject.class )
-public abstract class DimensionalObject
-    extends BaseIdentifiableObject
+//@JsonSerialize( contentAs = DimensionalObject.class )
+public interface DimensionalObject
 {
     public static final String DATA_X_DIM_ID = "dx"; // in, de, ds
     public static final String INDICATOR_DIM_ID = "in";
@@ -58,23 +57,12 @@ public abstract class DimensionalObject
     @JsonProperty
     @JsonView({ DetailedView.class, DimensionalView.class })
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
-    public String getDimension()
-    {
-        return getUid();
-    }
+    String getDimension();
     
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JsonView({ DetailedView.class, DimensionalView.class })
     @JacksonXmlElementWrapper( localName = "items", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "item", namespace = DxfNamespaces.DXF_2_0 )
-    public List<IdentifiableObject> getItems()
-    {
-        return getDimensionItems();
-    }
-    
-    /**
-     * Returns an immutable collection of the dimension items for this dimension.
-     */
-    public abstract List<IdentifiableObject> getDimensionItems();
+    List<IdentifiableObject> getItems();
 }

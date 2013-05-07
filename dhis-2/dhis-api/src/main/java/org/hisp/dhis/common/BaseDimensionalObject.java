@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BaseDimensionalObject
-    extends DimensionalObject
+    implements DimensionalObject
 {
     private String dimension;
     
@@ -50,7 +50,7 @@ public class BaseDimensionalObject
     }
 
     @Override
-    public List<IdentifiableObject> getDimensionItems()
+    public List<IdentifiableObject> getItems()
     {
         return items;
     }

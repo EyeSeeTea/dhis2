@@ -39,6 +39,7 @@ import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.DimensionalView;
 import org.hisp.dhis.common.view.ExportView;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -57,7 +58,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
  */
 @JacksonXmlRootElement( localName = "dataElementGroupSet", namespace = DxfNamespaces.DXF_2_0)
 public class DataElementGroupSet
-    extends DimensionalObject
+    extends BaseIdentifiableObject implements DimensionalObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -174,6 +175,30 @@ public class DataElementGroupSet
     }
 
     public List<IdentifiableObject> getDimensionItems()
+    {
+        return new ArrayList<IdentifiableObject>( members );
+    }
+
+    // -------------------------------------------------------------------------
+    // Dimensional object
+    // -------------------------------------------------------------------------
+
+    @Override
+    @JsonProperty
+    @JsonView( { DetailedView.class, DimensionalView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getDimension()
+    {
+        return uid;
+    }
+
+    @Override
+    @JsonProperty
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, DimensionalView.class } )
+    @JacksonXmlElementWrapper( localName = "items", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "item", namespace = DxfNamespaces.DXF_2_0 )
+    public List<IdentifiableObject> getItems()
     {
         return new ArrayList<IdentifiableObject>( members );
     }

@@ -772,6 +772,7 @@ public class RelativePeriods
         map.put( RelativePeriodEnum.THIS_FINANCIAL_YEAR, new RelativePeriods().setThisFinancialYear( true ).getRelativePeriods( format, dynamicNames ) );
         map.put( RelativePeriodEnum.LAST_FINANCIAL_YEAR, new RelativePeriods().setLastFinancialYear( true ).getRelativePeriods( format, dynamicNames ) );
         map.put( RelativePeriodEnum.LAST_5_FINANCIAL_YEARS, new RelativePeriods().setLast5FinancialYears( true ).getRelativePeriods( format, dynamicNames ) );
+        map.put( RelativePeriodEnum.LAST_WEEK, new RelativePeriods().setLast4Weeks( true ).getRelativePeriods( format, dynamicNames ) );
         map.put( RelativePeriodEnum.LAST_4_WEEKS, new RelativePeriods().setLast4Weeks( true ).getRelativePeriods( format, dynamicNames ) );
         map.put( RelativePeriodEnum.LAST_12_WEEKS, new RelativePeriods().setLast12Weeks( true ).getRelativePeriods( format, dynamicNames ) );
         map.put( RelativePeriodEnum.LAST_52_WEEKS, new RelativePeriods().setLast52Weeks( true ).getRelativePeriods( format, dynamicNames ) );
@@ -807,6 +808,7 @@ public class RelativePeriods
         add( list, RelativePeriodEnum.THIS_FINANCIAL_YEAR, thisFinancialYear );
         add( list, RelativePeriodEnum.LAST_FINANCIAL_YEAR, lastFinancialYear );
         add( list, RelativePeriodEnum.LAST_5_FINANCIAL_YEARS, last5FinancialYears );
+        add( list, RelativePeriodEnum.LAST_WEEK, lastWeek );
         add( list, RelativePeriodEnum.LAST_4_WEEKS, last4Weeks );
         add( list, RelativePeriodEnum.LAST_12_WEEKS, last12Weeks );
         add( list, RelativePeriodEnum.LAST_52_WEEKS, last52Weeks );
