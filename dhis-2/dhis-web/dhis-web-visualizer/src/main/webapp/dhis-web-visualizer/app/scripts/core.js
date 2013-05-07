@@ -614,7 +614,6 @@ DV.core.getUtil = function(dv) {
 					targetLineFields = [],
 					baseLineFields = [],
 					store;
-console.log("columnIds", columnIds);
 
 				// Data
 				for (var i = 0, obj, category; i < rowIds.length; i++) {
