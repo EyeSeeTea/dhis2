@@ -3971,6 +3971,7 @@ Ext.onReady( function() {
 					categoryId = xLayout.extended.rowsDimensionNames[0],
 					filterIds = xLayout.extended.filtersDimensionNames,
 					dimMap = xLayout.extended.objectNameDimensionMap,
+					recMap = xLayout.extended.objectNameRecordsMap,
 					dimConf = dv.conf.finals.dimension;
 
 				// Type
@@ -3984,7 +3985,7 @@ Ext.onReady( function() {
 				// Indicators
 				dv.store.indicatorSelected.removeAll();
 				if (dimMap[dimConf.indicator.objectName]) {
-					dv.store.indicatorSelected.add(r.indicators);
+					dv.store.indicatorSelected.add(recMap[dimConf.indicator.objectName]);
 				}
 
 

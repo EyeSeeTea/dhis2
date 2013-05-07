@@ -451,7 +451,7 @@ DV.core.getUtil = function(dv) {
 
 					paramString += 'dimension=' + dimensionName;
 
-					items = xLayout.extended.dimensionNameItemsMap[dimensionName].sort();
+					items = Ext.clone(xLayout.extended.dimensionNameItemsMap[dimensionName]).sort();
 
 					if (dimensionName === dimConf.dataElement.dimensionName) {
 						for (var j = 0, index; j < items.length; j++) {
@@ -624,7 +624,6 @@ DV.core.getUtil = function(dv) {
 					category = rowIds[i];
 
 					obj[dv.conf.finals.data.domain] = xResponse.metaData.names[category];
-
 					for (var j = 0, id; j < columnIds.length; j++) {
 						id = dv.util.str.replaceAll(columnIds[j], '-', '') + rowIds[i];
 						obj[columnIds[j]] = xResponse.idValueMap[id];
@@ -1606,8 +1605,9 @@ console.log("chart", chart);
 				objectNameDimensionMap[dim.objectName] = dim;
 
 				// dimensionName : items
-				dimensionNameItemsMap[dim.dimensionName] = dimensionNameItemsMap[dim.dimensionName].concat(dim.items);
+				dimensionNameItemsMap[dim.dimensionName] = dimensionNameItemsMap[dim.dimensionName].concat(Ext.clone(dim.items));
 			}
+console.log("dimensionNameItemsMap", dimensionNameItemsMap);
 
 			xLayout.extended.objectNameDimensionMap = objectNameDimensionMap;
 			xLayout.extended.dimensionNameItemsMap = dimensionNameItemsMap;
