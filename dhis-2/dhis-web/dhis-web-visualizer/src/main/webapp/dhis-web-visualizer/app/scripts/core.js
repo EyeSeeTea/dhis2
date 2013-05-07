@@ -465,8 +465,8 @@ DV.core.getUtil = function(dv) {
 
 			getDefaultStore = function(xResponse, xLayout) {
 				var pe = dv.conf.finals.dimension.period.dimensionName,
-					columnDimensionName = xLayout.columns[0].dimensionName,
-					rowDimensionName = xLayout.rows[0].dimensionName,
+					columnDimensionName = xLayout.extended.columns[0].dimensionName,
+					rowDimensionName = xLayout.extended.rows[0].dimensionName,
 
 					data = [],
 					columnIds = columnDimensionName === pe ? xResponse.metaData.pe : xLayout.extended.dimensionNameItemsMap[columnDimensionName],
@@ -1219,7 +1219,7 @@ console.log("baseLineFields", store.baseLineFields);
 					chart;
 
 				// Theme
-				colors = dv.conf.chart.theme.dv1.slice(0, xResponse.nameHeaderMap[xLayout.rows[0].dimensionName].items.length);
+				colors = dv.conf.chart.theme.dv1.slice(0, xResponse.nameHeaderMap[xLayout.extended.rows[0].dimensionName].items.length);
 
 				Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
 					constructor: function(config) {
@@ -1361,11 +1361,11 @@ console.log("chart", chart);
 				dimensionNameItemsMap = {},
 
 				columns,
-				columnsDimensionNames,
+				columnsDimensionNames = [],
 				rows,
-				rowsDimensionNames,
+				rowsDimensionNames = [],
 				filters,
-				filtersDimensionNames;
+				filtersDimensionNames = [];
 
 			xLayout.extended = {};
 
@@ -1472,7 +1472,7 @@ console.log("chart", chart);
 			for (var i = 0, dim; i < columns.length; i++) {
 				dim = columns[i];
 				dim.objectName = dim.dimension;
-				dim.objectName = dimConf.objectNameMap[dim.objectName].dimensionName;
+				dim.dimensionName = dimConf.objectNameMap[dim.objectName].dimensionName;
 				dim.items = xLayout.extended.objectNameDimensionMap[dim.objectName].items;
 			}
 
@@ -1480,7 +1480,7 @@ console.log("chart", chart);
 			for (var i = 0, dim; i < rows.length; i++) {
 				dim = rows[i];
 				dim.objectName = dim.dimension;
-				dim.objectName = dimConf.objectNameMap[dim.objectName].dimensionName;
+				dim.dimensionName = dimConf.objectNameMap[dim.objectName].dimensionName;
 				dim.items = xLayout.extended.objectNameDimensionMap[dim.objectName].items;
 			}
 
@@ -1488,7 +1488,7 @@ console.log("chart", chart);
 			for (var i = 0, dim; i < filters.length; i++) {
 				dim = filters[i];
 				dim.objectName = dim.dimension;
-				dim.objectName = dimConf.objectNameMap[dim.objectName].dimensionName;
+				dim.dimensionName = dimConf.objectNameMap[dim.objectName].dimensionName;
 				dim.items = xLayout.extended.objectNameDimensionMap[dim.objectName].items;
 			}
 
@@ -1509,9 +1509,9 @@ console.log("chart", chart);
 				filtersDimensionNames.push(xLayout.extended.filters[i].dimensionName);
 			}
 
-			xLayout.extended.columnsDimensionNames = columnDimensionNames;
-			xLayout.extended.rowsDimensionNames = rowDimensionNames;
-			xLayout.extended.filtersDimensionNames = filterDimensionNames;
+			xLayout.extended.columnsDimensionNames = columnsDimensionNames;
+			xLayout.extended.rowsDimensionNames = rowsDimensionNames;
+			xLayout.extended.filtersDimensionNames = filtersDimensionNames;
 
 			return xLayout;
 		}
