@@ -29,6 +29,7 @@ package org.hisp.dhis.common;
 
 import java.util.List;
 
+import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.DimensionalView;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -55,7 +56,7 @@ public abstract class DimensionalObject
     public static final String ORGUNIT_DIM_ID = "ou";
     
     @JsonProperty
-    @JsonView({ DimensionalView.class })
+    @JsonView({ DetailedView.class, DimensionalView.class })
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
     public String getDimension()
     {
@@ -64,7 +65,7 @@ public abstract class DimensionalObject
     
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView({ DimensionalView.class })
+    @JsonView({ DetailedView.class, DimensionalView.class })
     @JacksonXmlElementWrapper( localName = "items", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "item", namespace = DxfNamespaces.DXF_2_0 )
     public List<IdentifiableObject> getItems()

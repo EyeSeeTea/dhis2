@@ -219,6 +219,12 @@ public class ChartController
     @Override
     public void postProcessEntity( Chart chart ) throws Exception
     {
+        chart.populateWebDomainProperties();
+        
+        System.out.println("categories " + chart.getColumns() );
+        System.out.println("rows " + chart.getColumns() );
+        System.out.println("filters " + chart.getFilters() );
+        
         I18nFormat format = i18nManager.getI18nFormat();
         
         if ( chart.getPeriods() != null && !chart.getPeriods().isEmpty() )
