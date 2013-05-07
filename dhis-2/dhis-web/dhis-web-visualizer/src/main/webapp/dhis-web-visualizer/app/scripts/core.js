@@ -316,8 +316,8 @@ DV.core.getUtil = function(dv) {
 					filterObjectNames = [],
 					filterItems = [],
 
-					dimensionNameObjectMap = {},
-					objectNameObjectMap = {};
+					objectNameDimensionMap = {},
+					dimensionNameItemsMap = {};
 
 				xLayout.extended = {};
 
@@ -396,12 +396,26 @@ DV.core.getUtil = function(dv) {
 				xLayout.extended.sortedItems = [].concat(xLayout.extended.sortedAxisItems, xLayout.extended.sortedFilterItems);
 
 				// Maps
+
+				// Add dimensionName keys
+				for (var i = 0, name; i < xLayout.extended.dimensionNames.length; i++) {
+					name = xLayout.extended.dimensionNames[i];
+					dimensionNameItemsMap[name] = [];
+				}
+
+				// Add dimensions and items
 				for (var i = 0, dim; i < xLayout.extended.dimensions.length; i++) {
 					dim = xLayout.extended.dimensions[i];
 
-					dimensionNameObjectMap[dim.dimensionName] = dim;
-					objectNameObjectMap[dim.objectName] = dim;
+					// objectName : object
+					objectNameDimensionMap[dim.objectName] = dim;
+
+					// dimensionName : items
+					dimensionNameItemsMap[dim.dimensionName].push(dim.items);
 				}
+
+				xLayout.extended.objectNameDimensionMap = objectNameDimensionMap;
+				xLayout.extended.dimensionNameItemsMap = dimensionNameItemsMap;
 
 				return xLayout;
 			};
@@ -490,16 +504,16 @@ DV.core.getUtil = function(dv) {
 
 						if (header.meta) {
 
-							// categories
+							// Categories
 							if (header.name === dv.conf.finals.dimension.category.dimensionName) {
 								header.items = [].concat(response.metaData[dv.conf.finals.dimension.category.dimensionName]);
 							}
-							// periods
+							// Periods
 							else if (header.name === dv.conf.finals.dimension.period.dimensionName) {
 								header.items = [].concat(response.metaData[dv.conf.finals.dimension.period.dimensionName]);
 							}
 							else {
-								header.items = xLayout.nameItemsMap[header.name];
+								header.items = xLayout.extended.dimensionNameItemsMap[header.name];
 							}
 
 							header.size = header.items.length;
@@ -514,19 +528,19 @@ DV.core.getUtil = function(dv) {
 					}
 				}();
 
-				var createValueIds = function() {
+				var createValueIdMap = function() {
 					var valueHeaderIndex = response.nameHeaderMap[dv.conf.finals.dimension.value.value].index,
-						coDim = response.nameHeaderMap[dv.conf.finals.dimension.category.dimensionName],
-						dimensionNames = xLayout.dimensionNames,
+						coHeader = response.nameHeaderMap[dv.conf.finals.dimension.category.dimensionName],
+						axisDimensionNames = xLayout.extended.axisDimensionNames,
 						idIndexOrder = [];
 
 					// idIndexOrder
-					for (var i = 0; i < dimensionNames.length; i++) {
-						idIndexOrder.push(response.nameHeaderMap[dimensionNames[i]].index);
+					for (var i = 0; i < axisDimensionNames.length; i++) {
+						idIndexOrder.push(response.nameHeaderMap[axisDimensionNames[i]].index);
 
-						// If co exists, add co after dx
-						if (coDim && dimensionNames[i] === dv.conf.finals.dimension.data.dimensionName) {
-							idIndexOrder.push(coDim.index);
+						// If co exists in response, add co after dx
+						if (coHeader && axisDimensionNames[i] === dv.conf.finals.dimension.data.dimensionName) {
+							idIndexOrder.push(coHeader.index);
 						}
 					}
 
@@ -1386,10 +1400,10 @@ console.log(xLayout);
 
 						//xLayout = getSyncronizedXLayout(xLayout, response);
 
-						if (!xLayout) {
-							dv.util.mask.hideMask();
-							return;
-						}
+						//if (!xLayout) {
+							//dv.util.mask.hideMask();
+							//return;
+						//}
 
 						xResponse = extendResponse(response, xLayout);
 
