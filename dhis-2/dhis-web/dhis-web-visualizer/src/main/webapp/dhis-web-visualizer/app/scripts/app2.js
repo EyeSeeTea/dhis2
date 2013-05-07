@@ -3501,7 +3501,7 @@ Ext.onReady( function() {
 				}
 			};
 
-			getDimensionPanels = function(dimensions, objectName, iconCls) {
+			getDimensionPanels = function(dimensions, iconCls) {
 				var	getAvailableStore,
 					getSelectedStore,
 
@@ -3662,8 +3662,7 @@ Ext.onReady( function() {
 						selectedStore: selectedStore,
 						getData: function() {
 							var data = {
-								dimensionName: dimension.id,
-								objectName: objectName,
+								dimension: dimension.id,
 								items: []
 							};
 
@@ -3789,7 +3788,7 @@ Ext.onReady( function() {
 
 					dv.util.array.sortObjectsByString(dims);
 
-					panels = panels.concat(getDimensionPanels(dims, dv.conf.finals.dimension.dimension.objectName, 'dv-panel-title-dimension'));
+					panels = panels.concat(getDimensionPanels(dims, 'dv-panel-title-dimension'));
 
 					last = panels[panels.length - 1];
 					last.cls = 'dv-accordion-last';

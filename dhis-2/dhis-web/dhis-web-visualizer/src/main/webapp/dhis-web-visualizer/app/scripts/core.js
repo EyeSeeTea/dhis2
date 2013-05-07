@@ -1248,6 +1248,7 @@ console.log("baseLineFields", store.baseLineFields);
 					chart;
 
 				xLayout = dv.util.chart.extendLayout(layout);
+console.log(xLayout);
 
 				dv.paramString = getParamString(xLayout);
 				url = dv.init.contextPath + '/api/analytics.json' + dv.paramString;
