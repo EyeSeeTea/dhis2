@@ -323,20 +323,20 @@ DV.core.getUtil = function(dv) {
 				xLayout.extended = {};
 
 				// Modify layout
-				for (var i = 0, objectName; i < xLayout.columns.length; i++) {
-					objectName = xLayout.columns[i].dimension;
-					xLayout.columns[i].objectName = objectName;
-					xLayout.columns[i].dimensionName = dimConf.objectNameMap[objectName].dimensionName;
+				for (var i = 0, dim; i < xLayout.columns.length; i++) {
+					dim = xLayout.columns[i];
+					dim.objectName = dim.dimension;
+					dim.dimensionName = dimConf.objectNameMap[dim.objectName].dimensionName;
 				}
-				for (var i = 0, objectName; i < xLayout.rows.length; i++) {
-					objectName = xLayout.columns[i].dimension;
-					xLayout.columns[i].objectName = objectName;
-					xLayout.columns[i].dimensionName = dimConf.objectNameMap[objectName].dimensionName;
+				for (var i = 0, dim; i < xLayout.rows.length; i++) {
+					dim = xLayout.rows[i];
+					dim.objectName = dim.dimension;
+					dim.dimensionName = dimConf.objectNameMap[dim.objectName].dimensionName;
 				}
-				for (var i = 0, objectName; i < xLayout.filters.length; i++) {
-					objectName = xLayout.columns[i].dimension;
-					xLayout.columns[i].objectName = objectName;
-					xLayout.columns[i].dimensionName = dimConf.objectNameMap[objectName].dimensionName;
+				for (var i = 0, dim; i < xLayout.filters.length; i++) {
+					dim = xLayout.filters[i];
+					dim.objectName = dim.dimension;
+					dim.dimensionName = dimConf.objectNameMap[dim.objectName].dimensionName;
 				}
 
 				// Axis
@@ -431,7 +431,7 @@ DV.core.getUtil = function(dv) {
 					objectNameDimensionMap[dim.objectName] = dim;
 
 					// dimensionName : items
-					dimensionNameItemsMap[dim.dimensionName].push(dim.items);
+					dimensionNameItemsMap[dim.dimensionName] = dimensionNameItemsMap[dim.dimensionName].concat(dim.items);
 				}
 
 				xLayout.extended.objectNameDimensionMap = objectNameDimensionMap;
@@ -603,10 +603,9 @@ DV.core.getUtil = function(dv) {
 			};
 
 			getDefaultStore = function(xResponse, xLayout) {
-				var dimConf = dv.conf.finals.dimension,
-					pe = dimConf.period.dimensionName,
-					columnDimensionName = dimConf.objectNameMap[xLayout.columns[0].dimension].dimensionName,
-					rowDimensionName = dimConf.objectNameMap[xLayout.rows[0].dimension].dimensionName,
+				var pe = dv.conf.finals.dimension.period.dimensionName,
+					columnDimensionName = xLayout.columns[0].dimensionName,
+					rowDimensionName = xLayout.rows[0].dimensionName,
 
 					data = [],
 					columnIds = columnDimensionName === pe ? xResponse.metaData.pe : xLayout.extended.dimensionNameItemsMap[columnDimensionName],
@@ -615,6 +614,7 @@ DV.core.getUtil = function(dv) {
 					targetLineFields = [],
 					baseLineFields = [],
 					store;
+console.log("columnIds", columnIds);
 
 				// Data
 				for (var i = 0, obj, category; i < rowIds.length; i++) {
@@ -1359,7 +1359,7 @@ console.log("baseLineFields", store.baseLineFields);
 					chart;
 
 				// Theme
-				colors = dv.conf.chart.theme.dv1.slice(0, xResponse.nameHeaderMap[xLayout.rows[0].dimension].items.length);
+				colors = dv.conf.chart.theme.dv1.slice(0, xResponse.nameHeaderMap[xLayout.rows[0].dimensionName].items.length);
 
 				Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
 					constructor: function(config) {
