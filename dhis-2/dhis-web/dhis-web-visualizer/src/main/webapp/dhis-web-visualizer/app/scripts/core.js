@@ -1507,6 +1507,7 @@ console.log("chart", chart);
 			xLayout.extended.columns = columns;
 			xLayout.extended.rows = rows;
 			xLayout.extended.filters = filters;
+
 			xLayout.extended.objectNameRecordsMap = objectNameRecordsMap;
 
 			// columnsDimensionNames, rowsDimensionNames, filtersDimensionNames
