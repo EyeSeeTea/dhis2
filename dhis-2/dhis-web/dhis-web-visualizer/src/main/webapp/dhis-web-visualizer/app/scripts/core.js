@@ -327,11 +327,11 @@ DV.core.getUtil = function(dv) {
 						dim = axisDimensions[i];
 						items = [];
 
-						axisDimensionNames.push(dim.dimensionName);
-						axisObjectNames.push(dim.objectName);
-
 						dim.dimensionName = objectNameMap[dim.dimension].dimensionName;
 						dim.objectName = dim.dimension;
+
+						axisDimensionNames.push(dim.dimensionName);
+						axisObjectNames.push(dim.objectName);
 
 						for (var j = 0; j < dim.items.length; j++) {
 							items.push(dim.items[j].id);
@@ -344,11 +344,11 @@ DV.core.getUtil = function(dv) {
 						dim = filterDimensions[i];
 						items = [];
 
-						filterDimensionNames.push(dim.dimensionName);
-						filterObjectNames.push(dim.objectName);
-
 						dim.dimensionName = objectNameMap[dim.dimension].dimensionName;
 						dim.objectName = dim.dimension;
+
+						filterDimensionNames.push(dim.dimensionName);
+						filterObjectNames.push(dim.objectName);
 
 						for (var j = 0; j < dim.items.length; j++) {
 							items.push(dim.items[j].id);
@@ -370,7 +370,7 @@ DV.core.getUtil = function(dv) {
 				}();
 
 				addSortedDimensions = function() {
-					xLayout.extend.sortedAxisDimensions = dv.util.array.sortDimensions(Ext.clone(xLayout.extended.axisDimensions));
+					xLayout.extended.sortedAxisDimensions = dv.util.array.sortDimensions(Ext.clone(xLayout.extended.axisDimensions));
 					xLayout.extended.sortedAxisDimensionNames = Ext.clone(xLayout.extended.axisDimensionNames).sort();
 					xLayout.extended.sortedAxisObjectNames = Ext.clone(xLayout.extended.axisObjectNames).sort();
 
@@ -380,6 +380,23 @@ DV.core.getUtil = function(dv) {
 
 					xLayout.extended.sortedDimensionNames = Ext.clone(xLayout.extended.dimensionNames).sort();
 					xLayout.extended.sortedObjectNames = Ext.clone(xLayout.extended.objectNames).sort();
+console.log(xLayout.extended.axisDimensions);
+console.log(xLayout.extended.axisDimensionNames);
+console.log(xLayout.extended.axisObjectNames);
+console.log(xLayout.extended.filterDimensions);
+console.log(xLayout.extended.filterDimensionNames);
+console.log(xLayout.extended.filterObjectNames);
+console.log(xLayout.extended.dimensionNames);
+console.log(xLayout.extended.objectNames);
+console.log(xLayout.extended.sortedAxisDimensions);
+console.log(xLayout.extended.sortedAxisDimensionNames);
+console.log(xLayout.extended.sortedAxisObjectNames);
+console.log(xLayout.extended.sortedFilterDimensions);
+console.log(xLayout.extended.sortedFilterDimensionNames);
+console.log(xLayout.extended.sortedFilterObjectNames);
+console.log(xLayout.extended.sortedDimensionNames);
+console.log(xLayout.extended.sortedObjectNames);
+
 				}();
 
 				addNameItemsMap = function() {
@@ -410,7 +427,7 @@ DV.core.getUtil = function(dv) {
 						xLayout.extended.filterItems = xLayout.extended.filterItems.concat(filterDim.items);
 					}
 				}();
-
+console.log(xLayout);return;
 				return xLayout;
 			};
 
