@@ -27,8 +27,11 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.DimensionalView;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -42,38 +45,36 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 * @author Lars Helge Overland
 */
 @JacksonXmlRootElement( localName = "dimension", namespace = DxfNamespaces.DXF_2_0)
-@JsonSerialize( contentAs = DimensionalObject.class )
-public abstract class DimensionalObject
-    extends BaseIdentifiableObject
+public interface DimensionalObject
 {
-    public static final String DATA_X_DIM_ID = "dx"; // in, de, ds
-    public static final String INDICATOR_DIM_ID = "in";
-    public static final String DATAELEMENT_DIM_ID = "de";
-    public static final String DATASET_DIM_ID = "ds";
-    public static final String CATEGORYOPTIONCOMBO_DIM_ID = "co";
-    public static final String PERIOD_DIM_ID = "pe";
-    public static final String ORGUNIT_DIM_ID = "ou";
-    
+    final String DATA_X_DIM_ID = "dx"; // in, de, ds, do
+    final String INDICATOR_DIM_ID = "in";
+    final String DATAELEMENT_DIM_ID = "de";
+    final String DATASET_DIM_ID = "ds";
+    final String DATAELEMENT_OPERAND_ID = "do";
+    final String CATEGORYOPTIONCOMBO_DIM_ID = "co";
+    final String PERIOD_DIM_ID = "pe";
+    final String ORGUNIT_DIM_ID = "ou";
+
+    final Map<String, DimensionType> DIMENSION_OBJECT_TYPE_MAP = new HashMap<String, DimensionType>() { {
+        DIMENSION_OBJECT_TYPE_MAP.put( DimensionalObject.DATA_X_DIM_ID, DimensionType.DATA_X );
+        DIMENSION_OBJECT_TYPE_MAP.put( DimensionalObject.INDICATOR_DIM_ID, DimensionType.INDICATOR );
+        DIMENSION_OBJECT_TYPE_MAP.put( DimensionalObject.DATAELEMENT_DIM_ID, DimensionType.DATAELEMENT );
+        DIMENSION_OBJECT_TYPE_MAP.put( DimensionalObject.DATASET_DIM_ID, DimensionType.DATASET );
+        DIMENSION_OBJECT_TYPE_MAP.put( DimensionalObject.DATAELEMENT_OPERAND_ID, DimensionType.DATAELEMENT_OPERAND );
+        DIMENSION_OBJECT_TYPE_MAP.put( DimensionalObject.PERIOD_DIM_ID, DimensionType.PERIOD );
+        DIMENSION_OBJECT_TYPE_MAP.put( DimensionalObject.ORGUNIT_DIM_ID, DimensionType.ORGANISATIONUNIT );
+    } };
+            
     @JsonProperty
-    @JsonView({ DimensionalView.class })
+    @JsonView({ DetailedView.class, DimensionalView.class })
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
-    public String getDimension()
-    {
-        return getUid();
-    }
+    String getDimension();
     
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView({ DimensionalView.class })
+    @JsonView({ DetailedView.class, DimensionalView.class })
     @JacksonXmlElementWrapper( localName = "items", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "item", namespace = DxfNamespaces.DXF_2_0 )
-    public List<IdentifiableObject> getItems()
-    {
-        return getDimensionItems();
-    }
-    
-    /**
-     * Returns an immutable collection of the dimension items for this dimension.
-     */
-    public abstract List<IdentifiableObject> getDimensionItems();
+    List<IdentifiableObject> getItems();
 }

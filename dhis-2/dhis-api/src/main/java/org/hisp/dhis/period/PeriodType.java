@@ -343,6 +343,49 @@ public abstract class PeriodType
         
         return null;
     }
+    
+    /**
+     * Returns a list of periods based on the given list of date strings in ISO
+     * format.
+     * 
+     * @param isoPeriods the list of date strings in ISO format.
+     * @return a list of periods.
+     */
+    public static List<Period> getPeriodsFromIsoString( Collection<String> isoPeriods )
+    {
+        List<Period> periods = new ArrayList<Period>();
+        
+        for ( String iso : isoPeriods )
+        {
+            Period period = getPeriodFromIsoString( iso );
+            
+            if ( period != null )
+            {
+                periods.add( period );
+            }
+        }
+        
+        return periods;
+    }
+    
+    /**
+     * Returns a list of iso period strings based on the given collection of
+     * Periods.
+     * 
+     * @param periods the collection of Periods.
+     * @return a list of iso periods.
+     */
+    public static List<String> getIsoPeriods( Collection<Period> periods )
+    {
+        List<String> isoPeriods = new ArrayList<String>();
+        
+        for ( Period period : periods )
+        {
+            isoPeriods.add( period.getIsoDate() );
+        }
+        
+        return isoPeriods;
+    }
 
     /**
      * Creates a period based on the given external identifier, which is on the

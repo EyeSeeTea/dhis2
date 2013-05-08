@@ -27,14 +27,14 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.common.DimensionalObject.DIMENSION_OBJECT_TYPE_MAP;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.hisp.dhis.dataelement.DataElementCategory;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
-import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -45,32 +45,26 @@ public class DefaultDimensionService
     implements DimensionService
 {
     @Autowired
-    private DataElementService dataElementService;
-    
-    @Autowired
-    private OrganisationUnitGroupService organisationUnitGroupService;
-    
-    @Autowired
-    private DataElementCategoryService categoryService;
+    private IdentifiableObjectManager identifiableObjectManager;
     
     @Override
     public DimensionalObject getDimension( String uid )
-    {
-        DataElementGroupSet degs = dataElementService.getDataElementGroupSet( uid );
+    {        
+        DataElementGroupSet degs = identifiableObjectManager.get( DataElementGroupSet.class, uid );
         
         if ( degs != null )
         {
             return degs;
         }
         
-        OrganisationUnitGroupSet ougs = organisationUnitGroupService.getOrganisationUnitGroupSet( uid );
+        OrganisationUnitGroupSet ougs = identifiableObjectManager.get( OrganisationUnitGroupSet.class, uid );
         
         if ( ougs != null )
         {
             return ougs;
         }
         
-        DataElementCategory cat = categoryService.getDataElementCategory( uid );
+        DataElementCategory cat = identifiableObjectManager.get( DataElementCategory.class, uid );
         
         if ( cat != null )
         {
@@ -79,15 +73,45 @@ public class DefaultDimensionService
         
         return null;
     }
-
+    
+    public DimensionType getDimensionType( String uid )
+    {
+        DataElementGroupSet degs = identifiableObjectManager.get( DataElementGroupSet.class, uid );
+        
+        if ( degs != null )
+        {
+            return DimensionType.DATAELEMENT_GROUPSET;
+        }
+        
+        OrganisationUnitGroupSet ougs = identifiableObjectManager.get( OrganisationUnitGroupSet.class, uid );
+        
+        if ( ougs != null )
+        {
+            return DimensionType.ORGANISATIONUNIT_GROUPSET;
+        }
+        
+        DataElementCategory cat = identifiableObjectManager.get( DataElementCategory.class, uid );
+        
+        if ( cat != null )
+        {
+            return DimensionType.CATEGORY;
+        }
+        
+        return DIMENSION_OBJECT_TYPE_MAP.get( uid );
+    }
+    
     @Override
     public List<DimensionalObject> getAllDimensions()
     {
+        Collection<DataElementGroupSet> degs = identifiableObjectManager.getAll( DataElementGroupSet.class );
+        Collection<OrganisationUnitGroupSet> ougs = identifiableObjectManager.getAll( OrganisationUnitGroupSet.class );
+        Collection<DataElementCategory> dcs = identifiableObjectManager.getAll( DataElementCategory.class );
+
         List<DimensionalObject> dimensions = new ArrayList<DimensionalObject>();
         
-        dimensions.addAll( dataElementService.getAllDataElementGroupSets() );
-        dimensions.addAll( organisationUnitGroupService.getAllOrganisationUnitGroupSets() );
-        dimensions.addAll( categoryService.getDataDimensionDataElementCategories() );
+        dimensions.addAll( degs );
+        dimensions.addAll( ougs );
+        dimensions.addAll( dcs );
         
         return dimensions;
     }

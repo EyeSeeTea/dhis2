@@ -27,11 +27,24 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.common.DimensionType.DATAELEMENT;
+import static org.hisp.dhis.common.DimensionType.DATAELEMENT_GROUPSET;
+import static org.hisp.dhis.common.DimensionType.DATASET;
+import static org.hisp.dhis.common.DimensionType.INDICATOR;
+import static org.hisp.dhis.common.DimensionType.ORGANISATIONUNIT;
+import static org.hisp.dhis.common.DimensionType.ORGANISATIONUNIT_GROUPSET;
+import static org.hisp.dhis.common.DimensionType.PERIOD;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_CHILDREN;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,6 +53,9 @@ import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.api.utils.ContextUtils.CacheStrategy;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
+import org.hisp.dhis.common.DimensionService;
+import org.hisp.dhis.common.DimensionType;
+import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
@@ -53,7 +69,11 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.period.RelativePeriodEnum;
+import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.system.util.CodecUtils;
+import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -101,6 +121,9 @@ public class ChartController
 
     @Autowired
     private OrganisationUnitGroupService organisationUnitGroupService;
+    
+    @Autowired
+    private DimensionService dimensionService;
     
     @Autowired
     private I18nManager i18nManager;
@@ -219,6 +242,8 @@ public class ChartController
     @Override
     public void postProcessEntity( Chart chart ) throws Exception
     {
+        chart.populateWebDomainProperties();
+        
         I18nFormat format = i18nManager.getI18nFormat();
         
         if ( chart.getPeriods() != null && !chart.getPeriods().isEmpty() )
@@ -236,17 +261,106 @@ public class ChartController
 
     private void mergeChart( Chart chart )
     {
+        List<DimensionalObject> cols = chart.getColumns();
+        
+        chart.getIndicators().clear();
+        chart.getDataElements().clear();
+        chart.getDataSets().clear();
+        chart.getPeriods().clear();
+        chart.getRelatives().clear();
+        chart.getOrganisationUnits().clear();
+        chart.getDataElementGroups().clear();
+        chart.getOrganisationUnitGroups().clear();
+        
+        for ( DimensionalObject dimension : cols )
+        {
+            DimensionType type = dimensionService.getDimensionType( dimension.getDimension() );
+            
+            List<String> uids = getUids( dimension.getItems() );
+            
+            if ( INDICATOR.equals( type ) )
+            {
+                chart.getIndicators().addAll( indicatorService.getIndicatorsByUid( uids ) );
+            }
+            else if ( DATAELEMENT.equals( type ) )
+            {
+                chart.getDataElements().addAll( dataElementService.getDataElementsByUid( uids ) );
+            }
+            else if ( DATASET.equals( type ) )
+            {
+                chart.getDataSets().addAll( dataSetService.getDataSetsByUid( uids ) );
+            }
+            else if ( PERIOD.equals( type ) )
+            {
+                Set<Period> periods = new HashSet<Period>();
+                
+                for ( String isoPeriod : uids )
+                {
+                    if ( RelativePeriodEnum.contains( isoPeriod ) )
+                    {
+                        RelativePeriodEnum relativePeriod = RelativePeriodEnum.valueOf( isoPeriod );
+                        periods.addAll( RelativePeriods.getRelativePeriodsFromEnum( relativePeriod, null, false ) );
+                    }
+                    else
+                    {
+                        Period period = PeriodType.getPeriodFromIsoString( isoPeriod );
+                    
+                        if ( period != null )
+                        {
+                            periods.add( period );
+                        }
+                    }
+                }
+                
+                chart.setPeriods( new ArrayList<Period>( periods ) );
+            }
+            else if ( ORGANISATIONUNIT.equals( type ) )
+            {
+                User user = currentUserService.getCurrentUser();
+                
+                List<OrganisationUnit> ous = new ArrayList<OrganisationUnit>();
+                
+                for ( String ou : uids )
+                {
+                    if ( KEY_USER_ORGUNIT.equals( ou ) && user != null && user.getOrganisationUnit() != null )
+                    {
+                        ous.add( user.getOrganisationUnit() );
+                    }
+                    else if ( KEY_USER_ORGUNIT_CHILDREN.equals( ou ) && user != null && user.getOrganisationUnit() != null )
+                    {
+                        ous.addAll( user.getOrganisationUnit().getSortedChildren() );
+                    }
+                    else
+                    {
+                        OrganisationUnit unit = organisationUnitService.getOrganisationUnit( ou );
+                        
+                        if ( unit != null )
+                        {
+                            ous.add( unit );
+                        }
+                    }
+                }
+                
+                chart.setOrganisationUnits( ous );
+            }
+            else if ( DATAELEMENT_GROUPSET.equals( type ) )
+            {
+                chart.getDataElementGroups().addAll( dataElementService.getDataElementGroupsByUid( uids ) );
+            }
+            else if ( ORGANISATIONUNIT_GROUPSET.equals( type ) )
+            {
+                chart.getOrganisationUnitGroups().addAll( organisationUnitGroupService.getOrganisationUnitGroupsByUid( uids ) );
+            }
+                        
+            //TODO categories
+        }
+        
         chart.setDataElements( dataElementService.getDataElementsByUid( getUids( chart.getDataElements() ) ) );
         chart.setIndicators( indicatorService.getIndicatorsByUid( getUids( chart.getIndicators() ) ) );
         chart.setDataSets( dataSetService.getDataSetsByUid( getUids( chart.getDataSets() ) ) );
         chart.setOrganisationUnits( organisationUnitService.getOrganisationUnitsByUid( getUids( chart.getOrganisationUnits() ) ) );
         chart.setPeriods( periodService.reloadPeriods( chart.getPeriods() ) );
 
-        if ( chart.getOrganisationUnitGroupSet() != null )
-        {
-            chart.setOrganisationUnitGroupSet( organisationUnitGroupService.getOrganisationUnitGroupSet( chart.getOrganisationUnitGroupSet().getUid() ) );
-        }
-        
         if ( chart.getUser() != null )
         {
             chart.setUser( userService.getUser( chart.getUser().getUid() ) );
