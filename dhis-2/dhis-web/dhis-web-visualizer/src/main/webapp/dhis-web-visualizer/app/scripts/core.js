@@ -1244,7 +1244,7 @@ console.log("baseLineFields", store.baseLineFields);
 						title: getDefaultSeriesTitle(store, xResponse)
 					};
 
-					//if (xLayout.options.showValues) {
+					//if (xLayout.showValues) {
 						//line.label = {
 							//display: 'rotate',
 							//'text-anchor': 'middle',
@@ -1256,19 +1256,19 @@ console.log("baseLineFields", store.baseLineFields);
 				}
 
 				// Options, theme colors
-				if (xLayout.options.showTrendLine) {
+				if (xLayout.showTrendLine) {
 					series = getDefaultTrendLines(store, xResponse).concat(series);
 
 					colors = colors.concat(colors);
 				}
 
-				if (xLayout.options.targetLineValue) {
+				if (xLayout.targetLineValue) {
 					series.push(getDefaultTargetLine(store, xLayout));
 
 					colors.push('#051a2e');
 				}
 
-				if (xLayout.options.baseLineValue) {
+				if (xLayout.baseLineValue) {
 					series.push(getDefaultBaseLine(store, xLayout));
 
 					colors.push('#051a2e');
