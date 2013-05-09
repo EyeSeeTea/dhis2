@@ -358,7 +358,7 @@ Ext.onReady( function() {
 				}
 			},
 			setAllFalse: function() {
-				var a = dv.cmp.dimension.relativeperiod.checkbox;
+				var a = dv.cmp.dimension.relativePeriod.checkbox;
 				for (var i = 0; i < a.length; i++) {
 					a[i].setValue(false);
 				}
@@ -1101,6 +1101,21 @@ Ext.onReady( function() {
 					favorite.name = nameTextfield.getValue();
 
 					if (favorite && favorite.name) {
+
+						// Server sync
+						favorite.showData = favorite.showValues;
+						favorite.targetLineLabel = favorite.targetLineTitle;
+						favorite.baseLineLabel = favorite.baseLineTitle;
+						favorite.domainAxisLabel = favorite.domainAxisTitle;
+						favorite.rangeAxisLabel = favorite.rangeAxisTitle;
+
+						delete favorite.showValues;
+						delete favorite.targetLineTitle;
+						delete favorite.baseLineTitle;
+						delete favorite.domainAxisTitle;
+						delete favorite.rangeAxisTitle;
+
+						// Request
 						Ext.Ajax.request({
 							url: dv.init.contextPath + '/api/charts/',
 							method: 'POST',
@@ -4018,7 +4033,7 @@ console.log("xLayout", xLayout);
 				}
 
 				// Periods
-				fixedPeriodSelected.removeAll();
+				dv.store.fixedPeriodSelected.removeAll();
 				dv.util.checkbox.setAllFalse();
 				periodRecords = recMap[dimConf.period.objectName] || [];
 				for (var i = 0, peroid, checkbox; i < periodRecords.length; i++) {
@@ -4031,11 +4046,11 @@ console.log("xLayout", xLayout);
 						fixedPeriodRecords.push(period);
 					}
 				}
-				fixedPeriodSelected.add(fixedPeriodRecords);
+				dv.store.fixedPeriodSelected.add(fixedPeriodRecords);
 
 				// Group sets
 
-				// Reset stores
+					// Reset stores
 				for (var key in dimensionIdSelectedStoreMap) {
 					if (dimensionIdSelectedStoreMap.hasOwnProperty(key)) {
 						var a = dimensionIdAvailableStoreMap[key],
@@ -4047,6 +4062,43 @@ console.log("xLayout", xLayout);
 						}
 					}
 				}
+
+					// Add records
+				for (var key in dimensionIdSelectedStoreMap) {
+					if (dimensionIdSelectedStoreMap.hasOwnProperty(key) && recMap[key]) {
+						dimensionIdSelectedStoreMap[key].add(recMap[key]);
+					}
+				}
+
+				// Options
+				//var showTrendLine,
+			//targetLineValue,
+			//targetLineTitle,
+			//baseLineValue,
+			//baseLineTitle,
+
+			//showValues,
+			//hideLegend,
+			//hideTitle,
+			//title,
+			//domainAxisTitle,
+			//rangeAxisTitle,
+
+				if (Ext.isBoolean(xLayout.regression)) {
+					dv.viewport.showTrendLine.setValue(xLayout.regression);
+				}
+				if (Ext.isBoolean(xLayout.showData)) {
+					dv.viewport.showValues.setValue(xLayout.showData);
+				}
+				if (Ext.isBoolean(xLayout.hideLegend)) {
+					dv.viewport.hideLegend.setValue(xLayout.hideLegend);
+				}
+				if (Ext.isBoolean(xLayout.hideTitle)) {
+					dv.viewport.hideTitle.setValue(xLayout.hideTitle);
+				}
+
+
+
 
 
 
@@ -4063,123 +4115,6 @@ console.log("xLayout", xLayout);
 					for (var key in graphMap) {
 						if (graphMap.hasOwnProperty(key)) {
 							treePanel.multipleExpand(key, graphMap[key], true);
-						}
-					}
-				}
-				else {
-					treePanel.reset();
-					update();
-				}
-
-
-
-
-
-
-
-
-				// Organisation units: tree sync/async
-
-				// User orgunit
-
-
-				// Organisation unit group sets
-				if (Ext.isObject(r.organisationUnitGroupSets)) {
-					for (var key in r.organisationUnitGroupSets) {
-						if (r.organisationUnitGroupSets.hasOwnProperty(key)) {
-							dimensionIdSelectedStoreMap[key].add(r.organisationUnitGroupSets[key]);
-							dv.util.multiselect.filterAvailable({store: dimensionIdAvailableStoreMap[key]}, {store: dimensionIdSelectedStoreMap[key]});
-						}
-					}
-				}
-
-				// Data element group sets
-				if (Ext.isObject(r.dataElementGroupSets)) {
-					for (var key in r.dataElementGroupSets) {
-						if (r.dataElementGroupSets.hasOwnProperty(key)) {
-							dimensionIdSelectedStoreMap[key].add(r.dataElementGroupSets[key]);
-							dv.util.multiselect.filterAvailable({store: dimensionIdAvailableStoreMap[key]}, {store: dimensionIdSelectedStoreMap[key]});
-						}
-					}
-				}
-
-				// Layout
-				dv.viewport.dimensionStore.reset(true);
-				dv.viewport.colStore.removeAll();
-				dv.viewport.rowStore.removeAll();
-				dv.viewport.filterStore.removeAll();
-
-				if (Ext.isArray(r.columnDimensions)) {
-					for (var i = 0, dim; i < r.columnDimensions.length; i++) {
-						dim = dv.conf.finals.dimension.objectNameMap[r.columnDimensions[i]];
-
-						dv.viewport.colStore.add({
-							id: dim.dimensionName,
-							name: dim.name
-						});
-
-						dv.viewport.dimensionStore.remove(dv.viewport.dimensionStore.getById(dim.dimensionName));
-
-					}
-				}
-
-				if (Ext.isArray(r.rowDimensions)) {
-					for (var i = 0, dim; i < r.rowDimensions.length; i++) {
-						dim = dv.conf.finals.dimension.objectNameMap[r.rowDimensions[i]];
-
-						dv.viewport.rowStore.add({
-							id: dim.dimensionName,
-							name: dim.name
-						});
-
-						dv.viewport.dimensionStore.remove(dv.viewport.dimensionStore.getById(dim.dimensionName));
-					}
-				}
-
-				if (Ext.isArray(r.filterDimensions)) {
-					for (var i = 0, dim; i < r.filterDimensions.length; i++) {
-						dim = dv.conf.finals.dimension.objectNameMap[r.filterDimensions[i]];
-
-						dv.viewport.filterStore.add({
-							id: dim.dimensionName,
-							name: dim.name
-						});
-
-						dv.viewport.dimensionStore.remove(dv.viewport.dimensionStore.getById(dim.dimensionName));
-					}
-				}
-
-				// Options
-				dv.viewport.showTotals.setValue(r.totals);
-				dv.viewport.showSubTotals.setValue(r.subtotals);
-				dv.viewport.hideEmptyRows.setValue(r.hideEmptyRows);
-				dv.viewport.displayDensity.setValue(r.displayDensity);
-				dv.viewport.fontSize.setValue(r.fontSize);
-				dv.viewport.digitGroupSeparator.setValue(r.digitGroupSeparator);
-
-				if (Ext.isObject(r.reportParams)) {
-					dv.viewport.reportingPeriod.setValue(r.reportParams.paramReportingPeriod);
-					dv.viewport.organisationUnit.setValue(r.reportParams.paramOrganisationUnit);
-					dv.viewport.parentOrganisationUnit.setValue(r.reportParams.paramParentOrganisationUnit);
-				}
-
-				// Upgrade fixes
-				if (!Ext.isArray(r.organisationUnits) || !r.organisationUnits.length) {
-					if (Ext.isObject(r.reportParams) && r.reportParams.paramOrganisationUnit) {
-						userOrganisationUnit.setValue(true);
-					}
-
-					if (Ext.isObject(r.reportParams) && r.reportParams.paramParentOrganisationUnit) {
-						userOrganisationUnit.setValue(true);
-					}
-				}
-
-				// Organisation units: If fav has organisation units, execute from tree callback instead
-				if (Ext.isArray(r.organisationUnits) && Ext.isObject(r.parentGraphMap)) {
-					treePanel.numberOfRecords = dv.util.object.getLength(r.parentGraphMap);
-					for (var key in r.parentGraphMap) {
-						if (r.parentGraphMap.hasOwnProperty(key)) {
-							treePanel.multipleExpand(key, r.parentGraphMap[key], true);
 						}
 					}
 				}
