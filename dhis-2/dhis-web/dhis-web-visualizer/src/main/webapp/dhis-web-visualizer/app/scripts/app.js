@@ -3972,9 +3972,12 @@ Ext.onReady( function() {
 					filterIds = xLayout.extended.filtersDimensionNames,
 					dimMap = xLayout.extended.objectNameDimensionMap,
 					recMap = xLayout.extended.objectNameRecordsMap,
+					graphMap = xLayout.extended.parentGraphMap,
 					dimConf = dv.conf.finals.dimension,
-					objectName;
-console.log("setfav xlayout", xLayout);
+					objectName,
+					periodRecords,
+					fixedPeriodRecords = [];
+console.log("xLayout", xLayout);
 
 				// Type
 				dv.viewport.chartType.setChartType(xLayout.type);
@@ -3988,14 +3991,14 @@ console.log("setfav xlayout", xLayout);
 				dv.store.indicatorSelected.removeAll();
 				objectName = dimConf.indicator.objectName;
 				if (dimMap[objectName]) {
-					dv.store.indicatorSelected.add(recMap[objectName]);
+					dv.store.indicatorSelected.add(Ext.clone(recMap[objectName]));
 				}
 
 				// Data elements
 				dv.store.dataElementSelected.removeAll();
 				objectName = dimConf.dataElement.objectName;
 				if (dimMap[objectName]) {
-					dv.store.dataElementSelected.add(recMap[objectName]);
+					dv.store.dataElementSelected.add(Ext.clone(recMap[objectName]));
 					dv.viewport.dataElementDetailLevel.setValue(objectName);
 				}
 
@@ -4003,7 +4006,7 @@ console.log("setfav xlayout", xLayout);
 				dv.store.dataElementSelected.removeAll();
 				objectName = dimConf.operand.objectName;
 				if (dimMap[objectName]) {
-					dv.store.dataElementSelected.add(recMap[objectName]);
+					dv.store.dataElementSelected.add(Ext.clone(recMap[objectName]));
 					dv.viewport.dataElementDetailLevel.setValue(objectName);
 				}
 
@@ -4011,52 +4014,28 @@ console.log("setfav xlayout", xLayout);
 				dv.store.dataSetSelected.removeAll();
 				objectName = dimConf.dataSet.objectName;
 				if (dimMap[objectName]) {
-					dv.store.dataSetSelected.add(recMap[objectName]);
+					dv.store.dataSetSelected.add(Ext.clone(recMap[objectName]));
 				}
 
-				// Fixed periods
-
-
-
-
-
-
-
-				// Data elements
-				dv.store.dataElementSelected.removeAll();
-				if (Ext.isArray(r.dataElements)) {
-					dv.store.dataElementSelected.add(r.dataElements);
-				}
-
-				// Data sets
-				dv.store.dataSetSelected.removeAll();
-				if (Ext.isArray(r.dataSets)) {
-					dv.store.dataSetSelected.add(r.dataSets);
-				}
-
-				// Fixed periods
-				dv.store.fixedPeriodSelected.removeAll();
-				if (Ext.isArray(r.periods)) {
-					dv.store.fixedPeriodSelected.add(r.periods);
-				}
-
-				// Relative periods
-				if (Ext.isObject(r.relativePeriods)) {
-					for (var key in r.relativePeriods) {
-						if (r.relativePeriods.hasOwnProperty(key) && dv.conf.period.relativePeriodParamKeys.hasOwnProperty(key)) {
-							var value = dv.conf.period.relativePeriodParamKeys[key];
-							relativePeriod.valueComponentMap[value].setValue(!!r.relativePeriods[key]);
-						}
+				// Periods
+				fixedPeriodSelected.removeAll();
+				dv.util.checkbox.setAllFalse();
+				periodRecords = recMap[dimConf.period.objectName] || [];
+				for (var i = 0, peroid, checkbox; i < periodRecords.length; i++) {
+					period = periodRecords[i];
+					checkbox = relativePeriod.valueComponentMap[period.id];
+					if (checkbox) {
+						checkbox.setValue(true);
+					}
+					else {
+						fixedPeriodRecords.push(period);
 					}
 				}
+				fixedPeriodSelected.add(fixedPeriodRecords);
 
-				// Organisation units: tree sync/async
+				// Group sets
 
-				// User orgunit
-				userOrganisationUnit.setValue(r.userOrganisationUnit);
-				userOrganisationUnitChildren.setValue(r.userOrganisationUnitChildren);
-
-				// Reset groupset stores
+				// Reset stores
 				for (var key in dimensionIdSelectedStoreMap) {
 					if (dimensionIdSelectedStoreMap.hasOwnProperty(key)) {
 						var a = dimensionIdAvailableStoreMap[key],
@@ -4068,6 +4047,41 @@ console.log("setfav xlayout", xLayout);
 						}
 					}
 				}
+
+
+
+
+
+
+				// Organisation units
+				userOrganisationUnit.setValue(xLayout.userOrganisationUnit);
+				userOrganisationUnitChildren.setValue(xLayout.userOrganisationUnitChildren);
+
+				// If fav has organisation units, wait for tree callback before update
+				if (recMap[dimConf.organisationUnit.objectName] && graphMap) {
+					treePanel.numberOfRecords = dv.util.object.getLength(graphMap);
+					for (var key in graphMap) {
+						if (graphMap.hasOwnProperty(key)) {
+							treePanel.multipleExpand(key, graphMap[key], true);
+						}
+					}
+				}
+				else {
+					treePanel.reset();
+					update();
+				}
+
+
+
+
+
+
+
+
+				// Organisation units: tree sync/async
+
+				// User orgunit
+
 
 				// Organisation unit group sets
 				if (Ext.isObject(r.organisationUnitGroupSets)) {
