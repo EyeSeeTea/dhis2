@@ -28,6 +28,11 @@ Ext.onReady( function() {
 		}
 
 		// Dynamic dimensions
+
+			// Sort by name
+		init.dimensions = dv.util.array.sortObjectsByString(init.dimensions);
+
+			// Extend
 		for (var i = 0, dim; i < init.dimensions.length; i++) {
 			dim = init.dimensions[i];
 			dim.dimensionName = dim.id;
@@ -204,42 +209,6 @@ Ext.onReady( function() {
 
 					return null;
 				}
-			}
-		};
-
-		util.store = {
-			addToStorage: function(s, records) {
-				s.each( function(r) {
-					if (!s.storage[r.data.id]) {
-						s.storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: s.parent};
-					}
-				});
-				if (records) {
-					Ext.Array.each(records, function(r) {
-						if (!s.storage[r.data.id]) {
-							s.storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: s.parent};
-						}
-					});
-				}
-			},
-			loadFromStorage: function(s) {
-				var items = [];
-				s.removeAll();
-				for (var obj in s.storage) {
-					if (s.storage[obj].parent === s.parent) {
-						items.push(s.storage[obj]);
-					}
-				}
-				s.add(items);
-				s.sort('name', 'ASC');
-			},
-			containsParent: function(s) {
-				for (var obj in s.storage) {
-					if (s.storage[obj].parent === s.parent) {
-						return true;
-					}
-				}
-				return false;
 			}
 		};
 

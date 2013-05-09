@@ -37,7 +37,9 @@ import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
@@ -54,7 +56,6 @@ import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.DimensionalView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.i18n.I18nFormat;
@@ -115,9 +116,9 @@ public class Chart
 
     private boolean regression;
 
-    private boolean hideSubtitle;
-    
     private boolean hideTitle;
+    
+    private boolean hideSubtitle;
     
     private String title;
 
@@ -180,6 +181,8 @@ public class Chart
     
     private transient List<DimensionalObject> filters = new ArrayList<DimensionalObject>();
     
+    private Map<String, String> parentGraphMap = new HashMap<String, String>();
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -222,6 +225,11 @@ public class Chart
         for ( String filter : filterDimensions )
         {
             filters.addAll( getDimensionalObjectList( filter ) );
+        }
+        
+        for ( OrganisationUnit organisationUnit : organisationUnits )
+        {
+            parentGraphMap.put( organisationUnit.getUid(), organisationUnit.getParentGraph() );
         }
     }
     
@@ -624,6 +632,19 @@ public class Chart
     @JsonProperty
     @JsonView( {DetailedView.class, ExportView.class, DimensionalView.class} )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public boolean isHideTitle()
+    {
+        return hideTitle;
+    }
+
+    public void setHideTitle( boolean hideTitle )
+    {
+        this.hideTitle = hideTitle;
+    }
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class, DimensionalView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
     public boolean isHideSubtitle()
     {
         return hideSubtitle;
@@ -632,19 +653,6 @@ public class Chart
     public void setHideSubtitle( Boolean hideSubtitle )
     {
         this.hideSubtitle = hideSubtitle;
-    }
-
-    @JsonProperty
-    @JsonView( {DetailedView.class, ExportView.class} )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
-    public boolean isHideTitle()
-    {
-        return hideTitle;
-    }
-
-    public void setHideTitle( Boolean hideTitle )
-    {
-        this.hideTitle = hideTitle;
     }
     
     @JsonProperty
@@ -919,7 +927,19 @@ public class Chart
     public void setFilters( List<DimensionalObject> filters )
     {
         this.filters = filters;
-    }    
+    }
+
+    @JsonProperty
+    @JsonView({ DetailedView.class, ExportView.class })
+    public Map<String, String> getParentGraphMap()
+    {
+        return parentGraphMap;
+    }
+
+    public void setParentGraphMap( Map<String, String> parentGraphMap )
+    {
+        this.parentGraphMap = parentGraphMap;
+    }
 
     // -------------------------------------------------------------------------
     // Merge with
