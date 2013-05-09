@@ -3974,6 +3974,7 @@ Ext.onReady( function() {
 					recMap = xLayout.extended.objectNameRecordsMap,
 					dimConf = dv.conf.finals.dimension,
 					objectName;
+console.log("setfav xlayout", xLayout);
 
 				// Type
 				dv.viewport.chartType.setChartType(xLayout.type);
@@ -4013,7 +4014,9 @@ Ext.onReady( function() {
 					dv.store.dataSetSelected.add(recMap[objectName]);
 				}
 
-				// Periods
+				// Fixed periods
+
+
 
 
 
