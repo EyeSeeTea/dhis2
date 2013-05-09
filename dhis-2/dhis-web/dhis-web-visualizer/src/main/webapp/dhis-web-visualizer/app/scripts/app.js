@@ -3972,7 +3972,8 @@ Ext.onReady( function() {
 					filterIds = xLayout.extended.filtersDimensionNames,
 					dimMap = xLayout.extended.objectNameDimensionMap,
 					recMap = xLayout.extended.objectNameRecordsMap,
-					dimConf = dv.conf.finals.dimension;
+					dimConf = dv.conf.finals.dimension,
+					objectName;
 
 				// Type
 				dv.viewport.chartType.setChartType(xLayout.type);
@@ -3984,9 +3985,36 @@ Ext.onReady( function() {
 
 				// Indicators
 				dv.store.indicatorSelected.removeAll();
-				if (dimMap[dimConf.indicator.objectName]) {
-					dv.store.indicatorSelected.add(recMap[dimConf.indicator.objectName]);
+				objectName = dimConf.indicator.objectName;
+				if (dimMap[objectName]) {
+					dv.store.indicatorSelected.add(recMap[objectName]);
 				}
+
+				// Data elements
+				dv.store.dataElementSelected.removeAll();
+				objectName = dimConf.dataElement.objectName;
+				if (dimMap[objectName]) {
+					dv.store.dataElementSelected.add(recMap[objectName]);
+					dv.viewport.dataElementDetailLevel.setValue(objectName);
+				}
+
+				// Operands
+				dv.store.dataElementSelected.removeAll();
+				objectName = dimConf.operand.objectName;
+				if (dimMap[objectName]) {
+					dv.store.dataElementSelected.add(recMap[objectName]);
+					dv.viewport.dataElementDetailLevel.setValue(objectName);
+				}
+
+				// Data sets
+				dv.store.dataSetSelected.removeAll();
+				objectName = dimConf.dataSet.objectName;
+				if (dimMap[objectName]) {
+					dv.store.dataSetSelected.add(recMap[objectName]);
+				}
+
+				// Periods
+
 
 
 
