@@ -182,5 +182,7 @@ DV.i18n = {
 	delete_: '$encoder.jsEscape($i18n.getString( 'delete_' ) , "'")',
 	share_with_other_people: '$encoder.jsEscape($i18n.getString( 'share_with_other_people' ) , "'")',
 	totals: '$encoder.jsEscape($i18n.getString( 'totals' ) , "'")',
-	details: '$encoder.jsEscape($i18n.getString( 'details' ) , "'")'
+	details: '$encoder.jsEscape($i18n.getString( 'details' ) , "'")',
+	prev: '$encoder.jsEscape($i18n.getString( 'prev' ) , "'")',
+	next: '$encoder.jsEscape($i18n.getString( 'next' ) , "'")'
 };
