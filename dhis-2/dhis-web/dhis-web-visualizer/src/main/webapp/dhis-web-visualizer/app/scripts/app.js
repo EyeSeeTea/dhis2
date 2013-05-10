@@ -1072,6 +1072,8 @@ Ext.onReady( function() {
 					if (favorite && favorite.name) {
 
 						// Server sync
+
+							// Property names
 						favorite.showData = favorite.showValues;
 						favorite.targetLineLabel = favorite.targetLineTitle;
 						favorite.baseLineLabel = favorite.baseLineTitle;
@@ -1085,6 +1087,20 @@ Ext.onReady( function() {
 						delete favorite.rangeAxisTitle;
 
 						delete favorite.extended;
+
+							// Operand ids
+						for (var i = 0, item; i < favorite.columns[0].items.length; i++) {
+							favorite.columns[0].items[i].id = dv.util.str.replaceAll(favorite.columns[0].items[i].id, '-', '.');
+						}
+						for (var i = 0, item; i < favorite.rows[0].items.length; i++) {
+							favorite.rows[0].items[i].id = dv.util.str.replaceAll(favorite.rows[0].items[i].id, '-', '.');
+						}
+						for (var i = 0, dim; i < favorite.filters.length; i++) {
+							dim = favorite.filters[i];
+							for (var j = 0; j < dim.items.length; j++) {
+								dim.items[j].id = dv.util.str.replaceAll(dim.items[j].id, '-', '.');
+							}
+						}
 
 						// Request
 						Ext.Ajax.request({
