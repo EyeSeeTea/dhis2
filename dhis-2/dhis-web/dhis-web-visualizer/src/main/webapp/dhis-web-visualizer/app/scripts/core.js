@@ -674,6 +674,40 @@ DV.core.getUtil = function(dv) {
 				return paramString;
 			};
 
+			getSyncronizedXLayout = function(xLayout, response) {
+				var dimensions = [].concat(xLayout.columns, xLayout.rows, xLayout.filters),
+					xOuDimension = xLayout.extended.objectNameDimensionMap[dimConf.organisationUnit.objectName],
+					isUserOrgunit = Ext.Array.contains(xOuDimension.items, 'USER_ORGUNIT'),
+					isUserOrgunitChildren = Ext.Array.contains(xOuDimension.items, 'USER_ORGUNIT_CHILDREN'),
+					items = [],
+					isDirty = false;
+
+				// Add user orgunits
+				if (xOuDimension && (isUserOrgunit || isUserOrgunitChildren)) {
+					if (isUserOrgunit) {
+						items.push(Ext.clone(dv.init.user.ou));
+					}
+					if (isUserOrgunitChildren) {
+						items = items.concat(Ext.clone(dv.init.user.ouc));
+					}
+
+					for (var i = 0; i < dimensions.length; i++) {
+						if (dimensions[i].dimension === dimConf.organisationUnit.objectName) {
+							dimensions[i].items = items;
+						}
+					}
+
+					isDirty = true;
+				}
+
+				if (isDirty) {
+					delete xLayout.extended;
+					xLayout = dv.util.chart.extendLayout(xLayout);
+				}
+
+				return xLayout;
+			};
+
 			validateResponse = function(response) {
 				if (!(response && Ext.isObject(response))) {
 					alert('Data response invalid');
@@ -994,7 +1028,7 @@ console.log("baseLineFields", store.baseLineFields);
 				for (var i = 0, id; i < store.rangeFields.length; i++) {
 					id = store.rangeFields[i];
 
-					if (id.indexOf('.') !== -1) {
+					if (id.indexOf('-') !== -1) {
 						ids = id.split('-');
 						id = '';
 
@@ -1177,6 +1211,7 @@ console.log("baseLineFields", store.baseLineFields);
 
 			getDefaultChartTitle = function(store, xResponse, xLayout) {
 				var filterItems = xLayout.extended.filterItems,
+					a = [],
 					text = '';
 
 				if (Ext.isArray(filterItems) && filterItems.length) {
@@ -1481,7 +1516,7 @@ console.log("baseLineFields", store.baseLineFields);
 					series = getDefaultSeries(store, xResponse, xLayout);
 
 				series.type = 'area';
-				series.style.opacity = 0.55;
+				series.style.opacity = 0.7;
 				series.style.lineWidth = 0;
 				delete series.label;
 				delete series.tips;
@@ -1608,12 +1643,12 @@ console.log("baseLineFields", store.baseLineFields);
 							return;
 						}
 
-						//xLayout = getSyncronizedXLayout(xLayout, response);
+						xLayout = getSyncronizedXLayout(xLayout, response);
 
-						//if (!xLayout) {
-							//dv.util.mask.hideMask();
-							//return;
-						//}
+						if (!xLayout) {
+							dv.util.mask.hideMask();
+							return;
+						}
 
 						xResponse = extendResponse(response, xLayout);
 

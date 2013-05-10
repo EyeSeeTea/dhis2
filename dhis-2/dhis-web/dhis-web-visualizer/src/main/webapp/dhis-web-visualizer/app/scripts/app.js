@@ -1107,10 +1107,10 @@ Ext.onReady( function() {
 							for (var i = 0; i < dimensions.length; i++) {
 								if (dimensions[i].dimension === dv.conf.finals.dimension.organisationUnit.objectName) {
 									if (favorite.userOrganisationUnit) {
-										dimensions[i].items.push({id: 'USER_ORGANISATION_UNIT'});
+										dimensions[i].items.push({id: 'USER_ORGUNIT'});
 									}
 									if (favorite.userOrganisationUnitChildren) {
-										dimensions[i].items.push({id: 'USER_ORGANISATION_UNIT_CHILDREN'});
+										dimensions[i].items.push({id: 'USER_ORGUNIT_CHILDREN'});
 									}
 								}
 							}
@@ -3447,12 +3447,10 @@ Ext.onReady( function() {
 
 					if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue()) {
 						if (userOrganisationUnit.getValue()) {
-							data.items.push(dv.init.user.ou);
+							data.items.push({id: 'USER_ORGUNIT'});
 						}
 						if (userOrganisationUnitChildren.getValue()) {
-							for (var i = 0; i < dv.init.user.ouc.length; i++) {
-								data.items.push({id: dv.init.user.ouc[i].id});
-							}
+							data.items.push({id: 'USER_ORGUNIT_CHILDREN'});
 						}
 					}
 					else {
@@ -4023,7 +4021,6 @@ Ext.onReady( function() {
 					objectName,
 					periodRecords,
 					fixedPeriodRecords = [];
-console.log("xLayout", xLayout);
 
 				// Type
 				dv.viewport.chartType.setChartType(xLayout.type);
@@ -4101,18 +4098,27 @@ console.log("xLayout", xLayout);
 				}
 
 				// Options
-				//var showTrendLine,
-			//targetLineValue,
-			//targetLineTitle,
-			//baseLineValue,
-			//baseLineTitle,
-
-			//showValues,
-			//hideLegend,
-			//hideTitle,
-			//title,
-			//domainAxisTitle,
-			//rangeAxisTitle,
+				if (Ext.isNumber(xLayout.targetLineValue)) {
+					dv.viewport.targetLineValue.setValue(xLayout.targetLineValue);
+				}
+				if (Ext.isString(xLayout.targetLineTitle)) {
+					dv.viewport.targetLineTitle.setValue(xLayout.targetLineTitle);
+				}
+				if (Ext.isNumber(xLayout.baseLineValue)) {
+					dv.viewport.baseLineValue.setValue(xLayout.baseLineValue);
+				}
+				if (Ext.isString(xLayout.baseLineTitle)) {
+					dv.viewport.baseLineTitle.setValue(xLayout.baseLineTitle);
+				}
+				if (Ext.isString(xLayout.title)) {
+					dv.viewport.title.setValue(xLayout.title);
+				}
+				if (Ext.isString(xLayout.domainAxisTitle)) {
+					dv.viewport.domainAxisTitle.setValue(xLayout.domainAxisTitle);
+				}
+				if (Ext.isString(xLayout.rangeAxisTitle)) {
+					dv.viewport.rangeAxisTitle.setValue(xLayout.rangeAxisTitle);
+				}
 
 				if (Ext.isBoolean(xLayout.regression)) {
 					dv.viewport.showTrendLine.setValue(xLayout.regression);
@@ -4126,14 +4132,6 @@ console.log("xLayout", xLayout);
 				if (Ext.isBoolean(xLayout.hideTitle)) {
 					dv.viewport.hideTitle.setValue(xLayout.hideTitle);
 				}
-
-
-
-
-
-
-
-
 
 				// Organisation units
 				userOrganisationUnit.setValue(xLayout.userOrganisationUnit);
