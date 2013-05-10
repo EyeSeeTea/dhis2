@@ -3431,8 +3431,18 @@ Ext.onReady( function() {
 							items: []
 						};
 
-					for (var i = 0; i < r.length; i++) {
-						data.items.push({id: r[i].data.id});
+					if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue()) {
+						if (userOrganisationUnit.getValue()) {
+							data.items.push(dv.init.user.ou);
+						}
+						if (userOrganisationUnitChildren.getValue()) {
+							data.items.push(dv.init.user.ouc);
+						}
+					}
+					else {
+						for (var i = 0; i < r.length; i++) {
+							data.items.push({id: r[i].data.id});
+						}
 					}
 
 					return data.items.length ? data : null;
