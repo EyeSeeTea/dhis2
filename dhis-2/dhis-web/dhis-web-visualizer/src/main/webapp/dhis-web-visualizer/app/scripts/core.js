@@ -381,8 +381,8 @@ DV.core.getUtil = function(dv) {
 	util.number = {
 		isInteger: function(n) {
 			var str = new String(n);
-			if (str.indexOf('.') > -1) {
-				var d = str.substr(str.indexOf('.') + 1);
+			if (str.indexOf('-') > -1) {
+				var d = str.substr(str.indexOf('-') + 1);
 				return (d.length === 1 && d == '0');
 			}
 			return false;
@@ -994,7 +994,7 @@ console.log("baseLineFields", store.baseLineFields);
 				for (var i = 0, id; i < store.rangeFields.length; i++) {
 					id = store.rangeFields[i];
 
-					if (id.indexOf('-') !== -1) {
+					if (id.indexOf('.') !== -1) {
 						ids = id.split('-');
 						id = '';
 
@@ -1727,6 +1727,10 @@ DV.core.getAPI = function(dv) {
 
 					if (!(Ext.isObject(dim) && Ext.isString(dim.dimension) && Ext.isArray(dim.items) && dim.items.length)) {
 						return;
+					}
+
+					for (var j = 0; j < dim.items.length; j++) {
+						dim.items[j].id = dim.items[j].id.replace('.', '-');
 					}
 				}
 

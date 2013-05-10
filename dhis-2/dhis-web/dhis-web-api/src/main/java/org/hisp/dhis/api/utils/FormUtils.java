@@ -64,7 +64,7 @@ public class FormUtils
             {
                 Group s = new Group();
                 s.setLabel( section.getDisplayName() );
-                s.setFields( inputsFromDataElements( section.getDataElements(), new ArrayList<DataElementOperand>( section.getGreyedFields() ) ) );
+                s.setFields( inputsFromDataElements( new ArrayList<DataElement>( section.getDataElements() ), new ArrayList<DataElementOperand>( section.getGreyedFields() ) ) );
                 form.getGroups().add( s );
             }
         }
@@ -97,7 +97,7 @@ public class FormUtils
             {
                 for ( DataElementOperand operand : greyedFields )
                 {
-                    if ( dataElement == operand.getDataElement() && dataElement.getCategoryCombo() == operand.getCategoryOptionCombo().getCategoryCombo() )
+                    if ( dataElement.equals( operand.getDataElement() ) && dataElement.getCategoryCombo().equals( operand.getCategoryOptionCombo().getCategoryCombo() ) )
                     {
                         return false;
                     }

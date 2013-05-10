@@ -1047,29 +1047,7 @@ Ext.onReady( function() {
 
 		NameWindow = function(id) {
 			var window,
-				bodify,
 				record = dv.store.charts.getById(id);
-
-			bodify = function(xLayout) {
-				if (xLayout.extended.objectNameRecordsMap[dv.conf.finals.dimension.operand.objectName]) {
-					for (var i = 0, id; i < xLayout.columns[0].items.length; i++) {
-						xLayout.columns[0].items[i].id = xLayout.columns[0].items[i].id.replace('-', '.');
-					}
-
-					for (var i = 0, id; i < xLayout.rows[0].items.length; i++) {
-						xLayout.rows[0].items[i].id = xLayout.rows[0].items[i].id.replace('-', '.');
-					}
-
-					for (var i = 0, dim; i < xLayout.filters.length; i++) {
-						dim = xLayout.filters[i];
-						for (var j = 0, id; j < dim.items.length; j++) {
-							dim.items[j].id = dim.items[j].id.replace('-', '.');
-						}
-					}
-				}
-
-				return xLayout;
-			};
 
 			nameTextfield = Ext.create('Ext.form.field.Text', {
 				height: 26,
@@ -1088,7 +1066,7 @@ Ext.onReady( function() {
 			createButton = Ext.create('Ext.button.Button', {
 				text: 'Create', //i18n
 				handler: function() {
-					var favorite = bodify(Ext.clone(dv.xLayout));
+					var favorite = Ext.clone(dv.xLayout);
 					favorite.name = nameTextfield.getValue();
 
 					if (favorite && favorite.name) {
