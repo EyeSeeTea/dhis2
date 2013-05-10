@@ -1730,7 +1730,6 @@ DV.core.getAPI = function(dv) {
 					}
 
 					for (var j = 0; j < dim.items.length; j++) {
-console.log(dim.items[j].id);
 						dim.items[j].id = dim.items[j].id.replace('.', '-');
 					}
 				}

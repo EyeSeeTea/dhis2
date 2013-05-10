@@ -1071,9 +1071,7 @@ Ext.onReady( function() {
 
 					if (favorite && favorite.name) {
 
-						// Server sync
-
-							// Property names
+						// Server sync: property names
 						favorite.showData = favorite.showValues;
 						favorite.targetLineLabel = favorite.targetLineTitle;
 						favorite.baseLineLabel = favorite.baseLineTitle;
@@ -1088,7 +1086,7 @@ Ext.onReady( function() {
 
 						delete favorite.extended;
 
-							// Operand ids
+						// Server sync: operand ids
 						for (var i = 0, item; i < favorite.columns[0].items.length; i++) {
 							favorite.columns[0].items[i].id = dv.util.str.replaceAll(favorite.columns[0].items[i].id, '-', '.');
 						}
@@ -1099,6 +1097,22 @@ Ext.onReady( function() {
 							dim = favorite.filters[i];
 							for (var j = 0; j < dim.items.length; j++) {
 								dim.items[j].id = dv.util.str.replaceAll(dim.items[j].id, '-', '.');
+							}
+						}
+
+						// Server sync: user orgunit
+						if (favorite.userOrganisationUnit || favorite.userOrganisationUnitChildren) {
+							var dimensions = [].concat(favorite.columns, favorite.rows, favorite.filters);
+
+							for (var i = 0; i < dimensions.length; i++) {
+								if (dimensions[i].dimension === dv.conf.finals.dimension.organisationUnit.objectName) {
+									if (favorite.userOrganisationUnit) {
+										dimensions[i].items.push({id: 'USER_ORGANISATION_UNIT'});
+									}
+									if (favorite.userOrganisationUnitChildren) {
+										dimensions[i].items.push({id: 'USER_ORGANISATION_UNIT_CHILDREN'});
+									}
+								}
 							}
 						}
 
@@ -3436,7 +3450,9 @@ Ext.onReady( function() {
 							data.items.push(dv.init.user.ou);
 						}
 						if (userOrganisationUnitChildren.getValue()) {
-							data.items.push(dv.init.user.ouc);
+							for (var i = 0; i < dv.init.user.ouc.length; i++) {
+								data.items.push({id: dv.init.user.ouc[i].id});
+							}
 						}
 					}
 					else {
