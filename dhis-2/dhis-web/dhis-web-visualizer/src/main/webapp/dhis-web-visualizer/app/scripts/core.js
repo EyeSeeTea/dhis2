@@ -1213,7 +1213,7 @@ console.log("baseLineFields", store.baseLineFields);
 				var filterItems = xLayout.extended.filterItems,
 					a = [],
 					text = '';
-
+console.log("filterItems", filterItems);
 				if (Ext.isArray(filterItems) && filterItems.length) {
 					for (var i = 0; i < filterItems.length; i++) {
 						text += xResponse.metaData.names[filterItems[i]];
