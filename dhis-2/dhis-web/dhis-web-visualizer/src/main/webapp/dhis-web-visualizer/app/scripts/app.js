@@ -1053,30 +1053,17 @@ Ext.onReady( function() {
 			bodify = function(xLayout) {
 				if (xLayout.extended.objectNameRecordsMap[dv.conf.finals.dimension.operand.objectName]) {
 					for (var i = 0, id; i < xLayout.columns[0].items.length; i++) {
-						id = xLayout.columns[0].items[i].id;
-						if (id.indexOf('-') !== -1) {
-							xLayout.columns[0].items[i].id = id.substr(0, id.indexOf('-'));
-							console.log(xLayout.columns[0].items[i].id);
-						}
+						xLayout.columns[0].items[i].id = xLayout.columns[0].items[i].id.replace('-', '.');
 					}
 
-					for (var i = 0, dim; i < xLayout.rows.length; i++) {
-						dim = xLayout.rows[i];
-						for (var j = 0, id; j < dim.items.length; j++) {
-							id = dim.items[j].id;
-							if (id.indexOf('-') !== -1) {
-								id = id.substr(0, id.indexOf('-'));
-							}
-						}
+					for (var i = 0, id; i < xLayout.rows[0].items.length; i++) {
+						xLayout.rows[0].items[i].id = xLayout.rows[0].items[i].id.replace('-', '.');
 					}
 
 					for (var i = 0, dim; i < xLayout.filters.length; i++) {
 						dim = xLayout.filters[i];
 						for (var j = 0, id; j < dim.items.length; j++) {
-							id = dim.items[j].id;
-							if (id.indexOf('-') !== -1) {
-								id = id.substr(0, id.indexOf('-'));
-							}
+							dim.items[j].id = dim.items[j].id.replace('-', '.');
 						}
 					}
 				}
