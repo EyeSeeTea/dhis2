@@ -1087,11 +1087,6 @@ Ext.onReady( function() {
 
 						delete favorite.extended;
 
-						// Post params
-						for (var i = 0, dimensions = [].concat(favorite.columns, favorite.rows, favorite.filters); i < dimensions.length; i++) {
-							dimensions[i].items = dimensions[i].postItems;
-						}
-
 						// Server sync: user orgunit
 						if (favorite.userOrganisationUnit || favorite.userOrganisationUnitChildren) {
 							var dimensions = [].concat(favorite.columns, favorite.rows, favorite.filters);
