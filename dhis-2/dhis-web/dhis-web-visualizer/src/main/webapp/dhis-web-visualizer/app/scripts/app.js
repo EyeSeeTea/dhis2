@@ -1065,7 +1065,7 @@ Ext.onReady( function() {
 			});
 
 			createButton = Ext.create('Ext.button.Button', {
-				text: 'Create', //i18n
+				text: DV.i18n.create,
 				handler: function() {
 					var favorite = Ext.clone(dv.xLayout);
 					favorite.name = nameTextfield.getValue();
@@ -1089,7 +1089,7 @@ Ext.onReady( function() {
 
 						// Post params
 						for (var i = 0, dimensions = [].concat(favorite.columns, favorite.rows, favorite.filters); i < dimensions.length; i++) {
-							dimensions[i].items = dimensions[i].postParams;
+							dimensions[i].items = dimensions[i].postItems;
 						}
 
 						// Server sync: user orgunit
@@ -1135,7 +1135,7 @@ Ext.onReady( function() {
 			});
 
 			updateButton = Ext.create('Ext.button.Button', {
-				text: 'Update', //i18n
+				text: DV.i18n.update,
 				handler: function() {
 					var name = nameTextfield.getValue(),
 						favorite;
@@ -1173,7 +1173,7 @@ Ext.onReady( function() {
 			});
 
 			cancelButton = Ext.create('Ext.button.Button', {
-				text: 'Cancel', //i18n
+				text: DV.i18n.cancel,
 				handler: function() {
 					window.destroy();
 				}
@@ -1212,7 +1212,7 @@ Ext.onReady( function() {
 		};
 
 		addButton = Ext.create('Ext.button.Button', {
-			text: 'Add new', //i18n
+			text: DV.i18n.add_new,
 			width: 67,
 			height: 26,
 			style: 'border-radius: 1px;',
@@ -1576,12 +1576,12 @@ Ext.onReady( function() {
 
 			getData = function() {
 				var data = [
-					{id: 'r-------', name: 'Can view'}, //i18n
-					{id: 'rw------', name: 'Can edit and view'}
+					{id: 'r-------', name: DV.i18n.can_view},
+					{id: 'rw------', name: DV.i18n.can_edit_and_view}
 				];
 
 				if (isPublicAccess) {
-					data.unshift({id: '-------', name: 'None'});
+					data.unshift({id: '-------', name: DV.i18n.none});
 				}
 
 				return data;
@@ -1596,7 +1596,7 @@ Ext.onReady( function() {
 				var items = [];
 
 				combo = Ext.create('Ext.form.field.ComboBox', {
-					fieldLabel: isPublicAccess ? 'Public access' : obj.name, //i18n
+					fieldLabel: isPublicAccess ? DV.i18n.public_access : obj.name,
 					labelStyle: 'color:#333',
 					cls: 'dv-combo',
 					fieldStyle: 'padding-left:5px',
@@ -1693,7 +1693,7 @@ Ext.onReady( function() {
 		userGroupField = Ext.create('Ext.form.field.ComboBox', {
 			valueField: 'id',
 			displayField: 'name',
-			emptyText: 'Search for user groups', //i18n
+			emptyText: DV.i18n.search_for_user_groups,
 			queryParam: 'key',
 			queryDelay: 200,
 			minChars: 1,
