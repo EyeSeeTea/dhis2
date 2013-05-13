@@ -48,24 +48,30 @@ public class BaseDimensionalObject
      * The type of this dimension.
      */
     private DimensionType type;
-    
+
+    /**
+     * The name of this dimension. For the dynamic dimensions this will be equal
+     * to dimension identifier. For the period dimension, this will reflect the
+     * period type. For the org unit dimension, this will reflect the level.
+     */
+    private String dimensionName;
+
     /**
      * The dimensional items for this dimension.
      */
     private List<IdentifiableObject> items = new ArrayList<IdentifiableObject>();
     
-    /**
-     * Indicates whether this object should be considered a data dimension. Assumes
-     * true by default.
-     */
-    private boolean dataDimension = true;
-
     //--------------------------------------------------------------------------
     // Constructors
     //--------------------------------------------------------------------------
 
     public BaseDimensionalObject()
     {        
+    }
+
+    public BaseDimensionalObject( String dimension )
+    {
+        this.uid = dimension;
     }
     
     public BaseDimensionalObject( String dimension, DimensionType type, List<? extends IdentifiableObject> items )
@@ -75,9 +81,68 @@ public class BaseDimensionalObject
         this.items = new ArrayList<IdentifiableObject>( items );        
     }
 
+    public BaseDimensionalObject( String dimension, DimensionType type, String dimensionName, List<IdentifiableObject> items )
+    {
+        this.uid = dimension;
+        this.type = type;
+        this.dimensionName = dimensionName;
+        this.items = items;
+    }
+
+    public BaseDimensionalObject( String dimension, DimensionType type, String dimensionName, String displayName, List<IdentifiableObject> items )
+    {
+        this.uid = dimension;
+        this.type = type;
+        this.dimensionName = dimensionName;
+        this.displayName = displayName;
+        this.items = items;
+    }
+
+    // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------
+    
+    /**
+     * Indicates whether this dimension should use all dimension items. All
+     * dimension options is represented as an option list of zero elements.
+     */
+    public boolean isAllItems()
+    {
+        return items != null && items.isEmpty();
+    }
+
+    /**
+     * Indicates whether this dimension has any dimension items.
+     */
+    public boolean hasItems()
+    {
+        return items != null && !items.isEmpty();
+    }
+    
+    /**
+     * Returns dimension name with fall back to dimension.
+     */
+    public String getDimensionName()
+    {
+        return dimensionName != null ? dimensionName : uid;
+    }
+    
     //--------------------------------------------------------------------------
     // Getters and setters
     //--------------------------------------------------------------------------
+
+    @JsonProperty
+    @JsonView( {DimensionalView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getDimension()
+    {
+        return uid;
+    }
+
+    public void setDimension( String dimension )
+    {
+        this.uid = dimension;
+    }
 
     @JsonProperty
     @JsonView( {DimensionalView.class} )
@@ -92,17 +157,14 @@ public class BaseDimensionalObject
         this.type = type;
     }
 
-    @JsonProperty
-    @JsonView( {DimensionalView.class} )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getDimension()
+    public String getDisplayName()
     {
-        return uid;
+        return displayName;
     }
 
-    public void setDimension( String dimension )
+    public void setDisplayName( String displayName )
     {
-        this.uid = dimension;
+        this.displayName = displayName;
     }
 
     @Override
@@ -122,16 +184,6 @@ public class BaseDimensionalObject
         this.items = items;
     }
 
-    public boolean isDataDimension()
-    {
-        return dataDimension;
-    }
-
-    public void setDataDimension( boolean dataDimension )
-    {
-        this.dataDimension = dataDimension;
-    }
-    
     //--------------------------------------------------------------------------
     // Supportive methods
     //--------------------------------------------------------------------------
@@ -139,6 +191,6 @@ public class BaseDimensionalObject
     @Override
     public String toString()
     {
-        return "[" + uid + ", " + items + "]";
+        return "[" + uid + ", type: " + type  + ", " + items + "]";
     }
 }
