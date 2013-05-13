@@ -3735,6 +3735,12 @@ Ext.onReady( function() {
 					return;
 				}
 
+				// dc and ds
+				if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataSet.objectName]) {
+					alert('Data sets and detailed data elements cannot be specified together');
+					return;
+				}
+
 				// Categories as filter
 				//if (layout.filter && dv.viewport.layoutWindow.filterStore.getById(dimConf.category.dimensionName)) {
 					//alert(DV.i18n.categories_cannot_be_specified_as_filter);
