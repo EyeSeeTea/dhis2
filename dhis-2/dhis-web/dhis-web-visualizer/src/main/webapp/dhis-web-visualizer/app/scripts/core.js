@@ -1189,8 +1189,16 @@ console.log("baseLineFields", store.baseLineFields);
 					position = 'top',
 					padding = 0;
 
-				for (var i = 0; i < store.rangeFields.length; i++) {
-					str += xResponse.metaData.names[store.rangeFields[i]];
+				for (var i = 0, name, ids; i < store.rangeFields.length; i++) {
+					if (store.rangeFields[i].indexOf('-') !== -1) {
+						ids = store.rangeFields[i].split('-');
+						name = xResponse.metaData.names[ids[0]] + ' ' + xResponse.metaData.names[ids[1]];
+					}
+					else {
+						name = xResponse.metaData.names[store.rangeFields[i]];
+					}
+
+					str += name;
 				}
 
 				numberOfChars = str.length;
