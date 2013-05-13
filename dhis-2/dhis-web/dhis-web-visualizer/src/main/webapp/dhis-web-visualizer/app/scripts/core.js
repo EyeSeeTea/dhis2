@@ -1725,7 +1725,9 @@ DV.core.getApi = function(dv) {
 
 	api.Indicator = function(config) {
 		var indicator = api.Dimension(),
-			validateConfig;
+			validateConfig,
+			queryParams = [],
+			postParams = [];
 
 		validateConfig = function() {
 			if (!Ext.isObject(config)) {
@@ -1761,10 +1763,10 @@ DV.core.getApi = function(dv) {
 			indicator.objectName = dimConf.indicator.objectName;
 			indicator.items = Ext.clone(config.items);
 
-			for (var i = 0, id, queryClone = Ext.clone(indicator.items); i < indicator.items.length; i++) {
+			for (var i = 0, queryClone = Ext.clone(indicator.items); i < indicator.items.length; i++) {
 
 				// Query params
-				queryParams.push(queryClone.items[i].id);
+				queryParams.push(queryClone[i].id);
 			}
 
 			indicator.queryParams = queryParams;
@@ -1817,7 +1819,7 @@ DV.core.getApi = function(dv) {
 			for (var i = 0, id, queryClone = Ext.clone(dataElement.items); i < dataElement.items.length; i++) {
 
 				// Query params
-				queryParams.push(queryClone.items[i].id);
+				queryParams.push(queryClone[i].id);
 			}
 
 			operand.queryParams = queryParams;
@@ -1870,7 +1872,7 @@ DV.core.getApi = function(dv) {
 			for (var i = 0, id, queryClone = Ext.clone(operand.items), postClone = Ext.clone(operand.items); i < operand.items.length; i++) {
 
 				// Query params
-				id = queryClone.items[i].id;
+				id = queryClone[i].id;
 
 				if (id.indexOf('-') !== -1) {
 					id = id.substr(0, id.indexOf('-'));
@@ -1879,7 +1881,7 @@ DV.core.getApi = function(dv) {
 				queryParams.push(id);
 
 				// Post params
-				id = postClone.items[i].id.replace('-', '.');
+				id = postClone[i].id.replace('-', '.');
 				postParams.push({id: id});
 			}
 
@@ -1933,7 +1935,7 @@ DV.core.getApi = function(dv) {
 			for (var i = 0, id, queryClone = Ext.clone(dataSet.items); i < dataSet.items.length; i++) {
 
 				// Query params
-				queryParams.push(queryClone.items[i].id);
+				queryParams.push(queryClone[i].id);
 			}
 
 			dataSet.queryParams = queryParams;
@@ -1986,13 +1988,13 @@ DV.core.getApi = function(dv) {
 			for (var i = 0, id, queryClone = Ext.clone(period.items); i < period.items.length; i++) {
 
 				// Query params
-				queryParams.push(queryClone.items[i].id);
+				queryParams.push(queryClone[i].id);
 			}
 
-			operand.queryParams = queryParams;
-			operand.postParams = Ext.clone(period.items);
+			period.queryParams = queryParams;
+			period.postParams = Ext.clone(period.items);
 
-			return operand;
+			return period;
 		}();
 	};
 
@@ -2039,13 +2041,13 @@ DV.core.getApi = function(dv) {
 			for (var i = 0, id, queryClone = Ext.clone(organisationUnit.items); i < organisationUnit.items.length; i++) {
 
 				// Query params
-				queryParams.push(queryClone.items[i].id);
+				queryParams.push(queryClone[i].id);
 			}
 
 			organisationUnit.queryParams = queryParams;
 			organisationUnit.postParams = Ext.clone(organisationUnit.items);
 
-			return operand;
+			return organisationUnit;
 		}();
 	};
 
