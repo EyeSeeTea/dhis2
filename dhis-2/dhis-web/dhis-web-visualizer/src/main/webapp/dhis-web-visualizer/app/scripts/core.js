@@ -1711,6 +1711,7 @@ console.log("chart", chart);
 
 DV.core.getApi = function(dv) {
 	var api = {},
+		map = {},
 		dimConf = dv.conf.finals.dimension;
 
 	api.Dimension = function() {
@@ -1885,6 +1886,59 @@ DV.core.getApi = function(dv) {
 			operand.postParams = postParams;
 
 			return operand;
+		};
+	};
+
+	api.DataSet = function(config) {
+		var dataSet = this.Dimension(),
+			validateConfig,
+			queryParams = [],
+			postParams = [];
+
+		validateConfig = function() {
+			if (!Ext.isObject(config)) {
+				alert('Data set config is not an object');
+				return;
+			}
+
+			if (!Ext.isString(config.dimension)) {
+				alert('Data set dimension name is illegal');
+				return;
+			}
+
+			if (!Ext.isArray(config.items)) {
+				alert('Data set items is not an array');
+				return;
+			}
+
+			if (!config.items.length) {
+				alert('Data set has no items');
+				return;
+			}
+
+			return true;
+		};
+
+		return function() {
+			if (!validateConfig()) {
+				return;
+			}
+
+			dataSet.dimension = config.dimension;
+			dataSet.dimensionName = dimConf.dataSet.dimensionName;
+			dataSet.objectName = dimConf.dataSet.objectName;
+			dataSet.items = Ext.clone(config.items);
+
+			for (var i = 0, id, queryClone = Ext.clone(dataSet.items); i < dataSet.items.length; i++) {
+
+				// Query params
+				queryParams.push(queryClone.items[i].id);
+			}
+
+			dataSet.queryParams = queryParams;
+			dataSet.postParams = Ext.clone(dataSet.items);
+
+			return dataSet;
 		};
 	};
 
@@ -2129,6 +2183,13 @@ DV.core.getApi = function(dv) {
 			return Ext.clone(layout);
 		}();
 	};
+
+	api.objectNameClassMap[dimConf.indicator.objectName] = api.Indicator;
+	api.objectNameClassMap[dimConf.dataElement.objectName] = api.DataElement;
+	api.objectNameClassMap[dimConf.operand.objectName] = api.Operand;
+	api.objectNameClassMap[dimConf.dataSet.objectName] = api.DataSet;
+	api.objectNameClassMap[dimConf.period.objectName] = api.Period;
+	api.objectNameClassMap[dimConf.organisationUnit.objectName] = api.OrganisationUnit;
 
 	return api;
 };
