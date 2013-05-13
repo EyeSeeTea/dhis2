@@ -1732,9 +1732,7 @@ DV.core.getApi = function(dv) {
 
 	api.Indicator = function(config) {
 		var indicator = api.Dimension(),
-			validateConfig,
-			postItems = [],
-			postParams = [];
+			validateConfig;
 
 		validateConfig = function() {
 			if (!Ext.isObject(config)) {
@@ -1770,24 +1768,13 @@ DV.core.getApi = function(dv) {
 			indicator.objectName = dimConf.indicator.objectName;
 			indicator.items = Ext.clone(config.items);
 
-			for (var i = 0, queryClone = Ext.clone(indicator.items); i < indicator.items.length; i++) {
-
-				// Query params
-				postItems.push(queryClone[i].id);
-			}
-
-			indicator.postItems = postItems;
-			indicator.postParams = Ext.clone(indicator.items);
-
 			return indicator;
 		}();
 	};
 
 	api.DataElement = function(config) {
 		var dataElement = api.Dimension(),
-			validateConfig,
-			postItems = [],
-			postParams = [];
+			validateConfig;
 
 		validateConfig = function() {
 			if (!Ext.isObject(config)) {
@@ -1823,24 +1810,13 @@ DV.core.getApi = function(dv) {
 			dataElement.objectName = dimConf.dataElement.objectName;
 			dataElement.items = Ext.clone(config.items);
 
-			for (var i = 0, id, queryClone = Ext.clone(dataElement.items); i < dataElement.items.length; i++) {
-
-				// Query params
-				postItems.push(queryClone[i].id);
-			}
-
-			dataElement.postItems = postItems;
-			dataElement.postParams = Ext.clone(dataElement.items);
-
 			return dataElement;
 		}();
 	};
 
 	api.Operand = function(config) {
 		var operand = api.Dimension(),
-			validateConfig,
-			postItems = [],
-			postParams = [];
+			validateConfig;
 
 		validateConfig = function() {
 			if (!Ext.isObject(config)) {
@@ -1876,34 +1852,13 @@ DV.core.getApi = function(dv) {
 			operand.objectName = dimConf.operand.objectName;
 			operand.items = Ext.clone(config.items);
 
-			for (var i = 0, id, queryClone = Ext.clone(operand.items), postClone = Ext.clone(operand.items); i < operand.items.length; i++) {
-
-				// Query params
-				id = queryClone[i].id;
-
-				if (id.indexOf('-') !== -1) {
-					id = id.substr(0, id.indexOf('-'));
-				}
-
-				postItems.push(id);
-
-				// Post params
-				id = postClone[i].id.replace('-', '.');
-				postParams.push({id: id});
-			}
-
-			operand.postItems = postItems;
-			operand.postParams = postParams;
-
 			return operand;
 		}();
 	};
 
 	api.DataSet = function(config) {
 		var dataSet = api.Dimension(),
-			validateConfig,
-			postItems = [],
-			postParams = [];
+			validateConfig;
 
 		validateConfig = function() {
 			if (!Ext.isObject(config)) {
@@ -1939,24 +1894,13 @@ DV.core.getApi = function(dv) {
 			dataSet.objectName = dimConf.dataSet.objectName;
 			dataSet.items = Ext.clone(config.items);
 
-			for (var i = 0, id, queryClone = Ext.clone(dataSet.items); i < dataSet.items.length; i++) {
-
-				// Query params
-				postItems.push(queryClone[i].id);
-			}
-
-			dataSet.postItems = postItems;
-			dataSet.postParams = Ext.clone(dataSet.items);
-
 			return dataSet;
 		}();
 	};
 
 	api.Period = function(config) {
 		var period = api.Dimension(),
-			validateConfig,
-			postItems = [],
-			postParams = [];
+			validateConfig;
 
 		validateConfig = function() {
 			if (!Ext.isObject(config)) {
@@ -1992,24 +1936,13 @@ DV.core.getApi = function(dv) {
 			period.objectName = dimConf.period.objectName;
 			period.items = Ext.clone(config.items);
 
-			for (var i = 0, id, queryClone = Ext.clone(period.items); i < period.items.length; i++) {
-
-				// Query params
-				postItems.push(queryClone[i].id);
-			}
-
-			period.postItems = postItems;
-			period.postParams = Ext.clone(period.items);
-
 			return period;
 		}();
 	};
 
 	api.OrganisationUnit = function(config) {
 		var organisationUnit = api.Dimension(),
-			validateConfig,
-			postItems = [],
-			postParams = [];
+			validateConfig;
 
 		validateConfig = function() {
 			if (!Ext.isObject(config)) {
@@ -2044,15 +1977,6 @@ DV.core.getApi = function(dv) {
 			organisationUnit.dimensionName = dimConf.organisationUnit.dimensionName;
 			organisationUnit.objectName = dimConf.organisationUnit.objectName;
 			organisationUnit.items = Ext.clone(config.items);
-
-			for (var i = 0, id, queryClone = Ext.clone(organisationUnit.items); i < organisationUnit.items.length; i++) {
-
-				// Query params
-				postItems.push(queryClone[i].id);
-			}
-
-			organisationUnit.postItems = postItems;
-			organisationUnit.postParams = Ext.clone(organisationUnit.items);
 
 			return organisationUnit;
 		}();
@@ -2104,9 +2028,8 @@ DV.core.getApi = function(dv) {
 				}
 
 				for (var i = 0, dim; i < axis.length; i++) {
-					dim = axis[i];
-
-					if (!(Ext.isObject(dim) && Ext.isString(dim.dimension) && Ext.isArray(dim.items) && dim.items.length)) {
+					dim = dv.api.objectNameClassMap[axis[i].dimension](axis[i]);
+					if (!dim) {
 						return;
 					}
 				}
