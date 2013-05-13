@@ -1709,7 +1709,7 @@ console.log("chart", chart);
 	return util;
 };
 
-DV.core.getAPI = function(dv) {
+DV.core.getApi = function(dv) {
 	var api = {},
 		dimConf = dv.conf.finals.dimension;
 
@@ -2141,7 +2141,7 @@ DV.core.getInstance = function(config) {
 
 	dv.conf = DV.core.getConfig();
 	dv.util = DV.core.getUtil(dv);
-	dv.api = DV.core.getAPI(dv);
+	dv.api = DV.core.getApi(dv);
 
 	return dv;
 };
