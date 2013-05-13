@@ -630,6 +630,7 @@ DV.core.getUtil = function(dv) {
 					dimConf = dv.conf.finals.dimension,
 					addCategoryDimension = false,
 					map = xLayout.extended.dimensionNameItemsMap,
+					dx = dimConf.indicator.dimensionName,
 					items;
 
 				for (var i = 0, dimensionName; i < sortedAxisDimensionNames.length; i++) {
@@ -639,7 +640,7 @@ DV.core.getUtil = function(dv) {
 
 					items = Ext.clone(xLayout.extended.dimensionNameItemsMap[dimensionName]).sort();
 
-					if (dimensionName === dimConf.dataElement.dimensionName) {
+					if (dimensionName === dx) {
 						for (var j = 0, index; j < items.length; j++) {
 							index = items[j].indexOf('-');
 
