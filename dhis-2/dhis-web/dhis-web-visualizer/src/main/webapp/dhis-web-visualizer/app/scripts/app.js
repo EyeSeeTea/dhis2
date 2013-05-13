@@ -1087,18 +1087,9 @@ Ext.onReady( function() {
 
 						delete favorite.extended;
 
-						// Server sync: operand ids
-						for (var i = 0, item; i < favorite.columns[0].items.length; i++) {
-							favorite.columns[0].items[i].id = dv.util.str.replaceAll(favorite.columns[0].items[i].id, '-', '.');
-						}
-						for (var i = 0, item; i < favorite.rows[0].items.length; i++) {
-							favorite.rows[0].items[i].id = dv.util.str.replaceAll(favorite.rows[0].items[i].id, '-', '.');
-						}
-						for (var i = 0, dim; i < favorite.filters.length; i++) {
-							dim = favorite.filters[i];
-							for (var j = 0; j < dim.items.length; j++) {
-								dim.items[j].id = dv.util.str.replaceAll(dim.items[j].id, '-', '.');
-							}
+						// Post params
+						for (var i = 0, dimensions = [].concat(favorite.columns, favorite.rows, favorite.filters); i < dimensions.length; i++) {
+							dimensions[i].items = dimensions[i].postParams;
 						}
 
 						// Server sync: user orgunit

@@ -677,35 +677,41 @@ DV.core.getUtil = function(dv) {
 			getSyncronizedXLayout = function(xLayout, response) {
 				var dimensions = [].concat(xLayout.columns, xLayout.rows, xLayout.filters),
 					xOuDimension = xLayout.extended.objectNameDimensionMap[dimConf.organisationUnit.objectName],
-					isUserOrgunit = Ext.Array.contains(xOuDimension.items, 'USER_ORGUNIT'),
-					isUserOrgunitChildren = Ext.Array.contains(xOuDimension.items, 'USER_ORGUNIT_CHILDREN'),
-					items = [],
-					isDirty = false;
+					isUserOrgunit = xOuDimension && Ext.Array.contains(xOuDimension.items, 'USER_ORGUNIT'),
+					isUserOrgunitChildren = xOuDimension && Ext.Array.contains(xOuDimension.items, 'USER_ORGUNIT_CHILDREN'),
+					peItems = [],
+					ouItems = [];
+
+				// Relative periods
+				for (var i = 0, periodIds; i < dimensions.length; i++) {
+					if (dimensions[i].dimension === dimConf.period.objectName) {
+						periodIds = response.metaData.pe;
+
+						for (var j = 0; j < periodIds.length; j++) {
+							peItems.push({id: periodIds[j]});
+						}
+
+						dimensions[i].items = peItems;
+					}
+				}
 
 				// Add user orgunits
-				if (xOuDimension && (isUserOrgunit || isUserOrgunitChildren)) {
+				if (isUserOrgunit || isUserOrgunitChildren) {
 					if (isUserOrgunit) {
-						items.push(Ext.clone(dv.init.user.ou));
+						ouItems.push(Ext.clone(dv.init.user.ou));
 					}
 					if (isUserOrgunitChildren) {
-						items = items.concat(Ext.clone(dv.init.user.ouc));
+						ouItems = ouItems.concat(Ext.clone(dv.init.user.ouc));
 					}
 
 					for (var i = 0; i < dimensions.length; i++) {
 						if (dimensions[i].dimension === dimConf.organisationUnit.objectName) {
-							dimensions[i].items = items;
+							dimensions[i].items = ouItems;
 						}
 					}
-
-					isDirty = true;
 				}
 
-				if (isDirty) {
-					delete xLayout.extended;
-					xLayout = dv.util.chart.extendLayout(xLayout);
-				}
-
-				return xLayout;
+				return dv.util.chart.extendLayout(xLayout);
 			};
 
 			validateResponse = function(response) {
@@ -1213,7 +1219,7 @@ console.log("baseLineFields", store.baseLineFields);
 				var filterItems = xLayout.extended.filterItems,
 					a = [],
 					text = '';
-console.log("filterItems", filterItems);
+
 				if (Ext.isArray(filterItems) && filterItems.length) {
 					for (var i = 0; i < filterItems.length; i++) {
 						text += xResponse.metaData.names[filterItems[i]];
@@ -1710,10 +1716,10 @@ console.log("chart", chart);
 };
 
 DV.core.getApi = function(dv) {
-	var api = {
+	var dimConf = dv.conf.finals.dimension,
+		api = {
 			objectNameClassMap: {}
-		},
-		dimConf = dv.conf.finals.dimension;
+		};
 
 	api.Dimension = function() {
 		return {
@@ -1726,7 +1732,7 @@ DV.core.getApi = function(dv) {
 	api.Indicator = function(config) {
 		var indicator = api.Dimension(),
 			validateConfig,
-			queryParams = [],
+			postItems = [],
 			postParams = [];
 
 		validateConfig = function() {
@@ -1766,10 +1772,10 @@ DV.core.getApi = function(dv) {
 			for (var i = 0, queryClone = Ext.clone(indicator.items); i < indicator.items.length; i++) {
 
 				// Query params
-				queryParams.push(queryClone[i].id);
+				postItems.push(queryClone[i].id);
 			}
 
-			indicator.queryParams = queryParams;
+			indicator.postItems = postItems;
 			indicator.postParams = Ext.clone(indicator.items);
 
 			return indicator;
@@ -1779,7 +1785,7 @@ DV.core.getApi = function(dv) {
 	api.DataElement = function(config) {
 		var dataElement = api.Dimension(),
 			validateConfig,
-			queryParams = [],
+			postItems = [],
 			postParams = [];
 
 		validateConfig = function() {
@@ -1819,11 +1825,11 @@ DV.core.getApi = function(dv) {
 			for (var i = 0, id, queryClone = Ext.clone(dataElement.items); i < dataElement.items.length; i++) {
 
 				// Query params
-				queryParams.push(queryClone[i].id);
+				postItems.push(queryClone[i].id);
 			}
 
-			operand.queryParams = queryParams;
-			operand.postParams = Ext.clone(dataElement.items);
+			dataElement.postItems = postItems;
+			dataElement.postParams = Ext.clone(dataElement.items);
 
 			return dataElement;
 		}();
@@ -1832,7 +1838,7 @@ DV.core.getApi = function(dv) {
 	api.Operand = function(config) {
 		var operand = api.Dimension(),
 			validateConfig,
-			queryParams = [],
+			postItems = [],
 			postParams = [];
 
 		validateConfig = function() {
@@ -1878,14 +1884,14 @@ DV.core.getApi = function(dv) {
 					id = id.substr(0, id.indexOf('-'));
 				}
 
-				queryParams.push(id);
+				postItems.push(id);
 
 				// Post params
 				id = postClone[i].id.replace('-', '.');
 				postParams.push({id: id});
 			}
 
-			operand.queryParams = queryParams;
+			operand.postItems = postItems;
 			operand.postParams = postParams;
 
 			return operand;
@@ -1895,7 +1901,7 @@ DV.core.getApi = function(dv) {
 	api.DataSet = function(config) {
 		var dataSet = api.Dimension(),
 			validateConfig,
-			queryParams = [],
+			postItems = [],
 			postParams = [];
 
 		validateConfig = function() {
@@ -1935,10 +1941,10 @@ DV.core.getApi = function(dv) {
 			for (var i = 0, id, queryClone = Ext.clone(dataSet.items); i < dataSet.items.length; i++) {
 
 				// Query params
-				queryParams.push(queryClone[i].id);
+				postItems.push(queryClone[i].id);
 			}
 
-			dataSet.queryParams = queryParams;
+			dataSet.postItems = postItems;
 			dataSet.postParams = Ext.clone(dataSet.items);
 
 			return dataSet;
@@ -1948,7 +1954,7 @@ DV.core.getApi = function(dv) {
 	api.Period = function(config) {
 		var period = api.Dimension(),
 			validateConfig,
-			queryParams = [],
+			postItems = [],
 			postParams = [];
 
 		validateConfig = function() {
@@ -1988,10 +1994,10 @@ DV.core.getApi = function(dv) {
 			for (var i = 0, id, queryClone = Ext.clone(period.items); i < period.items.length; i++) {
 
 				// Query params
-				queryParams.push(queryClone[i].id);
+				postItems.push(queryClone[i].id);
 			}
 
-			period.queryParams = queryParams;
+			period.postItems = postItems;
 			period.postParams = Ext.clone(period.items);
 
 			return period;
@@ -2001,7 +2007,7 @@ DV.core.getApi = function(dv) {
 	api.OrganisationUnit = function(config) {
 		var organisationUnit = api.Dimension(),
 			validateConfig,
-			queryParams = [],
+			postItems = [],
 			postParams = [];
 
 		validateConfig = function() {
@@ -2041,10 +2047,10 @@ DV.core.getApi = function(dv) {
 			for (var i = 0, id, queryClone = Ext.clone(organisationUnit.items); i < organisationUnit.items.length; i++) {
 
 				// Query params
-				queryParams.push(queryClone[i].id);
+				postItems.push(queryClone[i].id);
 			}
 
-			organisationUnit.queryParams = queryParams;
+			organisationUnit.postItems = postItems;
 			organisationUnit.postParams = Ext.clone(organisationUnit.items);
 
 			return organisationUnit;
@@ -2101,10 +2107,6 @@ DV.core.getApi = function(dv) {
 
 					if (!(Ext.isObject(dim) && Ext.isString(dim.dimension) && Ext.isArray(dim.items) && dim.items.length)) {
 						return;
-					}
-
-					for (var j = 0; j < dim.items.length; j++) {
-						dim.items[j].id = dim.items[j].id.replace('.', '-');
 					}
 				}
 
