@@ -4126,8 +4126,22 @@ Ext.onReady( function() {
 				}
 
 				// Organisation units
-				userOrganisationUnit.setValue(xLayout.userOrganisationUnit);
-				userOrganisationUnitChildren.setValue(xLayout.userOrganisationUnitChildren);
+				if (recMap[dimConf.organisationUnit.objectName]) {
+					var isOu = false,
+						isOuc = false;
+
+					for (var i = 0, ouRecords = recMap[dimConf.organisationUnit.objectName]; i < ouRecords.length; i++) {
+						if (ouRecords[i].id === 'USER_ORGUNIT') {
+							isOu = true;
+						}
+						if (ouRecords[i].id === 'USER_ORGUNIT_CHILDREN') {
+							isOuc = true;
+						}
+					}
+				}
+
+				userOrganisationUnit.setValue(isOu);
+				userOrganisationUnitChildren.setValue(isOuc);
 
 				// If fav has organisation units, wait for tree callback before update
 				if (recMap[dimConf.organisationUnit.objectName] && graphMap) {
