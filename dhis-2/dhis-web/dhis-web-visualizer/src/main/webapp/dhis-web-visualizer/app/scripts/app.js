@@ -4030,7 +4030,11 @@ Ext.onReady( function() {
 
 				// Series, category, filter
 				dv.viewport.series.setValue(seriesId);
+				dv.viewport.series.filterNext();
+
 				dv.viewport.category.setValue(categoryId);
+				dv.viewport.category.filterNext();
+
 				dv.viewport.filter.setValue(filterIds);
 
 				// Indicators
