@@ -1071,6 +1071,7 @@ Ext.onReady( function() {
 					favorite.name = nameTextfield.getValue();
 
 					if (favorite && favorite.name) {
+						var dimensions = [].concat(favorite.columns, favorite.rows, favorite.filters);
 
 						// Server sync: property names
 						favorite.showData = favorite.showValues;
@@ -1086,6 +1087,15 @@ Ext.onReady( function() {
 						delete favorite.rangeAxisTitle;
 
 						delete favorite.extended;
+
+						// Replace operand id characters
+						for (var i = 0; i < dimensions.length; i++) {
+							if (dimensions[i].dimension === dv.conf.finals.dimension.operand.objectName) {
+								for (var j = 0; j < dimensions[i].items.length; j++) {
+									dimensions[i].items[j].id = dimensions[i].items[j].id.replace('-', '.');
+								}
+							}
+						}
 
 						// Server sync: user orgunit
 						if (favorite.userOrganisationUnit || favorite.userOrganisationUnitChildren) {
