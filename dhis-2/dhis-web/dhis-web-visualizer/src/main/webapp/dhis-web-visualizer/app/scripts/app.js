@@ -127,26 +127,27 @@ Ext.onReady( function() {
 			config.filters = [];
 
 			// Columns, rows, filters
-			for (var i = 0, dxItems = [], dim; i < panels.length; i++) {
+			for (var i = 0, dim; i < panels.length; i++) {
 				dim = panels[i].getData();
+
 				if (dim) {
 					if (dim.dimensionName === seriesDimensionName) {
-						config.columns.push({
+						config.columns.push(dv.api.objectNameClassMap[dim.objectName]({
 							dimension: dim.objectName,
 							items: dim.items
-						});
+						}));
 					}
 					else if (dim.dimensionName === categoryDimensionName) {
-						config.rows.push({
+						config.rows.push(dv.api.objectNameClassMap[dim.objectName]({
 							dimension: dim.objectName,
 							items: dim.items
-						});
+						}));
 					}
 					else if (Ext.Array.contains(filterDimensionNames, dim.dimensionName)) {
-						config.filters.push({
+						config.filters.push(dv.api.objectNameClassMap[dim.objectName]({
 							dimension: dim.objectName,
 							items: dim.items
-						});
+						}));
 					}
 				}
 			}

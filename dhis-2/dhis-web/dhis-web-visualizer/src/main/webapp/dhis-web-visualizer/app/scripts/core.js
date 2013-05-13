@@ -1710,8 +1710,9 @@ console.log("chart", chart);
 };
 
 DV.core.getApi = function(dv) {
-	var api = {},
-		map = {},
+	var api = {
+			objectNameClassMap: {}
+		},
 		dimConf = dv.conf.finals.dimension;
 
 	api.Dimension = function() {
@@ -1723,7 +1724,7 @@ DV.core.getApi = function(dv) {
 	};
 
 	api.Indicator = function(config) {
-		var indicator = this.Dimension(),
+		var indicator = api.Dimension(),
 			validateConfig;
 
 		validateConfig = function() {
@@ -1770,11 +1771,11 @@ DV.core.getApi = function(dv) {
 			indicator.postParams = Ext.clone(indicator.items);
 
 			return indicator;
-		};
+		}();
 	};
 
 	api.DataElement = function(config) {
-		var dataElement = this.Dimension(),
+		var dataElement = api.Dimension(),
 			validateConfig,
 			queryParams = [],
 			postParams = [];
@@ -1823,11 +1824,11 @@ DV.core.getApi = function(dv) {
 			operand.postParams = Ext.clone(dataElement.items);
 
 			return dataElement;
-		};
+		}();
 	};
 
 	api.Operand = function(config) {
-		var operand = this.Dimension(),
+		var operand = api.Dimension(),
 			validateConfig,
 			queryParams = [],
 			postParams = [];
@@ -1886,11 +1887,11 @@ DV.core.getApi = function(dv) {
 			operand.postParams = postParams;
 
 			return operand;
-		};
+		}();
 	};
 
 	api.DataSet = function(config) {
-		var dataSet = this.Dimension(),
+		var dataSet = api.Dimension(),
 			validateConfig,
 			queryParams = [],
 			postParams = [];
@@ -1939,11 +1940,11 @@ DV.core.getApi = function(dv) {
 			dataSet.postParams = Ext.clone(dataSet.items);
 
 			return dataSet;
-		};
+		}();
 	};
 
 	api.Period = function(config) {
-		var period = this.Dimension(),
+		var period = api.Dimension(),
 			validateConfig,
 			queryParams = [],
 			postParams = [];
@@ -1992,11 +1993,11 @@ DV.core.getApi = function(dv) {
 			operand.postParams = Ext.clone(period.items);
 
 			return operand;
-		};
+		}();
 	};
 
 	api.OrganisationUnit = function(config) {
-		var organisationUnit = this.Dimension(),
+		var organisationUnit = api.Dimension(),
 			validateConfig,
 			queryParams = [],
 			postParams = [];
@@ -2045,7 +2046,7 @@ DV.core.getApi = function(dv) {
 			organisationUnit.postParams = Ext.clone(organisationUnit.items);
 
 			return operand;
-		};
+		}();
 	};
 
 	api.Layout = function(config) {
