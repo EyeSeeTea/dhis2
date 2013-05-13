@@ -1710,7 +1710,289 @@ console.log("chart", chart);
 };
 
 DV.core.getAPI = function(dv) {
-	var api = {};
+	var api = {},
+		dimConf = dv.conf.finals.dimension;
+
+	api.Dimension = function() {
+		return {
+			dimension: null, // string
+
+			items: null // array of records
+		};
+	};
+
+	api.Indicator = function(config) {
+		var indicator = this.Dimension(),
+			validateConfig;
+
+		validateConfig = function() {
+			if (!Ext.isObject(config)) {
+				alert('Indicator config is not an object');
+				return;
+			}
+
+			if (!Ext.isString(config.dimension)) {
+				alert('Indicator dimension name is illegal');
+				return;
+			}
+
+			if (!Ext.isArray(config.items)) {
+				alert('Indicator items is not an array');
+				return;
+			}
+
+			if (!config.items.length) {
+				alert('Indicator has no items');
+				return;
+			}
+
+			return true;
+		};
+
+		return function() {
+			if (!validateConfig()) {
+				return;
+			}
+
+			indicator.dimension = config.dimension;
+			indicator.dimensionName = dimConf.indicator.dimensionName;
+			indicator.objectName = dimConf.indicator.objectName;
+			indicator.items = Ext.clone(config.items);
+
+			for (var i = 0, id, queryClone = Ext.clone(indicator.items); i < indicator.items.length; i++) {
+
+				// Query params
+				queryParams.push(queryClone.items[i].id);
+			}
+
+			indicator.queryParams = queryParams;
+			indicator.postParams = Ext.clone(indicator.items);
+
+			return indicator;
+		};
+	};
+
+	api.DataElement = function(config) {
+		var dataElement = this.Dimension(),
+			validateConfig,
+			queryParams = [],
+			postParams = [];
+
+		validateConfig = function() {
+			if (!Ext.isObject(config)) {
+				alert('Data element config is not an object');
+				return;
+			}
+
+			if (!Ext.isString(config.dimension)) {
+				alert('Data element dimension name is illegal');
+				return;
+			}
+
+			if (!Ext.isArray(config.items)) {
+				alert('Data element items is not an array');
+				return;
+			}
+
+			if (!config.items.length) {
+				alert('Data element has no items');
+				return;
+			}
+
+			return true;
+		};
+
+		return function() {
+			if (!validateConfig()) {
+				return;
+			}
+
+			dataElement.dimension = config.dimension;
+			dataElement.dimensionName = dimConf.dataElement.dimensionName;
+			dataElement.objectName = dimConf.dataElement.objectName;
+			dataElement.items = Ext.clone(config.items);
+
+			for (var i = 0, id, queryClone = Ext.clone(dataElement.items); i < dataElement.items.length; i++) {
+
+				// Query params
+				queryParams.push(queryClone.items[i].id);
+			}
+
+			operand.queryParams = queryParams;
+			operand.postParams = Ext.clone(dataElement.items);
+
+			return dataElement;
+		};
+	};
+
+	api.Operand = function(config) {
+		var operand = this.Dimension(),
+			validateConfig,
+			queryParams = [],
+			postParams = [];
+
+		validateConfig = function() {
+			if (!Ext.isObject(config)) {
+				alert('Operand config is not an object');
+				return;
+			}
+
+			if (!Ext.isString(config.dimension)) {
+				alert('Operand dimension name is illegal');
+				return;
+			}
+
+			if (!Ext.isArray(config.items)) {
+				alert('Operand items is not an array');
+				return;
+			}
+
+			if (!config.items.length) {
+				alert('Operand has no items');
+				return;
+			}
+
+			return true;
+		};
+
+		return function() {
+			if (!validateConfig()) {
+				return;
+			}
+
+			operand.dimension = config.dimension;
+			operand.dimensionName = dimConf.operand.dimensionName;
+			operand.objectName = dimConf.operand.objectName;
+			operand.items = Ext.clone(config.items);
+
+			for (var i = 0, id, queryClone = Ext.clone(operand.items), postClone = Ext.clone(operand.items); i < operand.items.length; i++) {
+
+				// Query params
+				id = queryClone.items[i].id;
+
+				if (id.indexOf('-') !== -1) {
+					id = id.substr(0, id.indexOf('-'));
+				}
+
+				queryParams.push(id);
+
+				// Post params
+				id = postClone.items[i].id.replace('-', '.');
+				postParams.push({id: id});
+			}
+
+			operand.queryParams = queryParams;
+			operand.postParams = postParams;
+
+			return operand;
+		};
+	};
+
+	api.Period = function(config) {
+		var period = this.Dimension(),
+			validateConfig,
+			queryParams = [],
+			postParams = [];
+
+		validateConfig = function() {
+			if (!Ext.isObject(config)) {
+				alert('Period config is not an object');
+				return;
+			}
+
+			if (!Ext.isString(config.dimension)) {
+				alert('Period dimension name is illegal');
+				return;
+			}
+
+			if (!Ext.isArray(config.items)) {
+				alert('Period items is not an array');
+				return;
+			}
+
+			if (!config.items.length) {
+				alert('Period has no items');
+				return;
+			}
+
+			return true;
+		};
+
+		return function() {
+			if (!validateConfig()) {
+				return;
+			}
+
+			period.dimension = config.dimension;
+			period.dimensionName = dimConf.period.dimensionName;
+			period.objectName = dimConf.period.objectName;
+			period.items = Ext.clone(config.items);
+
+			for (var i = 0, id, queryClone = Ext.clone(period.items); i < period.items.length; i++) {
+
+				// Query params
+				queryParams.push(queryClone.items[i].id);
+			}
+
+			operand.queryParams = queryParams;
+			operand.postParams = Ext.clone(period.items);
+
+			return operand;
+		};
+	};
+
+	api.OrganisationUnit = function(config) {
+		var organisationUnit = this.Dimension(),
+			validateConfig,
+			queryParams = [],
+			postParams = [];
+
+		validateConfig = function() {
+			if (!Ext.isObject(config)) {
+				alert('Organisation unit config is not an object');
+				return;
+			}
+
+			if (!Ext.isString(config.dimension)) {
+				alert('Organisation unit dimension name is illegal');
+				return;
+			}
+
+			if (!Ext.isArray(config.items)) {
+				alert('Organisation unit items is not an array');
+				return;
+			}
+
+			if (!config.items.length) {
+				alert('Organisation unit has no items');
+				return;
+			}
+
+			return true;
+		};
+
+		return function() {
+			if (!validateConfig()) {
+				return;
+			}
+
+			organisationUnit.dimension = config.dimension;
+			organisationUnit.dimensionName = dimConf.organisationUnit.dimensionName;
+			organisationUnit.objectName = dimConf.organisationUnit.objectName;
+			organisationUnit.items = Ext.clone(config.items);
+
+			for (var i = 0, id, queryClone = Ext.clone(organisationUnit.items); i < organisationUnit.items.length; i++) {
+
+				// Query params
+				queryParams.push(queryClone.items[i].id);
+			}
+
+			organisationUnit.queryParams = queryParams;
+			organisationUnit.postParams = Ext.clone(organisationUnit.items);
+
+			return operand;
+		};
+	};
 
 	api.Layout = function(config) {
 		var layout = {

@@ -45,6 +45,11 @@ public class BaseDimensionalObject
     extends BaseIdentifiableObject implements DimensionalObject
 {
     /**
+     * The type of this dimension.
+     */
+    private DimensionType type;
+    
+    /**
      * The dimensional items for this dimension.
      */
     private List<IdentifiableObject> items = new ArrayList<IdentifiableObject>();
@@ -55,14 +60,36 @@ public class BaseDimensionalObject
      */
     private boolean dataDimension = true;
 
+    //--------------------------------------------------------------------------
+    // Constructors
+    //--------------------------------------------------------------------------
+
     public BaseDimensionalObject()
     {        
     }
     
-    public BaseDimensionalObject( String dimension, List<? extends IdentifiableObject> items )
+    public BaseDimensionalObject( String dimension, DimensionType type, List<? extends IdentifiableObject> items )
     {
         this.uid = dimension;
+        this.type = type;
         this.items = new ArrayList<IdentifiableObject>( items );        
+    }
+
+    //--------------------------------------------------------------------------
+    // Getters and setters
+    //--------------------------------------------------------------------------
+
+    @JsonProperty
+    @JsonView( {DimensionalView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public DimensionType getType()
+    {
+        return type;
+    }
+
+    public void setType( DimensionType type )
+    {
+        this.type = type;
     }
 
     @JsonProperty
@@ -103,5 +130,15 @@ public class BaseDimensionalObject
     public void setDataDimension( boolean dataDimension )
     {
         this.dataDimension = dataDimension;
+    }
+    
+    //--------------------------------------------------------------------------
+    // Supportive methods
+    //--------------------------------------------------------------------------
+
+    @Override
+    public String toString()
+    {
+        return "[" + uid + ", " + items + "]";
     }
 }

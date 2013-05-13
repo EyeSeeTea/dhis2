@@ -1345,7 +1345,7 @@ Ext.onReady( function() {
 
 								if (record.data.access.update) {
 									message = DV.i18n.overwrite_favorite + '?\n\n' + record.data.name;
-									favorite = getBody();
+									favorite = Ext.clone(dv.xLayout);
 
 									if (favorite) {
 										favorite.name = record.data.name;
