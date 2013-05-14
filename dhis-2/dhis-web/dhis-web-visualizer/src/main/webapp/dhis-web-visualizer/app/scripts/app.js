@@ -75,7 +75,7 @@ Ext.onReady( function() {
 			var id = dv.util.url.getUrlParam('id');
 
 			if (id) {
-				dv.util.chart.loadTable(id);
+				dv.util.chart.loadChart(id);
 			}
 
 			// Fade in
