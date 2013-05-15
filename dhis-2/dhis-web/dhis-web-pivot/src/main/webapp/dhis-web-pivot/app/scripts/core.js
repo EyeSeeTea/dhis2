@@ -61,6 +61,12 @@ PT.core.getConfigs = function() {
                 dimensionName: 'dx',
                 objectName: 'de'
             },
+            operand: {
+				value: 'operand',
+				name: 'Operand',
+				dimensionName: 'dx',
+				objectName: 'dc'
+			},
             dataSet: {
 				value: 'dataSets',
                 name: PT.i18n.data_sets,
@@ -71,10 +77,7 @@ PT.core.getConfigs = function() {
                 value: 'period',
                 name: PT.i18n.periods,
                 dimensionName: 'pe',
-                objectName: 'pe',
-                warning: {
-					filter: '...'//PT.i18n.wm_multiple_filter_period
-				}
+                objectName: 'pe'
             },
             fixedPeriod: {
 				value: 'periods'
@@ -86,18 +89,11 @@ PT.core.getConfigs = function() {
                 value: 'organisationUnits',
                 name: PT.i18n.organisation_units,
                 dimensionName: 'ou',
-                objectName: 'ou',
-                warning: {
-					filter: '...'//PT.i18n.wm_multiple_filter_orgunit
-				}
+                objectName: 'ou'
             },
-            organisationUnitGroupSet: {
-				value: 'organisationUnitGroupSets',
-				objectName: 'ougs'
-			},
-            dataElementGroupSet: {
-				value: 'dataElementGroupSets',
-				objectName: 'degs'
+            dimension: {
+				value: 'dimension'
+				//objectName: 'di'
 			},
 			value: {
 				value: 'value'
@@ -114,12 +110,12 @@ PT.core.getConfigs = function() {
 	dim.objectNameMap[dim.data.objectName] = dim.data;
 	dim.objectNameMap[dim.indicator.objectName] = dim.indicator;
 	dim.objectNameMap[dim.dataElement.objectName] = dim.dataElement;
+	dim.objectNameMap[dim.operand.objectName] = dim.operand;
 	dim.objectNameMap[dim.dataSet.objectName] = dim.dataSet;
 	dim.objectNameMap[dim.category.objectName] = dim.category;
 	dim.objectNameMap[dim.period.objectName] = dim.period;
 	dim.objectNameMap[dim.organisationUnit.objectName] = dim.organisationUnit;
-	dim.objectNameMap[dim.organisationUnitGroupSet.objectName] = dim.organisationUnitGroupSet;
-	dim.objectNameMap[dim.dataElementGroupSet.objectName] = dim.dataElementGroupSet;
+	dim.objectNameMap[dim.dimension.objectName] = dim.dimension;
 
 	conf.period = {
 		relativePeriods: {

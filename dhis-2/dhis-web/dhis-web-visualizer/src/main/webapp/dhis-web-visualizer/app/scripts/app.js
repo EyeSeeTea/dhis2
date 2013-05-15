@@ -27,12 +27,9 @@ Ext.onReady( function() {
 			init.rootNodes[i].path = '/' + dv.conf.finals.root.id + '/' + init.rootNodes[i].id;
 		}
 
-		// Dynamic dimensions
-
-			// Sort by name
+		// Sort and extend dynamic dimensions
 		init.dimensions = dv.util.array.sortObjectsByString(init.dimensions);
 
-			// Extend
 		for (var i = 0, dim; i < init.dimensions.length; i++) {
 			dim = init.dimensions[i];
 			dim.dimensionName = dim.id;
@@ -40,6 +37,7 @@ Ext.onReady( function() {
 			dv.conf.finals.dimension.objectNameMap[dim.id] = dim;
 		}
 
+		// Viewport afterrender
 		init.afterRender = function() {
 
 			// Resize event handler

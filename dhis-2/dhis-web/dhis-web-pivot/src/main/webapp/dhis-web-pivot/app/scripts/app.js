@@ -28,22 +28,17 @@ Ext.onReady( function() {
 			init.rootNodes[i].path = '/' + pt.conf.finals.root.id + '/' + init.rootNodes[i].id;
 		}
 
-		// Ougs
-		for (var i = 0, dim = pt.conf.finals.dimension, oug; i < init.ougs.length; i++) {
-			oug = init.ougs[i];
-			oug.dimensionName = oug.id;
-			oug.objectName = pt.conf.finals.dimension.organisationUnitGroupSet.objectName;
-			dim.objectNameMap[oug.id] = oug;
+		// Sort and extend dynamic dimensions
+		init.dimensions = pt.util.array.sortObjectsByString(init.dimensions);
+
+		for (var i = 0, dim; i < init.dimensions.length; i++) {
+			dim = init.dimensions[i];
+			dim.dimensionName = dim.id;
+			dim.objectName = pt.conf.finals.dimension.dimension.objectName;
+			pt.conf.finals.dimension.objectNameMap[dim.id] = dim;
 		}
 
-		// Degs
-		for (var i = 0, dim = pt.conf.finals.dimension, deg; i < init.degs.length; i++) {
-			deg = init.degs[i];
-			deg.dimensionName = deg.id;
-			deg.objectName = pt.conf.finals.dimension.dataElementGroupSet.objectName;
-			dim.objectNameMap[deg.id] = deg;
-		}
-
+		// Viewport afterrender
 		init.afterRender = function() {
 
 			// Resize event handler
@@ -57,7 +52,7 @@ Ext.onReady( function() {
 
 			// Left gui
 			var viewportHeight = pt.viewport.westRegion.getHeight(),
-				numberOfTabs = pt.init.ougs.length + pt.init.degs.length + 5,
+				numberOfTabs = pt.init.dimensions.length + 5,
 				tabHeight = 28,
 				minPeriodHeight = 380;
 
@@ -489,10 +484,7 @@ Ext.onReady( function() {
 				data.push({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
 			}
 
-			return data.concat(
-				pt.util.array.sortObjectsByString(Ext.clone(pt.init.ougs)),
-				pt.util.array.sortObjectsByString(Ext.clone(pt.init.degs))
-			);
+			return data.concat(Ext.clone(pt.init.dimensions));
 		};
 
 		getStore = function(data) {
@@ -1921,8 +1913,8 @@ Ext.onReady( function() {
 				userOrganisationUnitChildren,
 				treePanel,
 				organisationUnit,
-				groupSetIdAvailableStoreMap = {},
-				groupSetIdSelectedStoreMap = {},
+				dimensionIdAvailableStoreMap = {},
+				dimensionIdSelectedStoreMap = {},
 				getGroupSetPanels,
 				validateSpecialCases,
 				update,
@@ -3206,33 +3198,39 @@ Ext.onReady( function() {
 				}
 			};
 
-			getGroupSetPanels = function(groupSets, objectName, iconCls) {
+			getDimensionPanels = function(dimensions, iconCls) {
 				var	getAvailableStore,
 					getSelectedStore,
 
 					createPanel,
 					getPanels;
 
-				getAvailableStore = function(groupSet) {
+				getAvailableStore = function(dimension) {
 					return Ext.create('Ext.data.Store', {
 						fields: ['id', 'name'],
-						data: groupSet.items,
+						proxy: {
+							type: 'ajax',
+							url: pt.baseUrl + '/api/dimensions/' + dimension.id + '.json',
+							reader: {
+								type: 'json',
+								root: 'items'
+							}
+						},
 						isLoaded: false,
 						storage: {},
 						sortStore: function() {
 							this.sort('name', 'ASC');
 						},
-						reload: function() {
-							this.removeAll();
-							this.storage = {};
-							this.loadData(groupSet.items);
+						reset: function() {
+							if (this.isLoaded) {
+								this.removeAll();
+								pt.util.store.loadFromStorage(this);
+								this.sortStore();
+							}
 						},
 						listeners: {
 							load: function(s) {
 								s.isLoaded = true;
-								//s.each( function(r) {
-									//r.data.name = pt.conf.util.jsonEncodeString(r.data.name);
-								//});
 								pt.util.store.addToStorage(s);
 							}
 						}
@@ -3246,7 +3244,7 @@ Ext.onReady( function() {
 					});
 				};
 
-				createPanel = function(groupSet) {
+				createPanel = function(dimension) {
 					var getAvailable,
 						getSelected,
 
@@ -3259,7 +3257,7 @@ Ext.onReady( function() {
 
 					getAvailable = function(availableStore) {
 						return Ext.create('Ext.ux.form.MultiSelect', {
-							cls: 'pt-toolbar-multiselect-left',
+							cls: 'dv-toolbar-multiselect-left',
 							width: (pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding) / 2,
 							valueField: 'id',
 							displayField: 'name',
@@ -3268,7 +3266,7 @@ Ext.onReady( function() {
 								{
 									xtype: 'label',
 									text: PT.i18n.available,
-									cls: 'pt-toolbar-multiselect-left-label'
+									cls: 'dv-toolbar-multiselect-left-label'
 								},
 								'->',
 								{
@@ -3300,7 +3298,7 @@ Ext.onReady( function() {
 
 					getSelected = function(selectedStore) {
 						return Ext.create('Ext.ux.form.MultiSelect', {
-							cls: 'pt-toolbar-multiselect-right',
+							cls: 'dv-toolbar-multiselect-right',
 							width: (pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding) / 2,
 							valueField: 'id',
 							displayField: 'name',
@@ -3327,7 +3325,7 @@ Ext.onReady( function() {
 								{
 									xtype: 'label',
 									text: PT.i18n.selected,
-									cls: 'pt-toolbar-multiselect-right-label'
+									cls: 'dv-toolbar-multiselect-right-label'
 								}
 							],
 							listeners: {
@@ -3340,11 +3338,11 @@ Ext.onReady( function() {
 						});
 					};
 
-					availableStore = getAvailableStore(groupSet);
+					availableStore = getAvailableStore(dimension);
 					selectedStore = getSelectedStore();
 
-					groupSetIdAvailableStoreMap[groupSet.id] = availableStore;
-					groupSetIdSelectedStoreMap[groupSet.id] = selectedStore;
+					dimensionIdAvailableStoreMap[dimension.id] = availableStore;
+					dimensionIdSelectedStoreMap[dimension.id] = selectedStore;
 
 					available = getAvailable(availableStore);
 					selected = getSelected(selectedStore);
@@ -3355,17 +3353,19 @@ Ext.onReady( function() {
 
 					panel = {
 						xtype: 'panel',
-						title: '<div class="' + iconCls + '">' + groupSet.name + '</div>',
+						title: '<div class="' + iconCls + '">' + dimension.name + '</div>',
 						hideCollapseTool: true,
+						availableStore: availableStore,
+						selectedStore: selectedStore,
 						getData: function() {
 							var data = {
-								dimensionName: groupSet.id,
-								objectName: objectName,
+								dimensionName: dimension.id,
+								objectName: dimension.id,
 								items: []
 							};
 
 							selectedStore.each( function(r) {
-								data.items.push(r.data.id);
+								data.items.push({id: r.data.id});
 							});
 
 							return data.items.length ? data : null;
@@ -3410,14 +3410,10 @@ Ext.onReady( function() {
 				};
 
 				getPanels = function() {
-					var panels = [],
-						groupSet,
-						last;
+					var panels = [];
 
-					for (var i = 0, panel; i < groupSets.length; i++) {
-						groupSet = groupSets[i];
-
-						panel = createPanel(groupSet);
+					for (var i = 0, panel; i < dimensions.length; i++) {
+						panel = createPanel(dimensions[i]);
 
 						panels.push(panel);
 					}
@@ -3497,14 +3493,11 @@ Ext.onReady( function() {
 						period,
 						organisationUnit
 					],
-					ougs = Ext.clone(pt.init.ougs),
-					degs = Ext.clone(pt.init.degs);
+					dims = Ext.clone(pt.init.dimensions);
 
-					pt.util.array.sortObjectsByString(ougs);
-					pt.util.array.sortObjectsByString(degs);
+					pt.util.array.sortObjectsByString(dims);
 
-					panels = panels.concat(getGroupSetPanels(ougs, pt.conf.finals.dimension.organisationUnitGroupSet.objectName, 'pt-panel-title-organisationunitgroupset'));
-					panels = panels.concat(getGroupSetPanels(degs, pt.conf.finals.dimension.dataElementGroupSet.objectName, 'pt-panel-title-dataelementgroupset'));
+					panels = panels.concat(getDimensionPanels(dims, 'pt-panel-title-dimension'));
 
 					last = panels[panels.length - 1];
 					last.cls = 'pt-accordion-last';
