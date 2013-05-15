@@ -3257,7 +3257,7 @@ Ext.onReady( function() {
 
 					getAvailable = function(availableStore) {
 						return Ext.create('Ext.ux.form.MultiSelect', {
-							cls: 'dv-toolbar-multiselect-left',
+							cls: 'pt-toolbar-multiselect-left',
 							width: (pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding) / 2,
 							valueField: 'id',
 							displayField: 'name',
@@ -3266,7 +3266,7 @@ Ext.onReady( function() {
 								{
 									xtype: 'label',
 									text: PT.i18n.available,
-									cls: 'dv-toolbar-multiselect-left-label'
+									cls: 'pt-toolbar-multiselect-left-label'
 								},
 								'->',
 								{
@@ -3298,7 +3298,7 @@ Ext.onReady( function() {
 
 					getSelected = function(selectedStore) {
 						return Ext.create('Ext.ux.form.MultiSelect', {
-							cls: 'dv-toolbar-multiselect-right',
+							cls: 'pt-toolbar-multiselect-right',
 							width: (pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding) / 2,
 							valueField: 'id',
 							displayField: 'name',
@@ -3325,7 +3325,7 @@ Ext.onReady( function() {
 								{
 									xtype: 'label',
 									text: PT.i18n.selected,
-									cls: 'dv-toolbar-multiselect-right-label'
+									cls: 'pt-toolbar-multiselect-right-label'
 								}
 							],
 							listeners: {
