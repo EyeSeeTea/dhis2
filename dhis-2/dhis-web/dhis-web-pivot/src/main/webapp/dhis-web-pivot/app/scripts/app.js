@@ -3153,7 +3153,7 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				collapsed: false,
 				getData: function() {
-					var records = treePanel.getSelectionModel().getSelection(),
+					var r = treePanel.getSelectionModel().getSelection(),
 						data = {
 							dimensionName: pt.conf.finals.dimension.organisationUnit.dimensionName,
 							objectName: pt.conf.finals.dimension.organisationUnit.objectName,
