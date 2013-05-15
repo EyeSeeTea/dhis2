@@ -818,33 +818,90 @@ console.log(xLayout);
 			};
 
 			getParamString = function(xLayout) {
-				var sortedDimensions = xLayout.sortedDimensions,
-					sortedFilterDimensions = xLayout.sortedFilterDimensions,
-					paramString = '?';
+				var sortedAxisDimensionNames = xLayout.extended.sortedAxisDimensionNames,
+					sortedFilterDimensions = xLayout.extended.sortedFilterDimensions,
+					paramString = '?',
+					dimConf = pt.conf.finals.dimension,
+					addCategoryDimension = false,
+					map = xLayout.extended.dimensionNameItemsMap,
+					dx = dimConf.indicator.dimensionName,
+					items;
 
-				for (var i = 0, sortedDim; i < sortedDimensions.length; i++) {
-					sortedDim = sortedDimensions[i];
+				for (var i = 0, dimensionName; i < sortedAxisDimensionNames.length; i++) {
+					dimensionName = sortedAxisDimensionNames[i];
 
-					paramString += 'dimension=' + sortedDim.dimensionName;
+					paramString += 'dimension=' + dimensionName;
 
-					if (sortedDim.dimensionName !== pt.conf.finals.dimension.category.dimensionName) {
-						paramString += ':' + sortedDim.items.join(';');
+					items = Ext.clone(xLayout.extended.dimensionNameItemsMap[dimensionName]).sort();
+
+					if (dimensionName === dx) {
+						for (var j = 0, index; j < items.length; j++) {
+							index = items[j].indexOf('-');
+
+							if (index > 0) {
+								addCategoryDimension = true;
+								items[j] = items[j].substr(0, index);
+							}
+						}
+
+						items = Ext.Array.unique(items);
 					}
 
-					if (i < (sortedDimensions.length - 1)) {
+					paramString += ':' + items.join(';');
+
+					if (i < (sortedAxisDimensionNames.length - 1)) {
 						paramString += '&';
 					}
 				}
 
-				if (sortedFilterDimensions) {
-					for (var i = 0, sortedFilterDim; i < sortedFilterDimensions.length; i++) {
-						sortedFilterDim = sortedFilterDimensions[i];
+				if (addCategoryDimension) {
+					paramString += '&dimension=' + pt.conf.finals.dimension.category.dimensionName;
+				}
 
-						paramString += '&filter=' + sortedFilterDim.dimensionName + ':' + sortedFilterDim.items.join(';');
+				if (Ext.isArray(sortedFilterDimensions) && sortedFilterDimensions.length) {
+					for (var i = 0, dim; i < sortedFilterDimensions.length; i++) {
+						dim = sortedFilterDimensions[i];
+
+						paramString += '&filter=' + dim.dimensionName + ':' + dim.items.join(';');
 					}
 				}
 
 				return paramString;
+
+
+
+
+
+
+
+
+				//var sortedDimensions = xLayout.sortedDimensions,
+					//sortedFilterDimensions = xLayout.sortedFilterDimensions,
+					//paramString = '?';
+
+				//for (var i = 0, sortedDim; i < sortedDimensions.length; i++) {
+					//sortedDim = sortedDimensions[i];
+
+					//paramString += 'dimension=' + sortedDim.dimensionName;
+
+					//if (sortedDim.dimensionName !== pt.conf.finals.dimension.category.dimensionName) {
+						//paramString += ':' + sortedDim.items.join(';');
+					//}
+
+					//if (i < (sortedDimensions.length - 1)) {
+						//paramString += '&';
+					//}
+				//}
+
+				//if (sortedFilterDimensions) {
+					//for (var i = 0, sortedFilterDim; i < sortedFilterDimensions.length; i++) {
+						//sortedFilterDim = sortedFilterDimensions[i];
+
+						//paramString += '&filter=' + sortedFilterDim.dimensionName + ':' + sortedFilterDim.items.join(';');
+					//}
+				//}
+
+				//return paramString;
 			};
 
 			validateResponse = function(response) {
