@@ -126,17 +126,11 @@ Ext.onReady( function() {
 			config.filters = [];
 
 			getDimension = function(config) {
-				if (dv.api.objectNameDimensionClassMap[config.objectName]) {
-					return dv.api.objectNameDimensionClassMap[config.objectName]({
-						dimension: config.objectName,
-						items: config.items
-					});
+				if (dv.api.objectNameDimensionClassMap[config.dimension]) {
+					return dv.api.objectNameDimensionClassMap[config.dimension](config);
 				}
 				else {
-					return dv.api.Dimension({
-						dimension: config.dimension,
-						items: config.items
-					});
+					return dv.api.Dimension(config);
 				}
 			};
 

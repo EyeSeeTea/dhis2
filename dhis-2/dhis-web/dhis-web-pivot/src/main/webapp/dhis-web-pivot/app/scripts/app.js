@@ -103,17 +103,11 @@ Ext.onReady( function() {
 			config.filters = [];
 
 			getDimension = function(config) {
-				if (pt.api.dimension.objectNameClassMap[config.objectName]) {
-					return pt.api.objectNameClassMap[config.objectName]({
-						dimension: config.objectName,
-						items: config.items
-					});
+				if (pt.api.dimension.objectNameClassMap[config.dimension]) {
+					return pt.api.dimension.objectNameClassMap[config.dimension](config);
 				}
 				else {
-					return pt.api.dimension.classes.Dimension({
-						dimension: config.dimension,
-						items: config.items
-					});
+					return pt.api.Dimension(config);
 				}
 			};
 

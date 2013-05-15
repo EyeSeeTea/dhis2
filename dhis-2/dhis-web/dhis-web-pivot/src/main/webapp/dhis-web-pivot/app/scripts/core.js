@@ -699,7 +699,7 @@ PT.core.getUtils = function(pt) {
 
 				objectNameRecordsMap[dim.objectName] = Ext.clone(dim.records);
 			}
-console.log(xLayout);
+
 			filters = Ext.clone(xLayout.filters);
 			for (var i = 0, dim; i < filters.length; i++) {
 				dim = filters[i];
@@ -738,8 +738,7 @@ console.log(xLayout);
 		},
 
 		createTable: function(layout, pt) {
-			var options = layout.options,
-				extendLayout,
+			var extendLayout,
 				getSyncronizedXLayout,
 				getParamString,
 				validateResponse,
@@ -1010,7 +1009,7 @@ console.log(xLayout);
 							aSpan.push(nCols); //if just one item and top level, span all
 						}
 						else {
-							if (options.hideEmptyRows && type === 'row') {
+							if (layout.hideEmptyRows && type === 'row') {
 								aSpan.push(nCols / aAccNumCols[i]);
 							}
 							else {
@@ -1196,7 +1195,7 @@ console.log(xLayout);
 					totalColObjects = [],
 					htmlArray;
 
-				getTdHtml = function(options, config) {
+				getTdHtml = function(config) {
 					var cls,
 						colSpan,
 						rowSpan,
@@ -1214,20 +1213,20 @@ console.log(xLayout);
 					colSpan = config.colSpan ? 'colspan="' + config.colSpan + '"' : '';
 					rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '"' : '';
 					htmlValue = config.collapsed ? '&nbsp;' : config.htmlValue || config.value || '&nbsp;';
-					htmlValue = config.type !== 'dimension' ? pt.util.number.pp(htmlValue, options.digitGroupSeparator) : htmlValue;
-					displayDensity = pt.conf.pivot.displayDensity[config.displayDensity] || pt.conf.pivot.displayDensity[options.displayDensity];
-					fontSize = pt.conf.pivot.fontSize[config.fontSize] || pt.conf.pivot.fontSize[options.fontSize];
+					htmlValue = config.type !== 'dimension' ? pt.util.number.pp(htmlValue, layout.digitGroupSeparator) : htmlValue;
+					displayDensity = pt.conf.pivot.displayDensity[config.displayDensity] || pt.conf.pivot.displayDensity[layout.displayDensity];
+					fontSize = pt.conf.pivot.fontSize[config.fontSize] || pt.conf.pivot.fontSize[layout.fontSize];
 
 					return '<td class="' + cls + '" ' + colSpan + ' ' + rowSpan + ' style="padding:' + displayDensity + '; font-size:' + fontSize + ';">' + htmlValue + '</td>';
 				};
 
 				doSubTotals = function(xAxis) {
-					return !!options.showSubTotals && xAxis && xAxis.dims > 1;
+					return !!layout.showSubTotals && xAxis && xAxis.dims > 1;
 
 					//var multiItemDimension = 0,
 						//unique;
 
-					//if (!(options.showSubTotals && xAxis && xAxis.dims > 1)) {
+					//if (!(layout.showSubTotals && xAxis && xAxis.dims > 1)) {
 						//return false;
 					//}
 
@@ -1243,7 +1242,7 @@ console.log(xLayout);
 				};
 
 				doTotals = function() {
-					return !!options.showTotals;
+					return !!layout.showTotals;
 				};
 
 				getColAxisHtmlArray = function() {
@@ -1251,7 +1250,7 @@ console.log(xLayout);
 						getEmptyHtmlArray;
 
 					getEmptyHtmlArray = function() {
-						return (xColAxis && xRowAxis) ? getTdHtml(options, {cls: 'pivot-dim-empty', colSpan: xRowAxis.dims, rowSpan: xColAxis.dims}) : '';
+						return (xColAxis && xRowAxis) ? getTdHtml({cls: 'pivot-dim-empty', colSpan: xRowAxis.dims, rowSpan: xColAxis.dims}) : '';
 					};
 
 					if (!(xColAxis && Ext.isObject(xColAxis))) {
@@ -1269,7 +1268,7 @@ console.log(xLayout);
 
 						for (var j = 0, id; j < dimItems.length; j++) {
 							id = dimItems[j];
-							dimHtml.push(getTdHtml(options, {
+							dimHtml.push(getTdHtml({
 								type: 'dimension',
 								cls: 'pivot-dim',
 								colSpan: colSpan,
@@ -1277,7 +1276,7 @@ console.log(xLayout);
 							}));
 
 							if (doSubTotals(xColAxis) && i === 0) {
-								dimHtml.push(getTdHtml(options, {
+								dimHtml.push(getTdHtml({
 									type: 'dimensionSubtotal',
 									cls: 'pivot-dim-subtotal',
 									rowSpan: xColAxis.dims
@@ -1286,7 +1285,7 @@ console.log(xLayout);
 
 							if (doTotals()) {
 								if (i === 0 && j === (dimItems.length - 1)) {
-									dimHtml.push(getTdHtml(options, {
+									dimHtml.push(getTdHtml({
 										type: 'dimensionTotal',
 										cls: 'pivot-dim-total',
 										rowSpan: xColAxis.dims,
@@ -1405,7 +1404,7 @@ console.log(xLayout);
 
 					// Hide empty rows (dims/values/totals)
 					if (xColAxis && xRowAxis) {
-						if (options.hideEmptyRows) {
+						if (layout.hideEmptyRows) {
 							for (var i = 0, valueRow, empty, parent; i < valueObjects.length; i++) {
 								valueRow = valueObjects[i];
 								empty = [];
@@ -1608,7 +1607,7 @@ console.log(xLayout);
 						row = [];
 
 						for (var j = 0; j < mergedObjects[i].length; j++) {
-							row.push(getTdHtml(options, mergedObjects[i][j]));
+							row.push(getTdHtml(mergedObjects[i][j]));
 						}
 
 						a.push(row);
@@ -1675,7 +1674,7 @@ console.log(xLayout);
 
 						// Total col html items
 						for (var i = 0; i < xTotalColObjects.length; i++) {
-							a.push(getTdHtml(options, xTotalColObjects[i]));
+							a.push(getTdHtml(xTotalColObjects[i]));
 						}
 					}
 
@@ -1697,7 +1696,7 @@ console.log(xLayout);
 						}
 
 						if (xColAxis && xRowAxis) {
-							a.push(getTdHtml(options, {
+							a.push(getTdHtml({
 								type: 'valueGrandTotal',
 								cls: 'pivot-value-grandtotal',
 								htmlValue: Ext.Array.contains(empty, false) ? pt.util.number.roundIf(total, 1).toString() : '&nbsp;',
@@ -1718,7 +1717,7 @@ console.log(xLayout);
 
 					if (doTotals()) {
 						if (xRowAxis) {
-							dimTotalArray = [getTdHtml(options, {
+							dimTotalArray = [getTdHtml({
 								type: 'dimensionSubtotal',
 								cls: 'pivot-dim-total',
 								colSpan: xRowAxis.dims,
@@ -1800,8 +1799,8 @@ console.log(xLayout);
 
 						xResponse = extendResponse(response, xLayout);
 
-						xColAxis = extendAxis('col', xLayout.col, xResponse);
-						xRowAxis = extendAxis('row', xLayout.row, xResponse);
+						xColAxis = extendAxis('col', xLayout.columns, xResponse);
+						xRowAxis = extendAxis('row', xLayout.rows, xResponse);
 
 						html = getTableHtml(xColAxis, xRowAxis, xResponse);
 
