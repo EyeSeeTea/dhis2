@@ -2038,7 +2038,7 @@ PT.core.getAPI = function(pt) {
 						}
 						else {
 							for (var j = 0; j < dim.items.length; j++) {
-								if (!Ext.isString(dim.items[j])) {
+								if (!Ext.isString(dim.items[j].id)) {
 									remove = true;
 								}
 							}
@@ -2096,7 +2096,7 @@ PT.core.getAPI = function(pt) {
 				}
 			}
 
-			if (!Ext.Array.contains(objectNames, dimConf.period.objectNames)) {
+			if (!Ext.Array.contains(objectNames, dimConf.period.objectName)) {
 				alert(PT.i18n.at_least_one_period_must_be_specified_as_column_row_or_filter);
 				return;
 			}
