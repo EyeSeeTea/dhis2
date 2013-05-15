@@ -503,8 +503,8 @@ PT.core.getUtils = function(pt) {
 	};
 
 	util.pivot = {
-		createTable: function(settings, pt) {
-			var options = settings.options,
+		createTable: function(layout, pt) {
+			var options = layout.options,
 				extendLayout,
 				getSyncronizedXLayout,
 				getParamString,
@@ -517,8 +517,8 @@ PT.core.getUtils = function(pt) {
 
 				dimConf = pt.conf.finals.dimension;
 
-			extendLayout = function(settings) {
-				var xLayout = Ext.clone(settings),
+			extendLayout = function(layout) {
+				var xLayout = Ext.clone(layout),
 					addDimensions,
 					addDimensionNames,
 					addSortedDimensions,
@@ -599,24 +599,24 @@ PT.core.getUtils = function(pt) {
 						return axis;
 					};
 
-					if (settings.col) {
-						settings.col = getAxis(settings.col);
+					if (layout.col) {
+						layout.col = getAxis(layout.col);
 					}
-					if (settings.row) {
-						settings.row = getAxis(settings.row);
+					if (layout.row) {
+						layout.row = getAxis(layout.row);
 					}
-					if (settings.filter) {
-						settings.filter = getAxis(settings.filter);
+					if (layout.filter) {
+						layout.filter = getAxis(layout.filter);
 					}
 				};
 
 				headerNames = getHeaderNames();
 
-				// remove co from settings if it does not exist in response
+				// remove co from layout if it does not exist in response
 				if (Ext.Array.contains(xLayout.dimensionNames, dimConf.category.dimensionName) && !(Ext.Array.contains(headerNames, dimConf.category.dimensionName))) {
 					removeDimensionFromLayout(dimConf.category.dimensionName);
 
-					newLayout = pt.api.Layout(settings);
+					newLayout = pt.api.layout.classes.Layout(layout);
 
 					if (!newLayout) {
 						return;
@@ -1547,7 +1547,7 @@ PT.core.getUtils = function(pt) {
 					xColAxis,
 					xRowAxis;
 
-				xLayout = extendLayout(settings);
+				xLayout = extendLayout(layout);
 
 				pt.paramString = getParamString(xLayout);
 				url = pt.init.contextPath + '/api/analytics.json' + pt.paramString;
@@ -1607,6 +1607,8 @@ PT.core.getUtils = function(pt) {
 
 						pt.xLayout = xLayout;
 						pt.xResponse = xResponse;
+console.log("xResponse", xResponse);
+console.log("xLayout", xLayout);
 					}
 				});
 
@@ -1638,9 +1640,352 @@ PT.core.getUtils = function(pt) {
 };
 
 PT.core.getAPI = function(pt) {
-	var api = {};
+	var dimConf = pt.conf.finals.dimension,
+		api = {
+			dimension: {
+				Dimension: null,
+				classes: {
+					Indicator: null,
+					DataElement: null,
+					Operand: null,
+					DataSet: null,
+					Period: null,
+					OrganisationUnit: null,
+					Dimension: null
+				},
+				objectNameClassMap: {}
+			},
+			layout: {
+				classes: {
+					Layout: null
+				}
+			}
+		};
 
-	api.Layout = function(config) {
+	// Dimension
+
+	api.dimension.Dimension = function() {
+		return {
+			dimension: null, // string
+
+			items: null // array of records
+		};
+	};
+
+	api.dimension.classes.Indicator = function(config) {
+		var indicator = api.dimension.Dimension(),
+			validateConfig;
+
+		validateConfig = function() {
+			if (!Ext.isObject(config)) {
+				alert('Indicator config is not an object');
+				return;
+			}
+
+			if (!Ext.isString(config.dimension)) {
+				alert('Indicator dimension name is illegal');
+				return;
+			}
+
+			if (!Ext.isArray(config.items)) {
+				alert('Indicator items is not an array');
+				return;
+			}
+
+			if (!config.items.length) {
+				alert('Indicator has no items');
+				return;
+			}
+
+			return true;
+		};
+
+		return function() {
+			if (!validateConfig()) {
+				return;
+			}
+
+			indicator.dimension = config.dimension;
+			indicator.dimensionName = dimConf.indicator.dimensionName;
+			indicator.objectName = dimConf.indicator.objectName;
+			indicator.items = Ext.clone(config.items);
+
+			return indicator;
+		}();
+	};
+
+	api.dimension.classes.DataElement = function(config) {
+		var dataElement = api.dimension.Dimension(),
+			validateConfig;
+
+		validateConfig = function() {
+			if (!Ext.isObject(config)) {
+				alert('Data element config is not an object');
+				return;
+			}
+
+			if (!Ext.isString(config.dimension)) {
+				alert('Data element dimension name is illegal');
+				return;
+			}
+
+			if (!Ext.isArray(config.items)) {
+				alert('Data element items is not an array');
+				return;
+			}
+
+			if (!config.items.length) {
+				alert('Data element has no items');
+				return;
+			}
+
+			return true;
+		};
+
+		return function() {
+			if (!validateConfig()) {
+				return;
+			}
+
+			dataElement.dimension = config.dimension;
+			dataElement.dimensionName = dimConf.dataElement.dimensionName;
+			dataElement.objectName = dimConf.dataElement.objectName;
+			dataElement.items = Ext.clone(config.items);
+
+			return dataElement;
+		}();
+	};
+
+	api.dimension.classes.Operand = function(config) {
+		var operand = api.dimension.Dimension(),
+			validateConfig;
+
+		validateConfig = function() {
+			if (!Ext.isObject(config)) {
+				alert('Operand config is not an object');
+				return;
+			}
+
+			if (!Ext.isString(config.dimension)) {
+				alert('Operand dimension name is illegal');
+				return;
+			}
+
+			if (!Ext.isArray(config.items)) {
+				alert('Operand items is not an array');
+				return;
+			}
+
+			if (!config.items.length) {
+				alert('Operand has no items');
+				return;
+			}
+
+			return true;
+		};
+
+		return function() {
+			if (!validateConfig()) {
+				return;
+			}
+
+			operand.dimension = config.dimension;
+			operand.dimensionName = dimConf.operand.dimensionName;
+			operand.objectName = dimConf.operand.objectName;
+			operand.items = Ext.clone(config.items);
+
+			// Replace operand id characters
+			for (var i = 0, id; i < operand.items.length; i++) {
+				id = operand.items[i].id;
+
+				if (id.indexOf('.') !== -1) {
+					id = id.replace('.', '-');
+					operand.items[i].id = id;
+				}
+			}
+
+			return operand;
+		}();
+	};
+
+	api.dimension.classes.DataSet = function(config) {
+		var dataSet = api.dimension.Dimension(),
+			validateConfig;
+
+		validateConfig = function() {
+			if (!Ext.isObject(config)) {
+				alert('Data set config is not an object');
+				return;
+			}
+
+			if (!Ext.isString(config.dimension)) {
+				alert('Data set dimension name is illegal');
+				return;
+			}
+
+			if (!Ext.isArray(config.items)) {
+				alert('Data set items is not an array');
+				return;
+			}
+
+			if (!config.items.length) {
+				alert('Data set has no items');
+				return;
+			}
+
+			return true;
+		};
+
+		return function() {
+			if (!validateConfig()) {
+				return;
+			}
+
+			dataSet.dimension = config.dimension;
+			dataSet.dimensionName = dimConf.dataSet.dimensionName;
+			dataSet.objectName = dimConf.dataSet.objectName;
+			dataSet.items = Ext.clone(config.items);
+
+			return dataSet;
+		}();
+	};
+
+	api.dimension.classes.Period = function(config) {
+		var period = api.dimension.Dimension(),
+			validateConfig;
+
+		validateConfig = function() {
+			if (!Ext.isObject(config)) {
+				alert('Period config is not an object');
+				return;
+			}
+
+			if (!Ext.isString(config.dimension)) {
+				alert('Period dimension name is illegal');
+				return;
+			}
+
+			if (!Ext.isArray(config.items)) {
+				alert('Period items is not an array');
+				return;
+			}
+
+			if (!config.items.length) {
+				alert('Period has no items');
+				return;
+			}
+
+			return true;
+		};
+
+		return function() {
+			if (!validateConfig()) {
+				return;
+			}
+
+			period.dimension = config.dimension;
+			period.dimensionName = dimConf.period.dimensionName;
+			period.objectName = dimConf.period.objectName;
+			period.items = Ext.clone(config.items);
+
+			return period;
+		}();
+	};
+
+	api.dimension.classes.OrganisationUnit = function(config) {
+		var organisationUnit = api.dimension.Dimension(),
+			validateConfig;
+
+		validateConfig = function() {
+			if (!Ext.isObject(config)) {
+				alert('Organisation unit config is not an object');
+				return;
+			}
+
+			if (!Ext.isString(config.dimension)) {
+				alert('Organisation unit dimension name is illegal');
+				return;
+			}
+
+			if (!Ext.isArray(config.items)) {
+				alert('Organisation unit items is not an array');
+				return;
+			}
+
+			if (!config.items.length) {
+				alert('Organisation unit has no items');
+				return;
+			}
+
+			return true;
+		};
+
+		return function() {
+			if (!validateConfig()) {
+				return;
+			}
+
+			organisationUnit.dimension = config.dimension;
+			organisationUnit.dimensionName = dimConf.organisationUnit.dimensionName;
+			organisationUnit.objectName = dimConf.organisationUnit.objectName;
+			organisationUnit.items = Ext.clone(config.items);
+
+			return organisationUnit;
+		}();
+	};
+
+	api.dimension.classes.Dimension = function(config) {
+		var dimension = api.dimension.Dimension(),
+			validateConfig;
+
+		validateConfig = function() {
+			if (!Ext.isObject(config)) {
+				alert('Dimension config is not an object');
+				return;
+			}
+
+			if (!Ext.isString(config.dimension)) {
+				alert('Dimension name is illegal');
+				return;
+			}
+
+			if (!Ext.isArray(config.items)) {
+				alert('Dimension items is not an array');
+				return;
+			}
+
+			if (!config.items.length) {
+				alert('Dimension has no items');
+				return;
+			}
+
+			return true;
+		};
+
+		return function() {
+			if (!validateConfig()) {
+				return;
+			}
+
+			dimension.dimension = config.dimension;
+			dimension.dimensionName = config.dimension;
+			dimension.objectName = config.dimension;
+			dimension.items = Ext.clone(config.items);
+
+			return dimension;
+		}();
+	};
+
+	api.dimension.objectNameClassMap[dimConf.indicator.objectName] = api.dimension.classes.Indicator;
+	api.dimension.objectNameClassMap[dimConf.dataElement.objectName] = api.dimension.classes.DataElement;
+	api.dimension.objectNameClassMap[dimConf.operand.objectName] = api.dimension.classes.Operand;
+	api.dimension.objectNameClassMap[dimConf.dataSet.objectName] = api.dimension.classes.DataSet;
+	api.dimension.objectNameClassMap[dimConf.period.objectName] = api.dimension.classes.Period;
+	api.dimension.objectNameClassMap[dimConf.organisationUnit.objectName] = api.dimension.classes.OrganisationUnit;
+
+	// Layout
+
+	api.layout.classes.Layout = function(config) {
 		var col,
 			row,
 			filter,

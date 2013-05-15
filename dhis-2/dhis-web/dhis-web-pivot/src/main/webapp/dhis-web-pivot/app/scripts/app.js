@@ -17,9 +17,9 @@ Ext.onReady( function() {
 
 	// Init
 
-	var pt = PT.core.getInstance();
+	pt = PT.core.getInstance();
 
-	PT.app.instances = [pt];
+	PT.core.instances = [pt];
 
 	PT.app.getInits = function(r) {
 		var init = Ext.decode(r.responseText);
@@ -90,6 +90,65 @@ Ext.onReady( function() {
 	PT.app.getUtils = function() {
 		var util = pt.util || {};
 
+		util.pivot.getLayoutConfig = function() {
+			var panels = pt.cmp.dimension.panels,
+				columnDimensionNames = pt.viewport.colStore.getDimensionNames(),
+				rowDimensionNames = pt.viewport.rowStore.getDimensionNames(),
+				filterDimensionNames = pt.viewport.filterStore.getDimensionNames(),
+				config = pt.viewport.optionsWindow.getOptions(),
+				getDimension;
+
+			config.columns = [];
+			config.rows = [];
+			config.filters = [];
+
+			getDimension = function(config) {
+				if (pt.api.dimension.objectNameClassMap[config.objectName]) {
+					return pt.api.objectNameClassMap[config.objectName]({
+						dimension: config.objectName,
+						items: config.items
+					});
+				}
+				else {
+					return pt.api.dimension.classes.Dimension({
+						dimension: config.dimension,
+						items: config.items
+					});
+				}
+			};
+
+			// Columns, rows, filters
+			for (var i = 0, dim; i < panels.length; i++) {
+				dim = panels[i].getData();
+
+				if (dim) {
+					if (Ext.Array.contains(columnDimensionNames, dim.dimensionName)) {
+						config.columns.push(getDimension({
+							dimension: dim.objectName,
+							items: dim.items
+						}));
+					}
+					else if (Ext.Array.contains(rowDimensionNames, dim.dimensionName)) {
+						config.rows.push(getDimension({
+							dimension: dim.objectName,
+							items: dim.items
+						}));
+					}
+					else if (Ext.Array.contains(filterDimensionNames, dim.dimensionName)) {
+						config.filters.push(getDimension({
+							dimension: dim.objectName,
+							items: dim.items
+						}));
+					}
+				}
+			}
+
+			config.userOrganisationUnit = pt.viewport.userOrganisationUnit.getValue();
+			config.userOrganisationUnitChildren = pt.viewport.userOrganisationUnitChildren.getValue();
+
+			return config;
+		};
+
 		util.dimension = {
 			panel: {
 				setHeight: function(mx) {
@@ -159,80 +218,6 @@ Ext.onReady( function() {
 
 				w.hasDestroyOnBlurHandler = true;
 			}
-		};
-
-		util.pivot.getLayoutConfig = function() {
-			var data = {},
-				setup = pt.viewport.layoutWindow ? pt.viewport.layoutWindow.getSetup() : {},
-				getData,
-				extendLayout,
-				config;
-
-			config = {
-				col: [],
-				row: [],
-				filter: [],
-				objects: [],
-				userOrganisationUnit: false,
-				userOrganisationUnitChildren: false
-			};
-
-			getData = function() {
-				var panels = pt.cmp.dimension.panels,
-					dxItems = [];
-
-				for (var i = 0, dim; i < panels.length; i++) {
-					dim = panels[i].getData();
-
-					if (dim) {
-						config.objects.push(dim);
-
-						if (dim.dimensionName === pt.conf.finals.dimension.data.dimensionName) {
-							dxItems = dxItems.concat(dim.items);
-						}
-						else {
-							data[dim.dimensionName] = dim.items;
-						}
-					}
-				}
-
-				if (dxItems.length) {
-					data[pt.conf.finals.dimension.data.dimensionName] = dxItems;
-				}
-			}();
-
-			extendLayout = function() {
-				for (var i = 0, dimensionName; i < setup.col.length; i++) {
-					dimensionName = setup.col[i];
-					config.col.push({
-						dimensionName: dimensionName,
-						items: data[dimensionName]
-					});
-				}
-
-				for (var i = 0, dimensionName; i < setup.row.length; i++) {
-					dimensionName = setup.row[i];
-					config.row.push({
-						dimensionName: dimensionName,
-						items: data[dimensionName]
-					});
-				}
-
-				for (var i = 0, dimensionName; i < setup.filter.length; i++) {
-					dimensionName = setup.filter[i];
-					config.filter.push({
-						dimensionName: dimensionName,
-						items: data[dimensionName]
-					});
-				}
-			}();
-
-			config.options = pt.viewport.optionsWindow.getOptions();
-
-			config.options.userOrganisationUnit = pt.viewport.userOrganisationUnit.getValue();
-			config.options.userOrganisationUnitChildren = pt.viewport.userOrganisationUnitChildren.getValue();
-
-			return config;
 		};
 
 		util.url = {
@@ -495,6 +480,16 @@ Ext.onReady( function() {
 			if (data) {
 				config.data = data;
 			}
+
+			config.getDimensionNames = function() {
+				var dimensionNames = [];
+
+				this.each(function(r) {
+					dimensionNames.push(r.data.id);
+				});
+
+				return Ext.clone(dimensionNames);
+			};
 
 			return Ext.create('Ext.data.Store', config);
 		};
@@ -2025,7 +2020,7 @@ Ext.onReady( function() {
 					};
 
 					pt.store.indicatorSelected.each( function(r) {
-						data.items.push(r.data.id);
+						data.items.push({id: r.data.id});
 					});
 
 					return data.items.length ? data : null;
@@ -2214,7 +2209,7 @@ Ext.onReady( function() {
 					};
 
 					pt.store.dataElementSelected.each( function(r) {
-						data.items.push(r.data.id);
+						data.items.push({id: r.data.id});
 					});
 
 					return data.items.length ? data : null;
@@ -2403,7 +2398,7 @@ Ext.onReady( function() {
 					};
 
 					pt.store.dataSetSelected.each( function(r) {
-						data.items.push(r.data.id);
+						data.items.push({id: r.data.id});
 					});
 
 					return data.items.length ? data : null;
@@ -2871,12 +2866,12 @@ Ext.onReady( function() {
 						chb = pt.cmp.dimension.relativePeriod.checkbox;
 
 					pt.store.fixedPeriodSelected.each( function(r) {
-						data.items.push(r.data.id);
+						data.items.push({id: r.data.id});
 					});
 
 					for (var i = 0; i < chb.length; i++) {
 						if (chb[i].getValue()) {
-							data.items.push(chb[i].relativePeriodId);
+							data.items.push({id: chb[i].relativePeriodId});
 						}
 					}
 
@@ -3165,8 +3160,18 @@ Ext.onReady( function() {
 							items: []
 						};
 
-					for (var i = 0; i < records.length; i++) {
-						data.items.push(records[i].data.id);
+					if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue()) {
+						if (userOrganisationUnit.getValue()) {
+							data.items.push({id: 'USER_ORGUNIT'});
+						}
+						if (userOrganisationUnitChildren.getValue()) {
+							data.items.push({id: 'USER_ORGUNIT_CHILDREN'});
+						}
+					}
+					else {
+						for (var i = 0; i < r.length; i++) {
+							data.items.push({id: r[i].data.id});
+						}
 					}
 
 					return data.items.length ? data : null;
@@ -3465,7 +3470,7 @@ Ext.onReady( function() {
 
 			update = function() {
 				var config = pt.util.pivot.getLayoutConfig(),
-					layout = pt.api.Layout(config);
+					layout = pt.api.layout.classes.Layout(config);
 
 				if (!layout) {
 					return;
