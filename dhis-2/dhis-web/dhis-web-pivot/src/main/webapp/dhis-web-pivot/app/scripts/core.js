@@ -867,41 +867,6 @@ console.log(xLayout);
 				}
 
 				return paramString;
-
-
-
-
-
-
-
-
-				//var sortedDimensions = xLayout.sortedDimensions,
-					//sortedFilterDimensions = xLayout.sortedFilterDimensions,
-					//paramString = '?';
-
-				//for (var i = 0, sortedDim; i < sortedDimensions.length; i++) {
-					//sortedDim = sortedDimensions[i];
-
-					//paramString += 'dimension=' + sortedDim.dimensionName;
-
-					//if (sortedDim.dimensionName !== pt.conf.finals.dimension.category.dimensionName) {
-						//paramString += ':' + sortedDim.items.join(';');
-					//}
-
-					//if (i < (sortedDimensions.length - 1)) {
-						//paramString += '&';
-					//}
-				//}
-
-				//if (sortedFilterDimensions) {
-					//for (var i = 0, sortedFilterDim; i < sortedFilterDimensions.length; i++) {
-						//sortedFilterDim = sortedFilterDimensions[i];
-
-						//paramString += '&filter=' + sortedFilterDim.dimensionName + ':' + sortedFilterDim.items.join(';');
-					//}
-				//}
-
-				//return paramString;
 			};
 
 			validateResponse = function(response) {
