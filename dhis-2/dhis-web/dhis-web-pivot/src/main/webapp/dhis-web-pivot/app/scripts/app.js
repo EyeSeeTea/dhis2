@@ -96,7 +96,9 @@ Ext.onReady( function() {
 				rowDimensionNames = pt.viewport.rowStore.getDimensionNames(),
 				filterDimensionNames = pt.viewport.filterStore.getDimensionNames(),
 				config = pt.viewport.optionsWindow.getOptions(),
-				getDimension;
+				dimConf = pt.conf.finals.dimension,
+				getDimension,
+				dimensionNameDataMap = {};
 
 			config.columns = [];
 			config.rows = [];
@@ -111,25 +113,49 @@ Ext.onReady( function() {
 				}
 			};
 
-			// Columns, rows, filters
-			for (var i = 0, dim; i < panels.length; i++) {
-				dim = panels[i].getData();
+			// Panel data
+			for (var i = 0, data; i < panels.length; i++) {
+				data = panels[i].getData();
 
-				if (dim) {
-					if (Ext.Array.contains(columnDimensionNames, dim.dimensionName)) {
-						config.columns.push(getDimension({
-							dimension: dim.objectName,
-							items: dim.items
-						}));
+				if (data) {
+					dimensionNameDataMap[data.objectName] = data;
+				}
+
+				dimensionNameDataMap[dimConf.data.dimensionName] = Ext.Array.clean([].concat(
+					dimensionNameDataMap[dimConf.indicator.objectName],
+					dimensionNameDataMap[dimConf.dataElement.objectName],
+					dimensionNameDataMap[dimConf.operand.objectName],
+					dimensionNameDataMap[dimConf.dataSet.objectName]
+				));
+			}
+
+			// Columns, rows, filters
+			for (var i = 0, nameArrays = [columnDimensionNames, rowDimensionNames, filterDimensionNames], axes = [config.columns, config.rows, config.filters], names; i < nameArrays.length; i++) {
+				names = nameArrays[i];
+
+				for (var j = 0, dimensionName, dim; j < names.length; j++) {
+					dimensionName = names[j];
+
+					if (dimensionName === dimConf.category.dimensionName) {
+						axes[i].push({
+							dimension: dimConf.category.objectName,
+							items: null
+						});
 					}
-					else if (Ext.Array.contains(rowDimensionNames, dim.dimensionName)) {
-						config.rows.push(getDimension({
-							dimension: dim.objectName,
-							items: dim.items
-						}));
+					else if (dimensionName === dimConf.data.dimensionName && dimensionNameDataMap.hasOwnProperty(dimensionName) && dimensionNameDataMap[dimensionName]) {
+						dim = dimensionNameDataMap[dimensionName];
+
+						for (var k = 0; k < dim.length; k++) {
+							axes[i].push(getDimension({
+								dimension: dim[k].objectName,
+								items: dim[k].items
+							}));
+						}
 					}
-					else if (Ext.Array.contains(filterDimensionNames, dim.dimensionName)) {
-						config.filters.push(getDimension({
+					else if (dimensionNameDataMap.hasOwnProperty(dimensionName) && dimensionNameDataMap[dimensionName]) {
+						dim = dimensionNameDataMap[dimensionName];
+
+						axes[i].push(getDimension({
 							dimension: dim.objectName,
 							items: dim.items
 						}));

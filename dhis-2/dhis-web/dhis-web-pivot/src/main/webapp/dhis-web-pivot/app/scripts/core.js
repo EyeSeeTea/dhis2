@@ -503,54 +503,6 @@ PT.core.getUtils = function(pt) {
 	};
 
 	util.pivot = {
-
-		//extendLayout = function(layout) {
-			//var xLayout = Ext.clone(layout),
-				//addDimensions,
-				//addDimensionNames,
-				//addSortedDimensions,
-				//addSortedFilterDimensions;
-
-			//addDimensions = function() {
-				//xLayout.dimensions = [].concat(Ext.clone(xLayout.columns) || [], Ext.clone(xLayout.rows) || []);
-			//}();
-
-			//addDimensionNames = function() {
-				//var a = [],
-					//dimensions = Ext.clone(xLayout.dimensions) || [];
-
-				//for (var i = 0; i < dimensions.length; i++) {
-					//a.push(dimensions[i].dimensionName);
-				//}
-
-				//xLayout.dimensionNames = a;
-			//}();
-
-			//addSortedDimensions = function() {
-				//xLayout.sortedDimensions = pt.util.array.sortDimensions(Ext.clone(xLayout.dimensions) || []);
-			//}();
-
-			//addSortedFilterDimensions = function() {
-					//xLayout.sortedFilterDimensions = pt.util.array.sortDimensions(Ext.clone(xLayout.filters) || []);
-			//}();
-
-			//addNameItemsMap = function() {
-				//var map = {},
-					//dimensions = Ext.clone(xLayout.dimensions) || [];
-
-				//for (var i = 0, dim; i < dimensions.length; i++) {
-					//dim = dimensions[i];
-
-					//map[dim.dimensionName] = dim.items || [];
-				//}
-
-				//xLayout.nameItemsMap = map;
-			//}();
-
-			//return xLayout;
-		//},
-
-
 		extendLayout: function(layout) {
 			var xLayout = Ext.clone(layout),
 				dimConf = pt.conf.finals.dimension,
