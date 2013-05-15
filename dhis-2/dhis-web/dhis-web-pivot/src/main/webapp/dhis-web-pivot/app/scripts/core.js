@@ -801,7 +801,7 @@ console.log(xLayout);
 				headerNames = getHeaderNames();
 
 				// remove co from layout if it does not exist in response
-				if (Ext.Array.contains(xLayout.dimensionNames, dimConf.category.dimensionName) && !(Ext.Array.contains(headerNames, dimConf.category.dimensionName))) {
+				if (Ext.Array.contains(xLayout.extended.axisDimensionNames, dimConf.category.dimensionName) && !(Ext.Array.contains(headerNames, dimConf.category.dimensionName))) {
 					removeDimensionFromLayout(dimConf.category.dimensionName);
 
 					newLayout = pt.api.layout.classes.Layout(layout);
@@ -917,7 +917,7 @@ console.log(xLayout);
 								header.items = [].concat(response.metaData[pt.conf.finals.dimension.period.dimensionName]);
 							}
 							else {
-								header.items = xLayout.nameItemsMap[header.name];
+								header.items = xLayout.extended.dimensionNameItemsMap[header.name];
 							}
 
 							header.size = header.items.length;
@@ -934,7 +934,7 @@ console.log(xLayout);
 
 				var createValueIds = function() {
 					var valueHeaderIndex = response.nameHeaderMap[pt.conf.finals.dimension.value.value].index,
-						dimensionNames = xLayout.dimensionNames,
+						dimensionNames = xLayout.extended.axisDimensionNames,
 						idIndexOrder = [];
 
 					// idIndexOrder
