@@ -1986,149 +1986,173 @@ PT.core.getAPI = function(pt) {
 	// Layout
 
 	api.layout.classes.Layout = function(config) {
-		var col,
-			row,
-			filter,
+		var layout = {
+			columns: null, // array of {dimension: <objectName>, items: [{id, name, code}]}
 
-			removeEmptyDimensions,
-			getValidatedAxis,
-			validateLayout,
+			rows: null, // array of {dimension: <objectName>, items: [{id, name, code}]}
 
-			defaultOptions = {
-				showTotals: true,
-				showSubTotals: true,
-				hideEmptyRows: false,
-				displayDensity: 'normal',
-				fontSize: 'normal',
-				digitGroupSeparator: 'space',
-				reportingPeriod: false,
-				organisationUnit: false,
-				parentOrganisationUnit: false
-			};
+			filters: null, // array of {dimension: <objectName>, items: [{id, name, code}]}
 
-		removeEmptyDimensions = function(axis) {
-			if (!axis) {
-				return;
-			}
+			showTotals: true, // boolean
 
-			for (var i = 0, dimension, remove; i < axis.length; i++) {
-				remove = false;
-				dimension = axis[i];
+			showSubTotals: true, // boolean
 
-				if (dimension.dimensionName !== pt.conf.finals.dimension.category.dimensionName) {
-					if (!(Ext.isArray(dimension.items) && dimension.items.length)) {
-						remove = true;
-					}
-					else {
-						for (var j = 0; j < dimension.items.length; j++) {
-							if (!Ext.isString(dimension.items[j])) {
-								remove = true;
+			hideEmptyRows: false, // boolean
+
+			displayDensity: 'normal', // string - 'compact', 'normal', 'comfortable'
+
+			fontSize: 'normal', // string - 'small', 'normal', 'large'
+
+			digitGroupSeparator: 'space', // string - 'none', 'comma', 'space'
+
+			userOrganisationUnit: false, // boolean
+
+			userOrganisationUnitChildren: false, // boolean
+
+			reportingPeriod: false, // boolean (report tables only)
+
+			organisationUnit: false, // boolean (report tables only)
+
+			parentOrganisationUnit: false // boolean (report tables only)
+		};
+
+		var validateConfig = function() {
+			var removeEmptyDimensions,
+				getValidatedAxis,
+				a = [],
+				objectNames = [],
+				dimConf = pt.conf.finals.dimension;
+
+			removeEmptyDimensions = function(axis) {
+				if (!axis) {
+					return;
+				}
+
+				for (var i = 0, dim, remove; i < axis.length; i++) {
+					remove = false;
+					dim = axis[i];
+
+					if (dim.dimension !== pt.conf.finals.dimension.category.objectName) {
+						if (!(Ext.isArray(dim.items) && dim.items.length)) {
+							remove = true;
+						}
+						else {
+							for (var j = 0; j < dim.items.length; j++) {
+								if (!Ext.isString(dim.items[j])) {
+									remove = true;
+								}
 							}
 						}
 					}
+
+					if (remove) {
+						axis = Ext.Array.erase(axis, i, 1);
+						i = i - 1;
+					}
 				}
 
-				if (remove) {
-					axis = Ext.Array.erase(axis, i, 1);
-					i = i - 1;
+				return axis;
+			};
+
+			getValidatedAxis = function(axis) {
+				if (!(axis && Ext.isArray(axis) && axis.length)) {
+					return;
 				}
-			}
 
-			return axis;
-		};
+				for (var i = 0, dimension; i < axis.length; i++) {
+					dimension = axis[i];
 
-		getValidatedAxis = function(axis) {
-			if (!(axis && Ext.isArray(axis) && axis.length)) {
+					if (!(Ext.isObject(dimension) && Ext.isString(dimension.dimensionName))) {
+						return;
+					}
+				}
+
+				axis = removeEmptyDimensions(axis);
+
+				return axis.length ? axis : null;
+			};
+
+			config.columns = getValidatedAxis(config.columns);
+			config.rows = getValidatedAxis(config.rows);
+			config.filters = getValidatedAxis(config.filters);
+
+			// Config must be an object
+			if (!(config && Ext.isObject(config))) {
+				alert(dv.el + ': Layout config is not an object');
 				return;
 			}
 
-			for (var i = 0, dimension; i < axis.length; i++) {
-				dimension = axis[i];
-
-				if (!(Ext.isObject(dimension) && Ext.isString(dimension.dimensionName))) {
-					return;
-				}
-			}
-
-			axis = removeEmptyDimensions(axis);
-
-			return axis.length ? axis : null;
-		};
-
-		getValidatedOptions = function(options) {
-			if (!(options && Ext.isObject(options))) {
-				return defaultOptions;
-			}
-
-			options.showTotals = Ext.isDefined(options.showTotals) ? options.showTotals : defaultOptions.showTotals;
-			options.showSubTotals = Ext.isDefined(options.showSubTotals) ? options.showSubTotals : defaultOptions.showSubTotals;
-			options.hideEmptyRows = Ext.isDefined(options.hideEmptyRows) ? options.hideEmptyRows : defaultOptions.hideEmptyRows;
-			options.displayDensity = options.displayDensity || defaultOptions.displayDensity;
-			options.fontSize = options.fontSize || defaultOptions.fontSize;
-			options.digitGroupSeparator = Ext.isDefined(options.digitGroupSeparator) ? options.digitGroupSeparator : defaultOptions.digitGroupSeparator;
-			options.reportingPeriod = Ext.isDefined(options.reportingPeriod) ? options.reportingPeriod : defaultOptions.reportingPeriod;
-			options.organisationUnit = Ext.isDefined(options.organisationUnit) ? options.organisationUnit : defaultOptions.organisationUnit;
-			options.parentOrganisationUnit = Ext.isDefined(options.parentOrganisationUnit) ? options.parentOrganisationUnit : defaultOptions.parentOrganisationUnit;
-
-			return options;
-		};
-
-		validateLayout = function() {
-			var a = [].concat(Ext.clone(col), Ext.clone(row), Ext.clone(filter)),
-				dimensionNames = [],
-				dimConf = pt.conf.finals.dimension;
-
-			if (!(col || row)) {
+			// At least one dimension specified as column or row
+			if (!(config.columns || config.rows)) {
 				alert(PT.i18n.at_least_one_dimension_must_be_specified_as_row_or_column);
 				return;
 			}
 
-			// Selected dimension names
+			// At least one period specified
+			a = [].concat(config.columns, config.rows, config.filters);
 			for (var i = 0; i < a.length; i++) {
 				if (a[i]) {
-					dimensionNames.push(a[i].dimensionName);
+					objectNames.push(a[i].dimension);
 				}
 			}
 
-			if (!Ext.Array.contains(dimensionNames, dimConf.period.dimensionName)) {
+			if (!Ext.Array.contains(objectNames, dimConf.period.objectNames)) {
 				alert(PT.i18n.at_least_one_period_must_be_specified_as_column_row_or_filter);
 				return;
+			}
+
+			// Properties
+			if (!Ext.isBoolean(config.showTotals)) {
+				config.showTotals = layout.showTotals;
+			}
+			if (!Ext.isBoolean(config.showSubTotals)) {
+				config.showSubTotals = layout.showSubTotals;
+			}
+			if (!Ext.isBoolean(config.hideEmptyRows)) {
+				config.hideEmptyRows = layout.hideEmptyRows;
+			}
+
+			if (!Ext.isString(config.displayDensity) || Ext.isEmpty(config.displayDensity)) {
+				config.displayDensity = layout.displayDensity;
+			}
+			if (!Ext.isString(config.fontSize) || Ext.isEmpty(config.fontSize)) {
+				config.fontSize = layout.fontSize;
+			}
+			if (!Ext.isString(config.digitGroupSeparator) || Ext.isEmpty(config.digitGroupSeparator)) {
+				config.digitGroupSeparator = layout.digitGroupSeparator;
+			}
+
+			if (!Ext.isBoolean(config.userOrganisationUnit)) {
+				config.userOrganisationUnit = layout.userOrganisationUnit;
+			}
+			if (!Ext.isBoolean(config.userOrganisationUnitChildren)) {
+				config.userOrganisationUnitChildren = layout.userOrganisationUnitChildren;
+			}
+			if (!Ext.isBoolean(config.reportingPeriod)) {
+				config.reportingPeriod = layout.reportingPeriod;
+			}
+			if (!Ext.isBoolean(config.organisationUnit)) {
+				config.organisationUnit = layout.organisationUnit;
+			}
+			if (!Ext.isBoolean(config.parentOrganisationUnit)) {
+				config.parentOrganisationUnit = layout.parentOrganisationUnit;
 			}
 
 			return true;
 		};
 
 		return function() {
-			var obj = {};
-
-			if (!(config && Ext.isObject(config))) {
-				console.log('Layout config is not an object');
+			if (!validateConfig()) {
 				return;
 			}
 
-			col = getValidatedAxis(config.col);
-			row = getValidatedAxis(config.row);
-			filter = getValidatedAxis(config.filter);
-
-			if (!validateLayout()) {
-				return;
+			for (var key in config) {
+				if (config.hasOwnProperty(key)) {
+					layout[key] = config[key];
+				}
 			}
 
-			if (col) {
-				obj.col = col;
-			}
-			if (row) {
-				obj.row = row;
-			}
-			if (filter) {
-				obj.filter = filter;
-			}
-
-			obj.objects = config.objects;
-
-			obj.options = getValidatedOptions(config.options);
-
-			return obj;
+			return Ext.clone(layout);
 		}();
 	};
 
