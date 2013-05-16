@@ -139,7 +139,9 @@ Ext.onReady( function() {
 					if (dimensionName === dimConf.category.dimensionName) {
 						axes[i].push({
 							dimension: dimConf.category.objectName,
-							items: null
+							dimensionName: dimConf.category.objectName,
+							objectName: dimConf.category.objectName,
+							items: []
 						});
 					}
 					else if (dimensionName === dimConf.data.dimensionName && dimensionNameDataMap.hasOwnProperty(dimensionName) && dimensionNameDataMap[dimensionName]) {
