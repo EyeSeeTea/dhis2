@@ -109,7 +109,7 @@ Ext.onReady( function() {
 					return pt.api.dimension.objectNameClassMap[config.dimension](config);
 				}
 				else {
-					return pt.api.Dimension(config);
+					return pt.api.dimension.classes.Dimension(config);
 				}
 			};
 

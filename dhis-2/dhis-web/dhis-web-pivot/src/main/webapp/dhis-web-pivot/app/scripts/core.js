@@ -630,7 +630,7 @@ PT.core.getUtils = function(pt) {
 			xLayout.extended.dimensionNameItemsMap = dimensionNameItemsMap;
 
 			// Columns, rows, filters
-			columns = Ext.clone(xLayout.columns);
+			columns = Ext.clone(xLayout.columns) || [];
 			for (var i = 0, dim; i < columns.length; i++) {
 				dim = columns[i];
 				dim.objectName = dim.dimension;
@@ -641,7 +641,7 @@ PT.core.getUtils = function(pt) {
 				objectNameRecordsMap[dim.objectName] = dim.records;
 			}
 
-			rows = Ext.clone(xLayout.rows);
+			rows = Ext.clone(xLayout.rows) || [];
 			for (var i = 0, dim; i < rows.length; i++) {
 				dim = rows[i];
 				dim.objectName = dim.dimension;
@@ -652,7 +652,7 @@ PT.core.getUtils = function(pt) {
 				objectNameRecordsMap[dim.objectName] = Ext.clone(dim.records);
 			}
 
-			filters = Ext.clone(xLayout.filters);
+			filters = Ext.clone(xLayout.filters) || [];
 			for (var i = 0, dim; i < filters.length; i++) {
 				dim = filters[i];
 				dim.objectName = dim.dimension;
