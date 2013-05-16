@@ -695,6 +695,7 @@ PT.core.getUtils = function(pt) {
 				getParamString,
 				validateResponse,
 				extendResponse,
+				getDimensionObjects,
 				extendAxis,
 				validateUrl,
 				getTableHtml,
@@ -761,7 +762,7 @@ PT.core.getUtils = function(pt) {
 						return;
 					}
 
-					return extendLayout(newLayout);
+					return pt.util.pivot.extendLayout(newLayout);
 				}
 				else {
 					return xLayout;
@@ -907,6 +908,19 @@ PT.core.getUtils = function(pt) {
 				}();
 
 				return response;
+			};
+
+			getDimensionObjects = function(dimensionNames) {
+				var a = [];
+				dimensionNames = Ext.Array.unique(dimensionNames);
+
+				for (var i = 0; i < dimensionNames.length; i++) {
+					a.push({
+						dimensionName: dimensionNames[i]
+					});
+				}
+
+				return a;
 			};
 
 			extendAxis = function(type, axis, xResponse) {
@@ -1708,6 +1722,7 @@ PT.core.getUtils = function(pt) {
 					xColAxis,
 					xRowAxis;
 
+				// Extend layout
 				xLayout = pt.util.pivot.extendLayout(layout);
 
 				pt.paramString = getParamString(xLayout);
@@ -1742,6 +1757,7 @@ PT.core.getUtils = function(pt) {
 							return;
 						}
 
+						// Synchronize xLayout with response
 						xLayout = getSyncronizedXLayout(xLayout, response);
 
 						if (!xLayout) {
@@ -1749,13 +1765,21 @@ PT.core.getUtils = function(pt) {
 							return;
 						}
 
+						// Extend response
 						xResponse = extendResponse(response, xLayout);
 
+						// Dimension objects
+						xLayout.columns = getDimensionObjects(xLayout.extended.columnsDimensionNames);
+						xLayout.rows = getDimensionObjects(xLayout.extended.rowsDimensionNames);
+
+						// Extend axes
 						xColAxis = extendAxis('col', xLayout.columns, xResponse);
 						xRowAxis = extendAxis('row', xLayout.rows, xResponse);
 
+						// Create html
 						html = getTableHtml(xColAxis, xRowAxis, xResponse);
 
+						// Update viewport
 						pt.viewport.centerRegion.removeAll(true);
 						pt.viewport.centerRegion.update(html);
 

@@ -3478,14 +3478,14 @@ Ext.onReady( function() {
 				}
 
 				// Degs and datasets in the same query
-				if (Ext.Array.contains(dimensionNames, dimConf.data.dimensionName) && pt.store.dataSetSelected.data.length) {
-					for (var i = 0; i < pt.init.degs.length; i++) {
-						if (Ext.Array.contains(dimensionNames, pt.init.degs[i].id)) {
-							alert(PT.i18n.data_element_group_sets_cannot_be_specified_together_with_data_sets);
-							return;
-						}
-					}
-				}
+				//if (Ext.Array.contains(dimensionNames, dimConf.data.dimensionName) && pt.store.dataSetSelected.data.length) {
+					//for (var i = 0; i < pt.init.degs.length; i++) {
+						//if (Ext.Array.contains(dimensionNames, pt.init.degs[i].id)) {
+							//alert(PT.i18n.data_element_group_sets_cannot_be_specified_together_with_data_sets);
+							//return;
+						//}
+					//}
+				//}
 
 				return true;
 			};
