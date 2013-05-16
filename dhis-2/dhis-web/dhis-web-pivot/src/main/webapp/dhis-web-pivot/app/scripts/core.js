@@ -921,6 +921,9 @@ PT.core.getUtils = function(pt) {
 				for (var i = 0; i < axis.length; i++) {
 					if (axis[i].dimensionName === dimConf.data.dimensionName) {
 						dxItems = dxItems.concat(axis[i].items);
+
+						delete axis[i].dimension;
+						delete axis[i].objectName;
 					}
 
 					if (!dimensionNameDimensionMap[axis[i].dimensionName]) {
