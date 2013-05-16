@@ -695,7 +695,7 @@ PT.core.getUtils = function(pt) {
 				getParamString,
 				validateResponse,
 				extendResponse,
-				getDimensionObjects,
+				getMergedDataDimensionsAxis,
 				extendAxis,
 				validateUrl,
 				getTableHtml,
@@ -910,17 +910,33 @@ PT.core.getUtils = function(pt) {
 				return response;
 			};
 
-			getDimensionObjects = function(dimensionNames) {
-				var a = [];
-				dimensionNames = Ext.Array.unique(dimensionNames);
+			getMergedDataDimensionsAxis = function(axis, dimensionNames) {
+				var dxItems = [],
+					dimensionNameDimensionMap = {},
+					mAxis = [];
 
-				for (var i = 0; i < dimensionNames.length; i++) {
-					a.push({
-						dimensionName: dimensionNames[i]
-					});
+				axis = Ext.clone(axis);
+				dimensionNames = Ext.Array.unique(Ext.clone(dimensionNames));
+
+				for (var i = 0; i < axis.length; i++) {
+					if (axis[i].dimensionName === dimConf.data.dimensionName) {
+						dxItems = dxItems.concat(axis[i].items);
+					}
+
+					if (!dimensionNameDimensionMap[axis[i].dimensionName]) {
+						dimensionNameDimensionMap[axis[i].dimensionName] = axis[i];
+					}
 				}
 
-				return a;
+				if (dimensionNameDimensionMap[dimConf.data.dimensionName]) {
+					dimensionNameDimensionMap[dimConf.data.dimensionName].items = dxItems;
+				}
+
+				for (var i = 0; i < dimensionNames.length; i++) {
+					mAxis.push(dimensionNameDimensionMap[dimensionNames[i]]);
+				}
+
+				return mAxis;
 			};
 
 			extendAxis = function(type, axis, xResponse) {
@@ -1769,8 +1785,8 @@ PT.core.getUtils = function(pt) {
 						xResponse = extendResponse(response, xLayout);
 
 						// Dimension objects
-						xLayout.columns = getDimensionObjects(xLayout.extended.columnsDimensionNames);
-						xLayout.rows = getDimensionObjects(xLayout.extended.rowsDimensionNames);
+						xLayout.columns = getMergedDataDimensionsAxis(xLayout.columns, xLayout.extended.columnsDimensionNames);
+						xLayout.rows = getMergedDataDimensionsAxis(xLayout.rows, xLayout.extended.rowsDimensionNames);
 
 						// Extend axes
 						xColAxis = extendAxis('col', xLayout.columns, xResponse);
@@ -1807,7 +1823,7 @@ console.log("xLayout", xLayout);
 			}
 
 			Ext.Ajax.request({
-				url: pt.baseUrl + '/api/reportTables/' + id + '.json?links=false',
+				url: pt.baseUrl + '/api/reportTables/' + id + '.json?links=false&viewClass=dimensional',
 				method: 'GET',
 				failure: function(r) {
 					pt.util.mask.hideMask();
