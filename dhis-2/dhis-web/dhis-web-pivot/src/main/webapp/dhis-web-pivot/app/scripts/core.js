@@ -1742,7 +1742,7 @@ PT.core.getUtils = function(pt) {
 					},
 					success: function(r) {
 						var html,
-							response = pt.api.data.Response(Ext.decode(r.responseText));
+							response = pt.api.response.Response(Ext.decode(r.responseText));
 
 						if (!response) {
 							pt.util.mask.hideMask();
@@ -1832,6 +1832,7 @@ PT.core.getAPI = function(pt) {
 	// Layout
 
 	api.layout.Record = function(config) {
+		var record = {};
 
 		// id: string
 
@@ -1846,11 +1847,14 @@ PT.core.getAPI = function(pt) {
 				return;
 			}
 
-			return Ext.clone(config);
+			record.id = config.id;
+
+			return Ext.clone(record);
 		}();
 	};
 
 	api.layout.Dimension = function(config) {
+		var dimension = {};
 
 		// dimension: string
 
@@ -1891,7 +1895,10 @@ PT.core.getAPI = function(pt) {
 				}
 			}
 
-			return Ext.clone(config);
+			dimension.dimension = config.dimension;
+			dimension.items = config.items;
+
+			return Ext.clone(dimension);
 		}();
 	};
 
@@ -2025,21 +2032,70 @@ PT.core.getAPI = function(pt) {
 
 	// Response
 
-	api.data.Response = function(config) {
+	api.response.Header = function(config) {
+		var header = {};
+
+		// name: string
+
+		// meta: boolean
+
 		return function() {
+			if (!Ext.isObject(config)) {
+				console.log('Header is not an object: ' + config);
+				return;
+			}
+
+			if (!Ext.isString(config.name)) {
+				console.log('Header name is not text: ' + config);
+				return;
+			}
+
+			if (!Ext.isBoolean(config.meta)) {
+				console.log('Header meta is not boolean: ' + config);
+				return;
+			}
+
+			header.name = config.name;
+			header.meta = config.meta;
+
+			return Ext.clone(header);
+		}();
+	};
+
+	api.response.Response = function(config) {
+		var response = {};
+
+		// headers: [Header]
+
+		return function() {
+			var headers = [];
+
 			if (!(config && Ext.isObject(config))) {
 				alert('Data response invalid');
 				return false;
 			}
 
-			if (!(config.headers && Ext.isArray(config.headers) && config.headers.length)) {
+			if (!(config.headers && Ext.isArray(config.headers))) {
 				alert('Data response invalid');
 				return false;
 			}
 
-			if (!(Ext.isNumber(config.width) && config.width > 0 &&
-				  Ext.isNumber(config.height) && config.height > 0 &&
-				  Ext.isArray(config.rows) && config.rows.length > 0)) {
+			for (var i = 0, header; i < config.headers.length; i++) {
+				header = api.response.Header(config.headers[i]);
+
+				if (header) {
+					headers.push(header);
+				}
+			}
+
+			config.headers = headers;
+
+			if (!config.headers.length) {
+				alert('No valid response headers');
+				return;
+			}
+
+			if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
 				alert('No values found');
 				return false;
 			}
@@ -2049,7 +2105,13 @@ PT.core.getAPI = function(pt) {
 				return false;
 			}
 
-			return config;
+			response.headers = config.headers;
+			response.metaData = config.metaData;
+			response.width = config.width;
+			response.height = config.height;
+			response.rows = config.rows;
+
+			return response;
 		}();
 	};
 
