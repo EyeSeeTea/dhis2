@@ -503,195 +503,339 @@ PT.core.getUtils = function(pt) {
 	};
 
 	util.pivot = {
-		extendLayout: function(layout) {
-			var xLayout = Ext.clone(layout),
-				dimConf = pt.conf.finals.dimension,
+		getExtendedLayout: function(layout) {
+			var dimConf = pt.conf.finals.dimension,
+				layout = Ext.clone(layout),
+				xLayout = {
+					columns: [],
+					rows: [],
+					filters: [],
 
-				axisDimensions = [].concat(Ext.clone(xLayout.columns) || [], Ext.clone(xLayout.rows) || []),
-				axisDimensionNames = [],
-				axisObjectNames = [],
-				axisItems = [],
+					// Axis
+					axisDimensions: [],
+					axisObjectNames: [],
+					axisDimensionNames: [],
 
-				filterDimensions = Ext.clone(xLayout.filters) || [],
-				filterDimensionNames = [],
-				filterObjectNames = [],
-				filterItems = [],
+					// Filter
+					filterDimensions: [],
+					filterObjectNames: [],
+					filterDimensionNames: [],
 
-				objectNameDimensionMap = {},
-				dimensionNameItemsMap = {},
+					// All
+					dimensions: [],
+					objectNames: [],
+					dimensionNames: [],
 
-				columns,
-				columnsDimensionNames = [],
-				rows,
-				rowsDimensionNames = [],
-				filters,
-				filtersDimensionNames = [],
+					// Object name maps
+					objectNameDimensionsMap: {},
+					objectNameItemsMap: {},
+					objectNameIdsMap: {},
 
-				objectNameRecordsMap = {};
+					// Dimension name maps
+					dimensionNameDimensionsMap: {},
+					dimensionNameItemsMap: {},
+					dimensionNameIdsMap: {}
+				};
 
-			xLayout.extended = {};
 
-			// Axis
-			for (var i = 0, dim, items; i < axisDimensions.length; i++) {
-				dim = axisDimensions[i];
-				items = [];
+				//axisDimensionNames = [],
+				//axisItems = [],
 
-				dim.dimensionName = pt.conf.finals.dimension.objectNameMap[dim.dimension].dimensionName;
-				dim.objectName = dim.dimension;
+				//filterDimensionNames = [],
+				//filterItems = [],
 
-				axisDimensionNames.push(dim.dimensionName);
-				axisObjectNames.push(dim.objectName);
 
-				for (var j = 0; j < dim.items.length; j++) {
-					items.push(dim.items[j].id);
-				}
+				//columnsDimensionNames = [],
+				//rowsDimensionNames = [],
+				//filtersDimensionNames = [];
 
-				dim.items = items;
-
-				axisItems = axisItems.concat(items);
-			}
-
-			// Filter
-			for (var i = 0, dim, items; i < filterDimensions.length; i++) {
-				dim = filterDimensions[i];
-				items = [];
-
-				dim.dimensionName = pt.conf.finals.dimension.objectNameMap[dim.dimension].dimensionName;
-				dim.objectName = dim.dimension;
-
-				filterDimensionNames.push(dim.dimensionName);
-				filterObjectNames.push(dim.objectName);
-
-				for (var j = 0; j < dim.items.length; j++) {
-					items.push(dim.items[j].id);
-				}
-
-				dim.items = items;
-
-				filterItems = filterItems.concat(items);
-			}
-
-			// Axis
-			xLayout.extended.axisDimensions = axisDimensions;
-			xLayout.extended.axisDimensionNames = Ext.Array.unique(axisDimensionNames);
-			xLayout.extended.axisObjectNames = axisObjectNames;
-			xLayout.extended.axisItems = axisItems;
-
-			// Filter
-			xLayout.extended.filterDimensions = filterDimensions;
-			xLayout.extended.filterDimensionNames = Ext.Array.unique(filterDimensionNames);
-			xLayout.extended.filterObjectNames = filterObjectNames;
-			xLayout.extended.filterItems = filterItems;
-
-			// All
-			xLayout.extended.dimensions = [].concat(axisDimensions, filterDimensions);
-			xLayout.extended.dimensionNames = Ext.Array.unique([].concat(axisDimensionNames, filterDimensionNames));
-			xLayout.extended.objectNames = [].concat(axisObjectNames, filterObjectNames);
-			xLayout.extended.items = [].concat(axisItems, filterItems);
-
-			// Sorted axis
-			xLayout.extended.sortedAxisDimensions = pt.util.array.sortDimensions(Ext.clone(axisDimensions));
-			xLayout.extended.sortedAxisDimensionNames = Ext.Array.unique(Ext.clone(axisDimensionNames).sort());
-			xLayout.extended.sortedAxisObjectNames = Ext.clone(axisObjectNames).sort();
-			xLayout.extended.sortedAxisItems = Ext.clone(axisItems).sort();
-
-			// Sorted filter
-			xLayout.extended.sortedFilterDimensions = pt.util.array.sortDimensions(Ext.clone(filterDimensions));
-			xLayout.extended.sortedFilterDimensionNames = Ext.Array.unique(Ext.clone(filterDimensionNames).sort());
-			xLayout.extended.sortedFilterObjectNames = Ext.clone(filterObjectNames).sort();
-			xLayout.extended.sortedFilterItems = Ext.clone(filterItems).sort();
-
-			// Sorted all
-			xLayout.extended.sortedDimensions = [].concat(xLayout.extended.sortedAxisDimensions, xLayout.extended.sortedFilterDimensions);
-			xLayout.extended.sortedDimensionNames = Ext.Array.unique([].concat(xLayout.extended.sortedAxisDimensionNames, xLayout.extended.sortedFilterDimensionNames));
-			xLayout.extended.sortedObjectNames = [].concat(xLayout.extended.sortedAxisObjectNames, xLayout.extended.sortedFilterObjectNames);
-			xLayout.extended.sortedItems = [].concat(xLayout.extended.sortedAxisItems, xLayout.extended.sortedFilterItems);
-
-			// Maps
-
-			// Add dimensionName keys
-			for (var i = 0, name; i < xLayout.extended.dimensionNames.length; i++) {
-				name = xLayout.extended.dimensionNames[i];
-				dimensionNameItemsMap[name] = [];
-			}
-
-			// Add dimensions and items
-			for (var i = 0, dim; i < xLayout.extended.dimensions.length; i++) {
-				dim = xLayout.extended.dimensions[i];
-
-				// objectName : object
-				objectNameDimensionMap[dim.objectName] = dim;
-
-				// dimensionName : items
-				dimensionNameItemsMap[dim.dimensionName] = dimensionNameItemsMap[dim.dimensionName].concat(Ext.clone(dim.items));
-			}
-
-			xLayout.extended.objectNameDimensionMap = objectNameDimensionMap;
-			xLayout.extended.dimensionNameItemsMap = dimensionNameItemsMap;
+				//objectNameRecordsMap = {};
 
 			// Columns, rows, filters
-			columns = Ext.clone(xLayout.columns) || [];
-			for (var i = 0, dim; i < columns.length; i++) {
-				dim = columns[i];
-				dim.objectName = dim.dimension;
-				dim.dimensionName = dimConf.objectNameMap[dim.objectName].dimensionName;
-				dim.records = Ext.clone(dim.items);
-				dim.items = xLayout.extended.objectNameDimensionMap[dim.objectName].items;
+			if (layout.columns) {
+				for (var i = 0, dim, items, xDim; i < layout.columns.length; i++) {
+					dim = layout.columns[i];
+					items = dim.items;
 
-				objectNameRecordsMap[dim.objectName] = dim.records;
+					xDim.dimension = dim.dimension;
+					xDim.objectName = dim.dimension;
+					xDim.dimensionName = dimConf.objectNameMap[dim.dimension].dimensionName;
+
+					if (items) {
+						xDim.items = items;
+						xDim.ids = [];
+
+						for (var j = 0; j < items.length; j++) {
+							xDim.ids.push(items[j].id);
+						}
+					}
+
+					xLayout.columns.push(xDim);
+
+					xLayout.axisDimensions.push(xDim);
+					xLayout.axisObjectNames.push(xDim.objectName);
+					xLayout.axisDimensionNames.push(dimConf.objectNameMap[xDim.objectName].dimensionName);
+
+					xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
+					xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
+					xLayout.objectNameIdsMap[xDim.objectName] = xDim.ids;
+				}
 			}
 
-			rows = Ext.clone(xLayout.rows) || [];
-			for (var i = 0, dim; i < rows.length; i++) {
-				dim = rows[i];
-				dim.objectName = dim.dimension;
-				dim.dimensionName = dimConf.objectNameMap[dim.objectName].dimensionName;
-				dim.records = Ext.clone(dim.items);
-				dim.items = xLayout.extended.objectNameDimensionMap[dim.objectName].items;
+			if (layout.rows) {
+				for (var i = 0, dim, items, xDim; i < layout.rows.length; i++) {
+					dim = layout.rows[i];
+					items = dim.items;
 
-				objectNameRecordsMap[dim.objectName] = Ext.clone(dim.records);
+					xDim.dimension = dim.dimension;
+					xDim.objectName = dim.dimension;
+					xDim.dimensionName = dimConf.objectNameMap[dim.dimension].dimensionName;
+
+					if (items) {
+						xDim.items = items;
+						xDim.ids = [];
+
+						for (var j = 0; j < items.length; j++) {
+							xDim.ids.push(items[j].id);
+						}
+					}
+
+					xLayout.rows.push(xDim);
+
+					xLayout.axisDimensions.push(xDim);
+					xLayout.axisObjectNames.push(xDim.objectName);
+					xLayout.axisDimensionNames.push(dimConf.objectNameMap[xDim.objectName].dimensionName);
+
+					xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
+					xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
+					xLayout.objectNameIdsMap[xDim.objectName] = xDim.ids;
+				}
 			}
 
-			filters = Ext.clone(xLayout.filters) || [];
-			for (var i = 0, dim; i < filters.length; i++) {
-				dim = filters[i];
-				dim.objectName = dim.dimension;
-				dim.dimensionName = dimConf.objectNameMap[dim.objectName].dimensionName;
-				dim.records = Ext.clone(dim.items);
-				dim.items = xLayout.extended.objectNameDimensionMap[dim.objectName].items;
+			if (layout.filters) {
+				for (var i = 0, dim, items, xDim; i < layout.filters.length; i++) {
+					dim = layout.filters[i];
+					items = dim.items;
 
-				objectNameRecordsMap[dim.objectName] = Ext.clone(dim.records);
+					xDim.dimension = dim.dimension;
+					xDim.objectName = dim.dimension;
+					xDim.dimensionName = dimConf.objectNameMap[dim.dimension].dimensionName;
+
+					if (items) {
+						xDim.items = items;
+						xDim.ids = [];
+
+						for (var j = 0; j < items.length; j++) {
+							xDim.ids.push(items[j].id);
+						}
+					}
+
+					xLayout.filters.push(xDim);
+
+					xLayout.filterDimensions.push(xDim);
+					xLayout.filterObjectNames.push(xDim.objectName);
+					xLayout.filterDimensionNames.push(dimConf.objectNameMap[xDim.objectName].dimensionName);
+
+					xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
+					xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
+					xLayout.objectNameIdsMap[xDim.objectName] = xDim.ids;
+				}
 			}
 
-			xLayout.extended.columns = columns;
-			xLayout.extended.rows = rows;
-			xLayout.extended.filters = filters;
+			xLayout.axisDimensionNames = Ext.Array.unique(xLayout.axisDimensionNames);
+			xLayout.filterDimensionNames = Ext.Array.unique(xLayout.filterDimensionNames);
 
-			xLayout.extended.objectNameRecordsMap = objectNameRecordsMap;
+			// All
+			xLayout.dimensions = [].concat(xLayout.axisDimensions, xLayout.filterDimensions);
+			xLayout.objectNames = [].concat(xLayout.axisObjectNames, xLayout.filterObjectNames);
+			xLayout.dimensionNames = [].concat(xLayout.axisDimensionNames, xLayout.filterDimensionNames);
 
-			// columnsDimensionNames, rowsDimensionNames, filtersDimensionNames
-			for (var i = 0; i < xLayout.extended.columns.length; i++) {
-				columnsDimensionNames.push(xLayout.extended.columns[i].dimensionName);
+			// Dimension name maps
+			for (var i = 0, dimName; i < xLayout.dimensionNames.length; i++) {
+				dimName = xLayout.dimensionNames[i];
+
+				dimensionNameDimensionsMap[dimName] = [];
+				dimensionNameItemsMap[dimName] = [];
+				dimensionNameIdsMap[dimName] = [];
 			}
 
-			for (var i = 0; i < xLayout.extended.rows.length; i++) {
-				rowsDimensionNames.push(xLayout.extended.rows[i].dimensionName);
-			}
+			for (var i = 0, xDim; i < xLayout.dimensions.length; i++) {
+				xDim = xLayout.dimensions[i];
 
-			for (var i = 0; i < xLayout.extended.filters.length; i++) {
-				filtersDimensionNames.push(xLayout.extended.filters[i].dimensionName);
+				dimensionNameDimensionsMap[xDim.dimensionName].push(xDim);
+				dimensionNameItemsMap[xDim.dimensionName].push(xDim.items);
+				dimensionNameIdsMap[xDim.dimensionName].push(xDim.ids);
 			}
-
-			xLayout.extended.columnsDimensionNames = columnsDimensionNames;
-			xLayout.extended.rowsDimensionNames = rowsDimensionNames;
-			xLayout.extended.filtersDimensionNames = filtersDimensionNames;
 
 			return xLayout;
+		};
+
+
+
+
+
+
+
+			// Axis
+			//for (var i = 0, dim, items; i < axisDimensions.length; i++) {
+				//dim = axisDimensions[i];
+				//items = [];
+
+				//dim.dimensionName = pt.conf.finals.dimension.objectNameMap[dim.dimension].dimensionName;
+				//dim.objectName = dim.dimension;
+
+				//axisDimensionNames.push(dim.dimensionName);
+				//axisObjectNames.push(dim.objectName);
+
+				//for (var j = 0; j < dim.items.length; j++) {
+					//items.push(dim.items[j].id);
+				//}
+
+				//dim.items = items;
+
+				//axisItems = axisItems.concat(items);
+			//}
+
+			//// Filter
+			//for (var i = 0, dim, items; i < filterDimensions.length; i++) {
+				//dim = filterDimensions[i];
+				//items = [];
+
+				//dim.dimensionName = pt.conf.finals.dimension.objectNameMap[dim.dimension].dimensionName;
+				//dim.objectName = dim.dimension;
+
+				//filterDimensionNames.push(dim.dimensionName);
+				//filterObjectNames.push(dim.objectName);
+
+				//for (var j = 0; j < dim.items.length; j++) {
+					//items.push(dim.items[j].id);
+				//}
+
+				//dim.items = items;
+
+				//filterItems = filterItems.concat(items);
+			//}
+
+			//// Axis
+			//xLayout.axisDimensions = axisDimensions;
+			//xLayout.axisDimensionNames = Ext.Array.unique(axisDimensionNames);
+			//xLayout.axisObjectNames = axisObjectNames;
+			//xLayout.axisItems = axisItems;
+
+			//// Filter
+			//xLayout.filterDimensions = filterDimensions;
+			//xLayout.filterDimensionNames = Ext.Array.unique(filterDimensionNames);
+			//xLayout.filterObjectNames = filterObjectNames;
+			//xLayout.filterItems = filterItems;
+
+			//// All
+			//xLayout.dimensions = [].concat(axisDimensions, filterDimensions);
+			//xLayout.dimensionNames = Ext.Array.unique([].concat(axisDimensionNames, filterDimensionNames));
+			//xLayout.objectNames = [].concat(axisObjectNames, filterObjectNames);
+			//xLayout.items = [].concat(axisItems, filterItems);
+
+			//// Sorted axis
+			//xLayout.sortedAxisDimensions = pt.util.array.sortDimensions(Ext.clone(axisDimensions));
+			//xLayout.sortedAxisDimensionNames = Ext.Array.unique(Ext.clone(axisDimensionNames).sort());
+			//xLayout.sortedAxisObjectNames = Ext.clone(axisObjectNames).sort();
+			//xLayout.sortedAxisItems = Ext.clone(axisItems).sort();
+
+			//// Sorted filter
+			//xLayout.sortedFilterDimensions = pt.util.array.sortDimensions(Ext.clone(filterDimensions));
+			//xLayout.sortedFilterDimensionNames = Ext.Array.unique(Ext.clone(filterDimensionNames).sort());
+			//xLayout.sortedFilterObjectNames = Ext.clone(filterObjectNames).sort();
+			//xLayout.sortedFilterItems = Ext.clone(filterItems).sort();
+
+			//// Sorted all
+			//xLayout.sortedDimensions = [].concat(xLayout.sortedAxisDimensions, xLayout.sortedFilterDimensions);
+			//xLayout.sortedDimensionNames = Ext.Array.unique([].concat(xLayout.sortedAxisDimensionNames, xLayout.sortedFilterDimensionNames));
+			//xLayout.sortedObjectNames = [].concat(xLayout.sortedAxisObjectNames, xLayout.sortedFilterObjectNames);
+			//xLayout.sortedItems = [].concat(xLayout.sortedAxisItems, xLayout.sortedFilterItems);
+
+			//// Maps
+
+			//// Add dimensionName keys
+			//for (var i = 0, name; i < xLayout.dimensionNames.length; i++) {
+				//name = xLayout.dimensionNames[i];
+				//dimensionNameItemsMap[name] = [];
+			//}
+
+			//// Add dimensions and items
+			//for (var i = 0, dim; i < xLayout.dimensions.length; i++) {
+				//dim = xLayout.dimensions[i];
+
+				//// objectName : object
+				//objectNameDimensionMap[dim.objectName] = dim;
+
+				//// dimensionName : items
+				//dimensionNameItemsMap[dim.dimensionName] = dimensionNameItemsMap[dim.dimensionName].concat(Ext.clone(dim.items));
+			//}
+
+			//xLayout.objectNameDimensionMap = objectNameDimensionMap;
+			//xLayout.dimensionNameItemsMap = dimensionNameItemsMap;
+
+			//// Columns, rows, filters
+			//columns = Ext.clone(xLayout.columns) || [];
+			//for (var i = 0, dim; i < columns.length; i++) {
+				//dim = columns[i];
+				//dim.objectName = dim.dimension;
+				//dim.dimensionName = dimConf.objectNameMap[dim.objectName].dimensionName;
+				//dim.records = Ext.clone(dim.items);
+				//dim.items = xLayout.objectNameDimensionMap[dim.objectName].items;
+
+				//objectNameRecordsMap[dim.objectName] = dim.records;
+			//}
+
+			//rows = Ext.clone(xLayout.rows) || [];
+			//for (var i = 0, dim; i < rows.length; i++) {
+				//dim = rows[i];
+				//dim.objectName = dim.dimension;
+				//dim.dimensionName = dimConf.objectNameMap[dim.objectName].dimensionName;
+				//dim.records = Ext.clone(dim.items);
+				//dim.items = xLayout.objectNameDimensionMap[dim.objectName].items;
+
+				//objectNameRecordsMap[dim.objectName] = Ext.clone(dim.records);
+			//}
+
+			//filters = Ext.clone(xLayout.filters) || [];
+			//for (var i = 0, dim; i < filters.length; i++) {
+				//dim = filters[i];
+				//dim.objectName = dim.dimension;
+				//dim.dimensionName = dimConf.objectNameMap[dim.objectName].dimensionName;
+				//dim.records = Ext.clone(dim.items);
+				//dim.items = xLayout.objectNameDimensionMap[dim.objectName].items;
+
+				//objectNameRecordsMap[dim.objectName] = Ext.clone(dim.records);
+			//}
+
+			//xLayout.columns = columns;
+			//xLayout.rows = rows;
+			//xLayout.filters = filters;
+
+			//xLayout.objectNameRecordsMap = objectNameRecordsMap;
+
+			//// columnsDimensionNames, rowsDimensionNames, filtersDimensionNames
+			//for (var i = 0; i < xLayout.columns.length; i++) {
+				//columnsDimensionNames.push(xLayout.columns[i].dimensionName);
+			//}
+
+			//for (var i = 0; i < xLayout.rows.length; i++) {
+				//rowsDimensionNames.push(xLayout.rows[i].dimensionName);
+			//}
+
+			//for (var i = 0; i < xLayout.filters.length; i++) {
+				//filtersDimensionNames.push(xLayout.filters[i].dimensionName);
+			//}
+
+			//xLayout.columnsDimensionNames = columnsDimensionNames;
+			//xLayout.rowsDimensionNames = rowsDimensionNames;
+			//xLayout.filtersDimensionNames = filtersDimensionNames;
+
+			//return xLayout;
 		},
 
 		createTable: function(layout, pt) {
-			var extendLayout,
-				getSyncronizedXLayout,
+			var getSyncronizedXLayout,
 				getParamString,
 				extendResponse,
 				getMergedDataDimensionsAxis,
@@ -753,7 +897,7 @@ PT.core.getUtils = function(pt) {
 						layout;
 
 					// Remove co from layout if it does not exist in response
-					if (Ext.Array.contains(xLayout.extended.axisDimensionNames, co) && !(Ext.Array.contains(headerNames, co))) {
+					if (Ext.Array.contains(xLayout.axisDimensionNames, co) && !(Ext.Array.contains(headerNames, co))) {
 						removeDimensionFromXLayout(co);
 
 						layout = pt.api.layout.Layout(xLayout);
@@ -766,12 +910,12 @@ PT.core.getUtils = function(pt) {
 			};
 
 			getParamString = function(xLayout) {
-				var sortedAxisDimensionNames = xLayout.extended.sortedAxisDimensionNames,
-					sortedFilterDimensions = xLayout.extended.sortedFilterDimensions,
+				var sortedAxisDimensionNames = xLayout.sortedAxisDimensionNames,
+					sortedFilterDimensions = xLayout.sortedFilterDimensions,
 					paramString = '?',
 					dimConf = pt.conf.finals.dimension,
 					addCategoryDimension = false,
-					map = xLayout.extended.dimensionNameItemsMap,
+					map = xLayout.dimensionNameItemsMap,
 					dx = dimConf.indicator.dimensionName,
 					items;
 
@@ -780,7 +924,7 @@ PT.core.getUtils = function(pt) {
 
 					paramString += 'dimension=' + dimensionName;
 
-					items = Ext.clone(xLayout.extended.dimensionNameItemsMap[dimensionName]).sort();
+					items = Ext.clone(xLayout.dimensionNameItemsMap[dimensionName]).sort();
 
 					if (dimensionName === dx) {
 						for (var j = 0, index; j < items.length; j++) {
@@ -839,7 +983,7 @@ PT.core.getUtils = function(pt) {
 								header.items = [].concat(response.metaData[pt.conf.finals.dimension.period.dimensionName]);
 							}
 							else {
-								header.items = xLayout.extended.dimensionNameItemsMap[header.name];
+								header.items = xLayout.dimensionNameItemsMap[header.name];
 							}
 
 							header.size = header.items.length;
@@ -856,7 +1000,7 @@ PT.core.getUtils = function(pt) {
 
 				var createValueIds = function() {
 					var valueHeaderIndex = response.nameHeaderMap[pt.conf.finals.dimension.value.value].index,
-						dimensionNames = xLayout.extended.axisDimensionNames,
+						dimensionNames = xLayout.axisDimensionNames,
 						idIndexOrder = [];
 
 					// idIndexOrder
@@ -1711,8 +1855,8 @@ PT.core.getUtils = function(pt) {
 					xColAxis,
 					xRowAxis;
 
-				// Extend layout
-				xLayout = pt.util.pivot.extendLayout(layout);
+				// Extended layout
+				xLayout = util.pivot.getExtendedLayout(layout);
 
 				// Param string
 				pt.paramString = getParamString(xLayout);
@@ -1761,8 +1905,8 @@ PT.core.getUtils = function(pt) {
 						xResponse = extendResponse(response, xLayout);
 
 						// Dimension objects
-						xLayout.columns = getMergedDataDimensionsAxis(xLayout.columns, xLayout.extended.columnsDimensionNames);
-						xLayout.rows = getMergedDataDimensionsAxis(xLayout.rows, xLayout.extended.rowsDimensionNames);
+						xLayout.columns = getMergedDataDimensionsAxis(xLayout.columns, xLayout.columnsDimensionNames);
+						xLayout.rows = getMergedDataDimensionsAxis(xLayout.rows, xLayout.rowsDimensionNames);
 
 						// Extend axes
 						xColAxis = extendAxis('col', xLayout.columns, xResponse);
@@ -1782,6 +1926,7 @@ PT.core.getUtils = function(pt) {
 							pt.viewport.downloadButton.enable();
 						}
 
+						pt.layout = layout;
 						pt.xLayout = xLayout;
 						pt.xResponse = xResponse;
 console.log("xResponse", xResponse);
@@ -1824,7 +1969,8 @@ PT.core.getAPI = function(pt) {
 				Dimension: null,
 				Layout: null
 			},
-			data: {
+			response: {
+				Header: null,
 				Response: null
 			}
 		};
