@@ -1854,9 +1854,9 @@ PT.core.getAPI = function(pt) {
 			}
 		};
 
-	// Dimension
+	// Layout
 
-	api.data.Record = function(config) {
+	api.layout.Record = function(config) {
 
 		// id: string
 
@@ -1875,7 +1875,7 @@ PT.core.getAPI = function(pt) {
 		}();
 	};
 
-	api.dimension.Dimension = function(config) {
+	api.layout.Dimension = function(config) {
 
 		// dimension: string
 
@@ -1920,8 +1920,6 @@ PT.core.getAPI = function(pt) {
 		}();
 	};
 
-	// Layout
-
 	api.layout.Layout = function(config) {
 
 		// columns: [Dimension]
@@ -1952,58 +1950,24 @@ PT.core.getAPI = function(pt) {
 
 		// parentOrganisationUnit: boolean (false) //report tables only
 
-		var removeEmptyDimensions,
-			getValidatedAxis;
-
-		removeEmptyDimensions = function(axis) {
-			if (!axis) {
-				return;
-			}
-
-			for (var i = 0, dim, remove; i < axis.length; i++) {
-				remove = false;
-				dim = axis[i];
-
-				if (dim.dimension !== pt.conf.finals.dimension.category.objectName) {
-					if (!(Ext.isArray(dim.items) && dim.items.length)) {
-						remove = true;
-					}
-					else {
-						for (var j = 0; j < dim.items.length; j++) {
-							if (!Ext.isString(dim.items[j].id)) {
-								remove = true;
-							}
-						}
-					}
-				}
-
-				if (remove) {
-					axis = Ext.Array.erase(axis, i, 1);
-					i = i - 1;
-				}
-			}
-
-			return axis;
-		};
-
-		getValidatedAxis = function(axis) {
+		var getValidatedDimensionArray = function(dimensionArray) {
 			var dimensions = [];
 
-			if (!(axis && Ext.isArray(axis) && axis.length)) {
+			if (!(dimensionArray && Ext.isArray(dimensionArray) && dimensionArray.length)) {
 				return;
 			}
 
-			for (var i = 0, dimension; i < axis.length; i++) {
-				dimension = api.dimension.Dimension(axis[i]);
+			for (var i = 0, dimension; i < dimensionArray.length; i++) {
+				dimension = api.dimension.Dimension(dimensionArray[i]);
 
 				if (dimension) {
 					dimensions.push(dimension);
 				}
 			}
 
-			axis = dimensions;
+			dimensionArray = dimensions;
 
-			return axis.length ? axis : null;
+			return dimensionArray.length ? dimensionArray : null;
 		};
 
 		return function() {
@@ -2011,9 +1975,9 @@ PT.core.getAPI = function(pt) {
 				objectNames = [],
 				dimConf = pt.conf.finals.dimension;
 
-			config.columns = getValidatedAxis(config.columns);
-			config.rows = getValidatedAxis(config.rows);
-			config.filters = getValidatedAxis(config.filters);
+			config.columns = getValidatedDimensionArray(config.columns);
+			config.rows = getValidatedDimensionArray(config.rows);
+			config.filters = getValidatedDimensionArray(config.filters);
 
 			// Config must be an object
 			if (!(config && Ext.isObject(config))) {
