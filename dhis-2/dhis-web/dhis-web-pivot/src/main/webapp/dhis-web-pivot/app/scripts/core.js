@@ -693,7 +693,6 @@ PT.core.getUtils = function(pt) {
 			var extendLayout,
 				getSyncronizedXLayout,
 				getParamString,
-				validateResponse,
 				extendResponse,
 				getMergedDataDimensionsAxis,
 				extendAxis,
@@ -705,9 +704,8 @@ PT.core.getUtils = function(pt) {
 
 			getSyncronizedXLayout = function(xLayout, response) {
 				var getHeaderNames,
-
 					headerNames,
-					newLayout;
+					layout;
 
 				getHeaderNames = function() {
 					var a = [];
@@ -719,15 +717,15 @@ PT.core.getUtils = function(pt) {
 					return a;
 				};
 
-				removeDimensionFromLayout = function(dimensionName) {
-					var getCleanAxis;
+				removeDimensionFromLayout = function(objectName) {
+					var getUpdatedAxis;
 
-					getAxis = function(axis) {
-						var axis = Ext.clone(axis),
-							dimension;
+					getUpdatedAxis = function(axis) {
+						var dimension;
+						axis = Ext.clone(axis);
 
 						for (var i = 0; i < axis.length; i++) {
-							if (axis[i].dimensionName === dimensionName) {
+							if (axis[i].dimension === objectName) {
 								dimension = axis[i];
 							}
 						}
@@ -739,34 +737,42 @@ PT.core.getUtils = function(pt) {
 						return axis;
 					};
 
-					if (layout.columns) {
-						layout.columns = getAxis(layout.columns);
+					if (xLayout.columns) {
+						xLayout.columns = getUpdatedAxis(xLayout.columns);
 					}
-					if (layout.rows) {
-						layout.rows = getAxis(layout.rows);
+					if (xLayout.rows) {
+						xLayout.rows = getUpdatedAxis(xLayout.rows);
 					}
-					if (layout.filters) {
-						layout.filters = getAxis(layout.filters);
+					if (xLayout.filters) {
+						xLayout.filters = getUpdatedAxis(xLayout.filters);
 					}
 				};
 
-				headerNames = getHeaderNames();
+				return function() {
+					var headerNames = [],
+						co = dimConf.category.objectName;
 
-				// remove co from layout if it does not exist in response
-				if (Ext.Array.contains(xLayout.extended.axisDimensionNames, dimConf.category.dimensionName) && !(Ext.Array.contains(headerNames, dimConf.category.dimensionName))) {
-					removeDimensionFromLayout(dimConf.category.dimensionName);
-
-					newLayout = pt.api.layout.classes.Layout(layout);
-
-					if (!newLayout) {
-						return;
+					// Header names
+					for (var i = 0; i < response.headers.length; i++) {
+						headerNames.push(response.headers[i].name);
 					}
 
-					return pt.util.pivot.extendLayout(newLayout);
-				}
-				else {
-					return xLayout;
-				}
+					// Remove co from layout if it does not exist in response
+					if (Ext.Array.contains(xLayout.extended.axisDimensionNames, co) && !(Ext.Array.contains(headerNames, co))) {
+						removeDimensionFromLayout(co);
+
+						layout = pt.api.layout.Layout(xLayout);
+
+						if (!layout) {
+							return;
+						}
+
+						return pt.util.pivot.extendLayout(layout);
+					}
+					else {
+						return xLayout;
+					}
+				}();
 			};
 
 			getParamString = function(xLayout) {
@@ -819,32 +825,6 @@ PT.core.getUtils = function(pt) {
 				}
 
 				return paramString;
-			};
-
-			validateResponse = function(response) {
-				if (!(response && Ext.isObject(response))) {
-					alert('Data invalid');
-					return false;
-				}
-
-				if (!(response.headers && Ext.isArray(response.headers) && response.headers.length)) {
-					alert('Data invalid');
-					return false;
-				}
-
-				if (!(Ext.isNumber(response.width) && response.width > 0 &&
-					  Ext.isNumber(response.height) && response.height > 0 &&
-					  Ext.isArray(response.rows) && response.rows.length > 0)) {
-					alert('No values found');
-					return false;
-				}
-
-				if (response.headers.length !== response.rows[0].length) {
-					alert('Data invalid');
-					return false;
-				}
-
-				return true;
 			};
 
 			extendResponse = function(response, xLayout) {
@@ -1772,14 +1752,14 @@ PT.core.getUtils = function(pt) {
 					},
 					success: function(r) {
 						var html,
-							response = Ext.decode(r.responseText);
+							response = pt.api.data.Response(Ext.decode(r.responseText));
 
-						if (!validateResponse(response)) {
+						if (!response) {
 							pt.util.mask.hideMask();
 							return;
 						}
 
-						// Synchronize xLayout with response
+						// Synchronize xLayout
 						xLayout = getSyncronizedXLayout(xLayout, response);
 
 						if (!xLayout) {
@@ -2045,6 +2025,9 @@ PT.core.getAPI = function(pt) {
 			if (!Ext.isBoolean(config.parentOrganisationUnit)) {
 				config.parentOrganisationUnit = false;
 			}
+
+			// Remove former extensions
+			delete config.extended;
 
 			return Ext.clone(config);
 		}();
