@@ -556,6 +556,7 @@ PT.core.getUtils = function(pt) {
 				for (var i = 0, dim, items, xDim; i < layout.columns.length; i++) {
 					dim = layout.columns[i];
 					items = dim.items;
+					xDim = {};
 
 					xDim.dimension = dim.dimension;
 					xDim.objectName = dim.dimension;
@@ -586,6 +587,7 @@ PT.core.getUtils = function(pt) {
 				for (var i = 0, dim, items, xDim; i < layout.rows.length; i++) {
 					dim = layout.rows[i];
 					items = dim.items;
+					xDim = {};
 
 					xDim.dimension = dim.dimension;
 					xDim.objectName = dim.dimension;
@@ -616,6 +618,7 @@ PT.core.getUtils = function(pt) {
 				for (var i = 0, dim, items, xDim; i < layout.filters.length; i++) {
 					dim = layout.filters[i];
 					items = dim.items;
+					xDim = {};
 
 					xDim.dimension = dim.dimension;
 					xDim.objectName = dim.dimension;
@@ -654,25 +657,20 @@ PT.core.getUtils = function(pt) {
 			for (var i = 0, dimName; i < xLayout.dimensionNames.length; i++) {
 				dimName = xLayout.dimensionNames[i];
 
-				dimensionNameDimensionsMap[dimName] = [];
-				dimensionNameItemsMap[dimName] = [];
-				dimensionNameIdsMap[dimName] = [];
+				xLayout.dimensionNameDimensionsMap[dimName] = [];
+				xLayout.dimensionNameItemsMap[dimName] = [];
+				xLayout.dimensionNameIdsMap[dimName] = [];
 			}
 
 			for (var i = 0, xDim; i < xLayout.dimensions.length; i++) {
 				xDim = xLayout.dimensions[i];
 
-				dimensionNameDimensionsMap[xDim.dimensionName].push(xDim);
-				dimensionNameItemsMap[xDim.dimensionName].push(xDim.items);
-				dimensionNameIdsMap[xDim.dimensionName].push(xDim.ids);
+				xLayout.dimensionNameDimensionsMap[xDim.dimensionName].push(xDim);
+				xLayout.dimensionNameItemsMap[xDim.dimensionName] = xLayout.dimensionNameItemsMap[xDim.dimensionName].concat(xDim.items);
+				xLayout.dimensionNameIdsMap[xDim.dimensionName] = xLayout.dimensionNameIdsMap[xDim.dimensionName].concat(xDim.ids);
 			}
 
 			return xLayout;
-		};
-
-
-
-
 
 
 
