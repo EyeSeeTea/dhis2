@@ -515,6 +515,11 @@ PT.core.getUtils = function(pt) {
 					rows: [],
 					filters: [],
 
+					columnObjectNames: [],
+					columnDimensionNames: [],
+					rowObjectNames: [],
+					rowDimensionNames: [],
+
 					// Axis
 					axisDimensions: [],
 					axisObjectNames: [],
@@ -572,6 +577,9 @@ PT.core.getUtils = function(pt) {
 
 					xLayout.columns.push(xDim);
 
+					xLayout.columnObjectNames.push(xDim.objectName);
+					xLayout.columnDimensionNames.push(xDim.dimensionName);
+
 					xLayout.axisDimensions.push(xDim);
 					xLayout.axisObjectNames.push(xDim.objectName);
 					xLayout.axisDimensionNames.push(dimConf.objectNameMap[xDim.objectName].dimensionName);
@@ -602,6 +610,9 @@ PT.core.getUtils = function(pt) {
 					}
 
 					xLayout.rows.push(xDim);
+
+					xLayout.rowObjectNames.push(xDim.objectName);
+					xLayout.rowDimensionNames.push(xDim.dimensionName);
 
 					xLayout.axisDimensions.push(xDim);
 					xLayout.axisObjectNames.push(xDim.objectName);
@@ -644,8 +655,13 @@ PT.core.getUtils = function(pt) {
 				}
 			}
 
+			// Unique dimension names
 			xLayout.axisDimensionNames = Ext.Array.unique(xLayout.axisDimensionNames);
 			xLayout.filterDimensionNames = Ext.Array.unique(xLayout.filterDimensionNames);
+
+			xLayout.columnDimensionNames = Ext.Array.unique(xLayout.columnDimensionNames);
+			xLayout.rowDimensionNames = Ext.Array.unique(xLayout.columnDimensionNames);
+			xLayout.filterDimensionNames = Ext.Array.unique(xLayout.columnDimensionNames);
 
 				// For param string
 			xLayout.sortedAxisDimensionNames = Ext.clone(xLayout.axisDimensionNames).sort();
@@ -879,6 +895,8 @@ PT.core.getUtils = function(pt) {
 				}
 
 				var axis = Ext.clone(axis),
+					tmpAxis = [],
+					dxItems = [],
 					spanType = type === 'col' ? 'colSpan' : 'rowSpan',
 					nCols = 1,
 					aNumCols = [],
@@ -890,8 +908,24 @@ PT.core.getUtils = function(pt) {
 					aAllObjects = [],
 					aUniqueIds;
 
-				// Port xLayout.columns/rows to old pivot format
+				// Port to old format (merge dx and set items = ids)
 				for (var i = 0; i < axis.length; i++) {
+					if (axis[i].dimensionName === dimConf.data.dimensionName) {
+						dxItems = dxItems.concat(axis[i].ids);
+					}
+				}
+
+				for (var i = 0, dim, dxItems = [], dxIds = []; i < axis.length; i++) {
+					dim = axis[i];
+
+					if (dim.dimensionName === dimConf.data.dimensionName) {
+						for (var j = 0; j < axis.length
+
+
+
+
+
+
 					axis[i].items = axis[i].ids;
 				}
 
@@ -996,7 +1030,7 @@ PT.core.getUtils = function(pt) {
 
 					aColIds.push(id);
 				}
-	//aColIds	= [ aaaaaaaaBBBBBBBBccccccc, aaaaaaaaaccccccccccbbbbbbbbbb, ... ]
+	//aColIds	= [ abc, bcd, ... ]
 
 
 
