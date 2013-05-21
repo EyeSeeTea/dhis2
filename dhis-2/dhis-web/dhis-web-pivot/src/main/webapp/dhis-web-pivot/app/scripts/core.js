@@ -1744,13 +1744,16 @@ PT.core.getUtils = function(pt) {
 				// Extend layout
 				xLayout = pt.util.pivot.extendLayout(layout);
 
+				// Param string
 				pt.paramString = getParamString(xLayout);
 				url = pt.init.contextPath + '/api/analytics.json' + pt.paramString;
 
+				// Validate request size
 				if (!validateUrl(url)) {
 					return;
 				}
 
+				// Show load mask
 				pt.util.mask.showMask(pt.viewport);
 
 				Ext.Ajax.request({
@@ -1846,11 +1849,13 @@ console.log("xLayout", xLayout);
 PT.core.getAPI = function(pt) {
 	var dimConf = pt.conf.finals.dimension,
 		api = {
-			dimension: {
-				Dimension: null
-			},
 			layout: {
+				Record: null,
+				Dimension: null,
 				Layout: null
+			},
+			data: {
+				Response: null
 			}
 		};
 
@@ -2042,6 +2047,36 @@ PT.core.getAPI = function(pt) {
 			}
 
 			return Ext.clone(config);
+		}();
+	};
+
+	// Response
+
+	api.data.Response = function(config) {
+		return function() {
+			if (!(config && Ext.isObject(config))) {
+				alert('Data response invalid');
+				return false;
+			}
+
+			if (!(config.headers && Ext.isArray(config.headers) && config.headers.length)) {
+				alert('Data response invalid');
+				return false;
+			}
+
+			if (!(Ext.isNumber(config.width) && config.width > 0 &&
+				  Ext.isNumber(config.height) && config.height > 0 &&
+				  Ext.isArray(config.rows) && config.rows.length > 0)) {
+				alert('No values found');
+				return false;
+			}
+
+			if (config.headers.length !== config.rows[0].length) {
+				alert('Data invalid');
+				return false;
+			}
+
+			return config;
 		}();
 	};
 
