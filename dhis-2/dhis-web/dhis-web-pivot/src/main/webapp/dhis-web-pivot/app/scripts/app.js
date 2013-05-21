@@ -136,10 +136,12 @@ Ext.onReady( function() {
 						});
 					}
 					else if (dimName === dx && nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
-						axes[i].concat(nameDimArrayMap[dimName]);
+						for (var k = 0; k < nameDimArrayMap[dimName].length; k++) {
+							axes[i].push(Ext.clone(nameDimArrayMap[dimName]));
+						}
 					}
 					else if (nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
-						axes.push(nameDimArrayMap[dimName]);
+						axes[i].push(Ext.clone(nameDimArrayMap[dimName]));
 					}
 				}
 			}
@@ -3476,8 +3478,7 @@ Ext.onReady( function() {
 			update = function() {
 				var config = pt.util.pivot.getLayoutConfig();
 
-console.log(config);return;
-				var	layout = pt.api.layout.classes.Layout(config);
+				var	layout = pt.api.layout.Layout(config);
 
 				if (!layout) {
 					return;

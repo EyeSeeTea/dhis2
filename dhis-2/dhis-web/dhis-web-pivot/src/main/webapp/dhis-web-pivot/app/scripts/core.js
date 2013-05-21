@@ -1958,7 +1958,7 @@ PT.core.getAPI = function(pt) {
 			}
 
 			for (var i = 0, dimension; i < dimensionArray.length; i++) {
-				dimension = api.dimension.Dimension(dimensionArray[i]);
+				dimension = api.layout.Dimension(dimensionArray[i]);
 
 				if (dimension) {
 					dimensions.push(dimension);
