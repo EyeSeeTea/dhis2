@@ -703,21 +703,10 @@ PT.core.getUtils = function(pt) {
 				dimConf = pt.conf.finals.dimension;
 
 			getSyncronizedXLayout = function(xLayout, response) {
-				var getHeaderNames,
-					headerNames,
-					layout;
+				var removeDimensionFromXLayout,
+					getHeaderNames;
 
-				getHeaderNames = function() {
-					var a = [];
-
-					for (var i = 0; i < response.headers.length; i++) {
-						a.push(response.headers[i].name);
-					}
-
-					return a;
-				};
-
-				removeDimensionFromLayout = function(objectName) {
+				removeDimensionFromXLayout = function(objectName) {
 					var getUpdatedAxis;
 
 					getUpdatedAxis = function(axis) {
@@ -748,30 +737,31 @@ PT.core.getUtils = function(pt) {
 					}
 				};
 
-				return function() {
-					var headerNames = [],
-						co = dimConf.category.objectName;
+				getHeaderNames = function() {
+					var headerNames = [];
 
-					// Header names
 					for (var i = 0; i < response.headers.length; i++) {
 						headerNames.push(response.headers[i].name);
 					}
 
+					return headerNames;
+				};
+
+				return function() {
+					var headerNames = getHeaderNames(),
+						co = dimConf.category.objectName,
+						layout;
+
 					// Remove co from layout if it does not exist in response
 					if (Ext.Array.contains(xLayout.extended.axisDimensionNames, co) && !(Ext.Array.contains(headerNames, co))) {
-						removeDimensionFromLayout(co);
+						removeDimensionFromXLayout(co);
 
 						layout = pt.api.layout.Layout(xLayout);
 
-						if (!layout) {
-							return;
-						}
+						return layout ? pt.util.pivot.extendLayout(layout) : null;
+					}
 
-						return pt.util.pivot.extendLayout(layout);
-					}
-					else {
-						return xLayout;
-					}
+					return xLayout;
 				}();
 			};
 
