@@ -516,10 +516,16 @@ PT.core.getUtils = function(pt) {
 					axisObjectNames: [],
 					axisDimensionNames: [],
 
+						// For param string
+					sortedAxisDimensionNames: [],
+
 					// Filter
 					filterDimensions: [],
 					filterObjectNames: [],
 					filterDimensionNames: [],
+
+						// For param string
+					sortedFilterDimensions: [],
 
 					// All
 					dimensions: [],
@@ -536,7 +542,6 @@ PT.core.getUtils = function(pt) {
 					dimensionNameItemsMap: {},
 					dimensionNameIdsMap: {}
 				};
-
 
 				//axisDimensionNames = [],
 				//axisItems = [],
