@@ -3441,14 +3441,17 @@ Ext.onReady( function() {
 			};
 
 			validateSpecialCases = function(layout) {
-				var dimConf = pt.conf.finals.dimension,
+				var dimConf = pt.conf.finals.dimension;
 					//dimensionNames = [],
-					layoutObjects = [].concat(Ext.clone(layout.columns || []), Ext.clone(layout.rows || []), Ext.clone(layout.filters || []));
+					//layoutObjects = [].concat(Ext.clone(layout.columns || []), Ext.clone(layout.rows || []), Ext.clone(layout.filters || []));
 
 				// Layout names
 				//for (var i = 0; i < layoutObjects.length; i++) {
 					//dimensionNames.push(layoutObjects[i].dimension);
 				//}
+				if (!layout) {
+					return;
+				}
 
 				if (layout.filters && layout.filters.length) {
 					for (var i = 0; i < layout.filters.length; i++) {
@@ -3481,20 +3484,14 @@ Ext.onReady( function() {
 			};
 
 			update = function() {
-				var config = pt.util.pivot.getLayoutConfig();
+				var config = pt.util.pivot.getLayoutConfig(),
+				layout = pt.api.layout.Layout(config);
 
-				var	layout = pt.api.layout.Layout(config);
-
-				if (!layout) {
-					return;
-				}
 				if (!validateSpecialCases(layout)) {
 					return;
 				}
 
-				if (layout) {
-					pt.util.pivot.createTable(layout, pt);
-				}
+				pt.util.pivot.createTable(layout, pt);
 			};
 
 			accordionBody = Ext.create('Ext.panel.Panel', {
