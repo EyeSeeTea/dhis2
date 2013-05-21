@@ -443,12 +443,16 @@ PT.core.getUtils = function(pt) {
 				return 0;
 			});
 
-			// Sort object items order
+			// Sort object items, ids
 			for (var i = 0, dim; i < dimensions.length; i++) {
 				dim = dimensions[i];
 
 				if (dim.items) {
-					dimensions[i].items.sort();
+					dimensions[i].items = util.array.sortDimensions(dim.items, 'id');
+				}
+
+				if (dim.ids) {
+					dimensions[i].ids = dim.ids.sort();
 				}
 			}
 
@@ -652,6 +656,10 @@ PT.core.getUtils = function(pt) {
 
 			xLayout.axisDimensionNames = Ext.Array.unique(xLayout.axisDimensionNames);
 			xLayout.filterDimensionNames = Ext.Array.unique(xLayout.filterDimensionNames);
+
+				// For param string
+			xLayout.sortedAxisDimensionNames = Ext.clone(xLayout.axisDimensionNames).sort();
+			xLayout.sortedFilterDimensions = pt.util.array.sortDimensions(Ext.clone(xLayout.filterDimensions));
 
 			// All
 			xLayout.dimensions = [].concat(xLayout.axisDimensions, xLayout.filterDimensions);
