@@ -1862,12 +1862,12 @@ PT.core.getAPI = function(pt) {
 
 		return function() {
 			if (!Ext.isObject(config)) {
-				console.log('Record config is not an object');
+				console.log('Record config is not an object: ' + config);
 				return;
 			}
 
 			if (!Ext.isString(config.id)) {
-				alert('Record id is not text');
+				alert('Record id is not text: ' + config);
 				return;
 			}
 
@@ -1883,12 +1883,12 @@ PT.core.getAPI = function(pt) {
 
 		return function() {
 			if (!Ext.isObject(config)) {
-				console.log('Dimension config is not an object');
+				console.log('Dimension config is not an object: ' + config);
 				return;
 			}
 
 			if (!Ext.isString(config.dimension)) {
-				console.log('Dimension name is not text');
+				console.log('Dimension name is not text: ' + config);
 				return;
 			}
 
@@ -1896,7 +1896,7 @@ PT.core.getAPI = function(pt) {
 				var records = [];
 
 				if (!Ext.isArray(config.items)) {
-					console.log('Dimension items is not an array');
+					console.log('Dimension items is not an array: ' + config);
 					return;
 				}
 
@@ -1911,7 +1911,7 @@ PT.core.getAPI = function(pt) {
 				config.items = records;
 
 				if (!config.items.length) {
-					console.log('Dimension has no valid items');
+					console.log('Dimension has no valid items: ' + config);
 					return;
 				}
 			}

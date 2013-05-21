@@ -3442,28 +3442,29 @@ Ext.onReady( function() {
 
 			validateSpecialCases = function(layout) {
 				var dimConf = pt.conf.finals.dimension,
-					dimensionNames = [],
-					layoutObjects = [].concat(Ext.clone(layout.col || []), Ext.clone(layout.row || []), Ext.clone(layout.filter || []));
+					//dimensionNames = [],
+					layoutObjects = [].concat(Ext.clone(layout.columns || []), Ext.clone(layout.rows || []), Ext.clone(layout.filters || []));
 
 				// Layout names
-				for (var i = 0; i < layoutObjects.length; i++) {
-					dimensionNames.push(layoutObjects[i].dimensionName);
-				}
+				//for (var i = 0; i < layoutObjects.length; i++) {
+					//dimensionNames.push(layoutObjects[i].dimension);
+				//}
 
-				// Indicator as filter
-				if (layout.filter && pt.store.indicatorSelected.data.length) {
-					for (var i = 0; i < layout.filter.length; i++) {
-						if (layout.filter[i].dimensionName === dimConf.data.dimensionName) {
+				if (layout.filters && layout.filters.length) {
+					for (var i = 0; i < layout.filters.length; i++) {
+
+						// Indicators as filter
+						if (layout.filters[i].dimension === dimConf.indicator.objectName) {
 							alert(PT.i18n.indicators_cannot_be_specified_as_filter);
 							return;
 						}
-					}
-				}
 
-				// Categories as filter
-				if (layout.filter && pt.viewport.layoutWindow.filterStore.getById(dimConf.category.dimensionName)) {
-					alert(PT.i18n.categories_cannot_be_specified_as_filter);
-					return;
+						// Categories as filter
+						if (layout.filters[i].dimension === dimConf.category.objectName) {
+							alert(PT.i18n.categories_cannot_be_specified_as_filter);
+							return;
+						}
+					}
 				}
 
 				// Degs and datasets in the same query
