@@ -4,7 +4,7 @@ Ext.onReady( function() {
 
 PT.core.getConfigs = function() {
 	var conf = {},
-		dim;
+		dimConf;
 
 	conf.finals = {
         ajax: {
@@ -104,18 +104,18 @@ PT.core.getConfigs = function() {
 		}
 	};
 
-	dim = conf.finals.dimension;
+	dimConf = conf.finals.dimension;
 
-	dim.objectNameMap = {};
-	dim.objectNameMap[dim.data.objectName] = dim.data;
-	dim.objectNameMap[dim.indicator.objectName] = dim.indicator;
-	dim.objectNameMap[dim.dataElement.objectName] = dim.dataElement;
-	dim.objectNameMap[dim.operand.objectName] = dim.operand;
-	dim.objectNameMap[dim.dataSet.objectName] = dim.dataSet;
-	dim.objectNameMap[dim.category.objectName] = dim.category;
-	dim.objectNameMap[dim.period.objectName] = dim.period;
-	dim.objectNameMap[dim.organisationUnit.objectName] = dim.organisationUnit;
-	dim.objectNameMap[dim.dimension.objectName] = dim.dimension;
+	dimConf.objectNameMap = {};
+	dimConf.objectNameMap[dimConf.data.objectName] = dimConf.data;
+	dimConf.objectNameMap[dimConf.indicator.objectName] = dimConf.indicator;
+	dimConf.objectNameMap[dimConf.dataElement.objectName] = dimConf.dataElement;
+	dimConf.objectNameMap[dimConf.operand.objectName] = dimConf.operand;
+	dimConf.objectNameMap[dimConf.dataSet.objectName] = dimConf.dataSet;
+	dimConf.objectNameMap[dimConf.category.objectName] = dimConf.category;
+	dimConf.objectNameMap[dimConf.period.objectName] = dimConf.period;
+	dimConf.objectNameMap[dimConf.organisationUnit.objectName] = dimConf.organisationUnit;
+	dimConf.objectNameMap[dimConf.dimension.objectName] = dimConf.dimension;
 
 	conf.period = {
 		relativePeriods: {
@@ -1892,7 +1892,7 @@ PT.core.getAPI = function(pt) {
 				return;
 			}
 
-			if (config.dimension !== pt.conf.finals.dimension.category.dimensionName) {
+			if (config.dimension !== pt.conf.finals.dimension.category.objectName) {
 				var records = [];
 
 				if (!Ext.isArray(config.items)) {
@@ -1901,7 +1901,7 @@ PT.core.getAPI = function(pt) {
 				}
 
 				for (var i = 0; i < config.items.length; i++) {
-					record = api.data.Record(config.items[i]);
+					record = api.layout.Record(config.items[i]);
 
 					if (record) {
 						records.push(record);

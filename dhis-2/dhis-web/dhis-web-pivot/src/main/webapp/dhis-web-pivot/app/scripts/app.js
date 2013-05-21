@@ -99,7 +99,7 @@ Ext.onReady( function() {
 				dimConf = pt.conf.finals.dimension,
 				dx = dimConf.data.dimensionName,
 				co = dimConf.category.dimensionName,
-				dimNameDimArrayMap = {},
+				nameDimArrayMap = {},
 				getDimension;
 
 			config.columns = [];
@@ -107,21 +107,20 @@ Ext.onReady( function() {
 			config.filters = [];
 
 			// Panel data
-			for (var i = 0, dimension, dimName; i < panels.length; i++) {
-				dimension = panels[i].getDimension();
+			for (var i = 0, dim, dimName; i < panels.length; i++) {
+				dim = panels[i].getDimension();
 
-				if (dimension) {
-					dimName = pt.conf.finals.dimension.objectNameDimensionMap[dimension.dimension].dimensionName;
-					dimNameDimArrayMap[dimName] = dimension;
+				if (dim) {
+					nameDimArrayMap[dim.dimension] = [dim];
 				}
-
-				dimNameDimArrayMap[dx] = Ext.Array.clean([].concat(
-					dimNameDimArrayMap[dimConf.indicator.objectName],
-					dimNameDimArrayMap[dimConf.dataElement.objectName],
-					dimNameDimArrayMap[dimConf.operand.objectName],
-					dimNameDimArrayMap[dimConf.dataSet.objectName]
-				));
 			}
+
+			nameDimArrayMap[dx] = Ext.Array.clean([].concat(
+				nameDimArrayMap[dimConf.indicator.objectName],
+				nameDimArrayMap[dimConf.dataElement.objectName],
+				nameDimArrayMap[dimConf.operand.objectName],
+				nameDimArrayMap[dimConf.dataSet.objectName]
+			));
 
 			// Columns, rows, filters
 			for (var i = 0, nameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], dimNames; i < nameArrays.length; i++) {
@@ -136,11 +135,11 @@ Ext.onReady( function() {
 							items: []
 						});
 					}
-					else if (dimName === dx && dimNameDimArrayMap.hasOwnProperty(dimName) && dimNameDimArrayMap[dimName]) {
-						axes[i].concat(dimNameDimArrayMap[dimName]);
+					else if (dimName === dx && nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
+						axes[i].concat(nameDimArrayMap[dimName]);
 					}
-					else if (dimNameDimArrayMap.hasOwnProperty(dimName) && dimNameDimArrayMap[dimName]) {
-						axes.push(dimNameDimArrayMap[dimName]);
+					else if (nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
+						axes.push(nameDimArrayMap[dimName]);
 					}
 				}
 			}
@@ -2034,7 +2033,7 @@ Ext.onReady( function() {
 						config.items.push({id: r.data.id});
 					});
 
-					return pt.api.layout.Dimension(config);
+					return config.items.length ? config : null;
 				},
 				onExpand: function() {
 					var h = pt.viewport.westRegion.hasScrollbar ?
@@ -2222,7 +2221,7 @@ Ext.onReady( function() {
 						config.items.push({id: r.data.id});
 					});
 
-					return pt.api.layout.Dimension(config);
+					return config.items.length ? config : null;
 				},
 				onExpand: function() {
 					var h = pt.viewport.westRegion.hasScrollbar ?
@@ -2410,7 +2409,7 @@ Ext.onReady( function() {
 						config.items.push({id: r.data.id});
 					});
 
-					return pt.api.layout.Dimension(config);
+					return config.items.length ? config : null;
 				},
 				onExpand: function() {
 					var h = pt.viewport.westRegion.hasScrollbar ?
@@ -2883,7 +2882,7 @@ Ext.onReady( function() {
 						}
 					}
 
-					return pt.api.layout.Dimension(config);
+					return config.items.length ? config : null;
 				},
 				onExpand: function() {
 					var h = pt.viewport.westRegion.hasScrollbar ?
@@ -3181,7 +3180,7 @@ Ext.onReady( function() {
 						}
 					}
 
-					return pt.api.layout.Dimension(config);
+					return config.items.length ? config : null;
 				},
 				onExpand: function() {
 					var h = pt.viewport.westRegion.hasScrollbar ?
@@ -3379,7 +3378,7 @@ Ext.onReady( function() {
 								config.items.push({id: r.data.id});
 							});
 
-							return pt.api.layout.Dimension(config);
+							return config.items.length ? config : null;
 						},
 						onExpand: function() {
 							if (!availableStore.isLoaded) {
@@ -3475,8 +3474,10 @@ Ext.onReady( function() {
 			};
 
 			update = function() {
-				var config = pt.util.pivot.getLayoutConfig(),
-					layout = pt.api.layout.classes.Layout(config);
+				var config = pt.util.pivot.getLayoutConfig();
+
+console.log(config);return;
+				var	layout = pt.api.layout.classes.Layout(config);
 
 				if (!layout) {
 					return;
@@ -3955,5 +3956,6 @@ Ext.onReady( function() {
 		url: pt.conf.finals.ajax.path_pivot + 'initialize.action',
 		success: function(r) {
 			PT.app.init.onInitialize(r);
-	}});
+		}
+	});
 });
