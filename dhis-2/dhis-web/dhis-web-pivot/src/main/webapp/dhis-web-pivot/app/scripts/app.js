@@ -1063,7 +1063,7 @@ Ext.onReady( function() {
 			var favorite;
 
 			if (pt.xLayout) {
-				favorite = Ext.clone(pt.xLayout.options);
+				favorite = Ext.clone(pt.xLayout);
 
 				// Server sync
 				favorite.totals = favorite.showTotals;
@@ -1082,102 +1082,102 @@ Ext.onReady( function() {
 				delete favorite.parentOrganisationUnit;
 
 				// Dimensions
-				for (var i = 0, obj, key, items; i < pt.xLayout.objects.length; i++) {
-					obj = pt.xLayout.objects[i];
+				//for (var i = 0, obj, key, items; i < pt.xLayout.objects.length; i++) {
+					//obj = pt.xLayout.objects[i];
 
-					if (obj.objectName === pt.conf.finals.dimension.period.objectName) {
-						for (var j = 0, item; j < obj.items.length; j++) {
-							item = obj.items[j];
+					//if (obj.objectName === pt.conf.finals.dimension.period.objectName) {
+						//for (var j = 0, item; j < obj.items.length; j++) {
+							//item = obj.items[j];
 
-							if (pt.conf.period.relativePeriodValueKeys[item]) {
-								key = pt.conf.finals.dimension.relativePeriod.value;
+							//if (pt.conf.period.relativePeriodValueKeys[item]) {
+								//key = pt.conf.finals.dimension.relativePeriod.value;
 
-								if (!favorite[key]) {
-									favorite[key] = {};
-								}
+								//if (!favorite[key]) {
+									//favorite[key] = {};
+								//}
 
-								favorite[key][pt.conf.period.relativePeriodValueKeys[item]] = true;
-							}
-							else {
-								key = pt.conf.finals.dimension.fixedPeriod.value;
+								//favorite[key][pt.conf.period.relativePeriodValueKeys[item]] = true;
+							//}
+							//else {
+								//key = pt.conf.finals.dimension.fixedPeriod.value;
 
-								if (!favorite[key]) {
-									favorite[key] = [];
-								}
+								//if (!favorite[key]) {
+									//favorite[key] = [];
+								//}
 
-								favorite[key].push({
-									id: item
-								});
-							}
-						}
-					}
-					else if (obj.objectName === pt.conf.finals.dimension.organisationUnitGroupSet.objectName ||
-							 obj.objectName === pt.conf.finals.dimension.dataElementGroupSet.objectName) {
-						key = pt.conf.finals.dimension.objectNameMap[obj.objectName].value;
+								//favorite[key].push({
+									//id: item
+								//});
+							//}
+						//}
+					//}
+					//else if (obj.objectName === pt.conf.finals.dimension.organisationUnitGroupSet.objectName ||
+							 //obj.objectName === pt.conf.finals.dimension.dataElementGroupSet.objectName) {
+						//key = pt.conf.finals.dimension.objectNameMap[obj.objectName].value;
 
-						if (!favorite[key]) {
-							favorite[key] = {};
-						}
+						//if (!favorite[key]) {
+							//favorite[key] = {};
+						//}
 
-						favorite[key][obj.dimensionName] = [];
+						//favorite[key][obj.dimensionName] = [];
 
-						for (var j = 0, item; j < obj.items.length; j++) {
-							item = obj.items[j];
+						//for (var j = 0, item; j < obj.items.length; j++) {
+							//item = obj.items[j];
 
-							favorite[key][obj.dimensionName].push({
-								id: item
-							});
-						}
-					}
-					else {
-						key = pt.conf.finals.dimension.objectNameMap[obj.objectName].value;
-						favorite[key] = [];
+							//favorite[key][obj.dimensionName].push({
+								//id: item
+							//});
+						//}
+					//}
+					//else {
+						//key = pt.conf.finals.dimension.objectNameMap[obj.objectName].value;
+						//favorite[key] = [];
 
-						for (var j = 0, item; j < obj.items.length; j++) {
-							item = obj.items[j];
+						//for (var j = 0, item; j < obj.items.length; j++) {
+							//item = obj.items[j];
 
-							favorite[key].push({
-								id: item
-							});
-						}
-					}
-				}
+							//favorite[key].push({
+								//id: item
+							//});
+						//}
+					//}
+				//}
 
 				// Relative periods PUT workaround
-				if (!favorite.relativePeriods) {
-					favorite.relativePeriods = {};
-				}
+				//if (!favorite.relativePeriods) {
+					//favorite.relativePeriods = {};
+				//}
 
 				// Layout
-				if (pt.xLayout.col) {
-					var a = [];
+				//if (pt.xLayout.col) {
+					//var a = [];
 
-					for (var i = 0; i < pt.xLayout.col.length; i++) {
-						a.push(pt.xLayout.col[i].dimensionName);
-					}
+					//for (var i = 0; i < pt.xLayout.col.length; i++) {
+						//a.push(pt.xLayout.col[i].dimensionName);
+					//}
 
-					favorite.columnDimensions = a;
-				}
+					//favorite.columnDimensions = a;
+				//}
 
-				if (pt.xLayout.row) {
-					var a = [];
+				//if (pt.xLayout.row) {
+					//var a = [];
 
-					for (var i = 0; i < pt.xLayout.row.length; i++) {
-						a.push(pt.xLayout.row[i].dimensionName);
-					}
+					//for (var i = 0; i < pt.xLayout.row.length; i++) {
+						//a.push(pt.xLayout.row[i].dimensionName);
+					//}
 
-					favorite.rowDimensions = a;
-				}
+					//favorite.rowDimensions = a;
+				//}
 
-				if (pt.xLayout.filter) {
-					var a = [];
+				//if (pt.xLayout.filter) {
+					//var a = [];
 
-					for (var i = 0; i < pt.xLayout.filter.length; i++) {
-						a.push(pt.xLayout.filter[i].dimensionName);
-					}
+					//for (var i = 0; i < pt.xLayout.filter.length; i++) {
+						//a.push(pt.xLayout.filter[i].dimensionName);
+					//}
 
-					favorite.filterDimensions = a;
-				}
+					//favorite.filterDimensions = a;
+				//}
 			}
 
 			return favorite;
@@ -1205,7 +1205,17 @@ Ext.onReady( function() {
 				text: PT.i18n.create,
 				handler: function() {
 					var favorite = getBody();
-					favorite.name = nameTextfield.getValue	();
+					favorite.name = nameTextfield.getValue();
+
+					favorite.columns = Ext.clone(favorite.extended.columns);
+					favorite.rows = Ext.clone(favorite.extended.rows);
+					favorite.filters = Ext.clone(favorite.extended.filters);
+
+					favorite.columns = [{dimensions:'in', items: [{id: 'Uvn6LCg7dVU'}]}];
+					favorite.rows = [{dimensions:'pe', items: [{id: 'LAST_3_MONTHS'}]}];
+					favorite.filters = [{dimensions:'pe', items: [{id: 'ImspTQPwCqd'}]}];
+
+					delete favorite.extended;
 
 					if (favorite && favorite.name) {
 						Ext.Ajax.request({
