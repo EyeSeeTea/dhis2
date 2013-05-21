@@ -550,19 +550,6 @@ PT.core.getUtils = function(pt) {
 					dimensionNameSortedIdsMap: {}
 				};
 
-				//axisDimensionNames = [],
-				//axisItems = [],
-
-				//filterDimensionNames = [],
-				//filterItems = [],
-
-
-				//columnsDimensionNames = [],
-				//rowsDimensionNames = [],
-				//filtersDimensionNames = [];
-
-				//objectNameRecordsMap = {};
-
 			// Columns, rows, filters
 			if (layout.columns) {
 				for (var i = 0, dim, items, xDim; i < layout.columns.length; i++) {
@@ -697,16 +684,16 @@ PT.core.getUtils = function(pt) {
 		},
 
 		createTable: function(layout, pt) {
-			var getSyncronizedXLayout,
+			var dimConf = pt.conf.finals.dimension,
+				getSyncronizedXLayout,
 				getParamString,
 				getExtendedResponse,
-				getMergedDataDimensionsAxis,
-				extendAxis,
+				getExtendedAxis,
 				validateUrl,
 				getTableHtml,
 				initialize,
 
-				dimConf = pt.conf.finals.dimension;
+
 
 			getSyncronizedXLayout = function(xLayout, response) {
 				var removeDimensionFromXLayout,
@@ -886,39 +873,7 @@ PT.core.getUtils = function(pt) {
 				return response;
 			};
 
-			getMergedDataDimensionsAxis = function(axis, dimensionNames) {
-				var dxItems = [],
-					dimensionNameDimensionMap = {},
-					mAxis = [];
-
-				axis = Ext.clone(axis);
-				dimensionNames = Ext.Array.unique(Ext.clone(dimensionNames));
-
-				for (var i = 0; i < axis.length; i++) {
-					if (axis[i].dimensionName === dimConf.data.dimensionName) {
-						dxItems = dxItems.concat(axis[i].items);
-
-						delete axis[i].dimension;
-						delete axis[i].objectName;
-					}
-
-					if (!dimensionNameDimensionMap[axis[i].dimensionName]) {
-						dimensionNameDimensionMap[axis[i].dimensionName] = axis[i];
-					}
-				}
-
-				if (dimensionNameDimensionMap[dimConf.data.dimensionName]) {
-					dimensionNameDimensionMap[dimConf.data.dimensionName].items = dxItems;
-				}
-
-				for (var i = 0; i < dimensionNames.length; i++) {
-					mAxis.push(dimensionNameDimensionMap[dimensionNames[i]]);
-				}
-
-				return mAxis;
-			};
-
-			extendAxis = function(type, axis, xResponse) {
+			getExtendedAxis = function(type, axis, xResponse) {
 				if (!axis || (Ext.isArray(axis) && !axis.length)) {
 					return;
 				}
@@ -1767,17 +1722,13 @@ PT.core.getUtils = function(pt) {
 							pt.util.mask.hideMask();
 							return;
 						}
-console.log("xLayout", xLayout);
-						// Extend response
+
+						// Extended response
 						xResponse = getExtendedResponse(response, xLayout);
 
-						// Dimension objects
-						//xLayout.columns = getMergedDataDimensionsAxis(xLayout.columns, xLayout.columnsDimensionNames);
-						//xLayout.rows = getMergedDataDimensionsAxis(xLayout.rows, xLayout.rowsDimensionNames);
-
-						// Extend axes
-						xColAxis = extendAxis('col', xLayout.columns, xResponse);
-						xRowAxis = extendAxis('row', xLayout.rows, xResponse);
+						// Extended axes
+						xColAxis = getExtendedAxis('col', xLayout.columns, xResponse);
+						xRowAxis = getExtendedAxis('row', xLayout.rows, xResponse);
 
 						// Create html
 						html = getTableHtml(xColAxis, xRowAxis, xResponse);
