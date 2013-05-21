@@ -136,12 +136,16 @@ Ext.onReady( function() {
 						});
 					}
 					else if (dimName === dx && nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
-						for (var k = 0; k < nameDimArrayMap[dimName].length; k++) {
-							axes[i].push(Ext.clone(nameDimArrayMap[dimName]));
+						for (var k = 0; k < nameDimArrayMap[dx].length; k++) {
+							axes[i].push(Ext.clone(nameDimArrayMap[dx][k]));
 						}
 					}
 					else if (nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
-						axes[i].push(Ext.clone(nameDimArrayMap[dimName]));
+						//axes[i].push(Ext.clone(nameDimArrayMap[dimName]));
+
+						for (var k = 0; k < nameDimArrayMap[dimName].length; k++) {
+							axes[i].push(Ext.clone(nameDimArrayMap[dimName][k]));
+						}
 					}
 				}
 			}
