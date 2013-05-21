@@ -1989,12 +1989,12 @@ function saveCoordinatesEvent()
 		alert(i18n_enter_values_for_longitude_and_latitude_fields);
 		isValid = false;
 	}	
-	else if(!isInt(longitude)){
+	else if(!isNumber(longitude)){
 		byId('longitude').style.backgroundColor = '#ffcc00';
 		alert(i18n_enter_a_valid_number);
 		isValid = false;
 	}
-	else if(!isInt(latitude)){
+	else if(!isNumber(latitude)){
 		byId('latitude').style.backgroundColor = '#ffcc00';
 		alert(i18n_enter_a_valid_number);
 		isValid = false;
@@ -2019,20 +2019,35 @@ function saveCoordinatesEvent()
 		alert(i18n_enter_a_value_greater_than_or_equal_to_nagetive_90);
 		isValid = false;
 	}
-	
-	if( isValid ){
-		jQuery.postJSON( "saveCoordinatesEvent.action",
-			{ 
-				programStageInstanceId: programStageInstanceId,
-				longitude: longitude,
-				latitude: latitude
-			}, 
-			function( json ) 
-			{   
-				 byId('longitude').style.backgroundColor = SUCCESS_COLOR;
-				 byId('latitude').style.backgroundColor = SUCCESS_COLOR;
-			});
-	}
+
+    if ( isValid ) {
+        $.ajax( {
+            url: 'saveCoordinatesEvent.action',
+            data: {
+                programStageInstanceId: programStageInstanceId,
+                longitude: longitude,
+                latitude: latitude
+            },
+            cache: false,
+            dataType: 'json'
+        } ).done(function() {
+            byId( 'longitude' ).style.backgroundColor = SUCCESS_COLOR;
+            byId( 'latitude' ).style.backgroundColor = SUCCESS_COLOR;
+        } ).fail(function() {
+            if(DAO.store && programStageInstanceId.indexOf('local') != -1 ) {
+                DAO.store.get( 'dataValues', programStageInstanceId ).done( function ( data ) {
+                    data.coordinate = {};
+                    data.coordinate.longitude = longitude;
+                    data.coordinate.latitude = latitude;
+
+                    this.set( 'dataValues', data ).done( function () {
+                        byId( 'longitude' ).style.backgroundColor = SUCCESS_COLOR;
+                        byId( 'latitude' ).style.backgroundColor = SUCCESS_COLOR;
+                    } );
+                } );
+            }
+        });
+    }
 }
 
 // ---------------------------------------------------------------------------------

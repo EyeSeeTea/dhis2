@@ -1847,434 +1847,169 @@ PT.core.getAPI = function(pt) {
 	var dimConf = pt.conf.finals.dimension,
 		api = {
 			dimension: {
-				Dimension: null,
-				classes: {
-					Indicator: null,
-					DataElement: null,
-					Operand: null,
-					DataSet: null,
-					Period: null,
-					OrganisationUnit: null,
-					Dimension: null
-				},
-				objectNameClassMap: {}
+				Dimension: null
 			},
 			layout: {
-				classes: {
-					Layout: null
-				}
+				Layout: null
 			}
 		};
 
 	// Dimension
 
-	api.dimension.Dimension = function() {
-		return {
-			dimension: null, // string
+	api.data.Record = function(config) {
 
-			items: null // array of records
-		};
-	};
-
-	api.dimension.classes.Indicator = function(config) {
-		var indicator = api.dimension.Dimension(),
-			validateConfig;
-
-		validateConfig = function() {
-			if (!Ext.isObject(config)) {
-				alert('Indicator config is not an object');
-				return;
-			}
-
-			if (!Ext.isString(config.dimension)) {
-				alert('Indicator dimension name is illegal');
-				return;
-			}
-
-			if (!Ext.isArray(config.items)) {
-				alert('Indicator items is not an array');
-				return;
-			}
-
-			if (!config.items.length) {
-				alert('Indicator has no items');
-				return;
-			}
-
-			return true;
-		};
+		// id: string
 
 		return function() {
-			if (!validateConfig()) {
+			if (!Ext.isObject(config)) {
+				console.log('Record config is not an object');
 				return;
 			}
 
-			indicator.dimension = config.dimension;
-			indicator.dimensionName = dimConf.indicator.dimensionName;
-			indicator.objectName = dimConf.indicator.objectName;
-			indicator.items = Ext.clone(config.items);
+			if (!Ext.isString(config.id)) {
+				alert('Record id is not text');
+				return;
+			}
 
-			return indicator;
+			return Ext.clone(config);
 		}();
 	};
 
-	api.dimension.classes.DataElement = function(config) {
-		var dataElement = api.dimension.Dimension(),
-			validateConfig;
+	api.dimension.Dimension = function(config) {
 
-		validateConfig = function() {
+		// dimension: string
+
+		// items: [Record]
+
+		return function() {
 			if (!Ext.isObject(config)) {
-				alert('Data element config is not an object');
+				console.log('Dimension config is not an object');
 				return;
 			}
 
 			if (!Ext.isString(config.dimension)) {
-				alert('Data element dimension name is illegal');
+				console.log('Dimension name is not text');
 				return;
 			}
 
-			if (!Ext.isArray(config.items)) {
-				alert('Data element items is not an array');
-				return;
-			}
+			if (config.dimension !== pt.conf.finals.dimension.category.dimensionName) {
+				var records = [];
 
-			if (!config.items.length) {
-				alert('Data element has no items');
-				return;
-			}
+				if (!Ext.isArray(config.items)) {
+					console.log('Dimension items is not an array');
+					return;
+				}
 
-			return true;
-		};
+				for (var i = 0; i < config.items.length; i++) {
+					record = api.data.Record(config.items[i]);
 
-		return function() {
-			if (!validateConfig()) {
-				return;
-			}
+					if (record) {
+						records.push(record);
+					}
+				}
 
-			dataElement.dimension = config.dimension;
-			dataElement.dimensionName = dimConf.dataElement.dimensionName;
-			dataElement.objectName = dimConf.dataElement.objectName;
-			dataElement.items = Ext.clone(config.items);
+				config.items = records;
 
-			return dataElement;
-		}();
-	};
-
-	api.dimension.classes.Operand = function(config) {
-		var operand = api.dimension.Dimension(),
-			validateConfig;
-
-		validateConfig = function() {
-			if (!Ext.isObject(config)) {
-				alert('Operand config is not an object');
-				return;
-			}
-
-			if (!Ext.isString(config.dimension)) {
-				alert('Operand dimension name is illegal');
-				return;
-			}
-
-			if (!Ext.isArray(config.items)) {
-				alert('Operand items is not an array');
-				return;
-			}
-
-			if (!config.items.length) {
-				alert('Operand has no items');
-				return;
-			}
-
-			return true;
-		};
-
-		return function() {
-			if (!validateConfig()) {
-				return;
-			}
-
-			operand.dimension = config.dimension;
-			operand.dimensionName = dimConf.operand.dimensionName;
-			operand.objectName = dimConf.operand.objectName;
-			operand.items = Ext.clone(config.items);
-
-			// Replace operand id characters
-			for (var i = 0, id; i < operand.items.length; i++) {
-				id = operand.items[i].id;
-
-				if (id.indexOf('.') !== -1) {
-					id = id.replace('.', '-');
-					operand.items[i].id = id;
+				if (!config.items.length) {
+					console.log('Dimension has no valid items');
+					return;
 				}
 			}
 
-			return operand;
+			return Ext.clone(config);
 		}();
 	};
-
-	api.dimension.classes.DataSet = function(config) {
-		var dataSet = api.dimension.Dimension(),
-			validateConfig;
-
-		validateConfig = function() {
-			if (!Ext.isObject(config)) {
-				alert('Data set config is not an object');
-				return;
-			}
-
-			if (!Ext.isString(config.dimension)) {
-				alert('Data set dimension name is illegal');
-				return;
-			}
-
-			if (!Ext.isArray(config.items)) {
-				alert('Data set items is not an array');
-				return;
-			}
-
-			if (!config.items.length) {
-				alert('Data set has no items');
-				return;
-			}
-
-			return true;
-		};
-
-		return function() {
-			if (!validateConfig()) {
-				return;
-			}
-
-			dataSet.dimension = config.dimension;
-			dataSet.dimensionName = dimConf.dataSet.dimensionName;
-			dataSet.objectName = dimConf.dataSet.objectName;
-			dataSet.items = Ext.clone(config.items);
-
-			return dataSet;
-		}();
-	};
-
-	api.dimension.classes.Period = function(config) {
-		var period = api.dimension.Dimension(),
-			validateConfig;
-
-		validateConfig = function() {
-			if (!Ext.isObject(config)) {
-				alert('Period config is not an object');
-				return;
-			}
-
-			if (!Ext.isString(config.dimension)) {
-				alert('Period dimension name is illegal');
-				return;
-			}
-
-			if (!Ext.isArray(config.items)) {
-				alert('Period items is not an array');
-				return;
-			}
-
-			if (!config.items.length) {
-				alert('Period has no items');
-				return;
-			}
-
-			return true;
-		};
-
-		return function() {
-			if (!validateConfig()) {
-				return;
-			}
-
-			period.dimension = config.dimension;
-			period.dimensionName = dimConf.period.dimensionName;
-			period.objectName = dimConf.period.objectName;
-			period.items = Ext.clone(config.items);
-
-			return period;
-		}();
-	};
-
-	api.dimension.classes.OrganisationUnit = function(config) {
-		var organisationUnit = api.dimension.Dimension(),
-			validateConfig;
-
-		validateConfig = function() {
-			if (!Ext.isObject(config)) {
-				alert('Organisation unit config is not an object');
-				return;
-			}
-
-			if (!Ext.isString(config.dimension)) {
-				alert('Organisation unit dimension name is illegal');
-				return;
-			}
-
-			if (!Ext.isArray(config.items)) {
-				alert('Organisation unit items is not an array');
-				return;
-			}
-
-			if (!config.items.length) {
-				alert('Organisation unit has no items');
-				return;
-			}
-
-			return true;
-		};
-
-		return function() {
-			if (!validateConfig()) {
-				return;
-			}
-
-			organisationUnit.dimension = config.dimension;
-			organisationUnit.dimensionName = dimConf.organisationUnit.dimensionName;
-			organisationUnit.objectName = dimConf.organisationUnit.objectName;
-			organisationUnit.items = Ext.clone(config.items);
-
-			return organisationUnit;
-		}();
-	};
-
-	api.dimension.classes.Dimension = function(config) {
-		var dimension = api.dimension.Dimension(),
-			validateConfig;
-
-		validateConfig = function() {
-			if (!Ext.isObject(config)) {
-				alert('Dimension config is not an object');
-				return;
-			}
-
-			if (!Ext.isString(config.dimension)) {
-				alert('Dimension name is illegal');
-				return;
-			}
-
-			if (!Ext.isArray(config.items)) {
-				alert('Dimension items is not an array');
-				return;
-			}
-
-			if (!config.items.length) {
-				alert('Dimension has no items');
-				return;
-			}
-
-			return true;
-		};
-
-		return function() {
-			if (!validateConfig()) {
-				return;
-			}
-
-			dimension.dimension = config.dimension;
-			dimension.dimensionName = config.dimension;
-			dimension.objectName = config.dimension;
-			dimension.items = Ext.clone(config.items);
-
-			return dimension;
-		}();
-	};
-
-	api.dimension.objectNameClassMap[dimConf.indicator.objectName] = api.dimension.classes.Indicator;
-	api.dimension.objectNameClassMap[dimConf.dataElement.objectName] = api.dimension.classes.DataElement;
-	api.dimension.objectNameClassMap[dimConf.operand.objectName] = api.dimension.classes.Operand;
-	api.dimension.objectNameClassMap[dimConf.dataSet.objectName] = api.dimension.classes.DataSet;
-	api.dimension.objectNameClassMap[dimConf.period.objectName] = api.dimension.classes.Period;
-	api.dimension.objectNameClassMap[dimConf.organisationUnit.objectName] = api.dimension.classes.OrganisationUnit;
 
 	// Layout
 
-	api.layout.classes.Layout = function(config) {
-		var layout = {
-			columns: null, // array of {dimension: <objectName>, items: [{id, name, code}]}
+	api.layout.Layout = function(config) {
 
-			rows: null, // array of {dimension: <objectName>, items: [{id, name, code}]}
+		// columns: [Dimension]
 
-			filters: null, // array of {dimension: <objectName>, items: [{id, name, code}]}
+		// rows: [Dimension]
 
-			showTotals: true, // boolean
+		// filters: [Dimension]
 
-			showSubTotals: true, // boolean
+		// showTotals: boolean (true)
 
-			hideEmptyRows: false, // boolean
+		// showSubTotals: boolean (true)
 
-			displayDensity: 'normal', // string - 'compact', 'normal', 'comfortable'
+		// hideEmptyRows: boolean (false)
 
-			fontSize: 'normal', // string - 'small', 'normal', 'large'
+		// displayDensity: string ('normal') - 'compact', 'normal', 'comfortable'
 
-			digitGroupSeparator: 'space', // string - 'none', 'comma', 'space'
+		// fontSize: string ('normal') - 'small', 'normal', 'large'
 
-			userOrganisationUnit: false, // boolean
+		// digitGroupSeparator: string ('space') - 'none', 'comma', 'space'
 
-			userOrganisationUnitChildren: false, // boolean
+		// userOrganisationUnit: boolean (false)
 
-			reportingPeriod: false, // boolean (report tables only)
+		// userOrganisationUnitChildren: boolean (false)
 
-			organisationUnit: false, // boolean (report tables only)
+		// reportingPeriod: boolean (false) //report tables only
 
-			parentOrganisationUnit: false // boolean (report tables only)
-		};
+		// organisationUnit: boolean (false) //report tables only
 
-		var validateConfig = function() {
-			var removeEmptyDimensions,
-				getValidatedAxis,
-				a = [],
-				objectNames = [],
-				dimConf = pt.conf.finals.dimension;
+		// parentOrganisationUnit: boolean (false) //report tables only
 
-			removeEmptyDimensions = function(axis) {
-				if (!axis) {
-					return;
-				}
+		var removeEmptyDimensions,
+			getValidatedAxis;
 
-				for (var i = 0, dim, remove; i < axis.length; i++) {
-					remove = false;
-					dim = axis[i];
+		removeEmptyDimensions = function(axis) {
+			if (!axis) {
+				return;
+			}
 
-					if (dim.dimension !== pt.conf.finals.dimension.category.objectName) {
-						if (!(Ext.isArray(dim.items) && dim.items.length)) {
-							remove = true;
-						}
-						else {
-							for (var j = 0; j < dim.items.length; j++) {
-								if (!Ext.isString(dim.items[j].id)) {
-									remove = true;
-								}
+			for (var i = 0, dim, remove; i < axis.length; i++) {
+				remove = false;
+				dim = axis[i];
+
+				if (dim.dimension !== pt.conf.finals.dimension.category.objectName) {
+					if (!(Ext.isArray(dim.items) && dim.items.length)) {
+						remove = true;
+					}
+					else {
+						for (var j = 0; j < dim.items.length; j++) {
+							if (!Ext.isString(dim.items[j].id)) {
+								remove = true;
 							}
 						}
 					}
-
-					if (remove) {
-						axis = Ext.Array.erase(axis, i, 1);
-						i = i - 1;
-					}
 				}
 
-				return axis;
-			};
-
-			getValidatedAxis = function(axis) {
-				if (!(axis && Ext.isArray(axis) && axis.length)) {
-					return;
+				if (remove) {
+					axis = Ext.Array.erase(axis, i, 1);
+					i = i - 1;
 				}
+			}
 
-				for (var i = 0, dimension; i < axis.length; i++) {
-					dimension = axis[i];
+			return axis;
+		};
 
-					if (!(Ext.isObject(dimension) && Ext.isString(dimension.dimensionName))) {
-						return;
-					}
+		getValidatedAxis = function(axis) {
+			var dimensions = [];
+
+			if (!(axis && Ext.isArray(axis) && axis.length)) {
+				return;
+			}
+
+			for (var i = 0, dimension; i < axis.length; i++) {
+				dimension = api.dimension.Dimension(axis[i]);
+
+				if (dimension) {
+					dimensions.push(dimension);
 				}
+			}
 
-				axis = removeEmptyDimensions(axis);
+			axis = dimensions;
 
-				return axis.length ? axis : null;
-			};
+			return axis.length ? axis : null;
+		};
+
+		return function() {
+			var a = [],
+				objectNames = [],
+				dimConf = pt.conf.finals.dimension;
 
 			config.columns = getValidatedAxis(config.columns);
 			config.rows = getValidatedAxis(config.rows);
@@ -2307,56 +2042,42 @@ PT.core.getAPI = function(pt) {
 
 			// Properties
 			if (!Ext.isBoolean(config.showTotals)) {
-				config.showTotals = layout.showTotals;
+				config.showTotals = true;
 			}
 			if (!Ext.isBoolean(config.showSubTotals)) {
-				config.showSubTotals = layout.showSubTotals;
+				config.showSubTotals = true;
 			}
 			if (!Ext.isBoolean(config.hideEmptyRows)) {
-				config.hideEmptyRows = layout.hideEmptyRows;
+				config.hideEmptyRows = false;
 			}
 
 			if (!Ext.isString(config.displayDensity) || Ext.isEmpty(config.displayDensity)) {
-				config.displayDensity = layout.displayDensity;
+				config.displayDensity = 'normal';
 			}
 			if (!Ext.isString(config.fontSize) || Ext.isEmpty(config.fontSize)) {
-				config.fontSize = layout.fontSize;
+				config.fontSize = 'normal';
 			}
 			if (!Ext.isString(config.digitGroupSeparator) || Ext.isEmpty(config.digitGroupSeparator)) {
-				config.digitGroupSeparator = layout.digitGroupSeparator;
+				config.digitGroupSeparator = 'space';
 			}
 
 			if (!Ext.isBoolean(config.userOrganisationUnit)) {
-				config.userOrganisationUnit = layout.userOrganisationUnit;
+				config.userOrganisationUnit = false;
 			}
 			if (!Ext.isBoolean(config.userOrganisationUnitChildren)) {
-				config.userOrganisationUnitChildren = layout.userOrganisationUnitChildren;
+				config.userOrganisationUnitChildren = false;
 			}
 			if (!Ext.isBoolean(config.reportingPeriod)) {
-				config.reportingPeriod = layout.reportingPeriod;
+				config.reportingPeriod = false;
 			}
 			if (!Ext.isBoolean(config.organisationUnit)) {
-				config.organisationUnit = layout.organisationUnit;
+				config.organisationUnit = false;
 			}
 			if (!Ext.isBoolean(config.parentOrganisationUnit)) {
-				config.parentOrganisationUnit = layout.parentOrganisationUnit;
+				config.parentOrganisationUnit = false;
 			}
 
-			return true;
-		};
-
-		return function() {
-			if (!validateConfig()) {
-				return;
-			}
-
-			for (var key in config) {
-				if (config.hasOwnProperty(key)) {
-					layout[key] = config[key];
-				}
-			}
-
-			return Ext.clone(layout);
+			return Ext.clone(config);
 		}();
 	};
 

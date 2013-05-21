@@ -66,6 +66,7 @@ import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.patient.PatientIdentifierTypeService;
 import org.hisp.dhis.patient.PatientMobileSetting;
 import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.patient.util.PatientIdentifierGenerator;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
@@ -1669,11 +1670,10 @@ public class ActivityReportingServiceImpl
     }
 
     @Override
-    public org.hisp.dhis.api.mobile.model.LWUITmodel.Patient findLatestPatient( int orgUnitId )
+    public org.hisp.dhis.api.mobile.model.LWUITmodel.Patient findLatestPatient()
         throws NotAllowedException
     {
-
-        Patient patient = (Patient) this.patientService.getLatestPatient( orgUnitId );
+        Patient patient = (Patient) this.patientService.getPatient( this.patientId );
 
         org.hisp.dhis.api.mobile.model.LWUITmodel.Patient patientMobile = getPatientModel( patient );
         return patientMobile;
@@ -1781,7 +1781,6 @@ public class ActivityReportingServiceImpl
         patientWeb.setAttributes( patientAttributeSet );
 
         patientId = patientService.createPatient( patientWeb, null, null, patientAttributeValues );
-        
 
         return PATIENT_REGISTERED;
 

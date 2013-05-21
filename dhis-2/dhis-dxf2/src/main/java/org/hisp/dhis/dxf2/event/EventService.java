@@ -1,7 +1,7 @@
-package org.hisp.dhis.api.controller.tracker;
+package org.hisp.dhis.dxf2.event;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,18 +27,22 @@ package org.hisp.dhis.api.controller.tracker;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.api.controller.AbstractCrudController;
-import org.hisp.dhis.program.ProgramStage;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
+import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Controller
-@RequestMapping( value = ProgramStageController.RESOURCE_PATH )
-public class ProgramStageController
-    extends AbstractCrudController<ProgramStage>
+public interface EventService
 {
-    public static final String RESOURCE_PATH = "/programStages";
+    ImportSummary saveEventXml( InputStream inputStream ) throws IOException;
+
+    ImportSummaries saveEventsXml( InputStream inputStream ) throws IOException;
+
+    ImportSummary saveEventJson( InputStream inputStream ) throws IOException;
+
+    ImportSummaries saveEventsJson( InputStream inputStream ) throws IOException;
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.programdatavalue;
+package org.hisp.dhis.dxf2.event;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -31,96 +31,68 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.system.util.ValidationUtils;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "programInstance", namespace = DxfNamespaces.DXF_2_0 )
-public class ProgramInstance
+@JacksonXmlRootElement( localName = "coordinate", namespace = DxfNamespaces.DXF_2_0 )
+public class Coordinate
 {
-    private String id;
+    private Double latitude;
 
-    private String programInstanceId;
+    private Double longitude;
 
-    private String organisationUnitId;
-
-    private String executionDate;
-
-    private Boolean completed = false;
-
-    public ProgramInstance()
+    public Coordinate()
     {
+    }
+
+    public Coordinate( Double longitude, Double latitude )
+    {
+        this.longitude = longitude;
+        this.latitude = latitude;
     }
 
     @JsonProperty( required = true )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
-    public String getId()
+    public Double getLatitude()
     {
-        return id;
+        return latitude;
     }
 
-    public void setId( String id )
+    public void setLatitude( Double latitude )
     {
-        this.id = id;
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
-    public String getProgramInstanceId()
-    {
-        return programInstanceId;
-    }
-
-    public void setProgramInstanceId( String programInstanceId )
-    {
-        this.programInstanceId = programInstanceId;
+        this.latitude = latitude;
     }
 
     @JsonProperty( required = true )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
-    public String getOrganisationUnitId()
+    public Double getLongitude()
     {
-        return organisationUnitId;
+        return longitude;
     }
 
-    public void setOrganisationUnitId( String organisationUnitId )
+    public void setLongitude( Double longitude )
     {
-        this.organisationUnitId = organisationUnitId;
+        this.longitude = longitude;
     }
 
-    @JsonProperty( required = true )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
-    public String getExecutionDate()
+    public boolean isValid()
     {
-        return executionDate;
+        return ValidationUtils.coordinateIsValid( getCoordinateString() );
     }
 
-    public void setExecutionDate( String executionDate )
+    public String getCoordinateString()
     {
-        this.executionDate = executionDate;
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
-    public boolean isCompleted()
-    {
-        return completed;
-    }
-
-    public void setCompleted( Boolean completed )
-    {
-        this.completed = completed;
+        return "[" + longitude + "," + latitude + "]";
     }
 
     @Override
     public String toString()
     {
-        return "ProgramInstance{" +
-            "id='" + id + '\'' +
-            ", programInstanceId='" + programInstanceId + '\'' +
-            ", organisationUnitId='" + organisationUnitId + '\'' +
-            ", executionDate='" + executionDate + '\'' +
-            ", completed=" + completed +
+        return "Coordinate{" +
+            "latitude=" + latitude +
+            ", longitude=" + longitude +
             '}';
     }
 }

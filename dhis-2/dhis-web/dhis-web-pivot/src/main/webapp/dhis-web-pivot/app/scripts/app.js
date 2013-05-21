@@ -105,8 +105,8 @@ Ext.onReady( function() {
 			config.filters = [];
 
 			getDimension = function(config) {
-				if (pt.api.dimension.objectNameClassMap[config.dimension]) {
-					return pt.api.dimension.objectNameClassMap[config.dimension](config);
+				if (pt.api.dimension.maps.objectNameClassMap[config.dimension]) {
+					return pt.api.dimension.maps.objectNameClassMap[config.dimension](config);
 				}
 				else {
 					return pt.api.dimension.classes.Dimension(config);
@@ -1211,9 +1211,9 @@ Ext.onReady( function() {
 					favorite.rows = Ext.clone(favorite.extended.rows);
 					favorite.filters = Ext.clone(favorite.extended.filters);
 
-					favorite.columns = [{dimensions:'in', items: [{id: 'Uvn6LCg7dVU'}]}];
-					favorite.rows = [{dimensions:'pe', items: [{id: 'LAST_3_MONTHS'}]}];
-					favorite.filters = [{dimensions:'pe', items: [{id: 'ImspTQPwCqd'}]}];
+					favorite.columns = [{dimension:'in', items: [{id: 'Uvn6LCg7dVU'}]}];
+					favorite.rows = [{dimension:'pe', items: [{id: 'LAST_3_MONTHS'}]}];
+					favorite.filters = [{dimension:'pe', items: [{id: 'ImspTQPwCqd'}]}];
 
 					delete favorite.extended;
 
@@ -2044,18 +2044,17 @@ Ext.onReady( function() {
 				xtype: 'panel',
 				title: '<div class="pt-panel-title-data">' + PT.i18n.indicators + '</div>',
 				hideCollapseTool: true,
-				getData: function() {
-					var data = {
-						dimensionName: pt.conf.finals.dimension.indicator.dimensionName,
-						objectName: pt.conf.finals.dimension.indicator.objectName,
+				getDimension: function() {
+					var dim = {
+						dimension: pt.conf.finals.dimension.indicator.objectName,
 						items: []
 					};
 
 					pt.store.indicatorSelected.each( function(r) {
-						data.items.push({id: r.data.id});
+						dim.items.push({id: r.data.id});
 					});
 
-					return data.items.length ? data : null;
+					return dim.items.length ? dim : null;
 				},
 				onExpand: function() {
 					var h = pt.viewport.westRegion.hasScrollbar ?
@@ -2233,18 +2232,17 @@ Ext.onReady( function() {
 				xtype: 'panel',
 				title: '<div class="pt-panel-title-data">' + PT.i18n.data_elements + '</div>',
 				hideCollapseTool: true,
-				getData: function() {
-					var data = {
-						dimensionName: pt.conf.finals.dimension.dataElement.dimensionName,
-						objectName: pt.conf.finals.dimension.dataElement.objectName,
+				getDimension: function() {
+					var dim = {
+						dimension: pt.conf.finals.dimension.dataElement.objectName,
 						items: []
 					};
 
 					pt.store.dataElementSelected.each( function(r) {
-						data.items.push({id: r.data.id});
+						dim.items.push({id: r.data.id});
 					});
 
-					return data.items.length ? data : null;
+					return dim.items.length ? dim : null;
 				},
 				onExpand: function() {
 					var h = pt.viewport.westRegion.hasScrollbar ?
@@ -2422,18 +2420,17 @@ Ext.onReady( function() {
 				xtype: 'panel',
 				title: '<div class="pt-panel-title-data">' + PT.i18n.reporting_rates + '</div>',
 				hideCollapseTool: true,
-				getData: function() {
-					var data = {
-						dimensionName: pt.conf.finals.dimension.dataSet.dimensionName,
-						objectName: pt.conf.finals.dimension.dataSet.objectName,
+				getDimension: function() {
+					var dim = {
+						dimension: pt.conf.finals.dimension.dataSet.objectName,
 						items: []
 					};
 
 					pt.store.dataSetSelected.each( function(r) {
-						data.items.push({id: r.data.id});
+						dim.items.push({id: r.data.id});
 					});
 
-					return data.items.length ? data : null;
+					return dim.items.length ? dim : null;
 				},
 				onExpand: function() {
 					var h = pt.viewport.westRegion.hasScrollbar ?
@@ -2889,25 +2886,24 @@ Ext.onReady( function() {
 				xtype: 'panel',
 				title: '<div class="pt-panel-title-period">Periods</div>',
 				hideCollapseTool: true,
-				getData: function() {
-					var data = {
-							dimensionName: pt.conf.finals.dimension.period.dimensionName,
-							objectName: pt.conf.finals.dimension.period.objectName,
+				getDimension: function() {
+					var dim = {
+							dimension: pt.conf.finals.dimension.period.objectName,
 							items: []
 						},
 						chb = pt.cmp.dimension.relativePeriod.checkbox;
 
 					pt.store.fixedPeriodSelected.each( function(r) {
-						data.items.push({id: r.data.id});
+						dim.items.push({id: r.data.id});
 					});
 
 					for (var i = 0; i < chb.length; i++) {
 						if (chb[i].getValue()) {
-							data.items.push({id: chb[i].relativePeriodId});
+							dim.items.push({id: chb[i].relativePeriodId});
 						}
 					}
 
-					return data.items.length ? data : null;
+					return dim.items.length ? dim : null;
 				},
 				onExpand: function() {
 					var h = pt.viewport.westRegion.hasScrollbar ?
@@ -3184,29 +3180,28 @@ Ext.onReady( function() {
 				bodyStyle: 'padding-top:5px',
 				hideCollapseTool: true,
 				collapsed: false,
-				getData: function() {
+				getDimension: function() {
 					var r = treePanel.getSelectionModel().getSelection(),
-						data = {
-							dimensionName: pt.conf.finals.dimension.organisationUnit.dimensionName,
-							objectName: pt.conf.finals.dimension.organisationUnit.objectName,
+						dim = {
+							dimension: pt.conf.finals.dimension.organisationUnit.objectName,
 							items: []
 						};
 
 					if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue()) {
 						if (userOrganisationUnit.getValue()) {
-							data.items.push({id: 'USER_ORGUNIT'});
+							dim.items.push({id: 'USER_ORGUNIT'});
 						}
 						if (userOrganisationUnitChildren.getValue()) {
-							data.items.push({id: 'USER_ORGUNIT_CHILDREN'});
+							dim.items.push({id: 'USER_ORGUNIT_CHILDREN'});
 						}
 					}
 					else {
 						for (var i = 0; i < r.length; i++) {
-							data.items.push({id: r[i].data.id});
+							dim.items.push({id: r[i].data.id});
 						}
 					}
 
-					return data.items.length ? data : null;
+					return dim.items.length ? dim : null;
 				},
 				onExpand: function() {
 					var h = pt.viewport.westRegion.hasScrollbar ?
@@ -3394,18 +3389,17 @@ Ext.onReady( function() {
 						hideCollapseTool: true,
 						availableStore: availableStore,
 						selectedStore: selectedStore,
-						getData: function() {
-							var data = {
-								dimensionName: dimension.id,
-								objectName: dimension.id,
+						getDimension: function() {
+							var dim = {
+								dimension: dimension.id,
 								items: []
 							};
 
 							selectedStore.each( function(r) {
-								data.items.push({id: r.data.id});
+								dim.items.push({id: r.data.id});
 							});
 
-							return data.items.length ? data : null;
+							return dim.items.length ? dim : null;
 						},
 						onExpand: function() {
 							if (!availableStore.isLoaded) {

@@ -1,23 +1,13 @@
 
 var dataElementSelector;
-var otherProgramStageDataElements;
 var existedDataEntry;
 var timeout;
 
 jQuery(function(){
-	dataElementSelector = jQuery("#dataElementSelection").dialog({
+	dataElementSelector = jQuery("#dataElementDiv").dialog({
 		title: i18n_dataelement,
 		height: 420,
 		width: 480,
-		position: [$("body").width()- 50, 0],
-		autoOpen: false,
-		zIndex:99999
-	});
-	
-	otherProgramStageDataElements = jQuery("#otherProgramStageDataElements").dialog({
-		title: i18n_dataelement_of_orther_program_stage,
-		height: 460,
-		width:jQuery("#otherProgramStageDataElements [id=dataElementIds]").outerWidth() + 50,
 		position: [$("body").width()- 50, 0],
 		autoOpen: false,
 		zIndex:99999
@@ -66,11 +56,6 @@ jQuery(function(){
 		timeOut = window.setTimeout( "validateDataEntryFormTimeout( false );", 60000 );
 	}
 });
-
-function openOtherProgramStageDataElements()
-{
-	otherProgramStageDataElements.dialog("open");
-}
 	
 function openDataElementSelector()
 {
@@ -369,14 +354,5 @@ function autoSaveDataEntryForm()
 	{
 		setHeaderDelayMessage( i18n_save_success ); 
 	} );
-}
-
-function deleteRegistrationFormFromView()
-{
-	var result = window.confirm( i18n_confirm_delete + '\n\n' + name );
-	if ( result )
-	{
-		window.location.href = 'delRegistrationEntryFormAction.action?id=' + id;
-	}
 }
 

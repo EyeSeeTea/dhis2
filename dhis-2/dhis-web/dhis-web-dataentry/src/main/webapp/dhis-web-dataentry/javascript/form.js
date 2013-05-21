@@ -11,6 +11,9 @@ var indicatorFormulas = [];
 // Array with associative arrays for each data set, populated in select.vm
 var dataSets = [];
 
+// Maps input field to optionSet
+var optionSets = {};
+
 // Associative array with identifier and array of assigned data sets
 var dataSetAssociationSets = [];
 
@@ -69,6 +72,16 @@ var FORMTYPE_MULTIORG_SECTION = 'multiorg_section';
 var FORMTYPE_DEFAULT = 'default';
 
 var EVENT_FORM_LOADED = "dhis-web-dataentry-form-loaded";
+
+var MAX_DROPDOWN_DISPLAYED = 30;
+
+var DAO = DAO || {};
+
+DAO.store = new dhis2.storage.Store( {
+    name: 'dhis2',
+    adapters: [ dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter ],
+    objectStores: [ 'optionSets' ]
+} );
 
 ( function( $ ) {
     $.safeEach = function( arr, fn ) 
@@ -187,6 +200,7 @@ function loadMetaData()
 	        dataElements = metaData.dataElements;
 	        indicatorFormulas = metaData.indicatorFormulas;
 	        dataSets = metaData.dataSets;
+            optionSets = metaData.optionSets;
 	        dataSetAssociationSets = metaData.dataSetAssociationSets;
 	        organisationUnitAssociationSetMap = metaData.organisationUnitAssociationSetMap;
 
@@ -371,7 +385,7 @@ function addEventListeners()
 
         if ( type == 'date' )
         {
-            $( this ).css( 'width', '80%' );
+            $( this ).css( 'width', '100%' );
             datePicker( id );
         }
     } );
@@ -396,9 +410,34 @@ function addEventListeners()
             saveBoolean( dataElementId, optionComboId, id );
         } );
 
-        $( this ).css( 'width', '100%' );
+        $( this ).css( 'width', '90%' );
     } );
-    
+
+    $( '[name="entryoptionset"]' ).each( function( i )
+    {
+        var id = $( this ).attr( 'id' );
+        var split = splitFieldId( id );
+
+        var dataElementId = split.dataElementId;
+        var optionComboId = split.optionComboId;
+
+        $( this ).unbind( 'focus' );
+        $( this ).unbind( 'change' );
+
+        $( this ).focus( valueFocus );
+        $( this ).blur( valueBlur );
+
+        $( this ).change( function()
+        {
+            saveVal( dataElementId, optionComboId, id );
+        } );
+
+        if ( formType != FORMTYPE_CUSTOM ) {
+            $( this ).css( 'width', '80%' );
+            $( this ).css( 'text-align', 'center' );
+        }
+    } );
+
     $( '[name="commentlink"]' ).each( function( i )
     {
         var id = $( this ).attr( 'id' );
@@ -507,6 +546,7 @@ function loadForm( dataSetId, multiOrg )
         }
 
         loadDataValues();
+        insertOptionSets();
     }
     else
     {
@@ -531,7 +571,8 @@ function loadForm( dataSetId, multiOrg )
                 $( '#currentOrganisationUnit' ).html( i18n_no_organisationunit_selected );
             }
 
-            loadDataValues()
+            insertOptionSets();
+            loadDataValues();
         } );
     }
 }
@@ -835,6 +876,7 @@ function organisationUnitSelected( orgUnits, orgUnitNames, children )
     addOptionById( 'selectedDataSetId', '-1', '[ ' + i18n_select_data_set + ' ]' );
 
     var dataSetValid = false;
+    var multiDataSetValid = false;
 
     $.safeEach( dataSetList, function( idx, item ) 
     {
@@ -856,6 +898,11 @@ function organisationUnitSelected( orgUnits, orgUnitNames, children )
 
             $.safeEach( childrenDataSets, function( idx, item )
             {
+                if ( dataSetId == item.id && multiOrganisationUnit)
+                {
+                    multiDataSetValid = true;
+                }
+
                 $( '<option />' ).attr( 'data-multiorg', true).attr( 'value', item.id).html(item.name).appendTo( '#selectedDataSetId' );
             } );
 
@@ -863,19 +910,25 @@ function organisationUnitSelected( orgUnits, orgUnitNames, children )
         }
     }
 
-    if ( !multiOrganisationUnit && dataSetValid && dataSetId != null )
-    {
+    if ( !multiOrganisationUnit && dataSetValid && dataSetId != null ) {
         $( '#selectedDataSetId' ).val( dataSetId );
 
-        if ( periodId && periodId != -1 && dataEntryFormIsLoaded )
-        {
+        if ( periodId && periodId != -1 && dataEntryFormIsLoaded ) {
+            resetSectionFilters();
+            showLoader();
+            loadDataValues();
+        }
+    } else if ( multiOrganisationUnit && multiDataSetValid && dataSetId != null ) {
+        $( '#selectedDataSetId' ).val( dataSetId );
+        dataSetSelected();
+
+        if ( periodId && periodId != -1 && dataEntryFormIsLoaded ) {
             resetSectionFilters();
             showLoader();
             loadDataValues();
         }
     }
-    else
-    {
+    else {
         multiOrganisationUnit = false;
 
         clearSectionFilters();
@@ -1048,11 +1101,13 @@ function insertDataValues()
 
     $( '[name="entryfield"]' ).val( '' );
     $( '[name="entryselect"]' ).val( '' );
+    $( '[name="entryoptionset"]' ).val( '' );
     $( '[name="dyninput"]' ).val( '' );
     $( '[name="dynselect"]' ).val( '' );
 
     $( '[name="entryfield"]' ).css( 'background-color', COLOR_WHITE );
     $( '[name="entryselect"]' ).css( 'background-color', COLOR_WHITE );
+    $( '[name="entryoptionset"]' ).css( 'background-color', COLOR_WHITE );
     $( '[name="dyninput"]' ).css( 'background-color', COLOR_WHITE );
 
     $( '[name="min"]' ).html( '' );
@@ -1508,7 +1563,7 @@ function validateCompulsoryCombinations()
     if ( fieldCombinationRequired )
     {
         var violations = false;
-		
+
         $( '[name="entryfield"]' ).add( '[name="entryselect"]' ).each( function( i )
         {
             var id = $( this ).attr( 'id' );
@@ -1601,6 +1656,10 @@ function updateForms()
     purgeLocalForms();
     updateExistingLocalForms();
     downloadRemoteForms();
+
+    DAO.store.open().done(function() {
+        loadOptionSets();
+    });
 }
 
 function purgeLocalForms()
@@ -2158,4 +2217,159 @@ function StorageManager()
 
         return true;
     };
+}
+
+// -----------------------------------------------------------------------------
+// OptionSet
+// -----------------------------------------------------------------------------
+
+function searchOptionSet( uid, query, success ) {
+    if(window.DAO !== undefined && window.DAO.store !== undefined ) {
+        DAO.store.get( 'optionSets', uid ).done( function ( obj ) {
+            if(obj) {
+                var options = [];
+
+                if(query == null || query == "") {
+                    options = obj.optionSet.options.slice(0, MAX_DROPDOWN_DISPLAYED-1);
+                } else {
+                    query = query.toLowerCase();
+
+                    _.each(obj.optionSet.options, function(item, idx) {
+                        if ( item.toLowerCase().indexOf( query ) != -1 ) {
+                            options.push(item);
+                        }
+                    });
+                }
+
+                success( $.map( options, function ( item ) {
+                    return {
+                        label: item,
+                        id: item
+                    };
+                } ) );
+            } else {
+                getOptions( uid, query, success );
+            }
+        } );
+    } else {
+        getOptions( uid, query, success );
+    }
+}
+
+function getOptions( uid, query, success ) {
+    $.ajax( {
+        url: '../api/optionSets/' + uid + '.json?links=false&q=' + query,
+        dataType: "json",
+        cache: false,
+        type: 'GET',
+        success: function ( data ) {
+            success( $.map( data.options, function ( item ) {
+                return {
+                    label: item,
+                    id: item
+                };
+            } ) );
+        }
+    } );
+}
+
+function loadOptionSets() {
+    var optionSetUids = _.values( optionSets );
+    optionSetUids = _.union(optionSetUids);
+
+    var deferred = $.Deferred();
+    var promise = deferred.promise();
+
+    _.each( optionSetUids, function ( item, idx ) {
+        promise = promise.then( function () {
+            return $.ajax( {
+                url: '../api/optionSets/' + item + '.json?links=false',
+                type: 'GET',
+                cache: false
+            } ).done( function ( data ) {
+                log( 'Successfully stored optionSet: ' + item );
+
+                var obj = {};
+                obj.id = item;
+                obj.optionSet = data;
+                DAO.store.set( 'optionSets', obj );
+            } );
+        } );
+    } );
+
+    promise = promise.then( function () {
+    } );
+
+    deferred.resolve();
+}
+
+function insertOptionSets() {
+    $( '[name="entryoptionset"]' ).each( function ( idx, item ) {
+        var optionSetKey = splitFieldId( item.id );
+
+        if ( multiOrganisationUnit ) {
+            item = optionSetKey.organisationUnitId + '-' + optionSetKey.dataElementId + '-' + optionSetKey.optionComboId;
+        } else {
+            item = optionSetKey.dataElementId + '-' + optionSetKey.optionComboId;
+        }
+
+        item = item + '-val';
+        optionSetKey = optionSetKey.dataElementId + '-' + optionSetKey.optionComboId;
+
+        autocompleteOptionSetField( item, optionSets[optionSetKey] );
+    } );
+}
+
+function autocompleteOptionSetField( idField, optionSetUid ) {
+    var input = jQuery( "#" + idField );
+
+    if ( !input ) {
+        return;
+    }
+
+    input.css( "width", "85%" );
+    input.autocomplete( {
+        delay: 0,
+        minLength: 0,
+        source: function ( request, response ) {
+            searchOptionSet( optionSetUid, input.val(), response );
+        },
+        select: function ( event, ui ) {
+            input.val( ui.item.value );
+            input.autocomplete( "close" );
+            input.change();
+        }
+    } ).addClass( "ui-widget" );
+
+    input.data( "autocomplete" )._renderItem = function ( ul, item ) {
+        return $( "<li></li>" )
+            .data( "item.autocomplete", item )
+            .append( "<a>" + item.label + "</a>" )
+            .appendTo( ul );
+    };
+
+    var wrapper = this.wrapper = $( "<span style='width:200px'>" )
+        .addClass( "ui-combobox" )
+        .insertAfter( input );
+
+    var button = $( "<a style='width:20px; margin-bottom:-5px;height:20px;'>" )
+        .attr( "tabIndex", -1 )
+        .attr( "title", 'i18n_show_all_items' )
+        .appendTo( wrapper )
+        .button( {
+            icons: {
+                primary: "ui-icon-triangle-1-s"
+            },
+            text: false
+        } )
+        .addClass( 'small-button' )
+        .click( function () {
+            if ( input.autocomplete( "widget" ).is( ":visible" ) ) {
+                input.autocomplete( "close" );
+                return;
+            }
+            $( this ).blur();
+            input.autocomplete( "search", "" );
+            input.focus();
+        } );
 }

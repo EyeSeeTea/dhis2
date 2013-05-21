@@ -600,11 +600,4 @@ public class DefaultPatientService
         return patientStore.getRegistrationOrgunitIds( startDate, endDate );
     }
 
-    @Override
-    public Patient getLatestPatient(Integer orgunitId)
-    {
-        
-        return patientStore.getLatestPatient(orgunitId);
-    }
-
 }
