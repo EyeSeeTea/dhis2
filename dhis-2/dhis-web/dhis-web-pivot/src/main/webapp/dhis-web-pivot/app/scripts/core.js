@@ -544,7 +544,10 @@ PT.core.getUtils = function(pt) {
 					// Dimension name maps
 					dimensionNameDimensionsMap: {},
 					dimensionNameItemsMap: {},
-					dimensionNameIdsMap: {}
+					dimensionNameIdsMap: {},
+
+						// For param string
+					dimensionNameSortedIdsMap: {}
 				};
 
 				//axisDimensionNames = [],
@@ -683,9 +686,14 @@ PT.core.getUtils = function(pt) {
 				xLayout.dimensionNameIdsMap[xDim.dimensionName] = xLayout.dimensionNameIdsMap[xDim.dimensionName].concat(xDim.ids);
 			}
 
+				// For param string
+			for (var key in xLayout.dimensionNameIdsMap) {
+				if (xLayout.dimensionNameIdsMap.hasOwnProperty(key)) {
+					xLayout.dimensionNameSortedIdsMap[key] = Ext.clone(xLayout.dimensionNameIdsMap[key]).sort();
+				}
+			}
+
 			return xLayout;
-
-
 
 			// Axis
 			//for (var i = 0, dim, items; i < axisDimensions.length; i++) {
@@ -923,21 +931,21 @@ PT.core.getUtils = function(pt) {
 			getParamString = function(xLayout) {
 				var sortedAxisDimensionNames = xLayout.sortedAxisDimensionNames,
 					sortedFilterDimensions = xLayout.sortedFilterDimensions,
+					dimensionNameSortedIdsMap = xLayout.dimensionNameSortedIdsMap,
 					paramString = '?',
 					dimConf = pt.conf.finals.dimension,
 					addCategoryDimension = false,
 					map = xLayout.dimensionNameItemsMap,
-					dx = dimConf.indicator.dimensionName,
-					items;
+					dx = dimConf.indicator.dimensionName;
 
-				for (var i = 0, dimensionName; i < sortedAxisDimensionNames.length; i++) {
-					dimensionName = sortedAxisDimensionNames[i];
+				for (var i = 0, dimName, items; i < sortedAxisDimensionNames.length; i++) {
+					dimName = sortedAxisDimensionNames[i];
 
-					paramString += 'dimension=' + dimensionName;
+					paramString += 'dimension=' + dimName;
 
-					items = Ext.clone(xLayout.dimensionNameItemsMap[dimensionName]).sort();
+					items = Ext.clone(dimensionNameSortedIdsMap[dimName]);
 
-					if (dimensionName === dx) {
+					if (dimName === dx) {
 						for (var j = 0, index; j < items.length; j++) {
 							index = items[j].indexOf('-');
 
@@ -965,7 +973,7 @@ PT.core.getUtils = function(pt) {
 					for (var i = 0, dim; i < sortedFilterDimensions.length; i++) {
 						dim = sortedFilterDimensions[i];
 
-						paramString += '&filter=' + dim.dimensionName + ':' + dim.items.join(';');
+						paramString += '&filter=' + dim.dimensionName + ':' + dim.ids.join(';');
 					}
 				}
 
