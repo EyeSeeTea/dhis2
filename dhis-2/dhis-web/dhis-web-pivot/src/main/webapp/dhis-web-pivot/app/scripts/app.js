@@ -92,75 +92,55 @@ Ext.onReady( function() {
 
 		util.pivot.getLayoutConfig = function() {
 			var panels = pt.cmp.dimension.panels,
-				columnDimensionNames = pt.viewport.colStore.getDimensionNames(),
-				rowDimensionNames = pt.viewport.rowStore.getDimensionNames(),
-				filterDimensionNames = pt.viewport.filterStore.getDimensionNames(),
+				columnDimNames = pt.viewport.colStore.getDimensionNames(),
+				rowDimNames = pt.viewport.rowStore.getDimensionNames(),
+				filterDimNames = pt.viewport.filterStore.getDimensionNames(),
 				config = pt.viewport.optionsWindow.getOptions(),
 				dimConf = pt.conf.finals.dimension,
-				getDimension,
-				dimensionNameDataMap = {};
+				dx = dimConf.data.dimensionName,
+				co = dimConf.category.dimensionName,
+				dimNameDimArrayMap = {},
+				getDimension;
 
 			config.columns = [];
 			config.rows = [];
 			config.filters = [];
 
-			getDimension = function(config) {
-				if (pt.api.dimension.maps.objectNameClassMap[config.dimension]) {
-					return pt.api.dimension.maps.objectNameClassMap[config.dimension](config);
-				}
-				else {
-					return pt.api.dimension.classes.Dimension(config);
-				}
-			};
-
 			// Panel data
-			for (var i = 0, data; i < panels.length; i++) {
-				data = panels[i].getData();
+			for (var i = 0, dimension, dimName; i < panels.length; i++) {
+				dimension = panels[i].getDimension();
 
-				if (data) {
-					dimensionNameDataMap[data.objectName] = data;
+				if (dimension) {
+					dimName = pt.conf.finals.dimension.objectNameDimensionMap[dimension.dimension].dimensionName;
+					dimNameDimArrayMap[dimName] = dimension;
 				}
 
-				dimensionNameDataMap[dimConf.data.dimensionName] = Ext.Array.clean([].concat(
-					dimensionNameDataMap[dimConf.indicator.objectName],
-					dimensionNameDataMap[dimConf.dataElement.objectName],
-					dimensionNameDataMap[dimConf.operand.objectName],
-					dimensionNameDataMap[dimConf.dataSet.objectName]
+				dimNameDimArrayMap[dx] = Ext.Array.clean([].concat(
+					dimNameDimArrayMap[dimConf.indicator.objectName],
+					dimNameDimArrayMap[dimConf.dataElement.objectName],
+					dimNameDimArrayMap[dimConf.operand.objectName],
+					dimNameDimArrayMap[dimConf.dataSet.objectName]
 				));
 			}
 
 			// Columns, rows, filters
-			for (var i = 0, nameArrays = [columnDimensionNames, rowDimensionNames, filterDimensionNames], axes = [config.columns, config.rows, config.filters], names; i < nameArrays.length; i++) {
-				names = nameArrays[i];
+			for (var i = 0, nameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], dimNames; i < nameArrays.length; i++) {
+				dimNames = nameArrays[i];
 
-				for (var j = 0, dimensionName, dim; j < names.length; j++) {
-					dimensionName = names[j];
+				for (var j = 0, dimName, dim; j < dimNames.length; j++) {
+					dimName = dimNames[j];
 
-					if (dimensionName === dimConf.category.dimensionName) {
+					if (dimName === co) {
 						axes[i].push({
-							dimension: dimConf.category.objectName,
-							dimensionName: dimConf.category.objectName,
-							objectName: dimConf.category.objectName,
+							dimension: co,
 							items: []
 						});
 					}
-					else if (dimensionName === dimConf.data.dimensionName && dimensionNameDataMap.hasOwnProperty(dimensionName) && dimensionNameDataMap[dimensionName]) {
-						dim = dimensionNameDataMap[dimensionName];
-
-						for (var k = 0; k < dim.length; k++) {
-							axes[i].push(getDimension({
-								dimension: dim[k].objectName,
-								items: dim[k].items
-							}));
-						}
+					else if (dimName === dx && dimNameDimArrayMap.hasOwnProperty(dimName) && dimNameDimArrayMap[dimName]) {
+						axes[i].concat(dimNameDimArrayMap[dimName]);
 					}
-					else if (dimensionNameDataMap.hasOwnProperty(dimensionName) && dimensionNameDataMap[dimensionName]) {
-						dim = dimensionNameDataMap[dimensionName];
-
-						axes[i].push(getDimension({
-							dimension: dim.objectName,
-							items: dim.items
-						}));
+					else if (dimNameDimArrayMap.hasOwnProperty(dimName) && dimNameDimArrayMap[dimName]) {
+						axes.push(dimNameDimArrayMap[dimName]);
 					}
 				}
 			}
@@ -2045,16 +2025,16 @@ Ext.onReady( function() {
 				title: '<div class="pt-panel-title-data">' + PT.i18n.indicators + '</div>',
 				hideCollapseTool: true,
 				getDimension: function() {
-					var dim = {
+					var config = {
 						dimension: pt.conf.finals.dimension.indicator.objectName,
 						items: []
 					};
 
 					pt.store.indicatorSelected.each( function(r) {
-						dim.items.push({id: r.data.id});
+						config.items.push({id: r.data.id});
 					});
 
-					return dim.items.length ? dim : null;
+					return pt.api.layout.Dimension(config);
 				},
 				onExpand: function() {
 					var h = pt.viewport.westRegion.hasScrollbar ?
@@ -2233,16 +2213,16 @@ Ext.onReady( function() {
 				title: '<div class="pt-panel-title-data">' + PT.i18n.data_elements + '</div>',
 				hideCollapseTool: true,
 				getDimension: function() {
-					var dim = {
+					var config = {
 						dimension: pt.conf.finals.dimension.dataElement.objectName,
 						items: []
 					};
 
 					pt.store.dataElementSelected.each( function(r) {
-						dim.items.push({id: r.data.id});
+						config.items.push({id: r.data.id});
 					});
 
-					return dim.items.length ? dim : null;
+					return pt.api.layout.Dimension(config);
 				},
 				onExpand: function() {
 					var h = pt.viewport.westRegion.hasScrollbar ?
@@ -2421,16 +2401,16 @@ Ext.onReady( function() {
 				title: '<div class="pt-panel-title-data">' + PT.i18n.reporting_rates + '</div>',
 				hideCollapseTool: true,
 				getDimension: function() {
-					var dim = {
+					var config = {
 						dimension: pt.conf.finals.dimension.dataSet.objectName,
 						items: []
 					};
 
 					pt.store.dataSetSelected.each( function(r) {
-						dim.items.push({id: r.data.id});
+						config.items.push({id: r.data.id});
 					});
 
-					return dim.items.length ? dim : null;
+					return pt.api.layout.Dimension(config);
 				},
 				onExpand: function() {
 					var h = pt.viewport.westRegion.hasScrollbar ?
@@ -2887,23 +2867,23 @@ Ext.onReady( function() {
 				title: '<div class="pt-panel-title-period">Periods</div>',
 				hideCollapseTool: true,
 				getDimension: function() {
-					var dim = {
+					var config = {
 							dimension: pt.conf.finals.dimension.period.objectName,
 							items: []
 						},
 						chb = pt.cmp.dimension.relativePeriod.checkbox;
 
 					pt.store.fixedPeriodSelected.each( function(r) {
-						dim.items.push({id: r.data.id});
+						config.items.push({id: r.data.id});
 					});
 
 					for (var i = 0; i < chb.length; i++) {
 						if (chb[i].getValue()) {
-							dim.items.push({id: chb[i].relativePeriodId});
+							config.items.push({id: chb[i].relativePeriodId});
 						}
 					}
 
-					return dim.items.length ? dim : null;
+					return pt.api.layout.Dimension(config);
 				},
 				onExpand: function() {
 					var h = pt.viewport.westRegion.hasScrollbar ?
@@ -3182,26 +3162,26 @@ Ext.onReady( function() {
 				collapsed: false,
 				getDimension: function() {
 					var r = treePanel.getSelectionModel().getSelection(),
-						dim = {
+						config = {
 							dimension: pt.conf.finals.dimension.organisationUnit.objectName,
 							items: []
 						};
 
 					if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue()) {
 						if (userOrganisationUnit.getValue()) {
-							dim.items.push({id: 'USER_ORGUNIT'});
+							config.items.push({id: 'USER_ORGUNIT'});
 						}
 						if (userOrganisationUnitChildren.getValue()) {
-							dim.items.push({id: 'USER_ORGUNIT_CHILDREN'});
+							config.items.push({id: 'USER_ORGUNIT_CHILDREN'});
 						}
 					}
 					else {
 						for (var i = 0; i < r.length; i++) {
-							dim.items.push({id: r[i].data.id});
+							config.items.push({id: r[i].data.id});
 						}
 					}
 
-					return dim.items.length ? dim : null;
+					return pt.api.layout.Dimension(config);
 				},
 				onExpand: function() {
 					var h = pt.viewport.westRegion.hasScrollbar ?
@@ -3390,16 +3370,16 @@ Ext.onReady( function() {
 						availableStore: availableStore,
 						selectedStore: selectedStore,
 						getDimension: function() {
-							var dim = {
+							var config = {
 								dimension: dimension.id,
 								items: []
 							};
 
 							selectedStore.each( function(r) {
-								dim.items.push({id: r.data.id});
+								config.items.push({id: r.data.id});
 							});
 
-							return dim.items.length ? dim : null;
+							return pt.api.layout.Dimension(config);
 						},
 						onExpand: function() {
 							if (!availableStore.isLoaded) {
