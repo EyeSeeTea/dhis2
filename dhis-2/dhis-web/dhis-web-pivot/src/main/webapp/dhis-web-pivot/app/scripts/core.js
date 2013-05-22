@@ -765,7 +765,7 @@ PT.core.getUtils = function(pt) {
 
 						layout = pt.api.layout.Layout(xLayout);
 
-						return layout ? pt.util.pivot.extendLayout(layout) : null;
+						return layout ? pt.util.pivot.getExtendedLayout(layout) : null;
 					}
 
 					return xLayout;
@@ -887,14 +887,13 @@ PT.core.getUtils = function(pt) {
 				return response;
 			};
 
-			getExtendedAxis = function(type, axis, xResponse) {
-				if (!axis || (Ext.isArray(axis) && !axis.length)) {
+			getExtendedAxis = function(type, dimensionNames, xResponse) {
+				if (!dimensionNames || (Ext.isArray(dimensionNames) && !dimensionNames.length)) {
 					return;
 				}
 
-				var axis = Ext.clone(axis),
-					tmpAxis = [],
-					dxItems = [],
+				var dimensionNames = Ext.clone(dimensionNames),
+					mDimensions = [],
 					spanType = type === 'col' ? 'colSpan' : 'rowSpan',
 					nCols = 1,
 					aNumCols = [],
@@ -906,32 +905,17 @@ PT.core.getUtils = function(pt) {
 					aAllObjects = [],
 					aUniqueIds;
 
-				// Port to old format (merge dx and set items = ids)
-				for (var i = 0; i < axis.length; i++) {
-					if (axis[i].dimensionName === dimConf.data.dimensionName) {
-						dxItems = dxItems.concat(axis[i].ids);
-					}
+				for (var i = 0; i < dimensionNames.length; i++) {
+					mDimensions.push({
+						dimensionName: dimensionNames[i]
+					});
 				}
-
-				//for (var i = 0, dim, dxItems = [], dxIds = []; i < axis.length; i++) {
-					//dim = axis[i];
-
-					//if (dim.dimensionName === dimConf.data.dimensionName) {
-						//for (var j = 0; j < axis.length
-
-
-
-
-
-
-					//axis[i].items = axis[i].ids;
-				//}
 
 				aUniqueIds = function() {
 					var a = [];
 
-					for (var i = 0, dim; i < axis.length; i++) {
-						dim = axis[i];
+					for (var i = 0, dim; i < mDimensions.length; i++) {
+						dim = mDimensions[i];
 
 						a.push(xResponse.nameHeaderMap[dim.dimensionName].items);
 					}
@@ -1083,7 +1067,7 @@ PT.core.getUtils = function(pt) {
 
 				return {
 					type: type,
-					items: axis,
+					items: mDimensions,
 					xItems: {
 						unique: aUniqueIds,
 						gui: aGuiItems,
@@ -1759,8 +1743,8 @@ PT.core.getUtils = function(pt) {
 						xResponse = getExtendedResponse(response, xLayout);
 
 						// Extended axes
-						xColAxis = getExtendedAxis('col', xLayout.columns, xResponse);
-						xRowAxis = getExtendedAxis('row', xLayout.rows, xResponse);
+						xColAxis = getExtendedAxis('col', xLayout.columnDimensionNames, xResponse);
+						xRowAxis = getExtendedAxis('row', xLayout.rowDimensionNames, xResponse);
 
 						// Create html
 						html = getTableHtml(xColAxis, xRowAxis, xResponse);
