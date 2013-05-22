@@ -4109,7 +4109,9 @@ Ext.onReady( function() {
 					dimConf = dv.conf.finals.dimension,
 					objectName,
 					periodRecords,
-					fixedPeriodRecords = [];
+					fixedPeriodRecords = [],
+					isOu = false,
+					isOuc = false;
 
 				// Type
 				dv.viewport.chartType.setChartType(xLayout.type);
@@ -4191,9 +4193,6 @@ Ext.onReady( function() {
 
 				// Organisation units
 				if (recMap[dimConf.organisationUnit.objectName]) {
-					var isOu = false,
-						isOuc = false;
-
 					for (var i = 0, ouRecords = recMap[dimConf.organisationUnit.objectName]; i < ouRecords.length; i++) {
 						if (ouRecords[i].id === 'USER_ORGUNIT') {
 							isOu = true;

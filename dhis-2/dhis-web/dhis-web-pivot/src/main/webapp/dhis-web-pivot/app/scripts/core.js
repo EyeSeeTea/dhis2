@@ -1832,6 +1832,10 @@ PT.core.getAPI = function(pt) {
 
 			record.id = config.id;
 
+			if (Ext.isString(config.name)) {
+				record.name = config.name;
+			}
+
 			return Ext.clone(record);
 		}();
 	};
@@ -1910,6 +1914,8 @@ PT.core.getAPI = function(pt) {
 
 		// userOrganisationUnitChildren: boolean (false)
 
+		// parentGraphMap: string ('')
+
 		// reportingPeriod: boolean (false) //report tables only
 
 		// organisationUnit: boolean (false) //report tables only
@@ -1986,9 +1992,13 @@ PT.core.getAPI = function(pt) {
 
 			layout.userOrganisationUnit = Ext.isBoolean(config.userOrganisationUnit) ? config.userOrganisationUnit : false;
 			layout.userOrganisationUnitChildren = Ext.isBoolean(config.userOrganisationUnitChildren) ? config.userOrganisationUnitChildren : false;
+
+			layout.parentGraphMap = Ext.isString(config.parentGraphMap) ? config.parentGraphMap : '';
+
 			layout.reportingPeriod = Ext.isBoolean(config.reportingPeriod) ? config.reportingPeriod : false;
 			layout.organisationUnit = Ext.isBoolean(config.organisationUnit) ? config.organisationUnit : false;
 			layout.parentOrganisationUnit = Ext.isBoolean(config.parentOrganisationUnit) ? config.parentOrganisationUnit : false;
+
 
 			return Ext.clone(layout);
 		}();
