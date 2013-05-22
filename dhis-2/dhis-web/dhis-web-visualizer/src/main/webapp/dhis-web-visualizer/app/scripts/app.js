@@ -4130,6 +4130,7 @@ Ext.onReady( function() {
 				objectName = dimConf.indicator.objectName;
 				if (dimMap[objectName]) {
 					dv.store.indicatorSelected.add(Ext.clone(recMap[objectName]));
+					pt.util.multiselect.filterAvailable({store: pt.store.indicatorAvailable}, {store: pt.store.indicatorSelected});
 				}
 
 				// Data elements
@@ -4137,6 +4138,7 @@ Ext.onReady( function() {
 				objectName = dimConf.dataElement.objectName;
 				if (dimMap[objectName]) {
 					dv.store.dataElementSelected.add(Ext.clone(recMap[objectName]));
+					pt.util.multiselect.filterAvailable({store: pt.store.dataElementAvailable}, {store: pt.store.dataElementSelected});
 					dv.viewport.dataElementDetailLevel.setValue(objectName);
 				}
 
@@ -4144,6 +4146,7 @@ Ext.onReady( function() {
 				objectName = dimConf.operand.objectName;
 				if (dimMap[objectName]) {
 					dv.store.dataElementSelected.add(Ext.clone(recMap[objectName]));
+					pt.util.multiselect.filterAvailable({store: pt.store.dataSetAvailable}, {store: pt.store.dataSetSelected});
 					dv.viewport.dataElementDetailLevel.setValue(objectName);
 				}
 
@@ -4169,6 +4172,7 @@ Ext.onReady( function() {
 					}
 				}
 				dv.store.fixedPeriodSelected.add(fixedPeriodRecords);
+				pt.util.multiselect.filterAvailable({store: pt.store.fixedPeriodAvailable}, {store: pt.store.fixedPeriodSelected});
 
 				// Group sets
 				for (var key in dimensionIdSelectedStoreMap) {
