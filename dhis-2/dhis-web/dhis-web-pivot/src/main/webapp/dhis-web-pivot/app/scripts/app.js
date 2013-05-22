@@ -3674,10 +3674,10 @@ Ext.onReady( function() {
 				userOrganisationUnitChildren.setValue(r.userOrganisationUnitChildren);
 
 				// Reset groupset stores
-				for (var key in groupSetIdSelectedStoreMap) {
-					if (groupSetIdSelectedStoreMap.hasOwnProperty(key)) {
-						var a = groupSetIdAvailableStoreMap[key],
-							s = groupSetIdSelectedStoreMap[key];
+				for (var key in dimensionIdSelectedStoreMap) {
+					if (dimensionIdSelectedStoreMap.hasOwnProperty(key)) {
+						var a = dimensionIdAvailableStoreMap[key],
+							s = dimensionIdSelectedStoreMap[key];
 
 						if (s.getCount() > 0) {
 							a.reload();
@@ -3690,8 +3690,8 @@ Ext.onReady( function() {
 				if (Ext.isObject(r.organisationUnitGroupSets)) {
 					for (var key in r.organisationUnitGroupSets) {
 						if (r.organisationUnitGroupSets.hasOwnProperty(key)) {
-							groupSetIdSelectedStoreMap[key].add(r.organisationUnitGroupSets[key]);
-							pt.util.multiselect.filterAvailable({store: groupSetIdAvailableStoreMap[key]}, {store: groupSetIdSelectedStoreMap[key]});
+							dimensionIdSelectedStoreMap[key].add(r.organisationUnitGroupSets[key]);
+							pt.util.multiselect.filterAvailable({store: dimensionIdAvailableStoreMap[key]}, {store: dimensionIdSelectedStoreMap[key]});
 						}
 					}
 				}
@@ -3700,8 +3700,8 @@ Ext.onReady( function() {
 				if (Ext.isObject(r.dataElementGroupSets)) {
 					for (var key in r.dataElementGroupSets) {
 						if (r.dataElementGroupSets.hasOwnProperty(key)) {
-							groupSetIdSelectedStoreMap[key].add(r.dataElementGroupSets[key]);
-							pt.util.multiselect.filterAvailable({store: groupSetIdAvailableStoreMap[key]}, {store: groupSetIdSelectedStoreMap[key]});
+							dimensionIdSelectedStoreMap[key].add(r.dataElementGroupSets[key]);
+							pt.util.multiselect.filterAvailable({store: dimensionIdAvailableStoreMap[key]}, {store: dimensionIdSelectedStoreMap[key]});
 						}
 					}
 				}
