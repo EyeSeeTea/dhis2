@@ -660,8 +660,8 @@ PT.core.getUtils = function(pt) {
 			xLayout.filterDimensionNames = Ext.Array.unique(xLayout.filterDimensionNames);
 
 			xLayout.columnDimensionNames = Ext.Array.unique(xLayout.columnDimensionNames);
-			xLayout.rowDimensionNames = Ext.Array.unique(xLayout.columnDimensionNames);
-			xLayout.filterDimensionNames = Ext.Array.unique(xLayout.columnDimensionNames);
+			xLayout.rowDimensionNames = Ext.Array.unique(xLayout.rowDimensionNames);
+			xLayout.filterDimensionNames = Ext.Array.unique(xLayout.filterDimensionNames);
 
 				// For param string
 			xLayout.sortedAxisDimensionNames = Ext.clone(xLayout.axisDimensionNames).sort();
@@ -707,9 +707,7 @@ PT.core.getUtils = function(pt) {
 				getExtendedAxis,
 				validateUrl,
 				getTableHtml,
-				initialize,
-
-
+				initialize;
 
 			getSyncronizedXLayout = function(xLayout, response) {
 				var removeDimensionFromXLayout,
@@ -915,19 +913,19 @@ PT.core.getUtils = function(pt) {
 					}
 				}
 
-				for (var i = 0, dim, dxItems = [], dxIds = []; i < axis.length; i++) {
-					dim = axis[i];
+				//for (var i = 0, dim, dxItems = [], dxIds = []; i < axis.length; i++) {
+					//dim = axis[i];
 
-					if (dim.dimensionName === dimConf.data.dimensionName) {
-						for (var j = 0; j < axis.length
-
-
+					//if (dim.dimensionName === dimConf.data.dimensionName) {
+						//for (var j = 0; j < axis.length
 
 
 
 
-					axis[i].items = axis[i].ids;
-				}
+
+
+					//axis[i].items = axis[i].ids;
+				//}
 
 				aUniqueIds = function() {
 					var a = [];
