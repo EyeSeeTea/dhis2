@@ -1047,8 +1047,8 @@ Ext.onReady( function() {
 		getBody = function() {
 			var favorite;
 
-			if (pt.xLayout) {
-				favorite = Ext.clone(pt.xLayout);
+			if (pt.layout) {
+				favorite = Ext.clone(pt.layout);
 
 				// Server sync
 				favorite.totals = favorite.showTotals;
@@ -1192,15 +1192,15 @@ Ext.onReady( function() {
 					var favorite = getBody();
 					favorite.name = nameTextfield.getValue();
 
-					favorite.columns = Ext.clone(favorite.extended.columns);
-					favorite.rows = Ext.clone(favorite.extended.rows);
-					favorite.filters = Ext.clone(favorite.extended.filters);
+					//favorite.columns = Ext.clone(favorite.extended.columns);
+					//favorite.rows = Ext.clone(favorite.extended.rows);
+					//favorite.filters = Ext.clone(favorite.extended.filters);
 
-					favorite.columns = [{dimension:'in', items: [{id: 'Uvn6LCg7dVU'}]}];
-					favorite.rows = [{dimension:'pe', items: [{id: 'LAST_3_MONTHS'}]}];
-					favorite.filters = [{dimension:'pe', items: [{id: 'ImspTQPwCqd'}]}];
+					//favorite.columns = [{dimension:'in', items: [{id: 'Uvn6LCg7dVU'}]}];
+					//favorite.rows = [{dimension:'pe', items: [{id: 'LAST_3_MONTHS'}]}];
+					//favorite.filters = [{dimension:'pe', items: [{id: 'ImspTQPwCqd'}]}];
 
-					delete favorite.extended;
+					//delete favorite.extended;
 
 					if (favorite && favorite.name) {
 						Ext.Ajax.request({
