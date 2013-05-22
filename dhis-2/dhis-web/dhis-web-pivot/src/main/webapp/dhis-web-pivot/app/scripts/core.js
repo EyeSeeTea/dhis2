@@ -1785,8 +1785,11 @@ console.log("xLayout", xLayout);
 					alert(r.responseText);
 				},
 				success: function(r) {
-					var config = Ext.decode(r.responseText);
-					pt.viewport.setFavorite(config);
+					var layout = pt.api.layout.Layout(Ext.decode(r.responseText));
+
+					if (layout) {
+						pt.viewport.setFavorite(layout);
+					}
 				}
 			});
 		}
@@ -1883,6 +1886,7 @@ PT.core.getAPI = function(pt) {
 	};
 
 	api.layout.Layout = function(config) {
+		var layout = {};
 
 		// columns: [Dimension]
 
@@ -1966,47 +1970,27 @@ PT.core.getAPI = function(pt) {
 				return;
 			}
 
+			// Layout
+			layout.columns = config.columns;
+			layout.rows = config.rows;
+			layout.filters = config.filters;
+
 			// Properties
-			if (!Ext.isBoolean(config.showTotals)) {
-				config.showTotals = true;
-			}
-			if (!Ext.isBoolean(config.showSubTotals)) {
-				config.showSubTotals = true;
-			}
-			if (!Ext.isBoolean(config.hideEmptyRows)) {
-				config.hideEmptyRows = false;
-			}
+			layout.showTotals = Ext.isBoolean(config.totals) ? config.totals : (Ext.isBoolean(config.showTotals) ? config.showTotals : true);
+			layout.showSubTotals = Ext.isBoolean(config.subtotals) ? config.subtotals : (Ext.isBoolean(config.showSubTotals) ? config.showSubTotals : true);
+			layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : false;
 
-			if (!Ext.isString(config.displayDensity) || Ext.isEmpty(config.displayDensity)) {
-				config.displayDensity = 'normal';
-			}
-			if (!Ext.isString(config.fontSize) || Ext.isEmpty(config.fontSize)) {
-				config.fontSize = 'normal';
-			}
-			if (!Ext.isString(config.digitGroupSeparator) || Ext.isEmpty(config.digitGroupSeparator)) {
-				config.digitGroupSeparator = 'space';
-			}
+			layout.displayDensity = Ext.isString(config.displayDensity) &&  !Ext.isEmpty(config.displayDensity) ? config.displayDensity : 'normal';
+			layout.fontSize = Ext.isString(config.fontSize) &&  !Ext.isEmpty(config.fontSize) ? config.fontSize : 'normal';
+			layout.digitGroupSeparator = Ext.isString(config.digitGroupSeparator) &&  !Ext.isEmpty(config.digitGroupSeparator) ? config.digitGroupSeparator : 'space';
 
-			if (!Ext.isBoolean(config.userOrganisationUnit)) {
-				config.userOrganisationUnit = false;
-			}
-			if (!Ext.isBoolean(config.userOrganisationUnitChildren)) {
-				config.userOrganisationUnitChildren = false;
-			}
-			if (!Ext.isBoolean(config.reportingPeriod)) {
-				config.reportingPeriod = false;
-			}
-			if (!Ext.isBoolean(config.organisationUnit)) {
-				config.organisationUnit = false;
-			}
-			if (!Ext.isBoolean(config.parentOrganisationUnit)) {
-				config.parentOrganisationUnit = false;
-			}
+			layout.userOrganisationUnit = Ext.isBoolean(config.userOrganisationUnit) ? config.userOrganisationUnit : false;
+			layout.userOrganisationUnitChildren = Ext.isBoolean(config.userOrganisationUnitChildren) ? config.userOrganisationUnitChildren : false;
+			layout.reportingPeriod = Ext.isBoolean(config.reportingPeriod) ? config.reportingPeriod : false;
+			layout.organisationUnit = Ext.isBoolean(config.organisationUnit) ? config.organisationUnit : false;
+			layout.parentOrganisationUnit = Ext.isBoolean(config.parentOrganisationUnit) ? config.parentOrganisationUnit : false;
 
-			// Remove former extensions
-			delete config.extended;
-
-			return Ext.clone(config);
+			return Ext.clone(layout);
 		}();
 	};
 
