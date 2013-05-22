@@ -3622,9 +3622,16 @@ Ext.onReady( function() {
 				}
 			});
 
-			setFavorite = function(r) {
+			setFavorite = function(layout) {
+				//var xLayout,
+					//dimMap,
+					//recMap,
 
-				pt.util.pivot.createTable(r, pt);return;
+
+
+				pt.util.pivot.createTable(layout, pt);
+
+				xLayout = pt.util.pivot.getExtendedLayout(layout);
 
 				// Indicators
 				pt.store.indicatorSelected.removeAll();
