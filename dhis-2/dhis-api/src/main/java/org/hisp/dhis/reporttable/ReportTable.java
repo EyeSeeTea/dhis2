@@ -383,9 +383,7 @@ public class ReportTable
             addTransientOrganisationUnit( organisationUnit );
         }
 
-        // Populate grid
-        
-        this.populateGridColumnsAndRows( date, user, format );
+        // Handle special dimension
         
         if ( isDimensional() )
         {
@@ -393,10 +391,9 @@ public class ReportTable
             verify( nonEmptyLists( categoryOptionCombos ) == 1, "Category option combos size must be larger than 0" );
         }
 
-        // Allow for no columns or rows
+        // Populate grid
         
-        addIfEmpty( gridColumns ); 
-        addIfEmpty( gridRows );
+        this.populateGridColumnsAndRows( date, user, format );
     }
     
     // -------------------------------------------------------------------------
@@ -419,7 +416,10 @@ public class ReportTable
         }
 
         gridColumns = new CombinationGenerator<NameableObject>( tableColumns.toArray( IRT2D ) ).getCombinations();
-        gridRows = new CombinationGenerator<NameableObject>( tableRows.toArray( IRT2D ) ).getCombinations();        
+        gridRows = new CombinationGenerator<NameableObject>( tableRows.toArray( IRT2D ) ).getCombinations();
+
+        addIfEmpty( gridColumns ); 
+        addIfEmpty( gridRows );
     }
     
     @Override
@@ -440,17 +440,7 @@ public class ReportTable
             filters.addAll( getDimensionalObjectList( filter ) );
         }
     }
-            
-    private DataElementCategoryCombo getCategoryCombo()
-    {
-        if ( dataElements != null && !dataElements.isEmpty() )
-        {
-            return dataElements.get( 0 ).getCategoryCombo();
-        }
-        
-        return null;
-    }
-
+    
     /**
      * Indicates whether this ReportTable is multi-dimensional.
      */
@@ -772,7 +762,20 @@ public class ReportTable
             throw new IllegalStateException( falseMessage );
         }
     }
-    
+
+    /**
+     * Returns the category combo of the first data element.
+     */
+    private DataElementCategoryCombo getCategoryCombo()
+    {
+        if ( dataElements != null && !dataElements.isEmpty() )
+        {
+            return dataElements.get( 0 ).getCategoryCombo();
+        }
+        
+        return null;
+    }
+
     /**
      * Gets the real Nameable class in case of a proxy.
      */
