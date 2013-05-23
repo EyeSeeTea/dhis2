@@ -1795,7 +1795,7 @@ console.log("xLayout", xLayout);
 	return util;
 };
 
-PT.core.getAPI = function(pt) {
+PT.core.getApi = function(pt) {
 	var dimConf = pt.conf.finals.dimension,
 		api = {
 			layout: {
@@ -1911,7 +1911,7 @@ PT.core.getAPI = function(pt) {
 
 		// userOrganisationUnitChildren: boolean (false)
 
-		// parentGraphMap: string ('')
+		// parentGraphMap: object
 
 		// reportingPeriod: boolean (false) //report tables only
 
@@ -2109,7 +2109,7 @@ PT.core.getInstance = function(config) {
 
 	pt.conf = PT.core.getConfigs();
 	pt.util = PT.core.getUtils(pt);
-	pt.api = PT.core.getAPI(pt);
+	pt.api = PT.core.getApi(pt);
 
 	return pt;
 };
