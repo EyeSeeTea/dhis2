@@ -496,7 +496,7 @@ DV.core.getUtil = function(dv) {
 					xLayout.columnObjectNames.push(xDim.objectName);
 					xLayout.columnDimensionNames.push(xDim.dimensionName);
 					xLayout.columnItems = xLayout.columnItems.concat(xDim.items);
-					xLayout.columnIds = xLayout.columnIds.concat(xDim.items);
+					xLayout.columnIds = xLayout.columnIds.concat(xDim.ids);
 
 					xLayout.axisDimensions.push(xDim);
 					xLayout.axisObjectNames.push(xDim.objectName);
@@ -532,7 +532,7 @@ DV.core.getUtil = function(dv) {
 					xLayout.rowObjectNames.push(xDim.objectName);
 					xLayout.rowDimensionNames.push(xDim.dimensionName);
 					xLayout.rowItems = xLayout.columnItems.concat(xDim.items);
-					xLayout.rowIds = xLayout.columnIds.concat(xDim.items);
+					xLayout.rowIds = xLayout.columnIds.concat(xDim.ids);
 
 					xLayout.axisDimensions.push(xDim);
 					xLayout.axisObjectNames.push(xDim.objectName);
@@ -569,7 +569,7 @@ DV.core.getUtil = function(dv) {
 					xLayout.filterObjectNames.push(xDim.objectName);
 					xLayout.filterDimensionNames.push(dimConf.objectNameMap[xDim.objectName].dimensionName);
 					xLayout.filterItems = xLayout.columnItems.concat(xDim.items);
-					xLayout.filterIds = xLayout.columnIds.concat(xDim.items);
+					xLayout.filterIds = xLayout.columnIds.concat(xDim.ids);
 
 					xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
 					xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
@@ -1258,7 +1258,7 @@ console.log("baseLineFields", store.baseLineFields);
 				return Ext.create('Ext.draw.Sprite', {
 					type: 'text',
 					text: text,
-					font: 'bold 19px ' + dv.conf.chart.style.fontFamily,
+					font: 'bold 18px ' + dv.conf.chart.style.fontFamily,
 					fill: '#111',
 					height: 20,
 					y: 	20
