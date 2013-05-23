@@ -40,7 +40,6 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.common.BaseAnalyticalObject;
-import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.CombinationGenerator;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DxfNamespaces;
@@ -765,25 +764,6 @@ public class ReportTable
         
         return null;
     }
-
-    /**
-     * Gets the real Nameable class in case of a proxy.
-     */
-    @SuppressWarnings("unchecked")
-    public static Class<? extends NameableObject> getNameableClass( Class<?> clazz )
-    {
-        while ( clazz != null )
-        {       
-            if ( BaseNameableObject.class.equals( clazz.getSuperclass() ) )
-            {
-                return (Class<? extends NameableObject>) clazz;
-            }
-            
-            clazz = clazz.getSuperclass();
-        }
-        
-        throw new IllegalStateException( "Class is not a Nameable object: " + clazz );
-    }    
 
     // -------------------------------------------------------------------------
     // Get- and set-methods for persisted properties
