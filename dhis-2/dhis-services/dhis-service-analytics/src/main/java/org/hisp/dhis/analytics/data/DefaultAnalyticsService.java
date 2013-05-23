@@ -484,7 +484,7 @@ public class DefaultAnalyticsService
     {
         ReportTable table = new ReportTable();
         
-        
+        // 1 populate columnDimensions, rowDimensions
         
         return table;
     }

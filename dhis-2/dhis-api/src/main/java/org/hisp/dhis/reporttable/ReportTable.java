@@ -614,10 +614,10 @@ public class ReportTable
      *
      * @param grid the grid, should be empty and not null.
      * @param valueMap the mapping of identifiers to aggregate values.
-     * @param format the I18nFormat.
+     * @param paramColumns whether to include report parameter columns.
      * @return a grid.
      */
-    public Grid getGrid( Grid grid, Map<String, Double> valueMap )
+    public Grid getGrid( Grid grid, Map<String, Double> valueMap, boolean paramColumns )
     {
         final String subtitle = StringUtils.trimToEmpty( getParentOrganisationUnitName() ) + SPACE
             + StringUtils.trimToEmpty( getReportingPeriodName() );
@@ -638,12 +638,15 @@ public class ReportTable
             grid.addHeader( new GridHeader( name + " description", row + "_description", String.class.getName(), true, true ) );
         }
         
-        grid.addHeader( new GridHeader( "Reporting month", REPORTING_MONTH_COLUMN_NAME,
-            String.class.getName(), true, true ) );
-        grid.addHeader( new GridHeader( "Organisation unit parameter",
-            PARAM_ORGANISATIONUNIT_COLUMN_NAME, String.class.getName(), true, true ) );
-        grid.addHeader( new GridHeader( "Organisation unit is parent",
-            ORGANISATION_UNIT_IS_PARENT_COLUMN_NAME, String.class.getName(), true, true ) );
+        if ( paramColumns )
+        {
+            grid.addHeader( new GridHeader( "Reporting month", REPORTING_MONTH_COLUMN_NAME,
+                String.class.getName(), true, true ) );
+            grid.addHeader( new GridHeader( "Organisation unit parameter",
+                PARAM_ORGANISATIONUNIT_COLUMN_NAME, String.class.getName(), true, true ) );
+            grid.addHeader( new GridHeader( "Organisation unit is parent",
+                ORGANISATION_UNIT_IS_PARENT_COLUMN_NAME, String.class.getName(), true, true ) );
+        }
 
         final int startColumnIndex = grid.getHeaders().size();
         final int numberOfColumns = getGridColumns().size();
@@ -674,9 +677,12 @@ public class ReportTable
                 grid.addValue( object.getDescription() );
             }
             
-            grid.addValue( reportingPeriodName );
-            grid.addValue( getParentOrganisationUnitName() );
-            grid.addValue( isCurrentParent( row ) ? "Yes" : "No" );
+            if ( paramColumns )
+            {
+                grid.addValue( reportingPeriodName );
+                grid.addValue( getParentOrganisationUnitName() );
+                grid.addValue( isCurrentParent( row ) ? "Yes" : "No" );
+            }
 
             // -----------------------------------------------------------------
             // Row data values
