@@ -3793,6 +3793,13 @@ Ext.onReady( function() {
 							//alert(PT.i18n.categories_cannot_be_specified_as_filter);
 							//return;
 						//}
+
+						// Operands as filter
+						if (layout.filters[i].dimension === dimConf.operand.objectName) {
+							alert(DV.i18n.detailed_data_elements_cannot_be_specified_as_filter);
+							return;
+						}
+
 					}
 				}
 

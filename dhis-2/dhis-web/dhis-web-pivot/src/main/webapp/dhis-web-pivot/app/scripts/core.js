@@ -841,25 +841,32 @@ PT.core.getUtils = function(pt) {
 			getExtendedResponse = function(response, xLayout) {
 				response.nameHeaderMap = {};
 				response.idValueMap = {};
+				ids = [];
 
 				var extendHeaders = function() {
 
 					// Extend headers: index, items, size
 					for (var i = 0, header; i < response.headers.length; i++) {
 						header = response.headers[i];
+
+						// Index
 						header.index = i;
 
 						if (header.meta) {
 
-							// Get ids from metadata
+							// Items: get ids from metadata
 							if (Ext.isArray(response.metaData[header.name])) {
 								header.items = Ext.clone(response.metaData[header.name]);
 							}
-							// Get ids from xLayout
+							// Items: get ids from xLayout
 							else {
 								header.items = xLayout.dimensionNameIdsMap[header.name];
 							}
 
+							// Collect ids
+							ids = ids.concat(header.items);
+
+							// Size
 							header.size = header.items.length;
 						}
 					}
@@ -869,6 +876,17 @@ PT.core.getUtils = function(pt) {
 						header = response.headers[i];
 
 						response.nameHeaderMap[header.name] = header;
+					}
+				}();
+
+				var extendMetaData = function() {
+					for (var i = 0, id, splitId ; i < ids.length; i++) {
+						id = ids[i];
+
+						if (id.indexOf('-') !== -1) {
+							splitId = id.split('-');
+							response.metaData.names[id] = response.metaData.names[splitId[0]] + ' ' + response.metaData.names[splitId[1]];
+						}
 					}
 				}();
 

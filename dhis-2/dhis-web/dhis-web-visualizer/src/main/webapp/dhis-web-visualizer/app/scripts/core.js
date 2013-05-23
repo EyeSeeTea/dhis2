@@ -751,25 +751,32 @@ DV.core.getUtil = function(dv) {
 			getExtendedResponse = function(response, xLayout) {
 				response.nameHeaderMap = {};
 				response.idValueMap = {};
+				ids = [];
 
 				var extendHeaders = function() {
 
 					// Extend headers: index, items, size
 					for (var i = 0, header; i < response.headers.length; i++) {
 						header = response.headers[i];
+
+						// Index
 						header.index = i;
 
 						if (header.meta) {
 
-							// Get ids from metadata
+							// Items: get ids from metadata
 							if (Ext.isArray(response.metaData[header.name])) {
 								header.items = Ext.clone(response.metaData[header.name]);
 							}
-							// Get ids from xLayout
+							// Items: get ids from xLayout
 							else {
 								header.items = xLayout.dimensionNameIdsMap[header.name];
 							}
 
+							// Collect ids
+							ids = ids.concat(header.items);
+
+							// Size
 							header.size = header.items.length;
 						}
 					}
@@ -779,6 +786,17 @@ DV.core.getUtil = function(dv) {
 						header = response.headers[i];
 
 						response.nameHeaderMap[header.name] = header;
+					}
+				}();
+
+				var extendMetaData = function() {
+					for (var i = 0, id, splitId ; i < ids.length; i++) {
+						id = ids[i];
+
+						if (id.indexOf('-') !== -1) {
+							splitId = id.split('-');
+							response.metaData.names[id] = response.metaData.names[splitId[0]] + ' ' + response.metaData.names[splitId[1]];
+						}
 					}
 				}();
 
@@ -1034,26 +1052,25 @@ console.log("baseLineFields", store.baseLineFields);
 			};
 
 			getDefaultSeriesTitle = function(store, xResponse) {
-				var a = [],
-					ids;
+				var a = [];
 
-				for (var i = 0, id; i < store.rangeFields.length; i++) {
+				for (var i = 0, id, ids; i < store.rangeFields.length; i++) {
 					id = store.rangeFields[i];
 
-					if (id.indexOf('-') !== -1) {
-						ids = id.split('-');
-						id = '';
+					//if (id.indexOf('-') !== -1) {
+						//ids = id.split('-');
+						//id = '';
 
-						for (var j = 0; j < ids.length; j++) {
-							id += j !== 0 ? ' ' : '';
-							id += xResponse.metaData.names[ids[j]];
-						}
+						//for (var j = 0; j < ids.length; j++) {
+							//id += j !== 0 ? ' ' : '';
+							//id += xResponse.metaData.names[ids[j]];
+						//}
 
-						a.push(id);
-					}
-					else {
+						//a.push(id);
+					//}
+					//else {
 						a.push(xResponse.metaData.names[id]);
-					}
+					//}
 				}
 
 				return a;
@@ -1230,15 +1247,19 @@ console.log("baseLineFields", store.baseLineFields);
 			};
 
 			getDefaultChartTitle = function(store, xResponse, xLayout) {
-				var filterIds = xLayout.filterIds,
+				var ids = xLayout.filterIds,
 					a = [],
 					text = '',
 					fontSize;
 
-				if (Ext.isArray(filterIds) && filterIds.length) {
-					for (var i = 0; i < filterIds.length; i++) {
-						text += xResponse.metaData.names[filterIds[i]];
-						text += i < filterIds.length - 1 ? ', ' : '';
+				if (layout.type === dv.conf.finals.chart.pie) {
+					ids = ids.concat(xLayout.columnIds);
+				}
+console.log("ids", ids);
+				if (Ext.isArray(ids) && ids.length) {
+					for (var i = 0; i < ids.length; i++) {
+						text += xResponse.metaData.names[ids[i]];
+						text += i < ids.length - 1 ? ', ' : '';
 					}
 				}
 
