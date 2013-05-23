@@ -837,14 +837,11 @@ PT.core.getUtils = function(pt) {
 
 						if (header.meta) {
 
-							// categories
-							if (header.name === pt.conf.finals.dimension.category.dimensionName) {
-								header.items = [].concat(response.metaData[pt.conf.finals.dimension.category.dimensionName]);
+							// Get ids from metadata
+							if (Ext.isArray(response.metaData[header.name])) {
+								header.items = Ext.clone(response.metaData[header.name]);
 							}
-							// periods
-							else if (header.name === pt.conf.finals.dimension.period.dimensionName) {
-								header.items = [].concat(response.metaData[pt.conf.finals.dimension.period.dimensionName]);
-							}
+							// Get ids from xLayout
 							else {
 								header.items = xLayout.dimensionNameIdsMap[header.name];
 							}
@@ -2001,7 +1998,7 @@ PT.core.getAPI = function(pt) {
 			layout.userOrganisationUnit = Ext.isBoolean(config.userOrganisationUnit) ? config.userOrganisationUnit : false;
 			layout.userOrganisationUnitChildren = Ext.isBoolean(config.userOrganisationUnitChildren) ? config.userOrganisationUnitChildren : false;
 
-			layout.parentGraphMap = Ext.isString(config.parentGraphMap) ? config.parentGraphMap : '';
+			layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
 
 			layout.reportingPeriod = Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramReportingPeriod) ? config.reportParams.paramReportingPeriod : (Ext.isBoolean(config.reportingPeriod) ? config.reportingPeriod : false);
 			layout.organisationUnit =  Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramOrganisationUnit) ? config.reportParams.paramOrganisationUnit : (Ext.isBoolean(config.organisationUnit) ? config.organisationUnit : false);

@@ -3848,7 +3848,7 @@ Ext.onReady( function() {
 				userOrganisationUnitChildren.setValue(isOuc);
 
 				// If fav has organisation units, wait for tree callback before update
-				if (recMap[dimConf.organisationUnit.objectName] && graphMap) {
+				if (recMap[dimConf.organisationUnit.objectName] && Ext.isObject(graphMap)) {
 					treePanel.numberOfRecords = pt.util.object.getLength(graphMap);
 					for (var key in graphMap) {
 						if (graphMap.hasOwnProperty(key)) {
