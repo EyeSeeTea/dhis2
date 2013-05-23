@@ -759,16 +759,30 @@ PT.core.getUtils = function(pt) {
 						co = dimConf.category.objectName,
 						layout;
 
+					// Use metaData ids if any
+					for (var i = 0, dim, metaData, items; i < dimensions.length; i++) {
+						dim = dimensions[i];
+						metaData = response.metaData[dim.objectName];
+
+						if (Ext.isArray(metaData)) {
+							items = [];
+
+							for (var j = 0; j < metaData.length; j++) {
+								items.push({id: metaData[j]});
+							}
+
+							dim.items = items;
+						}
+					}
+
 					// Remove co from layout if it does not exist in response
 					if (Ext.Array.contains(xLayout.axisDimensionNames, co) && !(Ext.Array.contains(headerNames, co))) {
 						removeDimensionFromXLayout(co);
-
-						layout = pt.api.layout.Layout(xLayout);
-
-						return layout ? pt.util.pivot.getExtendedLayout(layout) : null;
 					}
 
-					return xLayout;
+					layout = pt.api.layout.Layout(xLayout);
+
+					return layout ? pt.util.pivot.getExtendedLayout(layout) : null;
 				}();
 			};
 

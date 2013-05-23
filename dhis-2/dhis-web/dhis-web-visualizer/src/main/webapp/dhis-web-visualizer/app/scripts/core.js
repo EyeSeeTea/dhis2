@@ -701,6 +701,7 @@ DV.core.getUtil = function(dv) {
 					ouItems = [],
 					layout;
 
+				// Use metaData ids if any
 				for (var i = 0, dim, metaData, items; i < dimensions.length; i++) {
 					dim = dimensions[i];
 					metaData = response.metaData[dim.objectName];
