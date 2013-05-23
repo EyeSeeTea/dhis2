@@ -144,6 +144,9 @@ public class ReportTable
     public static final int DESC = 1;
     public static final int NONE = 0;
 
+    public static final NameableObject[] IRT = new NameableObject[0];
+    public static final NameableObject[][] IRT2D = new NameableObject[0][];
+
     public static final Map<String, String> PRETTY_COLUMNS = new HashMap<String, String>()
     {
         {
@@ -170,9 +173,6 @@ public class ReportTable
     };
 
     private static final String EMPTY = "";
-
-    private static final NameableObject[] IRT = new NameableObject[0];
-    private static final NameableObject[][] IRT2D = new NameableObject[0][];
 
     private static final String ILLEGAL_FILENAME_CHARS_REGEX = "[/\\?%*:|\"'<>.]";
 
@@ -593,6 +593,17 @@ public class ReportTable
     }
 
     /**
+     * Adds an empty list of NameableObjects to the given list if empty.
+     */
+    public static void addIfEmpty( List<List<NameableObject>> list )
+    {
+        if ( list != null && list.size() == 0 )
+        {
+            list.add( Arrays.asList( new NameableObject[0] ) );
+        }
+    }
+
+    /**
      * Generates a grid for this report table based on the given aggregate value
      * map.
      *
@@ -604,9 +615,9 @@ public class ReportTable
     public Grid getGrid( Grid grid, Map<String, Double> valueMap, boolean paramColumns )
     {
         final String subtitle = StringUtils.trimToEmpty( getParentOrganisationUnitName() ) + SPACE
-            + StringUtils.trimToEmpty( getReportingPeriodName() );
+            + StringUtils.trimToEmpty( reportingPeriodName );
 
-        grid.setTitle( getName() + " - " + subtitle );
+        grid.setTitle( name + " - " + subtitle );
 
         // ---------------------------------------------------------------------
         // Headers
@@ -674,7 +685,7 @@ public class ReportTable
 
             for ( List<NameableObject> column : gridColumns )
             {
-                String key = BaseAnalyticalObject.getId( column, row );
+                String key = BaseAnalyticalObject.getIdentifer( column, row );
                 
                 Double value = valueMap.get( key );
                 
@@ -712,17 +723,6 @@ public class ReportTable
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
-
-    /**
-     * Adds an empty list of NameableObjects to the given list if empty.
-     */
-    private static void addIfEmpty( List<List<NameableObject>> list )
-    {
-        if ( list != null && list.size() == 0 )
-        {
-            list.add( Arrays.asList( new NameableObject[0] ) );
-        }
-    }
 
     /**
      * Returns the number of empty lists among the argument lists.
@@ -1002,10 +1002,20 @@ public class ReportTable
         return gridColumns;
     }
 
+    public void setGridColumns( List<List<NameableObject>> gridColumns )
+    {
+        this.gridColumns = gridColumns;
+    }
+
     @JsonIgnore
     public List<List<NameableObject>> getGridRows()
     {
         return gridRows;
+    }
+
+    public void setGridRows( List<List<NameableObject>> gridRows )
+    {
+        this.gridRows = gridRows;
     }
 
     @JsonIgnore

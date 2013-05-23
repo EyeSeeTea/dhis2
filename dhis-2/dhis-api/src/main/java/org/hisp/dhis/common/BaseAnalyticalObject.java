@@ -406,7 +406,7 @@ public abstract class BaseAnalyticalObject
         return categoryDims;
     }
     
-    public static String getId( List<NameableObject> column, List<NameableObject> row )
+    public static String getIdentifer( List<NameableObject> column, List<NameableObject> row )
     {
         StringBuilder id = new StringBuilder();
         
