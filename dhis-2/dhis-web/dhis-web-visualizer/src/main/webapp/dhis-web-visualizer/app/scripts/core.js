@@ -1467,7 +1467,8 @@ console.log("baseLineFields", store.baseLineFields);
 					categoryAxis = getDefaultCategoryAxis(store, xLayout),
 					axes = [numericAxis, categoryAxis],
 					series = [],
-					colors = dv.conf.chart.theme.dv1.slice(0, store.rangeFields.length);
+					colors = dv.conf.chart.theme.dv1.slice(0, store.rangeFields.length),
+					seriesTitles = getDefaultSeriesTitle(store, xResponse);
 
 				// Series
 				for (var i = 0, line; i < store.rangeFields.length; i++) {
@@ -1485,7 +1486,7 @@ console.log("baseLineFields", store.baseLineFields);
 							radius: 4
 						},
 						tips: getDefaultTips(),
-						title: getDefaultSeriesTitle(store, xResponse)
+						title: seriesTitles[i]
 					};
 
 					//if (xLayout.showValues) {
