@@ -1154,20 +1154,6 @@ Ext.onReady( function() {
 						}
 					}
 				}
-
-				// Server sync: user orgunit
-				//if (favorite.userOrganisationUnit || favorite.userOrganisationUnitChildren) {
-					//for (var i = 0; i < dimensions.length; i++) {
-						//if (dimensions[i].dimension === dv.conf.finals.dimension.organisationUnit.objectName) {
-							//if (favorite.userOrganisationUnit) {
-								//dimensions[i].items.push({id: 'USER_ORGUNIT'});
-							//}
-							//if (favorite.userOrganisationUnitChildren) {
-								//dimensions[i].items.push({id: 'USER_ORGUNIT_CHILDREN'});
-							//}
-						//}
-					//}
-				//}
 			}
 
 			return favorite;
@@ -2623,7 +2609,7 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				getDimension: function() {
 					var config = {
-						dimension: dv.conf.finals.dimension.dataElement.objectName,
+						dimension: dataElementDetailLevel.getValue(),
 						items: []
 					};
 

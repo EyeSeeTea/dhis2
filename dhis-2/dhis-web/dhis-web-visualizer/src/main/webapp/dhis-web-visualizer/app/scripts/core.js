@@ -1232,7 +1232,8 @@ console.log("baseLineFields", store.baseLineFields);
 			getDefaultChartTitle = function(store, xResponse, xLayout) {
 				var filterIds = xLayout.filterIds,
 					a = [],
-					text = '';
+					text = '',
+					fontSize;
 
 				if (Ext.isArray(filterIds) && filterIds.length) {
 					for (var i = 0; i < filterIds.length; i++) {
@@ -1245,10 +1246,12 @@ console.log("baseLineFields", store.baseLineFields);
 					text = xLayout.title;
 				}
 
+				fontSize = (dv.viewport.centerRegion.getWidth() / text.length) < 11.6 ? 13 : 18;
+
 				return Ext.create('Ext.draw.Sprite', {
 					type: 'text',
 					text: text,
-					font: 'bold 18px ' + dv.conf.chart.style.fontFamily,
+					font: 'bold ' + fontSize + 'px ' + dv.conf.chart.style.fontFamily,
 					fill: '#111',
 					height: 20,
 					y: 	20
@@ -1756,7 +1759,7 @@ DV.core.getApi = function(dv) {
 				return;
 			}
 
-			record.id = config.id;
+			record.id = config.id.replace('.', '-');
 
 			if (Ext.isString(config.name)) {
 				record.name = config.name;
@@ -1850,6 +1853,8 @@ DV.core.getApi = function(dv) {
 
 		// userOrganisationUnitChildren: boolean (false)
 
+		// parentGraphMap: object
+
 		var getValidatedDimensionArray = function(dimensionArray) {
 			var dimensions = [];
 
@@ -1937,6 +1942,8 @@ DV.core.getApi = function(dv) {
 
 			layout.userOrganisationUnit = Ext.isBoolean(config.userOrganisationUnit) ? config.userOrganisationUnit : false;
 			layout.userOrganisationUnitChildren = Ext.isBoolean(config.userOrganisationUnitChildren) ? config.userOrganisationUnitChildren : false;
+
+			layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : undefined;
 
 			return Ext.clone(layout);
 		}();
