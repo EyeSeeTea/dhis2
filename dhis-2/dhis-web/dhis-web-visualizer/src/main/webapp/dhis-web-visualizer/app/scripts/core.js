@@ -471,6 +471,8 @@ DV.core.getUtil = function(dv) {
 					dimensionNameSortedIdsMap: {}
 				};
 
+			Ext.applyIf(xLayout, layout);
+
 			// Columns, rows, filters
 			if (layout.columns) {
 				for (var i = 0, dim, items, xDim; i < layout.columns.length; i++) {
@@ -1240,7 +1242,7 @@ console.log("baseLineFields", store.baseLineFields);
 					text = '',
 					fontSize;
 
-				if (layout.type === dv.conf.finals.chart.pie) {
+				if (xLayout.type === dv.conf.finals.chart.pie) {
 					ids = ids.concat(xLayout.columnIds);
 				}
 
@@ -1685,7 +1687,7 @@ console.log("baseLineFields", store.baseLineFields);
 
 						xResponse = getExtendedResponse(response, xLayout);
 
-						chart = generator[layout.type](xResponse, xLayout);
+						chart = generator[xLayout.type](xResponse, xLayout);
 
 						dv.viewport.centerRegion.removeAll(true);
 						dv.viewport.centerRegion.add(chart);
@@ -1704,6 +1706,7 @@ console.log("baseLineFields", store.baseLineFields);
 
 console.log("xResponse", xResponse);
 console.log("xLayout", xLayout);
+console.log("layout", layout);
 					}
 				});
 
