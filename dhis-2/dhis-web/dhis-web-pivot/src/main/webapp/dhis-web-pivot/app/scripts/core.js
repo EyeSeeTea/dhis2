@@ -1775,7 +1775,7 @@ console.log("xLayout", xLayout);
 			}
 
 			Ext.Ajax.request({
-				url: pt.baseUrl + '/api/reportTables/' + id + '.json?links=false&viewClass=dimensional',
+				url: pt.baseUrl + '/api/reportTables/' + id + '.json?viewClass=dimensional&links=false',
 				method: 'GET',
 				failure: function(r) {
 					pt.util.mask.hideMask();

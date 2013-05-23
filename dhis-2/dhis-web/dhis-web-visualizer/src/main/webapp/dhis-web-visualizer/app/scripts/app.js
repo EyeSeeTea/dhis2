@@ -1201,32 +1201,29 @@ Ext.onReady( function() {
 					var favorite = getBody();
 					favorite.name = nameTextfield.getValue();
 
-					if (!(favorite && favorite.name)) {
-						return;
+					if (favorite && favorite.name) {
+						Ext.Ajax.request({
+							url: dv.baseUrl + '/api/charts/',
+							method: 'POST',
+							headers: {'Content-Type': 'application/json'},
+							params: Ext.encode(favorite),
+							failure: function(r) {
+								dv.util.mask.hideMask();
+								alert(r.responseText);
+							},
+							success: function(r) {
+								var id = r.getAllResponseHeaders().location.split('/').pop();
+
+								dv.favorite = favorite;
+
+								dv.store.charts.loadStore();
+
+								//dv.viewport.interpretationButton.enable();
+
+								window.destroy();
+							}
+						});
 					}
-
-					// Request
-					Ext.Ajax.request({
-						url: dv.init.contextPath + '/api/charts/',
-						method: 'POST',
-						headers: {'Content-Type': 'application/json'},
-						params: Ext.encode(favorite),
-						failure: function(r) {
-							dv.util.mask.hideMask();
-							alert(r.responseText);
-						},
-						success: function(r) {
-							var id = r.getAllResponseHeaders().location.split('/').pop();
-
-							dv.favorite = favorite;
-
-							dv.store.charts.loadStore();
-
-							//dv.viewport.interpretationButton.enable();
-
-							window.destroy();
-						}
-					});
 				}
 			});
 

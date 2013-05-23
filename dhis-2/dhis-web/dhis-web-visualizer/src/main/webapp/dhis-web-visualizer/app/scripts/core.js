@@ -531,8 +531,8 @@ DV.core.getUtil = function(dv) {
 
 					xLayout.rowObjectNames.push(xDim.objectName);
 					xLayout.rowDimensionNames.push(xDim.dimensionName);
-					xLayout.rowItems = xLayout.columnItems.concat(xDim.items);
-					xLayout.rowIds = xLayout.columnIds.concat(xDim.ids);
+					xLayout.rowItems = xLayout.rowItems.concat(xDim.items);
+					xLayout.rowIds = xLayout.rowIds.concat(xDim.ids);
 
 					xLayout.axisDimensions.push(xDim);
 					xLayout.axisObjectNames.push(xDim.objectName);
@@ -568,8 +568,8 @@ DV.core.getUtil = function(dv) {
 					xLayout.filterDimensions.push(xDim);
 					xLayout.filterObjectNames.push(xDim.objectName);
 					xLayout.filterDimensionNames.push(dimConf.objectNameMap[xDim.objectName].dimensionName);
-					xLayout.filterItems = xLayout.columnItems.concat(xDim.items);
-					xLayout.filterIds = xLayout.columnIds.concat(xDim.ids);
+					xLayout.filterItems = xLayout.filterItems.concat(xDim.items);
+					xLayout.filterIds = xLayout.filterIds.concat(xDim.ids);
 
 					xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
 					xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
@@ -1700,7 +1700,6 @@ console.log("baseLineFields", store.baseLineFields);
 
 console.log("xResponse", xResponse);
 console.log("xLayout", xLayout);
-console.log("chart", chart);
 					}
 				});
 
@@ -1721,15 +1720,10 @@ console.log("chart", chart);
 					alert(r.responseText);
 				},
 				success: function(r) {
-					var layout,
-						xLayout;
+					var layout = dv.api.layout.Layout(Ext.decode(r.responseText));
 
-					r = Ext.decode(r.responseText);
-					layout = dv.api.layout.Layout(r);
-					xLayout = dv.util.chart.extendLayout(layout);
-
-					if (xLayout) {
-						dv.viewport.setFavorite(xLayout);
+					if (layout) {
+						dv.viewport.setFavorite(layout);
 					}
 				}
 			});
