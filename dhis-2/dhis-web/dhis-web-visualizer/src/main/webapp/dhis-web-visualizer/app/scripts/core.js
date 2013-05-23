@@ -875,7 +875,9 @@ DV.core.getUtil = function(dv) {
 
 					obj[dv.conf.finals.data.domain] = xResponse.metaData.names[category];
 					for (var j = 0, id; j < columnIds.length; j++) {
-						id = dv.util.str.replaceAll(columnIds[j], '-', '') + rowIds[i];
+						id = dv.util.str.replaceAll(columnIds[j], '-', '') + dv.util.str.replaceAll(rowIds[i], '-', '');
+						//id = columnIds[j].replace('-', '') + rowIds[i].replace('-', '');
+
 						obj[columnIds[j]] = xResponse.idValueMap[id];
 					}
 
@@ -1056,21 +1058,7 @@ console.log("baseLineFields", store.baseLineFields);
 
 				for (var i = 0, id, ids; i < store.rangeFields.length; i++) {
 					id = store.rangeFields[i];
-
-					//if (id.indexOf('-') !== -1) {
-						//ids = id.split('-');
-						//id = '';
-
-						//for (var j = 0; j < ids.length; j++) {
-							//id += j !== 0 ? ' ' : '';
-							//id += xResponse.metaData.names[ids[j]];
-						//}
-
-						//a.push(id);
-					//}
-					//else {
-						a.push(xResponse.metaData.names[id]);
-					//}
+					a.push(xResponse.metaData.names[id]);
 				}
 
 				return a;
@@ -1255,7 +1243,7 @@ console.log("baseLineFields", store.baseLineFields);
 				if (layout.type === dv.conf.finals.chart.pie) {
 					ids = ids.concat(xLayout.columnIds);
 				}
-console.log("ids", ids);
+
 				if (Ext.isArray(ids) && ids.length) {
 					for (var i = 0; i < ids.length; i++) {
 						text += xResponse.metaData.names[ids[i]];
@@ -1642,7 +1630,7 @@ console.log("ids", ids);
 
 				chart.legend.position = 'right';
 				chart.legend.isVertical = true;
-				chart.insetPadding = 20;
+				chart.insetPadding = 40;
 				chart.shadow = true;
 
 				return chart;
