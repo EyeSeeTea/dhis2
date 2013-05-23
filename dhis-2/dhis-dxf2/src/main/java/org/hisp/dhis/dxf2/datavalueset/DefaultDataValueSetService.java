@@ -37,6 +37,7 @@ import static org.hisp.dhis.system.util.DateUtils.getDefaultDate;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Collection;
@@ -66,6 +67,7 @@ import org.hisp.dhis.dxf2.importsummary.ImportCount;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
+import org.hisp.dhis.dxf2.pdfform.PdfDataEntryFormUtil;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.jdbc.batchhandler.DataValueBatchHandler;
@@ -239,6 +241,25 @@ public class DefaultDataValueSetService
             return new ImportSummary( ImportStatus.ERROR, "The import process failed: " + ex.getMessage() );
         }
     }
+
+
+    public ImportSummary saveDataValueSetPdf( InputStream in, ImportOptions importOptions, TaskId id )
+    {
+        try
+        {
+            DataValueSet dataValueSet = PdfDataEntryFormUtil.getDataValueSet(in);
+
+            return saveDataValueSet( importOptions, id, dataValueSet );            
+        }
+        catch ( RuntimeException ex )
+        {
+            log.error( DebugUtils.getStackTrace( ex ) );
+            notifier.clear( id ).notify( id, ERROR, "Unfortunately the process failed, check the logs", true );
+            return new ImportSummary( ImportStatus.ERROR, "The import process failed: " + ex.getMessage() );
+        }
+    }    
+
+
 
     private ImportSummary saveDataValueSet( ImportOptions importOptions, TaskId id, DataValueSet dataValueSet )
     {

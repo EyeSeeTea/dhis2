@@ -42,6 +42,10 @@ public class ImportDataValueTask
 {
     public static final String FORMAT_CSV = "csv";
     
+    // PDF Task: Added.
+    public static final String FORMAT_PDF = "pdf";
+
+    
     private DataValueSetService dataValueSetService;
     private InputStream in;
     private Reader reader;
@@ -65,6 +69,10 @@ public class ImportDataValueTask
         if ( FORMAT_CSV.equals( format ) )
         {
             dataValueSetService.saveDataValueSetCsv( reader, options, taskId );
+        }
+        else if ( FORMAT_PDF.equals( format ) )
+        {
+            dataValueSetService.saveDataValueSetPdf( in, options, taskId );
         }
         else
         {
