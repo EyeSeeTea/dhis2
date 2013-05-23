@@ -4172,7 +4172,7 @@ Ext.onReady( function() {
 				}
 
 				// Layout
-				dv.viewport.chartType.setChartType(xLayout.type);
+				dv.viewport.chartType.setChartType(layout.type);
 
 				dv.viewport.series.setValue(xLayout.columnDimensionNames[0]);
 				dv.viewport.series.filterNext();
