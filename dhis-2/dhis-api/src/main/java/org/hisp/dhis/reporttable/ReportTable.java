@@ -40,7 +40,6 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.common.BaseAnalyticalObject;
-import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.CombinationGenerator;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DxfNamespaces;
@@ -144,6 +143,9 @@ public class ReportTable
     public static final int DESC = 1;
     public static final int NONE = 0;
 
+    public static final NameableObject[] IRT = new NameableObject[0];
+    public static final NameableObject[][] IRT2D = new NameableObject[0][];
+
     public static final Map<String, String> PRETTY_COLUMNS = new HashMap<String, String>()
     {
         {
@@ -170,9 +172,6 @@ public class ReportTable
     };
 
     private static final String EMPTY = "";
-
-    private static final NameableObject[] IRT = new NameableObject[0];
-    private static final NameableObject[][] IRT2D = new NameableObject[0][];
 
     private static final String ILLEGAL_FILENAME_CHARS_REGEX = "[/\\?%*:|\"'<>.]";
 
@@ -211,14 +210,14 @@ public class ReportTable
     private ReportParams reportParams;
 
     /**
-     * The sort order if any applied to the last column of the table.
+     * The sort order based on the last column of the table, 0 if none. 
      */
-    private Integer sortOrder;
+    private int sortOrder;
 
     /**
-     * Indicates whether the table should be limited from top by this value.
+     * Indicates whether the table should be limited from top, 0 if none.
      */
-    private Integer topLimit;
+    private int topLimit;
 
     /**
      * Indicates rendering of sub-totals for the table.
@@ -383,9 +382,7 @@ public class ReportTable
             addTransientOrganisationUnit( organisationUnit );
         }
 
-        // Populate grid
-        
-        this.populateGridColumnsAndRows( date, user, format );
+        // Handle special dimension
         
         if ( isDimensional() )
         {
@@ -393,10 +390,9 @@ public class ReportTable
             verify( nonEmptyLists( categoryOptionCombos ) == 1, "Category option combos size must be larger than 0" );
         }
 
-        // Allow for no columns or rows
+        // Populate grid
         
-        addIfEmpty( gridColumns ); 
-        addIfEmpty( gridRows );
+        this.populateGridColumnsAndRows( date, user, format );
     }
     
     // -------------------------------------------------------------------------
@@ -419,7 +415,10 @@ public class ReportTable
         }
 
         gridColumns = new CombinationGenerator<NameableObject>( tableColumns.toArray( IRT2D ) ).getCombinations();
-        gridRows = new CombinationGenerator<NameableObject>( tableRows.toArray( IRT2D ) ).getCombinations();        
+        gridRows = new CombinationGenerator<NameableObject>( tableRows.toArray( IRT2D ) ).getCombinations();
+
+        addIfEmpty( gridColumns ); 
+        addIfEmpty( gridRows );
     }
     
     @Override
@@ -440,17 +439,7 @@ public class ReportTable
             filters.addAll( getDimensionalObjectList( filter ) );
         }
     }
-            
-    private DataElementCategoryCombo getCategoryCombo()
-    {
-        if ( dataElements != null && !dataElements.isEmpty() )
-        {
-            return dataElements.get( 0 ).getCategoryCombo();
-        }
-        
-        return null;
-    }
-
+    
     /**
      * Indicates whether this ReportTable is multi-dimensional.
      */
@@ -542,22 +531,6 @@ public class ReportTable
     }
     
     /**
-     * Returns null-safe sort order, none if null.
-     */
-    public int sortOrder()
-    {
-        return sortOrder != null ? sortOrder : NONE;
-    }
-
-    /**
-     * Returns null-safe top limit, 0 if null;
-     */
-    public int topLimit()
-    {
-        return topLimit != null ? topLimit : 0;
-    }
-
-    /**
      * Tests whether this report table has report params.
      */
     public boolean hasReportParams()
@@ -619,26 +592,41 @@ public class ReportTable
     }
 
     /**
+     * Adds an empty list of NameableObjects to the given list if empty.
+     */
+    public static void addIfEmpty( List<List<NameableObject>> list )
+    {
+        if ( list != null && list.size() == 0 )
+        {
+            list.add( Arrays.asList( new NameableObject[0] ) );
+        }
+    }
+
+    /**
      * Generates a grid for this report table based on the given aggregate value
      * map.
      *
      * @param grid the grid, should be empty and not null.
      * @param valueMap the mapping of identifiers to aggregate values.
-     * @param format the I18nFormat.
+     * @param paramColumns whether to include report parameter columns.
      * @return a grid.
      */
-    public Grid getGrid( Grid grid, Map<String, Double> valueMap )
+    public Grid getGrid( Grid grid, Map<String, Double> valueMap, boolean paramColumns )
     {
         final String subtitle = StringUtils.trimToEmpty( getParentOrganisationUnitName() ) + SPACE
-            + StringUtils.trimToEmpty( getReportingPeriodName() );
+            + StringUtils.trimToEmpty( reportingPeriodName );
 
-        grid.setTitle( getName() + " - " + subtitle );
+        valueMap = new HashMap<String, Double>( valueMap );
+        
+        sortKeys( valueMap );
+        
+        grid.setTitle( name + " - " + subtitle );
 
         // ---------------------------------------------------------------------
         // Headers
         // ---------------------------------------------------------------------
 
-        for ( String row : getRowDimensions() )
+        for ( String row : rowDimensions )
         {
             String name = StringUtils.defaultIfEmpty( DimensionalObject.PRETTY_NAMES.get( row ), row );
             
@@ -648,17 +636,20 @@ public class ReportTable
             grid.addHeader( new GridHeader( name + " description", row + "_description", String.class.getName(), true, true ) );
         }
         
-        grid.addHeader( new GridHeader( "Reporting month", REPORTING_MONTH_COLUMN_NAME,
-            String.class.getName(), true, true ) );
-        grid.addHeader( new GridHeader( "Organisation unit parameter",
-            PARAM_ORGANISATIONUNIT_COLUMN_NAME, String.class.getName(), true, true ) );
-        grid.addHeader( new GridHeader( "Organisation unit is parent",
-            ORGANISATION_UNIT_IS_PARENT_COLUMN_NAME, String.class.getName(), true, true ) );
+        if ( paramColumns )
+        {
+            grid.addHeader( new GridHeader( "Reporting month", REPORTING_MONTH_COLUMN_NAME,
+                String.class.getName(), true, true ) );
+            grid.addHeader( new GridHeader( "Organisation unit parameter",
+                PARAM_ORGANISATIONUNIT_COLUMN_NAME, String.class.getName(), true, true ) );
+            grid.addHeader( new GridHeader( "Organisation unit is parent",
+                ORGANISATION_UNIT_IS_PARENT_COLUMN_NAME, String.class.getName(), true, true ) );
+        }
 
         final int startColumnIndex = grid.getHeaders().size();
         final int numberOfColumns = getGridColumns().size();
 
-        for ( List<NameableObject> column : getGridColumns() )
+        for ( List<NameableObject> column : gridColumns )
         {
             grid.addHeader( new GridHeader( getPrettyColumnName( column ), getColumnName( column ), Double.class
                 .getName(), false, false ) );
@@ -668,7 +659,7 @@ public class ReportTable
         // Values
         // ---------------------------------------------------------------------
 
-        for ( List<NameableObject> row : getGridRows() )
+        for ( List<NameableObject> row : gridRows )
         {
             grid.addRow();
 
@@ -684,17 +675,20 @@ public class ReportTable
                 grid.addValue( object.getDescription() );
             }
             
-            grid.addValue( getReportingPeriodName() );
-            grid.addValue( getParentOrganisationUnitName() );
-            grid.addValue( isCurrentParent( row ) ? "Yes" : "No" );
+            if ( paramColumns )
+            {
+                grid.addValue( reportingPeriodName );
+                grid.addValue( getParentOrganisationUnitName() );
+                grid.addValue( isCurrentParent( row ) ? "Yes" : "No" );
+            }
 
             // -----------------------------------------------------------------
             // Row data values
             // -----------------------------------------------------------------
 
-            for ( List<NameableObject> column : getGridColumns() )
+            for ( List<NameableObject> column : gridColumns )
             {
-                String key = BaseAnalyticalObject.getId( column, row );
+                String key = getIdentifer( column, row );
                 
                 Double value = valueMap.get( key );
                 
@@ -702,12 +696,12 @@ public class ReportTable
             }
         }
 
-        if ( isRegression() )
+        if ( regression )
         {
             grid.addRegressionToGrid( startColumnIndex, numberOfColumns );
         }
 
-        if ( isCumulative() )
+        if ( cumulative )
         {
             grid.addCumulativesToGrid( startColumnIndex, numberOfColumns );
         }
@@ -716,14 +710,14 @@ public class ReportTable
         // Sort and limit
         // ---------------------------------------------------------------------
 
-        if ( sortOrder() != ReportTable.NONE )
+        if ( sortOrder != ReportTable.NONE )
         {
-            grid.sortGrid( grid.getWidth(), sortOrder() );
+            grid.sortGrid( grid.getWidth(), sortOrder );
         }
 
-        if ( topLimit() > 0 )
+        if ( topLimit > 0 )
         {
-            grid.limitGrid( topLimit() );
+            grid.limitGrid( topLimit );
         }
 
         return grid;
@@ -732,17 +726,6 @@ public class ReportTable
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
-
-    /**
-     * Adds an empty list of NameableObjects to the given list if empty.
-     */
-    private static void addIfEmpty( List<List<NameableObject>> list )
-    {
-        if ( list != null && list.size() == 0 )
-        {
-            list.add( Arrays.asList( new NameableObject[0] ) );
-        }
-    }
 
     /**
      * Returns the number of empty lists among the argument lists.
@@ -772,25 +755,19 @@ public class ReportTable
             throw new IllegalStateException( falseMessage );
         }
     }
-    
+
     /**
-     * Gets the real Nameable class in case of a proxy.
+     * Returns the category combo of the first data element.
      */
-    @SuppressWarnings("unchecked")
-    public static Class<? extends NameableObject> getNameableClass( Class<?> clazz )
+    private DataElementCategoryCombo getCategoryCombo()
     {
-        while ( clazz != null )
-        {       
-            if ( BaseNameableObject.class.equals( clazz.getSuperclass() ) )
-            {
-                return (Class<? extends NameableObject>) clazz;
-            }
-            
-            clazz = clazz.getSuperclass();
+        if ( dataElements != null && !dataElements.isEmpty() )
+        {
+            return dataElements.get( 0 ).getCategoryCombo();
         }
         
-        throw new IllegalStateException( "Class is not a Nameable object: " + clazz );
-    }    
+        return null;
+    }
 
     // -------------------------------------------------------------------------
     // Get- and set-methods for persisted properties
@@ -886,12 +863,12 @@ public class ReportTable
     @JsonProperty
     @JsonView( {DetailedView.class, ExportView.class, DimensionalView.class} )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
-    public Integer getSortOrder()
+    public int getSortOrder()
     {
         return sortOrder;
     }
 
-    public void setSortOrder( Integer sortOrder )
+    public void setSortOrder( int sortOrder )
     {
         this.sortOrder = sortOrder;
     }
@@ -899,12 +876,12 @@ public class ReportTable
     @JsonProperty
     @JsonView( {DetailedView.class, ExportView.class, DimensionalView.class} )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
-    public Integer getTopLimit()
+    public int getTopLimit()
     {
         return topLimit;
     }
 
-    public void setTopLimit( Integer topLimit )
+    public void setTopLimit( int topLimit )
     {
         this.topLimit = topLimit;
     }
@@ -1009,10 +986,20 @@ public class ReportTable
         return gridColumns;
     }
 
+    public void setGridColumns( List<List<NameableObject>> gridColumns )
+    {
+        this.gridColumns = gridColumns;
+    }
+
     @JsonIgnore
     public List<List<NameableObject>> getGridRows()
     {
         return gridRows;
+    }
+
+    public void setGridRows( List<List<NameableObject>> gridRows )
+    {
+        this.gridRows = gridRows;
     }
 
     @JsonIgnore
@@ -1051,8 +1038,8 @@ public class ReportTable
             regression = reportTable.isRegression();
             cumulative = reportTable.isCumulative();
             reportParams = reportTable.getReportParams() == null ? reportParams : reportTable.getReportParams();
-            sortOrder = reportTable.getSortOrder() == null ? sortOrder : reportTable.getSortOrder();
-            topLimit = reportTable.getTopLimit() == null ? topLimit : reportTable.getTopLimit();
+            sortOrder = reportTable.getSortOrder();
+            topLimit = reportTable.getTopLimit();
             totals = reportTable.isTotals();
             subtotals = reportTable.isSubtotals();
             hideEmptyRows = reportTable.isHideEmptyRows();

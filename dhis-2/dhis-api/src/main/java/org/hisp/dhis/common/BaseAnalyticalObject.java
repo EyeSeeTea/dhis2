@@ -35,10 +35,12 @@ import static org.hisp.dhis.common.DimensionalObject.INDICATOR_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_CHILDREN;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -46,6 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.common.adapter.JacksonPeriodDeserializer;
 import org.hisp.dhis.common.adapter.JacksonPeriodSerializer;
 import org.hisp.dhis.common.annotation.Scanned;
@@ -338,25 +341,25 @@ public abstract class BaseAnalyticalObject
         }        
         else if ( ORGUNIT_DIM_ID.equals( dimension ) && ( !organisationUnits.isEmpty() || hasUserOrgUnit() ) )
         {
-            List<IdentifiableObject> ouList = new ArrayList<IdentifiableObject>();
+            List<NameableObject> ouList = new ArrayList<NameableObject>();
             ouList.addAll( organisationUnits );
             ouList.addAll( transientOrganisationUnits );
             
             if ( userOrganisationUnit )
             {
-                ouList.add( new BaseIdentifiableObject( KEY_USER_ORGUNIT, KEY_USER_ORGUNIT, KEY_USER_ORGUNIT ) );
+                ouList.add( new BaseNameableObject( KEY_USER_ORGUNIT, KEY_USER_ORGUNIT, KEY_USER_ORGUNIT ) );
             }
             
             if ( userOrganisationUnitChildren )
             {
-                ouList.add( new BaseIdentifiableObject( KEY_USER_ORGUNIT_CHILDREN, KEY_USER_ORGUNIT_CHILDREN, KEY_USER_ORGUNIT_CHILDREN ) );
+                ouList.add( new BaseNameableObject( KEY_USER_ORGUNIT_CHILDREN, KEY_USER_ORGUNIT_CHILDREN, KEY_USER_ORGUNIT_CHILDREN ) );
             }
             
             objects.add( new BaseDimensionalObject( dimension, DimensionType.ORGANISATIONUNIT, ouList ) );
         }
         else if ( CATEGORYOPTIONCOMBO_DIM_ID.equals( dimension ) )
         {
-            objects.add( new BaseDimensionalObject( dimension, DimensionType.CATEGORY_OPTION_COMBO, new ArrayList<IdentifiableObject>() ) );
+            objects.add( new BaseDimensionalObject( dimension, DimensionType.CATEGORY_OPTION_COMBO, new ArrayList<BaseNameableObject>() ) );
         }
         else if ( categoryDims.contains( dimension ) )
         {
@@ -366,7 +369,7 @@ public abstract class BaseAnalyticalObject
         }
         else // Group set
         {
-            ListMap<String, IdentifiableObject> deGroupMap = new ListMap<String, IdentifiableObject>();
+            ListMap<String, BaseNameableObject> deGroupMap = new ListMap<String, BaseNameableObject>();
             
             for ( DataElementGroup group : dataElementGroups )
             {
@@ -378,7 +381,7 @@ public abstract class BaseAnalyticalObject
                 objects.add( new BaseDimensionalObject( dimension, DimensionType.DATAELEMENT_GROUPSET, deGroupMap.get( dimension ) ) );
             }
             
-            ListMap<String, IdentifiableObject> ouGroupMap = new ListMap<String, IdentifiableObject>();
+            ListMap<String, BaseNameableObject> ouGroupMap = new ListMap<String, BaseNameableObject>();
             
             for ( OrganisationUnitGroup group : organisationUnitGroups )
             {
@@ -406,21 +409,60 @@ public abstract class BaseAnalyticalObject
         return categoryDims;
     }
     
-    public static String getId( List<NameableObject> column, List<NameableObject> row )
+    /**
+     * Splits the keys of the given map on the dimension identifier separator, 
+     * sorts the identifiers, writes them out as a key and puts the key back into
+     * the map.
+     */
+    public static void sortKeys( Map<String, Double> valueMap )
     {
-        StringBuilder id = new StringBuilder();
+        Map<String, Double> map = new HashMap<String, Double>();
         
-        for ( NameableObject item : column )
+        for ( String key : valueMap.keySet() )
         {
-            id.append( item.getUid() ).append( "-" );
+            if ( key != null )
+            {
+                String[] ids = key.split( DIMENSION_SEP );
+                
+                Collections.sort( Arrays.asList( ids ) );
+                
+                String sortedKey = StringUtils.join( ids, DIMENSION_SEP );
+                
+                map.put( sortedKey, valueMap.get( key ) );
+            }
         }
         
-        for ( NameableObject item : row )
+        valueMap.clear();
+        valueMap.putAll( map );
+    }
+    
+    /**
+     * Generates an identifier based on the given lists of NameableObjects. Uses
+     * the UIDs for each NameableObject, sorts them and writes them out as a key.
+     */
+    public static String getIdentifer( List<NameableObject> column, List<NameableObject> row )
+    {
+        List<String> ids = new ArrayList<String>();
+        
+        if ( column != null )
         {
-            id.append( item.getUid() ).append( "-" );
+            for ( NameableObject item : column )
+            {
+                ids.add( item.getUid() );
+            }
         }
         
-        return id.substring( 0, id.length() - 1 );
+        if ( row != null )
+        {
+            for ( NameableObject item : row )
+            {
+                ids.add( item.getUid() );
+            }
+        }
+        
+        Collections.sort( ids );
+        
+        return StringUtils.join( ids, DIMENSION_SEP );
     }
     
     public void mergeWith( BaseAnalyticalObject other )
