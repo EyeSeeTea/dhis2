@@ -1156,18 +1156,18 @@ Ext.onReady( function() {
 				}
 
 				// Server sync: user orgunit
-				if (favorite.userOrganisationUnit || favorite.userOrganisationUnitChildren) {
-					for (var i = 0; i < dimensions.length; i++) {
-						if (dimensions[i].dimension === dv.conf.finals.dimension.organisationUnit.objectName) {
-							if (favorite.userOrganisationUnit) {
-								dimensions[i].items.push({id: 'USER_ORGUNIT'});
-							}
-							if (favorite.userOrganisationUnitChildren) {
-								dimensions[i].items.push({id: 'USER_ORGUNIT_CHILDREN'});
-							}
-						}
-					}
-				}
+				//if (favorite.userOrganisationUnit || favorite.userOrganisationUnitChildren) {
+					//for (var i = 0; i < dimensions.length; i++) {
+						//if (dimensions[i].dimension === dv.conf.finals.dimension.organisationUnit.objectName) {
+							//if (favorite.userOrganisationUnit) {
+								//dimensions[i].items.push({id: 'USER_ORGUNIT'});
+							//}
+							//if (favorite.userOrganisationUnitChildren) {
+								//dimensions[i].items.push({id: 'USER_ORGUNIT_CHILDREN'});
+							//}
+						//}
+					//}
+				//}
 			}
 
 			return favorite;
@@ -4092,7 +4092,7 @@ Ext.onReady( function() {
 				}
 			});
 
-			setFavorite = function(xLayout) {
+			setFavorite = function(layout) {
 				var dimConf = dv.conf.finals.dimension,
 					xLayout,
 					dimMap,
@@ -4181,13 +4181,13 @@ Ext.onReady( function() {
 				// Layout
 				dv.viewport.chartType.setChartType(xLayout.type);
 
-				dv.viewport.series.setValue(columnDimensionNames[0]);
+				dv.viewport.series.setValue(xLayout.columnDimensionNames[0]);
 				dv.viewport.series.filterNext();
 
-				dv.viewport.category.setValue(rowDimensionNames[0]);
+				dv.viewport.category.setValue(xLayout.rowDimensionNames[0]);
 				dv.viewport.category.filterNext();
 
-				dv.viewport.filter.setValue(filterDimensionNames);
+				dv.viewport.filter.setValue(xLayout.filterDimensionNames);
 
 				// Options
 				dv.viewport.optionsWindow.setOptions(layout);
