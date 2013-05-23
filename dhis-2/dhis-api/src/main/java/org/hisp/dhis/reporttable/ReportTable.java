@@ -211,14 +211,14 @@ public class ReportTable
     private ReportParams reportParams;
 
     /**
-     * The sort order if any applied to the last column of the table.
+     * The sort order based on the last column of the table, 0 if none. 
      */
-    private Integer sortOrder;
+    private int sortOrder;
 
     /**
-     * Indicates whether the table should be limited from top by this value.
+     * Indicates whether the table should be limited from top, 0 if none.
      */
-    private Integer topLimit;
+    private int topLimit;
 
     /**
      * Indicates rendering of sub-totals for the table.
@@ -532,22 +532,6 @@ public class ReportTable
     }
     
     /**
-     * Returns null-safe sort order, none if null.
-     */
-    public int sortOrder()
-    {
-        return sortOrder != null ? sortOrder : NONE;
-    }
-
-    /**
-     * Returns null-safe top limit, 0 if null;
-     */
-    public int topLimit()
-    {
-        return topLimit != null ? topLimit : 0;
-    }
-
-    /**
      * Tests whether this report table has report params.
      */
     public boolean hasReportParams()
@@ -712,14 +696,14 @@ public class ReportTable
         // Sort and limit
         // ---------------------------------------------------------------------
 
-        if ( sortOrder() != ReportTable.NONE )
+        if ( sortOrder != ReportTable.NONE )
         {
-            grid.sortGrid( grid.getWidth(), sortOrder() );
+            grid.sortGrid( grid.getWidth(), sortOrder );
         }
 
-        if ( topLimit() > 0 )
+        if ( topLimit > 0 )
         {
-            grid.limitGrid( topLimit() );
+            grid.limitGrid( topLimit );
         }
 
         return grid;
@@ -895,12 +879,12 @@ public class ReportTable
     @JsonProperty
     @JsonView( {DetailedView.class, ExportView.class, DimensionalView.class} )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
-    public Integer getSortOrder()
+    public int getSortOrder()
     {
         return sortOrder;
     }
 
-    public void setSortOrder( Integer sortOrder )
+    public void setSortOrder( int sortOrder )
     {
         this.sortOrder = sortOrder;
     }
@@ -908,12 +892,12 @@ public class ReportTable
     @JsonProperty
     @JsonView( {DetailedView.class, ExportView.class, DimensionalView.class} )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
-    public Integer getTopLimit()
+    public int getTopLimit()
     {
         return topLimit;
     }
 
-    public void setTopLimit( Integer topLimit )
+    public void setTopLimit( int topLimit )
     {
         this.topLimit = topLimit;
     }
@@ -1060,8 +1044,8 @@ public class ReportTable
             regression = reportTable.isRegression();
             cumulative = reportTable.isCumulative();
             reportParams = reportTable.getReportParams() == null ? reportParams : reportTable.getReportParams();
-            sortOrder = reportTable.getSortOrder() == null ? sortOrder : reportTable.getSortOrder();
-            topLimit = reportTable.getTopLimit() == null ? topLimit : reportTable.getTopLimit();
+            sortOrder = reportTable.getSortOrder();
+            topLimit = reportTable.getTopLimit();
             totals = reportTable.isTotals();
             subtotals = reportTable.isSubtotals();
             hideEmptyRows = reportTable.isHideEmptyRows();
