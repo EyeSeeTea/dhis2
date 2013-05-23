@@ -628,7 +628,7 @@ public class ReportTable
         // Headers
         // ---------------------------------------------------------------------
 
-        for ( String row : getRowDimensions() )
+        for ( String row : rowDimensions )
         {
             String name = StringUtils.defaultIfEmpty( DimensionalObject.PRETTY_NAMES.get( row ), row );
             
@@ -648,7 +648,7 @@ public class ReportTable
         final int startColumnIndex = grid.getHeaders().size();
         final int numberOfColumns = getGridColumns().size();
 
-        for ( List<NameableObject> column : getGridColumns() )
+        for ( List<NameableObject> column : gridColumns )
         {
             grid.addHeader( new GridHeader( getPrettyColumnName( column ), getColumnName( column ), Double.class
                 .getName(), false, false ) );
@@ -658,7 +658,7 @@ public class ReportTable
         // Values
         // ---------------------------------------------------------------------
 
-        for ( List<NameableObject> row : getGridRows() )
+        for ( List<NameableObject> row : gridRows )
         {
             grid.addRow();
 
@@ -674,7 +674,7 @@ public class ReportTable
                 grid.addValue( object.getDescription() );
             }
             
-            grid.addValue( getReportingPeriodName() );
+            grid.addValue( reportingPeriodName );
             grid.addValue( getParentOrganisationUnitName() );
             grid.addValue( isCurrentParent( row ) ? "Yes" : "No" );
 
@@ -682,7 +682,7 @@ public class ReportTable
             // Row data values
             // -----------------------------------------------------------------
 
-            for ( List<NameableObject> column : getGridColumns() )
+            for ( List<NameableObject> column : gridColumns )
             {
                 String key = BaseAnalyticalObject.getId( column, row );
                 
@@ -692,12 +692,12 @@ public class ReportTable
             }
         }
 
-        if ( isRegression() )
+        if ( regression )
         {
             grid.addRegressionToGrid( startColumnIndex, numberOfColumns );
         }
 
-        if ( isCumulative() )
+        if ( cumulative )
         {
             grid.addCumulativesToGrid( startColumnIndex, numberOfColumns );
         }
