@@ -417,7 +417,7 @@ DV.core.getUtil = function(dv) {
 	};
 
 	util.chart = {
-		extendLayout: function(layout) {
+		getExtendedLayout: function(layout) {
 			var dimConf = dv.conf.finals.dimension,
 				layout = Ext.clone(layout),
 				xLayout = {
@@ -698,38 +698,27 @@ DV.core.getUtil = function(dv) {
 					isUserOrgunit = xOuDimension && Ext.Array.contains(xOuDimension.items, 'USER_ORGUNIT'),
 					isUserOrgunitChildren = xOuDimension && Ext.Array.contains(xOuDimension.items, 'USER_ORGUNIT_CHILDREN'),
 					peItems = [],
-					ouItems = [];
+					ouItems = [],
+					layout;
 
-				// Relative periods
-				for (var i = 0, periodIds; i < dimensions.length; i++) {
-					if (dimensions[i].dimension === dimConf.period.objectName) {
-						periodIds = response.metaData.pe;
+				for (var i = 0, dim, metaData, items; i < dimensions.length; i++) {
+					dim = dimensions[i];
+					metaData = response.metaData[dim.objectName];
 
-						for (var j = 0; j < periodIds.length; j++) {
-							peItems.push({id: periodIds[j]});
+					if (Ext.isArray(metaData)) {
+						items = [];
+
+						for (var j = 0; j < metaData.length; j++) {
+							items.push({id: metaData[j]});
 						}
 
-						dimensions[i].items = peItems;
+						dim.items = items;
 					}
 				}
 
-				// Add user orgunits
-				if (isUserOrgunit || isUserOrgunitChildren) {
-					if (isUserOrgunit) {
-						ouItems.push(Ext.clone(dv.init.user.ou));
-					}
-					if (isUserOrgunitChildren) {
-						ouItems = ouItems.concat(Ext.clone(dv.init.user.ouc));
-					}
+				layout = dv.api.layout.Layout(xLayout);
 
-					for (var i = 0; i < dimensions.length; i++) {
-						if (dimensions[i].dimension === dimConf.organisationUnit.objectName) {
-							dimensions[i].items = ouItems;
-						}
-					}
-				}
-
-				return dv.util.chart.extendLayout(xLayout);
+				return layout ? dv.util.chart.getExtendedLayout(layout) : null;
 			};
 
 			validateResponse = function(response) {
@@ -1639,7 +1628,7 @@ console.log("baseLineFields", store.baseLineFields);
 					xResponse,
 					chart;
 
-				xLayout = dv.util.chart.extendLayout(layout);
+				xLayout = dv.util.chart.getExtendedLayout(layout);
 
 				dv.paramString = getParamString(xLayout);
 				url = dv.init.contextPath + '/api/analytics.json' + dv.paramString;
@@ -1695,6 +1684,7 @@ console.log("baseLineFields", store.baseLineFields);
 						}
 
 						dv.chart = chart;
+						dv.layout = layout;
 						dv.xLayout = xLayout;
 						dv.xResponse = xResponse;
 

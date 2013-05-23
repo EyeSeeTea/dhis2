@@ -1120,10 +1120,12 @@ Ext.onReady( function() {
 		});
 
 		getBody = function() {
-			var favorite = Ext.clone(dv.xLayout);
+			var favorite,
+				dimensions;
 
-			if (favorite) {
-				var dimensions = [].concat(favorite.columns, favorite.rows, favorite.filters);
+			if (dv.layout) {
+				favorite = Ext.clone(dv.layout);
+				dimensions = [].concat(favorite.columns, favorite.rows, favorite.filters);
 
 				// Server sync: property names
 				favorite.showData = favorite.showValues;
@@ -1144,8 +1146,6 @@ Ext.onReady( function() {
 				favorite.rangeAxisLabel = favorite.rangeAxisTitle;
 				delete favorite.rangeAxisTitle;
 
-				delete favorite.extended;
-
 				// Replace operand id characters
 				for (var i = 0; i < dimensions.length; i++) {
 					if (dimensions[i].dimension === dv.conf.finals.dimension.operand.objectName) {
@@ -1157,8 +1157,6 @@ Ext.onReady( function() {
 
 				// Server sync: user orgunit
 				if (favorite.userOrganisationUnit || favorite.userOrganisationUnitChildren) {
-					var dimensions = [].concat(favorite.columns, favorite.rows, favorite.filters);
-
 					for (var i = 0; i < dimensions.length; i++) {
 						if (dimensions[i].dimension === dv.conf.finals.dimension.organisationUnit.objectName) {
 							if (favorite.userOrganisationUnit) {
@@ -1170,11 +1168,9 @@ Ext.onReady( function() {
 						}
 					}
 				}
-
-				return favorite;
 			}
 
-			return;
+			return favorite;
 		};
 
 		NameWindow = function(id) {
