@@ -704,15 +704,15 @@ DV.core.getUtil = function(dv) {
 					layout;
 
 				// Use metaData ids if any
-				for (var i = 0, dim, metaData, items; i < dimensions.length; i++) {
+				for (var i = 0, dim, metaDataDim, items; i < dimensions.length; i++) {
 					dim = dimensions[i];
-					metaData = response.metaData[dim.objectName];
+					metaDataDim = response.metaData[dim.objectName];
 
-					if (Ext.isArray(metaData)) {
+					if (Ext.isArray(metaDataDim)) {
 						items = [];
 
-						for (var j = 0; j < metaData.length; j++) {
-							items.push({id: metaData[j]});
+						for (var j = 0; j < metaDataDim.length; j++) {
+							items.push({id: metaDataDim[j]});
 						}
 
 						dim.items = items;
@@ -1899,7 +1899,7 @@ DV.core.getApi = function(dv) {
 
 			// Config must be an object
 			if (!(config && Ext.isObject(config))) {
-				alert(dv.el + ': Layout config is not an object');
+				console.log(dv.el + ': Layout config is not an object');
 				return;
 			}
 
@@ -1945,13 +1945,17 @@ DV.core.getApi = function(dv) {
 			layout.hideTitle = Ext.isBoolean(config.hideTitle) ? config.hideTitle : false;
 
 			layout.targetLineValue = Ext.isNumber(config.targetLineValue) ? config.targetLineValue : undefined;
-			layout.targetLineTitle = Ext.isString(config.targetLineTitle) &&  !Ext.isEmpty(config.targetLineTitle) ? config.targetLineTitle : undefined;
+			layout.targetLineTitle = Ext.isString(config.targetLineLabel) && !Ext.isEmpty(config.targetLineLabel) ? config.targetLineLabel :
+				(Ext.isString(config.targetLineTitle) && !Ext.isEmpty(config.targetLineTitle) ? config.targetLineTitle : undefined);
 			layout.baseLineValue = Ext.isNumber(config.baseLineValue) ? config.baseLineValue : undefined;
-			layout.baseLineTitle = Ext.isString(config.baseLineTitle) &&  !Ext.isEmpty(config.baseLineTitle) ? config.baseLineTitle : undefined;
+			layout.baseLineTitle = Ext.isString(config.baseLineLabel) && !Ext.isEmpty(config.baseLineLabel) ? config.baseLineLabel :
+				(Ext.isString(config.baseLineTitle) && !Ext.isEmpty(config.baseLineTitle) ? config.baseLineTitle : undefined);
 
 			layout.title = Ext.isString(config.title) &&  !Ext.isEmpty(config.title) ? config.title : undefined;
-			layout.domainAxisTitle = Ext.isString(config.domainAxisTitle) &&  !Ext.isEmpty(config.domainAxisTitle) ? config.domainAxisTitle : undefined;
-			layout.rangeAxisTitle = Ext.isString(config.rangeAxisTitle) &&  !Ext.isEmpty(config.rangeAxisTitle) ? config.rangeAxisTitle : undefined;
+			layout.domainAxisTitle = Ext.isString(config.domainAxisLabel) && !Ext.isEmpty(config.domainAxisLabel) ? config.domainAxisLabel :
+				(Ext.isString(config.domainAxisTitle) && !Ext.isEmpty(config.domainAxisTitle) ? config.domainAxisTitle : undefined);
+			layout.rangeAxisTitle = Ext.isString(config.rangeAxisLabel) && !Ext.isEmpty(config.rangeAxisLabel) ? config.rangeAxisLabel :
+				(Ext.isString(config.rangeAxisTitle) && !Ext.isEmpty(config.rangeAxisTitle) ? config.rangeAxisTitle : undefined);
 
 			layout.userOrganisationUnit = Ext.isBoolean(config.userOrganisationUnit) ? config.userOrganisationUnit : false;
 			layout.userOrganisationUnitChildren = Ext.isBoolean(config.userOrganisationUnitChildren) ? config.userOrganisationUnitChildren : false;

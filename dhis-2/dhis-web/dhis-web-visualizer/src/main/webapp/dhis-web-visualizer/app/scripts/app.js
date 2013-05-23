@@ -843,7 +843,7 @@ Ext.onReady( function() {
 
 		hideTitle = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: DV.i18n.hide_chart_title,
-			style: 'margin-bottom:6px',
+			style: 'margin-bottom:7px',
 			listeners: {
 				change: function() {
 					title.xable();
@@ -858,7 +858,6 @@ Ext.onReady( function() {
 			width: 310,
 			fieldLabel: DV.i18n.chart_title,
 			fieldLabel: 'Chart title',
-			labelStyle: 'padding-left:16px',
 			labelWidth: 123,
 			maxLength: 100,
 			enforceMaxLength: true,
@@ -873,7 +872,6 @@ Ext.onReady( function() {
 			style: 'margin-bottom:2px; margin-left:2px',
 			width: 310,
 			fieldLabel: DV.i18n.domain_axis_label,
-			labelStyle: 'padding-left:16px',
 			labelWidth: 123,
 			maxLength: 100,
 			enforceMaxLength: true
@@ -885,7 +883,6 @@ Ext.onReady( function() {
 			style: 'margin-bottom:0; margin-left:2px',
 			width: 310,
 			fieldLabel: DV.i18n.range_axis_label,
-			labelStyle: 'padding-left:16px',
 			labelWidth: 123,
 			maxLength: 100,
 			enforceMaxLength: true
@@ -904,7 +901,7 @@ Ext.onReady( function() {
 					bodyStyle: 'border:0 none',
 					items: [
 						{
-							bodyStyle: 'border:0 none; padding-top:3px; padding-left:18px; margin-right:5px',
+							bodyStyle: 'border:0 none; padding-top:3px; padding-left:2px; margin-right:5px',
 							width: 130,
 							html: 'Target value / title:'
 						},
@@ -918,7 +915,7 @@ Ext.onReady( function() {
 					bodyStyle: 'border:0 none',
 					items: [
 						{
-							bodyStyle: 'border:0 none; padding-top:3px; padding-left:18px; margin-right:5px',
+							bodyStyle: 'border:0 none; padding-top:3px; padding-left:2px; margin-right:5px',
 							width: 130,
 							html: 'Base value / title:'
 						},

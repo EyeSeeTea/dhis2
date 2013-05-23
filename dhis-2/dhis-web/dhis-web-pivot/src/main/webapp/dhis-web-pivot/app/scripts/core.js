@@ -713,7 +713,8 @@ PT.core.getUtils = function(pt) {
 
 			getSyncronizedXLayout = function(xLayout, response) {
 				var removeDimensionFromXLayout,
-					getHeaderNames;
+					getHeaderNames,
+					dimensions = [].concat(xLayout.columns, xLayout.rows, xLayout.filters);
 
 				removeDimensionFromXLayout = function(objectName) {
 					var getUpdatedAxis;
@@ -762,15 +763,15 @@ PT.core.getUtils = function(pt) {
 						layout;
 
 					// Use metaData ids if any
-					for (var i = 0, dim, metaData, items; i < dimensions.length; i++) {
+					for (var i = 0, dim, metaDataDim, items; i < dimensions.length; i++) {
 						dim = dimensions[i];
-						metaData = response.metaData[dim.objectName];
+						metaDataDim = response.metaData[dim.objectName];
 
-						if (Ext.isArray(metaData)) {
+						if (Ext.isArray(metaDataDim)) {
 							items = [];
 
-							for (var j = 0; j < metaData.length; j++) {
-								items.push({id: metaData[j]});
+							for (var j = 0; j < metaDataDim.length; j++) {
+								items.push({id: metaDataDim[j]});
 							}
 
 							dim.items = items;
