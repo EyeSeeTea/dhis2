@@ -21,6 +21,7 @@ import com.lowagie.text.PageSize;
 import com.lowagie.text.Phrase;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.AcroFields;
+import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.AcroFields.Item;
 import com.lowagie.text.pdf.PdfReader;
 
@@ -29,9 +30,10 @@ public class PdfDataEntryFormUtil {
 
     // public Static Values
     public static final int DATATYPE_DATASET = 0;
-
     public static final int DATATYPE_PROGRAMSTAGE = 1;
 
+    public static final float UNITSIZE_DEFAULT = 10;
+    
     // Label Names
     public static final String LABELCODE_TEXTFIELD = "TXFD_";
 
@@ -48,6 +50,17 @@ public class PdfDataEntryFormUtil {
     public static final String LABELCODE_DATAENTRYTEXTFIELD = "TXFDDV_";
 
     public static final String LABELCODE_PROGRAMSTAGEIDTEXTBOX = "TXPSTGID_";
+
+    
+    // Cell Related
+    
+    public final static float CELL_MIN_HEIGHT_DEFAULT = 13;
+
+    public final static float CONTENT_HEIGHT_DEFAULT = 11;
+
+    public final static int CELL_COLUMN_TYPE_LABEL = 0;
+
+    public final static int CELL_COLUMN_TYPE_ENTRYFIELD = 1;
 
     
     // private static values
@@ -108,9 +121,40 @@ public class PdfDataEntryFormUtil {
             
     // --- Document Setting Related [END]
     // -------------------------------------------------------------------------
+
+    // -------------------------------------------------------------------------
+    // --- PdfPCell Related [START]
+        
+    public static PdfPCell getPdfPCell( float minHeight )
+    {
+        return getPdfPCell( minHeight, CELL_COLUMN_TYPE_LABEL );
+    }
+
+    public static PdfPCell getPdfPCell( float minHeight, int cellContentType )
+    {
+        PdfPCell cell = new PdfPCell();
+        cell.setMinimumHeight( minHeight );
+        cell.setBorder( Rectangle.NO_BORDER );
+
+        if ( cellContentType == CELL_COLUMN_TYPE_LABEL )
+        {
+            cell.setHorizontalAlignment( Element.ALIGN_RIGHT );
+            cell.setVerticalAlignment( Element.ALIGN_TOP );
+        }
+        else if ( cellContentType == CELL_COLUMN_TYPE_ENTRYFIELD )
+        {
+            cell.setHorizontalAlignment( Element.ALIGN_CENTER );
+            cell.setVerticalAlignment( Element.ALIGN_MIDDLE );
+        }
+
+        return cell;
+    }
+
+
+    // --- PdfPCell Related [END]
+    // -------------------------------------------------------------------------
     
-    
-    
+ 
     // Retreive DataValue Informations from PDF inputStream.
     public static DataValueSet getDataValueSet( InputStream in )
         throws RuntimeException
