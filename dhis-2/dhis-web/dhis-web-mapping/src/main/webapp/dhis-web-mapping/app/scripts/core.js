@@ -55,7 +55,7 @@ GIS.core.getConfigs = function() {
 					param: 'value',
 					dimensionName: 'value',
 					objectName: 'value'
-
+				}
 			},
 			widget: {
 				value: 'value',
@@ -1328,8 +1328,8 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 			period = gis.conf.finals.dimension.period,
 			organisationUnit = gis.conf.finals.dimension.organisationUnit;
 
-		paramString += 'dimension=ou:LEVEL-' + view.parentOrganisationUnit.id + '-' + view.organisationUnitLevel.id;
-		paramString += '&filter=dx:' + view[type].id;
+		paramString += 'dimension=ou:LEVEL-' + view.organisationUnitLevel.level + '-' + view.parentOrganisationUnit.id;
+		paramString += '&dimension=dx:' + view[type].id;
 		paramString += '&filter=pe:' + view.period.id;
 
 		Ext.Ajax.request({
@@ -1338,16 +1338,17 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 			scope: this,
 			success: function(r) {
 				//var values = r,
-				var response = Ext.decode(r),
+				var response = Ext.decode(r.responseText),
 					dimConf = gis.conf.finals.dimension,
 					featureMap = {},
 					valueMap = {},
 					ouIndex,
+					dxIndex,
 					valueIndex,
 					newFeatures = [];
 
 				if (!(Ext.isObject(response) && Ext.isArray(response.rows) && response.rows.length)) {
-					alert(GIS.i18n.no_aggregated_data_found);
+					alert(GIS.i18n.current_selection_no_data);
 					olmap.mask.hide();
 					return;
 				}
@@ -1356,6 +1357,9 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 				for (var i = 0; i < response.headers.length; i++) {
 					if (response.headers[i].name === dimConf.organisationUnit.dimensionName) {
 						ouIndex = i;
+					}
+					else if (response.headers[i].name === dimConf.data.dimensionName) {
+						dxIndex = i;
 					}
 					else if (response.headers[i].name === dimConf.value.dimensionName) {
 						valueIndex = i;
@@ -1371,7 +1375,7 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 				// Value map
 				for (var i = 0; i < response.rows.length; i++) {
 					var id = response.rows[i][ouIndex],
-						value = response.rows[i][valueIndex];
+						value = parseFloat(response.rows[i][valueIndex]);
 					valueMap[id] = value;
 				}
 
