@@ -3842,12 +3842,9 @@ Ext.onReady( function() {
 				added: function() {
 					this.store.cmp.push(this);
 				},
-				select: function() {
+				select: function(cb) {
 					dataElement.clearValue();
-
-					var store = dataElement.store;
-					store.proxy.url = gis.baseUrl + gis.conf.url.path_api +  'dataElementGroups/' + this.getValue() + '.json?links=false&paging=false';
-					store.load();
+					cb.loadAvailable();
 				}
 			}
 		});
@@ -3865,11 +3862,11 @@ Ext.onReady( function() {
 			store: dataElementsByGroupStore,
 			listeners: {
 				select: function() {
-					var index = this.getValue().indexOf('-'),
-						id;
+					var id = this.getValue(),
+						index = id.indexOf('-');
 
 					if (index !== -1) {
-						id = this.getValue().substr(0, index);
+						id = id.substr(0, index);
 					}
 
 					Ext.Ajax.request({
