@@ -42,7 +42,9 @@ import java.util.List;
 @JacksonXmlRootElement( localName = "event", namespace = DxfNamespaces.DXF_2_0 )
 public class Event
 {
-    private String id;
+    private String programId;
+
+    private String programStageId;
 
     private String eventId;
 
@@ -66,17 +68,29 @@ public class Event
 
     @JsonProperty( required = true )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
-    public String getId()
+    public String getProgramId()
     {
-        return id;
+        return programId;
     }
 
-    public void setId( String id )
+    public void setProgramId( String programId )
     {
-        this.id = id;
+        this.programId = programId;
     }
 
-    @JsonProperty
+    @JsonProperty( required = true )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
+    public String getProgramStageId()
+    {
+        return programStageId;
+    }
+
+    public void setProgramStageId( String programStageId )
+    {
+        this.programStageId = programStageId;
+    }
+
+    @JsonProperty( required = true )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
     public String getEventId()
     {
@@ -177,7 +191,8 @@ public class Event
     public String toString()
     {
         return "Event{" +
-            "id='" + id + '\'' +
+            "programId='" + programId + '\'' +
+            ", programStageId='" + programStageId + '\'' +
             ", eventId='" + eventId + '\'' +
             ", organisationUnitId='" + organisationUnitId + '\'' +
             ", patientId='" + patientId + '\'' +
