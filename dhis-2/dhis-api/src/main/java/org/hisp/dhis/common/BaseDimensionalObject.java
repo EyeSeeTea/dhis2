@@ -42,7 +42,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 @JacksonXmlRootElement( localName = "dimensionalObject", namespace = DxfNamespaces.DXF_2_0)
 public class BaseDimensionalObject
-    extends BaseIdentifiableObject implements DimensionalObject
+    extends BaseNameableObject implements DimensionalObject
 {
     /**
      * The type of this dimension.
@@ -59,7 +59,7 @@ public class BaseDimensionalObject
     /**
      * The dimensional items for this dimension.
      */
-    private List<IdentifiableObject> items = new ArrayList<IdentifiableObject>();
+    private List<NameableObject> items = new ArrayList<NameableObject>();
     
     //--------------------------------------------------------------------------
     // Constructors
@@ -74,28 +74,28 @@ public class BaseDimensionalObject
         this.uid = dimension;
     }
     
-    public BaseDimensionalObject( String dimension, DimensionType type, List<? extends IdentifiableObject> items )
+    public BaseDimensionalObject( String dimension, DimensionType type, List<? extends NameableObject> items )
     {
         this.uid = dimension;
         this.type = type;
-        this.items = new ArrayList<IdentifiableObject>( items );        
+        this.items = new ArrayList<NameableObject>( items );
     }
 
-    public BaseDimensionalObject( String dimension, DimensionType type, String dimensionName, List<IdentifiableObject> items )
+    public BaseDimensionalObject( String dimension, DimensionType type, String dimensionName, List<? extends NameableObject> items )
     {
         this.uid = dimension;
         this.type = type;
         this.dimensionName = dimensionName;
-        this.items = items;
+        this.items = new ArrayList<NameableObject>( items );
     }
 
-    public BaseDimensionalObject( String dimension, DimensionType type, String dimensionName, String displayName, List<IdentifiableObject> items )
+    public BaseDimensionalObject( String dimension, DimensionType type, String dimensionName, String displayName, List<? extends NameableObject> items )
     {
         this.uid = dimension;
         this.type = type;
         this.dimensionName = dimensionName;
         this.displayName = displayName;
-        this.items = items;
+        this.items = new ArrayList<NameableObject>( items );
     }
 
     // -------------------------------------------------------------------------
@@ -157,29 +157,19 @@ public class BaseDimensionalObject
         this.type = type;
     }
 
-    public String getDisplayName()
-    {
-        return displayName;
-    }
-
-    public void setDisplayName( String displayName )
-    {
-        this.displayName = displayName;
-    }
-
     @Override
     @JsonProperty
-    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonDeserialize( contentAs = BaseIdentifiableObject.class )
+    @JsonSerialize( contentAs = BaseNameableObject.class )
+    @JsonDeserialize( contentAs = BaseNameableObject.class )
     @JsonView( { DimensionalView.class } )
     @JacksonXmlElementWrapper( localName = "items", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "item", namespace = DxfNamespaces.DXF_2_0 )
-    public List<IdentifiableObject> getItems()
+    public List<NameableObject> getItems()
     {
         return items;
     }
 
-    public void setItems( List<IdentifiableObject> items )
+    public void setItems( List<NameableObject> items )
     {
         this.items = items;
     }

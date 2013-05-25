@@ -30,8 +30,8 @@ package org.hisp.dhis.analytics;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.ListMap;
+import org.hisp.dhis.common.NameableObject;
 
 /**
  * @author Lars Helge Overland
@@ -58,5 +58,5 @@ public interface AnalyticsManager
      * @param dataPeriodAggregationPeriodMap the mapping between data periods and
      *        aggregation periods for this query.
      */
-    void replaceDataPeriodsWithAggregationPeriods( Map<String, Double> dataValueMap, DataQueryParams params, ListMap<IdentifiableObject, IdentifiableObject> dataPeriodAggregationPeriodMap );
+    void replaceDataPeriodsWithAggregationPeriods( Map<String, Double> dataValueMap, DataQueryParams params, ListMap<NameableObject, NameableObject> dataPeriodAggregationPeriodMap );
 }

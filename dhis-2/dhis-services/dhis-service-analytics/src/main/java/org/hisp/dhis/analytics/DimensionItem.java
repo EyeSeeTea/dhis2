@@ -31,8 +31,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hisp.dhis.common.DimensionalObject;
-import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.system.util.CollectionUtils;
+
+import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
 
 /**
  * @author Lars Helge Overland
@@ -41,13 +43,13 @@ public class DimensionItem
 {
     private String dimension;
     
-    private IdentifiableObject item;
+    private NameableObject item;
 
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
 
-    public DimensionItem( String dimension, IdentifiableObject item )
+    public DimensionItem( String dimension, NameableObject item )
     {
         this.dimension = dimension;
         this.item = item;
@@ -67,12 +69,12 @@ public class DimensionItem
         this.dimension = dimension;
     }
 
-    public IdentifiableObject getItem()
+    public NameableObject getItem()
     {
         return item;
     }
 
-    public void setItem( IdentifiableObject item )
+    public void setItem( NameableObject item )
     {
         this.item = item;
     }
@@ -94,7 +96,7 @@ public class DimensionItem
         {
             for ( DimensionItem item : items )
             {
-                builder.append( item.getItem().getUid() ).append( DataQueryParams.DIMENSION_SEP );
+                builder.append( item.getItem().getUid() ).append( DIMENSION_SEP );
             }
             
             builder.deleteCharAt( builder.length() - 1 );
@@ -127,7 +129,7 @@ public class DimensionItem
      * dimension items. If no items are given, items are null or there are 
      * no period dimension, null is returned.
      */
-    public static IdentifiableObject getPeriodItem( List<DimensionItem> items )
+    public static NameableObject getPeriodItem( List<DimensionItem> items )
     {
         if ( items != null && !items.isEmpty() )
         {

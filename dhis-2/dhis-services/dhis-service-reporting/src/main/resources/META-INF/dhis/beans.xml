@@ -6,10 +6,6 @@
 
   <!-- ReportTable -->
 
-  <bean id="org.hisp.dhis.reporttable.jdbc.ReportTableManager" class="org.hisp.dhis.reporttable.jdbc.JDBCReportTableManager">
-	  <property name="jdbcTemplate" ref="jdbcTemplate" />
-  </bean>
-
   <bean id="org.hisp.dhis.reporttable.ReportTableStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
     <property name="clazz" value="org.hisp.dhis.reporttable.ReportTable" />
     <property name="sessionFactory" ref="sessionFactory" />
@@ -109,16 +105,6 @@
   <bean id="org.hisp.dhis.completeness.DataSetCompletenessStore" class="org.hisp.dhis.completeness.jdbc.JDBCDataSetCompletenessStore">
     <property name="statementManager" ref="statementManager" />
 	<property name="statementBuilder" ref="statementBuilder" />
-  </bean>
-
-  <!-- PivotTable -->
-
-  <bean id="org.hisp.dhis.pivottable.PivotTableService" class="org.hisp.dhis.pivottable.impl.DefaultPivotTableService">
-    <property name="aggregatedDataValueService" ref="org.hisp.dhis.aggregation.AggregatedDataValueService" />
-    <property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
-    <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
-    <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
-    <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
   </bean>
 
   <!-- DataSetReport -->
