@@ -1224,7 +1224,8 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 		loadData,
 		loadLegend,
 		afterLoad,
-		loader;
+		loader,
+		dimConf = gis.conf.finals.dimension;
 
 	compareView = function(view, doExecute) {
 		var src = layer.core.view;
@@ -1257,13 +1258,13 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 			return gis.conf.finals.widget.loadtype_organisationunit;
 		}
 		else {
-			if (view.valueType === gis.conf.finals.dimension.indicator.id && view.indicator.id !== src.indicator.id) {
+			if (view.valueType === dimConf.indicator.id && view.indicator.id !== src.indicator.id) {
 				if (doExecute) {
 					loadData(view);
 				}
 				return gis.conf.finals.widget.loadtype_data;
 			}
-			if (view.valueType === gis.conf.finals.dimension.dataElement.id && view.dataElement.id !== src.dataElement.id) {
+			if (view.valueType === dimConf.dataElement.id && view.dataElement.id !== src.dataElement.id) {
 				if (doExecute) {
 					loadData(view);
 				}
