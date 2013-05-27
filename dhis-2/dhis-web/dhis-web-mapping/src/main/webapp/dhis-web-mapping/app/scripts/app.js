@@ -4269,7 +4269,7 @@ Ext.onReady( function() {
 		};
 
 		setGui = function(view) {
-console.log(view);
+
 			// Value type
 			valueType.setValue(view.valueType);
 
@@ -4290,7 +4290,6 @@ console.log(view);
 			indeGroupView.setValue(indeGroupRecord.id);
 
 			// in/de/dc
-
 			if (view.valueType === dimConf.dataElement.id) {
 				if (Ext.isObject(view.dataElement) && Ext.isString(view.dataElement.id) && view.dataElement.id.indexOf('-') !== -1) {
 					dataElementDetailLevel.setValue(dimConf.operand.objectName);
@@ -4300,7 +4299,7 @@ console.log(view);
 				}
 				else {
 					dataElementDetailLevel.setValue(dimConf.dataElement.objectName);
-					indeStore.setTotalsProxy(indeGroupRecord.id, true, function() {
+					indeStore.setTotalsProxy(indeGroupRecord.id, false, function() {
 						indeView.setValue(indeRecord.id);
 					});
 				}
@@ -4310,23 +4309,6 @@ console.log(view);
 					indeView.setValue(indeRecord.id);
 				});
 			}
-
-
-			//// in/de
-			//indeStore.removeAll();
-			//indeStore.add(indeRecord);
-			//indeView.setValue(indeRecord.id);
-
-
-			//indeGroupStore.loadFn( function() {
-				//indeGroupView.setValue(indeGroupRecord);
-			//});
-
-			////indeStore.proxy.url = gis.baseUrl + gis.conf.url.path_api + view.valueType + 'Groups/' + indeGroupValue + '.json?links=false&paging=false';
-			//indeStore.loadFn( function() {
-				//indeView.setValue(indeValue);
-			//});
-
 
 			// Period
 			periodType.setValue(view.periodType);
