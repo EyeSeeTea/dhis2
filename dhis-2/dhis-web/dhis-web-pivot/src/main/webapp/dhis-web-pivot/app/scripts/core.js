@@ -880,7 +880,7 @@ PT.core.getUtils = function(pt) {
 						if (header.meta) {
 
 							// Items
-							header.items = Ext.clone(xLayout.dimensionNameIdsMap[header.name]);
+							header.items = Ext.clone(xLayout.dimensionNameIdsMap[header.name]) || [];
 
 							// Size
 							header.size = header.items.length;

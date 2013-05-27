@@ -697,8 +697,8 @@ DV.core.getUtil = function(dv) {
 			getSyncronizedXLayout = function(xLayout, response) {
 				var dimensions = [].concat(xLayout.columns, xLayout.rows, xLayout.filters),
 					xOuDimension = xLayout.objectNameDimensionsMap[dimConf.organisationUnit.objectName],
-					isUserOrgunit = xOuDimension && Ext.Array.contains(xOuDimension.items, 'USER_ORGUNIT'),
-					isUserOrgunitChildren = xOuDimension && Ext.Array.contains(xOuDimension.items, 'USER_ORGUNIT_CHILDREN'),
+					isUserOrgunit = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT'),
+					isUserOrgunitChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_CHILDREN'),
 					ou = dimConf.organisationUnit.objectName,
 					layout;
 
@@ -712,10 +712,10 @@ DV.core.getUtil = function(dv) {
 					if (dim.dimensionName === ou) {
 						if (isUserOrgunit || isUserOrgunitChildren) {
 							if (isUserOrgunit) {
-								dim.items = dim.items.concat(pt.init.user.ou);
+								dim.items = dim.items.concat(dv.init.user.ou);
 							}
 							if (isUserOrgunitChildren) {
-								dim.items = dim.items.concat(pt.init.user.ouc);
+								dim.items = dim.items.concat(dv.init.user.ouc);
 							}
 						}
 						else {
@@ -784,7 +784,7 @@ DV.core.getUtil = function(dv) {
 						if (header.meta) {
 
 							// Items
-							header.items = Ext.clone(xLayout.dimensionNameIdsMap[header.name]);
+							header.items = Ext.clone(xLayout.dimensionNameIdsMap[header.name]) || [];
 
 							// Size
 							header.size = header.items.length;
