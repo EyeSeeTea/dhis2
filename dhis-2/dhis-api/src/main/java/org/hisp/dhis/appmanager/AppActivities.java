@@ -1,7 +1,5 @@
 package org.hisp.dhis.appmanager;
 
-import java.io.Serializable;
-
 /*
  * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
@@ -29,6 +27,9 @@ import java.io.Serializable;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
+
 /**
  * @author Saptarshi
  */
@@ -39,18 +40,15 @@ public class AppActivities
      * Determines if a de-serialized file is compatible with this class.
      */
     private static final long serialVersionUID = 7530768303537807631L;
+    
+    @JsonProperty("dhis")
+    private AppDhis dhis;
 
-    // TODO: allow get
-    private String dhisUrl;
-
-    public String getDhisUrl()
-    {
-        return dhisUrl;
+    public AppDhis getDhis() {
+        return dhis;
     }
 
-    public void setDhisUrl( String dhisUrl )
-    {
-        this.dhisUrl = dhisUrl;
+    public void setDhis(AppDhis dhis) {
+        this.dhis = dhis;
     }
-
 }

@@ -1837,10 +1837,20 @@ Ext.onReady( function() {
 								layer = layers[i];
 								view = layer.widget.getView();
 
-								// add
+								// Check for operand
+								if (view.valueType === gis.conf.finals.dimension.dataElement.value && Ext.isString(view.dataElement.id) && view.dataElement.id.indexOf('-') !== -1) {
+									view.dataElementOperand = {id: view.dataElement.id.replace('-', '.')};
+									view.dataElement = null;
+								}
+
+								//if (Ext.isObject(view.dataElement) && Ext.isString(view.dataElement.id) && !Ext.isEmpty(view.dataElement.id)) {
+									//view.dataElement.id = view.dataElement.id.replace('-', '.');
+								//}
+
+								// Add
 								view.layer = layer.id;
 
-								// remove
+								// Remove
 								delete view.periodType;
 								views.push(view);
 							}

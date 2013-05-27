@@ -1210,7 +1210,7 @@ Ext.onReady( function() {
 
 					if (id && name) {
 						Ext.Ajax.request({
-							url: pt.baseUrl + '/api/reportTables/' + id + '.json?links=false',
+							url: pt.baseUrl + '/api/reportTables/' + id + '.json?viewClass=dimensional&links=false',
 							method: 'GET',
 							failure: function(r) {
 								pt.viewport.mask.show();

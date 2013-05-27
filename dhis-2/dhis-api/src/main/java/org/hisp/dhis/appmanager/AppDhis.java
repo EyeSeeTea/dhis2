@@ -1,4 +1,4 @@
-package org.hisp.dhis.appmanager.action;
+package org.hisp.dhis.appmanager;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -27,61 +27,29 @@ package org.hisp.dhis.appmanager.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hisp.dhis.appmanager.App;
-import org.hisp.dhis.appmanager.AppManagerService;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.opensymphony.xwork2.Action;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 
 /**
- * @author Saptarshi Purkayastha
+ * @author Saptarshi
  */
-public class AppListAction
-    implements Action
+public class AppDhis
+    implements Serializable
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
+    /**
+     * Determines if a de-serialized file is compatible with this class.
+     */
+    private static final long serialVersionUID = -8854371580010728182L;
 
-    @Autowired
-    private AppManagerService appManagerService;
+    @JsonProperty("href")
+    private String href;
 
-    // -------------------------------------------------------------------------
-    // Input & Output
-    // -------------------------------------------------------------------------
-
-    private List<App> appList;
-
-    public List<App> getAppList()
+    public String getHref()
     {
-        return appManagerService.getInstalledApps();
+        return href;
     }
 
-    private List<String> appFolderNames;
-
-    public List<String> getAppFolderNames()
-    {
-        return appFolderNames;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    @Override
-    public String execute()
-        throws Exception
-    {
-        appFolderNames = new ArrayList<String>();
-
-        for ( App app : getAppList() )
-        {
-            appFolderNames.add( appManagerService.getAppFolderName( app ) );
-        }
-
-        return SUCCESS;
+    public void setHref(String href) {
+        this.href = href;
     }
 }
