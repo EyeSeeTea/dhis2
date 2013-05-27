@@ -760,6 +760,7 @@ PT.core.getUtils = function(pt) {
 				return function() {
 					var headerNames = getHeaderNames(),
 						co = dimConf.category.objectName,
+						ou = dimConf.organisationUnit.objectName,
 						layout;
 
 					// Use metaData ids if any
@@ -767,14 +768,37 @@ PT.core.getUtils = function(pt) {
 						dim = dimensions[i];
 						metaDataDim = response.metaData[dim.objectName];
 
-						if (Ext.isArray(metaDataDim)) {
-							items = [];
+						// If ou and children
+						if (dim.dimensionName === ou && !!xLayout.userOrganisationUnitChildren) {
+							var items = [],
+								ouIds = [];
 
 							for (var j = 0; j < metaDataDim.length; j++) {
-								items.push({id: metaDataDim[j]});
+								items.push({
+									id: metaDataDim[j],
+									name: response.metaData.names[metaDataDim[j]]
+								});
 							}
 
-							dim.items = items;
+							dim.items = pt.util.array.sortObjectsByString(Ext.clone(items));
+						}
+						else {
+							var ids = [];
+							dim.items = [];
+
+							// Items: get ids from metadata
+							if (Ext.isArray(metaDataDim) && dim.dimensionName !== dimConf.organisationUnit.dimensionName) {
+								ids = Ext.clone(response.metaData[dim.dimensionName]);
+							}
+							// Items: get ids from xLayout
+							else {
+								ids = Ext.clone(xLayout.dimensionNameIdsMap[dim.dimensionName]);
+							}
+
+							// Add records
+							for (var j = 0; j < ids.length; j++) {
+								dim.items.push({id: ids[j]});
+							}
 						}
 					}
 
@@ -857,20 +881,44 @@ PT.core.getUtils = function(pt) {
 
 						if (header.meta) {
 
-							// Items: get ids from metadata
-							if (Ext.isArray(response.metaData[header.name])) {
-								header.items = Ext.clone(response.metaData[header.name]);
-							}
-							// Items: get ids from xLayout
-							else {
-								header.items = xLayout.dimensionNameIdsMap[header.name];
-							}
+												//// Items: if ou and children
+												//if (header.name === dimConf.organisationUnit.dimensionName && !!xLayout.userOrganisationUnitChildren) {
+													//var ouIds = response.metaData[header.name],
+														//items = [];
 
-							// Collect ids
-							ids = ids.concat(header.items);
+													//for (var j = 0; j < ouIds.length; j++) {
+														//items.push({
+															//id: ouIds[j],
+															//name: response.metaData.names[ouIds[j]]
+														//});
+													//}
+
+													//items = pt.util.array.sortObjectsByString(Ext.clone(items));
+													//ouIds = [];
+
+													//for (var j = 0; j < items.length; j++) {
+														//ouIds.push(items[j].id);
+													//}
+
+													//header.items = ouIds;
+												//}
+												//// Items: get ids from metadata
+												//else if (Ext.isArray(response.metaData[header.name]) && header.name !== dimConf.organisationUnit.dimensionName) {
+													//header.items = Ext.clone(response.metaData[header.name]);
+												//}
+												//// Items: get ids from xLayout
+												//else {
+													//header.items = xLayout.dimensionNameIdsMap[header.name];
+												//}
+
+							// Items
+							header.items = Ext.clone(xLayout.dimensionNameIdsMap[header.name]);
 
 							// Size
 							header.size = header.items.length;
+
+							// Collect ids, used by extendMetaData
+							ids = ids.concat(header.items);
 						}
 					}
 
@@ -1985,7 +2033,10 @@ PT.core.getApi = function(pt) {
 		return function() {
 			var a = [],
 				objectNames = [],
-				dimConf = pt.conf.finals.dimension;
+				dimConf = pt.conf.finals.dimension,
+				dims,
+				isOu = false,
+				isOuc = false;
 
 			config.columns = getValidatedDimensionArray(config.columns);
 			config.rows = getValidatedDimensionArray(config.rows);
@@ -2016,6 +2067,18 @@ PT.core.getApi = function(pt) {
 				return;
 			}
 
+			dims = [].concat(config.columns, config.rows, config.filters);
+			for (var i = 0; i < dims.length; i++) {
+				for (var j = 0; j < dims[i].items.length; j++) {
+					if (dims[i].items[j].id === 'USER_ORGUNIT') {
+						isOu = true;
+					}
+					else if (dims[i].items[j].id === 'USER_ORGUNIT_CHILDREN') {
+						isOuc = true;
+					}
+				}
+			}
+
 			// Layout
 			layout.columns = config.columns;
 			layout.rows = config.rows;
@@ -2030,8 +2093,8 @@ PT.core.getApi = function(pt) {
 			layout.fontSize = Ext.isString(config.fontSize) &&  !Ext.isEmpty(config.fontSize) ? config.fontSize : 'normal';
 			layout.digitGroupSeparator = Ext.isString(config.digitGroupSeparator) &&  !Ext.isEmpty(config.digitGroupSeparator) ? config.digitGroupSeparator : 'space';
 
-			layout.userOrganisationUnit = Ext.isBoolean(config.userOrganisationUnit) ? config.userOrganisationUnit : false;
-			layout.userOrganisationUnitChildren = Ext.isBoolean(config.userOrganisationUnitChildren) ? config.userOrganisationUnitChildren : false;
+			layout.userOrganisationUnit = isOu;
+			layout.userOrganisationUnitChildren = isOuc;
 
 			layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : undefined;
 
