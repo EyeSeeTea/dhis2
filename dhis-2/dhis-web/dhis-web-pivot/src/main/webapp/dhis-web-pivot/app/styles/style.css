@@ -483,17 +483,6 @@ td .bad div {
     padding-left: 18px;
 }
 
-.pt-menu-item-title .x-menu-item-link {
-	padding-left: 7px;
-	font-weight: bold;
-}
-.pt-menu-item-title-over,
-.pt-menu-item-title-over .x-menu-item-link {
-	background-color: #f2f2f2;
-	border: 1px solid transparent;
-	cursor: default;
-}
-
 /*----------------------------------------------------------------------------
  * Button
  *--------------------------------------------------------------------------*/
