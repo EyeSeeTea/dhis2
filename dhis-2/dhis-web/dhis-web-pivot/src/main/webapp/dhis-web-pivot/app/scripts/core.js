@@ -766,38 +766,33 @@ PT.core.getUtils = function(pt) {
 					// Use metaData ids if any
 					for (var i = 0, dim, metaDataDim, items; i < dimensions.length; i++) {
 						dim = dimensions[i];
+						dim.items = [];
 						metaDataDim = response.metaData[dim.objectName];
 
 						// If ou and children
-						if (dim.dimensionName === ou && !!xLayout.userOrganisationUnitChildren) {
-							var items = [],
-								ouIds = [];
-
-							for (var j = 0; j < metaDataDim.length; j++) {
-								items.push({
-									id: metaDataDim[j],
-									name: response.metaData.names[metaDataDim[j]]
-								});
+						if (dim.dimensionName === ou) {
+							if (xLayout.userOrganisationUnit || xLayout.userOrganisationUnitChildren) {
+								if (xLayout.userOrganisationUnit) {
+									dim.items = dim.items.concat(pt.init.user.ou);
+								}
+								if (xLayout.userOrganisationUnitChildren) {
+									dim.items = dim.items.concat(pt.init.user.ouc);
+								}
 							}
-
-							dim.items = pt.util.array.sortObjectsByString(Ext.clone(items));
+							else {
+								dim.items = Ext.clone(xLayout.dimensionNameItemsMap[dim.dimensionName]);
+							}
 						}
 						else {
-							var ids = [];
-							dim.items = [];
-
-							// Items: get ids from metadata
+							// Items: get ids from metadata -> items
 							if (Ext.isArray(metaDataDim) && dim.dimensionName !== dimConf.organisationUnit.dimensionName) {
-								ids = Ext.clone(response.metaData[dim.dimensionName]);
+								for (var j = 0, ids = Ext.clone(response.metaData[dim.dimensionName]); j < ids.length; j++) {
+									dim.items.push({id: ids[j]});
+								}
 							}
-							// Items: get ids from xLayout
+							// Items: get items from xLayout
 							else {
-								ids = Ext.clone(xLayout.dimensionNameIdsMap[dim.dimensionName]);
-							}
-
-							// Add records
-							for (var j = 0; j < ids.length; j++) {
-								dim.items.push({id: ids[j]});
+								dim.items = Ext.clone(xLayout.dimensionNameItemsMap[dim.dimensionName]);
 							}
 						}
 					}

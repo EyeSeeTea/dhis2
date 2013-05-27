@@ -3777,7 +3777,7 @@ Ext.onReady( function() {
 
 						if (recMap[key]) {
 							s.add(recMap[key]);
-							dv.util.multiselect.filterAvailable({store: a}, {store: s});
+							pt.util.multiselect.filterAvailable({store: a}, {store: s});
 						}
 					}
 				}
