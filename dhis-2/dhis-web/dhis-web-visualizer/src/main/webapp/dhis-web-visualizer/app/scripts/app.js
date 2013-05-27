@@ -3508,7 +3508,7 @@ Ext.onReady( function() {
 							config.items.push({id: r[i].data.id});
 						}
 					}
-
+console.log("getdim", config.items);
 					return config.items.length ? config : null;
 				},
 				onExpand: function() {

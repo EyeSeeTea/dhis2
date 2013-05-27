@@ -699,23 +699,41 @@ DV.core.getUtil = function(dv) {
 					xOuDimension = xLayout.objectNameDimensionsMap[dimConf.organisationUnit.objectName],
 					isUserOrgunit = xOuDimension && Ext.Array.contains(xOuDimension.items, 'USER_ORGUNIT'),
 					isUserOrgunitChildren = xOuDimension && Ext.Array.contains(xOuDimension.items, 'USER_ORGUNIT_CHILDREN'),
-					peItems = [],
-					ouItems = [],
+					ou = dimConf.organisationUnit.objectName,
 					layout;
 
-				// Use metaData ids if any
+				// Set items from init/metaData/xLayout
 				for (var i = 0, dim, metaDataDim, items; i < dimensions.length; i++) {
 					dim = dimensions[i];
+					dim.items = [];
 					metaDataDim = response.metaData[dim.objectName];
 
-					if (Ext.isArray(metaDataDim)) {
-						items = [];
-
-						for (var j = 0; j < metaDataDim.length; j++) {
-							items.push({id: metaDataDim[j]});
+					// If ou and children
+					if (dim.dimensionName === ou) {
+						if (isUserOrgunit || isUserOrgunitChildren) {
+							if (isUserOrgunit) {
+								dim.items = dim.items.concat(pt.init.user.ou);
+							}
+							if (isUserOrgunitChildren) {
+								dim.items = dim.items.concat(pt.init.user.ouc);
+							}
 						}
-
-						dim.items = items;
+						else {
+							dim.items = Ext.clone(xLayout.dimensionNameItemsMap[dim.dimensionName]);
+console.log("getdim2", dim.items);
+						}
+					}
+					else {
+						// Items: get ids from metadata -> items
+						if (Ext.isArray(metaDataDim) && dim.dimensionName !== dimConf.organisationUnit.dimensionName) {
+							for (var j = 0, ids = Ext.clone(response.metaData[dim.dimensionName]); j < ids.length; j++) {
+								dim.items.push({id: ids[j]});
+							}
+						}
+						// Items: get items from xLayout
+						else {
+							dim.items = Ext.clone(xLayout.dimensionNameItemsMap[dim.dimensionName]);
+						}
 					}
 				}
 
@@ -766,20 +784,14 @@ DV.core.getUtil = function(dv) {
 
 						if (header.meta) {
 
-							// Items: get ids from metadata
-							if (Ext.isArray(response.metaData[header.name])) {
-								header.items = Ext.clone(response.metaData[header.name]);
-							}
-							// Items: get ids from xLayout
-							else {
-								header.items = xLayout.dimensionNameIdsMap[header.name];
-							}
-
-							// Collect ids
-							ids = ids.concat(header.items);
+							// Items
+							header.items = Ext.clone(xLayout.dimensionNameIdsMap[header.name]);
 
 							// Size
 							header.size = header.items.length;
+
+							// Collect ids, used by extendMetaData
+							ids = ids.concat(header.items);
 						}
 					}
 
