@@ -3459,7 +3459,7 @@ Ext.onReady( function() {
 				if (!validateSpecialCases(layout)) {
 					return;
 				}
-alert(4);
+
 				pt.util.pivot.createTable(layout, pt);
 			};
 
@@ -3610,16 +3610,7 @@ alert(4);
 							iconCls: 'pt-menu-item-csv',
 							handler: function() {
 								if (pt.baseUrl && pt.paramString) {
-									window.open(pt.baseUrl + '/api/analytics.json' + pt.paramString);
-								}
-							}
-						},
-						{
-							text: 'CSV',
-							iconCls: 'pt-menu-item-csv',
-							handler: function() {
-								if (pt.baseUrl && pt.paramString) {
-									window.location.href = pt.baseUrl + '/api/analytics.csv' + pt.paramString;
+									window.open(pt.baseUrl + '/api/analytics.json' + pt.paramString, '_blank');
 								}
 							}
 						},
@@ -3628,7 +3619,7 @@ alert(4);
 							iconCls: 'pt-menu-item-csv',
 							handler: function() {
 								if (pt.baseUrl && pt.paramString) {
-									window.open(pt.baseUrl + '/api/analytics.xml' + pt.paramString);
+									window.open(pt.baseUrl + '/api/analytics.xml' + pt.paramString, '_blank');
 								}
 							}
 						},
@@ -3638,6 +3629,15 @@ alert(4);
 							handler: function() {
 								if (pt.baseUrl && pt.paramString) {
 									window.location.href = pt.baseUrl + '/api/analytics.xls' + pt.paramString;
+								}
+							}
+						},
+						{
+							text: 'CSV',
+							iconCls: 'pt-menu-item-csv',
+							handler: function() {
+								if (pt.baseUrl && pt.paramString) {
+									window.location.href = pt.baseUrl + '/api/analytics.csv' + pt.paramString;
 								}
 							}
 						}
