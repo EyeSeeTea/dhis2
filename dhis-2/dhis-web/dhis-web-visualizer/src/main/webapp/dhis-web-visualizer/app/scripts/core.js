@@ -720,7 +720,6 @@ DV.core.getUtil = function(dv) {
 						}
 						else {
 							dim.items = Ext.clone(xLayout.dimensionNameItemsMap[dim.dimensionName]);
-console.log("getdim2", dim.items);
 						}
 					}
 					else {
@@ -874,9 +873,8 @@ console.log("getdim2", dim.items);
 					rowDimensionName = xLayout.rows[0].dimensionName,
 
 					data = [],
-					//columnIds = columnDimensionName === pe ? xResponse.metaData.pe : xLayout.extended.dimensionNameItemsMap[columnDimensionName],
-					columnIds = Ext.isArray(xResponse.metaData[columnDimensionName]) ? xResponse.metaData[columnDimensionName] : xLayout.dimensionNameIdsMap[columnDimensionName],
-					rowIds = Ext.isArray(xResponse.metaData[rowDimensionName]) ? xResponse.metaData[rowDimensionName] : xLayout.dimensionNameIdsMap[rowDimensionName],
+					columnIds = xLayout.columnIds,
+					rowIds = xLayout.rowIds,
 					trendLineFields = [],
 					targetLineFields = [],
 					baseLineFields = [],
