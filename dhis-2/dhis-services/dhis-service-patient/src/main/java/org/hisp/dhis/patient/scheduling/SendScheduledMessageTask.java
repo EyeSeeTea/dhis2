@@ -169,7 +169,12 @@ public class SendScheduledMessageTask
                 String sortOrderSql = "SELECT max(sort_order) "
                     + "FROM programstageinstance_outboundsms where programstageinstanceid="
                     + schedulingProgramObject.getProgramStageInstanceId();
-                int sortOrder = jdbcTemplate.queryForObject( sortOrderSql, Integer.class ) + 1;
+                Integer sortOrder = jdbcTemplate.queryForObject( sortOrderSql, Integer.class );
+                if ( sortOrder == null )
+                {
+                    sortOrder = 0;
+                }
+                sortOrder = sortOrder + 1;
 
                 String sql = "INSERT INTO programstageinstance_outboundsms"
                     + "( programstageinstanceid, outboundsmsid, sort_order) VALUES " + "("
@@ -208,11 +213,17 @@ public class SendScheduledMessageTask
                 String sortOrderSql = "select max(sort_order) "
                     + "from programinstance_outboundsms where programinstanceid="
                     + schedulingProgramObject.getProgramInstanceId();
-                int sortOrder = jdbcTemplate.queryForObject( sortOrderSql, Integer.class ) + 1;
+                Integer sortOrder = jdbcTemplate.queryForObject( sortOrderSql, Integer.class );
+                if ( sortOrder == null )
+                {
+                    sortOrder = 0;
+                }
+                sortOrder = sortOrder + 1;
 
                 String sql = "INSERT INTO programinstance_outboundsms"
                     + "( programinstanceid, outboundsmsid, sort_order) VALUES " + "("
-                    + schedulingProgramObject.getProgramInstanceId() + ", " + outboundSms.getId() + "," + sortOrder + ") ";
+                    + schedulingProgramObject.getProgramInstanceId() + ", " + outboundSms.getId() + "," + sortOrder
+                    + ") ";
 
                 jdbcTemplate.execute( sql );
 
@@ -225,7 +236,7 @@ public class SendScheduledMessageTask
             }
         }
 
-        notifier.notify( taskId, INFO, "Preparing reminder messages for enrollement completed", true );
+        notifier.notify( taskId, INFO, "Sending reminder messages for enrollement completed", true );
 
     }
 

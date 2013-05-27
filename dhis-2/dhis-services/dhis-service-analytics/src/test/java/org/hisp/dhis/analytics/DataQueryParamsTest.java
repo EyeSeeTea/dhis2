@@ -41,7 +41,7 @@ import java.util.Map;
 
 import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.DimensionType;
-import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.period.Period;
 import org.junit.Test;
 
@@ -57,11 +57,27 @@ public class DataQueryParamsTest
     }
     
     @Test
-    public void testGetDimensionOptionsFromParam()
+    public void testGetDimensionItemsFromParam()
     {
         List<String> expected = new ArrayList<String>( Arrays.asList( "D348asd782j", "kj78HnH6hgT", "9ds9dS98s2" ) );
         
         assertEquals( expected, DataQueryParams.getDimensionItemsFromParam( "de:D348asd782j;kj78HnH6hgT;9ds9dS98s2" ) );        
+    }
+    
+    @Test
+    public void testGetLevelFromLevelParam()
+    {
+        assertEquals( 4, DataQueryParams.getLevelFromLevelParam( "LEVEL-4-dFsdfejdf2" ) );
+        assertEquals( 0, DataQueryParams.getLevelFromLevelParam( "LEVEL" ) );
+        assertEquals( 0, DataQueryParams.getLevelFromLevelParam( "LEVEL-gFd" ) );        
+    }
+    
+    @Test
+    public void testGetBoundaryFromLevelParam()
+    {
+        assertEquals( "dFsdfejdf2", DataQueryParams.getBoundaryFromLevelParam( "LEVEL-4-dFsdfejdf2" ) );
+        assertEquals( null, DataQueryParams.getBoundaryFromLevelParam( "LEVEL-4-" ) );
+        assertEquals( null, DataQueryParams.getBoundaryFromLevelParam( "LEVEL-4" ) );
     }
     
     @Test
@@ -81,7 +97,7 @@ public class DataQueryParamsTest
         
         assertFalse( params.hasPeriods() );
         
-        List<IdentifiableObject> periods = new ArrayList<IdentifiableObject>();
+        List<NameableObject> periods = new ArrayList<NameableObject>();
         
         params.getDimensions().add( new BaseDimensionalObject( PERIOD_DIM_ID, DimensionType.PERIOD, periods ) );
         
