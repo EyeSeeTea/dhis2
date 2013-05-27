@@ -3522,11 +3522,15 @@ Ext.onReady( function() {
 			},
 			isLoaded: false,
 			loadFn: function(fn) {
-				if (this.isLoaded) {
-					fn.call();
-				}
-				else {
-					this.load(fn);
+				if (Ext.isFunction(fn)) {
+					if (this.isLoaded) {
+						fn.call();
+					}
+					else {
+						this.load({
+							callback: fn
+						});
+					}
 				}
 			},
 			listeners: {
@@ -4305,8 +4309,11 @@ Ext.onReady( function() {
 				}
 			}
 			else {
-				indeStore.loadFn( function() {
-					indeView.setValue(indeRecord.id);
+				indeStore.proxy.url = gis.baseUrl + '/api/indicatorGroups/' + indeGroupRecord.id + '.json?links=false&paging=false';
+				indeStore.load({
+					callback: function() {
+						indeView.setValue(indeRecord.id);
+					}
 				});
 			}
 
