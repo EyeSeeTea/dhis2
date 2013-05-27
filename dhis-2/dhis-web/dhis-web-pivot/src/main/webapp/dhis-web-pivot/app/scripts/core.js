@@ -876,36 +876,6 @@ PT.core.getUtils = function(pt) {
 
 						if (header.meta) {
 
-												//// Items: if ou and children
-												//if (header.name === dimConf.organisationUnit.dimensionName && !!xLayout.userOrganisationUnitChildren) {
-													//var ouIds = response.metaData[header.name],
-														//items = [];
-
-													//for (var j = 0; j < ouIds.length; j++) {
-														//items.push({
-															//id: ouIds[j],
-															//name: response.metaData.names[ouIds[j]]
-														//});
-													//}
-
-													//items = pt.util.array.sortObjectsByString(Ext.clone(items));
-													//ouIds = [];
-
-													//for (var j = 0; j < items.length; j++) {
-														//ouIds.push(items[j].id);
-													//}
-
-													//header.items = ouIds;
-												//}
-												//// Items: get ids from metadata
-												//else if (Ext.isArray(response.metaData[header.name]) && header.name !== dimConf.organisationUnit.dimensionName) {
-													//header.items = Ext.clone(response.metaData[header.name]);
-												//}
-												//// Items: get ids from xLayout
-												//else {
-													//header.items = xLayout.dimensionNameIdsMap[header.name];
-												//}
-
 							// Items
 							header.items = Ext.clone(xLayout.dimensionNameIdsMap[header.name]);
 
@@ -2063,13 +2033,17 @@ PT.core.getApi = function(pt) {
 			}
 
 			dims = [].concat(config.columns, config.rows, config.filters);
-			for (var i = 0; i < dims.length; i++) {
-				for (var j = 0; j < dims[i].items.length; j++) {
-					if (dims[i].items[j].id === 'USER_ORGUNIT') {
-						isOu = true;
-					}
-					else if (dims[i].items[j].id === 'USER_ORGUNIT_CHILDREN') {
-						isOuc = true;
+			for (var i = 0, dim; i < dims.length; i++) {
+				dim = dims[i];
+
+				if (dim) {
+					for (var j = 0; j < dims[i].items.length; j++) {
+						if (dims[i].items[j].id === 'USER_ORGUNIT') {
+							isOu = true;
+						}
+						else if (dims[i].items[j].id === 'USER_ORGUNIT_CHILDREN') {
+							isOuc = true;
+						}
 					}
 				}
 			}
