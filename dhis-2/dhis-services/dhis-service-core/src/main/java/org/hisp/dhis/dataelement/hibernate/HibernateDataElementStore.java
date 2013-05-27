@@ -33,6 +33,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -44,17 +46,19 @@ import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementStore;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.system.util.ConversionUtils;
+import org.hisp.dhis.system.util.TextUtils;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.RowCallbackHandler;
 
 /**
  * @author Torgeir Lorange Ostby
- * @version $Id: HibernateDataElementStore.java 5243 2008-05-25 10:18:58Z
- *          larshelg $
  */
 public class HibernateDataElementStore
     extends HibernateIdentifiableObjectStore<DataElement>
     implements DataElementStore
 {
+    private static final Log log = LogFactory.getLog( HibernateDataElementStore.class );
+    
     // -------------------------------------------------------------------------
     // DataElement
     // -------------------------------------------------------------------------
@@ -223,26 +227,35 @@ public class HibernateDataElementStore
         return getQuery( hql ).setInteger( "aggregationLevel", aggregationLevel ).list();
     }
 
-    public ListMap<String, String> getDataElementCategoryOptionComboMap()
+    public ListMap<String, String> getDataElementCategoryOptionComboMap( Set<String> dataElementUids )
     {
-        final String sql = "select de.uid, coc.uid from dataelement de "
-            + "join categorycombos_optioncombos cc on de.categorycomboid = cc.categorycomboid "
-            + "join categoryoptioncombo coc on cc.categoryoptioncomboid = coc.categoryoptioncomboid";
+        final String sql = 
+            "select dataelementuid, categoryoptioncombouid " +
+            "from _dataelementcategoryoptioncombo " +
+            "where dataelementuid in (" + TextUtils.getQuotedCommaDelimitedString( dataElementUids ) + ")";
 
         final ListMap<String, String> map = new ListMap<String, String>();
 
-        jdbcTemplate.query( sql, new RowCallbackHandler()
+        try
         {
-            @Override
-            public void processRow( ResultSet rs )
-                throws SQLException
+            jdbcTemplate.query( sql, new RowCallbackHandler()
             {
-                String de = rs.getString( 1 );
-                String coc = rs.getString( 2 );
-
-                map.putValue( de, coc );
-            }
-        } );
+                @Override
+                public void processRow( ResultSet rs )
+                    throws SQLException
+                {
+                    String de = rs.getString( 1 );
+                    String coc = rs.getString( 2 );
+    
+                    map.putValue( de, coc );
+                }
+            } );
+        }
+        catch ( BadSqlGrammarException ex )
+        {
+            log.error( "Resource table _dataelementcategoryoptioncomboname does not exist, please generate it" );
+            return new ListMap<String, String>();
+        }
 
         return map;
     }
