@@ -327,7 +327,33 @@ public class DefaultDataEntryFormService
                 }
 
                 inputHtml = inputHtml.replace( TAG_CLOSE, appendCode );
-                inputHtml += "<span id=\"" + dataElement.getUid() + "-dataelement\" style=\"display:none\">" + dataElement.getFormNameFallback() + "</span>";
+                
+                
+                inputHtml += "<span id=\"" + dataElement.getUid() + "-dataelement\" style=\"display:none\""; 
+
+                // Conditional DataElement Decoration Add
+                if(dataSet.isEnableDataElementDecoration() && dataElement.getDescription().length() > 0) 
+                {
+                    inputHtml += " title=\"" + dataElement.getDescription() + "\"";
+                }
+                
+                inputHtml += ">";
+                
+                if(dataSet.isEnableDataElementDecoration() && dataElement.getUrl().length() > 0) 
+                {
+                    inputHtml += "<a href=\"" + dataElement.getUrl() + "\" target=\"_blank\">";
+                }                
+                
+                // The Data Element Name
+                inputHtml += dataElement.getFormNameFallback();
+
+                if(dataSet.isEnableDataElementDecoration() && dataElement.getUrl().length() > 0) 
+                {
+                    inputHtml += "</a>";
+                }
+                
+                inputHtml += "</span>";
+
                 inputHtml += "<span id=\"" + categoryOptionCombo.getUid() + "-optioncombo\" style=\"display:none\">" + categoryOptionCombo.getName() + "</span>";
             }
             else if ( dynamicInputMather.find() && dynamicInputMather.groupCount() > 0 )

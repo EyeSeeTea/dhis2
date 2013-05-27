@@ -574,6 +574,9 @@ public class TableAlteror
         executeSql( "ALTER TABLE dataelement ALTER COLUMN domaintype SET NOT NULL" );
         executeSql( "update dataelementcategory set datadimension = false where datadimension is null" );
         
+        executeSql( "UPDATE dataset SET enabledataelementdecoration=false WHERE enabledataelementdecoration is null" );
+        
+        
         log.info( "Tables updated" );
     }
 

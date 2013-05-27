@@ -121,7 +121,7 @@ public class DataElement
      * The i18n variant of the display name. Should not be persisted.
      */
     protected transient String displayFormName;
-    
+
     /**
      * If this DataElement is active or not (enabled or disabled).
      */
@@ -431,7 +431,7 @@ public class DataElement
     {
         this.displayFormName = displayFormName;
     }
-
+    
     /**
      * Returns the minimum number of expiry days from the data sets of this data
      * element.
@@ -467,7 +467,7 @@ public class DataElement
     {
         this.formName = formName;
     }
-
+    
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)

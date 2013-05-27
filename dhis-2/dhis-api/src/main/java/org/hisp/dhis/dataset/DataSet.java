@@ -190,6 +190,12 @@ public class DataSet
      */
     private boolean skipOffline;
 
+    /**
+     * Property indicating whether it should enable the Data Elements decorations
+     * , which are description tooltip and url link anchor.
+     */
+    private Boolean enableDataElementDecoration;
+
     // -------------------------------------------------------------------------
     // Contructors
     // -------------------------------------------------------------------------
@@ -679,6 +685,20 @@ public class DataSet
         this.skipOffline = skipOffline;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Boolean isEnableDataElementDecoration()
+    {
+        return enableDataElementDecoration;
+    }
+
+    public void setEnableDataElementDecoration( Boolean enableDataElementDecoration )
+    {
+        this.enableDataElementDecoration = enableDataElementDecoration;
+    }
+    
+    
     @Override
     public void mergeWith( IdentifiableObject other )
     {
@@ -699,7 +719,8 @@ public class DataSet
             fieldCombinationRequired = dataSet.isFieldCombinationRequired();
             validCompleteOnly = dataSet.isValidCompleteOnly();
             skipOffline = dataSet.isSkipOffline();
-
+            enableDataElementDecoration = dataSet.isEnableDataElementDecoration();
+            
             removeAllDataElements();
 
             for ( DataElement dataElement : dataSet.getDataElements() )

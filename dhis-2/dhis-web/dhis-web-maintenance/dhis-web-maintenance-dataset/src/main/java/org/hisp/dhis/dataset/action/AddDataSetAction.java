@@ -185,6 +185,13 @@ public class AddDataSetAction
         this.skipOffline = skipOffline;
     }
 
+    private boolean enableDataElementDecoration;
+
+    public void setEnableDataElementDecoration( boolean enableDataElementDecoration )
+    {
+        this.enableDataElementDecoration = enableDataElementDecoration;
+    }
+
     private Collection<String> dataElementsSelectedList = new HashSet<String>();
 
     public void setDataElementsSelectedList( Collection<String> dataElementsSelectedList )
@@ -243,6 +250,7 @@ public class AddDataSetAction
         dataSet.setValidCompleteOnly( validCompleteOnly );
         dataSet.setNotifyCompletingUser( notifyCompletingUser );
         dataSet.setSkipOffline( skipOffline );
+        dataSet.setEnableDataElementDecoration( enableDataElementDecoration );
         
         dataSetService.addDataSet( dataSet );
 
