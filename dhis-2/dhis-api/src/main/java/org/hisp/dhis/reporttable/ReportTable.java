@@ -30,6 +30,7 @@ package org.hisp.dhis.reporttable;
 import static org.hisp.dhis.common.DimensionalObject.DATA_X_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -273,11 +274,6 @@ public class ReportTable
      */
     private OrganisationUnit parentOrganisationUnit;
 
-    /**
-     * The category option combos derived from the dimension set.
-     */
-    private List<DataElementCategoryOptionCombo> categoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>();
-
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -386,10 +382,10 @@ public class ReportTable
         
         if ( isDimensional() )
         {
-            categoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>( getCategoryCombo().getOptionCombos() );
-            verify( nonEmptyLists( categoryOptionCombos ) == 1, "Category option combos size must be larger than 0" );
+            transientCategoryOptionCombos.addAll( getCategoryCombo().getSortedOptionCombos() );
+            verify( nonEmptyLists( transientCategoryOptionCombos ) == 1, "Category option combos size must be larger than 0" );
         }
-
+        
         // Populate grid
         
         this.populateGridColumnsAndRows( date, user, format );
@@ -413,7 +409,7 @@ public class ReportTable
         {
             tableRows.add( getDimensionalObject( dimension, date, user, true, format ).getItems().toArray( IRT ) );
         }
-
+                
         gridColumns = new CombinationGenerator<NameableObject>( tableColumns.toArray( IRT2D ) ).getCombinations();
         gridRows = new CombinationGenerator<NameableObject>( tableRows.toArray( IRT2D ) ).getCombinations();
 
@@ -445,7 +441,8 @@ public class ReportTable
      */
     public boolean isDimensional()
     {
-        return dataElements != null && !dataElements.isEmpty() && columnDimensions.contains( DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID );
+        return dataElements != null && !dataElements.isEmpty() && ( 
+            columnDimensions.contains( CATEGORYOPTIONCOMBO_DIM_ID ) || rowDimensions.contains( CATEGORYOPTIONCOMBO_DIM_ID ) );
     }
 
     /**
@@ -1012,18 +1009,6 @@ public class ReportTable
     public void setParentOrganisationUnit( OrganisationUnit parentOrganisationUnit )
     {
         this.parentOrganisationUnit = parentOrganisationUnit;
-    }
-
-    @JsonIgnore
-    public List<DataElementCategoryOptionCombo> getCategoryOptionCombos()
-    {
-        return categoryOptionCombos;
-    }
-
-    @JsonIgnore
-    public void setCategoryOptionCombos( List<DataElementCategoryOptionCombo> categoryOptionCombos )
-    {
-        this.categoryOptionCombos = categoryOptionCombos;
     }
 
     @Override
