@@ -953,6 +953,22 @@ GIS.core.MapLoader = function(gis) {
 		Ext.data.JsonP.request({
 			url: gis.baseUrl + gis.conf.url.path_api + 'maps/' + gis.map.id + '.jsonp?links=false',
 			success: function(r) {
+
+				// Operand
+				if (Ext.isArray(r.mapViews)) {
+					for (var i = 0, view; i < r.mapViews.length; i++) {
+						view = r.mapViews[i];
+
+						if (view) {
+							if (Ext.isObject(view.dataElementOperand) && Ext.isString(view.dataElementOperand.id)) {
+								view.dataElement = Ext.clone(view.dataElementOperand);
+								view.dataElement.id = view.dataElement.id.replace('.', '-');
+								delete view.dataElementOperand;
+							}
+						}
+					}
+				}
+
 				gis.map = r;
 				setMap();
 			},
@@ -1341,10 +1357,10 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 		paramString += 'dimension=ou:LEVEL-' + view.organisationUnitLevel.level + '-' + view.parentOrganisationUnit.id;
 
 		// dx
-		if (Ext.isString(view[type].id) && view[type].id.indexOf('-') !== -1) {
+		if (view[type] && Ext.isString(view[type].id) && view[type].id.indexOf('-') !== -1) {
 			paramString += '&dimension=co&dimension=dx:' + view[type].id.substr(0, view[type].id.indexOf('-'));
 		}
-		else {
+		else if (view[type] && Ext.isString(view[type].id)) {
 			paramString += '&dimension=dx:' + view[type].id;
 		}
 

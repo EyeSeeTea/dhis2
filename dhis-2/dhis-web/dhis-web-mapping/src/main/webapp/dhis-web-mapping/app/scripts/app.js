@@ -1823,7 +1823,8 @@ Ext.onReady( function() {
 			createButton = Ext.create('Ext.button.Button', {
 				text: GIS.i18n.create,
 				handler: function() {
-					var name = nameTextfield.getValue(),
+					var dimConf = gis.conf.finals.dimension,
+						name = nameTextfield.getValue(),
 						layers = gis.util.map.getVisibleVectorLayers(),
 						layer,
 						lonlat = gis.olmap.getCenter(),
@@ -1836,6 +1837,12 @@ Ext.onReady( function() {
 							for (var i = 0; i < layers.length; i++) {
 								layer = layers[i];
 								view = layer.widget.getView();
+
+								// Operand
+								if (view.valueType === dimConf.dataElement.value && Ext.isObject(view.dataElement) && Ext.isString(view.dataElement.id) && view.dataElement.id.indexOf('-') !== -1) {
+									view.dataElementOperand = {id: view.dataElement.id.replace('-', '.')};
+									view.dataElement = null;
+								}
 
 								// add
 								view.layer = layer.id;
@@ -2016,16 +2023,6 @@ Ext.onReady( function() {
 								element.dom.setAttribute('onclick', 'Ext.get(this).load();');
 							}
 						};
-
-							//var el = Ext.get(record.data.id);
-							//if (el) {
-								//el = el.parent('td');
-								//el.addClsOnOver('link');
-								//el.gis = gis;
-								//el.map = {id: record.data.id};
-								//el.dom.setAttribute('onclick', 'Ext.get(this).gis.map = Ext.get(this).map; GIS.core.MapLoader(Ext.get(this).gis).load();');
-							//}
-						//};
 
 						Ext.defer(fn, 100);
 
@@ -2324,7 +2321,7 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function() {
-					this.setPosition(115, 37);
+					this.setPosition(115, 33);
 				}
 			}
 		});
@@ -3006,7 +3003,7 @@ Ext.onReady( function() {
 			},
 			listeners: {
 				show: function() {
-					this.setPosition(185, 37);
+					this.setPosition(185, 33);
 				}
 			}
 		});
