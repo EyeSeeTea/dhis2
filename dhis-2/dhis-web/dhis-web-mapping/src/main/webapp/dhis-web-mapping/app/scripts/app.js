@@ -4883,7 +4883,6 @@ Ext.onReady( function() {
 				{
 					xtype: 'form',
 					cls: 'el-border-0',
-					width: 270,
 					items: [
 						{
 							html: GIS.i18n.organisationunit_groupset,
