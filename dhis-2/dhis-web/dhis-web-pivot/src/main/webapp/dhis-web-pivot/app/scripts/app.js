@@ -3580,21 +3580,21 @@ Ext.onReady( function() {
 						},
 						{
 							text: 'Microsoft Excel (.xls)',
-							iconCls: 'pt-menu-item-xls',
+							iconCls: 'pt-menu-item-tablelayout',
 							handler: function() {
 								openTableLayoutTab('xls');
 							}
 						},
 						{
 							text: 'CSV (.csv)',
-							iconCls: 'pt-menu-item-xls',
+							iconCls: 'pt-menu-item-tablelayout',
 							handler: function() {
 								openTableLayoutTab('csv');
 							}
 						},
 						{
 							text: 'HTML (.html)',
-							iconCls: 'pt-menu-item-xls',
+							iconCls: 'pt-menu-item-tablelayout',
 							handler: function() {
 								openTableLayoutTab('html', true);
 							}
@@ -3606,7 +3606,7 @@ Ext.onReady( function() {
 						},
 						{
 							text: 'JSON',
-							iconCls: 'pt-menu-item-csv',
+							iconCls: 'pt-menu-item-datasource',
 							handler: function() {
 								if (pt.baseUrl && pt.paramString) {
 									window.open(pt.baseUrl + '/api/analytics.json' + pt.util.pivot.getParamString(pt.xLayout, true), '_blank');
@@ -3615,7 +3615,7 @@ Ext.onReady( function() {
 						},
 						{
 							text: 'XML',
-							iconCls: 'pt-menu-item-csv',
+							iconCls: 'pt-menu-item-datasource',
 							handler: function() {
 								if (pt.baseUrl && pt.paramString) {
 									window.open(pt.baseUrl + '/api/analytics.xml' + pt.util.pivot.getParamString(pt.xLayout, true), '_blank');
@@ -3624,7 +3624,7 @@ Ext.onReady( function() {
 						},
 						{
 							text: 'Microsoft Excel',
-							iconCls: 'pt-menu-item-xls',
+							iconCls: 'pt-menu-item-datasource',
 							handler: function() {
 								if (pt.baseUrl && pt.paramString) {
 									window.location.href = pt.baseUrl + '/api/analytics.xls' + pt.util.pivot.getParamString(pt.xLayout, true);
@@ -3633,7 +3633,7 @@ Ext.onReady( function() {
 						},
 						{
 							text: 'CSV',
-							iconCls: 'pt-menu-item-csv',
+							iconCls: 'pt-menu-item-datasource',
 							handler: function() {
 								if (pt.baseUrl && pt.paramString) {
 									window.location.href = pt.baseUrl + '/api/analytics.csv' + pt.util.pivot.getParamString(pt.xLayout, true);
