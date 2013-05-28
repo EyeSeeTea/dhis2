@@ -3436,6 +3436,12 @@ Ext.onReady( function() {
 							alert(PT.i18n.categories_cannot_be_specified_as_filter);
 							return;
 						}
+
+						// Data sets as filter
+						if (layout.filters[i].dimension === dimConf.category.objectName) {
+							alert(PT.i18n.data_sets_cannot_be_specified_as_filter);
+							return;
+						}
 					}
 				}
 
@@ -3825,7 +3831,7 @@ Ext.onReady( function() {
 				if (layout.columns) {
 					for (var i = 0, dim; i < layout.columns.length; i++) {
 						dim = dimConf.objectNameMap[layout.columns[i].dimension];
-
+console.log("coldim", dim);
 						pt.viewport.colStore.add({
 							id: dim.dimensionName,
 							name: dim.name
