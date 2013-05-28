@@ -3831,10 +3831,10 @@ Ext.onReady( function() {
 				if (layout.columns) {
 					for (var i = 0, dim; i < layout.columns.length; i++) {
 						dim = dimConf.objectNameMap[layout.columns[i].dimension];
-console.log("coldim", dim);
+
 						pt.viewport.colStore.add({
 							id: dim.dimensionName,
-							name: dim.name
+							name: dimConf.objectNameMap[dim.dimensionName].name
 						});
 
 						pt.viewport.dimensionStore.remove(pt.viewport.dimensionStore.getById(dim.dimensionName));
@@ -3847,7 +3847,7 @@ console.log("coldim", dim);
 
 						pt.viewport.rowStore.add({
 							id: dim.dimensionName,
-							name: dim.name
+							name: dimConf.objectNameMap[dim.dimensionName].name
 						});
 
 						pt.viewport.dimensionStore.remove(pt.viewport.dimensionStore.getById(dim.dimensionName));
@@ -3860,7 +3860,7 @@ console.log("coldim", dim);
 
 						pt.viewport.filterStore.add({
 							id: dim.dimensionName,
-							name: dim.name
+							name: dimConf.objectNameMap[dim.dimensionName].name
 						});
 
 						pt.viewport.dimensionStore.remove(pt.viewport.dimensionStore.getById(dim.dimensionName));
