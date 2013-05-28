@@ -52,6 +52,7 @@ import static org.hisp.dhis.common.NameableObjectUtils.asTypedList;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_LEVEL;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_CHILDREN;
+import static org.hisp.dhis.period.PeriodType.getPeriodTypeFromIsoString;
 import static org.hisp.dhis.reporttable.ReportTable.IRT2D;
 import static org.hisp.dhis.reporttable.ReportTable.addIfEmpty;
 
@@ -86,6 +87,7 @@ import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.constant.ConstantService;
 import org.hisp.dhis.dataelement.DataElement;
@@ -306,6 +308,8 @@ public class DefaultAnalyticsService
 
             Map<String, PeriodType> dsPtMap = dataSourceParams.getDataSetPeriodTypeMap();
 
+            PeriodType filterPeriodType = dataSourceParams.getFilterPeriodType();
+            
             // -----------------------------------------------------------------
             // Join data maps, calculate completeness and add to grid
             // -----------------------------------------------------------------
@@ -317,13 +321,13 @@ public class DefaultAnalyticsService
                 List<String> targetRow = ListUtils.getAtIndexes( dataRow, completenessDimIndexes );
                 String targetKey = StringUtils.join( targetRow, DIMENSION_SEP );
                 Double target = targetMap.get( targetKey );
-                             
+                
                 if ( target != null && entry.getValue() != null )
                 {
-                    PeriodType queryPt = PeriodType.getPeriodTypeFromIsoString( dataRow.get( periodIndex ) );
-                    PeriodType dataPt = dsPtMap.get( dataRow.get( dataSetIndex ) );
+                    PeriodType queryPt = filterPeriodType != null ? filterPeriodType : getPeriodTypeFromIsoString( dataRow.get( periodIndex ) );
+                    PeriodType dataSetPt = dsPtMap.get( dataRow.get( dataSetIndex ) );
                     
-                    target = target * queryPt.getPeriodSpan( dataPt );
+                    target = target * queryPt.getPeriodSpan( dataSetPt );
                     
                     double value = entry.getValue() * PERCENT / target;
                     
@@ -385,6 +389,9 @@ public class DefaultAnalyticsService
             return getAggregatedDataValues( params );
         }
         
+        ListUtils.removeEmptys( columns );
+        ListUtils.removeEmptys( rows );
+        
         queryPlanner.validateTableLayout( params, columns, rows );
         
         Map<String, Double> valueMap = getAggregatedDataValueMapping( params );
@@ -400,7 +407,7 @@ public class DefaultAnalyticsService
             {
                 reportTable.getColumnDimensions().add( dimension );
                 
-                tableColumns.add( params.getDimensionArrayCollapseDx( dimension ) );
+                tableColumns.add( params.getDimensionArrayCollapseDxExplodeCoc( dimension ) );
             }
         }
         
@@ -410,7 +417,7 @@ public class DefaultAnalyticsService
             {
                 reportTable.getRowDimensions().add( dimension );
                 
-                tableRows.add( params.getDimensionArrayCollapseDx( dimension ) );
+                tableRows.add( params.getDimensionArrayCollapseDxExplodeCoc( dimension ) );
             }
         }
 
@@ -419,6 +426,8 @@ public class DefaultAnalyticsService
 
         addIfEmpty( reportTable.getGridColumns() ); 
         addIfEmpty( reportTable.getGridRows() );
+        
+        reportTable.setTitle( IdentifiableObjectUtils.join( params.getFilterItems() ) );
 
         return reportTable.getGrid( new ListGrid(), valueMap, false );
     }
@@ -830,7 +839,7 @@ public class DefaultAnalyticsService
         
         if ( dec != null && dec.isDataDimension() )
         {
-            List<NameableObject> decos = asList( categoryService.getDataElementCategoriesByUid( items ) );
+            List<NameableObject> decos = asList( categoryService.getDataElementCategoryOptionsByUid( items ) );
             
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.CATEGORY, null, dec.getDisplayName(), decos );
             

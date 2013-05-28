@@ -62,6 +62,7 @@ import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.ListMap;
 import org.hisp.dhis.common.NameableObject;
+import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataelement.DataElementOperand;
@@ -411,6 +412,22 @@ public class DataQueryParams
     }
     
     /**
+     * Returns the period type of the first period specified as filter. Returns
+     * null if there is no period filter.
+     */
+    public PeriodType getFilterPeriodType()
+    {
+        List<NameableObject> filterPeriods = getFilterPeriods();
+        
+        if ( filterPeriods != null && !filterPeriods.isEmpty() )
+        {
+            return ( (Period) filterPeriods.get( 0 ) ).getPeriodType();
+        }
+        
+        return null;
+    }
+    
+    /**
      * Returns the number of dimension option permutations. Merges the three data
      * dimensions into one prior to the calculation.
      */
@@ -539,7 +556,7 @@ public class DataQueryParams
     }
     
     /**
-     * Generates all permutations of the dimension and filter options for this query.
+     * Generates all permutations of the dimension options for this query.
      * Ignores the data element, category option combo and indicator dimensions.
      */
     public List<List<DimensionItem>> getDimensionItemPermutations()
@@ -699,6 +716,24 @@ public class DataQueryParams
         
         return this;
     }
+
+    /**
+     * Get all filter items.
+     */
+    public List<NameableObject> getFilterItems()
+    {
+        List<NameableObject> filterItems = new ArrayList<NameableObject>();
+        
+        for ( DimensionalObject filter : filters )
+        {
+            if ( filter != null && filter.getItems() != null )
+            {
+                filterItems.addAll( filter.getItems() );
+            }
+        }
+        
+        return filterItems;
+    }
     
     // -------------------------------------------------------------------------
     // Static methods
@@ -735,7 +770,7 @@ public class DataQueryParams
         
         if ( param.split( DIMENSION_NAME_SEP ).length > 1 )
         {
-            return Arrays.asList( param.split( DIMENSION_NAME_SEP )[1].split( OPTION_SEP ) );
+            return new ArrayList<String>( Arrays.asList( param.split( DIMENSION_NAME_SEP )[1].split( OPTION_SEP ) ) );
         }
         
         return new ArrayList<String>();
@@ -794,7 +829,7 @@ public class DataQueryParams
             return null;
         }
         
-        return Arrays.asList( param.split( OPTION_SEP ) );
+        return new ArrayList<String>( Arrays.asList( param.split( OPTION_SEP ) ) );
     }
     
     /**
@@ -1047,9 +1082,11 @@ public class DataQueryParams
     /**
      * Retrieves the options for the given dimension identifier. If the dx dimension
      * is specified, all concrete dimensions (in|de|dc|ds) are returned as a single
-     * dimension. Returns an empty array if the dimension is not present.
+     * dimension. If the co dimension is specified, all category option combos for
+     * the first data element is returned. Returns an empty array if the dimension 
+     * is not present.
      */
-    public NameableObject[] getDimensionArrayCollapseDx( String dimension )
+    public NameableObject[] getDimensionArrayCollapseDxExplodeCoc( String dimension )
     {
         List<NameableObject> items = new ArrayList<NameableObject>();
         
@@ -1059,6 +1096,17 @@ public class DataQueryParams
             items.addAll( getDimensionOptionsNullSafe( DATAELEMENT_DIM_ID ) );
             items.addAll( getDimensionOptionsNullSafe( DATAELEMENT_OPERAND_ID ) );
             items.addAll( getDimensionOptionsNullSafe( DATASET_DIM_ID ) );
+        }
+        else if ( CATEGORYOPTIONCOMBO_DIM_ID.equals( dimension ) )
+        {
+            List<NameableObject> des = getDimensionOrFilter( DATAELEMENT_DIM_ID );
+            
+            if ( des != null && !des.isEmpty() )
+            {
+                DataElement de = (DataElement) des.get( 0 );
+                
+                items.addAll( de.getCategoryCombo().getSortedOptionCombos() );
+            }
         }
         else
         {
