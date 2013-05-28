@@ -854,6 +854,10 @@ PT.core.getUtils = function(pt) {
 						}
 					}
 
+					console.log("lay", xLayout.axisDimensionNames);
+					console.log("res", headerNames);
+
+
 					// Remove co from layout if it does not exist in response
 					if (Ext.Array.contains(xLayout.axisDimensionNames, co) && !(Ext.Array.contains(headerNames, co))) {
 						removeDimensionFromXLayout(co);

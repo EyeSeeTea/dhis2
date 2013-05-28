@@ -3570,13 +3570,12 @@ Ext.onReady( function() {
 				disabled: true,
 				menu: {
 					cls: 'pt-menu',
-					width: 140,
 					shadow: false,
 					showSeparator: false,
 					items: [
 						{
 							xtype: 'label',
-							text: 'Table layout',
+							text: PT.i18n.table_layout,
 							style: 'padding:7px 5px 5px 7px; font-weight:bold'
 						},
 						{
@@ -3602,7 +3601,7 @@ Ext.onReady( function() {
 						},
 						{
 							xtype: 'label',
-							text: 'Plain data source',
+							text: PT.i18n.plain_data_sources,
 							style: 'padding:7px 5px 5px 7px; font-weight:bold'
 						},
 						{
@@ -3610,7 +3609,7 @@ Ext.onReady( function() {
 							iconCls: 'pt-menu-item-csv',
 							handler: function() {
 								if (pt.baseUrl && pt.paramString) {
-									window.open(pt.baseUrl + '/api/analytics.json' + pt.util.pivot.getParamString(pt.xLayout), '_blank');
+									window.open(pt.baseUrl + '/api/analytics.json' + pt.util.pivot.getParamString(pt.xLayout, true), '_blank');
 								}
 							}
 						},
@@ -3619,7 +3618,7 @@ Ext.onReady( function() {
 							iconCls: 'pt-menu-item-csv',
 							handler: function() {
 								if (pt.baseUrl && pt.paramString) {
-									window.open(pt.baseUrl + '/api/analytics.xml' + pt.util.pivot.getParamString(pt.xLayout), '_blank');
+									window.open(pt.baseUrl + '/api/analytics.xml' + pt.util.pivot.getParamString(pt.xLayout, true), '_blank');
 								}
 							}
 						},
@@ -3628,7 +3627,7 @@ Ext.onReady( function() {
 							iconCls: 'pt-menu-item-xls',
 							handler: function() {
 								if (pt.baseUrl && pt.paramString) {
-									window.location.href = pt.baseUrl + '/api/analytics.xls' + pt.util.pivot.getParamString(pt.xLayout);
+									window.location.href = pt.baseUrl + '/api/analytics.xls' + pt.util.pivot.getParamString(pt.xLayout, true);
 								}
 							}
 						},
@@ -3637,7 +3636,7 @@ Ext.onReady( function() {
 							iconCls: 'pt-menu-item-csv',
 							handler: function() {
 								if (pt.baseUrl && pt.paramString) {
-									window.location.href = pt.baseUrl + '/api/analytics.csv' + pt.util.pivot.getParamString(pt.xLayout);
+									window.location.href = pt.baseUrl + '/api/analytics.csv' + pt.util.pivot.getParamString(pt.xLayout, true);
 								}
 							}
 						}
