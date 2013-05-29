@@ -1648,8 +1648,7 @@ console.log("baseLineFields", store.baseLineFields);
 				chart = getDefaultChart(store, null, series, xResponse, xLayout);
 				chart.legend.position = 'right';
 				chart.legend.isVertical = true;
-				chart.insetPadding = 20;
-				chart.padding = '20 0 20 20';
+				chart.insetPadding = 40;
 				chart.shadow = true;
 
 				return chart;
