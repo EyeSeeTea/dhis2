@@ -1588,40 +1588,45 @@ console.log("baseLineFields", store.baseLineFields);
 			};
 
 			generator.pie = function(xResponse, xLayout) {
-				var store = getDefaultStore(xResponse, xLayout),
+				console.log("RF", getDefaultStore(xResponse, xLayout).rangeFields);
+				var store = getDefaultStore(xResponse, xLayout);
+				for (var i = 0; i < store.rangeFields[0].length; i++) {
+					store.rangeFields[0][i] = i;
+				}
+
 					series = [{
 						type: 'pie',
 						field: store.rangeFields[0],
 						lengthField: store.rangeFields[0],
-						donut: 7,
-						showInLegend: true,
-						highlight: {
-							segment: {
-								margin: 5
-							}
-						},
-						label: {
-							field: dv.conf.finals.data.domain,
-							display: 'middle',
-							contrast: true,
-							font: '14px ' + dv.conf.chart.style.fontFamily,
-							renderer: function(value) {
-								var record = store.getAt(store.findExact(dv.conf.finals.data.domain, value));
+						//donut: 7,
+							//showInLegend: true,
+							//highlight: {
+								//segment: {
+									//margin: 5
+								//}
+							//},
+							//label: {
+								//field: dv.conf.finals.data.domain,
+								//display: 'middle',
+								//contrast: true,
+								//font: '14px ' + dv.conf.chart.style.fontFamily,
+								//renderer: function(value) {
+									//var record = store.getAt(store.findExact(dv.conf.finals.data.domain, value));
 
-								return record.data[store.rangeFields[0]];
-							}
-						},
-						style: {
-							opacity: 0.8,
-							stroke: '#555'
-						},
-						tips: {
-							trackMouse: true,
-							cls: 'dv-chart-tips',
-							renderer: function(item) {
-								this.update('<div style="text-align:center"><div style="font-size:17px; font-weight:bold">' + item.data[store.rangeFields[0]] + '</div><div style="font-size:10px">' + item.data[dv.conf.finals.data.domain] + '</div></div>');
-							}
-						}
+									//return record.data[store.rangeFields[0]];
+								//}
+							//},
+						//style: {
+							//opacity: 0.8,
+							//stroke: '#555'
+						//},
+							//tips: {
+								//trackMouse: true,
+								//cls: 'dv-chart-tips',
+								//renderer: function(item) {
+									//this.update('<div style="text-align:center"><div style="font-size:17px; font-weight:bold">' + item.data[store.rangeFields[0]] + '</div><div style="font-size:10px">' + item.data[dv.conf.finals.data.domain] + '</div></div>');
+								//}
+							//}
 					}],
 					colors,
 					chart;
