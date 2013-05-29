@@ -1743,9 +1743,14 @@ console.log("layout", layout);
 					alert(r.responseText);
 				},
 				success: function(r) {
-					var layout = dv.api.layout.Layout(Ext.decode(r.responseText));
+					var layoutConfig = Ext.decode(r.responseText),
+						layout = dv.api.layout.Layout(layoutConfig);
 
 					if (layout) {
+						layout.id = layoutConfig.id;
+						layout.name = layoutConfig.name;
+						dv.favorite = Ext.clone(layout);
+
 						dv.viewport.setFavorite(layout);
 					}
 				}
