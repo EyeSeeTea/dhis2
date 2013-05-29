@@ -1,11 +1,11 @@
-<h3>
- <a name="mainPagelink" href="javascript:onClickBackBtn();">$i18n.getString( 'patient_management' )</a>
- &#8226; $i18n.getString( 'patient_dashboard' )
- &raquo; <a href="javascript:dashboardHistoryToggle();" >$i18n.getString( 'access_log' )</a>
-</h3>
-
-<div class='dashboard-area'>
-<table>
+<table style='margin-top:-25px;'>
+	<tr>
+		<td colspan='3'>
+			<h3><a name="mainPagelink" href="javascript:onClickBackBtn();">$i18n.getString( 'patient_management' )</a>
+			&#8226; $i18n.getString( 'patient_dashboard' )</h3>
+		</td>
+		<td><span style="float:right;"><h4><a href="javascript:dashboardHistoryToggle();" >$i18n.getString( 'access_log' )</a></h4></span></td>
+	</tr>
 <tr>
 #if( $auth.hasAccess( "dhis-web-caseentry", "accessPatientAttributes" ) )
 <td>
@@ -129,9 +129,10 @@
 						#if( $status!=1 && $status!=5 && $flag=='false')
 							<tr id='tr1_$programInstance.id' type='$programInstance.program.type'
 								programStageInstanceId='$programStageInstanceId' style='cursor:pointer;'
-								onclick='javascript:loadActiveProgramStageRecords("$programInstance.id", "$programStageInstance.id")' >
+								onclick='javascript:setFieldValue("programIdAddPatient",$programInstance.program.id);loadActiveProgramStageRecords("$programInstance.id", "$programStageInstance.id")' >
 								<td id='td_$programInstance.id'>
 									<a><span id='infor_$programInstance.id'>$programInstance.program.displayName ($format.formatDate($programInstance.enrollmentDate))</span></a>
+									<img id='followup_$programInstance.id' src='images/risk_small.png' #if($programInstance.followup=='true') #else class='hidden' #end >
 								</td>
 							</tr>
 							#if($programInstance.program.type==1 && $programStageInstance)
@@ -177,7 +178,7 @@
 							#set($programStageInstanceId = $programStageInstance.id)
 						#end
 					#end
-					<tr onclick='javascript:loadActiveProgramStageRecords($programInstance.id);' >
+					<tr onclick='javascript:setFieldValue("programIdAddPatient",$programInstance.program.id);loadActiveProgramStageRecords($programInstance.id);' >
 						<td>
 							<a><span id='infor_$programInstance.id'>$programInstance.program.displayName ($format.formatDate($programInstance.enrollmentDate))</span></a>
 						</td>

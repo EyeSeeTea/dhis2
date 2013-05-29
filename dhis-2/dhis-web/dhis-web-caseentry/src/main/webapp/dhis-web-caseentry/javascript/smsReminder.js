@@ -1,4 +1,4 @@
-
+isAjax = true;
 function orgunitSelected( orgUnits, orgUnitNames )
 {
 	var width = jQuery('#programIdAddPatient').width();
@@ -90,10 +90,8 @@ function listAllPatient()
 		}, 
 		function()
 		{
-			setInnerHTML('searchInforLbl',i18n_list_all_patients);
 			showById('colorHelpLink');
 			showById('listEventDiv');
-			setTableStyles();
 			hideLoader();
 		});
 }
@@ -133,6 +131,9 @@ function advancedSearch( params )
 
 function programTrackingList( programStageInstanceId, isSendSMS ) 
 {
+	hideById('listEventDiv');
+	hideById('searchDiv');
+	showLoader();
 	setFieldValue('sendToList', "false");
 	$('#smsManagementDiv' ).load("programTrackingList.action",
 		{
@@ -144,6 +145,7 @@ function programTrackingList( programStageInstanceId, isSendSMS )
 			hideById('searchDiv');
 			hideById('listEventDiv');
 			showById('smsManagementDiv');
+			hideLoader();
 		});
 }
 

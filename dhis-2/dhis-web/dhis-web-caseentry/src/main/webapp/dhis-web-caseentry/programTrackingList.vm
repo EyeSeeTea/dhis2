@@ -127,7 +127,7 @@
 	</ul>
 	
 	<div id='tab-1'>
-		<table class="mainPageTable">
+		<table class="mainPageTable" id='messageList'>
 			<colgroup>
 				<col width="160px"/>
 				<col width="160px"/>
@@ -190,6 +190,10 @@
 			programReports(getFieldValue('programInstanceId'));
 		}
 	});
+	
+	tableSorter( 'messageList' );
+	var sorting = [[0,1]];
+	$("#messageList").trigger("sorton", [sorting]);
 	
 	var i18n_color_quick_help = '$encoder.jsEscape( $i18n.getString( "color_quick_help" ) , "'")';
 	var i18n_comment_added = '$encoder.jsEscape( $i18n.getString( "comment_added" ) , "'")';
