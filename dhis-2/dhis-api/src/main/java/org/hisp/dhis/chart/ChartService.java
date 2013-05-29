@@ -29,7 +29,6 @@ package org.hisp.dhis.chart;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 import org.hisp.dhis.dataelement.DataElement;
@@ -50,6 +49,10 @@ public interface ChartService
 {
     String ID = ChartService.class.getName();
 
+    // -------------------------------------------------------------------------
+    // JFreeChart
+    // -------------------------------------------------------------------------
+
     JFreeChart getJFreeChart( int id, I18nFormat format );
 
     JFreeChart getJFreeChart( Chart chart, I18nFormat format );
@@ -59,25 +62,26 @@ public interface ChartService
      * 
      * @param chart the chart to use as basis for the JFreeChart generation.
      * @param date the date to use as basis for relative periods, can be null.
-     * @param unit the org unit to use as basis for relative units, will
+     * @param organisationUnit the org unit to use as basis for relative units, will
      *        override the current user org unit if set, can be null.
      * @param format the i18n format.
      * @return a JFreeChart object.
      */
-    JFreeChart getJFreeChart( Chart chart, Date date, OrganisationUnit unit, I18nFormat format );
+    JFreeChart getJFreeChart( Chart chart, Date date, OrganisationUnit organisationUnit, I18nFormat format );
     
-    JFreeChart getJFreePeriodChart( Indicator indicator, OrganisationUnit unit, boolean title, I18nFormat format );
+    JFreeChart getJFreePeriodChart( Indicator indicator, OrganisationUnit organisationUnit, boolean title, I18nFormat format );
 
     JFreeChart getJFreeOrganisationUnitChart( Indicator indicator, OrganisationUnit parent, boolean title, I18nFormat format );
-
-    JFreeChart getJFreeChart( List<Indicator> indicators, List<DataElement> dataElements, List<Period> periods,
-                              List<OrganisationUnit> organisationUnits, String series, String category, String filter, boolean regression, I18nFormat format );
 
     JFreeChart getJFreeChart( String name, PlotOrientation orientation, CategoryLabelPositions labelPositions,
                               Map<String, Double> categoryValues );
 
     JFreeChart getJFreeChartHistory( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo,
                                      Period lastPeriod, OrganisationUnit organisationUnit, int historyLength, I18nFormat format );
+
+    // -------------------------------------------------------------------------
+    // Chart CRUD
+    // -------------------------------------------------------------------------
 
     int addChart( Chart chart );
 
