@@ -853,7 +853,6 @@ Ext.onReady( function() {
 		dv.viewport.hideTitle = hideTitle;
 
 		title = Ext.create('Ext.form.field.Text', {
-			//cls: 'dv-textfield-alt1',
 			style: 'margin-bottom:2px; margin-left:2px',
 			width: 310,
 			fieldLabel: DV.i18n.chart_title,
@@ -868,7 +867,6 @@ Ext.onReady( function() {
 		dv.viewport.title = title;
 
 		domainAxisTitle = Ext.create('Ext.form.field.Text', {
-			//cls: 'dv-textfield-alt1',
 			style: 'margin-bottom:2px; margin-left:2px',
 			width: 310,
 			fieldLabel: DV.i18n.domain_axis_label,
@@ -880,7 +878,6 @@ Ext.onReady( function() {
 		dv.viewport.domainAxisTitle = domainAxisTitle;
 
 		rangeAxisTitle = Ext.create('Ext.form.field.Text', {
-			//cls: 'dv-textfield-alt1',
 			style: 'margin-bottom:0; margin-left:2px',
 			width: 310,
 			fieldLabel: DV.i18n.range_axis_label,
@@ -1940,6 +1937,7 @@ Ext.onReady( function() {
 				bodyStyle: 'padding:5px 5px 3px; background-color:#fff',
 				resizable: true,
 				modal: true,
+				destroyOnBlur: true,
 				items: [
 					textArea,
 					linkPanel
@@ -1959,6 +1957,10 @@ Ext.onReady( function() {
 						dv.util.window.setAnchorPosition(w, dv.viewport.interpretationButton);
 
 						document.body.oncontextmenu = true;
+
+						if (!w.hasDestroyOnBlurHandler) {
+							dv.util.window.addDestroyOnBlurHandler(w);
+						}
 					},
 					hide: function() {
 						document.body.oncontextmenu = function(){return false;};
