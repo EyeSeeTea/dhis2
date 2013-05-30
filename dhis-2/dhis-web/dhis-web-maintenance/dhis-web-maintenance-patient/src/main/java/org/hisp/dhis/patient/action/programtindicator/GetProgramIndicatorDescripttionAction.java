@@ -25,65 +25,58 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.caseentry.action.caseaggregation;
+package org.hisp.dhis.patient.action.programtindicator;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-
-import org.hisp.dhis.caseaggregation.CaseAggregationCondition;
-import org.hisp.dhis.caseaggregation.CaseAggregationConditionService;
-import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.program.ProgramIndicatorService;
 
 import com.opensymphony.xwork2.Action;
 
-public class CaseAggregationFormAction
+/**
+ * @author Chau Thu Tran
+ * @version $ GetProgramIndicatorDescripttionAction.java May 30, 2013 11:09:04
+ *          AM $
+ */
+public class GetProgramIndicatorDescripttionAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private CaseAggregationConditionService aggregationConditionService;
+    private ProgramIndicatorService programIndicatorService;
 
-    public void setAggregationConditionService( CaseAggregationConditionService aggregationConditionService )
+    public void setProgramIndicatorService( ProgramIndicatorService programIndicatorService )
     {
-        this.aggregationConditionService = aggregationConditionService;
+        this.programIndicatorService = programIndicatorService;
     }
 
     // -------------------------------------------------------------------------
-    // Input/Output
+    // Setters
     // -------------------------------------------------------------------------
 
-    private List<DataSet> datasets = new ArrayList<DataSet>();
+    private String expression;
 
-    public List<DataSet> getDatasets()
+    public void setExpression( String expression )
     {
-        return datasets;
+        this.expression = expression;
+    }
+
+    private String message;
+
+    public String getMessage()
+    {
+        return message;
     }
 
     // -------------------------------------------------------------------------
-    // Implementation Action
+    // Action implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
         throws Exception
     {
-        Collection<CaseAggregationCondition> aggConditions = aggregationConditionService
-            .getAllCaseAggregationCondition();
-
-        for ( CaseAggregationCondition aggCondition : aggConditions )
-        {
-            DataElement dataElement = aggCondition.getAggregationDataElement();
-
-            datasets.addAll( dataElement.getDataSets() );
-        }
-        
-        Collections.sort( datasets, IdentifiableObjectNameComparator.INSTANCE );
+        message = programIndicatorService.getExpressionDescription( expression );
 
         return SUCCESS;
     }

@@ -410,7 +410,8 @@ function addEventListeners()
             saveBoolean( dataElementId, optionComboId, id );
         } );
 
-        $( this ).css( 'width', '90%' );
+        $( this ).css( 'width', '88%' );
+        $( this ).css( 'margin-right', '2px' );
     } );
 
     $( '[name="entrytrueonly"]' ).each( function( i )
@@ -2248,7 +2249,7 @@ function StorageManager()
 }
 
 // -----------------------------------------------------------------------------
-// OptionSet
+// Option set
 // -----------------------------------------------------------------------------
 
 function searchOptionSet( uid, query, success ) {
@@ -2388,7 +2389,7 @@ function autocompleteOptionSetField( idField, optionSetUid ) {
 
     var button = $( "<a style='width:20px; margin-bottom:-5px;height:20px;'>" )
         .attr( "tabIndex", -1 )
-        .attr( "title", 'i18n_show_all_items' )
+        .attr( "title", i18n_show_all_items )
         .appendTo( wrapper )
         .button( {
             icons: {
