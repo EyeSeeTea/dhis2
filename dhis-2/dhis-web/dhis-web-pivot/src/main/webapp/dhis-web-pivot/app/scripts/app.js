@@ -155,7 +155,7 @@ Ext.onReady( function() {
 					}
 				}
 			}
-
+			
 			config.userOrganisationUnit = pt.viewport.userOrganisationUnit.getValue();
 			config.userOrganisationUnitChildren = pt.viewport.userOrganisationUnitChildren.getValue();
 
