@@ -24,6 +24,7 @@ Ext.onReady( function() {
 	PT.app.getInits = function(r) {
 		var init = Ext.decode(r.responseText);
 
+		// Root nodes
 		for (var i = 0; i < init.rootNodes.length; i++) {
 			init.rootNodes[i].path = '/' + pt.conf.finals.root.id + '/' + init.rootNodes[i].id;
 		}
@@ -37,6 +38,14 @@ Ext.onReady( function() {
 			dim.objectName = pt.conf.finals.dimension.dimension.objectName;
 			pt.conf.finals.dimension.objectNameMap[dim.id] = dim;
 		}
+
+		// Legend set map
+		init.idLegendSetMap = {};
+
+		for (var i = 0, set; i < init.legendSets.length; i++) {
+			set = init.legendSets[i];
+			init.idLegendSetMap[set.id] = set;
+		}			
 
 		// Viewport afterrender
 		init.afterRender = function() {
