@@ -414,13 +414,12 @@ Ext.onReady( function() {
 				var data = pt.init.legendSets;
 				data.unshift({id: 0, name: PT.i18n.none, index: -1});
 				return data;
-			}()
+			}(),
+			sorters: [
+				{property: 'index', direction: 'ASC'},
+				{property: 'name', direction: 'ASC'}
+			]
 		});
-		//store.legendSet.add({id: 0, name: PT.i18n.none, index: -1});
-		store.legendSet.sort([
-			{property: 'index', direction: 'ASC'},
-			{property: 'name', direction: 'ASC'}
-		]);
 		
 		return store;
 	};
