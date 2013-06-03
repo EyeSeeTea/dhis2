@@ -410,29 +410,17 @@ Ext.onReady( function() {
 
 		store.legendSet = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name', 'index'],
-			proxy: {
-				type: 'ajax',
-				url: pt.baseUrl + '/api/mapLegendSets.json?links=false',
-				reader: {
-					type: 'json',
-					root: 'mapLegendSets'
-				}
-			},
-			listeners: {
-				load: function(s) {
-					s.add({
-						id: 0,
-						name: '[ ' + PT.i18n.none + ' ]',
-						index: -1
-					});
-
-					s.sort([
-						{property: 'index', direction: 'ASC'},
-						{property: 'name', direction: 'ASC'}
-					]);
-				}
-			}
+			data: function() {
+				var data = pt.init.legendSets;
+				data.unshift({id: 0, name: PT.i18n.none, index: -1});
+				return data;
+			}()
 		});
+		//store.legendSet.add({id: 0, name: PT.i18n.none, index: -1});
+		store.legendSet.sort([
+			{property: 'index', direction: 'ASC'},
+			{property: 'name', direction: 'ASC'}
+		]);
 		
 		return store;
 	};
@@ -905,8 +893,10 @@ Ext.onReady( function() {
 			valueField: 'id',
 			displayField: 'name',
 			editable: false,
+			value: 0,
 			store: pt.store.legendSet
 		});
+		pt.viewport.legendSet = legendSet;
 
 		reportingPeriod = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: PT.i18n.reporting_period,
@@ -1110,6 +1100,10 @@ Ext.onReady( function() {
 
 					if (!w.hasHideOnBlurHandler) {
 						pt.util.window.addHideOnBlurHandler(w);
+					}
+
+					if (!legendSet.store.isLoaded) {
+						legendSet.store.load();
 					}
 				}
 			}
