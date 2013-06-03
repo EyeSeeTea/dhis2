@@ -27,6 +27,17 @@ package org.hisp.dhis.dxf2.pdfform;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
+import org.hisp.dhis.dxf2.datavalueset.DataValueSet;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodType;
+
 import com.lowagie.text.Document;
 import com.lowagie.text.Element;
 import com.lowagie.text.Font;
@@ -35,54 +46,62 @@ import com.lowagie.text.PageSize;
 import com.lowagie.text.Phrase;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.AcroFields;
-import com.lowagie.text.pdf.AcroFields.Item;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfReader;
-import org.hisp.dhis.dxf2.datavalueset.DataValueSet;
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodType;
-
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-
 
 public class PdfDataEntryFormUtil
 {
     public static final int DATATYPE_DATASET = 0;
+
     public static final int DATATYPE_PROGRAMSTAGE = 1;
 
     public static final float UNITSIZE_DEFAULT = 10;
 
     // Label Names
-    
+
     public static final String LABELCODE_TEXTFIELD = "TXFD_";
+
     public static final String LABELCODE_BUTTON = "BTNFD_";
+
     public static final String LABELCODE_ORGID = LABELCODE_TEXTFIELD + "OrgID";
+
     public static final String LABELCODE_PERIODID = LABELCODE_TEXTFIELD + "PeriodID";
+
     public static final String LABELCODE_BUTTON_SAVEAS = LABELCODE_BUTTON + "SaveAs";
+
     public static final String LABELCODE_DATADATETEXTFIELD = "TXFDDT_";
+
     public static final String LABELCODE_DATAENTRYTEXTFIELD = "TXFDDV_";
+
     public static final String LABELCODE_PROGRAMSTAGEIDTEXTBOX = "TXPSTGID_";
 
     // Cell Related
 
-    public final static float CELL_MIN_HEIGHT_DEFAULT = 13;
+    public final static float CELL_MIN_HEIGHT_DEFAULT = 14;
+
     public final static float CONTENT_HEIGHT_DEFAULT = 11;
+
     public final static int CELL_COLUMN_TYPE_LABEL = 0;
+
     public final static int CELL_COLUMN_TYPE_ENTRYFIELD = 1;
 
+    public final static int CELL_COLUMN_TYPE_HEADER = 2;
+
     private static final String DATAVALUE_IMPORT_STOREBY = "admin";
+
     private static final String DATAVALUE_IMPORT_COMMENT = "Imported by PDF Data Entry Form";
+
     private static final String DATAVALUE_IMPORT_TIMESTAMP_DATEFORMAT = "yyyy-MM-dd";
+
     private static final String FOOTERTEXT_DEFAULT = "PDF Template generated from DHIS %s on %s";
+
     private static final String DATEFORMAT_FOOTER_DEFAULT = "MMMM dd, yyyy";
 
+    private static final String ERROR_INVALID_PERIOD = "Invalid period: ";
+
+    private static final String ERROR_EMPTY_ORG_UNIT = "The organisation unit was not specified";
+
+    private static final String ERROR_EMPTY_PERIOD = "The period was not specified.";
 
     // -------------------------------------------------------------------------
     // METHODS
@@ -110,8 +129,8 @@ public class PdfDataEntryFormUtil
     {
         if ( typeId == PdfDataEntryFormUtil.DATATYPE_PROGRAMSTAGE )
         {
-            return new Rectangle( PageSize.A4.getLeft(),
-                PageSize.A4.getBottom(), PageSize.A4.getTop(), PageSize.A4.getRight() );
+            return new Rectangle( PageSize.A4.getLeft(), PageSize.A4.getBottom(), PageSize.A4.getTop(),
+                PageSize.A4.getRight() );
         }
         else
         {
@@ -129,23 +148,34 @@ public class PdfDataEntryFormUtil
         PdfPCell cell = new PdfPCell();
         cell.setMinimumHeight( minHeight );
         cell.setBorder( Rectangle.NO_BORDER );
+        cell.setPadding( 1f );
 
-        if ( cellContentType == CELL_COLUMN_TYPE_LABEL )
+        switch ( cellContentType )
         {
-            cell.setHorizontalAlignment( Element.ALIGN_RIGHT );
-            cell.setVerticalAlignment( Element.ALIGN_TOP );
-        }
-        else if ( cellContentType == CELL_COLUMN_TYPE_ENTRYFIELD )
-        {
+        case CELL_COLUMN_TYPE_ENTRYFIELD:
             cell.setHorizontalAlignment( Element.ALIGN_CENTER );
             cell.setVerticalAlignment( Element.ALIGN_MIDDLE );
+
+            break;
+
+        case CELL_COLUMN_TYPE_HEADER:
+            cell.setHorizontalAlignment( Element.ALIGN_CENTER );
+            cell.setVerticalAlignment( Element.ALIGN_MIDDLE );
+
+            break;
+
+        case CELL_COLUMN_TYPE_LABEL:
+            cell.setHorizontalAlignment( Element.ALIGN_RIGHT );
+            cell.setVerticalAlignment( Element.ALIGN_TOP );
+
+        default:
+            break;
         }
 
         return cell;
     }
 
     public static DataValueSet getDataValueSet( InputStream in )
-        throws RuntimeException
     {
         PdfReader reader = null;
 
@@ -155,39 +185,50 @@ public class PdfDataEntryFormUtil
 
         try
         {
-            reader = new PdfReader( in ); // new PdfReader(in, null);
+            reader = new PdfReader( in );
 
             AcroFields form = reader.getAcroFields();
 
             if ( form != null )
             {
-                // TODO: MOVE THESE STATIC NAME VALUES TO inside of service
-                // class or PDFForm Class <-- should be in PDFForm Class.
-                String strOrgUID = form.getField( PdfDataEntryFormUtil.LABELCODE_ORGID );
-                String strPeriodID = form.getField( PdfDataEntryFormUtil.LABELCODE_PERIODID );
 
-                Period period = PeriodType.createPeriodExternalId( strPeriodID );
+                // Process OrgUnitUID and PeriodID from the PDF Form
+
+                String orgUnitUID = form.getField( PdfDataEntryFormUtil.LABELCODE_ORGID ).trim();
+                String periodID = form.getField( PdfDataEntryFormUtil.LABELCODE_PERIODID ).trim();
+
+                if ( periodID == "" )
+                {
+                    throw new IllegalArgumentException( ERROR_EMPTY_PERIOD );
+                }
+
+                if ( orgUnitUID == "" )
+                {
+                    throw new IllegalArgumentException( ERROR_EMPTY_ORG_UNIT );
+                }
+
+                Period period = PeriodType.createPeriodExternalId( periodID );
+
+                if ( period == null )
+                {
+                    throw new IllegalArgumentException( ERROR_INVALID_PERIOD + periodID );
+                }
 
                 // Loop Through the Fields and get data.
-                HashMap<String, AcroFields.Item> fields = form.getFields();
-                Set<Entry<String, Item>> entrySet = fields.entrySet();
 
                 Set<String> fldNames = form.getFields().keySet();
 
                 for ( String fldName : fldNames )
                 {
-
                     if ( fldName.startsWith( PdfDataEntryFormUtil.LABELCODE_DATAENTRYTEXTFIELD ) )
                     {
-
                         String[] strArrFldName = fldName.split( "_" );
 
-                        // Create DataValues to be put in a DataValueSet
                         org.hisp.dhis.dxf2.datavalue.DataValue dataValue = new org.hisp.dhis.dxf2.datavalue.DataValue();
 
                         dataValue.setDataElement( strArrFldName[1] );
                         dataValue.setCategoryOptionCombo( strArrFldName[2] );
-                        dataValue.setOrgUnit( strOrgUID );
+                        dataValue.setOrgUnit( orgUnitUID );
                         dataValue.setPeriod( period.getIsoDate() );
 
                         dataValue.setValue( form.getField( fldName ) );
@@ -206,13 +247,12 @@ public class PdfDataEntryFormUtil
             }
             else
             {
-                throw new RuntimeException( "Could not generate PDF AcroFields form from the file." );
+                throw new RuntimeException( "Could not generate PDF AcroFields form from input" );
             }
-
         }
-        catch ( Exception e )
+        catch ( Exception ex )
         {
-            throw new RuntimeException( e.getMessage() );
+            throw new RuntimeException( ex );
         }
         finally
         {

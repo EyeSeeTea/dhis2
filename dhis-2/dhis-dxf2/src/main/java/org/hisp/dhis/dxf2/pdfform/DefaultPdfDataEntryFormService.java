@@ -27,6 +27,32 @@ package org.hisp.dhis.dxf2.pdfform;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.awt.Color;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.List;
+
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.dataset.Section;
+import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.option.OptionService;
+import org.hisp.dhis.option.OptionSet;
+import org.hisp.dhis.period.CalendarPeriodType;
+import org.hisp.dhis.period.MonthlyPeriodType;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageDataElement;
+import org.hisp.dhis.program.ProgramStageSection;
+import org.hisp.dhis.program.ProgramStageService;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.lowagie.text.Chunk;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
@@ -46,33 +72,6 @@ import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import com.lowagie.text.pdf.RadioCheckField;
 import com.lowagie.text.pdf.TextField;
-
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataelement.DataElementOperand;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetService;
-import org.hisp.dhis.dataset.Section;
-import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.option.OptionService;
-import org.hisp.dhis.option.OptionSet;
-import org.hisp.dhis.period.CalendarPeriodType;
-import org.hisp.dhis.period.MonthlyPeriodType;
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.program.ProgramStageDataElement;
-import org.hisp.dhis.program.ProgramStageSection;
-import org.hisp.dhis.program.ProgramStageService;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.awt.*;
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.List;
 
 public class DefaultPdfDataEntryFormService
     implements PdfDataEntryFormService
@@ -122,7 +121,7 @@ public class DefaultPdfDataEntryFormService
         {
             this.pdfFormFontSettings = pdfFormFontSettings;
             this.format = format;
-            
+
             document.setPageSize( pageSize );
 
             document.open();
@@ -171,10 +170,12 @@ public class DefaultPdfDataEntryFormService
 
             document.add( mainTable );
 
-            document.add( Chunk.NEWLINE );
-            document.add( Chunk.NEWLINE );
+            // Hide the 'Save As' button for now.
+            // document.add( Chunk.NEWLINE );
+            // document.add( Chunk.NEWLINE );
 
-            insertSaveAsButton( document, writer, PdfDataEntryFormUtil.LABELCODE_BUTTON_SAVEAS );
+            // insertSaveAsButton( document, writer,
+            // PdfDataEntryFormUtil.LABELCODE_BUTTON_SAVEAS );
         }
     }
 
@@ -220,7 +221,6 @@ public class DefaultPdfDataEntryFormService
             insertTable_DataSetSections( mainTable, writer, rectangle, dataSet.getDataElements(), "" );
         }
     }
-    
 
     private void insertTable_DataSetSections( PdfPTable mainTable, PdfWriter writer, Rectangle rectangle,
         Collection<DataElement> dataElements, String sectionName )
@@ -237,15 +237,23 @@ public class DefaultPdfDataEntryFormService
 
         // Create A Table To Add For Each Section
         PdfPTable table = new PdfPTable( 2 );
-        
-        // For each DataElement and Category Combo of the dataElement, create row.
+
+        // For each DataElement and Category Combo of the dataElement, create
+        // row.
         for ( DataElement dataElement : dataElements )
         {
             for ( DataElementCategoryOptionCombo categoryOptionCombo : dataElement.getCategoryCombo()
                 .getSortedOptionCombos() )
             {
 
-                addCell_Text( table, dataElement.getDisplayName() + " " + categoryOptionCombo.getDisplayName(), Element.ALIGN_RIGHT );
+                String categoryOptionComboDisplayName = "";
+
+                // Hide Default category option combo name
+                if ( !categoryOptionCombo.isDefault() )
+                    categoryOptionComboDisplayName = categoryOptionCombo.getDisplayName();
+
+                addCell_Text( table, dataElement.getDisplayName() + " " + categoryOptionComboDisplayName,
+                    Element.ALIGN_RIGHT );
 
                 String strFieldLabel = PdfDataEntryFormUtil.LABELCODE_DATAENTRYTEXTFIELD + dataElement.getUid() + "_"
                     + categoryOptionCombo.getUid();
@@ -288,21 +296,6 @@ public class DefaultPdfDataEntryFormService
 
         mainTable.addCell( cell_withInnerTable );
     }
-
-    private static boolean isDisabled( DataElement dataElement, DataElementCategoryOptionCombo dataElementCategoryOptionCombo, List<DataElementOperand> greyedFields )
-    {
-        for ( DataElementOperand operand : greyedFields )
-        {
-            if ( dataElement.getUid().equals( operand.getDataElement().getUid() )
-                && dataElementCategoryOptionCombo.getUid().equals( operand.getCategoryOptionCombo().getUid() ) )
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
 
     private void setProgramStage_DocumentContent( Document document, PdfWriter writer, String programStageUid )
         throws IOException, DocumentException, ParseException, Exception
@@ -366,7 +359,8 @@ public class DefaultPdfDataEntryFormService
         Collection<ProgramStageDataElement> programStageDataElements )
         throws IOException, DocumentException
     {
-        // Add one to column count due to date entry + one hidden height set field.
+        // Add one to column count due to date entry + one hidden height set
+        // field.
         int colCount = programStageDataElements.size() + 1 + 1;
 
         PdfPTable table = new PdfPTable( colCount ); // Code 1
@@ -400,17 +394,17 @@ public class DefaultPdfDataEntryFormService
         table.setWidths( cellWidths );
 
         // Create Header
-        table.addCell( new PdfPCell( new Phrase( "Date" ) ) );
+        addCell_Text( table, "Date", Element.ALIGN_CENTER );
 
         // Add Program Data Elements Columns
         for ( ProgramStageDataElement programStageDataElement : programStageDataElements )
         {
             DataElement dataElement = programStageDataElement.getDataElement();
 
-            table.addCell( new PdfPCell( new Phrase( dataElement.getDisplayFormName() ) ) );
+            addCell_Text( table, dataElement.getDisplayFormName(), Element.ALIGN_CENTER );
         }
 
-        table.addCell( new PdfPCell( new Phrase( TEXT_BLANK ) ) );
+        addCell_Text( table, TEXT_BLANK, Element.ALIGN_CENTER );
 
         // ADD A HIDDEN INFO FOR ProgramStageID
         // Print rows, having the data elements repeating on each column.
@@ -428,7 +422,6 @@ public class DefaultPdfDataEntryFormService
                 DataElement dataElement = programStageDataElement.getDataElement();
 
                 OptionSet optionSet = dataElement.getOptionSet();
-                String optionSetName = "";
 
                 // addCell_Text(table, dataElement.getFormName());
 
@@ -440,8 +433,6 @@ public class DefaultPdfDataEntryFormService
 
                 if ( optionSet != null )
                 {
-                    optionSetName = optionSet.getName();
-
                     String query = ""; // Get All Option
 
                     // TODO: This gets repeated <- Create an array of the
@@ -501,14 +492,14 @@ public class DefaultPdfDataEntryFormService
         // Create A table to add for each group AT HERE
         PdfPTable table = new PdfPTable( 2 ); // Code 1
 
-        addCell_Text( table, "OrganizationID", Element.ALIGN_LEFT );
+        addCell_Text( table, "Organization unit identifier", Element.ALIGN_LEFT );
         addCell_WithTextField( table, rectangle, writer, PdfDataEntryFormUtil.LABELCODE_ORGID,
             PdfFieldCell.TYPE_TEXT_ORGUNIT );
 
         String[] periodsTitle = getPeriodTitles( periods, format );
         String[] periodsValue = getPeriodValues( periods );
 
-        addCell_Text( table, "PeriodID", Element.ALIGN_LEFT );
+        addCell_Text( table, "Period", Element.ALIGN_LEFT );
         addCell_WithDropDownListField( table, PdfDataEntryFormUtil.LABELCODE_PERIODID, periodsTitle, periodsValue,
             rectangle, writer );
 
@@ -593,7 +584,7 @@ public class DefaultPdfDataEntryFormService
 
         cell.setPhrase( new Phrase( text, font ) );
 
-        table.addCell( cell );
+        table.addCell( cell ); // TODO: change this with cellEvent?
     }
 
     private void addCell_WithTextField( PdfPTable table, Rectangle rect, PdfWriter writer, String strfldName )
@@ -630,7 +621,7 @@ public class DefaultPdfDataEntryFormService
         nameField.setText( value );
 
         nameField.setAlignment( Element.ALIGN_RIGHT );
-        nameField.setFontSize( PdfDataEntryFormUtil.UNITSIZE_DEFAULT );
+        nameField.setFont( pdfFormFontSettings.getFont( PdfFormFontSettings.FONTTYPE_BODY ).getBaseFont() );
 
         PdfPCell cell = PdfDataEntryFormUtil.getPdfPCell( PdfDataEntryFormUtil.CELL_MIN_HEIGHT_DEFAULT,
             PdfDataEntryFormUtil.CELL_COLUMN_TYPE_ENTRYFIELD );
@@ -658,7 +649,7 @@ public class DefaultPdfDataEntryFormService
         dropDown.setWidget( rect, PdfAnnotation.HIGHLIGHT_INVERT );
         dropDown.setFieldName( strfldName );
 
-        dropDown.setMKBorderColor( CMYKColor.BLACK );
+        dropDown.setMKBorderColor( Color.BLACK );
 
         PdfPCell cell = PdfDataEntryFormUtil.getPdfPCell( PdfDataEntryFormUtil.CELL_MIN_HEIGHT_DEFAULT,
             PdfDataEntryFormUtil.CELL_COLUMN_TYPE_ENTRYFIELD );
@@ -718,7 +709,7 @@ public class DefaultPdfDataEntryFormService
         PdfFormField radiogroupField = PdfFormField.createRadioButton( writer, true );
         radiogroupField.setFieldName( strfldName );
 
-        cell.setCellEvent( new PdfFieldCell( radiogroupField, new String[]{ "Yes", "No", "null" }, new String[]{
+        cell.setCellEvent( new PdfFieldCell( radiogroupField, new String[] { "Yes", "No", "null" }, new String[] {
             "true", "false", "" }, "", 30.0f, PdfFieldCell.TYPE_RADIOBUTTON, writer ) );
 
         table.addCell( cell );

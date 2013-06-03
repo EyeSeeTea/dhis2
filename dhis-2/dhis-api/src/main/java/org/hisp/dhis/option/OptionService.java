@@ -36,20 +36,28 @@ import java.util.List;
 public interface OptionService
 {
     final String ID = OptionService.class.getName();
-    
+
     int saveOptionSet( OptionSet optionSet );
-    
+
     void updateOptionSet( OptionSet optionSet );
-    
+
     OptionSet getOptionSet( int id );
-    
+
     OptionSet getOptionSet( String uid );
-    
+
     OptionSet getOptionSetByName( String name );
-    
+
     void deleteOptionSet( OptionSet optionSet );
 
     Collection<OptionSet> getAllOptionSets();
+
+    List<String> getOptions( int optionSetId, String name, Integer max );
+
+    Integer getOptionSetsCountByName( String name );
+
+    Collection<OptionSet> getOptionSetsBetweenByName( String name, int first, int max );
+
+    Collection<OptionSet> getOptionSetsBetween( int first, int max );
     
-    List<String> getOptions( int optionSetId, String key, Integer max  );
+    Integer getOptionSetCount();
 }
