@@ -211,4 +211,9 @@
     <property name="category" value="METADATA_IMPORT" />
   </bean>
 
+  <!-- DXF2 MetaData import/export -->
+  <bean id="org.hisp.dhis.importexport.action.dxf2.MetaDataSubSetExportAction"
+        class="org.hisp.dhis.importexport.action.dxf2.MetaDataExportSubSetFormAction" />
+
+
 </beans>

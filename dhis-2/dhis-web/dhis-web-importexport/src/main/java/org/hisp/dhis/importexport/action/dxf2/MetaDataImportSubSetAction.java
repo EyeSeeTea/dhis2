@@ -47,7 +47,7 @@ import java.io.InputStream;
 /**
  * @author Rosu Ovidiu <rosu.ovi@gmail.com>
  */
-public class MetaDataSubSetImportAction
+public class MetaDataImportSubSetAction
     implements Action
 {
 

@@ -50,14 +50,14 @@ import java.lang.System;
 /**
  * @author Rosu Ovidiu <rosu.ovi@gmail.com>
  */
-public class MetaDataSubSetExportAction
+public class MetaDataExportSubSetFormAction
     implements Action
 {
 
     @Override
     public String execute() throws Exception
     {
-        System.out.println("AM INTRAT IN EXPORT");
+        System.out.println("\nAM INTRAT IN EXPORT\n");
 
         return SUCCESS;
     }

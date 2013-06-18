@@ -4,7 +4,7 @@
     });
 </script>
 
-<h3>$i18n.getString( "metadata_export" )</h3>
+<h3>$i18n.getString( "metadata_subset_export" )</h3>
 
 <form id="exportForm" name="exportForm">
 

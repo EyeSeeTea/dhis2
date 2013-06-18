@@ -309,19 +309,19 @@
 
       <!-- DXF2 MetaData Subset import/export -->
 
-      <action name="dxf2MetaDataSubSetImport" class="org.hisp.dhis.importexport.action.NoAction">
+      <action name="dxf2MetaDataImportSubSet" class="org.hisp.dhis.importexport.action.NoAction">
           <result name="success" type="velocity">/main.vm</result>
           <param name="menu">/dhis-web-importexport/mainMenu.vm</param>
-          <param name="page">/dhis-web-importexport/dxf2MetaDataSubSetImport.vm</param>
-          <param name="javascripts">javascript/importMetaDataSubSet.js</param>
+          <param name="page">/dhis-web-importexport/dxf2MetaDataImportSubSet.vm</param>
+          <param name="javascripts">javascript/metaDataImportSubSet.js</param>
           <param name="requiredAuthorities">F_METADATA_IMPORT</param>
       </action>
 
-      <action name="dxf2MetaDataSubSetExport" class="org.hisp.dhis.importexport.action.dxf2.MetaDataExportFormAction">
+      <action name="dxf2MetaDataExportSubSet" class="org.hisp.dhis.importexport.action.dxf2.MetaDataExportSubSetFormAction">
           <result name="success" type="velocity">/main.vm</result>
           <param name="menu">/dhis-web-importexport/mainMenu.vm</param>
-          <param name="page">/dhis-web-importexport/dxf2MetaDataSubSetExport.vm</param>
-          <param name="javascripts">javascript/exportMetaDataSubset.js</param>
+          <param name="page">/dhis-web-importexport/dxf2MetaDataExportSubSet.vm</param>
+          <param name="javascripts">javascript/metaDataExportSubSet.js</param>
           <param name="requiredAuthorities">F_METADATA_EXPORT</param>
       </action>
 
