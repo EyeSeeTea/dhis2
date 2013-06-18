@@ -44,6 +44,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.lang.SafeVarargs;
+import java.lang.System;
 
 /**
  * @author Rosu Ovidiu <rosu.ovi@gmail.com>
@@ -55,6 +57,7 @@ public class MetaDataSubSetExportAction
     @Override
     public String execute() throws Exception
     {
+        System.out.println("AM INTRAT IN EXPORT");
 
         return SUCCESS;
     }
