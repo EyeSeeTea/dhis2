@@ -63,8 +63,11 @@ import org.hisp.dhis.caseaggregation.CaseAggregationCondition;
 import org.hisp.dhis.caseaggregation.CaseAggregationConditionManager;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.CalendarPeriodType;
 import org.hisp.dhis.period.Period;
@@ -106,6 +109,20 @@ public class JdbcCaseAggregationConditionManager
     public void setJdbcTemplate( JdbcTemplate jdbcTemplate )
     {
         this.jdbcTemplate = jdbcTemplate;
+    }
+
+    private StatementBuilder statementBuilder;
+
+    public void setStatementBuilder( StatementBuilder statementBuilder )
+    {
+        this.statementBuilder = statementBuilder;
+    }
+
+    private DataElementService dataElementService;
+
+    public void setDataElementService( DataElementService dataElementService )
+    {
+        this.dataElementService = dataElementService;
     }
 
     // -------------------------------------------------------------------------
@@ -188,7 +205,7 @@ public class JdbcCaseAggregationConditionManager
 
             SqlRowSet rs = jdbcTemplate.queryForRowSet( sql );
             grid.addRows( rs );
-            
+
             return grid;
         }
 
@@ -367,9 +384,9 @@ public class JdbcCaseAggregationConditionManager
             sql += "GROUP BY ou.organisationunitid, ou.name";
 
         }
-        
+
         sql = sql.replaceAll( "COMBINE", "" );
-        
+
         return sql;
     }
 
@@ -392,13 +409,17 @@ public class JdbcCaseAggregationConditionManager
                     DateUtils.getMediumDateString( period.getStartDate() ),
                     DateUtils.getMediumDateString( period.getEndDate() ) );
         }
-        else if ( hasPatients || operator.equals( CaseAggregationCondition.AGGRERATION_COUNT ) )
+        else
         {
-            sql += "p.firstName, p.middleName, p.lastName, p.gender, p.birthDate, p.phoneNumber, ";
-        }
-        else if ( hasDataelement )
-        {
-            sql += "pdv.value,";
+            if ( hasPatients || operator.equals( CaseAggregationCondition.AGGRERATION_COUNT ) )
+            {
+                sql += "p.firstName, p.middleName, p.lastName, p.gender, p.birthDate, p.phoneNumber, ";
+            }
+
+            if ( hasDataelement )
+            {
+                sql += "pdv.value,";
+            }
         }
 
         sql += "pgs.name as program_stage, psi.executiondate as report_date ";
@@ -547,7 +568,7 @@ public class JdbcCaseAggregationConditionManager
                 periodid = rs.getInt( "periodid" );
             }
 
-            if ( periodid == null)
+            if ( periodid == null )
             {
                 String insertSql = "insert into period (periodtypeid,startdate,enddate) " + " VALUES " + "("
                     + periodTypeId + ",'" + start + "','" + end + "' )";
@@ -754,7 +775,15 @@ public class JdbcCaseAggregationConditionManager
 
         if ( isExist )
         {
-            sql += " AND _pdv.value ";
+            DataElement dataElement = dataElementService.getDataElement( dataElementId );
+            if ( dataElement.getType().equals( DataElement.VALUE_TYPE_INT ) )
+            {
+                sql += " AND ( cast( _pdv.value as " + statementBuilder.getDoubleColumnType() + " )  ) ";
+            }
+            else
+            {
+                sql += " AND _pdv.value ";
+            }
         }
 
         return sql;
@@ -967,7 +996,7 @@ public class JdbcCaseAggregationConditionManager
         sql += " UNION ";
         sql += "( select distinct organisationunitid from patient where registrationdate>='" + startDate
             + "' and registrationdate<='" + endDate + "')";
-        
+
         Collection<Integer> orgunitIds = new HashSet<Integer>();
         orgunitIds = jdbcTemplate.query( sql, new RowMapper<Integer>()
         {
@@ -1056,7 +1085,6 @@ public class JdbcCaseAggregationConditionManager
             String match = matcher.group();
 
             match = match.replaceAll( "[\\[\\]]", "" );
-
             String[] info = match.split( SEPARATOR_OBJECT );
 
             if ( info[0].equalsIgnoreCase( CaseAggregationCondition.OBJECT_PROGRAM_STAGE_DATAELEMENT ) )

@@ -200,6 +200,8 @@ public class TableAlteror
         executeSql( "update program set remindCompleted=false where remindCompleted is null" );
         executeSql( "update patientreminder set dateToCompare='duedate' where programstageid is not null" );
         executeSql( "UPDATE programinstance SET followup=false where followup is null" );
+        executeSql( "UPDATE patientreminder SET sendTo=1 where sendTo is null" );
+        
         
         updateUid();
 
@@ -215,8 +217,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE program ALTER COLUMN dateofenrollmentdescription DROP NOT NULL");
         executeSql( "UPDATE program SET displayOnAllOrgunit=true where displayOnAllOrgunit is null" );
         executeSql( "UPDATE program SET useFormNameDataElement=true where useFormNameDataElement is null" );
-        
-        
+        executeSql( "ALTER TABLE caseaggregationcondition ALTER COLUMN aggregationexpression TYPE varchar(1000)");
     }
 
     // -------------------------------------------------------------------------
