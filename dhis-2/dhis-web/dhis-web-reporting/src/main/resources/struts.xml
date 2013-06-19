@@ -48,16 +48,6 @@
       <param name="onExceptionReturn">plainTextError</param>
     </action>
 
-    <!-- Chart -->
-
-    <action name="viewChart" class="org.hisp.dhis.reporting.chart.action.ViewChartAction">
-      <result name="success" type="chart"></result>
-    </action>
-
-    <action name="generateChart" class="org.hisp.dhis.reporting.chart.action.GenerateChartAction">
-      <result name="success" type="chart"></result>
-    </action>
-
     <!-- Report -->
 
     <action name="displayAddReportForm" class="org.hisp.dhis.reporting.reportviewer.action.GetReportOptionsAction">
@@ -132,22 +122,11 @@
       <param name="onExceptionReturn">plainTextError</param>
     </action>
 
-    <action name="saveTable" class="org.hisp.dhis.reporting.tablecreator.action.SaveTableAction">
-      <result name="success" type="redirect">displayManageTableForm.action</result>
-    </action>
-
     <action name="getReportParams" class="org.hisp.dhis.reporting.tablecreator.action.GetReportParamsAction">
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-reporting/inputReportParamsForm.vm</param>
       <param name="menu">/dhis-web-reporting/menu.vm</param>
       <param name="javascripts">../dhis-web-commons/oust/oust.js,javascript/generateReport.js</param>
-    </action>
-
-    <action name="displayAddTableForm" class="org.hisp.dhis.reporting.tablecreator.action.GetTableOptionsAction">
-      <result name="success" type="velocity">/main.vm</result>
-      <param name="page">/dhis-web-reporting/addTableForm.vm</param>
-      <param name="menu">/dhis-web-reporting/menu.vm</param>
-      <param name="javascripts">../dhis-web-commons/oust/oust.js,javascript/table.js,javascript/lists.js</param>
     </action>
 
     <action name="getTable" class="org.hisp.dhis.reporting.tablecreator.action.GetTableAction">
@@ -171,26 +150,6 @@
       <param name="hideMenu">true</param>
       <param name="javascripts">javascript/generateReport.js</param>
       <param name="stylesheets">style/dhis-web-reporting.css</param>
-    </action>
-
-    <action name="getCategoryComboDataElements" class="org.hisp.dhis.reporting.tablecreator.action.GetCategoryComboDataElementsAction">
-      <result name="success" type="velocity-xml">../dhis-web-commons/ajax/xmlDataElements.vm</result>
-      <param name="onExceptionReturn">plainTextError</param>
-    </action>
-
-    <!-- PivotTable -->
-
-    <action name="displayPivotTableForm" class="org.hisp.dhis.reporting.pivottable.action.GetPivotTableOptionsAction">
-      <result name="success" type="velocity">/main.vm</result>
-      <param name="page">/dhis-web-reporting/viewPivotTableForm.vm</param>
-      <param name="hideMenu">true</param>
-      <param name="javascripts">../dhis-web-commons/oust/oust.js,javascript/pivot.js</param>
-    </action>
-
-    <action name="getPivotTable" class="org.hisp.dhis.reporting.pivottable.action.GetPivotTableAction">
-      <result name="xls" type="gridXlsResult" />
-      <result name="json" type="velocity-json">/dhis-web-reporting/responsePivotTable.vm</result>
-      <param name="onExceptionReturn">plainTextError</param>
     </action>
 
     <!-- Data Completeness -->

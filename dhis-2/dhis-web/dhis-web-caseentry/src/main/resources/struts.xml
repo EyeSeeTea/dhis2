@@ -538,6 +538,9 @@
       <param name="page">
         /dhis-web-caseentry/updatePatientForm.vm
       </param>
+      <param name="javascripts">
+      	../dhis-web-commons/javascripts/jQuery/jquery-barcode.min.js
+      </param>
       <param name="requiredAuthorities">F_PATIENT_UPDATE</param>
     </action>
 
@@ -717,6 +720,9 @@
       class="org.hisp.dhis.caseentry.action.patient.ShowRelationshipListAction">
       <result name="success" type="velocity">/content.vm</result>
       <param name="page">/dhis-web-caseentry/relationshipList.vm</param>
+       <param name="javascripts">
+      		../dhis-web-commons/javascripts/jQuery/jquery-barcode.min.js
+      </param>
       <param name="requiredAuthorities">F_RELATIONSHIP_MANAGEMENT</param>
     </action>
 
@@ -743,9 +749,8 @@
 
     <action name="searchRelationshipPatient"
       class="org.hisp.dhis.caseentry.action.patient.SearchRelationshipPatientAction">
-      <result name="success" type="velocity-json">
-        /dhis-web-caseentry/responseRelationshipPatients.vm
-      </result>
+      <result name="success" type="velocity">/content.vm</result>
+      <param name="page">/dhis-web-caseentry/relationshipPatients.vm</param>
       <param name="requiredAuthorities">F_RELATIONSHIP_ADD</param>
     </action>
 
@@ -865,6 +870,13 @@
       </result>
       <param name="requiredAuthorities">F_GENERATE_BENEFICIARY_TABULAR_REPORT</param>
     </action>
+    
+    <action name="loadProgramStageSections"
+      class="org.hisp.dhis.caseentry.action.report.GetProgramStageSectionsAction">
+      <result name="success" type="velocity-json">/dhis-web-caseentry/jsonProgramStageSections.vm
+      </result>
+      <param name="requiredAuthorities">F_GENERATE_BENEFICIARY_TABULAR_REPORT</param>
+    </action>
 
     <action name="loadDataElements"
       class="org.hisp.dhis.caseentry.action.report.LoadDataElementsAction">
@@ -905,7 +917,7 @@
       <result name="success" type="velocity-json">
         /dhis-web-commons/ajax/jsonResponseSuccess.vm
       </result>
-      <param name="requiredAuthorities">F_GENERATE_BENEFICIARY_TABULAR_REPORT</param>
+      <param name="anyAuthorities">F_PATIENT_TABULAR_REPORT_PUBLIC_ADD,F_PATIENT_TABULAR_REPORT_PRIVATE_ADD</param>
     </action>
 
     <action name="getTabularReports"
@@ -967,7 +979,7 @@
       <result name="success" type="velocity-json">
         /dhis-web-commons/ajax/jsonResponseSuccess.vm
       </result>
-      <param name="requiredAuthorities">F_GENERATE_BENEFICIARY_TABULAR_REPORT</param>
+      <param name="anyAuthorities">F_PATIENT_AGGREGATE_REPORT_PUBLIC_ADD,F_PATIENT_AGGREGATE_REPORT_PRIVATE_ADD</param>
     </action>
 
     <action name="getAggregateReports"
@@ -1016,7 +1028,7 @@
       <interceptor-ref name="organisationUnitTreeStack" />
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-caseentry/programTrackingSelect.vm</param>
-      <param name="menu">/dhis-web-caseentry/trackingMenu.vm</param>
+      <param name="menu">/dhis-web-caseentry/registrationMenu.vm</param>
       <param name="stylesheets">style/style.css</param>
       <param name="javascripts">
         ../dhis-web-commons/ouwt/ouwt.js,
@@ -1115,7 +1127,7 @@
       <interceptor-ref name="organisationUnitTreeStack" />
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-caseentry/activityPlanSelect.vm</param>
-      <param name="menu">/dhis-web-caseentry/trackingMenu.vm</param>
+      <param name="menu">/dhis-web-caseentry/registrationMenu.vm</param>
       <param name="stylesheets">style/style.css</param>
       <param name="javascripts">
         ../dhis-web-commons/ouwt/ouwt.js,
@@ -1147,7 +1159,7 @@
 	<!-- Program-stage-completeness -->
 	
 	  <action name="programStageCompletenessSelect"
-      class="org.hisp.dhis.caseentry.action.caseentry.MultiDataEntrySelectAction">
+      class="org.hisp.dhis.caseentry.action.patient.SelectAction">
       <interceptor-ref name="organisationUnitTreeStack" />
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-caseentry/programStageCompletenessSelect.vm</param>

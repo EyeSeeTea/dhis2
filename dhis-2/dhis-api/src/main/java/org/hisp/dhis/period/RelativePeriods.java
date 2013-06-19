@@ -356,6 +356,11 @@ public class RelativePeriods
      */
     public String getReportingPeriodName( Date date, I18nFormat format )
     {
+        if ( date == null )
+        {
+            return getReportingPeriodName( format );
+        }
+        
         Period period = getPeriodType().createPeriod( date );
         return format.formatPeriod( period );
     }
@@ -698,6 +703,21 @@ public class RelativePeriods
     }
 
     /**
+     * Returns a date.
+     *
+     * @param months the number of months to subtract from the current date.
+     * @param date the date representing now, ignored if null.
+     * @return a date.
+     */
+    private static Date subtractMonths( int months, Date date )
+    {
+        Calendar cal = PeriodType.createCalendarInstance( date );
+        cal.add( Calendar.MONTH, (months * -1) );
+
+        return cal.getTime();
+    }
+
+    /**
      * Sets the name and short name of the given Period. The name will be
      * formatted to the real period name if the given dynamicNames argument is
      * true. The short name will be formatted in any case.
@@ -708,7 +728,7 @@ public class RelativePeriods
      * @param format       the I18nFormat.
      * @return a period.
      */
-    private Period setName( Period period, String periodName, boolean dynamicNames, I18nFormat format )
+    public static Period setName( Period period, String periodName, boolean dynamicNames, I18nFormat format )
     {
         period.setName( dynamicNames && format != null ? format.formatPeriod( period ) : periodName );
         period.setShortName( format != null ? format.formatPeriod( period ) : null );
@@ -718,26 +738,11 @@ public class RelativePeriods
     /**
      * Returns a date.
      *
-     * @param months the number of months to subtract from the current date.
-     * @param date the date representing now, ignored if null.
-     * @return a date.
-     */
-    private Date subtractMonths( int months, Date date )
-    {
-        Calendar cal = PeriodType.createCalendarInstance( date );
-        cal.add( Calendar.MONTH, (months * -1) );
-
-        return cal.getTime();
-    }
-
-    /**
-     * Returns a date.
-     *
      * @param months the number of weeks to subtract from the current date.
      * @param date the date representing now, ignored if null.
      * @return a date.
      */
-    public Date subtractWeeks( int weeks, Date date )
+    public static Date subtractWeeks( int weeks, Date date )
     {
         Calendar cal = PeriodType.createCalendarInstance( date );
         cal.add( Calendar.DAY_OF_YEAR, (weeks * -7) );
@@ -751,35 +756,35 @@ public class RelativePeriods
      * @param relativePeriods a list of RelativePeriodsEnum.
      * @return a RelativePeriods instance.
      */
-    public static List<Period> getRelativePeriodsFromEnum( RelativePeriodEnum relativePeriod, I18nFormat format, boolean dynamicNames )
+    public static List<Period> getRelativePeriodsFromEnum( RelativePeriodEnum relativePeriod, Date date, I18nFormat format, boolean dynamicNames )
     {
-        Map<RelativePeriodEnum, List<Period>> map = new HashMap<RelativePeriodEnum, List<Period>>();
+        Map<RelativePeriodEnum, RelativePeriods> map = new HashMap<RelativePeriodEnum, RelativePeriods>();
         
-        map.put( RelativePeriodEnum.LAST_MONTH, new RelativePeriods().setReportingMonth( true ).getRelativePeriods( format, dynamicNames ) );
-        map.put( RelativePeriodEnum.LAST_BIMONTH, new RelativePeriods().setReportingBimonth( true ).getRelativePeriods( format, dynamicNames ) );
-        map.put( RelativePeriodEnum.LAST_QUARTER, new RelativePeriods().setReportingQuarter( true ).getRelativePeriods( format, dynamicNames ) );
-        map.put( RelativePeriodEnum.LAST_SIX_MONTH, new RelativePeriods().setLastSixMonth( true ).getRelativePeriods( format, dynamicNames ) );
-        map.put( RelativePeriodEnum.MONTHS_THIS_YEAR, new RelativePeriods().setMonthsThisYear( true ).getRelativePeriods( format, dynamicNames ) );
-        map.put( RelativePeriodEnum.QUARTERS_THIS_YEAR, new RelativePeriods().setQuartersThisYear( true ).getRelativePeriods( format, dynamicNames ) );
-        map.put( RelativePeriodEnum.THIS_YEAR, new RelativePeriods().setThisYear( true ).getRelativePeriods( format, dynamicNames ) );
-        map.put( RelativePeriodEnum.MONTHS_LAST_YEAR, new RelativePeriods().setMonthsLastYear( true ).getRelativePeriods( format, dynamicNames ) );
-        map.put( RelativePeriodEnum.QUARTERS_LAST_YEAR, new RelativePeriods().setQuartersLastYear( true ).getRelativePeriods( format, dynamicNames ) );
-        map.put( RelativePeriodEnum.LAST_YEAR, new RelativePeriods().setLastYear( true ).getRelativePeriods( format, dynamicNames ) );
-        map.put( RelativePeriodEnum.LAST_5_YEARS, new RelativePeriods().setLast5Years( true ).getRelativePeriods( format, dynamicNames ) );
-        map.put( RelativePeriodEnum.LAST_12_MONTHS, new RelativePeriods().setLast12Months( true ).getRelativePeriods( format, dynamicNames ) );
-        map.put( RelativePeriodEnum.LAST_3_MONTHS, new RelativePeriods().setLast3Months( true ).getRelativePeriods( format, dynamicNames ) );
-        map.put( RelativePeriodEnum.LAST_6_BIMONTHS, new RelativePeriods().setLast6BiMonths( true ).getRelativePeriods( format, dynamicNames ) );
-        map.put( RelativePeriodEnum.LAST_4_QUARTERS, new RelativePeriods().setLast4Quarters( true ).getRelativePeriods( format, dynamicNames ) );
-        map.put( RelativePeriodEnum.LAST_2_SIXMONTHS, new RelativePeriods().setLast2SixMonths( true ).getRelativePeriods( format, dynamicNames ) );
-        map.put( RelativePeriodEnum.THIS_FINANCIAL_YEAR, new RelativePeriods().setThisFinancialYear( true ).getRelativePeriods( format, dynamicNames ) );
-        map.put( RelativePeriodEnum.LAST_FINANCIAL_YEAR, new RelativePeriods().setLastFinancialYear( true ).getRelativePeriods( format, dynamicNames ) );
-        map.put( RelativePeriodEnum.LAST_5_FINANCIAL_YEARS, new RelativePeriods().setLast5FinancialYears( true ).getRelativePeriods( format, dynamicNames ) );
-        map.put( RelativePeriodEnum.LAST_WEEK, new RelativePeriods().setLast4Weeks( true ).getRelativePeriods( format, dynamicNames ) );
-        map.put( RelativePeriodEnum.LAST_4_WEEKS, new RelativePeriods().setLast4Weeks( true ).getRelativePeriods( format, dynamicNames ) );
-        map.put( RelativePeriodEnum.LAST_12_WEEKS, new RelativePeriods().setLast12Weeks( true ).getRelativePeriods( format, dynamicNames ) );
-        map.put( RelativePeriodEnum.LAST_52_WEEKS, new RelativePeriods().setLast52Weeks( true ).getRelativePeriods( format, dynamicNames ) );
+        map.put( RelativePeriodEnum.LAST_MONTH, new RelativePeriods().setReportingMonth( true ) );
+        map.put( RelativePeriodEnum.LAST_BIMONTH, new RelativePeriods().setReportingBimonth( true ) );
+        map.put( RelativePeriodEnum.LAST_QUARTER, new RelativePeriods().setReportingQuarter( true ) );
+        map.put( RelativePeriodEnum.LAST_SIX_MONTH, new RelativePeriods().setLastSixMonth( true ) );
+        map.put( RelativePeriodEnum.MONTHS_THIS_YEAR, new RelativePeriods().setMonthsThisYear( true ) );
+        map.put( RelativePeriodEnum.QUARTERS_THIS_YEAR, new RelativePeriods().setQuartersThisYear( true ) );
+        map.put( RelativePeriodEnum.THIS_YEAR, new RelativePeriods().setThisYear( true ) );
+        map.put( RelativePeriodEnum.MONTHS_LAST_YEAR, new RelativePeriods().setMonthsLastYear( true ) );
+        map.put( RelativePeriodEnum.QUARTERS_LAST_YEAR, new RelativePeriods().setQuartersLastYear( true ) );
+        map.put( RelativePeriodEnum.LAST_YEAR, new RelativePeriods().setLastYear( true ) );
+        map.put( RelativePeriodEnum.LAST_5_YEARS, new RelativePeriods().setLast5Years( true ) );
+        map.put( RelativePeriodEnum.LAST_12_MONTHS, new RelativePeriods().setLast12Months( true ) );
+        map.put( RelativePeriodEnum.LAST_3_MONTHS, new RelativePeriods().setLast3Months( true ) );
+        map.put( RelativePeriodEnum.LAST_6_BIMONTHS, new RelativePeriods().setLast6BiMonths( true ) );
+        map.put( RelativePeriodEnum.LAST_4_QUARTERS, new RelativePeriods().setLast4Quarters( true ) );
+        map.put( RelativePeriodEnum.LAST_2_SIXMONTHS, new RelativePeriods().setLast2SixMonths( true ) );
+        map.put( RelativePeriodEnum.THIS_FINANCIAL_YEAR, new RelativePeriods().setThisFinancialYear( true ) );
+        map.put( RelativePeriodEnum.LAST_FINANCIAL_YEAR, new RelativePeriods().setLastFinancialYear( true ) );
+        map.put( RelativePeriodEnum.LAST_5_FINANCIAL_YEARS, new RelativePeriods().setLast5FinancialYears( true ) );
+        map.put( RelativePeriodEnum.LAST_WEEK, new RelativePeriods().setLast4Weeks( true ) );
+        map.put( RelativePeriodEnum.LAST_4_WEEKS, new RelativePeriods().setLast4Weeks( true ) );
+        map.put( RelativePeriodEnum.LAST_12_WEEKS, new RelativePeriods().setLast12Weeks( true ) );
+        map.put( RelativePeriodEnum.LAST_52_WEEKS, new RelativePeriods().setLast52Weeks( true ) );
         
-        return map.get( relativePeriod );
+        return map.containsKey( relativePeriod ) ? map.get( relativePeriod ).getRelativePeriods( date, format, dynamicNames ) : new ArrayList<Period>();
     }
     
     /**

@@ -20,6 +20,15 @@
 					<td>$encoder.htmlEncode($programStageInstance.programInstance.patient.getFullName()) ( $programStageInstance.programInstance.patient.gender )</td>
 				</tr>
 				<tr>
+					<td class="bold">$i18n.getString("gender")</td>
+					<td>#if($patient.gender=='F')
+							<img src='images/female_small.png'>
+						#else
+							<img src='images/male_small.png'>
+						#end
+					</td>
+				</tr>
+				<tr>
 					<td class="bold">$i18n.getString( "date_of_birth" ):</td>
 					<td>$format.formatDate( $programStageInstance.programInstance.patient.birthDate ) ( $programStageInstance.programInstance.patient.getAge() )</td>
 				</tr>
@@ -120,14 +129,14 @@
 	</div>
 </div>			
 
-<div id='tabs'>
+<div id='tabs-tracking'>
 	<ul>
-		<li><a href="#tab-1">$i18n.getString("comments")</a></li>
-		<li><a href="#tab-2">$i18n.getString("messages")</a></li>
+		<li><a href="#tab-1">$i18n.getString("comments_and_sms_message")</a></li>
+		<li><a href="#tab-2">$i18n.getString("program_report")</a></li>
 	</ul>
 	
 	<div id='tab-1'>
-		<table class="mainPageTable">
+		<table class="mainPageTable" id='messageList'>
 			<colgroup>
 				<col width="160px"/>
 				<col width="160px"/>
@@ -138,6 +147,7 @@
 				<th>$i18n.getString( "date" )</th>
 				<th>$i18n.getString( "events" )</th>
 				<th>$i18n.getString( "sender" )</th>
+				<th>$i18n.getString( "type" )</th>
 				<th>$i18n.getString( "message" )</th>
 			</tr>
 			<tbody id='commentTB' name='commentTB'>
@@ -147,41 +157,32 @@
 						<td>$format.formatDateTime($comment.createdDate)</td>
 						<td>$encoder.htmlEncode($programStageInstance.programStage.displayName)</td>
 						<td>$encoder.htmlEncode($comment.creator)</td>
+						<td>$i18n.getString('comment')</td>
 						<td>$encoder.htmlEncode($comment.commentText)</td>
 					</tr>
 					#set( $mark = !$mark )
 				#end
-			</tbody>
-		</table>
-	</div>
-	
-	<div id='tab-2'>
-		<table class="mainPageTable">
-			<colgroup>
-				<col width="160px"/>
-				<col width="160px"/>
-				<col width="100px"/>
-				<col/>
-			</colgroup>
-			<tr>
-				<th>$i18n.getString( "date" )</th>
-				<th>$i18n.getString( "program_stage" )</th>
-				<th>$i18n.getString( "sender" )</th>
-				<th>$i18n.getString( "message" )</th>
-			</tr>
-			<tbody id='messageTB' name='messageTB'>
-				#set( $mark = false )
 				#foreach( $sms in $outboundSms )
 					<tr id="tr${sms.id}" #alternate( $mark )>
 						<td>$format.formatDateTime($!sms.date)</td>
 						<td>$encoder.htmlEncode($programStageInstance.programStage.displayName)</td>
 						<td>$encoder.htmlEncode($sms.sender)</td>
+						<td>$i18n.getString('message')</td>
 						<td>$encoder.htmlEncode($sms.message)</td>
 					</tr>
 					#set( $mark = !$mark )
 				#end
 			</tbody>
 		</table>
+		
+	</div>
+	
+	<div id='tab-2'>
+		<p>
+			<input type="button" onclick="exportProgramReports( '$programInstance.id', 'xls' )" value="$i18n.getString('get_report_as_xls')" style='width:150px;'>
+			<input type="button" onclick="exportProgramReports( '$programInstance.id', 'pdf' )" value="$i18n.getString('get_report_as_pdf')" style='width:150px;'>
+		</p>
+		<div id='programReportDiv'></div>
 	</div>
 <div>
 
@@ -189,9 +190,20 @@
 	jQuery(document).ready(	function(){
 		setFieldValue('programStageName', "$programStageInstance.programStage.displayName");
 		setFieldValue( "programStageInstanceId", "$!programStageInstance.id" );
-		$('#tabs').tabs();
+		$('#tabs-tracking').tabs();
 	});
 
+	
+	$( "#tabs-tracking" ).bind( "tabsselect", function(event, ui) {
+		if( ui.tab.hash == '#tab-2' ){
+			programReports(getFieldValue('programInstanceId'));
+		}
+	});
+	
+	tableSorter( 'messageList' );
+	var sorting = [[0,1]];
+	$("#messageList").trigger("sorton", [sorting]);
+	
 	var i18n_color_quick_help = '$encoder.jsEscape( $i18n.getString( "color_quick_help" ) , "'")';
 	var i18n_comment_added = '$encoder.jsEscape( $i18n.getString( "comment_added" ) , "'")';
 	var i18n_this_field_is_required = '$encoder.jsEscape( $i18n.getString( "this_field_is_required" ) , "'")';

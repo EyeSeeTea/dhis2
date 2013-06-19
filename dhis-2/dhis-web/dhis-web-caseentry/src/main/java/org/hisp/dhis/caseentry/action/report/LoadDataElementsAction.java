@@ -30,6 +30,8 @@ package org.hisp.dhis.caseentry.action.report;
 import java.util.Collection;
 
 import org.hisp.dhis.program.ProgramStageDataElement;
+import org.hisp.dhis.program.ProgramStageSection;
+import org.hisp.dhis.program.ProgramStageSectionService;
 import org.hisp.dhis.program.ProgramStageService;
 
 import com.opensymphony.xwork2.Action;
@@ -53,6 +55,13 @@ public class LoadDataElementsAction
         this.programStageService = programStageService;
     }
 
+    private ProgramStageSectionService programStageSectionService;
+
+    public void setProgramStageSectionService( ProgramStageSectionService programStageSectionService )
+    {
+        this.programStageSectionService = programStageSectionService;
+    }
+
     // -------------------------------------------------------------------------
     // Input/output
     // -------------------------------------------------------------------------
@@ -62,6 +71,13 @@ public class LoadDataElementsAction
     public void setProgramStageId( Integer programStageId )
     {
         this.programStageId = programStageId;
+    }
+
+    private Integer sectionId;
+
+    public void setSectionId( Integer sectionId )
+    {
+        this.sectionId = sectionId;
     }
 
     private Collection<ProgramStageDataElement> psDataElements;
@@ -82,6 +98,11 @@ public class LoadDataElementsAction
         if ( programStageId != null )
         {
             psDataElements = programStageService.getProgramStage( programStageId ).getProgramStageDataElements();
+        }
+        else if( sectionId != null )
+        {
+            ProgramStageSection section = programStageSectionService.getProgramStageSection( sectionId );
+            psDataElements = section.getProgramStageDataElements();
         }
         
         return SUCCESS;

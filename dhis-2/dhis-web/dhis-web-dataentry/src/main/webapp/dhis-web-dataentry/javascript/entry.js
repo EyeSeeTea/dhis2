@@ -17,6 +17,7 @@
 
 var FORMULA_PATTERN = /#\{.+?\}/g;
 var SEPARATOR = '.';
+var EVENT_VALUE_SAVED = 'dhis-web-dataentry-value-saved';
 
 function updateDataElementTotals()
 {
@@ -238,6 +239,21 @@ function saveBoolean( dataElementId, optionComboId, fieldId )
     valueSaver.save();
 }
 
+function saveTrueOnly( dataElementId, optionComboId, fieldId )
+{
+    fieldId = '#' + fieldId;
+
+    var value = $( fieldId ).attr('checked');
+
+    $( fieldId ).css( 'background-color', COLOR_YELLOW );
+
+    var periodId = $( '#selectedPeriodId' ).val();
+
+    var valueSaver = new ValueSaver( dataElementId, optionComboId,
+    	currentOrganisationUnitId, periodId, value, fieldId, COLOR_GREEN );
+    valueSaver.save();
+}
+
 /**
  * Supportive method.
  */
@@ -249,6 +265,14 @@ function alertField( fieldId, alertMessage )
     window.alert( alertMessage );
 
     return false;
+}
+
+/**
+ * Convenience method which can be used in custom form scripts. Do not change.
+ */
+function onValueSave( fn )
+{
+	$( 'body' ).off( EVENT_VALUE_SAVED ).on( EVENT_VALUE_SAVED, fn );
 }
 
 // -----------------------------------------------------------------------------
@@ -297,6 +321,8 @@ function ValueSaver( dataElementId, optionComboId, organisationUnitId, periodId,
             markValue( fieldId, COLOR_RED );
             window.alert( i18n_saving_value_failed_status_code + '\n\n' + code );
         }
+        
+        $( 'body' ).trigger( EVENT_VALUE_SAVED, dataValue );
     }
 
     function handleError( jqXHR, textStatus, errorThrown )

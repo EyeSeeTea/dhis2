@@ -29,13 +29,14 @@ package org.hisp.dhis.translation.hibernate;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
+//import java.util.I18nLocale;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.hisp.dhis.translation.Translation;
 import org.hisp.dhis.translation.TranslationStore;
 
@@ -74,7 +75,7 @@ public class HibernateTranslationStore
         session.update( translation );
     }
 
-    public Translation getTranslation( String className, int id, Locale locale, String property )
+    public Translation getTranslation( String className, int id, I18nLocale locale, String property )
     {
         Session session = sessionFactory.getCurrentSession();
 
@@ -82,7 +83,7 @@ public class HibernateTranslationStore
 
         criteria.add( Restrictions.eq( "className", className ) );
         criteria.add( Restrictions.eq( "id", id ) );
-        criteria.add( Restrictions.eq( "locale", locale.toString() ) );
+        criteria.add( Restrictions.eq( "locale", locale.getName() ) );
         criteria.add( Restrictions.eq( "property", property ) );
 
         criteria.setCacheable( true );
@@ -91,7 +92,7 @@ public class HibernateTranslationStore
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<Translation> getTranslations( String className, int id, Locale locale )
+    public Collection<Translation> getTranslations( String className, int id, I18nLocale locale )
     {
         Session session = sessionFactory.getCurrentSession();
 
@@ -99,7 +100,7 @@ public class HibernateTranslationStore
 
         criteria.add( Restrictions.eq( "className", className ) );
         criteria.add( Restrictions.eq( "id", id ) );
-        criteria.add( Restrictions.eq( "locale", locale.toString() ) );
+        criteria.add( Restrictions.eq( "locale", locale.getName() ) );
 
         criteria.setCacheable( true );
 
@@ -107,14 +108,14 @@ public class HibernateTranslationStore
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<Translation> getTranslations( String className, Locale locale )
+    public Collection<Translation> getTranslations( String className, I18nLocale locale )
     {
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( Translation.class );
 
         criteria.add( Restrictions.eq( "className", className ) );
-        criteria.add( Restrictions.eq( "locale", locale.toString() ) );
+        criteria.add( Restrictions.eq( "locale", locale.getName() ) );
 
         criteria.setCacheable( true );
 

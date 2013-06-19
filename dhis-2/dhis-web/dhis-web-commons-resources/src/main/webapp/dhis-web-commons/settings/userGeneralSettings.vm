@@ -41,7 +41,7 @@
 <select id="currentLocaleDb" name="currentLocaleDb">
 	<option value="">[$i18n.getString( "use_db_locale_no_translation" )]</option>
 #foreach( $locale in $availableLocalesDb )
-	<option value="$locale.toString()" #if( $locale == $currentLocaleDb )selected="selected"#end>$locale.getDisplayName()</option>
+	<option value="$locale.id" #if( $locale == $currentLocaleDb )selected="selected"#end>$locale.getDisplayName()</option>
 #end
 </select>
 </div>

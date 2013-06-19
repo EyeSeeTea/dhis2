@@ -83,7 +83,7 @@ public class SaveTabularReportAction
     {
         this.currentUserService = currentUserService;
     }
-    
+
     private I18nFormat format;
 
     public void setFormat( I18nFormat format )
@@ -119,6 +119,10 @@ public class SaveTabularReportAction
 
     private Boolean userOrganisationUnitChildren;
 
+    private Boolean displayOrgunitCode;
+
+    private Boolean useFormNameDataElement;
+
     // -------------------------------------------------------------------------
     // Setters
     // -------------------------------------------------------------------------
@@ -153,6 +157,11 @@ public class SaveTabularReportAction
         this.endDate = endDate;
     }
 
+    public void setDisplayOrgunitCode( Boolean displayOrgunitCode )
+    {
+        this.displayOrgunitCode = displayOrgunitCode;
+    }
+
     public void setStartDate( String startDate )
     {
         this.startDate = startDate;
@@ -183,6 +192,11 @@ public class SaveTabularReportAction
         this.userOrganisationUnitChildren = userOrganisationUnitChildren;
     }
 
+    public void setUseFormNameDataElement( Boolean useFormNameDataElement )
+    {
+        this.useFormNameDataElement = useFormNameDataElement;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -193,10 +207,12 @@ public class SaveTabularReportAction
     {
         userOrganisationUnit = (userOrganisationUnit == null) ? false : userOrganisationUnit;
         userOrganisationUnitChildren = (userOrganisationUnitChildren == null) ? false : userOrganisationUnitChildren;
+        displayOrgunitCode = (displayOrgunitCode == null) ? false : displayOrgunitCode;
+        ;
 
         Set<OrganisationUnit> orgunits = new HashSet<OrganisationUnit>(
             organisationUnitService.getOrganisationUnits( orgunitIds ) );
-        
+
         ProgramStage programStage = programStageService.getProgramStage( programStageId );
 
         // ---------------------------------------------------------------------
@@ -211,6 +227,8 @@ public class SaveTabularReportAction
         tabularReport.setFacilityLB( facilityLB );
         tabularReport.setSortedOrgunitAsc( orderByOrgunitAsc );
         tabularReport.setUser( currentUserService.getCurrentUser() );
+        tabularReport.setDisplayOrgunitCode( displayOrgunitCode );
+        tabularReport.setUseFormNameDataElement( useFormNameDataElement );
 
         if ( useCompletedEvents != null )
         {
@@ -226,5 +244,4 @@ public class SaveTabularReportAction
 
         return SUCCESS;
     }
-
 }

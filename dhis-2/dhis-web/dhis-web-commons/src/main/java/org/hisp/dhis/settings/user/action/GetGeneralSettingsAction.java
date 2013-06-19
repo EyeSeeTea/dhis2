@@ -31,6 +31,7 @@ import static org.hisp.dhis.user.UserSettingService.AUTO_SAVE_DATA_ENTRY_FORM;
 import static org.hisp.dhis.user.UserSettingService.KEY_MESSAGE_EMAIL_NOTIFICATION;
 import static org.hisp.dhis.user.UserSettingService.KEY_MESSAGE_SMS_NOTIFICATION;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -39,6 +40,8 @@ import java.util.Locale;
 import java.util.SortedMap;
 
 import org.hisp.dhis.i18n.I18nService;
+import org.hisp.dhis.i18n.locale.I18nLocale;
+import org.hisp.dhis.i18n.locale.I18nLocaleService;
 import org.hisp.dhis.i18n.locale.LocaleManager;
 import org.hisp.dhis.i18n.resourcebundle.ResourceBundleManager;
 import org.hisp.dhis.setting.StyleManager;
@@ -70,6 +73,14 @@ public class GetGeneralSettingsAction
     public void setI18nService( I18nService i18nService )
     {
         this.i18nService = i18nService;
+    }
+
+    private I18nLocaleService i18nLocaleService;
+
+
+    public void setI18nLocaleService( I18nLocaleService i18nLocaleService )
+    {
+        this.i18nLocaleService = i18nLocaleService;
     }
 
     private LocaleManager localeManager;
@@ -111,16 +122,16 @@ public class GetGeneralSettingsAction
         return currentLocale;
     }
 
-    private List<Locale> availableLocalesDb;
+    private List<I18nLocale> availableLocalesDb;
 
-    public List<Locale> getAvailableLocalesDb()
+    public List<I18nLocale> getAvailableLocalesDb()
     {
         return availableLocalesDb;
     }
 
-    private Locale currentLocaleDb;
+    private I18nLocale currentLocaleDb;
 
-    public Locale getCurrentLocaleDb()
+    public I18nLocale getCurrentLocaleDb()
     {
         return currentLocaleDb;
     }
@@ -183,22 +194,32 @@ public class GetGeneralSettingsAction
 
         currentLocale = localeManager.getCurrentLocale();
 
+        
+        
         // ---------------------------------------------------------------------
         // Get available locales in db
         // ---------------------------------------------------------------------
+                
+        availableLocalesDb = new ArrayList<I18nLocale>( i18nLocaleService.getAllI18nLocales() );
 
-        availableLocalesDb = new ArrayList<Locale>( i18nService.getAvailableLocales() );
-
-        Collections.sort( availableLocalesDb, new Comparator<Locale>()
+        Collections.sort( availableLocalesDb, new Comparator<I18nLocale>()
         {
-            public int compare( Locale locale0, Locale locale1 )
+            public int compare( I18nLocale locale0, I18nLocale locale1 )
             {
                 return locale0.getDisplayName().compareTo( locale1.getDisplayName() );
             }
         } );
 
-        currentLocaleDb = i18nService.getCurrentLocale();
+        currentLocaleDb = i18nLocaleService.getCurrentI18nLocale();
 
+        
+        String currentLocaleDbName = "";
+        if( currentLocaleDb == null ) currentLocaleDbName = "null";
+        else currentLocaleDbName = currentLocaleDb.getName();
+        
+        System.out.println( "Current Locale DB: " + currentLocaleDbName );
+
+        
         // ---------------------------------------------------------------------
         // Get Auto-save data entry form
         // ---------------------------------------------------------------------

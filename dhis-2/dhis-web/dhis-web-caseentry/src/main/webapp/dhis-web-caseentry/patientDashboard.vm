@@ -1,11 +1,11 @@
-<h3>
- <a name="mainPagelink" href="javascript:onClickBackBtn();">$i18n.getString( 'patient_management' )</a>
- &#8226; $i18n.getString( 'patient_dashboard' )
- &raquo; <a href="javascript:dashboardHistoryToggle();" >$i18n.getString( 'history' )</a>
-</h3>
-
-<div class='dashboard-area'>
-<table>
+<table style='margin-top:-25px;'>
+	<tr>
+		<td colspan='3'>
+			<h3><a name="mainPagelink" href="javascript:onClickBackBtn();">$i18n.getString( 'patient_management' )</a>
+			&#8226; $i18n.getString( 'patient_dashboard' )</h3>
+		</td>
+		<td><span style="float:right;"><h4><a href="javascript:dashboardHistoryToggle();" >$i18n.getString( 'access_log' )</a></h4></span></td>
+	</tr>
 <tr>
 #if( $auth.hasAccess( "dhis-web-caseentry", "accessPatientAttributes" ) )
 <td>
@@ -32,7 +32,12 @@
 				#if( $!patient.gender )
 				<tr>
 					<td>$i18n.getString("gender")</td>
-					<td>$i18n.getString($!patient.gender)</td>
+					<td>#if($patient.gender=='F')
+							<img src='images/female_small.png'>
+						#else
+							<img src='images/male_small.png'>
+						#end
+					</td>
 				</tr>
 				#end
 				#if( $!patient.birthDate )
@@ -129,9 +134,10 @@
 						#if( $status!=1 && $status!=5 && $flag=='false')
 							<tr id='tr1_$programInstance.id' type='$programInstance.program.type'
 								programStageInstanceId='$programStageInstanceId' style='cursor:pointer;'
-								onclick='javascript:loadActiveProgramStageRecords("$programInstance.id", "$programStageInstance.id")' >
+								onclick='javascript:setFieldValue("programIdAddPatient",$programInstance.program.id);loadActiveProgramStageRecords("$programInstance.id", "$programStageInstance.id")' >
 								<td id='td_$programInstance.id'>
 									<a><span id='infor_$programInstance.id'>$programInstance.program.displayName ($format.formatDate($programInstance.enrollmentDate))</span></a>
+									<img id='followup_$programInstance.id' src='images/risk_small.png' #if($programInstance.followup=='true') #else class='hidden' #end >
 								</td>
 							</tr>
 							#if($programInstance.program.type==1 && $programStageInstance)
@@ -177,7 +183,7 @@
 							#set($programStageInstanceId = $programStageInstance.id)
 						#end
 					#end
-					<tr onclick='javascript:loadActiveProgramStageRecords($programInstance.id);' >
+					<tr onclick='javascript:setFieldValue("programIdAddPatient",$programInstance.program.id);loadActiveProgramStageRecords($programInstance.id);' >
 						<td>
 							<a><span id='infor_$programInstance.id'>$programInstance.program.displayName ($format.formatDate($programInstance.enrollmentDate))</span></a>
 						</td>
@@ -269,4 +275,6 @@
 	jQuery('[name=mainPagelink]').html(i18n_main_form_link);
 	var i18n_history = '$encoder.jsEscape( $i18n.getString( "history" ) , "'" )';
 	var i18n_this_field_is_required = '$encoder.jsEscape( $i18n.getString( "this_field_is_required" ) , "'" )';
+	var i18n_comment = '$encoder.jsEscape( $i18n.getString( "comment" ) , "'")';
+	var i18n_message = '$encoder.jsEscape( $i18n.getString( "message" ) , "'")';
 </script>

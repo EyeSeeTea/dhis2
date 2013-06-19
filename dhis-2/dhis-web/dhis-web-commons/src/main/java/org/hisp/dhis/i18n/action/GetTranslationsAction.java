@@ -31,6 +31,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.hisp.dhis.i18n.I18nService;
+import org.hisp.dhis.i18n.locale.I18nLocale;
+import org.hisp.dhis.i18n.locale.I18nLocaleService;
 import org.hisp.dhis.system.util.LocaleUtils;
 
 import com.opensymphony.xwork2.ActionSupport;
@@ -60,6 +62,13 @@ public class GetTranslationsAction
         this.i18nService = i18nService;
     }
 
+    private I18nLocaleService i18nLocaleService;
+
+    public void setI18nLocaleService( I18nLocaleService i18nLocaleService )
+    {
+        this.i18nLocaleService = i18nLocaleService;
+    }
+    
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -91,7 +100,7 @@ public class GetTranslationsAction
     public String execute()
         throws Exception
     {
-        Locale locale = LocaleUtils.getLocale( loc );
+        I18nLocale locale = i18nLocaleService.getI18nLocaleByName( loc );
 
         translations = i18nService.getTranslations( className, id, locale );
         

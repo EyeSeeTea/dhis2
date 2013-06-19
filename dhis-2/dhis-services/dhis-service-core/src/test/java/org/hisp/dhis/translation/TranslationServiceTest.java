@@ -36,6 +36,8 @@ import java.util.Locale;
 
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.i18n.locale.I18nLocale;
+import org.hisp.dhis.i18n.locale.I18nLocaleService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.junit.Test;
 
@@ -47,6 +49,8 @@ public class TranslationServiceTest
 {
     private TranslationService translationService;
 
+    private I18nLocaleService i18nLocaleService;
+    
     // -------------------------------------------------------------------------
     // Set up/tear down
     // -------------------------------------------------------------------------
@@ -55,6 +59,10 @@ public class TranslationServiceTest
     public void setUpTest()
     {
         translationService = (TranslationService) getBean( TranslationService.ID );
+        
+        locale1 = new I18nLocale("UK", "test1");
+        locale2 = new I18nLocale("US", "test2");
+        locale3 = new I18nLocale("FRANCE", "test3");        
     }
     
     // -------------------------------------------------------------------------
@@ -64,31 +72,32 @@ public class TranslationServiceTest
     private int id1 = 0;
     private int id2 = 1;
 
-    private String locale1 = Locale.UK.toString();
-    private String locale2 = Locale.US.toString();
-    private String locale3 = Locale.FRANCE.toString();
+    private I18nLocale locale1;
+    private I18nLocale locale2;
+    private I18nLocale locale3;
 
     private String className1 = OrganisationUnit.class.getName();
     private String className2 = DataElement.class.getName();
 
-    private Translation translation1a = new Translation( className1, id1, locale1, "name", "cheers" );
-    private Translation translation1b = new Translation( className1, id1, locale1, "shortName", "goodbye" );
-    private Translation translation2a = new Translation( className1, id1, locale2, "name", "hello" );
-    private Translation translation2b = new Translation( className2, id1, locale2, "name", "hey" );
-    private Translation translation2c = new Translation( className2, id2, locale3, "name", "bonjour" );
+    private Translation translation1a = new Translation( className1, id1, locale1.getName(), "name", "cheers" );
+    private Translation translation1b = new Translation( className1, id1, locale1.getName(), "shortName", "goodbye" );
+    private Translation translation2a = new Translation( className1, id1, locale2.getName(), "name", "hello" );
+    private Translation translation2b = new Translation( className2, id1, locale2.getName(), "name", "hey" );
+    private Translation translation2c = new Translation( className2, id2, locale3.getName(), "name", "bonjour" );
 
     // -------------------------------------------------------------------------
     // Tests
     // -------------------------------------------------------------------------
 
+  
     @Test
     public void testAddGet()
     {
         translationService.addTranslation( translation1a );
         translationService.addTranslation( translation1b );
         
-        assertEquals( translation1a, translationService.getTranslation( className1, id1, Locale.UK, "name" ) );
-        assertEquals( translation1b, translationService.getTranslation( className1, id1, Locale.UK, "shortName" ) );
+        assertEquals( translation1a, translationService.getTranslation( className1, id1, locale1, "name" ) );
+        assertEquals( translation1b, translationService.getTranslation( className1, id1, locale1, "shortName" ) );
     }
     
     @Test
@@ -97,18 +106,18 @@ public class TranslationServiceTest
         translationService.addTranslation( translation1a );
         translationService.addTranslation( translation1b );
         
-        assertNotNull( translationService.getTranslation( className1, id1, Locale.UK, "name" ) );
-        assertNotNull( translationService.getTranslation( className1, id1, Locale.UK, "shortName" ) );
+        assertNotNull( translationService.getTranslation( className1, id1, locale1, "name" ) );
+        assertNotNull( translationService.getTranslation( className1, id1, locale1, "shortName" ) );
         
         translationService.deleteTranslation( translation1a );
         
-        assertNull( translationService.getTranslation( className1, id1, Locale.UK, "name" ) );
-        assertNotNull( translationService.getTranslation( className1, id1, Locale.UK, "shortName" ) );
+        assertNull( translationService.getTranslation( className1, id1, locale1, "name" ) );
+        assertNotNull( translationService.getTranslation( className1, id1, locale1, "shortName" ) );
 
         translationService.deleteTranslation( translation1b );
 
-        assertNull( translationService.getTranslation( className1, id1, Locale.UK, "name" ) );
-        assertNull( translationService.getTranslation( className1, id1, Locale.UK, "shortName" ) );
+        assertNull( translationService.getTranslation( className1, id1, locale1, "name" ) );
+        assertNull( translationService.getTranslation( className1, id1, locale1, "shortName" ) );
     }
     
     @Test
@@ -116,13 +125,13 @@ public class TranslationServiceTest
     {
         translationService.addTranslation( translation1a );
         
-        assertEquals( translation1a, translationService.getTranslation( className1, id1, Locale.UK, "name" ) );
+        assertEquals( translation1a, translationService.getTranslation( className1, id1, locale1, "name" ) );
         
         translation1a.setValue( "regards" );
         
         translationService.updateTranslation( translation1a );
 
-        assertEquals( "regards", translationService.getTranslation( className1, id1, Locale.UK, "name" ).getValue() );
+        assertEquals( "regards", translationService.getTranslation( className1, id1, locale1, "name" ).getValue() );
     }
 
     @Test
@@ -134,9 +143,9 @@ public class TranslationServiceTest
         translationService.addTranslation( translation2b );
         translationService.addTranslation( translation2c );
         
-        assertEquals( 2, translationService.getTranslations( className1, id1, Locale.UK ).size() );
-        assertTrue( translationService.getTranslations( className1, id1, Locale.UK ).contains( translation1a ) );
-        assertTrue( translationService.getTranslations( className1, id1, Locale.UK ).contains( translation1b ) );
+        assertEquals( 2, translationService.getTranslations( className1, id1, locale1 ).size() );
+        assertTrue( translationService.getTranslations( className1, id1, locale1 ).contains( translation1a ) );
+        assertTrue( translationService.getTranslations( className1, id1, locale1 ).contains( translation1b ) );
     }
 
     @Test
@@ -148,9 +157,9 @@ public class TranslationServiceTest
         translationService.addTranslation( translation2b );
         translationService.addTranslation( translation2c );
         
-        assertEquals( 2, translationService.getTranslations( className1, Locale.UK ).size() );
-        assertTrue( translationService.getTranslations( className1, id1, Locale.UK ).contains( translation1a ) );
-        assertTrue( translationService.getTranslations( className1, id1, Locale.UK ).contains( translation1b ) );
+        assertEquals( 2, translationService.getTranslations( className1, locale1 ).size() );
+        assertTrue( translationService.getTranslations( className1, id1, locale1 ).contains( translation1a ) );
+        assertTrue( translationService.getTranslations( className1, id1, locale1 ).contains( translation1b ) );
     }
     
     @Test

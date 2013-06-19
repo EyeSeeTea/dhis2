@@ -20,7 +20,7 @@
 			<li><a href="#tab-3">$i18n.getString("reschedule_and_set_status")</a></li>
 			<li><a href="#tab-4">$i18n.getString("comments_and_sms_message")</a></li>
 		#end
-		<li><a href="#tab-5">$i18n.getString("program_reports")</a></li>
+		<li><a href="#tab-5">$i18n.getString("program_report")</a></li>
 	</ul>
 	
 	#if( $hasDataEntry == 'true')
@@ -50,8 +50,9 @@
 		</div>
 	#end
 	
-	#if( ($identifierTypes && $identifierTypes.size() > 0)
-		|| ($patientAttributes && $patientAttributes.size() > 0) )
+	#if($auth.hasAccess( "dhis-web-caseentry", "accessPatientAttributes" )  &&
+		( ($identifierTypes && $identifierTypes.size() > 0)
+		|| ($patientAttributes && $patientAttributes.size() > 0) ) )
 		<!-- Identifiers and Attributes TAB -->
 		<div id="tab-2">
 			<form id='patientPropertyForm' name='patientPropertyForm' method="POST">
@@ -174,6 +175,9 @@
 			getEventMessages(getFieldValue('programInstanceId'));
 		}
 	});
+	
+	showById('toogleRiskStatusTD');
+	jQuery('#tb_$!programInstance.id').css('margin-top',-25);
 	
 	if( jQuery('#tabs li').length == 1){
 		programReports(getFieldValue('programInstanceId'));

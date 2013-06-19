@@ -27,7 +27,12 @@
 
 package org.hisp.dhis.caseentry.action.report;
 
-import static org.hisp.dhis.patientreport.PatientTabularReport.*;
+import static org.hisp.dhis.patientreport.PatientTabularReport.PREFIX_DATA_ELEMENT;
+import static org.hisp.dhis.patientreport.PatientTabularReport.PREFIX_FIXED_ATTRIBUTE;
+import static org.hisp.dhis.patientreport.PatientTabularReport.PREFIX_IDENTIFIER_TYPE;
+import static org.hisp.dhis.patientreport.PatientTabularReport.PREFIX_NUMBER_DATA_ELEMENT;
+import static org.hisp.dhis.patientreport.PatientTabularReport.PREFIX_PATIENT_ATTRIBUTE;
+import static org.hisp.dhis.patientreport.PatientTabularReport.VALUE_TYPE_OPTION_SET;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -304,6 +309,20 @@ public class GenerateTabularReportAction
         return message;
     }
 
+    private Boolean displayOrgunitCode;
+
+    public void setDisplayOrgunitCode( Boolean displayOrgunitCode )
+    {
+        this.displayOrgunitCode = displayOrgunitCode;
+    }
+
+    private Boolean useFormNameDataElement;
+
+    public void setUseFormNameDataElement( Boolean useFormNameDataElement )
+    {
+        this.useFormNameDataElement = useFormNameDataElement;
+    }
+
     private boolean accessPrivateInfo = false;
 
     // -------------------------------------------------------------------------
@@ -404,22 +423,23 @@ public class GenerateTabularReportAction
         {
             if ( type == null ) // Tabular report
             {
-                totalRecords = programStageInstanceService.getTabularReportCount( anonynousEntryForm, programStage, columns,
-                    organisationUnits, level, useCompletedEvents, startValue, endValue );
+                totalRecords = programStageInstanceService.getTabularReportCount( anonynousEntryForm, programStage,
+                    columns, organisationUnits, level, useCompletedEvents, startValue, endValue );
 
                 total = getNumberOfPages( totalRecords );
 
                 this.paging = createPaging( totalRecords );
 
-                grid = programStageInstanceService.getTabularReport( anonynousEntryForm, programStage, columns, organisationUnits, level,
-                    startValue, endValue, !orderByOrgunitAsc, useCompletedEvents, accessPrivateInfo, getStartPos(),
-                    paging.getPageSize(), i18n );
+                grid = programStageInstanceService.getTabularReport( anonynousEntryForm, programStage, columns,
+                    organisationUnits, level, startValue, endValue, !orderByOrgunitAsc, useCompletedEvents,
+                    accessPrivateInfo, displayOrgunitCode, getStartPos(), paging.getPageSize(), i18n );
             }
             // Download as Excel
             else
             {
-                grid = programStageInstanceService.getTabularReport( anonynousEntryForm, programStage, columns, organisationUnits, level,
-                    startValue, endValue, !orderByOrgunitAsc, useCompletedEvents, accessPrivateInfo, null, null, i18n );
+                grid = programStageInstanceService.getTabularReport( anonynousEntryForm, programStage, columns,
+                    organisationUnits, level, startValue, endValue, !orderByOrgunitAsc, useCompletedEvents,
+                    accessPrivateInfo, displayOrgunitCode, null, null, i18n );
             }
         }
         catch ( SQLGrammarException ex )
@@ -469,7 +489,7 @@ public class GenerateTabularReportAction
                 column.setPrefix( prefix );
                 column.setIdentifier( values[1] );
                 column.setHidden( Boolean.parseBoolean( values[2] ) );
-                
+
                 column.setOperator( values.length == 5 ? TextUtils.lower( values[3] ) : null );
                 column.setQuery( values.length == 5 ? TextUtils.lower( values[4] ) : null );
 
@@ -523,7 +543,15 @@ public class GenerateTabularReportAction
                     {
                         column.setDateType( true );
                     }
-                    column.setName( dataElement.getFormNameFallback() );
+                    
+                    if ( useFormNameDataElement != null && useFormNameDataElement )
+                    {
+                        column.setName( dataElement.getFormNameFallback() );
+                    }
+                    else
+                    {
+                        column.setName( dataElement.getDisplayName() );  
+                    }
                 }
 
                 columns.add( column );

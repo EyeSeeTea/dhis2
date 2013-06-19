@@ -34,16 +34,21 @@ import static org.hisp.dhis.common.DimensionalObject.DATA_X_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.INDICATOR_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_CHILDREN;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.common.adapter.JacksonPeriodDeserializer;
 import org.hisp.dhis.common.adapter.JacksonPeriodSerializer;
 import org.hisp.dhis.common.annotation.Scanned;
@@ -52,6 +57,7 @@ import org.hisp.dhis.common.view.DimensionalView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryDimension;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
@@ -66,6 +72,7 @@ import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.period.comparator.AscendingPeriodComparator;
 import org.hisp.dhis.user.User;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -119,6 +126,8 @@ public abstract class BaseAnalyticalObject
 
     protected boolean userOrganisationUnitChildren;
 
+    protected boolean rewindRelativePeriods;
+
     // -------------------------------------------------------------------------
     // Analytical properties
     // -------------------------------------------------------------------------
@@ -137,6 +146,12 @@ public abstract class BaseAnalyticalObject
 
     protected transient List<OrganisationUnit> transientOrganisationUnits = new ArrayList<OrganisationUnit>();
     
+    protected transient List<DataElementCategoryOptionCombo> transientCategoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>();
+        
+    protected transient Date relativePeriodDate;
+
+    protected transient OrganisationUnit relativeOrganisationUnit;
+        
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
@@ -153,11 +168,19 @@ public abstract class BaseAnalyticalObject
         return relatives != null && !relatives.isEmpty();
     }
     
-    protected void addTransientOrganisationUnits( List<OrganisationUnit> organisationUnits )
+    protected void addTransientOrganisationUnits( Collection<OrganisationUnit> organisationUnits )
     {
         if ( organisationUnits != null )
         {
             this.transientOrganisationUnits.addAll( organisationUnits );
+        }
+    }
+    
+    protected void addTransientOrganisationUnit( OrganisationUnit organisationUnit )
+    {
+        if ( organisationUnit != null )
+        {
+            this.transientOrganisationUnits.add( organisationUnit );
         }
     }
     
@@ -194,11 +217,20 @@ public abstract class BaseAnalyticalObject
         }
         else if ( PERIOD_DIM_ID.equals( dimension ) )
         {
+            setPeriodNames( periods, dynamicNames, format );
+            
             items.addAll( periods );
             
             if ( hasRelativePeriods() )
             {
-                items.addAll( relatives.getRelativePeriods( date, format, dynamicNames ) ); //TODO dyn names if period is on rows
+                if ( rewindRelativePeriods )
+                {
+                    items.addAll( relatives.getRewindedRelativePeriods( 1, date, format, dynamicNames ) );
+                }
+                else
+                {
+                    items.addAll( relatives.getRelativePeriods( date, format, dynamicNames ) );
+                }
             }
             
             type = DimensionType.PERIOD;
@@ -215,10 +247,16 @@ public abstract class BaseAnalyticalObject
             
             if ( userOrganisationUnitChildren && user != null && user.hasOrganisationUnit() )
             {
-                items.addAll( user.getOrganisationUnit().getChildren() );
+                items.addAll( user.getOrganisationUnit().getSortedChildren() );
             }
             
             type = DimensionType.ORGANISATIONUNIT;
+        }
+        else if ( CATEGORYOPTIONCOMBO_DIM_ID.equals( dimension ) )
+        {
+            items.addAll( transientCategoryOptionCombos );
+            
+            type = DimensionType.CATEGORY_OPTION_COMBO;
         }
         else if ( categoryDims.contains( dimension ) )
         {
@@ -234,7 +272,10 @@ public abstract class BaseAnalyticalObject
             
             for ( DataElementGroup group : dataElementGroups )
             {
-                deGroupMap.putValue( group.getGroupSet().getDimension(), group );
+                if ( group.getGroupSet() != null )
+                {
+                    deGroupMap.putValue( group.getGroupSet().getDimension(), group );
+                }
             }
             
             if ( deGroupMap.containsKey( dimension ) )
@@ -248,7 +289,10 @@ public abstract class BaseAnalyticalObject
             
             for ( OrganisationUnitGroup group : organisationUnitGroups )
             {
-                ouGroupMap.putValue( group.getGroupSet().getUid(), group );
+                if ( group.getGroupSet() != null )
+                {
+                    ouGroupMap.putValue( group.getGroupSet().getUid(), group );
+                }
             }
             
             if ( ouGroupMap.containsKey( dimension ) )
@@ -325,21 +369,25 @@ public abstract class BaseAnalyticalObject
         }        
         else if ( ORGUNIT_DIM_ID.equals( dimension ) && ( !organisationUnits.isEmpty() || hasUserOrgUnit() ) )
         {
-            List<IdentifiableObject> ouList = new ArrayList<IdentifiableObject>();
+            List<NameableObject> ouList = new ArrayList<NameableObject>();
             ouList.addAll( organisationUnits );
             ouList.addAll( transientOrganisationUnits );
             
             if ( userOrganisationUnit )
             {
-                ouList.add( new BaseIdentifiableObject( KEY_USER_ORGUNIT, KEY_USER_ORGUNIT, KEY_USER_ORGUNIT ) );
+                ouList.add( new BaseNameableObject( KEY_USER_ORGUNIT, KEY_USER_ORGUNIT, KEY_USER_ORGUNIT ) );
             }
             
             if ( userOrganisationUnitChildren )
             {
-                ouList.add( new BaseIdentifiableObject( KEY_USER_ORGUNIT_CHILDREN, KEY_USER_ORGUNIT_CHILDREN, KEY_USER_ORGUNIT_CHILDREN ) );
+                ouList.add( new BaseNameableObject( KEY_USER_ORGUNIT_CHILDREN, KEY_USER_ORGUNIT_CHILDREN, KEY_USER_ORGUNIT_CHILDREN ) );
             }
             
             objects.add( new BaseDimensionalObject( dimension, DimensionType.ORGANISATIONUNIT, ouList ) );
+        }
+        else if ( CATEGORYOPTIONCOMBO_DIM_ID.equals( dimension ) )
+        {
+            objects.add( new BaseDimensionalObject( dimension, DimensionType.CATEGORY_OPTION_COMBO, new ArrayList<BaseNameableObject>() ) );
         }
         else if ( categoryDims.contains( dimension ) )
         {
@@ -349,11 +397,14 @@ public abstract class BaseAnalyticalObject
         }
         else // Group set
         {
-            ListMap<String, IdentifiableObject> deGroupMap = new ListMap<String, IdentifiableObject>();
+            ListMap<String, BaseNameableObject> deGroupMap = new ListMap<String, BaseNameableObject>();
             
             for ( DataElementGroup group : dataElementGroups )
             {
-                deGroupMap.putValue( group.getGroupSet().getDimension(), group );
+                if ( group.getGroupSet() != null )
+                {
+                    deGroupMap.putValue( group.getGroupSet().getDimension(), group );
+                }
             }
             
             if ( deGroupMap.containsKey( dimension ) )
@@ -361,11 +412,14 @@ public abstract class BaseAnalyticalObject
                 objects.add( new BaseDimensionalObject( dimension, DimensionType.DATAELEMENT_GROUPSET, deGroupMap.get( dimension ) ) );
             }
             
-            ListMap<String, IdentifiableObject> ouGroupMap = new ListMap<String, IdentifiableObject>();
+            ListMap<String, BaseNameableObject> ouGroupMap = new ListMap<String, BaseNameableObject>();
             
             for ( OrganisationUnitGroup group : organisationUnitGroups )
             {
-                ouGroupMap.putValue( group.getGroupSet().getUid(), group );
+                if ( group.getGroupSet() != null )
+                {
+                    ouGroupMap.putValue( group.getGroupSet().getUid(), group );
+                }
             }
             
             if ( ouGroupMap.containsKey( dimension ) )
@@ -388,44 +442,111 @@ public abstract class BaseAnalyticalObject
         
         return categoryDims;
     }
+
+    private void setPeriodNames( List<Period> periods, boolean dynamicNames, I18nFormat format )
+    {
+        for ( Period period : periods )
+        {
+            RelativePeriods.setName( period, null, dynamicNames, format );
+        }
+    }
     
-    public void mergeWith( BaseAnalyticalObject other )
+    /**
+     * Splits the keys of the given map on the dimension identifier separator, 
+     * sorts the identifiers, writes them out as a key and puts the key back into
+     * the map.
+     */
+    public static void sortKeys( Map<String, Double> valueMap )
+    {
+        Map<String, Double> map = new HashMap<String, Double>();
+        
+        for ( String key : valueMap.keySet() )
+        {
+            if ( key != null )
+            {
+                String[] ids = key.split( DIMENSION_SEP );
+                
+                Collections.sort( Arrays.asList( ids ) );
+                
+                String sortedKey = StringUtils.join( ids, DIMENSION_SEP );
+                
+                map.put( sortedKey, valueMap.get( key ) );
+            }
+        }
+        
+        valueMap.clear();
+        valueMap.putAll( map );
+    }
+    
+    /**
+     * Generates an identifier based on the given lists of NameableObjects. Uses
+     * the UIDs for each NameableObject, sorts them and writes them out as a key.
+     */
+    public static String getIdentifer( List<NameableObject> column, List<NameableObject> row )
+    {
+        List<String> ids = new ArrayList<String>();
+        
+        if ( column != null )
+        {
+            for ( NameableObject item : column )
+            {
+                ids.add( item.getUid() );
+            }
+        }
+        
+        if ( row != null )
+        {
+            for ( NameableObject item : row )
+            {
+                ids.add( item.getUid() );
+            }
+        }
+        
+        Collections.sort( ids );
+        
+        return StringUtils.join( ids, DIMENSION_SEP );
+    }
+    
+    @Override
+    public void mergeWith( IdentifiableObject other )
     {
         super.mergeWith( other );
         
         if ( other.getClass().isInstance( this ) )
-        {            
+        {
+            BaseAnalyticalObject object = (BaseAnalyticalObject) other;
+            
             indicators.clear();
-            indicators.addAll( other.getIndicators() );
+            indicators.addAll( object.getIndicators() );
 
             dataElements.clear();
-            dataElements.addAll( other.getDataElements() );
+            dataElements.addAll( object.getDataElements() );
 
             dataElementOperands.clear();
-            dataElementOperands.addAll( other.getDataElementOperands() );
+            dataElementOperands.addAll( object.getDataElementOperands() );
             
             dataSets.clear();
-            dataSets.addAll( other.getDataSets() );
+            dataSets.addAll( object.getDataSets() );
             
             periods.clear();
-            periods.addAll( other.getPeriods() );
+            periods.addAll( object.getPeriods() );
 
-            relatives = other.getRelatives() == null ? relatives : other.getRelatives();
+            relatives = object.getRelatives() == null ? relatives : object.getRelatives();
             
             organisationUnits.clear();
-            organisationUnits.addAll( other.getOrganisationUnits() );
+            organisationUnits.addAll( object.getOrganisationUnits() );
             
             dataElementGroups.clear();
-            dataElementGroups.addAll( other.getDataElementGroups() );
+            dataElementGroups.addAll( object.getDataElementGroups() );
             
             organisationUnitGroups.clear();
-            organisationUnitGroups.addAll( other.getOrganisationUnitGroups() );
+            organisationUnitGroups.addAll( object.getOrganisationUnitGroups() );
             
             categoryDimensions.clear();
-            categoryDimensions.addAll( other.getCategoryDimensions() );
+            categoryDimensions.addAll( object.getCategoryDimensions() );
             
-            userOrganisationUnit = other.isUserOrganisationUnit();
-            userOrganisationUnitChildren = other.isUserOrganisationUnitChildren();            
+            userOrganisationUnit = object.isUserOrganisationUnit();
+            userOrganisationUnitChildren = object.isUserOrganisationUnitChildren();            
         }
     }
 
@@ -601,6 +722,41 @@ public abstract class BaseAnalyticalObject
         this.userOrganisationUnitChildren = userOrganisationUnitChildren;
     }
 
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public boolean isRewindRelativePeriods()
+    {
+        return rewindRelativePeriods;
+    }
+
+    public void setRewindRelativePeriods( boolean rewindRelativePeriods )
+    {
+        this.rewindRelativePeriods = rewindRelativePeriods;
+    }
+
+    // -------------------------------------------------------------------------
+    // Transient properties
+    // -------------------------------------------------------------------------
+
+    @JsonIgnore
+    public List<OrganisationUnit> getTransientOrganisationUnits()
+    {
+        return transientOrganisationUnits;
+    }
+
+    @JsonIgnore
+    public Date getRelativePeriodDate()
+    {
+        return relativePeriodDate;
+    }
+
+    @JsonIgnore
+    public OrganisationUnit getRelativeOrganisationUnit()
+    {
+        return relativeOrganisationUnit;
+    }
+
     // -------------------------------------------------------------------------
     // Web domain properties
     // -------------------------------------------------------------------------
@@ -654,7 +810,7 @@ public abstract class BaseAnalyticalObject
     }
 
     @JsonProperty
-    @JsonView({ DetailedView.class, ExportView.class })
+    @JsonView( {DimensionalView.class} )
     public Map<String, String> getParentGraphMap()
     {
         return parentGraphMap;

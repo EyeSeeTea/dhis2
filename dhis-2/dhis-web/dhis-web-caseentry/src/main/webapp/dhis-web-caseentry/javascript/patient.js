@@ -40,6 +40,7 @@ selection.setListenerFunction( organisationUnitSelected );
 
 function listAllPatient()
 {
+	jQuery('#loaderDiv').show();
 	hideById('listPatientDiv');
 	hideById('editPatientDiv');
 	hideById('migrationPatientDiv');
@@ -74,7 +75,6 @@ function listAllPatient()
 				jQuery('#loaderDiv').hide();
 			});
 	}
-	hideLoader();
 }
 
 function advancedSearch( params )
@@ -326,7 +326,6 @@ function loadDataEntry( programStageInstanceId )
 			programStageInstanceId: programStageInstanceId
 		},function( )
 		{
-			showById('postCommentTbl');
 			var executionDate = jQuery('#executionDate').val();
 			var completed = jQuery('#entryFormContainer input[id=completed]').val();
 			var irregular = jQuery('#entryFormContainer input[id=irregular]').val();

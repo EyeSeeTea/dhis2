@@ -44,11 +44,14 @@ input[type=text],textarea
 {
   padding-right: 2px;
   padding-left: 2px;
+  height: 28px;
+  white-space: nowrap;
 }
 
 .formSection th
 {
   text-align: center;
+  min-width: 46px;
 }
 
 .sectionFilter
@@ -57,6 +60,7 @@ input[type=text],textarea
   border: solid 1px #f0f0f0; 
   outline: 0;
   color: #333;
+  height: 14px;
 }
 
 .historyHeader

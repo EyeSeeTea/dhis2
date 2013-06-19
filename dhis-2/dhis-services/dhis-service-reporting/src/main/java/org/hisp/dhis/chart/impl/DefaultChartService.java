@@ -34,13 +34,13 @@ import static org.hisp.dhis.chart.Chart.TYPE_LINE;
 import static org.hisp.dhis.chart.Chart.TYPE_PIE;
 import static org.hisp.dhis.chart.Chart.TYPE_STACKED_BAR;
 import static org.hisp.dhis.chart.Chart.TYPE_STACKED_COLUMN;
+import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
 import static org.hisp.dhis.system.util.ConversionUtils.getArray;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -53,7 +53,6 @@ import org.apache.commons.math.analysis.UnivariateRealFunction;
 import org.apache.commons.math.analysis.UnivariateRealInterpolator;
 import org.apache.commons.math.stat.regression.SimpleRegression;
 import org.hisp.dhis.analytics.AnalyticsService;
-import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.chart.ChartStore;
@@ -61,6 +60,7 @@ import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.i18n.I18nFormat;
@@ -104,7 +104,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
  */
 @Transactional
 public class DefaultChartService
@@ -189,40 +188,18 @@ public class DefaultChartService
         return getJFreeChart( chart, null, null, format );
     }
 
-    public JFreeChart getJFreeChart( Chart chart, Date date, OrganisationUnit unit, I18nFormat format )
+    public JFreeChart getJFreeChart( Chart chart, Date date, OrganisationUnit organisationUnit, I18nFormat format )
     {
-        if ( chart.hasRelativePeriods() )
+        User user = currentUserService.getCurrentUser();
+
+        if ( organisationUnit == null && user != null )
         {
-            List<Period> periods = chart.isRewindRelativePeriods() ?
-                chart.getRelatives().getRewindedRelativePeriods( 1, date, format, true ) :
-                chart.getRelatives().getRelativePeriods( date, format, true );
-
-            chart.setRelativePeriods( periodService.reloadPeriods( periods ) );
+            organisationUnit = user.getOrganisationUnit();
         }
+        
+        chart.init( user, date, organisationUnit, format );
 
-        User currentUser = currentUserService.getCurrentUser();
-
-        if ( currentUser != null && chart.hasUserOrgUnit() && 
-            ( currentUser.getOrganisationUnit() != null || unit != null ) )
-        {
-            if ( unit == null )
-            {
-                unit = currentUser.getOrganisationUnit();
-            }
-            
-            if ( chart.isUserOrganisationUnit() )
-            {
-                chart.getRelativeOrganisationUnits().add( unit );
-            }
-            else if ( chart.isUserOrganisationUnitChildren() )
-            {
-                chart.getRelativeOrganisationUnits().addAll( unit.hasChild() ? unit.getSortedChildren() : Arrays.asList( unit ) );
-            }
-        }
-
-        chart.setFormat( format );
-
-        return getJFreeChart( chart, !chart.isHideSubtitle(), format );
+        return getJFreeChart( chart );
     }
 
     public JFreeChart getJFreePeriodChart( Indicator indicator, OrganisationUnit unit, boolean title, I18nFormat format )
@@ -241,11 +218,12 @@ public class DefaultChartService
         chart.setDimensions( DimensionalObject.DATA_X_DIM_ID, DimensionalObject.PERIOD_DIM_ID, DimensionalObject.ORGUNIT_DIM_ID );
         chart.setHideLegend( true );
         chart.getIndicators().add( indicator );
-        chart.setRelativePeriods( periods );
+        chart.setPeriods( periods );
         chart.getOrganisationUnits().add( unit );
+        chart.setHideSubtitle( title );
         chart.setFormat( format );
 
-        return getJFreeChart( chart, title, format );
+        return getJFreeChart( chart );
     }
 
     public JFreeChart getJFreeOrganisationUnitChart( Indicator indicator, OrganisationUnit parent, boolean title,
@@ -265,32 +243,12 @@ public class DefaultChartService
         chart.setDimensions( DimensionalObject.DATA_X_DIM_ID, DimensionalObject.ORGUNIT_DIM_ID, DimensionalObject.PERIOD_DIM_ID );
         chart.setHideLegend( true );
         chart.getIndicators().add( indicator );
-        chart.setRelativePeriods( periods );
+        chart.setPeriods( periods );
         chart.setOrganisationUnits( parent.getSortedChildren() );
+        chart.setHideSubtitle( title );
         chart.setFormat( format );
 
-        return getJFreeChart( chart, title, format );
-    }
-
-    public JFreeChart getJFreeChart( List<Indicator> indicators, List<DataElement> dataElements,
-        List<Period> periods, List<OrganisationUnit> organisationUnits,
-        String series, String category, String filter,
-        boolean regression, I18nFormat format )
-    {
-        Chart chart = new Chart();
-
-        chart.setType( TYPE_COLUMN );
-        chart.setDimensions( series, category, filter );
-        chart.setHideLegend( false );
-        chart.setRegression( regression );
-        chart.setIndicators( indicators );
-        chart.setDataElements( dataElements );
-        chart.setRelativePeriods( periods );
-        chart.setOrganisationUnits( organisationUnits );
-        chart.setFormat( format );
-        chart.setName( chart.generateTitle() );
-
-        return getJFreeChart( chart, false, format );
+        return getJFreeChart( chart );
     }
 
     public JFreeChart getJFreeChart( String name, PlotOrientation orientation, CategoryLabelPositions labelPositions,
@@ -527,7 +485,7 @@ public class DefaultChartService
     /**
      * Returns a JFreeChart of type defined in the chart argument.
      */
-    private JFreeChart getJFreeChart( Chart chart, boolean subTitle, I18nFormat format )
+    private JFreeChart getJFreeChart( Chart chart )
     {
         final BarRenderer barRenderer = getBarRenderer();
         final LineAndShapeRenderer lineRenderer = getLineRenderer();
@@ -538,7 +496,7 @@ public class DefaultChartService
 
         CategoryPlot plot = null;
 
-        CategoryDataset[] dataSets = getCategoryDataSet( chart, format );
+        CategoryDataset[] dataSets = getCategoryDataSet( chart );
 
         if ( chart.isType( TYPE_LINE ) )
         {
@@ -594,7 +552,7 @@ public class DefaultChartService
             plot.addRangeMarker( getMarker( chart.getBaseLineValue(), chart.getBaseLineLabel() ) );
         }
 
-        if ( subTitle )
+        if ( chart.isHideSubtitle() )
         {
             jFreeChart.addSubtitle( getSubTitle( chart ) );
         }
@@ -718,10 +676,10 @@ public class DefaultChartService
         return multiplePieChart;
     }
 
-    private CategoryDataset[] getCategoryDataSet( Chart chart, I18nFormat format )
+    private CategoryDataset[] getCategoryDataSet( Chart chart )
     {
-        Map<String, Double> valueMap = analyticsService.getAggregatedDataValueMapping( chart, format );
-
+        Map<String, Double> valueMap = analyticsService.getAggregatedDataValueMapping( chart, chart.getFormat() );
+        
         DefaultCategoryDataset regularDataSet = new DefaultCategoryDataset();
         DefaultCategoryDataset regressionDataSet = new DefaultCategoryDataset();
 
@@ -735,7 +693,11 @@ public class DefaultChartService
             {
                 categoryIndex++;
 
-                String key = series.getUid() + DataQueryParams.DIMENSION_SEP + category.getUid();
+                String key = series.getUid() + DIMENSION_SEP + category.getUid();
+
+                // Replace potential operand separator with dimension separator
+                
+                key = key.replace( DataElementOperand.SEPARATOR, DIMENSION_SEP );
 
                 Double value = valueMap.get( key );
                 
@@ -815,11 +777,6 @@ public class DefaultChartService
     public Collection<Chart> getAllCharts()
     {
         return chartStore.getAll();
-    }
-
-    public Collection<Chart> getSystemAndUserCharts()
-    {
-        return chartStore.getSystemAndUserCharts( currentUserService.getCurrentUser() );
     }
 
     public Chart getChartByName( String name )

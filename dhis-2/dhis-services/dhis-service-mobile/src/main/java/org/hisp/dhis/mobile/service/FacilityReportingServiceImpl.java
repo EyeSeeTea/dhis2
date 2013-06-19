@@ -34,7 +34,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -55,6 +54,8 @@ import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataelement.comparator.DataElementSortOrderComparator;
 import org.hisp.dhis.dataset.CompleteDataSetRegistration;
 import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
+import org.hisp.dhis.i18n.locale.I18nLocale;
+import org.hisp.dhis.i18n.locale.I18nLocaleService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.DailyPeriodType;
@@ -112,6 +113,18 @@ public class FacilityReportingServiceImpl
         this.programService = programService;
     }
 
+    private I18nLocaleService i18nLocaleService;
+
+    public I18nLocaleService getI18nLocaleService()
+    {
+        return i18nLocaleService;
+    }
+
+    public void setI18nLocaleService( I18nLocaleService i18nLocaleService )
+    {
+        this.i18nLocaleService = i18nLocaleService;
+    }
+
     // -------------------------------------------------------------------------
     // Service methods
     // -------------------------------------------------------------------------
@@ -120,7 +133,7 @@ public class FacilityReportingServiceImpl
     {
 
         List<DataSet> datasets = new ArrayList<DataSet>();
-        Locale locale = LocaleUtil.getLocale( localeString );
+        I18nLocale locale = i18nLocaleService.getI18nLocaleByName( localeString );
 
         if ( DEBUG )
             log.debug( "Getting data sets for unit " + unit.getName() );
@@ -218,7 +231,7 @@ public class FacilityReportingServiceImpl
         return getDataSetForLocale( id, null );
     }
 
-    public DataSet getDataSetForLocale( int dataSetId, Locale locale )
+    public DataSet getDataSetForLocale( int dataSetId, I18nLocale locale )
     {
         org.hisp.dhis.dataset.DataSet dataSet = dataSetService.getDataSet( dataSetId );
 
@@ -302,7 +315,7 @@ public class FacilityReportingServiceImpl
         return ds;
     }
 
-    private List<DataElement> getDataElements( Locale locale, List<org.hisp.dhis.dataelement.DataElement> dataElements )
+    private List<DataElement> getDataElements( I18nLocale locale, List<org.hisp.dhis.dataelement.DataElement> dataElements )
     {
         List<DataElement> dataElementList = new ArrayList<DataElement>();
 

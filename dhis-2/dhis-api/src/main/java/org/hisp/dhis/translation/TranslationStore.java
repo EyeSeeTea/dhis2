@@ -27,8 +27,10 @@ package org.hisp.dhis.translation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Locale;
+//import java.util.I18nLocale;
 import java.util.Collection;
+
+import org.hisp.dhis.i18n.locale.I18nLocale;
 
 /**
  * @author Oyvind Brucker
@@ -60,7 +62,7 @@ public interface TranslationStore
      * @param property the property.
      * @return a Translation.
      */
-    Translation getTranslation( String className, int id, Locale locale, String property );
+    Translation getTranslation( String className, int id, I18nLocale locale, String property );
 
     /**
      * Retrieves a Collection of Translations.
@@ -70,7 +72,7 @@ public interface TranslationStore
      * @param locale the locale.
      * @return a Collection of Translations.
      */
-    Collection<Translation> getTranslations( String className, int id, Locale locale );
+    Collection<Translation> getTranslations( String className, int id, I18nLocale locale );
 
     /**
      * Retrieves a Collection of Translations.
@@ -79,7 +81,7 @@ public interface TranslationStore
      * @param locale the locale.
      * @return a Collection of Translations.
      */
-    Collection<Translation> getTranslations( String className, Locale locale );
+    Collection<Translation> getTranslations( String className, I18nLocale locale );
 
     /**
      * Retrieves a Collection of all Translations.

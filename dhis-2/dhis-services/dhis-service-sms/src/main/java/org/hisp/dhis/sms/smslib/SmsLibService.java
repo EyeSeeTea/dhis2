@@ -48,9 +48,11 @@ import org.smslib.IOutboundMessageNotification;
 import org.smslib.OutboundMessage;
 import org.smslib.SMSLibException;
 import org.smslib.Service;
+import org.smslib.Message.MessageEncodings;
 import org.smslib.Service.ServiceStatus;
 
 import java.io.IOException;
+import java.lang.Character.UnicodeBlock;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +73,7 @@ public class SmsLibService
 
     private final String SMPP_GATEWAY = "smpp_gw";
 
-    private Map<String, String> gatewayMap = new HashMap<String, String>();
+    public static Map<String, String> gatewayMap = new HashMap<String, String>();
 
     private GateWayFactory gatewayFactory = new GateWayFactory();
 
@@ -145,6 +147,18 @@ public class SmsLibService
         }
 
         OutboundMessage outboundMessage = new OutboundMessage( recipient, sms.getMessage() );
+        
+        //Check if text contain any specific unicode character
+        for( char each: sms.getMessage().toCharArray())
+        {
+            if( !Character.UnicodeBlock.of(each).equals( UnicodeBlock.BASIC_LATIN ) )
+            {
+                outboundMessage.setEncoding( MessageEncodings.ENCUCS2 );
+                break;
+            }
+        }
+        
+        outboundMessage.setStatusReport( true );
 
         String longNumber = config.getLongNumber();
 

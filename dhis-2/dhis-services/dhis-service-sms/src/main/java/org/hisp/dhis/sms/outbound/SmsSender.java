@@ -28,12 +28,14 @@
 package org.hisp.dhis.sms.outbound;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.message.MessageSender;
 import org.hisp.dhis.sms.SmsServiceException;
+import org.hisp.dhis.sms.smslib.SmsLibService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
@@ -50,6 +52,10 @@ public class SmsSender
     implements MessageSender
 {
     private static final Log log = LogFactory.getLog( SmsSender.class );
+
+    private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
+
+    private static final int MAX_HEX_CHAR = 280;
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -87,36 +93,36 @@ public class SmsSender
     public String sendMessage( String subject, String text, User sender, Set<User> users, boolean forceSend )
     {
         String message = null;
+        
+        if ( transportService == null || SmsLibService.gatewayMap == null )
+        {
+            message = "No gateway";
+            return message;
+        }
 
-        Set<User> toSendUserList = new HashSet<User>();
+        Set<User> toSendList = new HashSet<User>();
 
         String gatewayId = transportService.getDefaultGateway();
-
+        
         if ( gatewayId != null && !gatewayId.trim().isEmpty() )
         {
-            boolean sendSMSNotification = false;
             for ( User user : users )
             {
-                if ( !currentUserService.getCurrentUser().equals( user ) )
+                if ( currentUserService.getCurrentUser() != null )
                 {
-                    // check if receiver is raw number or not
-                    if ( user.getFirstName() == null )
+                    if ( !currentUserService.getCurrentUser().equals( user ) )
                     {
-                        toSendUserList.add( user );
-                    }
-                    else
-                    {
-                        UserSetting userSetting = userService.getUserSetting( user,
-                            UserSettingService.KEY_MESSAGE_SMS_NOTIFICATION );
-                        if ( userSetting != null )
+                        if ( isQualifiedReceiver( user ) )
                         {
-                            sendSMSNotification = (Boolean) userSetting.getValue();
-                            if ( sendSMSNotification == true )
-                            {
-                                toSendUserList.add( user );
-                                sendSMSNotification = false;
-                            }
+                            toSendList.add( user );
                         }
+                    }
+                }
+                else if ( currentUserService.getCurrentUser() == null )
+                {
+                    if ( isQualifiedReceiver( user ) )
+                    {
+                        toSendList.add( user );
                     }
                 }
             }
@@ -125,17 +131,56 @@ public class SmsSender
 
             if ( outboundSmsService != null || outboundSmsService.isEnabled() )
             {
-                text = createMessage( subject, text, sender );
-
-                phoneNumbers = getRecipientsPhoneNumber( toSendUserList );
-
-                if ( !phoneNumbers.isEmpty() && phoneNumbers.size() > 0 )
+                phoneNumbers = getRecipientsPhoneNumber( toSendList );
+                /*if ( SmsLibService.gatewayMap.get( "bulk_gw" ).equals( gatewayId ) )
                 {
-                    message = sendMessage( text, phoneNumbers, gatewayId );
+                    try
+                    {
+                        String hexText = toHex( text.getBytes( "unicode" ) );
+                        if ( hexText.length() > MAX_HEX_CHAR )
+                        {
+ 
+                            List<String> splitTextList = new ArrayList<String>();
+                            splitTextList = splitLongHexString( hexText, text, splitTextList );
+                            for ( String each: splitTextList )
+                            {
+                                //text = createMessage( subject, each, sender );
+                                
+                                if ( !phoneNumbers.isEmpty() && phoneNumbers.size() > 0 )
+                                {
+                                    //message = sendMessage( text, phoneNumbers, gatewayId );
+                                    message = sendMessage( each, phoneNumbers, gatewayId );
+                                }
+                            }
+                        }
+                        else
+                        {
+                            //text = createMessage( subject, text, sender );
+                            
+                            if ( !phoneNumbers.isEmpty() && phoneNumbers.size() > 0 )
+                            {
+                                message = sendMessage( text, phoneNumbers, gatewayId );
+                            }
+                        }
+                    }
+                    catch ( UnsupportedEncodingException e )
+                    {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                 }
-
+                else*/
+                {
+                    text = createMessage( subject, text, sender );
+                    
+                    if ( !phoneNumbers.isEmpty() && phoneNumbers.size() > 0 )
+                    {
+                        message = sendMessage( text, phoneNumbers, gatewayId );
+                    }
+                }
             }
         }
+        
         return message;
     }
 
@@ -143,9 +188,40 @@ public class SmsSender
     // Supportive methods
     // -------------------------------------------------------------------------
 
+    private boolean isQualifiedReceiver( User user )
+    {
+        // if receiver is raw number
+        if ( user.getFirstName() == null )
+        {
+            return true;
+        }
+        // if receiver is user
+        else
+        {
+            UserSetting userSetting = userService
+                .getUserSetting( user, UserSettingService.KEY_MESSAGE_SMS_NOTIFICATION );
+            if ( userSetting != null )
+            {
+                boolean sendSMSNotification = (Boolean) userSetting.getValue();
+                if ( sendSMSNotification == true )
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+
     private String createMessage( String subject, String text, User sender )
     {
-        String name = "unknown";
+        String name = "DHIS";
 
         if ( sender != null )
         {
@@ -161,7 +237,7 @@ public class SmsSender
             subject = " - " + subject;
         }
 
-        text = "From " + name + subject + ": " + text;
+        text = name + subject + ": " + text;
 
         // Simplistic cut off 160 characters
         int length = text.length();
@@ -203,6 +279,49 @@ public class SmsSender
 
             log.warn( "Unable to send message through sms: " + sms, e );
         }
+
         return message;
+    }
+
+    public String toHex( byte[] buf )
+    {
+        char[] chars = new char[2 * buf.length];
+        for ( int i = 0; i < buf.length; ++i )
+        {
+            chars[2 * i] = HEX_CHARS[(buf[i] & 0xF0) >>> 4];
+            chars[2 * i + 1] = HEX_CHARS[buf[i] & 0x0F];
+        }
+        return new String( chars );
+    }
+
+    public List<String> splitLongHexString( String hexString, String message, List<String> result )
+    {
+
+        String firstTempHex = null;
+        String secondTempHex = null;
+        String firstTempString = null;
+        String secondTempString = null;
+        int indexToCut;
+
+        firstTempHex = hexString.substring( 0, MAX_HEX_CHAR );
+
+        int lastSpaceIndex = firstTempHex.lastIndexOf( "0020" );
+
+        firstTempHex = firstTempHex.substring( 0, lastSpaceIndex );
+        indexToCut = (firstTempHex.length() - 4) / 4;
+        firstTempString = message.substring( 0, indexToCut );
+        result.add( firstTempString );
+
+        secondTempHex = "feff" + hexString.substring( firstTempHex.length() + 4, hexString.length() );
+        secondTempString = message.substring( indexToCut + 1, message.length() );
+        if ( secondTempHex.length() <= MAX_HEX_CHAR )
+        {
+            result.add( secondTempString );
+            return result;
+        }
+        else
+        {
+            return splitLongHexString( secondTempHex, secondTempString, result );
+        }
     }
 }

@@ -41,6 +41,7 @@ import java.util.Map;
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -51,7 +52,9 @@ public class I18nServiceTest
     extends DhisSpringTest
 {
     private I18nService i18nService;
-
+    private I18nLocale locale;
+    
+    
     // -------------------------------------------------------------------------
     // Set up/tear down
     // -------------------------------------------------------------------------
@@ -63,6 +66,8 @@ public class I18nServiceTest
         i18nService = (I18nService) getBean( I18nService.ID );
         
         dataElementService = (DataElementService) getBean( DataElementService.ID );
+        
+        locale = new I18nLocale("FRANCE", "France Locale Testing");
     }
 
     // -------------------------------------------------------------------------
@@ -73,7 +78,6 @@ public class I18nServiceTest
     public void testUpdateTranslation()
         throws Exception
     {
-        Locale locale = Locale.FRANCE;
         String className = DataElement.class.getSimpleName();
         
         DataElement dataElementA = createDataElement( 'A' );
@@ -97,7 +101,6 @@ public class I18nServiceTest
     @Test
     public void testInternationaliseObject()
     {
-        Locale locale = Locale.FRANCE;
         String className = DataElement.class.getSimpleName();
         
         DataElement dataElementA = createDataElement( 'A' );
@@ -124,7 +127,6 @@ public class I18nServiceTest
     @Test
     public void testInternationaliseCollection()
     {
-        Locale locale = Locale.FRANCE;
         String className = DataElement.class.getSimpleName();
         
         DataElement dataElementA = createDataElement( 'A' );

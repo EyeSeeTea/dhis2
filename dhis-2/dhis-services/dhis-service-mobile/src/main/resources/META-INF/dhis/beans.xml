@@ -8,6 +8,7 @@
   <bean id="org.hisp.dhis.mobile.api.FacilityReportingService" class="org.hisp.dhis.mobile.service.FacilityReportingServiceImpl">
     <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
+    <property name="i18nLocaleService" ref="org.hisp.dhis.i18n.locale.I18nLocaleService" />
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
     <property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />

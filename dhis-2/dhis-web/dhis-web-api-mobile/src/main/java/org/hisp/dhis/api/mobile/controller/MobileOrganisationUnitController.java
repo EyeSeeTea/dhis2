@@ -26,6 +26,7 @@ import org.hisp.dhis.api.mobile.model.LWUITmodel.Program;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.ProgramStage;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.Relationship;
 import org.hisp.dhis.i18n.I18nService;
+import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.smscommand.SMSCommandService;
@@ -91,7 +92,7 @@ public class MobileOrganisationUnitController
         mobileModel.setPrograms( programService.getPrograms( unit, locale ) );
         mobileModel.setDatasets( facilityReportingService.getMobileDataSetsForUnit( unit, locale ) );
         mobileModel.setServerCurrentDate( new Date() );
-        mobileModel.setLocales( getLocalStrings( i18nService.getAvailableLocales() ) );
+        mobileModel.setLocales( getI18nLocalStrings( i18nService.getAvailableLocales() ) );
         return mobileModel;
     }
 
@@ -195,7 +196,7 @@ public class MobileOrganisationUnitController
         mobileModel.setPrograms( programService.getPrograms( unit, locale ) );
         mobileModel.setDatasets( facilityReportingService.getMobileDataSetsForUnit( unit, locale ) );
         mobileModel.setServerCurrentDate( new Date() );
-        mobileModel.setLocales( getLocalStrings( i18nService.getAvailableLocales() ) );
+        mobileModel.setLocales( getI18nLocalStrings( i18nService.getAvailableLocales() ) );
         mobileModel.setSmsCommands( this.getMobileSMSCommands( smsCommandService.getJ2MESMSCommands() ) );
         return mobileModel;
     }
@@ -399,6 +400,22 @@ public class MobileOrganisationUnitController
         return localeStrings;
     }
 
+    private Collection<String> getI18nLocalStrings( Collection<I18nLocale> locales )
+    {
+        if ( locales == null || locales.isEmpty() )
+        {
+            return null;
+        }
+        Collection<String> localeStrings = new ArrayList<String>();
+
+        for ( I18nLocale locale : locales )
+        {
+            // TODO: THIS HAS TO BE MATCHED WITH OTHERS..  <-- SHOULD BE ONLY NAME?
+            localeStrings.add( locale.getLanguage() + "-" + locale.getCountry() );
+        }
+        return localeStrings;
+    }
+    
     private List<SMSCommand> getMobileSMSCommands( Collection<org.hisp.dhis.smscommand.SMSCommand> normalSMSCommands )
     {
         List<SMSCommand> smsCommands = new ArrayList<SMSCommand>();

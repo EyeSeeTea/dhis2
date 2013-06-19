@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.hisp.dhis</groupId>
     <artifactId>dhis-web</artifactId>
-    <version>2.12-SNAPSHOT</version>
+    <version>2.13-SNAPSHOT</version>
   </parent>
   
   <artifactId>dhis-web-mapping</artifactId>
@@ -40,7 +40,7 @@
     </dependency>
     <dependency>
       <groupId>org.hisp.dhis</groupId>
-      <artifactId>dhis-service-datamart-default</artifactId>
+      <artifactId>dhis-service-analytics</artifactId>
     </dependency>
     <dependency>
       <groupId>org.hisp.dhis</groupId>

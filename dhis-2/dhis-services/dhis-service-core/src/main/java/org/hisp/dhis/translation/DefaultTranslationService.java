@@ -28,8 +28,9 @@ package org.hisp.dhis.translation;
  */
 
 import java.util.Collection;
-import java.util.Locale;
+//import java.util.I18nLocale;
 
+import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.hisp.dhis.translation.Translation;
 import org.hisp.dhis.translation.TranslationService;
 import org.hisp.dhis.translation.TranslationStore;
@@ -68,17 +69,17 @@ public class DefaultTranslationService
         translationStore.updateTranslation( translation );
     }
 
-    public Translation getTranslation( String className, int id, Locale locale, String property )
+    public Translation getTranslation( String className, int id, I18nLocale locale, String property )
     {
         return translationStore.getTranslation( className, id, locale, property );
     }
 
-    public Collection<Translation> getTranslations( String className, int id, Locale locale )
+    public Collection<Translation> getTranslations( String className, int id, I18nLocale locale )
     {
         return translationStore.getTranslations( className, id, locale );
     }
 
-    public Collection<Translation> getTranslations( String className, Locale locale )
+    public Collection<Translation> getTranslations( String className, I18nLocale locale )
     {
         return translationStore.getTranslations( className, locale );
     }

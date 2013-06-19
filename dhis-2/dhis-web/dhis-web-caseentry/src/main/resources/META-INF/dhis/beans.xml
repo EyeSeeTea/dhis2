@@ -215,6 +215,10 @@
 		<property name="programStageInstanceService"
 			ref="org.hisp.dhis.program.ProgramStageInstanceService" />
 		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
+		<property name="patientAttributeService"
+			ref="org.hisp.dhis.patient.PatientAttributeService" />
+		<property name="patientAttributeValueService"
+			ref="org.hisp.dhis.patientattributevalue.PatientAttributeValueService" />
 	</bean>
 
 	<!-- Single-event DataEntry -->
@@ -331,7 +335,6 @@
 		<property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
 		<property name="aggregationConditionService"
 			ref="org.hisp.dhis.caseaggregation.CaseAggregationConditionService" />
-		<property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
 		<property name="organisationUnitService"
 			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
 	</bean>
@@ -356,11 +359,8 @@
 		scope="prototype">
 		<property name="organisationUnitService"
 			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-		<property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
 		<property name="aggregationConditionService"
 			ref="org.hisp.dhis.caseaggregation.CaseAggregationConditionService" />
-		<property name="patientDataValueService"
-			ref="org.hisp.dhis.patientdatavalue.PatientDataValueService" />
 	</bean>
 
 	<bean
@@ -892,6 +892,8 @@
 		class="org.hisp.dhis.caseentry.action.report.LoadDataElementsAction"
 		scope="prototype">
 		<property name="programStageService" ref="org.hisp.dhis.program.ProgramStageService" />
+		<property name="programStageSectionService"
+			ref="org.hisp.dhis.program.ProgramStageSectionService" />
 	</bean>
 
 	<bean
@@ -965,7 +967,6 @@
 			ref="org.hisp.dhis.patientreport.PatientTabularReportService" />
 	</bean>
 
-
 	<bean
 		id="org.hisp.dhis.caseentry.action.report.GetOrganisationUnitsAction"
 		class="org.hisp.dhis.caseentry.action.report.GetOrganisationUnitsAction"
@@ -974,6 +975,11 @@
 			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
 	</bean>
 
+	<bean id="org.hisp.dhis.caseentry.action.report.GetProgramStageSectionsAction"
+		class="org.hisp.dhis.caseentry.action.report.GetProgramStageSectionsAction"
+		scope="prototype">
+		<property name="programStageService" ref="org.hisp.dhis.program.ProgramStageService" />
+	</bean>
 
 	<!-- Patient Aggregate Report -->
 

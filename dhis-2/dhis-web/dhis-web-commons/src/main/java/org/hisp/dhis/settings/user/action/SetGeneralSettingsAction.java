@@ -31,10 +31,13 @@ import static org.hisp.dhis.user.UserSettingService.KEY_DB_LOCALE;
 import static org.hisp.dhis.user.UserSettingService.KEY_MESSAGE_EMAIL_NOTIFICATION;
 import static org.hisp.dhis.user.UserSettingService.KEY_MESSAGE_SMS_NOTIFICATION;
 
+import java.io.PrintStream;
 import java.util.Locale;
 
 import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.i18n.locale.I18nLocale;
+import org.hisp.dhis.i18n.locale.I18nLocaleService;
 import org.hisp.dhis.i18n.locale.LocaleManager;
 import org.hisp.dhis.setting.StyleManager;
 import org.hisp.dhis.user.UserSettingService;
@@ -72,6 +75,13 @@ public class SetGeneralSettingsAction
     {
         this.userSettingService = userSettingService;
     }
+    
+    private I18nLocaleService i18nLocaleService;
+
+    public void setI18nLocaleService( I18nLocaleService i18nLocaleService )
+    {
+        this.i18nLocaleService = i18nLocaleService;
+    }
 
     // -------------------------------------------------------------------------
     // Input
@@ -84,9 +94,9 @@ public class SetGeneralSettingsAction
         this.currentLocale = locale;
     }
 
-    private String currentLocaleDb;
+    private int currentLocaleDb;
 
-    public void setCurrentLocaleDb( String currentLocaleDb )
+    public void setCurrentLocaleDb( int currentLocaleDb )
     {
         this.currentLocaleDb = currentLocaleDb;
     }
@@ -135,8 +145,25 @@ public class SetGeneralSettingsAction
     {
         localeManager.setCurrentLocale( getRespectiveLocale( currentLocale ) );
 
-        userSettingService.saveUserSetting( KEY_DB_LOCALE, getRespectiveLocale( StringUtils
-            .trimToNull( currentLocaleDb ) ) );
+
+
+        
+        PrintStream printStream = new PrintStream(System.out);       
+        printStream.println( "Current Locale DB Set Name: '" + String.valueOf( currentLocaleDb ) + "'" );  // output to stdout
+
+        
+        I18nLocale currentLocaleDBObj = i18nLocaleService.getI18nLocale( currentLocaleDb );
+
+        
+        String currentLocaleDbName = "";
+        if( currentLocaleDBObj == null ) currentLocaleDbName = "null";
+        else currentLocaleDbName = currentLocaleDBObj.getName();
+        
+        printStream.println( "Current Locale DB Object Name: " + currentLocaleDbName );  // output to stdout
+
+                
+        
+        userSettingService.saveUserSetting( KEY_DB_LOCALE, "tran") ;
 
         styleManager.setUserStyle( currentStyle );
         

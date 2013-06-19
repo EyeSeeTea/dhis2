@@ -29,8 +29,11 @@ package org.hisp.dhis.api.controller.mapping;
 
 import org.hisp.dhis.api.controller.AbstractCrudController;
 import org.hisp.dhis.api.utils.ContextUtils;
+import org.hisp.dhis.dataelement.DataElementOperandService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
+import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.mapping.Map;
 import org.hisp.dhis.mapping.MapView;
@@ -81,10 +84,16 @@ public class MapController
     private DataElementService dataElementService;
 
     @Autowired
+    private DataElementOperandService operandService;
+    
+    @Autowired
     private PeriodService periodService;
 
     @Autowired
     private CurrentUserService currentUserService;
+
+    @Autowired
+    private I18nManager i18nManager;
 
     //--------------------------------------------------------------------------
     // CRUD
@@ -179,15 +188,25 @@ public class MapController
     }
 
     @Override
-    public void postProcessEntity( Map map )
+    public void postProcessEntity( Map map ) throws Exception
     {
         for ( MapView view : map.getMapViews() )
         {
-            if ( view != null && view.getParentOrganisationUnit() != null )
+            if ( view != null )
             {
-                String parentUid = view.getParentOrganisationUnit().getUid();
-                view.setParentGraph( view.getParentOrganisationUnit().getParentGraph() + "/" + parentUid );
-                view.setParentLevel( organisationUnitService.getLevelOfOrganisationUnit( view.getParentOrganisationUnit().getId() ) );
+                if ( view.getPeriod() != null )
+                {
+                    I18nFormat format = i18nManager.getI18nFormat();
+                    
+                    view.getPeriod().setName( format.formatPeriod( view.getPeriod() ) );
+                }
+                
+                if ( view.getParentOrganisationUnit() != null )
+                {
+                    String parentUid = view.getParentOrganisationUnit().getUid();
+                    view.setParentGraph( view.getParentOrganisationUnit().getParentGraph() + "/" + parentUid );
+                    view.setParentLevel( organisationUnitService.getLevelOfOrganisationUnit( view.getParentOrganisationUnit().getId() ) );
+                }
             }
         }
     }
@@ -195,8 +214,6 @@ public class MapController
     //--------------------------------------------------------------------------
     // Supportive methods
     //--------------------------------------------------------------------------
-
-    // TODO use the import service instead
 
     private void mergeMap( Map map )
     {
@@ -227,6 +244,11 @@ public class MapController
         {
             view.setDataElement( dataElementService.getDataElement( view.getDataElement().getUid() ) );
         }
+        
+        if ( view.getDataElementOperand() != null )
+        {
+            view.setDataElementOperand( operandService.getDataElementOperandByUid( view.getDataElementOperand().getUid() ) );
+        }        
 
         if ( view.getPeriod() != null )
         {

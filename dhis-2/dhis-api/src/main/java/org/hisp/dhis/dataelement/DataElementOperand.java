@@ -151,6 +151,11 @@ public class DataElementOperand
     @Override
     public String getUid()
     {
+        if ( uid != null )
+        {
+            return uid;
+        }
+        
         String uid = null;
         
         if ( dataElement != null )
@@ -182,6 +187,24 @@ public class DataElementOperand
         }
         
         return name;
+    }
+    
+    @Override
+    public String getShortName()
+    {
+        String shortName = null;
+        
+        if ( dataElement != null )
+        {
+            shortName = dataElement.getShortName();
+        }
+        
+        if ( categoryOptionCombo != null )
+        {
+            shortName += SPACE + categoryOptionCombo.getName();
+        }
+        
+        return shortName;
     }
     
     /**
@@ -522,6 +545,7 @@ public class DataElementOperand
     {
         return "DataElementOperand{" +
             "id=" + id +
+            ", uid=" + uid +
             ", dataElement=" + dataElement +
             ", categoryOptionCombo=" + categoryOptionCombo +
             ", dataElementId=" + dataElementId +

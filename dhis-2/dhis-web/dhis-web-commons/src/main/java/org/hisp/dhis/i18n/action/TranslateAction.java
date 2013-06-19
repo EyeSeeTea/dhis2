@@ -40,6 +40,8 @@ import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.i18n.I18nService;
+import org.hisp.dhis.i18n.locale.I18nLocale;
+import org.hisp.dhis.i18n.locale.I18nLocaleService;
 import org.hisp.dhis.system.util.LocaleUtils;
 
 import com.opensymphony.xwork2.Action;
@@ -67,11 +69,19 @@ public class TranslateAction
     // Dependencies
     // -------------------------------------------------------------------------
 
+
     private I18nService i18nService;
 
     public void setI18nService( I18nService i18nService )
     {
         this.i18nService = i18nService;
+    }
+
+    private I18nLocaleService i18nLocaleService;
+
+    public void setI18nLocaleService( I18nLocaleService i18nLocaleService )
+    {
+        this.i18nLocaleService = i18nLocaleService;
     }
 
     private IdentifiableObjectManager identifiableObjectManager;
@@ -147,7 +157,8 @@ public class TranslateAction
 
         List<String> propertyNames = i18nService.getObjectPropertyNames( object );
         
-        Locale thisLocale = LocaleUtils.getLocale( loc );
+        I18nLocale thisLocale = i18nLocaleService.getI18nLocaleByName( loc );
+                
 
         HttpServletRequest request = ServletActionContext.getRequest();
 

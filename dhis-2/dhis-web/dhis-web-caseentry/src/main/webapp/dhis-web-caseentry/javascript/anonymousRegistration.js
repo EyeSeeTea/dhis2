@@ -693,7 +693,7 @@ function searchEvents( listAll ) {
     var params = 'anonynousEntryForm=true';
     jQuery( '#displayInReports option' ).each( function ( i, item ) {
         var input = jQuery( item );
-        params += '&searchingValues=de_' + input.val() + '_false_';
+        params += '&filterValues=de_' + input.val() + '_false_';
     } );
 
     if ( listAll ) {
@@ -724,7 +724,7 @@ function searchEvents( listAll ) {
 
                 if ( value != '' ) {
                     searchingValue += getValueFormula( value );
-                    params += '&searchingValues=' + searchingValue;
+                    params += '&filterValues=' + searchingValue;
                 }
                 searchingValue = '';
                 value = '';
@@ -1025,7 +1025,7 @@ function updateDataForm() {
     jQuery( '.stage-object-selected' ).attr( 'psid', programStageId );
     setInnerHTML( 'programName', programName );
     jQuery('#executionDate').css('width',430);
-    jQuery('#executionDate').css('margin-right',30);
+    jQuery('#executionDate').css('margin-right',34);
 
     if ( getFieldValue( 'completed' ) == 'true' ) {
         disable( "completeBtn" );

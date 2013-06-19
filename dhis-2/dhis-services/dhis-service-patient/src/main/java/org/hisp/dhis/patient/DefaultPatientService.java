@@ -523,27 +523,27 @@ public class DefaultPatientService
         patientStore.removeErollmentPrograms( program );
     }
 
-    public Collection<Patient> searchPatients( List<String> searchKeys, OrganisationUnit orgunit, Integer min,
-        Integer max )
+    public Collection<Patient> searchPatients( List<String> searchKeys, OrganisationUnit orgunit, Boolean followup,
+        Collection<PatientAttribute> patientAttributes, Integer min, Integer max )
     {
-        return patientStore.search( searchKeys, orgunit, min, max );
+        return patientStore.search( searchKeys, orgunit, followup, patientAttributes, min, max );
     }
 
-    public int countSearchPatients( List<String> searchKeys, OrganisationUnit orgunit )
+    public int countSearchPatients( List<String> searchKeys, OrganisationUnit orgunit, Boolean followup )
     {
-        return patientStore.countSearch( searchKeys, orgunit );
+        return patientStore.countSearch( searchKeys, orgunit, followup );
     }
 
-    public Collection<String> getPatientPhoneNumbers( List<String> searchKeys, OrganisationUnit orgunit, Integer min,
-        Integer max )
+    public Collection<String> getPatientPhoneNumbers( List<String> searchKeys, OrganisationUnit orgunit,
+        Boolean followup, Integer min, Integer max )
     {
-        return patientStore.getPatientPhoneNumbers( searchKeys, orgunit, min, max );
+        return patientStore.getPatientPhoneNumbers( searchKeys, orgunit, followup, null, min, max );
     }
 
-    public List<Integer> getProgramStageInstances( List<String> searchKeys, OrganisationUnit orgunit, Integer min,
-        Integer max )
+    public List<Integer> getProgramStageInstances( List<String> searchKeys, OrganisationUnit orgunit, Boolean followup,
+        Integer min, Integer max )
     {
-        return patientStore.getProgramStageInstances( searchKeys, orgunit, min, max );
+        return patientStore.getProgramStageInstances( searchKeys, orgunit, followup, null, min, max );
     }
 
     @Override
@@ -553,7 +553,8 @@ public class DefaultPatientService
     }
 
     @Override
-    public Grid getScheduledEventsReport( List<String> searchKeys, OrganisationUnit orgunit, I18n i18n )
+    public Grid getScheduledEventsReport( List<String> searchKeys, OrganisationUnit orgunit, Boolean followup,
+        Integer min, Integer max, I18n i18n )
     {
         String startDate = "";
         String endDate = "";
@@ -580,11 +581,19 @@ public class DefaultPatientService
         grid.addHeader( new GridHeader( i18n.getString( "last_name" ), false, true ) );
         grid.addHeader( new GridHeader( i18n.getString( "gender" ), false, true ) );
         grid.addHeader( new GridHeader( i18n.getString( "phone_number" ), false, true ) );
+
+        Collection<PatientAttribute> patientAttributes = patientAttributeService
+            .getPatientAttributesByDisplayOnVisitSchedule( true );
+        for ( PatientAttribute patientAttribute : patientAttributes )
+        {
+            grid.addHeader( new GridHeader( patientAttribute.getDisplayName(), false, true ) );
+        }
+
         grid.addHeader( new GridHeader( "programstageinstanceid", true, true ) );
         grid.addHeader( new GridHeader( i18n.getString( "program_stage" ), false, true ) );
         grid.addHeader( new GridHeader( i18n.getString( "due_date" ), false, true ) );
 
-        return patientStore.getPatientEventReport( grid, searchKeys, orgunit );
+        return patientStore.getPatientEventReport( grid, searchKeys, orgunit, followup, patientAttributes, min, max );
 
     }
 

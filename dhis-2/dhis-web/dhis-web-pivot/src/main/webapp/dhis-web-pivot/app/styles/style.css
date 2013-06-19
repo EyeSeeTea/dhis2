@@ -96,6 +96,16 @@ body.x-windows {
     border-right: 2px solid white;
 }
 
+	/* User select */
+.user-select {
+	-webkit-touch-callout: text;
+	-webkit-user-select: text;
+	-khtml-user-select: text;
+	-moz-user-select: text;
+	-ms-user-select: text;
+	user-select: text;
+}
+
 	/* Scrollbar */
 .x-scroller-vertical {
 	border: 0 none;
@@ -202,16 +212,32 @@ table.pivot {
 	text-align: right;
 }
 
-td .good div {
-	background-color: #bbddbb;
-	color: #000;
+	/* Legend */
+.pivot td.legend {
+	padding: 0;
 }
-td .medium div {
 
+.pivot div.legendCt {
+	display: table;
+	float: right;
+	width: 100%;
 }
-td .bad div {
-	background-color: #eacccc;
-	color: #000;
+.pivot div.arrowCt {
+	display: table-cell;
+	vertical-align: top;
+	width: 8px;
+}
+.pivot div.arrow {
+	width: 0;
+	height: 0;
+}
+.pivot div.number {
+	display: table-cell;
+}
+
+.pivot div.legendColor {
+	display: table-cell;
+	width: 2px;
 }
 
 
@@ -234,8 +260,7 @@ td .bad div {
 .pt-panel-title-data,
 .pt-panel-title-period,
 .pt-panel-title-organisationunit,
-.pt-panel-title-organisationunitgroupset,
-.pt-panel-title-dataelementgroupset {
+.pt-panel-title-dimension {
 	height: 17px;
 	background-repeat: no-repeat;
 	padding-left: 20px
@@ -250,10 +275,7 @@ td .bad div {
 .pt-panel-title-organisationunit {
 	background-image: url(../images/organisationunit.png);
 }
-.pt-panel-title-organisationunitgroupset {
-	background-image: url(../images/organisationunitgroupset.png);
-}
-.pt-panel-title-dataelementgroupset {
+.pt-panel-title-dimension {
 	background-image: url(../images/dataelementgroupset.png);
 }
 
@@ -478,15 +500,18 @@ td .bad div {
  *--------------------------------------------------------------------------*/
 
 	/* Menu item icon */
-.pt-menu-item-xls {
-    background-image:url('../images/pdf.png');
+.pt-menu-item-image {
+    background-image:url('../images/dl_image.png');
     padding-left: 18px;
 }
-.pt-menu-item-csv {
-    background-image:url('../images/pdf.png');
+.pt-menu-item-tablelayout {
+    background-image:url('../images/dl_tablelayout.png');
     padding-left: 18px;
 }
-
+.pt-menu-item-datasource {
+    background-image:url('../images/dl_datasource.png');
+    padding-left: 18px;
+}
 
 /*----------------------------------------------------------------------------
  * Button

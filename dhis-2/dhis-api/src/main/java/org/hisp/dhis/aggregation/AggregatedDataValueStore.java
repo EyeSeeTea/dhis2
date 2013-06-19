@@ -32,8 +32,6 @@ import java.util.Collection;
 import org.hisp.dhis.completeness.DataSetCompletenessResult;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
-import org.hisp.dhis.datavalue.DataValue;
-import org.hisp.dhis.datavalue.DeflatedDataValue;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.period.Period;
@@ -180,28 +178,6 @@ public interface AggregatedDataValueStore
     public int countDataValuesAtLevel( OrganisationUnit orgunit, OrganisationUnitLevel level, Collection<Period> periods );
 
     // ----------------------------------------------------------------------
-    // AggregatedDataMapValue
-    // ----------------------------------------------------------------------
-    
-    /**
-     * Retrieves the AggregatedDataMapValues for the given arguments.
-     * 
-     * @param dataElementId the DataElement identifier.
-     * @param periodId the Period identifier.
-     * @param organisationUnitIds the set of OrganisationUnit identifiers.
-     */
-    Collection<AggregatedMapValue> getAggregatedDataMapValues( int dataElementId, int periodId, Collection<Integer> organisationUnitIds );
-
-    /**
-     * Retrieves the AggregatedDataMapValues for the given arguments.
-     * 
-     * @param dataElementIds the set of DataElement identifiers.
-     * @param periodId the Period identifier.
-     * @param organisationUnitId the OrganisationUnit identifier.
-     */
-    Collection<AggregatedMapValue> getAggregatedDataMapValues( Collection<Integer> dataElementIds, int periodId, int organisationUnitId );
-    
-    // ----------------------------------------------------------------------
     // AggregatedIndicatorValue
     // ----------------------------------------------------------------------
 
@@ -272,19 +248,6 @@ public interface AggregatedDataValueStore
     public int countIndicatorValuesAtLevel( OrganisationUnit orgunit, OrganisationUnitLevel level, Collection<Period> periods );
 
     // ----------------------------------------------------------------------
-    // AggregatedIndicatorMapValue
-    // ----------------------------------------------------------------------
-    
-    /**
-     * Retrieves the AggregatedIndicatorMapValues for the given arguments.
-     * 
-     * @param indicatorId the Indicator identifier.
-     * @param periodId the Period identifier.
-     * @param organisationUnitIds the collection of OrganisationUnit identifiers.
-     */
-    Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, int periodId, Collection<Integer> organisationUnitIds );
-
-    // ----------------------------------------------------------------------
     // AggregatedDataSetCompleteness
     // ----------------------------------------------------------------------
 
@@ -298,28 +261,4 @@ public interface AggregatedDataValueStore
      */
     Collection<DataSetCompletenessResult> getAggregatedDataSetCompleteness( Collection<Integer> dataSetIds, Collection<Integer> periodIds,
         Collection<Integer> organisationUnitIds );
-    
-    // ----------------------------------------------------------------------
-    // DataValue
-    // ----------------------------------------------------------------------
-    
-    /**
-     * Gets a Collection of DeflatedDataValues.
-     * 
-     * @param dataElementId the DataElement identifier.
-     * @param periodId the Period identifier.
-     * @param sourceIds the Collection of Source identifiers.
-     */
-    Collection<DeflatedDataValue> getDeflatedDataValues( int dataElementId, int periodId, Collection<Integer> sourceIds );
-    
-    /**
-     * Gets a DataValues. Note that this is a "deflated" data value as the objects
-     * in the composite identifier only has its id property populated.
-     * 
-     * @param dataElementId the DataElement identifier.
-     * @param categoryOptionComboId the DataElementCategoryOptionCombo identifier.
-     * @param periodId the Period identifier.
-     * @param sourceId the Source identifier.
-     */
-    DataValue getDataValue( int dataElementId, int categoryOptionComboId, int periodId, int sourceId );
 }

@@ -35,46 +35,7 @@
     <property name="documentService" ref="org.hisp.dhis.document.DocumentService" />
   </bean>
 
-  <!-- Charts -->
-
-  <bean id="org.hisp.dhis.reporting.chart.action.GenerateChartAction" class="org.hisp.dhis.reporting.chart.action.GenerateChartAction"
-    scope="prototype">
-    <property name="chartService" ref="org.hisp.dhis.chart.ChartService" />
-    <property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
-    <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
-    <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
-    <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-  </bean>
-
-  <bean id="org.hisp.dhis.reporting.chart.action.ViewChartAction" class="org.hisp.dhis.reporting.chart.action.ViewChartAction"
-    scope="prototype">
-    <property name="chartService" ref="org.hisp.dhis.chart.ChartService" />
-  </bean>
-
   <!-- TableCreator -->
-
-  <bean id="org.hisp.dhis.reporting.tablecreator.action.GetTableOptionsAction" class="org.hisp.dhis.reporting.tablecreator.action.GetTableOptionsAction"
-    scope="prototype">
-    <property name="reportTableService" ref="org.hisp.dhis.reporttable.ReportTableService" />
-    <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
-    <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
-    <property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
-    <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
-    <property name="organisationUnitGroupService" ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
-    <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
-    <property name="selectionTreeManager" ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
-  </bean>
-
-  <bean id="org.hisp.dhis.reporting.tablecreator.action.SaveTableAction" class="org.hisp.dhis.reporting.tablecreator.action.SaveTableAction"
-    scope="prototype">
-    <property name="reportTableService" ref="org.hisp.dhis.reporttable.ReportTableService" />
-    <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
-    <property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
-    <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
-    <property name="organisationUnitGroupService" ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
-    <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
-    <property name="selectionTreeManager" ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
-  </bean>
 
   <bean id="org.hisp.dhis.reporting.tablecreator.action.GetReportParamsAction" class="org.hisp.dhis.reporting.tablecreator.action.GetReportParamsAction"
     scope="prototype">
@@ -108,12 +69,6 @@
     scope="prototype">
     <property name="reportTableService" ref="org.hisp.dhis.reporttable.ReportTableService" />
 	<property name="constantService" ref="org.hisp.dhis.constant.ConstantService" />
-  </bean>
-
-  <bean id="org.hisp.dhis.reporting.tablecreator.action.GetCategoryComboDataElementsAction" class="org.hisp.dhis.reporting.tablecreator.action.GetCategoryComboDataElementsAction"
-    scope="prototype">
-    <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
-    <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
   </bean>
 
   <!-- Report -->
@@ -154,19 +109,6 @@
 
   <bean id="org.hisp.dhis.reporting.reportviewer.action.GetReportAndParamsAction" class="org.hisp.dhis.reporting.reportviewer.action.GetReportAndParamsAction"
     scope="prototype">
-  </bean>
-
-  <!-- PivotTable -->
-
-  <bean id="org.hisp.dhis.reporting.pivottable.action.GetPivotTableOptionsAction" class="org.hisp.dhis.reporting.pivottable.action.GetPivotTableOptionsAction"
-    scope="prototype">
-    <property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
-    <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
-  </bean>
-
-  <bean id="org.hisp.dhis.reporting.pivottable.action.GetPivotTableAction" class="org.hisp.dhis.reporting.pivottable.action.GetPivotTableAction"
-    scope="prototype">
-    <property name="pivotTableService" ref="org.hisp.dhis.pivottable.PivotTableService" />
   </bean>
 
   <!-- DataSet Report -->

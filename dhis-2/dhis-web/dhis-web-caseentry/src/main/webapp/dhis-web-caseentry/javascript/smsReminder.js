@@ -1,10 +1,11 @@
-
+isAjax = true;
 function orgunitSelected( orgUnits, orgUnitNames )
 {
 	var width = jQuery('#programIdAddPatient').width();
 	jQuery('#programIdAddPatient').width(width-30);
 	showById( "programLoader" );
 	disable('programIdAddPatient');
+	disable('listPatientBtn');
 	showById('mainLinkLbl');
 	showById('searchDiv');
 	hideById('listEventDiv');
@@ -26,12 +27,21 @@ function orgunitSelected( orgUnits, orgUnitNames )
 	jQuery.get("getPrograms.action",{}, 
 		function(json)
 		{
-			jQuery( '#programIdAddPatient').append( '<option value="">' + i18n_please_select + '</option>' );
+			var count = 0;
 			for ( i in json.programs ) {
 				if(json.programs[i].type==1){
+					count++;
 					jQuery( '#programIdAddPatient').append( '<option value="' + json.programs[i].id +'" type="' + json.programs[i].type + '">' + json.programs[i].name + '</option>' );
 				}
 			}
+			if(count==0){
+				jQuery( '#programIdAddPatient').prepend( '<option value="" selected>' + i18n_none_program + '</option>' );
+			}
+			else if(count>1){
+				jQuery( '#programIdAddPatient').prepend( '<option value="" selected>' + i18n_please_select + '</option>' );
+				enable('listPatientBtn');
+			}
+			
 			enableBtn();
 			hideById('programLoader');
 			jQuery('#programIdAddPatient').width(width);
@@ -67,9 +77,12 @@ function listAllPatient()
 				+ startDate + "_" + endDate + "_" 
 				+ getFieldValue('orgunitId') + "_true_" 
 				+ getFieldValue('statusEvent');
-	
+	var followup = "";
+	if( byId('followup').checked ){
+		followup = "?followup=true";
+	}
 	showLoader();
-	jQuery('#listEventDiv').load('getSMSPatientRecords.action',
+	jQuery('#listEventDiv').load('getSMSPatientRecords.action' + followup,
 		{
 			programId:programId,
 			listAll:false,
@@ -77,10 +90,8 @@ function listAllPatient()
 		}, 
 		function()
 		{
-			setInnerHTML('searchInforLbl',i18n_list_all_patients);
 			showById('colorHelpLink');
 			showById('listEventDiv');
-			setTableStyles();
 			hideLoader();
 		});
 }
@@ -120,6 +131,9 @@ function advancedSearch( params )
 
 function programTrackingList( programStageInstanceId, isSendSMS ) 
 {
+	hideById('listEventDiv');
+	hideById('searchDiv');
+	showLoader();
 	setFieldValue('sendToList', "false");
 	$('#smsManagementDiv' ).load("programTrackingList.action",
 		{
@@ -131,6 +145,7 @@ function programTrackingList( programStageInstanceId, isSendSMS )
 			hideById('searchDiv');
 			hideById('listEventDiv');
 			showById('smsManagementDiv');
+			hideLoader();
 		});
 }
 
@@ -269,3 +284,22 @@ function onClickBackBtn()
 		validateAdvancedSearch();
 	}
 }
+
+// load program instance history
+function programTrackingReport( programInstanceId )
+{
+	$('#programTrackingReportDiv').load("getProgramReportHistory.action", 
+		{
+			programInstanceId:programInstanceId
+		}).dialog(
+		{
+			title:i18n_program_report,
+			maximize:true, 
+			closable:true,
+			modal:true,
+			overlay:{background:'#000000', opacity:0.1},
+			width:850,
+			height:500
+		});
+}
+

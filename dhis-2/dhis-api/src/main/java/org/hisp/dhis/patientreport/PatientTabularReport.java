@@ -87,6 +87,10 @@ public class PatientTabularReport
     private Boolean userOrganisationUnitChildren;
 
     private List<String> filterValues = new ArrayList<String>();
+    
+    private Boolean displayOrgunitCode;
+    
+    private Boolean useFormNameDataElement;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -108,6 +112,16 @@ public class PatientTabularReport
     public Date getStartDate()
     {
         return startDate;
+    }
+
+    public Boolean getUseFormNameDataElement()
+    {
+        return useFormNameDataElement;
+    }
+
+    public void setUseFormNameDataElement( Boolean useFormNameDataElement )
+    {
+        this.useFormNameDataElement = useFormNameDataElement;
     }
 
     public void setStartDate( Date startDate )
@@ -223,6 +237,16 @@ public class PatientTabularReport
     public void setProgramStage( ProgramStage programStage )
     {
         this.programStage = programStage;
+    }
+
+    public Boolean getDisplayOrgunitCode()
+    {
+        return displayOrgunitCode;
+    }
+
+    public void setDisplayOrgunitCode( Boolean displayOrgunitCode )
+    {
+        this.displayOrgunitCode = displayOrgunitCode;
     }
 
 }

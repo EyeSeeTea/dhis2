@@ -33,8 +33,6 @@ import org.hisp.dhis.completeness.DataSetCompletenessResult;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.datavalue.DataValue;
-import org.hisp.dhis.datavalue.DeflatedDataValue;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
@@ -135,20 +133,6 @@ public class DefaultAggregatedDataValueService
     {
         return aggregatedDataValueStore.countDataValuesAtLevel( orgunit, level, periods );
     }
-        
-    // -------------------------------------------------------------------------
-    // AggregatedDataMapValue
-    // -------------------------------------------------------------------------
-    
-    public Collection<AggregatedMapValue> getAggregatedDataMapValues( int dataElementId, int periodId, Collection<Integer> organisationUnitIds )
-    {
-        return aggregatedDataValueStore.getAggregatedDataMapValues( dataElementId, periodId, organisationUnitIds );
-    }
-    
-    public Collection<AggregatedMapValue> getAggregatedDataMapValues( Collection<Integer> dataElementIds, int periodId, int organisationUnitId )
-    {
-        return aggregatedDataValueStore.getAggregatedDataMapValues( dataElementIds, periodId, organisationUnitId );
-    }
     
     // -------------------------------------------------------------------------
     // AggregatedIndicatorValue
@@ -197,15 +181,6 @@ public class DefaultAggregatedDataValueService
     }
     
     // -------------------------------------------------------------------------
-    // AggregatedIndicatorMapValue
-    // -------------------------------------------------------------------------
-    
-    public Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, int periodId, Collection<Integer> organisationUnitIds )
-    {
-        return aggregatedDataValueStore.getAggregatedIndicatorMapValues( indicatorId, periodId, organisationUnitIds );
-    }
-
-    // -------------------------------------------------------------------------
     // AggregatedDataSetCompleteness
     // -------------------------------------------------------------------------
     
@@ -213,19 +188,5 @@ public class DefaultAggregatedDataValueService
         Collection<Integer> organisationUnitIds )
     {
         return aggregatedDataValueStore.getAggregatedDataSetCompleteness( dataSetIds, periodIds, organisationUnitIds );
-    }
-    
-    // -------------------------------------------------------------------------
-    // DataValue
-    // -------------------------------------------------------------------------
-    
-    public Collection<DeflatedDataValue> getDeflatedDataValues( int dataElementId, int periodId, Collection<Integer> sourceIds )
-    {
-        return aggregatedDataValueStore.getDeflatedDataValues( dataElementId, periodId, sourceIds );
-    }
-    
-    public DataValue getDataValue( int dataElementId, int categoryOptionComboId, int periodId, int sourceId )
-    {
-        return aggregatedDataValueStore.getDataValue( dataElementId, categoryOptionComboId, periodId, sourceId );
     }
 }

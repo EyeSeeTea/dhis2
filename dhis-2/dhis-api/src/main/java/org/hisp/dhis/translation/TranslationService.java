@@ -28,7 +28,9 @@ package org.hisp.dhis.translation;
  */
 
 import java.util.Collection;
-import java.util.Locale;
+
+import org.hisp.dhis.i18n.locale.I18nLocale;
+//import java.util.I18nLocale;
 
 /**
  * @author Lars Helge Overland
@@ -61,7 +63,7 @@ public interface TranslationService
      * @param property the property.
      * @return a Translation.
      */
-    Translation getTranslation( String className, int id, Locale locale, String property );
+    Translation getTranslation( String className, int id, I18nLocale locale, String property );
 
     /**
      * Retrieves a Collection of Translations.
@@ -71,7 +73,7 @@ public interface TranslationService
      * @param locale the locale.
      * @return a Collection of Translations.
      */
-    Collection<Translation> getTranslations( String className, int id, Locale locale );
+    Collection<Translation> getTranslations( String className, int id, I18nLocale locale );
 
     /**
      * Retrieves a Collection of Translations.
@@ -80,7 +82,7 @@ public interface TranslationService
      * @param locale the locale.
      * @return a Collection of Translations.
      */
-    Collection<Translation> getTranslations( String className, Locale locale );
+    Collection<Translation> getTranslations( String className, I18nLocale locale );
 
     /**
      * Retrieves a Collection of all Translations.

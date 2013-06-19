@@ -1682,13 +1682,17 @@ function loadActiveProgramStageRecords(programInstanceId, activeProgramStageInst
 				hideById('programInstanceDiv');
 				if( hasDataEntry=='true' || hasDataEntry==undefined ){
 					var programStageInstanceId = jQuery('.stage-object').attr('id').split('_')[1];
-					loadDataEntry( programStageInstanceId );
+					if( programStageInstanceId )
+					{
+						loadDataEntry( programStageInstanceId );
+					}
 				}
 			}
 			else{
 				showById('programInstanceDiv');
 				activeProgramInstanceDiv( programInstanceId );
 				if( activeProgramStageInstanceId != undefined 
+					&& activeProgramStageInstanceId!=false
 					&& ( hasDataEntry=='true' || hasDataEntry==undefined ))
 				{
 					loadDataEntry( activeProgramStageInstanceId );
@@ -1797,6 +1801,7 @@ function sendSmsOnePatient( field, programStageInstanceId )
 				jQuery('[name=messageTB]').prepend("<tr><td>" + getFieldValue('currentDate') + " " + currentTime + "</td>"
 					+ "<td>" + getFieldValue('programStageName') + "</td>"
 					+ "<td>" + getFieldValue('currentUsername') + "</td>"
+					+ "<td>" + i18n_message + "</td>"
 					+ "<td>" + field.value + "</td></tr>");
 				field.value="";
 				field.style.backgroundColor = SUCCESS_COLOR;
@@ -1860,6 +1865,7 @@ function addComment( field, programStageInstanceId )
 			}
 
 			content += "<td>" + getFieldValue('currentUsername') + "</td>"
+			content += "<td>" + i18n_comment + "</td>";
 			content += "<td>" + commentText + "</td></tr>";
 			jQuery('#commentTB').prepend(content);
 			field.value="";
@@ -2065,13 +2071,15 @@ function markForFollowup( programInstanceId, followup )
 		{   
 			 if( followup )
 			 {
-				showById('imgMarkFollowup');
-				hideById('imgUnmarkFollowup');
+				jQuery('[name=imgMarkFollowup]').show();
+				jQuery('[name=imgUnmarkFollowup]').hide();
+				showById("followup_" + programInstanceId);
 			 }
 			 else
 			 {
-				hideById('imgMarkFollowup');
-				showById('imgUnmarkFollowup');
+				jQuery('[name=imgMarkFollowup]').hide();
+				jQuery('[name=imgUnmarkFollowup]').show();
+				hideById("followup_" + programInstanceId);
 			 }
 		});
 }

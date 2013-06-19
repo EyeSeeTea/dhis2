@@ -42,15 +42,17 @@ import java.util.List;
 @JacksonXmlRootElement( localName = "event", namespace = DxfNamespaces.DXF_2_0 )
 public class Event
 {
-    private String id;
+    private String program;
 
-    private String eventId;
+    private String programStage;
 
-    private String organisationUnitId;
+    private String event;
 
-    private String patientId;
+    private String orgUnit;
 
-    private String executionDate;
+    private String patient;
+
+    private String eventDate;
 
     private Boolean completed = false;
 
@@ -66,62 +68,74 @@ public class Event
 
     @JsonProperty( required = true )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
-    public String getId()
+    public String getProgram()
     {
-        return id;
+        return program;
     }
 
-    public void setId( String id )
+    public void setProgram( String program )
     {
-        this.id = id;
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
-    public String getEventId()
-    {
-        return eventId;
-    }
-
-    public void setEventId( String eventId )
-    {
-        this.eventId = eventId;
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
-    public String getOrganisationUnitId()
-    {
-        return organisationUnitId;
-    }
-
-    public void setOrganisationUnitId( String organisationUnitId )
-    {
-        this.organisationUnitId = organisationUnitId;
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
-    public String getPatientId()
-    {
-        return patientId;
-    }
-
-    public void setPatientId( String patientId )
-    {
-        this.patientId = patientId;
+        this.program = program;
     }
 
     @JsonProperty( required = true )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
-    public String getExecutionDate()
+    public String getProgramStage()
     {
-        return executionDate;
+        return programStage;
     }
 
-    public void setExecutionDate( String executionDate )
+    public void setProgramStage( String programStage )
     {
-        this.executionDate = executionDate;
+        this.programStage = programStage;
+    }
+
+    @JsonProperty( required = true )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
+    public String getEvent()
+    {
+        return event;
+    }
+
+    public void setEvent( String event )
+    {
+        this.event = event;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
+    public String getOrgUnit()
+    {
+        return orgUnit;
+    }
+
+    public void setOrgUnit( String orgUnit )
+    {
+        this.orgUnit = orgUnit;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
+    public String getPatient()
+    {
+        return patient;
+    }
+
+    public void setPatient( String patient )
+    {
+        this.patient = patient;
+    }
+
+    @JsonProperty( required = true )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
+    public String getEventDate()
+    {
+        return eventDate;
+    }
+
+    public void setEventDate( String eventDate )
+    {
+        this.eventDate = eventDate;
     }
 
     @JsonProperty
@@ -177,11 +191,12 @@ public class Event
     public String toString()
     {
         return "Event{" +
-            "id='" + id + '\'' +
-            ", eventId='" + eventId + '\'' +
-            ", organisationUnitId='" + organisationUnitId + '\'' +
-            ", patientId='" + patientId + '\'' +
-            ", executionDate='" + executionDate + '\'' +
+            "program='" + program + '\'' +
+            ", programStage='" + programStage + '\'' +
+            ", eventId='" + event + '\'' +
+            ", orgUnit='" + orgUnit + '\'' +
+            ", patient='" + patient + '\'' +
+            ", eventDate='" + eventDate + '\'' +
             ", completed=" + completed +
             ", storedBy='" + storedBy + '\'' +
             ", coordinate=" + coordinate +

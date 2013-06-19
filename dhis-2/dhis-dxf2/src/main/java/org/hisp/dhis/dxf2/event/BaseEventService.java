@@ -48,6 +48,7 @@ import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
+import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -65,6 +66,9 @@ public abstract class BaseEventService implements EventService
 
     @Autowired
     private ProgramService programService;
+
+    @Autowired
+    private ProgramStageService programStageService;
 
     @Autowired
     private ProgramInstanceService programInstanceService;
@@ -98,11 +102,25 @@ public abstract class BaseEventService implements EventService
 
     protected ImportSummary saveEvent( Event event )
     {
-        Program program = programService.getProgram( event.getId() );
+        Program program;
+
+        if ( event.getProgram() != null )
+        {
+            program = programService.getProgram( event.getProgram() );
+        }
+        else if ( event.getProgramStage() != null )
+        {
+            ProgramStage programStage = programStageService.getProgramStage( event.getProgramStage() );
+            program = programStage.getProgram();
+        }
+        else
+        {
+            return new ImportSummary( ImportStatus.ERROR, "No Event programId or programStageId was provided." );
+        }
 
         if ( program == null )
         {
-            return new ImportSummary( ImportStatus.ERROR, "Event ID does not point to a valid program." );
+            return new ImportSummary( ImportStatus.ERROR, "No valid Event programId or programStageId was provided." );
         }
         else
         {
@@ -114,7 +132,7 @@ public abstract class BaseEventService implements EventService
             }
         }
 
-        OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( event.getOrganisationUnitId() );
+        OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( event.getOrgUnit() );
 
         if ( organisationUnit == null )
         {
@@ -173,17 +191,17 @@ public abstract class BaseEventService implements EventService
             return new ImportSummary( ImportStatus.ERROR, ex.getMessage() );
         }
 
-        Date executionDate = format.parseDate( event.getExecutionDate() );
+        Date eventDate = format.parseDate( event.getEventDate() );
 
-        if ( executionDate == null )
+        if ( eventDate == null )
         {
-            return new ImportSummary( ImportStatus.ERROR, "Event executionDate is not in a valid format." );
+            return new ImportSummary( ImportStatus.ERROR, "Event eventDate is not in a valid format." );
         }
 
         ImportSummary importSummary = new ImportSummary();
         importSummary.setStatus( ImportStatus.SUCCESS );
 
-        ProgramStageInstance programStageInstance = saveExecutionDate( program, organisationUnit, executionDate,
+        ProgramStageInstance programStageInstance = saveEventDate( program, organisationUnit, eventDate,
             event.getCompleted(), event.getCoordinate() );
 
         String storedBy = event.getStoredBy();
@@ -200,11 +218,11 @@ public abstract class BaseEventService implements EventService
 
         for ( DataValue dataValue : event.getDataValues() )
         {
-            DataElement dataElement = dataElementService.getDataElement( dataValue.getDataElementId() );
+            DataElement dataElement = dataElementService.getDataElement( dataValue.getDataElement() );
 
             if ( dataElement == null )
             {
-                importSummary.getConflicts().add( new ImportConflict( "dataElementId", dataValue.getDataElementId() + " is not a valid dataElementId." ) );
+                importSummary.getConflicts().add( new ImportConflict( "dataElementId", dataValue.getDataElement() + " is not a valid dataElementId." ) );
                 importSummary.getDataValueCount().incrementIgnored();
             }
             else
@@ -244,7 +262,7 @@ public abstract class BaseEventService implements EventService
         return new ImportSummary();
     }
 
-    private ProgramStageInstance saveExecutionDate( Program program, OrganisationUnit organisationUnit, Date date, Boolean completed,
+    private ProgramStageInstance saveEventDate( Program program, OrganisationUnit organisationUnit, Date date, Boolean completed,
         Coordinate coordinate )
     {
         ProgramStage programStage = program.getProgramStages().iterator().next();

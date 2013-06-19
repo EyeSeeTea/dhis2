@@ -410,9 +410,57 @@ function addEventListeners()
             saveBoolean( dataElementId, optionComboId, id );
         } );
 
+        $( this ).css( 'width', '88%' );
+        $( this ).css( 'margin-right', '2px' );
+    } );
+
+    $( '[name="entrytrueonly"]' ).each( function( i )
+    {
+        var id = $( this ).attr( 'id' );
+        var split = splitFieldId( id );
+
+        var dataElementId = split.dataElementId;
+        var optionComboId = split.optionComboId;
+
+        $( this ).unbind( 'focus' );
+        $( this ).unbind( 'change' );
+
+        $( this ).focus( valueFocus );
+        $( this ).blur( valueBlur );
+
+        $( this ).change( function()
+        {
+            saveTrueOnly( dataElementId, optionComboId, id );
+        } );
+
         $( this ).css( 'width', '90%' );
     } );
-    
+
+    $( '[name="entryoptionset"]' ).each( function( i )
+    {
+        var id = $( this ).attr( 'id' );
+        var split = splitFieldId( id );
+
+        var dataElementId = split.dataElementId;
+        var optionComboId = split.optionComboId;
+
+        $( this ).unbind( 'focus' );
+        $( this ).unbind( 'change' );
+
+        $( this ).focus( valueFocus );
+        $( this ).blur( valueBlur );
+
+        $( this ).change( function()
+        {
+            saveVal( dataElementId, optionComboId, id );
+        } );
+
+        if ( formType != FORMTYPE_CUSTOM ) {
+            $( this ).css( 'width', '80%' );
+            $( this ).css( 'text-align', 'center' );
+        }
+    } );
+
     $( '[name="commentlink"]' ).each( function( i )
     {
         var id = $( this ).attr( 'id' );
@@ -546,8 +594,8 @@ function loadForm( dataSetId, multiOrg )
                 $( '#currentOrganisationUnit' ).html( i18n_no_organisationunit_selected );
             }
 
-            loadDataValues();
             insertOptionSets();
+            loadDataValues();
         } );
     }
 }
@@ -1076,11 +1124,15 @@ function insertDataValues()
 
     $( '[name="entryfield"]' ).val( '' );
     $( '[name="entryselect"]' ).val( '' );
+    $( '[name="entrytrueonly"]' ).removeAttr('checked');
+    $( '[name="entryoptionset"]' ).val( '' );
     $( '[name="dyninput"]' ).val( '' );
     $( '[name="dynselect"]' ).val( '' );
 
     $( '[name="entryfield"]' ).css( 'background-color', COLOR_WHITE );
     $( '[name="entryselect"]' ).css( 'background-color', COLOR_WHITE );
+    $( '[name="entrytrueonly"]' ).css( 'background-color', COLOR_WHITE );
+    $( '[name="entryoptionset"]' ).css( 'background-color', COLOR_WHITE );
     $( '[name="dyninput"]' ).css( 'background-color', COLOR_WHITE );
 
     $( '[name="min"]' ).html( '' );
@@ -1132,8 +1184,12 @@ function insertDataValues()
 
 	            if ( $( fieldId ).length > 0 ) // Insert for fixed input fields
 	            {
-	                $( fieldId ).val( value.val );
-	            }
+                    if ( $( fieldId ).attr( 'name' ) == 'entrytrueonly' ) {
+                        $( fieldId ).attr('checked', true);
+                    } else {
+                        $( fieldId ).val( value.val );
+                    }
+                }
 	            else // Insert for potential dynamic input fields
 	            {
                     var split = splitFieldId( value.id );
@@ -1157,7 +1213,7 @@ function insertDataValues()
         			}
 
     				var dynamicInputId = '#' + code + '-' + optionComboId + '-dyninput';
-    				
+
         			if ( $( dynamicInputId ).length == 0 )
     				{
         				log( 'Could not find find dynamic input element for option combo: ' + optionComboId );
@@ -1335,6 +1391,14 @@ function getPreviousEntryField( field )
             return field;
         }
     }
+}
+
+/**
+ * Convenience method which can be used in custom form scripts. Do not change.
+ */
+function onFormLoad( fn )
+{
+	$( 'body' ).off( EVENT_FORM_LOADED ).on( EVENT_FORM_LOADED, fn );
 }
 
 // -----------------------------------------------------------------------------
@@ -1536,7 +1600,7 @@ function validateCompulsoryCombinations()
     if ( fieldCombinationRequired )
     {
         var violations = false;
-		
+
         $( '[name="entryfield"]' ).add( '[name="entryselect"]' ).each( function( i )
         {
             var id = $( this ).attr( 'id' );
@@ -2193,7 +2257,7 @@ function StorageManager()
 }
 
 // -----------------------------------------------------------------------------
-// OptionSet
+// Option set
 // -----------------------------------------------------------------------------
 
 function searchOptionSet( uid, query, success ) {
@@ -2207,11 +2271,17 @@ function searchOptionSet( uid, query, success ) {
                 } else {
                     query = query.toLowerCase();
 
-                    _.each(obj.optionSet.options, function(item, idx) {
-                        if ( item.toLowerCase().indexOf( query ) != -1 ) {
-                            options.push(item);
+                    for ( var idx=0, len = obj.optionSet.options.length; idx < len; idx++ ) {
+                        var item = obj.optionSet.options[idx];
+
+                        if ( options.length >= MAX_DROPDOWN_DISPLAYED ) {
+                            break;
                         }
-                    });
+
+                        if ( item.toLowerCase().indexOf( query ) != -1 ) {
+                            options.push( item );
+                        }
+                    }
                 }
 
                 success( $.map( options, function ( item ) {
@@ -2277,13 +2347,29 @@ function loadOptionSets() {
 }
 
 function insertOptionSets() {
-    $.each( _.keys(optionSets), function(idx, item) {
-        autocompleteOptionSetField( item + '-val', optionSets[item] );
-    });
+    $( '[name="entryoptionset"]' ).each( function ( idx, item ) {
+        var optionSetKey = splitFieldId( item.id );
+
+        if ( multiOrganisationUnit ) {
+            item = optionSetKey.organisationUnitId + '-' + optionSetKey.dataElementId + '-' + optionSetKey.optionComboId;
+        } else {
+            item = optionSetKey.dataElementId + '-' + optionSetKey.optionComboId;
+        }
+
+        item = item + '-val';
+        optionSetKey = optionSetKey.dataElementId + '-' + optionSetKey.optionComboId;
+
+        autocompleteOptionSetField( item, optionSets[optionSetKey] );
+    } );
 }
 
 function autocompleteOptionSetField( idField, optionSetUid ) {
     var input = jQuery( "#" + idField );
+
+    if ( !input ) {
+        return;
+    }
+
     input.css( "width", "85%" );
     input.autocomplete( {
         delay: 0,
@@ -2311,7 +2397,7 @@ function autocompleteOptionSetField( idField, optionSetUid ) {
 
     var button = $( "<a style='width:20px; margin-bottom:-5px;height:20px;'>" )
         .attr( "tabIndex", -1 )
-        .attr( "title", 'i18n_show_all_items' )
+        .attr( "title", i18n_show_all_items )
         .appendTo( wrapper )
         .button( {
             icons: {

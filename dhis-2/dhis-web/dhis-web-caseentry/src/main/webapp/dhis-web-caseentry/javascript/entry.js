@@ -618,6 +618,10 @@ function runCompleteEvent( isCreateEvent )
 
                         disableCompletedButton(true);
                         hideLoader();
+
+                        if ( isCreateEvent ) {
+                            showAddEventForm();
+                        }
                     }
                 }
             });
@@ -814,6 +818,7 @@ function loadProgramStageInstance( programStageInstanceId, always ) {
                         "<tr>",
                         "<td>" + item.createdDate + "</td>",
                         "<td>" + item.creator + "</td>",
+						"<td>" + i18n_comment + "</td>",
                         "<td>" + item.text + "</td>",
                         "</tr>"
                     ].join(' ');
@@ -882,7 +887,10 @@ function entryFormContainerOnReady()
             TOGGLE.init();
 
             jQuery( "#entryForm :input" ).each( function () {
-                if ( jQuery( this ).attr( 'options' ) != null && jQuery( this ).attr( 'options' ) == 'true' ) {
+                if ( jQuery( this ).attr( 'options' ) != null 
+					&& jQuery( this ).attr( 'options' ) == 'true' 
+					&& ( jQuery( this ).attr( 'disabled' ) == null  
+						|| jQuery( this ).attr( 'disabled' ) != 'disabled' ) ){
                     autocompletedField( jQuery( this ).attr( 'id' ) );
                 }
                 else if ( jQuery( this ).attr( 'username' ) != null && jQuery( this ).attr( 'username' ) == 'true' ) {
@@ -933,11 +941,17 @@ function searchOptionSet( uid, query, success ) {
                 } else {
                     query = query.toLowerCase();
 
-                    _.each(obj.optionSet.options, function(item, idx) {
-                        if ( item.toLowerCase().indexOf( query ) != -1 ) {
-                            options.push(item);
+                    for ( var idx=0, len = obj.optionSet.options.length; idx < len; idx++ ) {
+                        var item = obj.optionSet.options[idx];
+
+                        if ( options.length >= MAX_DROPDOWN_DISPLAYED ) {
+                            break;
                         }
-                    });
+
+                        if ( item.toLowerCase().indexOf( query ) != -1 ) {
+                            options.push( item );
+                        }
+                    }
                 }
 
                 success( $.map( options, function ( item ) {
@@ -1176,7 +1190,7 @@ function autocompletedUsernameField( idField )
 
 function filterOnSection()
 {
-    var value = 'sec_' + $( '#filterDataSetSection option:selected' ).val();
+    var value = $( '#filterDataSetSection option:selected' ).val();
     
     if ( value == 'all' )
     {
@@ -1185,6 +1199,6 @@ function filterOnSection()
     else
     {
         $( '.formSection' ).hide();
-        $( '#' + value ).show();
+        $( '#sec_' + value ).show();
     }
 }

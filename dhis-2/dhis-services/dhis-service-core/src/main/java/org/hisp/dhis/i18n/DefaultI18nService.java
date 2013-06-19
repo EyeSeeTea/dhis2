@@ -47,6 +47,8 @@ import java.util.Map;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.i18n.locale.I18nLocale;
+import org.hisp.dhis.i18n.locale.I18nLocaleService;
 import org.hisp.dhis.system.util.LocaleUtils;
 import org.hisp.dhis.translation.Translation;
 import org.hisp.dhis.translation.TranslationService;
@@ -76,17 +78,27 @@ public class DefaultI18nService
         this.userSettingService = userSettingService;
     }
 
+    private I18nLocaleService i18nLocaleService;
+
+    public void setI18nLocaleService( I18nLocaleService i18nLocaleService )
+    {
+        this.i18nLocaleService = i18nLocaleService;
+    }
+    
     // -------------------------------------------------------------------------
     // Properties
     // -------------------------------------------------------------------------
 
-    private List<Locale> locales = new ArrayList<Locale>();
+    private List<I18nLocale> locales = new ArrayList<I18nLocale>();
 
     public void setLocales( List<String> localeStrings )
     {
         for ( String string : localeStrings )
         {
-            Locale locale = LocaleUtils.getLocale( string );
+            //I18nLocale locale = LocaleUtils.getLocale( string );
+            
+            // TODO: Need to find out the source of this call and find the format used.
+            I18nLocale locale = i18nLocaleService.getI18nLocaleByName( string); //LocaleUtils.getLocale( string );
 
             if ( locale != null )
             {
@@ -94,9 +106,9 @@ public class DefaultI18nService
             }
         }
 
-        Collections.sort( locales, new Comparator<Locale>()
+        Collections.sort( locales, new Comparator<I18nLocale>()
         {
-            public int compare( Locale l1, Locale l2 )
+            public int compare( I18nLocale l1, I18nLocale l2 )
             {
                 return l1.getDisplayName().compareTo( l2.getDisplayName() );
             }
@@ -119,7 +131,7 @@ public class DefaultI18nService
         }
     }
 
-    public void internationalise( Object object, Locale locale )
+    public void internationalise( Object object, I18nLocale locale )
     {
         if ( isCollection( object ) )
         {
@@ -131,7 +143,7 @@ public class DefaultI18nService
         }
     }
 
-    private void internationaliseObject( Object object, Locale locale )
+    private void internationaliseObject( Object object, I18nLocale locale )
     {
         if ( locale == null || object == null )
         {
@@ -156,7 +168,7 @@ public class DefaultI18nService
         }
     }
 
-    private void internationaliseCollection( Collection<?> objects, Locale locale )
+    private void internationaliseCollection( Collection<?> objects, I18nLocale locale )
     {
         if ( locale == null || objects == null || objects.size() == 0 )
         {
@@ -231,7 +243,7 @@ public class DefaultI18nService
     // Translation
     // -------------------------------------------------------------------------
 
-    public void updateTranslation( String className, int id, Locale locale, Map<String, String> translations )
+    public void updateTranslation( String className, int id, I18nLocale locale, Map<String, String> translations )
     {
         if ( locale != null && className != null )
         {
@@ -268,7 +280,7 @@ public class DefaultI18nService
         return getTranslations( className, id, getCurrentLocale() );
     }
 
-    public Map<String, String> getTranslations( String className, int id, Locale locale )
+    public Map<String, String> getTranslations( String className, int id, I18nLocale locale )
     {
         if ( locale != null && className != null )
         {
@@ -279,12 +291,12 @@ public class DefaultI18nService
     }
 
     // -------------------------------------------------------------------------
-    // Locale
+    // I18nLocale
     // -------------------------------------------------------------------------
 
-    public Locale getCurrentLocale()
+    public I18nLocale getCurrentLocale()
     {
-        return (Locale) userSettingService.getUserSetting( UserSettingService.KEY_DB_LOCALE );
+        return (I18nLocale) userSettingService.getUserSetting( UserSettingService.KEY_DB_LOCALE );
     }
 
     public boolean currentLocaleIsBase()
@@ -292,7 +304,7 @@ public class DefaultI18nService
         return getCurrentLocale() == null;
     }
 
-    public List<Locale> getAvailableLocales()
+    public List<I18nLocale> getAvailableLocales()
     {
         return locales;
     }

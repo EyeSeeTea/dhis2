@@ -27,6 +27,7 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.common.DimensionalObjectUtils.getUniqueDimensions;
 import static org.hisp.dhis.common.DimensionalObjectUtils.toDimension;
 
 import java.io.IOException;
@@ -41,7 +42,6 @@ import org.hisp.dhis.api.utils.ContextUtils.CacheStrategy;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.common.DimensionService;
-import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.i18n.I18nManager;
@@ -51,6 +51,7 @@ import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.CodecUtils;
 import org.hisp.dhis.user.UserService;
 import org.jfree.chart.ChartUtilities;
@@ -159,6 +160,7 @@ public class ChartController
     @RequestMapping( value = { "/{uid}/data", "/{uid}/data.png" }, method = RequestMethod.GET )
     public void getChart( @PathVariable( "uid" ) String uid,
         @RequestParam( value = "date", required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date date,
+        @RequestParam( value = "pe", required = false) String pe,
         @RequestParam( value = "ou", required = false ) String ou,
         @RequestParam( value = "width", defaultValue = "800", required = false ) int width,
         @RequestParam( value = "height", defaultValue = "500", required = false ) int height,
@@ -166,7 +168,19 @@ public class ChartController
     {
         Chart chart = chartService.getChartNoAcl( uid );
 
+        if ( chart == null )
+        {
+            ContextUtils.notFoundResponse( response, "Chart does not exist: " + uid );
+            return;
+        }
+        
         OrganisationUnit unit = ou != null ? organisationUnitService.getOrganisationUnit( ou ) : null;
+        
+        if ( pe != null )
+        {
+            Period period = PeriodType.getPeriodFromIsoString( pe );            
+            date = period != null ? period.getStartDate() : date;
+        }
         
         JFreeChart jFreeChart = chartService.getJFreeChart( chart, date, unit, i18nManager.getI18nFormat() );
 
@@ -215,10 +229,10 @@ public class ChartController
             chart.getParentGraphMap().put( organisationUnit.getUid(), organisationUnit.getParentGraph() );
         }
         
-        I18nFormat format = i18nManager.getI18nFormat();
-        
         if ( chart.getPeriods() != null && !chart.getPeriods().isEmpty() )
         {
+            I18nFormat format = i18nManager.getI18nFormat();
+            
             for ( Period period : chart.getPeriods() )
             {
                 period.setName( format.formatPeriod( period ) );
@@ -235,13 +249,17 @@ public class ChartController
         dimensionService.mergeAnalyticalObject( chart );
         
         chart.getFilterDimensions().clear();
-                
-        chart.setSeries( toDimension( chart.getColumns().get( 0 ).getDimension() ) );
-        chart.setCategory( toDimension( chart.getRows().get( 0 ).getDimension() ) );
         
-        for ( DimensionalObject dimension : chart.getFilters() )
+        if ( chart.getColumns() != null )
         {
-            chart.getFilterDimensions().add( toDimension( dimension.getDimension() ) );
+            chart.setSeries( toDimension( chart.getColumns().get( 0 ).getDimension() ) );
         }
+        
+        if ( chart.getRows() != null )
+        {
+            chart.setCategory( toDimension( chart.getRows().get( 0 ).getDimension() ) );
+        }
+        
+        chart.getFilterDimensions().addAll( getUniqueDimensions( chart.getFilters() ) );
     }
 }

@@ -27,6 +27,7 @@ package org.hisp.dhis.analytics.data;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,7 +57,13 @@ public class MockAnalyticsService
     {
         throw new NotImplementedException();
     }
-    
+
+    @Override
+    public Grid getAggregatedDataValues( DataQueryParams params, boolean tableLayout, List<String> columns, List<String> rows )
+    {
+        throw new NotImplementedException();
+    }
+
     @Override
     public Map<String, Double> getAggregatedDataValueMapping( DataQueryParams params )
     {
@@ -71,7 +78,7 @@ public class MockAnalyticsService
 
     @Override
     public DataQueryParams getFromUrl( Set<String> dimensionParams, Set<String> filterParams,
-        AggregationType aggregationType, String measureCriteria, I18nFormat format )
+        AggregationType aggregationType, String measureCriteria, boolean skipMeta, I18nFormat format )
     {
         throw new NotImplementedException();
     }
