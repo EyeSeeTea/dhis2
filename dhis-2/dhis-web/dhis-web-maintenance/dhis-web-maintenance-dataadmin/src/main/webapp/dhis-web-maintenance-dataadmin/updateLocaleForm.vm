@@ -1,0 +1,80 @@
+<script type="text/javascript">
+	jQuery(document).ready(	function(){
+		
+		var rules = getValidationRules("i18nLocale");
+		
+		validation2( 'updateLocaleForm', function( form ){ form.submit(); },
+		{
+			'rules': rules
+		});
+	
+		checkValueIsExist( "name", "validateLocale.action", {id: $i18nLocale.id} );
+	});
+		
+</script>
+
+
+<h3>$i18n.getString( "edit_locale" )</h3>
+
+<form id="updateLocaleForm" name="updateLocaleForm" action="updateLocale.action" method="post" class="inputForm">
+
+  <input type="hidden" id="id" name="id" value="$i18nLocale.id">
+  <table id="detailsList">
+    <thead>
+      <tr>
+        <th colspan="2">$i18n.getString( "locale_details" )</th>
+      </tr>
+    </thead>
+    <tbody>
+		<tr>
+			<td><label>$i18n.getString( "name" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+			<td><input style="width: 330px;" type="text" id="name" name="name" value="$encoder.htmlEncode( $i18nLocale.name)" ></td>
+			<td></td>
+		</tr>	
+		
+		<tr>
+			<td><label>$i18n.getString( "description" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+			<td><input style="width: 330px;" type="text" id="description" name="description" value="$encoder.htmlEncode( $i18nLocale.description )" ></td>
+			<td></td>
+		</tr>
+
+		<tr>
+			<td><label>$i18n.getString( "language" ) </label></td>
+			<td>
+				<select id="language" name="language">
+					<option value="">[$i18n.getString( "locale_language_no_translation" )]</option>
+				#foreach( $language in $availableLanguages )
+					<option value="$language" #if( $language == $i18nLocale.language )selected="selected"#end>$language</option>
+				#end
+				</select>
+			</td>
+			<td></td>
+		</tr>
+
+		<tr>
+			<td><label>$i18n.getString( "country" ) </label></td>
+			<td>
+				<select id="country" name="country">
+					<option value="">[$i18n.getString( "locale_country_no_translation" )]</option>
+				#foreach( $country in $availableCountries )
+					<option value="$country" #if( $country == $i18nLocale.country )selected="selected"#end>$country</option>
+				#end
+				</select>
+			</td>
+			<td></td>
+		</tr>
+		
+		
+		<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+		
+    </tbody>
+  </table>  
+  <table>
+	 <tr>
+      	<td colspan='3'>
+			<input type="submit" value="$i18n.getString( 'update' )">
+			<input type="button" value="$i18n.getString( 'cancel' )" onclick="window.location.href='locale.action'">
+		</td>
+      </tr>
+  </table>
+</form>	

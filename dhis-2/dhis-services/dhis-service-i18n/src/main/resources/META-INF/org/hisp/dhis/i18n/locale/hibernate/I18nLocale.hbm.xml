@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd"
+    [<!ENTITY identifiableProperties SYSTEM "classpath://org/hisp/dhis/common/identifiableProperties.hbm">]
+    >
+
+<hibernate-mapping>
+  <class name="org.hisp.dhis.i18n.locale.I18nLocale" table="i18nlocale">
+
+    <id name="id" column="i18nlocaleid">
+      <generator class="native" />
+    </id>
+    &identifiableProperties;
+
+    <property name="name" column="name" not-null="true" unique="true" length="230" />
+
+    <property name="description" type="text" />
+
+    <property name="language" type="text" />
+
+    <property name="country" type="text" />
+
+	<!-- Form properties -->
+
+  </class>
+</hibernate-mapping>
