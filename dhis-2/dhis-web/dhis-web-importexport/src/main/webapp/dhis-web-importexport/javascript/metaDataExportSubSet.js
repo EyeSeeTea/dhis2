@@ -1,4 +1,3 @@
-
 function selectAll()
 {
     $("#exportForm").find("input:checkbox").attr("checked", true);
@@ -13,18 +12,18 @@ function exportMetaData()
 {
     alert('Merge');
 }
+
 function showTable() {
-    alert('ShowTable');
     if($('#attributeTypes').is(':checked')) {
-        $('#attributeTypesTable').show();
+        $('#availableAttributes').show();
     } else {
-        $('#attributeTypesTable').hide();
+        $('#availableAttributes').hide();
     }
 
     if($('#categories').is(':checked')) {
-        $('#categoriesTable').show();
+        $('#availableDataElementCategories').show();
     } else {
-        $('#categoriesTable').hide();
+        $('#availableDataElementCategories').hide();
     }
 
     if($('#documents').is(':checked')) {
