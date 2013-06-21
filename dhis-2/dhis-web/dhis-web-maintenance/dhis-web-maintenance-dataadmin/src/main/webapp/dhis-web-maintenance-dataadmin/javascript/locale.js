@@ -9,6 +9,8 @@ function showLocaleDetails( i18nLocaleId )
 	}, function(json){
 		setInnerHTML( 'nameField', json.i18nLocale.name );
 		setInnerHTML( 'descriptionField', json.i18nLocale.description );
+		setInnerHTML( 'languageField', json.i18nLocale.language );
+		setInnerHTML( 'countryField', json.i18nLocale.country );
 		
 		showDetails();
 	});   
