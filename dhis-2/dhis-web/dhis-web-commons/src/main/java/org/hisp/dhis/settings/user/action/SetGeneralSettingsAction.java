@@ -145,26 +145,8 @@ public class SetGeneralSettingsAction
     {
         localeManager.setCurrentLocale( getRespectiveLocale( currentLocale ) );
 
-
-
+        userSettingService.saveUserSetting( KEY_DB_LOCALE, currentLocaleDb) ;
         
-        PrintStream printStream = new PrintStream(System.out);       
-        printStream.println( "Current Locale DB Set Name: '" + String.valueOf( currentLocaleDb ) + "'" );  // output to stdout
-
-        
-        I18nLocale currentLocaleDBObj = i18nLocaleService.getI18nLocale( currentLocaleDb );
-
-        
-        String currentLocaleDbName = "";
-        if( currentLocaleDBObj == null ) currentLocaleDbName = "null";
-        else currentLocaleDbName = currentLocaleDBObj.getName();
-        
-        printStream.println( "Current Locale DB Object Name: " + currentLocaleDbName );  // output to stdout
-
-                
-        
-        userSettingService.saveUserSetting( KEY_DB_LOCALE, "tran") ;
-
         styleManager.setUserStyle( currentStyle );
         
         userSettingService.saveUserSetting( KEY_MESSAGE_EMAIL_NOTIFICATION, messageEmailNotification );

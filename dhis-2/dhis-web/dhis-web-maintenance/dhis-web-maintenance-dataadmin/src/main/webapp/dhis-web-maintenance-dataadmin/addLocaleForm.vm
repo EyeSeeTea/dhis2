@@ -39,27 +39,13 @@
 		
 		<tr>
 			<td><label>$i18n.getString( "language" ) </label></td>
-			<td>
-				<select id="language" name="language">
-					<option value="">[$i18n.getString( "locale_language_no_translation" )]</option>
-				#foreach( $language in $availableLanguages )
-					<option value="$language">$language</option>
-				#end
-				</select>
-			</td>
+			<td><input style="width: 330px;" type="text" id="language" name="language" ></td>
 			<td></td>
 		</tr>
 
 		<tr>
 			<td><label>$i18n.getString( "country" ) </label></td>
-			<td>
-				<select id="country" name="country">
-					<option value="">[$i18n.getString( "locale_country_no_translation" )]</option>
-				#foreach( $country in $availableCountries )
-					<option value="$country">$country</option>
-				#end
-				</select>
-			</td>
+			<td><input style="width: 330px;" type="text" id="country" name="country" ></td>
 			<td></td>
 		</tr>
 		

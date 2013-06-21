@@ -29,7 +29,6 @@ package org.hisp.dhis.i18n.action;
 
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,7 +41,6 @@ import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.hisp.dhis.i18n.locale.I18nLocaleService;
-import org.hisp.dhis.system.util.LocaleUtils;
 
 import com.opensymphony.xwork2.Action;
 
@@ -59,16 +57,17 @@ public class TranslateAction
 
     private String objectId;
 
-    private String loc;
+    private Integer loc;
 
     private String returnUrl;
 
     private String message;
 
+    private String locale;
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
 
     private I18nService i18nService;
 
@@ -105,9 +104,9 @@ public class TranslateAction
         this.objectId = objectId;
     }
 
-    public void setLoc( String locale )
+    public void setLoc( Integer loc )
     {
-        this.loc = locale;
+        this.loc = loc;
     }
 
     public void setReturnUrl( String returnUrl )
@@ -131,7 +130,7 @@ public class TranslateAction
 
     public String getLocale()
     {
-        return loc;
+        return locale;
     }
 
     public String getReturnUrl()
@@ -151,24 +150,25 @@ public class TranslateAction
     public String execute()
         throws Exception
     {
-        log.info( "Classname: " + className + ", id: " + objectId + ", loc: " + loc );
+        I18nLocale localeObj = i18nLocaleService.getI18nLocale( loc );
+        locale = localeObj.getName();
+
+        log.info( "Classname: " + className + ", id: " + objectId + ", loc: " + locale );
 
         IdentifiableObject object = identifiableObjectManager.getObject( Integer.parseInt( objectId ), className );
 
         List<String> propertyNames = i18nService.getObjectPropertyNames( object );
-        
-        I18nLocale thisLocale = i18nLocaleService.getI18nLocaleByName( loc );
-                
 
         HttpServletRequest request = ServletActionContext.getRequest();
 
         Map<String, String> translations = new Hashtable<String, String>();
-        
+
         for ( String propertyName : propertyNames )
         {
             String[] translation = request.getParameterValues( propertyName );
 
-            if ( translation != null && translation.length > 0 && translation[0] != null && !translation[0].trim().isEmpty() )
+            if ( translation != null && translation.length > 0 && translation[0] != null
+                && !translation[0].trim().isEmpty() )
             {
                 translations.put( propertyName, translation[0] );
             }
@@ -176,9 +176,9 @@ public class TranslateAction
 
         log.info( "Translations: " + translations );
 
-        if ( thisLocale != null && !loc.equals( "NONE" ) )
+        if ( locale != null && !locale.equals( "NONE" ) )
         {
-            i18nService.updateTranslation( className, Integer.parseInt( objectId ), thisLocale, translations );
+            i18nService.updateTranslation( className, Integer.parseInt( objectId ), localeObj, translations );
         }
 
         return SUCCESS;

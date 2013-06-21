@@ -211,15 +211,8 @@ public class GetGeneralSettingsAction
         } );
 
         currentLocaleDb = i18nLocaleService.getCurrentI18nLocale();
+        
 
-        
-        String currentLocaleDbName = "";
-        if( currentLocaleDb == null ) currentLocaleDbName = "null";
-        else currentLocaleDbName = currentLocaleDb.getName();
-        
-        System.out.println( "Current Locale DB: " + currentLocaleDbName );
-
-        
         // ---------------------------------------------------------------------
         // Get Auto-save data entry form
         // ---------------------------------------------------------------------

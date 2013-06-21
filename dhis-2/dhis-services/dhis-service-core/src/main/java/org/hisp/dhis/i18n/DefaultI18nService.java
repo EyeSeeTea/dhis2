@@ -94,9 +94,7 @@ public class DefaultI18nService
     public void setLocales( List<String> localeStrings )
     {
         for ( String string : localeStrings )
-        {
-            //I18nLocale locale = LocaleUtils.getLocale( string );
-            
+        {            
             // TODO: Need to find out the source of this call and find the format used.
             I18nLocale locale = i18nLocaleService.getI18nLocaleByName( string); //LocaleUtils.getLocale( string );
 
@@ -263,7 +261,7 @@ public class DefaultI18nService
                     }
                     else
                     {
-                        translation = new Translation( className, id, locale.toString(), key, value );
+                        translation = new Translation( className, id, locale.getName(), key, value );
                         translationService.addTranslation( translation );
                     }
                 }
@@ -296,7 +294,7 @@ public class DefaultI18nService
 
     public I18nLocale getCurrentLocale()
     {
-        return (I18nLocale) userSettingService.getUserSetting( UserSettingService.KEY_DB_LOCALE );
+        return i18nLocaleService.getCurrentI18nLocale();
     }
 
     public boolean currentLocaleIsBase()
@@ -306,7 +304,7 @@ public class DefaultI18nService
 
     public List<I18nLocale> getAvailableLocales()
     {
-        return locales;
+        return i18nLocaleService.getAllI18nLocales();
     }
 
     // -------------------------------------------------------------------------

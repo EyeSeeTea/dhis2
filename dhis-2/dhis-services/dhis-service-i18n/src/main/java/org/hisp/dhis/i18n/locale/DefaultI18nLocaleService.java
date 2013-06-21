@@ -145,9 +145,17 @@ public class DefaultI18nLocaleService
 //    
     public I18nLocale getCurrentI18nLocale()
     {
-        String i18nLocaleName = (String) userSettingService.getUserSetting( UserSettingService.KEY_DB_LOCALE );
+        I18nLocale i18nLocale = null;
+
+        try
+        {
+            Integer i18nLocaleId = (Integer) userSettingService.getUserSetting( UserSettingService.KEY_DB_LOCALE );
+            
+            i18nLocale = getI18nLocale( i18nLocaleId );
+        }
+        catch (Exception ex) {}
         
-        return ( i18nLocaleName == null ) ?  null : getI18nLocaleByName( i18nLocaleName );
+        return i18nLocale;
         
     }
     

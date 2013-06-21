@@ -2,7 +2,7 @@ function getTranslation()
 {
 	clearFields();
 
-    var loc = $( '#loc :selected' ).val();
+    var loc = $( '#loc option:selected' ).val();
 	
 	if ( loc != 'NONE' )
 	{
