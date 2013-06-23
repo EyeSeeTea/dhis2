@@ -37,4 +37,8 @@ public interface ExportService
     MetaData getMetaData( Options options );
 
     MetaData getMetaData( Options options, TaskId taskId );
+
+    MetaData getFilteredMetaData( Options options , Filters filters );
+
+    MetaData getFilteredMetaData( Options options, Filters filters, TaskId taskId);
 }

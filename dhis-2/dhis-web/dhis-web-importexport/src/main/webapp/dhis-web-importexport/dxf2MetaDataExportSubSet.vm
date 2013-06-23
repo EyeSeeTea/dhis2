@@ -1,36 +1,6 @@
 <script type="text/javascript">
-    jQuery(document).ready(function () {
+    jQuery(function () {
         selectNone();
-    });
-
-    jQuery(function() {
-        jQuery("#availableAttributes").dhisAjaxSelect({
-            source: "../dhis-web-commons-ajax-json/getAttributes.action",
-            iterator: "attributes",
-            connectedTo: 'selectedAttributes',
-            handler: function(item) {
-                var option = jQuery("<option data-id='" + item.groups + "' />");
-                option.text( item.name );
-                option.attr( "value", item.id );
-
-                return option;
-            }
-        });
-    });
-
-    jQuery(function() {
-        jQuery("#availableDataElementCategories").dhisAjaxSelect({
-            source: "../dhis-web-commons-ajax-json/getDataElementCategories.action",
-            iterator: "dataElementCategories",
-            connectedTo: 'selectedDataElementCategories',
-            handler: function(item) {
-                var option = jQuery("<option data-id='" + item.groups + "' />");
-                option.text( item.name );
-                option.attr( "value", item.id );
-
-                return option;
-            }
-        });
     });
 </script>
 
@@ -38,39 +8,44 @@
 
 <form id="exportForm" name="exportForm">
 
-    <input id="categoryCombos" name="categoryCombos" type="checkbox" value="false" style="display: none;" />
-    <input id="categoryOptionCombos" name="categoryOptionCombos" type="checkbox" value="false" style="display: none;" />
-    <input id="categoryOptions" name="categoryOptions" type="checkbox" value="false" style="display: none;" />
-    <input id="sections" name="sections" type="checkbox" value="false" style="display: none;" />
-    <input id="mapViews" name="mapViews" type="checkbox" value="false" style="display: none;" />
-    <input id="mapLegends" name="mapLegends" type="checkbox" value="false" style="display: none;" />
+    <input id="categoryCombos" name="categoryCombos" type="checkbox" value="false" style="display: none;"/>
+    <input id="categoryOptionCombos" name="categoryOptionCombos" type="checkbox" value="false" style="display: none;"/>
+    <input id="categoryOptions" name="categoryOptions" type="checkbox" value="false" style="display: none;"/>
+    <input id="sections" name="sections" type="checkbox" value="false" style="display: none;"/>
+    <input id="mapViews" name="mapViews" type="checkbox" value="false" style="display: none;"/>
+    <input id="mapLegends" name="mapLegends" type="checkbox" value="false" style="display: none;"/>
 
     <fieldset style="width: 80%; border: 1px solid #ccc; padding: 15px;">
-        <div style="width: 200px; float: left;"><input id="attributeTypes" name="attributeTypes" type="checkbox" value="true" /> <label for="attributeTypes"> Attribute Types</label></div>
-        <div style="width: 200px; float: left;"><input id="categories" name="categories" type="checkbox" value="true" /> <label for="categories">Categories</label></div>
-        <div style="width: 200px; float: left;"><input id="charts" name="charts" type="checkbox" value="true" /> <label for="charts">Charts</label></div>
+        <div style="width: 200px; float: left;"><input id="attributeTypes" name="attributeTypes" type="checkbox"
+                                                       value="true"/> <label for="attributeTypes"> Attribute
+            Types</label></div>
+        <div style="width: 200px; float: left;"><input id="categories" name="categories" type="checkbox" value="true"/>
+            <label for="categories">Categories</label></div>
+        <div style="width: 200px; float: left;"><input id="charts" name="charts" type="checkbox" value="true"/> <label
+                for="charts">Charts</label></div>
+        <div style="width: 200px; float: left;"><input id="dataElements" name="dataElements" type="checkbox"
+                                                       value="true"/> <label for="dataElements"> Data Elements</label>
+        </div>
+        <div style="width: 200px; float: left;"><input id="dataSets" name="dataSets" type="checkbox" value="true"/>
+            <label for="dataSets"> Data Sets</label></div>
 
     </fieldset>
 
-    <br />
+    <br/>
 
     <table>
         <tr>
-            <select id="availableAttributes" multiple="multiple" style="height: 200px; width: 50%; display: none;"></select>
-        </tr>
-        <tr>
-            <select id="availableDataElementCategories" multiple="multiple" style="height: 200px; width: 50%; display: none;"></select>
-        </tr>
-
-        <tr>
             <td colspan="2">
-                <input type="button" value="$i18n.getString( 'display_metadata' )" style="width:204px;" onclick="showTable();" />
+                <input type="button" value="$i18n.getString( 'display_metadata' )" style="width:204px;"
+                       onclick="displayMetaData();"/>
             </td>
         </tr>
         <tr>
             <td colspan="2">
-                <input type="button" value="$i18n.getString( 'select_all' )" style="width:100px;" onclick="selectAll();" />
-                <input type="button" value="$i18n.getString( 'select_none' )" style="width:100px;" onclick="selectNone();" />
+                <input type="button" value="$i18n.getString( 'select_all' )" style="width:100px;"
+                       onclick="selectAll();"/>
+                <input type="button" value="$i18n.getString( 'select_none' )" style="width:100px;"
+                       onclick="selectNone();"/>
             </td>
         </tr>
 
@@ -95,7 +70,8 @@
 
         <tr>
             <td colspan="2">
-                <input type="button" value="$i18n.getString( 'export' )" style="width:204px;" onclick="exportMetaData();" />
+                <input type="button" value="$i18n.getString( 'export' )" style="width:204px;"
+                       onclick="exportMetaData();"/>
             </td>
         </tr>
 

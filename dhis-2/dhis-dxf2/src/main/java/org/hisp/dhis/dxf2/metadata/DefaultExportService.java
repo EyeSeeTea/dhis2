@@ -78,8 +78,15 @@ public class DefaultExportService
     }
 
     @Override
+    public MetaData getFilteredMetaData( Options options, Filters filters )
+    {
+        return getFilteredMetaData( options, filters, null );
+    }
+
+    @Override
     public MetaData getMetaData( Options options, TaskId taskId )
     {
+
         MetaData metaData = new MetaData();
         metaData.setCreated( new Date() );
 
@@ -137,5 +144,18 @@ public class DefaultExportService
         }
 
         return metaData;
+    }
+
+    @Override
+    public MetaData getFilteredMetaData(Options options, Filters filters, TaskId taskId) {
+        System.out.println("\nAM INTRAT IN LAYERUL DE SERVICE\n");
+        // todo : FILTER LOGIC HERE
+
+
+
+
+
+
+
     }
 }

@@ -41,10 +41,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.api.utils.ContextUtils.CacheStrategy;
 import org.hisp.dhis.common.view.ExportView;
-import org.hisp.dhis.dxf2.metadata.ExportService;
-import org.hisp.dhis.dxf2.metadata.ImportOptions;
-import org.hisp.dhis.dxf2.metadata.ImportService;
-import org.hisp.dhis.dxf2.metadata.MetaData;
+import org.hisp.dhis.dxf2.metadata.*;
 import org.hisp.dhis.dxf2.metadata.tasks.ImportMetaDataTask;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.scheduling.TaskCategory;
@@ -58,6 +55,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+
+
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -145,7 +144,17 @@ public class MetaDataController
     public void exportZippedXML( @RequestParam Map<String, String> parameters, HttpServletResponse response ) throws IOException
     {
         WebOptions options = new WebOptions( parameters );
-        MetaData metaData = exportService.getMetaData( options );
+
+        // todo : give a filter example
+        Filters filters = new Filters( parameters );
+
+        MetaData metaData;
+        if( filters != null ) {
+            metaData = exportService.getFilteredMetaData( options, filters );
+        } else
+        {
+            metaData = exportService.getMetaData( options );
+        }
 
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_ZIP, CacheStrategy.NO_CACHE, "metaData.xml.zip", true );
         response.addHeader( ContextUtils.HEADER_CONTENT_TRANSFER_ENCODING, "binary" );

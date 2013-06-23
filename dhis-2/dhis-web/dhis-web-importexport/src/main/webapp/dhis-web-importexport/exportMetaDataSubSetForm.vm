@@ -1,2 +1,0 @@
-<form id="exportForm" name="exportForm" method="post" action="exportMetaData.action">
-   <input type="hidden" name="exportFormat" value="$!exportFormat" />
