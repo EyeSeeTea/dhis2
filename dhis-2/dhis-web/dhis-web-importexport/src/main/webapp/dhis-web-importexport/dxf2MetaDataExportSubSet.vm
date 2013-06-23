@@ -71,7 +71,7 @@
         <tr>
             <td colspan="2">
                 <input type="button" value="$i18n.getString( 'export' )" style="width:204px;"
-                       onclick="exportMetaData();"/>
+                       onclick="exportMetaDataSubSet();"/>
             </td>
         </tr>
 

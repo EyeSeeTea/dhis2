@@ -58,7 +58,7 @@ public class MetaDataExportSubSetFormAction
     @Override
     public String execute() throws Exception
     {
-        System.out.println("\nAM INTRAT IN EXPORT\n");
+        System.out.println("\n1. AM INTRAT IN EXPORT ACTION\n");
 
         return SUCCESS;
     }

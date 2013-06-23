@@ -33,7 +33,7 @@ function displayMetaData() {
     }
 }
 
-function exportMetaData() {
+function exportMetaDataSubSet() {
 
     if ($('#dataSets').is(':checked')) {
         $('#sections').attr('checked', true);
