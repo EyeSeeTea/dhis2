@@ -27,7 +27,6 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 import java.util.List;
 
 /**
@@ -93,6 +92,4 @@ public interface GenericStore<T>
      * @return the count of objects.
      */
     int getCount();
-
-
 }
