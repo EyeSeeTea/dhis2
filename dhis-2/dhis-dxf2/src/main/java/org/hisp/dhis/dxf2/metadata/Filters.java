@@ -1,7 +1,7 @@
-package org.hisp.dhis.common;
+package org.hisp.dhis.dxf2.metadata;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,72 +27,23 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-import java.util.List;
+import java.util.Map;
 
 /**
- * @author Lars Helge Overland
+ * @author Rosu Ovidiu <rosu.ovi@gmail.com>
  */
-public interface GenericStore<T>
+public class Filters
+    extends Options
 {
-    /**
-     * Class of the object for this store.
-     */
-    Class<T> getClazz();
+    public Filters(Map<String, String> filters)
+    {
+        super( filters );
+    }
 
-    /**
-     * Saves the given object instance.
-     *
-     * @param object the object instance.
-     * @return the generated identifier.
-     */
-    int save( T object );
 
-    /**
-     * Updates the given object instance.
-     *
-     * @param object the object instance.
-     */
-    void update( T object );
 
-    /**
-     * Retrieves the object with the given identifier. This method will first
-     * look in the current Session, then hit the database if not existing.
-     *
-     * @param id the object identifier.
-     * @return the object identified by the given identifier.
-     */
-    T get( int id );
 
-    /**
-     * Retrieves the object with the given identifier, assuming it exists.
-     *
-     * @param id the object identifier.
-     * @return the object identified by the given identifier or a generated
-     *         proxy.
-     */
-    T load( int id );
 
-    /**
-     * Retrieves a List of all objects.
-     *
-     * @return a List of all objects.
-     */
-    List<T> getAll();
-
-    /**
-     * Removes the given object instance.
-     *
-     * @param object the object instance to delete.
-     */
-    void delete( T object );
-
-    /**
-     * Gets the count of objects.
-     *
-     * @return the count of objects.
-     */
-    int getCount();
 
 
 }

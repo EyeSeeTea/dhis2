@@ -52,11 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Lars Helge Overland
@@ -384,6 +380,21 @@ public class HibernateGenericStore<T>
         Query query = sharingEnabled() ? getQueryAllAcl() : getQueryAll();
 
         return query.list();
+    }
+
+    //OVIDIU
+    @Override
+    @SuppressWarnings("unchecked")
+    public final List<T> getByCriteria( Map<String, String> expressions )
+    {
+        Criterion[] criterions = new Criterion[expressions.size()];
+        int index = 0;
+        for( Map.Entry<String, String> entry : expressions.entrySet())
+        {
+            criterions[index] = Restrictions.eq(entry.getKey(), Boolean.valueOf(entry.getValue()));
+            index++;
+        }
+        return getList( criterions );
     }
 
     private Query getQueryAllAcl()
@@ -976,4 +987,6 @@ public class HibernateGenericStore<T>
 
         return true;
     }
+
+
 }

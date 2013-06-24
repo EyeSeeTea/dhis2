@@ -29,6 +29,7 @@ package org.hisp.dhis.common;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.criterion.Criterion;
 import org.hisp.dhis.common.IdentifiableObject.IdentifiableProperty;
 import org.hisp.dhis.common.NameableObject.NameableProperty;
 import org.hisp.dhis.user.CurrentUserService;
@@ -194,6 +195,20 @@ public class DefaultIdentifiableObjectManager
         }
 
         return (Collection<T>) store.getAll();
+    }
+
+    // OVIDIU
+    @Override
+    public <T extends IdentifiableObject> Collection<T> getByFilters( Class<T> clazz, Map<String, String> expressions)
+    {
+        GenericIdentifiableObjectStore store = getIdentifiableObjectStore( clazz );
+
+        if ( store == null)
+        {
+            return new ArrayList<T>();
+        }
+
+        return (Collection<T>) store.getByCriteria( expressions );
     }
 
     @Override

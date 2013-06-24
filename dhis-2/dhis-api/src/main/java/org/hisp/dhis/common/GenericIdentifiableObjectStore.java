@@ -32,6 +32,7 @@ import org.hisp.dhis.user.User;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Lars Helge Overland
@@ -207,4 +208,13 @@ public interface GenericIdentifiableObjectStore<T>
      * @return list of objects.
      */
     List<T> getByUser( User user );
+
+    // OVIDIU TODO: DESCRIPTION
+    /**
+     * Retrieves a List based on the given Criterions.
+     *
+     * @param expressions the Criterions for the Criteria.
+     * @return a List with objects of the implementation Class type.
+     */
+    List<T> getByCriteria( Map<String, String> expressions );
 }

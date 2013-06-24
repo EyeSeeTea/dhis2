@@ -50,19 +50,16 @@ import org.springframework.util.StringUtils;
  */
 @Service
 public class DefaultExportService
-        implements ExportService {
+        implements ExportService
+{
     private static final Log log = LogFactory.getLog(DefaultExportService.class);
-
     //-------------------------------------------------------------------------------------------------------
     // Dependencies
     //-------------------------------------------------------------------------------------------------------
-
     @Autowired
     protected IdentifiableObjectManager manager;
-
     @Autowired
     private CurrentUserService currentUserService;
-
     @Autowired
     private Notifier notifier;
 
@@ -71,17 +68,20 @@ public class DefaultExportService
     //-------------------------------------------------------------------------------------------------------
 
     @Override
-    public MetaData getMetaData( Options options ) {
+    public MetaData getMetaData( Options options )
+    {
         return getMetaData(options, null);
     }
 
     @Override
-    public MetaData getFilteredMetaData( Options options, Filters filters ) {
+    public MetaData getFilteredMetaData( Options options, Filters filters )
+    {
         return getFilteredMetaData(options, filters, null);
     }
 
     @Override
-    public MetaData getMetaData( Options options, TaskId taskId ) {
+    public MetaData getMetaData( Options options, TaskId taskId )
+    {
 
         MetaData metaData = new MetaData();
         metaData.setCreated(new Date());
@@ -90,12 +90,15 @@ public class DefaultExportService
 
         Date lastUpdated = options.getLastUpdated();
 
-        if ( taskId != null ) {
+        if ( taskId != null )
+        {
             notifier.notify(taskId, "Exporting meta-data");
         }
 
-        for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() ) {
-            if ( !options.isEnabled(entry.getValue()) ) {
+        for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
+        {
+            if ( !options.isEnabled(entry.getValue()) )
+            {
                 continue;
             }
 
@@ -103,13 +106,16 @@ public class DefaultExportService
 
             Collection<? extends IdentifiableObject> idObjects;
 
-            if ( lastUpdated != null ) {
+            if ( lastUpdated != null )
+            {
                 idObjects = manager.getByLastUpdated(idObjectClass, lastUpdated);
-            } else {
+            } else
+            {
                 idObjects = manager.getAll(idObjectClass);
             }
 
-            if ( idObjects.isEmpty() ) {
+            if ( idObjects.isEmpty() )
+            {
                 continue;
             }
 
@@ -117,7 +123,8 @@ public class DefaultExportService
 
             log.info(message);
 
-            if ( taskId != null ) {
+            if ( taskId != null )
+            {
                 notifier.notify(taskId, message);
             }
 
@@ -126,7 +133,8 @@ public class DefaultExportService
 
         log.info("Export done at " + new Date());
 
-        if ( taskId != null ) {
+        if ( taskId != null )
+        {
             notifier.notify(taskId, NotificationLevel.INFO, "Export done", true);
         }
 
@@ -134,21 +142,27 @@ public class DefaultExportService
     }
 
     @Override
-    public MetaData getFilteredMetaData( Options options, Filters filters, TaskId taskId ) {
+    public MetaData getFilteredMetaData( Options options, Filters filters, TaskId taskId )
+    {
         System.out.println("\n3. AM INTRAT IN SERVICE");
+
         MetaData metaData = new MetaData();
         metaData.setCreated(new Date());
 
         log.info("User '" + currentUserService.getCurrentUsername() + "' started export at " + new Date());
         Date lastUpdated = options.getLastUpdated();
 
-        if ( taskId != null ) {
+        if ( taskId != null )
+        {
             notifier.notify(taskId, "Exporting meta-data subsets");
         }
 
-        //todo logic here Ovidiu
-        for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() ) {
-            if ( !options.isEnabled(entry.getValue()) ) {
+        // Ovidiu
+        //todo logic here
+        for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
+        {
+            if ( !options.isEnabled(entry.getValue()) )
+            {
                 continue;
             }
 
@@ -156,23 +170,29 @@ public class DefaultExportService
 
             Collection<? extends IdentifiableObject> idObjects;
 
-            if ( lastUpdated != null ) {
+            if ( lastUpdated != null )
+            {
                 idObjects = manager.getByLastUpdated(idObjectClass, lastUpdated);
-            } else {
-                idObjects = manager.getAll(idObjectClass);
+            } else
+            {
+                Map<String, String> expressions = filters.getOptions();
+                idObjects = manager.getByFilters(idObjectClass, expressions);
             }
 
-            if ( idObjects.isEmpty() ) {
+            if ( idObjects.isEmpty() )
+            {
                 continue;
             }
 
             String message = "Exporting";
             log.info(message);
 
-            if ( taskId != null ) {
+            if ( taskId != null )
+            {
                 notifier.notify(taskId, NotificationLevel.INFO, "Export done", true);
             }
-            if ( taskId != null ) {
+            if ( taskId != null )
+            {
                 notifier.notify(taskId, message);
             }
 
@@ -181,7 +201,8 @@ public class DefaultExportService
 
         log.info("Export done at " + new Date());
 
-        if ( taskId != null ) {
+        if ( taskId != null )
+        {
             notifier.notify(taskId, NotificationLevel.INFO, "Export done", true);
         }
 

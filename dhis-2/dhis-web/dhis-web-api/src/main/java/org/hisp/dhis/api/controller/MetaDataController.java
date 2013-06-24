@@ -28,7 +28,10 @@ package org.hisp.dhis.api.controller;
  */
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -148,9 +151,11 @@ public class MetaDataController
         System.out.println( "\n2. AM INTRAT IN CONTROLLER" );
         WebOptions options = new WebOptions( parameters );
 
+        //OVIDIU
         // todo : give a filter example
-        Filters filters = new Filters( parameters );
-        filters.addOption("dataElementAttribute", "true");
+        Map<String, String> testFilters = new HashMap<String, String>();
+        testFilters.put("dataElementAttribute", "false");
+        Filters filters = new Filters( testFilters );
 
         MetaData metaData;
         if( filters != null )
