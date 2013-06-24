@@ -3272,12 +3272,22 @@ Ext.onReady( function() {
 				}
 			});
 
+			//organisationUnitLevel = Ext.create('Ext.form.field.ComboBox', {
+				
+
 			organisationUnit = {
 				xtype: 'panel',
 				title: '<div class="pt-panel-title-organisationunit">' + PT.i18n.organisation_units + '</div>',
 				bodyStyle: 'padding-top:5px',
 				hideCollapseTool: true,
 				collapsed: false,
+				tools: [{
+					type: 'gear',
+					tooltip: 'Toggle selection type',
+					handler: function() {
+						console.log("toggle panels");
+					}
+				}],
 				getDimension: function() {
 					var r = treePanel.getSelectionModel().getSelection(),
 						config = {
@@ -3318,6 +3328,7 @@ Ext.onReady( function() {
 					},
 					treePanel
 				],
+				suppressExpand: false,
 				listeners: {
 					added: function() {
 						pt.cmp.dimension.panels.push(this);
