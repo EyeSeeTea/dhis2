@@ -879,7 +879,12 @@ PT.core.getUtils = function(pt) {
 								
 								// Items: get ids from metadata -> items
 								for (var j = 0, ids = Ext.clone(response.metaData[dim.dimensionName]); j < ids.length; j++) {
-									dim.items.push({id: ids[j]});
+									dim.items.push({
+										id: ids[j],
+										name: response.metaData.names[ids[j]]
+									});
+									
+									dim.items = pt.util.array.sortObjectsByString(dim.items);
 								}
 							}
 							else {
