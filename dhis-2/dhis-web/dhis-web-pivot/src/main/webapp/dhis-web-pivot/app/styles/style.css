@@ -552,6 +552,15 @@ table.pivot {
     background-image: linear-gradient(top, #d1d1d1,#e5e5e5);
 }
 
+/*----------------------------------------------------------------------------
+ * PT Button
+ *--------------------------------------------------------------------------*/
+
+.pt-button-icon-gear {
+	width: 22px !important;
+	height: 22px !important;
+	background: url('../images/gear_18.png') no-repeat;
+}
 
 /*----------------------------------------------------------------------------
  * Tooltip
