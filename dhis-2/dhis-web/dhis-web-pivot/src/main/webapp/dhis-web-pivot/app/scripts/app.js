@@ -3340,12 +3340,12 @@ Ext.onReady( function() {
 				},
 				items: [
 					{
-						text: PT.i18n.select_organisation_units,
+						text: PT.i18n.select_organisation_units + '&nbsp;&nbsp;',
 						param: 'explicit',
 						iconCls: 'pt-menu-item-selected'
 					},
 					{
-						text: PT.i18n.select_boundaries_and_level,
+						text: PT.i18n.select_boundaries_and_level + '&nbsp;&nbsp;',
 						param: 'boundary'
 					}
 				],
@@ -4060,7 +4060,8 @@ Ext.onReady( function() {
 					fixedPeriodRecords = [],
                     dimNames = [],
 					isOu = false,
-					isOuc = false;
+					isOuc = false,
+					isLevel = false;
 
 				// State
 				pt.viewport.interpretationButton.enable();
@@ -4209,11 +4210,29 @@ Ext.onReady( function() {
 						if (ouRecords[i].id === 'USER_ORGUNIT_CHILDREN') {
 							isOuc = true;
 						}
+						if (ouRecords[i].id.substr(0,5) === 'LEVEL') {
+							isLevel = true;
+						}
 					}
 				}
+				
+				if (isLevel) {
+					var ouRecords = recMap[dimConf.organisationUnit.objectName],
+						level;
+						
+					if (Ext.isArray(ouRecords) && ouRecords.length) {
+						level = ouRecords[i].id.split('-')[1];
+					}
+					
+					toolMenu.clickHandler('boundary');
+					organisationUnitLevel.setValue(level);
+				}
+				else {
+					toolMenu.clickHandler('explicit');					
 
-				userOrganisationUnit.setValue(isOu);
-				userOrganisationUnitChildren.setValue(isOuc);
+					userOrganisationUnit.setValue(isOu);
+					userOrganisationUnitChildren.setValue(isOuc);
+				}
 
 				// If fav has organisation units, wait for tree callback before update
 				if (recMap[dimConf.organisationUnit.objectName] && Ext.isObject(graphMap)) {
