@@ -2033,9 +2033,13 @@ Ext.onReady( function() {
 				fixedPeriodAvailable,
 				fixedPeriodSelected,
 				period,
+				treePanel,
 				userOrganisationUnit,
 				userOrganisationUnitChildren,
-				treePanel,
+				userOrganisationUnitPanel,
+				organisationUnitLevel,
+				tool,
+				toolPanel,
 				organisationUnit,
 				dimensionIdAvailableStoreMap = {},
 				dimensionIdSelectedStoreMap = {},
@@ -3256,7 +3260,7 @@ Ext.onReady( function() {
 
 			userOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
 				columnWidth: 0.5,
-				style: 'padding-top:2px; padding-left:7px; margin-bottom:0',
+				style: 'padding-top:2px; padding-left:3px; margin-bottom:0',
 				boxLabel: PT.i18n.user_organisation_unit,
 				labelWidth: pt.conf.layout.form_label_width,
 				handler: function(chb, checked) {
@@ -3287,10 +3291,10 @@ Ext.onReady( function() {
 			organisationUnitLevel = Ext.create('Ext.form.field.ComboBox', {
 				cls: 'pt-combo',
 				style: 'margin-bottom:0',
-				width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding - 24 - 2,
+				width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding - 38,
 				valueField: 'id',
 				displayField: 'name',
-				emptyText: 'Select organisation unit level',
+				emptyText: PT.i18n.select_organisation_unit_level,
 				editable: false,
 				hidden: true,
 				store: {
@@ -3299,54 +3303,74 @@ Ext.onReady( function() {
 				}
 			});
 			
-			tool = Ext.create('Ext.button.Button', {
-				iconCls: 'pt-button-icon-gear',
-				width: 24,
-				height: 24,
-				//menuAlign: 'tr-br',
-				menu: {
-					items: [
-						{
-							text: 'Select explicitly',
-							listeners: {
-								click: function() {
-									userOrganisationUnit.show();
-									userOrganisationUnitChildren.show();
-									organisationUnitLevel.hide();
-								}
-							}
-						},
-						{
-							text: 'Select by boundary/parent',
-							listeners: {
-								click: function() {
-									userOrganisationUnit.hide();
-									userOrganisationUnitChildren.hide();
-									organisationUnitLevel.show();
-									treePanel.enable();
-								}
-							}
+			toolMenu = Ext.create('Ext.menu.Menu', {
+				shadow: false,
+				showSeparator: false,
+				menuValue: 'explicit',
+				clickHandler: function(param) {
+					var items = this.items.items;
+					this.menuValue = param;
+					
+					// Menu item icon cls
+					for (var i = 0; i < items.length; i++) {
+						if (items[i].param === param) {
+							items[i].setIconCls('pt-menu-item-selected');
 						}
-					]
-							
+						else {
+							items[i].setIconCls('');
+						}
+					}
+						
+					// Gui
+					if (param === 'explicit') {
+						userOrganisationUnit.show();
+						userOrganisationUnitChildren.show();
+						organisationUnitLevel.hide();
+						
+						if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue()) {
+							treePanel.disable();
+						}
+					}
+					else if (param === 'boundary') {
+						userOrganisationUnit.hide();
+						userOrganisationUnitChildren.hide();
+						organisationUnitLevel.show();
+						treePanel.enable();
+					}
+				},
+				items: [
+					{
+						text: PT.i18n.select_organisation_units,
+						param: 'explicit',
+						iconCls: 'pt-menu-item-selected'
+					},
+					{
+						text: PT.i18n.select_boundaries_and_level,
+						param: 'boundary'
+					}
+				],
+				listeners: {
+					afterrender: function() {
+						this.getEl().addCls('pt-btn-menu');
+					},
+					click: function(menu, item) {
+						this.clickHandler(item.param);
+					}
 				}
-			});	
+			});
 			
-			//tool = Ext.create('Ext.Img', {
-				//src: 'images/gear_24.png',
-				//listeners: {
-					//render: function() {
-						//this.getEl().on('click', function() {
-							//alert(2);
-						//});
-					//}
-				//}
-			//});
+			tool = Ext.create('Ext.button.Button', {
+				cls: 'pt-button-organisationunitselection',
+				iconCls: 'pt-button-icon-gear',
+				width: 36,
+				height: 24,
+				menu: toolMenu
+			});
 			
 			toolPanel = Ext.create('Ext.panel.Panel', {
-				width: 24,
+				width: 36,
 				bodyStyle: 'border:0 none; text-align:right',
-				style: 'margin-left:2px',
+				style: 'margin-right:2px',
 				items: tool
 			});
 			
@@ -3391,8 +3415,9 @@ Ext.onReady( function() {
 						bodyStyle: 'border:0 none',
 						style: 'padding-bottom:2px',
 						items: [
+							toolPanel,
 							{
-								width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding - 26,
+								width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding - 38,
 								layout: 'column',
 								bodyStyle: 'border:0 none',
 								items: [
@@ -3400,8 +3425,7 @@ Ext.onReady( function() {
 									userOrganisationUnitChildren,
 									organisationUnitLevel
 								]
-							},
-							toolPanel
+							}							
 						]
 					},
 					treePanel
