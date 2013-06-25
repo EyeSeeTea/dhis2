@@ -3292,7 +3292,7 @@ Ext.onReady( function() {
 				cls: 'pt-combo',
 				style: 'margin-bottom:0',
 				width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding - 38,
-				valueField: 'id',
+				valueField: 'level',
 				displayField: 'name',
 				emptyText: PT.i18n.select_organisation_unit_level,
 				editable: false,
@@ -3386,21 +3386,28 @@ Ext.onReady( function() {
 							dimension: pt.conf.finals.dimension.organisationUnit.objectName,
 							items: []
 						};
-
-					if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue()) {
-						if (userOrganisationUnit.getValue()) {
-							config.items.push({id: 'USER_ORGUNIT'});
+						
+					if (toolMenu.menuValue === 'explicit') {
+						if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue()) {
+							if (userOrganisationUnit.getValue()) {
+								config.items.push({id: 'USER_ORGUNIT'});
+							}
+							if (userOrganisationUnitChildren.getValue()) {
+								config.items.push({id: 'USER_ORGUNIT_CHILDREN'});
+							}
 						}
-						if (userOrganisationUnitChildren.getValue()) {
-							config.items.push({id: 'USER_ORGUNIT_CHILDREN'});
+						else {
+							for (var i = 0; i < r.length; i++) {
+								config.items.push({id: r[i].data.id});
+							}
 						}
 					}
-					else {
+					else if (toolMenu.menuValue === 'boundary') {
 						for (var i = 0; i < r.length; i++) {
-							config.items.push({id: r[i].data.id});
+							config.items.push({id: 'LEVEL-' + organisationUnitLevel.getValue() + '-' + r[i].data.id});
 						}
 					}
-
+					
 					return config.items.length ? config : null;
 				},
 				onExpand: function() {
