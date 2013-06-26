@@ -2005,7 +2005,7 @@ DV.core.getApi = function(dv) {
 			}
 
 			// Layout
-			layout.type = config.type;
+			layout.type = config.type.toLowerCase();
 
 			layout.columns = config.columns;
 			layout.rows = config.rows;
