@@ -1260,7 +1260,6 @@ console.log("baseLineFields", store.baseLineFields);
 				numberOfChars = str.length;
 
 				width = (numberOfItems * itemLength) + (numberOfChars * charLength);
-//alert(width + ' > ' + dv.viewport.centerRegion.getWidth() + '\n' + str);
 
 				if (width > dv.viewport.centerRegion.getWidth() - 50) {
 					isVertical = true;
