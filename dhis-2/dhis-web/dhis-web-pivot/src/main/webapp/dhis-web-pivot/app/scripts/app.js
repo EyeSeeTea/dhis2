@@ -1222,10 +1222,12 @@ Ext.onReady( function() {
 		});
 
 		getBody = function() {
-			var favorite;
+			var favorite,
+				dimensions;
 
 			if (pt.layout) {
 				favorite = Ext.clone(pt.layout);
+				dimensions = [].concat(favorite.columns, favorite.rows, favorite.filters);
 
 				// Server sync
 				favorite.totals = favorite.showTotals;
@@ -1244,6 +1246,15 @@ Ext.onReady( function() {
 				delete favorite.parentOrganisationUnit;
 
 				delete favorite.parentGraphMap;
+				
+				// Replace operand id characters
+				for (var i = 0; i < dimensions.length; i++) {
+					if (dimensions[i].dimension === pt.conf.finals.dimension.operand.objectName) {
+						for (var j = 0; j < dimensions[i].items.length; j++) {
+							dimensions[i].items[j].id = dimensions[i].items[j].id.replace('-', '.');
+						}
+					}
+				}
 			}
 
 			return favorite;
@@ -2424,7 +2435,7 @@ Ext.onReady( function() {
 			dataElementGroupComboBox = Ext.create('Ext.form.field.ComboBox', {
 				cls: 'pt-combo',
 				style: 'margin:0 2px 2px 0',
-				width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding - 110,
+				width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding - 90,
 				valueField: 'id',
 				displayField: 'name',
 				emptyText: PT.i18n.select_data_element_group,
@@ -2459,7 +2470,7 @@ Ext.onReady( function() {
 				editable: false,
 				valueField: 'id',
 				displayField: 'text',
-				width: 110 - 2,
+				width: 90 - 2,
 				value: pt.conf.finals.dimension.dataElement.objectName,
 				store: {
 					fields: ['id', 'text'],

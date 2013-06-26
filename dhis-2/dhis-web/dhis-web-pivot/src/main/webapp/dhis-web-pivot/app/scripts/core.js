@@ -2014,7 +2014,7 @@ PT.core.getApi = function(pt) {
 				return;
 			}
 
-			record.id = config.id;
+			record.id = config.id.replace('.', '-');
 
 			if (Ext.isString(config.name)) {
 				record.name = config.name;
