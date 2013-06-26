@@ -27,7 +27,6 @@
 
 package org.hisp.dhis.i18n.locale;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.hisp.dhis.user.UserSettingService;
@@ -52,46 +51,11 @@ public class DefaultI18nLocaleService
         this.i18nLocaleStore = i18nLocaleStore;
     }
 
-    private List<String> languages;
-
-    public void setLanguages( List<String> languages )
-    {
-        this.languages = languages;
-    }
-    
-    public List<String> getLanguages()
-    {
-        Collections.sort( languages );
-        return languages;
-    }
-
-/*    public String getFlagImage()
-    {
-        String flag = (String) getSystemSetting( KEY_FLAG );
-
-        return flag != null ? flag + ".png" : null;
-    }
-*/
-
     private UserSettingService userSettingService;
 
     public void setUserSettingService( UserSettingService userSettingService )
     {
         this.userSettingService = userSettingService;
-    }
-
-
-    private List<String> countries;
-
-    public void setCountries( List<String> countries )
-    {
-        this.countries = countries;
-    }
-    
-    public List<String> getCountries()
-    {
-        Collections.sort( countries );
-        return countries;
     }
 
     // -------------------------------------------------------------------------
@@ -115,7 +79,7 @@ public class DefaultI18nLocaleService
 
     public List<I18nLocale> getAllI18nLocales()
     {
-    	return i18nLocaleStore.getAll();                
+        return i18nLocaleStore.getAll();
     }
 
     public I18nLocale getI18nLocale( int id )
@@ -128,35 +92,24 @@ public class DefaultI18nLocaleService
         return i18nLocaleStore.getByName( name );
     }
 
-    public List<String> getAvailableLanguages()
-    {
-        return languages;
-    }
-
-    public List<String> getAvailableCountries()
-    {
-        return countries;
-    }
-
-//    public I18nLocale getCurrentI18nLocale()
-//    {
-//        return (I18nLocale) userSettingService.getUserSetting( UserSettingService.KEY_DB_LOCALE );
-//    }
-//    
     public I18nLocale getCurrentI18nLocale()
     {
         I18nLocale i18nLocale = null;
 
         try
         {
-            Integer i18nLocaleId = (Integer) userSettingService.getUserSetting( UserSettingService.KEY_DB_LOCALE );
-            
-            i18nLocale = getI18nLocale( i18nLocaleId );
+            String i18nLocaleId = (String) userSettingService.getUserSetting( UserSettingService.KEY_DB_LOCALE );
+
+            if ( i18nLocaleId != "None" )
+            {
+                i18nLocale = getI18nLocale( Integer.valueOf( i18nLocaleId ) );
+            }
         }
-        catch (Exception ex) {}
-        
+        catch ( Exception ex )
+        {
+        }
+
         return i18nLocale;
-        
     }
-    
+
 }

@@ -31,7 +31,8 @@ package org.hisp.dhis.dataadmin.action.locale;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.hisp.dhis.i18n.locale.*;
+import org.hisp.dhis.i18n.locale.I18nLocale;
+import org.hisp.dhis.i18n.locale.I18nLocaleService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -102,19 +103,9 @@ public class GetLocaleListAction
 
     public String execute()
         throws Exception
-    {
-        
+    {        
         i18nlocales = i18nlocaleService.getAllI18nLocales();
-        
-        // Selection feature - will need to work on it.
-        if ( id == null )
-        {
-        }
-        else
-        {
-            I18nLocale i18nlocale = i18nlocaleService.getI18nLocale( id );
-        }
-        
+                
         return SUCCESS;
     }
 }

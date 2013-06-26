@@ -31,7 +31,6 @@ import static org.hisp.dhis.user.UserSettingService.AUTO_SAVE_DATA_ENTRY_FORM;
 import static org.hisp.dhis.user.UserSettingService.KEY_MESSAGE_EMAIL_NOTIFICATION;
 import static org.hisp.dhis.user.UserSettingService.KEY_MESSAGE_SMS_NOTIFICATION;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -76,7 +75,6 @@ public class GetGeneralSettingsAction
     }
 
     private I18nLocaleService i18nLocaleService;
-
 
     public void setI18nLocaleService( I18nLocaleService i18nLocaleService )
     {
@@ -194,12 +192,10 @@ public class GetGeneralSettingsAction
 
         currentLocale = localeManager.getCurrentLocale();
 
-        
-        
         // ---------------------------------------------------------------------
         // Get available locales in db
         // ---------------------------------------------------------------------
-                
+
         availableLocalesDb = new ArrayList<I18nLocale>( i18nLocaleService.getAllI18nLocales() );
 
         Collections.sort( availableLocalesDb, new Comparator<I18nLocale>()
@@ -211,7 +207,6 @@ public class GetGeneralSettingsAction
         } );
 
         currentLocaleDb = i18nLocaleService.getCurrentI18nLocale();
-        
 
         // ---------------------------------------------------------------------
         // Get Auto-save data entry form

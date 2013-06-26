@@ -50,10 +50,6 @@ public interface I18nLocaleService
     I18nLocale getI18nLocaleByName( String name );
 
     List<I18nLocale> getAllI18nLocales();
-
-    List<String> getAvailableLanguages();
-    
-    List<String> getAvailableCountries();
     
     I18nLocale getCurrentI18nLocale();
     

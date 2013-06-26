@@ -27,9 +27,8 @@
 
 package org.hisp.dhis.dataadmin.action.locale;
 
-import java.util.List;
-
-import org.hisp.dhis.i18n.locale.*;
+import org.hisp.dhis.i18n.locale.I18nLocale;
+import org.hisp.dhis.i18n.locale.I18nLocaleService;
 
 import com.opensymphony.xwork2.Action;
 

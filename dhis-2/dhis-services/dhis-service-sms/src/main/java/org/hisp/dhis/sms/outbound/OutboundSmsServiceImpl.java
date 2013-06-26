@@ -138,6 +138,7 @@ public class OutboundSmsServiceImpl
         OutboundSms sms = outboundSmsStore.get( outboundSmsId );
         outboundSmsStore.delete( sms );
     }
+    
     // -------------------------------------------------------------------------
     // Support methods
     // -------------------------------------------------------------------------
@@ -158,6 +159,4 @@ public class OutboundSmsServiceImpl
             return "Exception sending message " + sms + e.getMessage();
         }
     }
-
-
 }

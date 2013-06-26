@@ -23,23 +23,6 @@
   <bean id="org.hisp.dhis.i18n.locale.I18nLocaleService" class="org.hisp.dhis.i18n.locale.DefaultI18nLocaleService">
     <property name="i18nLocaleStore" ref="org.hisp.dhis.i18n.locale.I18nLocaleStore" />
     <property name="userSettingService" ref="org.hisp.dhis.user.UserSettingService" />
-    <property name="languages">
-      <list>
-        <value>Chinese</value>
-        <value>Dutch</value>
-        <value>English</value>
-        <value>French</value>
-        <value>German</value>
-        <value>Norwegian</value>
-      </list>
-    </property>
-    <property name="countries">
-      <list>
-        <value>United States</value>
-        <value>France</value>
-        <value>England</value>
-      </list>
-    </property>
   </bean>
 
   <bean id="org.hisp.dhis.i18n.locale.I18nLocaleStore" class="org.hisp.dhis.i18n.locale.hibernate.HibernateI18nLocaleStore">

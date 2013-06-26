@@ -42,7 +42,7 @@ public interface IncomingSmsStore
 
     IncomingSms get( int id );
 
-    Collection<IncomingSms> getSmsByStatus( SmsMessageStatus status );
+    Collection<IncomingSms> getSmsByStatus( SmsMessageStatus status, String keyword );
 
     Collection<IncomingSms> getSmsByOriginator( String originator );
 
@@ -53,5 +53,4 @@ public interface IncomingSmsStore
     void delete( IncomingSms incomingSms);
     
     Collection<IncomingSms> getAllUnparsedSmses();
-
 }

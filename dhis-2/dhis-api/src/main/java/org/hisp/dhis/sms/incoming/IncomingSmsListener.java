@@ -1,7 +1,7 @@
 package org.hisp.dhis.sms.incoming;
 
 /*
- * Copyright (c) 2011, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,46 +27,9 @@ package org.hisp.dhis.sms.incoming;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.List;
-
-import org.hisp.dhis.sms.queue.MessageQueue;
-import org.smslib.InboundMessage;
-
-/**
- * Service providing support for retrieving incoming SMSes.
- */
-public interface IncomingSmsService
+public interface IncomingSmsListener
 {
-    String ID = IncomingSmsService.class.getName();
-
-    /**
-     * Get the next sms incoming for processing, if any.
-     * 
-     * @return the oldest sms in the INCOMING state.
-     */
-    IncomingSms getNextUnprocessed();
+    boolean accept( IncomingSms sms );
     
-    void update( IncomingSms sms );
-    
-    IncomingSms findBy ( Integer id );
-    
-    List<IncomingSms> listAllMessage();
-    
-    List<IncomingSms> listAllMessageFromModem();
-    
-    void deleteAllFromModem();
-    
-    void deleteById( Integer id );
-    
-    List<InboundMessage> getMsgList();
-    
-    void save ( IncomingSms sms );
-    
-    public void setIncomingSmsQueue( MessageQueue incomingSmsQueue );
-    
-    Collection<IncomingSms> getSmsByStatus( SmsMessageStatus status, String keyword );
-
-    IncomingSms convertToIncomingSms( InboundMessage message );
-
+    void receive( IncomingSms sms );
 }

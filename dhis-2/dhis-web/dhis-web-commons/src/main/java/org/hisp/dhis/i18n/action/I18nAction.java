@@ -30,7 +30,6 @@ package org.hisp.dhis.i18n.action;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import org.hisp.dhis.common.IdentifiableObject;
@@ -58,13 +57,13 @@ public class I18nAction
     private String message;
 
     private I18nLocale currentLocale;
-    
+
     private List<I18nLocale> availableLocales = new ArrayList<I18nLocale>();
-    
+
     private Map<String, String> translations = new Hashtable<String, String>();
 
     private Map<String, String> referenceTranslations = new Hashtable<String, String>();
-    
+
     private List<String> propertyNames = new ArrayList<String>();
 
     // -------------------------------------------------------------------------
@@ -77,7 +76,7 @@ public class I18nAction
     {
         this.i18nService = i18nService;
     }
-    
+
     private IdentifiableObjectManager identifiableObjectManager;
 
     public void setIdentifiableObjectManager( IdentifiableObjectManager identifiableObjectManager )
@@ -166,9 +165,9 @@ public class I18nAction
         throws Exception
     {
         currentLocale = i18nService.getCurrentLocale();
-        
+
         availableLocales = i18nService.getAvailableLocales();
-        
+
         translations = i18nService.getTranslations( className, objectId );
 
         IdentifiableObject object = identifiableObjectManager.getObject( objectId, className );

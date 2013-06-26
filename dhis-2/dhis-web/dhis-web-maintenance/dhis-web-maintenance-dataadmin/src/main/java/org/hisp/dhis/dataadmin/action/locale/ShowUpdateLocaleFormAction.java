@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-20012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,19 +26,13 @@
  */
 package org.hisp.dhis.dataadmin.action.locale;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-
-
-import org.hisp.dhis.i18n.locale.*;
-import org.hisp.dhis.program.Program;
+import org.hisp.dhis.i18n.locale.I18nLocale;
+import org.hisp.dhis.i18n.locale.I18nLocaleService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Chau Thu Tran
+ * @author James Chang
  * @version $Id$
  */
 public class ShowUpdateLocaleFormAction
@@ -79,21 +73,6 @@ public class ShowUpdateLocaleFormAction
     {
         this.id = id;
     }
-
-
-    private List<String> availableLanguages;
-
-    public List<String> getAvailableLanguages()
-    {
-        return availableLanguages;
-    }
-
-    private List<String> availableCountries;
-
-    public List<String> getAvailableCountries()
-    {
-        return availableCountries;
-    }
         
     // -------------------------------------------------------------------------
     // Action implementation
@@ -104,9 +83,6 @@ public class ShowUpdateLocaleFormAction
     {
     	i18nlocale = i18nLocaleService.getI18nLocale( id );
 
-    	availableLanguages = i18nLocaleService.getAvailableLanguages();
-    	availableCountries = i18nLocaleService.getAvailableCountries();
-    	
         return SUCCESS;
     }
 }

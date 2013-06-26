@@ -57,7 +57,7 @@ public class TranslateAction
 
     private String objectId;
 
-    private Integer loc;
+    private String loc;
 
     private String returnUrl;
 
@@ -104,7 +104,7 @@ public class TranslateAction
         this.objectId = objectId;
     }
 
-    public void setLoc( Integer loc )
+    public void setLoc( String loc )
     {
         this.loc = loc;
     }
@@ -150,9 +150,16 @@ public class TranslateAction
     public String execute()
         throws Exception
     {
-        I18nLocale localeObj = i18nLocaleService.getI18nLocale( loc );
-        locale = localeObj.getName();
+        
+        I18nLocale localeObj = null;
+        
+        if ( loc != null && !loc.equals( "NONE" ) )
+        {
+            localeObj = i18nLocaleService.getI18nLocale( Integer.valueOf( loc ) );
 
+            locale = localeObj.getName();
+        }
+        
         log.info( "Classname: " + className + ", id: " + objectId + ", loc: " + locale );
 
         IdentifiableObject object = identifiableObjectManager.getObject( Integer.parseInt( objectId ), className );
@@ -176,7 +183,7 @@ public class TranslateAction
 
         log.info( "Translations: " + translations );
 
-        if ( locale != null && !locale.equals( "NONE" ) )
+        if ( localeObj != null )
         {
             i18nService.updateTranslation( className, Integer.parseInt( objectId ), localeObj, translations );
         }

@@ -36,13 +36,13 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.smslib.AGateway;
 import org.smslib.GatewayException;
 import org.smslib.OutboundMessage;
 import org.smslib.TimeoutException;
 import org.smslib.helper.Logger;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Simplistic http gateway sending smses through a get to a url constructed from
@@ -71,7 +71,6 @@ import org.springframework.web.client.RestTemplate;
  * </ul>
  * 
  */
-
 public class SimplisticHttpGetGateWay
     extends AGateway
 {
@@ -80,8 +79,6 @@ public class SimplisticHttpGetGateWay
     private static final String RECIPIENT = "recipient";
 
     private static final String MESSAGE = "message";
-
-    RestTemplate restTemplate = new RestTemplate();
 
     private Map<String, String> parameters;
 
@@ -125,6 +122,7 @@ public class SimplisticHttpGetGateWay
         requestParameters.put( MESSAGE, msg.getText() );
 
         String sender = msg.getFrom();
+        
         if ( sender != null )
         {
             Logger.getInstance().logDebug( "Adding sender " + sender, null, getGatewayId() );
@@ -133,6 +131,7 @@ public class SimplisticHttpGetGateWay
         try
         {
             String urlString = urlTemplate;
+            
             for ( String key : requestParameters.keySet() )
             {
                 if ( requestParameters.get( key ) != null )
@@ -141,11 +140,13 @@ public class SimplisticHttpGetGateWay
                         URLEncoder.encode( requestParameters.get( key ), "UTF-8" ) );
                 }
             }
+            
             Logger.getInstance().logInfo( "RequestURL: " + urlString, null, getGatewayId() );
             URL requestURL = new URL( urlString );
             URLConnection conn = requestURL.openConnection();
             BufferedReader reader = new BufferedReader( new InputStreamReader( conn.getInputStream() ) );
             String line, response = "";
+            
             while ( (line = reader.readLine()) != null )
             {
                 response += line;
@@ -168,7 +169,6 @@ public class SimplisticHttpGetGateWay
         }
 
         return true;
-
     }
 
     @Override
@@ -177,5 +177,4 @@ public class SimplisticHttpGetGateWay
         // FIXME: ?
         return 500;
     }
-
 }

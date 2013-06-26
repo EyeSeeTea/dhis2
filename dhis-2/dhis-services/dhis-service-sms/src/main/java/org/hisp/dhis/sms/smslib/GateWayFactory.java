@@ -70,12 +70,10 @@ public class GateWayFactory
         }
 
         throw new SmsServiceException( "Gateway config of unknown type: " + config.getClass().getName() );
-
     }
 
     public AGateway createSMPPGatewayConfig( SMPPGatewayConfig config )
     {
-
         AGateway gateway = new JSMPPGateway( config.getName(), config.getAddress(), config.getPort(),
             new BindAttributes( config.getUsername(), config.getPassword(), "cp", BindType.TRANSCEIVER ) );
         gateway.setInbound( true );
