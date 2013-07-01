@@ -4133,7 +4133,7 @@ Ext.onReady( function() {
 							disabled: !pt.layout,
 							handler: function() {
 								if (sessionStorage && sessionStorage.setItem) {
-									sessionStorage.pt = pt;
+									sessionStorage.setItem('pt', JSON.stringify(pt.layout));
 									url += '?src=pt'
 								}
 								window.location.href = url;
