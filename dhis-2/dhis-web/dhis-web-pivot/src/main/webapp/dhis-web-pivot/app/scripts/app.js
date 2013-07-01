@@ -4117,6 +4117,37 @@ Ext.onReady( function() {
 				}
 			});
 
+			getLinkMenu = function(url, anchorCmp) {
+				return Ext.create('Ext.menu.Menu', {
+					shadow: false,
+					showSeparator: false,
+					items: [
+						{
+							text: 'Open',
+							handler: function() {
+								window.location.href = url;
+							}
+						},
+						{
+							text: 'Open current table' + '&nbsp;&nbsp;',
+							disabled: !pt.layout,
+							handler: function() {
+								if (sessionStorage && sessionStorage.setItem) {
+									sessionStorage.pt = pt;
+									url += '?src=pt'
+								}
+								window.location.href = url;
+							}
+						}
+					],
+					listeners: {
+						show: function() {
+							pt.util.window.setAnchorPosition(this, anchorCmp);
+						}
+					}
+				});
+			};
+
 			centerRegion = Ext.create('Ext.panel.Panel', {
 				region: 'center',
 				bodyStyle: 'padding:1px',
@@ -4162,7 +4193,10 @@ Ext.onReady( function() {
 							text: PT.i18n.chart,
                             toggleGroup: 'module',
 							handler: function(b) {
-                                window.location.href = '../../dhis-web-visualizer/app/index.html';
+                                //window.location.href = '../../dhis-web-visualizer/app/index.html';
+
+                                b.menu = getLinkMenu('../../dhis-web-visualizer/app/index.html', b);
+								b.menu.show();
 							}
 						},
 						{
