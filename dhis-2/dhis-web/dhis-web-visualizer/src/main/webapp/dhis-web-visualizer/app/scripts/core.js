@@ -3,7 +3,7 @@ DV.core = {
 };
 
 Ext.onReady( function() {
-	
+
 DV.core.getConfig = function() {
 	var conf = {};
 
@@ -708,7 +708,7 @@ DV.core.getUtil = function(dv) {
 								}
 							}
 						}
-						
+
 						return false;
 					}(),
 					ou = dimConf.organisationUnit.objectName,
@@ -731,14 +731,14 @@ DV.core.getUtil = function(dv) {
 							}
 						}
 						else if (isLevel) {
-							
+
 							// Items: get ids from metadata -> items
 							for (var j = 0, ids = Ext.clone(response.metaData[dim.dimensionName]); j < ids.length; j++) {
 								dim.items.push({
 									id: ids[j],
 									name: response.metaData.names[ids[j]]
 								});
-								
+
 								dim.items = dv.util.array.sortObjectsByString(dim.items);
 							}
 						}
@@ -1695,7 +1695,7 @@ console.log("baseLineFields", store.baseLineFields);
 				xLayout = util.chart.getExtendedLayout(layout);
 
 				dv.paramString = util.chart.getParamString(xLayout, true);
-				url = dv.init.contextPath + '/api/analytics.json' + dv.paramString;				
+				url = dv.init.contextPath + '/api/analytics.json' + dv.paramString;
 
 				if (!validateUrl(url)) {
 					return;
@@ -1787,7 +1787,31 @@ console.log("layout", layout);
 					}
 				}
 			});
-		}
+		},
+
+        pt2dv: function(ptLayoutConfig) {
+            var ptLayoutConfig = Ext.clone(ptLayoutConfig),
+                layoutConfig = Ext.clone(ptLayoutConfig);
+
+            layoutConfig.columns = [];
+            layoutConfig.rows = [];
+            layoutConfig.filters = undefined;
+
+            // Series
+            if (Ext.isArray(ptLayoutConfig.columns) && ptLayoutConfig.columns.length) {
+                layoutConfig.columns.push(ptLayoutConfig.columns.pop());
+            }
+
+            // Rows
+            if (Ext.isArray(ptLayoutConfig.rows) && ptLayoutConfig.rows.length) {
+                layoutConfig.rows.push(ptLayoutConfig.rows.pop());
+            }
+
+            // Filters
+            layoutConfig.filters = [].concat(ptLayoutConfig.columns, ptLayoutConfig.rows, ptLayoutConfig.filters);
+
+            return layoutConfig;
+        }
 	};
 
 	return util;
@@ -2004,7 +2028,7 @@ DV.core.getApi = function(dv) {
 			}
 
 			// Layout
-			layout.type = config.type.toLowerCase();
+			layout.type = Ext.isString(config.type) ? config.type.toLowerCase() : dv.conf.finals.chart.column;
 
 			layout.columns = config.columns;
 			layout.rows = config.rows;

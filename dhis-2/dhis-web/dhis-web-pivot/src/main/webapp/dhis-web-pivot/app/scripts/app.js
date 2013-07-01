@@ -4399,7 +4399,9 @@ Ext.onReady( function() {
 				}
 
 				// Options
-				pt.viewport.optionsWindow.setOptions(layout);
+				if (pt.viewport.optionsWindow) {
+					pt.viewport.optionsWindow.setOptions(layout);
+				}
 
 				// Organisation units
 				if (recMap[dimConf.organisationUnit.objectName]) {
