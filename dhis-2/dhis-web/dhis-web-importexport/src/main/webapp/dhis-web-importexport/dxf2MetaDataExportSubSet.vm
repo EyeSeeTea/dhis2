@@ -1,54 +1,143 @@
-<script type="text/javascript">
-    jQuery(function () {
-        selectNone();
-    });
+<script>
+    var i18n_select_organisation_unit = '$encoder.jsEscape( $i18n.getString( "select_organisation_unit" ), "'")';
+    var i18n_select_startdate = '$encoder.jsEscape( $i18n.getString( "select_startdate" ), "'")';
+    var i18n_select_enddate = '$encoder.jsEscape( $i18n.getString( "select_enddate" ), "'")';
+    var i18n_select_datasets = '$encoder.jsEscape( $i18n.getString( "select_datasets" ), "'")';
 </script>
 
-<h3>$i18n.getString( "metadata_subset_export" )</h3>
+<h2>$i18n.getString( "metadata_subset_export" )</h2>
 
-<form id="exportForm" name="exportForm">
+<!-- EXPORT FORM -->
+<!-- ACTION METHOD HERE -->
+<form id="exportForm" name="exportForm" method="post" action="exportDetailedMetaData.action">
+    <input type="hidden" name="exportFormat" value="$!exportFormat">
 
-    <input id="categoryCombos" name="categoryCombos" type="checkbox" value="false" style="display: none;"/>
-    <input id="categoryOptionCombos" name="categoryOptionCombos" type="checkbox" value="false" style="display: none;"/>
-    <input id="categoryOptions" name="categoryOptions" type="checkbox" value="false" style="display: none;"/>
-    <input id="sections" name="sections" type="checkbox" value="false" style="display: none;"/>
-    <input id="mapViews" name="mapViews" type="checkbox" value="false" style="display: none;"/>
-    <input id="mapLegends" name="mapLegends" type="checkbox" value="false" style="display: none;"/>
+    <!-- ATTRIBUTE TYPES SELECTION -->
+    <div>
+        <input id="attributeTypes" name="attributeTypes" type="checkbox" value="true"
+               style="float: left; width: 25px;"/><h4>$i18n.getString( "attribute_types" )</h4>
 
-    <fieldset style="width: 80%; border: 1px solid #ccc; padding: 15px;">
-        <div style="width: 200px; float: left;"><input id="attributeTypes" name="attributeTypes" type="checkbox"
-                                                       value="true"/> <label for="attributeTypes"> Attribute
-            Types</label></div>
-        <div style="width: 200px; float: left;"><input id="categories" name="categories" type="checkbox" value="true"/>
-            <label for="categories">Categories</label></div>
-        <div style="width: 200px; float: left;"><input id="charts" name="charts" type="checkbox" value="true"/> <label
-                for="charts">Charts</label></div>
-        <div style="width: 200px; float: left;"><input id="dataElements" name="dataElements" type="checkbox"
-                                                       value="true"/> <label for="dataElements"> Data Elements</label>
-        </div>
-        <div style="width: 200px; float: left;"><input id="dataSets" name="dataSets" type="checkbox" value="true"/>
-            <label for="dataSets"> Data Sets</label></div>
+        <table id="attributeTypesSelectionArea">
 
-    </fieldset>
+            <colgroup>
+                <col style="width: 500px;"/>
+                <col/>
+                <col style="width: 500px"/>
+            </colgroup>
+            <thead>
 
-    <br/>
+            <!-- TIMESTAMP FILTER -->
+            <tr>
+                <th>$i18n.getString( "start_date" )</th>
+                <td></td>
+                <th>$i18n.getString( "end_date" )</th>
+            </tr>
+            <tr>
+                <td><input type="text" id="startDate" name="startDate" value="$!startDate" style="width:230px"></td>
+                <td></td>
+                <td><input type="text" id="endDate" name="endDate" value="$!endDate" style="width:230px"></td>
+            </tr>
+            <tr>
+                <td colspan="3" height="15"></td>
+            </tr>
+
+            <!-- DATA -->
+            <tr>
+                <th>$i18n.getString( "available_attribute_Types" )</th>
+                <th>$i18n.getString( "filter" )</th>
+                <th>$i18n.getString( "selected_attribute_types" )</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+                    <select id="availableAttributes" multiple="multiple" style="height: 200px; width: 100%;"></select>
+                </td>
+                <td>
+                    <input type="button" value="&gt;" title="$i18n.getString( 'move_selected' )" style="width:50px"
+                           onclick="dhisAjaxSelect_moveAllSelected( 'availableAttributes' );"/><br/>
+                    <input type="button" value="&lt;" title="$i18n.getString( 'remove_selected' )" style="width:50px"
+                           onclick="dhisAjaxSelect_moveAllSelected( 'selectedAttributes' );"/><br/>
+                    <input type="button" value="&gt;&gt;" title="$i18n.getString('move_all')" style="width:50px"
+                           onclick="dhisAjaxSelect_moveAll( 'availableAttributes' );"/><br/>
+                    <input type="button" value="&lt;&lt;" title="$i18n.getString('remove_all')" style="width:50px"
+                           onclick="dhisAjaxSelect_moveAll( 'selectedAttributes' );"/>
+                </td>
+                <td>
+                    <select id="selectedAttributes" name="selectedAttributes" multiple="multiple"
+                            style="height: 200px; width: 100%; margin-top: 45px;"></select>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- DATA SETS SELECTION -->
+    <div>
+        <input id="dataSets" name="dataSets" type="checkbox" value="true"
+               style="float: left; width: 25px;"/><h4>$i18n.getString( "data_sets" )</h4>
+        <table id="dataSetsSelectionArea">
+            <colgroup>
+                <col style="width: 500px;"/>
+                <col/>
+                <col style="width: 500px"/>
+            </colgroup>
+            <thead>
+
+            <!-- TIMESTAMP FILTER -->
+            <tr>
+                <th>$i18n.getString( "start_date" )</th>
+                <td></td>
+                <th>$i18n.getString( "end_date" )</th>
+            </tr>
+            <tr>
+                <td><input type="text" id="startDate" name="startDate" value="$!startDate" style="width:230px"></td>
+                <td></td>
+                <td><input type="text" id="endDate" name="endDate" value="$!endDate" style="width:230px"></td>
+            </tr>
+            <tr>
+                <td colspan="3" height="15"></td>
+            </tr>
+
+            <!-- DATA -->
+            <tr>
+                <th>$i18n.getString( "available_data_sets" )</th>
+                <th>$i18n.getString( "filter" )</th>
+                <th>$i18n.getString( "selected_data_sets" )</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+                    <select id="availableDataSets" multiple="multiple" style="height: 200px; width: 100%;"></select>
+                </td>
+                <td>
+                    <input type="button" value="&gt;" title="$i18n.getString( 'move_selected' )" style="width:50px"
+                           onclick="dhisAjaxSelect_moveAllSelected( 'availableDataSets' );"/><br/>
+                    <input type="button" value="&lt;" title="$i18n.getString( 'remove_selected' )" style="width:50px"
+                           onclick="dhisAjaxSelect_moveAllSelected( 'selectedDataSets' );"/><br/>
+                    <input type="button" value="&gt;&gt;" title="$i18n.getString('move_all')" style="width:50px"
+                           onclick="dhisAjaxSelect_moveAll( 'availableDataSets' );"/><br/>
+                    <input type="button" value="&lt;&lt;" title="$i18n.getString('remove_all')" style="width:50px"
+                           onclick="dhisAjaxSelect_moveAll( 'selectedDataSets' );"/>
+                </td>
+                <td>
+                    <select id="selectedDataSets" name="selectedDataSets" multiple="multiple"
+                            style="height: 200px; width: 100%; margin-top: 45px;"></select>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+
+
+
+
+
 
     <table>
-        <tr>
-            <td colspan="2">
-                <input type="button" value="$i18n.getString( 'display_metadata' )" style="width:204px;"
-                       onclick="displayMetaData();"/>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <input type="button" value="$i18n.getString( 'select_all' )" style="width:100px;"
-                       onclick="selectAll();"/>
-                <input type="button" value="$i18n.getString( 'select_none' )" style="width:100px;"
-                       onclick="selectNone();"/>
-            </td>
-        </tr>
-
         <tr>
             <td colspan="2">
                 <select id="format" style="width: 204px;">
@@ -71,12 +160,11 @@
         <tr>
             <td colspan="2">
                 <input type="button" value="$i18n.getString( 'export' )" style="width:204px;"
-                       onclick="exportMetaDataSubSet();"/>
+                       onclick="exportMetaData();"/>
             </td>
         </tr>
 
+        </tbody>
     </table>
+
 </form>
-
-<span id="message"></span>
-
