@@ -1790,25 +1790,41 @@ console.log("layout", layout);
 		},
 
         pt2dv: function(ptLayoutConfig) {
-            var ptLayoutConfig = Ext.clone(ptLayoutConfig),
+            var dimConf = dv.conf.finals.dimension,
+                ptLayoutConfig = Ext.clone(ptLayoutConfig),
                 layoutConfig = Ext.clone(ptLayoutConfig);
 
             layoutConfig.columns = [];
             layoutConfig.rows = [];
-            layoutConfig.filters = undefined;
+            layoutConfig.filters = ptLayoutConfig.filters;
 
             // Series
             if (Ext.isArray(ptLayoutConfig.columns) && ptLayoutConfig.columns.length) {
-                layoutConfig.columns.push(ptLayoutConfig.columns.pop());
+                for (var i = 0, dim; i < ptLayoutConfig.columns.length; i++) {
+                    dim = ptLayoutConfig.columns[i];
+
+                    if (!layoutConfig.columns.length && (dim.dimension === dimConf.indicator.objectName || (i === ptLayoutConfig.columns.length - 1))) {
+                        layoutConfig.columns.push(dim);
+                    }
+                    else {
+                        layoutConfig.filters.push(dim);
+                    }
+                }
             }
 
             // Rows
             if (Ext.isArray(ptLayoutConfig.rows) && ptLayoutConfig.rows.length) {
-                layoutConfig.rows.push(ptLayoutConfig.rows.pop());
-            }
+                for (var i = 0, dim; i < ptLayoutConfig.rows.length; i++) {
+                    dim = ptLayoutConfig.rows[i];
 
-            // Filters
-            layoutConfig.filters = [].concat(ptLayoutConfig.columns, ptLayoutConfig.rows, ptLayoutConfig.filters);
+                    if (!layoutConfig.rows.length && (dim.dimension === dimConf.indicator.objectName || (i === ptLayoutConfig.rows.length - 1))) {
+                        layoutConfig.rows.push(dim);
+                    }
+                    else {
+                        layoutConfig.filters.push(dim);
+                    }
+                }
+            }
 
             return layoutConfig;
         }

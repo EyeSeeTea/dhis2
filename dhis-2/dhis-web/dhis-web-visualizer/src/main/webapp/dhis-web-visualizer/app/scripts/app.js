@@ -4412,6 +4412,7 @@ Ext.onReady( function() {
 				// Indicators
 				dv.store.indicatorSelected.removeAll();
 				objectName = dimConf.indicator.objectName;
+console.log("dimmap", dimMap);return;
 				if (dimMap[objectName]) {
 					dv.store.indicatorSelected.add(Ext.clone(recMap[objectName]));
 					dv.util.multiselect.filterAvailable({store: dv.store.indicatorAvailable}, {store: dv.store.indicatorSelected});
