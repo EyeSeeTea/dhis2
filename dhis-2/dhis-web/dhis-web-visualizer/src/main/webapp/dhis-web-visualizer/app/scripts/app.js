@@ -1,3 +1,5 @@
+DV.isSessionStorage = 'sessionStorage' in window && window['sessionStorage'] !== null;
+
 DV.app = {};
 DV.app.init = {};
 
