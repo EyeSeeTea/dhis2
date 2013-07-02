@@ -73,7 +73,7 @@ Ext.onReady( function() {
 			// Look for url params
 			var id = dv.util.url.getUrlParam('id'),
                 src = dv.util.url.getUrlParam('src'),
-                layoutConfig,
+                xLayoutConfig,
                 layout,
                 conversionFn;
 
@@ -4383,7 +4383,7 @@ Ext.onReady( function() {
 				}
 			});
 
-			setFavorite = function(layout) {
+			setFavorite = function(layout) {				
 				var dimConf = dv.conf.finals.dimension,
 					xLayout,
 					dimMap,
@@ -4411,8 +4411,7 @@ Ext.onReady( function() {
 
 				// Indicators
 				dv.store.indicatorSelected.removeAll();
-				objectName = dimConf.indicator.objectName;
-console.log("dimmap", dimMap);return;
+				objectName = dimConf.indicator.objectName;				
 				if (dimMap[objectName]) {
 					dv.store.indicatorSelected.add(Ext.clone(recMap[objectName]));
 					dv.util.multiselect.filterAvailable({store: dv.store.indicatorAvailable}, {store: dv.store.indicatorSelected});

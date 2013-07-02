@@ -2236,7 +2236,10 @@ Ext.onReady( function() {
 					};
 
 					pt.store.indicatorSelected.each( function(r) {
-						config.items.push({id: r.data.id});
+						config.items.push({
+							id: r.data.id,
+							name: r.data.name
+						});
 					});
 
 					return config.items.length ? config : null;
@@ -2521,7 +2524,10 @@ Ext.onReady( function() {
 					};
 
 					pt.store.dataElementSelected.each( function(r) {
-						config.items.push({id: r.data.id});
+						config.items.push({
+							id: r.data.id,
+							name: r.data.name
+						});
 					});
 
 					return config.items.length ? config : null;
@@ -2655,7 +2661,10 @@ Ext.onReady( function() {
 					};
 
 					pt.store.dataSetSelected.each( function(r) {
-						config.items.push({id: r.data.id});
+						config.items.push({
+							id: r.data.id,
+							name: r.data.name
+						});
 					});
 
 					return config.items.length ? config : null;
@@ -3122,12 +3131,18 @@ Ext.onReady( function() {
 						chb = pt.cmp.dimension.relativePeriod.checkbox;
 
 					pt.store.fixedPeriodSelected.each( function(r) {
-						config.items.push({id: r.data.id});
+						config.items.push({
+							id: r.data.id,
+							name: r.data.name
+						});
 					});
 
 					for (var i = 0; i < chb.length; i++) {
 						if (chb[i].getValue()) {
-							config.items.push({id: chb[i].relativePeriodId});
+							config.items.push({
+								id: chb[i].relativePeriodId,
+								name: ''
+							});
 						}
 					}
 
@@ -3516,10 +3531,16 @@ Ext.onReady( function() {
 					if (toolMenu.menuValue === 'explicit') {
 						if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue()) {
 							if (userOrganisationUnit.getValue()) {
-								config.items.push({id: 'USER_ORGUNIT'});
+								config.items.push({
+									id: 'USER_ORGUNIT',
+									name: ''
+								});
 							}
 							if (userOrganisationUnitChildren.getValue()) {
-								config.items.push({id: 'USER_ORGUNIT_CHILDREN'});
+								config.items.push({
+									id: 'USER_ORGUNIT_CHILDREN',
+									name: ''
+								});
 							}
 						}
 						else {
@@ -3530,7 +3551,10 @@ Ext.onReady( function() {
 					}
 					else if (toolMenu.menuValue === 'boundary') {
 						for (var i = 0; i < r.length; i++) {
-							config.items.push({id: 'LEVEL-' + organisationUnitLevel.getValue() + '-' + r[i].data.id});
+							config.items.push({
+								id: 'LEVEL-' + organisationUnitLevel.getValue() + '-' + r[i].data.id,
+								name: ''
+							});
 						}
 					}
 					

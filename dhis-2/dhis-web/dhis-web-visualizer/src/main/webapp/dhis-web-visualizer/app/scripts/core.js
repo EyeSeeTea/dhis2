@@ -761,8 +761,28 @@ DV.core.getUtil = function(dv) {
 				}
 
 				layout = dv.api.layout.Layout(xLayout);
-
-				return layout ? dv.util.chart.getExtendedLayout(layout) : null;
+				
+				if (layout) {
+					dimensions = [].concat(layout.columns, layout.rows, layout.filters);
+					
+					for (var i = 0, idNameMap = response.metaData.names, dimItems; i < dimensions.length; i++) {
+						dimItems = dimensions[i].items;
+						
+						if (Ext.isArray(dimItems) && dimItems.length) {
+							for (var j = 0, item; j < dimItems.length; j++) {
+								item = dimItems[j];
+								
+								if (Ext.isObject(item) && Ext.isString(idNameMap[item.id])) {
+									item.name = idNameMap[item.id];
+								}
+							}
+						}
+					}
+					
+					return dv.util.chart.getExtendedLayout(layout);
+				}
+				
+				return undefined;
 			};
 
 			validateResponse = function(response) {
@@ -797,7 +817,7 @@ DV.core.getUtil = function(dv) {
 				ids = [];
 
 				var extendHeaders = function() {
-
+console.log("xLayout", xLayout);
 					// Extend headers: index, items, size
 					for (var i = 0, header; i < response.headers.length; i++) {
 						header = response.headers[i];
@@ -806,7 +826,7 @@ DV.core.getUtil = function(dv) {
 						header.index = i;
 
 						if (header.meta) {
-
+console.log(header.index, header.name);
 							// Items
 							header.items = Ext.clone(xLayout.dimensionNameIdsMap[header.name]) || [];
 
