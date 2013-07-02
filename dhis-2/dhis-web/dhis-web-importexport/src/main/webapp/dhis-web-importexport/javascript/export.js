@@ -59,7 +59,7 @@ function validateDataValueExportForm()
         return false;
     }
     if ( !hasText( "startDate" ) )
-    {                                                    funct
+    {
         setHeaderDelayMessage( i18n_select_startdate );
         return false;
     }
