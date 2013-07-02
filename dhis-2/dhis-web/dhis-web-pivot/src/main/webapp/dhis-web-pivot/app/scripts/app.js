@@ -4141,8 +4141,20 @@ Ext.onReady( function() {
 				}
 			});
 
+			defaultButton = Ext.create('Ext.button.Button', {
+				text: PT.i18n.table,
+				toggleGroup: 'module',
+				pressed: true,
+				handler: function() {
+					if (!this.pressed) {
+						this.toggle();
+					}
+				}					
+			});
+			
 			getLinkMenu = function(url, anchorCmp) {
 				return Ext.create('Ext.menu.Menu', {
+					closeAction: 'destroy',
 					shadow: false,
 					showSeparator: false,
 					items: [
@@ -4153,7 +4165,7 @@ Ext.onReady( function() {
 							}
 						},
 						{
-							text: 'Open current table' + '&nbsp;&nbsp;',
+							text: 'Open table' + '&nbsp;&nbsp;',
 							disabled: !pt.layout,
 							handler: function() {
 								if (sessionStorage && sessionStorage.setItem) {
@@ -4167,6 +4179,11 @@ Ext.onReady( function() {
 					listeners: {
 						show: function() {
 							pt.util.window.setAnchorPosition(this, anchorCmp);
+						},
+						hide: function() {
+							this.destroy();
+							
+							defaultButton.toggle();
 						}
 					}
 				});
@@ -4208,11 +4225,7 @@ Ext.onReady( function() {
 						downloadButton,
 						interpretationButton,
                         '->',
-						{
-							text: PT.i18n.table,
-                            toggleGroup: 'module',
-							pressed: true
-						},
+                        defaultButton,
 						{
 							text: PT.i18n.chart,
                             toggleGroup: 'module',
@@ -4220,6 +4233,11 @@ Ext.onReady( function() {
                                 //window.location.href = '../../dhis-web-visualizer/app/index.html';
 
                                 b.menu = getLinkMenu('../../dhis-web-visualizer/app/index.html', b);
+                                
+                                b.menu.on('destroy', function() {
+									b.menu = undefined;
+								});
+								
 								b.menu.show();
 							}
 						},
