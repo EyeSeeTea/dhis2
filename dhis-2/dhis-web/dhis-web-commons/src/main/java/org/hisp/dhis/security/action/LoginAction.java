@@ -27,7 +27,13 @@ package org.hisp.dhis.security.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
 import org.apache.struts2.ServletActionContext;
+import org.hisp.dhis.i18n.resourcebundle.ResourceBundleManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mobile.device.Device;
 import org.springframework.mobile.device.DeviceResolver;
 
@@ -49,6 +55,9 @@ public class LoginAction
     {
         this.deviceResolver = deviceResolver;
     }
+    
+    @Autowired
+    private ResourceBundleManager resourceBundleManager;
 
     // -------------------------------------------------------------------------
     // Input & Output
@@ -65,6 +74,13 @@ public class LoginAction
     {
         return failed;
     }
+    
+    private List<Locale> availableLocales;
+
+    public List<Locale> getAvailableLocales()
+    {
+        return availableLocales;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -72,6 +88,7 @@ public class LoginAction
 
     @Override
     public String execute()
+        throws Exception
     {
         Device device = deviceResolver.resolveDevice( ServletActionContext.getRequest() );
 
@@ -82,6 +99,8 @@ public class LoginAction
             return "mobile";
         }
 
+        availableLocales = new ArrayList<Locale>( resourceBundleManager.getAvailableLocales() );
+        
         return "standard";
     }
 }
