@@ -1,3 +1,5 @@
+PT.isSessionStorage = 'sessionStorage' in window && window['sessionStorage'] !== null;
+
 PT.app = {};
 PT.app.init = {};
 
@@ -4149,7 +4151,7 @@ Ext.onReady( function() {
 					if (!this.pressed) {
 						this.toggle();
 					}
-				}					
+				}
 			});
 			
 			getLinkMenu = function(url, anchorCmp) {
@@ -4166,13 +4168,15 @@ Ext.onReady( function() {
 						},
 						{
 							text: 'Open table' + '&nbsp;&nbsp;',
-							disabled: !pt.layout,
+							disabled: !PT.isSessionStorage || !pt.layout,
 							handler: function() {
-								if (sessionStorage && sessionStorage.setItem) {
-									sessionStorage.setItem('pt', JSON.stringify(pt.layout));
-									url += '?src=pt'
+								if (PT.isSessionStorage) {
+									var dhis2 = sessionStorage.getItem('dhis2') ? JSON.parse(sessionStorage.getItem('dhis2')) : {};
+									dhis2.analytical = pt.layout;
+									sessionStorage.setItem('dhis2', JSON.stringify(dhis2));
+									
+									window.location.href = url + '?ss=true'
 								}
-								window.location.href = url;
 							}
 						}
 					],
