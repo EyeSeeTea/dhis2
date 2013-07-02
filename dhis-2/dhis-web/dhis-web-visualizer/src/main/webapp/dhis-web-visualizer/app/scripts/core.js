@@ -760,6 +760,7 @@ DV.core.getUtil = function(dv) {
 					}
 				}
 
+				// Re-layout
 				layout = dv.api.layout.Layout(xLayout);
 				
 				if (layout) {
@@ -772,8 +773,8 @@ DV.core.getUtil = function(dv) {
 							for (var j = 0, item; j < dimItems.length; j++) {
 								item = dimItems[j];
 								
-								if (Ext.isObject(item) && Ext.isString(idNameMap[item.id])) {
-									item.name = idNameMap[item.id];
+								if (Ext.isObject(item) && Ext.isString(idNameMap[item.id]) && !Ext.isString(item.name)) {
+									item.name = idNameMap[item.id] || '';
 								}
 							}
 						}
@@ -817,7 +818,6 @@ DV.core.getUtil = function(dv) {
 				ids = [];
 
 				var extendHeaders = function() {
-console.log("xLayout", xLayout);
 					// Extend headers: index, items, size
 					for (var i = 0, header; i < response.headers.length; i++) {
 						header = response.headers[i];
@@ -826,7 +826,7 @@ console.log("xLayout", xLayout);
 						header.index = i;
 
 						if (header.meta) {
-console.log(header.index, header.name);
+							
 							// Items
 							header.items = Ext.clone(xLayout.dimensionNameIdsMap[header.name]) || [];
 

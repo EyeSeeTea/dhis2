@@ -917,8 +917,28 @@ PT.core.getUtils = function(pt) {
 
 					// Re-layout
 					layout = pt.api.layout.Layout(xLayout);
-
-					return layout ? pt.util.pivot.getExtendedLayout(layout) : null;
+				
+					if (layout) {
+						dimensions = [].concat(layout.columns, layout.rows, layout.filters);
+						
+						for (var i = 0, idNameMap = response.metaData.names, dimItems; i < dimensions.length; i++) {
+							dimItems = dimensions[i].items;
+							
+							if (Ext.isArray(dimItems) && dimItems.length) {
+								for (var j = 0, item; j < dimItems.length; j++) {
+									item = dimItems[j];
+									
+									if (Ext.isObject(item) && Ext.isString(idNameMap[item.id]) && !Ext.isString(item.name)) {
+										item.name = idNameMap[item.id] || '';
+									}
+								}
+							}
+						}
+						
+						return pt.util.pivot.getExtendedLayout(layout);
+					}
+					
+					return undefined;
 				}();
 			};
 
