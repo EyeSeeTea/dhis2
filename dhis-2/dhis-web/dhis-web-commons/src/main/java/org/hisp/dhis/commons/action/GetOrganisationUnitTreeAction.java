@@ -27,12 +27,7 @@ package org.hisp.dhis.commons.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
+import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.configuration.ConfigurationService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -45,7 +40,11 @@ import org.hisp.dhis.user.User;
 import org.hisp.dhis.version.Version;
 import org.hisp.dhis.version.VersionService;
 
-import com.opensymphony.xwork2.Action;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @author mortenoh
@@ -129,6 +128,13 @@ public class GetOrganisationUnitTreeAction
         this.parentId = parentId;
     }
 
+    private String byName;
+
+    public void setByName( String byName )
+    {
+        this.byName = byName;
+    }
+
     private boolean realRoot;
 
     public boolean isRealRoot()
@@ -143,13 +149,34 @@ public class GetOrganisationUnitTreeAction
     public String execute()
         throws Exception
     {
+        if ( byName != null )
+        {
+            List<OrganisationUnit> organisationUnitByName = organisationUnitService.getOrganisationUnitByName( byName );
+
+            if ( !organisationUnitByName.isEmpty() )
+            {
+                OrganisationUnit child = organisationUnitByName.get( 0 );
+                organisationUnits.add( child );
+                OrganisationUnit parent = child.getParent();
+
+                do
+                {
+                    organisationUnits.add( parent );
+                    organisationUnits.addAll( parent.getChildren() );
+                }
+                while ( (parent = parent.getParent()) != null );
+
+                return "partial";
+            }
+        }
+
         if ( parentId != null )
         {
             OrganisationUnit parent = organisationUnitService.getOrganisationUnit( parentId );
 
             if ( parent != null )
             {
-                organisationUnits.addAll( organisationUnitService.getOrganisationUnitWithChildren( parent.getId() ) );
+                organisationUnits.addAll( parent.getChildren() );
             }
 
             return "partial";

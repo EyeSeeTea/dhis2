@@ -787,7 +787,7 @@ PT.core.getUtils = function(pt) {
 
 		createTable: function(layout, pt) {
 			var dimConf = pt.conf.finals.dimension,
-				legendSet = layout.legendSet ? pt.init.idLegendSetMap[layout.legendSet.id] : undefined,
+				legendSet = layout.legendSet ? pt.init.idLegendSetMap[layout.legendSet.id] : null,
 				getSyncronizedXLayout,
 				getExtendedResponse,
 				getExtendedAxis,
@@ -938,7 +938,7 @@ PT.core.getUtils = function(pt) {
 						return pt.util.pivot.getExtendedLayout(layout);
 					}
 					
-					return undefined;
+					return null;
 				}();
 			};
 
@@ -1158,7 +1158,8 @@ PT.core.getUtils = function(pt) {
 
 					for (var j = 0; j < aAllItems[i].length; j++) {
 						allRow.push({
-							id: aAllItems[i][j]
+							id: aAllItems[i][j],
+							uuid: Ext.data.IdGenerator.get('uuid').generate()
 						});
 					}
 
@@ -1188,8 +1189,9 @@ PT.core.getUtils = function(pt) {
 						allRow = aAllObjects[i];
 
 						for (var j = 0, obj, sizeCount = 0, span = aSpan[i - 1], parentObj = aAllObjects[i - 1][0]; j < allRow.length; j++) {
-							obj = allRow[j];
+							obj = allRow[j];							
 							obj.parent = parentObj;
+							
 							sizeCount++;
 
 							if (sizeCount === span) {
@@ -1199,7 +1201,24 @@ PT.core.getUtils = function(pt) {
 						}
 					}
 				}
-
+				
+				// add uuids array to leaf dims
+				if (aAllObjects.length) {
+					for (var i = 0, leaf, uuids; i < aAllObjects[aAllObjects.length - 1].length; i++) {
+						leaf = aAllObjects[aAllObjects.length - 1][i];
+						uuids = [leaf.uuid];
+						obj = leaf;
+						
+						while (obj.parent) {
+							obj = obj.parent;
+							uuids.push(obj.uuid);
+						}
+						
+						leaf.uuids = uuids;
+					}
+				}
+console.log(aAllObjects);
+				
 				return {
 					type: type,
 					items: mDimensions,
@@ -1278,14 +1297,16 @@ PT.core.getUtils = function(pt) {
 						fontSize,
 						html = '',
 						isLegendSet = Ext.isObject(legendSet) && Ext.isArray(legendSet.legends) && legendSet.legends.length,
-						isValue = Ext.isObject(config) && Ext.isString(config.type) && config.type.substr(0,5) === 'value' && !config.empty;
-
+						isNumeric = Ext.isObject(config) && Ext.isString(config.type) && config.type.substr(0,5) === 'value' && !config.empty,
+						isValue = Ext.isObject(config) && Ext.isString(config.type) && config.type === 'value' && !config.empty,
+						idConfigMap = {};
+						
 					if (!Ext.isObject(config)) {
 						return '';
-					}
+					}					
 
 					// Background color from legend set
-					if (isValue && isLegendSet) {
+					if (isNumeric && isLegendSet) {
 						legends = legendSet.legends;
 
 						for (var i = 0, value; i < legends.length; i++) {
@@ -1301,6 +1322,7 @@ PT.core.getUtils = function(pt) {
 					rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '" ' : '';
 					htmlValue = config.collapsed ? '&nbsp;' : config.htmlValue || config.value || '&nbsp;';
 					htmlValue = config.type !== 'dimension' ? pt.util.number.pp(htmlValue, layout.digitGroupSeparator) : htmlValue;
+htmlValue = config.uuid || htmlValue;					
 					displayDensity = pt.conf.pivot.displayDensity[config.displayDensity] || pt.conf.pivot.displayDensity[layout.displayDensity];
 					fontSize = pt.conf.pivot.fontSize[config.fontSize] || pt.conf.pivot.fontSize[layout.fontSize];
 
@@ -2226,12 +2248,12 @@ PT.core.getApi = function(pt) {
 			layout.displayDensity = Ext.isString(config.displayDensity) && !Ext.isEmpty(config.displayDensity) ? config.displayDensity : 'normal';
 			layout.fontSize = Ext.isString(config.fontSize) && !Ext.isEmpty(config.fontSize) ? config.fontSize : 'normal';
 			layout.digitGroupSeparator = Ext.isString(config.digitGroupSeparator) && !Ext.isEmpty(config.digitGroupSeparator) ? config.digitGroupSeparator : 'space';
-			layout.legendSet = Ext.isObject(config.legendSet) && Ext.isString(config.legendSet.id) ? config.legendSet : undefined;
+			layout.legendSet = Ext.isObject(config.legendSet) && Ext.isString(config.legendSet.id) ? config.legendSet : null;
 
 			layout.userOrganisationUnit = isOu;
 			layout.userOrganisationUnitChildren = isOuc;
 
-			layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : undefined;
+			layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
 
 			layout.reportingPeriod = Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramReportingPeriod) ? config.reportParams.paramReportingPeriod : (Ext.isBoolean(config.reportingPeriod) ? config.reportingPeriod : false);
 			layout.organisationUnit =  Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramOrganisationUnit) ? config.reportParams.paramOrganisationUnit : (Ext.isBoolean(config.organisationUnit) ? config.organisationUnit : false);

@@ -1,15 +1,3 @@
-/*----------------------------------------------------------------------------*/
-/* Search button for orgunit                                                  */
-/*----------------------------------------------------------------------------*/
-
-.searchOrgunit
-{
-  display: none; 
-  position: absolute;
-  width: 200px;
-  margin-left: 22px;
-  z-index: 9999;
-}
 
 /*----------------------------------------------------------------------------*/
 /* Right bar                                                                  */
@@ -22,7 +10,7 @@ div#rightBar
   height: 454px;
   width: 300px;
   float: right;
-  position: absolute;
+  position: fixed;
   top: 85px;
   right: 10px;
   border: 1px solid #a4d2a3;
@@ -57,6 +45,53 @@ div#rightBar
 {
   font-size: 9pt;
   padding-left: 14px;
+}
+
+/*----------------------------------------------------------------------------*/
+/* Details area                                                              */
+/*----------------------------------------------------------------------------*/
+
+#detailsData
+{
+  vertical-align: top;
+  width: 0;
+  padding-left: 15px;
+}
+
+#detailsArea 
+{
+  display: none;
+  border: 1px solid #ececec;
+  position: fixed;
+  top: 150px;
+  width: 233px;
+  margin-right: 20px;
+  padding: 15px;
+  overflow: auto;
+  color: #222;
+}
+
+#detailsArea label 
+{
+  font-family: LiberationSansBold, arial;
+  font-size: 13px;
+}
+
+#hideDetailsArea
+{
+  float: right;
+}
+
+#warningArea
+{
+  display: none;
+  border: 1px solid #9d0000;
+  background-color: #f48d8d;
+  position: fixed;
+  top: 150px;
+  width: 233px;
+  padding: 15px;
+  overflow: auto;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -112,9 +147,9 @@ div.thingy
 #showLeftBar
 {
   display: none;
-  position: fixed;
-  left: 23px;
-  top: 53px;
+  position: absolute;
+  left: 22px;
+  top: 50px;
   font-family: LiberationSansBold, arial;
   font-size: 9pt;
   cursor: pointer;
@@ -141,18 +176,19 @@ div.thingy
 
 div#orgUnitTree 
 {
-  font-size: 9pt; /* Size to change */
+  font-size: 9pt;
   padding-top: 4px;
 }
 
 #leftBarContents div#orgUnitTree 
 {
-  font-size: 9pt; /* Size to change */
+  font-size: 9pt;
   background-color: white;
   overflow: auto;
   width: 233px;
   height: 298px;
-  border: 1px inset #FFFFFF;
+  border-top: 1px solid #e3e3e3;
+  border-bottom: 1px solid #e3e3e3;
 }
 
 div#orgUnitTree ul 
@@ -163,21 +199,15 @@ div#orgUnitTree ul
 
 div#orgUnitTree ul li:last-child 
 {
-    background-position: 0pt -1766px;
+  background-position: 0pt -1766px;
 }
 
 div#orgUnitTree li 
 {
   list-style-type: none;
-  white-space: nowrap; /* Makes list items never wrap */
-  margin-top: 0pt;
-  margin-right: 0pt;
-  margin-bottom: 0pt;
-  margin-left: 0pt;
-  padding-top: 1px;
-  padding-right: 0pt;
-  padding-bottom: 1px;
-  padding-left: 14px;
+  white-space: nowrap;
+  margin-top: 0;
+  padding: 1px 0 1px 15px;
   background-color: transparent;
   background-image: url('../../images/treeview-gray-line.gif');
   background-repeat: no-repeat;
@@ -193,6 +223,9 @@ div#orgUnitTree span.toggle
 
 div#orgUnitTree a 
 {
+  display: inline;
+  border: 0;
+  padding: 0;
   color: #5C0000;
   text-decoration: none;
   cursor: pointer;
@@ -293,33 +326,6 @@ span#info
   border: 1px solid #12cd17;
   width: 500px;
   border-radius: 3px;
-}
-
-div#detailsArea 
-{
-  border: 1px solid #a9c2dc;
-  background-color: #ebf0f6;
-  position: fixed;
-  width: 18em;
-  max-height: 75%;
-  padding: 0.5em;
-  overflow: auto;
-  border-radius: 3px;
-}
-
-div#detailsArea label 
-{
-  font-family: LiberationSansBold, arial;
-  font-size: 13px;
-}
-
-div#warningArea
-{
-  border: 1px solid #9d0000;
-  background-color: #f48d8d;
-  position: fixed;
-  width: 18em;
-  padding: 0.5em;
 }
 
 div#headerMessage
@@ -437,7 +443,6 @@ span.error
 
 div.inputCriteria
 {
-  position: relative;
   border: 1px solid #a4d2a3;
   background-color: #d5efd5;
   padding-top: 10px;

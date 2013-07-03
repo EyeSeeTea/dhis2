@@ -4239,7 +4239,7 @@ Ext.onReady( function() {
                                 b.menu = getLinkMenu('../../dhis-web-visualizer/app/index.html', b);
                                 
                                 b.menu.on('destroy', function() {
-									b.menu = undefined;
+									b.menu = null;
 								});
 								
 								b.menu.show();
