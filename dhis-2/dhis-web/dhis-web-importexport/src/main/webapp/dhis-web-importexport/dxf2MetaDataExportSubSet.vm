@@ -7,8 +7,14 @@
     var i18n_available_attributes = '$i18n.getString( "available_Attributes" )';
     var i18n_selected_attributes = '$i18n.getString( "selected_Attributes" )';
 
-    var i18n_available_dataSets= '$i18n.getString( "available_data_sets" )';
-    var i18n_selected_dataSets = '$i18n.getString( "selected_data_sets" )';
+    var i18n_available_dataElements = '$i18n.getString( "available_data_elements" )';
+    var i18n_selected_dataElements = '$i18n.getString( "selected_data_elements" )';
+
+    var i18n_available_dataSets = '$i18n.getString( "available_datasets" )';
+    var i18n_selected_dataSets = '$i18n.getString( "selected_datasets" )';
+
+    var i18n_available_indicators = '$i18n.getString( "available_indicators" )';
+    var i18n_selected_indicators = '$i18n.getString( "selected_indicators" )';
 
     var i18n_filter = '$i18n.getString( "filter" )';
     var i18n_start_date = '$i18n.getString( "start_date" )';
@@ -18,31 +24,54 @@
     var i18n_remove_selected = '$i18n.getString( "remove_selected" )';
     var i18n_move_all = '$i18n.getString( "move_all" )';
     var i18n_remove_all = '$i18n.getString( "remove_all" )';
+
+    var startDate = '$!startDate';
+    var endDate = '$!endDate';
 </script>
 
 <h2>$i18n.getString( "metadata_subset_export" )</h2>
 
 <!-- EXPORT FORM -->
 <!-- ACTION METHOD HERE -->
-<form id="exportForm" name="exportForm" method="post" action="exportDetailedMetaData.action">
-    <input type="hidden" name="exportFormat" value="$!exportFormat">
+<form id="exportForm" name="exportForm" method="post" action="">
 
-    <!-- ATTRIBUTES SELECTION -->
+
     <div>
-        <input id="attributes" name="attributes" type="checkbox" value="true" style="float: left; width: 25px;"/>
-        <label for="attributes" style="font-size: 16px;">$i18n.getString( "attributes" )</label>
-
-        <div id="mainDivAttributes"></div>
-    </div>
-
-    <!-- DATA SETS SELECTION -->
-    <div>
-        <input id="dataSets" name="dataSets" type="checkbox" value="true"
-               style="float: left; width: 25px;"/><h4>$i18n.getString( "data_sets" )</h4>
-        <div id="mainDataSets"></div>
+        <!-- ATTRIBUTES SELECTION -->
+        <div>
+            <input id="attributes" class="metadataCheckbox" name="Attributes" type="checkbox" value="true" style="float: left; width: 25px;"/>
+            <label id="labelAttributes" for="attributes" style="font-size: 16px;">$i18n.getString( "attributes" )</label>
+            <div id="mainDivAttributes"></div>
+        </div>
+        <!-- DATA ELEMENTS SELECTION -->
+        <div>
+            <input id="dataElements" class="metadataCheckbox" name="DataElements" type="checkbox" value="true" style="float: left; width: 25px;"/>
+            <label id="labelDataElements" for="dataElements" style="font-size: 16px;">$i18n.getString( "data_elements" )</label>
+            <div id="mainDivDataElements"></div>
+        </div>
+        <!-- DATA SETS SELECTION -->
+        <div>
+            <input id="dataSets" class="metadataCheckbox" name="DataSets" type="checkbox" value="true" style="float: left; width: 25px;"/>
+            <label id="labelDataSets" for="dataSets" style="font-size: 16px;">$i18n.getString( "data_sets" )</label>
+            <div id="mainDivDataSets"></div>
+        </div>
+        <!-- INDICATORS SELECTION -->
+        <div>
+            <input id="indicators" class="metadataCheckbox" name="Indicators" type="checkbox" value="true" style="float: left; width: 25px;"/>
+            <label id="labelIndicators" for="indicators" style="font-size: 16px;">$i18n.getString( "indicators" )</label>
+            <div id="mainDivIndicators"></div>
+        </div>
     </div>
 
     <table>
+        <tr>
+            <td colspan="2">
+                <input type="button" value="$i18n.getString( 'select_all' )" style="width:100px;"
+                       onclick="selectAll();"/>
+                <input type="button" value="$i18n.getString( 'select_none' )" style="width:100px;"
+                       onclick="selectNone();"/>
+            </td>
+        </tr>
         <tr>
             <td colspan="2">
                 <select id="format" style="width: 204px;">
@@ -71,5 +100,4 @@
 
         </tbody>
     </table>
-
 </form>

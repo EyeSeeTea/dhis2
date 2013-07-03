@@ -1,137 +1,66 @@
+// Global Variables
+
+var metadataArray = ["Attributes", "DataElements", "DataSets", "Indicators"];
+
+// ---------------------------------------------------------------
+
+// Select all checkboxes
 function selectAll() {
     $("#exportForm").find("input:checkbox").attr("checked", true);
-};
 
-function selectNone() {
-    $("#exportForm").find("input:checkbox").attr("checked", false);
-};
-
-function lowercaseFirstLetter(string) {
-    return string.charAt(0).toLowerCase() + string.slice(1);
+    for(var i = 0; i < metadataArray.length; i++) {
+        $("#label" + metadataArray[i]).css({"color" : "lime"});
+        insertMetadataDesign(metadataArray[i]);
+        loadMetadata(metadataArray[i]);
+    }
 }
 
+// Deselect all checkboxes
+function selectNone() {
+    $("#exportForm").find("input:checkbox").attr("checked", false);
 
-function exportMetaDataSubSet() {
-
-    if ($('#dataSets').is(':checked')) {
-        $('#sections').attr('checked', true);
+    for(var i = 0; i < metadataArray.length; i++) {
+        removeMetadataDesign(metadataArray[i]);
+        $("#label" + metadataArray[i]).css({"color" : "black"});
     }
-    else {
-        $('#sections').attr('checked', false);
-    }
+}
 
-    if ($('#categories').is(':checked')) {
-        $('#categoryCombos').attr('checked', true);
-        $('#categoryOptionCombos').attr('checked', true);
-        $('#categoryOptions').attr('checked', true);
-    }
-    else {
-        $('#categoryCombos').attr('checked', false);
-        $('#categoryOptionCombos').attr('checked', false);
-        $('#categoryOptions').attr('checked', false);
-    }
-
-    if ($('#mapLegendSets').is(':checked')) {
-        $('#mapLegends').attr('checked', true);
-    }
-    else {
-        $('#mapLegends').attr('checked', false);
-    }
-
-    if ($('#maps').is(':checked')) {
-        $('#mapViews').attr('checked', true);
-    }
-    else {
-        $('#mapViews').attr('checked', false);
-    }
-
-    var url = "../api/metaData";
-    var format = $("#format").val();
-    var compression = $("#compression").val();
-
-    url += "." + format;
-
-    if (compression == "zip") {
-        url += ".zip";
-    }
-    else if (compression == "gz") {
-        url += ".gz";
-    }
-
-    url += "?assumeTrue=false&" + $("#exportForm").serialize();
-
-    log("url" + url);
-
-    alert(url);
-    window.location = url;
-};
-
-//function sendInformation() {
-//    var data;
-//    if ($('#attributeTypes').is(':checked')) {
-//        data = {dataElementAttribute: "false"};
-//    }
-//    $.ajax(
-//        {
-//            url: "../api/metaData.xml.zip",
-//            type: "GET",
-//            data: data,
-//            dataType: "text",
-//            success: function () {
-//                alert("A MERS OVIDIU");
-//            },
-//            error: function (data, status, er) {
-//                alert("error: " + data + " status: " + status + " er:" + er);
-//            }
-//        }
-//    )
-//};
-
-// Collapse Metadata Category information
-jQuery(function () {
-    $('#attributes').click(function () {
-        if ($('#attributes').is(':checked')) {
-            insertMetadataDesign("Attributes");
-            loadMetadata("Attributes");
-            $('#selectionAreaAttributes').show();
-        } else {
-            $('#selectionAreaAttributes').show();
-            removeMetadataDesign("Attributes");
-        }
-    });
-
-    $('#dataSets').click(function () {
-        if ($('#dataSets').is(':checked')) {
-            insertMetadataDesign("DataSets");
-            loadMetadata("DataSets");
-            $('#selectionAreaDataSets').show();
-        } else {
-            $('#selectionAreaDataSets').show();
-            removeMetadataDesign("DataSets");
-        }
-    })
-});
-
-// Deselect all Metadata categories combo boxes
+// Deselect all Metadata categories checkboxes
 jQuery(function () {
     selectNone();
 });
 
+// Make the first letter lowercase
+function lowercaseFirstLetter(string) {
+    return string.charAt(0).toLowerCase() + string.slice(1);
+}
+
+// Collapse Metadata Category information
+jQuery(function () {
+    for(var i = 0; i < metadataArray.length; i++) {
+        var metadataId = "#" + lowercaseFirstLetter(metadataArray[i]);
+        $(metadataId).change(function () {
+            var metadataCategoryName = $(this).attr("name");
+
+            if ($(this).is(":checked")) {
+                $("#label" + metadataCategoryName).css({"color" : "lime"});
+                insertMetadataDesign(metadataCategoryName);
+                loadMetadata(metadataCategoryName);
+            } else {
+                removeMetadataDesign(metadataCategoryName);
+                $("#label" + metadataCategoryName).css({"color" : "black"});
+            }
+        });
+    }
+});
+
 // Insert Metadata HTML & CSS for a Category
 function insertMetadataDesign(metadataCategoryName) {
-
-    if( metadataCategoryName == "Attributes") {
-        var i18n_available_metadata = i18n_available_attributes;
-        var i18n_selected_metadata = i18n_selected_attributes;
-    }
-
-    if( metadataCategoryName == "DataSets") {
-        var i18n_available_metadata = i18n_available_dataSets;
-        var i18n_selected_metadata = i18n_selected_dataSets;
-    }
+    var i18n_available_metadata = getI18nAvailableMetadata(metadataCategoryName);
+    var i18n_selected_metadata = getI18nSelectedMetadata(metadataCategoryName);
 
     var design =
-        '<table id="selectionArea'+metadataCategoryName + '">' +
+        '<table id="selectionArea'+metadataCategoryName + '" style="border: 1px solid #ccc; padding: 15px;  margin-top: 10px; margin-bottom: 10px;">' +
         '<colgroup>' +
             '<col style="width: 500px;"/>' +
             '<col/>' +
@@ -146,9 +75,9 @@ function insertMetadataDesign(metadataCategoryName) {
                 '<th>' + i18n_end_date + '</th>' +
             '</tr>' +
             '<tr>' +
-                '<td><input type="text" id="startDate" name="startDate" value="$!startDate" style="width:230px"></td>' +
+                '<td><input type="text" id="startDate" name="startDate" value="' + startDate + '" style="width:230px"></td>' +
                     '<td></td>' +
-                    '<td><input type="text" id="endDate" name="endDate" value="$!endDate" style="width:230px"></td>' +
+                    '<td><input type="text" id="endDate" name="endDate" value="' + endDate + '" style="width:230px"></td>' +
                     '</tr>' +
                     '<tr>' +
                         '<td colspan="3" height="15"></td>' +
@@ -172,7 +101,7 @@ function insertMetadataDesign(metadataCategoryName) {
                             '<input type="button" value="&lt;" title="' + i18n_remove_selected + '" style="width:50px"' +
                                 'onclick="dhisAjaxSelect_moveAllSelected( \'selected' + metadataCategoryName + '\' );"/><br/>' +
                             '<input type="button" value="&gt;&gt;" title="' + i18n_move_all + '" style="width:50px"' +
-                                'onclick="dhisAjaxSelect_moveAll( \'available' + metadataCategoryName + ' );"/><br/>' +
+                                'onclick="dhisAjaxSelect_moveAll( \'available' + metadataCategoryName + '\' );"/><br/>' +
                             '<input type="button" value="&lt;&lt;" title="' + i18n_remove_all +  '" style="width:50px"' +
                                 'onclick="dhisAjaxSelect_moveAll( \'selected' + metadataCategoryName + '\' );"/>' +
                         '</td>' +
@@ -186,7 +115,7 @@ function insertMetadataDesign(metadataCategoryName) {
     ;
 
     $("#mainDiv" + metadataCategoryName).append(design);
-};
+}
 
 // Remove Metadata HTML and CSS from a Category
 function removeMetadataDesign(metadataCategoryName) {
@@ -207,11 +136,44 @@ function loadMetadata(metadataCategoryName) {
             return option;
         }
     });
-};
+}
 
+function getI18nAvailableMetadata(metadataCategoryName) {
 
+    if( metadataCategoryName == "Attributes") {
+        return i18n_available_attributes;
+    }
 
+    if( metadataCategoryName == "DataElements") {
+        return i18n_available_dataElements;
+    }
 
+    if( metadataCategoryName == "DataSets") {
+        return i18n_available_dataSets;
+    }
+
+    if( metadataCategoryName == "Indicators") {
+        return i18n_available_indicators;
+    }
+}
+
+function getI18nSelectedMetadata(metadataCategoryName) {
+    if( metadataCategoryName == "Attributes") {
+        return i18n_selected_attributes;
+    }
+
+    if( metadataCategoryName == "DataElements") {
+        return i18n_selected_dataElements;
+    }
+
+    if( metadataCategoryName == "DataSets") {
+        return i18n_selected_dataSets;
+    }
+
+    if( metadataCategoryName == "Indicators") {
+        return i18n_selected_indicators;
+    }
+}
 
 
 
