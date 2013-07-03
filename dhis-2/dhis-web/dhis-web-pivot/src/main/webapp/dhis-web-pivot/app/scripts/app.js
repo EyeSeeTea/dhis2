@@ -339,7 +339,6 @@ Ext.onReady( function() {
 				});
 			},
 			setDetailsProxy: function(uid) {
-				console.log(uid);
 				if (Ext.isString(uid)) {
 					this.setProxy({
 						type: 'ajax',

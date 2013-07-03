@@ -1202,7 +1202,7 @@ PT.core.getUtils = function(pt) {
 					}
 				}
 				
-				// add uuids array to leaf dims
+				// add uuids array to leaves
 				if (aAllObjects.length) {
 					for (var i = 0, leaf, uuids; i < aAllObjects[aAllObjects.length - 1].length; i++) {
 						leaf = aAllObjects[aAllObjects.length - 1][i];
@@ -1217,7 +1217,6 @@ PT.core.getUtils = function(pt) {
 						leaf.uuids = uuids;
 					}
 				}
-console.log(aAllObjects);
 				
 				return {
 					type: type,
@@ -1284,6 +1283,7 @@ console.log(aAllObjects);
 					valueItems = [],
 					valueObjects = [],
 					totalColObjects = [],
+					uuidUuidsMap = {},
 					htmlArray;
 
 				getTdHtml = function(config) {
@@ -1298,12 +1298,16 @@ console.log(aAllObjects);
 						html = '',
 						isLegendSet = Ext.isObject(legendSet) && Ext.isArray(legendSet.legends) && legendSet.legends.length,
 						isNumeric = Ext.isObject(config) && Ext.isString(config.type) && config.type.substr(0,5) === 'value' && !config.empty,
-						isValue = Ext.isObject(config) && Ext.isString(config.type) && config.type === 'value' && !config.empty,
-						idConfigMap = {};
+						isValue = Ext.isObject(config) && Ext.isString(config.type) && config.type === 'value' && !config.empty;
 						
 					if (!Ext.isObject(config)) {
 						return '';
-					}					
+					}
+					
+					// uuids map
+					if (Ext.isString(config.uuid) && Ext.isArray(config.uuids) && config.uuids.length) {
+						uuidUuidsMap[config.uuid] = config.uuids;
+					}
 
 					// Background color from legend set
 					if (isNumeric && isLegendSet) {
@@ -1344,7 +1348,9 @@ htmlValue = config.uuid || htmlValue;
 						cls += config.hidden ? ' td-hidden' : '';
 						cls += config.collapsed ? ' td-collapsed' : '';
 
-						html += '<td class="' + cls + '" ';
+						html += '<td ';
+						html += config.uuid ? ('id="' + config.uuid + '" ') : '';
+						html += ' class="' + cls + '" ';
 						html += colSpan + rowSpan + '>';
 						html += '<div class="legendCt">';
 						html += '<div class="number ' + config.cls + '" style="padding:' + displayDensity + '; padding-right:3px; font-size:' + fontSize + '">' + htmlValue + '</div>';
@@ -1511,8 +1517,9 @@ htmlValue = config.uuid || htmlValue;
 						valueItemsRow = [];
 						valueObjectsRow = [];
 
-						for (var j = 0, id, value, htmlValue, empty; j < colSize; j++) {
+						for (var j = 0, id, value, htmlValue, empty, uuids; j < colSize; j++) {
 							id = (xColAxis ? pt.util.str.replaceAll(xColAxis.ids[j], '-', '') : '') + (xRowAxis ? pt.util.str.replaceAll(xRowAxis.ids[i], '-', '') : '');
+							uuids = [].concat(xColAxis.objects.all[xColAxis.dims - 1][j].uuids, xRowAxis.objects.all[xRowAxis.dims - 1][i].uuids);							
 							empty = false;
 							
 							if (idValueMap[id]) {
@@ -1531,7 +1538,8 @@ htmlValue = config.uuid || htmlValue;
 								cls: 'pivot-value',
 								value: value,
 								htmlValue: htmlValue,
-								empty: empty
+								empty: empty,
+								uuids: uuids
 							});
 						}
 
@@ -1905,6 +1913,7 @@ htmlValue = config.uuid || htmlValue;
 
 				htmlArray = [].concat(getColAxisHtmlArray(), getRowHtmlArray(), getTotalHtmlArray());
 				htmlArray = Ext.Array.clean(htmlArray);
+console.log(uuidUuidsMap);				
 
 				return getHtml(htmlArray);
 			};
