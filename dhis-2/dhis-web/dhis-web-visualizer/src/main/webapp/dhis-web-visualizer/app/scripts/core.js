@@ -1809,21 +1809,21 @@ console.log("layout", layout);
 			});
 		},
 
-        pt2dv: function(ptLayoutConfig) {
+        analytical2layout: function(analytical) {
             var dimConf = dv.conf.finals.dimension,
-                ptLayoutConfig = Ext.clone(ptLayoutConfig),
-                layoutConfig = Ext.clone(ptLayoutConfig);
+                analytical = Ext.clone(analytical),
+                layoutConfig = Ext.clone(analytical);
 
             layoutConfig.columns = [];
             layoutConfig.rows = [];
-            layoutConfig.filters = ptLayoutConfig.filters;
+            layoutConfig.filters = analytical.filters;
 
             // Series
-            if (Ext.isArray(ptLayoutConfig.columns) && ptLayoutConfig.columns.length) {
-                for (var i = 0, dim; i < ptLayoutConfig.columns.length; i++) {
-                    dim = ptLayoutConfig.columns[i];
+            if (Ext.isArray(analytical.columns) && analytical.columns.length) {
+                for (var i = 0, dim; i < analytical.columns.length; i++) {
+                    dim = analytical.columns[i];
 
-                    if (!layoutConfig.columns.length && (dim.dimension === dimConf.indicator.objectName || (i === ptLayoutConfig.columns.length - 1))) {
+                    if (!layoutConfig.columns.length && (dim.dimension === dimConf.indicator.objectName || (i === analytical.columns.length - 1))) {
                         layoutConfig.columns.push(dim);
                     }
                     else {
@@ -1833,11 +1833,11 @@ console.log("layout", layout);
             }
 
             // Rows
-            if (Ext.isArray(ptLayoutConfig.rows) && ptLayoutConfig.rows.length) {
-                for (var i = 0, dim; i < ptLayoutConfig.rows.length; i++) {
-                    dim = ptLayoutConfig.rows[i];
+            if (Ext.isArray(analytical.rows) && analytical.rows.length) {
+                for (var i = 0, dim; i < analytical.rows.length; i++) {
+                    dim = analytical.rows[i];
 
-                    if (!layoutConfig.rows.length && (dim.dimension === dimConf.indicator.objectName || (i === ptLayoutConfig.rows.length - 1))) {
+                    if (!layoutConfig.rows.length && (dim.dimension === dimConf.indicator.objectName || (i === analytical.rows.length - 1))) {
                         layoutConfig.rows.push(dim);
                     }
                     else {

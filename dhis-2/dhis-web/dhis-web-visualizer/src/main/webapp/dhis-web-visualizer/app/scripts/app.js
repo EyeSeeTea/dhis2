@@ -19,7 +19,7 @@ Ext.onReady( function() {
 
 	// Init
 
-	var dv = DV.core.getInstance();
+	dv = DV.core.getInstance();	
 	DV.core.instances.push(dv);
 
 	DV.app.getInit = function(r) {
@@ -74,28 +74,19 @@ Ext.onReady( function() {
 
 			// Look for url params
 			var id = dv.util.url.getUrlParam('id'),
-                src = dv.util.url.getUrlParam('src'),
-                xLayoutConfig,
-                layout,
-                conversionFn;
-
+                analytical = dv.util.url.getUrlParam('analytical'),
+                layout;
+                
 			if (id) {
 				dv.util.chart.loadChart(id);
 			}
-            else if (src) {
-                if (sessionStorage && sessionStorage.getItem && sessionStorage.getItem(src)) {
-                    layoutConfig = JSON.parse(sessionStorage.getItem(src));
-                    conversionFn = dv.util.chart[(Ext.isString(src) ? src : '') + '2dv'];
-
-                    if (Ext.isObject(layoutConfig) && Ext.isFunction(conversionFn)) {
-                        layout = dv.api.layout.Layout(conversionFn(layoutConfig));
-
-                        if (layout) {
-                            dv.viewport.setFavorite(layout);
-                        }
-                    }
-                }
-            }
+            else if (analytical === 'true' && DV.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && 'analytical' in JSON.parse(sessionStorage.getItem('dhis2'))) {
+				layout = dv.api.layout.Layout(dv.util.chart.analytical2layout(JSON.parse(sessionStorage.getItem('dhis2')).analytical));
+				
+				if (layout) {
+					dv.viewport.setFavorite(layout);
+				}
+			}
 
 			// Fade in
 			Ext.defer( function() {
