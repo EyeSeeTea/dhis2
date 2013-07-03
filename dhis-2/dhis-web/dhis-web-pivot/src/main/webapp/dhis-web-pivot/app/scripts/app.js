@@ -4175,7 +4175,7 @@ Ext.onReady( function() {
 									dhis2.analytical = pt.layout;
 									sessionStorage.setItem('dhis2', JSON.stringify(dhis2));
 									
-									window.location.href = url + '?ss=true'
+									window.location.href = url + '?analytical=true'
 								}
 							}
 						}
