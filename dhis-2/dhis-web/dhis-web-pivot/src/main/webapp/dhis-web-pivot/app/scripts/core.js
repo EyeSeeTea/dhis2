@@ -1533,12 +1533,16 @@ console.log("config.uuid", config.uuid, config.htmlValue, config.cls, config.hid
 						valueObjectsRow = [];
 
 						for (var j = 0, id, value, htmlValue, empty, uuid, uuids; j < colSize; j++) {
+							empty = false;
+							
+							// meta data uid
 							id = (xColAxis ? pt.util.str.replaceAll(xColAxis.ids[j], '-', '') : '') + (xRowAxis ? pt.util.str.replaceAll(xRowAxis.ids[i], '-', '') : '');
+							
+							// value html element id
 							uuid = Ext.data.IdGenerator.get('uuid').generate();
 							
-							uuids = [].concat(xColAxis.objects.all[xColAxis.dims - 1][j].uuids, xRowAxis.objects.all[xRowAxis.dims - 1][i].uuids);	
-							
-							empty = false;
+							// col and row dim element ids
+							uuids = [].concat(xColAxis.objects.all[xColAxis.dims - 1][j].uuids, xRowAxis.objects.all[xRowAxis.dims - 1][i].uuids);							
 							
 							if (idValueMap[id]) {
 								value = parseFloat(idValueMap[id]);
@@ -1561,7 +1565,7 @@ console.log("config.uuid", config.uuid, config.htmlValue, config.cls, config.hid
 								uuids: uuids
 							});
 							
-							// Map uuid to parent uuids
+							// Map element id to dim element ids
 							uuidUuidsMap[uuid] = uuids;
 						}
 
