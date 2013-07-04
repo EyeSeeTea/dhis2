@@ -4547,18 +4547,16 @@ Ext.onReady( function() {
 		pt.baseUrl = pt.init.contextPath;
 
 		pt.util = PT.app.getUtils();
-
 		pt.store = PT.app.getStores();
-
 		pt.cmp = PT.app.getCmp();
 
 		pt.viewport = createViewport();
-
 		pt.viewport.layoutWindow = PT.app.LayoutWindow();
 		pt.viewport.layoutWindow.hide();
-
 		pt.viewport.optionsWindow = PT.app.OptionsWindow();
 		pt.viewport.optionsWindow.hide();
+		
+		pt.uuidUuidsMap = {};
 	};
 
 	Ext.Ajax.request({

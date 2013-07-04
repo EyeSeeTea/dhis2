@@ -168,6 +168,9 @@ table.pivot {
 	background-color: #dae6f8;
 	text-align: center;
 }
+.pivot-dim.highlighted {
+	background-color: #c5d8f6;
+}
 .pivot-dim-subtotal {
 	background-color: #cad6e8;
 	text-align: center;

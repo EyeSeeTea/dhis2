@@ -792,8 +792,10 @@ PT.core.getUtils = function(pt) {
 				getExtendedResponse,
 				getExtendedAxis,
 				validateUrl,
+				setMouseHandlers,
 				getTableHtml,
-				initialize;
+				initialize,
+				uuidUuidsMap = {};
 
 			getSyncronizedXLayout = function(xLayout, response) {
 				var removeDimensionFromXLayout,
@@ -1115,7 +1117,6 @@ console.log("dimensions", dimensions);
 	//				[o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2...] (30)
 	//		  	  ]
 
-
 				for (var i = 0, aAllRow, aUniqueRow, span, factor; i < aUniqueIds.length; i++) {
 					aAllRow = [];
 					aUniqueRow = aUniqueIds[i];
@@ -1148,7 +1149,6 @@ console.log("dimensions", dimensions);
 					aColIds.push(id);
 				}
 	//aColIds	= [ abc, bcd, ... ]
-
 
 
 				// allObjects
@@ -1204,17 +1204,30 @@ console.log("dimensions", dimensions);
 				
 				// add uuids array to leaves
 				if (aAllObjects.length) {
-					for (var i = 0, leaf, uuids; i < aAllObjects[aAllObjects.length - 1].length; i++) {
+					for (var i = 0, leaf, parentUuids, span = aAllObjects.length > 1 ? aSpan[aAllObjects.length - 2] : 1, leafUuids = []; i < aAllObjects[aAllObjects.length - 1].length; i++) {
 						leaf = aAllObjects[aAllObjects.length - 1][i];
-						uuids = [leaf.uuid];
+						leafUuids.push(leaf.uuid);
+						parentUuids = [];
 						obj = leaf;
 						
+						// get parent uuids
 						while (obj.parent) {
 							obj = obj.parent;
-							uuids.push(obj.uuid);
+							parentUuids.push(obj.uuid);
 						}
 						
-						leaf.uuids = uuids;
+						// add parent uuids
+						leaf.uuids = Ext.clone(parentUuids);
+						
+						// add uuid for all leaves
+						if (leafUuids.length === span) {
+							for (var j = i - span + 1, leaf; j <= i; j++) {
+								leaf = aAllObjects[aAllObjects.length - 1][j];
+								leaf.uuids = leaf.uuids.concat(Ext.clone(leafUuids));
+							}
+							
+							leafUuids = [];
+						}
 					}
 				}
 				
@@ -1245,6 +1258,18 @@ console.log("dimensions", dimensions);
 
 				return true;
 			};
+
+			setMouseHandlers = function() {
+				var valueElement;
+				
+				for (var key in uuidUuidsMap) {
+					if (uuidUuidsMap.hasOwnProperty(key)) {
+						valueElement = Ext.get(key);
+						valueElement.dom.setAttribute('onmouseover', 'pt.util.pivot.onMouseEvent(this.id, "onmouseover");');
+						valueElement.dom.setAttribute('onmouseout', 'pt.util.pivot.onMouseEvent(this.id, "onmouseout");');
+					}
+				}
+			};						
 
 			getTableHtml = function(xColAxis, xRowAxis, xResponse) {
 				var getTdHtml,
@@ -1283,7 +1308,6 @@ console.log("dimensions", dimensions);
 					valueItems = [],
 					valueObjects = [],
 					totalColObjects = [],
-					uuidUuidsMap = {},
 					htmlArray;
 
 				getTdHtml = function(config) {
@@ -1321,22 +1345,9 @@ console.log("dimensions", dimensions);
 					rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '" ' : '';
 					htmlValue = config.collapsed ? '&nbsp;' : config.htmlValue || config.value || '&nbsp;';
 					htmlValue = config.type !== 'dimension' ? pt.util.number.pp(htmlValue, layout.digitGroupSeparator) : htmlValue;
-htmlValue = config.uuid ? config.uuid + ' ' + htmlValue : htmlValue;					
+//htmlValue = config.uuid ? config.uuid + ' ' + htmlValue : htmlValue;					
 					displayDensity = pt.conf.pivot.displayDensity[config.displayDensity] || pt.conf.pivot.displayDensity[layout.displayDensity];
 					fontSize = pt.conf.pivot.fontSize[config.fontSize] || pt.conf.pivot.fontSize[layout.fontSize];
-
-					//var randomFromInterval = function(from,to) {
-						//return Math.floor(Math.random() * (to - from + 1) + from);
-					//};
-
-					//var a = ['#ff0000', '#e7ea22', '#00ff00'];
-
-					//var n = randomFromInterval(0,2);
-					//console.log(n);
-
-//if (Ext.isString(config.type) && config.type.substr(0,5) === 'value') {
-					//bgColor = a[n];
-				//}
 
 					if (bgColor) {
 						cls = 'legend';
@@ -1376,8 +1387,10 @@ console.log("config.uuid", config.uuid, config.htmlValue, config.cls, config.hid
 						html += config.uuid ? ('id="' + config.uuid + '" ') : '';
 						html += ' class="' + cls + '" ';
 						html += colSpan + rowSpan;
-						html += 'style="padding:' + displayDensity + '; font-size:' + fontSize + ';">' + htmlValue;
-						html += '</td>';
+						html += 'style="padding:' + displayDensity + '; font-size:' + fontSize + ';"';
+						
+						//html += isValue ? ' onmouseover="javascript:console.log(this.id);"' : '';
+						html += '>' + htmlValue + '</td>';
 					}
 
 					return html;
@@ -1922,7 +1935,6 @@ console.log("config.uuid", config.uuid, config.htmlValue, config.cls, config.hid
 
 				htmlArray = [].concat(getColAxisHtmlArray(), getRowHtmlArray(), getTotalHtmlArray());
 				htmlArray = Ext.Array.clean(htmlArray);
-console.log("uuidUuidsMap", uuidUuidsMap);				
 
 				return getHtml(htmlArray);
 			};
@@ -1966,6 +1978,7 @@ console.log("uuidUuidsMap", uuidUuidsMap);
 					success: function(r) {
 						var html,
 							response = pt.api.response.Response(Ext.decode(r.responseText));
+							//element;
 
 						if (!response) {
 							pt.util.mask.hideMask();
@@ -1995,11 +2008,18 @@ console.log("uuidUuidsMap", uuidUuidsMap);
 						pt.viewport.centerRegion.update(html);
 
 						// After table success
+						
+						// Hide mask
 						pt.util.mask.hideMask();
 
+						// Gui state
 						if (pt.viewport.downloadButton) {
 							pt.viewport.downloadButton.enable();
 						}
+						
+						// Add value event handlers
+						pt.uuidUuidsMap = uuidUuidsMap;
+						setMouseHandlers();
 
 						pt.layout = layout;
 						pt.xLayout = xLayout;
@@ -2038,6 +2058,27 @@ console.log("xLayout", xLayout);
 					}
 				}
 			});
+		},
+	
+		onMouseEvent: function(uuid, event) {
+			var dimUuids;
+			
+			if (Ext.isString(uuid) && Ext.isArray(pt.uuidUuidsMap[uuid])) {
+				dimUuids = pt.uuidUuidsMap[uuid];
+				
+				for (var i = 0, el; i < dimUuids.length; i++) {
+					el = Ext.get(dimUuids[i]);
+					
+					if (el) {
+						if (event === 'onmouseover') {
+							el.addCls('highlighted');
+						}
+						else if (event === 'onmouseout') {
+							el.removeCls('highlighted');
+						}
+					}
+				}
+			}
 		}
 	};
 
