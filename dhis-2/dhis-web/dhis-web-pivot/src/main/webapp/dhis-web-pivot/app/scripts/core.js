@@ -1414,7 +1414,6 @@ console.log("config.uuid", config.uuid, config.htmlValue, config.cls, config.hid
 
 					getEmptyHtmlArray = function() {
 						return (xColAxis && xRowAxis) ? getTdHtml({
-							id: Ext.data.IdGenerator.get('uuid').generate(),
 							cls: 'pivot-dim-empty',
 							colSpan: xRowAxis.dims,
 							rowSpan: xColAxis.dims
@@ -1437,7 +1436,7 @@ console.log("config.uuid", config.uuid, config.htmlValue, config.cls, config.hid
 						for (var j = 0, id; j < dimItems.length; j++) {
 							id = dimItems[j];
 							dimHtml.push(getTdHtml({
-								id: Ext.data.IdGenerator.get('uuid').generate(),
+								uuid: Ext.data.IdGenerator.get('uuid').generate(),
 								type: 'dimension',
 								cls: 'pivot-dim',
 								colSpan: colSpan,
@@ -1446,7 +1445,6 @@ console.log("config.uuid", config.uuid, config.htmlValue, config.cls, config.hid
 
 							if (doSubTotals(xColAxis) && i === 0) {
 								dimHtml.push(getTdHtml({
-									id: Ext.data.IdGenerator.get('uuid').generate(),
 									type: 'dimensionSubtotal',
 									cls: 'pivot-dim-subtotal',
 									rowSpan: xColAxis.dims
@@ -1456,7 +1454,6 @@ console.log("config.uuid", config.uuid, config.htmlValue, config.cls, config.hid
 							if (doTotals()) {
 								if (i === 0 && j === (dimItems.length - 1)) {
 									dimHtml.push(getTdHtml({
-										id: Ext.data.IdGenerator.get('uuid').generate(),
 										type: 'dimensionTotal',
 										cls: 'pivot-dim-total',
 										rowSpan: xColAxis.dims,
