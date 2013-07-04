@@ -920,8 +920,8 @@ PT.core.getUtils = function(pt) {
 				
 					if (layout) {
 						dimensions = [].concat(layout.columns, layout.rows, layout.filters);
-						
-						for (var i = 0, idNameMap = response.metaData.names, dimItems; i < dimensions.length; i++) {
+console.log("dimensions", dimensions);						
+						for (var i = 0, idNameMap = response.metaData.names, dimItems; i < dimensions.length; i++) {							
 							dimItems = dimensions[i].items;
 							
 							if (Ext.isArray(dimItems) && dimItems.length) {
@@ -1303,11 +1303,6 @@ PT.core.getUtils = function(pt) {
 					if (!Ext.isObject(config)) {
 						return '';
 					}
-					
-					// uuids map
-					if (Ext.isString(config.uuid) && Ext.isArray(config.uuids) && config.uuids.length) {
-						uuidUuidsMap[config.uuid] = config.uuids;
-					}
 
 					// Background color from legend set
 					if (isNumeric && isLegendSet) {
@@ -1326,7 +1321,7 @@ PT.core.getUtils = function(pt) {
 					rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '" ' : '';
 					htmlValue = config.collapsed ? '&nbsp;' : config.htmlValue || config.value || '&nbsp;';
 					htmlValue = config.type !== 'dimension' ? pt.util.number.pp(htmlValue, layout.digitGroupSeparator) : htmlValue;
-htmlValue = config.uuid || htmlValue;					
+htmlValue = config.uuid ? config.uuid + ' ' + htmlValue : htmlValue;					
 					displayDensity = pt.conf.pivot.displayDensity[config.displayDensity] || pt.conf.pivot.displayDensity[layout.displayDensity];
 					fontSize = pt.conf.pivot.fontSize[config.fontSize] || pt.conf.pivot.fontSize[layout.fontSize];
 
@@ -1376,8 +1371,10 @@ htmlValue = config.uuid || htmlValue;
 						cls = config.cls ? config.cls : '';
 						cls += config.hidden ? ' td-hidden' : '';
 						cls += config.collapsed ? ' td-collapsed' : '';
-
-						html += '<td class="' + cls + '" ';
+console.log("config.uuid", config.uuid, config.htmlValue, config.cls, config.hidden, config.collapsed);
+						html += '<td ';
+						html += config.uuid ? ('id="' + config.uuid + '" ') : '';
+						html += ' class="' + cls + '" ';
 						html += colSpan + rowSpan;
 						html += 'style="padding:' + displayDensity + '; font-size:' + fontSize + ';">' + htmlValue;
 						html += '</td>';
@@ -1416,7 +1413,12 @@ htmlValue = config.uuid || htmlValue;
 						getEmptyHtmlArray;
 
 					getEmptyHtmlArray = function() {
-						return (xColAxis && xRowAxis) ? getTdHtml({cls: 'pivot-dim-empty', colSpan: xRowAxis.dims, rowSpan: xColAxis.dims}) : '';
+						return (xColAxis && xRowAxis) ? getTdHtml({
+							id: Ext.data.IdGenerator.get('uuid').generate(),
+							cls: 'pivot-dim-empty',
+							colSpan: xRowAxis.dims,
+							rowSpan: xColAxis.dims
+						}) : '';
 					};
 
 					if (!(xColAxis && Ext.isObject(xColAxis))) {
@@ -1435,6 +1437,7 @@ htmlValue = config.uuid || htmlValue;
 						for (var j = 0, id; j < dimItems.length; j++) {
 							id = dimItems[j];
 							dimHtml.push(getTdHtml({
+								id: Ext.data.IdGenerator.get('uuid').generate(),
 								type: 'dimension',
 								cls: 'pivot-dim',
 								colSpan: colSpan,
@@ -1443,6 +1446,7 @@ htmlValue = config.uuid || htmlValue;
 
 							if (doSubTotals(xColAxis) && i === 0) {
 								dimHtml.push(getTdHtml({
+									id: Ext.data.IdGenerator.get('uuid').generate(),
 									type: 'dimensionSubtotal',
 									cls: 'pivot-dim-subtotal',
 									rowSpan: xColAxis.dims
@@ -1452,6 +1456,7 @@ htmlValue = config.uuid || htmlValue;
 							if (doTotals()) {
 								if (i === 0 && j === (dimItems.length - 1)) {
 									dimHtml.push(getTdHtml({
+										id: Ext.data.IdGenerator.get('uuid').generate(),
 										type: 'dimensionTotal',
 										cls: 'pivot-dim-total',
 										rowSpan: xColAxis.dims,
@@ -1517,9 +1522,12 @@ htmlValue = config.uuid || htmlValue;
 						valueItemsRow = [];
 						valueObjectsRow = [];
 
-						for (var j = 0, id, value, htmlValue, empty, uuids; j < colSize; j++) {
+						for (var j = 0, id, value, htmlValue, empty, uuid, uuids; j < colSize; j++) {
 							id = (xColAxis ? pt.util.str.replaceAll(xColAxis.ids[j], '-', '') : '') + (xRowAxis ? pt.util.str.replaceAll(xRowAxis.ids[i], '-', '') : '');
-							uuids = [].concat(xColAxis.objects.all[xColAxis.dims - 1][j].uuids, xRowAxis.objects.all[xRowAxis.dims - 1][i].uuids);							
+							uuid = Ext.data.IdGenerator.get('uuid').generate();
+							
+							uuids = [].concat(xColAxis.objects.all[xColAxis.dims - 1][j].uuids, xRowAxis.objects.all[xRowAxis.dims - 1][i].uuids);	
+							
 							empty = false;
 							
 							if (idValueMap[id]) {
@@ -1534,6 +1542,7 @@ htmlValue = config.uuid || htmlValue;
 
 							valueItemsRow.push(value);
 							valueObjectsRow.push({
+								uuid: uuid,
 								type: 'value',
 								cls: 'pivot-value',
 								value: value,
@@ -1541,6 +1550,9 @@ htmlValue = config.uuid || htmlValue;
 								empty: empty,
 								uuids: uuids
 							});
+							
+							// Map uuid to parent uuids
+							uuidUuidsMap[uuid] = uuids;
 						}
 
 						valueItems.push(valueItemsRow);
@@ -1913,7 +1925,7 @@ htmlValue = config.uuid || htmlValue;
 
 				htmlArray = [].concat(getColAxisHtmlArray(), getRowHtmlArray(), getTotalHtmlArray());
 				htmlArray = Ext.Array.clean(htmlArray);
-console.log(uuidUuidsMap);				
+console.log("uuidUuidsMap", uuidUuidsMap);				
 
 				return getHtml(htmlArray);
 			};
@@ -1977,7 +1989,7 @@ console.log(uuidUuidsMap);
 						// Extended axes
 						xColAxis = getExtendedAxis('col', xLayout.columnDimensionNames, xResponse);
 						xRowAxis = getExtendedAxis('row', xLayout.rowDimensionNames, xResponse);
-
+						
 						// Create html
 						html = getTableHtml(xColAxis, xRowAxis, xResponse);
 
