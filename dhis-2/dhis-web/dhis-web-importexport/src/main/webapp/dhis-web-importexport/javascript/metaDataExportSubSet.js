@@ -1,6 +1,9 @@
 // Global Variables
+// --------------------------------------------------------------
 
-var metadataArray = ["Attributes", "DataElements", "DataSets", "Indicators"];
+var metadataArray = [ "Attributes", "Constants", "DataElementGroupSets", "DataElementGroups", "DataElements", "DataSets",
+    "IndicatorGroupSets", "IndicatorGroups", "Indicators", "OrganisationUnitGroupSets", "OrganisationUnitGroups", "OrganisationUnitLevels",
+    "OrganisationUnits", "UserGroups", "UserRoles", "Users", "ValidationRules" ];
 
 // ---------------------------------------------------------------
 
@@ -144,6 +147,22 @@ function getI18nAvailableMetadata(metadataCategoryName) {
         return i18n_available_attributes;
     }
 
+    if( metadataCategoryName == "Categories") {
+        return i18n_available_categories;
+    }
+
+    if( metadataCategoryName == "Constants") {
+        return i18n_available_constants;
+    }
+
+    if( metadataCategoryName == "DataElementGroupSets") {
+        return i18n_available_dataElementGroupSets;
+    }
+
+    if( metadataCategoryName == "DataElementGroups") {
+        return i18n_available_dataElementGroups;
+    }
+
     if( metadataCategoryName == "DataElements") {
         return i18n_available_dataElements;
     }
@@ -152,14 +171,66 @@ function getI18nAvailableMetadata(metadataCategoryName) {
         return i18n_available_dataSets;
     }
 
+    if( metadataCategoryName == "IndicatorGroupSets") {
+        return i18n_available_indicatorGroupSets;
+    }
+
+    if( metadataCategoryName == "IndicatorGroups") {
+        return i18n_available_indicatorGroups;
+    }
+
     if( metadataCategoryName == "Indicators") {
         return i18n_available_indicators;
+    }
+
+    if( metadataCategoryName == "OrganisationUnitGroupSets") {
+        return i18n_available_organisationUnitGroupSets;
+    }
+
+    if( metadataCategoryName == "OrganisationUnitLevels") {
+        return i18n_available_organisationUnitLevels;
+    }
+
+    if( metadataCategoryName == "OrganisationUnits") {
+        return i18n_available_organisationUnits;
+    }
+
+    if( metadataCategoryName == "UserGroups") {
+        return i18n_available_userGroups;
+    }
+
+    if( metadataCategoryName == "UserRoles") {
+        return i18n_selected_userRoles;
+    }
+
+    if( metadataCategoryName == "Users") {
+        return i18n_selected_users;
+    }
+
+    if( metadataCategoryName == "ValidationRules") {
+        return i18n_selected_validationRules;
     }
 }
 
 function getI18nSelectedMetadata(metadataCategoryName) {
     if( metadataCategoryName == "Attributes") {
         return i18n_selected_attributes;
+    }
+
+    if( metadataCategoryName == "Categories") {
+        return i18n_selected_categories;
+    }
+
+    if( metadataCategoryName == "Constants") {
+        return i18n_selected_constants;
+    }
+
+    if( metadataCategoryName == "DataElementGroupSets") {
+        return i18n_selected_dataElementGroupSets;
+    }
+
+    if( metadataCategoryName == "DataElementGroups") {
+        return i18n_selected_dataElementGroups;
     }
 
     if( metadataCategoryName == "DataElements") {
@@ -170,8 +241,44 @@ function getI18nSelectedMetadata(metadataCategoryName) {
         return i18n_selected_dataSets;
     }
 
+    if( metadataCategoryName == "IndicatorGroupSets") {
+        return i18n_selected_indicatorGroupSets;
+    }
+
+    if( metadataCategoryName == "IndicatorGroups") {
+        return i18n_selected_indicatorGroups;
+    }
+
     if( metadataCategoryName == "Indicators") {
         return i18n_selected_indicators;
+    }
+
+    if( metadataCategoryName == "OrganisationUnitGroupSets") {
+        return i18n_selected_organisationUnitGroupSets;
+    }
+
+    if( metadataCategoryName == "OrganisationUnitLevels") {
+        return i18n_selected_organisationUnitLevels;
+    }
+
+    if( metadataCategoryName == "OrganisationUnits") {
+        return i18n_selected_organisationUnits;
+    }
+
+    if( metadataCategoryName == "UserGroups") {
+        return i18n_selected_userGroups;
+    }
+
+    if( metadataCategoryName == "UserRoles") {
+        return i18n_selected_userRoles;
+    }
+
+    if( metadataCategoryName == "Users") {
+        return i18n_selected_users;
+    }
+
+    if( metadataCategoryName == "ValidationRules") {
+        return i18n_selected_validationRules;
     }
 }
 

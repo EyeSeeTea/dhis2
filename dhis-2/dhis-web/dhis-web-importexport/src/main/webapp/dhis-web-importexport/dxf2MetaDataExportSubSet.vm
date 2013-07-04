@@ -7,14 +7,56 @@
     var i18n_available_attributes = '$i18n.getString( "available_Attributes" )';
     var i18n_selected_attributes = '$i18n.getString( "selected_Attributes" )';
 
+    var i18n_available_categories = '$i18n.getString( "available_categories" )';
+    var i18n_selected_categories = '$i18n.getString( "selected_categories" )';
+
+    var i18n_available_constants = '$i18n.getString( "available_constants" )';
+    var i18n_selected_constants = '$i18n.getString( "selected_constants" )';
+
+    var i18n_available_dataElementGroupSets = '$i18n.getString( "available_dataElementGroupSets" )';
+    var i18n_selected_dataElementGroupSets = '$i18n.getString( "selected_dataElementGroupSets" )';
+
+    var i18n_available_dataElementGroups = '$i18n.getString( "available_dataElementGroups" )';
+    var i18n_selected_dataElementGroups = '$i18n.getString( "selected_dataElementGroups" )';
+
     var i18n_available_dataElements = '$i18n.getString( "available_data_elements" )';
     var i18n_selected_dataElements = '$i18n.getString( "selected_data_elements" )';
 
     var i18n_available_dataSets = '$i18n.getString( "available_datasets" )';
     var i18n_selected_dataSets = '$i18n.getString( "selected_datasets" )';
 
+    var i18n_available_indicatorGroupSets = '$i18n.getString( "available_indicatorGroupSets" )';
+    var i18n_selected_indicatorGroupSets = '$i18n.getString( "selected_indicatorGroupSets" )';
+
+    var i18n_available_indicatorGroups = '$i18n.getString( "available_indicatorGroups" )';
+    var i18n_selected_indicatorGroups = '$i18n.getString( "selected_indicatorGroups" )';
+
     var i18n_available_indicators = '$i18n.getString( "available_indicators" )';
     var i18n_selected_indicators = '$i18n.getString( "selected_indicators" )';
+
+    var i18n_available_organisationUnitGroupSets = '$i18n.getString( "available_organisationUnitGroupSets" )';
+    var i18n_selected_organisationUnitGroupSets = '$i18n.getString( "selected_organisationUnitGroupSets" )';
+
+    var i18n_available_organisationUnitGroups = '$i18n.getString( "available_organisationUnitGroups" )';
+    var i18n_selected_organisationUnitGroups = '$i18n.getString( "selected_organisationUnitGroups" )';
+
+    var i18n_available_organisationUnitLevels = '$i18n.getString( "available_organisationUnitLevels" )';
+    var i18n_selected_organisationUnitLevels = '$i18n.getString( "selected_organisationUnitLevels" )';
+
+    var i18n_available_organisationUnits = '$i18n.getString( "available_organisationUnits" )';
+    var i18n_selected_organisationUnits = '$i18n.getString( "selected_organisationUnits" )';
+
+    var i18n_available_userGroups = '$i18n.getString( "available_userGroups" )';
+    var i18n_selected_userGroups = '$i18n.getString( "selected_userGroups" )';
+
+    var i18n_available_userRoles = '$i18n.getString( "available_userGroups" )';
+    var i18n_selected_userRoles = '$i18n.getString( "selected_userGroups" )';
+
+    var i18n_available_users = '$i18n.getString( "available_users" )';
+    var i18n_selected_users = '$i18n.getString( "selected_users" )';
+
+    var i18n_available_validationRules = '$i18n.getString( "available_validationRules" )';
+    var i18n_selected_validationRules = '$i18n.getString( "selected_validationRules" )';
 
     var i18n_filter = '$i18n.getString( "filter" )';
     var i18n_start_date = '$i18n.getString( "start_date" )';
@@ -38,28 +80,112 @@
 
     <div>
         <!-- ATTRIBUTES SELECTION -->
-        <div>
+        <div style="margin: 5px;">
             <input id="attributes" class="metadataCheckbox" name="Attributes" type="checkbox" value="true" style="float: left; width: 25px;"/>
             <label id="labelAttributes" for="attributes" style="font-size: 16px;">$i18n.getString( "attributes" )</label>
             <div id="mainDivAttributes"></div>
         </div>
+        <!-- CATEGORIES SELECTION -->
+##        <div>
+##            <input id="categories" class="metadataCheckbox" name="Categories" type="checkbox" value="true" style="float: left; width: 25px;"/>
+##            <label id="labelCategories" for="categories" style="font-size: 16px;">$i18n.getString( "categories" )</label>
+##            <div id="mainDivCategories"></div>
+##        </div>
+        <!-- CONSTANTS SELECTION -->
+        <div style="margin: 5px;">
+            <input id="constants" class="metadataCheckbox" name="Constants" type="checkbox" value="true" style="float: left; width: 25px;"/>
+            <label id="labelConstants" for="constants" style="font-size: 16px;">$i18n.getString( "constants" )</label>
+            <div id="mainDivConstants"></div>
+        </div>
+        <!-- DATA ELEMENT GROUP SETS SELECTION -->
+        <div style="margin: 5px;">
+            <input id="dataElementGroupSets" class="metadataCheckbox" name="DataElementGroupSets" type="checkbox" value="true" style="float: left; width: 25px;"/>
+            <label id="labelDataElementGroupSets" for="dataElementGroupSets" style="font-size: 16px;">$i18n.getString( "data_element_group_sets" )</label>
+            <div id="mainDivDataElementGroupSets"></div>
+        </div>
+        <!-- DATA ELEMENT GROUPS SELECTION -->
+        <div style="margin: 5px;">
+            <input id="dataElementGroups" class="metadataCheckbox" name="DataElementGroups" type="checkbox" value="true" style="float: left; width: 25px;"/>
+            <label id="labelDataElementGroups" for="dataElementGroups" style="font-size: 16px;">$i18n.getString( "data_element_groups" )</label>
+            <div id="mainDivDataElementGroups"></div>
+        </div>
         <!-- DATA ELEMENTS SELECTION -->
-        <div>
+        <div style="margin: 5px;">
             <input id="dataElements" class="metadataCheckbox" name="DataElements" type="checkbox" value="true" style="float: left; width: 25px;"/>
             <label id="labelDataElements" for="dataElements" style="font-size: 16px;">$i18n.getString( "data_elements" )</label>
             <div id="mainDivDataElements"></div>
         </div>
         <!-- DATA SETS SELECTION -->
-        <div>
+        <div style="margin: 5px;">
             <input id="dataSets" class="metadataCheckbox" name="DataSets" type="checkbox" value="true" style="float: left; width: 25px;"/>
             <label id="labelDataSets" for="dataSets" style="font-size: 16px;">$i18n.getString( "data_sets" )</label>
             <div id="mainDivDataSets"></div>
         </div>
+        <!-- INDICATOR GROUP SETS SELECTION -->
+        <div style="margin: 5px;">
+            <input id="indicatorGroupSets" class="metadataCheckbox" name="IndicatorGroupSets" type="checkbox" value="true" style="float: left; width: 25px;"/>
+            <label id="labelIndicatorGroupSets" for="indicatorGroupSets" style="font-size: 16px;">$i18n.getString( "indicator_group_sets" )</label>
+            <div id="mainDivIndicatorGroupSets"></div>
+        </div>
+        <!-- INDICATOR GROUP SETS SELECTION -->
+        <div style="margin: 5px;">
+            <input id="indicatorGroups" class="metadataCheckbox" name="IndicatorGroups" type="checkbox" value="true" style="float: left; width: 25px;"/>
+            <label id="labelIndicatorGroups" for="indicatorGroups" style="font-size: 16px;">$i18n.getString( "indicator_groups" )</label>
+            <div id="mainDivIndicatorGroups"></div>
+        </div>
         <!-- INDICATORS SELECTION -->
-        <div>
+        <div style="margin: 5px;">
             <input id="indicators" class="metadataCheckbox" name="Indicators" type="checkbox" value="true" style="float: left; width: 25px;"/>
             <label id="labelIndicators" for="indicators" style="font-size: 16px;">$i18n.getString( "indicators" )</label>
             <div id="mainDivIndicators"></div>
+        </div>
+        <!-- ORGANISATION UNIT GROUP SETS SELECTION -->
+        <div style="margin: 5px;">
+            <input id="organisationUnitGroupSets" class="metadataCheckbox" name="OrganisationUnitGroupSets" type="checkbox" value="true" style="float: left; width: 25px;"/>
+            <label id="labelOrganisationUnitGroupSets" for="organisationUnitGroupSets" style="font-size: 16px;">$i18n.getString( "organisation_unit_group_sets" )</label>
+            <div id="mainDivOrganisationUnitGroupSets"></div>
+        </div>
+        <!-- ORGANISATION UNIT GROUPS SELECTION -->
+        <div style="margin: 5px;">
+            <input id="organisationUnitGroups" class="metadataCheckbox" name="OrganisationUnitGroups" type="checkbox" value="true" style="float: left; width: 25px;"/>
+            <label id="labelOrganisationUnitGroups" for="organisationUnitGroups" style="font-size: 16px;">$i18n.getString( "organisation_unit_groups" )</label>
+            <div id="mainDivOrganisationUnitGroups"></div>
+        </div>
+        <!-- ORGANISATION UNIT LEVELS SELECTION -->
+        <div style="margin: 5px;">
+            <input id="organisationUnitLevels" class="metadataCheckbox" name="OrganisationUnitLevels" type="checkbox" value="true" style="float: left; width: 25px;"/>
+            <label id="labelOrganisationUnitLevels" for="organisationUnitLevels" style="font-size: 16px;">$i18n.getString( "organisation_unit_levels" )</label>
+            <div id="mainDivOrganisationUnitLevels"></div>
+        </div>
+        <!-- ORGANISATION UNITS SELECTION -->
+        <div style="margin: 5px;">
+            <input id="organisationUnits" class="metadataCheckbox" name="OrganisationUnits" type="checkbox" value="true" style="float: left; width: 25px;"/>
+            <label id="labelOrganisationUnits" for="organisationUnits" style="font-size: 16px;">$i18n.getString( "organisation_units" )</label>
+            <div id="mainDivOrganisationUnits"></div>
+        </div>
+        <!-- USER GROUPS SELECTION -->
+        <div style="margin: 5px;">
+            <input id="userGroups" class="metadataCheckbox" name="UserGroups" type="checkbox" value="true" style="float: left; width: 25px;"/>
+            <label id="labelUserGroups" for="userGroups" style="font-size: 16px;">$i18n.getString( "user_groups" )</label>
+            <div id="mainDivUserGroups"></div>
+        </div>
+        <!-- USER ROLES SELECTION -->
+        <div style="margin: 5px;">
+            <input id="userRoles" class="metadataCheckbox" name="UserRoles" type="checkbox" value="true" style="float: left; width: 25px;"/>
+            <label id="labelUserRoles" for="userRoles" style="font-size: 16px;">$i18n.getString( "user_roles" )</label>
+            <div id="mainDivUserRoles"></div>
+        </div>
+        <!-- USERS SELECTION -->
+        <div style="margin: 5px;">
+            <input id="users" class="metadataCheckbox" name="Users" type="checkbox" value="true" style="float: left; width: 25px;"/>
+            <label id="labelUsers" for="users" style="font-size: 16px;">$i18n.getString( "users" )</label>
+            <div id="mainDivUsers"></div>
+        </div>
+        <!-- VALIDATION RULES SELECTION -->
+        <div style="margin: 5px;">
+            <input id="validationRules" class="metadataCheckbox" name="ValidationRules" type="checkbox" value="true" style="float: left; width: 25px;"/>
+            <label id="labelValidationRules" for="validationRules" style="font-size: 16px;">$i18n.getString( "validation_rules" )</label>
+            <div id="mainDivValidationRules"></div>
         </div>
     </div>
 
