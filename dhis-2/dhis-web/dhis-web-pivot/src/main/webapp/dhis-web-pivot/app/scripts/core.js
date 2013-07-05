@@ -795,7 +795,8 @@ PT.core.getUtils = function(pt) {
 				setMouseHandlers,
 				getTableHtml,
 				initialize,
-				uuidUuidsMap = {};
+				uuidUuidsMap = {},
+				uuidXMap = {};
 
 			getSyncronizedXLayout = function(xLayout, response) {
 				var removeDimensionFromXLayout,
@@ -1152,14 +1153,16 @@ console.log("dimensions", dimensions);
 
 
 				// allObjects
-
+				
 				for (var i = 0, allRow; i < aAllItems.length; i++) {
 					allRow = [];
 
 					for (var j = 0; j < aAllItems[i].length; j++) {
 						allRow.push({
 							id: aAllItems[i][j],
-							uuid: Ext.data.IdGenerator.get('uuid').generate()
+							uuid: Ext.data.IdGenerator.get('uuid').generate(),
+							dim: i,
+							axis: type
 						});
 					}
 
@@ -1230,6 +1233,7 @@ console.log("dimensions", dimensions);
 						}
 					}
 				}
+console.log("aAllObjects", aAllObjects);				
 				
 				return {
 					type: type,
@@ -1319,10 +1323,10 @@ console.log("dimensions", dimensions);
 						htmlValue,
 						displayDensity,
 						fontSize,
-						html = '',
 						isLegendSet = Ext.isObject(legendSet) && Ext.isArray(legendSet.legends) && legendSet.legends.length,
 						isNumeric = Ext.isObject(config) && Ext.isString(config.type) && config.type.substr(0,5) === 'value' && !config.empty,
-						isValue = Ext.isObject(config) && Ext.isString(config.type) && config.type === 'value' && !config.empty;
+						isValue = Ext.isObject(config) && Ext.isString(config.type) && config.type === 'value' && !config.empty,
+						html = '';
 						
 					if (!Ext.isObject(config)) {
 						return '';
@@ -1345,7 +1349,6 @@ console.log("dimensions", dimensions);
 					rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '" ' : '';
 					htmlValue = config.collapsed ? '&nbsp;' : config.htmlValue || config.value || '&nbsp;';
 					htmlValue = config.type !== 'dimension' ? pt.util.number.pp(htmlValue, layout.digitGroupSeparator) : htmlValue;
-//htmlValue = config.uuid ? config.uuid + ' ' + htmlValue : htmlValue;					
 					displayDensity = pt.conf.pivot.displayDensity[config.displayDensity] || pt.conf.pivot.displayDensity[layout.displayDensity];
 					fontSize = pt.conf.pivot.fontSize[config.fontSize] || pt.conf.pivot.fontSize[layout.fontSize];
 
@@ -1382,7 +1385,6 @@ console.log("dimensions", dimensions);
 						cls = config.cls ? config.cls : '';
 						cls += config.hidden ? ' td-hidden' : '';
 						cls += config.collapsed ? ' td-collapsed' : '';
-console.log("config.uuid", config.uuid, config.htmlValue, config.cls, config.hidden, config.collapsed);
 						html += '<td ';
 						html += config.uuid ? ('id="' + config.uuid + '" ') : '';
 						html += ' class="' + cls + '" ';
@@ -1474,6 +1476,7 @@ console.log("config.uuid", config.uuid, config.htmlValue, config.cls, config.hid
 									htmlValue: 'Total'
 								}));
 							}
+						}
 
 						a.push(dimHtml);
 					}
@@ -1505,8 +1508,7 @@ console.log("config.uuid", config.uuid, config.htmlValue, config.cls, config.hid
 							recursiveReduce(obj.parent);
 						}
 					};
-console.log("xRowAxis", xRowAxis);
-console.log("xColAxis", xColAxis);
+					
 					// Populate dim objects
 					if (xRowAxis) {
 						for (var i = 0, row; i < xRowAxis.size; i++) {
