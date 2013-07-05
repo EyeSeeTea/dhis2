@@ -1438,42 +1438,72 @@ console.log("config.uuid", config.uuid, config.htmlValue, config.cls, config.hid
 					}
 
 					for (var i = 0, dimItems, colSpan, dimHtml; i < xColAxis.dims; i++) {
-						dimItems = xColAxis.xItems.gui[i];
-						colSpan = xColAxis.span[i];
+						//dimItems = xColAxis.xItems.gui[i];
+						//colSpan = xColAxis.span[i];
 						dimHtml = [];
 
 						if (i === 0) {
 							dimHtml.push(getEmptyHtmlArray());
 						}
 
-						for (var j = 0, id; j < dimItems.length; j++) {
-							id = dimItems[j];
-							dimHtml.push(getTdHtml({
-								uuid: Ext.data.IdGenerator.get('uuid').generate(),
-								type: 'dimension',
-								cls: 'pivot-dim',
-								colSpan: colSpan,
-								htmlValue: xResponse.metaData.names[id]
-							}));
-
-							if (doSubTotals(xColAxis) && i === 0) {
+						for (var j = 0, obj, spanCount = 0; j < xColAxis.size; j++) {
+							spanCount++;
+							
+							obj = xColAxis.objects.all[i][j];
+							obj.type = 'dimension';
+							obj.cls = 'pivot-dim';
+							obj.noBreak = false;
+							obj.hidden = !(obj.rowSpan || obj.colSpan);
+							obj.htmlValue = xResponse.metaData.names[obj.id];
+							
+							dimHtml.push(getTdHtml(obj));
+							
+							if (i === 0 && spanCount === xColAxis.span[i] && doSubTotals(xColAxis) ) {
+								dimHtml.push(getTdHtml({
+									type: 'dimensionSubtotal',
+									cls: 'pivot-dim-subtotal',
+									rowSpan: xColAxis.dims
+								}));
+								
+								spanCount = 0;
+							}
+							
+							if ((j === xColAxis.size - 1) && doTotals()) {
 								dimHtml.push(getTdHtml({
 									type: 'dimensionSubtotal',
 									cls: 'pivot-dim-subtotal',
 									rowSpan: xColAxis.dims
 								}));
 							}
+							
+							
+							//id = dimItems[j];
+							//dimHtml.push(getTdHtml({
+								//uuid: Ext.data.IdGenerator.get('uuid').generate(),
+								//type: 'dimension',
+								//cls: 'pivot-dim',
+								//colSpan: colSpan,
+								//htmlValue: xResponse.metaData.names[id]
+							//}));
 
-							if (doTotals()) {
-								if (i === 0 && j === (dimItems.length - 1)) {
-									dimHtml.push(getTdHtml({
-										type: 'dimensionTotal',
-										cls: 'pivot-dim-total',
-										rowSpan: xColAxis.dims,
-										htmlValue: 'Total'
-									}));
-								}
-							}
+							//if (doSubTotals(xColAxis) && i === 0) {
+								//dimHtml.push(getTdHtml({
+									//type: 'dimensionSubtotal',
+									//cls: 'pivot-dim-subtotal',
+									//rowSpan: xColAxis.dims
+								//}));
+							//}
+
+							//if (doTotals()) {
+								//if (i === 0 && j === (dimItems.length - 1)) {
+									//dimHtml.push(getTdHtml({
+										//type: 'dimensionTotal',
+										//cls: 'pivot-dim-total',
+										//rowSpan: xColAxis.dims,
+										//htmlValue: 'Total'
+									//}));
+								//}
+							//}
 						}
 
 						a.push(dimHtml);
@@ -1506,13 +1536,14 @@ console.log("config.uuid", config.uuid, config.htmlValue, config.cls, config.hid
 							recursiveReduce(obj.parent);
 						}
 					};
-
+console.log("xRowAxis", xRowAxis);
+console.log("xColAxis", xColAxis);
 					// Populate dim objects
 					if (xRowAxis) {
-						for (var i = 0, row; i < xRowAxis.objects.all[0].length; i++) {
+						for (var i = 0, row; i < xRowAxis.size; i++) {
 							row = [];
 
-							for (var j = 0, obj, newObj; j < xRowAxis.objects.all.length; j++) {
+							for (var j = 0, obj, newObj; j < xRowAxis.dims; j++) {
 								obj = xRowAxis.objects.all[j][i];
 								obj.type = 'dimension';
 								obj.cls = 'pivot-dim td-nobreak';
