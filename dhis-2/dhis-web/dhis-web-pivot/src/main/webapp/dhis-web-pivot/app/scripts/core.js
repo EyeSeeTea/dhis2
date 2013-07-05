@@ -795,8 +795,8 @@ PT.core.getUtils = function(pt) {
 				setMouseHandlers,
 				getTableHtml,
 				initialize,
-				uuidUuidsMap = {},
-				uuidXMap = {};
+				uuidDimUuidsMap = {},
+				uuidObjectMap = {};
 
 			getSyncronizedXLayout = function(xLayout, response) {
 				var removeDimensionFromXLayout,
@@ -1233,6 +1233,16 @@ console.log("dimensions", dimensions);
 						}
 					}
 				}
+				
+				// populate uuid-object map
+				for (var i = 0; i < aAllObjects.length; i++) {
+					for (var j = 0, object; j < aAllObjects[i].length; j++) {
+						object = aAllObjects[i][j];
+console.log(object.uuid, object);
+						uuidObjectMap[object.uuid] = object;
+					}
+				}
+
 console.log("aAllObjects", aAllObjects);				
 				
 				return {
@@ -1266,11 +1276,13 @@ console.log("aAllObjects", aAllObjects);
 			setMouseHandlers = function() {
 				var valueElement;
 				
-				for (var key in uuidUuidsMap) {
-					if (uuidUuidsMap.hasOwnProperty(key)) {
+				for (var key in uuidDimUuidsMap) {
+					if (uuidDimUuidsMap.hasOwnProperty(key)) {
 						valueElement = Ext.get(key);
-						valueElement.dom.setAttribute('onmouseover', 'pt.util.pivot.onMouseEvent(this.id, "onmouseover");');
-						valueElement.dom.setAttribute('onmouseout', 'pt.util.pivot.onMouseEvent(this.id, "onmouseout");');
+						valueElement.dom.setAttribute('onmouseover', 'pt.util.pivot.onMouseHover(this.id, "onmouseover");');
+						valueElement.dom.setAttribute('onmouseout', 'pt.util.pivot.onMouseHover(this.id, "onmouseout");');
+						
+						valueElement.dom.setAttribute('onclick', 'pt.util.pivot.onMouseClick(this.id);');
 					}
 				}
 			};						
@@ -1568,7 +1580,7 @@ console.log("aAllObjects", aAllObjects);
 							});
 							
 							// Map element id to dim element ids
-							uuidUuidsMap[uuid] = uuids;
+							uuidDimUuidsMap[uuid] = uuids;
 						}
 
 						valueItems.push(valueItemsRow);
@@ -2023,10 +2035,14 @@ console.log("aAllObjects", aAllObjects);
 							pt.viewport.downloadButton.enable();
 						}
 						
+						// Add uuid maps to instance
+						pt.uuidDimUuidsMap = uuidDimUuidsMap;
+						pt.uuidObjectMap = uuidObjectMap;
+						
 						// Add value event handlers
-						pt.uuidUuidsMap = uuidUuidsMap;
 						setMouseHandlers();
 
+						// Add objects to instance
 						pt.layout = layout;
 						pt.xLayout = xLayout;
 						pt.xResponse = xResponse;
@@ -2066,11 +2082,11 @@ console.log("xLayout", xLayout);
 			});
 		},
 	
-		onMouseEvent: function(uuid, event) {
+		onMouseHover: function(uuid, event) {
 			var dimUuids;
 			
-			if (Ext.isString(uuid) && Ext.isArray(pt.uuidUuidsMap[uuid])) {
-				dimUuids = pt.uuidUuidsMap[uuid];
+			if (Ext.isString(uuid) && Ext.isArray(pt.uuidDimUuidsMap[uuid])) {
+				dimUuids = pt.uuidDimUuidsMap[uuid];
 				
 				for (var i = 0, el; i < dimUuids.length; i++) {
 					el = Ext.get(dimUuids[i]);
@@ -2085,6 +2101,45 @@ console.log("xLayout", xLayout);
 					}
 				}
 			}
+		},
+		
+		onMouseClick: function(uuid) {
+			var uuids = pt.uuidDimUuidsMap[uuid],
+				objects = [],
+				layoutConfig = Ext.clone(pt.layout),
+				dimensions = [].concat(layoutConfig.columns, layoutConfig.rows),
+				dhis2;
+			
+			// get objects
+			for (var i = 0; i < uuids.length; i++) {
+				objects.push(pt.uuidObjectMap[uuids[i]]);
+			}
+			
+			// clear layout items
+			for (var i = 0; i < dimensions.length; i++) {
+				dimensions[i].items = [];
+			}
+			
+			// add new items	
+			for (var i = 0, obj, axis; i < objects.length; i++) {
+				obj = objects[i];
+				axis = obj.axis === 'col' ? layoutConfig.columns : layoutConfig.rows;
+				
+				axis[obj.dim].items.push({
+					id: obj.id,
+					name: pt.xResponse.metaData.names[obj.id]
+				});
+			}
+			
+			// add to session storage
+			if (PT.isSessionStorage) {
+				dhis2 = sessionStorage.getItem('dhis2') ? JSON.parse(sessionStorage.getItem('dhis2')) : {};
+				dhis2.analytical = layoutConfig;
+				sessionStorage.setItem('dhis2', JSON.stringify(dhis2));
+				
+				window.location.href = '../../dhis-web-visualizer/app/index.html?analytical=true'
+			}
+				
 		}
 	};
 
