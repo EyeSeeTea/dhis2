@@ -1437,9 +1437,7 @@ console.log("config.uuid", config.uuid, config.htmlValue, config.cls, config.hid
 						return a;
 					}
 
-					for (var i = 0, dimItems, colSpan, dimHtml; i < xColAxis.dims; i++) {
-						//dimItems = xColAxis.xItems.gui[i];
-						//colSpan = xColAxis.span[i];
+					for (var i = 0, dimHtml; i < xColAxis.dims; i++) {
 						dimHtml = [];
 
 						if (i === 0) {
@@ -1468,43 +1466,14 @@ console.log("config.uuid", config.uuid, config.htmlValue, config.cls, config.hid
 								spanCount = 0;
 							}
 							
-							if ((j === xColAxis.size - 1) && doTotals()) {
+							if (i === 0 && (j === xColAxis.size - 1) && doTotals()) {
 								dimHtml.push(getTdHtml({
-									type: 'dimensionSubtotal',
-									cls: 'pivot-dim-subtotal',
-									rowSpan: xColAxis.dims
+									type: 'dimensionTotal',
+									cls: 'pivot-dim-total',
+									rowSpan: xColAxis.dims,
+									htmlValue: 'Total'
 								}));
 							}
-							
-							
-							//id = dimItems[j];
-							//dimHtml.push(getTdHtml({
-								//uuid: Ext.data.IdGenerator.get('uuid').generate(),
-								//type: 'dimension',
-								//cls: 'pivot-dim',
-								//colSpan: colSpan,
-								//htmlValue: xResponse.metaData.names[id]
-							//}));
-
-							//if (doSubTotals(xColAxis) && i === 0) {
-								//dimHtml.push(getTdHtml({
-									//type: 'dimensionSubtotal',
-									//cls: 'pivot-dim-subtotal',
-									//rowSpan: xColAxis.dims
-								//}));
-							//}
-
-							//if (doTotals()) {
-								//if (i === 0 && j === (dimItems.length - 1)) {
-									//dimHtml.push(getTdHtml({
-										//type: 'dimensionTotal',
-										//cls: 'pivot-dim-total',
-										//rowSpan: xColAxis.dims,
-										//htmlValue: 'Total'
-									//}));
-								//}
-							//}
-						}
 
 						a.push(dimHtml);
 					}
