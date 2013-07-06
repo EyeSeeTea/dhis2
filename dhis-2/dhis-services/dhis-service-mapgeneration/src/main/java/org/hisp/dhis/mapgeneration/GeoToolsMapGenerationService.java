@@ -99,8 +99,8 @@ public class GeoToolsMapGenerationService
         
         // Build internal representation of a map using GeoTools, then render it
         // to an image
-        GeoToolsMap gtMap = new GeoToolsMap( mapLayer );
-        BufferedImage mapImage = gtMap.render( height );
+        InternalMap map = new InternalMap( mapLayer );
+        BufferedImage mapImage = MapUtils.render( map, height );
 
         // Build the legend set, then render it to an image
         LegendSet legendSet = new LegendSet( mapLayer );
