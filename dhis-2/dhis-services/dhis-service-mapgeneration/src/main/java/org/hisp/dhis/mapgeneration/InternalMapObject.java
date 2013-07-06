@@ -29,6 +29,13 @@ package org.hisp.dhis.mapgeneration;
 
 import java.awt.Color;
 
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vividsolutions.jts.geom.Geometry;
+
 /**
  * An internal representation of a map object in a map layer.
  * 
@@ -44,7 +51,7 @@ import java.awt.Color;
  * 
  * @author Olai Solheim <olais@ifi.uio.no>
  */
-public abstract class InternalMapObject
+public class InternalMapObject
 {
     protected String name;
 
@@ -63,6 +70,105 @@ public abstract class InternalMapObject
     protected InternalMapLayer mapLayer;
 
     protected Interval interval;
+    
+    private Geometry geometry;
+
+    // -------------------------------------------------------------------------
+    // Constructors
+    // -------------------------------------------------------------------------
+
+    public InternalMapObject()
+    {
+    }
+
+    // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------
+
+    /**
+     * Builds the GeoTools geometric primitive for a given organisation unit and
+     * sets it for this map object.
+     * 
+     * Quick guide to how geometry is stored in DHIS:
+     * 
+     * Geometry for org units is stored in the DB as [[[[0.32, -33.87], [23.99,
+     * -43.02], ...]]], and may be retrieved by calling the getCoordinates
+     * method of OrganisationUnit.
+     * 
+     * The coordinates vary according to feature type, which can be found with a
+     * call to getFeatureType of OrganisationUnit. It varies between the
+     * following structures (names are omitted in the actual coordinates
+     * string):
+     * 
+     * multipolygon = [ polygon0 = [ shell0 = [ point0 = [0.32, -33.87], point1
+     * = [23.99, -43.02], point2 = [...]], hole0 = [...], hole1 = [...]],
+     * polygon1 = [...] polygon2 = [...]] polygon = [ shell0 = [ point0 = [0.32,
+     * -33.87], point1 = [23.99, -43.02]], hole0 = [...], hole1 = [...]]
+     * 
+     * point = [0.32, -33.87]
+     * 
+     * Multi-polygons are stored as an array of polygons. Polygons are stored as
+     * an array of linear-rings, where the first linear-ring is the shell, and
+     * remaining linear-rings are the holes in the polygon. Linear-rings are
+     * stored as an array of points, which in turn is stored as an array of
+     * (two) components as a floating point type.
+     * 
+     * There are three types of geometry that may be stored in a DHIS org unit:
+     * point, polygon, and multi-polygon. This method supports all three.
+     * 
+     * NOTE However, as of writing, there is a bug in DHIS OrganisationUnit
+     * where when getFeatureType reports type Polygon, getCoordinates really
+     * returns coordinates in the format of type MultiPolygon.
+     * 
+     * @param orgUnit the organisation unit
+     */
+    public static Geometry buildAndApplyGeometryForOrganisationUnit( OrganisationUnit orgUnit )
+    {
+        // The final GeoTools primitive
+        Geometry primitive = null;
+
+        // The DHIS coordinates as string
+        String coords = orgUnit.getCoordinates();
+
+        // The json root that is parsed from the coordinate string
+        JsonNode root = null;
+
+        try
+        {
+            // Create a parser for the json and parse it into root
+            JsonParser parser = new ObjectMapper().getJsonFactory().createJsonParser( coords );
+            root = parser.readValueAsTree();
+        }
+        catch ( Exception ex )
+        {
+            throw new RuntimeException( ex );
+        }
+
+        // Use the factory to build the correct type based on the feature type
+        // Polygon is treated similarly as MultiPolygon        
+        if ( OrganisationUnit.FEATURETYPE_POINT.equals( orgUnit.getFeatureType() ) )
+        {
+            primitive = GeoToolsPrimitiveFromJsonFactory.createPointFromJson( root );
+        }
+        else if ( OrganisationUnit.FEATURETYPE_POLYGON.equals( orgUnit.getFeatureType() ) )
+        {
+            primitive = GeoToolsPrimitiveFromJsonFactory.createMultiPolygonFromJson( root ); 
+        }
+        else if ( OrganisationUnit.FEATURETYPE_MULTIPOLYGON.equals( orgUnit.getFeatureType() ) )
+        {
+            primitive = GeoToolsPrimitiveFromJsonFactory.createMultiPolygonFromJson( root );
+        }
+        else
+        {
+            throw new RuntimeException( "Not sure what to do with the feature type '" + orgUnit.getFeatureType() + "'" );
+        }
+
+        return primitive;
+    }
+
+    // -------------------------------------------------------------------------
+    // Getters and setters
+    // -------------------------------------------------------------------------
 
     /**
      * Gets the name of this map object.
@@ -244,6 +350,28 @@ public abstract class InternalMapObject
     {
         this.interval = interval;
         this.fillColor = interval.getColor();
+    }
+
+    /**
+     * Gets the geometry for this map object which is any of the GeoTools
+     * primitives.
+     * 
+     * @return the GeoTools geometric primitive
+     */
+    public Geometry getGeometry()
+    {
+        return this.geometry;
+    }
+
+    /**
+     * Sets the geometry for this map object which is any of the GeoTools
+     * primitives.
+     * 
+     * @param geometry the GeoTools geometric primitive
+     */
+    public void setGeometry( Geometry geometry )
+    {
+        this.geometry = geometry;
     }
 
     /**

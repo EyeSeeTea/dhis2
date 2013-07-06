@@ -45,10 +45,13 @@ import org.geotools.renderer.GTRenderer;
 import org.geotools.renderer.lite.StreamingRenderer;
 import org.geotools.styling.SLD;
 import org.geotools.styling.Style;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
@@ -164,7 +167,7 @@ public class MapUtils
     }
     
     // -------------------------------------------------------------------------
-    // Map rendering
+    // Map
     // -------------------------------------------------------------------------
 
     public static BufferedImage render( InternalMap map )
@@ -177,7 +180,7 @@ public class MapUtils
         MapContent mapContent = new MapContent();
 
         // Convert map objects to features, and add them to the map
-        for ( GeoToolsMapObject mapObject : map.getMapObjects() )
+        for ( InternalMapObject mapObject : map.getMapObjects() )
         {
             try
             {
@@ -232,7 +235,7 @@ public class MapUtils
     /**
      * Creates a feature layer based on a map object.
      */
-    public static Layer createFeatureLayerFromMapObject( GeoToolsMapObject mapObject )
+    public static Layer createFeatureLayerFromMapObject( InternalMapObject mapObject )
         throws SchemaException
     {
         SimpleFeatureType featureType = createFeatureType( mapObject.getGeometry() );

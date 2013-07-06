@@ -268,11 +268,11 @@ public class GeoToolsMapGenerationService
         return mapValues;
     }
     
-    private GeoToolsMapObject buildSingleGeoToolsMapObjectForMapLayer( InternalMapLayer mapLayer,
+    private InternalMapObject buildSingleGeoToolsMapObjectForMapLayer( InternalMapLayer mapLayer,
         double mapValue, OrganisationUnit orgUnit )
     {
         // Create and setup an internal map object
-        GeoToolsMapObject mapObject = new GeoToolsMapObject();
+        InternalMapObject mapObject = new InternalMapObject();
         mapObject.setName( orgUnit.getName() );
         mapObject.setValue( mapValue );
         mapObject.setFillOpacity( mapLayer.getOpacity() );
@@ -281,7 +281,7 @@ public class GeoToolsMapGenerationService
 
         // Build and set the GeoTools-specific geometric primitive that outlines
         // the org unit on the map
-        mapObject.buildAndApplyGeometryForOrganisationUnit( orgUnit );
+        mapObject.setGeometry( InternalMapObject.buildAndApplyGeometryForOrganisationUnit( orgUnit ) );
 
         // Add the map object to the map layer
         mapLayer.addMapObject( mapObject );

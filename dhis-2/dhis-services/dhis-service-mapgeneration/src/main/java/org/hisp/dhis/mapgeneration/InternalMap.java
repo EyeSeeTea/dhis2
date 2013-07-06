@@ -50,7 +50,7 @@ public class InternalMap
 
     protected boolean isAntiAliasingEnabled = true;
     
-    private List<GeoToolsMapObject> mapObjects = new ArrayList<GeoToolsMapObject>();
+    private List<InternalMapObject> mapObjects = new ArrayList<InternalMapObject>();
 
     public InternalMap()
     {
@@ -76,12 +76,12 @@ public class InternalMap
         this.isAntiAliasingEnabled = isAntiAliasingEnabled;
     }
 
-    public List<GeoToolsMapObject> getMapObjects()
+    public List<InternalMapObject> getMapObjects()
     {
         return mapObjects;
     }
 
-    public void setMapObjects( List<GeoToolsMapObject> mapObjects )
+    public void setMapObjects( List<InternalMapObject> mapObjects )
     {
         this.mapObjects = mapObjects;
     }
@@ -90,7 +90,7 @@ public class InternalMap
 
     public InternalMap( InternalMapLayer layer )
     {
-        this.mapObjects = new LinkedList<GeoToolsMapObject>();
+        this.mapObjects = new LinkedList<InternalMapObject>();
         this.addMapLayer( layer );
     }
 
@@ -98,7 +98,7 @@ public class InternalMap
     {
         for ( InternalMapObject mapObject : layer.getAllMapObjects() )
         {
-            this.mapObjects.add( (GeoToolsMapObject) mapObject );
+            this.mapObjects.add( mapObject );
         }
     }
 }
