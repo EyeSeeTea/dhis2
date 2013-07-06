@@ -1,0 +1,14 @@
+#set( $size = $concepts.size() )
+{ "concepts": [
+#foreach( $concept in $concepts )
+{
+    "id": ${concept.id},
+    "name": "$!encoder.jsonEncode( ${concept.name} )"
+}
+    #if( $velocityCount < $size ),#end
+#end
+]
+#if( $usePaging ),
+"paging":#parse( "/dhis-web-commons/ajax/jsonPaging.vm" )
+#end
+}

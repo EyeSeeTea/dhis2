@@ -615,4 +615,18 @@
     <property name="attributeService" ref="org.hisp.dhis.attribute.AttributeService" />
   </bean>
 
+  <!--Ovidiu-->
+
+    <bean id="org.dhis.commons.action.GetChartsAction" class="org.hisp.dhis.commons.action.GetChartsAction">
+        <property name="chartService" ref="org.hisp.dhis.chart.ChartService" />
+    </bean>
+
+    <bean id="org.dhis.commons.action.GetConceptsAction" class="org.hisp.dhis.commons.action.GetConceptsAction">
+        <property name="conceptService" ref="org.hisp.dhis.concept.ConceptService" />
+    </bean>
+
+    <bean id="org.dhis.commons.action.GetDataDictionariesAction" class="org.hisp.dhis.commons.action.GetDataDictionariesAction">
+        <property name="dataDictionaryService" ref="org.hisp.dhis.datadictionary.DataDictionaryService" />
+    </bean>
+
 </beans>

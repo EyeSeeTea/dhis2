@@ -1,7 +1,8 @@
 // Global Variables
 // --------------------------------------------------------------
 
-var metadataArray = [ "Attributes", "Constants", "DataElementGroupSets", "DataElementGroups", "DataElements", "DataSets",
+var metadataArray = [ "Attributes", "Charts", "Concepts", "Constants", "DataDictionaries", "DataElementGroupSets",
+    "DataElementGroups", "DataElements", "DataSets",
     "IndicatorGroupSets", "IndicatorGroups", "Indicators", "OrganisationUnitGroupSets", "OrganisationUnitGroups", "OrganisationUnitLevels",
     "OrganisationUnits", "UserGroups", "UserRoles", "Users", "ValidationRules" ];
 
@@ -151,8 +152,20 @@ function getI18nAvailableMetadata(metadataCategoryName) {
         return i18n_available_categories;
     }
 
+    if( metadataCategoryName == "Charts") {
+        return i18n_available_charts;
+    }
+
+    if( metadataCategoryName == "Concepts") {
+        return i18n_available_concepts;
+    }
+
     if( metadataCategoryName == "Constants") {
         return i18n_available_constants;
+    }
+
+    if( metadataCategoryName == "DataDictionaries") {
+        return i18n_available_dataDictionaries;
     }
 
     if( metadataCategoryName == "DataElementGroupSets") {
@@ -213,6 +226,7 @@ function getI18nAvailableMetadata(metadataCategoryName) {
 }
 
 function getI18nSelectedMetadata(metadataCategoryName) {
+
     if( metadataCategoryName == "Attributes") {
         return i18n_selected_attributes;
     }
@@ -221,8 +235,20 @@ function getI18nSelectedMetadata(metadataCategoryName) {
         return i18n_selected_categories;
     }
 
+    if( metadataCategoryName == "Charts") {
+        return i18n_selected_charts;
+    }
+
+    if( metadataCategoryName == "Concepts") {
+        return i18n_selected_concepts;
+    }
+
     if( metadataCategoryName == "Constants") {
         return i18n_selected_constants;
+    }
+
+    if( metadataCategoryName == "DataDictionaries") {
+        return i18n_selected_dataDictionaries;
     }
 
     if( metadataCategoryName == "DataElementGroupSets") {

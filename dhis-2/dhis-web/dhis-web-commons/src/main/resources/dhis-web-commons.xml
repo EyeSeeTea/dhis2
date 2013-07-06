@@ -784,6 +784,28 @@
       <param name="onExceptionReturn">plainTextError</param>
     </action>
 
+    <!--OVIDIU-->
+    <action name="getCharts" class="org.dhis.commons.action.GetChartsAction">
+        <result name="success" type="velocity-json">
+            /dhis-web-commons/ajax/jsonCharts.vm
+        </result>
+        <param name="onExceptionReturn">plainTextError</param>
+    </action>
+
+      <action name="getConcepts" class="org.dhis.commons.action.GetConceptsAction">
+          <result name="success" type="velocity-json">
+              /dhis-web-commons/ajax/jsonConcepts.vm
+          </result>
+          <param name="onExceptionReturn">plainTextError</param>
+      </action>
+
+      <action name="getDataDictionaries" class="org.dhis.commons.action.GetDataDictionariesAction">
+          <result name="success" type="velocity-json">
+              /dhis-web-commons/ajax/jsonDataDictionaries.vm
+          </result>
+          <param name="onExceptionReturn">plainTextError</param>
+      </action>
+
     <action name="getPeriod" class="org.hisp.dhis.commons.action.GetPeriodAction">
       <result name="success" type="velocity-json">
         /dhis-web-commons/ajax/jsonPeriod.vm

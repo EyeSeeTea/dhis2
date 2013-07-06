@@ -1,0 +1,14 @@
+#set( $size = $dataDictionaries.size() )
+{ "dataDictionaries": [
+#foreach( $dataDictionary in $dataDictionaries )
+  {
+    "id": ${dataDictionary.id},
+    "name": "$!encoder.jsonEncode( ${dataDictionary.name} )",
+    "regions": "$!encoder.jsonEncode( ${dataDictionary.region} )"
+  }#if( $velocityCount < $size ),#end
+#end
+]
+#if( $usePaging ),
+	"paging":#parse( "/dhis-web-commons/ajax/jsonPaging.vm" )
+#end
+}
