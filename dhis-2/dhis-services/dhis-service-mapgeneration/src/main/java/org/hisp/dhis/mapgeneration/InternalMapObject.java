@@ -170,205 +170,102 @@ public class InternalMapObject
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    /**
-     * Gets the name of this map object.
-     * 
-     * @return the name
-     */
     public String getName()
     {
         return this.name;
     }
 
-    /**
-     * Sets the name of this map object.
-     * 
-     * @param name the name
-     */
     public void setName( String name )
     {
         this.name = name;
     }
 
-    /**
-     * Gets the value for this map object.
-     * 
-     * @return the value
-     */
     public double getValue()
     {
         return this.value;
     }
 
-    /**
-     * Sets the value for this map object.
-     * 
-     * @param value the value
-     */
     public void setValue( double value )
     {
         this.value = value;
     }
 
-    /**
-     * Gets the radius for this map object (if point).
-     * 
-     * @return the radius
-     */
     public int getRadius()
     {
         return this.radius;
     }
 
-    /**
-     * Sets the radius for this map object (if point).
-     * 
-     * @param radius the fill color
-     */
     public void setRadius( int radius )
     {
         this.radius = radius;
     }
 
-    /**
-     * Gets the fill color for this map object.
-     * 
-     * @return the fill color
-     */
     public Color getFillColor()
     {
         return this.fillColor;
     }
 
-    /**
-     * Sets the fill color for this map object.
-     * 
-     * @param fillColor the fill color
-     */
     public void setFillColor( Color fillColor )
     {
         this.fillColor = fillColor;
     }
 
-    /**
-     * Gets the fill opacity for this object.
-     * 
-     * @return the fill opacity
-     */
     public float getFillOpacity()
     {
         return this.fillOpacity;
     }
 
-    /**
-     * Sets the fill opacity for this object.
-     * 
-     * @param fillOpacity the fill opacity
-     */
     public void setFillOpacity( float fillOpacity )
     {
         this.fillOpacity = fillOpacity;
     }
 
-    /**
-     * Gets the stroke color for this map object.
-     * 
-     * @return the stroke color
-     */
     public Color getStrokeColor()
     {
         return this.strokeColor;
     }
 
-    /**
-     * Sets the stroke color for this map object.
-     * 
-     * @param strokeColor the stroke color
-     */
     public void setStrokeColor( Color strokeColor )
     {
         this.strokeColor = strokeColor;
     }
 
-    /**
-     * Gets the stroke width for this map object.
-     * 
-     * @return the stroke width
-     */
     public int getStrokeWidth()
     {
         return this.strokeWidth;
     }
 
-    /**
-     * Sets the stroke width for this map object.
-     * 
-     * @param strokeWidth
-     */
     public void setStrokeWidth( int strokeWidth )
     {
         this.strokeWidth = strokeWidth;
     }
 
-    /**
-     * Gets the map layer this map object is associated with.
-     * 
-     * @return the map layer
-     */
     public InternalMapLayer getMapLayer()
     {
         return this.mapLayer;
     }
 
-    /**
-     * Sets the map layer this object is associated with.
-     * 
-     * @param mapLayer the map layer
-     */
     public void setMapLayer( InternalMapLayer mapLayer )
     {
         this.mapLayer = mapLayer;
     }
 
-    /**
-     * Gets the interval this map object is associated with.
-     * 
-     * @return the interval
-     */
     public Interval getInterval()
     {
         return this.interval;
     }
 
-    /**
-     * Sets the interval this map object is associated with and updates this map
-     * object with the properties (e.g. fill color) from the given interval.
-     * 
-     * @param interval the interval
-     */
     public void setInterval( Interval interval )
     {
         this.interval = interval;
         this.fillColor = interval.getColor();
     }
 
-    /**
-     * Gets the geometry for this map object which is any of the GeoTools
-     * primitives.
-     * 
-     * @return the GeoTools geometric primitive
-     */
     public Geometry getGeometry()
     {
         return this.geometry;
     }
 
-    /**
-     * Sets the geometry for this map object which is any of the GeoTools
-     * primitives.
-     * 
-     * @param geometry the GeoTools geometric primitive
-     */
     public void setGeometry( Geometry geometry )
     {
         this.geometry = geometry;
