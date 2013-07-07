@@ -139,6 +139,7 @@ function loadMetadata(metadataCategoryName) {
     });
 }
 
+// Get Available Metadata
 function getI18nAvailableMetadata(metadataCategoryName) {
     switch (metadataCategoryName) {
         case "Attributes":
@@ -202,6 +203,7 @@ function getI18nAvailableMetadata(metadataCategoryName) {
     }
 }
 
+// Get Selected Metadata
 function getI18nSelectedMetadata(metadataCategoryName) {
     switch (metadataCategoryName) {
         case "Attributes":
