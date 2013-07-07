@@ -9,37 +9,6 @@ var metadataArray = [ "Attributes", "DataElementCategories", "Charts", "Concepts
 
 // ---------------------------------------------------------------
 
-// Select all checkboxes
-function selectAll() {
-    $("#exportForm").find("input:checkbox").attr("checked", true);
-
-    for(var i = 0; i < metadataArray.length; i++) {
-        $("#label" + metadataArray[i]).css({"color" : "lime"});
-        insertMetadataDesign(metadataArray[i]);
-        loadMetadata(metadataArray[i]);
-    }
-}
-
-// Deselect all checkboxes
-function selectNone() {
-    $("#exportForm").find("input:checkbox").attr("checked", false);
-
-    for(var i = 0; i < metadataArray.length; i++) {
-        removeMetadataDesign(metadataArray[i]);
-        $("#label" + metadataArray[i]).css({"color" : "black"});
-    }
-}
-
-// Deselect all Metadata categories checkboxes
-jQuery(function () {
-    selectNone();
-});
-
-// Make the first letter lowercase
-function lowercaseFirstLetter(string) {
-    return string.charAt(0).toLowerCase() + string.slice(1);
-}
-
 // Collapse Metadata Category information
 jQuery(function () {
     for(var i = 0; i < metadataArray.length; i++) {
@@ -70,10 +39,35 @@ jQuery(function () {
     });
 });
 
+// Select all checkboxes
+function selectAll() {
+    $("#exportForm").find("input:checkbox").attr("checked", true);
+
+    for(var i = 0; i < metadataArray.length; i++) {
+        $("#label" + metadataArray[i]).css({"color" : "lime"});
+        insertMetadataDesign(metadataArray[i]);
+        loadMetadata(metadataArray[i]);
+    }
+}
+
+// Deselect all checkboxes
+function selectNone() {
+    $("#exportForm").find("input:checkbox").attr("checked", false);
+
+    for(var i = 0; i < metadataArray.length; i++) {
+        removeMetadataDesign(metadataArray[i]);
+        $("#label" + metadataArray[i]).css({"color" : "black"});
+    }
+}
+
+// Make the first letter lowercase
+function lowercaseFirstLetter(string) {
+    return string.charAt(0).toLowerCase() + string.slice(1);
+}
+
 // Insert Metadata HTML & CSS for a Category
 function insertMetadataDesign(metadataCategoryName) {
     var design = generateMetadataDesign(metadataCategoryName);
-
     $("#mainDiv" + metadataCategoryName).append(design);
 }
 
@@ -146,240 +140,128 @@ function loadMetadata(metadataCategoryName) {
 }
 
 function getI18nAvailableMetadata(metadataCategoryName) {
-
-    if( metadataCategoryName == "Attributes") {
-        return i18n_available_attributes;
-    }
-
-    if( metadataCategoryName == "DataElementCategories") {
-        return i18n_available_categories;
-    }
-
-    if( metadataCategoryName == "Charts") {
-        return i18n_available_charts;
-    }
-
-    if( metadataCategoryName == "Concepts") {
-        return i18n_available_concepts;
-    }
-
-    if( metadataCategoryName == "Constants") {
-        return i18n_available_constants;
-    }
-
-    if( metadataCategoryName == "DataDictionaries") {
-        return i18n_available_dataDictionaries;
-    }
-
-    if( metadataCategoryName == "DataElementGroupSets") {
-        return i18n_available_dataElementGroupSets;
-    }
-
-    if( metadataCategoryName == "DataElementGroups") {
-        return i18n_available_dataElementGroups;
-    }
-
-    if( metadataCategoryName == "DataElements") {
-        return i18n_available_dataElements;
-    }
-
-    if( metadataCategoryName == "DataSets") {
-        return i18n_available_dataSets;
-    }
-
-    if( metadataCategoryName == "Documents") {
-        return i18n_available_documents;
-    }
-
-    if( metadataCategoryName == "IndicatorGroupSets") {
-        return i18n_available_indicatorGroupSets;
-    }
-
-    if( metadataCategoryName == "IndicatorGroups") {
-        return i18n_available_indicatorGroups;
-    }
-
-    if( metadataCategoryName == "Indicators") {
-        return i18n_available_indicators;
-    }
-
-    if( metadataCategoryName == "IndicatorTypes") {
-        return i18n_available_indicatorTypes;
-    }
-
-    if( metadataCategoryName == "MapLegendSets") {
-        return i18n_available_mapLegendSets;
-    }
-
-    if( metadataCategoryName == "Maps") {
-        return i18n_available_maps;
-    }
-
-    if( metadataCategoryName == "OptionSets") {
-        return i18n_available_optionSets;
-    }
-
-    if( metadataCategoryName == "OrganisationUnitGroupSets") {
-        return i18n_available_organisationUnitGroupSets;
-    }
-
-    if( metadataCategoryName == "OrganisationUnitLevels") {
-        return i18n_available_organisationUnitLevels;
-    }
-
-    if( metadataCategoryName == "OrganisationUnits") {
-        return i18n_available_organisationUnits;
-    }
-
-    if( metadataCategoryName == "ReportTables") {
-        return i18n_available_reportTables;
-    }
-
-    if( metadataCategoryName == "Reports") {
-        return i18n_available_reports;
-    }
-
-    if( metadataCategoryName == "SqlViews") {
-        return i18n_available_sqlViews;
-    }
-
-    if( metadataCategoryName == "UserGroups") {
-        return i18n_available_userGroups;
-    }
-
-    if( metadataCategoryName == "UserRoles") {
-        return i18n_available_userRoles;
-    }
-
-    if( metadataCategoryName == "Users") {
-        return i18n_available_users;
-    }
-
-    if( metadataCategoryName == "ValidationRuleGroups") {
-        return i18n_available_validationRuleGroups;
-    }
-
-    if( metadataCategoryName == "ValidationRules") {
-        return i18n_available_validationRules;
+    switch (metadataCategoryName) {
+        case "Attributes":
+            return i18n_available_attributes;
+        case "DataElementCategories":
+            return i18n_available_categories;
+        case "Charts":
+            return i18n_available_charts;
+        case "Concepts":
+            return i18n_available_concepts;
+        case "Constants":
+            return i18n_available_constants;
+        case "DataDictionaries":
+            return i18n_available_dataDictionaries;
+        case "DataElementGroupSets":
+            return i18n_available_dataElementGroupSets;
+        case "DataElementGroups":
+            return i18n_available_dataElementGroups;
+        case "DataElements":
+            return i18n_available_dataElements;
+        case "DataSets":
+            return i18n_available_dataSets;
+        case "Documents":
+            return i18n_available_documents;
+        case "IndicatorGroupSets":
+            return i18n_available_indicatorGroupSets;
+        case "IndicatorGroups":
+            return i18n_available_indicatorGroups;
+        case "Indicators":
+            return i18n_available_indicators;
+        case "IndicatorTypes":
+            return i18n_available_indicatorTypes;
+        case "MapLegendSets":
+            return i18n_available_mapLegendSets;
+        case "Maps":
+            return i18n_available_maps;
+        case "OptionSets":
+            return i18n_available_optionSets;
+        case "OrganisationUnitGroupSets":
+            return i18n_available_organisationUnitGroupSets;
+        case "OrganisationUnitLevels":
+            return i18n_available_organisationUnitLevels;
+        case "OrganisationUnits":
+            return i18n_available_organisationUnits;
+        case "ReportTables":
+            return i18n_available_reportTables;
+        case "Reports":
+            return i18n_available_reports;
+        case "SqlViews":
+            return i18n_available_sqlViews;
+        case "UserGroups":
+            return i18n_available_userGroups;
+        case "UserRoles":
+            return i18n_available_userRoles;
+        case "Users":
+            return i18n_available_users;
+        case "ValidationRuleGroups":
+            return i18n_available_validationRuleGroups;
+        case "ValidationRules":
+            return i18n_available_validationRules;
     }
 }
 
 function getI18nSelectedMetadata(metadataCategoryName) {
-
-    if( metadataCategoryName == "Attributes") {
-        return i18n_selected_attributes;
-    }
-
-    if( metadataCategoryName == "DataElementCategories") {
-        return i18n_selected_categories;
-    }
-
-    if( metadataCategoryName == "Charts") {
-        return i18n_selected_charts;
-    }
-
-    if( metadataCategoryName == "Concepts") {
-        return i18n_selected_concepts;
-    }
-
-    if( metadataCategoryName == "Constants") {
-        return i18n_selected_constants;
-    }
-
-    if( metadataCategoryName == "DataDictionaries") {
-        return i18n_selected_dataDictionaries;
-    }
-
-    if( metadataCategoryName == "DataElementGroupSets") {
-        return i18n_selected_dataElementGroupSets;
-    }
-
-    if( metadataCategoryName == "DataElementGroups") {
-        return i18n_selected_dataElementGroups;
-    }
-
-    if( metadataCategoryName == "DataElements") {
-        return i18n_selected_dataElements;
-    }
-
-    if( metadataCategoryName == "DataSets") {
-        return i18n_selected_dataSets;
-    }
-
-    if( metadataCategoryName == "Documents") {
-        return i18n_selected_documents;
-    }
-
-    if( metadataCategoryName == "IndicatorGroupSets") {
-        return i18n_selected_indicatorGroupSets;
-    }
-
-    if( metadataCategoryName == "IndicatorGroups") {
-        return i18n_selected_indicatorGroups;
-    }
-
-    if( metadataCategoryName == "Indicators") {
-        return i18n_selected_indicators;
-    }
-
-    if( metadataCategoryName == "IndicatorTypes") {
-        return i18n_selected_indicatorTypes;
-    }
-
-    if( metadataCategoryName == "MapLegendSets") {
-        return i18n_selected_mapLegendSets;
-    }
-
-    if( metadataCategoryName == "Maps") {
-        return i18n_selected_maps;
-    }
-
-    if( metadataCategoryName == "OptionSets") {
-        return i18n_selected_optionSets;
-    }
-
-    if( metadataCategoryName == "OrganisationUnitGroupSets") {
-        return i18n_selected_organisationUnitGroupSets;
-    }
-
-    if( metadataCategoryName == "OrganisationUnitLevels") {
-        return i18n_selected_organisationUnitLevels;
-    }
-
-    if( metadataCategoryName == "OrganisationUnits") {
-        return i18n_selected_organisationUnits;
-    }
-
-    if( metadataCategoryName == "ReportTables") {
-        return i18n_selected_reportTables;
-    }
-
-    if( metadataCategoryName == "Reports") {
-        return i18n_selected_reports;
-    }
-
-    if( metadataCategoryName == "SqlViews") {
-        return i18n_selected_sqlViews;
-    }
-
-    if( metadataCategoryName == "UserGroups") {
-        return i18n_selected_userGroups;
-    }
-
-    if( metadataCategoryName == "UserRoles") {
-        return i18n_selected_userRoles;
-    }
-
-    if( metadataCategoryName == "Users") {
-        return i18n_selected_users;
-    }
-
-    if( metadataCategoryName == "ValidationRuleGroups") {
-        return i18n_selected_validationRuleGroups;
-    }
-
-    if( metadataCategoryName == "ValidationRules") {
-        return i18n_selected_validationRules;
+    switch (metadataCategoryName) {
+        case "Attributes":
+            return i18n_selected_attributes;
+        case "DataElementCategories":
+            return i18n_selected_categories;
+        case "Charts":
+            return i18n_selected_charts;
+        case "Concepts":
+            return i18n_selected_concepts;
+        case "Constants":
+            return i18n_selected_constants;
+        case "DataDictionaries":
+            return i18n_selected_dataDictionaries;
+        case "DataElementGroupSets":
+            return i18n_selected_dataElementGroupSets;
+        case "DataElementGroups":
+            return i18n_selected_dataElementGroups;
+        case "DataElements":
+            return i18n_selected_dataElements;
+        case "DataSets":
+            return i18n_selected_dataSets;
+        case "Documents":
+            return i18n_selected_documents;
+        case "IndicatorGroupSets":
+            return i18n_selected_indicatorGroupSets;
+        case "IndicatorGroups":
+            return i18n_selected_indicatorGroups;
+        case "Indicators":
+            return i18n_selected_indicators;
+        case "IndicatorTypes":
+            return i18n_selected_indicatorTypes;
+        case "MapLegendSets":
+            return i18n_selected_mapLegendSets;
+        case "Maps":
+            return i18n_selected_maps;
+        case "OptionSets":
+            return i18n_selected_optionSets;
+        case "OrganisationUnitGroupSets":
+            return i18n_selected_organisationUnitGroupSets;
+        case "OrganisationUnitLevels":
+            return i18n_selected_organisationUnitLevels;
+        case "OrganisationUnits":
+            return i18n_selected_organisationUnits;
+        case "ReportTables":
+            return i18n_selected_reportTables;
+        case "Reports":
+            return i18n_selected_reports;
+        case "SqlViews":
+            return i18n_selected_sqlViews;
+        case "UserGroups":
+            return i18n_selected_userGroups;
+        case "UserRoles":
+            return i18n_selected_userRoles;
+        case "Users":
+            return i18n_selected_users;
+        case "ValidationRuleGroups":
+            return i18n_selected_validationRuleGroups;
+        case "ValidationRules":
+            return i18n_selected_validationRules;
     }
 }
 
