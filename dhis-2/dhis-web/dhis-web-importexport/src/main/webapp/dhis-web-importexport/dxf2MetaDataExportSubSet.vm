@@ -1,6 +1,6 @@
 <script>
-    var i18n_available_attributes = '$i18n.getString( "available_attributes" )';
-    var i18n_selected_attributes = '$i18n.getString( "selected_attributes" )';
+    var i18n_available_attributeTypes = '$i18n.getString( "available_attribute_types" )';
+    var i18n_selected_attributeTypes = '$i18n.getString( "selected_attribute_types" )';
 
     var i18n_available_categories = '$i18n.getString( "available_categories" )';
     var i18n_selected_categories = '$i18n.getString( "selected_categories" )';
@@ -104,19 +104,19 @@
 
     <!-- MENU -->
     <div id="mainDivAccordion">
-        <!-- ATTRIBUTES SELECTION -->
-        <h6 style="font-size: 10pt;">$i18n.getString( "attributes" )</h6>
+        <!-- ATTRIBUTES TYPES SELECTION -->
+        <h6 style="font-size: 10pt;">$i18n.getString( "attribute_types" )</h6>
         <div style="margin: 5px;">
-            <input id="attributes" class="metadataCheckbox" name="Attributes" type="checkbox" value="true" style="float: left; width: 9pt;"/>
-            <label id="labelAttributes" for="attributes" style="font-size: 10pt;">$i18n.getString( "attributes" )</label>
-            <div id="mainDivAttributes"></div>
+            <input id="attributeTypes" class="metadataCheckbox" name="AttributeTypes" type="checkbox" value="true" style="float: left; width: 9pt;"/>
+            <label id="labelAttributeTypes" for="attributeTypes" style="font-size: 10pt;">$i18n.getString( "attribute_types" )</label>
+            <div id="mainDivAttributeTypes"></div>
         </div>
         <!-- CATEGORIES SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "categories" )</h6>
         <div style="margin: 5px;">
-            <input id="dataElementCategories" class="metadataCheckbox" name="DataElementCategories" type="checkbox" value="true" style="float: left; width: 9pt;"/>
-            <label id="labelDataElementCategories" for="dataElementCategories" style="font-size: 10pt;">$i18n.getString( "categories" )</label>
-            <div id="mainDivDataElementCategories"></div>
+            <input id="dimensions" class="metadataCheckbox" name="Dimensions" type="checkbox" value="true" style="float: left; width: 9pt;"/>
+            <label id="labelDimensions" for="dimensions" style="font-size: 10pt;">$i18n.getString( "categories" )</label>
+            <div id="mainDivDimensions"></div>
         </div>
         <!-- CHARTS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "charts" )</h6>

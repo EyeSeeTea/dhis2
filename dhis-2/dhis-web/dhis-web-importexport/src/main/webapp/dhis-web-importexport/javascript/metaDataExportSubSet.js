@@ -1,7 +1,7 @@
 // Global Variables
 // --------------------------------------------------------------
 
-var metadataArray = [ "Attributes", "DataElementCategories", "Charts", "Concepts", "Constants", "DataDictionaries", "DataElementGroupSets",
+var metadataArray = [ "AttributeTypes", "Dimensions", "Charts", "Concepts", "Constants", "DataDictionaries", "DataElementGroupSets",
     "DataElementGroups", "DataElements", "DataSets", "Documents", "IndicatorGroupSets", "IndicatorGroups", "Indicators",
     "IndicatorTypes", "MapLegendSets", "Maps", "OptionSets", "OrganisationUnitGroupSets", "OrganisationUnitGroups",
     "OrganisationUnitLevels", "OrganisationUnits", "ReportTables", "Reports", "SqlViews", "UserGroups", "UserRoles",
@@ -126,11 +126,11 @@ function removeMetadataDesign(metadataCategoryName) {
 // Load MetaData for a Category
 function loadMetadata(metadataCategoryName) {
     jQuery("#available" + metadataCategoryName).dhisAjaxSelect({
-        source: "../dhis-web-commons-ajax-json/get" + metadataCategoryName + ".action",
+        source: "../api/" + lowercaseFirstLetter(metadataCategoryName) + ".json?links=false&paging=false",
         iterator: lowercaseFirstLetter(metadataCategoryName),
         connectedTo: "selected" + metadataCategoryName,
         handler: function (item) {
-            var option = jQuery("<option data-id='" + item.groups + "' />");
+            var option = jQuery("<option data-uid='" + item.groups + "' />");
             option.text(item.name);
             option.attr("value", item.id);
 
@@ -142,8 +142,8 @@ function loadMetadata(metadataCategoryName) {
 function getI18nAvailableMetadata(metadataCategoryName) {
     switch (metadataCategoryName) {
         case "Attributes":
-            return i18n_available_attributes;
-        case "DataElementCategories":
+            return i18n_available_attributeTypes;
+        case "Dimensions":
             return i18n_available_categories;
         case "Charts":
             return i18n_available_charts;
@@ -205,8 +205,8 @@ function getI18nAvailableMetadata(metadataCategoryName) {
 function getI18nSelectedMetadata(metadataCategoryName) {
     switch (metadataCategoryName) {
         case "Attributes":
-            return i18n_selected_attributes;
-        case "DataElementCategories":
+            return i18n_selected_attributeTypes;
+        case "Dimensions":
             return i18n_selected_categories;
         case "Charts":
             return i18n_selected_charts;
