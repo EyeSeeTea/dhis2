@@ -1,0 +1,14 @@
+#set( $size = $mapLegendSets.size() )
+{ "mapLegendSets": [
+#foreach( $mapLegendSet in $mapLegendSets )
+{
+    "id": ${mapLegendSet.id},
+    "name": "$!encoder.jsonEncode( ${mapLegendSet.name} )"
+}
+    #if( $velocityCount < $size ),#end
+#end
+]
+#if( $usePaging ),
+    "paging":#parse( "/dhis-web-commons/ajax/jsonPaging.vm" )
+#end
+}

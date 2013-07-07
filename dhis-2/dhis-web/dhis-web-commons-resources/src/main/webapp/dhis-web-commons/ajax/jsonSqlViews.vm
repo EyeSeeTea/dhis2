@@ -1,0 +1,14 @@
+#set( $size = $sqlViews.size() )
+{ "sqlViews": [
+#foreach( $sqlView in $sqlViews )
+{
+    "id": ${sqlView.id},
+    "name": "$!encoder.jsonEncode( ${sqlView.name} )"
+}
+    #if( $velocityCount < $size ),#end
+#end
+]
+#if( $usePaging ),
+    "paging":#parse( "/dhis-web-commons/ajax/jsonPaging.vm" )
+#end
+}

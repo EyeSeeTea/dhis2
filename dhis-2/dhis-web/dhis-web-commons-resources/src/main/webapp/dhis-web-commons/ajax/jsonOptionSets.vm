@@ -1,0 +1,14 @@
+#set( $size = $optionSets.size() )
+{ "optionSets": [
+#foreach( $optionSet in $optionSets )
+{
+    "id": ${optionSet.id},
+    "name": "$!encoder.jsonEncode( ${optionSet.name} )"
+}
+    #if( $velocityCount < $size ),#end
+#end
+]
+#if( $usePaging ),
+    "paging":#parse( "/dhis-web-commons/ajax/jsonPaging.vm" )
+#end
+}

@@ -629,4 +629,40 @@
         <property name="dataDictionaryService" ref="org.hisp.dhis.datadictionary.DataDictionaryService" />
     </bean>
 
+    <bean id="org.dhis.commons.action.GetDocumentsAction" class="org.hisp.dhis.commons.action.GetDocumentsAction">
+        <property name="documentService" ref="org.hisp.dhis.document.DocumentService" />
+    </bean>
+
+    <bean id="org.dhis.commons.action.GetIndicatorTypesAction" class="org.hisp.dhis.commons.action.GetIndicatorTypesAction">
+        <property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
+    </bean>
+
+    <bean id="org.dhis.commons.action.GetMapLegendSetsAction" class="org.hisp.dhis.commons.action.GetMapLegendSetsAction">
+        <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
+    </bean>
+
+    <bean id="org.dhis.commons.action.GetMapsAction" class="org.hisp.dhis.commons.action.GetMapsAction">
+        <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
+    </bean>
+
+    <bean id="org.dhis.commons.action.GetOptionSetsAction" class="org.hisp.dhis.commons.action.GetOptionSetsAction">
+        <property name="optionService" ref="org.hisp.dhis.option.OptionService" />
+    </bean>
+
+    <bean id="org.dhis.commons.action.GetReportTablesAction" class="org.hisp.dhis.commons.action.GetReportTablesAction">
+        <property name="reportTableService" ref="org.hisp.dhis.reporttable.ReportTableService" />
+    </bean>
+
+    <bean id="org.dhis.commons.action.GetReportsAction" class="org.hisp.dhis.commons.action.GetReportsAction">
+        <property name="reportService" ref="org.hisp.dhis.report.ReportService" />
+    </bean>
+
+    <bean id="org.dhis.commons.action.GetSqlViewsAction" class="org.hisp.dhis.commons.action.GetSqlViewsAction">
+        <property name="sqlViewService" ref="org.hisp.dhis.sqlview.SqlViewService" />
+    </bean>
+
+    <bean id="org.dhis.commons.action.GetValidationRuleGroupsAction" class="org.hisp.dhis.commons.action.GetValidationRuleGroupsAction">
+        <property name="validationRuleService" ref="org.hisp.dhis.validation.ValidationRuleService" />
+    </bean>
+
 </beans>

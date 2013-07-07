@@ -1,0 +1,14 @@
+#set( $size = $documents.size() )
+{ "documents": [
+#foreach( $document in $documents )
+{
+    "id": ${document.id},
+    "name": "$!encoder.jsonEncode( ${document.name} )"
+}
+    #if( $velocityCount < $size ),#end
+#end
+]
+#if( $usePaging ),
+    "paging":#parse( "/dhis-web-commons/ajax/jsonPaging.vm" )
+#end
+}

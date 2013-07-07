@@ -1,7 +1,7 @@
 package org.hisp.dhis.commons.action;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,10 +30,8 @@ package org.hisp.dhis.commons.action;
 import com.opensymphony.xwork2.Action;
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.concept.Concept;
-import org.hisp.dhis.concept.ConceptService;
-import org.hisp.dhis.datadictionary.DataDictionary;
-import org.hisp.dhis.datadictionary.DataDictionaryService;
+import org.hisp.dhis.document.Document;
+import org.hisp.dhis.document.DocumentService;
 import org.hisp.dhis.util.ContextUtils;
 
 import java.util.ArrayList;
@@ -44,29 +42,29 @@ import java.util.List;
  * @author rosu.ovi@gmail.com
  */
 
-public class GetDataDictionariesAction
+public class GetDocumentsAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataDictionaryService dataDictionaryService;
+    private DocumentService documentService;
 
-    public void setDataDictionaryService( DataDictionaryService dataDictionaryService )
+    public void setDocumentService( DocumentService documentService )
     {
-        this.dataDictionaryService = dataDictionaryService;
+        this.documentService = documentService;
     }
 
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private List<DataDictionary> dataDictionaries;
+    private List<Document> documents;
 
-    public List<DataDictionary> getDataDictionaries()
+    public List<Document> getDocuments()
     {
-        return dataDictionaries;
+        return documents;
     }
 
     // -------------------------------------------------------------------------
@@ -76,11 +74,11 @@ public class GetDataDictionariesAction
     @Override
     public String execute()
     {
-        dataDictionaries = new ArrayList<DataDictionary>( dataDictionaryService.getAllDataDictionaries() );
+        documents = new ArrayList<Document>( documentService.getAllDocuments() );
 
-        ContextUtils.clearIfNotModified(ServletActionContext.getRequest(), ServletActionContext.getResponse(), dataDictionaries);
+        ContextUtils.clearIfNotModified(ServletActionContext.getRequest(), ServletActionContext.getResponse(), documents);
 
-        Collections.sort(dataDictionaries, IdentifiableObjectNameComparator.INSTANCE);
+        Collections.sort(documents, IdentifiableObjectNameComparator.INSTANCE);
 
         return SUCCESS;
     }

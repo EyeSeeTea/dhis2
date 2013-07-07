@@ -1,7 +1,7 @@
 package org.hisp.dhis.commons.action;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,12 +29,12 @@ package org.hisp.dhis.commons.action;
 
 import com.opensymphony.xwork2.Action;
 import org.apache.struts2.ServletActionContext;
+import org.hisp.dhis.chart.Chart;
+import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.concept.Concept;
-import org.hisp.dhis.concept.ConceptService;
-import org.hisp.dhis.datadictionary.DataDictionary;
-import org.hisp.dhis.datadictionary.DataDictionaryService;
 import org.hisp.dhis.util.ContextUtils;
+import org.hisp.dhis.validation.ValidationRuleGroup;
+import org.hisp.dhis.validation.ValidationRuleService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,29 +44,29 @@ import java.util.List;
  * @author rosu.ovi@gmail.com
  */
 
-public class GetDataDictionariesAction
+public class GetValidationRuleGroupsAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataDictionaryService dataDictionaryService;
+    private ValidationRuleService validationRuleService;
 
-    public void setDataDictionaryService( DataDictionaryService dataDictionaryService )
+    public void setValidationRuleService( ValidationRuleService validationRuleService )
     {
-        this.dataDictionaryService = dataDictionaryService;
+        this.validationRuleService = validationRuleService;
     }
 
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private List<DataDictionary> dataDictionaries;
+    private List<ValidationRuleGroup> validationRuleGroups;
 
-    public List<DataDictionary> getDataDictionaries()
+    public List<ValidationRuleGroup> getValidationRuleGroups()
     {
-        return dataDictionaries;
+        return validationRuleGroups;
     }
 
     // -------------------------------------------------------------------------
@@ -74,13 +74,13 @@ public class GetDataDictionariesAction
     // -------------------------------------------------------------------------
 
     @Override
-    public String execute()
+    public String execute() throws Exception
     {
-        dataDictionaries = new ArrayList<DataDictionary>( dataDictionaryService.getAllDataDictionaries() );
+        validationRuleGroups = new ArrayList<ValidationRuleGroup>( validationRuleService.getAllValidationRuleGroups() );
 
-        ContextUtils.clearIfNotModified(ServletActionContext.getRequest(), ServletActionContext.getResponse(), dataDictionaries);
+        ContextUtils.clearIfNotModified(ServletActionContext.getRequest(), ServletActionContext.getResponse(), validationRuleGroups);
 
-        Collections.sort(dataDictionaries, IdentifiableObjectNameComparator.INSTANCE);
+        Collections.sort(validationRuleGroups, IdentifiableObjectNameComparator.INSTANCE);
 
         return SUCCESS;
     }

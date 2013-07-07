@@ -1,10 +1,11 @@
 // Global Variables
 // --------------------------------------------------------------
 
-var metadataArray = [ "Attributes", "Charts", "Concepts", "Constants", "DataDictionaries", "DataElementGroupSets",
-    "DataElementGroups", "DataElements", "DataSets",
-    "IndicatorGroupSets", "IndicatorGroups", "Indicators", "OrganisationUnitGroupSets", "OrganisationUnitGroups", "OrganisationUnitLevels",
-    "OrganisationUnits", "UserGroups", "UserRoles", "Users", "ValidationRules" ];
+var metadataArray = [ "Attributes", "DataElementCategories", "Charts", "Concepts", "Constants", "DataDictionaries", "DataElementGroupSets",
+    "DataElementGroups", "DataElements", "DataSets", "Documents", "IndicatorGroupSets", "IndicatorGroups", "Indicators",
+    "IndicatorTypes", "MapLegendSets", "Maps", "OptionSets", "OrganisationUnitGroupSets", "OrganisationUnitGroups",
+    "OrganisationUnitLevels", "OrganisationUnits", "ReportTables", "Reports", "SqlViews", "UserGroups", "UserRoles",
+    "Users", "ValidationRuleGroups", "ValidationRules" ];
 
 // ---------------------------------------------------------------
 
@@ -60,9 +61,15 @@ jQuery(function () {
 
 // Insert Metadata HTML & CSS for a Category
 function insertMetadataDesign(metadataCategoryName) {
+    var design = generateMetadataDesign(metadataCategoryName);
+
+    $("#mainDiv" + metadataCategoryName).append(design);
+}
+
+// Generate Metadata HTML & CSS for a Category
+function generateMetadataDesign(metadataCategoryName) {
     var i18n_available_metadata = getI18nAvailableMetadata(metadataCategoryName);
     var i18n_selected_metadata = getI18nSelectedMetadata(metadataCategoryName);
-
     var design =
         '<table id="selectionArea'+metadataCategoryName + '" style="border: 1px solid #ccc; padding: 15px;  margin-top: 10px; margin-bottom: 10px;">' +
         '<colgroup>' +
@@ -71,29 +78,13 @@ function insertMetadataDesign(metadataCategoryName) {
             '<col style="width: 500px"/>' +
         '</colgroup>' +
         '<thead>' +
-
-            '<!-- TIMESTAMP FILTER -->' +
+            '<!-- DATA -->' +
             '<tr>' +
-                '<th>' + i18n_start_date + '</th>' +
-                '<td></td>' +
-                '<th>' + i18n_end_date + '</th>' +
+                '<th>' + i18n_available_metadata + '</th>' +
+                '<th>' + i18n_filter + '</th>' +
+                '<th>' + i18n_selected_metadata + '</th>' +
             '</tr>' +
-            '<tr>' +
-                '<td><input type="text" id="startDate" name="startDate" value="' + startDate + '" style="width:230px"></td>' +
-                    '<td></td>' +
-                    '<td><input type="text" id="endDate" name="endDate" value="' + endDate + '" style="width:230px"></td>' +
-                    '</tr>' +
-                    '<tr>' +
-                        '<td colspan="3" height="15"></td>' +
-                    '</tr>' +
-
-                    '<!-- DATA -->' +
-                    '<tr>' +
-                        '<th>' + i18n_available_metadata + '</th>' +
-                        '<th>' + i18n_filter + '</th>' +
-                        '<th>' + i18n_selected_metadata + '</th>' +
-                    '</tr>' +
-                '</thead>' +
+        '</thead>' +
                 '<tbody>' +
                     '<tr>' +
                         '<td>' +
@@ -118,8 +109,9 @@ function insertMetadataDesign(metadataCategoryName) {
             '</table>'
     ;
 
-    $("#mainDiv" + metadataCategoryName).append(design);
+    return design;
 }
+
 
 // Remove Metadata HTML and CSS from a Category
 function removeMetadataDesign(metadataCategoryName) {
@@ -184,6 +176,10 @@ function getI18nAvailableMetadata(metadataCategoryName) {
         return i18n_available_dataSets;
     }
 
+    if( metadataCategoryName == "Documents") {
+        return i18n_available_documents;
+    }
+
     if( metadataCategoryName == "IndicatorGroupSets") {
         return i18n_available_indicatorGroupSets;
     }
@@ -194,6 +190,22 @@ function getI18nAvailableMetadata(metadataCategoryName) {
 
     if( metadataCategoryName == "Indicators") {
         return i18n_available_indicators;
+    }
+
+    if( metadataCategoryName == "IndicatorTypes") {
+        return i18n_available_indicatorTypes;
+    }
+
+    if( metadataCategoryName == "MapLegendSets") {
+        return i18n_available_mapLegendSets;
+    }
+
+    if( metadataCategoryName == "Maps") {
+        return i18n_available_maps;
+    }
+
+    if( metadataCategoryName == "OptionSets") {
+        return i18n_available_optionSets;
     }
 
     if( metadataCategoryName == "OrganisationUnitGroupSets") {
@@ -208,20 +220,36 @@ function getI18nAvailableMetadata(metadataCategoryName) {
         return i18n_available_organisationUnits;
     }
 
+    if( metadataCategoryName == "ReportTables") {
+        return i18n_available_reportTables;
+    }
+
+    if( metadataCategoryName == "Reports") {
+        return i18n_available_reports;
+    }
+
+    if( metadataCategoryName == "SqlViews") {
+        return i18n_available_sqlViews;
+    }
+
     if( metadataCategoryName == "UserGroups") {
         return i18n_available_userGroups;
     }
 
     if( metadataCategoryName == "UserRoles") {
-        return i18n_selected_userRoles;
+        return i18n_available_userRoles;
     }
 
     if( metadataCategoryName == "Users") {
-        return i18n_selected_users;
+        return i18n_available_users;
+    }
+
+    if( metadataCategoryName == "ValidationRuleGroups") {
+        return i18n_available_validationRuleGroups;
     }
 
     if( metadataCategoryName == "ValidationRules") {
-        return i18n_selected_validationRules;
+        return i18n_available_validationRules;
     }
 }
 
@@ -267,6 +295,10 @@ function getI18nSelectedMetadata(metadataCategoryName) {
         return i18n_selected_dataSets;
     }
 
+    if( metadataCategoryName == "Documents") {
+        return i18n_selected_documents;
+    }
+
     if( metadataCategoryName == "IndicatorGroupSets") {
         return i18n_selected_indicatorGroupSets;
     }
@@ -277,6 +309,22 @@ function getI18nSelectedMetadata(metadataCategoryName) {
 
     if( metadataCategoryName == "Indicators") {
         return i18n_selected_indicators;
+    }
+
+    if( metadataCategoryName == "IndicatorTypes") {
+        return i18n_selected_indicatorTypes;
+    }
+
+    if( metadataCategoryName == "MapLegendSets") {
+        return i18n_selected_mapLegendSets;
+    }
+
+    if( metadataCategoryName == "Maps") {
+        return i18n_selected_maps;
+    }
+
+    if( metadataCategoryName == "OptionSets") {
+        return i18n_selected_optionSets;
     }
 
     if( metadataCategoryName == "OrganisationUnitGroupSets") {
@@ -291,6 +339,18 @@ function getI18nSelectedMetadata(metadataCategoryName) {
         return i18n_selected_organisationUnits;
     }
 
+    if( metadataCategoryName == "ReportTables") {
+        return i18n_selected_reportTables;
+    }
+
+    if( metadataCategoryName == "Reports") {
+        return i18n_selected_reports;
+    }
+
+    if( metadataCategoryName == "SqlViews") {
+        return i18n_selected_sqlViews;
+    }
+
     if( metadataCategoryName == "UserGroups") {
         return i18n_selected_userGroups;
     }
@@ -301,6 +361,10 @@ function getI18nSelectedMetadata(metadataCategoryName) {
 
     if( metadataCategoryName == "Users") {
         return i18n_selected_users;
+    }
+
+    if( metadataCategoryName == "ValidationRuleGroups") {
+        return i18n_selected_validationRuleGroups;
     }
 
     if( metadataCategoryName == "ValidationRules") {

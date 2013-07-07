@@ -1,7 +1,7 @@
 package org.hisp.dhis.commons.action;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,10 +30,8 @@ package org.hisp.dhis.commons.action;
 import com.opensymphony.xwork2.Action;
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.concept.Concept;
-import org.hisp.dhis.concept.ConceptService;
-import org.hisp.dhis.datadictionary.DataDictionary;
-import org.hisp.dhis.datadictionary.DataDictionaryService;
+import org.hisp.dhis.sqlview.SqlView;
+import org.hisp.dhis.sqlview.SqlViewService;
 import org.hisp.dhis.util.ContextUtils;
 
 import java.util.ArrayList;
@@ -44,29 +42,29 @@ import java.util.List;
  * @author rosu.ovi@gmail.com
  */
 
-public class GetDataDictionariesAction
+public class GetSqlViewsAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataDictionaryService dataDictionaryService;
+    private SqlViewService sqlViewService;
 
-    public void setDataDictionaryService( DataDictionaryService dataDictionaryService )
+    public void setSqlViewService( SqlViewService sqlViewService )
     {
-        this.dataDictionaryService = dataDictionaryService;
+        this.sqlViewService = sqlViewService;
     }
 
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private List<DataDictionary> dataDictionaries;
+    private List<SqlView> sqlViews;
 
-    public List<DataDictionary> getDataDictionaries()
+    public List<SqlView> getSqlViews()
     {
-        return dataDictionaries;
+        return sqlViews;
     }
 
     // -------------------------------------------------------------------------
@@ -74,13 +72,13 @@ public class GetDataDictionariesAction
     // -------------------------------------------------------------------------
 
     @Override
-    public String execute()
+    public String execute() throws Exception
     {
-        dataDictionaries = new ArrayList<DataDictionary>( dataDictionaryService.getAllDataDictionaries() );
+        sqlViews = new ArrayList<SqlView>( sqlViewService.getAllSqlViews() );
 
-        ContextUtils.clearIfNotModified(ServletActionContext.getRequest(), ServletActionContext.getResponse(), dataDictionaries);
+        ContextUtils.clearIfNotModified(ServletActionContext.getRequest(), ServletActionContext.getResponse(), sqlViews);
 
-        Collections.sort(dataDictionaries, IdentifiableObjectNameComparator.INSTANCE);
+        Collections.sort(sqlViews, IdentifiableObjectNameComparator.INSTANCE);
 
         return SUCCESS;
     }
