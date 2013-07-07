@@ -59,6 +59,17 @@ jQuery(function () {
     }
 });
 
+// Metadata Category Accordion
+jQuery(function () {
+    selectNone();
+    $("#mainDivAccordion").accordion({
+        active: false,
+        collapsible: true,
+        clearStyle: true,
+        autoHeight: false
+    });
+});
+
 // Insert Metadata HTML & CSS for a Category
 function insertMetadataDesign(metadataCategoryName) {
     var design = generateMetadataDesign(metadataCategoryName);
@@ -140,7 +151,7 @@ function getI18nAvailableMetadata(metadataCategoryName) {
         return i18n_available_attributes;
     }
 
-    if( metadataCategoryName == "Categories") {
+    if( metadataCategoryName == "DataElementCategories") {
         return i18n_available_categories;
     }
 
@@ -259,7 +270,7 @@ function getI18nSelectedMetadata(metadataCategoryName) {
         return i18n_selected_attributes;
     }
 
-    if( metadataCategoryName == "Categories") {
+    if( metadataCategoryName == "DataElementCategories") {
         return i18n_selected_categories;
     }
 
