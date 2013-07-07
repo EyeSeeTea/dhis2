@@ -35,4 +35,5 @@ import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 public interface MapStore
     extends GenericIdentifiableObjectStore<Map>
 {
+    String ID = MapStore.class.getName();
 }

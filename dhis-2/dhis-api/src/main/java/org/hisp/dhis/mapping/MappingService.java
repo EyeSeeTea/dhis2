@@ -108,6 +108,8 @@ public interface MappingService
     void deleteMap( Map map );
         
     List<Map> getMapsBetweenLikeName( String name, int first, int max );
+
+    List<Map> getAllMaps();
     
     // -------------------------------------------------------------------------
     // MapView

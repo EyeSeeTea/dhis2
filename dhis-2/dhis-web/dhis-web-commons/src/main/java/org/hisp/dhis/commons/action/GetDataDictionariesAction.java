@@ -30,8 +30,6 @@ package org.hisp.dhis.commons.action;
 import com.opensymphony.xwork2.Action;
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.concept.Concept;
-import org.hisp.dhis.concept.ConceptService;
 import org.hisp.dhis.datadictionary.DataDictionary;
 import org.hisp.dhis.datadictionary.DataDictionaryService;
 import org.hisp.dhis.util.ContextUtils;
