@@ -100,7 +100,7 @@
 
 <!-- EXPORT FORM -->
 <!-- ACTION METHOD HERE -->
-<form id="exportForm" name="exportForm" method="post" action="">
+<form id="exportForm" name="exportForm" method="post" action="metaDataSubSetExportForm.action">
 
     <!-- MENU -->
     <div id="mainDivAccordion">
@@ -349,7 +349,7 @@
         <tr>
             <td colspan="2">
                 <input type="button" value="$i18n.getString( 'export' )" style="width:254px; font-size: 10pt;"
-                       onclick="exportMetaData();"/>
+                       onclick="exportMetaDataSubSet();"/>
             </td>
         </tr>
     </table>

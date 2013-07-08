@@ -15,7 +15,7 @@
 
 <ul>
   <li><a href="dxf2MetaDataExport.action">$i18n.getString( "metadata_export" )&nbsp;</a></li>
-  <li><a href="dxf2MetaDataExportSubSet.action">$i18n.getString( "metadata_subset_export" )&nbsp;</a></li>
+  <li><a href="dxf2MetaDataSubSetExport.action">$i18n.getString( "metadata_subset_export" )&nbsp;</a></li>
   <li><a href="displayDataValueExportForm.action">$i18n.getString( "data_export" )&nbsp;</a></li>
   <li><a href="displayExternalExportMenu.action">$i18n.getString( "export_to_other_systems" )&nbsp;</a></li>
 </ul>

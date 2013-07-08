@@ -317,14 +317,20 @@
           <param name="requiredAuthorities">F_METADATA_IMPORT</param>
       </action>
 
-      <action name="dxf2MetaDataExportSubSet" class="org.hisp.dhis.importexport.action.dxf2.MetaDataExportSubSetFormAction">
+      <!--Ovidiu-->
+      <!--EXPORT-->
+      <action name="dxf2MetaDataSubSetExport" class="org.hisp.dhis.importexport.action.NoAction">
           <result name="success" type="velocity">/main.vm</result>
           <param name="menu">/dhis-web-importexport/mainMenu.vm</param>
-          <param name="page">/dhis-web-importexport/dxf2MetaDataExportSubSet.vm</param>
-          <param name="javascripts">javascript/metaDataExportSubSet.js</param>
+          <param name="page">/dhis-web-importexport/dxf2MetaDataSubSetExport.vm</param>
+          <param name="javascripts">javascript/metaDataSubSetExport.js</param>
           <param name="requiredAuthorities">F_METADATA_EXPORT</param>
       </action>
 
+      <action name="metaDataSubSetExportForm" class="org.hisp.dhis.importexport.action.dxf2.MetaDataSubSetExportFormAction">
+          <result name="success" type="outputStreamResult" />
+          <param name="requiredAuthorities">F_METADATA_EXPORT</param>
+      </action>
 
   </package>
 
