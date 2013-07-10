@@ -31,12 +31,12 @@ jQuery(function () {
 // MetaData Category Accordion
 jQuery(function () {
     selectNone();
-//    $("#mainDivAccordion").accordion({
-//        active: false,
-//        collapsible: true,
-//        clearStyle: true,
-//        autoHeight: false
-//    });
+    $("#mainDivAccordion").accordion({
+        active: false,
+        collapsible: true,
+        clearStyle: true,
+        autoHeight: false
+    });
 });
 
 // Select all checkboxes
