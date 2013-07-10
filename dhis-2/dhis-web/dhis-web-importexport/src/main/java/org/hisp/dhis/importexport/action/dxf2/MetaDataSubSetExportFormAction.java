@@ -28,6 +28,10 @@ package org.hisp.dhis.importexport.action.dxf2;
  */
 
 import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.dxf2.metadata.ExportService;
+import org.hisp.dhis.dxf2.metadata.Filter;
+import org.hisp.dhis.dxf2.metadata.MetaData;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.awt.*;
 import java.lang.System;
@@ -39,6 +43,9 @@ import java.util.Set;
 public class MetaDataSubSetExportFormAction
     implements Action
 {
+
+    @Autowired
+    private ExportService exportService;
 
     // -------------------------------------------------------------------------
     // Input
@@ -261,6 +268,15 @@ public class MetaDataSubSetExportFormAction
     @Override
     public String execute() throws Exception
     {
+        Filter filter = new Filter();
+        filter.createFilter( "attributeTypes", selectedAttributeTypes );
+
+        System.out.println("Merge");
+
+
+//        MetaData metaData = exportService.getFilteredMetaData( filter );
+
+
 
         return SUCCESS;
     }

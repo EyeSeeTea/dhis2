@@ -74,9 +74,9 @@ public class DefaultExportService
     }
 
     @Override
-    public MetaData getFilteredMetaData( Options options, Filters filters )
+    public MetaData getFilteredMetaData( Filter filter )
     {
-        return getFilteredMetaData(options, filters, null);
+        return getFilteredMetaData( filter, null );
     }
 
     @Override
@@ -141,16 +141,14 @@ public class DefaultExportService
         return metaData;
     }
 
+//    OVIDIU
     @Override
-    public MetaData getFilteredMetaData( Options options, Filters filters, TaskId taskId )
+    public MetaData getFilteredMetaData( Filter filter, TaskId taskId )
     {
-        System.out.println("\n3. AM INTRAT IN SERVICE");
-
         MetaData metaData = new MetaData();
         metaData.setCreated(new Date());
 
         log.info("User '" + currentUserService.getCurrentUsername() + "' started export at " + new Date());
-        Date lastUpdated = options.getLastUpdated();
 
         if ( taskId != null )
         {
@@ -161,23 +159,12 @@ public class DefaultExportService
         //todo logic here
         for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
         {
-            if ( !options.isEnabled(entry.getValue()) )
-            {
-                continue;
-            }
-
             Class<? extends IdentifiableObject> idObjectClass = entry.getKey();
 
             Collection<? extends IdentifiableObject> idObjects;
 
-            if ( lastUpdated != null )
-            {
-                idObjects = manager.getByLastUpdated(idObjectClass, lastUpdated);
-            } else
-            {
-                Map<String, String> expressions = filters.getOptions();
-                idObjects = manager.getByFilters(idObjectClass, expressions);
-            }
+//            idObjects = manager.getByFilters(idObjectClass, expressions);
+            idObjects = null;
 
             if ( idObjects.isEmpty() )
             {

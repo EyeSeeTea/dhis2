@@ -144,27 +144,11 @@ public class MetaDataController
 
     @RequestMapping( value = { MetaDataController.RESOURCE_PATH + ".xml.zip" }, produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
-    public void exportZippedXML(
-            @RequestParam Map<String, String> parameters,
-            HttpServletResponse response ) throws IOException
+    public void exportZippedXML( @RequestParam Map<String, String> parameters, HttpServletResponse response ) throws IOException
     {
-        System.out.println( "\n2. AM INTRAT IN CONTROLLER" );
+
         WebOptions options = new WebOptions( parameters );
-
-        //OVIDIU
-        // todo : give a filter example
-        Map<String, String> testFilters = new HashMap<String, String>();
-        testFilters.put("dataElementAttribute", "false");
-        Filters filters = new Filters( testFilters );
-
-        MetaData metaData;
-        if( filters != null )
-        {
-            metaData = exportService.getFilteredMetaData( options, filters );
-        } else
-        {
-            metaData = exportService.getMetaData( options );
-        }
+        MetaData metaData = exportService.getMetaData( options );
 
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_ZIP, CacheStrategy.NO_CACHE, "metaData.xml.zip", true );
         response.addHeader( ContextUtils.HEADER_CONTENT_TRANSFER_ENCODING, "binary" );

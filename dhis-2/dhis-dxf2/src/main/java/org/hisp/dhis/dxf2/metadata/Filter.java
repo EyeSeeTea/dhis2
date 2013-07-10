@@ -27,25 +27,24 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Rosu Ovidiu <rosu.ovi@gmail.com>
  */
-public class Filters
-    extends Options
+public class Filter
 {
-    public Filters(Map<String, String> filters)
-    {
-        super( filters );
+    private Map<String, String> values;
+
+    public Map<String, String> createFilter( String clazz, Set<String> uids) {
+        this.values = new HashMap<String, String>();
+
+        for( String uid : uids) {
+            values.put( clazz, uid );
+        }
+
+        return values;
     }
-
-
-
-
-
-
-
-
-
 }
