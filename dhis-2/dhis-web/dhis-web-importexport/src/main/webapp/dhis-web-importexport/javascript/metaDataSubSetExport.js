@@ -88,12 +88,36 @@ function exportMetaDataSubSet()
 
     $.ajax({
         url: url,
-        data: "HELLO WORLD SPRING",
+        data: JSON.stringify(createFilter()),
+        dataType: "json",
         type: "POST",
         success: function () {
-            alert("A MERS");
+            console.log(JSON.stringify(createFilter()));
         }
     });
+}
+
+// Create Filter Object
+function createFilter()
+{
+    var filter = new Array();
+    for(var i = 0; i < metaDataArray.length; i++)
+    {
+        var name = metaDataArray[i];
+        var values = $("#selected" + metaDataArray[i]).val();
+        if(values != undefined)
+        {
+            for(var j = 0; j < values.length; j++)
+            {
+                var filterItem = new Object();
+                filterItem[name] = values[j];
+
+                filter.push(filterItem);
+            }
+        }
+    }
+
+    return filter;
 }
 
 // Select all checkboxes

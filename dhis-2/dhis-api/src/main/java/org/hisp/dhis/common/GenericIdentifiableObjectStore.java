@@ -209,7 +209,7 @@ public interface GenericIdentifiableObjectStore<T>
      */
     List<T> getByUser( User user );
 
-    // OVIDIU TODO: DESCRIPTION
+    // OVIDIU
     /**
      * Retrieves a List based on the given Criterions.
      *

@@ -37,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -76,7 +77,7 @@ public class DetailedMetaDataController
 
     @RequestMapping( value = DetailedMetaDataController.RESOURCE_PATH )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
-    public void detailedExport( @RequestParam Map<String, String> parameters, Model model) throws IOException
+    public void detailedExport( @RequestBody String json, Model model) throws IOException
     {
         System.out.println("\n 1. DETAILED EXPORT ENTERED \n");
 

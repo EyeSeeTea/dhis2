@@ -104,7 +104,7 @@
 
 <!-- EXPORT FORM -->
 <!-- ACTION METHOD HERE -->
-<form id="exportForm" name="exportForm" method="post" action="metaDataSubSetExportForm.action">
+<form id="exportForm" name="exportForm">
 
     <!-- MENU -->
     <div id="mainDivAccordion">
