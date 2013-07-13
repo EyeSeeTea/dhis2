@@ -307,6 +307,7 @@
       <param name="requiredAuthorities">F_MANAGE_INTEGRATION_ROUTES</param>
     </action>
 
+      <!--ovidiu-->
       <!-- DXF2 MetaData Subset import/export -->
 
       <action name="dxf2MetaDataSubSetImport" class="org.hisp.dhis.importexport.action.NoAction">
@@ -317,7 +318,6 @@
           <param name="requiredAuthorities">F_METADATA_IMPORT</param>
       </action>
 
-      <!--ovidiu-->
       <action name="dxf2MetaDataSubSetExport" class="org.hisp.dhis.importexport.action.NoAction">
           <result name="success" type="velocity">/main.vm</result>
           <param name="menu">/dhis-web-importexport/mainMenu.vm</param>
@@ -325,7 +325,6 @@
           <param name="javascripts">javascript/metaDataSubSetExport.js</param>
           <param name="requiredAuthorities">F_METADATA_EXPORT</param>
       </action>
-
 
   </package>
 
