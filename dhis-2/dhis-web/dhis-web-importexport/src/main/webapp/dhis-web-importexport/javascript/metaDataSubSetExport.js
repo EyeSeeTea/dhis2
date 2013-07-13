@@ -166,42 +166,41 @@ function generateMetaDataDesign(metaDataCategoryName)
     var i18n_available_metadata = getI18nAvailableMetaData(metaDataCategoryName);
     var i18n_selected_metadata = getI18nSelectedMetaData(metaDataCategoryName);
     var design =
-        '<table id="selectionArea'+metaDataCategoryName + '" style="border: 1px solid #ccc; padding: 15px;  margin-top: 10px; margin-bottom: 10px;">' +
-        '<colgroup>' +
-            '<col style="width: 500px;"/>' +
-            '<col/>' +
-            '<col style="width: 500px"/>' +
-        '</colgroup>' +
-        '<thead>' +
-            '<!-- DATA -->' +
-            '<tr>' +
-                '<th>' + i18n_available_metadata + '</th>' +
-                '<th>' + i18n_filter + '</th>' +
-                '<th>' + i18n_selected_metadata + '</th>' +
-            '</tr>' +
-        '</thead>' +
-                '<tbody>' +
-                    '<tr>' +
-                        '<td>' +
-                            '<select id="available' + metaDataCategoryName + '" multiple="multiple" style="height: 200px; width: 100%;"></select>' +
-                        '</td>' +
-                        '<td>' +
-                            '<input type="button" value="&gt;" title="' + i18n_move_selected + '" style="width:50px"' +
-                                'onclick="dhisAjaxSelect_moveAllSelected( \'available' + metaDataCategoryName + '\' );"/><br/>' +
-                            '<input type="button" value="&lt;" title="' + i18n_remove_selected + '" style="width:50px"' +
-                                'onclick="dhisAjaxSelect_moveAllSelected( \'selected' + metaDataCategoryName + '\' );"/><br/>' +
-                            '<input id="select' + metaDataCategoryName + '" type="button" value="&gt;&gt;" title="' + i18n_move_all + '" style="width:50px"' +
-                                'onclick="dhisAjaxSelect_moveAll( \'available' + metaDataCategoryName + '\' );"/><br/>' +
-                            '<input id="deselect' + metaDataCategoryName + '" type="button" value="&lt;&lt;" title="' + i18n_remove_all +  '" style="width:50px"' +
-                                'onclick="dhisAjaxSelect_moveAll( \'selected' + metaDataCategoryName + '\' );"/>' +
-                        '</td>' +
-                        '<td>' +
-                            '<select id="selected' + metaDataCategoryName + '" name="selected' + metaDataCategoryName + '" multiple="multiple"' +
-                            'style="height: 200px; width: 100%; margin-top: 45px;"></select>' +
-                        '</td>' +
-                    '</tr>' +
-                '</tbody>' +
-            '</table>'
+        '<table id="selectionArea'+metaDataCategoryName + '" style="border: 1px solid #ccc; padding: 15px;  margin-top: 10px; margin-bottom: 10px;">'
+        + '<colgroup>'
+        +    '<col style="width: 500px;"/>'
+        +    '<col/>'
+        +    '<col style="width: 500px"/>'
+        + '</colgroup>'
+        + '<thead>'
+        +    '<tr>'
+        +        '<th>' + i18n_available_metadata + '</th>'
+        +        '<th>' + i18n_filter + '</th>'
+        +        '<th>' + i18n_selected_metadata + '</th>'
+        +    '</tr>'
+        + '</thead>'
+        +        '<tbody>'
+        +            '<tr>'
+        +                '<td>'
+        +                   '<select id="available' + metaDataCategoryName + '" multiple="multiple" style="height: 200px; width: 100%;"></select>'
+        +               '</td>'
+        +               '<td>'
+        +                   '<input type="button" value="&gt;" title="' + i18n_move_selected + '" style="width:50px"'
+        +                       'onclick="dhisAjaxSelect_moveAllSelected( \'available' + metaDataCategoryName + '\' );"/><br/>'
+        +                   '<input type="button" value="&lt;" title="' + i18n_remove_selected + '" style="width:50px"'
+        +                       'onclick="dhisAjaxSelect_moveAllSelected( \'selected' + metaDataCategoryName + '\' );"/><br/>'
+        +                   '<input id="select' + metaDataCategoryName + '" type="button" value="&gt;&gt;" title="' + i18n_move_all + '" style="width:50px"'
+        +                       'onclick="dhisAjaxSelect_moveAll( \'available' + metaDataCategoryName + '\' );"/><br/>'
+        +                   '<input id="deselect' + metaDataCategoryName + '" type="button" value="&lt;&lt;" title="' + i18n_remove_all +  '" style="width:50px"'
+        +                       'onclick="dhisAjaxSelect_moveAll( \'selected' + metaDataCategoryName + '\' );"/>'
+        +               '</td>'
+        +               '<td>'
+        +                   '<select id="selected' + metaDataCategoryName + '" name="selected' + metaDataCategoryName + '" multiple="multiple"'
+        +                   'style="height: 200px; width: 100%; margin-top: 45px;"></select>'
+        +               '</td>'
+        +           '</tr>'
+        +       '</tbody>'
+        +   '</table>'
     ;
 
     return design;
