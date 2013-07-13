@@ -28,13 +28,17 @@ package org.hisp.dhis.importexport.action.dxf2;
  */
 
 import com.opensymphony.xwork2.Action;
+import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.dxf2.metadata.ExportService;
 import org.hisp.dhis.dxf2.metadata.Filter;
 import org.hisp.dhis.dxf2.metadata.MetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.servlet.http.HttpServletRequest;
 import java.awt.*;
 import java.lang.System;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -50,6 +54,13 @@ public class MetaDataSubSetExportFormAction
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
+
+    private HttpServletRequest request;
+
+    public HttpServletRequest getRequest()
+    {
+        return request;
+    }
 
     private Set<String> selectedAttributeTypes;
 
@@ -269,9 +280,8 @@ public class MetaDataSubSetExportFormAction
     public String execute() throws Exception
     {
         Filter filter = new Filter();
-        filter.createFilter( "attributeTypes", selectedAttributeTypes );
 
-        System.out.println("Merge");
+        Map requestMap = ServletActionContext.getRequest().getParameterMap();
 
 
 //        MetaData metaData = exportService.getFilteredMetaData( filter );
