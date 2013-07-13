@@ -81,8 +81,8 @@
     var i18n_available_userGroups = '$i18n.getString( "available_userGroups" )';
     var i18n_selected_userGroups = '$i18n.getString( "selected_userGroups" )';
 
-    var i18n_available_userRoles = '$i18n.getString( "available_userGroups" )';
-    var i18n_selected_userRoles = '$i18n.getString( "selected_userGroups" )';
+    var i18n_available_userRoles = '$i18n.getString( "available_userRoles" )';
+    var i18n_selected_userRoles = '$i18n.getString( "selected_userRoles" )';
 
     var i18n_available_users = '$i18n.getString( "available_users" )';
     var i18n_selected_users = '$i18n.getString( "selected_users" )';
@@ -350,7 +350,7 @@
         <tr>
             <td colspan="2">
                 <input type="button" value="$i18n.getString( 'export' )" style="width:254px; font-size: 10pt;"
-                       onclick="exportMetaDataSubSet();"/>
+                       onclick="exportDetailedMetaData();"/>
             </td>
         </tr>
     </table>

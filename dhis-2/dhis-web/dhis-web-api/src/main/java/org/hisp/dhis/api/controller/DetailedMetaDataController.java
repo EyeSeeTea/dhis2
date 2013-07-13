@@ -75,9 +75,9 @@ public class DetailedMetaDataController
     // Detailed MetaData Export
     //--------------------------------------------------------------------------
 
-    @RequestMapping( value = DetailedMetaDataController.RESOURCE_PATH )
+    @RequestMapping( value = DetailedMetaDataController.RESOURCE_PATH, headers = "Accept=application/json" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
-    public void detailedExport( @RequestBody String json, Model model) throws IOException
+    public void detailedExport( @RequestBody String json, Model model ) throws IOException
     {
         System.out.println("\n 1. DETAILED EXPORT ENTERED \n");
 

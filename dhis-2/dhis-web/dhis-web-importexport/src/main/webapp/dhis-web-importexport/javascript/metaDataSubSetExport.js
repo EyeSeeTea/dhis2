@@ -69,7 +69,7 @@ jQuery(function ()
 });
 
 // Export MetaDataSubSet AJAX
-function exportMetaDataSubSet()
+function exportDetailedMetaData()
 {
     var url = "../api/detailedMetaData";
 //    var format = $("#format").val();
@@ -88,32 +88,43 @@ function exportMetaDataSubSet()
 
     $.ajax({
         url: url,
-        data: JSON.stringify(createFilter()),
+        data: JSON.stringify(createFilterJSON()),
         dataType: "json",
+        contentType: "application/json",
         type: "POST",
-        success: function () {
-            console.log(JSON.stringify(createFilter()));
+        success: function ()
+        {
+            console.log("Exported JSON:" + JSON.stringify(createFilterJSON()));
+        },
+        error: function ()
+        {
+            alert("Export unsuccessful.");
+
         }
     });
 }
 
 // Create Filter Object
-function createFilter()
+function createFilterJSON()
 {
-    var filter = new Array();
+    var filter = {};
     for(var i = 0; i < metaDataArray.length; i++)
     {
-        var name = metaDataArray[i];
+        var filterCategory = [];
         var values = $("#selected" + metaDataArray[i]).val();
         if(values != undefined)
         {
             for(var j = 0; j < values.length; j++)
             {
-                var filterItem = new Object();
-                filterItem[name] = values[j];
-
-                filter.push(filterItem);
+                var filterItem = {};
+                filterItem.uid = values[j];
+                filterCategory.push(filterItem);
             }
+        }
+
+        if(filterCategory.length != 0)
+        {
+            filter[metaDataArray[i]] = filterCategory;
         }
     }
 
