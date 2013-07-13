@@ -1,3 +1,4 @@
+
 // Global Variables
 // --------------------------------------------------------------
 
@@ -67,6 +68,34 @@ jQuery(function ()
     });
 });
 
+// Export MetaDataSubSet AJAX
+function exportMetaDataSubSet()
+{
+    var url = "../api/detailedMetaData";
+//    var format = $("#format").val();
+//    var compression = $("#compression").val();
+//
+//    url += "." + format;
+//
+//    if(compression == "zip")
+//    {
+//        url += ".zip";
+//    }
+//    else if(compression == "gz")
+//    {
+//        url += ".gz";
+//    }
+
+    $.ajax({
+        url: url,
+        data: "HELLO WORLD SPRING",
+        type: "POST",
+        success: function () {
+            alert("A MERS");
+        }
+    });
+}
+
 // Select all checkboxes
 function selectAll()
 {
@@ -118,12 +147,6 @@ function selectNone()
             removeMetaDataDesign(metaDataArray[i]);
         }
     }
-}
-
-// Make the first letter lowercase
-function lowercaseFirstLetter(string)
-{
-    return string.charAt(0).toLowerCase() + string.slice(1);
 }
 
 // Insert MetaData HTML & CSS Checkbox
@@ -206,12 +229,6 @@ function generateMetaDataDesign(metaDataCategoryName)
     return design;
 }
 
-// Remove MetaData HTML and CSS from a Category
-function removeMetaDataDesign(metaDataCategoryName)
-{
-    $("#mainDiv" + metaDataCategoryName).empty();
-}
-
 // Load MetaData for a Category
 function loadMetaData(metaDataCategoryName)
 {
@@ -231,16 +248,10 @@ function loadMetaData(metaDataCategoryName)
     });
 }
 
-// Export MetaDataSubSet
-function exportMetaDataSubSet()
+// Remove MetaData HTML and CSS from a Category
+function removeMetaDataDesign(metaDataCategoryName)
 {
-    for(var i = 0; i < metaDataArray; i++)
-    {
-        selectAllById( "selected" + metaDataArray[i] );
-        $("#checkbox" + metaDataArray[i]).attr("disabled", "disabled");
-    }
-
-    $("#exportForm").submit();
+    $("#mainDiv" + metaDataCategoryName).empty();
 }
 
 // Get MetaData Name
@@ -397,4 +408,10 @@ function getI18nSelectedMetaData(metaDataCategoryName)
         case "ValidationRules":
             return i18n_selected_validationRules;
     }
+}
+
+// Make the first letter lowercase
+function lowercaseFirstLetter(string)
+{
+    return string.charAt(0).toLowerCase() + string.slice(1);
 }

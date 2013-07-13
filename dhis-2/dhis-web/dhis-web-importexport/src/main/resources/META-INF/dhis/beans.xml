@@ -211,12 +211,4 @@
     <property name="category" value="METADATA_IMPORT" />
   </bean>
 
-  <!-- DXF2 MetaData import/export -->
-    <!--Ovidiu-->
-  <bean id="org.hisp.dhis.importexport.action.dxf2.MetaDataSubSetExportFormAction"
-        class="org.hisp.dhis.importexport.action.dxf2.MetaDataSubSetExportFormAction"
-          scope="prototype">
-  </bean>
-
-
 </beans>

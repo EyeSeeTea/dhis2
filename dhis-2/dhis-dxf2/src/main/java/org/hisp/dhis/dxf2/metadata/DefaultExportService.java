@@ -74,12 +74,6 @@ public class DefaultExportService
     }
 
     @Override
-    public MetaData getFilteredMetaData( Filter filter )
-    {
-        return getFilteredMetaData( filter, null );
-    }
-
-    @Override
     public MetaData getMetaData( Options options, TaskId taskId )
     {
 
@@ -123,61 +117,6 @@ public class DefaultExportService
 
             log.info(message);
 
-            if ( taskId != null )
-            {
-                notifier.notify(taskId, message);
-            }
-
-            ReflectionUtils.invokeSetterMethod(entry.getValue(), metaData, new ArrayList<IdentifiableObject>(idObjects));
-        }
-
-        log.info("Export done at " + new Date());
-
-        if ( taskId != null )
-        {
-            notifier.notify(taskId, NotificationLevel.INFO, "Export done", true);
-        }
-
-        return metaData;
-    }
-
-//    OVIDIU
-    @Override
-    public MetaData getFilteredMetaData( Filter filter, TaskId taskId )
-    {
-        MetaData metaData = new MetaData();
-        metaData.setCreated(new Date());
-
-        log.info("User '" + currentUserService.getCurrentUsername() + "' started export at " + new Date());
-
-        if ( taskId != null )
-        {
-            notifier.notify(taskId, "Exporting meta-data subsets");
-        }
-
-        // Ovidiu
-        //todo logic here
-        for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
-        {
-            Class<? extends IdentifiableObject> idObjectClass = entry.getKey();
-
-            Collection<? extends IdentifiableObject> idObjects;
-
-//            idObjects = manager.getByFilters(idObjectClass, expressions);
-            idObjects = null;
-
-            if ( idObjects.isEmpty() )
-            {
-                continue;
-            }
-
-            String message = "Exporting";
-            log.info(message);
-
-            if ( taskId != null )
-            {
-                notifier.notify(taskId, NotificationLevel.INFO, "Export done", true);
-            }
             if ( taskId != null )
             {
                 notifier.notify(taskId, message);
