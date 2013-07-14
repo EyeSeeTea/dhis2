@@ -59,7 +59,7 @@ jQuery(function ()
 // MetaData Category Accordion
 jQuery(function ()
 {
-    selectNone();
+    deselectAll();
     $("#mainDivAccordion").accordion({
         active: false,
         collapsible: true,
@@ -68,7 +68,7 @@ jQuery(function ()
     });
 });
 
-// Export MetaDataSubSet AJAX
+// Export DetailedMetaData AJAX
 function exportDetailedMetaData()
 {
     var url = "../api/detailedMetaData";
@@ -146,6 +146,21 @@ function selectAll()
     }
 }
 
+// Deselect all checkboxes
+function deselectAll()
+{
+    for(var i = 0; i < metaDataArray.length; i++)
+    {
+        if($("#checkbox" + metaDataArray[i]).is(":checked"))
+        {
+            $("#checkbox" + metaDataArray[i]).prop("checked", false);
+            $("#label" + metaDataArray[i]).css({"color" : "black"});
+            removeMetaDataDesign(metaDataArray[i]);
+        }
+    }
+}
+
+
 // Select all values
 function selectAllValues()
 {
@@ -158,30 +173,28 @@ function selectAllValues()
     }
 }
 
+// Deselect all values
+function deselectAllValues()
+{
+    for(var i = 0; i < metaDataArray.length; i++)
+    {
+        if($("#checkbox" + metaDataArray[i]).is(":checked"))
+        {
+            $("#deselect" + metaDataArray[i]).click();
+        }
+    }
+}
+
 // Select all values by category
 function selectAllValuesByCategory(metaDataCategoryName)
 {
     $("#select" + metaDataCategoryName).click();
 }
 
-// Select no values by category
+// Deselect all values by category
 function deselectValuesByCategory(metaDataCategoryName)
 {
     $("#deselect" + metaDataCategoryName).click();
-}
-
-// Deselect all checkboxes
-function selectNone()
-{
-    for(var i = 0; i < metaDataArray.length; i++)
-    {
-        if($("#checkbox" + metaDataArray[i]).is(":checked"))
-        {
-            $("#checkbox" + metaDataArray[i]).prop("checked", false);
-            $("#label" + metaDataArray[i]).css({"color" : "black"});
-            removeMetaDataDesign(metaDataArray[i]);
-        }
-    }
 }
 
 // Insert MetaData HTML & CSS Checkbox

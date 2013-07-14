@@ -100,14 +100,14 @@
     var i18n_remove_all = '$i18n.getString( "remove_all" )';
 </script>
 
-<h3>$i18n.getString( "metadata_subset_export" )</h3>
+<h3>$i18n.getString( "metadata_detailed_export" )</h3>
 
 <!-- EXPORT FORM -->
 <!-- ACTION METHOD HERE -->
 <form id="exportForm" name="exportForm">
 
     <!-- MENU -->
-    <div id="mainDivAccordion">
+    <div id="mainDivAccordion" style="width: 70%;">
 
         <!-- ATTRIBUTES TYPES SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "attribute_types" )</h6>
@@ -324,8 +324,10 @@
                        onclick="selectAll();"/>
                 <input type="button" value="$i18n.getString( 'select_all_values' )" style="width:125px; font-size: 10pt;"
                        onclick="selectAllValues();"/>
-                <input type="button" value="$i18n.getString( 'select_none' )" style="width:125px; font-size: 10pt;"
-                       onclick="selectNone();"/>
+                <input type="button" value="$i18n.getString( 'deselect_all_values' )" style="width:125px; font-size: 10pt;"
+                       onclick="deselectAllValues();"/>
+                <input type="button" value="$i18n.getString( 'deselect_all_tables' )" style="width:125px; font-size: 10pt;"
+                       onclick="deselectAll();"/>
             </td>
         </tr>
         <tr>
