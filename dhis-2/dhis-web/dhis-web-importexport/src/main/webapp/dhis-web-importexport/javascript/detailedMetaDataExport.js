@@ -139,6 +139,7 @@ function selectAll()
         {
             $("#checkbox" + metaDataArray[i]).prop("checked", true);
             $("#label" + metaDataArray[i]).css({"color" : "lime"});
+            $("#divSelectAll" + metaDataArray[i]).show();
             insertMetaDataDesign(metaDataArray[i]);
             loadMetaData(metaDataArray[i]);
         }
@@ -154,11 +155,12 @@ function deselectAll()
         {
             $("#checkbox" + metaDataArray[i]).prop("checked", false);
             $("#label" + metaDataArray[i]).css({"color" : "black"});
+            $("#divSelectAll" + metaDataArray[i]).prop("checked", false);
+            $("#divSelectAll" + metaDataArray[i]).hide();
             removeMetaDataDesign(metaDataArray[i]);
         }
     }
 }
-
 
 // Select all values
 function selectAllValues()
