@@ -783,7 +783,7 @@ DV.core.getUtil = function(dv) {
 					return dv.util.chart.getExtendedLayout(layout);
 				}
 
-				return undefined;
+				return null;
 			};
 
 			validateResponse = function(response) {
@@ -2086,23 +2086,23 @@ DV.core.getApi = function(dv) {
 			layout.hideLegend = Ext.isBoolean(config.hideLegend) ? config.hideLegend : false;
 			layout.hideTitle = Ext.isBoolean(config.hideTitle) ? config.hideTitle : false;
 
-			layout.targetLineValue = Ext.isNumber(config.targetLineValue) ? config.targetLineValue : undefined;
+			layout.targetLineValue = Ext.isNumber(config.targetLineValue) ? config.targetLineValue : null;
 			layout.targetLineTitle = Ext.isString(config.targetLineLabel) && !Ext.isEmpty(config.targetLineLabel) ? config.targetLineLabel :
-				(Ext.isString(config.targetLineTitle) && !Ext.isEmpty(config.targetLineTitle) ? config.targetLineTitle : undefined);
-			layout.baseLineValue = Ext.isNumber(config.baseLineValue) ? config.baseLineValue : undefined;
+				(Ext.isString(config.targetLineTitle) && !Ext.isEmpty(config.targetLineTitle) ? config.targetLineTitle : null);
+			layout.baseLineValue = Ext.isNumber(config.baseLineValue) ? config.baseLineValue : null;
 			layout.baseLineTitle = Ext.isString(config.baseLineLabel) && !Ext.isEmpty(config.baseLineLabel) ? config.baseLineLabel :
-				(Ext.isString(config.baseLineTitle) && !Ext.isEmpty(config.baseLineTitle) ? config.baseLineTitle : undefined);
+				(Ext.isString(config.baseLineTitle) && !Ext.isEmpty(config.baseLineTitle) ? config.baseLineTitle : null);
 
-			layout.title = Ext.isString(config.title) &&  !Ext.isEmpty(config.title) ? config.title : undefined;
+			layout.title = Ext.isString(config.title) &&  !Ext.isEmpty(config.title) ? config.title : null;
 			layout.domainAxisTitle = Ext.isString(config.domainAxisLabel) && !Ext.isEmpty(config.domainAxisLabel) ? config.domainAxisLabel :
-				(Ext.isString(config.domainAxisTitle) && !Ext.isEmpty(config.domainAxisTitle) ? config.domainAxisTitle : undefined);
+				(Ext.isString(config.domainAxisTitle) && !Ext.isEmpty(config.domainAxisTitle) ? config.domainAxisTitle : null);
 			layout.rangeAxisTitle = Ext.isString(config.rangeAxisLabel) && !Ext.isEmpty(config.rangeAxisLabel) ? config.rangeAxisLabel :
-				(Ext.isString(config.rangeAxisTitle) && !Ext.isEmpty(config.rangeAxisTitle) ? config.rangeAxisTitle : undefined);
+				(Ext.isString(config.rangeAxisTitle) && !Ext.isEmpty(config.rangeAxisTitle) ? config.rangeAxisTitle : null);
 
 			layout.userOrganisationUnit = isOu;
 			layout.userOrganisationUnitChildren = isOuc;
 
-			layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : undefined;
+			layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
 
 			return Ext.clone(layout);
 		}();

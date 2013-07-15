@@ -4089,7 +4089,7 @@ Ext.onReady( function() {
 
 				// State
 				dv.viewport.interpretationButton.disable();
-				dv.favorite = undefined;
+				dv.favorite = null;
 
 				// Create chart
 				dv.util.chart.createChart(layout, dv);

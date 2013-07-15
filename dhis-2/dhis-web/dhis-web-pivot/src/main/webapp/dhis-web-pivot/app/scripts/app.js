@@ -4323,6 +4323,7 @@ Ext.onReady( function() {
 				if (dimMap[objectName]) {
 					pt.store.dataElementSelected.add(Ext.clone(recMap[objectName]));
 					pt.util.multiselect.filterAvailable({store: pt.store.dataElementAvailable}, {store: pt.store.dataElementSelected});
+					dataElementDetailLevel.setValue(objectName);
 				}
 
 				// Operands
