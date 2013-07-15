@@ -173,6 +173,7 @@ a.menuLink:hover
   opacity: 0.94;
   border-bottom-left-radius: 3px;
   border-bottom-right-radius: 3px;
+  box-shadow: #ccc 0px 1px 1px 0px;
 }
 
 .menuDropDownBox
@@ -207,13 +208,14 @@ a.menuLink:hover
 
 #leftBar
 {
-  height: 580px;
+  height: 100%;
+  background-color: #fafafa;
   width: 235px;
   position: fixed;
   top: 46px;
   left: 0px;
   padding-top: 6px;
-  border-right: 1px solid #ececec;
+  border-right: 1px solid #e8e8e8;
 }
 
 #leftBarContents
@@ -234,23 +236,23 @@ a.menuLink:hover
 {
   list-style-type: none;
   padding: 0;
-  margin: 0 20px 0 20px;
+  margin: 0 13px;
 }
 
 #leftBarContents ul a
 {
   display: block;
-  color: #333;
+  color: #303030;
   text-decoration: none;
-  padding-top: 8px;
-  padding-bottom: 8px;
+  padding: 8px 7px;
   cursor: pointer;
-  border-bottom: 1px solid #ececec;
+  border-bottom: 1px solid #e8e8e8;
 }
 
 #leftBarContents a:hover
 {
   text-decoration: underline;
+  background-color: #f4f4f4;
 }
 
 /*----------------------------------------------------------------------------*/

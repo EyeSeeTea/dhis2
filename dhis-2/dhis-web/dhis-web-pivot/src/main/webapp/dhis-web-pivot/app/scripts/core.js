@@ -1329,7 +1329,6 @@ console.log("aAllObjects", aAllObjects);
 				getTdHtml = function(config) {
 					var bgColor,
 						legends,
-						cls,
 						colSpan,
 						rowSpan,
 						htmlValue,
@@ -1338,6 +1337,7 @@ console.log("aAllObjects", aAllObjects);
 						isLegendSet = Ext.isObject(legendSet) && Ext.isArray(legendSet.legends) && legendSet.legends.length,
 						isNumeric = Ext.isObject(config) && Ext.isString(config.type) && config.type.substr(0,5) === 'value' && !config.empty,
 						isValue = Ext.isObject(config) && Ext.isString(config.type) && config.type === 'value' && !config.empty,
+						cls = '',
 						html = '';
 						
 					if (!Ext.isObject(config)) {
@@ -1356,29 +1356,28 @@ console.log("aAllObjects", aAllObjects);
 							}
 						}
 					}
-
+					
 					colSpan = config.colSpan ? 'colspan="' + config.colSpan + '" ' : '';
 					rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '" ' : '';
 					htmlValue = config.collapsed ? '&nbsp;' : config.htmlValue || config.value || '&nbsp;';
 					htmlValue = config.type !== 'dimension' ? pt.util.number.pp(htmlValue, layout.digitGroupSeparator) : htmlValue;
 					displayDensity = pt.conf.pivot.displayDensity[config.displayDensity] || pt.conf.pivot.displayDensity[layout.displayDensity];
 					fontSize = pt.conf.pivot.fontSize[config.fontSize] || pt.conf.pivot.fontSize[layout.fontSize];
+					
+					cls += config.hidden ? ' td-hidden' : '';
+					cls += config.collapsed ? ' td-collapsed' : '';
+					cls += isValue ? ' pointer' : '';
+					cls += bgColor ? ' legend' : (config.cls ? ' ' + config.cls : '');
+
+					html += '<td ' + (config.uuid ? ('id="' + config.uuid + '" ') : '') + ' class="' + cls + '" ' + colSpan + rowSpan;
 
 					if (bgColor) {
-						cls = 'legend';
-						cls += config.hidden ? ' td-hidden' : '';
-						cls += config.collapsed ? ' td-collapsed' : '';
-
-						html += '<td ';
-						html += config.uuid ? ('id="' + config.uuid + '" ') : '';
-						html += ' class="' + cls + '" ';
-						html += colSpan + rowSpan + '>';
+						html += '>';
 						html += '<div class="legendCt">';
 						html += '<div class="number ' + config.cls + '" style="padding:' + displayDensity + '; padding-right:3px; font-size:' + fontSize + '">' + htmlValue + '</div>';
 						html += '<div class="arrowCt ' + config.cls + '">';
 						html += '<div class="arrow" style="border-bottom:8px solid transparent; border-right:8px solid ' + bgColor + '">&nbsp;</div>';
-						html += '</div>';
-						html += '</div></div></td>';
+						html += '</div></div></div></td>';
 
 						//cls = 'legend';
 						//cls += config.hidden ? ' td-hidden' : '';
@@ -1394,17 +1393,7 @@ console.log("aAllObjects", aAllObjects);
 						//html += '</div></td>';
 					}
 					else {
-						cls = config.cls ? config.cls : '';
-						cls += config.hidden ? ' td-hidden' : '';
-						cls += config.collapsed ? ' td-collapsed' : '';
-						html += '<td ';
-						html += config.uuid ? ('id="' + config.uuid + '" ') : '';
-						html += ' class="' + cls + '" ';
-						html += colSpan + rowSpan;
-						html += 'style="padding:' + displayDensity + '; font-size:' + fontSize + ';"';
-						
-						//html += isValue ? ' onmouseover="javascript:console.log(this.id);"' : '';
-						html += '>' + htmlValue + '</td>';
+						html += 'style="padding:' + displayDensity + '; font-size:' + fontSize + ';"' + '>' + htmlValue + '</td>';
 					}
 
 					return html;

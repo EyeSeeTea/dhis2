@@ -26,13 +26,6 @@
  */
 package org.hisp.dhis.program;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.dataelement.DataElement;
@@ -49,6 +42,13 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Abyot Asalefew
@@ -96,6 +96,7 @@ public class DefaultProgramStageInstanceService
 
     public int addProgramStageInstance( ProgramStageInstance programStageInstance )
     {
+        programStageInstance.setAutoFields();
         return programStageInstanceStore.save( programStageInstance );
     }
 
@@ -114,6 +115,11 @@ public class DefaultProgramStageInstanceService
         return programStageInstanceStore.get( id );
     }
 
+    public ProgramStageInstance getProgramStageInstance( String uid )
+    {
+        return programStageInstanceStore.getByUid( uid );
+    }
+
     public ProgramStageInstance getProgramStageInstance( ProgramInstance programInstance, ProgramStage programStage )
     {
         return programStageInstanceStore.get( programInstance, programStage );
@@ -126,6 +132,7 @@ public class DefaultProgramStageInstanceService
 
     public void updateProgramStageInstance( ProgramStageInstance programStageInstance )
     {
+        programStageInstance.setAutoFields();
         programStageInstanceStore.update( programStageInstance );
     }
 

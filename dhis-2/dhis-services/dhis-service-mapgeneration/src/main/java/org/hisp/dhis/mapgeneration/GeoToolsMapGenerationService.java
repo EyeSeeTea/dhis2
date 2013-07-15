@@ -34,7 +34,9 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.analytics.AnalyticsService;
@@ -97,8 +99,8 @@ public class GeoToolsMapGenerationService
         
         // Build internal representation of a map using GeoTools, then render it
         // to an image
-        GeoToolsMap gtMap = new GeoToolsMap( mapLayer );
-        BufferedImage mapImage = gtMap.render( height );
+        InternalMap map = new InternalMap( mapLayer );
+        BufferedImage mapImage = MapUtils.render( map, height );
 
         // Build the legend set, then render it to an image
         LegendSet legendSet = new LegendSet( mapLayer );
@@ -137,36 +139,18 @@ public class GeoToolsMapGenerationService
         List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.
             getOrganisationUnitsAtLevel( mapView.getOrganisationUnitLevel().getLevel(), mapView.getParentOrganisationUnit() ) );
 
-        DataQueryParams params = new DataQueryParams();
+        Map<String, OrganisationUnit> uidOuMap = new HashMap<String, OrganisationUnit>();
         
-        if ( mapView.getIndicator() != null )
+        for ( OrganisationUnit ou : organisationUnits )
         {
-            params.setIndicators( getList( mapView.getIndicator() ) );
-        }
-        else if ( mapView.getDataElement() != null )
-        {
-            params.setDataElements( getList( mapView.getDataElement() ) );
+            uidOuMap.put( ou.getUid(), ou );
         }
         
-        //TODO operands
-
-        params.setOrganisationUnits( organisationUnits );
-        params.setFilterPeriods( getList( mapView.getPeriod() ) );
+        mapView.setOrganisationUnitsAtLevel( organisationUnits );
         
-        Grid grid = analyticsService.getAggregatedDataValues( params );
+        Grid grid = getDataGrid( mapView );
         
-        Collection<MapValue> mapValues = new ArrayList<MapValue>();
-
-        for ( List<Object> row : grid.getRows() )
-        {
-            if ( row != null && row.size() >= 3 )
-            {
-                String ou = (String) row.get( 1 );
-                Double value = (Double) row.get( 2 );
-                
-                mapValues.add( new MapValue( ou, value ) );
-            }
-        }
+        Collection<MapValue> mapValues = getMapValues( grid );
                 
         if ( mapValues.isEmpty() )
         {
@@ -216,7 +200,7 @@ public class GeoToolsMapGenerationService
         for ( MapValue mapValue : mapValues )
         {
             // Get the org unit for this map value
-            OrganisationUnit orgUnit = organisationUnitService.getOrganisationUnit( mapValue.getOu() );
+            OrganisationUnit orgUnit = uidOuMap.get( mapValue.getOu() );
             
             if ( orgUnit != null && orgUnit.hasCoordinates() && orgUnit.hasFeatureType() )
             {
@@ -239,11 +223,56 @@ public class GeoToolsMapGenerationService
         return mapLayer;
     }
 
-    private GeoToolsMapObject buildSingleGeoToolsMapObjectForMapLayer( InternalMapLayer mapLayer,
+    /**
+     * Creates a Grid with aggregated data.
+     */
+    private Grid getDataGrid( MapView mapView )
+    {
+        DataQueryParams params = new DataQueryParams();
+        
+        if ( mapView.getIndicator() != null )
+        {
+            params.setIndicators( getList( mapView.getIndicator() ) );
+        }
+        else if ( mapView.getDataElement() != null )
+        {
+            params.setDataElements( getList( mapView.getDataElement() ) );
+        }
+        
+        //TODO operands
+
+        params.setOrganisationUnits( mapView.getOrganisationUnitsAtLevel() );
+        params.setFilterPeriods( getList( mapView.getPeriod() ) );
+        
+        return analyticsService.getAggregatedDataValues( params );
+    }
+    
+    /**
+     * Creates a list of aggregated map values.
+     */
+    private List<MapValue> getMapValues( Grid grid )
+    {
+        List<MapValue> mapValues = new ArrayList<MapValue>();
+
+        for ( List<Object> row : grid.getRows() )
+        {
+            if ( row != null && row.size() >= 3 )
+            {
+                String ou = (String) row.get( 1 );
+                Double value = (Double) row.get( 2 );
+                
+                mapValues.add( new MapValue( ou, value ) );
+            }
+        }
+
+        return mapValues;
+    }
+    
+    private InternalMapObject buildSingleGeoToolsMapObjectForMapLayer( InternalMapLayer mapLayer,
         double mapValue, OrganisationUnit orgUnit )
     {
         // Create and setup an internal map object
-        GeoToolsMapObject mapObject = new GeoToolsMapObject();
+        InternalMapObject mapObject = new InternalMapObject();
         mapObject.setName( orgUnit.getName() );
         mapObject.setValue( mapValue );
         mapObject.setFillOpacity( mapLayer.getOpacity() );
@@ -252,7 +281,7 @@ public class GeoToolsMapGenerationService
 
         // Build and set the GeoTools-specific geometric primitive that outlines
         // the org unit on the map
-        mapObject.buildAndApplyGeometryForOrganisationUnit( orgUnit );
+        mapObject.setGeometry( InternalMapObject.buildAndApplyGeometryForOrganisationUnit( orgUnit ) );
 
         // Add the map object to the map layer
         mapLayer.addMapObject( mapObject );

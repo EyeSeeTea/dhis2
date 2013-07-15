@@ -18,7 +18,7 @@
 #contentDiv
 {
   position: relative;
-  top: 44px;
+  top: 46px;
 }
 
 .removeIcon
@@ -93,9 +93,18 @@
   position: absolute;
   left: 411px;
   height: 22px;
-  width: 552px;
+  width: 486px;
   border: 1px solid #aaa;
   padding: 5px 6px 0 6px;
+  box-shadow: #ccc 0px 1px 2px 0px inset;
+  border-radius: 2px;
+}
+
+#searchButton
+{
+  position: absolute;
+  margin-top: 6px;
+  left: 915px;
 }
 
 #searchField
@@ -114,14 +123,15 @@
   position: absolute;
   margin-top: 29px;
   left: 411px;
-  width: 568px;
+  width: 498px;
   border-right: 1px solid #bbb;
   border-bottom: 1px solid #bbb;
   border-left: 1px solid #bbb;
   background-color: #fff;
   display: none;
   overflow: hidden;
-  z-index: 20;
+  z-index: 5;
+  box-shadow: #ccc 0px 1px 2px 0px;
 }
 
 #hitDiv ul
