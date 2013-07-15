@@ -4160,21 +4160,17 @@ Ext.onReady( function() {
 					showSeparator: false,
 					items: [
 						{
-							text: 'Open',
+							text: 'Go to charts', //i18n
 							handler: function() {
 								window.location.href = url;
 							}
 						},
 						{
-							text: 'Open table' + '&nbsp;&nbsp;',
+							text: 'View table as chart' + '&nbsp;&nbsp;', //i18n
 							disabled: !PT.isSessionStorage || !pt.layout,
 							handler: function() {
 								if (PT.isSessionStorage) {
-									var dhis2 = sessionStorage.getItem('dhis2') ? JSON.parse(sessionStorage.getItem('dhis2')) : {};
-									dhis2.analytical = pt.layout;
-									sessionStorage.setItem('dhis2', JSON.stringify(dhis2));
-									
-									window.location.href = url + '?analytical=true'
+									pt.util.pivot.setSessionStorage(pt.layout, url);
 								}
 							}
 						}
