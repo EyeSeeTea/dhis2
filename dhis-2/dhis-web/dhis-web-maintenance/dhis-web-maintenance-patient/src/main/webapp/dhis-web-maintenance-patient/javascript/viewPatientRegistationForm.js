@@ -118,7 +118,7 @@ function programAttrOnClick()
 	showById('programAttrTab');
 }
 
-function getRequiredFields()
+function getDefaultRequiredFields()
 {
 	var requiredFields = {};
 	if( getFieldValue("disableRegistrationFields")!='true' )
@@ -185,6 +185,58 @@ function getRequiredFields()
 	
 	}
 	return requiredFields;
+}
+
+function validateProgramFields()
+{
+	var requiredFields = {};
+	jQuery('#programAttrSelector option').each(function() {
+		var item = jQuery(this);
+		if( item.attr('mandatory')=='true'){
+			requiredFields['programid=' + item.val()] = item.text();
+		}
+	});
+	
+	var html = jQuery("#designTextarea").ckeditorGet().getData();
+	var input = jQuery( html ).find("input");
+	if( input.length > 0 )
+	{
+		input.each( function(i, item){	
+			var key = "";
+			var inputKey = jQuery(item).attr('fixedattributeid');
+			if( jQuery(item).attr('programid')!=undefined ){
+				inputKey = jQuery(item).attr('programid');
+				key = 'programid=' + inputKey
+			}
+			
+			for (var idx in requiredFields){
+				if( key == idx){
+					delete requiredFields[idx];
+				}
+			}
+		});
+	}
+	
+	var violate = "";
+	if( Object.keys(requiredFields).length > 0 )
+	{
+		violate = '<h3>' + i18n_please_insert_all_required_fields + '<h3>';
+		for (var idx in requiredFields){
+			violate += " - " + requiredFields[idx] + '<br>';
+		}
+		jQuery('#validateDiv').html(violate).dialog({
+			title:i18n_required_fields_valivation,
+			maximize:true, 
+			closable:true,
+			modal:false,
+			overlay:{background:'#000000', opacity:0.1},
+			width:500,
+			height:300
+		});
+		return false;
+	}
+	
+	return true;
 }
 
 function validateFormOnclick()
@@ -400,11 +452,7 @@ function validateDataEntryForm(form)
 		setHeaderDelayMessage( i18n_enter_a_name );
 		return false;
 	}
-	else if ( !validateForm() )
-	{
-		return false;
-	}
-	else
+	else if(validateProgramFields())
 	{
 		$.postUTF8( 'validateDataEntryForm.action',
 		{

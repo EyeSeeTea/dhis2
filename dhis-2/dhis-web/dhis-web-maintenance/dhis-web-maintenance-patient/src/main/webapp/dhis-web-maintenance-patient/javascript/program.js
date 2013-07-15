@@ -41,9 +41,6 @@ function showProgramDetails( programId )
 		var remindCompleted = ( json.program.remindCompleted == 'true') ? i18n_yes : i18n_no;
 		setInnerHTML( 'remindCompletedField', remindCompleted );   	
 		
-		var disableRegistrationFields = ( json.program.disableRegistrationFields == 'true') ? i18n_yes : i18n_no;
-		setInnerHTML( 'disableRegistrationFieldsField', disableRegistrationFields );   	
-		
 		setInnerHTML( 'dateOfEnrollmentDescriptionField', json.program.dateOfEnrollmentDescription );   
 		setInnerHTML( 'dateOfIncidentDescriptionField', json.program.dateOfIncidentDescription );   		
 		setInnerHTML( 'programStageCountField',  json.program.programStageCount );
@@ -269,7 +266,7 @@ function generateTemplateMessageForm()
 				+ '<tr name="tr' + rowId + '">'
 				+ 	'<td><label>' + i18n_send_when_to + '</label></td>'
 				+ 	'<td>'
-				+ 		'<select id="whenToSend' + rowId + '" name="whenToSend' + rowId + '" class="whenToSend" >'
+				+ 		'<select id="whenToSend' + rowId + '" name="whenToSend' + rowId + '" class="whenToSend" onchange="whenToSendOnChange(' + rowId + ')" >'
 				+ 			'<option value="">' + i18n_from_the_day_set + '</option>'
 				+ 			'<option value="3">' + i18n_complete_program + '</option>'
 				+ 		'</select>'
@@ -278,7 +275,7 @@ function generateTemplateMessageForm()
 				+ '<tr name="tr' + rowId + '">'
 				+ 	'<td><label>' + i18n_date_to_compare + '</label></td>'
 				+ 	'<td>'
-				+		'<select class="dateToCompare">'
+				+		'<select id="dateToCompare' + rowId + '" class="dateToCompare">'
 				+			'<option value="dateofincident">' + i18n_incident_date + '</option>'
 				+			'<option value="enrollmentdate">' + i18n_enrollment_date + '</option>'
 				+ 		'</select>'
@@ -330,4 +327,17 @@ function insertParams( paramValue, rowId )
 {
 	var templateMessage = paramValue;
 	insertTextCommon('templateMessage' + rowId, templateMessage);
+}
+
+function whenToSendOnChange(index)
+{
+	var whenToSend = getFieldValue('whenToSend' + index );
+	if(whenToSend==3){
+		disable('dateToCompare' + index );
+		disable('daysAllowedSendMessage' + index );
+	}
+	else{
+		enable('dateToCompare' + index );
+		enable('daysAllowedSendMessage' + index );
+	}
 }

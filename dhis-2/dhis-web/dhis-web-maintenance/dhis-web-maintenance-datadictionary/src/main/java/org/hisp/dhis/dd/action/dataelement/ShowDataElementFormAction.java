@@ -27,13 +27,7 @@ package org.hisp.dhis.dd.action.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.attribute.comparator.AttributeSortOrderComparator;
@@ -52,13 +46,18 @@ import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.system.util.AttributeUtils;
 
-import com.opensymphony.xwork2.Action;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Hans S. Toemmerholt
  * @version $Id: GetDataElementAction.java 2869 2007-02-20 14:26:09Z andegje $
  */
-public class ShowUpdateDataElementFormAction
+public class ShowDataElementFormAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -195,6 +194,18 @@ public class ShowUpdateDataElementFormAction
         return legendSets;
     }
 
+    private boolean update;
+
+    public boolean isUpdate()
+    {
+        return update;
+    }
+
+    public void setUpdate( boolean update )
+    {
+        this.update = update;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -207,16 +218,23 @@ public class ShowUpdateDataElementFormAction
         dataElementCategoryCombos = new ArrayList<DataElementCategoryCombo>( dataElementCategoryService
             .getAllDataElementCategoryCombos() );
 
-        dataElement = dataElementService.getDataElement( id );
+        dataElementGroups = dataElementService.getAllDataElementGroups();
+
+        if ( id != null )
+        {
+            dataElement = dataElementService.getDataElement( id );
+
+            Map<Integer, OrganisationUnitLevel> levelMap = organisationUnitService.getOrganisationUnitLevelMap();
+
+            for ( Integer level : dataElement.getAggregationLevels() )
+            {
+                aggregationLevels.add( levelMap.get( level ) );
+            }
+
+            attributeValues = AttributeUtils.getAttributeValueMap( dataElement.getAttributeValues() );
+        }
 
         organisationUnitLevels = organisationUnitService.getOrganisationUnitLevels();
-
-        Map<Integer, OrganisationUnitLevel> levelMap = organisationUnitService.getOrganisationUnitLevelMap();
-
-        for ( Integer level : dataElement.getAggregationLevels() )
-        {
-            aggregationLevels.add( levelMap.get( level ) );
-        }
 
         organisationUnitLevels.removeAll( aggregationLevels );
 
@@ -225,12 +243,10 @@ public class ShowUpdateDataElementFormAction
 
         attributes = new ArrayList<Attribute>( attributeService.getDataElementAttributes() );
 
-        attributeValues = AttributeUtils.getAttributeValueMap( dataElement.getAttributeValues() );
-
         optionSets = new ArrayList<OptionSet>( optionService.getAllOptionSets() );
 
         legendSets = new ArrayList<MapLegendSet>( mappingService.getAllMapLegendSets() );
-        
+
         Collections.sort( dataElementCategoryCombos, IdentifiableObjectNameComparator.INSTANCE );
         Collections.sort( groupSets, IdentifiableObjectNameComparator.INSTANCE );
         Collections.sort( attributes, new AttributeSortOrderComparator() );

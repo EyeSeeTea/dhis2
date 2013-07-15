@@ -90,7 +90,7 @@ public class UpdatePatientAction
     {
         this.systemSettingManager = systemSettingManager;
     }
-    
+
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -111,7 +111,7 @@ public class UpdatePatientAction
 
     private String gender;
 
-    private String phoneNumber;
+    private String[] phoneNumber;
 
     private boolean underAge;
 
@@ -120,10 +120,6 @@ public class UpdatePatientAction
     private Integer relationshipTypeId;
 
     private Integer healthWorker;
-
-    private Character dobType;
-
-    private String registrationDate;
 
     // -------------------------------------------------------------------------
     // Output
@@ -148,71 +144,95 @@ public class UpdatePatientAction
         // Set FirstName, MiddleName, LastName by FullName
         // ---------------------------------------------------------------------
 
-        int startIndex = fullName.indexOf( ' ' );
-        int endIndex = fullName.lastIndexOf( ' ' );
-
-        String firstName = fullName.toString();
-        String middleName = "";
-        String lastName = "";
-
-        if ( fullName.indexOf( ' ' ) != -1 )
+        if ( fullName != null )
         {
-            firstName = fullName.substring( 0, startIndex );
-            if ( startIndex == endIndex )
-            {
-                middleName = "";
-                lastName = fullName.substring( startIndex + 1, fullName.length() );
-            }
-            else
-            {
-                middleName = fullName.substring( startIndex + 1, endIndex );
-                lastName = fullName.substring( endIndex + 1, fullName.length() );
-            }
-        }
+            fullName = fullName.trim();
 
-        patient.setFirstName( firstName );
-        patient.setMiddleName( middleName );
-        patient.setLastName( lastName );
+            int startIndex = fullName.indexOf( ' ' );
+            int endIndex = fullName.lastIndexOf( ' ' );
+
+            String firstName = fullName.toString();
+            String middleName = "";
+            String lastName = "";
+
+            if ( fullName.indexOf( ' ' ) != -1 )
+            {
+                firstName = fullName.substring( 0, startIndex );
+                if ( startIndex == endIndex )
+                {
+                    middleName = "";
+                    lastName = fullName.substring( startIndex + 1, fullName.length() );
+                }
+                else
+                {
+                    middleName = fullName.substring( startIndex + 1, endIndex );
+                    lastName = fullName.substring( endIndex + 1, fullName.length() );
+                }
+            }
+
+            patient.setFirstName( firstName );
+            patient.setMiddleName( middleName );
+            patient.setLastName( lastName );
+        }
 
         // ---------------------------------------------------------------------
         // Set Other information for patient
         // ---------------------------------------------------------------------
 
-        phoneNumber = (phoneNumber!=null && phoneNumber.trim().equals( systemSettingManager
-            .getSystemSetting( SystemSettingManager.KEY_PHONE_NUMBER_AREA_CODE ) )) ? null : phoneNumber;
+        String phone = "";
 
-        patient.setGender( gender );
-        patient.setIsDead( isDead );
-        patient.setPhoneNumber( phoneNumber );
-        if ( healthWorker != null )
+        for ( String _phoneNumber : phoneNumber )
         {
-            patient.setHealthWorker( userService.getUser( healthWorker ) );
+            _phoneNumber = (_phoneNumber != null && _phoneNumber.isEmpty() && _phoneNumber.trim().equals(
+                systemSettingManager.getSystemSetting( SystemSettingManager.KEY_PHONE_NUMBER_AREA_CODE ) )) ? null
+                : _phoneNumber;
+            if ( _phoneNumber != null )
+            {
+                phone += _phoneNumber + ";";
+            }
         }
 
+        phone = (phone.isEmpty()) ? null : phone.substring( 0, phone.length() - 1 );
+
+        patient.setPhoneNumber( phone );
+        patient.setGender( gender );
+        patient.setIsDead( false );
+        patient.setUnderAge( underAge );
+        patient.setOrganisationUnit( organisationUnit );
+        patient.setIsDead( isDead );
         if ( deathDate != null )
         {
             deathDate = deathDate.trim();
             patient.setDeathDate( format.parseDate( deathDate ) );
         }
 
-        patient.setUnderAge( underAge );
-        patient.setOrganisationUnit( organisationUnit );
-
-        if ( dobType == Patient.DOB_TYPE_VERIFIED || dobType == Patient.DOB_TYPE_DECLARED )
+        if ( healthWorker != null )
         {
-            birthDate = birthDate.trim();
-            patient.setBirthDate( format.parseDate( birthDate ) );
-        }
-        else
-        {
-            patient.setBirthDateFromAge( age.intValue(), Patient.AGE_TYPE_YEAR );
+            patient.setHealthWorker( userService.getUser( healthWorker ) );
         }
 
-        patient.setDobType( dobType );
-
-        if ( registrationDate != null )
+        if ( birthDate != null || age != null )
         {
-            patient.setRegistrationDate( format.parseDate( registrationDate ) );
+            verified = (verified == null) ? false : verified;
+
+            Character dobType = (verified) ? Patient.DOB_TYPE_VERIFIED : Patient.DOB_TYPE_DECLARED;
+
+            if ( !verified && age != null )
+            {
+                dobType = 'A';
+            }
+
+            if ( dobType == Patient.DOB_TYPE_VERIFIED || dobType == Patient.DOB_TYPE_DECLARED )
+            {
+                birthDate = birthDate.trim();
+                patient.setBirthDate( format.parseDate( birthDate ) );
+            }
+            else
+            {
+                patient.setBirthDateFromAge( age.intValue(), Patient.AGE_TYPE_YEAR );
+            }
+
+            patient.setDobType( dobType );
         }
 
         // -------------------------------------------------------------------------------------
@@ -367,11 +387,6 @@ public class UpdatePatientAction
         this.patientIdentifierTypeService = patientIdentifierTypeService;
     }
 
-    public void setDobType( Character dobType )
-    {
-        this.dobType = dobType;
-    }
-
     public void setFormat( I18nFormat format )
     {
         this.format = format;
@@ -432,7 +447,7 @@ public class UpdatePatientAction
         this.gender = gender;
     }
 
-    public void setPhoneNumber( String phoneNumber )
+    public void setPhoneNumber( String[] phoneNumber )
     {
         this.phoneNumber = phoneNumber;
     }
@@ -470,11 +485,6 @@ public class UpdatePatientAction
     public void setVerified( Boolean verified )
     {
         this.verified = verified;
-    }
-
-    public void setRegistrationDate( String registrationDate )
-    {
-        this.registrationDate = registrationDate;
     }
 
 }

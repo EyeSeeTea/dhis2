@@ -775,9 +775,8 @@ public class JdbcCaseAggregationConditionManager
             sql = sql
                 .replace( CaseAggregationCondition.MINUS_DATAELEMENT_OPERATOR + "_" + key, minus2SQLMap.get( key ) );
         }
-
+        
         return sql + " ) ";
-
     }
 
     /**
@@ -795,7 +794,7 @@ public class JdbcCaseAggregationConditionManager
             + "ON _pi.programinstanceid=_psi.programinstanceid "
             + "WHERE psi.programstageinstanceid=_pdv.programstageinstanceid AND _pdv.dataelementid=" + dataElementId
             + "  AND _psi.organisationunitid in (" + TextUtils.getCommaDelimitedString( orgunitIds ) + ")  "
-            + "AND _pi.programid = " + programId + " AND _psi.executionDate>='" + startDate
+            + "  AND _pi.programid = " + programId + " AND _psi.executionDate>='" + startDate
             + "' AND _psi.executionDate <= '" + endDate + "' ";
 
         if ( !programStageId.equals( IN_CONDITION_GET_ALL ) )
@@ -825,8 +824,8 @@ public class JdbcCaseAggregationConditionManager
      */
     private String getConditionForPatientAttribute( int attributeId, Collection<Integer> orgunitIds )
     {
-        String sql = " EXISTS ( SELECT * " + "FROM patientattributevalue _pav "
-            + "WHERE _pav.patientid = pi.patientid " + "and _pav.patientattributeid=" + attributeId
+        String sql = " EXISTS ( SELECT _pav.patientid FROM patientattributevalue _pav "
+            + "WHERE _pav.patientid = pi.patientid AND _pav.patientattributeid=" + attributeId
             + "  AND p.organisationunitid in (" + TextUtils.getCommaDelimitedString( orgunitIds ) + ") AND _pav.value ";
 
         return sql;
@@ -855,7 +854,7 @@ public class JdbcCaseAggregationConditionManager
     private String getConditionForPatientProperty( String propertyName, String operator, String startDate,
         String endDate )
     {
-        String sql = " EXISTS (SELECT * FROM patient _p WHERE _p.patientid = pi.patientid AND ";
+        String sql = " EXISTS (SELECT _p.patientid FROM patient _p WHERE _p.patientid = pi.patientid AND ";
 
         if ( propertyName.equals( PROPERTY_AGE ) )
         {
@@ -877,9 +876,9 @@ public class JdbcCaseAggregationConditionManager
     private String getConditionForPatientProgramStageProperty( String propertyName, String operator, String startDate,
         String endDate )
     {
-        String sql = " EXISTS ( SELECT * from programstageinstance _psi "
-            + "WHERE _psi.programstageinstanceid=psi.programstageinstanceid AND _psi.executionDate>='" + startDate
-            + "' and _psi.executionDate<='" + endDate + "' and " + propertyName;
+        String sql = " EXISTS ( SELECT _psi.programstageinstanceid from programstageinstance _psi "
+            + "WHERE _psi.programstageinstanceid=psi.programstageinstanceid AND ( _psi.executionDate BETWEEN '"
+            + startDate + "' AND '" + endDate + "') AND " + propertyName;
 
         return sql;
     }
@@ -892,13 +891,12 @@ public class JdbcCaseAggregationConditionManager
      */
     private String getConditionForProgramProperty( String operator, String startDate, String endDate, String property )
     {
-        String sql = " EXISTS ( SELECT * FROM programinstance as _pi WHERE psi.programinstanceid=_pi.programsinstanceid AND "
-            + "_pi.enrollmentdate>='"
+        String sql = " EXISTS ( SELECT _pi.programinstanceid FROM programinstance as _pi WHERE psi.programinstanceid=_pi.programsinstanceid AND "
+            + "psi.executionDate >= '"
             + startDate
-            + "' "
-            + "AND _pi.enrollmentdate<='"
+            + "' AND psi.executionDate <= '"
             + endDate
-            + "'  AND "
+            + "' AND "
             + property
             + " ";
 
@@ -913,8 +911,8 @@ public class JdbcCaseAggregationConditionManager
     private String getConditionForProgram( String programId, String operator, Collection<Integer> orgunitIds,
         String startDate, String endDate )
     {
-        String sql = " EXISTS ( SELECT * FROM programinstance as _pi "
-            + "inner join programstageinstance _psi on _pi.programinstanceid=_psi.programinstanceid "
+        String sql = " EXISTS ( SELECT _psi.programstageinstanceid FROM programinstance as _pi "
+            + "INNER JOIN programstageinstance _psi ON _pi.programinstanceid=_psi.programinstanceid "
             + "WHERE psi.programstageinstanceid=_psi.programstageinstanceid AND _pi.programid=" + programId + " "
             + " AND _psi.organisationunitid in (" + TextUtils.getCommaDelimitedString( orgunitIds )
             + ") AND _pi.enrollmentdate >= '" + startDate + "' AND _pi.enrollmentdate <= '" + endDate + "' ";
@@ -930,10 +928,15 @@ public class JdbcCaseAggregationConditionManager
     private String getConditionForProgramStage( String programStageId, String operator, Collection<Integer> orgunitIds,
         String startDate, String endDate )
     {
-        String sql = " EXISTS ( SELECT * FROM programinstance as _pi INNER JOIN programstageinstance _psi "
+        String sql = " EXISTS ( SELECT _psi.programstageinstanceid FROM programinstance as _pi INNER JOIN programstageinstance _psi "
             + "ON _pi.programinstanceid = _psi.programinstanceid WHERE _psi.programstageinstanceid=psi.programstageinstanceid "
-            + "AND _psi.programstageid=" + programStageId + " AND _psi.executiondate >= '" + startDate
-            + "' AND _psi.executiondate <= '" + endDate + "' AND _psi.organisationunitid in ("
+            + "AND _psi.programstageid="
+            + programStageId
+            + "  AND _psi.executiondate >= '"
+            + startDate
+            + "' AND _psi.executiondate <= '"
+            + endDate
+            + "' AND _psi.organisationunitid in ("
             + TextUtils.getCommaDelimitedString( orgunitIds ) + ")  ";
 
         return sql;
@@ -948,7 +951,7 @@ public class JdbcCaseAggregationConditionManager
     private String getConditionForCountProgramStage( String programStageId, String operator,
         Collection<Integer> orgunitIds, String startDate, String endDate )
     {
-        String sql = " EXISTS ( SELECT * FROM programstageinstance as _psi "
+        String sql = " EXISTS ( SELECT _psi.programstageinstanceid FROM programstageinstance as _psi "
             + "WHERE psi.programstageinstanceid=_psi.programstageinstanceid AND _psi.organisationunitid in ("
             + TextUtils.getCommaDelimitedString( orgunitIds ) + ") and _psi.programstageid = " + programStageId + " "
             + "AND _psi.executionDate >= '" + startDate + "' AND _psi.executionDate <= '" + endDate + "' "
@@ -1003,14 +1006,14 @@ public class JdbcCaseAggregationConditionManager
     private String getConditionForMinusDataElement( Collection<Integer> orgunitIds, Integer programStageId,
         Integer dataElementId, String compareSide, String startDate, String endDate )
     {
-        return " EXISTS ( SELECT * FROM patientdatavalue _pdv inner join programstageinstance _psi "
+        return " EXISTS ( SELECT_pdv.value FROM patientdatavalue _pdv inner join programstageinstance _psi "
             + "                         ON _pdv.programstageinstanceid=_psi.programstageinstanceid "
             + "                 JOIN programinstance _pi ON _pi.programinstanceid=_psi.programinstanceid "
             + "           WHERE psi.programstageinstanceid=_pdv.programstageinstanceid "
             + "                  AND _pdv.dataelementid=" + dataElementId
             + "                 AND _psi.organisationunitid in (" + TextUtils.getCommaDelimitedString( orgunitIds )
-            + ") " + "                 AND _psi.programstageid = " + programStageId + " AND _psi.executionDate>='"
-            + startDate + "' AND _psi.executionDate <= '" + endDate + "' "
+            + ") " + "                 AND _psi.programstageid = " + programStageId
+            + " AND ( _psi.executionDate BETWEEN '" + startDate + "' AND '" + endDate + "') "
             + "                 AND ( DATE(_pdv.value) - DATE(" + compareSide + ") ) ";
     }
 
@@ -1018,22 +1021,38 @@ public class JdbcCaseAggregationConditionManager
         String dataElementId1, String programStageId2, String dataElementId2, String compareSide, String startDate,
         String endDate )
     {
-        return " EXISTS ( SELECT * FROM ( SELECT  * FROM patientdatavalue _pdv INNER JOIN programstageinstance _psi "
-            + "                         ON _pdv.programstageinstanceid=_psi.programstageinstanceid "
+        return " EXISTS ( SELECT * FROM ( SELECT _pdv.value FROM patientdatavalue _pdv "
+            + "                 INNER JOIN programstageinstance _psi ON _pdv.programstageinstanceid=_psi.programstageinstanceid "
             + "                 JOIN programinstance _pi ON _pi.programinstanceid=_psi.programinstanceid "
-            + "           WHERE psi.programstageinstanceid=_pdv.programstageinstanceid and _pdv.dataelementid= " + dataElementId1 
-            + "                 AND _psi.organisationunitid in ("+ TextUtils.getCommaDelimitedString( orgunitIds )+") "
-            + "                 AND _psi.programstageid = " + programStageId1
-            + "                 AND _psi.executionDate>='" + startDate + "'  "
-            + "                 AND _psi.executionDate <= '" + endDate + "' ) AS d1 cross join "
-            + "         (  SELECT * FROM patientdatavalue _pdv INNER JOIN programstageinstance _psi "
+            + "           WHERE psi.programstageinstanceid=_pdv.programstageinstanceid AND _pdv.dataelementid= "
+            + dataElementId1
+            + "                 AND _psi.organisationunitid in ("
+            + TextUtils.getCommaDelimitedString( orgunitIds )
+            + ") "
+            + "                 AND _psi.programstageid = "
+            + programStageId1
+            + "                 AND _psi.executionDate>='"
+            + startDate
+            + "'  "
+            + "                 AND _psi.executionDate <= '"
+            + endDate
+            + "' ) AS d1 cross join "
+            + "         (  SELECT _pdv.value FROM patientdatavalue _pdv INNER JOIN programstageinstance _psi "
             + "                        ON _pdv.programstageinstanceid=_psi.programstageinstanceid "
             + "                  JOIN programinstance _pi ON _pi.programinstanceid=_psi.programinstanceid "
-            + "           WHERE psi.programstageinstanceid=_pdv.programstageinstanceid and _pdv.dataelementid= " + dataElementId2
-            + "                 AND _psi.organisationunitid in ("+ TextUtils.getCommaDelimitedString( orgunitIds )+") "
-            + "                 AND _psi.programstageid =  " + programStageId2
-            + "                 AND _psi.executionDate>='" + startDate + "'  "
-            + "                 AND _psi.executionDate <= '" + endDate + "' ) AS d2 WHERE DATE(d1.value ) - DATE(d2.value) " + compareSide;
+            + "           WHERE psi.programstageinstanceid=_pdv.programstageinstanceid and _pdv.dataelementid= "
+            + dataElementId2
+            + "                 AND _psi.organisationunitid in ("
+            + TextUtils.getCommaDelimitedString( orgunitIds )
+            + ") "
+            + "                 AND _psi.programstageid =  "
+            + programStageId2
+            + "                 AND _psi.executionDate>='"
+            + startDate
+            + "'  "
+            + "                 AND _psi.executionDate <= '"
+            + endDate
+            + "' ) AS d2 WHERE DATE(d1.value ) - DATE(d2.value) " + compareSide;
     }
 
     /**
@@ -1045,9 +1064,9 @@ public class JdbcCaseAggregationConditionManager
     {
         String sql = "(select organisationunitid from programstageinstance where executiondate>= '" + startDate
             + "' and executiondate<='" + endDate + "')";
-        sql += " UNION ";
-        sql += "( select distinct organisationunitid from patient where registrationdate>='" + startDate
-            + "' and registrationdate<='" + endDate + "')";
+        sql += " UNION ALL ";
+        sql += "( select distinct organisationunitid from patient where registrationdate BETWEEN '" + startDate
+            + "' AND '" + endDate + "')";
 
         Collection<Integer> orgunitIds = new HashSet<Integer>();
         orgunitIds = jdbcTemplate.query( sql, new RowMapper<Integer>()
