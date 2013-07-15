@@ -762,27 +762,27 @@ DV.core.getUtil = function(dv) {
 
 				// Re-layout
 				layout = dv.api.layout.Layout(xLayout);
-				
+
 				if (layout) {
 					dimensions = [].concat(layout.columns, layout.rows, layout.filters);
-					
+
 					for (var i = 0, idNameMap = response.metaData.names, dimItems; i < dimensions.length; i++) {
 						dimItems = dimensions[i].items;
-						
+
 						if (Ext.isArray(dimItems) && dimItems.length) {
 							for (var j = 0, item; j < dimItems.length; j++) {
 								item = dimItems[j];
-								
+
 								if (Ext.isObject(item) && Ext.isString(idNameMap[item.id]) && !Ext.isString(item.name)) {
 									item.name = idNameMap[item.id] || '';
 								}
 							}
 						}
 					}
-					
+
 					return dv.util.chart.getExtendedLayout(layout);
 				}
-				
+
 				return undefined;
 			};
 
@@ -826,7 +826,7 @@ DV.core.getUtil = function(dv) {
 						header.index = i;
 
 						if (header.meta) {
-							
+
 							// Items
 							header.items = Ext.clone(xLayout.dimensionNameIdsMap[header.name]) || [];
 
@@ -865,7 +865,7 @@ DV.core.getUtil = function(dv) {
 
 					// idIndexOrder
 					for (var i = 0; i < axisDimensionNames.length; i++) {
-						idIndexOrder.push(response.nameHeaderMap[axisDimensionNames[i]].index);
+                        idIndexOrder.push(response.nameHeaderMap[axisDimensionNames[i]].index);
 
 						// If co exists in response, add co after dx
 						if (coHeader && axisDimensionNames[i] === dv.conf.finals.dimension.data.dimensionName) {
@@ -1812,17 +1812,28 @@ console.log("layout", layout);
         analytical2layout: function(analytical) {
             var dimConf = dv.conf.finals.dimension,
                 analytical = Ext.clone(analytical),
-                layoutConfig = Ext.clone(analytical);
+                layoutConfig = Ext.clone(analytical),
+                analyticalDims = [].concat(analytical.columns, analytical.rows, analytical.filters),
+                co = dimConf.category.objectName;
 
             layoutConfig.columns = [];
             layoutConfig.rows = [];
             layoutConfig.filters = analytical.filters;
+
+            // Remove co dimension
+            for (var i = 0; i < analyticalDims.length; i++) {
+                if (analyticalDims[i].dimension === co) {
+                    Ext.Array.erase(analyticalDims, i, 1);
+                    i--;
+                }
+            }
 
             // Series
             if (Ext.isArray(analytical.columns) && analytical.columns.length) {
                 for (var i = 0, dim; i < analytical.columns.length; i++) {
                     dim = analytical.columns[i];
 
+                    // add just one item - in or last item
                     if (!layoutConfig.columns.length && (dim.dimension === dimConf.indicator.objectName || (i === analytical.columns.length - 1))) {
                         layoutConfig.columns.push(dim);
                     }
