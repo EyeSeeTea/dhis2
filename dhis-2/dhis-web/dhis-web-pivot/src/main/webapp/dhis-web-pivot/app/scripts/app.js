@@ -4232,9 +4232,8 @@ Ext.onReady( function() {
 						{
 							text: PT.i18n.chart,
                             toggleGroup: 'module',
+                            menu: {},
 							handler: function(b) {
-                                //window.location.href = '../../dhis-web-visualizer/app/index.html';
-
                                 b.menu = getLinkMenu('../../dhis-web-visualizer/app/index.html', b);
                                 
                                 b.menu.on('destroy', function() {
@@ -4247,6 +4246,7 @@ Ext.onReady( function() {
 						{
 							text: PT.i18n.map,
                             toggleGroup: 'module',
+                            menu: {},
 							handler: function(b) {
                                 window.location.href = '../../dhis-web-mapping/app/index.html';
 							}
