@@ -27,10 +27,7 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -76,7 +73,6 @@ public class DefaultExportService
     @Override
     public MetaData getMetaData( Options options, TaskId taskId )
     {
-
         MetaData metaData = new MetaData();
         metaData.setCreated(new Date());
 
@@ -130,6 +126,56 @@ public class DefaultExportService
         if ( taskId != null )
         {
             notifier.notify(taskId, NotificationLevel.INFO, "Export done", true);
+        }
+
+        return metaData;
+    }
+
+    // Ovidiu
+    @Override
+    public MetaData getFilteredMetaData( FilterOptions filterOptions )
+    {
+        return getFilteredMetaData( filterOptions, null );
+    }
+
+    // Ovidiu
+    @Override
+    public MetaData getFilteredMetaData( FilterOptions filterOptions, TaskId taskId )
+    {
+        MetaData metaData = new MetaData();
+        metaData.setCreated(new Date());
+
+        log.info( "User '" + currentUserService.getCurrentUsername() + "' started export at " + new Date() );
+
+        for ( Map.Entry<String, List<String>> filterOptionEntry : filterOptions.getFilterOptions().entrySet() )
+        {
+            String className = filterOptionEntry.getKey();
+            for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
+            {
+                if ( entry.getValue().equals( className ) )
+                {
+                    Class<? extends IdentifiableObject> idObjectClass = entry.getKey();
+                    Collection<? extends IdentifiableObject> idObjects;
+                    idObjects = manager.getByUid( idObjectClass, filterOptionEntry.getValue() );
+
+                    if ( idObjects.isEmpty() )
+                    {
+                        continue;
+                    }
+
+                    String message = "Exporting " + idObjects.size() + " " + StringUtils.capitalize( entry.getValue() );
+                    log.info(message);
+
+                    ReflectionUtils.invokeSetterMethod( entry.getValue(), metaData, new ArrayList<IdentifiableObject>( idObjects ) );
+
+                    log.info("Export done at " + new Date());
+
+                    if ( taskId != null )
+                    {
+                        notifier.notify(taskId, NotificationLevel.INFO, "Export done", true);
+                    }
+                }
+            }
         }
 
         return metaData;

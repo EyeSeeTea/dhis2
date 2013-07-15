@@ -197,20 +197,6 @@ public class DefaultIdentifiableObjectManager
         return (Collection<T>) store.getAll();
     }
 
-    // OVIDIU
-    @Override
-    public <T extends IdentifiableObject> Collection<T> getByFilters( Class<T> clazz, Map<String, String> expressions)
-    {
-        GenericIdentifiableObjectStore store = getIdentifiableObjectStore( clazz );
-
-        if ( store == null)
-        {
-            return new ArrayList<T>();
-        }
-
-        return (Collection<T>) store.getByCriteria( expressions );
-    }
-
     @Override
     @SuppressWarnings("unchecked")
     public <T extends IdentifiableObject> Collection<T> getAllSorted( Class<T> clazz )

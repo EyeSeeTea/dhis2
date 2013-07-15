@@ -28,10 +28,7 @@ package org.hisp.dhis.api.controller;
  */
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;

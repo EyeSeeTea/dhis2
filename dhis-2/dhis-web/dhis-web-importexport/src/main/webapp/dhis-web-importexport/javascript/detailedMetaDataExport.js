@@ -70,7 +70,7 @@ jQuery(function ()
 // Export DetailedMetaData AJAX
 function exportDetailedMetaData()
 {
-    var url = "../api/detailedMetaData";
+    var url = "../api/detailedMetaData.xml";
 //    var format = $("#format").val();
 //    var compression = $("#compression").val();
 //
@@ -116,14 +116,16 @@ function createFilterJSON()
             for(var j = 0; j < values.length; j++)
             {
                 var filterItem = {};
-                filterItem.uid = values[j];
+                var item = lowercaseFirstLetter(metaDataArray[i].slice(0, metaDataArray[i].length - 1));
+                filterItem[item] = values[j];
                 filterCategory.push(filterItem);
             }
         }
 
         if(filterCategory.length != 0)
         {
-            filter[metaDataArray[i]] = filterCategory;
+            var metaDataCategory = lowercaseFirstLetter(metaDataArray[i]);
+            filter[metaDataCategory] = filterCategory;
         }
     }
 
