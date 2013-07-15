@@ -19,7 +19,7 @@ Ext.onReady( function() {
 
 	// Init
 
-	dv = DV.core.getInstance();	
+	dv = DV.core.getInstance();
 	DV.core.instances.push(dv);
 
 	DV.app.getInit = function(r) {
@@ -76,13 +76,13 @@ Ext.onReady( function() {
 			var id = dv.util.url.getUrlParam('id'),
                 analytical = dv.util.url.getUrlParam('analytical'),
                 layout;
-                
+
 			if (id) {
 				dv.util.chart.loadChart(id);
 			}
             else if (analytical === 'true' && DV.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && 'analytical' in JSON.parse(sessionStorage.getItem('dhis2'))) {
 				layout = dv.api.layout.Layout(dv.util.chart.analytical2layout(JSON.parse(sessionStorage.getItem('dhis2')).analytical));
-				
+
 				if (layout) {
 					dv.viewport.setFavorite(layout);
 				}
@@ -4376,7 +4376,7 @@ Ext.onReady( function() {
 				}
 			});
 
-			setFavorite = function(layout) {				
+			setFavorite = function(layout) {
 				var dimConf = dv.conf.finals.dimension,
 					xLayout,
 					dimMap,
@@ -4404,7 +4404,7 @@ Ext.onReady( function() {
 
 				// Indicators
 				dv.store.indicatorSelected.removeAll();
-				objectName = dimConf.indicator.objectName;				
+				objectName = dimConf.indicator.objectName;
 				if (dimMap[objectName]) {
 					dv.store.indicatorSelected.add(Ext.clone(recMap[objectName]));
 					dv.util.multiselect.filterAvailable({store: dv.store.indicatorAvailable}, {store: dv.store.indicatorSelected});

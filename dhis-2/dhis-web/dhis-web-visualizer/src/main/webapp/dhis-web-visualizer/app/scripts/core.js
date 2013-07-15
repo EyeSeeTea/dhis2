@@ -1813,32 +1813,26 @@ console.log("layout", layout);
             var dimConf = dv.conf.finals.dimension,
                 analytical = Ext.clone(analytical),
                 layoutConfig = Ext.clone(analytical),
-                analyticalDims = [].concat(analytical.columns, analytical.rows, analytical.filters),
                 co = dimConf.category.objectName;
 
             layoutConfig.columns = [];
             layoutConfig.rows = [];
             layoutConfig.filters = analytical.filters;
 
-            // Remove co dimension
-            for (var i = 0; i < analyticalDims.length; i++) {
-                if (analyticalDims[i].dimension === co) {
-                    Ext.Array.erase(analyticalDims, i, 1);
-                    i--;
-                }
-            }
-
             // Series
             if (Ext.isArray(analytical.columns) && analytical.columns.length) {
                 for (var i = 0, dim; i < analytical.columns.length; i++) {
                     dim = analytical.columns[i];
 
-                    // add just one item - in or last item
-                    if (!layoutConfig.columns.length && (dim.dimension === dimConf.indicator.objectName || (i === analytical.columns.length - 1))) {
-                        layoutConfig.columns.push(dim);
-                    }
-                    else {
-                        layoutConfig.filters.push(dim);
+                    if (dim.dimension !== co) {
+
+                        // add just one item - in or last item
+                        if (!layoutConfig.columns.length && (dim.dimension === dimConf.indicator.objectName || (i === analytical.columns.length - 1))) {
+                            layoutConfig.columns.push(dim);
+                        }
+                        else {
+                            layoutConfig.filters.push(dim);
+                        }
                     }
                 }
             }
@@ -1848,11 +1842,15 @@ console.log("layout", layout);
                 for (var i = 0, dim; i < analytical.rows.length; i++) {
                     dim = analytical.rows[i];
 
-                    if (!layoutConfig.rows.length && (dim.dimension === dimConf.indicator.objectName || (i === analytical.rows.length - 1))) {
-                        layoutConfig.rows.push(dim);
-                    }
-                    else {
-                        layoutConfig.filters.push(dim);
+                    if (dim.dimension !== co) {
+
+                        // add just one item - in or last item
+                        if (!layoutConfig.rows.length && (dim.dimension === dimConf.indicator.objectName || (i === analytical.rows.length - 1))) {
+                            layoutConfig.rows.push(dim);
+                        }
+                        else {
+                            layoutConfig.filters.push(dim);
+                        }
                     }
                 }
             }
