@@ -26,6 +26,9 @@
  */
 package org.hisp.dhis.dataadmin.action.locale;
 
+import java.util.List;
+import java.util.Map;
+
 import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.hisp.dhis.i18n.locale.I18nLocaleService;
 
@@ -73,6 +76,21 @@ public class ShowUpdateLocaleFormAction
     {
         this.id = id;
     }
+
+
+    private Map<String, String> availableLanguages;
+
+    public Map<String, String> getAvailableLanguages()
+    {
+        return availableLanguages;
+    }
+
+    private Map<String, String> availableCountries;
+
+    public Map<String, String> getAvailableCountries()
+    {
+        return availableCountries;
+    }
         
     // -------------------------------------------------------------------------
     // Action implementation
@@ -83,6 +101,9 @@ public class ShowUpdateLocaleFormAction
     {
     	i18nlocale = i18nLocaleService.getI18nLocale( id );
 
+    	availableLanguages = i18nLocaleService.getAvailableLanguages();
+    	availableCountries = i18nLocaleService.getAvailableCountries();
+    	
         return SUCCESS;
     }
 }

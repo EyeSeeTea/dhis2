@@ -45,6 +45,8 @@ public class Translation
     private int id;
 
     private String locale;
+    
+    private String country;
 
     private String property;
 

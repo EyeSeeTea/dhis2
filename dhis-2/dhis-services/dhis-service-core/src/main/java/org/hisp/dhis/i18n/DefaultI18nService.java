@@ -150,6 +150,11 @@ public class DefaultI18nService
 
         List<String> properties = getObjectPropertyNames( object );
 
+        // If I18nLocale is passed rather than java locale, we pass back the translation?
+        // But, where do we put the default value check?  At below 'for' statement?
+        
+        // What if this is old locale?  <-- distinqui
+        
         Collection<Translation> translations = translationService.getTranslations( getClassName( object ),
             getId( object ), locale );
 
@@ -159,6 +164,10 @@ public class DefaultI18nService
         {
             String value = translationMap.get( property );
 
+            // At here, if langauge & country specific locale does not exists,
+            // we can fall back to language specific one.
+            // If also need to retreive them as well...
+            
             if ( value != null && !value.isEmpty() )
             {
                 setProperty( object, "display", property, value );

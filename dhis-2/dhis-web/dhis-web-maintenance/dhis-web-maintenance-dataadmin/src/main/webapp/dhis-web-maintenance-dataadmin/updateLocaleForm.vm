@@ -40,13 +40,27 @@
 
 		<tr>
 			<td><label>$i18n.getString( "language" ) </label></td>
-			<td><input style="width: 330px;" type="text" id="language" name="language" value="$encoder.htmlEncode( $i18nLocale.language )" ></td>
+			<td>
+				<select id="language" name="language">
+					<option value="">[$i18n.getString( "locale_language_no_translation" )]</option>
+				#foreach( $language in $availableLanguages.entrySet() )
+					<option value="$language.value" #if( $language.value == $i18nLocale.language )selected="selected"#end>$language.key</option>
+				#end
+				</select>
+			</td>
 			<td></td>
 		</tr>
 
 		<tr>
 			<td><label>$i18n.getString( "country" ) </label></td>
-			<td><input style="width: 330px;" type="text" id="country" name="country" value="$encoder.htmlEncode( $i18nLocale.country )" ></td>
+			<td>
+				<select id="country" name="country">
+					<option value="">[$i18n.getString( "locale_country_no_translation" )]</option>
+				#foreach( $country in $availableCountries.entrySet() )
+					<option value="$country.value" #if( $country.value == $i18nLocale.country )selected="selected"#end>$country.key</option>
+				#end
+				</select>
+			</td>
 			<td></td>
 		</tr>
 		

@@ -27,7 +27,9 @@
 
 package org.hisp.dhis.i18n.locale;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.hisp.dhis.user.UserSettingService;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,8 +53,43 @@ public class DefaultI18nLocaleService
         this.i18nLocaleStore = i18nLocaleStore;
     }
 
-    private UserSettingService userSettingService;
+    private Map<String, String> languages;
 
+    public void setLanguages( Map<String, String> languages )
+    {
+        this.languages = languages;
+    }
+    
+    public Map<String, String> getLanguages()
+    {
+        //Collections.sort( languages );
+        return languages;
+    }
+
+/*    public String getFlagImage()
+    {
+        String flag = (String) getSystemSetting( KEY_FLAG );
+
+        return flag != null ? flag + ".png" : null;
+    }
+*/
+
+    private Map<String, String> countries;
+
+
+    public void setCountries( Map<String, String> countries )
+    {
+        this.countries = countries;
+    }
+    
+    public Map<String, String> getCountries()
+    {
+        //Collections.sort( countries );
+        return countries;
+    }
+
+    private UserSettingService userSettingService;
+    
     public void setUserSettingService( UserSettingService userSettingService )
     {
         this.userSettingService = userSettingService;
@@ -110,6 +147,16 @@ public class DefaultI18nLocaleService
         }
 
         return i18nLocale;
+    }
+
+    public Map<String, String> getAvailableLanguages()
+    {
+        return languages;
+    }
+
+    public Map<String, String> getAvailableCountries()
+    {
+        return countries;
     }
 
 }

@@ -100,11 +100,38 @@ public class HibernateTranslationStore
 
         criteria.add( Restrictions.eq( "className", className ) );
         criteria.add( Restrictions.eq( "id", id ) );
-        criteria.add( Restrictions.eq( "locale", locale.getName() ) );
+        //criteria.add( Restrictions.eq( "locale", locale.getName() ) );
+        criteria.add( Restrictions.eq( "locale", locale.getLanguage() ) );
+        criteria.add( Restrictions.eq( "country", locale.getCountry() ) );
 
         criteria.setCacheable( true );
 
+        
+        
         return criteria.list();
+    }
+    
+    
+    @SuppressWarnings( "unchecked" )
+    public Collection<Translation> getTranslations( String className, int id, I18nLocale locale )
+    {
+        Collection<Translation> abc = getTranslations(  className, id,  locale );
+        
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( Translation.class );
+
+        criteria.add( Restrictions.eq( "className", className ) );
+        criteria.add( Restrictions.eq( "id", id ) );
+        //criteria.add( Restrictions.eq( "locale", locale.getName() ) );
+        criteria.add( Restrictions.eq( "locale", locale.getLanguage() ) );
+        criteria.add( Restrictions.eq( "country", "" ));
+
+        criteria.setCacheable( true );
+
+        abc.addAll( criteria.list() );
+        
+        return abc;
     }
 
     @SuppressWarnings( "unchecked" )
