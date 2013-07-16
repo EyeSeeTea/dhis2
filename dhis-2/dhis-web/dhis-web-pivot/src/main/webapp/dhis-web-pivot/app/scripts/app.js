@@ -4152,41 +4152,6 @@ Ext.onReady( function() {
 					}
 				}
 			});
-			
-			getLinkMenu = function(url, anchorCmp) {
-				return Ext.create('Ext.menu.Menu', {
-					closeAction: 'destroy',
-					shadow: false,
-					showSeparator: false,
-					items: [
-						{
-							text: 'Go to charts', //i18n
-							handler: function() {
-								window.location.href = url;
-							}
-						},
-						{
-							text: 'View table as chart' + '&nbsp;&nbsp;', //i18n
-							disabled: !PT.isSessionStorage || !pt.layout,
-							handler: function() {
-								if (PT.isSessionStorage) {
-									pt.util.pivot.setSessionStorage(pt.layout, url);
-								}
-							}
-						}
-					],
-					listeners: {
-						show: function() {
-							pt.util.window.setAnchorPosition(this, anchorCmp);
-						},
-						hide: function() {
-							this.destroy();
-							
-							defaultButton.toggle();
-						}
-					}
-				});
-			};
 
 			centerRegion = Ext.create('Ext.panel.Panel', {
 				region: 'center',
@@ -4230,21 +4195,60 @@ Ext.onReady( function() {
                             toggleGroup: 'module',
                             menu: {},
 							handler: function(b) {
-                                b.menu = getLinkMenu('../../dhis-web-visualizer/app/index.html', b);
-                                
-                                b.menu.on('destroy', function() {
-									b.menu = null;
-								});
-								
+                                b.menu = Ext.create('Ext.menu.Menu', {
+                                    closeAction: 'destroy',
+                                    shadow: false,
+                                    showSeparator: false,
+                                    items: [
+                                        {
+                                            text: 'Go to charts', //i18n
+                                            handler: function() {
+                                                window.location.href = pt.baseUrl + '/dhis-web-visualizer/app/index.html';
+                                            }
+                                        },
+                                        '-',
+                                        {
+                                            text: 'View table as chart' + '&nbsp;&nbsp;', //i18n
+                                            disabled: !PT.isSessionStorage || !pt.layout,
+                                            handler: function() {
+                                                if (PT.isSessionStorage) {
+                                                    pt.util.pivot.setSessionStorage(pt.layout, 'analytical', '/dhis-web-visualizer/app/index.html?s=analytical');
+                                                }
+                                            }
+                                        },
+                                        {
+                                            text: 'View last chart' + '&nbsp;&nbsp;', //i18n
+                                            disabled: !PT.isSessionStorage || !sessionStorage.getItem('chart'),
+                                            handler: function() {
+                                                if (PT.isSessionStorage && sessionStorage.getItem('chart')) {
+                                                    window.location.href = pt.baseUrl + '/dhis-web-visualizer/app/index.html?s=chart';
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    listeners: {
+                                        show: function() {
+                                            pt.util.window.setAnchorPosition(b.menu, b);
+                                        },
+                                        hide: function() {
+                                            b.menu.destroy();
+                                            defaultButton.toggle();
+                                        },
+                                        destroy: function(m) {
+                                            b.menu = null;
+                                        }
+                                    }
+                                });
+
 								b.menu.show();
 							}
 						},
 						{
 							text: PT.i18n.map,
                             toggleGroup: 'module',
-                            menu: {},
+                            //menu: {},
 							handler: function(b) {
-                                window.location.href = '../../dhis-web-mapping/app/index.html';
+                                window.location.href = pt.baseUrl + '/dhis-web-mapping/app/index.html';
 							}
 						},
 						{
@@ -4256,7 +4260,7 @@ Ext.onReady( function() {
                             xtype: 'button',
                             text: PT.i18n.home,
                             handler: function() {
-                                window.location.href = '../../dhis-web-commons-about/redirect.action';
+                                window.location.href = pt.baseUrl + '/dhis-web-commons-about/redirect.action';
                             }
                         }
 					]

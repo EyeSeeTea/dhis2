@@ -677,6 +677,18 @@ DV.core.getUtil = function(dv) {
 			return paramString;
 		},
 
+		setSessionStorage: function(obj, session, url) {
+			if (DV.isSessionStorage) {
+				dhis2 = JSON.parse(sessionStorage.getItem('dhis2')) || {};
+				dhis2[name] = obj;
+				sessionStorage.setItem('dhis2', JSON.stringify(dhis2));
+
+				if (Ext.isString(url)) {
+					window.location.href = url + '?s=' + session;
+				}
+			}
+		},
+
 		createChart: function(layout, dv) {
 			var dimConf = dv.conf.finals.dimension,
 				getSyncronizedXLayout,
@@ -1767,6 +1779,11 @@ console.log("baseLineFields", store.baseLineFields);
 							dv.viewport.downloadButton.enable();
 						}
 
+						// Set session storage
+						if (DV.isSessionStorage) {
+							dv.util.chart.setSessionStorage(layout, 'chart');
+						}
+
 						dv.chart = chart;
 						dv.layout = layout;
 						dv.xLayout = xLayout;
@@ -1870,7 +1887,7 @@ console.log("layout", layout);
                     }
                 }
             }
-console.log(Ext.clone(layoutConfig));
+
             return layoutConfig;
         }
 	};

@@ -74,18 +74,18 @@ Ext.onReady( function() {
 
 			// Look for url params
 			var id = dv.util.url.getUrlParam('id'),
-                analytical = dv.util.url.getUrlParam('analytical'),
+                session = dv.util.url.getUrlParam('s'),
                 layout;
 
 			if (id) {
 				dv.util.chart.loadChart(id);
 			}
-            else if (analytical === 'true' && DV.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && 'analytical' in JSON.parse(sessionStorage.getItem('dhis2'))) {
-                var json = JSON.parse(sessionStorage.getItem('dhis2')).analytical;
+            else if (Ext.isString(session) && DV.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
+                var json = JSON.parse(sessionStorage.getItem('dhis2'))[session];
 
                 var conv = dv.util.chart.analytical2layout(json);
 
-                layout = dv.api.layout.Layout(conv);
+                var layout = dv.api.layout.Layout(conv);
 
                 //layout = dv.api.layout.Layout(dv.util.chart.analytical2layout(JSON.parse(sessionStorage.getItem('dhis2')).analytical));
 
@@ -387,15 +387,15 @@ Ext.onReady( function() {
 
 		util.window.setAnchorPosition = function(w, target) {
 			var vpw = dv.viewport.getWidth(),
-				targetx = target ? target.getPosition()[0] : 4,
+				targetX = target ? target.getPosition()[0] : 4,
 				winw = w.getWidth(),
 				y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
 
-			if ((targetx + winw) > vpw) {
+			if ((targetX + winw) > vpw) {
 				w.setPosition((vpw - winw - 2), y);
 			}
 			else {
-				w.setPosition(targetx, y);
+				w.setPosition(targetX, y);
 			}
 		};
 
@@ -4300,6 +4300,20 @@ Ext.onReady( function() {
 				}
 			});
 
+			defaultButton = Ext.create('Ext.button.Button', {
+				text: DV.i18n.chart,
+				toggleGroup: 'module',
+				pressed: true,
+				handler: function() {
+					if (!this.pressed) {
+						this.toggle();
+					}
+				}
+			});
+
+			getLinkMenu = function(anchorCmp) {
+			};
+
 			centerRegion = Ext.create('Ext.panel.Panel', {
 				region: 'center',
 				bodyStyle: 'padding:0; text-align:center',
@@ -4343,22 +4357,64 @@ Ext.onReady( function() {
 						'->',
 						{
 							text: DV.i18n.table,
-							toggleGroup: 'module',
+                            toggleGroup: 'module',
+                            menu: {},
 							handler: function(b) {
-								window.location.href = '../../dhis-web-pivot/app/index.html';
+                                b.menu = Ext.create('Ext.menu.Menu', {
+                                    closeAction: 'destroy',
+                                    shadow: false,
+                                    showSeparator: false,
+                                    items: [
+                                        {
+                                            text: 'Go to pivot tables', //i18n
+                                            handler: function() {
+                                                window.location.href = dv.baseUrl + '/dhis-web-pivot/app/index.html';
+                                            }
+                                        },
+                                        '-',
+                                        {
+                                            text: 'View chart as pivot table' + '&nbsp;&nbsp;', //i18n
+                                            disabled: !DV.isSessionStorage || !dv.layout,
+                                            handler: function() {
+                                                if (DV.isSessionStorage) {
+                                                    dv.util.pivot.setSessionStorage(dv.layout, 'analytical', '/dhis-web-pivot/app/index.html?s=analytical');
+                                                }
+                                            }
+                                        },
+                                        {
+                                            text: 'View last pivot table' + '&nbsp;&nbsp;', //i18n
+                                            disabled: !DV.isSessionStorage || !sessionStorage.getItem('table'),
+                                            handler: function() {
+                                                if (DV.isSessionStorage && sessionStorage.getItem('chart')) {
+                                                    window.location.href = dv.baseUrl + '/dhis-web-pivot/app/index.html?s=table';
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    listeners: {
+                                        show: function() {
+                                            dv.util.window.setAnchorPosition(b.menu, b);
+                                        },
+                                        hide: function() {
+                                            b.menu.destroy();
+                                            defaultButton.toggle();
+                                        },
+                                        destroy: function(m) {
+                                            b.menu = null;
+                                        }
+                                    }
+                                });
+
+								b.menu.show();
 							}
 						},
-						{
-							text: DV.i18n.chart,
-							toggleGroup: 'module',
-							pressed: true,
-							handler: dv.util.button.type.toggleHandler
-						},
+                        defaultButton,
 						{
 							text: DV.i18n.map,
-							toggleGroup: 'module',
+                            toggleGroup: 'module',
+                            menu: {},
 							handler: function(b) {
-								window.location.href = '../../dhis-web-mapping/app/index.html';
+                                window.location.href = dv.baseUrl + '/dhis-web-mapping/app/index.html';
 							}
 						},
 						getSeparator(),
@@ -4366,7 +4422,7 @@ Ext.onReady( function() {
 							xtype: 'button',
 							text: DV.i18n.home,
 							handler: function() {
-								window.location.href = '../../dhis-web-commons-about/redirect.action';
+								window.location.href = dv.baseUrl + '/dhis-web-commons-about/redirect.action';
 							}
 						});
 

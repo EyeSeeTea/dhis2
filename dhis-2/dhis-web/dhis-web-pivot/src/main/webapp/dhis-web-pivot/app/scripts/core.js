@@ -785,14 +785,14 @@ PT.core.getUtils = function(pt) {
 			return paramString;
 		},
 
-		setSessionStorage: function(obj, url) {
+		setSessionStorage: function(obj, session, url) {
 			if (PT.isSessionStorage) {
 				dhis2 = JSON.parse(sessionStorage.getItem('dhis2')) || {};
-				dhis2.analytical = obj;
+				dhis2[name] = obj;
 				sessionStorage.setItem('dhis2', JSON.stringify(dhis2));
 
 				if (Ext.isString(url)) {
-					window.location.href = url + '?analytical=true';
+					window.location.href = url + '?s=' + session;
 				}
 			}
 		},
@@ -935,7 +935,7 @@ PT.core.getUtils = function(pt) {
 				
 					if (layout) {
 						dimensions = [].concat(layout.columns, layout.rows, layout.filters);
-console.log("dimensions", dimensions);						
+						
 						for (var i = 0, idNameMap = response.metaData.names, dimItems; i < dimensions.length; i++) {							
 							dimItems = dimensions[i].items;
 							
@@ -1291,9 +1291,7 @@ console.log("aAllObjects", aAllObjects);
 				for (var key in uuidDimUuidsMap) {
 					if (uuidDimUuidsMap.hasOwnProperty(key)) {
 						valueElement = Ext.get(key);
-						//valueElement.dom.setAttribute('onmouseover', 'pt.util.pivot.onMouseOver(this.id, "onmouseover");');
-						//valueElement.dom.setAttribute('onmouseout', 'pt.util.pivot.onMouseOver(this.id, "onmouseout");');
-						
+												
 						valueElement.dom.setAttribute('onclick', 'pt.util.pivot.onMouseClick(this.id);');
 					}
 				}
@@ -2039,15 +2037,17 @@ console.log("aAllObjects", aAllObjects);
 						pt.uuidDimUuidsMap = uuidDimUuidsMap;
 						pt.uuidObjectMap = uuidObjectMap;
 						
-						// Add value event handlers if browser supports html5
+						// Add value event handlers, set session storage
 						if (PT.isSessionStorage) {
 							setMouseHandlers();
+							pt.util.pivot.setSessionStorage(layout, 'table');
 						}
 
 						// Add objects to instance
 						pt.layout = layout;
 						pt.xLayout = xLayout;
 						pt.xResponse = xResponse;
+						
 console.log("xResponse", xResponse);
 console.log("xLayout", xLayout);
 					}
@@ -2146,10 +2146,10 @@ console.log("xLayout", xLayout);
 				showSeparator: false,
 				items: [
 					{
-						text: 'View as chart', //i18n
+						text: 'View selection as chart' + '&nbsp;&nbsp;', //i18n
 						param: 'chart',
 						handler: function() {
-							that.setSessionStorage(layoutConfig, pt.baseUrl + '/dhis-web-visualizer/app/index.html');
+							that.setSessionStorage(layoutConfig, 'analytical', pt.baseUrl + '/dhis-web-visualizer/app/index.html?s=analytical');
 						},
 						listeners: {
 							render: function() {
@@ -2164,8 +2164,9 @@ console.log("xLayout", xLayout);
 						}
 					},
 					{
-						text: 'View as map', //i18n
+						text: 'View selection as map' + '&nbsp;&nbsp;', //i18n
 						param: 'map',
+						disabled: true,
 						handler: function() {
 							that.setSessionStorage(layoutConfig, pt.baseUrl + '/dhis-web-mapping/app/index.html');
 						}
