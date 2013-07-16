@@ -1811,24 +1811,32 @@ console.log("layout", layout);
 
         analytical2layout: function(analytical) {
             var dimConf = dv.conf.finals.dimension,
-                analytical = Ext.clone(analytical),
-                layoutConfig = Ext.clone(analytical),
-                co = dimConf.category.objectName;
+                co = dimConf.category.objectName,
+                layoutConfig = Ext.clone(analytical);
+
+            analytical = Ext.clone(analytical);
 
             layoutConfig.columns = [];
             layoutConfig.rows = [];
-            layoutConfig.filters = analytical.filters;
 
             // Series
             if (Ext.isArray(analytical.columns) && analytical.columns.length) {
                 for (var i = 0, dim; i < analytical.columns.length; i++) {
                     dim = analytical.columns[i];
 
-                    if (dim.dimension !== co) {
+                    if (dim.dimension === co) {
+                        continue;
+                    }
 
-                        // add just one item - in or last item
-                        if (!layoutConfig.columns.length && (dim.dimension === dimConf.indicator.objectName || (i === analytical.columns.length - 1))) {
-                            layoutConfig.columns.push(dim);
+                    if (!layoutConfig.columns.length) {
+                        layoutConfig.columns.push(dim);
+                    }
+                    else {
+
+                        // in or last item (one only) - rest as filter
+                        if (dim.dimension === dimConf.indicator.objectName || (i === analytical.columns.length - 1)) {
+                            layoutConfig.filters = layoutConfig.filters.concat(layoutConfig.columns);
+                            layoutConfig.columns = [dim];
                         }
                         else {
                             layoutConfig.filters.push(dim);
@@ -1842,11 +1850,19 @@ console.log("layout", layout);
                 for (var i = 0, dim; i < analytical.rows.length; i++) {
                     dim = analytical.rows[i];
 
-                    if (dim.dimension !== co) {
+                    if (dim.dimension === co) {
+                        continue;
+                    }
 
-                        // add just one item - in or last item
-                        if (!layoutConfig.rows.length && (dim.dimension === dimConf.indicator.objectName || (i === analytical.rows.length - 1))) {
-                            layoutConfig.rows.push(dim);
+                    if (!layoutConfig.rows.length) {
+                        layoutConfig.rows.push(dim);
+                    }
+                    else {
+
+                        // in or last item (one only) - rest as filter
+                        if (dim.dimension === dimConf.indicator.objectName || (i === analytical.rows.length - 1)) {
+                            layoutConfig.filters = layoutConfig.filters.concat(layoutConfig.rows);
+                            layoutConfig.rows = [dim];
                         }
                         else {
                             layoutConfig.filters.push(dim);
@@ -1854,7 +1870,7 @@ console.log("layout", layout);
                     }
                 }
             }
-
+console.log(Ext.clone(layoutConfig));
             return layoutConfig;
         }
 	};

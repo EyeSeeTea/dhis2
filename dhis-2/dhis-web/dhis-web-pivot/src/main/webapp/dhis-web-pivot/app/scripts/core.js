@@ -2149,7 +2149,7 @@ console.log("xLayout", xLayout);
 						text: 'View as chart', //i18n
 						param: 'chart',
 						handler: function() {
-							that.setSessionStorage(layoutConfig, '../../dhis-web-visualizer/app/index.html');
+							that.setSessionStorage(layoutConfig, pt.baseUrl + '/dhis-web-visualizer/app/index.html');
 						},
 						listeners: {
 							render: function() {
@@ -2167,7 +2167,7 @@ console.log("xLayout", xLayout);
 						text: 'View as map', //i18n
 						param: 'map',
 						handler: function() {
-							that.setSessionStorage(layoutConfig, '../../dhis-web-mapping/app/index.html');
+							that.setSessionStorage(layoutConfig, pt.baseUrl + '/dhis-web-mapping/app/index.html');
 						}
 					}		
 				]

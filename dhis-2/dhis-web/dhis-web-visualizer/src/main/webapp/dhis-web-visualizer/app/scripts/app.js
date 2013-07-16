@@ -81,7 +81,13 @@ Ext.onReady( function() {
 				dv.util.chart.loadChart(id);
 			}
             else if (analytical === 'true' && DV.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && 'analytical' in JSON.parse(sessionStorage.getItem('dhis2'))) {
-				layout = dv.api.layout.Layout(dv.util.chart.analytical2layout(JSON.parse(sessionStorage.getItem('dhis2')).analytical));
+                var json = JSON.parse(sessionStorage.getItem('dhis2')).analytical;
+
+                var conv = dv.util.chart.analytical2layout(json);
+
+                layout = dv.api.layout.Layout(conv);
+
+                //layout = dv.api.layout.Layout(dv.util.chart.analytical2layout(JSON.parse(sessionStorage.getItem('dhis2')).analytical));
 
 				if (layout) {
 					dv.viewport.setFavorite(layout);
