@@ -788,11 +788,11 @@ PT.core.getUtils = function(pt) {
 		setSessionStorage: function(obj, session, url) {
 			if (PT.isSessionStorage) {
 				dhis2 = JSON.parse(sessionStorage.getItem('dhis2')) || {};
-				dhis2[name] = obj;
+				dhis2[session] = obj;
 				sessionStorage.setItem('dhis2', JSON.stringify(dhis2));
 
 				if (Ext.isString(url)) {
-					window.location.href = url + '?s=' + session;
+					window.location.href = url;
 				}
 			}
 		},

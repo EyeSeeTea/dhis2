@@ -81,13 +81,7 @@ Ext.onReady( function() {
 				dv.util.chart.loadChart(id);
 			}
             else if (Ext.isString(session) && DV.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
-                var json = JSON.parse(sessionStorage.getItem('dhis2'))[session];
-
-                var conv = dv.util.chart.analytical2layout(json);
-
-                var layout = dv.api.layout.Layout(conv);
-
-                //layout = dv.api.layout.Layout(dv.util.chart.analytical2layout(JSON.parse(sessionStorage.getItem('dhis2')).analytical));
+                layout = dv.api.layout.Layout(dv.util.chart.analytical2layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]));
 
 				if (layout) {
 					dv.viewport.setFavorite(layout);
@@ -534,7 +528,7 @@ Ext.onReady( function() {
 					return x;
 				}
 
-				return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, dv.conf.pivot.digitGroupSeparator[nf]);
+				return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, dv.conf.chart.digitGroupSeparator[nf]);
 			}
 		};
 
@@ -4377,17 +4371,15 @@ Ext.onReady( function() {
                                             disabled: !DV.isSessionStorage || !dv.layout,
                                             handler: function() {
                                                 if (DV.isSessionStorage) {
-                                                    dv.util.pivot.setSessionStorage(dv.layout, 'analytical', '/dhis-web-pivot/app/index.html?s=analytical');
+                                                    dv.util.chart.setSessionStorage(dv.layout, 'analytical', '/dhis-web-pivot/app/index.html?s=analytical');
                                                 }
                                             }
                                         },
                                         {
                                             text: 'View last pivot table' + '&nbsp;&nbsp;', //i18n
-                                            disabled: !DV.isSessionStorage || !sessionStorage.getItem('table'),
+                                            disabled: !(DV.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['table']),
                                             handler: function() {
-                                                if (DV.isSessionStorage && sessionStorage.getItem('chart')) {
-                                                    window.location.href = dv.baseUrl + '/dhis-web-pivot/app/index.html?s=table';
-                                                }
+                                                window.location.href = dv.baseUrl + '/dhis-web-pivot/app/index.html?s=table';
                                             }
                                         }
                                     ],

@@ -81,10 +81,19 @@ Ext.onReady( function() {
 			pt.cmp.dimension.panels[0].expand();
 
 			// Load favorite from url
-			var id = pt.util.url.getUrlParam('id');
+			var id = pt.util.url.getUrlParam('id'),
+                session = pt.util.url.getUrlParam('s'),
+                layout;
 
 			if (id) {
 				pt.util.pivot.loadTable(id);
+			}
+            else if (Ext.isString(session) && PT.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
+                layout = pt.api.layout.Layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]);
+
+				if (layout) {
+					pt.viewport.setFavorite(layout);
+				}
 			}
 
 			// Fade in
@@ -4218,11 +4227,9 @@ Ext.onReady( function() {
                                         },
                                         {
                                             text: 'View last chart' + '&nbsp;&nbsp;', //i18n
-                                            disabled: !PT.isSessionStorage || !sessionStorage.getItem('chart'),
+                                            disabled: !(PT.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['chart']),
                                             handler: function() {
-                                                if (PT.isSessionStorage && sessionStorage.getItem('chart')) {
-                                                    window.location.href = pt.baseUrl + '/dhis-web-visualizer/app/index.html?s=chart';
-                                                }
+												window.location.href = pt.baseUrl + '/dhis-web-visualizer/app/index.html?s=chart';
                                             }
                                         }
                                     ],
