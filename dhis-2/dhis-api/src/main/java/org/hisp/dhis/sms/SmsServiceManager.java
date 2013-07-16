@@ -1,3 +1,5 @@
+package org.hisp.dhis.sms;
+
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -25,32 +27,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.sms.parse;
-
-import java.util.HashMap;
 import java.util.Map;
 
- /**
- * @author Nguyen Kim Lai
- */
-public class DhisMessageAlertParser 
-    implements IParser
-{    
-    @Override
-    public Map<String, String> parse( String sms )
-    {
-        HashMap<String, String> output = new HashMap<String, String>();
-        
-        String userGroupCode = sms.substring( 0, sms.indexOf( " " ) );
-        String content = sms.substring( userGroupCode.length());
-        
-        output.put( userGroupCode.trim(), content.trim() );
-        
-        return output;
-    }
+import org.hisp.dhis.sms.outbound.OutboundSms;
 
-    @Override
-    public void setSeparator( String separator )
-    {
-    }
+public interface SmsServiceManager
+{
+    Map<String, String> getGatewayMap();
+
+    void stopService();
+
+    void startService();
+
+    void reloadConfig()
+        throws SmsServiceException;
+
+    String getServiceStatus();
+
+    String getMessageStatus();
+
+    String getDefaultGateway();
+
+    String sendMessage( OutboundSms sms, String gatewayId )
+        throws SmsServiceException;
+
+    String sendMessage( OutboundSms sms )
+        throws SmsServiceException;
+
+    String sendMessage( String message, String phoneNumber )
+        throws SmsServiceException;
 }

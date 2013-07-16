@@ -1,4 +1,4 @@
-package org.hisp.dhis.sms.parse;
+package org.hisp.dhis.sms.manager;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,64 +27,87 @@ package org.hisp.dhis.sms.parse;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
+import org.hisp.dhis.sms.SmsServiceException;
+import org.hisp.dhis.sms.SmsServiceManager;
+import org.hisp.dhis.sms.outbound.OutboundSms;
 
-import org.hisp.dhis.smscommand.SMSCommand;
-
-public class J2MEDataEntryParser
-    implements IParser
+public class DefaultSmsServiceManager
+    implements SmsServiceManager
 {
-    private SMSCommand smsCommand;
-
-    public J2MEDataEntryParser()
-    {
-    }
-    
-    public J2MEDataEntryParser( SMSCommand smsCommand )
-    {
-        this.smsCommand = smsCommand;
-    }
-    
-    @Override
-    public Map<String, String> parse( String sms )
-    {
-        String[] keyValuePairs = null;
-        
-        if ( sms.indexOf( "#" ) > -1 )
-        {
-            keyValuePairs = sms.split( "#" );
-        }
-        else
-        {
-            keyValuePairs = new String[1];
-            keyValuePairs[0] = sms;
-        }
-
-        Map<String, String> keyValueMap = new HashMap<String, String>();
-        for ( String keyValuePair : keyValuePairs )
-        {
-            String[] token = keyValuePair.split( Pattern.quote( smsCommand.getSeparator() ) );
-            keyValueMap.put( token[0], token[1] );
-        }
-
-        return keyValueMap;
-    }
 
     @Override
-    public void setSeparator( String separator )
+    public Map<String, String> getGatewayMap()
     {
         // TODO Auto-generated method stub
+        return null;
     }
 
-    public SMSCommand getSmsCommand()
+    @Override
+    public void stopService()
     {
-        return smsCommand;
+        // TODO Auto-generated method stub
+
     }
 
-    public void setSmsCommand( SMSCommand smsCommand )
+    @Override
+    public void startService()
     {
-        this.smsCommand = smsCommand;
+        // TODO Auto-generated method stub
+
     }
+
+    @Override
+    public void reloadConfig()
+        throws SmsServiceException
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public String getServiceStatus()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getMessageStatus()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getDefaultGateway()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String sendMessage( OutboundSms sms, String gatewayId )
+        throws SmsServiceException
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String sendMessage( OutboundSms sms )
+        throws SmsServiceException
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String sendMessage( String message, String phoneNumber )
+        throws SmsServiceException
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
