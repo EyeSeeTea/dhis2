@@ -4367,7 +4367,7 @@ Ext.onReady( function() {
                                         },
                                         '-',
                                         {
-                                            text: 'View chart as pivot table' + '&nbsp;&nbsp;', //i18n
+                                            text: 'View chart as table' + '&nbsp;&nbsp;', //i18n
                                             disabled: !DV.isSessionStorage || !dv.layout,
                                             handler: function() {
                                                 if (DV.isSessionStorage) {
@@ -4376,7 +4376,7 @@ Ext.onReady( function() {
                                             }
                                         },
                                         {
-                                            text: 'View last pivot table' + '&nbsp;&nbsp;', //i18n
+                                            text: 'View last table' + '&nbsp;&nbsp;', //i18n
                                             disabled: !(DV.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['table']),
                                             handler: function() {
                                                 window.location.href = dv.baseUrl + '/dhis-web-pivot/app/index.html?s=table';
@@ -4404,7 +4404,7 @@ Ext.onReady( function() {
 						{
 							text: DV.i18n.map,
                             toggleGroup: 'module',
-                            menu: {},
+                            //menu: {},
 							handler: function(b) {
                                 window.location.href = dv.baseUrl + '/dhis-web-mapping/app/index.html';
 							}
