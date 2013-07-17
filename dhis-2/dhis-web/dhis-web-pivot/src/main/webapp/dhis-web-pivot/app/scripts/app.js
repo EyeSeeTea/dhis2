@@ -841,11 +841,13 @@ Ext.onReady( function() {
 				}
 			],
 			listeners: {
-				show: function(w) {
-					pt.util.window.setAnchorPosition(w, pt.viewport.layoutButton);
+				show: function(w) {					
+					if (pt.viewport.layoutButton.rendered) {
+						pt.util.window.setAnchorPosition(w, pt.viewport.layoutButton);
 
-					if (!w.hasHideOnBlurHandler) {
-						pt.util.window.addHideOnBlurHandler(w);
+						if (!w.hasHideOnBlurHandler) {
+							pt.util.window.addHideOnBlurHandler(w);
+						}
 					}
 				}
 			}
@@ -1169,10 +1171,12 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function(w) {
-					pt.util.window.setAnchorPosition(w, pt.viewport.optionsButton);
+					if (pt.viewport.optionsButton.rendered) {
+						pt.util.window.setAnchorPosition(w, pt.viewport.optionsButton);
 
-					if (!w.hasHideOnBlurHandler) {
-						pt.util.window.addHideOnBlurHandler(w);
+						if (!w.hasHideOnBlurHandler) {
+							pt.util.window.addHideOnBlurHandler(w);
+						}
 					}
 
 					if (!legendSet.store.isLoaded) {
@@ -4526,6 +4530,11 @@ Ext.onReady( function() {
 				listeners: {
 					render: function(vp) {
 						pt.viewport = vp;
+
+						pt.viewport.layoutWindow = PT.app.LayoutWindow();
+						pt.viewport.layoutWindow.hide();
+						pt.viewport.optionsWindow = PT.app.OptionsWindow();
+						pt.viewport.optionsWindow.hide();						
 					},
 					afterrender: function() {
 						pt.init.afterRender();
@@ -4559,10 +4568,6 @@ Ext.onReady( function() {
 		pt.cmp = PT.app.getCmp();
 
 		pt.viewport = createViewport();
-		pt.viewport.layoutWindow = PT.app.LayoutWindow();
-		pt.viewport.layoutWindow.hide();
-		pt.viewport.optionsWindow = PT.app.OptionsWindow();
-		pt.viewport.optionsWindow.hide();
 		
 		pt.uuidUuidsMap = {};
 	};
