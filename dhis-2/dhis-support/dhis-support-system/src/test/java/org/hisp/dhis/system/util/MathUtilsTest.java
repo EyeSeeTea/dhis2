@@ -99,6 +99,9 @@ public class MathUtilsTest
         assertTrue( MathUtils.isNumeric( "1.234" ) );
         assertTrue( MathUtils.isNumeric( "-1234" ) );
         assertTrue( MathUtils.isNumeric( "-12.34" ) );
+        assertTrue( MathUtils.isNumeric( "-0.34" ) );
+        assertTrue( MathUtils.isNumeric( "6.34E11" ) );
+        assertTrue( MathUtils.isNumeric( "3.342E7" ) );
 
         assertFalse( MathUtils.isNumeric( "Hey" ) );
         assertFalse( MathUtils.isNumeric( "45 Perinatal Condition" ) );
@@ -117,6 +120,13 @@ public class MathUtilsTest
         assertFalse( MathUtils.isNumeric( "0,1" ) );
         assertFalse( MathUtils.isNumeric( "0," ) );
         assertFalse( MathUtils.isNumeric( "0." ) );
+        assertFalse( MathUtils.isNumeric( "01" ) );
+        assertFalse( MathUtils.isNumeric( "001" ) );
+        assertFalse( MathUtils.isNumeric( "00.23" ) );
+        assertFalse( MathUtils.isNumeric( "01.23" ) );
+        assertFalse( MathUtils.isNumeric( "4.23E" ) );
+        assertFalse( MathUtils.isNumeric( "4.23Ef" ) );
+        assertFalse( MathUtils.isNumeric( "E5" ) );
         assertFalse( MathUtils.isNumeric( null ) );
     }
 
@@ -133,6 +143,9 @@ public class MathUtilsTest
         assertTrue( MathUtils.isNumericLenient( "1.234" ) );
         assertTrue( MathUtils.isNumericLenient( "-1234" ) );
         assertTrue( MathUtils.isNumericLenient( "-12.34" ) );
+        assertTrue( MathUtils.isNumericLenient( "-0.34" ) );
+        assertTrue( MathUtils.isNumericLenient( "6.34E11" ) );
+        assertTrue( MathUtils.isNumericLenient( "3.342E7" ) );
 
         assertFalse( MathUtils.isNumericLenient( "Hey" ) );
         assertFalse( MathUtils.isNumericLenient( "45 Perinatal Condition" ) );
@@ -152,6 +165,9 @@ public class MathUtilsTest
         assertFalse( MathUtils.isNumericLenient( "0,1" ) );
         assertFalse( MathUtils.isNumericLenient( "0," ) );
         assertFalse( MathUtils.isNumericLenient( "0." ) );
+        assertFalse( MathUtils.isNumericLenient( "4.23E" ) );
+        assertFalse( MathUtils.isNumericLenient( "4.23Ef" ) );
+        assertFalse( MathUtils.isNumericLenient( "E5" ) );
         assertFalse( MathUtils.isNumericLenient( null ) );
     }
     

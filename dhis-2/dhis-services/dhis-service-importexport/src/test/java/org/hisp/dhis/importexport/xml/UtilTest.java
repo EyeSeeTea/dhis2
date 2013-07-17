@@ -1,7 +1,7 @@
-package org.hisp.dhis.sms.outbound;
+package org.hisp.dhis.importexport.xml;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2005, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -11,7 +11,7 @@ package org.hisp.dhis.sms.outbound;
  * * Redistributions in binary form must reproduce the above copyright notice,
  *   this list of conditions and the following disclaimer in the documentation
  *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
+ * * Neither the name of the <ORGANIZATION> nor the names of its contributors may
  *   be used to endorse or promote products derived from this software without
  *   specific prior written permission.
  *
@@ -27,43 +27,31 @@ package org.hisp.dhis.sms.outbound;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
-import org.hisp.dhis.sms.SmsServiceException;
-import org.hisp.dhis.sms.config.SmsConfigurable;
+import java.text.ParseException;
+import junit.framework.Assert;
+import org.junit.Test;
 
 /**
- * OutboundSmsService provides support for sending SMSes.
+ *
+ * @author bobj
  */
-public interface OutboundSmsService
-    extends SmsConfigurable
-{
-    String ID = OutboundSmsService.class.getName();
+public class UtilTest {
 
-    boolean isEnabled();
-
-    /**
-     * Send an SMS message.
-     * 
-     * @param sms the message to be sent
-     * @throws SmsServiceException if unable to sent Message
-     */
-    String sendMessage( OutboundSms sms, String gatewayId )
-        throws SmsServiceException;
-
-    String sendMessage( OutboundSms sms )
-        throws SmsServiceException;
-
-    String sendMessage( String message, String phoneNumber )
-        throws SmsServiceException;
-
-    List<OutboundSms> getAllOutboundSms();
-
-    int saveOutboundSms( OutboundSms sms );
-
-    void updateOutboundSms( OutboundSms sms );
-
-    void deleteById( Integer outboundSmsId );
-
-    List<OutboundSms> getOutboundSms( OutboundSmsStatus status );
+    @Test
+    public void testCoords()
+    {
+        String src = "34.5,65,7 1234.67890,0.0056";
+        String decimals = "4";
+        
+        String expected = "<coord>34.5000,65.0000</coord><coord>1234.6789,0.0056</coord>";
+        
+        try
+        {
+            String result = Util.gmlToCoords( src, decimals );
+            Assert.assertEquals( expected, result );
+        } catch ( ParseException ex )
+        {
+            Assert.fail( ex.getMessage() );
+        }
+    }
 }
