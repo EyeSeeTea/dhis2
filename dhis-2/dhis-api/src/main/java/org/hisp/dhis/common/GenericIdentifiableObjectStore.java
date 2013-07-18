@@ -208,13 +208,4 @@ public interface GenericIdentifiableObjectStore<T>
      * @return list of objects.
      */
     List<T> getByUser( User user );
-
-    // OVIDIU
-    /**
-     * Retrieves a List based on the given Criterions.
-     *
-     * @param expressions the Criterions for the Criteria.
-     * @return a List with objects of the implementation Class type.
-     */
-    List<T> getByCriteria( Map<String, String> expressions );
 }

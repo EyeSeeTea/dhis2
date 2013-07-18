@@ -30,7 +30,7 @@ jQuery(function ()
             } else
             {
                 $("#labelSelectAll" + metaDataCategoryName).css({"color" : "black"});
-                $("#divSelectAll" + metaDataCategoryName).prop("checked", false);
+                $("#checkboxSelectAll" + metaDataCategoryName).prop("checked", false);
                 $("#divSelectAll" + metaDataCategoryName).hide();
                 $("#label" + metaDataCategoryName).css({"color" : "black"});
                 removeMetaDataDesign(metaDataCategoryName);
@@ -95,7 +95,7 @@ function exportDetailedMetaData()
         {
             console.log("Exported JSON: " + JSON.stringify(createFilterJSON()));
             console.log(response);
-            window.location = "../api/detailedMetaData/getFile";
+            window.location = "../api/detailedMetaData/getMetaDataFile";
         },
         error: function()
         {
@@ -168,7 +168,7 @@ function deselectAll()
         {
             $("#checkbox" + metaDataArray[i]).prop("checked", false);
             $("#label" + metaDataArray[i]).css({"color" : "black"});
-            $("#divSelectAll" + metaDataArray[i]).prop("checked", false);
+            $("#checkboxSelectAll" + metaDataArray[i]).prop("checked", false);
             $("#divSelectAll" + metaDataArray[i]).hide();
             removeMetaDataDesign(metaDataArray[i]);
         }
@@ -294,7 +294,7 @@ function generateMetaDataDesign(metaDataCategoryName)
 // Load MetaData for a Category
 function loadMetaData(metaDataCategoryName)
 {
-    jQuery("#available" + metaDataCategoryName).dhisAjaxSelect({
+    $("#available" + metaDataCategoryName).dhisAjaxSelect({
         source: "../api/" + lowercaseFirstLetter(metaDataCategoryName) + ".json?links=false&paging=false",
         iterator: lowercaseFirstLetter(metaDataCategoryName),
         connectedTo: "selected" + metaDataCategoryName,
@@ -306,7 +306,8 @@ function loadMetaData(metaDataCategoryName)
             option.attr("value", item.id);
 
             return option;
-        }
+        },
+        timeout: 15000
     });
 }
 

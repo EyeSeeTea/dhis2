@@ -41,4 +41,6 @@ public interface ExportService
     MetaData getFilteredMetaData( Filter filter );
 
     MetaData getFilteredMetaData( Filter filter, TaskId taskId );
+
+    void saveFilter( Filter filter );
 }

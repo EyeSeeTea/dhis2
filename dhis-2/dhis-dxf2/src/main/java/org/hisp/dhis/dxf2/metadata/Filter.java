@@ -27,19 +27,30 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 
 import java.util.*;
 
 /**
- * @author Ovidiu Rosu <mortenoh@gmail.com>
+ * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
 @JacksonXmlRootElement( localName = "filter", namespace = DxfNamespaces.DXF_2_0 )
 public class Filter
+    extends BaseIdentifiableObject
 {
+    /**
+     * Determines if a de-serialized file is compatible with this class.
+     */
+    private static final long serialVersionUID = 8736213901318412954L;
+
+    private Date created;
+
     private Map<String, List<String>> options =  new HashMap<String, List<String>>();
 
     //--------------------------------------------------------------------------
@@ -53,6 +64,18 @@ public class Filter
     //--------------------------------------------------------------------------
     // Getters & Setters
     //--------------------------------------------------------------------------
+
+    @JsonProperty
+    @JacksonXmlProperty
+    public Date getCreated()
+    {
+        return created;
+    }
+
+    public void setCreated( Date created )
+    {
+        this.created = created;
+    }
 
     public Map<String, List<String>> getOptions()
     {
@@ -78,6 +101,9 @@ public class Filter
         options.putAll( newOptions );
     }
 
+    /**
+     * @param json - MetaData request JSON
+     */
     public Map<String, List<String>> processJSON( JSONObject json )
     {
         Map<String, List<String>> resultMap = new HashMap<String, List<String>>();

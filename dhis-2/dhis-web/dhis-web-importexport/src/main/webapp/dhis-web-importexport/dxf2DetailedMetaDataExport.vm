@@ -292,14 +292,15 @@
             <td colspan="2">
                 <input type="button" value="$i18n.getString( 'select_all_tables' )" style="width:125px; font-size: 10pt;"
                        onclick="selectAll();"/>
-                <input type="button" value="$i18n.getString( 'select_all_values' )" style="width:125px; font-size: 10pt;"
-                       onclick="selectAllValues();"/>
+                <input type="button" value="$i18n.getString( 'deselect_all_tables' )" style="width:125px; font-size: 10pt;"
+                       onclick="deselectAll();"/>
+
             </td>
         </tr>
         <tr>
             <td colspan="2">
-                <input type="button" value="$i18n.getString( 'deselect_all_tables' )" style="width:125px; font-size: 10pt;"
-                       onclick="deselectAll();"/>
+                <input type="button" value="$i18n.getString( 'select_all_values' )" style="width:125px; font-size: 10pt;"
+                       onclick="selectAllValues();"/>
                 <input type="button" value="$i18n.getString( 'deselect_all_values' )" style="width:125px; font-size: 10pt;"
                        onclick="deselectAllValues();"/>
             </td>

@@ -145,6 +145,8 @@ public class DefaultExportService
         MetaData metaData = new MetaData();
         metaData.setCreated(new Date());
 
+        // TODO: Implement date
+
         log.info( "User '" + currentUserService.getCurrentUsername() + "' started export at " + new Date() );
 
         for ( Map.Entry<String, List<String>> filterOptionEntry : filter.getOptions().entrySet() )
@@ -179,5 +181,12 @@ public class DefaultExportService
         }
 
         return metaData;
+    }
+
+    // OVIDIU
+    @Override
+    public void saveFilter( Filter filter )
+    {
+        manager.save( filter );
     }
 }

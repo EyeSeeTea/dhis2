@@ -382,21 +382,6 @@ public class HibernateGenericStore<T>
         return query.list();
     }
 
-    //OVIDIU
-    @Override
-    @SuppressWarnings("unchecked")
-    public final List<T> getByCriteria( Map<String, String> expressions )
-    {
-        Criterion[] criterions = new Criterion[expressions.size()];
-        int index = 0;
-        for( Map.Entry<String, String> entry : expressions.entrySet())
-        {
-            criterions[index] = Restrictions.eq(entry.getKey(), Boolean.valueOf(entry.getValue()));
-            index++;
-        }
-        return getList( criterions );
-    }
-
     private Query getQueryAllAcl()
     {
         String hql = "select distinct c from " + clazz.getName() + " c"

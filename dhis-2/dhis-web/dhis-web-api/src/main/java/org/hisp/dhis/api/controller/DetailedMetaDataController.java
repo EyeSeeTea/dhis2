@@ -138,7 +138,7 @@ public class DetailedMetaDataController
     // Detailed MetaData Export - GET Requests
     //--------------------------------------------------------------------------
 
-    @RequestMapping( method = RequestMethod.GET, value = DetailedMetaDataController.RESOURCE_PATH + "/getFile" )
+    @RequestMapping( method = RequestMethod.GET, value = DetailedMetaDataController.RESOURCE_PATH + "/getMetaDataFile" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void getExportXml( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
