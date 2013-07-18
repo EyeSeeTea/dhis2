@@ -133,21 +133,21 @@ public class DefaultExportService
 
     // Ovidiu
     @Override
-    public MetaData getFilteredMetaData( FilterOptions filterOptions )
+    public MetaData getFilteredMetaData( Filter filter )
     {
-        return getFilteredMetaData( filterOptions, null );
+        return getFilteredMetaData( filter, null );
     }
 
     // Ovidiu
     @Override
-    public MetaData getFilteredMetaData( FilterOptions filterOptions, TaskId taskId )
+    public MetaData getFilteredMetaData( Filter filter, TaskId taskId )
     {
         MetaData metaData = new MetaData();
         metaData.setCreated(new Date());
 
         log.info( "User '" + currentUserService.getCurrentUsername() + "' started export at " + new Date() );
 
-        for ( Map.Entry<String, List<String>> filterOptionEntry : filterOptions.getFilterOptions().entrySet() )
+        for ( Map.Entry<String, List<String>> filterOptionEntry : filter.getOptions().entrySet() )
         {
             String className = filterOptionEntry.getKey();
             for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )

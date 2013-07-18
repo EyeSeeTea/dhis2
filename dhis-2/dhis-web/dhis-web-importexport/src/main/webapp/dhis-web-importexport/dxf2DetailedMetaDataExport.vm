@@ -1,4 +1,4 @@
-<script>
+<script type="text/javascript">
     var i18n_attributeTypes = '$i18n.getString( "attribute_types" )';
     var i18n_select_all_attributeTypes = '$i18n.getString( "select_all_attribute_types" )';
     var i18n_available_attributeTypes = '$i18n.getString( "available_attribute_types" )';
@@ -160,7 +160,7 @@
 
 <!-- EXPORT FORM -->
 <!-- ACTION METHOD HERE -->
-<form id="exportForm" name="exportForm">
+<form id="exportForm" name="exportForm" method="post" action="../api/detailedMetaData.xml">
 
     <!-- MENU -->
     <div id="mainDivAccordion">
@@ -307,8 +307,8 @@
         <tr>
             <td colspan="2">
                 <select id="format" style="width: 254px; font-size: 10pt;">
-                    <option value="xml">XML</option>
-                    <option value="json">Json</option>
+                    <option value="Xml">XML</option>
+                    <option value="Json">Json</option>
                 </select>
             </td>
         </tr>
@@ -325,6 +325,7 @@
 
         <tr>
             <td colspan="2">
+                <input type="hidden" id="json" value="" />
                 <input type="button" value="$i18n.getString( 'export' )" style="width:254px; font-size: 10pt;"
                        onclick="exportDetailedMetaData();"/>
             </td>

@@ -28,12 +28,10 @@ package org.hisp.dhis.api.controller;
  */
 
 import net.sf.json.JSONObject;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.api.utils.ContextUtils;
-import org.hisp.dhis.common.view.ExportView;
-import org.hisp.dhis.dxf2.metadata.ExportService;
-import org.hisp.dhis.dxf2.metadata.FilterOptions;
-import org.hisp.dhis.dxf2.metadata.ImportService;
-import org.hisp.dhis.dxf2.metadata.MetaData;
+import org.hisp.dhis.dxf2.metadata.*;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.system.scheduling.Scheduler;
 import org.hisp.dhis.user.CurrentUserService;
@@ -44,28 +42,24 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.ws.Response;
 import java.io.IOException;
-import java.util.Map;
+import java.io.OutputStream;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
 @Controller
-@RequestMapping( method = RequestMethod.POST )
 public class DetailedMetaDataController
 {
     public static final String RESOURCE_PATH = "/detailedMetaData";
 
-    @Autowired
-    private ExportService exportService;
+    private static final Log log = LogFactory.getLog( DetailedMetaDataController.class );
 
     @Autowired
-    private ImportService importService;
+    private ExportService exportService;
 
     @Autowired
     private ContextUtils contextUtils;
@@ -76,84 +70,139 @@ public class DetailedMetaDataController
     @Autowired
     private CurrentUserService currentUserService;
 
+    private String detailedMetaDataString;
 
+    private String format;
 
     //--------------------------------------------------------------------------
-    // Detailed MetaData Export
+    // Getters & Setters
+    //--------------------------------------------------------------------------
+
+    public String getFormat()
+    {
+        return format;
+    }
+
+    public void setFormat( String format )
+    {
+        this.format = format;
+    }
+
+    public String getDetailedMetaDataString()
+    {
+        return detailedMetaDataString;
+    }
+
+    public void setDetailedMetaDataString( String detailedMetaDataString )
+    {
+        this.detailedMetaDataString = detailedMetaDataString;
+    }
+
+    //--------------------------------------------------------------------------
+    // Detailed MetaData Export - POST Requests
     //--------------------------------------------------------------------------
 
     @RequestMapping( value = DetailedMetaDataController.RESOURCE_PATH, headers = "Accept=application/json" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
-    public void detailedExport( @RequestBody String requestJson, Model model ) throws IOException
+    public void detailedExport( @RequestBody JSONObject json, Model model ) throws IOException
     {
     }
 
-    @RequestMapping( value = DetailedMetaDataController.RESOURCE_PATH + ".xml", headers = "Accept=application/json", produces = "*/*" )
+    @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/setXml",
+            headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
-    public String exportXml( @RequestBody String requestJson, HttpServletResponse response ) throws IOException
+    public void exportXml( @RequestBody JSONObject json ) throws IOException
     {
-        JSONObject json = JSONObject.fromObject( requestJson );
-        FilterOptions filterOptions = new FilterOptions();
-        filterOptions.addFilterOptions( filterOptions.processJSON( json ) );
-        MetaData metaData = exportService.getFilteredMetaData( filterOptions );
+        Filter filter = new Filter();
+        filter.addOptions( filter.processJSON( json ) );
+        MetaData metaData = exportService.getFilteredMetaData( filter );
 
-//        contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_XML, ContextUtils.CacheStrategy.NO_CACHE, "detailedMetaData.xml", true );
-//
-//        JacksonUtils.toXmlWithView( response.getOutputStream(), metaData, ExportView.class );
-
-        return JacksonUtils.toXmlWithViewAsString( metaData, ExportView.class );
+        format = ".xml";
+        detailedMetaDataString = JacksonUtils.toXmlAsString( metaData );
     }
 
-    @RequestMapping( value = DetailedMetaDataController.RESOURCE_PATH + ".json", produces = "*/*" )
+    @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/setJson",
+            headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
-    public void exportJson( @RequestParam Map<String, String> parameters, HttpServletResponse response ) throws IOException
+    public void exportJson( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
+    {
+        Filter filter = new Filter();
+        filter.addOptions( filter.processJSON( json ) );
+        MetaData metaData = exportService.getFilteredMetaData( filter );
+
+        format = ".json";
+        detailedMetaDataString = JacksonUtils.toJsonAsString( metaData );
+    }
+
+    //--------------------------------------------------------------------------
+    // Detailed MetaData Export - GET Requests
+    //--------------------------------------------------------------------------
+
+    @RequestMapping( method = RequestMethod.GET, value = DetailedMetaDataController.RESOURCE_PATH + "/getFile" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
+    public void getExportXml( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    {
+        String fileName = "metaData" + format;
+        contextUtils.configureResponse( response, ContextUtils.HEADER_CONTENT_DISPOSITION, ContextUtils.CacheStrategy.NO_CACHE, fileName, true );
+        OutputStream outputStream = response.getOutputStream();
+
+        try {
+            outputStream.write( detailedMetaDataString.getBytes() );
+            outputStream.flush();
+
+        } catch ( Exception e )
+        {
+            log.info( "Error: " + e );
+
+        } finally
+        {
+            outputStream.close();
+        }
+    }
+
+
+
+
+
+
+
+    // TODO
+
+    @RequestMapping( value = { DetailedMetaDataController.RESOURCE_PATH + ".zip" }, headers = "Accept=application/json", produces = "*/*" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
+    public void exportZipped( @RequestBody JSONObject json, HttpServletResponse response, HttpServletRequest request ) throws IOException
     {
 
     }
 
-    @RequestMapping( value = { DetailedMetaDataController.RESOURCE_PATH + ".zip" }, produces = "*/*" )
+    @RequestMapping( value = { DetailedMetaDataController.RESOURCE_PATH + ".xml.zip" }, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
-    public void exportZipped( @RequestParam Map<String, String> parameters, HttpServletResponse response, HttpServletRequest request ) throws IOException
+    public void exportZippedXML( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
 
     }
 
-    @RequestMapping( value = { DetailedMetaDataController.RESOURCE_PATH + ".xml.zip" }, produces = "*/*" )
+    @RequestMapping( value = { DetailedMetaDataController.RESOURCE_PATH + ".json.zip" }, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
-    public void exportZippedXML( @RequestParam Map<String, String> parameters, HttpServletResponse response ) throws IOException
+    public void exportZippedJSON( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
-
     }
 
-    @RequestMapping( value = { DetailedMetaDataController.RESOURCE_PATH + ".json.zip" }, produces = "*/*" )
+    @RequestMapping( value = { DetailedMetaDataController.RESOURCE_PATH + ".gz" }, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
-    public void exportZippedJSON( @RequestParam Map<String, String> parameters, HttpServletResponse response ) throws IOException
+    public void exportGZipped( @RequestBody JSONObject json, HttpServletResponse response, HttpServletRequest request ) throws IOException
     {
-        System.out.println("\n 1. DETAILED EXPORT ENTERED \n");
-
     }
 
-    @RequestMapping( value = { DetailedMetaDataController.RESOURCE_PATH + ".gz" }, produces = "*/*" )
+    @RequestMapping( value = { DetailedMetaDataController.RESOURCE_PATH + ".xml.gz" }, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
-    public void exportGZipped( @RequestParam Map<String, String> parameters, HttpServletResponse response, HttpServletRequest request ) throws IOException
+    public void exportGZippedXML( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
-        System.out.println("\n 1. DETAILED EXPORT ENTERED \n");
-
     }
 
-    @RequestMapping( value = { DetailedMetaDataController.RESOURCE_PATH + ".xml.gz" }, produces = "*/*" )
+    @RequestMapping( value = { DetailedMetaDataController.RESOURCE_PATH + ".json.gz" }, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
-    public void exportGZippedXML( @RequestParam Map<String, String> parameters, HttpServletResponse response ) throws IOException
+    public void exportGZippedJSON( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
-        System.out.println("\n 1. DETAILED EXPORT ENTERED \n");
-
-    }
-
-    @RequestMapping( value = { DetailedMetaDataController.RESOURCE_PATH + ".json.gz" }, produces = "*/*" )
-    @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
-    public void exportGZippedJSON( @RequestParam Map<String, String> parameters, HttpServletResponse response ) throws IOException
-    {
-        System.out.println("\n 1. DETAILED EXPORT ENTERED \n");
-
     }
 }

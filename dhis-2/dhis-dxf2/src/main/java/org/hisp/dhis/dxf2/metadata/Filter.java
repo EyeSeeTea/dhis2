@@ -27,47 +27,12 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.attribute.Attribute;
-import org.hisp.dhis.chart.Chart;
-import org.hisp.dhis.common.DimensionalObject;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import org.hisp.dhis.common.DxfNamespaces;
-import org.hisp.dhis.concept.Concept;
-import org.hisp.dhis.constant.Constant;
-import org.hisp.dhis.datadictionary.DataDictionary;
-import org.hisp.dhis.dataelement.*;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.Section;
-import org.hisp.dhis.document.Document;
-import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.indicator.IndicatorGroup;
-import org.hisp.dhis.indicator.IndicatorGroupSet;
-import org.hisp.dhis.indicator.IndicatorType;
-import org.hisp.dhis.interpretation.Interpretation;
-import org.hisp.dhis.mapping.*;
-import org.hisp.dhis.message.MessageConversation;
-import org.hisp.dhis.option.OptionSet;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
-import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.report.Report;
-import org.hisp.dhis.reporttable.ReportTable;
-import org.hisp.dhis.sqlview.SqlView;
-import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserAuthorityGroup;
-import org.hisp.dhis.user.UserGroup;
-import org.hisp.dhis.validation.ValidationRule;
-import org.hisp.dhis.validation.ValidationRuleGroup;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Ovidiu Rosu <mortenoh@gmail.com>
@@ -75,43 +40,65 @@ import java.util.List;
 @JacksonXmlRootElement( localName = "filter", namespace = DxfNamespaces.DXF_2_0 )
 public class Filter
 {
-    private Date created;
+    private Map<String, List<String>> options =  new HashMap<String, List<String>>();
 
-    private List<String> attributeTypesUids = new ArrayList<String>();
-
-    private List<String> dataElementsUids = new ArrayList<String>();
+    //--------------------------------------------------------------------------
+    // Constructor
+    //--------------------------------------------------------------------------
 
     public Filter()
     {
     }
 
-    public Date getCreated()
+    //--------------------------------------------------------------------------
+    // Getters & Setters
+    //--------------------------------------------------------------------------
+
+    public Map<String, List<String>> getOptions()
     {
-        return created;
+        return options;
     }
 
-    public void setCreated( Date created )
+    public void setOptions( Map<String, List<String>> options )
     {
-        this.created = created;
+        this.options = options;
     }
 
-    public List<String> getAttributeTypesUids()
+    //--------------------------------------------------------------------------
+    // Filter Options
+    //--------------------------------------------------------------------------
+
+    public void addOption( String option, List<String> values )
     {
-        return attributeTypesUids;
+        options.put( option, values );
     }
 
-    public void setAttributeTypesUids( List<String> attributeTypesUids )
+    public void addOptions( Map<String, List<String>> newOptions )
     {
-        this.attributeTypesUids = attributeTypesUids;
+        options.putAll( newOptions );
     }
 
-    public List<String> getDataElementsUids()
+    public Map<String, List<String>> processJSON( JSONObject json )
     {
-        return dataElementsUids;
-    }
+        Map<String, List<String>> resultMap = new HashMap<String, List<String>>();
+        Iterator jsonIterator = json.keys();
+        while ( jsonIterator.hasNext() )
+        {
+            String key = (String) jsonIterator.next();
+            List<String> values = new ArrayList<String>();
+            JSONArray uids = json.getJSONArray( key );
 
-    public void setDataElementsUids( List<String> dataElementsUids )
-    {
-        this.dataElementsUids = dataElementsUids;
+            for ( int i = 0; i < uids.size(); i++ )
+            {
+                JSONObject uid = uids.getJSONObject( i );
+                String uidKey = key.substring( 0, key.length() - 1 );
+
+                values.add( uid.getString( uidKey ) );
+            }
+
+            resultMap.put( key, values );
+        }
+
+        return resultMap;
     }
 }

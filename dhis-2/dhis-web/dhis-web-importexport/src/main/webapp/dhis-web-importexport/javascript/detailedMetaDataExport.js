@@ -70,11 +70,11 @@ jQuery(function ()
 // Export DetailedMetaData AJAX
 function exportDetailedMetaData()
 {
-    var url = "../api/detailedMetaData.xml";
-//    var format = $("#format").val();
+    var url = "../api/detailedMetaData";
+    var format = $("#format").val();
 //    var compression = $("#compression").val();
 //
-//    url += "." + format;
+    url += "/set" + format;
 //
 //    if(compression == "zip")
 //    {
@@ -86,22 +86,33 @@ function exportDetailedMetaData()
 //    }
 
     $.ajax({
+        type: "POST",
         url: url,
         data: JSON.stringify(createFilterJSON()),
-        dataType: "json",
         contentType: "application/json",
-        type: "POST",
-        success: function ()
+        dataType: "xml",
+        success: function(response)
         {
             console.log("Exported JSON: " + JSON.stringify(createFilterJSON()));
+            console.log(response);
+            window.location = "../api/detailedMetaData/getFile";
         },
-        error: function ()
+        error: function()
         {
-            alert("Export unsuccessful.");
-
+            console.log(arguments);
+            alert("Export process failed.");
         }
     });
 }
+
+//function submitDetailedMetaData()
+//{
+//    for(var i = 0; i < metaDataArray.length; i++)
+//    {
+//        selectAllById("selected" + metaDataArray[i]);
+//    }
+//    $("#exportForm").submit();
+//}
 
 // Create Filter Object
 function createFilterJSON()
@@ -116,8 +127,8 @@ function createFilterJSON()
             for(var j = 0; j < values.length; j++)
             {
                 var filterItem = {};
-                var item = lowercaseFirstLetter(metaDataArray[i].slice(0, metaDataArray[i].length - 1));
-                filterItem[item] = values[j];
+                var itemKey = lowercaseFirstLetter(metaDataArray[i].slice(0, metaDataArray[i].length - 1));
+                filterItem[itemKey] = values[j];
                 filterCategory.push(filterItem);
             }
         }
@@ -221,12 +232,12 @@ function generateMetaDataCategoryDesign(metaDataCategoryName)
     var selectAllMetadataName = getI18nMetaDataSelectAllName(metaDataCategoryName);
     var design =
         '<div style="float: left; width: 200px;">'
-            + '<input id="checkbox' + metaDataCategoryName + '" class="metadataCheckbox" name="' + metaDataCategoryName + '" type="checkbox"/>'
-            + '<label id="label' + metaDataCategoryName + '" for="' + metaDataCategoryName + '" style="font-size: 10pt;">' + metadataName + '</label>'
+        +     '<input id="checkbox' + metaDataCategoryName + '" class="metadataCheckbox" name="' + metaDataCategoryName + '" type="checkbox"/>'
+        +     '<label id="label' + metaDataCategoryName + '" for="' + metaDataCategoryName + '" style="font-size: 10pt;">' + metadataName + '</label>'
         + '</div>'
         + '<div id="divSelectAll' + metaDataCategoryName + '" style="display: none;">'
-            + '<input id="checkboxSelectAll' + metaDataCategoryName + '" class="metadataCheckbox" name="' + metaDataCategoryName + '" type="checkbox"/>'
-            + '<label id="labelSelectAll' + metaDataCategoryName + '" for="' + metaDataCategoryName + '" style="font-size: 10pt;">' + selectAllMetadataName + '</label>'
+        +     '<input id="checkboxSelectAll' + metaDataCategoryName + '" class="metadataCheckbox" name="' + metaDataCategoryName + '" type="checkbox"/>'
+        +     '<label id="labelSelectAll' + metaDataCategoryName + '" for="' + metaDataCategoryName + '" style="font-size: 10pt;">' + selectAllMetadataName + '</label>'
         + '</div>'
         + '<div id="mainDiv' + metaDataCategoryName + '"></div>'
     ;
