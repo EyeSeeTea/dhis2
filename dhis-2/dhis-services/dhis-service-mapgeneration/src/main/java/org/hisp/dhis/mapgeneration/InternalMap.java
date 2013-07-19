@@ -27,78 +27,24 @@ package org.hisp.dhis.mapgeneration;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.awt.Color;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
-/**
- * An internal representation of a map.
- * 
- * It encapsulates all the information of a map built by adding layers to it. It
- * may then create an image representing the map by a call to render.
- * 
- * Finally, one should extend this class with an implementation that uses a
- * specific platform, e.g. GeoTools to draw the map.
- * 
- * @author Kjetil Andresen <kjetand@ifi.uio.no>
- * @author Olai Solheim <olais@ifi.uio.no>
- */
 public class InternalMap
 {
-    protected Color backgroundColor = null;
-
-    protected boolean isAntiAliasingEnabled = true;
+    private List<InternalMapLayer> layers = new ArrayList<InternalMapLayer>();
     
-    private List<InternalMapObject> mapObjects = new ArrayList<InternalMapObject>();
-
     public InternalMap()
     {
     }
-    
-    public Color getBackgroundColor()
+
+    public List<InternalMapLayer> getLayers()
     {
-        return backgroundColor;
+        return layers;
     }
 
-    public void setBackgroundColor( Color backgroundColor )
+    public void setLayers( List<InternalMapLayer> layers )
     {
-        this.backgroundColor = backgroundColor;
-    }
-
-    public boolean isAntiAliasingEnabled()
-    {
-        return isAntiAliasingEnabled;
-    }
-
-    public void setAntiAliasingEnabled( boolean isAntiAliasingEnabled )
-    {
-        this.isAntiAliasingEnabled = isAntiAliasingEnabled;
-    }
-
-    public List<InternalMapObject> getMapObjects()
-    {
-        return mapObjects;
-    }
-
-    public void setMapObjects( List<InternalMapObject> mapObjects )
-    {
-        this.mapObjects = mapObjects;
-    }
-    
-    //TODO remove
-
-    public InternalMap( InternalMapLayer layer )
-    {
-        this.mapObjects = new LinkedList<InternalMapObject>();
-        this.addMapLayer( layer );
-    }
-
-    public void addMapLayer( InternalMapLayer layer )
-    {
-        for ( InternalMapObject mapObject : layer.getAllMapObjects() )
-        {
-            this.mapObjects.add( mapObject );
-        }
+        this.layers = layers;
     }
 }

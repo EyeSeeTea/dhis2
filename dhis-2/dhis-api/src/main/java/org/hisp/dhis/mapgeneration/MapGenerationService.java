@@ -29,6 +29,7 @@ package org.hisp.dhis.mapgeneration;
 
 import java.awt.image.BufferedImage;
 
+import org.hisp.dhis.mapping.Map;
 import org.hisp.dhis.mapping.MapView;
 
 /**
@@ -46,7 +47,7 @@ import org.hisp.dhis.mapping.MapView;
 public interface MapGenerationService
 {
     public final String ID = MapGenerationService.class.getName();
-
+    
     /**
      * Generate an image that represents this map.
      * 
@@ -54,4 +55,12 @@ public interface MapGenerationService
      * @return the rendered map image or null if there is no data for the map view.
      */
     public BufferedImage generateMapImage( MapView mapView );
+    
+    /**
+     * Generate an image that represents this map.
+     * 
+     * @param mapView the map view that will be rendered
+     * @return the rendered map image or null if there is no data for the map view.
+     */
+    public BufferedImage generateMapImage( Map map );
 }
