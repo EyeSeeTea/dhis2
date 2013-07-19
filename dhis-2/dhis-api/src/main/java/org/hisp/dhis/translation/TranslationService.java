@@ -85,6 +85,27 @@ public interface TranslationService
     Collection<Translation> getTranslations( String className, I18nLocale locale );
 
     /**
+     * Retrieves a Translation without Default Language fallback.
+     * 
+     * @param className the class name.
+     * @param id the id.
+     * @param locale the locale.
+     * @param property the property.
+     * @return a Translation.
+     */
+    Translation getTranslationWithoutDefault( String className, int id, I18nLocale locale, String property );
+
+    /**
+     * Retrieves a Collection of Translations without Default Language fallback.
+     * 
+     * @param className the class name.
+     * @param id the id.
+     * @param locale the locale.
+     * @return a Collection of Translations.
+     */
+    Collection<Translation> getTranslationsWithoutDefault( String className, int id, I18nLocale locale );
+
+    /**
      * Retrieves a Collection of all Translations.
      * 
      * @return a Collection of all Translations.

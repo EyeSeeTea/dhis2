@@ -7,7 +7,7 @@
 		{
 			'rules': rules
 		});
-	
+		
 		checkValueIsExist( "name", "validateLocale.action", {id: $i18nLocale.id} );
 	});
 		
@@ -16,7 +16,7 @@
 
 <h3>$i18n.getString( "edit_locale" )</h3>
 
-<form id="updateLocaleForm" name="updateLocaleForm" action="updateLocale.action" method="post" class="inputForm">
+<form id="updateLocaleForm" name="updateLocaleForm" action="updateLocale.action" method="post" class="inputForm" >
 
   <input type="hidden" id="id" name="id" value="$i18nLocale.id">
   <table id="detailsList">
@@ -27,21 +27,16 @@
     </thead>
     <tbody>
 		<tr>
-			<td><label>$i18n.getString( "name" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
-			<td><input style="width: 330px;" type="text" id="name" name="name" value="$encoder.htmlEncode( $i18nLocale.name)" ></td>
+			<td><label>$i18n.getString( "name" ) </label></td>
+			<td><input style="width: 330px;background-color:LightGray;" type="text" readonly id="name" name="name" value="$encoder.htmlEncode( $i18nLocale.name )" ></td>
 			<td></td>
 		</tr>	
-		
-		<tr>
-			<td><label>$i18n.getString( "description" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
-			<td><input style="width: 330px;" type="text" id="description" name="description" value="$encoder.htmlEncode( $i18nLocale.description )" ></td>
-			<td></td>
-		</tr>
+
 
 		<tr>
 			<td><label>$i18n.getString( "language" ) </label></td>
 			<td>
-				<select id="language" name="language">
+				<select id="language" name="language" onchange="setName()" class="{validate:{required:true}}">
 					<option value="">[$i18n.getString( "locale_language_no_translation" )]</option>
 				#foreach( $language in $availableLanguages.entrySet() )
 					<option value="$language.value" #if( $language.value == $i18nLocale.language )selected="selected"#end>$language.key</option>
@@ -54,7 +49,7 @@
 		<tr>
 			<td><label>$i18n.getString( "country" ) </label></td>
 			<td>
-				<select id="country" name="country">
+				<select id="country" name="country" onchange="setName()" class="{validate:{required:true}}">
 					<option value="">[$i18n.getString( "locale_country_no_translation" )]</option>
 				#foreach( $country in $availableCountries.entrySet() )
 					<option value="$country.value" #if( $country.value == $i18nLocale.country )selected="selected"#end>$country.key</option>

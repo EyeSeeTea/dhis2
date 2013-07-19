@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
@@ -28,33 +27,35 @@
 
 package org.hisp.dhis.dataadmin.action.locale;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.hisp.dhis.i18n.locale.I18nLocaleService;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.paging.ActionPagingSupport;
 
 /**
  * @author James Chang
  * @version $Id$
  */
 public class GetLocaleListAction
-    implements Action
+    extends ActionPagingSupport<I18nLocale>
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-    
+
     private I18nLocaleService i18nlocaleService;
 
     public void setI18nLocaleService( I18nLocaleService i18nlocaleService )
     {
         this.i18nlocaleService = i18nlocaleService;
     }
-    
-    
+
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
@@ -71,41 +72,60 @@ public class GetLocaleListAction
         this.id = id;
     }
 
-    
-    private Collection<I18nLocale> i18nlocales = new ArrayList<I18nLocale>();
+    private int total;
 
-    public Collection<I18nLocale> getI18nLocales()
+    public int getTotal()
+    {
+        return total;
+    }
+
+    private List<I18nLocale> i18nlocales = new ArrayList<I18nLocale>();
+
+    public List<I18nLocale> getI18nLocales()
     {
         return i18nlocales;
     }
 
-    public void setI18nLocales( Collection<I18nLocale> i18nlocales )
-    {
-        this.i18nlocales = i18nlocales;
-    }
 
+    private String key;
     
-    private String strTestNote = "";
-
-    public String getTestNote()
+    public String getKey()
     {
-        return strTestNote;
+        return key;
     }
 
-    public void setTestNote(String strTestNote)
+    public void setKey( String key )
     {
-        this.strTestNote = strTestNote;
+        this.key = key;
     }
     
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
         throws Exception
-    {        
-        i18nlocales = i18nlocaleService.getAllI18nLocales();
-                
+    {
+        if ( isNotBlank( key ) ) // Filter on key only if set
+        {
+            total = i18nlocaleService.getI18nLocaleCountByName( key );
+
+            this.paging = createPaging( total );
+            
+            i18nlocales = new ArrayList<I18nLocale>( i18nlocaleService.getI18nLocalesByName( key, paging.getStartPos(), paging.getPageSize() ) );
+        }
+        else
+        {
+            total = i18nlocaleService.getI18nLocaleCount();
+            
+            this.paging = createPaging( total );
+    
+            i18nlocales = new ArrayList<I18nLocale>( i18nlocaleService.getI18nLocales( paging.getStartPos(), paging.getPageSize() ));
+        }
+        
+        Collections.sort( i18nlocales, IdentifiableObjectNameComparator.INSTANCE );
+        
         return SUCCESS;
     }
 }

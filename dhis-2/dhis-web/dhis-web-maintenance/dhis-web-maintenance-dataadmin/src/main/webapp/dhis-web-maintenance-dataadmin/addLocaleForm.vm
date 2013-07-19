@@ -26,21 +26,15 @@
     
 	<tbody>
 		<tr>
-			<td><label>$i18n.getString( "name" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
-			<td><input style="width: 330px;" type="text" id="name" name="name" ></td>
+			<td><label>$i18n.getString( "name" ) </label></td>
+			<td><input style="width: 330px;background-color:LightGray;" readonly type="text" id="name" name="name" ></td>
 			<td></td>
 		</tr>	
-		
-		<tr>
-			<td><label>$i18n.getString( "description" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
-			<td><input style="width: 330px;" type="text" id="description" name="description" ></td>
-			<td></td>
-		</tr>	
-		
+
 		<tr>
 			<td><label>$i18n.getString( "language" ) </label></td>
 			<td>
-				<select id="language" name="language">
+				<select id="language" name="language" onchange="setName()" class="{validate:{required:true}}">
 					<option value="">[$i18n.getString( "locale_language_no_translation" )]</option>
 				#foreach( $language in $availableLanguages.entrySet() )
 					<option value="$language.value">$language.key</option>
@@ -53,7 +47,7 @@
 		<tr>
 			<td><label>$i18n.getString( "country" ) </label></td>
 			<td>
-				<select id="country" name="country">
+				<select id="country" name="country" onchange="setName()" class="{validate:{required:true}}">
 					<option value="">[$i18n.getString( "locale_country_no_translation" )]</option>
 				#foreach( $country in $availableCountries.entrySet() )
 					<option value="$country.value">$country.key</option>

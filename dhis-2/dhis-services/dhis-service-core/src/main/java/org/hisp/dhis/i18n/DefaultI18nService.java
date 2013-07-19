@@ -149,11 +149,6 @@ public class DefaultI18nService
         }
 
         List<String> properties = getObjectPropertyNames( object );
-
-        // If I18nLocale is passed rather than java locale, we pass back the translation?
-        // But, where do we put the default value check?  At below 'for' statement?
-        
-        // What if this is old locale?  <-- distinqui
         
         Collection<Translation> translations = translationService.getTranslations( getClassName( object ),
             getId( object ), locale );
@@ -163,10 +158,6 @@ public class DefaultI18nService
         for ( String property : properties )
         {
             String value = translationMap.get( property );
-
-            // At here, if langauge & country specific locale does not exists,
-            // we can fall back to language specific one.
-            // If also need to retreive them as well...
             
             if ( value != null && !value.isEmpty() )
             {
@@ -259,7 +250,14 @@ public class DefaultI18nService
                 String key = translationEntry.getKey();
                 String value = translationEntry.getValue();
 
-                Translation translation = translationService.getTranslation( className, id, locale, key );
+                // toto: Remove all the printlns
+                //System.out.println("\n\n =====\n key : " + key );
+                //System.out.println("\n\n value : " + value );
+
+                
+                Translation translation = translationService.getTranslationWithoutDefault( className, id, locale, key );
+
+                //System.out.println("\n\n translation : " + translation );
 
                 if ( value != null && !value.trim().isEmpty() )
                 {
@@ -270,7 +268,15 @@ public class DefaultI18nService
                     }
                     else
                     {
-                        translation = new Translation( className, id, locale.getName(), key, value );
+                        translation = new Translation( className, id, locale.getLanguage(), locale.getCountry(), key, value );
+                        
+//                        System.out.println("\n\n  locale.getLanguage() : " + className );
+//                        System.out.println("\n\n id : " + id );
+//                        System.out.println("\n\n locale.getLanguage() : " + locale.getLanguage() );
+//                        System.out.println("\n\n locale.getCountry() : " + locale.getCountry() );
+//                        System.out.println("\n\n key : " + key );
+//                        System.out.println("\n\n value : " + value + " =====\n" );
+                        
                         translationService.addTranslation( translation );
                     }
                 }
@@ -292,6 +298,21 @@ public class DefaultI18nService
         if ( locale != null && className != null )
         {
             return convertTranslations( translationService.getTranslations( className, id, locale ) );
+        }
+
+        return new HashMap<String, String>();
+    }
+
+    public Map<String, String> getTranslationsWithoutDefault( String className, int id )
+    {
+        return getTranslationsWithoutDefault( className, id, getCurrentLocale() );
+    }
+
+    public Map<String, String> getTranslationsWithoutDefault( String className, int id, I18nLocale locale )
+    {
+        if ( locale != null && className != null )
+        {
+            return convertTranslations( translationService.getTranslationsWithoutDefault( className, id, locale ) );
         }
 
         return new HashMap<String, String>();

@@ -27,104 +27,105 @@
       <map>
 		<entry key="Abkhazian" value="ab"/>
 		<entry key="Afrikaans" value="af"/>
-		<entry key="Aragonese" value="an"/>
+		<entry key="Albanian" value="sq"/>
 		<entry key="Arabic" value="ar"/>
+		<entry key="Aragonese" value="an"/>
+		<entry key="Armenian" value="hy"/>
 		<entry key="Assamese" value="as"/>
 		<entry key="Azerbaijani" value="az"/>
+		<entry key="Basque" value="eu"/>
 		<entry key="Belarusian" value="be"/>
-		<entry key="Bulgarian" value="bg"/>
 		<entry key="Bengali" value="bn"/>
-		<entry key="Tibetan" value="bo"/>
-		<entry key="Breton" value="br"/>
 		<entry key="Bosnian" value="bs"/>
+		<entry key="Breton" value="br"/>
+		<entry key="Bulgarian" value="bg"/>
+		<entry key="Burmese" value="my"/>
 		<entry key="Catalan / Valencian" value="ca"/>
 		<entry key="Chechen" value="ce"/>
-		<entry key="Corsican" value="co"/>
-		<entry key="Czech" value="cs"/>
+		<entry key="Chinese" value="zh"/>
 		<entry key="Church Slavic" value="cu"/>
-		<entry key="Welsh" value="cy"/>
+		<entry key="Cornish" value="kw"/>
+		<entry key="Corsican" value="co"/>
+		<entry key="Croatian" value="hr"/>
+		<entry key="Czech" value="cs"/>
 		<entry key="Danish" value="da"/>
-		<entry key="German" value="de"/>
-		<entry key="Greek" value="el"/>
+		<entry key="Dutch" value="nl"/>
 		<entry key="English" value="en"/>
 		<entry key="Esperanto" value="eo"/>
-		<entry key="Spanish / Castilian" value="es"/>
 		<entry key="Estonian" value="et"/>
-		<entry key="Basque" value="eu"/>
-		<entry key="Persian" value="fa"/>
-		<entry key="Finnish" value="fi"/>
-		<entry key="Fijian" value="fj"/>
 		<entry key="Faroese" value="fo"/>
+		<entry key="Fijian" value="fj"/>
+		<entry key="Finnish" value="fi"/>
 		<entry key="French" value="fr"/>
-		<entry key="Western Frisian" value="fy"/>
-		<entry key="Irish" value="ga"/>
 		<entry key="Gaelic / Scottish Gaelic" value="gd"/>
 		<entry key="Galician" value="gl"/>
-		<entry key="Manx" value="gv"/>
+		<entry key="Georgian" value="ka"/>
+		<entry key="German" value="de"/>
+		<entry key="Greek" value="el"/>
+		<entry key="Haitian; Haitian Creole" value="ht"/>
 		<entry key="Hebrew" value="he"/>
 		<entry key="Hindi" value="hi"/>
-		<entry key="Croatian" value="hr"/>
-		<entry key="Haitian; Haitian Creole" value="ht"/>
 		<entry key="Hungarian" value="hu"/>
-		<entry key="Armenian" value="hy"/>
-		<entry key="Indonesian" value="id"/>
 		<entry key="Icelandic" value="is"/>
+		<entry key="Indonesian" value="id"/>
+		<entry key="Irish" value="ga"/>
 		<entry key="Italian" value="it"/>
 		<entry key="Japanese" value="ja"/>
 		<entry key="Javanese" value="jv"/>
-		<entry key="Georgian" value="ka"/>
+		<entry key="Kirghiz" value="ky"/>
 		<entry key="Kongo" value="kg"/>
 		<entry key="Korean" value="ko"/>
 		<entry key="Kurdish" value="ku"/>
-		<entry key="Cornish" value="kw"/>
-		<entry key="Kirghiz" value="ky"/>
 		<entry key="Latin" value="la"/>
-		<entry key="Luxembourgish; Letzeburgesch" value="lb"/>
+		<entry key="Latvian" value="lv"/>
 		<entry key="Limburgan; Limburger; Limburgish" value="li"/>
 		<entry key="Lingala" value="ln"/>
 		<entry key="Lithuanian" value="lt"/>
-		<entry key="Latvian" value="lv"/>
-		<entry key="Malagasy" value="mg"/>
+		<entry key="Luxembourgish; Letzeburgesch" value="lb"/>
 		<entry key="Macedonian" value="mk"/>
-		<entry key="Mongolian" value="mn"/>
-		<entry key="Moldavian" value="mo"/>
+		<entry key="Malagasy" value="mg"/>
 		<entry key="Malay" value="ms"/>
 		<entry key="Maltese" value="mt"/>
-		<entry key="Burmese" value="my"/>
-		<entry key="Norwegian (Bokmal)" value="nb"/>
+		<entry key="Manx" value="gv"/>
+		<entry key="Moldavian" value="mo"/>
+		<entry key="Mongolian" value="mn"/>
 		<entry key="Nepali" value="ne"/>
-		<entry key="Dutch" value="nl"/>
-		<entry key="Norwegian (Nynorsk)" value="nn"/>
+		<entry key="Northern Sami" value="se"/>
 		<entry key="Norwegian" value="no"/>
+		<entry key="Norwegian (Bokmal)" value="nb"/>
+		<entry key="Norwegian (Nynorsk)" value="nn"/>
 		<entry key="Occitan (post 1500); Provencal" value="oc"/>
+		<entry key="Persian" value="fa"/>
 		<entry key="Polish" value="pl"/>
 		<entry key="Portuguese" value="pt"/>
 		<entry key="Raeto-Romance" value="rm"/>
 		<entry key="Romanian" value="ro"/>
 		<entry key="Russian" value="ru"/>
 		<entry key="Sardinian" value="sc"/>
-		<entry key="Northern Sami" value="se"/>
+		<entry key="Serbian" value="sr"/>
 		<entry key="Slovak" value="sk"/>
 		<entry key="Slovenian" value="sl"/>
 		<entry key="Somali" value="so"/>
-		<entry key="Albanian" value="sq"/>
-		<entry key="Serbian" value="sr"/>
-		<entry key="Swedish" value="sv"/>
+		<entry key="Spanish / Castilian" value="es"/>
 		<entry key="Swahili" value="sw"/>
-		<entry key="Turkmen" value="tk"/>
-		<entry key="Turkish" value="tr"/>
+		<entry key="Swedish" value="sv"/>
 		<entry key="Tahitian" value="ty"/>
+		<entry key="Tibetan" value="bo"/>
+		<entry key="Turkish" value="tr"/>
+		<entry key="Turkmen" value="tk"/>
 		<entry key="Ukrainian" value="uk"/>
 		<entry key="Urdu" value="ur"/>
 		<entry key="Uzbek" value="uz"/>
 		<entry key="Vietnamese" value="vi"/>
 		<entry key="Volapuk" value="vo"/>
+		<entry key="Welsh" value="cy"/>
+		<entry key="Western Frisian" value="fy"/>
 		<entry key="Yiddish" value="yi"/>
-		<entry key="Chinese" value="zh"/>
       </map>
     </property>
     <property name="countries">
       <map>
+		<entry key="Country Default" value="default"/>
 		<entry key="AFGHANISTAN" value="AF"/>
 		<entry key="ALAND ISLANDS" value="AX"/>
 		<entry key="ALBANIA" value="AL"/>
@@ -378,7 +379,7 @@
     </property>
   </bean>
 
-  <bean id="org.hisp.dhis.i18n.locale.I18nLocaleStore" class="org.hisp.dhis.i18n.locale.hibernate.HibernateI18nLocaleStore">
+  <bean id="org.hisp.dhis.i18n.locale.I18nLocaleStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
     <property name="clazz" value="org.hisp.dhis.i18n.locale.I18nLocale" />
     <property name="sessionFactory" ref="sessionFactory" />
   </bean>

@@ -67,7 +67,7 @@ public class I18nServiceTest
         
         dataElementService = (DataElementService) getBean( DataElementService.ID );
         
-        locale = new I18nLocale("FRANCE", "France Locale Testing");
+        locale = new I18nLocale("FRANCE", "fr", "FR");
     }
 
     // -------------------------------------------------------------------------

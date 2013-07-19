@@ -27,10 +27,11 @@
 
 package org.hisp.dhis.i18n.locale;
 
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.hisp.dhis.common.GenericNameableObjectStore;
 import org.hisp.dhis.user.UserSettingService;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,9 +47,9 @@ public class DefaultI18nLocaleService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private I18nLocaleStore i18nLocaleStore;
+    private GenericNameableObjectStore<I18nLocale> i18nLocaleStore;
 
-    public void setI18nLocaleStore( I18nLocaleStore i18nLocaleStore )
+    public void setI18nLocaleStore( GenericNameableObjectStore<I18nLocale> i18nLocaleStore )
     {
         this.i18nLocaleStore = i18nLocaleStore;
     }
@@ -59,12 +60,13 @@ public class DefaultI18nLocaleService
     {
         this.languages = languages;
     }
-    
+   
+    /*
     public Map<String, String> getLanguages()
     {
-        //Collections.sort( languages );
         return languages;
     }
+    */
 
 /*    public String getFlagImage()
     {
@@ -82,11 +84,12 @@ public class DefaultI18nLocaleService
         this.countries = countries;
     }
     
+    /*
     public Map<String, String> getCountries()
     {
-        //Collections.sort( countries );
         return countries;
     }
+    */
 
     private UserSettingService userSettingService;
     
@@ -159,4 +162,24 @@ public class DefaultI18nLocaleService
         return countries;
     }
 
+    public int getI18nLocaleCount()
+    {
+        return i18nLocaleStore.getCount();
+    }
+    
+    public Collection<I18nLocale> getI18nLocales(int min, int max)
+    {
+        return i18nLocaleStore.getAllOrderedLastUpdated( min, max );
+    }    
+
+    public int getI18nLocaleCountByName(String key)
+    {
+        return i18nLocaleStore.getCountLikeName( key );
+    }
+    
+    public Collection<I18nLocale> getI18nLocalesByName(String key, int min, int max)
+    {
+        return i18nLocaleStore.getAllLikeNameOrderedName( key, min, max );        
+    }
+    
 }

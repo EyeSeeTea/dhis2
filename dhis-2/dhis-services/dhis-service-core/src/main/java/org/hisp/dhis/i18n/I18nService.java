@@ -70,6 +70,10 @@ public interface I18nService
 
     Map<String, String> getTranslations( String className, int id, I18nLocale locale );
     
+    Map<String, String> getTranslationsWithoutDefault( String className, int id );
+
+    Map<String, String> getTranslationsWithoutDefault( String className, int id, I18nLocale locale );
+    
     // -------------------------------------------------------------------------
     // I18nLocale
     // -------------------------------------------------------------------------

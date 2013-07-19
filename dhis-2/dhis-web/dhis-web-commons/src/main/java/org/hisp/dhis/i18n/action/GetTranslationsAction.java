@@ -100,7 +100,7 @@ public class GetTranslationsAction
     {
         I18nLocale locale = i18nLocaleService.getI18nLocale( loc );
 
-        translations = i18nService.getTranslations( className, id, locale );
+        translations = i18nService.getTranslationsWithoutDefault( className, id, locale );
         
         return SUCCESS;
     }

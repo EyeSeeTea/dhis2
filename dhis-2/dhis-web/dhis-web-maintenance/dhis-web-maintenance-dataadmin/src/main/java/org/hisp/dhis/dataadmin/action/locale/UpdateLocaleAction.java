@@ -69,13 +69,6 @@ public class UpdateLocaleAction
         this.name = name;
     }
 
-    private String description;
-
-    public void setDescription( String description )
-    {
-        this.description = description;
-    }
-
     private String language;
 
     public void setLanguage( String language )
@@ -101,7 +94,6 @@ public class UpdateLocaleAction
     {
         I18nLocale i18nLocale = i18nLocaleService.getI18nLocale( id );
         i18nLocale.setName( name );
-        i18nLocale.setDescription( description );
         i18nLocale.setLanguage(language);
         i18nLocale.setCountry(country);
 

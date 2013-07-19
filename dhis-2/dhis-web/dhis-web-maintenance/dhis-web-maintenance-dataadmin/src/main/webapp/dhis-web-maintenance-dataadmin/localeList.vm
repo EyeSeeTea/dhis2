@@ -3,25 +3,30 @@
 	//var i18n_none = '$encoder.jsEscape( $i18n.getString( "none" ), "'")';	
 	//var i18n_yes = '$encoder.jsEscape( $i18n.getString( "yes" ) , "'" )';
 	//var i18n_no = '$encoder.jsEscape( $i18n.getString( "no" ), "'")';	
-
-	jQuery(document).ready(function(){	
-		tableSorter( 'listTable' );
-	});
 	
 </script>
 
 <h3>$i18n.getString( "locale_management" ) #openHelp( "locale" )</h3>
 
 <table class="mainPageTable">
-	<tr>
-		<td align="right"><input type="button" value="$i18n.getString( "add_new" )" onclick="window.location.href='showAddLocaleForm.action'" style="width:70px"></td>
-	</tr>
+  <tr>
+  	<td>
+  	<table width="100%">
+		<tr valign="bottom">
+			<td>#filterDiv( "locale" )</td>
+			<td>&nbsp;</td>
+			<td align="right"><input type="button" value="$i18n.getString( "add_new" )" onclick="window.location.href='showAddLocaleForm.action'" style="width:70px"></td>
+		</tr>
+	</table>
+	</td>
+	<td>&nbsp;</td>
+  </tr>
   <tr>
     <td style="vertical-align:top">
 		
 		<table class="listTable" id="listTable">
-			  <col>          
-			  <col width="200">
+			  <col />          
+			  <col width="100" />
 			<thead>			  
 			  <tr>            
 				<th>$i18n.getString( "name" )</th>
@@ -57,7 +62,6 @@
 					<a href="javascript:hideDetails()" title="$i18n.getString( 'hide_details' )"><img src="../images/hide.png" alt="$i18n.getString( 'hide_details' )"/></a>
 				</div>
 				<p><label>$i18n.getString( "name" ):</label><br/><span id="nameField"></span></p>
-				<p><label>$i18n.getString( "description" ):</label><br/><span id="descriptionField"></span></p>
 				<p><label>$i18n.getString( "language" ):</label><br/><span id="languageField"></span></p>
 				<p><label>$i18n.getString( "country" ):</label><br/><span id="countryField"></span></p>
 			</div>

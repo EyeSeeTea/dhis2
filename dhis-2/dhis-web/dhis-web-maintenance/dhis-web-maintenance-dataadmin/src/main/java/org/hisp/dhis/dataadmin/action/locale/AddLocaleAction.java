@@ -62,13 +62,6 @@ public class AddLocaleAction
         this.name = name;
     }
 
-    private String description;
-
-    public void setDescription( String description )
-    {
-        this.description = description;
-    }
-
     private String language;
 
     public void setLanguage( String language )
@@ -93,7 +86,6 @@ public class AddLocaleAction
         I18nLocale i18nLocale = new I18nLocale();
 
         i18nLocale.setName( name );
-        i18nLocale.setDescription( description );
         i18nLocale.setLanguage(language);
         i18nLocale.setCountry(country);
         

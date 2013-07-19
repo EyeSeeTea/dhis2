@@ -60,9 +60,9 @@ public class TranslationServiceTest
     {
         translationService = (TranslationService) getBean( TranslationService.ID );
         
-        locale1 = new I18nLocale("UK", "test1");
-        locale2 = new I18nLocale("US", "test2");
-        locale3 = new I18nLocale("FRANCE", "test3");        
+        locale1 = new I18nLocale("UK_English", "en", "UK");
+        locale2 = new I18nLocale("US_English", "en", "US");
+        locale3 = new I18nLocale("FR_Franch", "fr", "FR");        
     }
     
     // -------------------------------------------------------------------------
@@ -79,11 +79,11 @@ public class TranslationServiceTest
     private String className1 = OrganisationUnit.class.getName();
     private String className2 = DataElement.class.getName();
 
-    private Translation translation1a = new Translation( className1, id1, locale1.getName(), "name", "cheers" );
-    private Translation translation1b = new Translation( className1, id1, locale1.getName(), "shortName", "goodbye" );
-    private Translation translation2a = new Translation( className1, id1, locale2.getName(), "name", "hello" );
-    private Translation translation2b = new Translation( className2, id1, locale2.getName(), "name", "hey" );
-    private Translation translation2c = new Translation( className2, id2, locale3.getName(), "name", "bonjour" );
+    private Translation translation1a = new Translation( className1, id1, locale1.getLanguage(), locale1.getCountry(), "name", "cheers" );
+    private Translation translation1b = new Translation( className1, id1, locale1.getLanguage(), locale1.getCountry(), "shortName", "goodbye" );
+    private Translation translation2a = new Translation( className1, id1, locale2.getLanguage(), locale2.getCountry(), "name", "hello" );
+    private Translation translation2b = new Translation( className2, id1, locale2.getLanguage(), locale2.getCountry(), "name", "hey" );
+    private Translation translation2c = new Translation( className2, id2, locale3.getLanguage(), locale3.getCountry(), "name", "bonjour" );
 
     // -------------------------------------------------------------------------
     // Tests

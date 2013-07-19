@@ -79,10 +79,9 @@ public class ShowAddLocaleFormAction
 
     public String execute()
     {
-
     	availableLanguages = i18nLocaleService.getAvailableLanguages();
     	availableCountries = i18nLocaleService.getAvailableCountries();
-
+    	
         return SUCCESS;
     }
 }

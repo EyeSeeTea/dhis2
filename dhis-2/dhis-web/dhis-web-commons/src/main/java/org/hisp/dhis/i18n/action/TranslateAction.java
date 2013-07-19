@@ -150,16 +150,16 @@ public class TranslateAction
     public String execute()
         throws Exception
     {
-        
+
         I18nLocale localeObj = null;
-        
+
         if ( loc != null && !loc.equals( "NONE" ) )
         {
             localeObj = i18nLocaleService.getI18nLocale( Integer.valueOf( loc ) );
 
             locale = localeObj.getName();
         }
-        
+
         log.info( "Classname: " + className + ", id: " + objectId + ", loc: " + locale );
 
         IdentifiableObject object = identifiableObjectManager.getObject( Integer.parseInt( objectId ), className );

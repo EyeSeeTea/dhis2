@@ -29,16 +29,16 @@ package org.hisp.dhis.translation.hibernate;
 
 import java.util.Collection;
 import java.util.List;
-//import java.util.I18nLocale;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.hisp.dhis.translation.Translation;
 import org.hisp.dhis.translation.TranslationStore;
+
+//import java.util.I18nLocale;
 
 /**
  * @author Oyvind Brucker
@@ -75,78 +75,74 @@ public class HibernateTranslationStore
         session.update( translation );
     }
 
+    // Used in update?  // add?    
     public Translation getTranslation( String className, int id, I18nLocale locale, String property )
     {
-        Session session = sessionFactory.getCurrentSession();
+        Collection<Translation> translations = getTranslations( className, id, locale, property, true );
 
-        Criteria criteria = session.createCriteria( Translation.class );
-
-        criteria.add( Restrictions.eq( "className", className ) );
-        criteria.add( Restrictions.eq( "id", id ) );
-        criteria.add( Restrictions.eq( "locale", locale.getName() ) );
-        criteria.add( Restrictions.eq( "property", property ) );
-
-        criteria.setCacheable( true );
-
-        return (Translation) criteria.uniqueResult();
-    }
-
-    @SuppressWarnings( "unchecked" )
-    public Collection<Translation> getTranslations( String className, int id, I18nLocale locale )
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( Translation.class );
-
-        criteria.add( Restrictions.eq( "className", className ) );
-        criteria.add( Restrictions.eq( "id", id ) );
-        //criteria.add( Restrictions.eq( "locale", locale.getName() ) );
-        criteria.add( Restrictions.eq( "locale", locale.getLanguage() ) );
-        criteria.add( Restrictions.eq( "country", locale.getCountry() ) );
-
-        criteria.setCacheable( true );
-
-        
-        
-        return criteria.list();
+        return (translations == null || translations.size() == 0) ? null : translations.iterator().next();
     }
     
-    
-    @SuppressWarnings( "unchecked" )
     public Collection<Translation> getTranslations( String className, int id, I18nLocale locale )
     {
-        Collection<Translation> abc = getTranslations(  className, id,  locale );
-        
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( Translation.class );
-
-        criteria.add( Restrictions.eq( "className", className ) );
-        criteria.add( Restrictions.eq( "id", id ) );
-        //criteria.add( Restrictions.eq( "locale", locale.getName() ) );
-        criteria.add( Restrictions.eq( "locale", locale.getLanguage() ) );
-        criteria.add( Restrictions.eq( "country", "" ));
-
-        criteria.setCacheable( true );
-
-        abc.addAll( criteria.list() );
-        
-        return abc;
+        return getTranslations( className, id, locale, null, true );
     }
 
-    @SuppressWarnings( "unchecked" )
     public Collection<Translation> getTranslations( String className, I18nLocale locale )
     {
+        return getTranslations( className, null, locale, null, true );
+    }
+
+    public Translation getTranslationWithoutDefault( String className, int id, I18nLocale locale, String property )
+    {
+        Collection<Translation> translations = getTranslations( className, id, locale, property, false );
+
+        return (translations == null || translations.size() == 0) ? null : translations.iterator().next();
+    }
+
+    public Collection<Translation> getTranslationsWithoutDefault( String className, int id, I18nLocale locale )
+    {
+        return getTranslations( className, id, locale, null, false );
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<Translation> getTranslations( String className, Integer id, I18nLocale locale, String property, boolean useDefault )
+    {
         Session session = sessionFactory.getCurrentSession();
 
-        Criteria criteria = session.createCriteria( Translation.class );
+        String hql = "from Translation t where t.className='" + className + "'";
 
-        criteria.add( Restrictions.eq( "className", className ) );
-        criteria.add( Restrictions.eq( "locale", locale.getName() ) );
+        if ( id != null )
+        {
+            hql += " and t.id=" + id;
+        }
 
-        criteria.setCacheable( true );
+        if ( property != null )
+        {
+            hql += " and t.property='" + property + "'";
+        }
 
-        return criteria.list();
+        if ( locale.getCountry().equals( Translation.DEFAULT_COUNTRY ) )
+        {
+            hql += " and t.locale='" + locale.getLanguage() + "' and t.country = '" + Translation.DEFAULT_COUNTRY + "'";
+        }
+        else
+        {
+            hql += " and ( (t.locale='" + locale.getLanguage() + "' and t.country = '" + locale.getCountry() + "' ) ";
+
+            if( useDefault )
+            {                
+                hql += " or ( t.locale='" + locale.getLanguage() + "' and t.country = '" + Translation.DEFAULT_COUNTRY + "'" 
+                        + " and not exists ( from Translation t1 where t1.className=t.className and t1.property=t.property and t1.id=t.id and t1.locale=t.locale and t1.country = '" + locale.getCountry() + "' ) )";
+            }
+                
+            hql += " )";                    
+                        
+        }
+
+        Query query = session.createQuery( hql );
+
+        return query.list();
     }
 
     @SuppressWarnings( "unchecked" )

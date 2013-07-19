@@ -1,49 +1,45 @@
 package org.hisp.dhis.i18n.locale;
 
-
 //import java.util.HashSet;
 //import java.util.List;
 //import java.util.Set;
 
 //import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.common.BaseIdentifiableObject;
+
 //import org.hisp.dhis.validation.ValidationCriteria;
 
-
-public class I18nLocale extends BaseIdentifiableObject
+public class I18nLocale
+    extends BaseIdentifiableObject
 {
     /**
      * 
      */
     private static final long serialVersionUID = -8425127015696485061L;
 
-    private String description;
-
     private String language;
 
     private String country;
-    
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
     public I18nLocale()
     {
-        
+
     }
-    
-    public I18nLocale(String name, String description, String language, String country)
+
+    public I18nLocale( String name, String language, String country )
     {
         this.name = name;
-        this.description = description;
         this.language = language;
         this.country = country;
     }
 
-    public I18nLocale(String name, String description)
+    public I18nLocale( String name )
     {
         this.name = name;
-        this.description = description;
         this.language = "en";
         this.country = "US";
     }
@@ -55,46 +51,35 @@ public class I18nLocale extends BaseIdentifiableObject
     @Override
     public int hashCode()
     {
-        return name.hashCode();
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        return result;
     }
 
     @Override
-    public boolean equals( Object o )
+    public boolean equals( Object obj )
     {
-        if ( this == o )
-        {
+        if ( this == obj )
             return true;
-        }
-
-        if ( o == null )
-        {
+        if ( !super.equals( obj ) )
             return false;
-        }
-
-        if ( !(o instanceof I18nLocale) )
-        {
+        if ( getClass() != obj.getClass() )
             return false;
+        I18nLocale other = (I18nLocale) obj;
+        if ( name == null )
+        {
+            if ( other.name != null )
+                return false;
         }
-
-        final I18nLocale other = (I18nLocale) o;
-
-        return name.equals( other.getName() );
+        else if ( !name.equals( other.name ) )
+            return false;
+        return true;
     }
-    
-    
+
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
-
-    public String getDescription()
-    {
-        return description;
-    }
-
-    public void setDescription( String description )
-    {
-        this.description = description;
-    }
 
     public String getLanguage()
     {
@@ -116,11 +101,5 @@ public class I18nLocale extends BaseIdentifiableObject
         this.country = country;
     }
 
-    // -------------------------------------------------------------------------
-    // Convenience method
-    // -------------------------------------------------------------------------
 
-    
-    // NEED TO IMPLEMENT SOMETHING TO LOAD THE ENTIRE LISTING?
-    
 }

@@ -15,11 +15,9 @@
 
     <property name="name" column="name" not-null="true" unique="true" length="230" />
 
-    <property name="description" type="text" />
+    <property name="language" length="15" />
 
-    <property name="language" type="text" />
-
-    <property name="country" type="text" />
+    <property name="country" length="15" />
 
 	<!-- Form properties -->
 

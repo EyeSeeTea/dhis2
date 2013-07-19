@@ -27,6 +27,7 @@
 
 package org.hisp.dhis.i18n.locale;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -56,5 +57,13 @@ public interface I18nLocaleService
     Map<String, String> getAvailableLanguages();
 
     Map<String, String> getAvailableCountries();
+
+    int getI18nLocaleCount();
+    
+    Collection<I18nLocale> getI18nLocales(int min, int max);
+    
+    int getI18nLocaleCountByName(String key);
+
+    Collection<I18nLocale> getI18nLocalesByName(String key, int min, int max);
 
 }
