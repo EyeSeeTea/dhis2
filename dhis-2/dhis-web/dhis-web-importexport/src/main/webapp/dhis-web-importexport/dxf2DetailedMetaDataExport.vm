@@ -159,8 +159,7 @@
 <h3>$i18n.getString( "metadata_detailed_export" )</h3>
 
 <!-- EXPORT FORM -->
-<!-- ACTION METHOD HERE -->
-<form id="exportForm" name="exportForm" method="post" action="../api/detailedMetaData.xml">
+<form id="exportForm" name="exportForm">
 
     <!-- MENU -->
     <div id="mainDivAccordion">
@@ -284,8 +283,8 @@
         <h6 style="font-size: 10pt;">$i18n.getString( "validation_rules" )</h6>
         <div id="divValidationRules" style="margin: 5px;"></div>
     </div>
-
     <br>
+
     <!-- INPUT -->
     <table>
         <tr>

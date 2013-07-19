@@ -23,16 +23,9 @@ jQuery(function ()
 
             if ($(this).is(":checked"))
             {
-                $("#label" + metaDataCategoryName).css({"color" : "lime"});
-                $("#divSelectAll" + metaDataCategoryName).show();
                 insertMetaDataDesign(metaDataCategoryName);
-                loadMetaData(metaDataCategoryName);
             } else
             {
-                $("#labelSelectAll" + metaDataCategoryName).css({"color" : "black"});
-                $("#checkboxSelectAll" + metaDataCategoryName).prop("checked", false);
-                $("#divSelectAll" + metaDataCategoryName).hide();
-                $("#label" + metaDataCategoryName).css({"color" : "black"});
                 removeMetaDataDesign(metaDataCategoryName);
             }
         });
@@ -44,11 +37,9 @@ jQuery(function ()
 
             if($(this).is(":checked"))
             {
-                $("#labelSelectAll" + metaDataCategoryName).css({color: "lime"});
                 selectAllValuesByCategory(metaDataCategoryName);
             } else
             {
-                $("#labelSelectAll" + metaDataCategoryName).css({color: "black"});
                 deselectValuesByCategory(metaDataCategoryName);
             }
         });
@@ -70,24 +61,9 @@ jQuery(function ()
 // Export DetailedMetaData AJAX
 function exportDetailedMetaData()
 {
-    var url = "../api/detailedMetaData";
-    var format = $("#format").val();
-//    var compression = $("#compression").val();
-//
-    url += "/set" + format;
-//
-//    if(compression == "zip")
-//    {
-//        url += ".zip";
-//    }
-//    else if(compression == "gz")
-//    {
-//        url += ".gz";
-//    }
-
     $.ajax({
         type: "POST",
-        url: url,
+        url: getURL(),
         data: JSON.stringify(createFilterJSON()),
         contentType: "application/json",
         dataType: "xml",
@@ -103,6 +79,26 @@ function exportDetailedMetaData()
             alert("Export process failed.");
         }
     });
+}
+
+// Generate Export URL
+function getURL()
+{
+    var url = "../api/detailedMetaData";
+    var format = $("#format").val();
+    var compression = $("#compression").val();
+    url += "/set" + format;
+
+    if(compression == "zip")
+    {
+        url += ".zip";
+    }
+    else if(compression == "gz")
+    {
+        url += ".gz";
+    }
+
+    return url;
 }
 
 //function submitDetailedMetaData()
@@ -151,10 +147,7 @@ function selectAll()
         if(!$("#checkbox" + metaDataArray[i]).is(":checked"))
         {
             $("#checkbox" + metaDataArray[i]).prop("checked", true);
-            $("#label" + metaDataArray[i]).css({"color" : "lime"});
-            $("#divSelectAll" + metaDataArray[i]).show();
             insertMetaDataDesign(metaDataArray[i]);
-            loadMetaData(metaDataArray[i]);
         }
     }
 }
@@ -167,9 +160,6 @@ function deselectAll()
         if($("#checkbox" + metaDataArray[i]).is(":checked"))
         {
             $("#checkbox" + metaDataArray[i]).prop("checked", false);
-            $("#label" + metaDataArray[i]).css({"color" : "black"});
-            $("#checkboxSelectAll" + metaDataArray[i]).prop("checked", false);
-            $("#divSelectAll" + metaDataArray[i]).hide();
             removeMetaDataDesign(metaDataArray[i]);
         }
     }
@@ -202,12 +192,14 @@ function deselectAllValues()
 // Select all values by category
 function selectAllValuesByCategory(metaDataCategoryName)
 {
+    $("#labelSelectAll" + metaDataCategoryName).css({color: "lime"});
     $("#select" + metaDataCategoryName).click();
 }
 
 // Deselect all values by category
 function deselectValuesByCategory(metaDataCategoryName)
 {
+    $("#labelSelectAll" + metaDataCategoryName).css({color: "black"});
     $("#deselect" + metaDataCategoryName).click();
 }
 
@@ -221,8 +213,18 @@ function insertMetaDataCategoryDesign(metaDataCategoryName)
 // Insert MetaData HTML & CSS for a Category
 function insertMetaDataDesign(metaDataCategoryName)
 {
-    var design = generateMetaDataDesign(metaDataCategoryName);
-    $("#mainDiv" + metaDataCategoryName).append(design);
+    $("#label" + metaDataCategoryName).css({"color" : "lime"});
+    $("#divSelectAll" + metaDataCategoryName).show();
+
+    if($("#mainDiv" + metaDataCategoryName).is(":empty"))
+    {
+        var design = generateMetaDataDesign(metaDataCategoryName);
+        $("#mainDiv" + metaDataCategoryName).append(design);
+        loadMetaData(metaDataCategoryName);
+    } else
+    {
+        $("#mainDiv" + metaDataCategoryName).show();
+    }
 }
 
 // Generate MetaData Checkboxes
@@ -306,15 +308,20 @@ function loadMetaData(metaDataCategoryName)
             option.attr("value", item.id);
 
             return option;
-        },
-        timeout: 15000
+        }
     });
 }
 
 // Remove MetaData HTML and CSS from a Category
 function removeMetaDataDesign(metaDataCategoryName)
 {
-    $("#mainDiv" + metaDataCategoryName).empty();
+    $("#label" + metaDataCategoryName).css({"color" : "black"});
+    $("#labelSelectAll" + metaDataCategoryName).css({"color" : "black"});
+    $("#checkboxSelectAll" + metaDataCategoryName).prop("checked", false);
+    deselectValuesByCategory(metaDataCategoryName);
+
+    $("#divSelectAll" + metaDataCategoryName).hide();
+    $("#mainDiv" + metaDataCategoryName).hide();
 }
 
 // Get MetaData Name
