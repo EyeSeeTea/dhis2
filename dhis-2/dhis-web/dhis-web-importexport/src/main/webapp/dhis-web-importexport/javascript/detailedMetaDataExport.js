@@ -91,11 +91,11 @@ function getURL()
 
     if(compression == "zip")
     {
-        url += ".zip";
+        url += "Zip";
     }
     else if(compression == "gz")
     {
-        url += ".gz";
+        url += "Gz";
     }
 
     return url;
