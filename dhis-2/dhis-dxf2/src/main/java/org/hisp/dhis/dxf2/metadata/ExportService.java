@@ -27,6 +27,7 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dxf2.metadata.filters.Filter;
 import org.hisp.dhis.scheduling.TaskId;
 
 /**

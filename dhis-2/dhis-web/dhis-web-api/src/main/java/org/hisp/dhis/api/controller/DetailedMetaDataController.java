@@ -31,7 +31,9 @@ import net.sf.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.api.utils.ContextUtils;
-import org.hisp.dhis.dxf2.metadata.*;
+import org.hisp.dhis.dxf2.metadata.ExportService;
+import org.hisp.dhis.dxf2.metadata.MetaData;
+import org.hisp.dhis.dxf2.metadata.filters.Filter;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.system.scheduling.Scheduler;
 import org.hisp.dhis.user.CurrentUserService;
@@ -128,48 +130,48 @@ public class DetailedMetaDataController
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportXml( @RequestBody JSONObject json ) throws IOException
     {
-        processMetaData( json );
         format = ".xml";
+        processMetaData( json );
     }
 
     @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/setJson", headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportJson( @RequestBody JSONObject json ) throws IOException
     {
-        processMetaData( json );
         format = ".json";
+        processMetaData( json );
     }
 
     @RequestMapping( method = RequestMethod.POST, value = { DetailedMetaDataController.RESOURCE_PATH + "/setXmlZip" }, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportZippedXML( @RequestBody JSONObject json ) throws IOException
     {
-        processMetaData( json );
         format = ".xml.zip";
+        processMetaData( json );
     }
 
     @RequestMapping( method = RequestMethod.POST, value = { DetailedMetaDataController.RESOURCE_PATH + "/setJsonZip" }, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportZippedJSON( @RequestBody JSONObject json ) throws IOException
     {
-        processMetaData( json );
         format = ".json.zip";
+        processMetaData( json );
     }
 
     @RequestMapping( method = RequestMethod.POST, value = { DetailedMetaDataController.RESOURCE_PATH + "/setXmlGz" }, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportGZippedXML( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
-        processMetaData( json );
         format = ".xml.gz";
+        processMetaData( json );
     }
 
     @RequestMapping( method = RequestMethod.POST, value = { DetailedMetaDataController.RESOURCE_PATH + "/setJsonGz" }, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportGZippedJSON( @RequestBody JSONObject json ) throws IOException
     {
-        processMetaData( json );
         format = ".json.gz";
+        processMetaData( json );
     }
 
     //--------------------------------------------------------------------------
@@ -185,7 +187,7 @@ public class DetailedMetaDataController
     }
 
     //--------------------------------------------------------------------------
-    // Detailed MetaData Export - Business Logic
+    // Detailed MetaData Export - Logic
     //--------------------------------------------------------------------------
 
     private void processMetaData( JSONObject json) throws IOException
@@ -193,7 +195,14 @@ public class DetailedMetaDataController
         Filter filter = new Filter();
         filter.addOptions( filter.processJSON( json ) );
         MetaData metaData = exportService.getFilteredMetaData( filter );
-        detailedMetaDataString = JacksonUtils.toXmlAsString( metaData );
+        if( format.contains( ".xml" ))
+        {
+            detailedMetaDataString = JacksonUtils.toXmlAsString( metaData );
+        }
+        if( format.contains( ".json" ))
+        {
+            detailedMetaDataString = JacksonUtils.toJsonAsString( metaData );
+        }
     }
 
     private void processFileOutput( HttpServletResponse response, String fileName) throws IOException
@@ -205,57 +214,34 @@ public class DetailedMetaDataController
             response.addHeader( ContextUtils.HEADER_CONTENT_TRANSFER_ENCODING, "binary" );
             ZipOutputStream zip = new ZipOutputStream( response.getOutputStream() );
             zip.putNextEntry( new ZipEntry( zipFileName ) );
-
-            try
-            {
-                zip.write( detailedMetaDataString.getBytes() );
-                zip.flush();
-
-            } catch( Exception e )
-            {
-                log.info( "Error: " + e );
-
-            } finally
-            {
-                zip.close();
-            }
-        } else if( format.contains( ".gz" ) )
+            writeToOutputStream( zip, detailedMetaDataString.getBytes() );
+        } else
+        if( format.contains( ".gz" ) )
         {
             contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_GZIP, ContextUtils.CacheStrategy.NO_CACHE, fileName, true );
             response.addHeader( ContextUtils.HEADER_CONTENT_TRANSFER_ENCODING, "binary" );
             GZIPOutputStream gzip = new GZIPOutputStream( response.getOutputStream() );
-
-            try
-            {
-                gzip.write( detailedMetaDataString.getBytes() );
-                gzip.flush();
-
-            } catch( Exception e )
-            {
-                log.info( "Error: " + e );
-
-            } finally
-            {
-                gzip.close();
-            }
+            writeToOutputStream( gzip, detailedMetaDataString.getBytes() );
         } else
         {
             contextUtils.configureResponse( response, ContextUtils.HEADER_CONTENT_DISPOSITION, ContextUtils.CacheStrategy.NO_CACHE, fileName, true );
             OutputStream outputStream = response.getOutputStream();
+            writeToOutputStream( outputStream, detailedMetaDataString.getBytes() );
+        }
+    }
 
-            try
-            {
-                outputStream.write( detailedMetaDataString.getBytes() );
-                outputStream.flush();
-
-            } catch( Exception e )
-            {
-                log.info( "Error: " + e );
-
-            } finally
-            {
-                outputStream.close();
-            }
+    private static void writeToOutputStream( OutputStream outputStream, byte[] data ) throws IOException
+    {
+        try
+        {
+            outputStream.write( data );
+            outputStream.flush();
+        } catch( Exception e )
+        {
+            log.info( "Error: " + e );
+        } finally
+        {
+            outputStream.close();
         }
     }
 }

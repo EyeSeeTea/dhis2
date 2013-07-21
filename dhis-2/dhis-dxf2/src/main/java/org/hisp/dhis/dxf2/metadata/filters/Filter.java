@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.metadata;
+package org.hisp.dhis.dxf2.metadata.filters;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -49,7 +49,7 @@ public class Filter
      */
     private static final long serialVersionUID = 8736213901318412954L;
 
-    private Date created;
+    private String metaDataUids;
 
     private Map<String, List<String>> options =  new HashMap<String, List<String>>();
 
@@ -65,18 +65,6 @@ public class Filter
     // Getters & Setters
     //--------------------------------------------------------------------------
 
-    @JsonProperty
-    @JacksonXmlProperty
-    public Date getCreated()
-    {
-        return created;
-    }
-
-    public void setCreated( Date created )
-    {
-        this.created = created;
-    }
-
     public Map<String, List<String>> getOptions()
     {
         return options;
@@ -87,8 +75,18 @@ public class Filter
         this.options = options;
     }
 
+    public String getMetaDataUids()
+    {
+        return metaDataUids;
+    }
+
+    public void setMetaDataUids( String metaDataUids )
+    {
+        this.metaDataUids = metaDataUids;
+    }
+
     //--------------------------------------------------------------------------
-    // Filter Options
+    // Logic
     //--------------------------------------------------------------------------
 
     public void addOption( String option, List<String> values )
@@ -102,7 +100,7 @@ public class Filter
     }
 
     /**
-     * @param json - MetaData request JSON
+     * @param json - MetaData request JSON processing method
      */
     public Map<String, List<String>> processJSON( JSONObject json )
     {
