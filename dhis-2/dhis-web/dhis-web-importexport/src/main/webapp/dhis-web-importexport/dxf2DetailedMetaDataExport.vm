@@ -150,6 +150,9 @@
     var i18n_selected_validationRules = '$i18n.getString( "selected_validationRules" )';
 
     var i18n_filter = '$i18n.getString( "filter" )';
+    var i18n_selected_filter = '$i18n.getString( "selected_filter" )';
+    var i18_filter_commands = '$i18n.getString( "filter_commands" )';
+
     var i18n_move_selected = '$i18n.getString( "move_selected" )';
     var i18n_remove_selected = '$i18n.getString( "remove_selected" )';
     var i18n_move_all = '$i18n.getString( "move_all" )';
@@ -157,6 +160,32 @@
 </script>
 
 <h3>$i18n.getString( "metadata_detailed_export" )</h3>
+
+<!-- FILTER DEFINITION -->
+<div id="mainDivFilter" class="inputCriteria" style="width: 500px; height: 120px;">
+    <div style="width: 200px; float: left;">
+        <p>$i18n.getString( "selected_filter" )</p>
+        <select style="width: 80%;">
+            <option>Filter 1</option>
+            <option>Filter 2</option>
+        </select>
+    </div>
+    <div style="width: 300px; float: left;">
+        <p>$i18n.getString( "filter_commands" )</p>
+        <div>
+            <form id="filterForm" name="filterForm">
+                <div>
+                    <span>Name:&nbsp</span><input type="text" name="filterName"/>
+                </div>
+                <div>
+                    <input type="button" name="buttonSave" value="Save" style="width: 80px; margin-top: 15px; margin-right: 10px;"/>
+                    <input type="button" name="buttonUpdate" value="Update" style="width: 80px; margin-top: 15px;  margin-right: 10px;"/>
+                    <input type="button" name="buttonDelete" value="Delete" style="width: 80px; margin-top: 15px;  margin-right: 10px;"/>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <!-- EXPORT FORM -->
 <form id="exportForm" name="exportForm">
