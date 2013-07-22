@@ -1,5 +1,9 @@
 package org.hisp.dhis.dashboard;
 
+import java.util.List;
+
+import org.hisp.dhis.user.User;
+
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -36,4 +40,16 @@ public interface DashboardService
     final String ID = DashboardService.class.getName();
 
     DashboardSearchResult search( String query );
+    
+    int saveDashboard( Dashboard dashboard );
+    
+    void updateDashboard( Dashboard dashboard );
+    
+    void deleteDashboard( Dashboard dashboard );
+    
+    Dashboard getDashboard( int id );
+    
+    Dashboard getDashboard( String uid );
+    
+    List<Dashboard> getByUser( User user );
 }
