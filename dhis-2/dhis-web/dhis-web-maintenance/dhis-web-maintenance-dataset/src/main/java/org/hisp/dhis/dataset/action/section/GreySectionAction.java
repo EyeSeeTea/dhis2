@@ -112,7 +112,7 @@ public class GreySectionAction
         return sectionIsMultiDimensional;
     }
 
-    Map<Integer, Collection<DataElementCategoryOption>> optionsMap = new HashMap<Integer, Collection<DataElementCategoryOption>>();
+    private Map<Integer, Collection<DataElementCategoryOption>> optionsMap = new HashMap<Integer, Collection<DataElementCategoryOption>>();
 
     public Map<Integer, Collection<DataElementCategoryOption>> getOptionsMap()
     {
@@ -193,7 +193,7 @@ public class GreySectionAction
             {
                 int categoryOptionSize = cat.getCategoryOptions().size();
                 
-                if ( catColSpan > 0 && categoryOptionSize > 0 )
+                if ( categoryOptionSize > 0 && catColSpan >= categoryOptionSize )
                 {
                     catColSpan = catColSpan / categoryOptionSize;
 
