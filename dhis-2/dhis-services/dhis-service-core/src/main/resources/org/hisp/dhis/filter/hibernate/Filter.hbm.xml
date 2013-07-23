@@ -1,15 +1,27 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC
         "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd"
+        [<!ENTITY identifiableProperties SYSTEM "classpath://org/hisp/dhis/common/identifiableProperties.hbm">]
+        >
 
         <!--Ovidiu-->
 <hibernate-mapping>
+    <class name="org.hisp.dhis.filter.Filter" table="filter">
 
+        <cache usage="read-write"/>
 
+        <id name="id" column="filterid">
+            <generator class="native" />
+        </id>
 
+        &identifiableProperties;
+        
+        <property name="name" column="name" not-null="true" unique="true" length="160"/>
+        
+        <property name="description" column="description" type="text"/>
 
+        <property name="metaDataUids" column="metadatauids" type="text"/>
 
-
-
+    </class>
 </hibernate-mapping>

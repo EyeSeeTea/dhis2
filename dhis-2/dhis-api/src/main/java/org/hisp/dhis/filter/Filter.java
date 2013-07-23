@@ -27,9 +27,14 @@ package org.hisp.dhis.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 
 
 /**
@@ -37,7 +42,7 @@ import org.hisp.dhis.common.DxfNamespaces;
  */
 @JacksonXmlRootElement( localName = "filter", namespace = DxfNamespaces.DXF_2_0 )
 public class Filter
-    extends BaseIdentifiableObject
+    extends BaseNameableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -47,17 +52,20 @@ public class Filter
     private String metaDataUids;
 
     //--------------------------------------------------------------------------
-    // Constructor
+    // Constructors
     //--------------------------------------------------------------------------
 
     public Filter()
     {
     }
 
-    //--------------------------------------------------------------------------
-    // Getters & Setters
-    //--------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Getters and setters properties
+    // -------------------------------------------------------------------------
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getMetaDataUids()
     {
         return metaDataUids;
@@ -71,6 +79,6 @@ public class Filter
     @Override
     public String toString()
     {
-        return "";
+        return "It Works!";
     }
 }

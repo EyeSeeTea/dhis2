@@ -45,6 +45,7 @@ import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.Section;
 import org.hisp.dhis.document.Document;
+import org.hisp.dhis.filter.Filter;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
@@ -178,6 +179,12 @@ final public class ExchangeClasses
         // special class which is created on demand in association with other objects
         exportClasses.remove( DataElementOperand.class );
         importClasses.remove( DataElementOperand.class );
+
+        // OVIDIU
+        allExportClasses.put( Filter.class, "filters" );
+        // Ovidiu - for now do not allow filters are not available for export/import
+        exportClasses.remove( Filter.class );
+        importClasses.remove( Filter.class );
     }
 
     public static Map<Class<? extends IdentifiableObject>, String> getAllExportMap()
