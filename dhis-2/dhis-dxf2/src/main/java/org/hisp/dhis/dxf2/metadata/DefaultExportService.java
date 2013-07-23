@@ -33,7 +33,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
-import org.hisp.dhis.dxf2.metadata.filters.Filter;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.notification.NotificationLevel;
 import org.hisp.dhis.system.notification.Notifier;
@@ -134,14 +133,14 @@ public class DefaultExportService
 
     // Ovidiu
     @Override
-    public MetaData getFilteredMetaData( Filter filter )
+    public MetaData getFilteredMetaData( FilterOptions filterOptions )
     {
-        return getFilteredMetaData( filter, null );
+        return getFilteredMetaData( filterOptions, null );
     }
 
     // Ovidiu
     @Override
-    public MetaData getFilteredMetaData( Filter filter, TaskId taskId )
+    public MetaData getFilteredMetaData( FilterOptions filterOptions, TaskId taskId )
     {
         MetaData metaData = new MetaData();
         metaData.setCreated(new Date());
@@ -150,7 +149,7 @@ public class DefaultExportService
 
         log.info( "User '" + currentUserService.getCurrentUsername() + "' started export at " + new Date() );
 
-        for ( Map.Entry<String, List<String>> filterOptionEntry : filter.getOptions().entrySet() )
+        for ( Map.Entry<String, List<String>> filterOptionEntry : filterOptions.getOptions().entrySet() )
         {
             String className = filterOptionEntry.getKey();
             for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
@@ -186,8 +185,7 @@ public class DefaultExportService
 
     // OVIDIU
     @Override
-    public void saveFilter( Filter filter )
+    public void saveFilter( FilterOptions filterOptions )
     {
-        manager.save( filter );
     }
 }

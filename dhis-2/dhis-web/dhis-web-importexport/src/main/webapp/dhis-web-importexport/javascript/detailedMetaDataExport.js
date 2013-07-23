@@ -61,20 +61,22 @@ jQuery(function ()
 // Export DetailedMetaData AJAX
 function exportDetailedMetaData()
 {
+    var json = JSON.stringify(createFilterJSON());
+    console.log("Exported JSON:" + json);
     $.ajax({
         type: "POST",
         url: getURL(),
-        data: JSON.stringify(createFilterJSON()),
+        data: json,
         contentType: "application/json",
         dataType: "xml",
         success: function(response)
         {
-            console.log("Exported JSON: " + JSON.stringify(createFilterJSON()));
-            console.log(response);
+            console.log("Response" + response);
             window.location = "../api/detailedMetaData/getMetaDataFile";
         },
-        error: function()
+        error: function(request, status, error)
         {
+            console.log(request.responseText);
             console.log(arguments);
             alert("Export process failed.");
         }
@@ -101,38 +103,23 @@ function getURL()
     return url;
 }
 
-//function submitDetailedMetaData()
-//{
-//    for(var i = 0; i < metaDataArray.length; i++)
-//    {
-//        selectAllById("selected" + metaDataArray[i]);
-//    }
-//    $("#exportForm").submit();
-//}
-
 // Create Filter Object
 function createFilterJSON()
 {
     var filter = {};
-    for(var i = 0; i < metaDataArray.length; i++)
+    for (var i = 0; i < metaDataArray.length; i++)
     {
-        var filterCategory = [];
+        var filterValues = [];
         var values = $("#selected" + metaDataArray[i]).val();
-        if(values != undefined)
+        if (values != undefined)
         {
-            for(var j = 0; j < values.length; j++)
-            {
-                var filterItem = {};
-                var itemKey = lowercaseFirstLetter(metaDataArray[i].slice(0, metaDataArray[i].length - 1));
-                filterItem[itemKey] = values[j];
-                filterCategory.push(filterItem);
-            }
+            filterValues = values;
         }
 
-        if(filterCategory.length != 0)
+        if (filterValues.length != 0)
         {
             var metaDataCategory = lowercaseFirstLetter(metaDataArray[i]);
-            filter[metaDataCategory] = filterCategory;
+            filter[metaDataCategory] = filterValues;
         }
     }
 
@@ -308,6 +295,12 @@ function loadMetaData(metaDataCategoryName)
             option.attr("value", item.id);
 
             return option;
+        },
+        error: function(request, status, error)
+        {
+            console.log(request.responseText);
+            console.log(arguments);
+            alert("Export process failed.");
         }
     });
 }

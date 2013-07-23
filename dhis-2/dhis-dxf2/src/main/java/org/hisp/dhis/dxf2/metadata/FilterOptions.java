@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.metadata.filters;
+package org.hisp.dhis.dxf2.metadata;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -27,43 +27,34 @@ package org.hisp.dhis.dxf2.metadata.filters;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.filter.Filter;
 
 import java.util.*;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
-@JacksonXmlRootElement( localName = "filter", namespace = DxfNamespaces.DXF_2_0 )
-public class Filter
-    extends BaseIdentifiableObject
+public class FilterOptions
 {
-    /**
-     * Determines if a de-serialized file is compatible with this class.
-     */
-    private static final long serialVersionUID = 8736213901318412954L;
-
-    private String metaDataUids;
+    private Filter filter;
 
     private Map<String, List<String>> options =  new HashMap<String, List<String>>();
 
     //--------------------------------------------------------------------------
-    // Constructor
-    //--------------------------------------------------------------------------
-
-    public Filter()
-    {
-    }
-
-    //--------------------------------------------------------------------------
     // Getters & Setters
     //--------------------------------------------------------------------------
+
+    public Filter getFilter()
+    {
+        return filter;
+    }
+
+    public void setFilter( Filter filter )
+    {
+        this.filter = filter;
+    }
 
     public Map<String, List<String>> getOptions()
     {
@@ -73,16 +64,6 @@ public class Filter
     public void setOptions( Map<String, List<String>> options )
     {
         this.options = options;
-    }
-
-    public String getMetaDataUids()
-    {
-        return metaDataUids;
-    }
-
-    public void setMetaDataUids( String metaDataUids )
-    {
-        this.metaDataUids = metaDataUids;
     }
 
     //--------------------------------------------------------------------------
@@ -108,19 +89,16 @@ public class Filter
         Iterator jsonIterator = json.keys();
         while ( jsonIterator.hasNext() )
         {
+            List<String> uids = new ArrayList<String>();
+
             String key = (String) jsonIterator.next();
-            List<String> values = new ArrayList<String>();
-            JSONArray uids = json.getJSONArray( key );
-
-            for ( int i = 0; i < uids.size(); i++ )
+            JSONArray values = json.getJSONArray( key );
+            for(int i = 0; i < values.size(); i++)
             {
-                JSONObject uid = uids.getJSONObject( i );
-                String uidKey = key.substring( 0, key.length() - 1 );
-
-                values.add( uid.getString( uidKey ) );
+                String uid = values.getString( i );
+                uids.add( uid );
             }
-
-            resultMap.put( key, values );
+            resultMap.put( key, uids );
         }
 
         return resultMap;

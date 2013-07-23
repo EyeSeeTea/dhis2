@@ -27,7 +27,6 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dxf2.metadata.filters.Filter;
 import org.hisp.dhis.scheduling.TaskId;
 
 /**
@@ -39,9 +38,9 @@ public interface ExportService
 
     MetaData getMetaData( Options options, TaskId taskId );
 
-    MetaData getFilteredMetaData( Filter filter );
+    MetaData getFilteredMetaData( FilterOptions filterOptions );
 
-    MetaData getFilteredMetaData( Filter filter, TaskId taskId );
+    MetaData getFilteredMetaData( FilterOptions filterOptions, TaskId taskId );
 
-    void saveFilter( Filter filter );
+    void saveFilter( FilterOptions filterOptions );
 }
