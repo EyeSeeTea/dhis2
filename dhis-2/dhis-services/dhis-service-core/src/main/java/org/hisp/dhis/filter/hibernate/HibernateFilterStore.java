@@ -1,4 +1,4 @@
-package org.hisp.dhis.filter;
+package org.hisp.dhis.filter.hibernate;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -27,17 +27,27 @@ package org.hisp.dhis.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.filter.Filter;
+import org.hisp.dhis.filter.FilterStore;
+
 import java.util.Collection;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
-public interface FilterStore
+public class HibernateFilterStore
+    extends HibernateIdentifiableObjectStore<Filter>
+    implements FilterStore
 {
-    /**
-     * Returns all Filters.
-     *
-     * @return a collection of all Filters.
-     */
-    Collection<Filter> getAllFilters();
+    // -------------------------------------------------------------------------
+    // Filter
+    // -------------------------------------------------------------------------
+
+    @Override
+    public Collection<Filter> getAllFilters()
+    {
+        System.out.println("A intrat in filter store");
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
 }

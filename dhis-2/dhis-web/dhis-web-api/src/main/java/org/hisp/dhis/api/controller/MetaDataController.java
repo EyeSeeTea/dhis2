@@ -56,8 +56,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-
-
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
@@ -120,7 +118,7 @@ public class MetaDataController
 
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_JSON, CacheStrategy.NO_CACHE, "metaData.json", true );
 
-        JacksonUtils.toXmlWithView( response.getOutputStream(), metaData, ExportView.class );
+        JacksonUtils.toJsonWithView( response.getOutputStream(), metaData, ExportView.class );
     }
 
     @RequestMapping( value = { MetaDataController.RESOURCE_PATH + ".zip" }, produces = "*/*" )

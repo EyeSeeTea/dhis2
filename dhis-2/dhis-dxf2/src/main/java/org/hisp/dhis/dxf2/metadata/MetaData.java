@@ -48,6 +48,7 @@ import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.Section;
 import org.hisp.dhis.document.Document;
+import org.hisp.dhis.filter.Filter;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
@@ -170,6 +171,9 @@ public class MetaData
     private List<ProgramStage> programStages = new ArrayList<ProgramStage>();
 
     private List<DimensionalObject> dimensions = new ArrayList<DimensionalObject>();
+
+    // Ovidiu
+    private List<Filter> filters = new ArrayList<Filter>();
     
     public MetaData()
     {
@@ -731,6 +735,21 @@ public class MetaData
     public void setDimensions( List<DimensionalObject> dimensions )
     {
         this.dimensions = dimensions;
+    }
+
+    // Ovidiu
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "filters", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "filter", namespace = DxfNamespaces.DXF_2_0 )
+    public List<Filter> getFilters()
+    {
+        return filters;
+    }
+
+    public void setFilters( List<Filter> filters )
+    {
+        this.filters = filters;
     }
 
     @Override

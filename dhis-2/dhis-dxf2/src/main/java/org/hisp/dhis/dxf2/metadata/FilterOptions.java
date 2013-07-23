@@ -81,7 +81,7 @@ public class FilterOptions
     }
 
     /**
-     * @param json - MetaData request JSON processing method
+     * @param json - JSON request processing method for filtered MetaData
      */
     public Map<String, List<String>> processJSON( JSONObject json )
     {

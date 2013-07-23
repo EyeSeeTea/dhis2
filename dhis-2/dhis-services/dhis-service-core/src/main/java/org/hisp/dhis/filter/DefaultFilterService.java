@@ -27,17 +27,9 @@ package org.hisp.dhis.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
-public interface FilterStore
+public class DefaultFilterService
 {
-    /**
-     * Returns all Filters.
-     *
-     * @return a collection of all Filters.
-     */
-    Collection<Filter> getAllFilters();
 }

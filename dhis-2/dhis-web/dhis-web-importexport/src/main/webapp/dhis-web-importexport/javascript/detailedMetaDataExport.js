@@ -270,7 +270,7 @@ function generateMetaDataDesign(metaDataCategoryName)
         +               '</td>'
         +               '<td>'
         +                   '<select id="selected' + metaDataCategoryName + '" name="selected' + metaDataCategoryName + '" multiple="multiple"'
-        +                   'style="height: 200px; width: 100%; margin-top: 45px;"></select>'
+        +                   'style="height: 200px; width: 100%; margin-top: 25px;"></select>'
         +               '</td>'
         +           '</tr>'
         +       '</tbody>'
