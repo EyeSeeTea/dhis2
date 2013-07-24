@@ -41,7 +41,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 /**
  * @author Lars Helge Overland
  */
-@JacksonXmlRootElement( localName = "dashboardItem", namespace = DxfNamespaces.DXF_2_0)
+@JacksonXmlRootElement( localName = "dashboard", namespace = DxfNamespaces.DXF_2_0 )
 public class Dashboard
     extends BaseIdentifiableObject
 {
@@ -98,6 +98,26 @@ public class Dashboard
         
         return true;
     }
+    
+    /**
+     * Returns an item from this dashboard of the given type which number of
+     * content is less than max. Returns null if no item matches the criteria.
+     * 
+     * @param type the type of content to return.
+     * @return an item.
+     */
+    public DashboardItem getAvailableItemByType( String type )
+    {
+        for ( DashboardItem item : items )
+        {
+            if ( type.equals( item.getType() ) && item.getContentCount() < DashboardItem.MAX_CONTENT )
+            {
+                return item;
+            }
+        }
+        
+        return null;
+    }    
     
     // -------------------------------------------------------------------------
     // Getters and setters
