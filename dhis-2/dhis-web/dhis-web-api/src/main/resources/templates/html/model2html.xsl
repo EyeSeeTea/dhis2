@@ -58,6 +58,9 @@
   <xsl:include href="program.xsl" />
   <xsl:include href="programStage.xsl" />
 
+  <!--OVIDIU-->
+  <xsl:include href="filter.xsl" />
+
   <!-- Config elements -->
 
   <xsl:include href="config/sms.xsl" />

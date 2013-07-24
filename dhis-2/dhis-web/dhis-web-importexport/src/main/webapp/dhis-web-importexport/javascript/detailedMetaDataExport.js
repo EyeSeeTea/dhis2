@@ -287,6 +287,7 @@ function loadMetaData(metaDataCategoryName)
         source: "../api/" + lowercaseFirstLetter(metaDataCategoryName) + ".json?links=false&paging=false",
         iterator: lowercaseFirstLetter(metaDataCategoryName),
         connectedTo: "selected" + metaDataCategoryName,
+        timeout: 5000,
         handler: function (item)
         {
             var option = jQuery("<option/>");

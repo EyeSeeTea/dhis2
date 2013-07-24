@@ -80,10 +80,4 @@ public class Filter
     {
         this.metaDataUids = metaDataUids;
     }
-
-    @Override
-    public String toString()
-    {
-        return "It Works!";
-    }
 }
