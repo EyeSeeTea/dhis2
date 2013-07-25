@@ -37,10 +37,24 @@ import java.util.*;
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
 public class FilterOptions
+    extends Options
 {
     private Filter filter;
 
-    private Map<String, List<String>> options =  new HashMap<String, List<String>>();
+    private Map<String, List<String>> filterRestrictions =  new HashMap<String, List<String>>();
+
+    //--------------------------------------------------------------------------
+    // Constructors
+    //--------------------------------------------------------------------------
+
+    public FilterOptions()
+    {
+    }
+
+    public FilterOptions( Map<String, String> options )
+    {
+        super( options );
+    }
 
     //--------------------------------------------------------------------------
     // Getters & Setters
@@ -56,28 +70,28 @@ public class FilterOptions
         this.filter = filter;
     }
 
-    public Map<String, List<String>> getOptions()
+    public Map<String, List<String>> getFilterRestrictions()
     {
-        return options;
+        return filterRestrictions;
     }
 
-    public void setOptions( Map<String, List<String>> options )
+    public void setFilterRestrictions( Map<String, List<String>> filterRestrictions )
     {
-        this.options = options;
+        this.filterRestrictions = filterRestrictions;
     }
 
     //--------------------------------------------------------------------------
     // Logic
     //--------------------------------------------------------------------------
 
-    public void addOption( String option, List<String> values )
+    public void addFilterRestriction( String filterRestriction, List<String> values )
     {
-        options.put( option, values );
+        filterRestrictions.put( filterRestriction, values );
     }
 
-    public void addOptions( Map<String, List<String>> newOptions )
+    public void addFilterRestrictions( Map<String, List<String>> newFilterRestrictions )
     {
-        options.putAll( newOptions );
+        filterRestrictions.putAll( newFilterRestrictions );
     }
 
     /**

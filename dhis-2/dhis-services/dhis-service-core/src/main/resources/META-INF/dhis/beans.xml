@@ -566,6 +566,12 @@
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
 
+    <!--Ovidiu-->
+
+  <bean id="org.hisp.dhis.filter.FilterService" class="org.hisp.dhis.filter.DefaultFilterService">
+        <property name="filterStore" ref="org.hisp.dhis.filter.FilterStore" />
+  </bean>
+
   <bean id="org.hisp.dhis.option.OptionService" class="org.hisp.dhis.option.DefaultOptionService">
     <property name="optionStore" ref="org.hisp.dhis.option.OptionStore" />
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />

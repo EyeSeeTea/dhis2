@@ -27,9 +27,33 @@ package org.hisp.dhis.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.List;
+
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
 public class DefaultFilterService
+    implements FilterService
 {
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
+    private FilterStore filterStore;
+
+    public FilterStore getFilterStore()
+    {
+        return filterStore;
+    }
+
+    public void setFilterStore( FilterStore filterStore )
+    {
+        this.filterStore = filterStore;
+    }
+
+    @Override
+    public List<Filter> getAllFilters()
+    {
+        return (List<Filter>) filterStore.getAllFilters();
+    }
 }

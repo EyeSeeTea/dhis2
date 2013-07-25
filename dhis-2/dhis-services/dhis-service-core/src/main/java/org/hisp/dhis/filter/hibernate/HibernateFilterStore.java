@@ -27,6 +27,9 @@ package org.hisp.dhis.filter.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.filter.Filter;
 import org.hisp.dhis.filter.FilterStore;
@@ -41,13 +44,26 @@ public class HibernateFilterStore
     implements FilterStore
 {
     // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
+    private SessionFactory sessionFactory;
+
+    public void setSessionFactory( SessionFactory sessionFactory )
+    {
+        this.sessionFactory = sessionFactory;
+    }
+    // -------------------------------------------------------------------------
     // Filter
     // -------------------------------------------------------------------------
 
     @Override
     public Collection<Filter> getAllFilters()
     {
-        System.out.println("A intrat in filter store");
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( Filter.class );
+
+        return criteria.list();
     }
 }

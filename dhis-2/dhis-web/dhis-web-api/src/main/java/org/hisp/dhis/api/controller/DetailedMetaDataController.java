@@ -35,6 +35,7 @@ import org.hisp.dhis.dxf2.metadata.ExportService;
 import org.hisp.dhis.dxf2.metadata.FilterOptions;
 import org.hisp.dhis.dxf2.metadata.MetaData;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
+import org.hisp.dhis.filter.Filter;
 import org.hisp.dhis.system.scheduling.Scheduler;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,14 +43,17 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -187,14 +191,23 @@ public class DetailedMetaDataController
         processFileOutput( response, fileName );
     }
 
+    @RequestMapping( method = RequestMethod.GET, value = DetailedMetaDataController.RESOURCE_PATH + "/getFilters" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
+    public @ResponseBody String getFilters( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    {
+        List<Filter> filters = exportService.loadFilters();
+        contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_JSON, ContextUtils.CacheStrategy.NO_CACHE );
+        return JacksonUtils.toJsonAsString( filters );
+    }
+
     //--------------------------------------------------------------------------
     // Detailed MetaData Export - Logic
     //--------------------------------------------------------------------------
 
-    private String processMetaData( JSONObject json) throws IOException
+    private String processMetaData( JSONObject json ) throws IOException
     {
         FilterOptions filterOptions = new FilterOptions();
-        filterOptions.addOptions( filterOptions.processJSON( json ) );
+        filterOptions.addFilterRestrictions( filterOptions.processJSON( json ) );
         MetaData metaData = exportService.getFilteredMetaData( filterOptions );
         if( format.contains( ".xml" ))
         {
@@ -207,7 +220,7 @@ public class DetailedMetaDataController
         return "";
     }
 
-    private void processFileOutput( HttpServletResponse response, String fileName) throws IOException
+    private void processFileOutput( HttpServletResponse response, String fileName ) throws IOException
     {
         if(format.contains( ".zip" ))
         {

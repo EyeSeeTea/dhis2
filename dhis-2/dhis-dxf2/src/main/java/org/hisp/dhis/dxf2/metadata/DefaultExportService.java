@@ -33,6 +33,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.filter.DefaultFilterService;
+import org.hisp.dhis.filter.Filter;
+import org.hisp.dhis.filter.FilterStore;
+import org.hisp.dhis.filter.hibernate.HibernateFilterStore;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.notification.NotificationLevel;
 import org.hisp.dhis.system.notification.Notifier;
@@ -55,10 +59,15 @@ public class DefaultExportService
     //-------------------------------------------------------------------------------------------------------
     @Autowired
     protected IdentifiableObjectManager manager;
+
     @Autowired
     private CurrentUserService currentUserService;
+
     @Autowired
     private Notifier notifier;
+
+    @Autowired
+    private DefaultFilterService filterService;
 
     //-------------------------------------------------------------------------------------------------------
     // ExportService Implementation
@@ -74,7 +83,7 @@ public class DefaultExportService
     public MetaData getMetaData( Options options, TaskId taskId )
     {
         MetaData metaData = new MetaData();
-        metaData.setCreated(new Date());
+        metaData.setCreated( new Date() );
 
         log.info("User '" + currentUserService.getCurrentUsername() + "' started export at " + new Date());
 
@@ -143,22 +152,27 @@ public class DefaultExportService
     public MetaData getFilteredMetaData( FilterOptions filterOptions, TaskId taskId )
     {
         MetaData metaData = new MetaData();
-        metaData.setCreated(new Date());
-
-        // TODO: Implement date
+        metaData.setCreated( new Date() );
 
         log.info( "User '" + currentUserService.getCurrentUsername() + "' started export at " + new Date() );
+        Date lastUpdated = filterOptions.getLastUpdated();
 
-        for ( Map.Entry<String, List<String>> filterOptionEntry : filterOptions.getOptions().entrySet() )
+        // TODO: IMPLEMENT DATE
+        if ( taskId != null )
         {
-            String className = filterOptionEntry.getKey();
+            notifier.notify(taskId, "Exporting metaData");
+        }
+
+        for ( Map.Entry<String, List<String>> filterRestrictionEntry : filterOptions.getFilterRestrictions().entrySet() )
+        {
+            String className = filterRestrictionEntry.getKey();
             for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
             {
                 if ( entry.getValue().equals( className ) )
                 {
                     Class<? extends IdentifiableObject> idObjectClass = entry.getKey();
                     Collection<? extends IdentifiableObject> idObjects;
-                    idObjects = manager.getByUid( idObjectClass, filterOptionEntry.getValue() );
+                    idObjects = manager.getByUid( idObjectClass, filterRestrictionEntry.getValue() );
 
                     if ( idObjects.isEmpty() )
                     {
@@ -181,6 +195,12 @@ public class DefaultExportService
         }
 
         return metaData;
+    }
+
+    @Override
+    public List<Filter> loadFilters()
+    {
+        return filterService.getAllFilters();
     }
 
     // OVIDIU

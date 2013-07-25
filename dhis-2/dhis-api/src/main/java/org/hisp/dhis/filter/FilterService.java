@@ -27,56 +27,12 @@ package org.hisp.dhis.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.DxfNamespaces;
-import org.hisp.dhis.common.view.DetailedView;
-import org.hisp.dhis.common.view.ExportView;
+import java.util.List;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
-@JacksonXmlRootElement( localName = "filter", namespace = DxfNamespaces.DXF_2_0 )
-public class Filter
-    extends BaseIdentifiableObject
+public interface FilterService
 {
-    /**
-     * Determines if a de-serialized file is compatible with this class.
-     */
-    private static final long serialVersionUID = 8736213901318412954L;
-
-    private String metaDataUids;
-
-    //--------------------------------------------------------------------------
-    // Constructors
-    //--------------------------------------------------------------------------
-
-    public Filter()
-    {
-    }
-
-    public Filter( String name )
-    {
-        this.name = name;
-    }
-
-    // -------------------------------------------------------------------------
-    // Getters and setters properties
-    // -------------------------------------------------------------------------
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getMetaDataUids()
-    {
-        return metaDataUids;
-    }
-
-    public void setMetaDataUids( String metaDataUids )
-    {
-        this.metaDataUids = metaDataUids;
-    }
+    List<Filter> getAllFilters();
 }

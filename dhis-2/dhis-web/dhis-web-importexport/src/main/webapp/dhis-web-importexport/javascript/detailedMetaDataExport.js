@@ -10,8 +10,22 @@ var metaDataArray = [ "AttributeTypes", "Dimensions", "Charts", "Concepts", "Con
 
 // ---------------------------------------------------------------
 
-// Collapse MetaData Category information
+// MetaData Category Accordion
 jQuery(function ()
+{
+    loadFilters();
+    loadMetaDataCategories();
+    deselectAll();
+    $("#mainDivAccordion").accordion({
+        active: false,
+        collapsible: true,
+        clearStyle: true,
+        autoHeight: false
+    });
+});
+
+// Collapse MetaData Category information
+function loadMetaDataCategories()
 {
     for(var i = 0; i < metaDataArray.length; i++)
     {
@@ -44,43 +58,61 @@ jQuery(function ()
             }
         });
     }
-});
+}
 
-// MetaData Category Accordion
-jQuery(function ()
+// Load Filters
+function loadFilters()
 {
-    deselectAll();
-    $("#mainDivAccordion").accordion({
-        active: false,
-        collapsible: true,
-        clearStyle: true,
-        autoHeight: false
-    });
-});
+    $.ajax(
+        {
+            type: "GET",
+            url: "../api/detailedMetaData/getFilters",
+            dataType: "json",
+            success: function(response)
+            {
+                var filters = response;
+                console.log("Filters: " + JSON.stringify(filters));
+                generateFiltersDesign();
+            },
+            error: function (request, status, error)
+            {
+                console.log(request.responseText);
+                console.log(arguments);
+                alert("Getting filters process failed.");
+            }
+        })
+}
+
+// Generate Filters Design
+function generateFiltersDesign()
+{
+
+}
 
 // Export DetailedMetaData AJAX
 function exportDetailedMetaData()
 {
     var json = JSON.stringify(createFilterJSON());
     console.log("Exported JSON:" + json);
-    $.ajax({
-        type: "POST",
-        url: getURL(),
-        data: json,
-        contentType: "application/json",
-        dataType: "xml",
-        success: function(response)
+    $.ajax(
         {
-            console.log("Response" + response);
-            window.location = "../api/detailedMetaData/getMetaDataFile";
-        },
-        error: function(request, status, error)
-        {
-            console.log(request.responseText);
-            console.log(arguments);
-            alert("Export process failed.");
-        }
-    });
+            type: "POST",
+            url: getURL(),
+            data: json,
+            contentType: "application/json",
+            dataType: "xml",
+            success: function (response)
+            {
+                console.log("Response" + response);
+                window.location = "../api/detailedMetaData/getMetaDataFile";
+            },
+            error: function (request, status, error)
+            {
+                console.log(request.responseText);
+                console.log(arguments);
+                alert("Export process failed.");
+            }
+        });
 }
 
 // Generate Export URL
