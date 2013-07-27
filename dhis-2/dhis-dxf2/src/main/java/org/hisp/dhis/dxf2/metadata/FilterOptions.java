@@ -37,11 +37,11 @@ import java.util.*;
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
 public class FilterOptions
-    extends Options
+        extends Options
 {
     private Filter filter;
 
-    private Map<String, List<String>> filterRestrictions =  new HashMap<String, List<String>>();
+    private Map<String, List<String>> filterRestrictions = new HashMap<String, List<String>>();
 
     //--------------------------------------------------------------------------
     // Constructors
@@ -105,9 +105,9 @@ public class FilterOptions
         {
             List<String> uids = new ArrayList<String>();
 
-            String key = (String) jsonIterator.next();
+            String key = ( String ) jsonIterator.next();
             JSONArray values = json.getJSONArray( key );
-            for(int i = 0; i < values.size(); i++)
+            for ( int i = 0; i < values.size(); i++ )
             {
                 String uid = values.getString( i );
                 uids.add( uid );

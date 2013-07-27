@@ -30,6 +30,7 @@ package org.hisp.dhis.dxf2.metadata;
 import org.hisp.dhis.filter.Filter;
 import org.hisp.dhis.scheduling.TaskId;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -48,4 +49,6 @@ public interface ExportService
     List<Filter> loadFilters();
 
     void saveFilter( FilterOptions filterOptions );
+
+    void deleteFilter( String json ) throws IOException;
 }

@@ -322,7 +322,7 @@
           <result name="success" type="velocity">/main.vm</result>
           <param name="menu">/dhis-web-importexport/mainMenu.vm</param>
           <param name="page">/dhis-web-importexport/dxf2DetailedMetaDataExport.vm</param>
-          <param name="javascripts">javascript/detailedMetaDataExport.js</param>
+          <param name="javascripts">javascript/detailedMetaDataExport.js,javascript/filter.js,javascript/utils.js</param>
           <param name="requiredAuthorities">F_METADATA_EXPORT</param>
       </action>
 

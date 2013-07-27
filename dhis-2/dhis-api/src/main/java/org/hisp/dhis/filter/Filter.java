@@ -41,7 +41,7 @@ import org.hisp.dhis.common.view.ExportView;
  */
 @JacksonXmlRootElement( localName = "filter", namespace = DxfNamespaces.DXF_2_0 )
 public class Filter
-    extends BaseIdentifiableObject
+        extends BaseIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -68,7 +68,7 @@ public class Filter
     // -------------------------------------------------------------------------
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getMetaDataUids()
     {

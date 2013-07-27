@@ -35,4 +35,6 @@ import java.util.List;
 public interface FilterService
 {
     List<Filter> getAllFilters();
+
+    void deleteFilter( Filter filter );
 }

@@ -33,7 +33,7 @@ import java.util.List;
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
 public class DefaultFilterService
-    implements FilterService
+        implements FilterService
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -51,9 +51,20 @@ public class DefaultFilterService
         this.filterStore = filterStore;
     }
 
+    // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------
+
     @Override
     public List<Filter> getAllFilters()
     {
-        return (List<Filter>) filterStore.getAllFilters();
+        return ( List<Filter> ) filterStore.getAllFilters();
+    }
+
+    @Override
+    public void deleteFilter( Filter filter )
+    {
+        filterStore.deleteFilter( filter );
+
     }
 }

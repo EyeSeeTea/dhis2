@@ -174,7 +174,7 @@ public class MetaData
 
     // Ovidiu
     private List<Filter> filters = new ArrayList<Filter>();
-    
+
     public MetaData()
     {
     }
@@ -756,47 +756,47 @@ public class MetaData
     public String toString()
     {
         return "MetaData{" +
-            "attributeTypes=" + attributeTypes +
-            ", documents=" + documents +
-            ", constants=" + constants +
-            ", concepts=" + concepts +
-            ", users=" + users +
-            ", userRoles=" + userRoles +
-            ", userGroups=" + userGroups +
-            ", messageConversations=" + messageConversations +
-            ", interpretations=" + interpretations +
-            ", optionSets=" + optionSets +
-            ", categories=" + categories +
-            ", categoryOptions=" + categoryOptions +
-            ", categoryCombos=" + categoryCombos +
-            ", categoryOptionCombos=" + categoryOptionCombos +
-            ", dataElements=" + dataElements +
-            ", dataElementGroups=" + dataElementGroups +
-            ", dataElementGroupSets=" + dataElementGroupSets +
-            ", indicators=" + indicators +
-            ", indicatorGroups=" + indicatorGroups +
-            ", indicatorGroupSets=" + indicatorGroupSets +
-            ", indicatorTypes=" + indicatorTypes +
-            ", organisationUnits=" + organisationUnits +
-            ", organisationUnitGroups=" + organisationUnitGroups +
-            ", organisationUnitGroupSets=" + organisationUnitGroupSets +
-            ", organisationUnitLevels=" + organisationUnitLevels +
-            ", validationRules=" + validationRules +
-            ", validationRuleGroups=" + validationRuleGroups +
-            ", sqlViews=" + sqlViews +
-            ", charts=" + charts +
-            ", reports=" + reports +
-            ", reportTables=" + reportTables +
-            ", maps=" + maps +
-            ", mapViews=" + mapViews +
-            ", mapLegends=" + mapLegends +
-            ", mapLegendSets=" + mapLegendSets +
-            ", mapLayers=" + mapLayers +
-            ", dataDictionaries=" + dataDictionaries +
-            ", sections=" + sections +
-            ", dataSets=" + dataSets +
-            ", programs=" + programs +
-            ", dimensions=" + dimensions +
-            '}';
+                "attributeTypes=" + attributeTypes +
+                ", documents=" + documents +
+                ", constants=" + constants +
+                ", concepts=" + concepts +
+                ", users=" + users +
+                ", userRoles=" + userRoles +
+                ", userGroups=" + userGroups +
+                ", messageConversations=" + messageConversations +
+                ", interpretations=" + interpretations +
+                ", optionSets=" + optionSets +
+                ", categories=" + categories +
+                ", categoryOptions=" + categoryOptions +
+                ", categoryCombos=" + categoryCombos +
+                ", categoryOptionCombos=" + categoryOptionCombos +
+                ", dataElements=" + dataElements +
+                ", dataElementGroups=" + dataElementGroups +
+                ", dataElementGroupSets=" + dataElementGroupSets +
+                ", indicators=" + indicators +
+                ", indicatorGroups=" + indicatorGroups +
+                ", indicatorGroupSets=" + indicatorGroupSets +
+                ", indicatorTypes=" + indicatorTypes +
+                ", organisationUnits=" + organisationUnits +
+                ", organisationUnitGroups=" + organisationUnitGroups +
+                ", organisationUnitGroupSets=" + organisationUnitGroupSets +
+                ", organisationUnitLevels=" + organisationUnitLevels +
+                ", validationRules=" + validationRules +
+                ", validationRuleGroups=" + validationRuleGroups +
+                ", sqlViews=" + sqlViews +
+                ", charts=" + charts +
+                ", reports=" + reports +
+                ", reportTables=" + reportTables +
+                ", maps=" + maps +
+                ", mapViews=" + mapViews +
+                ", mapLegends=" + mapLegends +
+                ", mapLegendSets=" + mapLegendSets +
+                ", mapLayers=" + mapLayers +
+                ", dataDictionaries=" + dataDictionaries +
+                ", sections=" + sections +
+                ", dataSets=" + dataSets +
+                ", programs=" + programs +
+                ", dimensions=" + dimensions +
+                '}';
     }
 }

@@ -29,11 +29,7 @@ package org.hisp.dhis.api.controller;
 
 import org.hisp.dhis.filter.Filter;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
@@ -41,25 +37,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 @RequestMapping( value = FilterController.RESOURCE_PATH )
 public class FilterController
-    extends AbstractCrudController<Filter>
+        extends AbstractCrudController<Filter>
 {
     public static final String RESOURCE_PATH = "/filters";
-
-    // -------------------------------------------------------------------------
-    // Controller
-    // -------------------------------------------------------------------------
-
-    // TODO - CONTROLLER IMPLEMENTATION
-
-//    @RequestMapping(value = "/{uid}", method = RequestMethod.GET)
-//    public String getFilter( @PathVariable("uid") String uid, Model model )
-//    {
-//        return "";
-//    }
-//
-//    @RequestMapping(method = RequestMethod.GET)
-//    public String getFilters( @RequestParam(value = "links", defaultValue = "true", required = false) Boolean links, Model model )
-//    {
-//        return "";
-//    }
 }

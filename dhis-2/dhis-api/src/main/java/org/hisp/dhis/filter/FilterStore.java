@@ -40,4 +40,6 @@ public interface FilterStore
      * @return a collection of all Filters.
      */
     Collection<Filter> getAllFilters();
+
+    void deleteFilter( Filter filter );
 }

@@ -29,7 +29,6 @@ package org.hisp.dhis.filter.hibernate;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.filter.Filter;
 import org.hisp.dhis.filter.FilterStore;
@@ -40,19 +39,9 @@ import java.util.Collection;
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
 public class HibernateFilterStore
-    extends HibernateIdentifiableObjectStore<Filter>
-    implements FilterStore
+        extends HibernateIdentifiableObjectStore<Filter>
+        implements FilterStore
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private SessionFactory sessionFactory;
-
-    public void setSessionFactory( SessionFactory sessionFactory )
-    {
-        this.sessionFactory = sessionFactory;
-    }
     // -------------------------------------------------------------------------
     // Filter
     // -------------------------------------------------------------------------
@@ -65,5 +54,13 @@ public class HibernateFilterStore
         Criteria criteria = session.createCriteria( Filter.class );
 
         return criteria.list();
+    }
+
+    @Override
+    public void deleteFilter( Filter filter )
+    {
+        Session session = sessionFactory.getCurrentSession();
+
+        session.delete( filter );
     }
 }

@@ -43,7 +43,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -71,7 +70,7 @@ public class DetailedMetaDataController
     @Autowired
     private ExportService exportService;
 
-    @Qualifier("contextUtils")
+    @Qualifier( "contextUtils" )
     @Autowired
     private ContextUtils contextUtils;
 
@@ -119,13 +118,13 @@ public class DetailedMetaDataController
     {
     }
 
-    @RequestMapping( value = { DetailedMetaDataController.RESOURCE_PATH + ".zip" }, headers = "Accept=application/json", produces = "*/*" )
+    @RequestMapping( value = {DetailedMetaDataController.RESOURCE_PATH + ".zip"}, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportZipped( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
     }
 
-    @RequestMapping( value = { DetailedMetaDataController.RESOURCE_PATH + ".gz" }, headers = "Accept=application/json", produces = "*/*" )
+    @RequestMapping( value = {DetailedMetaDataController.RESOURCE_PATH + ".gz"}, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportGZipped( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
@@ -147,7 +146,7 @@ public class DetailedMetaDataController
         detailedMetaDataString = processMetaData( json );
     }
 
-    @RequestMapping( method = RequestMethod.POST, value = { DetailedMetaDataController.RESOURCE_PATH + "/setXmlZip" }, headers = "Accept=application/json", produces = "*/*" )
+    @RequestMapping( method = RequestMethod.POST, value = {DetailedMetaDataController.RESOURCE_PATH + "/setXmlZip"}, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportZippedXML( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
@@ -155,7 +154,7 @@ public class DetailedMetaDataController
         detailedMetaDataString = processMetaData( json );
     }
 
-    @RequestMapping( method = RequestMethod.POST, value = { DetailedMetaDataController.RESOURCE_PATH + "/setJsonZip" }, headers = "Accept=application/json", produces = "*/*" )
+    @RequestMapping( method = RequestMethod.POST, value = {DetailedMetaDataController.RESOURCE_PATH + "/setJsonZip"}, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportZippedJSON( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
@@ -163,7 +162,7 @@ public class DetailedMetaDataController
         detailedMetaDataString = processMetaData( json );
     }
 
-    @RequestMapping( method = RequestMethod.POST, value = { DetailedMetaDataController.RESOURCE_PATH + "/setXmlGz" }, headers = "Accept=application/json", produces = "*/*" )
+    @RequestMapping( method = RequestMethod.POST, value = {DetailedMetaDataController.RESOURCE_PATH + "/setXmlGz"}, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportGZippedXML( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
@@ -171,7 +170,7 @@ public class DetailedMetaDataController
         detailedMetaDataString = processMetaData( json );
     }
 
-    @RequestMapping( method = RequestMethod.POST, value = { DetailedMetaDataController.RESOURCE_PATH + "/setJsonGz" }, headers = "Accept=application/json", produces = "*/*" )
+    @RequestMapping( method = RequestMethod.POST, value = {DetailedMetaDataController.RESOURCE_PATH + "/setJsonGz"}, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportGZippedJSON( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
@@ -201,6 +200,17 @@ public class DetailedMetaDataController
     }
 
     //--------------------------------------------------------------------------
+    // Detailed MetaData Export - Filter functionality
+    //--------------------------------------------------------------------------
+
+    @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/removeFilter " )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
+    public void deleteFilter( @RequestBody JSONObject json ) throws IOException
+    {
+        exportService.deleteFilter( json.toString() );
+    }
+
+    //--------------------------------------------------------------------------
     // Detailed MetaData Export - Logic
     //--------------------------------------------------------------------------
 
@@ -209,11 +219,11 @@ public class DetailedMetaDataController
         FilterOptions filterOptions = new FilterOptions();
         filterOptions.addFilterRestrictions( filterOptions.processJSON( json ) );
         MetaData metaData = exportService.getFilteredMetaData( filterOptions );
-        if( format.contains( ".xml" ))
+        if ( format.contains( ".xml" ) )
         {
             return detailedMetaDataString = JacksonUtils.toXmlAsString( metaData );
         }
-        if( format.contains( ".json" ))
+        if ( format.contains( ".json" ) )
         {
             return detailedMetaDataString = JacksonUtils.toJsonAsString( metaData );
         }
@@ -222,7 +232,7 @@ public class DetailedMetaDataController
 
     private void processFileOutput( HttpServletResponse response, String fileName ) throws IOException
     {
-        if(format.contains( ".zip" ))
+        if ( format.contains( ".zip" ) )
         {
             String zipFileName = fileName.replace( ".zip", "" );
             contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_ZIP, ContextUtils.CacheStrategy.NO_CACHE, fileName, true );
@@ -230,8 +240,7 @@ public class DetailedMetaDataController
             ZipOutputStream zip = new ZipOutputStream( response.getOutputStream() );
             zip.putNextEntry( new ZipEntry( zipFileName ) );
             writeToOutputStream( zip, detailedMetaDataString.getBytes() );
-        } else
-        if( format.contains( ".gz" ) )
+        } else if ( format.contains( ".gz" ) )
         {
             contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_GZIP, ContextUtils.CacheStrategy.NO_CACHE, fileName, true );
             response.addHeader( ContextUtils.HEADER_CONTENT_TRANSFER_ENCODING, "binary" );
@@ -251,7 +260,7 @@ public class DetailedMetaDataController
         {
             outputStream.write( data );
             outputStream.flush();
-        } catch( Exception e )
+        } catch ( Exception e )
         {
             log.info( "Error: " + e );
         } finally

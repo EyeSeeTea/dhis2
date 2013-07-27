@@ -27,16 +27,16 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.io.IOException;
 import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.filter.DefaultFilterService;
 import org.hisp.dhis.filter.Filter;
-import org.hisp.dhis.filter.FilterStore;
-import org.hisp.dhis.filter.hibernate.HibernateFilterStore;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.notification.NotificationLevel;
 import org.hisp.dhis.system.notification.Notifier;
@@ -53,7 +53,7 @@ import org.springframework.util.StringUtils;
 public class DefaultExportService
         implements ExportService
 {
-    private static final Log log = LogFactory.getLog(DefaultExportService.class);
+    private static final Log log = LogFactory.getLog( DefaultExportService.class );
     //-------------------------------------------------------------------------------------------------------
     // Dependencies
     //-------------------------------------------------------------------------------------------------------
@@ -76,7 +76,7 @@ public class DefaultExportService
     @Override
     public MetaData getMetaData( Options options )
     {
-        return getMetaData(options, null);
+        return getMetaData( options, null );
     }
 
     @Override
@@ -85,18 +85,18 @@ public class DefaultExportService
         MetaData metaData = new MetaData();
         metaData.setCreated( new Date() );
 
-        log.info("User '" + currentUserService.getCurrentUsername() + "' started export at " + new Date());
+        log.info( "User '" + currentUserService.getCurrentUsername() + "' started export at " + new Date() );
 
         Date lastUpdated = options.getLastUpdated();
 
         if ( taskId != null )
         {
-            notifier.notify(taskId, "Exporting meta-data");
+            notifier.notify( taskId, "Exporting meta-data" );
         }
 
         for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
         {
-            if ( !options.isEnabled(entry.getValue()) )
+            if ( !options.isEnabled( entry.getValue() ) )
             {
                 continue;
             }
@@ -107,10 +107,10 @@ public class DefaultExportService
 
             if ( lastUpdated != null )
             {
-                idObjects = manager.getByLastUpdated(idObjectClass, lastUpdated);
+                idObjects = manager.getByLastUpdated( idObjectClass, lastUpdated );
             } else
             {
-                idObjects = manager.getAll(idObjectClass);
+                idObjects = manager.getAll( idObjectClass );
             }
 
             if ( idObjects.isEmpty() )
@@ -118,23 +118,23 @@ public class DefaultExportService
                 continue;
             }
 
-            String message = "Exporting " + idObjects.size() + " " + StringUtils.capitalize(entry.getValue());
+            String message = "Exporting " + idObjects.size() + " " + StringUtils.capitalize( entry.getValue() );
 
-            log.info(message);
+            log.info( message );
 
             if ( taskId != null )
             {
-                notifier.notify(taskId, message);
+                notifier.notify( taskId, message );
             }
 
-            ReflectionUtils.invokeSetterMethod(entry.getValue(), metaData, new ArrayList<IdentifiableObject>(idObjects));
+            ReflectionUtils.invokeSetterMethod( entry.getValue(), metaData, new ArrayList<IdentifiableObject>( idObjects ) );
         }
 
-        log.info("Export done at " + new Date());
+        log.info( "Export done at " + new Date() );
 
         if ( taskId != null )
         {
-            notifier.notify(taskId, NotificationLevel.INFO, "Export done", true);
+            notifier.notify( taskId, NotificationLevel.INFO, "Export done", true );
         }
 
         return metaData;
@@ -160,7 +160,7 @@ public class DefaultExportService
         // TODO: IMPLEMENT DATE
         if ( taskId != null )
         {
-            notifier.notify(taskId, "Exporting metaData");
+            notifier.notify( taskId, "Exporting metaData" );
         }
 
         for ( Map.Entry<String, List<String>> filterRestrictionEntry : filterOptions.getFilterRestrictions().entrySet() )
@@ -180,15 +180,15 @@ public class DefaultExportService
                     }
 
                     String message = "Exporting " + idObjects.size() + " " + StringUtils.capitalize( entry.getValue() );
-                    log.info(message);
+                    log.info( message );
 
                     ReflectionUtils.invokeSetterMethod( entry.getValue(), metaData, new ArrayList<IdentifiableObject>( idObjects ) );
 
-                    log.info("Export done at " + new Date());
+                    log.info( "Export done at " + new Date() );
 
                     if ( taskId != null )
                     {
-                        notifier.notify(taskId, NotificationLevel.INFO, "Export done", true);
+                        notifier.notify( taskId, NotificationLevel.INFO, "Export done", true );
                     }
                 }
             }
@@ -207,5 +207,13 @@ public class DefaultExportService
     @Override
     public void saveFilter( FilterOptions filterOptions )
     {
+    }
+
+    @Override
+    public void deleteFilter( String json ) throws IOException
+    {
+        ObjectMapper mapper = new ObjectMapper();
+        Filter filter = mapper.readValue( json, Filter.class );
+        filterService.deleteFilter( filter );
     }
 }
