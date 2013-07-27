@@ -57,10 +57,20 @@ public class HibernateFilterStore
     }
 
     @Override
+    public void saveFilter( Filter filter )
+    {
+        save( filter );
+    }
+
+    @Override
+    public void updateFilter( Filter filter )
+    {
+        update( filter );
+    }
+
+    @Override
     public void deleteFilter( Filter filter )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        session.delete( filter );
+        delete( filter );
     }
 }

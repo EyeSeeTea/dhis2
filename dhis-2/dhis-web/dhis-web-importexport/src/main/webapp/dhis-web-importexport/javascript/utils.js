@@ -4,10 +4,16 @@ function lowercaseFirstLetter(string)
     return string.charAt(0).toLowerCase() + string.slice(1);
 }
 
+// Remove all white spaces from a String
+function removeWhiteSpace(string)
+{
+    return string.replace(/ /g,'')
+}
+
 // Get MetaData Name
 function getI18nMetaDataName(metaDataCategoryName)
 {
-    switch (metaDataCategoryName)
+    switch ( metaDataCategoryName )
     {
         case "AttributeTypes":
             return i18n_attributeTypes;
@@ -75,7 +81,7 @@ function getI18nMetaDataName(metaDataCategoryName)
 // Get MetaData Select all Name
 function getI18nMetaDataSelectAllName(metaDataCategoryName)
 {
-    switch (metaDataCategoryName)
+    switch ( metaDataCategoryName )
     {
         case "AttributeTypes":
             return i18n_select_all_attributeTypes;
@@ -143,7 +149,7 @@ function getI18nMetaDataSelectAllName(metaDataCategoryName)
 // Get Available Metadata
 function getI18nAvailableMetaData(metaDataCategoryName)
 {
-    switch (metaDataCategoryName)
+    switch ( metaDataCategoryName )
     {
         case "AttributeTypes":
             return i18n_available_attributeTypes;
@@ -209,7 +215,7 @@ function getI18nAvailableMetaData(metaDataCategoryName)
 // Get Selected Metadata
 function getI18nSelectedMetaData(metaDataCategoryName)
 {
-    switch (metaDataCategoryName)
+    switch ( metaDataCategoryName )
     {
         case "AttributeTypes":
             return i18n_selected_attributeTypes;

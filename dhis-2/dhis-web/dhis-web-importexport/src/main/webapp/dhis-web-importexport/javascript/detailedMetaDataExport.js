@@ -15,7 +15,8 @@ jQuery(function ()
     loadFilters();
     loadMetaDataCategories();
     deselectAll();
-    $("#mainDivAccordion").accordion({
+    $("#mainDivAccordion").accordion(
+        {
         active: false,
         collapsible: true,
         clearStyle: true,
@@ -26,7 +27,7 @@ jQuery(function ()
 // Collapse MetaData Category information
 function loadMetaDataCategories()
 {
-    for(var i = 0; i < metaDataArray.length; i++)
+    for ( var i = 0; i < metaDataArray.length; i++ )
     {
         insertMetaDataCategoryDesign(metaDataArray[i]);
         var metadataId = "#checkbox" + metaDataArray[i];
@@ -34,11 +35,9 @@ function loadMetaDataCategories()
         {
             var metaDataCategoryName = $(this).attr("name");
 
-            if ($(this).is(":checked"))
-            {
+            if ( $(this).is(":checked") ) {
                 insertMetaDataDesign(metaDataCategoryName);
-            } else
-            {
+            } else {
                 removeMetaDataDesign(metaDataCategoryName);
             }
         });
@@ -48,11 +47,10 @@ function loadMetaDataCategories()
         {
             var metaDataCategoryName = $(this).attr("name");
 
-            if($(this).is(":checked"))
+            if ( $(this).is(":checked") )
             {
                 selectAllValuesByCategory(metaDataCategoryName);
-            } else
-            {
+            } else {
                 deselectValuesByCategory(metaDataCategoryName);
             }
         });
@@ -93,11 +91,11 @@ function getURL()
     var compression = $("#compression").val();
     url += "/set" + format;
 
-    if(compression == "zip")
+    if ( compression == "zip" )
     {
         url += "Zip";
     }
-    else if(compression == "gz")
+    else if ( compression == "gz" )
     {
         url += "Gz";
     }
@@ -109,16 +107,16 @@ function getURL()
 function createFilterJSON()
 {
     var filter = {};
-    for (var i = 0; i < metaDataArray.length; i++)
+    for ( var i = 0; i < metaDataArray.length; i++ )
     {
         var filterValues = [];
         var values = $("#selected" + metaDataArray[i]).val();
-        if (values != undefined)
+        if ( values != undefined )
         {
             filterValues = values;
         }
 
-        if (filterValues.length != 0)
+        if ( filterValues.length != 0 )
         {
             var metaDataCategory = lowercaseFirstLetter(metaDataArray[i]);
             filter[metaDataCategory] = filterValues;
@@ -131,9 +129,9 @@ function createFilterJSON()
 // Select all checkboxes
 function selectAll()
 {
-    for(var i = 0; i < metaDataArray.length; i++)
+    for ( var i = 0; i < metaDataArray.length; i++ )
     {
-        if(!$("#checkbox" + metaDataArray[i]).is(":checked"))
+        if ( !$("#checkbox" + metaDataArray[i]).is(":checked") )
         {
             $("#checkbox" + metaDataArray[i]).prop("checked", true);
             insertMetaDataDesign(metaDataArray[i]);
@@ -144,22 +142,24 @@ function selectAll()
 // Deselect all checkboxes
 function deselectAll()
 {
-    for(var i = 0; i < metaDataArray.length; i++)
+    for ( var i = 0; i < metaDataArray.length; i++ )
     {
-        if($("#checkbox" + metaDataArray[i]).is(":checked"))
+        if ( $("#checkbox" + metaDataArray[i]).is(":checked") )
         {
             $("#checkbox" + metaDataArray[i]).prop("checked", false);
             removeMetaDataDesign(metaDataArray[i]);
         }
     }
+    deselectAllValues();
 }
 
 // Select all values
 function selectAllValues()
 {
-    for(var i = 0; i < metaDataArray.length; i++)
+    selectAll();
+    for ( var i = 0; i < metaDataArray.length; i++ )
     {
-        if($("#checkbox" + metaDataArray[i]).is(":checked"))
+        if ( $("#checkbox" + metaDataArray[i]).is(":checked") )
         {
             $("#select" + metaDataArray[i]).click();
         }
@@ -169,12 +169,16 @@ function selectAllValues()
 // Deselect all values
 function deselectAllValues()
 {
-    for(var i = 0; i < metaDataArray.length; i++)
+    for ( var i = 0; i < metaDataArray.length; i++ )
     {
-        if($("#checkbox" + metaDataArray[i]).is(":checked"))
+        if ( $("#checkbox" + metaDataArray[i]).is(":checked") )
         {
             $("#deselect" + metaDataArray[i]).click();
         }
+        $("#available" + metaDataArray[i]).find("option").each(function ()
+        {
+            $(this).prop("selected", false);
+        });
     }
 }
 
@@ -202,18 +206,23 @@ function insertMetaDataCategoryDesign(metaDataCategoryName)
 // Insert MetaData HTML & CSS for a Category
 function insertMetaDataDesign(metaDataCategoryName)
 {
-    $("#label" + metaDataCategoryName).css({"color" : "lime"});
+    $("#label" + metaDataCategoryName).css({"color": "lime"});
     $("#divSelectAll" + metaDataCategoryName).show();
 
-    if($("#mainDiv" + metaDataCategoryName).is(":empty"))
+    if ( $("#mainDiv" + metaDataCategoryName).is(":empty") )
     {
         var design = generateMetaDataDesign(metaDataCategoryName);
         $("#mainDiv" + metaDataCategoryName).append(design);
         loadMetaData(metaDataCategoryName);
-    } else
-    {
+    } else {
         $("#mainDiv" + metaDataCategoryName).show();
     }
+}
+
+// Move selected values by MetaData Category
+function moveSelectedValuesByCategory(metaDataCategoryName)
+{
+    $("#moveSelected" + metaDataCategoryName).click();
 }
 
 // Generate MetaData Checkboxes
@@ -261,9 +270,9 @@ function generateMetaDataDesign(metaDataCategoryName)
         +                   '<select id="available' + metaDataCategoryName + '" multiple="multiple" style="height: 200px; width: 100%;"></select>'
         +               '</td>'
         +               '<td>'
-        +                   '<input type="button" value="&gt;" title="' + i18n_move_selected + '" style="width:50px"'
+        +                   '<input id="moveSelected' + metaDataCategoryName +'" type="button" value="&gt;" title="' + i18n_move_selected + '" style="width:50px"'
         +                       'onclick="dhisAjaxSelect_moveAllSelected( \'available' + metaDataCategoryName + '\' );"/><br/>'
-        +                   '<input type="button" value="&lt;" title="' + i18n_remove_selected + '" style="width:50px"'
+        +                   '<input id="removeSelected' + metaDataCategoryName + '" type="button" value="&lt;" title="' + i18n_remove_selected + '" style="width:50px"'
         +                       'onclick="dhisAjaxSelect_moveAllSelected( \'selected' + metaDataCategoryName + '\' );"/><br/>'
         +                   '<input id="select' + metaDataCategoryName + '" type="button" value="&gt;&gt;" title="' + i18n_move_all + '" style="width:50px"'
         +                       'onclick="dhisAjaxSelect_moveAll( \'available' + metaDataCategoryName + '\' );"/><br/>'
@@ -285,11 +294,11 @@ function generateMetaDataDesign(metaDataCategoryName)
 // Load MetaData for a Category
 function loadMetaData(metaDataCategoryName)
 {
-    $("#available" + metaDataCategoryName).dhisAjaxSelect({
+    $("#available" + metaDataCategoryName).dhisAjaxSelect(
+        {
         source: "../api/" + lowercaseFirstLetter(metaDataCategoryName) + ".json?links=false&paging=false",
         iterator: lowercaseFirstLetter(metaDataCategoryName),
         connectedTo: "selected" + metaDataCategoryName,
-        timeout: 5000,
         handler: function (item)
         {
             var option = jQuery("<option/>");
@@ -299,7 +308,7 @@ function loadMetaData(metaDataCategoryName)
 
             return option;
         },
-        error: function(request, status, error)
+        error: function (request, status, error)
         {
             console.log(request.responseText);
             console.log(arguments);
@@ -311,8 +320,8 @@ function loadMetaData(metaDataCategoryName)
 // Remove MetaData HTML and CSS from a Category
 function removeMetaDataDesign(metaDataCategoryName)
 {
-    $("#label" + metaDataCategoryName).css({"color" : "black"});
-    $("#labelSelectAll" + metaDataCategoryName).css({"color" : "black"});
+    $("#label" + metaDataCategoryName).css({"color": "black"});
+    $("#labelSelectAll" + metaDataCategoryName).css({"color": "black"});
     $("#checkboxSelectAll" + metaDataCategoryName).prop("checked", false);
     deselectValuesByCategory(metaDataCategoryName);
 
