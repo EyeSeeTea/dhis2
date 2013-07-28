@@ -35,8 +35,8 @@ import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
-import org.hisp.dhis.filter.DefaultFilterService;
 import org.hisp.dhis.filter.Filter;
+import org.hisp.dhis.filter.FilterService;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.notification.NotificationLevel;
 import org.hisp.dhis.system.notification.Notifier;
@@ -67,7 +67,7 @@ public class DefaultExportService
     private Notifier notifier;
 
     @Autowired
-    private DefaultFilterService filterService;
+    private FilterService filterService;
 
     //-------------------------------------------------------------------------------------------------------
     // ExportService Implementation
@@ -203,10 +203,20 @@ public class DefaultExportService
         return filterService.getAllFilters();
     }
 
-    // OVIDIU
     @Override
-    public void saveFilter( FilterOptions filterOptions )
+    public void saveFilter( String json ) throws IOException
     {
+        ObjectMapper mapper = new ObjectMapper();
+        Filter filter = mapper.readValue( json, Filter.class );
+        filterService.saveFilter( filter );
+    }
+
+    @Override
+    public void updateFilter( String json ) throws IOException
+    {
+        ObjectMapper mapper = new ObjectMapper();
+        Filter filter = mapper.readValue( json, Filter.class );
+        filterService.saveFilter( filter );
     }
 
     @Override

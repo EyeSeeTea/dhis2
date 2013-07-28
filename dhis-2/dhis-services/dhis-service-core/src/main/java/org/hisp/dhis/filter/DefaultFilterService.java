@@ -62,6 +62,18 @@ public class DefaultFilterService
     }
 
     @Override
+    public void saveFilter( Filter filter )
+    {
+        filterStore.saveFilter( filter );
+    }
+
+    @Override
+    public void updateFilter( Filter filter )
+    {
+        filterStore.updateFilter( filter );
+    }
+
+    @Override
     public void deleteFilter( Filter filter )
     {
         filterStore.deleteFilter( filter );

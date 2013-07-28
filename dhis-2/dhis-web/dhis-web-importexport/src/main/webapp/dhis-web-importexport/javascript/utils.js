@@ -7,7 +7,7 @@ function lowercaseFirstLetter(string)
 // Remove all white spaces from a String
 function removeWhiteSpace(string)
 {
-    return string.replace(/ /g,'')
+    return string.replace(/ /g, '')
 }
 
 // Get MetaData Name

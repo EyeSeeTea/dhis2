@@ -36,5 +36,9 @@ public interface FilterService
 {
     List<Filter> getAllFilters();
 
+    void saveFilter( Filter filter );
+
+    void updateFilter( Filter filter );
+
     void deleteFilter( Filter filter );
 }

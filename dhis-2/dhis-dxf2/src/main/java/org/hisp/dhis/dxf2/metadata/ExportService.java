@@ -48,7 +48,9 @@ public interface ExportService
 
     List<Filter> loadFilters();
 
-    void saveFilter( FilterOptions filterOptions );
+    void saveFilter( String json ) throws IOException;
+
+    void updateFilter ( String json ) throws IOException;
 
     void deleteFilter( String json ) throws IOException;
 }

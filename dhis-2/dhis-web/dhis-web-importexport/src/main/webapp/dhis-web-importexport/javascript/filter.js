@@ -77,7 +77,7 @@ function filterButtonEvents(filter)
 // Apply a Filter to the MetaData Tables
 function filterApplyButton(filter)
 {
-    var filterName = removeWhiteSpace( filter.name );
+    var filterName = removeWhiteSpace(filter.name);
     $("#buttonApply" + filterName).live("click", function ()
     {
         selectAll();
@@ -87,7 +87,7 @@ function filterApplyButton(filter)
         {
             if ( id === filters[i].id )
             {
-                applyFilter( filters[i].metaDataUids );
+                applyFilter(filters[i].metaDataUids);
             }
         }
     });
@@ -113,7 +113,7 @@ function applyFilter(data)
         }
     }
 
-    for( var i = 0; i < metaDataArray.length; i++)
+    for ( var i = 0; i < metaDataArray.length; i++ )
     {
         moveSelectedValuesByCategory(metaDataArray[i]);
     }
@@ -122,7 +122,7 @@ function applyFilter(data)
 // Save a Filter to the database
 function filterSaveButton(filter)
 {
-    var filterName = removeWhiteSpace( filter.name );
+    var filterName = removeWhiteSpace(filter.name);
     $("#buttonSave" + filterName).live("click", function ()
     {
     });
@@ -131,7 +131,7 @@ function filterSaveButton(filter)
 // Delete a Filter from the database
 function filterRemoveButton(filter)
 {
-    var filterName = removeWhiteSpace( filter.name );
+    var filterName = removeWhiteSpace(filter.name);
     $("#buttonRemove" + filterName).live("click", function ()
     {
         var id = ($(this).attr("value"));
@@ -143,7 +143,7 @@ function filterRemoveButton(filter)
                 $.ajax(
                     {
                         type: "POST",
-                        url: "../api/detailedMetaData/removeFilter",
+                        url: "../api/detailedMetaData/deleteFilter",
                         contentType: "application/json",
                         data: JSON.stringify(json),
                         success: function ()

@@ -192,7 +192,9 @@ public class DetailedMetaDataController
 
     @RequestMapping( method = RequestMethod.GET, value = DetailedMetaDataController.RESOURCE_PATH + "/getFilters" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
-    public @ResponseBody String getFilters( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    public
+    @ResponseBody
+    String getFilters( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         List<Filter> filters = exportService.loadFilters();
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_JSON, ContextUtils.CacheStrategy.NO_CACHE );
@@ -203,7 +205,7 @@ public class DetailedMetaDataController
     // Detailed MetaData Export - Filter functionality
     //--------------------------------------------------------------------------
 
-    @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/removeFilter " )
+    @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/deleteFilter " )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void deleteFilter( @RequestBody JSONObject json ) throws IOException
     {

@@ -17,11 +17,11 @@ jQuery(function ()
     deselectAll();
     $("#mainDivAccordion").accordion(
         {
-        active: false,
-        collapsible: true,
-        clearStyle: true,
-        autoHeight: false
-    });
+            active: false,
+            collapsible: true,
+            clearStyle: true,
+            autoHeight: false
+        });
 });
 
 // Collapse MetaData Category information
@@ -35,9 +35,11 @@ function loadMetaDataCategories()
         {
             var metaDataCategoryName = $(this).attr("name");
 
-            if ( $(this).is(":checked") ) {
+            if ( $(this).is(":checked") )
+            {
                 insertMetaDataDesign(metaDataCategoryName);
-            } else {
+            } else
+            {
                 removeMetaDataDesign(metaDataCategoryName);
             }
         });
@@ -50,7 +52,8 @@ function loadMetaDataCategories()
             if ( $(this).is(":checked") )
             {
                 selectAllValuesByCategory(metaDataCategoryName);
-            } else {
+            } else
+            {
                 deselectValuesByCategory(metaDataCategoryName);
             }
         });
@@ -214,7 +217,8 @@ function insertMetaDataDesign(metaDataCategoryName)
         var design = generateMetaDataDesign(metaDataCategoryName);
         $("#mainDiv" + metaDataCategoryName).append(design);
         loadMetaData(metaDataCategoryName);
-    } else {
+    } else
+    {
         $("#mainDiv" + metaDataCategoryName).show();
     }
 }
@@ -296,25 +300,25 @@ function loadMetaData(metaDataCategoryName)
 {
     $("#available" + metaDataCategoryName).dhisAjaxSelect(
         {
-        source: "../api/" + lowercaseFirstLetter(metaDataCategoryName) + ".json?links=false&paging=false",
-        iterator: lowercaseFirstLetter(metaDataCategoryName),
-        connectedTo: "selected" + metaDataCategoryName,
-        handler: function (item)
-        {
-            var option = jQuery("<option/>");
-            option.text(item.name);
-            option.attr("name", item.name);
-            option.attr("value", item.id);
+            source: "../api/" + lowercaseFirstLetter(metaDataCategoryName) + ".json?links=false&paging=false",
+            iterator: lowercaseFirstLetter(metaDataCategoryName),
+            connectedTo: "selected" + metaDataCategoryName,
+            handler: function (item)
+            {
+                var option = jQuery("<option/>");
+                option.text(item.name);
+                option.attr("name", item.name);
+                option.attr("value", item.id);
 
-            return option;
-        },
-        error: function (request, status, error)
-        {
-            console.log(request.responseText);
-            console.log(arguments);
-            alert("Fetching metadata process failed.");
-        }
-    });
+                return option;
+            },
+            error: function (request, status, error)
+            {
+                console.log(request.responseText);
+                console.log(arguments);
+                alert("Fetching metadata process failed.");
+            }
+        });
 }
 
 // Remove MetaData HTML and CSS from a Category
