@@ -169,7 +169,7 @@
 <!-- FILTER DEFINITION -->
 <div id="mainDivFilter">
     <p style="font-size: 12pt; float: left;">$i18n.getString( "filter_commands" )</p>
-    <div  style="float: right; width: 250px; height: 40px; background-color: ghostwhite; border: solid 1px lightskyblue; border-radius: 5px;">
+    <div style="float: right; width: 250px; height: 40px; background-color: ghostwhite; border: solid 1px lightskyblue; border-radius: 5px;">
         <p id="appliedFilterMessage" style="margin: 10px; font-size: 12pt; text-align: center;">$i18n.getString( "no_filter_applied" )</p>
     </div>
     <table id="filterTable" style="width: 100%; margin-bottom: 10px; border-spacing: 0;"></table>

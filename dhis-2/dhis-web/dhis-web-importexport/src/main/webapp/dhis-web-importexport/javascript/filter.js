@@ -84,17 +84,22 @@ function filterApplyButton( filter )
     var filterName = removeWhiteSpace( filter.name );
     $( "#buttonApply" + filterName ).live( "click", function ()
     {
-        selectAllCheckboxes();
-        var id = $( this ).attr( "value" );
-
-        for ( var i = 0; i < filters.length; i++ )
+        for ( var j = 0; j < metaDataArray.length; j++ )
         {
-            if ( id === filters[i].id )
+            if ( $( "#mainDiv" + metaDataArray[j] ).children().length > 0 )
             {
-                applyFilter( filters[i].metaDataUids );
+                var id = $( this ).attr( "value" );
+
+                for ( var i = 0; i < filters.length; i++ )
+                {
+                    if ( id === filters[i].id )
+                    {
+                        applyFilter( filters[i].metaDataUids );
+                    }
+                }
+                $( "#appliedFilterMessage" ).text( filter.name + " applied !" ).css( {"color": "darkorange"} );
             }
         }
-        $( "#appliedFilterMessage" ).text( filter.name + " applied !" ).css( {"color": "darkorange"} );
     } );
 }
 

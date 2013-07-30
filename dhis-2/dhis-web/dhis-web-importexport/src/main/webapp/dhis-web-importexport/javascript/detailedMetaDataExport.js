@@ -12,8 +12,8 @@ var metaDataArray = [ "AttributeTypes", "Dimensions", "Charts", "Concepts", "Con
 // MetaData Category Accordion
 jQuery( function ()
 {
-    loadFilters();
     loadMetaDataCategories();
+    loadFilters();
     $( "#mainDivAccordion" ).accordion(
         {
             active: false,
