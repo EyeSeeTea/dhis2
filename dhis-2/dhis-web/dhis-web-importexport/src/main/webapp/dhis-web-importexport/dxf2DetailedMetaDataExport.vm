@@ -161,14 +161,18 @@
     var i18n_remove = '$i18n.getString( "remove" )';
     var i18n_apply = '$i18n.getString( "apply" )';
     var i18n_save = '$i18n.getString( "save" )';
+    var i18n_no_filter_applied = '$i18n.getString( "no_filter_applied" )';
 </script>
 
 <h3>$i18n.getString( "metadata_detailed_export" )</h3>
 
 <!-- FILTER DEFINITION -->
 <div id="mainDivFilter">
-    <p style="font-size: 12pt;">$i18n.getString( "filter_commands" )</p>
-    <table id="filterTable" style="width: 100%; padding: 10px; margin-bottom: 10px; border-spacing: 0;"></table>
+    <p style="font-size: 12pt; float: left;">$i18n.getString( "filter_commands" )</p>
+    <div  style="float: right; width: 250px; height: 40px; background-color: ghostwhite; border: solid 1px lightskyblue; border-radius: 5px;">
+        <p id="appliedFilterMessage" style="margin: 10px; font-size: 12pt; text-align: center;">$i18n.getString( "no_filter_applied" )</p>
+    </div>
+    <table id="filterTable" style="width: 100%; margin-bottom: 10px; border-spacing: 0;"></table>
 </div>
 
 <!-- EXPORT FORM -->
@@ -334,10 +338,10 @@
             <td colspan="2">
                 <input type="button" value="$i18n.getString( 'select_all_tables' )"
                        style="width:125px; font-size: 10pt;"
-                       onclick="selectAll();"/>
+                       onclick="selectAllCheckboxes();"/>
                 <input type="button" value="$i18n.getString( 'deselect_all_tables' )"
                        style="width:125px; font-size: 10pt;"
-                       onclick="deselectAll();"/>
+                       onclick="deselectAllCheckboxes();"/>
             </td>
         </tr>
         <tr>

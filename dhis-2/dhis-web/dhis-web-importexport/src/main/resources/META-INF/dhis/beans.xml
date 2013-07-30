@@ -211,4 +211,8 @@
     <property name="category" value="METADATA_IMPORT" />
   </bean>
 
+    <!--Ovidiu-->
+  <bean id="org.hisp.dhis.importexport.action.dxf2.FilterExportForm"
+      class="org.hisp.dhis.importexport.action.dxf2.FilterExportFormAction" />
+
 </beans>

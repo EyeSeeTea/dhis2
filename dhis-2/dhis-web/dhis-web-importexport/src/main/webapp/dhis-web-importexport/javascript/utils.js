@@ -1,17 +1,17 @@
 // Make the first letter lowercase
-function lowercaseFirstLetter(string)
+function lowercaseFirstLetter( string )
 {
-    return string.charAt(0).toLowerCase() + string.slice(1);
+    return string.charAt( 0 ).toLowerCase() + string.slice( 1 );
 }
 
 // Remove all white spaces from a String
-function removeWhiteSpace(string)
+function removeWhiteSpace( string )
 {
-    return string.replace(/ /g, '')
+    return string.replace( / /g, '' )
 }
 
 // Get MetaData Name
-function getI18nMetaDataName(metaDataCategoryName)
+function getI18nMetaDataName( metaDataCategoryName )
 {
     switch ( metaDataCategoryName )
     {
@@ -79,7 +79,7 @@ function getI18nMetaDataName(metaDataCategoryName)
 }
 
 // Get MetaData Select all Name
-function getI18nMetaDataSelectAllName(metaDataCategoryName)
+function getI18nMetaDataSelectAllName( metaDataCategoryName )
 {
     switch ( metaDataCategoryName )
     {
@@ -147,7 +147,7 @@ function getI18nMetaDataSelectAllName(metaDataCategoryName)
 }
 
 // Get Available Metadata
-function getI18nAvailableMetaData(metaDataCategoryName)
+function getI18nAvailableMetaData( metaDataCategoryName )
 {
     switch ( metaDataCategoryName )
     {
@@ -189,6 +189,8 @@ function getI18nAvailableMetaData(metaDataCategoryName)
             return i18n_available_optionSets;
         case "OrganisationUnitGroupSets":
             return i18n_available_organisationUnitGroupSets;
+        case "OrganisationUnitGroups":
+            return i18n_available_organisationUnitGroups;
         case "OrganisationUnitLevels":
             return i18n_available_organisationUnitLevels;
         case "OrganisationUnits":
@@ -213,7 +215,7 @@ function getI18nAvailableMetaData(metaDataCategoryName)
 }
 
 // Get Selected Metadata
-function getI18nSelectedMetaData(metaDataCategoryName)
+function getI18nSelectedMetaData( metaDataCategoryName )
 {
     switch ( metaDataCategoryName )
     {
@@ -255,6 +257,8 @@ function getI18nSelectedMetaData(metaDataCategoryName)
             return i18n_selected_optionSets;
         case "OrganisationUnitGroupSets":
             return i18n_selected_organisationUnitGroupSets;
+        case "OrganisationUnitGroups":
+            return i18n_selected_organisationUnitGroups;
         case "OrganisationUnitLevels":
             return i18n_selected_organisationUnitLevels;
         case "OrganisationUnits":

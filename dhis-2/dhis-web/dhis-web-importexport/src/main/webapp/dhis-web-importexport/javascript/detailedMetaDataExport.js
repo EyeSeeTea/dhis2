@@ -10,61 +10,58 @@ var metaDataArray = [ "AttributeTypes", "Dimensions", "Charts", "Concepts", "Con
 // ---------------------------------------------------------------
 
 // MetaData Category Accordion
-jQuery(function ()
+jQuery( function ()
 {
     loadFilters();
     loadMetaDataCategories();
-    deselectAll();
-    $("#mainDivAccordion").accordion(
+    $( "#mainDivAccordion" ).accordion(
         {
             active: false,
             collapsible: true,
             clearStyle: true,
             autoHeight: false
-        });
-});
+        } );
+} );
 
 // Collapse MetaData Category information
 function loadMetaDataCategories()
 {
     for ( var i = 0; i < metaDataArray.length; i++ )
     {
-        insertMetaDataCategoryDesign(metaDataArray[i]);
-        var metadataId = "#checkbox" + metaDataArray[i];
-        $(metadataId).change(function ()
+        insertMetaDataCategoryDesign( metaDataArray[i] );
+        $( "#checkbox" + metaDataArray[i] ).change( function ()
         {
-            var metaDataCategoryName = $(this).attr("name");
+            var metaDataCategoryName = $( this ).attr( "name" );
 
-            if ( $(this).is(":checked") )
+            if ( $( this ).is( ":checked" ) )
             {
-                insertMetaDataDesign(metaDataCategoryName);
+                insertMetaDataDesign( metaDataCategoryName );
             } else
             {
-                removeMetaDataDesign(metaDataCategoryName);
+                removeMetaDataDesign( metaDataCategoryName );
             }
-        });
+        } );
 
-        var selectAllMetadataId = "#checkboxSelectAll" + metaDataArray[i];
-        $(selectAllMetadataId).change(function ()
+        $( "#checkboxSelectAll" + metaDataArray[i] ).change( function ()
         {
-            var metaDataCategoryName = $(this).attr("name");
+            var metaDataCategoryName = $( this ).attr( "name" );
 
-            if ( $(this).is(":checked") )
+            if ( $( this ).is( ":checked" ) )
             {
-                selectAllValuesByCategory(metaDataCategoryName);
+                selectAllValuesByCategory( metaDataCategoryName );
             } else
             {
-                deselectValuesByCategory(metaDataCategoryName);
+                deselectValuesByCategory( metaDataCategoryName );
             }
-        });
+        } );
     }
 }
 
 // Export DetailedMetaData AJAX
 function exportDetailedMetaData()
 {
-    var json = JSON.stringify(createFilterJSON());
-    console.log("Exported JSON:" + json);
+    var json = JSON.stringify( createFilterJSON() );
+    console.log( "Exported JSON:" + json );
     $.ajax(
         {
             type: "POST",
@@ -72,26 +69,26 @@ function exportDetailedMetaData()
             data: json,
             contentType: "application/json",
             dataType: "xml",
-            success: function (response)
+            success: function ( response )
             {
-                console.log("Response" + response);
+                console.log( "Response" + response );
                 window.location = "../api/detailedMetaData/getMetaDataFile";
             },
-            error: function (request, status, error)
+            error: function ( request, status, error )
             {
-                console.log(request.responseText);
-                console.log(arguments);
-                alert("Export process failed.");
+                console.log( request.responseText );
+                console.log( arguments );
+                alert( "Export process failed." );
             }
-        });
+        } );
 }
 
 // Generate Export URL
 function getURL()
 {
     var url = "../api/detailedMetaData";
-    var format = $("#format").val();
-    var compression = $("#compression").val();
+    var format = $( "#format" ).val();
+    var compression = $( "#compression" ).val();
     url += "/set" + format;
 
     if ( compression == "zip" )
@@ -113,7 +110,7 @@ function createFilterJSON()
     for ( var i = 0; i < metaDataArray.length; i++ )
     {
         var filterValues = [];
-        var values = $("#selected" + metaDataArray[i]).val();
+        var values = $( "#selected" + metaDataArray[i] ).val();
         if ( values != undefined )
         {
             filterValues = values;
@@ -121,7 +118,7 @@ function createFilterJSON()
 
         if ( filterValues.length != 0 )
         {
-            var metaDataCategory = lowercaseFirstLetter(metaDataArray[i]);
+            var metaDataCategory = lowercaseFirstLetter( metaDataArray[i] );
             filter[metaDataCategory] = filterValues;
         }
     }
@@ -129,28 +126,29 @@ function createFilterJSON()
     return filter;
 }
 
-// Select all checkboxes
-function selectAll()
+// Select all MetaData type checkboxes (selected values are reset)
+function selectAllCheckboxes()
 {
     for ( var i = 0; i < metaDataArray.length; i++ )
     {
-        if ( !$("#checkbox" + metaDataArray[i]).is(":checked") )
+        if ( !$( "#checkbox" + metaDataArray[i] ).is( ":checked" ) )
         {
-            $("#checkbox" + metaDataArray[i]).prop("checked", true);
-            insertMetaDataDesign(metaDataArray[i]);
+            $( "#checkbox" + metaDataArray[i] ).prop( "checked", true );
+            insertMetaDataDesign( metaDataArray[i] );
         }
     }
+    deselectAllValues();
 }
 
-// Deselect all checkboxes
-function deselectAll()
+// Deselect all MetaData type checkboxes
+function deselectAllCheckboxes()
 {
     for ( var i = 0; i < metaDataArray.length; i++ )
     {
-        if ( $("#checkbox" + metaDataArray[i]).is(":checked") )
+        if ( $( "#checkbox" + metaDataArray[i] ).is( ":checked" ) )
         {
-            $("#checkbox" + metaDataArray[i]).prop("checked", false);
-            removeMetaDataDesign(metaDataArray[i]);
+            $( "#checkbox" + metaDataArray[i] ).prop( "checked", false );
+            removeMetaDataDesign( metaDataArray[i] );
         }
     }
     deselectAllValues();
@@ -159,12 +157,11 @@ function deselectAll()
 // Select all values
 function selectAllValues()
 {
-    selectAll();
     for ( var i = 0; i < metaDataArray.length; i++ )
     {
-        if ( $("#checkbox" + metaDataArray[i]).is(":checked") )
+        if ( $( "#checkbox" + metaDataArray[i] ).is( ":checked" ) )
         {
-            $("#select" + metaDataArray[i]).click();
+            $( "#select" + metaDataArray[i] ).click();
         }
     }
 }
@@ -174,68 +171,70 @@ function deselectAllValues()
 {
     for ( var i = 0; i < metaDataArray.length; i++ )
     {
-        if ( $("#checkbox" + metaDataArray[i]).is(":checked") )
+        if ( $( "#checkbox" + metaDataArray[i] ).is( ":checked" ) )
         {
-            $("#deselect" + metaDataArray[i]).click();
+            $( "#deselect" + metaDataArray[i] ).click();
         }
-        $("#available" + metaDataArray[i]).find("option").each(function ()
+        $( "#available" + metaDataArray[i] ).find( "option" ).each( function ()
         {
-            $(this).prop("selected", false);
-        });
+            $( this ).prop( "selected", false );
+        } );
     }
+    $( "#appliedFilterMessage" ).text( i18n_no_filter_applied ).css( {"color": "black"} );
 }
 
 // Select all values by category
-function selectAllValuesByCategory(metaDataCategoryName)
+function selectAllValuesByCategory( metaDataCategoryName )
 {
-    $("#labelSelectAll" + metaDataCategoryName).css({color: "lime"});
-    $("#select" + metaDataCategoryName).click();
+    $( "#labelSelectAll" + metaDataCategoryName ).css( {color: "lime"} );
+    $( "#select" + metaDataCategoryName ).click();
 }
 
 // Deselect all values by category
-function deselectValuesByCategory(metaDataCategoryName)
+function deselectValuesByCategory( metaDataCategoryName )
 {
-    $("#labelSelectAll" + metaDataCategoryName).css({color: "black"});
-    $("#deselect" + metaDataCategoryName).click();
+    $( "#labelSelectAll" + metaDataCategoryName ).css( {color: "black"} );
+    $( "#deselect" + metaDataCategoryName ).click();
 }
 
 // Insert MetaData HTML & CSS Checkbox
-function insertMetaDataCategoryDesign(metaDataCategoryName)
+function insertMetaDataCategoryDesign( metaDataCategoryName )
 {
-    var design = generateMetaDataCategoryDesign(metaDataCategoryName);
-    $("#div" + metaDataCategoryName).append(design);
+    var design = generateMetaDataCategoryDesign( metaDataCategoryName );
+    $( "#div" + metaDataCategoryName ).append( design );
 }
 
 // Insert MetaData HTML & CSS for a Category
-function insertMetaDataDesign(metaDataCategoryName)
+function insertMetaDataDesign( metaDataCategoryName )
 {
-    $("#label" + metaDataCategoryName).css({"color": "lime"});
-    $("#divSelectAll" + metaDataCategoryName).show();
+    $( "#label" + metaDataCategoryName ).css( {"color": "lime"} );
+    $( "#divSelectAll" + metaDataCategoryName ).show();
 
-    if ( $("#mainDiv" + metaDataCategoryName).is(":empty") )
+    if ( $( "#mainDiv" + metaDataCategoryName ).is( ":empty" ) )
     {
-        var design = generateMetaDataDesign(metaDataCategoryName);
-        $("#mainDiv" + metaDataCategoryName).append(design);
-        loadMetaData(metaDataCategoryName);
+        var design = generateMetaDataDesign( metaDataCategoryName );
+        $( "#mainDiv" + metaDataCategoryName ).append( design );
+        loadMetaData( metaDataCategoryName );
     } else
     {
-        $("#mainDiv" + metaDataCategoryName).show();
+        $( "#mainDiv" + metaDataCategoryName ).show();
+        deselectAllValues();
     }
 }
 
 // Move selected values by MetaData Category
-function moveSelectedValuesByCategory(metaDataCategoryName)
+function moveSelectedValuesByCategory( metaDataCategoryName )
 {
-    $("#moveSelected" + metaDataCategoryName).click();
+    $( "#moveSelected" + metaDataCategoryName ).click();
 }
 
 // Generate MetaData Checkboxes
-function generateMetaDataCategoryDesign(metaDataCategoryName)
+function generateMetaDataCategoryDesign( metaDataCategoryName )
 {
-    var metadataName = getI18nMetaDataName(metaDataCategoryName);
-    var selectAllMetadataName = getI18nMetaDataSelectAllName(metaDataCategoryName);
+    var metadataName = getI18nMetaDataName( metaDataCategoryName );
+    var selectAllMetadataName = getI18nMetaDataSelectAllName( metaDataCategoryName );
     var design =
-        '<div style="float: left; width: 200px;">'
+          '<div style="float: left; width: 200px;">'
         +     '<input id="checkbox' + metaDataCategoryName + '" class="metadataCheckbox" name="' + metaDataCategoryName + '" type="checkbox"/>'
         +     '<label id="label' + metaDataCategoryName + '" for="' + metaDataCategoryName + '" style="font-size: 10pt;">' + metadataName + '</label>'
         + '</div>'
@@ -250,12 +249,12 @@ function generateMetaDataCategoryDesign(metaDataCategoryName)
 }
 
 // Generate MetaData HTML & CSS for a Category
-function generateMetaDataDesign(metaDataCategoryName)
+function generateMetaDataDesign( metaDataCategoryName )
 {
-    var i18n_available_metadata = getI18nAvailableMetaData(metaDataCategoryName);
-    var i18n_selected_metadata = getI18nSelectedMetaData(metaDataCategoryName);
+    var i18n_available_metadata = getI18nAvailableMetaData( metaDataCategoryName );
+    var i18n_selected_metadata = getI18nSelectedMetaData( metaDataCategoryName );
     var design =
-        '<table id="selectionArea'+metaDataCategoryName + '" style="border: 1px solid #ccc; padding: 15px;  margin-top: 10px; margin-bottom: 10px;">'
+          '<table id="selectionArea'+metaDataCategoryName + '" style="border: 1px solid #ccc; padding: 15px;  margin-top: 10px; margin-bottom: 10px;">'
         + '<colgroup>'
         +    '<col style="width: 500px;"/>'
         +    '<col/>'
@@ -289,46 +288,46 @@ function generateMetaDataDesign(metaDataCategoryName)
         +               '</td>'
         +           '</tr>'
         +       '</tbody>'
-        +   '</table>'
+        + '</table>'
     ;
 
     return design;
 }
 
 // Load MetaData for a Category
-function loadMetaData(metaDataCategoryName)
+function loadMetaData( metaDataCategoryName )
 {
-    $("#available" + metaDataCategoryName).dhisAjaxSelect(
+    $( "#available" + metaDataCategoryName ).dhisAjaxSelect(
         {
-            source: "../api/" + lowercaseFirstLetter(metaDataCategoryName) + ".json?links=false&paging=false",
-            iterator: lowercaseFirstLetter(metaDataCategoryName),
+            source: "../api/" + lowercaseFirstLetter( metaDataCategoryName ) + ".json?links=false&paging=false",
+            iterator: lowercaseFirstLetter( metaDataCategoryName ),
             connectedTo: "selected" + metaDataCategoryName,
-            handler: function (item)
+            handler: function ( item )
             {
-                var option = jQuery("<option/>");
-                option.text(item.name);
-                option.attr("name", item.name);
-                option.attr("value", item.id);
+                var option = jQuery( "<option/>" );
+                option.text( item.name );
+                option.attr( "name", item.name );
+                option.attr( "value", item.id );
 
                 return option;
             },
-            error: function (request, status, error)
+            error: function ( request, status, error )
             {
-                console.log(request.responseText);
-                console.log(arguments);
-                alert("Fetching metadata process failed.");
+                console.log( request.responseText );
+                console.log( arguments );
+                alert( "Fetching metadata process failed." );
             }
-        });
+        } );
 }
 
 // Remove MetaData HTML and CSS from a Category
-function removeMetaDataDesign(metaDataCategoryName)
+function removeMetaDataDesign( metaDataCategoryName )
 {
-    $("#label" + metaDataCategoryName).css({"color": "black"});
-    $("#labelSelectAll" + metaDataCategoryName).css({"color": "black"});
-    $("#checkboxSelectAll" + metaDataCategoryName).prop("checked", false);
-    deselectValuesByCategory(metaDataCategoryName);
+    $( "#label" + metaDataCategoryName ).css( {"color": "black"} );
+    $( "#labelSelectAll" + metaDataCategoryName ).css( {"color": "black"} );
+    $( "#checkboxSelectAll" + metaDataCategoryName ).prop( "checked", false );
+    deselectValuesByCategory( metaDataCategoryName );
 
-    $("#divSelectAll" + metaDataCategoryName).hide();
-    $("#mainDiv" + metaDataCategoryName).hide();
+    $( "#divSelectAll" + metaDataCategoryName ).hide();
+    $( "#mainDiv" + metaDataCategoryName ).hide();
 }

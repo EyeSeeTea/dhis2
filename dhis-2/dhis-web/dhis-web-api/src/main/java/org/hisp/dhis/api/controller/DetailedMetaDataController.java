@@ -205,7 +205,7 @@ public class DetailedMetaDataController
     // Detailed MetaData Export - Filter functionality
     //--------------------------------------------------------------------------
 
-    @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/deleteFilter " )
+    @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/deleteFilter" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void deleteFilter( @RequestBody JSONObject json ) throws IOException
     {
