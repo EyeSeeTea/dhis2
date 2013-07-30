@@ -118,22 +118,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name= "i18nLocaleService" ref="org.hisp.dhis.i18n.locale.I18nLocaleService" />
 	</bean>
 			
-	<bean id="org.hisp.dhis.dataadmin.action.locale.UpdateLocaleAction"
-		class="org.hisp.dhis.dataadmin.action.locale.UpdateLocaleAction"
-		scope="prototype">
-		<property name= "i18nLocaleService" ref="org.hisp.dhis.i18n.locale.I18nLocaleService" />
-	</bean>
-		
 	<bean
 		id="org.hisp.dhis.dataadmin.action.locale.ShowAddLocaleFormAction"
 		class="org.hisp.dhis.dataadmin.action.locale.ShowAddLocaleFormAction"
-		scope="prototype">
-		<property name= "i18nLocaleService" ref="org.hisp.dhis.i18n.locale.I18nLocaleService" />
-	</bean>
-
-	<bean
-		id="org.hisp.dhis.dataadmin.action.locale.ShowUpdateLocaleFormAction"
-		class="org.hisp.dhis.dataadmin.action.locale.ShowUpdateLocaleFormAction"
 		scope="prototype">
 		<property name= "i18nLocaleService" ref="org.hisp.dhis.i18n.locale.I18nLocaleService" />
 	</bean>

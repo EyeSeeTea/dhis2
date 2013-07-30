@@ -28,6 +28,8 @@ package org.hisp.dhis.i18n.action;
  */
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -167,6 +169,13 @@ public class I18nAction
         currentLocale = i18nService.getCurrentLocale();
 
         availableLocales = i18nService.getAvailableLocales();
+        
+        Collections.sort( availableLocales, new Comparator<I18nLocale>() {
+           public int compare(I18nLocale locale1, I18nLocale locale2) {
+               return locale1.getDisplayName().compareTo( locale2.getDisplayName() );
+           }
+        });
+        
 
         translations = i18nService.getTranslationsWithoutDefault( className, objectId );
         

@@ -28,7 +28,6 @@
 
 package org.hisp.dhis.dataadmin.action.locale;
 
-import java.util.List;
 import java.util.Map;
 
 import org.hisp.dhis.i18n.locale.I18nLocaleService;

@@ -40,7 +40,6 @@
 					<td onclick="showLocaleDetails( $i18nLocale.id )">$encoder.htmlEncode( $i18nLocale.name )</td>                
 					
 					<td style="text-align:center">
-					  <a href="showUpdateLocaleForm.action?id=$i18nLocale.id" title="$i18n.getString( 'edit' )"><img src="../images/edit.png" alt="$i18n.getString( 'edit' )"></a>
 					  <a href="javascript:removeLocale( $i18nLocale.id, '$encoder.jsEncode( $i18nLocale.name )' )" title="$i18n.getString( "remove" )"><img src="../images/delete.png" alt="$i18n.getString( 'remove' )"></a>
 					  <a href="javascript:showLocaleDetails( $i18nLocale.id )" title="$i18n.getString( 'show_details' )"><img src="../images/information.png" alt="$i18n.getString( 'show_details' )"></a>
 					</td>
