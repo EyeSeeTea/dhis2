@@ -98,6 +98,14 @@ public interface TranslationService
     /**
      * Retrieves a Collection of Translations without Default Language fallback.
      * 
+     * @param locale the locale.
+     * @return a Collection of Translations.
+     */
+    Collection<Translation> getTranslationsWithoutDefault( I18nLocale locale );
+
+    /**
+     * Retrieves a Collection of Translations without Default Language fallback.
+     * 
      * @param className the class name.
      * @param id the id.
      * @param locale the locale.

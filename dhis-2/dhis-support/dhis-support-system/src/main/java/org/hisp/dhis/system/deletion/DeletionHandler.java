@@ -49,6 +49,7 @@ import org.hisp.dhis.dataset.Section;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.document.Document;
 import org.hisp.dhis.expression.Expression;
+import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
@@ -704,4 +705,15 @@ public abstract class DeletionHandler
         return null;
     }
 
+    public void deleteI18nLocale( I18nLocale i18nLocale )
+    {
+    }
+
+    public String allowDeleteI18nLocale( I18nLocale i18nLocale )
+    {
+        return null;
+    }
+
+    
+    
 }

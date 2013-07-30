@@ -75,7 +75,7 @@ public class HibernateTranslationStore
         session.update( translation );
     }
 
-    // Used in update?  // add?    
+  
     public Translation getTranslation( String className, int id, I18nLocale locale, String property )
     {
         Collection<Translation> translations = getTranslations( className, id, locale, property, true );
@@ -100,17 +100,27 @@ public class HibernateTranslationStore
         return (translations == null || translations.size() == 0) ? null : translations.iterator().next();
     }
 
+    public Collection<Translation> getTranslationsWithoutDefault( I18nLocale locale )
+    {
+        return getTranslations( null, null, locale, null, false );
+    }
+
     public Collection<Translation> getTranslationsWithoutDefault( String className, int id, I18nLocale locale )
     {
         return getTranslations( className, id, locale, null, false );
     }
-
+    
     @SuppressWarnings( "unchecked" )
     public Collection<Translation> getTranslations( String className, Integer id, I18nLocale locale, String property, boolean useDefault )
     {
         Session session = sessionFactory.getCurrentSession();
 
-        String hql = "from Translation t where t.className='" + className + "'";
+        String hql = "from Translation t where t.className is not null";
+        
+        if ( className != null )
+        {
+            hql += " and t.className='" + className + "'";
+        }
 
         if ( id != null )
         {

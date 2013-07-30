@@ -89,6 +89,11 @@ public class DefaultTranslationService
         return translationStore.getTranslationWithoutDefault( className, id, locale, property );
     }
 
+    public Collection<Translation> getTranslationsWithoutDefault( I18nLocale locale )
+    {
+        return translationStore.getTranslationsWithoutDefault( locale );
+    }
+
     public Collection<Translation> getTranslationsWithoutDefault( String className, int id, I18nLocale locale )
     {
         return translationStore.getTranslationsWithoutDefault( className, id, locale );

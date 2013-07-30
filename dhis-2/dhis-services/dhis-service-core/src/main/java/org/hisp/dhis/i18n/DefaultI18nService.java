@@ -249,15 +249,8 @@ public class DefaultI18nService
             {
                 String key = translationEntry.getKey();
                 String value = translationEntry.getValue();
-
-                // toto: Remove all the printlns
-                //System.out.println("\n\n =====\n key : " + key );
-                //System.out.println("\n\n value : " + value );
-
                 
                 Translation translation = translationService.getTranslationWithoutDefault( className, id, locale, key );
-
-                //System.out.println("\n\n translation : " + translation );
 
                 if ( value != null && !value.trim().isEmpty() )
                 {
@@ -269,14 +262,7 @@ public class DefaultI18nService
                     else
                     {
                         translation = new Translation( className, id, locale.getLanguage(), locale.getCountry(), key, value );
-                        
-//                        System.out.println("\n\n  locale.getLanguage() : " + className );
-//                        System.out.println("\n\n id : " + id );
-//                        System.out.println("\n\n locale.getLanguage() : " + locale.getLanguage() );
-//                        System.out.println("\n\n locale.getCountry() : " + locale.getCountry() );
-//                        System.out.println("\n\n key : " + key );
-//                        System.out.println("\n\n value : " + value + " =====\n" );
-                        
+
                         translationService.addTranslation( translation );
                     }
                 }
