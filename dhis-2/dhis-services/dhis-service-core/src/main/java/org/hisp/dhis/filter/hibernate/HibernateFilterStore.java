@@ -28,6 +28,7 @@ package org.hisp.dhis.filter.hibernate;
  */
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.filter.Filter;
@@ -49,11 +50,7 @@ public class HibernateFilterStore
     @Override
     public Collection<Filter> getAllFilters()
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( Filter.class );
-
-        return criteria.list();
+        return getAll();
     }
 
     @Override
@@ -71,6 +68,11 @@ public class HibernateFilterStore
     @Override
     public void deleteFilter( Filter filter )
     {
-        delete( filter );
+        Query query = getQuery( "delete Filter where uid = :uid" );
+        query.setParameter( "uid", filter.getUid() );
+        query.executeUpdate();
+
+        //TODO: DETERMINE WHY THIS DOESN'T WORK
+//        delete( filter );
     }
 }

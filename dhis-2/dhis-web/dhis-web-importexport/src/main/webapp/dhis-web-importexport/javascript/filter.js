@@ -14,7 +14,7 @@ function loadFilters()
             success: function ( response )
             {
                 filters = response;
-                console.log( "Filters: " + JSON.stringify( filters ) );
+                console.log( "Loaded filters: " + JSON.stringify( filters ) );
                 insertFilterDesign( filters );
             },
             error: function ( request, status, error )
@@ -33,7 +33,7 @@ function insertFilterDesign( filters )
     {
         var filterId = filters[i].id;
         var filterName = removeWhiteSpace( filters[i].name );
-        var filterMetaDataUids = filters[i].metaDataUids;
+        var filterCode = filters[i].code;
         var design =
                       '<tr id="' + filterId +'" style="margin: 20px;">'
                     +      '<td>'
@@ -47,8 +47,9 @@ function insertFilterDesign( filters )
                     +      '<td style="float: right;">'
                     +          '<form id="form' + filterName + '" action="filterExportForm.action">'
                     +                '<input type="hidden" name="name" value="' + filters[i].name + '" />'
-                    +                '<input type="hidden" name="code" value="' + filters[i].code + '" />'
-                    +                '<input type="hidden" name="metaDataUids" value="" id="metaDataUids' + filterName + '" />'
+                    +                '<input type="hidden" name="id" value="' + filterId + '" />'
+                    +                '<input type="hidden" name="code" value="' + filterCode + '" />'
+                    +                '<input id="metaDataUids' + filterName + '" type="hidden" name="metaDataUids" value="" />'
                     +          '</form>'
                     +          '<button id="buttonEdit' + filterName + '" value="' + filterId + '" type="button" style="background-color: inherit;">'
                     +              '<img src="../images/edit.png" alt="' + i18n_edit + '"/>'
@@ -123,9 +124,9 @@ function applyFilter( data )
         }
     }
 
-    for ( var i = 0; i < metaDataArray.length; i++ )
+    for ( var k = 0; k < metaDataArray.length; k++ )
     {
-        moveSelectedValuesByCategory( metaDataArray[i] );
+        moveSelectedValuesByCategory( metaDataArray[k] );
     }
 }
 
@@ -152,6 +153,7 @@ function getSelectedUids()
             selectedUids += $( this ).attr( "value" ) + ", ";
         } );
     }
+    selectedUids = removeLastComma( selectedUids );
     return selectedUids;
 }
 
@@ -166,7 +168,8 @@ function filterRemoveButton( filter )
         {
             if ( id === filters[i].id )
             {
-                var json = filters[i];
+                var json = replaceIdWithUid( filters[i] );
+                console.log( "Deleted json: " + JSON.stringify( json ) );
                 $.ajax(
                     {
                         type: "POST",
@@ -176,6 +179,7 @@ function filterRemoveButton( filter )
                         success: function ()
                         {
                             console.log( "Filter successfully removed." );
+                            location.reload();
                         },
                         error: function ( request, status, error )
                         {

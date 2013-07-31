@@ -10,6 +10,24 @@ function removeWhiteSpace( string )
     return string.replace( / /g, '' )
 }
 
+// Remove the last white space + comma from the metaDataUids list
+function removeLastComma( string )
+{
+    var length = string.length;
+    return string.substring( 0, length - 2 );
+}
+
+// Replace id with uid
+function replaceIdWithUid( object )
+{
+    var tempValue = object.id;
+    object.uid = tempValue;
+    delete object.id;
+//    object.id = 2;
+
+    return object;
+}
+
 // Get MetaData Name
 function getI18nMetaDataName( metaDataCategoryName )
 {
@@ -75,6 +93,8 @@ function getI18nMetaDataName( metaDataCategoryName )
             return i18n_validationRuleGroups;
         case "ValidationRules":
             return i18n_validationRules;
+        default :
+            return "";
     }
 }
 
@@ -143,6 +163,8 @@ function getI18nMetaDataSelectAllName( metaDataCategoryName )
             return i18n_select_all_validationRuleGroups;
         case "ValidationRules":
             return i18n_select_all_validationRules;
+        default :
+            return "";
     }
 }
 
@@ -211,6 +233,8 @@ function getI18nAvailableMetaData( metaDataCategoryName )
             return i18n_available_validationRuleGroups;
         case "ValidationRules":
             return i18n_available_validationRules;
+        default :
+            return "";
     }
 }
 
@@ -279,5 +303,7 @@ function getI18nSelectedMetaData( metaDataCategoryName )
             return i18n_selected_validationRuleGroups;
         case "ValidationRules":
             return i18n_selected_validationRules;
+        default :
+            return "";
     }
 }

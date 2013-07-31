@@ -192,9 +192,7 @@ public class DetailedMetaDataController
 
     @RequestMapping( method = RequestMethod.GET, value = DetailedMetaDataController.RESOURCE_PATH + "/getFilters" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
-    public
-    @ResponseBody
-    String getFilters( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    public @ResponseBody String getFilters( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         List<Filter> filters = exportService.loadFilters();
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_JSON, ContextUtils.CacheStrategy.NO_CACHE );

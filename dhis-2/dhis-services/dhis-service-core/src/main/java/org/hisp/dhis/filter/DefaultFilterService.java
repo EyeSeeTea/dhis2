@@ -77,6 +77,5 @@ public class DefaultFilterService
     public void deleteFilter( Filter filter )
     {
         filterStore.deleteFilter( filter );
-
     }
 }
