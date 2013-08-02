@@ -23,8 +23,6 @@ function replaceIdWithUid( object )
     var tempValue = object.id;
     object.uid = tempValue;
     delete object.id;
-//    object.id = 2;
-
     return object;
 }
 

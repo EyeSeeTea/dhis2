@@ -30,6 +30,7 @@ package org.hisp.dhis.dxf2.metadata;
 import java.io.IOException;
 import java.util.*;
 
+import net.sf.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -204,19 +205,25 @@ public class DefaultExportService
     }
 
     @Override
-    public void saveFilter( String json ) throws IOException
+    public void saveFilter( Map<String, String> parameters ) throws IOException
     {
+        JSONObject json = new JSONObject();
+        json.accumulateAll( parameters );
         ObjectMapper mapper = new ObjectMapper();
-        Filter filter = mapper.readValue( json, Filter.class );
+        Filter filter = mapper.readValue( json.toString(), Filter.class );
+
         filterService.saveFilter( filter );
     }
 
     @Override
-    public void updateFilter( String json ) throws IOException
+    public void updateFilter( Map<String, String> parameters ) throws IOException
     {
+        JSONObject json = new JSONObject();
+        json.accumulateAll( parameters );
         ObjectMapper mapper = new ObjectMapper();
-        Filter filter = mapper.readValue( json, Filter.class );
-        filterService.saveFilter( filter );
+        Filter filter = mapper.readValue( json.toString(), Filter.class );
+
+        filterService.updateFilter( filter );
     }
 
     @Override

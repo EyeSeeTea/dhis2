@@ -32,6 +32,7 @@ import org.hisp.dhis.scheduling.TaskId;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -48,9 +49,9 @@ public interface ExportService
 
     List<Filter> loadFilters();
 
-    void saveFilter( String json ) throws IOException;
+    void saveFilter( Map<String, String> parameters ) throws IOException;
 
-    void updateFilter ( String json ) throws IOException;
+    void updateFilter( Map<String, String> parameters ) throws IOException;
 
     void deleteFilter( String json ) throws IOException;
 }

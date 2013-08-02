@@ -168,7 +168,16 @@
 
 <!-- FILTER DEFINITION -->
 <div id="mainDivFilter">
-    <p style="font-size: 12pt; float: left;">$i18n.getString( "filter_commands" )</p>
+    <div style="float: left; margin-bottom: 10px;">
+        <p style="font-size: 12pt;">$i18n.getString( "filter_commands" )</p>
+        <form id="formCreateFilter" action="saveFilterExportForm.action">
+            <input type="hidden" name="name" value="" />
+            <input type="hidden" name="id" value="" />
+            <input type="hidden" name="code" value="" />
+            <input type="hidden" name="metaDataUids" value="" />
+            <input type="button" value="$i18n.getString( "new_filter" )" onclick="createFilter();" style="width: 125px;">
+        </form>
+    </div>
     <div style="float: right; width: 250px; height: 40px; background-color: ghostwhite; border: solid 1px lightskyblue; border-radius: 5px;">
         <p id="appliedFilterMessage" style="margin: 10px; font-size: 12pt; text-align: center;">$i18n.getString( "no_filter_applied" )</p>
     </div>

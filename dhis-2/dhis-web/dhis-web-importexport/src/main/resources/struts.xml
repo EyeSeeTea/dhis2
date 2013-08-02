@@ -326,11 +326,19 @@
           <param name="requiredAuthorities">F_METADATA_EXPORT</param>
       </action>
 
-      <action name="filterExportForm" class="org.hisp.dhis.importexport.action.dxf2.FilterExportForm">
+      <action name="saveFilterExportForm" class="org.hisp.dhis.importexport.action.dxf2.SaveFilterExportFormAction">
           <result name="success" type="velocity">/main.vm</result>
           <param name="menu">/dhis-web-importexport/mainMenu.vm</param>
-          <param name="page">/dhis-web-importexport/filterExportForm.vm</param>
-          <param name="javascripts">javascript/filterExportForm.js</param>
+          <param name="page">/dhis-web-importexport/saveFilterExportForm.vm</param>
+          <param name="javascripts">javascript/exportFilterForm.js</param>
+          <param name="requiredAuthorities">F_METADATA_EXPORT</param>
+      </action>
+
+      <action name="updateFilterExportForm" class="org.hisp.dhis.importexport.action.dxf2.UpdateFilterExportFormAction">
+          <result name="success" type="velocity">/main.vm</result>
+          <param name="menu">/dhis-web-importexport/mainMenu.vm</param>
+          <param name="page">/dhis-web-importexport/updateFilterExportForm.vm</param>
+          <param name="javascripts">javascript/exportFilterForm.js</param>
           <param name="requiredAuthorities">F_METADATA_EXPORT</param>
       </action>
 

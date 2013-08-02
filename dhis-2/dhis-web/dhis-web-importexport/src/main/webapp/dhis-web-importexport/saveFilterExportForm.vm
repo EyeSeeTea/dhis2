@@ -1,6 +1,6 @@
 <h3>$i18n.getString( "save_filter" )</h3>
 
-<form id="saveFilter" name="saveFilter" action="addDataSet.action" method="post">
+<form id="formFilter" name="formFilter" method="post" action="../api/detailedMetaData/saveFilter">
     <table id="detailsList" style="width: 540px;">
         <col/> ## Labels
         <col/> ## Input
@@ -15,7 +15,7 @@
                 <label>$i18n.getString( "name" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label>
             </td>
             <td>
-                <input type="text" id="name" name="name" value="$filter.name" style="width: 90%;" onchange="nameChanged()">
+                <input type="text" id="name" name="name" value="$filter.name" style="width: 90%;" onchange="">
             </td>
         </tr>
         <tr>
@@ -28,11 +28,11 @@
         </tr>
         <tr>
             <td><label>$i18n.getString( "filter_metaData_uids" )</label></td>
-            <td><textarea id="filterMetaDataUids" name="filterMetaDataUids" rows="10" cols="63">$filter.metaDataUids</textarea></td>
+            <td><textarea id="metaDataUids" name="metaDataUids" rows="10" cols="63">$filter.metaDataUids</textarea></td>
         </tr>
         <tr>
             <td colspan="3">
-                <input type="submit" value="$i18n.getString( 'save' )" style="width:120px" />
+                <input type="submit" value="$i18n.getString( 'save' )" onclick="saveFilter();" style="width:120px" />
             </td>
         </tr>
         </tbody>

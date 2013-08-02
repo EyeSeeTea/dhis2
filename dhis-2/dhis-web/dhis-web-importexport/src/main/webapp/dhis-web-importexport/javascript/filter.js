@@ -3,6 +3,12 @@
 var filters = [];
 // --------------------------------------------------------------
 
+// Create a new Filter
+function createFilter()
+{
+    $( "#formCreateFilter" ).submit();
+}
+
 // Load Filters from the database
 function loadFilters()
 {
@@ -35,7 +41,7 @@ function insertFilterDesign( filters )
         var filterName = removeWhiteSpace( filters[i].name );
         var filterCode = filters[i].code;
         var design =
-                      '<tr id="' + filterId +'" style="margin: 20px;">'
+                      '<tr id="tr' + filterName +'" style="margin: 20px;">'
                     +      '<td>'
                     +          '<p style="padding-left: 10px; font-size: 10pt;">' + filters[i].name + '</p>'
                     +      '</td>'
@@ -45,13 +51,13 @@ function insertFilterDesign( filters )
                     +          '</button>'
                     +      '</td>'
                     +      '<td style="float: right;">'
-                    +          '<form id="form' + filterName + '" action="filterExportForm.action">'
+                    +          '<form id="form' + filterName + '" action="updateFilterExportForm.action">'
                     +                '<input type="hidden" name="name" value="' + filters[i].name + '" />'
-                    +                '<input type="hidden" name="id" value="' + filterId + '" />'
+                    +                '<input type="hidden" name="uid" value="' + filterId + '" />'
                     +                '<input type="hidden" name="code" value="' + filterCode + '" />'
                     +                '<input id="metaDataUids' + filterName + '" type="hidden" name="metaDataUids" value="" />'
                     +          '</form>'
-                    +          '<button id="buttonEdit' + filterName + '" value="' + filterId + '" type="button" style="background-color: inherit;">'
+                    +          '<button id="buttonEdit' + filterName + '" type="button" style="background-color: inherit;">'
                     +              '<img src="../images/edit.png" alt="' + i18n_edit + '"/>'
                     +          '</button>'
                     +          '<button id="buttonRemove' + filterName + '" value="' + filterId + '" type="button" style="background-color: inherit;">'
@@ -66,7 +72,7 @@ function insertFilterDesign( filters )
         $( "#filterTable" ).append( design );
         if ( i % 2 === 0 )
         {
-            $( "#" + filterId ).css( "background-color", "#EEF7FA" );
+            $( "#tr" + filterName ).css( "background-color", "#EEF7FA" );
         }
     }
 }

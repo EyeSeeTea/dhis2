@@ -34,8 +34,8 @@ import org.hisp.dhis.filter.Filter;
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
-public class FilterExportFormAction
-    implements Action
+public class SaveFilterExportFormAction
+        implements Action
 {
     // -------------------------------------------------------------------------
     // Input

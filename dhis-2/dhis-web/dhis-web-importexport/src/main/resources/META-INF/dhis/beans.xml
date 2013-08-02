@@ -212,7 +212,10 @@
   </bean>
 
     <!--Ovidiu-->
-  <bean id="org.hisp.dhis.importexport.action.dxf2.FilterExportForm"
-      class="org.hisp.dhis.importexport.action.dxf2.FilterExportFormAction" />
+  <bean id="org.hisp.dhis.importexport.action.dxf2.SaveFilterExportForm"
+      class="org.hisp.dhis.importexport.action.dxf2.SaveFilterExportFormAction" />
+
+  <bean id="org.hisp.dhis.importexport.action.dxf2.UpdateFilterExportForm"
+      class="org.hisp.dhis.importexport.action.dxf2.UpdateFilterExportFormAction" />
 
 </beans>

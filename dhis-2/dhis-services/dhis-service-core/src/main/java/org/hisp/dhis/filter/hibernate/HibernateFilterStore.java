@@ -27,10 +27,8 @@ package org.hisp.dhis.filter.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hibernate.Criteria;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hibernate.*;
+import org.hibernate.cfg.Configuration;
 import org.hisp.dhis.filter.Filter;
 import org.hisp.dhis.filter.FilterStore;
 
@@ -40,39 +38,64 @@ import java.util.Collection;
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
 public class HibernateFilterStore
-        extends HibernateIdentifiableObjectStore<Filter>
         implements FilterStore
 {
     // -------------------------------------------------------------------------
-    // Filter
+    // Dependencies
+    // -------------------------------------------------------------------------
+
+    private SessionFactory sessionFactory;
+
+    public void setSessionFactory( SessionFactory sessionFactory )
+    {
+        this.sessionFactory = sessionFactory;
+    }
+
+    public SessionFactory getSessionFactory()
+    {
+        return sessionFactory;
+    }
+
+    // -------------------------------------------------------------------------
+    // Filter basic functionality
     // -------------------------------------------------------------------------
 
     @Override
     public Collection<Filter> getAllFilters()
     {
-        return getAll();
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( Filter.class );
+
+        return criteria.list();
     }
 
     @Override
     public void saveFilter( Filter filter )
     {
-        save( filter );
+        Session session = sessionFactory.getCurrentSession();
+
+        filter.setAutoFields();
+
+        session.save( filter );
+        session.flush();
     }
 
     @Override
     public void updateFilter( Filter filter )
     {
-        update( filter );
+        Session session = sessionFactory.getCurrentSession();
+
+        session.update( filter );
     }
 
     @Override
     public void deleteFilter( Filter filter )
     {
-        Query query = getQuery( "delete Filter where uid = :uid" );
+        Session session = sessionFactory.getCurrentSession();
+
+        Query query = session.createQuery( "DELETE Filter WHERE uid = :uid" );
         query.setParameter( "uid", filter.getUid() );
         query.executeUpdate();
-
-        //TODO: DETERMINE WHY THIS DOESN'T WORK
-//        delete( filter );
     }
 }
