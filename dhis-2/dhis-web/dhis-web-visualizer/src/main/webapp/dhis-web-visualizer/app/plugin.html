@@ -1,8 +1,11 @@
+<!DOCTYPE html>
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="../../../dhis-web-commons/javascripts/ext/resources/css/ext-plugin-gray.css" />
-    <script type="text/javascript" src="../../../dhis-web-commons/javascripts/ext/ext-all.js"></script>
-    <script type="text/javascript" src="../../../dhis-web-commons/javascripts/plugin/plugin.js"></script>
+    
+    <script src="../../../dhis-web-commons/javascripts/ext/ext-all.js"></script>
+	<script src="scripts/core.js"></script>
+	<script src="scripts/plugin.js"></script>
 	
     <style type="text/css">
 		body {font-family: sans-serif; margin: 0 0 0 60px;}
@@ -20,100 +23,15 @@
 		table .val {text-align: center;}
     </style>
     
-	<script type="text/javascript">
+	<script>
 		Ext.onReady( function() {
-			var url = '../../../'; // http://apps.dhis2.org/dev/
-		
-			DHIS.getChart({
-				uid: 'UlfTKWZWV4u',
-				callbackName: 'chart1',
+			var url = 'http://localhost:8080';
+			
+			DV.plugin.getChart({
+				url: url,
 				el: 'chart1',
-				url: url
+				uid: 'UlfTKWZWV4u'
 			});
-			
-			DHIS.getChart({
-				type: 'stackedcolumn',
-				indicators: ['Uvn6LCg7dVU'],
-				periods: 'last12Months',
-				category: 'period',
-				filter: 'organisationunit',
-				organisationunits: ['ImspTQPwCqd'],
-				orgUnitIsParent: false,
-				showData: true,
-				trendLine: true,
-				hideLegend: false,
-				hideSubtitle: false,
-				userOrganisationUnit: false,
-				userOrganisationUnitChildren: true,
-				targetLineValue: 80,
-				targetLineLabel: null,
-				baseLineValue: null,
-				baseLineLabel: null,
-				domainAxisLabel: null,
-				rangeAxisLabel: null,
-				callbackName: 'chart2',
-				el: 'chart2',
-				url: url
-			});
-			
-			DHIS.getChart({
-				type: 'stackedcolumn',
-				indicators: ['Uvn6LCg7dVU'],
-				periods: 'thisYear',
-				category: 'organisationunit',
-				filter: 'period',
-				organisationunits: ['ImspTQPwCqd'],
-				orgUnitIsParent: true,
-				skipAnimation: true,
-				showData: true,
-				trendLine: true,
-				hideLegend: false,
-				hideSubtitle: false,
-				targetLineValue: 80,
-				targetLineLabel: null,				
-				baseLineValue: 20,
-				baseLineLabel: null,
-				callbackName: 'chart3',
-				el: 'chart3',
-				url: url
-			});
-			
-			DHIS.getTable({
-				indicators: ['Uvn6LCg7dVU'],
-				periods: ['last12Months'],
-				orgunits: ['ImspTQPwCqd'],
-				crosstab: ['periods'],
-				orgUnitIsParent: true,
-				hiddenCols: [0],
-				useExtGrid: false,
-				callbackName: 'table1',
-				el: 'table1',
-				url: url
-			});
-			
-			DHIS.getTable({
-				indicators: ['OdiHJayrsKo'],
-				periods: ['last12Months'],
-				orgunits: ['ImspTQPwCqd'],
-				crosstab: ['periods'],
-				orgUnitIsParent: true,
-				hiddenCols: [0],
-				useExtGrid: true,
-				el: 'table2',
-				url: url
-			});
-			
-			var url1 = DHIS.getUrl({
-				indicators: ['OdiHJayrsKo'],
-				periods: ['last12Months'],
-				orgunits: ['ImspTQPwCqd'],
-				crosstab: ['periods'],
-				orgUnitIsParent: true,
-				format: 'pdf',
-				url: url
-			});
-			
-			Ext.get('url1').update(url1);
 		});
 	</script>
 	
@@ -152,22 +70,10 @@
 </head>
 
 <body>
-    <h1>My chart 1</h1>
-	<div id="chart1"></div>
+    <h1>MFL</h1>
+	<div id="chart1" width="800" height="300">dfgt</div>
 	
-    <h1>My chart 2</h1>
+    <h1>DHIS2</h1>
 	<div id="chart2"></div>
-	
-    <h1>My chart 3</h1>
-	<div id="chart3"></div>
-	
-	<h1>My table 1</h1>
-	<div id="table1"></div>
-		
-	<h1>My table 2</h1>
-	<div id="table2"></div>
-	
-	<h1>My URL</h1>
-	<div id="url1"></div>
 </body>
 </html>

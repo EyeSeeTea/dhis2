@@ -1,3 +1,11 @@
+if (!('DV' in window)) {
+	DV = {};
+}
+
+if(!('i18n' in DV)) {
+	DV.i18n = {};
+}
+
 DV.core = {
 	instances: []
 };
@@ -1854,32 +1862,59 @@ console.log("layout", layout);
 			}();
 		},
 
-		loadChart: function(id) {
+		loadChart: function(id, isJsonP) {
+			var url = dv.baseUrl + '/api/charts/' + id,
+				params = '?viewClass=dimensional&links=false',
+				method = 'GET',
+				success,
+				failure;
+			
 			if (!Ext.isString(id)) {
 				alert('Invalid id');
 				return;
 			}
+			
+			success = function(layoutConfig) {
+				var layout = dv.api.layout.Layout(layoutConfig);
 
-			Ext.Ajax.request({
-				url: dv.baseUrl + '/api/charts/' + id + '.json?viewClass=dimensional&links=false',
-				method: 'GET',
-				failure: function(r) {
-					dv.util.mask.hideMask();
-					alert(r.responseText);
-				},
-				success: function(r) {
-					var layoutConfig = Ext.decode(r.responseText),
-						layout = dv.api.layout.Layout(layoutConfig);
+				if (layout) {
+					dv.favorite = Ext.clone(layout);
+					dv.favorite.id = layoutConfig.id;
+					dv.favorite.name = layoutConfig.name;
 
-					if (layout) {
-						dv.favorite = Ext.clone(layout);
-						dv.favorite.id = layoutConfig.id;
-						dv.favorite.name = layoutConfig.name;
-
-						dv.viewport.setFavorite(layout);
-					}
+					dv.viewport.setFavorite(layout);
 				}
-			});
+			};
+			
+			failure = function(responseText) {
+				dv.util.mask.hideMask();
+				alert(responseText);
+			};
+				
+			if (isJsonP) {
+				Ext.data.JsonP.request({
+					url: url + '.jsonp' + params,
+					method: method,
+					failure: function(r) {
+						failure(r);
+					},
+					success: function(r) {
+						success(r);
+					}
+				});
+			}
+			else {
+				Ext.Ajax.request({
+					url: url + '.json' + params,
+					method: method,
+					failure: function(r) {
+						failure(r.responseText);
+					},
+					success: function(r) {
+						success(Ext.decode(r.responseText));
+					}
+				});
+			}
 		},
 
         analytical2layout: function(analytical) {
