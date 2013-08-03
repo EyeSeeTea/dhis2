@@ -98,7 +98,7 @@ Ext.onReady(function() {
 				el: config.el
 			});
 			
-			//PT.core.instances.push(pt);
+			PT.core.instances.push(pt);
 			
 			pt.viewport = createViewport();
 			pt.isPlugin = true;
