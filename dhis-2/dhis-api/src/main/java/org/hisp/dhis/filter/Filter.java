@@ -58,9 +58,10 @@ public class Filter
     {
     }
 
-    public Filter( String name )
+    public Filter( String uid, String code, String name, String metaDataUids )
     {
-        this.name = name;
+        super( uid, code, name );
+        this.metaDataUids = metaDataUids;
     }
 
     // -------------------------------------------------------------------------

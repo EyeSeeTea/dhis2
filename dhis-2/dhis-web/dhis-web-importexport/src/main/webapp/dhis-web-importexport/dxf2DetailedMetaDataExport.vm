@@ -168,20 +168,25 @@
 
 <!-- FILTER DEFINITION -->
 <div id="mainDivFilter">
+
     <div style="float: left; margin-bottom: 10px;">
         <p style="font-size: 12pt;">$i18n.getString( "filter_commands" )</p>
         <form id="formCreateFilter" action="saveFilterExportForm.action">
-            <input type="hidden" name="name" value="" />
-            <input type="hidden" name="id" value="" />
-            <input type="hidden" name="code" value="" />
-            <input type="hidden" name="metaDataUids" value="" />
-            <input type="button" value="$i18n.getString( "new_filter" )" onclick="createFilter();" style="width: 125px;">
+            <input type="hidden" name="name" value=""/>
+            <input type="hidden" name="id" value=""/>
+            <input type="hidden" name="code" value=""/>
+            <input type="hidden" name="metaDataUids" value=""/>
+            <input type="button" value="$i18n.getString( "new_filter" )" onclick="createFilter();" style="width: 125px;" />
         </form>
     </div>
+
     <div style="float: right; width: 250px; height: 40px; background-color: ghostwhite; border: solid 1px lightskyblue; border-radius: 5px;">
-        <p id="appliedFilterMessage" style="margin: 10px; font-size: 12pt; text-align: center;">$i18n.getString( "no_filter_applied" )</p>
+        <p id="appliedFilterMessage"
+           style="margin: 10px; font-size: 12pt; text-align: center;">$i18n.getString( "no_filter_applied" )</p>
     </div>
+
     <table id="filterTable" style="width: 100%; margin-bottom: 10px; border-spacing: 0;"></table>
+
 </div>
 
 <!-- EXPORT FORM -->
@@ -388,4 +393,5 @@
             </td>
         </tr>
     </table>
+
 </form>

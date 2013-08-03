@@ -31,29 +31,19 @@ package org.hisp.dhis.importexport.action.dxf2;
 import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.filter.Filter;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
 public class UpdateFilterExportFormAction
-    implements Action
+        implements Action
 {
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
-
-    private Integer id;
-
-    public Integer getId()
-    {
-        return id;
-    }
-
-    public void setId( Integer id )
-    {
-        this.id = id;
-    }
 
     private String uid;
 
@@ -103,35 +93,11 @@ public class UpdateFilterExportFormAction
         this.metaDataUids = metaDataUids;
     }
 
-    private Date created;
-
-    public Date getCreated()
-    {
-        return created;
-    }
-
-    public void setCreated( Date created )
-    {
-        this.created = created;
-    }
-
-    private Date lastUpdated;
-
-    public Date getLastUpdated()
-    {
-        return lastUpdated;
-    }
-
-    public void setLastUpdated( Date lastUpdated )
-    {
-        this.lastUpdated = lastUpdated;
-    }
-
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
 
-    private Filter filter = new Filter();
+    private Filter filter;
 
     public Filter getFilter()
     {
@@ -150,10 +116,7 @@ public class UpdateFilterExportFormAction
     @Override
     public String execute() throws Exception
     {
-        filter.setUid( uid );
-        filter.setName( name );
-        filter.setCode( code );
-        filter.setMetaDataUids( metaDataUids );
+        filter = new Filter( uid, code, name, metaDataUids );
         return SUCCESS;
     }
 }

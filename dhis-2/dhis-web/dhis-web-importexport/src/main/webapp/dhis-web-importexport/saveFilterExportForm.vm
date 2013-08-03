@@ -1,6 +1,6 @@
 <h3>$i18n.getString( "save_filter" )</h3>
 
-<form id="formFilter" name="formFilter" method="post" action="../api/detailedMetaData/saveFilter">
+<form id="formFilter" name="formFilter">
     <table id="detailsList" style="width: 540px;">
         <col/> ## Labels
         <col/> ## Input
@@ -32,7 +32,12 @@
         </tr>
         <tr>
             <td colspan="3">
-                <input type="submit" value="$i18n.getString( 'save' )" onclick="saveFilter();" style="width:120px" />
+                <input type="button" value="$i18n.getString( 'save' )" onclick="saveFilter();" style="width:120px" />
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <input type="button" value="$i18n.getString( 'go_back' )" onclick="window.history.back();" style="width:120px" />
             </td>
         </tr>
         </tbody>

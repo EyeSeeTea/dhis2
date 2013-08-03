@@ -47,11 +47,11 @@ public interface ExportService
 
     MetaData getFilteredMetaData( FilterOptions filterOptions, TaskId taskId );
 
-    List<Filter> loadFilters();
+    List<Filter> getFilters();
 
-    void saveFilter( Map<String, String> parameters ) throws IOException;
+    void saveFilter( String json ) throws IOException;
 
-    void updateFilter( Map<String, String> parameters ) throws IOException;
+    void updateFilter( String json ) throws IOException;
 
     void deleteFilter( String json ) throws IOException;
 }

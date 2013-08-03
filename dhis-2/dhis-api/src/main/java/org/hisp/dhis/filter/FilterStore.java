@@ -41,9 +41,24 @@ public interface FilterStore
      */
     Collection<Filter> getAllFilters();
 
+    /**
+     * Save a Filter.
+     *
+     * @param filter
+     */
     void saveFilter( Filter filter );
 
+    /**
+     * Update a Filter.
+     *
+     * @param filter
+     */
     void updateFilter( Filter filter );
 
+    /**
+     * Delete a Filter.
+     *
+     * @param filter
+     */
     void deleteFilter( Filter filter );
 }

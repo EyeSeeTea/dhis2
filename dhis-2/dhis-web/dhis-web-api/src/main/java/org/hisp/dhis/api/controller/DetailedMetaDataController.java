@@ -44,14 +44,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -193,7 +191,7 @@ public class DetailedMetaDataController
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public @ResponseBody String getFilters( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
-        List<Filter> filters = exportService.loadFilters();
+        List<Filter> filters = exportService.getFilters();
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_JSON, ContextUtils.CacheStrategy.NO_CACHE );
         return JacksonUtils.toJsonAsString( filters );
     }
@@ -203,20 +201,20 @@ public class DetailedMetaDataController
     //--------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/saveFilter" )
-    public void saveFilter( @RequestParam Map<String, String> parameters, HttpServletResponse response ) throws IOException
+    public void saveFilter( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
-        exportService.saveFilter( parameters );
+        exportService.saveFilter( json.toString() );
     }
 
     @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/updateFilter" )
-    public void updateFilter( @RequestParam Map<String, String> parameters, HttpServletResponse response ) throws IOException
+    public void updateFilter( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
-        exportService.updateFilter( parameters );
+        exportService.updateFilter( json.toString() );
     }
 
     @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/deleteFilter" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
-    public void deleteFilter( @RequestBody JSONObject json ) throws IOException
+    public void deleteFilter( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
         exportService.deleteFilter( json.toString() );
     }

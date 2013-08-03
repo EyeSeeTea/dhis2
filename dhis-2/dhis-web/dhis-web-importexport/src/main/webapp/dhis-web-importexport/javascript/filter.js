@@ -1,4 +1,5 @@
 // Global Variables
+
 // --------------------------------------------------------------
 var filters = [];
 // --------------------------------------------------------------
@@ -40,6 +41,7 @@ function insertFilterDesign( filters )
         var filterId = filters[i].id;
         var filterName = removeWhiteSpace( filters[i].name );
         var filterCode = filters[i].code;
+        var filterCreated = filters[i].created;
         var design =
                       '<tr id="tr' + filterName +'" style="margin: 20px;">'
                     +      '<td>'
@@ -184,8 +186,8 @@ function filterRemoveButton( filter )
                         data: JSON.stringify( json ),
                         success: function ()
                         {
+                            $( "#tr" + filterName ).remove();
                             console.log( "Filter successfully removed." );
-                            location.reload();
                         },
                         error: function ( request, status, error )
                         {

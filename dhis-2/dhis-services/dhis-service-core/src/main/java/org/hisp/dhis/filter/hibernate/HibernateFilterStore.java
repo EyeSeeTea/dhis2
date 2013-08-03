@@ -27,12 +27,17 @@ package org.hisp.dhis.filter.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.*;
-import org.hibernate.cfg.Configuration;
 import org.hisp.dhis.filter.Filter;
 import org.hisp.dhis.filter.FilterStore;
+import org.hisp.dhis.user.CurrentUserService;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
@@ -40,9 +45,14 @@ import java.util.Collection;
 public class HibernateFilterStore
         implements FilterStore
 {
+    public static final Log log = LogFactory.getLog( HibernateFilterStore.class );
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
+
+    @Autowired
+    private CurrentUserService currentUserService;
 
     private SessionFactory sessionFactory;
 
@@ -61,41 +71,99 @@ public class HibernateFilterStore
     // -------------------------------------------------------------------------
 
     @Override
+    @SuppressWarnings( "unchecked" )
     public Collection<Filter> getAllFilters()
     {
-        Session session = sessionFactory.getCurrentSession();
+        List<Filter> filters = new ArrayList<Filter>();
 
-        Criteria criteria = session.createCriteria( Filter.class );
+        Session session = sessionFactory.openSession();
+        Transaction transaction = null;
+        try
+        {
+            transaction = session.beginTransaction();
+            Criteria criteria = session.createCriteria( Filter.class );
+            filters = criteria.list();
+            transaction.commit();
+        } catch ( HibernateException ex )
+        {
+            log.error( "Error getting Filters: ", ex );
+        } finally
+        {
+            session.close();
+        }
 
-        return criteria.list();
+        return filters;
     }
 
     @Override
     public void saveFilter( Filter filter )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        filter.setAutoFields();
-
-        session.save( filter );
-        session.flush();
+        Session session = sessionFactory.openSession();
+        Transaction transaction = null;
+        try
+        {
+            transaction = session.beginTransaction();
+            session.save( filter );
+            transaction.commit();
+        } catch ( HibernateException ex )
+        {
+            log.error( "Error saving Filter: ", ex );
+        } finally
+        {
+            session.close();
+        }
     }
 
     @Override
     public void updateFilter( Filter filter )
     {
-        Session session = sessionFactory.getCurrentSession();
+        Session session = sessionFactory.openSession();
+        Transaction transaction = null;
+        try
+        {
+            transaction = session.beginTransaction();
+            Query query = session.createQuery(
+                    "UPDATE Filter SET "
+                            + "name = :name, "
+                            + "code = :code, "
+                            + "metadatauids = :metadatauids, "
+                            + "lastupdated = :lastupdated "
+                            + "WHERE uid = :uid" );
+            query.setParameter( "name", filter.getName() );
+            query.setParameter( "uid", filter.getUid() );
+            query.setParameter( "code", filter.getCode() );
+            query.setParameter( "metadatauids", filter.getMetaDataUids() );
+            query.setParameter( "lastupdated", filter.getLastUpdated() );
 
-        session.update( filter );
+            query.executeUpdate();
+            transaction.commit();
+        } catch ( HibernateException ex )
+        {
+            log.error( "Error updating Filter: ", ex );
+        } finally
+        {
+            session.close();
+        }
     }
 
     @Override
     public void deleteFilter( Filter filter )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        Query query = session.createQuery( "DELETE Filter WHERE uid = :uid" );
-        query.setParameter( "uid", filter.getUid() );
-        query.executeUpdate();
+        Session session = sessionFactory.openSession();
+        Transaction transaction = null;
+        try
+        {
+            transaction = session.beginTransaction();
+            Query query = session.createQuery( "DELETE Filter WHERE uid = :uid" );
+            query.setParameter( "uid", filter.getUid() );
+            query.executeUpdate();
+            transaction.commit();
+        } catch ( HibernateException ex )
+        {
+            log.error( "Error deleting Filter: ", ex );
+        } finally
+        {
+            session.close();
+        }
     }
 }

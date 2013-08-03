@@ -1,6 +1,6 @@
 <h3>$i18n.getString( "update_filter" )</h3>
 
-<form id="formFilter" name="formFilter" method="post" action="../api/detailedMetaData/updateFilter">
+<form id="formFilter" name="formFilter">
     <input type="hidden" id="uid" name="uid" value="$filter.uid" />
     <table id="detailsList" style="width: 540px;">
         <col/> ## Labels
@@ -33,7 +33,12 @@
         </tr>
         <tr>
             <td colspan="3">
-                <input type="submit" value="$i18n.getString( 'update' )" onclick="updateFilter();" style="width:120px" />
+                <input type="button" value="$i18n.getString( 'update' )" onclick="updateFilter();" style="width:120px" />
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <input type="button" value="$i18n.getString( 'go_back' )" onclick="window.history.back();" style="width:120px" />
             </td>
         </tr>
         </tbody>
