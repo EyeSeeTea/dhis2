@@ -63,7 +63,9 @@
 
     <!--Ovidiu-->
     <bean id="org.hisp.dhis.filter.FilterStore" class="org.hisp.dhis.filter.hibernate.HibernateFilterStore">
+        <property name="clazz" value="org.hisp.dhis.filter.Filter" />
         <property name="sessionFactory" ref="sessionFactory" />
+        <property name="cacheable" value="true" />
     </bean>
 
   <bean id="org.hisp.dhis.indicator.IndicatorTypeStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">

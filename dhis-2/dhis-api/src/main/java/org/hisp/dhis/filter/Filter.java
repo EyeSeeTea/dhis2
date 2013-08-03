@@ -58,6 +58,11 @@ public class Filter
     {
     }
 
+    public Filter( String name )
+    {
+        this.name = name;
+    }
+
     public Filter( String uid, String code, String name, String metaDataUids )
     {
         super( uid, code, name );

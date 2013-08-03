@@ -27,14 +27,9 @@ package org.hisp.dhis.filter.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hibernate.*;
-import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.filter.Filter;
 import org.hisp.dhis.filter.FilterStore;
-import org.hisp.dhis.user.CurrentUserService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
 
@@ -42,29 +37,9 @@ import java.util.Collection;
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
 public class HibernateFilterStore
+        extends HibernateIdentifiableObjectStore<Filter>
         implements FilterStore
 {
-    public static final Log log = LogFactory.getLog( HibernateFilterStore.class );
-
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    @Autowired
-    private CurrentUserService currentUserService;
-
-    private SessionFactory sessionFactory;
-
-    public void setSessionFactory( SessionFactory sessionFactory )
-    {
-        this.sessionFactory = sessionFactory;
-    }
-
-    public SessionFactory getSessionFactory()
-    {
-        return sessionFactory;
-    }
-
     // -------------------------------------------------------------------------
     // Filter basic functionality
     // -------------------------------------------------------------------------
@@ -72,49 +47,33 @@ public class HibernateFilterStore
     @Override
     public Filter getFilterByUid( String uid )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( Filter.class );
-        criteria.add( Restrictions.eq( "uid", uid ) );
-
-        return ( Filter ) criteria.uniqueResult();
+        return getByUid( uid );
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
     public Collection<Filter> getAllFilters()
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( Filter.class );
-
-        return criteria.list();
+        return getAll();
     }
 
     @Override
     public void saveFilter( Filter filter )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        session.save( filter );
-        session.flush();
+        save( filter );
+        sessionFactory.getCurrentSession().flush();
     }
 
     @Override
     public void updateFilter( Filter filter )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        session.update( filter );
-        session.flush();
+        update( filter );
+        sessionFactory.getCurrentSession().flush();
     }
 
     @Override
     public void deleteFilter( Filter filter )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        session.delete( filter );
-        session.flush();
+        delete( filter );
+        sessionFactory.getCurrentSession().flush();
     }
 }
