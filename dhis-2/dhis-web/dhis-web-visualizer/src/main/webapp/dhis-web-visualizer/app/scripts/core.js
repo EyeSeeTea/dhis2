@@ -374,15 +374,15 @@ DV.core.getUtil = function(dv) {
 
 	util.mask = {
 		showMask: function(cmp, str) {
-			if (DV.mask) {
-				DV.mask.destroy();
+			if (dv.mask) {
+				dv.mask.destroy();
 			}
-			DV.mask = new Ext.LoadMask(cmp, {msg: str});
-			DV.mask.show();
+			dv.mask = new Ext.LoadMask(cmp, {msg: str});
+			dv.mask.show();
 		},
 		hideMask: function() {
-			if (DV.mask) {
-				DV.mask.hide();
+			if (dv.mask) {
+				dv.mask.hide();
 			}
 		}
 	};
@@ -409,6 +409,12 @@ DV.core.getUtil = function(dv) {
 		}
 	};
 
+	util.str = {
+		replaceAll: function(str, find, replace) {
+			return str.replace(new RegExp(find, 'g'), replace);
+		}
+	};
+	
 	util.value = {
 		jsonfy: function(values) {
 			var a = [];
@@ -1797,7 +1803,7 @@ console.log("baseLineFields", store.baseLineFields);
 					return;
 				}
 
-				dv.util.mask.showMask(dv.viewport);
+				dv.util.mask.showMask(dv.viewport.centerRegion);
 
 				Ext.Ajax.request({
 					method: 'GET',

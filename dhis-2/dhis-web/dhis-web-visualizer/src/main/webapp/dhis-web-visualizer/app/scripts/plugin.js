@@ -14,23 +14,31 @@ Ext.onReady(function() {
 			dv,
 			initialize;
 			
+		afterRender = function() {
+			
+		};
+			
 		createViewport = function() {
-			var viewport,
+			var setFavorite,
 				centerRegion,
 				el = Ext.get(dv.el),
+				width,
+				height,
 				viewportConfig;
 				
-			//viewportConfing = {
-				//renderTo: el
+			width = el.getWidth() - parseInt(el.getStyle('border-left-width')) - parseInt(el.getStyle('border-right-width'));
+			height = el.getHeight() - parseInt(el.getStyle('border-top-width')) - parseInt(el.getStyle('border-bottom-width'));				
 				
-			viewport = Ext.create('Ext.panel.Panel', {
+			setFavorite = function(layout) {
+				dv.util.chart.createChart(layout, dv);
+			};
+			
+			centerRegion = Ext.create('Ext.panel.Panel', {
 				renderTo: el,
-				width: el.getWidth(),
-				height: el.getHeight(),
+				bodyStyle: 'border: 0 none',
+				width: config.width || width,
+				height: config.height || height,
 				layout: 'fit',
-				setFavorite: function(layout) {
-					dv.util.chart.createChart(layout, dv);
-				},
 				listeners: {
 					afterrender: function() {
 						afterRender();
@@ -38,22 +46,25 @@ Ext.onReady(function() {
 				}
 			});
 			
-			return viewport;
+			return {
+				setFavorite: setFavorite,
+				centerRegion: centerRegion
+			};
 		};
 		
 		initialize = function() {
 			
 			dv = DV.core.getInstance({
 				baseUrl: config.url,
-				el: config.url
+				el: config.el
 			});
-			
-			dv.viewport = createViewport();
 
 			Ext.data.JsonP.request({
 				url: dv.baseUrl + '/dhis-web-visualizer/initialize.action',
 				success: function(r) {
 					dv.init = r;
+			
+					dv.viewport = createViewport();
 					
 					if (Ext.isString(config.uid)) {
 						dv.util.chart.loadChart(config.uid, true);

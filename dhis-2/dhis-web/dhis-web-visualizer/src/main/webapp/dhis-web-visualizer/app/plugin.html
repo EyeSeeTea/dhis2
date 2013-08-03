@@ -12,15 +12,7 @@
 		
 		h1 {font-size: 20px; margin: 20px 0;}
 		
-		#chart1, #chart2, #chart3, #table1, #table2 {width: 1000px; margin-bottom: 50px;}
-		
-		#chart1, #chart2, #chart3 {height: 400px; border: 2px solid #d1d1d1; border-radius: 3px;}
-		
-		table {border-collapse: collapse;}
-		
-		table th, td {text-align: left; border: 1px solid #ccc;}
-		
-		table .val {text-align: center;}
+		#chart1, #chart2 {width: 1000px; margin-bottom: 50px; height: 400px; border: 2px solid #d1d1d1; border-radius: 3px;}
     </style>
     
 	<script>
@@ -34,44 +26,11 @@
 			});
 		});
 	</script>
-	
-	<!--
-	CONFIG              	TYPE            DEFAULT             DESCRIPTION
-
-	uid                 	string                              (Optional) A chart uid. If provided, only 'el' and 'url' are required.
-		
-	type                			string          'column'            (Optional) Chart types: 'column', 'stackedcolumn', 'bar', 'stackedbar', 'line', 'area', 'pie'
-	indicators          			[integer]                           (Required*) Indicator uids. Required if no data elements are provided.
-	dataelements        			[integer]                           (Required*) Data element uids. Required if no indicators are provided.
-	periods             			[string]        'last12Months'      (Optional) Relative period names.
-	organisationunits   			[integer]                           (Required) Organisation unit uids.
-	series              			string          'data'              (Optional) Series: 'data', 'period' or 'organisationunit'.
-	category            			string          'period'            (Optional) Category: 'indicator', 'dataelement', 'period' or 'organisationunit'.
-	filter              			string          'organisationunit'  (Optional) Filter: 'indicator', 'dataelement', 'period' or 'organisationunit'.
-	orgUnitIsParent					boolean			false				(Optional) If true, the children of the provided orgunit are displayed.
-	showData						boolean			false				(Optional) If true, the exact data are displayed on the chart.
-	trendLine						boolean			false				(Optional) If true, trend line(s) are added.
-	hideLegend						boolean			false				(Optional) If true, the legend is not visible.
-	hideSubtitle					boolean			false				(Optional) If true, the subtitle is not visible.
-	userOrganisationUnit			boolean			false				(Optional) If true, the provided orgunits are replaced by the user orgunit.
-	userOrganisationUnitChildren	boolean			false				(Optional) If true, the provided orgunits are replaced by the user orgunit children.
-	targetLineValue					integer								(Optional) The value of the target line.
-	targetLineLabel					string								(Optional) The legend name of the target line. Requires targetLineValue, otherwise ignored.
-	baseLineValue					integer								(Optional) The value of the base line.
-	baseLineLabel					string								(Optional) The legend name of the base line. Requires baseLineValue, otherwise ignored.
-	domainAxisLabel					string								(Optional) Domain axis (usually the x axis) label.
-	rangeAxisLabel					string								(Optional) Range axis (usually the y axis) label.
-	legendPosition      			string          'top'               (Optional) Positions: 'top', 'right', 'bottom' or 'left'.
-	el                  			string                              (Required) The element id to render the chart.
-	width               			integer         <el width>          (Optional) Chart width. Default is the element width.
-	height              			integer         <el height>         (Optional) Chart height. Default is the element height.
-	url                 			string                              (Required) The base url of the DHIS instance.
-	-->
 </head>
 
 <body>
     <h1>MFL</h1>
-	<div id="chart1" width="800" height="300">dfgt</div>
+	<div id="chart1"></div>
 	
     <h1>DHIS2</h1>
 	<div id="chart2"></div>
