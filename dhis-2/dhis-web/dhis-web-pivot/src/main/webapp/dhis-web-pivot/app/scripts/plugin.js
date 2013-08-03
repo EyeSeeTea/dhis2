@@ -1,5 +1,4 @@
 PT.plugin = {};
-PT.plugin.init = {};
 
 Ext.onReady(function() {
 	Ext.Ajax.method = 'GET';
@@ -7,6 +6,27 @@ Ext.onReady(function() {
 	document.body.oncontextmenu = function() {
 		return false;
 	};
+	
+	css = 'table.pivot { \n font-family: arial,sans-serif,ubuntu,consolas; \n } \n';
+	css += '.td-nobreak { \n white-space: nowrap; \n } \n';
+	css += '.td-hidden { \n display: none; \n } \n';
+	css += '.td-collapsed { \n display: none; \n } \n';
+	css += 'table.pivot { \n border-collapse: collapse; \n border-spacing: 0px; \n border: 0 none; \n } \n';
+	css += '.pivot td { \n padding: 5px; \n border: \n 1px solid #b2b2b2; \n } \n';
+	css += '.pivot-dim { \n background-color: #dae6f8; \n text-align: center; \n } \n';
+	css += '.pivot-dim.highlighted { \n	background-color: #c5d8f6; \n } \n';
+	css += '.pivot-dim-subtotal { \n background-color: #cad6e8; \n text-align: center; \n } \n';
+	css += '.pivot-dim-total { \n background-color: #bac6d8; \n text-align: center; \n } \n';
+	css += '.pivot-dim-empty { \n background-color: #dae6f8; \n text-align: center; \n } \n';
+	css += '.pivot-value { \n background-color: #fff; \n white-space: nowrap; \n text-align: right; \n } \n';
+	css += '.pivot-value-subtotal { \n background-color: #f4f4f4; \n white-space: nowrap; \n text-align: right; \n } \n';
+	css += '.pivot-value-subtotal-total { \n background-color: #e7e7e7; \n white-space: nowrap; \n text-align: right; \n } \n';
+	css += '.pivot-value-total { \n background-color: #e4e4e4; \n white-space: nowrap; \n text-align: right; \n } \n';
+	css += '.pivot-value-total-subgrandtotal { \n background-color: #d8d8d8; \n white-space: nowrap; \n text-align: right; \n } \n';
+	css += '.pivot-value-grandtotal { \n background-color: #c8c8c8; \n white-space: nowrap; \n text-align: right; \n } \n';
+	
+	Ext.util.CSS.createStyleSheet(css);
+	
 	
 	PT.plugin.getTable = function(config) {
 		var validateConfig,
@@ -52,7 +72,7 @@ Ext.onReady(function() {
 			
 			centerRegion = Ext.create('Ext.panel.Panel', {
 				renderTo: el,
-				bodyStyle: 'border: 0 none',
+				bodyStyle: 'border: 0 none; padding: 1px',
 				width: config.width || width,
 				height: config.height || height,
 				layout: 'fit',
