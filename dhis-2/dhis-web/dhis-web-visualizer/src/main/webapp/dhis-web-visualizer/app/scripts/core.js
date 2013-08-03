@@ -6,6 +6,8 @@ if(!('i18n' in DV)) {
 	DV.i18n = {};
 }
 
+DV.debug = false;
+
 DV.core = {
 	instances: []
 };
@@ -1058,14 +1060,15 @@ DV.core.getUtil = function(dv) {
 
 					return Ext.Array.max(sums);
 				};
-
-
-console.log("data", data);
-console.log("rangeFields", store.rangeFields);
-console.log("domainFields", store.domainFields);
-console.log("trendLineFields", store.trendLineFields);
-console.log("targetLineFields", store.targetLineFields);
-console.log("baseLineFields", store.baseLineFields);
+				
+				if (DV.debug) {
+					console.log("data", data);
+					console.log("rangeFields", store.rangeFields);
+					console.log("domainFields", store.domainFields);
+					console.log("trendLineFields", store.trendLineFields);
+					console.log("targetLineFields", store.targetLineFields);
+					console.log("baseLineFields", store.baseLineFields);
+				}
 
 				return store;
 			};
@@ -1858,10 +1861,12 @@ console.log("baseLineFields", store.baseLineFields);
 						dv.layout = layout;
 						dv.xLayout = xLayout;
 						dv.xResponse = xResponse;
-
-console.log("xResponse", xResponse);
-console.log("xLayout", xLayout);
-console.log("layout", layout);
+						
+						if (DV.debug) {
+							console.log("xResponse", xResponse);
+							console.log("xLayout", xLayout);
+							console.log("layout", layout);
+						}
 					}
 				});
 
