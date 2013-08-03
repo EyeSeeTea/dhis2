@@ -34,6 +34,8 @@ import java.util.List;
  */
 public interface FilterService
 {
+    Filter getFilterByUid( String uid );
+
     List<Filter> getAllFilters();
 
     void saveFilter( Filter filter );

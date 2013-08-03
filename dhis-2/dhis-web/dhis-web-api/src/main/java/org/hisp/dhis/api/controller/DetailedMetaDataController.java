@@ -203,20 +203,20 @@ public class DetailedMetaDataController
     @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/saveFilter" )
     public void saveFilter( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
-        exportService.saveFilter( json.toString() );
+        exportService.saveFilter( json );
     }
 
     @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/updateFilter" )
     public void updateFilter( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
-        exportService.updateFilter( json.toString() );
+        exportService.updateFilter( json );
     }
 
     @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/deleteFilter" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void deleteFilter( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
-        exportService.deleteFilter( json.toString() );
+        exportService.deleteFilter( json );
     }
 
     //--------------------------------------------------------------------------

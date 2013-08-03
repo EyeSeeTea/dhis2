@@ -56,6 +56,12 @@ public class DefaultFilterService
     // -------------------------------------------------------------------------
 
     @Override
+    public Filter getFilterByUid( String uid )
+    {
+        return filterStore.getFilterByUid( uid );
+    }
+
+    @Override
     public List<Filter> getAllFilters()
     {
         return ( List<Filter> ) filterStore.getAllFilters();

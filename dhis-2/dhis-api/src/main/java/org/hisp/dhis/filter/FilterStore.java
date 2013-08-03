@@ -35,6 +35,12 @@ import java.util.Collection;
 public interface FilterStore
 {
     /**
+     * Returns a Filter by Uid.
+     *
+     * @return a Filter.
+     */
+    Filter getFilterByUid( String uid );
+    /**
      * Returns all Filters.
      *
      * @return a collection of all Filters.

@@ -30,6 +30,7 @@ package org.hisp.dhis.dxf2.metadata;
 import java.io.IOException;
 import java.util.*;
 
+import net.sf.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -204,31 +205,32 @@ public class DefaultExportService
     }
 
     @Override
-    public void saveFilter( String json ) throws IOException
+    public void saveFilter( JSONObject json ) throws IOException
     {
+        String jsonString = json.toString();
         ObjectMapper mapper = new ObjectMapper();
-        Filter filter = mapper.readValue( json, Filter.class );
+        Filter filter = mapper.readValue( jsonString, Filter.class );
         filter.setAutoFields();
 
         filterService.saveFilter( filter );
     }
 
     @Override
-    public void updateFilter( String json ) throws IOException
+    public void updateFilter( JSONObject json ) throws IOException
     {
-        ObjectMapper mapper = new ObjectMapper();
-        Filter filter = mapper.readValue( json, Filter.class );
+        Filter filter = filterService.getFilterByUid( json.getString( "uid" ) );
+        filter.setName( json.getString( "name" ) );
+        filter.setCode( json.getString( "code" ) );
+        filter.setMetaDataUids( json.getString( "metaDataUids" ) );
         filter.setLastUpdated( new Date() );
 
         filterService.updateFilter( filter );
     }
 
     @Override
-    public void deleteFilter( String json ) throws IOException
+    public void deleteFilter( JSONObject json ) throws IOException
     {
-        ObjectMapper mapper = new ObjectMapper();
-        Filter filter = mapper.readValue( json, Filter.class );
-
+        Filter filter = filterService.getFilterByUid( json.getString( "uid" ) );
         filterService.deleteFilter( filter );
     }
 }

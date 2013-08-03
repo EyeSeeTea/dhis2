@@ -27,12 +27,12 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import net.sf.json.JSONObject;
 import org.hisp.dhis.filter.Filter;
 import org.hisp.dhis.scheduling.TaskId;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -49,9 +49,9 @@ public interface ExportService
 
     List<Filter> getFilters();
 
-    void saveFilter( String json ) throws IOException;
+    void saveFilter( JSONObject json ) throws IOException;
 
-    void updateFilter( String json ) throws IOException;
+    void updateFilter( JSONObject json ) throws IOException;
 
-    void deleteFilter( String json ) throws IOException;
+    void deleteFilter( JSONObject json ) throws IOException;
 }
