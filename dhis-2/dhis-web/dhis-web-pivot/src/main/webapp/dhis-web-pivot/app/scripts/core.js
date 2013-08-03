@@ -1,4 +1,16 @@
-PT.core = {};
+if (!('PT' in window)) {
+	PT = {};
+}
+
+if(!('i18n' in PT)) {
+	PT.i18n = {};
+}
+
+PT.debug = false;
+
+PT.core = {
+	instances: []
+};
 
 Ext.onReady( function() {
 
@@ -376,7 +388,7 @@ PT.core.getUtils = function(pt) {
 
 	util.mask = {
 		showMask: function(cmp, msg) {
-			cmp = cmp || pt.viewport;
+			cmp = cmp || pt.viewport.centerRegion;
 			msg = msg || 'Loading..';
 
 			if (pt.viewport.mask) {
@@ -506,6 +518,12 @@ PT.core.getUtils = function(pt) {
 		}
 	};
 
+	util.str = {
+		replaceAll: function(str, find, replace) {
+			return str.replace(new RegExp(find, 'g'), replace);
+		}
+	};
+		
 	util.color = {
 		hexToRgb: function(hex) {
 			var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
@@ -1978,7 +1996,7 @@ PT.core.getUtils = function(pt) {
 				}
 
 				// Show load mask
-				pt.util.mask.showMask(pt.viewport);
+				pt.util.mask.showMask(pt.viewport.centerRegion);
 
 				Ext.Ajax.request({
 					method: 'GET',

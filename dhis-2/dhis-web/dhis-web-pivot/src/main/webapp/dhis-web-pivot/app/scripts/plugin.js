@@ -1,154 +1,94 @@
-//format
+PT.plugin = {};
+PT.plugin.init = {};
 
-settings = {
-	col: [
-		{name: 'dx', items: ['Uvn6LCg7dVU', 'OdiHJayrsKo', 'sB79w2hiLp8']},
-		{name: 'co'}
-	],
-	row: [
-		{name: 'pe', items: ['201201', '201202', '201203']},
-		{name: 'Bpx0589u8y0', items: ['MAs88nJc9nL', 'PVLOW4bCshG']}
-	],
-	filter: [
-		{name: 'ou', items: ['ImspTQPwCqd']}
-	],
-	options: {
-		showTotals: true,
-		showSubTotals: true,
-		hideEmptyRows: false,
-		displayDensity: 'normal',
-		fontSize: 'normal',
-		digitGroupSeparator: 'space',
-		reportingPeriod: false,
-		organisationUnit: false,
-		parentOrganisationUnit: false,
-		userOrganisationUnit: true,
-		userOrganisationUnitChildren: false
-	}
-};
+Ext.onReady(function() {
+	Ext.Ajax.method = 'GET';
 
-xLayout = {
-	col: [
-		{name: 'dx', items: ['Uvn6LCg7dVU', 'OdiHJayrsKo', 'sB79w2hiLp8']},
-		{name: 'co'}
-	],
-	row: [
-		{name: 'pe', items: ['201201', '201202', '201203']},
-		{name: 'Bpx0589u8y0', items: ['MAs88nJc9nL', 'PVLOW4bCshG']}
-	],
-	filter: [
-		{name: 'ou', items: ['ImspTQPwCqd']}
-	],
-	dimensions: [
-		{name: 'dx', items: ['Uvn6LCg7dVU', 'OdiHJayrsKo', 'sB79w2hiLp8']},
-		{name: 'co'},
-		{name: 'pe', items: ['201201', '201202', '201203']},
-		{name: 'Bpx0589u8y0', items: ['MAs88nJc9nL', 'PVLOW4bCshG']},
-		{name: 'ou', items: ['ImspTQPwCqd']}
-	],
-	dimensionNames: ['dx', 'co', 'pe', 'Bpx0589u8y0', 'ou'],
-	sortedDimensions: [
-		{name: 'Bpx0589u8y0', items: ['MAs88nJc9nL', 'PVLOW4bCshG']},
-		{name: 'co'},
-		{name: 'dx', items: ['OdiHJayrsKo', 'Uvn6LCg7dVU', 'sB79w2hiLp8']},
-		{name: 'ou', items: ['ImspTQPwCqd']},
-		{name: 'pe', items: ['201201', '201202', '201203']}
-	],
-	sortedFilterDimensions: [
-		{name: 'ou', items: ['ImspTQPwCqd']}
-	],
-	nameItemsMap: {
-		'dx': ['Uvn6LCg7dVU', 'OdiHJayrsKo', 'sB79w2hiLp8'],
-		'co': [],
-		'pe': ['201201', '201202', '201203'],
-		'Bpx0589u8y0': ['MAs88nJc9nL', 'PVLOW4bCshG'],
-		'ou': ['ImspTQPwCqd']
-	},
-	options: {
-		showTotals: true,
-		showSubTotals: true,
-		hideEmptyRows: false,
-		displayDensity: 'normal',
-		fontSize: 'normal',
-		digitGroupSeparator: 'space',
-		reportingPeriod: false,
-		organisationUnit: false,
-		parentOrganisationUnit: false,
-		userOrganisationUnit: true,
-		userOrganisationUnitChildren: false
-	}
-};
+	document.body.oncontextmenu = function() {
+		return false;
+	};
+	
+	PT.plugin.getTable = function(config) {
+		var validateConfig,
+			afterRender,
+			createViewport,
+			pt,
+			initialize;
+			
+		validateConfig = function(config) {
+			if (!Ext.isObject(config)) {
+				console.log('Invalid report table configuration');
+				return;
+			}
+			
+			if (!Ext.isString(config.el)) {
+				console.log('No element provided');
+				return;
+			}
+			
+			if (!Ext.isString(config.uid)) {
+				console.log('No report table uid provided');
+				return;
+			}
+			
+			return true;
+		};
+			
+		afterRender = function() {};
+			
+		createViewport = function() {
+			var el = Ext.get(pt.el),
+				setFavorite,
+				centerRegion,
+				width,
+				height;
+				
+			width = el.getWidth() - parseInt(el.getStyle('border-left-width')) - parseInt(el.getStyle('border-right-width'));
+			height = el.getHeight() - parseInt(el.getStyle('border-top-width')) - parseInt(el.getStyle('border-bottom-width'));				
+				
+			setFavorite = function(layout) {
+				pt.util.pivot.createTable(layout, pt);
+			};
+			
+			centerRegion = Ext.create('Ext.panel.Panel', {
+				renderTo: el,
+				bodyStyle: 'border: 0 none',
+				width: config.width || width,
+				height: config.height || height,
+				layout: 'fit',
+				listeners: {
+					afterrender: function() {
+						afterRender();
+					}
+				}
+			});
+			
+			return {
+				setFavorite: setFavorite,
+				centerRegion: centerRegion
+			};
+		};
+		
+		initialize = function() {
+			if (!validateConfig(config)) {
+				return;
+			}
+			
+			pt = PT.core.getInstance({
+				baseUrl: config.url,
+				el: config.el
+			});
+			
+			pt.viewport = createViewport();
 
-xResponse = {
-	headers: [
-		{
-			name: "dx",
-			column: "dx",
-			type: "java.lang.String",
-			hidden: false,
-			meta: true,
-			index: 0,
-			size: 3,
-			items: [
-
-		}
-	],
-	metaData: {
-		201201: "January 2012",
-		201202: "February 2012"
-	},
-	height: 96,
-	width: 4,
-	rows: [
-		[
-			"PVLOW4bCshG",
-			"Jtf34kNZhzP",
-			"201201",
-			"12.0"
-		]
-	],
-	//metaDataHeaderMap: {
-		//'Jtf34kNZhzP': 'dx'
-	//}
-	nameHeaderMap: {
-		'dx': {
-			name: "dx",
-			column: "dx",
-			type: "java.lang.String",
-			hidden: false,
-			meta: true,
-			index: 0,
-			size: 3,
-			items: [
-
-		}
-	}
-};
-
-xAxis = {
-	dims: 2,
-	size: 15,
-	ids: ["O3qECFGrzeFeT1vvFVhLHc", "O3qECFGrzeFio8xTtlZV18", x15],
-	span: [5, 1],
-	items: [
-		{
-			name: 'dx',
-			items: ["O3qECFGrzeF", "t3QKFZbCf2B", "OLlWZUfLtsR"]
-		},
-		etc
-	],
-	xItems: {
-		all: [
-			[x15, "O3qECFGrzeF"],
-			[x15, "eT1vvFVhLHc"]
-		],
-		gui: [
-			[x3],
-			[x15]
-		],
-		unique: [
-			[x3],
-			[x5]
-		]
-	}
-};
+			Ext.data.JsonP.request({
+				url: pt.baseUrl + '/dhis-web-pivot/initialize.action',
+				success: function(r) {
+					pt.init = r;
+					
+					pt.util.pivot.loadTable(config.uid, true);	
+				}
+			});
+		}();
+	};
+});
