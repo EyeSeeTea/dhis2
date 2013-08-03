@@ -7,6 +7,7 @@ Ext.onReady(function() {
 		return false;
 	};
 	
+	// Table css
 	css = 'table.pivot { \n font-family: arial,sans-serif,ubuntu,consolas; \n } \n';
 	css += '.td-nobreak { \n white-space: nowrap; \n } \n';
 	css += '.td-hidden { \n display: none; \n } \n';
@@ -25,8 +26,13 @@ Ext.onReady(function() {
 	css += '.pivot-value-total-subgrandtotal { \n background-color: #d8d8d8; \n white-space: nowrap; \n text-align: right; \n } \n';
 	css += '.pivot-value-grandtotal { \n background-color: #c8c8c8; \n white-space: nowrap; \n text-align: right; \n } \n';
 	
-	Ext.util.CSS.createStyleSheet(css);
+	// Load mask css
 	
+	css += '.x-mask-msg { \n padding: 0; \n	border: 0 none; \n background-image: none; \n background-color: transparent; \n } \n';
+	css += '.x-mask-msg div { \n background-position: 11px center; \n } \n';
+	css += '.x-mask-msg .x-mask-loading { \n border: 0 none; \n	background-color: #000; \n color: #fff; \n border-radius: 2px; \n padding: 12px 14px 12px 30px; \n opacity: 0.65; \n } \n';	
+	
+	Ext.util.CSS.createStyleSheet(css);
 	
 	PT.plugin.getTable = function(config) {
 		var validateConfig,
@@ -37,12 +43,12 @@ Ext.onReady(function() {
 			
 		validateConfig = function(config) {
 			if (!Ext.isObject(config)) {
-				console.log('Invalid report table configuration');
+				console.log('Report table configuration is not an object');
 				return;
 			}
 			
 			if (!Ext.isString(config.el)) {
-				console.log('No element provided');
+				console.log('No element id provided');
 				return;
 			}
 			
@@ -59,12 +65,7 @@ Ext.onReady(function() {
 		createViewport = function() {
 			var el = Ext.get(pt.el),
 				setFavorite,
-				centerRegion,
-				width,
-				height;
-				
-			width = el.getWidth() - parseInt(el.getStyle('border-left-width')) - parseInt(el.getStyle('border-right-width'));
-			height = el.getHeight() - parseInt(el.getStyle('border-top-width')) - parseInt(el.getStyle('border-bottom-width'));				
+				centerRegion;
 				
 			setFavorite = function(layout) {
 				pt.util.pivot.createTable(layout, pt);
@@ -72,9 +73,7 @@ Ext.onReady(function() {
 			
 			centerRegion = Ext.create('Ext.panel.Panel', {
 				renderTo: el,
-				bodyStyle: 'border: 0 none; padding: 1px',
-				width: config.width || width,
-				height: config.height || height,
+				bodyStyle: 'border: 0 none',
 				layout: 'fit',
 				listeners: {
 					afterrender: function() {
@@ -99,14 +98,17 @@ Ext.onReady(function() {
 				el: config.el
 			});
 			
+			//PT.core.instances.push(pt);
+			
 			pt.viewport = createViewport();
+			pt.isPlugin = true;
 
 			Ext.data.JsonP.request({
 				url: pt.baseUrl + '/dhis-web-pivot/initialize.action',
 				success: function(r) {
 					pt.init = r;
 					
-					pt.util.pivot.loadTable(config.uid, true);	
+					pt.util.pivot.loadTable(config.uid);	
 				}
 			});
 		}();

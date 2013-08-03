@@ -1873,7 +1873,7 @@ DV.core.getUtil = function(dv) {
 			}();
 		},
 
-		loadChart: function(id, isJsonP) {
+		loadChart: function(id, isPlugin) {
 			var url = dv.baseUrl + '/api/charts/' + id,
 				params = '?viewClass=dimensional&links=false',
 				method = 'GET',
@@ -1902,7 +1902,7 @@ DV.core.getUtil = function(dv) {
 				alert(responseText);
 			};
 				
-			if (isJsonP) {
+			if (isPlugin) {
 				Ext.data.JsonP.request({
 					url: url + '.jsonp' + params,
 					method: method,
