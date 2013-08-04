@@ -1,12 +1,9 @@
-PT.isSessionStorage = 'sessionStorage' in window && window['sessionStorage'] !== null;
-
-PT.app = {};
-PT.app.init = {};
-
 Ext.onReady( function() {
 	var createViewport,
 		initialize,
 		pt;
+
+	PT.app = {};
 
 	PT.app.getInits = function(init) {		
 		init = PT.core.getInits(init, pt);
@@ -294,7 +291,7 @@ Ext.onReady( function() {
 
 				this.setProxy({
 					type: 'ajax',
-					url: pt.conf.finals.ajax.path_api + path,
+					url: pt.baseUrl + pt.conf.finals.ajax.path_api + path,
 					reader: {
 						type: 'json',
 						root: 'dataElements'
@@ -312,7 +309,7 @@ Ext.onReady( function() {
 				if (Ext.isString(uid)) {
 					this.setProxy({
 						type: 'ajax',
-						url: pt.conf.finals.ajax.path_commons + 'getOperands.action?uid=' + uid,
+						url: pt.baseUrl + pt.conf.finals.ajax.path_commons + 'getOperands.action?uid=' + uid,
 						reader: {
 							type: 'json',
 							root: 'operands'
@@ -352,7 +349,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.dataset_get,
+				url: pt.baseUrl + pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.dataset_get,
 				reader: {
 					type: 'json',
 					root: 'dataSets'
@@ -2010,7 +2007,7 @@ Ext.onReady( function() {
 				handler: function() {
 					if (textArea.getValue()) {
 						Ext.Ajax.request({
-							url: pt.conf.finals.ajax.path_api + 'interpretations/reportTable/' + pt.favorite.id,
+							url: pt.baseUrl + pt.conf.finals.ajax.path_api + 'interpretations/reportTable/' + pt.favorite.id,
 							method: 'POST',
 							params: textArea.getValue(),
 							headers: {'Content-Type': 'text/html'},
@@ -2240,7 +2237,7 @@ Ext.onReady( function() {
 						fields: ['id', 'name', 'index'],
 						proxy: {
 							type: 'ajax',
-							url: pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.indicatorgroup_get,
+							url: pt.baseUrl + pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.indicatorgroup_get,
 							reader: {
 								type: 'json',
 								root: 'indicatorGroups'
@@ -2277,11 +2274,11 @@ Ext.onReady( function() {
 							}
 							else {
 								if (cb.getValue() === 0) {
-									store.proxy.url = pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.indicator_getall;
+									store.proxy.url = pt.baseUrl + pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.indicator_getall;
 									store.load();
 								}
 								else {
-									store.proxy.url = pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.indicator_get + cb.getValue() + '.json';
+									store.proxy.url = pt.baseUrl + pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.indicator_get + cb.getValue() + '.json';
 									store.load();
 								}
 							}
@@ -2391,7 +2388,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name', 'index'],
 			proxy: {
 				type: 'ajax',
-				url: pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.dataelementgroup_get,
+				url: pt.baseUrl + pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.dataelementgroup_get,
 				reader: {
 					type: 'json',
 					root: 'dataElementGroups'
@@ -3277,21 +3274,21 @@ Ext.onReady( function() {
 			},
 			selectByGroup: function(id) {
 				if (id) {
-					var url = pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbygroup,
+					var url = pt.baseUrl + pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbygroup,
 						params = {id: id};
 					this.select(url, params);
 				}
 			},
 			selectByLevel: function(level) {
 				if (level) {
-					var url = pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbylevel,
+					var url = pt.baseUrl + pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbylevel,
 						params = {level: level};
 					this.select(url, params);
 				}
 			},
 			selectByIds: function(ids) {
 				if (ids) {
-					var url = pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbyids;
+					var url = pt.baseUrl + pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbyids;
 					Ext.Array.each(ids, function(item) {
 						url = Ext.String.urlAppend(url, 'ids=' + item);
 					});
@@ -3304,7 +3301,7 @@ Ext.onReady( function() {
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
-					url: pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunitchildren_get
+					url: pt.baseUrl + pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunitchildren_get
 				},
 				root: {
 					id: pt.conf.finals.root.id,
@@ -4462,16 +4459,16 @@ Ext.onReady( function() {
 		pt = PT.core.getInstance();
 
 		Ext.Ajax.request({
-			url: pt.conf.finals.ajax.path_pivot + 'initialize.action',
+			url: '../initialize.action',
 			success: function(r) {
-				pt.init = PT.app.getInits(Ext.decode(r.responseText));
+				pt.init = PT.app.getInits(Ext.decode(r.responseText));		
 				pt.baseUrl = pt.init.contextPath;
 				pt.el = 'app';
-				
+						
 				pt.util = PT.app.getUtils();
 				pt.store = PT.app.getStores();
 				pt.cmp = PT.app.getCmp();
-				
+								
 				pt.viewport = createViewport();
 			}
 		});

@@ -12,6 +12,9 @@ Ext.onReady( function() {
 
 	// Mode
 	PT.isDebug = false;
+	
+	// HTML5
+	PT.isSessionStorage = 'sessionStorage' in window && window['sessionStorage'] !== null;
 
 	// Core
 	
@@ -48,11 +51,9 @@ Ext.onReady( function() {
 
 		conf.finals = {
 			ajax: {
-				path_pivot: '../',
-				path_api: '../../api/',
-				path_commons: '../../dhis-web-commons-ajax-json/',
-				initialize: 'initialize.action',
-				redirect: 'dhis-web-commons-about/redirect.action',
+				path_pivot: '/dhis-web-pivot/',
+				path_api: '/api/',
+				path_commons: '/dhis-web-commons-ajax-json/',
 				data_get: 'chartValues.json',
 				indicator_get: 'indicatorGroups/',
 				indicator_getall: 'indicators.json?paging=false&links=false',
@@ -2698,9 +2699,6 @@ Ext.onReady( function() {
 	PT.core.getInstance = function() {
 		var pt = {};
 
-		//pt.baseUrl = Ext.isObject(config) && Ext.isString(config.url) ? config.url : '../../';
-		//pt.el = Ext.isObject(config) && Ext.isString(config.el) ? config.el : 'app';
-
 		pt.conf = PT.core.getConfigs();
 		pt.util = PT.core.getUtils(pt);
 		pt.api = PT.core.getApi(pt);
@@ -2709,5 +2707,4 @@ Ext.onReady( function() {
 
 		return pt;
 	};
-
 });
