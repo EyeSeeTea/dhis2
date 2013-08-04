@@ -39,6 +39,7 @@ Ext.onReady(function() {
 			afterRender,
 			createViewport,
 			pt,
+			layout,
 			initialize;
 			
 		validateConfig = function(config) {
@@ -48,12 +49,12 @@ Ext.onReady(function() {
 			}
 			
 			if (!Ext.isString(config.el)) {
-				console.log('No element id provided');
+				console.log('No valid element id provided');
 				return;
 			}
 			
-			if (!Ext.isString(config.uid)) {
-				console.log('No report table uid provided');
+			if (!Ext.isString(config.url)) {
+				console.log('No valid url provided');
 				return;
 			}
 			
@@ -108,7 +109,18 @@ Ext.onReady(function() {
 				success: function(r) {
 					pt.init = r;
 					
-					pt.util.pivot.loadTable(config.uid);	
+					if (config.uid) {
+						pt.util.pivot.loadTable(config.uid);
+					}
+					else {
+						layout = pt.api.layout.Layout(config);
+						
+						if (!layout) {
+							return;
+						}
+						
+						pt.util.pivot.createTable(pt, layout);
+					}
 				}
 			});
 		}();

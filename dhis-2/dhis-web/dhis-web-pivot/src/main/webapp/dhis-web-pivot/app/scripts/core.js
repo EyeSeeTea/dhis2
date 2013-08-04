@@ -2102,7 +2102,7 @@ PT.core.getUtils = function(pt) {
 				failure;
 				
 			if (!Ext.isString(id)) {
-				alert('Invalid id');
+				alert('Invalid uid');
 				return;
 			}
 			
@@ -2349,7 +2349,9 @@ PT.core.getApi = function(pt) {
 	};
 
 	api.layout.Layout = function(config) {
-		var layout = {};
+		var layout = {},
+			getValidatedDimensionArray,
+			validateSpecialCases;
 
 		// columns: [Dimension]
 
@@ -2391,7 +2393,7 @@ PT.core.getApi = function(pt) {
 
 		// topLimit: integer (100) //5, 10, 20, 50, 100
 
-		var getValidatedDimensionArray = function(dimensionArray) {
+		getValidatedDimensionArray = function(dimensionArray) {
 			var dimensions = [];
 
 			if (!(dimensionArray && Ext.isArray(dimensionArray) && dimensionArray.length)) {
@@ -2410,6 +2412,81 @@ PT.core.getApi = function(pt) {
 
 			return dimensionArray.length ? dimensionArray : null;
 		};
+
+		validateSpecialCases = function() {
+			var dimConf = pt.conf.finals.dimension,
+				dimensions,
+				objectNameDimensionMap = {};
+
+			if (!layout) {
+				return;
+			}
+
+			dimensions = Ext.Array.clean([].concat(layout.columns, layout.rows, layout.filters));
+			
+			for (var i = 0; i < dimensions.length; i++) {
+				objectNameDimensionMap[dimensions[i].dimension] = dimensions[i];
+			}
+
+			if (layout.filters && layout.filters.length) {
+				for (var i = 0; i < layout.filters.length; i++) {
+
+					// Indicators as filter
+					if (layout.filters[i].dimension === dimConf.indicator.objectName) {
+						alert(PT.i18n.indicators_cannot_be_specified_as_filter);
+						return;
+					}
+
+					// Categories as filter
+					if (layout.filters[i].dimension === dimConf.category.objectName) {
+						alert(PT.i18n.categories_cannot_be_specified_as_filter);
+						return;
+					}
+
+					// Data sets as filter
+					if (layout.filters[i].dimension === dimConf.category.objectName) {
+						alert(PT.i18n.data_sets_cannot_be_specified_as_filter);
+						return;
+					}
+				}
+			}
+
+			// dc and in
+			if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.indicator.objectName]) {
+				alert('Indicators and detailed data elements cannot be specified together');
+				return;
+			}
+
+			// dc and de
+			if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataElement.objectName]) {
+				alert('Detailed data elements and totals cannot be specified together');
+				return;
+			}
+
+			// dc and ds
+			if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataSet.objectName]) {
+				alert('Data sets and detailed data elements cannot be specified together');
+				return;
+			}
+
+			// dc and co
+			if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.category.objectName]) {
+				alert('Categories and detailed data elements cannot be specified together');
+				return;
+			}
+
+			// Degs and datasets in the same query
+			//if (Ext.Array.contains(dimensionNames, dimConf.data.dimensionName) && pt.store.dataSetSelected.data.length) {
+				//for (var i = 0; i < pt.init.degs.length; i++) {
+					//if (Ext.Array.contains(dimensionNames, pt.init.degs[i].id)) {
+						//alert(PT.i18n.data_element_group_sets_cannot_be_specified_together_with_data_sets);
+						//return;
+					//}
+				//}
+			//}
+
+			return true;
+		};		
 
 		return function() {
 			var a = [],
@@ -2494,6 +2571,10 @@ PT.core.getApi = function(pt) {
 			layout.cumulative = Ext.isBoolean(config.cumulative) ? config.cumulative : false;
 			layout.sortOrder = Ext.isNumber(config.sortOrder) ? config.sortOrder : 0;
 			layout.topLimit = Ext.isNumber(config.topLimit) ? config.topLimit : 0;
+			
+			if (!validateSpecialCases()) {
+				return;
+			}
 
 			return Ext.clone(layout);
 		}();
