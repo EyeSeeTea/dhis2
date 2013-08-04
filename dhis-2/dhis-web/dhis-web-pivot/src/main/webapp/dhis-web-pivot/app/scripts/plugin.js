@@ -1,6 +1,6 @@
 Ext.onReady(function() {
 	
-	// Create CSS
+	// Inject CSS
 	css = 'table.pivot { \n font-family: arial,sans-serif,ubuntu,consolas; \n } \n';
 	css += '.td-nobreak { \n white-space: nowrap; \n } \n';
 	css += '.td-hidden { \n display: none; \n } \n';
@@ -23,10 +23,14 @@ Ext.onReady(function() {
 	css += '.x-mask-msg div { \n background-position: 11px center; \n } \n';
 	css += '.x-mask-msg .x-mask-loading { \n border: 0 none; \n	background-color: #000; \n color: #fff; \n border-radius: 2px; \n padding: 12px 14px 12px 30px; \n opacity: 0.65; \n } \n';	
 	
+	css += '.pivot td.legend { \n padding: 0; \n } \n';
+	css += '.pivot div.legendCt { \n display: table; \n float: right; \n width: 100%; \n } \n';
+	css += '.pivot div.arrowCt { \n display: table-cell; \n vertical-align: top; \n width: 8px; \n } \n';
+	css += '.pivot div.arrow { \n width: 0; \n height: 0; \n } \n';
+	css += '.pivot div.number { \n display: table-cell; \n } \n',
+	css += '.pivot div.legendColor { \n display: table-cell; \n width: 2px; \n } \n';	
+	
 	Ext.util.CSS.createStyleSheet(css);
-	if (!validateConfig(config)) {
-		return;
-	}
 	
 	// Plugin	
 	PT.plugin = {};
@@ -67,12 +71,7 @@ Ext.onReady(function() {
 			centerRegion = Ext.create('Ext.panel.Panel', {
 				renderTo: Ext.get(pt.el),
 				bodyStyle: 'border: 0 none',
-				layout: 'fit',
-				listeners: {
-					afterrender: function() {
-						afterRender();
-					}
-				}
+				layout: 'fit'
 			});
 			
 			return {
@@ -83,6 +82,11 @@ Ext.onReady(function() {
 			
 		initialize = function() {
 			
+			// Validate config
+			if (!validateConfig(config)) {
+				return;
+			}
+			
 			// Instance
 			pt = PT.core.getInstance();
 			
@@ -90,9 +94,9 @@ Ext.onReady(function() {
 			pt.el = config.el;
 
 			Ext.data.JsonP.request({
-				url: pt.baseUrl + '/dhis-web-pivot/initialize.action',
+				url: pt.baseUrl + pt.conf.finals.ajax.path_pivot + 'initialize.action',
 				success: function(r) {
-					pt.init = PT.core.getInits(r);
+					pt.init = PT.core.getInits(r, pt);
 					pt.viewport = createViewport();
 					pt.isPlugin = true;
 					
@@ -111,5 +115,5 @@ Ext.onReady(function() {
 				}
 			});
 		}();
-		
+	};
 });
