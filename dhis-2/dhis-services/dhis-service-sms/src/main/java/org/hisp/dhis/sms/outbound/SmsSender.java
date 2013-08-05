@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.message.MessageSender;
@@ -136,7 +135,7 @@ public class SmsSender
                 text = createMessage( subject, text, sender );
                 
                 // Bulk is limited in sending long SMS, need to cut into small pieces
-                if ( SmsLibService.gatewayMap.get( "bulk_gw" ).equals( gatewayId ) )
+                if ( SmsLibService.gatewayMap.get( "bulk_gw" )!= null && SmsLibService.gatewayMap.get( "bulk_gw" ).equals( gatewayId ) )
                 {
                     // Check if text contain any specific unicode character
                     for( char each: text.toCharArray())
@@ -253,7 +252,6 @@ public class SmsSender
                 recipients.add( phoneNumber );
             }
         }
-
         return recipients;
     }
 
@@ -274,7 +272,6 @@ public class SmsSender
 
             log.warn( "Unable to send message through sms: " + sms, e );
         }
-
         return message;
     }
 

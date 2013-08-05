@@ -480,39 +480,6 @@ function addEventListeners()
         	viewHist( dataElementId, optionComboId );
         } );
     } );
-    
-    $( '[name="dynselect"]' ).each( function( i )
-    {
-    	var id = $( this ).attr( 'id' );
-    	var code = id.split( '-' )[0];
-    	
-    	$( this ).unbind( 'change' );
-    	
-    	$( this ).change( function()
-    	{
-            dynamicSelectChanged( id, code );
-    	} );
-    } );
-    
-    $( '[name="dyninput"]' ).each( function( i )
-    {
-    	var id = $( this ).attr( 'id' );
-    	var code = id.split( '-' )[0];
-        var optionComboId = id.split( '-' )[1];
-        
-        $( this ).unbind( 'change' );
-        $( this ).unbind( 'keyup' );
-
-        $( this ).change( function()
-        {
-            saveDynamicVal( code, optionComboId, id );
-        } );
-
-        $( this ).keyup( function( event )
-        {
-            keyPress( event, this );
-        } );
-    } );
 }
 
 function resetSectionFilters()
@@ -564,8 +531,11 @@ function loadForm( dataSetId, multiOrg )
 
         if ( !multiOrganisationUnit )
         {
+            if ( dataSets[dataSetId].renderAsTabs ) {
+                $( "#tabs" ).tabs();
+            }
+
             enableSectionFilter();
-            insertDynamicOptions();
         }
 
         loadDataValues();
@@ -586,8 +556,11 @@ function loadForm( dataSetId, multiOrg )
 
             if( !multiOrganisationUnit )
             {
+                if ( dataSets[dataSetId].renderAsTabs ) {
+                    $( "#tabs" ).tabs();
+                }
+
                 enableSectionFilter();
-                insertDynamicOptions();
             }
             else
             {
@@ -598,68 +571,6 @@ function loadForm( dataSetId, multiOrg )
             loadDataValues();
         } );
     }
-}
-
-//------------------------------------------------------------------------------
-// Dynamic input
-//------------------------------------------------------------------------------
-
-function insertDynamicOptions()
-{
-	var optionMarkup = $( '#dynselect' ).html();
-	
-	if ( !isDefined( optionMarkup ) )
-	{
-		return; // Custom form only
-	}
-	
-    $( '[name="dynselect"]' ).each( function( i )
-    {
-    	$( this ).append( optionMarkup );
-    } );
-}
-
-function dynamicSelectChanged( id, code )
-{
-	var validSelection = $( '#' + id ).val() != -1;
-	var color = validSelection ? COLOR_WHITE : COLOR_GREY;
-	
-	$( 'input[code="' + code + '"]' ).prop( 'disabled', !validSelection );
-	$( 'input[code="' + code + '"]' ).css( 'background-color', color );
-}
-
-function getDynamicSelectElementId( dataElementId )
-{
-	// Search for element where data element is already selected
-	
-	var id = null;
-	
-	$( '[name="dynselect"]' ).each( function( i )
-	{
-		if ( $( this ).val() == dataElementId )
-		{
-			id = $( this ).attr( 'id' );
-			return false;
-		}
-	} );
-
-	if ( id != null )
-	{
-		return id;
-	}
-	
-	// Search for unselected element
-	
-	$( '[name="dynselect"]' ).each( function( i )
-	{
-		if ( $( this ).val() == -1 )
-		{
-			id = $( this ).attr( 'id' );
-			return false;
-		}
-	} );
-	
-	return id;
 }
 
 //------------------------------------------------------------------------------
@@ -1126,14 +1037,11 @@ function insertDataValues()
     $( '[name="entryselect"]' ).val( '' );
     $( '[name="entrytrueonly"]' ).removeAttr('checked');
     $( '[name="entryoptionset"]' ).val( '' );
-    $( '[name="dyninput"]' ).val( '' );
-    $( '[name="dynselect"]' ).val( '' );
 
     $( '[name="entryfield"]' ).css( 'background-color', COLOR_WHITE );
     $( '[name="entryselect"]' ).css( 'background-color', COLOR_WHITE );
     $( '[name="entrytrueonly"]' ).css( 'background-color', COLOR_WHITE );
     $( '[name="entryoptionset"]' ).css( 'background-color', COLOR_WHITE );
-    $( '[name="dyninput"]' ).css( 'background-color', COLOR_WHITE );
 
     $( '[name="min"]' ).html( '' );
     $( '[name="max"]' ).html( '' );
@@ -1142,9 +1050,6 @@ function insertDataValues()
     
     // Disable and grey dynamic fields to start with and enable later
 
-    $( '[name="dyninput"]' ).prop( 'disabled', true );    
-    $( '[name="dyninput"]' ).css( 'background-color', COLOR_GREY );
-    
     $.ajax( {
     	url: 'getDataValues.action',
     	data:
@@ -1182,7 +1087,7 @@ function insertDataValues()
 	        {
 	            var fieldId = '#' + value.id + '-val';
 
-	            if ( $( fieldId ).length > 0 ) // Insert for fixed input fields
+	            if ( $( fieldId ).length > 0 )
 	            {
                     if ( $( fieldId ).attr( 'name' ) == 'entrytrueonly' ) {
                         $( fieldId ).attr('checked', true);
@@ -1190,48 +1095,7 @@ function insertDataValues()
                         $( fieldId ).val( value.val );
                     }
                 }
-	            else // Insert for potential dynamic input fields
-	            {
-                    var split = splitFieldId( value.id );
-	                var dataElementId = split.dataElementId;
-	                var optionComboId = split.optionComboId;
-	                
-	                var selectElementId = '#' + getDynamicSelectElementId( dataElementId );
-	                
-	                if ( $( selectElementId ).length == 0 )
-	                {
-	                	log( 'Could not find dynamic select element for data element: ' + dataElementId );
-	                	return true;
-	                }
-
-                	var code = $( selectElementId ).attr( 'id' ).split( '-' )[0];
-        			
-        			if ( !isDefined( code ) )
-        			{
-        				log( 'Could not find code on select element: ' + selectElementId );
-        				return true;
-        			}
-
-    				var dynamicInputId = '#' + code + '-' + optionComboId + '-dyninput';
-
-        			if ( $( dynamicInputId ).length == 0 )
-    				{
-        				log( 'Could not find find dynamic input element for option combo: ' + optionComboId );
-        				return true;
-    				}
-
-        			// Set data element in select list
-        			    		    
-        			$( selectElementId ).val( dataElementId );
-
-        			// Enable input fields and set value
-        			
-        		    $( 'input[code="' + code + '"]' ).prop( 'disabled', false );    
-        		    $( 'input[code="' + code + '"]' ).css( 'background-color', COLOR_WHITE );
-        		    
-    				$( dynamicInputId ).val( value.val );
-	            }
-
+	            
 	            dataValueMap[value.id] = value.val;
 	        } );
 

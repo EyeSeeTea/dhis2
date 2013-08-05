@@ -43,6 +43,12 @@ jQuery( document ).ready( function()
 		var sendTo = jQuery( "#sendTo" );
 		sendTo.empty();
 		
+		var whenToSend = jQuery( "#whenToSend" );
+		whenToSend.empty();
+		
+		var userGroup = jQuery( "#userGroup" );
+		userGroup.empty();	
+		
 		jQuery("#selectedList").find("tr").each( function( i, item ){ 
 			
 			selectedDataElementsValidator.append( "<option value='" + item.id + "' selected='true'>" + item.id + "</option>" );
@@ -71,6 +77,12 @@ jQuery( document ).ready( function()
 		});
 		jQuery(".sendTo").each( function( i, item ){ 
 			sendTo.append( "<option value='" + item.value + "' selected='true'>" + item.value +"</option>" );
+		});
+		jQuery(".whenToSend").each( function( i, item ){ 
+			whenToSend.append( "<option value='" + item.value + "' selected='true'>" + item.value +"</option>" );
+		});
+		jQuery(".userGroup").each( function( i, item ){ 
+			userGroup.append( "<option value='" + item.value + "' selected='true'>" + item.value +"</option>" );
 		});
 	});
 	

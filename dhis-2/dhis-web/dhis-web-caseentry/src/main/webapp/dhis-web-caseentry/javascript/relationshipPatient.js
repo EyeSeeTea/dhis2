@@ -35,7 +35,8 @@ function showAddRelationshipPatient( patientId, isShowPatientList )
 	jQuery('#loaderDiv').show();
 	jQuery('#addRelationshipDiv').load('showAddRelationshipPatient.action',
 		{
-			id:patientId
+			id:patientId,
+			programId: getFieldValue('programIdAddPatient')
 		}, function()
 		{
 			showById('addRelationshipDiv');
@@ -70,11 +71,11 @@ function addRelationshipPatientCompleted( messageElement )
     }
     else if ( type == 'error' )
     {
-        showErrorMessage( i18n_adding_patient_failed + ':' + '\n' + message );
+        setHeaderMessage( i18n_adding_patient_failed + ':' + '\n' + message );
     }
     else if ( type == 'input' )
     {
-        showWarningMessage( message );
+        setHeaderMessage( message );
     }
     else if( type == 'duplicate' )
     {
@@ -101,11 +102,10 @@ function addRelationshipPatient()
 			showById('listPatientDiv');
 			jQuery('#loaderDiv').hide();
 
-			if( getFieldValue( 'isShowPatientList' ) == 'false' )
-			{
-				showRelationshipList( getFieldValue('id') );
-			}else
-			{
+			if( getFieldValue( 'isShowPatientList' ) == 'false' ){
+				showRelationshipList( getFieldValue('relationshipId') );
+			}
+			else{
 				loadPatientList();
 			}
 		}});
@@ -242,11 +242,11 @@ function searchValidationCompleted( messageElement )
 	}
 	else if( type == 'error' )
 	{
-		showErrorMessage( i18n_searching_patient_failed + ':' + '\n' + message );
+		setHeaderMessage( i18n_searching_patient_failed + ':' + '\n' + message );
 	}
 	else if( type == 'input' )
 	{
-		showWarningMessage( message );
+		setHeaderMessage( message );
 	}
 }
 
@@ -254,11 +254,11 @@ function validateAddRelationship(partnerId)
 {
 	var relationshipTypeId = jQuery( '#relationshipSelectForm [id=relationshipTypeId] option:selected' ).val();	
 	if( relationshipTypeId==''){
-		showWarningMessage( i18n_please_select_relationship_type );
+		setHeaderMessage( i18n_please_select_relationship_type );
 		return;
 	}
 	if( partnerId==null){
-		showWarningMessage( i18n_please_select_a_patient_for_setting_relationship );
+		setHeaderMessage( i18n_please_select_a_patient_for_setting_relationship );
 		return;
 	}
 	addRelationship(partnerId);
@@ -287,13 +287,13 @@ function addRelationship(partnerId)
 			
 			if( type == 'success' ){
 				jQuery('#searchRelationshipDiv [id=tr' + partnerId + ']').css("background-color","#C0C0C0")
-				showSuccessMessage( i18n_save_success );
+				setHeaderMessage( i18n_save_success );
 			}	
 			else if( type == 'error' ){
-				showErrorMessage( i18n_adding_relationship_failed + ':' + '\n' + message );
+				setHeaderMessage( i18n_adding_relationship_failed + ':' + '\n' + message );
 			}
 			else if( type == 'input' ){
-				showWarningMessage( message );
+				setHeaderMessage( message );
 			}
 		}
 	}); 

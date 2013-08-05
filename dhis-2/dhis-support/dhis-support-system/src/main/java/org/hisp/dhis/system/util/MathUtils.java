@@ -46,8 +46,8 @@ public class MathUtils
     
     private static final double TOLERANCE = 0.01; 
     
-    public static final String NUMERIC_REGEXP = "^(0|-?[1-9]\\d*)(\\.\\d+)?$";    
-    public static final String NUMERIC_LENIENT_REGEXP = "^(-?[0-9]+)(\\.[0-9]+)?$";
+    public static final String NUMERIC_REGEXP = "^(-?0|-?[1-9]\\d*)(\\.\\d+)?(E\\d+)?$";
+    public static final String NUMERIC_LENIENT_REGEXP = "^(-?[0-9]+)(\\.[0-9]+)?(E\\d+)?$";
     
     private static final Pattern NUMERIC_PATTERN = Pattern.compile( NUMERIC_REGEXP );
     private static final Pattern NUMERIC_LENIENT_PATTERN = Pattern.compile( NUMERIC_LENIENT_REGEXP );
@@ -147,10 +147,33 @@ public class MathUtils
         
         return Math.round( value * factor ) / factor;
     }
+    
+    /**
+     * Return a rounded off number.
+     * 
+     * <ul>
+     * <li>If value is exclusively between 1 and -1 it will have 2 decimals.</li>
+     * <li>If value if greater or equal to 1 the value will have 1 decimal.</li>
+     * </ul>
+     * 
+     * @param value the value to round off.
+     * @return a rounded off number.
+     */
+    public static double getRounded( double value )
+    {
+        if ( value < 1d && value > -1d )
+        {
+            return getRounded( value, 2 );
+        }
+        else
+        {
+            return getRounded( value, 1 );
+        }
+    }
 
     /**
-     * Returns a string representation of number rounded to given number
-     * of significant figures
+     * Returns a string representation of number rounded to given number of
+     * significant figures
      * 
      * @param value
      * @param significantFigures
@@ -158,8 +181,8 @@ public class MathUtils
      */
     public static String roundToString( double value, int significantFigures )
     {
-        MathContext mc = new MathContext(significantFigures);
-        BigDecimal num = new BigDecimal(value);
+        MathContext mc = new MathContext( significantFigures );
+        BigDecimal num = new BigDecimal( value );
         return num.round( mc ).toPlainString();
     }
 

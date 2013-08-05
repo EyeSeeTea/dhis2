@@ -27,9 +27,11 @@ package org.hisp.dhis.settings.action.system;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.SortedMap;
 
+import org.hisp.dhis.setting.SystemSetting;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.setting.StyleManager;
 import org.hisp.dhis.system.util.Filter;
@@ -104,6 +106,14 @@ public class GetAppearanceSettingsAction
     {
         return currentStyle;
     }
+    
+    private HashMap<String, Integer> systemSettingIds;
+    
+    public HashMap<String, Integer> getSystemSettingIds()
+    {
+        return systemSettingIds;
+    }
+    
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -117,10 +127,29 @@ public class GetAppearanceSettingsAction
         
         flags = systemSettingManager.getFlags();
 
+        systemSettingIds = new HashMap<String, Integer>();
+        
+        addSystemSettingId( systemSettingIds, SystemSettingManager.KEY_APPLICATION_TITLE );
+        addSystemSettingId( systemSettingIds, SystemSettingManager.KEY_APPLICATION_INTRO );
+        addSystemSettingId( systemSettingIds, SystemSettingManager.KEY_APPLICATION_NOTIFICATION );
+        addSystemSettingId( systemSettingIds, SystemSettingManager.KEY_APPLICATION_FOOTER );
+                
         modules = moduleManager.getMenuModules();
 
         FilterUtils.filter( modules, startableFilter );
 
         return SUCCESS;
     }
+
+    private void addSystemSettingId(HashMap<String, Integer> systemSettingIds, String name)
+    {
+        SystemSetting systemSetting = systemSettingManager.getSystemSettingObject( name );
+  
+        Integer systemSettingId = ( systemSetting == null ) ? null : systemSetting.getId();
+        
+        systemSettingIds.put( name, systemSettingId );        
+    }
+    
 }
+
+

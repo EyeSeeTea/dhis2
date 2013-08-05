@@ -169,12 +169,17 @@ public class DefaultAnalyticsService
     
     @Autowired
     private ConstantService constantService;
-    
-    @Autowired
-    private CurrentUserService currentUserService;
-    
+
     @Autowired
     private DataElementOperandService operandService;
+
+    @Autowired
+    private CurrentUserService currentUserService;
+
+    public void setCurrentUserService( CurrentUserService currentUserService )
+    {
+        this.currentUserService = currentUserService; // Testing purposes
+    }
 
     // -------------------------------------------------------------------------
     // Implementation
@@ -249,7 +254,7 @@ public class DefaultAnalyticsService
                                                         
                             grid.addRow();
                             grid.addValues( DimensionItem.getItemIdentifiers( row ) );
-                            grid.addValue( MathUtils.getRounded( value, 1 ) );
+                            grid.addValue( MathUtils.getRounded( value ) );
                         }
                     }
                 }
@@ -272,7 +277,7 @@ public class DefaultAnalyticsService
             {
                 grid.addRow();
                 grid.addValues( entry.getKey().split( DIMENSION_SEP ) );
-                grid.addValue( entry.getValue() );
+                grid.addValue( MathUtils.getRounded( entry.getValue() ) );
             }
         }
 
@@ -338,7 +343,7 @@ public class DefaultAnalyticsService
                     
                     grid.addRow();
                     grid.addValues( dataRow.toArray() );
-                    grid.addValue( MathUtils.getRounded( value, 1 ) );
+                    grid.addValue( MathUtils.getRounded( value ) );
                 }
             }
         }
@@ -355,7 +360,7 @@ public class DefaultAnalyticsService
             {
                 grid.addRow();
                 grid.addValues( entry.getKey().split( DIMENSION_SEP ) );
-                grid.addValue( entry.getValue() );
+                grid.addValue( MathUtils.getRounded( entry.getValue() ) );
             }
         }
 
@@ -808,6 +813,7 @@ public class DefaultAnalyticsService
                 else if ( ou != null && ou.startsWith( KEY_LEVEL ) )
                 {
                     int level = DataQueryParams.getLevelFromLevelParam( ou );
+                    
                     String boundaryId = DataQueryParams.getBoundaryFromLevelParam( ou );
                     
                     OrganisationUnit boundary = null;

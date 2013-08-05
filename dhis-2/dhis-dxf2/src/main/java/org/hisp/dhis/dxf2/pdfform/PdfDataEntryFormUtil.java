@@ -27,6 +27,7 @@ package org.hisp.dhis.dxf2.pdfform;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.awt.Color;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -49,6 +50,9 @@ import com.lowagie.text.pdf.AcroFields;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfReader;
 
+/**
+ * @author James Chang
+ */
 public class PdfDataEntryFormUtil
 {
     public static final int DATATYPE_DATASET = 0;
@@ -77,9 +81,11 @@ public class PdfDataEntryFormUtil
 
     // Cell Related
 
+    private static final Color COLOR_CELLBORDER = Color.getHSBColor( 0.0f, 0.0f, 0.863f);
+
     public final static float CELL_MIN_HEIGHT_DEFAULT = 14;
 
-    public final static float CONTENT_HEIGHT_DEFAULT = 11;
+    public final static float CONTENT_HEIGHT_DEFAULT = 12;
 
     public final static int CELL_COLUMN_TYPE_LABEL = 0;
 
@@ -138,38 +144,48 @@ public class PdfDataEntryFormUtil
         }
     }
 
-    public static PdfPCell getPdfPCell( float minHeight )
+    public static PdfPCell getPdfPCell( boolean hasBorder )
     {
-        return getPdfPCell( minHeight, CELL_COLUMN_TYPE_LABEL );
+        return getPdfPCell( CELL_MIN_HEIGHT_DEFAULT, CELL_COLUMN_TYPE_ENTRYFIELD, hasBorder );
     }
 
-    public static PdfPCell getPdfPCell( float minHeight, int cellContentType )
+    public static PdfPCell getPdfPCell( float minHeight, int cellContentType, boolean hasBorder )
     {
         PdfPCell cell = new PdfPCell();
         cell.setMinimumHeight( minHeight );
-        cell.setBorder( Rectangle.NO_BORDER );
-        cell.setPadding( 1f );
+        
+        if( hasBorder )
+        {
+            cell.setBorderWidth( 0.1f );
+            cell.setBorderColor( COLOR_CELLBORDER );            
+        }
+        else
+        {
+            cell.setBorder( Rectangle.NO_BORDER );
+        }
+        
+        cell.setPadding( 2.0f );
 
         switch ( cellContentType )
         {
-        case CELL_COLUMN_TYPE_ENTRYFIELD:
-            cell.setHorizontalAlignment( Element.ALIGN_CENTER );
-            cell.setVerticalAlignment( Element.ALIGN_MIDDLE );
-
-            break;
-
-        case CELL_COLUMN_TYPE_HEADER:
-            cell.setHorizontalAlignment( Element.ALIGN_CENTER );
-            cell.setVerticalAlignment( Element.ALIGN_MIDDLE );
-
-            break;
-
-        case CELL_COLUMN_TYPE_LABEL:
-            cell.setHorizontalAlignment( Element.ALIGN_RIGHT );
-            cell.setVerticalAlignment( Element.ALIGN_TOP );
-
-        default:
-            break;
+            case CELL_COLUMN_TYPE_ENTRYFIELD:
+                cell.setHorizontalAlignment( Element.ALIGN_CENTER );
+                cell.setVerticalAlignment( Element.ALIGN_MIDDLE );
+    
+                break;
+    
+            case CELL_COLUMN_TYPE_HEADER:
+                cell.setHorizontalAlignment( Element.ALIGN_CENTER );
+                cell.setVerticalAlignment( Element.ALIGN_MIDDLE );
+    
+                break;
+    
+            case CELL_COLUMN_TYPE_LABEL:
+                cell.setHorizontalAlignment( Element.ALIGN_RIGHT );
+                cell.setVerticalAlignment( Element.ALIGN_TOP );
+    
+            default:
+                break;
         }
 
         return cell;
@@ -216,6 +232,7 @@ public class PdfDataEntryFormUtil
 
                 // Loop Through the Fields and get data.
 
+                @SuppressWarnings( "unchecked" )
                 Set<String> fldNames = form.getFields().keySet();
 
                 for ( String fldName : fldNames )

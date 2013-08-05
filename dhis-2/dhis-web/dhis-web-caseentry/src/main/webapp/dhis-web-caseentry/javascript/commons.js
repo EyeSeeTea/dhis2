@@ -592,7 +592,14 @@ function closeDueDateDiv( programInstanceId )
 
 function registerIrregularEncounter( programInstanceId, programStageId, programStageName, dueDate )
 {
-	jQuery.postJSON( "registerIrregularEncounter.action",
+	if(dueDate==''){
+		showById("spanDueDateNewEncounter_" + programInstanceId);
+	}
+	else
+	{
+		hideById("spanDueDateNewEncounter_" + programInstanceId);
+		
+		jQuery.postJSON( "registerIrregularEncounter.action",
 		{ 
 			programInstanceId:programInstanceId,
 			programStageId: programStageId, 
@@ -669,6 +676,7 @@ function registerIrregularEncounter( programInstanceId, programStageId, programS
 			loadDataEntry( programStageInstanceId );
 			showSuccessMessage(i18n_create_event_success);
 		});
+	}
 }
 
 function disableCompletedButton( disabled )
@@ -1267,11 +1275,32 @@ function programOnchange( programId )
 				disable('dateOfIncidentField');
 			}
 		}
-		var programId = jQuery('#programEnrollmentSelectDiv [id=programId] option:selected').val();
+		
+		var program = jQuery('#programEnrollmentSelectDiv [id=programId] option:selected');
 		jQuery('#identifierAndAttributeDiv').load("getPatientIdentifierAndAttribute.action", 
 		{
-			id:programId
+			id:program.val()
 		}, function(){
+			if(getFieldValue('useBirthDateAsEnrollmentDate')=='true'){ 
+				setFieldValue("enrollmentDateField", birthDate)
+			}
+			
+			if(getFieldValue('useBirthDateAsIncidentDate')=='true'){ 
+				setFieldValue("dateOfIncidentField", birthDate)
+			}
+			else{
+				setFieldValue("dateOfIncidentField", "");
+			}
+			
+			jQuery("#dateOfIncidentField").datepicker("destroy");
+			jQuery("#enrollmentDateField").datepicker("destroy");
+			if(program.attr("selectEnrollmentDatesInFuture")=='true'){
+				datePickerInRange( 'dateOfIncidentField' , 'enrollmentDateField', false, true );
+			}
+			else{
+				datePickerInRangeValid( 'dateOfIncidentField' , 'enrollmentDateField', false, true );
+			}
+		
 			showById('identifierAndAttributeDiv');
 		});
 	}
@@ -2110,4 +2139,38 @@ function saveComment( programInstanceId )
 		{   
 			 $( '#comment' ).css( 'background-color', COLOR_GREEN );
 		});
+}
+
+function addPhoneNumberField(phoneNumberAreaCode)
+{	
+	$('.phoneNumberTR').last().after(
+		'<tr class="phoneNumberTR">'
+		+ '	<td></td>'
+		+ '	<td class="input-column">'
+		+ '		<input type="text" id="phoneNumber" name="phoneNumber" class="{validate:{phone:true}}" value="'+phoneNumberAreaCode+'"/>'
+		+ '		<input type="button" value="-" onclick="removePhoneNumberField(this)" style="width:20px;" />'
+		+ '	</td>'
+		+ '</tr>' );
+}
+
+function removePhoneNumberField(_this)
+{
+	$(_this).parent().parent().remove();
+}
+
+function addCustomPhoneNumberField( phoneNumber )
+{
+	if(phoneNumber=='')
+	{
+		phoneNumber = phoneNumberAreaCode;
+	}
+	var idx = $('.phoneNumberTR').length + 1;
+	$('.phoneNumberTR').last().after(
+		'<br/><input type="text" id="phoneNumber" name="phoneNumber" class="idxPhoneNumber' + idx + ' {validate:{phone:true}}" value=\"' + phoneNumber + '\" />'
+		+ '    <input type="button" value="-" class="phoneNumberTR idxPhoneNumber' + idx + '" onclick="removeCustomPhoneNumberField(' + idx + ')" style="width:20px;" />');
+}
+
+function removeCustomPhoneNumberField(idx)
+{
+	$('.idxPhoneNumber' + idx).remove();
 }

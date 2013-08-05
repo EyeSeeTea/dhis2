@@ -106,7 +106,7 @@ public class CombinationGeneratorTest
         assertNull( generator.getNext() );
         assertNull( generator.getNext() );
     }
-    
+
     @Test
     public void testHasNextA()
     {

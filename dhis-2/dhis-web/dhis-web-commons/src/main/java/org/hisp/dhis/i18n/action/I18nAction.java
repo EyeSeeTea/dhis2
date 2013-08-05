@@ -27,17 +27,23 @@ package org.hisp.dhis.i18n.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.system.util.ReflectionUtils.getProperty;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.mapping.Array;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.i18n.locale.I18nLocale;
+import org.hisp.dhis.setting.SystemSetting;
+import org.hisp.dhis.setting.SystemSettingManager;
 
 import com.opensymphony.xwork2.Action;
 
@@ -86,6 +92,13 @@ public class I18nAction
         this.identifiableObjectManager = identifiableObjectManager;
     }
 
+    private SystemSettingManager systemSettingManager;
+
+    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
+    {
+        this.systemSettingManager = systemSettingManager;
+    }
+    
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -179,12 +192,50 @@ public class I18nAction
 
         translations = i18nService.getTranslationsWithoutDefault( className, objectId );
         
-        IdentifiableObject object = identifiableObjectManager.getObject( objectId, className );
+        // For Maintanence Appearance Setting translation case, check 'SystemSettng' as className and use 'Value' property.
+        // Otherwise, perform the general Identifiable interface properties listing.
+        
+        if( className.equals( SystemSetting.class.getSimpleName() ))
+        {            
+            SystemSetting systemSettingObject = systemSettingManager.getSystemSettingObject( objectId );
 
-        referenceTranslations = i18nService.getObjectPropertyValues( object );
-
-        propertyNames = i18nService.getObjectPropertyNames( object );
-
+            referenceTranslations = new HashMap<String, String> ();
+            referenceTranslations.put( SystemSetting.SYSTEMSETTING_PROPERTY_VALUE, systemSettingObject.getValue().toString() );
+                        
+            propertyNames = new ArrayList<String>();
+            propertyNames.add( SystemSetting.SYSTEMSETTING_PROPERTY_VALUE );
+            
+        }
+        else
+        {        
+            IdentifiableObject object = identifiableObjectManager.getObject( objectId, className );
+        
+            referenceTranslations = i18nService.getObjectPropertyValues( object );
+        
+            propertyNames = i18nService.getObjectPropertyNames( object );
+        }
+        
+        
         return SUCCESS;
     }
 }
+
+
+
+/*  ToDo: To be deleted.
+public Map<String, String> getObjectPropertyValues( Object object )
+{
+    List<String> properties = getObjectPropertyNames( object );
+
+    Map<String, String> translations = new HashMap<String, String>();
+
+    for ( String property : properties )
+    {
+        translations.put( property, getProperty( object, property ) );
+    }
+
+    return translations;
+}
+*/          
+
+

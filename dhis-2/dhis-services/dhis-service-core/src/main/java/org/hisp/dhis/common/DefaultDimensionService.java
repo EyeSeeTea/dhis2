@@ -37,16 +37,15 @@ import static org.hisp.dhis.common.DimensionType.ORGANISATIONUNIT;
 import static org.hisp.dhis.common.DimensionType.ORGANISATIONUNIT_GROUPSET;
 import static org.hisp.dhis.common.DimensionType.PERIOD;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_LEVEL;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_CHILDREN;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
@@ -65,6 +64,7 @@ import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.RelativePeriodEnum;
 import org.hisp.dhis.period.RelativePeriods;
+import org.hisp.dhis.system.util.UniqueArrayList;
 import org.hisp.dhis.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -250,7 +250,7 @@ public class DefaultDimensionService
                 else if ( PERIOD.equals( type ) )
                 {
                     List<RelativePeriodEnum> enums = new ArrayList<RelativePeriodEnum>();                
-                    Set<Period> periods = new HashSet<Period>();
+                    List<Period> periods = new UniqueArrayList<Period>();
                     
                     for ( String isoPeriod : uids )
                     {
@@ -285,6 +285,20 @@ public class DefaultDimensionService
                         else if ( KEY_USER_ORGUNIT_CHILDREN.equals( ou ) )
                         {
                             object.setUserOrganisationUnitChildren( true );
+                        }
+                        else if ( ou != null && ou.startsWith( KEY_LEVEL ) )
+                        {
+                            int level = DimensionalObjectUtils.getLevelFromLevelParam( ou );
+                            
+                            String boundary = DimensionalObjectUtils.getBoundaryFromLevelParam( ou );
+
+                            OrganisationUnit unit = identifiableObjectManager.get( OrganisationUnit.class, boundary );
+                            
+                            if ( level > 0 && unit != null )
+                            {
+                                object.setOrganisationUnitLevel( level );
+                                ous.add( unit );
+                            }
                         }
                         else
                         {

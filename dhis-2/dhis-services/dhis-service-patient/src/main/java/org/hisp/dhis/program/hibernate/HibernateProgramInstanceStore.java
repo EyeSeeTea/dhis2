@@ -219,6 +219,8 @@ public class HibernateProgramInstanceStore
         sql += " UNION ( " + sendMessageToOrgunitRegisteredSql( dateToCompare ) + " ) ";
         
         sql += " UNION ( " + sendMessageToUsersSql( dateToCompare ) + " ) ";
+        
+        sql += " UNION ( " + sendMessageToUserGroupsSql( dateToCompare ) + " ) ";
 
         SqlRowSet rs = jdbcTemplate.queryForRowSet( sql );
 
@@ -266,7 +268,7 @@ public class HibernateProgramInstanceStore
 
             schedulingProgramObjects.add( schedulingProgramObject );
         }
-
+        
         return schedulingProgramObjects;
     }
     
@@ -287,7 +289,7 @@ public class HibernateProgramInstanceStore
             + "         and prm.templatemessage is not NULL and prm.templatemessage != ''   "
             + "         and pg.type=1 and prm.daysallowedsendmessage is not null    "
             + "         and ( DATE(now()) - DATE(pi." + dateToCompare + ") ) = prm.daysallowedsendmessage "
-            + "         and prm.dateToCompare='" + dateToCompare + "' and prm.sendto = "
+            + "         and prm.whenToSend is null and prm.dateToCompare='" + dateToCompare + "' and prm.sendto = "
             + PatientReminder.SEND_TO_PATIENT;
     }
 
@@ -313,7 +315,7 @@ public class HibernateProgramInstanceStore
             + " ) ) = prm.daysallowedsendmessage "
             + "      and prm.dateToCompare='"
             + dateToCompare
-            + "'     and prm.sendto =  " + PatientReminder.SEND_TO_HEALTH_WORKER;
+            + "'     and prm.whenToSend is null and prm.sendto =  " + PatientReminder.SEND_TO_HEALTH_WORKER;
     }
 
     private String sendMessageToOrgunitRegisteredSql( String dateToCompare )
@@ -336,7 +338,7 @@ public class HibernateProgramInstanceStore
             + " ) ) = prm.daysallowedsendmessage "
             + "      and prm.dateToCompare='"
             + dateToCompare
-            + "'     and prm.sendto =  " + PatientReminder.SEND_TO_ORGUGNIT_REGISTERED;
+            + "'     and prm.whenToSend is null and prm.sendto =  " + PatientReminder.SEND_TO_ORGUGNIT_REGISTERED;
     }
 
     private String sendMessageToUsersSql( String dateToCompare )
@@ -364,4 +366,30 @@ public class HibernateProgramInstanceStore
             + PatientReminder.SEND_TO_ALL_USERS_IN_ORGUGNIT_REGISTERED;
     }
     
+    private String sendMessageToUserGroupsSql( String dateToCompare )
+    {
+        return "select pi.programinstanceid, uif.phonenumber,prm.templatemessage, p.firstname, p.middlename, p.lastname, org.name as orgunitName ,"
+            + " pg.name as programName, pi.dateofincident, pi.enrollmentdate, (DATE(now()) - DATE(pi.enrollmentdate) ) as days_since_erollment_date, "
+            + "(DATE(now()) - DATE(pi.dateofincident) ) as days_since_incident_date "
+            + "  from patient p INNER JOIN programinstance pi "
+            + "       ON p.patientid=pi.patientid "
+            + "   INNER JOIN program pg "
+            + "       ON pg.programid=pi.programid "
+            + "   INNER JOIN organisationunit org "
+            + "       ON org.organisationunitid = p.organisationunitid "
+            + "   INNER JOIN patientreminder prm "
+            + "       ON prm.programid = pg.programid "
+            + "   INNER JOIN usergroupmembers ugm "
+            + "       ON ugm.usergroupid = prm.usergroupid "
+            + "   INNER JOIN userinfo uif "
+            + "       ON uif.userinfoid = ugm.userid "
+            + "  WHERE pi.status= "
+            + ProgramInstance.STATUS_ACTIVE
+            + "       and uif.phonenumber is not NULL and uif.phonenumber != '' "
+            + "       and prm.templatemessage is not NULL and prm.templatemessage != '' "
+            + "       and pg.type=1 and prm.daysallowedsendmessage is not null "
+            + "       and (  DATE(now()) - DATE("+ dateToCompare +") ) = prm.daysallowedsendmessage "
+            + "       and prm.whentosend is null "
+            + "       and prm.sendto = " +  PatientReminder.SEND_TO_USER_GROUP;
+    }
 }

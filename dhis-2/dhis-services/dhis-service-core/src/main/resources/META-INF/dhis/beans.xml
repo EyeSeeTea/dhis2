@@ -972,7 +972,7 @@
     <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
     <property name="operandService" ref="org.hisp.dhis.dataelement.DataElementOperandService" />
   </bean>
-
+  
   <!-- DeletionManager -->
 
   <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">

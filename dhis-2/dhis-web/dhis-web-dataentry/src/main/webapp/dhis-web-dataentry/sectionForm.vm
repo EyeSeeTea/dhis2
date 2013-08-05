@@ -1,26 +1,50 @@
-#set( $marker = 0 )
+
 #set( $tabIndex = 1 )
 #set( $hasAccess = $auth.hasAccess( "dhis-web-dataentry", "saveValue" ) )
 
-#foreach( $section in $sections )
-
-#if( $marker == 1 )
-  #set( $marker = 0 )
+#if( $dataSet.renderAsTabs )
+    <div id="tabs">
+        <ul>
+        #foreach( $section in $sections )
+            #if( $section.displayName )
+                <li><a href="#tab-${section.uid}">$encoder.htmlEncode( $section.displayName )</a></li>
+            #else
+                <li><a href="#tab-${section.uid}">$i18n.getString("section") $velocityCount</a></li>
+            #end
+        #end
+        </ul>
+        #foreach( $section in $sections )
+            <div id="tab-${section.uid}">
+                #set( $categoryComboId = $sectionCombos.get( $section.id ) )
+                #renderSection( $categoryComboId, $section.dataElements )
+            </div>
+        #end
+    </div>
 #else
-  #set( $marker = 1 )
+    #foreach( $section in $sections )
+        #set( $categoryComboId = $sectionCombos.get( $section.id ) )
+        #renderSection( $categoryComboId, $section.dataElements, $section.displayName )
+    #end
 #end
 
+#*
+    @param $categoryComboId
+    @param $dataElements Data Elements to be rendered in your section
+    @param $args.title Include if you want a title rendered in your section
+*#
+#macro( renderSection $categoryComboId $dataElements $title )
 <table class="formSection" style="margin-bottom: 20px;">
+#if( $!title )
 <tr>
   <td>
-    <div class="cent"><h3>$encoder.htmlEncode( $section.displayName )</h3></div>
+    <div class="cent"><h3>$encoder.htmlEncode( $title )</h3></div>
   </td>
 </tr>
+#end
 <tr>
   <td>
     <div>
     <table cellspacing="0">
-    #set( $categoryComboId = $sectionCombos.get( $section.id ) )
     #set( $colCount = $numberOfTotalColumns.get( $categoryComboId ) )
     #set( $categories = $orderedCategories.get( $categoryComboId ) )
     #set( $optionsMap = $orderedOptionsMap.get( $categoryComboId ) )
@@ -35,7 +59,7 @@
     #set( $cols = $colRepeat.get( $category.id ) )
     #foreach( $col in $cols )
     #foreach( $categoryOption in $categoryOptions )
-    <th colspan="$colCount"><span align="center">#if( $categoryOption.isDefault() )${i18n.getString( "value" )}#else ${encoder.htmlEncode( $categoryOption.name )}#end</span></th>
+    <th colspan="$colCount"><span align="center">#if( $categoryOption.isDefault() )${i18n.getString( "value" )}#else ${encoder.htmlEncode( $categoryOption.displayName )}#end</span></th>
     #end
     #end
     </tr>
@@ -44,9 +68,9 @@
     #set( $count = 0 )
     #set( $mark = 0 )
     #set( $optionCombos = $orderedCategoryOptionCombos.get( $categoryComboId )  )
-    #foreach( $optionCombo in $optionCombos )<span id="${optionCombo.uid}-optioncombo" class="hidden">${encoder.htmlEncode( $optionCombo.name )}</span>
+    #foreach( $optionCombo in $optionCombos )<span id="${optionCombo.uid}-optioncombo" class="hidden">${encoder.htmlEncode( $optionCombo.displayName )}</span>
     #end
-    #foreach( $dataElement in $section.dataElements )
+    #foreach( $dataElement in $dataElements )
     #if( $mark == 1 )
     #set( $mark = 0 )
     #else
@@ -59,7 +83,7 @@
     #set( $dataEntryId = "${dataElement.uid}-${optionCombo.uid}-val" )
     #set( $commentId = "${dataElement.uid}-${optionCombo.uid}-comment" )
     #set( $greyedField = false )
-    #set( $greyedField = $greyedFields.get( "${dataElement.uid}:${optionCombo.uid}" ) )  
+    #set( $greyedField = $greyedFields.get( "${dataElement.uid}:${optionCombo.uid}" ) )
     #if( $dataElement.type == "bool" )
     <td><select name="entryselect" id="$dataEntryId" tabindex="$tabIndex"#if( $greyedField || !$hasAccess ) disabled="disabled"#end>
       <option value="">[$i18n.getString( "no_value" )]</option>

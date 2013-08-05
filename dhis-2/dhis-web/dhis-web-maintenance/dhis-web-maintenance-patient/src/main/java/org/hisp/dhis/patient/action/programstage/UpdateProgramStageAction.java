@@ -39,6 +39,8 @@ import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageDataElement;
 import org.hisp.dhis.program.ProgramStageDataElementService;
 import org.hisp.dhis.program.ProgramStageService;
+import org.hisp.dhis.user.UserGroup;
+import org.hisp.dhis.user.UserGroupService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -74,7 +76,14 @@ public class UpdateProgramStageAction
     {
         this.programStageDataElementService = programStageDataElementService;
     }
-
+    
+    private UserGroupService userGroupService;
+    
+    public void setUserGroupService( UserGroupService userGroupService )
+    {
+        this.userGroupService = userGroupService;
+    }
+    
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
@@ -219,6 +228,20 @@ public class UpdateProgramStageAction
         this.allowDateInFutures = allowDateInFutures;
     }
 
+    private List<Integer> whenToSend = new ArrayList<Integer>();
+
+    public void setWhenToSend( List<Integer> whenToSend )
+    {
+        this.whenToSend = whenToSend;
+    }
+    
+    private List<Integer> userGroup = new ArrayList<Integer>();
+    
+    public void setUserGroup( List<Integer> userGroup )
+    {
+        this.userGroup = userGroup;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -242,10 +265,14 @@ public class UpdateProgramStageAction
         programStage.setIrregular( irregular );
         programStage.setMinDaysFromStart( minDaysFromStart );
         programStage.setDisplayGenerateEventBox( displayGenerateEventBox );
-        programStage.setAutoGenerateEvent( autoGenerateEvent );
+        if ( !programStage.getProgram().isSingleEvent() )
+        {
+            programStage.setAutoGenerateEvent( autoGenerateEvent );
+        }
         programStage.setValidCompleteOnly( validCompleteOnly );
         programStage.setCaptureCoordinates( captureCoordinates );
 
+        // SMS Reminder
         Set<PatientReminder> patientReminders = new HashSet<PatientReminder>();
         for ( int i = 0; i < this.daysAllowedSendMessages.size(); i++ )
         {
@@ -253,6 +280,16 @@ public class UpdateProgramStageAction
                 templateMessages.get( i ) );
             reminder.setDateToCompare( PatientReminder.DUE_DATE_TO_COMPARE );
             reminder.setSendTo( sendTo.get( i ) );
+            reminder.setWhenToSend( whenToSend.get( i ) );
+            if ( reminder.getSendTo() == PatientReminder.SEND_TO_USER_GROUP )
+            {
+                UserGroup selectedUserGroup = userGroupService.getUserGroup( userGroup.get( i ) );
+                reminder.setUserGroup( selectedUserGroup );
+            }
+            else
+            {
+                reminder.setUserGroup( null );
+            }
             patientReminders.add( reminder );
         }
         programStage.setPatientReminders( patientReminders );

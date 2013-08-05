@@ -8,7 +8,7 @@ function addProgramStage()
 {
 	var programId = document.getElementById('id').value;
 
-	if( programId == "null"  || programId == "" )
+	if( programId == "null" || programId == "" )
 	{
 		showWarningMessage( i18n_please_select_program );
 	}
@@ -278,18 +278,34 @@ function generateTemplateMessageForm()
 				+ 	'<td colspan="2">' + i18n_reminder + ' ' + rowId + '<a href="javascript:removeTemplateMessageForm('+ rowId +')"> ( '+ i18n_remove_reminder + ' )</a></td>'
 				+ '</tr>'
 				+ '<tr name="tr' + rowId + '">'
+				+ 	'<td><label>' + i18n_send_when_to + '</label></td>'
+				+ 	'<td>'
+				+ 		'<select id="whenToSend' + rowId + '" name="whenToSend' + rowId + '" class="whenToSend" onchange="whenToSendOnChange(' + rowId + ')">'
+				+ 			'<option value="">' + i18n_from_the_day_set + '</option>'
+				+ 			'<option value="2">' + i18n_complete_event + '</option>'
+				+ 		'</select>'
+				+	'</td>'
+				+ '</tr>'
+				+ '<tr name="tr' + rowId + '">'
 				+ 	'<td><label>' + i18n_days_before_after_due_date + '</label></td>'
 				+ 	'<td><input type="text" id="daysAllowedSendMessage' + rowId + '" name="daysAllowedSendMessage' + rowId + '" class="daysAllowedSendMessage {validate:{required:true,number:true}}"/></td>'
 				+ '</tr>'
-				+ '<tr>'
+				+ '<tr name="tr' + rowId + '">'
 				+ 	'<td><label>' + i18n_send_to + '</label></td>'
 				+ 	'<td>'
-				+ 		'<select id="sendTo' + rowId + '" name="sendTo' + rowId + '" class="sendTo" >'
+				+ 		'<select id="sendTo' + rowId + '" name="sendTo' + rowId + '" class="sendTo" onchange="onchangeUserGroup('+ rowId +')">'
 				+ 			'<option value="1">' + i18n_patient + '</option>'
 				+ 			'<option value="2">' + i18n_health_worker + '</option>'
 				+ 			'<option value="3">' + i18n_orgunit_registered + '</option>'
 				+ 			'<option value="4">' + i18n_all_users_in_orgunit_registered + '</option>'
+				+ 			'<option value="5">' + i18n_user_group + '</option>'
 				+ 		'</select>'
+				+	'</td>'
+				+ '/<tr>'
+				+ '<tr name="tr' + rowId + '" id="tr' + rowId + '">'
+				+ 	'<td><label>' + i18n_user_group + '</label></td>'
+				+ 	'<td>'
+				+	program_stage_SMS_reminder_form
 				+	'</td>'
 				+ '/<tr>'
 				+ '<tr name="tr' + rowId + '">'
@@ -311,9 +327,32 @@ function generateTemplateMessageForm()
 				+ '</tr>';
 
 	jQuery('#programStageMessage').append( contend );
+	showHideUserGroup();
 }
 
 function removeTemplateMessageForm( rowId )
 {
 	jQuery("[name=tr" + rowId + "]").remove();
+}
+
+function whenToSendOnChange(index)
+{
+	var whenToSend = getFieldValue('whenToSend' + index );
+	if(whenToSend==2){
+		disable('daysAllowedSendMessage' + index );
+	}
+	else{
+		enable('daysAllowedSendMessage' + index );
+	}
+}
+function showHideUserGroup()
+{
+	jQuery(".sendTo").each( function( i, item ){
+		var numb = i+1;
+		if( item.value == 5){
+			showById( 'tr'+numb );
+		}
+		else
+			hideById ( 'tr'+numb );
+	});
 }

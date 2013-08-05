@@ -6,6 +6,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /*
@@ -93,11 +94,11 @@ public interface UserService
      */
     Collection<User> getAllUsers();
 
-    Collection<User> getAllUsersBetween( int first, int max );
+    List<User> getAllUsersBetween( int first, int max );
     
-    Collection<User> getAllUsersBetweenByName( String name, int first, int max );
+    List<User> getAllUsersBetweenByName( String name, int first, int max );
 
-    Collection<User> getUsersByLastUpdated(Date lastUpdated);
+    Collection<User> getUsersByLastUpdated( Date lastUpdated );
 
     /**
      * Returns a Collection of the Users which are not associated with any
@@ -142,6 +143,8 @@ public interface UserService
     int getUsersByOrganisationUnitCount( OrganisationUnit orgUnit );
 
     int getUsersByOrganisationUnitCountByName( OrganisationUnit orgUnit, String name );
+    
+    List<User> getUsersByUid( List<String> uids );
 
     // -------------------------------------------------------------------------
     // UserCredentials

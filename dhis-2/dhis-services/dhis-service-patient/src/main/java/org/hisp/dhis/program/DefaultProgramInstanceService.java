@@ -209,7 +209,14 @@ public class DefaultProgramInstanceService
 
         Grid attrGrid = new ListGrid();
 
-        attrGrid.setTitle( patient.getFullName() );
+        if ( patient.getFirstName() == null && patient.getMiddleName() == null && patient.getLastName() == null )
+        {
+            attrGrid.setTitle( "" );
+        }
+        else
+        {
+            attrGrid.setTitle( patient.getFullName() );
+        }
         attrGrid.setSubtitle( "" );
 
         attrGrid.addHeader( new GridHeader( i18n.getString( "name" ), false, true ) );
@@ -220,21 +227,30 @@ public class DefaultProgramInstanceService
         // Add fixed attribues
         // ---------------------------------------------------------------------
 
-        attrGrid.addRow();
-        attrGrid.addValue( i18n.getString( "gender" ) );
-        attrGrid.addValue( i18n.getString( patient.getGender() ) );
+        if ( patient.getGender() != null )
+        {
+            attrGrid.addRow();
+            attrGrid.addValue( i18n.getString( "gender" ) );
+            attrGrid.addValue( i18n.getString( patient.getGender() ) );
+        }
 
-        attrGrid.addRow();
-        attrGrid.addValue( i18n.getString( "date_of_birth" ) );
-        attrGrid.addValue( format.formatDate( patient.getBirthDate() ) );
+        if ( patient.getBirthDate() != null )
+        {
+            attrGrid.addRow();
+            attrGrid.addValue( i18n.getString( "date_of_birth" ) );
+            attrGrid.addValue( format.formatDate( patient.getBirthDate() ) );
 
-        attrGrid.addRow();
-        attrGrid.addValue( i18n.getString( "age" ) );
-        attrGrid.addValue( patient.getAge() );
+            attrGrid.addRow();
+            attrGrid.addValue( i18n.getString( "age" ) );
+            attrGrid.addValue( patient.getAge() );
+        }
 
-        attrGrid.addRow();
-        attrGrid.addValue( i18n.getString( "dob_type" ) );
-        attrGrid.addValue( i18n.getString( patient.getDobType() + "" ) );
+        if ( patient.getDobType() != null )
+        {
+            attrGrid.addRow();
+            attrGrid.addValue( i18n.getString( "dob_type" ) );
+            attrGrid.addValue( i18n.getString( patient.getDobType() + "" ) );
+        }
 
         attrGrid.addRow();
         attrGrid.addValue( i18n.getString( "phoneNumber" ) );
@@ -332,12 +348,6 @@ public class DefaultProgramInstanceService
                 {
                     Grid gridProgram = getProgramInstanceReport( programInstance, i18n, format );
 
-                    // ---------------------------------------------------------------------
-                    // Grids for program-stage-instance
-                    // ---------------------------------------------------------------------
-
-                    getProgramStageInstancesReport( gridProgram, programInstance, format, i18n );
-
                     grids.add( gridProgram );
                 }
             }
@@ -380,16 +390,22 @@ public class DefaultProgramInstanceService
 
         Collection<PatientIdentifier> identifiers = patient.getIdentifiers();
 
-        if ( identifiers.size() > 0 )
+        if ( identifierTypes != null && identifiers.size() > 0 )
         {
             for ( PatientIdentifierType identifierType : identifierTypes )
             {
                 for ( PatientIdentifier identifier : identifiers )
                 {
-                    if ( identifier.getIdentifierType().equals( identifierType ) )
+                    if (  identifier.getIdentifierType() != null && identifier.getIdentifierType().equals( identifierType ) )
                     {
                         grid.addRow();
                         grid.addValue( identifierType.getDisplayName() );
+                        grid.addValue( identifier.getIdentifier() );
+                    }
+                    else if (  identifier.getIdentifierType() == null )
+                    {
+                        grid.addRow();
+                        grid.addValue( i18n.getString( "system_identifier" ));
                         grid.addValue( identifier.getIdentifier() );
                     }
                 }

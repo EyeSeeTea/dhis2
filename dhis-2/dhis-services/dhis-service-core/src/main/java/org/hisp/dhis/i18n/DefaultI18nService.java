@@ -278,7 +278,17 @@ public class DefaultI18nService
     {
         return getTranslations( className, id, getCurrentLocale() );
     }
+    
+    public Map<String, String> getTranslations( String className, I18nLocale locale )
+    {
+        if ( locale != null && className != null )
+        {
+            return convertTranslations( translationService.getTranslations( className, locale ) );
+        }
 
+        return new HashMap<String, String>();
+    }    
+        
     public Map<String, String> getTranslations( String className, int id, I18nLocale locale )
     {
         if ( locale != null && className != null )
@@ -288,7 +298,7 @@ public class DefaultI18nService
 
         return new HashMap<String, String>();
     }
-
+    
     public Map<String, String> getTranslationsWithoutDefault( String className, int id )
     {
         return getTranslationsWithoutDefault( className, id, getCurrentLocale() );

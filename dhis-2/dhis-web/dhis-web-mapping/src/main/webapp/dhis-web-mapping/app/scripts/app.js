@@ -17,8 +17,9 @@ Ext.onReady( function() {
 
 	// Init
 
-	var gis = GIS.core.getInstance();
-	GIS.app.instances = [gis];
+	gis = GIS.core.getInstance();
+	
+	GIS.core.instances = [gis];
 
 	GIS.app.getInits = function(r) {
 		var init = Ext.decode(r.responseText);
@@ -3097,7 +3098,7 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function() {
-					this.setPosition(253, 37);
+					this.setPosition(253, 33);
 				}
 			}
 		});
@@ -5068,6 +5069,7 @@ Ext.onReady( function() {
 
 						a.push({
 							text: GIS.i18n.table,
+							iconCls: 'gis-button-icon-table',
                             toggleGroup: 'module',
 							handler: function(b) {
                                 window.location.href = '../../dhis-web-pivot/app/index.html';
@@ -5076,6 +5078,7 @@ Ext.onReady( function() {
 
 						a.push({
 							text: GIS.i18n.chart,
+							iconCls: 'gis-button-icon-chart',
                             toggleGroup: 'module',
 							handler: function(b) {
                                 window.location.href = '../../dhis-web-visualizer/app/index.html';
@@ -5084,6 +5087,7 @@ Ext.onReady( function() {
 
 						a.push({
 							text: GIS.i18n.map,
+							iconCls: 'gis-button-icon-map',
                             toggleGroup: 'module',
                             pressed: true
 						});
@@ -5311,7 +5315,6 @@ Ext.onReady( function() {
 			GIS.core.createSelectHandlers(gis, layer);
 
 			gis.viewport = createViewport();
-			gis.viewport.gis = gis;
 		}();
 	};
 

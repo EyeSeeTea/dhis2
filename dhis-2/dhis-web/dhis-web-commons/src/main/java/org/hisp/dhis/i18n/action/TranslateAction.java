@@ -27,6 +27,8 @@ package org.hisp.dhis.i18n.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +43,8 @@ import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.hisp.dhis.i18n.locale.I18nLocaleService;
+import org.hisp.dhis.setting.SystemSetting;
+import org.hisp.dhis.setting.SystemSettingManager;
 
 import com.opensymphony.xwork2.Action;
 
@@ -162,10 +166,21 @@ public class TranslateAction
 
         log.info( "Classname: " + className + ", id: " + objectId + ", loc: " + locale );
 
-        IdentifiableObject object = identifiableObjectManager.getObject( Integer.parseInt( objectId ), className );
-
-        List<String> propertyNames = i18nService.getObjectPropertyNames( object );
-
+        List<String> propertyNames = null;
+        
+        if( className.equals( SystemSetting.class.getSimpleName() ))
+        {                        
+            propertyNames = new ArrayList<String>();
+            propertyNames.add( SystemSetting.SYSTEMSETTING_PROPERTY_VALUE );            
+        }
+        else
+        {                    
+            IdentifiableObject object = identifiableObjectManager.getObject( Integer.parseInt( objectId ), className );
+            
+            propertyNames = i18nService.getObjectPropertyNames( object );
+        }        
+        
+        
         HttpServletRequest request = ServletActionContext.getRequest();
 
         Map<String, String> translations = new Hashtable<String, String>();

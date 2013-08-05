@@ -93,12 +93,22 @@ public class DefaultSystemSettingManager
 
         return setting != null && setting.hasValue() ? setting.getValue() : null;
     }
-
+    
     public Serializable getSystemSetting( String name, Serializable defaultValue )
     {
         SystemSetting setting = systemSettingStore.getByName( name );
 
         return setting != null && setting.hasValue() ? setting.getValue() : defaultValue;
+    }
+
+    public SystemSetting getSystemSettingObject( String name )
+    {
+        return systemSettingStore.getByName( name );
+    }
+
+    public SystemSetting getSystemSettingObject( int id )
+    {
+        return systemSettingStore.get( id );
     }
 
     public Collection<SystemSetting> getAllSystemSettings()
@@ -128,7 +138,7 @@ public class DefaultSystemSettingManager
 
     public String getFlagImage()
     {
-        String flag = (String) getSystemSetting( KEY_FLAG );
+        String flag = (String) getSystemSetting( KEY_FLAG, DEFAULT_FLAG );
 
         return flag != null ? flag + ".png" : null;
     }

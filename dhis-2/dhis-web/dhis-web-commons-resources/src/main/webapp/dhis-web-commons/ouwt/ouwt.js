@@ -446,7 +446,13 @@ function Selection()
             names.push( name );
         }
 
-        listenerFunction( ids, names, children );
+        if ( !$.isArray( selected ) ) {
+            subtree.getChildren( selected ).done(function() {
+                listenerFunction( ids, names, children );
+            });
+        } else {
+            listenerFunction( ids, names, children );
+        }
     };
 
     function getTagId( unitId )
@@ -485,11 +491,33 @@ function Selection()
 
             subtree.reloadTree();
             selection.sync( false, selection.responseReceived );
-            // selection.responseReceived();
         }
         else
         {
-            $( '#searchField' ).css( 'background-color', '#ffc5c5' );
+            $.ajax( {
+                url: '../dhis-web-commons-ajax-json/getOrganisationUnitTree.action',
+                data: { byName: name }
+            } ).done(function(data) {
+                if ( data.realRoot === undefined ) {
+                    if ( sessionStorage["organisationUnits"] === undefined )
+                    {
+                        sessionStorage["organisationUnits"] = JSON.stringify( data.organisationUnits );
+                    }
+                    else
+                    {
+                        var units = JSON.parse( sessionStorage["organisationUnits"] );
+                        $.extend(units, data.organisationUnits);
+                        sessionStorage["organisationUnits"] = JSON.stringify( units );
+                    }
+
+                    $.extend(organisationUnits, data.organisationUnits);
+                    selection.findByName();
+                }
+
+                $( '#searchField' ).css( 'background-color', '#ffc5c5' );
+            } ).fail(function() {
+                $( '#searchField' ).css( 'background-color', '#ffc5c5' );
+            });
         }
     };
 
@@ -672,6 +700,26 @@ function Subtree()
         }
     }
 
+    this.getChildren = function( parentId ) {
+        return $.post( '../dhis-web-commons-ajax-json/getOrganisationUnitTree.action?parentId=' + parentId, function ( data, textStatus, jqXHR )
+            {
+                // load additional organisationUnits into sessionStorage
+                if ( sessionStorage["organisationUnits"] === undefined )
+                {
+                    sessionStorage["organisationUnits"] = JSON.stringify( data.organisationUnits );
+                }
+                else
+                {
+                    var units = JSON.parse( sessionStorage["organisationUnits"] );
+                    $.extend(units, data.organisationUnits);
+                    sessionStorage["organisationUnits"] = JSON.stringify( units );
+                }
+
+                $.extend(organisationUnits, data.organisationUnits);
+            }
+        );
+    }
+
     function getAndCreateChildren(parentTag, parent)
     {
         if ( parent.c !== undefined )
@@ -682,25 +730,9 @@ function Subtree()
             }
             else
             {
-                $.post( '../dhis-web-commons-ajax-json/getOrganisationUnitTree.action?parentId=' + parent.id,
-                function ( data, textStatus, jqXHR )
-                    {
-                        // load additional organisationUnits into sessionStorage
-                        if ( sessionStorage["organisationUnits"] === undefined )
-                        {
-                            sessionStorage["organisationUnits"] = JSON.stringify( data.organisationUnits );
-                        } 
-                        else 
-                        {
-                            units = JSON.parse( sessionStorage["organisationUnits"] );
-                            $.extend(units, data.organisationUnits);
-                            sessionStorage["organisationUnits"] = JSON.stringify( units );
-                        }
-
-                        $.extend(organisationUnits, data.organisationUnits);
-                        createChildren( parentTag, parent );
-                    }
-                );
+                subtree.getChildren( parent.id ).done( function () {
+                    createChildren( parentTag, parent );
+                } );
             }
         }
 

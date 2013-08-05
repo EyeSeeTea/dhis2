@@ -68,6 +68,7 @@ import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.minmax.MinMaxDataElement;
 import org.hisp.dhis.minmax.MinMaxDataElementService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.RelativePeriods;
@@ -161,6 +162,13 @@ public class DefaultChartService
         this.currentUserService = currentUserService;
     }
 
+    private OrganisationUnitService organisationUnitService;
+    
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitService = organisationUnitService;
+    }
+
     private AnalyticsService analyticsService;
 
     public void setAnalyticsService( AnalyticsService analyticsService )
@@ -196,8 +204,15 @@ public class DefaultChartService
         {
             organisationUnit = user.getOrganisationUnit();
         }
+
+        List<OrganisationUnit> atLevel = new ArrayList<OrganisationUnit>();
         
-        chart.init( user, date, organisationUnit, format );
+        if ( chart.getOrganisationUnitLevel() != null && chart.getOrganisationUnits() != null )
+        {
+            atLevel.addAll( organisationUnitService.getOrganisationUnitsAtLevel( chart.getOrganisationUnitLevel(), chart.getOrganisationUnits() ) );
+        }
+        
+        chart.init( user, date, organisationUnit, atLevel, format );
 
         return getJFreeChart( chart );
     }
@@ -807,12 +822,12 @@ public class DefaultChartService
         return chartStore.getCountLikeName( name );
     }
 
-    public Collection<Chart> getChartsBetween( int first, int max )
+    public List<Chart> getChartsBetween( int first, int max )
     {
         return chartStore.getAllOrderedName( first, max );
     }
 
-    public Collection<Chart> getChartsBetweenByName( String name, int first, int max )
+    public List<Chart> getChartsBetweenByName( String name, int first, int max )
     {
         return chartStore.getAllLikeNameOrderedName( name, first, max );
     }

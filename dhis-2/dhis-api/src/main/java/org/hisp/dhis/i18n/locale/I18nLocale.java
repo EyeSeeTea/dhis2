@@ -17,6 +17,8 @@ public class I18nLocale
      */
     private static final long serialVersionUID = -8425127015696485061L;
 
+    public static final String DEFAULT_COUNTRY = "default";
+    
     private String language;
 
     private String country;

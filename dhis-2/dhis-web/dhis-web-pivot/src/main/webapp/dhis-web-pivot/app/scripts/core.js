@@ -10,6 +10,7 @@ PT.core.getConfigs = function() {
         ajax: {
             path_pivot: '../',
             path_api: '../../api/',
+            path_commons: '../../dhis-web-commons-ajax-json/',
             initialize: 'initialize.action',
             redirect: 'dhis-web-commons-about/redirect.action',
             data_get: 'chartValues.json',
@@ -480,17 +481,16 @@ PT.core.getUtils = function(pt) {
 	util.number = {
 		getNumberOfDecimals: function(x) {
 			var tmp = new String(x);
-			return (tmp.indexOf(".") > -1) ? (tmp.length - tmp.indexOf(".") - 1) : 0;
+			return (tmp.indexOf('.') > -1) ? (tmp.length - tmp.indexOf('.') - 1) : 0;
 		},
 
 		roundIf: function(x, prec) {
-			if (Ext.isString(x)) {
-				x = parseFloat(x);
-			}
+			x = parseFloat(x);
+			prec = parseFloat(prec);
 
 			if (Ext.isNumber(x) && Ext.isNumber(prec)) {
 				var dec = pt.util.number.getNumberOfDecimals(x);
-				return parseFloat(dec > prec ? Ext.Number.toFixed(x, prec) : x);
+				return dec > prec ? Ext.Number.toFixed(x, prec) : x;
 			}
 			return x;
 		},
@@ -737,7 +737,8 @@ PT.core.getUtils = function(pt) {
 				dimConf = pt.conf.finals.dimension,
 				addCategoryDimension = false,
 				map = xLayout.dimensionNameItemsMap,
-				dx = dimConf.indicator.dimensionName;
+				dx = dimConf.indicator.dimensionName,
+				co = dimConf.category.dimensionName;
 
 			for (var i = 0, dimName, items; i < axisDimensionNames.length; i++) {
 				dimName = axisDimensionNames[i];
@@ -758,8 +759,8 @@ PT.core.getUtils = function(pt) {
 
 					items = Ext.Array.unique(items);
 				}
-
-				if (dimName !== dimConf.category.dimensionName) {
+				
+				if (dimName !== co) {
 					paramString += ':' + items.join(';');
 				}
 
@@ -767,7 +768,7 @@ PT.core.getUtils = function(pt) {
 					paramString += '&';
 				}
 			}
-
+			
 			if (addCategoryDimension) {
 				paramString += '&dimension=' + pt.conf.finals.dimension.category.dimensionName;
 			}
@@ -783,15 +784,30 @@ PT.core.getUtils = function(pt) {
 			return paramString;
 		},
 
+		setSessionStorage: function(obj, session, url) {
+			if (PT.isSessionStorage) {
+				dhis2 = JSON.parse(sessionStorage.getItem('dhis2')) || {};
+				dhis2[session] = obj;
+				sessionStorage.setItem('dhis2', JSON.stringify(dhis2));
+
+				if (Ext.isString(url)) {
+					window.location.href = url;
+				}
+			}
+		},
+
 		createTable: function(layout, pt) {
 			var dimConf = pt.conf.finals.dimension,
-				legendSet = layout.legendSet ? pt.init.idLegendSetMap[layout.legendSet.id] : undefined,
+				legendSet = layout.legendSet ? pt.init.idLegendSetMap[layout.legendSet.id] : null,
 				getSyncronizedXLayout,
 				getExtendedResponse,
 				getExtendedAxis,
 				validateUrl,
+				setMouseHandlers,
 				getTableHtml,
-				initialize;
+				initialize,
+				uuidDimUuidsMap = {},
+				uuidObjectMap = {};
 
 			getSyncronizedXLayout = function(xLayout, response) {
 				var removeDimensionFromXLayout,
@@ -844,6 +860,17 @@ PT.core.getUtils = function(pt) {
 						xOuDimension = xLayout.objectNameDimensionsMap[dimConf.organisationUnit.objectName],
 						isUserOrgunit = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT'),
 						isUserOrgunitChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_CHILDREN'),
+						isLevel = function() {
+							if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
+								for (var i = 0; i < xOuDimension.ids.length; i++) {
+									if (xOuDimension.ids[i].substr(0,5) === 'LEVEL') {
+										return true;
+									}
+								}
+							}
+							
+							return false;
+						}(),
 						co = dimConf.category.objectName,
 						ou = dimConf.organisationUnit.objectName,
 						layout;
@@ -862,6 +889,18 @@ PT.core.getUtils = function(pt) {
 								}
 								if (isUserOrgunitChildren) {
 									dim.items = dim.items.concat(pt.init.user.ouc);
+								}
+							}
+							else if (isLevel) {
+								
+								// Items: get ids from metadata -> items
+								for (var j = 0, ids = Ext.clone(response.metaData[dim.dimensionName]); j < ids.length; j++) {
+									dim.items.push({
+										id: ids[j],
+										name: response.metaData.names[ids[j]]
+									});
+									
+									dim.items = pt.util.array.sortObjectsByString(dim.items);
 								}
 							}
 							else {
@@ -892,8 +931,28 @@ PT.core.getUtils = function(pt) {
 
 					// Re-layout
 					layout = pt.api.layout.Layout(xLayout);
-
-					return layout ? pt.util.pivot.getExtendedLayout(layout) : null;
+				
+					if (layout) {
+						dimensions = [].concat(layout.columns || [], layout.rows || [], layout.filters || []);
+						
+						for (var i = 0, idNameMap = response.metaData.names, dimItems; i < dimensions.length; i++) {							
+							dimItems = dimensions[i].items;
+							
+							if (Ext.isArray(dimItems) && dimItems.length) {
+								for (var j = 0, item; j < dimItems.length; j++) {
+									item = dimItems[j];
+									
+									if (Ext.isObject(item) && Ext.isString(idNameMap[item.id]) && !Ext.isString(item.name)) {
+										item.name = idNameMap[item.id] || '';
+									}
+								}
+							}
+						}
+						
+						return pt.util.pivot.getExtendedLayout(layout);
+					}
+					
+					return null;
 				}();
 			};
 
@@ -943,14 +1002,22 @@ PT.core.getUtils = function(pt) {
 					}
 				}();
 
-				var createValueIds = function() {
+				var createValueIdMap = function() {
 					var valueHeaderIndex = response.nameHeaderMap[pt.conf.finals.dimension.value.value].index,
-						dimensionNames = xLayout.axisDimensionNames,
+						coHeader = response.nameHeaderMap[pt.conf.finals.dimension.category.dimensionName],
+						dx = dimConf.data.dimensionName,
+						co = dimConf.category.dimensionName,
+						axisDimensionNames = xLayout.axisDimensionNames,
 						idIndexOrder = [];
 
 					// idIndexOrder
-					for (var i = 0; i < dimensionNames.length; i++) {
-						idIndexOrder.push(response.nameHeaderMap[dimensionNames[i]].index);
+					for (var i = 0; i < axisDimensionNames.length; i++) {
+						idIndexOrder.push(response.nameHeaderMap[axisDimensionNames[i]].index);
+
+						// If co exists in response and is not added in layout, add co after dx
+						if (coHeader && !Ext.Array.contains(axisDimensionNames, co) && axisDimensionNames[i] === dx) {
+							idIndexOrder.push(coHeader.index);
+						}
 					}
 
 					// idValueMap
@@ -1062,7 +1129,6 @@ PT.core.getUtils = function(pt) {
 	//				[o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2...] (30)
 	//		  	  ]
 
-
 				for (var i = 0, aAllRow, aUniqueRow, span, factor; i < aUniqueIds.length; i++) {
 					aAllRow = [];
 					aUniqueRow = aUniqueIds[i];
@@ -1097,15 +1163,17 @@ PT.core.getUtils = function(pt) {
 	//aColIds	= [ abc, bcd, ... ]
 
 
-
 				// allObjects
-
+				
 				for (var i = 0, allRow; i < aAllItems.length; i++) {
 					allRow = [];
 
 					for (var j = 0; j < aAllItems[i].length; j++) {
 						allRow.push({
-							id: aAllItems[i][j]
+							id: aAllItems[i][j],
+							uuid: Ext.data.IdGenerator.get('uuid').generate(),
+							dim: i,
+							axis: type
 						});
 					}
 
@@ -1135,8 +1203,9 @@ PT.core.getUtils = function(pt) {
 						allRow = aAllObjects[i];
 
 						for (var j = 0, obj, sizeCount = 0, span = aSpan[i - 1], parentObj = aAllObjects[i - 1][0]; j < allRow.length; j++) {
-							obj = allRow[j];
+							obj = allRow[j];							
 							obj.parent = parentObj;
+							
 							sizeCount++;
 
 							if (sizeCount === span) {
@@ -1146,7 +1215,47 @@ PT.core.getUtils = function(pt) {
 						}
 					}
 				}
+				
+				// add uuids array to leaves
+				if (aAllObjects.length) {
+					for (var i = 0, leaf, parentUuids, obj, span = aAllObjects.length > 1 ? aSpan[aAllObjects.length - 2] : 1, leafUuids = []; i < aAllObjects[aAllObjects.length - 1].length; i++) {
+						leaf = aAllObjects[aAllObjects.length - 1][i];
+						leafUuids.push(leaf.uuid);
+						parentUuids = [];
+						obj = leaf;
+						
+						// get parent uuids
+						while (obj.parent) {
+							obj = obj.parent;
+							parentUuids.push(obj.uuid);
+						}
+						
+						// add parent uuids
+						leaf.uuids = Ext.clone(parentUuids);
+						
+						// add uuid for all leaves
+						if (leafUuids.length === span) {
+							for (var j = i - span + 1, leaf; j <= i; j++) {
+								leaf = aAllObjects[aAllObjects.length - 1][j];
+								leaf.uuids = leaf.uuids.concat(Ext.clone(leafUuids));
+							}
+							
+							leafUuids = [];
+						}
+					}
+				}
+				
+				// populate uuid-object map
+				for (var i = 0; i < aAllObjects.length; i++) {
+					for (var j = 0, object; j < aAllObjects[i].length; j++) {
+						object = aAllObjects[i][j];
+//console.log(object.uuid, object);
+						uuidObjectMap[object.uuid] = object;
+					}
+				}
 
+//console.log("aAllObjects", aAllObjects);				
+				
 				return {
 					type: type,
 					items: mDimensions,
@@ -1174,6 +1283,18 @@ PT.core.getUtils = function(pt) {
 
 				return true;
 			};
+
+			setMouseHandlers = function() {
+				var valueElement;
+				
+				for (var key in uuidDimUuidsMap) {
+					if (uuidDimUuidsMap.hasOwnProperty(key)) {
+						valueElement = Ext.get(key);
+												
+						valueElement.dom.setAttribute('onclick', 'pt.util.pivot.onMouseClick(this.id);');
+					}
+				}
+			};						
 
 			getTableHtml = function(xColAxis, xRowAxis, xResponse) {
 				var getTdHtml,
@@ -1217,22 +1338,23 @@ PT.core.getUtils = function(pt) {
 				getTdHtml = function(config) {
 					var bgColor,
 						legends,
-						cls,
 						colSpan,
 						rowSpan,
 						htmlValue,
 						displayDensity,
 						fontSize,
-						html = '',
 						isLegendSet = Ext.isObject(legendSet) && Ext.isArray(legendSet.legends) && legendSet.legends.length,
-						isValue = Ext.isObject(config) && Ext.isString(config.type) && config.type.substr(0,5) === 'value' && !config.empty;
-
+						isNumeric = Ext.isObject(config) && Ext.isString(config.type) && config.type.substr(0,5) === 'value' && !config.empty,
+						isValue = Ext.isObject(config) && Ext.isString(config.type) && config.type === 'value' && !config.empty,
+						cls = '',
+						html = '';
+						
 					if (!Ext.isObject(config)) {
 						return '';
 					}
 
 					// Background color from legend set
-					if (isValue && isLegendSet) {
+					if (isNumeric && isLegendSet) {
 						legends = legendSet.legends;
 
 						for (var i = 0, value; i < legends.length; i++) {
@@ -1243,40 +1365,28 @@ PT.core.getUtils = function(pt) {
 							}
 						}
 					}
-
+					
 					colSpan = config.colSpan ? 'colspan="' + config.colSpan + '" ' : '';
 					rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '" ' : '';
 					htmlValue = config.collapsed ? '&nbsp;' : config.htmlValue || config.value || '&nbsp;';
 					htmlValue = config.type !== 'dimension' ? pt.util.number.pp(htmlValue, layout.digitGroupSeparator) : htmlValue;
 					displayDensity = pt.conf.pivot.displayDensity[config.displayDensity] || pt.conf.pivot.displayDensity[layout.displayDensity];
 					fontSize = pt.conf.pivot.fontSize[config.fontSize] || pt.conf.pivot.fontSize[layout.fontSize];
+					
+					cls += config.hidden ? ' td-hidden' : '';
+					cls += config.collapsed ? ' td-collapsed' : '';
+					cls += isValue ? ' pointer' : '';
+					cls += bgColor ? ' legend' : (config.cls ? ' ' + config.cls : '');
 
-					//var randomFromInterval = function(from,to) {
-						//return Math.floor(Math.random() * (to - from + 1) + from);
-					//};
-
-					//var a = ['#ff0000', '#e7ea22', '#00ff00'];
-
-					//var n = randomFromInterval(0,2);
-					//console.log(n);
-
-//if (Ext.isString(config.type) && config.type.substr(0,5) === 'value') {
-					//bgColor = a[n];
-				//}
+					html += '<td ' + (config.uuid ? ('id="' + config.uuid + '" ') : '') + ' class="' + cls + '" ' + colSpan + rowSpan;
 
 					if (bgColor) {
-						cls = 'legend';
-						cls += config.hidden ? ' td-hidden' : '';
-						cls += config.collapsed ? ' td-collapsed' : '';
-
-						html += '<td class="' + cls + '" ';
-						html += colSpan + rowSpan + '>';
+						html += '>';
 						html += '<div class="legendCt">';
 						html += '<div class="number ' + config.cls + '" style="padding:' + displayDensity + '; padding-right:3px; font-size:' + fontSize + '">' + htmlValue + '</div>';
 						html += '<div class="arrowCt ' + config.cls + '">';
 						html += '<div class="arrow" style="border-bottom:8px solid transparent; border-right:8px solid ' + bgColor + '">&nbsp;</div>';
-						html += '</div>';
-						html += '</div></div></td>';
+						html += '</div></div></div></td>';
 
 						//cls = 'legend';
 						//cls += config.hidden ? ' td-hidden' : '';
@@ -1292,14 +1402,7 @@ PT.core.getUtils = function(pt) {
 						//html += '</div></td>';
 					}
 					else {
-						cls = config.cls ? config.cls : '';
-						cls += config.hidden ? ' td-hidden' : '';
-						cls += config.collapsed ? ' td-collapsed' : '';
-
-						html += '<td class="' + cls + '" ';
-						html += colSpan + rowSpan;
-						html += 'style="padding:' + displayDensity + '; font-size:' + fontSize + ';">' + htmlValue;
-						html += '</td>';
+						html += 'style="padding:' + displayDensity + '; font-size:' + fontSize + ';"' + '>' + htmlValue + '</td>';
 					}
 
 					return html;
@@ -1335,48 +1438,53 @@ PT.core.getUtils = function(pt) {
 						getEmptyHtmlArray;
 
 					getEmptyHtmlArray = function() {
-						return (xColAxis && xRowAxis) ? getTdHtml({cls: 'pivot-dim-empty', colSpan: xRowAxis.dims, rowSpan: xColAxis.dims}) : '';
+						return (xColAxis && xRowAxis) ? getTdHtml({
+							cls: 'pivot-dim-empty',
+							colSpan: xRowAxis.dims,
+							rowSpan: xColAxis.dims
+						}) : '';
 					};
 
 					if (!(xColAxis && Ext.isObject(xColAxis))) {
 						return a;
 					}
 
-					for (var i = 0, dimItems, colSpan, dimHtml; i < xColAxis.dims; i++) {
-						dimItems = xColAxis.xItems.gui[i];
-						colSpan = xColAxis.span[i];
+					for (var i = 0, dimHtml; i < xColAxis.dims; i++) {
 						dimHtml = [];
 
 						if (i === 0) {
 							dimHtml.push(getEmptyHtmlArray());
 						}
 
-						for (var j = 0, id; j < dimItems.length; j++) {
-							id = dimItems[j];
-							dimHtml.push(getTdHtml({
-								type: 'dimension',
-								cls: 'pivot-dim',
-								colSpan: colSpan,
-								htmlValue: xResponse.metaData.names[id]
-							}));
-
-							if (doSubTotals(xColAxis) && i === 0) {
+						for (var j = 0, obj, spanCount = 0; j < xColAxis.size; j++) {
+							spanCount++;
+							
+							obj = xColAxis.objects.all[i][j];
+							obj.type = 'dimension';
+							obj.cls = 'pivot-dim';
+							obj.noBreak = false;
+							obj.hidden = !(obj.rowSpan || obj.colSpan);
+							obj.htmlValue = xResponse.metaData.names[obj.id];
+							
+							dimHtml.push(getTdHtml(obj));
+							
+							if (i === 0 && spanCount === xColAxis.span[i] && doSubTotals(xColAxis) ) {
 								dimHtml.push(getTdHtml({
 									type: 'dimensionSubtotal',
 									cls: 'pivot-dim-subtotal',
 									rowSpan: xColAxis.dims
 								}));
+								
+								spanCount = 0;
 							}
-
-							if (doTotals()) {
-								if (i === 0 && j === (dimItems.length - 1)) {
-									dimHtml.push(getTdHtml({
-										type: 'dimensionTotal',
-										cls: 'pivot-dim-total',
-										rowSpan: xColAxis.dims,
-										htmlValue: 'Total'
-									}));
-								}
+							
+							if (i === 0 && (j === xColAxis.size - 1) && doTotals()) {
+								dimHtml.push(getTdHtml({
+									type: 'dimensionTotal',
+									cls: 'pivot-dim-total',
+									rowSpan: xColAxis.dims,
+									htmlValue: 'Total'
+								}));
 							}
 						}
 
@@ -1410,13 +1518,13 @@ PT.core.getUtils = function(pt) {
 							recursiveReduce(obj.parent);
 						}
 					};
-
+					
 					// Populate dim objects
 					if (xRowAxis) {
-						for (var i = 0, row; i < xRowAxis.objects.all[0].length; i++) {
+						for (var i = 0, row; i < xRowAxis.size; i++) {
 							row = [];
 
-							for (var j = 0, obj, newObj; j < xRowAxis.objects.all.length; j++) {
+							for (var j = 0, obj, newObj; j < xRowAxis.dims; j++) {
 								obj = xRowAxis.objects.all[j][i];
 								obj.type = 'dimension';
 								obj.cls = 'pivot-dim td-nobreak';
@@ -1432,17 +1540,31 @@ PT.core.getUtils = function(pt) {
 					}
 
 					// Value objects
-					for (var i = 0, valueItemsRow, valueObjectsRow, map = Ext.clone(xResponse.idValueMap); i < rowSize; i++) {
+					for (var i = 0, valueItemsRow, valueObjectsRow, idValueMap = Ext.clone(xResponse.idValueMap); i < rowSize; i++) {
 						valueItemsRow = [];
 						valueObjectsRow = [];
 
-						for (var j = 0, id, value, htmlValue, empty; j < colSize; j++) {
-							id = (xColAxis ? xColAxis.ids[j] : '') + (xRowAxis ? xRowAxis.ids[i] : '');
+						for (var j = 0, id, value, htmlValue, empty, uuid, uuids; j < colSize; j++) {
 							empty = false;
-
-							if (map[id]) {
-								value = parseFloat(map[id]);
-								htmlValue = pt.util.number.roundIf(map[id], 1).toString();
+							uuids = [];
+							
+							// meta data uid
+							id = (xColAxis ? pt.util.str.replaceAll(xColAxis.ids[j], '-', '') : '') + (xRowAxis ? pt.util.str.replaceAll(xRowAxis.ids[i], '-', '') : '');
+							
+							// value html element id
+							uuid = Ext.data.IdGenerator.get('uuid').generate();
+							
+							// col and row dim element ids							
+							if (xColAxis) {
+								uuids = uuids.concat(xColAxis.objects.all[xColAxis.dims - 1][j].uuids);
+							}
+							if (xRowAxis) {
+								uuids = uuids.concat(xRowAxis.objects.all[xRowAxis.dims - 1][i].uuids);
+							}
+							
+							if (idValueMap[id]) {
+								value = parseFloat(idValueMap[id]);
+								htmlValue = value.toString();
 							}
 							else {
 								value = 0;
@@ -1452,12 +1574,17 @@ PT.core.getUtils = function(pt) {
 
 							valueItemsRow.push(value);
 							valueObjectsRow.push({
+								uuid: uuid,
 								type: 'value',
 								cls: 'pivot-value',
 								value: value,
 								htmlValue: htmlValue,
-								empty: empty
+								empty: empty,
+								uuids: uuids
 							});
+							
+							// Map element id to dim element ids
+							uuidDimUuidsMap[uuid] = uuids;
 						}
 
 						valueItems.push(valueItemsRow);
@@ -1478,7 +1605,7 @@ PT.core.getUtils = function(pt) {
 								type: 'valueTotal',
 								cls: 'pivot-value-total',
 								value: total,
-								htmlValue: Ext.Array.contains(empty, false) ? pt.util.number.roundIf(total, 1).toString() : '&nbsp;',
+								htmlValue: Ext.Array.contains(empty, false) ? parseFloat(pt.util.number.roundIf(total, 2)).toString() : '&nbsp;',
 								empty: !Ext.Array.contains(empty, false)
 							});
 
@@ -1539,13 +1666,11 @@ PT.core.getUtils = function(pt) {
 								row.push(item);
 
 								if (colCount === colUniqueFactor) {
-									rowSubTotal = pt.util.number.roundIf(rowSubTotal, 1);
-
 									row.push({
 										type: 'valueSubtotal',
 										cls: 'pivot-value-subtotal',
 										value: rowSubTotal,
-										htmlValue: Ext.Array.contains(empty, false) ? rowSubTotal.toString() : '&nbsp',
+										htmlValue: Ext.Array.contains(empty, false) ? parseFloat(pt.util.number.roundIf(rowSubTotal, 2)).toString() : '&nbsp',
 										empty: !Ext.Array.contains(empty, false),
 										collapsed: !Ext.Array.contains(collapsed, false)
 									});
@@ -1627,7 +1752,7 @@ PT.core.getUtils = function(pt) {
 									tmpValueObjects[tmpCount++].push({
 										type: item.type === 'value' ? 'valueSubtotal' : 'valueSubtotalTotal',
 										value: subTotal,
-										htmlValue: Ext.Array.contains(empty, false) ? pt.util.number.roundIf(subTotal, 1).toString() : '&nbsp;',
+										htmlValue: Ext.Array.contains(empty, false) ? parseFloat(pt.util.number.roundIf(subTotal, 2)).toString() : '&nbsp;',
 										collapsed: collapsed,
 										cls: item.type === 'value' ? 'pivot-value-subtotal' : 'pivot-value-subtotal-total'
 									});
@@ -1653,7 +1778,7 @@ PT.core.getUtils = function(pt) {
 									type: 'valueTotalSubgrandtotal',
 									cls: 'pivot-value-total-subgrandtotal',
 									value: subTotal,
-									htmlValue: Ext.Array.contains(empty, false) ? pt.util.number.roundIf(subTotal, 1).toString() : '&nbsp;',
+									htmlValue: Ext.Array.contains(empty, false) ? parseFloat(pt.util.number.roundIf(subTotal, 2)).toString() : '&nbsp;',
 									empty: !Ext.Array.contains(empty, false),
 									collapsed: !Ext.Array.contains(collapsed, false)
 								});
@@ -1719,7 +1844,7 @@ PT.core.getUtils = function(pt) {
 							totalColObjects.push({
 								type: 'valueTotal',
 								value: total,
-								htmlValue: Ext.Array.contains(empty, false) ? pt.util.number.roundIf(total, 1).toString() : '&nbsp;',
+								htmlValue: Ext.Array.contains(empty, false) ? parseFloat(pt.util.number.roundIf(total, 2)).toString() : '&nbsp;',
 								empty: !Ext.Array.contains(empty, false),
 								cls: 'pivot-value-total'
 							});
@@ -1744,7 +1869,7 @@ PT.core.getUtils = function(pt) {
 									tmp.push({
 										type: 'valueTotalSubgrandtotal',
 										value: subTotal,
-										htmlValue: Ext.Array.contains(empty, false) ? pt.util.number.roundIf(subTotal, 1).toString() : '&nbsp;',
+										htmlValue: Ext.Array.contains(empty, false) ? parseFloat(pt.util.number.roundIf(subTotal, 2)).toString() : '&nbsp;',
 										empty: !Ext.Array.contains(empty, false),
 										cls: 'pivot-value-total-subgrandtotal'
 									});
@@ -1777,14 +1902,13 @@ PT.core.getUtils = function(pt) {
 
 							total += obj.value;
 							empty.push(obj.empty);
-							//values.push(totalColObjects[i].value);
 						}
 
 						if (xColAxis && xRowAxis) {
 							a.push(getTdHtml({
 								type: 'valueGrandTotal',
 								cls: 'pivot-value-grandtotal',
-								htmlValue: Ext.Array.contains(empty, false) ? pt.util.number.roundIf(total, 1).toString() : '&nbsp;',
+								htmlValue: Ext.Array.contains(empty, false) ? parseFloat(pt.util.number.roundIf(total, 2)).toString() : '&nbsp;',
 								empty: !Ext.Array.contains(empty, false)
 							}));
 						}
@@ -1893,7 +2017,7 @@ PT.core.getUtils = function(pt) {
 						// Extended axes
 						xColAxis = getExtendedAxis('col', xLayout.columnDimensionNames, xResponse);
 						xRowAxis = getExtendedAxis('row', xLayout.rowDimensionNames, xResponse);
-
+						
 						// Create html
 						html = getTableHtml(xColAxis, xRowAxis, xResponse);
 
@@ -1902,15 +2026,30 @@ PT.core.getUtils = function(pt) {
 						pt.viewport.centerRegion.update(html);
 
 						// After table success
+						
+						// Hide mask
 						pt.util.mask.hideMask();
 
+						// Gui state
 						if (pt.viewport.downloadButton) {
 							pt.viewport.downloadButton.enable();
 						}
+						
+						// Add uuid maps to instance
+						pt.uuidDimUuidsMap = uuidDimUuidsMap;
+						pt.uuidObjectMap = uuidObjectMap;
+						
+						// Add value event handlers, set session storage
+						if (PT.isSessionStorage) {
+							setMouseHandlers();
+							pt.util.pivot.setSessionStorage(layout, 'table');
+						}
 
+						// Add objects to instance
 						pt.layout = layout;
 						pt.xLayout = xLayout;
 						pt.xResponse = xResponse;
+						
 console.log("xResponse", xResponse);
 console.log("xLayout", xLayout);
 					}
@@ -1933,9 +2072,8 @@ console.log("xLayout", xLayout);
 					alert(r.responseText);
 				},
 				success: function(r) {
-					var layoutConfig = Ext.decode(r.responseText);
-
-					var	layout = pt.api.layout.Layout(layoutConfig);
+					var layoutConfig = Ext.decode(r.responseText),
+						layout = pt.api.layout.Layout(layoutConfig);
 
 					if (layout) {
 						pt.favorite = Ext.clone(layout);
@@ -1946,6 +2084,110 @@ console.log("xLayout", xLayout);
 					}
 				}
 			});
+		},
+	
+		onMouseHover: function(uuid, event, param) {
+			var dimUuids;
+
+			if (param === 'chart') {			
+				if (Ext.isString(uuid) && Ext.isArray(pt.uuidDimUuidsMap[uuid])) {
+					dimUuids = pt.uuidDimUuidsMap[uuid];
+					
+					for (var i = 0, el; i < dimUuids.length; i++) {
+						el = Ext.get(dimUuids[i]);
+						
+						if (el) {
+							if (event === 'mouseover') {
+								el.addCls('highlighted');
+							}
+							else if (event === 'mouseout') {
+								el.removeCls('highlighted');
+							}
+						}
+					}
+				}
+			}
+		},
+		
+		onMouseClick: function(uuid) {
+			var that = this,
+				uuids = pt.uuidDimUuidsMap[uuid],
+				layoutConfig = Ext.clone(pt.layout),
+				objects = [],
+				dhis2,
+				menu;
+
+			// modify layout dimension items based on uuid objects
+
+			// get objects
+			for (var i = 0; i < uuids.length; i++) {
+				objects.push(pt.uuidObjectMap[uuids[i]]);
+			}
+			
+			// clear layoutConfig dimension items
+			for (var i = 0, a = [].concat(layoutConfig.columns, layoutConfig.rows); i < a.length; i++) {
+				a[i].items = [];
+			}
+			
+			// add new items
+			for (var i = 0, obj, axis; i < objects.length; i++) {
+				obj = objects[i];
+				axis = obj.axis === 'col' ? layoutConfig.columns || [] : layoutConfig.rows || [];
+
+				if (axis.length) {
+					axis[obj.dim].items.push({
+						id: obj.id,
+						name: pt.xResponse.metaData.names[obj.id]
+					});
+				}
+			}
+
+			// menu
+
+			menu = Ext.create('Ext.menu.Menu', {
+				shadow: true,
+				showSeparator: false,
+				items: [
+					{
+						text: 'View selection as chart' + '&nbsp;&nbsp;', //i18n
+						iconCls: 'pt-button-icon-chart',
+						param: 'chart',
+						handler: function() {
+							that.setSessionStorage(layoutConfig, 'analytical', pt.baseUrl + '/dhis-web-visualizer/app/index.html?s=analytical');
+						},
+						listeners: {
+							render: function() {
+								this.getEl().on('mouseover', function() {
+									that.onMouseHover(uuid, 'mouseover', 'chart');
+								});
+
+								this.getEl().on('mouseout', function() {
+									that.onMouseHover(uuid, 'mouseout', 'chart');
+								});
+							}
+						}
+					},
+					{
+						text: 'View selection as map' + '&nbsp;&nbsp;', //i18n
+						iconCls: 'pt-button-icon-map',
+						param: 'map',
+						disabled: true,
+						handler: function() {
+							that.setSessionStorage(layoutConfig, pt.baseUrl + '/dhis-web-mapping/app/index.html');
+						}
+					}		
+				]
+			});
+
+			menu.showAt(function() {
+				var el = Ext.get(uuid),
+					xy = el.getXY();
+
+				xy[0] += el.getWidth() - 5;
+				xy[1] += el.getHeight() - 5;
+
+				return xy;
+			}());
 		}
 	};
 
@@ -1984,7 +2226,7 @@ PT.core.getApi = function(pt) {
 				return;
 			}
 
-			record.id = config.id;
+			record.id = config.id.replace('.', '-');
 
 			if (Ext.isString(config.name)) {
 				record.name = config.name;
@@ -2174,12 +2416,12 @@ PT.core.getApi = function(pt) {
 			layout.displayDensity = Ext.isString(config.displayDensity) && !Ext.isEmpty(config.displayDensity) ? config.displayDensity : 'normal';
 			layout.fontSize = Ext.isString(config.fontSize) && !Ext.isEmpty(config.fontSize) ? config.fontSize : 'normal';
 			layout.digitGroupSeparator = Ext.isString(config.digitGroupSeparator) && !Ext.isEmpty(config.digitGroupSeparator) ? config.digitGroupSeparator : 'space';
-			layout.legendSet = Ext.isObject(config.legendSet) && Ext.isString(config.legendSet.id) ? config.legendSet : undefined;
+			layout.legendSet = Ext.isObject(config.legendSet) && Ext.isString(config.legendSet.id) ? config.legendSet : null;
 
 			layout.userOrganisationUnit = isOu;
 			layout.userOrganisationUnitChildren = isOuc;
 
-			layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : undefined;
+			layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
 
 			layout.reportingPeriod = Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramReportingPeriod) ? config.reportParams.paramReportingPeriod : (Ext.isBoolean(config.reportingPeriod) ? config.reportingPeriod : false);
 			layout.organisationUnit =  Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramOrganisationUnit) ? config.reportParams.paramOrganisationUnit : (Ext.isBoolean(config.organisationUnit) ? config.organisationUnit : false);

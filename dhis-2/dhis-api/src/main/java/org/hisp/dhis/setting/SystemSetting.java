@@ -35,6 +35,8 @@ import java.io.Serializable;
 public class SystemSetting
     implements Serializable
 {
+    public static final String SYSTEMSETTING_PROPERTY_VALUE = "Value";
+    
     private int id;
 
     private String name;

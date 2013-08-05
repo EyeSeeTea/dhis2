@@ -132,9 +132,9 @@ public class HibernateTranslationStore
             hql += " and t.property='" + property + "'";
         }
 
-        if ( locale.getCountry().equals( Translation.DEFAULT_COUNTRY ) )
+        if ( locale.getCountry().equals( I18nLocale.DEFAULT_COUNTRY ) )
         {
-            hql += " and t.locale='" + locale.getLanguage() + "' and t.country = '" + Translation.DEFAULT_COUNTRY + "'";
+            hql += " and t.locale='" + locale.getLanguage() + "' and t.country = '" + I18nLocale.DEFAULT_COUNTRY + "'";
         }
         else
         {
@@ -142,7 +142,7 @@ public class HibernateTranslationStore
 
             if( useDefault )
             {                
-                hql += " or ( t.locale='" + locale.getLanguage() + "' and t.country = '" + Translation.DEFAULT_COUNTRY + "'" 
+                hql += " or ( t.locale='" + locale.getLanguage() + "' and t.country = '" + I18nLocale.DEFAULT_COUNTRY + "'" 
                         + " and not exists ( from Translation t1 where t1.className=t.className and t1.property=t.property and t1.id=t.id and t1.locale=t.locale and t1.country = '" + locale.getCountry() + "' ) )";
             }
                 

@@ -400,6 +400,8 @@ public class HibernateProgramStageInstanceStore
         sql += " UNION ( " + sendMessageToOrgunitRegisteredSql() + " ) ";
         
         sql += " UNION ( " + sendMessageToUsersSql() + " ) ";
+        
+        sql += " UNION ( " + sendMessageToUserGroupsSql() + " ) ";
 
         SqlRowSet rs = jdbcTemplate.queryForRowSet( sql );
 
@@ -732,7 +734,7 @@ public class HibernateProgramStageInstanceStore
         return rs != null ? rs.intValue() : 0;
     }
 
-    public Grid getCompleteness( OrganisationUnit orgunit, Program program, String startDate, String endDate, I18n i18n )
+    public Grid getCompleteness( Collection<Integer> orgunitIds, Program program, String startDate, String endDate, I18n i18n )
     {
         String sql = "SELECT ou.name as orgunit, ps.name as events, psi.completeduser as user_name, count(psi.programstageinstanceid) as number_of_events "
             + "         FROM programstageinstance psi INNER JOIN programstage ps "
@@ -741,9 +743,9 @@ public class HibernateProgramStageInstanceStore
             + "                         ON ou.organisationunitid=psi.organisationunitid"
             + "                 INNER JOIN program pg "
             + "                         ON pg.programid = ps.programid "
-            + "         WHERE ou.parentid = "
-            + orgunit.getId()
-            + "                 AND pg.programid = "
+            + "         WHERE ou.organisationunitid in ( "
+            + TextUtils.getCommaDelimitedString( orgunitIds )
+            + " )                AND pg.programid = "
             + program.getId()
             + "         GROUP BY ou.name, ps.name, psi.completeduser, psi.completeddate, psi.completed "
             + "         HAVING psi.completeddate >= '"
@@ -2399,7 +2401,7 @@ public class HibernateProgramStageInstanceStore
             + "     and pg.type=1 and prm.daysallowedsendmessage is not null  "
             + "     and psi.executiondate is null "
             + "     and (  DATE(now()) - DATE(psi.duedate) ) = prm.daysallowedsendmessage "
-            + "     and prm.sendto = " + PatientReminder.SEND_TO_PATIENT;
+            + "     and prm.whentosend is null and prm.sendto = " + PatientReminder.SEND_TO_PATIENT;
     }
 
     private String sendMessageToHealthWorkerSql()
@@ -2430,7 +2432,7 @@ public class HibernateProgramStageInstanceStore
             + "               and pg.type=1 and prm.daysallowedsendmessage is not null "
             + "               and psi.executiondate is null "
             + "               and (  DATE(now()) - DATE(psi.duedate) ) = prm.daysallowedsendmessage "
-            + "               and prm.sendto = " + PatientReminder.SEND_TO_HEALTH_WORKER;
+            + "               and prm.whentosend is null and prm.sendto = " + PatientReminder.SEND_TO_HEALTH_WORKER;
     }
 
     private String sendMessageToOrgunitRegisteredSql()
@@ -2459,7 +2461,7 @@ public class HibernateProgramStageInstanceStore
             + "               and pg.type=1 and prm.daysallowedsendmessage is not null "
             + "               and psi.executiondate is null "
             + "               and (  DATE(now()) - DATE(psi.duedate) ) = prm.daysallowedsendmessage "
-            + "               and prm.sendto = " +  + PatientReminder.SEND_TO_ORGUGNIT_REGISTERED;
+            + "               and prm.whentosend is null and prm.sendto = " +  + PatientReminder.SEND_TO_ORGUGNIT_REGISTERED;
     }
 
     private String sendMessageToUsersSql()
@@ -2490,6 +2492,38 @@ public class HibernateProgramStageInstanceStore
             + "       and pg.type=1 and prm.daysallowedsendmessage is not null "
             + "       and psi.executiondate is null "
             + "       and (  DATE(now()) - DATE(psi.duedate) ) = prm.daysallowedsendmessage "
-            + "       and prm.sendto = " +  PatientReminder.SEND_TO_ALL_USERS_IN_ORGUGNIT_REGISTERED;
+            + "       and prm.whentosend is null and prm.sendto = " +  PatientReminder.SEND_TO_ALL_USERS_IN_ORGUGNIT_REGISTERED;
+    }
+    
+    private String sendMessageToUserGroupsSql()
+    {
+        return "select psi.programstageinstanceid, uif.phonenumber,prm.templatemessage, p.firstname, p.middlename, p.lastname, org.name as orgunitName ,"
+            + " pg.name as programName, ps.name as programStageName, psi.duedate, "
+            + "(DATE(now()) - DATE(psi.duedate) ) as days_since_due_date "
+            + "  from patient p INNER JOIN programinstance pi "
+            + "       ON p.patientid=pi.patientid "
+            + "   INNER JOIN programstageinstance psi "
+            + "       ON psi.programinstanceid=pi.programinstanceid "
+            + "   INNER JOIN program pg "
+            + "       ON pg.programid=pi.programid "
+            + "   INNER JOIN programstage ps "
+            + "       ON ps.programstageid=psi.programstageid "
+            + "   INNER JOIN patientreminder prm "
+            + "       ON prm.programstageid = ps.programstageid "
+            + "   INNER JOIN organisationunit org "
+            + "       ON org.organisationunitid = p.organisationunitid "
+            + "   INNER JOIN usergroupmembers ugm "
+            + "       ON ugm.usergroupid = prm.usergroupid "
+            + "   INNER JOIN userinfo uif "
+            + "       ON uif.userinfoid = ugm.userid "
+            + "  WHERE pi.status= "
+            + ProgramInstance.STATUS_ACTIVE
+            + "       and uif.phonenumber is not NULL and uif.phonenumber != '' "
+            + "       and prm.templatemessage is not NULL and prm.templatemessage != '' "
+            + "       and pg.type=1 and prm.daysallowedsendmessage is not null "
+            + "       and psi.executiondate is not null "
+            + "       and (  DATE(now()) - DATE(psi.duedate) ) = prm.daysallowedsendmessage "
+            + "       and prm.whentosend is null "
+            + "       and prm.sendto = " +  PatientReminder.SEND_TO_USER_GROUP;
     }
 }

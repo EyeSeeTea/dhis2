@@ -103,12 +103,13 @@ DV.core.getConfig = function() {
             category: 'category',
             filter: 'filter',
             column: 'column',
-            stackedColumn: 'stackedColumn',
+            stackedcolumn: 'stackedcolumn',
             bar: 'bar',
-            stackedBar: 'stackedBar',
+            stackedbar: 'stackedbar',
             line: 'line',
             area: 'area',
-            pie: 'pie'
+            pie: 'pie',
+            radar: 'radar'
         },
         data: {
 			domain: 'domain_',
@@ -677,6 +678,18 @@ DV.core.getUtil = function(dv) {
 			return paramString;
 		},
 
+		setSessionStorage: function(obj, session, url) {
+			if (DV.isSessionStorage) {
+				dhis2 = JSON.parse(sessionStorage.getItem('dhis2')) || {};
+				dhis2[session] = obj;
+				sessionStorage.setItem('dhis2', JSON.stringify(dhis2));
+
+				if (Ext.isString(url)) {
+					window.location.href = url;
+				}
+			}
+		},
+
 		createChart: function(layout, dv) {
 			var dimConf = dv.conf.finals.dimension,
 				getSyncronizedXLayout,
@@ -700,6 +713,17 @@ DV.core.getUtil = function(dv) {
 					xOuDimension = xLayout.objectNameDimensionsMap[dimConf.organisationUnit.objectName],
 					isUserOrgunit = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT'),
 					isUserOrgunitChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_CHILDREN'),
+					isLevel = function() {
+						if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
+							for (var i = 0; i < xOuDimension.ids.length; i++) {
+								if (xOuDimension.ids[i].substr(0,5) === 'LEVEL') {
+									return true;
+								}
+							}
+						}
+
+						return false;
+					}(),
 					ou = dimConf.organisationUnit.objectName,
 					layout;
 
@@ -717,6 +741,18 @@ DV.core.getUtil = function(dv) {
 							}
 							if (isUserOrgunitChildren) {
 								dim.items = dim.items.concat(dv.init.user.ouc);
+							}
+						}
+						else if (isLevel) {
+
+							// Items: get ids from metadata -> items
+							for (var j = 0, ids = Ext.clone(response.metaData[dim.dimensionName]); j < ids.length; j++) {
+								dim.items.push({
+									id: ids[j],
+									name: response.metaData.names[ids[j]]
+								});
+
+								dim.items = dv.util.array.sortObjectsByString(dim.items);
 							}
 						}
 						else {
@@ -737,9 +773,30 @@ DV.core.getUtil = function(dv) {
 					}
 				}
 
+				// Re-layout
 				layout = dv.api.layout.Layout(xLayout);
 
-				return layout ? dv.util.chart.getExtendedLayout(layout) : null;
+				if (layout) {
+					dimensions = [].concat(layout.columns, layout.rows, layout.filters);
+
+					for (var i = 0, idNameMap = response.metaData.names, dimItems; i < dimensions.length; i++) {
+						dimItems = dimensions[i].items;
+
+						if (Ext.isArray(dimItems) && dimItems.length) {
+							for (var j = 0, item; j < dimItems.length; j++) {
+								item = dimItems[j];
+
+								if (Ext.isObject(item) && Ext.isString(idNameMap[item.id]) && !Ext.isString(item.name)) {
+									item.name = idNameMap[item.id] || '';
+								}
+							}
+						}
+					}
+
+					return dv.util.chart.getExtendedLayout(layout);
+				}
+
+				return null;
 			};
 
 			validateResponse = function(response) {
@@ -774,7 +831,6 @@ DV.core.getUtil = function(dv) {
 				ids = [];
 
 				var extendHeaders = function() {
-
 					// Extend headers: index, items, size
 					for (var i = 0, header; i < response.headers.length; i++) {
 						header = response.headers[i];
@@ -822,7 +878,7 @@ DV.core.getUtil = function(dv) {
 
 					// idIndexOrder
 					for (var i = 0; i < axisDimensionNames.length; i++) {
-						idIndexOrder.push(response.nameHeaderMap[axisDimensionNames[i]].index);
+                        idIndexOrder.push(response.nameHeaderMap[axisDimensionNames[i]].index);
 
 						// If co exists in response, add co after dx
 						if (coHeader && axisDimensionNames[i] === dv.conf.finals.dimension.data.dimensionName) {
@@ -1007,7 +1063,7 @@ console.log("baseLineFields", store.baseLineFields);
 					axis;
 
 				// Set maximum if stacked + extra line
-				if ((xLayout.type === typeConf.stackedColumn || xLayout.type === typeConf.stackedBar) &&
+				if ((xLayout.type === typeConf.stackedcolumn || xLayout.type === typeConf.stackedbar) &&
 					(xLayout.showTrendLine || xLayout.targetLineValue || xLayout.baseLineValue)) {
 					var a = [store.getMaximum(), store.getMaximumSum()];
 					maximum = Math.ceil(Ext.Array.max(a) * 1.1);
@@ -1237,7 +1293,6 @@ console.log("baseLineFields", store.baseLineFields);
 				numberOfChars = str.length;
 
 				width = (numberOfItems * itemLength) + (numberOfChars * charLength);
-//alert(width + ' > ' + dv.viewport.centerRegion.getWidth() + '\n' + str);
 
 				if (width > dv.viewport.centerRegion.getWidth() - 50) {
 					isVertical = true;
@@ -1324,7 +1379,7 @@ console.log("baseLineFields", store.baseLineFields);
 				};
 			};
 
-			getDefaultChart = function(store, axes, series, xResponse, xLayout) {
+			getDefaultChart = function(store, axes, series, xResponse, xLayout, theme) {
 				var chart,
 					config = {
 						store: store,
@@ -1335,7 +1390,7 @@ console.log("baseLineFields", store.baseLineFields);
 						insetPadding: 35,
 						width: dv.viewport.centerRegion.getWidth(),
 						height: dv.viewport.centerRegion.getHeight() - 25,
-						theme: 'dv1'
+						theme: theme || 'dv1'
 					};
 
 				// Legend
@@ -1399,7 +1454,7 @@ console.log("baseLineFields", store.baseLineFields);
 				return getDefaultChart(store, axes, series, xResponse, xLayout);
 			};
 
-			generator.stackedColumn = function(xResponse, xLayout) {
+			generator.stackedcolumn = function(xResponse, xLayout) {
 				var chart = this.column(xResponse, xLayout);
 
 				for (var i = 0, item; i < chart.series.items.length; i++) {
@@ -1480,7 +1535,7 @@ console.log("baseLineFields", store.baseLineFields);
 				return getDefaultChart(store, axes, series, xResponse, xLayout);
 			};
 
-			generator.stackedBar = function(xResponse, xLayout) {
+			generator.stackedbar = function(xResponse, xLayout) {
 				var chart = this.bar(xResponse, xLayout);
 
 				for (var i = 0, item; i < chart.series.items.length; i++) {
@@ -1524,8 +1579,7 @@ console.log("baseLineFields", store.baseLineFields);
 
 					//if (xLayout.showValues) {
 						//line.label = {
-							//display: 'rotate',
-							//'text-anchor': 'middle',
+							//display: 'over',
 							//field: store.rangeFields[i]
 						//};
 					//}
@@ -1665,6 +1719,61 @@ console.log("baseLineFields", store.baseLineFields);
 				return chart;
 			};
 
+			generator.radar = function(xResponse, xLayout) {
+				var store = getDefaultStore(xResponse, xLayout),
+					axes = [],
+					series = [],
+					seriesTitles = getDefaultSeriesTitle(store, xResponse),
+					chart;
+					
+				// Axes
+				axes.push({
+					type: 'Radial',
+					position: 'radial',
+					label: {
+						display: true
+					}
+				});
+
+				// Series
+				for (var i = 0, obj; i < store.rangeFields.length; i++) {
+					obj = {
+						showInLegend: true,
+						type: 'radar',
+						xField: store.domainFields,
+						yField: store.rangeFields[i],
+						style: {
+							opacity: 0.5
+						},
+						tips: getDefaultTips(),
+						title: seriesTitles[i]
+					};
+
+					if (xLayout.showValues) {
+						obj.label = {
+							display: 'over',
+							field: store.rangeFields[i]
+						};
+					}
+
+					series.push(obj);
+				}
+
+				chart = getDefaultChart(store, axes, series, xResponse, xLayout, 'Category2');
+				
+				chart.insetPadding = 40;
+				chart.height = dv.viewport.centerRegion.getHeight() - 80;
+				
+				chart.setChartSize = function() {
+					this.animate = false;
+					this.setWidth(dv.viewport.centerRegion.getWidth());
+					this.setHeight(dv.viewport.centerRegion.getHeight() - 80);
+					this.animate = true;
+				};
+				
+				return chart;
+			};				
+
 			initialize = function() {
 				var url,
 					xLayout,
@@ -1726,6 +1835,11 @@ console.log("baseLineFields", store.baseLineFields);
 							dv.viewport.downloadButton.enable();
 						}
 
+						// Set session storage
+						if (DV.isSessionStorage) {
+							dv.util.chart.setSessionStorage(layout, 'chart');
+						}
+
 						dv.chart = chart;
 						dv.layout = layout;
 						dv.xLayout = xLayout;
@@ -1766,7 +1880,73 @@ console.log("layout", layout);
 					}
 				}
 			});
-		}
+		},
+
+        analytical2layout: function(analytical) {
+            var dimConf = dv.conf.finals.dimension,
+                co = dimConf.category.objectName,
+                layoutConfig = Ext.clone(analytical);
+
+            analytical = Ext.clone(analytical);
+
+            layoutConfig.columns = [];
+            layoutConfig.rows = [];
+            layoutConfig.filters = layoutConfig.filters || [];
+
+            // Series
+            if (Ext.isArray(analytical.columns) && analytical.columns.length) {
+                for (var i = 0, dim; i < analytical.columns.length; i++) {
+                    dim = analytical.columns[i];
+
+                    if (dim.dimension === co) {
+                        continue;
+                    }
+
+                    if (!layoutConfig.columns.length) {
+                        layoutConfig.columns.push(dim);
+                    }
+                    else {
+
+                        // in or last item (one only) - rest as filter
+                        if (dim.dimension === dimConf.indicator.objectName || (i === analytical.columns.length - 1)) {
+                            layoutConfig.filters.push(layoutConfig.columns.pop());
+                            layoutConfig.columns = [dim];
+                        }
+                        else {
+                            layoutConfig.filters.push(dim);
+                        }
+                    }
+                }
+            }
+
+            // Rows
+            if (Ext.isArray(analytical.rows) && analytical.rows.length) {
+                for (var i = 0, dim; i < analytical.rows.length; i++) {
+                    dim = analytical.rows[i];
+
+                    if (dim.dimension === co) {
+                        continue;
+                    }
+
+                    if (!layoutConfig.rows.length) {
+                        layoutConfig.rows.push(dim);
+                    }
+                    else {
+
+                        // in or last item (one only) - rest as filter
+                        if (dim.dimension === dimConf.indicator.objectName || (i === analytical.rows.length - 1)) {
+                            layoutConfig.filters.push(layoutConfig.rows.pop());
+                            layoutConfig.rows = [dim];
+                        }
+                        else {
+                            layoutConfig.filters.push(dim);
+                        }
+                    }
+                }
+            }
+
+            return layoutConfig;
+        }
 	};
 
 	return util;
@@ -1866,7 +2046,7 @@ DV.core.getApi = function(dv) {
 	api.layout.Layout = function(config) {
 		var layout = {};
 
-		// type: string ('column') - 'column', 'stackedColumn', 'bar', 'stackedBar', 'line', 'area', 'pie'
+		// type: string ('column') - 'column', 'stackedcolumn', 'bar', 'stackedbar', 'line', 'area', 'pie'
 
 		// columns: [Dimension]
 
@@ -1983,7 +2163,7 @@ DV.core.getApi = function(dv) {
 			}
 
 			// Layout
-			layout.type = config.type;
+			layout.type = Ext.isString(config.type) ? config.type.toLowerCase() : dv.conf.finals.chart.column;
 
 			layout.columns = config.columns;
 			layout.rows = config.rows;
@@ -1996,23 +2176,23 @@ DV.core.getApi = function(dv) {
 			layout.hideLegend = Ext.isBoolean(config.hideLegend) ? config.hideLegend : false;
 			layout.hideTitle = Ext.isBoolean(config.hideTitle) ? config.hideTitle : false;
 
-			layout.targetLineValue = Ext.isNumber(config.targetLineValue) ? config.targetLineValue : undefined;
+			layout.targetLineValue = Ext.isNumber(config.targetLineValue) ? config.targetLineValue : null;
 			layout.targetLineTitle = Ext.isString(config.targetLineLabel) && !Ext.isEmpty(config.targetLineLabel) ? config.targetLineLabel :
-				(Ext.isString(config.targetLineTitle) && !Ext.isEmpty(config.targetLineTitle) ? config.targetLineTitle : undefined);
-			layout.baseLineValue = Ext.isNumber(config.baseLineValue) ? config.baseLineValue : undefined;
+				(Ext.isString(config.targetLineTitle) && !Ext.isEmpty(config.targetLineTitle) ? config.targetLineTitle : null);
+			layout.baseLineValue = Ext.isNumber(config.baseLineValue) ? config.baseLineValue : null;
 			layout.baseLineTitle = Ext.isString(config.baseLineLabel) && !Ext.isEmpty(config.baseLineLabel) ? config.baseLineLabel :
-				(Ext.isString(config.baseLineTitle) && !Ext.isEmpty(config.baseLineTitle) ? config.baseLineTitle : undefined);
+				(Ext.isString(config.baseLineTitle) && !Ext.isEmpty(config.baseLineTitle) ? config.baseLineTitle : null);
 
-			layout.title = Ext.isString(config.title) &&  !Ext.isEmpty(config.title) ? config.title : undefined;
+			layout.title = Ext.isString(config.title) &&  !Ext.isEmpty(config.title) ? config.title : null;
 			layout.domainAxisTitle = Ext.isString(config.domainAxisLabel) && !Ext.isEmpty(config.domainAxisLabel) ? config.domainAxisLabel :
-				(Ext.isString(config.domainAxisTitle) && !Ext.isEmpty(config.domainAxisTitle) ? config.domainAxisTitle : undefined);
+				(Ext.isString(config.domainAxisTitle) && !Ext.isEmpty(config.domainAxisTitle) ? config.domainAxisTitle : null);
 			layout.rangeAxisTitle = Ext.isString(config.rangeAxisLabel) && !Ext.isEmpty(config.rangeAxisLabel) ? config.rangeAxisLabel :
-				(Ext.isString(config.rangeAxisTitle) && !Ext.isEmpty(config.rangeAxisTitle) ? config.rangeAxisTitle : undefined);
+				(Ext.isString(config.rangeAxisTitle) && !Ext.isEmpty(config.rangeAxisTitle) ? config.rangeAxisTitle : null);
 
 			layout.userOrganisationUnit = isOu;
 			layout.userOrganisationUnitChildren = isOuc;
 
-			layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : undefined;
+			layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
 
 			return Ext.clone(layout);
 		}();

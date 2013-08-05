@@ -2,17 +2,26 @@
  *
  * Panel
  * DV Panel
+ * 
  * Combobox
  * DV Combobox
+ * 
  * MultiSelect
  * DV MultiSelect
+ * 
  * Checkbox
  * DV Checkbox
+ * 
  * Toolbar
  * DV Toolbar
+ * 
+ * Menu
+ * DV Menu
+ * 
  * Button
  * Tooltip
  * LoadMask
+ * 
  * DV Grid
  * DV Window
  * DV Label
@@ -21,8 +30,6 @@
  * DV Accordion
  * DV Textarea
  * DV Tips
- * Menu
- * DV Menu
 */
 
 /* General */
@@ -347,6 +354,64 @@ body.x-windows {
 
 
 /*----------------------------------------------------------------------------
+ * Menu
+ *--------------------------------------------------------------------------*/
+
+.x-menu-body {
+    border-color: #bbb;
+    border-radius: 2px;
+}
+
+.x-menu-item-active .x-menu-item-link {
+	border-radius: 0;
+	border-color: #e1e1e1;
+	background-color: #e1e1e1;
+	background-image: none;
+}
+.x-menu-body {
+	padding: 0;
+}
+
+	/* Menu item */
+.x-menu-item-link {
+    padding: 4px 5px 4px 26px;
+}
+	/* Menu item color */
+.x-menu-item-text {
+    color: #111;
+}
+
+
+/*----------------------------------------------------------------------------
+ * DV Menu
+ *--------------------------------------------------------------------------*/
+
+	/* Menu item icon */
+.dv-menu-item-noicon .x-menu-item-link {
+	padding-left: 10px;
+}
+	
+.dv-menu-item-image {
+    background-image:url('../images/dl_image.png');
+    padding-left: 18px;
+}
+.dv-menu-item-datasource {
+    background-image:url('../images/dl_datasource.png');
+    padding-left: 18px;
+}
+
+.dv-menu-item-selected {
+    background-image:url('../images/check.png');
+    padding-left: 18px;
+}
+
+	/* Menu align */
+.dv-btn-menu {
+	margin-top: 2px;
+}
+
+
+/*----------------------------------------------------------------------------
  * Button
  *--------------------------------------------------------------------------*/
 
@@ -373,6 +438,10 @@ body.x-windows {
     height: 32px;
 }
 
+.x-btn-default-small {
+	border-radius: 1px;
+}
+
 .x-btn-default-toolbar-small-pressed {
 	border-color: #bbb;
     background-image: none;
@@ -383,6 +452,31 @@ body.x-windows {
     background-image: -o-linear-gradient(top, #d1d1d1,#e5e5e5);
     background-image: -ms-linear-gradient(top, #d1d1d1,#e5e5e5);
     background-image: linear-gradient(top, #d1d1d1,#e5e5e5);
+}
+
+
+/*----------------------------------------------------------------------------
+ * DV Button
+ *--------------------------------------------------------------------------*/
+
+.dv-button-icon-gear {
+	width: 22px !important;
+	height: 22px !important;
+	background: url('../images/gear_18.png') no-repeat;
+}
+
+.dv-button-icon-table {
+	background: url('../images/table_14.png') no-repeat;
+}
+.dv-button-icon-chart {
+	background: url('../images/chart_14.png') no-repeat;
+}
+.dv-button-icon-map {
+	background: url('../images/map_14.png') no-repeat;
+}
+
+.dv-button-organisationunitselection .x-btn-center {
+	width: 18px !important;
 }
 
 
@@ -418,12 +512,15 @@ body.x-windows {
 	background-image: none;
 	background-color: transparent;
 }
+.x-mask-msg div {
+    background-position: 11px center;
+}
 .x-mask-msg .x-mask-loading {
 	border: 0 none;
 	background-color: #000;
 	color: #fff;
 	border-radius: 2px;
-	padding: 10px 9px 10px 25px;
+	padding: 12px 14px 12px 30px;
 	opacity: 0.65;
 }
 
@@ -631,12 +728,12 @@ body.x-windows {
 	border-top-right-radius: 1px;
     background-image: none;
     background-color: #e0e0e0;
-    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #dcdcdc), color-stop(100%, #e5e5e5)) !important;
-    background-image: -webkit-linear-gradient(top, #dcdcdc, #e5e5e5) !important;
-    background-image: -moz-linear-gradient(top, #dcdcdc, #e5e5e5) !important;
-    background-image: -o-linear-gradient(top, #dcdcdc, #e5e5e5) !important;
-    background-image: -ms-linear-gradient(top, #dcdcdc, #e5e5e5) !important;
-    background-image: linear-gradient(top, #dcdcdc, #e5e5e5) !important;
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #dedede), color-stop(100%, #e6e6e6)) !important;
+    background-image: -webkit-linear-gradient(top, #dedede, #e6e6e6) !important;
+    background-image: -moz-linear-gradient(top, #dedede, #e6e6e6) !important;
+    background-image: -o-linear-gradient(top, #dedede, #e6e6e6) !important;
+    background-image: -ms-linear-gradient(top, #dedede, #e6e6e6) !important;
+    background-image: linear-gradient(top, #dedede, #e6e6e6) !important;
 }
 	/* accordion title dock, default, collapsed */
 .dv-accordion .collapsed .x-accordion-hd {
@@ -645,8 +742,7 @@ body.x-windows {
 
 	/* accordion title dock outer, shared */
 .dv-accordion .x-accordion-item {
-	border-top-left-radius: 2px;
-	border-top-right-radius: 2px;
+	border-radius: 1px;
 }
 	/* accordion title dock outer, default */
 .dv-accordion .x-accordion-item {
@@ -719,93 +815,4 @@ body.x-windows {
     color: #444;
 	-webkit-text-stroke: 0;
 }
-
-
-/*----------------------------------------------------------------------------
- * Menu
- *--------------------------------------------------------------------------*/
-
-.x-menu-body {
-    border-color: #bbb;
-    border-radius: 2px;
-}
-
-.x-menu-item-active .x-menu-item-link {
-	border-radius: 0;
-	border-color: #e1e1e1;
-	background-color: #e1e1e1;
-	background-image: none;
-}
-.x-menu-body {
-	padding: 0;
-}
-
-	/* Menu item */
-.x-menu-item-link {
-    padding: 4px 5px 4px 28px;
-}
-	/* Menu item color */
-.x-menu-item-text {
-    color: #111;
-}
-
-
-/*----------------------------------------------------------------------------
- * DV Menu
- *--------------------------------------------------------------------------*/
-
-	/* Menu item icon */
-.dv-menu-item-image {
-    background-image:url('../images/dl_image.png');
-    padding-left: 18px;
-}
-.dv-menu-item-datasource {
-    background-image:url('../images/dl_datasource.png');
-    padding-left: 18px;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

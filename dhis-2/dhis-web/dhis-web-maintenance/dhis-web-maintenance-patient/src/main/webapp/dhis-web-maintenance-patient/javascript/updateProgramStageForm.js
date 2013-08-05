@@ -1,6 +1,7 @@
 var duplicate = false;
 jQuery( document ).ready( function()
 {
+	showHideUserGroup();
 	validation( 'updateProgramStageForm', function( form ){ 
 		if( duplicate==true) 
 			return false;
@@ -43,6 +44,12 @@ jQuery( document ).ready( function()
 		var sendTo = jQuery( "#sendTo" );
 		sendTo.empty();
 		
+		var whenToSend = jQuery( "#whenToSend" );
+		whenToSend.empty();
+		
+		var userGroup = jQuery( "#userGroup" );
+		userGroup.empty();
+		
 		jQuery("#selectedList").find("tr").each( function( i, item ){ 
 			
 			selectedDataElementsValidator.append( "<option value='" + item.id + "' selected='true'>" + item.id + "</option>" );
@@ -72,6 +79,12 @@ jQuery( document ).ready( function()
 		jQuery(".sendTo").each( function( i, item ){ 
 			sendTo.append( "<option value='" + item.value + "' selected='true'>" + item.value +"</option>" );
 		});
+		jQuery(".whenToSend").each( function( i, item ){ 
+			whenToSend.append( "<option value='" + item.value + "' selected='true'>" + item.value +"</option>" );
+		});
+		jQuery(".userGroup").each( function( i, item ){ 
+			userGroup.append( "<option value='" + item.value + "' selected='true'>" + item.value +"</option>" );
+		});
 	});
 	
 	checkValueIsExist( "name", "validateProgramStage.action", {id:getFieldValue('programId'), programStageId:getFieldValue('id')});	
@@ -98,3 +111,14 @@ jQuery( document ).ready( function()
 		}
 	});
 });
+function showHideUserGroup()
+{
+	jQuery(".sendTo").each( function( i, item ){
+		var numb = i+1;
+		if( item.value == 5){
+			showById( 'tr'+numb );
+		}
+		else
+			hideById ( 'tr'+numb );
+	});
+}

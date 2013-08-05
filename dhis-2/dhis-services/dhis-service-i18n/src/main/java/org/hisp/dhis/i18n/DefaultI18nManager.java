@@ -64,25 +64,27 @@ public class DefaultI18nManager
     // I18nManager implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public I18n getI18n( Class<?> clazz )
         throws I18nManagerException
     {
         return new I18n( getGlobalResourceBundle(), getSpecificResourceBundle( clazz.getName() ) );
     }
 
-    /**
-     * Used to send a specific clazzName (path) to the resource bundler.
-     *
-     * @param clazzName Path to use for getting i18n prop file
-     * @return I18n object
-     * @throws I18nManagerException
-     */
+    @Override
+    public I18n getI18n( Class<?> clazz, Locale locale )
+        throws I18nManagerException
+    {
+        return new I18n( getGlobalResourceBundle(locale), getSpecificResourceBundle( clazz.getName(), locale ) );
+    }
+
     @Override
     public I18n getI18n( String clazzName ) throws I18nManagerException
     {
         return new I18n( getGlobalResourceBundle(), getSpecificResourceBundle( clazzName ) );
     }
-
+    
+    @Override
     public I18nFormat getI18nFormat()
         throws I18nManagerException
     {
@@ -100,9 +102,15 @@ public class DefaultI18nManager
     private ResourceBundle getGlobalResourceBundle()
         throws I18nManagerException
     {
+        return getGlobalResourceBundle( getCurrentLocale() );
+    }
+
+    private ResourceBundle getGlobalResourceBundle( Locale locale )
+        throws I18nManagerException
+    {
         try
         {
-            return resourceBundleManager.getGlobalResourceBundle( getCurrentLocale() );
+            return resourceBundleManager.getGlobalResourceBundle( locale );
         }
         catch ( ResourceBundleManagerException e )
         {
@@ -112,7 +120,12 @@ public class DefaultI18nManager
 
     private ResourceBundle getSpecificResourceBundle( String clazzName )
     {
-        return resourceBundleManager.getSpecificResourceBundle( clazzName, getCurrentLocale() );
+        return getSpecificResourceBundle( clazzName, getCurrentLocale() );
+    }
+
+    private ResourceBundle getSpecificResourceBundle( String clazzName, Locale locale )
+    {
+        return resourceBundleManager.getSpecificResourceBundle( clazzName, locale );
     }
 
     private Locale getCurrentLocale()

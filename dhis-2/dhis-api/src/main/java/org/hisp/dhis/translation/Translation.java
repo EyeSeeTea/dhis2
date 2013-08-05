@@ -39,8 +39,6 @@ public class Translation
      * Determines if a de-serialized file is compatible with this class.
      */
     private static final long serialVersionUID = 4432944068677351446L;
-
-    public static final String DEFAULT_COUNTRY = "default";
     
     private String className;
 

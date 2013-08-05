@@ -300,16 +300,25 @@ function ValueSaver( dataElementId_, value_, dataElementType_, resultColor_  )
 
             DAO.store.get( 'dataValues', dataValueKey ).done( function ( obj ) {
                 if ( !obj ) {
-                    markValue( ERROR );
-                    window.alert( i18n_saving_value_failed_error_code + '\n\n' + errorCode );
-                    return;
+                    obj = {};
+                    obj.executionDate = {};
+                    obj.executionDate.programId = $( '#programId' ).val();
+                    obj.executionDate.programStageInstanceId = dataValueKey;
+
+                    var orgUnitId = $( '#orgunitId' ).val();
+                    obj.executionDate.organisationUnitId = orgUnitId;
+                    obj.executionDate.organisationUnit = organisationUnits[orgUnitId].n;
                 }
+
+                obj.executionDate.executionDate = $( '#executionDate' ).val();
+                obj.executionDate.completed = $( '#completed' ).val();
 
                 if ( !obj.values ) {
                     obj.values = {};
                 }
 
                 obj.id = dataValueKey;
+                data.value = decodeURI(data.value);
                 obj.values[key] = data;
 
                 this.set( 'dataValues', obj );
@@ -606,7 +615,7 @@ function runCompleteEvent( isCreateEvent )
                                 return;
                             }
 
-                            obj.executionDate.completed = true;
+                            obj.executionDate.completed = 'true';
                             DAO.store.set('dataValues', obj);
                         } );
 
@@ -659,7 +668,7 @@ function doUnComplete( isCreateEvent )
                             return;
                         }
 
-                        obj.executionDate.completed = false;
+                        obj.executionDate.completed = 'false';
                         DAO.store.set( 'dataValues', obj );
                     } );
                 }

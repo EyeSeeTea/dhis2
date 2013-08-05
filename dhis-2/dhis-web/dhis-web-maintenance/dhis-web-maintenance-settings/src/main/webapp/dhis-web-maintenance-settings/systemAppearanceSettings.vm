@@ -22,19 +22,31 @@
 
 <div class="settingLabel">$i18n.getString( "application_title" )</div>
 
-<div class="setting"><input type="text" id="applicationTitle" name="applicationTitle" maxlength="40" value="$!{applicationTitle}"/></div>
+<div class="setting">
+<input type="text" id="applicationTitle" name="applicationTitle" maxlength="40" value="$!{applicationTitle}" style="vertical-align:top;" />
+<a href="javascript:translate( 'SystemSetting', '$systemSettingIds.get("applicationTitle")' )" title="$i18n.getString( 'translation_translate' )"><img src="../images/i18n.png" alt="$i18n.getString( 'translation_translate' )"/></a>
+</div>
 
 <div class="settingLabel">$i18n.getString( "application_introduction" ) <span class="tipText">($i18n.getString( "allows_html" ))</span></div>
 
-<div class="setting"><textarea id="applicationIntro" name="applicationIntro">$!{keyApplicationIntro}</textarea></div>
+<div class="setting">
+<textarea id="applicationIntro" name="applicationIntro">$!{keyApplicationIntro}</textarea>
+<a href="javascript:translate( 'SystemSetting', '$systemSettingIds.get("keyApplicationIntro")' )" title="$i18n.getString( 'translation_translate' )"><img src="../images/i18n.png" alt="$i18n.getString( 'translation_translate' )"/></a>
+</div>
 
 <div class="settingLabel">$i18n.getString( "application_notification" ) <span class="tipText">($i18n.getString( "allows_html" ))</span></div>
 
-<div class="setting"><textarea id="applicationNotification" name="applicationNotification">$!{keyApplicationNotification}</textarea></div>
+<div class="setting">
+<textarea id="applicationNotification" name="applicationNotification">$!{keyApplicationNotification}</textarea>
+<a href="javascript:translate( 'SystemSetting', '$systemSettingIds.get("keyApplicationNotification")' )" title="$i18n.getString( 'translation_translate' )"><img src="../images/i18n.png" alt="$i18n.getString( 'translation_translate' )"/></a>
+</div>
 
 <div class="settingLabel">$i18n.getString( "application_footer" ) <span class="tipText">($i18n.getString( "allows_html" ))</span></div>
 
-<div class="setting"><textarea id="applicationFooter" name="applicationFooter">$!{keyApplicationFooter}</textarea></div>
+<div class="setting">
+<textarea id="applicationFooter" name="applicationFooter">$!{keyApplicationFooter}</textarea>
+<a href="javascript:translate( 'SystemSetting', '$systemSettingIds.get("keyApplicationFooter")' )" title="$i18n.getString( 'translation_translate' )"><img src="../images/i18n.png" alt="$i18n.getString( 'translation_translate' )"/></a>
+</div>
 
 <div class="settingLabel">$i18n.getString( "style" )</div>
 

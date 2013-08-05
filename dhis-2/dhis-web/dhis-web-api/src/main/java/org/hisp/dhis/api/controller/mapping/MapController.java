@@ -27,14 +27,26 @@ package org.hisp.dhis.api.controller.mapping;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.period.PeriodType.getPeriodFromIsoString;
+
+import java.awt.image.BufferedImage;
+import java.io.InputStream;
+import java.util.Iterator;
+
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.hisp.dhis.api.controller.AbstractCrudController;
 import org.hisp.dhis.api.utils.ContextUtils;
+import org.hisp.dhis.api.utils.ContextUtils.CacheStrategy;
 import org.hisp.dhis.dataelement.DataElementOperandService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.mapgeneration.MapGenerationService;
 import org.hisp.dhis.mapping.Map;
 import org.hisp.dhis.mapping.MapView;
 import org.hisp.dhis.mapping.MappingService;
@@ -48,14 +60,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.InputStream;
-import java.util.Iterator;
-
-import static org.hisp.dhis.period.PeriodType.getPeriodFromIsoString;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -94,6 +100,12 @@ public class MapController
 
     @Autowired
     private I18nManager i18nManager;
+
+    @Autowired
+    private MapGenerationService mapGenerationService;
+
+    @Autowired
+    private ContextUtils contextUtils;
 
     //--------------------------------------------------------------------------
     // CRUD
@@ -211,6 +223,17 @@ public class MapController
         }
     }
 
+    @RequestMapping(value = { "/{uid}/data", "/{uid}/data.png" }, method = RequestMethod.GET)
+    public void getMapData( 
+        @PathVariable String uid, 
+        @RequestParam( required = false, defaultValue = "512" ) Integer width, 
+        HttpServletResponse response ) throws Exception
+    {
+        Map map = mappingService.getMap( uid );
+
+        renderMapViewPng( map, width, response );
+    }
+
     //--------------------------------------------------------------------------
     // Supportive methods
     //--------------------------------------------------------------------------
@@ -273,6 +296,23 @@ public class MapController
         if ( view.getOrganisationUnitGroupSet() != null )
         {
             view.setOrganisationUnitGroupSet( organisationUnitGroupService.getOrganisationUnitGroupSet( view.getOrganisationUnitGroupSet().getUid() ) );
+        }
+    }
+
+    private void renderMapViewPng( Map map, int width, HttpServletResponse response )
+        throws Exception
+    {
+        BufferedImage image = mapGenerationService.generateMapImage( map, width );
+
+        if ( image != null )
+        {
+            contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_PNG, CacheStrategy.RESPECT_SYSTEM_SETTING, "map.png", false );
+
+            ImageIO.write( image, "PNG", response.getOutputStream() );
+        }
+        else
+        {
+            response.setStatus( HttpServletResponse.SC_NO_CONTENT );
         }
     }
 }

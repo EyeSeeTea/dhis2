@@ -209,7 +209,7 @@ public class TableAlteror
 
         updateProgramInstanceStatus();
         
-        executeSql( "UPDATE program SET disableRegistrationFields=false where disableRegistrationFields is null" );
+        executeSql( "ALTER TABLE program DROP COLUMN disableRegistrationFields" );
         executeSql( "ALTER TABLE program ALTER COLUMN dateofincidentdescription DROP NOT NULL");
         executeSql( "ALTER TABLE patient ALTER COLUMN birthdate DROP NOT NULL");
         executeSql( "ALTER TABLE patient ALTER COLUMN gender DROP NOT NULL");
@@ -218,6 +218,10 @@ public class TableAlteror
         executeSql( "UPDATE program SET displayOnAllOrgunit=true where displayOnAllOrgunit is null" );
         executeSql( "UPDATE program SET useFormNameDataElement=true where useFormNameDataElement is null" );
         executeSql( "ALTER TABLE caseaggregationcondition ALTER COLUMN aggregationexpression TYPE varchar(1000)");
+        executeSql( "update patientattribute set displayonvisitschedule = false where displayonvisitschedule is null");
+        executeSql( "update program set useBirthDateAsIncidentDate = false where useBirthDateAsIncidentDate is null");
+        executeSql( "update program set useBirthDateAsEnrollmentDate = false where useBirthDateAsEnrollmentDate is null");
+        executeSql( "update program set selectEnrollmentDatesInFuture = true where selectEnrollmentDatesInFuture is null");
     }
 
     // -------------------------------------------------------------------------
