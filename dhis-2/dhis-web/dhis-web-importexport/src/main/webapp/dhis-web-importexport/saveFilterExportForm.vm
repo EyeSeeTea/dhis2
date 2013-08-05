@@ -15,7 +15,7 @@
                 <label>$i18n.getString( "name" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label>
             </td>
             <td>
-                <input type="text" id="name" name="name" value="$filter.name" style="width: 90%;" onchange="">
+                <input type="text" id="name" name="name" value="$filter.name" style="width: 90%;">
             </td>
         </tr>
         <tr>

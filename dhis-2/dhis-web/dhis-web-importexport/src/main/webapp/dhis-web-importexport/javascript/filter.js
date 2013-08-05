@@ -41,7 +41,7 @@ function insertFilterDesign( filters )
         var filterId = filters[i].id;
         var filterName = removeWhiteSpace( filters[i].name );
         var filterCode = filters[i].code;
-        var filterCreated = filters[i].created;
+        var filterMetaDataUids = filters[i].metaDataUids;
         var design =
                       '<tr id="tr' + filterName +'" style="margin: 20px;">'
                     +      '<td>'
@@ -57,7 +57,7 @@ function insertFilterDesign( filters )
                     +                '<input type="hidden" name="name" value="' + filters[i].name + '" />'
                     +                '<input type="hidden" name="uid" value="' + filterId + '" />'
                     +                '<input type="hidden" name="code" value="' + filterCode + '" />'
-                    +                '<input id="metaDataUids' + filterName + '" type="hidden" name="metaDataUids" value="" />'
+                    +                '<input type="hidden" id="metaDataUids' + filterName + '" name="metaDataUids" value="' + filterMetaDataUids + '" />'
                     +          '</form>'
                     +          '<button id="buttonEdit' + filterName + '" type="button" style="background-color: inherit;">'
                     +              '<img src="../images/edit.png" alt="' + i18n_edit + '"/>'
@@ -82,13 +82,13 @@ function insertFilterDesign( filters )
 // Add Filter button events
 function filterButtonEvents( filter )
 {
-    filterApplyButton( filter );
-    filterEditButton( filter );
-    filterRemoveButton( filter );
+    applyFilterButton( filter );
+    editFilterButton( filter );
+    removeFilterButton( filter );
 }
 
 // Apply a Filter to the MetaData Tables
-function filterApplyButton( filter )
+function applyFilterButton( filter )
 {
     var filterName = removeWhiteSpace( filter.name );
     $( "#buttonApply" + filterName ).live( "click", function ()
@@ -139,13 +139,18 @@ function applyFilter( data )
 }
 
 // Edit an existing Filter
-function filterEditButton( filter )
+function editFilterButton( filter )
 {
     var filterName = removeWhiteSpace( filter.name );
+
     $( "#buttonEdit" + filterName ).live( "click", function ()
     {
-        var selectedUids = getSelectedUids();
-        $( "#metaDataUids" + filterName ).attr( "value", selectedUids );
+        var existingUidsArray = (filter.metaDataUids).split( ", " );
+        existingUidsArray = removeEmptyStringFromArray( existingUidsArray );
+        var selectedUidsArray = getSelectedUids();
+        var metaDataUids = getAllUids( existingUidsArray, selectedUidsArray );
+
+        $( "#metaDataUids" + filterName ).attr( "value", metaDataUids );
         $( "#form" + filterName ).submit();
     } );
 }
@@ -153,20 +158,44 @@ function filterEditButton( filter )
 // Get all the selected uids from the tables
 function getSelectedUids()
 {
-    var selectedUids = "";
+    var selectedUidsArray = [];
     for ( var i = 0; i < metaDataArray.length; i++ )
     {
         $( "#selected" + metaDataArray[i] + " option" ).each( function ()
         {
-            selectedUids += $( this ).attr( "value" ) + ", ";
+            selectedUidsArray.push( $( this ).attr( "value" ) );
         } );
     }
-    selectedUids = removeLastComma( selectedUids );
-    return selectedUids;
+    return selectedUidsArray;
+}
+
+// Add the Selected Uids to the existing Uids that a Filter has
+function getAllUids( existingUidsArray, selectedUidsArray )
+{
+    for ( var i = 0; i < existingUidsArray.length; i++ )
+    {
+        for ( var j = 0; j < selectedUidsArray.length; j++ )
+        {
+            if ( selectedUidsArray[j] === existingUidsArray[i] )
+            {
+                selectedUidsArray.splice( j, 1 );
+            }
+        }
+    }
+
+    var finalUidsArray = existingUidsArray.concat( selectedUidsArray );
+    var finalUids = "";
+
+    for ( var k = 0; k < finalUidsArray.length; k++ )
+    {
+        finalUids += finalUidsArray[k] + ", ";
+    }
+    finalUids = removeLastComma( finalUids );
+    return finalUids;
 }
 
 // Delete a Filter from the database
-function filterRemoveButton( filter )
+function removeFilterButton( filter )
 {
     var filterName = removeWhiteSpace( filter.name );
     $( "#buttonRemove" + filterName ).live( "click", function ()

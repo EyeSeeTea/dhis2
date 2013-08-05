@@ -2,25 +2,30 @@
 function saveFilter()
 {
     var json = JSON.stringify( createFilter() );
-
-    $.ajax(
-        {
-            type: "POST",
-            url: "../api/detailedMetaData/saveFilter",
-            contentType: "application/json",
-            data: json,
-            success: function ()
+    if ( validateFilter() )
+    {
+        $.ajax(
             {
-                console.log( "Filter successfully saved." );
-                alert( "Filter saved !" );
-            },
-            error: function ( request, status, error )
-            {
-                console.log( request.responseText );
-                console.log( arguments );
-                alert( "Save filter process failed." );
-            }
-        } );
+                type: "POST",
+                url: "../api/detailedMetaData/saveFilter",
+                contentType: "application/json",
+                data: json,
+                success: function ()
+                {
+                    console.log( "Filter successfully saved." );
+                    alert( "Filter saved !" );
+                },
+                error: function ( request, status, error )
+                {
+                    console.log( request.responseText );
+                    console.log( arguments );
+                    alert( "Save filter process failed." );
+                }
+            } );
+    } else
+    {
+        alert( "Filter name cannot be empty." );
+    }
 }
 
 // Update an existing Filter in the database
@@ -32,24 +37,30 @@ function updateFilter()
 
     var json = JSON.stringify( filter );
 
-    $.ajax(
-        {
-            type: "POST",
-            url: "../api/detailedMetaData/updateFilter",
-            contentType: "application/json",
-            data: json,
-            success: function ()
+    if ( validateFilter() )
+    {
+        $.ajax(
             {
-                console.log( "Filter successfully saved." );
-                alert( "Filter updated !" );
-            },
-            error: function ( request, status, error )
-            {
-                console.log( request.responseText );
-                console.log( arguments );
-                alert( "Update filter process failed." );
-            }
-        } );
+                type: "POST",
+                url: "../api/detailedMetaData/updateFilter",
+                contentType: "application/json",
+                data: json,
+                success: function ()
+                {
+                    console.log( "Filter successfully saved." );
+                    alert( "Filter updated !" );
+                },
+                error: function ( request, status, error )
+                {
+                    console.log( request.responseText );
+                    console.log( arguments );
+                    alert( "Update filter process failed." );
+                }
+            } );
+    } else
+    {
+        alert( "Filter name cannot be empty." );
+    }
 }
 
 // Create a Filter object
@@ -61,4 +72,16 @@ function createFilter()
     filter.metaDataUids = $( "#metaDataUids" ).attr( "value" );
 
     return filter;
+}
+
+// Validate the Filter before saving it to the database
+function validateFilter()
+{
+    if ( $( "#name" ).attr( "value" ) != "" )
+    {
+        return true;
+    } else
+    {
+        return false;
+    }
 }

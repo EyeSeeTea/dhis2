@@ -10,6 +10,20 @@ function removeWhiteSpace( string )
     return string.replace( / /g, '' )
 }
 
+// Remove empty strings from an array
+function removeEmptyStringFromArray( array )
+{
+    for ( var i = 0; i < array.length; i++ )
+    {
+        if ( array[i] === "" )
+        {
+            array.splice( i, 1 );
+        }
+    }
+
+    return array;
+}
+
 // Remove the last white space + comma from the metaDataUids list
 function removeLastComma( string )
 {
