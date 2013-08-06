@@ -1,7 +1,7 @@
-package org.hisp.dhis.api.controller;
+package org.hisp.dhis.common;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,38 +27,38 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dxf2.utils.JacksonUtils;
-import org.hisp.dhis.option.OptionSet;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Controller
-@RequestMapping(value = OptionSetController.RESOURCE_PATH)
-public class OptionSetController
-    extends AbstractCrudController<OptionSet>
+public final class PagerUtils
 {
-    public static final String RESOURCE_PATH = "/optionSets";
-
-    @RequestMapping( value = "/{uid}/version", method = RequestMethod.GET )
-    public void getVersion( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
-        HttpServletResponse response ) throws IOException
+    public static <T> List<T> pageCollection( Collection<T> col, Pager pager )
     {
-        OptionSet optionSet = manager.get( OptionSet.class, uid );
+        return pageCollection( col, pager.getOffset(), pager.getPageSize() );
+    }
 
-        Map<String, Integer> versionMap = new HashMap<String, Integer>();
-        versionMap.put( "version", optionSet.getVersion() );
+    public static <T> List<T> pageCollection( Collection<T> col, int offset, int limit )
+    {
+        List<T> objects = new ArrayList<T>( col );
 
-        JacksonUtils.toJson( response.getOutputStream(), versionMap );
+        if ( offset >= objects.size() )
+        {
+            offset = objects.isEmpty() ? objects.size() : objects.size() - 1;
+        }
+
+        if ( (offset + limit) > objects.size() )
+        {
+            limit = objects.size() - offset;
+        }
+
+        return objects.subList( offset, offset + limit );
+    }
+
+    private PagerUtils()
+    {
     }
 }

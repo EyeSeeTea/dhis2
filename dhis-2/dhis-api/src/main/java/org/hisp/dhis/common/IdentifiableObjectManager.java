@@ -53,6 +53,8 @@ public interface IdentifiableObjectManager
 
     <T extends IdentifiableObject> T search( Class<T> clazz, String query );
 
+    <T extends IdentifiableObject> Collection<T> filter( Class<T> clazz, String query );
+
     <T extends IdentifiableObject> Collection<T> getAll( Class<T> clazz );
 
     <T extends IdentifiableObject> Collection<T> getAllSorted( Class<T> clazz );
@@ -60,6 +62,8 @@ public interface IdentifiableObjectManager
     <T extends IdentifiableObject> List<T> getByUid( Class<T> clazz, Collection<String> uids );
 
     <T extends IdentifiableObject> Collection<T> getLikeName( Class<T> clazz, String name );
+
+    <T extends IdentifiableObject> Collection<T> getLikeShortName( Class<T> clazz, String shortName );
 
     <T extends IdentifiableObject> List<T> getBetween( Class<T> clazz, int first, int max );
 

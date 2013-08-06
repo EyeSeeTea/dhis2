@@ -1,7 +1,5 @@
-package org.hisp.dhis.dataadmin.action.option;
-
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,63 +25,62 @@ package org.hisp.dhis.dataadmin.action.option;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.hisp.dhis.caseentry.action.patient;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
+
 import com.opensymphony.xwork2.Action;
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.option.OptionService;
-import org.hisp.dhis.option.OptionSet;
 
 /**
  * @author Chau Thu Tran
- * @version $ValidateOptionSetAction.java Feb 3, 2012 9:28:11 PM$
+ * 
+ * @version $ ShowActivityPlanFormAction.java Aug 6, 2013 1:15:22 PM $
  */
-public class ValidateOptionSetAction
+public class ShowActivityPlanFormAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private OptionService optionService;
+    private OrganisationUnitSelectionManager selectionManager;
 
-    public void setOptionService( OptionService optionService )
+    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
-        this.optionService = optionService;
+        this.selectionManager = selectionManager;
     }
 
-    private I18n i18n;
+    private ProgramService programService;
 
-    public void setI18n( I18n i18n )
+    public void setProgramService( ProgramService programService )
     {
-        this.i18n = i18n;
-    }
-
-    // -------------------------------------------------------------------------
-    // Input
-    // -------------------------------------------------------------------------
-
-    private Integer id;
-
-    public void setId( Integer id )
-    {
-        this.id = id;
-    }
-
-    private String name;
-
-    public void setName( String name )
-    {
-        this.name = name;
+        this.programService = programService;
     }
 
     // -------------------------------------------------------------------------
-    // Output
+    // Input/output
     // -------------------------------------------------------------------------
 
-    private String message;
+    private OrganisationUnit organisationUnit;
 
-    public String getMessage()
+    public OrganisationUnit getOrganisationUnit()
     {
-        return message;
+        return organisationUnit;
+    }
+
+    private List<Program> programs;
+
+    public List<Program> getPrograms()
+    {
+        return programs;
     }
 
     // -------------------------------------------------------------------------
@@ -91,22 +88,16 @@ public class ValidateOptionSetAction
     // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
-        if ( name != null )
-        {
-            OptionSet match = optionService.getOptionSetByName( name );
+        organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
-            if ( match != null && (id == null || match.getId() != id) )
-            {
-                message = i18n.getString( "name_in_use" );
+        programs = new ArrayList<Program>( programService.getAllPrograms() );
+        programs.retainAll( programService.getProgramsByCurrentUser() );
+        programs.removeAll( programService.getPrograms( Program.SINGLE_EVENT_WITHOUT_REGISTRATION ) );
 
-                return ERROR;
-            }
-        }
-
-        message = "ok";
+        Collections.sort( programs, IdentifiableObjectNameComparator.INSTANCE );
 
         return SUCCESS;
     }
-
 }
