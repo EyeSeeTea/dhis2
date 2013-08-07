@@ -1,8 +1,8 @@
 
 // Set the selection locale as a cookie value and retrieve translations asynchronously.
-function selectLanguage(localeSelected)
+function selectLanguage(localeSelected, translationUrl)
 {
-	$.cookie("loginLocale", localeSelected, { expires : 356*10 });
+	setLoginLocaleCookie(localeSelected);
 	
 	$.getJSON( translationUrl + localeSelected, function( json ) {			
 		updateTranslation( json );
@@ -27,10 +27,7 @@ function updateTranslation(translation)
 	$('#language').html(translation.login_language);
 	
 	
-	if(translation.applicationTitle != '') 
-	{
-		$('#titleArea').html(translation.applicationTitle);
-	}
+	if(translation.applicationTitle != '') $('#titleArea').html(translation.applicationTitle);
 	else $('#titleArea').html($('#titleAreaOriginalHdn').val());
 
 	if(translation.keyApplicationIntro != '') $('#introArea').html(translation.keyApplicationIntro);
@@ -43,14 +40,3 @@ function updateTranslation(translation)
 	else $('#applicationFooter').html($('#applicationFooterOriginalHdn').html());
 }
           
-
-function getSynchData(url) {
-	return $.parseJSON(
-		$.ajax( {
-			type: "GET",
-			dataType: "json",
-			url: url,
-			async: false,
-		} ).responseText 
-	);
-}

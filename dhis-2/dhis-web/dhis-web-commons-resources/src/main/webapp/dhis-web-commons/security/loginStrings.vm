@@ -1,6 +1,6 @@
 {
-"login_username": "$!i18nObject.getString( "login_username" )",
-"login_password": "$!i18nObject.getString( "login_password" )",
+"login_username": "$!i18nObject.getString( "username" )",
+"login_password": "$!i18nObject.getString( "password" )",
 "button_login": "$!i18nObject.getString( "button_login" )",
 "button_clear": "$!i18nObject.getString( "button_clear" )",
 "forgot_password": "$!i18nObject.getString( "forgot_password" )",

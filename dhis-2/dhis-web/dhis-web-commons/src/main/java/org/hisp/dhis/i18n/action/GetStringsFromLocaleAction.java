@@ -138,13 +138,14 @@ public class GetStringsFromLocaleAction
         
         // Database Locale
 
-        //if ( page.compareTo( PAGE_LOGIN) == 0 ) 
+        if ( page.compareTo( PAGE_LOGIN ) == 0 )
+        {        
+            // TODO - i18nLocale create it by using i18nLocaleService?         
+            I18nLocale i18nLocale = new I18nLocale("", language, I18nLocale.DEFAULT_COUNTRY);
+                        
+            translations = convertTranslations_SystemSetting( translationService.getTranslations( SystemSetting.class.getSimpleName(), i18nLocale ) );
+        }
         
-        // TODO - i18nLocale create it by using i18nLocaleService?         
-        I18nLocale i18nLocale = new I18nLocale("", language, I18nLocale.DEFAULT_COUNTRY);
-                        
-        translations = convertTranslations_SystemSetting( translationService.getTranslations( SystemSetting.class.getSimpleName(), i18nLocale ) );
-                        
         return SUCCESS;
     }
 

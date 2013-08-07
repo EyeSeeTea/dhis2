@@ -5,9 +5,10 @@
         <script type="text/javascript" src="../javascripts/jQuery/jquery.min.js"></script>
         <script type="text/javascript" src="../javascripts/jQuery/jquery.cookie.js"></script>
         <script type="text/javascript" src="../javascripts/login.js"></script>
+        <script type="text/javascript" src="../javascripts/loginCommon.js"></script>        
         <script type="text/javascript">
 
-			var translationUrl = 'loginStrings.action?language=';
+			var loginTranslationUrl = 'loginStrings.action?page=login&language=';
 			
 			$(document).ready(function() {
 			            
@@ -24,15 +25,7 @@
 				// On page load, get locale selection cookie value ('en' if no value) 
 				// and retrieve translation synchronously before the page load.  
 				// Also, set the dropdown selection.
-				
-				var localeFromCookie = $.cookie("loginLocale");				
-								
-				if(localeFromCookie == null)
-				{
-				 	localeFromCookie = 'en';
-			    }
-			
-			    updateTranslation( getSynchData( translationUrl + localeFromCookie ) );
+				var localeFromCookie = updateTranslationFromCookie(loginTranslationUrl);	
 			            	    
 			    $('#currentLocale').val(localeFromCookie);
 			            	            	                                   
@@ -114,7 +107,7 @@
         	</div>
 	        <div id="footerAreaLanguage">
 				<span id="language">$i18n.getString( "login_language" )</span>: 
-				<select id="currentLocale" name="currentLocale" style="width:auto;" onchange="selectLanguage(this.value);">
+				<select id="currentLocale" name="currentLocale" style="width:auto;" onchange="selectLanguage(this.value, loginTranslationUrl);">
 				#foreach( $locale in $availableLocales )
 					<option value="$locale.toString()">$locale.getDisplayName()</option>
 				#end

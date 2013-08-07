@@ -24,3 +24,12 @@ function recoverAccount()
 		}
 	} );
 }
+
+function updateTranslation(translation)
+{	
+	$('#account_recovery').html(translation.account_recovery);
+	$('#recovery_user_name').html(translation.user_name);
+	$('#recoveryButton').val(translation.recover);
+	$('#recoverySuccessMessage').html(translation.recover_success_message);
+	$('#recoveryErrorMessage').html(translation.recover_error_message);
+}

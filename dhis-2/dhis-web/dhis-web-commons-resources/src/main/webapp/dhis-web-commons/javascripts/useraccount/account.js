@@ -39,7 +39,12 @@ var validationRules = {
 	}
 };
 
+
+var accountTranslationUrl = 'accountStrings.action?page=account&language=';
+
 $( document ).ready( function() {
+		
+	updateTranslationFromCookie(accountTranslationUrl);	
 	
 	Recaptcha.create( "6LcM6tcSAAAAANwYsFp--0SYtcnze_WdYn8XwMMk", "recaptchaDiv", {
 		theme: "white"
@@ -53,6 +58,25 @@ $( document ).ready( function() {
 		}
 	} );
 } );
+
+
+function updateTranslation(translation)
+{	
+	$('#create_new_account').html(translation.create_new_account);
+	$('#new_user_account_name').html(translation.name);
+	$('#firstName').attr("placeholder", translation.first_name);
+	$('#surname').attr("placeholder", translation.last_name);
+	$('#new_user_account_user_name').html(translation.user_name);
+	$('#new_user_account_password').html(translation.password);
+	$('#new_user_account_confirm_password').html(translation.confirm_password);
+	$('#new_user_account_email').html(translation.email);
+	$('#new_user_account_mobile_phone').html(translation.mobile_phone);
+	$('#new_user_account_employer').html(translation.employer);
+	$('#new_user_account_prove_not_robot').html(translation.prove_not_robot);
+	$('#cant_read_words').html(translation.cant_read_words);
+	$('#submitButton').val(translation.create);
+}
+
 
 function accountSubmitHandler()
 {	
