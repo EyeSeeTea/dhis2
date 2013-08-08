@@ -1,3 +1,7 @@
+<script>
+    var i18n_validate_filter = '$i18n.getString( "validate_filter" )';
+</script>
+
 <h3>$i18n.getString( "update_filter" )</h3>
 
 <form id="formFilter" name="formFilter">
@@ -16,7 +20,7 @@
                 <label>$i18n.getString( "name" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label>
             </td>
             <td>
-                <input type="text" id="name" name="name" value="$filter.name" style="width: 90%;" onchange="">
+                <input type="text" id="name" name="name" value="$filter.name" style="width: 90%;">
             </td>
         </tr>
         <tr>

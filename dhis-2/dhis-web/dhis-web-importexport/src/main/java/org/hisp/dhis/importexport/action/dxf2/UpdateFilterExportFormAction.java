@@ -31,10 +31,6 @@ package org.hisp.dhis.importexport.action.dxf2;
 import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.filter.Filter;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */

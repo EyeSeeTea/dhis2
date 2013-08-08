@@ -26,7 +26,7 @@
                     <td> <xsl:value-of select="@code" /> </td>
                 </tr>
                 <tr>
-                    <td>MetaData UIDS</td>
+                    <td>MetaData UIDs</td>
                     <td> <xsl:value-of select="d:metaDataUids" /> </td>
                 </tr>
             </table>

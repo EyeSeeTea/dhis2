@@ -1,7 +1,15 @@
+// Create a Filter object
+function Filter()
+{
+    this.name = $( "#name" ).attr( "value" );
+    this.code = $( "#code" ).attr( "value" );
+    this.metaDataUids = $( "#metaDataUids" ).attr( "value" );
+}
+
 // Save the Filter in the database
 function saveFilter()
 {
-    var json = JSON.stringify( createFilter() );
+    var json = JSON.stringify( new Filter() );
     if ( validateFilter() )
     {
         $.ajax(
@@ -13,7 +21,7 @@ function saveFilter()
                 success: function ()
                 {
                     console.log( "Filter successfully saved." );
-                    alert( "Filter saved !" );
+                    window.location = "dxf2DetailedMetaDataExport.action";
                 },
                 error: function ( request, status, error )
                 {
@@ -24,14 +32,14 @@ function saveFilter()
             } );
     } else
     {
-        alert( "Filter name cannot be empty." );
+        setHeaderDelayMessage( i18n_validate_filter );
     }
 }
 
 // Update an existing Filter in the database
 function updateFilter()
 {
-    var filter = createFilter();
+    var  filter = new Filter();
     filter.uid = $( "#uid" ).attr( "value" );
 //    filter.created = $( "#created" ).attr( "value" );
 
@@ -48,7 +56,7 @@ function updateFilter()
                 success: function ()
                 {
                     console.log( "Filter successfully saved." );
-                    alert( "Filter updated !" );
+                    window.location = "dxf2DetailedMetaDataExport.action";
                 },
                 error: function ( request, status, error )
                 {
@@ -59,29 +67,12 @@ function updateFilter()
             } );
     } else
     {
-        alert( "Filter name cannot be empty." );
+        setHeaderDelayMessage( i18n_validate_filter );
     }
-}
-
-// Create a Filter object
-function createFilter()
-{
-    var filter = {};
-    filter.name = $( "#name" ).attr( "value" );
-    filter.code = $( "#code" ).attr( "value" );
-    filter.metaDataUids = $( "#metaDataUids" ).attr( "value" );
-
-    return filter;
 }
 
 // Validate the Filter before saving it to the database
 function validateFilter()
 {
-    if ( $( "#name" ).attr( "value" ) != "" )
-    {
-        return true;
-    } else
-    {
-        return false;
-    }
+    return ($( "#name" ).attr( "value" ) != "");
 }

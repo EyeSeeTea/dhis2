@@ -1,11 +1,5 @@
-// Global Variables
-
-// --------------------------------------------------------------
-var filters = [];
-// --------------------------------------------------------------
-
-// Create a new Filter
-function createFilter()
+// Submit the Create Filter Form
+function submitCreateFilterForm()
 {
     $( "#formCreateFilter" ).submit();
 }
@@ -20,9 +14,8 @@ function loadFilters()
             dataType: "json",
             success: function ( response )
             {
-                filters = response;
-                console.log( "Loaded filters: " + JSON.stringify( filters ) );
-                insertFilterDesign( filters );
+                console.log( "Loaded filters: " + JSON.stringify( response ) );
+                insertFilterDesign( response );
             },
             error: function ( request, status, error )
             {
@@ -53,7 +46,7 @@ function insertFilterDesign( filters )
                     +          '</button>'
                     +      '</td>'
                     +      '<td style="float: right;">'
-                    +          '<form id="form' + filterName + '" action="updateFilterExportForm.action">'
+                    +          '<form id="form' + filterName + '" method="POST" action="updateFilterExportForm.action">'
                     +                '<input type="hidden" name="name" value="' + filters[i].name + '" />'
                     +                '<input type="hidden" name="uid" value="' + filterId + '" />'
                     +                '<input type="hidden" name="code" value="' + filterCode + '" />'
@@ -72,7 +65,7 @@ function insertFilterDesign( filters )
         filterButtonEvents( filters[i] );
 
         $( "#filterTable" ).append( design );
-        if ( i % 2 === 0 )
+        if ( i % 2 == 0 )
         {
             $( "#tr" + filterName ).css( "background-color", "#EEF7FA" );
         }
@@ -91,51 +84,67 @@ function filterButtonEvents( filter )
 function applyFilterButton( filter )
 {
     var filterName = removeWhiteSpace( filter.name );
+
     $( "#buttonApply" + filterName ).live( "click", function ()
     {
-        for ( var j = 0; j < metaDataArray.length; j++ )
-        {
-            if ( $( "#mainDiv" + metaDataArray[j] ).children().length > 0 )
-            {
-                var id = $( this ).attr( "value" );
-
-                for ( var i = 0; i < filters.length; i++ )
-                {
-                    if ( id === filters[i].id )
-                    {
-                        applyFilter( filters[i].metaDataUids );
-                    }
-                }
-                $( "#appliedFilterMessage" ).text( filter.name + " applied !" ).css( {"color": "darkorange"} );
-            }
-        }
+        applyFilter( filter );
     } );
 }
 
 // Apply a Filter to the tables by selecting the uids from the Filter
-function applyFilter( data )
+function applyFilter( filter )
 {
-    var uids = data.split( ", " );
+    var uids = (filter.metaDataUids).split( ", " );
+    var uidsLength = uids.length;
+    var filterName = filter.name;
 
-    for ( var i = 0; i < uids.length; i++ )
+    for ( var i = 0; i < uidsLength; i++ )
     {
         for ( var j = 0; j < metaDataArray.length; j++ )
         {
             $( "#available" + metaDataArray[j] + " option" ).each( function ()
             {
                 var availableUid = $( this ).val();
-                if ( uids[i] === availableUid )
+                if ( uids[i] == availableUid )
                 {
                     $( this ).prop( "selected", true );
+                    uids.splice( i, 1 );
                 }
             } );
+            moveSelectedValuesByCategory( metaDataArray[j] );
         }
     }
+    filterStatus( filterName, uids, uidsLength );
+}
 
-    for ( var k = 0; k < metaDataArray.length; k++ )
+// Filter status after being applied
+function filterStatus( filterName, uids, uidsLength )
+{
+    var remainingUidsLength = uids.length;
+    if ( remainingUidsLength == 0 )
     {
-        moveSelectedValuesByCategory( metaDataArray[k] );
+        $( "#appliedFilterMessage" ).text( filterName + " applied !" ).css( {"color": "darkorange"} );
+        $( "#unappliedUids" ).text( "" );
+    } else if ( remainingUidsLength < uidsLength )
+    {
+        $( "#appliedFilterMessage" ).text( filterName + " partially applied !" ).css( {"color": "darkorange"} );
+        $( "#unappliedUids" ).text( "Remaining Filter Uids: " + uidsToString( uids ) );
+    } else if ( remainingUidsLength == uidsLength )
+    {
+        $( "#appliedFilterMessage" ).text( i18n_no_filter_applied ).css( {"color": "black"} );
+        $( "#unappliedUids" ).text( "" );
     }
+}
+
+// Convert an Uid array to string
+function uidsToString( uids )
+{
+    var uidsString = "";
+    for ( var i = 0; i < uids.length; i++ )
+    {
+        uidsString += uids[i] + ", ";
+    }
+    return removeLastComma( uidsString );
 }
 
 // Edit an existing Filter
@@ -159,6 +168,7 @@ function editFilterButton( filter )
 function getSelectedUids()
 {
     var selectedUidsArray = [];
+
     for ( var i = 0; i < metaDataArray.length; i++ )
     {
         $( "#selected" + metaDataArray[i] + " option" ).each( function ()
@@ -176,7 +186,7 @@ function getAllUids( existingUidsArray, selectedUidsArray )
     {
         for ( var j = 0; j < selectedUidsArray.length; j++ )
         {
-            if ( selectedUidsArray[j] === existingUidsArray[i] )
+            if ( selectedUidsArray[j] == existingUidsArray[i] )
             {
                 selectedUidsArray.splice( j, 1 );
             }
@@ -198,34 +208,28 @@ function getAllUids( existingUidsArray, selectedUidsArray )
 function removeFilterButton( filter )
 {
     var filterName = removeWhiteSpace( filter.name );
+
     $( "#buttonRemove" + filterName ).live( "click", function ()
     {
-        var id = ($( this ).attr( "value" ));
-        for ( var i = 0; i < filters.length; i++ )
-        {
-            if ( id === filters[i].id )
+        var json = replaceIdWithUid( filter );
+        console.log( "Deleted json: " + JSON.stringify( json ) );
+        $.ajax(
             {
-                var json = replaceIdWithUid( filters[i] );
-                console.log( "Deleted json: " + JSON.stringify( json ) );
-                $.ajax(
-                    {
-                        type: "POST",
-                        url: "../api/detailedMetaData/deleteFilter",
-                        contentType: "application/json",
-                        data: JSON.stringify( json ),
-                        success: function ()
-                        {
-                            $( "#tr" + filterName ).remove();
-                            console.log( "Filter successfully removed." );
-                        },
-                        error: function ( request, status, error )
-                        {
-                            console.log( request.responseText );
-                            console.log( arguments );
-                            alert( "Remove filter process failed." );
-                        }
-                    } );
-            }
-        }
+                type: "POST",
+                url: "../api/detailedMetaData/deleteFilter",
+                contentType: "application/json",
+                data: JSON.stringify( json ),
+                success: function ()
+                {
+                    $( "#tr" + filterName ).remove();
+                    console.log( "Filter successfully removed." );
+                },
+                error: function ( request, status, error )
+                {
+                    console.log( request.responseText );
+                    console.log( arguments );
+                    alert( "Remove filter process failed." );
+                }
+            } );
     } );
 }

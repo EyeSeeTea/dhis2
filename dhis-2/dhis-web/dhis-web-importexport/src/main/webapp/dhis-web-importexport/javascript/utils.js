@@ -34,8 +34,7 @@ function removeLastComma( string )
 // Replace id with uid
 function replaceIdWithUid( object )
 {
-    var tempValue = object.id;
-    object.uid = tempValue;
+    object.uid = object.id;
     delete object.id;
     return object;
 }
