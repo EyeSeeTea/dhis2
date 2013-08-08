@@ -44,7 +44,6 @@ function updateFilter()
 //    filter.created = $( "#created" ).attr( "value" );
 
     var json = JSON.stringify( filter );
-
     if ( validateFilter() )
     {
         $.ajax(

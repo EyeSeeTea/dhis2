@@ -36,35 +36,30 @@ function insertFilterDesign( filters )
         var filterCode = filters[i].code;
         var filterMetaDataUids = filters[i].metaDataUids;
         var design =
-                      '<tr id="tr' + filterName +'" style="margin: 20px;">'
-                    +      '<td>'
-                    +          '<p style="padding-left: 10px; font-size: 10pt;">' + filters[i].name + '</p>'
-                    +      '</td>'
-                    +      '<td style="float: left;">'
-                    +          '<button id="buttonApply' + filterName + '" value="' + filterId + '" type="button" style="background-color: inherit;">'
-                    +              '<img src="../images/start_process.png" alt="' + i18n_apply + '" )"/>'
-                    +          '</button>'
-                    +      '</td>'
-                    +      '<td style="float: right;">'
-                    +          '<form id="form' + filterName + '" method="POST" action="updateFilterExportForm.action">'
-                    +                '<input type="hidden" name="name" value="' + filters[i].name + '" />'
-                    +                '<input type="hidden" name="uid" value="' + filterId + '" />'
-                    +                '<input type="hidden" name="code" value="' + filterCode + '" />'
-                    +                '<input type="hidden" id="metaDataUids' + filterName + '" name="metaDataUids" value="' + filterMetaDataUids + '" />'
-                    +          '</form>'
-                    +          '<button id="buttonEdit' + filterName + '" type="button" style="background-color: inherit;">'
-                    +              '<img src="../images/edit.png" alt="' + i18n_edit + '"/>'
-                    +          '</button>'
-                    +          '<button id="buttonRemove' + filterName + '" value="' + filterId + '" type="button" style="background-color: inherit;">'
-                    +              '<img src="../images/delete.png" alt="' + i18n_remove + '" />'
-                    +          '</button>'
-                    +      '</td>'
-                    + '</tr>'
-            ;
+                  '<tr id="tr' + filterName + '" class="listRow">'
+                +      '<td>' + filters[i].name + '</td>'
+                +      '<td style="text-align:right; float: left;">'
+                +          '<button id="buttonApply' + filterName + '" value="' + filterId + '" type="button" style="background-color: inherit; border: 0px;">'
+                +              '<img src="../images/success_small.png" title="' + i18n_apply + '" alt="' + i18n_apply + '" />'
+                +          '</button>'
+                +          '<form id="form' + filterName + '" method="POST" action="updateFilterExportForm.action" style="float: left;">'
+                +              '<input type="hidden" name="name" value="' + filters[i].name + '" />'
+                +              '<input type="hidden" name="uid" value="' + filterId + '" />'
+                +              '<input type="hidden" name="code" value="' + filterCode + '" />'
+                +              '<input type="hidden" id="metaDataUids' + filterName + '" name="metaDataUids" value="' + filterMetaDataUids + '" />'
+                +          '</form>'
+                +          '<button id="buttonEdit' + filterName + '" type="button" style="background-color: inherit; border: 0px;">'
+                +              '<img src="../images/edit.png" title="' + i18n_edit + '" alt="' + i18n_edit + '" />'
+                +          '</button>'
+                +          '<button id="buttonRemove' + filterName + '" value="' + filterId + '" type="button" style="background-color: inherit; border: 0px;">'
+                +              '<img src="../images/delete.png" title="' + i18n_remove + '" alt="' + i18n_remove + '" />'
+                +          '</button>'
+                +      '</td>'
+                +  '</tr>'
+        ;
 
         filterButtonEvents( filters[i] );
-
-        $( "#filterTable" ).append( design );
+        $( "#filterTableBody" ).append( design );
         if ( i % 2 == 0 )
         {
             $( "#tr" + filterName ).css( "background-color", "#EEF7FA" );
@@ -84,7 +79,6 @@ function filterButtonEvents( filter )
 function applyFilterButton( filter )
 {
     var filterName = removeWhiteSpace( filter.name );
-
     $( "#buttonApply" + filterName ).live( "click", function ()
     {
         applyFilter( filter );
@@ -97,7 +91,6 @@ function applyFilter( filter )
     var uids = (filter.metaDataUids).split( ", " );
     var uidsLength = uids.length;
     var filterName = filter.name;
-
     for ( var i = 0; i < uidsLength; i++ )
     {
         for ( var j = 0; j < metaDataArray.length; j++ )
@@ -151,7 +144,6 @@ function uidsToString( uids )
 function editFilterButton( filter )
 {
     var filterName = removeWhiteSpace( filter.name );
-
     $( "#buttonEdit" + filterName ).live( "click", function ()
     {
         var existingUidsArray = (filter.metaDataUids).split( ", " );
@@ -168,7 +160,6 @@ function editFilterButton( filter )
 function getSelectedUids()
 {
     var selectedUidsArray = [];
-
     for ( var i = 0; i < metaDataArray.length; i++ )
     {
         $( "#selected" + metaDataArray[i] + " option" ).each( function ()
@@ -195,7 +186,6 @@ function getAllUids( existingUidsArray, selectedUidsArray )
 
     var finalUidsArray = existingUidsArray.concat( selectedUidsArray );
     var finalUids = "";
-
     for ( var k = 0; k < finalUidsArray.length; k++ )
     {
         finalUids += finalUidsArray[k] + ", ";
@@ -208,7 +198,6 @@ function getAllUids( existingUidsArray, selectedUidsArray )
 function removeFilterButton( filter )
 {
     var filterName = removeWhiteSpace( filter.name );
-
     $( "#buttonRemove" + filterName ).live( "click", function ()
     {
         var json = replaceIdWithUid( filter );

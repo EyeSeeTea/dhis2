@@ -168,188 +168,162 @@
 
 <!-- FILTER DEFINITION -->
 <div id="mainDivFilter">
+    <!-- FILTER NOTIFICATIONS -->
+    <div>
+        <div style="width: 200px; background-color: ghostwhite; border: solid 1px lightskyblue; border-radius: 5px;">
+            <p id="appliedFilterMessage" style="font-size: 10pt; text-align: center;">$i18n.getString( "no_filter_applied" )</p>
+        </div>
+        <p id="unappliedUids" style="color: red;"></p>
+    </div>
 
-    <!-- FILTER COMMANDS -->
-    <div style="float: left; margin-bottom: 10px;">
-        <p style="font-size: 12pt;">$i18n.getString( "filter_commands" )</p>
-
-        <form id="formCreateFilter" method="POST" action="saveFilterExportForm.action">
+    <div style="margin-bottom: 10px;">
+        <!-- FILTER COMMANDS -->
+        <form id="formCreateFilter" method="POST" action="saveFilterExportForm.action" style="float: right;">
             <input type="hidden" name="name" value=""/>
             <input type="hidden" name="id" value=""/>
             <input type="hidden" name="code" value=""/>
             <input type="hidden" name="metaDataUids" value=""/>
             <input type="button" value="$i18n.getString( "new_filter" )" onclick="submitCreateFilterForm();"
-                   style="width: 125px;"/>
+                   style="float: right; width: 125px;"/>
         </form>
+        <!-- FILTER TABLE -->
+        <table id="filterTable" class="listTable">
+            <col/>
+            <col width="260"/>
+            <thead>
+            <tr>
+                <th>$i18n.getString( "name" )</th>
+                <th>$i18n.getString( "operations" )</th>
+            </tr>
+            </thead>
+            <tbody id="filterTableBody">
+            </tbody>
+        </table>
     </div>
-
-    <!-- FILTER NOTIFICATIONS -->
-    <div style="float: right; width: 250px; height: 40px; background-color: ghostwhite; border: solid 1px lightskyblue; border-radius: 5px;">
-        <p id="appliedFilterMessage"
-           style="margin: 10px; font-size: 12pt; text-align: center;">$i18n.getString( "no_filter_applied" )</p>
-    </div>
-    <div style="width: 100%; float: left;">
-        <p id="unappliedUids" style="color: red;"></p>
-    </div>
-
-    <!-- FILTER TABLE -->
-    <table id="filterTable" style="width: 100%; margin-bottom: 10px; border-spacing: 0;"></table>
-
 </div>
 
 <!-- EXPORT FORM -->
 <form id="exportForm" name="exportForm">
-
     <!-- MENU -->
     <div id="mainDivAccordion" >
         <!-- ATTRIBUTES TYPES SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "attribute_types" )</h6>
-
         <div id="divAttributeTypes" style="margin: 5px;"></div>
 
         <!-- CATEGORIES SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "categories" )</h6>
-
         <div id="divDimensions" style="margin: 5px;"></div>
 
         <!-- CHARTS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "charts" )</h6>
-
         <div id="divCharts" style="margin: 5px;"></div>
 
         <!-- CONCEPTS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "concepts" )</h6>
-
         <div id="divConcepts" style="margin: 5px;"></div>
 
         <!-- CONSTANTS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "constants" )</h6>
-
         <div id="divConstants" style="margin: 5px;"></div>
 
         <!-- DATA DICTIONARIES SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "data_dictionaries" )</h6>
-
         <div id="divDataDictionaries" style="margin: 5px;"></div>
 
         <!-- DATA ELEMENT GROUP SETS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "data_element_group_sets" )</h6>
-
         <div id="divDataElementGroupSets" style="margin: 5px;"></div>
 
         <!-- DATA ELEMENT GROUPS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "data_element_groups" )</h6>
-
         <div id="divDataElementGroups" style="margin: 5px;"></div>
 
         <!-- DATA ELEMENTS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "data_elements" )</h6>
-
         <div id="divDataElements" style="margin: 5px;"></div>
 
         <!-- DATA SETS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "data_sets" )</h6>
-
         <div id="divDataSets" style="margin: 5px;"></div>
 
         <!-- DOCUMENTS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "documents" )</h6>
-
         <div id="divDocuments" style="margin: 5px;"></div>
 
         <!-- INDICATOR GROUP SETS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "indicator_group_sets" )</h6>
-
         <div id="divIndicatorGroupSets" style="margin: 5px;"></div>
 
         <!-- INDICATOR GROUPS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "indicator_groups" )</h6>
-
         <div id="divIndicatorGroups" style="margin: 5px;"></div>
 
         <!-- INDICATOR TYPES SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "indicator_types" )</h6>
-
         <div id="divIndicatorTypes" style="margin: 5px;"></div>
 
         <!-- INDICATORS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "indicators" )</h6>
-
         <div id="divIndicators" style="margin: 5px;"></div>
 
         <!-- MAP LEGEND SETS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "map_legend_sets" )</h6>
-
         <div id="divMapLegendSets" style="margin: 5px;"></div>
 
         <!-- MAPS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "maps" )</h6>
-
         <div id="divMaps" style="margin: 5px;"></div>
 
         <!-- OPTION SETS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "option_sets" )</h6>
-
         <div id="divOptionSets" style="margin: 5px;"></div>
 
         <!-- ORGANISATION UNIT GROUP SETS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "organisation_unit_group_sets" )</h6>
-
         <div id="divOrganisationUnitGroupSets" style="margin: 5px;"></div>
 
         <!-- ORGANISATION UNIT GROUPS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "organisation_unit_groups" )</h6>
-
         <div id="divOrganisationUnitGroups" style="margin: 5px;"></div>
 
         <!-- ORGANISATION UNIT LEVELS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "organisation_unit_levels" )</h6>
-
         <div id="divOrganisationUnitLevels" style="margin: 5px;"></div>
 
         <!-- ORGANISATION UNITS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "organisation_units" )</h6>
-
         <div id="divOrganisationUnits" style="margin: 5px;"></div>
 
         <!-- REPORT TABLES SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "report_tables" )</h6>
-
         <div id="divReportTables" style="margin: 5px;"></div>
 
         <!-- REPORTS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "reports" )</h6>
-
         <div id="divReports" style="margin: 5px;"></div>
 
         <!-- SQL VIEWS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "sql_views" )</h6>
-
         <div id="divSqlViews" style="margin: 5px;"></div>
 
         <!-- USER GROUPS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "user_groups" )</h6>
-
         <div id="divUserGroups" style="margin: 5px;"></div>
 
         <!-- USER ROLES SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "user_roles" )</h6>
-
         <div id="divUserRoles" style="margin: 5px;"></div>
 
         <!-- USERS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "users" )</h6>
-
         <div id="divUsers" style="margin: 5px;"></div>
 
         <!-- VALIDATION RULE GROUPS SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "validation_rule_groups" )</h6>
-
         <div id="divValidationRuleGroups" style="margin: 5px;"></div>
 
         <!-- VALIDATION RULES SELECTION -->
         <h6 style="font-size: 10pt;">$i18n.getString( "validation_rules" )</h6>
-
         <div id="divValidationRules" style="margin: 5px;"></div>
     </div>
     <br>
@@ -401,5 +375,4 @@
             </td>
         </tr>
     </table>
-
 </form>
