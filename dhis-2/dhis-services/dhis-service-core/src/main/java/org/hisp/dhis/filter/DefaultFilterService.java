@@ -27,11 +27,14 @@ package org.hisp.dhis.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
+@Transactional
 public class DefaultFilterService
         implements FilterService
 {

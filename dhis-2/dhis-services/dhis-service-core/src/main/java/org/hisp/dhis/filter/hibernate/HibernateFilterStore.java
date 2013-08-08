@@ -60,20 +60,17 @@ public class HibernateFilterStore
     public void saveFilter( Filter filter )
     {
         save( filter );
-        sessionFactory.getCurrentSession().flush();
     }
 
     @Override
     public void updateFilter( Filter filter )
     {
         update( filter );
-        sessionFactory.getCurrentSession().flush();
     }
 
     @Override
     public void deleteFilter( Filter filter )
     {
         delete( filter );
-        sessionFactory.getCurrentSession().flush();
     }
 }
