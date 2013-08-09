@@ -26,6 +26,7 @@ package org.hisp.dhis.appmanager;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
@@ -109,19 +110,21 @@ public class DefaultAppManagerService
     @Override
     public void setAppFolderPath( String appFolderPath )
     {
-        try
+        if(!appFolderPath.isEmpty())
         {
-            File folder = new File( appFolderPath );
-            if ( !folder.exists() )
+            try
             {
-                FileUtils.forceMkdir( folder );
+                File folder = new File( appFolderPath );
+                if ( !folder.exists() )
+                {
+                    FileUtils.forceMkdir( folder );
+                }
+            }
+            catch ( IOException ex )
+            {
+                log.error( ex.getLocalizedMessage(), ex );
             }
         }
-        catch ( IOException ex )
-        {
-            log.error( ex.getLocalizedMessage(), ex );
-        }
-        
         appSettingManager.saveSystemSetting( KEY_APP_FOLDER_PATH, appFolderPath );
     }
 
@@ -140,5 +143,15 @@ public class DefaultAppManagerService
         }
         
         return appFolderNames.get( app );
+    }
+
+    @Override
+    public String getAppBaseUrl() {
+        return StringUtils.trimToNull( (String) appSettingManager.getSystemSetting( KEY_APP_BASE_URL ) );
+    }
+
+    @Override
+    public void setAppBaseUrl(String appBaseUrl) {
+        appSettingManager.saveSystemSetting( KEY_APP_BASE_URL, appBaseUrl );
     }
 }

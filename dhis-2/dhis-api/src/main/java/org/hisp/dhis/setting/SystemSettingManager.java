@@ -47,6 +47,7 @@ public interface SystemSettingManager
     final String KEY_APPLICATION_TITLE = "applicationTitle";
     final String KEY_APPLICATION_INTRO = "keyApplicationIntro";
     final String KEY_APPLICATION_NOTIFICATION = "keyApplicationNotification";
+    final String KEY_APPLICATION_FOOTER = "keyApplicationFooter";
     final String KEY_FLAG = "keyFlag";
     final String KEY_FLAG_IMAGE = "keyFlagImage";
     final String KEY_START_MODULE = "startModule";
@@ -77,6 +78,7 @@ public interface SystemSettingManager
     final String KEY_SCHEDULE_AGGREGATE_QUERY_BUILDER_TASKS = "scheduleAggregateQueryBuilder";
     final String KEY_SCHEDULE_AGGREGATE_QUERY_BUILDER_TASK_STRATEGY = "scheduleAggregateQueryBuilderTackStrategy";
     final String DEFAULT_SCHEDULE_AGGREGATE_QUERY_BUILDER_TASK_STRATEGY = "lastMonth";
+    final String DEFAULT_FLAG = "dhis2";
     
     final String KEY_CONFIGURATION = "keyConfig";
     final String KEY_ACCOUNT_RECOVERY = "keyAccountRecovery";

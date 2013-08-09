@@ -27,6 +27,7 @@ package org.hisp.dhis.reporttable;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DATA_X_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
@@ -42,23 +43,23 @@ import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.common.BaseAnalyticalObject;
 import org.hisp.dhis.common.CombinationGenerator;
 import org.hisp.dhis.common.DimensionalObject;
+import org.hisp.dhis.common.DimensionalObjectUtils;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.DimensionalView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.mapping.MapLegendSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.user.User;
@@ -71,51 +72,12 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
- * The ReportTable object represents a customizable database table. It has
- * features like crosstabulation, relative periods, parameters, and display
- * columns.
- *
  * @author Lars Helge Overland
  */
 @JacksonXmlRootElement( localName = "reportTable", namespace = DxfNamespaces.DXF_2_0)
 public class ReportTable
     extends BaseAnalyticalObject
 {
-    /**
-     * Determines if a de-serialized file is compatible with this class.
-     */
-    private static final long serialVersionUID = 5618655666320890565L;
-    
-    public static final String DATAELEMENT_ID = "dataelementid";
-    public static final String CATEGORYCOMBO_ID = "categoryoptioncomboid";
-    public static final String CATEGORYOPTION_ID = "categoryoptionid";
-
-    public static final String INDICATOR_ID = "indicatorid";
-    public static final String INDICATOR_UID = "indicatoruid";
-    public static final String INDICATOR_NAME = "indicatorname";
-    public static final String INDICATOR_CODE = "indicatorcode";
-    public static final String INDICATOR_DESCRIPTION = "indicatordescription";
-
-    public static final String DATASET_ID = "datasetid";
-
-    public static final String PERIOD_ID = "periodid";
-    public static final String PERIOD_UID = "perioduid";
-    public static final String PERIOD_NAME = "periodname";
-    public static final String PERIOD_CODE = "periodcode";
-    public static final String PERIOD_DESCRIPTION = "perioddescription";
-
-    public static final String ORGANISATIONUNIT_ID = "organisationunitid";
-    public static final String ORGANISATIONUNIT_UID = "organisationunituid";
-    public static final String ORGANISATIONUNIT_NAME = "organisationunitname";
-    public static final String ORGANISATIONUNIT_CODE = "organisationunitcode";
-    public static final String ORGANISATIONUNIT_DESCRIPTION = "organisationunitdescription";
-
-    public static final String ORGANISATIONUNITGROUP_ID = "organisationunitgroupid";
-    public static final String ORGANISATIONUNITGROUP_UID = "organisationunitgroupuid";
-    public static final String ORGANISATIONUNITGROUP_NAME = "organisationunitgroupname";
-    public static final String ORGANISATIONUNITGROUP_CODE = "organisationunitgroupcode";
-    public static final String ORGANISATIONUNITGROUP_DESCRIPTION = "organisationunitgroupdescription";
-
     public static final String REPORTING_MONTH_COLUMN_NAME = "reporting_month_name";
     public static final String PARAM_ORGANISATIONUNIT_COLUMN_NAME = "param_organisationunit_name";
     public static final String ORGANISATION_UNIT_IS_PARENT_COLUMN_NAME = "organisation_unit_is_parent";
@@ -146,35 +108,17 @@ public class ReportTable
     public static final NameableObject[] IRT = new NameableObject[0];
     public static final NameableObject[][] IRT2D = new NameableObject[0][];
 
-    public static final Map<String, String> PRETTY_COLUMNS = new HashMap<String, String>()
-    {
-        {
-            put( CATEGORYCOMBO_ID, "Category combination ID" );
-            put( INDICATOR_ID, "Indicator ID" );
-            put( PERIOD_ID, "Period ID" );
-            put( ORGANISATIONUNIT_ID, "Organisation unit ID" );
-            put( ORGANISATIONUNITGROUP_ID, "Organisation unit group ID" );
-        }
-    };
-
-    public static final Map<Class<? extends NameableObject>, String> CLASS_ID_MAP = new HashMap<Class<? extends NameableObject>, String>()
-    {
-        {
-            put( Indicator.class, INDICATOR_ID );
-            put( DataElement.class, DATAELEMENT_ID );
-            put( DataElementCategoryOptionCombo.class, CATEGORYCOMBO_ID );
-            put( DataElementCategoryOption.class, CATEGORYOPTION_ID );
-            put( DataSet.class, DATASET_ID );
-            put( Period.class, PERIOD_ID );
-            put( OrganisationUnit.class, ORGANISATIONUNIT_ID );
-            put( OrganisationUnitGroup.class, ORGANISATIONUNITGROUP_ID );
-        }
-    };
-
     private static final String EMPTY = "";
 
     private static final String ILLEGAL_FILENAME_CHARS_REGEX = "[/\\?%*:|\"'<>.]";
 
+    private static final Map<String, String> COLUMN_NAMES = DimensionalObjectUtils.asMap( 
+        DATA_X_DIM_ID, "data",
+        CATEGORYOPTIONCOMBO_DIM_ID, "categoryoptioncombo",
+        PERIOD_DIM_ID, "period",
+        ORGUNIT_DIM_ID, "organisationunit"
+    );
+    
     // -------------------------------------------------------------------------
     // Persisted properties
     // -------------------------------------------------------------------------
@@ -249,6 +193,11 @@ public class ReportTable
      */
     private String fontSize;
     
+    /**
+     * The legend set in the table.
+     */
+    private MapLegendSet legendSet;
+    
     // -------------------------------------------------------------------------
     // Transient properties
     // -------------------------------------------------------------------------
@@ -256,27 +205,22 @@ public class ReportTable
     /**
      * All crosstabulated columns.
      */
-    private List<List<NameableObject>> gridColumns = new ArrayList<List<NameableObject>>();
+    private transient List<List<NameableObject>> gridColumns = new ArrayList<List<NameableObject>>();
 
     /**
      * All rows.
      */
-    private List<List<NameableObject>> gridRows = new ArrayList<List<NameableObject>>();
+    private transient List<List<NameableObject>> gridRows = new ArrayList<List<NameableObject>>();
 
     /**
      * The name of the reporting month based on the report param.
      */
-    private String reportingPeriodName;
+    private transient String reportingPeriodName;
 
     /**
-     * The parent organisation unit.
+     * The title of the report table grid.
      */
-    private OrganisationUnit parentOrganisationUnit;
-
-    /**
-     * The category option combos derived from the dimension set.
-     */
-    private List<DataElementCategoryOptionCombo> categoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>();
+    private transient String title;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -355,7 +299,8 @@ public class ReportTable
     // Init
     // -------------------------------------------------------------------------
 
-    public void init( User user, Date date, OrganisationUnit organisationUnit, I18nFormat format )
+    @Override
+    public void init( User user, Date date, OrganisationUnit organisationUnit, List<OrganisationUnit> organisationUnitsAtLevel, I18nFormat format )
     {
         verify( ( periods != null && !periods.isEmpty() ) || hasRelativePeriods(), "Must contain periods or relative periods" );
 
@@ -371,14 +316,14 @@ public class ReportTable
         if ( organisationUnit != null && hasReportParams() && reportParams.isParamParentOrganisationUnit() )
         {
             organisationUnit.setCurrentParent( true );
-            this.parentOrganisationUnit = organisationUnit;
+            this.relativeOrganisationUnit = organisationUnit;
             addTransientOrganisationUnits( organisationUnit.getChildren() );
             addTransientOrganisationUnit( organisationUnit );
         }
 
         if ( organisationUnit != null && hasReportParams() && reportParams.isParamOrganisationUnit() )
         {
-            this.parentOrganisationUnit = organisationUnit;
+            this.relativeOrganisationUnit = organisationUnit;
             addTransientOrganisationUnit( organisationUnit );
         }
 
@@ -386,32 +331,38 @@ public class ReportTable
         
         if ( isDimensional() )
         {
-            categoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>( getCategoryCombo().getOptionCombos() );
-            verify( nonEmptyLists( categoryOptionCombos ) == 1, "Category option combos size must be larger than 0" );
+            transientCategoryOptionCombos.addAll( getCategoryCombo().getSortedOptionCombos() );
+            verify( nonEmptyLists( transientCategoryOptionCombos ) == 1, "Category option combos size must be larger than 0" );
         }
-
+        
         // Populate grid
         
-        this.populateGridColumnsAndRows( date, user, format );
+        this.populateGridColumnsAndRows( date, user, organisationUnitsAtLevel, format );
     }
     
     // -------------------------------------------------------------------------
     // Public methods
     // -------------------------------------------------------------------------
     
-    public void populateGridColumnsAndRows( Date date, User user, I18nFormat format )
+    public void populateGridColumnsAndRows( Date date, User user, List<OrganisationUnit> organisationUnitsAtLevel, I18nFormat format )
     {
         List<NameableObject[]> tableColumns = new ArrayList<NameableObject[]>();
         List<NameableObject[]> tableRows = new ArrayList<NameableObject[]>();
+        List<NameableObject> filterItems = new ArrayList<NameableObject>();
         
         for ( String dimension : columnDimensions )
         {
-            tableColumns.add( getDimensionalObject( dimension, date, user, false, format ).getItems().toArray( IRT ) );
+            tableColumns.add( getDimensionalObject( dimension, date, user, false, organisationUnitsAtLevel, format ).getItems().toArray( IRT ) );
         }
         
         for ( String dimension : rowDimensions )
         {
-            tableRows.add( getDimensionalObject( dimension, date, user, true, format ).getItems().toArray( IRT ) );
+            tableRows.add( getDimensionalObject( dimension, date, user, true, organisationUnitsAtLevel, format ).getItems().toArray( IRT ) );
+        }
+        
+        for ( String filter : filterDimensions )
+        {
+            filterItems.addAll( getDimensionalObject( filter, date, user, true, organisationUnitsAtLevel, format ).getItems() );
         }
 
         gridColumns = new CombinationGenerator<NameableObject>( tableColumns.toArray( IRT2D ) ).getCombinations();
@@ -419,6 +370,8 @@ public class ReportTable
 
         addIfEmpty( gridColumns ); 
         addIfEmpty( gridRows );
+        
+        title = IdentifiableObjectUtils.join( filterItems );
     }
     
     @Override
@@ -445,7 +398,8 @@ public class ReportTable
      */
     public boolean isDimensional()
     {
-        return dataElements != null && !dataElements.isEmpty() && columnDimensions.contains( DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID );
+        return dataElements != null && !dataElements.isEmpty() && ( 
+            columnDimensions.contains( CATEGORYOPTIONCOMBO_DIM_ID ) || rowDimensions.contains( CATEGORYOPTIONCOMBO_DIM_ID ) );
     }
 
     /**
@@ -543,7 +497,7 @@ public class ReportTable
      */
     public String getParentOrganisationUnitName()
     {
-        return parentOrganisationUnit != null ? parentOrganisationUnit.getName() : EMPTY;
+        return relativeOrganisationUnit != null ? relativeOrganisationUnit.getName() : EMPTY;
     }
 
     public boolean isDoIndicators()
@@ -613,14 +567,23 @@ public class ReportTable
      */
     public Grid getGrid( Grid grid, Map<String, Double> valueMap, boolean paramColumns )
     {
-        final String subtitle = StringUtils.trimToEmpty( getParentOrganisationUnitName() ) + SPACE
-            + StringUtils.trimToEmpty( reportingPeriodName );
-
         valueMap = new HashMap<String, Double>( valueMap );
         
         sortKeys( valueMap );
-        
-        grid.setTitle( name + " - " + subtitle );
+
+        // ---------------------------------------------------------------------
+        // Title
+        // ---------------------------------------------------------------------
+
+        if ( name != null )
+        {        
+            grid.setTitle( name );
+            grid.setSubtitle( title );
+        }
+        else
+        {
+            grid.setTitle( title );
+        }
 
         // ---------------------------------------------------------------------
         // Headers
@@ -628,12 +591,13 @@ public class ReportTable
 
         for ( String row : rowDimensions )
         {
-            String name = StringUtils.defaultIfEmpty( DimensionalObject.PRETTY_NAMES.get( row ), row );
+            String name = StringUtils.defaultIfEmpty( DimensionalObject.PRETTY_NAMES.get( row ), row );            
+            String col = StringUtils.defaultIfEmpty( COLUMN_NAMES.get( row ), row );
             
-            grid.addHeader( new GridHeader( name + " ID", row + "_id", String.class.getName(), true, true ) );
-            grid.addHeader( new GridHeader( name, row + "_name", String.class.getName(), false, true ) );
-            grid.addHeader( new GridHeader( name + " code", row + "_code", String.class.getName(), true, true ) );
-            grid.addHeader( new GridHeader( name + " description", row + "_description", String.class.getName(), true, true ) );
+            grid.addHeader( new GridHeader( name + " ID", col + "id", String.class.getName(), true, true ) );
+            grid.addHeader( new GridHeader( name, col + "name", String.class.getName(), false, true ) );
+            grid.addHeader( new GridHeader( name + " code", col + "code", String.class.getName(), true, true ) );
+            grid.addHeader( new GridHeader( name + " description", col + "description", String.class.getName(), true, true ) );
         }
         
         if ( paramColumns )
@@ -964,6 +928,19 @@ public class ReportTable
         this.fontSize = fontSize;
     }
 
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class, DimensionalView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public MapLegendSet getLegendSet()
+    {
+        return legendSet;
+    }
+
+    public void setLegendSet( MapLegendSet legendSet )
+    {
+        this.legendSet = legendSet;
+    }
+
     // -------------------------------------------------------------------------
     // Get- and set-methods for transient properties
     // -------------------------------------------------------------------------
@@ -1003,27 +980,14 @@ public class ReportTable
     }
 
     @JsonIgnore
-    public OrganisationUnit getParentOrganisationUnit()
+    public String getTitle()
     {
-        return parentOrganisationUnit;
+        return title;
     }
 
-    @JsonIgnore
-    public void setParentOrganisationUnit( OrganisationUnit parentOrganisationUnit )
+    public void setTitle( String title )
     {
-        this.parentOrganisationUnit = parentOrganisationUnit;
-    }
-
-    @JsonIgnore
-    public List<DataElementCategoryOptionCombo> getCategoryOptionCombos()
-    {
-        return categoryOptionCombos;
-    }
-
-    @JsonIgnore
-    public void setCategoryOptionCombos( List<DataElementCategoryOptionCombo> categoryOptionCombos )
-    {
-        this.categoryOptionCombos = categoryOptionCombos;
+        this.title = title;
     }
 
     @Override
@@ -1046,6 +1010,7 @@ public class ReportTable
             digitGroupSeparator = reportTable.getDigitGroupSeparator();
             displayDensity = reportTable.getDisplayDensity();
             fontSize = reportTable.getFontSize();
+            legendSet = reportTable.getLegendSet();
             
             columnDimensions.clear();
             columnDimensions.addAll( reportTable.getColumnDimensions() );

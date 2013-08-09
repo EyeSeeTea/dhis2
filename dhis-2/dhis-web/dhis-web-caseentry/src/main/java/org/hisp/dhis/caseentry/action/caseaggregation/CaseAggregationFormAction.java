@@ -27,11 +27,15 @@
 
 package org.hisp.dhis.caseentry.action.caseaggregation;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 import org.hisp.dhis.caseaggregation.CaseAggregationCondition;
 import org.hisp.dhis.caseaggregation.CaseAggregationConditionService;
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
 
@@ -55,9 +59,9 @@ public class CaseAggregationFormAction
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private Collection<DataSet> datasets = new HashSet<DataSet>();
+    private List<DataSet> datasets = new ArrayList<DataSet>();
 
-    public Collection<DataSet> getDatasets()
+    public List<DataSet> getDatasets()
     {
         return datasets;
     }
@@ -72,12 +76,15 @@ public class CaseAggregationFormAction
         Collection<CaseAggregationCondition> aggConditions = aggregationConditionService
             .getAllCaseAggregationCondition();
 
+        Collection<DataSet> uniqueDataSetList = new HashSet<DataSet>();        
         for ( CaseAggregationCondition aggCondition : aggConditions )
         {
             DataElement dataElement = aggCondition.getAggregationDataElement();
 
-            datasets.addAll( dataElement.getDataSets() );
+            uniqueDataSetList.addAll( dataElement.getDataSets() );
         }
+        datasets.addAll(uniqueDataSetList);
+        Collections.sort( datasets, IdentifiableObjectNameComparator.INSTANCE );
 
         return SUCCESS;
     }

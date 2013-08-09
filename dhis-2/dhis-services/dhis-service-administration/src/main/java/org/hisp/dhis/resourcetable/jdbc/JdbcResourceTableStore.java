@@ -95,7 +95,7 @@ public class JdbcResourceTableStore
     {
         try
         {
-            jdbcTemplate.update( "DROP TABLE IF EXISTS " + TABLE_NAME_ORGANISATION_UNIT_STRUCTURE );            
+            jdbcTemplate.execute( "DROP TABLE IF EXISTS " + TABLE_NAME_ORGANISATION_UNIT_STRUCTURE );            
         }
         catch ( BadSqlGrammarException ex )
         {
@@ -117,7 +117,7 @@ public class JdbcResourceTableStore
         
         log.info( "Create organisation unit structure table SQL: " + sql );
         
-        jdbcTemplate.update( sql.toString() );
+        jdbcTemplate.execute( sql.toString() );
     }
     
     // -------------------------------------------------------------------------
@@ -128,7 +128,7 @@ public class JdbcResourceTableStore
     {
         try
         {
-            jdbcTemplate.update( "DROP TABLE IF EXISTS " + TABLE_NAME_CATEGORY_OPTION_COMBO_NAME );            
+            jdbcTemplate.execute( "DROP TABLE IF EXISTS " + TABLE_NAME_CATEGORY_OPTION_COMBO_NAME );            
         }
         catch ( BadSqlGrammarException ex )
         {
@@ -140,7 +140,7 @@ public class JdbcResourceTableStore
         
         log.info( "Create category option combo name table SQL: " + sql );
         
-        jdbcTemplate.update( sql );
+        jdbcTemplate.execute( sql );
     }
     
     // -------------------------------------------------------------------------
@@ -151,7 +151,7 @@ public class JdbcResourceTableStore
     {
         try
         {
-            jdbcTemplate.update( "DROP TABLE IF EXISTS " + CreateDataElementGroupSetTableStatement.TABLE_NAME );
+            jdbcTemplate.execute( "DROP TABLE IF EXISTS " + CreateDataElementGroupSetTableStatement.TABLE_NAME );
         }
         catch ( BadSqlGrammarException ex )
         {
@@ -160,7 +160,7 @@ public class JdbcResourceTableStore
         
         Statement statement = new CreateDataElementGroupSetTableStatement( groupSets );
         
-        jdbcTemplate.update( statement.getStatement() );
+        jdbcTemplate.execute( statement.getStatement() );
     }
 
     // -------------------------------------------------------------------------
@@ -171,7 +171,7 @@ public class JdbcResourceTableStore
     {
         try
         {
-            jdbcTemplate.update( "DROP TABLE IF EXISTS " + CreateIndicatorGroupSetTableStatement.TABLE_NAME );
+            jdbcTemplate.execute( "DROP TABLE IF EXISTS " + CreateIndicatorGroupSetTableStatement.TABLE_NAME );
         }
         catch ( BadSqlGrammarException ex )
         {
@@ -180,7 +180,7 @@ public class JdbcResourceTableStore
         
         Statement statement = new CreateIndicatorGroupSetTableStatement( groupSets );
         
-        jdbcTemplate.update( statement.getStatement() );
+        jdbcTemplate.execute( statement.getStatement() );
     }
     
     // -------------------------------------------------------------------------
@@ -191,7 +191,7 @@ public class JdbcResourceTableStore
     {
         try
         {
-            jdbcTemplate.update( "DROP TABLE IF EXISTS " + CreateOrganisationUnitGroupSetTableStatement.TABLE_NAME );
+            jdbcTemplate.execute( "DROP TABLE IF EXISTS " + CreateOrganisationUnitGroupSetTableStatement.TABLE_NAME );
         }
         catch ( BadSqlGrammarException ex )
         {
@@ -200,7 +200,7 @@ public class JdbcResourceTableStore
         
         Statement statement = new CreateOrganisationUnitGroupSetTableStatement( groupSets );
         
-        jdbcTemplate.update( statement.getStatement() );
+        jdbcTemplate.execute( statement.getStatement() );
     }
     
     // -------------------------------------------------------------------------
@@ -211,7 +211,7 @@ public class JdbcResourceTableStore
     {
         try
         {
-            jdbcTemplate.update( "DROP TABLE IF EXISTS " + CreateCategoryTableStatement.TABLE_NAME );
+            jdbcTemplate.execute( "DROP TABLE IF EXISTS " + CreateCategoryTableStatement.TABLE_NAME );
         }
         catch ( BadSqlGrammarException ex )
         {
@@ -220,7 +220,7 @@ public class JdbcResourceTableStore
         
         Statement statement = new CreateCategoryTableStatement( categories );
         
-        jdbcTemplate.update( statement.getStatement() );
+        jdbcTemplate.execute( statement.getStatement() );
     }
 
     // -------------------------------------------------------------------------
@@ -231,7 +231,7 @@ public class JdbcResourceTableStore
     {
         try
         {
-            jdbcTemplate.update( "DROP TABLE IF EXISTS " + TABLE_NAME_DATA_ELEMENT_STRUCTURE );            
+            jdbcTemplate.execute( "DROP TABLE IF EXISTS " + TABLE_NAME_DATA_ELEMENT_STRUCTURE );            
         }
         catch ( BadSqlGrammarException ex )
         {
@@ -243,7 +243,7 @@ public class JdbcResourceTableStore
         
         log.info( "Create data element structure SQL: " + sql );
         
-        jdbcTemplate.update( sql );        
+        jdbcTemplate.execute( sql );        
     }
     
     // -------------------------------------------------------------------------
@@ -254,7 +254,7 @@ public class JdbcResourceTableStore
     {
         try
         {
-            jdbcTemplate.update( "DROP TABLE IF EXISTS " + TABLE_NAME_PERIOD_STRUCTURE );            
+            jdbcTemplate.execute( "DROP TABLE IF EXISTS " + TABLE_NAME_PERIOD_STRUCTURE );            
         }
         catch ( BadSqlGrammarException ex )
         {
@@ -272,6 +272,47 @@ public class JdbcResourceTableStore
         
         log.info( "Create period structure SQL: " + sql );
         
-        jdbcTemplate.update( sql );
+        jdbcTemplate.execute( sql );
+    }
+
+    // -------------------------------------------------------------------------
+    // DataElementCategoryOptionComboTable
+    // -------------------------------------------------------------------------
+
+    public void createAndGenerateDataElementCategoryOptionCombo()
+    {
+        try
+        {
+            jdbcTemplate.execute( "DROP TABLE IF EXISTS " + TABLE_NAME_DATA_ELEMENT_CATEGORY_OPTION_COMBO );            
+        }
+        catch ( BadSqlGrammarException ex )
+        {
+            // Do nothing, table does not exist
+        }
+        
+        final String create = "CREATE TABLE " + TABLE_NAME_DATA_ELEMENT_CATEGORY_OPTION_COMBO + 
+            " (dataelementuid VARCHAR(11) NOT NULL, categoryoptioncombouid VARCHAR(11) NOT NULL)";
+        
+        jdbcTemplate.execute( create );
+        
+        log.info( "Create data element category option combo SQL: " + create );
+        
+        final String sql = 
+            "insert into " + TABLE_NAME_DATA_ELEMENT_CATEGORY_OPTION_COMBO + " (dataelementuid, categoryoptioncombouid) " +
+            "select de.uid as dataelementuid, coc.uid as categoryoptioncombouid " +
+            "from dataelement de " +
+            "join categorycombos_optioncombos cc on de.categorycomboid = cc.categorycomboid " +
+            "join categoryoptioncombo coc on cc.categoryoptioncomboid = coc.categoryoptioncomboid";
+        
+        log.info( "Insert data element category option combo SQL: " + sql );
+        
+        jdbcTemplate.execute( sql );
+        
+        final String index = "CREATE INDEX dataelement_categoryoptioncombo ON " + 
+            TABLE_NAME_DATA_ELEMENT_CATEGORY_OPTION_COMBO + " (dataelementuid, categoryoptioncombouid)";
+        
+        log.info( "Create data element category option combo index SQL: " + index );
+
+        jdbcTemplate.execute( index );        
     }
 }

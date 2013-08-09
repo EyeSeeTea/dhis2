@@ -49,7 +49,6 @@ public class HibernateIncomingSmsStore
     // -------------------------------------------------------------------------
 
     private SessionFactory sessionFactory;
-    
 
     public void setSessionFactory( SessionFactory sessionFactory )
     {
@@ -63,8 +62,7 @@ public class HibernateIncomingSmsStore
     @Override
     public int save( IncomingSms sms )
     {
-        return (Integer) sessionFactory.getCurrentSession().save( sms );
-        
+        return (Integer) sessionFactory.getCurrentSession().save( sms );        
     }
 
     @Override
@@ -75,16 +73,21 @@ public class HibernateIncomingSmsStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Collection<IncomingSms> getSmsByStatus( SmsMessageStatus status )
+    @SuppressWarnings( "unchecked" )
+    public Collection<IncomingSms> getSmsByStatus( SmsMessageStatus status, String keyword )
     {
         Session session = sessionFactory.getCurrentSession();
-        Criteria criteria = session.createCriteria( IncomingSms.class ).add( Restrictions.eq( "status", status ) );
+        Criteria criteria = session.createCriteria( IncomingSms.class ).addOrder( Order.desc( "sentDate" ) );
+        if ( status != null )
+        {
+            criteria.add( Restrictions.eq( "status", status ) );
+        }
+        criteria.add( Restrictions.ilike( "originator", "%" + keyword + "%" ) );
         return criteria.list();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public Collection<IncomingSms> getSmsByOriginator( String originator )
     {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria( IncomingSms.class );
@@ -93,15 +96,15 @@ public class HibernateIncomingSmsStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public Collection<IncomingSms> getAllSmses()
     {
-        return sessionFactory.getCurrentSession().createCriteria( IncomingSms.class ).addOrder( Order.desc( "id" ) ).list();
+        return sessionFactory.getCurrentSession().createCriteria( IncomingSms.class ).addOrder( Order.desc( "id" ) )
+            .list();
     }
 
     @Override
-    public long getSmsCount()
-    
+    public long getSmsCount()    
     {
         Session session = sessionFactory.getCurrentSession();
         Criteria criteria = session.createCriteria( IncomingSms.class );
@@ -130,5 +133,4 @@ public class HibernateIncomingSmsStore
         criteria.add( Restrictions.eq( "parsed", false ) );
         return criteria.list();
     }
-
 }

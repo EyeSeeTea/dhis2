@@ -191,7 +191,7 @@ public class TableAlteror
         executeSql( "UPDATE patientidentifiertype SET type='string' WHERE type='text'" );
 
         executeSql( "UPDATE program SET onlyEnrollOnce='false' WHERE onlyEnrollOnce is null" );
-        executeSql( "UPDATE programStage SET captureCoordinates='false' WHERE captureCoordinates is null" );
+        executeSql( "UPDATE programStage SET captureCoordinates='false' WHERE captureCoordinates is null and captureCoordinates != true" );
 
         executeSql( "update caseaggregationcondition set \"operator\"='times' where \"operator\"='SUM'" );
 
@@ -200,6 +200,8 @@ public class TableAlteror
         executeSql( "update program set remindCompleted=false where remindCompleted is null" );
         executeSql( "update patientreminder set dateToCompare='duedate' where programstageid is not null" );
         executeSql( "UPDATE programinstance SET followup=false where followup is null" );
+        executeSql( "UPDATE patientreminder SET sendTo=1 where sendTo is null" );
+        
         
         updateUid();
 
@@ -207,14 +209,20 @@ public class TableAlteror
 
         updateProgramInstanceStatus();
         
-        executeSql( "UPDATE program SET disableRegistrationFields=false where disableRegistrationFields is null" );
+        executeSql( "ALTER TABLE program DROP COLUMN disableRegistrationFields" );
         executeSql( "ALTER TABLE program ALTER COLUMN dateofincidentdescription DROP NOT NULL");
         executeSql( "ALTER TABLE patient ALTER COLUMN birthdate DROP NOT NULL");
         executeSql( "ALTER TABLE patient ALTER COLUMN gender DROP NOT NULL");
         executeSql( "ALTER TABLE patient ALTER COLUMN underage DROP NOT NULL");
         executeSql( "ALTER TABLE program ALTER COLUMN dateofenrollmentdescription DROP NOT NULL");
         executeSql( "UPDATE program SET displayOnAllOrgunit=true where displayOnAllOrgunit is null" );
-        
+        executeSql( "UPDATE program SET useFormNameDataElement=true where useFormNameDataElement is null" );
+        executeSql( "ALTER TABLE caseaggregationcondition ALTER COLUMN aggregationexpression TYPE varchar(1000)");
+        executeSql( "update patientattribute set displayonvisitschedule = false where displayonvisitschedule is null");
+        executeSql( "update program set useBirthDateAsIncidentDate = false where useBirthDateAsIncidentDate is null");
+        executeSql( "update program set useBirthDateAsEnrollmentDate = false where useBirthDateAsEnrollmentDate is null");
+        executeSql( "update program set selectEnrollmentDatesInFuture = true where selectEnrollmentDatesInFuture is null");
+        executeSql( "update programstage set relatedPatient = false where relatedPatient is null");
     }
 
     // -------------------------------------------------------------------------

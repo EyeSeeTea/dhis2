@@ -49,6 +49,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientAttribute;
+import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.patient.PatientStore;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
@@ -254,10 +255,10 @@ public class HibernatePatientStore
     }
 
     @Override
-    public Collection<Patient> search( List<String> searchKeys, OrganisationUnit orgunit,
+    public Collection<Patient> search( List<String> searchKeys, OrganisationUnit orgunit, Boolean followup,
         Collection<PatientAttribute> patientAttributes, Integer min, Integer max )
     {
-        String sql = searchPatientSql( false, searchKeys, orgunit, patientAttributes, min, max );
+        String sql = searchPatientSql( false, searchKeys, orgunit, followup, patientAttributes, null, min, max );
         Collection<Patient> patients = new HashSet<Patient>();
         try
         {
@@ -279,9 +280,9 @@ public class HibernatePatientStore
 
     @Override
     public Collection<String> getPatientPhoneNumbers( List<String> searchKeys, OrganisationUnit orgunit,
-        Collection<PatientAttribute> patientAttributes, Integer min, Integer max )
+        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer min, Integer max )
     {
-        String sql = searchPatientSql( false, searchKeys, orgunit, patientAttributes, min, max );
+        String sql = searchPatientSql( false, searchKeys, orgunit, followup, patientAttributes, null, min, max );
         Collection<String> phoneNumbers = new HashSet<String>();
         try
         {
@@ -303,10 +304,12 @@ public class HibernatePatientStore
     }
 
     @Override
-    public List<Integer> getProgramStageInstances( List<String> searchKeys, OrganisationUnit orgunit,
-        Collection<PatientAttribute> patientAttributes, Integer min, Integer max )
+    public List<Integer> getProgramStageInstances( List<String> searchKeys, OrganisationUnit orgunit, Boolean followup,
+        Collection<PatientAttribute> patientAttributes, Collection<PatientIdentifierType> identifierTypes, Integer min,
+        Integer max )
     {
-        String sql = searchPatientSql( false, searchKeys, orgunit, patientAttributes, min, max );
+        String sql = searchPatientSql( false, searchKeys, orgunit, followup, patientAttributes, identifierTypes, min,
+            max );
         List<Integer> programStageInstanceIds = new ArrayList<Integer>();
         try
         {
@@ -327,21 +330,21 @@ public class HibernatePatientStore
         return programStageInstanceIds;
     }
 
-    public int countSearch( List<String> searchKeys, OrganisationUnit orgunit )
+    public int countSearch( List<String> searchKeys, OrganisationUnit orgunit, Boolean followup )
     {
-        String sql = searchPatientSql( true, searchKeys, orgunit, null, null, null );
+        String sql = searchPatientSql( true, searchKeys, orgunit, followup, null, null, null, null );
         return jdbcTemplate.queryForObject( sql, Integer.class );
     }
 
     @Override
-    public Grid getPatientEventReport( Grid grid, List<String> searchKeys, OrganisationUnit orgunit,
-        Collection<PatientAttribute> patientAttributes, Integer min, Integer max )
+    public Grid getPatientEventReport( Grid grid, List<String> searchKeys, OrganisationUnit orgunit, Boolean followup,
+        Collection<PatientAttribute> patientAttributes, Collection<PatientIdentifierType> identifierTypes, Integer min, Integer max )
     {
         // ---------------------------------------------------------------------
         // Get SQL and build grid
         // ---------------------------------------------------------------------
 
-        String sql = searchPatientSql( false, searchKeys, orgunit, patientAttributes, null, null );
+        String sql = searchPatientSql( false, searchKeys, orgunit, followup, patientAttributes, identifierTypes, null, null );
 
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet( sql );
 
@@ -355,13 +358,24 @@ public class HibernatePatientStore
     // -------------------------------------------------------------------------
 
     private String searchPatientSql( boolean count, List<String> searchKeys, OrganisationUnit orgunit,
-        Collection<PatientAttribute> patientAttributes, Integer min, Integer max )
+        Boolean followup, Collection<PatientAttribute> patientAttributes,
+        Collection<PatientIdentifierType> identifierTypes, Integer min, Integer max )
     {
         String selector = count ? "count(*) " : "* ";
 
         String sql = "select " + selector
             + " from ( select distinct p.patientid, p.firstname, p.middlename, p.lastname, p.gender, p.phonenumber,";
 
+        if ( identifierTypes != null )
+        {
+            for ( PatientIdentifierType identifierType : identifierTypes )
+            {
+                sql += "(select identifier from patientidentifier where patientid=p.patientid and patientidentifiertypeid="
+                    + identifierType.getId() + " ) as " + Patient.PREFIX_IDENTIFIER_TYPE + "_" + identifierType.getId()
+                    + " ,";
+            }
+        }
+        
         if ( patientAttributes != null )
         {
             for ( PatientAttribute patientAttribute : patientAttributes )
@@ -371,6 +385,7 @@ public class HibernatePatientStore
                     + patientAttribute.getId() + " ,";
             }
         }
+
 
         String patientWhere = "";
         String patientOperator = " where ";
@@ -610,12 +625,12 @@ public class HibernatePatientStore
             if ( isPriorityEvent )
             {
                 subSQL += ",pgi.followup ";
-                orderBy = " ORDER BY pgi.followup desc, duedate asc ";
+                orderBy = " ORDER BY pgi.followup desc, p.patientid, p.firstname, p.middlename, p.lastname, duedate asc ";
                 patientGroupBy += ",pgi.followup ";
             }
             else
             {
-                orderBy = " ORDER BY duedate asc ";
+                orderBy = " ORDER BY p.patientid, p.firstname, p.middlename, p.lastname, duedate asc ";
             }
             sql = sql + subSQL + from + " inner join programinstance pgi on " + " (pgi.patientid=p.patientid) "
                 + " inner join programstageinstance psi on " + " (psi.programinstanceid=pgi.programinstanceid) "
@@ -633,6 +648,10 @@ public class HibernatePatientStore
         }
 
         sql += from + patientWhere;
+        if ( followup != null )
+        {
+            sql += " AND pgi.followup=" + followup;
+        }
         if ( isSearchEvent )
         {
             sql += patientGroupBy;
@@ -645,7 +664,7 @@ public class HibernatePatientStore
         {
             sql += statementBuilder.limitRecord( min, max );
         }
-
+       
         return sql;
     }
 

@@ -29,7 +29,10 @@ package org.hisp.dhis.program;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
@@ -42,11 +45,17 @@ import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.patient.PatientIdentifier;
 import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.patient.PatientReminder;
+import org.hisp.dhis.patient.PatientReminderService;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
+import org.hisp.dhis.patientcomment.PatientComment;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueService;
+import org.hisp.dhis.sms.SmsServiceException;
+import org.hisp.dhis.sms.outbound.OutboundSms;
+import org.hisp.dhis.sms.outbound.OutboundSmsService;
 import org.hisp.dhis.system.grid.ListGrid;
+import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -80,6 +89,34 @@ public class DefaultProgramInstanceService
     public void setPatientDataValueService( PatientDataValueService patientDataValueService )
     {
         this.patientDataValueService = patientDataValueService;
+    }
+
+    private ProgramService programService;
+
+    public void setProgramService( ProgramService programService )
+    {
+        this.programService = programService;
+    }
+
+    private OutboundSmsService outboundSmsService;
+
+    public void setOutboundSmsService( OutboundSmsService outboundSmsService )
+    {
+        this.outboundSmsService = outboundSmsService;
+    }
+
+    private CurrentUserService currentUserService;
+
+    public void setCurrentUserService( CurrentUserService currentUserService )
+    {
+        this.currentUserService = currentUserService;
+    }
+
+    private PatientReminderService patientReminderService;
+
+    public void setPatientReminderService( PatientReminderService patientReminderService )
+    {
+        this.patientReminderService = patientReminderService;
     }
 
     // -------------------------------------------------------------------------
@@ -199,34 +236,48 @@ public class DefaultProgramInstanceService
 
         Grid attrGrid = new ListGrid();
 
-        attrGrid.setTitle( patient.getFullName() );
+        if ( patient.getFirstName() == null && patient.getMiddleName() == null && patient.getLastName() == null )
+        {
+            attrGrid.setTitle( "" );
+        }
+        else
+        {
+            attrGrid.setTitle( patient.getFullName() );
+        }
         attrGrid.setSubtitle( "" );
 
         attrGrid.addHeader( new GridHeader( i18n.getString( "name" ), false, true ) );
         attrGrid.addHeader( new GridHeader( i18n.getString( "value" ), false, true ) );
         attrGrid.addHeader( new GridHeader( "", true, false ) );
 
-        Collection<PatientAttribute> patientAttributes = patient.getAttributes();
-
         // ---------------------------------------------------------------------
         // Add fixed attribues
         // ---------------------------------------------------------------------
 
-        attrGrid.addRow();
-        attrGrid.addValue( i18n.getString( "gender" ) );
-        attrGrid.addValue( i18n.getString( patient.getGender() ) );
+        if ( patient.getGender() != null )
+        {
+            attrGrid.addRow();
+            attrGrid.addValue( i18n.getString( "gender" ) );
+            attrGrid.addValue( i18n.getString( patient.getGender() ) );
+        }
 
-        attrGrid.addRow();
-        attrGrid.addValue( i18n.getString( "date_of_birth" ) );
-        attrGrid.addValue( format.formatDate( patient.getBirthDate() ) );
+        if ( patient.getBirthDate() != null )
+        {
+            attrGrid.addRow();
+            attrGrid.addValue( i18n.getString( "date_of_birth" ) );
+            attrGrid.addValue( format.formatDate( patient.getBirthDate() ) );
 
-        attrGrid.addRow();
-        attrGrid.addValue( i18n.getString( "age" ) );
-        attrGrid.addValue( patient.getAge() );
+            attrGrid.addRow();
+            attrGrid.addValue( i18n.getString( "age" ) );
+            attrGrid.addValue( patient.getAge() );
+        }
 
-        attrGrid.addRow();
-        attrGrid.addValue( i18n.getString( "dob_type" ) );
-        attrGrid.addValue( i18n.getString( patient.getDobType() + "" ) );
+        if ( patient.getDobType() != null )
+        {
+            attrGrid.addRow();
+            attrGrid.addValue( i18n.getString( "dob_type" ) );
+            attrGrid.addValue( i18n.getString( patient.getDobType() + "" ) );
+        }
 
         attrGrid.addRow();
         attrGrid.addValue( i18n.getString( "phoneNumber" ) );
@@ -238,24 +289,35 @@ public class DefaultProgramInstanceService
         // Add dynamic attribues
         // ---------------------------------------------------------------------
 
-        for ( PatientAttribute patientAttribute : patientAttributes )
+        Collection<Program> programs = programService
+            .getProgramsByCurrentUser( Program.MULTIPLE_EVENTS_WITH_REGISTRATION );
+        programs.addAll( programService.getProgramsByCurrentUser( Program.SINGLE_EVENT_WITH_REGISTRATION ) );
+
+        Collection<PatientAttributeValue> attributeValues = patientAttributeValueService
+            .getPatientAttributeValues( patient );
+        Iterator<PatientAttributeValue> iterAttribute = attributeValues.iterator();
+
+        for ( Program program : programs )
+        {
+            Collection<PatientAttribute> atttributes = program.getPatientAttributes();
+            while ( iterAttribute.hasNext() )
+            {
+                PatientAttributeValue attributeValue = iterAttribute.next();
+                if ( !atttributes.contains( attributeValue.getPatientAttribute() ) )
+                {
+                    iterAttribute.remove();
+                }
+            }
+        }
+
+        for ( PatientAttributeValue attributeValue : attributeValues )
         {
             attrGrid.addRow();
-            attrGrid.addValue( patientAttribute.getDisplayName() );
-            PatientAttributeValue attributeValue = patientAttributeValueService.getPatientAttributeValue( patient,
-                patientAttribute );
-            String value = "";
-            if ( attributeValue == null )
+            attrGrid.addValue( attributeValue.getPatientAttribute().getDisplayName() );
+            String value = attributeValue.getValue();
+            if ( attributeValue.getPatientAttribute().getValueType().equals( PatientAttribute.TYPE_BOOL ) )
             {
-                value = PatientAttributeValue.UNKNOWN;
-            }
-            else if ( attributeValue.getPatientAttribute().getValueType().equals( PatientAttribute.TYPE_BOOL ) )
-            {
-                value = i18n.getString( attributeValue.getValue() );
-            }
-            else
-            {
-                value = attributeValue.getValue();
+                value = i18n.getString( value );
             }
 
             attrGrid.addValue( value );
@@ -265,21 +327,36 @@ public class DefaultProgramInstanceService
         // Add identifier
         // ---------------------------------------------------------------------
 
-        for ( PatientIdentifier identifier : patient.getIdentifiers() )
+        Collection<PatientIdentifier> identifiers = patient.getIdentifiers();
+        Iterator<PatientIdentifier> iterIdentifier = identifiers.iterator();
+
+        for ( Program program : programs )
+        {
+            Collection<PatientIdentifierType> identifierTypes = program.getPatientIdentifierTypes();
+            while ( iterIdentifier.hasNext() )
+            {
+                PatientIdentifier identifier = iterIdentifier.next();
+                if ( !identifierTypes.contains( identifier.getIdentifierType() ) )
+                {
+                    iterIdentifier.remove();
+                }
+            }
+        }
+
+        for ( PatientIdentifier identifier : identifiers )
         {
             attrGrid.addRow();
-
             PatientIdentifierType idType = identifier.getIdentifierType();
             if ( idType != null )
             {
                 attrGrid.addValue( idType.getName() );
-                attrGrid.addValue( identifier.getIdentifier() );
             }
             else
             {
                 attrGrid.addValue( i18n.getString( "system_identifier" ) );
-                attrGrid.addValue( identifier.getIdentifier() );
+
             }
+            attrGrid.addValue( identifier.getIdentifier() );
         }
 
         grids.add( attrGrid );
@@ -294,15 +371,12 @@ public class DefaultProgramInstanceService
         {
             for ( ProgramInstance programInstance : programInstances )
             {
-                Grid gridProgram = getProgramInstanceReport( programInstance, i18n, format );
+                if ( programs.contains( programInstance.getProgram() ) )
+                {
+                    Grid gridProgram = getProgramInstanceReport( programInstance, i18n, format );
 
-                // ---------------------------------------------------------------------
-                // Grids for program-stage-instance
-                // ---------------------------------------------------------------------
-
-                getProgramStageInstancesReport( gridProgram, programInstance, format, i18n );
-
-                grids.add( gridProgram );
+                    grids.add( gridProgram );
+                }
             }
         }
 
@@ -324,9 +398,8 @@ public class DefaultProgramInstanceService
         // Headers
         // ---------------------------------------------------------------------
 
-        grid.addHeader( new GridHeader( i18n.getString( "name" ), false, false ) );
-        grid.addHeader( new GridHeader( i18n.getString( "value" ), false, false ) );
-        grid.addHeader( new GridHeader( "", true, false ) );
+        grid.addHeader( new GridHeader( "", false, false ) );
+        grid.addHeader( new GridHeader( "", false, false ) );
 
         // ---------------------------------------------------------------------
         // Grids for program-stage-instance
@@ -335,6 +408,75 @@ public class DefaultProgramInstanceService
         grid.addRow();
         grid.addValue( programInstance.getProgram().getDateOfEnrollmentDescription() );
         grid.addValue( format.formatDate( programInstance.getEnrollmentDate() ) );
+
+        // Get patient-identifiers which belong to the program
+
+        Patient patient = programInstance.getPatient();
+
+        Collection<PatientIdentifierType> identifierTypes = programInstance.getProgram().getPatientIdentifierTypes();
+
+        Collection<PatientIdentifier> identifiers = patient.getIdentifiers();
+
+        if ( identifierTypes != null && identifiers.size() > 0 )
+        {
+            for ( PatientIdentifierType identifierType : identifierTypes )
+            {
+                for ( PatientIdentifier identifier : identifiers )
+                {
+                    if ( identifier.getIdentifierType() != null
+                        && identifier.getIdentifierType().equals( identifierType ) )
+                    {
+                        grid.addRow();
+                        grid.addValue( identifierType.getDisplayName() );
+                        grid.addValue( identifier.getIdentifier() );
+                    }
+                    else if ( identifier.getIdentifierType() == null )
+                    {
+                        grid.addRow();
+                        grid.addValue( i18n.getString( "system_identifier" ) );
+                        grid.addValue( identifier.getIdentifier() );
+                    }
+                }
+            }
+        }
+
+        // Get patient-attribute-values which belong to the program
+
+        Collection<PatientAttribute> attrtibutes = programInstance.getProgram().getPatientAttributes();
+        for ( PatientAttribute attrtibute : attrtibutes )
+        {
+            PatientAttributeValue attributeValue = patientAttributeValueService.getPatientAttributeValue( patient,
+                attrtibute );
+            if ( attributeValue != null )
+            {
+                grid.addRow();
+                grid.addValue( attrtibute.getDisplayName() );
+                grid.addValue( attributeValue.getValue() );
+            }
+        }
+
+        PatientComment patientComment = programInstance.getPatientComment();
+        if ( patientComment != null )
+        {
+            grid.addRow();
+            grid.addValue( i18n.getString( "comment" ) + " " + i18n.getString( "on" ) + " "
+                + format.formatDateTime( patientComment.getCreatedDate() ) );
+            grid.addValue( patientComment.getCommentText() );
+        }
+
+        // Get sms of the program-instance
+
+        List<OutboundSms> messasges = programInstance.getOutboundSms();
+
+        for ( OutboundSms messasge : messasges )
+        {
+            grid.addRow();
+            grid.addValue( i18n.getString( "message" ) + " " + i18n.getString( "on" ) + " "
+                + format.formatDateTime( messasge.getDate() ) );
+            grid.addValue( messasge.getMessage() );
+        }
+
+        // Program-instance attributes
 
         if ( programInstance.getProgram().getDisplayIncidentDate() != null
             && programInstance.getProgram().getDisplayIncidentDate() )
@@ -366,7 +508,7 @@ public class DefaultProgramInstanceService
         programInstanceStore.removeProgramEnrollment( programInstance );
     }
 
-    public Collection<SchedulingProgramObject> getSendMesssageEvents()
+    public Collection<SchedulingProgramObject> getScheduleMesssages()
     {
         Collection<SchedulingProgramObject> result = programInstanceStore
             .getSendMesssageEvents( PatientReminder.ENROLLEMENT_DATE_TO_COMPARE );
@@ -376,8 +518,29 @@ public class DefaultProgramInstanceService
         return result;
     }
 
+    public Collection<OutboundSms> sendMessages( ProgramInstance programInstance, int status, I18nFormat format )
+    {
+        Patient patient = programInstance.getPatient();
+        Collection<OutboundSms> outboundSmsList = new HashSet<OutboundSms>();
+
+        Collection<PatientReminder> reminders = programInstance.getProgram().getPatientReminders();
+        for ( PatientReminder rm : reminders )
+        {
+            if ( rm != null && rm.getWhenToSend() != null && rm.getWhenToSend() == status )
+            {
+                OutboundSms outboundSms = sendProgramMessage( rm, programInstance, patient, format );
+                if ( outboundSms != null )
+                {
+                    outboundSmsList.add( outboundSms );
+                }
+            }
+        }
+        
+        return outboundSmsList;
+    }
+
     // -------------------------------------------------------------------------
-    // due-date && report-date
+    // Supportive methods
     // -------------------------------------------------------------------------
 
     private void getProgramStageInstancesReport( Grid grid, ProgramInstance programInstance, I18nFormat format,
@@ -392,7 +555,7 @@ public class DefaultProgramInstanceService
             grid.addValue( "" );
 
             grid.addRow();
-            grid.addValue( ">> " + programStageInstance.getProgramStage().getName() );
+            grid.addValue( programStageInstance.getProgramStage().getName() );
             grid.addValue( "" );
 
             // -----------------------------------------------------------------
@@ -410,6 +573,30 @@ public class DefaultProgramInstanceService
                 grid.addValue( format.formatDate( programStageInstance.getExecutionDate() ) );
             }
 
+            // Comments
+
+            List<PatientComment> comments = new ArrayList<PatientComment>( programStageInstance.getPatientComments() );
+
+            for ( PatientComment comment : comments )
+            {
+                grid.addRow();
+                grid.addValue( i18n.getString( "comment" ) + " " + i18n.getString( "on" ) + " "
+                    + format.formatDateTime( comment.getCreatedDate() ) );
+                grid.addValue( comment.getCommentText() );
+            }
+
+            // SMS messages
+
+            List<OutboundSms> messasges = programStageInstance.getOutboundSms();
+
+            for ( OutboundSms messasge : messasges )
+            {
+                grid.addRow();
+                grid.addValue( i18n.getString( "messsage" ) + " " + i18n.getString( "on" ) + " "
+                    + format.formatDateTime( messasge.getDate() ) );
+                grid.addValue( messasge.getMessage() );
+            }
+
             // -----------------------------------------------------------------
             // Values
             // -----------------------------------------------------------------
@@ -422,7 +609,7 @@ public class DefaultProgramInstanceService
                 DataElement dataElement = patientDataValue.getDataElement();
 
                 grid.addRow();
-                grid.addValue( dataElement.getName() );
+                grid.addValue( dataElement.getFormNameFallback() );
 
                 if ( dataElement.getType().equals( DataElement.VALUE_TYPE_BOOL ) )
                 {
@@ -434,6 +621,33 @@ public class DefaultProgramInstanceService
                 }
             }
         }
+    }
+
+    private OutboundSms sendProgramMessage( PatientReminder patientReminder, ProgramInstance programInstance,
+        Patient patient, I18nFormat format )
+    {
+        Set<String> phoneNumbers = patientReminderService.getPhonenumbers( patientReminder, patient );
+        OutboundSms outboundSms = null;
+
+        if ( phoneNumbers.size() > 0 )
+        {
+            String msg = patientReminderService.getMessageFromTemplate( patientReminder, programInstance, format );
+
+            try
+            {
+                outboundSms = new OutboundSms();
+                outboundSms.setMessage( msg );
+                outboundSms.setRecipients( phoneNumbers );
+                outboundSms.setSender( currentUserService.getCurrentUsername() );
+                outboundSmsService.sendMessage( outboundSms, null );
+            }
+            catch ( SmsServiceException e )
+            {
+                e.printStackTrace();
+            }
+        }
+
+        return outboundSms;
     }
 
 }

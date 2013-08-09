@@ -33,8 +33,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
 
 /**
  * @author Lars Helge Overland
@@ -81,7 +84,7 @@ public class ListUtils
      * @param list the list to select from.
      * @param indexes the indexes of the elements in the list to select.
      */
-    public static <T> List<T> getAll( List<T> list, List<Integer> indexes )
+    public static <T> List<T> getAtIndexes( List<T> list, List<Integer> indexes )
     {
         List<T> elements = new ArrayList<T>();
         
@@ -165,5 +168,26 @@ public class ListUtils
         }
         
         return list;
+    }
+    
+    /**
+     * Removes empty strings from the given list. Empty includes null.
+     * 
+     * @param list the list of strings.
+     */
+    public static void removeEmptys( List<String> list )
+    {
+        if ( list != null && !list.isEmpty() )
+        {
+            Iterator<String> iterator = list.iterator();
+            
+            while ( iterator.hasNext() )
+            {
+                if ( StringUtils.isEmpty( iterator.next() ) )
+                {
+                    iterator.remove();
+                }
+            }
+        }
     }
 }

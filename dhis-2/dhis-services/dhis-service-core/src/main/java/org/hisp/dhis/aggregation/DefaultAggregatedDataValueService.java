@@ -133,20 +133,6 @@ public class DefaultAggregatedDataValueService
     {
         return aggregatedDataValueStore.countDataValuesAtLevel( orgunit, level, periods );
     }
-        
-    // -------------------------------------------------------------------------
-    // AggregatedDataMapValue
-    // -------------------------------------------------------------------------
-    
-    public Collection<AggregatedMapValue> getAggregatedDataMapValues( int dataElementId, int periodId, Collection<Integer> organisationUnitIds )
-    {
-        return aggregatedDataValueStore.getAggregatedDataMapValues( dataElementId, periodId, organisationUnitIds );
-    }
-    
-    public Collection<AggregatedMapValue> getAggregatedDataMapValues( Collection<Integer> dataElementIds, int periodId, int organisationUnitId )
-    {
-        return aggregatedDataValueStore.getAggregatedDataMapValues( dataElementIds, periodId, organisationUnitId );
-    }
     
     // -------------------------------------------------------------------------
     // AggregatedIndicatorValue
@@ -195,15 +181,6 @@ public class DefaultAggregatedDataValueService
     }
     
     // -------------------------------------------------------------------------
-    // AggregatedIndicatorMapValue
-    // -------------------------------------------------------------------------
-    
-    public Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, int periodId, Collection<Integer> organisationUnitIds )
-    {
-        return aggregatedDataValueStore.getAggregatedIndicatorMapValues( indicatorId, periodId, organisationUnitIds );
-    }
-
-    // -------------------------------------------------------------------------
     // AggregatedDataSetCompleteness
     // -------------------------------------------------------------------------
     
@@ -211,5 +188,19 @@ public class DefaultAggregatedDataValueService
         Collection<Integer> organisationUnitIds )
     {
         return aggregatedDataValueStore.getAggregatedDataSetCompleteness( dataSetIds, periodIds, organisationUnitIds );
+    }
+
+    // -------------------------------------------------------------------------
+    // Data mart
+    // -------------------------------------------------------------------------
+    
+    public void dropDataMart()
+    {
+        aggregatedDataValueStore.dropDataMart();
+    }
+    
+    public void createDataMart()
+    {
+        aggregatedDataValueStore.createDataMart();
     }
 }

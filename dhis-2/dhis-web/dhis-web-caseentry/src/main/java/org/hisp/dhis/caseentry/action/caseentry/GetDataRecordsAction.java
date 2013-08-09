@@ -29,12 +29,13 @@ package org.hisp.dhis.caseentry.action.caseentry;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.hisp.dhis.caseentry.state.SelectedStateManager;
 import org.hisp.dhis.common.Grid;
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.paging.ActionPagingSupport;
@@ -195,6 +196,20 @@ public class GetDataRecordsAction
         return patientAttributeValueMap;
     }
 
+    private Boolean followup;
+
+    public void setFollowup( Boolean followup )
+    {
+        this.followup = followup;
+    }
+
+    private Boolean trackingReport;
+
+    public void setTrackingReport( Boolean trackingReport )
+    {
+        this.trackingReport = trackingReport;
+    }
+
     // -------------------------------------------------------------------------
     // Implementation Action
     // -------------------------------------------------------------------------
@@ -218,11 +233,13 @@ public class GetDataRecordsAction
                 patientAttributes = new ArrayList<PatientAttribute>(
                     patientAttributeService.getPatientAttributesByDisplayOnVisitSchedule( true ) );
 
-                total = patientService.countSearchPatients( searchTexts, orgunit );
+                Collections.sort( patientAttributes, IdentifiableObjectNameComparator.INSTANCE );
+
+                total = patientService.countSearchPatients( searchTexts, orgunit, followup );
                 this.paging = createPaging( total );
 
                 List<Integer> stageInstanceIds = patientService.getProgramStageInstances( searchTexts, orgunit,
-                    paging.getStartPos(), paging.getPageSize() );
+                    followup, paging.getStartPos(), paging.getPageSize() );
 
                 for ( Integer stageInstanceId : stageInstanceIds )
                 {
@@ -249,9 +266,13 @@ public class GetDataRecordsAction
                     }
                 }
             }
+            else if(trackingReport != null && trackingReport )
+            {
+                grid = patientService.getTrackingEventsReport( program, searchTexts, orgunit, followup, i18n );
+            }
             else
             {
-                grid = patientService.getScheduledEventsReport( searchTexts, orgunit, null, null, i18n );
+                grid = patientService.getScheduledEventsReport( searchTexts, orgunit, followup, null, null, i18n );
             }
         }
 

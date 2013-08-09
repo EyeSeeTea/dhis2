@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.hisp.dhis</groupId>
   <artifactId>dhis</artifactId>
-  <version>2.12-SNAPSHOT</version>
+  <version>2.13-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>DHIS 2</name>
   <url>http://dhis2.org</url>
@@ -426,7 +426,7 @@
       <dependency>
         <groupId>org.springframework.hateoas</groupId>
         <artifactId>spring-hateoas</artifactId>
-        <version>0.4.0.RELEASE</version>
+        <version>0.5.0.RELEASE</version>
       </dependency>
       <dependency>
         <groupId>cglib</groupId>
@@ -481,7 +481,7 @@
       <dependency>
         <groupId>org.springframework.mobile</groupId>
         <artifactId>spring-mobile-device</artifactId>
-        <version>1.0.0.RELEASE</version>
+        <version>1.0.1.RELEASE</version>
       </dependency>
       <!--Other -->
       <dependency>
@@ -630,10 +630,11 @@
         <version>1.2</version>
       </dependency>
       <dependency>
-        <groupId>net.sf.opencsv</groupId>
-        <artifactId>opencsv</artifactId>
-        <version>2.3</version>
+        <groupId>net.sourceforge.javacsv</groupId>
+        <artifactId>javacsv</artifactId>
+        <version>2.0</version>
       </dependency>
+            
       <!--DBMS -->
       <dependency>
         <groupId>com.h2database</groupId>
@@ -719,7 +720,7 @@
       <dependency>
         <groupId>net.sf.jasperreports</groupId>
         <artifactId>jasperreports</artifactId>
-        <version>4.7.1</version>
+        <version>5.2.0</version>
         <exclusions>
           <exclusion>
             <groupId>xalan</groupId>
@@ -737,9 +738,9 @@
         <version>4.0.0</version>
       </dependency>
       <dependency>
-        <groupId>jfree</groupId>
+        <groupId>org.jfree</groupId>
         <artifactId>jfreechart</artifactId>
-        <version>1.0.13</version>
+        <version>1.0.15</version>
         <exclusions>
           <exclusion>
             <groupId>gnujaxp</groupId>
@@ -748,9 +749,9 @@
         </exclusions>
       </dependency>
       <dependency>
-        <groupId>jfree</groupId>
+        <groupId>org.jfree</groupId>
         <artifactId>jcommon</artifactId>
-        <version>1.0.16</version>
+        <version>1.0.17</version>
         <exclusions>
           <exclusion>
             <groupId>gnujaxp</groupId>
@@ -954,13 +955,13 @@
   <properties>
     <rootDir></rootDir>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <spring.version>3.2.2.RELEASE</spring.version>
-    <spring.security.version>3.1.3.RELEASE</spring.security.version>
+    <spring.version>3.2.3.RELEASE</spring.version>
+    <spring.security.version>3.1.4.RELEASE</spring.security.version>
     <hibernate.version>4.2.0.Final</hibernate.version>
     <hibernate-validator.version>4.3.1.Final</hibernate-validator.version>
     <jackson.version>2.0.6</jackson.version>
     <camel.version>2.10.2</camel.version>
     <slf4j.version>1.6.6</slf4j.version>
-    <geotools.version>8.4</geotools.version>
+    <geotools.version>9.3</geotools.version>
   </properties>
 </project>

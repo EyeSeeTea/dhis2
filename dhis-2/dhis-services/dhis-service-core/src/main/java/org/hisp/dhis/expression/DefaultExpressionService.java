@@ -68,8 +68,6 @@ import org.springframework.transaction.annotation.Transactional;
  * 
  * @author Margrethe Store
  * @author Lars Helge Overland
- * @version $Id: DefaultExpressionService.java 6463 2008-11-24 12:05:46Z
- *          larshelg $
  */
 public class DefaultExpressionService
     implements ExpressionService
@@ -154,11 +152,25 @@ public class DefaultExpressionService
             return null;
         }
         
-        final double denominatorValue = calculateExpression( generateExpression( indicator.getExplodedDenominatorFallback(), valueMap, constantMap, days, false ) );
+        final String numeratorExpression = generateExpression( indicator.getExplodedDenominatorFallback(), valueMap, constantMap, days, false );
+        
+        if ( numeratorExpression == null )
+        {
+            return null;
+        }
+        
+        final double denominatorValue = calculateExpression( numeratorExpression );
         
         if ( !isEqual( denominatorValue, 0d ) )
         {
-            final double numeratorValue = calculateExpression( generateExpression( indicator.getExplodedNumeratorFallback(), valueMap, constantMap, days, false ) );
+            final String denominatorExpression = generateExpression( indicator.getExplodedNumeratorFallback(), valueMap, constantMap, days, false );
+            
+            if ( denominatorExpression == null )
+            {
+                return null;
+            }
+            
+            final double numeratorValue = calculateExpression( denominatorExpression );
             
             final double annualizationFactor = period != null ? DateUtils.getAnnualizationFactor( indicator, period.getStartDate(), period.getEndDate() ) : 1d;
             final double factor = indicator.getIndicatorType().getFactor();
@@ -202,7 +214,24 @@ public class DefaultExpressionService
 
         return dataElementsInExpression;
     }
-
+    
+    public Set<String> getDataElementTotalUids( String expression )
+    {
+        Set<String> uids = new HashSet<String>();
+        
+        if ( expression != null )
+        {
+            final Matcher matcher = DATA_ELEMENT_TOTAL_PATTERN.matcher( expression );
+            
+            while ( matcher.find() )
+            {
+                uids.add( matcher.group( 1 ) );
+            }
+        }
+        
+        return uids;
+    }
+    
     @Transactional
     public Set<DataElementCategoryOptionCombo> getOptionCombosInExpression( String expression )
     {
@@ -460,17 +489,31 @@ public class DefaultExpressionService
                 indicator.setExplodedDenominator( substituteExpression( indicator.getDenominator(), days ) );
             }
 
-            final ListMap<String, String> dataElementMap = dataElementService.getDataElementCategoryOptionComboMap();
+            Set<String> dataElementTotals = new HashSet<String>();
             
             for ( Indicator indicator : indicators )
             {
-                indicator.setExplodedNumerator( explodeExpression( indicator.getExplodedNumerator() != null ? indicator.getExplodedNumerator() : "", dataElementMap ) );
-                indicator.setExplodedDenominator( explodeExpression( indicator.getExplodedDenominator() != null ? indicator.getExplodedDenominator() : "", dataElementMap ) );
-            }     
+                dataElementTotals.addAll( getDataElementTotalUids( indicator.getNumerator() ) );
+                dataElementTotals.addAll( getDataElementTotalUids( indicator.getDenominator() ) );
+            }
+            
+            if ( !dataElementTotals.isEmpty() )
+            {
+                final ListMap<String, String> dataElementMap = dataElementService.getDataElementCategoryOptionComboMap( dataElementTotals );
+                
+                if ( !dataElementMap.isEmpty() )
+                {
+                    for ( Indicator indicator : indicators )
+                    {
+                        indicator.setExplodedNumerator( explodeExpression( indicator.getExplodedNumerator() != null ? indicator.getExplodedNumerator() : "", dataElementMap ) );
+                        indicator.setExplodedDenominator( explodeExpression( indicator.getExplodedDenominator() != null ? indicator.getExplodedDenominator() : "", dataElementMap ) );
+                    }
+                }
+            }
         }
     }
     
-    private String explodeExpression( String expression, ListMap<String, String> dataElementMap )
+    private String explodeExpression( String expression, ListMap<String, String> dataElementOptionComboMap )
     {
         if ( expression == null || expression.isEmpty() )
         {
@@ -486,7 +529,7 @@ public class DefaultExpressionService
             {
                 final StringBuilder replace = new StringBuilder( PAR_OPEN );
 
-                for ( String coc : dataElementMap.get( matcher.group( 1 ) ) )
+                for ( String coc : dataElementOptionComboMap.get( matcher.group( 1 ) ) )
                 {
                     replace.append( EXP_OPEN ).append( matcher.group( 1 ) ).append( SEPARATOR ).append(
                         coc ).append( EXP_CLOSE ).append( "+" );

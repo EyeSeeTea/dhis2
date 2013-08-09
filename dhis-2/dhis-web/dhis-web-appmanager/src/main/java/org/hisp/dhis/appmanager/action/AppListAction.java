@@ -27,12 +27,14 @@ package org.hisp.dhis.appmanager.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.hisp.dhis.appmanager.App;
 import org.hisp.dhis.appmanager.AppManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Saptarshi Purkayastha
@@ -51,18 +53,27 @@ public class AppListAction
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private List<App> appList;
+    private List<App> appList = new ArrayList<App>();
 
     public List<App> getAppList()
     {
         return appManagerService.getInstalledApps();
     }
 
-    private List<String> appFolderNames;
+    private List<String> appFolderNames = new ArrayList<String>();
 
     public List<String> getAppFolderNames()
     {
         return appFolderNames;
+    }
+
+    //TODO: create settings to set for external server like Apache2/nginx
+    // Should be a per-app setting
+    private String appsRootUrl = new String();
+
+    public String getAppsRootUrl()
+    {
+        return appManagerService.getAppBaseUrl();
     }
 
     // -------------------------------------------------------------------------
@@ -73,11 +84,11 @@ public class AppListAction
     public String execute()
         throws Exception
     {
-        appFolderNames = new ArrayList<String>();
         for ( App app : getAppList() )
         {
             appFolderNames.add( appManagerService.getAppFolderName( app ) );
         }
+
         return SUCCESS;
     }
 }

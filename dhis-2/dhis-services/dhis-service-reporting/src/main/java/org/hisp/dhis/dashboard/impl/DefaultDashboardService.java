@@ -27,25 +27,30 @@ package org.hisp.dhis.dashboard.impl;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
+import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
+import static org.hisp.dhis.dashboard.DashboardItem.TYPE_CHART;
+import static org.hisp.dhis.dashboard.DashboardItem.TYPE_MAP;
+import static org.hisp.dhis.dashboard.DashboardItem.TYPE_REPORT_TABLE;
+import static org.hisp.dhis.dashboard.DashboardItem.TYPE_REPORTS;
+import static org.hisp.dhis.dashboard.DashboardItem.TYPE_REPORT_TABLES;
+import static org.hisp.dhis.dashboard.DashboardItem.TYPE_RESOURCES;
+import static org.hisp.dhis.dashboard.DashboardItem.TYPE_USERS;
+
 import java.util.List;
 
-import org.hisp.dhis.chart.ChartService;
-import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.dashboard.DashboardContent;
-import org.hisp.dhis.dashboard.DashboardContentStore;
+import org.hisp.dhis.chart.Chart;
+import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.dashboard.Dashboard;
+import org.hisp.dhis.dashboard.DashboardItem;
+import org.hisp.dhis.dashboard.DashboardSearchResult;
 import org.hisp.dhis.dashboard.DashboardService;
 import org.hisp.dhis.document.Document;
-import org.hisp.dhis.document.DocumentService;
 import org.hisp.dhis.mapping.Map;
-import org.hisp.dhis.mapping.MappingService;
 import org.hisp.dhis.report.Report;
-import org.hisp.dhis.report.ReportService;
 import org.hisp.dhis.reporttable.ReportTable;
-import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -58,148 +63,177 @@ public class DefaultDashboardService
     implements DashboardService
 {
     private static final int MAX_PER_OBJECT = 5;
-    private static final int MAX_OBJECTS = 15;
     
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DashboardContentStore dashboardContentStore;
-
-    public void setDashboardContentStore( DashboardContentStore dashboardContentStore )
-    {
-        this.dashboardContentStore = dashboardContentStore;
-    }
+    private HibernateIdentifiableObjectStore<Dashboard> dashboardStore;
     
-    private UserService userService;
+    public void setDashboardStore( HibernateIdentifiableObjectStore<Dashboard> dashboardStore )
+    {
+        this.dashboardStore = dashboardStore;
+    }
+
+    @Autowired
+    private IdentifiableObjectManager objectManager;
     
-    public void setUserService( UserService userService )
-    {
-        this.userService = userService;
-    }
-
-    private ChartService chartService;
-
-    public void setChartService( ChartService chartService )
-    {
-        this.chartService = chartService;
-    }
-
-    private MappingService mappingService;
-
-    public void setMappingService( MappingService mappingService )
-    {
-        this.mappingService = mappingService;
-    }
-
-    private ReportService reportService;
-
-    public void setReportService( ReportService reportService )
-    {
-        this.reportService = reportService;
-    }
-    
-    private ReportTableService reportTableService;
-
-    public void setReportTableService( ReportTableService reportTableService )
-    {
-        this.reportTableService = reportTableService;
-    }
-    
-    private DocumentService documentService;
-
-    public void setDocumentService( DocumentService documentService )
-    {
-        this.documentService = documentService;
-    }
-
     // -------------------------------------------------------------------------
     // DashboardService implementation
     // -------------------------------------------------------------------------
 
-    public List<IdentifiableObject> search( String query )
+    @Override
+    public DashboardSearchResult search( String query )
     {
-        List<IdentifiableObject> objects = new ArrayList<IdentifiableObject>();
+        DashboardSearchResult result = new DashboardSearchResult();
         
-        int remaining = 0;
+        result.setUsers( objectManager.getBetweenByName( User.class, query, 0, MAX_PER_OBJECT ) );
+        result.setCharts( objectManager.getBetweenByName( Chart.class, query, 0, MAX_PER_OBJECT ) );
+        result.setMaps( objectManager.getBetweenByName( Map.class, query, 0, MAX_PER_OBJECT ) );
+        result.setReportTables( objectManager.getBetweenByName( ReportTable.class, query, 0, MAX_PER_OBJECT ) );
+        result.setReports( objectManager.getBetweenByName( Report.class, query, 0, MAX_PER_OBJECT ) );
+        result.setResources( objectManager.getBetweenByName( Document.class, query, 0, MAX_PER_OBJECT ) );
         
-        objects.addAll( userService.getAllUsersBetweenByName( query, 0, MAX_PER_OBJECT ) );
-        objects.addAll( chartService.getChartsBetweenByName( query, 0, MAX_PER_OBJECT ) );
-        objects.addAll( mappingService.getMapsBetweenLikeName( query, 0, MAX_PER_OBJECT ) );
+        return result;
+    }
 
-        remaining = MAX_OBJECTS - objects.size();
+    @Override
+    public void addItemContent( String dashboardUid, String type, String contentUid )
+    {
+        Dashboard dashboard = getDashboard( dashboardUid );               
         
-        if ( remaining > 0 )
+        if ( TYPE_CHART.equals( type ) )
         {
-            objects.addAll( reportService.getReportsBetweenByName( query, 0, MAX_PER_OBJECT ) );
+            DashboardItem item = new DashboardItem();
+            item.setChart( objectManager.get( Chart.class, contentUid ) );
+            dashboard.getItems().add( 0, item );
+        }
+        else if ( TYPE_MAP.equals( type ) )
+        {
+            DashboardItem item = new DashboardItem();
+            item.setMap( objectManager.get( Map.class, contentUid ) );
+            dashboard.getItems().add( 0, item );
+        }
+        else if ( TYPE_REPORT_TABLE.equals( type ) )
+        {
+            DashboardItem item = new DashboardItem();
+            item.setReportTable( objectManager.get( ReportTable.class, contentUid ) );
+            dashboard.getItems().add( 0, item );
+        }
+        else // Link item
+        {
+            DashboardItem availableItem = dashboard.getAvailableItemByType( type );
+            
+            DashboardItem item = availableItem == null ? new DashboardItem() : availableItem;
+            
+            if ( TYPE_USERS.equals( type ) )
+            {
+                item.getUsers().add( objectManager.get( User.class, contentUid ) );
+            }
+            else if ( TYPE_REPORT_TABLES.equals( type ) )
+            {
+                item.getReportTables().add( objectManager.get( ReportTable.class, contentUid ) );
+            }
+            else if ( TYPE_REPORTS.equals( type ) )
+            {
+                item.getReports().add( objectManager.get( Report.class, contentUid ) );
+            }
+            else if ( TYPE_RESOURCES.equals( type ) )
+            {
+                item.getResources().add( objectManager.get( Document.class, contentUid ) );
+            }
+            
+            if ( availableItem == null )
+            {
+                dashboard.getItems().add( 0, item );
+            }
         }
         
-        remaining = MAX_OBJECTS - objects.size();
-        
-        if ( remaining > 0 )
+        updateDashboard( dashboard );
+    }
+    
+    public void mergeDashboard( Dashboard dashboard )
+    {
+        if ( dashboard.getItems() != null )
         {
-            objects.addAll( reportTableService.getReportTablesBetweenByName( query, 0, Math.min( remaining, MAX_PER_OBJECT ) ) );
+            for ( DashboardItem item : dashboard.getItems() )
+            {
+                mergeDashboardItem( item );
+            }
         }
-
-        remaining = MAX_OBJECTS - objects.size();
-        
-        if ( remaining > 0 )
+    }
+    
+    public void mergeDashboardItem( DashboardItem item )
+    {
+        if ( item.getChart() != null )
         {
-            objects.addAll( documentService.getDocumentsBetweenByName( query, 0, Math.min( remaining, MAX_PER_OBJECT ) ) );
+            item.setChart( objectManager.get( Chart.class, item.getChart().getUid() ) );
         }
         
-        return objects;
-    }
-    
-    public void saveDashboardContent( DashboardContent dashboardContent )
-    {
-        dashboardContentStore.save( dashboardContent );
+        if ( item.getMap() != null )
+        {
+            item.setMap( objectManager.get( Map.class, item.getMap().getUid() ) );
+        }
+        
+        if ( item.getReportTable() != null )
+        {
+            item.setReportTable( objectManager.get( ReportTable.class, item.getReportTable().getUid() ) );
+        }
+        
+        if ( item.getUsers() != null )
+        {
+            item.setUsers( objectManager.getByUid( User.class, getUids( item.getUsers() ) ) );
+        }
+        
+        if ( item.getReportTables() != null )
+        {
+            item.setReportTables( objectManager.getByUid( ReportTable.class, getUids( item.getReportTables() ) ) );
+        }
+        
+        if ( item.getReports() != null )
+        {
+            item.setReports( objectManager.getByUid( Report.class, getUids( item.getReports() ) ) );
+        }
+        
+        if ( item.getResources() != null )
+        {
+            item.setResources( objectManager.getByUid( Document.class, getUids( item.getResources() ) ) );
+        }
     }
 
-    public void updateDashboardContent( DashboardContent dashboardContent )
+    @Override
+    public int saveDashboard( Dashboard dashboard )
     {
-        dashboardContentStore.update( dashboardContent );
-    }
-    
-    public DashboardContent getDashboardContent( int id )
-    {
-        return dashboardContentStore.get( id );
+        return dashboardStore.save( dashboard );
     }
 
-    public DashboardContent getDashboardContent( User user )
+    @Override
+    public void updateDashboard( Dashboard dashboard )
     {
-        DashboardContent content = dashboardContentStore.get( user.getId() );
-
-        return content != null ? content : new DashboardContent( user );
+        dashboardStore.update( dashboard );
     }
 
-    public Collection<DashboardContent> getAllDashboardContent()
+    @Override
+    public void deleteDashboard( Dashboard dashboard )
     {
-        return dashboardContentStore.getAll();
+        dashboardStore.delete( dashboard );
     }
-    
-    public void deleteDashboardContent( DashboardContent content )
+
+    @Override
+    public Dashboard getDashboard( int id )
     {
-        dashboardContentStore.delete( content );
+        return dashboardStore.get( id );
     }
-    
-    public Collection<DashboardContent> getByDocument( Document document )
+
+    @Override
+    public Dashboard getDashboard( String uid )
     {
-        return dashboardContentStore.getByDocument( document );
+        return dashboardStore.getByUid( uid );
     }
-    
-    public Collection<DashboardContent> getByMap( Map map )
+
+    @Override
+    public List<Dashboard> getByUser( User user )
     {
-        return dashboardContentStore.getByMap( map );
-    }
-    
-    public Collection<DashboardContent> getByReport( Report report )
-    {
-        return dashboardContentStore.getByReport( report );
-    }
-    
-    public Collection<DashboardContent> getByReportTable( ReportTable reportTable )
-    {
-        return dashboardContentStore.getByReportTable( reportTable );
+        return dashboardStore.getByUser( user );
     }
 }

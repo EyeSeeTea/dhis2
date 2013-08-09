@@ -55,6 +55,33 @@ public class DimensionalObjectUtils
         
         return identifier;
     }
+    
+    /**
+     * Creates a unique list of dimension identifiers based on the given list
+     * of DimensionalObjects.
+     * 
+     * @param dimensions the list of DimensionalObjects.
+     * @return list of dimension identifiers.
+     */
+    public static List<String> getUniqueDimensions( List<DimensionalObject> dimensions )
+    {
+        List<String> dims = new ArrayList<String>();
+        
+        if ( dimensions != null )
+        {
+            for ( DimensionalObject dimension : dimensions )
+            {
+                String dim = toDimension( dimension.getDimension() );
+                
+                if ( dim != null && !dims.contains( dim ) )
+                {
+                    dims.add( dim );
+                }
+            }
+        }
+        
+        return dims;
+    }
 
     /**
      * Creates a two-dimensional array of dimension items based on the list of
@@ -96,5 +123,47 @@ public class DimensionalObjectUtils
         }
         
         return map;
+    }
+
+    /**
+     * Retrieves the level from a level parameter string, which is on the format
+     * LEVEL-<level>-<item> .
+     */
+    public static int getLevelFromLevelParam( String param )
+    {
+        if ( param == null )   
+        {
+            return 0;
+        }
+        
+        String[] split = param.split( "-" );
+        
+        if ( split.length > 1 ) // TODO check if valid integer
+        {
+            return Integer.parseInt( split[1] );
+        }
+        
+        return 0;
+    }
+    
+    /**
+     * Retrieves the boundary dimension item from a level parameter string, which
+     * is on the format LEVEL-<level>-<item> .
+     */
+    public static String getBoundaryFromLevelParam( String param )
+    {
+        if ( param == null )   
+        {
+            return null;
+        }
+        
+        String[] split = param.split( "-" );
+        
+        if ( split.length > 2 && split[2] != null )
+        {
+            return split[2];
+        }
+        
+        return null;
     }
 }

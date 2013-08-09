@@ -27,12 +27,10 @@
 
 package org.hisp.dhis.program;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
@@ -47,9 +45,12 @@ import org.hisp.dhis.patient.PatientReminder;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.validation.ValidationCriteria;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * @author Abyot Asalefew
@@ -121,17 +122,22 @@ public class Program
 
     private Set<PatientReminder> patientReminders = new HashSet<PatientReminder>();
 
-    private Boolean disableRegistrationFields = false;
-
     /**
      * All OrganisationUnitGroup that register data with this program.
      */
     private Set<OrganisationUnitGroup> organisationUnitGroups = new HashSet<OrganisationUnitGroup>();
 
     /**
-     * Allow enrolling person to all orgunit no matter what the program is assigned for the orgunit or not
+     * Allow enrolling person to all orgunit no matter what the program is
+     * assigned for the orgunit or not
      */
     private Boolean displayOnAllOrgunit = true;
+
+    private Boolean useBirthDateAsIncidentDate;
+
+    private Boolean useBirthDateAsEnrollmentDate;
+
+    private Boolean selectEnrollmentDatesInFuture;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -172,6 +178,61 @@ public class Program
         final Program other = (Program) o;
 
         return name.equals( other.getName() );
+    }
+
+    // -------------------------------------------------------------------------
+    // Logic methods
+    // -------------------------------------------------------------------------
+
+    public ProgramStage getProgramStageByStage( int stage )
+    {
+        int count = 1;
+
+        for ( ProgramStage programStage : programStages )
+        {
+            if ( count == stage )
+            {
+                return programStage;
+            }
+
+            count++;
+        }
+
+        return null;
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public ValidationCriteria isValid( Patient patient )
+    {
+        try
+        {
+            for ( ValidationCriteria criteria : patientValidationCriteria )
+            {
+                Object propertyValue = getValueFromPatient( StringUtils.capitalize( criteria.getProperty() ), patient );
+
+                if ( propertyValue != null )
+                {
+                    // Compare property value with compare value
+
+                    int i = ((Comparable<Object>) propertyValue).compareTo( criteria.getValue() );
+
+                    // Return validation criteria if criteria is not met
+
+                    if ( i != criteria.getOperator() )
+                    {
+                        return criteria;
+                    }
+                }
+            }
+
+            // Return null if all criteria are met
+
+            return null;
+        }
+        catch ( Exception ex )
+        {
+            throw new RuntimeException( ex );
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -371,6 +432,9 @@ public class Program
         this.displayIncidentDate = displayIncidentDate;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     private Object getValueFromPatient( String property, Patient patient )
         throws Exception
     {
@@ -416,58 +480,6 @@ public class Program
         this.blockEntryForm = blockEntryForm;
     }
 
-    // -------------------------------------------------------------------------
-    // Logic methods
-    // -------------------------------------------------------------------------
-
-    public ProgramStage getProgramStageByStage( int stage )
-    {
-        int count = 1;
-
-        for ( ProgramStage programStage : programStages )
-        {
-            if ( count == stage )
-            {
-                return programStage;
-            }
-
-            count++;
-        }
-
-        return null;
-    }
-
-    @SuppressWarnings( "unchecked" )
-    public ValidationCriteria isValid( Patient patient )
-    {
-        try
-        {
-            for ( ValidationCriteria criteria : patientValidationCriteria )
-            {
-                Object propertyValue = getValueFromPatient( StringUtils.capitalize( criteria.getProperty() ), patient );
-
-                // Compare property value with compare value
-
-                int i = ((Comparable<Object>) propertyValue).compareTo( criteria.getValue() );
-
-                // Return validation criteria if criteria is not met
-
-                if ( i != criteria.getOperator() )
-                {
-                    return criteria;
-                }
-            }
-
-            // Return null if all criteria are met
-
-            return null;
-        }
-        catch ( Exception ex )
-        {
-            throw new RuntimeException( ex );
-        }
-    }
-
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
@@ -511,6 +523,9 @@ public class Program
         this.onlyEnrollOnce = onlyEnrollOnce;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Set<PatientReminder> getPatientReminders()
     {
         return patientReminders;
@@ -519,18 +534,6 @@ public class Program
     public void setPatientReminders( Set<PatientReminder> patientReminders )
     {
         this.patientReminders = patientReminders;
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Boolean getDisableRegistrationFields()
-    {
-        return disableRegistrationFields;
-    }
-
-    public void setDisableRegistrationFields( Boolean disableRegistrationFields )
-    {
-        this.disableRegistrationFields = disableRegistrationFields;
     }
 
     @JsonProperty
@@ -557,6 +560,43 @@ public class Program
     public void setDisplayOnAllOrgunit( Boolean displayOnAllOrgunit )
     {
         this.displayOnAllOrgunit = displayOnAllOrgunit;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Boolean getUseBirthDateAsIncidentDate()
+    {
+        return useBirthDateAsIncidentDate;
+    }
+
+    public void setUseBirthDateAsIncidentDate( Boolean useBirthDateAsIncidentDate )
+    {
+        this.useBirthDateAsIncidentDate = useBirthDateAsIncidentDate;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Boolean getUseBirthDateAsEnrollmentDate()
+    {
+        return useBirthDateAsEnrollmentDate;
+    }
+
+    public void setUseBirthDateAsEnrollmentDate( Boolean useBirthDateAsEnrollmentDate )
+    {
+        this.useBirthDateAsEnrollmentDate = useBirthDateAsEnrollmentDate;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Boolean getSelectEnrollmentDatesInFuture()
+    {
+        return selectEnrollmentDatesInFuture;
+    }
+
+    public void setSelectEnrollmentDatesInFuture( Boolean selectEnrollmentDatesInFuture )
+    {
+        this.selectEnrollmentDatesInFuture = selectEnrollmentDatesInFuture;
     }
 
 }

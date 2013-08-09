@@ -125,8 +125,8 @@ public class IntervalSet
     {
         Assert.isTrue( mapLayer != null );
         Assert.isTrue( length > 0 );
-        Assert.isTrue( mapLayer.getAllMapObjects() != null );
-        Assert.isTrue( mapLayer.getAllMapObjects().size() > 0 );
+        Assert.isTrue( mapLayer.getMapObjects() != null );
+        Assert.isTrue( mapLayer.getMapObjects().size() > 0 );
 
         IntervalSet set = new IntervalSet();
         set.intervals = new LinkedList<Interval>();
@@ -135,7 +135,7 @@ public class IntervalSet
         set.objectHigh = null;
 
         // Determine the objects with the min and max values
-        for ( InternalMapObject mapObject : mapLayer.getAllMapObjects() )
+        for ( InternalMapObject mapObject : mapLayer.getMapObjects() )
         {
             if ( set.objectLow == null || mapObject.getValue() < set.objectLow.getValue() )
             {
@@ -189,8 +189,8 @@ public class IntervalSet
     {
         Assert.isTrue( mapLayer != null );
         Assert.isTrue( length > 0 );
-        Assert.isTrue( mapLayer.getAllMapObjects() != null );
-        Assert.isTrue( mapLayer.getAllMapObjects().size() > 0 );
+        Assert.isTrue( mapLayer.getMapObjects() != null );
+        Assert.isTrue( mapLayer.getMapObjects().size() > 0 );
 
         throw new RuntimeException( "This distribution strategy is not implemented yet!" );
     }
@@ -204,18 +204,15 @@ public class IntervalSet
      */
     private static void distributeAndUpdateMapObjectsForMapLayer( InternalMapLayer mapLayer, IntervalSet set )
     {
-
         // For each map object, determine in which interval it belongs
-        for ( InternalMapObject obj : mapLayer.getAllMapObjects() )
+        for ( InternalMapObject obj : mapLayer.getMapObjects() )
         {
             for ( Interval in : set.intervals )
             {
-
                 // If the map object's value is within this interval's
                 // boundaries, add it to this interval
                 if ( obj.getValue() >= in.getValueLow() && obj.getValue() <= in.getValueHigh() )
                 {
-
                     // Add map object to interval and set interval for map
                     // object
                     in.addMember( obj );

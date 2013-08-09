@@ -1,7 +1,7 @@
 package org.hisp.dhis.api.controller;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.Pager;
+import org.hisp.dhis.common.PagerUtils;
 import org.hisp.dhis.common.SharingUtils;
 import org.hisp.dhis.dxf2.metadata.ExchangeClasses;
 import org.hisp.dhis.system.util.ReflectionUtils;
@@ -87,18 +88,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         ReflectionUtils.invokeSetterMethod( ExchangeClasses.getAllExportMap().get( getEntityClass() ), metaData, entityList );
 
-        if ( options.hasLinks() )
-        {
-            WebUtils.generateLinks( metaData );
-        }
-
-        if ( SharingUtils.isSupported( getEntityClass() ) )
-        {
-            for ( T object : entityList )
-            {
-                addAccessProperties( object );
-            }
-        }
+        handleLinksAndAccess( options, metaData, entityList );
 
         postProcessEntities( entityList );
         postProcessEntities( entityList, parameters );
@@ -118,10 +108,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         ReflectionUtils.invokeSetterMethod( ExchangeClasses.getAllExportMap().get( getEntityClass() ), metaData, entityList );
 
-        if ( options.hasLinks() )
-        {
-            WebUtils.generateLinks( metaData );
-        }
+        handleLinksAndAccess( options, metaData, entityList );
 
         postProcessEntities( entityList );
         postProcessEntities( entityList, parameters );
@@ -312,16 +299,17 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         if ( options.hasPaging() )
         {
-            int count = manager.getCount( getEntityClass() );
+            entityList = new ArrayList<T>( manager.filter( getEntityClass(), query ) );
 
-            Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
+            Pager pager = new Pager( options.getPage(), entityList.size(), options.getPageSize() );
             metaData.setPager( pager );
 
-            entityList = new ArrayList<T>( manager.getBetweenByName( getEntityClass(), query, pager.getOffset(), pager.getPageSize() ) );
+            entityList = PagerUtils.pageCollection( entityList, pager );
+
         }
         else
         {
-            entityList = new ArrayList<T>( manager.getLikeName( getEntityClass(), query ) );
+            entityList = new ArrayList<T>( manager.filter( getEntityClass(), query ) );
         }
 
         return entityList;
@@ -342,6 +330,22 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         access.setDelete( SharingUtils.canDelete( currentUserService.getCurrentUser(), object ) );
 
         ((BaseIdentifiableObject) object).setAccess( access );
+    }
+
+    protected void handleLinksAndAccess( WebOptions options, WebMetaData metaData, List<T> entityList )
+    {
+        if ( options != null && options.hasLinks() )
+        {
+            WebUtils.generateLinks( metaData );
+        }
+
+        if ( entityList != null && SharingUtils.isSupported( getEntityClass() ) )
+        {
+            for ( T object : entityList )
+            {
+                addAccessProperties( object );
+            }
+        }
     }
 
     //--------------------------------------------------------------------------

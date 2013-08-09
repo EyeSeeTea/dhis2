@@ -2,8 +2,8 @@
 #currentSelection
 {
   padding: 6px;
-  background-color: #e0e0e0;
-  border: 1px solid #a0a0a0;
+  background-color: #eee;
+  border: 1px solid #bbb;
   font-size: 14px;
   text-align: right;
   position: fixed;
@@ -14,17 +14,48 @@
   border-radius: 3px;
 }
 
-.currentRow
-{
-  background-color: #d5ffc5;
-  padding-right: 50px;
-}
-
 #actions
 {
   float: right;
   width: 160px;
   text-align: right;
+}
+
+#closeCurrentSelection
+{
+  float:left;
+  cursor:pointer;
+  margin-right:5px;
+}
+
+#contentDiv
+{
+  margin-bottom: 8px;
+}
+
+#completenessDiv
+{
+  display: none;
+  width: 386px;
+  height: 29px;
+}
+
+#infoDiv
+{
+  display: none;
+  width: 386px;
+  height: 20px;
+}
+
+#completedByDiv
+{
+  display: none;
+}
+
+.currentRow
+{
+  background-color: #d5ffc5;
+  padding-right: 50px;
 }
 
 .hidden 
@@ -44,11 +75,14 @@ input[type=text],textarea
 {
   padding-right: 2px;
   padding-left: 2px;
+  height: 28px;
+  white-space: nowrap;
 }
 
 .formSection th
 {
   text-align: center;
+  min-width: 46px;
 }
 
 .sectionFilter

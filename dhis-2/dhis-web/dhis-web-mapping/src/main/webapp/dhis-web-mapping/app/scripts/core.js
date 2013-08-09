@@ -127,14 +127,11 @@ GIS.core.getUtils = function(gis) {
 	util.map = {};
 
 	util.map.getVisibleVectorLayers = function() {
-		var layers = [],
-			layer;
+		var layers = [];
 
-		for (var i = 0; i < gis.olmap.layers.length; i++) {
+		for (var i = 0, layer; i < gis.olmap.layers.length; i++) {
 			layer = gis.olmap.layers[i];
-			if (layer.layerType === conf.finals.layer.type_vector &&
-				layer.visibility &&
-				layer.features.length) {
+			if (layer.layerType === conf.finals.layer.type_vector && layer.visibility && layer.features.length) {
 				layers.push(layer);
 			}
 		}
@@ -259,7 +256,7 @@ GIS.core.getOLMap = function(gis) {
 				documentDrag: true
 			}),
 			new OpenLayers.Control.MousePosition({
-				prefix: '<span class="el-fontsize-10"><span class="text-mouseposition-lonlat">LON </span>',
+				prefix: '<span id="mouseposition" class="el-fontsize-10"><span class="text-mouseposition-lonlat">LON </span>',
 				separator: '<span class="text-mouseposition-lonlat">&nbsp;&nbsp;LAT </span>',
 				suffix: '<div id="google-logo" name="http://www.google.com/intl/en-US_US/help/terms_maps.html" onclick="window.open(Ext.get(this).dom.attributes.name.nodeValue);"></div></span>'
 			}),
@@ -953,6 +950,22 @@ GIS.core.MapLoader = function(gis) {
 		Ext.data.JsonP.request({
 			url: gis.baseUrl + gis.conf.url.path_api + 'maps/' + gis.map.id + '.jsonp?links=false',
 			success: function(r) {
+
+				// Operand
+				if (Ext.isArray(r.mapViews)) {
+					for (var i = 0, view; i < r.mapViews.length; i++) {
+						view = r.mapViews[i];
+
+						if (view) {
+							if (Ext.isObject(view.dataElementOperand) && Ext.isString(view.dataElementOperand.id)) {
+								view.dataElement = Ext.clone(view.dataElementOperand);
+								view.dataElement.id = view.dataElement.id.replace('.', '-');
+								delete view.dataElementOperand;
+							}
+						}
+					}
+				}
+
 				gis.map = r;
 				setMap();
 			},
@@ -1208,7 +1221,8 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 		loadData,
 		loadLegend,
 		afterLoad,
-		loader;
+		loader,
+		dimConf = gis.conf.finals.dimension;
 
 	compareView = function(view, doExecute) {
 		var src = layer.core.view;
@@ -1241,13 +1255,13 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 			return gis.conf.finals.widget.loadtype_organisationunit;
 		}
 		else {
-			if (view.valueType === gis.conf.finals.dimension.indicator.id && view.indicator.id !== src.indicator.id) {
+			if (view.valueType === dimConf.indicator.id && view.indicator.id !== src.indicator.id) {
 				if (doExecute) {
 					loadData(view);
 				}
 				return gis.conf.finals.widget.loadtype_data;
 			}
-			if (view.valueType === gis.conf.finals.dimension.dataElement.id && view.dataElement.id !== src.dataElement.id) {
+			if (view.valueType === dimConf.dataElement.id && view.dataElement.id !== src.dataElement.id) {
 				if (doExecute) {
 					loadData(view);
 				}
@@ -1341,21 +1355,24 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 		paramString += 'dimension=ou:LEVEL-' + view.organisationUnitLevel.level + '-' + view.parentOrganisationUnit.id;
 
 		// dx
-		if (Ext.isString(view[type].id) && view[type].id.indexOf('-') !== -1) {
+		if (view[type] && Ext.isString(view[type].id) && view[type].id.indexOf('-') !== -1) {
 			paramString += '&dimension=co&dimension=dx:' + view[type].id.substr(0, view[type].id.indexOf('-'));
 		}
-		else {
+		else if (view[type] && Ext.isString(view[type].id)) {
 			paramString += '&dimension=dx:' + view[type].id;
 		}
 
+		// Filter
 		paramString += '&filter=pe:' + view.period.id;
+
+		// Skip metaData
+		paramString += '&skipMeta=true';
 
 		Ext.Ajax.request({
 			url: gis.baseUrl + '/api/analytics.json' + paramString,
 			disableCaching: false,
 			scope: this,
 			success: function(r) {
-				//var values = r,
 				var response = Ext.decode(r.responseText),
 					dimConf = gis.conf.finals.dimension,
 					featureMap = {},
@@ -1759,7 +1776,8 @@ GIS.core.LayerLoaderFacility = function(gis, layer) {
 };
 
 GIS.core.getInstance = function(config) {
-	var gis = {};
+	var gis = {},
+		layers = [];
 
 	gis.baseUrl = config && config.baseUrl ? config.baseUrl : '../..';
 	gis.el = config && config.el ? config.el : null;
@@ -1770,9 +1788,11 @@ GIS.core.getInstance = function(config) {
 	gis.olmap = GIS.core.getOLMap(gis);
 	gis.layer = GIS.core.getLayers(gis);
 
-	gis.olmap.addLayers([
-		gis.layer.googleStreets,
-		gis.layer.googleHybrid,
+	if (window.google) {
+		layers.push(gis.layer.googleStreets, gis.layer.googleHybrid);
+	}
+
+	layers.push(
 		gis.layer.openStreetMap,
 		gis.layer.thematic4,
 		gis.layer.thematic3,
@@ -1780,7 +1800,9 @@ GIS.core.getInstance = function(config) {
 		gis.layer.thematic1,
 		gis.layer.boundary,
 		gis.layer.facility
-	]);
+	);
+
+	gis.olmap.addLayers(layers);
 
 	return gis;
 };

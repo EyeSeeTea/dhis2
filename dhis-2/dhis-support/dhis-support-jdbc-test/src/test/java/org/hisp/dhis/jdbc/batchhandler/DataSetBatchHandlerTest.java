@@ -27,13 +27,6 @@ package org.hisp.dhis.jdbc.batchhandler;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Collection;
-
 import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
 import org.hisp.dhis.DhisTest;
@@ -45,6 +38,10 @@ import org.hisp.dhis.period.PeriodType;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collection;
+
+import static org.junit.Assert.*;
+
 /**
  * @author Lars Helge Overland
  * @version $Id: DataSetBatchHandlerTest.java 4949 2008-04-21 07:59:54Z larshelg $
@@ -54,13 +51,13 @@ public class DataSetBatchHandlerTest
 {
     @Autowired
     private BatchHandlerFactory batchHandlerFactory;
-    
+
     private BatchHandler<DataSet> batchHandler;
-    
+
     private DataSet dataSetA;
     private DataSet dataSetB;
     private DataSet dataSetC;
-    
+
     // -------------------------------------------------------------------------
     // Fixture
     // -------------------------------------------------------------------------
@@ -69,18 +66,18 @@ public class DataSetBatchHandlerTest
     public void setUpTest()
     {
         dataSetService = (DataSetService) getBean( DataSetService.ID );
-        
+
         periodService = (PeriodService) getBean( PeriodService.ID );
-        
+
         batchHandler = batchHandlerFactory.createBatchHandler( DataSetBatchHandler.class );
 
         batchHandler.init();
-        
+
         PeriodType periodType = periodService.getPeriodTypeByName( MonthlyPeriodType.NAME );
-        
+
         dataSetA = createDataSet( 'A', periodType );
         dataSetB = createDataSet( 'B', periodType );
-        dataSetC = createDataSet( 'C', periodType );        
+        dataSetC = createDataSet( 'C', periodType );
     }
 
     @Override
@@ -88,13 +85,13 @@ public class DataSetBatchHandlerTest
     {
         batchHandler.flush();
     }
-    
+
     @Override
     public boolean emptyDatabaseAfterTest()
     {
         return true;
     }
-    
+
     // -------------------------------------------------------------------------
     // Tests
     // -------------------------------------------------------------------------
@@ -107,9 +104,9 @@ public class DataSetBatchHandlerTest
         batchHandler.addObject( dataSetC );
 
         batchHandler.flush();
-        
+
         Collection<DataSet> dataSets = dataSetService.getAllDataSets();
-        
+
         assertTrue( dataSets.contains( dataSetA ) );
         assertTrue( dataSets.contains( dataSetB ) );
         assertTrue( dataSets.contains( dataSetC ) );
@@ -121,7 +118,7 @@ public class DataSetBatchHandlerTest
         int idA = batchHandler.insertObject( dataSetA, true );
         int idB = batchHandler.insertObject( dataSetB, true );
         int idC = batchHandler.insertObject( dataSetC, true );
-        
+
         assertNotNull( dataSetService.getDataSet( idA ) );
         assertNotNull( dataSetService.getDataSet( idB ) );
         assertNotNull( dataSetService.getDataSet( idC ) );
@@ -131,12 +128,12 @@ public class DataSetBatchHandlerTest
     public void testUpdateObject()
     {
         int id = batchHandler.insertObject( dataSetA, true );
-        
+
         dataSetA.setId( id );
         dataSetA.setName( "UpdatedName" );
-        
+
         batchHandler.updateObject( dataSetA );
-        
+
         assertEquals( "UpdatedName", dataSetService.getDataSet( id ).getName() );
     }
 
@@ -144,9 +141,9 @@ public class DataSetBatchHandlerTest
     public void testGetObjectIdentifier()
     {
         int referenceId = dataSetService.addDataSet( dataSetA );
-        
+
         int retrievedId = batchHandler.getObjectIdentifier( "DataSetA" );
-        
+
         assertEquals( referenceId, retrievedId );
     }
 
@@ -154,9 +151,9 @@ public class DataSetBatchHandlerTest
     public void testObjectExists()
     {
         dataSetService.addDataSet( dataSetA );
-        
+
         assertTrue( batchHandler.objectExists( dataSetA ) );
-        
+
         assertFalse( batchHandler.objectExists( dataSetB ) );
     }
 }

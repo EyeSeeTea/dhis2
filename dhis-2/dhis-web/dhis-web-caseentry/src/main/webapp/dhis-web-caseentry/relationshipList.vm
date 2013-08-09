@@ -5,7 +5,7 @@
 </h5>
 <h3>	
 	&raquo; <a href="javascript:showAddRelationship('$patient.id')" >$i18n.getString( 'seach_available_patient' )</a>
-	&#8226; <a href="javascript:showAddRelationshipPatient( '$patient.id',false )" >$i18n.getString( 'add_new_patient' )</a>
+	&#8226; <a href="javascript:showAddRelationshipPatient( '$patient.id',false,'' )" >$i18n.getString( 'add_new_patient' )</a>
 </h3>
 
 <input type="hidden" id="id" name="id" value="$patient.id">
@@ -19,7 +19,12 @@
 				</tr>
 				<tr>
 					<td class="bold text-column">$i18n.getString( "gender" ): </td>
-					<td>$i18n.getString( $patient.gender )<td>
+					<td>#if($patient.gender=='F')
+							<img src='images/female_small.png'>
+						#else
+							<img src='images/male_small.png'>
+						#end
+					<td>
 				</tr>
 				<tr>
 					<td class="bold text-column">$i18n.getString( "date_of_birth" ): </td>

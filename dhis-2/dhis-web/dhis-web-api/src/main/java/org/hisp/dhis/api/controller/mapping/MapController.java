@@ -27,12 +27,26 @@ package org.hisp.dhis.api.controller.mapping;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.period.PeriodType.getPeriodFromIsoString;
+
+import java.awt.image.BufferedImage;
+import java.io.InputStream;
+import java.util.Iterator;
+
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.hisp.dhis.api.controller.AbstractCrudController;
 import org.hisp.dhis.api.utils.ContextUtils;
+import org.hisp.dhis.api.utils.ContextUtils.CacheStrategy;
 import org.hisp.dhis.dataelement.DataElementOperandService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
+import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.mapgeneration.MapGenerationService;
 import org.hisp.dhis.mapping.Map;
 import org.hisp.dhis.mapping.MapView;
 import org.hisp.dhis.mapping.MappingService;
@@ -46,14 +60,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.InputStream;
-import java.util.Iterator;
-
-import static org.hisp.dhis.period.PeriodType.getPeriodFromIsoString;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -89,6 +97,15 @@ public class MapController
 
     @Autowired
     private CurrentUserService currentUserService;
+
+    @Autowired
+    private I18nManager i18nManager;
+
+    @Autowired
+    private MapGenerationService mapGenerationService;
+
+    @Autowired
+    private ContextUtils contextUtils;
 
     //--------------------------------------------------------------------------
     // CRUD
@@ -183,24 +200,44 @@ public class MapController
     }
 
     @Override
-    public void postProcessEntity( Map map )
+    public void postProcessEntity( Map map ) throws Exception
     {
         for ( MapView view : map.getMapViews() )
         {
-            if ( view != null && view.getParentOrganisationUnit() != null )
+            if ( view != null )
             {
-                String parentUid = view.getParentOrganisationUnit().getUid();
-                view.setParentGraph( view.getParentOrganisationUnit().getParentGraph() + "/" + parentUid );
-                view.setParentLevel( organisationUnitService.getLevelOfOrganisationUnit( view.getParentOrganisationUnit().getId() ) );
+                if ( view.getPeriod() != null )
+                {
+                    I18nFormat format = i18nManager.getI18nFormat();
+                    
+                    view.getPeriod().setName( format.formatPeriod( view.getPeriod() ) );
+                }
+                
+                if ( view.getParentOrganisationUnit() != null )
+                {
+                    String parentUid = view.getParentOrganisationUnit().getUid();
+                    view.setParentGraph( view.getParentOrganisationUnit().getParentGraph() + "/" + parentUid );
+                    view.setParentLevel( organisationUnitService.getLevelOfOrganisationUnit( view.getParentOrganisationUnit().getId() ) );
+                }
             }
         }
+    }
+
+    @RequestMapping(value = { "/{uid}/data", "/{uid}/data.png" }, method = RequestMethod.GET)
+    public void getMapData( 
+        @PathVariable String uid, 
+        @RequestParam( required = false ) Integer width, 
+        @RequestParam( required = false ) Integer height, 
+        HttpServletResponse response ) throws Exception
+    {
+        Map map = mappingService.getMap( uid );
+
+        renderMapViewPng( map, width, height, response );
     }
 
     //--------------------------------------------------------------------------
     // Supportive methods
     //--------------------------------------------------------------------------
-
-    // TODO use the import service instead
 
     private void mergeMap( Map map )
     {
@@ -260,6 +297,23 @@ public class MapController
         if ( view.getOrganisationUnitGroupSet() != null )
         {
             view.setOrganisationUnitGroupSet( organisationUnitGroupService.getOrganisationUnitGroupSet( view.getOrganisationUnitGroupSet().getUid() ) );
+        }
+    }
+
+    private void renderMapViewPng( Map map, Integer width, Integer height, HttpServletResponse response )
+        throws Exception
+    {
+        BufferedImage image = mapGenerationService.generateMapImage( map, width, height );
+
+        if ( image != null )
+        {
+            contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_PNG, CacheStrategy.RESPECT_SYSTEM_SETTING, "map.png", false );
+
+            ImageIO.write( image, "PNG", response.getOutputStream() );
+        }
+        else
+        {
+            response.setStatus( HttpServletResponse.SC_NO_CONTENT );
         }
     }
 }

@@ -3,70 +3,15 @@
 /* Dashboard                                                                  */
 /*----------------------------------------------------------------------------*/
 
-.contentProviderTable
-{
-  width: 295px;
-}
-
-.contentProviderTable td
-{
-  padding-top: 3px;
-  padding-bottom: 3px;
-  border-bottom: 1px solid #cad5e5;
-}
-
 #contentDiv
 {
   position: relative;
-  top: 44px;
+  top: 98px;
 }
 
-.removeIcon
+#contentList
 {
-   padding: 2px 2px 1px 2px;
-}
-
-.linkArea
-{
-  border: 1px solid #d0d0d0;
-  padding: 1px;
-  height: 196px;
-  width: 295px;
-  overflow: hidden;
-  margin-bottom: 15px;
-}
-
-.linkArea div
-{
-  position: absolute;
-}
-
-.chartArea
-{
-  border: 1px solid #d0d0d0;
-  padding: 1px;
-  height: 310px;
-  width: 310px;
-  overflow: hidden;
-  margin-bottom: 15px;
-}
-
-.chartArea div
-{
-  position: absolute;
-}
-
-.buttonArea
-{
-  margin-bottom: 2px;
-}
-
-.labelText
-{
-  color: #999;
-  font-size: 16px;
-  padding: 40px 0 0 30px;
-  width: 230px;
+  list-style-type: none;
 }
 
 #dashboardMenu
@@ -74,6 +19,50 @@
   position: absolute; 
   margin-top: 6px;
 }
+
+#dashboardListContainer
+{
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  margin-top: 48px;
+}
+
+#dashboardListWrapper
+{
+  position: relative;
+  width: auto;
+  height: 29px;
+  background-color: #f7f7f7;
+  border: 1px solid #d0d0d0;
+  border-radius: 3px;
+  padding: 0;
+}
+
+#dashboardList li
+{
+  border-right: 1px solid #d0d0d0;
+  padding: 7px 14px 6px 14px;
+}
+
+.dasboardIntro
+{
+  padding: 30px 140px;
+  font-size: 28px;
+  color: #bbb;
+}
+
+.dasboardTip
+{
+  padding: 20px 140px;
+  font-size: 22px;
+  color: #bbb;
+}
+
+.currentDashboard
+{
+  background-color: #eee;
+} 
 
 .horizontalMenu ul
 {
@@ -86,14 +75,112 @@
   float: left;
 }
 
+.item
+{
+  border: 1px solid #ccc;
+  width: 405px;
+  height: 328px;
+  padding: 6px;
+  margin: 0 19px 19px 0;
+  border-radius: 3px;
+  cursor: pointer;  
+  box-shadow: #ddd 0px 1px 3px 0px;
+  background-color: #fff;
+  overflow: auto;
+}
+
+.item h3
+{
+  font-size: 12px;
+  font-family: LiberationSansBold, sans-serif;
+  color: #39547d;
+  margin: 2px 5px;
+}
+
+.item h4
+{
+  margin: 0;
+}
+
+.item:hover
+{
+  border: 1px solid #bbb;
+  box-shadow: #ccc 0px 1px 3px 0px;
+}
+
+.dropItem
+{
+  width: 405px;
+  height: 328px;
+  padding: 6px;
+  margin: 0 19px 19px 0;
+  border: 1px dashed #9ec5df;
+  background-color: #e9f5fb;
+  border-radius: 3px;
+  display: none;
+}
+
+.blankDropItem
+{
+  border: 1px solid #fff;
+  background-color: #fff;
+  display: block;
+}
+
+.itemHeader
+{
+  margin: 0 0 10px 0;
+  padding: 0 0 3px 0;
+  border-bottom: 1px solid #e0e0e0;
+  cursor: move;
+}
+
+.itemHeader a
+{
+  margin-left: 5px;
+}
+
+.itemList
+{
+  display: inline;
+}
+
+.itemList li
+{
+  float: none;
+  padding: 8px 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.itemTitle
+{
+  font-family: 'LiberationSansBold';
+  color: #336C8B;
+}
+
+.removeItemLink
+{
+  float: right;
+  display: inline-block;
+}
+
 #searchDiv
 {
   position: absolute;
   left: 411px;
   height: 22px;
-  width: 556px;
+  width: 486px;
   border: 1px solid #aaa;
   padding: 5px 6px 0 6px;
+  box-shadow: #ccc 0px 1px 2px 0px inset;
+  border-radius: 2px;
+}
+
+#searchButton
+{
+  position: absolute;
+  margin-top: 6px;
+  left: 915px;
 }
 
 #searchField
@@ -112,32 +199,60 @@
   position: absolute;
   margin-top: 29px;
   left: 411px;
-  width: 568px;
+  width: 498px;
+  max-height: 520px;
+  overflow-y: scroll;
   border-right: 1px solid #bbb;
   border-bottom: 1px solid #bbb;
   border-left: 1px solid #bbb;
   background-color: #fff;
   display: none;
-  overflow: hidden;
-  z-index: 20;
+  z-index: 5;
+  box-shadow: #ccc 0px 1px 2px 0px;
 }
 
-#hitDiv ul
-{
+#hitDiv li
+{ 
   list-style-type: none;
 }
 
-#hitDiv a
+#hitDiv img
 {
-  display: block;
-  width: 100%;
-  padding: 7px 6px 7px 12px;
+  margin-right: 7px;
+}
+
+#hitDiv .viewLink
+{
+  display: inline-block;
+  padding: 7px 5px 7px 12px;
+  width: 412px;
+}
+
+#hitDiv .addLink
+{
+  float: right;
+  display: inline-block;
+  padding: 9px 15px 7px 15px;
+}
+
+.hitHeader
+{
+  padding: 5px 6px 5px 33px;
+  margin: 2px 0;
+  border-bottom: 1px solid #ddd;
+  color: #336C8B;
+  font-family: LiberationSansBold;
 }
 
 #hitDiv a:hover
 {
   text-decoration: none;
   background-color: #eee;
+}
+
+#hitDiv::-webkit-scrollbar-track:vertical
+{
+    background-color: #fff;
 }
 
 #shareForm
@@ -166,6 +281,16 @@
 {
   color: #3567cd;
   cursor: pointer;
+}
+
+#addDashboardForm
+{
+  display: none;
+}
+
+#manageDashboardForm
+{
+  display: none;
 }
 
 #chartView
@@ -460,4 +585,28 @@ div#selectionTree
 {
   width: 610px;
   margin-left: 38px;
+}
+
+/*----------------------------------------------------------------------------*/
+/* Print style                                                                */
+/*----------------------------------------------------------------------------*/
+
+@media print {
+
+.horizontalMenu li
+{
+  page-break-inside: avoid;
+}
+
+#dashboardHeader, #dashboardMenu, #searchDiv, #searchButton, #hitDiv, #dashboardListContainer
+{
+  display: none;
+}
+
+#contentDiv
+{
+  top: 0;
+  width: 960px;
+}
+
 }

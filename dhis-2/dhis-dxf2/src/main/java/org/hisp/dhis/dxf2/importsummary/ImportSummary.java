@@ -49,6 +49,10 @@ public class ImportSummary
 
     private String dataSetComplete;
 
+    private String reference;
+
+    private String href;
+
     public ImportSummary()
     {
     }
@@ -118,5 +122,29 @@ public class ImportSummary
     public void setDataSetComplete( String dataSetComplete )
     {
         this.dataSetComplete = dataSetComplete;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getReference()
+    {
+        return reference;
+    }
+
+    public void setReference( String reference )
+    {
+        this.reference = reference;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getHref()
+    {
+        return href;
+    }
+
+    public void setHref( String href )
+    {
+        this.href = href;
     }
 }

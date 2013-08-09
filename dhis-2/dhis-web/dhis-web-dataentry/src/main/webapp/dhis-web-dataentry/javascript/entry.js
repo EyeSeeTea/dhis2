@@ -17,6 +17,7 @@
 
 var FORMULA_PATTERN = /#\{.+?\}/g;
 var SEPARATOR = '.';
+var EVENT_VALUE_SAVED = 'dhis-web-dataentry-value-saved';
 
 function updateDataElementTotals()
 {
@@ -109,19 +110,6 @@ function generateExpression( expression )
     }
 
     return expression;
-}
-
-function saveDynamicVal( code, optionComboId, fieldId )
-{
-    var dataElementId = $( '#' + code + '-dynselect option:selected' ).val();
-    
-    if ( !isDefined( dataElementId ) || dataElementId == -1 )
-    {
-    	log( 'There is no select list in form or no option selected for code: ' + code );
-    	return;
-    }
-    
-    saveVal( dataElementId, optionComboId, fieldId );
 }
 
 function saveVal( dataElementId, optionComboId, fieldId )
@@ -266,6 +254,14 @@ function alertField( fieldId, alertMessage )
     return false;
 }
 
+/**
+ * Convenience method which can be used in custom form scripts. Do not change.
+ */
+function onValueSave( fn )
+{
+	$( 'body' ).off( EVENT_VALUE_SAVED ).on( EVENT_VALUE_SAVED, fn );
+}
+
 // -----------------------------------------------------------------------------
 // Saver objects
 // -----------------------------------------------------------------------------
@@ -312,6 +308,8 @@ function ValueSaver( dataElementId, optionComboId, organisationUnitId, periodId,
             markValue( fieldId, COLOR_RED );
             window.alert( i18n_saving_value_failed_status_code + '\n\n' + code );
         }
+        
+        $( 'body' ).trigger( EVENT_VALUE_SAVED, dataValue );
     }
 
     function handleError( jqXHR, textStatus, errorThrown )

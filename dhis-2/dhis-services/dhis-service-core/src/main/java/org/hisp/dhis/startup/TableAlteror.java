@@ -462,6 +462,13 @@ public class TableAlteror
         executeSql( "update chart set userorganisationunitchildren = false where userorganisationunitchildren is null" );
         executeSql( "update chart set userorganisationunit = false where userorganisationunit is null" );
         executeSql( "update chart set hidetitle = false where hidetitle is null" );
+
+        // Move chart filters to chart_filters table
+        
+        executeSql( "insert into chart_filters (chartid, sort_order, filter) select chartid, 0, filter from chart" );
+        executeSql( "alter table chart drop column filter" );
+                
+        // Upgrade chart dimension identifiers
         
         executeSql( "update chart set series = 'dx' where series = 'data'" );
         executeSql( "update chart set series = 'pe' where series = 'period'" );
@@ -472,9 +479,6 @@ public class TableAlteror
         executeSql( "update chart_filters set filter = 'dx' where filter = 'data'" );
         executeSql( "update chart_filters set filter = 'pe' where filter = 'period'" );
         executeSql( "update chart_filters set filter = 'ou' where filter = 'organisationunit'" );
-        
-        executeSql( "insert into chart_filters (chartid, sort_order, filter) select chartid, 0, filter from chart" );
-        executeSql( "alter table chart drop column filter" );
                 
         executeSql( "update users set selfregistered = false where selfregistered is null" );
         executeSql( "update users set disabled = false where disabled is null" );
@@ -499,6 +503,8 @@ public class TableAlteror
 
         executeSql( "UPDATE dataset SET skipaggregation = false WHERE skipaggregation IS NULL" );
         executeSql( "UPDATE dataset SET skipoffline = false WHERE skipoffline IS NULL" );
+        executeSql( "UPDATE dataset SET renderastabs = false WHERE renderastabs IS NULL" );
+        executeSql( "UPDATE dataset SET renderhorizontally = false WHERE renderhorizontally IS NULL" );
 
         executeSql( "UPDATE categorycombo SET skiptotal = false WHERE skiptotal IS NULL" );
 
@@ -532,6 +538,44 @@ public class TableAlteror
         executeSql( "UPDATE userroleauthorities SET authority='F_USERGROUP_UPDATE' WHERE authority='F_USER_GRUP_UPDATE'" );
         executeSql( "UPDATE userroleauthorities SET authority='F_USERGROUP_DELETE' WHERE authority='F_USER_GRUP_DELETE'" );
         executeSql( "UPDATE userroleauthorities SET authority='F_USERGROUP_LIST' WHERE authority='F_USER_GRUP_LIST'" );
+
+        // remove unused authorities
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_CONCEPT_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_CONSTANT_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_DATAELEMENT_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_DATAELEMENTGROUP_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_DATAELEMENTGROUPSET_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_DATADICTIONARY_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_DATAELEMENT_MINMAX_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_DATASET_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_SECTION_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_DATAVALUE_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_INDICATOR_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_INDICATORTYPE_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_INDICATORGROUP_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_INDICATORGROUPSET_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_ORGANISATIONUNIT_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_ORGUNITGROUP_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_ORGUNITGROUPSET_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_USERROLE_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_USERGROUP_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_USER_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_VALIDATIONRULE_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_VALIDATIONRULEGROUP_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_REPORT_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_SQLVIEW_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_VALIDATIONCRITERIA_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_OPTIONSET_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_ATTRIBUTE_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_PATIENTATTRIBUTE_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_PATIENT_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_UPDATE_PROGRAM_INDICATOR'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_PROGRAM_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_PROGRAMSTAGE_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_PROGRAMSTAGE_SECTION_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_PATIENTIDENTIFIERTYPE_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_PROGRAM_ATTRIBUTE_UPDATE'" );
+        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_PATIENT_DATAVALUE_UPDATE'" );
 
         // update denominator of indicator which has indicatortype as 'number'
         executeSql( "UPDATE indicator SET denominator = 1, denominatordescription = '' WHERE indicatortypeid IN (SELECT DISTINCT indicatortypeid FROM indicatortype WHERE indicatornumber = true) AND denominator IS NULL" );
@@ -576,9 +620,13 @@ public class TableAlteror
         executeSql( "ALTER TABLE dataelement ALTER COLUMN domaintype SET NOT NULL" );
         executeSql( "update dataelementcategory set datadimension = false where datadimension is null" );
         
-        executeSql( "UPDATE dataset SET enabledataelementdecoration=false WHERE enabledataelementdecoration is null" );
-        
-        
+		executeSql( "UPDATE dataset SET enabledataelementdecoration=false WHERE enabledataelementdecoration is null" );
+
+        executeSql( "alter table validationrulegroup rename column validationgroupid to validationrulegroupid" );
+        executeSql( "alter table sqlview rename column viewid to sqlviewid" );
+
+        executeSql( "UPDATE optionset SET version=1 WHERE version IS NULL" );
+
         log.info( "Tables updated" );
     }
 

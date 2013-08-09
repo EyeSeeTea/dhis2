@@ -1,12 +1,10 @@
 CACHE MANIFEST
-# 2.12-SNAPSHOT V3
+# 2.13-SNAPSHOT V3
 NETWORK:
 *
 CACHE:
 css/light_blue/light_blue.css
-css/light_blue/logo_background.png
 css/light_blue/logo_banner.png
-css/light_blue/logo_separator.png
 css/widgets.css
 css/print.css
 ../dhis-web-dataentry/style/dhis-web-dataentry.css

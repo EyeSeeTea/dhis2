@@ -59,10 +59,9 @@
 
     <bean id="org.hisp.dhis.mapping.action.GetInfrastructuralDataElementMapValuesAction"
         class="org.hisp.dhis.mapping.action.GetInfrastructuralDataElementMapValuesAction" scope="prototype">
-        <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
     </bean>
 
-<!-- Period -->
+    <!-- Period -->
 
 	<bean id="org.hisp.dhis.mapping.action.GetAllPeriodTypesAction"
 		class="org.hisp.dhis.mapping.action.GetAllPeriodTypesAction" scope="prototype">

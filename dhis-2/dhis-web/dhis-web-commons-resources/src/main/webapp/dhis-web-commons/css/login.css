@@ -91,6 +91,12 @@ input[type=text],input[type=password]
   padding-right: 5px;
 }
 
+#loginField input[type=text],input[type=password]
+{
+  width: 240px;
+  height: 20px;
+}
+
 #loginMessage
 {
   background-color: #3b6da1;
@@ -113,6 +119,23 @@ input[type=text],input[type=password]
   border-radius: 3px;
 }
 
+#notificationArea a 
+{
+  color: #6b90b8;
+}
+
+#footerArea
+{
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  padding: 10px 0 9px 50px;
+  font-size: 12px;
+  border-top: 1px solid #416f9d;
+  color: #6b90b8;
+  width: 100%;
+}
+	
 .greenButtonLink
 {
   padding: 6px 12px;
@@ -144,6 +167,7 @@ input[type=text],input[type=password]
   border: 1px solid #444;
   border-radius: 3px;
   color: #222;
+  width: 120px;
 }
 
 .button:hover 

@@ -1,6 +1,6 @@
-<h3>$i18n.getString( "patient_attribute_visit_schedule" )</h3>
+<h3>$i18n.getString( "patient_attribute_visit_schedule_form" ) #openHelp('patient_attribute_visit_schedule')</h3>
 																			
-<form id="patientAttributeVisitScheduleForm" name="patientAttributeVisitScheduleForm" action="savePatientAttributeVisitSchedule.action" method="post" action='savePatientAttributeVisitSchedule.action'>
+<form id="patientAttributeVisitScheduleForm" name="patientAttributeVisitScheduleForm" action="savePatientAttributeVisitSchedule.action" method="post" action='savePatientAttributeVisitSchedule.action' onsubmit="selectAllById('selectedAttributeIds');">
 
 <table>
 	<colgroup>
@@ -35,10 +35,14 @@
 				#end
 			</select>
 		</td>
+		<td>
+			<a href="javascript:moveUpSelectedOption( 'selectedAttributeIds')" title="$i18n.getString( 'move_up' )"><img src="../images/move_up.png" alt="$i18n.getString( 'move_up' )"/></a><br/><br/>
+			<a href="javascript:moveDownSelectedOption( 'selectedAttributeIds' )" title="$i18n.getString( 'move_down' )"><img src="../images/move_down.png" alt="$i18n.getString( 'move_up' )"/></a>
+		</td>
 	</tr>  
 	<tr>
 		<td colspan='2'>
-			<input type="submit" value="$i18n.getString( 'add' )" />
+			<input type="submit" value="$i18n.getString( 'save' )" />
 			<input type="button" value="$i18n.getString( 'cancel' )" onclick="window.location.href='patientAttributeGroup.action'"/>
 		</td>
 	</tr>

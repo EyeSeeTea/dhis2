@@ -27,14 +27,18 @@ package org.hisp.dhis.appmanager.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
 import java.io.File;
 import java.util.List;
+
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.appmanager.App;
 import org.hisp.dhis.appmanager.AppManagerService;
 import org.hisp.dhis.i18n.I18n;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.opensymphony.xwork2.Action;
+import javax.servlet.http.HttpServletRequest;
+import org.hisp.dhis.util.ContextUtils;
 
 /**
  * @author Saptarshi Purkayastha
@@ -63,7 +67,15 @@ public class AppSettingsAction
 
         if ( null == appFolderPath || appFolderPath.isEmpty() )
         {
-            appFolderPath = ServletActionContext.getServletContext().getRealPath( "/" ) + File.separatorChar + "apps";
+            String realPath = ServletActionContext.getServletContext().getRealPath( "/" );
+            if ( realPath.endsWith( "/" ) || realPath.endsWith( "\\" ) )
+            {
+                appFolderPath = realPath + "apps";
+            }
+            else
+            {
+                appFolderPath = realPath + File.separatorChar + "apps";
+            }
             appManagerService.setAppFolderPath( appFolderPath );
         }
 
@@ -74,6 +86,42 @@ public class AppSettingsAction
     {
         isSaved = true;
         appManagerService.setAppFolderPath( appFolderPath );
+    }
+
+    private String appBaseUrl;
+
+    public String getAppBaseUrl()
+    {
+        appBaseUrl = appManagerService.getAppBaseUrl();
+
+        if ( null == appBaseUrl || appBaseUrl.isEmpty() )
+        {
+            HttpServletRequest request = ServletActionContext.getRequest();
+            String realPath = ServletActionContext.getServletContext().getRealPath( "/" );
+            String appsPath = appManagerService.getAppFolderPath();
+            String baseUrl = ContextUtils.getBaseUrl( request );
+            String contextPath = request.getContextPath();
+
+            if ( !contextPath.isEmpty() )
+            {
+                appBaseUrl = baseUrl.substring( 0, baseUrl.length() - 1 ) + request.getContextPath() + "/"
+                    + ((appsPath.replace( "//", "/" )).replace( realPath, "" )).replace( '\\', '/' );
+            }
+            else
+            {
+                appBaseUrl = baseUrl.substring( 0, baseUrl.length() - 1 )
+                    + ((appsPath.replace( "//", "/" )).replace( realPath, "" )).replace( '\\', '/' );
+            }
+
+            appManagerService.setAppBaseUrl( appBaseUrl );
+        }
+
+        return appBaseUrl;
+    }
+
+    public void setAppBaseUrl( String appBaseUrl )
+    {
+        appManagerService.setAppBaseUrl( appBaseUrl );
     }
 
     private String appStoreUrl;

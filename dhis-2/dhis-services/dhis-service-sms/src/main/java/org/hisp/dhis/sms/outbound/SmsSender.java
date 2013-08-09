@@ -27,13 +27,16 @@
 
 package org.hisp.dhis.sms.outbound;
 
+import java.lang.Character.UnicodeBlock;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.message.MessageSender;
 import org.hisp.dhis.sms.SmsServiceException;
+import org.hisp.dhis.sms.smslib.SmsLibService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
@@ -50,6 +53,8 @@ public class SmsSender
     implements MessageSender
 {
     private static final Log log = LogFactory.getLog( SmsSender.class );
+
+    private static int MAX_CHAR = 160;
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -82,41 +87,41 @@ public class SmsSender
     /**
      * Note this methods is invoked asynchronously.
      */
-    //@Async
+    // @Async
     @Override
     public String sendMessage( String subject, String text, User sender, Set<User> users, boolean forceSend )
     {
         String message = null;
 
-        Set<User> toSendUserList = new HashSet<User>();
+        if ( transportService == null || SmsLibService.gatewayMap == null )
+        {
+            message = "No gateway";
+            return message;
+        }
+
+        Set<User> toSendList = new HashSet<User>();
 
         String gatewayId = transportService.getDefaultGateway();
 
         if ( gatewayId != null && !gatewayId.trim().isEmpty() )
         {
-            boolean sendSMSNotification = false;
             for ( User user : users )
             {
-                if ( !currentUserService.getCurrentUser().equals( user ) )
+                if ( currentUserService.getCurrentUser() != null )
                 {
-                    // check if receiver is raw number or not
-                    if ( user.getFirstName() == null )
+                    if ( !currentUserService.getCurrentUser().equals( user ) )
                     {
-                        toSendUserList.add( user );
-                    }
-                    else
-                    {
-                        UserSetting userSetting = userService.getUserSetting( user,
-                            UserSettingService.KEY_MESSAGE_SMS_NOTIFICATION );
-                        if ( userSetting != null )
+                        if ( isQualifiedReceiver( user ) )
                         {
-                            sendSMSNotification = (Boolean) userSetting.getValue();
-                            if ( sendSMSNotification == true )
-                            {
-                                toSendUserList.add( user );
-                                sendSMSNotification = false;
-                            }
+                            toSendList.add( user );
                         }
+                    }
+                }
+                else if ( currentUserService.getCurrentUser() == null )
+                {
+                    if ( isQualifiedReceiver( user ) )
+                    {
+                        toSendList.add( user );
                     }
                 }
             }
@@ -125,17 +130,52 @@ public class SmsSender
 
             if ( outboundSmsService != null || outboundSmsService.isEnabled() )
             {
+                phoneNumbers = getRecipientsPhoneNumber( toSendList );
+                
                 text = createMessage( subject, text, sender );
-
-                phoneNumbers = getRecipientsPhoneNumber( toSendUserList );
-
-                if ( !phoneNumbers.isEmpty() && phoneNumbers.size() > 0 )
+                
+                // Bulk is limited in sending long SMS, need to cut into small pieces
+                if ( SmsLibService.gatewayMap.get( "bulk_gw" )!= null && SmsLibService.gatewayMap.get( "bulk_gw" ).equals( gatewayId ) )
                 {
-                    message = sendMessage( text, phoneNumbers, gatewayId );
+                    // Check if text contain any specific unicode character
+                    for( char each: text.toCharArray())
+                    {
+                        if( !Character.UnicodeBlock.of(each).equals( UnicodeBlock.BASIC_LATIN ) )
+                        {
+                            MAX_CHAR = 40;
+                            break;
+                        }
+                    }
+                    if ( text.length() > MAX_CHAR )
+                    {
+                        List<String> splitTextList = new ArrayList<String>();
+                        splitTextList = splitLongUnicodeString( text, splitTextList );
+                        for ( String each : splitTextList )
+                        {
+                            if ( !phoneNumbers.isEmpty() && phoneNumbers.size() > 0 )
+                            {
+                                message = sendMessage( each, phoneNumbers, gatewayId );
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if ( !phoneNumbers.isEmpty() && phoneNumbers.size() > 0 )
+                        {
+                            message = sendMessage( text, phoneNumbers, gatewayId );
+                        }
+                    }
                 }
-
+                else
+                {
+                    if ( !phoneNumbers.isEmpty() && phoneNumbers.size() > 0 )
+                    {
+                        message = sendMessage( text, phoneNumbers, gatewayId );
+                    }
+                }
             }
         }
+
         return message;
     }
 
@@ -143,10 +183,40 @@ public class SmsSender
     // Supportive methods
     // -------------------------------------------------------------------------
 
-    private String createMessage( String subject, String text, User sender )
-    //private String createMessage( String subject, String text, User sender, boolean isUnicode )
+    private boolean isQualifiedReceiver( User user )
     {
-        String name = "unknown";
+        if ( user.getFirstName() == null ) // If receiver is raw number
+        {
+            return true;
+        }        
+        else // If receiver is user
+        {
+            UserSetting userSetting = userService
+                .getUserSetting( user, UserSettingService.KEY_MESSAGE_SMS_NOTIFICATION );
+            
+            if ( userSetting != null )
+            {
+                boolean sendSMSNotification = (Boolean) userSetting.getValue();
+                
+                if ( sendSMSNotification == true )
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+
+    private String createMessage( String subject, String text, User sender )
+    {
+        String name = "DHIS";
 
         if ( sender != null )
         {
@@ -162,10 +232,9 @@ public class SmsSender
             subject = " - " + subject;
         }
 
-        text = "From " + name + subject + ": " + text;
+        text = name + subject + ": " + text;
 
-        // Simplistic cut off 160 characters
-        int length = text.length();
+        int length = text.length(); // Simplistic cut off 160 characters
 
         return (length > 160) ? text.substring( 0, 157 ) + "..." : text;
     }
@@ -183,12 +252,10 @@ public class SmsSender
                 recipients.add( phoneNumber );
             }
         }
-
         return recipients;
     }
 
     private String sendMessage( String text, Set<String> recipients, String gateWayId )
-    //private String sendMessage( String text, Set<String> recipients, String gateWayId, boolean isUnicode )
     {
         String message = null;
         OutboundSms sms = new OutboundSms();
@@ -205,7 +272,33 @@ public class SmsSender
 
             log.warn( "Unable to send message through sms: " + sms, e );
         }
-        
         return message;
+    }
+
+    public List<String> splitLongUnicodeString( String message, List<String> result )
+    {
+        String firstTempString = null;
+        String secondTempString = null;
+        int indexToCut;
+
+        firstTempString = message.substring( 0, MAX_CHAR );
+
+        indexToCut = firstTempString.lastIndexOf( " " );
+
+        firstTempString = firstTempString.substring( 0, indexToCut );
+
+        result.add( firstTempString );
+
+        secondTempString = message.substring( indexToCut + 1, message.length() );
+
+        if ( secondTempString.length() <= MAX_CHAR )
+        {
+            result.add( secondTempString );
+            return result;
+        }
+        else
+        {
+            return splitLongUnicodeString( secondTempString, result );
+        }
     }
 }

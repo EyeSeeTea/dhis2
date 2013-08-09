@@ -31,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.hisp.dhis.common.BaseLinkableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 
 import java.util.ArrayList;
@@ -40,17 +41,17 @@ import java.util.List;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @JacksonXmlRootElement( localName = "event", namespace = DxfNamespaces.DXF_2_0 )
-public class Event
+public class Event extends BaseLinkableObject
 {
-    private String programId;
+    private String program;
 
-    private String programStageId;
+    private String programStage;
 
-    private String eventId;
+    private String event;
 
-    private String organisationUnitId;
+    private String orgUnit;
 
-    private String patientId;
+    private String patient;
 
     private String eventDate;
 
@@ -67,67 +68,67 @@ public class Event
     }
 
     @JsonProperty( required = true )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
-    public String getProgramId()
+    @JacksonXmlProperty( isAttribute = true )
+    public String getProgram()
     {
-        return programId;
+        return program;
     }
 
-    public void setProgramId( String programId )
+    public void setProgram( String program )
     {
-        this.programId = programId;
-    }
-
-    @JsonProperty( required = true )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
-    public String getProgramStageId()
-    {
-        return programStageId;
-    }
-
-    public void setProgramStageId( String programStageId )
-    {
-        this.programStageId = programStageId;
+        this.program = program;
     }
 
     @JsonProperty( required = true )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
-    public String getEventId()
+    @JacksonXmlProperty( isAttribute = true )
+    public String getProgramStage()
     {
-        return eventId;
+        return programStage;
     }
 
-    public void setEventId( String eventId )
+    public void setProgramStage( String programStage )
     {
-        this.eventId = eventId;
+        this.programStage = programStage;
+    }
+
+    @JsonProperty( required = true )
+    @JacksonXmlProperty( isAttribute = true )
+    public String getEvent()
+    {
+        return event;
+    }
+
+    public void setEvent( String event )
+    {
+        this.event = event;
     }
 
     @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
-    public String getOrganisationUnitId()
+    @JacksonXmlProperty( isAttribute = true )
+    public String getOrgUnit()
     {
-        return organisationUnitId;
+        return orgUnit;
     }
 
-    public void setOrganisationUnitId( String organisationUnitId )
+    public void setOrgUnit( String orgUnit )
     {
-        this.organisationUnitId = organisationUnitId;
+        this.orgUnit = orgUnit;
     }
 
     @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
-    public String getPatientId()
+    @JacksonXmlProperty( isAttribute = true )
+    public String getPatient()
     {
-        return patientId;
+        return patient;
     }
 
-    public void setPatientId( String patientId )
+    public void setPatient( String patient )
     {
-        this.patientId = patientId;
+        this.patient = patient;
     }
 
     @JsonProperty( required = true )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
+    @JacksonXmlProperty( isAttribute = true )
     public String getEventDate()
     {
         return eventDate;
@@ -139,7 +140,7 @@ public class Event
     }
 
     @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
+    @JacksonXmlProperty( isAttribute = true )
     public Boolean getCompleted()
     {
         return completed;
@@ -151,7 +152,7 @@ public class Event
     }
 
     @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
+    @JacksonXmlProperty( isAttribute = true )
     public String getStoredBy()
     {
         return storedBy;
@@ -191,11 +192,11 @@ public class Event
     public String toString()
     {
         return "Event{" +
-            "programId='" + programId + '\'' +
-            ", programStageId='" + programStageId + '\'' +
-            ", eventId='" + eventId + '\'' +
-            ", organisationUnitId='" + organisationUnitId + '\'' +
-            ", patientId='" + patientId + '\'' +
+            "program='" + program + '\'' +
+            ", programStage='" + programStage + '\'' +
+            ", event='" + event + '\'' +
+            ", orgUnit='" + orgUnit + '\'' +
+            ", patient='" + patient + '\'' +
             ", eventDate='" + eventDate + '\'' +
             ", completed=" + completed +
             ", storedBy='" + storedBy + '\'' +

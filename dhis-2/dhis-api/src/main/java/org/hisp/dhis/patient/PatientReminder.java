@@ -29,6 +29,8 @@ package org.hisp.dhis.patient;
 
 import java.io.Serializable;
 
+import org.hisp.dhis.user.UserGroup;
+
 /**
  * @author Chau Thu Tran
  * @version PatientReminder.java 1:07:58 PM Sep 18, 2012 $
@@ -39,11 +41,11 @@ public class PatientReminder
     private static final long serialVersionUID = 3101502417481903219L;
 
     public static final String DUE_DATE_TO_COMPARE = "duedate";
-    
+
     public static final String ENROLLEMENT_DATE_TO_COMPARE = "enrollmentdate";
-    
+
     public static final String INCIDENT_DATE_TO_COMPARE = "dateofincident";
-    
+
     public static final String TEMPLATE_MESSSAGE_PATIENT_NAME = "{patient-name}";
 
     public static final String TEMPLATE_MESSSAGE_PROGRAM_NAME = "{program-name}";
@@ -64,6 +66,22 @@ public class PatientReminder
 
     public static final String TEMPLATE_MESSSAGE_DAYS_SINCE_INCIDENT_DATE = "{days-since-incident-date}";
 
+    public static final int SEND_TO_PATIENT = 1;
+
+    public static final int SEND_TO_HEALTH_WORKER = 2;
+
+    public static final int SEND_TO_ORGUGNIT_REGISTERED = 3;
+
+    public static final int SEND_TO_ALL_USERS_IN_ORGUGNIT_REGISTERED = 4;
+
+    public static final int SEND_TO_USER_GROUP = 5;
+
+    public static final int SEND_WHEN_TO_EMROLLEMENT = 1;
+
+    public static final int SEND_WHEN_TO_C0MPLETED_EVENT = 2;
+
+    public static final int SEND_WHEN_TO_C0MPLETED_PROGRAM = 3;
+
     private int id;
 
     private String name;
@@ -74,14 +92,15 @@ public class PatientReminder
 
     private String dateToCompare;
 
+    private Integer sendTo;
+
+    private Integer whenToSend;
+
+    private UserGroup userGroup;
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
-
-    public PatientReminder()
-    {
-
-    }
 
     public PatientReminder( String name, Integer daysAllowedSendMessage, String templateMessage )
     {
@@ -142,6 +161,41 @@ public class PatientReminder
     public void setDateToCompare( String dateToCompare )
     {
         this.dateToCompare = dateToCompare;
+    }
+
+    public Integer getSendTo()
+    {
+        return sendTo;
+    }
+
+    public void setSendTo( Integer sendTo )
+    {
+        this.sendTo = sendTo;
+    }
+
+    public Integer getWhenToSend()
+    {
+        return whenToSend;
+    }
+
+    public void setWhenToSend( Integer whenToSend )
+    {
+        this.whenToSend = whenToSend;
+    }
+
+    public PatientReminder()
+    {
+
+    }
+
+    public UserGroup getUserGroup()
+    {
+        return userGroup;
+    }
+
+    public void setUserGroup( UserGroup userGroup )
+    {
+        this.userGroup = userGroup;
     }
 
 }

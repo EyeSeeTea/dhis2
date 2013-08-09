@@ -39,6 +39,8 @@ import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageDataElement;
 import org.hisp.dhis.program.ProgramStageDataElementService;
 import org.hisp.dhis.program.ProgramStageService;
+import org.hisp.dhis.user.UserGroup;
+import org.hisp.dhis.user.UserGroupService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -73,6 +75,13 @@ public class UpdateProgramStageAction
     public void setProgramStageDataElementService( ProgramStageDataElementService programStageDataElementService )
     {
         this.programStageDataElementService = programStageDataElementService;
+    }
+
+    private UserGroupService userGroupService;
+
+    public void setUserGroupService( UserGroupService userGroupService )
+    {
+        this.userGroupService = userGroupService;
     }
 
     // -------------------------------------------------------------------------
@@ -170,6 +179,13 @@ public class UpdateProgramStageAction
         this.templateMessages = templateMessages;
     }
 
+    private List<Integer> sendTo = new ArrayList<Integer>();
+
+    public void setSendTo( List<Integer> sendTo )
+    {
+        this.sendTo = sendTo;
+    }
+
     private Boolean autoGenerateEvent;
 
     public void setAutoGenerateEvent( Boolean autoGenerateEvent )
@@ -205,6 +221,34 @@ public class UpdateProgramStageAction
         this.captureCoordinates = captureCoordinates;
     }
 
+    private List<Boolean> allowDateInFutures;
+
+    public void setAllowDateInFutures( List<Boolean> allowDateInFutures )
+    {
+        this.allowDateInFutures = allowDateInFutures;
+    }
+
+    private List<Integer> whenToSend = new ArrayList<Integer>();
+
+    public void setWhenToSend( List<Integer> whenToSend )
+    {
+        this.whenToSend = whenToSend;
+    }
+
+    private List<Integer> userGroup = new ArrayList<Integer>();
+
+    public void setUserGroup( List<Integer> userGroup )
+    {
+        this.userGroup = userGroup;
+    }
+
+    private Boolean relatedPatient;
+
+    public void setRelatedPatient( Boolean relatedPatient )
+    {
+        this.relatedPatient = relatedPatient;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -214,9 +258,11 @@ public class UpdateProgramStageAction
     {
         minDaysFromStart = (minDaysFromStart == null) ? 0 : minDaysFromStart;
         irregular = (irregular == null) ? false : irregular;
-        autoGenerateEvent = (autoGenerateEvent == null) ? true : autoGenerateEvent;
+        autoGenerateEvent = (autoGenerateEvent == null) ? false : autoGenerateEvent;
         validCompleteOnly = (validCompleteOnly == null) ? false : validCompleteOnly;
         displayGenerateEventBox = (displayGenerateEventBox == null) ? false : displayGenerateEventBox;
+        captureCoordinates = (captureCoordinates == null) ? false : captureCoordinates;
+        relatedPatient = (relatedPatient == null) ? false : relatedPatient;
 
         ProgramStage programStage = programStageService.getProgramStage( id );
 
@@ -228,16 +274,33 @@ public class UpdateProgramStageAction
         programStage.setIrregular( irregular );
         programStage.setMinDaysFromStart( minDaysFromStart );
         programStage.setDisplayGenerateEventBox( displayGenerateEventBox );
-        programStage.setAutoGenerateEvent( autoGenerateEvent );
+        programStage.setRelatedPatient( relatedPatient );
+
+        if ( !programStage.getProgram().isSingleEvent() )
+        {
+            programStage.setAutoGenerateEvent( autoGenerateEvent );
+        }
         programStage.setValidCompleteOnly( validCompleteOnly );
         programStage.setCaptureCoordinates( captureCoordinates );
 
+        // SMS Reminder
         Set<PatientReminder> patientReminders = new HashSet<PatientReminder>();
         for ( int i = 0; i < this.daysAllowedSendMessages.size(); i++ )
         {
             PatientReminder reminder = new PatientReminder( "", daysAllowedSendMessages.get( i ),
                 templateMessages.get( i ) );
             reminder.setDateToCompare( PatientReminder.DUE_DATE_TO_COMPARE );
+            reminder.setSendTo( sendTo.get( i ) );
+            reminder.setWhenToSend( whenToSend.get( i ) );
+            if ( reminder.getSendTo() == PatientReminder.SEND_TO_USER_GROUP )
+            {
+                UserGroup selectedUserGroup = userGroupService.getUserGroup( userGroup.get( i ) );
+                reminder.setUserGroup( selectedUserGroup );
+            }
+            else
+            {
+                reminder.setUserGroup( null );
+            }
             patientReminders.add( reminder );
         }
         programStage.setPatientReminders( patientReminders );
@@ -252,6 +315,7 @@ public class UpdateProgramStageAction
             DataElement dataElement = dataElementService.getDataElement( selectedDataElementsValidator.get( i ) );
             Boolean allowed = allowProvidedElsewhere.get( i ) == null ? false : allowProvidedElsewhere.get( i );
             Boolean displayInReport = displayInReports.get( i ) == null ? false : displayInReports.get( i );
+            Boolean allowDate = allowDateInFutures.get( i ) == null ? false : allowDateInFutures.get( i );
 
             ProgramStageDataElement programStageDataElement = programStageDataElementService.get( programStage,
                 dataElement );
@@ -262,6 +326,7 @@ public class UpdateProgramStageAction
                     this.compulsories.get( i ), new Integer( i ) );
                 programStageDataElement.setAllowProvidedElsewhere( allowed );
                 programStageDataElement.setDisplayInReports( displayInReport );
+                programStageDataElement.setAllowDateInFuture( allowDate );
                 programStageDataElementService.addProgramStageDataElement( programStageDataElement );
             }
             else
@@ -270,6 +335,7 @@ public class UpdateProgramStageAction
                 programStageDataElement.setSortOrder( new Integer( i ) );
                 programStageDataElement.setAllowProvidedElsewhere( allowed );
                 programStageDataElement.setDisplayInReports( displayInReport );
+                programStageDataElement.setAllowDateInFuture( allowDate );
                 programStageDataElementService.updateProgramStageDataElement( programStageDataElement );
 
                 programStageDataElements.remove( programStageDataElement );

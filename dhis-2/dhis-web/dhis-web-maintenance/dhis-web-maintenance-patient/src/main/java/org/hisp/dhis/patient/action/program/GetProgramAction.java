@@ -36,6 +36,8 @@ import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.user.UserGroup;
+import org.hisp.dhis.user.UserGroupService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -70,7 +72,14 @@ public class GetProgramAction
     {
         this.selectionTreeManager = selectionTreeManager;
     }
-
+    
+    private UserGroupService userGroupService;
+    
+    public void setUserGroupService( UserGroupService userGroupService )
+    {
+        this.userGroupService = userGroupService;
+    }
+    
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
@@ -138,7 +147,14 @@ public class GetProgramAction
     {
         return availableOrgunitGroups;
     }
-
+    
+    private List<UserGroup> userGroups;
+    
+    public List<UserGroup> getUserGroups()
+    {
+        return userGroups;
+    }
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -152,7 +168,9 @@ public class GetProgramAction
         availableOrgunitGroups.removeAll( program.getOrganisationUnitGroups() );
 
         selectionTreeManager.setSelectedOrganisationUnits( program.getOrganisationUnits() );
-
+        
+        userGroups = new ArrayList<UserGroup>( userGroupService.getAllUserGroups() );
+        
         return SUCCESS;
     }
 }

@@ -257,6 +257,7 @@ public class HibernateProgramStageInstanceStore
             .setFirstResult( min ).setMaxResults( max ).list();
     }
 
+    @Override
     public Grid getTabularReport( Boolean anonynousEntryForm, ProgramStage programStage,
         Map<Integer, OrganisationUnitLevel> orgUnitLevelMap, Collection<Integer> orgUnits,
         List<TabularReportColumn> columns, int level, int maxLevel, Date startDate, Date endDate, boolean descOrder,
@@ -351,10 +352,10 @@ public class HibernateProgramStageInstanceStore
 
     public int getTabularReportCount( Boolean anonynousEntryForm, ProgramStage programStage,
         List<TabularReportColumn> columns, Collection<Integer> organisationUnits, int level, int maxLevel,
-        Date startDate, Date endDate, Boolean completed, Boolean displayOrgunitCode )
+        Date startDate, Date endDate, Boolean completed )
     {
         String sql = getTabularReportSql( anonynousEntryForm, true, programStage, columns, organisationUnits, level,
-            maxLevel, startDate, endDate, false, completed, null, displayOrgunitCode, null, null );
+            maxLevel, startDate, endDate, false, completed, null, null, null, null );
 
         return jdbcTemplate.queryForObject( sql, Integer.class );
     }
@@ -392,27 +393,15 @@ public class HibernateProgramStageInstanceStore
 
     public Collection<SchedulingProgramObject> getSendMesssageEvents()
     {
-        String sql = "select psi.programstageinstanceid, p.phonenumber, prm.templatemessage, p.firstname, p.middlename, p.lastname, org.name as orgunitName "
-            + ",pg.name as programName, ps.name as programStageName, psi.duedate,(DATE(now()) - DATE(psi.duedate) ) as days_since_due_date,psi.duedate "
-            + "from patient p INNER JOIN programinstance pi "
-            + "     ON p.patientid=pi.patientid "
-            + " INNER JOIN programstageinstance psi  "
-            + "     ON psi.programinstanceid=pi.programinstanceid "
-            + " INNER JOIN program pg  "
-            + "     ON pg.programid=pi.programid "
-            + " INNER JOIN programstage ps  "
-            + "     ON ps.programstageid=psi.programstageid "
-            + " INNER JOIN organisationunit org  "
-            + "     ON org.organisationunitid = p.organisationunitid "
-            + " INNER JOIN patientreminder prm  "
-            + "     ON prm.programstageid = ps.programstageid "
-            + "WHERE pi.status="
-            + ProgramInstance.STATUS_ACTIVE
-            + "     and p.phonenumber is not NULL and p.phonenumber != '' "
-            + "     and prm.templatemessage is not NULL and prm.templatemessage != '' "
-            + "     and pg.type=1 and prm.daysallowedsendmessage is not null  "
-            + "     and psi.executiondate is null "
-            + "     and (  DATE(now()) - DATE(psi.duedate) ) = prm.daysallowedsendmessage ";
+        String sql = " ( " + sendMessageToPatientSql() + " ) ";
+
+        sql += " UNION ( " + sendMessageToHealthWorkerSql() + " ) ";
+
+        sql += " UNION ( " + sendMessageToOrgunitRegisteredSql() + " ) ";
+
+        sql += " UNION ( " + sendMessageToUsersSql() + " ) ";
+
+        sql += " UNION ( " + sendMessageToUserGroupsSql() + " ) ";
 
         SqlRowSet rs = jdbcTemplate.queryForRowSet( sql );
 
@@ -484,7 +473,7 @@ public class HibernateProgramStageInstanceStore
     public Grid getAggregateReport( int position, ProgramStage programStage, Collection<Integer> orgunitIds,
         String facilityLB, Integer deGroupBy, Integer deSum, Map<Integer, Collection<String>> deFilters,
         List<Period> periods, String aggregateType, Integer limit, Boolean useCompletedEvents, Boolean displayTotals,
-        I18nFormat format, I18n i18n )
+        Boolean useFormNameDataElement, I18nFormat format, I18n i18n )
     {
         String sql = "";
         String filterSQL = filterSQLStatement( deFilters );
@@ -499,22 +488,23 @@ public class HibernateProgramStageInstanceStore
         String subTitle = " ";
         if ( deSum != null )
         {
-            subTitle = i18n.getString( "group_by" ) + ": "
-                + dataElementService.getDataElement( deSum ).getDisplayName() + "; ";
+            DataElement dataElement = dataElementService.getDataElement( deSum );
+            String dename = dataElement.getDisplayName();
+            if ( useFormNameDataElement != null || useFormNameDataElement )
+            {
+                dename = dataElement.getFormNameFallback();
+            }
+            subTitle = i18n.getString( "group_by" ) + ": " + dename + "; ";
         }
 
         // Filter is only one orgunit
+
         if ( position == PatientAggregateReport.POSITION_ROW_PERIOD_COLUMN_DATA )
         {
             String orgunitName = organisationUnitService.getOrganisationUnit( orgunitIds.iterator().next() )
                 .getDisplayName();
 
-            String filterDataDes = getFilterDataDescription( deFilters );
-            if ( !filterDataDes.isEmpty() )
-            {
-                filterDataDes = "; " + i18n.getString( "data_filter" ) + ": " + filterDataDes;
-            }
-            grid.setSubtitle( subTitle + i18n.getString( "orgunit" ) + ": " + orgunitName + filterDataDes );
+            grid.setSubtitle( subTitle + i18n.getString( "orgunit" ) + ": " + orgunitName );
         }
         // Filter is only one period
         else if ( position == PatientAggregateReport.POSITION_ROW_ORGUNIT
@@ -536,13 +526,7 @@ public class HibernateProgramStageInstanceStore
                 periodName += startDate + " -> " + endDate;
             }
 
-            String filterDataDes = getFilterDataDescription( deFilters );
-            if ( !filterDataDes.isEmpty() )
-            {
-                filterDataDes = "; " + i18n.getString( "data_filter" ) + ": " + filterDataDes;
-            }
-
-            grid.setSubtitle( subTitle + i18n.getString( "period" ) + ": " + periodName + filterDataDes );
+            grid.setSubtitle( subTitle + i18n.getString( "period" ) + ": " + periodName );
         }
         else
         {
@@ -576,18 +560,10 @@ public class HibernateProgramStageInstanceStore
             }
 
             // Data filter description
-            String filterDataDes = "";
-            if ( position == PatientAggregateReport.POSITION_ROW_ORGUNIT_COLUMN_PERIOD
-                || position == PatientAggregateReport.POSITION_ROW_PERIOD_COLUMN_ORGUNIT
-                || position == PatientAggregateReport.POSITION_ROW_ORGUNIT_ROW_PERIOD
-                || position == PatientAggregateReport.POSITION_ROW_PERIOD
-                || position == PatientAggregateReport.POSITION_ROW_ORGUNIT )
+            String filterDataDes = getFilterDataDescription( deFilters );
+            if ( !filterDataDes.isEmpty() )
             {
-                filterDataDes = getFilterDataDescription( deFilters );
-                if ( !filterDataDes.isEmpty() )
-                {
-                    filterDataDes = i18n.getString( "data_filter" ) + ": " + filterDataDes + "; ";
-                }
+                filterDataDes = "; " + i18n.getString( "data_filter" ) + ": " + filterDataDes;
             }
 
             subTitle += filterOrgunitDes + filterPeriodDes + filterDataDes;
@@ -645,7 +621,7 @@ public class HibernateProgramStageInstanceStore
         else if ( position == PatientAggregateReport.POSITION_ROW_DATA_COLUMN_PERIOD && deGroupBy != null )
         {
             sql = getAggregateReportSQL9( programStage, orgunitIds.iterator().next(), facilityLB, filterSQL, deGroupBy,
-                deSum, periods, aggregateType, limit, useCompletedEvents, format );
+                deSum, periods, aggregateType, limit, useCompletedEvents, useFormNameDataElement, format );
         }
 
         // Type = 6 && With group-by
@@ -758,7 +734,8 @@ public class HibernateProgramStageInstanceStore
         return rs != null ? rs.intValue() : 0;
     }
 
-    public Grid getCompleteness( OrganisationUnit orgunit, Program program, String startDate, String endDate, I18n i18n )
+    public Grid getCompleteness( Collection<Integer> orgunitIds, Program program, String startDate, String endDate,
+        I18n i18n )
     {
         String sql = "SELECT ou.name as orgunit, ps.name as events, psi.completeduser as user_name, count(psi.programstageinstanceid) as number_of_events "
             + "         FROM programstageinstance psi INNER JOIN programstage ps "
@@ -767,9 +744,9 @@ public class HibernateProgramStageInstanceStore
             + "                         ON ou.organisationunitid=psi.organisationunitid"
             + "                 INNER JOIN program pg "
             + "                         ON pg.programid = ps.programid "
-            + "         WHERE ou.parentid = "
-            + orgunit.getId()
-            + "                 AND pg.programid = "
+            + "         WHERE ou.organisationunitid in ( "
+            + TextUtils.getCommaDelimitedString( orgunitIds )
+            + " )                AND pg.programid = "
             + program.getId()
             + "         GROUP BY ou.name, ps.name, psi.completeduser, psi.completeddate, psi.completed "
             + "         HAVING psi.completeddate >= '"
@@ -799,6 +776,13 @@ public class HibernateProgramStageInstanceStore
         GridUtils.addRows( grid, rs );
 
         return grid;
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<ProgramStageInstance> get( Patient patient )
+    {
+        return getCriteria().createAlias( "patients", "patient" )
+            .add( Restrictions.eq( "patient.id", patient.getId() ) ).list();
     }
 
     // -------------------------------------------------------------------------
@@ -888,7 +872,7 @@ public class HibernateProgramStageInstanceStore
 
     private String getTabularReportSql( Boolean anonynousEntryForm, boolean count, ProgramStage programStage,
         List<TabularReportColumn> columns, Collection<Integer> orgUnits, int level, int maxLevel, Date startDate,
-        Date endDate, boolean descOrder, Boolean completed, Boolean accessPrivateInfo, Boolean displayOrgunitCode,
+        Date endDate, Boolean descOrder, Boolean completed, Boolean accessPrivateInfo, Boolean displayOrgunitCode,
         Integer min, Integer max )
     {
         Set<String> deKeys = new HashSet<String>();
@@ -1074,7 +1058,7 @@ public class HibernateProgramStageInstanceStore
         }
 
         sql += "psi.executiondate ";
-        sql += descOrder ? "desc " : "";
+        sql += (descOrder == null || descOrder) ? "desc " : "";
         sql += ") as tabular ";
         sql += where; // filters
         sql = sql.substring( 0, sql.length() - 1 ) + " "; // Remove last comma
@@ -1200,16 +1184,16 @@ public class HibernateProgramStageInstanceStore
                     sql += filterSQL + "LIMIT 1 ) ";
                 }
 
-                sql += "as \"" + periodName + "\" ,";
+                sql += " as \"" + periodName + "\" ,";
             }
             // -- end period
 
             sql = sql.substring( 0, sql.length() - 1 ) + " ";
-            sql += " ) ";
+            sql += " ) ) ";
             sql += " UNION ";
         }
-        sql = sql.substring( 0, sql.length() - 6 );
-        sql += ") ORDER BY orgunit asc ";
+        sql = sql.substring( 0, sql.length() - 10 );
+        sql += " ORDER BY orgunit asc ";
         if ( limit != null )
         {
             sql += "LIMIT " + limit;
@@ -1299,8 +1283,9 @@ public class HibernateProgramStageInstanceStore
             }
         }
 
-        sql = sql.substring( 0, sql.length() - 6 ) + " ";
-        sql += " ) ORDER BY orgunit asc ";
+        sql = sql.substring( 0, sql.length() - 6 ) + " ) ";
+
+        sql += " ORDER BY orgunit asc ";
         if ( limit != null )
         {
             sql += "LIMIT " + limit;
@@ -1379,21 +1364,24 @@ public class HibernateProgramStageInstanceStore
                     }
                     sql += "     psi_1.executiondate >= '" + startDate + "' AND ";
                     sql += "     psi_1.executiondate <= '" + endDate + "' ";
-                    sql += filterSQL + " LIMIT 1 ) ";
+                    sql += filterSQL + " LIMIT 1 ";
                 }
 
-                sql += " as " + aggregateType;
+                sql += " ) as " + aggregateType;
                 sql += ") ";
                 sql += " UNION ALL ";
 
             }
         }
 
-        sql = sql.substring( 0, sql.length() - 10 ) + " ) ";
-        if ( limit != null )
-        {
-            sql += " LIMIT " + limit;
-        }
+        sql = sql.substring( 0, sql.length() - 10 );
+
+        if ( periods.size() > 1 )
+
+            if ( limit != null )
+            {
+                sql += " LIMIT " + limit;
+            }
 
         return sql;
     }
@@ -1917,7 +1905,7 @@ public class HibernateProgramStageInstanceStore
      **/
     private String getAggregateReportSQL9( ProgramStage programStage, Integer root, String facilityLB,
         String filterSQL, Integer deGroupBy, Integer deSum, Collection<Period> periods, String aggregateType,
-        Integer limit, Boolean useCompletedEvents, I18nFormat format )
+        Integer limit, Boolean useCompletedEvents, Boolean useFormNameDataElement, I18nFormat format )
     {
         String sql = "";
         Collection<Integer> allOrgunitIds = getOrganisationUnits( root, facilityLB );
@@ -1956,7 +1944,13 @@ public class HibernateProgramStageInstanceStore
 
         String firstPeriodName = "";
 
-        String groupByName = dataElementService.getDataElement( deGroupBy ).getDisplayName();
+        DataElement dataElement = dataElementService.getDataElement( deGroupBy );
+        String groupByName = dataElement.getDisplayName();
+        if ( useFormNameDataElement != null || useFormNameDataElement )
+        {
+            groupByName = dataElement.getFormNameFallback();
+        }
+
         for ( String deValue : deValues )
         {
             sql += "(SELECT DISTINCT '" + deValue + "' as \"" + groupByName + "\", ";
@@ -2249,7 +2243,8 @@ public class HibernateProgramStageInstanceStore
             for ( int i = 1; i <= cols; i++ )
             {
                 // meta column
-                if ( rs.getMetaData().getColumnType( i ) == Types.VARCHAR )
+                if ( rs.getMetaData().getColumnType( i ) == Types.VARCHAR
+                    || rs.getMetaData().getColumnType( i ) == Types.OTHER )
                 {
                     grid.addValue( rs.getObject( i ) );
                 }
@@ -2391,4 +2386,153 @@ public class HibernateProgramStageInstanceStore
         }
     }
 
+    private String sendMessageToPatientSql()
+    {
+        return "select psi.programstageinstanceid, p.phonenumber, prm.templatemessage, p.firstname, p.middlename, p.lastname, org.name as orgunitName "
+            + ",pg.name as programName, ps.name as programStageName, psi.duedate,(DATE(now()) - DATE(psi.duedate) ) as days_since_due_date "
+            + "from patient p INNER JOIN programinstance pi "
+            + "     ON p.patientid=pi.patientid "
+            + " INNER JOIN programstageinstance psi  "
+            + "     ON psi.programinstanceid=pi.programinstanceid "
+            + " INNER JOIN program pg  "
+            + "     ON pg.programid=pi.programid "
+            + " INNER JOIN programstage ps  "
+            + "     ON ps.programstageid=psi.programstageid "
+            + " INNER JOIN organisationunit org  "
+            + "     ON org.organisationunitid = p.organisationunitid "
+            + " INNER JOIN patientreminder prm  "
+            + "     ON prm.programstageid = ps.programstageid "
+            + "WHERE pi.status="
+            + ProgramInstance.STATUS_ACTIVE
+            + "     and p.phonenumber is not NULL and p.phonenumber != '' "
+            + "     and prm.templatemessage is not NULL and prm.templatemessage != '' "
+            + "     and pg.type=1 and prm.daysallowedsendmessage is not null  "
+            + "     and psi.executiondate is null "
+            + "     and (  DATE(now()) - DATE(psi.duedate) ) = prm.daysallowedsendmessage "
+            + "     and prm.whentosend is null and prm.sendto = " + PatientReminder.SEND_TO_PATIENT;
+    }
+
+    private String sendMessageToHealthWorkerSql()
+    {
+        return "SELECT psi.programstageinstanceid, uif.phonenumber, prm.templatemessage,p.firstname, p.middlename, p.lastname, org.name as orgunitName, "
+            + "pg.name as programName, ps.name as programStageName, psi.duedate, "
+            + "         (DATE(now()) - DATE(psi.duedate) ) as days_since_due_date "
+            + " FROM patient p INNER JOIN programinstance pi "
+            + "          ON p.patientid=pi.patientid "
+            + "           INNER JOIN programstageinstance psi  "
+            + "                ON psi.programinstanceid=pi.programinstanceid "
+            + "             INNER JOIN program pg  "
+            + "               ON pg.programid=pi.programid "
+            + "           INNER JOIN programstage ps  "
+            + "               ON ps.programstageid=psi.programstageid "
+            + "           INNER JOIN organisationunit org  "
+            + "               ON org.organisationunitid = p.organisationunitid "
+            + "           INNER JOIN patientreminder prm  "
+            + "               ON prm.programstageid = ps.programstageid "
+            + "           INNER JOIN users us"
+            + "               ON us.userid=p.healthworkerid "
+            + "           INNER JOIN userinfo uif "
+            + "               ON us.userid=uif.userinfoid "
+            + " WHERE pi.status="
+            + ProgramInstance.STATUS_ACTIVE
+            + " and uif.phonenumber is not NULL and uif.phonenumber != '' "
+            + "               and prm.templatemessage is not NULL and prm.templatemessage != '' "
+            + "               and pg.type=1 and prm.daysallowedsendmessage is not null "
+            + "               and psi.executiondate is null "
+            + "               and (  DATE(now()) - DATE(psi.duedate) ) = prm.daysallowedsendmessage "
+            + "               and prm.whentosend is null and prm.sendto = " + PatientReminder.SEND_TO_HEALTH_WORKER;
+    }
+
+    private String sendMessageToOrgunitRegisteredSql()
+    {
+        return "select psi.programstageinstanceid, ou.phonenumber, prm.templatemessage, p.firstname, p.middlename, p.lastname, org.name as orgunitName, "
+            + "pg.name as programName, ps.name as programStageName, psi.duedate,"
+            + "(DATE(now()) - DATE(psi.duedate) ) as days_since_due_date "
+            + "            from patient p INNER JOIN programinstance pi "
+            + "               ON p.patientid=pi.patientid "
+            + "           INNER JOIN programstageinstance psi "
+            + "               ON psi.programinstanceid=pi.programinstanceid "
+            + "           INNER JOIN program pg "
+            + "               ON pg.programid=pi.programid "
+            + "           INNER JOIN programstage ps "
+            + "               ON ps.programstageid=psi.programstageid "
+            + "           INNER JOIN organisationunit org "
+            + "               ON org.organisationunitid = p.organisationunitid "
+            + "           INNER JOIN patientreminder prm "
+            + "               ON prm.programstageid = ps.programstageid "
+            + "           INNER JOIN organisationunit ou "
+            + "               ON ou.organisationunitid=p.organisationunitid "
+            + "WHERE pi.status= "
+            + ProgramInstance.STATUS_ACTIVE
+            + "               and ou.phonenumber is not NULL and ou.phonenumber != '' "
+            + "               and prm.templatemessage is not NULL and prm.templatemessage != '' "
+            + "               and pg.type=1 and prm.daysallowedsendmessage is not null "
+            + "               and psi.executiondate is null "
+            + "               and (  DATE(now()) - DATE(psi.duedate) ) = prm.daysallowedsendmessage "
+            + "               and prm.whentosend is null and prm.sendto = "
+            + +PatientReminder.SEND_TO_ORGUGNIT_REGISTERED;
+    }
+
+    private String sendMessageToUsersSql()
+    {
+        return "select psi.programstageinstanceid, uif.phonenumber,prm.templatemessage, p.firstname, p.middlename, p.lastname, org.name as orgunitName ,"
+            + " pg.name as programName, ps.name as programStageName, psi.duedate, "
+            + "(DATE(now()) - DATE(psi.duedate) ) as days_since_due_date "
+            + "  from patient p INNER JOIN programinstance pi "
+            + "       ON p.patientid=pi.patientid "
+            + "   INNER JOIN programstageinstance psi "
+            + "       ON psi.programinstanceid=pi.programinstanceid "
+            + "   INNER JOIN program pg "
+            + "       ON pg.programid=pi.programid "
+            + "   INNER JOIN programstage ps "
+            + "       ON ps.programstageid=psi.programstageid "
+            + "   INNER JOIN patientreminder prm "
+            + "       ON prm.programstageid = ps.programstageid "
+            + "   INNER JOIN organisationunit org "
+            + "       ON org.organisationunitid = p.organisationunitid "
+            + "   INNER JOIN usermembership ums "
+            + "       ON ums.organisationunitid = p.organisationunitid "
+            + "   INNER JOIN userinfo uif "
+            + "       ON uif.userinfoid = ums.userinfoid "
+            + "  WHERE pi.status= "
+            + ProgramInstance.STATUS_ACTIVE
+            + "       and uif.phonenumber is not NULL and uif.phonenumber != '' "
+            + "       and prm.templatemessage is not NULL and prm.templatemessage != '' "
+            + "       and pg.type=1 and prm.daysallowedsendmessage is not null "
+            + "       and psi.executiondate is null "
+            + "       and (  DATE(now()) - DATE(psi.duedate) ) = prm.daysallowedsendmessage "
+            + "       and prm.whentosend is null and prm.sendto = "
+            + PatientReminder.SEND_TO_ALL_USERS_IN_ORGUGNIT_REGISTERED;
+    }
+
+    private String sendMessageToUserGroupsSql()
+    {
+        return "select psi.programstageinstanceid, uif.phonenumber,prm.templatemessage, p.firstname, p.middlename, p.lastname, org.name as orgunitName ,"
+            + " pg.name as programName, ps.name as programStageName, psi.duedate, "
+            + "(DATE(now()) - DATE(psi.duedate) ) as days_since_due_date "
+            + "  from patient p INNER JOIN programinstance pi "
+            + "       ON p.patientid=pi.patientid "
+            + "   INNER JOIN programstageinstance psi "
+            + "       ON psi.programinstanceid=pi.programinstanceid "
+            + "   INNER JOIN program pg "
+            + "       ON pg.programid=pi.programid "
+            + "   INNER JOIN programstage ps "
+            + "       ON ps.programstageid=psi.programstageid "
+            + "   INNER JOIN patientreminder prm "
+            + "       ON prm.programstageid = ps.programstageid "
+            + "   INNER JOIN organisationunit org "
+            + "       ON org.organisationunitid = p.organisationunitid "
+            + "   INNER JOIN usergroupmembers ugm "
+            + "       ON ugm.usergroupid = prm.usergroupid "
+            + "   INNER JOIN userinfo uif "
+            + "       ON uif.userinfoid = ugm.userid "
+            + "  WHERE pi.status= "
+            + ProgramInstance.STATUS_ACTIVE
+            + "       and uif.phonenumber is not NULL and uif.phonenumber != '' "
+            + "       and prm.templatemessage is not NULL and prm.templatemessage != '' "
+            + "       and pg.type=1 and prm.daysallowedsendmessage is not null "
+            + "       and psi.executiondate is not null "
+            + "       and (  DATE(now()) - DATE(psi.duedate) ) = prm.daysallowedsendmessage "
+            + "       and prm.whentosend is null " + "       and prm.sendto = " + PatientReminder.SEND_TO_USER_GROUP;
+    }
 }

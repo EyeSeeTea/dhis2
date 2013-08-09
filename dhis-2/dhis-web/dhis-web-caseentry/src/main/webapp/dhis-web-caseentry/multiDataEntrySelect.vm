@@ -6,9 +6,14 @@
 				item.remove();
 			}
 		});
+		if(jQuery("#programIdAddPatient option").length==1)
+		{
+			jQuery("#programIdAddPatient [value=]").remove();
+		}
 		
 		hideById('addPatientBtn');
-		hideById('listPatientBtn');
+		var i18n_list_events = '$encoder.jsEscape( $i18n.getString( "list_events" ) , "'")';
+		setFieldValue('listPatientBtn', i18n_list_events);
 		showById('dueDateTR');
 		showById('programStageAddPatientTR');
 		showById('scheduleVisitTR');
@@ -77,4 +82,6 @@
 	var i18n_main_form_link = '$encoder.jsEscape( $i18n.getString( "multiple_individual_records_management" ), "'")';
 	var i18n_patient_details_and_history = '$encoder.jsEscape( $i18n.getString( "patient_details_and_history" ), "'")';
 	var i18n_insert_a_report_date = '$encoder.jsEscape( $i18n.getString( "insert_a_report_date" ) , "'")';
+	var i18n_comment = '$encoder.jsEscape( $i18n.getString( "comment" ) , "'")';
+	var i18n_message = '$encoder.jsEscape( $i18n.getString( "message" ) , "'")';
 </script>

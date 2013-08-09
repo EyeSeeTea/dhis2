@@ -22,7 +22,7 @@ function showAddRelationship( patientId )
 // Add Relationship Patient
 // -----------------------------------------------------------------------------
 
-function showAddRelationshipPatient( patientId, isShowPatientList )
+function showAddRelationshipPatient( patientId, isShowPatientList, programStageInstanceId )
 {
 	hideById( 'selectDiv' );
 	hideById( 'searchDiv' );
@@ -35,7 +35,9 @@ function showAddRelationshipPatient( patientId, isShowPatientList )
 	jQuery('#loaderDiv').show();
 	jQuery('#addRelationshipDiv').load('showAddRelationshipPatient.action',
 		{
-			id:patientId
+			id:patientId,
+			programId: getFieldValue('programIdAddPatient'),
+			programStageInstanceId: programStageInstanceId
 		}, function()
 		{
 			showById('addRelationshipDiv');
@@ -70,11 +72,11 @@ function addRelationshipPatientCompleted( messageElement )
     }
     else if ( type == 'error' )
     {
-        showErrorMessage( i18n_adding_patient_failed + ':' + '\n' + message );
+        setHeaderMessage( i18n_adding_patient_failed + ':' + '\n' + message );
     }
     else if ( type == 'input' )
     {
-        showWarningMessage( message );
+        setHeaderMessage( message );
     }
     else if( type == 'duplicate' )
     {
@@ -101,11 +103,10 @@ function addRelationshipPatient()
 			showById('listPatientDiv');
 			jQuery('#loaderDiv').hide();
 
-			if( getFieldValue( 'isShowPatientList' ) == 'false' )
-			{
-				showRelationshipList( getFieldValue('id') );
-			}else
-			{
+			if( getFieldValue( 'isShowPatientList' ) == 'false' ){
+				showRelationshipList( getFieldValue('relationshipId') );
+			}
+			else{
 				loadPatientList();
 			}
 		}});
@@ -209,6 +210,7 @@ function removeRepresentativeCompleted( messageElement )
 
 function validateSearchPartner()
 {
+	hideById('searchRelationshipDiv');
 	$.ajax({
 		url: 'validateSearchRelationship.action',
 		type:"POST",
@@ -227,27 +229,13 @@ function searchValidationCompleted( messageElement )
 	if( type == 'success' )
 	{
 		jQuery('#loaderDiv').show();
-		jQuery("#relationshipSelectForm :input").each(function()
-			{
-				jQuery(this).attr('disabled', 'disabled');
-			});
-			
 		$.ajax({
 			type: "GET",
 			url: 'searchRelationshipPatient.action',
 			data: getParamsForDiv('relationshipSelectForm'),
-			success: function( json ) {
-				clearListById('availablePartnersList');
-				for ( i in json.patients ) 
-				{
-					addOptionById( 'availablePartnersList', json.patients[i].id, json.patients[i].fullName );
-				} 
-				
-				jQuery("#relationshipSelectForm :input").each(function()
-					{
-						jQuery(this).removeAttr('disabled');
-					});
-					
+			success: function( html ) {
+				setInnerHTML('searchRelationshipDiv',html);
+				showById('searchRelationshipDiv');
 				jQuery('#loaderDiv').hide();
 			}
 		});
@@ -255,35 +243,31 @@ function searchValidationCompleted( messageElement )
 	}
 	else if( type == 'error' )
 	{
-		showErrorMessage( i18n_searching_patient_failed + ':' + '\n' + message );
+		setHeaderMessage( i18n_searching_patient_failed + ':' + '\n' + message );
 	}
 	else if( type == 'input' )
 	{
-		showWarningMessage( message );
+		setHeaderMessage( message );
 	}
 }
 
-function validateAddRelationship()
+function validateAddRelationship(partnerId)
 {
-	var relationshipTypeId = jQuery( '#relationshipSelectForm [id=relationshipTypeId] option:selected' ).val();
-	var partnerId = jQuery( '#relationshipSelectForm [id=availablePartnersList]' ).val();
-	
+	var relationshipTypeId = jQuery( '#relationshipSelectForm [id=relationshipTypeId] option:selected' ).val();	
 	if( relationshipTypeId==''){
-		showWarningMessage( i18n_please_select_relationship_type );
+		setHeaderMessage( i18n_please_select_relationship_type );
 		return;
 	}
 	if( partnerId==null){
-		showWarningMessage( i18n_please_select_a_patient_for_setting_relationship );
+		setHeaderMessage( i18n_please_select_a_patient_for_setting_relationship );
 		return;
 	}
-	addRelationship();
+	addRelationship(partnerId);
 }
 
-function addRelationship() 
+function addRelationship(partnerId) 
 {
-	var relationshipTypeId = jQuery( '#relationshipSelectForm [id=relationshipTypeId] option:selected' ).val();
-	var partnerId = jQuery( '#relationshipSelectForm [id=availablePartnersList]' ).val();
-	
+	var relationshipTypeId = jQuery( '#relationshipSelectForm [id=relationshipTypeId] option:selected' ).val();	
 	var relTypeId = relationshipTypeId.substr( 0, relationshipTypeId.indexOf(':') );
 	var relName = relationshipTypeId.substr( relationshipTypeId.indexOf(':') + 1, relationshipTypeId.length );
 	
@@ -292,38 +276,30 @@ function addRelationship()
 		'&relationshipTypeId=' + relTypeId +
 		'&relationshipName=' + relName ;
 	
-	jQuery('#loaderDiv').show();
-	
 	$.ajax({
 		url: 'saveRelationship.action',
 		type:"POST",
 		data: params,
 		dataType: "xml",
-		success: addRelationshipCompleted
-		}); 
+		success:  function( messageElement ) {
+			messageElement = messageElement.getElementsByTagName( 'message' )[0];
+			var type = messageElement.getAttribute( 'type' );
+			var message = messageElement.firstChild.nodeValue;
+			
+			if( type == 'success' ){
+				jQuery('#searchRelationshipDiv [id=tr' + partnerId + ']').css("background-color","#C0C0C0")
+				setHeaderMessage( i18n_save_success );
+			}	
+			else if( type == 'error' ){
+				setHeaderMessage( i18n_adding_relationship_failed + ':' + '\n' + message );
+			}
+			else if( type == 'input' ){
+				setHeaderMessage( message );
+			}
+		}
+	}); 
 		
 	return false;
-}
-
-function addRelationshipCompleted( messageElement )
-{
-	messageElement = messageElement.getElementsByTagName( 'message' )[0];
-	var type = messageElement.getAttribute( 'type' );
-	var message = messageElement.firstChild.nodeValue;
-	
-	if( type == 'success' )
-	{
-		showSuccessMessage( i18n_save_success );
-	}	
-	else if( type == 'error' )
-	{
-		showErrorMessage( i18n_adding_relationship_failed + ':' + '\n' + message );
-	}
-	else if( type == 'input' )
-	{
-		showWarningMessage( message );
-	}
-	jQuery('#loaderDiv').hide();
 }
 
 //------------------------------------------------------------------------------

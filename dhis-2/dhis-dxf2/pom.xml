@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.hisp.dhis</groupId>
     <artifactId>dhis</artifactId>
-    <version>2.12-SNAPSHOT</version>
+    <version>2.13-SNAPSHOT</version>
   </parent>
 
   <artifactId>dhis-dxf2</artifactId>
@@ -45,10 +45,13 @@
       <artifactId>dhis-support-xml</artifactId>
     </dependency>
     <dependency>
-      <groupId>net.sf.opencsv</groupId>
-      <artifactId>opencsv</artifactId>
+      <groupId>net.sourceforge.javacsv</groupId>
+      <artifactId>javacsv</artifactId>
     </dependency>
-
+    <dependency>
+      <groupId>com.lowagie</groupId>
+      <artifactId>itext</artifactId>
+    </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>

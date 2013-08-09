@@ -27,13 +27,10 @@ package org.hisp.dhis.sms.outcoming;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.annotate.JsonAutoDetect.Visibility;
-import org.codehaus.jackson.annotate.JsonMethod;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.message.MessageSender;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -47,10 +44,11 @@ import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Dang Duy Hieu
@@ -153,8 +151,9 @@ public class ProcessingSendSMSAction
     // Action Implementation
     // -------------------------------------------------------------------------
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public String execute()
+        throws Exception
     {
         gatewayId = transportService.getDefaultGateway();
 
@@ -178,32 +177,22 @@ public class ProcessingSendSMSAction
 
         if ( sendTarget != null && sendTarget.equals( "phone" ) )
         {
-            try
-            {
-                ObjectMapper mapper = new ObjectMapper().setVisibility( JsonMethod.FIELD, Visibility.ANY );
-                mapper.configure( DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false );
-                recipients = mapper.readValue( recipients.iterator().next(), Set.class );
+            ObjectMapper mapper = new ObjectMapper().setVisibility( PropertyAccessor.FIELD,
+                JsonAutoDetect.Visibility.ANY );
+            mapper.disable( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES );
+            recipients = mapper.readValue( recipients.iterator().next(), Set.class );
 
-                for ( String each : recipients )
+            for ( String each : recipients )
+            {
+                if ( !each.startsWith( "+" ) )
                 {
-                    User user = new User();
-                    user.setPhoneNumber( each );
-                    recipientsList.add( user );
+                    each = "+" + each;
                 }
+                User user = new User();
+                user.setPhoneNumber( each );
+                recipientsList.add( user );
             }
-            catch ( JsonParseException e )
-            {
-                e.printStackTrace();
-            }
-            catch ( JsonMappingException e )
-            {
-                e.printStackTrace();
-            }
-            catch ( IOException e )
-            {
-                e.printStackTrace();
-            }
-            //message = messageSender.sendMessage( smsSubject, smsMessage, currentUser, true, recipients, gatewayId );
+
             message = messageSender.sendMessage( smsSubject, smsMessage, currentUser, recipientsList, false );
 
         }
@@ -225,7 +214,6 @@ public class ProcessingSendSMSAction
                 return ERROR;
             }
 
-            //message = messageSender.sendMessage( smsSubject, smsMessage, currentUser, false, group.getMembers(), gatewayId );
             message = messageSender.sendMessage( smsSubject, smsMessage, currentUser, group.getMembers(), false );
         }
         else if ( sendTarget.equals( "user" ) )
@@ -234,23 +222,17 @@ public class ProcessingSendSMSAction
 
             if ( units != null && !units.isEmpty() )
             {
-                //Set<User> users = new HashSet<User>();
-
                 for ( OrganisationUnit unit : units )
                 {
-                    //users.addAll( unit.getUsers() );
                     recipientsList.addAll( unit.getUsers() );
                 }
 
-                //if ( users.isEmpty() )
                 if ( recipientsList.isEmpty() )
                 {
                     message = i18n.getString( "there_is_no_user_assigned_to_selected_units" );
 
                     return ERROR;
                 }
-
-                //message = messageSender.sendMessage( smsSubject, smsMessage, currentUser, false, users, gatewayId );
                 message = messageSender.sendMessage( smsSubject, smsMessage, currentUser, recipientsList, false );
             }
         }
@@ -260,7 +242,6 @@ public class ProcessingSendSMSAction
             {
                 if ( unit.getPhoneNumber() != null && !unit.getPhoneNumber().isEmpty() )
                 {
-                    //recipients.add( unit.getPhoneNumber() );
                     User user = new User();
                     user.setPhoneNumber( unit.getPhoneNumber() );
                     recipientsList.add( user );
@@ -274,33 +255,17 @@ public class ProcessingSendSMSAction
                 return ERROR;
             }
 
-            //message = messageSender.sendMessage( smsSubject, smsMessage, currentUser, true, recipients, gatewayId );
             message = messageSender.sendMessage( smsSubject, smsMessage, currentUser, recipientsList, false );
         }
         else
         {
             Patient patient = null;
-            //Set<String> phones = new HashSet<String>();
 
-            try
-            {
-                ObjectMapper mapper = new ObjectMapper().setVisibility( JsonMethod.FIELD, Visibility.ANY );
-                mapper.configure( DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false );
+            ObjectMapper mapper = new ObjectMapper().setVisibility( PropertyAccessor.FIELD,
+                JsonAutoDetect.Visibility.ANY );
+            mapper.disable( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES );
 
-                recipients = mapper.readValue( recipients.iterator().next(), Set.class );
-            }
-            catch ( JsonParseException e )
-            {
-                e.printStackTrace();
-            }
-            catch ( JsonMappingException e )
-            {
-                e.printStackTrace();
-            }
-            catch ( IOException e )
-            {
-                e.printStackTrace();
-            }
+            recipients = mapper.readValue( recipients.iterator().next(), Set.class );
 
             for ( String patientId : recipients )
             {
@@ -308,7 +273,6 @@ public class ProcessingSendSMSAction
 
                 if ( patient != null && patient.getPhoneNumber() != null && !patient.getPhoneNumber().isEmpty() )
                 {
-                    //phones.add( patient.getPhoneNumber() );
                     User user = new User();
                     user.setPhoneNumber( patient.getPhoneNumber() );
                     recipientsList.add( user );
@@ -322,7 +286,6 @@ public class ProcessingSendSMSAction
                 return ERROR;
             }
 
-            //message = messageSender.sendMessage( smsSubject, smsMessage, currentUser, true, phones, gatewayId );
             message = messageSender.sendMessage( smsSubject, smsMessage, currentUser, recipientsList, false );
         }
 

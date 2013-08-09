@@ -88,10 +88,10 @@ public class DataSetController
 
     @Autowired
     private DataSetService dataSetService;
-    
+
     @Autowired
     private DataEntryFormService dataEntryFormService;
-    
+
     @Autowired
     private ExportService exportService;
 
@@ -121,6 +121,18 @@ public class DataSetController
         Transformer transformer = tf.newTransformer( new StreamSource( new ClassPathResource( DSD_TRANSFORM ).getInputStream() ) );
 
         transformer.transform( new StreamSource( input ), new StreamResult( response.getOutputStream() ) );
+    }
+
+    @RequestMapping( value = "/{uid}/version", method = RequestMethod.GET )
+    public void getVersion( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
+        HttpServletResponse response ) throws IOException
+    {
+        DataSet dataSet = manager.get( DataSet.class, uid );
+
+        Map<String, Integer> versionMap = new HashMap<String, Integer>();
+        versionMap.put( "version", dataSet.getVersion() );
+
+        JacksonUtils.toJson( response.getOutputStream(), versionMap );
     }
 
     @RequestMapping( value = "/{uid}/form", method = RequestMethod.GET, produces = "application/json" )
@@ -199,7 +211,7 @@ public class DataSetController
 
     @RequestMapping( value = "/{uid}/customDataEntryForm", method = { RequestMethod.PUT, RequestMethod.POST }, consumes = "text/html" )
     @PreAuthorize( "hasRole('ALL')" )
-    public void updateCustomDataEntryForm( @PathVariable( "uid" ) String uid, 
+    public void updateCustomDataEntryForm( @PathVariable( "uid" ) String uid,
         @RequestBody String formContent,
         HttpServletResponse response ) throws Exception
     {
@@ -210,14 +222,14 @@ public class DataSetController
             ContextUtils.notFoundResponse( response, "Data set not found for identifier: " + uid );
             return;
         }
-        
+
         DataEntryForm form = dataSet.getDataEntryForm();
-        
+
         if ( form == null )
         {
             form = new DataEntryForm( dataSet.getName(), DataEntryForm.STYLE_REGULAR, formContent );
             dataEntryFormService.addDataEntryForm( form );
-            
+
             dataSet.setDataEntryForm( form );
             dataSetService.updateDataSet( dataSet );
         }
@@ -227,7 +239,7 @@ public class DataSetController
             dataEntryFormService.updateDataEntryForm( form );
         }
     }
-    
+
     /**
      * Select only the meta-data required to describe form definitions.
      *

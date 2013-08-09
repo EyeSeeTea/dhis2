@@ -29,8 +29,11 @@ package org.hisp.dhis.caseentry.action.reminder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.patient.PatientReminder;
+import org.hisp.dhis.patient.PatientReminderService;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.sms.SmsServiceException;
@@ -73,6 +76,13 @@ public class SendSmsAction
         this.currentUserService = currentUserService;
     }
 
+    private PatientReminderService patientReminderService;
+
+    public void setPatientReminderService( PatientReminderService patientReminderService )
+    {
+        this.patientReminderService = patientReminderService;
+    }
+
     private I18n i18n;
 
     public void setI18n( I18n i18n )
@@ -98,6 +108,13 @@ public class SendSmsAction
         this.msg = msg;
     }
 
+    private int sendTo;
+
+    public void setSendTo( int sendTo )
+    {
+        this.sendTo = sendTo;
+    }
+
     private String message = "";
 
     public String getMessage()
@@ -116,40 +133,40 @@ public class SendSmsAction
         ProgramStageInstance programStageInstance = programStageInstanceService
             .getProgramStageInstance( programStageInstanceId );
 
-        String phoneNumber = programStageInstance.getProgramInstance().getPatient().getPhoneNumber();
+        PatientReminder patientReminder = new PatientReminder();
+        patientReminder.setTemplateMessage( msg );
+        patientReminder.setSendTo( sendTo );
 
-        if ( phoneNumber != null && !phoneNumber.isEmpty() )
+        Set<String> phoneNumbers = patientReminderService.getPhonenumbers( patientReminder, programStageInstance
+            .getProgramInstance().getPatient() );
+
+        try
         {
-            try
+            OutboundSms outboundSms = new OutboundSms();
+            outboundSms.setMessage( msg );
+            outboundSms.setRecipients( phoneNumbers );
+            outboundSms.setSender( currentUserService.getCurrentUsername() );
+            outboundSmsService.sendMessage( outboundSms, null );
+
+            List<OutboundSms> outboundSmsList = programStageInstance.getOutboundSms();
+            if ( outboundSmsList == null )
             {
-                OutboundSms outboundSms = new OutboundSms( msg, phoneNumber );
-                outboundSms.setSender( currentUserService.getCurrentUsername() );
-                outboundSmsService.sendMessage( outboundSms, null );
-
-                List<OutboundSms> outboundSmsList = programStageInstance.getOutboundSms();
-                if ( outboundSmsList == null )
-                {
-                    outboundSmsList = new ArrayList<OutboundSms>();
-                }
-                outboundSmsList.add( outboundSms );
-                programStageInstance.setOutboundSms( outboundSmsList );
-                programStageInstanceService.updateProgramStageInstance( programStageInstance );
-
-                message = i18n.getString( "sent_message_to" ) + " " + phoneNumber;
-
-                return SUCCESS;
+                outboundSmsList = new ArrayList<OutboundSms>();
             }
-            catch ( SmsServiceException e )
-            {
-                message = e.getMessage();
+            outboundSmsList.add( outboundSms );
+            programStageInstance.setOutboundSms( outboundSmsList );
+            programStageInstanceService.updateProgramStageInstance( programStageInstance );
 
-                return ERROR;
-            }
+            message = i18n.getString( "message_is_sent" );
+        }
+        catch ( SmsServiceException e )
+        {
+            message = e.getMessage();
+
+            return ERROR;
         }
 
-        message = i18n.getString( "patient_did_not_register_a_phone_number" );
-        
-        return INPUT;
+        return SUCCESS;
     }
 
 }

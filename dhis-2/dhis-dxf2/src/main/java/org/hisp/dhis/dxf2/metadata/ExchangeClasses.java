@@ -27,11 +27,20 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.chart.Chart;
+import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.constant.Constant;
+import org.hisp.dhis.dashboard.Dashboard;
+import org.hisp.dhis.dashboard.DashboardItem;
 import org.hisp.dhis.datadictionary.DataDictionary;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
@@ -70,12 +79,6 @@ import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleGroup;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
@@ -89,6 +92,9 @@ final public class ExchangeClasses
 
     // these are the ones that are available for dxf2 import
     private static Map<Class<? extends IdentifiableObject>, String> importClasses;
+
+    // these will be listed on the global resource page
+    private static Map<Class<? extends IdentifiableObject>, String> publicResourceClasses;
 
     static
     {
@@ -118,7 +124,7 @@ final public class ExchangeClasses
         allExportClasses.put( DataElement.class, "dataElements" );
         allExportClasses.put( DataElementGroup.class, "dataElementGroups" );
         allExportClasses.put( DataElementGroupSet.class, "dataElementGroupSets" );
-        
+
         allExportClasses.put( DataElementOperand.class, "dataElementOperands" );
 
         allExportClasses.put( IndicatorType.class, "indicatorTypes" );
@@ -134,6 +140,9 @@ final public class ExchangeClasses
         allExportClasses.put( ReportTable.class, "reportTables" );
         allExportClasses.put( Report.class, "reports" );
         allExportClasses.put( Chart.class, "charts" );
+        
+        allExportClasses.put( Dashboard.class, "dashboards" );
+        allExportClasses.put( DashboardItem.class, "dashboardItems" );
 
         allExportClasses.put( ValidationRule.class, "validationRules" );
         allExportClasses.put( ValidationRuleGroup.class, "validationRuleGroups" );
@@ -150,6 +159,8 @@ final public class ExchangeClasses
 
         allExportClasses.put( Program.class, "programs" );
         allExportClasses.put( ProgramStage.class, "programStages" );
+
+        allExportClasses.put( BaseDimensionalObject.class, "dimensions" );
 
         exportClasses = new LinkedHashMap<Class<? extends IdentifiableObject>, String>( allExportClasses );
         importClasses = new LinkedHashMap<Class<? extends IdentifiableObject>, String>( allExportClasses );
@@ -168,7 +179,7 @@ final public class ExchangeClasses
         exportClasses.remove( ProgramStage.class );
         importClasses.remove( Program.class );
         importClasses.remove( ProgramStage.class );
-        
+
         // special class which is created on demand in association with other objects
         exportClasses.remove( DataElementOperand.class );
         importClasses.remove( DataElementOperand.class );

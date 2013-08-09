@@ -66,11 +66,8 @@ public class DataSet
     extends BaseNameableObject
 {
     public static final String TYPE_DEFAULT = "default";
-
     public static final String TYPE_SECTION = "section";
-
     public static final String TYPE_CUSTOM = "custom";
-
     public static final String TYPE_SECTION_MULTIORG = "multiorg_section";
 
     public static final int NO_EXPIRY = 0;
@@ -190,14 +187,24 @@ public class DataSet
      */
     private boolean skipOffline;
 
-    /**
+   /**
      * Property indicating whether it should enable the Data Elements decorations
      * , which are description tooltip and url link anchor.
      */
     private Boolean enableDataElementDecoration;
 
+    /**
+     * Render default and section forms with tabs instead of multiple sections in one page
+     */
+    private boolean renderAsTabs;
+
+    /**
+     * Render multi-organisationUnit forms either with OU vertically or horizontally.
+     */
+    private boolean renderHorizontally;
+
     // -------------------------------------------------------------------------
-    // Contructors
+    // Constructors
     // -------------------------------------------------------------------------
 
     public DataSet()
@@ -688,6 +695,32 @@ public class DataSet
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isRenderAsTabs()
+    {
+        return renderAsTabs;
+    }
+
+    public void setRenderAsTabs( boolean renderAsTabs )
+    {
+        this.renderAsTabs = renderAsTabs;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isRenderHorizontally()
+    {
+        return renderHorizontally;
+    }
+
+    public void setRenderHorizontally( boolean renderHorizontally )
+    {
+        this.renderHorizontally = renderHorizontally;
+    }
+
+   @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Boolean isEnableDataElementDecoration()
     {
         return enableDataElementDecoration;
@@ -698,7 +731,7 @@ public class DataSet
         this.enableDataElementDecoration = enableDataElementDecoration;
     }
     
-    
+	
     @Override
     public void mergeWith( IdentifiableObject other )
     {
@@ -719,8 +752,11 @@ public class DataSet
             fieldCombinationRequired = dataSet.isFieldCombinationRequired();
             validCompleteOnly = dataSet.isValidCompleteOnly();
             skipOffline = dataSet.isSkipOffline();
+            renderAsTabs = dataSet.isRenderAsTabs();
+            renderHorizontally = dataSet.isRenderHorizontally();
+
             enableDataElementDecoration = dataSet.isEnableDataElementDecoration();
-            
+ 
             removeAllDataElements();
 
             for ( DataElement dataElement : dataSet.getDataElements() )

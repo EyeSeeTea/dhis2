@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.hisp.dhis</groupId>
     <artifactId>dhis-services</artifactId>
-    <version>2.12-SNAPSHOT</version>
+    <version>2.13-SNAPSHOT</version>
   </parent>
   
   <artifactId>dhis-service-mapgeneration</artifactId>
@@ -27,7 +27,7 @@
     </dependency>
     <dependency>
       <groupId>org.hisp.dhis</groupId>
-      <artifactId>dhis-service-aggregationengine-default</artifactId>
+      <artifactId>dhis-service-analytics</artifactId>
     </dependency>
     
     <!-- Other -->

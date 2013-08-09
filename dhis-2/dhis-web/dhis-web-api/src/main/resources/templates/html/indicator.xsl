@@ -15,6 +15,10 @@
           <td> <xsl:value-of select="@id" /> </td>
         </tr>
         <tr>
+          <td>Created</td>
+          <td> <xsl:value-of select="@created" /> </td>
+        </tr>
+        <tr>
           <td>Last Updated</td>
           <td> <xsl:value-of select="@lastUpdated" /> </td>
         </tr>
@@ -31,20 +35,20 @@
           <td> <xsl:value-of select="d:description" /> </td>
         </tr>
         <tr>
-          <td>Denominator</td>
-          <td> <xsl:value-of select="d:denominator" /> </td>
-        </tr>
-        <tr>
-          <td>Denominator Description</td>
-          <td> <xsl:value-of select="d:denominatorDescription" /> </td>
-        </tr>
-        <tr>
           <td>Numerator</td>
           <td> <xsl:value-of select="d:numerator" /> </td>
         </tr>
         <tr>
           <td>Numerator Description</td>
           <td> <xsl:value-of select="d:numeratorDescription" /> </td>
+        </tr>
+        <tr>
+          <td>Denominator</td>
+          <td> <xsl:value-of select="d:denominator" /> </td>
+        </tr>
+        <tr>
+          <td>Denominator Description</td>
+          <td> <xsl:value-of select="d:denominatorDescription" /> </td>
         </tr>
         <tr>
           <td>Annualized</td>

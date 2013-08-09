@@ -40,6 +40,8 @@ import org.hisp.dhis.patient.PatientIdentifierTypeService;
 import org.hisp.dhis.patient.PatientReminder;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.user.UserGroup;
+import org.hisp.dhis.user.UserGroupService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -73,6 +75,13 @@ public class UpdateProgramAction
     public void setPatientAttributeService( PatientAttributeService patientAttributeService )
     {
         this.patientAttributeService = patientAttributeService;
+    }
+
+    private UserGroupService userGroupService;
+
+    public void setUserGroupService( UserGroupService userGroupService )
+    {
+        this.userGroupService = userGroupService;
     }
 
     // -------------------------------------------------------------------------
@@ -217,11 +226,11 @@ public class UpdateProgramAction
         this.datesToCompare = datesToCompare;
     }
 
-    private Boolean disableRegistrationFields;
+    private List<Integer> sendTo = new ArrayList<Integer>();
 
-    public void setDisableRegistrationFields( Boolean disableRegistrationFields )
+    public void setSendTo( List<Integer> sendTo )
     {
-        this.disableRegistrationFields = disableRegistrationFields;
+        this.sendTo = sendTo;
     }
 
     private Boolean displayOnAllOrgunit;
@@ -229,6 +238,41 @@ public class UpdateProgramAction
     public void setDisplayOnAllOrgunit( Boolean displayOnAllOrgunit )
     {
         this.displayOnAllOrgunit = displayOnAllOrgunit;
+    }
+
+    private List<Integer> whenToSend = new ArrayList<Integer>();
+
+    public void setWhenToSend( List<Integer> whenToSend )
+    {
+        this.whenToSend = whenToSend;
+    }
+
+    private Boolean useBirthDateAsIncidentDate;
+
+    public void setUseBirthDateAsIncidentDate( Boolean useBirthDateAsIncidentDate )
+    {
+        this.useBirthDateAsIncidentDate = useBirthDateAsIncidentDate;
+    }
+
+    private Boolean useBirthDateAsEnrollmentDate;
+
+    public void setUseBirthDateAsEnrollmentDate( Boolean useBirthDateAsEnrollmentDate )
+    {
+        this.useBirthDateAsEnrollmentDate = useBirthDateAsEnrollmentDate;
+    }
+
+    private List<Integer> userGroup = new ArrayList<Integer>();
+
+    public void setUserGroup( List<Integer> userGroup )
+    {
+        this.userGroup = userGroup;
+    }
+
+    private Boolean selectEnrollmentDatesInFuture;
+
+    public void setSelectEnrollmentDatesInFuture( Boolean selectEnrollmentDatesInFuture )
+    {
+        this.selectEnrollmentDatesInFuture = selectEnrollmentDatesInFuture;
     }
 
     // -------------------------------------------------------------------------
@@ -244,9 +288,11 @@ public class UpdateProgramAction
         ignoreOverdueEvents = (ignoreOverdueEvents == null) ? false : ignoreOverdueEvents;
         blockEntryForm = (blockEntryForm == null) ? false : blockEntryForm;
         remindCompleted = (remindCompleted == null) ? false : remindCompleted;
-        disableRegistrationFields = (disableRegistrationFields == null) ? false : disableRegistrationFields;
         displayOnAllOrgunit = (displayOnAllOrgunit == null) ? false : displayOnAllOrgunit;
-
+        useBirthDateAsIncidentDate = (useBirthDateAsIncidentDate == null) ? false : useBirthDateAsIncidentDate;
+        useBirthDateAsEnrollmentDate = (useBirthDateAsEnrollmentDate == null) ? false : useBirthDateAsEnrollmentDate;
+        selectEnrollmentDatesInFuture = (selectEnrollmentDatesInFuture == null) ? false : selectEnrollmentDatesInFuture;
+        
         Program program = programService.getProgram( id );
         program.setName( name );
         program.setDescription( description );
@@ -259,8 +305,10 @@ public class UpdateProgramAction
         program.setBlockEntryForm( blockEntryForm );
         program.setOnlyEnrollOnce( onlyEnrollOnce );
         program.setRemindCompleted( remindCompleted );
-        program.setDisableRegistrationFields( disableRegistrationFields );
         program.setDisplayOnAllOrgunit( displayOnAllOrgunit );
+        program.setUseBirthDateAsIncidentDate( useBirthDateAsIncidentDate );
+        program.setUseBirthDateAsEnrollmentDate( useBirthDateAsEnrollmentDate );
+        program.setSelectEnrollmentDatesInFuture( selectEnrollmentDatesInFuture );
 
         if ( type == Program.MULTIPLE_EVENTS_WITH_REGISTRATION )
         {
@@ -309,6 +357,18 @@ public class UpdateProgramAction
             PatientReminder reminder = new PatientReminder( "", daysAllowedSendMessages.get( i ),
                 templateMessages.get( i ) );
             reminder.setDateToCompare( datesToCompare.get( i ) );
+            reminder.setSendTo( sendTo.get( i ) );
+            reminder.setWhenToSend( whenToSend.get( i ) );
+            
+            if ( reminder.getSendTo() == PatientReminder.SEND_TO_USER_GROUP )
+            {
+                UserGroup selectedUserGroup = userGroupService.getUserGroup( userGroup.get( i ) );
+                reminder.setUserGroup( selectedUserGroup );
+            }
+            else
+            {
+                reminder.setUserGroup( null );
+            }
             patientReminders.add( reminder );
         }
         program.setPatientReminders( patientReminders );

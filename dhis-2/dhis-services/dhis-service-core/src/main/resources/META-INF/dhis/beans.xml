@@ -235,6 +235,7 @@
 
   <bean id="org.hisp.dhis.aggregation.AggregatedDataValueStore" class="org.hisp.dhis.aggregation.jdbc.JdbcAggregatedDataValueStore">
     <property name="statementManager" ref="statementManager" />
+    <property name="statementBuilder" ref="statementBuilder" />
     <property name="jdbcTemplate" ref="jdbcTemplate" />
   </bean>
 
@@ -246,6 +247,7 @@
   <bean id="org.hisp.dhis.user.UserAuthorityGroupStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
     <property name="clazz" value="org.hisp.dhis.user.UserAuthorityGroup" />
     <property name="sessionFactory" ref="sessionFactory" />
+    <property name="cacheable" value="true" />
   </bean>
 
   <bean id="org.hisp.dhis.message.MessageConversationStore" class="org.hisp.dhis.message.hibernate.HibernateMessageConversationStore">
@@ -270,6 +272,7 @@
   <bean id="org.hisp.dhis.constant.ConstantStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="clazz" value="org.hisp.dhis.constant.Constant" />
+    <property name="cacheable" value="true" />
   </bean>
 
   <bean id="org.hisp.dhis.version.VersionStore" class="org.hisp.dhis.version.hibernate.HibernateVersionStore">
@@ -571,8 +574,6 @@
     <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
     <property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
-    <property name="aggregatedDataValueService" ref="org.hisp.dhis.aggregation.AggregatedDataValueService" />
-    <property name="configurationService" ref="org.hisp.dhis.configuration.ConfigurationService" />
   </bean>
 
   <bean id="org.hisp.dhis.setting.SystemSettingManager" class="org.hisp.dhis.setting.DefaultSystemSettingManager">
@@ -762,8 +763,6 @@
   </bean>
 
   <bean id="org.hisp.dhis.startup.TableCreator" class="org.hisp.dhis.startup.TableCreator">
-    <property name="jdbcTemplate" ref="jdbcTemplate" />
-    <property name="statementBuilder" ref="statementBuilder" />
     <property name="name" value="TableCreator" />
     <property name="runlevel" value="3" />
   </bean>
@@ -785,6 +784,14 @@
     <property name="runlevel" value="6" />
     <property name="skipInTests" value="true" />
   </bean>
+  
+  <!--  <bean id="org.hisp.dhis.user.UserDefaultPopulator"
+    class="org.hisp.dhis.user.UserDefaultPopulator">
+    <property name="userService" ref="org.hisp.dhis.user.UserService" />
+    <property name="runlevel" value="5" />
+    <property name="skipInTests" value="true" />
+  </bean>
+  -->
 
   <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
     <property name="targetObject" ref="org.hisp.dhis.system.startup.StartupRoutineExecutor" />
@@ -801,6 +808,7 @@
           <ref local="org.hisp.dhis.organisationunit.OrganisationUnitGroupSetPopulator" />
           <ref local="org.hisp.dhis.dataentryform.DataEntryFormUpgrader" />
           <ref local="org.hisp.dhis.startup.ExpressionUpgrader" />
+          <!--<ref local="org.hisp.dhis.user.UserDefaultPopulator" />-->
         </list>
       </list>
     </property>
@@ -960,8 +968,9 @@
 
   <bean id="org.hisp.dhis.mapping.MapViewDeletionHandler" class="org.hisp.dhis.mapping.MapViewDeletionHandler">
     <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
+    <property name="operandService" ref="org.hisp.dhis.dataelement.DataElementOperandService" />
   </bean>
-
+  
   <!-- DeletionManager -->
 
   <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">

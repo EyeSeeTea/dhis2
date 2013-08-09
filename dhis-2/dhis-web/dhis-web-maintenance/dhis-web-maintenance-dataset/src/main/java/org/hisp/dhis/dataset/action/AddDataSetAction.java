@@ -27,12 +27,7 @@ package org.hisp.dhis.dataset.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.system.util.TextUtils.nullIfEmpty;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
+import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
@@ -42,7 +37,11 @@ import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.user.UserGroupService;
 import org.hisp.dhis.user.UserService;
 
-import com.opensymphony.xwork2.Action;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.hisp.dhis.system.util.TextUtils.nullIfEmpty;
 
 /**
  * @author Kristian
@@ -128,14 +127,14 @@ public class AddDataSetAction
     {
         this.expiryDays = expiryDays;
     }
-    
+
     private int notificationRecipients;
-    
+
     public void setNotificationRecipients( int notificationRecipients )
     {
         this.notificationRecipients = notificationRecipients;
     }
-    
+
     private boolean notifyCompletingUser;
 
     public void setNotifyCompletingUser( boolean notifyCompletingUser )
@@ -165,12 +164,12 @@ public class AddDataSetAction
     }
 
     private boolean fieldCombinationRequired;
-    
+
     public void setFieldCombinationRequired( boolean fieldCombinationRequired )
     {
         this.fieldCombinationRequired = fieldCombinationRequired;
     }
-    
+
     private boolean validCompleteOnly;
 
     public void setValidCompleteOnly( boolean validCompleteOnly )
@@ -190,6 +189,20 @@ public class AddDataSetAction
     public void setEnableDataElementDecoration( boolean enableDataElementDecoration )
     {
         this.enableDataElementDecoration = enableDataElementDecoration;
+    }
+
+    private boolean renderAsTabs;
+
+    public void setRenderAsTabs( boolean renderAsTabs )
+    {
+        this.renderAsTabs = renderAsTabs;
+    }
+
+    private boolean renderHorizontally;
+
+    public void setRenderHorizontally( boolean renderHorizontally )
+    {
+        this.renderHorizontally = renderHorizontally;
     }
 
     private Collection<String> dataElementsSelectedList = new HashSet<String>();
@@ -216,7 +229,7 @@ public class AddDataSetAction
         // ---------------------------------------------------------------------
         // Prepare values
         // ---------------------------------------------------------------------
-        
+
         code = nullIfEmpty( code );
         shortName = nullIfEmpty( shortName );
         description = nullIfEmpty( description );
@@ -239,7 +252,7 @@ public class AddDataSetAction
         {
             indicators.add( indicatorService.getIndicator( Integer.parseInt( id ) ) );
         }
-        
+
         dataSet.setDescription( description );
         dataSet.setVersion( 1 );
         dataSet.setMobile( false );
@@ -250,8 +263,10 @@ public class AddDataSetAction
         dataSet.setValidCompleteOnly( validCompleteOnly );
         dataSet.setNotifyCompletingUser( notifyCompletingUser );
         dataSet.setSkipOffline( skipOffline );
-        dataSet.setEnableDataElementDecoration( enableDataElementDecoration );
-        
+        dataSet.setEnableDataElementDecoration( enableDataElementDecoration );		
+        dataSet.setRenderAsTabs( renderAsTabs );
+        dataSet.setRenderHorizontally( renderHorizontally );
+
         dataSetService.addDataSet( dataSet );
 
         userService.assignDataSetToUserRole( dataSet );

@@ -29,7 +29,6 @@ package org.hisp.dhis.dxf2.event;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import org.hisp.dhis.common.DxfNamespaces;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -38,7 +37,7 @@ public class DataValue
 {
     private String value;
 
-    private String dataElementId;
+    private String dataElement;
 
     private Boolean providedElsewhere = false;
 
@@ -47,7 +46,7 @@ public class DataValue
     }
 
     @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
+    @JacksonXmlProperty( isAttribute = true )
     public String getValue()
     {
         return value;
@@ -59,19 +58,19 @@ public class DataValue
     }
 
     @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
-    public String getDataElementId()
+    @JacksonXmlProperty( isAttribute = true )
+    public String getDataElement()
     {
-        return dataElementId;
+        return dataElement;
     }
 
-    public void setDataElementId( String dataElementId )
+    public void setDataElement( String dataElement )
     {
-        this.dataElementId = dataElementId;
+        this.dataElement = dataElement;
     }
 
     @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
+    @JacksonXmlProperty( isAttribute = true )
     public Boolean getProvidedElsewhere()
     {
         return providedElsewhere;
@@ -87,7 +86,7 @@ public class DataValue
     {
         return "DataValue{" +
             "value='" + value + '\'' +
-            ", dataElementId='" + dataElementId + '\'' +
+            ", dataElement='" + dataElement + '\'' +
             ", providedElsewhere=" + providedElsewhere +
             '}';
     }

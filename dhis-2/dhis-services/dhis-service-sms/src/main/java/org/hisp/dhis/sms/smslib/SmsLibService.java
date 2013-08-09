@@ -27,6 +27,13 @@ package org.hisp.dhis.sms.smslib;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.io.IOException;
+import java.lang.Character.UnicodeBlock;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.sms.SmsServiceException;
@@ -45,17 +52,11 @@ import org.smslib.AGateway;
 import org.smslib.GatewayException;
 import org.smslib.IInboundMessageNotification;
 import org.smslib.IOutboundMessageNotification;
+import org.smslib.Message.MessageEncodings;
 import org.smslib.OutboundMessage;
 import org.smslib.SMSLibException;
 import org.smslib.Service;
-import org.smslib.Message.MessageEncodings;
 import org.smslib.Service.ServiceStatus;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class SmsLibService
     implements OutboundSmsTransportService
@@ -72,7 +73,7 @@ public class SmsLibService
 
     private final String SMPP_GATEWAY = "smpp_gw";
 
-    private Map<String, String> gatewayMap = new HashMap<String, String>();
+    public static Map<String, String> gatewayMap = new HashMap<String, String>();
 
     private GateWayFactory gatewayFactory = new GateWayFactory();
 
@@ -98,7 +99,12 @@ public class SmsLibService
     {
         this.smsConsumer = smsConsumer;
     }
-
+    
+    public OutboundSms getOutboundSms( int id )
+    {
+        return outboundSmsStore.getOutboundSmsbyId( id );
+    }
+    
     @Override
     public boolean isEnabled()
     {
@@ -147,7 +153,17 @@ public class SmsLibService
 
         OutboundMessage outboundMessage = new OutboundMessage( recipient, sms.getMessage() );
         
-        outboundMessage.setEncoding( MessageEncodings.ENCUCS2 );
+        //Check if text contain any specific unicode character
+        for( char each: sms.getMessage().toCharArray())
+        {
+            if( !Character.UnicodeBlock.of(each).equals( UnicodeBlock.BASIC_LATIN ) )
+            {
+                outboundMessage.setEncoding( MessageEncodings.ENCUCS2 );
+                break;
+            }
+        }
+        
+        outboundMessage.setStatusReport( true );
 
         String longNumber = config.getLongNumber();
 
@@ -161,7 +177,7 @@ public class SmsLibService
         try
         {
             log.info( "Sending message " + sms );
-
+            
             if ( gatewayId == null || gatewayId.isEmpty() )
             {
                 sent = getService().sendMessage( outboundMessage );
@@ -215,11 +231,11 @@ public class SmsLibService
 
         if ( sms.getId() == 0 )
         {
-            outboundSmsStore.save( sms );
+            outboundSmsStore.saveOutboundSms( sms );
         }
         else
         {
-            outboundSmsStore.update( sms );
+            outboundSmsStore.updateOutboundSms( sms );
         }
         
         return message;
@@ -285,7 +301,6 @@ public class SmsLibService
 
         message = "success";
 
-        // Add gateways
         if ( config.getGateways() == null || config.getGateways().isEmpty() )
         {
             message = "unable_load_configuration_cause_of_there_is_no_gateway";
@@ -489,20 +504,19 @@ public class SmsLibService
     @Override
     public List<OutboundSms> getAllOutboundSms()
     {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public int saveOutboundSms( OutboundSms sms )
     {
-        return outboundSmsStore.save( sms );
+        return outboundSmsStore.saveOutboundSms( sms );
     }
 
     @Override
     public void updateOutboundSms( OutboundSms sms )
     {
-        outboundSmsStore.update( sms );
+        outboundSmsStore.updateOutboundSms( sms );
     }
 
     @Override
@@ -512,11 +526,11 @@ public class SmsLibService
     }
 
     @Override
-    public void deleteById( Integer outboundSmsId )
+    public void deleteById( Integer id )
     {
-        OutboundSms sms = outboundSmsStore.get( outboundSmsId );
+        OutboundSms sms = outboundSmsStore.getOutboundSmsbyId( id );
 
-        outboundSmsStore.delete( sms );
+        outboundSmsStore.deleteOutboundSms( sms );
     }
 
     public String getDefaultGateway()
@@ -560,6 +574,23 @@ public class SmsLibService
         {
             gatewayId = gatewayMap.get( MODEM_GATEWAY );
         }
+        
         return gatewayId;
+    }
+
+    @Override
+    public String sendMessage( OutboundSms sms )
+        throws SmsServiceException
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String sendMessage( String message, String phoneNumber )
+        throws SmsServiceException
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

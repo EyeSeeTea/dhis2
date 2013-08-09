@@ -27,20 +27,24 @@
 
 package org.hisp.dhis.dataadmin.action.option;
 
-import java.util.Collection;
-
+import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.option.OptionService;
 import org.hisp.dhis.option.OptionSet;
+import org.hisp.dhis.paging.ActionPagingSupport;
 
-import com.opensymphony.xwork2.Action;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 /**
  * @author Chau Thu Tran
- * 
  * @version $GetOptionSetListAction.java Feb 3, 2012 9:28:11 PM$
  */
 public class GetOptionSetListAction
-    implements Action
+    extends ActionPagingSupport<Attribute>
 {
     // -------------------------------------------------------------------------------------------------
     // Dependencies
@@ -49,23 +53,31 @@ public class GetOptionSetListAction
     private OptionService optionService;
 
     // -------------------------------------------------------------------------------------------------
-    // Input
+    // Input & Output
     // -------------------------------------------------------------------------------------------------
 
-    private Collection<OptionSet> optionSets;
-
-    // -------------------------------------------------------------------------------------------------
-    // Setters
-    // -------------------------------------------------------------------------------------------------
+    private List<OptionSet> optionSets;
 
     public void setOptionService( OptionService optionService )
     {
         this.optionService = optionService;
     }
 
-    public Collection<OptionSet> getOptionSets()
+    public List<OptionSet> getOptionSets()
     {
         return optionSets;
+    }
+
+    private String key;
+
+    public String getKey()
+    {
+        return key;
+    }
+
+    public void setKey( String key )
+    {
+        this.key = key;
     }
 
     // -------------------------------------------------------------------------------------------------
@@ -76,7 +88,21 @@ public class GetOptionSetListAction
     public String execute()
         throws Exception
     {
-        optionSets = optionService.getAllOptionSets();
+        if ( isNotBlank( key ) )
+        {
+            this.paging = createPaging( optionService.getOptionSetsCountByName( key ) );
+
+            optionSets = new ArrayList<OptionSet>( optionService.getOptionSetsBetweenByName( key, paging.getStartPos(),
+                paging.getPageSize() ) );
+        }
+        else
+        {
+            this.paging = createPaging( optionService.getOptionSetCount() );
+
+            optionSets = new ArrayList<OptionSet>( optionService.getOptionSetsBetween( paging.getStartPos(), paging.getPageSize() ) );
+        }
+
+        Collections.sort( optionSets, IdentifiableObjectNameComparator.INSTANCE );
 
         return SUCCESS;
     }

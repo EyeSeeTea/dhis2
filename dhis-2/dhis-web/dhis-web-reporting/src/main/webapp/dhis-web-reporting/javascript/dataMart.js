@@ -2,6 +2,7 @@
 $( document ).ready( function() {
 	datePickerInRange( 'startDate' , 'endDate' );
 	pingNotificationsTimeout();
+	$( '.dataMart' ).attr( 'disabled', 'disabled' );
 } );
 
 function startExport()
@@ -34,7 +35,7 @@ function pingNotificationsTimeout()
 
 function toggleDataMart()
 {
-	if ( $( '#dataMart' ).is( ':checked' ) )
+	if ( !$( '#dataMart' ).is( ':checked' ) )
 	{
 		$( '.dataMart' ).attr( 'disabled', 'disabled' );
 	}

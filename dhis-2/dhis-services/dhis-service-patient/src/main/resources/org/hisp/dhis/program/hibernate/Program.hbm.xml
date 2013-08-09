@@ -81,8 +81,6 @@
       <one-to-many class="org.hisp.dhis.patient.PatientReminder" />
     </set>
     
-    <property name="disableRegistrationFields" />
-    
     <set name="organisationUnitGroups" table="orgunitgroupprograms">
 	  <key column="programid" />
 	  <many-to-many class="org.hisp.dhis.organisationunit.OrganisationUnitGroup" column="orgunitgroupid"/>
@@ -90,6 +88,12 @@
 	
 	<property name="displayOnAllOrgunit" />
 	
+	<property name="useBirthDateAsIncidentDate" />
+	
+	<property name="useBirthDateAsEnrollmentDate" />
+	
+    <property name="selectEnrollmentDatesInFuture" />
+    
 	<!-- Access properties -->
 	
     <many-to-one name="user" class="org.hisp.dhis.user.User" column="userid" foreign-key="fk_program_userid" />

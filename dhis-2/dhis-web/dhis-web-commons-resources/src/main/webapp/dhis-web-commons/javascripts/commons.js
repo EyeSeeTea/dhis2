@@ -1,3 +1,56 @@
+/*
+ * Copyright (c) 2004-2012, University of Oslo
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ * * Neither the name of the HISP project nor the names of its contributors may
+ *   be used to endorse or promote products derived from this software without
+ *   specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+dhis2.util.namespace( 'dhis2.commons' );
+
+dhis2.commons.getCurrentPage = function() {
+	return $.cookie( "currentPage" );
+}
+
+dhis2.commons.getCurrentKey = function() {
+	return $.cookie( "currentKey" );
+}
+
+dhis2.commons.redirectCurrentPage = function( url ) {
+	var currentPage = dhis2.commons.getCurrentPage();
+	var currentKey = dhis2.commons.getCurrentKey();
+	var separator = url && url.indexOf( "?" ) == -1 ? "?" : "&";
+
+    var redirect = url;
+
+    if ( currentPage && currentKey ) {
+        redirect = currentPage ? ( url + separator + "currentPage=" + currentPage + "&key=" + currentKey ) : url;
+    } 
+    else if ( currentPage ) {
+        redirect = currentPage ? ( url + separator + "currentPage=" + currentPage ) : url;
+    }
+
+    window.location.href = redirect;
+};
 
 // -----------------------------------------------------------------------------
 // Global variables
@@ -668,7 +721,8 @@ function hideInfo()
  */
 function showDetails()
 {
-    $( '#detailsArea' ).show( "fast" );
+	$( '#detailsData' ).css( 'width', '270px' );
+    $( '#detailsArea' ).show();
 }
 
 /**
@@ -676,7 +730,8 @@ function showDetails()
  */
 function hideDetails()
 {
-    $( '#detailsArea' ).hide( "fast" );
+	$( '#detailsData' ).css( 'width', '0' );
+    $( '#detailsArea' ).hide();
 }
 
 /**
@@ -826,6 +881,8 @@ function removeItem( itemId, itemName, confirmation, action, success )
     
     if ( result )
     {
+    	setHeaderWaitMessage( i18n_deleting );
+    	
     	$.postJSON(
     	    action,
     	    {
@@ -847,11 +904,11 @@ function removeItem( itemId, itemName, confirmation, action, success )
 						success.call();
 					}
   
-					showSuccessMessage( i18n_delete_success );
+					setHeaderDelayMessage( i18n_delete_success );
     	    	}
     	    	else if ( json.response == "error" )
     	    	{ 
-					showWarningMessage( json.message );
+					setHeaderMessage( json.message );
     	    	}
     	    }
     	);
@@ -1412,11 +1469,6 @@ function showSuccessMessage( message, time )
 function showWarningMessage( message, time )
 {
 	jQuery.growlUI( i18n_warning, message, 'warning', time ); 	
-}
-
-function showWaitMessage( message, time )
-{
-	jQuery.growlUI( i18n_waiting, message, 'waiting', time );
 }
 
 function markInvalid( elementId, message )

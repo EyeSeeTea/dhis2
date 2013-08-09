@@ -51,10 +51,6 @@ var validationRules = {
         "name" : {
             "required" : true,
             "rangelength" : [ 2, 140 ]
-        },
-        "description" : {
-            "required" : true,
-            "rangelength" : [ 2, 210 ]
         }
     },
     "userGroup" : {
@@ -180,9 +176,6 @@ var validationRules = {
         "name" : {
             "required" : true,
             "rangelength" : [ 2, 50 ]
-        },
-        "description" : {
-            "required" : true
         },
         "sqlquery" : {
             "required" : true

@@ -7,10 +7,42 @@
 			<div id='flow_$!programInstance.id' class="stage-flow">
 				<table class="table-flow">											
 					<tr id='programStageIdTR_$!programInstance.id'>
+						#foreach( $programStageInstance in $linkProgramStageInstances )
+						<td id='arrow_$programStageInstance.id' style='font-size:25px;'>&rarr;</td>
+						<td>
+							#set($valueDate=$format.formatDate( $programStageInstance.dueDate ))
+							#if($!programStageInstance.executionDate)
+								#set($valueDate=$format.formatDate( $programStageInstance.executionDate ))
+							#end
+							<div class="orgunit-object" id="org_$!programStageInstance.id">&nbsp;$!programStageInstance.organisationUnit.name</div>
+							<input type="button" name="programStageBtn"
+								id="ps_$!programStageInstance.id"
+								name="ps_$!programStageInstance.id"
+								pi="$programInstance.id"
+								psid="$programStageInstance.programStage.id"
+								psuid="$programStageInstance.programStage.uid"
+								psname="$programStageInstance.programStage.displayName"
+								status="$programStageInstance.getEventStatus()"
+								programType='$programInstance.program.type'
+								reportDate="$!format.formatDate( $!programStageInstance.executionDate )"
+								reportDateDes="$programStageInstance.programStage.reportDateDescription"
+								dueDate="$format.formatDate( $programStageInstance.dueDate )"
+								class="stage-object" 
+								value="$programStageInstance.programStage.displayName&#13;&#10;&nbsp;$valueDate" 
+								linkedEvent='true'
+								onclick="javascript:loadDataEntry( $programStageInstance.id );">
+							<script>	
+								var status = $programStageInstance.getEventStatus();
+								setEventColorStatus( $programStageInstance.id ,status);
+							</script>
+						</td>
+						#end
+						
 						#if( $programStageInstances)
 						#else
 							#set( $programStageInstances = $programInstance.programStageInstances)
 						#end
+						
 						#foreach( $programStageInstance in $programStageInstances )
 						<td id='arrow_$programStageInstance.id' style='font-size:25px;'>&rarr;</td>
 						<td>
@@ -33,6 +65,7 @@
 								dueDate="$format.formatDate( $programStageInstance.dueDate )"
 								class="stage-object" 
 								value="$programStageInstance.programStage.displayName&#13;&#10;&nbsp;$valueDate" 
+								linkedEvent='false'
 								onclick="javascript:loadDataEntry( $programStageInstance.id );">
 							<script>	
 								var status = $programStageInstance.getEventStatus();
@@ -49,6 +82,11 @@
 		</td>
 		<td>&nbsp;</td>
 		<td align="right">
+			#if($programInstance.followup)
+				#set($followup=$programInstance.followup)
+			#else
+				#set($followup='false')
+			#end
 			<input type="button" class='patient-object' id="newEncounterBtn_$!programInstance.id" name="newEncounterBtn" value="$i18n.getString('create_new_event')" onClick="javascript:showCreateNewEvent('$!programInstance.id');" >
 		</td>
 	</tr>			
@@ -87,6 +125,10 @@
 		</tr>
 		<tr>
 			<td></td>
+			<td><span id='spanDueDateNewEncounter_$!programInstance.id' class='hidden' style='color:red' >$i18n.getString('this_field_is_required')</td>
+		</tr>
+		<tr>
+			<td></td>
 			<td>
 				<input type='button' value='$i18n.getString("create")' onclick='registerIrregularEncounter( "$!programInstance.id",getFieldValue("repeatableProgramStage_$!programInstance.id"), jQuery("#repeatableProgramStage_$!programInstance.id option:selected").text(),getFieldValue("dueDateNewEncounter_$programInstance.id" ) );' />
 				<input type='button' value='$i18n.getString("cancel")' onclick="closeDueDateDiv('$!programInstance.id');" />
@@ -95,7 +137,7 @@
 		</tr>
 		<tr>
 			<td></td>
-			<td id='createEventMessage_$!programInstance.id' style='color:green'></td>
+			<td id='createEventMessage_$!programInstance.id' style='color:red'></td>
 		</tr>
 	</table>
 </div>

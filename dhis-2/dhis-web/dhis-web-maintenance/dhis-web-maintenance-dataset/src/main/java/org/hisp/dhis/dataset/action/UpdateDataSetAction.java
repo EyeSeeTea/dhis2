@@ -27,10 +27,7 @@ package org.hisp.dhis.dataset.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
+import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
@@ -43,7 +40,9 @@ import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.user.UserGroupService;
 
-import com.opensymphony.xwork2.Action;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.hisp.dhis.system.util.TextUtils.equalsNullSafe;
 import static org.hisp.dhis.system.util.TextUtils.nullIfEmpty;
@@ -79,14 +78,14 @@ public class UpdateDataSetAction
     {
         this.dataElementService = dataElementService;
     }
-    
+
     private IndicatorService indicatorService;
 
     public void setIndicatorService( IndicatorService indicatorService )
     {
         this.indicatorService = indicatorService;
     }
-    
+
     private SectionService sectionService;
 
     public void setSectionService( SectionService sectionService )
@@ -141,7 +140,7 @@ public class UpdateDataSetAction
     }
 
     private int notificationRecipients;
-    
+
     public void setNotificationRecipients( int notificationRecipients )
     {
         this.notificationRecipients = notificationRecipients;
@@ -181,9 +180,9 @@ public class UpdateDataSetAction
     {
         this.allowFuturePeriods = allowFuturePeriods;
     }
-    
+
     private boolean fieldCombinationRequired;
-    
+
     public void setFieldCombinationRequired( boolean fieldCombinationRequired )
     {
         this.fieldCombinationRequired = fieldCombinationRequired;
@@ -208,6 +207,20 @@ public class UpdateDataSetAction
     public void setEnableDataElementDecoration( boolean enableDataElementDecoration )
     {
         this.enableDataElementDecoration = enableDataElementDecoration;
+    }
+
+    private boolean renderAsTabs;
+
+    public void setRenderAsTabs( boolean renderAsTabs )
+    {
+        this.renderAsTabs = renderAsTabs;
+    }
+
+    private boolean renderHorizontally;
+
+    public void setRenderHorizontally( boolean renderHorizontally )
+    {
+        this.renderHorizontally = renderHorizontally;
     }
 
     private Collection<String> dataElementsSelectedList = new HashSet<String>();
@@ -259,7 +272,7 @@ public class UpdateDataSetAction
 
         dataSet.setExpiryDays( expiryDays );
         dataSet.setSkipAggregation( skipAggregation );
-        
+
         if ( !(equalsNullSafe( name, dataSet.getName() ) && periodType.equals( dataSet.getPeriodType() )
             && dataElements.equals( dataSet.getDataElements() ) && indicators.equals( dataSet.getIndicators() )) )
         {
@@ -278,7 +291,9 @@ public class UpdateDataSetAction
         dataSet.setValidCompleteOnly( validCompleteOnly );
         dataSet.setNotifyCompletingUser( notifyCompletingUser );
         dataSet.setSkipOffline( skipOffline );
-        dataSet.setEnableDataElementDecoration( enableDataElementDecoration );
+        dataSet.setEnableDataElementDecoration( enableDataElementDecoration );		
+        dataSet.setRenderAsTabs( renderAsTabs );
+        dataSet.setRenderHorizontally( renderHorizontally );
         dataSet.setNotificationRecipients( userGroupService.getUserGroup( notificationRecipients ) );
 
         dataSetService.updateDataSet( dataSet );
@@ -294,7 +309,7 @@ public class UpdateDataSetAction
                 sectionService.updateSection( section );
             }
         }
-        
+
         return SUCCESS;
     }
 }

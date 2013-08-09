@@ -27,8 +27,14 @@
 
 package org.hisp.dhis.caseentry.action.reminder;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.patient.PatientReminder;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
+import org.hisp.dhis.sms.outbound.OutboundSms;
 
 import com.opensymphony.xwork2.Action;
 
@@ -49,6 +55,13 @@ public class SetEventStatusAction
     public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
     {
         this.programStageInstanceService = programStageInstanceService;
+    }
+
+    private I18nFormat format;
+
+    public void setFormat( I18nFormat format )
+    {
+        this.format = format;
     }
 
     // -------------------------------------------------------------------------
@@ -85,6 +98,15 @@ public class SetEventStatusAction
         case ProgramStageInstance.COMPLETED_STATUS:
             programStageInstance.setCompleted( true );
             programStageInstance.setStatus( null );
+            
+            // Send message when to completed the event
+            List<OutboundSms> psiOutboundSms = programStageInstance.getOutboundSms();
+            if ( psiOutboundSms == null )
+            {
+                psiOutboundSms = new ArrayList<OutboundSms>();
+            }
+            psiOutboundSms.addAll( programStageInstanceService.sendMessages( programStageInstance,
+                PatientReminder.SEND_WHEN_TO_C0MPLETED_EVENT, format ) );
             break;
         case ProgramStageInstance.VISITED_STATUS:
             programStageInstance.setCompleted( false );

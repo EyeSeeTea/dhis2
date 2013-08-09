@@ -55,6 +55,9 @@
   <xsl:include href="interpretation.xsl" />
   <xsl:include href="dataValueSets.xsl" />
   <xsl:include href="optionSets.xsl" />
+  <xsl:include href="program.xsl" />
+  <xsl:include href="programStage.xsl" />
+  <xsl:include href="event.xsl" />
 
   <!-- Config elements -->
 

@@ -341,7 +341,7 @@ function addEventListeners()
     var dataSetId = $( '#selectedDataSetId' ).val();
 	var formType = dataSets[dataSetId].type;
 
-    $( '[name="entryfield"]' ).each( function( i )
+    $( '.entryfield' ).each( function( i )
     {
         var id = $( this ).attr( 'id' );
 
@@ -390,7 +390,7 @@ function addEventListeners()
         }
     } );
 
-    $( '[name="entryselect"]' ).each( function( i )
+    $( '.entryselect' ).each( function( i )
     {
         var id = $( this ).attr( 'id' );
         var split = splitFieldId( id );
@@ -410,10 +410,11 @@ function addEventListeners()
             saveBoolean( dataElementId, optionComboId, id );
         } );
 
-        $( this ).css( 'width', '90%' );
+        $( this ).css( 'width', '88%' );
+        $( this ).css( 'margin-right', '2px' );
     } );
 
-    $( '[name="entrytrueonly"]' ).each( function( i )
+    $( 'entrytrueonly' ).each( function( i )
     {
         var id = $( this ).attr( 'id' );
         var split = splitFieldId( id );
@@ -435,7 +436,7 @@ function addEventListeners()
         $( this ).css( 'width', '90%' );
     } );
 
-    $( '[name="entryoptionset"]' ).each( function( i )
+    $( '.entryoptionset' ).each( function( i )
     {
         var id = $( this ).attr( 'id' );
         var split = splitFieldId( id );
@@ -477,39 +478,6 @@ function addEventListeners()
         
         $( this ).click ( function() {
         	viewHist( dataElementId, optionComboId );
-        } );
-    } );
-    
-    $( '[name="dynselect"]' ).each( function( i )
-    {
-    	var id = $( this ).attr( 'id' );
-    	var code = id.split( '-' )[0];
-    	
-    	$( this ).unbind( 'change' );
-    	
-    	$( this ).change( function()
-    	{
-            dynamicSelectChanged( id, code );
-    	} );
-    } );
-    
-    $( '[name="dyninput"]' ).each( function( i )
-    {
-    	var id = $( this ).attr( 'id' );
-    	var code = id.split( '-' )[0];
-        var optionComboId = id.split( '-' )[1];
-        
-        $( this ).unbind( 'change' );
-        $( this ).unbind( 'keyup' );
-
-        $( this ).change( function()
-        {
-            saveDynamicVal( code, optionComboId, id );
-        } );
-
-        $( this ).keyup( function( event )
-        {
-            keyPress( event, this );
         } );
     } );
 }
@@ -563,8 +531,11 @@ function loadForm( dataSetId, multiOrg )
 
         if ( !multiOrganisationUnit )
         {
+            if ( dataSets[dataSetId].renderAsTabs ) {
+                $( "#tabs" ).tabs();
+            }
+
             enableSectionFilter();
-            insertDynamicOptions();
         }
 
         loadDataValues();
@@ -585,8 +556,11 @@ function loadForm( dataSetId, multiOrg )
 
             if( !multiOrganisationUnit )
             {
+                if ( dataSets[dataSetId].renderAsTabs ) {
+                    $( "#tabs" ).tabs();
+                }
+
                 enableSectionFilter();
-                insertDynamicOptions();
             }
             else
             {
@@ -597,68 +571,6 @@ function loadForm( dataSetId, multiOrg )
             loadDataValues();
         } );
     }
-}
-
-//------------------------------------------------------------------------------
-// Dynamic input
-//------------------------------------------------------------------------------
-
-function insertDynamicOptions()
-{
-	var optionMarkup = $( '#dynselect' ).html();
-	
-	if ( !isDefined( optionMarkup ) )
-	{
-		return; // Custom form only
-	}
-	
-    $( '[name="dynselect"]' ).each( function( i )
-    {
-    	$( this ).append( optionMarkup );
-    } );
-}
-
-function dynamicSelectChanged( id, code )
-{
-	var validSelection = $( '#' + id ).val() != -1;
-	var color = validSelection ? COLOR_WHITE : COLOR_GREY;
-	
-	$( 'input[code="' + code + '"]' ).prop( 'disabled', !validSelection );
-	$( 'input[code="' + code + '"]' ).css( 'background-color', color );
-}
-
-function getDynamicSelectElementId( dataElementId )
-{
-	// Search for element where data element is already selected
-	
-	var id = null;
-	
-	$( '[name="dynselect"]' ).each( function( i )
-	{
-		if ( $( this ).val() == dataElementId )
-		{
-			id = $( this ).attr( 'id' );
-			return false;
-		}
-	} );
-
-	if ( id != null )
-	{
-		return id;
-	}
-	
-	// Search for unselected element
-	
-	$( '[name="dynselect"]' ).each( function( i )
-	{
-		if ( $( this ).val() == -1 )
-		{
-			id = $( this ).attr( 'id' );
-			return false;
-		}
-	} );
-	
-	return id;
 }
 
 //------------------------------------------------------------------------------
@@ -1121,29 +1033,23 @@ function insertDataValues()
 
     // Clear existing values and colors, grey disabled fields
 
-    $( '[name="entryfield"]' ).val( '' );
-    $( '[name="entryselect"]' ).val( '' );
-    $( '[name="entrytrueonly"]' ).removeAttr('checked');
-    $( '[name="entryoptionset"]' ).val( '' );
-    $( '[name="dyninput"]' ).val( '' );
-    $( '[name="dynselect"]' ).val( '' );
+    $( '.entryfield' ).val( '' );
+    $( '.entryselect' ).val( '' );
+    $( '.entrytrueonly' ).removeAttr('checked');
+    $( '.entryoptionset' ).val( '' );
 
-    $( '[name="entryfield"]' ).css( 'background-color', COLOR_WHITE );
-    $( '[name="entryselect"]' ).css( 'background-color', COLOR_WHITE );
-    $( '[name="entrytrueonly"]' ).css( 'background-color', COLOR_WHITE );
-    $( '[name="entryoptionset"]' ).css( 'background-color', COLOR_WHITE );
-    $( '[name="dyninput"]' ).css( 'background-color', COLOR_WHITE );
+    $( '.entryfield' ).css( 'background-color', COLOR_WHITE );
+    $( '.entryselect' ).css( 'background-color', COLOR_WHITE );
+    $( '.entrytrueonly' ).css( 'background-color', COLOR_WHITE );
+    $( '.entryoptionset' ).css( 'background-color', COLOR_WHITE );
 
     $( '[name="min"]' ).html( '' );
     $( '[name="max"]' ).html( '' );
 
-    $( '[name="entryfield"]' ).filter( ':disabled' ).css( 'background-color', COLOR_GREY );
+    $( '.entryfield' ).filter( ':disabled' ).css( 'background-color', COLOR_GREY );
     
     // Disable and grey dynamic fields to start with and enable later
 
-    $( '[name="dyninput"]' ).prop( 'disabled', true );    
-    $( '[name="dyninput"]' ).css( 'background-color', COLOR_GREY );
-    
     $.ajax( {
     	url: 'getDataValues.action',
     	data:
@@ -1164,14 +1070,17 @@ function insertDataValues()
 	    {
 	    	if ( json.locked )
 	    	{
-	    		$( '#contentDiv' ).hide();
-	    		$( '#completenessDiv' ).hide();
+	            $('#contentDiv input').attr('disabled', 'disabled');
+	            $('.entryoptionset').autocomplete('disable');
+                $('.sectionFilter').removeAttr('disabled');
+                $( '#completenessDiv' ).hide();
 	    		setHeaderDelayMessage( i18n_dataset_is_locked );
-	    		return;
 	    	}
 	    	else
-	    	{	    		
-	    		$( '#contentDiv' ).show();
+	    	{
+                $('.entryoptionset').autocomplete('enable');
+                $('#contentDiv input').removeAttr('disabled');
+                $('#contentDiv input').css('backgroundColor', '#fff');
 	    		$( '#completenessDiv' ).show();
 	    	}
 	    	
@@ -1181,7 +1090,7 @@ function insertDataValues()
 	        {
 	            var fieldId = '#' + value.id + '-val';
 
-	            if ( $( fieldId ).length > 0 ) // Insert for fixed input fields
+	            if ( $( fieldId ).length > 0 )
 	            {
                     if ( $( fieldId ).attr( 'name' ) == 'entrytrueonly' ) {
                         $( fieldId ).attr('checked', true);
@@ -1189,71 +1098,32 @@ function insertDataValues()
                         $( fieldId ).val( value.val );
                     }
                 }
-	            else // Insert for potential dynamic input fields
-	            {
-                    var split = splitFieldId( value.id );
-	                var dataElementId = split.dataElementId;
-	                var optionComboId = split.optionComboId;
-	                
-	                var selectElementId = '#' + getDynamicSelectElementId( dataElementId );
-	                
-	                if ( $( selectElementId ).length == 0 )
-	                {
-	                	log( 'Could not find dynamic select element for data element: ' + dataElementId );
-	                	return true;
-	                }
-
-                	var code = $( selectElementId ).attr( 'id' ).split( '-' )[0];
-        			
-        			if ( !isDefined( code ) )
-        			{
-        				log( 'Could not find code on select element: ' + selectElementId );
-        				return true;
-        			}
-
-    				var dynamicInputId = '#' + code + '-' + optionComboId + '-dyninput';
-
-        			if ( $( dynamicInputId ).length == 0 )
-    				{
-        				log( 'Could not find find dynamic input element for option combo: ' + optionComboId );
-        				return true;
-    				}
-
-        			// Set data element in select list
-        			    		    
-        			$( selectElementId ).val( dataElementId );
-
-        			// Enable input fields and set value
-        			
-        		    $( 'input[code="' + code + '"]' ).prop( 'disabled', false );    
-        		    $( 'input[code="' + code + '"]' ).css( 'background-color', COLOR_WHITE );
-        		    
-    				$( dynamicInputId ).val( value.val );
-	            }
-
+	            
 	            dataValueMap[value.id] = value.val;
 	        } );
 
 	        // Set min-max values and colorize violation fields
 
-	        $.safeEach( json.minMaxDataElements, function( i, value )
-	        {
-	            var minId = value.id + '-min';
-	            var maxId = value.id + '-max';
+            if(!json.locked) {
+                $.safeEach( json.minMaxDataElements, function( i, value )
+                {
+                    var minId = value.id + '-min';
+                    var maxId = value.id + '-max';
 
-	            var valFieldId = '#' + value.id + '-val';
+                    var valFieldId = '#' + value.id + '-val';
 
-	            var dataValue = dataValueMap[value.id];
+                    var dataValue = dataValueMap[value.id];
 
-	            if ( dataValue && ( ( value.min && new Number( dataValue ) < new Number(
-	            	value.min ) ) || ( value.max && new Number( dataValue ) > new Number( value.max ) ) ) )
-	            {
-	                $( valFieldId ).css( 'background-color', COLOR_ORANGE );
-	            }
+                    if ( dataValue && ( ( value.min && new Number( dataValue ) < new Number(
+                        value.min ) ) || ( value.max && new Number( dataValue ) > new Number( value.max ) ) ) )
+                    {
+                        $( valFieldId ).css( 'background-color', COLOR_ORANGE );
+                    }
 
-	            currentMinMaxValueMap[minId] = value.min;
-	            currentMinMaxValueMap[maxId] = value.max;
-	        } );
+                    currentMinMaxValueMap[minId] = value.min;
+                    currentMinMaxValueMap[maxId] = value.max;
+                } );
+            }
 
 	        // Update indicator values in form
 
@@ -1262,7 +1132,7 @@ function insertDataValues()
 
 	        // Set completeness button
 
-	        if ( json.complete )
+	        if ( json.complete && !json.locked)
 	        {
 	            $( '#completeButton' ).attr( 'disabled', 'disabled' );
 	            $( '#undoButton' ).removeAttr( 'disabled' );
@@ -1282,7 +1152,12 @@ function insertDataValues()
 	            $( '#undoButton' ).attr( 'disabled', 'disabled' );
 	            $( '#infoDiv' ).hide();
 	        }
-	    }
+
+            if(json.locked) {
+                $('#contentDiv input').css('backgroundColor', '#eee');
+                $('.sectionFilter').css('backgroundColor', '#fff');
+            }
+        }
 	} );
 }
 
@@ -1390,6 +1265,14 @@ function getPreviousEntryField( field )
             return field;
         }
     }
+}
+
+/**
+ * Convenience method which can be used in custom form scripts. Do not change.
+ */
+function onFormLoad( fn )
+{
+	$( 'body' ).off( EVENT_FORM_LOADED ).on( EVENT_FORM_LOADED, fn );
 }
 
 // -----------------------------------------------------------------------------
@@ -1592,7 +1475,7 @@ function validateCompulsoryCombinations()
     {
         var violations = false;
 
-        $( '[name="entryfield"]' ).add( '[name="entryselect"]' ).each( function( i )
+        $( '.entryfield' ).add( '[name="entryselect"]' ).each( function( i )
         {
             var id = $( this ).attr( 'id' );
 
@@ -2248,7 +2131,7 @@ function StorageManager()
 }
 
 // -----------------------------------------------------------------------------
-// OptionSet
+// Option set
 // -----------------------------------------------------------------------------
 
 function searchOptionSet( uid, query, success ) {
@@ -2308,27 +2191,35 @@ function getOptions( uid, query, success ) {
 }
 
 function loadOptionSets() {
-    var optionSetUids = _.values( optionSets );
-    optionSetUids = _.union(optionSetUids);
+    var options = _.values( optionSets );
+    var uids = [];
 
     var deferred = $.Deferred();
     var promise = deferred.promise();
 
-    _.each( optionSetUids, function ( item, idx ) {
-        promise = promise.then( function () {
-            return $.ajax( {
-                url: '../api/optionSets/' + item + '.json?links=false',
-                type: 'GET',
-                cache: false
-            } ).done( function ( data ) {
-                log( 'Successfully stored optionSet: ' + item );
+    _.each( options, function ( item, idx ) {
+        if(uids.indexOf(item.uid) == -1) {
+            DAO.store.get('optionSets', item.uid).done(function(obj) {
+                if(!obj || obj.optionSet.version !== item.v) {
+                    promise = promise.then( function () {
+                        return $.ajax( {
+                            url: '../api/optionSets/' + item.uid + '.json?links=false',
+                            type: 'GET',
+                            cache: false
+                        } ).done( function ( data ) {
+                            log( 'Successfully stored optionSet: ' + item.uid );
 
-                var obj = {};
-                obj.id = item;
-                obj.optionSet = data;
-                DAO.store.set( 'optionSets', obj );
-            } );
-        } );
+                            var obj = {};
+                            obj.id = item.uid;
+                            obj.optionSet = data;
+                            DAO.store.set( 'optionSets', obj );
+                        } );
+                    } );
+
+                    uids.push( item.uid );
+                }
+            });
+        }
     } );
 
     promise = promise.then( function () {
@@ -2338,7 +2229,7 @@ function loadOptionSets() {
 }
 
 function insertOptionSets() {
-    $( '[name="entryoptionset"]' ).each( function ( idx, item ) {
+    $( '.entryoptionset' ).each( function ( idx, item ) {
         var optionSetKey = splitFieldId( item.id );
 
         if ( multiOrganisationUnit ) {
@@ -2350,7 +2241,7 @@ function insertOptionSets() {
         item = item + '-val';
         optionSetKey = optionSetKey.dataElementId + '-' + optionSetKey.optionComboId;
 
-        autocompleteOptionSetField( item, optionSets[optionSetKey] );
+        autocompleteOptionSetField( item, optionSets[optionSetKey].uid );
     } );
 }
 
@@ -2388,7 +2279,7 @@ function autocompleteOptionSetField( idField, optionSetUid ) {
 
     var button = $( "<a style='width:20px; margin-bottom:-5px;height:20px;'>" )
         .attr( "tabIndex", -1 )
-        .attr( "title", 'i18n_show_all_items' )
+        .attr( "title", i18n_show_all_items )
         .appendTo( wrapper )
         .button( {
             icons: {

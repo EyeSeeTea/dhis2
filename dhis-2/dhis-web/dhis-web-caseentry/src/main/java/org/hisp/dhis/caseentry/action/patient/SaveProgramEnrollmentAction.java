@@ -26,12 +26,15 @@
  */
 package org.hisp.dhis.caseentry.action.patient;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import org.hisp.dhis.caseentry.state.SelectedStateManager;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientReminder;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
@@ -40,6 +43,7 @@ import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
+import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.system.util.DateUtils;
 
 import com.opensymphony.xwork2.Action;
@@ -159,9 +163,24 @@ public class SaveProgramEnrollmentAction
 
         Program program = programService.getProgram( programId );
 
+        if ( enrollmentDate == null || enrollmentDate.isEmpty() )
+        {
+            if ( program.getUseBirthDateAsIncidentDate() )
+            {
+                enrollmentDate = format.formatDate( patient.getBirthDate() );
+            }
+        }
+
         if ( dateOfIncident == null || dateOfIncident.isEmpty() )
         {
-            dateOfIncident = enrollmentDate;
+            if ( program.getUseBirthDateAsIncidentDate() )
+            {
+                dateOfIncident = format.formatDate( patient.getBirthDate() );
+            }
+            else
+            {
+                dateOfIncident = enrollmentDate;
+            }
         }
 
         Collection<ProgramInstance> programInstances = programInstanceService.getProgramInstances( patient, program,
@@ -225,6 +244,17 @@ public class SaveProgramEnrollmentAction
                     }
                 }
             }
+
+            // send messages after enrollment program
+            List<OutboundSms> outboundSms = programInstance.getOutboundSms();
+            if ( outboundSms == null )
+            {
+                outboundSms = new ArrayList<OutboundSms>();
+            }
+            
+            outboundSms.addAll( programInstanceService.sendMessages( programInstance,
+                PatientReminder.SEND_WHEN_TO_EMROLLEMENT, format ) );
+            programInstanceService.updateProgramInstance( programInstance );
         }
         else
         {
@@ -250,4 +280,5 @@ public class SaveProgramEnrollmentAction
 
         return SUCCESS;
     }
+
 }

@@ -38,6 +38,7 @@ import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_CHILDREN;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_LEVEL;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,6 +58,7 @@ import org.hisp.dhis.common.view.DimensionalView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryDimension;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
@@ -83,11 +85,15 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
  * This class contains associations to dimensional meta-data. Should typically
  * be sub-classed by analytical objects like tables, maps and charts.
  * 
+ * Implementation note: Objects currently managing this class are AnalyticsService,
+ * DefaultDimensionService and the getDimensionalObject and getDimensionalObjectList 
+ * methods of this class.
+ * 
  * @author Lars Helge Overland
  */
 public abstract class BaseAnalyticalObject
     extends BaseIdentifiableObject
-{
+{    
     // -------------------------------------------------------------------------
     // Persisted properties
     // -------------------------------------------------------------------------
@@ -125,6 +131,10 @@ public abstract class BaseAnalyticalObject
 
     protected boolean userOrganisationUnitChildren;
 
+    protected Integer organisationUnitLevel;
+    
+    protected boolean rewindRelativePeriods;
+
     // -------------------------------------------------------------------------
     // Analytical properties
     // -------------------------------------------------------------------------
@@ -142,13 +152,19 @@ public abstract class BaseAnalyticalObject
     // -------------------------------------------------------------------------
 
     protected transient List<OrganisationUnit> transientOrganisationUnits = new ArrayList<OrganisationUnit>();
+    
+    protected transient List<DataElementCategoryOptionCombo> transientCategoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>();
         
     protected transient Date relativePeriodDate;
-    
+
+    protected transient OrganisationUnit relativeOrganisationUnit;
+        
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
 
+    public abstract void init( User user, Date date, OrganisationUnit organisationUnit, List<OrganisationUnit> organisationUnitsAtLevel, I18nFormat format );
+    
     public abstract void populateAnalyticalProperties();
     
     public boolean hasUserOrgUnit()
@@ -191,7 +207,7 @@ public abstract class BaseAnalyticalObject
      * @param format the I18nFormat.
      * @return a DimensionalObject.
      */
-    protected DimensionalObject getDimensionalObject( String dimension, Date date, User user, boolean dynamicNames, I18nFormat format )
+    protected DimensionalObject getDimensionalObject( String dimension, Date date, User user, boolean dynamicNames, List<OrganisationUnit> organisationUnitsAtLevel, I18nFormat format )
     {       
         List<NameableObject> items = new ArrayList<NameableObject>();
         
@@ -210,11 +226,20 @@ public abstract class BaseAnalyticalObject
         }
         else if ( PERIOD_DIM_ID.equals( dimension ) )
         {
+            setPeriodNames( periods, dynamicNames, format );
+            
             items.addAll( periods );
             
             if ( hasRelativePeriods() )
             {
-                items.addAll( relatives.getRelativePeriods( date, format, dynamicNames ) ); //TODO dyn names if period is on rows
+                if ( rewindRelativePeriods )
+                {
+                    items.addAll( relatives.getRewindedRelativePeriods( 1, date, format, dynamicNames ) );
+                }
+                else
+                {
+                    items.addAll( relatives.getRelativePeriods( date, format, dynamicNames ) );
+                }
             }
             
             type = DimensionType.PERIOD;
@@ -231,10 +256,21 @@ public abstract class BaseAnalyticalObject
             
             if ( userOrganisationUnitChildren && user != null && user.hasOrganisationUnit() )
             {
-                items.addAll( user.getOrganisationUnit().getChildren() );
+                items.addAll( user.getOrganisationUnit().getSortedChildren() );
+            }
+            
+            if ( organisationUnitLevel != null && organisationUnitsAtLevel != null )
+            {
+                items.addAll( organisationUnitsAtLevel );
             }
             
             type = DimensionType.ORGANISATIONUNIT;
+        }
+        else if ( CATEGORYOPTIONCOMBO_DIM_ID.equals( dimension ) )
+        {
+            items.addAll( transientCategoryOptionCombos );
+            
+            type = DimensionType.CATEGORY_OPTION_COMBO;
         }
         else if ( categoryDims.contains( dimension ) )
         {
@@ -345,7 +381,7 @@ public abstract class BaseAnalyticalObject
             
             objects.add( new BaseDimensionalObject( dimension, DimensionType.PERIOD, periodList ) );
         }        
-        else if ( ORGUNIT_DIM_ID.equals( dimension ) && ( !organisationUnits.isEmpty() || hasUserOrgUnit() ) )
+        else if ( ORGUNIT_DIM_ID.equals( dimension ) && ( !organisationUnits.isEmpty() || !transientOrganisationUnits.isEmpty() || hasUserOrgUnit() ) )
         {
             List<NameableObject> ouList = new ArrayList<NameableObject>();
             ouList.addAll( organisationUnits );
@@ -359,6 +395,16 @@ public abstract class BaseAnalyticalObject
             if ( userOrganisationUnitChildren )
             {
                 ouList.add( new BaseNameableObject( KEY_USER_ORGUNIT_CHILDREN, KEY_USER_ORGUNIT_CHILDREN, KEY_USER_ORGUNIT_CHILDREN ) );
+            }
+            
+            if ( organisationUnitLevel != null )
+            {
+                for ( OrganisationUnit unit : organisationUnits )
+                {
+                    String id = KEY_LEVEL + organisationUnitLevel + DimensionalObject.DIMENSION_SEP + unit.getUid();
+                    
+                    ouList.add( new BaseNameableObject( id, id, id ) );
+                }
             }
             
             objects.add( new BaseDimensionalObject( dimension, DimensionType.ORGANISATIONUNIT, ouList ) );
@@ -419,6 +465,14 @@ public abstract class BaseAnalyticalObject
         }
         
         return categoryDims;
+    }
+
+    private void setPeriodNames( List<Period> periods, boolean dynamicNames, I18nFormat format )
+    {
+        for ( Period period : periods )
+        {
+            RelativePeriods.setName( period, null, dynamicNames, format );
+        }
     }
     
     /**
@@ -516,7 +570,8 @@ public abstract class BaseAnalyticalObject
             categoryDimensions.addAll( object.getCategoryDimensions() );
             
             userOrganisationUnit = object.isUserOrganisationUnit();
-            userOrganisationUnitChildren = object.isUserOrganisationUnitChildren();            
+            userOrganisationUnitChildren = object.isUserOrganisationUnitChildren();
+            organisationUnitLevel = object.getOrganisationUnitLevel();
         }
     }
 
@@ -692,14 +747,52 @@ public abstract class BaseAnalyticalObject
         this.userOrganisationUnitChildren = userOrganisationUnitChildren;
     }
 
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public Integer getOrganisationUnitLevel()
+    {
+        return organisationUnitLevel;
+    }
+
+    public void setOrganisationUnitLevel( Integer organisationUnitLevel )
+    {
+        this.organisationUnitLevel = organisationUnitLevel;
+    }
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public boolean isRewindRelativePeriods()
+    {
+        return rewindRelativePeriods;
+    }
+
+    public void setRewindRelativePeriods( boolean rewindRelativePeriods )
+    {
+        this.rewindRelativePeriods = rewindRelativePeriods;
+    }
+
     // -------------------------------------------------------------------------
     // Transient properties
     // -------------------------------------------------------------------------
 
     @JsonIgnore
+    public List<OrganisationUnit> getTransientOrganisationUnits()
+    {
+        return transientOrganisationUnits;
+    }
+
+    @JsonIgnore
     public Date getRelativePeriodDate()
     {
         return relativePeriodDate;
+    }
+
+    @JsonIgnore
+    public OrganisationUnit getRelativeOrganisationUnit()
+    {
+        return relativeOrganisationUnit;
     }
 
     // -------------------------------------------------------------------------

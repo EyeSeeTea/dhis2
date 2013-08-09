@@ -1,5 +1,9 @@
 package org.hisp.dhis.dashboard;
 
+import java.util.List;
+
+import org.hisp.dhis.user.User;
+
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -27,15 +31,6 @@ package org.hisp.dhis.dashboard;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.List;
-
-import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.document.Document;
-import org.hisp.dhis.mapping.Map;
-import org.hisp.dhis.report.Report;
-import org.hisp.dhis.reporttable.ReportTable;
-import org.hisp.dhis.user.User;
 
 /**
  * @author Lars Helge Overland
@@ -44,25 +39,23 @@ public interface DashboardService
 {
     final String ID = DashboardService.class.getName();
 
-    List<IdentifiableObject> search( String query );
+    DashboardSearchResult search( String query );
     
-    void saveDashboardContent( DashboardContent dashboardContent );
-
-    void updateDashboardContent( DashboardContent dashboardContent );
+    void addItemContent( String dashboardUid, String type, String contentUid );
     
-    DashboardContent getDashboardContent( int id );
-
-    DashboardContent getDashboardContent( User user );
-
-    Collection<DashboardContent> getAllDashboardContent();
+    void mergeDashboard( Dashboard dashboard );
     
-    void deleteDashboardContent( DashboardContent content );
-
-    Collection<DashboardContent> getByDocument( Document document );
+    void mergeDashboardItem( DashboardItem item );
     
-    Collection<DashboardContent> getByMap( Map map );
+    int saveDashboard( Dashboard dashboard );
     
-    Collection<DashboardContent> getByReport( Report report );
+    void updateDashboard( Dashboard dashboard );
     
-    Collection<DashboardContent> getByReportTable( ReportTable reportTable );
+    void deleteDashboard( Dashboard dashboard );
+    
+    Dashboard getDashboard( int id );
+    
+    Dashboard getDashboard( String uid );
+    
+    List<Dashboard> getByUser( User user );
 }

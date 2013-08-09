@@ -27,7 +27,7 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.common.DimensionalObjectUtils.toDimension;
+import static org.hisp.dhis.common.DimensionalObjectUtils.getUniqueDimensions;
 import static org.hisp.dhis.system.util.CodecUtils.filenameEncode;
 
 import java.io.InputStream;
@@ -40,7 +40,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.api.utils.ContextUtils.CacheStrategy;
 import org.hisp.dhis.common.DimensionService;
-import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSetService;
@@ -48,6 +47,7 @@ import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.mapping.MappingService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -106,6 +106,9 @@ public class ReportTableController
     
     @Autowired
     private DimensionService dimensionService;
+    
+    @Autowired
+    private MappingService mappingService;
 
     @Autowired
     private I18nManager i18nManager;
@@ -302,28 +305,13 @@ public class ReportTableController
         reportTable.getRowDimensions().clear();
         reportTable.getFilterDimensions().clear();
         
-        if ( reportTable.getColumns() != null )
-        {
-            for ( DimensionalObject column : reportTable.getColumns() )
-            {
-                reportTable.getColumnDimensions().add( toDimension( column.getDimension() ) );
-            }
-        }
+        reportTable.getColumnDimensions().addAll( getUniqueDimensions( reportTable.getColumns() ) );
+        reportTable.getRowDimensions().addAll( getUniqueDimensions( reportTable.getRows() ) );
+        reportTable.getFilterDimensions().addAll( getUniqueDimensions( reportTable.getFilters() ) );
         
-        if ( reportTable.getRows() != null )
+        if ( reportTable.getLegendSet() != null )
         {
-            for ( DimensionalObject row : reportTable.getRows() )
-            {
-                reportTable.getRowDimensions().add( toDimension( row.getDimension() ) );
-            }
-        }
-        
-        if ( reportTable.getFilters() != null )
-        {
-            for ( DimensionalObject filter : reportTable.getFilters() )
-            {
-                reportTable.getFilterDimensions().add( toDimension( filter.getDimension() ) );
-            }
+            reportTable.setLegendSet( mappingService.getMapLegendSet( reportTable.getLegendSet().getUid() ) );
         }
     }
 }

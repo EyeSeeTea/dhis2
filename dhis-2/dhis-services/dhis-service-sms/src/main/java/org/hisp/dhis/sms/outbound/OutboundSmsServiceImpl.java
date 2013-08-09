@@ -100,7 +100,7 @@ public class OutboundSmsServiceImpl
         {
             throw new SmsServiceNotEnabledException();
         }
-        
+
         if ( transportService != null )
         {
             return sendMessageInternal( sms, gatewayId );
@@ -110,9 +110,46 @@ public class OutboundSmsServiceImpl
     }
 
     @Override
+    @Transactional
+    public String sendMessage( OutboundSms sms )
+        throws SmsServiceException
+    {
+        if ( !enabled )
+        {
+            throw new SmsServiceNotEnabledException();
+        }
+
+        if ( transportService != null )
+        {
+            return sendMessageInternal( sms, transportService.getDefaultGateway() );
+        }
+
+        return "outboundsms_saved";
+    }
+
+    @Override
+    @Transactional
+    public String sendMessage( String message, String phoneNumber )
+        throws SmsServiceException
+    {
+        if ( !enabled )
+        {
+            throw new SmsServiceNotEnabledException();
+        }
+
+        if ( transportService != null )
+        {
+            String defaultGatewayId = transportService.getDefaultGateway();
+            return sendMessageInternal( new OutboundSms( message, phoneNumber ), defaultGatewayId );
+        }
+
+        return "outboundsms_saved";
+    }
+
+    @Override
     public List<OutboundSms> getAllOutboundSms()
     {
-        return outboundSmsStore.getAll();
+        return outboundSmsStore.getAllOutboundSms();
     }
 
     @Override
@@ -122,22 +159,30 @@ public class OutboundSmsServiceImpl
     }
 
     @Override
-    public void updateOutboundSms( OutboundSms sms)
+    public void updateOutboundSms( OutboundSms sms )
     {
-        outboundSmsStore.update( sms );
-    }
-    
-    @Override
-    public int saveOutboundSms(OutboundSms sms) {
-        return outboundSmsStore.save( sms );
+        outboundSmsStore.updateOutboundSms( sms );
     }
 
     @Override
-    public void deleteById( Integer outboundSmsId )
+    public int saveOutboundSms( OutboundSms sms )
     {
-        OutboundSms sms = outboundSmsStore.get( outboundSmsId );
-        outboundSmsStore.delete( sms );
+        return outboundSmsStore.saveOutboundSms( sms );
     }
+
+    @Override
+    public void deleteById( Integer id )
+    {
+        OutboundSms sms = outboundSmsStore.getOutboundSmsbyId( id );
+        outboundSmsStore.deleteOutboundSms( sms );
+    }
+
+    @Override
+    public OutboundSms getOutboundSms( int id )
+    {
+        return outboundSmsStore.getOutboundSmsbyId( id );
+    }
+
     // -------------------------------------------------------------------------
     // Support methods
     // -------------------------------------------------------------------------
@@ -147,7 +192,7 @@ public class OutboundSmsServiceImpl
         try
         {
             String message = transportService.sendMessage( sms, id );
-            
+
             return message;
         }
         catch ( SmsServiceException e )
@@ -158,6 +203,5 @@ public class OutboundSmsServiceImpl
             return "Exception sending message " + sms + e.getMessage();
         }
     }
-
 
 }
