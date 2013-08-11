@@ -235,15 +235,27 @@ public class DefaultExportService
     @Override
     public void deleteFilter( JSONObject json ) throws IOException
     {
+        Filter filter = filterService.getFilterByUid( json.getString( "uid" ) );
+        filterService.deleteFilter( filter );
+    }
+
+    @Override
+    public String getDependencies( String uid ) throws IOException
+    {
         MetaDataDependencies metaDataDependencies = new MetaDataDependencies();
 
         List<String> uids = new ArrayList<String>();
-        uids.add( "lVsbKXoF0zX" );
+        uids.add( uid );
         List<DataElement> dataElements = manager.getByUid( DataElement.class, uids );
 
+        List<String> dependencyUids = metaDataDependencies.getDependenciesUids( dataElements.get( 0 ) );
 
-        List<String> result = metaDataDependencies.getDependenciesUids( dataElements.get( 0 ) );
-//        Filter filter = filterService.getFilterByUid( json.getString( "uid" ) );
-//        filterService.deleteFilter( filter );
+        String result = "";
+        for (String value : dependencyUids)
+        {
+            result += value + ", ";
+        }
+
+        return result;
     }
 }

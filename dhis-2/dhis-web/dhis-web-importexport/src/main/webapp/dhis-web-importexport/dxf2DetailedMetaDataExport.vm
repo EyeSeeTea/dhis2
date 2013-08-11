@@ -176,6 +176,15 @@
         <p id="unappliedUids" style="color: red;"></p>
     </div>
 
+    <div>
+        <p>Development: Compute dependencies for a DataElement</p>
+        <form id="formDependencies" style="float: left;">
+            <label for="uid">Uid:</label>
+            <input type="text" id="uid"/>
+        </form>
+        <button onclick="getDependencies();">Compute</button>
+    </div>
+
     <!-- FILTER -->
     <div style="margin-bottom: 10px;">
         <!-- FILTER TABLE -->

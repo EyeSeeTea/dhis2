@@ -16,6 +16,7 @@ function loadFilters()
             {
                 console.log( "Loaded filters: " + JSON.stringify( response ) );
                 insertFilterDesign( response );
+                setTableStyles();
             },
             error: function ( request, status, error )
             {
@@ -36,9 +37,9 @@ function insertFilterDesign( filters )
         var filterCode = filters[i].code;
         var filterMetaDataUids = filters[i].metaDataUids;
         var design =
-                 '<tr id="tr' + filterName + '" class="listRow">'
+                 '<tr id="tr' + filterName + '">'
                 +     '<td>' + filters[i].name + '</td>'
-                +     '<td style="text-align:right; float: left;">'
+                +     '<td>'
                 +         '<button id="buttonApply' + filterName + '" value="' + filterId + '" type="button" style="background-color: inherit; border: 0px;">'
                 +             '<img src="../images/success_small.png" title="' + i18n_apply + '" alt="' + i18n_apply + '" />'
                 +         '</button>'
@@ -59,12 +60,7 @@ function insertFilterDesign( filters )
         ;
 
         filterButtonEvents( filters[i] );
-
         $( "#filterTableBody" ).append( design );
-        if ( i % 2 == 0 )
-        {
-            $( "#tr" + filterName ).css( "background-color", "#EEF7FA" );
-        }
     }
 }
 

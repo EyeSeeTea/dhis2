@@ -333,3 +333,25 @@ function removeMetaDataDesign( metaDataCategoryName )
     $( "#divSelectAll" + metaDataCategoryName ).hide();
     $( "#mainDiv" + metaDataCategoryName ).hide();
 }
+
+// FOR DEVELOPMENT - TO BE DELETED
+function getDependencies()
+{
+    var data = $( "#uid" ).attr( "value" );
+    $.ajax(
+        {
+            type: "GET",
+            url: "../api/detailedMetaData/getDependencies",
+            data: {
+                uid : data
+            },
+            success: function ( response )
+            {
+                alert( response );
+            },
+            error: function ()
+            {
+                alert( "Ajax failed" );
+            }
+        } );
+}

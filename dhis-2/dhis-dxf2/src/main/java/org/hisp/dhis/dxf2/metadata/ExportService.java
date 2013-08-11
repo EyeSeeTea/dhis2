@@ -54,4 +54,6 @@ public interface ExportService
     void updateFilter( JSONObject json ) throws IOException;
 
     void deleteFilter( JSONObject json ) throws IOException;
+
+    String getDependencies( String uid ) throws IOException;
 }
