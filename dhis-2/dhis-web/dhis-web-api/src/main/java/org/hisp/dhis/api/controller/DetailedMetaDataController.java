@@ -50,6 +50,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -111,20 +112,15 @@ public class DetailedMetaDataController
 
     @RequestMapping( value = DetailedMetaDataController.RESOURCE_PATH, headers = "Accept=application/json" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
-    public void detailedExport( @RequestBody JSONObject json, Model model ) throws IOException
+    public String detailedExport( @RequestParam Map<String, String> parameters, Model model ) throws IOException
     {
-    }
+        WebOptions options = new WebOptions( parameters );
+        MetaData metaData = exportService.getMetaData( options );
 
-    @RequestMapping( value = {DetailedMetaDataController.RESOURCE_PATH + ".zip"}, headers = "Accept=application/json", produces = "*/*" )
-    @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
-    public void exportZipped( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
-    {
-    }
+        model.addAttribute( "model", metaData );
+        model.addAttribute( "viewClass", "export" );
 
-    @RequestMapping( value = {DetailedMetaDataController.RESOURCE_PATH + ".gz"}, headers = "Accept=application/json", produces = "*/*" )
-    @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
-    public void exportGZipped( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
-    {
+        return "export";
     }
 
     @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/setXml", headers = "Accept=application/json", produces = "*/*" )
@@ -143,7 +139,7 @@ public class DetailedMetaDataController
         detailedMetaDataString = processMetaData( json );
     }
 
-    @RequestMapping( method = RequestMethod.POST, value = {DetailedMetaDataController.RESOURCE_PATH + "/setXmlZip"}, headers = "Accept=application/json", produces = "*/*" )
+    @RequestMapping( method = RequestMethod.POST, value = { DetailedMetaDataController.RESOURCE_PATH + "/setXmlZip" }, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportZippedXML( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
@@ -151,7 +147,7 @@ public class DetailedMetaDataController
         detailedMetaDataString = processMetaData( json );
     }
 
-    @RequestMapping( method = RequestMethod.POST, value = {DetailedMetaDataController.RESOURCE_PATH + "/setJsonZip"}, headers = "Accept=application/json", produces = "*/*" )
+    @RequestMapping( method = RequestMethod.POST, value = { DetailedMetaDataController.RESOURCE_PATH + "/setJsonZip" }, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportZippedJSON( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
@@ -159,7 +155,7 @@ public class DetailedMetaDataController
         detailedMetaDataString = processMetaData( json );
     }
 
-    @RequestMapping( method = RequestMethod.POST, value = {DetailedMetaDataController.RESOURCE_PATH + "/setXmlGz"}, headers = "Accept=application/json", produces = "*/*" )
+    @RequestMapping( method = RequestMethod.POST, value = { DetailedMetaDataController.RESOURCE_PATH + "/setXmlGz" }, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportGZippedXML( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
@@ -167,7 +163,7 @@ public class DetailedMetaDataController
         detailedMetaDataString = processMetaData( json );
     }
 
-    @RequestMapping( method = RequestMethod.POST, value = {DetailedMetaDataController.RESOURCE_PATH + "/setJsonGz"}, headers = "Accept=application/json", produces = "*/*" )
+    @RequestMapping( method = RequestMethod.POST, value = { DetailedMetaDataController.RESOURCE_PATH + "/setJsonGz" }, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportGZippedJSON( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
@@ -201,12 +197,14 @@ public class DetailedMetaDataController
     //--------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/saveFilter" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void saveFilter( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
         exportService.saveFilter( json );
     }
 
     @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/updateFilter" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void updateFilter( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
         exportService.updateFilter( json );

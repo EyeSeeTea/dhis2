@@ -36,29 +36,30 @@ function insertFilterDesign( filters )
         var filterCode = filters[i].code;
         var filterMetaDataUids = filters[i].metaDataUids;
         var design =
-                  '<tr id="tr' + filterName + '" class="listRow">'
-                +      '<td>' + filters[i].name + '</td>'
-                +      '<td style="text-align:right; float: left;">'
-                +          '<button id="buttonApply' + filterName + '" value="' + filterId + '" type="button" style="background-color: inherit; border: 0px;">'
-                +              '<img src="../images/success_small.png" title="' + i18n_apply + '" alt="' + i18n_apply + '" />'
-                +          '</button>'
-                +          '<form id="form' + filterName + '" method="POST" action="updateFilterExportForm.action" style="float: left;">'
-                +              '<input type="hidden" name="name" value="' + filters[i].name + '" />'
-                +              '<input type="hidden" name="uid" value="' + filterId + '" />'
-                +              '<input type="hidden" name="code" value="' + filterCode + '" />'
-                +              '<input type="hidden" id="metaDataUids' + filterName + '" name="metaDataUids" value="' + filterMetaDataUids + '" />'
-                +          '</form>'
-                +          '<button id="buttonEdit' + filterName + '" type="button" style="background-color: inherit; border: 0px;">'
-                +              '<img src="../images/edit.png" title="' + i18n_edit + '" alt="' + i18n_edit + '" />'
-                +          '</button>'
-                +          '<button id="buttonRemove' + filterName + '" value="' + filterId + '" type="button" style="background-color: inherit; border: 0px;">'
-                +              '<img src="../images/delete.png" title="' + i18n_remove + '" alt="' + i18n_remove + '" />'
-                +          '</button>'
-                +      '</td>'
-                +  '</tr>'
+                 '<tr id="tr' + filterName + '" class="listRow">'
+                +     '<td>' + filters[i].name + '</td>'
+                +     '<td style="text-align:right; float: left;">'
+                +         '<button id="buttonApply' + filterName + '" value="' + filterId + '" type="button" style="background-color: inherit; border: 0px;">'
+                +             '<img src="../images/success_small.png" title="' + i18n_apply + '" alt="' + i18n_apply + '" />'
+                +         '</button>'
+                +         '<form id="form' + filterName + '" method="POST" action="updateFilterExportForm.action" style="float: left;">'
+                +             '<input type="hidden" name="name" value="' + filters[i].name + '" />'
+                +             '<input type="hidden" name="uid" value="' + filterId + '" />'
+                +             '<input type="hidden" name="code" value="' + filterCode + '" />'
+                +             '<input type="hidden" id="metaDataUids' + filterName + '" name="metaDataUids" value="' + filterMetaDataUids + '" />'
+                +         '</form>'
+                +         '<button id="buttonEdit' + filterName + '" type="button" style="background-color: inherit; border: 0px;">'
+                +             '<img src="../images/edit.png" title="' + i18n_edit + '" alt="' + i18n_edit + '" />'
+                +         '</button>'
+                +         '<button id="buttonRemove' + filterName + '" value="' + filterId + '" type="button" style="background-color: inherit; border: 0px;">'
+                +             '<img src="../images/delete.png" title="' + i18n_remove + '" alt="' + i18n_remove + '" />'
+                +         '</button>'
+                +     '</td>'
+                + '</tr>'
         ;
 
         filterButtonEvents( filters[i] );
+
         $( "#filterTableBody" ).append( design );
         if ( i % 2 == 0 )
         {
@@ -137,6 +138,7 @@ function uidsToString( uids )
     {
         uidsString += uids[i] + ", ";
     }
+
     return removeLastComma( uidsString );
 }
 
@@ -167,6 +169,7 @@ function getSelectedUids()
             selectedUidsArray.push( $( this ).attr( "value" ) );
         } );
     }
+
     return selectedUidsArray;
 }
 
@@ -191,6 +194,7 @@ function getAllUids( existingUidsArray, selectedUidsArray )
         finalUids += finalUidsArray[k] + ", ";
     }
     finalUids = removeLastComma( finalUids );
+
     return finalUids;
 }
 
@@ -201,7 +205,6 @@ function removeFilterButton( filter )
     $( "#buttonRemove" + filterName ).live( "click", function ()
     {
         var json = replaceIdWithUid( filter );
-        console.log( "Deleted json: " + JSON.stringify( json ) );
         $.ajax(
             {
                 type: "POST",

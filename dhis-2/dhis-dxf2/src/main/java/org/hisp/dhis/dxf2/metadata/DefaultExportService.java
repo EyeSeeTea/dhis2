@@ -38,6 +38,7 @@ import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.filter.Filter;
 import org.hisp.dhis.filter.FilterService;
+import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.notification.NotificationLevel;
 import org.hisp.dhis.system.notification.Notifier;
@@ -156,12 +157,10 @@ public class DefaultExportService
         metaData.setCreated( new Date() );
 
         log.info( "User '" + currentUserService.getCurrentUsername() + "' started export at " + new Date() );
-        Date lastUpdated = filterOptions.getLastUpdated();
 
-        // TODO: IMPLEMENT DATE
         if ( taskId != null )
         {
-            notifier.notify( taskId, "Exporting metaData" );
+            notifier.notify( taskId, "Exporting meta-data" );
         }
 
         for ( Map.Entry<String, List<String>> filterRestrictionEntry : filterOptions.getFilterRestrictions().entrySet() )
@@ -182,6 +181,11 @@ public class DefaultExportService
 
                     String message = "Exporting " + idObjects.size() + " " + StringUtils.capitalize( entry.getValue() );
                     log.info( message );
+
+                    if ( taskId != null )
+                    {
+                        notifier.notify( taskId, message );
+                    }
 
                     ReflectionUtils.invokeSetterMethod( entry.getValue(), metaData, new ArrayList<IdentifiableObject>( idObjects ) );
 

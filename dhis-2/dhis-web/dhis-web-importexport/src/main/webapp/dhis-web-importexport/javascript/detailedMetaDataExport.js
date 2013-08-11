@@ -62,11 +62,12 @@ function loadMetaDataCategories()
 function exportDetailedMetaData()
 {
     var json = JSON.stringify( createFilterJSON() );
+    var url = getURL();
     console.log( "Exported JSON:" + json );
     $.ajax(
         {
             type: "POST",
-            url: getURL(),
+            url: url,
             data: json,
             contentType: "application/json",
             dataType: "xml",

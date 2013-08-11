@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
 @Controller
-@RequestMapping( value = FilterController.RESOURCE_PATH )
+@RequestMapping(value = FilterController.RESOURCE_PATH)
 public class FilterController
         extends AbstractCrudController<Filter>
 {

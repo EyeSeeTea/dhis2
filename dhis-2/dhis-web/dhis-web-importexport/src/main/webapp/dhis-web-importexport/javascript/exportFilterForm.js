@@ -39,7 +39,7 @@ function saveFilter()
 // Update an existing Filter in the database
 function updateFilter()
 {
-    var  filter = new Filter();
+    var filter = new Filter();
     filter.uid = $( "#uid" ).attr( "value" );
 //    filter.created = $( "#created" ).attr( "value" );
 

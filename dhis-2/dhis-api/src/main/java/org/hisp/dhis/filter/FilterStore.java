@@ -35,7 +35,7 @@ import java.util.Collection;
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
 public interface FilterStore
-    extends GenericIdentifiableObjectStore<Filter>
+        extends GenericIdentifiableObjectStore<Filter>
 {
     /**
      * Returns a Filter by Uid.
@@ -43,6 +43,7 @@ public interface FilterStore
      * @return a Filter.
      */
     Filter getFilterByUid( String uid );
+
     /**
      * Returns all Filters.
      *
