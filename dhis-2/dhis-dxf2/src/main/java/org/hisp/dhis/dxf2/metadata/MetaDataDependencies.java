@@ -64,53 +64,95 @@ public class MetaDataDependencies
     // Logic
     //--------------------------------------------------------------------------
 
+    /*
+     * Get all dependency Uids from the dependency Objects for a MetaData Object
+     */
     public List<String> getDependenciesUids( IdentifiableObject identifiableObject )
     {
         List<String> uids = new ArrayList<String>();
 
-        List<Set<? extends IdentifiableObject>> dependencySets = getAllDependencies( identifiableObject );
+        List<Object> dependencyObjects = getAllDependencies( identifiableObject );
+        List<Collection<? extends IdentifiableObject>> dependencyCollections = getAllDependencyCollections( identifiableObject );
 
-        for ( Set<? extends IdentifiableObject> dependencySet : dependencySets )
+        for ( Object dependencyObject : dependencyObjects )
         {
-            if ( dependencySet.size() > 0 )
+            String uid = ( ( IdentifiableObject ) dependencyObject ).getUid();
+            uids.add( uid );
+        }
+
+        for ( Collection<? extends IdentifiableObject> collection : dependencyCollections )
+        {
+            for ( IdentifiableObject entry : collection )
             {
-                for ( IdentifiableObject object : dependencySet )
-                {
-                    uids.add( object.getUid() );
-                }
+                String uid = entry.getUid();
+                uids.add( uid );
             }
         }
 
         return uids;
     }
 
-    private List<Set<? extends IdentifiableObject>> getAllDependencies( IdentifiableObject identifiableObject )
+    /*
+     * Get all dependency Objects for a MetaData Object
+     */
+    private List<Object> getAllDependencies( IdentifiableObject identifiableObject )
     {
-        List<Set<? extends IdentifiableObject>> dependencySets = new ArrayList<Set<? extends IdentifiableObject>>();
+        List<Object> dependencyObjects = new ArrayList<Object>();
+
         List<Field> fields = ReflectionUtils.getAllFields( identifiableObject.getClass() );
         List<Field> dependencyFields = getDependencyFields( fields );
 
         for ( Field field : dependencyFields )
         {
-            Set<? extends IdentifiableObject> dependencySet = ReflectionUtils.invokeGetterMethod( field.getName(), identifiableObject );
-            dependencySets.add( dependencySet );
+            Object dependencyObject = ReflectionUtils.invokeGetterMethod( field.getName(), identifiableObject );
+            if ( dependencyObject != null )
+            {
+                dependencyObjects.add( dependencyObject );
+            }
         }
 
-        return dependencySets;
+        return dependencyObjects;
     }
 
+    /*
+     * Get all dependency Collections for a MetaData Object
+     */
+    private List<Collection<? extends IdentifiableObject>> getAllDependencyCollections( IdentifiableObject identifiableObject )
+    {
+        List<Collection<? extends IdentifiableObject>> dependencyCollections = new ArrayList<Collection<? extends IdentifiableObject>>();
+
+        List<Field> fields = ReflectionUtils.getAllFields( identifiableObject.getClass() );
+        List<Field> dependencyFieldsCollections = getDependencyFieldsCollections( fields );
+
+        for ( Field field : dependencyFieldsCollections )
+        {
+            Collection<? extends IdentifiableObject> dependencyCollection = ReflectionUtils.invokeGetterMethod( field.getName(), identifiableObject );
+
+            if ( dependencyCollection != null )
+            {
+                dependencyCollections.add( dependencyCollection );
+            }
+        }
+
+        return dependencyCollections;
+    }
+
+    /*
+     * Get all Fields that contain a dependency to other MetaData types
+     */
     private List<Field> getDependencyFields( List<Field> fields )
     {
         List<Field> dependencyFields = new ArrayList<Field>();
 
         for ( Field field : fields )
         {
-            if ( ReflectionUtils.isType( field, Set.class ) )
+            if ( ReflectionUtils.isType( field, IdentifiableObject.class ) )
             {
                 for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
                 {
-                    if ( isGenericTypeOf( field, entry.getKey() ) )
+                    if ( ReflectionUtils.isType( field, entry.getKey() ) )
                     {
+                        log.info( "\nDEPENDENCY OBJECT FIELD: " + field );
                         dependencyFields.add( field );
                     }
                 }
@@ -120,6 +162,34 @@ public class MetaDataDependencies
         return dependencyFields;
     }
 
+    /*
+     * Get all Fields that contain a dependency collection to other MetaData types
+     */
+    private List<Field> getDependencyFieldsCollections( List<Field> fields )
+    {
+        List<Field> dependencyFieldsCollections = new ArrayList<Field>();
+
+        for ( Field field : fields )
+        {
+            if ( ReflectionUtils.isType( field, Collection.class ) )
+            {
+                for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
+                {
+                    if ( isGenericTypeOf( field, entry.getKey() ) )
+                    {
+                        log.info( "\nDEPENDENCY COLLECTION FIELD: " + field );
+                        dependencyFieldsCollections.add( field );
+                    }
+                }
+            }
+        }
+
+        return dependencyFieldsCollections;
+    }
+
+    /*
+     * Check the Generic type of a Field
+     */
     private boolean isGenericTypeOf( Field field, Class<?> clazz )
     {
         Type type = field.getGenericType();

@@ -36,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.filter.Filter;
 import org.hisp.dhis.filter.FilterService;
 import org.hisp.dhis.indicator.Indicator;
@@ -237,11 +238,11 @@ public class DefaultExportService
         MetaDataDependencies metaDataDependencies = new MetaDataDependencies();
 
         List<String> uids = new ArrayList<String>();
-        uids.add( "AUqdhY4mpvp" );
-        List<Indicator> indicators = manager.getByUid( Indicator.class, uids );
+        uids.add( "lVsbKXoF0zX" );
+        List<DataElement> dataElements = manager.getByUid( DataElement.class, uids );
 
 
-        List<String> result = metaDataDependencies.getDependenciesUids( indicators.get( 0 ) );
+        List<String> result = metaDataDependencies.getDependenciesUids( dataElements.get( 0 ) );
 //        Filter filter = filterService.getFilterByUid( json.getString( "uid" ) );
 //        filterService.deleteFilter( filter );
     }
