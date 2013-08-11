@@ -176,21 +176,26 @@
         <p id="unappliedUids" style="color: red;"></p>
     </div>
 
+    <!-- FILTER -->
     <div style="margin-bottom: 10px;">
-        <!-- FILTER COMMANDS -->
-        <form id="formCreateFilter" method="POST" action="saveFilterExportForm.action" style="float: right;">
-            <input type="hidden" name="name" value=""/>
-            <input type="hidden" name="id" value=""/>
-            <input type="hidden" name="code" value=""/>
-            <input type="hidden" name="metaDataUids" value=""/>
-            <input type="button" value="$i18n.getString( "new_filter" )" onclick="submitCreateFilterForm();"
-                   style="float: right; width: 125px;"/>
-        </form>
         <!-- FILTER TABLE -->
         <table id="filterTable" class="listTable">
             <col/>
             <col width="260"/>
             <thead>
+            <tr>
+                <td>#filterDiv( "filter" )</td>
+                <td>
+                    <form id="formCreateFilter" method="POST" action="saveFilterExportForm.action" style="float: right;">
+                        <input type="hidden" name="name" value=""/>
+                        <input type="hidden" name="id" value=""/>
+                        <input type="hidden" name="code" value=""/>
+                        <input type="hidden" name="metaDataUids" value=""/>
+                        <input type="button" value="$i18n.getString( 'sort' )" onclick="" style="width: 80px;"/>
+                        <input type="button" value="$i18n.getString( "new_filter" )" onclick="submitCreateFilterForm();" style="width: 80px;"/>
+                    </form>
+                </td>
+            </tr>
             <tr>
                 <th>$i18n.getString( "name" )</th>
                 <th>$i18n.getString( "operations" )</th>
@@ -332,22 +337,14 @@
     <table>
         <tr>
             <td colspan="2">
-                <input type="button" value="$i18n.getString( 'select_all_tables' )"
-                       style="width:125px; font-size: 10pt;"
-                       onclick="selectAllCheckboxes();"/>
-                <input type="button" value="$i18n.getString( 'deselect_all_tables' )"
-                       style="width:125px; font-size: 10pt;"
-                       onclick="deselectAllCheckboxes();"/>
+                <input type="button" value="$i18n.getString( 'select_all_tables' )" style="width:125px; font-size: 10pt;" onclick="selectAllCheckboxes();"/>
+                <input type="button" value="$i18n.getString( 'deselect_all_tables' )" style="width:125px; font-size: 10pt;" onclick="deselectAllCheckboxes();"/>
             </td>
         </tr>
         <tr>
             <td colspan="2">
-                <input type="button" value="$i18n.getString( 'select_all_values' )"
-                       style="width:125px; font-size: 10pt;"
-                       onclick="selectAllValues();"/>
-                <input type="button" value="$i18n.getString( 'deselect_all_values' )"
-                       style="width:125px; font-size: 10pt;"
-                       onclick="deselectAllValues();"/>
+                <input type="button" value="$i18n.getString( 'select_all_values' )" style="width:125px; font-size: 10pt;" onclick="selectAllValues();"/>
+                <input type="button" value="$i18n.getString( 'deselect_all_values' )" style="width:125px; font-size: 10pt;" onclick="deselectAllValues();"/>
             </td>
         </tr>
         <tr>
@@ -370,8 +367,7 @@
         <tr>
             <td colspan="2">
                 <input type="hidden" id="json" value=""/>
-                <input type="button" value="$i18n.getString( 'export' )" style="width:254px; font-size: 10pt;"
-                       onclick="exportDetailedMetaData();"/>
+                <input type="button" value="$i18n.getString( 'export' )" style="width:254px; font-size: 10pt;" onclick="exportDetailedMetaData();"/>
             </td>
         </tr>
     </table>

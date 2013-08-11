@@ -234,7 +234,15 @@ public class DefaultExportService
     @Override
     public void deleteFilter( JSONObject json ) throws IOException
     {
-        Filter filter = filterService.getFilterByUid( json.getString( "uid" ) );
-        filterService.deleteFilter( filter );
+        MetaDataDependencies metaDataDependencies = new MetaDataDependencies();
+
+        List<String> uids = new ArrayList<String>();
+        uids.add( "AUqdhY4mpvp" );
+        List<Indicator> indicators = manager.getByUid( Indicator.class, uids );
+
+
+        List<String> result = metaDataDependencies.getDependenciesUids( indicators.get( 0 ) );
+//        Filter filter = filterService.getFilterByUid( json.getString( "uid" ) );
+//        filterService.deleteFilter( filter );
     }
 }

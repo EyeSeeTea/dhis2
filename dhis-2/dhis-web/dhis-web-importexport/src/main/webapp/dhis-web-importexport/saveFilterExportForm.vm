@@ -5,7 +5,7 @@
 <h3>$i18n.getString( "save_filter" )</h3>
 
 <form id="formFilter" name="formFilter">
-    <table id="detailsList" style="width: 540px;">
+    <table id="detailsList" style="width: 600px;">
         <col/> ## Labels
         <col/> ## Input
         <thead>
@@ -15,33 +15,29 @@
         </thead>
         <tbody>
         <tr>
-            <td>
-                <label>$i18n.getString( "name" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label>
-            </td>
+            <td><label>$i18n.getString( "name" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
             <td>
                 <input type="text" id="name" name="name" value="$filter.name" style="width: 90%;">
             </td>
         </tr>
         <tr>
-            <td>
-                <label>$i18n.getString( "code" )</label>
-            </td>
+            <td><label>$i18n.getString( "code" )</label></td>
             <td>
                 <input type="text" id="code" name="code" value="$filter.code" style="width: 90%;">
             </td>
         </tr>
         <tr>
             <td><label>$i18n.getString( "filter_metaData_uids" )</label></td>
-            <td><textarea id="metaDataUids" name="metaDataUids" rows="10" cols="63">$filter.metaDataUids</textarea></td>
-        </tr>
-        <tr>
-            <td colspan="3">
-                <input type="button" value="$i18n.getString( 'save' )" onclick="saveFilter();" style="width:120px" />
+            <td>
+                <textarea id="metaDataUids" name="metaDataUids" rows="10" cols="63" style="width: 90%;">$filter.metaDataUids</textarea>
             </td>
         </tr>
         <tr>
-            <td colspan="3">
-                <input type="button" value="$i18n.getString( 'go_back' )" onclick="window.history.back();" style="width:120px" />
+            <td>
+                <input type="button" value="$i18n.getString( 'save' )" onclick="saveFilter();" style="width:120px" />
+            </td>
+            <td>
+                <input type="button" value="$i18n.getString( 'go_back' )" onclick="window.history.back();" style="float: left; width:120px" />
             </td>
         </tr>
         </tbody>
