@@ -71,12 +71,12 @@ public class MetaDataDependencies
     {
         List<String> uids = new ArrayList<String>();
 
-        List<Object> dependencyObjects = getAllDependencies( identifiableObject );
+        List<IdentifiableObject> dependencyObjects = getAllDependencies( identifiableObject );
         List<Collection<? extends IdentifiableObject>> dependencyCollections = getAllDependencyCollections( identifiableObject );
 
-        for ( Object dependencyObject : dependencyObjects )
+        for ( IdentifiableObject dependencyObject : dependencyObjects )
         {
-            String uid = ( ( IdentifiableObject ) dependencyObject ).getUid();
+            String uid = dependencyObject.getUid();
             uids.add( uid );
         }
 
@@ -95,16 +95,16 @@ public class MetaDataDependencies
     /*
      * Get all dependency Objects for a MetaData Object
      */
-    private List<Object> getAllDependencies( IdentifiableObject identifiableObject )
+    private List<IdentifiableObject> getAllDependencies( IdentifiableObject identifiableObject )
     {
-        List<Object> dependencyObjects = new ArrayList<Object>();
+        List<IdentifiableObject> dependencyObjects = new ArrayList<IdentifiableObject>();
 
         List<Field> fields = ReflectionUtils.getAllFields( identifiableObject.getClass() );
         List<Field> dependencyFields = getDependencyFields( fields );
 
         for ( Field field : dependencyFields )
         {
-            Object dependencyObject = ReflectionUtils.invokeGetterMethod( field.getName(), identifiableObject );
+            IdentifiableObject dependencyObject = ReflectionUtils.invokeGetterMethod( field.getName(), identifiableObject );
             if ( dependencyObject != null )
             {
                 dependencyObjects.add( dependencyObject );
