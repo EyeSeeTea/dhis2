@@ -383,24 +383,24 @@ Ext.onReady( function() {
 
 			util.mask = {
 				showMask: function(cmp, msg) {
-					cmp = cmp || pt.viewport.centerRegion;
-					msg = msg || 'Loading..';
+					//cmp = cmp || pt.viewport.centerRegion;
+					//msg = msg || 'Loading..';
 
-					if (pt.viewport.mask) {
-						pt.viewport.mask.destroy();
-					}
-					pt.viewport.mask = new Ext.create('Ext.LoadMask', cmp, {
-						shadow: false,
-						msg: msg,
-						style: 'box-shadow:0',
-						bodyStyle: 'box-shadow:0'
-					});
-					pt.viewport.mask.show();
+					//if (pt.viewport.mask) {
+						//pt.viewport.mask.destroy();
+					//}
+					//pt.viewport.mask = new Ext.create('Ext.LoadMask', cmp, {
+						//shadow: false,
+						//msg: msg,
+						//style: 'box-shadow:0',
+						//bodyStyle: 'box-shadow:0'
+					//});
+					//pt.viewport.mask.show();
 				},
 				hideMask: function() {
-					if (pt.viewport.mask) {
-						pt.viewport.mask.hide();
-					}
+					//if (pt.viewport.mask) {
+						//pt.viewport.mask.hide();
+					//}
 				}
 			};
 
@@ -408,7 +408,7 @@ Ext.onReady( function() {
 				setRelativePeriods: function(rp) {
 					if (rp) {
 						for (var r in rp) {
-							var cmp = pt.util.getCmp('checkbox[relativePeriodId="' + r + '"]');
+							var cmp = util.getCmp('checkbox[relativePeriodId="' + r + '"]');
 							if (cmp) {
 								cmp.setValue(rp[r]);
 							}
@@ -495,7 +495,7 @@ Ext.onReady( function() {
 					prec = parseFloat(prec);
 
 					if (Ext.isNumber(x) && Ext.isNumber(prec)) {
-						var dec = pt.util.number.getNumberOfDecimals(x);
+						var dec = util.number.getNumberOfDecimals(x);
 						return dec > prec ? Ext.Number.toFixed(x, prec) : x;
 					}
 					return x;
@@ -549,7 +549,7 @@ Ext.onReady( function() {
 			util.message = {
 				alert: function(message) {
 					if (pt.isPlugin) {
-						console.log(pt.el + ': ' + message);
+						console.log(pt.init.el + ': ' + message);
 					}
 					else {
 						alert(message);
@@ -1138,7 +1138,7 @@ Ext.onReady( function() {
 
 					// For param string
 				xLayout.sortedAxisDimensionNames = Ext.clone(xLayout.axisDimensionNames).sort();
-				xLayout.sortedFilterDimensions = pt.util.array.sortDimensions(Ext.clone(xLayout.filterDimensions));
+				xLayout.sortedFilterDimensions = util.array.sortDimensions(Ext.clone(xLayout.filterDimensions));
 
 				// All
 				xLayout.dimensions = [].concat(xLayout.axisDimensions, xLayout.filterDimensions);
@@ -1248,7 +1248,7 @@ Ext.onReady( function() {
 					setMouseHandlers,
 					getTableHtml,
 					initialize,
-					tableUuid = pt.el + '_' + Ext.data.IdGenerator.get('uuid').generate(),
+					tableUuid = pt.init.el + '_' + Ext.data.IdGenerator.get('uuid').generate(),
 					uuidDimUuidsMap = {},
 					uuidObjectMap = {};
 
@@ -1392,7 +1392,7 @@ Ext.onReady( function() {
 								}
 							}
 							
-							return pt.util.pivot.getExtendedLayout(layout);
+							return pt.engine.getExtendedLayout(layout);
 						}
 						
 						return null;
@@ -2410,10 +2410,10 @@ Ext.onReady( function() {
 						xRowAxis;
 
 					// Extended layout
-					xLayout = util.pivot.getExtendedLayout(layout);
-
+					xLayout = engine.getExtendedLayout(layout);
+					
 					// Param string
-					pt.paramString = util.pivot.getParamString(xLayout, true);
+					pt.paramString = engine.getParamString(xLayout, true);
 					url = pt.init.contextPath + '/api/analytics.json' + pt.paramString;
 
 					// Validate request size
@@ -2487,7 +2487,7 @@ Ext.onReady( function() {
 							}
 							
 							// Hide mask
-							pt.util.mask.hideMask();
+							util.mask.hideMask();
 
 							// Gui state
 							if (pt.viewport.downloadButton) {
@@ -2501,7 +2501,7 @@ Ext.onReady( function() {
 							// Add value event handlers, set session storage
 							if (!pt.isPlugin && PT.isSessionStorage) {
 								setMouseHandlers();
-								pt.util.pivot.setSessionStorage(layout, 'table');
+								engine.setSessionStorage(layout, 'table');
 							}
 
 							// Add objects to instance
