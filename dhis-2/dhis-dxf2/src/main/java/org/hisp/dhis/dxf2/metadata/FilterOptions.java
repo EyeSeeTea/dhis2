@@ -27,11 +27,8 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-import org.hisp.dhis.filter.Filter;
-
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
@@ -39,82 +36,28 @@ import java.util.*;
 public class FilterOptions
         extends Options
 {
-    private Filter filter;
-
-    private Map<String, List<String>> filterRestrictions = new HashMap<String, List<String>>();
+    private Map<String, List<String>> restrictions;
 
     //--------------------------------------------------------------------------
     // Constructors
     //--------------------------------------------------------------------------
 
-    public FilterOptions()
+    public FilterOptions( Map<String, List<String>> restrictions )
     {
-    }
-
-    public FilterOptions( Map<String, String> options )
-    {
-        super( options );
+        this.restrictions = restrictions;
     }
 
     //--------------------------------------------------------------------------
     // Getters & Setters
     //--------------------------------------------------------------------------
 
-    public Filter getFilter()
+    public Map<String, List<String>> getRestrictions()
     {
-        return filter;
+        return restrictions;
     }
 
-    public void setFilter( Filter filter )
+    public void setRestrictions( Map<String, List<String>> restrictions )
     {
-        this.filter = filter;
-    }
-
-    public Map<String, List<String>> getFilterRestrictions()
-    {
-        return filterRestrictions;
-    }
-
-    public void setFilterRestrictions( Map<String, List<String>> filterRestrictions )
-    {
-        this.filterRestrictions = filterRestrictions;
-    }
-
-    //--------------------------------------------------------------------------
-    // Logic
-    //--------------------------------------------------------------------------
-
-    public void addFilterRestriction( String filterRestriction, List<String> values )
-    {
-        filterRestrictions.put( filterRestriction, values );
-    }
-
-    public void addFilterRestrictions( Map<String, List<String>> newFilterRestrictions )
-    {
-        filterRestrictions.putAll( newFilterRestrictions );
-    }
-
-    /**
-     * @param json - JSON request processing method for filtered MetaData
-     */
-    public Map<String, List<String>> processJSON( JSONObject json )
-    {
-        Map<String, List<String>> resultMap = new HashMap<String, List<String>>();
-        Iterator jsonIterator = json.keys();
-        while ( jsonIterator.hasNext() )
-        {
-            List<String> uids = new ArrayList<String>();
-
-            String key = ( String ) jsonIterator.next();
-            JSONArray values = json.getJSONArray( key );
-            for ( int i = 0; i < values.size(); i++ )
-            {
-                String uid = values.getString( i );
-                uids.add( uid );
-            }
-            resultMap.put( key, uids );
-        }
-
-        return resultMap;
+        this.restrictions = restrictions;
     }
 }

@@ -61,30 +61,30 @@ public class DefaultFilterService
     @Override
     public Filter getFilterByUid( String uid )
     {
-        return filterStore.getFilterByUid( uid );
+        return filterStore.getByUid( uid );
     }
 
     @Override
     public List<Filter> getAllFilters()
     {
-        return ( List<Filter> ) filterStore.getAllFilters();
+        return filterStore.getAll();
     }
 
     @Override
     public void saveFilter( Filter filter )
     {
-        filterStore.saveFilter( filter );
+        filterStore.save( filter );
     }
 
     @Override
     public void updateFilter( Filter filter )
     {
-        filterStore.updateFilter( filter );
+        filterStore.update( filter );
     }
 
     @Override
     public void deleteFilter( Filter filter )
     {
-        filterStore.deleteFilter( filter );
+        filterStore.delete( filter );
     }
 }

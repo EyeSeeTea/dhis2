@@ -37,38 +37,4 @@ import java.util.Collection;
 public interface FilterStore
         extends GenericIdentifiableObjectStore<Filter>
 {
-    /**
-     * Returns a Filter by Uid.
-     *
-     * @return a Filter.
-     */
-    Filter getFilterByUid( String uid );
-
-    /**
-     * Returns all Filters.
-     *
-     * @return a collection of all Filters.
-     */
-    Collection<Filter> getAllFilters();
-
-    /**
-     * Save a Filter.
-     *
-     * @param filter
-     */
-    void saveFilter( Filter filter );
-
-    /**
-     * Update a Filter.
-     *
-     * @param filter
-     */
-    void updateFilter( Filter filter );
-
-    /**
-     * Delete a Filter.
-     *
-     * @param filter
-     */
-    void deleteFilter( Filter filter );
 }

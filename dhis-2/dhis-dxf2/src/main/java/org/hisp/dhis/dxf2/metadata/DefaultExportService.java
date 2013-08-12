@@ -164,16 +164,16 @@ public class DefaultExportService
             notifier.notify( taskId, "Exporting meta-data" );
         }
 
-        for ( Map.Entry<String, List<String>> filterRestrictionEntry : filterOptions.getFilterRestrictions().entrySet() )
+        for ( Map.Entry<String, List<String>> restrictionEntry : filterOptions.getRestrictions().entrySet() )
         {
-            String className = filterRestrictionEntry.getKey();
+            String className = restrictionEntry.getKey();
             for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
             {
                 if ( entry.getValue().equals( className ) )
                 {
                     Class<? extends IdentifiableObject> idObjectClass = entry.getKey();
                     Collection<? extends IdentifiableObject> idObjects;
-                    idObjects = manager.getByUid( idObjectClass, filterRestrictionEntry.getValue() );
+                    idObjects = manager.getByUid( idObjectClass, restrictionEntry.getValue() );
 
                     if ( idObjects.isEmpty() )
                     {
@@ -251,7 +251,7 @@ public class DefaultExportService
         List<String> dependencyUids = metaDataDependencies.getDependenciesUids( dataElements.get( 0 ) );
 
         String result = "";
-        for (String value : dependencyUids)
+        for ( String value : dependencyUids )
         {
             result += value + ", ";
         }

@@ -27,6 +27,7 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,6 +50,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
@@ -127,48 +129,72 @@ public class DetailedMetaDataController
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportXml( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
+        Map request = new ObjectMapper().readValue( json.toString(), HashMap.class );
+        FilterOptions filterOptions = new FilterOptions( request);
+
+        MetaData metaData = exportService.getFilteredMetaData( filterOptions );
+        detailedMetaDataString = JacksonUtils.toXmlAsString( metaData );
         format = ".xml";
-        detailedMetaDataString = processMetaData( json );
     }
 
     @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/setJson", headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportJson( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
+        Map request = new ObjectMapper().readValue( json.toString(), HashMap.class );
+        FilterOptions filterOptions = new FilterOptions( request);
+
+        MetaData metaData = exportService.getFilteredMetaData( filterOptions );
+        detailedMetaDataString = JacksonUtils.toJsonAsString( metaData );
         format = ".json";
-        detailedMetaDataString = processMetaData( json );
     }
 
     @RequestMapping( method = RequestMethod.POST, value = { DetailedMetaDataController.RESOURCE_PATH + "/setXmlZip" }, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportZippedXML( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
+        Map request = new ObjectMapper().readValue( json.toString(), HashMap.class );
+        FilterOptions filterOptions = new FilterOptions( request);
+
+        MetaData metaData = exportService.getFilteredMetaData( filterOptions );
+        detailedMetaDataString = JacksonUtils.toXmlAsString( metaData );
         format = ".xml.zip";
-        detailedMetaDataString = processMetaData( json );
     }
 
     @RequestMapping( method = RequestMethod.POST, value = { DetailedMetaDataController.RESOURCE_PATH + "/setJsonZip" }, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportZippedJSON( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
+        Map request = new ObjectMapper().readValue( json.toString(), HashMap.class );
+        FilterOptions filterOptions = new FilterOptions( request);
+
+        MetaData metaData = exportService.getFilteredMetaData( filterOptions );
+        detailedMetaDataString = JacksonUtils.toJsonAsString( metaData );
         format = ".json.zip";
-        detailedMetaDataString = processMetaData( json );
     }
 
     @RequestMapping( method = RequestMethod.POST, value = { DetailedMetaDataController.RESOURCE_PATH + "/setXmlGz" }, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportGZippedXML( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
+        Map request = new ObjectMapper().readValue( json.toString(), HashMap.class );
+        FilterOptions filterOptions = new FilterOptions( request);
+
+        MetaData metaData = exportService.getFilteredMetaData( filterOptions );
+        detailedMetaDataString = JacksonUtils.toXmlAsString( metaData );
         format = ".xml.gz";
-        detailedMetaDataString = processMetaData( json );
     }
 
     @RequestMapping( method = RequestMethod.POST, value = { DetailedMetaDataController.RESOURCE_PATH + "/setJsonGz" }, headers = "Accept=application/json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportGZippedJSON( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
+        Map request = new ObjectMapper().readValue( json.toString(), HashMap.class );
+        FilterOptions filterOptions = new FilterOptions( request);
+
+        MetaData metaData = exportService.getFilteredMetaData( filterOptions );
+        detailedMetaDataString = JacksonUtils.toJsonAsString( metaData );
         format = ".json.gz";
-        detailedMetaDataString = processMetaData( json );
     }
 
     //--------------------------------------------------------------------------
@@ -226,26 +252,9 @@ public class DetailedMetaDataController
         return exportService.getDependencies( uid );
     }
 
-
     //--------------------------------------------------------------------------
     // Detailed MetaData Export - Logic
     //--------------------------------------------------------------------------
-
-    private String processMetaData( JSONObject json ) throws IOException
-    {
-        FilterOptions filterOptions = new FilterOptions();
-        filterOptions.addFilterRestrictions( filterOptions.processJSON( json ) );
-        MetaData metaData = exportService.getFilteredMetaData( filterOptions );
-        if ( format.contains( ".xml" ) )
-        {
-            return detailedMetaDataString = JacksonUtils.toXmlAsString( metaData );
-        }
-        if ( format.contains( ".json" ) )
-        {
-            return detailedMetaDataString = JacksonUtils.toJsonAsString( metaData );
-        }
-        return "";
-    }
 
     private void processFileOutput( HttpServletResponse response, String fileName ) throws IOException
     {

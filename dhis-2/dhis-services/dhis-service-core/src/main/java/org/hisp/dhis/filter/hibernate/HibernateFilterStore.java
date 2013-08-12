@@ -40,37 +40,4 @@ public class HibernateFilterStore
         extends HibernateIdentifiableObjectStore<Filter>
         implements FilterStore
 {
-    // -------------------------------------------------------------------------
-    // Filter basic functionality
-    // -------------------------------------------------------------------------
-
-    @Override
-    public Filter getFilterByUid( String uid )
-    {
-        return getByUid( uid );
-    }
-
-    @Override
-    public Collection<Filter> getAllFilters()
-    {
-        return getAll();
-    }
-
-    @Override
-    public void saveFilter( Filter filter )
-    {
-        save( filter );
-    }
-
-    @Override
-    public void updateFilter( Filter filter )
-    {
-        update( filter );
-    }
-
-    @Override
-    public void deleteFilter( Filter filter )
-    {
-        delete( filter );
-    }
 }
