@@ -43,7 +43,7 @@ Ext.onReady(function() {
 		afterRender = function() {};
 
 		createViewport = function() {
-			var el = Ext.get(dv.el),
+			var el = Ext.get(dv.init.el),
 				setFavorite,
 				centerRegion,
 				elBorderW = parseInt(el.getStyle('border-left-width')) + parseInt(el.getStyle('border-right-width')),
@@ -54,7 +54,7 @@ Ext.onReady(function() {
 				height = el.getHeight() - elBorderH - elPaddingH;
 
 			setFavorite = function(layout) {
-				dv.util.chart.createChart(layout, dv);
+				dv.engine.createChart(layout, dv);
 			};
 
 			centerRegion = Ext.create('Ext.panel.Panel', {
@@ -92,11 +92,11 @@ Ext.onReady(function() {
 			dv.isPlugin = true;
 
 			Ext.data.JsonP.request({
-				url: dv.baseUrl + '/dhis-web-visualizer/initialize.action',
+				url: dv.init.contextPath + '/dhis-web-visualizer/initialize.action',
 				success: function(r) {
 					dv.init = r;
 
-					dv.util.chart.loadChart(config.uid);
+					dv.engine.loadChart(config.uid, dv);
 				}
 			});
 		}();

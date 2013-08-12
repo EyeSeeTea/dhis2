@@ -5,733 +5,742 @@ Ext.onReady( function() {
 
     DV.app = {};
 
-	DV.app.getInits = function(init) {
-		init = DV.core.getInits(init, dv);
+    DV.app.extendInstance = function(dv) {
+        var init = dv.init,
+            conf = dv.conf,
+            util = dv.util,
+            api = dv.api,
+            engine = dv.engine,
+            store = {},
+            cmp = {},
+            dimConf = conf.finals.dimension;
 
-        // Root nodes
-		for (var i = 0; i < init.rootNodes.length; i++) {
-			init.rootNodes[i].path = '/' + dv.conf.finals.root.id + '/' + init.rootNodes[i].id;
-		}
+        dv.init.el = 'app';
 
-		// Viewport afterrender
-		init.afterRender = function() {
+        // init
+        (function() {
 
-			// Add resize event handler
-			dv.viewport.westRegion.on('resize', function() {
-				var panel = dv.util.dimension.panel.getExpanded();
-
-				if (panel) {
-					panel.onExpand();
-				}
-			});
-
-			// Left gui scrollbar
-			var viewportHeight = dv.viewport.westRegion.getHeight(),
-				numberOfTabs = dv.init.dimensions.length + 5,
-				tabHeight = 28,
-				minPeriodHeight = 380,
-				settingsHeight = 91;
-
-			if (viewportHeight > numberOfTabs * tabHeight + minPeriodHeight + settingsHeight) {
-				if (!Ext.isIE) {
-					dv.viewport.accordion.setAutoScroll(false);
-					dv.viewport.westRegion.setWidth(dv.conf.layout.west_width);
-					dv.viewport.accordion.doLayout();
-				}
-			}
-			else {
-				dv.viewport.westRegion.hasScrollbar = true;
-			}
-
-            // Expand first panel
-			dv.cmp.dimension.panels[0].expand();
-
-			// Look for url params
-			var id = dv.util.url.getUrlParam('id'),
-                session = dv.util.url.getUrlParam('s'),
-                layout;
-
-			if (id) {
-				dv.util.chart.loadChart(id);
-			}
-            else if (Ext.isString(session) && DV.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
-                layout = dv.api.layout.Layout(dv.util.chart.analytical2layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]));
-
-				if (layout) {
-					dv.viewport.setFavorite(layout);
-				}
-			}
-
-			// Fade in
-			Ext.defer( function() {
-				Ext.getBody().fadeIn({
-					duration: 400
-				});
-			}, 500 );
-		};
-
-		return init;
-	};
-
-	DV.app.getUtils = function() {
-		var util = dv.util || {};
-
-		util.chart.getLayoutConfig = function() {
-			var panels = dv.cmp.dimension.panels,
-				columnDimNames = [dv.viewport.series.getValue()],
-				rowDimNames = [dv.viewport.category.getValue()],
-				filterDimNames = dv.viewport.filter.getValue(),
-				config = dv.viewport.optionsWindow.getOptions(),
-				dimConf = dv.conf.finals.dimension,
-				dx = dimConf.data.dimensionName,
-				co = dimConf.category.dimensionName,
-				nameDimArrayMap = {};
-
-			config.type = dv.viewport.chartType.getChartType();
-
-			config.columns = [];
-			config.rows = [];
-			config.filters = [];
-
-			// Panel data
-			for (var i = 0, dim, dimName; i < panels.length; i++) {
-				dim = panels[i].getDimension();
-
-				if (dim) {
-					nameDimArrayMap[dim.dimension] = [dim];
-				}
-			}
-
-			nameDimArrayMap[dx] = Ext.Array.clean([].concat(
-				nameDimArrayMap[dimConf.indicator.objectName],
-				nameDimArrayMap[dimConf.dataElement.objectName],
-				nameDimArrayMap[dimConf.operand.objectName],
-				nameDimArrayMap[dimConf.dataSet.objectName]
-			));
-
-			// Columns, rows, filters
-			for (var i = 0, nameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], dimNames; i < nameArrays.length; i++) {
-				dimNames = nameArrays[i];
-
-				for (var j = 0, dimName, dim; j < dimNames.length; j++) {
-					dimName = dimNames[j];
-
-					if (dimName === dx && nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
-						for (var k = 0; k < nameDimArrayMap[dx].length; k++) {
-							axes[i].push(Ext.clone(nameDimArrayMap[dx][k]));
-						}
-					}
-					else if (nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
-						for (var k = 0; k < nameDimArrayMap[dimName].length; k++) {
-							axes[i].push(Ext.clone(nameDimArrayMap[dimName][k]));
-						}
-					}
-				}
-			}
-
-			config.userOrganisationUnit = dv.viewport.userOrganisationUnit.getValue();
-			config.userOrganisationUnitChildren = dv.viewport.userOrganisationUnitChildren.getValue();
-
-			return config;
-		};
-
-		util.chart.submitSvgForm = function(type) {
-			var svg = Ext.query('svg'),
-				form = Ext.query('#exportForm')[0];
-
-			if (!(Ext.isArray(svg) && svg.length)) {
-				alert('Browser does not support SVG');
-				return;
-			}
-
-			svg = Ext.get(svg[0]);
-			svg = svg.parent().dom.innerHTML;
-
-			Ext.query('#svgField')[0].value = svg;
-			Ext.query('#typeField')[0].value = type;
-			Ext.query('#nameField')[0].value = 'test';
-
-			form.action = '../exportImage.action';
-			form.submit();
-		};
-
-		util.dimension = {
-			panel: {
-				setHeight: function(mx) {
-					var settingsHeight = 91,
-						panelHeight = settingsHeight + dv.cmp.dimension.panels.length * 28,
-						height;
-
-					if (dv.viewport.westRegion.hasScrollbar) {
-						height = panelHeight + mx;
-						dv.viewport.accordion.setHeight(dv.viewport.getHeight() - settingsHeight - 2);
-						dv.viewport.accordionBody.setHeight(height - settingsHeight - 2);
-					}
-					else {
-						height = dv.viewport.westRegion.getHeight() - dv.conf.layout.west_fill - settingsHeight;
-						mx += panelHeight;
-						dv.viewport.accordion.setHeight((height > mx ? mx : height) - 2);
-						dv.viewport.accordionBody.setHeight((height > mx ? mx : height) - 2);
-					}
-				},
-
-				getExpanded: function() {
-					for (var i = 0, panel; i < dv.cmp.dimension.panels.length; i++) {
-						panel = dv.cmp.dimension.panels[i];
-
-						if (!panel.collapsed) {
-							return panel;
-						}
-					}
-
-					return null;
-				}
-			}
-		};
-
-		util.url = {
-			getUrlParam: function(s) {
-				var output = '';
-				var href = window.location.href;
-				if (href.indexOf('?') > -1 ) {
-					var query = href.substr(href.indexOf('?') + 1);
-					var query = query.split('&');
-					for (var i = 0; i < query.length; i++) {
-						if (query[i].indexOf('=') > -1) {
-							var a = query[i].split('=');
-							if (a[0].toLowerCase() === s) {
-								output = a[1];
-								break;
-							}
-						}
-					}
-				}
-				return unescape(output);
-			}
-		};
-
-		util.multiselect = {
-			select: function(a, s) {
-				var selected = a.getValue();
-				if (selected.length) {
-					var array = [];
-					Ext.Array.each(selected, function(item) {
-						array.push({id: item, name: a.store.getAt(a.store.findExact('id', item)).data.name});
-					});
-					s.store.add(array);
-				}
-				this.filterAvailable(a, s);
-			},
-			selectAll: function(a, s, doReverse) {
-				var array = [];
-				a.store.each( function(r) {
-					array.push({id: r.data.id, name: r.data.name});
-				});
-				if (doReverse) {
-					array.reverse();
-				}
-				s.store.add(array);
-				this.filterAvailable(a, s);
-			},
-			unselect: function(a, s) {
-				var selected = s.getValue();
-				if (selected.length) {
-					Ext.Array.each(selected, function(item) {
-						s.store.remove(s.store.getAt(s.store.findExact('id', item)));
-					});
-					this.filterAvailable(a, s);
-				}
-			},
-			unselectAll: function(a, s) {
-				s.store.removeAll();
-				a.store.clearFilter();
-				this.filterAvailable(a, s);
-			},
-			filterAvailable: function(a, s) {
-				a.store.filterBy( function(r) {
-					var keep = true;
-					s.store.each( function(r2) {
-						if (r.data.id == r2.data.id) {
-							keep = false;
-						}
-
-					});
-					return keep;
-				});
-				a.store.sortStore();
-			},
-			setHeight: function(ms, panel, fill) {
-				for (var i = 0; i < ms.length; i++) {
-					ms[i].setHeight(panel.getHeight() - fill);
-				}
-			}
-		};
-
-		util.button = {
-			type: {
-				getValue: function() {
-					for (var i = 0; i < dv.cmp.charttype.length; i++) {
-						if (dv.cmp.charttype[i].pressed) {
-							return dv.cmp.charttype[i].name;
-						}
-					}
-				},
-				setValue: function(type) {
-					for (var i = 0; i < dv.cmp.charttype.length; i++) {
-						dv.cmp.charttype[i].toggle(dv.cmp.charttype[i].name === type);
-					}
-				},
-				toggleHandler: function(b) {
-					if (!b.pressed) {
-						b.toggle();
-					}
-				}
-			}
-		};
-
-		util.checkbox = {
-			setRelativePeriods: function(rp) {
-				if (rp) {
-					for (var key in rp) {
-						var cmp = dv.util.getCmp('checkbox[relativePeriodId="' + key + '"]');
-						if (cmp) {
-							cmp.setValue(rp[key]);
-						}
-					}
-				}
-				else {
-					dv.util.checkbox.setAllFalse();
-				}
-			},
-			setAllFalse: function() {
-				var a = dv.cmp.dimension.relativePeriod.checkbox;
-				for (var i = 0; i < a.length; i++) {
-					a[i].setValue(false);
-				}
-			},
-			isAllFalse: function() {
-				var a = dv.cmp.dimension.relativePeriod.checkbox;
-				for (var i = 0; i < a.length; i++) {
-					if (a[i].getValue()) {
-						return false;
-					}
-				}
-				return true;
-			}
-		};
-
-		util.toolbar = {
-			separator: {
-				xtype: 'tbseparator',
-				height: 26,
-				style: 'border-left: 1px solid #d1d1d1; border-right: 1px solid #f1f1f1'
-			}
-		};
-
-		util.window = dv.util.window || {};
-
-		util.window.setAnchorPosition = function(w, target) {
-			var vpw = dv.viewport.getWidth(),
-				targetX = target ? target.getPosition()[0] : 4,
-				winw = w.getWidth(),
-				y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
-
-			if ((targetX + winw) > vpw) {
-				w.setPosition((vpw - winw - 2), y);
-			}
-			else {
-				w.setPosition(targetX, y);
-			}
-		};
-
-        util.notification = {
-            error: function(title, text) {
-                title = title || '';
-                text = text || '';
-                Ext.create('Ext.window.Window', {
-                    title: title,
-                    cls: 'dv-messagebox',
-                    iconCls: 'dv-window-title-messagebox',
-                    modal: true,
-                    width: 300,
-                    items: [
-                        {
-                            xtype: 'label',
-                            width: 40,
-                            text: text
-                        }
-                    ]
-                }).show();
-                dv.cmp.statusbar.panel.setWidth(dv.cmp.region.center.getWidth());
-                dv.cmp.statusbar.panel.update('<img src="' + dv.conf.finals.ajax.path_images + dv.conf.statusbar.icon.error + '" style="padding:0 5px 0 0"/>' + text);
-            },
-            warning: function(text) {
-                text = text || '';
-                dv.cmp.statusbar.panel.setWidth(dv.cmp.region.center.getWidth());
-                dv.cmp.statusbar.panel.update('<img src="' + dv.conf.finals.ajax.path_images + dv.conf.statusbar.icon.warning + '" style="padding:0 5px 0 0"/>' + text);
-            },
-            ok: function() {
-                dv.cmp.statusbar.panel.setWidth(dv.cmp.region.center.getWidth());
-                dv.cmp.statusbar.panel.update('<img src="' + dv.conf.finals.ajax.path_images + dv.conf.statusbar.icon.ok + '" style="padding:0 5px 0 0"/>&nbsp;&nbsp;');
-            },
-            interpretation: function(text) {
-                dv.cmp.statusbar.panel.setWidth(dv.cmp.region.center.getWidth());
-                dv.cmp.statusbar.panel.update('<img src="' + dv.conf.finals.ajax.path_images + dv.conf.statusbar.icon.ok + '" style="padding:0 5px 0 0"/>' + text);
+            // root nodes
+            for (var i = 0; i < init.rootNodes.length; i++) {
+                init.rootNodes[i].path = '/' + conf.finals.root.id + '/' + init.rootNodes[i].id;
             }
-        };
 
-		util.store = {
-			addToStorage: function(s, records) {
-				s.each( function(r) {
-					if (!s.storage[r.data.id]) {
-						s.storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: s.parent};
-					}
-				});
-				if (records) {
-					Ext.Array.each(records, function(r) {
-						if (!s.storage[r.data.id]) {
-							s.storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: s.parent};
-						}
-					});
-				}
-			},
-			loadFromStorage: function(s) {
-				var items = [];
-				s.removeAll();
-				for (var obj in s.storage) {
-					if (s.storage[obj].parent === s.parent) {
-						items.push(s.storage[obj]);
-					}
-				}
-				s.add(items);
-				s.sort('name', 'ASC');
-			},
-			containsParent: function(s) {
-				for (var obj in s.storage) {
-					if (s.storage[obj].parent === s.parent) {
-						return true;
-					}
-				}
-				return false;
-			}
-		};
+            // viewport afterrender
+            init.afterRender = function() {
 
-		util.mask = {
-			showMask: function(cmp, msg) {
-				cmp = cmp || dv.viewport;
-				msg = msg || 'Loading..';
+                // Add resize event handler
+                dv.viewport.westRegion.on('resize', function() {
+                    var panel = util.dimension.panel.getExpanded();
 
-				if (dv.viewport.mask) {
-					dv.viewport.mask.destroy();
-				}
-				dv.viewport.mask = new Ext.create('Ext.LoadMask', cmp, {
-					id: 'dv-loadmask',
-					shadow: false,
-					msg: msg,
-					style: 'box-shadow:0',
-					bodyStyle: 'box-shadow:0'
-				});
-				dv.viewport.mask.show();
-			},
-			hideMask: function() {
-				if (dv.viewport.mask) {
-					dv.viewport.mask.hide();
-				}
-			}
-		};
+                    if (panel) {
+                        panel.onExpand();
+                    }
+                });
 
-		util.object = {
-			getLength: function(object) {
-				var size = 0;
+                // Left gui scrollbar
+                var viewportHeight = dv.viewport.westRegion.getHeight(),
+                    numberOfTabs = init.dimensions.length + 5,
+                    tabHeight = 28,
+                    minPeriodHeight = 380,
+                    settingsHeight = 91;
 
-				for (var key in object) {
-					if (object.hasOwnProperty(key)) {
-						size++;
-					}
-				}
+                if (viewportHeight > numberOfTabs * tabHeight + minPeriodHeight + settingsHeight) {
+                    if (!Ext.isIE) {
+                        dv.viewport.accordion.setAutoScroll(false);
+                        dv.viewport.westRegion.setWidth(dv.conf.layout.west_width);
+                        dv.viewport.accordion.doLayout();
+                    }
+                }
+                else {
+                    dv.viewport.westRegion.hasScrollbar = true;
+                }
 
-				return size;
-			}
-		};
+                // Expand first panel
+                dv.cmp.dimension.panels[0].expand();
 
-		util.number = {
-			getNumberOfDecimals: function(x) {
-				var tmp = new String(x);
-				return (tmp.indexOf(".") > -1) ? (tmp.length - tmp.indexOf(".") - 1) : 0;
-			},
+                // Look for url params
+                var id = util.url.getUrlParam('id'),
+                    session = util.url.getUrlParam('s'),
+                    layout;
 
-			roundIf: function(x, fix) {
-				if (Ext.isString(x)) {
-					x = parseFloat(x);
-				}
+                if (id) {
+                    engine.loadChart(id, dv);
+                }
+                else if (Ext.isString(session) && DV.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
+                    layout = api.layout.Layout(util.chart.analytical2layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]));
 
-				if (Ext.isNumber(x) && Ext.isNumber(fix)) {
-					var dec = dv.util.number.getNumberOfDecimals(x);
-					return parseFloat(dec > fix ? x.toFixed(fix) : x);
-				}
-				return x;
-			},
+                    if (layout) {
+                        dv.viewport.setFavorite(layout);
+                    }
+                }
 
-			pp: function(x, nf) {
-				nf = nf || 'space';
+                // Fade in
+                Ext.defer( function() {
+                    Ext.getBody().fadeIn({
+                        duration: 400
+                    });
+                }, 500 );
+            };
+        }());
 
-				if (nf === 'none') {
-					return x;
-				}
+        // util
+        (function() {
 
-				return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, dv.conf.chart.digitGroupSeparator[nf]);
-			}
-		};
+            util.chart = util.chart || {};
 
-		return util;
-	};
+            util.chart.getLayoutConfig = function() {
+                var panels = dv.cmp.dimension.panels,
+                    columnDimNames = [dv.viewport.series.getValue()],
+                    rowDimNames = [dv.viewport.category.getValue()],
+                    filterDimNames = dv.viewport.filter.getValue(),
+                    config = dv.viewport.optionsWindow.getOptions(),
+                    dx = dimConf.data.dimensionName,
+                    co = dimConf.category.dimensionName,
+                    nameDimArrayMap = {};
 
-	DV.app.getStores = function() {
-		var store = dv.store || {};
+                config.type = dv.viewport.chartType.getChartType();
 
-		store.indicatorAvailable = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			proxy: {
-				type: 'ajax',
-				reader: {
-					type: 'json',
-					root: 'indicators'
-				}
-			},
-			storage: {},
-			sortStore: function() {
-				this.sort('name', 'ASC');
-			},
-			listeners: {
-				load: function(s) {
-					dv.util.store.addToStorage(s);
-					dv.util.multiselect.filterAvailable({store: s}, {store: store.indicatorSelected});
-				}
-			}
-		});
+                config.columns = [];
+                config.rows = [];
+                config.filters = [];
 
-		store.indicatorSelected = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			data: []
-		});
+                // Panel data
+                for (var i = 0, dim, dimName; i < panels.length; i++) {
+                    dim = panels[i].getDimension();
 
-		store.dataElementAvailable = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'dataElementId', 'optionComboId', 'operandName'],
-			proxy: {
-				type: 'ajax',
-				reader: {
-					type: 'json',
-					root: 'dataElements'
-				}
-			},
-			storage: {},
-			sortStore: function() {
-				this.sort('name', 'ASC');
-			},
-			setTotalsProxy: function(uid) {
-				var path;
+                    if (dim) {
+                        nameDimArrayMap[dim.dimension] = [dim];
+                    }
+                }
 
-				if (Ext.isString(uid)) {
-					path = dv.conf.finals.ajax.dataelement_get + uid + '.json?links=false&paging=false';
-				}
-				else if (uid === 0) {
-					path = dv.conf.finals.ajax.dataelement_getall;
-				}
+                nameDimArrayMap[dx] = Ext.Array.clean([].concat(
+                    nameDimArrayMap[dimConf.indicator.objectName],
+                    nameDimArrayMap[dimConf.dataElement.objectName],
+                    nameDimArrayMap[dimConf.operand.objectName],
+                    nameDimArrayMap[dimConf.dataSet.objectName]
+                ));
 
-				if (!path) {
-					alert('Invalid parameter');
-					return;
-				}
+                // Columns, rows, filters
+                for (var i = 0, nameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], dimNames; i < nameArrays.length; i++) {
+                    dimNames = nameArrays[i];
 
-				this.setProxy({
-					type: 'ajax',
-					url: dv.conf.finals.ajax.path_api + path,
-					reader: {
-						type: 'json',
-						root: 'dataElements'
-					}
-				});
+                    for (var j = 0, dimName, dim; j < dimNames.length; j++) {
+                        dimName = dimNames[j];
 
-				this.load({
-					scope: this,
-					callback: function() {
-						dv.util.multiselect.filterAvailable({store: this}, {store: store.dataElementSelected});
-					}
-				});
-			},
-			setDetailsProxy: function(uid) {
-				if (Ext.isString(uid)) {
-					this.setProxy({
-						type: 'ajax',
-						url: dv.conf.finals.ajax.path_commons + 'getOperands.action?uid=' + uid,
-						reader: {
-							type: 'json',
-							root: 'operands'
-						}
-					});
+                        if (dimName === dx && nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
+                            for (var k = 0; k < nameDimArrayMap[dx].length; k++) {
+                                axes[i].push(Ext.clone(nameDimArrayMap[dx][k]));
+                            }
+                        }
+                        else if (nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
+                            for (var k = 0; k < nameDimArrayMap[dimName].length; k++) {
+                                axes[i].push(Ext.clone(nameDimArrayMap[dimName][k]));
+                            }
+                        }
+                    }
+                }
 
-					this.load({
-						scope: this,
-						callback: function() {
-							this.each(function(r) {
-								r.set('id', r.data.dataElementId + '-' + r.data.optionComboId);
-								r.set('name', r.data.operandName);
-							});
+                config.userOrganisationUnit = dv.viewport.userOrganisationUnit.getValue();
+                config.userOrganisationUnitChildren = dv.viewport.userOrganisationUnitChildren.getValue();
 
-							dv.util.multiselect.filterAvailable({store: this}, {store: store.dataElementSelected});
-						}
-					});
-				}
-				else {
-					alert('Invalid parameter');
-				}
-			},
-			listeners: {
-				load: function(s) {
+                return config;
+            };
 
-				}
-			}
-		});
+            util.chart.submitSvgForm = function(type) {
+                var svg = Ext.query('svg'),
+                    form = Ext.query('#exportForm')[0];
 
-		store.dataElementSelected = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			data: []
-		});
+                if (!(Ext.isArray(svg) && svg.length)) {
+                    alert('Browser does not support SVG');
+                    return;
+                }
 
-		store.dataSetAvailable = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			proxy: {
-				type: 'ajax',
-				url: dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.dataset_get,
-				reader: {
-					type: 'json',
-					root: 'dataSets'
-				}
-			},
-			storage: {},
-			sortStore: function() {
-				this.sort('name', 'ASC');
-			},
-			isLoaded: false,
-			listeners: {
-				load: function(s) {
-					this.isLoaded = true;
-					dv.util.store.addToStorage(s);
-					dv.util.multiselect.filterAvailable({store: s}, {store: store.dataSetSelected});
-				}
-			}
-		});
+                svg = Ext.get(svg[0]);
+                svg = svg.parent().dom.innerHTML;
 
-		store.dataSetSelected = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			data: []
-		});
+                Ext.query('#svgField')[0].value = svg;
+                Ext.query('#typeField')[0].value = type;
+                Ext.query('#nameField')[0].value = 'test';
 
-		store.periodType = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			data: dv.conf.period.periodTypes
-		});
+                form.action = '../exportImage.action';
+                form.submit();
+            };
 
-		store.fixedPeriodAvailable = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'index'],
-			data: [],
-			setIndex: function(periods) {
-				for (var i = 0; i < periods.length; i++) {
-					periods[i].index = i;
-				}
-			},
-			sortStore: function() {
-				this.sort('index', 'ASC');
-			}
-		});
+            util.dimension = {
+                panel: {
+                    setHeight: function(mx) {
+                        var settingsHeight = 91,
+                            panelHeight = settingsHeight + dv.cmp.dimension.panels.length * 28,
+                            height;
 
-		store.fixedPeriodSelected = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			data: []
-		});
+                        if (dv.viewport.westRegion.hasScrollbar) {
+                            height = panelHeight + mx;
+                            dv.viewport.accordion.setHeight(dv.viewport.getHeight() - settingsHeight - 2);
+                            dv.viewport.accordionBody.setHeight(height - settingsHeight - 2);
+                        }
+                        else {
+                            height = dv.viewport.westRegion.getHeight() - conf.layout.west_fill - settingsHeight;
+                            mx += panelHeight;
+                            dv.viewport.accordion.setHeight((height > mx ? mx : height) - 2);
+                            dv.viewport.accordionBody.setHeight((height > mx ? mx : height) - 2);
+                        }
+                    },
 
-		store.charts = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'lastUpdated', 'access'],
-			proxy: {
-				type: 'ajax',
-				reader: {
-					type: 'json',
-					root: 'charts'
-				}
-			},
-			isLoaded: false,
-			pageSize: 10,
-			page: 1,
-			defaultUrl: dv.baseUrl + '/api/charts.json?links=false',
-			loadStore: function(url) {
-				this.proxy.url = url || this.defaultUrl;
+                    getExpanded: function() {
+                        for (var i = 0, panel; i < dv.cmp.dimension.panels.length; i++) {
+                            panel = dv.cmp.dimension.panels[i];
 
-				this.load({
-					params: {
-						pageSize: this.pageSize,
-						page: this.page
-					}
-				});
-			},
-			loadFn: function(fn) {
-				if (this.isLoaded) {
-					fn.call();
-				}
-				else {
-					this.load(fn);
-				}
-			},
-			listeners: {
-				load: function(s) {
-					if (!this.isLoaded) {
-						this.isLoaded = true;
-					}
+                            if (!panel.collapsed) {
+                                return panel;
+                            }
+                        }
 
-					this.sort('name', 'ASC');
-				}
-			}
-		});
+                        return null;
+                    }
+                }
+            };
 
-		store.getDimensionStore = function() {
-			return Ext.create('Ext.data.Store', {
-				fields: ['id', 'name'],
-				data: function() {
-					var dimConf = dv.conf.finals.dimension,
-						data = [
-							{id: dimConf.data.dimensionName, name: dimConf.data.name},
-							{id: dimConf.period.dimensionName, name: dimConf.period.name},
-							{id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name}
-						];
+            util.url = {
+                getUrlParam: function(s) {
+                    var output = '';
+                    var href = window.location.href;
+                    if (href.indexOf('?') > -1 ) {
+                        var query = href.substr(href.indexOf('?') + 1);
+                        var query = query.split('&');
+                        for (var i = 0; i < query.length; i++) {
+                            if (query[i].indexOf('=') > -1) {
+                                var a = query[i].split('=');
+                                if (a[0].toLowerCase() === s) {
+                                    output = a[1];
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    return unescape(output);
+                }
+            };
 
-					return data.concat(Ext.clone(dv.init.dimensions));
-				}()
-			});
-		};
+            util.multiselect = {
+                select: function(a, s) {
+                    var selected = a.getValue();
+                    if (selected.length) {
+                        var array = [];
+                        Ext.Array.each(selected, function(item) {
+                            array.push({id: item, name: a.store.getAt(a.store.findExact('id', item)).data.name});
+                        });
+                        s.store.add(array);
+                    }
+                    this.filterAvailable(a, s);
+                },
+                selectAll: function(a, s, doReverse) {
+                    var array = [];
+                    a.store.each( function(r) {
+                        array.push({id: r.data.id, name: r.data.name});
+                    });
+                    if (doReverse) {
+                        array.reverse();
+                    }
+                    s.store.add(array);
+                    this.filterAvailable(a, s);
+                },
+                unselect: function(a, s) {
+                    var selected = s.getValue();
+                    if (selected.length) {
+                        Ext.Array.each(selected, function(item) {
+                            s.store.remove(s.store.getAt(s.store.findExact('id', item)));
+                        });
+                        this.filterAvailable(a, s);
+                    }
+                },
+                unselectAll: function(a, s) {
+                    s.store.removeAll();
+                    a.store.clearFilter();
+                    this.filterAvailable(a, s);
+                },
+                filterAvailable: function(a, s) {
+                    a.store.filterBy( function(r) {
+                        var keep = true;
+                        s.store.each( function(r2) {
+                            if (r.data.id == r2.data.id) {
+                                keep = false;
+                            }
 
-		return store;
-	};
+                        });
+                        return keep;
+                    });
+                    a.store.sortStore();
+                },
+                setHeight: function(ms, panel, fill) {
+                    for (var i = 0; i < ms.length; i++) {
+                        ms[i].setHeight(panel.getHeight() - fill);
+                    }
+                }
+            };
 
-	DV.app.getCmp = function() {
-		var cmp = {
-			region: {},
-			charttype: [],
-			layout: {},
-			dimension: {
-				panels: [],
+            util.button = {
+                type: {
+                    getValue: function() {
+                        for (var i = 0; i < dv.cmp.charttype.length; i++) {
+                            if (dv.cmp.charttype[i].pressed) {
+                                return dv.cmp.charttype[i].name;
+                            }
+                        }
+                    },
+                    setValue: function(type) {
+                        for (var i = 0; i < dv.cmp.charttype.length; i++) {
+                            dv.cmp.charttype[i].toggle(dv.cmp.charttype[i].name === type);
+                        }
+                    },
+                    toggleHandler: function(b) {
+                        if (!b.pressed) {
+                            b.toggle();
+                        }
+                    }
+                }
+            };
 
-				indicator: {},
-				dataElement: {},
-				dataSet: {},
-				relativePeriod: {
-					checkbox: []
-				},
-				fixedPeriod: {},
-				organisationUnit: {}
-			},
-			favorite: {}
-		};
+            util.checkbox = {
+                setRelativePeriods: function(rp) {
+                    if (rp) {
+                        for (var key in rp) {
+                            var cmp = util.getCmp('checkbox[relativePeriodId="' + key + '"]');
+                            if (cmp) {
+                                cmp.setValue(rp[key]);
+                            }
+                        }
+                    }
+                    else {
+                        util.checkbox.setAllFalse();
+                    }
+                },
+                setAllFalse: function() {
+                    var a = dv.cmp.dimension.relativePeriod.checkbox;
+                    for (var i = 0; i < a.length; i++) {
+                        a[i].setValue(false);
+                    }
+                },
+                isAllFalse: function() {
+                    var a = dv.cmp.dimension.relativePeriod.checkbox;
+                    for (var i = 0; i < a.length; i++) {
+                        if (a[i].getValue()) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            };
 
-		return cmp;
+            util.toolbar = {
+                separator: {
+                    xtype: 'tbseparator',
+                    height: 26,
+                    style: 'border-left: 1px solid #d1d1d1; border-right: 1px solid #f1f1f1'
+                }
+            };
+
+            util.window = util.window || {};
+
+            util.window.setAnchorPosition = function(w, target) {
+                var vpw = dv.viewport.getWidth(),
+                    targetX = target ? target.getPosition()[0] : 4,
+                    winw = w.getWidth(),
+                    y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
+
+                if ((targetX + winw) > vpw) {
+                    w.setPosition((vpw - winw - 2), y);
+                }
+                else {
+                    w.setPosition(targetX, y);
+                }
+            };
+
+            util.notification = {
+                error: function(title, text) {
+                    title = title || '';
+                    text = text || '';
+                    Ext.create('Ext.window.Window', {
+                        title: title,
+                        cls: 'dv-messagebox',
+                        iconCls: 'dv-window-title-messagebox',
+                        modal: true,
+                        width: 300,
+                        items: [
+                            {
+                                xtype: 'label',
+                                width: 40,
+                                text: text
+                            }
+                        ]
+                    }).show();
+                    dv.cmp.statusbar.panel.setWidth(dv.cmp.region.center.getWidth());
+                    dv.cmp.statusbar.panel.update('<img src="' + dv.conf.finals.ajax.path_images + conf.statusbar.icon.error + '" style="padding:0 5px 0 0"/>' + text);
+                },
+                warning: function(text) {
+                    text = text || '';
+                    dv.cmp.statusbar.panel.setWidth(dv.cmp.region.center.getWidth());
+                    dv.cmp.statusbar.panel.update('<img src="' + conf.finals.ajax.path_images + conf.statusbar.icon.warning + '" style="padding:0 5px 0 0"/>' + text);
+                },
+                ok: function() {
+                    dv.cmp.statusbar.panel.setWidth(dv.cmp.region.center.getWidth());
+                    dv.cmp.statusbar.panel.update('<img src="' + conf.finals.ajax.path_images + conf.statusbar.icon.ok + '" style="padding:0 5px 0 0"/>&nbsp;&nbsp;');
+                },
+                interpretation: function(text) {
+                    dv.cmp.statusbar.panel.setWidth(dv.cmp.region.center.getWidth());
+                    dv.cmp.statusbar.panel.update('<img src="' + conf.finals.ajax.path_images + conf.statusbar.icon.ok + '" style="padding:0 5px 0 0"/>' + text);
+                }
+            };
+
+            util.store = {
+                addToStorage: function(s, records) {
+                    s.each( function(r) {
+                        if (!s.storage[r.data.id]) {
+                            s.storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: s.parent};
+                        }
+                    });
+                    if (records) {
+                        Ext.Array.each(records, function(r) {
+                            if (!s.storage[r.data.id]) {
+                                s.storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: s.parent};
+                            }
+                        });
+                    }
+                },
+                loadFromStorage: function(s) {
+                    var items = [];
+                    s.removeAll();
+                    for (var obj in s.storage) {
+                        if (s.storage[obj].parent === s.parent) {
+                            items.push(s.storage[obj]);
+                        }
+                    }
+                    s.add(items);
+                    s.sort('name', 'ASC');
+                },
+                containsParent: function(s) {
+                    for (var obj in s.storage) {
+                        if (s.storage[obj].parent === s.parent) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            };
+
+            util.mask = {
+                showMask: function(cmp, msg) {
+                    cmp = cmp || dv.viewport;
+                    msg = msg || 'Loading..';
+
+                    if (dv.viewport.mask) {
+                        dv.viewport.mask.destroy();
+                    }
+                    dv.viewport.mask = new Ext.create('Ext.LoadMask', cmp, {
+                        id: 'dv-loadmask',
+                        shadow: false,
+                        msg: msg,
+                        style: 'box-shadow:0',
+                        bodyStyle: 'box-shadow:0'
+                    });
+                    dv.viewport.mask.show();
+                },
+                hideMask: function() {
+                    if (dv.viewport.mask) {
+                        dv.viewport.mask.hide();
+                    }
+                }
+            };
+
+            util.object = {
+                getLength: function(object) {
+                    var size = 0;
+
+                    for (var key in object) {
+                        if (object.hasOwnProperty(key)) {
+                            size++;
+                        }
+                    }
+
+                    return size;
+                }
+            };
+
+            util.number = {
+                getNumberOfDecimals: function(x) {
+                    var tmp = new String(x);
+                    return (tmp.indexOf(".") > -1) ? (tmp.length - tmp.indexOf(".") - 1) : 0;
+                },
+
+                roundIf: function(x, fix) {
+                    if (Ext.isString(x)) {
+                        x = parseFloat(x);
+                    }
+
+                    if (Ext.isNumber(x) && Ext.isNumber(fix)) {
+                        var dec = util.number.getNumberOfDecimals(x);
+                        return parseFloat(dec > fix ? x.toFixed(fix) : x);
+                    }
+                    return x;
+                },
+
+                pp: function(x, nf) {
+                    nf = nf || 'space';
+
+                    if (nf === 'none') {
+                        return x;
+                    }
+
+                    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.chart.digitGroupSeparator[nf]);
+                }
+            };
+        }());
+
+        // store
+        (function() {
+            store.indicatorAvailable = Ext.create('Ext.data.Store', {
+                fields: ['id', 'name'],
+                proxy: {
+                    type: 'ajax',
+                    reader: {
+                        type: 'json',
+                        root: 'indicators'
+                    }
+                },
+                storage: {},
+                sortStore: function() {
+                    this.sort('name', 'ASC');
+                },
+                listeners: {
+                    load: function(s) {
+                        util.store.addToStorage(s);
+                        util.multiselect.filterAvailable({store: s}, {store: store.indicatorSelected});
+                    }
+                }
+            });
+
+            store.indicatorSelected = Ext.create('Ext.data.Store', {
+                fields: ['id', 'name'],
+                data: []
+            });
+
+            store.dataElementAvailable = Ext.create('Ext.data.Store', {
+                fields: ['id', 'name', 'dataElementId', 'optionComboId', 'operandName'],
+                proxy: {
+                    type: 'ajax',
+                    reader: {
+                        type: 'json',
+                        root: 'dataElements'
+                    }
+                },
+                storage: {},
+                sortStore: function() {
+                    this.sort('name', 'ASC');
+                },
+                setTotalsProxy: function(uid) {
+                    var path;
+
+                    if (Ext.isString(uid)) {
+                        path = conf.finals.ajax.dataelement_get + uid + '.json?links=false&paging=false';
+                    }
+                    else if (uid === 0) {
+                        path = conf.finals.ajax.dataelement_getall;
+                    }
+
+                    if (!path) {
+                        alert('Invalid parameter');
+                        return;
+                    }
+
+                    this.setProxy({
+                        type: 'ajax',
+                        url: conf.finals.ajax.path_api + path,
+                        reader: {
+                            type: 'json',
+                            root: 'dataElements'
+                        }
+                    });
+
+                    this.load({
+                        scope: this,
+                        callback: function() {
+                            util.multiselect.filterAvailable({store: this}, {store: store.dataElementSelected});
+                        }
+                    });
+                },
+                setDetailsProxy: function(uid) {
+                    if (Ext.isString(uid)) {
+                        this.setProxy({
+                            type: 'ajax',
+                            url: conf.finals.ajax.path_commons + 'getOperands.action?uid=' + uid,
+                            reader: {
+                                type: 'json',
+                                root: 'operands'
+                            }
+                        });
+
+                        this.load({
+                            scope: this,
+                            callback: function() {
+                                this.each(function(r) {
+                                    r.set('id', r.data.dataElementId + '-' + r.data.optionComboId);
+                                    r.set('name', r.data.operandName);
+                                });
+
+                                util.multiselect.filterAvailable({store: this}, {store: store.dataElementSelected});
+                            }
+                        });
+                    }
+                    else {
+                        alert('Invalid parameter');
+                    }
+                },
+                listeners: {
+                    load: function(s) {
+
+                    }
+                }
+            });
+
+            store.dataElementSelected = Ext.create('Ext.data.Store', {
+                fields: ['id', 'name'],
+                data: []
+            });
+
+            store.dataSetAvailable = Ext.create('Ext.data.Store', {
+                fields: ['id', 'name'],
+                proxy: {
+                    type: 'ajax',
+                    url: conf.finals.ajax.path_api + conf.finals.ajax.dataset_get,
+                    reader: {
+                        type: 'json',
+                        root: 'dataSets'
+                    }
+                },
+                storage: {},
+                sortStore: function() {
+                    this.sort('name', 'ASC');
+                },
+                isLoaded: false,
+                listeners: {
+                    load: function(s) {
+                        this.isLoaded = true;
+                        util.store.addToStorage(s);
+                        util.multiselect.filterAvailable({store: s}, {store: store.dataSetSelected});
+                    }
+                }
+            });
+
+            store.dataSetSelected = Ext.create('Ext.data.Store', {
+                fields: ['id', 'name'],
+                data: []
+            });
+
+            store.periodType = Ext.create('Ext.data.Store', {
+                fields: ['id', 'name'],
+                data: conf.period.periodTypes
+            });
+
+            store.fixedPeriodAvailable = Ext.create('Ext.data.Store', {
+                fields: ['id', 'name', 'index'],
+                data: [],
+                setIndex: function(periods) {
+                    for (var i = 0; i < periods.length; i++) {
+                        periods[i].index = i;
+                    }
+                },
+                sortStore: function() {
+                    this.sort('index', 'ASC');
+                }
+            });
+
+            store.fixedPeriodSelected = Ext.create('Ext.data.Store', {
+                fields: ['id', 'name'],
+                data: []
+            });
+
+            store.charts = Ext.create('Ext.data.Store', {
+                fields: ['id', 'name', 'lastUpdated', 'access'],
+                proxy: {
+                    type: 'ajax',
+                    reader: {
+                        type: 'json',
+                        root: 'charts'
+                    }
+                },
+                isLoaded: false,
+                pageSize: 10,
+                page: 1,
+                defaultUrl: init.contextPath + '/api/charts.json?links=false',
+                loadStore: function(url) {
+                    this.proxy.url = url || this.defaultUrl;
+
+                    this.load({
+                        params: {
+                            pageSize: this.pageSize,
+                            page: this.page
+                        }
+                    });
+                },
+                loadFn: function(fn) {
+                    if (this.isLoaded) {
+                        fn.call();
+                    }
+                    else {
+                        this.load(fn);
+                    }
+                },
+                listeners: {
+                    load: function(s) {
+                        if (!this.isLoaded) {
+                            this.isLoaded = true;
+                        }
+
+                        this.sort('name', 'ASC');
+                    }
+                }
+            });
+
+            store.getDimensionStore = function() {
+                return Ext.create('Ext.data.Store', {
+                    fields: ['id', 'name'],
+                    data: function() {
+                        var data = [
+                                {id: dimConf.data.dimensionName, name: dimConf.data.name},
+                                {id: dimConf.period.dimensionName, name: dimConf.period.name},
+                                {id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name}
+                            ];
+
+                        return data.concat(Ext.clone(init.dimensions));
+                    }()
+                });
+            };
+
+            dv.store = store;
+        }());
+
+        // cmp
+        (function() {
+            cmp = {
+                region: {},
+                charttype: [],
+                layout: {},
+                dimension: {
+                    panels: [],
+
+                    indicator: {},
+                    dataElement: {},
+                    dataSet: {},
+                    relativePeriod: {
+                        checkbox: []
+                    },
+                    fixedPeriod: {},
+                    organisationUnit: {}
+                },
+                favorite: {}
+            };
+
+            dv.cmp = cmp;
+        }());
 	};
 
 	DV.app.OptionsWindow = function() {
@@ -1168,7 +1177,7 @@ Ext.onReady( function() {
 
 					if (favorite && favorite.name) {
 						Ext.Ajax.request({
-							url: dv.baseUrl + '/api/charts/',
+							url: dv.init.contextPath + '/api/charts/',
 							method: 'POST',
 							headers: {'Content-Type': 'application/json'},
 							params: Ext.encode(favorite),
@@ -1294,7 +1303,7 @@ Ext.onReady( function() {
 						this.currentValue = this.getValue();
 
 						var value = this.getValue(),
-							url = value ? dv.baseUrl + '/api/charts/query/' + value + '.json?links=false' : null,
+							url = value ? dv.init.contextPath + '/api/charts/query/' + value + '.json?links=false' : null,
 							store = dv.store.charts;
 
 						store.page = 1;
@@ -1308,7 +1317,7 @@ Ext.onReady( function() {
 			text: DV.i18n.prev,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? dv.baseUrl + '/api/charts/query/' + value + '.json?links=false' : null,
+					url = value ? dv.init.contextPath + '/api/charts/query/' + value + '.json?links=false' : null,
 					store = dv.store.charts;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
@@ -1320,7 +1329,7 @@ Ext.onReady( function() {
 			text: DV.i18n.next,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? dv.baseUrl + '/api/charts/query/' + value + '.json?links=false' : null,
+					url = value ? dv.init.contextPath + '/api/charts/query/' + value + '.json?links=false' : null,
 					store = dv.store.charts;
 
 				store.page = store.page + 1;
@@ -1352,7 +1361,7 @@ Ext.onReady( function() {
 								element.addClsOnOver('link');
 								element.load = function() {
 									favoriteWindow.hide();
-									dv.util.chart.loadChart(record.data.id);
+									dv.engine.loadChart(record.data.id, dv);
 								};
 								element.dom.setAttribute('onclick', 'Ext.get(this).load();');
 							}
@@ -1401,7 +1410,7 @@ Ext.onReady( function() {
 
 										if (confirm(message)) {
 											Ext.Ajax.request({
-												url: dv.baseUrl + '/api/charts/' + record.data.id,
+												url: dv.init.contextPath + '/api/charts/' + record.data.id,
 												method: 'PUT',
 												headers: {'Content-Type': 'application/json'},
 												params: Ext.encode(favorite),
@@ -1458,7 +1467,7 @@ Ext.onReady( function() {
 
 									if (confirm(message)) {
 										Ext.Ajax.request({
-											url: dv.baseUrl + '/api/charts/' + record.data.id,
+											url: dv.init.contextPath + '/api/charts/' + record.data.id,
 											method: 'DELETE',
 											success: function() {
 												dv.store.charts.loadStore();
@@ -1888,8 +1897,8 @@ Ext.onReady( function() {
 
 			linkPanel = Ext.create('Ext.panel.Panel', {
 				html: function() {
-					var chartUrl = dv.baseUrl + '/dhis-web-visualizer/app/index.html?id=' + dv.favorite.id,
-						apiUrl = dv.baseUrl + '/api/charts/' + dv.favorite.id + '/data',
+					var chartUrl = dv.init.contextPath + '/dhis-web-visualizer/app/index.html?id=' + dv.favorite.id,
+						apiUrl = dv.init.contextPath + '/api/charts/' + dv.favorite.id + '/data',
 						html = '';
 
 					html += '<div><b>Chart link: </b><span class="user-select"><a href="' + chartUrl + '" target="_blank">' + chartUrl + '</a></span></div>';
@@ -1973,7 +1982,9 @@ Ext.onReady( function() {
 	};
 
     createViewport = function() {
-        var buttons = [],
+        var dimConf = dv.conf.finals.dimension,
+
+            buttons = [],
             buttonAddedListener,
             column,
             stackedcolumn,
@@ -3770,7 +3781,7 @@ Ext.onReady( function() {
                     fields: ['id', 'name'],
                     proxy: {
                         type: 'ajax',
-                        url: dv.baseUrl + '/api/dimensions/' + dimension.id + '.json',
+                        url: dv.init.contextPath + '/api/dimensions/' + dimension.id + '.json',
                         reader: {
                             type: 'json',
                             root: 'items'
@@ -3984,8 +3995,7 @@ Ext.onReady( function() {
         };
 
         validateSpecialCases = function(layout) {
-            var dimConf = dv.conf.finals.dimension,
-                dimensions,
+            var dimensions,
                 objectNameDimensionMap = {};
 
             if (!layout) {
@@ -4072,7 +4082,7 @@ Ext.onReady( function() {
             dv.favorite = null;
 
             // Create chart
-            dv.util.chart.createChart(layout, dv);
+            dv.engine.createChart(layout, dv);
         };
 
         accordionBody = Ext.create('Ext.panel.Panel', {
@@ -4196,8 +4206,8 @@ Ext.onReady( function() {
                         text: 'JSON',
                         iconCls: 'dv-menu-item-datasource',
                         handler: function() {
-                            if (dv.baseUrl && dv.paramString) {
-                                window.open(dv.baseUrl + '/api/analytics.json' + dv.util.chart.getParamString(dv.xLayout, true));
+                            if (dv.init.contextPath && dv.paramString) {
+                                window.open(dv.init.contextPath + '/api/analytics.json' + dv.engine.getParamString(dv.xLayout, true));
                             }
                         }
                     },
@@ -4205,8 +4215,8 @@ Ext.onReady( function() {
                         text: 'XML',
                         iconCls: 'dv-menu-item-datasource',
                         handler: function() {
-                            if (dv.baseUrl && dv.paramString) {
-                                window.open(dv.baseUrl + '/api/analytics.xml' + dv.util.chart.getParamString(dv.xLayout, true));
+                            if (dv.init.contextPath && dv.paramString) {
+                                window.open(dv.init.contextPath + '/api/analytics.xml' + dv.engine.getParamString(dv.xLayout, true));
                             }
                         }
                     },
@@ -4214,8 +4224,8 @@ Ext.onReady( function() {
                         text: 'Microsoft Excel',
                         iconCls: 'dv-menu-item-datasource',
                         handler: function() {
-                            if (dv.baseUrl && dv.paramString) {
-                                window.location.href = dv.baseUrl + '/api/analytics.xls' + dv.util.chart.getParamString(dv.xLayout, true);
+                            if (dv.init.contextPath && dv.paramString) {
+                                window.location.href = dv.init.contextPath + '/api/analytics.xls' + dv.engine.getParamString(dv.xLayout, true);
                             }
                         }
                     },
@@ -4223,8 +4233,8 @@ Ext.onReady( function() {
                         text: 'CSV',
                         iconCls: 'dv-menu-item-datasource',
                         handler: function() {
-                            if (dv.baseUrl && dv.paramString) {
-                                window.location.href = dv.baseUrl + '/api/analytics.csv' + dv.util.chart.getParamString(dv.xLayout, true);
+                            if (dv.init.contextPath && dv.paramString) {
+                                window.location.href = dv.init.contextPath + '/api/analytics.csv' + dv.engine.getParamString(dv.xLayout, true);
                             }
                         }
                     }
@@ -4345,7 +4355,7 @@ Ext.onReady( function() {
                                         text: 'Go to pivot tables' + '&nbsp;&nbsp;', //i18n
                                         cls: 'dv-menu-item-noicon',
                                         handler: function() {
-                                            window.location.href = dv.baseUrl + '/dhis-web-pivot/app/index.html';
+                                            window.location.href = dv.init.contextPath + '/dhis-web-pivot/app/index.html';
                                         }
                                     },
                                     '-',
@@ -4355,7 +4365,7 @@ Ext.onReady( function() {
                                         disabled: !DV.isSessionStorage || !dv.layout,
                                         handler: function() {
                                             if (DV.isSessionStorage) {
-                                                dv.util.chart.setSessionStorage(dv.layout, 'analytical', dv.baseUrl + '/dhis-web-pivot/app/index.html?s=analytical');
+                                                dv.engine.setSessionStorage(dv.layout, 'analytical', dv.init.contextPath + '/dhis-web-pivot/app/index.html?s=analytical');
                                             }
                                         }
                                     },
@@ -4364,7 +4374,7 @@ Ext.onReady( function() {
                                         cls: 'dv-menu-item-noicon',
                                         disabled: !(DV.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['table']),
                                         handler: function() {
-                                            window.location.href = dv.baseUrl + '/dhis-web-pivot/app/index.html?s=table';
+                                            window.location.href = dv.init.contextPath + '/dhis-web-pivot/app/index.html?s=table';
                                         }
                                     }
                                 ],
@@ -4392,7 +4402,7 @@ Ext.onReady( function() {
                         toggleGroup: 'module',
                         //menu: {},
                         handler: function(b) {
-                            window.location.href = dv.baseUrl + '/dhis-web-mapping/app/index.html';
+                            window.location.href = dv.init.contextPath + '/dhis-web-mapping/app/index.html';
                         }
                     },
                     getSeparator(),
@@ -4400,7 +4410,7 @@ Ext.onReady( function() {
                         xtype: 'button',
                         text: DV.i18n.home,
                         handler: function() {
-                            window.location.href = dv.baseUrl + '/dhis-web-commons-about/redirect.action';
+                            window.location.href = dv.init.contextPath + '/dhis-web-commons-about/redirect.action';
                         }
                     });
 
@@ -4417,8 +4427,7 @@ Ext.onReady( function() {
         });
 
         setFavorite = function(layout) {
-            var dimConf = dv.conf.finals.dimension,
-                xLayout,
+            var xLayout,
                 dimMap,
                 recMap,
                 graphMap,
@@ -4433,11 +4442,11 @@ Ext.onReady( function() {
             dv.viewport.interpretationButton.enable();
 
             // Create chart
-            dv.util.chart.createChart(layout, dv);
+            dv.engine.createChart(layout, dv);
 
             // Set gui
 
-            xLayout = dv.util.chart.getExtendedLayout(layout);
+            xLayout = dv.engine.getExtendedLayout(layout);
             dimMap = xLayout.objectNameDimensionsMap;
             recMap = xLayout.objectNameItemsMap;
             graphMap = layout.parentGraphMap;
@@ -4643,19 +4652,12 @@ Ext.onReady( function() {
 			return false;
 		};
 
-        // Instance
-        dv = DV.core.getInstance();
-
         Ext.Ajax.request({
             url: '../initialize.action',
             success: function(r) {
-				dv.init = DV.app.getInits(Ext.decode(r.responseText));
-				dv.baseUrl = dv.init.contextPath;
-				dv.el = 'app';
+                dv = DV.core.getInstance(Ext.decode(r.responseText));
 
-                dv.util = DV.app.getUtils();
-                dv.store = DV.app.getStores();
-                dv.cmp = DV.app.getCmp();
+                DV.app.extendInstance(dv);
 
                 dv.viewport = createViewport();
             }

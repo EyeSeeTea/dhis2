@@ -1,46 +1,36 @@
 Ext.onReady( function() {
 
-	// Ext config
+	// ext config
 	Ext.Ajax.method = 'GET';
 
-	// Namespace
+	// namespace
 	if (!('DV' in window)) {
 		DV = {
 			i18n: {}
 		};
 	}
 
-	// Mode
+	// mode
 	DV.isDebug = false;
 
-	// HTML5
+	// html5
 	DV.isSessionStorage = 'sessionStorage' in window && window['sessionStorage'] !== null;
 
-	// Core
+	// core
 
 	DV.core = {};
-
 	DV.core.instances = [];
 
-	DV.core.getInits = function(init, dv) {
+	DV.core.getInstance = function(init) {
+        var conf = {},
+            util = {},
+            api = {},
+            engine = {},
+            dimConf;
 
-		// Sort and extend dynamic dimensions
-		init.dimensions = dv.util.array.sortObjectsByString(init.dimensions);
-
-		for (var i = 0, dim; i < init.dimensions.length; i++) {
-			dim = init.dimensions[i];
-			dim.dimensionName = dim.id;
-			dim.objectName = dv.conf.finals.dimension.dimension.objectName;
-			dv.conf.finals.dimension.objectNameMap[dim.id] = dim;
-		}
-
-		return init;
-	};
-
-    DV.core.getConfigs = function() {
-        var conf = {};
-
-        conf.finals = {
+        // conf
+        (function() {
+            conf.finals = {
             ajax: {
                 path_visualizer: '../',
                 path_api: '../../api/',
@@ -164,305 +154,637 @@ Ext.onReady( function() {
             }
         };
 
-        dim = conf.finals.dimension;
+            dimConf = conf.finals.dimension;
 
-        dim.objectNameMap = {};
-        dim.objectNameMap[dim.data.objectName] = dim.data;
-        dim.objectNameMap[dim.indicator.objectName] = dim.indicator;
-        dim.objectNameMap[dim.dataElement.objectName] = dim.dataElement;
-        dim.objectNameMap[dim.operand.objectName] = dim.operand;
-        dim.objectNameMap[dim.dataSet.objectName] = dim.dataSet;
-        dim.objectNameMap[dim.category.objectName] = dim.category;
-        dim.objectNameMap[dim.period.objectName] = dim.period;
-        dim.objectNameMap[dim.organisationUnit.objectName] = dim.organisationUnit;
-        dim.objectNameMap[dim.dimension.objectName] = dim.dimension;
+            dimConf.objectNameMap = {};
+            dimConf.objectNameMap[dimConf.data.objectName] = dimConf.data;
+            dimConf.objectNameMap[dimConf.indicator.objectName] = dimConf.indicator;
+            dimConf.objectNameMap[dimConf.dataElement.objectName] = dimConf.dataElement;
+            dimConf.objectNameMap[dimConf.operand.objectName] = dimConf.operand;
+            dimConf.objectNameMap[dimConf.dataSet.objectName] = dimConf.dataSet;
+            dimConf.objectNameMap[dimConf.category.objectName] = dimConf.category;
+            dimConf.objectNameMap[dimConf.period.objectName] = dimConf.period;
+            dimConf.objectNameMap[dimConf.organisationUnit.objectName] = dimConf.organisationUnit;
+            dimConf.objectNameMap[dimConf.dimension.objectName] = dimConf.dimension;
 
-        conf.period = {
-            relativePeriods: {
-                'LAST_WEEK': 1,
-                'LAST_4_WEEKS': 4,
-                'LAST_12_WEEKS': 12,
-                'LAST_MONTH': 1,
-                'LAST_3_MONTHS': 3,
-                'LAST_BIMONTH': 1,
-                'LAST_6_BIMONTHS': 6,
-                'LAST_12_MONTHS': 12,
-                'LAST_QUARTER': 1,
-                'LAST_4_QUARTERS': 4,
-                'LAST_SIX_MONTH': 1,
-                'LAST_2_SIXMONTHS': 2,
-                'LAST_FINANCIAL_YEAR': 1,
-                'LAST_5_FINANCIAL_YEARS': 6,
-                'THIS_YEAR': 1,
-                'LAST_YEAR': 1,
-                'LAST_5_YEARS': 5
-            },
-            relativePeriodValueKeys: {
-                'LAST_WEEK': 'lastWeek',
-                'LAST_4_WEEKS': 'last4Weeks',
-                'LAST_12_WEEKS': 'last12Weeks',
-                'LAST_MONTH': 'lastMonth',
-                'LAST_3_MONTHS': 'last3Months',
-                'LAST_12_MONTHS': 'last12Months',
-                'LAST_BIMONTH': 'lastBimonth',
-                'LAST_6_BIMONTHS': 'last6BiMonths',
-                'LAST_QUARTER': 'lastQuarter',
-                'LAST_4_QUARTERS': 'last4Quarters',
-                'LAST_SIX_MONTH': 'lastSixMonth',
-                'LAST_2_SIXMONTHS': 'last2SixMonths',
-                'LAST_FINANCIAL_YEAR': 'lastFinancialYear',
-                'LAST_5_FINANCIAL_YEARS': 'last5FinancialYears',
-                'THIS_YEAR': 'thisYear',
-                'LAST_YEAR': 'lastYear',
-                'LAST_5_YEARS': 'last5Years'
-            },
-            relativePeriodParamKeys: {
-                'lastWeek': 'LAST_WEEK',
-                'last4Weeks': 'LAST_4_WEEKS',
-                'last12Weeks': 'LAST_12_WEEKS',
-                'lastMonth': 'LAST_MONTH',
-                'last3Months': 'LAST_3_MONTHS',
-                'last12Months': 'LAST_12_MONTHS',
-                'lastBimonth': 'LAST_BIMONTH',
-                'last6BiMonths': 'LAST_6_BIMONTHS',
-                'lastQuarter': 'LAST_QUARTER',
-                'last4Quarters': 'LAST_4_QUARTERS',
-                'lastSixMonth': 'LAST_SIX_MONTH',
-                'last2SixMonths': 'LAST_2_SIXMONTHS',
-                'lastFinancialYear': 'LAST_FINANCIAL_YEAR',
-                'last5FinancialYears': 'LAST_5_FINANCIAL_YEARS',
-                'thisYear': 'THIS_YEAR',
-                'lastYear': 'LAST_YEAR',
-                'last5Years': 'LAST_5_YEARS'
-            },
-            periodTypes: [
-                {id: 'Daily', name: 'Daily'},
-                {id: 'Weekly', name: 'Weekly'},
-                {id: 'Monthly', name: 'Monthly'},
-                {id: 'BiMonthly', name: 'BiMonthly'},
-                {id: 'Quarterly', name: 'Quarterly'},
-                {id: 'SixMonthly', name: 'SixMonthly'},
-                {id: 'Yearly', name: 'Yearly'},
-                {id: 'FinancialOct', name: 'FinancialOct'},
-                {id: 'FinancialJuly', name: 'FinancialJuly'},
-                {id: 'FinancialApril', name: 'FinancialApril'}
-            ]
-        };
+            conf.period = {
+                relativePeriods: {
+                    'LAST_WEEK': 1,
+                    'LAST_4_WEEKS': 4,
+                    'LAST_12_WEEKS': 12,
+                    'LAST_MONTH': 1,
+                    'LAST_3_MONTHS': 3,
+                    'LAST_BIMONTH': 1,
+                    'LAST_6_BIMONTHS': 6,
+                    'LAST_12_MONTHS': 12,
+                    'LAST_QUARTER': 1,
+                    'LAST_4_QUARTERS': 4,
+                    'LAST_SIX_MONTH': 1,
+                    'LAST_2_SIXMONTHS': 2,
+                    'LAST_FINANCIAL_YEAR': 1,
+                    'LAST_5_FINANCIAL_YEARS': 6,
+                    'THIS_YEAR': 1,
+                    'LAST_YEAR': 1,
+                    'LAST_5_YEARS': 5
+                },
+                relativePeriodValueKeys: {
+                    'LAST_WEEK': 'lastWeek',
+                    'LAST_4_WEEKS': 'last4Weeks',
+                    'LAST_12_WEEKS': 'last12Weeks',
+                    'LAST_MONTH': 'lastMonth',
+                    'LAST_3_MONTHS': 'last3Months',
+                    'LAST_12_MONTHS': 'last12Months',
+                    'LAST_BIMONTH': 'lastBimonth',
+                    'LAST_6_BIMONTHS': 'last6BiMonths',
+                    'LAST_QUARTER': 'lastQuarter',
+                    'LAST_4_QUARTERS': 'last4Quarters',
+                    'LAST_SIX_MONTH': 'lastSixMonth',
+                    'LAST_2_SIXMONTHS': 'last2SixMonths',
+                    'LAST_FINANCIAL_YEAR': 'lastFinancialYear',
+                    'LAST_5_FINANCIAL_YEARS': 'last5FinancialYears',
+                    'THIS_YEAR': 'thisYear',
+                    'LAST_YEAR': 'lastYear',
+                    'LAST_5_YEARS': 'last5Years'
+                },
+                relativePeriodParamKeys: {
+                    'lastWeek': 'LAST_WEEK',
+                    'last4Weeks': 'LAST_4_WEEKS',
+                    'last12Weeks': 'LAST_12_WEEKS',
+                    'lastMonth': 'LAST_MONTH',
+                    'last3Months': 'LAST_3_MONTHS',
+                    'last12Months': 'LAST_12_MONTHS',
+                    'lastBimonth': 'LAST_BIMONTH',
+                    'last6BiMonths': 'LAST_6_BIMONTHS',
+                    'lastQuarter': 'LAST_QUARTER',
+                    'last4Quarters': 'LAST_4_QUARTERS',
+                    'lastSixMonth': 'LAST_SIX_MONTH',
+                    'last2SixMonths': 'LAST_2_SIXMONTHS',
+                    'lastFinancialYear': 'LAST_FINANCIAL_YEAR',
+                    'last5FinancialYears': 'LAST_5_FINANCIAL_YEARS',
+                    'thisYear': 'THIS_YEAR',
+                    'lastYear': 'LAST_YEAR',
+                    'last5Years': 'LAST_5_YEARS'
+                },
+                periodTypes: [
+                    {id: 'Daily', name: 'Daily'},
+                    {id: 'Weekly', name: 'Weekly'},
+                    {id: 'Monthly', name: 'Monthly'},
+                    {id: 'BiMonthly', name: 'BiMonthly'},
+                    {id: 'Quarterly', name: 'Quarterly'},
+                    {id: 'SixMonthly', name: 'SixMonthly'},
+                    {id: 'Yearly', name: 'Yearly'},
+                    {id: 'FinancialOct', name: 'FinancialOct'},
+                    {id: 'FinancialJuly', name: 'FinancialJuly'},
+                    {id: 'FinancialApril', name: 'FinancialApril'}
+                ]
+            };
 
-        conf.chart = {
-            style: {
-                inset: 30,
-                fontFamily: 'Arial,Sans-serif,Lucida Grande,Ubuntu'
-            },
-            theme: {
-                dv1: ['#94ae0a', '#0b3b68', '#a61120', '#ff8809', '#7c7474', '#a61187', '#ffd13e', '#24ad9a', '#a66111', '#414141', '#4500c4', '#1d5700']
+            conf.chart = {
+                style: {
+                    inset: 30,
+                    fontFamily: 'Arial,Sans-serif,Lucida Grande,Ubuntu'
+                },
+                theme: {
+                    dv1: ['#94ae0a', '#0b3b68', '#a61120', '#ff8809', '#7c7474', '#a61187', '#ffd13e', '#24ad9a', '#a66111', '#414141', '#4500c4', '#1d5700']
+                }
+            };
+
+            conf.statusbar = {
+                icon: {
+                    error: 'error_s.png',
+                    warning: 'warning.png',
+                    ok: 'ok.png'
+                }
+            };
+
+            conf.layout = {
+                west_width: 424,
+                west_fieldset_width: 416,
+                west_width_padding: 4,
+                west_fill: 2,
+                west_fill_accordion_indicator: 59,
+                west_fill_accordion_dataelement: 59,
+                west_fill_accordion_dataset: 33,
+                west_fill_accordion_period: 296,
+                west_fill_accordion_organisationunit: 62,
+                west_maxheight_accordion_indicator: 350,
+                west_maxheight_accordion_dataelement: 350,
+                west_maxheight_accordion_dataset: 350,
+                west_maxheight_accordion_period: 513,
+                west_maxheight_accordion_organisationunit: 500,
+                west_maxheight_accordion_group: 350,
+                west_scrollbarheight_accordion_indicator: 300,
+                west_scrollbarheight_accordion_dataelement: 300,
+                west_scrollbarheight_accordion_dataset: 300,
+                west_scrollbarheight_accordion_period: 450,
+                west_scrollbarheight_accordion_organisationunit: 450,
+                west_scrollbarheight_accordion_group: 300,
+                east_tbar_height: 31,
+                east_gridcolumn_height: 30,
+                form_label_width: 55,
+                window_favorite_ypos: 100,
+                window_confirm_width: 250,
+                window_share_width: 500,
+                grid_favorite_width: 420,
+                grid_row_height: 27,
+                treepanel_minheight: 135,
+                treepanel_maxheight: 400,
+                treepanel_fill_default: 310,
+                treepanel_toolbar_menu_width_group: 140,
+                treepanel_toolbar_menu_width_level: 120,
+                multiselect_minheight: 100,
+                multiselect_maxheight: 250,
+                multiselect_fill_default: 345,
+                multiselect_fill_reportingrates: 315
+            };
+        }());
+
+        // util
+        (function() {
+
+            util.array = {
+                sortDimensions: function(dimensions, key) {
+                    key = key || 'dimensionName';
+
+                    // Sort object order
+                    Ext.Array.sort(dimensions, function(a,b) {
+                        if (a[key] < b[key]) {
+                            return -1;
+                        }
+                        if (a[key] > b[key]) {
+                            return 1;
+                        }
+                        return 0;
+                    });
+
+                    // Sort object items order
+                    for (var i = 0, dim; i < dimensions.length; i++) {
+                        dim = dimensions[i];
+
+                        if (dim.items) {
+                            dimensions[i].items.sort();
+                        }
+                    }
+
+                    return dimensions;
+                },
+
+                sortObjectsByString: function(array, key) {
+                    key = key || 'name';
+                    array.sort( function(a, b) {
+                        var nameA = a[key].toLowerCase(),
+                            nameB = b[key].toLowerCase();
+
+                        if (nameA < nameB) {
+                            return -1;
+                        }
+                        if (nameA > nameB) {
+                            return 1;
+                        }
+                        return 0;
+                    });
+                    return array;
+                }
+            };
+
+            util.window = {
+                setAnchorPosition: function(w, target) {
+                    var vpw = dv.viewport.getWidth(),
+                        targetx = target ? target.getPosition()[0] : 4,
+                        winw = w.getWidth(),
+                        y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
+
+                    if ((targetx + winw) > vpw) {
+                        w.setPosition((vpw - winw - 2), y);
+                    }
+                    else {
+                        w.setPosition(targetx, y);
+                    }
+                },
+                addHideOnBlurHandler: function(w) {
+                    var el = Ext.get(Ext.query('.x-mask')[0]);
+
+                    el.on('click', function() {
+                        if (w.hideOnBlur) {
+                            w.hide();
+                        }
+                    });
+
+                    w.hasHideOnBlurHandler = true;
+                },
+                addDestroyOnBlurHandler: function(w) {
+                    var el = Ext.get(Ext.query('.x-mask')[0]);
+
+                    el.on('click', function() {
+                        if (w.destroyOnBlur) {
+                            w.destroy();
+                        }
+                    });
+
+                    w.hasDestroyOnBlurHandler = true;
+                }
+            };
+
+            util.mask = {
+                showMask: function(cmp, msg) {
+                    cmp = cmp || pt.viewport.centerRegion;
+                    msg = msg || 'Loading..';
+
+                    if (dv.viewport.mask) {
+                        dv.viewport.mask.destroy();
+                    }
+                    dv.viewport.mask = new Ext.LoadMask(cmp, {msg: msg});
+                    dv.viewport.mask.show();
+                },
+                hideMask: function() {
+                    if (dv.viewport.mask) {
+                        dv.viewport.mask.hide();
+                    }
+                }
+            };
+
+            util.number = {
+                isInteger: function(n) {
+                    var str = new String(n);
+                    if (str.indexOf('-') > -1) {
+                        var d = str.substr(str.indexOf('-') + 1);
+                        return (d.length === 1 && d == '0');
+                    }
+                    return false;
+                },
+                allValuesAreIntegers: function(values) {
+                    for (var i = 0; i < values.length; i++) {
+                        if (!this.isInteger(values[i].value)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                },
+                getChartAxisFormatRenderer: function() {
+                    return this.allValuesAreIntegers(DV.value.values) ? '0' : '0.0';
+                }
+            };
+
+            util.str = {
+                replaceAll: function(str, find, replace) {
+                    return str.replace(new RegExp(find, 'g'), replace);
+                }
+            };
+
+            util.value = {
+                jsonfy: function(values) {
+                    var a = [];
+                    for (var i = 0; i < values.length; i++) {
+                        var v = {
+                            value: parseFloat(values[i][0]),
+                            data: values[i][1],
+                            period: values[i][2],
+                            organisationunit: values[i][3]
+                        };
+                        a.push(v);
+                    }
+                    return a;
+                }
+            };
+        }());
+
+        // init
+        (function() {
+
+            // sort and extend dynamic dimensions
+            init.dimensions = util.array.sortObjectsByString(init.dimensions);
+
+            for (var i = 0, dim; i < init.dimensions.length; i++) {
+                dim = init.dimensions[i];
+                dim.dimensionName = dim.id;
+                dim.objectName = dimConf.dimension.objectName;
+                dimConf.objectNameMap[dim.id] = dim;
             }
-        };
+        }());
 
-        conf.statusbar = {
-            icon: {
-                error: 'error_s.png',
-                warning: 'warning.png',
-                ok: 'ok.png'
-            }
-        };
+        // api
+        (function() {
 
-        conf.layout = {
-            west_width: 424,
-            west_fieldset_width: 416,
-            west_width_padding: 4,
-            west_fill: 2,
-            west_fill_accordion_indicator: 59,
-            west_fill_accordion_dataelement: 59,
-            west_fill_accordion_dataset: 33,
-            west_fill_accordion_period: 296,
-            west_fill_accordion_organisationunit: 62,
-            west_maxheight_accordion_indicator: 350,
-            west_maxheight_accordion_dataelement: 350,
-            west_maxheight_accordion_dataset: 350,
-            west_maxheight_accordion_period: 513,
-            west_maxheight_accordion_organisationunit: 500,
-            west_maxheight_accordion_group: 350,
-            west_scrollbarheight_accordion_indicator: 300,
-            west_scrollbarheight_accordion_dataelement: 300,
-            west_scrollbarheight_accordion_dataset: 300,
-            west_scrollbarheight_accordion_period: 450,
-            west_scrollbarheight_accordion_organisationunit: 450,
-            west_scrollbarheight_accordion_group: 300,
-            east_tbar_height: 31,
-            east_gridcolumn_height: 30,
-            form_label_width: 55,
-            window_favorite_ypos: 100,
-            window_confirm_width: 250,
-            window_share_width: 500,
-            grid_favorite_width: 420,
-            grid_row_height: 27,
-            treepanel_minheight: 135,
-            treepanel_maxheight: 400,
-            treepanel_fill_default: 310,
-            treepanel_toolbar_menu_width_group: 140,
-            treepanel_toolbar_menu_width_level: 120,
-            multiselect_minheight: 100,
-            multiselect_maxheight: 250,
-            multiselect_fill_default: 345,
-            multiselect_fill_reportingrates: 315
-        };
+            api.layout = {};
+            api.response = {};
 
-        return conf;
-    };
+            api.layout.Record = function(config) {
+                var record = {};
 
-    DV.core.getUtils = function(dv) {
-        var util = {};
+                // id: string
 
-        util.array = {
-            sortDimensions: function(dimensions, key) {
-                key = key || 'dimensionName';
-
-                // Sort object order
-                Ext.Array.sort(dimensions, function(a,b) {
-                    if (a[key] < b[key]) {
-                        return -1;
+                return function() {
+                    if (!Ext.isObject(config)) {
+                        console.log('Record config is not an object: ' + config);
+                        return;
                     }
-                    if (a[key] > b[key]) {
-                        return 1;
+
+                    if (!Ext.isString(config.id)) {
+                        alert('Record id is not text: ' + config);
+                        return;
                     }
-                    return 0;
-                });
 
-                // Sort object items order
-                for (var i = 0, dim; i < dimensions.length; i++) {
-                    dim = dimensions[i];
+                    record.id = config.id.replace('.', '-');
 
-                    if (dim.items) {
-                        dimensions[i].items.sort();
+                    if (Ext.isString(config.name)) {
+                        record.name = config.name;
                     }
-                }
 
-                return dimensions;
-            },
+                    return Ext.clone(record);
+                }();
+            };
 
-            sortObjectsByString: function(array, key) {
-                key = key || 'name';
-                array.sort( function(a, b) {
-                    var nameA = a[key].toLowerCase(),
-                        nameB = b[key].toLowerCase();
+            api.layout.Dimension = function(config) {
+                var dimension = {};
 
-                    if (nameA < nameB) {
-                        return -1;
+                // dimension: string
+
+                // items: [Record]
+
+                return function() {
+                    if (!Ext.isObject(config)) {
+                        console.log('Dimension config is not an object: ' + config);
+                        return;
                     }
-                    if (nameA > nameB) {
-                        return 1;
+
+                    if (!Ext.isString(config.dimension)) {
+                        console.log('Dimension name is not text: ' + config);
+                        return;
                     }
-                    return 0;
-                });
-                return array;
-            }
-        };
 
-        util.window = {
-            setAnchorPosition: function(w, target) {
-                var vpw = dv.viewport.getWidth(),
-                    targetx = target ? target.getPosition()[0] : 4,
-                    winw = w.getWidth(),
-                    y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
+                    if (config.dimension !== conf.finals.dimension.category.objectName) {
+                        var records = [];
 
-                if ((targetx + winw) > vpw) {
-                    w.setPosition((vpw - winw - 2), y);
-                }
-                else {
-                    w.setPosition(targetx, y);
-                }
-            },
-            addHideOnBlurHandler: function(w) {
-                var el = Ext.get(Ext.query('.x-mask')[0]);
+                        if (!Ext.isArray(config.items)) {
+                            console.log('Dimension items is not an array: ' + config);
+                            return;
+                        }
 
-                el.on('click', function() {
-                    if (w.hideOnBlur) {
-                        w.hide();
+                        for (var i = 0; i < config.items.length; i++) {
+                            record = api.layout.Record(config.items[i]);
+
+                            if (record) {
+                                records.push(record);
+                            }
+                        }
+
+                        config.items = records;
+
+                        if (!config.items.length) {
+                            console.log('Dimension has no valid items: ' + config);
+                            return;
+                        }
                     }
-                });
 
-                w.hasHideOnBlurHandler = true;
-            },
-            addDestroyOnBlurHandler: function(w) {
-                var el = Ext.get(Ext.query('.x-mask')[0]);
+                    dimension.dimension = config.dimension;
+                    dimension.items = config.items;
 
-                el.on('click', function() {
-                    if (w.destroyOnBlur) {
-                        w.destroy();
+                    return Ext.clone(dimension);
+                }();
+            };
+
+            api.layout.Layout = function(config) {
+                var layout = {};
+
+                // type: string ('column') - 'column', 'stackedcolumn', 'bar', 'stackedbar', 'line', 'area', 'pie'
+
+                // columns: [Dimension]
+
+                // rows: [Dimension]
+
+                // filters: [Dimension]
+
+                // showTrendLine: boolean (false)
+
+                // targetLineValue: number
+
+                // targetLineTitle: string
+
+                // baseLineValue: number
+
+                // baseLineTitle: string
+
+                // showValues: boolean (true)
+
+                // hideLegend: boolean (false)
+
+                // hideTitle: boolean (false)
+
+                // domainAxisTitle: string
+
+                // rangeAxisTitle: string
+
+                // userOrganisationUnit: boolean (false)
+
+                // userOrganisationUnitChildren: boolean (false)
+
+                // parentGraphMap: object
+
+                var getValidatedDimensionArray = function(dimensionArray) {
+                    var dimensions = [];
+
+                    if (!(dimensionArray && Ext.isArray(dimensionArray) && dimensionArray.length)) {
+                        return;
                     }
-                });
 
-                w.hasDestroyOnBlurHandler = true;
-            }
-        };
+                    for (var i = 0, dimension; i < dimensionArray.length; i++) {
+                        dimension = api.layout.Dimension(dimensionArray[i]);
 
-        util.mask = {
-            showMask: function(cmp, msg) {
-                cmp = cmp || pt.viewport.centerRegion;
-                msg = msg || 'Loading..';
+                        if (dimension) {
+                            dimensions.push(dimension);
+                        }
+                    }
 
-                if (dv.viewport.mask) {
-                    dv.viewport.mask.destroy();
-                }
-                dv.viewport.mask = new Ext.LoadMask(cmp, {msg: msg});
-                dv.viewport.mask.show();
-            },
-            hideMask: function() {
-                if (dv.viewport.mask) {
-                    dv.viewport.mask.hide();
-                }
-            }
-        };
+                    dimensionArray = dimensions;
 
-        util.number = {
-            isInteger: function(n) {
-                var str = new String(n);
-                if (str.indexOf('-') > -1) {
-                    var d = str.substr(str.indexOf('-') + 1);
-                    return (d.length === 1 && d == '0');
-                }
-                return false;
-            },
-            allValuesAreIntegers: function(values) {
-                for (var i = 0; i < values.length; i++) {
-                    if (!this.isInteger(values[i].value)) {
+                    return dimensionArray.length ? dimensionArray : null;
+                };
+
+                return function() {
+                    var a = [],
+                        objectNames = [],
+                        dims,
+                        isOu = false,
+                        isOuc = false;
+
+                    config.columns = getValidatedDimensionArray(config.columns);
+                    config.rows = getValidatedDimensionArray(config.rows);
+                    config.filters = getValidatedDimensionArray(config.filters);
+
+                    // Config must be an object
+                    if (!(config && Ext.isObject(config))) {
+                        console.log(dv.init.el + ': Layout config is not an object');
+                        return;
+                    }
+
+                    // Series, category, filter
+                    if (!config.columns) {
+                        alert('No series dimension specified');
+                        return;
+                    }
+                    if (!config.rows) {
+                        alert('No category dimension specified');
+                        return;
+                    }
+                    if (!config.filters) {
+                        alert('No filter dimensions specified');
+                        return;
+                    }
+
+                    // Get object names and isOu/isOuc
+                    for (var i = 0, dim, dims = [].concat(config.columns, config.rows, config.filters); i < dims.length; i++) {
+                        dim = dims[i];
+
+                        if (dim) {
+
+                            // Object names
+                            if (Ext.isString(dim.dimension)) {
+                                objectNames.push(dim.dimension);
+                            }
+
+                            // isOu/isOuc
+                            if (dim.dimension === dimConf.organisationUnit.objectName && Ext.isArray(dim.items)) {
+                                for (var j = 0; j < dim.items.length; j++) {
+                                    if (dim.items[j].id === 'USER_ORGUNIT') {
+                                        isOu = true;
+                                    }
+                                    else if (dim.items[j].id === 'USER_ORGUNIT_CHILDREN') {
+                                        isOuc = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (!Ext.Array.contains(objectNames, dimConf.period.objectName)) {
+                        alert('At least one period must be specified as series, category or filter');
+                        return;
+                    }
+
+                    // Layout
+                    layout.type = Ext.isString(config.type) ? config.type.toLowerCase() : conf.finals.chart.column;
+
+                    layout.columns = config.columns;
+                    layout.rows = config.rows;
+                    layout.filters = config.filters;
+
+                    // Properties
+                    layout.showTrendLine = Ext.isBoolean(config.regression) ? config.regression : (Ext.isBoolean(config.showTrendLine) ? config.showTrendLine : false);
+                    layout.showValues = Ext.isBoolean(config.showData) ? config.showData : (Ext.isBoolean(config.showValues) ? config.showValues : true);
+
+                    layout.hideLegend = Ext.isBoolean(config.hideLegend) ? config.hideLegend : false;
+                    layout.hideTitle = Ext.isBoolean(config.hideTitle) ? config.hideTitle : false;
+
+                    layout.targetLineValue = Ext.isNumber(config.targetLineValue) ? config.targetLineValue : null;
+                    layout.targetLineTitle = Ext.isString(config.targetLineLabel) && !Ext.isEmpty(config.targetLineLabel) ? config.targetLineLabel :
+                        (Ext.isString(config.targetLineTitle) && !Ext.isEmpty(config.targetLineTitle) ? config.targetLineTitle : null);
+                    layout.baseLineValue = Ext.isNumber(config.baseLineValue) ? config.baseLineValue : null;
+                    layout.baseLineTitle = Ext.isString(config.baseLineLabel) && !Ext.isEmpty(config.baseLineLabel) ? config.baseLineLabel :
+                        (Ext.isString(config.baseLineTitle) && !Ext.isEmpty(config.baseLineTitle) ? config.baseLineTitle : null);
+
+                    layout.title = Ext.isString(config.title) &&  !Ext.isEmpty(config.title) ? config.title : null;
+                    layout.domainAxisTitle = Ext.isString(config.domainAxisLabel) && !Ext.isEmpty(config.domainAxisLabel) ? config.domainAxisLabel :
+                        (Ext.isString(config.domainAxisTitle) && !Ext.isEmpty(config.domainAxisTitle) ? config.domainAxisTitle : null);
+                    layout.rangeAxisTitle = Ext.isString(config.rangeAxisLabel) && !Ext.isEmpty(config.rangeAxisLabel) ? config.rangeAxisLabel :
+                        (Ext.isString(config.rangeAxisTitle) && !Ext.isEmpty(config.rangeAxisTitle) ? config.rangeAxisTitle : null);
+
+                    layout.userOrganisationUnit = isOu;
+                    layout.userOrganisationUnitChildren = isOuc;
+
+                    layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
+
+                    return Ext.clone(layout);
+                }();
+            };
+
+            api.response.Header = function(config) {
+                var header = {};
+
+                // name: string
+
+                // meta: boolean
+
+                return function() {
+                    if (!Ext.isObject(config)) {
+                        console.log('Header is not an object: ' + config);
+                        return;
+                    }
+
+                    if (!Ext.isString(config.name)) {
+                        console.log('Header name is not text: ' + config);
+                        return;
+                    }
+
+                    if (!Ext.isBoolean(config.meta)) {
+                        console.log('Header meta is not boolean: ' + config);
+                        return;
+                    }
+
+                    header.name = config.name;
+                    header.meta = config.meta;
+
+                    return Ext.clone(header);
+                }();
+            };
+
+            api.response.Response = function(config) {
+                var response = {};
+
+                // headers: [Header]
+
+                return function() {
+                    var headers = [];
+
+                    if (!(config && Ext.isObject(config))) {
+                        alert('Data response invalid');
                         return false;
                     }
-                }
-                return true;
-            },
-            getChartAxisFormatRenderer: function() {
-                return this.allValuesAreIntegers(DV.value.values) ? '0' : '0.0';
-            }
-        };
 
-        util.str = {
-            replaceAll: function(str, find, replace) {
-                return str.replace(new RegExp(find, 'g'), replace);
-            }
-        };
+                    if (!(config.headers && Ext.isArray(config.headers))) {
+                        alert('Data response invalid');
+                        return false;
+                    }
 
-        util.value = {
-            jsonfy: function(values) {
-                var a = [];
-                for (var i = 0; i < values.length; i++) {
-                    var v = {
-                        value: parseFloat(values[i][0]),
-                        data: values[i][1],
-                        period: values[i][2],
-                        organisationunit: values[i][3]
-                    };
-                    a.push(v);
-                }
-                return a;
-            }
-        };
+                    for (var i = 0, header; i < config.headers.length; i++) {
+                        header = api.response.Header(config.headers[i]);
 
-        util.chart = {
-            getExtendedLayout: function(layout) {
-                var dimConf = dv.conf.finals.dimension,
-                    layout = Ext.clone(layout),
+                        if (header) {
+                            headers.push(header);
+                        }
+                    }
+
+                    config.headers = headers;
+
+                    if (!config.headers.length) {
+                        alert('No valid response headers');
+                        return;
+                    }
+
+                    if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
+                        alert('No values found');
+                        return false;
+                    }
+
+                    if (config.headers.length !== config.rows[0].length) {
+                        alert('Data invalid');
+                        return false;
+                    }
+
+                    response.headers = config.headers;
+                    response.metaData = config.metaData;
+                    response.width = config.width;
+                    response.height = config.height;
+                    response.rows = config.rows;
+
+                    return response;
+                }();
+            };
+        }());
+
+        // engine
+        (function() {
+            engine.getExtendedLayout = function(layout) {
+                var layout = Ext.clone(layout),
                     xLayout = {
                         columns: [],
                         rows: [],
@@ -632,7 +954,7 @@ Ext.onReady( function() {
 
                     // For param string
                 xLayout.sortedAxisDimensionNames = Ext.clone(xLayout.axisDimensionNames).sort();
-                xLayout.sortedFilterDimensions = dv.util.array.sortDimensions(Ext.clone(xLayout.filterDimensions));
+                xLayout.sortedFilterDimensions = util.array.sortDimensions(Ext.clone(xLayout.filterDimensions));
 
                 // All
                 xLayout.dimensions = [].concat(xLayout.axisDimensions, xLayout.filterDimensions);
@@ -664,14 +986,13 @@ Ext.onReady( function() {
                 }
 
                 return xLayout;
-            },
+            };
 
-            getParamString: function(xLayout, isSorted) {
+            engine.getParamString = function(xLayout, isSorted) {
                 var axisDimensionNames = isSorted ? xLayout.sortedAxisDimensionNames : xLayout.axisDimensionNames,
                     filterDimensions = isSorted ? xLayout.sortedFilterDimensions : xLayout.filterDimensions,
                     dimensionNameIdsMap = isSorted ? xLayout.dimensionNameSortedIdsMap : xLayout.dimensionNameIdsMap,
                     paramString = '?',
-                    dimConf = dv.conf.finals.dimension,
                     addCategoryDimension = false,
                     map = xLayout.dimensionNameItemsMap,
                     dx = dimConf.indicator.dimensionName;
@@ -718,9 +1039,9 @@ Ext.onReady( function() {
                 }
 
                 return paramString;
-            },
+            };
 
-            setSessionStorage: function(obj, session, url) {
+            engine.setSessionStorage = function(obj, session, url) {
                 if (DV.isSessionStorage) {
                     dhis2 = JSON.parse(sessionStorage.getItem('dhis2')) || {};
                     dhis2[session] = obj;
@@ -730,11 +1051,10 @@ Ext.onReady( function() {
                         window.location.href = url;
                     }
                 }
-            },
+            };
 
-            createChart: function(layout, dv) {
-                var dimConf = dv.conf.finals.dimension,
-                    getSyncronizedXLayout,
+            engine.createChart = function(layout, dv) {
+                var getSyncronizedXLayout,
                     getExtendedResponse,
                     getDefaultStore,
                     getDefaultNumericAxis,
@@ -794,7 +1114,7 @@ Ext.onReady( function() {
                                         name: response.metaData.names[ids[j]]
                                     });
 
-                                    dim.items = dv.util.array.sortObjectsByString(dim.items);
+                                    dim.items = util.array.sortObjectsByString(dim.items);
                                 }
                             }
                             else {
@@ -835,7 +1155,7 @@ Ext.onReady( function() {
                             }
                         }
 
-                        return dv.util.chart.getExtendedLayout(layout);
+                        return engine.getExtendedLayout(layout);
                     }
 
                     return null;
@@ -986,7 +1306,7 @@ Ext.onReady( function() {
 
                         obj[dv.conf.finals.data.domain] = xResponse.metaData.names[category];
                         for (var j = 0, id; j < columnIds.length; j++) {
-                            id = dv.util.str.replaceAll(columnIds[j], '-', '') + dv.util.str.replaceAll(rowIds[i], '-', '');
+                            id = util.str.replaceAll(columnIds[j], '-', '') + util.str.replaceAll(rowIds[i], '-', '');
                             //id = columnIds[j].replace('-', '') + rowIds[i].replace('-', '');
 
                             obj[columnIds[j]] = xResponse.idValueMap[id];
@@ -1823,16 +2143,16 @@ Ext.onReady( function() {
                         xResponse,
                         chart;
 
-                    xLayout = util.chart.getExtendedLayout(layout);
+                    xLayout = engine.getExtendedLayout(layout);
 
-                    dv.paramString = util.chart.getParamString(xLayout, true);
+                    dv.paramString = engine.getParamString(xLayout, true);
                     url = dv.init.contextPath + '/api/analytics.json' + dv.paramString;
 
                     if (!validateUrl(url)) {
                         return;
                     }
 
-                    dv.util.mask.showMask(dv.viewport.centerRegion);
+                    util.mask.showMask(dv.viewport.centerRegion);
 
                     Ext.Ajax.request({
                         method: 'GET',
@@ -1845,7 +2165,7 @@ Ext.onReady( function() {
                         },
                         disableCaching: false,
                         failure: function(r) {
-                            dv.util.mask.hideMask();
+                            util.mask.hideMask();
                             alert(r.responseText);
                         },
                         success: function(r) {
@@ -1853,14 +2173,14 @@ Ext.onReady( function() {
                                 response = Ext.decode(r.responseText);
 
                             if (!validateResponse(response)) {
-                                dv.util.mask.hideMask();
+                                util.mask.hideMask();
                                 return;
                             }
 
                             xLayout = getSyncronizedXLayout(xLayout, response);
 
                             if (!xLayout) {
-                                dv.util.mask.hideMask();
+                                util.mask.hideMask();
                                 return;
                             }
 
@@ -1872,7 +2192,7 @@ Ext.onReady( function() {
                             dv.viewport.centerRegion.add(chart);
 
                             // After table success
-                            dv.util.mask.hideMask();
+                            util.mask.hideMask();
 
                             if (dv.viewport.downloadButton) {
                                 dv.viewport.downloadButton.enable();
@@ -1880,7 +2200,7 @@ Ext.onReady( function() {
 
                             // Set session storage
                             if (DV.isSessionStorage) {
-                                dv.util.chart.setSessionStorage(layout, 'chart');
+                                engine.setSessionStorage(layout, 'chart');
                             }
 
                             dv.chart = chart;
@@ -1897,10 +2217,10 @@ Ext.onReady( function() {
                     });
 
                 }();
-            },
+            };
 
-            loadChart: function(id) {
-                var url = dv.baseUrl + '/api/charts/' + id,
+            engine.loadChart = function(id, dv) {
+                var url = init.contextPath + '/api/charts/' + id,
                     params = '?viewClass=dimensional&links=false',
                     method = 'GET',
                     success,
@@ -1912,7 +2232,7 @@ Ext.onReady( function() {
                 }
 
                 success = function(layoutConfig) {
-                    var layout = dv.api.layout.Layout(layoutConfig);
+                    var layout = api.layout.Layout(layoutConfig);
 
                     if (layout) {
                         dv.favorite = Ext.clone(layout);
@@ -1924,7 +2244,7 @@ Ext.onReady( function() {
                 };
 
                 failure = function(responseText) {
-                    dv.util.mask.hideMask();
+                    util.mask.hideMask();
                     alert(responseText);
                 };
 
@@ -1952,11 +2272,10 @@ Ext.onReady( function() {
                         }
                     });
                 }
-            },
+            };
 
-            analytical2layout: function(analytical) {
-                var dimConf = dv.conf.finals.dimension,
-                    co = dimConf.category.objectName,
+            engine.analytical2layout = function(analytical) {
+                var co = dimConf.category.objectName,
                     layoutConfig = Ext.clone(analytical);
 
                 analytical = Ext.clone(analytical);
@@ -2018,355 +2337,18 @@ Ext.onReady( function() {
                 }
 
                 return layoutConfig;
-            }
-        };
-
-        return util;
-    };
-
-    DV.core.getApi = function(dv) {
-        var dimConf = dv.conf.finals.dimension,
-            api = {
-                layout: {
-                    Record: null,
-                    Dimension: null,
-                    Layout: null
-                },
-                response: {
-                    Header: null,
-                    Response: null
-                }
             };
-
-        // Layout
-
-        api.layout.Record = function(config) {
-            var record = {};
-
-            // id: string
-
-            return function() {
-                if (!Ext.isObject(config)) {
-                    console.log('Record config is not an object: ' + config);
-                    return;
-                }
-
-                if (!Ext.isString(config.id)) {
-                    alert('Record id is not text: ' + config);
-                    return;
-                }
-
-                record.id = config.id.replace('.', '-');
-
-                if (Ext.isString(config.name)) {
-                    record.name = config.name;
-                }
-
-                return Ext.clone(record);
-            }();
-        };
-
-        api.layout.Dimension = function(config) {
-            var dimension = {};
-
-            // dimension: string
-
-            // items: [Record]
-
-            return function() {
-                if (!Ext.isObject(config)) {
-                    console.log('Dimension config is not an object: ' + config);
-                    return;
-                }
-
-                if (!Ext.isString(config.dimension)) {
-                    console.log('Dimension name is not text: ' + config);
-                    return;
-                }
-
-                if (config.dimension !== dv.conf.finals.dimension.category.objectName) {
-                    var records = [];
-
-                    if (!Ext.isArray(config.items)) {
-                        console.log('Dimension items is not an array: ' + config);
-                        return;
-                    }
-
-                    for (var i = 0; i < config.items.length; i++) {
-                        record = api.layout.Record(config.items[i]);
-
-                        if (record) {
-                            records.push(record);
-                        }
-                    }
-
-                    config.items = records;
-
-                    if (!config.items.length) {
-                        console.log('Dimension has no valid items: ' + config);
-                        return;
-                    }
-                }
-
-                dimension.dimension = config.dimension;
-                dimension.items = config.items;
-
-                return Ext.clone(dimension);
-            }();
-        };
-
-        api.layout.Layout = function(config) {
-            var layout = {};
-
-            // type: string ('column') - 'column', 'stackedcolumn', 'bar', 'stackedbar', 'line', 'area', 'pie'
-
-            // columns: [Dimension]
-
-            // rows: [Dimension]
-
-            // filters: [Dimension]
-
-            // showTrendLine: boolean (false)
-
-            // targetLineValue: number
-
-            // targetLineTitle: string
-
-            // baseLineValue: number
-
-            // baseLineTitle: string
-
-            // showValues: boolean (true)
-
-            // hideLegend: boolean (false)
-
-            // hideTitle: boolean (false)
-
-            // domainAxisTitle: string
-
-            // rangeAxisTitle: string
-
-            // userOrganisationUnit: boolean (false)
-
-            // userOrganisationUnitChildren: boolean (false)
-
-            // parentGraphMap: object
-
-            var getValidatedDimensionArray = function(dimensionArray) {
-                var dimensions = [];
-
-                if (!(dimensionArray && Ext.isArray(dimensionArray) && dimensionArray.length)) {
-                    return;
-                }
-
-                for (var i = 0, dimension; i < dimensionArray.length; i++) {
-                    dimension = api.layout.Dimension(dimensionArray[i]);
-
-                    if (dimension) {
-                        dimensions.push(dimension);
-                    }
-                }
-
-                dimensionArray = dimensions;
-
-                return dimensionArray.length ? dimensionArray : null;
-            };
-
-            return function() {
-                var a = [],
-                    objectNames = [],
-                    dimConf = dv.conf.finals.dimension,
-                    dims,
-                    isOu = false,
-                    isOuc = false;
-
-                config.columns = getValidatedDimensionArray(config.columns);
-                config.rows = getValidatedDimensionArray(config.rows);
-                config.filters = getValidatedDimensionArray(config.filters);
-
-                // Config must be an object
-                if (!(config && Ext.isObject(config))) {
-                    console.log(dv.el + ': Layout config is not an object');
-                    return;
-                }
-
-                // Series, category, filter
-                if (!config.columns) {
-                    alert('No series dimension specified');
-                    return;
-                }
-                if (!config.rows) {
-                    alert('No category dimension specified');
-                    return;
-                }
-                if (!config.filters) {
-                    alert('No filter dimensions specified');
-                    return;
-                }
-
-                // Get object names and isOu/isOuc
-                for (var i = 0, dim, dims = [].concat(config.columns, config.rows, config.filters); i < dims.length; i++) {
-                    dim = dims[i];
-
-                    if (dim) {
-
-                        // Object names
-                        if (Ext.isString(dim.dimension)) {
-                            objectNames.push(dim.dimension);
-                        }
-
-                        // isOu/isOuc
-                        if (dim.dimension === dimConf.organisationUnit.objectName && Ext.isArray(dim.items)) {
-                            for (var j = 0; j < dim.items.length; j++) {
-                                if (dim.items[j].id === 'USER_ORGUNIT') {
-                                    isOu = true;
-                                }
-                                else if (dim.items[j].id === 'USER_ORGUNIT_CHILDREN') {
-                                    isOuc = true;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (!Ext.Array.contains(objectNames, dimConf.period.objectName)) {
-                    alert('At least one period must be specified as series, category or filter');
-                    return;
-                }
-
-                // Layout
-                layout.type = Ext.isString(config.type) ? config.type.toLowerCase() : dv.conf.finals.chart.column;
-
-                layout.columns = config.columns;
-                layout.rows = config.rows;
-                layout.filters = config.filters;
-
-                // Properties
-                layout.showTrendLine = Ext.isBoolean(config.regression) ? config.regression : (Ext.isBoolean(config.showTrendLine) ? config.showTrendLine : false);
-                layout.showValues = Ext.isBoolean(config.showData) ? config.showData : (Ext.isBoolean(config.showValues) ? config.showValues : true);
-
-                layout.hideLegend = Ext.isBoolean(config.hideLegend) ? config.hideLegend : false;
-                layout.hideTitle = Ext.isBoolean(config.hideTitle) ? config.hideTitle : false;
-
-                layout.targetLineValue = Ext.isNumber(config.targetLineValue) ? config.targetLineValue : null;
-                layout.targetLineTitle = Ext.isString(config.targetLineLabel) && !Ext.isEmpty(config.targetLineLabel) ? config.targetLineLabel :
-                    (Ext.isString(config.targetLineTitle) && !Ext.isEmpty(config.targetLineTitle) ? config.targetLineTitle : null);
-                layout.baseLineValue = Ext.isNumber(config.baseLineValue) ? config.baseLineValue : null;
-                layout.baseLineTitle = Ext.isString(config.baseLineLabel) && !Ext.isEmpty(config.baseLineLabel) ? config.baseLineLabel :
-                    (Ext.isString(config.baseLineTitle) && !Ext.isEmpty(config.baseLineTitle) ? config.baseLineTitle : null);
-
-                layout.title = Ext.isString(config.title) &&  !Ext.isEmpty(config.title) ? config.title : null;
-                layout.domainAxisTitle = Ext.isString(config.domainAxisLabel) && !Ext.isEmpty(config.domainAxisLabel) ? config.domainAxisLabel :
-                    (Ext.isString(config.domainAxisTitle) && !Ext.isEmpty(config.domainAxisTitle) ? config.domainAxisTitle : null);
-                layout.rangeAxisTitle = Ext.isString(config.rangeAxisLabel) && !Ext.isEmpty(config.rangeAxisLabel) ? config.rangeAxisLabel :
-                    (Ext.isString(config.rangeAxisTitle) && !Ext.isEmpty(config.rangeAxisTitle) ? config.rangeAxisTitle : null);
-
-                layout.userOrganisationUnit = isOu;
-                layout.userOrganisationUnitChildren = isOuc;
-
-                layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
-
-                return Ext.clone(layout);
-            }();
-        };
-
-        // Response
-
-        api.response.Header = function(config) {
-            var header = {};
-
-            // name: string
-
-            // meta: boolean
-
-            return function() {
-                if (!Ext.isObject(config)) {
-                    console.log('Header is not an object: ' + config);
-                    return;
-                }
-
-                if (!Ext.isString(config.name)) {
-                    console.log('Header name is not text: ' + config);
-                    return;
-                }
-
-                if (!Ext.isBoolean(config.meta)) {
-                    console.log('Header meta is not boolean: ' + config);
-                    return;
-                }
-
-                header.name = config.name;
-                header.meta = config.meta;
-
-                return Ext.clone(header);
-            }();
-        };
-
-        api.response.Response = function(config) {
-            var response = {};
-
-            // headers: [Header]
-
-            return function() {
-                var headers = [];
-
-                if (!(config && Ext.isObject(config))) {
-                    alert('Data response invalid');
-                    return false;
-                }
-
-                if (!(config.headers && Ext.isArray(config.headers))) {
-                    alert('Data response invalid');
-                    return false;
-                }
-
-                for (var i = 0, header; i < config.headers.length; i++) {
-                    header = api.response.Header(config.headers[i]);
-
-                    if (header) {
-                        headers.push(header);
-                    }
-                }
-
-                config.headers = headers;
-
-                if (!config.headers.length) {
-                    alert('No valid response headers');
-                    return;
-                }
-
-                if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
-                    alert('No values found');
-                    return false;
-                }
-
-                if (config.headers.length !== config.rows[0].length) {
-                    alert('Data invalid');
-                    return false;
-                }
-
-                response.headers = config.headers;
-                response.metaData = config.metaData;
-                response.width = config.width;
-                response.height = config.height;
-                response.rows = config.rows;
-
-                return response;
-            }();
-        };
-
-        return api;
-    };
-
-    DV.core.getInstance = function(config) {
-        var dv = {};
-
-        dv.conf = DV.core.getConfigs();
-        dv.util = DV.core.getUtils(dv);
-        dv.api = DV.core.getApi(dv);
-
-        DV.core.instances.push(dv);
-
-        return dv;
+        }());
+
+        // instance
+        DV.core.instances.push({
+            conf: conf,
+            util: util,
+            init: init,
+            api: api,
+            engine: engine
+        });
+
+        return DV.core.instances[DV.core.instances.length - 1];
     };
 });
