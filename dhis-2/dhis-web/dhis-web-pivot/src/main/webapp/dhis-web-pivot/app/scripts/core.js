@@ -288,63 +288,6 @@ Ext.onReady( function() {
 				}
 			};
 
-			util.multiselect = {
-				select: function(a, s) {
-					var selected = a.getValue();
-					if (selected.length) {
-						var array = [];
-						Ext.Array.each(selected, function(item) {
-							array.push({id: item, name: a.store.getAt(a.store.findExact('id', item)).data.name});
-						});
-						s.store.add(array);
-					}
-					this.filterAvailable(a, s);
-				},
-				selectAll: function(a, s, doReverse) {
-					var array = [];
-					a.store.each( function(r) {
-						array.push({id: r.data.id, name: r.data.name});
-					});
-					if (doReverse) {
-						array.reverse();
-					}
-					s.store.add(array);
-					this.filterAvailable(a, s);
-				},
-				unselect: function(a, s) {
-					var selected = s.getValue();
-					if (selected.length) {
-						Ext.Array.each(selected, function(item) {
-							s.store.remove(s.store.getAt(s.store.findExact('id', item)));
-						});
-						this.filterAvailable(a, s);
-					}
-				},
-				unselectAll: function(a, s) {
-					s.store.removeAll();
-					a.store.clearFilter();
-					this.filterAvailable(a, s);
-				},
-				filterAvailable: function(a, s) {
-					a.store.filterBy( function(r) {
-						var keep = true;
-						s.store.each( function(r2) {
-							if (r.data.id == r2.data.id) {
-								keep = false;
-							}
-
-						});
-						return keep;
-					});
-					a.store.sortStore();
-				},
-				setHeight: function(ms, panel, fill) {
-					for (var i = 0; i < ms.length; i++) {
-						ms[i].setHeight(panel.getHeight() - fill);
-					}
-				}
-			};
-
 			util.store = {
 				addToStorage: function(s, records) {
 					s.each( function(r) {
@@ -378,60 +321,6 @@ Ext.onReady( function() {
 						}
 					}
 					return false;
-				}
-			};
-
-			util.mask = {
-				showMask: function(cmp, msg) {
-					//cmp = cmp || pt.viewport.centerRegion;
-					//msg = msg || 'Loading..';
-
-					//if (pt.viewport.mask) {
-						//pt.viewport.mask.destroy();
-					//}
-					//pt.viewport.mask = new Ext.create('Ext.LoadMask', cmp, {
-						//shadow: false,
-						//msg: msg,
-						//style: 'box-shadow:0',
-						//bodyStyle: 'box-shadow:0'
-					//});
-					//pt.viewport.mask.show();
-				},
-				hideMask: function() {
-					//if (pt.viewport.mask) {
-						//pt.viewport.mask.hide();
-					//}
-				}
-			};
-
-			util.checkbox = {
-				setRelativePeriods: function(rp) {
-					if (rp) {
-						for (var r in rp) {
-							var cmp = util.getCmp('checkbox[relativePeriodId="' + r + '"]');
-							if (cmp) {
-								cmp.setValue(rp[r]);
-							}
-						}
-					}
-					else {
-						PT.util.checkbox.setAllFalse();
-					}
-				},
-				setAllFalse: function() {
-					var a = pt.cmp.dimension.relativePeriod.checkbox;
-					for (var i = 0; i < a.length; i++) {
-						a[i].setValue(false);
-					}
-				},
-				isAllFalse: function() {
-					var a = pt.cmp.dimension.relativePeriod.checkbox;
-					for (var i = 0; i < a.length; i++) {
-						if (a[i].getValue()) {
-							return false;
-						}
-					}
-					return true;
 				}
 			};
 
@@ -815,7 +704,7 @@ Ext.onReady( function() {
 
 					// Config must be an object
 					if (!(config && Ext.isObject(config))) {
-						alert(pt.el + ': Layout config is not an object');
+						alert(pt.init.el + ': Layout config is not an object');
 						return;
 					}
 
@@ -2421,7 +2310,7 @@ Ext.onReady( function() {
 						return;
 					}
 
-					// Show load mask
+					// Show load mask					
 					pt.util.mask.showMask(pt.viewport.centerRegion);
 
 					Ext.Ajax.request({
@@ -2473,7 +2362,7 @@ Ext.onReady( function() {
 							
 							// Resize render elements if plugin
 							if (pt.isPlugin) {
-								var baseEl = Ext.get(pt.el),
+								var baseEl = Ext.get(pt.init.el),
 									baseElBorderW = parseInt(baseEl.getStyle('border-left-width')) + parseInt(baseEl.getStyle('border-right-width')),
 									baseElBorderH = parseInt(baseEl.getStyle('border-top-width')) + parseInt(baseEl.getStyle('border-bottom-width')),
 									baseElPaddingW = parseInt(baseEl.getStyle('padding-left')) + parseInt(baseEl.getStyle('padding-right')),

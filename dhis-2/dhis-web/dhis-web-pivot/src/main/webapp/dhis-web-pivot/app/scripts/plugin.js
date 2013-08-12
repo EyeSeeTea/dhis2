@@ -35,6 +35,35 @@ Ext.onReady(function() {
 	// Plugin	
 	PT.plugin = {};
 	
+	PT.plugin.extendInstance = function(pt) {
+		var util = pt.util;
+		
+		(function() {			
+			util.mask = {
+				showMask: function(cmp, msg) {
+					cmp = cmp || pt.viewport.centerRegion;
+					msg = msg || 'Loading..';
+
+					if (pt.viewport.mask) {
+						pt.viewport.mask.destroy();
+					}
+					pt.viewport.mask = new Ext.create('Ext.LoadMask', cmp, {
+						shadow: false,
+						msg: msg,
+						style: 'box-shadow:0',
+						bodyStyle: 'box-shadow:0'
+					});
+					pt.viewport.mask.show();
+				},
+				hideMask: function() {
+					if (pt.viewport.mask) {
+						pt.viewport.mask.hide();
+					}
+				}
+			};
+		}());
+	};
+	
 	PT.plugin.getTable = function(config) {
 		var validateConfig,
 			createViewport,
@@ -69,7 +98,7 @@ Ext.onReady(function() {
 			};
 			
 			centerRegion = Ext.create('Ext.panel.Panel', {
-				renderTo: Ext.get(pt.el),
+				renderTo: Ext.get(pt.init.el),
 				bodyStyle: 'border: 0 none',
 				layout: 'fit'
 			});
@@ -82,15 +111,16 @@ Ext.onReady(function() {
 			
 		initialize = function() {
 			
-			// validate config
 			if (!validateConfig(config)) {
 				return;
 			}			
 			
 			Ext.data.JsonP.request({
-				url: config.url + '/dhis-web-visualizer/initialize.action',
+				url: config.url + '/dhis-web-pivot/initialize.action',
 				success: function(r) {
 					pt = PT.core.getInstance(r);
+					
+					PT.plugin.extendInstance(pt);
 
 					pt.init.el = config.el;
 					pt.isPlugin = true;					

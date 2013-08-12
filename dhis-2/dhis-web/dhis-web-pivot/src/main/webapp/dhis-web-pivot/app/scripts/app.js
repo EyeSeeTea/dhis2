@@ -52,6 +52,104 @@ Ext.onReady( function() {
 				}
 			};
 
+			util.mask = {
+				showMask: function(cmp, msg) {
+					cmp = cmp || pt.viewport.centerRegion;
+					msg = msg || 'Loading..';
+
+					if (pt.viewport.mask) {
+						pt.viewport.mask.destroy();
+					}
+					pt.viewport.mask = new Ext.create('Ext.LoadMask', cmp, {
+						shadow: false,
+						msg: msg,
+						style: 'box-shadow:0',
+						bodyStyle: 'box-shadow:0'
+					});
+					pt.viewport.mask.show();
+				},
+				hideMask: function() {
+					if (pt.viewport.mask) {
+						pt.viewport.mask.hide();
+					}
+				}
+			};
+
+			util.checkbox = {
+				setAllFalse: function() {
+					var a = cmp.dimension.relativePeriod.checkbox;
+					for (var i = 0; i < a.length; i++) {
+						a[i].setValue(false);
+					}
+				},
+				isAllFalse: function() {
+					var a = cmp.dimension.relativePeriod.checkbox;
+					for (var i = 0; i < a.length; i++) {
+						if (a[i].getValue()) {
+							return false;
+						}
+					}
+					return true;
+				}
+			};
+
+			util.multiselect = {
+				select: function(a, s) {
+					var selected = a.getValue();
+					if (selected.length) {
+						var array = [];
+						Ext.Array.each(selected, function(item) {
+							array.push({id: item, name: a.store.getAt(a.store.findExact('id', item)).data.name});
+						});
+						s.store.add(array);
+					}
+					this.filterAvailable(a, s);
+				},
+				selectAll: function(a, s, doReverse) {
+					var array = [];
+					a.store.each( function(r) {
+						array.push({id: r.data.id, name: r.data.name});
+					});
+					if (doReverse) {
+						array.reverse();
+					}
+					s.store.add(array);
+					this.filterAvailable(a, s);
+				},
+				unselect: function(a, s) {
+					var selected = s.getValue();
+					if (selected.length) {
+						Ext.Array.each(selected, function(item) {
+							s.store.remove(s.store.getAt(s.store.findExact('id', item)));
+						});
+						this.filterAvailable(a, s);
+					}
+				},
+				unselectAll: function(a, s) {
+					s.store.removeAll();
+					a.store.clearFilter();
+					this.filterAvailable(a, s);
+				},
+				filterAvailable: function(a, s) {
+					a.store.filterBy( function(r) {
+						var keep = true;
+						s.store.each( function(r2) {
+							if (r.data.id == r2.data.id) {
+								keep = false;
+							}
+
+						});
+						return keep;
+					});
+					a.store.sortStore();
+				},
+				setHeight: function(ms, panel, fill) {
+					for (var i = 0; i < ms.length; i++) {
+						ms[i].setHeight(panel.getHeight() - fill);
+					}
+				}
+			};
+
 			util.url = {
 				getUrlParam: function(s) {
 					var output = '';
@@ -151,7 +249,7 @@ Ext.onReady( function() {
 					pt.viewport.westRegion.hasScrollbar = true;
 				}
 
-				pt.cmp.dimension.panels[0].expand();
+				cmp.dimension.panels[0].expand();
 
 				// Load favorite from url
 				var id = util.url.getUrlParam('id'),
@@ -4215,7 +4313,7 @@ Ext.onReady( function() {
 
 			// Set gui
 
-			xLayout = pt.util.pivot.getExtendedLayout(layout);
+			xLayout = pt.engine.getExtendedLayout(layout);
 			dimMap = xLayout.objectNameDimensionsMap;
 			recMap = xLayout.objectNameItemsMap;
 			graphMap = layout.parentGraphMap;
