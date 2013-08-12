@@ -5,8 +5,17 @@ Ext.onReady( function() {
 
 	PT.app = {};
 
-	PT.app.getInits = function(init) {		
-		init = PT.core.getInits(init, pt);
+	PT.app.extendInstance = function(pt) {	
+        var init = pt.init,
+            conf = pt.conf,
+            util = pt.util,
+            api = pt.api,
+            engine = pt.engine,
+            store = {},
+            cmp = {},
+            dimConf = conf.finals.dimension;
+
+        pt.init.el = 'app';
 
 		// Root nodes
 		for (var i = 0; i < init.rootNodes.length; i++) {

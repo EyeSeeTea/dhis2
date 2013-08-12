@@ -31,128 +31,128 @@ Ext.onReady( function() {
         // conf
         (function() {
             conf.finals = {
-            ajax: {
-                path_visualizer: '../',
-                path_api: '../../api/',
-                path_commons: '../../dhis-web-commons-ajax-json/',
-                initialize: 'initialize.action',
-                redirect: 'dhis-web-commons-about/redirect.action',
-                data_get: 'chartValues.json',
-                indicator_get: 'indicatorGroups/',
-                indicator_getall: 'indicators.json?paging=false&links=false',
-                indicatorgroup_get: 'indicatorGroups.json?paging=false&links=false',
-                dataelement_get: 'dataElementGroups/',
-                dataelement_getall: 'dataElements.json?paging=false&links=false',
-                dataelementgroup_get: 'dataElementGroups.json?paging=false&links=false',
-                dataset_get: 'dataSets.json?paging=false&links=false',
-                organisationunit_getbygroup: 'getOrganisationUnitPathsByGroup.action',
-                organisationunit_getbylevel: 'getOrganisationUnitPathsByLevel.action',
-                organisationunit_getbyids: 'getOrganisationUnitPaths.action',
-                organisationunitgroup_getall: 'organisationUnitGroups.json?paging=false&links=false',
-                organisationunitgroupset_get: 'getOrganisationUnitGroupSetsMinified.action',
-                organisationunitlevel_getall: 'organisationUnitLevels.json?paging=false&links=false&viewClass=detailed',
-                organisationunitchildren_get: 'getOrganisationUnitChildren.action',
-                favorite_addorupdate: 'addOrUpdateChart.action',
-                favorite_addorupdatesystem: 'addOrUpdateSystemChart.action',
-                favorite_updatename: 'updateChartName.action',
-                favorite_get: 'charts/',
-                favorite_getall: 'getSystemAndCurrentUserCharts.action',
-                favorite_delete: 'deleteCharts.action'
-            },
-            dimension: {
-                data: {
-                    value: 'data',
-                    name: DV.i18n.data,
-                    dimensionName: 'dx',
-                    objectName: 'dx'
-                },
-                indicator: {
-                    value: 'indicator',
-                    name: DV.i18n.indicator,
-                    dimensionName: 'dx',
-                    objectName: 'in'
-                },
-                dataElement: {
-                    value: 'dataelement',
-                    name: DV.i18n.data_element,
-                    dimensionName: 'dx',
-                    objectName: 'de'
-                },
-                operand: {
-                    value: 'operand',
-                    name: 'Operand',
-                    dimensionName: 'dx',
-                    objectName: 'dc'
-                },
-                dataSet: {
-                    value: 'dataset',
-                    name: DV.i18n.dataset,
-                    dimensionName: 'dx',
-                    objectName: 'ds'
-                },
-                category: {
-                    name: DV.i18n.categories,
-                    dimensionName: 'co',
-                    objectName: 'co',
-                },
-                period: {
-                    value: 'period',
-                    name: DV.i18n.period,
-                    dimensionName: 'pe',
-                    objectName: 'pe',
-                },
-                fixedPeriod: {
-                    value: 'periods'
-                },
-                relativePeriod: {
-                    value: 'relativePeriods'
-                },
-                organisationUnit: {
-                    value: 'organisationUnits',
-                    name: DV.i18n.organisation_units,
-                    dimensionName: 'ou',
-                    objectName: 'ou',
+                ajax: {
+                    path_visualizer: '../',
+                    path_api: '../../api/',
+                    path_commons: '../../dhis-web-commons-ajax-json/',
+                    initialize: 'initialize.action',
+                    redirect: 'dhis-web-commons-about/redirect.action',
+                    data_get: 'chartValues.json',
+                    indicator_get: 'indicatorGroups/',
+                    indicator_getall: 'indicators.json?paging=false&links=false',
+                    indicatorgroup_get: 'indicatorGroups.json?paging=false&links=false',
+                    dataelement_get: 'dataElementGroups/',
+                    dataelement_getall: 'dataElements.json?paging=false&links=false',
+                    dataelementgroup_get: 'dataElementGroups.json?paging=false&links=false',
+                    dataset_get: 'dataSets.json?paging=false&links=false',
+                    organisationunit_getbygroup: 'getOrganisationUnitPathsByGroup.action',
+                    organisationunit_getbylevel: 'getOrganisationUnitPathsByLevel.action',
+                    organisationunit_getbyids: 'getOrganisationUnitPaths.action',
+                    organisationunitgroup_getall: 'organisationUnitGroups.json?paging=false&links=false',
+                    organisationunitgroupset_get: 'getOrganisationUnitGroupSetsMinified.action',
+                    organisationunitlevel_getall: 'organisationUnitLevels.json?paging=false&links=false&viewClass=detailed',
+                    organisationunitchildren_get: 'getOrganisationUnitChildren.action',
+                    favorite_addorupdate: 'addOrUpdateChart.action',
+                    favorite_addorupdatesystem: 'addOrUpdateSystemChart.action',
+                    favorite_updatename: 'updateChartName.action',
+                    favorite_get: 'charts/',
+                    favorite_getall: 'getSystemAndCurrentUserCharts.action',
+                    favorite_delete: 'deleteCharts.action'
                 },
                 dimension: {
-                    value: 'dimension'
-                    //objectName: 'di'
+                    data: {
+                        value: 'data',
+                        name: DV.i18n.data,
+                        dimensionName: 'dx',
+                        objectName: 'dx'
+                    },
+                    indicator: {
+                        value: 'indicator',
+                        name: DV.i18n.indicator,
+                        dimensionName: 'dx',
+                        objectName: 'in'
+                    },
+                    dataElement: {
+                        value: 'dataelement',
+                        name: DV.i18n.data_element,
+                        dimensionName: 'dx',
+                        objectName: 'de'
+                    },
+                    operand: {
+                        value: 'operand',
+                        name: 'Operand',
+                        dimensionName: 'dx',
+                        objectName: 'dc'
+                    },
+                    dataSet: {
+                        value: 'dataset',
+                        name: DV.i18n.dataset,
+                        dimensionName: 'dx',
+                        objectName: 'ds'
+                    },
+                    category: {
+                        name: DV.i18n.categories,
+                        dimensionName: 'co',
+                        objectName: 'co',
+                    },
+                    period: {
+                        value: 'period',
+                        name: DV.i18n.period,
+                        dimensionName: 'pe',
+                        objectName: 'pe',
+                    },
+                    fixedPeriod: {
+                        value: 'periods'
+                    },
+                    relativePeriod: {
+                        value: 'relativePeriods'
+                    },
+                    organisationUnit: {
+                        value: 'organisationUnits',
+                        name: DV.i18n.organisation_units,
+                        dimensionName: 'ou',
+                        objectName: 'ou',
+                    },
+                    dimension: {
+                        value: 'dimension'
+                        //objectName: 'di'
+                    },
+                    value: {
+                        value: 'value'
+                    }
                 },
-                value: {
-                    value: 'value'
+                chart: {
+                    series: 'series',
+                    category: 'category',
+                    filter: 'filter',
+                    column: 'column',
+                    stackedcolumn: 'stackedcolumn',
+                    bar: 'bar',
+                    stackedbar: 'stackedbar',
+                    line: 'line',
+                    area: 'area',
+                    pie: 'pie',
+                    radar: 'radar'
+                },
+                data: {
+                    domain: 'domain_',
+                    targetLine: 'targetline_',
+                    baseLine: 'baseline_',
+                    trendLine: 'trendline_'
+                },
+                image: {
+                    png: 'png',
+                    pdf: 'pdf'
+                },
+                cmd: {
+                    init: 'init_',
+                    none: 'none_',
+                    urlparam: 'id'
+                },
+                root: {
+                    id: 'root'
                 }
-            },
-            chart: {
-                series: 'series',
-                category: 'category',
-                filter: 'filter',
-                column: 'column',
-                stackedcolumn: 'stackedcolumn',
-                bar: 'bar',
-                stackedbar: 'stackedbar',
-                line: 'line',
-                area: 'area',
-                pie: 'pie',
-                radar: 'radar'
-            },
-            data: {
-                domain: 'domain_',
-                targetLine: 'targetline_',
-                baseLine: 'baseline_',
-                trendLine: 'trendline_'
-            },
-            image: {
-                png: 'png',
-                pdf: 'pdf'
-            },
-            cmd: {
-                init: 'init_',
-                none: 'none_',
-                urlparam: 'id'
-            },
-            root: {
-                id: 'root'
-            }
-        };
+            };
 
             dimConf = conf.finals.dimension;
 
@@ -301,7 +301,6 @@ Ext.onReady( function() {
 
         // util
         (function() {
-
             util.array = {
                 sortDimensions: function(dimensions, key) {
                     key = key || 'dimensionName';
@@ -464,7 +463,6 @@ Ext.onReady( function() {
 
         // api
         (function() {
-
             api.layout = {};
             api.response = {};
 

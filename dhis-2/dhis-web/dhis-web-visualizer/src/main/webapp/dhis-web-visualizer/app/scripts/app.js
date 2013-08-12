@@ -6,164 +6,36 @@ Ext.onReady( function() {
     DV.app = {};
 
     DV.app.extendInstance = function(dv) {
-        var init = dv.init,
-            conf = dv.conf,
+        var conf = dv.conf,
             util = dv.util,
-            api = dv.api,
+            init = dv.init,
             engine = dv.engine,
             store = {},
             cmp = {},
             dimConf = conf.finals.dimension;
 
-        dv.init.el = 'app';
-
-        // init
-        (function() {
-
-            // root nodes
-            for (var i = 0; i < init.rootNodes.length; i++) {
-                init.rootNodes[i].path = '/' + conf.finals.root.id + '/' + init.rootNodes[i].id;
-            }
-
-            // viewport afterrender
-            init.afterRender = function() {
-
-                // Add resize event handler
-                dv.viewport.westRegion.on('resize', function() {
-                    var panel = util.dimension.panel.getExpanded();
-
-                    if (panel) {
-                        panel.onExpand();
-                    }
-                });
-
-                // Left gui scrollbar
-                var viewportHeight = dv.viewport.westRegion.getHeight(),
-                    numberOfTabs = init.dimensions.length + 5,
-                    tabHeight = 28,
-                    minPeriodHeight = 380,
-                    settingsHeight = 91;
-
-                if (viewportHeight > numberOfTabs * tabHeight + minPeriodHeight + settingsHeight) {
-                    if (!Ext.isIE) {
-                        dv.viewport.accordion.setAutoScroll(false);
-                        dv.viewport.westRegion.setWidth(dv.conf.layout.west_width);
-                        dv.viewport.accordion.doLayout();
-                    }
-                }
-                else {
-                    dv.viewport.westRegion.hasScrollbar = true;
-                }
-
-                // Expand first panel
-                dv.cmp.dimension.panels[0].expand();
-
-                // Look for url params
-                var id = util.url.getUrlParam('id'),
-                    session = util.url.getUrlParam('s'),
-                    layout;
-
-                if (id) {
-                    engine.loadChart(id, dv);
-                }
-                else if (Ext.isString(session) && DV.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
-                    layout = api.layout.Layout(util.chart.analytical2layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]));
-
-                    if (layout) {
-                        dv.viewport.setFavorite(layout);
-                    }
-                }
-
-                // Fade in
-                Ext.defer( function() {
-                    Ext.getBody().fadeIn({
-                        duration: 400
-                    });
-                }, 500 );
-            };
-        }());
-
         // util
         (function() {
+            util.svg = {
+                submitForm: function(type) {
+                    var svg = Ext.query('svg'),
+                        form = Ext.query('#exportForm')[0];
 
-            util.chart = util.chart || {};
-
-            util.chart.getLayoutConfig = function() {
-                var panels = dv.cmp.dimension.panels,
-                    columnDimNames = [dv.viewport.series.getValue()],
-                    rowDimNames = [dv.viewport.category.getValue()],
-                    filterDimNames = dv.viewport.filter.getValue(),
-                    config = dv.viewport.optionsWindow.getOptions(),
-                    dx = dimConf.data.dimensionName,
-                    co = dimConf.category.dimensionName,
-                    nameDimArrayMap = {};
-
-                config.type = dv.viewport.chartType.getChartType();
-
-                config.columns = [];
-                config.rows = [];
-                config.filters = [];
-
-                // Panel data
-                for (var i = 0, dim, dimName; i < panels.length; i++) {
-                    dim = panels[i].getDimension();
-
-                    if (dim) {
-                        nameDimArrayMap[dim.dimension] = [dim];
+                    if (!(Ext.isArray(svg) && svg.length)) {
+                        alert('Browser does not support SVG');
+                        return;
                     }
+
+                    svg = Ext.get(svg[0]);
+                    svg = svg.parent().dom.innerHTML;
+
+                    Ext.query('#svgField')[0].value = svg;
+                    Ext.query('#typeField')[0].value = type;
+                    Ext.query('#nameField')[0].value = 'test';
+
+                    form.action = '../exportImage.action';
+                    form.submit();
                 }
-
-                nameDimArrayMap[dx] = Ext.Array.clean([].concat(
-                    nameDimArrayMap[dimConf.indicator.objectName],
-                    nameDimArrayMap[dimConf.dataElement.objectName],
-                    nameDimArrayMap[dimConf.operand.objectName],
-                    nameDimArrayMap[dimConf.dataSet.objectName]
-                ));
-
-                // Columns, rows, filters
-                for (var i = 0, nameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], dimNames; i < nameArrays.length; i++) {
-                    dimNames = nameArrays[i];
-
-                    for (var j = 0, dimName, dim; j < dimNames.length; j++) {
-                        dimName = dimNames[j];
-
-                        if (dimName === dx && nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
-                            for (var k = 0; k < nameDimArrayMap[dx].length; k++) {
-                                axes[i].push(Ext.clone(nameDimArrayMap[dx][k]));
-                            }
-                        }
-                        else if (nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
-                            for (var k = 0; k < nameDimArrayMap[dimName].length; k++) {
-                                axes[i].push(Ext.clone(nameDimArrayMap[dimName][k]));
-                            }
-                        }
-                    }
-                }
-
-                config.userOrganisationUnit = dv.viewport.userOrganisationUnit.getValue();
-                config.userOrganisationUnitChildren = dv.viewport.userOrganisationUnitChildren.getValue();
-
-                return config;
-            };
-
-            util.chart.submitSvgForm = function(type) {
-                var svg = Ext.query('svg'),
-                    form = Ext.query('#exportForm')[0];
-
-                if (!(Ext.isArray(svg) && svg.length)) {
-                    alert('Browser does not support SVG');
-                    return;
-                }
-
-                svg = Ext.get(svg[0]);
-                svg = svg.parent().dom.innerHTML;
-
-                Ext.query('#svgField')[0].value = svg;
-                Ext.query('#typeField')[0].value = type;
-                Ext.query('#nameField')[0].value = 'test';
-
-                form.action = '../exportImage.action';
-                form.submit();
             };
 
             util.dimension = {
@@ -495,6 +367,72 @@ Ext.onReady( function() {
             };
         }());
 
+        // init
+        (function() {
+
+            // root nodes
+            for (var i = 0; i < init.rootNodes.length; i++) {
+                init.rootNodes[i].path = '/' + conf.finals.root.id + '/' + init.rootNodes[i].id;
+            }
+
+            // viewport afterrender
+            init.afterRender = function() {
+
+                // Add resize event handler
+                dv.viewport.westRegion.on('resize', function() {
+                    var panel = util.dimension.panel.getExpanded();
+
+                    if (panel) {
+                        panel.onExpand();
+                    }
+                });
+
+                // Left gui scrollbar
+                var viewportHeight = dv.viewport.westRegion.getHeight(),
+                    numberOfTabs = init.dimensions.length + 5,
+                    tabHeight = 28,
+                    minPeriodHeight = 380,
+                    settingsHeight = 91;
+
+                if (viewportHeight > numberOfTabs * tabHeight + minPeriodHeight + settingsHeight) {
+                    if (!Ext.isIE) {
+                        dv.viewport.accordion.setAutoScroll(false);
+                        dv.viewport.westRegion.setWidth(dv.conf.layout.west_width);
+                        dv.viewport.accordion.doLayout();
+                    }
+                }
+                else {
+                    dv.viewport.westRegion.hasScrollbar = true;
+                }
+
+                // Expand first panel
+                dv.cmp.dimension.panels[0].expand();
+
+                // Look for url params
+                var id = util.url.getUrlParam('id'),
+                    session = util.url.getUrlParam('s'),
+                    layout;
+
+                if (id) {
+                    engine.loadChart(id, dv);
+                }
+                else if (Ext.isString(session) && DV.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
+                    layout = api.layout.Layout(util.chart.analytical2layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]));
+
+                    if (layout) {
+                        dv.viewport.setFavorite(layout);
+                    }
+                }
+
+                // Fade in
+                Ext.defer( function() {
+                    Ext.getBody().fadeIn({
+                        duration: 400
+                    });
+                }, 500 );
+            };
+        }());
+
         // store
         (function() {
             store.indicatorAvailable = Ext.create('Ext.data.Store', {
@@ -741,7 +679,68 @@ Ext.onReady( function() {
 
             dv.cmp = cmp;
         }());
-	};
+
+        // engine
+        (function() {
+            engine.getLayoutConfig = function() {
+                var panels = cmp.dimension.panels,
+                    columnDimNames = [dv.viewport.series.getValue()],
+                    rowDimNames = [dv.viewport.category.getValue()],
+                    filterDimNames = dv.viewport.filter.getValue(),
+                    config = dv.viewport.optionsWindow.getOptions(),
+                    dx = dimConf.data.dimensionName,
+                    co = dimConf.category.dimensionName,
+                    nameDimArrayMap = {};
+
+                config.type = dv.viewport.chartType.getChartType();
+
+                config.columns = [];
+                config.rows = [];
+                config.filters = [];
+
+                // Panel data
+                for (var i = 0, dim, dimName; i < panels.length; i++) {
+                    dim = panels[i].getDimension();
+
+                    if (dim) {
+                        nameDimArrayMap[dim.dimension] = [dim];
+                    }
+                }
+
+                nameDimArrayMap[dx] = Ext.Array.clean([].concat(
+                    nameDimArrayMap[dimConf.indicator.objectName],
+                    nameDimArrayMap[dimConf.dataElement.objectName],
+                    nameDimArrayMap[dimConf.operand.objectName],
+                    nameDimArrayMap[dimConf.dataSet.objectName]
+                ));
+
+                // Columns, rows, filters
+                for (var i = 0, nameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], dimNames; i < nameArrays.length; i++) {
+                    dimNames = nameArrays[i];
+
+                    for (var j = 0, dimName, dim; j < dimNames.length; j++) {
+                        dimName = dimNames[j];
+
+                        if (dimName === dx && nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
+                            for (var k = 0; k < nameDimArrayMap[dx].length; k++) {
+                                axes[i].push(Ext.clone(nameDimArrayMap[dx][k]));
+                            }
+                        }
+                        else if (nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
+                            for (var k = 0; k < nameDimArrayMap[dimName].length; k++) {
+                                axes[i].push(Ext.clone(nameDimArrayMap[dimName][k]));
+                            }
+                        }
+                    }
+                }
+
+                config.userOrganisationUnit = dv.viewport.userOrganisationUnit.getValue();
+                config.userOrganisationUnitChildren = dv.viewport.userOrganisationUnitChildren.getValue();
+
+                return config;
+            };
+        }());
+    };
 
 	DV.app.OptionsWindow = function() {
 		var showTrendLine,
@@ -4070,7 +4069,7 @@ Ext.onReady( function() {
         };
 
         update = function() {
-            var config = dv.util.chart.getLayoutConfig(),
+            var config = dv.engine.getLayoutConfig(),
             layout = dv.api.layout.Layout(config);
 
             if (!validateSpecialCases(layout)) {
@@ -4187,14 +4186,14 @@ Ext.onReady( function() {
                         text: DV.i18n.image_png + ' (.png)',
                         iconCls: 'dv-menu-item-image',
                         handler: function() {
-                            dv.util.chart.submitSvgForm('png');
+                            dv.util.svg.submitForm('png');
                         }
                     },
                     {
                         text: 'PDF (.pdf)',
                         iconCls: 'dv-menu-item-image',
                         handler: function() {
-                            dv.util.chart.submitSvgForm('pdf');
+                            dv.util.svg.submitForm('pdf');
                         }
                     },
                     {
