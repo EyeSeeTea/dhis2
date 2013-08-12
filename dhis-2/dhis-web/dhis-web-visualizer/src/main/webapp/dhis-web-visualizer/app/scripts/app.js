@@ -1,42 +1,16 @@
-DV.isSessionStorage = 'sessionStorage' in window && window['sessionStorage'] !== null;
-
-DV.app = {};
-DV.app.init = {};
-
 Ext.onReady( function() {
-	Ext.Ajax.method = 'GET';
-	Ext.QuickTips.init();
+    var createViewport,
+        initialize,
+        dv;
 
-	document.body.oncontextmenu = function() {
-		return false;
-	};
+    DV.app = {};
 
-    Ext.override(Ext.LoadMask, {
-		onHide: function() {
-			this.callParent();
-		}
-	});
+	DV.app.getInits = function(init) {
+		init = DV.core.getInits(init, dv);
 
-	// Init
-
-	dv = DV.core.getInstance();
-	DV.core.instances.push(dv);
-
-	DV.app.getInit = function(r) {
-		var init = Ext.decode(r.responseText);
-
+        // Root nodes
 		for (var i = 0; i < init.rootNodes.length; i++) {
 			init.rootNodes[i].path = '/' + dv.conf.finals.root.id + '/' + init.rootNodes[i].id;
-		}
-
-		// Sort and extend dynamic dimensions
-		init.dimensions = dv.util.array.sortObjectsByString(init.dimensions);
-
-		for (var i = 0, dim; i < init.dimensions.length; i++) {
-			dim = init.dimensions[i];
-			dim.dimensionName = dim.id;
-			dim.objectName = dv.conf.finals.dimension.dimension.objectName;
-			dv.conf.finals.dimension.objectNameMap[dim.id] = dim;
 		}
 
 		// Viewport afterrender
@@ -99,30 +73,7 @@ Ext.onReady( function() {
 		return init;
 	};
 
-	DV.app.getCmp = function() {
-		var cmp = {
-			region: {},
-			charttype: [],
-			layout: {},
-			dimension: {
-				panels: [],
-
-				indicator: {},
-				dataElement: {},
-				dataSet: {},
-				relativePeriod: {
-					checkbox: []
-				},
-				fixedPeriod: {},
-				organisationUnit: {}
-			},
-			favorite: {}
-		};
-
-		return cmp;
-	};
-
-	DV.app.getUtil = function() {
+	DV.app.getUtils = function() {
 		var util = dv.util || {};
 
 		util.chart.getLayoutConfig = function() {
@@ -760,6 +711,29 @@ Ext.onReady( function() {
 		return store;
 	};
 
+	DV.app.getCmp = function() {
+		var cmp = {
+			region: {},
+			charttype: [],
+			layout: {},
+			dimension: {
+				panels: [],
+
+				indicator: {},
+				dataElement: {},
+				dataSet: {},
+				relativePeriod: {
+					checkbox: []
+				},
+				fixedPeriod: {},
+				organisationUnit: {}
+			},
+			favorite: {}
+		};
+
+		return cmp;
+	};
+
 	DV.app.OptionsWindow = function() {
 		var showTrendLine,
 			targetLineValue,
@@ -1067,11 +1041,13 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function(w) {
-					dv.util.window.setAnchorPosition(w, dv.viewport.optionsButton);
+					if (dv.viewport.optionsButton.rendered) {
+                        dv.util.window.setAnchorPosition(w, dv.viewport.optionsButton);
 
-					if (!w.hasHideOnBlurHandler) {
-						dv.util.window.addHideOnBlurHandler(w);
-					}
+                        if (!w.hasHideOnBlurHandler) {
+                            dv.util.window.addHideOnBlurHandler(w);
+                        }
+                    }
 				}
 			}
 		});
@@ -1996,2678 +1972,2694 @@ Ext.onReady( function() {
 		return;
 	};
 
-	DV.app.init.onInitialize = function(r) {
-		var createViewport;
-
-		createViewport = function() {
-			var buttons = [],
-				buttonAddedListener,
-				column,
-				stackedcolumn,
-				bar,
-				stackedbar,
-				line,
-				area,
-				pie,
-				radar,
-				buttons = [],
-				buttonAddedListener,
-				chartType,
-				seriesStore,
-				categoryStore,
-				filterStore,
-				series,
-				category,
-				filter,
-				layout,
-
-				indicatorAvailable,
-				indicatorSelected,
-				indicator,
-				dataElementAvailable,
-				dataElementSelected,
-				dataElementGroupStore,
-				dataElementGroupComboBox,
-				dataElementDetailLevel,
-				dataElement,
-				dataSetAvailable,
-				dataSetSelected,
-				dataSet,
-				rewind,
-				relativePeriod,
-				fixedPeriodAvailable,
-				fixedPeriodSelected,
-				period,
-				treePanel,
-				userOrganisationUnit,
-				userOrganisationUnitChildren,
-				userOrganisationUnitPanel,
-				organisationUnitLevel,
-				tool,
-				toolPanel,
-				organisationUnit,
-				dimensionIdAvailableStoreMap = {},
-				dimensionIdSelectedStoreMap = {},
-				getDimensionPanels,
-				validateSpecialCases,
-				update,
-
-				optionsButton,
-				favoriteButton,
-				downloadButton,
-
-				accordionBody,
-				accordion,
-				westRegion,
-				centerRegion,
-
-				setFavorite,
-
-				viewport,
-				addListeners;
-
-			buttonAddedListener = function(b) {
-				buttons.push(b);
-			};
-
-			column = Ext.create('Ext.button.Button', {
-				xtype: 'button',
-				chartType: dv.conf.finals.chart.column,
-				icon: 'images/column.png',
-				name: dv.conf.finals.chart.column,
-				tooltipText: DV.i18n.column_chart,
-				pressed: true,
-				listeners: {
-					added: buttonAddedListener
-				}
-			});
-
-			stackedcolumn = Ext.create('Ext.button.Button', {
-				xtype: 'button',
-				chartType: dv.conf.finals.chart.stackedcolumn,
-				icon: 'images/column-stacked.png',
-				name: dv.conf.finals.chart.stackedcolumn,
-				tooltipText: DV.i18n.stacked_column_chart,
-				listeners: {
-					added: buttonAddedListener
-				}
-			});
-
-			bar = Ext.create('Ext.button.Button', {
-				xtype: 'button',
-				chartType: dv.conf.finals.chart.bar,
-				icon: 'images/bar.png',
-				name: dv.conf.finals.chart.bar,
-				tooltipText: DV.i18n.bar_chart,
-				listeners: {
-					added: buttonAddedListener
-				}
-			});
-
-			stackedbar = Ext.create('Ext.button.Button', {
-				xtype: 'button',
-				chartType: dv.conf.finals.chart.stackedbar,
-				icon: 'images/bar-stacked.png',
-				name: dv.conf.finals.chart.stackedbar,
-				tooltipText: DV.i18n.stacked_bar_chart,
-				listeners: {
-					added: buttonAddedListener
-				}
-			});
-
-			line = Ext.create('Ext.button.Button', {
-				xtype: 'button',
-				chartType: dv.conf.finals.chart.line,
-				icon: 'images/line.png',
-				name: dv.conf.finals.chart.line,
-				tooltipText: DV.i18n.line_chart,
-				listeners: {
-					added: buttonAddedListener
-				}
-			});
-
-			area = Ext.create('Ext.button.Button', {
-				xtype: 'button',
-				chartType: dv.conf.finals.chart.area,
-				icon: 'images/area.png',
-				name: dv.conf.finals.chart.area,
-				tooltipText: DV.i18n.area_chart,
-				listeners: {
-					added: buttonAddedListener
-				}
-			});
-
-			pie = Ext.create('Ext.button.Button', {
-				xtype: 'button',
-				chartType: dv.conf.finals.chart.pie,
-				icon: 'images/pie.png',
-				name: dv.conf.finals.chart.pie,
-				tooltipText: DV.i18n.pie_chart,
-				listeners: {
-					added: buttonAddedListener
-				}
-			});
-			
-			radar = Ext.create('Ext.button.Button', {
-				xtype: 'button',
-				chartType: dv.conf.finals.chart.radar,
-				icon: 'images/radar.png',
-				name: dv.conf.finals.chart.radar,
-				tooltipText: DV.i18n.radar_chart,
-				listeners: {
-					added: buttonAddedListener
-				}
-			});
-
-			chartType = Ext.create('Ext.toolbar.Toolbar', {
-				height: 45,
-				style: 'padding-top:0px; border-style:none',
-				getChartType: function() {
-					for (var i = 0; i < buttons.length; i++) {
-						if (buttons[i].pressed) {
-							return buttons[i].chartType;
-						}
-					}
-				},
-				setChartType: function(type) {
-					for (var i = 0; i < buttons.length; i++) {
-						if (buttons[i].chartType === type) {
-							buttons[i].toggle(true);
-						}
-					}
-				},
-				defaults: {
-					height: 40,
-					toggleGroup: 'charttype',
-					handler: dv.util.button.type.toggleHandler,
-					listeners: {
-						afterrender: function(b) {
-							if (b.xtype === 'button') {
-								Ext.create('Ext.tip.ToolTip', {
-									target: b.getEl(),
-									html: b.tooltipText,
-									'anchor': 'bottom'
-								});
-							}
-						}
-					}
-				},
-				items: [
-					{
-						xtype: 'label',
-						text: DV.i18n.chart_type,
-						style: 'font-size:11px; font-weight:bold; padding:13px 8px 0 6px'
-					},
-					column,
-					stackedcolumn,
-					bar,
-					stackedbar,
-					line,
-					area,
-					pie,
-					radar
-				]
-			});
-
-			seriesStore = dv.store.getDimensionStore();
-			categoryStore = dv.store.getDimensionStore();
-			filterStore = dv.store.getDimensionStore();
-
-			series = Ext.create('Ext.form.field.ComboBox', {
-				cls: 'dv-combo',
-				baseBodyCls: 'small',
-				style: 'margin-bottom:0',
-				name: dv.conf.finals.chart.series,
-				queryMode: 'local',
-				editable: false,
-				valueField: 'id',
-				displayField: 'name',
-				width: (dv.conf.layout.west_fieldset_width / 3) - 1,
-				value: dv.conf.finals.dimension.data.dimensionName,
-				filterNext: function() {
-					category.filter(this.getValue());
-					filter.filter([this.getValue(), category.getValue()]);
-				},
-				store: seriesStore,
-				listeners: {
-					added: function(cb) {
-						dv.cmp.layout.series = this;
-						cb.filterNext();
-					},
-					select: function(cb) {
-						cb.filterNext();
-					}
-				}
-			});
-
-			category = Ext.create('Ext.form.field.ComboBox', {
-				cls: 'dv-combo',
-				baseBodyCls: 'small',
-				style: 'margin-bottom:0',
-				name: dv.conf.finals.chart.category,
-				queryMode: 'local',
-				editable: false,
-				lastQuery: '',
-				valueField: 'id',
-				displayField: 'name',
-				width: (dv.conf.layout.west_fieldset_width / 3) - 1,
-				value: dv.conf.finals.dimension.period.dimensionName,
-				filter: function(value) {
-					if (Ext.isString(value)) {
-						if (value === this.getValue()) {
-							this.clearValue();
-						}
-
-						this.store.clearFilter();
-
-						this.store.filterBy(function(record, id) {
-							return id !== value;
-						});
-					}
-				},
-				filterNext: function() {
-					filter.filter([series.getValue(), this.getValue()]);
-				},
-				store: categoryStore,
-				listeners: {
-					added: function(cb) {
-						dv.cmp.layout.category = this;
-						cb.filterNext();
-					},
-					select: function(cb) {
-						cb.filterNext();
-					}
-				}
-			});
-
-			filter = Ext.create('Ext.form.field.ComboBox', {
-				cls: 'dv-combo',
-				multiSelect: true,
-				baseBodyCls: 'small',
-				style: 'margin-bottom:0',
-				name: dv.conf.finals.chart.filter,
-				queryMode: 'local',
-				editable: false,
-				lastQuery: '',
-				valueField: 'id',
-				displayField: 'name',
-				width: (dv.conf.layout.west_fieldset_width / 3) - 1,
-				value: dv.conf.finals.dimension.organisationUnit.dimensionName,
-				filter: function(values) {
-					var a = Ext.clone(this.getValue()),
-						b = [];
-
-					for (var i = 0; i < a.length; i++) {
-						if (!Ext.Array.contains(values, a[i])) {
-							b.push(a[i]);
-						}
-					}
-
-					this.clearValue();
-					this.setValue(b);
-
-					this.store.filterBy(function(record, id) {
-						return !Ext.Array.contains(values, id);
-					});
-				},
-				store: filterStore,
-				listeners: {
-					added: function() {
-						dv.cmp.layout.filter = this;
-					},
-					beforedeselect: function(cb) {
-						return cb.getValue().length !== 1;
-					}
-				}
-			});
-
-			layout = Ext.create('Ext.toolbar.Toolbar', {
-				id: 'chartlayout_tb',
-				style: 'padding:2px 0 0 2px; background:#f5f5f5; border:0 none; border-top:1px dashed #ccc; border-bottom:1px solid #ccc',
-				height: 46,
-				items: [
-					{
-						xtype: 'panel',
-						bodyStyle: 'border-style:none; background-color:transparent; padding:0',
-						items: [
-							{
-								xtype: 'label',
-								text: DV.i18n.series,
-								style: 'font-size:11px; font-weight:bold; padding:0 4px'
-							},
-							{ bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
-							series
-						]
-					},
-					{
-						xtype: 'panel',
-						bodyStyle: 'border-style:none; background-color:transparent; padding:0',
-						items: [
-							{
-								xtype: 'label',
-								text: DV.i18n.category,
-								style: 'font-size:11px; font-weight:bold; padding:0 4px'
-							},
-							{ bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
-							category
-						]
-					},
-					{
-						xtype: 'panel',
-						bodyStyle: 'border-style:none; background-color:transparent; padding:0',
-						items: [
-							{
-								xtype: 'label',
-								text: DV.i18n.filters,
-								style: 'font-size:11px; font-weight:bold; padding:0 4px'
-							},
-							{ bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
-							filter
-						]
-					}
-				]
-			});
-
-			indicatorAvailable = Ext.create('Ext.ux.form.MultiSelect', {
-				cls: 'dv-toolbar-multiselect-left',
-				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
-				valueField: 'id',
-				displayField: 'name',
-				store: dv.store.indicatorAvailable,
-				tbar: [
-					{
-						xtype: 'label',
-						text: DV.i18n.available,
-						cls: 'dv-toolbar-multiselect-left-label'
-					},
-					'->',
-					{
-						xtype: 'button',
-						icon: 'images/arrowright.png',
-						width: 22,
-						handler: function() {
-							dv.util.multiselect.select(indicatorAvailable, indicatorSelected);
-						}
-					},
-					{
-						xtype: 'button',
-						icon: 'images/arrowrightdouble.png',
-						width: 22,
-						handler: function() {
-							dv.util.multiselect.selectAll(indicatorAvailable, indicatorSelected);
-						}
-					}
-				],
-				listeners: {
-					afterrender: function() {
-						this.boundList.on('itemdblclick', function() {
-							dv.util.multiselect.select(this, indicatorSelected);
-						}, this);
-					}
-				}
-			});
-
-			indicatorSelected = Ext.create('Ext.ux.form.MultiSelect', {
-				cls: 'dv-toolbar-multiselect-right',
-				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
-				valueField: 'id',
-				displayField: 'name',
-				ddReorder: true,
-				store: dv.store.indicatorSelected,
-				tbar: [
-					{
-						xtype: 'button',
-						icon: 'images/arrowleftdouble.png',
-						width: 22,
-						handler: function() {
-							dv.util.multiselect.unselectAll(indicatorAvailable, indicatorSelected);
-						}
-					},
-					{
-						xtype: 'button',
-						icon: 'images/arrowleft.png',
-						width: 22,
-						handler: function() {
-							dv.util.multiselect.unselect(indicatorAvailable, indicatorSelected);
-						}
-					},
-					'->',
-					{
-						xtype: 'label',
-						text: DV.i18n.selected,
-						cls: 'dv-toolbar-multiselect-right-label'
-					}
-				],
-				listeners: {
-					afterrender: function() {
-						this.boundList.on('itemdblclick', function() {
-							dv.util.multiselect.unselect(indicatorAvailable, this);
-						}, this);
-					}
-				}
-			});
-
-			indicator = {
-				xtype: 'panel',
-				title: '<div class="dv-panel-title-data">' + DV.i18n.indicators + '</div>',
-				hideCollapseTool: true,
-				getDimension: function() {
-					var config = {
-						dimension: dv.conf.finals.dimension.indicator.objectName,
-						items: []
-					};
-
-					dv.store.indicatorSelected.each( function(r) {
-						config.items.push({id: r.data.id});
-					});
-
-					return config.items.length ? config : null;
-				},
-				onExpand: function() {
-					var h = dv.viewport.westRegion.hasScrollbar ?
-						dv.conf.layout.west_scrollbarheight_accordion_indicator : dv.conf.layout.west_maxheight_accordion_indicator;
-					dv.util.dimension.panel.setHeight(h);
-					dv.util.multiselect.setHeight(
-						[indicatorAvailable, indicatorSelected],
-						this,
-						dv.conf.layout.west_fill_accordion_indicator
-					);
-				},
-				items: [
-					{
-						xtype: 'combobox',
-						cls: 'dv-combo',
-						style: 'margin-bottom:2px; margin-top:0px',
-						width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding,
-						valueField: 'id',
-						displayField: 'name',
-						emptyText: DV.i18n.select_indicator_group,
-						editable: false,
-						store: {
-							xtype: 'store',
-							fields: ['id', 'name', 'index'],
-							proxy: {
-								type: 'ajax',
-								url: dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.indicatorgroup_get,
-								reader: {
-									type: 'json',
-									root: 'indicatorGroups'
-								}
-							},
-							listeners: {
-								load: function(s) {
-									s.add({
-										id: 0,
-										name: '[ ' + DV.i18n.all_indicator_groups + ' ]',
-										index: -1
-									});
-									s.sort([
-										{
-											property: 'index',
-											direction: 'ASC'
-										},
-										{
-											property: 'name',
-											direction: 'ASC'
-										}
-									]);
-								}
-							}
-						},
-						listeners: {
-							select: function(cb) {
-								var store = dv.store.indicatorAvailable;
-								store.parent = cb.getValue();
-
-								if (dv.util.store.containsParent(store)) {
-									dv.util.store.loadFromStorage(store);
-									dv.util.multiselect.filterAvailable(indicatorAvailable, indicatorSelected);
-								}
-								else {
-									if (cb.getValue() === 0) {
-										store.proxy.url = dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.indicator_getall;
-										store.load();
-									}
-									else {
-										store.proxy.url = dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.indicator_get + cb.getValue() + '.json';
-										store.load();
-									}
-								}
-							}
-						}
-					},
-					{
-						xtype: 'panel',
-						layout: 'column',
-						bodyStyle: 'border-style:none',
-						items: [
-							indicatorAvailable,
-							indicatorSelected
-						]
-					}
-				],
-				listeners: {
-					added: function() {
-						dv.cmp.dimension.panels.push(this);
-					},
-					expand: function(p) {
-						p.onExpand();
-					}
-				}
-			};
-
-			dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
-				cls: 'dv-toolbar-multiselect-left',
-				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
-				valueField: 'id',
-				displayField: 'name',
-				store: dv.store.dataElementAvailable,
-				tbar: [
-					{
-						xtype: 'label',
-						text: DV.i18n.available,
-						cls: 'dv-toolbar-multiselect-left-label'
-					},
-					'->',
-					{
-						xtype: 'button',
-						icon: 'images/arrowright.png',
-						width: 22,
-						handler: function() {
-							dv.util.multiselect.select(dataElementAvailable, dataElementSelected);
-						}
-					},
-					{
-						xtype: 'button',
-						icon: 'images/arrowrightdouble.png',
-						width: 22,
-						handler: function() {
-							dv.util.multiselect.selectAll(dataElementAvailable, dataElementSelected);
-						}
-					}
-				],
-				listeners: {
-					afterrender: function() {
-						this.boundList.on('itemdblclick', function() {
-							dv.util.multiselect.select(this, dataElementSelected);
-						}, this);
-					}
-				}
-			});
-
-			dataElementSelected = Ext.create('Ext.ux.form.MultiSelect', {
-				cls: 'dv-toolbar-multiselect-right',
-				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
-				valueField: 'id',
-				displayField: 'name',
-				ddReorder: true,
-				store: dv.store.dataElementSelected,
-				tbar: [
-					{
-						xtype: 'button',
-						icon: 'images/arrowleftdouble.png',
-						width: 22,
-						handler: function() {
-							dv.util.multiselect.unselectAll(dataElementAvailable, dataElementSelected);
-						}
-					},
-					{
-						xtype: 'button',
-						icon: 'images/arrowleft.png',
-						width: 22,
-						handler: function() {
-							dv.util.multiselect.unselect(dataElementAvailable, dataElementSelected);
-						}
-					},
-					'->',
-					{
-						xtype: 'label',
-						text: DV.i18n.selected,
-						cls: 'dv-toolbar-multiselect-right-label'
-					}
-				],
-				listeners: {
-					afterrender: function() {
-						this.boundList.on('itemdblclick', function() {
-							dv.util.multiselect.unselect(dataElementAvailable, this);
-						}, this);
-					}
-				}
-			});
-
-			dataElementGroupStore = Ext.create('Ext.data.Store', {
-				fields: ['id', 'name', 'index'],
-				proxy: {
-					type: 'ajax',
-					url: dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.dataelementgroup_get,
-					reader: {
-						type: 'json',
-						root: 'dataElementGroups'
-					}
-				},
-				listeners: {
-					load: function(s) {
-						if (dataElementDetailLevel.getValue() === dv.conf.finals.dimension.dataElement.objectName) {
-							s.add({
-								id: 0,
-								name: '[ ' + DV.i18n.all_data_element_groups + ' ]',
-								index: -1
-							});
-						}
-
-						s.sort([
-							{property: 'index', direction: 'ASC'},
-							{property: 'name', direction: 'ASC'}
-						]);
-					}
-				}
-			});
-
-			dataElementGroupComboBox = Ext.create('Ext.form.field.ComboBox', {
-				cls: 'dv-combo',
-				style: 'margin:0 2px 2px 0',
-				width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding - 90,
-				valueField: 'id',
-				displayField: 'name',
-				emptyText: DV.i18n.select_data_element_group,
-				editable: false,
-				store: dataElementGroupStore,
-				loadAvailable: function() {
-					var store = dv.store.dataElementAvailable,
-						detailLevel = dataElementDetailLevel.getValue(),
-						value = this.getValue();
-
-					if (value !== null) {
-						if (detailLevel === dv.conf.finals.dimension.dataElement.objectName) {
-							store.setTotalsProxy(value);
-						}
-						else {
-							store.setDetailsProxy(value);
-						}
-					}
-				},
-				listeners: {
-					select: function(cb) {
-						cb.loadAvailable();
-					}
-				}
-			});
-
-			dataElementDetailLevel = Ext.create('Ext.form.field.ComboBox', {
-				cls: 'dv-combo',
-				style: 'margin-bottom:2px',
-				baseBodyCls: 'small',
-				queryMode: 'local',
-				editable: false,
-				valueField: 'id',
-				displayField: 'text',
-				width: 90 - 2,
-				value: dv.conf.finals.dimension.dataElement.objectName,
-				store: {
-					fields: ['id', 'text'],
-					data: [
-						{id: dv.conf.finals.dimension.dataElement.objectName, text: DV.i18n.totals},
-						{id: dv.conf.finals.dimension.operand.objectName, text: DV.i18n.details}
-					]
-				},
-				listeners: {
-					select: function(cb) {
-						var record = dataElementGroupStore.getById(0);
-
-						if (cb.getValue() === dv.conf.finals.dimension.operand.objectName && record) {
-							dataElementGroupStore.remove(record);
-						}
-
-						if (cb.getValue() === dv.conf.finals.dimension.dataElement.objectName && !record) {
-							dataElementGroupStore.insert(0, {
-								id: 0,
-								name: '[ ' + DV.i18n.all_data_element_groups + ' ]',
-								index: -1
-							});
-						}
-
-						dataElementGroupComboBox.loadAvailable();
-						dv.store.dataElementSelected.removeAll();
-					}
-				}
-			});
-
-			dataElement = {
-				xtype: 'panel',
-				title: '<div class="dv-panel-title-data">' + DV.i18n.data_elements + '</div>',
-				hideCollapseTool: true,
-				getDimension: function() {
-					var config = {
-						dimension: dataElementDetailLevel.getValue(),
-						items: []
-					};
-
-					dv.store.dataElementSelected.each( function(r) {
-						config.items.push({id: r.data.id});
-					});
-
-					return config.items.length ? config : null;
-				},
-				onExpand: function() {
-					var h = dv.viewport.westRegion.hasScrollbar ?
-						dv.conf.layout.west_scrollbarheight_accordion_dataelement : dv.conf.layout.west_maxheight_accordion_dataelement;
-					dv.util.dimension.panel.setHeight(h);
-					dv.util.multiselect.setHeight(
-						[dataElementAvailable, dataElementSelected],
-						this,
-						dv.conf.layout.west_fill_accordion_indicator
-					);
-				},
-				items: [
-					{
-						xtype: 'container',
-						layout: 'column',
-						items: [
-							dataElementGroupComboBox,
-							dataElementDetailLevel
-						]
-					},
-					{
-						xtype: 'panel',
-						layout: 'column',
-						bodyStyle: 'border-style:none',
-						items: [
-							dataElementAvailable,
-							dataElementSelected
-						]
-					}
-				],
-				listeners: {
-					added: function() {
-						dv.cmp.dimension.panels.push(this);
-					},
-					expand: function(p) {
-						p.onExpand();
-					}
-				}
-			};
-
-			dataSetAvailable = Ext.create('Ext.ux.form.MultiSelect', {
-				cls: 'dv-toolbar-multiselect-left',
-				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
-				valueField: 'id',
-				displayField: 'name',
-				store: dv.store.dataSetAvailable,
-				tbar: [
-					{
-						xtype: 'label',
-						text: DV.i18n.available,
-						cls: 'dv-toolbar-multiselect-left-label'
-					},
-					'->',
-					{
-						xtype: 'button',
-						icon: 'images/arrowright.png',
-						width: 22,
-						handler: function() {
-							dv.util.multiselect.select(dataSetAvailable, dataSetSelected);
-						}
-					},
-					{
-						xtype: 'button',
-						icon: 'images/arrowrightdouble.png',
-						width: 22,
-						handler: function() {
-							dv.util.multiselect.selectAll(dataSetAvailable, dataSetSelected);
-						}
-					}
-				],
-				listeners: {
-					afterrender: function() {
-						this.boundList.on('itemdblclick', function() {
-							dv.util.multiselect.select(this, dataSetSelected);
-						}, this);
-					}
-				}
-			});
-
-			dataSetSelected = Ext.create('Ext.ux.form.MultiSelect', {
-				cls: 'dv-toolbar-multiselect-right',
-				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
-				valueField: 'id',
-				displayField: 'name',
-				ddReorder: true,
-				store: dv.store.dataSetSelected,
-				tbar: [
-					{
-						xtype: 'button',
-						icon: 'images/arrowleftdouble.png',
-						width: 22,
-						handler: function() {
-							dv.util.multiselect.unselectAll(dataSetAvailable, dataSetSelected);
-						}
-					},
-					{
-						xtype: 'button',
-						icon: 'images/arrowleft.png',
-						width: 22,
-						handler: function() {
-							dv.util.multiselect.unselect(dataSetAvailable, dataSetSelected);
-						}
-					},
-					'->',
-					{
-						xtype: 'label',
-						text: DV.i18n.selected,
-						cls: 'dv-toolbar-multiselect-right-label'
-					}
-				],
-				listeners: {
-					afterrender: function() {
-						this.boundList.on('itemdblclick', function() {
-							dv.util.multiselect.unselect(dataSetAvailable, this);
-						}, this);
-					}
-				}
-			});
-
-			dataSet = {
-				xtype: 'panel',
-				title: '<div class="dv-panel-title-data">' + DV.i18n.reporting_rates + '</div>',
-				hideCollapseTool: true,
-				getDimension: function() {
-					var config = {
-						dimension: dv.conf.finals.dimension.dataSet.objectName,
-						items: []
-					};
-
-					dv.store.dataSetSelected.each( function(r) {
-						config.items.push({id: r.data.id});
-					});
-
-					return config.items.length ? config : null;
-				},
-				onExpand: function() {
-					var h = dv.viewport.westRegion.hasScrollbar ?
-						dv.conf.layout.west_scrollbarheight_accordion_dataset : dv.conf.layout.west_maxheight_accordion_dataset;
-					dv.util.dimension.panel.setHeight(h);
-					dv.util.multiselect.setHeight(
-						[dataSetAvailable, dataSetSelected],
-						this,
-						dv.conf.layout.west_fill_accordion_dataset
-					);
-
-					if (!dv.store.dataSetAvailable.isLoaded) {
-						dv.store.dataSetAvailable.load();
-					}
-				},
-				items: [
-					{
-						xtype: 'panel',
-						layout: 'column',
-						bodyStyle: 'border-style:none',
-						items: [
-							dataSetAvailable,
-							dataSetSelected
-						]
-					}
-				],
-				listeners: {
-					added: function() {
-						dv.cmp.dimension.panels.push(this);
-					},
-					expand: function(p) {
-						p.onExpand();
-					}
-				}
-			};
-
-			rewind = Ext.create('Ext.form.field.Checkbox', {
-				relativePeriodId: 'rewind',
-				boxLabel: 'Rewind one period',
-				xable: function() {
-					this.setDisabled(dv.util.checkbox.isAllFalse());
-				}
-			});
-
-			relativePeriod = {
-				xtype: 'panel',
-				hideCollapseTool: true,
-				autoScroll: true,
-				bodyStyle: 'border:0 none',
-				valueComponentMap: {},
-				items: [
-					{
-						xtype: 'container',
-						layout: 'column',
-						bodyStyle: 'border-style:none',
-						items: [
-							{
-								xtype: 'panel',
-								columnWidth: 0.34,
-								bodyStyle: 'border-style:none; padding:0 0 0 8px',
-								defaults: {
-									labelSeparator: '',
-									style: 'margin-bottom:2px',
-									listeners: {
-										added: function(chb) {
-											if (chb.xtype === 'checkbox') {
-												dv.cmp.dimension.relativePeriod.checkbox.push(chb);
-												relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-											}
-										},
-										change: function() {
-											rewind.xable();
-										}
-									}
-								},
-								items: [
-									{
-										xtype: 'label',
-										text: DV.i18n.weeks,
-										cls: 'dv-label-period-heading'
-									},
-									{
-										xtype: 'checkbox',
-										relativePeriodId: 'LAST_WEEK',
-										boxLabel: DV.i18n.last_week
-									},
-									{
-										xtype: 'checkbox',
-										relativePeriodId: 'LAST_4_WEEKS',
-										boxLabel: DV.i18n.last_4_weeks
-									},
-									{
-										xtype: 'checkbox',
-										relativePeriodId: 'LAST_12_WEEKS',
-										boxLabel: DV.i18n.last_12_weeks
-									}
-								]
-							},
-							{
-								xtype: 'panel',
-								columnWidth: 0.33,
-								bodyStyle: 'border-style:none',
-								defaults: {
-									labelSeparator: '',
-									style: 'margin-bottom:2px',
-									listeners: {
-										added: function(chb) {
-											if (chb.xtype === 'checkbox') {
-												dv.cmp.dimension.relativePeriod.checkbox.push(chb);
-												relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-											}
-										},
-										change: function() {
-											rewind.xable();
-										}
-									}
-								},
-								items: [
-									{
-										xtype: 'label',
-										text: DV.i18n.months,
-										cls: 'dv-label-period-heading'
-									},
-									{
-										xtype: 'checkbox',
-										relativePeriodId: 'LAST_MONTH',
-										boxLabel: DV.i18n.last_month
-									},
-									{
-										xtype: 'checkbox',
-										relativePeriodId: 'LAST_3_MONTHS',
-										boxLabel: DV.i18n.last_3_months
-									},
-									{
-										xtype: 'checkbox',
-										relativePeriodId: 'LAST_12_MONTHS',
-										boxLabel: DV.i18n.last_12_months,
-										checked: true
-									}
-								]
-							},
-							{
-								xtype: 'panel',
-								columnWidth: 0.33,
-								bodyStyle: 'border-style:none',
-								defaults: {
-									labelSeparator: '',
-									style: 'margin-bottom:2px',
-									listeners: {
-										added: function(chb) {
-											if (chb.xtype === 'checkbox') {
-												dv.cmp.dimension.relativePeriod.checkbox.push(chb);
-												relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-											}
-										},
-										change: function() {
-											rewind.xable();
-										}
-									}
-								},
-								items: [
-									{
-										xtype: 'label',
-										text: DV.i18n.bimonths,
-										cls: 'dv-label-period-heading'
-									},
-									{
-										xtype: 'checkbox',
-										relativePeriodId: 'LAST_BIMONTH',
-										boxLabel: DV.i18n.last_bimonth
-									},
-									{
-										xtype: 'checkbox',
-										relativePeriodId: 'LAST_6_BIMONTHS',
-										boxLabel: DV.i18n.last_6_bimonths
-									}
-								]
-							}
-						]
-					},
-					{
-						xtype: 'container',
-						layout: 'column',
-						bodyStyle: 'border-style:none',
-						items: [
-							{
-								xtype: 'panel',
-								columnWidth: 0.34,
-								bodyStyle: 'border-style:none; padding:5px 0 0 10px',
-								defaults: {
-									labelSeparator: '',
-									style: 'margin-bottom:2px',
-									listeners: {
-										added: function(chb) {
-											if (chb.xtype === 'checkbox') {
-												dv.cmp.dimension.relativePeriod.checkbox.push(chb);
-												relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-											}
-										},
-										change: function() {
-											rewind.xable();
-										}
-									}
-								},
-								items: [
-									{
-										xtype: 'label',
-										text: DV.i18n.quarters,
-										cls: 'dv-label-period-heading'
-									},
-									{
-										xtype: 'checkbox',
-										relativePeriodId: 'LAST_QUARTER',
-										boxLabel: DV.i18n.last_quarter
-									},
-									{
-										xtype: 'checkbox',
-										relativePeriodId: 'LAST_4_QUARTERS',
-										boxLabel: DV.i18n.last_4_quarters
-									}
-								]
-							},
-							{
-								xtype: 'panel',
-								columnWidth: 0.33,
-								bodyStyle: 'border-style:none; padding:5px 0 0',
-								defaults: {
-									labelSeparator: '',
-									style: 'margin-bottom:2px',
-									listeners: {
-										added: function(chb) {
-											if (chb.xtype === 'checkbox') {
-												dv.cmp.dimension.relativePeriod.checkbox.push(chb);
-												relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-											}
-										},
-										change: function() {
-											rewind.xable();
-										}
-									}
-								},
-								items: [
-									{
-										xtype: 'label',
-										text: DV.i18n.sixmonths,
-										cls: 'dv-label-period-heading'
-									},
-									{
-										xtype: 'checkbox',
-										relativePeriodId: 'LAST_SIX_MONTH',
-										boxLabel: DV.i18n.last_sixmonth
-									},
-									{
-										xtype: 'checkbox',
-										relativePeriodId: 'LAST_2_SIXMONTHS',
-										boxLabel: DV.i18n.last_2_sixmonths
-									}
-								]
-							},
-							{
-								xtype: 'panel',
-								columnWidth: 0.33,
-								bodyStyle: 'border-style:none; padding:5px 0 0',
-								defaults: {
-									labelSeparator: '',
-									style: 'margin-bottom:2px',
-									listeners: {
-										added: function(chb) {
-											if (chb.xtype === 'checkbox') {
-												dv.cmp.dimension.relativePeriod.checkbox.push(chb);
-												relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-											}
-										},
-										change: function() {
-											rewind.xable();
-										}
-									}
-								},
-								items: [
-									{
-										xtype: 'label',
-										text: DV.i18n.financial_years,
-										cls: 'dv-label-period-heading'
-									},
-									{
-										xtype: 'checkbox',
-										relativePeriodId: 'LAST_FINANCIAL_YEAR',
-										boxLabel: DV.i18n.last_financial_year
-									},
-									{
-										xtype: 'checkbox',
-										relativePeriodId: 'LAST_5_FINANCIAL_YEARS',
-										boxLabel: DV.i18n.last_5_financial_years
-									}
-								]
-							}
-
-							//{
-								//xtype: 'panel',
-								//layout: 'anchor',
-								//bodyStyle: 'border-style:none; padding:5px 0 0 46px',
-								//defaults: {
-									//labelSeparator: '',
-									//style: 'margin-bottom:2px',
-								//},
-								//items: [
-									//{
-										//xtype: 'label',
-										//text: 'Options',
-										//cls: 'dv-label-period-heading-options'
-									//},
-									//rewind
-								//]
-							//}
-						]
-					},
-					{
-						xtype: 'container',
-						layout: 'column',
-						bodyStyle: 'border-style:none',
-						items: [
-							{
-								xtype: 'panel',
-								columnWidth: 0.35,
-								bodyStyle: 'border-style:none; padding:5px 0 0 10px',
-								defaults: {
-									labelSeparator: '',
-									style: 'margin-bottom:2px',
-									listeners: {
-										added: function(chb) {
-											if (chb.xtype === 'checkbox') {
-												dv.cmp.dimension.relativePeriod.checkbox.push(chb);
-												relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-											}
-										},
-										change: function() {
-											rewind.xable();
-										}
-									}
-								},
-								items: [
-									{
-										xtype: 'label',
-										text: DV.i18n.years,
-										cls: 'dv-label-period-heading'
-									},
-									{
-										xtype: 'checkbox',
-										relativePeriodId: 'THIS_YEAR',
-										boxLabel: DV.i18n.this_year
-									},
-									{
-										xtype: 'checkbox',
-										relativePeriodId: 'LAST_YEAR',
-										boxLabel: DV.i18n.last_year
-									},
-									{
-										xtype: 'checkbox',
-										relativePeriodId: 'LAST_5_YEARS',
-										boxLabel: DV.i18n.last_5_years
-									}
-								]
-							}
-						]
-					}
-				]
-			};
-
-			fixedPeriodAvailable = Ext.create('Ext.ux.form.MultiSelect', {
-				cls: 'dv-toolbar-multiselect-left',
-				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
-				height: 180,
-				valueField: 'id',
-				displayField: 'name',
-				store: dv.store.fixedPeriodAvailable,
-				tbar: [
-					{
-						xtype: 'label',
-						text: DV.i18n.available,
-						cls: 'dv-toolbar-multiselect-left-label'
-					},
-					'->',
-					{
-						xtype: 'button',
-						icon: 'images/arrowright.png',
-						width: 22,
-						handler: function() {
-							dv.util.multiselect.select(fixedPeriodAvailable, fixedPeriodSelected);
-						}
-					},
-					{
-						xtype: 'button',
-						icon: 'images/arrowrightdouble.png',
-						width: 22,
-						handler: function() {
-							dv.util.multiselect.selectAll(fixedPeriodAvailable, fixedPeriodSelected, true);
-						}
-					},
-					' '
-				],
-				listeners: {
-					afterrender: function() {
-						this.boundList.on('itemdblclick', function() {
-							dv.util.multiselect.select(fixedPeriodAvailable, fixedPeriodSelected);
-						}, this);
-					}
-				}
-			});
-
-			fixedPeriodSelected = Ext.create('Ext.ux.form.MultiSelect', {
-				cls: 'dv-toolbar-multiselect-right',
-				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
-				height: 180,
-				valueField: 'id',
-				displayField: 'name',
-				ddReorder: false,
-				store: dv.store.fixedPeriodSelected,
-				tbar: [
-					' ',
-					{
-						xtype: 'button',
-						icon: 'images/arrowleftdouble.png',
-						width: 22,
-						handler: function() {
-							dv.util.multiselect.unselectAll(fixedPeriodAvailable, fixedPeriodSelected);
-						}
-					},
-					{
-						xtype: 'button',
-						icon: 'images/arrowleft.png',
-						width: 22,
-						handler: function() {
-							dv.util.multiselect.unselect(fixedPeriodAvailable, fixedPeriodSelected);
-						}
-					},
-					'->',
-					{
-						xtype: 'label',
-						text: DV.i18n.selected,
-						cls: 'dv-toolbar-multiselect-right-label'
-					}
-				],
-				listeners: {
-					afterrender: function() {
-						this.boundList.on('itemdblclick', function() {
-							dv.util.multiselect.unselect(fixedPeriodAvailable, fixedPeriodSelected);
-						}, this);
-					}
-				}
-			});
-
-			period = {
-				xtype: 'panel',
-				title: '<div class="dv-panel-title-period">Periods</div>',
-				hideCollapseTool: true,
-				getDimension: function() {
-					var config = {
-							dimension: dv.conf.finals.dimension.period.objectName,
-							items: []
-						},
-						chb = dv.cmp.dimension.relativePeriod.checkbox;
-
-					dv.store.fixedPeriodSelected.each( function(r) {
-						config.items.push({id: r.data.id});
-					});
-
-					for (var i = 0; i < chb.length; i++) {
-						if (chb[i].getValue()) {
-							config.items.push({id: chb[i].relativePeriodId});
-						}
-					}
-
-					return config.items.length ? config : null;
-				},
-				onExpand: function() {
-					var h = dv.viewport.westRegion.hasScrollbar ?
-						dv.conf.layout.west_scrollbarheight_accordion_period : dv.conf.layout.west_maxheight_accordion_period;
-					dv.util.dimension.panel.setHeight(h);
-					dv.util.multiselect.setHeight(
-						[fixedPeriodAvailable, fixedPeriodSelected],
-						this,
-						dv.conf.layout.west_fill_accordion_period
-					);
-				},
-				items: [
-					{
-						xtype: 'panel',
-						layout: 'column',
-						bodyStyle: 'border-style:none',
-						style: 'margin-top:0px',
-						items: [
-							{
-								xtype: 'combobox',
-								cls: 'dv-combo',
-								style: 'margin-bottom:2px',
-								width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding - 67 - 67 - 4,
-								valueField: 'id',
-								displayField: 'name',
-								emptyText: DV.i18n.select_period_type,
-								editable: false,
-								queryMode: 'remote',
-								store: dv.store.periodType,
-								periodOffset: 0,
-								listeners: {
-									select: function() {
-										var ptype = new PeriodType(),
-											periodType = this.getValue();
-
-										var periods = ptype.get(periodType).generatePeriods({
-											offset: this.periodOffset,
-											filterFuturePeriods: true,
-											reversePeriods: true
-										});
-
-										dv.store.fixedPeriodAvailable.setIndex(periods);
-										dv.store.fixedPeriodAvailable.loadData(periods);
-										dv.util.multiselect.filterAvailable(fixedPeriodAvailable, fixedPeriodSelected);
-									}
-								}
-							},
-							{
-								xtype: 'button',
-								text: DV.i18n.prev_year,
-								style: 'margin-left:2px; border-radius:2px',
-								width: 67,
-								height: 24,
-								handler: function() {
-									var cb = this.up('panel').down('combobox');
-									if (cb.getValue()) {
-										cb.periodOffset--;
-										cb.fireEvent('select');
-									}
-								}
-							},
-							{
-								xtype: 'button',
-								text: DV.i18n.next_year,
-								style: 'margin-left:2px; border-radius:2px',
-								width: 67,
-								height: 24,
-								handler: function() {
-									var cb = this.up('panel').down('combobox');
-									if (cb.getValue() && cb.periodOffset < 0) {
-										cb.periodOffset++;
-										cb.fireEvent('select');
-									}
-								}
-							}
-						]
-					},
-					{
-						xtype: 'panel',
-						layout: 'column',
-						bodyStyle: 'border-style:none; padding-bottom:2px',
-						items: [
-							fixedPeriodAvailable,
-							fixedPeriodSelected
-						]
-					},
-					relativePeriod
-				],
-				listeners: {
-					added: function() {
-						dv.cmp.dimension.panels.push(this);
-					},
-					expand: function(p) {
-						p.onExpand();
-					}
-				}
-			};
-
-			treePanel = Ext.create('Ext.tree.Panel', {
-				cls: 'dv-tree',
-				style: 'border-top: 1px solid #ddd; padding-top: 1px',
-				width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding,
-				rootVisible: false,
-				autoScroll: true,
-				multiSelect: true,
-				rendered: false,
-				reset: function() {
-					var rootNode = this.getRootNode().findChild('id', dv.init.rootNodes[0].id);
-					this.collapseAll();
-					this.expandPath(rootNode.getPath());
-					this.getSelectionModel().select(rootNode);
-				},
-				selectRootIf: function() {
-					if (this.getSelectionModel().getSelection().length < 1) {
-						var node = this.getRootNode().findChild('id', dv.init.rootNodes[0].id);
-						if (this.rendered) {
-							this.getSelectionModel().select(node);
-						}
-						return node;
-					}
-				},
-				numberOfRecords: 0,
-				recordsToSelect: [],
-				multipleSelectIf: function(doUpdate) {
-					if (this.recordsToSelect.length === this.numberOfRecords) {
-						this.getSelectionModel().select(this.recordsToSelect);
-						this.recordsToSelect = [];
-						this.numberOfRecords = 0;
-
-						if (doUpdate) {
-							update();
-						}
-					}
-				},
-				multipleExpand: function(id, path, doUpdate) {
-					this.expandPath('/' + dv.conf.finals.root.id + path, 'id', '/', function() {
-						var record = this.getRootNode().findChild('id', id, true);
-						this.recordsToSelect.push(record);
-						this.multipleSelectIf(doUpdate);
-					}, this);
-				},
-				select: function(url, params) {
-					if (!params) {
-						params = {};
-					}
-					Ext.Ajax.request({
-						url: url,
-						method: 'GET',
-						params: params,
-						scope: this,
-						success: function(r) {
-							var a = Ext.decode(r.responseText).organisationUnits;
-							this.numberOfRecords = a.length;
-							for (var i = 0; i < a.length; i++) {
-								this.multipleExpand(a[i].id, a[i].path);
-							}
-						}
-					});
-				},
-				selectByGroup: function(id) {
-					if (id) {
-						var url = dv.conf.finals.ajax.path_visualizer + dv.conf.finals.ajax.organisationunit_getbygroup,
-							params = {id: id};
-						this.select(url, params);
-					}
-				},
-				selectByLevel: function(level) {
-					if (level) {
-						var url = dv.conf.finals.ajax.path_visualizer + dv.conf.finals.ajax.organisationunit_getbylevel,
-							params = {level: level};
-						this.select(url, params);
-					}
-				},
-				selectByIds: function(ids) {
-					if (ids) {
-						var url = dv.conf.finals.ajax.path_visualizer + dv.conf.finals.ajax.organisationunit_getbyids;
-						Ext.Array.each(ids, function(item) {
-							url = Ext.String.urlAppend(url, 'ids=' + item);
-						});
-						if (!this.rendered) {
-							dv.cmp.dimension.organisationUnit.panel.expand();
-						}
-						this.select(url);
-					}
-				},
-				store: Ext.create('Ext.data.TreeStore', {
-					proxy: {
-						type: 'ajax',
-						url: dv.conf.finals.ajax.path_visualizer + dv.conf.finals.ajax.organisationunitchildren_get
-					},
-					root: {
-						id: dv.conf.finals.root.id,
-						expanded: true,
-						children: dv.init.rootNodes
-					}
-				}),
-				xable: function(checked, value) {
-					this.setDisabled(!!(checked || value));
-				},
-				listeners: {
-					added: function() {
-						dv.cmp.dimension.organisationUnit.treepanel = this;
-					},
-					render: function() {
-						this.rendered = true;
-					},
-					afterrender: function() {
-						this.getSelectionModel().select(0);
-					},
-					itemcontextmenu: function(v, r, h, i, e) {
-						v.getSelectionModel().select(r, false);
-
-						if (v.menu) {
-							v.menu.destroy();
-						}
-						v.menu = Ext.create('Ext.menu.Menu', {
-							id: 'treepanel-contextmenu',
-							showSeparator: false,
-							shadow: false
-						});
-						if (!r.data.leaf) {
-							v.menu.add({
-								id: 'treepanel-contextmenu-item',
-								text: DV.i18n.select_all_children,
-								icon: 'images/node-select-child.png',
-								handler: function() {
-									r.expand(false, function() {
-										v.getSelectionModel().select(r.childNodes, true);
-										v.getSelectionModel().deselect(r);
-									});
-								}
-							});
-						}
-						else {
-							return;
-						}
-
-						v.menu.showAt(e.xy);
-					}
-				}
-			});
-
-			userOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
-				columnWidth: 0.5,
-				style: 'padding-top:2px; padding-left:3px; margin-bottom:0',
-				boxLabel: DV.i18n.user_organisation_unit,
-				labelWidth: dv.conf.layout.form_label_width,
-				handler: function(chb, checked) {
-					treePanel.xable(checked, userOrganisationUnitChildren.getValue());
-				}
-			});
-
-			userOrganisationUnitChildren = Ext.create('Ext.form.field.Checkbox', {
-				columnWidth: 0.5,
-				style: 'padding-top:2px; margin-bottom:0',
-				boxLabel: DV.i18n.user_organisation_unit_children,
-				labelWidth: dv.conf.layout.form_label_width,
-				handler: function(chb, checked) {
-					treePanel.xable(checked, userOrganisationUnit.getValue());
-				}
-			});
-
-			userOrganisationUnitPanel = Ext.create('Ext.panel.Panel', {
-				columnWidth: 0.9,
-				layout: 'column',
-				bodyStyle: 'border:0 none; padding-bottom:3px; padding-left:7px',
-				items: [
-					userOrganisationUnit,
-					userOrganisationUnitChildren
-				]
-			});
-
-			organisationUnitLevel = Ext.create('Ext.form.field.ComboBox', {
-				cls: 'dv-combo',
-				style: 'margin-bottom:0',
-				width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding - 38,
-				valueField: 'level',
-				displayField: 'name',
-				emptyText: DV.i18n.select_organisation_unit_level,
-				editable: false,
-				hidden: true,
-				store: {
-					fields: ['id', 'name', 'level'],
-					data: dv.init.organisationUnitLevels
-				}
-			});
-
-			toolMenu = Ext.create('Ext.menu.Menu', {
-				shadow: false,
-				showSeparator: false,
-				menuValue: 'explicit',
-				clickHandler: function(param) {
-					var items = this.items.items;
-					this.menuValue = param;
-
-					// Menu item icon cls
-					for (var i = 0; i < items.length; i++) {
-						if (items[i].param === param) {
-							items[i].setIconCls('dv-menu-item-selected');
-						}
-						else {
-							items[i].setIconCls('');
-						}
-					}
-
-					// Gui
-					if (param === 'explicit') {
-						userOrganisationUnit.show();
-						userOrganisationUnitChildren.show();
-						organisationUnitLevel.hide();
-
-						if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue()) {
-							treePanel.disable();
-						}
-					}
-					else if (param === 'boundary') {
-						userOrganisationUnit.hide();
-						userOrganisationUnitChildren.hide();
-						organisationUnitLevel.show();
-						treePanel.enable();
-					}
-				},
-				items: [
-					{
-						text: DV.i18n.select_organisation_units + '&nbsp;&nbsp;',
-						param: 'explicit',
-						iconCls: 'dv-menu-item-selected'
-					},
-					{
-						text: DV.i18n.select_boundaries_and_level + '&nbsp;&nbsp;',
-						param: 'boundary'
-					}
-				],
-				listeners: {
-					afterrender: function() {
-						this.getEl().addCls('dv-btn-menu');
-					},
-					click: function(menu, item) {
-						this.clickHandler(item.param);
-					}
-				}
-			});
-
-			tool = Ext.create('Ext.button.Button', {
-				cls: 'dv-button-organisationunitselection',
-				iconCls: 'dv-button-icon-gear',
-				width: 36,
-				height: 24,
-				menu: toolMenu
-			});
-
-			toolPanel = Ext.create('Ext.panel.Panel', {
-				width: 36,
-				bodyStyle: 'border:0 none; text-align:right',
-				style: 'margin-right:2px',
-				items: tool
-			});
-
-			organisationUnit = {
-				xtype: 'panel',
-				title: '<div class="dv-panel-title-organisationunit">' + DV.i18n.organisation_units + '</div>',
-				bodyStyle: 'padding:2px',
-				hideCollapseTool: true,
-				collapsed: false,
-				getDimension: function() {
-					var r = treePanel.getSelectionModel().getSelection(),
-						config = {
-							dimension: dv.conf.finals.dimension.organisationUnit.objectName,
-							items: []
-						};
-
-					if (toolMenu.menuValue === 'explicit') {
-						if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue()) {
-							if (userOrganisationUnit.getValue()) {
-								config.items.push({id: 'USER_ORGUNIT'});
-							}
-							if (userOrganisationUnitChildren.getValue()) {
-								config.items.push({id: 'USER_ORGUNIT_CHILDREN'});
-							}
-						}
-						else {
-							for (var i = 0; i < r.length; i++) {
-								config.items.push({id: r[i].data.id});
-							}
-						}
-					}
-					else if (toolMenu.menuValue === 'boundary') {
-						for (var i = 0; i < r.length; i++) {
-							config.items.push({id: 'LEVEL-' + organisationUnitLevel.getValue() + '-' + r[i].data.id});
-						}
-					}
-
-					return config.items.length ? config : null;
-				},
-				onExpand: function() {
-					var h = dv.viewport.westRegion.hasScrollbar ?
-						dv.conf.layout.west_scrollbarheight_accordion_organisationunit : dv.conf.layout.west_maxheight_accordion_organisationunit;
-					dv.util.dimension.panel.setHeight(h);
-					treePanel.setHeight(this.getHeight() - dv.conf.layout.west_fill_accordion_organisationunit);
-				},
-				items: [
-					{
-						layout: 'column',
-						bodyStyle: 'border:0 none',
-						style: 'padding-bottom:2px',
-						items: [
-							toolPanel,
-							{
-								width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding - 38,
-								layout: 'column',
-								bodyStyle: 'border:0 none',
-								items: [
-									userOrganisationUnit,
-									userOrganisationUnitChildren,
-									organisationUnitLevel
-								]
-							}
-						]
-					},
-					treePanel
-				],
-				listeners: {
-					added: function() {
-						dv.cmp.dimension.panels.push(this);
-					},
-					expand: function(p) {
-						p.onExpand();
-					}
-				}
-			};
-
-			getDimensionPanels = function(dimensions, iconCls) {
-				var	getAvailableStore,
-					getSelectedStore,
-
-					createPanel,
-					getPanels;
-
-				getAvailableStore = function(dimension) {
-					return Ext.create('Ext.data.Store', {
-						fields: ['id', 'name'],
-						proxy: {
-							type: 'ajax',
-							url: dv.baseUrl + '/api/dimensions/' + dimension.id + '.json',
-							reader: {
-								type: 'json',
-								root: 'items'
-							}
-						},
-						isLoaded: false,
-						storage: {},
-						sortStore: function() {
-							this.sort('name', 'ASC');
-						},
-						reset: function() {
-							if (this.isLoaded) {
-								this.removeAll();
-								dv.util.store.loadFromStorage(this);
-								this.sortStore();
-							}
-						},
-						listeners: {
-							load: function(s) {
-								s.isLoaded = true;
-								dv.util.store.addToStorage(s);
-							}
-						}
-					});
-				};
-
-				getSelectedStore = function() {
-					return Ext.create('Ext.data.Store', {
-						fields: ['id', 'name'],
-						data: []
-					});
-				};
-
-				createPanel = function(dimension) {
-					var getAvailable,
-						getSelected,
-
-						availableStore,
-						selectedStore,
-						available,
-						selected,
-
-						panel;
-
-					getAvailable = function(availableStore) {
-						return Ext.create('Ext.ux.form.MultiSelect', {
-							cls: 'dv-toolbar-multiselect-left',
-							width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
-							valueField: 'id',
-							displayField: 'name',
-							store: availableStore,
-							tbar: [
-								{
-									xtype: 'label',
-									text: DV.i18n.available,
-									cls: 'dv-toolbar-multiselect-left-label'
-								},
-								'->',
-								{
-									xtype: 'button',
-									icon: 'images/arrowright.png',
-									width: 22,
-									handler: function() {
-										dv.util.multiselect.select(available, selected);
-									}
-								},
-								{
-									xtype: 'button',
-									icon: 'images/arrowrightdouble.png',
-									width: 22,
-									handler: function() {
-										dv.util.multiselect.selectAll(available, selected);
-									}
-								}
-							],
-							listeners: {
-								afterrender: function() {
-									this.boundList.on('itemdblclick', function() {
-										dv.util.multiselect.select(available, selected);
-									}, this);
-								}
-							}
-						});
-					};
-
-					getSelected = function(selectedStore) {
-						return Ext.create('Ext.ux.form.MultiSelect', {
-							cls: 'dv-toolbar-multiselect-right',
-							width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
-							valueField: 'id',
-							displayField: 'name',
-							ddReorder: true,
-							store: selectedStore,
-							tbar: [
-								{
-									xtype: 'button',
-									icon: 'images/arrowleftdouble.png',
-									width: 22,
-									handler: function() {
-										dv.util.multiselect.unselectAll(available, selected);
-									}
-								},
-								{
-									xtype: 'button',
-									icon: 'images/arrowleft.png',
-									width: 22,
-									handler: function() {
-										dv.util.multiselect.unselect(available, selected);
-									}
-								},
-								'->',
-								{
-									xtype: 'label',
-									text: DV.i18n.selected,
-									cls: 'dv-toolbar-multiselect-right-label'
-								}
-							],
-							listeners: {
-								afterrender: function() {
-									this.boundList.on('itemdblclick', function() {
-										dv.util.multiselect.unselect(available, selected);
-									}, this);
-								}
-							}
-						});
-					};
-
-					availableStore = getAvailableStore(dimension);
-					selectedStore = getSelectedStore();
-
-					dimensionIdAvailableStoreMap[dimension.id] = availableStore;
-					dimensionIdSelectedStoreMap[dimension.id] = selectedStore;
-
-					available = getAvailable(availableStore);
-					selected = getSelected(selectedStore);
-
-					availableStore.on('load', function() {
-						dv.util.multiselect.filterAvailable(available, selected);
-					});
-
-					panel = {
-						xtype: 'panel',
-						title: '<div class="' + iconCls + '">' + dimension.name + '</div>',
-						hideCollapseTool: true,
-						availableStore: availableStore,
-						selectedStore: selectedStore,
-						getDimension: function() {
-							var config = {
-								dimension: dimension.id,
-								items: []
-							};
-
-							selectedStore.each( function(r) {
-								config.items.push({id: r.data.id});
-							});
-
-							return config.items.length ? config : null;
-						},
-						onExpand: function() {
-							if (!availableStore.isLoaded) {
-								availableStore.load();
-							}
-
-							var h = dv.viewport.westRegion.hasScrollbar ?
-								dv.conf.layout.west_scrollbarheight_accordion_group : dv.conf.layout.west_maxheight_accordion_group;
-							dv.util.dimension.panel.setHeight(h);
-
-							dv.util.multiselect.setHeight(
-								[available, selected],
-								this,
-								dv.conf.layout.west_fill_accordion_dataset
-							);
-						},
-						items: [
-							{
-								xtype: 'panel',
-								layout: 'column',
-								bodyStyle: 'border-style:none',
-								items: [
-									available,
-									selected
-								]
-							}
-						],
-						listeners: {
-							added: function() {
-								dv.cmp.dimension.panels.push(this);
-							},
-							expand: function(p) {
-								p.onExpand();
-							}
-						}
-					};
-
-					return panel;
-				};
-
-				getPanels = function() {
-					var panels = [];
-
-					for (var i = 0, panel; i < dimensions.length; i++) {
-						panel = createPanel(dimensions[i]);
-
-						panels.push(panel);
-					}
-
-					return panels;
-				};
-
-				return getPanels();
-			};
-
-			validateSpecialCases = function(layout) {
-				var dimConf = dv.conf.finals.dimension,
-					dimensions,
-					objectNameDimensionMap = {};
-
-				if (!layout) {
-					return;
-				}
-
-				dimensions = [].concat(layout.columns, layout.rows, layout.filters);
-
-				for (var i = 0; i < dimensions.length; i++) {
-					objectNameDimensionMap[dimensions[i].dimension] = dimensions[i];
-				}
-
-				if (layout.filters && layout.filters.length) {
-					for (var i = 0; i < layout.filters.length; i++) {
-
-						// Indicators as filter
-						if (layout.filters[i].dimension === dimConf.indicator.objectName) {
-							alert(DV.i18n.indicators_cannot_be_specified_as_filter);
-							return;
-						}
-
-						// Categories as filter
-						//if (layout.filters[i].dimension === dimConf.category.objectName) {
-							//alert(DV.i18n.categories_cannot_be_specified_as_filter);
-							//return;
-						//}
-
-						// Operands as filter
-						if (layout.filters[i].dimension === dimConf.operand.objectName) {
-							alert(DV.i18n.detailed_data_elements_cannot_be_specified_as_filter);
-							return;
-						}
-
-					}
-				}
-
-				// dc and in
-				if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.indicator.objectName]) {
-					alert('Indicators and detailed data elements cannot be specified together');
-					return;
-				}
-
-				// dc and de
-				if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataElement.objectName]) {
-					alert('Detailed data elements and totals cannot be specified together');
-					return;
-				}
-
-				// dc and ds
-				if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataSet.objectName]) {
-					alert('Data sets and detailed data elements cannot be specified together');
-					return;
-				}
-
-				// Categories as filter
-				//if (layout.filter && dv.viewport.layoutWindow.filterStore.getById(dimConf.category.dimensionName)) {
-					//alert(DV.i18n.categories_cannot_be_specified_as_filter);
-					//return;
-				//}
-
-				// Degs and datasets in the same query
-				//if (Ext.Array.contains(dimensionNames, dimConf.data.dimensionName) && dv.store.dataSetSelected.data.length) {
-					//for (var i = 0; i < dv.init.degs.length; i++) {
-						//if (Ext.Array.contains(dimensionNames, dv.init.degs[i].id)) {
-							//alert(DV.i18n.data_element_group_sets_cannot_be_specified_together_with_data_sets);
-							//return;
-						//}
-					//}
-				//}
-
-				return true;
-			};
-
-			update = function() {
-				var config = dv.util.chart.getLayoutConfig(),
-				layout = dv.api.layout.Layout(config);
-
-				if (!validateSpecialCases(layout)) {
-					return;
-				}
-
-				// State
-				dv.viewport.interpretationButton.disable();
-				dv.favorite = null;
-
-				// Create chart
-				dv.util.chart.createChart(layout, dv);
-			};
-
-			accordionBody = Ext.create('Ext.panel.Panel', {
-				layout: 'accordion',
-				activeOnTop: true,
-				cls: 'dv-accordion',
-				bodyStyle: 'border:0 none; margin-bottom:2px',
-				height: 700,
-				items: function() {
-					var panels = [
-						indicator,
-						dataElement,
-						dataSet,
-						period,
-						organisationUnit
-					],
-					dims = Ext.clone(dv.init.dimensions);
-
-					dv.util.array.sortObjectsByString(dims);
-
-					panels = panels.concat(getDimensionPanels(dims, 'dv-panel-title-dimension'));
-
-					last = panels[panels.length - 1];
-					last.cls = 'dv-accordion-last';
-
-					return panels;
-				}()
-			});
-
-			accordion = Ext.create('Ext.panel.Panel', {
-				bodyStyle: 'border-style:none; padding:2px; padding-bottom:0; overflow-y:scroll;',
-				items: accordionBody,
-				listeners: {
-					added: function() {
-						dv.cmp.dimension.accordion = this;
-					}
-				}
-			});
-
-			westRegion = Ext.create('Ext.panel.Panel', {
-				region: 'west',
-				preventHeader: true,
-				collapsible: true,
-				collapseMode: 'mini',
-				width: function() {
-					if (Ext.isWebKit) {
-						return dv.conf.layout.west_width + 8;
-					}
-					else {
-						if (Ext.isLinux && Ext.isGecko) {
-							return dv.conf.layout.west_width + 13;
-						}
-						return dv.conf.layout.west_width + 17;
-					}
-				}(),
-				items: [
-					chartType,
-					layout,
-					accordion
-				]
-			});
-
-			optionsButton = Ext.create('Ext.button.Button', {
-				text: DV.i18n.options,
-				menu: {},
-				handler: function() {
-					if (!dv.viewport.optionsWindow) {
-						dv.viewport.optionsWindow = DV.app.OptionsWindow();
-					}
-
-					dv.viewport.optionsWindow.show();
-				}
-			});
-
-			favoriteButton = Ext.create('Ext.button.Button', {
-				text: DV.i18n.favorites,
-				menu: {},
-				handler: function() {
-					if (dv.viewport.favoriteWindow) {
-						dv.viewport.favoriteWindow.destroy();
-					}
-
-					dv.viewport.favoriteWindow = DV.app.FavoriteWindow();
-					dv.viewport.favoriteWindow.show();
-				}
-			});
-
-			downloadButton = Ext.create('Ext.button.Button', {
-				text: DV.i18n.download,
-				disabled: true,
-				menu: {
-					cls: 'dv-menu',
-					shadow: false,
-					showSeparator: false,
-					items: [
-						{
-							xtype: 'label',
-							text: DV.i18n.graphics,
-							style: 'padding:7px 5px 5px 7px; font-weight:bold'
-						},
-						{
-							text: DV.i18n.image_png + ' (.png)',
-							iconCls: 'dv-menu-item-image',
-							handler: function() {
-								dv.util.chart.submitSvgForm('png');
-							}
-						},
-						{
-							text: 'PDF (.pdf)',
-							iconCls: 'dv-menu-item-image',
-							handler: function() {
-								dv.util.chart.submitSvgForm('pdf');
-							}
-						},
-						{
-							xtype: 'label',
-							text: DV.i18n.plain_data_sources,
-							style: 'padding:7px 5px 5px 7px; font-weight:bold'
-						},
-						{
-							text: 'JSON',
-							iconCls: 'dv-menu-item-datasource',
-							handler: function() {
-								if (dv.baseUrl && dv.paramString) {
-									window.open(dv.baseUrl + '/api/analytics.json' + dv.util.chart.getParamString(dv.xLayout, true));
-								}
-							}
-						},
-						{
-							text: 'XML',
-							iconCls: 'dv-menu-item-datasource',
-							handler: function() {
-								if (dv.baseUrl && dv.paramString) {
-									window.open(dv.baseUrl + '/api/analytics.xml' + dv.util.chart.getParamString(dv.xLayout, true));
-								}
-							}
-						},
-						{
-							text: 'Microsoft Excel',
-							iconCls: 'dv-menu-item-datasource',
-							handler: function() {
-								if (dv.baseUrl && dv.paramString) {
-									window.location.href = dv.baseUrl + '/api/analytics.xls' + dv.util.chart.getParamString(dv.xLayout, true);
-								}
-							}
-						},
-						{
-							text: 'CSV',
-							iconCls: 'dv-menu-item-datasource',
-							handler: function() {
-								if (dv.baseUrl && dv.paramString) {
-									window.location.href = dv.baseUrl + '/api/analytics.csv' + dv.util.chart.getParamString(dv.xLayout, true);
-								}
-							}
-						}
-					],
-					listeners: {
-						afterrender: function() {
-							this.getEl().addCls('dv-toolbar-btn-menu');
-						}
-					}
-				}
-			});
-
-			interpretationButton = Ext.create('Ext.button.Button', {
-				text: DV.i18n.share,
-				menu: {},
-				disabled: true,
-				xable: function() {
-					if (dv.favorite) {
-						this.enable();
-						this.disabledTooltip.destroy();
-					}
-					else {
-						if (dv.xLayout) {
-							this.disable();
-							this.createTooltip();
-						}
-					}
-				},
-				disabledTooltip: null,
-				createTooltip: function() {
-					this.disabledTooltip = Ext.create('Ext.tip.ToolTip', {
-						target: this.getEl(),
-						html: DV.i18n.save_load_favorite_before_sharing,
-						'anchor': 'bottom'
-					});
-				},
-				handler: function() {
-					if (dv.viewport.interpretationWindow) {
-						dv.viewport.interpretationWindow.destroy();
-					}
-
-					dv.viewport.interpretationWindow = DV.app.InterpretationWindow();
-
-					if (dv.viewport.interpretationWindow) {
-						dv.viewport.interpretationWindow.show();
-					}
-				}
-			});
-
-			defaultButton = Ext.create('Ext.button.Button', {
-				text: DV.i18n.chart,
-				iconCls: 'dv-button-icon-chart',
-				toggleGroup: 'module',
-				pressed: true,
-				handler: function() {
-					if (!this.pressed) {
-						this.toggle();
-					}
-				}
-			});
-
-			getLinkMenu = function(anchorCmp) {
-			};
-
-			centerRegion = Ext.create('Ext.panel.Panel', {
-				region: 'center',
-				bodyStyle: 'padding:0; text-align:center',
-				tbar: {
-                    defaults: {
-                        height: 26
-                    },
-					items: function() {
-						var items = [],
-							getSeparator;
-
-						getSeparator = function() {
-							return {
-								xtype: 'tbseparator',
-								height: 18,
-								style: 'border-color:transparent; border-right-color:#d1d1d1; margin-right:4px'
-							};
-						};
-
-						items.push({
-							text: '<<<',
-							handler: function(b) {
-								var text = b.getText();
-								text = text === '<<<' ? '>>>' : '<<<';
-								b.setText(text);
-
-								westRegion.toggleCollapse();
-							}
-						},
-						{
-							text: '<b>' + DV.i18n.update + '</b>',
-							handler: function() {
-								update();
-							}
-						},
-						optionsButton,
-						getSeparator(),
-						favoriteButton,
-						downloadButton,
-						interpretationButton,
-						'->',
-						{
-							text: DV.i18n.table,
-							iconCls: 'dv-button-icon-table',
-                            toggleGroup: 'module',
-                            menu: {},
-							handler: function(b) {
-                                b.menu = Ext.create('Ext.menu.Menu', {
-                                    closeAction: 'destroy',
-                                    shadow: false,
-                                    showSeparator: false,
-                                    items: [
-                                        {
-                                            text: 'Go to pivot tables' + '&nbsp;&nbsp;', //i18n
-                                            cls: 'dv-menu-item-noicon',
-                                            handler: function() {
-                                                window.location.href = dv.baseUrl + '/dhis-web-pivot/app/index.html';
-                                            }
-                                        },
-                                        '-',
-                                        {
-                                            text: 'View chart as table' + '&nbsp;&nbsp;', //i18n
-                                            cls: 'dv-menu-item-noicon',
-                                            disabled: !DV.isSessionStorage || !dv.layout,
-                                            handler: function() {
-                                                if (DV.isSessionStorage) {
-                                                    dv.util.chart.setSessionStorage(dv.layout, 'analytical', dv.baseUrl + '/dhis-web-pivot/app/index.html?s=analytical');
-                                                }
-                                            }
-                                        },
-                                        {
-                                            text: 'View last table' + '&nbsp;&nbsp;', //i18n
-                                            cls: 'dv-menu-item-noicon',
-                                            disabled: !(DV.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['table']),
-                                            handler: function() {
-                                                window.location.href = dv.baseUrl + '/dhis-web-pivot/app/index.html?s=table';
-                                            }
-                                        }
-                                    ],
-                                    listeners: {
-                                        show: function() {
-                                            dv.util.window.setAnchorPosition(b.menu, b);
-                                        },
-                                        hide: function() {
-                                            b.menu.destroy();
-                                            defaultButton.toggle();
-                                        },
-                                        destroy: function(m) {
-                                            b.menu = null;
-                                        }
-                                    }
-                                });
-
-								b.menu.show();
-							}
-						},
-                        defaultButton,
-						{
-							text: DV.i18n.map,
-							iconCls: 'dv-button-icon-map',
-                            toggleGroup: 'module',
-                            //menu: {},
-							handler: function(b) {
-                                window.location.href = dv.baseUrl + '/dhis-web-mapping/app/index.html';
-							}
-						},
-						getSeparator(),
-						{
-							xtype: 'button',
-							text: DV.i18n.home,
-							handler: function() {
-								window.location.href = dv.baseUrl + '/dhis-web-commons-about/redirect.action';
-							}
-						});
-
-						return items;
-					}()
-				},
-				listeners: {
-					resize: function(p) {
-						if (dv.xLayout && dv.chart) {
-							dv.chart.onViewportResize();
-						}
-					}
-				}
-			});
-
-			setFavorite = function(layout) {
-				var dimConf = dv.conf.finals.dimension,
-					xLayout,
-					dimMap,
-					recMap,
-					graphMap,
-					objectName,
-					periodRecords,
-					fixedPeriodRecords = [],
-					isOu = false,
-					isOuc = false,
-                    isLevel = false;
-
-				// State
-				dv.viewport.interpretationButton.enable();
-
-				// Create chart
-				dv.util.chart.createChart(layout, dv);
-
-				// Set gui
-
-				xLayout = dv.util.chart.getExtendedLayout(layout);
-				dimMap = xLayout.objectNameDimensionsMap;
-				recMap = xLayout.objectNameItemsMap;
-				graphMap = layout.parentGraphMap;
-
-				// Indicators
-				dv.store.indicatorSelected.removeAll();
-				objectName = dimConf.indicator.objectName;
-				if (dimMap[objectName]) {
-					dv.store.indicatorSelected.add(Ext.clone(recMap[objectName]));
-					dv.util.multiselect.filterAvailable({store: dv.store.indicatorAvailable}, {store: dv.store.indicatorSelected});
-				}
-
-				// Data elements
-				dv.store.dataElementSelected.removeAll();
-				objectName = dimConf.dataElement.objectName;
-				if (dimMap[objectName]) {
-					dv.store.dataElementSelected.add(Ext.clone(recMap[objectName]));
-					dv.util.multiselect.filterAvailable({store: dv.store.dataElementAvailable}, {store: dv.store.dataElementSelected});
-					dv.viewport.dataElementDetailLevel.setValue(objectName);
-				}
-
-				// Operands
-				objectName = dimConf.operand.objectName;
-				if (dimMap[objectName]) {
-					dv.store.dataElementSelected.add(Ext.clone(recMap[objectName]));
-					dv.util.multiselect.filterAvailable({store: dv.store.dataElementAvailable}, {store: dv.store.dataElementSelected});
-					dv.viewport.dataElementDetailLevel.setValue(objectName);
-				}
-
-				// Data sets
-				dv.store.dataSetSelected.removeAll();
-				objectName = dimConf.dataSet.objectName;
-				if (dimMap[objectName]) {
-					dv.store.dataSetSelected.add(Ext.clone(recMap[objectName]));
-				}
-
-				// Periods
-				dv.store.fixedPeriodSelected.removeAll();
-				dv.util.checkbox.setAllFalse();
-				periodRecords = recMap[dimConf.period.objectName] || [];
-				for (var i = 0, peroid, checkbox; i < periodRecords.length; i++) {
-					period = periodRecords[i];
-					checkbox = relativePeriod.valueComponentMap[period.id];
-					if (checkbox) {
-						checkbox.setValue(true);
-					}
-					else {
-						fixedPeriodRecords.push(period);
-					}
-				}
-				dv.store.fixedPeriodSelected.add(fixedPeriodRecords);
-				dv.util.multiselect.filterAvailable({store: dv.store.fixedPeriodAvailable}, {store: dv.store.fixedPeriodSelected});
-
-				// Group sets
-				for (var key in dimensionIdSelectedStoreMap) {
-					if (dimensionIdSelectedStoreMap.hasOwnProperty(key)) {
-						var a = dimensionIdAvailableStoreMap[key],
-							s = dimensionIdSelectedStoreMap[key];
-
-						if (s.getCount() > 0) {
-							a.reset();
-							s.removeAll();
-						}
-
-						if (recMap[key]) {
-							s.add(recMap[key]);
-							dv.util.multiselect.filterAvailable({store: a}, {store: s});
-						}
-					}
-				}
-
-				// Layout
-				dv.viewport.chartType.setChartType(xLayout.type);
-
-				dv.viewport.series.setValue(xLayout.columnDimensionNames[0]);
-				dv.viewport.series.filterNext();
-
-				dv.viewport.category.setValue(xLayout.rowDimensionNames[0]);
-				dv.viewport.category.filterNext();
-
-				dv.viewport.filter.setValue(xLayout.filterDimensionNames);
-
-				// Options
-                if (dv.viewport.optionsWindow) {
-                    dv.viewport.optionsWindow.setOptions(layout);
+    createViewport = function() {
+        var buttons = [],
+            buttonAddedListener,
+            column,
+            stackedcolumn,
+            bar,
+            stackedbar,
+            line,
+            area,
+            pie,
+            radar,
+            buttons = [],
+            buttonAddedListener,
+            chartType,
+            seriesStore,
+            categoryStore,
+            filterStore,
+            series,
+            category,
+            filter,
+            layout,
+
+            indicatorAvailable,
+            indicatorSelected,
+            indicator,
+            dataElementAvailable,
+            dataElementSelected,
+            dataElementGroupStore,
+            dataElementGroupComboBox,
+            dataElementDetailLevel,
+            dataElement,
+            dataSetAvailable,
+            dataSetSelected,
+            dataSet,
+            rewind,
+            relativePeriod,
+            fixedPeriodAvailable,
+            fixedPeriodSelected,
+            period,
+            treePanel,
+            userOrganisationUnit,
+            userOrganisationUnitChildren,
+            userOrganisationUnitPanel,
+            organisationUnitLevel,
+            tool,
+            toolPanel,
+            organisationUnit,
+            dimensionIdAvailableStoreMap = {},
+            dimensionIdSelectedStoreMap = {},
+            getDimensionPanels,
+            validateSpecialCases,
+            update,
+
+            optionsButton,
+            favoriteButton,
+            downloadButton,
+
+            accordionBody,
+            accordion,
+            westRegion,
+            centerRegion,
+
+            setFavorite,
+
+            viewport,
+            addListeners;
+
+        buttonAddedListener = function(b) {
+            buttons.push(b);
+        };
+
+        column = Ext.create('Ext.button.Button', {
+            xtype: 'button',
+            chartType: dv.conf.finals.chart.column,
+            icon: 'images/column.png',
+            name: dv.conf.finals.chart.column,
+            tooltipText: DV.i18n.column_chart,
+            pressed: true,
+            listeners: {
+                added: buttonAddedListener
+            }
+        });
+
+        stackedcolumn = Ext.create('Ext.button.Button', {
+            xtype: 'button',
+            chartType: dv.conf.finals.chart.stackedcolumn,
+            icon: 'images/column-stacked.png',
+            name: dv.conf.finals.chart.stackedcolumn,
+            tooltipText: DV.i18n.stacked_column_chart,
+            listeners: {
+                added: buttonAddedListener
+            }
+        });
+
+        bar = Ext.create('Ext.button.Button', {
+            xtype: 'button',
+            chartType: dv.conf.finals.chart.bar,
+            icon: 'images/bar.png',
+            name: dv.conf.finals.chart.bar,
+            tooltipText: DV.i18n.bar_chart,
+            listeners: {
+                added: buttonAddedListener
+            }
+        });
+
+        stackedbar = Ext.create('Ext.button.Button', {
+            xtype: 'button',
+            chartType: dv.conf.finals.chart.stackedbar,
+            icon: 'images/bar-stacked.png',
+            name: dv.conf.finals.chart.stackedbar,
+            tooltipText: DV.i18n.stacked_bar_chart,
+            listeners: {
+                added: buttonAddedListener
+            }
+        });
+
+        line = Ext.create('Ext.button.Button', {
+            xtype: 'button',
+            chartType: dv.conf.finals.chart.line,
+            icon: 'images/line.png',
+            name: dv.conf.finals.chart.line,
+            tooltipText: DV.i18n.line_chart,
+            listeners: {
+                added: buttonAddedListener
+            }
+        });
+
+        area = Ext.create('Ext.button.Button', {
+            xtype: 'button',
+            chartType: dv.conf.finals.chart.area,
+            icon: 'images/area.png',
+            name: dv.conf.finals.chart.area,
+            tooltipText: DV.i18n.area_chart,
+            listeners: {
+                added: buttonAddedListener
+            }
+        });
+
+        pie = Ext.create('Ext.button.Button', {
+            xtype: 'button',
+            chartType: dv.conf.finals.chart.pie,
+            icon: 'images/pie.png',
+            name: dv.conf.finals.chart.pie,
+            tooltipText: DV.i18n.pie_chart,
+            listeners: {
+                added: buttonAddedListener
+            }
+        });
+
+        radar = Ext.create('Ext.button.Button', {
+            xtype: 'button',
+            chartType: dv.conf.finals.chart.radar,
+            icon: 'images/radar.png',
+            name: dv.conf.finals.chart.radar,
+            tooltipText: DV.i18n.radar_chart,
+            listeners: {
+                added: buttonAddedListener
+            }
+        });
+
+        chartType = Ext.create('Ext.toolbar.Toolbar', {
+            height: 45,
+            style: 'padding-top:0px; border-style:none',
+            getChartType: function() {
+                for (var i = 0; i < buttons.length; i++) {
+                    if (buttons[i].pressed) {
+                        return buttons[i].chartType;
+                    }
                 }
-
-				// Organisation units
-				if (recMap[dimConf.organisationUnit.objectName]) {
-					for (var i = 0, ouRecords = recMap[dimConf.organisationUnit.objectName]; i < ouRecords.length; i++) {
-						if (ouRecords[i].id === 'USER_ORGUNIT') {
-							isOu = true;
-						}
-						if (ouRecords[i].id === 'USER_ORGUNIT_CHILDREN') {
-							isOuc = true;
-						}
-						if (ouRecords[i].id.substr(0,5) === 'LEVEL') {
-							isLevel = true;
-						}
-					}
-				}
-
-				if (isLevel) {
-					var ouRecords = recMap[dimConf.organisationUnit.objectName],
-						level;
-
-					if (Ext.isArray(ouRecords) && ouRecords.length) {
-						level = ouRecords[i].id.split('-')[1];
-					}
-
-					toolMenu.clickHandler('boundary');
-					organisationUnitLevel.setValue(level);
-				}
-				else {
-					toolMenu.clickHandler('explicit');
-
-					userOrganisationUnit.setValue(isOu);
-					userOrganisationUnitChildren.setValue(isOuc);
-				}
-
-				// If fav has organisation units, wait for tree callback before update
-				if (recMap[dimConf.organisationUnit.objectName] && Ext.isObject(graphMap)) {
-					treePanel.numberOfRecords = dv.util.object.getLength(graphMap);
-
-                    for (var i = 0, a = xLayout.objectNameItemsMap[dimConf.organisationUnit.objectName]; i < a.length; i++) {
-                        if (graphMap.hasOwnProperty(a[i].id)) {
-                            treePanel.multipleExpand(a[i].id, graphMap[a[i].id], false);
+            },
+            setChartType: function(type) {
+                for (var i = 0; i < buttons.length; i++) {
+                    if (buttons[i].chartType === type) {
+                        buttons[i].toggle(true);
+                    }
+                }
+            },
+            defaults: {
+                height: 40,
+                toggleGroup: 'charttype',
+                handler: dv.util.button.type.toggleHandler,
+                listeners: {
+                    afterrender: function(b) {
+                        if (b.xtype === 'button') {
+                            Ext.create('Ext.tip.ToolTip', {
+                                target: b.getEl(),
+                                html: b.tooltipText,
+                                'anchor': 'bottom'
+                            });
                         }
                     }
-				}
-				else {
-					treePanel.reset();
-				}
-			};
+                }
+            },
+            items: [
+                {
+                    xtype: 'label',
+                    text: DV.i18n.chart_type,
+                    style: 'font-size:11px; font-weight:bold; padding:13px 8px 0 6px'
+                },
+                column,
+                stackedcolumn,
+                bar,
+                stackedbar,
+                line,
+                area,
+                pie,
+                radar
+            ]
+        });
 
-			viewport = Ext.create('Ext.container.Viewport', {
-				layout: 'border',
-				chartType: chartType,
-				series: series,
-				category: category,
-				filter: filter,
-				accordion: accordion,
-				accordionBody: accordionBody,
-				westRegion: westRegion,
-				centerRegion: centerRegion,
-				updateViewport: update,
-				optionsButton: optionsButton,
-				favoriteButton: favoriteButton,
-				downloadButton: downloadButton,
-				interpretationButton: interpretationButton,
-				userOrganisationUnit: userOrganisationUnit,
-				userOrganisationUnitChildren: userOrganisationUnitChildren,
-				dataElementDetailLevel: dataElementDetailLevel,
-				setFavorite: setFavorite,
-				items: [
-					westRegion,
-					centerRegion
-				],
-				listeners: {
-					render: function(vp) {
-						dv.viewport = vp;
-					},
-					afterrender: function() {
-						dv.init.afterRender();
-					}
-				}
-			});
+        seriesStore = dv.store.getDimensionStore();
+        categoryStore = dv.store.getDimensionStore();
+        filterStore = dv.store.getDimensionStore();
 
-			addListeners = function() {
-				dv.store.indicatorAvailable.on('load', function() {
-					dv.util.multiselect.filterAvailable(indicatorAvailable, indicatorSelected);
-				});
+        series = Ext.create('Ext.form.field.ComboBox', {
+            cls: 'dv-combo',
+            baseBodyCls: 'small',
+            style: 'margin-bottom:0',
+            name: dv.conf.finals.chart.series,
+            queryMode: 'local',
+            editable: false,
+            valueField: 'id',
+            displayField: 'name',
+            width: (dv.conf.layout.west_fieldset_width / 3) - 1,
+            value: dv.conf.finals.dimension.data.dimensionName,
+            filterNext: function() {
+                category.filter(this.getValue());
+                filter.filter([this.getValue(), category.getValue()]);
+            },
+            store: seriesStore,
+            listeners: {
+                added: function(cb) {
+                    dv.cmp.layout.series = this;
+                    cb.filterNext();
+                },
+                select: function(cb) {
+                    cb.filterNext();
+                }
+            }
+        });
 
-				dv.store.dataElementAvailable.on('load', function() {
-					dv.util.multiselect.filterAvailable(dataElementAvailable, dataElementSelected);
-				});
+        category = Ext.create('Ext.form.field.ComboBox', {
+            cls: 'dv-combo',
+            baseBodyCls: 'small',
+            style: 'margin-bottom:0',
+            name: dv.conf.finals.chart.category,
+            queryMode: 'local',
+            editable: false,
+            lastQuery: '',
+            valueField: 'id',
+            displayField: 'name',
+            width: (dv.conf.layout.west_fieldset_width / 3) - 1,
+            value: dv.conf.finals.dimension.period.dimensionName,
+            filter: function(value) {
+                if (Ext.isString(value)) {
+                    if (value === this.getValue()) {
+                        this.clearValue();
+                    }
 
-				dv.store.dataSetAvailable.on('load', function(s) {
-					dv.util.multiselect.filterAvailable(dataSetAvailable, dataSetSelected);
-					s.sort('name', 'ASC');
-				});
-			}();
+                    this.store.clearFilter();
 
-			return viewport;
+                    this.store.filterBy(function(record, id) {
+                        return id !== value;
+                    });
+                }
+            },
+            filterNext: function() {
+                filter.filter([series.getValue(), this.getValue()]);
+            },
+            store: categoryStore,
+            listeners: {
+                added: function(cb) {
+                    dv.cmp.layout.category = this;
+                    cb.filterNext();
+                },
+                select: function(cb) {
+                    cb.filterNext();
+                }
+            }
+        });
+
+        filter = Ext.create('Ext.form.field.ComboBox', {
+            cls: 'dv-combo',
+            multiSelect: true,
+            baseBodyCls: 'small',
+            style: 'margin-bottom:0',
+            name: dv.conf.finals.chart.filter,
+            queryMode: 'local',
+            editable: false,
+            lastQuery: '',
+            valueField: 'id',
+            displayField: 'name',
+            width: (dv.conf.layout.west_fieldset_width / 3) - 1,
+            value: dv.conf.finals.dimension.organisationUnit.dimensionName,
+            filter: function(values) {
+                var a = Ext.clone(this.getValue()),
+                    b = [];
+
+                for (var i = 0; i < a.length; i++) {
+                    if (!Ext.Array.contains(values, a[i])) {
+                        b.push(a[i]);
+                    }
+                }
+
+                this.clearValue();
+                this.setValue(b);
+
+                this.store.filterBy(function(record, id) {
+                    return !Ext.Array.contains(values, id);
+                });
+            },
+            store: filterStore,
+            listeners: {
+                added: function() {
+                    dv.cmp.layout.filter = this;
+                },
+                beforedeselect: function(cb) {
+                    return cb.getValue().length !== 1;
+                }
+            }
+        });
+
+        layout = Ext.create('Ext.toolbar.Toolbar', {
+            id: 'chartlayout_tb',
+            style: 'padding:2px 0 0 2px; background:#f5f5f5; border:0 none; border-top:1px dashed #ccc; border-bottom:1px solid #ccc',
+            height: 46,
+            items: [
+                {
+                    xtype: 'panel',
+                    bodyStyle: 'border-style:none; background-color:transparent; padding:0',
+                    items: [
+                        {
+                            xtype: 'label',
+                            text: DV.i18n.series,
+                            style: 'font-size:11px; font-weight:bold; padding:0 4px'
+                        },
+                        { bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
+                        series
+                    ]
+                },
+                {
+                    xtype: 'panel',
+                    bodyStyle: 'border-style:none; background-color:transparent; padding:0',
+                    items: [
+                        {
+                            xtype: 'label',
+                            text: DV.i18n.category,
+                            style: 'font-size:11px; font-weight:bold; padding:0 4px'
+                        },
+                        { bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
+                        category
+                    ]
+                },
+                {
+                    xtype: 'panel',
+                    bodyStyle: 'border-style:none; background-color:transparent; padding:0',
+                    items: [
+                        {
+                            xtype: 'label',
+                            text: DV.i18n.filters,
+                            style: 'font-size:11px; font-weight:bold; padding:0 4px'
+                        },
+                        { bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
+                        filter
+                    ]
+                }
+            ]
+        });
+
+        indicatorAvailable = Ext.create('Ext.ux.form.MultiSelect', {
+            cls: 'dv-toolbar-multiselect-left',
+            width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
+            valueField: 'id',
+            displayField: 'name',
+            store: dv.store.indicatorAvailable,
+            tbar: [
+                {
+                    xtype: 'label',
+                    text: DV.i18n.available,
+                    cls: 'dv-toolbar-multiselect-left-label'
+                },
+                '->',
+                {
+                    xtype: 'button',
+                    icon: 'images/arrowright.png',
+                    width: 22,
+                    handler: function() {
+                        dv.util.multiselect.select(indicatorAvailable, indicatorSelected);
+                    }
+                },
+                {
+                    xtype: 'button',
+                    icon: 'images/arrowrightdouble.png',
+                    width: 22,
+                    handler: function() {
+                        dv.util.multiselect.selectAll(indicatorAvailable, indicatorSelected);
+                    }
+                }
+            ],
+            listeners: {
+                afterrender: function() {
+                    this.boundList.on('itemdblclick', function() {
+                        dv.util.multiselect.select(this, indicatorSelected);
+                    }, this);
+                }
+            }
+        });
+
+        indicatorSelected = Ext.create('Ext.ux.form.MultiSelect', {
+            cls: 'dv-toolbar-multiselect-right',
+            width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
+            valueField: 'id',
+            displayField: 'name',
+            ddReorder: true,
+            store: dv.store.indicatorSelected,
+            tbar: [
+                {
+                    xtype: 'button',
+                    icon: 'images/arrowleftdouble.png',
+                    width: 22,
+                    handler: function() {
+                        dv.util.multiselect.unselectAll(indicatorAvailable, indicatorSelected);
+                    }
+                },
+                {
+                    xtype: 'button',
+                    icon: 'images/arrowleft.png',
+                    width: 22,
+                    handler: function() {
+                        dv.util.multiselect.unselect(indicatorAvailable, indicatorSelected);
+                    }
+                },
+                '->',
+                {
+                    xtype: 'label',
+                    text: DV.i18n.selected,
+                    cls: 'dv-toolbar-multiselect-right-label'
+                }
+            ],
+            listeners: {
+                afterrender: function() {
+                    this.boundList.on('itemdblclick', function() {
+                        dv.util.multiselect.unselect(indicatorAvailable, this);
+                    }, this);
+                }
+            }
+        });
+
+        indicator = {
+            xtype: 'panel',
+            title: '<div class="dv-panel-title-data">' + DV.i18n.indicators + '</div>',
+            hideCollapseTool: true,
+            getDimension: function() {
+                var config = {
+                    dimension: dv.conf.finals.dimension.indicator.objectName,
+                    items: []
+                };
+
+                dv.store.indicatorSelected.each( function(r) {
+                    config.items.push({id: r.data.id});
+                });
+
+                return config.items.length ? config : null;
+            },
+            onExpand: function() {
+                var h = dv.viewport.westRegion.hasScrollbar ?
+                    dv.conf.layout.west_scrollbarheight_accordion_indicator : dv.conf.layout.west_maxheight_accordion_indicator;
+                dv.util.dimension.panel.setHeight(h);
+                dv.util.multiselect.setHeight(
+                    [indicatorAvailable, indicatorSelected],
+                    this,
+                    dv.conf.layout.west_fill_accordion_indicator
+                );
+            },
+            items: [
+                {
+                    xtype: 'combobox',
+                    cls: 'dv-combo',
+                    style: 'margin-bottom:2px; margin-top:0px',
+                    width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding,
+                    valueField: 'id',
+                    displayField: 'name',
+                    emptyText: DV.i18n.select_indicator_group,
+                    editable: false,
+                    store: {
+                        xtype: 'store',
+                        fields: ['id', 'name', 'index'],
+                        proxy: {
+                            type: 'ajax',
+                            url: dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.indicatorgroup_get,
+                            reader: {
+                                type: 'json',
+                                root: 'indicatorGroups'
+                            }
+                        },
+                        listeners: {
+                            load: function(s) {
+                                s.add({
+                                    id: 0,
+                                    name: '[ ' + DV.i18n.all_indicator_groups + ' ]',
+                                    index: -1
+                                });
+                                s.sort([
+                                    {
+                                        property: 'index',
+                                        direction: 'ASC'
+                                    },
+                                    {
+                                        property: 'name',
+                                        direction: 'ASC'
+                                    }
+                                ]);
+                            }
+                        }
+                    },
+                    listeners: {
+                        select: function(cb) {
+                            var store = dv.store.indicatorAvailable;
+                            store.parent = cb.getValue();
+
+                            if (dv.util.store.containsParent(store)) {
+                                dv.util.store.loadFromStorage(store);
+                                dv.util.multiselect.filterAvailable(indicatorAvailable, indicatorSelected);
+                            }
+                            else {
+                                if (cb.getValue() === 0) {
+                                    store.proxy.url = dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.indicator_getall;
+                                    store.load();
+                                }
+                                else {
+                                    store.proxy.url = dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.indicator_get + cb.getValue() + '.json';
+                                    store.load();
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    xtype: 'panel',
+                    layout: 'column',
+                    bodyStyle: 'border-style:none',
+                    items: [
+                        indicatorAvailable,
+                        indicatorSelected
+                    ]
+                }
+            ],
+            listeners: {
+                added: function() {
+                    dv.cmp.dimension.panels.push(this);
+                },
+                expand: function(p) {
+                    p.onExpand();
+                }
+            }
+        };
+
+        dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
+            cls: 'dv-toolbar-multiselect-left',
+            width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
+            valueField: 'id',
+            displayField: 'name',
+            store: dv.store.dataElementAvailable,
+            tbar: [
+                {
+                    xtype: 'label',
+                    text: DV.i18n.available,
+                    cls: 'dv-toolbar-multiselect-left-label'
+                },
+                '->',
+                {
+                    xtype: 'button',
+                    icon: 'images/arrowright.png',
+                    width: 22,
+                    handler: function() {
+                        dv.util.multiselect.select(dataElementAvailable, dataElementSelected);
+                    }
+                },
+                {
+                    xtype: 'button',
+                    icon: 'images/arrowrightdouble.png',
+                    width: 22,
+                    handler: function() {
+                        dv.util.multiselect.selectAll(dataElementAvailable, dataElementSelected);
+                    }
+                }
+            ],
+            listeners: {
+                afterrender: function() {
+                    this.boundList.on('itemdblclick', function() {
+                        dv.util.multiselect.select(this, dataElementSelected);
+                    }, this);
+                }
+            }
+        });
+
+        dataElementSelected = Ext.create('Ext.ux.form.MultiSelect', {
+            cls: 'dv-toolbar-multiselect-right',
+            width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
+            valueField: 'id',
+            displayField: 'name',
+            ddReorder: true,
+            store: dv.store.dataElementSelected,
+            tbar: [
+                {
+                    xtype: 'button',
+                    icon: 'images/arrowleftdouble.png',
+                    width: 22,
+                    handler: function() {
+                        dv.util.multiselect.unselectAll(dataElementAvailable, dataElementSelected);
+                    }
+                },
+                {
+                    xtype: 'button',
+                    icon: 'images/arrowleft.png',
+                    width: 22,
+                    handler: function() {
+                        dv.util.multiselect.unselect(dataElementAvailable, dataElementSelected);
+                    }
+                },
+                '->',
+                {
+                    xtype: 'label',
+                    text: DV.i18n.selected,
+                    cls: 'dv-toolbar-multiselect-right-label'
+                }
+            ],
+            listeners: {
+                afterrender: function() {
+                    this.boundList.on('itemdblclick', function() {
+                        dv.util.multiselect.unselect(dataElementAvailable, this);
+                    }, this);
+                }
+            }
+        });
+
+        dataElementGroupStore = Ext.create('Ext.data.Store', {
+            fields: ['id', 'name', 'index'],
+            proxy: {
+                type: 'ajax',
+                url: dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.dataelementgroup_get,
+                reader: {
+                    type: 'json',
+                    root: 'dataElementGroups'
+                }
+            },
+            listeners: {
+                load: function(s) {
+                    if (dataElementDetailLevel.getValue() === dv.conf.finals.dimension.dataElement.objectName) {
+                        s.add({
+                            id: 0,
+                            name: '[ ' + DV.i18n.all_data_element_groups + ' ]',
+                            index: -1
+                        });
+                    }
+
+                    s.sort([
+                        {property: 'index', direction: 'ASC'},
+                        {property: 'name', direction: 'ASC'}
+                    ]);
+                }
+            }
+        });
+
+        dataElementGroupComboBox = Ext.create('Ext.form.field.ComboBox', {
+            cls: 'dv-combo',
+            style: 'margin:0 2px 2px 0',
+            width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding - 90,
+            valueField: 'id',
+            displayField: 'name',
+            emptyText: DV.i18n.select_data_element_group,
+            editable: false,
+            store: dataElementGroupStore,
+            loadAvailable: function() {
+                var store = dv.store.dataElementAvailable,
+                    detailLevel = dataElementDetailLevel.getValue(),
+                    value = this.getValue();
+
+                if (value !== null) {
+                    if (detailLevel === dv.conf.finals.dimension.dataElement.objectName) {
+                        store.setTotalsProxy(value);
+                    }
+                    else {
+                        store.setDetailsProxy(value);
+                    }
+                }
+            },
+            listeners: {
+                select: function(cb) {
+                    cb.loadAvailable();
+                }
+            }
+        });
+
+        dataElementDetailLevel = Ext.create('Ext.form.field.ComboBox', {
+            cls: 'dv-combo',
+            style: 'margin-bottom:2px',
+            baseBodyCls: 'small',
+            queryMode: 'local',
+            editable: false,
+            valueField: 'id',
+            displayField: 'text',
+            width: 90 - 2,
+            value: dv.conf.finals.dimension.dataElement.objectName,
+            store: {
+                fields: ['id', 'text'],
+                data: [
+                    {id: dv.conf.finals.dimension.dataElement.objectName, text: DV.i18n.totals},
+                    {id: dv.conf.finals.dimension.operand.objectName, text: DV.i18n.details}
+                ]
+            },
+            listeners: {
+                select: function(cb) {
+                    var record = dataElementGroupStore.getById(0);
+
+                    if (cb.getValue() === dv.conf.finals.dimension.operand.objectName && record) {
+                        dataElementGroupStore.remove(record);
+                    }
+
+                    if (cb.getValue() === dv.conf.finals.dimension.dataElement.objectName && !record) {
+                        dataElementGroupStore.insert(0, {
+                            id: 0,
+                            name: '[ ' + DV.i18n.all_data_element_groups + ' ]',
+                            index: -1
+                        });
+                    }
+
+                    dataElementGroupComboBox.loadAvailable();
+                    dv.store.dataElementSelected.removeAll();
+                }
+            }
+        });
+
+        dataElement = {
+            xtype: 'panel',
+            title: '<div class="dv-panel-title-data">' + DV.i18n.data_elements + '</div>',
+            hideCollapseTool: true,
+            getDimension: function() {
+                var config = {
+                    dimension: dataElementDetailLevel.getValue(),
+                    items: []
+                };
+
+                dv.store.dataElementSelected.each( function(r) {
+                    config.items.push({id: r.data.id});
+                });
+
+                return config.items.length ? config : null;
+            },
+            onExpand: function() {
+                var h = dv.viewport.westRegion.hasScrollbar ?
+                    dv.conf.layout.west_scrollbarheight_accordion_dataelement : dv.conf.layout.west_maxheight_accordion_dataelement;
+                dv.util.dimension.panel.setHeight(h);
+                dv.util.multiselect.setHeight(
+                    [dataElementAvailable, dataElementSelected],
+                    this,
+                    dv.conf.layout.west_fill_accordion_indicator
+                );
+            },
+            items: [
+                {
+                    xtype: 'container',
+                    layout: 'column',
+                    items: [
+                        dataElementGroupComboBox,
+                        dataElementDetailLevel
+                    ]
+                },
+                {
+                    xtype: 'panel',
+                    layout: 'column',
+                    bodyStyle: 'border-style:none',
+                    items: [
+                        dataElementAvailable,
+                        dataElementSelected
+                    ]
+                }
+            ],
+            listeners: {
+                added: function() {
+                    dv.cmp.dimension.panels.push(this);
+                },
+                expand: function(p) {
+                    p.onExpand();
+                }
+            }
+        };
+
+        dataSetAvailable = Ext.create('Ext.ux.form.MultiSelect', {
+            cls: 'dv-toolbar-multiselect-left',
+            width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
+            valueField: 'id',
+            displayField: 'name',
+            store: dv.store.dataSetAvailable,
+            tbar: [
+                {
+                    xtype: 'label',
+                    text: DV.i18n.available,
+                    cls: 'dv-toolbar-multiselect-left-label'
+                },
+                '->',
+                {
+                    xtype: 'button',
+                    icon: 'images/arrowright.png',
+                    width: 22,
+                    handler: function() {
+                        dv.util.multiselect.select(dataSetAvailable, dataSetSelected);
+                    }
+                },
+                {
+                    xtype: 'button',
+                    icon: 'images/arrowrightdouble.png',
+                    width: 22,
+                    handler: function() {
+                        dv.util.multiselect.selectAll(dataSetAvailable, dataSetSelected);
+                    }
+                }
+            ],
+            listeners: {
+                afterrender: function() {
+                    this.boundList.on('itemdblclick', function() {
+                        dv.util.multiselect.select(this, dataSetSelected);
+                    }, this);
+                }
+            }
+        });
+
+        dataSetSelected = Ext.create('Ext.ux.form.MultiSelect', {
+            cls: 'dv-toolbar-multiselect-right',
+            width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
+            valueField: 'id',
+            displayField: 'name',
+            ddReorder: true,
+            store: dv.store.dataSetSelected,
+            tbar: [
+                {
+                    xtype: 'button',
+                    icon: 'images/arrowleftdouble.png',
+                    width: 22,
+                    handler: function() {
+                        dv.util.multiselect.unselectAll(dataSetAvailable, dataSetSelected);
+                    }
+                },
+                {
+                    xtype: 'button',
+                    icon: 'images/arrowleft.png',
+                    width: 22,
+                    handler: function() {
+                        dv.util.multiselect.unselect(dataSetAvailable, dataSetSelected);
+                    }
+                },
+                '->',
+                {
+                    xtype: 'label',
+                    text: DV.i18n.selected,
+                    cls: 'dv-toolbar-multiselect-right-label'
+                }
+            ],
+            listeners: {
+                afterrender: function() {
+                    this.boundList.on('itemdblclick', function() {
+                        dv.util.multiselect.unselect(dataSetAvailable, this);
+                    }, this);
+                }
+            }
+        });
+
+        dataSet = {
+            xtype: 'panel',
+            title: '<div class="dv-panel-title-data">' + DV.i18n.reporting_rates + '</div>',
+            hideCollapseTool: true,
+            getDimension: function() {
+                var config = {
+                    dimension: dv.conf.finals.dimension.dataSet.objectName,
+                    items: []
+                };
+
+                dv.store.dataSetSelected.each( function(r) {
+                    config.items.push({id: r.data.id});
+                });
+
+                return config.items.length ? config : null;
+            },
+            onExpand: function() {
+                var h = dv.viewport.westRegion.hasScrollbar ?
+                    dv.conf.layout.west_scrollbarheight_accordion_dataset : dv.conf.layout.west_maxheight_accordion_dataset;
+                dv.util.dimension.panel.setHeight(h);
+                dv.util.multiselect.setHeight(
+                    [dataSetAvailable, dataSetSelected],
+                    this,
+                    dv.conf.layout.west_fill_accordion_dataset
+                );
+
+                if (!dv.store.dataSetAvailable.isLoaded) {
+                    dv.store.dataSetAvailable.load();
+                }
+            },
+            items: [
+                {
+                    xtype: 'panel',
+                    layout: 'column',
+                    bodyStyle: 'border-style:none',
+                    items: [
+                        dataSetAvailable,
+                        dataSetSelected
+                    ]
+                }
+            ],
+            listeners: {
+                added: function() {
+                    dv.cmp.dimension.panels.push(this);
+                },
+                expand: function(p) {
+                    p.onExpand();
+                }
+            }
+        };
+
+        rewind = Ext.create('Ext.form.field.Checkbox', {
+            relativePeriodId: 'rewind',
+            boxLabel: 'Rewind one period',
+            xable: function() {
+                this.setDisabled(dv.util.checkbox.isAllFalse());
+            }
+        });
+
+        relativePeriod = {
+            xtype: 'panel',
+            hideCollapseTool: true,
+            autoScroll: true,
+            bodyStyle: 'border:0 none',
+            valueComponentMap: {},
+            items: [
+                {
+                    xtype: 'container',
+                    layout: 'column',
+                    bodyStyle: 'border-style:none',
+                    items: [
+                        {
+                            xtype: 'panel',
+                            columnWidth: 0.34,
+                            bodyStyle: 'border-style:none; padding:0 0 0 8px',
+                            defaults: {
+                                labelSeparator: '',
+                                style: 'margin-bottom:2px',
+                                listeners: {
+                                    added: function(chb) {
+                                        if (chb.xtype === 'checkbox') {
+                                            dv.cmp.dimension.relativePeriod.checkbox.push(chb);
+                                            relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
+                                        }
+                                    },
+                                    change: function() {
+                                        rewind.xable();
+                                    }
+                                }
+                            },
+                            items: [
+                                {
+                                    xtype: 'label',
+                                    text: DV.i18n.weeks,
+                                    cls: 'dv-label-period-heading'
+                                },
+                                {
+                                    xtype: 'checkbox',
+                                    relativePeriodId: 'LAST_WEEK',
+                                    boxLabel: DV.i18n.last_week
+                                },
+                                {
+                                    xtype: 'checkbox',
+                                    relativePeriodId: 'LAST_4_WEEKS',
+                                    boxLabel: DV.i18n.last_4_weeks
+                                },
+                                {
+                                    xtype: 'checkbox',
+                                    relativePeriodId: 'LAST_12_WEEKS',
+                                    boxLabel: DV.i18n.last_12_weeks
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'panel',
+                            columnWidth: 0.33,
+                            bodyStyle: 'border-style:none',
+                            defaults: {
+                                labelSeparator: '',
+                                style: 'margin-bottom:2px',
+                                listeners: {
+                                    added: function(chb) {
+                                        if (chb.xtype === 'checkbox') {
+                                            dv.cmp.dimension.relativePeriod.checkbox.push(chb);
+                                            relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
+                                        }
+                                    },
+                                    change: function() {
+                                        rewind.xable();
+                                    }
+                                }
+                            },
+                            items: [
+                                {
+                                    xtype: 'label',
+                                    text: DV.i18n.months,
+                                    cls: 'dv-label-period-heading'
+                                },
+                                {
+                                    xtype: 'checkbox',
+                                    relativePeriodId: 'LAST_MONTH',
+                                    boxLabel: DV.i18n.last_month
+                                },
+                                {
+                                    xtype: 'checkbox',
+                                    relativePeriodId: 'LAST_3_MONTHS',
+                                    boxLabel: DV.i18n.last_3_months
+                                },
+                                {
+                                    xtype: 'checkbox',
+                                    relativePeriodId: 'LAST_12_MONTHS',
+                                    boxLabel: DV.i18n.last_12_months,
+                                    checked: true
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'panel',
+                            columnWidth: 0.33,
+                            bodyStyle: 'border-style:none',
+                            defaults: {
+                                labelSeparator: '',
+                                style: 'margin-bottom:2px',
+                                listeners: {
+                                    added: function(chb) {
+                                        if (chb.xtype === 'checkbox') {
+                                            dv.cmp.dimension.relativePeriod.checkbox.push(chb);
+                                            relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
+                                        }
+                                    },
+                                    change: function() {
+                                        rewind.xable();
+                                    }
+                                }
+                            },
+                            items: [
+                                {
+                                    xtype: 'label',
+                                    text: DV.i18n.bimonths,
+                                    cls: 'dv-label-period-heading'
+                                },
+                                {
+                                    xtype: 'checkbox',
+                                    relativePeriodId: 'LAST_BIMONTH',
+                                    boxLabel: DV.i18n.last_bimonth
+                                },
+                                {
+                                    xtype: 'checkbox',
+                                    relativePeriodId: 'LAST_6_BIMONTHS',
+                                    boxLabel: DV.i18n.last_6_bimonths
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    xtype: 'container',
+                    layout: 'column',
+                    bodyStyle: 'border-style:none',
+                    items: [
+                        {
+                            xtype: 'panel',
+                            columnWidth: 0.34,
+                            bodyStyle: 'border-style:none; padding:5px 0 0 10px',
+                            defaults: {
+                                labelSeparator: '',
+                                style: 'margin-bottom:2px',
+                                listeners: {
+                                    added: function(chb) {
+                                        if (chb.xtype === 'checkbox') {
+                                            dv.cmp.dimension.relativePeriod.checkbox.push(chb);
+                                            relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
+                                        }
+                                    },
+                                    change: function() {
+                                        rewind.xable();
+                                    }
+                                }
+                            },
+                            items: [
+                                {
+                                    xtype: 'label',
+                                    text: DV.i18n.quarters,
+                                    cls: 'dv-label-period-heading'
+                                },
+                                {
+                                    xtype: 'checkbox',
+                                    relativePeriodId: 'LAST_QUARTER',
+                                    boxLabel: DV.i18n.last_quarter
+                                },
+                                {
+                                    xtype: 'checkbox',
+                                    relativePeriodId: 'LAST_4_QUARTERS',
+                                    boxLabel: DV.i18n.last_4_quarters
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'panel',
+                            columnWidth: 0.33,
+                            bodyStyle: 'border-style:none; padding:5px 0 0',
+                            defaults: {
+                                labelSeparator: '',
+                                style: 'margin-bottom:2px',
+                                listeners: {
+                                    added: function(chb) {
+                                        if (chb.xtype === 'checkbox') {
+                                            dv.cmp.dimension.relativePeriod.checkbox.push(chb);
+                                            relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
+                                        }
+                                    },
+                                    change: function() {
+                                        rewind.xable();
+                                    }
+                                }
+                            },
+                            items: [
+                                {
+                                    xtype: 'label',
+                                    text: DV.i18n.sixmonths,
+                                    cls: 'dv-label-period-heading'
+                                },
+                                {
+                                    xtype: 'checkbox',
+                                    relativePeriodId: 'LAST_SIX_MONTH',
+                                    boxLabel: DV.i18n.last_sixmonth
+                                },
+                                {
+                                    xtype: 'checkbox',
+                                    relativePeriodId: 'LAST_2_SIXMONTHS',
+                                    boxLabel: DV.i18n.last_2_sixmonths
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'panel',
+                            columnWidth: 0.33,
+                            bodyStyle: 'border-style:none; padding:5px 0 0',
+                            defaults: {
+                                labelSeparator: '',
+                                style: 'margin-bottom:2px',
+                                listeners: {
+                                    added: function(chb) {
+                                        if (chb.xtype === 'checkbox') {
+                                            dv.cmp.dimension.relativePeriod.checkbox.push(chb);
+                                            relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
+                                        }
+                                    },
+                                    change: function() {
+                                        rewind.xable();
+                                    }
+                                }
+                            },
+                            items: [
+                                {
+                                    xtype: 'label',
+                                    text: DV.i18n.financial_years,
+                                    cls: 'dv-label-period-heading'
+                                },
+                                {
+                                    xtype: 'checkbox',
+                                    relativePeriodId: 'LAST_FINANCIAL_YEAR',
+                                    boxLabel: DV.i18n.last_financial_year
+                                },
+                                {
+                                    xtype: 'checkbox',
+                                    relativePeriodId: 'LAST_5_FINANCIAL_YEARS',
+                                    boxLabel: DV.i18n.last_5_financial_years
+                                }
+                            ]
+                        }
+
+                        //{
+                            //xtype: 'panel',
+                            //layout: 'anchor',
+                            //bodyStyle: 'border-style:none; padding:5px 0 0 46px',
+                            //defaults: {
+                                //labelSeparator: '',
+                                //style: 'margin-bottom:2px',
+                            //},
+                            //items: [
+                                //{
+                                    //xtype: 'label',
+                                    //text: 'Options',
+                                    //cls: 'dv-label-period-heading-options'
+                                //},
+                                //rewind
+                            //]
+                        //}
+                    ]
+                },
+                {
+                    xtype: 'container',
+                    layout: 'column',
+                    bodyStyle: 'border-style:none',
+                    items: [
+                        {
+                            xtype: 'panel',
+                            columnWidth: 0.35,
+                            bodyStyle: 'border-style:none; padding:5px 0 0 10px',
+                            defaults: {
+                                labelSeparator: '',
+                                style: 'margin-bottom:2px',
+                                listeners: {
+                                    added: function(chb) {
+                                        if (chb.xtype === 'checkbox') {
+                                            dv.cmp.dimension.relativePeriod.checkbox.push(chb);
+                                            relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
+                                        }
+                                    },
+                                    change: function() {
+                                        rewind.xable();
+                                    }
+                                }
+                            },
+                            items: [
+                                {
+                                    xtype: 'label',
+                                    text: DV.i18n.years,
+                                    cls: 'dv-label-period-heading'
+                                },
+                                {
+                                    xtype: 'checkbox',
+                                    relativePeriodId: 'THIS_YEAR',
+                                    boxLabel: DV.i18n.this_year
+                                },
+                                {
+                                    xtype: 'checkbox',
+                                    relativePeriodId: 'LAST_YEAR',
+                                    boxLabel: DV.i18n.last_year
+                                },
+                                {
+                                    xtype: 'checkbox',
+                                    relativePeriodId: 'LAST_5_YEARS',
+                                    boxLabel: DV.i18n.last_5_years
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+
+        fixedPeriodAvailable = Ext.create('Ext.ux.form.MultiSelect', {
+            cls: 'dv-toolbar-multiselect-left',
+            width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
+            height: 180,
+            valueField: 'id',
+            displayField: 'name',
+            store: dv.store.fixedPeriodAvailable,
+            tbar: [
+                {
+                    xtype: 'label',
+                    text: DV.i18n.available,
+                    cls: 'dv-toolbar-multiselect-left-label'
+                },
+                '->',
+                {
+                    xtype: 'button',
+                    icon: 'images/arrowright.png',
+                    width: 22,
+                    handler: function() {
+                        dv.util.multiselect.select(fixedPeriodAvailable, fixedPeriodSelected);
+                    }
+                },
+                {
+                    xtype: 'button',
+                    icon: 'images/arrowrightdouble.png',
+                    width: 22,
+                    handler: function() {
+                        dv.util.multiselect.selectAll(fixedPeriodAvailable, fixedPeriodSelected, true);
+                    }
+                },
+                ' '
+            ],
+            listeners: {
+                afterrender: function() {
+                    this.boundList.on('itemdblclick', function() {
+                        dv.util.multiselect.select(fixedPeriodAvailable, fixedPeriodSelected);
+                    }, this);
+                }
+            }
+        });
+
+        fixedPeriodSelected = Ext.create('Ext.ux.form.MultiSelect', {
+            cls: 'dv-toolbar-multiselect-right',
+            width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
+            height: 180,
+            valueField: 'id',
+            displayField: 'name',
+            ddReorder: false,
+            store: dv.store.fixedPeriodSelected,
+            tbar: [
+                ' ',
+                {
+                    xtype: 'button',
+                    icon: 'images/arrowleftdouble.png',
+                    width: 22,
+                    handler: function() {
+                        dv.util.multiselect.unselectAll(fixedPeriodAvailable, fixedPeriodSelected);
+                    }
+                },
+                {
+                    xtype: 'button',
+                    icon: 'images/arrowleft.png',
+                    width: 22,
+                    handler: function() {
+                        dv.util.multiselect.unselect(fixedPeriodAvailable, fixedPeriodSelected);
+                    }
+                },
+                '->',
+                {
+                    xtype: 'label',
+                    text: DV.i18n.selected,
+                    cls: 'dv-toolbar-multiselect-right-label'
+                }
+            ],
+            listeners: {
+                afterrender: function() {
+                    this.boundList.on('itemdblclick', function() {
+                        dv.util.multiselect.unselect(fixedPeriodAvailable, fixedPeriodSelected);
+                    }, this);
+                }
+            }
+        });
+
+        period = {
+            xtype: 'panel',
+            title: '<div class="dv-panel-title-period">Periods</div>',
+            hideCollapseTool: true,
+            getDimension: function() {
+                var config = {
+                        dimension: dv.conf.finals.dimension.period.objectName,
+                        items: []
+                    },
+                    chb = dv.cmp.dimension.relativePeriod.checkbox;
+
+                dv.store.fixedPeriodSelected.each( function(r) {
+                    config.items.push({id: r.data.id});
+                });
+
+                for (var i = 0; i < chb.length; i++) {
+                    if (chb[i].getValue()) {
+                        config.items.push({id: chb[i].relativePeriodId});
+                    }
+                }
+
+                return config.items.length ? config : null;
+            },
+            onExpand: function() {
+                var h = dv.viewport.westRegion.hasScrollbar ?
+                    dv.conf.layout.west_scrollbarheight_accordion_period : dv.conf.layout.west_maxheight_accordion_period;
+                dv.util.dimension.panel.setHeight(h);
+                dv.util.multiselect.setHeight(
+                    [fixedPeriodAvailable, fixedPeriodSelected],
+                    this,
+                    dv.conf.layout.west_fill_accordion_period
+                );
+            },
+            items: [
+                {
+                    xtype: 'panel',
+                    layout: 'column',
+                    bodyStyle: 'border-style:none',
+                    style: 'margin-top:0px',
+                    items: [
+                        {
+                            xtype: 'combobox',
+                            cls: 'dv-combo',
+                            style: 'margin-bottom:2px',
+                            width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding - 67 - 67 - 4,
+                            valueField: 'id',
+                            displayField: 'name',
+                            emptyText: DV.i18n.select_period_type,
+                            editable: false,
+                            queryMode: 'remote',
+                            store: dv.store.periodType,
+                            periodOffset: 0,
+                            listeners: {
+                                select: function() {
+                                    var ptype = new PeriodType(),
+                                        periodType = this.getValue();
+
+                                    var periods = ptype.get(periodType).generatePeriods({
+                                        offset: this.periodOffset,
+                                        filterFuturePeriods: true,
+                                        reversePeriods: true
+                                    });
+
+                                    dv.store.fixedPeriodAvailable.setIndex(periods);
+                                    dv.store.fixedPeriodAvailable.loadData(periods);
+                                    dv.util.multiselect.filterAvailable(fixedPeriodAvailable, fixedPeriodSelected);
+                                }
+                            }
+                        },
+                        {
+                            xtype: 'button',
+                            text: DV.i18n.prev_year,
+                            style: 'margin-left:2px; border-radius:2px',
+                            width: 67,
+                            height: 24,
+                            handler: function() {
+                                var cb = this.up('panel').down('combobox');
+                                if (cb.getValue()) {
+                                    cb.periodOffset--;
+                                    cb.fireEvent('select');
+                                }
+                            }
+                        },
+                        {
+                            xtype: 'button',
+                            text: DV.i18n.next_year,
+                            style: 'margin-left:2px; border-radius:2px',
+                            width: 67,
+                            height: 24,
+                            handler: function() {
+                                var cb = this.up('panel').down('combobox');
+                                if (cb.getValue() && cb.periodOffset < 0) {
+                                    cb.periodOffset++;
+                                    cb.fireEvent('select');
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    xtype: 'panel',
+                    layout: 'column',
+                    bodyStyle: 'border-style:none; padding-bottom:2px',
+                    items: [
+                        fixedPeriodAvailable,
+                        fixedPeriodSelected
+                    ]
+                },
+                relativePeriod
+            ],
+            listeners: {
+                added: function() {
+                    dv.cmp.dimension.panels.push(this);
+                },
+                expand: function(p) {
+                    p.onExpand();
+                }
+            }
+        };
+
+        treePanel = Ext.create('Ext.tree.Panel', {
+            cls: 'dv-tree',
+            style: 'border-top: 1px solid #ddd; padding-top: 1px',
+            width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding,
+            rootVisible: false,
+            autoScroll: true,
+            multiSelect: true,
+            rendered: false,
+            reset: function() {
+                var rootNode = this.getRootNode().findChild('id', dv.init.rootNodes[0].id);
+                this.collapseAll();
+                this.expandPath(rootNode.getPath());
+                this.getSelectionModel().select(rootNode);
+            },
+            selectRootIf: function() {
+                if (this.getSelectionModel().getSelection().length < 1) {
+                    var node = this.getRootNode().findChild('id', dv.init.rootNodes[0].id);
+                    if (this.rendered) {
+                        this.getSelectionModel().select(node);
+                    }
+                    return node;
+                }
+            },
+            numberOfRecords: 0,
+            recordsToSelect: [],
+            multipleSelectIf: function(doUpdate) {
+                if (this.recordsToSelect.length === this.numberOfRecords) {
+                    this.getSelectionModel().select(this.recordsToSelect);
+                    this.recordsToSelect = [];
+                    this.numberOfRecords = 0;
+
+                    if (doUpdate) {
+                        update();
+                    }
+                }
+            },
+            multipleExpand: function(id, path, doUpdate) {
+                this.expandPath('/' + dv.conf.finals.root.id + path, 'id', '/', function() {
+                    var record = this.getRootNode().findChild('id', id, true);
+                    this.recordsToSelect.push(record);
+                    this.multipleSelectIf(doUpdate);
+                }, this);
+            },
+            select: function(url, params) {
+                if (!params) {
+                    params = {};
+                }
+                Ext.Ajax.request({
+                    url: url,
+                    method: 'GET',
+                    params: params,
+                    scope: this,
+                    success: function(r) {
+                        var a = Ext.decode(r.responseText).organisationUnits;
+                        this.numberOfRecords = a.length;
+                        for (var i = 0; i < a.length; i++) {
+                            this.multipleExpand(a[i].id, a[i].path);
+                        }
+                    }
+                });
+            },
+            selectByGroup: function(id) {
+                if (id) {
+                    var url = dv.conf.finals.ajax.path_visualizer + dv.conf.finals.ajax.organisationunit_getbygroup,
+                        params = {id: id};
+                    this.select(url, params);
+                }
+            },
+            selectByLevel: function(level) {
+                if (level) {
+                    var url = dv.conf.finals.ajax.path_visualizer + dv.conf.finals.ajax.organisationunit_getbylevel,
+                        params = {level: level};
+                    this.select(url, params);
+                }
+            },
+            selectByIds: function(ids) {
+                if (ids) {
+                    var url = dv.conf.finals.ajax.path_visualizer + dv.conf.finals.ajax.organisationunit_getbyids;
+                    Ext.Array.each(ids, function(item) {
+                        url = Ext.String.urlAppend(url, 'ids=' + item);
+                    });
+                    if (!this.rendered) {
+                        dv.cmp.dimension.organisationUnit.panel.expand();
+                    }
+                    this.select(url);
+                }
+            },
+            store: Ext.create('Ext.data.TreeStore', {
+                proxy: {
+                    type: 'ajax',
+                    url: dv.conf.finals.ajax.path_visualizer + dv.conf.finals.ajax.organisationunitchildren_get
+                },
+                root: {
+                    id: dv.conf.finals.root.id,
+                    expanded: true,
+                    children: dv.init.rootNodes
+                }
+            }),
+            xable: function(checked, value) {
+                this.setDisabled(!!(checked || value));
+            },
+            listeners: {
+                added: function() {
+                    dv.cmp.dimension.organisationUnit.treepanel = this;
+                },
+                render: function() {
+                    this.rendered = true;
+                },
+                afterrender: function() {
+                    this.getSelectionModel().select(0);
+                },
+                itemcontextmenu: function(v, r, h, i, e) {
+                    v.getSelectionModel().select(r, false);
+
+                    if (v.menu) {
+                        v.menu.destroy();
+                    }
+                    v.menu = Ext.create('Ext.menu.Menu', {
+                        id: 'treepanel-contextmenu',
+                        showSeparator: false,
+                        shadow: false
+                    });
+                    if (!r.data.leaf) {
+                        v.menu.add({
+                            id: 'treepanel-contextmenu-item',
+                            text: DV.i18n.select_all_children,
+                            icon: 'images/node-select-child.png',
+                            handler: function() {
+                                r.expand(false, function() {
+                                    v.getSelectionModel().select(r.childNodes, true);
+                                    v.getSelectionModel().deselect(r);
+                                });
+                            }
+                        });
+                    }
+                    else {
+                        return;
+                    }
+
+                    v.menu.showAt(e.xy);
+                }
+            }
+        });
+
+        userOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
+            columnWidth: 0.5,
+            style: 'padding-top:2px; padding-left:3px; margin-bottom:0',
+            boxLabel: DV.i18n.user_organisation_unit,
+            labelWidth: dv.conf.layout.form_label_width,
+            handler: function(chb, checked) {
+                treePanel.xable(checked, userOrganisationUnitChildren.getValue());
+            }
+        });
+
+        userOrganisationUnitChildren = Ext.create('Ext.form.field.Checkbox', {
+            columnWidth: 0.5,
+            style: 'padding-top:2px; margin-bottom:0',
+            boxLabel: DV.i18n.user_organisation_unit_children,
+            labelWidth: dv.conf.layout.form_label_width,
+            handler: function(chb, checked) {
+                treePanel.xable(checked, userOrganisationUnit.getValue());
+            }
+        });
+
+        userOrganisationUnitPanel = Ext.create('Ext.panel.Panel', {
+            columnWidth: 0.9,
+            layout: 'column',
+            bodyStyle: 'border:0 none; padding-bottom:3px; padding-left:7px',
+            items: [
+                userOrganisationUnit,
+                userOrganisationUnitChildren
+            ]
+        });
+
+        organisationUnitLevel = Ext.create('Ext.form.field.ComboBox', {
+            cls: 'dv-combo',
+            style: 'margin-bottom:0',
+            width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding - 38,
+            valueField: 'level',
+            displayField: 'name',
+            emptyText: DV.i18n.select_organisation_unit_level,
+            editable: false,
+            hidden: true,
+            store: {
+                fields: ['id', 'name', 'level'],
+                data: dv.init.organisationUnitLevels
+            }
+        });
+
+        toolMenu = Ext.create('Ext.menu.Menu', {
+            shadow: false,
+            showSeparator: false,
+            menuValue: 'explicit',
+            clickHandler: function(param) {
+                var items = this.items.items;
+                this.menuValue = param;
+
+                // Menu item icon cls
+                for (var i = 0; i < items.length; i++) {
+                    if (items[i].param === param) {
+                        items[i].setIconCls('dv-menu-item-selected');
+                    }
+                    else {
+                        items[i].setIconCls('');
+                    }
+                }
+
+                // Gui
+                if (param === 'explicit') {
+                    userOrganisationUnit.show();
+                    userOrganisationUnitChildren.show();
+                    organisationUnitLevel.hide();
+
+                    if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue()) {
+                        treePanel.disable();
+                    }
+                }
+                else if (param === 'boundary') {
+                    userOrganisationUnit.hide();
+                    userOrganisationUnitChildren.hide();
+                    organisationUnitLevel.show();
+                    treePanel.enable();
+                }
+            },
+            items: [
+                {
+                    text: DV.i18n.select_organisation_units + '&nbsp;&nbsp;',
+                    param: 'explicit',
+                    iconCls: 'dv-menu-item-selected'
+                },
+                {
+                    text: DV.i18n.select_boundaries_and_level + '&nbsp;&nbsp;',
+                    param: 'boundary'
+                }
+            ],
+            listeners: {
+                afterrender: function() {
+                    this.getEl().addCls('dv-btn-menu');
+                },
+                click: function(menu, item) {
+                    this.clickHandler(item.param);
+                }
+            }
+        });
+
+        tool = Ext.create('Ext.button.Button', {
+            cls: 'dv-button-organisationunitselection',
+            iconCls: 'dv-button-icon-gear',
+            width: 36,
+            height: 24,
+            menu: toolMenu
+        });
+
+        toolPanel = Ext.create('Ext.panel.Panel', {
+            width: 36,
+            bodyStyle: 'border:0 none; text-align:right',
+            style: 'margin-right:2px',
+            items: tool
+        });
+
+        organisationUnit = {
+            xtype: 'panel',
+            title: '<div class="dv-panel-title-organisationunit">' + DV.i18n.organisation_units + '</div>',
+            bodyStyle: 'padding:2px',
+            hideCollapseTool: true,
+            collapsed: false,
+            getDimension: function() {
+                var r = treePanel.getSelectionModel().getSelection(),
+                    config = {
+                        dimension: dv.conf.finals.dimension.organisationUnit.objectName,
+                        items: []
+                    };
+
+                if (toolMenu.menuValue === 'explicit') {
+                    if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue()) {
+                        if (userOrganisationUnit.getValue()) {
+                            config.items.push({id: 'USER_ORGUNIT'});
+                        }
+                        if (userOrganisationUnitChildren.getValue()) {
+                            config.items.push({id: 'USER_ORGUNIT_CHILDREN'});
+                        }
+                    }
+                    else {
+                        for (var i = 0; i < r.length; i++) {
+                            config.items.push({id: r[i].data.id});
+                        }
+                    }
+                }
+                else if (toolMenu.menuValue === 'boundary') {
+                    for (var i = 0; i < r.length; i++) {
+                        config.items.push({id: 'LEVEL-' + organisationUnitLevel.getValue() + '-' + r[i].data.id});
+                    }
+                }
+
+                return config.items.length ? config : null;
+            },
+            onExpand: function() {
+                var h = dv.viewport.westRegion.hasScrollbar ?
+                    dv.conf.layout.west_scrollbarheight_accordion_organisationunit : dv.conf.layout.west_maxheight_accordion_organisationunit;
+                dv.util.dimension.panel.setHeight(h);
+                treePanel.setHeight(this.getHeight() - dv.conf.layout.west_fill_accordion_organisationunit);
+            },
+            items: [
+                {
+                    layout: 'column',
+                    bodyStyle: 'border:0 none',
+                    style: 'padding-bottom:2px',
+                    items: [
+                        toolPanel,
+                        {
+                            width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding - 38,
+                            layout: 'column',
+                            bodyStyle: 'border:0 none',
+                            items: [
+                                userOrganisationUnit,
+                                userOrganisationUnitChildren,
+                                organisationUnitLevel
+                            ]
+                        }
+                    ]
+                },
+                treePanel
+            ],
+            listeners: {
+                added: function() {
+                    dv.cmp.dimension.panels.push(this);
+                },
+                expand: function(p) {
+                    p.onExpand();
+                }
+            }
+        };
+
+        getDimensionPanels = function(dimensions, iconCls) {
+            var	getAvailableStore,
+                getSelectedStore,
+
+                createPanel,
+                getPanels;
+
+            getAvailableStore = function(dimension) {
+                return Ext.create('Ext.data.Store', {
+                    fields: ['id', 'name'],
+                    proxy: {
+                        type: 'ajax',
+                        url: dv.baseUrl + '/api/dimensions/' + dimension.id + '.json',
+                        reader: {
+                            type: 'json',
+                            root: 'items'
+                        }
+                    },
+                    isLoaded: false,
+                    storage: {},
+                    sortStore: function() {
+                        this.sort('name', 'ASC');
+                    },
+                    reset: function() {
+                        if (this.isLoaded) {
+                            this.removeAll();
+                            dv.util.store.loadFromStorage(this);
+                            this.sortStore();
+                        }
+                    },
+                    listeners: {
+                        load: function(s) {
+                            s.isLoaded = true;
+                            dv.util.store.addToStorage(s);
+                        }
+                    }
+                });
+            };
+
+            getSelectedStore = function() {
+                return Ext.create('Ext.data.Store', {
+                    fields: ['id', 'name'],
+                    data: []
+                });
+            };
+
+            createPanel = function(dimension) {
+                var getAvailable,
+                    getSelected,
+
+                    availableStore,
+                    selectedStore,
+                    available,
+                    selected,
+
+                    panel;
+
+                getAvailable = function(availableStore) {
+                    return Ext.create('Ext.ux.form.MultiSelect', {
+                        cls: 'dv-toolbar-multiselect-left',
+                        width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
+                        valueField: 'id',
+                        displayField: 'name',
+                        store: availableStore,
+                        tbar: [
+                            {
+                                xtype: 'label',
+                                text: DV.i18n.available,
+                                cls: 'dv-toolbar-multiselect-left-label'
+                            },
+                            '->',
+                            {
+                                xtype: 'button',
+                                icon: 'images/arrowright.png',
+                                width: 22,
+                                handler: function() {
+                                    dv.util.multiselect.select(available, selected);
+                                }
+                            },
+                            {
+                                xtype: 'button',
+                                icon: 'images/arrowrightdouble.png',
+                                width: 22,
+                                handler: function() {
+                                    dv.util.multiselect.selectAll(available, selected);
+                                }
+                            }
+                        ],
+                        listeners: {
+                            afterrender: function() {
+                                this.boundList.on('itemdblclick', function() {
+                                    dv.util.multiselect.select(available, selected);
+                                }, this);
+                            }
+                        }
+                    });
+                };
+
+                getSelected = function(selectedStore) {
+                    return Ext.create('Ext.ux.form.MultiSelect', {
+                        cls: 'dv-toolbar-multiselect-right',
+                        width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
+                        valueField: 'id',
+                        displayField: 'name',
+                        ddReorder: true,
+                        store: selectedStore,
+                        tbar: [
+                            {
+                                xtype: 'button',
+                                icon: 'images/arrowleftdouble.png',
+                                width: 22,
+                                handler: function() {
+                                    dv.util.multiselect.unselectAll(available, selected);
+                                }
+                            },
+                            {
+                                xtype: 'button',
+                                icon: 'images/arrowleft.png',
+                                width: 22,
+                                handler: function() {
+                                    dv.util.multiselect.unselect(available, selected);
+                                }
+                            },
+                            '->',
+                            {
+                                xtype: 'label',
+                                text: DV.i18n.selected,
+                                cls: 'dv-toolbar-multiselect-right-label'
+                            }
+                        ],
+                        listeners: {
+                            afterrender: function() {
+                                this.boundList.on('itemdblclick', function() {
+                                    dv.util.multiselect.unselect(available, selected);
+                                }, this);
+                            }
+                        }
+                    });
+                };
+
+                availableStore = getAvailableStore(dimension);
+                selectedStore = getSelectedStore();
+
+                dimensionIdAvailableStoreMap[dimension.id] = availableStore;
+                dimensionIdSelectedStoreMap[dimension.id] = selectedStore;
+
+                available = getAvailable(availableStore);
+                selected = getSelected(selectedStore);
+
+                availableStore.on('load', function() {
+                    dv.util.multiselect.filterAvailable(available, selected);
+                });
+
+                panel = {
+                    xtype: 'panel',
+                    title: '<div class="' + iconCls + '">' + dimension.name + '</div>',
+                    hideCollapseTool: true,
+                    availableStore: availableStore,
+                    selectedStore: selectedStore,
+                    getDimension: function() {
+                        var config = {
+                            dimension: dimension.id,
+                            items: []
+                        };
+
+                        selectedStore.each( function(r) {
+                            config.items.push({id: r.data.id});
+                        });
+
+                        return config.items.length ? config : null;
+                    },
+                    onExpand: function() {
+                        if (!availableStore.isLoaded) {
+                            availableStore.load();
+                        }
+
+                        var h = dv.viewport.westRegion.hasScrollbar ?
+                            dv.conf.layout.west_scrollbarheight_accordion_group : dv.conf.layout.west_maxheight_accordion_group;
+                        dv.util.dimension.panel.setHeight(h);
+
+                        dv.util.multiselect.setHeight(
+                            [available, selected],
+                            this,
+                            dv.conf.layout.west_fill_accordion_dataset
+                        );
+                    },
+                    items: [
+                        {
+                            xtype: 'panel',
+                            layout: 'column',
+                            bodyStyle: 'border-style:none',
+                            items: [
+                                available,
+                                selected
+                            ]
+                        }
+                    ],
+                    listeners: {
+                        added: function() {
+                            dv.cmp.dimension.panels.push(this);
+                        },
+                        expand: function(p) {
+                            p.onExpand();
+                        }
+                    }
+                };
+
+                return panel;
+            };
+
+            getPanels = function() {
+                var panels = [];
+
+                for (var i = 0, panel; i < dimensions.length; i++) {
+                    panel = createPanel(dimensions[i]);
+
+                    panels.push(panel);
+                }
+
+                return panels;
+            };
+
+            return getPanels();
+        };
+
+        validateSpecialCases = function(layout) {
+            var dimConf = dv.conf.finals.dimension,
+                dimensions,
+                objectNameDimensionMap = {};
+
+            if (!layout) {
+                return;
+            }
+
+            dimensions = [].concat(layout.columns, layout.rows, layout.filters);
+
+            for (var i = 0; i < dimensions.length; i++) {
+                objectNameDimensionMap[dimensions[i].dimension] = dimensions[i];
+            }
+
+            if (layout.filters && layout.filters.length) {
+                for (var i = 0; i < layout.filters.length; i++) {
+
+                    // Indicators as filter
+                    if (layout.filters[i].dimension === dimConf.indicator.objectName) {
+                        alert(DV.i18n.indicators_cannot_be_specified_as_filter);
+                        return;
+                    }
+
+                    // Categories as filter
+                    //if (layout.filters[i].dimension === dimConf.category.objectName) {
+                        //alert(DV.i18n.categories_cannot_be_specified_as_filter);
+                        //return;
+                    //}
+
+                    // Operands as filter
+                    if (layout.filters[i].dimension === dimConf.operand.objectName) {
+                        alert(DV.i18n.detailed_data_elements_cannot_be_specified_as_filter);
+                        return;
+                    }
+
+                }
+            }
+
+            // dc and in
+            if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.indicator.objectName]) {
+                alert('Indicators and detailed data elements cannot be specified together');
+                return;
+            }
+
+            // dc and de
+            if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataElement.objectName]) {
+                alert('Detailed data elements and totals cannot be specified together');
+                return;
+            }
+
+            // dc and ds
+            if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataSet.objectName]) {
+                alert('Data sets and detailed data elements cannot be specified together');
+                return;
+            }
+
+            // Categories as filter
+            //if (layout.filter && dv.viewport.layoutWindow.filterStore.getById(dimConf.category.dimensionName)) {
+                //alert(DV.i18n.categories_cannot_be_specified_as_filter);
+                //return;
+            //}
+
+            // Degs and datasets in the same query
+            //if (Ext.Array.contains(dimensionNames, dimConf.data.dimensionName) && dv.store.dataSetSelected.data.length) {
+                //for (var i = 0; i < dv.init.degs.length; i++) {
+                    //if (Ext.Array.contains(dimensionNames, dv.init.degs[i].id)) {
+                        //alert(DV.i18n.data_element_group_sets_cannot_be_specified_together_with_data_sets);
+                        //return;
+                    //}
+                //}
+            //}
+
+            return true;
+        };
+
+        update = function() {
+            var config = dv.util.chart.getLayoutConfig(),
+            layout = dv.api.layout.Layout(config);
+
+            if (!validateSpecialCases(layout)) {
+                return;
+            }
+
+            // State
+            dv.viewport.interpretationButton.disable();
+            dv.favorite = null;
+
+            // Create chart
+            dv.util.chart.createChart(layout, dv);
+        };
+
+        accordionBody = Ext.create('Ext.panel.Panel', {
+            layout: 'accordion',
+            activeOnTop: true,
+            cls: 'dv-accordion',
+            bodyStyle: 'border:0 none; margin-bottom:2px',
+            height: 700,
+            items: function() {
+                var panels = [
+                    indicator,
+                    dataElement,
+                    dataSet,
+                    period,
+                    organisationUnit
+                ],
+                dims = Ext.clone(dv.init.dimensions);
+
+                dv.util.array.sortObjectsByString(dims);
+
+                panels = panels.concat(getDimensionPanels(dims, 'dv-panel-title-dimension'));
+
+                last = panels[panels.length - 1];
+                last.cls = 'dv-accordion-last';
+
+                return panels;
+            }()
+        });
+
+        accordion = Ext.create('Ext.panel.Panel', {
+            bodyStyle: 'border-style:none; padding:2px; padding-bottom:0; overflow-y:scroll;',
+            items: accordionBody,
+            listeners: {
+                added: function() {
+                    dv.cmp.dimension.accordion = this;
+                }
+            }
+        });
+
+        westRegion = Ext.create('Ext.panel.Panel', {
+            region: 'west',
+            preventHeader: true,
+            collapsible: true,
+            collapseMode: 'mini',
+            width: function() {
+                if (Ext.isWebKit) {
+                    return dv.conf.layout.west_width + 8;
+                }
+                else {
+                    if (Ext.isLinux && Ext.isGecko) {
+                        return dv.conf.layout.west_width + 13;
+                    }
+                    return dv.conf.layout.west_width + 17;
+                }
+            }(),
+            items: [
+                chartType,
+                layout,
+                accordion
+            ]
+        });
+
+        optionsButton = Ext.create('Ext.button.Button', {
+            text: DV.i18n.options,
+            menu: {},
+            handler: function() {
+                if (!dv.viewport.optionsWindow) {
+                    dv.viewport.optionsWindow = DV.app.OptionsWindow();
+                }
+
+                dv.viewport.optionsWindow.show();
+            }
+        });
+
+        favoriteButton = Ext.create('Ext.button.Button', {
+            text: DV.i18n.favorites,
+            menu: {},
+            handler: function() {
+                if (dv.viewport.favoriteWindow) {
+                    dv.viewport.favoriteWindow.destroy();
+                }
+
+                dv.viewport.favoriteWindow = DV.app.FavoriteWindow();
+                dv.viewport.favoriteWindow.show();
+            }
+        });
+
+        downloadButton = Ext.create('Ext.button.Button', {
+            text: DV.i18n.download,
+            disabled: true,
+            menu: {
+                cls: 'dv-menu',
+                shadow: false,
+                showSeparator: false,
+                items: [
+                    {
+                        xtype: 'label',
+                        text: DV.i18n.graphics,
+                        style: 'padding:7px 5px 5px 7px; font-weight:bold'
+                    },
+                    {
+                        text: DV.i18n.image_png + ' (.png)',
+                        iconCls: 'dv-menu-item-image',
+                        handler: function() {
+                            dv.util.chart.submitSvgForm('png');
+                        }
+                    },
+                    {
+                        text: 'PDF (.pdf)',
+                        iconCls: 'dv-menu-item-image',
+                        handler: function() {
+                            dv.util.chart.submitSvgForm('pdf');
+                        }
+                    },
+                    {
+                        xtype: 'label',
+                        text: DV.i18n.plain_data_sources,
+                        style: 'padding:7px 5px 5px 7px; font-weight:bold'
+                    },
+                    {
+                        text: 'JSON',
+                        iconCls: 'dv-menu-item-datasource',
+                        handler: function() {
+                            if (dv.baseUrl && dv.paramString) {
+                                window.open(dv.baseUrl + '/api/analytics.json' + dv.util.chart.getParamString(dv.xLayout, true));
+                            }
+                        }
+                    },
+                    {
+                        text: 'XML',
+                        iconCls: 'dv-menu-item-datasource',
+                        handler: function() {
+                            if (dv.baseUrl && dv.paramString) {
+                                window.open(dv.baseUrl + '/api/analytics.xml' + dv.util.chart.getParamString(dv.xLayout, true));
+                            }
+                        }
+                    },
+                    {
+                        text: 'Microsoft Excel',
+                        iconCls: 'dv-menu-item-datasource',
+                        handler: function() {
+                            if (dv.baseUrl && dv.paramString) {
+                                window.location.href = dv.baseUrl + '/api/analytics.xls' + dv.util.chart.getParamString(dv.xLayout, true);
+                            }
+                        }
+                    },
+                    {
+                        text: 'CSV',
+                        iconCls: 'dv-menu-item-datasource',
+                        handler: function() {
+                            if (dv.baseUrl && dv.paramString) {
+                                window.location.href = dv.baseUrl + '/api/analytics.csv' + dv.util.chart.getParamString(dv.xLayout, true);
+                            }
+                        }
+                    }
+                ],
+                listeners: {
+                    afterrender: function() {
+                        this.getEl().addCls('dv-toolbar-btn-menu');
+                    }
+                }
+            }
+        });
+
+        interpretationButton = Ext.create('Ext.button.Button', {
+            text: DV.i18n.share,
+            menu: {},
+            disabled: true,
+            xable: function() {
+                if (dv.favorite) {
+                    this.enable();
+                    this.disabledTooltip.destroy();
+                }
+                else {
+                    if (dv.xLayout) {
+                        this.disable();
+                        this.createTooltip();
+                    }
+                }
+            },
+            disabledTooltip: null,
+            createTooltip: function() {
+                this.disabledTooltip = Ext.create('Ext.tip.ToolTip', {
+                    target: this.getEl(),
+                    html: DV.i18n.save_load_favorite_before_sharing,
+                    'anchor': 'bottom'
+                });
+            },
+            handler: function() {
+                if (dv.viewport.interpretationWindow) {
+                    dv.viewport.interpretationWindow.destroy();
+                }
+
+                dv.viewport.interpretationWindow = DV.app.InterpretationWindow();
+
+                if (dv.viewport.interpretationWindow) {
+                    dv.viewport.interpretationWindow.show();
+                }
+            }
+        });
+
+        defaultButton = Ext.create('Ext.button.Button', {
+            text: DV.i18n.chart,
+            iconCls: 'dv-button-icon-chart',
+            toggleGroup: 'module',
+            pressed: true,
+            handler: function() {
+                if (!this.pressed) {
+                    this.toggle();
+                }
+            }
+        });
+
+        getLinkMenu = function(anchorCmp) {
+        };
+
+        centerRegion = Ext.create('Ext.panel.Panel', {
+            region: 'center',
+            bodyStyle: 'padding:0; text-align:center',
+            tbar: {
+                defaults: {
+                    height: 26
+                },
+                items: function() {
+                    var items = [],
+                        getSeparator;
+
+                    getSeparator = function() {
+                        return {
+                            xtype: 'tbseparator',
+                            height: 18,
+                            style: 'border-color:transparent; border-right-color:#d1d1d1; margin-right:4px'
+                        };
+                    };
+
+                    items.push({
+                        text: '<<<',
+                        handler: function(b) {
+                            var text = b.getText();
+                            text = text === '<<<' ? '>>>' : '<<<';
+                            b.setText(text);
+
+                            westRegion.toggleCollapse();
+                        }
+                    },
+                    {
+                        text: '<b>' + DV.i18n.update + '</b>',
+                        handler: function() {
+                            update();
+                        }
+                    },
+                    optionsButton,
+                    getSeparator(),
+                    favoriteButton,
+                    downloadButton,
+                    interpretationButton,
+                    '->',
+                    {
+                        text: DV.i18n.table,
+                        iconCls: 'dv-button-icon-table',
+                        toggleGroup: 'module',
+                        menu: {},
+                        handler: function(b) {
+                            b.menu = Ext.create('Ext.menu.Menu', {
+                                closeAction: 'destroy',
+                                shadow: false,
+                                showSeparator: false,
+                                items: [
+                                    {
+                                        text: 'Go to pivot tables' + '&nbsp;&nbsp;', //i18n
+                                        cls: 'dv-menu-item-noicon',
+                                        handler: function() {
+                                            window.location.href = dv.baseUrl + '/dhis-web-pivot/app/index.html';
+                                        }
+                                    },
+                                    '-',
+                                    {
+                                        text: 'View chart as table' + '&nbsp;&nbsp;', //i18n
+                                        cls: 'dv-menu-item-noicon',
+                                        disabled: !DV.isSessionStorage || !dv.layout,
+                                        handler: function() {
+                                            if (DV.isSessionStorage) {
+                                                dv.util.chart.setSessionStorage(dv.layout, 'analytical', dv.baseUrl + '/dhis-web-pivot/app/index.html?s=analytical');
+                                            }
+                                        }
+                                    },
+                                    {
+                                        text: 'View last table' + '&nbsp;&nbsp;', //i18n
+                                        cls: 'dv-menu-item-noicon',
+                                        disabled: !(DV.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['table']),
+                                        handler: function() {
+                                            window.location.href = dv.baseUrl + '/dhis-web-pivot/app/index.html?s=table';
+                                        }
+                                    }
+                                ],
+                                listeners: {
+                                    show: function() {
+                                        dv.util.window.setAnchorPosition(b.menu, b);
+                                    },
+                                    hide: function() {
+                                        b.menu.destroy();
+                                        defaultButton.toggle();
+                                    },
+                                    destroy: function(m) {
+                                        b.menu = null;
+                                    }
+                                }
+                            });
+
+                            b.menu.show();
+                        }
+                    },
+                    defaultButton,
+                    {
+                        text: DV.i18n.map,
+                        iconCls: 'dv-button-icon-map',
+                        toggleGroup: 'module',
+                        //menu: {},
+                        handler: function(b) {
+                            window.location.href = dv.baseUrl + '/dhis-web-mapping/app/index.html';
+                        }
+                    },
+                    getSeparator(),
+                    {
+                        xtype: 'button',
+                        text: DV.i18n.home,
+                        handler: function() {
+                            window.location.href = dv.baseUrl + '/dhis-web-commons-about/redirect.action';
+                        }
+                    });
+
+                    return items;
+                }()
+            },
+            listeners: {
+                resize: function(p) {
+                    if (dv.xLayout && dv.chart) {
+                        dv.chart.onViewportResize();
+                    }
+                }
+            }
+        });
+
+        setFavorite = function(layout) {
+            var dimConf = dv.conf.finals.dimension,
+                xLayout,
+                dimMap,
+                recMap,
+                graphMap,
+                objectName,
+                periodRecords,
+                fixedPeriodRecords = [],
+                isOu = false,
+                isOuc = false,
+                isLevel = false;
+
+            // State
+            dv.viewport.interpretationButton.enable();
+
+            // Create chart
+            dv.util.chart.createChart(layout, dv);
+
+            // Set gui
+
+            xLayout = dv.util.chart.getExtendedLayout(layout);
+            dimMap = xLayout.objectNameDimensionsMap;
+            recMap = xLayout.objectNameItemsMap;
+            graphMap = layout.parentGraphMap;
+
+            // Indicators
+            dv.store.indicatorSelected.removeAll();
+            objectName = dimConf.indicator.objectName;
+            if (dimMap[objectName]) {
+                dv.store.indicatorSelected.add(Ext.clone(recMap[objectName]));
+                dv.util.multiselect.filterAvailable({store: dv.store.indicatorAvailable}, {store: dv.store.indicatorSelected});
+            }
+
+            // Data elements
+            dv.store.dataElementSelected.removeAll();
+            objectName = dimConf.dataElement.objectName;
+            if (dimMap[objectName]) {
+                dv.store.dataElementSelected.add(Ext.clone(recMap[objectName]));
+                dv.util.multiselect.filterAvailable({store: dv.store.dataElementAvailable}, {store: dv.store.dataElementSelected});
+                dv.viewport.dataElementDetailLevel.setValue(objectName);
+            }
+
+            // Operands
+            objectName = dimConf.operand.objectName;
+            if (dimMap[objectName]) {
+                dv.store.dataElementSelected.add(Ext.clone(recMap[objectName]));
+                dv.util.multiselect.filterAvailable({store: dv.store.dataElementAvailable}, {store: dv.store.dataElementSelected});
+                dv.viewport.dataElementDetailLevel.setValue(objectName);
+            }
+
+            // Data sets
+            dv.store.dataSetSelected.removeAll();
+            objectName = dimConf.dataSet.objectName;
+            if (dimMap[objectName]) {
+                dv.store.dataSetSelected.add(Ext.clone(recMap[objectName]));
+            }
+
+            // Periods
+            dv.store.fixedPeriodSelected.removeAll();
+            dv.util.checkbox.setAllFalse();
+            periodRecords = recMap[dimConf.period.objectName] || [];
+            for (var i = 0, peroid, checkbox; i < periodRecords.length; i++) {
+                period = periodRecords[i];
+                checkbox = relativePeriod.valueComponentMap[period.id];
+                if (checkbox) {
+                    checkbox.setValue(true);
+                }
+                else {
+                    fixedPeriodRecords.push(period);
+                }
+            }
+            dv.store.fixedPeriodSelected.add(fixedPeriodRecords);
+            dv.util.multiselect.filterAvailable({store: dv.store.fixedPeriodAvailable}, {store: dv.store.fixedPeriodSelected});
+
+            // Group sets
+            for (var key in dimensionIdSelectedStoreMap) {
+                if (dimensionIdSelectedStoreMap.hasOwnProperty(key)) {
+                    var a = dimensionIdAvailableStoreMap[key],
+                        s = dimensionIdSelectedStoreMap[key];
+
+                    if (s.getCount() > 0) {
+                        a.reset();
+                        s.removeAll();
+                    }
+
+                    if (recMap[key]) {
+                        s.add(recMap[key]);
+                        dv.util.multiselect.filterAvailable({store: a}, {store: s});
+                    }
+                }
+            }
+
+            // Layout
+            dv.viewport.chartType.setChartType(xLayout.type);
+
+            dv.viewport.series.setValue(xLayout.columnDimensionNames[0]);
+            dv.viewport.series.filterNext();
+
+            dv.viewport.category.setValue(xLayout.rowDimensionNames[0]);
+            dv.viewport.category.filterNext();
+
+            dv.viewport.filter.setValue(xLayout.filterDimensionNames);
+
+            // Options
+            if (dv.viewport.optionsWindow) {
+                dv.viewport.optionsWindow.setOptions(layout);
+            }
+
+            // Organisation units
+            if (recMap[dimConf.organisationUnit.objectName]) {
+                for (var i = 0, ouRecords = recMap[dimConf.organisationUnit.objectName]; i < ouRecords.length; i++) {
+                    if (ouRecords[i].id === 'USER_ORGUNIT') {
+                        isOu = true;
+                    }
+                    if (ouRecords[i].id === 'USER_ORGUNIT_CHILDREN') {
+                        isOuc = true;
+                    }
+                    if (ouRecords[i].id.substr(0,5) === 'LEVEL') {
+                        isLevel = true;
+                    }
+                }
+            }
+
+            if (isLevel) {
+                var ouRecords = recMap[dimConf.organisationUnit.objectName],
+                    level;
+
+                if (Ext.isArray(ouRecords) && ouRecords.length) {
+                    level = ouRecords[i].id.split('-')[1];
+                }
+
+                toolMenu.clickHandler('boundary');
+                organisationUnitLevel.setValue(level);
+            }
+            else {
+                toolMenu.clickHandler('explicit');
+
+                userOrganisationUnit.setValue(isOu);
+                userOrganisationUnitChildren.setValue(isOuc);
+            }
+
+            // If fav has organisation units, wait for tree callback before update
+            if (recMap[dimConf.organisationUnit.objectName] && Ext.isObject(graphMap)) {
+                treePanel.numberOfRecords = dv.util.object.getLength(graphMap);
+
+                for (var i = 0, a = xLayout.objectNameItemsMap[dimConf.organisationUnit.objectName]; i < a.length; i++) {
+                    if (graphMap.hasOwnProperty(a[i].id)) {
+                        treePanel.multipleExpand(a[i].id, graphMap[a[i].id], false);
+                    }
+                }
+            }
+            else {
+                treePanel.reset();
+            }
+        };
+
+        viewport = Ext.create('Ext.container.Viewport', {
+            layout: 'border',
+            chartType: chartType,
+            series: series,
+            category: category,
+            filter: filter,
+            accordion: accordion,
+            accordionBody: accordionBody,
+            westRegion: westRegion,
+            centerRegion: centerRegion,
+            updateViewport: update,
+            optionsButton: optionsButton,
+            favoriteButton: favoriteButton,
+            downloadButton: downloadButton,
+            interpretationButton: interpretationButton,
+            userOrganisationUnit: userOrganisationUnit,
+            userOrganisationUnitChildren: userOrganisationUnitChildren,
+            dataElementDetailLevel: dataElementDetailLevel,
+            setFavorite: setFavorite,
+            items: [
+                westRegion,
+                centerRegion
+            ],
+            listeners: {
+                render: function(vp) {
+                    dv.viewport = vp;
+
+                    dv.viewport.optionsWindow = DV.app.OptionsWindow();
+                    dv.viewport.optionsWindow.hide();
+                },
+                afterrender: function() {
+                    dv.init.afterRender();
+                }
+            }
+        });
+
+        addListeners = function() {
+            dv.store.indicatorAvailable.on('load', function() {
+                dv.util.multiselect.filterAvailable(indicatorAvailable, indicatorSelected);
+            });
+
+            dv.store.dataElementAvailable.on('load', function() {
+                dv.util.multiselect.filterAvailable(dataElementAvailable, dataElementSelected);
+            });
+
+            dv.store.dataSetAvailable.on('load', function(s) {
+                dv.util.multiselect.filterAvailable(dataSetAvailable, dataSetSelected);
+                s.sort('name', 'ASC');
+            });
+        }();
+
+        return viewport;
+    };
+
+	initialize = function(r) {
+
+		// Ext configuration
+		Ext.QuickTips.init();
+
+		Ext.override(Ext.LoadMask, {
+			onHide: function() {
+				this.callParent();
+			}
+		});
+
+		// Right click handler
+		document.body.oncontextmenu = function() {
+			return false;
 		};
 
-		dv.init = DV.app.getInit(r);
-		dv.baseUrl = dv.init.contextPath;
+        // Instance
+        dv = DV.core.getInstance();
 
-		dv.cmp = DV.app.getCmp();
-		dv.util = DV.app.getUtil();
-		dv.store = DV.app.getStores();
+        Ext.Ajax.request({
+            url: '../initialize.action',
+            success: function(r) {
+				dv.init = DV.app.getInits(Ext.decode(r.responseText));
+				dv.baseUrl = dv.init.contextPath;
+				dv.el = 'app';
 
-		dv.viewport = createViewport();
+                dv.util = DV.app.getUtils();
+                dv.store = DV.app.getStores();
+                dv.cmp = DV.app.getCmp();
 
-		dv.viewport.optionsWindow = DV.app.OptionsWindow();
-		dv.viewport.optionsWindow.hide();
-	};
-
-	Ext.Ajax.request({
-		url: dv.conf.finals.ajax.path_visualizer + 'initialize.action',
-		success: function(r) {
-			DV.app.init.onInitialize(r);
-	}});
+                dv.viewport = createViewport();
+            }
+        });
+	}();
 });
 

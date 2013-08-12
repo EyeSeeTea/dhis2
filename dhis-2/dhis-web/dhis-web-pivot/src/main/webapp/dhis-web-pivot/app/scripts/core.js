@@ -20,7 +20,7 @@ Ext.onReady( function() {
 	
 	PT.core = {};
 	
-	PT.core.instances = [];	
+	PT.core.instances = [];
 
 	PT.core.getInits = function(init, pt) {
 		
