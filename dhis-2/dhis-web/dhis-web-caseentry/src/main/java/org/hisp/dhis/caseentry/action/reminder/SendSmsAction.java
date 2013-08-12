@@ -28,17 +28,17 @@
 package org.hisp.dhis.caseentry.action.reminder;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.patient.PatientReminder;
+import org.hisp.dhis.patient.PatientReminderService;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
+import org.hisp.dhis.sms.SmsSender;
 import org.hisp.dhis.sms.SmsServiceException;
 import org.hisp.dhis.sms.outbound.OutboundSms;
-import org.hisp.dhis.sms.outbound.OutboundSmsService;
 import org.hisp.dhis.user.CurrentUserService;
 
 import com.opensymphony.xwork2.Action;
@@ -55,11 +55,11 @@ public class SendSmsAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private OutboundSmsService outboundSmsService;
-
-    public void setOutboundSmsService( OutboundSmsService outboundSmsService )
+    private SmsSender smsSender;
+    
+    public void setSmsSender( SmsSender smsSender )
     {
-        this.outboundSmsService = outboundSmsService;
+        this.smsSender = smsSender;
     }
 
     private ProgramStageInstanceService programStageInstanceService;
@@ -74,6 +74,13 @@ public class SendSmsAction
     public void setCurrentUserService( CurrentUserService currentUserService )
     {
         this.currentUserService = currentUserService;
+    }
+
+    private PatientReminderService patientReminderService;
+
+    public void setPatientReminderService( PatientReminderService patientReminderService )
+    {
+        this.patientReminderService = patientReminderService;
     }
 
     private I18n i18n;
@@ -126,29 +133,12 @@ public class SendSmsAction
         ProgramStageInstance programStageInstance = programStageInstanceService
             .getProgramStageInstance( programStageInstanceId );
 
-        Set<String> phoneNumbers = new HashSet<String>();
+        PatientReminder patientReminder = new PatientReminder();
+        patientReminder.setTemplateMessage( msg );
+        patientReminder.setSendTo( sendTo );
 
-        switch ( sendTo )
-        {
-        case PatientReminder.SEND_TO_PATIENT:
-            String[] _phoneNumbers = programStageInstance.getProgramInstance().getPatient().getPhoneNumber().split( ";" );
-            for ( String phoneNumber : _phoneNumbers )
-            {
-                phoneNumbers.add(phoneNumber);
-            }
-            break;
-        case PatientReminder.SEND_TO_HEALTH_WORKER:
-            phoneNumbers
-                .add( programStageInstance.getProgramInstance().getPatient().getHealthWorker().getPhoneNumber() );
-            break;
-        case PatientReminder.SEND_TO_ORGUGNIT_REGISTERED:
-            phoneNumbers.add( programStageInstance.getProgramInstance().getPatient().getOrganisationUnit()
-                .getPhoneNumber() );
-            break;
-        default:
-            phoneNumbers.add( programStageInstance.getProgramInstance().getPatient().getPhoneNumber() );
-            break;
-        }
+        Set<String> phoneNumbers = patientReminderService.getPhonenumbers( patientReminder, programStageInstance
+            .getProgramInstance().getPatient() );
 
         try
         {
@@ -156,7 +146,7 @@ public class SendSmsAction
             outboundSms.setMessage( msg );
             outboundSms.setRecipients( phoneNumbers );
             outboundSms.setSender( currentUserService.getCurrentUsername() );
-            outboundSmsService.sendMessage( outboundSms, null );
+            smsSender.sendMessage( outboundSms, null );
 
             List<OutboundSms> outboundSmsList = programStageInstance.getOutboundSms();
             if ( outboundSmsList == null )

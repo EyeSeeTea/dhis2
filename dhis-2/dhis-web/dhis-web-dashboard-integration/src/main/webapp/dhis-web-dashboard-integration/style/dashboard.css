@@ -84,14 +84,34 @@
   margin: 0 19px 19px 0;
   border-radius: 3px;
   cursor: pointer;  
-  box-shadow: #ddd 0px 1px 2px 0px;
+  box-shadow: #ddd 0px 1px 3px 0px;
   background-color: #fff;
+  overflow: auto;
+}
+
+.item h3
+{
+  font-size: 12px;
+  font-family: LiberationSansBold, sans-serif;
+  color: #39547d;
+  margin: 2px 5px;
+}
+
+.item h4
+{
+  margin: 0;
 }
 
 .item:hover
 {
   border: 1px solid #bbb;
-  box-shadow: #ccc 0px 1px 2px 0px;
+  box-shadow: #ccc 0px 1px 3px 0px;
+}
+
+.item::-webkit-scrollbar
+{
+  width: 8px;
+  height: 8px;
 }
 
 .dropItem
@@ -571,4 +591,28 @@ div#selectionTree
 {
   width: 610px;
   margin-left: 38px;
+}
+
+/*----------------------------------------------------------------------------*/
+/* Print style                                                                */
+/*----------------------------------------------------------------------------*/
+
+@media print {
+
+.horizontalMenu li
+{
+  page-break-inside: avoid;
+}
+
+#dashboardHeader, #dashboardMenu, #searchDiv, #searchButton, #hitDiv, #dashboardListContainer
+{
+  display: none;
+}
+
+#contentDiv
+{
+  top: 0;
+  width: 960px;
+}
+
 }

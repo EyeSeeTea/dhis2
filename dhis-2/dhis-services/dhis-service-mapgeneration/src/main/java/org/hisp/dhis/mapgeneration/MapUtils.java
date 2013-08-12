@@ -57,7 +57,7 @@ public class MapUtils
     private static final String COLOR_PREFIX = "#";
     private static final int COLOR_RADIX = 16;
 
-    private static final int DEFAULT_MAP_WIDTH = 500;
+    public static final int DEFAULT_MAP_WIDTH = 500;
 
     /**
      * Linear interpolation of int.
@@ -154,12 +154,7 @@ public class MapUtils
     // Map
     // -------------------------------------------------------------------------
 
-    public static BufferedImage render( InternalMap map )
-    {
-        return render( map, DEFAULT_MAP_WIDTH );
-    }
-
-    public static BufferedImage render( InternalMap map, int imageWidth )
+    public static BufferedImage render( InternalMap map, Integer maxWidth, Integer maxHeight )
     {
         MapContent mapContent = new MapContent();
 
@@ -174,27 +169,87 @@ public class MapUtils
         }
 
         // Create a renderer for this map
+        
         GTRenderer renderer = new StreamingRenderer();
         renderer.setMapContent( mapContent );
 
         // Calculate image height
-        // TODO Might want to add a margin of say 25 pixels surrounding the map
+        
         ReferencedEnvelope mapBounds = mapContent.getMaxBounds();
-        double imageHeightFactor = mapBounds.getSpan( 1 ) / mapBounds.getSpan( 0 );
-        Rectangle imageBounds = new Rectangle( 0, 0, imageWidth, (int) Math.ceil( imageWidth * imageHeightFactor ) );
+        double widthToHeightFactor = mapBounds.getSpan( 0 ) / mapBounds.getSpan( 1 );
+        int[] widthHeight = getWidthHeight( maxWidth, maxHeight, LegendSet.LEGEND_TOTAL_WIDTH, 0, widthToHeightFactor );
+        
+        //LegendSet.LEGEND_TOTAL_WIDTH;
+        
+        Rectangle imageBounds = new Rectangle( 0, 0, widthHeight[0], widthHeight[1] );
 
         // Create an image and get the graphics context from it
+        
         BufferedImage image = new BufferedImage( imageBounds.width, imageBounds.height, BufferedImage.TYPE_INT_ARGB );
         Graphics2D g = (Graphics2D) image.getGraphics();
 
         g.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
         
-        // Render the map
         renderer.paint( g, imageBounds, mapBounds );
 
         mapContent.dispose();
         
         return image;
+    }
+    
+    /**
+     * Calcuates the width and height of an two-dimensional area. If width is not
+     * null, the width will be used and the height will be calculated. If the height 
+     * is not null, the height will be used and the width will be calculated. If 
+     * both width and height are not null, the width or height will be adjusted 
+     * to the greatest value possible without exceeding any of max width and max 
+     * height.
+     * 
+     * @param maxWidth the maximum width.
+     * @param maxHeight the maxium height.
+     * @param subtractWidth the value to subtract from final width
+     * @param subtractHeight the value to subtract from final height 
+     * @param widthFactor the width to height factor.
+     * @return array where first position holds the width and second the height.
+     * @throws IllegalArgumentException if none of width and height are specified.
+     */
+    public static int[] getWidthHeight( Integer maxWidth, Integer maxHeight, int subtractWidth, int subtractHeight, double widthFactor )
+    {
+        if ( maxWidth == null && maxHeight == null )
+        {
+            throw new IllegalArgumentException( "At least one of width and height must be specified" );
+        }
+        
+        if ( maxWidth == null )
+        {
+            maxHeight -= subtractHeight;
+            maxWidth = (int) Math.ceil( maxHeight * widthFactor );
+        }   
+        else if ( maxHeight == null )
+        {
+            maxWidth -= subtractWidth;
+            maxHeight = (int) Math.ceil( maxWidth / widthFactor );
+        }
+        else // Both set
+        {
+            maxWidth -= subtractWidth;
+            maxHeight -= subtractHeight;
+            
+            double maxWidthFactor = (double) maxWidth / maxHeight;
+            
+            if ( maxWidthFactor > widthFactor ) // Canvas wider than area
+            {
+                maxWidth = (int) Math.ceil( maxHeight * widthFactor );
+            }
+            else // Area wider than canvas
+            {
+                maxHeight = (int) Math.ceil( maxWidth / widthFactor );
+            }
+        }
+        
+        int[] result = { maxWidth, maxHeight };
+        
+        return result;
     }
 
     /**
