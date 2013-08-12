@@ -77,6 +77,8 @@ Ext.onReady(function() {
 		};
 
 		initialize = function() {
+
+            // validate config
 			if (!validateConfig(config)) {
 				return;
 			}
@@ -92,11 +94,26 @@ Ext.onReady(function() {
 			dv.isPlugin = true;
 
 			Ext.data.JsonP.request({
-				url: dv.init.contextPath + '/dhis-web-visualizer/initialize.action',
+				url: config.url + '/dhis-web-visualizer/initialize.action',
 				success: function(r) {
-					dv.init = r;
+                    dv = DV.core.getInstance(r);
 
-					dv.engine.loadChart(config.uid, dv);
+                    dv.init.el = config.el;
+                    dv.isPlugin = true;
+                    dv.viewport = createViewport();
+
+					if (config.uid) {
+						dv.engine.loadTable(config.uid, dv);
+					}
+					else {
+						layout = dv.api.layout.Layout(config);
+
+						if (!layout) {
+							return;
+						}
+
+						dv.engine.createTable(layout, dv);
+					}
 				}
 			});
 		}();

@@ -9,10 +9,13 @@ Ext.onReady( function() {
         var conf = dv.conf,
             util = dv.util,
             init = dv.init,
+            api = dv.api,
             engine = dv.engine,
             store = {},
             cmp = {},
             dimConf = conf.finals.dimension;
+
+        dv.init.el = 'app';
 
         // util
         (function() {
@@ -4637,7 +4640,7 @@ Ext.onReady( function() {
 
 	initialize = function(r) {
 
-		// Ext configuration
+		// ext configuration
 		Ext.QuickTips.init();
 
 		Ext.override(Ext.LoadMask, {
@@ -4646,7 +4649,7 @@ Ext.onReady( function() {
 			}
 		});
 
-		// Right click handler
+		// right click handler
 		document.body.oncontextmenu = function() {
 			return false;
 		};

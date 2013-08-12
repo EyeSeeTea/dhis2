@@ -508,7 +508,7 @@ Ext.onReady( function() {
 						return x;
 					}
 
-					return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, pt.conf.pivot.digitGroupSeparator[nf]);
+					return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.pivot.digitGroupSeparator[nf]);
 				}
 			};
 
@@ -562,13 +562,13 @@ Ext.onReady( function() {
 		(function() {
 			
 			// sort and extend dynamic dimensions
-			init.dimensions = pt.util.array.sortObjectsByString(init.dimensions);
+			init.dimensions = util.array.sortObjectsByString(init.dimensions);
 
 			for (var i = 0, dim; i < init.dimensions.length; i++) {
 				dim = init.dimensions[i];
 				dim.dimensionName = dim.id;
-				dim.objectName = pt.conf.finals.dimension.dimension.objectName;
-				pt.conf.finals.dimension.objectNameMap[dim.id] = dim;
+				dim.objectName = conf.finals.dimension.dimension.objectName;
+				conf.finals.dimension.objectNameMap[dim.id] = dim;
 			}
 
 			// legend set map
@@ -630,7 +630,7 @@ Ext.onReady( function() {
 						return;
 					}
 
-					if (config.dimension !== pt.conf.finals.dimension.category.objectName) {
+					if (config.dimension !== conf.finals.dimension.category.objectName) {
 						var records = [];
 
 						if (!Ext.isArray(config.items)) {
@@ -727,7 +727,7 @@ Ext.onReady( function() {
 				};
 
 				validateSpecialCases = function() {
-					var dimConf = pt.conf.finals.dimension,
+					var dimConf = conf.finals.dimension,
 						dimensions,
 						objectNameDimensionMap = {};
 
@@ -804,7 +804,7 @@ Ext.onReady( function() {
 				return function() {
 					var a = [],
 						objectNames = [],
-						dimConf = pt.conf.finals.dimension,
+						dimConf = conf.finals.dimension,
 						dims,
 						isOu = false,
 						isOuc = false;
@@ -980,8 +980,7 @@ Ext.onReady( function() {
 		// engine
 		(function() {
 			engine.getExtendedLayout = function(layout) {
-				var dimConf = pt.conf.finals.dimension,
-					layout = Ext.clone(layout),
+				var layout = Ext.clone(layout),
 					xLayout = {
 						columns: [],
 						rows: [],
@@ -1178,7 +1177,7 @@ Ext.onReady( function() {
 					filterDimensions = isSorted ? xLayout.sortedFilterDimensions : xLayout.filterDimensions,
 					dimensionNameIdsMap = isSorted ? xLayout.dimensionNameSortedIdsMap : xLayout.dimensionNameIdsMap,
 					paramString = '?',
-					dimConf = pt.conf.finals.dimension,
+					dimConf = conf.finals.dimension,
 					addCategoryDimension = false,
 					map = xLayout.dimensionNameItemsMap,
 					dx = dimConf.indicator.dimensionName,
@@ -1214,7 +1213,7 @@ Ext.onReady( function() {
 				}
 				
 				if (addCategoryDimension) {
-					paramString += '&dimension=' + pt.conf.finals.dimension.category.dimensionName;
+					paramString += '&dimension=' + conf.finals.dimension.category.dimensionName;
 				}
 
 				if (Ext.isArray(filterDimensions) && filterDimensions.length) {
@@ -1447,8 +1446,8 @@ Ext.onReady( function() {
 					}();
 
 					var createValueIdMap = function() {
-						var valueHeaderIndex = response.nameHeaderMap[pt.conf.finals.dimension.value.value].index,
-							coHeader = response.nameHeaderMap[pt.conf.finals.dimension.category.dimensionName],
+						var valueHeaderIndex = response.nameHeaderMap[conf.finals.dimension.value.value].index,
+							coHeader = response.nameHeaderMap[conf.finals.dimension.category.dimensionName],
 							dx = dimConf.data.dimensionName,
 							co = dimConf.category.dimensionName,
 							axisDimensionNames = xLayout.axisDimensionNames,
@@ -1815,8 +1814,8 @@ Ext.onReady( function() {
 						rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '" ' : '';
 						htmlValue = config.collapsed ? '&nbsp;' : config.htmlValue || config.value || '&nbsp;';
 						htmlValue = config.type !== 'dimension' ? pt.util.number.pp(htmlValue, layout.digitGroupSeparator) : htmlValue;
-						displayDensity = pt.conf.pivot.displayDensity[config.displayDensity] || pt.conf.pivot.displayDensity[layout.displayDensity];
-						fontSize = pt.conf.pivot.fontSize[config.fontSize] || pt.conf.pivot.fontSize[layout.fontSize];
+						displayDensity = conf.pivot.displayDensity[config.displayDensity] || conf.pivot.displayDensity[layout.displayDensity];
+						fontSize = conf.pivot.fontSize[config.fontSize] || conf.pivot.fontSize[layout.fontSize];
 						
 						cls += config.hidden ? ' td-hidden' : '';
 						cls += config.collapsed ? ' td-collapsed' : '';
@@ -2521,7 +2520,7 @@ Ext.onReady( function() {
 			};
 
 			engine.loadTable = function(id, pt) {
-				var url = pt.baseUrl + '/api/reportTables/' + id,
+				var url = init.contextPath + '/api/reportTables/' + id,
 					params = '?viewClass=dimensional&links=false',
 					method = 'GET',
 					success,
@@ -2533,7 +2532,7 @@ Ext.onReady( function() {
 				}
 				
 				success = function(layoutConfig) {
-					var layout = pt.api.layout.Layout(layoutConfig);
+					var layout = api.layout.Layout(layoutConfig);
 
 					if (layout) {
 						pt.favorite = Ext.clone(layout);
@@ -2545,7 +2544,7 @@ Ext.onReady( function() {
 				};
 				
 				failure = function(responseText) {
-					pt.util.mask.hideMask();
+					util.mask.hideMask();
 					alert(responseText);
 				};
 					
@@ -2642,7 +2641,7 @@ Ext.onReady( function() {
 							iconCls: 'pt-button-icon-chart',
 							param: 'chart',
 							handler: function() {
-								that.setSessionStorage(layoutConfig, 'analytical', pt.baseUrl + '/dhis-web-visualizer/app/index.html?s=analytical');
+								that.setSessionStorage(layoutConfig, 'analytical', pt.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
 							},
 							listeners: {
 								render: function() {
@@ -2662,7 +2661,7 @@ Ext.onReady( function() {
 							param: 'map',
 							disabled: true,
 							handler: function() {
-								that.setSessionStorage(layoutConfig, pt.baseUrl + '/dhis-web-mapping/app/index.html');
+								that.setSessionStorage(layoutConfig, pt.init.contextPath + '/dhis-web-mapping/app/index.html');
 							}
 						}		
 					]

@@ -65,7 +65,7 @@ Ext.onReady(function() {
 				centerRegion;
 				
 			setFavorite = function(layout) {
-				pt.util.pivot.createTable(layout, pt);
+				pt.engine.createTable(layout, pt);
 			};
 			
 			centerRegion = Ext.create('Ext.panel.Panel', {
@@ -82,26 +82,22 @@ Ext.onReady(function() {
 			
 		initialize = function() {
 			
-			// Validate config
+			// validate config
 			if (!validateConfig(config)) {
 				return;
-			}
+			}			
 			
-			// Instance
-			pt = PT.core.getInstance();
-			
-			pt.baseUrl = config.url;
-			pt.el = config.el;
-
 			Ext.data.JsonP.request({
-				url: pt.baseUrl + pt.conf.finals.ajax.path_pivot + 'initialize.action',
+				url: config.url + '/dhis-web-visualizer/initialize.action',
 				success: function(r) {
-					pt.init = PT.core.getInits(r, pt);
-					pt.viewport = createViewport();
-					pt.isPlugin = true;
+					pt = PT.core.getInstance(r);
+
+					pt.init.el = config.el;
+					pt.isPlugin = true;					
+					pt.viewport = createViewport();					
 					
 					if (config.uid) {
-						pt.util.pivot.loadTable(config.uid);
+						pt.engine.loadTable(config.uid, pt);
 					}
 					else {
 						layout = pt.api.layout.Layout(config);
@@ -110,7 +106,7 @@ Ext.onReady(function() {
 							return;
 						}
 						
-						pt.util.pivot.createTable(layout, pt);
+						pt.engine.createTable(layout, pt);
 					}
 				}
 			});

@@ -5,7 +5,7 @@ Ext.onReady( function() {
 
 	PT.app = {};
 
-	PT.app.extendInstance = function(pt) {	
+	PT.app.extendInstance = function(pt) {
         var init = pt.init,
             conf = pt.conf,
             util = pt.util,
@@ -17,170 +17,65 @@ Ext.onReady( function() {
 
         pt.init.el = 'app';
 
-		// Root nodes
-		for (var i = 0; i < init.rootNodes.length; i++) {
-			init.rootNodes[i].path = '/' + pt.conf.finals.root.id + '/' + init.rootNodes[i].id;
-		}
+		// util
+		(function() {
+			util.dimension = {
+				panel: {
+					setHeight: function(mx) {
+						var panelHeight = pt.cmp.dimension.panels.length * 28,
+							height;
 
-		// Viewport afterrender
-		init.afterRender = function() {
+						if (pt.viewport.westRegion.hasScrollbar) {
+							height = panelHeight + mx;
+							pt.viewport.accordion.setHeight(pt.viewport.getHeight() - 2);
+							pt.viewport.accordionBody.setHeight(height - 2);
+						}
+						else {
+							height = pt.viewport.westRegion.getHeight() - conf.layout.west_fill;
+							mx += panelHeight;
+							pt.viewport.accordion.setHeight((height > mx ? mx : height) - 2);
+							pt.viewport.accordionBody.setHeight((height > mx ? mx : height) - 2);
+						}
+					},
 
-			// Resize event handler
-			pt.viewport.westRegion.on('resize', function() {
-				var panel = pt.util.dimension.panel.getExpanded();
+					getExpanded: function() {
+						for (var i = 0, panel; i < pt.cmp.dimension.panels.length; i++) {
+							panel = pt.cmp.dimension.panels[i];
 
-				if (panel) {
-					panel.onExpand();
-				}
-			});
+							if (!panel.collapsed) {
+								return panel;
+							}
+						}
 
-			// Left gui
-			var viewportHeight = pt.viewport.westRegion.getHeight(),
-				numberOfTabs = pt.init.dimensions.length + 5,
-				tabHeight = 28,
-				minPeriodHeight = 380;
-
-			if (viewportHeight > numberOfTabs * tabHeight + minPeriodHeight) {
-				if (!Ext.isIE) {
-					pt.viewport.accordion.setAutoScroll(false);
-					pt.viewport.westRegion.setWidth(pt.conf.layout.west_width);
-					pt.viewport.accordion.doLayout();
-				}
-			}
-			else {
-				pt.viewport.westRegion.hasScrollbar = true;
-			}
-
-			pt.cmp.dimension.panels[0].expand();
-
-			// Load favorite from url
-			var id = pt.util.url.getUrlParam('id'),
-                session = pt.util.url.getUrlParam('s'),
-                layout;
-
-			if (id) {
-				pt.util.pivot.loadTable(id);
-			}
-            else if (Ext.isString(session) && PT.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
-                layout = pt.api.layout.Layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]);
-
-				if (layout) {
-					pt.viewport.setFavorite(layout);
-				}
-			}
-
-			// Fade in
-			Ext.defer( function() {
-				Ext.getBody().fadeIn({
-					duration: 400
-				});
-			}, 500 );
-		};
-
-		return init;
-	};
-
-	PT.app.getUtils = function() {
-		var util = pt.util || {};
-
-		util.pivot.getLayoutConfig = function() {
-			var panels = pt.cmp.dimension.panels,
-				columnDimNames = pt.viewport.colStore.getDimensionNames(),
-				rowDimNames = pt.viewport.rowStore.getDimensionNames(),
-				filterDimNames = pt.viewport.filterStore.getDimensionNames(),
-				config = pt.viewport.optionsWindow.getOptions(),
-				dimConf = pt.conf.finals.dimension,
-				dx = dimConf.data.dimensionName,
-				co = dimConf.category.dimensionName,
-				nameDimArrayMap = {};
-
-			config.columns = [];
-			config.rows = [];
-			config.filters = [];
-
-			// Panel data
-			for (var i = 0, dim, dimName; i < panels.length; i++) {
-				dim = panels[i].getDimension();
-
-				if (dim) {
-					nameDimArrayMap[dim.dimension] = [dim];
-				}
-			}
-
-			nameDimArrayMap[dx] = Ext.Array.clean([].concat(
-				nameDimArrayMap[dimConf.indicator.objectName],
-				nameDimArrayMap[dimConf.dataElement.objectName],
-				nameDimArrayMap[dimConf.operand.objectName],
-				nameDimArrayMap[dimConf.dataSet.objectName]
-			));			
-
-			// Columns, rows, filters
-			for (var i = 0, nameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], dimNames; i < nameArrays.length; i++) {
-				dimNames = nameArrays[i];
-
-				for (var j = 0, dimName, dim; j < dimNames.length; j++) {
-					dimName = dimNames[j];
-
-					if (dimName === co) {
-						axes[i].push({
-							dimension: co,
-							items: []
-						});
+						return null;
 					}
-					else if (dimName === dx && nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
-						for (var k = 0; k < nameDimArrayMap[dx].length; k++) {
-							axes[i].push(Ext.clone(nameDimArrayMap[dx][k]));
+				}
+			};
+
+			util.url = {
+				getUrlParam: function(s) {
+					var output = '';
+					var href = window.location.href;
+					if (href.indexOf('?') > -1 ) {
+						var query = href.substr(href.indexOf('?') + 1);
+						var query = query.split('&');
+						for (var i = 0; i < query.length; i++) {
+							if (query[i].indexOf('=') > -1) {
+								var a = query[i].split('=');
+								if (a[0].toLowerCase() === s) {
+									output = a[1];
+									break;
+								}
+							}
 						}
 					}
-					else if (nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
-						for (var k = 0; k < nameDimArrayMap[dimName].length; k++) {
-							axes[i].push(Ext.clone(nameDimArrayMap[dimName][k]));
-						}
-					}
+					return unescape(output);
 				}
-			}
+			};
+			
+			util.window = util.window || {};
 
-			config.userOrganisationUnit = pt.viewport.userOrganisationUnit.getValue();
-			config.userOrganisationUnitChildren = pt.viewport.userOrganisationUnitChildren.getValue();
-
-			return config;
-		};
-
-		util.dimension = {
-			panel: {
-				setHeight: function(mx) {
-					var panelHeight = pt.cmp.dimension.panels.length * 28,
-						height;
-
-					if (pt.viewport.westRegion.hasScrollbar) {
-						height = panelHeight + mx;
-						pt.viewport.accordion.setHeight(pt.viewport.getHeight() - 2);
-						pt.viewport.accordionBody.setHeight(height - 2);
-					}
-					else {
-						height = pt.viewport.westRegion.getHeight() - pt.conf.layout.west_fill;
-						mx += panelHeight;
-						pt.viewport.accordion.setHeight((height > mx ? mx : height) - 2);
-						pt.viewport.accordionBody.setHeight((height > mx ? mx : height) - 2);
-					}
-				},
-
-				getExpanded: function() {
-					for (var i = 0, panel; i < pt.cmp.dimension.panels.length; i++) {
-						panel = pt.cmp.dimension.panels[i];
-
-						if (!panel.collapsed) {
-							return panel;
-						}
-					}
-
-					return null;
-				}
-			}
-		};
-
-		util.window = {
-			setAnchorPosition: function(w, target) {
+			util.window.setAnchorPosition = function(w, target) {
 				var vpw = pt.viewport.getWidth(),
 					targetx = target ? target.getPosition()[0] : 4,
 					winw = w.getWidth(),
@@ -192,8 +87,9 @@ Ext.onReady( function() {
 				else {
 					w.setPosition(targetx, y);
 				}
-			},
-			addHideOnBlurHandler: function(w) {
+			};
+
+			util.window.addHideOnBlurHandler = function(w) {
 				var el = Ext.get(Ext.query('.x-mask')[0]);
 
 				el.on('click', function() {
@@ -203,8 +99,9 @@ Ext.onReady( function() {
 				});
 
 				w.hasHideOnBlurHandler = true;
-			},
-			addDestroyOnBlurHandler: function(w) {
+			};
+
+			util.window.addDestroyOnBlurHandler = function(w) {
 				var el = Ext.get(Ext.query('.x-mask')[0]);
 
 				el.on('click', function() {
@@ -214,276 +111,381 @@ Ext.onReady( function() {
 				});
 
 				w.hasDestroyOnBlurHandler = true;
-			}
-		};
+			};
+		}());
 
-		util.url = {
-			getUrlParam: function(s) {
-				var output = '';
-				var href = window.location.href;
-				if (href.indexOf('?') > -1 ) {
-					var query = href.substr(href.indexOf('?') + 1);
-					var query = query.split('&');
-					for (var i = 0; i < query.length; i++) {
-						if (query[i].indexOf('=') > -1) {
-							var a = query[i].split('=');
-							if (a[0].toLowerCase() === s) {
-								output = a[1];
-								break;
-							}
-						}
+        // init
+        (function() {
+
+			// root nodes
+			for (var i = 0; i < init.rootNodes.length; i++) {
+				init.rootNodes[i].path = '/' + conf.finals.root.id + '/' + init.rootNodes[i].id;
+			}
+
+			// viewport afterrender
+			init.afterRender = function() {
+
+				// Resize event handler
+				pt.viewport.westRegion.on('resize', function() {
+					var panel = util.dimension.panel.getExpanded();
+
+					if (panel) {
+						panel.onExpand();
+					}
+				});
+
+				// Left gui
+				var viewportHeight = pt.viewport.westRegion.getHeight(),
+					numberOfTabs = init.dimensions.length + 5,
+					tabHeight = 28,
+					minPeriodHeight = 380;
+
+				if (viewportHeight > numberOfTabs * tabHeight + minPeriodHeight) {
+					if (!Ext.isIE) {
+						pt.viewport.accordion.setAutoScroll(false);
+						pt.viewport.westRegion.setWidth(conf.layout.west_width);
+						pt.viewport.accordion.doLayout();
 					}
 				}
-				return unescape(output);
-			}
-		};
-		
-		return util;
-	};
-
-	PT.app.getStores = function() {
-		var store = pt.store || {};
-
-		store.indicatorAvailable = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			proxy: {
-				type: 'ajax',
-				reader: {
-					type: 'json',
-					root: 'indicators'
-				}
-			},
-			storage: {},
-			sortStore: function() {
-				this.sort('name', 'ASC');
-			},
-			listeners: {
-				load: function(s) {
-					pt.util.store.addToStorage(s);
-					pt.util.multiselect.filterAvailable({store: s}, {store: store.indicatorSelected});
-				}
-			}
-		});
-
-		store.indicatorSelected = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			data: []
-		});
-
-		store.dataElementAvailable = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'dataElementId', 'optionComboId', 'operandName'],
-			proxy: {
-				type: 'ajax',
-				reader: {
-					type: 'json',
-					root: 'dataElements'
-				}
-			},
-			storage: {},
-			sortStore: function() {
-				this.sort('name', 'ASC');
-			},
-			setTotalsProxy: function(uid) {
-				var path;
-
-				if (Ext.isString(uid)) {
-					path = pt.conf.finals.ajax.dataelement_get + uid + '.json?links=false&paging=false';
-				}
-				else if (uid === 0) {
-					path = pt.conf.finals.ajax.dataelement_getall;
+				else {
+					pt.viewport.westRegion.hasScrollbar = true;
 				}
 
-				if (!path) {
-					alert('Invalid parameter');
-					return;
+				pt.cmp.dimension.panels[0].expand();
+
+				// Load favorite from url
+				var id = util.url.getUrlParam('id'),
+					session = util.url.getUrlParam('s'),
+					layout;
+
+				if (id) {
+					engine.loadTable(id, pt);
+				}
+				else if (Ext.isString(session) && PT.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
+					layout = api.layout.Layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]);
+
+					if (layout) {
+						pt.viewport.setFavorite(layout);
+					}
 				}
 
-				this.setProxy({
+				// Fade in
+				Ext.defer( function() {
+					Ext.getBody().fadeIn({
+						duration: 400
+					});
+				}, 500 );
+			};
+		}());
+
+		// store
+		(function() {
+			store.indicatorAvailable = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name'],
+				proxy: {
 					type: 'ajax',
-					url: pt.baseUrl + pt.conf.finals.ajax.path_api + path,
+					reader: {
+						type: 'json',
+						root: 'indicators'
+					}
+				},
+				storage: {},
+				sortStore: function() {
+					this.sort('name', 'ASC');
+				},
+				listeners: {
+					load: function(s) {
+						util.store.addToStorage(s);
+						util.multiselect.filterAvailable({store: s}, {store: store.indicatorSelected});
+					}
+				}
+			});
+
+			store.indicatorSelected = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name'],
+				data: []
+			});
+
+			store.dataElementAvailable = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name', 'dataElementId', 'optionComboId', 'operandName'],
+				proxy: {
+					type: 'ajax',
 					reader: {
 						type: 'json',
 						root: 'dataElements'
 					}
-				});
+				},
+				storage: {},
+				sortStore: function() {
+					this.sort('name', 'ASC');
+				},
+				setTotalsProxy: function(uid) {
+					var path;
 
-				this.load({
-					scope: this,
-					callback: function() {
-						pt.util.multiselect.filterAvailable({store: this}, {store: store.dataElementSelected});
+					if (Ext.isString(uid)) {
+						path = conf.finals.ajax.dataelement_get + uid + '.json?links=false&paging=false';
 					}
-				});
-			},
-			setDetailsProxy: function(uid) {
-				if (Ext.isString(uid)) {
+					else if (uid === 0) {
+						path = conf.finals.ajax.dataelement_getall;
+					}
+
+					if (!path) {
+						alert('Invalid parameter');
+						return;
+					}
+
 					this.setProxy({
 						type: 'ajax',
-						url: pt.baseUrl + pt.conf.finals.ajax.path_commons + 'getOperands.action?uid=' + uid,
+						url: init.contextPath + conf.finals.ajax.path_api + path,
 						reader: {
 							type: 'json',
-							root: 'operands'
+							root: 'dataElements'
 						}
 					});
 
 					this.load({
 						scope: this,
 						callback: function() {
-							this.each(function(r) {
-								r.set('id', r.data.dataElementId + '-' + r.data.optionComboId);
-								r.set('name', r.data.operandName);
-							});
-							
-							pt.util.multiselect.filterAvailable({store: this}, {store: store.dataElementSelected});
+							util.multiselect.filterAvailable({store: this}, {store: store.dataElementSelected});
 						}
 					});
-				}
-				else {
-					alert('Invalid parameter');
-				}
-			},
-			listeners: {
-				load: function(s) {
-					pt.util.store.addToStorage(s);
-					pt.util.multiselect.filterAvailable({store: s}, {store: store.dataElementSelected});
-				}
-			}
-		});
+				},
+				setDetailsProxy: function(uid) {
+					if (Ext.isString(uid)) {
+						this.setProxy({
+							type: 'ajax',
+							url: init.contextPath + conf.finals.ajax.path_commons + 'getOperands.action?uid=' + uid,
+							reader: {
+								type: 'json',
+								root: 'operands'
+							}
+						});
 
-		store.dataElementSelected = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			data: []
-		});
-
-		store.dataSetAvailable = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			proxy: {
-				type: 'ajax',
-				url: pt.baseUrl + pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.dataset_get,
-				reader: {
-					type: 'json',
-					root: 'dataSets'
-				}
-			},
-			storage: {},
-			sortStore: function() {
-				this.sort('name', 'ASC');
-			},
-			isLoaded: false,
-			listeners: {
-				load: function(s) {
-					this.isLoaded = true;
-
-					pt.util.store.addToStorage(s);
-					pt.util.multiselect.filterAvailable({store: s}, {store: store.dataSetSelected});
-				}
-			}
-		});
-
-		store.dataSetSelected = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			data: []
-		});
-
-		store.periodType = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			data: pt.conf.period.periodTypes
-		});
-
-		store.fixedPeriodAvailable = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'index'],
-			data: [],
-			setIndex: function(periods) {
-				for (var i = 0; i < periods.length; i++) {
-					periods[i].index = i;
-				}
-			},
-			sortStore: function() {
-				this.sort('index', 'ASC');
-			}
-		});
-
-		store.fixedPeriodSelected = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			data: []
-		});
-
-		store.reportTable = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'lastUpdated', 'access'],
-			proxy: {
-				type: 'ajax',
-				reader: {
-					type: 'json',
-					root: 'reportTables'
-				}
-			},
-			isLoaded: false,
-			pageSize: 10,
-			page: 1,
-			defaultUrl: pt.baseUrl + '/api/reportTables.json?links=false',
-			loadStore: function(url) {
-				this.proxy.url = url || this.defaultUrl;
-
-				this.load({
-					params: {
-						pageSize: this.pageSize,
-						page: this.page
+						this.load({
+							scope: this,
+							callback: function() {
+								this.each(function(r) {
+									r.set('id', r.data.dataElementId + '-' + r.data.optionComboId);
+									r.set('name', r.data.operandName);
+								});
+								
+								util.multiselect.filterAvailable({store: this}, {store: store.dataElementSelected});
+							}
+						});
 					}
-				});
-			},
-			loadFn: function(fn) {
-				if (this.isLoaded) {
-					fn.call();
-				}
-				else {
-					this.load(fn);
-				}
-			},
-			listeners: {
-				load: function(s) {
-					if (!this.isLoaded) {
-						this.isLoaded = true;
+					else {
+						alert('Invalid parameter');
 					}
+				},
+				listeners: {
+					load: function(s) {
+						util.store.addToStorage(s);
+						util.multiselect.filterAvailable({store: s}, {store: store.dataElementSelected});
+					}
+				}
+			});
 
+			store.dataElementSelected = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name'],
+				data: []
+			});
+
+			store.dataSetAvailable = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name'],
+				proxy: {
+					type: 'ajax',
+					url: init.contextPath + conf.finals.ajax.path_api + conf.finals.ajax.dataset_get,
+					reader: {
+						type: 'json',
+						root: 'dataSets'
+					}
+				},
+				storage: {},
+				sortStore: function() {
 					this.sort('name', 'ASC');
+				},
+				isLoaded: false,
+				listeners: {
+					load: function(s) {
+						this.isLoaded = true;
+
+						util.store.addToStorage(s);
+						util.multiselect.filterAvailable({store: s}, {store: store.dataSetSelected});
+					}
 				}
-			}
-		});
+			});
 
-		store.legendSet = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'index'],
-			data: function() {
-				var data = pt.init.legendSets;
-				data.unshift({id: 0, name: PT.i18n.none, index: -1});
-				return data;
-			}(),
-			sorters: [
-				{property: 'index', direction: 'ASC'},
-				{property: 'name', direction: 'ASC'}
-			]
-		});
+			store.dataSetSelected = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name'],
+				data: []
+			});
 
-		return store;
-	};
+			store.periodType = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name'],
+				data: conf.period.periodTypes
+			});
 
-	PT.app.getCmp = function() {
-		var cmp = {};
+			store.fixedPeriodAvailable = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name', 'index'],
+				data: [],
+				setIndex: function(periods) {
+					for (var i = 0; i < periods.length; i++) {
+						periods[i].index = i;
+					}
+				},
+				sortStore: function() {
+					this.sort('index', 'ASC');
+				}
+			});
 
-		cmp.dimension = {
-			panels: [],
+			store.fixedPeriodSelected = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name'],
+				data: []
+			});
 
-			indicator: {},
-			dataElement: {},
-			dataSet: {},
-			relativePeriod: {},
-			fixedPeriod: {},
-			organisationUnit: {}
-		};
+			store.reportTable = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name', 'lastUpdated', 'access'],
+				proxy: {
+					type: 'ajax',
+					reader: {
+						type: 'json',
+						root: 'reportTables'
+					}
+				},
+				isLoaded: false,
+				pageSize: 10,
+				page: 1,
+				defaultUrl: init.contextPath + '/api/reportTables.json?links=false',
+				loadStore: function(url) {
+					this.proxy.url = url || this.defaultUrl;
 
-		cmp.dimension.relativePeriod.checkbox = [];
+					this.load({
+						params: {
+							pageSize: this.pageSize,
+							page: this.page
+						}
+					});
+				},
+				loadFn: function(fn) {
+					if (this.isLoaded) {
+						fn.call();
+					}
+					else {
+						this.load(fn);
+					}
+				},
+				listeners: {
+					load: function(s) {
+						if (!this.isLoaded) {
+							this.isLoaded = true;
+						}
 
-		cmp.favorite = {};
+						this.sort('name', 'ASC');
+					}
+				}
+			});
 
-		return cmp;
+			store.legendSet = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name', 'index'],
+				data: function() {
+					var data = init.legendSets;
+					data.unshift({id: 0, name: PT.i18n.none, index: -1});
+					return data;
+				}(),
+				sorters: [
+					{property: 'index', direction: 'ASC'},
+					{property: 'name', direction: 'ASC'}
+				]
+			});
+
+			pt.store = store;
+		}());
+
+		// cmp
+		(function() {
+			cmp = {
+				dimension: {
+					panels: [],
+
+					indicator: {},
+					dataElement: {},
+					dataSet: {},
+					relativePeriod: {
+						checkbox: []
+					},
+					fixedPeriod: {},
+					organisationUnit: {}
+				},
+				favorite: {}
+			};
+
+			pt.cmp = cmp;
+		}());
+
+		// engine
+		(function() {
+			engine.getLayoutConfig = function() {
+				var panels = pt.cmp.dimension.panels,
+					columnDimNames = pt.viewport.colStore.getDimensionNames(),
+					rowDimNames = pt.viewport.rowStore.getDimensionNames(),
+					filterDimNames = pt.viewport.filterStore.getDimensionNames(),
+					config = pt.viewport.optionsWindow.getOptions(),
+					dx = dimConf.data.dimensionName,
+					co = dimConf.category.dimensionName,
+					nameDimArrayMap = {};
+
+				config.columns = [];
+				config.rows = [];
+				config.filters = [];
+
+				// Panel data
+				for (var i = 0, dim, dimName; i < panels.length; i++) {
+					dim = panels[i].getDimension();
+
+					if (dim) {
+						nameDimArrayMap[dim.dimension] = [dim];
+					}
+				}
+
+				nameDimArrayMap[dx] = Ext.Array.clean([].concat(
+					nameDimArrayMap[dimConf.indicator.objectName],
+					nameDimArrayMap[dimConf.dataElement.objectName],
+					nameDimArrayMap[dimConf.operand.objectName],
+					nameDimArrayMap[dimConf.dataSet.objectName]
+				));			
+
+				// Columns, rows, filters
+				for (var i = 0, nameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], dimNames; i < nameArrays.length; i++) {
+					dimNames = nameArrays[i];
+
+					for (var j = 0, dimName, dim; j < dimNames.length; j++) {
+						dimName = dimNames[j];
+
+						if (dimName === co) {
+							axes[i].push({
+								dimension: co,
+								items: []
+							});
+						}
+						else if (dimName === dx && nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
+							for (var k = 0; k < nameDimArrayMap[dx].length; k++) {
+								axes[i].push(Ext.clone(nameDimArrayMap[dx][k]));
+							}
+						}
+						else if (nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
+							for (var k = 0; k < nameDimArrayMap[dimName].length; k++) {
+								axes[i].push(Ext.clone(nameDimArrayMap[dimName][k]));
+							}
+						}
+					}
+				}
+
+				config.userOrganisationUnit = pt.viewport.userOrganisationUnit.getValue();
+				config.userOrganisationUnitChildren = pt.viewport.userOrganisationUnitChildren.getValue();
+
+				return config;
+			};
+		}());
 	};
 
 	PT.app.LayoutWindow = function() {
@@ -1271,7 +1273,7 @@ Ext.onReady( function() {
 
 					if (favorite && favorite.name) {
 						Ext.Ajax.request({
-							url: pt.baseUrl + '/api/reportTables/',
+							url: pt.init.contextPath + '/api/reportTables/',
 							method: 'POST',
 							headers: {'Content-Type': 'application/json'},
 							params: Ext.encode(favorite),
@@ -1303,7 +1305,7 @@ Ext.onReady( function() {
 
 					if (id && name) {
 						Ext.Ajax.request({
-							url: pt.baseUrl + '/api/reportTables/' + id + '.json?viewClass=dimensional&links=false',
+							url: pt.init.contextPath + '/api/reportTables/' + id + '.json?viewClass=dimensional&links=false',
 							method: 'GET',
 							failure: function(r) {
 								pt.viewport.mask.show();
@@ -1317,7 +1319,7 @@ Ext.onReady( function() {
 								//delete reportTable.legendSet;
 
 								Ext.Ajax.request({
-									url: pt.baseUrl + '/api/reportTables/' + reportTable.id,
+									url: pt.init.contextPath + '/api/reportTables/' + reportTable.id,
 									method: 'PUT',
 									headers: {'Content-Type': 'application/json'},
 									params: Ext.encode(reportTable),
@@ -1401,7 +1403,7 @@ Ext.onReady( function() {
 						this.currentValue = this.getValue();
 
 						var value = this.getValue(),
-							url = value ? pt.baseUrl + '/api/reportTables/query/' + value + '.json?links=false' : null,
+							url = value ? pt.init.contextPath + '/api/reportTables/query/' + value + '.json?links=false' : null,
 							store = pt.store.reportTable;
 
 						store.page = 1;
@@ -1415,7 +1417,7 @@ Ext.onReady( function() {
 			text: PT.i18n.prev,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? pt.baseUrl + '/api/reportTables/query/' + value + '.json?links=false' : null,
+					url = value ? pt.init.contextPath + '/api/reportTables/query/' + value + '.json?links=false' : null,
 					store = pt.store.reportTable;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
@@ -1427,7 +1429,7 @@ Ext.onReady( function() {
 			text: PT.i18n.next,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? pt.baseUrl + '/api/reportTables/query/' + value + '.json?links=false' : null,
+					url = value ? pt.init.contextPath + '/api/reportTables/query/' + value + '.json?links=false' : null,
 					store = pt.store.reportTable;
 
 				store.page = store.page + 1;
@@ -1459,7 +1461,7 @@ Ext.onReady( function() {
 								element.addClsOnOver('link');
 								element.load = function() {
 									favoriteWindow.hide();
-									pt.util.pivot.loadTable(record.data.id);
+									pt.engine.loadTable(record.data.id, pt);
 								};
 								element.dom.setAttribute('onclick', 'Ext.get(this).load();');
 							}
@@ -1508,7 +1510,7 @@ Ext.onReady( function() {
 
 										if (confirm(message)) {
 											Ext.Ajax.request({
-												url: pt.baseUrl + '/api/reportTables/' + record.data.id,
+												url: pt.init.contextPath + '/api/reportTables/' + record.data.id,
 												method: 'PUT',
 												headers: {'Content-Type': 'application/json'},
 												params: Ext.encode(favorite),
@@ -1536,7 +1538,7 @@ Ext.onReady( function() {
 
 								if (record.data.access.manage) {
 									Ext.Ajax.request({
-										url: pt.baseUrl + '/api/sharing?type=reportTable&id=' + record.data.id,
+										url: pt.init.contextPath + '/api/sharing?type=reportTable&id=' + record.data.id,
 										method: 'GET',
 										failure: function(r) {
 											pt.viewport.mask.hide();
@@ -1565,7 +1567,7 @@ Ext.onReady( function() {
 
 									if (confirm(message)) {
 										Ext.Ajax.request({
-											url: pt.baseUrl + '/api/reportTables/' + record.data.id,
+											url: pt.init.contextPath + '/api/reportTables/' + record.data.id,
 											method: 'DELETE',
 											success: function() {
 												pt.store.reportTable.loadStore();
@@ -1845,7 +1847,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: pt.baseUrl + '/api/sharing/search',
+				url: pt.init.contextPath + '/api/sharing/search',
 				reader: {
 					type: 'json',
 					root: 'userGroups'
@@ -1941,7 +1943,7 @@ Ext.onReady( function() {
 					text: PT.i18n.save,
 					handler: function() {
 						Ext.Ajax.request({
-							url: pt.baseUrl + '/api/sharing?type=reportTable&id=' + sharing.object.id,
+							url: pt.init.contextPath + '/api/sharing?type=reportTable&id=' + sharing.object.id,
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json'
@@ -1995,8 +1997,8 @@ Ext.onReady( function() {
 
 			linkPanel = Ext.create('Ext.panel.Panel', {
 				html: function() {
-					var reportTableUrl = pt.baseUrl + '/dhis-web-pivot/app/index.html?id=' + pt.favorite.id,
-						apiUrl = pt.baseUrl + '/api/reportTables/' + pt.favorite.id + '/data.html',
+					var reportTableUrl = pt.init.contextPath + '/dhis-web-pivot/app/index.html?id=' + pt.favorite.id,
+						apiUrl = pt.init.contextPath + '/api/reportTables/' + pt.favorite.id + '/data.html',
 						html = '';
 					
 					html += '<div><b>Pivot link: </b><span class="user-select"><a href="' + reportTableUrl + '" target="_blank">' + reportTableUrl + '</a></span></div>';
@@ -2016,7 +2018,7 @@ Ext.onReady( function() {
 				handler: function() {
 					if (textArea.getValue()) {
 						Ext.Ajax.request({
-							url: pt.baseUrl + pt.conf.finals.ajax.path_api + 'interpretations/reportTable/' + pt.favorite.id,
+							url: pt.init.contextPath + pt.conf.finals.ajax.path_api + 'interpretations/reportTable/' + pt.favorite.id,
 							method: 'POST',
 							params: textArea.getValue(),
 							headers: {'Content-Type': 'text/html'},
@@ -2246,7 +2248,7 @@ Ext.onReady( function() {
 						fields: ['id', 'name', 'index'],
 						proxy: {
 							type: 'ajax',
-							url: pt.baseUrl + pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.indicatorgroup_get,
+							url: pt.init.contextPath + pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.indicatorgroup_get,
 							reader: {
 								type: 'json',
 								root: 'indicatorGroups'
@@ -2283,11 +2285,11 @@ Ext.onReady( function() {
 							}
 							else {
 								if (cb.getValue() === 0) {
-									store.proxy.url = pt.baseUrl + pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.indicator_getall;
+									store.proxy.url = pt.init.contextPath + pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.indicator_getall;
 									store.load();
 								}
 								else {
-									store.proxy.url = pt.baseUrl + pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.indicator_get + cb.getValue() + '.json';
+									store.proxy.url = pt.init.contextPath + pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.indicator_get + cb.getValue() + '.json';
 									store.load();
 								}
 							}
@@ -2397,7 +2399,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name', 'index'],
 			proxy: {
 				type: 'ajax',
-				url: pt.baseUrl + pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.dataelementgroup_get,
+				url: pt.init.contextPath + pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.dataelementgroup_get,
 				reader: {
 					type: 'json',
 					root: 'dataElementGroups'
@@ -3283,21 +3285,21 @@ Ext.onReady( function() {
 			},
 			selectByGroup: function(id) {
 				if (id) {
-					var url = pt.baseUrl + pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbygroup,
+					var url = pt.init.contextPath + pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbygroup,
 						params = {id: id};
 					this.select(url, params);
 				}
 			},
 			selectByLevel: function(level) {
 				if (level) {
-					var url = pt.baseUrl + pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbylevel,
+					var url = pt.init.contextPath + pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbylevel,
 						params = {level: level};
 					this.select(url, params);
 				}
 			},
 			selectByIds: function(ids) {
 				if (ids) {
-					var url = pt.baseUrl + pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbyids;
+					var url = pt.init.contextPath + pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbyids;
 					Ext.Array.each(ids, function(item) {
 						url = Ext.String.urlAppend(url, 'ids=' + item);
 					});
@@ -3310,7 +3312,7 @@ Ext.onReady( function() {
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
-					url: pt.baseUrl + pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunitchildren_get
+					url: pt.init.contextPath + pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunitchildren_get
 				},
 				root: {
 					id: pt.conf.finals.root.id,
@@ -3587,7 +3589,7 @@ Ext.onReady( function() {
 					fields: ['id', 'name'],
 					proxy: {
 						type: 'ajax',
-						url: pt.baseUrl + '/api/dimensions/' + dimension.id + '.json',
+						url: pt.init.contextPath + '/api/dimensions/' + dimension.id + '.json',
 						reader: {
 							type: 'json',
 							root: 'items'
@@ -3801,15 +3803,14 @@ Ext.onReady( function() {
 		};
 
 		update = function() {
-			var config = pt.util.pivot.getLayoutConfig();
-			
-			var layout = pt.api.layout.Layout(config);
+			var config = pt.engine.getLayoutConfig(),
+				layout = pt.api.layout.Layout(config);
 			
 			if (!layout) {
 				return;
 			}
 
-			pt.util.pivot.createTable(layout, pt);
+			pt.engine.createTable(layout, pt);
 		};
 
 		accordionBody = Ext.create('Ext.panel.Panel', {
@@ -3906,8 +3907,8 @@ Ext.onReady( function() {
 		});
 
 		openTableLayoutTab = function(type, isNewTab) {
-			if (pt.baseUrl && pt.paramString) {
-				var url = pt.baseUrl + '/api/analytics.' + type + pt.util.pivot.getParamString(pt.xLayout);
+			if (pt.init.contextPath && pt.paramString) {
+				var url = pt.init.contextPath + '/api/analytics.' + type + pt.util.pivot.getParamString(pt.xLayout);
 				url += '&tableLayout=true&columns=' + pt.xLayout.columnDimensionNames.join(';') + '&rows=' + pt.xLayout.rowDimensionNames.join(';');
 
 				window.open(url, isNewTab ? '_blank' : '_top');
@@ -3957,8 +3958,8 @@ Ext.onReady( function() {
 						text: 'JSON',
 						iconCls: 'pt-menu-item-datasource',
 						handler: function() {
-							if (pt.baseUrl && pt.paramString) {
-								window.open(pt.baseUrl + '/api/analytics.json' + pt.paramString, '_blank');
+							if (pt.init.contextPath && pt.paramString) {
+								window.open(pt.init.contextPath + '/api/analytics.json' + pt.paramString, '_blank');
 							}
 						}
 					},
@@ -3966,8 +3967,8 @@ Ext.onReady( function() {
 						text: 'XML',
 						iconCls: 'pt-menu-item-datasource',
 						handler: function() {
-							if (pt.baseUrl && pt.paramString) {
-								window.open(pt.baseUrl + '/api/analytics.xml' + pt.paramString, '_blank');
+							if (pt.init.contextPath && pt.paramString) {
+								window.open(pt.init.contextPath + '/api/analytics.xml' + pt.paramString, '_blank');
 							}
 						}
 					},
@@ -3975,8 +3976,8 @@ Ext.onReady( function() {
 						text: 'Microsoft Excel',
 						iconCls: 'pt-menu-item-datasource',
 						handler: function() {
-							if (pt.baseUrl && pt.paramString) {
-								window.location.href = pt.baseUrl + '/api/analytics.xls' + pt.paramString;
+							if (pt.init.contextPath && pt.paramString) {
+								window.location.href = pt.init.contextPath + '/api/analytics.xls' + pt.paramString;
 							}
 						}
 					},
@@ -3984,8 +3985,8 @@ Ext.onReady( function() {
 						text: 'CSV',
 						iconCls: 'pt-menu-item-datasource',
 						handler: function() {
-							if (pt.baseUrl && pt.paramString) {
-								window.location.href = pt.baseUrl + '/api/analytics.csv' + pt.paramString;
+							if (pt.init.contextPath && pt.paramString) {
+								window.location.href = pt.init.contextPath + '/api/analytics.csv' + pt.paramString;
 							}
 						}
 					},
@@ -3993,8 +3994,8 @@ Ext.onReady( function() {
 						text: 'JRXML',
 						iconCls: 'pt-menu-item-datasource',
 						handler: function() {
-							if (pt.baseUrl && pt.paramString) {
-								window.open(pt.baseUrl + '/api/analytics.jrxml' + pt.paramString, '_blank');
+							if (pt.init.contextPath && pt.paramString) {
+								window.open(pt.init.contextPath + '/api/analytics.jrxml' + pt.paramString, '_blank');
 							}
 						}
 					}
@@ -4108,7 +4109,7 @@ Ext.onReady( function() {
 										text: 'Go to charts' + '&nbsp;&nbsp;', //i18n
 										cls: 'pt-menu-item-noicon',
 										handler: function() {
-											window.location.href = pt.baseUrl + '/dhis-web-visualizer/app/index.html';
+											window.location.href = pt.init.contextPath + '/dhis-web-visualizer/app/index.html';
 										}
 									},
 									'-',
@@ -4118,7 +4119,7 @@ Ext.onReady( function() {
 										disabled: !PT.isSessionStorage || !pt.layout,
 										handler: function() {
 											if (PT.isSessionStorage) {
-												pt.util.pivot.setSessionStorage(pt.layout, 'analytical', pt.baseUrl + '/dhis-web-visualizer/app/index.html?s=analytical');
+												pt.util.pivot.setSessionStorage(pt.layout, 'analytical', pt.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
 											}
 										}
 									},
@@ -4127,7 +4128,7 @@ Ext.onReady( function() {
 										cls: 'pt-menu-item-noicon',
 										disabled: !(PT.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['chart']),
 										handler: function() {
-											window.location.href = pt.baseUrl + '/dhis-web-visualizer/app/index.html?s=chart';
+											window.location.href = pt.init.contextPath + '/dhis-web-visualizer/app/index.html?s=chart';
 										}
 									}
 								],
@@ -4154,7 +4155,7 @@ Ext.onReady( function() {
 						toggleGroup: 'module',
 						//menu: {},
 						handler: function(b) {
-							window.location.href = pt.baseUrl + '/dhis-web-mapping/app/index.html';
+							window.location.href = pt.init.contextPath + '/dhis-web-mapping/app/index.html';
 						}
 					},
 					{
@@ -4166,7 +4167,7 @@ Ext.onReady( function() {
 						xtype: 'button',
 						text: PT.i18n.home,
 						handler: function() {
-							window.location.href = pt.baseUrl + '/dhis-web-commons-about/redirect.action';
+							window.location.href = pt.init.contextPath + '/dhis-web-commons-about/redirect.action';
 						}
 					}
 				]
@@ -4210,7 +4211,7 @@ Ext.onReady( function() {
 			pt.viewport.interpretationButton.enable();
 
 			// Create chart
-			pt.util.pivot.createTable(layout, pt);
+			pt.engine.createTable(layout, pt);
 
 			// Set gui
 
@@ -4450,7 +4451,7 @@ Ext.onReady( function() {
 
 	initialize = function() {
 	
-		// Ext configuration
+		// ext configuration
 		Ext.QuickTips.init();
 
 		Ext.override(Ext.LoadMask, {
@@ -4459,24 +4460,17 @@ Ext.onReady( function() {
 			}
 		});
 		
-		// Right click handler
+		// right click handler
 		document.body.oncontextmenu = function() {
 			return false;
 		};
-		
-		// Instance
-		pt = PT.core.getInstance();
 
 		Ext.Ajax.request({
 			url: '../initialize.action',
 			success: function(r) {
-				pt.init = PT.app.getInits(Ext.decode(r.responseText));		
-				pt.baseUrl = pt.init.contextPath;
-				pt.el = 'app';
-						
-				pt.util = PT.app.getUtils();
-				pt.store = PT.app.getStores();
-				pt.cmp = PT.app.getCmp();
+				pt = PT.core.getInstance(Ext.decode(r.responseText));
+
+				PT.app.extendInstance(pt);
 								
 				pt.viewport = createViewport();
 			}
