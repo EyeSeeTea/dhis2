@@ -1099,10 +1099,10 @@ Ext.onReady( function() {
                         if (dim.dimensionName === ou) {
                             if (isUserOrgunit || isUserOrgunitChildren) {
                                 if (isUserOrgunit) {
-                                    dim.items = dim.items.concat(dv.init.user.ou);
+                                    dim.items = dim.items.concat(init.user.ou);
                                 }
                                 if (isUserOrgunitChildren) {
-                                    dim.items = dim.items.concat(dv.init.user.ouc);
+                                    dim.items = dim.items.concat(init.user.ouc);
                                 }
                             }
                             else if (isLevel) {
@@ -2146,7 +2146,7 @@ Ext.onReady( function() {
                     xLayout = engine.getExtendedLayout(layout);
 
                     dv.paramString = engine.getParamString(xLayout, true);
-                    url = dv.init.contextPath + '/api/analytics.json' + dv.paramString;
+                    url = init.contextPath + '/api/analytics.json' + dv.paramString;
 
                     if (!validateUrl(url)) {
                         return;
