@@ -243,15 +243,6 @@ public class DetailedMetaDataController
         exportService.deleteFilter( json );
     }
 
-    // FOR DEVELOPMENT ONLY - TO BE DELETED
-    @RequestMapping( method = RequestMethod.GET, value = DetailedMetaDataController.RESOURCE_PATH + "/getDependencies" )
-    @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
-    public @ResponseBody String getDependencies( HttpServletRequest request, HttpServletResponse response ) throws IOException
-    {
-        String uid = request.getParameter( "uid" );
-        return exportService.getDependencies( uid );
-    }
-
     //--------------------------------------------------------------------------
     // Detailed MetaData Export - Logic
     //--------------------------------------------------------------------------

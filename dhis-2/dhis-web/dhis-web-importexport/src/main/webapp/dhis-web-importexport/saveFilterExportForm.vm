@@ -17,19 +17,19 @@
         <tr>
             <td><label>$i18n.getString( "name" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
             <td>
-                <input type="text" id="name" name="name" value="$filter.name" style="width: 90%;">
+                <input type="text" id="name" name="name" value="$filter.name" style="width: 95%;">
             </td>
         </tr>
         <tr>
             <td><label>$i18n.getString( "code" )</label></td>
             <td>
-                <input type="text" id="code" name="code" value="$filter.code" style="width: 90%;">
+                <input type="text" id="code" name="code" value="$filter.code" style="width: 95%;">
             </td>
         </tr>
         <tr>
             <td><label>$i18n.getString( "filter_metaData_uids" )</label></td>
             <td>
-                <textarea id="metaDataUids" name="metaDataUids" rows="10" cols="63" style="width: 90%;">$filter.metaDataUids</textarea>
+                <textarea id="metaDataUids" name="metaDataUids" rows="10" cols="63" style="width: 95%;">$filter.metaDataUids</textarea>
             </td>
         </tr>
         <tr>

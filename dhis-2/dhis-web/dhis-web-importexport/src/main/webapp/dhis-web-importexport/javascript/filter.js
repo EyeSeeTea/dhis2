@@ -4,6 +4,19 @@ function submitCreateFilterForm()
     $( "#formCreateFilter" ).submit();
 }
 
+// Display the Filter Table
+function displayFilterTable()
+{
+    var filterTable = $( "#filterTable" );
+    if ( filterTable.css( "display" ) == "none" )
+    {
+        filterTable.show();
+    } else
+    {
+        filterTable.hide();
+    }
+}
+
 // Load Filters from the database
 function loadFilters()
 {
@@ -40,7 +53,7 @@ function insertFilterDesign( filters )
                  '<tr id="tr' + filterName + '">'
                 +     '<td>' + filters[i].name + '</td>'
                 +     '<td>'
-                +         '<button id="buttonApply' + filterName + '" value="' + filterId + '" type="button" style="background-color: inherit; border: 0px;">'
+                +         '<button id="buttonApply' + filterName + '" value="' + filterId + '" type="button" style="background-color: inherit; border: 0px; cursor: pointer;">'
                 +             '<img src="../images/success_small.png" title="' + i18n_apply + '" alt="' + i18n_apply + '" />'
                 +         '</button>'
                 +         '<form id="form' + filterName + '" method="POST" action="updateFilterExportForm.action" style="float: left;">'
@@ -49,10 +62,10 @@ function insertFilterDesign( filters )
                 +             '<input type="hidden" name="code" value="' + filterCode + '" />'
                 +             '<input type="hidden" id="metaDataUids' + filterName + '" name="metaDataUids" value="' + filterMetaDataUids + '" />'
                 +         '</form>'
-                +         '<button id="buttonEdit' + filterName + '" type="button" style="background-color: inherit; border: 0px;">'
+                +         '<button id="buttonEdit' + filterName + '" type="button" style="background-color: inherit; border: 0px; cursor: pointer;">'
                 +             '<img src="../images/edit.png" title="' + i18n_edit + '" alt="' + i18n_edit + '" />'
                 +         '</button>'
-                +         '<button id="buttonRemove' + filterName + '" value="' + filterId + '" type="button" style="background-color: inherit; border: 0px;">'
+                +         '<button id="buttonRemove' + filterName + '" value="' + filterId + '" type="button" style="background-color: inherit; border: 0px; cursor: pointer;">'
                 +             '<img src="../images/delete.png" title="' + i18n_remove + '" alt="' + i18n_remove + '" />'
                 +         '</button>'
                 +     '</td>'
@@ -78,7 +91,12 @@ function applyFilterButton( filter )
     var filterName = removeWhiteSpace( filter.name );
     $( "#buttonApply" + filterName ).live( "click", function ()
     {
-        applyFilter( filter );
+        selectAllCheckboxes();
+        $( document ).ajaxStop( function ()
+        {
+            applyFilter( filter );
+        } );
+        applyFilter( filter )
     } );
 }
 
@@ -86,9 +104,7 @@ function applyFilterButton( filter )
 function applyFilter( filter )
 {
     var uids = (filter.metaDataUids).split( ", " );
-    var uidsLength = uids.length;
-    var filterName = filter.name;
-    for ( var i = 0; i < uidsLength; i++ )
+    for ( var i = 0; i < uids.length; i++ )
     {
         for ( var j = 0; j < metaDataArray.length; j++ )
         {
@@ -104,38 +120,6 @@ function applyFilter( filter )
             moveSelectedValuesByCategory( metaDataArray[j] );
         }
     }
-    filterStatus( filterName, uids, uidsLength );
-}
-
-// Filter status after being applied
-function filterStatus( filterName, uids, uidsLength )
-{
-    var remainingUidsLength = uids.length;
-    if ( remainingUidsLength == 0 )
-    {
-        $( "#appliedFilterMessage" ).text( filterName + " applied !" ).css( {"color": "darkorange"} );
-        $( "#unappliedUids" ).text( "" );
-    } else if ( remainingUidsLength < uidsLength )
-    {
-        $( "#appliedFilterMessage" ).text( filterName + " partially applied !" ).css( {"color": "darkorange"} );
-        $( "#unappliedUids" ).text( "Remaining Filter Uids: " + uidsToString( uids ) );
-    } else if ( remainingUidsLength == uidsLength )
-    {
-        $( "#appliedFilterMessage" ).text( i18n_no_filter_applied ).css( {"color": "black"} );
-        $( "#unappliedUids" ).text( "" );
-    }
-}
-
-// Convert an Uid array to string
-function uidsToString( uids )
-{
-    var uidsString = "";
-    for ( var i = 0; i < uids.length; i++ )
-    {
-        uidsString += uids[i] + ", ";
-    }
-
-    return removeLastComma( uidsString );
 }
 
 // Edit an existing Filter

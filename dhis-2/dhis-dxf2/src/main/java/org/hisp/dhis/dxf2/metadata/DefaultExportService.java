@@ -238,24 +238,4 @@ public class DefaultExportService
         Filter filter = filterService.getFilterByUid( json.getString( "uid" ) );
         filterService.deleteFilter( filter );
     }
-
-    @Override
-    public String getDependencies( String uid ) throws IOException
-    {
-        MetaDataDependencies metaDataDependencies = new MetaDataDependencies();
-
-        List<String> uids = new ArrayList<String>();
-        uids.add( uid );
-        List<DataElement> dataElements = manager.getByUid( DataElement.class, uids );
-
-        List<String> dependencyUids = metaDataDependencies.getDependenciesUids( dataElements.get( 0 ) );
-
-        String result = "";
-        for ( String value : dependencyUids )
-        {
-            result += value + ", ";
-        }
-
-        return result;
-    }
 }

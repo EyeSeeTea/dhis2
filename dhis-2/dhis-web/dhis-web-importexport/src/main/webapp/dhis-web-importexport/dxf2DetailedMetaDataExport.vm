@@ -161,59 +161,47 @@
     var i18n_remove = '$i18n.getString( "remove" )';
     var i18n_apply = '$i18n.getString( "apply" )';
     var i18n_save = '$i18n.getString( "save" )';
-    var i18n_no_filter_applied = '$i18n.getString( "no_filter_applied" )';
 </script>
 
 <h3>$i18n.getString( "metadata_detailed_export" )</h3>
 
-<!-- FILTER DEFINITION -->
-<div id="mainDivFilter">
-    <!-- FILTER NOTIFICATIONS -->
-    <div>
-        <div style="width: 200px; background-color: ghostwhite; border: solid 1px lightskyblue; border-radius: 5px;">
-            <p id="appliedFilterMessage" style="font-size: 10pt; text-align: center;">$i18n.getString( "no_filter_applied" )</p>
-        </div>
-        <p id="unappliedUids" style="color: red;"></p>
-    </div>
+<div id="mainDivFilter" style="margin-bottom: 10px;">
+    <button id="filterButton" onclick="displayFilterTable();" style="width: 100px;">$i18n.getString( 'filter' )</button>
+    <table id="filterTable" class="mainPageTable" style="display: none;">
+        <tr>
+            <td style="vertical-align:top">
+                <table width="100%">
+                    <tr>
+                        <td colspan="9" style="text-align:right">
+                            <form id="formCreateFilter" method="POST" action="saveFilterExportForm.action">
+                                <input type="hidden" name="name" value=""/>
+                                <input type="hidden" name="id" value=""/>
+                                <input type="hidden" name="code" value=""/>
+                                <input type="hidden" name="metaDataUids" value=""/>
+                                <input type="button" value="$i18n.getString( 'sort' )" onclick="" style="width: 80px;"/>
+                                <input type="button" value="$i18n.getString( "create" )" onclick="submitCreateFilterForm();" style="width: 80px;"/>
+                                <input type="button" value="$i18n.getString( "create_temporary" )" onclick="" style="width: 120px;"/>
+                            </form>
+                        </td>
+                    </tr>
+                </table>
 
-    <div>
-        <p>Development: Compute dependencies for a DataElement</p>
-        <form id="formDependencies" style="float: left;">
-            <label for="uid">Uid:</label>
-            <input type="text" id="uid"/>
-        </form>
-        <button onclick="getDependencies();">Compute</button>
-    </div>
-
-    <!-- FILTER -->
-    <div style="margin-bottom: 10px;">
-        <!-- FILTER TABLE -->
-        <table id="filterTable" class="listTable">
-            <col/>
-            <col width="260"/>
-            <thead>
-            <tr>
-                <td>#filterDiv( "filter" )</td>
-                <td>
-                    <form id="formCreateFilter" method="POST" action="saveFilterExportForm.action" style="float: right;">
-                        <input type="hidden" name="name" value=""/>
-                        <input type="hidden" name="id" value=""/>
-                        <input type="hidden" name="code" value=""/>
-                        <input type="hidden" name="metaDataUids" value=""/>
-                        <input type="button" value="$i18n.getString( 'sort' )" onclick="" style="width: 80px;"/>
-                        <input type="button" value="$i18n.getString( "new_filter" )" onclick="submitCreateFilterForm();" style="width: 80px;"/>
-                    </form>
-                </td>
-            </tr>
-            <tr>
-                <th>$i18n.getString( "name" )</th>
-                <th>$i18n.getString( "operations" )</th>
-            </tr>
-            </thead>
-            <tbody id="filterTableBody">
-            </tbody>
-        </table>
-    </div>
+                <!-- FILTER TABLE -->
+                <table id="filterList" class="listTable">
+                    <col/>
+                    <col width="260"/>
+                    <thead>
+                    <tr>
+                        <th>$i18n.getString( "name" )</th>
+                        <th class="{sorter: false}">$i18n.getString( "operations" )</th>
+                    </tr>
+                    </thead>
+                    <tbody id="filterTableBody">
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </table>
 </div>
 
 <!-- EXPORT FORM -->

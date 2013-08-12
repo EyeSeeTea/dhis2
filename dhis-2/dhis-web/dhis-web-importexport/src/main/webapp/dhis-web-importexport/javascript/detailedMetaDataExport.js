@@ -133,9 +133,10 @@ function selectAllCheckboxes()
 {
     for ( var i = 0; i < metaDataArray.length; i++ )
     {
-        if ( !$( "#checkbox" + metaDataArray[i] ).is( ":checked" ) )
+        var checkBoxMetaDataCategory = $( "#checkbox" + metaDataArray[i] );
+        if ( !checkBoxMetaDataCategory.is( ":checked" ) )
         {
-            $( "#checkbox" + metaDataArray[i] ).prop( "checked", true );
+            checkBoxMetaDataCategory.prop( "checked", true );
             insertMetaDataDesign( metaDataArray[i] );
         }
     }
@@ -147,9 +148,10 @@ function deselectAllCheckboxes()
 {
     for ( var i = 0; i < metaDataArray.length; i++ )
     {
-        if ( $( "#checkbox" + metaDataArray[i] ).is( ":checked" ) )
+        var checkBoxMetaDataCategory = $( "#checkbox" + metaDataArray[i] );
+        if ( checkBoxMetaDataCategory.is( ":checked" ) )
         {
-            $( "#checkbox" + metaDataArray[i] ).prop( "checked", false );
+            checkBoxMetaDataCategory.prop( "checked", false );
             removeMetaDataDesign( metaDataArray[i] );
         }
     }
@@ -182,7 +184,6 @@ function deselectAllValues()
             $( this ).prop( "selected", false );
         } );
     }
-    $( "#appliedFilterMessage" ).text( i18n_no_filter_applied ).css( {"color": "black"} );
 }
 
 // Select all values by category
@@ -197,6 +198,11 @@ function deselectValuesByCategory( metaDataCategoryName )
 {
     $( "#labelSelectAll" + metaDataCategoryName ).css( {color: "black"} );
     $( "#deselect" + metaDataCategoryName ).click();
+
+    $( "#available" + metaDataCategoryName ).find( "option" ).each( function ()
+    {
+        $( this ).prop( "selected", false );
+    } );
 }
 
 // Insert MetaData HTML & CSS Checkbox
@@ -212,14 +218,15 @@ function insertMetaDataDesign( metaDataCategoryName )
     $( "#label" + metaDataCategoryName ).css( {"color": "lime"} );
     $( "#divSelectAll" + metaDataCategoryName ).show();
 
-    if ( $( "#mainDiv" + metaDataCategoryName ).is( ":empty" ) )
+    var metaDataCategory = $( "#mainDiv" + metaDataCategoryName );
+    if ( metaDataCategory.is( ":empty" ) )
     {
         var design = generateMetaDataDesign( metaDataCategoryName );
-        $( "#mainDiv" + metaDataCategoryName ).append( design );
+        metaDataCategory.append( design );
         loadMetaData( metaDataCategoryName );
     } else
     {
-        $( "#mainDiv" + metaDataCategoryName ).show();
+        metaDataCategory.show();
         deselectAllValues();
     }
 }
@@ -312,12 +319,6 @@ function loadMetaData( metaDataCategoryName )
                 option.attr( "value", item.id );
 
                 return option;
-            },
-            error: function ( request, status, error )
-            {
-                console.log( request.responseText );
-                console.log( arguments );
-                alert( "Fetching metadata process failed." );
             }
         } );
 }
@@ -332,26 +333,4 @@ function removeMetaDataDesign( metaDataCategoryName )
 
     $( "#divSelectAll" + metaDataCategoryName ).hide();
     $( "#mainDiv" + metaDataCategoryName ).hide();
-}
-
-// FOR DEVELOPMENT - TO BE DELETED
-function getDependencies()
-{
-    var data = $( "#uid" ).attr( "value" );
-    $.ajax(
-        {
-            type: "GET",
-            url: "../api/detailedMetaData/getDependencies",
-            data: {
-                uid : data
-            },
-            success: function ( response )
-            {
-                alert( response );
-            },
-            error: function ()
-            {
-                alert( "Ajax failed" );
-            }
-        } );
 }
