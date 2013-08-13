@@ -1,5 +1,3 @@
-package org.hisp.dhis.security;
-
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -26,46 +24,66 @@ package org.hisp.dhis.security;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.sms.phonepattern;
 
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import java.util.List;
 
-/**
- * This access provider will put an Authentication object with all GrantedAuthorities
- * in the SecurityContext in any case. This means that any user will be authenticated
- * and the login effectively bypassed.
+import org.hisp.dhis.common.BaseIdentifiableObject;
+
+ /**
+ * @author Nguyen Kim Lai
  *
- * @author Torgeir Lorange Ostby
- * @version $Id: GhostAutomaticAccessProvider.java 3160 2007-03-24 20:15:06Z torgeilo $
+ * @version PhoneNumberPattern.java 1:11:57 PM Aug 7, 2013 $
  */
-public class GhostAutomaticAccessProvider
-    extends AbstractAutomaticAccessProvider
-{
-    private Authentication authentication;
+public class PhoneNumberPattern extends BaseIdentifiableObject
+{   
+    private static final long serialVersionUID = -9068432098081093265L;
 
-    // -------------------------------------------------------------------------
-    // AdminAccessManager implementation
-    // -------------------------------------------------------------------------
+    private List<String> startWiths;
+    
+    private List<String> followBys;
+    
+    private Integer digitLeft;
+    
+    private String regex;
 
-    public void initialise()
+    public List<String> getStartWiths()
     {
-        String username = "ghost_admin";
-        String password = "";
-
-        UserDetails user = new User( username, password, true, true, true, true,
-            getGrantedAuthorities() );
-
-        authentication = new UsernamePasswordAuthenticationToken( user, user.getPassword(), user.getAuthorities() );
+        return startWiths;
     }
 
-    public void access()
+    public void setStartWiths( List<String> startWiths )
     {
-        if ( authentication != null && SecurityContextHolder.getContext().getAuthentication() == null )
-        {
-            SecurityContextHolder.getContext().setAuthentication( authentication );
-        }
+        this.startWiths = startWiths;
+    }
+
+    public List<String> getFollowBys()
+    {
+        return followBys;
+    }
+
+    public void setFollowBys( List<String> followBys )
+    {
+        this.followBys = followBys;
+    }
+
+    public Integer getDigitLeft()
+    {
+        return digitLeft;
+    }
+
+    public void setDigitLeft( Integer digitLeft )
+    {
+        this.digitLeft = digitLeft;
+    }
+
+    public String getRegex()
+    {
+        return regex;
+    }
+
+    public void setRegex( String regex )
+    {
+        this.regex = regex;
     }
 }

@@ -1,5 +1,3 @@
-package org.hisp.dhis.security;
-
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -26,46 +24,59 @@ package org.hisp.dhis.security;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.sms.phonepattern;
 
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import java.util.List;
 
 /**
- * This access provider will put an Authentication object with all GrantedAuthorities
- * in the SecurityContext in any case. This means that any user will be authenticated
- * and the login effectively bypassed.
- *
- * @author Torgeir Lorange Ostby
- * @version $Id: GhostAutomaticAccessProvider.java 3160 2007-03-24 20:15:06Z torgeilo $
+ * @author Nguyen Kim Lai
+ * 
+ * @version DefaultPhoneNumberPatternService.java 3:21:33 PM Aug 8, 2013 $
  */
-public class GhostAutomaticAccessProvider
-    extends AbstractAutomaticAccessProvider
+public class DefaultPhoneNumberPatternService
+    implements PhoneNumberPatternService
 {
-    private Authentication authentication;
-
     // -------------------------------------------------------------------------
-    // AdminAccessManager implementation
+    // Dependencies
     // -------------------------------------------------------------------------
-
-    public void initialise()
+    private PhoneNumberPatternStore phoneNumberPatternStore;
+    
+    public void setPhoneNumberPatternStore( PhoneNumberPatternStore phoneNumberPatternStore )
     {
-        String username = "ghost_admin";
-        String password = "";
+        this.phoneNumberPatternStore = phoneNumberPatternStore;
+    }
+    
+    // -------------------------------------------------------------------------
+    // Implementation
+    // -------------------------------------------------------------------------
 
-        UserDetails user = new User( username, password, true, true, true, true,
-            getGrantedAuthorities() );
-
-        authentication = new UsernamePasswordAuthenticationToken( user, user.getPassword(), user.getAuthorities() );
+    @Override
+    public void deleteById( Integer id )
+    {
+        phoneNumberPatternStore.deleteById( id );
     }
 
-    public void access()
+    @Override
+    public List<PhoneNumberPattern> getAllPhonePattern()
     {
-        if ( authentication != null && SecurityContextHolder.getContext().getAuthentication() == null )
-        {
-            SecurityContextHolder.getContext().setAuthentication( authentication );
-        }
+        return phoneNumberPatternStore.getAll();
+    }
+
+    @Override
+    public PhoneNumberPattern getPhonePatternById( int id )
+    {
+        return phoneNumberPatternStore.get( id );
+    }
+
+    @Override
+    public int savePhonePattern( PhoneNumberPattern phoneNumberPattern )
+    {
+        return phoneNumberPatternStore.save( phoneNumberPattern );
+    }
+
+    @Override
+    public void updatePhonePattern( PhoneNumberPattern phoneNumberPattern )
+    {
+        phoneNumberPatternStore.update( phoneNumberPattern );
     }
 }

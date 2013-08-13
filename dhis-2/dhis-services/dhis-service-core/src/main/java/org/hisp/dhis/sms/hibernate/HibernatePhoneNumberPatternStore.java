@@ -1,5 +1,3 @@
-package org.hisp.dhis.security;
-
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -26,46 +24,43 @@ package org.hisp.dhis.security;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.sms.hibernate;
 
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.sms.phonepattern.PhoneNumberPattern;
+import org.hisp.dhis.sms.phonepattern.PhoneNumberPatternStore;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * This access provider will put an Authentication object with all GrantedAuthorities
- * in the SecurityContext in any case. This means that any user will be authenticated
- * and the login effectively bypassed.
- *
- * @author Torgeir Lorange Ostby
- * @version $Id: GhostAutomaticAccessProvider.java 3160 2007-03-24 20:15:06Z torgeilo $
+ * @author Nguyen Kim Lai
+ * 
+ * @version HibernatePhoneNumberPatternStore.java 3:21:45 PM Aug 8, 2013 $
  */
-public class GhostAutomaticAccessProvider
-    extends AbstractAutomaticAccessProvider
+
+@Transactional
+public class HibernatePhoneNumberPatternStore
+    extends HibernateGenericStore<PhoneNumberPattern>
+    implements PhoneNumberPatternStore
 {
-    private Authentication authentication;
-
     // -------------------------------------------------------------------------
-    // AdminAccessManager implementation
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    public void initialise()
+    private JdbcTemplate jdbcTemplate;
+
+    public void setJdbcTemplate( JdbcTemplate jdbcTemplate )
     {
-        String username = "ghost_admin";
-        String password = "";
-
-        UserDetails user = new User( username, password, true, true, true, true,
-            getGrantedAuthorities() );
-
-        authentication = new UsernamePasswordAuthenticationToken( user, user.getPassword(), user.getAuthorities() );
+        this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void access()
+    // -------------------------------------------------------------------------
+    // Implementation
+    // -------------------------------------------------------------------------
+
+    @Override
+    public void deleteById( Integer id )
     {
-        if ( authentication != null && SecurityContextHolder.getContext().getAuthentication() == null )
-        {
-            SecurityContextHolder.getContext().setAuthentication( authentication );
-        }
+        delete( get( id ) );
     }
 }
