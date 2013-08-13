@@ -191,7 +191,7 @@ public class DataSet
      * Property indicating whether it should enable the Data Elements decorations
      * , which are description tooltip and url link anchor.
      */
-    private Boolean enableDataElementDecoration;
+    private Boolean dataElementDecoration;
 
     /**
      * Render default and section forms with tabs instead of multiple sections in one page
@@ -721,14 +721,14 @@ public class DataSet
    @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Boolean isEnableDataElementDecoration()
+    public Boolean isDataElementDecoration()
     {
-        return enableDataElementDecoration;
+        return dataElementDecoration;
     }
 
-    public void setEnableDataElementDecoration( Boolean enableDataElementDecoration )
+    public void setDataElementDecoration( Boolean dataElementDecoration )
     {
-        this.enableDataElementDecoration = enableDataElementDecoration;
+        this.dataElementDecoration = dataElementDecoration;
     }
     
 	
@@ -755,7 +755,7 @@ public class DataSet
             renderAsTabs = dataSet.isRenderAsTabs();
             renderHorizontally = dataSet.isRenderHorizontally();
 
-            enableDataElementDecoration = dataSet.isEnableDataElementDecoration();
+            dataElementDecoration = dataSet.isDataElementDecoration();
  
             removeAllDataElements();
 

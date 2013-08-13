@@ -1,7 +1,7 @@
 
 #set( $tabIndex = 1 )
 #set( $hasAccess = $auth.hasAccess( "dhis-web-dataentry", "saveValue" ) )
-#set( $enableDataElementDecoration = $dataSet.enableDataElementDecoration )
+#set( $enableDataElementDecoration = $dataSet.dataElementDecoration )
 
 #if( $dataSet.renderAsTabs )
     <div id="tabs">

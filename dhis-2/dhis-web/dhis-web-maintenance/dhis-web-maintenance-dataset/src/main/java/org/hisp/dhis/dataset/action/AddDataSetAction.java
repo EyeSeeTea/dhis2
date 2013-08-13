@@ -184,11 +184,11 @@ public class AddDataSetAction
         this.skipOffline = skipOffline;
     }
 
-    private boolean enableDataElementDecoration;
+    private boolean dataElementDecoration;
 
-    public void setEnableDataElementDecoration( boolean enableDataElementDecoration )
+    public void setDataElementDecoration( boolean dataElementDecoration )
     {
-        this.enableDataElementDecoration = enableDataElementDecoration;
+        this.dataElementDecoration = dataElementDecoration;
     }
 
     private boolean renderAsTabs;
@@ -263,7 +263,7 @@ public class AddDataSetAction
         dataSet.setValidCompleteOnly( validCompleteOnly );
         dataSet.setNotifyCompletingUser( notifyCompletingUser );
         dataSet.setSkipOffline( skipOffline );
-        dataSet.setEnableDataElementDecoration( enableDataElementDecoration );		
+        dataSet.setDataElementDecoration( dataElementDecoration );		
         dataSet.setRenderAsTabs( renderAsTabs );
         dataSet.setRenderHorizontally( renderHorizontally );
 

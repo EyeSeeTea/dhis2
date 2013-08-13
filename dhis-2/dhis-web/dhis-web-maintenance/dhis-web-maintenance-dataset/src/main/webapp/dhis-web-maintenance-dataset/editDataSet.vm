@@ -164,11 +164,11 @@
         </td>
       </tr>
       <tr>
-        <td><label for="enableDataElementDecoration">$i18n.getString( "enable_dataelementdecoration" )</label></td>
+        <td><label for="dataElementDecoration">$i18n.getString( "dataelementdecoration" )</label></td>
         <td>
-          <select id="enableDataElementDecoration" name="enableDataElementDecoration">
+          <select id="dataElementDecoration" name="dataElementDecoration">
             <option value="false">$i18n.getString( "no" )</option>
-            <option value="true"#if( $dataSet.enableDataElementDecoration == true ) selected="selected"#end>$i18n.getString( "yes" )</option>
+            <option value="true"#if( $dataSet.isDataElementDecoration == true ) selected="selected"#end>$i18n.getString( "yes" )</option>
           </select>
         </td>
       </tr>      

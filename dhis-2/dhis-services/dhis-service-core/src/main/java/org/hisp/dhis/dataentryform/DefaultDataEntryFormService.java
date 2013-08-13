@@ -340,7 +340,7 @@ public class DefaultDataEntryFormService
                 inputHtml += "<span id=\"" + dataElement.getUid() + "-dataelement\" style=\"display:none\""; 
 
                 // Conditional DataElement Decoration Add
-                if(dataSet.isEnableDataElementDecoration() && dataElement.getDescription() != null
+                if(dataSet.isDataElementDecoration() && dataElement.getDescription() != null
                     && dataElement.getDescription().length() > 0) 
                 {
                     inputHtml += " title=\"" + dataElement.getDescription() + "\"";
@@ -348,7 +348,7 @@ public class DefaultDataEntryFormService
                 
                 inputHtml += ">";
                 
-                if(dataSet.isEnableDataElementDecoration() && dataElement.getUrl() != null
+                if(dataSet.isDataElementDecoration() && dataElement.getUrl() != null
                     && dataElement.getUrl().length() > 0) 
                 {
                     inputHtml += "<a href=\"" + dataElement.getUrl() + "\" target=\"_blank\">";
@@ -357,7 +357,7 @@ public class DefaultDataEntryFormService
                 // The Data Element Name
                 inputHtml += dataElement.getFormNameFallback();
 
-                if(dataSet.isEnableDataElementDecoration() && dataElement.getUrl() != null 
+                if(dataSet.isDataElementDecoration() && dataElement.getUrl() != null 
                     && dataElement.getUrl().length() > 0) 
                 {
                     inputHtml += "</a>";

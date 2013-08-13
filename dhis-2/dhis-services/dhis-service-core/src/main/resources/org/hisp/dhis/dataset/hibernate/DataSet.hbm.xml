@@ -90,7 +90,7 @@
 
     <property name="skipOffline" />
 
-    <property name="enableDataElementDecoration" />
+    <property name="dataElementDecoration" />
     
     <property name="renderAsTabs" />
 
