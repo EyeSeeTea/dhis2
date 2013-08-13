@@ -1,5 +1,10 @@
 Ext.onReady(function() {
 
+    // load trend line lib
+    Ext.Loader.setConfig({enabled: true});
+    Ext.Loader.setPath('trendline', '../../dhis-web-commons/javascripts');
+    Ext.require('trendline.simpleRegression');
+
 	// chart tips css
 	var css = '.dv-chart-tips { \n border-radius: 2px; \n padding: 0px 3px 1px; \n border: 2px solid #777; \n background-color: #f1f1f1; \n } \n';
 	css += '.dv-chart-tips .x-tip-body { \n background-color: #f1f1f1; \n font-size: 13px; \n font-weight: normal; \n color: #444; \n -webkit-text-stroke: 0; \n } \n';
@@ -28,11 +33,6 @@ Ext.onReady(function() {
 
 			if (!Ext.isString(config.el)) {
 				console.log('No element id provided');
-				return;
-			}
-
-			if (!Ext.isString(config.uid)) {
-				console.log('No chart uid provided');
 				return;
 			}
 
@@ -93,7 +93,7 @@ Ext.onReady(function() {
 							return;
 						}
 
-						dv.engine.loadChart(layout, dv);
+						dv.engine.createChart(layout, dv);
 					}
 				}
 			});

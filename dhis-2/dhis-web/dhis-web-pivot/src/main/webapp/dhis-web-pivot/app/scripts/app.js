@@ -52,28 +52,6 @@ Ext.onReady( function() {
 				}
 			};
 
-			util.mask = {
-				showMask: function(cmp, msg) {
-					msg = msg || 'Loading..';
-
-					if (cmp.mask) {
-						cmp.mask.destroy();
-					}
-					cmp.mask = new Ext.create('Ext.LoadMask', cmp, {
-						shadow: false,
-						msg: msg,
-						style: 'box-shadow:0',
-						bodyStyle: 'box-shadow:0'
-					});
-					cmp.mask.show();
-				},
-				hideMask: function(cmp) {
-					if (cmp.mask) {
-						cmp.mask.hide();
-					}
-				}
-			};
-
 			util.checkbox = {
 				setAllFalse: function() {
 					var a = cmp.dimension.relativePeriod.checkbox;

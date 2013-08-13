@@ -6,7 +6,11 @@ Ext.onReady( function() {
 	// namespace
 	if (!('DV' in window)) {
 		DV = {
-			i18n: {}
+			i18n: {
+                trend: 'Trend',
+                target: 'Target',
+                base: 'Base'
+            }
 		};
 	}
 
