@@ -1225,6 +1225,17 @@ Ext.onReady( function() {
 								
 								return false;
 							}(),
+							isGroup = function() {
+								if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
+									for (var i = 0; i < xOuDimension.ids.length; i++) {
+										if (xOuDimension.ids[i].substr(0,8) === 'OU_GROUP') {
+											return true;
+										}
+									}
+								}
+								
+								return false;
+							}(),
 							co = dimConf.category.objectName,
 							ou = dimConf.organisationUnit.objectName,
 							layout;
@@ -1245,7 +1256,7 @@ Ext.onReady( function() {
 										dim.items = dim.items.concat(pt.init.user.ouc);
 									}
 								}
-								else if (isLevel) {
+								else if (isLevel || isGroup) {
 									
 									// Items: get ids from metadata -> items
 									for (var j = 0, ids = Ext.clone(response.metaData[dim.dimensionName]); j < ids.length; j++) {
