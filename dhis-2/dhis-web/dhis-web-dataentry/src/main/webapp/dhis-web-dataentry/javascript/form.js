@@ -60,8 +60,11 @@ var COLOR_GREEN = '#b9ffb9';
 var COLOR_YELLOW = '#fffe8c';
 var COLOR_RED = '#ff8a8a';
 var COLOR_ORANGE = '#ff6600';
-var COLOR_WHITE = '#ffffff';
-var COLOR_GREY = '#cccccc';
+var COLOR_WHITE = '#fff';
+var COLOR_GREY = '#ccc';
+
+var COLOR_BORDER_ACTIVE = '#73ad72';
+var COLOR_BORDER = '#aaa';
 
 var DEFAULT_TYPE = 'int';
 var DEFAULT_NAME = '[unknown]';
@@ -414,7 +417,7 @@ function addEventListeners()
         $( this ).css( 'margin-right', '2px' );
     } );
 
-    $( 'entrytrueonly' ).each( function( i )
+    $( '.entrytrueonly' ).each( function( i )
     {
         var id = $( this ).attr( 'id' );
         var split = splitFieldId( id );
@@ -433,7 +436,7 @@ function addEventListeners()
             saveTrueOnly( dataElementId, optionComboId, id );
         } );
 
-        $( this ).css( 'width', '90%' );
+        $( this ).css( 'width', '60%' );
     } );
 
     $( '.entryoptionset' ).each( function( i )
@@ -967,7 +970,7 @@ function dataSetSelected()
             showLoader();
             $( '#selectedPeriodId' ).val( periodId );
 
-            var isMultiOrganisationUnitForm = !!$('#selectedDataSetId :selected').data('multiorg');
+            var isMultiOrganisationUnitForm = !!$( '#selectedDataSetId :selected' ).data( 'multiorg' );
             loadForm( dataSetId, isMultiOrganisationUnitForm );
         }
         else
@@ -1035,11 +1038,11 @@ function insertDataValues()
 
     $( '.entryfield' ).val( '' );
     $( '.entryselect' ).val( '' );
-    $( '.entrytrueonly' ).removeAttr('checked');
+    $( '.entrytrueonly' ).removeAttr( 'checked' );
     $( '.entryoptionset' ).val( '' );
 
-    $( '.entryfield' ).css( 'background-color', COLOR_WHITE );
-    $( '.entryselect' ).css( 'background-color', COLOR_WHITE );
+    $( '.entryfield' ).css( 'background-color', COLOR_WHITE ).css( 'border-color', COLOR_BORDER );
+    $( '.entryselect' ).css( 'background-color', COLOR_WHITE ).css( 'border-color', COLOR_BORDER );
     $( '.entrytrueonly' ).css( 'background-color', COLOR_WHITE );
     $( '.entryoptionset' ).css( 'background-color', COLOR_WHITE );
 
@@ -1048,8 +1051,6 @@ function insertDataValues()
 
     $( '.entryfield' ).filter( ':disabled' ).css( 'background-color', COLOR_GREY );
     
-    // Disable and grey dynamic fields to start with and enable later
-
     $.ajax( {
     	url: 'getDataValues.action',
     	data:
@@ -1070,17 +1071,17 @@ function insertDataValues()
 	    {
 	    	if ( json.locked )
 	    	{
-	            $('#contentDiv input').attr('disabled', 'disabled');
-	            $('.entryoptionset').autocomplete('disable');
-                $('.sectionFilter').removeAttr('disabled');
+	            $( '#contentDiv input').attr( 'disabled', 'disabled' );
+	            $( '.entryoptionset').autocomplete( 'disable' );
+                $( '.sectionFilter').removeAttr( 'disabled' );
                 $( '#completenessDiv' ).hide();
 	    		setHeaderDelayMessage( i18n_dataset_is_locked );
 	    	}
 	    	else
 	    	{
-                $('.entryoptionset').autocomplete('enable');
-                $('#contentDiv input').removeAttr('disabled');
-                $('#contentDiv input').css('backgroundColor', '#fff');
+                $( '.entryoptionset' ).autocomplete( 'enable' );
+                $( '#contentDiv input' ).removeAttr( 'disabled' );
+                $( '#contentDiv input' ).css( 'backgroundColor', '#fff' );
 	    		$( '#completenessDiv' ).show();
 	    	}
 	    	
@@ -1089,22 +1090,39 @@ function insertDataValues()
 	        $.safeEach( json.dataValues, function( i, value )
 	        {
 	            var fieldId = '#' + value.id + '-val';
+	            var commentId = '#' + value.id + '-comment';
 
-	            if ( $( fieldId ).length > 0 )
+	            if ( $( fieldId ).length > 0 ) // Set values
 	            {
-                    if ( $( fieldId ).attr( 'name' ) == 'entrytrueonly' ) {
-                        $( fieldId ).attr('checked', true);
-                    } else {
+                    if ( $( fieldId ).attr( 'name' ) == 'entrytrueonly' && 'true' == value.val ) 
+                    {
+                        $( fieldId ).attr( 'checked', true );
+                    } 
+                    else 
+                    {
                         $( fieldId ).val( value.val );
                     }
                 }
+	            
+	            if ( 'true' == value.com ) // Set active comments
+	            {
+	                if ( $( commentId ).length > 0 )
+	                {
+	                    $( commentId ).attr( 'src', '../images/comment_active.png' );
+	                }
+	                else if ( $( fieldId ).length > 0 )
+	                {
+	                    $( fieldId ).css( 'border-color', COLOR_BORDER_ACTIVE )
+	                }	            		
+	            }
 	            
 	            dataValueMap[value.id] = value.val;
 	        } );
 
 	        // Set min-max values and colorize violation fields
 
-            if(!json.locked) {
+            if( !json.locked ) 
+            {
                 $.safeEach( json.minMaxDataElements, function( i, value )
                 {
                     var minId = value.id + '-min';
@@ -1153,9 +1171,10 @@ function insertDataValues()
 	            $( '#infoDiv' ).hide();
 	        }
 
-            if(json.locked) {
-                $('#contentDiv input').css('backgroundColor', '#eee');
-                $('.sectionFilter').css('backgroundColor', '#fff');
+            if ( json.locked ) 
+            {
+                $( '#contentDiv input' ).css( 'backgroundColor', '#eee' );
+                $( '.sectionFilter' ).css( 'backgroundColor', '#fff' );
             }
         }
 	} );
@@ -1167,19 +1186,6 @@ function displayEntryFormCompleted()
 
     $( '#validationButton' ).removeAttr( 'disabled' );
     $( '#validateButton' ).removeAttr( 'disabled' );
-
-    /*
-    if ( !multiOrganisationUnit )
-    {
-        $( '#validationButton' ).removeAttr( 'disabled' );
-        $( '#validateButton' ).removeAttr( 'disabled' );
-    }
-    else
-    {
-        $( '#validationButton' ).attr( 'disabled', true );
-        $( '#validateButton' ).attr( 'disabled', true );
-    }
-    */
 
     dataEntryFormIsLoaded = true;
     hideLoader();
@@ -1325,8 +1331,8 @@ function undoCompleteDataSet()
 {
     var confirmed = confirm( i18n_confirm_undo );
     var params = storageManager.getCurrentCompleteDataSetParams();
-    params['organisationUnitId'] = selection.getSelected();
-    params['multiOrganisationUnit'] = multiOrganisationUnit;
+    params[ 'organisationUnitId' ] = selection.getSelected();
+    params[ 'multiOrganisationUnit' ] = multiOrganisationUnit;
 
     if ( confirmed )
     {
@@ -1374,7 +1380,8 @@ function displayUserDetails()
 	{
 		var url = '../dhis-web-commons-ajax-json/getUser.action';
 
-		$.getJSON( url, { username:currentCompletedByUser }, function( json ) {
+		$.getJSON( url, { username:currentCompletedByUser }, function( json ) 
+		{
 			$( '#userFullName' ).html( json.user.firstName + ' ' + json.user.surname );
 			$( '#userUsername' ).html( json.user.username );
 			$( '#userEmail' ).html( json.user.email );
@@ -2134,14 +2141,15 @@ function StorageManager()
 // Option set
 // -----------------------------------------------------------------------------
 
-function searchOptionSet( uid, query, success ) {
-    if(window.DAO !== undefined && window.DAO.store !== undefined ) {
+function searchOptionSet( uid, query, success ) 
+{
+    if ( window.DAO !== undefined && window.DAO.store !== undefined ) {
         DAO.store.get( 'optionSets', uid ).done( function ( obj ) {
-            if(obj) {
+            if ( obj ) {
                 var options = [];
 
-                if(query == null || query == "") {
-                    options = obj.optionSet.options.slice(0, MAX_DROPDOWN_DISPLAYED-1);
+                if ( query == null || query == '' ) {
+                    options = obj.optionSet.options.slice( 0, MAX_DROPDOWN_DISPLAYED - 1 );
                 } else {
                     query = query.toLowerCase();
 
@@ -2198,9 +2206,9 @@ function loadOptionSets() {
     var promise = deferred.promise();
 
     _.each( options, function ( item, idx ) {
-        if(uids.indexOf(item.uid) == -1) {
-            DAO.store.get('optionSets', item.uid).done(function(obj) {
-                if(!obj || obj.optionSet.version !== item.v) {
+        if( uids.indexOf( item.uid ) == -1 ) {
+            DAO.store.get('optionSets', item.uid).done( function( obj ) {
+                if( !obj || obj.optionSet.version !== item.v ) {
                     promise = promise.then( function () {
                         return $.ajax( {
                             url: '../api/optionSets/' + item.uid + '.json?links=false',
@@ -2246,13 +2254,13 @@ function insertOptionSets() {
 }
 
 function autocompleteOptionSetField( idField, optionSetUid ) {
-    var input = jQuery( "#" + idField );
+    var input = jQuery( '#' + idField );
 
     if ( !input ) {
         return;
     }
 
-    input.css( "width", "85%" );
+    input.css( 'width', '85%' );
     input.autocomplete( {
         delay: 0,
         minLength: 0,
@@ -2261,40 +2269,40 @@ function autocompleteOptionSetField( idField, optionSetUid ) {
         },
         select: function ( event, ui ) {
             input.val( ui.item.value );
-            input.autocomplete( "close" );
+            input.autocomplete( 'close' );
             input.change();
         }
-    } ).addClass( "ui-widget" );
+    } ).addClass( 'ui-widget' );
 
-    input.data( "autocomplete" )._renderItem = function ( ul, item ) {
-        return $( "<li></li>" )
-            .data( "item.autocomplete", item )
-            .append( "<a>" + item.label + "</a>" )
+    input.data( 'autocomplete' )._renderItem = function ( ul, item ) {
+        return $( '<li></li>' )
+            .data( 'item.autocomplete', item )
+            .append( '<a>' + item.label + '</a>' )
             .appendTo( ul );
     };
 
-    var wrapper = this.wrapper = $( "<span style='width:200px'>" )
-        .addClass( "ui-combobox" )
+    var wrapper = this.wrapper = $( '<span style="width:200px">' )
+        .addClass( 'ui-combobox' )
         .insertAfter( input );
 
-    var button = $( "<a style='width:20px; margin-bottom:-5px;height:20px;'>" )
-        .attr( "tabIndex", -1 )
-        .attr( "title", i18n_show_all_items )
+    var button = $( '<a style="width:20px; margin-bottom:-5px;height:20px;">' )
+        .attr( 'tabIndex', -1 )
+        .attr( 'title', i18n_show_all_items )
         .appendTo( wrapper )
         .button( {
             icons: {
-                primary: "ui-icon-triangle-1-s"
+                primary: 'ui-icon-triangle-1-s'
             },
             text: false
         } )
         .addClass( 'small-button' )
         .click( function () {
-            if ( input.autocomplete( "widget" ).is( ":visible" ) ) {
-                input.autocomplete( "close" );
+            if ( input.autocomplete( 'widget' ).is( ':visible' ) ) {
+                input.autocomplete( 'close' );
                 return;
             }
             $( this ).blur();
-            input.autocomplete( "search", "" );
+            input.autocomplete( 'search', '' );
             input.focus();
         } );
 }

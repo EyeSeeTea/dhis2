@@ -33,11 +33,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.hisp.dhis.message.Message;
-import org.hisp.dhis.message.MessageConversation;
-import org.hisp.dhis.message.MessageConversationStore;
-import org.hisp.dhis.message.MessageSender;
-import org.hisp.dhis.message.UserMessage;
+import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.sms.incoming.IncomingSms;
 import org.hisp.dhis.sms.incoming.IncomingSmsListener;
 import org.hisp.dhis.sms.parse.ParserType;
@@ -47,19 +43,19 @@ import org.hisp.dhis.smscommand.SMSCommandService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserService;
+import org.springframework.transaction.annotation.Transactional;
 
 public class DHISMessageAlertListener
     implements IncomingSmsListener
 {
-    private MessageSender smsMessageSender;
-
-    private MessageSender emailMessageSender;
-
-    private MessageConversationStore messageConversationStore;
 
     private SMSCommandService smsCommandService;
 
     private UserService userService;
+
+    private MessageService messageService;
+
+    private SmsMessageSender smsMessageSender;
 
     public SMSCommandService getSmsCommandService()
     {
@@ -71,6 +67,7 @@ public class DHISMessageAlertListener
         this.smsCommandService = smsCommandService;
     }
 
+    @Transactional
     @Override
     public boolean accept( IncomingSms sms )
     {
@@ -89,6 +86,7 @@ public class DHISMessageAlertListener
         return smsCommandService.getSMSCommand( commandString, ParserType.ALERT_PARSER ) != null;
     }
 
+    @Transactional
     @Override
     public void receive( IncomingSms sms )
     {
@@ -133,28 +131,8 @@ public class DHISMessageAlertListener
                 Set<User> receivers = new HashSet<User>( userGroup.getMembers() );
 
                 // forward to user group by SMS
-                smsMessageSender.sendMessage( smsCommand.getName(), message, sender, receivers, true );
+                messageService.sendMessage( smsCommand.getName(), message, null, receivers, sender, false, false );
 
-                // forward to user group by E-mail
-                emailMessageSender.sendMessage( smsCommand.getName(), message, sender, receivers, false );
-
-                // forward to user group by dhis message
-                if ( sender != null )
-                {
-                    receivers.add( sender );
-                }
-
-                MessageConversation conversation = new MessageConversation( smsCommand.getName(), sender );
-
-                conversation.addMessage( new Message( message, null, sender ) );
-
-                for ( User receiver : receivers )
-                {
-                    boolean read = receiver != null && receiver.equals( sender );
-
-                    conversation.addUserMessage( new UserMessage( receiver, read ) );
-                }
-                messageConversationStore.save( conversation );
                 // confirm SMS was received and forwarded completely
                 Set<User> feedbackList = new HashSet<User>();
                 feedbackList.add( sender );
@@ -170,36 +148,6 @@ public class DHISMessageAlertListener
         }
     }
 
-    public MessageSender getSmsMessageSender()
-    {
-        return smsMessageSender;
-    }
-
-    public void setSmsMessageSender( MessageSender smsMessageSender )
-    {
-        this.smsMessageSender = smsMessageSender;
-    }
-
-    public MessageSender getEmailMessageSender()
-    {
-        return emailMessageSender;
-    }
-
-    public void setEmailMessageSender( MessageSender emailMessageSender )
-    {
-        this.emailMessageSender = emailMessageSender;
-    }
-
-    public MessageConversationStore getMessageConversationStore()
-    {
-        return messageConversationStore;
-    }
-
-    public void setMessageConversationStore( MessageConversationStore messageConversationStore )
-    {
-        this.messageConversationStore = messageConversationStore;
-    }
-
     public UserService getUserService()
     {
         return userService;
@@ -208,5 +156,25 @@ public class DHISMessageAlertListener
     public void setUserService( UserService userService )
     {
         this.userService = userService;
+    }
+
+    public MessageService getMessageService()
+    {
+        return messageService;
+    }
+
+    public void setMessageService( MessageService messageService )
+    {
+        this.messageService = messageService;
+    }
+
+    public SmsMessageSender getSmsMessageSender()
+    {
+        return smsMessageSender;
+    }
+
+    public void setSmsMessageSender( SmsMessageSender smsMessageSender )
+    {
+        this.smsMessageSender = smsMessageSender;
     }
 }

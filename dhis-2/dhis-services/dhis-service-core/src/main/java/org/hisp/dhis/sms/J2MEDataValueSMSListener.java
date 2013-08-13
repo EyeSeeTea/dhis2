@@ -56,7 +56,6 @@ import org.hisp.dhis.period.WeeklyPeriodType;
 import org.hisp.dhis.period.YearlyPeriodType;
 import org.hisp.dhis.sms.incoming.IncomingSms;
 import org.hisp.dhis.sms.incoming.IncomingSmsListener;
-import org.hisp.dhis.sms.outbound.OutboundSmsService;
 import org.hisp.dhis.sms.parse.ParserType;
 import org.hisp.dhis.sms.parse.SMSParserException;
 import org.hisp.dhis.smscommand.SMSCode;
@@ -65,6 +64,7 @@ import org.hisp.dhis.smscommand.SMSCommandService;
 import org.hisp.dhis.system.util.ValidationUtils;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
+import org.springframework.transaction.annotation.Transactional;
 
 public class J2MEDataValueSMSListener
     implements IncomingSmsListener
@@ -79,8 +79,9 @@ public class J2MEDataValueSMSListener
 
     private CompleteDataSetRegistrationService registrationService;
 
-    private OutboundSmsService outboundSmsService;
-
+    private SmsSender smsSender;
+    
+    @Transactional
     @Override
     public boolean accept( IncomingSms sms )
     {
@@ -98,7 +99,8 @@ public class J2MEDataValueSMSListener
 
         return smsCommandService.getSMSCommand( commandString, ParserType.J2ME_PARSER ) != null;
     }
-
+    
+    @Transactional
     @Override
     public void receive( IncomingSms sms )
     {
@@ -158,7 +160,6 @@ public class J2MEDataValueSMSListener
 
     private Map<String, String> parse( String sms, SMSCommand smsCommand )
     {
-
         String[] keyValuePairs = null;
 
         if ( sms.indexOf( "#" ) > -1 )
@@ -278,6 +279,7 @@ public class J2MEDataValueSMSListener
             }
             throw new SMSParserException( messageListingOrgUnits );
         }
+        
         return orgUnit;
     }
 
@@ -386,13 +388,12 @@ public class J2MEDataValueSMSListener
             reportBack += notInReport;
         }
 
-        outboundSmsService.sendMessage( reportBack, sender );
+        smsSender.sendMessage( reportBack, sender );
     }
 
     public Period getPeriod( String periodName, PeriodType periodType )
         throws IllegalArgumentException
     {
-
         if ( periodType instanceof DailyPeriodType )
         {
             String pattern = "yyyy-MM-dd";
@@ -533,16 +534,6 @@ public class J2MEDataValueSMSListener
         this.registrationService = registrationService;
     }
 
-    public OutboundSmsService getOutboundSmsService()
-    {
-        return outboundSmsService;
-    }
-
-    public void setOutboundSmsService( OutboundSmsService outboundSmsService )
-    {
-        this.outboundSmsService = outboundSmsService;
-    }
-
     public DataElementCategoryService getDataElementCategoryService()
     {
         return dataElementCategoryService;
@@ -551,5 +542,15 @@ public class J2MEDataValueSMSListener
     public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
     {
         this.dataElementCategoryService = dataElementCategoryService;
+    }
+
+    public SmsSender getSmsSender()
+    {
+        return smsSender;
+    }
+
+    public void setSmsSender( SmsSender smsSender )
+    {
+        this.smsSender = smsSender;
     }
 }

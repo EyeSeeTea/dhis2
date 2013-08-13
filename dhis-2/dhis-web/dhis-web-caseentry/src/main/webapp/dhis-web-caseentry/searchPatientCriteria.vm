@@ -77,6 +77,10 @@
 					$i18n.getString('search_in_all_facilities') 
 					<input type='checkbox' id='searchInAllFacility' name='searchInAllFacility' />&nbsp;&nbsp;&nbsp;
 				</td>
+				<td>
+					$i18n.getString('search_by_user_orgunits') 
+					<input type='checkbox' id='searchByUserOrgunits' name='searchByUserOrgunits' />&nbsp;&nbsp;&nbsp;
+				</td>
 			</tr>
 		#else
 			<input type='checkbox' class='hidden' id='searchInAllFacility' name='searchInAllFacility' />

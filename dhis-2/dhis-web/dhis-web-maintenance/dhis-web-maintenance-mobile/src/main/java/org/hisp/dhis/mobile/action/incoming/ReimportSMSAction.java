@@ -1,8 +1,13 @@
 package org.hisp.dhis.mobile.action.incoming;
 
+import java.util.List;
+
 import org.hisp.dhis.sms.incoming.IncomingSms;
+import org.hisp.dhis.sms.incoming.IncomingSmsListener;
 import org.hisp.dhis.sms.incoming.IncomingSmsService;
-import org.hisp.dhis.sms.parse.ParserManager;
+import org.hisp.dhis.sms.incoming.SmsMessageStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.opensymphony.xwork2.Action;
 
 public class ReimportSMSAction
@@ -12,9 +17,9 @@ public class ReimportSMSAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ParserManager parserManager;
-
     private IncomingSmsService incomingSmsService;
+
+    private List<IncomingSmsListener> listeners;
 
     // -------------------------------------------------------------------------
     // Input & Output
@@ -24,14 +29,10 @@ public class ReimportSMSAction
 
     private IncomingSms incomingSMS;
 
-    public ParserManager getParserManager()
+    @Autowired
+    public void setListeners( List<IncomingSmsListener> listeners )
     {
-        return parserManager;
-    }
-
-    public void setParserManager( ParserManager parserManager )
-    {
-        this.parserManager = parserManager;
+        this.listeners = listeners;
     }
 
     public IncomingSmsService getIncomingSmsService()
@@ -63,9 +64,9 @@ public class ReimportSMSAction
     {
         this.incomingSMS = incomingSMS;
     }
-    
+
     private String message;
-    
+
     public String getMessage()
     {
         return message;
@@ -90,11 +91,21 @@ public class ReimportSMSAction
         {
             return "error";
         }
-        
+
         try
         {
-            parserManager.parse( incomingSMS );
-            message = "SMS imported";
+            for ( IncomingSmsListener listener : listeners )
+            {
+                if ( listener.accept( incomingSMS ) )
+                {
+                    listener.receive( incomingSMS );
+                    incomingSMS.setStatus( SmsMessageStatus.PROCESSED );
+                    incomingSmsService.update( incomingSMS );
+                    message = "SMS imported";
+                    return SUCCESS;
+                }
+            }
+            message = "No Command Found";
         }
         catch ( Exception e )
         {
