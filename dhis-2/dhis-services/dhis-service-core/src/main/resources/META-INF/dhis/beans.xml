@@ -782,7 +782,7 @@
   </bean>
 
 
- <bean id="org.hisp.dhis.i18n.locale.I18nLocaleStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
+ <bean id="org.hisp.dhis.i18n.I18nLocaleStore" class="org.hisp.dhis.i18n.hibernate.HibernateI18nLocaleStore">
     <property name="clazz" value="org.hisp.dhis.i18n.locale.I18nLocale" />
     <property name="sessionFactory" ref="sessionFactory" />
   </bean>
@@ -793,12 +793,13 @@
   <bean id="org.hisp.dhis.i18n.I18nService" class="org.hisp.dhis.i18n.DefaultI18nService">
     <property name="translationService" ref="org.hisp.dhis.translation.TranslationService" />
     <property name="userSettingService" ref="org.hisp.dhis.user.UserSettingService" />
-     <property name="i18nLocaleStore" ref="org.hisp.dhis.i18n.locale.I18nLocaleStore" />
+     <property name="i18nLocaleStore" ref="org.hisp.dhis.i18n.I18nLocaleStore" />
   	<property name="languages">
       <map>
 		<entry key="Abkhazian" value="ab"/>
 		<entry key="Afrikaans" value="af"/>
 		<entry key="Albanian" value="sq"/>
+		<entry key="Amharic" value="am"/>
 		<entry key="Arabic" value="ar"/>
 		<entry key="Aragonese" value="an"/>
 		<entry key="Armenian" value="hy"/>
@@ -807,6 +808,7 @@
 		<entry key="Basque" value="eu"/>
 		<entry key="Belarusian" value="be"/>
 		<entry key="Bengali" value="bn"/>
+		<entry key="Bislama" value="bi"/>
 		<entry key="Bosnian" value="bs"/>
 		<entry key="Breton" value="br"/>
 		<entry key="Bulgarian" value="bg"/>
@@ -833,6 +835,7 @@
 		<entry key="Georgian" value="ka"/>
 		<entry key="German" value="de"/>
 		<entry key="Greek" value="el"/>
+		<entry key="Gujarati" value="gu"/>		
 		<entry key="Haitian; Haitian Creole" value="ht"/>
 		<entry key="Hebrew" value="he"/>
 		<entry key="Hindi" value="hi"/>
@@ -843,6 +846,7 @@
 		<entry key="Italian" value="it"/>
 		<entry key="Japanese" value="ja"/>
 		<entry key="Javanese" value="jv"/>
+		<entry key="Kinyarwanda" value="rw"/>
 		<entry key="Kirghiz" value="ky"/>
 		<entry key="Kongo" value="kg"/>
 		<entry key="Korean" value="ko"/>
@@ -869,6 +873,7 @@
 		<entry key="Persian" value="fa"/>
 		<entry key="Polish" value="pl"/>
 		<entry key="Portuguese" value="pt"/>
+		<entry key="Pushto" value="ps"/>
 		<entry key="Raeto-Romance" value="rm"/>
 		<entry key="Romanian" value="ro"/>
 		<entry key="Russian" value="ru"/>
@@ -881,6 +886,7 @@
 		<entry key="Swahili" value="sw"/>
 		<entry key="Swedish" value="sv"/>
 		<entry key="Tahitian" value="ty"/>
+		<entry key="Tajik" value="tg"/>
 		<entry key="Tibetan" value="bo"/>
 		<entry key="Turkish" value="tr"/>
 		<entry key="Turkmen" value="tk"/>

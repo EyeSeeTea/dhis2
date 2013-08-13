@@ -41,7 +41,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import org.hisp.dhis.common.GenericNameableObjectStore;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.dataelement.DataElement;
@@ -74,40 +73,36 @@ public class DefaultI18nService
         this.userSettingService = userSettingService;
     }
 
+    private I18nLocaleStore i18nLocaleStore;
+
+    public void setI18nLocaleStore( I18nLocaleStore i18nLocaleStore )
+    {
+        this.i18nLocaleStore = i18nLocaleStore;
+    }
+
     // -------------------------------------------------------------------------
     // Properties
     // -------------------------------------------------------------------------
 
     /*
-    private List<I18nLocale> locales = new ArrayList<I18nLocale>();
+     * private List<I18nLocale> locales = new ArrayList<I18nLocale>();
+     * 
+     * public void setLocales( List<String> localeStrings ) { for ( String
+     * string : localeStrings ) { // TODO: Need to find out the source of this
+     * call and find the format used. I18nLocale locale = getI18nLocaleByName(
+     * string); //LocaleUtils.getLocale( string );
+     * 
+     * if ( locale != null ) { locales.add( locale ); } }
+     * 
+     * Collections.sort( locales, new Comparator<I18nLocale>() { public int
+     * compare( I18nLocale l1, I18nLocale l2 ) { return
+     * l1.getDisplayName().compareTo( l2.getDisplayName() ); } } ); }
+     */
 
-    public void setLocales( List<String> localeStrings )
-    {
-        for ( String string : localeStrings )
-        {            
-            // TODO: Need to find out the source of this call and find the format used.
-            I18nLocale locale = getI18nLocaleByName( string); //LocaleUtils.getLocale( string );
-
-            if ( locale != null )
-            {
-                locales.add( locale );
-            }
-        }
-
-        Collections.sort( locales, new Comparator<I18nLocale>()
-        {
-            public int compare( I18nLocale l1, I18nLocale l2 )
-            {
-                return l1.getDisplayName().compareTo( l2.getDisplayName() );
-            }
-        } );
-    }
-    */
-    
     // -------------------------------------------------------------------------
     // I18nLocale Properties
     // -------------------------------------------------------------------------
-    
+
     public I18nLocale getCurrentLocale()
     {
         I18nLocale i18nLocale = null;
@@ -137,13 +132,6 @@ public class DefaultI18nService
     {
         return i18nLocaleStore.getAll();
     }
-    
-    private GenericNameableObjectStore<I18nLocale> i18nLocaleStore;
-
-    public void setI18nLocaleStore( GenericNameableObjectStore<I18nLocale> i18nLocaleStore )
-    {
-        this.i18nLocaleStore = i18nLocaleStore;
-    }
 
     private Map<String, String> languages;
 
@@ -151,14 +139,14 @@ public class DefaultI18nService
     {
         this.languages = languages;
     }
-   
+
     private Map<String, String> countries;
 
     public void setCountries( Map<String, String> countries )
     {
         this.countries = countries;
     }
-    
+
     // -------------------------------------------------------------------------
     // Internationalise
     // -------------------------------------------------------------------------
@@ -195,7 +183,7 @@ public class DefaultI18nService
         }
 
         List<String> properties = getObjectPropertyNames( object );
-        
+
         Collection<Translation> translations = translationService.getTranslations( getClassName( object ),
             getId( object ), locale );
 
@@ -204,7 +192,7 @@ public class DefaultI18nService
         for ( String property : properties )
         {
             String value = translationMap.get( property );
-            
+
             if ( value != null && !value.isEmpty() )
             {
                 setProperty( object, "display", property, value );
@@ -261,7 +249,7 @@ public class DefaultI18nService
         {
             throw new IllegalArgumentException( "I18n object must be identifiable: " + object );
         }
-        
+
         if ( object instanceof DataElement )
         {
             return Arrays.asList( DataElement.I18N_PROPERTIES );
@@ -295,7 +283,7 @@ public class DefaultI18nService
             {
                 String key = translationEntry.getKey();
                 String value = translationEntry.getValue();
-                
+
                 Translation translation = translationService.getTranslationWithoutDefault( className, id, locale, key );
 
                 if ( value != null && !value.trim().isEmpty() )
@@ -307,7 +295,8 @@ public class DefaultI18nService
                     }
                     else
                     {
-                        translation = new Translation( className, id, locale.getLanguage(), locale.getCountry(), key, value );
+                        translation = new Translation( className, id, locale.getLanguage(), locale.getCountry(), key,
+                            value );
 
                         translationService.addTranslation( translation );
                     }
@@ -324,7 +313,7 @@ public class DefaultI18nService
     {
         return getTranslations( className, id, getCurrentLocale() );
     }
-    
+
     public Map<String, String> getTranslations( String className, I18nLocale locale )
     {
         if ( locale != null && className != null )
@@ -333,8 +322,8 @@ public class DefaultI18nService
         }
 
         return new HashMap<String, String>();
-    }    
-        
+    }
+
     public Map<String, String> getTranslations( String className, int id, I18nLocale locale )
     {
         if ( locale != null && className != null )
@@ -344,7 +333,7 @@ public class DefaultI18nService
 
         return new HashMap<String, String>();
     }
-    
+
     public Map<String, String> getTranslationsWithoutDefault( String className, int id )
     {
         return getTranslationsWithoutDefault( className, id, getCurrentLocale() );
@@ -380,7 +369,7 @@ public class DefaultI18nService
     }
 
     public List<I18nLocale> getAllI18nLocales()
-    {        
+    {
         return i18nLocaleStore.getAll();
     }
 
@@ -392,6 +381,11 @@ public class DefaultI18nService
     public I18nLocale getI18nLocaleByName( String name )
     {
         return i18nLocaleStore.getByName( name );
+    }
+
+    public I18nLocale getI18nLocaleByLocale( String language, String country )
+    {
+        return i18nLocaleStore.getI18nLocaleByLocale( language, country );
     }
 
     public Map<String, String> getAvailableLanguages()
@@ -408,22 +402,22 @@ public class DefaultI18nService
     {
         return i18nLocaleStore.getCount();
     }
-    
-    public Collection<I18nLocale> getI18nLocales(int min, int max)
+
+    public Collection<I18nLocale> getI18nLocales( int min, int max )
     {
         return i18nLocaleStore.getAllOrderedLastUpdated( min, max );
-    }    
+    }
 
-    public int getI18nLocaleCountByName(String key)
+    public int getI18nLocaleCountByName( String key )
     {
         return i18nLocaleStore.getCountLikeName( key );
     }
-    
-    public Collection<I18nLocale> getI18nLocalesByName(String key, int min, int max)
+
+    public Collection<I18nLocale> getI18nLocalesByName( String key, int min, int max )
     {
-        return i18nLocaleStore.getAllLikeNameOrderedName( key, min, max );        
+        return i18nLocaleStore.getAllLikeNameOrderedName( key, min, max );
     }
-    
+
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
@@ -473,4 +467,5 @@ public class DefaultI18nService
 
         return translationMap;
     }
+
 }

@@ -102,10 +102,10 @@ public interface I18nService
 
     I18nLocale getI18nLocaleByName( String name );
 
+    I18nLocale getI18nLocaleByLocale( String language, String country );
+
     List<I18nLocale> getAllI18nLocales();
-    
-    //I18nLocale getCurrentI18nLocale();
-    
+        
     int getI18nLocaleCount();
     
     Collection<I18nLocale> getI18nLocales(int min, int max);

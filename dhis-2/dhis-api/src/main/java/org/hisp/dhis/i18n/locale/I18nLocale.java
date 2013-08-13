@@ -81,10 +81,6 @@ public class I18nLocale
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    public String getLanguage()
-    {
-        return language;
-    }
 
     public String getName()
     {
@@ -96,6 +92,11 @@ public class I18nLocale
         this.name = name;
     }
 
+    public String getLanguage()
+    {
+        return language;
+    }
+    
     public void setLanguage( String language )
     {
         this.language = language;

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import org.hisp.dhis.api.mobile.ActivityReportingService;
 import org.hisp.dhis.api.mobile.FacilityReportingService;
@@ -360,21 +359,6 @@ public class MobileOrganisationUnitController
 
     // Supportive methods
 
-    private Collection<String> getLocalStrings( Collection<Locale> locales )
-    {
-        if ( locales == null || locales.isEmpty() )
-        {
-            return null;
-        }
-        Collection<String> localeStrings = new ArrayList<String>();
-
-        for ( Locale locale : locales )
-        {
-            localeStrings.add( locale.getLanguage() + "-" + locale.getCountry() );
-        }
-        return localeStrings;
-    }
-
     private Collection<String> getI18nLocalStrings( Collection<I18nLocale> locales )
     {
         if ( locales == null || locales.isEmpty() )
@@ -385,7 +369,6 @@ public class MobileOrganisationUnitController
 
         for ( I18nLocale locale : locales )
         {
-            // TODO: THIS HAS TO BE MATCHED WITH OTHERS..  <-- SHOULD BE ONLY NAME?
             localeStrings.add( locale.getLanguage() + "-" + locale.getCountry() );
         }
         return localeStrings;

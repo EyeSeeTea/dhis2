@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -124,12 +125,11 @@ public class FacilityReportingServiceImpl
 
     public List<DataSet> getMobileDataSetsForUnit( OrganisationUnit unit, String localeString )
     {
-
         List<DataSet> datasets = new ArrayList<DataSet>();
+                        
+        Locale locale = LocaleUtil.getLocale( localeString );
         
-        // TODO: get by language and country.
-        
-        I18nLocale locale = i18nService.getI18nLocaleByName( localeString );
+        I18nLocale i18nlocale = i18nService.getI18nLocaleByLocale( locale.getLanguage(), locale.getCountry() );
 
         if ( DEBUG )
             log.debug( "Getting data sets for unit " + unit.getName() );
@@ -144,7 +144,7 @@ public class FacilityReportingServiceImpl
                 if ( DEBUG )
                     log.debug( "Found data set " + dataSet.getName() );
 
-                datasets.add( getDataSetForLocale( dataSet.getId(), locale ) );
+                datasets.add( getDataSetForLocale( dataSet.getId(), i18nlocale ) );
             }
             else
             {
