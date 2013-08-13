@@ -386,18 +386,17 @@ Ext.onReady( function() {
 
             util.mask = {
                 showMask: function(cmp, msg) {
-                    cmp = cmp || pt.viewport.centerRegion;
                     msg = msg || 'Loading..';
 
-                    if (dv.viewport.mask) {
-                        dv.viewport.mask.destroy();
+                    if (cmp.mask) {
+                        cmp.mask.destroy();
                     }
-                    dv.viewport.mask = new Ext.LoadMask(cmp, {msg: msg});
-                    dv.viewport.mask.show();
+                    cmp.mask = new Ext.LoadMask(cmp, {msg: msg});
+                    cmp.mask.show();
                 },
-                hideMask: function() {
-                    if (dv.viewport.mask) {
-                        dv.viewport.mask.hide();
+                hideMask: function(cmp) {
+                    if (cmp.mask) {
+                        cmp.mask.hide();
                     }
                 }
             };
@@ -2190,7 +2189,7 @@ Ext.onReady( function() {
                             dv.viewport.centerRegion.add(chart);
 
                             // After table success
-                            util.mask.hideMask();
+                            util.mask.hideMask(dv.viewport.centerRegion);
 
                             if (dv.viewport.downloadButton) {
                                 dv.viewport.downloadButton.enable();

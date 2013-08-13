@@ -1,6 +1,6 @@
 Ext.onReady(function() {
 	
-	// Inject CSS
+	// css
 	css = 'table.pivot { \n font-family: arial,sans-serif,ubuntu,consolas; \n } \n';
 	css += '.td-nobreak { \n white-space: nowrap; \n } \n';
 	css += '.td-hidden { \n display: none; \n } \n';
@@ -32,37 +32,8 @@ Ext.onReady(function() {
 	
 	Ext.util.CSS.createStyleSheet(css);
 	
-	// Plugin	
+	// plugin	
 	PT.plugin = {};
-	
-	PT.plugin.extendInstance = function(pt) {
-		var util = pt.util;
-		
-		(function() {			
-			util.mask = {
-				showMask: function(cmp, msg) {
-					cmp = cmp || pt.viewport.centerRegion;
-					msg = msg || 'Loading..';
-
-					if (pt.viewport.mask) {
-						pt.viewport.mask.destroy();
-					}
-					pt.viewport.mask = new Ext.create('Ext.LoadMask', cmp, {
-						shadow: false,
-						msg: msg,
-						style: 'box-shadow:0',
-						bodyStyle: 'box-shadow:0'
-					});
-					pt.viewport.mask.show();
-				},
-				hideMask: function() {
-					if (pt.viewport.mask) {
-						pt.viewport.mask.hide();
-					}
-				}
-			};
-		}());
-	};
 	
 	PT.plugin.getTable = function(config) {
 		var validateConfig,
@@ -120,8 +91,6 @@ Ext.onReady(function() {
 				success: function(r) {
 					pt = PT.core.getInstance(r);
 					
-					PT.plugin.extendInstance(pt);
-
 					pt.init.el = config.el;
 					pt.isPlugin = true;					
 					pt.viewport = createViewport();					

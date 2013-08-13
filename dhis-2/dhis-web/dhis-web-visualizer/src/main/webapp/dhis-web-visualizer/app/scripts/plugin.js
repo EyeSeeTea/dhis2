@@ -1,25 +1,24 @@
-DV.plugin = {};
-DV.plugin.init = {};
-
 Ext.onReady(function() {
 
-	// Chart tips css
+	// chart tips css
 	var css = '.dv-chart-tips { \n border-radius: 2px; \n padding: 0px 3px 1px; \n border: 2px solid #777; \n background-color: #f1f1f1; \n } \n';
 	css += '.dv-chart-tips .x-tip-body { \n background-color: #f1f1f1; \n font-size: 13px; \n font-weight: normal; \n color: #444; \n -webkit-text-stroke: 0; \n } \n';
 
-	// Load mask css
+	// load mask css
 	css += '.x-mask-msg { \n padding: 0; \n	border: 0 none; \n background-image: none; \n background-color: transparent; \n } \n';
 	css += '.x-mask-msg div { \n background-position: 11px center; \n } \n';
 	css += '.x-mask-msg .x-mask-loading { \n border: 0 none; \n	background-color: #000; \n color: #fff; \n border-radius: 2px; \n padding: 12px 14px 12px 30px; \n opacity: 0.65; \n } \n';
 
 	Ext.util.CSS.createStyleSheet(css);
 
+    // plugin
+    DV.plugin = {};
+
 	DV.plugin.getChart = function(config) {
 		var validateConfig,
-			afterRender,
 			createViewport,
-			dv,
-			initialize;
+			initialize,
+			dv;
 
 		validateConfig = function(config) {
 			if (!Ext.isObject(config)) {
@@ -39,8 +38,6 @@ Ext.onReady(function() {
 
 			return true;
 		};
-
-		afterRender = function() {};
 
 		createViewport = function() {
 			var el = Ext.get(dv.init.el),
@@ -62,12 +59,7 @@ Ext.onReady(function() {
 				bodyStyle: 'border: 0 none',
 				width: config.width || width,
 				height: config.height || height,
-				layout: 'fit',
-				listeners: {
-					afterrender: function() {
-						afterRender();
-					}
-				}
+				layout: 'fit'
 			});
 
 			return {
@@ -78,20 +70,9 @@ Ext.onReady(function() {
 
 		initialize = function() {
 
-            // validate config
 			if (!validateConfig(config)) {
 				return;
 			}
-
-			dv = DV.core.getInstance({
-				baseUrl: config.url,
-				el: config.el
-			});
-
-			DV.core.instances.push(dv);
-
-			dv.viewport = createViewport();
-			dv.isPlugin = true;
 
 			Ext.data.JsonP.request({
 				url: config.url + '/dhis-web-visualizer/initialize.action',
@@ -103,7 +84,7 @@ Ext.onReady(function() {
                     dv.viewport = createViewport();
 
 					if (config.uid) {
-						dv.engine.loadTable(config.uid, dv);
+						dv.engine.loadChart(config.uid, dv);
 					}
 					else {
 						layout = dv.api.layout.Layout(config);
@@ -112,7 +93,7 @@ Ext.onReady(function() {
 							return;
 						}
 
-						dv.engine.createTable(layout, dv);
+						dv.engine.loadChart(layout, dv);
 					}
 				}
 			});

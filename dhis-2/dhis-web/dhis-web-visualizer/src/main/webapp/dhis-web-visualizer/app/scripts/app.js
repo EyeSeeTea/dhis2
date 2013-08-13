@@ -302,30 +302,6 @@ Ext.onReady( function() {
                 }
             };
 
-            util.mask = {
-                showMask: function(cmp, msg) {
-                    cmp = cmp || dv.viewport;
-                    msg = msg || 'Loading..';
-
-                    if (dv.viewport.mask) {
-                        dv.viewport.mask.destroy();
-                    }
-                    dv.viewport.mask = new Ext.create('Ext.LoadMask', cmp, {
-                        id: 'dv-loadmask',
-                        shadow: false,
-                        msg: msg,
-                        style: 'box-shadow:0',
-                        bodyStyle: 'box-shadow:0'
-                    });
-                    dv.viewport.mask.show();
-                },
-                hideMask: function() {
-                    if (dv.viewport.mask) {
-                        dv.viewport.mask.hide();
-                    }
-                }
-            };
-
             util.object = {
                 getLength: function(object) {
                     var size = 0;

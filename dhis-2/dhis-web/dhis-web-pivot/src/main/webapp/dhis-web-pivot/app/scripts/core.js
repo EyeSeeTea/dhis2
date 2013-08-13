@@ -2376,7 +2376,7 @@ Ext.onReady( function() {
 							}
 							
 							// Hide mask
-							util.mask.hideMask();
+							util.mask.hideMask(pt.viewport.centerRegion);
 
 							// Gui state
 							if (pt.viewport.downloadButton) {

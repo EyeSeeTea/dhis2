@@ -54,23 +54,22 @@ Ext.onReady( function() {
 
 			util.mask = {
 				showMask: function(cmp, msg) {
-					cmp = cmp || pt.viewport.centerRegion;
 					msg = msg || 'Loading..';
 
-					if (pt.viewport.mask) {
-						pt.viewport.mask.destroy();
+					if (cmp.mask) {
+						cmp.mask.destroy();
 					}
-					pt.viewport.mask = new Ext.create('Ext.LoadMask', cmp, {
+					cmp.mask = new Ext.create('Ext.LoadMask', cmp, {
 						shadow: false,
 						msg: msg,
 						style: 'box-shadow:0',
 						bodyStyle: 'box-shadow:0'
 					});
-					pt.viewport.mask.show();
+					cmp.mask.show();
 				},
-				hideMask: function() {
-					if (pt.viewport.mask) {
-						pt.viewport.mask.hide();
+				hideMask: function(cmp) {
+					if (cmp.mask) {
+						cmp.mask.hide();
 					}
 				}
 			};
