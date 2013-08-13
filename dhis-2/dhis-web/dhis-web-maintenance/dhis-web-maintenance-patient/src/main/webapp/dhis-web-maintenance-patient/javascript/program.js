@@ -273,8 +273,9 @@ function generateTemplateMessageForm()
 				+ 	'<td><label>' + i18n_send_when_to + '</label></td>'
 				+ 	'<td>'
 				+ 		'<select id="whenToSend' + rowId + '" name="whenToSend' + rowId + '" class="whenToSend" onchange="whenToSendOnChange(' + rowId + ')" >'
-				+ 			'<option value="">' + i18n_from_the_day_set + '</option>'
+				+ 			'<option value="">' + i18n_scheduled + '</option>'
 				+ 			'<option value="3">' + i18n_complete_program + '</option>'
+				+ 			'<option value="1">' + i18n_program_enrollment + '</option>'
 				+ 		'</select>'
 				+	'</td>'
 				+ '</tr>'
@@ -292,7 +293,7 @@ function generateTemplateMessageForm()
 				+ 	'<td><input type="text" id="daysAllowedSendMessage' + rowId + '" name="daysAllowedSendMessage' + rowId + '" class="daysAllowedSendMessage {validate:{required:true,number:true}}"/></td>'
 				+ '</tr>'
 				+ '<tr name="tr' + rowId + '">'
-				+ 	'<td><label>' + i18n_send_to + '</label></td>'
+				+ 	'<td><label>' + i18n_recipients + '</label></td>'
 				+ 	'<td>'
 				+ 		'<select id="sendTo' + rowId + '" name="sendTo' + rowId + '" class="sendTo" onchange="onchangeUserGroup('+ rowId +')">'
 				+ 			'<option value="1">' + i18n_patient + '</option>'
@@ -358,12 +359,12 @@ function insertParams( paramValue, rowId )
 function whenToSendOnChange(index)
 {
 	var whenToSend = getFieldValue('whenToSend' + index );
-	if(whenToSend==3){
-		disable('dateToCompare' + index );
-		disable('daysAllowedSendMessage' + index );
-	}
-	else{
+	if(whenToSend==""){
 		enable('dateToCompare' + index );
 		enable('daysAllowedSendMessage' + index );
+	}
+	else{
+		disable('dateToCompare' + index );
+		disable('daysAllowedSendMessage' + index );
 	}
 }

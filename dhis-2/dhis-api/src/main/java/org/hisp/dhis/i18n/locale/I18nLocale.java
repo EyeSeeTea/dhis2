@@ -17,7 +17,9 @@ public class I18nLocale
      */
     private static final long serialVersionUID = -8425127015696485061L;
 
-    public static final String DEFAULT_COUNTRY = "default";
+    public static final String DEFAULT_COUNTRY = "";
+    
+    private String name;
     
     private String language;
 
@@ -29,7 +31,9 @@ public class I18nLocale
 
     public I18nLocale()
     {
-
+        this.name = "English, UNITED STATES";
+        this.language = "en";
+        this.country = "US";
     }
 
     public I18nLocale( String name, String language, String country )
@@ -39,12 +43,6 @@ public class I18nLocale
         this.country = country;
     }
 
-    public I18nLocale( String name )
-    {
-        this.name = name;
-        this.language = "en";
-        this.country = "US";
-    }
 
     // -------------------------------------------------------------------------
     // hashCode, equals and toString
@@ -86,6 +84,16 @@ public class I18nLocale
     public String getLanguage()
     {
         return language;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName( String name )
+    {
+        this.name = name;
     }
 
     public void setLanguage( String language )

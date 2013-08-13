@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,45 +25,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.i18n.locale;
+package org.hisp.dhis.patient;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
+import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramStageInstance;
 
 /**
- * @author James Chang
- * @version $Id$
+ * @author Chau Thu Tran
+ * 
+ * @version $ PatientReminderService.java Aug 7, 2013 9:53:19 AM $
  */
-public interface I18nLocaleService
+public interface PatientReminderService
 {
-    String ID = I18nLocaleService.class.getName();
+    String getMessageFromTemplate( PatientReminder patientReminder, ProgramInstance programInstance, I18nFormat format );
 
-    int saveI18nLocale( I18nLocale locale );
-
-    void deleteI18nLocale( I18nLocale locale );
-
-    void updateI18nLocale( I18nLocale locale );
-
-    I18nLocale getI18nLocale( int id );
-
-    I18nLocale getI18nLocaleByName( String name );
-
-    List<I18nLocale> getAllI18nLocales();
+    String getMessageFromTemplate( PatientReminder patientReminder, ProgramStageInstance programStageInstance, I18nFormat format );
     
-    I18nLocale getCurrentI18nLocale();
-    
-    Map<String, String> getAvailableLanguages();
-
-    Map<String, String> getAvailableCountries();
-
-    int getI18nLocaleCount();
-    
-    Collection<I18nLocale> getI18nLocales(int min, int max);
-    
-    int getI18nLocaleCountByName(String key);
-
-    Collection<I18nLocale> getI18nLocalesByName(String key, int min, int max);
-
+    Set<String> getPhonenumbers( PatientReminder patientReminder, Patient patient );
 }

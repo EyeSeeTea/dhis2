@@ -29,9 +29,7 @@
 package org.hisp.dhis.dataadmin.action.locale;
 
 import java.util.Map;
-
-import org.hisp.dhis.i18n.locale.I18nLocaleService;
-
+import org.hisp.dhis.i18n.I18nService;
 import com.opensymphony.xwork2.Action;
 
 /**
@@ -46,11 +44,11 @@ public class ShowAddLocaleFormAction
     // -------------------------------------------------------------------------
 
     
-    private I18nLocaleService i18nLocaleService;
+    private I18nService i18nService;
 
-    public void setI18nLocaleService( I18nLocaleService i18nLocaleService )
+    public void setI18nService( I18nService i18nService )
     {
-        this.i18nLocaleService = i18nLocaleService;
+        this.i18nService = i18nService;
     }
      
     
@@ -78,8 +76,8 @@ public class ShowAddLocaleFormAction
 
     public String execute()
     {
-    	availableLanguages = i18nLocaleService.getAvailableLanguages();
-    	availableCountries = i18nLocaleService.getAvailableCountries();
+    	availableLanguages = i18nService.getAvailableLanguages();
+    	availableCountries = i18nService.getAvailableCountries();
     	
         return SUCCESS;
     }

@@ -75,18 +75,25 @@ function loadOptionSets( metaData ) {
     var promise = deferred2.promise();
 
     _.each( metaData.optionSets, function ( item, idx ) {
-        promise = promise.then( function () {
-            return $.ajax( {
-                url: 'getOptionSet.action?dataElementUid=' + item,
-                dataType: 'json',
-                cache: false
-            } ).done( function ( data ) {
-                var obj = {};
-                obj.id = item;
-                obj.optionSet = data.optionSet;
-                DAO.store.set( 'optionSets', obj );
-            } );
-        } );
+        DAO.store.get('optionSets', item.uid).done(function(obj) {
+            if(!obj || obj.optionSet.version !== item.v) {
+                promise = promise.then(function() {
+                    return $.ajax({
+                        url: 'getOptionSet.action',
+                        data: {
+                            id: item.uid
+                        },
+                        dataType: 'json',
+                        cache: false
+                    }).done(function(data) {
+                        var obj = {};
+                        obj.id = item.uid;
+                        obj.optionSet = data.optionSet;
+                        DAO.store.set('optionSets', obj);
+                    });
+                });
+            }
+        });
     } );
 
     if ( metaData.usernames ) {
@@ -756,9 +763,11 @@ function searchEvents( listAll ) {
             }
 
             hideLoader();
+            showById( 'listDiv' );
         }
     } ).fail(function() {
         hideById( 'dataEntryInfor' );
+        hideById( 'listDiv' );
     } ).always(function() {
         var searchInfor = (listAll) ? i18n_list_all_events : i18n_search_events_by_dataelements;
         setInnerHTML( 'searchInforTD', searchInfor );
@@ -773,7 +782,6 @@ function searchEvents( listAll ) {
             showById( 'filterBtn' );
         }
 
-        showById( 'listDiv' );
         hideLoader();
     });
 }

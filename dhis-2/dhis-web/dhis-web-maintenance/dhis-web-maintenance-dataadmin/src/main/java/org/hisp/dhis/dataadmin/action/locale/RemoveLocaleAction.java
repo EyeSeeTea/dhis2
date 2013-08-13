@@ -29,7 +29,8 @@ package org.hisp.dhis.dataadmin.action.locale;
 
 import org.hisp.dhis.common.DeleteNotAllowedException;
 import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.i18n.locale.*;
+import org.hisp.dhis.i18n.I18nService;
+import org.hisp.dhis.i18n.locale.I18nLocale;
 
 
 import com.opensymphony.xwork2.Action;
@@ -45,11 +46,11 @@ public class RemoveLocaleAction
     // Dependency
     // -------------------------------------------------------------------------
 
-    private I18nLocaleService i18nLocaleService;
+    private I18nService i18nService;
 
-    public void setI18nLocaleService( I18nLocaleService i18nLocaleService )
+    public void setI18nService( I18nService i18nService )
     {
-        this.i18nLocaleService = i18nLocaleService;
+        this.i18nService = i18nService;
     }
 
     // -------------------------------------------------------------------------
@@ -90,9 +91,9 @@ public class RemoveLocaleAction
     {
         try
         {
-            I18nLocale i18nLocale = i18nLocaleService.getI18nLocale( id );
+            I18nLocale i18nLocale = i18nService.getI18nLocale( id );
 
-            i18nLocaleService.deleteI18nLocale( i18nLocale );
+            i18nService.deleteI18nLocale( i18nLocale );
         }
         catch ( DeleteNotAllowedException ex )
         {

@@ -55,7 +55,10 @@ function showProgramStageDetails( programStageId )
 		setInnerHTML( 'nameField', json.programStage.name );	
 		setInnerHTML( 'descriptionField', json.programStage.description );
 		setInnerHTML( 'scheduledDaysFromStartField', json.programStage.minDaysFromStart ); 
-
+		
+		var relatedPatient = (json.programStage.relatedPatient=='true') ? i18n_yes : i18n_no;
+		setInnerHTML( 'relatedPatientField', relatedPatient );  
+		
 		var irregular = (json.programStage.irregular=='true') ? i18n_yes : i18n_no;
 		setInnerHTML( 'irregularField', irregular );  
 		
@@ -281,7 +284,7 @@ function generateTemplateMessageForm()
 				+ 	'<td><label>' + i18n_send_when_to + '</label></td>'
 				+ 	'<td>'
 				+ 		'<select id="whenToSend' + rowId + '" name="whenToSend' + rowId + '" class="whenToSend" onchange="whenToSendOnChange(' + rowId + ')">'
-				+ 			'<option value="">' + i18n_from_the_day_set + '</option>'
+				+ 			'<option value="">' + i18n_scheduled + '</option>'
 				+ 			'<option value="2">' + i18n_complete_event + '</option>'
 				+ 		'</select>'
 				+	'</td>'
@@ -291,7 +294,7 @@ function generateTemplateMessageForm()
 				+ 	'<td><input type="text" id="daysAllowedSendMessage' + rowId + '" name="daysAllowedSendMessage' + rowId + '" class="daysAllowedSendMessage {validate:{required:true,number:true}}"/></td>'
 				+ '</tr>'
 				+ '<tr name="tr' + rowId + '">'
-				+ 	'<td><label>' + i18n_send_to + '</label></td>'
+				+ 	'<td><label>' + i18n_recipients + '</label></td>'
 				+ 	'<td>'
 				+ 		'<select id="sendTo' + rowId + '" name="sendTo' + rowId + '" class="sendTo" onchange="onchangeUserGroup('+ rowId +')">'
 				+ 			'<option value="1">' + i18n_patient + '</option>'

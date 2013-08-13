@@ -97,39 +97,39 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   <bean id= "org.hisp.dhis.dataadmin.action.locale.GetLocaleListAction"
       class= "org.hisp.dhis.dataadmin.action.locale.GetLocaleListAction"
       scope= "prototype">
-     <property name= "i18nLocaleService" ref="org.hisp.dhis.i18n.locale.I18nLocaleService" />
+    <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />      
   </bean>
   
-	<bean id="org.hisp.dhis.dataadmin.action.locale.GetLocaleAction"
+  <bean id="org.hisp.dhis.dataadmin.action.locale.GetLocaleAction"
 		class="org.hisp.dhis.dataadmin.action.locale.GetLocaleAction" 
 		scope="prototype">
-     	<property name= "i18nLocaleService" ref="org.hisp.dhis.i18n.locale.I18nLocaleService" />
-	</bean>
+    <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
+  </bean>
 	
   <bean id="org.hisp.dhis.dataadmin.action.locale.AddLocaleAction"
 		class="org.hisp.dhis.dataadmin.action.locale.AddLocaleAction"
 	 scope="prototype">
-     <property name= "i18nLocaleService" ref="org.hisp.dhis.i18n.locale.I18nLocaleService" />
+    <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
 	
 		
-	<bean id="org.hisp.dhis.dataadmin.action.locale.RemoveLocaleAction"
+  <bean id="org.hisp.dhis.dataadmin.action.locale.RemoveLocaleAction"
 		class="org.hisp.dhis.dataadmin.action.locale.RemoveLocaleAction"
 		scope="prototype">
-		<property name= "i18nLocaleService" ref="org.hisp.dhis.i18n.locale.I18nLocaleService" />
-	</bean>
+    <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
+  </bean>
 			
-	<bean
+  <bean
 		id="org.hisp.dhis.dataadmin.action.locale.ShowAddLocaleFormAction"
 		class="org.hisp.dhis.dataadmin.action.locale.ShowAddLocaleFormAction"
 		scope="prototype">
-		<property name= "i18nLocaleService" ref="org.hisp.dhis.i18n.locale.I18nLocaleService" />
-	</bean>
+    <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
+  </bean>
 		
   <bean id="org.hisp.dhis.dataadmin.action.locale.ValidateLocaleAction"
       class="org.hisp.dhis.dataadmin.action.locale.ValidateLocaleAction"
       scope="prototype">
-		<property name= "i18nLocaleService" ref="org.hisp.dhis.i18n.locale.I18nLocaleService" />
+    <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
   
   

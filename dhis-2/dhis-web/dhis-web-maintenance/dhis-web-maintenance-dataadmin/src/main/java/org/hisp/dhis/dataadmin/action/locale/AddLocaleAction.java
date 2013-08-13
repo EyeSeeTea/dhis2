@@ -28,7 +28,7 @@
 package org.hisp.dhis.dataadmin.action.locale;
 
 import org.hisp.dhis.i18n.locale.I18nLocale;
-import org.hisp.dhis.i18n.locale.I18nLocaleService;
+import org.hisp.dhis.i18n.I18nService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -44,11 +44,11 @@ public class AddLocaleAction
     // Dependency
     // -------------------------------------------------------------------------
 
-    private I18nLocaleService i18nLocaleService;
+    private I18nService i18nService;
 
-    public void setI18nLocaleService( I18nLocaleService i18nLocaleService )
+    public void setI18nService( I18nService i18nService )
     {
-        this.i18nLocaleService = i18nLocaleService;
+        this.i18nService = i18nService;
     }
 
     // -------------------------------------------------------------------------
@@ -90,7 +90,7 @@ public class AddLocaleAction
         i18nLocale.setCountry(country);
         
 
-        i18nLocaleService.saveI18nLocale( i18nLocale );
+        i18nService.saveI18nLocale( i18nLocale );
 
         return SUCCESS;
     }

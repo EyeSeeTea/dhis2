@@ -36,20 +36,16 @@ import static org.hisp.dhis.system.util.ReflectionUtils.setProperty;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
+import org.hisp.dhis.common.GenericNameableObjectStore;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.i18n.locale.I18nLocale;
-import org.hisp.dhis.i18n.locale.I18nLocaleService;
-import org.hisp.dhis.system.util.LocaleUtils;
 import org.hisp.dhis.translation.Translation;
 import org.hisp.dhis.translation.TranslationService;
 import org.hisp.dhis.user.UserSettingService;
@@ -78,17 +74,11 @@ public class DefaultI18nService
         this.userSettingService = userSettingService;
     }
 
-    private I18nLocaleService i18nLocaleService;
-
-    public void setI18nLocaleService( I18nLocaleService i18nLocaleService )
-    {
-        this.i18nLocaleService = i18nLocaleService;
-    }
-    
     // -------------------------------------------------------------------------
     // Properties
     // -------------------------------------------------------------------------
 
+    /*
     private List<I18nLocale> locales = new ArrayList<I18nLocale>();
 
     public void setLocales( List<String> localeStrings )
@@ -96,7 +86,7 @@ public class DefaultI18nService
         for ( String string : localeStrings )
         {            
             // TODO: Need to find out the source of this call and find the format used.
-            I18nLocale locale = i18nLocaleService.getI18nLocaleByName( string); //LocaleUtils.getLocale( string );
+            I18nLocale locale = getI18nLocaleByName( string); //LocaleUtils.getLocale( string );
 
             if ( locale != null )
             {
@@ -112,7 +102,63 @@ public class DefaultI18nService
             }
         } );
     }
+    */
+    
+    // -------------------------------------------------------------------------
+    // I18nLocale Properties
+    // -------------------------------------------------------------------------
+    
+    public I18nLocale getCurrentLocale()
+    {
+        I18nLocale i18nLocale = null;
 
+        try
+        {
+            String i18nLocaleId = (String) userSettingService.getUserSetting( UserSettingService.KEY_DB_LOCALE );
+
+            if ( i18nLocaleId != "None" )
+            {
+                i18nLocale = getI18nLocale( Integer.valueOf( i18nLocaleId ) );
+            }
+        }
+        catch ( Exception ex )
+        {
+        }
+
+        return i18nLocale;
+    }
+
+    public boolean currentLocaleIsBase()
+    {
+        return getCurrentLocale() == null;
+    }
+
+    public List<I18nLocale> getAvailableLocales()
+    {
+        return i18nLocaleStore.getAll();
+    }
+    
+    private GenericNameableObjectStore<I18nLocale> i18nLocaleStore;
+
+    public void setI18nLocaleStore( GenericNameableObjectStore<I18nLocale> i18nLocaleStore )
+    {
+        this.i18nLocaleStore = i18nLocaleStore;
+    }
+
+    private Map<String, String> languages;
+
+    public void setLanguages( Map<String, String> languages )
+    {
+        this.languages = languages;
+    }
+   
+    private Map<String, String> countries;
+
+    public void setCountries( Map<String, String> countries )
+    {
+        this.countries = countries;
+    }
+    
     // -------------------------------------------------------------------------
     // Internationalise
     // -------------------------------------------------------------------------
@@ -315,24 +361,69 @@ public class DefaultI18nService
     }
 
     // -------------------------------------------------------------------------
-    // I18nLocale
+    // I18nLocale Implementation methods
     // -------------------------------------------------------------------------
 
-    public I18nLocale getCurrentLocale()
+    public int saveI18nLocale( I18nLocale i18nlocale )
     {
-        return i18nLocaleService.getCurrentI18nLocale();
+        return i18nLocaleStore.save( i18nlocale );
     }
 
-    public boolean currentLocaleIsBase()
+    public void updateI18nLocale( I18nLocale i18nlocale )
     {
-        return getCurrentLocale() == null;
+        i18nLocaleStore.update( i18nlocale );
     }
 
-    public List<I18nLocale> getAvailableLocales()
+    public void deleteI18nLocale( I18nLocale i18nlocale )
     {
-        return i18nLocaleService.getAllI18nLocales();
+        i18nLocaleStore.delete( i18nlocale );
     }
 
+    public List<I18nLocale> getAllI18nLocales()
+    {        
+        return i18nLocaleStore.getAll();
+    }
+
+    public I18nLocale getI18nLocale( int id )
+    {
+        return i18nLocaleStore.get( id );
+    }
+
+    public I18nLocale getI18nLocaleByName( String name )
+    {
+        return i18nLocaleStore.getByName( name );
+    }
+
+    public Map<String, String> getAvailableLanguages()
+    {
+        return languages;
+    }
+
+    public Map<String, String> getAvailableCountries()
+    {
+        return countries;
+    }
+
+    public int getI18nLocaleCount()
+    {
+        return i18nLocaleStore.getCount();
+    }
+    
+    public Collection<I18nLocale> getI18nLocales(int min, int max)
+    {
+        return i18nLocaleStore.getAllOrderedLastUpdated( min, max );
+    }    
+
+    public int getI18nLocaleCountByName(String key)
+    {
+        return i18nLocaleStore.getCountLikeName( key );
+    }
+    
+    public Collection<I18nLocale> getI18nLocalesByName(String key, int min, int max)
+    {
+        return i18nLocaleStore.getAllLikeNameOrderedName( key, min, max );        
+    }
+    
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------

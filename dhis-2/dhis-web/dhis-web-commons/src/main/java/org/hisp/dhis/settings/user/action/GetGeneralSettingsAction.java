@@ -41,7 +41,6 @@ import java.util.SortedMap;
 
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.i18n.locale.I18nLocale;
-import org.hisp.dhis.i18n.locale.I18nLocaleService;
 import org.hisp.dhis.i18n.locale.LocaleManager;
 import org.hisp.dhis.i18n.resourcebundle.ResourceBundleManager;
 import org.hisp.dhis.setting.StyleManager;
@@ -73,13 +72,6 @@ public class GetGeneralSettingsAction
     public void setI18nService( I18nService i18nService )
     {
         this.i18nService = i18nService;
-    }
-
-    private I18nLocaleService i18nLocaleService;
-
-    public void setI18nLocaleService( I18nLocaleService i18nLocaleService )
-    {
-        this.i18nLocaleService = i18nLocaleService;
     }
 
     private LocaleManager localeManager;
@@ -201,9 +193,8 @@ public class GetGeneralSettingsAction
         // ---------------------------------------------------------------------
         // Get available locales in db
         // ---------------------------------------------------------------------
-
-        availableLocalesDb = new ArrayList<I18nLocale>( i18nLocaleService.getAllI18nLocales() );
-
+        availableLocalesDb = i18nService.getAllI18nLocales();
+               
         Collections.sort( availableLocalesDb, new Comparator<I18nLocale>()
         {
             public int compare( I18nLocale locale0, I18nLocale locale1 )
@@ -212,7 +203,7 @@ public class GetGeneralSettingsAction
             }
         } );
 
-        currentLocaleDb = i18nLocaleService.getCurrentI18nLocale();
+        currentLocaleDb = i18nService.getCurrentLocale();
 
         // ---------------------------------------------------------------------
         // Get styles

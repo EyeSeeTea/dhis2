@@ -32,12 +32,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Locale;
-
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.i18n.locale.I18nLocale;
-import org.hisp.dhis.i18n.locale.I18nLocaleService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.junit.Test;
 
@@ -48,8 +45,6 @@ public class TranslationServiceTest
     extends DhisSpringTest
 {
     private TranslationService translationService;
-
-    private I18nLocaleService i18nLocaleService;
     
     // -------------------------------------------------------------------------
     // Set up/tear down
@@ -58,11 +53,7 @@ public class TranslationServiceTest
     @Override
     public void setUpTest()
     {
-        translationService = (TranslationService) getBean( TranslationService.ID );
-        
-        locale1 = new I18nLocale("UK_English", "en", "UK");
-        locale2 = new I18nLocale("US_English", "en", "US");
-        locale3 = new I18nLocale("FR_Franch", "fr", "FR");        
+        translationService = (TranslationService) getBean( TranslationService.ID );    
     }
     
     // -------------------------------------------------------------------------
@@ -72,12 +63,12 @@ public class TranslationServiceTest
     private int id1 = 0;
     private int id2 = 1;
 
-    private I18nLocale locale1;
-    private I18nLocale locale2;
-    private I18nLocale locale3;
+    private I18nLocale locale1 = new I18nLocale("UK_English", "en", "UK");
+    private I18nLocale locale2 = new I18nLocale("US_English", "en", "US");
+    private I18nLocale locale3 = new I18nLocale("FR_Franch", "fr", "FR");  
 
-    private String className1 = OrganisationUnit.class.getName();
-    private String className2 = DataElement.class.getName();
+    private String className1 = OrganisationUnit.class.getName();  //getSimpleName();
+    private String className2 = DataElement.class.getName(); //  getSimpleName();
 
     private Translation translation1a = new Translation( className1, id1, locale1.getLanguage(), locale1.getCountry(), "name", "cheers" );
     private Translation translation1b = new Translation( className1, id1, locale1.getLanguage(), locale1.getCountry(), "shortName", "goodbye" );

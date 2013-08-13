@@ -27,6 +27,7 @@ package org.hisp.dhis.i18n;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
 import java.util.List;
 //import java.util.I18nLocale;
 import java.util.Map;
@@ -85,4 +86,31 @@ public interface I18nService
     boolean currentLocaleIsBase();
     
     List<I18nLocale> getAvailableLocales();
+
+    Map<String, String> getAvailableLanguages();
+
+    Map<String, String> getAvailableCountries();
+    
+
+    int saveI18nLocale( I18nLocale locale );
+
+    void deleteI18nLocale( I18nLocale locale );
+
+    void updateI18nLocale( I18nLocale locale );
+
+    I18nLocale getI18nLocale( int id );
+
+    I18nLocale getI18nLocaleByName( String name );
+
+    List<I18nLocale> getAllI18nLocales();
+    
+    //I18nLocale getCurrentI18nLocale();
+    
+    int getI18nLocaleCount();
+    
+    Collection<I18nLocale> getI18nLocales(int min, int max);
+    
+    int getI18nLocaleCountByName(String key);
+
+    Collection<I18nLocale> getI18nLocalesByName(String key, int min, int max);
 }

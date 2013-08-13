@@ -50,8 +50,8 @@ public class GetStringsFromLocaleAction
     implements Action
 {    
     private static final String PAGE_LOGIN = "login";
-    private static final String PAGE_ACCOUNT = "account";
-    private static final String PAGE_RECOVERY = "recovery";
+    //private static final String PAGE_ACCOUNT = "account";
+    //private static final String PAGE_RECOVERY = "recovery";
     
     // -------------------------------------------------------------------------
     // Dependencies
@@ -140,7 +140,7 @@ public class GetStringsFromLocaleAction
 
         if ( page.compareTo( PAGE_LOGIN ) == 0 )
         {        
-            // TODO - i18nLocale create it by using i18nLocaleService?         
+            // TODO - i18nLocale create it by using i18nService?         
             I18nLocale i18nLocale = new I18nLocale("", language, I18nLocale.DEFAULT_COUNTRY);
                         
             translations = convertTranslations_SystemSetting( translationService.getTranslations( SystemSetting.class.getSimpleName(), i18nLocale ) );

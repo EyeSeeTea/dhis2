@@ -32,8 +32,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Locale;
-
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.i18n.locale.I18nLocale;
@@ -58,9 +56,7 @@ public class TranslationStoreTest
     {
         translationStore = (TranslationStore) getBean( TranslationStore.ID );
     
-        locale1 = new I18nLocale("UK_English", "en", "UK");
-        locale2 = new I18nLocale("US_English", "en", "US");
-        locale3 = new I18nLocale("FR_Franch", "fr", "FR");   
+ 
     }
     
     // -------------------------------------------------------------------------
@@ -70,10 +66,14 @@ public class TranslationStoreTest
     private int id1 = 0;
     private int id2 = 1;
 
-    private I18nLocale locale1;
-    private I18nLocale locale2;
-    private I18nLocale locale3;
+//    private I18nLocale locale1;
+//    private I18nLocale locale2;
+//    private I18nLocale locale3;
 
+    private I18nLocale locale1 = new I18nLocale("UK_English", "en", "UK");
+    private I18nLocale locale2 = new I18nLocale("US_English", "en", "US");
+    private I18nLocale locale3 = new I18nLocale("FR_Franch", "fr", "FR");  
+    
     private String className1 = OrganisationUnit.class.getName();
     private String className2 = DataElement.class.getName();
 

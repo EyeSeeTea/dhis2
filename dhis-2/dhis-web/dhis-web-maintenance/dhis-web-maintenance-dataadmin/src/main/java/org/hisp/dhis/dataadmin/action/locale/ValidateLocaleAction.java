@@ -27,10 +27,9 @@ package org.hisp.dhis.dataadmin.action.locale;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.i18n.locale.*;
-
+import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.i18n.I18n;
-
+import org.hisp.dhis.i18n.locale.I18nLocale;
 import com.opensymphony.xwork2.Action;
 
 /**
@@ -44,11 +43,11 @@ public class ValidateLocaleAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private I18nLocaleService i18nLocaleService;
+    private I18nService i18nService;
 
-    public void setI18nLocaleService( I18nLocaleService i18nLocaleService )
+    public void setI18nService( I18nService i18nService )
     {
-        this.i18nLocaleService = i18nLocaleService;
+        this.i18nService = i18nService;
     }
 
     // -------------------------------------------------------------------------
@@ -100,7 +99,7 @@ public class ValidateLocaleAction
         if ( name != null )
         {
 
-            I18nLocale match = i18nLocaleService.getI18nLocaleByName(name);
+            I18nLocale match = i18nService.getI18nLocaleByName(name);
 
             if ( match != null && (id == null || match.getId() != id) )
             {

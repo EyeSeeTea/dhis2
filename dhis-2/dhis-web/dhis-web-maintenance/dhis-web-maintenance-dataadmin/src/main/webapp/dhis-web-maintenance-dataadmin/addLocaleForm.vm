@@ -47,8 +47,7 @@
 		<tr>
 			<td><label>$i18n.getString( "country" ) </label></td>
 			<td>
-				<select id="country" name="country" onchange="setName()" class="{validate:{required:true}}">
-					<option value="">[$i18n.getString( "locale_country_no_translation" )]</option>
+				<select id="country" name="country" onchange="setName()">
 				#foreach( $country in $availableCountries.entrySet() )
 					<option value="$country.value">$country.key</option>
 				#end

@@ -35,7 +35,7 @@ import java.util.List;
 
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.i18n.locale.I18nLocale;
-import org.hisp.dhis.i18n.locale.I18nLocaleService;
+import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.paging.ActionPagingSupport;
 
 /**
@@ -49,11 +49,11 @@ public class GetLocaleListAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private I18nLocaleService i18nlocaleService;
+    private I18nService i18nService;
 
-    public void setI18nLocaleService( I18nLocaleService i18nlocaleService )
+    public void setI18nService( I18nService i18nService )
     {
-        this.i18nlocaleService = i18nlocaleService;
+        this.i18nService = i18nService;
     }
 
     // -------------------------------------------------------------------------
@@ -109,19 +109,19 @@ public class GetLocaleListAction
     {
         if ( isNotBlank( key ) ) // Filter on key only if set
         {
-            total = i18nlocaleService.getI18nLocaleCountByName( key );
+            total = i18nService.getI18nLocaleCountByName( key );
 
             this.paging = createPaging( total );
             
-            i18nlocales = new ArrayList<I18nLocale>( i18nlocaleService.getI18nLocalesByName( key, paging.getStartPos(), paging.getPageSize() ) );
+            i18nlocales = new ArrayList<I18nLocale>( i18nService.getI18nLocalesByName( key, paging.getStartPos(), paging.getPageSize() ) );
         }
         else
         {
-            total = i18nlocaleService.getI18nLocaleCount();
+            total = i18nService.getI18nLocaleCount();
             
             this.paging = createPaging( total );
     
-            i18nlocales = new ArrayList<I18nLocale>( i18nlocaleService.getI18nLocales( paging.getStartPos(), paging.getPageSize() ));
+            i18nlocales = new ArrayList<I18nLocale>( i18nService.getI18nLocales( paging.getStartPos(), paging.getPageSize() ));
         }
         
         Collections.sort( i18nlocales, IdentifiableObjectNameComparator.INSTANCE );

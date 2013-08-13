@@ -55,7 +55,7 @@ import org.hisp.dhis.dataelement.comparator.DataElementSortOrderComparator;
 import org.hisp.dhis.dataset.CompleteDataSetRegistration;
 import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
 import org.hisp.dhis.i18n.locale.I18nLocale;
-import org.hisp.dhis.i18n.locale.I18nLocaleService;
+import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.DailyPeriodType;
@@ -91,8 +91,6 @@ public class FacilityReportingServiceImpl
 
     private org.hisp.dhis.dataset.DataSetService dataSetService;
 
-    private org.hisp.dhis.i18n.I18nService i18nService;
-
     private org.hisp.dhis.mobile.service.ModelMapping modelMapping;
 
     private CompleteDataSetRegistrationService registrationService;
@@ -113,16 +111,11 @@ public class FacilityReportingServiceImpl
         this.programService = programService;
     }
 
-    private I18nLocaleService i18nLocaleService;
+    private I18nService i18nService;
 
-    public I18nLocaleService getI18nLocaleService()
+    public I18nService getI18nService()
     {
-        return i18nLocaleService;
-    }
-
-    public void setI18nLocaleService( I18nLocaleService i18nLocaleService )
-    {
-        this.i18nLocaleService = i18nLocaleService;
+        return i18nService;
     }
 
     // -------------------------------------------------------------------------
@@ -133,7 +126,10 @@ public class FacilityReportingServiceImpl
     {
 
         List<DataSet> datasets = new ArrayList<DataSet>();
-        I18nLocale locale = i18nLocaleService.getI18nLocaleByName( localeString );
+        
+        // TODO: get by language and country.
+        
+        I18nLocale locale = i18nService.getI18nLocaleByName( localeString );
 
         if ( DEBUG )
             log.debug( "Getting data sets for unit " + unit.getName() );

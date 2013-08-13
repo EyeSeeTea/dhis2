@@ -269,12 +269,10 @@
 
   <bean id="org.hisp.dhis.i18n.action.GetTranslationsAction" class="org.hisp.dhis.i18n.action.GetTranslationsAction">
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
-    <property name="i18nLocaleService" ref="org.hisp.dhis.i18n.locale.I18nLocaleService" />
   </bean>
 
   <bean id="org.hisp.dhis.i18n.action.TranslateAction" class="org.hisp.dhis.i18n.action.TranslateAction">
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
-    <property name="i18nLocaleService" ref="org.hisp.dhis.i18n.locale.I18nLocaleService" />
     <property name="identifiableObjectManager" ref="org.hisp.dhis.common.IdentifiableObjectManager" />
   </bean>
 
@@ -601,11 +599,10 @@
     class="org.hisp.dhis.settings.user.action.GetGeneralSettingsAction"
     scope="prototype">
     <property name="resourceBundleManager" ref="org.hisp.dhis.i18n.resourcebundle.ResourceBundleManager" />
-    <!-- property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" /-->
+    <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
     <property name="localeManager" ref="org.hisp.dhis.i18n.locale.LocaleManager" />
     <property name="userSettingService" ref="org.hisp.dhis.user.UserSettingService" />
     <property name="styleManager" ref="org.hisp.dhis.setting.StyleManager" />
-    <property name="i18nLocaleService" ref="org.hisp.dhis.i18n.locale.I18nLocaleService" />
   </bean>
 
   <bean id="org.hisp.dhis.settings.user.action.SetGeneralSettingsAction"

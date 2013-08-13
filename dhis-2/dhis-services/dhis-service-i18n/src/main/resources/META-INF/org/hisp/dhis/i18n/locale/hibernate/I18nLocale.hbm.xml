@@ -13,11 +13,11 @@
     </id>
     &identifiableProperties;
 
-    <property name="name" column="name" not-null="true" unique="true" length="230" />
+    <property name="name" column="name" length="230" not-null="true" unique="true" />
 
-    <property name="language" length="15" />
+    <property name="language" column="language" length="15" not-null="true" />
 
-    <property name="country" length="15" />
+    <property name="country" column="country" length="15" not-null="true" />
 
 	<!-- Form properties -->
 

@@ -1822,7 +1822,6 @@ function sendSmsOnePatientForm()
 
 function sendSmsOnePatient( field, programStageInstanceId )
 {
-	setInnerHTML('smsError', '');
 	if(field.value==""){
 		field.style.backgroundColor = ERROR_COLOR;
 		jQuery('#' + field.id).attr("placeholder", i18n_this_field_is_required);
@@ -1838,16 +1837,14 @@ function sendSmsOnePatient( field, programStageInstanceId )
 		}, function ( json )
 		{
 			if ( json.response == "success" ) {
-				jQuery('#smsError').css("color", "green");
-				setInnerHTML('smsError', json.message);
 				var date = new Date();
 				var currentTime = date.getHours() + ":" + date.getMinutes();
-				jQuery('[name=messageTB]').prepend("<tr><td>" + getFieldValue('currentDate') + " " + currentTime + "</td>"
+				jQuery('[name=commentTB]').prepend("<tr><td>" + getFieldValue('currentDate') + " " + currentTime + "</td>"
 					+ "<td>" + getFieldValue('programStageName') + "</td>"
 					+ "<td>" + getFieldValue('currentUsername') + "</td>"
 					+ "<td>" + i18n_message + "</td>"
+					+ "<td>" + field.value + "</td>"+
 					+ "<td>" + field.value + "</td></tr>");
-				field.value="";
 				field.style.backgroundColor = SUCCESS_COLOR;
 				
 				jQuery('#enrollmentDate').width('325');
@@ -1856,8 +1853,6 @@ function sendSmsOnePatient( field, programStageInstanceId )
 			}
 			else {
 				showSuccessMessage( json.message );
-				jQuery('#smsError').css("color", "red");
-				setInnerHTML('smsError', json.message);
 				field.style.backgroundColor = ERROR_COLOR;
 			}
 			
@@ -1912,7 +1907,6 @@ function addComment( field, programStageInstanceId )
 			content += "<td>" + i18n_comment + "</td>";
 			content += "<td>" + commentText + "</td></tr>";
 			jQuery('#commentTB').prepend(content);
-			field.value="";
 			showSuccessMessage( i18n_comment_added );
 			field.style.backgroundColor = SUCCESS_COLOR;
 			
@@ -1930,15 +1924,52 @@ function addComment( field, programStageInstanceId )
 
 function removeComment( programStageInstanceId, commentId )
 {
-	jQuery.postUTF8( 'removePatientComment.action',
+	var result = window.confirm( i18n_confirmation_delete_message );
+    
+    if ( result )
+    {
+		setHeaderWaitMessage( i18n_deleting );
+		jQuery.postUTF8( 'removePatientComment.action',
 		{
 			programStageInstanceId: programStageInstanceId,
 			id: commentId
 		}, function ( json )
 		{
-			showSuccessMessage( json.message );
 			hideById( 'comment_' + commentId );
+			
+			jQuery( "tr#comment_" + commentId ).remove();
+			jQuery( "table.listTable tbody tr" ).removeClass( "listRow listAlternateRow" );
+			jQuery( "table.listTable tbody tr:odd" ).addClass( "listAlternateRow" );
+			jQuery( "table.listTable tbody tr:even" ).addClass( "listRow" );
+			jQuery( "table.listTable tbody" ).trigger("update");	
+			setHeaderDelayMessage( i18n_delete_success );
 		} );
+	}
+}
+
+function removeMessage(programInstanceId, programStageInstanceId, smsId )
+{
+	var result = window.confirm( i18n_confirmation_delete_message);
+    
+    if ( result )
+    {
+		setHeaderWaitMessage( i18n_deleting );
+		jQuery.postUTF8( 'removeSms.action',
+		{
+			programInstanceId: programInstanceId,
+			programStageInstanceId: programStageInstanceId,
+			id: smsId
+		}, 
+		function ( json )
+		{
+			jQuery( "tr#tr" + smsId ).remove();
+			jQuery( "table.listTable tbody tr" ).removeClass( "listRow listAlternateRow" );
+			jQuery( "table.listTable tbody tr:odd" ).addClass( "listAlternateRow" );
+			jQuery( "table.listTable tbody tr:even" ).addClass( "listRow" );
+			jQuery( "table.listTable tbody" ).trigger("update");	
+			setHeaderDelayMessage( i18n_delete_success );
+		} );
+	}
 }
 
 function commentDivToggle(isHide)
@@ -2137,7 +2168,7 @@ function saveComment( programInstanceId )
 		}, 
 		function( json ) 
 		{   
-			 $( '#comment' ).css( 'background-color', COLOR_GREEN );
+			 $( '#comment' ).css( 'background-color', SUCCESS_COLOR );
 		});
 }
 

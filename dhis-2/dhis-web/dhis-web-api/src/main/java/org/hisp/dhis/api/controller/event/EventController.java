@@ -39,7 +39,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -167,7 +166,7 @@ public class EventController
         updatedEvent.setEvent( uid );
 
         eventService.updateEvent( updatedEvent );
-        ContextUtils.okResponse( response, "" );
+        ContextUtils.okResponse( response, "Event updated: " + uid );
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = "application/json" )
@@ -186,7 +185,7 @@ public class EventController
         updatedEvent.setEvent( uid );
 
         eventService.updateEvent( updatedEvent );
-        ContextUtils.okResponse( response, "" );
+        ContextUtils.okResponse( response, "Event updated: " + uid );
     }
 
     /*

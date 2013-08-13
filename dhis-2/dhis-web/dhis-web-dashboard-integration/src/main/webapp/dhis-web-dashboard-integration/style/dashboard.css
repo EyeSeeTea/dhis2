@@ -6,7 +6,7 @@
 #contentDiv
 {
   position: relative;
-  top: 95px;
+  top: 98px;
 }
 
 #contentList
@@ -25,7 +25,7 @@
   position: absolute;
   left: 20px;
   right: 20px;
-  margin-top: 45px;
+  margin-top: 48px;
 }
 
 #dashboardListWrapper
@@ -33,7 +33,7 @@
   position: relative;
   width: auto;
   height: 29px;
-  background-color: #fafafa;
+  background-color: #f7f7f7;
   border: 1px solid #d0d0d0;
   border-radius: 3px;
   padding: 0;
@@ -49,6 +49,13 @@
 {
   padding: 30px 140px;
   font-size: 28px;
+  color: #bbb;
+}
+
+.dasboardTip
+{
+  padding: 20px 140px;
+  font-size: 22px;
   color: #bbb;
 }
 
@@ -77,14 +84,34 @@
   margin: 0 19px 19px 0;
   border-radius: 3px;
   cursor: pointer;  
-  box-shadow: #ddd 0px 1px 1px 0px;
+  box-shadow: #ddd 0px 1px 3px 0px;
   background-color: #fff;
+  overflow: auto;
+}
+
+.item h3
+{
+  font-size: 12px;
+  font-family: LiberationSansBold, sans-serif;
+  color: #39547d;
+  margin: 2px 5px;
+}
+
+.item h4
+{
+  margin: 0;
 }
 
 .item:hover
 {
-  border: 1px solid #aaa;
-  box-shadow: #aaa 0px 1px 1px 0px;
+  border: 1px solid #bbb;
+  box-shadow: #ccc 0px 1px 3px 0px;
+}
+
+.item::-webkit-scrollbar
+{
+  width: 8px;
+  height: 8px;
 }
 
 .dropItem
@@ -97,6 +124,13 @@
   background-color: #e9f5fb;
   border-radius: 3px;
   display: none;
+}
+
+.blankDropItem
+{
+  border: 1px solid #fff;
+  background-color: #fff;
+  display: block;
 }
 
 .itemHeader
@@ -557,4 +591,28 @@ div#selectionTree
 {
   width: 610px;
   margin-left: 38px;
+}
+
+/*----------------------------------------------------------------------------*/
+/* Print style                                                                */
+/*----------------------------------------------------------------------------*/
+
+@media print {
+
+.horizontalMenu li
+{
+  page-break-inside: avoid;
+}
+
+#dashboardHeader, #dashboardMenu, #searchDiv, #searchButton, #hitDiv, #dashboardListContainer
+{
+  display: none;
+}
+
+#contentDiv
+{
+  top: 0;
+  width: 960px;
+}
+
 }

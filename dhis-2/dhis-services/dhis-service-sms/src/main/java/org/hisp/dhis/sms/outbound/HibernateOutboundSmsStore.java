@@ -31,27 +31,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
+
 import org.hibernate.criterion.Order;
+import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
 public class HibernateOutboundSmsStore
+    extends HibernateGenericStore<OutboundSms>
     implements OutboundSmsStore
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private SessionFactory sessionFactory;
-
-    public void setSessionFactory( SessionFactory sessionFactory )
-    {
-        this.sessionFactory = sessionFactory;
-    }
 
     private JdbcTemplate jdbcTemplate;
 
@@ -65,10 +57,10 @@ public class HibernateOutboundSmsStore
     // -------------------------------------------------------------------------
 
     @Override
-    public int save( OutboundSms sms )
+    public int saveOutboundSms( OutboundSms sms )
     {
         checkDate( sms );
-        return (Integer) sessionFactory.getCurrentSession().save( sms );
+        return save( sms );
     }
 
     private void checkDate( OutboundSms sms )
@@ -80,18 +72,16 @@ public class HibernateOutboundSmsStore
     }
 
     @Override
-    public OutboundSms get( int id )
+    public OutboundSms getOutboundSmsbyId( int id )
     {
-        Session session = sessionFactory.getCurrentSession();
-        return (OutboundSms) session.get( OutboundSms.class, id );
+        return get( id );
     }
 
     @Override
     @SuppressWarnings( "unchecked" )
-    public List<OutboundSms> getAll()
+    public List<OutboundSms> getAllOutboundSms()
     {
-        Session session = sessionFactory.getCurrentSession();
-        return session.createCriteria( OutboundSms.class ).addOrder( Order.asc( "date" ) ).list();
+        return getCriteria().addOrder( Order.desc( "date" ) ).list();
     }
 
     @Override
@@ -140,14 +130,14 @@ public class HibernateOutboundSmsStore
     }
 
     @Override
-    public void update( OutboundSms sms )
+    public void updateOutboundSms( OutboundSms sms )
     {
-        sessionFactory.getCurrentSession().update( sms );
+        update( sms );
     }
 
     @Override
-    public void delete( OutboundSms sms )
+    public void deleteOutboundSms( OutboundSms sms )
     {
-        sessionFactory.getCurrentSession().delete( sms );
+        delete( sms );
     }
 }
