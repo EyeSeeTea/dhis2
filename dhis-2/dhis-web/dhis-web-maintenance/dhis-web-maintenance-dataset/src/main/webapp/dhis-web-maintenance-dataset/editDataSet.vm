@@ -168,7 +168,7 @@
         <td>
           <select id="dataElementDecoration" name="dataElementDecoration">
             <option value="false">$i18n.getString( "no" )</option>
-            <option value="true"#if( $dataSet.isDataElementDecoration == true ) selected="selected"#end>$i18n.getString( "yes" )</option>
+            <option value="true"#if( $dataSet.dataElementDecoration == true ) selected="selected"#end>$i18n.getString( "yes" )</option>
           </select>
         </td>
       </tr>      
