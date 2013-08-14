@@ -1657,13 +1657,14 @@ Ext.onReady( function() {
 							valueElement = Ext.get(key);
 													
 							valueElement.dom.pt = pt;
-							valueElement.dom.setAttribute('onclick', 'this.pt.util.pivot.onMouseClick(this.id);');
+							valueElement.dom.setAttribute('onclick', 'this.pt.engine.onMouseClick(this.id, this.pt);');
 						}
 					}
 				};						
 
 				getTableHtml = function(xColAxis, xRowAxis, xResponse) {
-					var getTdHtml,
+					var getRoundedHtmlValue,
+						getTdHtml,
 						doSubTotals,
 						doTotals,
 						getColAxisHtmlArray,
@@ -1673,7 +1674,6 @@ Ext.onReady( function() {
 						getGrandTotalHtmlArray,
 						getTotalHtmlArray,
 						getHtml,
-
 						getUniqueFactor = function(xAxis) {
 							if (!xAxis) {
 								return null;
@@ -1692,14 +1692,17 @@ Ext.onReady( function() {
 
 							return null;
 						},
-
 						colUniqueFactor = getUniqueFactor(xColAxis),
 						rowUniqueFactor = getUniqueFactor(xRowAxis),
-
 						valueItems = [],
 						valueObjects = [],
 						totalColObjects = [],
 						htmlArray;
+						
+					getRoundedHtmlValue = function(value, dec) {
+						dec = dec || 2;
+						return parseFloat(pt.util.number.roundIf(value, 2)).toString();
+					};
 
 					getTdHtml = function(config) {
 						var bgColor,
@@ -1971,7 +1974,7 @@ Ext.onReady( function() {
 									type: 'valueTotal',
 									cls: 'pivot-value-total',
 									value: total,
-									htmlValue: Ext.Array.contains(empty, false) ? parseFloat(pt.util.number.roundIf(total, 2)).toString() : '&nbsp;',
+									htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '&nbsp;',
 									empty: !Ext.Array.contains(empty, false)
 								});
 
@@ -2036,7 +2039,7 @@ Ext.onReady( function() {
 											type: 'valueSubtotal',
 											cls: 'pivot-value-subtotal',
 											value: rowSubTotal,
-											htmlValue: Ext.Array.contains(empty, false) ? parseFloat(pt.util.number.roundIf(rowSubTotal, 2)).toString() : '&nbsp',
+											htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(rowSubTotal) : '&nbsp',
 											empty: !Ext.Array.contains(empty, false),
 											collapsed: !Ext.Array.contains(collapsed, false)
 										});
@@ -2118,7 +2121,7 @@ Ext.onReady( function() {
 										tmpValueObjects[tmpCount++].push({
 											type: item.type === 'value' ? 'valueSubtotal' : 'valueSubtotalTotal',
 											value: subTotal,
-											htmlValue: Ext.Array.contains(empty, false) ? parseFloat(pt.util.number.roundIf(subTotal, 2)).toString() : '&nbsp;',
+											htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(subTotal) : '&nbsp;',
 											collapsed: collapsed,
 											cls: item.type === 'value' ? 'pivot-value-subtotal' : 'pivot-value-subtotal-total'
 										});
@@ -2144,7 +2147,7 @@ Ext.onReady( function() {
 										type: 'valueTotalSubgrandtotal',
 										cls: 'pivot-value-total-subgrandtotal',
 										value: subTotal,
-										htmlValue: Ext.Array.contains(empty, false) ? parseFloat(pt.util.number.roundIf(subTotal, 2)).toString() : '&nbsp;',
+										htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(subTotal) : '&nbsp;',
 										empty: !Ext.Array.contains(empty, false),
 										collapsed: !Ext.Array.contains(collapsed, false)
 									});
@@ -2210,7 +2213,7 @@ Ext.onReady( function() {
 								totalColObjects.push({
 									type: 'valueTotal',
 									value: total,
-									htmlValue: Ext.Array.contains(empty, false) ? parseFloat(pt.util.number.roundIf(total, 2)).toString() : '&nbsp;',
+									htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '&nbsp;',
 									empty: !Ext.Array.contains(empty, false),
 									cls: 'pivot-value-total'
 								});
@@ -2235,7 +2238,7 @@ Ext.onReady( function() {
 										tmp.push({
 											type: 'valueTotalSubgrandtotal',
 											value: subTotal,
-											htmlValue: Ext.Array.contains(empty, false) ? parseFloat(pt.util.number.roundIf(subTotal, 2)).toString() : '&nbsp;',
+											htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(subTotal) : '&nbsp;',
 											empty: !Ext.Array.contains(empty, false),
 											cls: 'pivot-value-total-subgrandtotal'
 										});
@@ -2274,7 +2277,7 @@ Ext.onReady( function() {
 								a.push(getTdHtml({
 									type: 'valueGrandTotal',
 									cls: 'pivot-value-grandtotal',
-									htmlValue: Ext.Array.contains(empty, false) ? parseFloat(pt.util.number.roundIf(total, 2)).toString() : '&nbsp;',
+									htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '&nbsp;',
 									empty: !Ext.Array.contains(empty, false)
 								}));
 							}
@@ -2496,7 +2499,7 @@ Ext.onReady( function() {
 				}
 			};
 		
-			engine.onMouseHover = function(uuid, event, param) {
+			engine.onMouseHover = function(uuid, event, param, pt) {
 				var dimUuids;
 
 				if (param === 'chart') {			
@@ -2519,7 +2522,7 @@ Ext.onReady( function() {
 				}
 			};
 			
-			engine.onMouseClick = function(uuid) {
+			engine.onMouseClick = function(uuid, pt) {
 				var that = this,
 					uuids = pt.uuidDimUuidsMap[uuid],
 					layoutConfig = Ext.clone(pt.layout),
@@ -2568,11 +2571,11 @@ Ext.onReady( function() {
 							listeners: {
 								render: function() {
 									this.getEl().on('mouseover', function() {
-										that.onMouseHover(uuid, 'mouseover', 'chart');
+										that.onMouseHover(uuid, 'mouseover', 'chart', pt);
 									});
 
 									this.getEl().on('mouseout', function() {
-										that.onMouseHover(uuid, 'mouseout', 'chart');
+										that.onMouseHover(uuid, 'mouseout', 'chart', pt);
 									});
 								}
 							}
