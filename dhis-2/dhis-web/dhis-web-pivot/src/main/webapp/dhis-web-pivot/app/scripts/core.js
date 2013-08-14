@@ -11,7 +11,7 @@ Ext.onReady( function() {
 	}
 
 	// mode
-	PT.isDebug = false;
+	PT.isDebug = true;
 	
 	// html5
 	PT.isSessionStorage = 'sessionStorage' in window && window['sessionStorage'] !== null;
@@ -470,8 +470,7 @@ Ext.onReady( function() {
 		}());
 
 		// init
-		(function() {
-			
+		(function() {			
 			// sort and extend dynamic dimensions
 			init.dimensions = util.array.sortObjectsByString(init.dimensions);
 
@@ -493,7 +492,6 @@ Ext.onReady( function() {
 
 		// api
 		(function() {
-
 			api.layout = {};
 			api.response = {};
 
@@ -1655,9 +1653,11 @@ Ext.onReady( function() {
 					for (var key in uuidDimUuidsMap) {
 						if (uuidDimUuidsMap.hasOwnProperty(key)) {
 							valueElement = Ext.get(key);
-													
-							valueElement.dom.pt = pt;
-							valueElement.dom.setAttribute('onclick', 'this.pt.engine.onMouseClick(this.id, this.pt);');
+							
+							if (parseFloat(valueElement.dom.textContent)) {
+								valueElement.dom.pt = pt;
+								valueElement.dom.setAttribute('onclick', 'this.pt.engine.onMouseClick(this.id, this.pt);');
+							}
 						}
 					}
 				};						
@@ -1737,7 +1737,7 @@ Ext.onReady( function() {
 						
 						colSpan = config.colSpan ? 'colspan="' + config.colSpan + '" ' : '';
 						rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '" ' : '';
-						htmlValue = config.collapsed ? '&nbsp;' : config.htmlValue || config.value || '&nbsp;';
+						htmlValue = config.collapsed ? '' : config.htmlValue || config.value || '';
 						htmlValue = config.type !== 'dimension' ? pt.util.number.pp(htmlValue, layout.digitGroupSeparator) : htmlValue;
 						displayDensity = conf.pivot.displayDensity[config.displayDensity] || conf.pivot.displayDensity[layout.displayDensity];
 						fontSize = conf.pivot.fontSize[config.fontSize] || conf.pivot.fontSize[layout.fontSize];
@@ -1937,7 +1937,7 @@ Ext.onReady( function() {
 								}
 								else {
 									value = 0;
-									htmlValue = '&nbsp;';
+									htmlValue = '';
 									empty = true;
 								}
 
@@ -1974,7 +1974,7 @@ Ext.onReady( function() {
 									type: 'valueTotal',
 									cls: 'pivot-value-total',
 									value: total,
-									htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '&nbsp;',
+									htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '',
 									empty: !Ext.Array.contains(empty, false)
 								});
 
@@ -2039,7 +2039,7 @@ Ext.onReady( function() {
 											type: 'valueSubtotal',
 											cls: 'pivot-value-subtotal',
 											value: rowSubTotal,
-											htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(rowSubTotal) : '&nbsp',
+											htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(rowSubTotal) : '',
 											empty: !Ext.Array.contains(empty, false),
 											collapsed: !Ext.Array.contains(collapsed, false)
 										});
@@ -2074,7 +2074,7 @@ Ext.onReady( function() {
 									obj.collapsed = Ext.Array.contains(collapsed, true);
 
 									if (i === 0) {
-										obj.htmlValue = '&nbsp;';
+										obj.htmlValue = '';
 										obj.colSpan = xRowAxis.dims;
 									}
 									else {
@@ -2121,7 +2121,7 @@ Ext.onReady( function() {
 										tmpValueObjects[tmpCount++].push({
 											type: item.type === 'value' ? 'valueSubtotal' : 'valueSubtotalTotal',
 											value: subTotal,
-											htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(subTotal) : '&nbsp;',
+											htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(subTotal) : '',
 											collapsed: collapsed,
 											cls: item.type === 'value' ? 'pivot-value-subtotal' : 'pivot-value-subtotal-total'
 										});
@@ -2147,7 +2147,7 @@ Ext.onReady( function() {
 										type: 'valueTotalSubgrandtotal',
 										cls: 'pivot-value-total-subgrandtotal',
 										value: subTotal,
-										htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(subTotal) : '&nbsp;',
+										htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(subTotal) : '',
 										empty: !Ext.Array.contains(empty, false),
 										collapsed: !Ext.Array.contains(collapsed, false)
 									});
@@ -2213,7 +2213,7 @@ Ext.onReady( function() {
 								totalColObjects.push({
 									type: 'valueTotal',
 									value: total,
-									htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '&nbsp;',
+									htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '',
 									empty: !Ext.Array.contains(empty, false),
 									cls: 'pivot-value-total'
 								});
@@ -2238,7 +2238,7 @@ Ext.onReady( function() {
 										tmp.push({
 											type: 'valueTotalSubgrandtotal',
 											value: subTotal,
-											htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(subTotal) : '&nbsp;',
+											htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(subTotal) : '',
 											empty: !Ext.Array.contains(empty, false),
 											cls: 'pivot-value-total-subgrandtotal'
 										});
@@ -2277,7 +2277,7 @@ Ext.onReady( function() {
 								a.push(getTdHtml({
 									type: 'valueGrandTotal',
 									cls: 'pivot-value-grandtotal',
-									htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '&nbsp;',
+									htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '',
 									empty: !Ext.Array.contains(empty, false)
 								}));
 							}
