@@ -3471,8 +3471,7 @@ Ext.onReady( function() {
 		userOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
 			columnWidth: 0.28,
 			style: 'padding-top:2px; padding-left:3px; margin-bottom:0',
-			//boxLabel: PT.i18n.user_organisation_unit,
-			boxLabel: 'User org unit',
+			boxLabel: PT.i18n.user_organisation_unit,
 			labelWidth: pt.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnitChildren.getValue(), userOrganisationUnitGrandChildren.getValue()]);
@@ -3482,8 +3481,7 @@ Ext.onReady( function() {
 		userOrganisationUnitChildren = Ext.create('Ext.form.field.Checkbox', {
 			columnWidth: 0.31,
 			style: 'padding-top:2px; margin-bottom:0',
-			//boxLabel: PT.i18n.user_organisation_unit_children,
-			boxLabel: 'Org unit children',
+			boxLabel: PT.i18n.user_organisation_unit_children,
 			labelWidth: pt.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitGrandChildren.getValue()]);
@@ -3491,10 +3489,9 @@ Ext.onReady( function() {
 		});
 
 		userOrganisationUnitGrandChildren = Ext.create('Ext.form.field.Checkbox', {
-			columnWidth: 0.40,
+			columnWidth: 0.41,
 			style: 'padding-top:2px; margin-bottom:0',
-			//boxLabel: PT.i18n.user_organisation_unit_children,
-			boxLabel: 'Org unit grand children',
+			boxLabel: PT.i18n.user_organisation_unit_grandchildren,
 			labelWidth: pt.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitChildren.getValue()]);
@@ -3503,6 +3500,7 @@ Ext.onReady( function() {
 		
 		organisationUnitLevel = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'pt-combo',
+			multiSelect: true,
 			style: 'margin-bottom:0',
 			width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding - 38,
 			valueField: 'level',
@@ -3651,24 +3649,40 @@ Ext.onReady( function() {
 					}
 				}
 				else if (toolMenu.menuValue === 'level') {
-					for (var i = 0; i < r.length; i++) {
+					var levels = organisationUnitLevel.getValue();
+console.log(levels);					
+					for (var i = 0; i < levels.length; i++) {
 						config.items.push({
-							id: 'LEVEL-' + organisationUnitLevel.getValue() + '-' + r[i].data.id,
+							id: 'LEVEL-' + levels[i],
 							name: ''
 						});
 					}
+						
+					for (var i = 0; i < r.length; i++) {
+						config.items.push({
+							id: r[i].data.id,
+							name: ''
+						});
+					}
+console.log(config.items);					
 				}
 				else if (toolMenu.menuValue === 'group') {
 					var groupIds = organisationUnitGroup.getValue();
-					
-					//for (var i = 0; i < r.length; i++) {
-						for (var j = 0; j < groupIds.length; j++) {
-							config.items.push({
-								id: 'OU_GROUP-' + groupIds[j],// + '-' + r[i].data.id,
-								name: ''
-							});
-						}
-					//}
+console.log(groupIds);					
+					for (var i = 0; i < groupIds.length; i++) {
+						config.items.push({
+							id: 'OU_GROUP-' + groupIds[i],
+							name: ''
+						});
+					}
+						
+					for (var i = 0; i < r.length; i++) {
+						config.items.push({
+							id: r[i].data.id,
+							name: ''
+						});
+					}
+console.log(config.items);	
 				}
 				
 				return config.items.length ? config : null;
