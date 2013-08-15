@@ -67,13 +67,14 @@ function insertFilterDesign()
 // Add Filter button events
 function filterButtonEvents( filter )
 {
-//    applyFilterButton( filter );
     exportFilterButton( filter );
     editFilterButton( filter );
     removeFilterButton( filter );
 }
 
-// Export detailed MetaData by applied Filter
+// -----------------------------------------------------------------------------
+// Export Detailed MetaData
+// -----------------------------------------------------------------------------
 function exportFilterButton( filter )
 {
     var filterName = removeWhiteSpace( filter.name );
@@ -84,9 +85,6 @@ function exportFilterButton( filter )
     } );
 }
 
-// -----------------------------------------------------------------------------
-// Export Detailed MetaData
-// -----------------------------------------------------------------------------
 function exportDetailedMetaData()
 {
     var json = $( "#exportJson" ).val();
@@ -133,43 +131,6 @@ function getURL()
     return url;
 }
 
-// Apply a Filter to the MetaData Tables
-function applyFilterButton( filter )
-{
-//    var filterName = removeWhiteSpace( filter.name );
-//    $( "#buttonApply" + filterName ).live( "click", function ()
-//    {
-//        selectAllCheckboxes();
-//        $( document ).ajaxStop( function ()
-//        {
-//            applyFilter( filter );
-//        } );
-//        applyFilter( filter )
-//    } );
-}
-
-// Apply a Filter to the tables by selecting the uids from the Filter
-//function applyFilter( filter )
-//{
-//    var uids = (filter.metaDataUids).split( ", " );
-//    for ( var i = 0; i < uids.length; i++ )
-//    {
-//        for ( var j = 0; j < metaDataArray.length; j++ )
-//        {
-//            $( "#available" + metaDataArray[j] + " option" ).each( function ()
-//            {
-//                var availableUid = $( this ).val();
-//                if ( uids[i] == availableUid )
-//                {
-//                    $( this ).prop( "selected", true );
-//                    uids.splice( i, 1 );
-//                }
-//            } );
-//            moveSelectedValuesByCategory( metaDataArray[j] );
-//        }
-//    }
-//}
-
 // -----------------------------------------------------------------------------
 // Edit a Filter
 // -----------------------------------------------------------------------------
@@ -190,50 +151,9 @@ function editFilterButton( filter )
                 $( "input[name='operation']" ).val( "update" );
             }
         }
-
         $( "#formFilter" ).submit();
     } );
 }
-
-//// Get all the selected uids from the tables
-//function getSelectedUids()
-//{
-//    var selectedUidsArray = [];
-//    for ( var i = 0; i < metaDataArray.length; i++ )
-//    {
-//        $( "#selected" + metaDataArray[i] + " option" ).each( function ()
-//        {
-//            selectedUidsArray.push( $( this ).attr( "value" ) );
-//        } );
-//    }
-//
-//    return selectedUidsArray;
-//}
-//
-//// Add the Selected Uids to the existing Uids that a Filter has
-//function getAllUids( existingUidsArray, selectedUidsArray )
-//{
-//    for ( var i = 0; i < existingUidsArray.length; i++ )
-//    {
-//        for ( var j = 0; j < selectedUidsArray.length; j++ )
-//        {
-//            if ( selectedUidsArray[j] == existingUidsArray[i] )
-//            {
-//                selectedUidsArray.splice( j, 1 );
-//            }
-//        }
-//    }
-//
-//    var finalUidsArray = existingUidsArray.concat( selectedUidsArray );
-//    var finalUids = "";
-//    for ( var k = 0; k < finalUidsArray.length; k++ )
-//    {
-//        finalUids += finalUidsArray[k] + ", ";
-//    }
-//    finalUids = removeLastComma( finalUids );
-//
-//    return finalUids;
-//}
 
 // -----------------------------------------------------------------------------
 // Delete a Filter

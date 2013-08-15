@@ -20,7 +20,7 @@ jQuery( function ()
         } );
 } );
 
-// Collapse MetaData Category information
+// Collapsed MetaData Category information
 function loadMetaDataCategories()
 {
     for ( var i = 0; i < metaDataArray.length; i++ )
@@ -54,76 +54,6 @@ function loadMetaDataCategories()
     }
 }
 
-//// Export DetailedMetaData AJAX
-//function exportDetailedMetaData()
-//{
-//    var json = JSON.stringify( createFilterJSON() );
-//    var url = getURL();
-//    console.log( "Exported JSON:" + json );
-//    $.ajax(
-//        {
-//            type: "POST",
-//            url: url,
-//            data: json,
-//            contentType: "application/json",
-//            dataType: "xml",
-//            success: function ( response )
-//            {
-//                console.log( "Response" + response );
-//                window.location = "../api/detailedMetaData/getMetaDataFile";
-//            },
-//            error: function ( request, status, error )
-//            {
-//                console.log( request.responseText );
-//                console.log( arguments );
-//                alert( "Export process failed." );
-//            }
-//        } );
-//}
-
-//// Generate Export URL
-//function getURL()
-//{
-//    var url = "../api/detailedMetaData";
-//    var format = $( "#format" ).val();
-//    var compression = $( "#compression" ).val();
-//    url += "/set" + format;
-//
-//    if ( compression == "zip" )
-//    {
-//        url += "Zip";
-//    }
-//    else if ( compression == "gz" )
-//    {
-//        url += "Gz";
-//    }
-//
-//    return url;
-//}
-
-//// Create Filter Object
-//function createFilterJSON()
-//{
-//    var filter = {};
-//    for ( var i = 0; i < metaDataArray.length; i++ )
-//    {
-//        var filterValues = [];
-//        var values = $( "#selected" + metaDataArray[i] ).val();
-//        if ( values != undefined )
-//        {
-//            filterValues = values;
-//        }
-//
-//        if ( filterValues.length != 0 )
-//        {
-//            var metaDataCategory = lowercaseFirstLetter( metaDataArray[i] );
-//            filter[metaDataCategory] = filterValues;
-//        }
-//    }
-//
-//    return filter;
-//}
-
 // Insert MetaData HTML & CSS Checkbox
 function insertMetaDataCategoryDesign( metaDataCategoryName )
 {
@@ -148,12 +78,6 @@ function insertMetaDataDesign( metaDataCategoryName )
         metaDataCategory.show();
         deselectAllValues();
     }
-}
-
-// Move selected values by MetaData Category
-function moveSelectedValuesByCategory( metaDataCategoryName )
-{
-    $( "#moveSelected" + metaDataCategoryName ).click();
 }
 
 // Generate MetaData Checkboxes
@@ -290,7 +214,6 @@ function getSelectedUidsJson()
             metaDataUidsJson[metaDataCategory] = metaDataCategoryValues;
         }
     }
-
     return metaDataUidsJson;
 }
 
@@ -369,6 +292,12 @@ function deselectValuesByCategory( metaDataCategoryName )
     {
         $( this ).prop( "selected", false );
     } );
+}
+
+// Move selected values by category
+function moveSelectedValuesByCategory( metaDataCategoryName )
+{
+    $( "#moveSelected" + metaDataCategoryName ).click();
 }
 
 // -----------------------------------------------------------------------------

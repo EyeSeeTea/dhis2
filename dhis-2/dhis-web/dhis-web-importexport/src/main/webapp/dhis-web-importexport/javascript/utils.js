@@ -20,7 +20,6 @@ function removeEmptyStringFromArray( array )
             array.splice( i, 1 );
         }
     }
-
     return array;
 }
 

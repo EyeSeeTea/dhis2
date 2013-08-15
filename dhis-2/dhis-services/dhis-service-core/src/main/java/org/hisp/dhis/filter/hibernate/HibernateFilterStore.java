@@ -31,8 +31,6 @@ import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.filter.Filter;
 import org.hisp.dhis.filter.FilterStore;
 
-import java.util.Collection;
-
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */

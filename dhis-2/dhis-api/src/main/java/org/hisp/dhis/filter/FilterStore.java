@@ -29,8 +29,6 @@ package org.hisp.dhis.filter;
 
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 
-import java.util.Collection;
-
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */

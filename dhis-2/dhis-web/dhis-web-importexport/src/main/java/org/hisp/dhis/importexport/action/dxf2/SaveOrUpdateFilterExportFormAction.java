@@ -27,7 +27,6 @@ package org.hisp.dhis.importexport.action.dxf2;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.filter.Filter;
 
