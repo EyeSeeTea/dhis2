@@ -322,23 +322,15 @@
           <result name="success" type="velocity">/main.vm</result>
           <param name="menu">/dhis-web-importexport/mainMenu.vm</param>
           <param name="page">/dhis-web-importexport/dxf2DetailedMetaDataExport.vm</param>
-          <param name="javascripts">javascript/detailedMetaDataExport.js,javascript/filter.js,javascript/utils.js</param>
+          <param name="javascripts">javascript/filter.js,javascript/utils.js</param>
           <param name="requiredAuthorities">F_METADATA_EXPORT</param>
       </action>
 
-      <action name="saveFilterExportForm" class="org.hisp.dhis.importexport.action.dxf2.SaveFilterExportFormAction">
+      <action name="saveOrUpdateFilterExportForm" class="org.hisp.dhis.importexport.action.dxf2.SaveOrUpdateFilterExportForm">
           <result name="success" type="velocity">/main.vm</result>
           <param name="menu">/dhis-web-importexport/mainMenu.vm</param>
-          <param name="page">/dhis-web-importexport/saveFilterExportForm.vm</param>
-          <param name="javascripts">javascript/exportFilterForm.js</param>
-          <param name="requiredAuthorities">F_METADATA_EXPORT</param>
-      </action>
-
-      <action name="updateFilterExportForm" class="org.hisp.dhis.importexport.action.dxf2.UpdateFilterExportFormAction">
-          <result name="success" type="velocity">/main.vm</result>
-          <param name="menu">/dhis-web-importexport/mainMenu.vm</param>
-          <param name="page">/dhis-web-importexport/updateFilterExportForm.vm</param>
-          <param name="javascripts">javascript/exportFilterForm.js</param>
+          <param name="page">/dhis-web-importexport/saveOrUpdateFilterExportForm.vm</param>
+          <param name="javascripts">javascript/detailedMetaDataExport.js,javascript/utils.js</param>
           <param name="requiredAuthorities">F_METADATA_EXPORT</param>
       </action>
 

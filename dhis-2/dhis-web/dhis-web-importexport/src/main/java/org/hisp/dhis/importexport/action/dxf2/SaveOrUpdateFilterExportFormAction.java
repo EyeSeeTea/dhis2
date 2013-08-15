@@ -34,7 +34,7 @@ import org.hisp.dhis.filter.Filter;
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
-public class SaveFilterExportFormAction
+public class SaveOrUpdateFilterExportFormAction
         implements Action
 {
     // -------------------------------------------------------------------------
@@ -51,6 +51,18 @@ public class SaveFilterExportFormAction
     public void setName( String name )
     {
         this.name = name;
+    }
+
+    private String uid;
+
+    public String getUid()
+    {
+        return uid;
+    }
+
+    public void setUid( String uid )
+    {
+        this.uid = uid;
     }
 
     private String code;
@@ -77,6 +89,18 @@ public class SaveFilterExportFormAction
         this.metaDataUids = metaDataUids;
     }
 
+    public String operation;
+
+    public String getOperation()
+    {
+        return operation;
+    }
+
+    public void setOperation( String operation )
+    {
+        this.operation = operation;
+    }
+
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
@@ -101,6 +125,7 @@ public class SaveFilterExportFormAction
     public String execute() throws Exception
     {
         filter.setName( name );
+        filter.setUid( uid );
         filter.setCode( code );
         filter.setMetaDataUids( metaDataUids );
         return SUCCESS;

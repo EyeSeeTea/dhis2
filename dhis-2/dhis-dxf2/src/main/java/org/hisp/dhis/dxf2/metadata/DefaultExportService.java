@@ -212,9 +212,9 @@ public class DefaultExportService
     @Override
     public void saveFilter( JSONObject json ) throws IOException
     {
-        String jsonString = json.toString();
-        ObjectMapper mapper = new ObjectMapper();
-        Filter filter = mapper.readValue( jsonString, Filter.class );
+        Filter filter = new Filter( json.getString( "name" ) );
+        filter.setCode( json.getString( "code" ) );
+        filter.setMetaDataUids( json.getString( "metaDataUids" ) );
         filter.setAutoFields();
 
         filterService.saveFilter( filter );
