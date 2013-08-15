@@ -2360,7 +2360,7 @@ Ext.onReady( function() {
 						},
 						disableCaching: false,
 						failure: function(r) {
-							pt.util.mask.hideMask();
+							pt.util.mask.hideMask(pt.viewport.centerRegion);
 							alert(r.responseText);
 						},
 						success: function(r) {
@@ -2368,7 +2368,7 @@ Ext.onReady( function() {
 								response = pt.api.response.Response(Ext.decode(r.responseText));
 
 							if (!response) {
-								pt.util.mask.hideMask();
+								pt.util.mask.hideMask(pt.viewport.centerRegion);
 								return;
 							}
 
@@ -2376,7 +2376,7 @@ Ext.onReady( function() {
 							xLayout = getSyncronizedXLayout(xLayout, response);
 
 							if (!xLayout) {
-								pt.util.mask.hideMask();
+								pt.util.mask.hideMask(pt.viewport.centerRegion);
 								return;
 							}
 
@@ -2469,7 +2469,7 @@ Ext.onReady( function() {
 				};
 				
 				failure = function(responseText) {
-					util.mask.hideMask();
+					util.mask.hideMask(pt.viewport.centerRegion);
 					alert(responseText);
 				};
 					

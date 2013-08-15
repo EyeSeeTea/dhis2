@@ -3650,7 +3650,7 @@ Ext.onReady( function() {
 				}
 				else if (toolMenu.menuValue === 'level') {
 					var levels = organisationUnitLevel.getValue();
-console.log(levels);					
+					
 					for (var i = 0; i < levels.length; i++) {
 						config.items.push({
 							id: 'LEVEL-' + levels[i],
@@ -3664,11 +3664,10 @@ console.log(levels);
 							name: ''
 						});
 					}
-console.log(config.items);					
 				}
 				else if (toolMenu.menuValue === 'group') {
 					var groupIds = organisationUnitGroup.getValue();
-console.log(groupIds);					
+					
 					for (var i = 0; i < groupIds.length; i++) {
 						config.items.push({
 							id: 'OU_GROUP-' + groupIds[i],
@@ -3682,7 +3681,6 @@ console.log(groupIds);
 							name: ''
 						});
 					}
-console.log(config.items);	
 				}
 				
 				return config.items.length ? config : null;
@@ -4355,7 +4353,8 @@ console.log(config.items);
 				dimNames = [],
 				isOu = false,
 				isOuc = false,
-				level;
+				levels = [],
+				groups = [];
 				
 			// State
 			pt.viewport.interpretationButton.enable();
@@ -4516,14 +4515,21 @@ console.log(config.items);
 						isOuc = true;
 					}
 					if (ouRecords[i].id.substr(0,5) === 'LEVEL') {
-						level = parseInt(ouRecords[i].id.split('-')[1]);
+						levels.push(parseInt(ouRecords[i].id.split('-')[1]));
+					}
+					if (ouRecords[i].id.substr(0,8) === 'OU_GROUP') {
+						groups.push(parseInt(ouRecords[i].id.split('-')[1]));
 					}
 				}
 			}
 			
-			if (level) {					
+			if (levels.length) {					
 				toolMenu.clickHandler('level');
-				organisationUnitLevel.setValue(level);
+				organisationUnitLevel.setValue(levels);
+			}
+			else if (groups.length) {					
+				toolMenu.clickHandler('group');
+				organisationUnitGroup.setValue(groups);
 			}
 			else {
 				toolMenu.clickHandler('orgunit');
