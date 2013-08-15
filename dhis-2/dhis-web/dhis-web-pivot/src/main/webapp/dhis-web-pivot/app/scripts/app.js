@@ -2186,6 +2186,7 @@ Ext.onReady( function() {
 			treePanel,
 			userOrganisationUnit,
 			userOrganisationUnitChildren,
+			userOrganisationUnitGrandChildren,
 			userOrganisationUnitPanel,
 			organisationUnitLevel,
 			tool,
@@ -3414,13 +3415,15 @@ Ext.onReady( function() {
 					}
 				}
 			}),
-			xable: function(checked, value) {
-				if (checked || value) {
-					this.disable();
+			xable: function(values) {
+				for (var i = 0; i < values.length; i++) {
+					if (!!values[i]) {
+						this.disable();
+						return;
+					}
 				}
-				else {
-					this.enable();
-				}
+				
+				this.enable();
 			},
 			listeners: {
 				added: function() {
@@ -3466,33 +3469,36 @@ Ext.onReady( function() {
 		});
 
 		userOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
-			columnWidth: 0.5,
+			columnWidth: 0.28,
 			style: 'padding-top:2px; padding-left:3px; margin-bottom:0',
-			boxLabel: PT.i18n.user_organisation_unit,
+			//boxLabel: PT.i18n.user_organisation_unit,
+			boxLabel: 'User org unit',
 			labelWidth: pt.conf.layout.form_label_width,
 			handler: function(chb, checked) {
-				treePanel.xable(checked, userOrganisationUnitChildren.getValue());
+				treePanel.xable([checked, userOrganisationUnitChildren.getValue(), userOrganisationUnitGrandChildren.getValue()]);
 			}
 		});
 
 		userOrganisationUnitChildren = Ext.create('Ext.form.field.Checkbox', {
-			columnWidth: 0.5,
+			columnWidth: 0.31,
 			style: 'padding-top:2px; margin-bottom:0',
-			boxLabel: PT.i18n.user_organisation_unit_children,
+			//boxLabel: PT.i18n.user_organisation_unit_children,
+			boxLabel: 'Org unit children',
 			labelWidth: pt.conf.layout.form_label_width,
 			handler: function(chb, checked) {
-				treePanel.xable(checked, userOrganisationUnit.getValue());
+				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitGrandChildren.getValue()]);
 			}
 		});
-		
-		userOrganisationUnitPanel = Ext.create('Ext.panel.Panel', {
-			columnWidth: 0.9,
-			layout: 'column',
-			bodyStyle: 'border:0 none; padding-bottom:3px; padding-left:7px',
-			items: [
-				userOrganisationUnit,
-				userOrganisationUnitChildren
-			]
+
+		userOrganisationUnitGrandChildren = Ext.create('Ext.form.field.Checkbox', {
+			columnWidth: 0.40,
+			style: 'padding-top:2px; margin-bottom:0',
+			//boxLabel: PT.i18n.user_organisation_unit_children,
+			boxLabel: 'Org unit grand children',
+			labelWidth: pt.conf.layout.form_label_width,
+			handler: function(chb, checked) {
+				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitChildren.getValue()]);
+			}
 		});
 		
 		organisationUnitLevel = Ext.create('Ext.form.field.ComboBox', {
@@ -3501,7 +3507,7 @@ Ext.onReady( function() {
 			width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding - 38,
 			valueField: 'level',
 			displayField: 'name',
-			emptyText: PT.i18n.select_organisation_unit_level,
+			emptyText: PT.i18n.select_organisation_unit_levels,
 			editable: false,
 			hidden: true,
 			store: {
@@ -3545,6 +3551,7 @@ Ext.onReady( function() {
 				if (param === 'orgunit') {
 					userOrganisationUnit.show();
 					userOrganisationUnitChildren.show();
+					userOrganisationUnitGrandChildren.show();
 					organisationUnitLevel.hide();
 					organisationUnitGroup.hide();
 					
@@ -3555,6 +3562,7 @@ Ext.onReady( function() {
 				else if (param === 'level') {
 					userOrganisationUnit.hide();
 					userOrganisationUnitChildren.hide();
+					userOrganisationUnitGrandChildren.hide();
 					organisationUnitLevel.show();
 					organisationUnitGroup.hide();
 					treePanel.enable();
@@ -3562,6 +3570,7 @@ Ext.onReady( function() {
 				else if (param === 'group') {
 					userOrganisationUnit.hide();
 					userOrganisationUnitChildren.hide();
+					userOrganisationUnitGrandChildren.hide();
 					organisationUnitLevel.hide();
 					organisationUnitGroup.show();
 					treePanel.enable();
@@ -3574,7 +3583,7 @@ Ext.onReady( function() {
 					iconCls: 'pt-menu-item-selected'
 				},
 				{
-					text: PT.i18n.select_boundaries_and_level + '&nbsp;&nbsp;',
+					text: PT.i18n.select_boundaries_and_levels + '&nbsp;&nbsp;',
 					param: 'level'
 				},
 				{
@@ -3684,6 +3693,7 @@ Ext.onReady( function() {
 							items: [
 								userOrganisationUnit,
 								userOrganisationUnitChildren,
+								userOrganisationUnitGrandChildren,
 								organisationUnitLevel,
 								organisationUnitGroup
 							]
