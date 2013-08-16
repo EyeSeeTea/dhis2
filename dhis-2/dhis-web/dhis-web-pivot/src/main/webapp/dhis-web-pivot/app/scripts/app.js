@@ -3628,7 +3628,7 @@ Ext.onReady( function() {
 					};
 					
 				if (toolMenu.menuValue === 'orgunit') {
-					if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue()) {
+					if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue() || userOrganisationUnitGrandChildren.getValue()) {
 						if (userOrganisationUnit.getValue()) {
 							config.items.push({
 								id: 'USER_ORGUNIT',
@@ -3638,6 +3638,12 @@ Ext.onReady( function() {
 						if (userOrganisationUnitChildren.getValue()) {
 							config.items.push({
 								id: 'USER_ORGUNIT_CHILDREN',
+								name: ''
+							});
+						}
+						if (userOrganisationUnitGrandChildren.getValue()) {
+							config.items.push({
+								id: 'USER_ORGUNIT_GRANDCHILDREN',
 								name: ''
 							});
 						}
@@ -4353,6 +4359,7 @@ Ext.onReady( function() {
 				dimNames = [],
 				isOu = false,
 				isOuc = false,
+				isOugc = false,
 				levels = [],
 				groups = [];
 				
@@ -4514,6 +4521,9 @@ Ext.onReady( function() {
 					if (ouRecords[i].id === 'USER_ORGUNIT_CHILDREN') {
 						isOuc = true;
 					}
+					if (ouRecords[i].id === 'USER_ORGUNIT_GRANDCHILDREN') {
+						isOugc = true;
+					}
 					if (ouRecords[i].id.substr(0,5) === 'LEVEL') {
 						levels.push(parseInt(ouRecords[i].id.split('-')[1]));
 					}
@@ -4535,6 +4545,7 @@ Ext.onReady( function() {
 				toolMenu.clickHandler('orgunit');
 				userOrganisationUnit.setValue(isOu);
 				userOrganisationUnitChildren.setValue(isOuc);
+				userOrganisationUnitGrandChildren.setValue(isOugc);
 			}
 
 			// If fav has organisation units, wait for tree callback before update
