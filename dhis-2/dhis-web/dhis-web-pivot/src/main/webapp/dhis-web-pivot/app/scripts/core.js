@@ -32,7 +32,7 @@ Ext.onReady( function() {
 		(function() {
 			conf.finals = {
 				ajax: {
-					path_pivot: '/dhis-web-pivot/',
+					path_module: '/dhis-web-pivot/',
 					path_api: '/api/',
 					path_commons: '/dhis-web-commons-ajax-json/',
 					data_get: 'chartValues.json',
@@ -735,7 +735,7 @@ Ext.onReady( function() {
 						return;
 					}
 
-					// Get object names and isOu/isOuc
+					// Get object names and user orgunits
 					for (var i = 0, dim, dims = [].concat(config.columns, config.rows, config.filters); i < dims.length; i++) {
 						dim = dims[i];
 
@@ -746,7 +746,7 @@ Ext.onReady( function() {
 								objectNames.push(dim.dimension);
 							}
 
-							// isOu/isOuc
+							// user orgunits
 							if (dim.dimension === dimConf.organisationUnit.objectName && Ext.isArray(dim.items)) {
 								for (var j = 0; j < dim.items.length; j++) {
 									if (dim.items[j].id === 'USER_ORGUNIT') {
@@ -786,6 +786,7 @@ Ext.onReady( function() {
 
 					layout.userOrganisationUnit = isOu;
 					layout.userOrganisationUnitChildren = isOuc;
+					layout.userOrganisationUnitGrandChildren = isOugc;
 
 					layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
 
