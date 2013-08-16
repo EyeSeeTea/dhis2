@@ -1256,41 +1256,41 @@ Ext.onReady( function() {
 									var userOu,
 										userOuc,
 										userOugc;
-										
+
 									if (isUserOrgunit) {
 										userOu = [{
-											id: pt.init.user.ou,
-											name: response.metaData.names[pt.init.user.ou]
+											id: dv.init.user.ou,
+											name: response.metaData.names[dv.init.user.ou]
 										}];
 									}
 									if (isUserOrgunitChildren) {
 										userOuc = [];
-										
-										for (var i = 0; i < pt.init.user.ouc.length; i++) {
+
+										for (var j = 0; j < dv.init.user.ouc.length; j++) {
 											userOuc.push({
-												id: pt.init.user.ouc[i],
-												name: response.metaData.names[pt.init.user.ouc[i]]
+												id: dv.init.user.ouc[j],
+												name: response.metaData.names[dv.init.user.ouc[j]]
 											});
 										}
 
-										userOuc = pt.util.array.sortObjectsByString(userOuc);
+										userOuc = dv.util.array.sortObjectsByString(userOuc);
 									}
 									if (isUserOrgunitGrandChildren) {
-										var userOuOuc = [].concat(pt.init.user.ou, pt.init.user.ouc),
+										var userOuOuc = [].concat(dv.init.user.ou, dv.init.user.ouc),
 											responseOu = response.metaData.ou;
-											
+
 										userOugc = [];
 
-										for (var i = 0; i < responseOu.length; i++) {
-											if (!Ext.Array.contains(userOuOuc, responseOu[i])) {
+										for (var j = 0; j < responseOu.length; j++) {
+											if (!Ext.Array.contains(userOuOuc, responseOu[j])) {
 												userOugc.push({
-													id: responseOu[i],
-													name: response.metaData.names[responseOu[i]]
+													id: responseOu[j],
+													name: response.metaData.names[responseOu[j]]
 												});
 											}
 										}
 
-										userOugc = pt.util.array.sortObjectsByString(userOugc);
+										userOugc = dv.util.array.sortObjectsByString(userOugc);
 									}
 
 									dim.items = [].concat(userOu || [], userOuc || [], userOugc || []);
@@ -1298,14 +1298,14 @@ Ext.onReady( function() {
 								else if (isLevel || isGroup) {
 									var responseOu = response.metaData.ou;
 
-									for (var i = 0; i < responseOu.length; i++) {
+									for (var j = 0; j < responseOu.length; j++) {
 										dim.items.push({
-											id: responseOu[i],
-											name: response.metaData.names[responseOu[i]]
+											id: responseOu[j],
+											name: response.metaData.names[responseOu[j]]
 										});
 									}
 
-									dim.items = pt.util.array.sortObjectsByString(dim.items);
+									dim.items = dv.util.array.sortObjectsByString(dim.items);
 								}
 								else {
 									dim.items = Ext.clone(xLayout.dimensionNameItemsMap[dim.dimensionName]);
@@ -1313,9 +1313,12 @@ Ext.onReady( function() {
 							}
 							else {
 								// Items: get ids from metadata -> items
-								if (Ext.isArray(metaDataDim) && dim.dimensionName !== dimConf.organisationUnit.dimensionName) {
+								if (Ext.isArray(metaDataDim)) {
 									for (var j = 0, ids = Ext.clone(response.metaData[dim.dimensionName]); j < ids.length; j++) {
-										dim.items.push({id: ids[j]});
+										dim.items.push({
+											id: ids[j],
+											name: response.metaData.names[ids[j]]
+										});
 									}
 								}
 								// Items: get items from xLayout

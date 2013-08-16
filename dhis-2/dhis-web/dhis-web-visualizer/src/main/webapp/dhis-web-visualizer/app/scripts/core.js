@@ -1111,7 +1111,6 @@ Ext.onReady( function() {
                         dim.items = [];
                         metaDataDim = response.metaData[dim.objectName];
 
-
                         // If ou and children
                         if (dim.dimensionName === ou) {
                             if (isUserOrgunit || isUserOrgunitChildren || isUserOrgunitGrandChildren) {
@@ -1128,10 +1127,10 @@ Ext.onReady( function() {
                                 if (isUserOrgunitChildren) {
                                     userOuc = [];
 
-                                    for (var i = 0; i < dv.init.user.ouc.length; i++) {
+                                    for (var j = 0; j < dv.init.user.ouc.length; j++) {
                                         userOuc.push({
-                                            id: dv.init.user.ouc[i],
-                                            name: response.metaData.names[dv.init.user.ouc[i]]
+                                            id: dv.init.user.ouc[j],
+                                            name: response.metaData.names[dv.init.user.ouc[j]]
                                         });
                                     }
 
@@ -1143,11 +1142,11 @@ Ext.onReady( function() {
 
                                     userOugc = [];
 
-                                    for (var i = 0; i < responseOu.length; i++) {
-                                        if (!Ext.Array.contains(userOuOuc, responseOu[i])) {
+                                    for (var j = 0; j < responseOu.length; j++) {
+                                        if (!Ext.Array.contains(userOuOuc, responseOu[j])) {
                                             userOugc.push({
-                                                id: responseOu[i],
-                                                name: response.metaData.names[responseOu[i]]
+                                                id: responseOu[j],
+                                                name: response.metaData.names[responseOu[j]]
                                             });
                                         }
                                     }
@@ -1160,10 +1159,10 @@ Ext.onReady( function() {
                             else if (isLevel || isGroup) {
                                 var responseOu = response.metaData.ou;
 
-                                for (var i = 0; i < responseOu.length; i++) {
+                                for (var j = 0; j < responseOu.length; j++) {
                                     dim.items.push({
-                                        id: responseOu[i],
-                                        name: response.metaData.names[responseOu[i]]
+                                        id: responseOu[j],
+                                        name: response.metaData.names[responseOu[j]]
                                     });
                                 }
 
@@ -1175,9 +1174,13 @@ Ext.onReady( function() {
                         }
                         else {
                             // Items: get ids from metadata -> items
-                            if (Ext.isArray(metaDataDim) && dim.dimensionName !== dimConf.organisationUnit.dimensionName) {
+                            //if (Ext.isArray(metaDataDim) && dim.dimensionName !== dimConf.organisationUnit.dimensionName) {
+                            if (Ext.isArray(metaDataDim)) {
                                 for (var j = 0, ids = Ext.clone(response.metaData[dim.dimensionName]); j < ids.length; j++) {
-                                    dim.items.push({id: ids[j]});
+                                    dim.items.push({
+                                        id: ids[j],
+                                        name: response.metaData.names[ids[j]]
+                                    });
                                 }
                             }
                             // Items: get items from xLayout
