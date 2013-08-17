@@ -3704,7 +3704,9 @@ Ext.onReady( function() {
                             items: [
                                 userOrganisationUnit,
                                 userOrganisationUnitChildren,
-                                organisationUnitLevel
+                                userOrganisationUnitGrandChildren,
+                                organisationUnitLevel,
+                                organisationUnitGroup
                             ]
                         }
                     ]
