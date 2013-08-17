@@ -3373,21 +3373,21 @@ Ext.onReady( function() {
 			},
 			selectByGroup: function(id) {
 				if (id) {
-					var url = pt.init.contextPath + pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbygroup,
+					var url = pt.init.contextPath + pt.conf.finals.ajax.path_module + pt.conf.finals.ajax.organisationunit_getbygroup,
 						params = {id: id};
 					this.select(url, params);
 				}
 			},
 			selectByLevel: function(level) {
 				if (level) {
-					var url = pt.init.contextPath + pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbylevel,
+					var url = pt.init.contextPath + pt.conf.finals.ajax.path_module + pt.conf.finals.ajax.organisationunit_getbylevel,
 						params = {level: level};
 					this.select(url, params);
 				}
 			},
 			selectByIds: function(ids) {
 				if (ids) {
-					var url = pt.init.contextPath + pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbyids;
+					var url = pt.init.contextPath + pt.conf.finals.ajax.path_module + pt.conf.finals.ajax.organisationunit_getbyids;
 					Ext.Array.each(ids, function(item) {
 						url = Ext.String.urlAppend(url, 'ids=' + item);
 					});
@@ -3400,7 +3400,7 @@ Ext.onReady( function() {
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
-					url: pt.init.contextPath + pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunitchildren_get
+					url: pt.init.contextPath + pt.conf.finals.ajax.path_module + pt.conf.finals.ajax.organisationunitchildren_get
 				},
 				root: {
 					id: pt.conf.finals.root.id,
@@ -3609,7 +3609,7 @@ Ext.onReady( function() {
 		
 		organisationUnit = {
             xtype: 'panel',
-            title: '<div class="dv-panel-title-organisationunit">' + PT.i18n.organisation_units + '</div>',
+            title: '<div class="pt-panel-title-organisationunit">' + PT.i18n.organisation_units + '</div>',
             bodyStyle: 'padding:2px',
             hideCollapseTool: true,
             collapsed: false,
