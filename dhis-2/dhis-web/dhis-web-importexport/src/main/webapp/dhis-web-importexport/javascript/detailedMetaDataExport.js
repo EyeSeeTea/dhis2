@@ -18,6 +18,15 @@ jQuery( function ()
             clearStyle: true,
             autoHeight: false
         } );
+
+    if ( $( "#metaDataUids" ).attr( "value" ) != "" )
+    {
+        selectAllCheckboxes();
+        $( document ).ajaxStop( function ()
+        {
+            applyFilter();
+        } );
+    }
 } );
 
 // Collapsed MetaData Category information
@@ -214,6 +223,7 @@ function getSelectedUidsJson()
             metaDataUidsJson[metaDataCategory] = metaDataCategoryValues;
         }
     }
+
     return metaDataUidsJson;
 }
 
@@ -229,6 +239,7 @@ function selectAllCheckboxes()
             insertMetaDataDesign( metaDataArray[i] );
         }
     }
+
     deselectAllValues();
 }
 
@@ -244,6 +255,7 @@ function deselectAllCheckboxes()
             removeMetaDataDesign( metaDataArray[i] );
         }
     }
+
     deselectAllValues();
 }
 
@@ -301,6 +313,38 @@ function moveSelectedValuesByCategory( metaDataCategoryName )
 }
 
 // -----------------------------------------------------------------------------
+// Apply Filter
+// -----------------------------------------------------------------------------
+function applyFilter()
+{
+    var metaDataUids = JSON.parse( $( "#metaDataUids" ).attr( "value" ) );
+    var metaDataCategory = "";
+    for ( var i = 0; i < metaDataArray.length; i++ )
+    {
+        metaDataCategory = lowercaseFirstLetter( metaDataArray[i] );
+        if ( metaDataUids.hasOwnProperty( metaDataCategory ) )
+        {
+            var uidValues = metaDataUids[metaDataCategory];
+
+            for ( var j = 0; j < uidValues.length; j++ )
+            {
+                $( "#available" + metaDataArray[i] + " option" ).each( function ()
+                {
+                    var availableUid = $( this ).val();
+                    if ( uidValues[j] == availableUid )
+                    {
+                        $( this ).prop( "selected", true );
+                        uidValues.splice( i, 1 );
+                    }
+                } );
+
+                moveSelectedValuesByCategory( metaDataArray[i] );
+            }
+        }
+    }
+}
+
+// -----------------------------------------------------------------------------
 // Save Filter
 // -----------------------------------------------------------------------------
 function saveFilter()
@@ -338,6 +382,7 @@ function saveFilter()
 // -----------------------------------------------------------------------------
 function updateFilter()
 {
+    $( "#metaDataUids" ).attr( "value", JSON.stringify( getSelectedUidsJson() ) );
     var json = JSON.stringify( new Filter() );
     if ( validateFilter() )
     {

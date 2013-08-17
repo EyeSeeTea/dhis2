@@ -27,7 +27,7 @@ package org.hisp.dhis.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
+import java.util.Collection;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
@@ -36,11 +36,19 @@ public interface FilterService
 {
     Filter getFilterByUid( String uid );
 
-    List<Filter> getAllFilters();
+    Collection<Filter> getAllFilters();
+
+    Collection<Filter> getFiltersBetweenByName( String name, int first, int max );
+
+    Collection<Filter> getFiltersBetween( int first, int max );
 
     void saveFilter( Filter filter );
 
     void updateFilter( Filter filter );
 
     void deleteFilter( Filter filter );
+
+    int getFilterCountByName( String name );
+
+    int getFilterCount();
 }

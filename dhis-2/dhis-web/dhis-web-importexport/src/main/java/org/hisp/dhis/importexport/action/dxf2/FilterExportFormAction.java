@@ -1,4 +1,4 @@
-package org.hisp.dhis.filter;
+package org.hisp.dhis.importexport.action.dxf2;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -27,103 +27,106 @@ package org.hisp.dhis.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.i18n.I18nService;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collection;
-
-import static org.hisp.dhis.i18n.I18nUtils.*;
+import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.filter.Filter;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
-@Transactional
-public class DefaultFilterService
-        implements FilterService
+public class FilterExportFormAction
+        implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Input
     // -------------------------------------------------------------------------
 
-    private FilterStore filterStore;
+    private String name;
 
-    public FilterStore getFilterStore()
+    public String getName()
     {
-        return filterStore;
+        return name;
     }
 
-    public void setFilterStore( FilterStore filterStore )
+    public void setName( String name )
     {
-        this.filterStore = filterStore;
+        this.name = name;
     }
 
-    private I18nService i18nService;
+    private String uid;
 
-    public I18nService getI18nService()
+    public String getUid()
     {
-        return i18nService;
+        return uid;
     }
 
-    public void setI18nService( I18nService i18nService )
+    public void setUid( String uid )
     {
-        this.i18nService = i18nService;
+        this.uid = uid;
+    }
+
+    private String code;
+
+    public String getCode()
+    {
+        return code;
+    }
+
+    public void setCode( String code )
+    {
+        this.code = code;
+    }
+
+    private String metaDataUids;
+
+    public String getMetaDataUids()
+    {
+        return metaDataUids;
+    }
+
+    public void setMetaDataUids( String metaDataUids )
+    {
+        this.metaDataUids = metaDataUids;
+    }
+
+    public String operation;
+
+    public String getOperation()
+    {
+        return operation;
+    }
+
+    public void setOperation( String operation )
+    {
+        this.operation = operation;
     }
 
     // -------------------------------------------------------------------------
-    // Logic
+    // Output
+    // -------------------------------------------------------------------------
+
+    private Filter filter = new Filter();
+
+    public Filter getFilter()
+    {
+        return filter;
+    }
+
+    public void setFilter( Filter filter )
+    {
+        this.filter = filter;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action Implementation
     // -------------------------------------------------------------------------
 
     @Override
-    public Filter getFilterByUid( String uid )
+    public String execute() throws Exception
     {
-        return filterStore.getByUid( uid );
-    }
-
-    @Override
-    public Collection<Filter> getAllFilters()
-    {
-        return filterStore.getAll();
-    }
-
-    @Override
-    public Collection<Filter> getFiltersBetweenByName( String name, int first, int max )
-    {
-        return getObjectsBetweenByName( i18nService, filterStore, name, first, max );
-    }
-
-    @Override
-    public Collection<Filter> getFiltersBetween( int first, int max )
-    {
-        return getObjectsBetween( i18nService, filterStore, first, max );
-    }
-
-    @Override
-    public void saveFilter( Filter filter )
-    {
-        filterStore.save( filter );
-    }
-
-    @Override
-    public void updateFilter( Filter filter )
-    {
-        filterStore.update( filter );
-    }
-
-    @Override
-    public void deleteFilter( Filter filter )
-    {
-        filterStore.delete( filter );
-    }
-
-    @Override
-    public int getFilterCountByName( String name )
-    {
-        return getCountByName( i18nService, filterStore, name );
-    }
-
-    @Override
-    public int getFilterCount()
-    {
-        return filterStore.getCount();
+        filter.setName( name );
+        filter.setUid( uid );
+        filter.setCode( code );
+        filter.setMetaDataUids( metaDataUids );
+        return SUCCESS;
     }
 }

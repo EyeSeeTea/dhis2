@@ -12,7 +12,7 @@
                 <table width="100%">
                     <tr>
                         <td colspan="9" style="text-align:right">
-                            <form id="formFilter" method="POST" action="saveOrUpdateFilterExportForm.action">
+                            <form id="formFilter" method="POST" action="filterExportForm.action">
                                 <input type="hidden" name="name" value=""/>
                                 <input type="hidden" name="uid" value=""/>
                                 <input type="hidden" name="code" value=""/>
@@ -37,8 +37,26 @@
                     </tr>
                     </thead>
                     <tbody id="filterTableBody">
+                    #foreach( $filter in $filters )
+                    <tr id="tr${filter.uid}">
+                        <td>$filter.name</td>
+                        <td>
+                            <button id="buttonExport${filter.uid}" type="button" style="background-color: inherit; border: 0px; cursor: pointer;" onclick="exportFilterButton( '$filter.uid' );">
+                                <img src="../images/start_process.png" title="$i18n.getString( 'export' )" alt="$i18n.getString( 'export' )"/>
+                            </button>
+                            <button id="buttonEdit${filter.uid}" type="button" style="background-color: inherit; border: 0px; cursor: pointer;" onclick="editFilterButton( '$filter.uid' );">
+                                <img src="../images/edit.png" title="$i18n.getString( 'edit' )" alt="$i18n.getString( 'edit' )"/>
+                            </button>
+                            <button id="buttonRemove${filter.uid}" type="button" style="background-color: inherit; border: 0px; cursor: pointer;" onclick="removeFilterButton( '$filter.uid' );">
+                                <img src="../images/delete.png" title="$i18n.getString( 'remove' )" alt="$i18n.getString( 'remove' )"/>
+                            </button>
+                        </td>
+                    </tr>
+                    #end
                     </tbody>
                 </table>
+                <p></p>
+                #parse( "/dhis-web-commons/paging/paging.vm" )
             </td>
         </tr>
     </table>

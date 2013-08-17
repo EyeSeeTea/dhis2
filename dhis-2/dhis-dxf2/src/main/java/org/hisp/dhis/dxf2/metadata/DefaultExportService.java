@@ -206,7 +206,7 @@ public class DefaultExportService
     @Override
     public List<Filter> getFilters()
     {
-        return filterService.getAllFilters();
+        return (List<Filter>) filterService.getAllFilters();
     }
 
     @Override

@@ -27,106 +27,80 @@ package org.hisp.dhis.importexport.action.dxf2;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.filter.Filter;
+import org.hisp.dhis.filter.FilterService;
+import org.hisp.dhis.paging.ActionPagingSupport;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
-public class SaveOrUpdateFilterExportFormAction
-        implements Action
+public class ListFilterAction
+        extends ActionPagingSupport<Filter>
 {
     // -------------------------------------------------------------------------
-    // Input
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    private String name;
+    @Autowired
+    private FilterService filterService;
 
-    public String getName()
+    // -------------------------------------------------------------------------
+    // Input & Output
+    // -------------------------------------------------------------------------
+
+    private List<Filter> filters;
+
+    public List<Filter> getFilters()
     {
-        return name;
+        return filters;
     }
 
-    public void setName( String name )
+    public void setFilters( List<Filter> filters )
     {
-        this.name = name;
+        this.filters = filters;
     }
 
-    private String uid;
+    private String key;
 
-    public String getUid()
+    public String getKey()
     {
-        return uid;
+        return key;
     }
 
-    public void setUid( String uid )
+    public void setKey( String key )
     {
-        this.uid = uid;
-    }
-
-    private String code;
-
-    public String getCode()
-    {
-        return code;
-    }
-
-    public void setCode( String code )
-    {
-        this.code = code;
-    }
-
-    private String metaDataUids;
-
-    public String getMetaDataUids()
-    {
-        return metaDataUids;
-    }
-
-    public void setMetaDataUids( String metaDataUids )
-    {
-        this.metaDataUids = metaDataUids;
-    }
-
-    public String operation;
-
-    public String getOperation()
-    {
-        return operation;
-    }
-
-    public void setOperation( String operation )
-    {
-        this.operation = operation;
+        this.key = key;
     }
 
     // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private Filter filter = new Filter();
-
-    public Filter getFilter()
-    {
-        return filter;
-    }
-
-    public void setFilter( Filter filter )
-    {
-        this.filter = filter;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action Implementation
+    // Action implementation
     // -------------------------------------------------------------------------
 
     @Override
     public String execute() throws Exception
     {
-        filter.setName( name );
-        filter.setUid( uid );
-        filter.setCode( code );
-        filter.setMetaDataUids( metaDataUids );
+        if ( isNotBlank( key ) ) // Filter on key only if set
+        {
+            this.paging = createPaging( filterService.getFilterCountByName( key ) );
+
+            filters = new ArrayList<Filter>( filterService.getFiltersBetweenByName( key, paging.getStartPos(), paging.getPageSize() ) );
+        } else
+        {
+            this.paging = createPaging( filterService.getFilterCount() );
+
+            filters = new ArrayList<Filter>( filterService.getFiltersBetween( paging.getStartPos(), paging.getPageSize() ) );
+        }
+
+        Collections.sort( filters, IdentifiableObjectNameComparator.INSTANCE );
+
         return SUCCESS;
     }
 }
