@@ -11,6 +11,7 @@
             <td style="vertical-align:top">
                 <table width="100%">
                     <tr>
+                        <td>#filterDiv( "dxf2DetailedMetaDataExport" )</td>
                         <td colspan="9" style="text-align:right">
                             <form id="formFilter" method="POST" action="filterExportForm.action">
                                 <input type="hidden" name="name" value=""/>
@@ -19,8 +20,8 @@
                                 <input type="hidden" name="metaDataUids" value=''/>
                                 <input type="hidden" name="operation" value=""/>
                                 <input type="button" value="$i18n.getString( 'sort' )" onclick="" style="width: 80px;"/>
-                                <input type="button" value="$i18n.getString( "create" )" onclick="submitFilterForm();" style="width: 80px;"/>
-                                <input type="button" value="$i18n.getString( "create_temporary" )" onclick="" style="width: 120px;"/>
+                                <input type="button" value="$i18n.getString( "add_new" )" onclick="submitFilterForm();" style="width: 80px;"/>
+                                <input type="button" value="$i18n.getString( "create_ad_hoc_filter" )" onclick="" style="width: 140px;"/>
                             </form>
                         </td>
                     </tr>

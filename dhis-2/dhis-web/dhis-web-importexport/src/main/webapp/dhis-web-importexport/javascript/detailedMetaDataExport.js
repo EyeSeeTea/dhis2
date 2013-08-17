@@ -26,6 +26,7 @@ jQuery( function ()
         {
             applyFilter();
         } );
+        applyFilter();
     }
 } );
 

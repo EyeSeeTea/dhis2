@@ -2,27 +2,12 @@
 var filters = [];
 
 // -----------------------------------------------------------------------------
-// Load Filters
+// Document ready
 // -----------------------------------------------------------------------------
-jQuery( function loadFilters()
+jQuery( function ()
     {
-        $.ajax(
-            {
-                type: "GET",
-                url: "../api/detailedMetaData/getFilters",
-                dataType: "json",
-                success: function ( response )
-                {
-                    console.log( "Loaded filters: " + JSON.stringify( response ) );
-                    filters = response;
-                },
-                error: function ( request, status, error )
-                {
-                    console.log( request.responseText );
-                    console.log( arguments );
-                    alert( "Getting filters process failed." );
-                }
-            } );
+        tableSorter( "filterList" );
+        loadFilters();
     }
 );
 
@@ -31,6 +16,30 @@ function submitFilterForm()
 {
     $( "input[name='operation']" ).val( "create" );
     $( "#formFilter" ).submit();
+}
+
+// -----------------------------------------------------------------------------
+// Load Filters
+// -----------------------------------------------------------------------------
+function loadFilters()
+{
+    $.ajax(
+        {
+            type: "GET",
+            url: "../api/detailedMetaData/getFilters",
+            dataType: "json",
+            success: function ( response )
+            {
+                console.log( "Loaded filters: " + JSON.stringify( response ) );
+                filters = response;
+            },
+            error: function ( request, status, error )
+            {
+                console.log( request.responseText );
+                console.log( arguments );
+                alert( "Getting filters process failed." );
+            }
+        } );
 }
 
 // -----------------------------------------------------------------------------
