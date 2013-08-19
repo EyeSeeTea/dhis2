@@ -30,26 +30,26 @@ package org.hisp.dhis.importexport.action.dxf2;
 import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.filter.Filter;
 import org.hisp.dhis.filter.FilterService;
-import org.hisp.dhis.filter.comparator.FilterSortOrderComparator;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
 public class GetFilterListSortOrderAction
-    implements Action
+        implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    @Autowired
     private FilterService filterService;
+
+    public void setFilterService( FilterService filterService )
+    {
+        this.filterService = filterService;
+    }
 
     // -------------------------------------------------------------------------
     // Output
@@ -75,8 +75,6 @@ public class GetFilterListSortOrderAction
     public String execute() throws Exception
     {
         filters = new ArrayList<Filter>( filterService.getAllFilters() );
-
-        Collections.sort( filters, new FilterSortOrderComparator() );
 
         return SUCCESS;
     }

@@ -330,6 +330,7 @@
         <result name="success" type="velocity">/main.vm</result>
         <param name="menu">/dhis-web-importexport/mainMenu.vm</param>
         <param name="page">/dhis-web-importexport/sortFilterForm.vm</param>
+        <param name="requiredAuthorities">F_METADATA_EXPORT</param>
     </action>
 
     <action name="filterExportForm" class="org.hisp.dhis.importexport.action.dxf2.FilterExportFormAction">
@@ -342,6 +343,7 @@
 
     <action name="saveFilterListSortOrder" class="org.hisp.dhis.importexport.action.dxf2.SaveFilterListSortOrderAction">
         <result name="success" type="redirect">dxf2DetailedMetaDataExport.action</result>
+        <param name="requiredAuthorities">F_METADATA_EXPORT</param>
     </action>
 
   </package>

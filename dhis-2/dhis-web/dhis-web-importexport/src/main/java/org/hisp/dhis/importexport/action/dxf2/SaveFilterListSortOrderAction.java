@@ -30,7 +30,6 @@ package org.hisp.dhis.importexport.action.dxf2;
 import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.filter.Filter;
 import org.hisp.dhis.filter.FilterService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -40,13 +39,16 @@ import java.util.List;
 public class SaveFilterListSortOrderAction
         implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    @Autowired
     private FilterService filterService;
+
+    public void setFilterService( FilterService filterService )
+    {
+        this.filterService = filterService;
+    }
 
     // -------------------------------------------------------------------------
     // Input

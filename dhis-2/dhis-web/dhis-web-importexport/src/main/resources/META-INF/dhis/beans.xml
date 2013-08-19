@@ -212,15 +212,23 @@
   </bean>
 
     <!--Ovidiu-->
-  <bean id="org.hisp.dhis.importexport.action.dxf2.FilterList"
+  <bean id="org.hisp.dhis.importexport.action.dxf2.FilterListAction"
       class="org.hisp.dhis.importexport.action.dxf2.FilterListAction" scope="prototype">
+      <property name="filterService" ref="org.hisp.dhis.filter.FilterService"/>
   </bean>
 
-  <bean id="org.hisp.dhis.importexport.action.dxf2.GetFilterListSortOrder"
+  <bean id="org.hisp.dhis.importexport.action.dxf2.GetFilterListSortOrderAction"
       class="org.hisp.dhis.importexport.action.dxf2.GetFilterListSortOrderAction" scope="prototype">
+      <property name="filterService" ref="org.hisp.dhis.filter.FilterService"/>
   </bean>
 
-  <bean id="org.hisp.dhis.importexport.action.dxf2.FilterExportForm"
-      class="org.hisp.dhis.importexport.action.dxf2.FilterExportFormAction" />
+  <bean id="org.hisp.dhis.importexport.action.dxf2.SaveFilterListSortOrderAction"
+      class="org.hisp.dhis.importexport.action.dxf2.SaveFilterListSortOrderAction" scope="prototype">
+      <property name="filterService" ref="org.hisp.dhis.filter.FilterService"/>
+  </bean>
+
+  <bean id="org.hisp.dhis.importexport.action.dxf2.FilterExportFormAction"
+      class="org.hisp.dhis.importexport.action.dxf2.FilterExportFormAction" scope="prototype">
+  </bean>
 
 </beans>

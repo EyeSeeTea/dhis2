@@ -6,7 +6,7 @@
 <h3>$i18n.getString( "metadata_detailed_export" ) #openHelp( "filter" )</h3>
 
 <div id="mainDivFilter" style="width: 70%;">
-    <table id="filterTable" class="mainPageTable">
+    <table class="mainPageTable">
         <tr>
             <td style="vertical-align:top">
                 <table width="100%">

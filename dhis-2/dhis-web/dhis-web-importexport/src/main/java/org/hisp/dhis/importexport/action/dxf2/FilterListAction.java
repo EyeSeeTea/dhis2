@@ -31,7 +31,6 @@ import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.filter.Filter;
 import org.hisp.dhis.filter.FilterService;
 import org.hisp.dhis.paging.ActionPagingSupport;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,8 +48,12 @@ public class FilterListAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    @Autowired
     private FilterService filterService;
+
+    public void setFilterService( FilterService filterService )
+    {
+        this.filterService = filterService;
+    }
 
     // -------------------------------------------------------------------------
     // Input & Output
