@@ -1,4 +1,4 @@
-package org.hisp.dhis.filter;
+package org.hisp.dhis.importexport.action.dxf2;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -27,30 +27,55 @@ package org.hisp.dhis.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.filter.Filter;
+import org.hisp.dhis.filter.FilterService;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
-public interface FilterService
+public class SaveFilterListSortOrderAction
+        implements Action
 {
-    Filter getFilter( Integer id );
 
-    Filter getFilterByUid( String uid );
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-    Collection<Filter> getAllFilters();
+    @Autowired
+    private FilterService filterService;
 
-    Collection<Filter> getFiltersBetweenByName( String name, int first, int max );
+    // -------------------------------------------------------------------------
+    // Input
+    // -------------------------------------------------------------------------
 
-    Collection<Filter> getFiltersBetween( int first, int max );
+    private List<String> filters;
 
-    void saveFilter( Filter filter );
+    public void setFilters( List<String> filters )
+    {
+        this.filters = filters;
+    }
 
-    void updateFilter( Filter filter );
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
 
-    void deleteFilter( Filter filter );
+    public String execute()
+    {
+        int sortOrder = 1;
 
-    int getFilterCountByName( String name );
+        for ( String id : filters )
+        {
+            Filter filter = filterService.getFilter( Integer.parseInt( id ) );
 
-    int getFilterCount();
+            filter.setSortOrder( sortOrder++ );
+
+            filterService.updateFilter( filter );
+        }
+
+        return SUCCESS;
+    }
 }

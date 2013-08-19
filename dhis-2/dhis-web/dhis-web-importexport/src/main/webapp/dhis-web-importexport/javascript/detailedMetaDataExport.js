@@ -423,6 +423,12 @@ function validateFilter()
 // Utils
 // -----------------------------------------------------------------------------
 
+// Make the first letter lowercase
+function lowercaseFirstLetter( string )
+{
+    return string.charAt( 0 ).toLowerCase() + string.slice( 1 );
+}
+
 // Get MetaData Name
 function getI18nMetaDataName( metaDataCategoryName )
 {

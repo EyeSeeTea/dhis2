@@ -33,13 +33,10 @@ import java.util.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
-import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.filter.Filter;
 import org.hisp.dhis.filter.FilterService;
-import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.notification.NotificationLevel;
 import org.hisp.dhis.system.notification.Notifier;
@@ -73,7 +70,7 @@ public class DefaultExportService
     private FilterService filterService;
 
     //-------------------------------------------------------------------------------------------------------
-    // ExportService Implementation
+    // ExportService Implementation - MetaData
     //-------------------------------------------------------------------------------------------------------
 
     @Override
@@ -143,6 +140,10 @@ public class DefaultExportService
         return metaData;
     }
 
+    //-------------------------------------------------------------------------------------------------------
+    // ExportService Implementation - Detailed MetaData
+    //-------------------------------------------------------------------------------------------------------
+
     // Ovidiu
     @Override
     public MetaData getFilteredMetaData( FilterOptions filterOptions )
@@ -150,7 +151,6 @@ public class DefaultExportService
         return getFilteredMetaData( filterOptions, null );
     }
 
-    // Ovidiu
     @Override
     public MetaData getFilteredMetaData( FilterOptions filterOptions, TaskId taskId )
     {
@@ -236,6 +236,7 @@ public class DefaultExportService
     public void deleteFilter( JSONObject json ) throws IOException
     {
         Filter filter = filterService.getFilterByUid( json.getString( "uid" ) );
+
         filterService.deleteFilter( filter );
     }
 }

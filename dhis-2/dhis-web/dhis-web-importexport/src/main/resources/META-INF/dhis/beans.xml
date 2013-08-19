@@ -212,9 +212,12 @@
   </bean>
 
     <!--Ovidiu-->
+  <bean id="org.hisp.dhis.importexport.action.dxf2.FilterList"
+      class="org.hisp.dhis.importexport.action.dxf2.FilterListAction" scope="prototype">
+  </bean>
 
-  <bean id="org.hisp.dhis.importexport.action.dxf2.ListFilter"
-      class="org.hisp.dhis.importexport.action.dxf2.ListFilterAction" scope="prototype">
+  <bean id="org.hisp.dhis.importexport.action.dxf2.GetFilterListSortOrder"
+      class="org.hisp.dhis.importexport.action.dxf2.GetFilterListSortOrderAction" scope="prototype">
   </bean>
 
   <bean id="org.hisp.dhis.importexport.action.dxf2.FilterExportForm"

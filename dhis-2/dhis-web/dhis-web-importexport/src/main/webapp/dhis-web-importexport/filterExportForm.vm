@@ -158,10 +158,10 @@
     var i18n_filter = '$i18n.getString( "filter" )';
 </script>
 
-#if ($operation == "create")
-    <h3>$i18n.getString( "save_filter" )</h3>
+#if ($operation == "addNew")
+    <h3>$i18n.getString( "create_new_filter" )</h3>
 #elseif($operation == "update")
-    <h3>$i18n.getString( "update_filter" )</h3>
+    <h3>$i18n.getString( "edit_filter" )</h3>
 #end
 
 <!-- METADATA TABLE -->
@@ -320,7 +320,7 @@
 <!-- FILTER FORM -->
 <form id="formFilter" name="formFilter">
     <input type="hidden" id="metaDataUids" name="metaDataUids" value='$filter.metaDataUids' />
-    #if ($operation == "create")
+    #if ($operation == "addNew")
         <input type="hidden" id="uid" name="uid" value="" />
     #elseif ($operation == "update")
         <input type="hidden" id="uid" name="uid" value="$filter.uid" />
@@ -355,15 +355,15 @@
             </td>
         </tr>
         <tr>
-            #if($operation == "create")
+            #if($operation == "addNew")
                 <td colspan="2">
-                    <input type="button" value="$i18n.getString( 'save' )" onclick="saveFilter();" style="width:125px" />
-                    <input type="button" value="$i18n.getString( 'go_back' )" onclick="window.history.back();" style="width:125px" />
+                    <input type="button" value="$i18n.getString( 'add_new' )" onclick="saveFilter();" style="width:125px" />
+                    <input type="button" value="$i18n.getString( 'cancel' )" onclick="window.history.back();" style="width:125px" />
                 </td>
             #elseif ($operation == "update")
                 <td colspan="2">
-                    <input type="button" value="$i18n.getString( 'update' )" onclick="updateFilter();" style="width:125px" />
-                    <input type="button" value="$i18n.getString( 'go_back' )" onclick="window.history.back();" style="width:125px" />
+                    <input type="button" value="$i18n.getString( 'save' )" onclick="updateFilter();" style="width:125px" />
+                    <input type="button" value="$i18n.getString( 'cancel' )" onclick="window.history.back();" style="width:125px" />
                 </td>
             #end
         </tr>

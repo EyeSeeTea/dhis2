@@ -1,4 +1,4 @@
-package org.hisp.dhis.filter;
+package org.hisp.dhis.filter.comparator;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -27,30 +27,30 @@ package org.hisp.dhis.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import org.hisp.dhis.filter.Filter;
+
+import java.util.Comparator;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
-public interface FilterService
+public class FilterSortOrderComparator
+        implements Comparator<Filter>
+
 {
-    Filter getFilter( Integer id );
+    @Override
+    public int compare( Filter filter0, Filter filter1 )
+    {
+        if ( filter0.getSortOrder() == null || filter0.getSortOrder() == 0 )
+        {
+            return filter0.getName().compareTo( filter1.getName() );
+        }
 
-    Filter getFilterByUid( String uid );
+        if ( filter1.getSortOrder() == null || filter1.getSortOrder() == 0 )
+        {
+            return filter0.getName().compareTo( filter1.getName() );
+        }
 
-    Collection<Filter> getAllFilters();
-
-    Collection<Filter> getFiltersBetweenByName( String name, int first, int max );
-
-    Collection<Filter> getFiltersBetween( int first, int max );
-
-    void saveFilter( Filter filter );
-
-    void updateFilter( Filter filter );
-
-    void deleteFilter( Filter filter );
-
-    int getFilterCountByName( String name );
-
-    int getFilterCount();
+        return filter0.getSortOrder() - filter1.getSortOrder();
+    }
 }

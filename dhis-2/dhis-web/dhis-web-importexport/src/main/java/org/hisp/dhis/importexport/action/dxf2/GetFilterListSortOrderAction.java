@@ -27,24 +27,23 @@ package org.hisp.dhis.importexport.action.dxf2;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.filter.Filter;
 import org.hisp.dhis.filter.FilterService;
-import org.hisp.dhis.paging.ActionPagingSupport;
+import org.hisp.dhis.filter.comparator.FilterSortOrderComparator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
-public class ListFilterAction
-        extends ActionPagingSupport<Filter>
+public class GetFilterListSortOrderAction
+    implements Action
 {
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -53,7 +52,7 @@ public class ListFilterAction
     private FilterService filterService;
 
     // -------------------------------------------------------------------------
-    // Input & Output
+    // Output
     // -------------------------------------------------------------------------
 
     private List<Filter> filters;
@@ -68,18 +67,6 @@ public class ListFilterAction
         this.filters = filters;
     }
 
-    private String key;
-
-    public String getKey()
-    {
-        return key;
-    }
-
-    public void setKey( String key )
-    {
-        this.key = key;
-    }
-
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -87,19 +74,9 @@ public class ListFilterAction
     @Override
     public String execute() throws Exception
     {
-        if ( isNotBlank( key ) ) // Filter on key only if set
-        {
-            this.paging = createPaging( filterService.getFilterCountByName( key ) );
+        filters = new ArrayList<Filter>( filterService.getAllFilters() );
 
-            filters = new ArrayList<Filter>( filterService.getFiltersBetweenByName( key, paging.getStartPos(), paging.getPageSize() ) );
-        } else
-        {
-            this.paging = createPaging( filterService.getFilterCount() );
-
-            filters = new ArrayList<Filter>( filterService.getFiltersBetween( paging.getStartPos(), paging.getPageSize() ) );
-        }
-
-        Collections.sort( filters, IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( filters, new FilterSortOrderComparator() );
 
         return SUCCESS;
     }

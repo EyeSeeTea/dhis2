@@ -3,7 +3,7 @@
     var i18n_edit = '$i18n.getString( "edit" )';
     var i18n_remove = '$i18n.getString( "remove" )';
 </script>
-<h3>$i18n.getString( "metadata_detailed_export" )</h3>
+<h3>$i18n.getString( "metadata_detailed_export" ) #openHelp( "filter" )</h3>
 
 <div id="mainDivFilter" style="width: 70%;">
     <table id="filterTable" class="mainPageTable">
@@ -19,9 +19,9 @@
                                 <input type="hidden" name="code" value=""/>
                                 <input type="hidden" name="metaDataUids" value=''/>
                                 <input type="hidden" name="operation" value=""/>
-                                <input type="button" value="$i18n.getString( 'sort' )" onclick="" style="width: 80px;"/>
+                                <input type="button" value="$i18n.getString( 'sort' )" onclick="window.location.href='showSortFilterForm.action';" style="width: 80px;"/>
                                 <input type="button" value="$i18n.getString( "add_new" )" onclick="submitFilterForm();" style="width: 80px;"/>
-                                <input type="button" value="$i18n.getString( "create_ad_hoc_filter" )" onclick="" style="width: 140px;"/>
+                                <input type="button" value="$i18n.getString( "add_ad_hoc_filter" )" onclick="" style="width: 140px;"/>
                             </form>
                         </td>
                     </tr>
@@ -51,6 +51,9 @@
                             <button id="buttonRemove${filter.uid}" type="button" style="background-color: inherit; border: 0px; cursor: pointer;" onclick="removeFilterButton( '$filter.uid' );">
                                 <img src="../images/delete.png" title="$i18n.getString( 'remove' )" alt="$i18n.getString( 'remove' )"/>
                             </button>
+                            <button type="button" style="background-color: inherit; border: 0px; cursor: pointer;" onclick="showFilterDetails( '$filter.uid' );">
+                                <img src="../images/information.png" title="$i18n.getString( 'show_details' )" alt="$i18n.getString( 'show_details' )"/>
+                            </button>
                         </td>
                     </tr>
                     #end
@@ -58,6 +61,14 @@
                 </table>
                 <p></p>
                 #parse( "/dhis-web-commons/paging/paging.vm" )
+            </td>
+            <td id="detailsData">
+                <div id="detailsArea" style="display: none;">
+                    <div id="hideDetailsArea">
+                        <a href="javascript:hideDetails();" title="$i18n.getString( 'hide_details' )"><img src="../images/hide.png" alt="$i18n.getString( 'hide_details' )"/></a>
+                    </div>
+                    <p><label>$i18n.getString( "name" ):</label><br/><span id="nameField"></span></p>
+                </div>
             </td>
         </tr>
     </table>

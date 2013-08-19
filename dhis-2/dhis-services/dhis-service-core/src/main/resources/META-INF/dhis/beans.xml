@@ -61,12 +61,12 @@
     <property name="cacheable" value="true" />
   </bean>
 
-    <!--Ovidiu-->
-    <bean id="org.hisp.dhis.filter.FilterStore" class="org.hisp.dhis.filter.hibernate.HibernateFilterStore">
-        <property name="clazz" value="org.hisp.dhis.filter.Filter" />
-        <property name="sessionFactory" ref="sessionFactory" />
-        <property name="cacheable" value="true" />
-    </bean>
+  <!--Ovidiu-->
+  <bean id="org.hisp.dhis.filter.FilterStore" class="org.hisp.dhis.filter.hibernate.HibernateFilterStore">
+      <property name="clazz" value="org.hisp.dhis.filter.Filter" />
+      <property name="sessionFactory" ref="sessionFactory" />
+      <property name="cacheable" value="true" />
+  </bean>
 
   <bean id="org.hisp.dhis.indicator.IndicatorTypeStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
     <property name="clazz" value="org.hisp.dhis.indicator.IndicatorType" />
@@ -567,7 +567,6 @@
   </bean>
 
     <!--Ovidiu-->
-
   <bean id="org.hisp.dhis.filter.FilterService" class="org.hisp.dhis.filter.DefaultFilterService">
         <property name="filterStore" ref="org.hisp.dhis.filter.FilterStore" />
         <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
@@ -700,7 +699,7 @@
   <bean id="org.hisp.dhis.help.HelpManager" class="org.hisp.dhis.help.DefaultHelpManager" />
 
   <bean id="org.hisp.dhis.common.DimensionService" class="org.hisp.dhis.common.DefaultDimensionService" />
-  
+
   <bean id="org.hisp.dhis.appmanager.AppManagerService" class="org.hisp.dhis.appmanager.DefaultAppManagerService" />
 
   <!-- I18nService -->
@@ -799,7 +798,7 @@
     <property name="runlevel" value="6" />
     <property name="skipInTests" value="true" />
   </bean>
-  
+
   <!--  <bean id="org.hisp.dhis.user.UserDefaultPopulator"
     class="org.hisp.dhis.user.UserDefaultPopulator">
     <property name="userService" ref="org.hisp.dhis.user.UserService" />
@@ -1060,7 +1059,7 @@
       <aop:before pointcut="execution( * org.hisp.dhis.mapping.MappingService.deleteMapView(..) )" method="intercept" />
     </aop:aspect>
 
-    <!-- <aop:aspect ref="i18nTranslationInterceptor"> <aop:after-returning pointcut="execution( * org.hisp.dhis.dataelement.DataElementService.get*(..) 
+    <!-- <aop:aspect ref="i18nTranslationInterceptor"> <aop:after-returning pointcut="execution( * org.hisp.dhis.dataelement.DataElementService.get*(..)
       )" method="intercept" returning="idObject"/> <aop:after-returning pointcut="execution( * org.hisp.dhis.dataelement.DataElementCategoryService.get*(..)
       )" method="intercept" returning="idObject"/> <aop:after-returning pointcut="execution( * org.hisp.dhis.indicator.IndicatorService.get*(..)
       )" method="intercept" returning="idObject"/> <aop:after-returning pointcut="execution( * org.hisp.dhis.datadictionary.DataDictionaryService.get*(..)

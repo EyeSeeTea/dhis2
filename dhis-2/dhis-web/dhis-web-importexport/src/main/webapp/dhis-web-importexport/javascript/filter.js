@@ -14,7 +14,7 @@ jQuery( function ()
 // Create a new Filter form
 function submitFilterForm()
 {
-    $( "input[name='operation']" ).val( "create" );
+    $( "input[name='operation']" ).val( "addNew" );
     $( "#formFilter" ).submit();
 }
 
@@ -40,6 +40,19 @@ function loadFilters()
                 alert( "Getting filters process failed." );
             }
         } );
+}
+
+// Show Filter details
+function showFilterDetails( filterUid )
+{
+    $("#detailsArea" ).show();
+    for ( var i = 0; i < filters.length; i++ )
+    {
+        if ( filters[i].id == filterUid )
+        {
+            setInnerHTML( 'nameField', filters[i].name );
+        }
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -157,4 +170,16 @@ function removeFilterButton( filterUid )
                 alert( "Remove filter process failed." );
             }
         } );
+}
+
+// -----------------------------------------------------------------------------
+// Utils
+// -----------------------------------------------------------------------------
+
+// Replace id with uid
+function replaceIdWithUid( object )
+{
+    object.uid = object.id;
+    delete object.id;
+    return object;
 }

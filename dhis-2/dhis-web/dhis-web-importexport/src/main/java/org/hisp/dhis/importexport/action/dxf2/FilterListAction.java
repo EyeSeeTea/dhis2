@@ -1,4 +1,4 @@
-package org.hisp.dhis.filter;
+package org.hisp.dhis.importexport.action.dxf2;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -27,109 +27,80 @@ package org.hisp.dhis.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.i18n.I18nService;
-import org.springframework.transaction.annotation.Transactional;
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.filter.Filter;
+import org.hisp.dhis.filter.FilterService;
+import org.hisp.dhis.paging.ActionPagingSupport;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import static org.hisp.dhis.i18n.I18nUtils.*;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
-@Transactional
-public class DefaultFilterService
-        implements FilterService
+public class FilterListAction
+        extends ActionPagingSupport<Filter>
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private FilterStore filterStore;
+    @Autowired
+    private FilterService filterService;
 
-    public FilterStore getFilterStore()
+    // -------------------------------------------------------------------------
+    // Input & Output
+    // -------------------------------------------------------------------------
+
+    private List<Filter> filters;
+
+    public List<Filter> getFilters()
     {
-        return filterStore;
+        return filters;
     }
 
-    public void setFilterStore( FilterStore filterStore )
+    public void setFilters( List<Filter> filters )
     {
-        this.filterStore = filterStore;
+        this.filters = filters;
     }
 
-    private I18nService i18nService;
+    private String key;
 
-    public I18nService getI18nService()
+    public String getKey()
     {
-        return i18nService;
+        return key;
     }
 
-    public void setI18nService( I18nService i18nService )
+    public void setKey( String key )
     {
-        this.i18nService = i18nService;
+        this.key = key;
     }
 
     // -------------------------------------------------------------------------
-    // Logic
+    // Action implementation
     // -------------------------------------------------------------------------
 
     @Override
-    public Filter getFilter( Integer id )
+    public String execute() throws Exception
     {
-        return filterStore.get( id );
-    }
+        if ( isNotBlank( key ) ) // Filter on key only if set
+        {
+            this.paging = createPaging( filterService.getFilterCountByName( key ) );
 
-    @Override
-    public Filter getFilterByUid( String uid )
-    {
-        return filterStore.getByUid( uid );
-    }
+            filters = new ArrayList<Filter>( filterService.getFiltersBetweenByName( key, paging.getStartPos(), paging.getPageSize() ) );
+        } else
+        {
+            this.paging = createPaging( filterService.getFilterCount() );
 
-    @Override
-    public Collection<Filter> getAllFilters()
-    {
-        return filterStore.getAll();
-    }
+            filters = new ArrayList<Filter>( filterService.getFiltersBetween( paging.getStartPos(), paging.getPageSize() ) );
+        }
 
-    @Override
-    public Collection<Filter> getFiltersBetweenByName( String name, int first, int max )
-    {
-        return getObjectsBetweenByName( i18nService, filterStore, name, first, max );
-    }
+        Collections.sort( filters, IdentifiableObjectNameComparator.INSTANCE );
 
-    @Override
-    public Collection<Filter> getFiltersBetween( int first, int max )
-    {
-        return getObjectsBetween( i18nService, filterStore, first, max );
-    }
-
-    @Override
-    public void saveFilter( Filter filter )
-    {
-        filterStore.save( filter );
-    }
-
-    @Override
-    public void updateFilter( Filter filter )
-    {
-        filterStore.update( filter );
-    }
-
-    @Override
-    public void deleteFilter( Filter filter )
-    {
-        filterStore.delete( filter );
-    }
-
-    @Override
-    public int getFilterCountByName( String name )
-    {
-        return getCountByName( i18nService, filterStore, name );
-    }
-
-    @Override
-    public int getFilterCount()
-    {
-        return filterStore.getCount();
+        return SUCCESS;
     }
 }

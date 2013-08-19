@@ -50,6 +50,8 @@ public class Filter
 
     private String metaDataUids;
 
+    private Integer sortOrder;
+
     //--------------------------------------------------------------------------
     // Constructors
     //--------------------------------------------------------------------------
@@ -84,5 +86,15 @@ public class Filter
     public void setMetaDataUids( String metaDataUids )
     {
         this.metaDataUids = metaDataUids;
+    }
+
+    public Integer getSortOrder()
+    {
+        return sortOrder;
+    }
+
+    public void setSortOrder( Integer sortOrder )
+    {
+        this.sortOrder = sortOrder;
     }
 }
