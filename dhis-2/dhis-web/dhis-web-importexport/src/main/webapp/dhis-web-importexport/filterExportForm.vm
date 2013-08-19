@@ -158,14 +158,16 @@
     var i18n_filter = '$i18n.getString( "filter" )';
 </script>
 
-#if ($operation == "addNew")
+#if ($command == "addNew")
     <h3>$i18n.getString( "create_new_filter" )</h3>
-#elseif($operation == "update")
+#elseif($command == "update")
     <h3>$i18n.getString( "edit_filter" )</h3>
+#elseif($command == "addAdHoc")
+    <h3>$i18n.getString( "create_ad_hoc_filter" )</h3>
 #end
 
 <!-- METADATA TABLE -->
-<div id="mainDivAccordion" style="margin-bottom: 20px;">
+<div id="mainDivAccordion" style="margin-bottom: 20px; width: 90%;">
     <!-- ATTRIBUTES TYPES SELECTION -->
     <h6 style="font-size: 10pt;">$i18n.getString( "attribute_types" )</h6>
 
@@ -320,9 +322,9 @@
 <!-- FILTER FORM -->
 <form id="formFilter" name="formFilter">
     <input type="hidden" id="metaDataUids" name="metaDataUids" value='$filter.metaDataUids' />
-    #if ($operation == "addNew")
+    #if ($command == "addNew" || $command == "addAdHoc")
         <input type="hidden" id="uid" name="uid" value="" />
-    #elseif ($operation == "update")
+    #elseif ($command == "update")
         <input type="hidden" id="uid" name="uid" value="$filter.uid" />
     #end
 
@@ -355,17 +357,54 @@
             </td>
         </tr>
         <tr>
-            #if($operation == "addNew")
+            #if($command == "addNew")
                 <td colspan="2">
                     <input type="button" value="$i18n.getString( 'add_new' )" onclick="saveFilter();" style="width:125px" />
                     <input type="button" value="$i18n.getString( 'cancel' )" onclick="window.history.back();" style="width:125px" />
                 </td>
-            #elseif ($operation == "update")
+            #elseif ($command == "update")
                 <td colspan="2">
                     <input type="button" value="$i18n.getString( 'save' )" onclick="updateFilter();" style="width:125px" />
+                    <input type="button" value="$i18n.getString( 'cancel' )" onclick="window.history.back();" style="width:125px" />
+                </td>
+            #elseif($command == "addAdHoc")
+                <td colspan="2">
+                    <input type="button" value="$i18n.getString( 'export' )" onclick="startExport();" style="width:125px" />
+                    <input type="button" value="$i18n.getString( 'add_new' )" onclick="saveFilter();" style="width:125px" />
                     <input type="button" value="$i18n.getString( 'cancel' )" onclick="window.history.back();" style="width:125px" />
                 </td>
             #end
         </tr>
     </table>
 </form>
+
+#if($command == "addAdHoc")
+    <!-- EXPORT DIALOG -->
+    <div id="exportDialog" style="display: none;">
+        <table>
+            <tr>
+                <td colspan="2">
+                    <select id="format" style="width: 250px; font-size: 10pt;">
+                        <option value="Xml">XML</option>
+                        <option value="Json">Json</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <select id="compression" style="width: 250px; font-size: 10pt;">
+                        <option value="zip">Zipped</option>
+                        <option value="gz">GZipped</option>
+                        <option value="uncompressed">Uncompressed</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <input type="hidden" id="exportJson" value=''/>
+                    <input type="button" value="$i18n.getString( 'export' )" style="width:250px; font-size: 10pt;" onclick="exportDetailedMetaData();"/>
+                </td>
+            </tr>
+        </table>
+    </div>
+#end

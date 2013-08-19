@@ -88,19 +88,19 @@ public class FilterExportFormAction
         this.metaDataUids = metaDataUids;
     }
 
-    public String operation;
+    public String command;
 
-    public String getOperation()
+    public String getCommand()
     {
-        return operation;
+        return command;
     }
 
-    public void setOperation( String operation )
+    public void setCommand( String command )
     {
-        this.operation = operation;
+        this.command = command;
     }
 
-    // -------------------------------------------------------------------------
+// -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
 

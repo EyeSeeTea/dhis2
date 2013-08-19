@@ -412,6 +412,79 @@ function updateFilter()
 }
 
 // -----------------------------------------------------------------------------
+// Export MetaData
+// -----------------------------------------------------------------------------
+
+// Start MetaData export
+function startExport()
+{
+    var metaDataUids = {};
+    for ( var i = 0; i < metaDataArray.length; i++ )
+    {
+        var values = [];
+        $( "#selected" + metaDataArray[i] + " option" ).each( function ()
+        {
+            values.push( $( this ).attr( "value" ) );
+        } );
+
+        if ( values.length > 0 )
+        {
+            metaDataUids[lowercaseFirstLetter( metaDataArray[i] )] = values;
+        }
+    }
+
+    $( "#exportJson" ).attr( "value", JSON.stringify( metaDataUids ) );
+    $( "#exportDialog" ).dialog();
+}
+
+// Export MetaData
+function exportDetailedMetaData()
+{
+    var json = $( "#exportJson" ).val();
+    var url = getURL();
+    $.ajax(
+        {
+            type: "POST",
+            url: url,
+            data: json,
+            contentType: "application/json",
+            dataType: "xml",
+            success: function ()
+            {
+                console.log( "Exported JSON: " + json );
+                $( "#exportDialog" ).dialog( "close" );
+                window.location = "../api/detailedMetaData/getMetaDataFile";
+            },
+            error: function ( request, status, error )
+            {
+                console.log( request.responseText );
+                console.log( arguments );
+                alert( "Export process failed." );
+            }
+        } );
+}
+
+// Generate Export URL
+function getURL()
+{
+    var url = "../api/detailedMetaData";
+    var format = $( "#format" ).val();
+    var compression = $( "#compression" ).val();
+    url += "/set" + format;
+
+    if ( compression == "zip" )
+    {
+        url += "Zip";
+    }
+    else if ( compression == "gz" )
+    {
+        url += "Gz";
+    }
+
+    return url;
+}
+
+// -----------------------------------------------------------------------------
 // Validate Filter
 // -----------------------------------------------------------------------------
 function validateFilter()

@@ -12,9 +12,9 @@ jQuery( function ()
 );
 
 // Create a new Filter form
-function submitFilterForm()
+function submitFilterForm( command )
 {
-    $( "input[name='operation']" ).val( "addNew" );
+    $( "input[name='command']" ).val( command );
     $( "#formFilter" ).submit();
 }
 
@@ -45,7 +45,7 @@ function loadFilters()
 // Show Filter details
 function showFilterDetails( filterUid )
 {
-    $("#detailsArea" ).show();
+    $( "#detailsArea" ).show( "fast" );
     for ( var i = 0; i < filters.length; i++ )
     {
         if ( filters[i].id == filterUid )
@@ -130,7 +130,7 @@ function editFilterButton( filterUid )
             $( "input[name='code']" ).val( filters[i].code );
             $( "input[name='uid']" ).val( filters[i].id );
             $( "input[name='metaDataUids']" ).val( filters[i].metaDataUids );
-            $( "input[name='operation']" ).val( "update" );
+            $( "input[name='command']" ).val( "update" );
         }
     }
 
