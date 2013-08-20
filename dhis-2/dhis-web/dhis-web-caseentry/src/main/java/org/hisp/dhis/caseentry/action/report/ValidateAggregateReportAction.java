@@ -28,8 +28,8 @@
 package org.hisp.dhis.caseentry.action.report;
 
 import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.patientreport.PatientTabularReport;
-import org.hisp.dhis.patientreport.PatientTabularReportService;
+import org.hisp.dhis.patientreport.PatientAggregateReport;
+import org.hisp.dhis.patientreport.PatientAggregateReportService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -38,18 +38,18 @@ import com.opensymphony.xwork2.Action;
  * 
  * @version $ValidationTabularReportAction.java Mar 12, 2012 12:36:48 PM$
  */
-public class ValidateTabularReportAction
+public class ValidateAggregateReportAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private PatientTabularReportService tabularReportService;
+    private PatientAggregateReportService aggregateReportService;
 
-    public void setTabularReportService( PatientTabularReportService tabularReportService )
+    public void setAggregateReportService( PatientAggregateReportService aggregateReportService )
     {
-        this.tabularReportService = tabularReportService;
+        this.aggregateReportService = aggregateReportService;
     }
 
     private I18n i18n;
@@ -62,7 +62,7 @@ public class ValidateTabularReportAction
     // -------------------------------------------------------------------------
     // Input && Output
     // -------------------------------------------------------------------------
-    
+
     private Integer id;
 
     public void setId( Integer id )
@@ -93,7 +93,7 @@ public class ValidateTabularReportAction
     {
         name = name.trim();
 
-        PatientTabularReport match = tabularReportService.getPatientTabularReport( name );
+        PatientAggregateReport match = aggregateReportService.getPatientAggregateReport( name );
 
         if ( match != null && (id == null || match.getId() != id.intValue()) )
         {

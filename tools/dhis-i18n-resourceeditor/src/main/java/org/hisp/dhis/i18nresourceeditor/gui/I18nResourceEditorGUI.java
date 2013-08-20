@@ -26,6 +26,7 @@ package org.hisp.dhis.i18nresourceeditor.gui;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -83,7 +84,7 @@ import org.hisp.dhis.i18nresourceeditor.tree.ResourceNode;
  */
 public class I18nResourceEditorGUI extends JFrame {
 
-    static final String dhisName = "DHIS 2.0";
+    static final String dhisName = "DHIS 2";
     static final String programName = dhisName + " i18n Resource Editor";
     static final String programVersion = "0.3";
     static final Font headerFont = new Font(null, Font.BOLD, 15); // Used as standard header
@@ -164,9 +165,10 @@ public class I18nResourceEditorGUI extends JFrame {
     private JPanel panelDialogStartSimple = new JPanel();
     private JTabbedPane tabDialogStart = new JTabbedPane();
     private JTextArea txtDialogStartBody = new JTextArea("Please select the " + dhisName +
-            " repository directory root, " + "this directory tree will be searched for i18n resources\n\n" +
-            "If it fails to detect any resources you can reset the directory in Settings\n\n" +
-            "See Help for more on how to use this program\n");
+            " source code root directory, ie. the \"dhis-2\" directory inside the repository checkout. " +
+            "The directory tree will be searched for i18n resources.\n\n" +
+            "You can later reset the directory under Settings.\n\n" +
+            "See Help for more information about this program.\n");
     private JTextArea txtDialogStartBodyS = new JTextArea("Please select a " + dhisName +
             " compatible resource bundle, " + "you can then simply edit this resource for all locales.\n\n");
     private JPanel panelDialogStartBottom = new JPanel();
@@ -998,7 +1000,7 @@ public class I18nResourceEditorGUI extends JFrame {
             if (currentLocale != null) {
                 // Then we should see what the list contains
                 String localestr = (String) cmbRefLocaleSelect.getModel().getSelectedItem();
-                currentRefLocale = (Locale) mapReflocales.get(localestr); // The string points to a locale in the map
+                currentRefLocale = mapReflocales.get(localestr); // The string points to a locale in the map
                 // Update the translation
                 try {
                     ResourceNode resource = getSelectedResource();

@@ -34,6 +34,7 @@ import static org.hisp.dhis.chart.Chart.TYPE_LINE;
 import static org.hisp.dhis.chart.Chart.TYPE_PIE;
 import static org.hisp.dhis.chart.Chart.TYPE_STACKED_BAR;
 import static org.hisp.dhis.chart.Chart.TYPE_STACKED_COLUMN;
+import static org.hisp.dhis.chart.Chart.TYPE_RADAR;
 import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
 import static org.hisp.dhis.system.util.ConversionUtils.getArray;
 
@@ -90,6 +91,7 @@ import org.jfree.chart.plot.Marker;
 import org.jfree.chart.plot.MultiplePiePlot;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.SpiderWebPlot;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.renderer.category.AreaRenderer;
 import org.jfree.chart.renderer.category.BarRenderer;
@@ -122,6 +124,8 @@ public class DefaultChartService
         Color.decode( "#b7404c" ), Color.decode( "#ff9f3a" ), Color.decode( "#968f8f" ), Color.decode( "#b7409f" ),
         Color.decode( "#ffda64" ), Color.decode( "#4fbdae" ), Color.decode( "#b78040" ), Color.decode( "#676767" ),
         Color.decode( "#6a33cf" ), Color.decode( "#4a7833" ) };
+    
+    private static final Color COLOR_TRANSPARENT = new Color( 255, 255, 255, 0 );
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -550,6 +554,10 @@ public class DefaultChartService
         {
             return getStackedBarChart( chart, dataSets[0], true );
         }
+        else if ( chart.isType( TYPE_RADAR ) )
+        {
+            return getRadarChart( chart, dataSets[0] );
+        }
         else
         {
             throw new IllegalArgumentException( "Illegal or no chart type: " + chart.getType() );
@@ -579,6 +587,8 @@ public class DefaultChartService
         }
 
         plot.setDatasetRenderingOrder( DatasetRenderingOrder.FORWARD );
+        plot.setBackgroundPaint( COLOR_TRANSPARENT );
+        plot.setOutlinePaint( COLOR_TRANSPARENT );
 
         // ---------------------------------------------------------------------
         // Category label positions
@@ -595,7 +605,7 @@ public class DefaultChartService
         // Color & antialias
         // ---------------------------------------------------------------------
 
-        jFreeChart.setBackgroundPaint( Color.WHITE );
+        jFreeChart.setBackgroundPaint( COLOR_TRANSPARENT );
         jFreeChart.setAntiAlias( true );
 
         return jFreeChart;
@@ -607,10 +617,10 @@ public class DefaultChartService
             chart.getRangeAxisLabel(), dataSet, PlotOrientation.VERTICAL, true, false, false );
         
         CategoryPlot plot = (CategoryPlot) areaChart.getPlot();
-        plot.setBackgroundPaint( Color.WHITE );
-        plot.setOutlinePaint( Color.WHITE );
         plot.setOrientation( PlotOrientation.VERTICAL );
         plot.setRenderer( getAreaRenderer() );
+        plot.setBackgroundPaint( COLOR_TRANSPARENT );
+        plot.setOutlinePaint( COLOR_TRANSPARENT );
         
         CategoryAxis xAxis = plot.getDomainAxis();
         xAxis.setCategoryLabelPositions( CategoryLabelPositions.UP_45 );
@@ -618,9 +628,24 @@ public class DefaultChartService
         
         areaChart.getTitle().setFont( titleFont );
         areaChart.addSubtitle( getSubTitle( chart ) );
+        areaChart.setBackgroundPaint( COLOR_TRANSPARENT );
         areaChart.setAntiAlias( true );
         
         return areaChart;
+    }
+    
+    private JFreeChart getRadarChart( Chart chart, CategoryDataset dataSet )
+    {
+        SpiderWebPlot plot = new SpiderWebPlot( dataSet, TableOrder.BY_ROW );
+        plot.setBackgroundPaint( COLOR_TRANSPARENT );
+        plot.setOutlinePaint( COLOR_TRANSPARENT );
+        plot.setLabelFont( labelFont );
+        
+        JFreeChart radarChart = new JFreeChart( chart.getName(), titleFont, plot, !chart.isHideLegend() );
+        radarChart.setAntiAlias( true );
+        radarChart.setBackgroundPaint( COLOR_TRANSPARENT );
+        
+        return radarChart;
     }
     
     private JFreeChart getStackedBarChart( Chart chart, CategoryDataset dataSet, boolean horizontal )
@@ -629,8 +654,8 @@ public class DefaultChartService
             chart.getRangeAxisLabel(), dataSet, PlotOrientation.VERTICAL, true, false, false );
 
         CategoryPlot plot = (CategoryPlot) stackedBarChart.getPlot();
-        plot.setBackgroundPaint( Color.WHITE );
-        plot.setOutlinePaint( Color.WHITE );
+        plot.setBackgroundPaint( COLOR_TRANSPARENT );
+        plot.setOutlinePaint( COLOR_TRANSPARENT );
         plot.setOrientation( horizontal ? PlotOrientation.HORIZONTAL : PlotOrientation.VERTICAL );
         plot.setRenderer( getStackedBarRenderer() );
 
@@ -639,6 +664,7 @@ public class DefaultChartService
 
         stackedBarChart.getTitle().setFont( titleFont );
         stackedBarChart.addSubtitle( getSubTitle( chart ) );
+        stackedBarChart.setBackgroundPaint( COLOR_TRANSPARENT );
         stackedBarChart.setAntiAlias( true );
 
         return stackedBarChart;
@@ -652,15 +678,18 @@ public class DefaultChartService
         multiplePieChart.getTitle().setFont( titleFont );
         multiplePieChart.addSubtitle( getSubTitle( chart ) );
         multiplePieChart.getLegend().setItemFont( subTitleFont );
-        multiplePieChart.setBackgroundPaint( Color.WHITE );
+        multiplePieChart.setBackgroundPaint( COLOR_TRANSPARENT );
         multiplePieChart.setAntiAlias( true );
 
         MultiplePiePlot multiplePiePlot = (MultiplePiePlot) multiplePieChart.getPlot();
+        multiplePiePlot.setBackgroundPaint( COLOR_TRANSPARENT );
         JFreeChart pieChart = multiplePiePlot.getPieChart();
+        pieChart.setBackgroundPaint( COLOR_TRANSPARENT );
         pieChart.getTitle().setFont( subTitleFont );
 
         PiePlot piePlot = (PiePlot) pieChart.getPlot();
-        piePlot.setBackgroundPaint( Color.WHITE );
+        piePlot.setBackgroundPaint( COLOR_TRANSPARENT );
+        piePlot.setOutlinePaint( COLOR_TRANSPARENT );
         piePlot.setLabelFont( labelFont );
         piePlot.setLabelGenerator( new StandardPieSectionLabelGenerator( "{2}" ) );
         piePlot.setSimpleLabels( true );

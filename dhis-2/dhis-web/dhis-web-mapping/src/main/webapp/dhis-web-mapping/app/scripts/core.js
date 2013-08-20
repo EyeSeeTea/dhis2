@@ -1,115 +1,25 @@
 Ext.onReady( function() {
 	
+	// ext config	
+	Ext.Ajax.method = 'GET';
+	
+	// namespace
 	if (!('GIS' in window)) {
 		GIS = {
 			i18n: {}
 		};
 	}
 
+	// mode
+	GIS.isDebug = false;
+	
+	// html5
+	GIS.isSessionStorage = 'sessionStorage' in window && window['sessionStorage'] !== null;
+
+	// core
+
 	GIS.core = {};
 	GIS.core.instances = [];
-
-	GIS.core.getUtils = function(gis) {
-		var conf = gis.conf,
-			util = {};
-
-		util.map = {};
-
-		util.map.getVisibleVectorLayers = function() {
-			var layers = [];
-
-			for (var i = 0, layer; i < gis.olmap.layers.length; i++) {
-				layer = gis.olmap.layers[i];
-				if (layer.layerType === conf.finals.layer.type_vector && layer.visibility && layer.features.length) {
-					layers.push(layer);
-				}
-			}
-			return layers;
-		};
-
-		util.map.getExtendedBounds = function(layers) {
-			var bounds = null;
-			if (layers.length) {
-				bounds = layers[0].getDataExtent();
-				if (layers.length > 1) {
-					for (var i = 1; i < layers.length; i++) {
-						bounds.extend(layers[i].getDataExtent());
-					}
-				}
-			}
-			return bounds;
-		};
-
-		util.map.zoomToVisibleExtent = function(olmap) {
-			var bounds = util.map.getExtendedBounds(util.map.getVisibleVectorLayers(olmap));
-			if (bounds) {
-				olmap.zoomToExtent(bounds);
-			}
-		};
-
-		util.map.getTransformedFeatureArray = function(features) {
-			var sourceProjection = new OpenLayers.Projection("EPSG:4326"),
-				destinationProjection = new OpenLayers.Projection("EPSG:900913");
-			for (var i = 0; i < features.length; i++) {
-				features[i].geometry.transform(sourceProjection, destinationProjection);
-			}
-			return features;
-		};
-
-		util.geojson = {};
-
-		util.geojson.decode = function(doc) {
-			var geojson = {};
-			geojson.type = 'FeatureCollection';
-			geojson.crs = {
-				type: 'EPSG',
-				properties: {
-					code: '4326'
-				}
-			};
-			geojson.features = [];
-
-			for (var i = 0; i < doc.geojson.length; i++) {
-				geojson.features.push({
-					geometry: {
-						type: parseInt(doc.geojson[i].ty) === 1 ? 'MultiPolygon' : 'Point',
-						coordinates: doc.geojson[i].co
-					},
-					properties: {
-						id: doc.geojson[i].uid,
-						internalId: doc.geojson[i].iid,
-						name: doc.geojson[i].na,
-						hcwc: doc.geojson[i].hc,
-						path: doc.geojson[i].path,
-						parentId: doc.geojson[i].pi,
-						parentName: doc.geojson[i].pn,
-						hasCoordinatesUp: doc.properties.hasCoordinatesUp
-					}
-				});
-			}
-
-			return geojson;
-		};
-
-		util.gui = {};
-		util.gui.combo = {};
-
-		util.gui.combo.setQueryMode = function(cmpArray, mode) {
-			for (var i = 0; i < cmpArray.length; i++) {
-				cmpArray[i].queryMode = mode;
-			}
-		};
-
-		return util;
-	};
-
-	GIS.core.getStores = function(gis) {
-		var stores = {};
-
-		stores.organisationUnitLevels = GIS.core.OrganisationUnitLevelStore(gis);
-
-		return stores;
-	};
 
 	GIS.core.getOLMap = function(gis) {
 		var olmap,
@@ -370,7 +280,7 @@ Ext.onReady( function() {
 			// Infrastructural data
 			showInfo = function() {
 				Ext.Ajax.request({
-					url: gis.baseUrl + gis.conf.url.path_gis + 'getFacilityInfo.action',
+					url: gis.init.contextPath + gis.conf.url.path_gis + 'getFacilityInfo.action',
 					params: {
 						id: feature.attributes.id
 					},
@@ -666,7 +576,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name', 'level'],
 			proxy: {
 				type: 'jsonp',
-				url: gis.baseUrl + gis.conf.url.path_api + 'organisationUnitLevels.jsonp?viewClass=detailed&links=false&paging=false',
+				url: gis.init.contextPath + gis.conf.url.path_api + 'organisationUnitLevels.jsonp?viewClass=detailed&links=false&paging=false',
 				reader: {
 					type: 'json',
 					root: 'organisationUnitLevels'
@@ -837,7 +747,7 @@ Ext.onReady( function() {
 
 		getMap = function() {
 			Ext.data.JsonP.request({
-				url: gis.baseUrl + gis.conf.url.path_api + 'maps/' + gis.map.id + '.jsonp?links=false',
+				url: gis.init.contextPath + gis.conf.url.path_api + 'maps/' + gis.map.id + '.jsonp?links=false',
 				success: function(r) {
 
 					// Operand
@@ -976,7 +886,7 @@ Ext.onReady( function() {
 
 		loadOrganisationUnits = function(view) {
 			Ext.data.JsonP.request({
-				url: gis.baseUrl + gis.conf.url.path_gis + 'getGeoJson.action',
+				url: gis.init.contextPath + gis.conf.url.path_gis + 'getGeoJson.action',
 				params: {
 					parentId: view.parentOrganisationUnit.id,
 					level: view.organisationUnitLevel.id
@@ -1194,7 +1104,7 @@ Ext.onReady( function() {
 
 		loadOrganisationUnits = function(view) {
 			Ext.data.JsonP.request({
-				url: gis.baseUrl + gis.conf.url.path_gis + 'getGeoJson.action',
+				url: gis.init.contextPath + gis.conf.url.path_gis + 'getGeoJson.action',
 				params: {
 					parentId: view.parentOrganisationUnit.id,
 					level: view.organisationUnitLevel.id
@@ -1258,7 +1168,7 @@ Ext.onReady( function() {
 			paramString += '&skipMeta=true';
 
 			Ext.Ajax.request({
-				url: gis.baseUrl + '/api/analytics.json' + paramString,
+				url: gis.init.contextPath + '/api/analytics.json' + paramString,
 				disableCaching: false,
 				scope: this,
 				success: function(r) {
@@ -1363,7 +1273,7 @@ Ext.onReady( function() {
 					names = [];
 
 				Ext.Ajax.request({
-					url: gis.baseUrl + gis.conf.url.path_api + 'mapLegendSets/' + view.legendSet.id + '.json?links=false&paging=false',
+					url: gis.init.contextPath + gis.conf.url.path_api + 'mapLegendSets/' + view.legendSet.id + '.json?links=false&paging=false',
 					scope: this,
 					success: function(r) {
 						legends = Ext.decode(r.responseText).mapLegends;
@@ -1516,7 +1426,7 @@ Ext.onReady( function() {
 
 		loadOrganisationUnits = function(view) {
 			Ext.data.JsonP.request({
-				url: gis.baseUrl + gis.conf.url.path_gis + 'getGeoJsonFacilities.action',
+				url: gis.init.contextPath + gis.conf.url.path_gis + 'getGeoJsonFacilities.action',
 				params: {
 					parentId: view.parentOrganisationUnit.id,
 					level: view.organisationUnitLevel.id
@@ -1570,7 +1480,7 @@ Ext.onReady( function() {
 			var store = gis.store.groupsByGroupSet,
 				options;
 
-			store.proxy.url = gis.baseUrl + gis.conf.url.path_gis + 'getOrganisationUnitGroupsByGroupSet.action?id=' + view.organisationUnitGroupSet.id;
+			store.proxy.url = gis.init.contextPath + gis.conf.url.path_gis + 'getOrganisationUnitGroupsByGroupSet.action?id=' + view.organisationUnitGroupSet.id;
 			store.load({
 				scope: this,
 				callback: function() {
@@ -1664,8 +1574,10 @@ Ext.onReady( function() {
 		return loader;
 	};
 
-	GIS.core.getInstance = function(config) {
+	GIS.core.getInstance = function(init) {
 		var conf = {},
+			util = {},
+			store = {},
 		
 			gis = {},
 			layers = [];
@@ -1786,12 +1698,107 @@ Ext.onReady( function() {
 			};		
 		}());
 		
-		gis.baseUrl = config && config.baseUrl ? config.baseUrl : '../..';
-		gis.el = config && config.el ? config.el : null;
+		// util
+		(function() {
+			util.map = {};
+			
+			util.map.getVisibleVectorLayers = function() {
+				var layers = [];
 
+				for (var i = 0, layer; i < gis.olmap.layers.length; i++) {
+					layer = gis.olmap.layers[i];
+					if (layer.layerType === conf.finals.layer.type_vector && layer.visibility && layer.features.length) {
+						layers.push(layer);
+					}
+				}
+				return layers;
+			};
+
+			util.map.getExtendedBounds = function(layers) {
+				var bounds = null;
+				if (layers.length) {
+					bounds = layers[0].getDataExtent();
+					if (layers.length > 1) {
+						for (var i = 1; i < layers.length; i++) {
+							bounds.extend(layers[i].getDataExtent());
+						}
+					}
+				}
+				return bounds;
+			};
+
+			util.map.zoomToVisibleExtent = function(olmap) {
+				var bounds = util.map.getExtendedBounds(util.map.getVisibleVectorLayers(olmap));
+				if (bounds) {
+					olmap.zoomToExtent(bounds);
+				}
+			};
+
+			util.map.getTransformedFeatureArray = function(features) {
+				var sourceProjection = new OpenLayers.Projection("EPSG:4326"),
+					destinationProjection = new OpenLayers.Projection("EPSG:900913");
+				for (var i = 0; i < features.length; i++) {
+					features[i].geometry.transform(sourceProjection, destinationProjection);
+				}
+				return features;
+			};
+
+			util.geojson = {};
+			
+			util.geojson.decode = function(doc) {
+				var geojson = {};
+				geojson.type = 'FeatureCollection';
+				geojson.crs = {
+					type: 'EPSG',
+					properties: {
+						code: '4326'
+					}
+				};
+				geojson.features = [];
+
+				for (var i = 0; i < doc.geojson.length; i++) {
+					geojson.features.push({
+						geometry: {
+							type: parseInt(doc.geojson[i].ty) === 1 ? 'MultiPolygon' : 'Point',
+							coordinates: doc.geojson[i].co
+						},
+						properties: {
+							id: doc.geojson[i].uid,
+							internalId: doc.geojson[i].iid,
+							name: doc.geojson[i].na,
+							hcwc: doc.geojson[i].hc,
+							path: doc.geojson[i].path,
+							parentId: doc.geojson[i].pi,
+							parentName: doc.geojson[i].pn,
+							hasCoordinatesUp: doc.properties.hasCoordinatesUp
+						}
+					});
+				}
+
+				return geojson;
+			};
+
+			util.gui = {};
+			util.gui.combo = {};
+
+			util.gui.combo.setQueryMode = function(cmpArray, mode) {
+				for (var i = 0; i < cmpArray.length; i++) {
+					cmpArray[i].queryMode = mode;
+				}
+			};
+		}());
+				
+		gis.init = init;
 		gis.conf = conf;
-		gis.util = GIS.core.getUtils(gis);
-		gis.store = GIS.core.getStores(gis);
+		gis.util = util;
+		
+		// store
+		(function() {
+			store.organisationUnitLevels = GIS.core.OrganisationUnitLevelStore(gis);
+		}());
+		
+		gis.store = store;
+		
 		gis.olmap = GIS.core.getOLMap(gis);
 		gis.layer = GIS.core.getLayers(gis);
 
