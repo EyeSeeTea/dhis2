@@ -1,4 +1,4 @@
-package org.hisp.dhis.api.webdomain;
+package org.hisp.dhis.api.controller;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -27,43 +27,39 @@ package org.hisp.dhis.api.webdomain;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hisp.dhis.api.controller.exception.NotAuthenticatedException;
+import org.hisp.dhis.api.controller.exception.NotFoundException;
+import org.hisp.dhis.api.controller.exception.NotFoundForQueryException;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.io.IOException;
 
 /**
- * We could have gotten this information from the form instance, but
- * in the interest of performance, we duplicate some information here.
- *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class FormDataSet
+@ControllerAdvice
+public class CrudControllerAdvice
 {
-    private String id;
-
-    private String label;
-
-    public FormDataSet()
+    @ExceptionHandler
+    public ResponseEntity<String> notAuthenticatedExceptionHandler( NotAuthenticatedException ex ) throws IOException
     {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add( "Content-Type", MediaType.TEXT_PLAIN_VALUE );
+
+        return new ResponseEntity<String>( ex.getMessage(), headers, HttpStatus.UNAUTHORIZED );
     }
 
-    @JsonProperty
-    public String getId()
+    @ExceptionHandler( { NotFoundException.class, NotFoundForQueryException.class } )
+    public ResponseEntity<String> notFoundExceptionHandler( Exception ex ) throws IOException
     {
-        return id;
-    }
+        HttpHeaders headers = new HttpHeaders();
+        headers.add( "Content-Type", MediaType.TEXT_PLAIN_VALUE );
 
-    public void setId( String id )
-    {
-        this.id = id;
-    }
-
-    @JsonProperty
-    public String getLabel()
-    {
-        return label;
-    }
-
-    public void setLabel( String label )
-    {
-        this.label = label;
+        return new ResponseEntity<String>( ex.getMessage(), headers, HttpStatus.NOT_FOUND );
     }
 }

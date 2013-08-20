@@ -1,4 +1,4 @@
-package org.hisp.dhis.api.webdomain;
+package org.hisp.dhis.api.controller.exception;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -27,43 +27,18 @@ package org.hisp.dhis.api.webdomain;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
- * We could have gotten this information from the form instance, but
- * in the interest of performance, we duplicate some information here.
- *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class FormDataSet
+public class NotFoundException extends Exception
 {
-    private String id;
-
-    private String label;
-
-    public FormDataSet()
+    public NotFoundException()
     {
+        super( "Object not found." );
     }
 
-    @JsonProperty
-    public String getId()
+    public NotFoundException( String uid )
     {
-        return id;
-    }
-
-    public void setId( String id )
-    {
-        this.id = id;
-    }
-
-    @JsonProperty
-    public String getLabel()
-    {
-        return label;
-    }
-
-    public void setLabel( String label )
-    {
-        this.label = label;
+        super( "Object not found for uid: " + uid );
     }
 }

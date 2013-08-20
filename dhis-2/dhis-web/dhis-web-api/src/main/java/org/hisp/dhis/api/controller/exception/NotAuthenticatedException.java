@@ -1,4 +1,4 @@
-package org.hisp.dhis.api.webdomain;
+package org.hisp.dhis.api.controller.exception;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -27,43 +27,13 @@ package org.hisp.dhis.api.webdomain;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
- * We could have gotten this information from the form instance, but
- * in the interest of performance, we duplicate some information here.
- *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class FormDataSet
+public class NotAuthenticatedException extends Exception
 {
-    private String id;
-
-    private String label;
-
-    public FormDataSet()
+    public NotAuthenticatedException()
     {
-    }
-
-    @JsonProperty
-    public String getId()
-    {
-        return id;
-    }
-
-    public void setId( String id )
-    {
-        this.id = id;
-    }
-
-    @JsonProperty
-    public String getLabel()
-    {
-        return label;
-    }
-
-    public void setLabel( String label )
-    {
-        this.label = label;
+        super( "User object is null, user is not authenticated." );
     }
 }
