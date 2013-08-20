@@ -77,15 +77,14 @@ function insertMetaDataDesign( metaDataCategoryName )
     $( "#label" + metaDataCategoryName ).css( {"color": "lime"} );
     $( "#divSelectAll" + metaDataCategoryName ).show();
 
-    var metaDataCategory = $( "#mainDiv" + metaDataCategoryName );
-    if ( metaDataCategory.is( ":empty" ) )
+    if ( $( "#mainDiv" + metaDataCategoryName ).is( ":empty" ) )
     {
         var design = generateMetaDataDesign( metaDataCategoryName );
-        metaDataCategory.append( design );
+        $( "#mainDiv" + metaDataCategoryName ).append( design );
         loadMetaData( metaDataCategoryName );
     } else
     {
-        metaDataCategory.show();
+        $( "#mainDiv" + metaDataCategoryName ).show();
         deselectAllValues();
     }
 }
@@ -171,6 +170,8 @@ function removeMetaDataDesign( metaDataCategoryName )
 // -----------------------------------------------------------------------------
 // Filter Object
 // -----------------------------------------------------------------------------
+
+// Filter
 function Filter()
 {
     this.name = $( "#name" ).attr( "value" );
@@ -180,8 +181,10 @@ function Filter()
 }
 
 // -----------------------------------------------------------------------------
-// Load MetaData for a Category type
+// Load MetaData by Category
 // -----------------------------------------------------------------------------
+
+// Load MetaData by Category
 function loadMetaData( metaDataCategoryName )
 {
     $( "#available" + metaDataCategoryName ).dhisAjaxSelect(
@@ -233,10 +236,9 @@ function selectAllCheckboxes()
 {
     for ( var i = 0; i < metaDataArray.length; i++ )
     {
-        var checkBoxMetaDataCategory = $( "#checkbox" + metaDataArray[i] );
-        if ( !checkBoxMetaDataCategory.is( ":checked" ) )
+        if ( !$( "#checkbox" + metaDataArray[i] ).is( ":checked" ) )
         {
-            checkBoxMetaDataCategory.prop( "checked", true );
+            $( "#checkbox" + metaDataArray[i] ).prop( "checked", true );
             insertMetaDataDesign( metaDataArray[i] );
         }
     }
@@ -249,10 +251,9 @@ function deselectAllCheckboxes()
 {
     for ( var i = 0; i < metaDataArray.length; i++ )
     {
-        var checkBoxMetaDataCategory = $( "#checkbox" + metaDataArray[i] );
-        if ( checkBoxMetaDataCategory.is( ":checked" ) )
+        if ( $( "#checkbox" + metaDataArray[i] ).is( ":checked" ) )
         {
-            checkBoxMetaDataCategory.prop( "checked", false );
+            $( "#checkbox" + metaDataArray[i] ).prop( "checked", false );
             removeMetaDataDesign( metaDataArray[i] );
         }
     }
@@ -316,6 +317,8 @@ function moveSelectedValuesByCategory( metaDataCategoryName )
 // -----------------------------------------------------------------------------
 // Apply Filter
 // -----------------------------------------------------------------------------
+
+// Apply Filter
 function applyFilter()
 {
     var metaDataUids = JSON.parse( $( "#metaDataUids" ).attr( "value" ) );
@@ -348,6 +351,8 @@ function applyFilter()
 // -----------------------------------------------------------------------------
 // Save Filter
 // -----------------------------------------------------------------------------
+
+// Save a Filter
 function saveFilter()
 {
     $( "#metaDataUids" ).attr( "value", JSON.stringify( getSelectedUidsJson() ) );
@@ -381,6 +386,8 @@ function saveFilter()
 // -----------------------------------------------------------------------------
 // Update Filter
 // -----------------------------------------------------------------------------
+
+// Update a Filter
 function updateFilter()
 {
     $( "#metaDataUids" ).attr( "value", JSON.stringify( getSelectedUidsJson() ) );
@@ -487,6 +494,8 @@ function getURL()
 // -----------------------------------------------------------------------------
 // Validate Filter
 // -----------------------------------------------------------------------------
+
+// Validate Filter
 function validateFilter()
 {
     return ($( "#name" ).attr( "value" ) != "");

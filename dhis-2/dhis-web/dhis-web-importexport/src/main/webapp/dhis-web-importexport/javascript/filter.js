@@ -21,6 +21,8 @@ function submitFilterForm( command )
 // -----------------------------------------------------------------------------
 // Load Filters
 // -----------------------------------------------------------------------------
+
+// Load Filters
 function loadFilters()
 {
     $.ajax(
@@ -58,6 +60,8 @@ function showFilterDetails( filterUid )
 // -----------------------------------------------------------------------------
 // Export Detailed MetaData
 // -----------------------------------------------------------------------------
+
+// Start export
 function exportFilterButton( filterUid )
 {
     for ( var i = 0; i < filters.length; i++ )
@@ -120,6 +124,8 @@ function getURL()
 // -----------------------------------------------------------------------------
 // Edit a Filter
 // -----------------------------------------------------------------------------
+
+// Edit a Filter
 function editFilterButton( filterUid )
 {
     for ( var i = 0; i < filters.length; i++ )
@@ -140,6 +146,8 @@ function editFilterButton( filterUid )
 // -----------------------------------------------------------------------------
 // Delete a Filter
 // -----------------------------------------------------------------------------
+
+// Delete a Filter
 function removeFilterButton( filterUid )
 {
     var filter = {};
