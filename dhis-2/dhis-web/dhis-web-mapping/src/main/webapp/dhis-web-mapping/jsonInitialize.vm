@@ -1,5 +1,4 @@
-#set( $baseLayersSize = $baseLayers.size() )
-#set( $rootNodesSize = $rootNodes.size() )
+#set($oucSize = $currentUser.getOrganisationUnit().getSortedChildren().size())
 #if($callback)$!{callback}
 (
 #end
@@ -9,7 +8,7 @@
 "user":{
   "id":"$!currentUser.uid",
   "name":"$currentUser.name",
-  "isAdmin": $auth.hasAccess( "dhis-web-mapping", "deleteMapLegendSet" )
+  "isAdmin": $auth.hasAccess( "dhis-web-mapping", "deleteMapLegendSet" ),
   "ou":"$currentUser.getOrganisationUnit().uid",
   "ouc":[#foreach($ou in $currentUser.getOrganisationUnit().getSortedChildren())"$ou.uid"#if($velocityCount < $oucSize),#end#end]
 },

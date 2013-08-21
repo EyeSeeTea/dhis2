@@ -6,7 +6,8 @@ Ext.onReady( function() {
 	GIS.app = {};
 
 	GIS.app.extendInstance = function(gis) {
-		var util = gis.util,
+		var conf = gis.conf,
+			util = gis.util,
 			init = gis.init,
 			store = gis.store,
 			layer;
@@ -455,6 +456,18 @@ Ext.onReady( function() {
 				}
 			});
 
+			store.organisationUnitGroup = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name'],
+				proxy: {
+					type: 'ajax',
+					url: init.contextPath + conf.finals.url.path_api + conf.finals.url.organisationunitgroup_getall,
+					reader: {
+						type: 'json',
+						root: 'organisationUnitGroups'
+					}
+				}
+			});
+			
 			store.legendSets = Ext.create('Ext.data.Store', {
 				fields: ['id', 'name'],
 				proxy: {
@@ -4224,6 +4237,7 @@ Ext.onReady( function() {
 		
 		treePanel = Ext.create('Ext.tree.Panel', {
 			cls: 'gis-tree',
+			height: 210,
 			style: 'border-top: 1px solid #ddd; padding-top: 1px',
 			width: gis.conf.layout.widget.item_width,
 			rootVisible: false,
@@ -4331,9 +4345,6 @@ Ext.onReady( function() {
 				this.enable();
 			},
 			listeners: {
-				added: function() {
-					gis.cmp.dimension.organisationUnit.treepanel = this;
-				},
 				render: function() {
 					this.rendered = true;
 				},
@@ -4374,9 +4385,10 @@ Ext.onReady( function() {
 		});
 
 		userOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
-			columnWidth: 0.28,
+			columnWidth: 0.30,
 			style: 'padding-top:2px; padding-left:3px; margin-bottom:0',
-			boxLabel: GIS.i18n.user_organisation_unit,
+			//boxLabel: GIS.i18n.user_organisation_unit,
+			boxLabel: 'User OU',
 			labelWidth: gis.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnitChildren.getValue(), userOrganisationUnitGrandChildren.getValue()]);
@@ -4384,9 +4396,10 @@ Ext.onReady( function() {
 		});
 
 		userOrganisationUnitChildren = Ext.create('Ext.form.field.Checkbox', {
-			columnWidth: 0.31,
+			columnWidth: 0.30,
 			style: 'padding-top:2px; margin-bottom:0',
-			boxLabel: GIS.i18n.user_organisation_unit_children,
+			//boxLabel: GIS.i18n.user_organisation_unit_children,
+			boxLabel: 'Children',
 			labelWidth: gis.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitGrandChildren.getValue()]);
@@ -4394,9 +4407,10 @@ Ext.onReady( function() {
 		});
 
 		userOrganisationUnitGrandChildren = Ext.create('Ext.form.field.Checkbox', {
-			columnWidth: 0.41,
+			columnWidth: 0.40,
 			style: 'padding-top:2px; margin-bottom:0',
-			boxLabel: GIS.i18n.user_organisation_unit_grandchildren,
+			//boxLabel: GIS.i18n.user_organisation_unit_grandchildren,
+			boxLabel: 'Grand children',
 			labelWidth: gis.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitChildren.getValue()]);
@@ -4984,7 +4998,7 @@ Ext.onReady( function() {
 							items: [
 								toolPanel,
 								{
-									//width: gis.conf.layout.widget.item_width - 38,
+									width: gis.conf.layout.widget.item_width - 38,
 									layout: 'column',
 									bodyStyle: 'border:0 none',
 									items: [

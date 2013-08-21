@@ -1592,7 +1592,9 @@ Ext.onReady( function() {
 				url: {
 					path_api: '/api/',
 					path_module: '/dhis-web-mapping/',
-					path_commons: '/dhis-web-commons-ajax-json/'
+					path_commons: '/dhis-web-commons-ajax-json/',
+					organisationunitchildren_get: 'getOrganisationUnitChildren.action',
+					organisationunitgroup_getall: 'organisationUnitGroups.json?paging=false&links=false',
 				},
 				layer: {
 					type_base: 'base',
