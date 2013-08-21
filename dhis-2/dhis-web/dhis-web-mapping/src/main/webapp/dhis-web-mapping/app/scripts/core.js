@@ -283,7 +283,7 @@ Ext.onReady( function() {
 			// Infrastructural data
 			showInfo = function() {
 				Ext.Ajax.request({
-					url: gis.init.contextPath + gis.conf.url.path_gis + 'getFacilityInfo.action',
+					url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'getFacilityInfo.action',
 					params: {
 						id: feature.attributes.id
 					},
@@ -579,7 +579,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name', 'level'],
 			proxy: {
 				type: 'jsonp',
-				url: gis.init.contextPath + gis.conf.url.path_api + 'organisationUnitLevels.jsonp?viewClass=detailed&links=false&paging=false',
+				url: gis.init.contextPath + gis.conf.finals.url.path_api + 'organisationUnitLevels.jsonp?viewClass=detailed&links=false&paging=false',
 				reader: {
 					type: 'json',
 					root: 'organisationUnitLevels'
@@ -750,7 +750,7 @@ Ext.onReady( function() {
 
 		getMap = function() {
 			Ext.data.JsonP.request({
-				url: gis.init.contextPath + gis.conf.url.path_api + 'maps/' + gis.map.id + '.jsonp?links=false',
+				url: gis.init.contextPath + gis.conf.finals.url.path_api + 'maps/' + gis.map.id + '.jsonp?links=false',
 				success: function(r) {
 
 					// Operand
@@ -889,7 +889,7 @@ Ext.onReady( function() {
 
 		loadOrganisationUnits = function(view) {
 			Ext.data.JsonP.request({
-				url: gis.init.contextPath + gis.conf.url.path_gis + 'getGeoJson.action',
+				url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'getGeoJson.action',
 				params: {
 					parentId: view.parentOrganisationUnit.id,
 					level: view.organisationUnitLevel.id
@@ -1107,7 +1107,7 @@ Ext.onReady( function() {
 
 		loadOrganisationUnits = function(view) {
 			Ext.data.JsonP.request({
-				url: gis.init.contextPath + gis.conf.url.path_gis + 'getGeoJson.action',
+				url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'getGeoJson.action',
 				params: {
 					parentId: view.parentOrganisationUnit.id,
 					level: view.organisationUnitLevel.id
@@ -1276,7 +1276,7 @@ Ext.onReady( function() {
 					names = [];
 
 				Ext.Ajax.request({
-					url: gis.init.contextPath + gis.conf.url.path_api + 'mapLegendSets/' + view.legendSet.id + '.json?links=false&paging=false',
+					url: gis.init.contextPath + gis.conf.finals.url.path_api + 'mapLegendSets/' + view.legendSet.id + '.json?links=false&paging=false',
 					scope: this,
 					success: function(r) {
 						legends = Ext.decode(r.responseText).mapLegends;
@@ -1429,7 +1429,7 @@ Ext.onReady( function() {
 
 		loadOrganisationUnits = function(view) {
 			Ext.data.JsonP.request({
-				url: gis.init.contextPath + gis.conf.url.path_gis + 'getGeoJsonFacilities.action',
+				url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'getGeoJsonFacilities.action',
 				params: {
 					parentId: view.parentOrganisationUnit.id,
 					level: view.organisationUnitLevel.id
@@ -1483,7 +1483,7 @@ Ext.onReady( function() {
 			var store = gis.store.groupsByGroupSet,
 				options;
 
-			store.proxy.url = gis.init.contextPath + gis.conf.url.path_gis + 'getOrganisationUnitGroupsByGroupSet.action?id=' + view.organisationUnitGroupSet.id;
+			store.proxy.url = gis.init.contextPath + gis.conf.finals.url.path_gis + 'getOrganisationUnitGroupsByGroupSet.action?id=' + view.organisationUnitGroupSet.id;
 			store.load({
 				scope: this,
 				callback: function() {
@@ -1589,6 +1589,11 @@ Ext.onReady( function() {
 		// conf
 		(function() {
 			conf.finals = {
+				url: {
+					path_api: '/api/',
+					path_module: '/dhis-web-mapping/',
+					path_commons: '/dhis-web-commons-ajax-json/'
+				},
 				layer: {
 					type_base: 'base',
 					type_vector: 'vector'
@@ -1661,13 +1666,10 @@ Ext.onReady( function() {
 					classify_with_bounds: 1,
 					classify_by_equal_intervals: 2,
 					classify_by_quantils: 3
+				},
+				root: {
+					id: 'root'
 				}
-			};
-			
-			conf.url = {
-				path_api: '/api/',
-				path_gis: '/dhis-web-mapping/',
-				path_commons: '../../dhis-web-commons-ajax-json/'
 			};
 			
 			conf.layout = {

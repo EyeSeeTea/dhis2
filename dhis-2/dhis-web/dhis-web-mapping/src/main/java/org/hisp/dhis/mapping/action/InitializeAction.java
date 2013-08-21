@@ -29,17 +29,13 @@ package org.hisp.dhis.mapping.action;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.configuration.ConfigurationService;
 import org.hisp.dhis.dataelement.DataElementGroup;
-import org.hisp.dhis.mapping.MapLayer;
-import org.hisp.dhis.mapping.MappingService;
-import org.hisp.dhis.mapping.comparator.MapLayerNameComparator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.PeriodType;
 
@@ -55,13 +51,6 @@ public class InitializeAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private MappingService mappingService;
-
-    public void setMappingService( MappingService mappingService )
-    {
-        this.mappingService = mappingService;
-    }
 
     private ConfigurationService configurationService;
 
@@ -104,13 +93,6 @@ public class InitializeAction
         return contextPath;
     }
 
-    private List<MapLayer> overlays;
-
-    public List<MapLayer> getOverlays()
-    {
-        return overlays;
-    }
-
     private DataElementGroup infrastructuralDataElementGroup;
 
     public DataElementGroup getInfrastructuralDataElementGroup()
@@ -131,6 +113,13 @@ public class InitializeAction
     {
         return rootNodes;
     }
+    
+    private Collection<OrganisationUnitLevel> levels;
+
+    public Collection<OrganisationUnitLevel> getLevels()
+    {
+        return levels;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -140,16 +129,19 @@ public class InitializeAction
         throws Exception
     {
         contextPath = ContextUtils.getContextPath( ServletActionContext.getRequest() );
-        
-        overlays = new ArrayList<MapLayer>( mappingService.getMapLayersByType( MappingService.MAP_LAYER_TYPE_OVERLAY ) );
-
-        Collections.sort( overlays, new MapLayerNameComparator() );
 
         infrastructuralDataElementGroup = configurationService.getConfiguration().getInfrastructuralDataElements();
 
         infrastructuralPeriodType = configurationService.getConfiguration().getInfrastructuralPeriodTypeDefaultIfNull();
 
         rootNodes = new ArrayList<OrganisationUnit>( organisationUnitService.getOrganisationUnitsAtLevel( 1 ) );
+
+        if ( rootNodes.size() < 1 )
+        {
+            rootNodes.add( new OrganisationUnit() );
+        }
+        
+        levels = organisationUnitService.getOrganisationUnitLevels();
 
         return SUCCESS;
     }

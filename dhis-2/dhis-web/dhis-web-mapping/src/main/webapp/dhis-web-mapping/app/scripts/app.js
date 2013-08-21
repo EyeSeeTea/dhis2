@@ -309,7 +309,7 @@ Ext.onReady( function() {
 				fields: ['id', 'name'],
 				proxy: {
 					type: 'ajax',
-					url: gis.init.contextPath + gis.conf.url.path_api + 'indicatorGroups.json?links=false&paging=false',
+					url: gis.init.contextPath + gis.conf.finals.url.path_api + 'indicatorGroups.json?links=false&paging=false',
 					reader: {
 						type: 'json',
 						root: 'indicatorGroups'
@@ -340,7 +340,7 @@ Ext.onReady( function() {
 				fields: ['id', 'name'],
 				proxy: {
 					type: 'ajax',
-					url: gis.init.contextPath + gis.conf.url.path_api + 'dataElementGroups.json?links=false&paging=false',
+					url: gis.init.contextPath + gis.conf.finals.url.path_api + 'dataElementGroups.json?links=false&paging=false',
 					reader: {
 						type: 'json',
 						root: 'dataElementGroups'
@@ -376,7 +376,7 @@ Ext.onReady( function() {
 				fields: ['id', 'name'],
 				proxy: {
 					type: 'ajax',
-					url: gis.init.contextPath + gis.conf.url.path_gis + 'getPeriodsByPeriodType.action',
+					url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'getPeriodsByPeriodType.action',
 					reader: {
 						type: 'json',
 						root: 'periods'
@@ -400,7 +400,7 @@ Ext.onReady( function() {
 				fields: ['id', 'name'],
 				proxy: {
 					type: 'ajax',
-					url: gis.init.contextPath + gis.conf.url.path_api + 'organisationUnitGroupSets.json?paging=false&links=false',
+					url: gis.init.contextPath + gis.conf.finals.url.path_api + 'organisationUnitGroupSets.json?paging=false&links=false',
 					reader: {
 						type: 'json',
 						root: 'organisationUnitGroupSets'
@@ -459,7 +459,7 @@ Ext.onReady( function() {
 				fields: ['id', 'name'],
 				proxy: {
 					type: 'ajax',
-					url: gis.init.contextPath + gis.conf.url.path_api + 'mapLegendSets.json?links=false&paging=false',
+					url: gis.init.contextPath + gis.conf.finals.url.path_api + 'mapLegendSets.json?links=false&paging=false',
 					reader: {
 						type: 'json',
 						root: 'mapLegendSets'
@@ -496,7 +496,7 @@ Ext.onReady( function() {
 				isLoaded: false,
 				pageSize: 10,
 				page: 1,
-				defaultUrl: gis.init.contextPath + gis.conf.url.path_api + 'maps.json?links=false',
+				defaultUrl: gis.init.contextPath + gis.conf.finals.url.path_api + 'maps.json?links=false',
 				loadStore: function(url) {
 					this.proxy.url = url || this.defaultUrl;
 
@@ -1657,7 +1657,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: gis.init.contextPath + gis.conf.url.path_api + 'sharing/search',
+				url: gis.init.contextPath + gis.conf.finals.url.path_api + 'sharing/search',
 				reader: {
 					type: 'json',
 					root: 'userGroups'
@@ -1753,7 +1753,7 @@ Ext.onReady( function() {
 					text: 'Save',
 					handler: function() {
 						Ext.Ajax.request({
-							url: gis.init.contextPath + gis.conf.url.path_api + 'sharing?type=map&id=' + sharing.object.id,
+							url: gis.init.contextPath + gis.conf.finals.url.path_api + 'sharing?type=map&id=' + sharing.object.id,
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json'
@@ -1902,7 +1902,7 @@ Ext.onReady( function() {
 							};
 
 							Ext.Ajax.request({
-								url: gis.init.contextPath + gis.conf.url.path_api + 'maps/',
+								url: gis.init.contextPath + gis.conf.finals.url.path_api + 'maps/',
 								method: 'POST',
 								headers: {'Content-Type': 'application/json'},
 								params: Ext.encode(map),
@@ -1933,7 +1933,7 @@ Ext.onReady( function() {
 					var name = nameTextfield.getValue();
 
 					Ext.Ajax.request({
-						url: gis.init.contextPath + gis.conf.url.path_gis + 'renameMap.action?id=' + id + '&name=' + name + '&user=true',
+						url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'renameMap.action?id=' + id + '&name=' + name + '&user=true',
 						success: function() {
 							gis.store.maps.loadStore();
 
@@ -1997,7 +1997,7 @@ Ext.onReady( function() {
 						this.currentValue = this.getValue();
 
 						var value = this.getValue(),
-							url = value ? gis.init.contextPath + gis.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
+							url = value ? gis.init.contextPath + gis.conf.finals.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
 							store = gis.store.maps;
 
 						store.page = 1;
@@ -2011,7 +2011,7 @@ Ext.onReady( function() {
 			text: GIS.i18n.prev,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? gis.init.contextPath + gis.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
+					url = value ? gis.init.contextPath + gis.conf.finals.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
 					store = gis.store.maps;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
@@ -2023,7 +2023,7 @@ Ext.onReady( function() {
 			text: GIS.i18n.next,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? gis.init.contextPath + gis.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
+					url = value ? gis.init.contextPath + gis.conf.finals.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
 					store = gis.store.maps;
 
 				store.page = store.page + 1;
@@ -2131,7 +2131,7 @@ Ext.onReady( function() {
 											};
 
 											Ext.Ajax.request({
-												url: gis.init.contextPath + gis.conf.url.path_api + 'maps/' + record.data.id,
+												url: gis.init.contextPath + gis.conf.finals.url.path_api + 'maps/' + record.data.id,
 												method: 'PUT',
 												headers: {'Content-Type': 'application/json'},
 												params: Ext.encode(map),
@@ -2188,7 +2188,7 @@ Ext.onReady( function() {
 
 									if (confirm(message)) {
 										Ext.Ajax.request({
-											url: gis.init.contextPath + gis.conf.url.path_gis + 'addMapViewToDashboard.action',
+											url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'addMapViewToDashboard.action',
 											params: {
 												id: record.data.id
 											}
@@ -2409,7 +2409,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: gis.init.contextPath + gis.conf.url.path_api + 'mapLegendSets.json?links=false&paging=false',
+				url: gis.init.contextPath + gis.conf.finals.url.path_api + 'mapLegendSets.json?links=false&paging=false',
 				reader: {
 					type: 'json',
 					root: 'mapLegendSets'
@@ -2845,7 +2845,7 @@ Ext.onReady( function() {
 			});
 
 			if (id) {
-				legendStore.proxy.url = gis.init.contextPath + gis.conf.url.path_api +  'mapLegendSets/' + id + '.json?links=false&paging=false';
+				legendStore.proxy.url = gis.init.contextPath + gis.conf.finals.url.path_api +  'mapLegendSets/' + id + '.json?links=false&paging=false';
 				legendStore.load();
 
 				legendSetName.setValue(legendSetStore.getById(id).data.name);
@@ -2872,7 +2872,7 @@ Ext.onReady( function() {
 		deleteLegendSet = function(id) {
 			if (id) {
 				Ext.Ajax.request({
-					url: gis.init.contextPath + gis.conf.url.path_api + 'mapLegendSets/' + id,
+					url: gis.init.contextPath + gis.conf.finals.url.path_api + 'mapLegendSets/' + id,
 					method: 'DELETE',
 					success: function() {
 						legendSetStore.load();
@@ -2971,7 +2971,7 @@ Ext.onReady( function() {
 					var body = Ext.encode(getRequestBody());
 
 					Ext.Ajax.request({
-						url: gis.init.contextPath + gis.conf.url.path_api + 'mapLegendSets/',
+						url: gis.init.contextPath + gis.conf.finals.url.path_api + 'mapLegendSets/',
 						method: 'POST',
 						headers: {'Content-Type': 'application/json'},
 						params: body,
@@ -2995,7 +2995,7 @@ Ext.onReady( function() {
 					body = Ext.encode(getRequestBody());
 
 					Ext.Ajax.request({
-						url: gis.init.contextPath + gis.conf.url.path_api + 'mapLegendSets/' + id,
+						url: gis.init.contextPath + gis.conf.finals.url.path_api + 'mapLegendSets/' + id,
 						method: 'PUT',
 						headers: {'Content-Type': 'application/json'},
 						params: body,
@@ -3157,7 +3157,7 @@ Ext.onReady( function() {
 			handler: function() {
 				if (textarea.getValue() && gis.map && gis.map.id) {
 					Ext.Ajax.request({
-						url: gis.init.contextPath + gis.conf.url.path_api + 'interpretations/map/' + gis.map.id,
+						url: gis.init.contextPath + gis.conf.finals.url.path_api + 'interpretations/map/' + gis.map.id,
 						method: 'POST',
 						params: textarea.getValue(),
 						headers: {'Content-Type': 'text/html'},
@@ -3323,7 +3323,7 @@ Ext.onReady( function() {
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
-					url: gis.init.contextPath + gis.conf.url.path_gis + 'getOrganisationUnitChildren.action'
+					url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'getOrganisationUnitChildren.action'
 				},
 				root: {
 					id: 'root',
@@ -3519,8 +3519,17 @@ Ext.onReady( function() {
 			colorHigh,
 			radiusLow,
 			radiusHigh,
-			level,
-			parent,
+			//level,
+			//parent,
+			treePanel,
+			userOrganisationUnit,
+			userOrganisationUnitChildren,
+			userOrganisationUnitGrandChildren,
+			organisationUnitLevel,
+			organisationUnitGroup,
+			toolMenu,
+			tool,
+			toolPanel,
 
 			periodTypePanel,
 			methodPanel,
@@ -3613,7 +3622,7 @@ Ext.onReady( function() {
 
 				this.setProxy({
 					type: 'ajax',
-					url: gis.init.contextPath + gis.conf.url.path_api + path,
+					url: gis.init.contextPath + gis.conf.finals.url.path_api + path,
 					reader: {
 						type: 'json',
 						root: 'dataElements'
@@ -3637,7 +3646,7 @@ Ext.onReady( function() {
 				if (Ext.isString(uid)) {
 					this.setProxy({
 						type: 'ajax',
-						url: gis.conf.url.path_commons + 'getOperands.action?uid=' + uid,
+						url: gis.conf.finals.url.path_commons + 'getOperands.action?uid=' + uid,
 						reader: {
 							type: 'json',
 							root: 'operands'
@@ -3815,7 +3824,7 @@ Ext.onReady( function() {
 					indicator.clearValue();
 
 					var store = indicator.store;
-					store.proxy.url = gis.init.contextPath + gis.conf.url.path_api +  'indicatorGroups/' + this.getValue() + '.json?links=false&paging=false';
+					store.proxy.url = gis.init.contextPath + gis.conf.finals.url.path_api +  'indicatorGroups/' + this.getValue() + '.json?links=false&paging=false';
 					store.load();
 				}
 			}
@@ -3835,7 +3844,7 @@ Ext.onReady( function() {
 			listeners: {
 				select: function(cb) {
 					Ext.Ajax.request({
-						url: gis.init.contextPath + gis.conf.url.path_api + 'indicators/' + this.getValue() + '.json?links=false',
+						url: gis.init.contextPath + gis.conf.finals.url.path_api + 'indicators/' + this.getValue() + '.json?links=false',
 						success: function(r) {
 							r = Ext.decode(r.responseText);
 
@@ -3920,7 +3929,7 @@ Ext.onReady( function() {
 					}
 
 					Ext.Ajax.request({
-						url: gis.init.contextPath + gis.conf.url.path_api + 'dataElements/' + id + '.json?links=false',
+						url: gis.init.contextPath + gis.conf.finals.url.path_api + 'dataElements/' + id + '.json?links=false',
 						success: function(r) {
 							r = Ext.decode(r.responseText);
 
@@ -4165,53 +4174,351 @@ Ext.onReady( function() {
 			value: 15
 		});
 
-		level = Ext.create('Ext.form.field.ComboBox', {
-			fieldLabel: GIS.i18n.level,
-			editable: false,
-			valueField: 'id',
-			displayField: 'name',
-			mode: 'remote',
-			forceSelection: true,
-			width: gis.conf.layout.widget.item_width,
-			labelWidth: gis.conf.layout.widget.itemlabel_width,
-			style: 'margin-bottom: 4px',
-			store: gis.store.organisationUnitLevels,
-			listeners: {
-				added: function() {
-					this.store.cmp.push(this);
-				}
-			}
-		});
+		//level = Ext.create('Ext.form.field.ComboBox', {
+			//fieldLabel: GIS.i18n.level,
+			//editable: false,
+			//valueField: 'id',
+			//displayField: 'name',
+			//mode: 'remote',
+			//forceSelection: true,
+			//width: gis.conf.layout.widget.item_width,
+			//labelWidth: gis.conf.layout.widget.itemlabel_width,
+			//style: 'margin-bottom: 4px',
+			//store: gis.store.organisationUnitLevels,
+			//listeners: {
+				//added: function() {
+					//this.store.cmp.push(this);
+				//}
+			//}
+		//});
 
-		parent = Ext.create('Ext.tree.Panel', {
-			autoScroll: true,
-			lines: false,
-			rootVisible: false,
-			multiSelect: false,
+		//parent = Ext.create('Ext.tree.Panel', {
+			//autoScroll: true,
+			//lines: false,
+			//rootVisible: false,
+			//multiSelect: false,
+			//width: gis.conf.layout.widget.item_width,
+			//height: 210,
+			//reset: function() {
+				//this.collapseAll();
+				//this.expandPath(gis.init.rootNodes[0].path);
+				//this.selectPath(gis.init.rootNodes[0].path);
+			//},
+			//store: Ext.create('Ext.data.TreeStore', {
+				//proxy: {
+					//type: 'ajax',
+					//url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'getOrganisationUnitChildren.action'
+				//},
+				//root: {
+					//id: 'root',
+					//expanded: true,
+					//children: gis.init.rootNodes
+				//}
+			//}),
+			//listeners: {
+				//afterrender: function() {
+					//this.getSelectionModel().select(0);
+				//}
+			//}
+		//});
+		
+		treePanel = Ext.create('Ext.tree.Panel', {
+			cls: 'gis-tree',
+			style: 'border-top: 1px solid #ddd; padding-top: 1px',
 			width: gis.conf.layout.widget.item_width,
-			height: 210,
+			rootVisible: false,
+			autoScroll: true,
+			multiSelect: true,
+			rendered: false,
 			reset: function() {
+				var rootNode = this.getRootNode().findChild('id', gis.init.rootNodes[0].id);
 				this.collapseAll();
-				this.expandPath(gis.init.rootNodes[0].path);
-				this.selectPath(gis.init.rootNodes[0].path);
+				this.expandPath(rootNode.getPath());
+				this.getSelectionModel().select(rootNode);
+			},
+			selectRootIf: function() {
+				if (this.getSelectionModel().getSelection().length < 1) {
+					var node = this.getRootNode().findChild('id', gis.init.rootNodes[0].id);
+					if (this.rendered) {
+						this.getSelectionModel().select(node);
+					}
+					return node;
+				}
+			},
+			numberOfRecords: 0,
+			recordsToSelect: [],
+			multipleSelectIf: function(doUpdate) {
+				if (this.recordsToSelect.length === this.numberOfRecords) {
+					this.getSelectionModel().select(this.recordsToSelect);
+					this.recordsToSelect = [];
+					this.numberOfRecords = 0;
+
+					if (doUpdate) {
+						update();
+					}
+				}
+			},
+			multipleExpand: function(id, path, doUpdate) {
+				this.expandPath('/' + gis.conf.finals.root.id + path, 'id', '/', function() {
+					var record = this.getRootNode().findChild('id', id, true);
+					this.recordsToSelect.push(record);
+					this.multipleSelectIf(doUpdate);
+				}, this);
+			},
+			select: function(url, params) {
+				if (!params) {
+					params = {};
+				}
+				Ext.Ajax.request({
+					url: url,
+					method: 'GET',
+					params: params,
+					scope: this,
+					success: function(r) {
+						var a = Ext.decode(r.responseText).organisationUnits;
+						this.numberOfRecords = a.length;
+						for (var i = 0; i < a.length; i++) {
+							this.multipleExpand(a[i].id, a[i].path);
+						}
+					}
+				});
+			},
+			selectByGroup: function(id) {
+				if (id) {
+					var url = gis.init.contextPath + gis.conf.finals.url.path_module + gis.conf.finals.url.organisationunit_getbygroup,
+						params = {id: id};
+					this.select(url, params);
+				}
+			},
+			selectByLevel: function(level) {
+				if (level) {
+					var url = gis.init.contextPath + gis.conf.finals.url.path_module + gis.conf.finals.url.organisationunit_getbylevel,
+						params = {level: level};
+					this.select(url, params);
+				}
+			},
+			selectByIds: function(ids) {
+				if (ids) {
+					var url = gis.init.contextPath + gis.conf.finals.url.path_module + gis.conf.finals.url.organisationunit_getbyids;
+					Ext.Array.each(ids, function(item) {
+						url = Ext.String.urlAppend(url, 'ids=' + item);
+					});
+					if (!this.rendered) {
+						gis.cmp.dimension.organisationUnit.panel.expand();
+					}
+					this.select(url);
+				}
 			},
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
-					url: gis.init.contextPath + gis.conf.url.path_gis + 'getOrganisationUnitChildren.action'
+					url: gis.init.contextPath + gis.conf.finals.url.path_module + gis.conf.finals.url.organisationunitchildren_get
 				},
 				root: {
-					id: 'root',
+					id: gis.conf.finals.root.id,
 					expanded: true,
 					children: gis.init.rootNodes
 				}
 			}),
+			xable: function(values) {
+				for (var i = 0; i < values.length; i++) {
+					if (!!values[i]) {
+						this.disable();
+						return;
+					}
+				}
+				
+				this.enable();
+			},
 			listeners: {
+				added: function() {
+					gis.cmp.dimension.organisationUnit.treepanel = this;
+				},
+				render: function() {
+					this.rendered = true;
+				},
 				afterrender: function() {
 					this.getSelectionModel().select(0);
+				},
+				itemcontextmenu: function(v, r, h, i, e) {
+					v.getSelectionModel().select(r, false);
+
+					if (v.menu) {
+						v.menu.destroy();
+					}
+					v.menu = Ext.create('Ext.menu.Menu', {
+						id: 'treepanel-contextmenu',
+						showSeparator: false,
+						shadow: false
+					});
+					if (!r.data.leaf) {
+						v.menu.add({
+							id: 'treepanel-contextmenu-item',
+							text: GIS.i18n.select_all_children,
+							icon: 'images/node-select-child.png',
+							handler: function() {
+								r.expand(false, function() {
+									v.getSelectionModel().select(r.childNodes, true);
+									v.getSelectionModel().deselect(r);
+								});
+							}
+						});
+					}
+					else {
+						return;
+					}
+
+					v.menu.showAt(e.xy);
 				}
 			}
 		});
+
+		userOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
+			columnWidth: 0.28,
+			style: 'padding-top:2px; padding-left:3px; margin-bottom:0',
+			boxLabel: GIS.i18n.user_organisation_unit,
+			labelWidth: gis.conf.layout.form_label_width,
+			handler: function(chb, checked) {
+				treePanel.xable([checked, userOrganisationUnitChildren.getValue(), userOrganisationUnitGrandChildren.getValue()]);
+			}
+		});
+
+		userOrganisationUnitChildren = Ext.create('Ext.form.field.Checkbox', {
+			columnWidth: 0.31,
+			style: 'padding-top:2px; margin-bottom:0',
+			boxLabel: GIS.i18n.user_organisation_unit_children,
+			labelWidth: gis.conf.layout.form_label_width,
+			handler: function(chb, checked) {
+				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitGrandChildren.getValue()]);
+			}
+		});
+
+		userOrganisationUnitGrandChildren = Ext.create('Ext.form.field.Checkbox', {
+			columnWidth: 0.41,
+			style: 'padding-top:2px; margin-bottom:0',
+			boxLabel: GIS.i18n.user_organisation_unit_grandchildren,
+			labelWidth: gis.conf.layout.form_label_width,
+			handler: function(chb, checked) {
+				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitChildren.getValue()]);
+			}
+		});
+
+		organisationUnitLevel = Ext.create('Ext.form.field.ComboBox', {
+			cls: 'gis-combo',
+			multiSelect: true,
+			style: 'margin-bottom:0',
+			width: gis.conf.layout.widget.item_width - 38,
+			valueField: 'level',
+			displayField: 'name',
+			emptyText: GIS.i18n.select_organisation_unit_levels,
+			editable: false,
+			hidden: true,
+			store: {
+				fields: ['id', 'name', 'level'],
+				data: gis.init.organisationUnitLevels
+			}
+		});
+
+		organisationUnitGroup = Ext.create('Ext.form.field.ComboBox', {
+			cls: 'gis-combo',
+			multiSelect: true,
+			style: 'margin-bottom:0',
+			width: gis.conf.layout.widget.item_width - 38,
+			valueField: 'id',
+			displayField: 'name',
+			emptyText: GIS.i18n.select_organisation_unit_groups,
+			editable: false,
+			hidden: true,
+			store: gis.store.organisationUnitGroup
+		});
+
+		toolMenu = Ext.create('Ext.menu.Menu', {
+			shadow: false,
+			showSeparator: false,
+			menuValue: 'orgunit',
+			clickHandler: function(param) {
+				var items = this.items.items;
+				this.menuValue = param;
+
+				// Menu item icon cls
+				for (var i = 0; i < items.length; i++) {
+					if (items[i].param === param) {
+						items[i].setIconCls('gis-menu-item-selected');
+					}
+					else {
+						items[i].setIconCls('');
+					}
+				}
+
+				// Gui
+				if (param === 'orgunit') {
+					userOrganisationUnit.show();
+					userOrganisationUnitChildren.show();
+					userOrganisationUnitGrandChildren.show();
+					organisationUnitLevel.hide();
+					organisationUnitGroup.hide();
+
+					if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue()) {
+						treePanel.disable();
+					}
+				}
+				else if (param === 'level') {
+					userOrganisationUnit.hide();
+					userOrganisationUnitChildren.hide();
+					userOrganisationUnitGrandChildren.hide();
+					organisationUnitLevel.show();
+					organisationUnitGroup.hide();
+					treePanel.enable();
+				}
+				else if (param === 'group') {
+					userOrganisationUnit.hide();
+					userOrganisationUnitChildren.hide();
+					userOrganisationUnitGrandChildren.hide();
+					organisationUnitLevel.hide();
+					organisationUnitGroup.show();
+					treePanel.enable();
+				}
+			},
+			items: [
+				{
+					text: GIS.i18n.select_organisation_units + '&nbsp;&nbsp;',
+					param: 'orgunit',
+					iconCls: 'gis-menu-item-selected'
+				},
+				{
+					text: GIS.i18n.select_boundaries_and_levels + '&nbsp;&nbsp;',
+					param: 'level'
+				},
+				{
+					text: GIS.i18n.select_boundaries_and_groups + '&nbsp;&nbsp;',
+					param: 'group'
+				}
+			],
+			listeners: {
+				afterrender: function() {
+					this.getEl().addCls('gis-btn-menu');
+				},
+				click: function(menu, item) {
+					this.clickHandler(item.param);
+				}
+			}
+		});
+
+		tool = Ext.create('Ext.button.Button', {
+			cls: 'gis-button-organisationunitselection',
+			iconCls: 'gis-button-icon-gear',
+			width: 36,
+			height: 24,
+			menu: toolMenu
+		});
+
+		toolPanel = Ext.create('Ext.panel.Panel', {
+			width: 36,
+			bodyStyle: 'border:0 none; text-align:right',
+			style: 'margin-right:2px',
+			items: tool
+		});
+
 
 		periodTypePanel = Ext.create('Ext.panel.Panel', {
 			layout: 'hbox',
@@ -4667,8 +4974,30 @@ Ext.onReady( function() {
 							html: GIS.i18n.organisation_unit_level_parent,
 							cls: 'gis-form-subtitle'
 						},
-						level,
-						parent
+						//level,
+						//parent
+						
+						{
+							layout: 'column',
+							bodyStyle: 'border:0 none',
+							style: 'padding-bottom:2px',
+							items: [
+								toolPanel,
+								{
+									//width: gis.conf.layout.widget.item_width - 38,
+									layout: 'column',
+									bodyStyle: 'border:0 none',
+									items: [
+										userOrganisationUnit,
+										userOrganisationUnitChildren,
+										userOrganisationUnitGrandChildren,
+										organisationUnitLevel,
+										organisationUnitGroup
+									]
+								}
+							]
+						},
+						treePanel
 					]
 				}
 			]
@@ -4776,7 +5105,7 @@ Ext.onReady( function() {
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
-					url: gis.init.contextPath + gis.conf.url.path_gis + 'getOrganisationUnitChildren.action'
+					url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'getOrganisationUnitChildren.action'
 				},
 				root: {
 					id: 'root',
@@ -5286,7 +5615,7 @@ Ext.onReady( function() {
 						center = gis.viewport.centerRegion;
 
 					Ext.Ajax.request({
-						url: gis.init.contextPath + gis.conf.url.path_gis + 'updateOrganisationUnitCoordinates.action',
+						url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'updateOrganisationUnitCoordinates.action',
 						method: 'POST',
 						params: {id: gis.olmap.relocate.feature.attributes.id, coordinates: coordinates},
 						success: function(r) {

@@ -31,7 +31,7 @@ Ext.onReady( function() {
 		// conf
 		(function() {
 			conf.finals = {
-				ajax: {
+				url: {
 					path_module: '/dhis-web-pivot/',
 					path_api: '/api/',
 					path_commons: '/dhis-web-commons-ajax-json/',
