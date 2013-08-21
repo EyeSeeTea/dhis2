@@ -2,17 +2,17 @@ Ext.onReady( function() {
 	var createViewport,
 		initialize,
 		gis;
-	
+
 	GIS.app = {};
-	
+
 	GIS.app.extendInstance = function(gis) {
 		var util = gis.util,
 			init = gis.init,
 			store = gis.store,
 			layer;
-			
+
 		// util
-		(function() {			
+		(function() {
 			util.map.getFeaturesByLayers = function(layers) {
 				var a = [];
 				for (var i = 0; i < layers.length; i++) {
@@ -302,7 +302,7 @@ Ext.onReady( function() {
 				init.rootNodes[i].path = '/root/' + init.rootNodes[i].id;
 			}
 		}());
-		
+
 		// store
 		(function() {
 			store.indicatorGroups = Ext.create('Ext.data.Store', {
@@ -526,7 +526,7 @@ Ext.onReady( function() {
 				}
 			});
 		}());
-		
+
 		// layer
 		(function() {
 			layer = gis.layer.facility;
@@ -3327,7 +3327,7 @@ Ext.onReady( function() {
 				},
 				root: {
 					id: 'root',
-					expanded: true,
+					expanded: false,
 					children: gis.init.rootNodes
 				},
 				listeners: {
@@ -4186,13 +4186,13 @@ Ext.onReady( function() {
 				this.selectPath(gis.init.rootNodes[0].path);
 			},
 			store: Ext.create('Ext.data.TreeStore', {
-				proxy: {
-					type: 'ajax',
-					url: gis.init.contextPath + gis.conf.url.path_gis + 'getOrganisationUnitChildren.action'
-				},
+				//proxy: {
+					//type: 'ajax',
+					//url: gis.init.contextPath + gis.conf.url.path_gis + 'getOrganisationUnitChildren.action'
+				//},
 				root: {
 					id: 'root',
-					expanded: true,
+					expanded: false,
 					children: gis.init.rootNodes
 				},
 				listeners: {
@@ -5144,8 +5144,8 @@ Ext.onReady( function() {
 			items: function() {
 				var a = [];
 
-				layersPanel = GIS.app.LayersPanel();					
-				
+				layersPanel = GIS.app.LayersPanel();
+
 				a.push({
 					title: GIS.i18n.layer_stack_transparency,
 					bodyStyle: 'padding: 4px 6px 3px',
@@ -5153,7 +5153,7 @@ Ext.onReady( function() {
 					collapsible: true,
 					animCollapse: false
 				});
-				
+
 				a.push({
 					title: GIS.i18n.thematic_layer_1_legend,
 					bodyStyle: 'padding: 4px 6px 6px; border: 0 none',
@@ -5166,7 +5166,7 @@ Ext.onReady( function() {
 						}
 					}
 				});
-				
+
 				a.push({
 					title: GIS.i18n.thematic_layer_2_legend,
 					bodyStyle: 'padding: 4px 6px 6px; border: 0 none',
@@ -5179,7 +5179,7 @@ Ext.onReady( function() {
 						}
 					}
 				});
-				
+
 				a.push({
 					title: GIS.i18n.thematic_layer_3_legend,
 					bodyStyle: 'padding: 4px 6px 6px; border: 0 none',
@@ -5192,7 +5192,7 @@ Ext.onReady( function() {
 						}
 					}
 				});
-				
+
 				a.push({
 					title: GIS.i18n.thematic_layer_4_legend,
 					bodyStyle: 'padding: 4px 6px 6px; border: 0 none',
@@ -5205,7 +5205,7 @@ Ext.onReady( function() {
 						}
 					}
 				});
-				
+
 				a.push({
 					title: GIS.i18n.facility_layer_legend,
 					bodyStyle: 'padding: 4px 6px 6px; border: 0 none',
@@ -5218,7 +5218,7 @@ Ext.onReady( function() {
 						}
 					}
 				});
-				
+
 				return a;
 			}(),
 			listeners: {
@@ -5278,14 +5278,14 @@ Ext.onReady( function() {
 				};
 				GIS.core.MapLoader(gis).load();
 			}
-			
+
 			if (base.length) {
-			
+
 				// hide base layer
 				if (base === 'false') {
 					for (var i = 0, item; i < layersPanel.layerItems.length; i++) {
 						item = layersPanel.layerItems[i];
-						
+
 						if (item.layer.layerType === gis.conf.finals.layer.type_base && item.layer.visibility) {
 							item.disableItem();
 						}
@@ -5293,10 +5293,10 @@ Ext.onReady( function() {
 				}
 				else {
 					var isEnabled = false;
-					
+
 					for (var i = 0, item; i < layersPanel.layerItems.length; i++) {
 						item = layersPanel.layerItems[i];
-						
+
 						if (item.layer.layerType === gis.conf.finals.layer.type_base) {
 							if (base === item.layer.id) {
 								item.enableItem();
@@ -5307,12 +5307,12 @@ Ext.onReady( function() {
 							}
 						}
 					}
-					
+
 					if (!isEnabled) {
 						layersPanel.layerItems[layersPanel.layerItems.length - 1].enableItem();
 					}
 				}
-			}				
+			}
 		};
 
 		viewport = Ext.create('Ext.container.Viewport', {
@@ -5339,9 +5339,9 @@ Ext.onReady( function() {
 
 		return viewport;
 	};
-	
+
 	initialize = function() {
-	
+
 		// ext configuration
 		Ext.QuickTips.init();
 
@@ -5350,7 +5350,7 @@ Ext.onReady( function() {
 				this.callParent();
 			}
 		});
-		
+
 		// right click handler
 		document.body.oncontextmenu = function() {
 			return false;
@@ -5360,11 +5360,11 @@ Ext.onReady( function() {
 			url: '../initialize.action',
 			success: function(r) {
 				gis = GIS.core.getInstance(Ext.decode(r.responseText));
-				
+
 				GIS.app.createExtensions();
 
 				GIS.app.extendInstance(gis);
-								
+
 				gis.viewport = createViewport();
 			}
 		});
