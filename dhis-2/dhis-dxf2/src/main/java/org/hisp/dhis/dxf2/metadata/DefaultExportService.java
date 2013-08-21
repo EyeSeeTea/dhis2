@@ -35,6 +35,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.filter.Filter;
 import org.hisp.dhis.filter.FilterService;
 import org.hisp.dhis.scheduling.TaskId;
@@ -68,6 +71,9 @@ public class DefaultExportService
 
     @Autowired
     private FilterService filterService;
+
+    @Autowired
+    private DataElementService dataElementService;
 
     //-------------------------------------------------------------------------------------------------------
     // ExportService Implementation - MetaData
@@ -235,6 +241,12 @@ public class DefaultExportService
     @Override
     public void deleteFilter( JSONObject json ) throws IOException
     {
+//        DataElementGroup dataElementGroup = dataElementService.getDataElementGroup( "qfxEYY9xAl6" );
+//        MetaDataDependencies metaDataDependencies = new MetaDataDependencies();
+//
+//        List<String> uids = metaDataDependencies.getAllDependencyUids( dataElementGroup );
+//
+//        System.out.println("Break");
         Filter filter = filterService.getFilterByUid( json.getString( "uid" ) );
 
         filterService.deleteFilter( filter );

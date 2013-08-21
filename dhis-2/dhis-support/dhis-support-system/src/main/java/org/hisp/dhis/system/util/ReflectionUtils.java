@@ -475,4 +475,28 @@ public class ReflectionUtils
             throw new RuntimeException( "Unknown Collection type." );
         }
     }
+
+    // OVIDIU
+    /*
+     * Check the Generic type of a Field
+     */
+    public static boolean isGenericTypeOf( Field field, Class<?> clazz )
+    {
+        Type type = field.getGenericType();
+        if ( type instanceof ParameterizedType )
+        {
+            ParameterizedType parameterizedType = ( ParameterizedType ) type;
+            Type[] types = parameterizedType.getActualTypeArguments();
+
+            for ( Type aType : types )
+            {
+                if ( aType.equals( clazz ) )
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 }

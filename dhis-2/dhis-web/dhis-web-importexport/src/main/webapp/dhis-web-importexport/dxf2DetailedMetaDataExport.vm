@@ -34,8 +34,8 @@
                     <col width="260"/>
                     <thead>
                     <tr>
-                        <th style="background-color: #cbddeb;">$i18n.getString( "name" )</th>
-                        <th class="{sorter: false}" style="background-color: #cbddeb;">$i18n.getString( "operations" )</th>
+                        <th>$i18n.getString( "name" )</th>
+                        <th class="{sorter: false}">$i18n.getString( "operations" )</th>
                     </tr>
                     </thead>
                     <tbody id="filterTableBody">

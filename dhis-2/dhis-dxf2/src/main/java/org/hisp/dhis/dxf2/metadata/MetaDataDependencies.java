@@ -27,14 +27,15 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.system.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -44,47 +45,21 @@ public class MetaDataDependencies
 {
     private static final Log log = LogFactory.getLog( MetaDataDependencies.class );
 
-    private List<String> dependencyUids;
-
-    // -------------------------------------------------------------------------
-    // Getters and setters properties
-    // -------------------------------------------------------------------------
-
-    public List<String> getDependencyUids()
-    {
-        return dependencyUids;
-    }
-
-    public void setDependencyUids( List<String> dependencyUids )
-    {
-        this.dependencyUids = dependencyUids;
-    }
-
     //--------------------------------------------------------------------------
-    // Logic
+    // Dependencies Logic
     //--------------------------------------------------------------------------
 
-    /*
-     * Get all dependency Uids from the dependency Objects for a MetaData Object
-     */
-    public List<String> getDependenciesUids( IdentifiableObject identifiableObject )
+    // Get all dependencies for an IdentifiableObject as a List of Uids
+    public List<String> getAllDependencyUids( IdentifiableObject identifiableObject )
     {
         List<String> uids = new ArrayList<String>();
+        List<IdentifiableObject> dependencies = computeAllDependencies( identifiableObject );
 
-        List<IdentifiableObject> dependencyObjects = getAllDependencies( identifiableObject );
-        List<Collection<? extends IdentifiableObject>> dependencyCollections = getAllDependencyCollections( identifiableObject );
-
-        for ( IdentifiableObject dependencyObject : dependencyObjects )
+        for ( IdentifiableObject dependency : dependencies )
         {
-            String uid = dependencyObject.getUid();
-            uids.add( uid );
-        }
-
-        for ( Collection<? extends IdentifiableObject> collection : dependencyCollections )
-        {
-            for ( IdentifiableObject entry : collection )
+            String uid = dependency.getUid();
+            if ( !uids.contains( uid ) )
             {
-                String uid = entry.getUid();
                 uids.add( uid );
             }
         }
@@ -92,20 +67,61 @@ public class MetaDataDependencies
         return uids;
     }
 
-    /*
-     * Get all dependency Objects for a MetaData Object
-     */
+    // Compute all dependencies for an IdentifiableObject
+    private List<IdentifiableObject> computeAllDependencies( IdentifiableObject identifiableObject )
+    {
+        List<IdentifiableObject> dependencies = getAllDependencies( identifiableObject );
+
+        if ( dependencies.size() == 0 )
+        {
+            return dependencies;
+        } else
+        {
+            List<IdentifiableObject> finalDependencies = new ArrayList<IdentifiableObject>();
+
+            for ( IdentifiableObject dependency : dependencies )
+            {
+                log.info( "[ COMPUTING Dependency ] : " + dependency.getName() );
+                finalDependencies.add( dependency );
+                finalDependencies.addAll( computeAllDependencies( dependency ) );
+            }
+
+            return finalDependencies;
+        }
+    }
+
+    // Get all dependencies for an IdentifiableObject
     private List<IdentifiableObject> getAllDependencies( IdentifiableObject identifiableObject )
+    {
+        List<IdentifiableObject> dependencies = new ArrayList<IdentifiableObject>();
+
+        List<IdentifiableObject> dependencyObjects = getAllDependencyObjects( identifiableObject );
+        List<Collection<IdentifiableObject>> dependencyCollections = getAllDependencyCollections( identifiableObject );
+
+        dependencies.addAll( dependencyObjects );
+
+        for ( Collection<IdentifiableObject> dependencyCollection : dependencyCollections )
+        {
+            dependencies.addAll( dependencyCollection );
+        }
+
+        return dependencies;
+    }
+
+    // Get all single dependency objects for an IdentifiableObject
+    private List<IdentifiableObject> getAllDependencyObjects( IdentifiableObject identifiableObject )
     {
         List<IdentifiableObject> dependencyObjects = new ArrayList<IdentifiableObject>();
 
         List<Field> fields = ReflectionUtils.getAllFields( identifiableObject.getClass() );
         List<Field> dependencyFields = getDependencyFields( fields );
 
-        for ( Field field : dependencyFields )
+        for ( Field dependencyField : dependencyFields )
         {
-            IdentifiableObject dependencyObject = ReflectionUtils.invokeGetterMethod( field.getName(), identifiableObject );
-            if ( dependencyObject != null )
+            Method getterMethod = ReflectionUtils.findGetterMethod( dependencyField.getName(), identifiableObject );
+            IdentifiableObject dependencyObject = ReflectionUtils.invokeGetterMethod( dependencyField.getName(), identifiableObject );
+
+            if ( dependencyObject != null && hasExportView( getterMethod ) )
             {
                 dependencyObjects.add( dependencyObject );
             }
@@ -114,21 +130,20 @@ public class MetaDataDependencies
         return dependencyObjects;
     }
 
-    /*
-     * Get all dependency Collections for a MetaData Object
-     */
-    private List<Collection<? extends IdentifiableObject>> getAllDependencyCollections( IdentifiableObject identifiableObject )
+    // Get all collections dependencies for a IdentifiableObject
+    private List<Collection<IdentifiableObject>> getAllDependencyCollections( IdentifiableObject identifiableObject )
     {
-        List<Collection<? extends IdentifiableObject>> dependencyCollections = new ArrayList<Collection<? extends IdentifiableObject>>();
+        List<Collection<IdentifiableObject>> dependencyCollections = new ArrayList<Collection<IdentifiableObject>>();
 
         List<Field> fields = ReflectionUtils.getAllFields( identifiableObject.getClass() );
-        List<Field> dependencyFieldsCollections = getDependencyFieldsCollections( fields );
+        List<Field> dependencyFieldsCollections = getDependencyFieldCollections( fields );
 
-        for ( Field field : dependencyFieldsCollections )
+        for ( Field dependencyFieldCollection : dependencyFieldsCollections )
         {
-            Collection<? extends IdentifiableObject> dependencyCollection = ReflectionUtils.invokeGetterMethod( field.getName(), identifiableObject );
+            Method getterMethod = ReflectionUtils.findGetterMethod( dependencyFieldCollection.getName(), identifiableObject );
+            Collection<IdentifiableObject> dependencyCollection = ReflectionUtils.invokeGetterMethod( dependencyFieldCollection.getName(), identifiableObject );
 
-            if ( dependencyCollection != null )
+            if ( dependencyCollection != null && hasExportView( getterMethod ) )
             {
                 dependencyCollections.add( dependencyCollection );
             }
@@ -137,9 +152,7 @@ public class MetaDataDependencies
         return dependencyCollections;
     }
 
-    /*
-     * Get all Fields that contain a dependency to other MetaData types
-     */
+    // Get all Fields that contain a dependency to other Identifiable types
     private List<Field> getDependencyFields( List<Field> fields )
     {
         List<Field> dependencyFields = new ArrayList<Field>();
@@ -152,7 +165,7 @@ public class MetaDataDependencies
                 {
                     if ( ReflectionUtils.isType( field, entry.getKey() ) )
                     {
-                        log.info( "\nDEPENDENCY OBJECT FIELD: " + field );
+                        log.info( "[ DEPENDENCY OBJECT FIELD ] : " + field.getName() );
                         dependencyFields.add( field );
                     }
                 }
@@ -162,10 +175,8 @@ public class MetaDataDependencies
         return dependencyFields;
     }
 
-    /*
-     * Get all Fields that contain a dependency collection to other MetaData types
-     */
-    private List<Field> getDependencyFieldsCollections( List<Field> fields )
+    // Get all Fields that contain a dependency collection to other Identifiable types
+    private List<Field> getDependencyFieldCollections( List<Field> fields )
     {
         List<Field> dependencyFieldsCollections = new ArrayList<Field>();
 
@@ -175,9 +186,9 @@ public class MetaDataDependencies
             {
                 for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
                 {
-                    if ( isGenericTypeOf( field, entry.getKey() ) )
+                    if ( ReflectionUtils.isGenericTypeOf( field, entry.getKey() ) )
                     {
-                        log.info( "\nDEPENDENCY COLLECTION FIELD: " + field );
+                        log.info( "[ DEPENDENCY COLLECTION FIELD ] : " + field.getName() );
                         dependencyFieldsCollections.add( field );
                     }
                 }
@@ -187,20 +198,16 @@ public class MetaDataDependencies
         return dependencyFieldsCollections;
     }
 
-    /*
-     * Check the Generic type of a Field
-     */
-    private boolean isGenericTypeOf( Field field, Class<?> clazz )
+    // Check if a Method has ExportView.class
+    private boolean hasExportView( Method method )
     {
-        Type type = field.getGenericType();
-        if ( type instanceof ParameterizedType )
+        if ( method.isAnnotationPresent( JsonView.class ) )
         {
-            ParameterizedType parameterizedType = ( ParameterizedType ) type;
-            Type[] types = parameterizedType.getActualTypeArguments();
+            Class[] viewClasses = method.getAnnotation( JsonView.class ).value();
 
-            for ( Type aType : types )
+            for ( Class viewClass : viewClasses )
             {
-                if ( aType.equals( clazz ) )
+                if ( viewClass.equals( ExportView.class ) )
                 {
                     return true;
                 }
