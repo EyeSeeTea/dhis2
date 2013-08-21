@@ -38,6 +38,7 @@ import org.hisp.dhis.analytics.AnalyticsTable;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Lars Helge Overland
@@ -46,10 +47,11 @@ public class JdbcCompletenessTargetTableManager
     extends AbstractJdbcTableManager
 {
     @Override
+    @Transactional
     public List<AnalyticsTable> getTables( boolean last3YearsOnly )
     {
         List<AnalyticsTable> tables = new ArrayList<AnalyticsTable>();
-        tables.add( new AnalyticsTable( getTableName() ) );
+        tables.add( new AnalyticsTable( getTableName(), getDimensionColumns( null ) ) );
         return tables;
     }
     

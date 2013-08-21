@@ -44,6 +44,7 @@ import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.system.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.hisp.dhis.system.util.TextUtils.removeLast;
 
@@ -61,6 +62,7 @@ public class JdbcEventAnalyticsTableManager
     // -------------------------------------------------------------------------
     
     @Override
+    @Transactional
     public List<AnalyticsTable> getTables( Date earliest, Date latest )
     {
         String baseName = getTableName();
@@ -73,7 +75,10 @@ public class JdbcEventAnalyticsTableManager
         {
             for ( Program program : programService.getAllPrograms() )
             {
-                tables.add( new AnalyticsTable( baseName, period, program ) );
+                AnalyticsTable table = new AnalyticsTable( baseName, null, period, program );
+                List<String[]> dimensionColumns = getDimensionColumns( table );
+                table.setDimensionColumns( dimensionColumns );                
+                tables.add( table );
             }
         }
         
@@ -142,7 +147,7 @@ public class JdbcEventAnalyticsTableManager
                 sql += col[2] + ",";
             }
             
-            sql = removeLast( sql, 1 );
+            sql = removeLast( sql, 1 ) + " ";
             
             sql += 
                 "from programstageinstance psi " +
@@ -151,7 +156,8 @@ public class JdbcEventAnalyticsTableManager
                 "left join program pr on pi.programid=pr.programid " +
                 "left join _orgunitstructure ous on psi.organisationunitid=ous.organisationunitid " +
                 "where psi.executiondate >= '" + start + "' " +
-                "and psi.executiondate <= '" + end + "'";
+                "and psi.executiondate <= '" + end + "' " +
+                "and pr.programid=" + table.getProgram().getId() + ";";
 
             log.info( "Populate SQL: "+ sql );
             
@@ -180,7 +186,7 @@ public class JdbcEventAnalyticsTableManager
             String select = "(select value from patientdatavalue where programstageinstanceid=" +
                 "psi.programstageinstanceid and dataelementid=" + dataElement.getId() + ") as " + dataElement.getUid();
             
-            String[] col = { dataElement.getUid(), "character(11) not null", select };
+            String[] col = { dataElement.getUid(), "character(255)", select };
             columns.add( col );
         }
         

@@ -88,15 +88,15 @@ public class AnalyticsTableTask
 
         notifier.notify( taskId, "Updating analytics tables" );
         
-        //analyticsTableService.update( last3Years, taskId );
+        analyticsTableService.update( last3Years, taskId );
         
         notifier.notify( taskId, "Updating completeness tables" );
         
-        //completenessTableService.update( last3Years, taskId );
+        completenessTableService.update( last3Years, taskId );
 
         notifier.notify( taskId, "Updating compeleteness target table" );
         
-        //completenessTargetTableService.update( last3Years, taskId );
+        completenessTargetTableService.update( last3Years, taskId );
         
         notifier.notify( taskId, "Updating event analytics tables" );
         

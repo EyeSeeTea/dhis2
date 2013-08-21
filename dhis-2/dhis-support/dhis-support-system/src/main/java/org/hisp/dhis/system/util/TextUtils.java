@@ -156,7 +156,7 @@ public class TextUtils
             return EMPTY;
         }
         
-        return string.substring( string.length(), string.length() - characters );
+        return string.substring( 0, string.length() - characters );
     }
     
     /**
