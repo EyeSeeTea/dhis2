@@ -450,7 +450,7 @@ gis-combo .x-form-item-label {
 
 		/* Toolbar btn menu */
 		.gis-toolbar-btn-menu { /* Align menu */
-			margin-top: 5px;
+			margin-top: 4px;
 		}
 		.gis-toolbar-btn-menu .x-panel-body-default { /* Menu border */
 			border-radius: 2px;
@@ -462,9 +462,27 @@ gis-combo .x-form-item-label {
  * Menu
  *--------------------------------------------------------------------------*/
 
-.x-menu-body { /* General menu */
-	background: #fff !important;
+.x-menu-body {
+    border-color: #bbb;
+    border-radius: 2px;
 	padding: 0;
+	background-color: #fff !important;
+}
+.x-menu-item-active .x-menu-item-link {
+	border-radius: 0;
+	border-color: #e1e1e1;
+	background-color: #e1e1e1;
+	background-image: none;
+}
+
+	/* Menu item */
+	
+.x-menu-item-link {
+    padding: 4px 5px 4px 26px;
+}
+	/* Menu item color */
+.x-menu-item-text {
+    color: #111;
 }
 
 
@@ -477,14 +495,6 @@ gis-combo .x-form-item-label {
 }
 
 	/* Menu item */
-	.x-menu-item-link { /* Menu item normal */
-		padding: 4px 5px 4px 26px;
-	}
-	.x-menu-item-active .x-menu-item-link { /* Menu item hover */
-		background: #ddd;
-		border-color: #ddd;
-		border-radius: 1px;
-	}
 	.gis-menu-item-first.x-menu-item-active .x-menu-item-link { /* Menu item (first) hover */
 		border-top-left-radius: 2px;
 		border-top-right-radius: 2px;
@@ -552,6 +562,11 @@ gis-combo .x-form-item-label {
 .gis-menu-item-selected {
     background-image:url('../images/check.png');
     padding-left: 18px;
+}
+
+	/* Menu align */
+.gis-btn-menu {
+	margin-top: 2px;
 }
 
 
