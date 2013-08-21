@@ -3327,15 +3327,8 @@ Ext.onReady( function() {
 				},
 				root: {
 					id: 'root',
-					expanded: false,
+					expanded: true,
 					children: gis.init.rootNodes
-				},
-				listeners: {
-					load: function(s, node, r) {
-						//for (var i = 0; i < r.length; i++) {
-							//r[i].data.text = gis.util.json.encodeString(r[i].data.text);
-						//}
-					}
 				}
 			}),
 			listeners: {
@@ -4186,21 +4179,14 @@ Ext.onReady( function() {
 				this.selectPath(gis.init.rootNodes[0].path);
 			},
 			store: Ext.create('Ext.data.TreeStore', {
-				//proxy: {
-					//type: 'ajax',
-					//url: gis.init.contextPath + gis.conf.url.path_gis + 'getOrganisationUnitChildren.action'
-				//},
+				proxy: {
+					type: 'ajax',
+					url: gis.init.contextPath + gis.conf.url.path_gis + 'getOrganisationUnitChildren.action'
+				},
 				root: {
 					id: 'root',
-					expanded: false,
+					expanded: true,
 					children: gis.init.rootNodes
-				},
-				listeners: {
-					load: function(s, node, r) {
-						//for (var i = 0; i < r.length; i++) {
-							//r[i].data.text = gis.util.json.encodeString(r[i].data.text);
-						//}
-					}
 				}
 			}),
 			listeners: {
@@ -4403,11 +4389,49 @@ Ext.onReady( function() {
 		getView = function(config) {
 			var parentArray = parent.getSelectionModel().getSelection(),
 				store = gis.store.organisationUnitLevels,
+				vType = valueType.getValue(),
 				view;
 
 			parentArray = parentArray.length ? parentArray : [{raw: gis.init.rootNodes[0]}];
 
 			view = {
+				columns: function() {					
+					if (vType === dimConf.indicator.id) {
+						return [{
+							dimension: dimConf.indicator.objectName,
+							items: [{
+								id: indicator.getValue()
+							}]
+						}];
+					}
+					else {
+						return [{
+							dimension: dimConf.dataElement.objectName,
+							items: [{
+								id: dataElement.getValue()
+							}]
+						}];
+					}
+				}(),
+				rows: [{
+					dimension: dimConf.organisationUnit.objectName,
+					items: [
+						{id: 'LEVEL-' + organisationUnitLevel},
+						{id: parentOrganisationUnit.getValue()}
+					]
+				}],						
+				filters: [{
+					dimension: dimConf.period.objectName,
+					items: [{
+						id: period.getValue()
+					}]
+				}],
+				valueType: vType,
+				
+					
+					
+				
+				
 				valueType: valueType.getValue(),
 				indicatorGroup: {
 					id: indicatorGroup.getValue(),
@@ -4741,13 +4765,6 @@ Ext.onReady( function() {
 					id: 'root',
 					expanded: true,
 					children: gis.init.rootNodes
-				},
-				listeners: {
-					load: function(s, node, r) {
-						//for (var i = 0; i < r.length; i++) {
-							//r[i].data.text = gis.util.json.encodeString(r[i].data.text);
-						//}
-					}
 				}
 			}),
 			listeners: {

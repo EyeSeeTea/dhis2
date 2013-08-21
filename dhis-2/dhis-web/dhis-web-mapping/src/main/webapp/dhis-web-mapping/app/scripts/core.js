@@ -15,6 +15,9 @@ Ext.onReady( function() {
 	
 	// html5
 	GIS.isSessionStorage = 'sessionStorage' in window && window['sessionStorage'] !== null;
+	
+	// log
+	GIS.logg = [];
 
 	// core
 
@@ -1579,8 +1582,9 @@ Ext.onReady( function() {
 			util = {},
 			store = {},
 		
-			gis = {},
+			//gis = {},
 			layers = [];
+			gis = {};
 			
 		// conf
 		(function() {
