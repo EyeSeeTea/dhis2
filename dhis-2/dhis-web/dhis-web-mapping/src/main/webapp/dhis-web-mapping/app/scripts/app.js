@@ -4985,7 +4985,7 @@ Ext.onReady( function() {
 						lowPanel,
 						highPanel,
 						{
-							html: GIS.i18n.organisation_unit_level_parent,
+							html: GIS.i18n.user_organisation_units,
 							cls: 'gis-form-subtitle'
 						},
 						//level,
