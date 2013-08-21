@@ -85,7 +85,7 @@ public abstract class AbstractJdbcTableManager
     // -------------------------------------------------------------------------
     // Implementation
     // -------------------------------------------------------------------------
-  
+
     public List<AnalyticsTable> getTables( boolean last3YearsOnly )
     {
         Date threeYrsAgo = new Cal().subtract( Calendar.YEAR, 2 ).set( 1, 1 ).time();
