@@ -4054,7 +4054,7 @@ Ext.onReady( function() {
 
 		openTableLayoutTab = function(type, isNewTab) {
 			if (pt.init.contextPath && pt.paramString) {
-				var url = pt.init.contextPath + '/api/analytics.' + type + pt.util.pivot.getParamString(pt.xLayout);
+				var url = pt.init.contextPath + '/api/analytics.' + type + pt.engine.getParamString(pt.xLayout);
 				url += '&tableLayout=true&columns=' + pt.xLayout.columnDimensionNames.join(';') + '&rows=' + pt.xLayout.rowDimensionNames.join(';');
 
 				window.open(url, isNewTab ? '_blank' : '_top');
@@ -4265,7 +4265,7 @@ Ext.onReady( function() {
 										disabled: !PT.isSessionStorage || !pt.layout,
 										handler: function() {
 											if (PT.isSessionStorage) {
-												pt.util.pivot.setSessionStorage(pt.layout, 'analytical', pt.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
+												pt.engine.setSessionStorage(pt.layout, 'analytical', pt.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
 											}
 										}
 									},

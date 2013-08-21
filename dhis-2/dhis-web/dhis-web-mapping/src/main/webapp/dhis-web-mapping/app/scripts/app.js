@@ -3992,22 +3992,39 @@ Ext.onReady( function() {
 			width: 142,
 			store: gis.store.periodTypes,
 			periodOffset: 0,
-			listeners: {
-				select: function() {
-					var pt = new PeriodType(),
-						type = this.getValue(),
-						offset = this.periodOffset,
-
-						periods = pt.get(type).generatePeriods({
-							offset: offset,
-							filterFuturePeriods: true,
-							reversePeriods: true
-						});
+			selectHandler: function() {
+				var type = this.getValue(),
+					pType,
+					offset,
+					periods;
+					
+				if (type === 'relativePeriods') {
+					periodsByTypeStore.loadData(gis.conf.period.relativePeriods);
+					
+					periodPrev.disable();
+					periodNext.disable();
+				}
+				else {
+					pType = new PeriodType();
+					offset = this.periodOffset;
+					periods = pType.get(type).generatePeriods({
+						offset: offset,
+						filterFuturePeriods: true,
+						reversePeriods: true
+					});
 
 					periodsByTypeStore.setIndex(periods);
 					periodsByTypeStore.loadData(periods);
+					
+					periodPrev.enable();
+					periodNext.enable();
+				}
 
-					period.selectFirst();
+				period.selectFirst();
+			},
+			listeners: {
+				select: function() {
+					this.selectHandler();
 				}
 			}
 		});

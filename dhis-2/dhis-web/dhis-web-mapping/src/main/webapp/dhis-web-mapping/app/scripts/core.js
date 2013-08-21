@@ -1688,6 +1688,7 @@ Ext.onReady( function() {
 			
 			conf.period = {
 				periodTypes: [
+					{id: 'relativePeriods', name: 'Relative'},
 					{id: 'Daily', name: 'Daily'},
 					{id: 'Weekly', name: 'Weekly'},
 					{id: 'Monthly', name: 'Monthly'},
@@ -1698,6 +1699,16 @@ Ext.onReady( function() {
 					{id: 'FinancialOct', name: 'FinancialOct'},
 					{id: 'FinancialJuly', name: 'FinancialJuly'},
 					{id: 'FinancialApril', name: 'FinancialApril'}
+				],
+				relativePeriods: [
+					{id: 'LAST_WEEK', name: GIS.i18n.last_week},
+					{id: 'LAST_MONTH', name: GIS.i18n.last_month},
+					{id: 'LAST_BIMONTH', name: GIS.i18n.last_bimonth},
+					{id: 'LAST_QUARTER', name: GIS.i18n.last_quarter},
+					{id: 'LAST_SIX_MONTH', name: GIS.i18n.last_sixmonth},
+					{id: 'LAST_FINANCIAL_YEAR', name: GIS.i18n.last_financial_year},
+					{id: 'THIS_YEAR', name: GIS.i18n.this_year},
+					{id: 'LAST_YEAR', name: GIS.i18n.last_year}
 				]
 			};		
 		}());
