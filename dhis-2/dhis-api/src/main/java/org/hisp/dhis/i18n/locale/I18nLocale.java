@@ -1,13 +1,6 @@
 package org.hisp.dhis.i18n.locale;
 
-//import java.util.HashSet;
-//import java.util.List;
-//import java.util.Set;
-
-//import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.common.BaseIdentifiableObject;
-
-//import org.hisp.dhis.validation.ValidationCriteria;
 
 public class I18nLocale
     extends BaseIdentifiableObject

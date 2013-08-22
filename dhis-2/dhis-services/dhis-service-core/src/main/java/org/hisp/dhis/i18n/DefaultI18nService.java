@@ -48,10 +48,12 @@ import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.hisp.dhis.translation.Translation;
 import org.hisp.dhis.translation.TranslationService;
 import org.hisp.dhis.user.UserSettingService;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Oyvind Brucker
  */
+@Transactional
 public class DefaultI18nService
     implements I18nService
 {
@@ -83,21 +85,6 @@ public class DefaultI18nService
     // -------------------------------------------------------------------------
     // Properties
     // -------------------------------------------------------------------------
-
-    /*
-     * private List<I18nLocale> locales = new ArrayList<I18nLocale>();
-     * 
-     * public void setLocales( List<String> localeStrings ) { for ( String
-     * string : localeStrings ) { // TODO: Need to find out the source of this
-     * call and find the format used. I18nLocale locale = getI18nLocaleByName(
-     * string); //LocaleUtils.getLocale( string );
-     * 
-     * if ( locale != null ) { locales.add( locale ); } }
-     * 
-     * Collections.sort( locales, new Comparator<I18nLocale>() { public int
-     * compare( I18nLocale l1, I18nLocale l2 ) { return
-     * l1.getDisplayName().compareTo( l2.getDisplayName() ); } } ); }
-     */
 
     // -------------------------------------------------------------------------
     // I18nLocale Properties

@@ -122,7 +122,7 @@ public class DimensionServiceTest
         organisationUnitService.addOrganisationUnit( ouD );
         organisationUnitService.addOrganisationUnit( ouE );
 
-        String level2 = KEY_LEVEL + 2 + DimensionalObject.DIMENSION_SEP + ouA.getUid();
+        String level2 = KEY_LEVEL + 2;
         
         ouUser = new BaseNameableObject( KEY_USER_ORGUNIT, KEY_USER_ORGUNIT, KEY_USER_ORGUNIT );
         ouLevel2 = new BaseNameableObject( level2, level2, level2 );
@@ -189,7 +189,7 @@ public class DimensionServiceTest
         ReportTable reportTable = new ReportTable();
 
         reportTable.getColumns().add( new BaseDimensionalObject( DimensionalObject.DATAELEMENT_DIM_ID, Arrays.asList( deA, deB ) ) );
-        reportTable.getRows().add( new BaseDimensionalObject( DimensionalObject.ORGUNIT_DIM_ID, Arrays.asList( ouLevel2 ) ) );
+        reportTable.getRows().add( new BaseDimensionalObject( DimensionalObject.ORGUNIT_DIM_ID, Arrays.asList( ouLevel2, ouA ) ) );
         reportTable.getFilters().add( new BaseDimensionalObject( DimensionalObject.PERIOD_DIM_ID, Arrays.asList( peA ) ) );
         
         dimensionService.mergeAnalyticalObject( reportTable );
@@ -197,7 +197,7 @@ public class DimensionServiceTest
         assertEquals( 2, reportTable.getDataElements().size() );
         assertEquals( 1, reportTable.getPeriods().size() );
         assertEquals( 1, reportTable.getOrganisationUnits().size() );
-        assertEquals( Integer.valueOf( 2 ), reportTable.getOrganisationUnitLevel() );
+        assertEquals( Integer.valueOf( 2 ), reportTable.getOrganisationUnitLevels().get( 0 ) );
     }
 
     @Test

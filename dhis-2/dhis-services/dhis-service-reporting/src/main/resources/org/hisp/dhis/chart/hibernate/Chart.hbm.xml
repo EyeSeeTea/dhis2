@@ -127,6 +127,13 @@
         foreign-key="fk_chart_orgunitgroups_orgunitgroupid" />
     </list>
     
+    <list name="organisationUnitLevels" table="chart_orgunitlevels">
+      <cache usage="read-write" />
+      <key column="chartid" foreign-key="fk_chart_orgunitlevels_chartid" />
+      <list-index column="sort_order" base="0" />
+      <element column="orgunitlevel" type="integer" />
+    </list>
+    
     <list name="itemOrganisationUnitGroups" table="chart_itemorgunitgroups">
       <cache usage="read-write" />
       <key column="chartid" foreign-key="fk_chart_itemorgunitunitgroups_chartid" />
@@ -139,13 +146,13 @@
 
     <property name="userOrganisationUnitChildren" />
 
-    <property name="organisationUnitLevel" />
-
     <property name="showData" />
 
     <property name="rewindRelativePeriods" />
 
     <!-- Access properties -->
+    <property name="externalAccess" />
+
     <many-to-one name="user" class="org.hisp.dhis.user.User" column="userid" foreign-key="fk_chart_userid" />
 
     <property name="publicAccess" length="8" />

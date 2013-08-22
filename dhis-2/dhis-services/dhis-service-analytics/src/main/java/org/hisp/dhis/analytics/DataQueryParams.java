@@ -88,9 +88,9 @@ public class DataQueryParams
     public static final String DISPLAY_NAME_PERIOD = "Period";
     public static final String DISPLAY_NAME_ORGUNIT = "Organisation unit";    
     
-    private static final String DIMENSION_NAME_SEP = ":";
-    private static final String OPTION_SEP = ";";
-    private static final String ITEM_SEP = "-";
+    public static final String DIMENSION_NAME_SEP = ":";
+    public static final String OPTION_SEP = ";";
+    public static final String ITEM_SEP = "-";
 
     public static final List<String> DATA_DIMS = Arrays.asList( INDICATOR_DIM_ID, DATAELEMENT_DIM_ID, DATAELEMENT_OPERAND_ID, DATASET_DIM_ID );
     public static final List<String> FIXED_DIMS = Arrays.asList( DATA_X_DIM_ID, INDICATOR_DIM_ID, DATAELEMENT_DIM_ID, DATASET_DIM_ID, PERIOD_DIM_ID, ORGUNIT_DIM_ID );
@@ -111,6 +111,8 @@ public class DataQueryParams
     private Map<MeasureFilter, Double> measureCriteria = new HashMap<MeasureFilter, Double>();
     
     private boolean skipMeta;
+    
+    private boolean ignoreLimit;
     
     // -------------------------------------------------------------------------
     // Transient properties
@@ -817,27 +819,6 @@ public class DataQueryParams
     }
     
     /**
-     * Retrieves the boundary dimension item from a level parameter string, which
-     * is on the format LEVEL-<level>-<item> .
-     */
-    public static String getBoundaryFromLevelParam( String param )
-    {
-        if ( param == null )   
-        {
-            return null;
-        }
-        
-        String[] split = param.split( ITEM_SEP );
-        
-        if ( split.length > 2 && split[2] != null )
-        {
-            return split[2];
-        }
-        
-        return null;
-    }
-
-    /**
      * Retrieves the uid from an org unit group parameter string, which is on
      * the format OU_GROUP-<uid> .
      */
@@ -1060,6 +1041,16 @@ public class DataQueryParams
     public void setSkipMeta( boolean skipMeta )
     {
         this.skipMeta = skipMeta;
+    }
+
+    public boolean isIgnoreLimit()
+    {
+        return ignoreLimit;
+    }
+
+    public void setIgnoreLimit( boolean ignoreLimit )
+    {
+        this.ignoreLimit = ignoreLimit;
     }
 
     // -------------------------------------------------------------------------

@@ -1,4 +1,3 @@
-
 function setName()
 {		
 	var displayName = "";
@@ -7,17 +6,15 @@ function setName()
 	var country = $( '#country option:selected' );
 		
 	
-	if( language.val() != "" && country.val() != "" )
+	if( language.val() != "")
 	{
 		displayName = language.text();	
 	    
-		if( country.val() != "default" )
+		if( country.val() != "" )
 		{
 			displayName = displayName + ", " + country.text();
 		}
 	}
 
 	setFieldValue('name',displayName);
-	
-	//$( '#name' ).val( displayName );
 }

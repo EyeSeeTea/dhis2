@@ -72,6 +72,7 @@ public class Chart
     public static final String TYPE_LINE = "line";
     public static final String TYPE_AREA = "area";
     public static final String TYPE_PIE = "pie";
+    public static final String TYPE_RADAR = "radar"; // Spider web
 
     private String domainAxisLabel;
 
@@ -117,6 +118,8 @@ public class Chart
     
     private transient List<OrganisationUnit> organisationUnitsAtLevel = new ArrayList<OrganisationUnit>();
 
+    private transient List<OrganisationUnit> organisationUnitsInGroups = new ArrayList<OrganisationUnit>();
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -135,12 +138,14 @@ public class Chart
     // -------------------------------------------------------------------------
 
     @Override
-    public void init( User user, Date date, OrganisationUnit organisationUnit, List<OrganisationUnit> organisationUnitsAtLevel, I18nFormat format )
+    public void init( User user, Date date, OrganisationUnit organisationUnit, 
+        List<OrganisationUnit> organisationUnitsAtLevel, List<OrganisationUnit> organisationUnitsInGroups, I18nFormat format )
     {
         this.user = user;
         this.relativePeriodDate = date;
         this.relativeOrganisationUnit = organisationUnit;
         this.organisationUnitsAtLevel = organisationUnitsAtLevel;
+        this.organisationUnitsInGroups = organisationUnitsInGroups;
         this.format = format;        
     }
     
@@ -150,14 +155,14 @@ public class Chart
 
     public List<NameableObject> series()
     {
-        DimensionalObject object = getDimensionalObject( series, relativePeriodDate, user, true, organisationUnitsAtLevel, format );
+        DimensionalObject object = getDimensionalObject( series, relativePeriodDate, user, true, organisationUnitsAtLevel, organisationUnitsInGroups, format );
         
         return object != null ? object.getItems() : null;
     }
 
     public List<NameableObject> category()
     {
-        DimensionalObject object = getDimensionalObject( category, relativePeriodDate, user, true, organisationUnitsAtLevel, format );
+        DimensionalObject object = getDimensionalObject( category, relativePeriodDate, user, true, organisationUnitsAtLevel, organisationUnitsInGroups, format );
         
         return object != null ? object.getItems() : null;
     }
@@ -168,7 +173,7 @@ public class Chart
         
         for ( String filter : filterDimensions )
         {
-            DimensionalObject object = getDimensionalObject( filter, relativePeriodDate, user, true, organisationUnitsAtLevel, format );
+            DimensionalObject object = getDimensionalObject( filter, relativePeriodDate, user, true, organisationUnitsAtLevel, organisationUnitsInGroups, format );
             
             if ( object != null )
             {

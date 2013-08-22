@@ -28,6 +28,8 @@ package org.hisp.dhis.analytics.table;
  */
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
@@ -35,6 +37,7 @@ import java.util.concurrent.Future;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.AnalyticsIndex;
+import org.hisp.dhis.analytics.AnalyticsTable;
 import org.hisp.dhis.analytics.AnalyticsTableManager;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
@@ -42,10 +45,13 @@ import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.period.Cal;
+import org.hisp.dhis.period.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Lars Helge Overland
@@ -78,9 +84,51 @@ public abstract class AbstractJdbcTableManager
     protected JdbcTemplate jdbcTemplate;
 
     // -------------------------------------------------------------------------
+    // Abstract methods
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns a list of string arrays in where the first index holds the database
+     * column name, the second index holds the database column data type and the 
+     * third column holds a table alias and name, i.e.:
+     * 
+     * 0 = database column name
+     * 1 = database column data type
+     * 2 = column alias and name
+     */
+    protected abstract List<String[]> getDimensionColumns( AnalyticsTable table );
+    
+    // -------------------------------------------------------------------------
     // Implementation
     // -------------------------------------------------------------------------
-  
+
+    @Transactional
+    public List<AnalyticsTable> getTables( boolean last3YearsOnly )
+    {
+        Date threeYrsAgo = new Cal().subtract( Calendar.YEAR, 2 ).set( 1, 1 ).time();
+        Date earliest = last3YearsOnly ? threeYrsAgo : getEarliestData();
+        Date latest = getLatestData();
+        
+        return getTables( earliest, latest );
+    }
+
+    @Transactional
+    public List<AnalyticsTable> getTables( Date earliest, Date latest )
+    {
+        String baseName = getTableName();
+        
+        List<Period> periods = PartitionUtils.getPeriods( earliest, latest );
+
+        List<AnalyticsTable> tables = new ArrayList<AnalyticsTable>();
+        
+        for ( Period period : periods )
+        {
+            tables.add( new AnalyticsTable( baseName, getDimensionColumns( null ), period ) );
+        }
+        
+        return tables;
+    }
+    
     public String getTempTableName()
     {
         return getTableName() + TABLE_TEMP_SUFFIX;
@@ -110,35 +158,24 @@ public abstract class AbstractJdbcTableManager
         return null;
     }
 
-    public void swapTable( String tableName )
+    public void swapTable( AnalyticsTable table )
     {
-        final String realTable = tableName.replaceFirst( TABLE_TEMP_SUFFIX, "" );
+        final String tempTable = table.getTempTableName();
+        final String realTable = table.getTableName();
         
         final String sqlDrop = "drop table " + realTable;
         
         executeSilently( sqlDrop );
         
-        final String sqlAlter = "alter table " + tableName + " rename to " + realTable;
+        final String sqlAlter = "alter table " + tempTable + " rename to " + realTable;
         
         executeSilently( sqlAlter );
     }
 
-    public List<String> getDimensionColumnNames()
+    public boolean pruneTable( AnalyticsTable table )
     {
-        List<String[]> columns = getDimensionColumns();
+        String tableName = table.getTempTableName();
         
-        List<String> columnNames = new ArrayList<String>();
-        
-        for ( String[] column : columns )
-        {
-            columnNames.add( column[0] );
-        }
-        
-        return columnNames;
-    }
-
-    public boolean pruneTable( String tableName )
-    {
         if ( !hasRows( tableName ) )
         {
             final String sqlDrop = "drop table " + tableName;
@@ -154,18 +191,18 @@ public abstract class AbstractJdbcTableManager
     }
 
     @Async
-    public Future<?> vacuumTablesAsync( ConcurrentLinkedQueue<String> tables )
+    public Future<?> vacuumTablesAsync( ConcurrentLinkedQueue<AnalyticsTable> tables )
     {
         taskLoop : while ( true )
         {
-            String table = tables.poll();
+            AnalyticsTable table = tables.poll();
             
             if ( table == null )
             {
                 break taskLoop;
             }
             
-            final String sql = statementBuilder.getVacuum( table );
+            final String sql = statementBuilder.getVacuum( table.getTempTableName() );
             
             log.info( "Vacuum SQL: " + sql );
             

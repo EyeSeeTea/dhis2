@@ -88,7 +88,6 @@ public class AddLocaleAction
         i18nLocale.setName( name );
         i18nLocale.setLanguage(language);
         i18nLocale.setCountry(country);
-        
 
         i18nService.saveI18nLocale( i18nLocale );
 
