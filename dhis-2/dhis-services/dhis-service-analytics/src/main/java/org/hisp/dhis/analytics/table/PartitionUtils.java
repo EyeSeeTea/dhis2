@@ -28,11 +28,9 @@ package org.hisp.dhis.analytics.table;
  */
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import org.hisp.dhis.analytics.AnalyticsTableManager;
 import org.hisp.dhis.common.ListMap;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.period.Period;
@@ -48,32 +46,19 @@ public class PartitionUtils
     
     private static final String SEP = "_";
 
-    public static List<String> getTempTableNames( Date earliest, Date latest, String tableName )
-    {   
-        if ( earliest == null || latest == null )
-        {
-            return new ArrayList<String>( Arrays.asList( tableName + AnalyticsTableManager.TABLE_TEMP_SUFFIX ) );
-        }
-        
-        if ( earliest.after( latest ) )
-        {
-            throw new IllegalArgumentException( "Earliest date is after latest: " + earliest + ", " + latest );
-        }
-        
-        List<String> tables = new ArrayList<String>();
+    public static List<Period> getPeriods( Date earliest, Date latest )
+    {
+        List<Period> periods = new ArrayList<Period>();
         
         Period period = PERIODTYPE.createPeriod( earliest );
         
         while ( period != null && period.getStartDate().before( latest ) )
         {
-            String table = tableName + AnalyticsTableManager.TABLE_TEMP_SUFFIX + SEP + period.getIsoDate();
-            
-            tables.add( table );
-            
+            periods.add( period );            
             period = PERIODTYPE.getNextPeriod( period );
         }
         
-        return tables;
+        return periods;
     }
     
     public static String getTableName( Period period, String tableName )

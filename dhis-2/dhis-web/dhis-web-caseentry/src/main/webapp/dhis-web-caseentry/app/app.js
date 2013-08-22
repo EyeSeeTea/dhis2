@@ -32,6 +32,9 @@ TR.conf = {
 				
 				obj.system.accessPatientAttributes = r.user.accessPatientAttributes;
 				
+				obj.report={};
+				obj.report.id = r.id;
+				
 				return obj;
 			}
 		}
@@ -54,6 +57,7 @@ TR.conf = {
 			casebasedfavorite_getall: 'getTabularReports.action',
 			casebasedfavorite_get: 'getTabularReport.action',
 			casebasedfavorite_rename: 'updateTabularReportName.action',
+			casebasedfavorite_validate: 'validateTabularReport.action',
 			casebasedfavorite_save: 'saveTabularReport.action',
             casebasedfavorite_delete: 'deleteTabularReport.action',
 			suggested_dataelement_get: 'getOptions.action',
@@ -62,6 +66,7 @@ TR.conf = {
 			aggregatefavorite_rename: 'updateAggregateReportName.action',
 			aggregatefavorite_save: 'saveAggregateReport.action',
             aggregatefavorite_delete: 'deleteAggregateReport.action',
+			aggregatefavorite_validate: 'validateAggregateReport.action',
 			generateaggregatereport_get: 'generateAggregateReport.action',
 			username_dataelement_get: 'getUsernameList.action',
 			organisationunit_getbyids: 'getOrganisationUnitPaths.action',
@@ -180,7 +185,7 @@ TR.conf = {
 		window_record_width: 450,
 		window_record_height: 300,
 		west_dataelements_multiselect: 120,
-		west_dataelements_filter_panel: 135,
+		west_dataelements_filter_panel: 130,
 		west_dataelements_expand_filter_panel: 280,
 		west_dataelements_collapse_filter_panel: 130,
 		west_dataelements_expand_aggregate_filter_panel: 230,
@@ -199,6 +204,36 @@ TR.conf = {
 				a[i] = TR.conf.util.jsonEncodeString(a[i]);
 			}
 			return a;
+		},
+		getURLParameters: function(paramName) {
+			var sURL = window.document.URL.toString();  
+			if (sURL.indexOf("?") > 0)
+			{
+			   var arrParams = sURL.split("?");         
+			   var arrURLParams = arrParams[1].split("&");      
+			   var arrParamNames = new Array(arrURLParams.length);
+			   var arrParamValues = new Array(arrURLParams.length);     
+			   var i = 0;
+			   for (i=0;i<arrURLParams.length;i++)
+			   {
+					var sParam =  arrURLParams[i].split("=");
+					arrParamNames[i] = sParam[0];
+					if (sParam[1] != ""){
+						arrParamValues[i] = unescape(sParam[1]);
+					}
+					else{
+						arrParamValues[i] = "";
+					}
+			    }
+
+				for (i=0;i<arrURLParams.length;i++)
+				{
+					if(arrParamNames[i] == paramName){
+						return arrParamValues[i];
+					}
+				}
+			}
+			return "";
 		}
 	}
 };
@@ -216,8 +251,9 @@ Ext.onReady( function() {
     Ext.QuickTips.init();
     document.body.oncontextmenu = function(){return false;}; 
     
+	var reportId = TR.conf.util.getURLParameters('id');
     Ext.Ajax.request({
-        url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.initialize,
+        url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.initialize + "?id=" + reportId,
         success: function(r) {
             
     TR.init = TR.conf.init.ajax.jsonfy(r);    
@@ -534,13 +570,10 @@ Ext.onReady( function() {
 				params.listeners={};
 				params.listeners.select = function(cb)  {
 					var opt = cb.getValue();
-					if(opt == 'in')
-					{
+					if(opt == 'in'){
 						Ext.getCmp('filter_' + id).multiSelect = true;
 					}
-					else
-					{
-						Ext.getCmp('filter_' + id).clearValue();
+					else{
 						Ext.getCmp('filter_' + id).multiSelect = false;
 					}
 				}
@@ -645,8 +678,17 @@ Ext.onReady( function() {
 						params.displayField = 'o';
 						params.multiSelect = true;
 						params.delimiter = ';';
-						var index = TR.store.dataelement.available.findExact('id', 'de_' + deId);
-						var deUid = TR.store.dataelement.available.getAt(index).data.uid;
+						var index = TR.store.dataelement.selected.findExact('id', 'de_' + deId);
+						var deUid = "";
+						if( index == -1 )
+						{
+							index = TR.store.dataelement.available.findExact('id', 'de_' + deId);
+							deUid = TR.store.dataelement.available.getAt(index).data.uid;
+						}
+						else
+						{
+							deUid = TR.store.dataelement.selected.getAt(index).data.uid;
+						}
 						params.store = Ext.create('Ext.data.Store', {
 							fields: ['o'],
 							data:[],
@@ -1163,7 +1205,8 @@ Ext.onReady( function() {
 										var name = TR.util.string.getEncodedString(f.dataElements[i].name);
 										var compulsory = f.dataElements[i].compulsory;
 										var valueType = f.dataElements[i].valueType;
-										TR.store.dataelement.selected.add({id: f.dataElements[i].id, name: name, compulsory: compulsory, valueType: valueType});
+										var uid = f.dataElements[i].uid;
+										TR.store.dataelement.selected.add({id: f.dataElements[i].id, name: name, compulsory: compulsory, valueType: valueType, uid:uid});
 										TR.util.multiselect.addFilterField( 'filterPanel', f.dataElements[i].id, name, valueType, f.dataElements[i].filter );
 									}
 									
@@ -1209,37 +1252,65 @@ Ext.onReady( function() {
 						}
 						
 						Ext.Ajax.request({
-							url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.aggregatefavorite_save,
+							url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.aggregatefavorite_validate,
 							method: 'POST',
-							params: p,
-							success: function() {
-								TR.store.aggregateFavorite.load({callback: function() {
-									TR.util.mask.hideMask();
-									if (fn) {
-										fn();
+							params: {name:name},
+							success: function(r) {
+									var json = Ext.JSON.decode(r.responseText);
+									if(json.response=='success'){
+										Ext.Ajax.request({
+											url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.aggregatefavorite_save,
+											method: 'POST',
+											params: p,
+											success: function() {
+												TR.store.aggregateFavorite.load({callback: function() {
+													TR.util.mask.hideMask();
+													if (fn) {
+														fn();
+													}
+												}});
+											}
+										});  
 									}
-								}});
-							}
-						});  
+									else{
+										TR.util.notification.error(TR.i18n.error, json.message);
+										window.destroy();
+										TR.util.mask.hideMask();
+									}
+								}
+							});
 					},
 					updateName: function(id, name) {
-						if (TR.store.aggregateFavorite.findExact('name', name) != -1) {
-							return;
-						}
 						TR.util.mask.showMask(TR.cmp.aggregateFavorite.window, TR.i18n.renaming + '...');
+						
 						Ext.Ajax.request({
-							url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.aggregatefavorite_rename,
+							url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.aggregatefavorite_validate,
 							method: 'POST',
-							params: {id: id, name: name},
-							success: function() {
-								TR.store.aggregateFavorite.load({callback: function() {
-									TR.cmp.aggregateFavorite.rename.window.close();
-									TR.util.mask.hideMask();
-									TR.cmp.aggregateFavorite.grid.getSelectionModel().select(TR.store.aggregateFavorite.getAt(TR.store.aggregateFavorite.findExact('name', name)));
-									TR.cmp.aggregateFavorite.name.setValue(name);
-								}});
-							}
-						});
+							params: {id:id, name:name},
+							success: function(r) {
+									var json = Ext.JSON.decode(r.responseText);
+									if(json.response=='success'){
+										Ext.Ajax.request({
+											url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.aggregatefavorite_rename,
+											method: 'POST',
+											params: {id: id, name: name},
+											success: function() {
+												TR.store.aggregateFavorite.load({callback: function() {
+													TR.cmp.aggregateFavorite.rename.window.close();
+													TR.util.mask.hideMask();
+													TR.cmp.aggregateFavorite.grid.getSelectionModel().select(TR.store.aggregateFavorite.getAt(TR.store.aggregateFavorite.findExact('name', name)));
+													TR.cmp.aggregateFavorite.name.setValue(name);
+												}});
+											}
+										});  
+									}
+									else{
+										TR.util.notification.error(TR.i18n.error, json.message);
+										window.destroy();
+										TR.util.mask.hideMask();
+									}
+								}
+							});
 					},
 					del: function(fn) {
 						TR.util.mask.showMask(TR.cmp.aggregateFavorite.window, TR.i18n.deleting + '...');
@@ -3295,15 +3366,30 @@ Ext.onReady( function() {
 						p.name = name;
 						
 						Ext.Ajax.request({
-							url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.casebasedfavorite_save,
+							url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.casebasedfavorite_validate,
 							method: 'POST',
-							params: p,
-							success: function() {
-								TR.store.caseBasedFavorite.loadStore();
-								window.destroy();
-								TR.util.mask.hideMask();
-							}
-						});
+							params: {name:name},
+							success: function(r) {
+									var json = Ext.JSON.decode(r.responseText);
+									if(json.response=='success'){
+										Ext.Ajax.request({
+											url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.casebasedfavorite_save,
+											method: 'POST',
+											params: p,
+											success: function() {
+												TR.store.caseBasedFavorite.loadStore();
+												window.destroy();
+												TR.util.mask.hideMask();
+											}
+										})
+									}
+									else{
+										TR.util.notification.error(TR.i18n.error, json.message);
+										window.destroy();
+										TR.util.mask.hideMask();
+									}
+								}
+							});
 					}
 				}
 			});
@@ -3314,26 +3400,39 @@ Ext.onReady( function() {
 					var name = nameTextfield.getValue();
 
 					if (id && name) {
-						if (TR.store.caseBasedFavorite.findExact('name', name) != -1) {
-							return;
-						}
 						TR.util.mask.showMask(TR.cmp.caseBasedFavorite.window, TR.i18n.renaming + '...');
+						
 						Ext.Ajax.request({
-							url:  TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.casebasedfavorite_rename,
+							url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.casebasedfavorite_validate,
 							method: 'POST',
-							params: {id: id, name: name},
-							failure: function(r) {
-								TR.util.mask.hideMask();
-								alert(r.responseText);
-							},
-							success: function() {
-								TR.store.caseBasedFavorite.loadStore();
-								window.destroy();
-								TR.util.mask.hideMask();
-							}
-						});
+							params: {id:id, name:name},
+							success: function(r) {
+									var json = Ext.JSON.decode(r.responseText);
+									if(json.response=='success'){
+										Ext.Ajax.request({
+											url:  TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.casebasedfavorite_rename,
+											method: 'POST',
+											params: {id: id, name: name},
+											failure: function(r) {
+												TR.util.mask.hideMask();
+												alert(r.responseText);
+											},
+											success: function() {
+												TR.store.caseBasedFavorite.loadStore();
+												window.destroy();
+												TR.util.mask.hideMask();
+											}
+										});
+									}
+									else{
+										TR.util.notification.error(TR.i18n.error, json.message);
+										window.destroy();
+										TR.util.mask.hideMask();
+									}
+								}
+							});
+						}
 					}
-				}
 			});
 			
 			cancelButton = Ext.create('Ext.button.Button', {
@@ -3446,7 +3545,7 @@ Ext.onReady( function() {
 								element.addClsOnOver('link');
 								element.load = function() {
 									favoriteWindow.hide();
-									TR.util.crud.favorite.run( record.data.id );
+									TR.util.crud.favorite.run( record.data.uid );
 								};
 								element.dom.setAttribute('onclick', 'Ext.get(this).load();');
 							}
@@ -3717,15 +3816,33 @@ Ext.onReady( function() {
 						p.name = name;
 						
 						Ext.Ajax.request({
-							url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.aggregatefavorite_save,
+							url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.aggregatefavorite_validate,
 							method: 'POST',
-							params: p,
-							success: function() {
-								TR.store.aggregateFavorite.loadStore();
-								window.destroy();
-								TR.util.mask.hideMask();
-							}
-						});  
+							params: {name:name},
+							success: function(r) {
+									var json = Ext.JSON.decode(r.responseText);
+									if(json.response=='success'){
+										Ext.Ajax.request({
+											url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.aggregatefavorite_save,
+											method: 'POST',
+											params: p,
+											success: function() {
+												TR.store.aggregateFavorite.load({callback: function() {
+													TR.util.mask.hideMask();
+													if (fn) {
+														fn();
+													}
+												}});
+											}
+										});  
+									}
+									else{
+										TR.util.notification.error(TR.i18n.error, json.message);
+										window.destroy();
+										TR.util.mask.hideMask();
+									}
+								}
+							});
 					}
 				}
 			});
@@ -6561,12 +6678,10 @@ Ext.onReady( function() {
 														xtype: 'panel',
 														layout: 'column',
 														id: 'filterPanel',
-														bodyStyle: 'background-color:transparent; padding:10px 10px 0px 3px',
-														autoScroll: true,
+														bodyStyle: 'background-color:transparent; padding:10px 10px 0px 3px;overflow-x: hidden; overflow-y: auto;',
 														overflowX: 'hidden',
-														overflowY: 'auto',
 														height: TR.conf.layout.west_dataelements_filter_panel,
-														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) ,
+														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor),
 														items: []
 													}
 												]
@@ -6889,6 +7004,12 @@ Ext.onReady( function() {
 				for( var i in TR.init.system.rootnodes){
 					TR.state.orgunitIds.push( TR.init.system.rootnodes[i].localid );
 				}
+				
+				if( TR.init.report.id != "")
+				{
+					Ext.getCmp('reportTypeGroup').setValue(true);
+					TR.util.crud.favorite.run(TR.init.report.id);
+				}
             },
             resize: function(vp) {
                 TR.cmp.region.west.setWidth(TR.conf.layout.west_width);
@@ -6902,5 +7023,6 @@ Ext.onReady( function() {
         }
     });
     
+	
     }});
 }); 

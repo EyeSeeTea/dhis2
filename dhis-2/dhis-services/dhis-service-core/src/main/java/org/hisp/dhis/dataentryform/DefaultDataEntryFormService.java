@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dataelement.DataElement;
@@ -169,7 +170,7 @@ public class DefaultDataEntryFormService
     public String prepareDataEntryFormForEdit( String htmlCode, I18n i18n )
     {
         //TODO HTML encode names
-        
+
         StringBuffer sb = new StringBuffer();
 
         Matcher inputMatcher = INPUT_PATTERN.matcher( htmlCode );
@@ -236,7 +237,7 @@ public class DefaultDataEntryFormService
         }
 
         inputMatcher.appendTail( sb );
-        
+
         return sb.toString();
     }
 
@@ -285,9 +286,25 @@ public class DefaultDataEntryFormService
                 {
                     return i18n.getString( "category_option_combo_with_id" ) + ": " + optionComboId + " " + i18n.getString( "does_not_exist" );
                 }
-
+                
+                // Conditional DataElement Decoration Add
+                if(dataSet.isDataElementDecoration() && dataElement.getDisplayDescription() != null
+                    && dataElement.getDisplayDescription().length() > 0) 
+                {
+                    String descriptionTooltip = " title=\"" +  StringEscapeUtils.escapeHtml( dataElement.getDisplayDescription() ) + "\" ";
+                    
+                    if( inputHtml.contains( "title=" ) )
+                    { 
+                        inputHtml = inputHtml.replaceAll( "title=\".*?\"", descriptionTooltip );
+                    }
+                    else
+                    {
+                        inputHtml = inputHtml.replace( TAG_CLOSE, descriptionTooltip + TAG_CLOSE );
+                    }
+                }                
+                
                 String appendCode = "";
-
+                
                 if ( dataElement.getType().equals( DataElement.VALUE_TYPE_BOOL ) )
                 {
                     inputHtml = inputHtml.replace( "input", "select" );
@@ -315,43 +332,17 @@ public class DefaultDataEntryFormService
 
                 inputHtml = inputHtml.replace( TAG_CLOSE, appendCode );
                 
-                
-                inputHtml += "<span id=\"" + dataElement.getUid() + "-dataelement\" style=\"display:none\""; 
 
-                // Conditional DataElement Decoration Add
-                if(dataSet.isDataElementDecoration() && dataElement.getDescription() != null
-                    && dataElement.getDescription().length() > 0) 
-                {
-                    inputHtml += " title=\"" + dataElement.getDescription() + "\"";
-                }
-                
-                inputHtml += ">";
-                
-                if(dataSet.isDataElementDecoration() && dataElement.getUrl() != null
-                    && dataElement.getUrl().length() > 0) 
-                {
-                    inputHtml += "<a href=\"" + dataElement.getUrl() + "\" target=\"_blank\">";
-                }                
-                
-                // The Data Element Name
-                inputHtml += dataElement.getFormNameFallback();
-
-                if(dataSet.isDataElementDecoration() && dataElement.getUrl() != null 
-                    && dataElement.getUrl().length() > 0) 
-                {
-                    inputHtml += "</a>";
-                }
-                
-                inputHtml += "</span>";
-
+                inputHtml += "<span id=\"" + dataElement.getUid() + "-dataelement\" style=\"display:none\">" + dataElement.getFormNameFallback() + "</span>";
                 inputHtml += "<span id=\"" + categoryOptionCombo.getUid() + "-optioncombo\" style=\"display:none\">" + categoryOptionCombo.getName() + "</span>";
             }
 
             inputMatcher.appendReplacement( sb, inputHtml );
+            
         }
 
         inputMatcher.appendTail( sb );
-
+        
         return sb.toString();
     }
 

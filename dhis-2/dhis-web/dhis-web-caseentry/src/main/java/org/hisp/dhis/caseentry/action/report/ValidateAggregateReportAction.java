@@ -1,5 +1,3 @@
-package org.hisp.dhis.webportal.menu.action;
-
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -27,36 +25,84 @@ package org.hisp.dhis.webportal.menu.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.webportal.menu.MenuState;
-import org.hisp.dhis.webportal.menu.MenuStateManager;
+package org.hisp.dhis.caseentry.action.report;
+
+import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.patientreport.PatientAggregateReport;
+import org.hisp.dhis.patientreport.PatientAggregateReportService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Torgeir Lorange Ostby
- * @version $Id: SetMenuHiddenAction.java 2869 2007-02-20 14:26:09Z andegje $
+ * @author Chau Thu Tran
+ * 
+ * @version $ValidationTabularReportAction.java Mar 12, 2012 12:36:48 PM$
  */
-public class SetMenuHiddenAction
+public class ValidateAggregateReportAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private MenuStateManager menuStateManager;
+    private PatientAggregateReportService aggregateReportService;
 
-    public void setMenuStateManager( MenuStateManager menuStateManager )
+    public void setAggregateReportService( PatientAggregateReportService aggregateReportService )
     {
-        this.menuStateManager = menuStateManager;
+        this.aggregateReportService = aggregateReportService;
+    }
+
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
     }
 
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Input && Output
     // -------------------------------------------------------------------------
 
-    public String execute() throws Exception
+    private Integer id;
+
+    public void setId( Integer id )
     {
-        menuStateManager.setMenuState( MenuState.HIDDEN );
+        this.id = id;
+    }
+
+    private String name;
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+    private String message;
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    // -------------------------------------------------------------------------
+    // Implementation Action
+    // -------------------------------------------------------------------------
+
+    public String execute()
+        throws Exception
+    {
+        name = name.trim();
+
+        PatientAggregateReport match = aggregateReportService.getPatientAggregateReport( name );
+
+        if ( match != null && (id == null || match.getId() != id.intValue()) )
+        {
+            message = i18n.getString( "name_in_use" );
+
+            return INPUT;
+        }
+
+        message = i18n.getString( "everything_is_ok" );
 
         return SUCCESS;
     }

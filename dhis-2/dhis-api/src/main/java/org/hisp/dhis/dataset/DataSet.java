@@ -188,10 +188,9 @@ public class DataSet
     private boolean skipOffline;
 
    /**
-     * Property indicating whether it should enable the Data Elements decorations
-     * , which are description tooltip and url link anchor.
+     * Property indicating whether it should enable data elements decoration in forms.
      */
-    private Boolean dataElementDecoration;
+    private boolean dataElementDecoration;
 
     /**
      * Render default and section forms with tabs instead of multiple sections in one page
@@ -718,19 +717,18 @@ public class DataSet
         this.renderHorizontally = renderHorizontally;
     }
 
-   @JsonProperty
+    @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Boolean isDataElementDecoration()
+    public boolean isDataElementDecoration()
     {
         return dataElementDecoration;
     }
 
-    public void setDataElementDecoration( Boolean dataElementDecoration )
+    public void setDataElementDecoration( boolean dataElementDecoration )
     {
         this.dataElementDecoration = dataElementDecoration;
-    }
-    
+    }    
 	
     @Override
     public void mergeWith( IdentifiableObject other )

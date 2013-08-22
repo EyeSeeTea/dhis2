@@ -32,7 +32,7 @@ Ext.onReady( function() {
 		(function() {
 			conf.finals = {
 				ajax: {
-					path_pivot: '/dhis-web-pivot/',
+					path_module: '/dhis-web-pivot/',
 					path_api: '/api/',
 					path_commons: '/dhis-web-commons-ajax-json/',
 					data_get: 'chartValues.json',
@@ -470,8 +470,7 @@ Ext.onReady( function() {
 		}());
 
 		// init
-		(function() {
-			
+		(function() {			
 			// sort and extend dynamic dimensions
 			init.dimensions = util.array.sortObjectsByString(init.dimensions);
 
@@ -493,7 +492,6 @@ Ext.onReady( function() {
 
 		// api
 		(function() {
-
 			api.layout = {};
 			api.response = {};
 
@@ -718,7 +716,8 @@ Ext.onReady( function() {
 						dimConf = conf.finals.dimension,
 						dims,
 						isOu = false,
-						isOuc = false;
+						isOuc = false,
+						isOugc = false;
 
 					config.columns = getValidatedDimensionArray(config.columns);
 					config.rows = getValidatedDimensionArray(config.rows);
@@ -736,7 +735,7 @@ Ext.onReady( function() {
 						return;
 					}
 
-					// Get object names and isOu/isOuc
+					// Get object names and user orgunits
 					for (var i = 0, dim, dims = [].concat(config.columns, config.rows, config.filters); i < dims.length; i++) {
 						dim = dims[i];
 
@@ -747,7 +746,7 @@ Ext.onReady( function() {
 								objectNames.push(dim.dimension);
 							}
 
-							// isOu/isOuc
+							// user orgunits
 							if (dim.dimension === dimConf.organisationUnit.objectName && Ext.isArray(dim.items)) {
 								for (var j = 0; j < dim.items.length; j++) {
 									if (dim.items[j].id === 'USER_ORGUNIT') {
@@ -755,6 +754,9 @@ Ext.onReady( function() {
 									}
 									else if (dim.items[j].id === 'USER_ORGUNIT_CHILDREN') {
 										isOuc = true;
+									}
+									else if (dim.items[j].id === 'USER_ORGUNIT_GRANDCHILDREN') {
+										isOugc = true;
 									}
 								}
 							}
@@ -784,6 +786,7 @@ Ext.onReady( function() {
 
 					layout.userOrganisationUnit = isOu;
 					layout.userOrganisationUnitChildren = isOuc;
+					layout.userOrganisationUnitGrandChildren = isOugc;
 
 					layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
 
@@ -1214,10 +1217,22 @@ Ext.onReady( function() {
 							xOuDimension = xLayout.objectNameDimensionsMap[dimConf.organisationUnit.objectName],
 							isUserOrgunit = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT'),
 							isUserOrgunitChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_CHILDREN'),
+							isUserOrgunitGrandChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_GRANDCHILDREN'),
 							isLevel = function() {
 								if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
 									for (var i = 0; i < xOuDimension.ids.length; i++) {
 										if (xOuDimension.ids[i].substr(0,5) === 'LEVEL') {
+											return true;
+										}
+									}
+								}
+								
+								return false;
+							}(),
+							isGroup = function() {
+								if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
+									for (var i = 0; i < xOuDimension.ids.length; i++) {
+										if (xOuDimension.ids[i].substr(0,8) === 'OU_GROUP') {
 											return true;
 										}
 									}
@@ -1237,25 +1252,60 @@ Ext.onReady( function() {
 
 							// If ou and children
 							if (dim.dimensionName === ou) {
-								if (isUserOrgunit || isUserOrgunitChildren) {
+								if (isUserOrgunit || isUserOrgunitChildren || isUserOrgunitGrandChildren) {
+									var userOu,
+										userOuc,
+										userOugc;
+
 									if (isUserOrgunit) {
-										dim.items = dim.items.concat(pt.init.user.ou);
+										userOu = [{
+											id: pt.init.user.ou,
+											name: response.metaData.names[pt.init.user.ou]
+										}];
 									}
 									if (isUserOrgunitChildren) {
-										dim.items = dim.items.concat(pt.init.user.ouc);
+										userOuc = [];
+
+										for (var j = 0; j < pt.init.user.ouc.length; j++) {
+											userOuc.push({
+												id: pt.init.user.ouc[j],
+												name: response.metaData.names[pt.init.user.ouc[j]]
+											});
+										}
+
+										userOuc = pt.util.array.sortObjectsByString(userOuc);
 									}
+									if (isUserOrgunitGrandChildren) {
+										var userOuOuc = [].concat(pt.init.user.ou, pt.init.user.ouc),
+											responseOu = response.metaData.ou;
+
+										userOugc = [];
+
+										for (var j = 0; j < responseOu.length; j++) {
+											if (!Ext.Array.contains(userOuOuc, responseOu[j])) {
+												userOugc.push({
+													id: responseOu[j],
+													name: response.metaData.names[responseOu[j]]
+												});
+											}
+										}
+
+										userOugc = pt.util.array.sortObjectsByString(userOugc);
+									}
+
+									dim.items = [].concat(userOu || [], userOuc || [], userOugc || []);
 								}
-								else if (isLevel) {
-									
-									// Items: get ids from metadata -> items
-									for (var j = 0, ids = Ext.clone(response.metaData[dim.dimensionName]); j < ids.length; j++) {
+								else if (isLevel || isGroup) {
+									var responseOu = response.metaData.ou;
+
+									for (var j = 0; j < responseOu.length; j++) {
 										dim.items.push({
-											id: ids[j],
-											name: response.metaData.names[ids[j]]
+											id: responseOu[j],
+											name: response.metaData.names[responseOu[j]]
 										});
-										
-										dim.items = pt.util.array.sortObjectsByString(dim.items);
 									}
+
+									dim.items = pt.util.array.sortObjectsByString(dim.items);
 								}
 								else {
 									dim.items = Ext.clone(xLayout.dimensionNameItemsMap[dim.dimensionName]);
@@ -1263,9 +1313,12 @@ Ext.onReady( function() {
 							}
 							else {
 								// Items: get ids from metadata -> items
-								if (Ext.isArray(metaDataDim) && dim.dimensionName !== dimConf.organisationUnit.dimensionName) {
+								if (Ext.isArray(metaDataDim)) {
 									for (var j = 0, ids = Ext.clone(response.metaData[dim.dimensionName]); j < ids.length; j++) {
-										dim.items.push({id: ids[j]});
+										dim.items.push({
+											id: ids[j],
+											name: response.metaData.names[ids[j]]
+										});
 									}
 								}
 								// Items: get items from xLayout
@@ -1644,15 +1697,18 @@ Ext.onReady( function() {
 					for (var key in uuidDimUuidsMap) {
 						if (uuidDimUuidsMap.hasOwnProperty(key)) {
 							valueElement = Ext.get(key);
-													
-							valueElement.dom.pt = pt;
-							valueElement.dom.setAttribute('onclick', 'this.pt.util.pivot.onMouseClick(this.id);');
+							
+							if (parseFloat(valueElement.dom.textContent)) {
+								valueElement.dom.pt = pt;
+								valueElement.dom.setAttribute('onclick', 'this.pt.engine.onMouseClick(this.id, this.pt);');
+							}
 						}
 					}
 				};						
 
 				getTableHtml = function(xColAxis, xRowAxis, xResponse) {
-					var getTdHtml,
+					var getRoundedHtmlValue,
+						getTdHtml,
 						doSubTotals,
 						doTotals,
 						getColAxisHtmlArray,
@@ -1662,7 +1718,6 @@ Ext.onReady( function() {
 						getGrandTotalHtmlArray,
 						getTotalHtmlArray,
 						getHtml,
-
 						getUniqueFactor = function(xAxis) {
 							if (!xAxis) {
 								return null;
@@ -1681,14 +1736,17 @@ Ext.onReady( function() {
 
 							return null;
 						},
-
 						colUniqueFactor = getUniqueFactor(xColAxis),
 						rowUniqueFactor = getUniqueFactor(xRowAxis),
-
 						valueItems = [],
 						valueObjects = [],
 						totalColObjects = [],
 						htmlArray;
+						
+					getRoundedHtmlValue = function(value, dec) {
+						dec = dec || 2;
+						return parseFloat(pt.util.number.roundIf(value, 2)).toString();
+					};
 
 					getTdHtml = function(config) {
 						var bgColor,
@@ -1723,7 +1781,7 @@ Ext.onReady( function() {
 						
 						colSpan = config.colSpan ? 'colspan="' + config.colSpan + '" ' : '';
 						rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '" ' : '';
-						htmlValue = config.collapsed ? '&nbsp;' : config.htmlValue || config.value || '&nbsp;';
+						htmlValue = config.collapsed ? '' : config.htmlValue || config.value || '';
 						htmlValue = config.type !== 'dimension' ? pt.util.number.pp(htmlValue, layout.digitGroupSeparator) : htmlValue;
 						displayDensity = conf.pivot.displayDensity[config.displayDensity] || conf.pivot.displayDensity[layout.displayDensity];
 						fontSize = conf.pivot.fontSize[config.fontSize] || conf.pivot.fontSize[layout.fontSize];
@@ -1923,7 +1981,7 @@ Ext.onReady( function() {
 								}
 								else {
 									value = 0;
-									htmlValue = '&nbsp;';
+									htmlValue = '';
 									empty = true;
 								}
 
@@ -1960,7 +2018,7 @@ Ext.onReady( function() {
 									type: 'valueTotal',
 									cls: 'pivot-value-total',
 									value: total,
-									htmlValue: Ext.Array.contains(empty, false) ? parseFloat(pt.util.number.roundIf(total, 2)).toString() : '&nbsp;',
+									htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '',
 									empty: !Ext.Array.contains(empty, false)
 								});
 
@@ -2025,7 +2083,7 @@ Ext.onReady( function() {
 											type: 'valueSubtotal',
 											cls: 'pivot-value-subtotal',
 											value: rowSubTotal,
-											htmlValue: Ext.Array.contains(empty, false) ? parseFloat(pt.util.number.roundIf(rowSubTotal, 2)).toString() : '&nbsp',
+											htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(rowSubTotal) : '',
 											empty: !Ext.Array.contains(empty, false),
 											collapsed: !Ext.Array.contains(collapsed, false)
 										});
@@ -2060,7 +2118,7 @@ Ext.onReady( function() {
 									obj.collapsed = Ext.Array.contains(collapsed, true);
 
 									if (i === 0) {
-										obj.htmlValue = '&nbsp;';
+										obj.htmlValue = '';
 										obj.colSpan = xRowAxis.dims;
 									}
 									else {
@@ -2107,7 +2165,7 @@ Ext.onReady( function() {
 										tmpValueObjects[tmpCount++].push({
 											type: item.type === 'value' ? 'valueSubtotal' : 'valueSubtotalTotal',
 											value: subTotal,
-											htmlValue: Ext.Array.contains(empty, false) ? parseFloat(pt.util.number.roundIf(subTotal, 2)).toString() : '&nbsp;',
+											htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(subTotal) : '',
 											collapsed: collapsed,
 											cls: item.type === 'value' ? 'pivot-value-subtotal' : 'pivot-value-subtotal-total'
 										});
@@ -2133,7 +2191,7 @@ Ext.onReady( function() {
 										type: 'valueTotalSubgrandtotal',
 										cls: 'pivot-value-total-subgrandtotal',
 										value: subTotal,
-										htmlValue: Ext.Array.contains(empty, false) ? parseFloat(pt.util.number.roundIf(subTotal, 2)).toString() : '&nbsp;',
+										htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(subTotal) : '',
 										empty: !Ext.Array.contains(empty, false),
 										collapsed: !Ext.Array.contains(collapsed, false)
 									});
@@ -2199,7 +2257,7 @@ Ext.onReady( function() {
 								totalColObjects.push({
 									type: 'valueTotal',
 									value: total,
-									htmlValue: Ext.Array.contains(empty, false) ? parseFloat(pt.util.number.roundIf(total, 2)).toString() : '&nbsp;',
+									htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '',
 									empty: !Ext.Array.contains(empty, false),
 									cls: 'pivot-value-total'
 								});
@@ -2224,7 +2282,7 @@ Ext.onReady( function() {
 										tmp.push({
 											type: 'valueTotalSubgrandtotal',
 											value: subTotal,
-											htmlValue: Ext.Array.contains(empty, false) ? parseFloat(pt.util.number.roundIf(subTotal, 2)).toString() : '&nbsp;',
+											htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(subTotal) : '',
 											empty: !Ext.Array.contains(empty, false),
 											cls: 'pivot-value-total-subgrandtotal'
 										});
@@ -2263,7 +2321,7 @@ Ext.onReady( function() {
 								a.push(getTdHtml({
 									type: 'valueGrandTotal',
 									cls: 'pivot-value-grandtotal',
-									htmlValue: Ext.Array.contains(empty, false) ? parseFloat(pt.util.number.roundIf(total, 2)).toString() : '&nbsp;',
+									htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '',
 									empty: !Ext.Array.contains(empty, false)
 								}));
 							}
@@ -2346,7 +2404,7 @@ Ext.onReady( function() {
 						},
 						disableCaching: false,
 						failure: function(r) {
-							pt.util.mask.hideMask();
+							pt.util.mask.hideMask(pt.viewport.centerRegion);
 							alert(r.responseText);
 						},
 						success: function(r) {
@@ -2354,7 +2412,7 @@ Ext.onReady( function() {
 								response = pt.api.response.Response(Ext.decode(r.responseText));
 
 							if (!response) {
-								pt.util.mask.hideMask();
+								pt.util.mask.hideMask(pt.viewport.centerRegion);
 								return;
 							}
 
@@ -2362,7 +2420,7 @@ Ext.onReady( function() {
 							xLayout = getSyncronizedXLayout(xLayout, response);
 
 							if (!xLayout) {
-								pt.util.mask.hideMask();
+								pt.util.mask.hideMask(pt.viewport.centerRegion);
 								return;
 							}
 
@@ -2455,7 +2513,7 @@ Ext.onReady( function() {
 				};
 				
 				failure = function(responseText) {
-					util.mask.hideMask();
+					util.mask.hideMask(pt.viewport.centerRegion);
 					alert(responseText);
 				};
 					
@@ -2485,7 +2543,7 @@ Ext.onReady( function() {
 				}
 			};
 		
-			engine.onMouseHover = function(uuid, event, param) {
+			engine.onMouseHover = function(uuid, event, param, pt) {
 				var dimUuids;
 
 				if (param === 'chart') {			
@@ -2508,7 +2566,7 @@ Ext.onReady( function() {
 				}
 			};
 			
-			engine.onMouseClick = function(uuid) {
+			engine.onMouseClick = function(uuid, pt) {
 				var that = this,
 					uuids = pt.uuidDimUuidsMap[uuid],
 					layoutConfig = Ext.clone(pt.layout),
@@ -2557,11 +2615,11 @@ Ext.onReady( function() {
 							listeners: {
 								render: function() {
 									this.getEl().on('mouseover', function() {
-										that.onMouseHover(uuid, 'mouseover', 'chart');
+										that.onMouseHover(uuid, 'mouseover', 'chart', pt);
 									});
 
 									this.getEl().on('mouseout', function() {
-										that.onMouseHover(uuid, 'mouseout', 'chart');
+										that.onMouseHover(uuid, 'mouseout', 'chart', pt);
 									});
 								}
 							}

@@ -112,6 +112,8 @@ public class DataQueryParams
     
     private boolean skipMeta;
     
+    private boolean ignoreLimit;
+    
     // -------------------------------------------------------------------------
     // Transient properties
     // -------------------------------------------------------------------------
@@ -817,27 +819,6 @@ public class DataQueryParams
     }
     
     /**
-     * Retrieves the boundary dimension item from a level parameter string, which
-     * is on the format LEVEL-<level>-<item> .
-     */
-    public static String getBoundaryFromLevelParam( String param )
-    {
-        if ( param == null )   
-        {
-            return null;
-        }
-        
-        String[] split = param.split( ITEM_SEP );
-        
-        if ( split.length > 2 && split[2] != null )
-        {
-            return split[2];
-        }
-        
-        return null;
-    }
-
-    /**
      * Retrieves the uid from an org unit group parameter string, which is on
      * the format OU_GROUP-<uid> .
      */
@@ -1060,6 +1041,16 @@ public class DataQueryParams
     public void setSkipMeta( boolean skipMeta )
     {
         this.skipMeta = skipMeta;
+    }
+
+    public boolean isIgnoreLimit()
+    {
+        return ignoreLimit;
+    }
+
+    public void setIgnoreLimit( boolean ignoreLimit )
+    {
+        this.ignoreLimit = ignoreLimit;
     }
 
     // -------------------------------------------------------------------------

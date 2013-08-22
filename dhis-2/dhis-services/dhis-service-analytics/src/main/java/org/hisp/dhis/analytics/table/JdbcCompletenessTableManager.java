@@ -34,9 +34,9 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 
+import org.hisp.dhis.analytics.AnalyticsTable;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
-import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.DateUtils;
 import org.springframework.scheduling.annotation.Async;
@@ -57,15 +57,17 @@ public class JdbcCompletenessTableManager
         return "completeness";
     }
     
-    public void createTable( String tableName )
+    public void createTable( AnalyticsTable table )
     {
+        final String tableName = table.getTempTableName();
+        
         final String sqlDrop = "drop table " + tableName;
         
         executeSilently( sqlDrop );
         
         String sqlCreate = "create table " + tableName + " (";
         
-        for ( String[] col : getDimensionColumns() )
+        for ( String[] col : getDimensionColumns( table ) )
         {
             sqlCreate += col[0] + " " + col[1] + ",";
         }
@@ -78,25 +80,23 @@ public class JdbcCompletenessTableManager
     }
     
     @Async
-    public Future<?> populateTableAsync( ConcurrentLinkedQueue<String> tables )
+    public Future<?> populateTableAsync( ConcurrentLinkedQueue<AnalyticsTable> tables )
     {
         taskLoop : while ( true )
         {
-            String table = tables.poll();
+            AnalyticsTable table = tables.poll();
                 
             if ( table == null )
             {
                 break taskLoop;
             }
             
-            Period period = PartitionUtils.getPeriod( table );
-            
-            final String start = DateUtils.getMediumDateString( period.getStartDate() );
-            final String end = DateUtils.getMediumDateString( period.getEndDate() );
+            final String start = DateUtils.getMediumDateString( table.getPeriod().getStartDate() );
+            final String end = DateUtils.getMediumDateString( table.getPeriod().getEndDate() );
         
-            String insert = "insert into " + table + " (";
+            String insert = "insert into " + table.getTempTableName() + " (";
             
-            for ( String[] col : getDimensionColumns() )
+            for ( String[] col : getDimensionColumns( table ) )
             {
                 insert += col[0] + ",";
             }
@@ -105,7 +105,7 @@ public class JdbcCompletenessTableManager
             
             String select = "select ";
             
-            for ( String[] col : getDimensionColumns() )
+            for ( String[] col : getDimensionColumns( table ) )
             {
                 select += col[2] + ",";
             }
@@ -134,7 +134,7 @@ public class JdbcCompletenessTableManager
         return null;
     }
     
-    public List<String[]> getDimensionColumns()
+    public List<String[]> getDimensionColumns( AnalyticsTable table )
     {
         List<String[]> columns = new ArrayList<String[]>();
 
@@ -188,7 +188,7 @@ public class JdbcCompletenessTableManager
     }
 
     @Async
-    public Future<?> applyAggregationLevels( ConcurrentLinkedQueue<String> tables, Collection<String> dataElements, int aggregationLevel )
+    public Future<?> applyAggregationLevels( ConcurrentLinkedQueue<AnalyticsTable> tables, Collection<String> dataElements, int aggregationLevel )
     {
         return null; // Not relevant
     }

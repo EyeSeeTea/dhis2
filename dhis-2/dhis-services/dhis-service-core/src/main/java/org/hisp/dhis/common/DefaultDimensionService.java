@@ -41,6 +41,7 @@ import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_LEVEL;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_ORGUNIT_GROUP;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_CHILDREN;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_GRANDCHILDREN;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -275,8 +276,6 @@ public class DefaultDimensionService
                 }
                 else if ( ORGANISATIONUNIT.equals( type ) )
                 {
-                    List<OrganisationUnit> ous = new ArrayList<OrganisationUnit>();
-                    
                     for ( String ou : uids )
                     {
                         if ( KEY_USER_ORGUNIT.equals( ou ) )
@@ -287,29 +286,28 @@ public class DefaultDimensionService
                         {
                             object.setUserOrganisationUnitChildren( true );
                         }
+                        else if ( KEY_USER_ORGUNIT_GRANDCHILDREN.equals( ou ) )
+                        {
+                            object.setUserOrganisationUnitGrandChildren( true );
+                        }
                         else if ( ou != null && ou.startsWith( KEY_LEVEL ) )
                         {
                             int level = DimensionalObjectUtils.getLevelFromLevelParam( ou );
                             
-                            String boundary = DimensionalObjectUtils.getBoundaryFromLevelParam( ou );
-
-                            OrganisationUnit unit = null;
-                            
-                            if ( level > 0 && boundary != null && ( unit = identifiableObjectManager.get( OrganisationUnit.class, boundary ) ) != null )
+                            if ( level > 0 )
                             {
-                                object.setOrganisationUnitLevel( level );
-                                ous.add( unit );
+                                object.getOrganisationUnitLevels().add( level );
                             }
                         }
                         else if ( ou != null && ou.startsWith( KEY_ORGUNIT_GROUP ) )
                         {
                             String uid = DimensionalObjectUtils.getUidFromOrgUnitGroupParam( ou );
                             
-                            OrganisationUnitGroup group = null;
+                            OrganisationUnitGroup group = identifiableObjectManager.get( OrganisationUnitGroup.class, uid );
                             
-                            if ( uid != null && ( group = identifiableObjectManager.get( OrganisationUnitGroup.class, uid ) ) != null )
+                            if ( group != null )
                             {
-                                ous.addAll( group.getMembers() );
+                                object.getItemOrganisationUnitGroups().add( group );
                             }
                         }
                         else
@@ -318,12 +316,10 @@ public class DefaultDimensionService
                             
                             if ( unit != null )
                             {
-                                ous.add( unit );
+                                object.getOrganisationUnits().add( unit );
                             }
                         }
                     }
-                    
-                    object.setOrganisationUnits( ous );
                 }
                 else if ( CATEGORY.equals( type ) )
                 {

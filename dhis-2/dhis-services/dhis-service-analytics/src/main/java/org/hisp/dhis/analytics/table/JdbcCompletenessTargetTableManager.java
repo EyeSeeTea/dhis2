@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 
+import org.hisp.dhis.analytics.AnalyticsTable;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.springframework.scheduling.annotation.Async;
@@ -44,6 +45,14 @@ import org.springframework.scheduling.annotation.Async;
 public class JdbcCompletenessTargetTableManager
     extends AbstractJdbcTableManager
 {
+    @Override
+    public List<AnalyticsTable> getTables( boolean last3YearsOnly )
+    {
+        List<AnalyticsTable> tables = new ArrayList<AnalyticsTable>();
+        tables.add( new AnalyticsTable( getTableName() ) );
+        return tables;
+    }
+    
     public boolean validState()
     {
         return true;
@@ -54,15 +63,17 @@ public class JdbcCompletenessTargetTableManager
         return "completenesstarget";
     }
 
-    public void createTable( String tableName )
+    public void createTable( AnalyticsTable table )
     {
+        final String tableName = table.getTempTableName();
+        
         final String sqlDrop = "drop table " + tableName;
         
         executeSilently( sqlDrop );
 
         String sqlCreate = "create table " + tableName + " (";
 
-        for ( String[] col : getDimensionColumns() )
+        for ( String[] col : getDimensionColumns( table ) )
         {
             sqlCreate += col[0] + " " + col[1] + ",";
         }
@@ -75,27 +86,27 @@ public class JdbcCompletenessTargetTableManager
     }
 
     @Async
-    public Future<?> populateTableAsync( ConcurrentLinkedQueue<String> tables )
+    public Future<?> populateTableAsync( ConcurrentLinkedQueue<AnalyticsTable> tables )
     {
         taskLoop : while ( true )
         {
-            String table = tables.poll();
+            AnalyticsTable table = tables.poll();
                 
             if ( table == null )
             {
                 break taskLoop;
             }
             
-            String sql = "insert into " + table + " (";
+            String sql = "insert into " + table.getTempTableName() + " (";
     
-            for ( String[] col : getDimensionColumns() )
+            for ( String[] col : getDimensionColumns( table ) )
             {
                 sql += col[0] + ",";
             }
     
             sql += "value) select ";
     
-            for ( String[] col : getDimensionColumns() )
+            for ( String[] col : getDimensionColumns( table ) )
             {
                 sql += col[2] + ",";
             }
@@ -115,7 +126,7 @@ public class JdbcCompletenessTargetTableManager
         return null;
     }
 
-    public List<String[]> getDimensionColumns()
+    public List<String[]> getDimensionColumns( AnalyticsTable table )
     {
         List<String[]> columns = new ArrayList<String[]>();
 
@@ -156,7 +167,7 @@ public class JdbcCompletenessTargetTableManager
     }
 
     @Async
-    public Future<?> applyAggregationLevels( ConcurrentLinkedQueue<String> tables, Collection<String> dataElements, int aggregationLevel )
+    public Future<?> applyAggregationLevels( ConcurrentLinkedQueue<AnalyticsTable> tables, Collection<String> dataElements, int aggregationLevel )
     {
         return null; // Not relevant
     }
