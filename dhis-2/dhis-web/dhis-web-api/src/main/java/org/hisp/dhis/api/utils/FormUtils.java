@@ -39,6 +39,8 @@ import org.hisp.dhis.dataset.Section;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageDataElement;
+import org.hisp.dhis.program.ProgramStageSection;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -60,9 +62,6 @@ public class FormUtils
 
         form.getOptions().put( "periodType", dataSet.getPeriodType().getName() );
         form.getOptions().put( "allowFuturePeriods", dataSet.isAllowFuturePeriods() );
-
-        form.setPeriodType( dataSet.getPeriodType().getName() );
-        form.setAllowFuturePeriods( dataSet.isAllowFuturePeriods() );
 
         if ( dataSet.getSections().size() > 0 )
         {
@@ -119,14 +118,55 @@ public class FormUtils
             form.getOptions().put( "dateOfIncidentDescription", program.getDateOfIncidentDescription() );
         }
 
-        form.getOptions().put( "type", "SINGLE_EVENT_WITHOUT_REGISTRATION" );
+        form.getOptions().put( "type", Program.TYPE_LOOKUP.get( program.getType() ) );
 
         ProgramStage programStage = program.getProgramStageByStage( 1 );
         Assert.notNull( programStage );
 
         form.getOptions().put( "captureCoordinates", programStage.getCaptureCoordinates() );
 
+        if ( programStage.getProgramStageSections().size() > 0 )
+        {
+            for ( ProgramStageSection section : programStage.getProgramStageSections() )
+            {
+                List<Field> fields = inputsFromProgramStageDataElements( section.getProgramStageDataElements() );
+
+                if ( !fields.isEmpty() )
+                {
+                    Group s = new Group();
+                    s.setLabel( section.getDisplayName() );
+                    s.setFields( fields );
+                    form.getGroups().add( s );
+                }
+            }
+        }
+        else
+        {
+            List<Field> fields = inputsFromProgramStageDataElements(
+                new ArrayList<ProgramStageDataElement>( programStage.getProgramStageDataElements() ) );
+
+            if ( !fields.isEmpty() )
+            {
+                Group s = new Group();
+                s.setLabel( "default" );
+                s.setFields( fields );
+                form.getGroups().add( s );
+            }
+        }
+
         return form;
+    }
+
+    private static List<Field> inputsFromProgramStageDataElements( List<ProgramStageDataElement> programStageDataElements )
+    {
+        List<DataElement> dataElements = new ArrayList<DataElement>();
+
+        for ( ProgramStageDataElement programStageDataElement : programStageDataElements )
+        {
+            dataElements.add( programStageDataElement.getDataElement() );
+        }
+
+        return inputsFromDataElements( dataElements, new ArrayList<DataElementOperand>() );
     }
 
     private static List<Field> inputsFromDataElements( List<DataElement> dataElements )
@@ -158,6 +198,11 @@ public class FormUtils
                     field.setDataElement( dataElement.getUid() );
                     field.setCategoryOptionCombo( categoryOptionCombo.getUid() );
                     field.setType( inputTypeFromDataElement( dataElement ) );
+
+                    if ( dataElement.getOptionSet() != null )
+                    {
+                        field.setOptionSet( dataElement.getOptionSet().getUid() );
+                    }
 
                     fields.add( field );
                 }

@@ -34,7 +34,6 @@ import java.util.List;
 import org.hisp.dhis.common.ListMap;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.YearlyPeriodType;
 
 /**
@@ -66,19 +65,6 @@ public class PartitionUtils
         Period year = PERIODTYPE.createPeriod( period.getStartDate() );
         
         return tableName + SEP + year.getIsoDate();
-    }
-
-    public static Period getPeriod( String tableName )
-    {
-        if ( tableName == null || tableName.indexOf( SEP ) == -1 )
-        {
-            return null;
-        }
-        
-        String[] split = tableName.split( SEP );
-        String isoPeriod = split[split.length - 1];
-        
-        return PeriodType.getPeriodFromIsoString( isoPeriod );
     }
     
     public static ListMap<String, NameableObject> getTableNamePeriodMap( List<NameableObject> periods, String tableName )
