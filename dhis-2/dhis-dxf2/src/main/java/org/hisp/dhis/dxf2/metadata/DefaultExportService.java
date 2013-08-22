@@ -241,10 +241,14 @@ public class DefaultExportService
     @Override
     public void deleteFilter( JSONObject json ) throws IOException
     {
-//        DataElementGroup dataElementGroup = dataElementService.getDataElementGroup( "qfxEYY9xAl6" );
+//        List<DataElementGroup> dataElementGroups = new ArrayList<DataElementGroup>();
+//
+//        dataElementGroups.add( dataElementService.getDataElementGroup( "oDkJh5Ddh7d" ) );
+//        dataElementGroups.add( dataElementService.getDataElementGroup( "qfxEYY9xAl6" ) );
+//
 //        MetaDataDependencies metaDataDependencies = new MetaDataDependencies();
 //
-//        List<String> uids = metaDataDependencies.getAllDependencyUids( dataElementGroup );
+//        Map<Class<? extends IdentifiableObject>, Set<String>> uids = metaDataDependencies.getAllDependencyUids( dataElementGroups );
 //
 //        System.out.println("Break");
         Filter filter = filterService.getFilterByUid( json.getString( "uid" ) );

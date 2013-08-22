@@ -46,42 +46,84 @@ public class MetaDataDependencies
     private static final Log log = LogFactory.getLog( MetaDataDependencies.class );
 
     //--------------------------------------------------------------------------
-    // Dependencies Logic
+    // Get dependencies
     //--------------------------------------------------------------------------
 
-    // Get all dependencies for an IdentifiableObject as a List of Uids
-    public List<String> getAllDependencyUids( IdentifiableObject identifiableObject )
+    // Get all dependencies for an IdentifiableObject
+    public Map<Class<? extends IdentifiableObject>, Set<String>> getAllDependencyUids( IdentifiableObject identifiableObject )
     {
-        List<String> uids = new ArrayList<String>();
+        Map<Class<? extends IdentifiableObject>, Set<String>> dependencyUidsMap = new HashMap<Class<? extends IdentifiableObject>, Set<String>>();
         List<IdentifiableObject> dependencies = computeAllDependencies( identifiableObject );
 
         for ( IdentifiableObject dependency : dependencies )
         {
-            String uid = dependency.getUid();
-            if ( !uids.contains( uid ) )
+            Class<? extends IdentifiableObject> key = dependency.getClass();
+            String uidValue = dependency.getUid();
+
+            if ( dependencyUidsMap.containsKey( key ) )
             {
-                uids.add( uid );
+                dependencyUidsMap.get( key ).add( uidValue );
+            } else
+            {
+                Set<String> dependencyUidsSet = new HashSet<String>();
+                dependencyUidsSet.add( uidValue );
+
+                dependencyUidsMap.put( key, dependencyUidsSet );
             }
         }
 
-        return uids;
+        return dependencyUidsMap;
     }
+
+    // Get all dependencies for a List of IdentifiableObjects
+    public Map<Class<? extends IdentifiableObject>, Set<String>> getAllDependencyUids( List<? extends IdentifiableObject> identifiableObjects )
+    {
+        Map<Class<? extends IdentifiableObject>, Set<String>> dependencyUidsMap = new HashMap<Class<? extends IdentifiableObject>, Set<String>>();
+
+        for ( IdentifiableObject identifiableObject : identifiableObjects )
+        {
+            List<IdentifiableObject> dependencies = computeAllDependencies( identifiableObject );
+
+            for ( IdentifiableObject dependency : dependencies )
+            {
+                Class<? extends IdentifiableObject> key = dependency.getClass();
+                String uidValue = dependency.getUid();
+
+                if ( dependencyUidsMap.containsKey( key ) )
+                {
+                    dependencyUidsMap.get( key ).add( uidValue );
+                } else
+                {
+                    Set<String> dependencyUidsSet = new HashSet<String>();
+                    dependencyUidsSet.add( uidValue );
+
+                    dependencyUidsMap.put( key, dependencyUidsSet );
+                }
+            }
+        }
+
+        return dependencyUidsMap;
+    }
+
+    //--------------------------------------------------------------------------
+    // Compute dependencies
+    //--------------------------------------------------------------------------
 
     // Compute all dependencies for an IdentifiableObject
     private List<IdentifiableObject> computeAllDependencies( IdentifiableObject identifiableObject )
     {
+        List<IdentifiableObject> finalDependencies = new ArrayList<IdentifiableObject>();
         List<IdentifiableObject> dependencies = getAllDependencies( identifiableObject );
 
         if ( dependencies.size() == 0 )
         {
-            return dependencies;
+            return finalDependencies;
         } else
         {
-            List<IdentifiableObject> finalDependencies = new ArrayList<IdentifiableObject>();
-
             for ( IdentifiableObject dependency : dependencies )
             {
                 log.info( "[ COMPUTING Dependency ] : " + dependency.getName() );
+
                 finalDependencies.add( dependency );
                 finalDependencies.addAll( computeAllDependencies( dependency ) );
             }
@@ -93,25 +135,25 @@ public class MetaDataDependencies
     // Get all dependencies for an IdentifiableObject
     private List<IdentifiableObject> getAllDependencies( IdentifiableObject identifiableObject )
     {
-        List<IdentifiableObject> dependencies = new ArrayList<IdentifiableObject>();
+        List<IdentifiableObject> allDependencies = new ArrayList<IdentifiableObject>();
 
         List<IdentifiableObject> dependencyObjects = getAllDependencyObjects( identifiableObject );
         List<Collection<IdentifiableObject>> dependencyCollections = getAllDependencyCollections( identifiableObject );
 
-        dependencies.addAll( dependencyObjects );
+        allDependencies.addAll( dependencyObjects );
 
         for ( Collection<IdentifiableObject> dependencyCollection : dependencyCollections )
         {
-            dependencies.addAll( dependencyCollection );
+            allDependencies.addAll( dependencyCollection );
         }
 
-        return dependencies;
+        return allDependencies;
     }
 
-    // Get all single dependency objects for an IdentifiableObject
+    // Get all Single dependency objects for an IdentifiableObject
     private List<IdentifiableObject> getAllDependencyObjects( IdentifiableObject identifiableObject )
     {
-        List<IdentifiableObject> dependencyObjects = new ArrayList<IdentifiableObject>();
+        List<IdentifiableObject> allDependencyObjects = new ArrayList<IdentifiableObject>();
 
         List<Field> fields = ReflectionUtils.getAllFields( identifiableObject.getClass() );
         List<Field> dependencyFields = getDependencyFields( fields );
@@ -123,36 +165,43 @@ public class MetaDataDependencies
 
             if ( dependencyObject != null && hasExportView( getterMethod ) )
             {
-                dependencyObjects.add( dependencyObject );
+                log.info( "[ DEPENDENCY OBJECT ] : " + dependencyObject.getName() );
+
+                allDependencyObjects.add( dependencyObject );
             }
         }
 
-        return dependencyObjects;
+        return allDependencyObjects;
     }
 
-    // Get all collections dependencies for a IdentifiableObject
+    // Get all Collections dependencies for an IdentifiableObject
     private List<Collection<IdentifiableObject>> getAllDependencyCollections( IdentifiableObject identifiableObject )
     {
-        List<Collection<IdentifiableObject>> dependencyCollections = new ArrayList<Collection<IdentifiableObject>>();
+        List<Collection<IdentifiableObject>> allDependencyCollections = new ArrayList<Collection<IdentifiableObject>>();
 
         List<Field> fields = ReflectionUtils.getAllFields( identifiableObject.getClass() );
-        List<Field> dependencyFieldsCollections = getDependencyFieldCollections( fields );
+        List<Field> dependencyFieldCollections = getDependencyFieldCollections( fields );
 
-        for ( Field dependencyFieldCollection : dependencyFieldsCollections )
+        for ( Field dependencyFieldCollection : dependencyFieldCollections )
         {
             Method getterMethod = ReflectionUtils.findGetterMethod( dependencyFieldCollection.getName(), identifiableObject );
             Collection<IdentifiableObject> dependencyCollection = ReflectionUtils.invokeGetterMethod( dependencyFieldCollection.getName(), identifiableObject );
 
             if ( dependencyCollection != null && hasExportView( getterMethod ) )
             {
-                dependencyCollections.add( dependencyCollection );
+                for ( IdentifiableObject dependencyEntry : dependencyCollection )
+                {
+                    log.info( "[ DEPENDENCY COLLECTION ENTRY ] : " + dependencyEntry.getName() );
+                }
+
+                allDependencyCollections.add( dependencyCollection );
             }
         }
 
-        return dependencyCollections;
+        return allDependencyCollections;
     }
 
-    // Get all Fields that contain a dependency to other Identifiable types
+    // Get all Fields that contain a dependency of other IdentifiableObjects
     private List<Field> getDependencyFields( List<Field> fields )
     {
         List<Field> dependencyFields = new ArrayList<Field>();
@@ -165,7 +214,6 @@ public class MetaDataDependencies
                 {
                     if ( ReflectionUtils.isType( field, entry.getKey() ) )
                     {
-                        log.info( "[ DEPENDENCY OBJECT FIELD ] : " + field.getName() );
                         dependencyFields.add( field );
                     }
                 }
@@ -175,10 +223,10 @@ public class MetaDataDependencies
         return dependencyFields;
     }
 
-    // Get all Fields that contain a dependency collection to other Identifiable types
+    // Get all Fields that contain a dependency Collection of other IdentifiableObjects
     private List<Field> getDependencyFieldCollections( List<Field> fields )
     {
-        List<Field> dependencyFieldsCollections = new ArrayList<Field>();
+        List<Field> dependencyFieldCollections = new ArrayList<Field>();
 
         for ( Field field : fields )
         {
@@ -188,14 +236,13 @@ public class MetaDataDependencies
                 {
                     if ( ReflectionUtils.isGenericTypeOf( field, entry.getKey() ) )
                     {
-                        log.info( "[ DEPENDENCY COLLECTION FIELD ] : " + field.getName() );
-                        dependencyFieldsCollections.add( field );
+                        dependencyFieldCollections.add( field );
                     }
                 }
             }
         }
 
-        return dependencyFieldsCollections;
+        return dependencyFieldCollections;
     }
 
     // Check if a Method has ExportView.class
