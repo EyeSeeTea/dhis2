@@ -1,8 +1,8 @@
 Ext.onReady( function() {
-	
-	// ext config	
+
+	// ext config
 	Ext.Ajax.method = 'GET';
-	
+
 	// namespace
 	if (!('GIS' in window)) {
 		GIS = {
@@ -12,10 +12,10 @@ Ext.onReady( function() {
 
 	// mode
 	GIS.isDebug = false;
-	
+
 	// html5
 	GIS.isSessionStorage = 'sessionStorage' in window && window['sessionStorage'] !== null;
-	
+
 	// log
 	GIS.logg = [];
 
@@ -1581,11 +1581,11 @@ Ext.onReady( function() {
 		var conf = {},
 			util = {},
 			store = {},
-		
+
 			//gis = {},
 			layers = [];
 			gis = {};
-			
+
 		// conf
 		(function() {
 			conf.finals = {
@@ -1595,6 +1595,7 @@ Ext.onReady( function() {
 					path_commons: '/dhis-web-commons-ajax-json/',
 					organisationunitchildren_get: 'getOrganisationUnitChildren.action',
 					organisationunitgroup_getall: 'organisationUnitGroups.json?paging=false&links=false',
+					dataset_get: 'dataSets.json?paging=false&links=false'
 				},
 				layer: {
 					type_base: 'base',
@@ -1628,6 +1629,11 @@ Ext.onReady( function() {
 						param: 'dc',
 						dimensionName: 'dx',
 						objectName: 'dc'
+					},
+					dataSet: {
+						value: 'dataSets',
+						dimensionName: 'dx',
+						objectName: 'ds'
 					},
 					period: {
 						id: 'period',
@@ -1673,7 +1679,7 @@ Ext.onReady( function() {
 					id: 'root'
 				}
 			};
-			
+
 			conf.layout = {
 				widget: {
 					item_width: 288,
@@ -1689,7 +1695,7 @@ Ext.onReady( function() {
 					row_height: 27
 				}
 			};
-			
+
 			conf.period = {
 				periodTypes: [
 					{id: 'relativePeriods', name: 'Relative'},
@@ -1714,13 +1720,13 @@ Ext.onReady( function() {
 					{id: 'THIS_YEAR', name: GIS.i18n.this_year},
 					{id: 'LAST_YEAR', name: GIS.i18n.last_year}
 				]
-			};		
+			};
 		}());
-		
+
 		// util
 		(function() {
 			util.map = {};
-			
+
 			util.map.getVisibleVectorLayers = function() {
 				var layers = [];
 
@@ -1763,7 +1769,7 @@ Ext.onReady( function() {
 			};
 
 			util.geojson = {};
-			
+
 			util.geojson.decode = function(doc) {
 				var geojson = {};
 				geojson.type = 'FeatureCollection';
@@ -1806,18 +1812,18 @@ Ext.onReady( function() {
 				}
 			};
 		}());
-				
+
 		gis.init = init;
 		gis.conf = conf;
 		gis.util = util;
-		
+
 		// store
 		(function() {
 			store.organisationUnitLevels = GIS.core.OrganisationUnitLevelStore(gis);
 		}());
-		
+
 		gis.store = store;
-		
+
 		gis.olmap = GIS.core.getOLMap(gis);
 		gis.layer = GIS.core.getLayers(gis);
 

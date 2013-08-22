@@ -467,7 +467,7 @@ Ext.onReady( function() {
 					}
 				}
 			});
-			
+
 			store.legendSets = Ext.create('Ext.data.Store', {
 				fields: ['id', 'name'],
 				proxy: {
@@ -3698,6 +3698,27 @@ Ext.onReady( function() {
 			}
 		});
 
+        dataSetStore = Ext.create('Ext.data.Store', {
+            fields: ['id', 'name'],
+            proxy: {
+                type: 'ajax',
+                url: gis.init.contextPath + gis.conf.finals.url.path_api + gis.conf.finals.url.dataset_get,
+                reader: {
+                    type: 'json',
+                    root: 'dataSets'
+                }
+            },
+            sortStore: function() {
+                this.sort('name', 'ASC');
+            },
+            isLoaded: false,
+            listeners: {
+                load: function(s) {
+                    this.isLoaded = true;
+                }
+            }
+        });
+
 		periodsByTypeStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name', 'index'],
 			data: [],
@@ -3765,17 +3786,26 @@ Ext.onReady( function() {
 		// Togglers
 
 		valueTypeToggler = function(valueType) {
-			if (valueType === 'indicator') {
+			if (valueType === dimConf.indicator.objectName) {
 				indicatorGroup.show();
 				indicator.show();
 				dataElementGroup.hide();
 				dataElementPanel.hide();
+				dataSet.hide();
 			}
-			else if (valueType === 'dataElement') {
+			else if (valueType === dimConf.dataElement.objectName || valueType === dimConf.operand.objectName) {
 				indicatorGroup.hide();
 				indicator.hide();
 				dataElementGroup.show();
 				dataElementPanel.show();
+				dataSet.hide();
+			}
+			else if (valueType === dimConf.dataSet.objectName) {
+				indicatorGroup.hide();
+				indicator.hide();
+				dataElementGroup.hide();
+				dataElementPanel.hide();
+				dataSet.show();
 			}
 		};
 
@@ -3805,12 +3835,13 @@ Ext.onReady( function() {
 			forceSelection: true,
 			width: gis.conf.layout.widget.item_width,
 			labelWidth: gis.conf.layout.widget.itemlabel_width,
-			value: gis.conf.finals.dimension.indicator.id,
+			value: dimConf.indicator.objectName,
 			store: Ext.create('Ext.data.ArrayStore', {
 				fields: ['id', 'name'],
 				data: [
-					[gis.conf.finals.dimension.indicator.id, GIS.i18n.indicator],
-					[gis.conf.finals.dimension.dataElement.id, GIS.i18n.dataelement]
+					[dimConf.indicator.objectName, GIS.i18n.indicator],
+					[dimConf.dataElement.objectName, GIS.i18n.dataelement],
+					[dimConf.dataSet.objectName, GIS.i18n.dataset]
 				]
 			}),
 			listeners: {
@@ -3976,7 +4007,7 @@ Ext.onReady( function() {
 			valueField: 'id',
 			displayField: 'text',
 			width: 65 - 2,
-			value: gis.conf.finals.dimension.dataElement.objectName,
+			value: dimConf.dataElement.objectName,
 			onSelect: function() {
 				dataElementGroup.loadAvailable();
 				dataElement.clearValue();
@@ -3984,8 +4015,8 @@ Ext.onReady( function() {
 			store: {
 				fields: ['id', 'text'],
 				data: [
-					{id: gis.conf.finals.dimension.dataElement.objectName, text: GIS.i18n.totals},
-					{id: gis.conf.finals.dimension.operand.objectName, text: GIS.i18n.details}
+					{id: dimConf.dataElement.objectName, text: GIS.i18n.totals},
+					{id: dimConf.operand.objectName, text: GIS.i18n.details}
 				]
 			},
 			listeners: {
@@ -4005,6 +4036,19 @@ Ext.onReady( function() {
 			]
 		});
 
+		dataSet = Ext.create('Ext.form.field.ComboBox', {
+			fieldLabel: GIS.i18n.dataSet,
+			editable: false,
+			valueField: 'id',
+			displayField: 'name',
+			queryMode: 'local',
+			forceSelection: true,
+			width: gis.conf.layout.widget.item_width,
+			labelWidth: gis.conf.layout.widget.itemlabel_width,
+			listConfig: {loadMask: false},
+			store: dataSetStore
+		});
+
 		periodType = Ext.create('Ext.form.field.ComboBox', {
 			editable: false,
 			valueField: 'id',
@@ -4019,10 +4063,10 @@ Ext.onReady( function() {
 					pType,
 					offset,
 					periods;
-					
+
 				if (type === 'relativePeriods') {
 					periodsByTypeStore.loadData(gis.conf.period.relativePeriods);
-					
+
 					periodPrev.disable();
 					periodNext.disable();
 				}
@@ -4037,7 +4081,7 @@ Ext.onReady( function() {
 
 					periodsByTypeStore.setIndex(periods);
 					periodsByTypeStore.loadData(periods);
-					
+
 					periodPrev.enable();
 					periodNext.enable();
 				}
@@ -4187,54 +4231,6 @@ Ext.onReady( function() {
 			value: 15
 		});
 
-		//level = Ext.create('Ext.form.field.ComboBox', {
-			//fieldLabel: GIS.i18n.level,
-			//editable: false,
-			//valueField: 'id',
-			//displayField: 'name',
-			//mode: 'remote',
-			//forceSelection: true,
-			//width: gis.conf.layout.widget.item_width,
-			//labelWidth: gis.conf.layout.widget.itemlabel_width,
-			//style: 'margin-bottom: 4px',
-			//store: gis.store.organisationUnitLevels,
-			//listeners: {
-				//added: function() {
-					//this.store.cmp.push(this);
-				//}
-			//}
-		//});
-
-		//parent = Ext.create('Ext.tree.Panel', {
-			//autoScroll: true,
-			//lines: false,
-			//rootVisible: false,
-			//multiSelect: false,
-			//width: gis.conf.layout.widget.item_width,
-			//height: 210,
-			//reset: function() {
-				//this.collapseAll();
-				//this.expandPath(gis.init.rootNodes[0].path);
-				//this.selectPath(gis.init.rootNodes[0].path);
-			//},
-			//store: Ext.create('Ext.data.TreeStore', {
-				//proxy: {
-					//type: 'ajax',
-					//url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'getOrganisationUnitChildren.action'
-				//},
-				//root: {
-					//id: 'root',
-					//expanded: true,
-					//children: gis.init.rootNodes
-				//}
-			//}),
-			//listeners: {
-				//afterrender: function() {
-					//this.getSelectionModel().select(0);
-				//}
-			//}
-		//});
-		
 		treePanel = Ext.create('Ext.tree.Panel', {
 			cls: 'gis-tree',
 			height: 210,
@@ -4341,10 +4337,81 @@ Ext.onReady( function() {
 						return;
 					}
 				}
-				
+
 				this.enable();
 			},
-			listeners: {
+			getDimension: function() {
+				var r = treePanel.getSelectionModel().getSelection(),
+					config = {
+						dimension: pt.conf.finals.dimension.organisationUnit.objectName,
+						items: []
+					};
+
+				if (toolMenu.menuValue === 'orgunit') {
+					if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue() || userOrganisationUnitGrandChildren.getValue()) {
+						if (userOrganisationUnit.getValue()) {
+							config.items.push({
+								id: 'USER_ORGUNIT',
+								name: ''
+							});
+						}
+						if (userOrganisationUnitChildren.getValue()) {
+							config.items.push({
+								id: 'USER_ORGUNIT_CHILDREN',
+								name: ''
+							});
+						}
+						if (userOrganisationUnitGrandChildren.getValue()) {
+							config.items.push({
+								id: 'USER_ORGUNIT_GRANDCHILDREN',
+								name: ''
+							});
+						}
+					}
+					else {
+						for (var i = 0; i < r.length; i++) {
+							config.items.push({id: r[i].data.id});
+						}
+					}
+				}
+				else if (toolMenu.menuValue === 'level') {
+					var levels = organisationUnitLevel.getValue();
+
+					for (var i = 0; i < levels.length; i++) {
+						config.items.push({
+							id: 'LEVEL-' + levels[i],
+							name: ''
+						});
+					}
+
+					for (var i = 0; i < r.length; i++) {
+						config.items.push({
+							id: r[i].data.id,
+							name: ''
+						});
+					}
+				}
+				else if (toolMenu.menuValue === 'group') {
+					var groupIds = organisationUnitGroup.getValue();
+
+					for (var i = 0; i < groupIds.length; i++) {
+						config.items.push({
+							id: 'OU_GROUP-' + groupIds[i],
+							name: ''
+						});
+					}
+
+					for (var i = 0; i < r.length; i++) {
+						config.items.push({
+							id: r[i].data.id,
+							name: ''
+						});
+					}
+				}
+
+				return config.items.length ? config : null;
+			},
+            listeners: {
 				render: function() {
 					this.rendered = true;
 				},
@@ -4725,15 +4792,11 @@ Ext.onReady( function() {
 		};
 
 		getView = function(config) {
-			var parentArray = parent.getSelectionModel().getSelection(),
-				store = gis.store.organisationUnitLevels,
-				vType = valueType.getValue(),
+			var vType = valueType.getValue(),
 				view;
 
-			parentArray = parentArray.length ? parentArray : [{raw: gis.init.rootNodes[0]}];
-
 			view = {
-				columns: function() {					
+				columns: function() {
 					if (vType === dimConf.indicator.id) {
 						return [{
 							dimension: dimConf.indicator.objectName,
@@ -4751,13 +4814,7 @@ Ext.onReady( function() {
 						}];
 					}
 				}(),
-				rows: [{
-					dimension: dimConf.organisationUnit.objectName,
-					items: [
-						{id: 'LEVEL-' + organisationUnitLevel},
-						{id: parentOrganisationUnit.getValue()}
-					]
-				}],						
+				rows: [treepanel.getDimension()],
 				filters: [{
 					dimension: dimConf.period.objectName,
 					items: [{
@@ -4765,11 +4822,11 @@ Ext.onReady( function() {
 					}]
 				}],
 				valueType: vType,
-				
-					
-					
-				
-				
+
+
+
+
+
 				valueType: valueType.getValue(),
 				indicatorGroup: {
 					id: indicatorGroup.getValue(),
@@ -4990,7 +5047,7 @@ Ext.onReady( function() {
 						},
 						//level,
 						//parent
-						
+
 						{
 							layout: 'column',
 							bodyStyle: 'border:0 none',

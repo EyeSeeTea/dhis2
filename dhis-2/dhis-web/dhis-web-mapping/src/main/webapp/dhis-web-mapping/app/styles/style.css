@@ -3,36 +3,36 @@
  *
  * Combobox
  * GIS Combobox
- * 
+ *
  * Panel
- * 
+ *
  * GIS form
- * 
+ *
  * Button
  * GIS Button
- * 
+ *
  * Toolbar
- * 
+ *
  * Menu
  * GIS Menu
- * 
+ *
  * Treepanel
  * Colorpicker
- * 
+ *
  * GIS Window
- * 
+ *
  * GIS Grid
- * 
+ *
  * GIS TextField
- * 
+ *
  * GIS TextArea
- * 
+ *
  * Checkbox
- * 
+ *
  * GIS NumberField
- * 
+ *
  * GIS Label
- * 
+ *
  * Tooltip
 */
 
@@ -476,7 +476,7 @@ gis-combo .x-form-item-label {
 }
 
 	/* Menu item */
-	
+
 .x-menu-item-link {
     padding: 4px 5px 4px 26px;
 }
@@ -518,7 +518,7 @@ gis-combo .x-form-item-label {
 	.gis-menu-item-icon-favorite {
 		left: 6px;
 	}
-	
+
 	.gis-menu-item-icon-edit {
 		background: url('../images/edit_16.png') no-repeat;
 	}
@@ -557,8 +557,8 @@ gis-combo .x-form-item-label {
 	}
 	.x-menu-item-text {
 		font-size: 10px !important;
-	}	
-	
+	}
+
 .gis-menu-item-selected {
     background-image:url('../images/check.png');
     padding-left: 18px;
@@ -797,7 +797,7 @@ gis-combo .x-form-item-label {
 /*----------------------------------------------------------------------------
  * GIS Textarea
  *--------------------------------------------------------------------------*/
- 
+
 .gis-textarea .x-form-field {
 	font-size: 11px;
 }
@@ -821,7 +821,7 @@ label.x-form-cb-label {
 	padding-top: 4px;
 }
 .x-form-checkbox {
-	vertical-align: -2px;
+	vertical-align: 0;
 }
 
 
