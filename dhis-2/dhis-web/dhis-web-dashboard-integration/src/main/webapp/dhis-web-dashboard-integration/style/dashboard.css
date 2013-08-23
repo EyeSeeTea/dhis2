@@ -32,7 +32,7 @@
 #dashboardListContainer
 {
   position: absolute;
-  left: 225px;
+  left: 290px;
   right: 20px;
   margin-top: 48px;
 }
@@ -110,6 +110,14 @@
   font-family: LiberationSansBold, sans-serif;
   color: #39547d;
   margin: 2px 5px;
+}
+
+.item h4
+{
+  font-size: 12px;
+  font-family: LiberationSansBold, sans-serif;
+  color: #4975b4;
+  margin: 1px 5px;
 }
 
 .item h4

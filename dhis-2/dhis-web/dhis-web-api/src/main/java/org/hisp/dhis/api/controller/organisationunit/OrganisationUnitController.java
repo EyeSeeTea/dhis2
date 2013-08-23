@@ -1,19 +1,20 @@
 package org.hisp.dhis.api.controller.organisationunit;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -31,7 +32,6 @@ import org.hisp.dhis.api.controller.AbstractCrudController;
 import org.hisp.dhis.api.controller.WebMetaData;
 import org.hisp.dhis.api.controller.WebOptions;
 import org.hisp.dhis.api.controller.exception.NotFoundException;
-import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.api.utils.WebUtils;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.dxf2.metadata.MetaData;
@@ -120,8 +120,8 @@ public class OrganisationUnitController
     }
 
     @Override
-    @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public String getObject( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
+    @RequestMapping(value = "/{uid}", method = RequestMethod.GET)
+    public String getObject( @PathVariable("uid") String uid, @RequestParam Map<String, String> parameters,
         Model model, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         WebOptions options = new WebOptions( parameters );
@@ -173,6 +173,27 @@ public class OrganisationUnitController
 
                 model.addAttribute( "model", metaData );
             }
+        }
+        if ( options.getOptions().containsKey( "includeDescendants" ) && Boolean.parseBoolean( options.getOptions().get( "includeDescendants" ) ) )
+        {
+            List<OrganisationUnit> entities = new ArrayList<OrganisationUnit>(
+                organisationUnitService.getOrganisationUnitsWithChildren( uid ) );
+
+            MetaData metaData = new MetaData();
+            metaData.setOrganisationUnits( entities );
+
+            model.addAttribute( "model", metaData );
+        }
+        if ( options.getOptions().containsKey( "includeChildren" ) && Boolean.parseBoolean( options.getOptions().get( "includeChildren" ) ) )
+        {
+            List<OrganisationUnit> entities = new ArrayList<OrganisationUnit>();
+            entities.add( entity );
+            entities.addAll( entity.getChildren() );
+
+            MetaData metaData = new MetaData();
+            metaData.setOrganisationUnits( entities );
+
+            model.addAttribute( "model", metaData );
         }
         else
         {
