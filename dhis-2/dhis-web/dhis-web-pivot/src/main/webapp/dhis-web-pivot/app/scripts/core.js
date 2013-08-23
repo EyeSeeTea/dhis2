@@ -459,12 +459,7 @@ Ext.onReady( function() {
 
 			util.message = {
 				alert: function(message) {
-					if (pt.isPlugin) {
-						console.log(pt.init.el + ': ' + message);
-					}
-					else {
-						alert(message);
-					}
+					console.log(init.el + ': ' + message);
 				}
 			};
 		}());
@@ -655,19 +650,19 @@ Ext.onReady( function() {
 
 							// Indicators as filter
 							if (layout.filters[i].dimension === dimConf.indicator.objectName) {
-								pt.util.message.alert(PT.i18n.indicators_cannot_be_specified_as_filter || 'Indicators cannot be specified as filter');
+								util.message.alert(PT.i18n.indicators_cannot_be_specified_as_filter || 'Indicators cannot be specified as filter');
 								return;
 							}
 
 							// Categories as filter
 							if (layout.filters[i].dimension === dimConf.category.objectName) {
-								pt.util.message.alert(PT.i18n.categories_cannot_be_specified_as_filter || 'Categories cannot be specified as filter');
+								util.message.alert(PT.i18n.categories_cannot_be_specified_as_filter || 'Categories cannot be specified as filter');
 								return;
 							}
 
 							// Data sets as filter
 							if (layout.filters[i].dimension === dimConf.category.objectName) {
-								pt.util.message.alert(PT.i18n.data_sets_cannot_be_specified_as_filter || 'Data sets cannot be specified as filter');
+								util.message.alert(PT.i18n.data_sets_cannot_be_specified_as_filter || 'Data sets cannot be specified as filter');
 								return;
 							}
 						}
@@ -675,25 +670,25 @@ Ext.onReady( function() {
 
 					// dc and in
 					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.indicator.objectName]) {
-						pt.util.message.alert('Indicators and detailed data elements cannot be specified together');
+						util.message.alert('Indicators and detailed data elements cannot be specified together');
 						return;
 					}
 
 					// dc and de
 					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataElement.objectName]) {
-						pt.util.message.alert('Detailed data elements and totals cannot be specified together');
+						util.message.alert('Detailed data elements and totals cannot be specified together');
 						return;
 					}
 
 					// dc and ds
 					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataSet.objectName]) {
-						pt.util.message.alert('Data sets and detailed data elements cannot be specified together');
+						util.message.alert('Data sets and detailed data elements cannot be specified together');
 						return;
 					}
 
 					// dc and co
 					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.category.objectName]) {
-						pt.util.message.alert('Categories and detailed data elements cannot be specified together');
+						util.message.alert('Categories and detailed data elements cannot be specified together');
 						return;
 					}
 
@@ -725,7 +720,7 @@ Ext.onReady( function() {
 
 					// Config must be an object
 					if (!(config && Ext.isObject(config))) {
-						alert(pt.init.el + ': Layout config is not an object');
+						alert(init.el + ': Layout config is not an object');
 						return;
 					}
 

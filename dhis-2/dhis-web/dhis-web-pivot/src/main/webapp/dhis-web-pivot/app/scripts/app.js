@@ -187,6 +187,12 @@ Ext.onReady( function() {
 
 				w.hasDestroyOnBlurHandler = true;
 			};
+			
+			util.message = {
+				alert: function(message) {
+					alert(message);
+				}
+			}			
 		}());
 
         // init
