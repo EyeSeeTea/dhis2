@@ -35,11 +35,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementGroup;
-import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.filter.Filter;
 import org.hisp.dhis.filter.FilterService;
+import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.notification.NotificationLevel;
 import org.hisp.dhis.system.notification.Notifier;
@@ -70,10 +69,13 @@ public class DefaultExportService
     private Notifier notifier;
 
     @Autowired
+    private MetaDataDependenciesService metaDataDependenciesService;
+
+    @Autowired
     private FilterService filterService;
 
     @Autowired
-    private DataElementService dataElementService;
+    private IndicatorService indicatorService;
 
     //-------------------------------------------------------------------------------------------------------
     // ExportService Implementation - MetaData
@@ -241,14 +243,9 @@ public class DefaultExportService
     @Override
     public void deleteFilter( JSONObject json ) throws IOException
     {
-//        List<DataElementGroup> dataElementGroups = new ArrayList<DataElementGroup>();
+//        Indicator indicator = indicatorService.getIndicator( "ReUHfIn0pTQ" );
 //
-//        dataElementGroups.add( dataElementService.getDataElementGroup( "oDkJh5Ddh7d" ) );
-//        dataElementGroups.add( dataElementService.getDataElementGroup( "qfxEYY9xAl6" ) );
-//
-//        MetaDataDependencies metaDataDependencies = new MetaDataDependencies();
-//
-//        Map<Class<? extends IdentifiableObject>, Set<String>> uids = metaDataDependencies.getAllDependencyUids( dataElementGroups );
+//        Map<Class<? extends IdentifiableObject>, Set<String>> uids = metaDataDependenciesService.getAllDependencyUids( indicator );
 //
 //        System.out.println("Break");
         Filter filter = filterService.getFilterByUid( json.getString( "uid" ) );
