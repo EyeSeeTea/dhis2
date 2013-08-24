@@ -82,22 +82,4 @@ public class ExportUtils
 
         return uids;
     }
-
-    public Map<Class<? extends IdentifiableObject>, Set<String>> mergeDependencyMaps( Map<Class<? extends IdentifiableObject>, Set<String>> map1, Map<Class<? extends IdentifiableObject>, Set<String>> map2 )
-    {
-        for ( Map.Entry<Class<? extends IdentifiableObject>, Set<String>> entry : map2.entrySet() )
-        {
-            Class<? extends IdentifiableObject> key = entry.getKey();
-
-            if ( map1.containsKey( key ) )
-            {
-                map1.get( key ).addAll( map2.get( key ) );
-            } else
-            {
-                map1.put( key, entry.getValue() );
-            }
-        }
-
-        return map1;
-    }
 }

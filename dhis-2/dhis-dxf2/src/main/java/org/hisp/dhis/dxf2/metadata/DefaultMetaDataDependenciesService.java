@@ -30,6 +30,7 @@ package org.hisp.dhis.dxf2.metadata;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.indicator.Indicator;
@@ -57,71 +58,53 @@ public class DefaultMetaDataDependenciesService
     @Autowired
     private ExportUtils exportUtils;
 
+    @Autowired
+    private IdentifiableObjectManager manager;
+
     //--------------------------------------------------------------------------
     // Get MetaData dependencies
     //--------------------------------------------------------------------------
 
     @Override
-    public Map<Class<? extends IdentifiableObject>, Set<String>> getAllDependencyUids( IdentifiableObject identifiableObject )
+    public Set<IdentifiableObject> getDependencySet( IdentifiableObject identifiableObject )
     {
-        Map<Class<? extends IdentifiableObject>, Set<String>> dependencyUidsMap = new HashMap<Class<? extends IdentifiableObject>, Set<String>>();
+        Set<IdentifiableObject> dependencySet = new HashSet<IdentifiableObject>();
+        List<IdentifiableObject> dependencies = computeAllDependencies( identifiableObject );
 
-        for ( IdentifiableObject dependency : computeAllDependencies( identifiableObject ) )
+        for ( IdentifiableObject dependency : dependencies )
         {
-            Class<? extends IdentifiableObject> key = dependency.getClass();
-            String uidValue = dependency.getUid();
-
-            if ( dependencyUidsMap.containsKey( key ) )
-            {
-                dependencyUidsMap.get( key ).add( uidValue );
-            } else
-            {
-                Set<String> dependencyUidsSet = new HashSet<String>();
-                dependencyUidsSet.add( uidValue );
-
-                dependencyUidsMap.put( key, dependencyUidsSet );
-            }
+            dependencySet.add( dependency );
         }
 
         if ( isSpecialCase( identifiableObject ) )
         {
-            dependencyUidsMap = exportUtils.mergeDependencyMaps( dependencyUidsMap, computeSpecialDependencyCase( identifiableObject ) );
+            dependencySet.addAll( computeSpecialDependencyCase( identifiableObject ) );
         }
 
-        return dependencyUidsMap;
+        return dependencySet;
     }
 
     @Override
-    public Map<Class<? extends IdentifiableObject>, Set<String>> getAllDependencyUids( List<? extends IdentifiableObject> identifiableObjects )
+    public Set<IdentifiableObject> getDependencySet( Collection<? extends IdentifiableObject> identifiableObjects )
     {
-        Map<Class<? extends IdentifiableObject>, Set<String>> dependencyUidsMap = new HashMap<Class<? extends IdentifiableObject>, Set<String>>();
+        Set<IdentifiableObject> dependencySet = new HashSet<IdentifiableObject>();
 
         for ( IdentifiableObject identifiableObject : identifiableObjects )
         {
-            for ( IdentifiableObject dependency : computeAllDependencies( identifiableObject ) )
+            List<IdentifiableObject> dependencies = computeAllDependencies( identifiableObject );
+
+            for ( IdentifiableObject dependency : dependencies )
             {
-                Class<? extends IdentifiableObject> key = dependency.getClass();
-                String uidValue = dependency.getUid();
-
-                if ( dependencyUidsMap.containsKey( key ) )
-                {
-                    dependencyUidsMap.get( key ).add( uidValue );
-                } else
-                {
-                    Set<String> dependencyUidsSet = new HashSet<String>();
-                    dependencyUidsSet.add( uidValue );
-
-                    dependencyUidsMap.put( key, dependencyUidsSet );
-                }
+                dependencySet.add( dependency );
             }
 
             if ( isSpecialCase( identifiableObject ) )
             {
-                dependencyUidsMap = exportUtils.mergeDependencyMaps( dependencyUidsMap, computeSpecialDependencyCase( identifiableObject ) );
+                dependencySet.addAll( computeSpecialDependencyCase( identifiableObject ) );
             }
         }
 
-        return dependencyUidsMap;
+        return dependencySet;
     }
 
     //--------------------------------------------------------------------------
@@ -133,7 +116,7 @@ public class DefaultMetaDataDependenciesService
         List<IdentifiableObject> finalDependencies = new ArrayList<IdentifiableObject>();
         List<IdentifiableObject> dependencies = getAllDependencies( identifiableObject );
 
-        if ( dependencies.size() == 0 )
+        if ( dependencies.isEmpty() )
         {
             return finalDependencies;
         } else
@@ -142,8 +125,10 @@ public class DefaultMetaDataDependenciesService
             {
                 log.info( "[ COMPUTING Dependency ] : " + dependency.getName() );
 
+                List<IdentifiableObject> computedDependencies = computeAllDependencies( dependency );
+
                 finalDependencies.add( dependency );
-                finalDependencies.addAll( computeAllDependencies( dependency ) );
+                finalDependencies.addAll( computedDependencies );
             }
 
             return finalDependencies;
@@ -227,9 +212,9 @@ public class DefaultMetaDataDependenciesService
         return ( identifiableObject instanceof Indicator || identifiableObject instanceof ValidationRule );
     }
 
-    private Map<Class<? extends IdentifiableObject>, Set<String>> computeSpecialDependencyCase( IdentifiableObject identifiableObject )
+    private Set<IdentifiableObject> computeSpecialDependencyCase( IdentifiableObject identifiableObject )
     {
-        Map<Class<? extends IdentifiableObject>, Set<String>> resultMap = new HashMap<Class<? extends IdentifiableObject>, Set<String>>();
+        Set<IdentifiableObject> resultSet = new HashSet<IdentifiableObject>();
 
         if ( identifiableObject instanceof Indicator )
         {
@@ -239,9 +224,11 @@ public class DefaultMetaDataDependenciesService
             expressions.add( ( String ) ReflectionUtils.invokeGetterMethod( "denominator", identifiableObject ) );
 
             Set<String> uidsSet = exportUtils.getUidsByPattern( expressions, Pattern.compile( "\\w+" ) );
-            resultMap.put( DataElement.class, uidsSet );
+            Collection<? extends IdentifiableObject> dependencies = manager.getByUid( DataElement.class, uidsSet );
 
-            return resultMap;
+            resultSet.addAll( dependencies );
+
+            return resultSet;
         } else if ( identifiableObject instanceof ValidationRule )
         {
             List<String> expressions = new ArrayList<String>();
@@ -252,11 +239,13 @@ public class DefaultMetaDataDependenciesService
             expressions.add( ( String ) ReflectionUtils.invokeGetterMethod( "expression", rightSide ) );
 
             Set<String> uidsSet = exportUtils.getUidsByPattern( expressions, Pattern.compile( "\\w+" ) );
-            resultMap.put( DataElement.class, uidsSet );
+            Collection<? extends IdentifiableObject> dependencies = manager.getByUid( DataElement.class, uidsSet );
 
-            return resultMap;
+            resultSet.addAll( dependencies );
+
+            return resultSet;
         }
 
-        return resultMap;
+        return resultSet;
     }
 }

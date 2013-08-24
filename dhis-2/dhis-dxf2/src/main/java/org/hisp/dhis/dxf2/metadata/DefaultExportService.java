@@ -33,12 +33,11 @@ import java.util.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.proxy.HibernateProxyHelper;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.filter.Filter;
 import org.hisp.dhis.filter.FilterService;
-import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.notification.NotificationLevel;
 import org.hisp.dhis.system.notification.Notifier;
@@ -73,9 +72,6 @@ public class DefaultExportService
 
     @Autowired
     private FilterService filterService;
-
-    @Autowired
-    private IndicatorService indicatorService;
 
     //-------------------------------------------------------------------------------------------------------
     // ExportService Implementation - MetaData
@@ -149,7 +145,7 @@ public class DefaultExportService
     }
 
     //-------------------------------------------------------------------------------------------------------
-    // ExportService Implementation - Detailed MetaData
+    // ExportService Implementation - Detailed MetaData Export
     //-------------------------------------------------------------------------------------------------------
 
     // Ovidiu
@@ -172,6 +168,8 @@ public class DefaultExportService
             notifier.notify( taskId, "Exporting meta-data" );
         }
 
+        Set<IdentifiableObject> idObjectDependencies = new HashSet<IdentifiableObject>();
+
         for ( Map.Entry<String, List<String>> restrictionEntry : filterOptions.getRestrictions().entrySet() )
         {
             String className = restrictionEntry.getKey();
@@ -180,8 +178,8 @@ public class DefaultExportService
                 if ( entry.getValue().equals( className ) )
                 {
                     Class<? extends IdentifiableObject> idObjectClass = entry.getKey();
-                    Collection<? extends IdentifiableObject> idObjects;
-                    idObjects = manager.getByUid( idObjectClass, restrictionEntry.getValue() );
+                    Collection<? extends IdentifiableObject> idObjects = manager.getByUid( idObjectClass, restrictionEntry.getValue() );
+                    idObjectDependencies.addAll( metaDataDependenciesService.getDependencySet( idObjects ) );
 
                     if ( idObjects.isEmpty() )
                     {
@@ -197,12 +195,42 @@ public class DefaultExportService
                     }
 
                     ReflectionUtils.invokeSetterMethod( entry.getValue(), metaData, new ArrayList<IdentifiableObject>( idObjects ) );
+                }
+            }
+        }
 
-                    log.info( "Export done at " + new Date() );
+        metaData = exportDependencySet( metaData, idObjectDependencies );
 
-                    if ( taskId != null )
+        log.info( "Exporting dependencies " + idObjectDependencies.size() );
+        log.info( "Export done at " + new Date() );
+
+        if ( taskId != null )
+        {
+            notifier.notify( taskId, NotificationLevel.INFO, "Export done", true );
+        }
+
+        return metaData;
+    }
+
+    private MetaData exportDependencySet( MetaData metaData, Set<IdentifiableObject> dependencies )
+    {
+        for ( IdentifiableObject dependency : dependencies )
+        {
+            for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
+            {
+                if ( entry.getKey().equals( HibernateProxyHelper.getClassWithoutInitializingProxy( dependency ) ) )
+                {
+                    List<IdentifiableObject> idObjects = ReflectionUtils.invokeGetterMethod( entry.getValue(), metaData );
+
+                    if ( idObjects != null )
                     {
-                        notifier.notify( taskId, NotificationLevel.INFO, "Export done", true );
+                        idObjects.add( dependency );
+                        ReflectionUtils.invokeSetterMethod( entry.getValue(), metaData, idObjects );
+                    } else
+                    {
+                        idObjects = new ArrayList<IdentifiableObject>();
+                        idObjects.add( dependency );
+                        ReflectionUtils.invokeSetterMethod( entry.getValue(), metaData, idObjects );
                     }
                 }
             }
@@ -211,16 +239,21 @@ public class DefaultExportService
         return metaData;
     }
 
+    //-------------------------------------------------------------------------------------------------------
+    // ExportService Implementation - Filter functionality
+    //-------------------------------------------------------------------------------------------------------
+
     @Override
     public List<Filter> getFilters()
     {
-        return (List<Filter>) filterService.getAllFilters();
+        return ( List<Filter> ) filterService.getAllFilters();
     }
 
     @Override
     public void saveFilter( JSONObject json ) throws IOException
     {
-        Filter filter = new Filter( json.getString( "name" ) );
+        Filter filter = new Filter();
+        filter.setName( json.getString( "name" ) );
         filter.setCode( json.getString( "code" ) );
         filter.setMetaDataUids( json.getString( "metaDataUids" ) );
         filter.setAutoFields();
@@ -243,11 +276,6 @@ public class DefaultExportService
     @Override
     public void deleteFilter( JSONObject json ) throws IOException
     {
-//        Indicator indicator = indicatorService.getIndicator( "ReUHfIn0pTQ" );
-//
-//        Map<Class<? extends IdentifiableObject>, Set<String>> uids = metaDataDependenciesService.getAllDependencyUids( indicator );
-//
-//        System.out.println("Break");
         Filter filter = filterService.getFilterByUid( json.getString( "uid" ) );
 
         filterService.deleteFilter( filter );
