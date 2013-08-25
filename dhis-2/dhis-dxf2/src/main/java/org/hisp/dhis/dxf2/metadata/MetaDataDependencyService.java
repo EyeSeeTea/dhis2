@@ -35,7 +35,7 @@ import java.util.Set;
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
-public interface MetaDataDependenciesService
+public interface MetaDataDependencyService
 {
     Set<IdentifiableObject> getDependencySet( IdentifiableObject identifiableObject );
 

@@ -36,28 +36,28 @@ import java.util.Map;
 public class FilterOptions
         extends Options
 {
-    private Map<String, List<String>> restrictions;
+    private Map<String, List<String>> identifiableObjectsMap;
 
     //--------------------------------------------------------------------------
     // Constructors
     //--------------------------------------------------------------------------
 
-    public FilterOptions( Map<String, List<String>> restrictions )
+    public FilterOptions( Map<String, List<String>> identifiableObjectsMap )
     {
-        this.restrictions = restrictions;
+        this.identifiableObjectsMap = identifiableObjectsMap;
     }
 
     //--------------------------------------------------------------------------
     // Getters & Setters
     //--------------------------------------------------------------------------
 
-    public Map<String, List<String>> getRestrictions()
+    public Map<String, List<String>> getIdentifiableObjectsMap()
     {
-        return restrictions;
+        return identifiableObjectsMap;
     }
 
-    public void setRestrictions( Map<String, List<String>> restrictions )
+    public void setIdentifiableObjectsMap( Map<String, List<String>> identifiableObjectsMap )
     {
-        this.restrictions = restrictions;
+        this.identifiableObjectsMap = identifiableObjectsMap;
     }
 }

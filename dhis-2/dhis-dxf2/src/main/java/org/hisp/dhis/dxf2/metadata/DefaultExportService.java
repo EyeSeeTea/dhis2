@@ -33,7 +33,7 @@ import java.util.*;
 import net.sf.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.proxy.HibernateProxyHelper;
+import org.hibernate.Hibernate;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.filter.Filter;
@@ -68,7 +68,7 @@ public class DefaultExportService
     private Notifier notifier;
 
     @Autowired
-    private MetaDataDependenciesService metaDataDependenciesService;
+    private MetaDataDependencyService metaDataDependencyService;
 
     @Autowired
     private FilterService filterService;
@@ -168,18 +168,18 @@ public class DefaultExportService
             notifier.notify( taskId, "Exporting meta-data" );
         }
 
-        Set<IdentifiableObject> idObjectDependencies = new HashSet<IdentifiableObject>();
+        Map<String, List<String>> identifiableObjectsMap = filterOptions.getIdentifiableObjectsMap();
+        identifiableObjectsMap = addDependencies( identifiableObjectsMap );
 
-        for ( Map.Entry<String, List<String>> restrictionEntry : filterOptions.getRestrictions().entrySet() )
+        for ( Map.Entry<String, List<String>> identifiableObjectsEntry : identifiableObjectsMap.entrySet() )
         {
-            String className = restrictionEntry.getKey();
+            String className = identifiableObjectsEntry.getKey();
             for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
             {
                 if ( entry.getValue().equals( className ) )
                 {
                     Class<? extends IdentifiableObject> idObjectClass = entry.getKey();
-                    Collection<? extends IdentifiableObject> idObjects = manager.getByUid( idObjectClass, restrictionEntry.getValue() );
-                    idObjectDependencies.addAll( metaDataDependenciesService.getDependencySet( idObjects ) );
+                    Collection<? extends IdentifiableObject> idObjects = manager.getByUid( idObjectClass, identifiableObjectsEntry.getValue() );
 
                     if ( idObjects.isEmpty() )
                     {
@@ -199,9 +199,6 @@ public class DefaultExportService
             }
         }
 
-        metaData = exportDependencySet( metaData, idObjectDependencies );
-
-        log.info( "Exporting dependencies " + idObjectDependencies.size() );
         log.info( "Export done at " + new Date() );
 
         if ( taskId != null )
@@ -212,31 +209,45 @@ public class DefaultExportService
         return metaData;
     }
 
-    private MetaData exportDependencySet( MetaData metaData, Set<IdentifiableObject> dependencies )
+    private Map<String, List<String>> addDependencies( Map<String, List<String>> identifiableObjectsMap )
     {
-        for ( IdentifiableObject dependency : dependencies )
+        Collection<? extends IdentifiableObject> identifiableObjects = null;
+
+        for ( Map.Entry<String, List<String>> identifiableObjectsEntry : identifiableObjectsMap.entrySet() )
+        {
+            String className = identifiableObjectsEntry.getKey();
+            for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
+            {
+                if ( entry.getValue().equals( className ) )
+                {
+                    Class<? extends IdentifiableObject> identifiableObjectClass = entry.getKey();
+                    identifiableObjects = manager.getByUid( identifiableObjectClass, identifiableObjectsEntry.getValue() );
+                }
+            }
+        }
+
+        Set<IdentifiableObject> dependencySet = metaDataDependencyService.getDependencySet( identifiableObjects );
+
+        for ( IdentifiableObject dependency : dependencySet )
         {
             for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
             {
-                if ( entry.getKey().equals( HibernateProxyHelper.getClassWithoutInitializingProxy( dependency ) ) )
+                if ( entry.getKey().equals( Hibernate.getClass( dependency ) ) )
                 {
-                    List<IdentifiableObject> idObjects = ReflectionUtils.invokeGetterMethod( entry.getValue(), metaData );
-
-                    if ( idObjects != null )
+                    if ( identifiableObjectsMap.get( entry.getValue() ) != null )
                     {
-                        idObjects.add( dependency );
-                        ReflectionUtils.invokeSetterMethod( entry.getValue(), metaData, idObjects );
+                        identifiableObjectsMap.get( entry.getValue() ).add( dependency.getUid() );
                     } else
                     {
-                        idObjects = new ArrayList<IdentifiableObject>();
-                        idObjects.add( dependency );
-                        ReflectionUtils.invokeSetterMethod( entry.getValue(), metaData, idObjects );
+                        List<String> dependencyUids = new ArrayList<String>();
+                        dependencyUids.add( dependency.getUid() );
+                        identifiableObjectsMap.put( entry.getValue(), dependencyUids );
                     }
                 }
             }
         }
 
-        return metaData;
+        return identifiableObjectsMap;
     }
 
     //-------------------------------------------------------------------------------------------------------

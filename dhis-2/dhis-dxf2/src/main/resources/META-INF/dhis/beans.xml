@@ -200,9 +200,6 @@
   </bean>
 
   <!--OVIDIU-->
-  <bean id="org.hisp.dhis.dxf2.metadata.MetaDataDependenciesService" class="org.hisp.dhis.dxf2.metadata.DefaultMetaDataDependenciesService" scope="prototype" />
-
-  <bean id="org.hisp.dhis.dxf2.metadata.ExportUtils" class="org.hisp.dhis.dxf2.metadata.ExportUtils" scope="prototype" />
-
+  <bean id="org.hisp.dhis.dxf2.metadata.MetaDataDependenciesService" class="org.hisp.dhis.dxf2.metadata.DefaultMetaDataDependencyService" scope="prototype" />
 
 </beans>

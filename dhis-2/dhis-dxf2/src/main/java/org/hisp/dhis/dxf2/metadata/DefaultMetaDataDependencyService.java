@@ -27,10 +27,12 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.indicator.Indicator;
@@ -41,22 +43,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
-public class DefaultMetaDataDependenciesService
-        implements MetaDataDependenciesService
+public class DefaultMetaDataDependencyService
+        implements MetaDataDependencyService
 {
-    private static final Log log = LogFactory.getLog( DefaultMetaDataDependenciesService.class );
+    private static final Log log = LogFactory.getLog( DefaultMetaDataDependencyService.class );
 
     //-------------------------------------------------------------------------------------------------------
     // Dependencies
     //-------------------------------------------------------------------------------------------------------
-
-    @Autowired
-    private ExportUtils exportUtils;
 
     @Autowired
     private IdentifiableObjectManager manager;
@@ -123,7 +123,7 @@ public class DefaultMetaDataDependenciesService
         {
             for ( IdentifiableObject dependency : dependencies )
             {
-                log.info( "[ COMPUTING Dependency ] : " + dependency.getName() );
+                log.info( "[ COMPUTING DEPENDENCY ] : " + dependency.getName() );
 
                 List<IdentifiableObject> computedDependencies = computeAllDependencies( dependency );
 
@@ -147,7 +147,7 @@ public class DefaultMetaDataDependenciesService
                 Method getterMethod = ReflectionUtils.findGetterMethod( dependencyField.getName(), identifiableObject );
                 Collection<IdentifiableObject> dependencyCollection = ReflectionUtils.invokeGetterMethod( dependencyField.getName(), identifiableObject );
 
-                if ( dependencyCollection != null && exportUtils.isExportView( getterMethod ) )
+                if ( dependencyCollection != null && isExportView( getterMethod ) )
                 {
                     for ( IdentifiableObject dependencyEntry : dependencyCollection )
                     {
@@ -161,7 +161,7 @@ public class DefaultMetaDataDependenciesService
                 Method getterMethod = ReflectionUtils.findGetterMethod( dependencyField.getName(), identifiableObject );
                 IdentifiableObject dependencyObject = ReflectionUtils.invokeGetterMethod( dependencyField.getName(), identifiableObject );
 
-                if ( dependencyObject != null && exportUtils.isExportView( getterMethod ) )
+                if ( dependencyObject != null && isExportView( getterMethod ) )
                 {
                     log.info( "[ DEPENDENCY OBJECT ] : " + dependencyObject.getName() );
 
@@ -223,10 +223,20 @@ public class DefaultMetaDataDependenciesService
             expressions.add( ( String ) ReflectionUtils.invokeGetterMethod( "numerator", identifiableObject ) );
             expressions.add( ( String ) ReflectionUtils.invokeGetterMethod( "denominator", identifiableObject ) );
 
-            Set<String> uidsSet = exportUtils.getUidsByPattern( expressions, Pattern.compile( "\\w+" ) );
-            Collection<? extends IdentifiableObject> dependencies = manager.getByUid( DataElement.class, uidsSet );
+            Set<String> uidsSet = getUidsByPattern( expressions, Pattern.compile( "\\w+" ) );
+            Collection<? extends IdentifiableObject> dataElements = manager.getByUid( DataElement.class, uidsSet );
 
-            resultSet.addAll( dependencies );
+            resultSet.addAll( dataElements );
+
+            for ( IdentifiableObject dataElement : dataElements )
+            {
+                List<IdentifiableObject> dependencies = computeAllDependencies( dataElement );
+
+                for ( IdentifiableObject dependency : dependencies )
+                {
+                    resultSet.add( dependency );
+                }
+            }
 
             return resultSet;
         } else if ( identifiableObject instanceof ValidationRule )
@@ -238,14 +248,64 @@ public class DefaultMetaDataDependenciesService
             expressions.add( ( String ) ReflectionUtils.invokeGetterMethod( "expression", leftSide ) );
             expressions.add( ( String ) ReflectionUtils.invokeGetterMethod( "expression", rightSide ) );
 
-            Set<String> uidsSet = exportUtils.getUidsByPattern( expressions, Pattern.compile( "\\w+" ) );
-            Collection<? extends IdentifiableObject> dependencies = manager.getByUid( DataElement.class, uidsSet );
+            Set<String> uidsSet = getUidsByPattern( expressions, Pattern.compile( "\\w+" ) );
+            Collection<? extends IdentifiableObject> dataElements = manager.getByUid( DataElement.class, uidsSet );
 
-            resultSet.addAll( dependencies );
+            resultSet.addAll( dataElements );
+
+            for ( IdentifiableObject dataElement : dataElements )
+            {
+                List<IdentifiableObject> dependencies = computeAllDependencies( dataElement );
+
+                for ( IdentifiableObject dependency : dependencies )
+                {
+                    resultSet.add( dependency );
+                }
+            }
 
             return resultSet;
+        } else
+        {
+            return resultSet;
+        }
+    }
+
+    //--------------------------------------------------------------------------
+    // Utils
+    //--------------------------------------------------------------------------
+
+    public boolean isExportView( Method method )
+    {
+        if ( method.isAnnotationPresent( JsonView.class ) )
+        {
+            Class[] viewClasses = method.getAnnotation( JsonView.class ).value();
+
+            for ( Class viewClass : viewClasses )
+            {
+                if ( viewClass.equals( ExportView.class ) )
+                {
+                    return true;
+                }
+            }
         }
 
-        return resultSet;
+        return false;
+    }
+
+    public Set<String> getUidsByPattern( List<String> expressions, Pattern pattern )
+    {
+        Set<String> uids = new HashSet<String>();
+
+        for ( String expression : expressions )
+        {
+            Matcher matcher = pattern.matcher( expression );
+
+            while ( matcher.find() )
+            {
+                uids.add( matcher.group() );
+            }
+        }
+
+        return uids;
     }
 }
