@@ -77,18 +77,20 @@ function exportFilterButton( filterUid )
 // Export MetaData
 function exportDetailedMetaData()
 {
-    var json = $( "#exportJson" ).val();
+    var exportJson = {};
+    exportJson.exportDependencies = $( "#exportDependencies" ).is( ":checked" ).toString();
+    exportJson.metaDataUids = $( "#exportJson" ).val();
     var url = getURL();
     $.ajax(
         {
             type: "POST",
             url: url,
-            data: json,
+            data: JSON.stringify( exportJson ),
             contentType: "application/json",
             dataType: "xml",
             success: function ()
             {
-                console.log( "Exported JSON: " + json );
+                console.log( "Exported JSON: " + JSON.stringify( exportJson ) );
                 $( "#exportDialog" ).dialog( "close" );
                 window.location = "../api/detailedMetaData/getMetaDataFile";
             },

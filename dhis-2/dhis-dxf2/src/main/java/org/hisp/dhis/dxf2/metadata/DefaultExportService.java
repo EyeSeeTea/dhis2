@@ -154,6 +154,7 @@ public class DefaultExportService
         return getFilteredMetaData( filterOptions, null );
     }
 
+    @SuppressWarnings( "unchecked" )
     @Override
     public MetaData getFilteredMetaData( FilterOptions filterOptions, TaskId taskId )
     {
@@ -167,9 +168,17 @@ public class DefaultExportService
             notifier.notify( taskId, "Exporting meta-data" );
         }
 
-        Map<String, List<String>> identifiableObjectUidsMap = filterOptions.getIdentifiableObjectUidsMap();
-        Map<String, List<IdentifiableObject>> identifiableObjectsMap = metaDataDependencyService.getIdentifiableObjectsMap( identifiableObjectUidsMap );
-        Map<String, List<IdentifiableObject>> allIdentifiableObjectsMap = metaDataDependencyService.getAllIdentifiableObjectsMap( identifiableObjectsMap );
+        Map<String, List<String>> identifiableObjectUidsMap = ( Map<String, List<String>> ) filterOptions.getRestrictionsMap().get( "metaDataUids" );
+        Map<String, List<IdentifiableObject>> allIdentifiableObjectsMap;
+
+        if ( filterOptions.getRestrictionsMap().get( "exportDependencies" ).equals( "true" ) )
+        {
+            Map<String, List<IdentifiableObject>> identifiableObjectsMap = metaDataDependencyService.getIdentifiableObjectsMap( identifiableObjectUidsMap );
+            allIdentifiableObjectsMap = metaDataDependencyService.getAllIdentifiableObjectsMap( identifiableObjectsMap );
+        } else
+        {
+            allIdentifiableObjectsMap = metaDataDependencyService.getIdentifiableObjectsMap( identifiableObjectUidsMap );
+        }
 
         for ( Map.Entry<String, List<IdentifiableObject>> identifiableObjectsEntry : allIdentifiableObjectsMap.entrySet() )
         {

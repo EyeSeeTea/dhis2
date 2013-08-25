@@ -72,6 +72,12 @@
     <table>
         <tr>
             <td colspan="2">
+                <input type="checkbox" id="exportDependencies" name="exportDependencies"/>
+                <label for="exportDependencies" style="font-size: 10pt;">$i18n.getString( "export_with_dependencies" ) #openHelp( "exportDependencies" )</label>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
                 <select id="format" style="width: 250px; font-size: 10pt;">
                     <option value="Xml">XML</option>
                     <option value="Json">Json</option>
