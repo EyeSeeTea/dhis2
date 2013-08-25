@@ -19,14 +19,32 @@ jQuery( function ()
             autoHeight: false
         } );
 
+    // TODO: Improve performance on applying filters
     if ( $( "#metaDataUids" ).attr( "value" ) != "" )
     {
+//        var metaDataUids = JSON.parse( $( "#metaDataUids" ).val() );
+//        var metaDataCategories = [];
+//
+//        for ( var metaDataCategory in metaDataUids )
+//        {
+//            metaDataCategories.push( metaDataCategory );
+//        }
+//
+//        for ( var i = 0; i < metaDataArray.length; i++ )
+//        {
+//            for ( var j = 0; j < metaDataCategories.length; j++ )
+//            {
+//                if ( metaDataCategories[j] == lowercaseFirstLetter( metaDataArray[i] ) )
+//                {
+//                    selectCheckbox( metaDataArray[i] );
+//                }
+//            }
+//        }
         selectAllCheckboxes();
-        $( document ).ajaxStop( function ()
+        $( "body" ).ajaxComplete( function ()
         {
             applyFilter();
         } );
-        applyFilter();
     }
 } );
 
@@ -259,6 +277,16 @@ function deselectAllCheckboxes()
     }
 
     deselectAllValues();
+}
+
+// Select a MetaData type checkbox
+function selectCheckbox( metaDataCategoryName )
+{
+    if ( !$( "#checkbox" + metaDataCategoryName ).is( ":checked" ) )
+    {
+        $( "#checkbox" + metaDataCategoryName ).prop( "checked", true );
+        insertMetaDataDesign( metaDataCategoryName );
+    }
 }
 
 // Select all values
