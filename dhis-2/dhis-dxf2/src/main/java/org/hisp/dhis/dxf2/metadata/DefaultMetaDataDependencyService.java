@@ -30,6 +30,7 @@ package org.hisp.dhis.dxf2.metadata;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Hibernate;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.view.ExportView;
@@ -62,7 +63,70 @@ public class DefaultMetaDataDependencyService
     private IdentifiableObjectManager manager;
 
     //--------------------------------------------------------------------------
-    // Get MetaData dependencies
+    // Get MetaData dependencies Map
+    //--------------------------------------------------------------------------
+
+    public Map<String, List<IdentifiableObject>> getIdentifiableObjectsMap( Map<String, List<String>> identifiableObjectUidsMap )
+    {
+        Map<String, List<IdentifiableObject>> identifiableObjectsMap = new HashMap<String, List<IdentifiableObject>>();
+
+        for ( Map.Entry<String, List<String>> identifiableObjectsUidsEntry : identifiableObjectUidsMap.entrySet() )
+        {
+            String className = identifiableObjectsUidsEntry.getKey();
+            for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
+            {
+                if ( entry.getValue().equals( className ) )
+                {
+                    Class<? extends IdentifiableObject> identifiableObjectClass = entry.getKey();
+                    Collection<? extends IdentifiableObject> identifiableObjects = manager.getByUid( identifiableObjectClass, identifiableObjectsUidsEntry.getValue() );
+
+                    identifiableObjectsMap.put( entry.getValue(), new ArrayList<IdentifiableObject>( identifiableObjects ) );
+                }
+            }
+        }
+
+        return identifiableObjectsMap;
+    }
+
+    public Map<String, List<IdentifiableObject>> getAllIdentifiableObjectsMap( Map<String, List<IdentifiableObject>> identifiableObjectsMap )
+    {
+        Map<String, List<IdentifiableObject>> allIdentifiableObjects = new HashMap<String, List<IdentifiableObject>>();
+        allIdentifiableObjects.putAll( identifiableObjectsMap );
+
+        Collection<IdentifiableObject> identifiableObjects = new HashSet<IdentifiableObject>();
+
+        for ( Map.Entry<String, List<IdentifiableObject>> identifiableObjectsEntry : identifiableObjectsMap.entrySet() )
+        {
+            identifiableObjects.addAll( identifiableObjectsEntry.getValue() );
+        }
+
+        Set<IdentifiableObject> dependencySet = getDependencySet( identifiableObjects );
+
+        for ( IdentifiableObject dependency : dependencySet )
+        {
+            for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
+            {
+                if ( entry.getKey().equals( Hibernate.getClass( dependency ) ) )
+                {
+                    if ( allIdentifiableObjects.get( entry.getValue() ) != null )
+                    {
+                        allIdentifiableObjects.get( entry.getValue() ).add( dependency );
+                    } else
+                    {
+                        List<IdentifiableObject> idObjects = new ArrayList<IdentifiableObject>();
+                        idObjects.add( dependency );
+
+                        allIdentifiableObjects.put( entry.getValue(), idObjects );
+                    }
+                }
+            }
+        }
+
+        return allIdentifiableObjects;
+    }
+
+    //--------------------------------------------------------------------------
+    // Get MetaData dependencies Set
     //--------------------------------------------------------------------------
 
     @Override
@@ -149,11 +213,11 @@ public class DefaultMetaDataDependencyService
 
                 if ( dependencyCollection != null && isExportView( getterMethod ) )
                 {
-                    for ( IdentifiableObject dependencyEntry : dependencyCollection )
+                    for ( IdentifiableObject dependencyElement : dependencyCollection )
                     {
-                        log.info( "[ DEPENDENCY COLLECTION ENTRY ] : " + dependencyEntry.getName() );
+                        log.info( "[ DEPENDENCY COLLECTION ELEMENT ] : " + dependencyElement.getName() );
 
-                        allDependencies.add( dependencyEntry );
+                        allDependencies.add( dependencyElement );
                     }
                 }
             } else
@@ -223,18 +287,18 @@ public class DefaultMetaDataDependencyService
             expressions.add( ( String ) ReflectionUtils.invokeGetterMethod( "numerator", identifiableObject ) );
             expressions.add( ( String ) ReflectionUtils.invokeGetterMethod( "denominator", identifiableObject ) );
 
-            Set<String> uidsSet = getUidsByPattern( expressions, Pattern.compile( "\\w+" ) );
-            Collection<? extends IdentifiableObject> dataElements = manager.getByUid( DataElement.class, uidsSet );
+            Set<String> uidSet = getUidsByPattern( expressions, Pattern.compile( "\\w+" ) );
+            Collection<? extends IdentifiableObject> dataElements = manager.getByUid( DataElement.class, uidSet );
 
             resultSet.addAll( dataElements );
 
             for ( IdentifiableObject dataElement : dataElements )
             {
-                List<IdentifiableObject> dependencies = computeAllDependencies( dataElement );
+                List<IdentifiableObject> dataElementDependencies = computeAllDependencies( dataElement );
 
-                for ( IdentifiableObject dependency : dependencies )
+                for ( IdentifiableObject dataElementDependency : dataElementDependencies )
                 {
-                    resultSet.add( dependency );
+                    resultSet.add( dataElementDependency );
                 }
             }
 
@@ -248,18 +312,18 @@ public class DefaultMetaDataDependencyService
             expressions.add( ( String ) ReflectionUtils.invokeGetterMethod( "expression", leftSide ) );
             expressions.add( ( String ) ReflectionUtils.invokeGetterMethod( "expression", rightSide ) );
 
-            Set<String> uidsSet = getUidsByPattern( expressions, Pattern.compile( "\\w+" ) );
-            Collection<? extends IdentifiableObject> dataElements = manager.getByUid( DataElement.class, uidsSet );
+            Set<String> uidSet = getUidsByPattern( expressions, Pattern.compile( "\\w+" ) );
+            Collection<? extends IdentifiableObject> dataElements = manager.getByUid( DataElement.class, uidSet );
 
             resultSet.addAll( dataElements );
 
             for ( IdentifiableObject dataElement : dataElements )
             {
-                List<IdentifiableObject> dependencies = computeAllDependencies( dataElement );
+                List<IdentifiableObject> dataElementDependencies = computeAllDependencies( dataElement );
 
-                for ( IdentifiableObject dependency : dependencies )
+                for ( IdentifiableObject dataElementDependency : dataElementDependencies )
                 {
-                    resultSet.add( dependency );
+                    resultSet.add( dataElementDependency );
                 }
             }
 
@@ -294,7 +358,7 @@ public class DefaultMetaDataDependencyService
 
     public Set<String> getUidsByPattern( List<String> expressions, Pattern pattern )
     {
-        Set<String> uids = new HashSet<String>();
+        Set<String> uidSet = new HashSet<String>();
 
         for ( String expression : expressions )
         {
@@ -302,10 +366,10 @@ public class DefaultMetaDataDependencyService
 
             while ( matcher.find() )
             {
-                uids.add( matcher.group() );
+                uidSet.add( matcher.group() );
             }
         }
 
-        return uids;
+        return uidSet;
     }
 }

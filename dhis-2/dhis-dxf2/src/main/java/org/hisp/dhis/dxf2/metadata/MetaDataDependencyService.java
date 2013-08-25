@@ -30,6 +30,8 @@ package org.hisp.dhis.dxf2.metadata;
 import org.hisp.dhis.common.IdentifiableObject;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -37,6 +39,10 @@ import java.util.Set;
  */
 public interface MetaDataDependencyService
 {
+    Map<String, List<IdentifiableObject>> getIdentifiableObjectsMap( Map<String, List<String>> identifiableObjectUidsMap );
+
+    Map<String, List<IdentifiableObject>> getAllIdentifiableObjectsMap( Map<String, List<IdentifiableObject>> identifiableObjectsMap );
+
     Set<IdentifiableObject> getDependencySet( IdentifiableObject identifiableObject );
 
     Set<IdentifiableObject> getDependencySet( Collection<? extends IdentifiableObject> identifiableObjects );
