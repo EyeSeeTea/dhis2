@@ -4,6 +4,8 @@
     var i18n_remove = '$i18n.getString( "remove" )';
 </script>
 
+##@author Ovidiu Rosu <rosu.ovi@gmail.com>
+
 <h3>$i18n.getString( "metadata_detailed_export" ) #openHelp( "filter" )</h3>
 
 <div id="mainDivFilter" style="width: 70%;">

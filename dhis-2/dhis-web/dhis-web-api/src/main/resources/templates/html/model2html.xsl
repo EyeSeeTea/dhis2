@@ -59,7 +59,7 @@
   <xsl:include href="program.xsl" />
   <xsl:include href="programStage.xsl" />
 
-  <!--OVIDIU-->
+  <!--@author Ovidiu Rosu <rosu.ovi@gmail.com>-->
   <xsl:include href="filter.xsl" />
 
   <!-- Config elements -->

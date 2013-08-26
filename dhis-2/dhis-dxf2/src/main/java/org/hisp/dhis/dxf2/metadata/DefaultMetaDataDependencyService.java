@@ -36,6 +36,7 @@ import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.expression.Expression;
+import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.system.util.ReflectionUtils;
 import org.hisp.dhis.validation.ValidationRule;
@@ -44,8 +45,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
@@ -62,42 +61,43 @@ public class DefaultMetaDataDependencyService
     @Autowired
     private IdentifiableObjectManager manager;
 
+    @Autowired
+    private ExpressionService expressionService;
+
     //--------------------------------------------------------------------------
-    // Get MetaData dependencies Map
+    // Get MetaData dependency Map
     //--------------------------------------------------------------------------
 
-    public Map<String, List<IdentifiableObject>> getIdentifiableObjectsMap( Map<String, List<String>> identifiableObjectUidsMap )
+    public Map<String, List<IdentifiableObject>> getIdentifiableObjectMap( Map<String, List<String>> identifiableObjectUidMap )
     {
-        Map<String, List<IdentifiableObject>> identifiableObjectsMap = new HashMap<String, List<IdentifiableObject>>();
+        Map<String, List<IdentifiableObject>> identifiableObjectMap = new HashMap<String, List<IdentifiableObject>>();
 
-        for ( Map.Entry<String, List<String>> identifiableObjectsUidsEntry : identifiableObjectUidsMap.entrySet() )
+        for ( Map.Entry<String, List<String>> identifiableObjectUidEntry : identifiableObjectUidMap.entrySet() )
         {
-            String className = identifiableObjectsUidsEntry.getKey();
+            String className = identifiableObjectUidEntry.getKey();
             for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
             {
                 if ( entry.getValue().equals( className ) )
                 {
                     Class<? extends IdentifiableObject> identifiableObjectClass = entry.getKey();
-                    Collection<? extends IdentifiableObject> identifiableObjects = manager.getByUid( identifiableObjectClass, identifiableObjectsUidsEntry.getValue() );
+                    Collection<? extends IdentifiableObject> identifiableObjects = manager.getByUid( identifiableObjectClass, identifiableObjectUidEntry.getValue() );
 
-                    identifiableObjectsMap.put( entry.getValue(), new ArrayList<IdentifiableObject>( identifiableObjects ) );
+                    identifiableObjectMap.put( entry.getValue(), new ArrayList<IdentifiableObject>( identifiableObjects ) );
                 }
             }
         }
 
-        return identifiableObjectsMap;
+        return identifiableObjectMap;
     }
 
-    public Map<String, List<IdentifiableObject>> getAllIdentifiableObjectsMap( Map<String, List<IdentifiableObject>> identifiableObjectsMap )
+    public Map<String, List<IdentifiableObject>> getAllIdentifiableObjectMap( Map<String, List<String>> identifiableObjectUidMap )
     {
-        Map<String, List<IdentifiableObject>> allIdentifiableObjects = new HashMap<String, List<IdentifiableObject>>();
-        allIdentifiableObjects.putAll( identifiableObjectsMap );
-
+        Map<String, List<IdentifiableObject>> allIdentifiableObjectMap = getIdentifiableObjectMap( identifiableObjectUidMap );
         Collection<IdentifiableObject> identifiableObjects = new HashSet<IdentifiableObject>();
 
-        for ( Map.Entry<String, List<IdentifiableObject>> identifiableObjectsEntry : identifiableObjectsMap.entrySet() )
+        for ( Map.Entry<String, List<IdentifiableObject>> identifiableObjectEntry : allIdentifiableObjectMap.entrySet() )
         {
-            identifiableObjects.addAll( identifiableObjectsEntry.getValue() );
+            identifiableObjects.addAll( identifiableObjectEntry.getValue() );
         }
 
         Set<IdentifiableObject> dependencySet = getDependencySet( identifiableObjects );
@@ -108,25 +108,25 @@ public class DefaultMetaDataDependencyService
             {
                 if ( entry.getKey().equals( dependency.getClass() ) )
                 {
-                    if ( allIdentifiableObjects.get( entry.getValue() ) != null )
+                    if ( allIdentifiableObjectMap.get( entry.getValue() ) != null )
                     {
-                        allIdentifiableObjects.get( entry.getValue() ).add( dependency );
+                        allIdentifiableObjectMap.get( entry.getValue() ).add( dependency );
                     } else
                     {
                         List<IdentifiableObject> idObjects = new ArrayList<IdentifiableObject>();
                         idObjects.add( dependency );
 
-                        allIdentifiableObjects.put( entry.getValue(), idObjects );
+                        allIdentifiableObjectMap.put( entry.getValue(), idObjects );
                     }
                 }
             }
         }
 
-        return allIdentifiableObjects;
+        return allIdentifiableObjectMap;
     }
 
     //--------------------------------------------------------------------------
-    // Get MetaData dependencies Set
+    // Get MetaData dependency Set
     //--------------------------------------------------------------------------
 
     @Override
@@ -155,17 +155,7 @@ public class DefaultMetaDataDependencyService
 
         for ( IdentifiableObject identifiableObject : identifiableObjects )
         {
-            List<IdentifiableObject> dependencies = computeAllDependencies( identifiableObject );
-
-            for ( IdentifiableObject dependency : dependencies )
-            {
-                dependencySet.add( dependency );
-            }
-
-            if ( isSpecialCase( identifiableObject ) )
-            {
-                dependencySet.addAll( computeSpecialDependencyCase( identifiableObject ) );
-            }
+            dependencySet.addAll( getDependencySet( identifiableObject ) );
         }
 
         return dependencySet;
@@ -178,14 +168,14 @@ public class DefaultMetaDataDependencyService
     private List<IdentifiableObject> computeAllDependencies( IdentifiableObject identifiableObject )
     {
         List<IdentifiableObject> finalDependencies = new ArrayList<IdentifiableObject>();
-        List<IdentifiableObject> dependencies = getAllDependencies( identifiableObject );
+        List<IdentifiableObject> allDependencies = getAllDependencies( identifiableObject );
 
-        if ( dependencies.isEmpty() )
+        if ( allDependencies.isEmpty() )
         {
             return finalDependencies;
         } else
         {
-            for ( IdentifiableObject dependency : dependencies )
+            for ( IdentifiableObject dependency : allDependencies )
             {
                 log.info( "[ COMPUTING DEPENDENCY ] : " + dependency.getName() );
 
@@ -202,87 +192,60 @@ public class DefaultMetaDataDependencyService
     private List<IdentifiableObject> getAllDependencies( IdentifiableObject identifiableObject )
     {
         List<IdentifiableObject> allDependencies = new ArrayList<IdentifiableObject>();
-        List<Field> dependencyFields = getDependencyFields( ReflectionUtils.getAllFields( identifiableObject.getClass() ) );
+        List<Field> fields = ReflectionUtils.getAllFields( identifiableObject.getClass() );
 
-        for ( Field dependencyField : dependencyFields )
+        for ( Field field : fields )
         {
-            if ( ReflectionUtils.isType( dependencyField, Collection.class ) )
+            for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
             {
-                Method getterMethod = ReflectionUtils.findGetterMethod( dependencyField.getName(), identifiableObject );
-                Collection<IdentifiableObject> dependencyCollection = ReflectionUtils.invokeGetterMethod( dependencyField.getName(), identifiableObject );
-
-                if ( dependencyCollection != null && isExportView( getterMethod ) )
+                if ( ReflectionUtils.isType( field, entry.getKey() ) )
                 {
-                    for ( IdentifiableObject dependencyElement : dependencyCollection )
-                    {
-                        log.info( "[ DEPENDENCY COLLECTION ELEMENT ] : " + dependencyElement.getName() );
+                    Method getterMethod = ReflectionUtils.findGetterMethod( field.getName(), identifiableObject );
+                    IdentifiableObject dependencyObject = ReflectionUtils.invokeGetterMethod( field.getName(), identifiableObject );
 
-                        if ( dependencyElement instanceof HibernateProxy )
+                    if ( dependencyObject != null && isExportView( getterMethod ) )
+                    {
+                        log.info( "[ DEPENDENCY OBJECT ] : " + dependencyObject.getName() );
+
+                        if ( dependencyObject instanceof HibernateProxy )
                         {
-                            Object hibernateProxy = ( ( HibernateProxy ) dependencyElement ).getHibernateLazyInitializer().getImplementation();
+                            Object hibernateProxy = ( ( HibernateProxy ) dependencyObject ).getHibernateLazyInitializer().getImplementation();
                             IdentifiableObject deProxyDependencyObject = ( IdentifiableObject ) hibernateProxy;
 
                             allDependencies.add( deProxyDependencyObject );
                         } else
                         {
-                            allDependencies.add( dependencyElement );
+                            allDependencies.add( dependencyObject );
                         }
                     }
-                }
-            } else
-            {
-                Method getterMethod = ReflectionUtils.findGetterMethod( dependencyField.getName(), identifiableObject );
-                IdentifiableObject dependencyObject = ReflectionUtils.invokeGetterMethod( dependencyField.getName(), identifiableObject );
-
-                if ( dependencyObject != null && isExportView( getterMethod ) )
+                } else if ( ReflectionUtils.isCollection( field.getName(), identifiableObject, entry.getKey() ) )
                 {
-                    log.info( "[ DEPENDENCY OBJECT ] : " + dependencyObject.getName() );
+                    Method getterMethod = ReflectionUtils.findGetterMethod( field.getName(), identifiableObject );
+                    Collection<IdentifiableObject> dependencyCollection = ReflectionUtils.invokeGetterMethod( field.getName(), identifiableObject );
 
-                    if ( dependencyObject instanceof HibernateProxy )
+                    if ( dependencyCollection != null && isExportView( getterMethod ) )
                     {
-                        Object hibernateProxy = ( ( HibernateProxy ) dependencyObject ).getHibernateLazyInitializer().getImplementation();
-                        IdentifiableObject deProxyDependencyObject = ( IdentifiableObject ) hibernateProxy;
+                        for ( IdentifiableObject dependencyElement : dependencyCollection )
+                        {
+                            log.info( "[ DEPENDENCY COLLECTION ELEMENT ] : " + dependencyElement.getName() );
 
-                        allDependencies.add( deProxyDependencyObject );
-                    } else
-                    {
-                        allDependencies.add( dependencyObject );
+                            if ( dependencyElement instanceof HibernateProxy )
+                            {
+                                Object hibernateProxy = ( ( HibernateProxy ) dependencyElement ).getHibernateLazyInitializer().getImplementation();
+                                IdentifiableObject deProxyDependencyObject = ( IdentifiableObject ) hibernateProxy;
+
+                                allDependencies.add( deProxyDependencyObject );
+                            } else
+                            {
+                                allDependencies.add( dependencyElement );
+                            }
+                        }
                     }
                 }
             }
         }
 
         return allDependencies;
-    }
-
-    private List<Field> getDependencyFields( List<Field> fields )
-    {
-        List<Field> dependencyFields = new ArrayList<Field>();
-
-        for ( Field field : fields )
-        {
-            if ( ReflectionUtils.isType( field, IdentifiableObject.class ) )
-            {
-                for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
-                {
-                    if ( ReflectionUtils.isType( field, entry.getKey() ) )
-                    {
-                        dependencyFields.add( field );
-                    }
-                }
-            } else if ( ReflectionUtils.isType( field, Collection.class ) )
-            {
-                for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
-                {
-                    if ( ReflectionUtils.isGenericTypeOf( field, entry.getKey() ) )
-                    {
-                        dependencyFields.add( field );
-                    }
-                }
-            }
-        }
-
-        return dependencyFields;
     }
 
     //--------------------------------------------------------------------------
@@ -300,50 +263,26 @@ public class DefaultMetaDataDependencyService
 
         if ( identifiableObject instanceof Indicator )
         {
-            List<String> expressions = new ArrayList<String>();
+            List<Indicator> indicators = new ArrayList<Indicator>();
+            indicators.add( ( Indicator ) identifiableObject );
+            Set<DataElement> dataElementSet = expressionService.getDataElementsInIndicators( indicators );
 
-            expressions.add( ( String ) ReflectionUtils.invokeGetterMethod( "numerator", identifiableObject ) );
-            expressions.add( ( String ) ReflectionUtils.invokeGetterMethod( "denominator", identifiableObject ) );
-
-            Set<String> uidSet = getUidsByPattern( expressions, Pattern.compile( "\\w+" ) );
-            Collection<? extends IdentifiableObject> dataElements = manager.getByUid( DataElement.class, uidSet );
-
-            resultSet.addAll( dataElements );
-
-            for ( IdentifiableObject dataElement : dataElements )
-            {
-                List<IdentifiableObject> dataElementDependencies = computeAllDependencies( dataElement );
-
-                for ( IdentifiableObject dataElementDependency : dataElementDependencies )
-                {
-                    resultSet.add( dataElementDependency );
-                }
-            }
+            resultSet.addAll( dataElementSet );
+            resultSet.addAll( getDependencySet( resultSet ) );
 
             return resultSet;
         } else if ( identifiableObject instanceof ValidationRule )
         {
-            List<String> expressions = new ArrayList<String>();
+            Set<DataElement> dataElementSet = new HashSet<DataElement>();
 
             Expression leftSide = ReflectionUtils.invokeGetterMethod( "leftSide", identifiableObject );
             Expression rightSide = ReflectionUtils.invokeGetterMethod( "leftSide", identifiableObject );
-            expressions.add( ( String ) ReflectionUtils.invokeGetterMethod( "expression", leftSide ) );
-            expressions.add( ( String ) ReflectionUtils.invokeGetterMethod( "expression", rightSide ) );
 
-            Set<String> uidSet = getUidsByPattern( expressions, Pattern.compile( "\\w+" ) );
-            Collection<? extends IdentifiableObject> dataElements = manager.getByUid( DataElement.class, uidSet );
+            dataElementSet.addAll( expressionService.getDataElementsInExpression( leftSide.getExpression() ) );
+            dataElementSet.addAll( expressionService.getDataElementsInExpression( rightSide.getExpression() ) );
 
-            resultSet.addAll( dataElements );
-
-            for ( IdentifiableObject dataElement : dataElements )
-            {
-                List<IdentifiableObject> dataElementDependencies = computeAllDependencies( dataElement );
-
-                for ( IdentifiableObject dataElementDependency : dataElementDependencies )
-                {
-                    resultSet.add( dataElementDependency );
-                }
-            }
+            resultSet.addAll( dataElementSet );
+            resultSet.addAll( getDependencySet( resultSet ) );
 
             return resultSet;
         } else
@@ -372,22 +311,5 @@ public class DefaultMetaDataDependencyService
         }
 
         return false;
-    }
-
-    public Set<String> getUidsByPattern( List<String> expressions, Pattern pattern )
-    {
-        Set<String> uidSet = new HashSet<String>();
-
-        for ( String expression : expressions )
-        {
-            Matcher matcher = pattern.matcher( expression );
-
-            while ( matcher.find() )
-            {
-                uidSet.add( matcher.group() );
-            }
-        }
-
-        return uidSet;
     }
 }

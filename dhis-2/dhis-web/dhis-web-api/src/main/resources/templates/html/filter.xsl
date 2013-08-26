@@ -3,7 +3,7 @@
                 xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:d="http://dhis2.org/schema/dxf/2.0"
         >
-    <!--OVIDIU-->
+    <!--@author Ovidiu Rosu <rosu.ovi@gmail.com>-->
     <xsl:template match="d:filter">
         <div class="filter">
             <h2> <xsl:value-of select="@name" /> </h2>

@@ -5,7 +5,7 @@
         [<!ENTITY identifiableProperties SYSTEM "classpath://org/hisp/dhis/common/identifiableProperties.hbm">]
         >
 
-        <!--Ovidiu-->
+        <!--@author Ovidiu Rosu <rosu.ovi@gmail.com>-->
 <hibernate-mapping>
     <class name="org.hisp.dhis.filter.Filter" table="filter">
 

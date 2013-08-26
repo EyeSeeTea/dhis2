@@ -172,7 +172,7 @@ public class MetaData
 
     private List<DimensionalObject> dimensions = new ArrayList<DimensionalObject>();
 
-    // Ovidiu
+    // //@author Ovidiu Rosu <rosu.ovi@gmail.com>
     private List<Filter> filters = new ArrayList<Filter>();
 
     public MetaData()
@@ -737,8 +737,7 @@ public class MetaData
         this.dimensions = dimensions;
     }
 
-    // Ovidiu
-
+    // //@author Ovidiu Rosu <rosu.ovi@gmail.com>
     @JsonProperty
     @JacksonXmlElementWrapper( localName = "filters", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "filter", namespace = DxfNamespaces.DXF_2_0 )

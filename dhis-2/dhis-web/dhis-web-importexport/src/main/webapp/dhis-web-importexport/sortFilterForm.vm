@@ -6,6 +6,8 @@
     }
 </script>
 
+##@author Ovidiu Rosu <rosu.ovi@gmail.com>
+
 <h3>$i18n.getString( "filter_sort_order" )</h3>
 
 <form id="sortOrderForm" action="saveFilterListSortOrder.action" method="post">

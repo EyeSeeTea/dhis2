@@ -61,7 +61,7 @@
     <property name="cacheable" value="true" />
   </bean>
 
-  <!--Ovidiu-->
+  <!--@author Ovidiu Rosu <rosu.ovi@gmail.com>-->
   <bean id="org.hisp.dhis.filter.FilterStore" class="org.hisp.dhis.filter.hibernate.HibernateFilterStore">
       <property name="clazz" value="org.hisp.dhis.filter.Filter" />
       <property name="sessionFactory" ref="sessionFactory" />
@@ -566,7 +566,7 @@
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
 
-    <!--Ovidiu-->
+  <!--@author Ovidiu Rosu <rosu.ovi@gmail.com>-->
   <bean id="org.hisp.dhis.filter.FilterService" class="org.hisp.dhis.filter.DefaultFilterService">
         <property name="filterStore" ref="org.hisp.dhis.filter.FilterStore" />
         <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />

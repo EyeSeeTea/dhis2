@@ -147,7 +147,7 @@ public class DefaultExportService
     // ExportService Implementation - Detailed MetaData Export
     //-------------------------------------------------------------------------------------------------------
 
-    // Ovidiu
+    //@author Ovidiu Rosu <rosu.ovi@gmail.com>
     @Override
     public MetaData getFilteredMetaData( FilterOptions filterOptions )
     {
@@ -169,20 +169,19 @@ public class DefaultExportService
         }
 
         Map<String, List<String>> identifiableObjectUidsMap = ( Map<String, List<String>> ) filterOptions.getRestrictionsMap().get( "metaDataUids" );
-        Map<String, List<IdentifiableObject>> allIdentifiableObjectsMap;
+        Map<String, List<IdentifiableObject>> allIdentifiableObjectMap;
 
         if ( filterOptions.getRestrictionsMap().get( "exportDependencies" ).equals( "true" ) )
         {
-            Map<String, List<IdentifiableObject>> identifiableObjectsMap = metaDataDependencyService.getIdentifiableObjectsMap( identifiableObjectUidsMap );
-            allIdentifiableObjectsMap = metaDataDependencyService.getAllIdentifiableObjectsMap( identifiableObjectsMap );
+            allIdentifiableObjectMap = metaDataDependencyService.getAllIdentifiableObjectMap( identifiableObjectUidsMap );
         } else
         {
-            allIdentifiableObjectsMap = metaDataDependencyService.getIdentifiableObjectsMap( identifiableObjectUidsMap );
+            allIdentifiableObjectMap = metaDataDependencyService.getIdentifiableObjectMap( identifiableObjectUidsMap );
         }
 
-        for ( Map.Entry<String, List<IdentifiableObject>> identifiableObjectsEntry : allIdentifiableObjectsMap.entrySet() )
+        for ( Map.Entry<String, List<IdentifiableObject>> identifiableObjectEntry : allIdentifiableObjectMap.entrySet() )
         {
-            String message = "Exporting " + identifiableObjectsEntry.getValue().size() + " " + StringUtils.capitalize( identifiableObjectsEntry.getKey() );
+            String message = "Exporting " + identifiableObjectEntry.getValue().size() + " " + StringUtils.capitalize( identifiableObjectEntry.getKey() );
             log.info( message );
 
             if ( taskId != null )
@@ -190,7 +189,7 @@ public class DefaultExportService
                 notifier.notify( taskId, message );
             }
 
-            ReflectionUtils.invokeSetterMethod( identifiableObjectsEntry.getKey(), metaData, identifiableObjectsEntry.getValue() );
+            ReflectionUtils.invokeSetterMethod( identifiableObjectEntry.getKey(), metaData, identifiableObjectEntry.getValue() );
         }
 
         log.info( "Export done at " + new Date() );

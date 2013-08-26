@@ -180,9 +180,9 @@ final public class ExchangeClasses
         exportClasses.remove( DataElementOperand.class );
         importClasses.remove( DataElementOperand.class );
 
-        // OVIDIU
+        //@author Ovidiu Rosu <rosu.ovi@gmail.com>
         allExportClasses.put( Filter.class, "filters" );
-        // Ovidiu - for now do not allow filters are not available for export/import
+        // Filters are not available for export/import for now
         exportClasses.remove( Filter.class );
         importClasses.remove( Filter.class );
     }

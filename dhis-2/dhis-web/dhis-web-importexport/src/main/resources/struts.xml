@@ -307,7 +307,7 @@
       <param name="requiredAuthorities">F_MANAGE_INTEGRATION_ROUTES</param>
     </action>
 
-      <!--Ovidiu-->
+      <!--@author Ovidiu Rosu <rosu.ovi@gmail.com>-->
       <!-- DXF2 Detailed MetaData import/export -->
 
     <action name="dxf2DetailedMetaDataImport" class="org.hisp.dhis.importexport.action.NoAction">

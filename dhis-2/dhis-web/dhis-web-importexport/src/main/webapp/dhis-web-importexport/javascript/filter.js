@@ -1,3 +1,5 @@
+//@author Ovidiu Rosu <rosu.ovi@gmail.com>
+
 // Global Variables
 var filters = [];
 

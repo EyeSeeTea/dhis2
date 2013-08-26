@@ -39,9 +39,9 @@ import java.util.Set;
  */
 public interface MetaDataDependencyService
 {
-    Map<String, List<IdentifiableObject>> getIdentifiableObjectsMap( Map<String, List<String>> identifiableObjectUidsMap );
+    Map<String, List<IdentifiableObject>> getIdentifiableObjectMap( Map<String, List<String>> identifiableObjectUidMap );
 
-    Map<String, List<IdentifiableObject>> getAllIdentifiableObjectsMap( Map<String, List<IdentifiableObject>> identifiableObjectsMap );
+    Map<String, List<IdentifiableObject>> getAllIdentifiableObjectMap( Map<String, List<String>> identifiableObjectUidMap );
 
     Set<IdentifiableObject> getDependencySet( IdentifiableObject identifiableObject );
 

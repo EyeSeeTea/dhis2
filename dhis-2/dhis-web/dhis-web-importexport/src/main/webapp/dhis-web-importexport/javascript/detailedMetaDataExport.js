@@ -1,3 +1,5 @@
+//@author Ovidiu Rosu <rosu.ovi@gmail.com>
+
 // Global Variables
 var metaDataArray = [ "AttributeTypes", "Dimensions", "Charts", "Concepts", "Constants", "DataDictionaries", "DataElementGroupSets",
     "DataElementGroups", "DataElements", "DataSets", "Documents", "IndicatorGroupSets", "IndicatorGroups", "Indicators",
