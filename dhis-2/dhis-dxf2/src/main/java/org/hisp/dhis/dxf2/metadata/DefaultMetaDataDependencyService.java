@@ -30,7 +30,7 @@ package org.hisp.dhis.dxf2.metadata;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Hibernate;
+import org.hibernate.proxy.HibernateProxy;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.view.ExportView;
@@ -106,7 +106,7 @@ public class DefaultMetaDataDependencyService
         {
             for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getExportMap().entrySet() )
             {
-                if ( entry.getKey().equals( Hibernate.getClass( dependency ) ) )
+                if ( entry.getKey().equals( dependency.getClass() ) )
                 {
                     if ( allIdentifiableObjects.get( entry.getValue() ) != null )
                     {
@@ -217,7 +217,16 @@ public class DefaultMetaDataDependencyService
                     {
                         log.info( "[ DEPENDENCY COLLECTION ELEMENT ] : " + dependencyElement.getName() );
 
-                        allDependencies.add( dependencyElement );
+                        if ( dependencyElement instanceof HibernateProxy )
+                        {
+                            Object hibernateProxy = ( ( HibernateProxy ) dependencyElement ).getHibernateLazyInitializer().getImplementation();
+                            IdentifiableObject deProxyDependencyObject = ( IdentifiableObject ) hibernateProxy;
+
+                            allDependencies.add( deProxyDependencyObject );
+                        } else
+                        {
+                            allDependencies.add( dependencyElement );
+                        }
                     }
                 }
             } else
@@ -229,7 +238,16 @@ public class DefaultMetaDataDependencyService
                 {
                     log.info( "[ DEPENDENCY OBJECT ] : " + dependencyObject.getName() );
 
-                    allDependencies.add( dependencyObject );
+                    if ( dependencyObject instanceof HibernateProxy )
+                    {
+                        Object hibernateProxy = ( ( HibernateProxy ) dependencyObject ).getHibernateLazyInitializer().getImplementation();
+                        IdentifiableObject deProxyDependencyObject = ( IdentifiableObject ) hibernateProxy;
+
+                        allDependencies.add( deProxyDependencyObject );
+                    } else
+                    {
+                        allDependencies.add( dependencyObject );
+                    }
                 }
             }
         }
