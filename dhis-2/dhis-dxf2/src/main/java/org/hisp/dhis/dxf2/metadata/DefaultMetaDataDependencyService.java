@@ -90,12 +90,12 @@ public class DefaultMetaDataDependencyService
         return identifiableObjectMap;
     }
 
-    public Map<String, List<IdentifiableObject>> getAllIdentifiableObjectMap( Map<String, List<String>> identifiableObjectUidMap )
+    public Map<String, List<IdentifiableObject>> getIdentifiableObjectWithDependencyMap( Map<String, List<String>> identifiableObjectUidMap )
     {
-        Map<String, List<IdentifiableObject>> allIdentifiableObjectMap = getIdentifiableObjectMap( identifiableObjectUidMap );
+        Map<String, List<IdentifiableObject>> identifiableObjectMap = getIdentifiableObjectMap( identifiableObjectUidMap );
         Collection<IdentifiableObject> identifiableObjects = new HashSet<IdentifiableObject>();
 
-        for ( Map.Entry<String, List<IdentifiableObject>> identifiableObjectEntry : allIdentifiableObjectMap.entrySet() )
+        for ( Map.Entry<String, List<IdentifiableObject>> identifiableObjectEntry : identifiableObjectMap.entrySet() )
         {
             identifiableObjects.addAll( identifiableObjectEntry.getValue() );
         }
@@ -108,21 +108,21 @@ public class DefaultMetaDataDependencyService
             {
                 if ( entry.getKey().equals( dependency.getClass() ) )
                 {
-                    if ( allIdentifiableObjectMap.get( entry.getValue() ) != null )
+                    if ( identifiableObjectMap.get( entry.getValue() ) != null )
                     {
-                        allIdentifiableObjectMap.get( entry.getValue() ).add( dependency );
+                        identifiableObjectMap.get( entry.getValue() ).add( dependency );
                     } else
                     {
                         List<IdentifiableObject> idObjects = new ArrayList<IdentifiableObject>();
                         idObjects.add( dependency );
 
-                        allIdentifiableObjectMap.put( entry.getValue(), idObjects );
+                        identifiableObjectMap.put( entry.getValue(), idObjects );
                     }
                 }
             }
         }
 
-        return allIdentifiableObjectMap;
+        return identifiableObjectMap;
     }
 
     //--------------------------------------------------------------------------
@@ -133,12 +133,7 @@ public class DefaultMetaDataDependencyService
     public Set<IdentifiableObject> getDependencySet( IdentifiableObject identifiableObject )
     {
         Set<IdentifiableObject> dependencySet = new HashSet<IdentifiableObject>();
-        List<IdentifiableObject> dependencies = computeAllDependencies( identifiableObject );
-
-        for ( IdentifiableObject dependency : dependencies )
-        {
-            dependencySet.add( dependency );
-        }
+        dependencySet.addAll( computeAllDependencies( identifiableObject ) );
 
         if ( isSpecialCase( identifiableObject ) )
         {
@@ -168,20 +163,20 @@ public class DefaultMetaDataDependencyService
     private List<IdentifiableObject> computeAllDependencies( IdentifiableObject identifiableObject )
     {
         List<IdentifiableObject> finalDependencies = new ArrayList<IdentifiableObject>();
-        List<IdentifiableObject> allDependencies = getAllDependencies( identifiableObject );
+        List<IdentifiableObject> dependencies = getDependencies( identifiableObject );
 
-        if ( allDependencies.isEmpty() )
+        if ( dependencies.isEmpty() )
         {
             return finalDependencies;
         } else
         {
-            for ( IdentifiableObject dependency : allDependencies )
+            for ( IdentifiableObject dependency : dependencies )
             {
                 log.info( "[ COMPUTING DEPENDENCY ] : " + dependency.getName() );
 
-                List<IdentifiableObject> computedDependencies = computeAllDependencies( dependency );
-
                 finalDependencies.add( dependency );
+
+                List<IdentifiableObject> computedDependencies = computeAllDependencies( dependency );
                 finalDependencies.addAll( computedDependencies );
             }
 
@@ -189,9 +184,9 @@ public class DefaultMetaDataDependencyService
         }
     }
 
-    private List<IdentifiableObject> getAllDependencies( IdentifiableObject identifiableObject )
+    private List<IdentifiableObject> getDependencies( IdentifiableObject identifiableObject )
     {
-        List<IdentifiableObject> allDependencies = new ArrayList<IdentifiableObject>();
+        List<IdentifiableObject> dependencies = new ArrayList<IdentifiableObject>();
         List<Field> fields = ReflectionUtils.getAllFields( identifiableObject.getClass() );
 
         for ( Field field : fields )
@@ -209,13 +204,13 @@ public class DefaultMetaDataDependencyService
 
                         if ( dependencyObject instanceof HibernateProxy )
                         {
-                            Object hibernateProxy = ( ( HibernateProxy ) dependencyObject ).getHibernateLazyInitializer().getImplementation();
-                            IdentifiableObject deProxyDependencyObject = ( IdentifiableObject ) hibernateProxy;
+                            Object hibernateProxyObject = ( ( HibernateProxy ) dependencyObject ).getHibernateLazyInitializer().getImplementation();
+                            IdentifiableObject deProxyDependencyObject = ( IdentifiableObject ) hibernateProxyObject;
 
-                            allDependencies.add( deProxyDependencyObject );
+                            dependencies.add( deProxyDependencyObject );
                         } else
                         {
-                            allDependencies.add( dependencyObject );
+                            dependencies.add( dependencyObject );
                         }
                     }
                 } else if ( ReflectionUtils.isCollection( field.getName(), identifiableObject, entry.getKey() ) )
@@ -231,13 +226,13 @@ public class DefaultMetaDataDependencyService
 
                             if ( dependencyElement instanceof HibernateProxy )
                             {
-                                Object hibernateProxy = ( ( HibernateProxy ) dependencyElement ).getHibernateLazyInitializer().getImplementation();
-                                IdentifiableObject deProxyDependencyObject = ( IdentifiableObject ) hibernateProxy;
+                                Object hibernateProxyObject = ( ( HibernateProxy ) dependencyElement ).getHibernateLazyInitializer().getImplementation();
+                                IdentifiableObject deProxyDependencyObject = ( IdentifiableObject ) hibernateProxyObject;
 
-                                allDependencies.add( deProxyDependencyObject );
+                                dependencies.add( deProxyDependencyObject );
                             } else
                             {
-                                allDependencies.add( dependencyElement );
+                                dependencies.add( dependencyElement );
                             }
                         }
                     }
@@ -245,11 +240,11 @@ public class DefaultMetaDataDependencyService
             }
         }
 
-        return allDependencies;
+        return dependencies;
     }
 
     //--------------------------------------------------------------------------
-    // Compute special cases
+    // Compute special case dependencies
     //--------------------------------------------------------------------------
 
     private boolean isSpecialCase( IdentifiableObject identifiableObject )
@@ -268,7 +263,7 @@ public class DefaultMetaDataDependencyService
             Set<DataElement> dataElementSet = expressionService.getDataElementsInIndicators( indicators );
 
             resultSet.addAll( dataElementSet );
-            resultSet.addAll( getDependencySet( resultSet ) );
+            resultSet.addAll( getDependencySet( dataElementSet ) );
 
             return resultSet;
         } else if ( identifiableObject instanceof ValidationRule )
@@ -282,7 +277,7 @@ public class DefaultMetaDataDependencyService
             dataElementSet.addAll( expressionService.getDataElementsInExpression( rightSide.getExpression() ) );
 
             resultSet.addAll( dataElementSet );
-            resultSet.addAll( getDependencySet( resultSet ) );
+            resultSet.addAll( getDependencySet( dataElementSet ) );
 
             return resultSet;
         } else

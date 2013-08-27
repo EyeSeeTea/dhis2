@@ -168,18 +168,18 @@ public class DefaultExportService
             notifier.notify( taskId, "Exporting meta-data" );
         }
 
-        Map<String, List<String>> identifiableObjectUidsMap = ( Map<String, List<String>> ) filterOptions.getRestrictionsMap().get( "metaDataUids" );
-        Map<String, List<IdentifiableObject>> allIdentifiableObjectMap;
+        Map<String, List<String>> identifiableObjectUidMap = ( Map<String, List<String>> ) filterOptions.getRestrictionsMap().get( "metaDataUids" );
+        Map<String, List<IdentifiableObject>> identifiableObjectMap;
 
         if ( filterOptions.getRestrictionsMap().get( "exportDependencies" ).equals( "true" ) )
         {
-            allIdentifiableObjectMap = metaDataDependencyService.getAllIdentifiableObjectMap( identifiableObjectUidsMap );
+            identifiableObjectMap = metaDataDependencyService.getIdentifiableObjectWithDependencyMap( identifiableObjectUidMap );
         } else
         {
-            allIdentifiableObjectMap = metaDataDependencyService.getIdentifiableObjectMap( identifiableObjectUidsMap );
+            identifiableObjectMap = metaDataDependencyService.getIdentifiableObjectMap( identifiableObjectUidMap );
         }
 
-        for ( Map.Entry<String, List<IdentifiableObject>> identifiableObjectEntry : allIdentifiableObjectMap.entrySet() )
+        for ( Map.Entry<String, List<IdentifiableObject>> identifiableObjectEntry : identifiableObjectMap.entrySet() )
         {
             String message = "Exporting " + identifiableObjectEntry.getValue().size() + " " + StringUtils.capitalize( identifiableObjectEntry.getKey() );
             log.info( message );
