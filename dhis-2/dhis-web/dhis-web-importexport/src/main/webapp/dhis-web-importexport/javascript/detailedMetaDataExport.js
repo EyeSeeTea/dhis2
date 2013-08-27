@@ -155,13 +155,13 @@ function generateMetaDataDesign( metaDataCategoryName )
         +               '</td>'
         +               '<td>'
         +                   '<input id="moveSelected' + metaDataCategoryName +'" type="button" value="&gt;" title="' + i18n_move_selected + '" style="width:50px"'
-        +                       'onclick="dhisAjaxSelect_moveAllSelected( \'available' + metaDataCategoryName + '\' );"/><br/>'
+        +                       'onclick="moveSelected( \'' + metaDataCategoryName + '\' );"/><br/>'
         +                   '<input id="removeSelected' + metaDataCategoryName + '" type="button" value="&lt;" title="' + i18n_remove_selected + '" style="width:50px"'
-        +                       'onclick="dhisAjaxSelect_moveAllSelected( \'selected' + metaDataCategoryName + '\' );"/><br/>'
+        +                       'onclick="removeSelected( \'' + metaDataCategoryName + '\' );"/><br/>'
         +                   '<input id="select' + metaDataCategoryName + '" type="button" value="&gt;&gt;" title="' + i18n_move_all + '" style="width:50px"'
-        +                       'onclick="dhisAjaxSelect_moveAll( \'available' + metaDataCategoryName + '\' );"/><br/>'
+        +                       'onclick="moveAll( \'' + metaDataCategoryName + '\' );"/><br/>'
         +                   '<input id="deselect' + metaDataCategoryName + '" type="button" value="&lt;&lt;" title="' + i18n_remove_all +  '" style="width:50px"'
-        +                       'onclick="dhisAjaxSelect_moveAll( \'selected' + metaDataCategoryName + '\' );"/>'
+        +                       'onclick="removeAll( \'' + metaDataCategoryName + '\' );"/><br/>'
         +               '</td>'
         +               '<td>'
         +                   '<select id="selected' + metaDataCategoryName + '" name="selected' + metaDataCategoryName + '" multiple="multiple"'
@@ -173,6 +173,37 @@ function generateMetaDataDesign( metaDataCategoryName )
     ;
 
     return design;
+}
+
+// Move all selected items
+function moveSelected( metaDataCategoryName )
+{
+    dhisAjaxSelect_moveAllSelected( "available" + metaDataCategoryName );
+    $( "#header" + metaDataCategoryName ).css( "background", "#CFFFB3" );
+}
+
+// Remove all selected items
+function removeSelected( metaDataCategoryName )
+{
+    dhisAjaxSelect_moveAllSelected( "selected" + metaDataCategoryName );
+    if ( $( "#selected" + metaDataCategoryName + " option" ).length == 0 )
+    {
+        $( "#header" + metaDataCategoryName ).css( "background", "" );
+    }
+}
+
+// Move all items
+function moveAll( metaDataCategoryName )
+{
+    dhisAjaxSelect_moveAll( "available" + metaDataCategoryName );
+    $( "#header" + metaDataCategoryName ).css( "background", "#CFFFB3" );
+}
+
+// Remove all items
+function removeAll( metaDataCategoryName )
+{
+    dhisAjaxSelect_moveAll( "selected" + metaDataCategoryName );
+    $( "#header" + metaDataCategoryName ).css( "background", "" );
 }
 
 // Remove MetaData HTML and CSS from a Category
