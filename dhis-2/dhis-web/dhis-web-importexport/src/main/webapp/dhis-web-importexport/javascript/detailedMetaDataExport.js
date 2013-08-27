@@ -179,7 +179,7 @@ function generateMetaDataDesign( metaDataCategoryName )
 function moveSelected( metaDataCategoryName )
 {
     dhisAjaxSelect_moveAllSelected( "available" + metaDataCategoryName );
-    $( "#header" + metaDataCategoryName ).css( "background", "#CFFFB3" );
+    $( "#heading" + metaDataCategoryName ).css( "background", "#CFFFB3 50% 50% repeat-x" );
 }
 
 // Remove all selected items
@@ -188,7 +188,7 @@ function removeSelected( metaDataCategoryName )
     dhisAjaxSelect_moveAllSelected( "selected" + metaDataCategoryName );
     if ( $( "#selected" + metaDataCategoryName + " option" ).length == 0 )
     {
-        $( "#header" + metaDataCategoryName ).css( "background", "" );
+        $( "#heading" + metaDataCategoryName ).css( "background", "" );
     }
 }
 
@@ -196,14 +196,14 @@ function removeSelected( metaDataCategoryName )
 function moveAll( metaDataCategoryName )
 {
     dhisAjaxSelect_moveAll( "available" + metaDataCategoryName );
-    $( "#header" + metaDataCategoryName ).css( "background", "#CFFFB3" );
+    $( "#heading" + metaDataCategoryName ).css( "background", "#CFFFB3 50% 50% repeat-x" );
 }
 
 // Remove all items
 function removeAll( metaDataCategoryName )
 {
     dhisAjaxSelect_moveAll( "selected" + metaDataCategoryName );
-    $( "#header" + metaDataCategoryName ).css( "background", "" );
+    $( "#heading" + metaDataCategoryName ).css( "background", "" );
 }
 
 // Remove MetaData HTML and CSS from a Category

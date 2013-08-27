@@ -168,184 +168,191 @@
     <h3>$i18n.getString( "create_ad_hoc_filter" )</h3>
 #end
 
+<!-- FILTER FORM -->
+<form id="formFilter" name="formFilter">
+    <input type="hidden" id="metaDataUids" name="metaDataUids" value='$filter.metaDataUids'/>
+    #if ($command == "addNew" || $command == "addAdHoc")
+        <input type="hidden" id="uid" name="uid" value=""/>
+    #elseif ($command == "update")
+        <input type="hidden" id="uid" name="uid" value="$filter.uid"/>
+    #end
+
+    <div>
+        <table id="detailsList" style="width: 400px;">
+            <tr>
+                <th colspan="2">$i18n.getString( "filter_details" )</th>
+            </tr>
+            <tr>
+                <td><label>$i18n.getString( "name" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
+                <td>
+                    <input type="text" id="name" name="name" value="$filter.name" style="width: 100%;">
+                </td>
+            </tr>
+            <tr>
+                <td><label>$i18n.getString( "code" )</label></td>
+                <td>
+                    <input type="text" id="code" name="code" value="$filter.code" style="width: 100%;">
+                </td>
+            </tr>
+        </table>
+    </div>
+</form>
+
 <!-- METADATA TABLE -->
-<div id="mainDivAccordion" style="margin-bottom: 20px; width: 90%;">
+<div id="mainDivAccordion" style="margin-bottom: 10px; margin-top: 10px; width: 90%;">
     <!-- ATTRIBUTES TYPES SELECTION -->
-    <h6 id="headerAttributeTypes" style="font-size: 10pt;">$i18n.getString( "attribute_types" )</h6>
+    <h6 id="headingAttributeTypes" style="font-size: 10pt;">$i18n.getString( "attribute_types" )</h6>
 
     <div id="divAttributeTypes" style="margin: 5px;"></div>
 
     <!-- CATEGORIES SELECTION -->
-    <h6 id="headerDimensions" style="font-size: 10pt;">$i18n.getString( "categories" )</h6>
+    <h6 id="headingDimensions" style="font-size: 10pt;">$i18n.getString( "categories" )</h6>
 
     <div id="divDimensions" style="margin: 5px;"></div>
 
     <!-- CHARTS SELECTION -->
-    <h6 id="headerCharts" style="font-size: 10pt;">$i18n.getString( "charts" )</h6>
+    <h6 id="headingCharts" style="font-size: 10pt;">$i18n.getString( "charts" )</h6>
 
     <div id="divCharts" style="margin: 5px;"></div>
 
     <!-- CONCEPTS SELECTION -->
-    <h6 id="headerConcepts" style="font-size: 10pt;">$i18n.getString( "concepts" )</h6>
+    <h6 id="headingConcepts" style="font-size: 10pt;">$i18n.getString( "concepts" )</h6>
 
     <div id="divConcepts" style="margin: 5px;"></div>
 
     <!-- CONSTANTS SELECTION -->
-    <h6 id="headerConstants" style="font-size: 10pt;">$i18n.getString( "constants" )</h6>
+    <h6 id="headingConstants" style="font-size: 10pt;">$i18n.getString( "constants" )</h6>
 
     <div id="divConstants" style="margin: 5px;"></div>
 
     <!-- DATA DICTIONARIES SELECTION -->
-    <h6 id="headerDataDictionaries" style="font-size: 10pt;">$i18n.getString( "data_dictionaries" )</h6>
+    <h6 id="headingDataDictionaries" style="font-size: 10pt;">$i18n.getString( "data_dictionaries" )</h6>
 
     <div id="divDataDictionaries" style="margin: 5px;"></div>
 
     <!-- DATA ELEMENT GROUP SETS SELECTION -->
-    <h6 id="headerDataElementGroupSets" style="font-size: 10pt;">$i18n.getString( "data_element_group_sets" )</h6>
+    <h6 id="headingDataElementGroupSets" style="font-size: 10pt;">$i18n.getString( "data_element_group_sets" )</h6>
 
     <div id="divDataElementGroupSets" style="margin: 5px;"></div>
 
     <!-- DATA ELEMENT GROUPS SELECTION -->
-    <h6 id="headerDataElementGroups" style="font-size: 10pt;">$i18n.getString( "data_element_groups" )</h6>
+    <h6 id="headingDataElementGroups" style="font-size: 10pt;">$i18n.getString( "data_element_groups" )</h6>
 
     <div id="divDataElementGroups" style="margin: 5px;"></div>
 
     <!-- DATA ELEMENTS SELECTION -->
-    <h6 id="headerDataElements" style="font-size: 10pt;">$i18n.getString( "data_elements" )</h6>
+    <h6 id="headingDataElements" style="font-size: 10pt;">$i18n.getString( "data_elements" )</h6>
 
     <div id="divDataElements" style="margin: 5px;"></div>
 
     <!-- DATA SETS SELECTION -->
-    <h6 id="headerDataSets" style="font-size: 10pt;">$i18n.getString( "data_sets" )</h6>
+    <h6 id="headingDataSets" style="font-size: 10pt;">$i18n.getString( "data_sets" )</h6>
 
     <div id="divDataSets" style="margin: 5px;"></div>
 
     <!-- DOCUMENTS SELECTION -->
-    <h6 id="headerDocuments" style="font-size: 10pt;">$i18n.getString( "documents" )</h6>
+    <h6 id="headingDocuments" style="font-size: 10pt;">$i18n.getString( "documents" )</h6>
 
     <div id="divDocuments" style="margin: 5px;"></div>
 
     <!-- INDICATOR GROUP SETS SELECTION -->
-    <h6 id="headerIndicatorGroupSets" style="font-size: 10pt;">$i18n.getString( "indicator_group_sets" )</h6>
+    <h6 id="headingIndicatorGroupSets" style="font-size: 10pt;">$i18n.getString( "indicator_group_sets" )</h6>
 
     <div id="divIndicatorGroupSets" style="margin: 5px;"></div>
 
     <!-- INDICATOR GROUPS SELECTION -->
-    <h6 id="headerIndicatorGroups" style="font-size: 10pt;">$i18n.getString( "indicator_groups" )</h6>
+    <h6 id="headingIndicatorGroups" style="font-size: 10pt;">$i18n.getString( "indicator_groups" )</h6>
 
     <div id="divIndicatorGroups" style="margin: 5px;"></div>
 
     <!-- INDICATOR TYPES SELECTION -->
-    <h6 id="headerIndicatorTypes" style="font-size: 10pt;">$i18n.getString( "indicator_types" )</h6>
+    <h6 id="headingIndicatorTypes" style="font-size: 10pt;">$i18n.getString( "indicator_types" )</h6>
 
     <div id="divIndicatorTypes" style="margin: 5px;"></div>
 
     <!-- INDICATORS SELECTION -->
-    <h6 id="headerIndicators" style="font-size: 10pt;">$i18n.getString( "indicators" )</h6>
+    <h6 id="headingIndicators" style="font-size: 10pt;">$i18n.getString( "indicators" )</h6>
 
     <div id="divIndicators" style="margin: 5px;"></div>
 
     <!-- MAP LEGEND SETS SELECTION -->
-    <h6 id="headerMapLegendSets" style="font-size: 10pt;">$i18n.getString( "map_legend_sets" )</h6>
+    <h6 id="headingMapLegendSets" style="font-size: 10pt;">$i18n.getString( "map_legend_sets" )</h6>
 
     <div id="divMapLegendSets" style="margin: 5px;"></div>
 
     <!-- MAPS SELECTION -->
-    <h6 id="headerMaps" style="font-size: 10pt;">$i18n.getString( "maps" )</h6>
+    <h6 id="headingMaps" style="font-size: 10pt;">$i18n.getString( "maps" )</h6>
 
     <div id="divMaps" style="margin: 5px;"></div>
 
     <!-- OPTION SETS SELECTION -->
-    <h6 id="headerOptionSets" style="font-size: 10pt;">$i18n.getString( "option_sets" )</h6>
+    <h6 id="headingOptionSets" style="font-size: 10pt;">$i18n.getString( "option_sets" )</h6>
 
     <div id="divOptionSets" style="margin: 5px;"></div>
 
     <!-- ORGANISATION UNIT GROUP SETS SELECTION -->
-    <h6 id="headerOrganisationUnitGroupSets" style="font-size: 10pt;">$i18n.getString( "organisation_unit_group_sets" )</h6>
+    <h6 id="headingOrganisationUnitGroupSets" style="font-size: 10pt;">$i18n.getString( "organisation_unit_group_sets" )</h6>
 
     <div id="divOrganisationUnitGroupSets" style="margin: 5px;"></div>
 
     <!-- ORGANISATION UNIT GROUPS SELECTION -->
-    <h6 id="headerOrganisationUnitGroups" style="font-size: 10pt;">$i18n.getString( "organisation_unit_groups" )</h6>
+    <h6 id="headingOrganisationUnitGroups" style="font-size: 10pt;">$i18n.getString( "organisation_unit_groups" )</h6>
 
     <div id="divOrganisationUnitGroups" style="margin: 5px;"></div>
 
     <!-- ORGANISATION UNIT LEVELS SELECTION -->
-    <h6 id="headerOrganisationUnitLevels" style="font-size: 10pt;">$i18n.getString( "organisation_unit_levels" )</h6>
+    <h6 id="headingOrganisationUnitLevels" style="font-size: 10pt;">$i18n.getString( "organisation_unit_levels" )</h6>
 
     <div id="divOrganisationUnitLevels" style="margin: 5px;"></div>
 
     <!-- ORGANISATION UNITS SELECTION -->
-    <h6 id="headerOrganisationUnits" style="font-size: 10pt;">$i18n.getString( "organisation_units" )</h6>
+    <h6 id="headingOrganisationUnits" style="font-size: 10pt;">$i18n.getString( "organisation_units" )</h6>
 
     <div id="divOrganisationUnits" style="margin: 5px;"></div>
 
     <!-- REPORT TABLES SELECTION -->
-    <h6 id="headerReportTables" style="font-size: 10pt;">$i18n.getString( "report_tables" )</h6>
+    <h6 id="headingReportTables" style="font-size: 10pt;">$i18n.getString( "report_tables" )</h6>
 
     <div id="divReportTables" style="margin: 5px;"></div>
 
     <!-- REPORTS SELECTION -->
-    <h6 id="headerReports" style="font-size: 10pt;">$i18n.getString( "reports" )</h6>
+    <h6 id="headingReports" style="font-size: 10pt;">$i18n.getString( "reports" )</h6>
 
     <div id="divReports" style="margin: 5px;"></div>
 
     <!-- SQL VIEWS SELECTION -->
-    <h6 id="headerSqlViews" style="font-size: 10pt;">$i18n.getString( "sql_views" )</h6>
+    <h6 id="headingSqlViews" style="font-size: 10pt;">$i18n.getString( "sql_views" )</h6>
 
     <div id="divSqlViews" style="margin: 5px;"></div>
 
     <!-- USER GROUPS SELECTION -->
-    <h6 id="headerUserGroups" style="font-size: 10pt;">$i18n.getString( "user_groups" )</h6>
+    <h6 id="headingUserGroups" style="font-size: 10pt;">$i18n.getString( "user_groups" )</h6>
 
     <div id="divUserGroups" style="margin: 5px;"></div>
 
     <!-- USER ROLES SELECTION -->
-    <h6 id="headerUserRoles" style="font-size: 10pt;">$i18n.getString( "user_roles" )</h6>
+    <h6 id="headingUserRoles" style="font-size: 10pt;">$i18n.getString( "user_roles" )</h6>
 
     <div id="divUserRoles" style="margin: 5px;"></div>
 
     <!-- USERS SELECTION -->
-    <h6 id="headerUsers" style="font-size: 10pt;">$i18n.getString( "users" )</h6>
+    <h6 id="headingUsers" style="font-size: 10pt;">$i18n.getString( "users" )</h6>
 
     <div id="divUsers" style="margin: 5px;"></div>
 
     <!-- VALIDATION RULE GROUPS SELECTION -->
-    <h6 id="headerValidationRuleGroups" style="font-size: 10pt;">$i18n.getString( "validation_rule_groups" )</h6>
+    <h6 id="headingValidationRuleGroups" style="font-size: 10pt;">$i18n.getString( "validation_rule_groups" )</h6>
 
     <div id="divValidationRuleGroups" style="margin: 5px;"></div>
 
     <!-- VALIDATION RULES SELECTION -->
-    <h6 id="headerValidationRules" style="font-size: 10pt;">$i18n.getString( "validation_rules" )</h6>
+    <h6 id="headingValidationRules" style="font-size: 10pt;">$i18n.getString( "validation_rules" )</h6>
 
     <div id="divValidationRules" style="margin: 5px;"></div>
 </div>
 
-<!-- FILTER FORM -->
-<form id="formFilter" name="formFilter">
-    <input type="hidden" id="metaDataUids" name="metaDataUids" value='$filter.metaDataUids' />
-    #if ($command == "addNew" || $command == "addAdHoc")
-        <input type="hidden" id="uid" name="uid" value="" />
-    #elseif ($command == "update")
-        <input type="hidden" id="uid" name="uid" value="$filter.uid" />
-    #end
-
+<div>
     <table id="detailsList" style="width: 500px;">
-        <tr>
-            <th colspan="2">$i18n.getString( "filter_details" )</th>
-        </tr>
-        <tr>
-            <td><label>$i18n.getString( "name" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
-            <td>
-                <input type="text" id="name" name="name" value="$filter.name" style="width: 100%;">
-            </td>
-        </tr>
-        <tr>
-            <td><label>$i18n.getString( "code" )</label></td>
-            <td>
-                <input type="text" id="code" name="code" value="$filter.code" style="width: 100%;">
-            </td>
-        </tr>
         <tr>
             <td colspan="2">
                 <input type="button" value="$i18n.getString( 'select_all_tables' )" style="width:125px;" onclick="selectAllCheckboxes();"/>
@@ -372,24 +379,17 @@
             #elseif($command == "addAdHoc")
                 <td colspan="2">
                     <input type="button" value="$i18n.getString( 'export' )" onclick="startExport();" style="width:125px" />
-                    <input type="button" value="$i18n.getString( 'add_new' )" onclick="saveFilter();" style="width:125px" />
                     <input type="button" value="$i18n.getString( 'cancel' )" onclick="window.history.back();" style="width:125px" />
                 </td>
             #end
         </tr>
     </table>
-</form>
+</div>
 
 #if($command == "addAdHoc")
     <!-- EXPORT DIALOG -->
     <div id="exportDialog" style="display: none;">
         <table>
-            <tr>
-                <td colspan="2">
-                    <input type="checkbox" id="exportDependencies" name="exportDependencies"/>
-                    <label for="exportDependencies" style="font-size: 10pt;">$i18n.getString( "export_with_dependencies" ) #openHelp( "exportDependencies" )</label>
-                </td>
-            </tr>
             <tr>
                 <td colspan="2">
                     <select id="format" style="width: 250px; font-size: 10pt;">
@@ -405,6 +405,12 @@
                         <option value="gz">GZipped</option>
                         <option value="uncompressed">Uncompressed</option>
                     </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <input type="checkbox" id="exportDependencies" name="exportDependencies"/>
+                    <label for="exportDependencies" style="font-size: 10pt;">$i18n.getString( "export_with_dependencies" ) #openHelp( "exportDependencies" )</label>
                 </td>
             </tr>
             <tr>

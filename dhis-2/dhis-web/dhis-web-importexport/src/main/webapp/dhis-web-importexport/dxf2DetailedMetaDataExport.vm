@@ -33,7 +33,7 @@
                 <!-- FILTER TABLE -->
                 <table id="filterList" class="listTable">
                     <col/>
-                    <col width="260"/>
+                    <col width="115"/>
                     <thead>
                     <tr>
                         <th>$i18n.getString( "name" )</th>
@@ -74,12 +74,6 @@
     <table>
         <tr>
             <td colspan="2">
-                <input type="checkbox" id="exportDependencies" name="exportDependencies"/>
-                <label for="exportDependencies" style="font-size: 10pt;">$i18n.getString( "export_with_dependencies" ) #openHelp( "exportDependencies" )</label>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
                 <select id="format" style="width: 250px; font-size: 10pt;">
                     <option value="Xml">XML</option>
                     <option value="Json">Json</option>
@@ -93,6 +87,12 @@
                     <option value="gz">GZipped</option>
                     <option value="uncompressed">Uncompressed</option>
                 </select>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <input type="checkbox" id="exportDependencies" name="exportDependencies"/>
+                <label for="exportDependencies" style="font-size: 10pt;">$i18n.getString( "export_with_dependencies" ) #openHelp( "exportDependencies" )</label>
             </td>
         </tr>
         <tr>
