@@ -824,6 +824,13 @@ label.x-form-cb-label {
 	vertical-align: 0;
 }
 
+	/* Alternative boxlabel cls */
+label.x-form-cb-label-alt1 {
+    position: relative;
+    top: -2px;
+    padding-left: 4px;
+}
+
 
 /*----------------------------------------------------------------------------
  * GIS Numberfield

@@ -2223,7 +2223,7 @@ Ext.onReady( function() {
                         },
                         disableCaching: false,
                         failure: function(r) {
-                            util.mask.hideMask();
+                            util.mask.hideMask(dv.viewport.centerRegion);
                             alert(r.responseText);
                         },
                         success: function(r) {
@@ -2231,14 +2231,14 @@ Ext.onReady( function() {
                                 response = Ext.decode(r.responseText);
 
                             if (!validateResponse(response)) {
-                                util.mask.hideMask();
+                                util.mask.hideMask(dv.viewport.centerRegion);
                                 return;
                             }
 
                             xLayout = getSyncronizedXLayout(xLayout, response);
 
                             if (!xLayout) {
-                                util.mask.hideMask();
+                                util.mask.hideMask(dv.viewport.centerRegion);
                                 return;
                             }
 
@@ -2302,7 +2302,7 @@ Ext.onReady( function() {
                 };
 
                 failure = function(responseText) {
-                    util.mask.hideMask();
+                    util.mask.hideMask(dv.viewport.centerRegion);
                     alert(responseText);
                 };
 

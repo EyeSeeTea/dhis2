@@ -4343,7 +4343,7 @@ Ext.onReady( function() {
 			getDimension: function() {
 				var r = treePanel.getSelectionModel().getSelection(),
 					config = {
-						dimension: pt.conf.finals.dimension.organisationUnit.objectName,
+						dimension: gis.conf.finals.dimension.organisationUnit.objectName,
 						items: []
 					};
 
@@ -4454,7 +4454,7 @@ Ext.onReady( function() {
 		userOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
 			columnWidth: 0.30,
 			style: 'padding-top:2px; padding-left:3px; margin-bottom:0',
-			//boxLabel: GIS.i18n.user_organisation_unit,
+			boxLabelCls: 'x-form-cb-label-alt1',
 			boxLabel: 'User OU',
 			labelWidth: gis.conf.layout.form_label_width,
 			handler: function(chb, checked) {
@@ -4465,7 +4465,7 @@ Ext.onReady( function() {
 		userOrganisationUnitChildren = Ext.create('Ext.form.field.Checkbox', {
 			columnWidth: 0.30,
 			style: 'padding-top:2px; margin-bottom:0',
-			//boxLabel: GIS.i18n.user_organisation_unit_children,
+			boxLabelCls: 'x-form-cb-label-alt1',
 			boxLabel: 'Children',
 			labelWidth: gis.conf.layout.form_label_width,
 			handler: function(chb, checked) {
@@ -4476,7 +4476,7 @@ Ext.onReady( function() {
 		userOrganisationUnitGrandChildren = Ext.create('Ext.form.field.Checkbox', {
 			columnWidth: 0.40,
 			style: 'padding-top:2px; margin-bottom:0',
-			//boxLabel: GIS.i18n.user_organisation_unit_grandchildren,
+			boxLabelCls: 'x-form-cb-label-alt1',
 			boxLabel: 'Grand children',
 			labelWidth: gis.conf.layout.form_label_width,
 			handler: function(chb, checked) {
@@ -4599,7 +4599,6 @@ Ext.onReady( function() {
 			style: 'margin-right:2px',
 			items: tool
 		});
-
 
 		periodTypePanel = Ext.create('Ext.panel.Panel', {
 			layout: 'hbox',
@@ -4796,25 +4795,13 @@ Ext.onReady( function() {
 				view;
 
 			view = {
-				columns: function() {
-					if (vType === dimConf.indicator.id) {
-						return [{
-							dimension: dimConf.indicator.objectName,
-							items: [{
-								id: indicator.getValue()
-							}]
-						}];
-					}
-					else {
-						return [{
-							dimension: dimConf.dataElement.objectName,
-							items: [{
-								id: dataElement.getValue()
-							}]
-						}];
-					}
-				}(),
-				rows: [treepanel.getDimension()],
+				columns: [{
+					dimension: vType,
+					items: [{
+						id: vType === dimConf.indicator.objectName ? indicator.getValue() : dataElement.getValue()
+					}]
+				}],
+				rows: [treePanel.getDimension()],
 				filters: [{
 					dimension: dimConf.period.objectName,
 					items: [{
@@ -4826,32 +4813,29 @@ Ext.onReady( function() {
 
 
 
-
-				valueType: valueType.getValue(),
-				indicatorGroup: {
-					id: indicatorGroup.getValue(),
-					name: indicatorGroup.getRawValue()
-				},
-				indicator: {
-					id: indicator.getValue(),
-					name: indicator.getRawValue()
-				},
-				dataElementGroup: {
-					id: dataElementGroup.getValue(),
-					name: dataElementGroup.getRawValue()
-				},
-				dataElement: {
-					id: dataElement.getValue(),
-					name: dataElement.getRawValue()
-				},
-				periodType: periodType.getValue(),
-				period: {
-					id: period.getValue()
-				},
-				legendType: legendType.getValue(),
+				//indicatorGroup: {
+					//id: indicatorGroup.getValue(),
+					//name: indicatorGroup.getRawValue()
+				//},
+				//indicator: {
+					//id: indicator.getValue(),
+					//name: indicator.getRawValue()
+				//},
+				//dataElementGroup: {
+					//id: dataElementGroup.getValue(),
+					//name: dataElementGroup.getRawValue()
+				//},
+				//dataElement: {
+					//id: dataElement.getValue(),
+					//name: dataElement.getRawValue()
+				//},
+				//periodType: periodType.getValue(),
+				//period: {
+					//id: period.getValue()
+				//},
+				//legendType: legendType.getValue(),
 				legendSet: {
-					id: legendSet.getValue(),
-					name: legendSet.getRawValue()
+					id: legendSet.getValue()
 				},
 				classes: parseInt(classes.getValue()),
 				method: parseInt(method.getValue()),
@@ -4859,19 +4843,20 @@ Ext.onReady( function() {
 				colorHigh: colorHigh.getValue(),
 				radiusLow: parseInt(radiusLow.getValue()),
 				radiusHigh: parseInt(radiusHigh.getValue()),
-				organisationUnitLevel: {
-					id: level.getValue(),
-					name: level.getRawValue(),
-					level: store.data.items.length && level.getValue() ? store.getById(level.getValue()).data.level : null
-				},
-				parentOrganisationUnit: {
-					id: parentArray[0].raw.id,
-					name: parentArray[0].raw.text
-				},
-				parentLevel: parentArray[0].raw.level,
-				parentGraph: parentArray[0].raw.path,
+				//organisationUnitLevel: {
+					//id: level.getValue(),
+					//name: level.getRawValue(),
+					//level: store.data.items.length && level.getValue() ? store.getById(level.getValue()).data.level : null
+				//},
+				//parentOrganisationUnit: {
+					//id: parentArray[0].raw.id,
+					//name: parentArray[0].raw.text
+				//},
+				//parentLevel: parentArray[0].raw.level,
+				//parentGraph: parentArray[0].raw.path,
 				opacity: layer.item.getOpacity()
 			};
+console.log(view);			
 
 			if (config && Ext.isObject(config)) {
 				view = layer.core.extendView(view, config);
@@ -5418,31 +5403,37 @@ Ext.onReady( function() {
 					a.push({
 						iconCls: 'gis-btn-icon-' + gis.layer.facility.id,
 						menu: gis.layer.facility.menu,
+						tooltip: GIS.i18n.symbol_layer,
 						width: 26
 					});
 					a.push({
 						iconCls: 'gis-btn-icon-' + gis.layer.boundary.id,
 						menu: gis.layer.boundary.menu,
+						tooltip: GIS.i18n.boundary_layer,
 						width: 26
 					});
 					a.push({
 						iconCls: 'gis-btn-icon-' + gis.layer.thematic1.id,
 						menu: gis.layer.thematic1.menu,
+						tooltip: GIS.i18n.thematic_layer + ' 1',
 						width: 26
 					});
 					a.push({
 						iconCls: 'gis-btn-icon-' + gis.layer.thematic2.id,
 						menu: gis.layer.thematic2.menu,
+						tooltip: GIS.i18n.thematic_layer + ' 2',
 						width: 26
 					});
 					a.push({
 						iconCls: 'gis-btn-icon-' + gis.layer.thematic3.id,
 						menu: gis.layer.thematic3.menu,
+						tooltip: GIS.i18n.thematic_layer + ' 3',
 						width: 26
 					});
 					a.push({
 						iconCls: 'gis-btn-icon-' + gis.layer.thematic4.id,
 						menu: gis.layer.thematic4.menu,
+						tooltip: GIS.i18n.thematic_layer + ' 4',
 						width: 26
 					});
 					a.push({

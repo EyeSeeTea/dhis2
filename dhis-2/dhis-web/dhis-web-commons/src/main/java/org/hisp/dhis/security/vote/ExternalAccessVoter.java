@@ -6,14 +6,15 @@ package org.hisp.dhis.security.vote;
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -33,6 +34,8 @@ import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.document.Document;
+import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDecisionVoter;
@@ -62,6 +65,8 @@ public class ExternalAccessVoter implements AccessDecisionVoter<FilterInvocation
         externalClasses.put( "charts", Chart.class );
         externalClasses.put( "maps", org.hisp.dhis.mapping.Map.class );
         externalClasses.put( "reportTables", ReportTable.class );
+        externalClasses.put( "reports", Report.class );
+        externalClasses.put( "documents", Document.class );
     }
 
     // -------------------------------------------------------------------------
@@ -102,7 +107,7 @@ public class ExternalAccessVoter implements AccessDecisionVoter<FilterInvocation
 
                 if ( urlSplit[1].equals( "api" ) && externalClasses.get( type ) != null )
                 {
-                    String uid = urlSplit[3];
+                    String uid = getUidPart( urlSplit[3] );
 
                     if ( CodeGenerator.isValidCode( uid ) )
                     {
@@ -122,5 +127,15 @@ public class ExternalAccessVoter implements AccessDecisionVoter<FilterInvocation
         LOG.debug( "ACCESS_ABSTAIN [" + filterInvocation.toString() + "]: No supported attributes." );
 
         return ACCESS_ABSTAIN;
+    }
+
+    private String getUidPart( String uidPath )
+    {
+        if ( uidPath.contains( "." ) )
+        {
+            return uidPath.substring( 0, uidPath.indexOf( "." ) );
+        }
+
+        return uidPath;
     }
 }

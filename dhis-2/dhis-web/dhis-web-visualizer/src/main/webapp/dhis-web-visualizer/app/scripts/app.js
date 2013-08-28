@@ -396,7 +396,7 @@ Ext.onReady( function() {
                     engine.loadChart(id, dv);
                 }
                 else if (Ext.isString(session) && DV.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
-                    layout = api.layout.Layout(util.chart.analytical2layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]));
+                    layout = api.layout.Layout(engine.analytical2layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]));
 
                     if (layout) {
                         dv.viewport.setFavorite(layout);
@@ -1248,7 +1248,7 @@ Ext.onReady( function() {
 							headers: {'Content-Type': 'application/json'},
 							params: Ext.encode(favorite),
 							failure: function(r) {
-								dv.util.mask.hideMask();
+								dv.util.mask.hideMask(dv.viewport.centerRegion);
 								alert(r.responseText);
 							},
 							success: function(r) {
@@ -1277,7 +1277,7 @@ Ext.onReady( function() {
 							url: dv.init.contextPath + '/api/charts/' + id + '.json?viewClass=dimensional&links=false',
 							method: 'GET',
 							failure: function(r) {
-								dv.util.mask.hideMask();
+								dv.util.mask.hideMask(dv.viewport.centerRegion);
 								alert(r.responseText);
 							},
 							success: function(r) {
@@ -1290,7 +1290,7 @@ Ext.onReady( function() {
 									headers: {'Content-Type': 'application/json'},
 									params: Ext.encode(favorite),
 									failure: function(r) {
-										dv.util.mask.hideMask();
+										dv.util.mask.hideMask(dv.viewport.centerRegion);
 										alert(r.responseText);
 									},
 									success: function(r) {
@@ -1507,7 +1507,7 @@ Ext.onReady( function() {
 										url: dv.init.contextPath + '/api/sharing?type=chart&id=' + record.data.id,
 										method: 'GET',
 										failure: function(r) {
-											dv.util.mask.hideMask();
+											dv.util.mask.hideMask(dv.viewport.centerRegion);
 											alert(r.responseText);
 										},
 										success: function(r) {

@@ -263,7 +263,7 @@ dhis2.db.removeDashboard = function()
 function updateSharing( dashboard ) {
     $( '#dashboardMenu' ).data( 'canManage', dashboard.access.manage );
 
-    if( dashboard.access.manage ) {
+    if ( dashboard.access.manage ) {
         var manageLink = $( '<a/>' )
             .addClass( 'bold' )
             .text( i18n_manage )
@@ -275,24 +275,26 @@ function updateSharing( dashboard ) {
             .text( i18n_share )
             .attr( 'href', 'javascript:showSharingDialog("dashboard", "' + dashboard.id + '")' );
         $( '#manageSharing' ).html( sharingLink );
-    } else {
+    } 
+    else 
+    {
         var manageLink = $( '<a/>' )
             .addClass( 'bold' )
-            .css({
+            .css( {
                 'cursor': 'default',
                 'text-decoration': 'none',
-                'color': 'black'
-            })
+                'color': '#888'
+            } )
             .text( i18n_manage );
         $( '#manageDashboard' ).html( manageLink );
 
         var sharingLink = $( '<a/>' )
             .addClass( 'bold' )
-            .css({
+            .css( {
                 'cursor': 'default',
                 'text-decoration': 'none',
-                'color': 'black'
-            })
+                'color': '#888'
+            } )
             .text( i18n_share );
         $( '#manageSharing' ).html( sharingLink );
     }
@@ -352,10 +354,10 @@ dhis2.db.renderDashboard = function( id )
 	
 	$.getJSON( "../api/dashboards/" + id, function( data )
 	{
-		if ( undefined !== data.items )
-		{
-            updateSharing( data );
+        updateSharing( data );
 
+        if( undefined !== data.items )
+        {
 			$.each( data.items, function( index, item )
 			{
 				var position = index - 1;

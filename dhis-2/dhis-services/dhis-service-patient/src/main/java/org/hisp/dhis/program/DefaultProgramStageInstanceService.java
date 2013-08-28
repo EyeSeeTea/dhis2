@@ -1,17 +1,20 @@
+package org.hisp.dhis.program;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,16 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.program;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
@@ -56,6 +49,15 @@ import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Abyot Asalefew
@@ -156,6 +158,12 @@ public class DefaultProgramStageInstanceService
     public Collection<ProgramStageInstance> getProgramStageInstances( ProgramStage programStage )
     {
         return programStageInstanceStore.get( programStage );
+    }
+
+    @Override
+    public Collection<ProgramStageInstance> getProgramStageInstances( ProgramStage programStage, OrganisationUnit organisationUnit )
+    {
+        return programStageInstanceStore.get( programStage, organisationUnit );
     }
 
     public void updateProgramStageInstance( ProgramStageInstance programStageInstance )
@@ -577,7 +585,7 @@ public class DefaultProgramStageInstanceService
                 }
             }
         }
-        
+
         return outboundSmsList;
     }
 
@@ -585,7 +593,7 @@ public class DefaultProgramStageInstanceService
     {
         return programStageInstanceStore.get( patient );
     }
-    
+
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
