@@ -3520,6 +3520,7 @@ Ext.onReady( function() {
 			dataElement,
 			dataElementDetailLevel,
 			dataElementPanel,
+			dataSet,
 			periodType,
 			period,
 			periodPrev,
@@ -3920,9 +3921,9 @@ Ext.onReady( function() {
 			valueField: 'id',
 			displayField: 'name',
 			forceSelection: true,
+			hidden: true,
 			width: gis.conf.layout.widget.item_width,
 			labelWidth: gis.conf.layout.widget.itemlabel_width,
-			hidden: true,
 			store: gis.store.dataElementGroups,
 			loadAvailable: function(preventLoad) {
 				var store = dataElementsByGroupStore,
@@ -4037,12 +4038,12 @@ Ext.onReady( function() {
 		});
 
 		dataSet = Ext.create('Ext.form.field.ComboBox', {
-			fieldLabel: GIS.i18n.dataSet,
+			fieldLabel: GIS.i18n.dataset,
 			editable: false,
 			valueField: 'id',
 			displayField: 'name',
-			queryMode: 'local',
 			forceSelection: true,
+			hidden: true,
 			width: gis.conf.layout.widget.item_width,
 			labelWidth: gis.conf.layout.widget.itemlabel_width,
 			listConfig: {loadMask: false},
@@ -4792,71 +4793,38 @@ Ext.onReady( function() {
 
 		getView = function(config) {
 			var vType = valueType.getValue(),
-				view;
+				view = {};
 
-			view = {
-				columns: [{
-					dimension: vType,
-					items: [{
-						id: vType === dimConf.indicator.objectName ? indicator.getValue() : dataElement.getValue()
-					}]
-				}],
-				rows: [treePanel.getDimension()],
-				filters: [{
-					dimension: dimConf.period.objectName,
-					items: [{
-						id: period.getValue()
-					}]
-				}],
-				valueType: vType,
-
-
-
-
-				//indicatorGroup: {
-					//id: indicatorGroup.getValue(),
-					//name: indicatorGroup.getRawValue()
-				//},
-				//indicator: {
-					//id: indicator.getValue(),
-					//name: indicator.getRawValue()
-				//},
-				//dataElementGroup: {
-					//id: dataElementGroup.getValue(),
-					//name: dataElementGroup.getRawValue()
-				//},
-				//dataElement: {
-					//id: dataElement.getValue(),
-					//name: dataElement.getRawValue()
-				//},
-				//periodType: periodType.getValue(),
-				//period: {
-					//id: period.getValue()
-				//},
-				//legendType: legendType.getValue(),
-				legendSet: {
+			view.columns = [{
+				dimension: vType,
+				items: [{
+					id: vType === dimConf.indicator.objectName ? indicator.getValue() : dataElement.getValue()
+				}]
+			}];
+			
+			view.rows = [treePanel.getDimension()];
+			
+			view.filters = [{
+				dimension: dimConf.period.objectName,
+				items: [{
+					id: period.getValue()
+				}]
+			}];
+			
+			view.valueType = vType;
+			view.classes = parseInt(classes.getValue());
+			view.method = parseInt(method.getValue());
+			view.colorLow = colorLow.getValue();
+			view.colorHigh = colorHigh.getValue();
+			view.radiusLow = parseInt(radiusLow.getValue());
+			view.radiusHigh = parseInt(radiusHigh.getValue());
+			view.opacity = layer.item.getOpacity();
+			
+			if (legendSet.getValue()) {
+				view.legendSet = {
 					id: legendSet.getValue()
-				},
-				classes: parseInt(classes.getValue()),
-				method: parseInt(method.getValue()),
-				colorLow: colorLow.getValue(),
-				colorHigh: colorHigh.getValue(),
-				radiusLow: parseInt(radiusLow.getValue()),
-				radiusHigh: parseInt(radiusHigh.getValue()),
-				//organisationUnitLevel: {
-					//id: level.getValue(),
-					//name: level.getRawValue(),
-					//level: store.data.items.length && level.getValue() ? store.getById(level.getValue()).data.level : null
-				//},
-				//parentOrganisationUnit: {
-					//id: parentArray[0].raw.id,
-					//name: parentArray[0].raw.text
-				//},
-				//parentLevel: parentArray[0].raw.level,
-				//parentGraph: parentArray[0].raw.path,
-				opacity: layer.item.getOpacity()
-			};
-console.log(view);			
+				};
+			}
 
 			if (config && Ext.isObject(config)) {
 				view = layer.core.extendView(view, config);
@@ -5015,6 +4983,7 @@ console.log(view);
 						indicator,
 						dataElementGroup,
 						dataElementPanel,
+						dataSet,
 						periodTypePanel,
 						period,
 						{
