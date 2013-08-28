@@ -16,7 +16,8 @@
  * Menu
  * GIS Menu
  *
- * Treepanel
+ * GIS Treepanel
+ * 
  * Colorpicker
  *
  * GIS Window
@@ -571,7 +572,7 @@ gis-combo .x-form-item-label {
 
 
 /*----------------------------------------------------------------------------
- * Treepanel
+ * GIS Treepanel
  *--------------------------------------------------------------------------*/
 
 	/* Node height */
