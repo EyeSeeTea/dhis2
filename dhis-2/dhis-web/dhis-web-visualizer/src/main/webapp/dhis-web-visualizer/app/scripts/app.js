@@ -4176,6 +4176,12 @@ Ext.onReady( function() {
                         return;
                     }
 
+					// Data sets as filter
+					if (layout.filters[i].dimension === dimConf.dataSet.objectName) {
+						util.message.alert(DV.i18n.data_sets_cannot_be_specified_as_filter || 'Data sets cannot be specified as filter');
+						return;
+					}
+
                 }
             }
 

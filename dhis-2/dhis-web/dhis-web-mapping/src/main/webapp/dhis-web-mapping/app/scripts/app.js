@@ -4811,7 +4811,6 @@ Ext.onReady( function() {
 				}]
 			}];
 			
-			view.valueType = vType;
 			view.classes = parseInt(classes.getValue());
 			view.method = parseInt(method.getValue());
 			view.colorLow = colorLow.getValue();
@@ -4825,16 +4824,26 @@ Ext.onReady( function() {
 					id: legendSet.getValue()
 				};
 			}
+console.log(view);	
 
-			if (config && Ext.isObject(config)) {
-				view = layer.core.extendView(view, config);
-			}
-
-			return validateView(view);
+			return gis.api.layout.Layout(view);
 		};
 
 		validateView = function(view) {
-			if (view.valueType === gis.conf.finals.dimension.indicator.id) {
+			
+			// data
+			if (!(Ext.isArray(view.columns)) &&
+				view.columns.length &&
+				Ext.isString(view.columns[0].dimension) &&
+				Ext.isArray(view.columns[0].items) &&
+				view.columns[0].items.length &&
+				Ext.isString(view.columns[0].items[0].id)) {
+					GIS.logg.push([view.columns, layer.id + '.columns']);
+			}
+			
+			// 
+			
+			if (view.valueType === gis.conf.finals.dimension.indicator.objectName) {
 				if (!view.indicatorGroup.id || !Ext.isString(view.indicatorGroup.id)) {
 					GIS.logg.push([view.indicatorGroup.id, layer.id + '.indicatorGroup.id: string']);
 					//alert("validation failed"); //todo

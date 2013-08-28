@@ -1580,10 +1580,9 @@ Ext.onReady( function() {
 	GIS.core.getInstance = function(init) {
 		var conf = {},
 			util = {},
+			api = {},
 			store = {},
-
-			//gis = {},
-			layers = [];
+			layers = [],
 			gis = {};
 
 		// conf
@@ -1817,11 +1816,382 @@ Ext.onReady( function() {
 		gis.conf = conf;
 		gis.util = util;
 
+		// api
+		(function() {
+			api.layout = {};
+			api.response = {};
+
+			api.layout.Record = function(config) {
+				var record = {};
+
+				// id: string
+
+				return function() {
+					if (!Ext.isObject(config)) {
+						console.log('Record config is not an object: ' + config);
+						return;
+					}
+
+					if (!Ext.isString(config.id)) {
+						alert('Record id is not text: ' + config);
+						return;
+					}
+
+					record.id = config.id.replace('.', '-');
+
+					if (Ext.isString(config.name)) {
+						record.name = config.name;
+					}
+
+					return Ext.clone(record);
+				}();
+			};
+
+			api.layout.Dimension = function(config) {
+				var dimension = {};
+
+				// dimension: string
+
+				// items: [Record]
+
+				return function() {
+					if (!Ext.isObject(config)) {
+						console.log('Dimension config is not an object: ' + config);
+						return;
+					}
+
+					if (!Ext.isString(config.dimension)) {
+						console.log('Dimension name is not text: ' + config);
+						return;
+					}
+
+					if (config.dimension !== conf.finals.dimension.category.objectName) {
+						var records = [];
+
+						if (!Ext.isArray(config.items)) {
+							console.log('Dimension items is not an array: ' + config);
+							return;
+						}
+
+						for (var i = 0; i < config.items.length; i++) {
+							record = api.layout.Record(config.items[i]);
+
+							if (record) {
+								records.push(record);
+							}
+						}
+
+						config.items = records;
+
+						if (!config.items.length) {
+							console.log('Dimension has no valid items: ' + config);
+							return;
+						}
+					}
+
+					dimension.dimension = config.dimension;
+					dimension.items = config.items;
+
+					return Ext.clone(dimension);
+				}();
+			};
+
+			api.layout.Layout = function(config) {
+				var layout = {},
+					getValidatedDimensionArray,
+					validateSpecialCases;
+
+				// columns: [Dimension]
+
+				// rows: [Dimension]
+
+				// filters: [Dimension]
+
+				// classes: integer (5) - 1-7
+
+				// method: integer (2) - 2, 3 // 2=equal intervals, 3=equal counts
+
+				// colorLow: string ('ff0000')
+
+				// colorHigh: string ('00ff00')
+
+				// radiusLow: integer (5)
+
+				// radiusHigh: integer (15)
+
+				// opacity: integer (0.8) - 0-1
+
+				getValidatedDimensionArray = function(dimensionArray) {
+					var dimensions = [];
+
+					if (!(dimensionArray && Ext.isArray(dimensionArray) && dimensionArray.length)) {
+						return;
+					}
+
+					for (var i = 0, dimension; i < dimensionArray.length; i++) {
+						dimension = api.layout.Dimension(dimensionArray[i]);
+
+						if (dimension) {
+							dimensions.push(dimension);
+						}
+					}
+
+					dimensionArray = dimensions;
+
+					return dimensionArray.length ? dimensionArray : null;
+				};
+
+				validateSpecialCases = function() {
+					var dimConf = conf.finals.dimension,
+						dimensions,
+						objectNameDimensionMap = {};
+
+					if (!layout) {
+						return;
+					}
+
+					dimensions = Ext.Array.clean([].concat(layout.columns, layout.rows, layout.filters));
+
+					for (var i = 0; i < dimensions.length; i++) {
+						objectNameDimensionMap[dimensions[i].dimension] = dimensions[i];
+					}
+
+					if (layout.filters && layout.filters.length) {
+						for (var i = 0; i < layout.filters.length; i++) {
+
+							// Indicators as filter
+							if (layout.filters[i].dimension === dimConf.indicator.objectName) {
+								util.message.alert(PT.i18n.indicators_cannot_be_specified_as_filter || 'Indicators cannot be specified as filter');
+								return;
+							}
+
+							// Categories as filter
+							if (layout.filters[i].dimension === dimConf.category.objectName) {
+								util.message.alert(PT.i18n.categories_cannot_be_specified_as_filter || 'Categories cannot be specified as filter');
+								return;
+							}
+
+							// Data sets as filter
+							if (layout.filters[i].dimension === dimConf.dataSet.objectName) {
+								util.message.alert(PT.i18n.data_sets_cannot_be_specified_as_filter || 'Data sets cannot be specified as filter');
+								return;
+							}
+						}
+					}
+
+					// dc and in
+					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.indicator.objectName]) {
+						util.message.alert('Indicators and detailed data elements cannot be specified together');
+						return;
+					}
+
+					// dc and de
+					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataElement.objectName]) {
+						util.message.alert('Detailed data elements and totals cannot be specified together');
+						return;
+					}
+
+					// dc and ds
+					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataSet.objectName]) {
+						util.message.alert('Data sets and detailed data elements cannot be specified together');
+						return;
+					}
+
+					// dc and co
+					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.category.objectName]) {
+						util.message.alert('Categories and detailed data elements cannot be specified together');
+						return;
+					}
+
+					// Degs and datasets in the same query
+					//if (Ext.Array.contains(dimensionNames, dimConf.data.dimensionName) && store.dataSetSelected.data.length) {
+						//for (var i = 0; i < init.degs.length; i++) {
+							//if (Ext.Array.contains(dimensionNames, init.degs[i].id)) {
+								//alert(PT.i18n.data_element_group_sets_cannot_be_specified_together_with_data_sets);
+								//return;
+							//}
+						//}
+					//}
+
+					return true;
+				};
+
+				return function() {
+					var a = [],
+						objectNames = [],
+						dimConf = conf.finals.dimension,
+						isOu = false,
+						isOuc = false,
+						isOugc = false;
+
+					config.columns = getValidatedDimensionArray(config.columns);
+					config.rows = getValidatedDimensionArray(config.rows);
+					config.filters = getValidatedDimensionArray(config.filters);
+
+					// Config must be an object
+					if (!(config && Ext.isObject(config))) {
+						alert(init.el + ': Layout config is not an object');
+						return;
+					}
+
+					// At least one dimension specified as column or row
+					if (!(config.columns || config.rows)) {
+						alert(PT.i18n.at_least_one_dimension_must_be_specified_as_row_or_column);
+						return;
+					}
+
+					// Get object names and user orgunits
+					for (var i = 0, dim, dims = [].concat(config.columns, config.rows, config.filters); i < dims.length; i++) {
+						dim = dims[i];
+
+						if (dim) {
+
+							// Object names
+							if (Ext.isString(dim.dimension)) {
+								objectNames.push(dim.dimension);
+							}
+
+							// user orgunits
+							if (dim.dimension === dimConf.organisationUnit.objectName && Ext.isArray(dim.items)) {
+								for (var j = 0; j < dim.items.length; j++) {
+									if (dim.items[j].id === 'USER_ORGUNIT') {
+										isOu = true;
+									}
+									else if (dim.items[j].id === 'USER_ORGUNIT_CHILDREN') {
+										isOuc = true;
+									}
+									else if (dim.items[j].id === 'USER_ORGUNIT_GRANDCHILDREN') {
+										isOugc = true;
+									}
+								}
+							}
+						}
+					}
+
+					// At least one period
+					if (!Ext.Array.contains(objectNames, dimConf.period.objectName)) {
+						alert(PT.i18n.at_least_one_period_must_be_specified_as_column_row_or_filter);
+						return;
+					}
+
+					// Layout
+					layout.columns = config.columns;
+					layout.rows = config.rows;
+					layout.filters = config.filters;
+
+					// Properties
+					layout.classes = Ext.isNumber(config.classes) && !Ext.isEmpty(config.classes) ? config.classes : 5;
+					layout.method = Ext.isNumber(config.method) && !Ext.isEmpty(config.method) ? config.method : 2;
+					layout.colorLow = Ext.isString(config.colorLow) && !Ext.isEmpty(config.colorLow) ? config.colorLow : 'ff0000';
+					layout.colorHigh = Ext.isString(config.colorHigh) && !Ext.isEmpty(config.colorHigh) ? config.colorHigh : '00ff00';
+					layout.radiusLow = Ext.isNumber(config.radiusLow) && !Ext.isEmpty(config.radiusLow) ? config.radiusLow : 5;
+					layout.radiusHigh = Ext.isNumber(config.radiusHigh) && !Ext.isEmpty(config.radiusHigh) ? config.radiusHigh : 15;
+					layout.opacity = Ext.isNumber(config.opacity) && !Ext.isEmpty(config.opacity) ? config.opacity : 80;
+
+					layout.userOrganisationUnit = isOu;
+					layout.userOrganisationUnitChildren = isOuc;
+					layout.userOrganisationUnitGrandChildren = isOugc;
+
+					layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
+
+					if (!validateSpecialCases()) {
+						return;
+					}
+
+					return Ext.clone(layout);
+				}();
+			};
+
+			api.response.Header = function(config) {
+				var header = {};
+
+				// name: string
+
+				// meta: boolean
+
+				return function() {
+					if (!Ext.isObject(config)) {
+						console.log('Header is not an object: ' + config);
+						return;
+					}
+
+					if (!Ext.isString(config.name)) {
+						console.log('Header name is not text: ' + config);
+						return;
+					}
+
+					if (!Ext.isBoolean(config.meta)) {
+						console.log('Header meta is not boolean: ' + config);
+						return;
+					}
+
+					header.name = config.name;
+					header.meta = config.meta;
+
+					return Ext.clone(header);
+				}();
+			};
+
+			api.response.Response = function(config) {
+				var response = {};
+
+				// headers: [Header]
+
+				return function() {
+					var headers = [];
+
+					if (!(config && Ext.isObject(config))) {
+						alert('Data response invalid');
+						return false;
+					}
+
+					if (!(config.headers && Ext.isArray(config.headers))) {
+						alert('Data response invalid');
+						return false;
+					}
+
+					for (var i = 0, header; i < config.headers.length; i++) {
+						header = api.response.Header(config.headers[i]);
+
+						if (header) {
+							headers.push(header);
+						}
+					}
+
+					config.headers = headers;
+
+					if (!config.headers.length) {
+						alert('No valid response headers');
+						return;
+					}
+
+					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
+						alert('No values found');
+						return false;
+					}
+
+					if (config.headers.length !== config.rows[0].length) {
+						alert('Data invalid');
+						return false;
+					}
+
+					response.headers = config.headers;
+					response.metaData = config.metaData;
+					response.width = config.width;
+					response.height = config.height;
+					response.rows = config.rows;
+
+					return response;
+				}();
+			};
+		}());
+
 		// store
 		(function() {
 			store.organisationUnitLevels = GIS.core.OrganisationUnitLevelStore(gis);
 		}());
 
+		gis.api = api;
 		gis.store = store;
 
 		gis.olmap = GIS.core.getOLMap(gis);
