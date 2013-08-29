@@ -1153,11 +1153,7 @@ Ext.onReady( function() {
 
 		loadOrganisationUnits = function(view) {
 			Ext.data.JsonP.request({
-				url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'getGeoJson.action',
-				params: {
-					parentId: view.parentOrganisationUnit.id,
-					level: view.organisationUnitLevel.id
-				},
+				url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'getGeoJson.action?ids=LEVEL-2&ids=ImspTQPwCqd',
 				scope: this,
 				disableCaching: false,
 				success: function(r) {

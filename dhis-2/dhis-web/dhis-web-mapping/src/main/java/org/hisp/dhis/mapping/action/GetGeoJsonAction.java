@@ -32,10 +32,17 @@ import static org.hisp.dhis.util.ContextUtils.clearIfNotModified;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.struts2.ServletActionContext;
+import org.hisp.dhis.analytics.AggregationType;
+import org.hisp.dhis.analytics.AnalyticsService;
+import org.hisp.dhis.analytics.DataQueryParams;
+import org.hisp.dhis.common.DimensionalObject;
+import org.hisp.dhis.common.NameableObjectUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.system.filter.OrganisationUnitWithValidCoordinatesFilter;
 import org.hisp.dhis.system.util.FilterUtils;
@@ -58,23 +65,23 @@ public class GetGeoJsonAction
     {
         this.organisationUnitService = organisationUnitService;
     }
+    
+    private AnalyticsService analyticsService;
+
+    public void setAnalyticsService( AnalyticsService analyticsService )
+    {
+        this.analyticsService = analyticsService;
+    }
 
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private String parentId;
+    private Collection<String> ids;
     
-    public void setParentId( String parentId )
+    public void setIds( Collection<String> ids )
     {
-        this.parentId = parentId;
-    }
-
-    private String level;
-
-    public void setLevel( String level )
-    {
-        this.level = level;
+        this.ids = ids;
     }
     
     private String callback;
@@ -114,27 +121,27 @@ public class GetGeoJsonAction
     public String execute()
         throws Exception
     {
-        OrganisationUnit parent = organisationUnitService.getOrganisationUnit( parentId );
-
-        if ( parent == null )
+        Set<String> ouParams = new HashSet<String>();
+        
+        for ( String id : ids )
         {
-            parent = organisationUnitService.getOrganisationUnit( Integer.parseInt( parentId ) );
+            if ( ouParams.size() != 0 )
+            {
+                ouParams.add( ";" );
+            }            
+            else
+            {
+                id = "ou:" + id;
+            }
+            
+            ouParams.add( id );
         }
         
-        OrganisationUnitLevel orgUnitLevel = organisationUnitService.getOrganisationUnitLevel( level );
-
-        if ( orgUnitLevel == null )
-        {
-            orgUnitLevel = organisationUnitService.getOrganisationUnitLevel( Integer.parseInt( level ) );
-        }
+        DataQueryParams params = analyticsService.getFromUrl( ouParams, null, AggregationType.SUM, null, false, false, null );
         
-        if ( orgUnitLevel == null )
-        {
-            orgUnitLevel = organisationUnitService.getOrganisationUnitLevel( parent.getOrganisationUnitLevel() );
-        }
+        DimensionalObject dim = params.getDimension( DimensionalObject.ORGUNIT_DIM_ID );
         
-        Collection<OrganisationUnit> organisationUnits = organisationUnitService.getOrganisationUnitsAtLevel(
-            orgUnitLevel.getLevel(), parent );
+        List<OrganisationUnit> organisationUnits = NameableObjectUtils.asTypedList( dim.getItems() );
 
         FilterUtils.filter( organisationUnits, new OrganisationUnitWithValidCoordinatesFilter() );
 
@@ -161,14 +168,8 @@ public class GetGeoJsonAction
             }
         }
         
-        if ( orgUnitLevel.getLevel() > 1 )
-        {
-            Collection<OrganisationUnit> organisationUnitsUp = organisationUnitService.getOrganisationUnitsAtLevel( orgUnitLevel.getLevel() - 1 );
-            
-            FilterUtils.filter( organisationUnitsUp, new OrganisationUnitWithValidCoordinatesFilter() );
-            
-            hasCoordinatesUp = organisationUnitsUp.size() > 0;
-        }
+        //tmp
+        hasCoordinatesUp = false;
 
         return SUCCESS;
     }

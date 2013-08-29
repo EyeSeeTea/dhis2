@@ -80,6 +80,8 @@
         scope="prototype">
         <property name="organisationUnitService"
             ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+        <property name="analyticsService"
+            ref="org.hisp.dhis.analytics.AnalyticsService" />
     </bean>
 
     <bean id="org.hisp.dhis.mapping.action.GetGeoJsonFacilitiesAction"
