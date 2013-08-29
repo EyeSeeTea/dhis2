@@ -590,7 +590,6 @@ Ext.onReady( function() {
 			numberField: null,
 			imageUrl: null,
 			text: null,
-			width: 184,
 			height: 22,
 			value: false,
 			opacity: 0.8,
@@ -699,7 +698,7 @@ Ext.onReady( function() {
 
 				this.items = [
 					{
-						width: this.checkbox.width + 6,
+						width: this.checkbox.width + 4,
 						items: this.checkbox
 					},
 					{
@@ -708,7 +707,7 @@ Ext.onReady( function() {
 						bodyStyle: 'padding-top: 4px'
 					},
 					{
-						width: 98,
+						width: 105,
 						html: this.text,
 						bodyStyle: 'padding-top: 4px'
 					},
@@ -5415,7 +5414,7 @@ console.log(view);
 
 				a.push({
 					title: GIS.i18n.layer_stack_transparency,
-					bodyStyle: 'padding: 4px 6px 3px',
+					bodyStyle: 'padding: 3px 2px 2px 4px',
 					items: layersPanel,
 					collapsible: true,
 					animCollapse: false
