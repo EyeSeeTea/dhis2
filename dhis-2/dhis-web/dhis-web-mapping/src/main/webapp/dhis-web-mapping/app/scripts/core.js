@@ -1097,51 +1097,39 @@ Ext.onReady( function() {
 					return gis.conf.finals.widget.loadtype_organisationunit;
 				}
 			}());
-
-			//if (view.organisationUnitLevel.id !== src.organisationUnitLevel.id) {
-				//if (doExecute) {
-					//loadOrganisationUnits(view);
-				//}
-				//return gis.conf.finals.widget.loadtype_organisationunit;
-			//}
-
-			//if (view.parentOrganisationUnit.id !== src.parentOrganisationUnit.id) {
-				//if (doExecute) {
-					//loadOrganisationUnits(view);
-				//}
-				//return gis.conf.finals.widget.loadtype_organisationunit;
-			//}
 			
+			// period
+			(function() {
+				var viewIds = [],
+					viewFilter = view.filters[0],					
+					srcIds = [],
+					srcFilter = view.filters[0];
+					
+				if (viewFilter.items.length === srcFilter.items.length) {					
+					for (var i = 0; i < viewFilter.items.length; i++) {
+						viewIds.push(viewFilter.items[i].id);
+					}
+					
+					for (var i = 0; i < srcFilter.items.length; i++) {
+						srcIds.push(srcFilter.items[i].id);
+					}
+					
+					if (Ext.Array.difference(viewIds, srcIds).length !== 0) {
+						if (doExecute) {
+							loadData(view);
+						}
+						return gis.conf.finals.widget.loadtype_organisationunit;
+					}
+				}
+				else {
+					if (doExecute) {
+						loadData(view);
+					}
+					return gis.conf.finals.widget.loadtype_organisationunit;
+				}
+			}());
 			
-
-			//if (view.valueType !== src.valueType) {
-				//if (doExecute) {
-					//loadData(view);
-				//}
-				//return gis.conf.finals.widget.loadtype_organisationunit;
-			//}
-			//else {
-				//if (view.valueType === dimConf.indicator.id && view.indicator.id !== src.indicator.id) {
-					//if (doExecute) {
-						//loadData(view);
-					//}
-					//return gis.conf.finals.widget.loadtype_data;
-				//}
-				//if (view.valueType === dimConf.dataElement.id && view.dataElement.id !== src.dataElement.id) {
-					//if (doExecute) {
-						//loadData(view);
-					//}
-					//return gis.conf.finals.widget.loadtype_data;
-				//}
-			//}
-
-			//if (view.period.id !== src.period.id) {
-				//if (doExecute) {
-					//loadData(view);
-				//}
-				//return gis.conf.finals.widget.loadtype_data;
-			//}
-			
+			// legend			
 			if (typeof view.legendSet !== typeof src.legendSet) {
 				if (doExecute) {
 					loadLegend(view);
@@ -1159,31 +1147,6 @@ Ext.onReady( function() {
 					}
 					return gis.conf.finals.widget.loadtype_legend;
 			}
-			
-			
-			//if (view.legendType !== src.legendType) {
-				//if (doExecute) {
-					//loadLegend(view);
-				//}
-				//return gis.conf.finals.widget.loadtype_legend;
-			//}
-			//else {
-				//if (view.legendType === gis.conf.finals.widget.legendtype_automatic) {
-					//if (view.classes !== src.classes || view.method !== src.method || view.colorLow !== src.colorLow || view.radiusLow !== src.radiusLow ||	view.colorHigh !== src.colorHigh || view.radiusHigh !== src.radiusHigh) {
-						//if (doExecute) {
-							//loadLegend(view);
-						//}
-						//return gis.conf.finals.widget.loadtype_legend;
-					//}
-				//}
-
-				//if (view.legendType === gis.conf.finals.widget.legendtype_predefined && view.legendSet.id !== src.legendSet.id) {
-					//if (doExecute) {
-						//loadLegend(view);
-					//}
-					//return gis.conf.finals.widget.loadtype_legend;
-				//}
-			//}
 
 			gis.olmap.mask.hide();
 		};
