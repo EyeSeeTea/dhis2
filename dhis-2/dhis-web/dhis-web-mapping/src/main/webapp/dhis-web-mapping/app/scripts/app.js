@@ -707,7 +707,7 @@ Ext.onReady( function() {
 						bodyStyle: 'padding-top: 4px'
 					},
 					{
-						width: 105,
+						width: 103,
 						html: this.text,
 						bodyStyle: 'padding-top: 4px'
 					},
@@ -5414,7 +5414,7 @@ console.log(view);
 
 				a.push({
 					title: GIS.i18n.layer_stack_transparency,
-					bodyStyle: 'padding: 3px 2px 2px 4px',
+					bodyStyle: 'padding: 3px 2px 2px 6px',
 					items: layersPanel,
 					collapsible: true,
 					animCollapse: false
