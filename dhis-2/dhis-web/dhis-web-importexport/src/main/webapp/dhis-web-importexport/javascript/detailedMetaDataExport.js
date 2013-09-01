@@ -21,27 +21,11 @@ jQuery( function ()
             autoHeight: false
         } );
 
+    loadMetaDataAccordionEvents();
+
     // TODO: Improve performance on applying filters
     if ( $( "#metaDataUids" ).attr( "value" ) != "" )
     {
-//        var metaDataUids = JSON.parse( $( "#metaDataUids" ).val() );
-//        var metaDataCategories = [];
-//
-//        for ( var metaDataCategory in metaDataUids )
-//        {
-//            metaDataCategories.push( metaDataCategory );
-//        }
-//
-//        for ( var i = 0; i < metaDataArray.length; i++ )
-//        {
-//            for ( var j = 0; j < metaDataCategories.length; j++ )
-//            {
-//                if ( metaDataCategories[j] == lowercaseFirstLetter( metaDataArray[i] ) )
-//                {
-//                    selectCheckbox( metaDataArray[i] );
-//                }
-//            }
-//        }
         selectAllCheckboxes();
         $( "body" ).ajaxComplete( function ()
         {
@@ -259,6 +243,26 @@ function loadMetaData( metaDataCategoryName )
 // MetaData Category Accordion Commands
 // -----------------------------------------------------------------------------
 
+// Load MetaData Category Accordion Events
+function loadMetaDataAccordionEvents()
+{
+    for ( var i = 0; i < metaDataArray.length; i++ )
+    {
+        $( "#heading" + metaDataArray[i] ).click( {metaDataCategoryName: metaDataArray[i]}, selectMetaDataCategory );
+    }
+}
+
+// Select a MetaData Category from the MetaData accordion
+function selectMetaDataCategory( categoryName )
+{
+    var metaDataCategoryName = categoryName.data.metaDataCategoryName;
+    if ( $( "#checkbox" + metaDataCategoryName ).not( ":checked" ) )
+    {
+        $( "#checkbox" + metaDataCategoryName ).prop( "checked", true );
+        insertMetaDataDesign( metaDataCategoryName );
+    }
+}
+
 // Get all selected Uids
 function getSelectedUidsJson()
 {
@@ -287,7 +291,7 @@ function selectAllCheckboxes()
 {
     for ( var i = 0; i < metaDataArray.length; i++ )
     {
-        if ( !$( "#checkbox" + metaDataArray[i] ).is( ":checked" ) )
+        if ( $( "#checkbox" + metaDataArray[i] ).not( ":checked" ) )
         {
             $( "#checkbox" + metaDataArray[i] ).prop( "checked", true );
             insertMetaDataDesign( metaDataArray[i] );
@@ -315,7 +319,7 @@ function deselectAllCheckboxes()
 // Select a MetaData type checkbox
 function selectCheckbox( metaDataCategoryName )
 {
-    if ( !$( "#checkbox" + metaDataCategoryName ).is( ":checked" ) )
+    if ( $( "#checkbox" + metaDataCategoryName ).not( ":checked" ) )
     {
         $( "#checkbox" + metaDataCategoryName ).prop( "checked", true );
         insertMetaDataDesign( metaDataCategoryName );
@@ -440,7 +444,7 @@ function saveFilter()
             } );
     } else
     {
-        setHeaderDelayMessage( i18n_validate_filter );
+        //TODO : Input validation
     }
 }
 
@@ -502,7 +506,9 @@ function startExport()
     }
 
     $( "#exportJson" ).attr( "value", JSON.stringify( metaDataUids ) );
-    $( "#exportDialog" ).dialog();
+    jQuery( "#exportDialog" ).dialog( {
+        title: i18n_export
+    } );
 }
 
 // Export MetaData
@@ -574,7 +580,7 @@ function lowercaseFirstLetter( string )
     return string.charAt( 0 ).toLowerCase() + string.slice( 1 );
 }
 
-// Get MetaData Name
+// Get MetaData category name
 function getI18nMetaDataName( metaDataCategoryName )
 {
     switch ( metaDataCategoryName )
@@ -644,7 +650,7 @@ function getI18nMetaDataName( metaDataCategoryName )
     }
 }
 
-// Get MetaData Select all Name
+// Get MetaData Select all category name
 function getI18nMetaDataSelectAllName( metaDataCategoryName )
 {
     switch ( metaDataCategoryName )
@@ -714,7 +720,7 @@ function getI18nMetaDataSelectAllName( metaDataCategoryName )
     }
 }
 
-// Get Available Metadata
+// Get Available Metadata category name
 function getI18nAvailableMetaData( metaDataCategoryName )
 {
     switch ( metaDataCategoryName )
@@ -784,7 +790,7 @@ function getI18nAvailableMetaData( metaDataCategoryName )
     }
 }
 
-// Get Selected Metadata
+// Get Selected Metadata category name
 function getI18nSelectedMetaData( metaDataCategoryName )
 {
     switch ( metaDataCategoryName )

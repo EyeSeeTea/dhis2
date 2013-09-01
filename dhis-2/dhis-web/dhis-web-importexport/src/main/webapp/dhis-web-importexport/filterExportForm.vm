@@ -1,4 +1,6 @@
 <script type="text/javascript">
+    var i18n_export = '$i18n.getString( "export" )';
+
     var i18n_attributeTypes = '$i18n.getString( "attribute_types" )';
     var i18n_select_all_attributeTypes = '$i18n.getString( "select_all_attribute_types" )';
     var i18n_available_attributeTypes = '$i18n.getString( "available_attribute_types" )';
@@ -169,7 +171,7 @@
 #end
 
 <!-- FILTER FORM -->
-<form id="formFilter" name="formFilter">
+<form id="formFilter" name="formFilter" class="inputForm">
     <input type="hidden" id="metaDataUids" name="metaDataUids" value='$filter.metaDataUids'/>
     #if ($command == "addNew" || $command == "addAdHoc")
         <input type="hidden" id="uid" name="uid" value=""/>
@@ -177,28 +179,30 @@
         <input type="hidden" id="uid" name="uid" value="$filter.uid"/>
     #end
 
-    <div>
-        <table id="detailsList" style="width: 400px;">
-            <tr>
-                <th colspan="2">$i18n.getString( "filter_details" )</th>
-            </tr>
-            <tr>
-                <td><label>$i18n.getString( "name" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
-                <td>
-                    <input type="text" id="name" name="name" value="$filter.name" style="width: 100%;">
-                </td>
-            </tr>
-            <tr>
-                <td><label>$i18n.getString( "code" )</label></td>
-                <td>
-                    <input type="text" id="code" name="code" value="$filter.code" style="width: 100%;">
-                </td>
-            </tr>
-        </table>
-    </div>
+    #if ($command == "addNew" || $command == "update")
+        <div>
+            <table id="detailsList" style="width: 400px;">
+                <tr>
+                    <th colspan="2">$i18n.getString( "filter_details" )</th>
+                </tr>
+                <tr>
+                    <td><label>$i18n.getString( "name" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
+                    <td>
+                        <input type="text" id="name" name="name" maxlength="150" value="$filter.name" style="width: 100%;">
+                    </td>
+                </tr>
+                <tr>
+                    <td><label>$i18n.getString( "code" )</label></td>
+                    <td>
+                        <input type="text" id="code" name="code" maxlength="25" value="$filter.code" style="width: 100%;">
+                    </td>
+                </tr>
+            </table>
+        </div>
+    #end
 </form>
 
-<!-- METADATA TABLE -->
+<!-- METADATA ACCORDION -->
 <div id="mainDivAccordion" style="margin-bottom: 10px; margin-top: 10px; width: 90%;">
     <!-- ATTRIBUTES TYPES SELECTION -->
     <h6 id="headingAttributeTypes" style="font-size: 10pt;">$i18n.getString( "attribute_types" )</h6>
@@ -352,6 +356,7 @@
 </div>
 
 <div>
+    <!-- METADATA ACCORDION COMMANDS -->
     <table id="detailsList" style="width: 500px;">
         <tr>
             <td colspan="2">
@@ -416,7 +421,7 @@
             <tr>
                 <td colspan="2">
                     <input type="hidden" id="exportJson" value=''/>
-                    <input type="button" value="$i18n.getString( 'export' )" style="width:250px; font-size: 10pt;" onclick="exportDetailedMetaData();"/>
+                    <input type="button" id="exportButton" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only ui-state-active2" value="$i18n.getString( 'export' )" style="width:250px; font-size: 10pt;" onclick="exportDetailedMetaData();"/>
                 </td>
             </tr>
         </table>

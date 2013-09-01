@@ -6,8 +6,9 @@
 
 ##@author Ovidiu Rosu <rosu.ovi@gmail.com>
 
-<h3>$i18n.getString( "metadata_detailed_export" ) #openHelp( "filter" )</h3>
+<h3>$i18n.getString( "metadata_detailed_export" ) #openHelp( "detailed_metadata_export" )</h3>
 
+<!-- FILTER EXPORT FORM -->
 <div id="mainDivFilter" style="width: 70%;">
     <table class="mainPageTable">
         <tr>
@@ -41,17 +42,17 @@
                     </tr>
                     </thead>
                     <tbody id="filterTableBody">
-                    #foreach( $filter in $filters )
-                    <tr id="tr${filter.uid}">
-                        <td>$filter.name</td>
-                        <td>
-                            <a href="javascript:exportFilterButton( '$filter.uid' );" title="$i18n.getString( 'export' )"><img src="../images/start_process.png" alt="$i18n.getString( 'export' )"/></a>
-                            <a href="javascript:editFilterButton( '$filter.uid' );" title="$i18n.getString( 'edit' )"><img src="../images/edit.png" alt="$i18n.getString( 'edit' )"/></a>
-                            <a href="javascript:removeFilterButton( '$filter.uid' );" title="$i18n.getString( 'remove' )"><img src="../images/delete.png" alt="$i18n.getString( 'remove' )"/></a>
-                            <a href="javascript:showFilterDetails( '$filter.uid' );" title="$i18n.getString( 'show_details' )"><img src="../images/information.png" alt="$i18n.getString( 'show_details' )"/></a>
-                        </td>
-                    </tr>
-                    #end
+                        #foreach( $filter in $filters )
+                        <tr id="tr${filter.uid}">
+                            <td>$filter.name</td>
+                            <td>
+                                <a href="javascript:exportFilterButton( '$filter.uid' );" title="$i18n.getString( 'export' )"><img src="../images/start_process.png" alt="$i18n.getString( 'export' )"/></a>
+                                <a href="javascript:editFilterButton( '$filter.uid' );" title="$i18n.getString( 'edit' )"><img src="../images/edit.png" alt="$i18n.getString( 'edit' )"/></a>
+                                <a href="javascript:removeFilterButton( '$filter.uid' );" title="$i18n.getString( 'remove' )"><img src="../images/delete.png" alt="$i18n.getString( 'remove' )"/></a>
+                                <a href="javascript:showFilterDetails( '$filter.uid' );" title="$i18n.getString( 'show_details' )"><img src="../images/information.png" alt="$i18n.getString( 'show_details' )"/></a>
+                            </td>
+                        </tr>
+                        #end
                     </tbody>
                 </table>
                 <p></p>
@@ -92,13 +93,13 @@
         <tr>
             <td colspan="2">
                 <input type="checkbox" id="exportDependencies" name="exportDependencies"/>
-                <label for="exportDependencies" style="font-size: 10pt;">$i18n.getString( "export_with_dependencies" ) #openHelp( "exportDependencies" )</label>
+                <label for="exportDependencies" style="font-size: 10pt;">$i18n.getString( "export_with_dependencies" ) #openHelp( "export_with_dependencies" )</label>
             </td>
         </tr>
         <tr>
             <td colspan="2">
                 <input type="hidden" id="exportJson" value=''/>
-                <input type="button" value="$i18n.getString( 'export' )" style="width:250px; font-size: 10pt;" onclick="exportDetailedMetaData();"/>
+                <input type="button" id="exportButton" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only ui-state-active2" value="$i18n.getString( 'export' )" style="width:250px; font-size: 10pt;" onclick="exportDetailedMetaData();"/>
             </td>
         </tr>
     </table>

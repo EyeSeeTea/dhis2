@@ -71,7 +71,9 @@ function exportFilterButton( filterUid )
         if ( filters[i].id == filterUid )
         {
             $( "#exportJson" ).attr( "value", filters[i].metaDataUids );
-            $( "#exportDialog" ).dialog();
+            jQuery( "#exportDialog" ).dialog( {
+                title: i18n_export
+            } );
         }
     }
 }
