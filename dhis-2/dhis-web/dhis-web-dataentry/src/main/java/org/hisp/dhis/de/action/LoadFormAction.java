@@ -1,19 +1,20 @@
 package org.hisp.dhis.de.action;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -28,8 +29,15 @@ package org.hisp.dhis.de.action;
  */
 
 import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.dataelement.*;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategory;
+import org.hisp.dhis.dataelement.DataElementCategoryCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataelement.DataElementOperand;
+import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.dataentryform.DataEntryFormService;
 import org.hisp.dhis.dataset.DataSet;
@@ -40,7 +48,12 @@ import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -207,6 +220,13 @@ public class LoadFormAction
         return dataElementsNotInForm;
     }
 
+    private DataSet dataSet;
+
+    public DataSet getDataSet()
+    {
+        return dataSet;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -214,7 +234,8 @@ public class LoadFormAction
     public String execute()
         throws Exception
     {
-        DataSet dataSet = dataSetService.getDataSet( dataSetId, true, false, false );
+                
+        dataSet = dataSetService.getDataSet( dataSetId, true, false, false, true );
 
         List<DataElement> dataElements = new ArrayList<DataElement>( dataElementService.getDataElements( dataSet, null,
             null ) );
@@ -270,7 +291,7 @@ public class LoadFormAction
             {
                 int categoryOptionSize = cat.getCategoryOptions().size();
 
-                if ( catColSpan > 0 && categoryOptionSize > 0 )
+                if ( categoryOptionSize > 0 && catColSpan >= categoryOptionSize )
                 {
                     catColSpan = catColSpan / categoryOptionSize;
                     int total = optionCombos.size() / (catColSpan * categoryOptionSize);
@@ -296,11 +317,35 @@ public class LoadFormAction
 
         String displayMode = dataSet.getDataSetType();
 
+        if ( displayMode.equals( DataSet.TYPE_DEFAULT ) )
+        {
+            DataSet newDataSet = new DataSet();
+            newDataSet.mergeWith( dataSet );
+            dataSet = newDataSet;
+
+            for ( int i = 0; i < orderedCategoryCombos.size(); i++ )
+            {
+                Section section = new Section();
+                section.setId( i );
+                section.setSortOrder( i );
+
+                // generate a random uid so that equals work
+                section.setUid( CodeGenerator.generateCode() );
+
+                section.setDataSet( dataSet );
+                dataSet.getSections().add( section );
+
+                section.getDataElements().addAll( orderedDataElements.get( orderedCategoryCombos.get( i ) ) );
+            }
+
+            displayMode = DataSet.TYPE_SECTION;
+        }
+
         // ---------------------------------------------------------------------
         // For multi-org unit we only support custom forms
         // ---------------------------------------------------------------------
-        
-        if ( multiOrganisationUnit != null && multiOrganisationUnit != 0 ) 
+
+        if ( multiOrganisationUnit != null && multiOrganisationUnit != 0 )
         {
             OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( multiOrganisationUnit );
             List<OrganisationUnit> organisationUnitChildren = new ArrayList<OrganisationUnit>();
@@ -323,9 +368,10 @@ public class LoadFormAction
             organisationUnits.addAll( organisationUnitChildren );
 
             getSectionForm( dataElements, dataSet );
-            
+
             displayMode = DataSet.TYPE_SECTION_MULTIORG;
         }
+
         if ( displayMode.equals( DataSet.TYPE_SECTION ) )
         {
             getSectionForm( dataElements, dataSet );
@@ -334,7 +380,7 @@ public class LoadFormAction
         {
             getOtherDataEntryForm( dataElements, dataSet );
         }
-
+        
         return displayMode;
     }
 
@@ -381,7 +427,7 @@ public class LoadFormAction
             Collections.sort( dataElementsNotInForm, IdentifiableObjectNameComparator.INSTANCE );
         }
 
-        List<DataElement> des = new ArrayList<DataElement>();
+        List<DataElement> des;
 
         for ( DataElementCategoryCombo categoryCombo : orderedCategoryCombos )
         {

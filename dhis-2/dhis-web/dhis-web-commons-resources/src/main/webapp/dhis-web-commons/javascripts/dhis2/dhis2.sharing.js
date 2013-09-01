@@ -64,9 +64,9 @@ function addUserGroupAccessSelectedItem(e) {
         access: "r-------"
     });
 
-    $(tmpl_html).insertAfter( $('#sharingAccessTable tbody tr').not('[id]') );
+    $(tmpl_html).insertAfter( $('#sharingAccessTable tbody tr').not('[id]').last() );
 
-    $('#sharingFindUserGroup').val('')
+    $('#sharingFindUserGroup').val('');
     sharingSelectedItem = undefined;
 
     $( '#addUserGroupAccess' ).attr( 'disabled', true );
@@ -92,7 +92,7 @@ function setUserGroupAccesses(userGroupAccesses) {
                 access: item.access
             });
 
-            $(tmpl_html).insertAfter( $('#sharingAccessTable tbody tr').not('[id]') );
+            $(tmpl_html).insertAfter( $('#sharingAccessTable tbody tr').not('[id]').last() );
         });
     }
 }
@@ -107,6 +107,18 @@ function setPublicAccess(access) {
 
 function getPublicAccess() {
     return $( '#sharingPublicAccess' ).val();
+}
+
+function setExternalAccess(access) {
+    if(access) {
+        $('#sharingExternalAccess').attr('checked', true);
+    } else {
+        $('#sharingExternalAccess').removeAttr('checked');
+    }
+}
+
+function getExternalAccess() {
+    return $('#sharingExternalAccess').is(':checked');
 }
 
 function getUserGroupAccesses() {
@@ -131,9 +143,14 @@ function getUserGroupAccesses() {
 function showSharingDialog( type, uid ) {
     loadSharingSettings( type, uid ).done( function ( data ) {
         setPublicAccess( data.object.publicAccess );
+        setExternalAccess( data.object.externalAccess );
         setUserGroupAccesses( data.object.userGroupAccesses );
 
         $( '#sharingName' ).text( data.object.name );
+
+        if ( !data.meta.allowExternalAccess ) {
+            $( '#sharingExternalAccess' ).attr( 'disabled', true );
+        }
 
         if ( !data.meta.allowPublicAccess ) {
             $( '#sharingPublicAccess' ).attr( 'disabled', true );
@@ -200,6 +217,7 @@ function showSharingDialog( type, uid ) {
                     var me = $( this );
 
                     data.object.publicAccess = getPublicAccess();
+                    data.object.externalAccess = getExternalAccess();
                     data.object.userGroupAccesses = getUserGroupAccesses();
 
                     saveSharingSettings( type, uid, data ).done( function () {

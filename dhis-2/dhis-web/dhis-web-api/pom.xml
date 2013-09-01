@@ -23,7 +23,7 @@
     </dependency>
     <dependency>
       <groupId>org.hisp.dhis</groupId>
-      <artifactId>dhis-dxf2</artifactId>
+      <artifactId>dhis-service-dxf2</artifactId>
     </dependency>
         <dependency>
       <groupId>org.hisp.dhis</groupId>
@@ -53,18 +53,16 @@
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-service-mapgeneration</artifactId>
     </dependency>
+	<!-- 
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-service-sms</artifactId>
     </dependency>
+	-->
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-service-analytics</artifactId>
     </dependency>
-	<dependency>
-      <groupId>org.hisp.dhis</groupId>
-      <artifactId>dhis-web-api-mobile</artifactId>
-    </dependency>	
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
@@ -85,6 +83,10 @@
       <groupId>net.sf.jasperreports</groupId>
       <artifactId>jasperreports-fonts</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.hisp.dhis</groupId>
+      <artifactId>dhis-web-api-mobile</artifactId>
+    </dependency> <!-- remove this -->
   </dependencies>
 
   <properties>

@@ -1,19 +1,20 @@
 package org.hisp.dhis.aggregation.jdbc;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -46,6 +47,7 @@ import org.hisp.dhis.completeness.DataSetCompletenessResult;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.period.Period;
@@ -71,6 +73,13 @@ public class JdbcAggregatedDataValueStore
     public void setJdbcTemplate( JdbcTemplate jdbcTemplate )
     {
         this.jdbcTemplate = jdbcTemplate;
+    }
+
+    private StatementBuilder statementBuilder;
+
+    public void setStatementBuilder( StatementBuilder statementBuilder )
+    {
+        this.statementBuilder = statementBuilder;
     }
     
     private StatementManager statementManager; //TODO remove
@@ -400,5 +409,41 @@ public class JdbcAggregatedDataValueStore
             "AND organisationunitid IN ( " + getCommaDelimitedString( organisationUnitIds ) + " ) ";
         
         return jdbcTemplate.query( sql, new AggregatedDataSetCompletenessRowMapper() );
+    }
+
+    public void dropDataMart()
+    {
+        executeSilently( "drop table aggregateddatavalue" );
+        executeSilently( "drop table aggregatedorgunitdatavalue" );
+        executeSilently( "drop table aggregatedindicatorvalue" );
+        executeSilently( "drop table aggregatedorgunitindicatorvalue" );
+        executeSilently( "drop table aggregateddatasetcompleteness" );
+        executeSilently( "drop table aggregatedorgunitdatasetcompleteness" );
+    }
+    
+    public void createDataMart()
+    {
+        executeSilently( statementBuilder.getCreateAggregatedDataValueTable( false ) );
+        executeSilently( statementBuilder.getCreateAggregatedOrgUnitDataValueTable( false ) );
+        executeSilently( statementBuilder.getCreateAggregatedIndicatorTable( false ) );
+        executeSilently( statementBuilder.getCreateAggregatedOrgUnitIndicatorTable( false ) );
+        executeSilently( statementBuilder.getCreateDataSetCompletenessTable() );
+        executeSilently( statementBuilder.getCreateOrgUnitDataSetCompletenessTable() );        
+    }
+    
+    // -------------------------------------------------------------------------
+    // Supportive
+    // -------------------------------------------------------------------------
+
+    private void executeSilently( final String sql )
+    {
+        try
+        {
+            jdbcTemplate.execute( sql );
+        }
+        catch ( Exception ex )
+        {
+            // Ignore
+        }
     }
 }

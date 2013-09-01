@@ -13,14 +13,9 @@
     <id name="id" column="chartid">
       <generator class="native" />
     </id>
+    &identifiableProperties;
 
     <property name="name" column="name" not-null="true" length="230" />
-
-    <property name="uid" column="uid" length="11" />
-
-    <property name="created" type="timestamp" />
-
-    <property name="lastUpdated" type="timestamp" />
 
     <property name="domainAxisLabel" />
 
@@ -132,6 +127,21 @@
         foreign-key="fk_chart_orgunitgroups_orgunitgroupid" />
     </list>
     
+    <list name="organisationUnitLevels" table="chart_orgunitlevels">
+      <cache usage="read-write" />
+      <key column="chartid" foreign-key="fk_chart_orgunitlevels_chartid" />
+      <list-index column="sort_order" base="0" />
+      <element column="orgunitlevel" type="integer" />
+    </list>
+    
+    <list name="itemOrganisationUnitGroups" table="chart_itemorgunitgroups">
+      <cache usage="read-write" />
+      <key column="chartid" foreign-key="fk_chart_itemorgunitunitgroups_chartid" />
+      <list-index column="sort_order" base="0" />
+      <many-to-many column="orgunitgroupid" class="org.hisp.dhis.organisationunit.OrganisationUnitGroup"
+        foreign-key="fk_chart_itemorgunitgroups_orgunitgroupid" />
+    </list>
+    
     <property name="userOrganisationUnit" />
 
     <property name="userOrganisationUnitChildren" />
@@ -141,6 +151,8 @@
     <property name="rewindRelativePeriods" />
 
     <!-- Access properties -->
+    <property name="externalAccess" />
+
     <many-to-one name="user" class="org.hisp.dhis.user.User" column="userid" foreign-key="fk_chart_userid" />
 
     <property name="publicAccess" length="8" />

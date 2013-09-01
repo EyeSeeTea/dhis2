@@ -168,6 +168,9 @@ table.pivot {
 	background-color: #dae6f8;
 	text-align: center;
 }
+.pivot-dim.highlighted {
+	background-color: #c5d8f6;
+}
 .pivot-dim-subtotal {
 	background-color: #cad6e8;
 	text-align: center;
@@ -488,7 +491,7 @@ table.pivot {
 
 	/* Menu item */
 .x-menu-item-link {
-    padding: 4px 5px 4px 28px;
+    padding: 4px 5px 4px 26px;
 }
 	/* Menu item color */
 .x-menu-item-text {
@@ -500,6 +503,10 @@ table.pivot {
  *--------------------------------------------------------------------------*/
 
 	/* Menu item icon */
+.pt-menu-item-noicon .x-menu-item-link {
+	padding-left: 10px;
+}
+	
 .pt-menu-item-image {
     background-image:url('../images/dl_image.png');
     padding-left: 18px;
@@ -511,6 +518,16 @@ table.pivot {
 .pt-menu-item-datasource {
     background-image:url('../images/dl_datasource.png');
     padding-left: 18px;
+}
+
+.pt-menu-item-selected {
+    background-image:url('../images/check.png');
+    padding-left: 18px;
+}
+
+	/* Menu align */
+.pt-btn-menu {
+	margin-top: 2px;
 }
 
 /*----------------------------------------------------------------------------
@@ -540,6 +557,10 @@ table.pivot {
     height: 32px;
 }
 
+.x-btn-default-small {
+	border-radius: 1px;
+}
+
 .x-btn-default-toolbar-small-pressed {
 	border-color: #bbb;
     background-image: none;
@@ -550,6 +571,30 @@ table.pivot {
     background-image: -o-linear-gradient(top, #d1d1d1,#e5e5e5);
     background-image: -ms-linear-gradient(top, #d1d1d1,#e5e5e5);
     background-image: linear-gradient(top, #d1d1d1,#e5e5e5);
+}
+
+/*----------------------------------------------------------------------------
+ * PT Button
+ *--------------------------------------------------------------------------*/
+
+.pt-button-icon-gear {
+	width: 22px !important;
+	height: 22px !important;
+	background: url('../images/gear_18.png') no-repeat;
+}
+
+.pt-button-icon-table {
+	background: url('../images/table_14.png') no-repeat;
+}
+.pt-button-icon-chart {
+	background: url('../images/chart_14.png') no-repeat;
+}
+.pt-button-icon-map {
+	background: url('../images/map_14.png') no-repeat;
+}
+
+.pt-button-organisationunitselection .x-btn-center {
+	width: 18px !important;
 }
 
 
@@ -585,12 +630,15 @@ table.pivot {
 	background-image: none;
 	background-color: transparent;
 }
+.x-mask-msg div {
+    background-position: 11px center;
+}
 .x-mask-msg .x-mask-loading {
 	border: 0 none;
 	background-color: #000;
 	color: #fff;
 	border-radius: 2px;
-	padding: 10px 9px 10px 25px;
+	padding: 12px 14px 12px 30px;
 	opacity: 0.65;
 }
 
@@ -806,16 +854,15 @@ table.pivot {
 	padding: 6px 5px 4px 8px;
 	border: 0 none;
 	cursor: pointer;
-	border-top-left-radius: 1px;
-	border-top-right-radius: 1px;
+	border-radius: 0;
     background-image: none;
     background-color: #e0e0e0;
-    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #dcdcdc), color-stop(100%, #e5e5e5)) !important;
-    background-image: -webkit-linear-gradient(top, #dcdcdc, #e5e5e5) !important;
-    background-image: -moz-linear-gradient(top, #dcdcdc, #e5e5e5) !important;
-    background-image: -o-linear-gradient(top, #dcdcdc, #e5e5e5) !important;
-    background-image: -ms-linear-gradient(top, #dcdcdc, #e5e5e5) !important;
-    background-image: linear-gradient(top, #dcdcdc, #e5e5e5) !important;
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #dedede), color-stop(100%, #e6e6e6)) !important;
+    background-image: -webkit-linear-gradient(top, #dddddd, #e6e6e6) !important;
+    background-image: -moz-linear-gradient(top, #dddddd, #e6e6e6) !important;
+    background-image: -o-linear-gradient(top, #dddddd, #e6e6e6) !important;
+    background-image: -ms-linear-gradient(top, #dddddd, #e6e6e6) !important;
+    background-image: linear-gradient(top, #dddddd, #e6e6e6) !important;
 }
 	/* accordion title dock, default, collapsed */
 .pt-accordion .collapsed .x-accordion-hd {
@@ -824,8 +871,7 @@ table.pivot {
 
 	/* accordion title dock outer, shared */
 .pt-accordion .x-accordion-item {
-	border-top-left-radius: 2px;
-	border-top-right-radius: 2px;
+	border-radius: 1px;
 }
 	/* accordion title dock outer, default */
 .pt-accordion .x-accordion-item {

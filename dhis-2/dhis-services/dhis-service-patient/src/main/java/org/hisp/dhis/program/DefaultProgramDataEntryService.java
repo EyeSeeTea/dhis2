@@ -1,17 +1,20 @@
+package org.hisp.dhis.program;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,8 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.program;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -110,7 +111,7 @@ public class DefaultProgramDataEntryService
         // Inline Javascript to add to HTML before outputting
         // ---------------------------------------------------------------------
 
-        final String jQueryCalendar = "<script>datePicker(\"$PROGRAMSTAGEID-$DATAELEMENTID-val\", false, false);</script>";
+        final String jQueryCalendar = "<script>$DATAPICKER-METHOD(\"$PROGRAMSTAGEID-$DATAELEMENTID-val\", false, false);</script>";
 
         StringBuffer sb = new StringBuffer();
 
@@ -135,6 +136,7 @@ public class DefaultProgramDataEntryService
 
             String compulsory = "null";
             boolean allowProvidedElsewhere = false;
+            String dateMethod = "datePickerValid";
             String inputHTML = dataElementMatcher.group( 1 );
 
             Matcher identifierMatcher = IDENTIFIER_PATTERN_FIELD.matcher( inputHTML );
@@ -172,6 +174,10 @@ public class DefaultProgramDataEntryService
 
                     compulsory = BooleanUtils.toStringTrueFalse( psde.isCompulsory() );
                     allowProvidedElsewhere = psde.getAllowProvidedElsewhere();
+                    if ( psde.getAllowDateInFuture() )
+                    {
+                        dateMethod = "datePicker";
+                    }
                 }
 
                 if ( dataElement == null )
@@ -207,7 +213,7 @@ public class DefaultProgramDataEntryService
                     }
 
                     patientDataValue = getValue( patientDataValues, dataElementUid );
-                    
+
                     dataElementValue = patientDataValue != null ? patientDataValue.getValue() : dataElementValue;
                 }
                 else
@@ -298,6 +304,7 @@ public class DefaultProgramDataEntryService
                 inputHTML = inputHTML.replace( "$COMPULSORY", compulsory );
                 inputHTML = inputHTML.replace( "$SAVEMODE", "false" );
                 inputHTML = inputHTML.replace( "$TABINDEX", tabindex + "" );
+                inputHTML = inputHTML.replace( "$DATAPICKER-METHOD", dateMethod );
                 inputHTML = inputHTML.replaceAll( "\\$", "\\\\\\$" );
 
                 dataElementMatcher.appendReplacement( sb, inputHTML );
@@ -316,7 +323,7 @@ public class DefaultProgramDataEntryService
         // Inline Javascript to add to HTML before outputting
         // ---------------------------------------------------------------------
 
-        final String jQueryCalendar = "<script>datePicker(\"$PROGRAMSTAGEID-$DATAELEMENTID-val\", false);</script>";
+        final String jQueryCalendar = "<script>$DATAPICKER-METHOD(\"$PROGRAMSTAGEID-$DATAELEMENTID-val\", false);</script>";
 
         StringBuffer sb = new StringBuffer();
 
@@ -341,6 +348,7 @@ public class DefaultProgramDataEntryService
 
             String compulsory = "null";
             boolean allowProvidedElsewhere = false;
+            String dateMethod = "datePickerValid";
             String inputHTML = dataElementMatcher.group( 1 );
 
             Matcher identifierMatcher = IDENTIFIER_PATTERN_FIELD.matcher( inputHTML );
@@ -378,6 +386,10 @@ public class DefaultProgramDataEntryService
 
                     compulsory = BooleanUtils.toStringTrueFalse( psde.isCompulsory() );
                     allowProvidedElsewhere = psde.getAllowProvidedElsewhere();
+                    if ( psde.getAllowDateInFuture() )
+                    {
+                        dateMethod = "datePicker";
+                    }
                 }
 
                 if ( dataElement == null )
@@ -480,6 +492,7 @@ public class DefaultProgramDataEntryService
                 inputHTML = inputHTML.replace( "$COMPULSORY", compulsory );
                 inputHTML = inputHTML.replace( "$SAVEMODE", "false" );
                 inputHTML = inputHTML.replace( "$TABINDEX", tabindex + "" );
+                inputHTML = inputHTML.replace( "$DATAPICKER-METHOD", dateMethod );
                 inputHTML = inputHTML.replaceAll( "\\$", "\\\\\\$" );
 
                 dataElementMatcher.appendReplacement( sb, inputHTML );
@@ -762,9 +775,9 @@ public class DefaultProgramDataEntryService
 
     /**
      * Replaces i18n string in the custom form code.
-     *
+     * 
      * @param dataEntryFormCode the data entry form html.
-     * @param i18n              the I18n object.
+     * @param i18n the I18n object.
      * @return internationalized data entry form html.
      */
     private String populateI18nStrings( String dataEntryFormCode, I18n i18n )

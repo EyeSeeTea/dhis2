@@ -1,19 +1,20 @@
 package org.hisp.dhis.system.util;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -133,6 +134,30 @@ public class TextUtils
         }
         
         return string.substring( beginIndex, endIndex );
+    }
+    
+    /**
+     * Removes the last given number of characters from the given string. Returns
+     * null if the string is null. Returns an empty string if characters is less
+     * than zero or greater than the length of the string.
+     * 
+     * @param string the string.
+     * @param characters number of characters to remove.
+     * @return the substring.
+     */
+    public static String removeLast( String string, int characters )
+    {
+        if ( string == null )
+        {
+            return null;
+        }
+        
+        if ( characters < 0 || characters > string.length() )
+        {
+            return EMPTY;
+        }
+        
+        return string.substring( 0, string.length() - characters );
     }
     
     /**

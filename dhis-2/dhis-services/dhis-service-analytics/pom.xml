@@ -27,11 +27,11 @@
     </dependency>
     <dependency>
       <groupId>org.hisp.dhis</groupId>
-      <artifactId>dhis-service-administration</artifactId>
+      <artifactId>dhis-service-patient</artifactId>
     </dependency>
     <dependency>
       <groupId>org.hisp.dhis</groupId>
-      <artifactId>dhis-support-system</artifactId>
+      <artifactId>dhis-service-administration</artifactId>
     </dependency>
     
     <!-- Other -->

@@ -1,6 +1,11 @@
+<script>
+	var phoneNumberAreaCode =  '$!encoder.jsEscape( $phoneNumberAreaCode , "'" )';
+</script>
 
 #if($!customRegistrationForm)
 	$customRegistrationForm
+#elseif($!patientRegistrationForm)
+	#parse( "/dhis-web-caseentry/defaultPatientForm.vm" )
 #else
 	## Macro for generating the jQuery validation rules 
 	#macro( validate $type $require )
@@ -10,10 +15,7 @@
 		{validate:{required:true}}
 	  #end
 	#end
-
-#if($!program && $program.disableRegistrationFields )
-
-#else
+	
 	<tr id='registrationDateTR'>
 		<td class='text-column'><label for="registration_date">$i18n.getString( "registration_date" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
 		<td class="input-column" colspan='2'>
@@ -50,7 +52,7 @@
 				<option value="A" #if($patient.dobType=='A') selected #end >$i18n.getString( "approximated" )</option>
 			</select>
 			<input type="text" id="birthDate" name="birthDate" value='$!format.formatDate($!patient.birthDate)' style='width:136px;' />
-			<input type="text" id="age" name="age" placeholder="Enter age in years..." value='$!patient.getIntegerValueOfAge()' class="{validate:{number:true}}" style='width:136px;' />
+			<input type="text" id="age" name="age" placeholder="$i18n.getString('enter_age_in_years')" value='$!patient.getIntegerValueOfAge()' class="{validate:{number:true}}" style='width:136px;' />
 		</td>
 	</tr>
 
@@ -61,10 +63,11 @@
 		</td>
 	</tr>
 
-	<tr>
+	<tr class='phoneNumberTR'>
 		<td class='text-column'><label for="phoneNumber">$i18n.getString( "phone_number" )</label></td>
 		<td class="input-column">
 			<input type="text" id="phoneNumber" name="phoneNumber" class="{validate:{phone:true}}"/>
+			<input type="button" value='+' style='width:20px;' onclick='addPhoneNumberField(phoneNumberAreaCode);' />
 		</td>
 	</tr>
 
@@ -122,8 +125,6 @@
 
 	<tr><td>&nbsp;</td></tr>
 
-#end
-
 #if( $identifierTypes.size() > 0)
 	<!--IDENTIFIERS -->
 	<tr><th colspan="2" class="heading-column">$i18n.getString("patient_identifiers")</th></tr>
@@ -132,9 +133,17 @@
 		#else
 			#set( $identifier = '' )
 			#set( $identifier = $identiferMap.get( $identifierType.id ) )
+			#if($identifierType.type=='orgunitCount' && $!orgunitCountIdentifier)
+				#set( $identifier = $!orgunitCountIdentifier )
+			#end
+		
 			<tr> 
 				<td class='text-column'><label>$encoder.htmlEncode($identifierType.displayName) #if($identifierType.mandatory) <em title="$i18n.getString( "required" )" class="required">*</em> #end</label></td>
-				<td class="input-column"><input type="text" id="iden$identifierType.id" name="iden$identifierType.id" value="$!identifier" data="{related:$identifierType.related}" #if($identifierType.related && $!patient.underAge) disabled="disabled" #end class="{validate:{required:$identifierType.mandatory, #if($!identifierType.noChars) maxlength:$identifierType.noChars, #end #if($identifierType.type=='number') number:true #elseif($!identifierType.type=='letter') lettersonly:true #end }}" /></td>	
+				<td class="input-column">
+					<input type="text" id="iden$identifierType.id" name="iden$identifierType.id" value="$!identifier" data="{related:$identifierType.related}" #if($identifierType.related && $!patient.underAge) disabled="disabled" #end 
+						class="{validate:{required:$identifierType.mandatory, #if($!identifierType.noChars) maxlength:$identifierType.noChars, #end #if($identifierType.type=='number') number:true #elseif($!identifierType.type=='letter') lettersonly:true #end }}" 
+						#if($identifierType.type=='orgunitCount') readonly #end />
+				</td>	
 			</tr>
 		#end
 	#end
@@ -246,7 +255,13 @@
 				<td class='text-column'><label for="dateOfIncident">$encoder.htmlEncode($program.dateOfIncidentDescription) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 				<td colspan='2' class='input-column'><input type="text" id="dateOfIncident" name="dateOfIncident"  class="{validate:{required:true}}"></td>
 			</tr>
-			<script>datePickerInRangeValid( 'dateOfIncident' , 'enrollmentDate', false, true );</script>
+			<script>
+				#if($program.selectEnrollmentDatesInFuture=='true')
+					datePickerInRange( 'dateOfIncident' , 'enrollmentDate', false, true );
+				#else
+					datePickerInRangeValid( 'dateOfIncident' , 'enrollmentDate', false, true );
+				#end
+			</script>
 		#else
 			<script>datePickerValid( 'enrollmentDate', true );</script>
 		#end
@@ -263,9 +278,23 @@
 		showById('birthDate');
 	#end
 	
-	#if( $!patient.phoneNumber && $patient.phoneNumber!="") 
-		setFieldValue('phoneNumber',"$!patient.phoneNumber")
-	#else 
-		setFieldValue('phoneNumber',"$!phoneNumberAreaCode")
+	#if( $!patient.phoneNumber )
+		if(!addRelationship){
+			var phoneNumbers = '$!encoder.jsEscape( $patient.phoneNumber , "'" )'.split(";");
+			setFieldValue('phoneNumber',phoneNumbers[0]);
+			#if($!customRegistrationForm)
+				for( var i = 1;i<phoneNumbers.length;i++ )
+				{
+					addCustomPhoneNumberField(phoneNumbers[i]);
+				}
+			#elseif( $!patient.phoneNumber && $patient.phoneNumber!="")
+				for( var i = 1;i<phoneNumbers.length;i++ )
+				{
+					addPhoneNumberField(phoneNumbers[i]);
+				}
+			#end
+		}
+	#else
+		setFieldValue('phoneNumber',phoneNumberAreaCode)
 	#end
 </script>

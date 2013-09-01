@@ -1,5 +1,4 @@
 <link href="../dhis-web-commons/javascripts/jQuery/ui/css/redmond/jquery-ui-1.9.1.custom.css" media="screen" rel="stylesheet" type="text/css">
-<link href="../dhis-web-commons/css/light_blue/light_blue.css" media="screen" rel="stylesheet" type="text/css">
 <link href="../dhis-web-commons/css/widgets.css" media="screen" rel="stylesheet" type="text/css">
 <link href="../dhis-web-commons/css/print.css" media="print" rel="stylesheet" type="text/css">
 <link href="../favicon.ico" rel="shortcut icon">
@@ -16,7 +15,7 @@
 			
 		jQuery('#designTextarea').ckeditor();
 		#if($!registrationForm)
-			jQuery("#designTextarea").ckeditorGet().setData('$encoder.jsEscape( $!registrationForm.dataEntryForm.htmlCode, "'" )');
+			jQuery("#designTextarea").ckeditorGet().setData('$!encoder.jsEscape( $registrationForm.dataEntryForm.htmlCode , "'" )');
 		#end
 		
 	});
@@ -49,19 +48,14 @@
 }
 </style>
 
-<form id="saveDataEntryForm" name="saveDataEntryForm" action="savePatientRegistrationForm.action" method="post">
+<form id="saveDataEntryForm" name="saveDataEntryForm" action="savePatientRegistrationForm.action" method="get">
 
 <input type="hidden" name="programId" id="programId" value="$!program.id"/>
-<input type="hidden" name="disableRegistrationFields" id="disableRegistrationFields" value="$!program.disableRegistrationFields"/>
 <input type="hidden" name="dataEntryFormId" id="dataEntryFormId" value="$!registrationForm.dataEntryForm.id"/>
 
 <h3>$i18n.getString( "add_patient_registration_form" )</h3>
 <h4>$!program.displayName</h4>
 
-#set($disableRegistrationFields=false)
-#if($program)
-	#set($disableRegistrationFields=$program.disableRegistrationFields)
-#end
 <div class="container" >
 	<table id="detailsList" width="100%">
 		<col/>
@@ -102,7 +96,6 @@
         <td>
 		    <button type="button" id="saveButton" onclick="isSave='true';validateDataEntryForm();">$i18n.getString( 'save' )</button>
             <button type="submit" id="saveAndCloseButton" onclick="isSave='false';"/>$i18n.getString( 'save_and_close' )</button>
-            <button type="button" id="validateButton" onclick="validateFormOnclick();">$i18n.getString( 'validate_form' )</button>
             <button type="button" id="cancelButton" onclick="window.location='patientRegistrationForm.action'">$i18n.getString( 'cancel' )</button>
 			&nbsp;&nbsp;<span style="color:#606060">|</span>&nbsp;
 		    <button type="button" id="propertiesButton" onclick="openPropertiesSelector()"/>$i18n.getString( 'insert_properties' )</button>
@@ -126,17 +119,36 @@
 		</tr>
 		<tr>
 			<td>
-				<select id="fixedAttrSelector" multiple="multiple" style="width:450px;height:270px" ondblclick="insertElement( 'fixedAttr' )">
-					<option value="registrationDate">$i18n.getString('registration_date') #if($disableRegistrationFields=='false')*#end</option>
-					<option value="fullName">$i18n.getString('full_name') #if($disableRegistrationFields=='false')*#end</option>
-					<option value="gender">$i18n.getString('gender') #if($disableRegistrationFields=='false')*#end</option>
-					<option value="dobType">$i18n.getString('dob_type') #if($disableRegistrationFields=='false')*#end</option>
-					<option value="birthDate">$i18n.getString('birth_date') #if($disableRegistrationFields=='false')*#end</option>
+				<select id="fixedAttrSelector" multiple="multiple" style="width:450px;height:270px" onclick='suggestionSelectorToggle()' ondblclick="insertElement( 'fixedAttr' )">
+					<option value="registrationDate">$i18n.getString('registration_date')</option>
+					<option value="fullName">$i18n.getString('full_name')</option>
+					<option value="gender">$i18n.getString('gender')</option>
+					<option value="dobType">$i18n.getString('dob_type')</option>
+					<option value="birthDate">$i18n.getString('birth_date')</option>
+					<option value="age">$i18n.getString('age_years')</option>
 					<option value="phoneNumber">$i18n.getString('phone_number')</option>
 					<option value="deathDate">$i18n.getString('death_date')</option>
 					<option value="isDead">$i18n.getString('is_dead')</option>
 					<option value="healthWorker">$i18n.getString('health_worker')</option>
 				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<input type='text' id='suggestedField' style='width:350px;'>
+				<select style='width:350px;display:none;' id='genderSelector'>
+					<option value="">[$i18n.getString( "please_select" )]</option>
+					<option value="M">$i18n.getString( "male" )</option>
+					<option value="F">$i18n.getString( "female" )</option>
+					<option value="T">$i18n.getString( "transgender" )</option>
+				</select>
+				<select style='width:350px;display:none;' id='dobTypeSelector'>
+					<option value="">[$i18n.getString( "please_select" )]</option>
+					<option value="V">$i18n.getString( "verified" )</option>
+					<option value="D">$i18n.getString( "declared" )</option>
+					<option value="A">$i18n.getString( "approximated" )</option>
+				</select>
+				<input type='checkbox' id='hiddenField'/>$i18n.getString("is_hidden")
 			</td>
 		</tr>
 	</table>
@@ -152,7 +164,7 @@
 			<td>
 				<select id="identifiersSelector" multiple="multiple" style="width:450px;height:270px" ondblclick="insertElement( 'iden' )">
 					#foreach( $identifierType in $identifierTypes )
-						<option value="$identifierType.uid" mandatory='$identifierType.mandatory'>$encoder.htmlEncode($identifierType.displayName) #if($identifierType.mandatory=='true' && $disableRegistrationFields=='false') * #end </option>
+						<option value="$identifierType.uid" mandatory='$identifierType.mandatory'>$encoder.htmlEncode($identifierType.displayName) #if($identifierType.mandatory=='true') * #end </option>
 					#end
 				</select>
 			</td>
@@ -188,9 +200,9 @@
 		<tr>
 			<td>
 				<select id="programAttrSelector" multiple="multiple" style="width:450px;height:270px" ondblclick="insertElement( 'prg' )">
-					<option value="enrollmentDate" mandatory='true'>$encoder.htmlEncode($program.dateOfEnrollmentDescription) *</option>
+					<option value="enrollmentDate" #if($program.useBirthDateAsEnrollmentDate=='false') mandatory='true' #end >$encoder.htmlEncode($program.dateOfEnrollmentDescription) #if($program.useBirthDateAsEnrollmentDate=='false') * #end</option>
 					#if($program.displayIncidentDate=='true')
-					<option value="dateOfIncident" mandatory='true'>$encoder.htmlEncode($program.dateOfIncidentDescription) *</option>
+					<option value="dateOfIncident" #if($program.useBirthDateAsIncidentDate=='false') mandatory='true' #end>$encoder.htmlEncode($program.dateOfIncidentDescription) #if($program.useBirthDateAsIncidentDate=='false') * #end</option>
 					#end
 				</select>
 			</td>

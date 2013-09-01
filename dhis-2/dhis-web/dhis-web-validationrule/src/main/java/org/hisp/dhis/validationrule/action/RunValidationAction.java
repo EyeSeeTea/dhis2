@@ -1,19 +1,20 @@
 package org.hisp.dhis.validationrule.action;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,11 +28,7 @@ package org.hisp.dhis.validationrule.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
+import com.opensymphony.xwork2.Action;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.Grid;
@@ -44,7 +41,10 @@ import org.hisp.dhis.validation.ValidationRuleGroup;
 import org.hisp.dhis.validation.ValidationRuleService;
 import org.hisp.dhis.validation.comparator.ValidationResultComparator;
 
-import com.opensymphony.xwork2.Action;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Margrethe Store
@@ -82,13 +82,13 @@ public class RunValidationAction
     {
         this.organisationUnitService = organisationUnitService;
     }
-    
+
     // -------------------------------------------------------------------------
     // Input/output
     // -------------------------------------------------------------------------
 
     private Integer organisationUnitId;
-    
+
     public void setOrganisationUnitId( Integer organisationUnitId )
     {
         this.organisationUnitId = organisationUnitId;
@@ -124,14 +124,14 @@ public class RunValidationAction
     {
         this.validationRuleGroupId = validationRuleGroupId;
     }
-    
+
     private List<ValidationResult> validationResults = new ArrayList<ValidationResult>();
 
     public List<ValidationResult> getValidationResults()
     {
         return validationResults;
     }
-    
+
     private Grid aggregateResults;
 
     public Grid getAggregateResults()
@@ -145,7 +145,7 @@ public class RunValidationAction
     {
         return maxExceeded;
     }
-    
+
     private OrganisationUnit organisationUnit;
 
     public OrganisationUnit getOrganisationUnit()
@@ -160,7 +160,7 @@ public class RunValidationAction
     public String execute()
     {
         organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
-        
+
         Collection<OrganisationUnit> organisationUnits = organisationUnitService.getOrganisationUnitWithChildren( organisationUnit.getId() );
 
         if ( validationRuleGroupId == -1 )
@@ -181,13 +181,13 @@ public class RunValidationAction
         }
 
         maxExceeded = validationResults.size() > ValidationRuleService.MAX_VIOLATIONS;
-        
+
         Collections.sort( validationResults, new ValidationResultComparator() );
 
         SessionUtils.setSessionVar( KEY_VALIDATIONRESULT, validationResults );
 
         log.info( "Validation done" );
-        
+
         return SUCCESS;
     }
 }

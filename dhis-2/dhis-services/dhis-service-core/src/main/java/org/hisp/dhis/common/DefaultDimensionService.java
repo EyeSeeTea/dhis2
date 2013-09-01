@@ -1,19 +1,20 @@
 package org.hisp.dhis.common;
 
 /*
- * Copyright (c) 2004-2005, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the <ORGANIZATION> nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -37,16 +38,17 @@ import static org.hisp.dhis.common.DimensionType.ORGANISATIONUNIT;
 import static org.hisp.dhis.common.DimensionType.ORGANISATIONUNIT_GROUPSET;
 import static org.hisp.dhis.common.DimensionType.PERIOD;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_LEVEL;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_ORGUNIT_GROUP;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_CHILDREN;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_GRANDCHILDREN;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
@@ -65,6 +67,7 @@ import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.RelativePeriodEnum;
 import org.hisp.dhis.period.RelativePeriods;
+import org.hisp.dhis.system.util.UniqueArrayList;
 import org.hisp.dhis.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -250,7 +253,7 @@ public class DefaultDimensionService
                 else if ( PERIOD.equals( type ) )
                 {
                     List<RelativePeriodEnum> enums = new ArrayList<RelativePeriodEnum>();                
-                    Set<Period> periods = new HashSet<Period>();
+                    List<Period> periods = new UniqueArrayList<Period>();
                     
                     for ( String isoPeriod : uids )
                     {
@@ -274,8 +277,6 @@ public class DefaultDimensionService
                 }
                 else if ( ORGANISATIONUNIT.equals( type ) )
                 {
-                    List<OrganisationUnit> ous = new ArrayList<OrganisationUnit>();
-                    
                     for ( String ou : uids )
                     {
                         if ( KEY_USER_ORGUNIT.equals( ou ) )
@@ -286,18 +287,40 @@ public class DefaultDimensionService
                         {
                             object.setUserOrganisationUnitChildren( true );
                         }
+                        else if ( KEY_USER_ORGUNIT_GRANDCHILDREN.equals( ou ) )
+                        {
+                            object.setUserOrganisationUnitGrandChildren( true );
+                        }
+                        else if ( ou != null && ou.startsWith( KEY_LEVEL ) )
+                        {
+                            int level = DimensionalObjectUtils.getLevelFromLevelParam( ou );
+                            
+                            if ( level > 0 )
+                            {
+                                object.getOrganisationUnitLevels().add( level );
+                            }
+                        }
+                        else if ( ou != null && ou.startsWith( KEY_ORGUNIT_GROUP ) )
+                        {
+                            String uid = DimensionalObjectUtils.getUidFromOrgUnitGroupParam( ou );
+                            
+                            OrganisationUnitGroup group = identifiableObjectManager.get( OrganisationUnitGroup.class, uid );
+                            
+                            if ( group != null )
+                            {
+                                object.getItemOrganisationUnitGroups().add( group );
+                            }
+                        }
                         else
                         {
                             OrganisationUnit unit = identifiableObjectManager.get( OrganisationUnit.class, ou );
                             
                             if ( unit != null )
                             {
-                                ous.add( unit );
+                                object.getOrganisationUnits().add( unit );
                             }
                         }
                     }
-                    
-                    object.setOrganisationUnits( ous );
                 }
                 else if ( CATEGORY.equals( type ) )
                 {

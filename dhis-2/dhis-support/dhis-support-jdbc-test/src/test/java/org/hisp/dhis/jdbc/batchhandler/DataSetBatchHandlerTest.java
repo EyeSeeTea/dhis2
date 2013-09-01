@@ -1,19 +1,20 @@
 package org.hisp.dhis.jdbc.batchhandler;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,13 +28,6 @@ package org.hisp.dhis.jdbc.batchhandler;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Collection;
-
 import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
 import org.hisp.dhis.DhisTest;
@@ -45,6 +39,10 @@ import org.hisp.dhis.period.PeriodType;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collection;
+
+import static org.junit.Assert.*;
+
 /**
  * @author Lars Helge Overland
  * @version $Id: DataSetBatchHandlerTest.java 4949 2008-04-21 07:59:54Z larshelg $
@@ -54,13 +52,13 @@ public class DataSetBatchHandlerTest
 {
     @Autowired
     private BatchHandlerFactory batchHandlerFactory;
-    
+
     private BatchHandler<DataSet> batchHandler;
-    
+
     private DataSet dataSetA;
     private DataSet dataSetB;
     private DataSet dataSetC;
-    
+
     // -------------------------------------------------------------------------
     // Fixture
     // -------------------------------------------------------------------------
@@ -69,18 +67,18 @@ public class DataSetBatchHandlerTest
     public void setUpTest()
     {
         dataSetService = (DataSetService) getBean( DataSetService.ID );
-        
+
         periodService = (PeriodService) getBean( PeriodService.ID );
-        
+
         batchHandler = batchHandlerFactory.createBatchHandler( DataSetBatchHandler.class );
 
         batchHandler.init();
-        
+
         PeriodType periodType = periodService.getPeriodTypeByName( MonthlyPeriodType.NAME );
-        
+
         dataSetA = createDataSet( 'A', periodType );
         dataSetB = createDataSet( 'B', periodType );
-        dataSetC = createDataSet( 'C', periodType );        
+        dataSetC = createDataSet( 'C', periodType );
     }
 
     @Override
@@ -88,13 +86,13 @@ public class DataSetBatchHandlerTest
     {
         batchHandler.flush();
     }
-    
+
     @Override
     public boolean emptyDatabaseAfterTest()
     {
         return true;
     }
-    
+
     // -------------------------------------------------------------------------
     // Tests
     // -------------------------------------------------------------------------
@@ -107,9 +105,9 @@ public class DataSetBatchHandlerTest
         batchHandler.addObject( dataSetC );
 
         batchHandler.flush();
-        
+
         Collection<DataSet> dataSets = dataSetService.getAllDataSets();
-        
+
         assertTrue( dataSets.contains( dataSetA ) );
         assertTrue( dataSets.contains( dataSetB ) );
         assertTrue( dataSets.contains( dataSetC ) );
@@ -121,7 +119,7 @@ public class DataSetBatchHandlerTest
         int idA = batchHandler.insertObject( dataSetA, true );
         int idB = batchHandler.insertObject( dataSetB, true );
         int idC = batchHandler.insertObject( dataSetC, true );
-        
+
         assertNotNull( dataSetService.getDataSet( idA ) );
         assertNotNull( dataSetService.getDataSet( idB ) );
         assertNotNull( dataSetService.getDataSet( idC ) );
@@ -131,12 +129,12 @@ public class DataSetBatchHandlerTest
     public void testUpdateObject()
     {
         int id = batchHandler.insertObject( dataSetA, true );
-        
+
         dataSetA.setId( id );
         dataSetA.setName( "UpdatedName" );
-        
+
         batchHandler.updateObject( dataSetA );
-        
+
         assertEquals( "UpdatedName", dataSetService.getDataSet( id ).getName() );
     }
 
@@ -144,9 +142,9 @@ public class DataSetBatchHandlerTest
     public void testGetObjectIdentifier()
     {
         int referenceId = dataSetService.addDataSet( dataSetA );
-        
+
         int retrievedId = batchHandler.getObjectIdentifier( "DataSetA" );
-        
+
         assertEquals( referenceId, retrievedId );
     }
 
@@ -154,9 +152,9 @@ public class DataSetBatchHandlerTest
     public void testObjectExists()
     {
         dataSetService.addDataSet( dataSetA );
-        
+
         assertTrue( batchHandler.objectExists( dataSetA ) );
-        
+
         assertFalse( batchHandler.objectExists( dataSetB ) );
     }
 }

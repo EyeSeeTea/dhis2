@@ -1,19 +1,20 @@
 package org.hisp.dhis.user;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -32,6 +33,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -185,13 +187,13 @@ public class DefaultUserService
     }
 
     @Override
-    public Collection<User> getAllUsersBetween( int first, int max )
+    public List<User> getAllUsersBetween( int first, int max )
     {
         return userStore.getAllOrderedName( first, max );
     }
     
     @Override
-    public Collection<User> getAllUsersBetweenByName( String name, int first, int max )
+    public List<User> getAllUsersBetweenByName( String name, int first, int max )
     {
         return userStore.getAllLikeNameOrderedName( name, first, max );
     }
@@ -227,7 +229,12 @@ public class DefaultUserService
                 }
             } );
     }
-
+    
+    public List<User> getUsersByUid( List<String> uids )
+    {
+        return userStore.getByUid( uids );
+    }
+    
     public Collection<UserCredentials> getUsersByOrganisationUnitBetween( OrganisationUnit unit, int first, int max )
     {
         return userCredentialsStore.getUsersByOrganisationUnitBetween( unit, first, max );

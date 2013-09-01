@@ -37,7 +37,11 @@
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-service-administration</artifactId>
     </dependency>
-    
+    <dependency>
+      <groupId>org.hisp.dhis</groupId>
+      <artifactId>dhis-service-eventreporting</artifactId>
+    </dependency> 
+	
     <!-- JasperReports -->
 
     <dependency>
@@ -49,11 +53,11 @@
       <artifactId>jasperreports-fonts</artifactId>
     </dependency>
     <dependency>
-      <groupId>jfree</groupId>
+      <groupId>org.jfree</groupId>
       <artifactId>jfreechart</artifactId>
     </dependency>
     <dependency>
-      <groupId>jfree</groupId>
+      <groupId>org.jfree</groupId>
       <artifactId>jcommon</artifactId>
     </dependency>
     <dependency>

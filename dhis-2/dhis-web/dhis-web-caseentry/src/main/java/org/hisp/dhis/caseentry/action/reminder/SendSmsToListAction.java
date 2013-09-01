@@ -1,17 +1,20 @@
+package org.hisp.dhis.caseentry.action.reminder;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,8 +28,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.caseentry.action.reminder;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -38,9 +39,9 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.program.ProgramStageInstanceService;
+import org.hisp.dhis.sms.SmsSender;
 import org.hisp.dhis.sms.SmsServiceException;
 import org.hisp.dhis.sms.outbound.OutboundSms;
-import org.hisp.dhis.sms.outbound.OutboundSmsService;
 import org.hisp.dhis.user.CurrentUserService;
 
 import com.opensymphony.xwork2.Action;
@@ -61,7 +62,7 @@ public class SendSmsToListAction
 
     private PatientService patientService;
 
-    private OutboundSmsService outboundSmsService;
+    private SmsSender smsSender;
 
     private ProgramStageInstanceService programStageInstanceService;
 
@@ -77,6 +78,8 @@ public class SendSmsToListAction
 
     private Boolean searchBySelectedOrgunit;
 
+    private Boolean searchByUserOrgunits;
+
     private Boolean followup;
 
     // -------------------------------------------------------------------------
@@ -88,9 +91,9 @@ public class SendSmsToListAction
         this.currentUserService = currentUserService;
     }
 
-    public void setOutboundSmsService( OutboundSmsService outboundSmsService )
+    public void setSmsSender( SmsSender smsSender )
     {
-        this.outboundSmsService = outboundSmsService;
+        this.smsSender = smsSender;
     }
 
     public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
@@ -118,6 +121,11 @@ public class SendSmsToListAction
         this.searchBySelectedOrgunit = searchBySelectedOrgunit;
     }
 
+    public void setSearchByUserOrgunits( Boolean searchByUserOrgunits )
+    {
+        this.searchByUserOrgunits = searchByUserOrgunits;
+    }
+
     public void setPatientService( PatientService patientService )
     {
         this.patientService = patientService;
@@ -127,10 +135,6 @@ public class SendSmsToListAction
     {
         this.searchTexts = searchTexts;
     }
-
-    // -------------------------------------------------------------------------
-    // Input & Output
-    // -------------------------------------------------------------------------
 
     private String msg;
 
@@ -154,14 +158,28 @@ public class SendSmsToListAction
     public String execute()
         throws Exception
     {
-        OrganisationUnit organisationUnit = (searchBySelectedOrgunit) ? selectionManager.getSelectedOrganisationUnit()
-            : null;
+        OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
+        Collection<OrganisationUnit> orgunits = new HashSet<OrganisationUnit>();
 
-        Collection<Integer> programStageInstanceIds = patientService.getProgramStageInstances( searchTexts,
-            organisationUnit, followup, null, null );
+        if ( searchByUserOrgunits )
+        {
+            Collection<OrganisationUnit> userOrgunits = currentUserService.getCurrentUser().getOrganisationUnits();
+            orgunits.addAll( userOrgunits );
+        }
+        else if ( searchBySelectedOrgunit )
+        {
+            orgunits.add( organisationUnit );
+        }
+        else
+        {
+            organisationUnit = null;
+        }
+
+        Collection<Integer> programStageInstanceIds = patientService.getProgramStageInstances( searchTexts, orgunits,
+            followup, null, null );
 
         Set<String> phoneNumberList = new HashSet<String>( patientService.getPatientPhoneNumbers( searchTexts,
-            organisationUnit, followup, null, null ) );
+            orgunits, followup, null, null ) );
         try
         {
             OutboundSms outboundSms = new OutboundSms();
@@ -169,7 +187,7 @@ public class SendSmsToListAction
             outboundSms.setRecipients( phoneNumberList );
             outboundSms.setSender( currentUserService.getCurrentUsername() );
 
-            outboundSmsService.sendMessage( outboundSms, null );
+            smsSender.sendMessage( outboundSms, null );
 
             programStageInstanceService.updateProgramStageInstances( programStageInstanceIds, outboundSms );
 
@@ -182,5 +200,4 @@ public class SendSmsToListAction
 
         return SUCCESS;
     }
-
 }

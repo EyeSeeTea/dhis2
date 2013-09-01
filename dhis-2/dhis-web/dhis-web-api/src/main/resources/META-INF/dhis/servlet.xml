@@ -33,6 +33,9 @@
         <entry key="jsonp" value="application/javascript" />
         <entry key="xml" value="application/xml" />
         <entry key="png" value="image/png" />
+        <entry key="pdf" value="application/pdf" />
+        <entry key="xls" value="application/vnd.ms-excel" />
+        <entry key="csv" value="application/csv" />
       </map>
     </constructor-arg>
   </bean>
@@ -60,6 +63,12 @@
         <bean class="org.hisp.dhis.api.view.JacksonJsonView">
           <constructor-arg name="withPadding" value="true" />
         </bean>
+
+        <bean class="org.hisp.dhis.api.view.PdfGridView" />
+
+        <bean class="org.hisp.dhis.api.view.ExcelGridView" />
+
+        <bean class="org.hisp.dhis.api.view.CsvGridView" />
       </list>
     </property>
 

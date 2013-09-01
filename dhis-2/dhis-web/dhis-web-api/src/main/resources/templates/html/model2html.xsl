@@ -58,6 +58,7 @@
   <xsl:include href="optionSets.xsl" />
   <xsl:include href="program.xsl" />
   <xsl:include href="programStage.xsl" />
+  <xsl:include href="event.xsl" />
 
   <!--@author Ovidiu Rosu <rosu.ovi@gmail.com>-->
   <xsl:include href="filter.xsl" />

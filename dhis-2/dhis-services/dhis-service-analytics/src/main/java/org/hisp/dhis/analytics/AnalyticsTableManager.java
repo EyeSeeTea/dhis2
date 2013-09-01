@@ -1,19 +1,20 @@
 package org.hisp.dhis.analytics;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -44,6 +45,23 @@ public interface AnalyticsTableManager
     public static final String COMPLETENESS_TARGET_TABLE_NAME = "completenesstarget";
     
     /**
+     * Returns analytics tables which yearly partitions. Yearly partitions will
+     * be generated starting from the earliest existing data value until the
+     * latest existing data value.
+     * 
+     * @param last3YearsOnly whether to generate for last 3 years only.
+     */
+    List<AnalyticsTable> getTables( boolean last3YearsOnly );
+    
+    /**
+     * Returns analytics tables which yearly partitions.
+     * 
+     * @param earliest the start date for the first year to generate table partitions.
+     * @param latest the end date for the last year to generate table partitions.
+     */
+    List<AnalyticsTable> getTables( Date earliest, Date latest );
+    
+    /**
      * Checks if the database content is in valid state for analytics table generation.
      */
     boolean validState();
@@ -63,13 +81,13 @@ public interface AnalyticsTableManager
      * 
      * @param tableName the table name.
      */
-    void createTable( String tableName );
+    void createTable( AnalyticsTable table );
     
     /**
      * Creates single indexes on the given columns of the analytics table with
      * the given name.
      * 
-     * @param indexes
+     * @param indexes the analytics indexes.
      */
     Future<?> createIndexesAsync( ConcurrentLinkedQueue<AnalyticsIndex> indexes );
     
@@ -77,33 +95,17 @@ public interface AnalyticsTableManager
      * Attempts to drop analytics table, then rename temporary table to analytics
      * table.
      * 
-     * @param tableName the name of the analytics table.
+     * @param table the analytics table.
      */
-    void swapTable( String tableName );
+    void swapTable( AnalyticsTable table );
     
     /**
      * Copies and denormalizes rows from data value table into analytics table.
      * The data range is based on the start date of the data value row.
      * 
-     * @param tables
+     * @param tables the analytics tables.
      */
-    Future<?> populateTableAsync( ConcurrentLinkedQueue<String> tables );    
-
-    /**
-     * Returns a list of string arrays in where the first index holds the database
-     * column name, the second index holds the database column data type and the 
-     * third column holds a table alias and name, i.e.:
-     * 
-     * 0 = database column name
-     * 1 = database column data type
-     * 2 = column alias and name
-     */
-    List<String[]> getDimensionColumns();
-    
-    /**
-     * Returns a list of database column names.
-     */
-    List<String> getDimensionColumnNames();
+    Future<?> populateTableAsync( ConcurrentLinkedQueue<AnalyticsTable> tables );    
 
     /**
      * Retrieves the start date of the period of the earliest data value row.
@@ -119,9 +121,9 @@ public interface AnalyticsTableManager
      * Checks whether the given table has no rows, if so drops the table. Returns
      * true if the table was empty and pruned, if not false.
      * 
-     * @param tableName the name of the table to prune.
+     * @param table the analytics table.
      */
-    boolean pruneTable( String tableName );
+    boolean pruneTable( AnalyticsTable table );
     
     /**
      * Drops the given table.
@@ -135,17 +137,17 @@ public interface AnalyticsTableManager
      * organisation unit level column values to null for the levels above the
      * given aggregation level.
      * 
-     * @param tables
+     * @param tables the analytics tables.
      * @param dataElements the data element uids to apply aggregation levels for.
      * @param aggregationLevel the aggregation level.
      */
-    Future<?> applyAggregationLevels( ConcurrentLinkedQueue<String> tables, Collection<String> dataElements, int aggregationLevel );
+    Future<?> applyAggregationLevels( ConcurrentLinkedQueue<AnalyticsTable> tables, Collection<String> dataElements, int aggregationLevel );
     
     /**
      * Performs vacuum or optimization of the given table. The type of operation
      * performed is dependent on the underlying DBMS.
      * 
-     * @param tables
+     * @param tables the analytics tables.
      */
-    Future<?> vacuumTablesAsync( ConcurrentLinkedQueue<String> tables );
+    Future<?> vacuumTablesAsync( ConcurrentLinkedQueue<AnalyticsTable> tables );
 }

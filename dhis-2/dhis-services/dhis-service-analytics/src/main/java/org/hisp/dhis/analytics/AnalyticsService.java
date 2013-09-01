@@ -1,19 +1,20 @@
 package org.hisp.dhis.analytics;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -36,6 +37,56 @@ import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.i18n.I18nFormat;
 
 /**
+ * <p>This interface is responsible for retrieving aggregated data. Data will be
+ * returned in a grid object or as a dimensional key-value mapping.</p>
+ * 
+ * <p>Most objects accept a DataQueryParams object which encapsulates the query 
+ * parameters. The dimensions in the response will appear in the same order as
+ * they are set on the DataQueryParams object. You can use various methods for
+ * setting indicators, data elements, data sets, periods, organisation units,
+ * categories, data element group sets and organisation unit group sets on the
+ * the DataQueryParams object. Objects can be defined as dimensions or filters.</p>
+ * 
+ * <p>Example usage for setting multiple indicators and a period as dimensions
+ * and an organisation unit as filter. In the grid response the first column
+ * will contain indicator identifiers, the second column will contain period
+ * identifiers and the third column will contain aggregated values. Note that
+ * the organisation unit is excluded since it is defined as a filter:</p>
+ * 
+ * <pre>
+ * <code>
+ * DataQueryParams params = new DataQueryParams();
+ * 
+ * params.setIndicators( indicators );
+ * params.setPeriod( period );
+ * params.setFilterOrganisationUnit( organisationUnit );
+ * 
+ * Grid grid = analyticsService.getAggregatedDataValues( params );
+ * </code>
+ * </pre>
+ * 
+ * <p>Example usage for including category option combos in the response. Note that 
+ * the index position of category option combos will follow the order of when the
+ * enableCategoryOptionCombos method was called. In the map response, the keys
+ * will represent the dimensions defined in the DataQueryParams object and will
+ * contain dimension identifiers separated by the "-" character. The key will
+ * be of type String and contain a data element identifier, a category option 
+ * combo identifier and an organisation unit identifier in that order. The map 
+ * values will be the aggregated values of type Double:</p>
+ * 
+ * <pre>
+ * <code>
+ * DataQueryParams params = new DataQueryParams();
+ * 
+ * params.setDataElement( dataElement );
+ * params.enableCategoryOptionCombos();
+ * params.setOrganisationUnits( organisationUnits );
+ * params.setFilterPeriod( period );
+ * 
+ * Map<String, Double> map = analyticsService.getAggregatedDataValueMapping( params );
+ * </code>
+ * </pre>
+ * 
  * @author Lars Helge Overland
  */
 public interface AnalyticsService
@@ -53,7 +104,7 @@ public interface AnalyticsService
     /**
      * Generates an aggregated value grid for the given query. The grid will
      * represent a table with dimensions used as columns and rows as specified
-     * in columnDimensions and rowDimensions arguments.
+     * in columns and rows dimension arguments.
      * 
      * @param params the data query parameters.
      * @param tableLayout whether to render the grid as a table with columns and rows,
@@ -93,11 +144,12 @@ public interface AnalyticsService
      * @param aggregationType the aggregation type.
      * @param measureCriteria the measure criteria.
      * @param skipMeta whether to skip the meta data part of the response.
+     * @param ignoreLimit whether to ignore the max number of cells limit.
      * @param format the i18n format.
      * @return a data query parameter object created based on the given URL info.
      */
     DataQueryParams getFromUrl( Set<String> dimensionParams, Set<String> filterParams, 
-        AggregationType aggregationType, String measureCriteria, boolean skipMeta, I18nFormat format );
+        AggregationType aggregationType, String measureCriteria, boolean skipMeta, boolean ignoreLimit, I18nFormat format );
     
     /**
      * Creates a data query parameter object from the given BaseAnalyticalObject.

@@ -1,19 +1,20 @@
 package org.hisp.dhis.mapgeneration;
 
 /*
- * Copyright (c) 2011, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -44,9 +45,9 @@ public class LegendItem
 {
     private Interval interval;
 
-    private static final int WIDTH = 25;
-
+    private static final int WIDTH = 22;
     private static final int HEIGHT = 20;
+    private static final int LABEL_MARGIN = 6;
 
     public LegendItem( Interval interval )
     {
@@ -68,7 +69,7 @@ public class LegendItem
 
         g.setColor( Color.BLACK );
         g.setFont( Legend.PLAIN_FONT );
-        g.drawString( label, WIDTH + 15, HEIGHT - 5 );
+        g.drawString( label, WIDTH + LABEL_MARGIN, HEIGHT - 5 );
     }
 
     public int getHeight()

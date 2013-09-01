@@ -1,17 +1,20 @@
+package org.hisp.dhis.caseentry.action.patient;
+
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,11 +28,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.caseentry.action.patient;
-
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -100,17 +103,25 @@ public class ShowAddRelationshipPatientAction
 
     private Collection<User> healthWorkers;
 
+    private List<Program> programs;
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
     {
-        patient = patientService.getPatient( id.intValue() );
+        OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
+        patient = patientService.getPatient( id );
 
         identifierTypes = patientIdentifierTypeService.getAllPatientIdentifierTypes();
         Collection<PatientAttribute> patientAttributes = patientAttributeService.getAllPatientAttributes();
-        Collection<Program> programs = programService.getAllPrograms();
+
+        programs = new ArrayList<Program>( programService.getProgramsByDisplayOnAllOrgunit( true, null ) );
+        programs.addAll( programService.getProgramsByDisplayOnAllOrgunit( false, organisationUnit ) );
+        programs.retainAll( programService.getProgramsByCurrentUser() );
+        programs.removeAll( programService.getPrograms( Program.SINGLE_EVENT_WITHOUT_REGISTRATION ) );
+
         for ( Program program : programs )
         {
             identifierTypes.removeAll( program.getPatientIdentifierTypes() );
@@ -172,7 +183,6 @@ public class ShowAddRelationshipPatientAction
             }
         }
 
-        OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
         healthWorkers = organisationUnit.getUsers();
 
         return SUCCESS;
@@ -181,10 +191,15 @@ public class ShowAddRelationshipPatientAction
     // -------------------------------------------------------------------------
     // Getter/Setter
     // -------------------------------------------------------------------------
-    
+
     public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
         this.selectionManager = selectionManager;
+    }
+
+    public List<Program> getPrograms()
+    {
+        return programs;
     }
 
     public void setProgramService( ProgramService programService )

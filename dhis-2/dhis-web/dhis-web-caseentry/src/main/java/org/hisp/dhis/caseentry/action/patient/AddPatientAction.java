@@ -1,17 +1,20 @@
+package org.hisp.dhis.caseentry.action.patient;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,8 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.caseentry.action.patient;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -53,6 +54,10 @@ import org.hisp.dhis.patient.PatientIdentifierTypeService;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.patient.util.PatientIdentifierGenerator;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
+import org.hisp.dhis.relationship.Relationship;
+import org.hisp.dhis.relationship.RelationshipService;
+import org.hisp.dhis.relationship.RelationshipType;
+import org.hisp.dhis.relationship.RelationshipTypeService;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.user.UserService;
 
@@ -93,6 +98,10 @@ public class AddPatientAction
 
     private SystemSettingManager systemSettingManager;
 
+    private RelationshipTypeService relationshipTypeService;
+
+    private RelationshipService relationshipService;
+
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -107,7 +116,7 @@ public class AddPatientAction
 
     private String gender;
 
-    private String phoneNumber;
+    private String[] phoneNumber;
 
     private String registrationDate;
 
@@ -122,6 +131,10 @@ public class AddPatientAction
     private boolean isDead;
 
     private String deathDate;
+
+    private Integer relationshipId;
+
+    private boolean relationshipFromA;
 
     private String message;
 
@@ -178,12 +191,24 @@ public class AddPatientAction
         // Set Other information for patient
         // ---------------------------------------------------------------------
 
-        phoneNumber = (phoneNumber!=null && phoneNumber.trim().equals( systemSettingManager
-            .getSystemSetting( SystemSettingManager.KEY_PHONE_NUMBER_AREA_CODE ) )) ? null : phoneNumber;
+        String phone = "";
 
+        for ( String _phoneNumber : phoneNumber )
+        {
+            _phoneNumber = (_phoneNumber != null && _phoneNumber.isEmpty() && _phoneNumber.trim().equals(
+                systemSettingManager.getSystemSetting( SystemSettingManager.KEY_PHONE_NUMBER_AREA_CODE ) )) ? null
+                : _phoneNumber;
+            if ( _phoneNumber != null )
+            {
+                phone += _phoneNumber + ";";
+            }
+        }
+
+        phone = (phone.isEmpty()) ? null : phone.substring( 0, phone.length() - 1 );
+
+        patient.setPhoneNumber( phone );
         patient.setGender( gender );
         patient.setIsDead( false );
-        patient.setPhoneNumber( phoneNumber );
         patient.setUnderAge( underAge );
         patient.setOrganisationUnit( organisationUnit );
         patient.setIsDead( isDead );
@@ -203,7 +228,7 @@ public class AddPatientAction
         {
             verified = (verified == null) ? false : verified;
 
-            Character dobType = (verified) ? 'V' : 'D';
+            Character dobType = (verified) ? Patient.DOB_TYPE_VERIFIED : Patient.DOB_TYPE_DECLARED;
 
             if ( !verified && age != null )
             {
@@ -276,6 +301,7 @@ public class AddPatientAction
         {
             gender = Patient.FEMALE;
         }
+
         String identifier = PatientIdentifierGenerator.getNewIdentifier( _birthDate, gender );
 
         PatientIdentifier systemGenerateIdentifier = patientIdentifierService.get( null, identifier );
@@ -351,6 +377,43 @@ public class AddPatientAction
         Integer id = patientService.createPatient( patient, representativeId, relationshipTypeId,
             patientAttributeValues );
 
+        // -------------------------------------------------------------------------
+        // Create relationship
+        // -------------------------------------------------------------------------
+
+        if ( relationshipId != null && relationshipTypeId != null )
+        {
+            Patient relationship = patientService.getPatient( relationshipId );
+            if ( relationship != null )
+            {
+                if ( underAge )
+                {
+                    patient.setRepresentative( relationship );
+                }
+
+                Relationship rel = new Relationship();
+                if ( relationshipFromA )
+                {
+                    rel.setPatientA( relationship );
+                    rel.setPatientB( patient );
+                }
+                else
+                {
+                    rel.setPatientA( patient );
+                    rel.setPatientB( relationship );
+                }
+                if ( relationshipTypeId != null )
+                {
+                    RelationshipType relType = relationshipTypeService.getRelationshipType( relationshipTypeId );
+                    if ( relType != null )
+                    {
+                        rel.setRelationshipType( relType );
+                        relationshipService.saveRelationship( rel );
+                    }
+                }
+            }
+        }
+
         message = id + "_" + systemGenerateIdentifier.getIdentifier();
 
         return SUCCESS;
@@ -363,6 +426,26 @@ public class AddPatientAction
     public void setUserService( UserService userService )
     {
         this.userService = userService;
+    }
+
+    public void setRelationshipTypeService( RelationshipTypeService relationshipTypeService )
+    {
+        this.relationshipTypeService = relationshipTypeService;
+    }
+
+    public void setRelationshipId( Integer relationshipId )
+    {
+        this.relationshipId = relationshipId;
+    }
+
+    public void setRelationshipFromA( boolean relationshipFromA )
+    {
+        this.relationshipFromA = relationshipFromA;
+    }
+
+    public void setRelationshipService( RelationshipService relationshipService )
+    {
+        this.relationshipService = relationshipService;
     }
 
     public void setSystemSettingManager( SystemSettingManager systemSettingManager )
@@ -455,7 +538,7 @@ public class AddPatientAction
         this.gender = gender;
     }
 
-    public void setPhoneNumber( String phoneNumber )
+    public void setPhoneNumber( String[] phoneNumber )
     {
         this.phoneNumber = phoneNumber;
     }

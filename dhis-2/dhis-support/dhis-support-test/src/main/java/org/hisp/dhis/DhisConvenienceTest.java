@@ -1,19 +1,20 @@
 package org.hisp.dhis;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -28,14 +29,17 @@ package org.hisp.dhis;
  */
 
 import java.io.File;
+import java.io.StringReader;
 import java.lang.reflect.Method;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import javax.xml.XMLConstants;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.aggregation.AggregatedDataValueService;
 import org.hisp.dhis.aggregation.AggregatedOrgUnitDataValueService;
 import org.hisp.dhis.chart.Chart;
@@ -101,6 +105,7 @@ import org.hisp.dhis.validation.ValidationRuleGroup;
 import org.hisp.dhis.validation.ValidationRuleService;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
+import org.xml.sax.InputSource;
 
 /**
  * @author Lars Helge Overland
@@ -108,6 +113,8 @@ import org.springframework.aop.support.AopUtils;
  */
 public abstract class DhisConvenienceTest
 {
+    protected static final Log log = LogFactory.getLog( DhisConvenienceTest.class );
+    
     protected static final String BASE_UID = "123456789a";
     protected static final String BASE_IN_UID = "inabcdefgh";
     protected static final String BASE_DE_UID = "deabcdefgh";
@@ -250,6 +257,7 @@ public abstract class DhisConvenienceTest
 
         if ( actual.size() != collection.size() )
         {
+            log.warn( "Actual collection has different size compared to reference collection: " + actual.size() + " / " + collection.size() );
             return false;
         }
 
@@ -257,6 +265,7 @@ public abstract class DhisConvenienceTest
         {
             if ( !collection.contains( object ) )
             {
+                log.warn( "Object in actual collection not part of reference collection: " + object );
                 return false;
             }
         }
@@ -265,6 +274,7 @@ public abstract class DhisConvenienceTest
         {
             if ( !actual.contains( object ) )
             {
+                log.warn( "Object in reference collection not part of actual collection: " + object );
                 return false;
             }
         }
@@ -993,6 +1003,7 @@ public abstract class DhisConvenienceTest
         
         return constant;
     }
+    
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
@@ -1039,7 +1050,54 @@ public abstract class DhisConvenienceTest
     }
 
     // -------------------------------------------------------------------------
-    // Validation Criteria
+    // Allow xpath testing of DXF2
     // -------------------------------------------------------------------------
 
+    protected String xpathTest( String xpathString, String xml )
+        throws XPathExpressionException
+    {
+        InputSource source = new InputSource( new StringReader( xml ) );
+        XPathFactory factory = XPathFactory.newInstance();
+        XPath xpath = factory.newXPath();
+        xpath.setNamespaceContext( new Dxf2NamespaceResolver() );
+
+        return xpath.evaluate( xpathString, source );
+    }
+
+    protected class Dxf2NamespaceResolver
+        implements NamespaceContext
+    {
+
+        @Override
+        public String getNamespaceURI( String prefix )
+        {
+            if ( prefix == null )
+            {
+                throw new IllegalArgumentException( "No prefix provided!" );
+            }
+            else
+            {
+                if ( prefix.equals( "d" ) )
+                {
+                    return "http://dhis2.org/schema/dxf/2.0";
+                }
+                else
+                {
+                    return XMLConstants.NULL_NS_URI;
+                }
+            }
+        }
+
+        @Override
+        public String getPrefix( String namespaceURI )
+        {
+            return null;
+        }
+
+        @Override
+        public Iterator<?> getPrefixes( String namespaceURI )
+        {
+            return null;
+        }
+    }
 }

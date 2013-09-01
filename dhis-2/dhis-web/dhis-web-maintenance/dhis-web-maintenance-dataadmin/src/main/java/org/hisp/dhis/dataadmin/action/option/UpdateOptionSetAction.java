@@ -1,17 +1,20 @@
+package org.hisp.dhis.dataadmin.action.option;
+
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,18 +28,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.dataadmin.action.option;
-
-import java.util.List;
-
+import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.option.OptionService;
 import org.hisp.dhis.option.OptionSet;
 
-import com.opensymphony.xwork2.Action;
+import java.util.List;
 
 /**
  * @author Chau Thu Tran
- * 
  * @version $UpdateOptionSetAction.java Feb 3, 2012 9:28:11 PM$
  */
 public class UpdateOptionSetAction
@@ -53,7 +52,7 @@ public class UpdateOptionSetAction
     // -------------------------------------------------------------------------------------------------
 
     private Integer id;
-    
+
     private String name;
 
     private List<String> options;
@@ -61,12 +60,12 @@ public class UpdateOptionSetAction
     // -------------------------------------------------------------------------------------------------
     // Setters
     // -------------------------------------------------------------------------------------------------
-    
+
     public void setOptionService( OptionService optionService )
     {
         this.optionService = optionService;
     }
-    
+
     public void setId( Integer id )
     {
         this.id = id;
@@ -92,10 +91,16 @@ public class UpdateOptionSetAction
     {
         OptionSet optionSet = optionService.getOptionSet( id );
         optionSet.setName( name );
+
+        if ( !optionSet.getOptions().equals( options ) )
+        {
+            optionSet.setVersion( optionSet.getVersion() + 1 );
+        }
+
         optionSet.setOptions( options );
-        
+
         optionService.updateOptionSet( optionSet );
-        
+
         return SUCCESS;
     }
 

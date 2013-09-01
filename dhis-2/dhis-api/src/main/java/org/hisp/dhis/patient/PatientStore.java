@@ -1,17 +1,20 @@
+package org.hisp.dhis.patient;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,8 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.patient;
 
 import java.util.Collection;
 import java.util.Date;
@@ -68,7 +69,7 @@ public interface PatientStore
 
     void removeErollmentPrograms( Program program );
 
-    int countSearch( List<String> searchKeys, OrganisationUnit orgunit, Boolean followup );
+    int countSearch( List<String> searchKeys, Collection<OrganisationUnit> orgunit, Boolean followup );
 
     Collection<Patient> getByPhoneNumber( String phoneNumber, Integer min, Integer max );
 
@@ -76,16 +77,19 @@ public interface PatientStore
 
     Collection<Integer> getRegistrationOrgunitIds( Date startDate, Date endDate );
 
-    Collection<Patient> search( List<String> searchKeys, OrganisationUnit orgunit, Boolean followup,
+    Collection<Patient> search( List<String> searchKeys, Collection<OrganisationUnit> orgunit, Boolean followup,
         Collection<PatientAttribute> patientAttributes, Integer min, Integer max );
 
-    Collection<String> getPatientPhoneNumbers( List<String> searchKeys, OrganisationUnit orgunit, Boolean followup,
+    Collection<String> getPatientPhoneNumbers( List<String> searchKeys, Collection<OrganisationUnit> orgunits, Boolean followup,
         Collection<PatientAttribute> patientAttributes, Integer min, Integer max );
 
-    List<Integer> getProgramStageInstances( List<String> searchKeys, OrganisationUnit orgunit, Boolean followup,
-        Collection<PatientAttribute> patientAttributes, Integer min, Integer max );
+    Grid getPatientEventReport( Grid grid, List<String> searchKeys, Collection<OrganisationUnit> orgunit, Boolean followup,
+        Collection<PatientAttribute> patientAttributes, Collection<PatientIdentifierType> identifierTypes, Integer min,
+        Integer max );
 
-    Grid getPatientEventReport( Grid grid, List<String> searchKeys, OrganisationUnit orgunit, Boolean followup,
-        Collection<PatientAttribute> patientAttributes, Integer min, Integer max );
+    List<Integer> getProgramStageInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits, Boolean followup,
+        Collection<PatientAttribute> patientAttributes, Collection<PatientIdentifierType> identifierTypes, Integer min,
+        Integer max );
+
 
 }

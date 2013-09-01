@@ -1,19 +1,20 @@
 package org.hisp.dhis.settings.action.system;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -30,6 +31,7 @@ package org.hisp.dhis.settings.action.system;
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_APPLICATION_TITLE;
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_APPLICATION_INTRO;
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_APPLICATION_NOTIFICATION;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_APPLICATION_FOOTER;
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_FLAG;
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_START_MODULE;
 
@@ -89,6 +91,13 @@ public class SetAppearanceSettingsAction
     {
         this.applicationNotification = applicationNotification;
     }
+    
+    private String applicationFooter;
+
+    public void setApplicationFooter( String applicationFooter )
+    {
+        this.applicationFooter = applicationFooter;
+    }
 
     private String flag;
 
@@ -134,6 +143,7 @@ public class SetAppearanceSettingsAction
         applicationIntro = StringUtils.trimToNull( applicationIntro );
         applicationTitle = StringUtils.trimToNull( applicationTitle );
         applicationNotification = StringUtils.trimToNull( applicationNotification );
+        applicationFooter = StringUtils.trimToNull( applicationFooter );
 
         if ( flag != null && flag.equals( "NO_FLAG" ) )
         {
@@ -148,6 +158,7 @@ public class SetAppearanceSettingsAction
         systemSettingManager.saveSystemSetting( KEY_APPLICATION_TITLE, applicationTitle );
         systemSettingManager.saveSystemSetting( KEY_APPLICATION_INTRO, applicationIntro );
         systemSettingManager.saveSystemSetting( KEY_APPLICATION_NOTIFICATION, applicationNotification );
+        systemSettingManager.saveSystemSetting( KEY_APPLICATION_FOOTER, applicationFooter );
         systemSettingManager.saveSystemSetting( KEY_FLAG, flag );
         systemSettingManager.saveSystemSetting( KEY_START_MODULE, startModule );
         styleManager.setSystemStyle( currentStyle );

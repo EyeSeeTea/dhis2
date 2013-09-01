@@ -281,6 +281,10 @@ function getSearchParams()
 	});
 		
 	params += '&listAll=false';
+	
+	var searchByUserOrgunits = byId('searchByUserOrgunits').checked ? true : false;
+	params += '&searchByUserOrgunits=' + searchByUserOrgunits;
+	
 	if( getFieldValue('searchByProgramStage') == "false"){
 		var searchInAllFacility = byId('searchInAllFacility').checked;
 		params += '&searchBySelectedOrgunit=' + !searchInAllFacility;
@@ -592,7 +596,14 @@ function closeDueDateDiv( programInstanceId )
 
 function registerIrregularEncounter( programInstanceId, programStageId, programStageName, dueDate )
 {
-	jQuery.postJSON( "registerIrregularEncounter.action",
+	if(dueDate==''){
+		showById("spanDueDateNewEncounter_" + programInstanceId);
+	}
+	else
+	{
+		hideById("spanDueDateNewEncounter_" + programInstanceId);
+		
+		jQuery.postJSON( "registerIrregularEncounter.action",
 		{ 
 			programInstanceId:programInstanceId,
 			programStageId: programStageId, 
@@ -636,16 +647,17 @@ function registerIrregularEncounter( programInstanceId, programStageId, programS
 				jQuery("#programStageIdTR_" + programInstanceId).append('<td id="arrow_' + programStageInstanceId + '"><img src="images/rightarrow.png"></td>'
 					+ '<td>'
 					+ '<div class="orgunit-object" id="org_' + programStageInstanceId + '">&nbsp;</div>'
-					+ '<input name="programStageBtn" '
-					+ 'id="' + elementId + '" ' 
-					+ 'psid="' + programStageId + '" '
-					+ 'programType="' + programType + '" '
-					+ 'psname="' + programStageName + '" '
-					+ 'dueDate="' + dueDate + '" '
-					+ 'value="'+ programStageName + '&#13;&#10;' + dueDate + '" '
-					+ 'onclick="javascript:loadDataEntry(' + programStageInstanceId + ')" '
-					+ 'type="button" class="stage-object" '
-					+ '></td>');
+						+ '<input name="programStageBtn" '
+						+ 'pi="' + programInstanceId + '" ' 
+						+ 'id="' + elementId + '" ' 
+						+ 'psid="' + programStageId + '" '
+						+ 'programType="' + programType + '" '
+						+ 'psname="' + programStageName + '" '
+						+ 'dueDate="' + dueDate + '" '
+						+ 'value="'+ programStageName + '&#13;&#10;' + dueDate + '" '
+						+ 'onclick="javascript:loadDataEntry(' + programStageInstanceId + ')" '
+						+ 'type="button" class="stage-object" '
+						+ '></td>');
 			}
 			if( jQuery('#tb_' + programInstanceId + " :input" ).length > 4 ){
 				jQuery('#tb_' + programInstanceId + ' .arrow-left').removeClass("hidden");
@@ -662,13 +674,14 @@ function registerIrregularEncounter( programInstanceId, programStageId, programS
 			jQuery('#ps_' + programStageInstanceId ).focus();
 			var repeatable = jQuery('#repeatableProgramStage_' + programInstanceId + " [value=" + programStageId + "]" )
 			if( repeatable.attr("repeatable")=="false"){
-				repeatable.remove();
+				repeatable.css("display","none");
 			}
 			jQuery('#createNewEncounterDiv_' + programInstanceId).dialog("close");
 			resetActiveEvent(programInstanceId);
 			loadDataEntry( programStageInstanceId );
 			showSuccessMessage(i18n_create_event_success);
 		});
+	}
 }
 
 function disableCompletedButton( disabled )
@@ -892,9 +905,14 @@ function resetActiveEvent( programInstanceId )
 function removeEvent( programStageInstanceId, isEvent )
 {	
     var result = window.confirm( i18n_comfirm_delete_event );
+					
     if ( result )
     {
-    	$.postJSON(
+		var eventBox = jQuery('#ps_' + programStageInstanceId);
+		var programStageId = eventBox.attr('psid');
+    	var programInstanceId = eventBox.attr('pi');
+					
+		$.postJSON(
     	    "removeCurrentEncounter.action",
     	    {
     	        "id": programStageInstanceId   
@@ -903,6 +921,8 @@ function removeEvent( programStageInstanceId, isEvent )
     	    { 
     	    	if ( json.response == "success" )
     	    	{
+					jQuery("#repeatableProgramStage_" + programInstanceId + " [value='" + programStageId + "']").css("display","block");
+
 					jQuery( "tr#tr" + programStageInstanceId ).remove();
 	                
 					jQuery( "table.listTable tbody tr" ).removeClass( "listRow listAlternateRow" );
@@ -916,14 +936,14 @@ function removeEvent( programStageInstanceId, isEvent )
 						showById('searchDiv');
 						showById('listPatientDiv');
 					}
+					
+					var id = 'ps_' + programStageInstanceId;
 					if(jQuery(".stage-object-selected").attr('id')== id)
 					{
 						hideById('entryForm');
 						hideById('executionDateTB');
 						hideById('inputCriteriaDiv');
 					}
-					var id = 'ps_' + programStageInstanceId;
-					var programInstanceId = jQuery('#' + id).attr('pi');
 					jQuery('#ps_' + programStageInstanceId).remove();
 					jQuery('#arrow_' + programStageInstanceId).remove();
 					jQuery('#org_' + programStageInstanceId).remove();
@@ -1267,11 +1287,32 @@ function programOnchange( programId )
 				disable('dateOfIncidentField');
 			}
 		}
-		var programId = jQuery('#programEnrollmentSelectDiv [id=programId] option:selected').val();
+		
+		var program = jQuery('#programEnrollmentSelectDiv [id=programId] option:selected');
 		jQuery('#identifierAndAttributeDiv').load("getPatientIdentifierAndAttribute.action", 
 		{
-			id:programId
+			id:program.val()
 		}, function(){
+			if(getFieldValue('useBirthDateAsEnrollmentDate')=='true'){ 
+				setFieldValue("enrollmentDateField", birthDate)
+			}
+			
+			if(getFieldValue('useBirthDateAsIncidentDate')=='true'){ 
+				setFieldValue("dateOfIncidentField", birthDate)
+			}
+			else{
+				setFieldValue("dateOfIncidentField", "");
+			}
+			
+			jQuery("#dateOfIncidentField").datepicker("destroy");
+			jQuery("#enrollmentDateField").datepicker("destroy");
+			if(program.attr("selectEnrollmentDatesInFuture")=='true'){
+				datePickerInRange( 'dateOfIncidentField' , 'enrollmentDateField', false, true );
+			}
+			else{
+				datePickerInRangeValid( 'dateOfIncidentField' , 'enrollmentDateField', false, true );
+			}
+		
 			showById('identifierAndAttributeDiv');
 		});
 	}
@@ -1777,9 +1818,23 @@ function viewPersonProgram ( displayedDiv, hidedDiv )
 // Comment && Message
 // --------------------------------------------------------------------
 
+function sendSmsOnePatientForm()
+{
+	jQuery('#smsDiv').dialog(
+		{
+			title:i18n_send_message,
+			maximize:true, 
+			closable:true,
+			closable:true,
+			modal:true,
+			overlay:{background:'#000000', opacity:0.1},
+			width:400,
+			height:200
+		});
+}
+
 function sendSmsOnePatient( field, programStageInstanceId )
 {
-	setInnerHTML('smsError', '');
 	if(field.value==""){
 		field.style.backgroundColor = ERROR_COLOR;
 		jQuery('#' + field.id).attr("placeholder", i18n_this_field_is_required);
@@ -1790,31 +1845,31 @@ function sendSmsOnePatient( field, programStageInstanceId )
 	jQuery.postUTF8( 'sendSMS.action',
 		{
 			programStageInstanceId: programStageInstanceId,
-			msg: field.value
+			msg: field.value,
+			sendTo: getFieldValue('sendTo')
 		}, function ( json )
 		{
 			if ( json.response == "success" ) {
-				jQuery('#smsError').css("color", "green");
-				setInnerHTML('smsError', json.message);
 				var date = new Date();
 				var currentTime = date.getHours() + ":" + date.getMinutes();
-				jQuery('[name=messageTB]').prepend("<tr><td>" + getFieldValue('currentDate') + " " + currentTime + "</td>"
+				jQuery('[name=commentTB]').prepend("<tr><td>" + getFieldValue('currentDate') + " " + currentTime + "</td>"
 					+ "<td>" + getFieldValue('programStageName') + "</td>"
 					+ "<td>" + getFieldValue('currentUsername') + "</td>"
 					+ "<td>" + i18n_message + "</td>"
+					+ "<td>" + field.value + "</td>"+
 					+ "<td>" + field.value + "</td></tr>");
-				field.value="";
 				field.style.backgroundColor = SUCCESS_COLOR;
-				
+				hideById('smsError');
+				setInnerHTML('smsSuccess', json.message);
+			
 				jQuery('#enrollmentDate').width('325');
 				jQuery('#dateOfIncident').width('325');
 				jQuery('#removeProgram').remove();
 			}
 			else {
-				showSuccessMessage( json.message );
-				jQuery('#smsError').css("color", "red");
-				setInnerHTML('smsError', json.message);
 				field.style.backgroundColor = ERROR_COLOR;
+				hideById('smsSuccess');
+				setInnerHTML('smsError', json.message);
 			}
 			
 			if( jQuery("#messageTB tr.hidden").length > 0 ){
@@ -1868,7 +1923,6 @@ function addComment( field, programStageInstanceId )
 			content += "<td>" + i18n_comment + "</td>";
 			content += "<td>" + commentText + "</td></tr>";
 			jQuery('#commentTB').prepend(content);
-			field.value="";
 			showSuccessMessage( i18n_comment_added );
 			field.style.backgroundColor = SUCCESS_COLOR;
 			
@@ -1886,15 +1940,52 @@ function addComment( field, programStageInstanceId )
 
 function removeComment( programStageInstanceId, commentId )
 {
-	jQuery.postUTF8( 'removePatientComment.action',
+	var result = window.confirm( i18n_confirmation_delete_message );
+    
+    if ( result )
+    {
+		setHeaderWaitMessage( i18n_deleting );
+		jQuery.postUTF8( 'removePatientComment.action',
 		{
 			programStageInstanceId: programStageInstanceId,
 			id: commentId
 		}, function ( json )
 		{
-			showSuccessMessage( json.message );
 			hideById( 'comment_' + commentId );
+			
+			jQuery( "tr#comment_" + commentId ).remove();
+			jQuery( "table.listTable tbody tr" ).removeClass( "listRow listAlternateRow" );
+			jQuery( "table.listTable tbody tr:odd" ).addClass( "listAlternateRow" );
+			jQuery( "table.listTable tbody tr:even" ).addClass( "listRow" );
+			jQuery( "table.listTable tbody" ).trigger("update");	
+			setHeaderDelayMessage( i18n_delete_success );
 		} );
+	}
+}
+
+function removeMessage(programInstanceId, programStageInstanceId, smsId )
+{
+	var result = window.confirm( i18n_confirmation_delete_message);
+    
+    if ( result )
+    {
+		setHeaderWaitMessage( i18n_deleting );
+		jQuery.postUTF8( 'removeSms.action',
+		{
+			programInstanceId: programInstanceId,
+			programStageInstanceId: programStageInstanceId,
+			id: smsId
+		}, 
+		function ( json )
+		{
+			jQuery( "tr#tr" + smsId ).remove();
+			jQuery( "table.listTable tbody tr" ).removeClass( "listRow listAlternateRow" );
+			jQuery( "table.listTable tbody tr:odd" ).addClass( "listAlternateRow" );
+			jQuery( "table.listTable tbody tr:even" ).addClass( "listRow" );
+			jQuery( "table.listTable tbody" ).trigger("update");	
+			setHeaderDelayMessage( i18n_delete_success );
+		} );
+	}
 }
 
 function commentDivToggle(isHide)
@@ -2093,6 +2184,40 @@ function saveComment( programInstanceId )
 		}, 
 		function( json ) 
 		{   
-			 $( '#comment' ).css( 'background-color', COLOR_GREEN );
+			 $( '#comment' ).css( 'background-color', SUCCESS_COLOR );
 		});
+}
+
+function addPhoneNumberField(phoneNumberAreaCode)
+{	
+	$('.phoneNumberTR').last().after(
+		'<tr class="phoneNumberTR">'
+		+ '	<td></td>'
+		+ '	<td class="input-column">'
+		+ '		<input type="text" id="phoneNumber" name="phoneNumber" class="{validate:{phone:true}}" value="'+phoneNumberAreaCode+'"/>'
+		+ '		<input type="button" value="-" onclick="removePhoneNumberField(this)" style="width:20px;" />'
+		+ '	</td>'
+		+ '</tr>' );
+}
+
+function removePhoneNumberField(_this)
+{
+	$(_this).parent().parent().remove();
+}
+
+function addCustomPhoneNumberField( phoneNumber )
+{
+	if(phoneNumber=='')
+	{
+		phoneNumber = phoneNumberAreaCode;
+	}
+	var idx = $('.phoneNumberTR').length + 1;
+	$('.phoneNumberTR').last().after(
+		'<br/><input type="text" id="phoneNumber" name="phoneNumber" class="idxPhoneNumber' + idx + ' {validate:{phone:true}}" value=\"' + phoneNumber + '\" />'
+		+ '    <input type="button" value="-" class="phoneNumberTR idxPhoneNumber' + idx + '" onclick="removeCustomPhoneNumberField(' + idx + ')" style="width:20px;" />');
+}
+
+function removeCustomPhoneNumberField(idx)
+{
+	$('.idxPhoneNumber' + idx).remove();
 }

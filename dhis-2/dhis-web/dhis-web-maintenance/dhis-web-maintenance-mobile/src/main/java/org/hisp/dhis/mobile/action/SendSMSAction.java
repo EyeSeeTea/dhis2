@@ -1,19 +1,20 @@
 package org.hisp.dhis.mobile.action;
 
 /*
- * Copyright (c) 2004-2007, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,9 +28,9 @@ package org.hisp.dhis.mobile.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.sms.SmsSender;
 import org.hisp.dhis.sms.SmsServiceException;
 import org.hisp.dhis.sms.outbound.OutboundSms;
-import org.hisp.dhis.sms.outbound.OutboundSmsService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -39,13 +40,20 @@ public class SendSMSAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private OutboundSmsService outboundSmsService;
-
-    public void setOutboundSmsService( OutboundSmsService outboundSmsService )
+    
+    
+    private SmsSender smsSender;
+    
+    public SmsSender getSmsSender()
     {
-        this.outboundSmsService = outboundSmsService;
+        return smsSender;
     }
+
+    public void setSmsSender( SmsSender smsSender )
+    {
+        this.smsSender = smsSender;
+    }
+
 
     // -------------------------------------------------------------------------
     // Input & Output
@@ -56,11 +64,6 @@ public class SendSMSAction
     public String getMessage()
     {
         return message;
-    }
-
-    public boolean getSmsServiceStatus()
-    {
-        return outboundSmsService.isEnabled();
     }
 
     String recipient;
@@ -96,7 +99,8 @@ public class SendSMSAction
         {
             try
             {
-                outboundSmsService.sendMessage( new OutboundSms( msg, recipient ), null );
+                smsSender.sendMessage( new OutboundSms( msg, recipient ), null );
+//                outboundSmsService.sendMessage( new OutboundSms( msg, recipient ), null );
                 this.message = "Sent message to " + recipient;
             }
             catch ( SmsServiceException e )

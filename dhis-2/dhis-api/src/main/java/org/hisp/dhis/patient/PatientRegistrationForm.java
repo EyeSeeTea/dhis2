@@ -1,17 +1,20 @@
+package org.hisp.dhis.patient;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,33 +28,40 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient;
+import java.util.List;
 
+import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.program.Program;
 
 /**
  * @author Chau Thu Tran
- * 
- * @version PatientRegistrationForm.java 9:33:02 AM Jan 31, 2013 $
  */
 public class PatientRegistrationForm
+    extends BaseIdentifiableObject
 {
+    private static final long serialVersionUID = -6000530171659755186L;
+
     public static String FIXED_ATTRIBUTE_FULLNAME = "fullName";
     public static String FIXED_ATTRIBUTE_GENDER = "gender";
     public static String FIXED_ATTRIBUTE_BIRTHDATE = "birthDate";
+    public static String FIXED_ATTRIBUTE_AGE = "age";
     public static String FIXED_ATTRIBUTE_PHONE_NUMBER = "phoneNumber";
     public static String FIXED_ATTRIBUTE_DEATH_DATE = "deathDate";
     public static String FIXED_ATTRIBUTE_REGISTRATION_DATE = "registrationDate";
     public static String FIXED_ATTRIBUTE_IS_DEAD = "isDead";
     public static String FIXED_ATTRIBUTE_DOB_TYPE = "dobType";
     public static String FIXED_ATTRIBUTE_HEALTH_WORKER = "healthWorker";
-    
-    private Integer id;
 
     private Program program;
 
     private DataEntryForm dataEntryForm;
+
+    private List<String> fixedAttributes;
+
+    private List<PatientAttribute> dynamicAttributes;
+
+    private List<PatientIdentifierType> identifierTypes;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -67,19 +77,11 @@ public class PatientRegistrationForm
         this.dataEntryForm = dataEntryForm;
     }
 
+    //TODO implement hashcode and equals
+    
     // -------------------------------------------------------------------------
     // Getters && Setters
     // -------------------------------------------------------------------------
-
-    public Integer getId()
-    {
-        return id;
-    }
-
-    public void setId( Integer id )
-    {
-        this.id = id;
-    }
 
     public Program getProgram()
     {
@@ -99,6 +101,36 @@ public class PatientRegistrationForm
     public void setDataEntryForm( DataEntryForm dataEntryForm )
     {
         this.dataEntryForm = dataEntryForm;
+    }
+
+    public List<String> getFixedAttributes()
+    {
+        return fixedAttributes;
+    }
+
+    public void setFixedAttributes( List<String> fixedAttributes )
+    {
+        this.fixedAttributes = fixedAttributes;
+    }
+
+    public List<PatientAttribute> getDynamicAttributes()
+    {
+        return dynamicAttributes;
+    }
+
+    public void setDynamicAttributes( List<PatientAttribute> dynamicAttributes )
+    {
+        this.dynamicAttributes = dynamicAttributes;
+    }
+
+    public List<PatientIdentifierType> getIdentifierTypes()
+    {
+        return identifierTypes;
+    }
+
+    public void setIdentifierTypes( List<PatientIdentifierType> identifierTypes )
+    {
+        this.identifierTypes = identifierTypes;
     }
 
 }

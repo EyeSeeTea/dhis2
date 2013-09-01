@@ -1,17 +1,20 @@
+package org.hisp.dhis.patientreport;
+
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,22 +28,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patientreport;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.user.User;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * @author Chau Thu Tran
  * @version $PatientTabularReport.java May 7, 2012 12:41:41 PM$
  */
+
+@JacksonXmlRootElement( localName = "patientTabularReport", namespace = DxfNamespaces.DXF_2_0 )
 public class PatientTabularReport
     extends BaseIdentifiableObject
 {
@@ -64,33 +78,27 @@ public class PatientTabularReport
 
     public static String VALUE_TYPE_OPTION_SET = "optionSet";
 
+    private Program program;
+
+    private ProgramStage programStage;
+
     private Date startDate;
 
     private Date endDate;
 
-    private ProgramStage programStage;
-
     private Set<OrganisationUnit> organisationUnits;
 
-    private int level;
+    private List<String> items = new ArrayList<String>();
 
-    private boolean sortedOrgunitAsc;
+    private String sortByAsc;
 
-    private String facilityLB;
+    private String sortByDesc;
 
     private User user;
 
-    private Boolean useCompletedEvents;
+    private int level;
 
-    private Boolean userOrganisationUnit;
-
-    private Boolean userOrganisationUnitChildren;
-
-    private List<String> filterValues = new ArrayList<String>();
-    
-    private Boolean displayOrgunitCode;
-    
-    private Boolean useFormNameDataElement;
+    private String facilityLB;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -109,19 +117,12 @@ public class PatientTabularReport
     // Getters && Setters
     // -------------------------------------------------------------------------
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Date getStartDate()
     {
         return startDate;
-    }
-
-    public Boolean getUseFormNameDataElement()
-    {
-        return useFormNameDataElement;
-    }
-
-    public void setUseFormNameDataElement( Boolean useFormNameDataElement )
-    {
-        this.useFormNameDataElement = useFormNameDataElement;
     }
 
     public void setStartDate( Date startDate )
@@ -129,6 +130,9 @@ public class PatientTabularReport
         this.startDate = startDate;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Date getEndDate()
     {
         return endDate;
@@ -139,6 +143,11 @@ public class PatientTabularReport
         this.endDate = endDate;
     }
 
+    @JsonProperty( value = "organisationUnits" )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlElementWrapper( localName = "organisationUnits", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "organisationUnit", namespace = DxfNamespaces.DXF_2_0 )
     public Set<OrganisationUnit> getOrganisationUnits()
     {
         return organisationUnits;
@@ -149,76 +158,65 @@ public class PatientTabularReport
         this.organisationUnits = organisationUnits;
     }
 
-    public List<String> getFilterValues()
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlElementWrapper( localName = "items", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "items", namespace = DxfNamespaces.DXF_2_0 )
+    public List<String> getItems()
     {
-        return filterValues;
+        return items;
     }
 
-    public void setFilterValues( List<String> filterValues )
+    public void setItems( List<String> items )
     {
-        this.filterValues = filterValues;
+        this.items = items;
     }
 
-    public int getLevel()
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Program getProgram()
     {
-        return level;
+        return program;
     }
 
-    public void setLevel( int level )
+    public void setProgram( Program program )
     {
-        this.level = level;
+        this.program = program;
     }
 
-    public boolean isSortedOrgunitAsc()
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getSortByAsc()
     {
-        return sortedOrgunitAsc;
+        return sortByAsc;
     }
 
-    public void setSortedOrgunitAsc( boolean sortedOrgunitAsc )
+    public void setSortByAsc( String sortByAsc )
     {
-        this.sortedOrgunitAsc = sortedOrgunitAsc;
+        this.sortByAsc = sortByAsc;
+    }
+    
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getSortByDesc()
+    {
+        return sortByDesc;
     }
 
-    public String getFacilityLB()
+    public void setSortByDesc( String sortByDesc )
     {
-        return facilityLB;
+        this.sortByDesc = sortByDesc;
     }
 
-    public void setFacilityLB( String facilityLB )
-    {
-        this.facilityLB = facilityLB;
-    }
 
-    public Boolean getUserOrganisationUnit()
-    {
-        return userOrganisationUnit;
-    }
-
-    public void setUserOrganisationUnit( Boolean userOrganisationUnit )
-    {
-        this.userOrganisationUnit = userOrganisationUnit;
-    }
-
-    public Boolean getUserOrganisationUnitChildren()
-    {
-        return userOrganisationUnitChildren;
-    }
-
-    public void setUserOrganisationUnitChildren( Boolean userOrganisationUnitChildren )
-    {
-        this.userOrganisationUnitChildren = userOrganisationUnitChildren;
-    }
-
-    public Boolean getUseCompletedEvents()
-    {
-        return useCompletedEvents;
-    }
-
-    public void setUseCompletedEvents( Boolean useCompletedEvents )
-    {
-        this.useCompletedEvents = useCompletedEvents;
-    }
-
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlElementWrapper( localName = "users", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "user", namespace = DxfNamespaces.DXF_2_0 )
     public User getUser()
     {
         return user;
@@ -229,6 +227,10 @@ public class PatientTabularReport
         this.user = user;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlElementWrapper( localName = "programStages", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "programStage", namespace = DxfNamespaces.DXF_2_0 )
     public ProgramStage getProgramStage()
     {
         return programStage;
@@ -239,14 +241,30 @@ public class PatientTabularReport
         this.programStage = programStage;
     }
 
-    public Boolean getDisplayOrgunitCode()
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public int getLevel()
     {
-        return displayOrgunitCode;
+        return level;
     }
 
-    public void setDisplayOrgunitCode( Boolean displayOrgunitCode )
+    public void setLevel( int level )
     {
-        this.displayOrgunitCode = displayOrgunitCode;
+        this.level = level;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getFacilityLB()
+    {
+        return facilityLB;
+    }
+
+    public void setFacilityLB( String facilityLB )
+    {
+        this.facilityLB = facilityLB;
     }
 
 }

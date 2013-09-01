@@ -1,17 +1,20 @@
+package org.hisp.dhis.patient.action.caseaggregation;
+
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,11 +28,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.caseaggregation;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import org.hisp.dhis.caseaggregation.CaseAggregationCondition;
@@ -105,16 +107,17 @@ public class GetAllCaseAggregationConditionAction
     public String execute()
         throws Exception
     {
-        dataSets = new ArrayList<DataSet>( dataSetService.getAllDataSets() );
+        Collection<DataSet> _datasets = new HashSet<DataSet>();
         aggregationConditions = aggregationConditionService.getAllCaseAggregationCondition();
 
         for ( CaseAggregationCondition aggCondition : aggregationConditions )
         {
             DataElement dataElement = aggCondition.getAggregationDataElement();
 
-            dataSets.addAll( dataElement.getDataSets() );
+            _datasets.addAll( dataElement.getDataSets() );
         }
 
+        dataSets = new ArrayList<DataSet>( _datasets );
         Collections.sort( dataSets, IdentifiableObjectNameComparator.INSTANCE );
 
         if ( dataSetId != null )

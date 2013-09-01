@@ -1,31 +1,32 @@
 package org.hisp.dhis.api.utils;
 
 /*
-* Copyright (c) 2004-2012, University of Oslo
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-* * Redistributions of source code must retain the above copyright notice, this
-*   list of conditions and the following disclaimer.
-* * Redistributions in binary form must reproduce the above copyright notice,
-*   this list of conditions and the following disclaimer in the documentation
-*   and/or other materials provided with the distribution.
-* * Neither the name of the HISP project nor the names of its contributors may
-*   be used to endorse or promote products derived from this software without
-*   specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-* ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-* DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-* ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-* ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ * Copyright (c) 2004-2013, University of Oslo
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 import org.hisp.dhis.api.webdomain.form.Field;
 import org.hisp.dhis.api.webdomain.form.Form;
@@ -37,6 +38,12 @@ import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.Section;
 import org.hisp.dhis.datavalue.DataValue;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageDataElement;
+import org.hisp.dhis.program.ProgramStageSection;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -53,8 +60,9 @@ public class FormUtils
     {
         Form form = new Form();
         form.setLabel( dataSet.getDisplayName() );
-        form.setPeriodType( dataSet.getPeriodType().getName() );
-        form.setAllowFuturePeriods( dataSet.isAllowFuturePeriods() );
+
+        form.getOptions().put( "periodType", dataSet.getPeriodType().getName() );
+        form.getOptions().put( "allowFuturePeriods", dataSet.isAllowFuturePeriods() );
 
         if ( dataSet.getSections().size() > 0 )
         {
@@ -88,6 +96,80 @@ public class FormUtils
     }
 
 
+    public static Form fromProgram( Program program )
+    {
+        Assert.notNull( program );
+        Assert.isTrue( program.getType() == Program.SINGLE_EVENT_WITHOUT_REGISTRATION );
+
+        Form form = new Form();
+        form.setLabel( program.getDisplayName() );
+
+        if ( !StringUtils.isEmpty( program.getDescription() ) )
+        {
+            form.getOptions().put( "description", program.getDescription() );
+        }
+
+        if ( !StringUtils.isEmpty( program.getDateOfEnrollmentDescription() ) )
+        {
+            form.getOptions().put( "dateOfEnrollmentDescription", program.getDateOfEnrollmentDescription() );
+        }
+
+        if ( !StringUtils.isEmpty( program.getDateOfIncidentDescription() ) )
+        {
+            form.getOptions().put( "dateOfIncidentDescription", program.getDateOfIncidentDescription() );
+        }
+
+        form.getOptions().put( "type", Program.TYPE_LOOKUP.get( program.getType() ) );
+
+        ProgramStage programStage = program.getProgramStageByStage( 1 );
+        Assert.notNull( programStage );
+
+        form.getOptions().put( "captureCoordinates", programStage.getCaptureCoordinates() );
+
+        if ( programStage.getProgramStageSections().size() > 0 )
+        {
+            for ( ProgramStageSection section : programStage.getProgramStageSections() )
+            {
+                List<Field> fields = inputsFromProgramStageDataElements( section.getProgramStageDataElements() );
+
+                if ( !fields.isEmpty() )
+                {
+                    Group s = new Group();
+                    s.setLabel( section.getDisplayName() );
+                    s.setFields( fields );
+                    form.getGroups().add( s );
+                }
+            }
+        }
+        else
+        {
+            List<Field> fields = inputsFromProgramStageDataElements(
+                new ArrayList<ProgramStageDataElement>( programStage.getProgramStageDataElements() ) );
+
+            if ( !fields.isEmpty() )
+            {
+                Group s = new Group();
+                s.setLabel( "default" );
+                s.setFields( fields );
+                form.getGroups().add( s );
+            }
+        }
+
+        return form;
+    }
+
+    private static List<Field> inputsFromProgramStageDataElements( List<ProgramStageDataElement> programStageDataElements )
+    {
+        List<DataElement> dataElements = new ArrayList<DataElement>();
+
+        for ( ProgramStageDataElement programStageDataElement : programStageDataElements )
+        {
+            dataElements.add( programStageDataElement.getDataElement() );
+        }
+
+        return inputsFromDataElements( dataElements, new ArrayList<DataElementOperand>() );
+    }
+
     private static List<Field> inputsFromDataElements( List<DataElement> dataElements )
     {
         return inputsFromDataElements( dataElements, new ArrayList<DataElementOperand>() );
@@ -105,10 +187,23 @@ public class FormUtils
                 {
                     Field field = new Field();
 
-                    field.setLabel( dataElement.getDisplayName() + " " + categoryOptionCombo.getDisplayName() );
+                    if ( categoryOptionCombo.isDefault() )
+                    {
+                        field.setLabel( dataElement.getDisplayName() );
+                    }
+                    else
+                    {
+                        field.setLabel( dataElement.getDisplayName() + " " + categoryOptionCombo.getDisplayName() );
+                    }
+
                     field.setDataElement( dataElement.getUid() );
                     field.setCategoryOptionCombo( categoryOptionCombo.getUid() );
                     field.setType( inputTypeFromDataElement( dataElement ) );
+
+                    if ( dataElement.getOptionSet() != null )
+                    {
+                        field.setOptionSet( dataElement.getOptionSet().getUid() );
+                    }
 
                     fields.add( field );
                 }
@@ -140,12 +235,10 @@ public class FormUtils
             {
                 return InputType.TEXT;
             }
-            /*
-            else if ( dataElement.getTextType().equalsIgnoreCase( "longtext" ) )
+            if ( DataElement.VALUE_TYPE_LONG_TEXT.equals( dataElement.getTextType() ) )
             {
-                return InputType.TEXT_LONG;
+                return InputType.LONG_TEXT;
             }
-            */
         }
         else if ( DataElement.VALUE_TYPE_INT.equals( dataElement.getType() ) )
         {
@@ -170,12 +263,10 @@ public class FormUtils
         {
             return InputType.BOOLEAN;
         }
-        /*
-        else if ( dataElement.getType().equalsIgnoreCase( "trueOnly" ) )
+        else if ( DataElement.VALUE_TYPE_TRUE_ONLY.equals( dataElement.getType() ) )
         {
             return InputType.TRUE_ONLY;
         }
-        */
         else if ( DataElement.VALUE_TYPE_DATE.equals( dataElement.getType() ) )
         {
             return InputType.DATE;

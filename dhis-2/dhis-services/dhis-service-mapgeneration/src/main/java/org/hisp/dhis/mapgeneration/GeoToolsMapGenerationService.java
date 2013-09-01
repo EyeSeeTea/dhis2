@@ -1,19 +1,20 @@
 package org.hisp.dhis.mapgeneration;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -34,6 +35,8 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -41,6 +44,7 @@ import org.hisp.dhis.analytics.AnalyticsService;
 import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.mapgeneration.IntervalSet.DistributionStrategy;
+import org.hisp.dhis.mapping.Map;
 import org.hisp.dhis.mapping.MapView;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -83,26 +87,53 @@ public class GeoToolsMapGenerationService
 
     public BufferedImage generateMapImage( MapView mapView )
     {
-        Assert.isTrue( mapView != null );
+        Map map = new Map();
+        
+        map.getMapViews().add( mapView );
+        
+        return generateMapImage( map );
+    }
 
-        int height = 512;
+    public BufferedImage generateMapImage( Map map )
+    {
+        return generateMapImage( map, 512, null );
+    }
+    
+    public BufferedImage generateMapImage( Map map, Integer width, Integer height )
+    {
+        Assert.isTrue( map != null );
+        
+        if ( width == null && height == null )
+        {
+            width = MapUtils.DEFAULT_MAP_WIDTH;
+        }
 
-        // Build internal map layer representation
-        InternalMapLayer mapLayer = buildSingleInternalMapLayer( mapView );
-
-        if ( mapLayer == null )
+        InternalMap internalMap = new InternalMap();
+        
+        List<MapView> mapViews = new ArrayList<MapView>( map.getMapViews() );
+        Collections.reverse( mapViews );
+        
+        for ( MapView mapView : mapViews )
+        {        
+            InternalMapLayer mapLayer = getSingleInternalMapLayer( mapView );
+            
+            if ( mapLayer != null )
+            {
+                internalMap.getLayers().add( mapLayer );
+            }
+        }
+        
+        if ( internalMap.getLayers().isEmpty() )
         {
             return null;
         }
         
-        // Build internal representation of a map using GeoTools, then render it
-        // to an image
-        GeoToolsMap gtMap = new GeoToolsMap( mapLayer );
-        BufferedImage mapImage = gtMap.render( height );
+        // Build representation of a map using GeoTools, then render as image
+        BufferedImage mapImage = MapUtils.render( internalMap, width, height );
 
         // Build the legend set, then render it to an image
-        LegendSet legendSet = new LegendSet( mapLayer );
-        BufferedImage legendImage = legendSet.render( height );
+        LegendSet legendSet = new LegendSet( internalMap.getLayers().get( 0 ) ); //TODO
+        BufferedImage legendImage = legendSet.render();
 
         // Combine the legend image and the map image into one image
         BufferedImage finalImage = combineLegendAndMapImages( legendImage, mapImage );
@@ -128,46 +159,31 @@ public class GeoToolsMapGenerationService
 
     private static final int DEFAULT_RADIUS_LOW = 15;
 
-    private InternalMapLayer buildSingleInternalMapLayer( MapView mapView )
+    private InternalMapLayer getSingleInternalMapLayer( MapView mapView )
     {
-        Assert.isTrue( mapView != null );
+        if ( mapView == null || mapView.getPeriod() == null || mapView.getParentOrganisationUnit() == null )
+        {
+            return null;
+        }
 
         boolean isIndicator = MapView.VALUE_TYPE_INDICATOR.equals( mapView.getValueType() );
 
         List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.
             getOrganisationUnitsAtLevel( mapView.getOrganisationUnitLevel().getLevel(), mapView.getParentOrganisationUnit() ) );
 
-        DataQueryParams params = new DataQueryParams();
+        java.util.Map<String, OrganisationUnit> uidOuMap = new HashMap<String, OrganisationUnit>();
         
-        if ( mapView.getIndicator() != null )
+        for ( OrganisationUnit ou : organisationUnits )
         {
-            params.setIndicators( getList( mapView.getIndicator() ) );
-        }
-        else if ( mapView.getDataElement() != null )
-        {
-            params.setDataElements( getList( mapView.getDataElement() ) );
+            uidOuMap.put( ou.getUid(), ou );
         }
         
-        //TODO operands
-
-        params.setOrganisationUnits( organisationUnits );
-        params.setFilterPeriods( getList( mapView.getPeriod() ) );
+        mapView.setOrganisationUnitsAtLevel( organisationUnits );
         
-        Grid grid = analyticsService.getAggregatedDataValues( params );
+        Grid grid = getDataGrid( mapView );
         
-        Collection<MapValue> mapValues = new ArrayList<MapValue>();
-
-        for ( List<Object> row : grid.getRows() )
-        {
-            if ( row != null && row.size() >= 3 )
-            {
-                String ou = (String) row.get( 1 );
-                Double value = (Double) row.get( 2 );
-                
-                mapValues.add( new MapValue( ou, value ) );
-            }
-        }
-                
+        Collection<MapValue> mapValues = getMapValues( grid );
+        
         if ( mapValues.isEmpty() )
         {
             return null;
@@ -183,8 +199,7 @@ public class GeoToolsMapGenerationService
         int radiusLow = !isIndicator ? mapView.getRadiusLow() : DEFAULT_RADIUS_LOW;
         int radiusHigh = !isIndicator ? mapView.getRadiusHigh() : DEFAULT_RADIUS_HIGH;
 
-        // Get the low and high colors, typically in hexadecimal form, e.g.
-        // '#ff3200' is an orange color
+        // Get the low and high colors, typically in hexadecimal form, e.g. #ff3200
         Color colorLow = MapUtils.createColorFromString( StringUtils.trimToNull( mapView.getColorLow() ) != null ? mapView.getColorLow()
             : DEFAULT_COLOR_LOW );
         Color colorHigh = MapUtils.createColorFromString( StringUtils.trimToNull( mapView.getColorHigh() ) != null ? mapView.getColorHigh()
@@ -216,7 +231,7 @@ public class GeoToolsMapGenerationService
         for ( MapValue mapValue : mapValues )
         {
             // Get the org unit for this map value
-            OrganisationUnit orgUnit = organisationUnitService.getOrganisationUnit( mapValue.getOu() );
+            OrganisationUnit orgUnit = uidOuMap.get( mapValue.getOu() );
             
             if ( orgUnit != null && orgUnit.hasCoordinates() && orgUnit.hasFeatureType() )
             {
@@ -239,11 +254,56 @@ public class GeoToolsMapGenerationService
         return mapLayer;
     }
 
-    private GeoToolsMapObject buildSingleGeoToolsMapObjectForMapLayer( InternalMapLayer mapLayer,
+    /**
+     * Creates a Grid with aggregated data.
+     */
+    private Grid getDataGrid( MapView mapView )
+    {
+        DataQueryParams params = new DataQueryParams();
+        
+        if ( mapView.getIndicator() != null )
+        {
+            params.setIndicators( getList( mapView.getIndicator() ) );
+        }
+        else if ( mapView.getDataElement() != null )
+        {
+            params.setDataElements( getList( mapView.getDataElement() ) );
+        }
+        
+        //TODO operands
+
+        params.setOrganisationUnits( mapView.getOrganisationUnitsAtLevel() );
+        params.setFilterPeriods( getList( mapView.getPeriod() ) );
+        
+        return analyticsService.getAggregatedDataValues( params );
+    }
+    
+    /**
+     * Creates a list of aggregated map values.
+     */
+    private List<MapValue> getMapValues( Grid grid )
+    {
+        List<MapValue> mapValues = new ArrayList<MapValue>();
+
+        for ( List<Object> row : grid.getRows() )
+        {
+            if ( row != null && row.size() >= 3 )
+            {
+                String ou = (String) row.get( 1 );
+                Double value = (Double) row.get( 2 );
+                
+                mapValues.add( new MapValue( ou, value ) );
+            }
+        }
+
+        return mapValues;
+    }
+    
+    private InternalMapObject buildSingleGeoToolsMapObjectForMapLayer( InternalMapLayer mapLayer,
         double mapValue, OrganisationUnit orgUnit )
     {
         // Create and setup an internal map object
-        GeoToolsMapObject mapObject = new GeoToolsMapObject();
+        InternalMapObject mapObject = new InternalMapObject();
         mapObject.setName( orgUnit.getName() );
         mapObject.setValue( mapValue );
         mapObject.setFillOpacity( mapLayer.getOpacity() );
@@ -252,7 +312,7 @@ public class GeoToolsMapGenerationService
 
         // Build and set the GeoTools-specific geometric primitive that outlines
         // the org unit on the map
-        mapObject.buildAndApplyGeometryForOrganisationUnit( orgUnit );
+        mapObject.setGeometry( InternalMapObject.buildAndApplyGeometryForOrganisationUnit( orgUnit ) );
 
         // Add the map object to the map layer
         mapLayer.addMapObject( mapObject );

@@ -1,19 +1,20 @@
 package org.hisp.dhis.hibernate;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -40,7 +41,9 @@ import org.hisp.dhis.common.AuditLogUtil;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.GenericNameableObjectStore;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.SharingUtils;
+import org.hisp.dhis.dashboard.Dashboard;
 import org.hisp.dhis.hibernate.exception.CreateAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.DeleteAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.ReadAccessDeniedException;
@@ -51,6 +54,7 @@ import org.hisp.dhis.user.UserGroupAccess;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
@@ -225,12 +229,20 @@ public class HibernateGenericStore<T>
 
             if ( SharingUtils.canCreatePublic( currentUserService.getCurrentUser(), identifiableObject ) )
             {
-                String build = AccessStringHelper.newInstance()
-                    .enable( AccessStringHelper.Permission.READ )
-                    .enable( AccessStringHelper.Permission.WRITE )
-                    .build();
+                if ( SharingUtils.defaultPublic( clazz ) )
+                {
+                    String build = AccessStringHelper.newInstance()
+                        .enable( AccessStringHelper.Permission.READ )
+                        .enable( AccessStringHelper.Permission.WRITE )
+                        .build();
 
-                identifiableObject.setPublicAccess( build );
+                    identifiableObject.setPublicAccess( build );
+                }
+                else
+                {
+                    String build = AccessStringHelper.newInstance().build();
+                    identifiableObject.setPublicAccess( build );
+                }
             }
             else if ( SharingUtils.canCreatePrivate( currentUserService.getCurrentUser(), identifiableObject ) )
             {
@@ -556,6 +568,43 @@ public class HibernateGenericStore<T>
     {
         Query query = getQuery( "from " + clazz.getName() + " c where lower(name) like :name order by c.name" );
         query.setString( "name", "%" + name.toLowerCase() + "%" );
+
+        return query;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<T> getAllLikeShortName( String shortName )
+    {
+        if ( NameableObject.class.isAssignableFrom( clazz ) )
+        {
+            Query query = sharingEnabled() ? getQueryAllLikeShortNameAcl( shortName ) : getQueryAllLikeShortName( shortName );
+            return query.list();
+        }
+
+        // fallback to using name
+        return getAllLikeName( shortName );
+    }
+
+    private Query getQueryAllLikeShortNameAcl( String shortName )
+    {
+        String hql = "select distinct c from " + clazz.getName() + " c"
+            + " where lower(shortName) like :shortName and ( c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
+            + " or exists "
+            + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
+            + " ) order by c.shortName";
+
+        Query query = getQuery( hql );
+        query.setEntity( "user", currentUserService.getCurrentUser() );
+        query.setString( "shortName", "%" + shortName.toLowerCase() + "%" );
+
+        return query;
+    }
+
+    private Query getQueryAllLikeShortName( String shortName )
+    {
+        Query query = getQuery( "from " + clazz.getName() + " c where lower(shortName) like :shortName order by c.shortName" );
+        query.setString( "shortName", "%" + shortName.toLowerCase() + "%" );
 
         return query;
     }
@@ -907,10 +956,15 @@ public class HibernateGenericStore<T>
     // Helpers
     //----------------------------------------------------------------------------------------------------------------
 
+    protected boolean forceAcl()
+    {
+        return Dashboard.class.isAssignableFrom( clazz );
+    }
+
     protected boolean sharingEnabled()
     {
-        return SharingUtils.isSupported( clazz ) && !(currentUserService.getCurrentUser() == null ||
-            currentUserService.getCurrentUser().getUserCredentials().getAllAuthorities().contains( SharingUtils.SHARING_OVERRIDE_AUTHORITY ));
+        return forceAcl() || (SharingUtils.isSupported( clazz ) && !(currentUserService.getCurrentUser() == null ||
+            CollectionUtils.containsAny( currentUserService.getCurrentUser().getUserCredentials().getAllAuthorities(), SharingUtils.SHARING_OVERRIDE_AUTHORITIES )));
     }
 
     protected boolean isReadAllowed( T object )

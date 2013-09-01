@@ -1,19 +1,20 @@
 package org.hisp.dhis.system.util;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -99,6 +100,9 @@ public class MathUtilsTest
         assertTrue( MathUtils.isNumeric( "1.234" ) );
         assertTrue( MathUtils.isNumeric( "-1234" ) );
         assertTrue( MathUtils.isNumeric( "-12.34" ) );
+        assertTrue( MathUtils.isNumeric( "-0.34" ) );
+        assertTrue( MathUtils.isNumeric( "6.34E11" ) );
+        assertTrue( MathUtils.isNumeric( "3.342E7" ) );
 
         assertFalse( MathUtils.isNumeric( "Hey" ) );
         assertFalse( MathUtils.isNumeric( "45 Perinatal Condition" ) );
@@ -117,6 +121,13 @@ public class MathUtilsTest
         assertFalse( MathUtils.isNumeric( "0,1" ) );
         assertFalse( MathUtils.isNumeric( "0," ) );
         assertFalse( MathUtils.isNumeric( "0." ) );
+        assertFalse( MathUtils.isNumeric( "01" ) );
+        assertFalse( MathUtils.isNumeric( "001" ) );
+        assertFalse( MathUtils.isNumeric( "00.23" ) );
+        assertFalse( MathUtils.isNumeric( "01.23" ) );
+        assertFalse( MathUtils.isNumeric( "4.23E" ) );
+        assertFalse( MathUtils.isNumeric( "4.23Ef" ) );
+        assertFalse( MathUtils.isNumeric( "E5" ) );
         assertFalse( MathUtils.isNumeric( null ) );
     }
 
@@ -133,6 +144,9 @@ public class MathUtilsTest
         assertTrue( MathUtils.isNumericLenient( "1.234" ) );
         assertTrue( MathUtils.isNumericLenient( "-1234" ) );
         assertTrue( MathUtils.isNumericLenient( "-12.34" ) );
+        assertTrue( MathUtils.isNumericLenient( "-0.34" ) );
+        assertTrue( MathUtils.isNumericLenient( "6.34E11" ) );
+        assertTrue( MathUtils.isNumericLenient( "3.342E7" ) );
 
         assertFalse( MathUtils.isNumericLenient( "Hey" ) );
         assertFalse( MathUtils.isNumericLenient( "45 Perinatal Condition" ) );
@@ -152,6 +166,9 @@ public class MathUtilsTest
         assertFalse( MathUtils.isNumericLenient( "0,1" ) );
         assertFalse( MathUtils.isNumericLenient( "0," ) );
         assertFalse( MathUtils.isNumericLenient( "0." ) );
+        assertFalse( MathUtils.isNumericLenient( "4.23E" ) );
+        assertFalse( MathUtils.isNumericLenient( "4.23Ef" ) );
+        assertFalse( MathUtils.isNumericLenient( "E5" ) );
         assertFalse( MathUtils.isNumericLenient( null ) );
     }
     
@@ -224,5 +241,28 @@ public class MathUtilsTest
     public void testGetAverage()
     {
         assertEquals( 7.5, MathUtils.getAverage( Arrays.asList( 5.0, 5.0, 10.0, 10.0 ) ), 0.01 );
+    }
+    
+    @Test
+    public void testGetRounded()
+    {
+        assertEquals( 10, MathUtils.getRounded( 10.00 ), 0.01 );
+        assertEquals( 10, MathUtils.getRounded( 10 ), 0.01 );
+        assertEquals( 0.53, MathUtils.getRounded( 0.5281 ), 0.01 );
+        assertEquals( 0.5, MathUtils.getRounded( 0.5 ), 0.01 );
+        assertEquals( 0, MathUtils.getRounded( 0 ), 0.01 );
+        assertEquals( -0.43, MathUtils.getRounded( -0.43123 ), 0.01 );
+        assertEquals( -10, MathUtils.getRounded( -10.00 ), 0.01 );        
+    }
+    
+    @Test
+    public void testCalculateExpression()
+    {
+        assertEquals( 3d, MathUtils.calculateExpression( "1+2" ), 0.01 );
+        assertEquals( 3d, MathUtils.calculateExpression( "abs(3)" ), 0.01 );
+        assertEquals( 3d, MathUtils.calculateExpression( "abs(-3)" ), 0.01 );
+        assertEquals( 3d, MathUtils.calculateExpression( "abs(3-6)" ), 0.01 );
+        assertEquals( 5d, MathUtils.calculateExpression( "sqrt(25)" ), 0.01 );
+        assertEquals( 1d, MathUtils.calculateExpression( "mod(7,2)" ), 0.01 );
     }
 }

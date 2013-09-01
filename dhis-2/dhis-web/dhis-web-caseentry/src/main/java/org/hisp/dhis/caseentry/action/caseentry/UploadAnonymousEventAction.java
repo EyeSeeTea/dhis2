@@ -6,14 +6,15 @@ package org.hisp.dhis.caseentry.action.caseentry;
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -117,28 +118,22 @@ public class UploadAnonymousEventAction implements Action
 
         Map<String, Object> executionDate = (Map<String, Object>) input.get( "executionDate" );
 
-        Integer programId;
-        Integer organisationUnitId;
+        Date date = format.parseDate( (String) executionDate.get( "executionDate" ) );
+
+        Boolean completed = null;
 
         try
         {
-            programId = Integer.parseInt( (String) executionDate.get( "programId" ) );
-            organisationUnitId = Integer.parseInt( (String) executionDate.get( "organisationUnitId" ) );
+            String completeString = (String) executionDate.get( "completed" );
+
+            if ( completeString != null )
+            {
+                completed = Boolean.parseBoolean( completeString );
+            }
         }
-        catch ( NumberFormatException e )
+        catch ( ClassCastException ignored )
         {
-            message = e.getMessage();
-            return ERROR;
         }
-
-        Date date = format.parseDate( (String) executionDate.get( "executionDate" ) );
-
-        if ( programId == null || date == null || organisationUnitId == null )
-        {
-            return INPUT;
-        }
-
-        Boolean completed = (Boolean) executionDate.get( "completed" );
 
         Coordinate coordinate = null;
         Map<String, String> coord = (Map<String, String>) input.get( "coordinate" );
@@ -158,7 +153,45 @@ public class UploadAnonymousEventAction implements Action
 
         }
 
-        ProgramStageInstance programStageInstance = saveExecutionDate( programId, organisationUnitId, date, completed, coordinate );
+        Integer programId;
+        Integer organisationUnitId;
+        Integer programStageInstanceId;
+        ProgramStageInstance programStageInstance;
+
+        try
+        {
+            programStageInstanceId = Integer.parseInt( (String) executionDate.get( "programStageInstanceId" ) );
+        }
+        catch ( NumberFormatException e )
+        {
+            programStageInstanceId = null;
+        }
+
+        if ( programStageInstanceId != null )
+        {
+            programStageInstance = programStageInstanceService.getProgramStageInstance( programStageInstanceId );
+            updateExecutionDate( programStageInstance, date, completed, coordinate );
+        }
+        else
+        {
+            try
+            {
+                programId = Integer.parseInt( (String) executionDate.get( "programId" ) );
+                organisationUnitId = Integer.parseInt( (String) executionDate.get( "organisationUnitId" ) );
+            }
+            catch ( NumberFormatException e )
+            {
+                message = e.getMessage();
+                return ERROR;
+            }
+
+            if ( date == null )
+            {
+                return INPUT;
+            }
+
+            programStageInstance = saveExecutionDate( programId, organisationUnitId, date, completed, coordinate );
+        }
 
         Map<String, Object> values = (Map<String, Object>) input.get( "values" );
 
@@ -177,6 +210,38 @@ public class UploadAnonymousEventAction implements Action
         }
 
         return SUCCESS;
+    }
+
+    private void updateExecutionDate( ProgramStageInstance programStageInstance, Date date, Boolean completed, Coordinate coordinate )
+    {
+        if ( date != null )
+        {
+            programStageInstance.setDueDate( date );
+            programStageInstance.setExecutionDate( date );
+        }
+
+        if ( completed != null )
+        {
+            programStageInstance.setCompleted( completed );
+            programStageInstance.setCompletedDate( new Date() );
+            programStageInstance.setCompletedUser( currentUserService.getCurrentUsername() );
+        }
+
+        if ( programStageInstance.getProgramStage().getCaptureCoordinates() )
+        {
+            if ( coordinate != null && coordinate.isValid() )
+            {
+                programStageInstance.setCoordinates( coordinate.getCoordinateString() );
+            }
+            else
+            {
+                programStageInstance.setCoordinates( null );
+            }
+        }
+
+        message = programStageInstance.getId() + "";
+
+        programStageInstanceService.updateProgramStageInstance( programStageInstance );
     }
 
     private ProgramStageInstance saveExecutionDate( Integer programId, Integer organisationUnitId, Date date, Boolean completed,

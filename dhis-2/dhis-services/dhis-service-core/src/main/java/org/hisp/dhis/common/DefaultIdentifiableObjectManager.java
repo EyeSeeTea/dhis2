@@ -1,19 +1,20 @@
 package org.hisp.dhis.common;
 
 /*
- * Copyright (c) 2004-2005, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the <ORGANIZATION> nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -32,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.criterion.Criterion;
 import org.hisp.dhis.common.IdentifiableObject.IdentifiableProperty;
 import org.hisp.dhis.common.NameableObject.NameableProperty;
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -138,6 +141,12 @@ public class DefaultIdentifiableObjectManager
     }
 
     @Override
+    public <T extends IdentifiableObject> boolean exists( Class<T> clazz, String uid )
+    {
+        return get( clazz, uid ) != null;
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public <T extends IdentifiableObject> T getByCode( Class<T> clazz, String code )
     {
@@ -182,7 +191,36 @@ public class DefaultIdentifiableObjectManager
 
         return object;
     }
-    
+
+    @Override
+    public <T extends IdentifiableObject> Collection<T> filter( Class<T> clazz, String query )
+    {
+        Set<T> uniqueObjects = new HashSet<T>();
+
+        T object = get( clazz, query );
+
+        if ( object != null )
+        {
+            uniqueObjects.add( object );
+        }
+
+        object = getByCode( clazz, query );
+
+        if ( object != null )
+        {
+            uniqueObjects.add( object );
+        }
+
+        uniqueObjects.addAll( getLikeName( clazz, query ) );
+        uniqueObjects.addAll( getLikeShortName( clazz, query ) );
+
+        List<T> objects = new ArrayList<T>( uniqueObjects );
+
+        Collections.sort( objects, IdentifiableObjectNameComparator.INSTANCE );
+
+        return objects;
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public <T extends IdentifiableObject> Collection<T> getAll( Class<T> clazz )
@@ -222,9 +260,9 @@ public class DefaultIdentifiableObjectManager
             return new ArrayList<T>();
         }
 
-        return (List<T>) store.getByUid( uids );        
+        return (List<T>) store.getByUid( uids );
     }
-    
+
     @Override
     @SuppressWarnings("unchecked")
     public <T extends IdentifiableObject> Collection<T> getLikeName( Class<T> clazz, String name )
@@ -241,7 +279,7 @@ public class DefaultIdentifiableObjectManager
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends IdentifiableObject> Collection<T> getBetween( Class<T> clazz, int first, int max )
+    public <T extends IdentifiableObject> Collection<T> getLikeShortName( Class<T> clazz, String shortName )
     {
         GenericIdentifiableObjectStore<IdentifiableObject> store = getIdentifiableObjectStore( clazz );
 
@@ -250,12 +288,12 @@ public class DefaultIdentifiableObjectManager
             return new ArrayList<T>();
         }
 
-        return (Collection<T>) store.getAllOrderedName( first, max );
+        return (Collection<T>) store.getAllLikeShortName( shortName );
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends IdentifiableObject> Collection<T> getBetweenByName( Class<T> clazz, String name, int first, int max )
+    public <T extends IdentifiableObject> List<T> getBetween( Class<T> clazz, int first, int max )
     {
         GenericIdentifiableObjectStore<IdentifiableObject> store = getIdentifiableObjectStore( clazz );
 
@@ -264,7 +302,21 @@ public class DefaultIdentifiableObjectManager
             return new ArrayList<T>();
         }
 
-        return (Collection<T>) store.getAllLikeNameOrderedName( name, first, max );
+        return (List<T>) store.getAllOrderedName( first, max );
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends IdentifiableObject> List<T> getBetweenByName( Class<T> clazz, String name, int first, int max )
+    {
+        GenericIdentifiableObjectStore<IdentifiableObject> store = getIdentifiableObjectStore( clazz );
+
+        if ( store == null )
+        {
+            return new ArrayList<T>();
+        }
+
+        return (List<T>) store.getAllLikeNameOrderedName( name, first, max );
     }
 
     @Override
@@ -282,7 +334,7 @@ public class DefaultIdentifiableObjectManager
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public <T extends IdentifiableObject> Collection<T> getByLastUpdatedSorted( Class<T> clazz, Date lastUpdated )
     {
         GenericIdentifiableObjectStore<IdentifiableObject> store = getIdentifiableObjectStore( clazz );
@@ -463,7 +515,7 @@ public class DefaultIdentifiableObjectManager
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public <T extends IdentifiableObject> T getNoAcl( Class<T> clazz, String uid )
     {
         GenericIdentifiableObjectStore<IdentifiableObject> store = getIdentifiableObjectStore( clazz );

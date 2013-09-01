@@ -1,17 +1,20 @@
+package org.hisp.dhis.program;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,24 +27,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.program;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.patientcomment.PatientComment;
-import org.hisp.dhis.sms.outbound.OutboundSms;
-
-import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patientcomment.PatientComment;
+import org.hisp.dhis.sms.outbound.OutboundSms;
+
 /**
  * @author Abyot Asalefew
  * @version $Id$
  */
-public class ProgramStageInstance
-    implements Serializable
+public class ProgramStageInstance extends BaseIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -49,16 +51,10 @@ public class ProgramStageInstance
     private static final long serialVersionUID = 6239130884678145713L;
 
     public static final int COMPLETED_STATUS = 1;
-
     public static final int VISITED_STATUS = 2;
-
     public static final int FUTURE_VISIT_STATUS = 3;
-
     public static final int LATE_VISIT_STATUS = 4;
-
     public static final int SKIPPED_STATUS = 5;
-
-    private int id;
 
     private ProgramInstance programInstance;
 
@@ -70,7 +66,7 @@ public class ProgramStageInstance
 
     private OrganisationUnit organisationUnit;
 
-    private boolean completed = false;
+    private boolean completed;
 
     private List<OutboundSms> outboundSms;
 
@@ -83,6 +79,8 @@ public class ProgramStageInstance
     private String completedUser;
 
     private Date completedDate;
+    
+    private Set<Patient> patients;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -103,24 +101,24 @@ public class ProgramStageInstance
     // -------------------------------------------------------------------------
 
     @Override
-    public boolean equals( Object o )
+    public boolean equals( Object object )
     {
-        if ( this == o )
+        if ( this == object )
         {
             return true;
         }
 
-        if ( o == null )
+        if ( object == null )
         {
             return false;
         }
 
-        if ( !(o instanceof ProgramStageInstance) )
+        if ( getClass() != object.getClass() )
         {
             return false;
         }
 
-        final ProgramStageInstance other = (ProgramStageInstance) o;
+        final ProgramStageInstance other = (ProgramStageInstance) object;
 
         return programInstance.equals( other.getProgramInstance() ) && programStage.equals( other.getProgramStage() );
 
@@ -143,22 +141,6 @@ public class ProgramStageInstance
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
-
-    /**
-     * @return the id
-     */
-    public int getId()
-    {
-        return id;
-    }
-
-    /**
-     * @param id the id to set
-     */
-    public void setId( int id )
-    {
-        this.id = id;
-    }
 
     /**
      * @return the programInstance
@@ -308,6 +290,16 @@ public class ProgramStageInstance
     public void setCoordinates( String coordinates )
     {
         this.coordinates = coordinates;
+    }
+
+    public Set<Patient> getPatients()
+    {
+        return patients;
+    }
+
+    public void setPatients( Set<Patient> patients )
+    {
+        this.patients = patients;
     }
 
     public Integer getEventStatus()

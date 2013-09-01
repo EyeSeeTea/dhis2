@@ -1,19 +1,20 @@
 package org.hisp.dhis.mobile.action;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -29,6 +30,7 @@ package org.hisp.dhis.mobile.action;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.hisp.dhis.program.ProgramStageInstanceService;
@@ -36,44 +38,58 @@ import org.hisp.dhis.program.SchedulingProgramObject;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.sms.outbound.OutboundSmsService;
 import org.hisp.dhis.sms.outbound.OutboundSmsStatus;
+import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserService;
 
 import com.opensymphony.xwork2.Action;
 
 public class ShowSentSMSAction
     implements Action
 {
-    
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-    
+
     private OutboundSmsService outboundSmsService;
-    
+
     public void setOutboundSmsService( OutboundSmsService outboundSmsService )
     {
         this.outboundSmsService = outboundSmsService;
     }
-    
+
     private ProgramStageInstanceService programStageInstanceService;
 
     public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
     {
         this.programStageInstanceService = programStageInstanceService;
     }
-    
+
+    private UserService userService;
+
+    public void setUserService( UserService userService )
+    {
+        this.userService = userService;
+    }
+
+    public UserService getUserService()
+    {
+        return userService;
+    }
+
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
-    
+
     private List<OutboundSms> listOutboundSMS;
-    
+
     public List<OutboundSms> getListOutboundSMS()
     {
         return listOutboundSMS;
     }
-    
+
     private Integer filterStatusType;
-    
+
     public Integer getFilterStatusType()
     {
         return filterStatusType;
@@ -85,12 +101,19 @@ public class ShowSentSMSAction
     }
 
     private Collection<SchedulingProgramObject> schedulingProgramObjects;
-    
+
     public Collection<SchedulingProgramObject> getSchedulingProgramObjects()
     {
         return schedulingProgramObjects;
     }
-    
+
+    private List<String> recipientNames;
+
+    public List<String> getRecipientNames()
+    {
+        return recipientNames;
+    }
+
     // -------------------------------------------------------------------------
     // Action Implementation
     // -------------------------------------------------------------------------
@@ -100,14 +123,14 @@ public class ShowSentSMSAction
         throws Exception
     {
         List<OutboundSms> tempListOutboundSMS = outboundSmsService.getAllOutboundSms();
-        
+
         listOutboundSMS = new ArrayList<OutboundSms>();
         
-        if ( filterStatusType != null && filterStatusType == 0)
+        if ( filterStatusType != null && filterStatusType == 0 )
         {
-            for ( OutboundSms each: tempListOutboundSMS )
+            for ( OutboundSms each : tempListOutboundSMS )
             {
-                if (each.getStatus().equals( OutboundSmsStatus.OUTBOUND ))
+                if ( each.getStatus().equals( OutboundSmsStatus.OUTBOUND ) )
                 {
                     this.listOutboundSMS.add( each );
                 }
@@ -115,20 +138,47 @@ public class ShowSentSMSAction
         }
         if ( filterStatusType != null && filterStatusType == 1 )
         {
-            for ( OutboundSms each: tempListOutboundSMS )
+            for ( OutboundSms each : tempListOutboundSMS )
             {
-                if (each.getStatus().equals( OutboundSmsStatus.SENT ))
+                if ( each.getStatus().equals( OutboundSmsStatus.SENT ) )
                 {
                     this.listOutboundSMS.add( each );
                 }
             }
         }
-        if ( filterStatusType != null && filterStatusType == 2 || filterStatusType == null)
+        if ( filterStatusType != null && filterStatusType == 2 || filterStatusType == null )
         {
-            for ( OutboundSms each: tempListOutboundSMS )
+            for ( OutboundSms each : tempListOutboundSMS )
             {
                 this.listOutboundSMS.add( each );
             }
+        }
+
+        recipientNames = new ArrayList<String>();
+        recipientNames.add( "" );
+        String tempString;
+        for ( OutboundSms outboundSms : listOutboundSMS )
+        {
+            tempString = "";
+            for ( String phoneNumber : outboundSms.getRecipients() )
+            {
+                Collection<User> users = userService.getUsersByPhoneNumber( phoneNumber );
+                if ( users == null || users.size() == 0 )
+                {
+                    tempString += "[unknown]";
+                }
+                else if ( users != null && users.size() > 0 )
+                {
+
+                    Iterator<User> usersIterator = users.iterator();
+                    while ( usersIterator.hasNext() )
+                    {
+                        User user = usersIterator.next();
+                        tempString += "[" + user.getUsername() + "]";
+                    }
+                }
+            }
+            recipientNames.add( tempString );
         }
         schedulingProgramObjects = programStageInstanceService.getSendMesssageEvents();
         return SUCCESS;

@@ -1,19 +1,20 @@
 package org.hisp.dhis.analytics.data;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -102,13 +103,13 @@ public class JdbcAnalyticsManager
         
         String sql = getSelectClause( params );
         
-        if ( params.filterSpansMultiplePartitions() )
+        if ( params.spansMultiplePartitions() )
         {
             sql += getFromWhereClauseMultiplePartitionFilters( params );
         }
         else
         {
-            sql += getFromWhereClause( params );
+            sql += getFromWhereClause( params, params.getPartitions().getSinglePartition() );
         }
         
         sql += getGroupByClause( params );
@@ -213,9 +214,9 @@ public class JdbcAnalyticsManager
     {
         String sql = "from (";
         
-        for ( DataQueryParams filterParams : params.getPartitionFilterParams() )
+        for ( String partition : params.getPartitions().getPartitions() )
         {
-            sql += "select " + getCommaDelimitedString( filterParams.getQueryDimensions() ) + ", ";
+            sql += "select " + getCommaDelimitedString( params.getQueryDimensions() ) + ", ";
             
             if ( params.isAggregationType( AVERAGE_INT ) )
             {
@@ -230,7 +231,7 @@ public class JdbcAnalyticsManager
                 sql += "value";
             }
             
-            sql += " " + getFromWhereClause( filterParams );
+            sql += " " + getFromWhereClause( params, partition );
             
             sql += "union all ";
         }
@@ -243,11 +244,11 @@ public class JdbcAnalyticsManager
     /**
      * Generates the from clause of the query SQL.
      */
-    private String getFromWhereClause( DataQueryParams params )
+    private String getFromWhereClause( DataQueryParams params, String partition )
     {
         SqlHelper sqlHelper = new SqlHelper();
 
-        String sql = "from " + params.getTableName() + " ";
+        String sql = "from " + partition + " ";
         
         for ( DimensionalObject dim : params.getQueryDimensions() )
         {

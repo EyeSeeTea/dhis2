@@ -6,14 +6,15 @@ package org.hisp.dhis.api.controller;
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -31,6 +32,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,6 +44,7 @@ import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.api.utils.ContextUtils.CacheStrategy;
 import org.hisp.dhis.api.utils.PdfDataEntryFormImportUtil;
 import org.hisp.dhis.common.IdentifiableObject.IdentifiableProperty;
+import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.dxf2.datavalueset.DataValueSetService;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.pdfform.PdfDataEntryFormService;
@@ -49,6 +53,8 @@ import org.hisp.dhis.dxf2.pdfform.PdfFormFontSettings;
 import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.i18n.I18nManagerException;
 import org.hisp.dhis.importexport.ImportStrategy;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.scheduling.TaskCategory;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.notification.Notifier;
@@ -74,6 +80,8 @@ public class PDFFormController
 {
     private static final Log log = LogFactory.getLog( PDFFormController.class );
 
+    //private static final String DATEFORMAT_DEFAULT = "MMMM dd, yyyy";
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -86,6 +94,12 @@ public class PDFFormController
 
     @Autowired
     private DataValueSetService dataValueSetService;
+
+    @Autowired
+    private DataSetService dataSetService;
+
+    @Autowired
+    private ProgramStageService programStageService;
 
     @Autowired
     private I18nManager i18nManager;
@@ -125,10 +139,13 @@ public class PDFFormController
             pdfFormFontSettings, i18nManager.getI18nFormat() );
 
         // 3. - Response Header/Content Type Set
-        
-        contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_PDF, CacheStrategy.NO_CACHE );
-        response.setContentLength( baos.size() );
 
+        String fileName = dataSetService.getDataSet( dataSetUid ).getName() + " " + (new SimpleDateFormat(
+            Period.DEFAULT_DATE_FORMAT )).format( new Date() ) ;
+        
+        contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_PDF, CacheStrategy.NO_CACHE, fileName, false );
+        response.setContentLength( baos.size() );        
+        
         // 4. - Output the data into Stream and close the stream.
         
         writeToOutputStream( baos, response );
@@ -202,7 +219,10 @@ public class PDFFormController
 
         // 3. - Response Header/Content Type Set
         
-        contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_PDF, CacheStrategy.NO_CACHE );
+        String fileName = programStageService.getProgramStage( programStageUid ).getName() + " " 
+            + (new SimpleDateFormat(Period.DEFAULT_DATE_FORMAT )).format( new Date() ) ;
+
+        contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_PDF, CacheStrategy.NO_CACHE, fileName, false );
         response.setContentLength( baos.size() );
 
         // 4. - write ByteArrayOutputStream to the ServletOutputStream

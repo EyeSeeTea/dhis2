@@ -1,17 +1,20 @@
+package org.hisp.dhis.caseaggregation;
+
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,8 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.caseaggregation;
 
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.dataelement.DataElement;
@@ -42,53 +43,34 @@ public class CaseAggregationCondition
     private static final long serialVersionUID = -5746649805915250424L;
 
     public static final String SEPARATOR_ID = "\\.";
-
     public static final String SEPARATOR_OBJECT = ":";
 
     public static final String AGGRERATION_COUNT = "COUNT";
-
     public static final String AGGRERATION_SUM = "times";
-
     public static final String AGGRERATION_SUM_VALUE = "sum";
-
     public static final String AGGRERATION_AVG_VALUE = "avg";
-
     public static final String AGGRERATION_AVG_MIN = "min";
-
     public static final String AGGRERATION_AVG_MAX = "max";
 
     public static final String OPERATOR_AND = "AND";
-
     public static final String OPERATOR_OR = "OR";
 
     public static String OBJECT_PROGRAM_STAGE_DATAELEMENT = "DE";
-
     public static String OBJECT_PATIENT_ATTRIBUTE = "CA";
-
     public static String OBJECT_PATIENT_PROPERTY = "CP";
-
     public static String OBJECT_PROGRAM_PROPERTY = "PP";
-
     public static String OBJECT_PROGRAM = "PG";
-
     public static String OBJECT_PATIENT = "PT";
-
     public static String OBJECT_PROGRAM_STAGE = "PS";
-
     public static String OBJECT_PROGRAM_STAGE_PROPERTY = "PSP";
-
     public static String OBJECT_PATIENT_PROGRAM_STAGE_PROPERTY = "PC";
-
     public static String OBJECT_ORGUNIT_COMPLETE_PROGRAM_STAGE = "PSIC";
-
     public static String OBJECT_PROGRAM_PROPERTY_INCIDENT_DATE = "dateOfIncident";
-
     public static String OBJECT_PROGRAM_PROPERTY_ENROLLEMENT_DATE = "enrollmentDate";
-    
     public static String OBJECT_PROGRAM_PROPERTY_REPORT_DATE_DATE = "executionDate";
-    
-    public static String MINUS_OPERATOR = "DATEDIFF";
 
+    public static String MINUS_OPERATOR = "DATEDIFF";
+    public static String MINUS_DATAELEMENT_OPERATOR = "DEDATEDIFF";
     public static String AUTO_STORED_BY = "DHIS-SYSTEM";
 
     public static final String regExp = "\\[(" + OBJECT_ORGUNIT_COMPLETE_PROGRAM_STAGE + "|" + OBJECT_PATIENT + "|"
@@ -97,9 +79,15 @@ public class CaseAggregationCondition
         + OBJECT_PATIENT_ATTRIBUTE + "|" + OBJECT_PATIENT_PROPERTY + "|" + OBJECT_PROGRAM_PROPERTY + ")"
         + SEPARATOR_OBJECT + "([a-zA-Z0-9@#\\- ]+[" + SEPARATOR_ID + "[a-zA-Z0-9]*]*)" + "\\]";
 
-    public static final String dataelementRegExp = MINUS_OPERATOR + "{1}\\s*\\(\\s*(\\[" + OBJECT_PROGRAM_STAGE_DATAELEMENT
-        + SEPARATOR_OBJECT + "([0-9]+" + SEPARATOR_ID + "[0-9]+" + SEPARATOR_ID + "[0-9]+)+\\])\\s*(,)+\\s*("
-        + OBJECT_PROGRAM_PROPERTY_INCIDENT_DATE + "|" + OBJECT_PROGRAM_PROPERTY_REPORT_DATE_DATE + "|" + OBJECT_PROGRAM_PROPERTY_ENROLLEMENT_DATE + ")+\\s*\\)\\s*";
+    public static final String dataelementRegExp = MINUS_OPERATOR + "{1}\\s*\\(\\s*(\\["
+        + OBJECT_PROGRAM_STAGE_DATAELEMENT + SEPARATOR_OBJECT + "([0-9]+" + SEPARATOR_ID + "[0-9]+" + SEPARATOR_ID
+        + "[0-9]+)+\\])\\s*(,)+\\s*(" + OBJECT_PROGRAM_PROPERTY_INCIDENT_DATE + "|"
+        + OBJECT_PROGRAM_PROPERTY_REPORT_DATE_DATE + "|" + OBJECT_PROGRAM_PROPERTY_ENROLLEMENT_DATE + ")+\\s*\\)\\s*";
+
+    public static final String minusDataelementRegExp = MINUS_DATAELEMENT_OPERATOR + "{1}\\s*\\(\\s*(\\["
+        + OBJECT_PROGRAM_STAGE_DATAELEMENT + SEPARATOR_OBJECT + "([0-9]+" + SEPARATOR_ID + "[0-9]+" + SEPARATOR_ID
+        + "[0-9]+)+\\])\\s*(,)\\s*(\\[" + OBJECT_PROGRAM_STAGE_DATAELEMENT + SEPARATOR_OBJECT + "([0-9]+"
+        + SEPARATOR_ID + "[0-9]+" + SEPARATOR_ID + "[0-9]+)+\\])\\s*\\)\\s*(>=|<=|!=|>|<|=){1}\\s*([0-9]+)";
 
     // -------------------------------------------------------------------------
     // Fields
@@ -160,29 +148,49 @@ public class CaseAggregationCondition
     }
 
     @Override
-    public boolean equals( Object obj )
+    public boolean equals( Object object )
     {
-        if ( this == obj )
+        if ( this == object )
+        {
             return true;
-        if ( obj == null )
+        }
+        
+        if ( object == null )
+        {
             return false;
-        if ( getClass() != obj.getClass() )
+        }
+        
+        if ( getClass() != object.getClass() )
+        {
             return false;
-        CaseAggregationCondition other = (CaseAggregationCondition) obj;
+        }
+        
+        final CaseAggregationCondition other = (CaseAggregationCondition) object;
+        
         if ( aggregationExpression == null )
         {
             if ( other.aggregationExpression != null )
+            {
                 return false;
+            }
         }
         else if ( !aggregationExpression.equals( other.aggregationExpression ) )
+        {
             return false;
+        }
+        
         if ( operator == null )
         {
             if ( other.operator != null )
+            {
                 return false;
+            }
         }
         else if ( !operator.equals( other.operator ) )
+        {
             return false;
+        }
+        
         return true;
     }
 

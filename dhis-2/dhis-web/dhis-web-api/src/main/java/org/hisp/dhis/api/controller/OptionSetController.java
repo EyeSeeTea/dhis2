@@ -1,19 +1,20 @@
 package org.hisp.dhis.api.controller;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,17 +28,38 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.option.OptionSet;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping( value = OptionSetController.RESOURCE_PATH )
+@RequestMapping(value = OptionSetController.RESOURCE_PATH)
 public class OptionSetController
     extends AbstractCrudController<OptionSet>
 {
     public static final String RESOURCE_PATH = "/optionSets";
+
+    @RequestMapping( value = "/{uid}/version", method = RequestMethod.GET )
+    public void getVersion( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
+        HttpServletResponse response ) throws IOException
+    {
+        OptionSet optionSet = manager.get( OptionSet.class, uid );
+
+        Map<String, Integer> versionMap = new HashMap<String, Integer>();
+        versionMap.put( "version", optionSet.getVersion() );
+
+        JacksonUtils.toJson( response.getOutputStream(), versionMap );
+    }
 }

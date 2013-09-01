@@ -6,14 +6,15 @@ package org.hisp.dhis.caseentry.action.caseentry;
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -44,6 +45,7 @@ import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramDataEntryService;
+import org.hisp.dhis.program.ProgramIndicatorService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageDataElement;
 import org.hisp.dhis.program.ProgramStageInstance;
@@ -147,9 +149,16 @@ public class LoadDataEntryAction
 
     private Map<String, Double> calAttributeValueMap = new HashMap<String, Double>();
 
+    private ProgramIndicatorService programIndicatorService;
+
     // -------------------------------------------------------------------------
     // Getters && Setters
     // -------------------------------------------------------------------------
+    
+    public void setProgramIndicatorService( ProgramIndicatorService programIndicatorService )
+    {
+        this.programIndicatorService = programIndicatorService;
+    }
 
     public void setOrganisationUnitId( Integer organisationUnitId )
     {
@@ -244,6 +253,13 @@ public class LoadDataEntryAction
         return latitude;
     }
 
+    private Map<String, String> programIndicatorsMap = new HashMap<String, String>();
+
+    public Map<String, String> getProgramIndicatorsMap()
+    {
+        return programIndicatorsMap;
+    }
+
     // -------------------------------------------------------------------------
     // Implementation Action
     // -------------------------------------------------------------------------
@@ -281,26 +297,37 @@ public class LoadDataEntryAction
         Collections.sort( programStageDataElements, new ProgramStageDataElementSortOrderComparator() );
 
         DataEntryForm dataEntryForm = programStage.getDataEntryForm();
-        Boolean displayProvidedOtherFacility = program.getDisplayProvidedOtherFacility() == null || !program.getDisplayProvidedOtherFacility();
+        Boolean displayProvidedOtherFacility = program.getDisplayProvidedOtherFacility() == null
+            || !program.getDisplayProvidedOtherFacility();
 
         if ( programStage.getDataEntryType().equals( ProgramStage.TYPE_SECTION ) )
         {
-            sections = new ArrayList<ProgramStageSection>(
-                programStageSectionService.getProgramStages( programStage ) );
+            sections = new ArrayList<ProgramStageSection>( programStageSectionService.getProgramStages( programStage ) );
 
             Collections.sort( sections, new ProgramStageSectionSortOrderComparator() );
         }
         else if ( programStage.getDataEntryType().equals( ProgramStage.TYPE_CUSTOM ) )
         {
             customDataEntryFormCode = programDataEntryService.prepareDataEntryFormForEntry(
-                dataEntryForm.getHtmlCode(), null, displayProvidedOtherFacility.toString(), i18n,
-                programStage, null, organisationUnit );
+                dataEntryForm.getHtmlCode(), null, displayProvidedOtherFacility.toString(), i18n, programStage, null,
+                organisationUnit );
         }
 
         if ( programStageInstance != null )
         {
-            organisationUnit = organisationUnitId == null ? selectedStateManager.getSelectedOrganisationUnit() :
-                organisationUnitService.getOrganisationUnit( organisationUnitId );
+            // ---------------------------------------------------------------------
+            // Get program indicators
+            // ---------------------------------------------------------------------
+
+            programIndicatorsMap.putAll( programIndicatorService.getProgramIndicatorValues( programStageInstance
+                .getProgramInstance() ) );
+
+            // ---------------------------------------------------------------------
+            // Get registration orgunit
+            // ---------------------------------------------------------------------
+
+            organisationUnit = organisationUnitId == null ? selectedStateManager.getSelectedOrganisationUnit()
+                : organisationUnitService.getOrganisationUnit( organisationUnitId );
 
             if ( program.isRegistration() )
             {

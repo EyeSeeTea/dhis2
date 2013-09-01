@@ -1,17 +1,20 @@
+package org.hisp.dhis.caseentry.action.patient;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,14 +27,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.caseentry.action.patient;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-
+import java.util.List;
 import org.hisp.dhis.caseentry.state.SelectedStateManager;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientReminder;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
@@ -40,6 +44,7 @@ import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
+import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.system.util.DateUtils;
 
 import com.opensymphony.xwork2.Action;
@@ -159,9 +164,24 @@ public class SaveProgramEnrollmentAction
 
         Program program = programService.getProgram( programId );
 
+        if ( enrollmentDate == null || enrollmentDate.isEmpty() )
+        {
+            if ( program.getUseBirthDateAsIncidentDate() )
+            {
+                enrollmentDate = format.formatDate( patient.getBirthDate() );
+            }
+        }
+
         if ( dateOfIncident == null || dateOfIncident.isEmpty() )
         {
-            dateOfIncident = enrollmentDate;
+            if ( program.getUseBirthDateAsIncidentDate() )
+            {
+                dateOfIncident = format.formatDate( patient.getBirthDate() );
+            }
+            else
+            {
+                dateOfIncident = enrollmentDate;
+            }
         }
 
         Collection<ProgramInstance> programInstances = programInstanceService.getProgramInstances( patient, program,
@@ -225,6 +245,17 @@ public class SaveProgramEnrollmentAction
                     }
                 }
             }
+
+            // send messages after enrollment program
+            List<OutboundSms> outboundSms = programInstance.getOutboundSms();
+            if ( outboundSms == null )
+            {
+                outboundSms = new ArrayList<OutboundSms>();
+            }
+            
+            outboundSms.addAll( programInstanceService.sendMessages( programInstance,
+                PatientReminder.SEND_WHEN_TO_EMROLLEMENT, format ) );
+            programInstanceService.updateProgramInstance( programInstance );
         }
         else
         {

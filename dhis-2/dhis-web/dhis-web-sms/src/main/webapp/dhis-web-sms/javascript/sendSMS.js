@@ -56,7 +56,7 @@ function sendSMSMessage( _form )
 
 		if ( list == '' )
 		{
-			showErrorMessage( i18n_no_recipient );
+			setHeaderDelayMessage( i18n_no_recipient );
 			return;
 		}
 		
@@ -76,7 +76,7 @@ function sendSMSMessage( _form )
 
 		if ( userGroup == null )
 		{
-			showErrorMessage( i18n_please_select_user_group );
+			setHeaderDelayMessage( i18n_please_select_user_group );
 			return;
 		}
 	}
@@ -84,7 +84,7 @@ function sendSMSMessage( _form )
 	{
 		if ( !isOrgunitSelected )
 		{
-			showErrorMessage( i18n_please_select_orgunit );
+			setHeaderDelayMessage( i18n_please_select_orgunit );
 			return;
 		}
 	}
@@ -105,16 +105,16 @@ function sendSMSMessage( _form )
 	{
 		recipients: JSON.stringify( p.recipients ),
 		gatewayId: getFieldValue( 'gatewayId' ),
-		smsMessage: getFieldValue( 'smsMessage' ),
+		text: getFieldValue( 'text' ),
 		sendTarget: getFieldValue( 'sendTarget' ),
 		userGroup: getFieldValue( 'userGroup' )
 	}, function ( json )
 	{
 		if ( json.response == "success" ) {
-			showSuccessMessage( json.message );
+			setHeaderDelayMessage( json.message );
 		}
 		else {
-			showErrorMessage( json.message, 7000 );
+			setHeaderDelayMessage( json.message, 7000 );
 		}
 	} );
 }

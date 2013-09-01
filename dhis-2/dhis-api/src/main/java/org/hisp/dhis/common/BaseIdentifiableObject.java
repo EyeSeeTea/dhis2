@@ -1,19 +1,20 @@
 package org.hisp.dhis.common;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,18 +28,6 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.apache.commons.lang.Validate;
-import org.hisp.dhis.common.view.DetailedView;
-import org.hisp.dhis.common.view.ExportView;
-import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserGroupAccess;
-
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -46,10 +35,22 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.Validate;
+import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserGroupAccess;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+
 /**
  * @author Bob Jolliffe
  */
-@JacksonXmlRootElement(localName = "identifiableObject", namespace = DxfNamespaces.DXF_2_0)
+@JacksonXmlRootElement( localName = "identifiableObject", namespace = DxfNamespaces.DXF_2_0 )
 public class BaseIdentifiableObject
     extends BaseLinkableObject
     implements IdentifiableObject
@@ -90,6 +91,11 @@ public class BaseIdentifiableObject
     protected Date lastUpdated;
 
     /**
+     * This object is available as external read-only
+     */
+    protected boolean externalAccess;
+
+    /**
      * Access string for public access.
      */
     protected String publicAccess;
@@ -128,7 +134,7 @@ public class BaseIdentifiableObject
         this.uid = uid;
         this.name = name;
     }
-    
+
     public BaseIdentifiableObject( String uid, String code, String name )
     {
         this.uid = uid;
@@ -170,8 +176,8 @@ public class BaseIdentifiableObject
         this.id = id;
     }
 
-    @JsonProperty(value = "id")
-    @JacksonXmlProperty(localName = "id", isAttribute = true)
+    @JsonProperty( value = "id" )
+    @JacksonXmlProperty( localName = "id", isAttribute = true )
     public String getUid()
     {
         return uid;
@@ -183,7 +189,7 @@ public class BaseIdentifiableObject
     }
 
     @JsonProperty
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty( isAttribute = true )
     public String getCode()
     {
         return code;
@@ -195,7 +201,7 @@ public class BaseIdentifiableObject
     }
 
     @JsonProperty
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty( isAttribute = true )
     public String getName()
     {
         return name;
@@ -219,7 +225,7 @@ public class BaseIdentifiableObject
     }
 
     @JsonProperty
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty( isAttribute = true )
     public Date getCreated()
     {
         return created;
@@ -231,7 +237,7 @@ public class BaseIdentifiableObject
     }
 
     @JsonProperty
-    @JacksonXmlProperty(isAttribute = true)
+    @JacksonXmlProperty( isAttribute = true )
     public Date getLastUpdated()
     {
         return lastUpdated;
@@ -244,8 +250,8 @@ public class BaseIdentifiableObject
 
     @Override
     @JsonProperty
-    @JsonView({ DetailedView.class, ExportView.class })
-    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
+    @JsonView( { DetailedView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getPublicAccess()
     {
         return publicAccess;
@@ -254,6 +260,20 @@ public class BaseIdentifiableObject
     public void setPublicAccess( String publicAccess )
     {
         this.publicAccess = publicAccess;
+    }
+
+    @Override
+    @JsonProperty
+    @JsonView( { DetailedView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean getExternalAccess()
+    {
+        return externalAccess;
+    }
+
+    public void setExternalAccess( Boolean externalAccess )
+    {
+        this.externalAccess = externalAccess == null ? false : externalAccess;
     }
 
     /*
@@ -274,9 +294,9 @@ public class BaseIdentifiableObject
     }
 
     @JsonProperty
-    @JsonView({ DetailedView.class, ExportView.class })
-    @JacksonXmlElementWrapper(localName = "userGroupAccesses", namespace = DxfNamespaces.DXF_2_0)
-    @JacksonXmlProperty(localName = "userGroupAccess", namespace = DxfNamespaces.DXF_2_0)
+    @JsonView( { DetailedView.class } )
+    @JacksonXmlElementWrapper( localName = "userGroupAccesses", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "userGroupAccess", namespace = DxfNamespaces.DXF_2_0 )
     public Set<UserGroupAccess> getUserGroupAccesses()
     {
         return userGroupAccesses;
@@ -288,7 +308,8 @@ public class BaseIdentifiableObject
     }
 
     @JsonProperty
-    @JacksonXmlProperty(localName = "access", namespace = DxfNamespaces.DXF_2_0)
+    @JsonView( { DetailedView.class } )
+    @JacksonXmlProperty( localName = "access", namespace = DxfNamespaces.DXF_2_0 )
     public Access getAccess()
     {
         return access;
@@ -333,9 +354,12 @@ public class BaseIdentifiableObject
             return true;
         }
 
-        if ( o == null || getClass() != o.getClass() ) return false;
+        if ( o == null || getClass() != o.getClass() )
+        {
+            return false;
+        }
 
-        BaseIdentifiableObject that = (BaseIdentifiableObject) o;
+        final BaseIdentifiableObject that = (BaseIdentifiableObject) o;
 
         if ( uid != null ? !uid.equals( that.uid ) : that.uid != null )
         {
@@ -443,12 +467,12 @@ public class BaseIdentifiableObject
     {
         return "[IdentifiableObject: " +
             "id='" + id +
-            "', uid='" + uid + 
-            "', code='" + code + 
-            "', name='" + name + 
-            "', created='" + created + 
-            "', lastUpdated='" + lastUpdated + 
-            "', class='" + getClass().getSimpleName() + 
+            "', uid='" + uid +
+            "', code='" + code +
+            "', name='" + name +
+            "', created='" + created +
+            "', lastUpdated='" + lastUpdated +
+            "', class='" + getClass().getSimpleName() +
             "']";
     }
 

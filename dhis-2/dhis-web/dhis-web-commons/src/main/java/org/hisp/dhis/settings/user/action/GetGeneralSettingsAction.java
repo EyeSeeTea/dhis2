@@ -1,19 +1,20 @@
 package org.hisp.dhis.settings.user.action;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,9 +28,10 @@ package org.hisp.dhis.settings.user.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.user.UserSettingService.AUTO_SAVE_DATA_ENTRY_FORM;
 import static org.hisp.dhis.user.UserSettingService.KEY_MESSAGE_EMAIL_NOTIFICATION;
 import static org.hisp.dhis.user.UserSettingService.KEY_MESSAGE_SMS_NOTIFICATION;
+import static org.hisp.dhis.user.UserSettingService.KEY_ANALYSIS_DISPLAY_PROPERTY;
+import static org.hisp.dhis.user.UserSettingService.DEFAULT_ANALYSIS_DISPLAY_PROPERTY;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -110,7 +112,7 @@ public class GetGeneralSettingsAction
     {
         return currentLocale;
     }
-
+    
     private List<Locale> availableLocalesDb;
 
     public List<Locale> getAvailableLocalesDb()
@@ -139,11 +141,11 @@ public class GetGeneralSettingsAction
         return styles;
     }
 
-    private Boolean autoSave;
+    private String analysisDisplayProperty;
 
-    public Boolean getAutoSave()
+    public String getAnalysisDisplayProperty()
     {
-        return autoSave;
+        return analysisDisplayProperty;
     }
 
     private Boolean messageEmailNotification;
@@ -183,6 +185,11 @@ public class GetGeneralSettingsAction
 
         currentLocale = localeManager.getCurrentLocale();
 
+        if ( !availableLocales.contains( currentLocale ) )
+        {
+            currentLocale = localeManager.getFallbackLocale();
+        }
+        
         // ---------------------------------------------------------------------
         // Get available locales in db
         // ---------------------------------------------------------------------
@@ -198,13 +205,7 @@ public class GetGeneralSettingsAction
         } );
 
         currentLocaleDb = i18nService.getCurrentLocale();
-
-        // ---------------------------------------------------------------------
-        // Get Auto-save data entry form
-        // ---------------------------------------------------------------------
-
-        autoSave = (Boolean) userSettingService.getUserSetting( AUTO_SAVE_DATA_ENTRY_FORM, false );
-
+        
         // ---------------------------------------------------------------------
         // Get styles
         // ---------------------------------------------------------------------
@@ -212,6 +213,8 @@ public class GetGeneralSettingsAction
         styles = styleManager.getStyles();
 
         currentStyle = styleManager.getCurrentStyle();
+        
+        analysisDisplayProperty = (String) userSettingService.getUserSetting( KEY_ANALYSIS_DISPLAY_PROPERTY, DEFAULT_ANALYSIS_DISPLAY_PROPERTY );
 
         messageEmailNotification = (Boolean) userSettingService.getUserSetting( KEY_MESSAGE_EMAIL_NOTIFICATION, false );
 

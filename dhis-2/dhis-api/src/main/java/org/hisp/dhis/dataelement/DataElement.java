@@ -6,14 +6,15 @@ package org.hisp.dhis.dataelement;
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -81,35 +82,22 @@ public class DataElement
     private static final long serialVersionUID = -7131541880444446669L;
 
     public static final String VALUE_TYPE_STRING = "string";
-
     public static final String VALUE_TYPE_INT = "int";
-
-    public static final String VALUE_TYPE_NUMBER = "number";
-    
+    public static final String VALUE_TYPE_NUMBER = "number";    
     public static final String VALUE_TYPE_USER_NAME = "username";
-
     public static final String VALUE_TYPE_POSITIVE_INT = "positiveNumber";
-
     public static final String VALUE_TYPE_NEGATIVE_INT = "negativeNumber";
-
     public static final String VALUE_TYPE_TRUE_ONLY = "trueOnly";
-
     public static final String VALUE_TYPE_TEXT = "text";
-
     public static final String VALUE_TYPE_LONG_TEXT = "longText";
-
     public static final String VALUE_TYPE_BOOL = "bool";
-
     public static final String VALUE_TYPE_DATE = "date";
 
     public static final String DOMAIN_TYPE_AGGREGATE = "aggregate";
-
     public static final String DOMAIN_TYPE_PATIENT = "patient";
 
     public static final String AGGREGATION_OPERATOR_SUM = "sum";
-
     public static final String AGGREGATION_OPERATOR_AVERAGE = "average";
-
     public static final String AGGREGATION_OPERATOR_COUNT = "count";
 
     /**
@@ -449,6 +437,16 @@ public class DataElement
         }
 
         return expiryDays == Integer.MAX_VALUE ? NO_EXPIRY : expiryDays;
+    }
+    
+    public boolean hasDescription()
+    {
+        return description != null && !description.trim().isEmpty();
+    }
+    
+    public boolean hasUrl()
+    {
+        return url != null && !url.trim().isEmpty();
     }
 
     // -------------------------------------------------------------------------

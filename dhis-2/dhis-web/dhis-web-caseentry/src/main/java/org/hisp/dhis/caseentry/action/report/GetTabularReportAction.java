@@ -1,17 +1,20 @@
+package org.hisp.dhis.caseentry.action.report;
+
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,8 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.caseentry.action.report;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,9 +87,9 @@ public class GetTabularReportAction
     // Input
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private String id;
 
-    public void setId( Integer id )
+    public void setId( String id )
     {
         this.id = id;
     }
@@ -171,45 +172,45 @@ public class GetTabularReportAction
     public String execute()
         throws Exception
     {
-        tabularReport = tabularReportService.getPatientTabularReport( id );
+        tabularReport = tabularReportService.getPatientTabularReportByUid( id );
 
         programStage = tabularReport.getProgramStage();
 
-        for ( String filterValue : tabularReport.getFilterValues() )
-        {
-            String[] values = filterValue.split( "_" );
-            String filter = "";
-            if ( values.length == 5 )
-            {
-                filter =  values[3] + "_" + values[4].trim().substring( 1, values[4].length() - 1 );
-            }
-
-            if ( values[0].equals( PatientTabularReport.PREFIX_FIXED_ATTRIBUTE ) )
-            {
-                selectedFixedAttributes.add( values[1] );
-                fixedAttributeFilters.add( filter );
-            }
-            else
-            {
-                int id = Integer.parseInt( values[1] );
-
-                if ( values[0].equals( PatientTabularReport.PREFIX_IDENTIFIER_TYPE ) )
-                {
-                    selectedIdentifierTypes.add( patientIdentifierTypeService.getPatientIdentifierType( id ) );
-                    identifierTypeFilters.add( filter );
-                }
-                else if ( values[0].equals( PatientTabularReport.PREFIX_PATIENT_ATTRIBUTE ) )
-                {
-                    selectedAttributes.add( patientAttributeService.getPatientAttribute( id ) );
-                    patientAttributeFilters.add( filter );
-                }
-                else if ( values[0].equals( PatientTabularReport.PREFIX_DATA_ELEMENT ) )
-                {
-                    selectedDataElements.add( dataElementService.getDataElement( id ) );
-                    dataelementFilters.add( filter );
-                }
-            }
-        }
+//        for ( String filterValue : tabularReport.getItems() )
+//        {
+//            String[] values = filterValue.split( "_" );
+//            String filter = "";
+//            if ( values.length == 5 )
+//            {
+//                filter =  values[3] + "_" + values[4].trim().substring( 1, values[4].length() - 1 );
+//            }
+//
+//            if ( values[0].equals( PatientTabularReport.PREFIX_FIXED_ATTRIBUTE ) )
+//            {
+//                selectedFixedAttributes.add( values[1] );
+//                fixedAttributeFilters.add( filter );
+//            }
+//            else
+//            {
+//                int id = Integer.parseInt( values[1] );
+//
+//                if ( values[0].equals( PatientTabularReport.PREFIX_IDENTIFIER_TYPE ) )
+//                {
+//                    selectedIdentifierTypes.add( patientIdentifierTypeService.getPatientIdentifierType( id ) );
+//                    identifierTypeFilters.add( filter );
+//                }
+//                else if ( values[0].equals( PatientTabularReport.PREFIX_PATIENT_ATTRIBUTE ) )
+//                {
+//                    selectedAttributes.add( patientAttributeService.getPatientAttribute( id ) );
+//                    patientAttributeFilters.add( filter );
+//                }
+//                else if ( values[0].equals( PatientTabularReport.PREFIX_DATA_ELEMENT ) )
+//                {
+//                    selectedDataElements.add( dataElementService.getDataElement( id ) );
+//                    dataelementFilters.add( filter );
+//                }
+//            }
+//        }
 
         return SUCCESS;
     }

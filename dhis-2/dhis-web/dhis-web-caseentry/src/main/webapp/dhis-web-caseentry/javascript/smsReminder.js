@@ -1,4 +1,6 @@
 isAjax = true;
+var generateResultParams = "";
+
 function orgunitSelected( orgUnits, orgUnitNames )
 {
 	var width = jQuery('#programIdAddPatient').width();
@@ -79,10 +81,13 @@ function listAllPatient()
 				+ getFieldValue('statusEvent');
 	var followup = "";
 	if( byId('followup').checked ){
-		followup = "?followup=true";
+		followup = "followup=true";
 	}
+	
+	generateResultParams = followup + "&programId=" + programId + "&searchTexts=" + searchTexts;
+	
 	showLoader();
-	jQuery('#listEventDiv').load('getSMSPatientRecords.action' + followup,
+	jQuery('#listEventDiv').load('getSMSPatientRecords.action?' + followup,
 		{
 			programId:programId,
 			listAll:false,
@@ -110,6 +115,8 @@ function advancedSearch( params )
 	hideById('listEventDiv');
 	showLoader();
 	params += "&programId=" + getFieldValue('programIdAddPatient');
+	generateResultParams = params;
+	
 	$.ajax({
 		url: 'getSMSPatientRecords.action',
 		type:"POST",
@@ -123,6 +130,12 @@ function advancedSearch( params )
 			hideLoader();
 		}
 	});
+}
+
+function exportXlsFile()
+{
+	var url = "getActivityPlanRecords.action?type=xls&trackingReport=true&" + generateResultParams;
+	window.location.href = url;
 }
 
 // --------------------------------------------------------------------
@@ -283,4 +296,30 @@ function onClickBackBtn()
 	else if( eventList == 2){
 		validateAdvancedSearch();
 	}
+}
+
+// load program instance history
+function programTrackingReport( programInstanceId )
+{
+	$('#programTrackingReportDiv').load("getProgramReportHistory.action", 
+		{
+			programInstanceId:programInstanceId
+		}).dialog(
+		{
+			title:i18n_program_report,
+			maximize:true, 
+			closable:true,
+			modal:true,
+			overlay:{background:'#000000', opacity:0.1},
+			width:850,
+			height:500
+		});
+}
+
+function getProgramStageInstanceById(programStageInstanceId)
+{
+	$('#tab-2').load("getProgramStageInstanceById.action", 
+	{
+		programStageInstanceId:programStageInstanceId
+	});
 }

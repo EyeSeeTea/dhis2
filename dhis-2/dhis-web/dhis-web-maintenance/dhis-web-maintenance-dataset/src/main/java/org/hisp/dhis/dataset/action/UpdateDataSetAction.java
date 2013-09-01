@@ -1,19 +1,20 @@
 package org.hisp.dhis.dataset.action;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,10 +28,7 @@ package org.hisp.dhis.dataset.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
+import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
@@ -43,7 +41,9 @@ import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.user.UserGroupService;
 
-import com.opensymphony.xwork2.Action;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.hisp.dhis.system.util.TextUtils.equalsNullSafe;
 import static org.hisp.dhis.system.util.TextUtils.nullIfEmpty;
@@ -79,14 +79,14 @@ public class UpdateDataSetAction
     {
         this.dataElementService = dataElementService;
     }
-    
+
     private IndicatorService indicatorService;
 
     public void setIndicatorService( IndicatorService indicatorService )
     {
         this.indicatorService = indicatorService;
     }
-    
+
     private SectionService sectionService;
 
     public void setSectionService( SectionService sectionService )
@@ -141,7 +141,7 @@ public class UpdateDataSetAction
     }
 
     private int notificationRecipients;
-    
+
     public void setNotificationRecipients( int notificationRecipients )
     {
         this.notificationRecipients = notificationRecipients;
@@ -181,9 +181,9 @@ public class UpdateDataSetAction
     {
         this.allowFuturePeriods = allowFuturePeriods;
     }
-    
+
     private boolean fieldCombinationRequired;
-    
+
     public void setFieldCombinationRequired( boolean fieldCombinationRequired )
     {
         this.fieldCombinationRequired = fieldCombinationRequired;
@@ -201,6 +201,27 @@ public class UpdateDataSetAction
     public void setSkipOffline( boolean skipOffline )
     {
         this.skipOffline = skipOffline;
+    }
+
+    private boolean dataElementDecoration;
+
+    public void setDataElementDecoration( boolean dataElementDecoration )
+    {
+        this.dataElementDecoration = dataElementDecoration;
+    }
+
+    private boolean renderAsTabs;
+
+    public void setRenderAsTabs( boolean renderAsTabs )
+    {
+        this.renderAsTabs = renderAsTabs;
+    }
+
+    private boolean renderHorizontally;
+
+    public void setRenderHorizontally( boolean renderHorizontally )
+    {
+        this.renderHorizontally = renderHorizontally;
     }
 
     private Collection<String> dataElementsSelectedList = new HashSet<String>();
@@ -252,9 +273,12 @@ public class UpdateDataSetAction
 
         dataSet.setExpiryDays( expiryDays );
         dataSet.setSkipAggregation( skipAggregation );
-        
-        if ( !(equalsNullSafe( name, dataSet.getName() ) && periodType.equals( dataSet.getPeriodType() )
-            && dataElements.equals( dataSet.getDataElements() ) && indicators.equals( dataSet.getIndicators() )) )
+
+        if ( !( equalsNullSafe( name, dataSet.getName() ) && 
+            periodType.equals( dataSet.getPeriodType() ) && 
+            dataElements.equals( dataSet.getDataElements() ) && 
+            indicators.equals( dataSet.getIndicators() ) &&
+            renderAsTabs == dataSet.isRenderAsTabs() ) )
         {
             dataSet.increaseVersion(); // Check if version must be updated
         }
@@ -271,6 +295,9 @@ public class UpdateDataSetAction
         dataSet.setValidCompleteOnly( validCompleteOnly );
         dataSet.setNotifyCompletingUser( notifyCompletingUser );
         dataSet.setSkipOffline( skipOffline );
+        dataSet.setDataElementDecoration( dataElementDecoration );		
+        dataSet.setRenderAsTabs( renderAsTabs );
+        dataSet.setRenderHorizontally( renderHorizontally );
         dataSet.setNotificationRecipients( userGroupService.getUserGroup( notificationRecipients ) );
 
         dataSetService.updateDataSet( dataSet );
@@ -286,7 +313,7 @@ public class UpdateDataSetAction
                 sectionService.updateSection( section );
             }
         }
-        
+
         return SUCCESS;
     }
 }

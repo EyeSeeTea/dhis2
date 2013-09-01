@@ -1,12 +1,10 @@
 CACHE MANIFEST
-# 2.13-SNAPSHOT V1
+# 2.13-SNAPSHOT V11
 NETWORK:
 *
 CACHE:
 css/light_blue/light_blue.css
-css/light_blue/logo_background.png
 css/light_blue/logo_banner.png
-css/light_blue/logo_separator.png
 css/widgets.css
 css/print.css
 ../dhis-web-dataentry/style/dhis-web-dataentry.css
@@ -48,9 +46,11 @@ fonts/LiberationSans-Bold-webfont.svg
 ../images/search.png
 ../images/colapse.png
 ../images/expand.png
-../images/transparent.gif
 ../images/help.png
 ../images/hide.png
+../images/comment.png
+../images/comment_active.png
+../images/transparent.gif
 ../images/ajax-loader-circle.gif
 ../images/ajax-loader-bar.gif
 ../dhis-web-dataentry/javascript/form.js

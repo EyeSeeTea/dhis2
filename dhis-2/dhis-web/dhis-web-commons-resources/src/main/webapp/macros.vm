@@ -1,10 +1,10 @@
 #macro( objectList $objectName $objects )
     <table class="objectListTable">
         <col>
-        <col width="80">
+        <col width="80">    
         <tr>
-            <td class="filter"><label for="filter">$i18n.getString( "filter_by_name" )</label>: <form action="none" onsubmit="filterValues(this.firstChild.firstChild.value);return false"><div><input id="filter" type="text"><input type="submit" value="Filter"></div></form></td>
-            <td style="text-align:right"><input type="button" value="$i18n.getString( "add_new" )" onclick="window.location.href='showAdd${objectName}Form.action'"></td>
+            <td class="filter"><label for="filter">$i18n.getString( "filter_by_name" )</label>: <form action="none" onsubmit="filterValues(this.firstChild.firstChild.value);return false"><div><input id="filter" type="text"><input type="submit" value="$i18n.getString( 'filter' )"></div></form></td>
+            <td style="text-align:right"><input type="button" value="$i18n.getString( 'add_new' )" onclick="window.location.href='showAdd${objectName}Form.action'"></td>
         </tr>
         <tr>
             <th>$i18n.getString( "name" )</th>
@@ -73,15 +73,10 @@
 <a href="javascript:getHelpContent('${id}')" title="$i18n.getString( 'help' )"><img src="../images/help.png" alt="$i18n.getString( 'help' )"></a>
 #end
 
-#macro( introListItem $action $objectKey )
-<li class="introItem" onclick="window.location.href='${action}'">
-  <span class="introItemHeader">$i18n.getString( "${objectKey}" )</span><br>$i18n.getString( "intro_${objectKey}" )
-</li>
-#end
-
 #macro( introListImgItem $action $objectKey $image )
 <li class="introItem" onclick="window.location.href='${action}'">
-  <span class="introItemHeader"><img src="../icons/${image}.png" style="float:left; margin-right:15px">$i18n.getString( "${objectKey}" )</span><br>$i18n.getString( "intro_${objectKey}" )
+  <img src="../icons/${image}.png" class="introIcon">
+  <div class="introItemText"><div class="introItemHeader">$i18n.getString( "${objectKey}" )</div><div>$i18n.getString( "intro_${objectKey}" )</div></div>
 </li>
 #end
 
@@ -94,13 +89,23 @@
 #end
 
 #macro( filterDiv $action )
-<form id="filterKeyForm" action="${action}.action" method="POST">	
-	<input type="text" id="key" name="key" value="$!encoder.htmlEncode( $key )" placeholder="$i18n.getString( 'filter_by_name' )" style="width:140px"/>
+<form id="filterKeyForm" action="${action}.action" method="GET" onsubmit="submitFilter()">
+	<input type="text" id="key" name="key" value="$!encoder.htmlEncode( $key )" placeholder="$i18n.getString( 'filter_by_name' )" class="filterInput" />
 	<input type="hidden" id="curKey" name="curKey" value="$!encoder.htmlEncode( $key )"/>
-	<input type="submit" value="$i18n.getString( 'filter' )" style="width:55px"/>
-	<input type="button" value="$i18n.getString( 'clear' )" 
-	   onclick="window.location.href='${action}.action'" style="width:55px"/>
+	<input type="submit" id="filterButton" value="$i18n.getString( 'filter' )" class="filterButton" />
+	<input type="button" value="$i18n.getString( 'clear' )" onclick="javascript:clearFilter()" class="filterButton" />
 </form>
+<script>
+function submitFilter() {
+    jQuery.cookie( "currentKey", $( '#key' ).val() );
+}
+
+function clearFilter() {
+    jQuery.cookie( "currentPage", null );
+    jQuery.cookie( "currentKey", null );
+    window.location.href = '${action}.action';
+}
+</script>
 #end
 
 #macro( trHeader $text )
@@ -119,7 +124,7 @@
 <tr>
 	<td style="width: 200px;"><label for="$!args.id">$!args.text #if($args.mandatory)<em title="$i18n.getString( 'required' )" class="required">*</em>#end</label></td>
 	<td>
-		<input type="text" id="$!args.id" name="$!name" value="$!args.value" class="{validate:{required:$args.mandatory,rangelength:[2,230]}}" style="width: 240px;" />
+		<input type="text" id="$!args.id" name="$!name" value="$!args.value" class="{validate:{required:$args.mandatory,rangelength:[2,230]}}" />
 	</td>
 </tr>
 #end
@@ -134,7 +139,7 @@
 <tr>
 	<td style="width: 200px;"><label for="$!args.id">$!args.text #if($args.mandatory)<em title="$i18n.getString( 'required' )" class="required">*</em>#end</label></td>
 	<td>
-		<select style="width: 244px;" id="$!args.id" name="$!name" class="{validate:{required:$args.mandatory}}">
+		<select id="$!args.id" name="$!name" class="{validate:{required:$args.mandatory}}">
 			<option value="" />
 			<option value="true" #if( $!args.value=="true" )selected="selected"#end>Yes</option>
 			<option value="false" #if( $!args.value=="false" )selected="selected"#end>No</option>
@@ -159,7 +164,7 @@ jQuery(function() {
 <tr>
 	<td style="width: 200px;"><label for="$!args.id">$!args.text #if($args.mandatory)<em title="$i18n.getString( 'required' )" class="required">*</em>#end</label></td>
 	<td>
-		<input type="text" id="$!args.id" name="$!name" value="$!args.value" class="{validate:{required:$args.mandatory}}" style="width: 240px;" />
+		<input type="text" id="$!args.id" name="$!name" value="$!args.value" class="{validate:{required:$args.mandatory}}" />
 	</td>
 </tr>
 #end
@@ -174,7 +179,7 @@ jQuery(function() {
 <tr>
 	<td style="width: 200px;"><label for="$!args.id">$!args.text #if($args.mandatory)<em title="$i18n.getString( 'required' )" class="required">*</em>#end</label></td>
 	<td>
-		<input type="text" id="$!args.id" name="$!name" value="$!args.value" class="{validate:{required:$args.mandatory,maxlength:230,number:true}}" style="width: 240px;" />
+		<input type="text" id="$!args.id" name="$!name" value="$!args.value" class="{validate:{required:$args.mandatory,maxlength:230,number:true}}" />
 	</td>
 </tr>
 #end
@@ -189,7 +194,7 @@ jQuery(function() {
 <tr>
 	<td style="width: 200px;"><label for="$!args.id">$!args.text #if($args.mandatory)<em title="$i18n.getString( 'required' )" class="required">*</em>#end</label></td>
 	<td>
-		<input type="text" id="$!args.id" name="$!name" value="$!args.value" class="{validate:{required:$args.mandatory,maxlength:230,integer:true}}" style="width: 240px;" />
+		<input type="text" id="$!args.id" name="$!name" value="$!args.value" class="{validate:{required:$args.mandatory,maxlength:230,integer:true}}" />
 	</td>
 </tr>
 #end
@@ -204,7 +209,7 @@ jQuery(function() {
 <tr>
 	<td style="width: 200px;"><label for="$!args.id">$!args.text #if($args.mandatory)<em title="$i18n.getString( 'required' )" class="required">*</em>#end</label></td>
 	<td>
-		<input type="text" id="$!args.id" name="$!name" value="$!args.value" class="{validate:{required:$args.mandatory,maxlength:230,positive_integer:true}}" style="width: 240px;" />
+		<input type="text" id="$!args.id" name="$!name" value="$!args.value" class="{validate:{required:$args.mandatory,maxlength:230,positive_integer:true}}" />
 	</td>
 </tr>
 #end
@@ -219,7 +224,7 @@ jQuery(function() {
 <tr>
 	<td style="width: 200px;"><label for="$!args.id">$!args.text #if($args.mandatory)<em title="$i18n.getString( 'required' )" class="required">*</em>#end</label></td>
 	<td>
-		<input type="text" id="$!args.id" name="$!name" value="$!args.value" class="{validate:{required:$args.mandatory,maxlength:230,negative_integer:true}}" style="width: 240px;" />
+		<input type="text" id="$!args.id" name="$!name" value="$!args.value" class="{validate:{required:$args.mandatory,maxlength:230,negative_integer:true}}" />
 	</td>
 </tr>
 #end
@@ -234,7 +239,7 @@ jQuery(function() {
 <tr>
 	<td style="width: 200px;"><label for="$!args.id">$!args.text #if($args.mandatory)<em title="$i18n.getString( 'required' )" class="required">*</em>#end</label></td>
 	<td>
-		<select style="width: 244px;" id="$!args.id" name="$name" class="{validate:{required:$args.mandatory}}">
+		<select id="$!args.id" name="$name" class="{validate:{required:$args.mandatory}}">
 		<option value="" #if( $choice == $args.value )selected="selected"#end />
 		#foreach( $choice in $args.choices )
 			<option value="$choice" #if( $args.value == $choice )selected="selected"#end>$choice</option>
@@ -328,19 +333,26 @@ jQuery.each(attributes, function(i, item) {
         </tbody>
     </table>
 
-    <table id="sharingAccessTable" style="width: 100%;">
+    <table id="sharingAccessTable" style="width: 100%; margin-top: 6px;">
         <tbody>
-            <tr>
-                <td style="width: 300px;">$i18n.getString( "public_access" )</td>
-                <td>
-                    <select id="sharingPublicAccess" style="width: 150px;">
-                        <option selected="selected" value="--------">$i18n.getString( "none" )</option>
-                        <option value="r-------">$i18n.getString( "can_view" )</option>
-                        <option value="rw------">$i18n.getString( "can_edit_and_view" )</option>
-                    </select>
-                </td>
-                <td style="width: 25px; text-align: center;"></td>
-            </tr>
+        <tr>
+            <td style="width: 300px; padding-top: 5px; padding-bottom: 5px;">$i18n.getString( "external_access" )</td>
+            <td style="text-align: right;">
+                <input id="sharingExternalAccess" type="checkbox" value="true" />
+            </td>
+            <td style="width: 25px; text-align: center;"></td>
+        </tr>
+        <tr>
+            <td style="width: 300px;">$i18n.getString( "public_access" )</td>
+            <td>
+                <select id="sharingPublicAccess" style="width: 150px;">
+                    <option selected="selected" value="--------">$i18n.getString( "none" )</option>
+                    <option value="r-------">$i18n.getString( "can_view" )</option>
+                    <option value="rw------">$i18n.getString( "can_edit_and_view" )</option>
+                </select>
+            </td>
+            <td style="width: 25px; text-align: center;"></td>
+        </tr>
         </tbody>
     </table>
 </div>

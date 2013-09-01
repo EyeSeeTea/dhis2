@@ -1,17 +1,20 @@
+package org.hisp.dhis.patient.scheduling;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,18 +28,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.scheduling;
-
 import static org.hisp.dhis.sms.outbound.OutboundSms.DHIS_SYSTEM_SENDER;
 import static org.hisp.dhis.system.notification.NotificationLevel.INFO;
-
 import java.util.Collection;
 import java.util.List;
-
 import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.program.SchedulingProgramObject;
 import org.hisp.dhis.scheduling.TaskId;
+import org.hisp.dhis.sms.SmsSender;
 import org.hisp.dhis.sms.SmsServiceException;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.sms.outbound.OutboundSmsService;
@@ -73,6 +73,13 @@ public class SendScheduledMessageTask
     public void setOutboundSmsService( OutboundSmsService outboundSmsService )
     {
         this.outboundSmsService = outboundSmsService;
+    }
+
+    private SmsSender smsSender;
+
+    public void setSmsSender( SmsSender smsSender )
+    {
+        this.smsSender = smsSender;
     }
 
     private JdbcTemplate jdbcTemplate;
@@ -199,7 +206,7 @@ public class SendScheduledMessageTask
     {
         notifier.notify( taskId, "Start to prepare reminder messages for enrollements" );
 
-        Collection<SchedulingProgramObject> schedulingProgramObjects = programInstanceService.getSendMesssageEvents();
+        Collection<SchedulingProgramObject> schedulingProgramObjects = programInstanceService.getScheduleMesssages();
 
         for ( SchedulingProgramObject schedulingProgramObject : schedulingProgramObjects )
         {
@@ -244,10 +251,13 @@ public class SendScheduledMessageTask
     {
         List<OutboundSms> outboundSmsList = outboundSmsService.getOutboundSms( OutboundSmsStatus.OUTBOUND );
 
-        for ( OutboundSms outboundSms : outboundSmsList )
+        if ( outboundSmsList != null )
         {
-            outboundSms.setStatus( OutboundSmsStatus.SENT );
-            outboundSmsService.sendMessage( outboundSms, null );
+            for ( OutboundSms outboundSms : outboundSmsList )
+            {
+                outboundSms.setStatus( OutboundSmsStatus.SENT );
+                smsSender.sendMessage( outboundSms, null );
+            }
         }
     }
 }

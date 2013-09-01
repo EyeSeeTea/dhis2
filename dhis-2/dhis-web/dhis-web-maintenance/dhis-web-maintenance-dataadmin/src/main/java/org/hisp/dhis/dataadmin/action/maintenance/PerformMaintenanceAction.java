@@ -1,19 +1,20 @@
 package org.hisp.dhis.dataadmin.action.maintenance;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -32,10 +33,10 @@ import javax.annotation.Resource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.aggregation.AggregatedDataValueService;
-import org.hisp.dhis.aggregation.AggregatedOrgUnitDataValueService;
 import org.hisp.dhis.analytics.AnalyticsTableService;
 import org.hisp.dhis.common.DeleteNotAllowedException;
 import org.hisp.dhis.completeness.DataSetCompletenessService;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.datamart.DataMartManager;
 import org.hisp.dhis.maintenance.MaintenanceService;
 import org.hisp.dhis.period.Period;
@@ -86,14 +87,7 @@ public class PerformMaintenanceAction
     {
         this.aggregatedDataValueService = aggregatedDataValueService;
     }
-    
-    private AggregatedOrgUnitDataValueService aggregatedOrgUnitDataValueService;
-    
-    public void setAggregatedOrgUnitDataValueService( AggregatedOrgUnitDataValueService aggregatedOrgUnitDataValueService )
-    {
-        this.aggregatedOrgUnitDataValueService = aggregatedOrgUnitDataValueService;
-    }
-    
+        
     private DataMartManager dataMartManager;
 
     public void setDataMartManager( DataMartManager dataMartManager )
@@ -113,6 +107,13 @@ public class PerformMaintenanceAction
     public void setCurrentUserService( CurrentUserService currentUserService )
     {
         this.currentUserService = currentUserService;
+    }
+    
+    private DataElementCategoryService categoryService;
+
+    public void setCategoryService( DataElementCategoryService categoryService )
+    {
+        this.categoryService = categoryService;
     }
 
     // -------------------------------------------------------------------------
@@ -161,6 +162,13 @@ public class PerformMaintenanceAction
         this.prunePeriods = prunePeriods;
     }
     
+    private boolean updateCategoryOptionCombos;
+
+    public void setUpdateCategoryOptionCombos( boolean updateCategoryOptionCombos )
+    {
+        this.updateCategoryOptionCombos = updateCategoryOptionCombos;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -168,6 +176,8 @@ public class PerformMaintenanceAction
     public String execute() 
         throws Exception
     {
+        String username = currentUserService.getCurrentUsername();
+        
         if ( clearAnalytics )
         {
             analyticsTableService.dropTables();
@@ -177,13 +187,10 @@ public class PerformMaintenanceAction
         
         if ( clearDataMart )
         {
-            aggregatedDataValueService.deleteAggregatedDataValues();
-            aggregatedDataValueService.deleteAggregatedIndicatorValues();
+            aggregatedDataValueService.dropDataMart();
+            aggregatedDataValueService.createDataMart();
             
-            aggregatedOrgUnitDataValueService.deleteAggregatedDataValues();
-            aggregatedOrgUnitDataValueService.deleteAggregatedIndicatorValues();
-            
-            log.info( "'" + currentUserService.getCurrentUsername() + "': Cleared data mart" );
+            log.info( "'" + username + "': Cleared data mart" );
         }
         
         if ( dataMartIndex )
@@ -201,7 +208,7 @@ public class PerformMaintenanceAction
             completenessService.dropIndex();
             completenessService.createIndex();
             
-            log.info( "'" + currentUserService.getCurrentUsername() + "': Rebuilt data mart indexes" );
+            log.info( "'" + username + "': Rebuilt data mart indexes" );
         }
         
         if ( zeroValues )
@@ -215,14 +222,21 @@ public class PerformMaintenanceAction
         {
             completenessService.deleteDataSetCompleteness();
             
-            log.info( "'" + currentUserService.getCurrentUsername() + "': Cleared data completeness" );
+            log.info( "'" + username + "': Cleared data completeness" );
         }
         
         if ( prunePeriods )
         {
             prunePeriods();
             
-            log.info( "'" + currentUserService.getCurrentUsername() + "': Pruned periods" );
+            log.info( "'" + username + "': Pruned periods" );
+        }
+        
+        if ( updateCategoryOptionCombos )
+        {
+            categoryService.updateAllOptionCombos();
+            
+            log.info( "'" + username + "': Updated category option combos" );
         }
         
         return SUCCESS;

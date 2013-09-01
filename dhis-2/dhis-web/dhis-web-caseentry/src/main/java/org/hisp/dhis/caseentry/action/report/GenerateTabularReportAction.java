@@ -1,17 +1,20 @@
+package org.hisp.dhis.caseentry.action.report;
+
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,8 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.caseentry.action.report;
 
 import static org.hisp.dhis.patientreport.PatientTabularReport.PREFIX_DATA_ELEMENT;
 import static org.hisp.dhis.patientreport.PatientTabularReport.PREFIX_FIXED_ATTRIBUTE;
@@ -220,6 +221,13 @@ public class GenerateTabularReportAction
         this.userOrganisationUnitChildren = userOrganisationUnitChildren;
     }
 
+    private Integer pageSize;
+
+    public void setPageSize( Integer pageSize )
+    {
+        this.pageSize = pageSize;
+    }
+
     private Grid grid;
 
     public Grid getGrid()
@@ -234,12 +242,12 @@ public class GenerateTabularReportAction
         return totalRecords;
     }
 
+    private Integer total;
+
     public void setTotal( Integer total )
     {
         this.total = total;
     }
-
-    private Integer total;
 
     public Integer getTotal()
     {
@@ -432,7 +440,7 @@ public class GenerateTabularReportAction
 
                 grid = programStageInstanceService.getTabularReport( anonynousEntryForm, programStage, columns,
                     organisationUnits, level, startValue, endValue, !orderByOrgunitAsc, useCompletedEvents,
-                    accessPrivateInfo, displayOrgunitCode, getStartPos(), paging.getPageSize(), i18n );
+                    accessPrivateInfo, displayOrgunitCode, paging.getStartPos(), paging.getPageSize(), i18n );
             }
             // Download as Excel
             else
@@ -456,19 +464,8 @@ public class GenerateTabularReportAction
 
     private int getNumberOfPages( int totalRecord )
     {
-        int pageSize = this.getDefaultPageSize();
-        return (totalRecord % pageSize == 0) ? (totalRecord / pageSize) : (totalRecord / pageSize + 1);
-    }
-
-    public int getStartPos()
-    {
-        if ( currentPage == null )
-        {
-            return paging.getStartPos();
-        }
-        int startPos = currentPage <= 0 ? 0 : (currentPage - 1) * paging.getPageSize();
-        startPos = (startPos > total) ? total : startPos;
-        return startPos;
+        int size = ( pageSize != null ) ? pageSize : this.getDefaultPageSize();
+        return (totalRecord % size == 0) ? (totalRecord / size) : (totalRecord / size + 1);
     }
 
     private List<TabularReportColumn> getTableColumns()
@@ -490,9 +487,8 @@ public class GenerateTabularReportAction
                 column.setIdentifier( values[1] );
                 column.setHidden( Boolean.parseBoolean( values[2] ) );
 
-                column.setOperator( values.length == 5 ? TextUtils.lower( values[3] ) : null );
-                column.setQuery( values.length == 5 ? TextUtils.lower( values[4] ) : null );
-
+                column.setOperator( values.length > 3 ? TextUtils.lower( values[3] ) : TextUtils.EMPTY);
+                column.setQuery( values.length > 4 ? TextUtils.lower( values[4] ) : TextUtils.EMPTY );
                 if ( PREFIX_FIXED_ATTRIBUTE.equals( prefix ) )
                 {
                     column.setName( values[1] );
@@ -543,20 +539,20 @@ public class GenerateTabularReportAction
                     {
                         column.setDateType( true );
                     }
-                    
+
                     if ( useFormNameDataElement != null && useFormNameDataElement )
                     {
                         column.setName( dataElement.getFormNameFallback() );
                     }
                     else
                     {
-                        column.setName( dataElement.getDisplayName() );  
+                        column.setName( dataElement.getDisplayName() );
                     }
+                    
+                    columns.add( column );
                 }
 
-                columns.add( column );
-
-                index++;
+               index++;
             }
         }
 

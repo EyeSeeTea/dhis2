@@ -20,7 +20,7 @@
         </tr>
 		 <tr>
 			<td colspan='2'>
-				$i18n.getString("filter_by_type"): <select type='text' id='deValueType' name='deValueType' onchange="filterDataElement(event, this.value, 'dataElements','dataElementBackups');" style='width:245px;'>
+				$i18n.getString("filter_by_type"): <select type='text' id='deValueType' name='deValueType' onchange="filterDataElement(event, getFieldValue('txtSearchValue'), 'dataElements','dataElementBackups');" style='width:245px;'>
 					<option value=''>[$i18n.getString('view_all')]</option>
 					<option value="int">$i18n.getString( "number" )</option>
 					<option value="string">$i18n.getString( "text" )</option>
@@ -82,6 +82,9 @@
 						<option suggested="F, M" title="Gender" value="[CP:gender]">$i18n.getString( 'gender' )</option>
 						<option suggested="V, D, A" title="DOB type" value="[CP:dobType]">$i18n.getString( 'dob_type' )</option>
 						<option suggested="" title="Age (days)" value="[CP:age]">$i18n.getString( "age_days" )</option>
+						#foreach($patientAttribute in $patientAttributes)
+							<option suggested="" title="$patientAttribute.displayName" value="[CA:$patientAttribute.id]">$patientAttribute.displayName</option>
+						#end
 					</select>
 				</td>
 				<td>
@@ -146,6 +149,7 @@
 			<input type='button' style="width:175px;" onclick='insertOperator( "DATEDIFF( , dateOfIncident) " );' value="$i18n.getString('minus_with_dateOfIncident')" />
 			<input type='button' style="width:175px;" onclick='insertOperator( "DATEDIFF( , enrollmentDate) " );' value="$i18n.getString('minus_with_enrollmentDate')" />
 			<input type='button' style="width:175px;" onclick='insertOperator( "DATEDIFF( , executionDate) " );' value="$i18n.getString('minus_with_executionDate')" />
+			<input type='button' style="width:175px;" onclick='insertOperator( "DEDATEDIFF( , ) " );' value="$i18n.getString('minus_with_dataelement')" />
 			<span style='padding-left:110px'>
 				<input type='button' style="width:45px;" align="right" alt="$i18n.getString( 'clear' )" onclick="byId('aggregationCondition').value='';" value="$i18n.getString('clear')" />
 			</span>
@@ -156,7 +160,7 @@
 		<td>
 			<fieldset>
 				<legend>$i18n.getString( "condition" )</legend>
-				<textarea id="aggregationCondition" name="aggregationCondition" onkeyup='getConditionDescription();' maxlength="254">$!caseAggregation.aggregationExpression</textarea>
+				<textarea id="aggregationCondition" name="aggregationCondition" onkeyup='getConditionDescription();' maxlength="1000">$!caseAggregation.aggregationExpression</textarea>
 			</fieldset>
 		</td>
 	</tr>

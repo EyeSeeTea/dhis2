@@ -1,19 +1,20 @@
 package org.hisp.dhis.api.controller;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,13 +28,15 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.api.utils.ContextUtils;
+import org.hisp.dhis.api.controller.exception.NotFoundException;
+import org.hisp.dhis.api.controller.exception.NotFoundForQueryException;
 import org.hisp.dhis.api.utils.WebUtils;
 import org.hisp.dhis.common.Access;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.Pager;
+import org.hisp.dhis.common.PagerUtils;
 import org.hisp.dhis.common.SharingUtils;
 import org.hisp.dhis.dxf2.metadata.ExchangeClasses;
 import org.hisp.dhis.system.util.ReflectionUtils;
@@ -127,8 +130,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         if ( entity == null )
         {
-            ContextUtils.notFoundResponse( response, "Object not found for uid: " + uid );
-            return null;
+            throw new NotFoundException( uid );
         }
 
         if ( options.hasLinks() )
@@ -159,8 +161,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         if ( entity == null )
         {
-            ContextUtils.notFoundResponse( response, "Object not found for query: " + query );
-            return null;
+            throw new NotFoundForQueryException( query );
         }
 
         if ( options.hasLinks() )
@@ -298,16 +299,17 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         if ( options.hasPaging() )
         {
-            int count = manager.getCount( getEntityClass() );
+            entityList = new ArrayList<T>( manager.filter( getEntityClass(), query ) );
 
-            Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
+            Pager pager = new Pager( options.getPage(), entityList.size(), options.getPageSize() );
             metaData.setPager( pager );
 
-            entityList = new ArrayList<T>( manager.getBetweenByName( getEntityClass(), query, pager.getOffset(), pager.getPageSize() ) );
+            entityList = PagerUtils.pageCollection( entityList, pager );
+
         }
         else
         {
-            entityList = new ArrayList<T>( manager.getLikeName( getEntityClass(), query ) );
+            entityList = new ArrayList<T>( manager.filter( getEntityClass(), query ) );
         }
 
         return entityList;
@@ -322,6 +324,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     {
         Access access = new Access();
         access.setManage( SharingUtils.canManage( currentUserService.getCurrentUser(), object ) );
+        access.setExternalize( SharingUtils.canExternalize( currentUserService.getCurrentUser(), object ) );
         access.setWrite( SharingUtils.canWrite( currentUserService.getCurrentUser(), object ) );
         access.setRead( SharingUtils.canRead( currentUserService.getCurrentUser(), object ) );
         access.setUpdate( SharingUtils.canUpdate( currentUserService.getCurrentUser(), object ) );
@@ -345,7 +348,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             }
         }
     }
-    
+
     //--------------------------------------------------------------------------
     // Reflection helpers
     //--------------------------------------------------------------------------

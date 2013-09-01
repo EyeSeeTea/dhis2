@@ -19,24 +19,6 @@ function pageInit()
     {
         $( this ).attr( "src", "../images/hide.png" );
     } );
-
-	// Set links on top menu items
-    
-    $( "#menuLink1" ).click( function() {
-    	window.location.href = "../dhis-web-commons-about/modules.action";
-    } );
-
-    $( "#menuLink2" ).click( function() {
-    	window.location.href = "../dhis-web-commons-about/modules.action";
-    } );
-
-    $( "#menuLink3" ).click( function() {
-    	window.location.href = "../dhis-web-commons-about/functions.action";
-    } );
-
-    $( "#menuLink4" ).click( function() {
-    	window.location.href = "../dhis-web-commons-about/functions.action";
-    } );
 	
 	// Set show and hide drop down events on top menu
 	
@@ -84,10 +66,6 @@ function pageInit()
 	{
 		hideDropDownTimeout();
 	} );
-	
-	// Intro fade in
-	
-	$( ".introList" ).fadeIn();
 }
 
 function setTableStyles()
@@ -162,46 +140,72 @@ function cancelHideDropDownTimeout()
 // Leftbar
 // -----------------------------------------------------------------------------
 
-var leftBar = new LeftBar();
+dhis2.util.namespace( 'dhis2.leftBar' );
 
-function LeftBar()
-{    
-    this.showAnimated = function()
-    {
-        setMenuVisible();
-        $( '#mainPage' ).removeAttr( 'style' );
-        $( '#leftBar' ).show( 'fast' );
-        $( '#showLeftBar' ).hide( 'fast' );
-    };
-    
-    this.hideAnimated = function()
-    {
-        setMenuHidden();
-        $( '#mainPage' ).attr( 'style', 'margin-left:20px' );
-        $( '#leftBar' ).hide( 'fast' );
-        $( '#showLeftBar' ).show( 'fast' );
-    };
-    
-    this.hide = function()
-    {
-        setMenuHidden();
-        $( '#mainPage' ).attr( 'style', 'margin-left:20px' );
-        document.getElementById( 'leftBar' ).style.display = 'none';
-        document.getElementById( 'showLeftBar' ).style.display = 'block';
-    };
+dhis2.leftBar.setLinks = function( showLeftBarLink, showExtendMenuLink )
+{
+	$( '#showLeftBar' ).css( 'display', ( showLeftBarLink ? 'inline' : 'none' ) );
+	$( '#extendMainMenuLink' ).css( 'display', ( showExtendMenuLink ? 'inline' : 'none' ) );
+};
 
-    function setMenuVisible()
-    {
-        $.get( '../dhis-web-commons/menu/setMenuVisible.action' );        
-    }
-    
-    function setMenuHidden()
-    {        
-        $.get( '../dhis-web-commons/menu/setMenuHidden.action' );        
-    }    
-    
-    this.openHelpForm = function( id )
-    {
-		window.open( "../dhis-web-commons/help/viewDynamicHelp.action?id=" + id, "Help", "width=800,height=600,scrollbars=yes" );
-    }
+dhis2.leftBar.showAnimated = function()
+{
+	dhis2.leftBar.setMenuVisible();
+	dhis2.leftBar.setLinks( false, true );
+	$( '#leftBar, #orgUnitTree' ).css( 'width', '' ).show( 'slide', { direction: 'left', duration: 200 } );
+	$( '#mainPage' ).css( 'margin-left', '' );
+};
+
+dhis2.leftBar.extend = function()
+{
+	dhis2.leftBar.setMenuExtended();
+	dhis2.leftBar.setLinks( false, false );
+    $( '#leftBar, #orgUnitTree' ).show().animate( { direction: 'left', width: '+=150px', duration: 20 } );
+    $( '#mainPage' ).animate( { direction: 'left', marginLeft: '+=150px', duration: 20 } );
+    $( '#hideMainMenuLink' ).attr( 'href', 'javascript:dhis2.leftBar.retract()' );
+};
+
+dhis2.leftBar.retract = function()
+{
+	dhis2.leftBar.setMenuVisible();
+	dhis2.leftBar.setLinks( false, true );
+    $( '#leftBar, #orgUnitTree' ).show().animate( { direction: 'right', width: '-=150px', duration: 20 } );
+    $( '#mainPage' ).animate( { direction: 'right', marginLeft: '-=150px', duration: 20 } );
+    $( '#hideMainMenuLink' ).attr( 'href', 'javascript:javascript:dhis2.leftBar.hideAnimated()' );
 }
+
+dhis2.leftBar.hideAnimated = function()
+{
+	dhis2.leftBar.setMenuHidden();
+	dhis2.leftBar.setLinks( true, false );
+    $( '#leftBar' ).hide( 'slide', { direction: 'left', duration: 200 } );
+    $( '#mainPage' ).animate( { direction: 'right', marginLeft: '20px', duration: 200 } );
+};
+
+dhis2.leftBar.hide = function()
+{
+	dhis2.leftBar.setMenuHidden();
+	dhis2.leftBar.setLinks( true, false );
+    $( '#leftBar' ).hide();
+    $( '#mainPage' ).css( 'margin-left', '20px' );
+};
+
+dhis2.leftBar.setMenuVisible = function()
+{
+    $.get( '../dhis-web-commons/menu/setMenuState.action?state=VISIBLE' );        
+};
+    
+dhis2.leftBar.setMenuExtended = function()
+{
+	$.get( '../dhis-web-commons/menu/setMenuState.action?state=EXTENDED' );
+};
+    
+dhis2.leftBar.setMenuHidden = function()
+{        
+    $.get( '../dhis-web-commons/menu/setMenuState.action?state=HIDDEN' );
+};
+    
+dhis2.leftBar.openHelpForm = function( id )
+{
+	window.open( "../dhis-web-commons/help/viewDynamicHelp.action?id=" + id, "Help", "width=800,height=600,scrollbars=yes" );
+};

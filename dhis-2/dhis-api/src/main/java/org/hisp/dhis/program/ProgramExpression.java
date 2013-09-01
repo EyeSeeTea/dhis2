@@ -1,17 +1,20 @@
+package org.hisp.dhis.program;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,8 +28,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.program;
-
 import java.io.Serializable;
 
 /**
@@ -37,22 +38,15 @@ import java.io.Serializable;
 public class ProgramExpression
     implements Serializable
 {
-    private static final long serialVersionUID = -2807997671779497354L;
-    
+    private static final long serialVersionUID = -2807997671779497354L;    
 
     public static final String SEPARATOR_ID = "\\.";
-
     public static String OBJECT_PROGRAM_STAGE_DATAELEMENT = "DE";
 
     public static final String SEPARATOR_OBJECT = ":";
-    
-
-    public static final String DUE_DATE = "DUE_DATE";
-    
+    public static final String DUE_DATE = "DUE_DATE";    
     public static final String REPORT_DATE = "REPORT_DATE";
-
-    public static final String RANGE_IN_DUE_DATE = "RANGE_IN_DUE_DATE";
-    
+    public static final String RANGE_IN_DUE_DATE = "RANGE_IN_DUE_DATE";    
     public static final String NOT_NULL_VALUE_IN_EXPRESSION = "NOT-NULL-VALUE";
 
     
@@ -68,7 +62,6 @@ public class ProgramExpression
 
     public ProgramExpression()
     {
-
     }
 
     public ProgramExpression( String expression, String description )
@@ -86,35 +79,55 @@ public class ProgramExpression
     {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((description == null) ? 0 : description.hashCode());
-        result = prime * result + ((expression == null) ? 0 : expression.hashCode());
+        result = prime * result + ( ( description == null ) ? 0 : description.hashCode() );
+        result = prime * result + ( ( expression == null ) ? 0 : expression.hashCode() );
         return result;
     }
 
     @Override
-    public boolean equals( Object obj )
+    public boolean equals( Object object )
     {
-        if ( this == obj )
+        if ( this == object )
+        {
             return true;
-        if ( obj == null )
+        }
+        
+        if ( object == null )
+        {
             return false;
-        if ( getClass() != obj.getClass() )
+        }
+        
+        if ( getClass() != object.getClass() )
+        {
             return false;
-        ProgramExpression other = (ProgramExpression) obj;
+        }
+        
+        final ProgramExpression other = (ProgramExpression) object;
+        
         if ( description == null )
         {
             if ( other.description != null )
+            {
                 return false;
+            }
         }
         else if ( !description.equals( other.description ) )
+        {
             return false;
+        }
+        
         if ( expression == null )
         {
             if ( other.expression != null )
+            {
                 return false;
+            }
         }
         else if ( !expression.equals( other.expression ) )
+        {
             return false;
+        }
+        
         return true;
     }
 

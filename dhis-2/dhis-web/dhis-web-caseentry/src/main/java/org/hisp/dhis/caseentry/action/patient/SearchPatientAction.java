@@ -1,17 +1,20 @@
+package org.hisp.dhis.caseentry.action.patient;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,11 +28,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.caseentry.action.patient;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +43,7 @@ import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.user.CurrentUserService;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -59,6 +62,8 @@ public class SearchPatientAction
 
     private ProgramService programService;
 
+    private CurrentUserService currentUserService;
+
     // -------------------------------------------------------------------------
     // Input/output
     // -------------------------------------------------------------------------
@@ -66,6 +71,8 @@ public class SearchPatientAction
     private List<String> searchTexts = new ArrayList<String>();
 
     private Boolean searchBySelectedOrgunit;
+
+    private Boolean searchByUserOrgunits;
 
     private boolean listAll;
 
@@ -75,9 +82,19 @@ public class SearchPatientAction
     // Getters && Setters
     // -------------------------------------------------------------------------
 
+    public void setCurrentUserService( CurrentUserService currentUserService )
+    {
+        this.currentUserService = currentUserService;
+    }
+
     public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
         this.selectionManager = selectionManager;
+    }
+
+    public void setSearchByUserOrgunits( Boolean searchByUserOrgunits )
+    {
+        this.searchByUserOrgunits = searchByUserOrgunits;
     }
 
     public void setProgramService( ProgramService programService )
@@ -150,6 +167,8 @@ public class SearchPatientAction
     public String execute()
         throws Exception
     {
+        Collection<OrganisationUnit> orgunits = new HashSet<OrganisationUnit>();
+
         OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
         // List all patients
@@ -164,14 +183,26 @@ public class SearchPatientAction
         // search patients
         else if ( searchTexts.size() > 0 )
         {
-            organisationUnit = (searchBySelectedOrgunit) ? organisationUnit : null;
+            if ( searchByUserOrgunits )
+            {
+                Collection<OrganisationUnit> userOrgunits = currentUserService.getCurrentUser().getOrganisationUnits();
+                orgunits.addAll( userOrgunits );
+            }
+            else if ( searchBySelectedOrgunit )
+            {
+                orgunits.add( organisationUnit );
+            }
+            else
+            {
+                organisationUnit = null;
+            }
 
-            total = patientService.countSearchPatients( searchTexts, organisationUnit, null );
+            total = patientService.countSearchPatients( searchTexts, orgunits, null );
             this.paging = createPaging( total );
-            patients = patientService.searchPatients( searchTexts, organisationUnit, null, null, paging.getStartPos(),
+            patients = patientService.searchPatients( searchTexts, orgunits, null, null, paging.getStartPos(),
                 paging.getPageSize() );
 
-            if ( !searchBySelectedOrgunit )
+            if ( !searchBySelectedOrgunit || searchByUserOrgunits )
             {
                 for ( Patient patient : patients )
                 {

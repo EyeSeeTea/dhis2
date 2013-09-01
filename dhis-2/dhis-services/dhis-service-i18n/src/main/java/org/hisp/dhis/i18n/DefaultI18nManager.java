@@ -1,19 +1,20 @@
 package org.hisp.dhis.i18n;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -64,25 +65,27 @@ public class DefaultI18nManager
     // I18nManager implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public I18n getI18n( Class<?> clazz )
         throws I18nManagerException
     {
         return new I18n( getGlobalResourceBundle(), getSpecificResourceBundle( clazz.getName() ) );
     }
 
-    /**
-     * Used to send a specific clazzName (path) to the resource bundler.
-     *
-     * @param clazzName Path to use for getting i18n prop file
-     * @return I18n object
-     * @throws I18nManagerException
-     */
+    @Override
+    public I18n getI18n( Class<?> clazz, Locale locale )
+        throws I18nManagerException
+    {
+        return new I18n( getGlobalResourceBundle(), getSpecificResourceBundle( clazz.getName() ) );
+    }
+
     @Override
     public I18n getI18n( String clazzName ) throws I18nManagerException
     {
         return new I18n( getGlobalResourceBundle(), getSpecificResourceBundle( clazzName ) );
     }
-
+    
+    @Override
     public I18nFormat getI18nFormat()
         throws I18nManagerException
     {

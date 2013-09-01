@@ -17,6 +17,11 @@
     <property name="templateMessage" />
     
  	<property name="dateToCompare" />
- 
+ 	
+ 	<property name="sendTo" />
+ 	
+ 	<property name="whenToSend" />
+ 	
+ 	<many-to-one name="userGroup" class="org.hisp.dhis.user.UserGroup" column="usergroupid" foreign-key="fk_patientreminder_usergroup"/>
   </class>
 </hibernate-mapping>

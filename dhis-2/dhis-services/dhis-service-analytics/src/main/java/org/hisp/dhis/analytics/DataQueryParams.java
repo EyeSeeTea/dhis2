@@ -1,19 +1,20 @@
 package org.hisp.dhis.analytics;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -36,10 +37,10 @@ import static org.hisp.dhis.common.DimensionalObject.DATAELEMENT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DATAELEMENT_OPERAND_ID;
 import static org.hisp.dhis.common.DimensionalObject.DATASET_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DATA_X_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
 import static org.hisp.dhis.common.DimensionalObject.INDICATOR_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
 import static org.hisp.dhis.common.NameableObjectUtils.asList;
 import static org.hisp.dhis.common.NameableObjectUtils.getList;
 import static org.hisp.dhis.system.util.CollectionUtils.emptyIfNull;
@@ -88,14 +89,14 @@ public class DataQueryParams
     public static final String DISPLAY_NAME_PERIOD = "Period";
     public static final String DISPLAY_NAME_ORGUNIT = "Organisation unit";    
     
-    private static final String DIMENSION_NAME_SEP = ":";
-    private static final String OPTION_SEP = ";";
-    private static final String ITEM_SEP = "-";
+    public static final String DIMENSION_NAME_SEP = ":";
+    public static final String OPTION_SEP = ";";
+    public static final String ITEM_SEP = "-";
 
     public static final List<String> DATA_DIMS = Arrays.asList( INDICATOR_DIM_ID, DATAELEMENT_DIM_ID, DATAELEMENT_OPERAND_ID, DATASET_DIM_ID );
     public static final List<String> FIXED_DIMS = Arrays.asList( DATA_X_DIM_ID, INDICATOR_DIM_ID, DATAELEMENT_DIM_ID, DATASET_DIM_ID, PERIOD_DIM_ID, ORGUNIT_DIM_ID );
     
-    public static final int MAX_DIM_OPT_PERM = 10000;
+    public static final int MAX_DIM_OPT_PERM = 50000;
 
     private static final List<DimensionType> COMPLETENESS_DIMENSION_TYPES = Arrays.asList( DATASET, ORGANISATIONUNIT, ORGANISATIONUNIT_GROUPSET );
     
@@ -112,14 +113,14 @@ public class DataQueryParams
     
     private boolean skipMeta;
     
+    private boolean ignoreLimit;
+    
     // -------------------------------------------------------------------------
     // Transient properties
     // -------------------------------------------------------------------------
     
-    private transient String tableName;
+    private transient Partitions partitions;
 
-    private ListMap<String, NameableObject> tableNamePeriodMap;
-    
     private transient String periodType;
         
     private transient PeriodType dataPeriodType;
@@ -141,11 +142,10 @@ public class DataQueryParams
         this.aggregationType = params.getAggregationType();
         this.measureCriteria = params.getMeasureCriteria();
         
-        this.tableName = params.getTableName();
+        this.partitions = params.getPartitions();
         this.periodType = params.getPeriodType();
         this.dataPeriodType = params.getDataPeriodType();
         this.skipPartitioning = params.isSkipPartitioning();
-        this.tableNamePeriodMap = params.getTableNamePeriodMap();
     }
 
     // -------------------------------------------------------------------------
@@ -185,39 +185,11 @@ public class DataQueryParams
      * If true it means that a period filter exists and that the periods span
      * multiple years.
      */
-    public boolean filterSpansMultiplePartitions()
+    public boolean spansMultiplePartitions()
     {
-        return tableNamePeriodMap != null && tableNamePeriodMap.size() > 1;
+        return partitions != null && partitions.isMultiple();
     }
-    
-    /**
-     * If the filters of this query spans more than partition, this method will
-     * return a list of queries with a query for each partition, generated from 
-     * this query, where the table name and filter period items are set according 
-     * to the relevant partition.
-     */
-    public List<DataQueryParams> getPartitionFilterParams()
-    {
-        List<DataQueryParams> filters = new ArrayList<DataQueryParams>();
         
-        if ( !filterSpansMultiplePartitions() )
-        {
-            return filters;
-        }   
-        
-        for ( String tableName : tableNamePeriodMap.keySet() )
-        {
-            List<NameableObject> periods = tableNamePeriodMap.get( tableName );
-            
-            DataQueryParams params = new DataQueryParams( this );
-            params.setTableName( tableName );
-            params.updateFilterOptions( PERIOD_DIM_ID, periods );
-            filters.add( params );
-        }
-        
-        return filters;
-    }
-    
     /**
      * Creates a mapping between dimension identifiers and filter dimensions. Filters 
      * are guaranteed not to be null.
@@ -793,6 +765,8 @@ public class DataQueryParams
         return new ArrayList<String>();
     }
     
+    // TODO move these to DimensionalObjectUtils or API, duplication of code
+    
     /**
      * Retrieves the level from a level parameter string, which is on the format
      * LEVEL-<level>-<item> .
@@ -815,21 +789,21 @@ public class DataQueryParams
     }
     
     /**
-     * Retrieves the boundary dimension item from a level parameter string, which
-     * is on the format LEVEL-<level>-<item> .
+     * Retrieves the uid from an org unit group parameter string, which is on
+     * the format OU_GROUP-<uid> .
      */
-    public static String getBoundaryFromLevelParam( String param )
+    public static String getUidFromOrgUnitGroupParam( String param )
     {
-        if ( param == null )   
+        if ( param == null )
         {
             return null;
         }
         
         String[] split = param.split( ITEM_SEP );
         
-        if ( split.length > 2 && split[2] != null )
+        if ( split.length > 1 && split[1] != null )
         {
-            return split[2];
+            return String.valueOf( split[1] );
         }
         
         return null;
@@ -1039,28 +1013,28 @@ public class DataQueryParams
         this.skipMeta = skipMeta;
     }
 
+    public boolean isIgnoreLimit()
+    {
+        return ignoreLimit;
+    }
+
+    public void setIgnoreLimit( boolean ignoreLimit )
+    {
+        this.ignoreLimit = ignoreLimit;
+    }
+
     // -------------------------------------------------------------------------
     // Get and set methods for transient properties
     // -------------------------------------------------------------------------
 
-    public String getTableName()
+    public Partitions getPartitions()
     {
-        return tableName;
+        return partitions;
     }
 
-    public void setTableName( String tableName )
+    public void setPartitions( Partitions partitions )
     {
-        this.tableName = tableName;
-    }
-
-    public ListMap<String, NameableObject> getTableNamePeriodMap()
-    {
-        return tableNamePeriodMap;
-    }
-
-    public void setTableNamePeriodMap( ListMap<String, NameableObject> tableNamePeriodMap )
-    {
-        this.tableNamePeriodMap = tableNamePeriodMap;
+        this.partitions = partitions;
     }
 
     public String getPeriodType()
@@ -1190,6 +1164,11 @@ public class DataQueryParams
         setDimensionOptions( INDICATOR_DIM_ID, DimensionType.INDICATOR, null, asList( indicators ) );
     }
     
+    public void setIndicator( NameableObject indicator )
+    {
+        setIndicators( getList( indicator ) );
+    }
+    
     public List<NameableObject> getDataElements()
     {
         return getDimensionOptions( DATAELEMENT_DIM_ID );
@@ -1198,6 +1177,11 @@ public class DataQueryParams
     public void setDataElements( List<? extends NameableObject> dataElements )
     {
         setDimensionOptions( DATAELEMENT_DIM_ID, DimensionType.DATAELEMENT, null, asList( dataElements ) );
+    }
+    
+    public void setDataElement( NameableObject dataElement )
+    {
+        setDataElements( getList( dataElement ) );
     }
     
     public List<NameableObject> getDataSets()
@@ -1210,6 +1194,11 @@ public class DataQueryParams
         setDimensionOptions( DATASET_DIM_ID, DimensionType.DATASET, null, asList( dataSets ) );
     }
     
+    public void setDataSet( NameableObject dataSet )
+    {
+        setDataSets( getList( dataSet ) );
+    }
+    
     public List<NameableObject> getPeriods()
     {
         return getDimensionOptions( PERIOD_DIM_ID );
@@ -1218,6 +1207,11 @@ public class DataQueryParams
     public void setPeriods( List<? extends NameableObject> periods )
     {
         setDimensionOptions( PERIOD_DIM_ID, DimensionType.PERIOD, null, asList( periods ) );
+    }
+    
+    public void setPeriod( NameableObject period )
+    {
+        setPeriods( getList( period ) );
     }
 
     public List<NameableObject> getOrganisationUnits()
@@ -1228,6 +1222,11 @@ public class DataQueryParams
     public void setOrganisationUnits( List<? extends NameableObject> organisationUnits )
     {
         setDimensionOptions( ORGUNIT_DIM_ID, DimensionType.ORGANISATIONUNIT, null, asList( organisationUnits ) );
+    }
+    
+    public void setOrganisationUnit( NameableObject organisationUnit )
+    {
+        setOrganisationUnits( getList( organisationUnit ) );
     }
     
     public List<DimensionalObject> getDataElementGroupSets()
@@ -1287,6 +1286,11 @@ public class DataQueryParams
         setFilterOptions( PERIOD_DIM_ID, DimensionType.PERIOD, null, periods );
     }
     
+    public void setFilterPeriod( Period period )
+    {
+        setFilterPeriods( getList( period ) );
+    }
+    
     public List<NameableObject> getFilterOrganisationUnits()
     {
         return getFilterOptions( ORGUNIT_DIM_ID );
@@ -1295,6 +1299,11 @@ public class DataQueryParams
     public void setFilterOrganisationUnits( List<NameableObject> organisationUnits )
     {
         setFilterOptions( ORGUNIT_DIM_ID, DimensionType.ORGANISATIONUNIT, null, organisationUnits );
+    }
+    
+    public void setFilterOrganisationUnit( NameableObject organisationUnit )
+    {
+        setFilterOrganisationUnits( getList( organisationUnit ) );
     }
     
     public void setFilter( String filter, DimensionType type, NameableObject item )

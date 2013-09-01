@@ -1,19 +1,20 @@
 package org.hisp.dhis.organisationunit;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -41,6 +42,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.hierarchy.HierarchyViolationException;
 import org.hisp.dhis.i18n.I18nService;
@@ -270,6 +272,37 @@ public class DefaultOrganisationUnitService
         } );
     }
 
+    public Collection<OrganisationUnit> getOrganisationUnits( Collection<OrganisationUnitGroup> groups, Collection<OrganisationUnit> parents )
+    {
+        Set<OrganisationUnit> members = new HashSet<OrganisationUnit>();
+        
+        for ( OrganisationUnitGroup group : groups )
+        {
+            members.addAll( group.getMembers() );
+        }
+        
+        if ( parents != null && !parents.isEmpty() )
+        {
+            Collection<OrganisationUnit> children = getOrganisationUnitsWithChildren( IdentifiableObjectUtils.getUids( parents ) );
+            
+            members.retainAll( children );
+        }
+        
+        return members;
+    }
+    
+    public Collection<OrganisationUnit> getOrganisationUnitsWithChildren( Collection<String> parentUids )
+    {
+        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        
+        for ( String uid : parentUids )
+        {
+            units.addAll( getOrganisationUnitsWithChildren( uid ) );
+        }
+        
+        return units;
+    }
+    
     public Collection<OrganisationUnit> getOrganisationUnitsWithChildren( String uid )
     {
         return getOrganisationUnitWithChildren( getOrganisationUnit( uid ).getId() );
@@ -286,10 +319,9 @@ public class DefaultOrganisationUnitService
 
         List<OrganisationUnit> result = new ArrayList<OrganisationUnit>();
 
-        int rootLevel = 1;
+        int rootLevel = organisationUnit.getOrganisationUnitLevel();
 
         organisationUnit.setLevel( rootLevel );
-
         result.add( organisationUnit );
 
         addOrganisationUnitChildren( organisationUnit, result, rootLevel );
@@ -313,13 +345,10 @@ public class DefaultOrganisationUnitService
         for ( OrganisationUnit child : childList )
         {
             child.setLevel( level );
-
             result.add( child );
 
             addOrganisationUnitChildren( child, result, level );
         }
-
-        level--;
     }
 
     public List<OrganisationUnit> getOrganisationUnitBranch( int id )
@@ -351,55 +380,68 @@ public class DefaultOrganisationUnitService
 
     public Collection<OrganisationUnit> getOrganisationUnitsAtLevel( int level )
     {
-        if ( level < 1 )
-        {
-            throw new IllegalArgumentException( "Level must be greater than zero" );
-        }
-
+        Collection<OrganisationUnit> roots = getRootOrganisationUnits();
+        
         if ( level == 1 )
         {
-            return getRootOrganisationUnits();
+            return roots;
         }
 
-        Set<OrganisationUnit> result = new HashSet<OrganisationUnit>();
-
-        for ( OrganisationUnit root : organisationUnitStore.getRootOrganisationUnits() )
-        {
-            addOrganisationUnitChildrenAtLevel( root, 2, level, result );
-        }
-
-        return result;
+        return getOrganisationUnitsAtLevel( level, roots );
     }
 
     public Collection<OrganisationUnit> getOrganisationUnitsAtLevel( int level, OrganisationUnit parent )
     {
-        if ( level < 1 )
-        {
-            throw new IllegalArgumentException( "Level must be greater than zero" );
-        }
+        Set<OrganisationUnit> parents = new HashSet<OrganisationUnit>();
+        parents.add( parent );
+        
+        return getOrganisationUnitsAtLevel( level, parent != null ? parents : null );
+    }
 
-        int parentLevel = parent.getOrganisationUnitLevel();
-
-        if ( level < parentLevel )
+    public Collection<OrganisationUnit> getOrganisationUnitsAtLevel( int level, Collection<OrganisationUnit> parents )
+    {
+        Set<Integer> levels = new HashSet<Integer>();
+        levels.add( level );
+        
+        return getOrganisationUnitsAtLevels( levels, parents );
+    }
+    
+    public Collection<OrganisationUnit> getOrganisationUnitsAtLevels( Collection<Integer> levels, Collection<OrganisationUnit> parents )
+    {
+        if ( parents == null || parents.isEmpty() )
         {
-            throw new IllegalArgumentException(
-                "Level must be greater than or equal to level of parent OrganisationUnit" );
+            parents = new HashSet<OrganisationUnit>( getRootOrganisationUnits() );
         }
 
         Set<OrganisationUnit> result = new HashSet<OrganisationUnit>();
-
-        if ( level == parentLevel )
+        
+        for ( Integer level : levels )
         {
-            result.add( parent );
-        }
-        else
-        {
-            addOrganisationUnitChildrenAtLevel( parent, parentLevel + 1, level, result );
-        }
-
-        for ( OrganisationUnit unit : result )
-        {
-            unit.setLevel( level );
+            if ( level < 1 )
+            {
+                throw new IllegalArgumentException( "Level must be greater than zero" );
+            }
+            
+            for ( OrganisationUnit parent : parents )
+            {
+                int parentLevel = parent.getOrganisationUnitLevel();
+    
+                if ( level < parentLevel )
+                {
+                    throw new IllegalArgumentException(
+                        "Level must be greater than or equal to level of parent OrganisationUnit" );
+                }
+    
+                if ( level == parentLevel )
+                {
+                    parent.setLevel( level );
+                    result.add( parent );
+                }
+                else
+                {
+                    addOrganisationUnitChildrenAtLevel( parent, parentLevel + 1, level, result );
+                }
+            }
         }
         
         return result;
@@ -415,7 +457,11 @@ public class DefaultOrganisationUnitService
     {
         if ( currentLevel == targetLevel )
         {
-            result.addAll( parent.getChildren() );
+            for ( OrganisationUnit child : parent.getChildren() )
+            {
+                child.setLevel( currentLevel );
+                result.add( child );
+            }
         }
         else
         {
@@ -739,7 +785,7 @@ public class DefaultOrganisationUnitService
 
         return levelMap;
     }
-
+    
     @Override
     public int getNumberOfOrganisationUnits()
     {

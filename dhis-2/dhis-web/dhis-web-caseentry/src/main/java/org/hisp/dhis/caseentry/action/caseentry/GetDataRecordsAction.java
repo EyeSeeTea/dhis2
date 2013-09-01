@@ -1,17 +1,20 @@
+package org.hisp.dhis.caseentry.action.caseentry;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,12 +28,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.caseentry.action.caseentry;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -204,6 +206,13 @@ public class GetDataRecordsAction
         this.followup = followup;
     }
 
+    private Boolean trackingReport;
+
+    public void setTrackingReport( Boolean trackingReport )
+    {
+        this.trackingReport = trackingReport;
+    }
+
     // -------------------------------------------------------------------------
     // Implementation Action
     // -------------------------------------------------------------------------
@@ -213,6 +222,9 @@ public class GetDataRecordsAction
     {
         OrganisationUnit orgunit = selectedStateManager.getSelectedOrganisationUnit();
 
+        Collection<OrganisationUnit> orgunits = new HashSet<OrganisationUnit>();
+        orgunits.add( orgunit );
+        
         if ( programId != null )
         {
             program = programService.getProgram( programId );
@@ -227,13 +239,13 @@ public class GetDataRecordsAction
                 patientAttributes = new ArrayList<PatientAttribute>(
                     patientAttributeService.getPatientAttributesByDisplayOnVisitSchedule( true ) );
 
-                Collections.sort( patientAttributes, IdentifiableObjectNameComparator.INSTANCE);
+                Collections.sort( patientAttributes, IdentifiableObjectNameComparator.INSTANCE );
 
-                total = patientService.countSearchPatients( searchTexts, orgunit, followup );
+                total = patientService.countSearchPatients( searchTexts, orgunits, followup );
                 this.paging = createPaging( total );
 
-                List<Integer> stageInstanceIds = patientService.getProgramStageInstances( searchTexts, orgunit, followup,
-                    paging.getStartPos(), paging.getPageSize() );
+                List<Integer> stageInstanceIds = patientService.getProgramStageInstances( searchTexts, orgunits,
+                    followup, paging.getStartPos(), paging.getPageSize() );
 
                 for ( Integer stageInstanceId : stageInstanceIds )
                 {
@@ -260,9 +272,13 @@ public class GetDataRecordsAction
                     }
                 }
             }
+            else if(trackingReport != null && trackingReport )
+            {
+                grid = patientService.getTrackingEventsReport( program, searchTexts, orgunits, followup, i18n );
+            }
             else
             {
-                grid = patientService.getScheduledEventsReport( searchTexts, orgunit, followup, null, null, i18n );
+                grid = patientService.getScheduledEventsReport( searchTexts, orgunits, followup, null, null, i18n );
             }
         }
 

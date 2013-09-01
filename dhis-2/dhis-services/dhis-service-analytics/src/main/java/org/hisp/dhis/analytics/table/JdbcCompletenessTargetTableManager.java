@@ -1,19 +1,20 @@
 package org.hisp.dhis.analytics.table;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -34,9 +35,11 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 
+import org.hisp.dhis.analytics.AnalyticsTable;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Lars Helge Overland
@@ -44,6 +47,15 @@ import org.springframework.scheduling.annotation.Async;
 public class JdbcCompletenessTargetTableManager
     extends AbstractJdbcTableManager
 {
+    @Override
+    @Transactional
+    public List<AnalyticsTable> getTables( boolean last3YearsOnly )
+    {
+        List<AnalyticsTable> tables = new ArrayList<AnalyticsTable>();
+        tables.add( new AnalyticsTable( getTableName(), getDimensionColumns( null ) ) );
+        return tables;
+    }
+    
     public boolean validState()
     {
         return true;
@@ -54,15 +66,17 @@ public class JdbcCompletenessTargetTableManager
         return "completenesstarget";
     }
 
-    public void createTable( String tableName )
+    public void createTable( AnalyticsTable table )
     {
+        final String tableName = table.getTempTableName();
+        
         final String sqlDrop = "drop table " + tableName;
         
         executeSilently( sqlDrop );
 
         String sqlCreate = "create table " + tableName + " (";
 
-        for ( String[] col : getDimensionColumns() )
+        for ( String[] col : getDimensionColumns( table ) )
         {
             sqlCreate += col[0] + " " + col[1] + ",";
         }
@@ -75,27 +89,27 @@ public class JdbcCompletenessTargetTableManager
     }
 
     @Async
-    public Future<?> populateTableAsync( ConcurrentLinkedQueue<String> tables )
+    public Future<?> populateTableAsync( ConcurrentLinkedQueue<AnalyticsTable> tables )
     {
         taskLoop : while ( true )
         {
-            String table = tables.poll();
+            AnalyticsTable table = tables.poll();
                 
             if ( table == null )
             {
                 break taskLoop;
             }
             
-            String sql = "insert into " + table + " (";
+            String sql = "insert into " + table.getTempTableName() + " (";
     
-            for ( String[] col : getDimensionColumns() )
+            for ( String[] col : getDimensionColumns( table ) )
             {
                 sql += col[0] + ",";
             }
     
             sql += "value) select ";
     
-            for ( String[] col : getDimensionColumns() )
+            for ( String[] col : getDimensionColumns( table ) )
             {
                 sql += col[2] + ",";
             }
@@ -115,7 +129,7 @@ public class JdbcCompletenessTargetTableManager
         return null;
     }
 
-    public List<String[]> getDimensionColumns()
+    public List<String[]> getDimensionColumns( AnalyticsTable table )
     {
         List<String[]> columns = new ArrayList<String[]>();
 
@@ -156,7 +170,7 @@ public class JdbcCompletenessTargetTableManager
     }
 
     @Async
-    public Future<?> applyAggregationLevels( ConcurrentLinkedQueue<String> tables, Collection<String> dataElements, int aggregationLevel )
+    public Future<?> applyAggregationLevels( ConcurrentLinkedQueue<AnalyticsTable> tables, Collection<String> dataElements, int aggregationLevel )
     {
         return null; // Not relevant
     }

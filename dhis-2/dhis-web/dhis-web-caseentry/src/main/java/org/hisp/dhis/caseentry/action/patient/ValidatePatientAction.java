@@ -1,17 +1,20 @@
+package org.hisp.dhis.caseentry.action.patient;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,8 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.caseentry.action.patient;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -122,60 +123,63 @@ public class ValidatePatientAction
 
     public String execute()
     {
-        fullName = fullName.trim();
-
-        int startIndex = fullName.indexOf( ' ' );
-        int endIndex = fullName.lastIndexOf( ' ' );
-
-        String firstName = fullName.toString();
-        String middleName = "";
-        String lastName = "";
-
-        if ( fullName.indexOf( ' ' ) != -1 )
+        if ( fullName != null )
         {
-            firstName = fullName.substring( 0, startIndex );
-            if ( startIndex == endIndex )
-            {
-                middleName = "";
-                lastName = fullName.substring( startIndex + 1, fullName.length() );
-            }
-            else
-            {
-                middleName = fullName.substring( startIndex + 1, endIndex );
-                lastName = fullName.substring( endIndex + 1, fullName.length() );
-            }
-        }
+            fullName = fullName.trim();
 
-        if ( !checkedDuplicate )
-        {
-            patients = patientService.getPatients( firstName, middleName, lastName, format.parseDate( birthDate ),
-                gender );
+            int startIndex = fullName.indexOf( ' ' );
+            int endIndex = fullName.lastIndexOf( ' ' );
 
-            if ( patients != null && patients.size() > 0 )
+            String firstName = fullName.toString();
+            String middleName = "";
+            String lastName = "";
+
+            if ( fullName.indexOf( ' ' ) != -1 )
             {
-                message = i18n.getString( "patient_duplicate" );
-
-                boolean flagDuplicate = false;
-                for ( Patient p : patients )
+                firstName = fullName.substring( 0, startIndex );
+                if ( startIndex == endIndex )
                 {
-                    if ( id == null || (id != null && p.getId().intValue() != id.intValue()) )
-                    {
-                        flagDuplicate = true;
-                        Collection<PatientAttributeValue> patientAttributeValues = patientAttributeValueService
-                            .getPatientAttributeValues( p );
+                    middleName = "";
+                    lastName = fullName.substring( startIndex + 1, fullName.length() );
+                }
+                else
+                {
+                    middleName = fullName.substring( startIndex + 1, endIndex );
+                    lastName = fullName.substring( endIndex + 1, fullName.length() );
+                }
+            }
 
-                        for ( PatientAttributeValue patientAttributeValue : patientAttributeValues )
+            if ( !checkedDuplicate && birthDate != null && gender != null )
+            {
+                patients = patientService.getPatients( firstName, middleName, lastName, format.parseDate( birthDate ),
+                    gender );
+
+                if ( patients != null && patients.size() > 0 )
+                {
+                    message = i18n.getString( "patient_duplicate" );
+
+                    boolean flagDuplicate = false;
+                    for ( Patient p : patients )
+                    {
+                        if ( id == null || (id != null && p.getId().intValue() != id.intValue()) )
                         {
-                            patientAttributeValueMap
-                                .put( p.getId() + "_" + patientAttributeValue.getPatientAttribute().getId(),
+                            flagDuplicate = true;
+                            Collection<PatientAttributeValue> patientAttributeValues = patientAttributeValueService
+                                .getPatientAttributeValues( p );
+
+                            for ( PatientAttributeValue patientAttributeValue : patientAttributeValues )
+                            {
+                                patientAttributeValueMap.put( p.getId() + "_"
+                                    + patientAttributeValue.getPatientAttribute().getId(),
                                     patientAttributeValue.getValue() );
+                            }
                         }
                     }
-                }
 
-                if ( flagDuplicate )
-                {
-                    return PATIENT_DUPLICATE;
+                    if ( flagDuplicate )
+                    {
+                        return PATIENT_DUPLICATE;
+                    }
                 }
             }
         }
@@ -196,20 +200,6 @@ public class ValidatePatientAction
                 message = i18n.getString( "please_choose_relationshipType_for_this_under_age_patient" );
                 return INPUT;
             }
-        }
-
-        Patient p = new Patient();
-        p.setGender( gender );
-
-        if ( birthDate != null )
-        {
-            birthDate = birthDate.trim();
-            p.setBirthDate( format.parseDate( birthDate ) );
-
-        }
-        else
-        {
-            p.setBirthDateFromAge( age.intValue(), ageType );
         }
 
         HttpServletRequest request = ServletActionContext.getRequest();
@@ -251,6 +241,23 @@ public class ValidatePatientAction
         // ---------------------------------------------------------------------
         // Check Enrollment for adding patient single event with registration
         // ---------------------------------------------------------------------
+
+        Patient p = new Patient();
+        if ( gender != null )
+        {
+            p.setGender( gender );
+        }
+
+        if ( birthDate != null )
+        {
+            birthDate = birthDate.trim();
+            p.setBirthDate( format.parseDate( birthDate ) );
+
+        }
+        else if ( age != null )
+        {
+            p.setBirthDateFromAge( age.intValue(), ageType );
+        }
 
         if ( programId != null )
         {

@@ -1,17 +1,20 @@
+package org.hisp.dhis.light.dataentry.action;
+
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,8 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.light.dataentry.action;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -293,8 +294,7 @@ public class SaveSectionFormAction
             storedBy = "[unknown]";
         }
 
-        HttpServletRequest request = (HttpServletRequest) ActionContext.getContext().get(
-            StrutsStatics.HTTP_REQUEST );
+        HttpServletRequest request = (HttpServletRequest) ActionContext.getContext().get( StrutsStatics.HTTP_REQUEST );
         Map<String, String> parameterMap = ContextUtils.getParameterMap( request );
 
         for ( String key : parameterMap.keySet() )
@@ -331,7 +331,8 @@ public class SaveSectionFormAction
                         if ( !valueIsEmpty && !FormUtils.isBoolean( value ) )
                         {
                             correctType = false;
-                            typeViolations.put( key, "\"" + value + "\"" + " " + i18n.getString( "is_invalid_boolean" ) );
+                            typeViolations
+                                .put( key, "\"" + value + "\"" + " " + i18n.getString( "is_invalid_boolean" ) );
                         }
                     }
                     else if ( type.equals( DataElement.VALUE_TYPE_DATE ) )
@@ -357,7 +358,8 @@ public class SaveSectionFormAction
                         if ( !FormUtils.isInteger( value ) )
                         {
                             correctType = false;
-                            typeViolations.put( key, "\"" + value + "\"" + " " + i18n.getString( "is_invalid_integer" ) );
+                            typeViolations
+                                .put( key, "\"" + value + "\"" + " " + i18n.getString( "is_invalid_integer" ) );
                         }
                     }
                     else if ( type.equals( DataElement.VALUE_TYPE_INT )
@@ -366,7 +368,8 @@ public class SaveSectionFormAction
                         if ( !FormUtils.isPositiveInteger( value ) )
                         {
                             correctType = false;
-                            typeViolations.put( key, "\"" + value + "\"" + " " + i18n.getString( "is_invalid_positive_integer" ) );
+                            typeViolations.put( key,
+                                "\"" + value + "\"" + " " + i18n.getString( "is_invalid_positive_integer" ) );
                         }
                     }
                     else if ( type.equals( DataElement.VALUE_TYPE_INT )
@@ -375,7 +378,8 @@ public class SaveSectionFormAction
                         if ( !FormUtils.isNegativeInteger( value ) )
                         {
                             correctType = false;
-                            typeViolations.put( key, "\"" + value + "\"" + " " + i18n.getString( "is_invalid_negative_integer" ) );
+                            typeViolations.put( key,
+                                "\"" + value + "\"" + " " + i18n.getString( "is_invalid_negative_integer" ) );
                         }
                     }
                 }
@@ -413,6 +417,7 @@ public class SaveSectionFormAction
                         }
                     }
                 }
+
             }
         }
 
@@ -464,8 +469,7 @@ public class SaveSectionFormAction
 
         validationViolations = formUtils.getValidationViolations( organisationUnit, dataElements, period );
 
-        if ( needsValidation
-            && (!validationViolations.isEmpty() || !typeViolations.isEmpty()) )
+        if ( needsValidation && (!validationViolations.isEmpty() || !typeViolations.isEmpty()) )
         {
             return ERROR;
         }

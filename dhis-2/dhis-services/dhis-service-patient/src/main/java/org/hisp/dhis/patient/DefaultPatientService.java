@@ -1,17 +1,20 @@
+package org.hisp.dhis.patient;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,8 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.patient;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -523,27 +524,27 @@ public class DefaultPatientService
         patientStore.removeErollmentPrograms( program );
     }
 
-    public Collection<Patient> searchPatients( List<String> searchKeys, OrganisationUnit orgunit, Boolean followup,
-        Collection<PatientAttribute> patientAttributes, Integer min, Integer max )
+    public Collection<Patient> searchPatients( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
+        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer min, Integer max )
     {
-        return patientStore.search( searchKeys, orgunit, followup, patientAttributes, min, max );
+        return patientStore.search( searchKeys, orgunits, followup, patientAttributes, min, max );
     }
 
-    public int countSearchPatients( List<String> searchKeys, OrganisationUnit orgunit, Boolean followup )
+    public int countSearchPatients( List<String> searchKeys, Collection<OrganisationUnit> orgunits, Boolean followup )
     {
-        return patientStore.countSearch( searchKeys, orgunit, followup );
+        return patientStore.countSearch( searchKeys, orgunits, followup );
     }
 
-    public Collection<String> getPatientPhoneNumbers( List<String> searchKeys, OrganisationUnit orgunit,
+    public Collection<String> getPatientPhoneNumbers( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
         Boolean followup, Integer min, Integer max )
     {
-        return patientStore.getPatientPhoneNumbers( searchKeys, orgunit, followup, null, min, max );
+        return patientStore.getPatientPhoneNumbers( searchKeys, orgunits, followup, null, min, max );
     }
 
-    public List<Integer> getProgramStageInstances( List<String> searchKeys, OrganisationUnit orgunit, Boolean followup,
-        Integer min, Integer max )
+    public List<Integer> getProgramStageInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
+        Boolean followup, Integer min, Integer max )
     {
-        return patientStore.getProgramStageInstances( searchKeys, orgunit, followup, null, min, max );
+        return patientStore.getProgramStageInstances( searchKeys, orgunits, followup, null, null, min, max );
     }
 
     @Override
@@ -553,8 +554,8 @@ public class DefaultPatientService
     }
 
     @Override
-    public Grid getScheduledEventsReport( List<String> searchKeys, OrganisationUnit orgunit, Boolean followup,
-        Integer min, Integer max, I18n i18n )
+    public Grid getScheduledEventsReport( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
+        Boolean followup, Integer min, Integer max, I18n i18n )
     {
         String startDate = "";
         String endDate = "";
@@ -593,7 +594,53 @@ public class DefaultPatientService
         grid.addHeader( new GridHeader( i18n.getString( "program_stage" ), false, true ) );
         grid.addHeader( new GridHeader( i18n.getString( "due_date" ), false, true ) );
 
-        return patientStore.getPatientEventReport( grid, searchKeys, orgunit, followup, patientAttributes, min, max );
+        return patientStore.getPatientEventReport( grid, searchKeys, orgunits, followup, patientAttributes, null, min,
+            max );
+
+    }
+
+    @Override
+    public Grid getTrackingEventsReport( Program program, List<String> searchKeys,
+        Collection<OrganisationUnit> orgunits, Boolean followup, I18n i18n )
+    {
+        String startDate = "";
+        String endDate = "";
+        for ( String searchKey : searchKeys )
+        {
+            String[] keys = searchKey.split( "_" );
+            if ( keys[0].equals( Patient.PREFIX_PROGRAM_EVENT_BY_STATUS ) )
+            {
+                startDate = keys[2];
+                endDate = keys[3];
+            }
+        }
+
+        Grid grid = new ListGrid();
+        grid.setTitle( i18n.getString( "program_tracking" ) );
+        if ( !startDate.isEmpty() && !endDate.isEmpty() )
+        {
+            grid.setSubtitle( i18n.getString( "from" ) + " " + startDate + " " + i18n.getString( "to" ) + " " + endDate );
+        }
+
+        grid.addHeader( new GridHeader( "patientid", true, true ) );
+        grid.addHeader( new GridHeader( i18n.getString( "first_name" ), true, true ) );
+        grid.addHeader( new GridHeader( i18n.getString( "middle_name" ), true, true ) );
+        grid.addHeader( new GridHeader( i18n.getString( "last_name" ), true, true ) );
+        grid.addHeader( new GridHeader( i18n.getString( "gender" ), true, true ) );
+        grid.addHeader( new GridHeader( i18n.getString( "phone_number" ), false, true ) );
+
+        Collection<PatientIdentifierType> patientIdentifierTypes = program.getPatientIdentifierTypes();
+        for ( PatientIdentifierType patientIdentifierType : patientIdentifierTypes )
+        {
+            grid.addHeader( new GridHeader( patientIdentifierType.getDisplayName(), false, true ) );
+        }
+        grid.addHeader( new GridHeader( "programstageinstanceid", true, true ) );
+        grid.addHeader( new GridHeader( i18n.getString( "program_stage" ), false, true ) );
+        grid.addHeader( new GridHeader( i18n.getString( "due_date" ), false, true ) );
+        grid.addHeader( new GridHeader( i18n.getString( "risk" ), false, true ) );
+
+        return patientStore.getPatientEventReport( grid, searchKeys, orgunits, followup, null, patientIdentifierTypes,
+            null, null );
 
     }
 

@@ -1,17 +1,20 @@
+package org.hisp.dhis.program;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,14 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.program;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
@@ -42,13 +37,27 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientReminder;
+import org.hisp.dhis.patient.PatientReminderService;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.patientreport.TabularReportColumn;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.sms.SmsSender;
+import org.hisp.dhis.sms.SmsServiceException;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.system.grid.ListGrid;
+import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Abyot Asalefew
@@ -90,12 +99,34 @@ public class DefaultProgramStageInstanceService
         this.organisationUnitService = organisationUnitService;
     }
 
+    private SmsSender smsSender;
+
+    public void setSmsSender( SmsSender smsSender )
+    {
+        this.smsSender = smsSender;
+    }
+
+    private CurrentUserService currentUserService;
+
+    public void setCurrentUserService( CurrentUserService currentUserService )
+    {
+        this.currentUserService = currentUserService;
+    }
+
+    private PatientReminderService patientReminderService;
+
+    public void setPatientReminderService( PatientReminderService patientReminderService )
+    {
+        this.patientReminderService = patientReminderService;
+    }
+
     // -------------------------------------------------------------------------
     // Implementation methods
     // -------------------------------------------------------------------------
 
     public int addProgramStageInstance( ProgramStageInstance programStageInstance )
     {
+        programStageInstance.setAutoFields();
         return programStageInstanceStore.save( programStageInstance );
     }
 
@@ -114,6 +145,11 @@ public class DefaultProgramStageInstanceService
         return programStageInstanceStore.get( id );
     }
 
+    public ProgramStageInstance getProgramStageInstance( String uid )
+    {
+        return programStageInstanceStore.getByUid( uid );
+    }
+
     public ProgramStageInstance getProgramStageInstance( ProgramInstance programInstance, ProgramStage programStage )
     {
         return programStageInstanceStore.get( programInstance, programStage );
@@ -124,8 +160,15 @@ public class DefaultProgramStageInstanceService
         return programStageInstanceStore.get( programStage );
     }
 
+    @Override
+    public Collection<ProgramStageInstance> getProgramStageInstances( ProgramStage programStage, OrganisationUnit organisationUnit )
+    {
+        return programStageInstanceStore.get( programStage, organisationUnit );
+    }
+
     public void updateProgramStageInstance( ProgramStageInstance programStageInstance )
     {
+        programStageInstance.setAutoFields();
         programStageInstanceStore.update( programStageInstance );
     }
 
@@ -492,7 +535,8 @@ public class DefaultProgramStageInstanceService
         Boolean useFormNameDataElement, I18nFormat format, I18n i18n )
     {
         return programStageInstanceStore.getAggregateReport( position, programStage, orgunitIds, facilityLB, deGroupBy,
-            deSum, deFilters, periods, aggregateType, limit, useCompletedEvents, displayTotals, useFormNameDataElement, format, i18n );
+            deSum, deFilters, periods, aggregateType, limit, useCompletedEvents, displayTotals, useFormNameDataElement,
+            format, i18n );
     }
 
     @Override
@@ -516,10 +560,67 @@ public class DefaultProgramStageInstanceService
     }
 
     @Override
-    public Grid getCompletenessProgramStageInstance( OrganisationUnit orgunit, Program program, String startDate,
+    public Grid getCompletenessProgramStageInstance( Collection<Integer> orgunitIds, Program program, String startDate,
         String endDate, I18n i18n )
     {
-        return programStageInstanceStore.getCompleteness( orgunit, program, startDate, endDate, i18n );
+        return programStageInstanceStore.getCompleteness( orgunitIds, program, startDate, endDate, i18n );
     }
 
+    @Override
+    public Collection<OutboundSms> sendMessages( ProgramStageInstance programStageInstance, int status,
+        I18nFormat format )
+    {
+        Patient patient = programStageInstance.getProgramInstance().getPatient();
+        Collection<OutboundSms> outboundSmsList = new HashSet<OutboundSms>();
+
+        Collection<PatientReminder> reminders = programStageInstance.getProgramStage().getPatientReminders();
+        for ( PatientReminder rm : reminders )
+        {
+            if ( rm != null && rm.getWhenToSend() != null && rm.getWhenToSend() == status )
+            {
+                OutboundSms outboundSms = sendEventMessage( rm, programStageInstance, patient, format );
+                if ( outboundSms != null )
+                {
+                    outboundSmsList.add( outboundSms );
+                }
+            }
+        }
+
+        return outboundSmsList;
+    }
+
+    public Collection<ProgramStageInstance> getProgramStageInstance( Patient patient )
+    {
+        return programStageInstanceStore.get( patient );
+    }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    private OutboundSms sendEventMessage( PatientReminder patientReminder, ProgramStageInstance programStageInstance,
+        Patient patient, I18nFormat format )
+    {
+        Set<String> phoneNumbers = patientReminderService.getPhonenumbers( patientReminder, patient );
+        OutboundSms outboundSms = null;
+
+        if ( phoneNumbers.size() > 0 )
+        {
+            String msg = patientReminderService.getMessageFromTemplate( patientReminder, programStageInstance, format );
+            try
+            {
+                outboundSms = new OutboundSms();
+                outboundSms.setMessage( msg );
+                outboundSms.setRecipients( phoneNumbers );
+                outboundSms.setSender( currentUserService.getCurrentUsername() );
+                smsSender.sendMessage( outboundSms, null );
+            }
+            catch ( SmsServiceException e )
+            {
+                e.printStackTrace();
+            }
+        }
+
+        return outboundSms;
+    }
 }

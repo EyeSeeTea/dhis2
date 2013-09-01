@@ -25,7 +25,6 @@
   <modules>
     <module>dhis-api</module>
     <module>dhis-services</module>
-    <module>dhis-dxf2</module>
     <module>dhis-support</module>
   </modules>
 
@@ -247,7 +246,7 @@
       </dependency>
       <dependency>
         <groupId>org.hisp.dhis</groupId>
-        <artifactId>dhis-dxf2</artifactId>
+        <artifactId>dhis-service-dxf2</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -295,14 +294,14 @@
         <artifactId>dhis-service-patient</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <dependency>
+	  <dependency>
         <groupId>org.hisp.dhis</groupId>
-        <artifactId>dhis-service-mobile</artifactId>
+        <artifactId>dhis-service-eventreporting</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.hisp.dhis</groupId>
-        <artifactId>dhis-service-sms</artifactId>
+        <artifactId>dhis-service-mobile</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -630,10 +629,11 @@
         <version>1.2</version>
       </dependency>
       <dependency>
-        <groupId>net.sf.opencsv</groupId>
-        <artifactId>opencsv</artifactId>
-        <version>2.3</version>
+        <groupId>net.sourceforge.javacsv</groupId>
+        <artifactId>javacsv</artifactId>
+        <version>2.0</version>
       </dependency>
+            
       <!--DBMS -->
       <dependency>
         <groupId>com.h2database</groupId>
@@ -719,7 +719,7 @@
       <dependency>
         <groupId>net.sf.jasperreports</groupId>
         <artifactId>jasperreports</artifactId>
-        <version>4.7.1</version>
+        <version>5.2.0</version>
         <exclusions>
           <exclusion>
             <groupId>xalan</groupId>
@@ -737,9 +737,9 @@
         <version>4.0.0</version>
       </dependency>
       <dependency>
-        <groupId>jfree</groupId>
+        <groupId>org.jfree</groupId>
         <artifactId>jfreechart</artifactId>
-        <version>1.0.13</version>
+        <version>1.0.15</version>
         <exclusions>
           <exclusion>
             <groupId>gnujaxp</groupId>
@@ -748,9 +748,9 @@
         </exclusions>
       </dependency>
       <dependency>
-        <groupId>jfree</groupId>
+        <groupId>org.jfree</groupId>
         <artifactId>jcommon</artifactId>
-        <version>1.0.16</version>
+        <version>1.0.17</version>
         <exclusions>
           <exclusion>
             <groupId>gnujaxp</groupId>
@@ -961,6 +961,6 @@
     <jackson.version>2.0.6</jackson.version>
     <camel.version>2.10.2</camel.version>
     <slf4j.version>1.6.6</slf4j.version>
-    <geotools.version>8.4</geotools.version>
+    <geotools.version>9.3</geotools.version>
   </properties>
 </project>

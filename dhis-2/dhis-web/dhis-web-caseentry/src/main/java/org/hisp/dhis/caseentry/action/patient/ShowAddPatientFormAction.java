@@ -1,17 +1,20 @@
+package org.hisp.dhis.caseentry.action.patient;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,8 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.caseentry.action.patient;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,6 +48,7 @@ import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.patient.PatientIdentifierTypeService;
 import org.hisp.dhis.patient.PatientRegistrationForm;
 import org.hisp.dhis.patient.PatientRegistrationFormService;
+import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.patient.comparator.PatientAttributeGroupSortOrderComparator;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
@@ -105,6 +107,13 @@ public class ShowAddPatientFormAction
     public void setAttributeGroupService( PatientAttributeGroupService attributeGroupService )
     {
         this.attributeGroupService = attributeGroupService;
+    }
+
+    private PatientService patientService;
+
+    public void setPatientService( PatientService patientService )
+    {
+        this.patientService = patientService;
     }
 
     private I18n i18n;
@@ -188,6 +197,20 @@ public class ShowAddPatientFormAction
         return attributeGroups;
     }
 
+    private String orgunitCountIdentifier;
+
+    public String getOrgunitCountIdentifier()
+    {
+        return orgunitCountIdentifier;
+    }
+
+    private PatientRegistrationForm patientRegistrationForm;
+
+    public PatientRegistrationForm getPatientRegistrationForm()
+    {
+        return patientRegistrationForm;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -199,10 +222,9 @@ public class ShowAddPatientFormAction
 
         if ( programId == null )
         {
-            PatientRegistrationForm patientRegistrationForm = patientRegistrationFormService
-                .getCommonPatientRegistrationForm();
+            patientRegistrationForm = patientRegistrationFormService.getCommonPatientRegistrationForm();
 
-            if ( patientRegistrationForm != null )
+            if ( patientRegistrationForm != null && patientRegistrationForm.getDataEntryForm() != null )
             {
                 customRegistrationForm = patientRegistrationFormService.prepareDataEntryFormForAdd(
                     patientRegistrationForm.getDataEntryForm().getHtmlCode(), healthWorkers, null, null, i18n, format );
@@ -211,10 +233,9 @@ public class ShowAddPatientFormAction
         else
         {
             program = programService.getProgram( programId );
-            PatientRegistrationForm patientRegistrationForm = patientRegistrationFormService
-                .getPatientRegistrationForm( program );
+            patientRegistrationForm = patientRegistrationFormService.getPatientRegistrationForm( program );
 
-            if ( patientRegistrationForm != null )
+            if ( patientRegistrationForm != null && patientRegistrationForm.getDataEntryForm() != null )
             {
                 customRegistrationForm = patientRegistrationFormService.prepareDataEntryFormForAdd(
                     patientRegistrationForm.getDataEntryForm().getHtmlCode(), healthWorkers, null, null, i18n, format );
@@ -227,8 +248,8 @@ public class ShowAddPatientFormAction
 
             Collection<PatientAttribute> patientAttributesInProgram = new HashSet<PatientAttribute>();
             Collection<Program> programs = programService.getAllPrograms();
-            programs.remove(program);
-            
+            programs.remove( program );
+
             for ( Program _program : programs )
             {
                 identifierTypes.removeAll( _program.getPatientIdentifierTypes() );
@@ -253,6 +274,33 @@ public class ShowAddPatientFormAction
             noGroupAttributes.removeAll( patientAttributesInProgram );
         }
 
+        orgunitCountIdentifier = generateOrgunitIdentifier( organisationUnit );
+
         return SUCCESS;
+    }
+
+    private String generateOrgunitIdentifier( OrganisationUnit organisationUnit )
+    {
+        String value = organisationUnit.getCode();
+        value = (value == null) ? "" : value;
+
+        int totalPatient = patientService.countGetPatientsByOrgUnit( organisationUnit );
+        if ( totalPatient < 10 )
+        {
+            value += "000" + totalPatient;
+        }
+        else if ( totalPatient < 100 )
+        {
+            value += "00" + totalPatient;
+        }
+        else if ( totalPatient < 1000 )
+        {
+            value += "0" + totalPatient;
+        }
+        else
+        {
+            value += totalPatient;
+        }
+        return value;
     }
 }

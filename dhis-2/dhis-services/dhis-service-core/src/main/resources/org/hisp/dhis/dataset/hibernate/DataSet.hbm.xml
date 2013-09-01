@@ -51,7 +51,6 @@
     </set>
 	
 	<set name="organisationUnitGroups" table="orgunitgroupdatasets" inverse="true">
-	  <cache usage="read-write" />
 	  <key column="datasetid" />
 	  <many-to-many class="org.hisp.dhis.organisationunit.OrganisationUnitGroup" column="orgunitgroupid"/>
 	</set>
@@ -89,6 +88,12 @@
     <property name="validCompleteOnly" />
 
     <property name="skipOffline" />
+
+    <property name="dataElementDecoration" />
+    
+    <property name="renderAsTabs" />
+
+    <property name="renderHorizontally" />
 
     <!-- Access properties -->
     <many-to-one name="user" class="org.hisp.dhis.user.User" column="userid" foreign-key="fk_dataset_userid" />

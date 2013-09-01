@@ -1,19 +1,20 @@
 package org.hisp.dhis.system.util;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -46,8 +47,8 @@ public class MathUtils
     
     private static final double TOLERANCE = 0.01; 
     
-    public static final String NUMERIC_REGEXP = "^(0|-?[1-9]\\d*)(\\.\\d+)?$";    
-    public static final String NUMERIC_LENIENT_REGEXP = "^(-?[0-9]+)(\\.[0-9]+)?$";
+    public static final String NUMERIC_REGEXP = "^(-?0|-?[1-9]\\d*)(\\.\\d+)?(E\\d+)?$";
+    public static final String NUMERIC_LENIENT_REGEXP = "^(-?[0-9]+)(\\.[0-9]+)?(E\\d+)?$";
     
     private static final Pattern NUMERIC_PATTERN = Pattern.compile( NUMERIC_REGEXP );
     private static final Pattern NUMERIC_LENIENT_PATTERN = Pattern.compile( NUMERIC_LENIENT_REGEXP );
@@ -68,8 +69,7 @@ public class MathUtils
     {
         final String expression = leftSide + operator.getMathematicalOperator() + rightSide;
         
-        final JEP parser = new JEP();
-        
+        final JEP parser = getJep();
         parser.parseExpression( expression );
         
         return ( parser.getValue() == 1.0 );
@@ -83,8 +83,7 @@ public class MathUtils
      */
     public static double calculateExpression( String expression )   
     {
-        final JEP parser = new JEP();
-        
+        final JEP parser = getJep();
         parser.parseExpression( expression );
         
         double result = parser.getValue();
@@ -100,8 +99,7 @@ public class MathUtils
      */
     public static boolean expressionHasErrors( String expression )
     {
-        final JEP parser = new JEP();
-        
+        final JEP parser = getJep();
         parser.parseExpression( expression );
         
         return parser.hasError();
@@ -116,11 +114,21 @@ public class MathUtils
      */
     public static String getExpressionErrorInfo( String expression )
     {
-        final JEP parser = new JEP();
-        
+        final JEP parser = getJep();
         parser.parseExpression( expression );
         
         return parser.getErrorInfo();
+    }
+    
+    /**
+     * Returns an JEP parser instance.
+     */
+    private static JEP getJep()
+    {
+        final JEP parser = new JEP();
+        parser.addStandardFunctions();
+        parser.addStandardConstants();
+        return parser;
     }
     
     /**
@@ -147,10 +155,33 @@ public class MathUtils
         
         return Math.round( value * factor ) / factor;
     }
+    
+    /**
+     * Return a rounded off number.
+     * 
+     * <ul>
+     * <li>If value is exclusively between 1 and -1 it will have 2 decimals.</li>
+     * <li>If value if greater or equal to 1 the value will have 1 decimal.</li>
+     * </ul>
+     * 
+     * @param value the value to round off.
+     * @return a rounded off number.
+     */
+    public static double getRounded( double value )
+    {
+        if ( value < 1d && value > -1d )
+        {
+            return getRounded( value, 2 );
+        }
+        else
+        {
+            return getRounded( value, 1 );
+        }
+    }
 
     /**
-     * Returns a string representation of number rounded to given number
-     * of significant figures
+     * Returns a string representation of number rounded to given number of
+     * significant figures
      * 
      * @param value
      * @param significantFigures
@@ -158,8 +189,8 @@ public class MathUtils
      */
     public static String roundToString( double value, int significantFigures )
     {
-        MathContext mc = new MathContext(significantFigures);
-        BigDecimal num = new BigDecimal(value);
+        MathContext mc = new MathContext( significantFigures );
+        BigDecimal num = new BigDecimal( value );
         return num.round( mc ).toPlainString();
     }
 

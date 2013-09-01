@@ -1,19 +1,20 @@
 package org.hisp.dhis.mapgeneration;
 
 /*
- * Copyright (c) 2011, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -125,8 +126,8 @@ public class IntervalSet
     {
         Assert.isTrue( mapLayer != null );
         Assert.isTrue( length > 0 );
-        Assert.isTrue( mapLayer.getAllMapObjects() != null );
-        Assert.isTrue( mapLayer.getAllMapObjects().size() > 0 );
+        Assert.isTrue( mapLayer.getMapObjects() != null );
+        Assert.isTrue( mapLayer.getMapObjects().size() > 0 );
 
         IntervalSet set = new IntervalSet();
         set.intervals = new LinkedList<Interval>();
@@ -135,7 +136,7 @@ public class IntervalSet
         set.objectHigh = null;
 
         // Determine the objects with the min and max values
-        for ( InternalMapObject mapObject : mapLayer.getAllMapObjects() )
+        for ( InternalMapObject mapObject : mapLayer.getMapObjects() )
         {
             if ( set.objectLow == null || mapObject.getValue() < set.objectLow.getValue() )
             {
@@ -189,8 +190,8 @@ public class IntervalSet
     {
         Assert.isTrue( mapLayer != null );
         Assert.isTrue( length > 0 );
-        Assert.isTrue( mapLayer.getAllMapObjects() != null );
-        Assert.isTrue( mapLayer.getAllMapObjects().size() > 0 );
+        Assert.isTrue( mapLayer.getMapObjects() != null );
+        Assert.isTrue( mapLayer.getMapObjects().size() > 0 );
 
         throw new RuntimeException( "This distribution strategy is not implemented yet!" );
     }
@@ -204,18 +205,15 @@ public class IntervalSet
      */
     private static void distributeAndUpdateMapObjectsForMapLayer( InternalMapLayer mapLayer, IntervalSet set )
     {
-
         // For each map object, determine in which interval it belongs
-        for ( InternalMapObject obj : mapLayer.getAllMapObjects() )
+        for ( InternalMapObject obj : mapLayer.getMapObjects() )
         {
             for ( Interval in : set.intervals )
             {
-
                 // If the map object's value is within this interval's
                 // boundaries, add it to this interval
                 if ( obj.getValue() >= in.getValueLow() && obj.getValue() <= in.getValueHigh() )
                 {
-
                     // Add map object to interval and set interval for map
                     // object
                     in.addMember( obj );

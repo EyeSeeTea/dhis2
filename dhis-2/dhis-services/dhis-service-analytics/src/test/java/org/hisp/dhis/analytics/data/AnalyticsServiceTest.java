@@ -1,19 +1,20 @@
 package org.hisp.dhis.analytics.data;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -41,12 +42,15 @@ import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.mock.MockCurrentUserService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -72,7 +76,7 @@ public class AnalyticsServiceTest
     private OrganisationUnitGroup ouGroupC;
     
     private OrganisationUnitGroupSet ouGroupSetA;
-        
+            
     @Autowired
     private AnalyticsService analyticsService;
     
@@ -104,6 +108,11 @@ public class AnalyticsServiceTest
         ouD = createOrganisationUnit( 'D' );
         ouE = createOrganisationUnit( 'E' );
         
+        ouB.updateParent( ouA );
+        ouC.updateParent( ouA );
+        ouD.updateParent( ouB );
+        ouE.updateParent( ouB );
+        
         organisationUnitService.addOrganisationUnit( ouA );
         organisationUnitService.addOrganisationUnit( ouB );
         organisationUnitService.addOrganisationUnit( ouC );
@@ -131,6 +140,17 @@ public class AnalyticsServiceTest
         ouGroupSetA.getOrganisationUnitGroups().add( ouGroupC );
         
         organisationUnitGroupService.updateOrganisationUnitGroupSet( ouGroupSetA );
+
+        // ---------------------------------------------------------------------
+        // Mock injection
+        // ---------------------------------------------------------------------
+
+        User user = createUser( 'A' );
+        user.addOrganisationUnit( ouA );
+        
+        CurrentUserService currentUserService = new MockCurrentUserService( user );
+        
+        setDependency( analyticsService, "currentUserService", currentUserService );
     }
     
     @Test
@@ -144,7 +164,7 @@ public class AnalyticsServiceTest
         Set<String> filterParams = new HashSet<String>();
         filterParams.add( "ou:" + ouA.getUid() + ";" + ouB.getUid() + ";" + ouC.getUid() + ";" + ouD.getUid() + ";" + ouE.getUid() );
         
-        DataQueryParams params = analyticsService.getFromUrl( dimensionParams, filterParams, null, null, false, null );
+        DataQueryParams params = analyticsService.getFromUrl( dimensionParams, filterParams, null, null, false, false, null );
         
         assertEquals( 4, params.getDataElements().size() );
         assertEquals( 3, params.getPeriods().size() );
@@ -161,10 +181,57 @@ public class AnalyticsServiceTest
         Set<String> filterParams = new HashSet<String>();
         filterParams.add( "ou:" + ouA.getUid() );
         
-        DataQueryParams params = analyticsService.getFromUrl( dimensionParams, filterParams, null, null, false, null );
+        DataQueryParams params = analyticsService.getFromUrl( dimensionParams, filterParams, null, null, false, false, null );
         
         assertEquals( 4, params.getDataElements().size() );
         assertEquals( 1, params.getFilterOrganisationUnits().size() );
+    }
+    
+    @Test
+    public void testGetFromUrlRelativePeriods()
+    {
+        Set<String> dimensionParams = new HashSet<String>();
+        dimensionParams.add( "dx:" + deA.getUid() + ";" + deB.getUid() + ";" + deC.getUid() + ";" + deD.getUid() );
+        dimensionParams.add( "pe:LAST_12_MONTHS" );
+
+        Set<String> filterParams = new HashSet<String>();
+        filterParams.add( "ou:" + ouA.getUid() + ";" + ouB.getUid() );
+
+        DataQueryParams params = analyticsService.getFromUrl( dimensionParams, filterParams, null, null, false, false, null );
+        
+        assertEquals( 4, params.getDataElements().size() );
+        assertEquals( 12, params.getPeriods().size() );
+        assertEquals( 2, params.getFilterOrganisationUnits().size() );
+    }
+    
+    @Test
+    public void testGetFromUrlUserOrgUnit()
+    {
+        Set<String> dimensionParams = new HashSet<String>();
+        dimensionParams.add( "ou:" + OrganisationUnit.KEY_USER_ORGUNIT );
+        dimensionParams.add( "dx:" + deA.getUid() + ";" + deB.getUid() );
+        dimensionParams.add( "pe:2011;2012" );
+        
+        DataQueryParams params = analyticsService.getFromUrl( dimensionParams, null, null, null, false, false, null );
+        
+        assertEquals( 1, params.getOrganisationUnits().size() );  
+        assertEquals( 2, params.getDataElements().size() );
+        assertEquals( 2, params.getPeriods().size() );      
+    }
+    
+    @Test
+    public void testGetFromUrlOrgUnitLevel()
+    {
+        Set<String> dimensionParams = new HashSet<String>();
+        dimensionParams.add( "ou:LEVEL-2-" + ouA.getUid() );
+        dimensionParams.add( "dx:" + deA.getUid() + ";" + deB.getUid() );
+        dimensionParams.add( "pe:2011;2012" );
+        
+        DataQueryParams params = analyticsService.getFromUrl( dimensionParams, null, null, null, false, false, null );
+        
+        assertEquals( 2, params.getOrganisationUnits().size() );  
+        assertEquals( 2, params.getDataElements().size() );
+        assertEquals( 2, params.getPeriods().size() ); 
     }
 
     @Test( expected = IllegalQueryException.class )
@@ -174,7 +241,7 @@ public class AnalyticsServiceTest
         dimensionParams.add( "dx" );
         dimensionParams.add( "pe:2012,2012S1,2012S2" );
         
-        analyticsService.getFromUrl( dimensionParams, null, null, null, false, null );        
+        analyticsService.getFromUrl( dimensionParams, null, null, null, false, false, null );        
     }
     
     @Test( expected = IllegalQueryException.class )
@@ -184,7 +251,7 @@ public class AnalyticsServiceTest
         dimensionParams.add( "dx:" + BASE_UID + "A;" + BASE_UID + "B;" + BASE_UID + "C;" + BASE_UID + "D" );
         dimensionParams.add( "pe" );
 
-        analyticsService.getFromUrl( dimensionParams, null, null, null, false, null );        
+        analyticsService.getFromUrl( dimensionParams, null, null, null, false, false, null );        
     }
 
     @Test( expected = IllegalQueryException.class )
@@ -194,7 +261,7 @@ public class AnalyticsServiceTest
         dimensionParams.add( "dx:" + BASE_UID + "A;" + BASE_UID + "B;" + BASE_UID + "C;" + BASE_UID + "D" );
         dimensionParams.add( "ou" );
         
-        analyticsService.getFromUrl( dimensionParams, null, null, null, false, null );        
+        analyticsService.getFromUrl( dimensionParams, null, null, null, false, false, null );        
     }
 
     @Test( expected = IllegalQueryException.class )
@@ -204,7 +271,7 @@ public class AnalyticsServiceTest
         dimensionParams.add( "dx:" + BASE_UID + "A;" + BASE_UID + "B;" + BASE_UID + "C;" + BASE_UID + "D" );
         dimensionParams.add( "yebo:2012,2012S1,2012S2" );
         
-        analyticsService.getFromUrl( dimensionParams, null, null, null, false, null );        
+        analyticsService.getFromUrl( dimensionParams, null, null, null, false, false, null );        
     }
     
     @Test

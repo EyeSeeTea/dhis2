@@ -1,19 +1,20 @@
 package org.hisp.dhis.validationrule.action;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,8 +28,7 @@ package org.hisp.dhis.validationrule.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
+import com.opensymphony.xwork2.Action;
 import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
@@ -41,7 +41,7 @@ import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.util.SessionUtils;
 import org.hisp.dhis.validation.ValidationResult;
 
-import com.opensymphony.xwork2.Action;
+import java.util.List;
 
 /**
  * @author Lars Helge Overland
@@ -50,7 +50,7 @@ public class ExportValidationResultAction
     implements Action
 {
     private static final String DEFAULT_TYPE = "pdf";
-    
+
     private static final String KEY_VALIDATIONRESULT = "validationResult";
 
     // -------------------------------------------------------------------------
@@ -70,14 +70,14 @@ public class ExportValidationResultAction
     {
         this.format = format;
     }
-    
+
     private I18n i18n;
 
     public void setI18n( I18n i18n )
     {
         this.i18n = i18n;
     }
-    
+
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -88,7 +88,7 @@ public class ExportValidationResultAction
     {
         this.type = type;
     }
-    
+
     private Integer organisationUnitId;
 
     public void setOrganisationUnitId( Integer organisationUnitId )
@@ -115,29 +115,29 @@ public class ExportValidationResultAction
         throws Exception
     {
         grid = generateGrid();
-        
+
         type = StringUtils.defaultIfEmpty( type, DEFAULT_TYPE );
-        
+
         return type;
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     private Grid generateGrid()
     {
         List<ValidationResult> results = (List<ValidationResult>) SessionUtils.
             getSessionVar( KEY_VALIDATIONRESULT );
-        
+
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
-        
+
         Grid grid = new ListGrid();
-        
+
         grid.setTitle( i18n.getString( "data_quality_report" ) );
-        
+
         if ( organisationUnit != null )
         {
             grid.setSubtitle( organisationUnit.getName() );
         }
-        
+
         grid.addHeader( new GridHeader( i18n.getString( "source" ), false, true ) );
         grid.addHeader( new GridHeader( i18n.getString( "period" ), false, true ) );
         grid.addHeader( new GridHeader( i18n.getString( "left_side_description" ), false, true ) );
@@ -145,12 +145,12 @@ public class ExportValidationResultAction
         grid.addHeader( new GridHeader( i18n.getString( "operator" ), false, false ) );
         grid.addHeader( new GridHeader( i18n.getString( "value" ), false, false ) );
         grid.addHeader( new GridHeader( i18n.getString( "right_side_description" ), false, true ) );
-    
+
         for ( ValidationResult validationResult : results )
         {
             OrganisationUnit unit = validationResult.getSource();
             Period period = validationResult.getPeriod();
-            
+
             grid.addRow();
             grid.addValue( unit.getName() );
             grid.addValue( format.formatPeriod( period ) );
@@ -160,7 +160,7 @@ public class ExportValidationResultAction
             grid.addValue( String.valueOf( validationResult.getRightsideValue() ) );
             grid.addValue( validationResult.getValidationRule().getRightSide().getDescription() );
         }
-        
+
         return grid;
     }
 }

@@ -1,19 +1,20 @@
 package org.hisp.dhis.organisationunit;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -42,6 +43,7 @@ import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.common.view.UuidView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.user.User;
@@ -75,7 +77,9 @@ public class OrganisationUnit
 
     public static final String KEY_USER_ORGUNIT = "USER_ORGUNIT";
     public static final String KEY_USER_ORGUNIT_CHILDREN = "USER_ORGUNIT_CHILDREN";
+    public static final String KEY_USER_ORGUNIT_GRANDCHILDREN = "USER_ORGUNIT_GRANDCHILDREN";
     public static final String KEY_LEVEL = "LEVEL-";
+    public static final String KEY_ORGUNIT_GROUP = "OU_GROUP-";
 
     private static final List<String> FEATURETYPES = Arrays.asList( FEATURETYPE_NONE, FEATURETYPE_MULTIPOLYGON, FEATURETYPE_POLYGON, FEATURETYPE_POINT );
 
@@ -301,6 +305,18 @@ public class OrganisationUnit
         for ( OrganisationUnit child : children )
         {
             grandChildren.addAll( child.getChildren() );
+        }
+
+        return grandChildren;
+    }
+
+    public List<OrganisationUnit> getSortedGrandChildren()
+    {
+        List<OrganisationUnit> grandChildren = new ArrayList<OrganisationUnit>();
+
+        for ( OrganisationUnit child : getSortedChildren() )
+        {
+            grandChildren.addAll( child.getSortedChildren() );
         }
 
         return grandChildren;
@@ -544,7 +560,7 @@ public class OrganisationUnit
         }
 
         this.level = currentLevel;
-        
+
         return currentLevel;
     }
 
@@ -621,6 +637,9 @@ public class OrganisationUnit
         return false;
     }
 
+    @JsonProperty
+    @JsonView( UuidView.class )
+    @JacksonXmlProperty( isAttribute = true, namespace = DxfNamespaces.DXF_2_0 )
     public String getUuid()
     {
         return uuid;

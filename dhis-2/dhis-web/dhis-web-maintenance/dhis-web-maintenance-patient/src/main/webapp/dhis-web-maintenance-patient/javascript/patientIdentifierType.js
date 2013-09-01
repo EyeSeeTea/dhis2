@@ -17,7 +17,7 @@ function showPatientIdentifierTypeDetails( patientIdentifierTypeId )
 			setInnerHTML( 'relatedField', boolValueMap[boolType] );
 			setInnerHTML( 'noCharsField', json.patientIdentifierType.noChars );
 			
-			var valueTypeMap = { 'text':i18n_string, 'number':i18n_number, 'letter':i18n_letter_only };
+			var valueTypeMap = { 'string':i18n_string, 'number':i18n_number, 'letter':i18n_letter_only, 'orgunitCount': i18n_orgunit_count };
 			var valueType = json.patientIdentifierType.type;
 			setInnerHTML( 'typeField', valueTypeMap[valueType] );
 			
@@ -32,4 +32,17 @@ function showPatientIdentifierTypeDetails( patientIdentifierTypeId )
 function removePatientIdentifierType( patientIdentifierTypeId, name )
 {
     removeItem( patientIdentifierTypeId, name, i18n_confirm_delete, 'removePatientIdentifierType.action' );
+}
+
+function typeOnChange()
+{
+	var type = getFieldValue('type');
+	if(type=='orgunitCount')
+	{
+		disable('noChars');
+	}
+	else
+	{
+		enable('noChars');
+	}
 }

@@ -1,17 +1,20 @@
+package org.hisp.dhis.patient.hibernate;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,8 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.patient.hibernate;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -49,6 +50,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientAttribute;
+import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.patient.PatientStore;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
@@ -254,10 +256,10 @@ public class HibernatePatientStore
     }
 
     @Override
-    public Collection<Patient> search( List<String> searchKeys, OrganisationUnit orgunit,
+    public Collection<Patient> search( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
         Boolean followup, Collection<PatientAttribute> patientAttributes, Integer min, Integer max )
     {
-        String sql = searchPatientSql( false, searchKeys, orgunit, followup, patientAttributes, min, max );
+        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, null, min, max );
         Collection<Patient> patients = new HashSet<Patient>();
         try
         {
@@ -278,10 +280,10 @@ public class HibernatePatientStore
     }
 
     @Override
-    public Collection<String> getPatientPhoneNumbers( List<String> searchKeys, OrganisationUnit orgunit,
+    public Collection<String> getPatientPhoneNumbers( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
         Boolean followup, Collection<PatientAttribute> patientAttributes, Integer min, Integer max )
     {
-        String sql = searchPatientSql( false, searchKeys, orgunit, followup, patientAttributes, min, max );
+        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, null, min, max );
         Collection<String> phoneNumbers = new HashSet<String>();
         try
         {
@@ -303,10 +305,12 @@ public class HibernatePatientStore
     }
 
     @Override
-    public List<Integer> getProgramStageInstances( List<String> searchKeys, OrganisationUnit orgunit, Boolean followup,
-        Collection<PatientAttribute> patientAttributes, Integer min, Integer max )
+    public List<Integer> getProgramStageInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
+        Boolean followup, Collection<PatientAttribute> patientAttributes,
+        Collection<PatientIdentifierType> identifierTypes, Integer min, Integer max )
     {
-        String sql = searchPatientSql( false, searchKeys, orgunit, followup, patientAttributes, min, max );
+        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, identifierTypes, min,
+            max );
         List<Integer> programStageInstanceIds = new ArrayList<Integer>();
         try
         {
@@ -327,21 +331,23 @@ public class HibernatePatientStore
         return programStageInstanceIds;
     }
 
-    public int countSearch( List<String> searchKeys, OrganisationUnit orgunit, Boolean followup )
+    public int countSearch( List<String> searchKeys, Collection<OrganisationUnit> orgunits, Boolean followup )
     {
-        String sql = searchPatientSql( true, searchKeys, orgunit, followup, null, null, null );
+        String sql = searchPatientSql( true, searchKeys, orgunits, followup, null, null, null, null );
         return jdbcTemplate.queryForObject( sql, Integer.class );
     }
 
     @Override
-    public Grid getPatientEventReport( Grid grid, List<String> searchKeys, OrganisationUnit orgunit,
-        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer min, Integer max )
+    public Grid getPatientEventReport( Grid grid, List<String> searchKeys, Collection<OrganisationUnit> orgunits,
+        Boolean followup, Collection<PatientAttribute> patientAttributes,
+        Collection<PatientIdentifierType> identifierTypes, Integer min, Integer max )
     {
         // ---------------------------------------------------------------------
         // Get SQL and build grid
         // ---------------------------------------------------------------------
 
-        String sql = searchPatientSql( false, searchKeys, orgunit, followup, patientAttributes, null, null );
+        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, identifierTypes, null,
+            null );
 
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet( sql );
 
@@ -354,13 +360,28 @@ public class HibernatePatientStore
     // Supportive methods
     // -------------------------------------------------------------------------
 
-    private String searchPatientSql( boolean count, List<String> searchKeys, OrganisationUnit orgunit,
-        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer min, Integer max )
+    private String searchPatientSql( boolean count, List<String> searchKeys, Collection<OrganisationUnit> orgunits,
+        Boolean followup, Collection<PatientAttribute> patientAttributes,
+        Collection<PatientIdentifierType> identifierTypes, Integer min, Integer max )
     {
         String selector = count ? "count(*) " : "* ";
 
         String sql = "select " + selector
             + " from ( select distinct p.patientid, p.firstname, p.middlename, p.lastname, p.gender, p.phonenumber,";
+
+        if ( identifierTypes != null )
+        {
+            for ( PatientIdentifierType identifierType : identifierTypes )
+            {
+                sql += "(select identifier from patientidentifier where patientid=p.patientid and patientidentifiertypeid="
+                    + identifierType.getId()
+                    + " ) as "
+                    + Patient.PREFIX_IDENTIFIER_TYPE
+                    + "_"
+                    + identifierType.getId()
+                    + " ,";
+            }
+        }
 
         if ( patientAttributes != null )
         {
@@ -381,7 +402,7 @@ public class HibernatePatientStore
         boolean hasIdentifier = false;
         boolean isSearchEvent = false;
         boolean isPriorityEvent = false;
-        Collection<Integer> orgunitChilrenIds = getOrgunitChildren( orgunit );
+        Collection<Integer> orgunitChilrenIds = getOrgunitChildren( orgunits );
 
         for ( String searchKey : searchKeys )
         {
@@ -594,11 +615,12 @@ public class HibernatePatientStore
             }
         }
 
-        if ( orgunit != null && !isSearchEvent )
+        if ( orgunits != null && !isSearchEvent )
         {
-            sql += "(select organisationunitid from patient where patientid=p.patientid and organisationunitid = "
-                + orgunit.getId() + " ) as orgunitid,";
-            otherWhere += operator + "orgunitid=" + orgunit.getId();
+            sql += "(select organisationunitid from patient where patientid=p.patientid and organisationunitid in ( "
+                + TextUtils.getCommaDelimitedString( getOrganisationUnitIds( orgunits ) ) + " ) ) as orgunitid,";
+            otherWhere += operator + "orgunitid in ( "
+                + TextUtils.getCommaDelimitedString( getOrganisationUnitIds( orgunits ) ) + " ) ";
         }
 
         sql = sql.substring( 0, sql.length() - 1 ) + " "; // Removing last comma
@@ -649,7 +671,7 @@ public class HibernatePatientStore
         {
             sql += statementBuilder.limitRecord( min, max );
         }
-
+        
         return sql;
     }
 
@@ -715,14 +737,35 @@ public class HibernatePatientStore
     // Supportive methods
     // -------------------------------------------------------------------------
 
-    private Collection<Integer> getOrgunitChildren( OrganisationUnit orgunit )
+    private Collection<Integer> getOrgunitChildren( Collection<OrganisationUnit> orgunits )
     {
         Collection<Integer> orgunitIds = new HashSet<Integer>();
-        if ( orgunit != null )
+        if ( orgunits != null )
         {
-            orgunitIds.addAll( organisationUnitService.getOrganisationUnitHierarchy().getChildren( orgunit.getId() ) );
-            orgunitIds.remove( orgunit.getId() );
+            for ( OrganisationUnit orgunit : orgunits )
+            {
+
+                orgunitIds
+                    .addAll( organisationUnitService.getOrganisationUnitHierarchy().getChildren( orgunit.getId() ) );
+                orgunitIds.remove( orgunit.getId() );
+            }
         }
+
+        if ( orgunitIds.size() == 0 )
+        {
+            orgunitIds.add( 0 );
+        }
+        return orgunitIds;
+    }
+
+    private Collection<Integer> getOrganisationUnitIds( Collection<OrganisationUnit> orgunits )
+    {
+        Collection<Integer> orgunitIds = new HashSet<Integer>();
+        for ( OrganisationUnit orgunit : orgunits )
+        {
+            orgunitIds.add( orgunit.getId() );
+        }
+
         if ( orgunitIds.size() == 0 )
         {
             orgunitIds.add( 0 );

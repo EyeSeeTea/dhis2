@@ -1,19 +1,20 @@
 package org.hisp.dhis.message;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -42,9 +43,33 @@ public interface MessageService
 
     final String META_USER_AGENT = "User-agent: ";
 
+    /**
+     * Sends a message to the in-box of the given recipients.
+     * 
+     * @param subject the message subject.
+     * @param text the message text.
+     * @param metaData message meta-data.
+     * @param users the recipients of the message.
+     * 
+     * @return the identifier of the created message conversation.
+     */
     int sendMessage( String subject, String text, String metaData, Set<User> users );
 
-    int sendMessage( String subject, String text, String metaData, Set<User> users, boolean includeFeedbackRecipients );
+    /**
+     * Sends a message to the in-box of the given recipients.
+     * 
+     * @param subject the message subject.
+     * @param text the message text.
+     * @param metaData message meta-data.
+     * @param users the recipients of the message.
+     * @param includeFeedbackRecipients include the feedback recipients user group
+     *        in the message recipients.
+     * @param forceNotifications send notifications to message senders ignoring
+     *        whether users have enabled it.
+     *        
+     * @return the identifier of the created message conversation.
+     */
+    int sendMessage( String subject, String text, String metaData, Set<User> users, User sender, boolean includeFeedbackRecipients, boolean forceNotifications );
 
     int sendFeedback( String subject, String text, String metaData );
 

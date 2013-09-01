@@ -1,19 +1,20 @@
 package org.hisp.dhis.api.controller.user;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,21 +28,15 @@ package org.hisp.dhis.api.controller.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.collections.CollectionUtils;
+import org.hisp.dhis.api.controller.exception.FilterTooShortException;
+import org.hisp.dhis.api.controller.exception.NotAuthenticatedException;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.api.utils.ContextUtils.CacheStrategy;
 import org.hisp.dhis.api.utils.FormUtils;
 import org.hisp.dhis.api.webdomain.FormDataSet;
 import org.hisp.dhis.api.webdomain.FormOrganisationUnit;
+import org.hisp.dhis.api.webdomain.FormProgram;
 import org.hisp.dhis.api.webdomain.Forms;
 import org.hisp.dhis.api.webdomain.user.Dashboard;
 import org.hisp.dhis.api.webdomain.user.Inbox;
@@ -57,6 +52,8 @@ import org.hisp.dhis.message.MessageConversation;
 import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserGroup;
@@ -67,6 +64,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -103,20 +111,22 @@ public class CurrentUserController
     private DataSetService dataSetService;
 
     @Autowired
+    private ProgramService programService;
+
+    @Autowired
     private ContextUtils contextUtils;
 
     @Autowired
     private I18nService i18nService;
 
-    @RequestMapping( produces = { "application/json", "text/*" } )
+    @RequestMapping(produces = { "application/json", "text/*" })
     public void getCurrentUser( HttpServletResponse response ) throws Exception
     {
         User currentUser = currentUserService.getCurrentUser();
 
         if ( currentUser == null )
         {
-            ContextUtils.notFoundResponse( response, "User object is null, user is not authenticated." );
-            return;
+            throw new NotAuthenticatedException();
         }
 
         JacksonUtils.toJson( response.getOutputStream(), currentUser );
@@ -129,8 +139,7 @@ public class CurrentUserController
 
         if ( currentUser == null )
         {
-            ContextUtils.notFoundResponse( response, "User object is null, user is not authenticated." );
-            return;
+            throw new NotAuthenticatedException();
         }
 
         Inbox inbox = new Inbox();
@@ -147,8 +156,7 @@ public class CurrentUserController
 
         if ( currentUser == null )
         {
-            ContextUtils.notFoundResponse( response, "User object is null, user is not authenticated." );
-            return;
+            throw new NotAuthenticatedException();
         }
 
         Dashboard dashboard = new Dashboard();
@@ -158,15 +166,14 @@ public class CurrentUserController
         JacksonUtils.toJson( response.getOutputStream(), dashboard );
     }
 
-    @RequestMapping(value = "/user-account", produces = { "application/json", "text/*" })
+    @RequestMapping(value = { "/profile", "/user-account" }, produces = { "application/json", "text/*" })
     public void getUserAccount( HttpServletResponse response ) throws Exception
     {
         User currentUser = currentUserService.getCurrentUser();
 
         if ( currentUser == null )
         {
-            ContextUtils.notFoundResponse( response, "User object is null, user is not authenticated." );
-            return;
+            throw new NotAuthenticatedException();
         }
 
         UserAccount userAccount = new UserAccount();
@@ -196,7 +203,7 @@ public class CurrentUserController
         JacksonUtils.toJson( response.getOutputStream(), userAccount );
     }
 
-    @RequestMapping(value = "/user-account", method = RequestMethod.POST, consumes = "application/json")
+    @RequestMapping(value = { "/profile", "/user-account" }, method = RequestMethod.POST, consumes = "application/json")
     public void postUserAccountJson( HttpServletResponse response, HttpServletRequest request ) throws Exception
     {
         UserAccount userAccount = JacksonUtils.fromJson( request.getInputStream(), UserAccount.class );
@@ -204,8 +211,7 @@ public class CurrentUserController
 
         if ( currentUser == null )
         {
-            ContextUtils.notFoundResponse( response, "User object is null, user is not authenticated." );
-            return;
+            throw new NotAuthenticatedException();
         }
 
         // basic user account
@@ -235,7 +241,7 @@ public class CurrentUserController
 
     @RequestMapping(value = "/recipients", produces = { "application/json", "text/*" })
     public void recipientsJson( HttpServletResponse response,
-        @RequestParam(value = "filter") String filter ) throws IOException
+        @RequestParam(value = "filter") String filter ) throws IOException, NotAuthenticatedException, FilterTooShortException
     {
         User currentUser = currentUserService.getCurrentUser();
 
@@ -243,8 +249,12 @@ public class CurrentUserController
 
         if ( currentUser == null )
         {
-            ContextUtils.notFoundResponse( response, "User object is null, user is not authenticated." );
-            return;
+            throw new NotAuthenticatedException();
+        }
+
+        if ( 3 > filter.length() )
+        {
+            throw new FilterTooShortException();
         }
 
         Recipients recipients = new Recipients();
@@ -257,29 +267,145 @@ public class CurrentUserController
     }
 
     @RequestMapping(value = "/assignedOrganisationUnits", produces = { "application/json", "text/*" })
-    public void getAssignedOrganisationUnits( HttpServletResponse response ) throws IOException
+    public void getAssignedOrganisationUnits( HttpServletResponse response, @RequestParam Map<String, String> parameters ) throws IOException, NotAuthenticatedException
     {
         User currentUser = currentUserService.getCurrentUser();
 
         if ( currentUser == null )
         {
-            ContextUtils.notFoundResponse( response, "User object is null, user is not authenticated." );
-            return;
+            throw new NotAuthenticatedException();
         }
 
-        JacksonUtils.toJson( response.getOutputStream(), currentUser.getOrganisationUnits() );
+        Set<OrganisationUnit> userOrganisationUnits = new HashSet<OrganisationUnit>();
+        userOrganisationUnits.add( currentUser.getOrganisationUnit() );
+
+        if ( parameters.containsKey( "includeChildren" ) && Boolean.parseBoolean( parameters.get( "includeChildren" ) ) )
+        {
+            for ( OrganisationUnit organisationUnit : userOrganisationUnits )
+            {
+                userOrganisationUnits.addAll( organisationUnit.getChildren() );
+            }
+        }
+        else if ( parameters.containsKey( "includeDescendants" ) && Boolean.parseBoolean( parameters.get( "includeDescendants" ) ) )
+        {
+            for ( OrganisationUnit organisationUnit : userOrganisationUnits )
+            {
+                userOrganisationUnits.addAll( organisationUnitService.getOrganisationUnitsWithChildren( organisationUnit.getUid() ) );
+            }
+        }
+
+        String viewName = parameters.get( "viewClass" );
+
+        if ( viewName == null )
+        {
+            viewName = "detailed";
+        }
+
+        Class<?> viewClass = JacksonUtils.getViewClass( viewName );
+
+        JacksonUtils.toJsonWithView( response.getOutputStream(), userOrganisationUnits, viewClass );
     }
 
-    @SuppressWarnings("unchecked")
-    @RequestMapping(value = "/forms", produces = { "application/json", "text/*" })
-    public void getForms( HttpServletResponse response ) throws IOException
+    @SuppressWarnings( "unchecked" )
+    @RequestMapping( value = { "/assignedPrograms" }, produces = { "application/json", "text/*" } )
+    public void getPrograms( HttpServletResponse response, @RequestParam Map<String, String> parameters,
+        @RequestParam( defaultValue = "1" ) Integer type )
+        throws IOException, NotAuthenticatedException
     {
         User currentUser = currentUserService.getCurrentUser();
 
         if ( currentUser == null )
         {
-            ContextUtils.notFoundResponse( response, "User object is null, user is not authenticated." );
-            return;
+            throw new NotAuthenticatedException();
+        }
+
+        Set<OrganisationUnit> userOrganisationUnits = new HashSet<OrganisationUnit>();
+        Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
+        Set<Program> programs = new HashSet<Program>();
+        Map<String, List<Program>> programAssociations = new HashMap<String, List<Program>>();
+
+        if ( currentUser.getOrganisationUnits().isEmpty() && currentUser.getUserCredentials().getAllAuthorities().contains( "ALL" ) )
+        {
+            userOrganisationUnits.addAll( organisationUnitService.getRootOrganisationUnits() );
+        }
+        else
+        {
+            userOrganisationUnits.addAll( currentUser.getOrganisationUnits() );
+        }
+
+        if ( parameters.containsKey( "includeDescendants" ) && Boolean.parseBoolean( parameters.get( "includeDescendants" ) ) )
+        {
+            for ( OrganisationUnit organisationUnit : userOrganisationUnits )
+            {
+                userOrganisationUnits.addAll( organisationUnitService.getOrganisationUnitsWithChildren( organisationUnit.getUid() ) );
+            }
+        }
+        else
+        {
+            for ( OrganisationUnit organisationUnit : userOrganisationUnits )
+            {
+                userOrganisationUnits.addAll( organisationUnit.getChildren() );
+            }
+        }
+
+        for ( OrganisationUnit organisationUnit : userOrganisationUnits )
+        {
+            List<Program> ouPrograms = new ArrayList<Program>(
+                programService.getPrograms( Program.SINGLE_EVENT_WITHOUT_REGISTRATION, organisationUnit ) );
+
+            if ( !ouPrograms.isEmpty() )
+            {
+                organisationUnits.add( organisationUnit );
+                programs.addAll( ouPrograms );
+                programAssociations.put( organisationUnit.getUid(), ouPrograms );
+            }
+        }
+
+        i18nService.internationalise( programs );
+
+        Forms forms = new Forms();
+
+        for ( OrganisationUnit organisationUnit : organisationUnits )
+        {
+            FormOrganisationUnit formOrganisationUnit = new FormOrganisationUnit();
+            formOrganisationUnit.setId( organisationUnit.getUid() );
+            formOrganisationUnit.setLabel( organisationUnit.getDisplayName() );
+            formOrganisationUnit.setLevel( organisationUnit.getOrganisationUnitLevel() );
+
+            if ( organisationUnit.getParent() != null )
+            {
+                formOrganisationUnit.setParent( organisationUnit.getParent().getUid() );
+            }
+
+            for ( Program program : programAssociations.get( organisationUnit.getUid() ) )
+            {
+                FormProgram formProgram = new FormProgram();
+                formProgram.setId( program.getUid() );
+                formProgram.setLabel( program.getDisplayName() );
+
+                formOrganisationUnit.getPrograms().add( formProgram );
+            }
+
+            forms.getOrganisationUnits().put( formOrganisationUnit.getId(), formOrganisationUnit );
+        }
+
+        for ( Program program : programs )
+        {
+            forms.getForms().put( program.getUid(), FormUtils.fromProgram( program ) );
+        }
+
+        JacksonUtils.toJson( response.getOutputStream(), forms );
+    }
+
+    @SuppressWarnings( "unchecked" )
+    @RequestMapping( value = "/assignedDataSets", produces = { "application/json", "text/*" } )
+    public void getDataSets( HttpServletResponse response, @RequestParam Map<String, String> parameters ) throws IOException, NotAuthenticatedException
+    {
+        User currentUser = currentUserService.getCurrentUser();
+
+        if ( currentUser == null )
+        {
+            throw new NotAuthenticatedException();
         }
 
         Forms forms = new Forms();
@@ -302,6 +428,21 @@ public class CurrentUserController
             userDataSets = currentUser.getUserCredentials().getAllDataSets();
         }
 
+        if ( parameters.containsKey( "includeDescendants" ) && Boolean.parseBoolean( parameters.get( "includeDescendants" ) ) )
+        {
+            for ( OrganisationUnit organisationUnit : userOrganisationUnits )
+            {
+                userOrganisationUnits.addAll( organisationUnitService.getOrganisationUnitsWithChildren( organisationUnit.getUid() ) );
+            }
+        }
+        else
+        {
+            for ( OrganisationUnit organisationUnit : userOrganisationUnits )
+            {
+                userOrganisationUnits.addAll( organisationUnit.getChildren() );
+            }
+        }
+
         for ( OrganisationUnit ou : userOrganisationUnits )
         {
             Set<DataSet> dataSets = new HashSet<DataSet>( CollectionUtils.intersection( ou.getDataSets(), userDataSets ) );
@@ -310,25 +451,21 @@ public class CurrentUserController
             {
                 organisationUnits.add( ou );
             }
-
-            for ( OrganisationUnit child : ou.getChildren() )
-            {
-                Set<DataSet> childDataSets = new HashSet<DataSet>( CollectionUtils.intersection( child.getDataSets(), userDataSets ) );
-
-                if ( childDataSets.size() > 0 )
-                {
-                    organisationUnits.add( child );
-                }
-            }
         }
 
         i18nService.internationalise( organisationUnits );
 
         for ( OrganisationUnit organisationUnit : organisationUnits )
         {
-            FormOrganisationUnit ou = new FormOrganisationUnit();
-            ou.setId( organisationUnit.getUid() );
-            ou.setLabel( organisationUnit.getDisplayName() );
+            FormOrganisationUnit formOrganisationUnit = new FormOrganisationUnit();
+            formOrganisationUnit.setId( organisationUnit.getUid() );
+            formOrganisationUnit.setLabel( organisationUnit.getDisplayName() );
+            formOrganisationUnit.setLevel( organisationUnit.getOrganisationUnitLevel() );
+
+            if ( organisationUnit.getParent() != null )
+            {
+                formOrganisationUnit.setParent( organisationUnit.getParent().getUid() );
+            }
 
             Set<DataSet> dataSets = new HashSet<DataSet>( CollectionUtils.intersection( organisationUnit.getDataSets(), userDataSets ) );
             i18nService.internationalise( dataSets );
@@ -340,15 +477,15 @@ public class CurrentUserController
 
                 String uid = dataSet.getUid();
 
-                FormDataSet ds = new FormDataSet();
-                ds.setId( uid );
-                ds.setLabel( dataSet.getDisplayName() );
+                FormDataSet formDataSet = new FormDataSet();
+                formDataSet.setId( uid );
+                formDataSet.setLabel( dataSet.getDisplayName() );
 
                 forms.getForms().put( uid, FormUtils.fromDataSet( dataSet ) );
-                ou.getDataSets().add( ds );
+                formOrganisationUnit.getDataSets().add( formDataSet );
             }
 
-            forms.getOrganisationUnits().put( ou.getId(), ou );
+            forms.getOrganisationUnits().put( formOrganisationUnit.getId(), formOrganisationUnit );
         }
 
         JacksonUtils.toJson( response.getOutputStream(), forms );

@@ -6,14 +6,15 @@ package org.hisp.dhis.system.util;
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -217,7 +218,6 @@ public class ValidationUtils
      * values are:
      * <p/>
      * <ul>
-     * <li>value_null_or_empty</li>
      * <li>data_element_or_type_null_or_empty</li>
      * <li>value_length_greater_than_max_length</li>
      * <li>value_not_numeric</li>
@@ -278,6 +278,32 @@ public class ValidationUtils
             return "value_is_zero_and_not_zero_significant";
         }
 
+        return null;
+    }
+    
+    /**
+     * Checks if the given comment is valid. Returns null if valid and a string
+     * if invalid, possible values are:
+     * </p>
+     * <ul>
+     * <li>comment_too_long</li>
+     * </ul>
+     * 
+     * @param comment the comment.
+     * @return null if the comment is valid, a string if not.
+     */
+    public static String commentIsValid( String comment )
+    {
+        if ( comment == null || comment.trim().isEmpty() )
+        {
+            return null;
+        }
+        
+        if ( comment.length() > 360 )
+        {
+            return "comment_too_long";
+        }
+        
         return null;
     }
 }

@@ -1,19 +1,20 @@
 package org.hisp.dhis.message;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -97,11 +98,11 @@ public class DefaultMessageService
 
     public int sendMessage( String subject, String text, String metaData, Set<User> users )
     {
-        return sendMessage( subject, text, metaData, users, false );
+        return sendMessage( subject, text, metaData, users, null, false, false );
     }
 
     public int sendMessage( String subject, String text, String metaData, Set<User> users_,
-        boolean includeFeedbackRecipients )
+        User sender, boolean includeFeedbackRecipients, boolean forceNotifications )
     {
         Set<User> users = new HashSet<User>( users_ );
 
@@ -119,18 +120,17 @@ public class DefaultMessageService
             }
         }
 
-        User sender = currentUserService.getCurrentUser();
-
-        if ( sender != null )
+        if ( sender == null )
+        {
+            sender = currentUserService.getCurrentUser();
+            if ( sender != null )
+            {
+                users.add( sender );
+            }
+        }
+        else
         {
             users.add( sender );
-        }
-
-        User recipient = currentUserService.getCurrentUser();
-
-        if ( recipient != null )
-        {
-            users.add( recipient );
         }
 
         // ---------------------------------------------------------------------
@@ -150,14 +150,16 @@ public class DefaultMessageService
 
         int id = saveMessageConversation( conversation );
 
-        invokeMessageSenders( subject, text, sender, users );
+        users.remove( sender );
+        
+        invokeMessageSenders( subject, text, sender, users, forceNotifications );
 
         return id;
     }
 
     public int sendFeedback( String subject, String text, String metaData )
     {
-        return sendMessage( subject, text, metaData, new HashSet<User>(), true );
+        return sendMessage( subject, text, metaData, new HashSet<User>(), null, true, false );
     }
 
     public void sendReply( MessageConversation conversation, String text, String metaData )
@@ -170,7 +172,7 @@ public class DefaultMessageService
 
         updateMessageConversation( conversation );
 
-        invokeMessageSenders( conversation.getSubject(), text, sender, new HashSet<User>( conversation.getUsers() ) );
+        invokeMessageSenders( conversation.getSubject(), text, sender, new HashSet<User>( conversation.getUsers() ), false );
     }
 
     public int sendCompletenessMessage( CompleteDataSetRegistration registration )
@@ -218,7 +220,7 @@ public class DefaultMessageService
         {
             int id = saveMessageConversation( conversation );
             
-            invokeMessageSenders( COMPLETE_SUBJECT, text, sender, new HashSet<User>( conversation.getUsers() ) );
+            invokeMessageSenders( COMPLETE_SUBJECT, text, sender, new HashSet<User>( conversation.getUsers() ), false );
 
             return id;
         }
@@ -301,13 +303,13 @@ public class DefaultMessageService
     // Supportive methods
     // -------------------------------------------------------------------------
 
-    private void invokeMessageSenders( String subject, String text, User sender, Set<User> users )
+    private void invokeMessageSenders( String subject, String text, User sender, Set<User> users, boolean forceSend )
     {
         for ( MessageSender messageSender : messageSenders )
         {
             log.debug( "Invoking message sender: " + messageSender.getClass().getSimpleName() );
             
-            messageSender.sendMessage( subject, text, sender, new HashSet<User>( users ), false );
+            messageSender.sendMessage( subject, text, sender, new HashSet<User>( users ), forceSend );
         }
     }
 }

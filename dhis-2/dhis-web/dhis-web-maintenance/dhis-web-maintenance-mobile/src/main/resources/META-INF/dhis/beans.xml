@@ -5,8 +5,6 @@
 
 	<bean id="org.hisp.dhis.mobile.action.incoming.ReimportSMSAction"
 		class="org.hisp.dhis.mobile.action.incoming.ReimportSMSAction">
-		<property name="parserManager"
-			ref="org.hisp.dhis.sms.parse.DefaultParserManager" />
 		<property name="incomingSmsService"
 			ref="org.hisp.dhis.sms.incoming.IncomingSmsService" />
 	</bean>
@@ -63,6 +61,8 @@
 			ref="org.hisp.dhis.sms.outbound.OutboundSmsService" />
 		<property name="programStageInstanceService"
 			ref="org.hisp.dhis.program.ProgramStageInstanceService" />
+		<property name="userService"
+			ref="org.hisp.dhis.user.UserService" />
 	</bean>
 
 	<!-- Patient Mobile Settings -->
@@ -167,8 +167,7 @@
 
 	</bean>
 
-	<bean
-		id="org.hisp.dhis.mobile.action.smscommand.CreateSMSCommandForm"
+	<bean id="org.hisp.dhis.mobile.action.smscommand.CreateSMSCommandForm"
 		class="org.hisp.dhis.mobile.action.smscommand.CreateSMSCommandForm"
 		scope="prototype">
 		<property name="smsCommandService" ref="smsCommandService" />
@@ -178,8 +177,7 @@
 			ref="org.hisp.dhis.user.UserGroupService" />
 	</bean>
 
-	<bean
-		id="org.hisp.dhis.mobile.action.smscommand.DeleteSMSCommandAction"
+	<bean id="org.hisp.dhis.mobile.action.smscommand.DeleteSMSCommandAction"
 		class="org.hisp.dhis.mobile.action.smscommand.DeleteSMSCommandAction"
 		scope="prototype">
 		<property name="smsCommandService" ref="smsCommandService" />
@@ -191,5 +189,11 @@
 		<property name="patientMobileSettingService"
 			ref="org.hisp.dhis.mobile.service.PatientMobileSettingService" />
 	</bean>
-
+	
+	<!-- 
+	<bean id="org.hisp.dhis.mobile.action.MobilePhonesPatternAction"
+		class="org.hisp.dhis.mobile.action.MobilePhonesPatternAction"
+		scope="prototype">
+	</bean>
+ 	-->
 </beans>

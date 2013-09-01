@@ -1,19 +1,20 @@
 package org.hisp.dhis.report.impl;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -31,7 +32,9 @@ import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
 import static org.hisp.dhis.system.util.TextUtils.getCommaDelimitedString;
 
 import java.io.OutputStream;
+import java.io.Writer;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -46,22 +49,28 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.util.JRProperties;
 
+import org.apache.velocity.VelocityContext;
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.common.Grid;
+import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.constant.ConstantService;
+import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.report.ReportService;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.reporttable.ReportTableService;
+import org.hisp.dhis.system.util.Encoder;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
 import org.hisp.dhis.system.util.JRExportUtils;
 import org.hisp.dhis.system.util.StreamUtils;
+import org.hisp.dhis.system.velocity.VelocityManager;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,7 +82,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultReportService
     implements ReportService
 {
-    public static final String ORGANISATIONUNIT_LEVEL_COLUMN_PREFIX = "idlevel";
+    public static final String ORGUNIT_LEVEL_COLUMN_PREFIX = "idlevel";
+    public static final String ORGUNIT_UID_LEVEL_COLUMN_PREFIX = "uidlevel";
+
+    private static final Encoder ENCODER = new Encoder();
     
     // -------------------------------------------------------------------------
     // Dependencies
@@ -151,7 +163,8 @@ public class DefaultReportService
             
             params.put( PARAM_ORGANISATIONUNIT_COLUMN_NAME, orgUnit.getName() );
             params.put( PARAM_ORGANISATIONUNIT_LEVEL, level );
-            params.put( PARAM_ORGANISATIONUNIT_LEVEL_COLUMN, ORGANISATIONUNIT_LEVEL_COLUMN_PREFIX + level );
+            params.put( PARAM_ORGANISATIONUNIT_LEVEL_COLUMN, ORGUNIT_LEVEL_COLUMN_PREFIX + level );
+            params.put( PARAM_ORGANISATIONUNIT_UID_LEVEL_COLUMN, ORGUNIT_UID_LEVEL_COLUMN_PREFIX + level );
         }
 
         JasperPrint print = null;
@@ -175,14 +188,19 @@ public class DefaultReportService
             {
                 if ( report.hasRelativePeriods() )
                 {
-                    Collection<Period> periods = periodService.reloadPeriods( report.getRelatives().getRelativePeriods( reportDate, null, false ) );
-                    String periodString = getCommaDelimitedString( getIdentifiers( Period.class, periods ) );
-                    params.put( PARAM_RELATIVE_PERIODS, periodString );
+                    List<Period> relativePeriods = report.getRelatives().getRelativePeriods( reportDate, null, false );
+                    
+                    String periodString = getCommaDelimitedString( getIdentifiers( Period.class, periodService.reloadPeriods( relativePeriods ) ) );
+                    String isoPeriodString = getCommaDelimitedString( IdentifiableObjectUtils.getUids( relativePeriods ) );
+                    
+                    params.put( PARAM_RELATIVE_PERIODS, periodString );                    
+                    params.put( PARAM_RELATIVE_ISO_PERIODS, isoPeriodString );
                 }
                 
                 if ( report.hasReportParams() && report.getReportParams().isParamOrganisationUnit() && orgUnit != null )
                 {
                     params.put( PARAM_ORG_UNITS, String.valueOf( orgUnit.getId() ) );
+                    params.put( PARAM_ORG_UNITS_UID, String.valueOf( orgUnit.getUid() ) );
                 }
 
                 Connection connection = DataSourceUtils.getConnection( dataSource );
@@ -208,6 +226,58 @@ public class DefaultReportService
         }
         
         return print;
+    }
+    
+    public void renderHtmlReport( Writer writer, String uid, String pe, String ou, I18nFormat format )
+    {
+        Report report = getReport( uid );        
+        OrganisationUnit organisationUnit = null;
+        List<OrganisationUnit> organisationUnitHierarchy = new ArrayList<OrganisationUnit>();
+        List<OrganisationUnit> organisationUnitChildren = new ArrayList<OrganisationUnit>();
+        List<Period> periods = new ArrayList<Period>();
+        
+        if ( ou != null )
+        {
+            organisationUnit = organisationUnitService.getOrganisationUnit( ou );
+            
+            if ( organisationUnit != null )
+            {
+                organisationUnitHierarchy.add( organisationUnit );
+                
+                OrganisationUnit parent = organisationUnit;
+                
+                while ( parent.getParent() != null )
+                {
+                    parent = parent.getParent();
+                    organisationUnitHierarchy.add( parent );
+                }
+                
+                organisationUnitChildren.addAll( organisationUnit.getChildren() );
+            }
+        }
+        
+        Date date = new Date();
+        
+        if ( pe != null )
+        {
+            date = PeriodType.getPeriodFromIsoString( pe ).getStartDate();
+        }
+        
+        if ( report != null && report.hasRelativePeriods() )
+        {
+            periods = report.getRelatives().getRelativePeriods( date, format, true );
+        }
+        
+        final VelocityContext context = new VelocityContext();
+        context.put( "report", report );
+        context.put( "organisationUnit", organisationUnit );
+        context.put( "organisationUnitHierarchy", organisationUnitHierarchy );
+        context.put( "organisationUnitChildren", organisationUnitChildren );
+        context.put( "periods", periods );
+        context.put( "format", format );
+        context.put( "encoder", ENCODER );
+        
+        new VelocityManager().getEngine().getTemplate( "html-report.vm" ).merge( context, writer );
     }
 
     public int saveReport( Report report )
@@ -275,5 +345,10 @@ public class DefaultReportService
                 return identifiers.contains( object.getId() );
             }
         } );
+    }
+    
+    public List<Report> getReportsByUid( List<String> uids )
+    {
+        return reportStore.getByUid( uids );
     }
 }

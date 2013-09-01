@@ -1,19 +1,20 @@
 package org.hisp.dhis.common;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,17 +28,20 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DATAELEMENT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DATAELEMENT_OPERAND_ID;
 import static org.hisp.dhis.common.DimensionalObject.DATASET_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DATA_X_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
 import static org.hisp.dhis.common.DimensionalObject.INDICATOR_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_LEVEL;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_ORGUNIT_GROUP;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_CHILDREN;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_GRANDCHILDREN;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -84,11 +88,15 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
  * This class contains associations to dimensional meta-data. Should typically
  * be sub-classed by analytical objects like tables, maps and charts.
  * 
+ * Implementation note: Objects currently managing this class are AnalyticsService,
+ * DefaultDimensionService and the getDimensionalObject and getDimensionalObjectList 
+ * methods of this class.
+ * 
  * @author Lars Helge Overland
  */
 public abstract class BaseAnalyticalObject
     extends BaseIdentifiableObject
-{
+{    
     // -------------------------------------------------------------------------
     // Persisted properties
     // -------------------------------------------------------------------------
@@ -125,7 +133,15 @@ public abstract class BaseAnalyticalObject
     protected boolean userOrganisationUnit;
 
     protected boolean userOrganisationUnitChildren;
+    
+    protected boolean userOrganisationUnitGrandChildren;
 
+    @Scanned
+    protected List<Integer> organisationUnitLevels = new ArrayList<Integer>();
+
+    @Scanned
+    protected List<OrganisationUnitGroup> itemOrganisationUnitGroups = new ArrayList<OrganisationUnitGroup>();
+    
     protected boolean rewindRelativePeriods;
 
     // -------------------------------------------------------------------------
@@ -156,16 +172,29 @@ public abstract class BaseAnalyticalObject
     // Logic
     // -------------------------------------------------------------------------
 
+    public abstract void init( User user, Date date, OrganisationUnit organisationUnit, 
+        List<OrganisationUnit> organisationUnitsAtLevel, List<OrganisationUnit> organisationUnitsInGroups, I18nFormat format );
+    
     public abstract void populateAnalyticalProperties();
     
     public boolean hasUserOrgUnit()
     {
-        return userOrganisationUnit || userOrganisationUnitChildren;
+        return userOrganisationUnit || userOrganisationUnitChildren || userOrganisationUnitGrandChildren;
     }
     
     public boolean hasRelativePeriods()
     {
         return relatives != null && !relatives.isEmpty();
+    }
+    
+    public boolean hasOrganisationUnitLevels()
+    {
+        return organisationUnitLevels != null && !organisationUnitLevels.isEmpty();
+    }
+    
+    public boolean hasItemOrganisationUnitGroups()
+    {
+        return itemOrganisationUnitGroups != null && !itemOrganisationUnitGroups.isEmpty();
     }
     
     protected void addTransientOrganisationUnits( Collection<OrganisationUnit> organisationUnits )
@@ -183,7 +212,7 @@ public abstract class BaseAnalyticalObject
             this.transientOrganisationUnits.add( organisationUnit );
         }
     }
-    
+        
     /**
      * Assembles a DimensionalObject. Collapses indicators, data elements, data
      * element operands and data sets into the dx dimension.
@@ -198,7 +227,8 @@ public abstract class BaseAnalyticalObject
      * @param format the I18nFormat.
      * @return a DimensionalObject.
      */
-    protected DimensionalObject getDimensionalObject( String dimension, Date date, User user, boolean dynamicNames, I18nFormat format )
+    protected DimensionalObject getDimensionalObject( String dimension, Date date, User user, boolean dynamicNames, 
+        List<OrganisationUnit> organisationUnitsAtLevel, List<OrganisationUnit> organisationUnitsInGroups, I18nFormat format )
     {       
         List<NameableObject> items = new ArrayList<NameableObject>();
         
@@ -248,6 +278,21 @@ public abstract class BaseAnalyticalObject
             if ( userOrganisationUnitChildren && user != null && user.hasOrganisationUnit() )
             {
                 items.addAll( user.getOrganisationUnit().getSortedChildren() );
+            }
+            
+            if ( userOrganisationUnitGrandChildren && user != null && user.hasOrganisationUnit() )
+            {
+                items.addAll( user.getOrganisationUnit().getSortedGrandChildren() );
+            }
+            
+            if ( organisationUnitLevels != null && !organisationUnitLevels.isEmpty() && organisationUnitsAtLevel != null )
+            {
+                items.addAll( organisationUnitsAtLevel ); // Must be set externally
+            }
+            
+            if ( itemOrganisationUnitGroups != null && !itemOrganisationUnitGroups.isEmpty() )
+            {
+                items.addAll( organisationUnitGroups ); // Must be set externally
             }
             
             type = DimensionType.ORGANISATIONUNIT;
@@ -367,7 +412,7 @@ public abstract class BaseAnalyticalObject
             
             objects.add( new BaseDimensionalObject( dimension, DimensionType.PERIOD, periodList ) );
         }        
-        else if ( ORGUNIT_DIM_ID.equals( dimension ) && ( !organisationUnits.isEmpty() || hasUserOrgUnit() ) )
+        else if ( ORGUNIT_DIM_ID.equals( dimension ) && ( !organisationUnits.isEmpty() || !transientOrganisationUnits.isEmpty() || hasUserOrgUnit() ) )
         {
             List<NameableObject> ouList = new ArrayList<NameableObject>();
             ouList.addAll( organisationUnits );
@@ -381,6 +426,31 @@ public abstract class BaseAnalyticalObject
             if ( userOrganisationUnitChildren )
             {
                 ouList.add( new BaseNameableObject( KEY_USER_ORGUNIT_CHILDREN, KEY_USER_ORGUNIT_CHILDREN, KEY_USER_ORGUNIT_CHILDREN ) );
+            }
+            
+            if ( userOrganisationUnitGrandChildren )
+            {
+                ouList.add( new BaseNameableObject( KEY_USER_ORGUNIT_GRANDCHILDREN, KEY_USER_ORGUNIT_GRANDCHILDREN, KEY_USER_ORGUNIT_GRANDCHILDREN ) );
+            }
+            
+            if ( organisationUnitLevels != null && !organisationUnitLevels.isEmpty() )
+            {
+                for ( Integer level : organisationUnitLevels )
+                {
+                    String id = KEY_LEVEL + level;
+                
+                    ouList.add( new BaseNameableObject( id, id, id ) );
+                }
+            }
+            
+            if ( itemOrganisationUnitGroups != null && !itemOrganisationUnitGroups.isEmpty() )
+            {
+                for ( OrganisationUnitGroup group : itemOrganisationUnitGroups )
+                {
+                    String id = KEY_ORGUNIT_GROUP + group.getUid();
+                    
+                    ouList.add( new BaseNameableObject( id, id, id ) );
+                }
             }
             
             objects.add( new BaseDimensionalObject( dimension, DimensionType.ORGANISATIONUNIT, ouList ) );
@@ -546,7 +616,7 @@ public abstract class BaseAnalyticalObject
             categoryDimensions.addAll( object.getCategoryDimensions() );
             
             userOrganisationUnit = object.isUserOrganisationUnit();
-            userOrganisationUnitChildren = object.isUserOrganisationUnitChildren();            
+            userOrganisationUnitChildren = object.isUserOrganisationUnitChildren();
         }
     }
 
@@ -586,7 +656,7 @@ public abstract class BaseAnalyticalObject
 
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class, ExportView.class} )
+    @JsonView( DetailedView.class )
     @JacksonXmlElementWrapper( localName = "dataElementOperands", namespace = DxfNamespaces.DXF_2_0)
     @JacksonXmlProperty( localName = "dataElementOperand", namespace = DxfNamespaces.DXF_2_0)
     public List<DataElementOperand> getDataElementOperands()
@@ -720,6 +790,47 @@ public abstract class BaseAnalyticalObject
     public void setUserOrganisationUnitChildren( boolean userOrganisationUnitChildren )
     {
         this.userOrganisationUnitChildren = userOrganisationUnitChildren;
+    }
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public boolean isUserOrganisationUnitGrandChildren()
+    {
+        return userOrganisationUnitGrandChildren;
+    }
+
+    public void setUserOrganisationUnitGrandChildren( boolean userOrganisationUnitGrandChildren )
+    {
+        this.userOrganisationUnitGrandChildren = userOrganisationUnitGrandChildren;
+    }
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlElementWrapper( localName = "organisationUnitLevels", namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty( localName = "organisationUnitLevel", namespace = DxfNamespaces.DXF_2_0)
+    public List<Integer> getOrganisationUnitLevels()
+    {
+        return organisationUnitLevels;
+    }
+
+    public void setOrganisationUnitLevels( List<Integer> organisationUnitLevels )
+    {
+        this.organisationUnitLevels = organisationUnitLevels;
+    }
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlElementWrapper( localName = "itemOrganisationUnitGroups", namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty( localName = "itemOrganisationUnitGroup", namespace = DxfNamespaces.DXF_2_0)
+    public List<OrganisationUnitGroup> getItemOrganisationUnitGroups()
+    {
+        return itemOrganisationUnitGroups;
+    }
+
+    public void setItemOrganisationUnitGroups( List<OrganisationUnitGroup> itemOrganisationUnitGroups )
+    {
+        this.itemOrganisationUnitGroups = itemOrganisationUnitGroups;
     }
 
     @JsonProperty

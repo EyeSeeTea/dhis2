@@ -1,17 +1,20 @@
+package org.hisp.dhis.patient;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,9 +28,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient;
-
 import java.io.Serializable;
+
+import org.hisp.dhis.user.UserGroup;
 
 /**
  * @author Chau Thu Tran
@@ -39,30 +42,29 @@ public class PatientReminder
     private static final long serialVersionUID = 3101502417481903219L;
 
     public static final String DUE_DATE_TO_COMPARE = "duedate";
-    
     public static final String ENROLLEMENT_DATE_TO_COMPARE = "enrollmentdate";
-    
     public static final String INCIDENT_DATE_TO_COMPARE = "dateofincident";
-    
+
     public static final String TEMPLATE_MESSSAGE_PATIENT_NAME = "{patient-name}";
-
     public static final String TEMPLATE_MESSSAGE_PROGRAM_NAME = "{program-name}";
-
     public static final String TEMPLATE_MESSSAGE_PROGAM_STAGE_NAME = "{program-stage-name}";
-
     public static final String TEMPLATE_MESSSAGE_DUE_DATE = "{due-date}";
-
     public static final String TEMPLATE_MESSSAGE_ORGUNIT_NAME = "{orgunit-name}";
-
     public static final String TEMPLATE_MESSSAGE_DAYS_SINCE_DUE_DATE = "{days-since-due-date}";
-
     public static final String TEMPLATE_MESSSAGE_INCIDENT_DATE = "{incident-date}";
-
     public static final String TEMPLATE_MESSSAGE_ENROLLMENT_DATE = "{enrollement-date}";
-
     public static final String TEMPLATE_MESSSAGE_DAYS_SINCE_ENROLLMENT_DATE = "{days-since-enrollment-date}";
-
     public static final String TEMPLATE_MESSSAGE_DAYS_SINCE_INCIDENT_DATE = "{days-since-incident-date}";
+
+    public static final int SEND_TO_PATIENT = 1;
+    public static final int SEND_TO_HEALTH_WORKER = 2;
+    public static final int SEND_TO_ORGUGNIT_REGISTERED = 3;
+    public static final int SEND_TO_ALL_USERS_IN_ORGUGNIT_REGISTERED = 4;
+    public static final int SEND_TO_USER_GROUP = 5;
+
+    public static final int SEND_WHEN_TO_EMROLLEMENT = 1;
+    public static final int SEND_WHEN_TO_C0MPLETED_EVENT = 2;
+    public static final int SEND_WHEN_TO_C0MPLETED_PROGRAM = 3;
 
     private int id;
 
@@ -74,13 +76,18 @@ public class PatientReminder
 
     private String dateToCompare;
 
+    private Integer sendTo;
+
+    private Integer whenToSend;
+
+    private UserGroup userGroup;
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
     public PatientReminder()
     {
-
     }
 
     public PatientReminder( String name, Integer daysAllowedSendMessage, String templateMessage )
@@ -90,6 +97,8 @@ public class PatientReminder
         this.templateMessage = templateMessage;
     }
 
+    //TODO implement hashcode and equals
+    
     // -------------------------------------------------------------------------
     // Getter && Setter
     // -------------------------------------------------------------------------
@@ -144,4 +153,33 @@ public class PatientReminder
         this.dateToCompare = dateToCompare;
     }
 
+    public Integer getSendTo()
+    {
+        return sendTo;
+    }
+
+    public void setSendTo( Integer sendTo )
+    {
+        this.sendTo = sendTo;
+    }
+
+    public Integer getWhenToSend()
+    {
+        return whenToSend;
+    }
+
+    public void setWhenToSend( Integer whenToSend )
+    {
+        this.whenToSend = whenToSend;
+    }
+
+    public UserGroup getUserGroup()
+    {
+        return userGroup;
+    }
+
+    public void setUserGroup( UserGroup userGroup )
+    {
+        this.userGroup = userGroup;
+    }
 }

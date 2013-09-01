@@ -1,19 +1,20 @@
 package org.hisp.dhis.option;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,15 +28,15 @@ package org.hisp.dhis.option;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.i18n.I18nUtils.i18n;
+import org.hisp.dhis.i18n.I18nService;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import org.hisp.dhis.i18n.I18nService;
-import org.springframework.transaction.annotation.Transactional;
+import static org.hisp.dhis.i18n.I18nUtils.i18n;
 
 /**
  * @author Lars Helge Overland
@@ -78,17 +79,17 @@ public class DefaultOptionService
 
     public OptionSet getOptionSet( int id )
     {
-        return i18n( i18nService, optionStore.get( id ));
+        return i18n( i18nService, optionStore.get( id ) );
     }
 
     public OptionSet getOptionSet( String uid )
     {
-        return i18n( i18nService, optionStore.getByUid( uid ));
+        return i18n( i18nService, optionStore.getByUid( uid ) );
     }
 
     public OptionSet getOptionSetByName( String name )
     {
-        return i18n( i18nService, optionStore.getByName( name ));
+        return i18n( i18nService, optionStore.getByName( name ) );
     }
 
     public void deleteOptionSet( OptionSet optionSet )
@@ -98,7 +99,7 @@ public class DefaultOptionService
 
     public Collection<OptionSet> getAllOptionSets()
     {
-        return i18n( i18nService, optionStore.getAll());
+        return i18n( i18nService, optionStore.getAll() );
     }
 
     public List<String> getOptions( int optionSetId, String key, Integer max )
@@ -122,7 +123,7 @@ public class DefaultOptionService
 
         return options;
     }
-    
+
     public Integer getOptionSetsCountByName( String name )
     {
         return optionStore.getCountLikeName( name );
@@ -130,14 +131,14 @@ public class DefaultOptionService
 
     public Collection<OptionSet> getOptionSetsBetweenByName( String name, int first, int max )
     {
-        return new HashSet<OptionSet>( i18n( i18nService, optionStore.getAllLikeNameOrderedName( name, first, max ) ));
+        return new HashSet<OptionSet>( i18n( i18nService, optionStore.getAllLikeNameOrderedName( name, first, max ) ) );
     }
 
     public Collection<OptionSet> getOptionSetsBetween( int first, int max )
     {
-        return new HashSet<OptionSet>( i18n( i18nService, optionStore.getAllOrderedName( first, max ) ));
+        return new HashSet<OptionSet>( i18n( i18nService, optionStore.getAllOrderedName( first, max ) ) );
     }
-    
+
     public Integer getOptionSetCount()
     {
         return optionStore.getCount();

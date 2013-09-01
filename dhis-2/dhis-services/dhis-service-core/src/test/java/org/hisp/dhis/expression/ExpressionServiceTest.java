@@ -1,19 +1,20 @@
 package org.hisp.dhis.expression;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -333,6 +334,18 @@ public class ExpressionServiceTest
         assertEquals( "12.0+34.0", expressionService.generateExpression( expressionA, valueMap, constantMap, null, false ) );
         assertEquals( "12.0+5", expressionService.generateExpression( expressionD, valueMap, constantMap, 5, false ) );
         assertEquals( "12.0*2.0", expressionService.generateExpression( expressionE, valueMap, constantMap, null, false ) );
+    }
+
+    @Test
+    public void testGenerateExpressionMapNullIfNoValues()
+    {
+        Map<DataElementOperand, Double> valueMap = new HashMap<DataElementOperand, Double>();
+        
+        Map<String, Double> constantMap = new HashMap<String, Double>();
+
+        assertNull( expressionService.generateExpression( expressionA, valueMap, constantMap, null, true ) );
+        assertNull( expressionService.generateExpression( expressionD, valueMap, constantMap, 5, true ) );
+        assertNotNull( expressionService.generateExpression( expressionE, valueMap, constantMap, null, false ) );
     }
     
     @Test

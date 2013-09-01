@@ -3,9 +3,9 @@
 <h3>$i18n.getString( "program_management" ) #openHelp( "program" )</h3>
 
 <table class="mainPageTable">
-	<tr>
-		<td align="right"><input type="button" value="$i18n.getString( "add_new" )" onclick="window.location.href='showAddProgramForm.action'" style="width:70px"></td>
-	</tr>
+  <tr>
+	<td align="right"><input type="button" value="$i18n.getString( "add_new" )" onclick="window.location.href='showAddProgramForm.action'" style="width:70px"></td>
+  </tr>
   <tr>
     <td style="vertical-align:top">
 		
@@ -78,10 +78,10 @@
 			  </tbody>
         </table>
 		</td>
-		<td style="width:20em; padding-left:2em; vertical-align:top">
+		<td id="detailsData">
 
-			<div id="detailsArea" style="display:none">
-				<div style="float:right">
+            <div id="detailsArea">
+                <div id="hideDetailsArea">
 					<a href="javascript:hideDetails()" title="$i18n.getString( "hide_details" )"><img src="../images/hide.png" alt="$i18n.getString( 'hide_details' )"></a>
 				</div>				
 				<p><label class="bold">$i18n.getString( "name" ):</label><br><span id="nameField"></span></p>
@@ -91,12 +91,14 @@
 				<p><label class="bold">$i18n.getString( "display_date_of_incident" ):</label><br><span id="displayIncidentDateField"></span></p>                                 <p><label class="bold">$i18n.getString( "generated_events_by_enrollment_date" ):</label><br><span id="generatedByEnrollmentDateField"></span></p>
 				<p><label class="bold">$i18n.getString( "skip_to_generate_overdue_events" ):</label><br><span id="ignoreOverdueEventsField"></span></p>
 				<p><label class="bold">$i18n.getString( "only_enroll_once" ):</label><br><span id="onlyEnrollOnceField"></span></p>
-				<p><label class="bold">$i18n.getString( "display_on_all_orgunits" ):</label><br><span id="displayOnAllOrgunitField"></span></p>
+				<p><label class="bold">$i18n.getString( "used_by_all_orgunits" ):</label><br><span id="displayOnAllOrgunitField"></span></p>
 				<p><label class="bold">$i18n.getString( "block_entry_form_after_completed" ):</label><br><span id="blockEntryFormField"></span></p>
 				<p><label class="bold">$i18n.getString( "remind_completing_program_after_program_stage_completed" ):</label><br><span id="remindCompletedField"></span></p>
-				<p><label class="bold">$i18n.getString( "disable_registration_fields" ):</label><br><span id="disableRegistrationFieldsField"></span></p>
-				<p><label class="bold">$i18n.getString( "date_of_enrollment_description" ):</label><br><span id="dateOfEnrollmentDescriptionField"></span></p>                          
+				<p><label class="bold">$i18n.getString( "use_birth_date_as_incident_date" ):</label><br><span id="useBirthDateAsIncidentDate"></span></p>                              
+				<p><label class="bold">$i18n.getString( "show_incident_date" ):</label><br><span id="displayIncidentDate"></span></p>                              
 				<p><label class="bold">$i18n.getString( "date_of_incident_description" ):</label><br><span id="dateOfIncidentDescriptionField"></span></p>                              
+				<p><label class="bold">$i18n.getString( "use_birth_date_as_enrollment_date" ):</label><br><span id="useBirthDateAsEnrollmentDate"></span></p>                              
+				<p><label class="bold">$i18n.getString( "date_of_enrollment_description" ):</label><br><span id="dateOfEnrollmentDescriptionField"></span></p>                          
 				<p><label class="bold">$i18n.getString( "number_of_attributes" ):</label><br><span id="noAttributesField"></span></p>
 				<p><label class="bold">$i18n.getString( "number_of_identifier_types" ):</label><br><span id="noIdentifierTypesField"></span></p>
 			</div>
@@ -113,5 +115,4 @@
 	var i18n_multiple_events_with_registration = '$encoder.jsEscape( $i18n.getString( "multiple_events_with_registration" ) , "'")';
     var i18n_single_event_with_registration = '$encoder.jsEscape( $i18n.getString( "single_event_with_registration" ) , "'")';
     var i18n_single_event_without_registration = '$encoder.jsEscape( $i18n.getString( "single_event_without_registration" ) , "'")';
-
 </script>

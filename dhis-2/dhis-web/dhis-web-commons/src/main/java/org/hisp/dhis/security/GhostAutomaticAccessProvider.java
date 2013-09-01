@@ -1,19 +1,20 @@
 package org.hisp.dhis.security;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -30,13 +31,14 @@ package org.hisp.dhis.security;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  * This access provider will put an Authentication object with all GrantedAuthorities
  * in the SecurityContext in any case. This means that any user will be authenticated
- * and the login effectively bypassed. 
- * 
+ * and the login effectively bypassed.
+ *
  * @author Torgeir Lorange Ostby
  * @version $Id: GhostAutomaticAccessProvider.java 3160 2007-03-24 20:15:06Z torgeilo $
  */
@@ -54,7 +56,7 @@ public class GhostAutomaticAccessProvider
         String username = "ghost_admin";
         String password = "";
 
-        UserDetails user = new org.springframework.security.core.userdetails.User( username, password, true, true, true, true,
+        UserDetails user = new User( username, password, true, true, true, true,
             getGrantedAuthorities() );
 
         authentication = new UsernamePasswordAuthenticationToken( user, user.getPassword(), user.getAuthorities() );

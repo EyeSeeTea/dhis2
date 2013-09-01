@@ -179,6 +179,8 @@
 			ref="org.hisp.dhis.patient.PatientIdentifierTypeService" />
 		<property name="patientAttributeService"
 			ref="org.hisp.dhis.patient.PatientAttributeService" />
+		<property name="userGroupService" 
+			ref="org.hisp.dhis.user.UserGroupService" />	
 	</bean>
 
 	<bean id="org.hisp.dhis.patient.action.program.GetProgramListAction"
@@ -202,6 +204,7 @@
 		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
 		<property name="selectionTreeManager"
 			ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
+		<property name="userGroupService" ref="org.hisp.dhis.user.UserGroupService" />
 	</bean>
 
 	<bean id="org.hisp.dhis.patient.action.program.RemoveProgramAction"
@@ -218,6 +221,7 @@
 			ref="org.hisp.dhis.patient.PatientIdentifierTypeService" />
 		<property name="patientAttributeService"
 			ref="org.hisp.dhis.patient.PatientAttributeService" />
+		<property name="userGroupService" ref="org.hisp.dhis.user.UserGroupService" />
 	</bean>
 
 	<bean
@@ -229,9 +233,8 @@
 			ref="org.hisp.dhis.patient.PatientIdentifierTypeService" />
 		<property name="patientAttributeService"
 			ref="org.hisp.dhis.patient.PatientAttributeService" />
+		<property name="userGroupService" ref="org.hisp.dhis.user.UserGroupService" />
 	</bean>
-
-
 	<bean id="org.hisp.dhis.patient.action.program.UpdateProgramAction"
 		class="org.hisp.dhis.patient.action.program.UpdateProgramAction"
 		scope="prototype">
@@ -240,6 +243,8 @@
 			ref="org.hisp.dhis.patient.PatientIdentifierTypeService" />
 		<property name="patientAttributeService"
 			ref="org.hisp.dhis.patient.PatientAttributeService" />
+		<property name="userGroupService"
+			ref="org.hisp.dhis.user.UserGroupService" />
 	</bean>
 
 	<bean id="org.hisp.dhis.patient.action.program.ValidateProgramAction"
@@ -287,6 +292,7 @@
 		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
 		<property name="programStageDataElementService"
 			ref="org.hisp.dhis.program.ProgramStageDataElementService" />
+		<property name="userGroupService" ref="org.hisp.dhis.user.UserGroupService" />
 	</bean>
 
 	<bean
@@ -300,6 +306,7 @@
 		class="org.hisp.dhis.patient.action.programstage.GetProgramStageAction"
 		scope="prototype">
 		<property name="programStageService" ref="org.hisp.dhis.program.ProgramStageService" />
+		<property name="userGroupService" ref="org.hisp.dhis.user.UserGroupService" />
 	</bean>
 
 	<bean
@@ -325,6 +332,8 @@
 		<property name="programStageService" ref="org.hisp.dhis.program.ProgramStageService" />
 		<property name="programStageDataElementService"
 			ref="org.hisp.dhis.program.ProgramStageDataElementService" />
+		<property name="userGroupService"
+			ref="org.hisp.dhis.user.UserGroupService" />
 	</bean>
 
 	<bean
@@ -554,6 +563,42 @@
 		</property>
 		<property name="patientRegistrationFormService">
 			<ref bean="org.hisp.dhis.patient.PatientRegistrationFormService" />
+		</property>
+	</bean>
+	
+	<bean
+		id="org.hisp.dhis.patient.action.dataentryform.ShowDefaultPatientRegistrationFormAction"
+		class="org.hisp.dhis.patient.action.dataentryform.ShowDefaultPatientRegistrationFormAction"
+		scope="prototype">
+		<property name="programService">
+			<ref bean="org.hisp.dhis.program.ProgramService" />
+		</property>
+		<property name="patientRegistrationFormService">
+			<ref bean="org.hisp.dhis.patient.PatientRegistrationFormService" />
+		</property>
+		<property name="patientAttributeService">
+			<ref bean="org.hisp.dhis.patient.PatientAttributeService" />
+		</property>
+		<property name="identifierTypeService">
+			<ref bean="org.hisp.dhis.patient.PatientIdentifierTypeService" />
+		</property>
+	</bean>
+	
+	<bean
+		id="org.hisp.dhis.patient.action.dataentryform.SaveDefaultPatientRegistrationFormAcion"
+		class="org.hisp.dhis.patient.action.dataentryform.SaveDefaultPatientRegistrationFormAcion"
+		scope="prototype">
+		<property name="programService">
+			<ref bean="org.hisp.dhis.program.ProgramService" />
+		</property>
+		<property name="patientRegistrationFormService">
+			<ref bean="org.hisp.dhis.patient.PatientRegistrationFormService" />
+		</property>
+		<property name="patientAttributeService">
+			<ref bean="org.hisp.dhis.patient.PatientAttributeService" />
+		</property>
+		<property name="identifierTypeService">
+			<ref bean="org.hisp.dhis.patient.PatientIdentifierTypeService" />
 		</property>
 	</bean>
 
@@ -1067,7 +1112,7 @@
 		class="org.hisp.dhis.patient.action.schedule.GetScheduleAggQueryBuilderParamsAction"
 		scope="prototype">
 		<property name="schedulingManager"
-			ref="org.hisp.dhis.patient.scheduling.CaseAggregateConditionSchedulingManager" />
+			ref="org.hisp.dhis.scheduling.CaseAggregateConditionSchedulingManager" />
 		<property name="systemSettingManager">
 			<ref bean="org.hisp.dhis.setting.SystemSettingManager" />
 		</property>
@@ -1078,7 +1123,7 @@
 		class="org.hisp.dhis.patient.action.schedule.ScheduleCaseAggregateConditionAction"
 		scope="prototype">
 		<property name="schedulingManager"
-			ref="org.hisp.dhis.patient.scheduling.CaseAggregateConditionSchedulingManager" />
+			ref="org.hisp.dhis.scheduling.CaseAggregateConditionSchedulingManager" />
 		<property name="systemSettingManager">
 			<ref bean="org.hisp.dhis.setting.SystemSettingManager" />
 		</property>

@@ -1,17 +1,20 @@
+package org.hisp.dhis.program;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,13 +27,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.program;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
@@ -43,13 +47,17 @@ import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.patient.PatientIdentifier;
 import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.patient.PatientReminder;
+import org.hisp.dhis.patient.PatientReminderService;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
 import org.hisp.dhis.patientcomment.PatientComment;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueService;
+import org.hisp.dhis.sms.SmsSender;
+import org.hisp.dhis.sms.SmsServiceException;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.system.grid.ListGrid;
+import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -90,6 +98,27 @@ public class DefaultProgramInstanceService
     public void setProgramService( ProgramService programService )
     {
         this.programService = programService;
+    }
+
+    private SmsSender smsSender;
+
+    public void setSmsSender( SmsSender smsSender )
+    {
+        this.smsSender = smsSender;
+    }
+
+    private CurrentUserService currentUserService;
+
+    public void setCurrentUserService( CurrentUserService currentUserService )
+    {
+        this.currentUserService = currentUserService;
+    }
+
+    private PatientReminderService patientReminderService;
+
+    public void setPatientReminderService( PatientReminderService patientReminderService )
+    {
+        this.patientReminderService = patientReminderService;
     }
 
     // -------------------------------------------------------------------------
@@ -209,7 +238,14 @@ public class DefaultProgramInstanceService
 
         Grid attrGrid = new ListGrid();
 
-        attrGrid.setTitle( patient.getFullName() );
+        if ( patient.getFirstName() == null && patient.getMiddleName() == null && patient.getLastName() == null )
+        {
+            attrGrid.setTitle( "" );
+        }
+        else
+        {
+            attrGrid.setTitle( patient.getFullName() );
+        }
         attrGrid.setSubtitle( "" );
 
         attrGrid.addHeader( new GridHeader( i18n.getString( "name" ), false, true ) );
@@ -220,21 +256,30 @@ public class DefaultProgramInstanceService
         // Add fixed attribues
         // ---------------------------------------------------------------------
 
-        attrGrid.addRow();
-        attrGrid.addValue( i18n.getString( "gender" ) );
-        attrGrid.addValue( i18n.getString( patient.getGender() ) );
+        if ( patient.getGender() != null )
+        {
+            attrGrid.addRow();
+            attrGrid.addValue( i18n.getString( "gender" ) );
+            attrGrid.addValue( i18n.getString( patient.getGender() ) );
+        }
 
-        attrGrid.addRow();
-        attrGrid.addValue( i18n.getString( "date_of_birth" ) );
-        attrGrid.addValue( format.formatDate( patient.getBirthDate() ) );
+        if ( patient.getBirthDate() != null )
+        {
+            attrGrid.addRow();
+            attrGrid.addValue( i18n.getString( "date_of_birth" ) );
+            attrGrid.addValue( format.formatDate( patient.getBirthDate() ) );
 
-        attrGrid.addRow();
-        attrGrid.addValue( i18n.getString( "age" ) );
-        attrGrid.addValue( patient.getAge() );
+            attrGrid.addRow();
+            attrGrid.addValue( i18n.getString( "age" ) );
+            attrGrid.addValue( patient.getAge() );
+        }
 
-        attrGrid.addRow();
-        attrGrid.addValue( i18n.getString( "dob_type" ) );
-        attrGrid.addValue( i18n.getString( patient.getDobType() + "" ) );
+        if ( patient.getDobType() != null )
+        {
+            attrGrid.addRow();
+            attrGrid.addValue( i18n.getString( "dob_type" ) );
+            attrGrid.addValue( i18n.getString( patient.getDobType() + "" ) );
+        }
 
         attrGrid.addRow();
         attrGrid.addValue( i18n.getString( "phoneNumber" ) );
@@ -332,12 +377,6 @@ public class DefaultProgramInstanceService
                 {
                     Grid gridProgram = getProgramInstanceReport( programInstance, i18n, format );
 
-                    // ---------------------------------------------------------------------
-                    // Grids for program-stage-instance
-                    // ---------------------------------------------------------------------
-
-                    getProgramStageInstancesReport( gridProgram, programInstance, format, i18n );
-
                     grids.add( gridProgram );
                 }
             }
@@ -380,16 +419,23 @@ public class DefaultProgramInstanceService
 
         Collection<PatientIdentifier> identifiers = patient.getIdentifiers();
 
-        if ( identifiers.size() > 0 )
+        if ( identifierTypes != null && identifiers.size() > 0 )
         {
             for ( PatientIdentifierType identifierType : identifierTypes )
             {
                 for ( PatientIdentifier identifier : identifiers )
                 {
-                    if ( identifier.getIdentifierType().equals( identifierType ) )
+                    if ( identifier.getIdentifierType() != null
+                        && identifier.getIdentifierType().equals( identifierType ) )
                     {
                         grid.addRow();
                         grid.addValue( identifierType.getDisplayName() );
+                        grid.addValue( identifier.getIdentifier() );
+                    }
+                    else if ( identifier.getIdentifierType() == null )
+                    {
+                        grid.addRow();
+                        grid.addValue( i18n.getString( "system_identifier" ) );
                         grid.addValue( identifier.getIdentifier() );
                     }
                 }
@@ -464,7 +510,7 @@ public class DefaultProgramInstanceService
         programInstanceStore.removeProgramEnrollment( programInstance );
     }
 
-    public Collection<SchedulingProgramObject> getSendMesssageEvents()
+    public Collection<SchedulingProgramObject> getScheduleMesssages()
     {
         Collection<SchedulingProgramObject> result = programInstanceStore
             .getSendMesssageEvents( PatientReminder.ENROLLEMENT_DATE_TO_COMPARE );
@@ -474,8 +520,29 @@ public class DefaultProgramInstanceService
         return result;
     }
 
+    public Collection<OutboundSms> sendMessages( ProgramInstance programInstance, int status, I18nFormat format )
+    {
+        Patient patient = programInstance.getPatient();
+        Collection<OutboundSms> outboundSmsList = new HashSet<OutboundSms>();
+
+        Collection<PatientReminder> reminders = programInstance.getProgram().getPatientReminders();
+        for ( PatientReminder rm : reminders )
+        {
+            if ( rm != null && rm.getWhenToSend() != null && rm.getWhenToSend() == status )
+            {
+                OutboundSms outboundSms = sendProgramMessage( rm, programInstance, patient, format );
+                if ( outboundSms != null )
+                {
+                    outboundSmsList.add( outboundSms );
+                }
+            }
+        }
+        
+        return outboundSmsList;
+    }
+
     // -------------------------------------------------------------------------
-    // due-date && report-date
+    // Supportive methods
     // -------------------------------------------------------------------------
 
     private void getProgramStageInstancesReport( Grid grid, ProgramInstance programInstance, I18nFormat format,
@@ -556,6 +623,33 @@ public class DefaultProgramInstanceService
                 }
             }
         }
+    }
+
+    private OutboundSms sendProgramMessage( PatientReminder patientReminder, ProgramInstance programInstance,
+        Patient patient, I18nFormat format )
+    {
+        Set<String> phoneNumbers = patientReminderService.getPhonenumbers( patientReminder, patient );
+        OutboundSms outboundSms = null;
+
+        if ( phoneNumbers.size() > 0 )
+        {
+            String msg = patientReminderService.getMessageFromTemplate( patientReminder, programInstance, format );
+
+            try
+            {
+                outboundSms = new OutboundSms();
+                outboundSms.setMessage( msg );
+                outboundSms.setRecipients( phoneNumbers );
+                outboundSms.setSender( currentUserService.getCurrentUsername() );
+                smsSender.sendMessage( outboundSms, null );
+            }
+            catch ( SmsServiceException e )
+            {
+                e.printStackTrace();
+            }
+        }
+
+        return outboundSms;
     }
 
 }

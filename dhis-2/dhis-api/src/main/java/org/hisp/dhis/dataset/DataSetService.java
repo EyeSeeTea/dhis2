@@ -1,19 +1,20 @@
 package org.hisp.dhis.dataset;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -88,6 +89,18 @@ public interface DataSetService
      * @return The DataSet with the given id or null if it does not exist.
      */
     DataSet getDataSet( int id, boolean i18nDataElements, boolean i18nIndicators, boolean i18nOrgUnits );
+
+    /**
+     * Get a DataSet
+     *
+     * @param id               The unique identifier for the DataSet to get.
+     * @param i18nDataElements whether to i18n the data elements of this data set.
+     * @param i18nIndicators   whether to i18n the indicators of this data set.
+     * @param i18nOrgUnits     whether to i18n the org units of this data set.
+     * @param i18nSections     whether to i18n the sections of this data set.
+     * @return The DataSet with the given id or null if it does not exist.
+     */
+    DataSet getDataSet( int id, boolean i18nDataElements, boolean i18nIndicators, boolean i18nOrgUnits, boolean i18nSections );
 
     /**
      * Returns the DataSet with the given UID.

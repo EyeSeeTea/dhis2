@@ -1,19 +1,20 @@
 package org.hisp.dhis.common;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -28,6 +29,7 @@ package org.hisp.dhis.common;
  */
 
 import org.hisp.dhis.chart.Chart;
+import org.hisp.dhis.dashboard.Dashboard;
 import org.hisp.dhis.datadictionary.DataDictionary;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.document.Document;
@@ -42,9 +44,13 @@ import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupAccess;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -53,65 +59,60 @@ import java.util.Set;
  */
 public final class SharingUtils
 {
+    public static Map<Class<? extends IdentifiableObject>, String> EXTERNAL_AUTHORITIES = new HashMap<Class<? extends IdentifiableObject>, String>();
+
     public static Map<Class<? extends IdentifiableObject>, String> PUBLIC_AUTHORITIES = new HashMap<Class<? extends IdentifiableObject>, String>();
 
     public static Map<Class<? extends IdentifiableObject>, String> PRIVATE_AUTHORITIES = new HashMap<Class<? extends IdentifiableObject>, String>();
 
     public static final Map<String, Class<? extends IdentifiableObject>> SUPPORTED_TYPES = new HashMap<String, Class<? extends IdentifiableObject>>();
 
-    public static final String SHARING_OVERRIDE_AUTHORITY = "ALL";
+    public static final List<String> SHARING_OVERRIDE_AUTHORITIES = Arrays.asList( "ALL", "F_METADATA_IMPORT" );
+
+    private static void addType( Class<? extends IdentifiableObject> clazz, String name, String externalAuth, String publicAuth, String privateAuth )
+    {
+        Assert.notNull( clazz );
+        Assert.hasLength( name );
+
+        SUPPORTED_TYPES.put( name, clazz );
+
+        if ( externalAuth != null )
+        {
+            EXTERNAL_AUTHORITIES.put( clazz, externalAuth );
+        }
+
+        if ( publicAuth != null )
+        {
+            PUBLIC_AUTHORITIES.put( clazz, publicAuth );
+        }
+
+        if ( privateAuth != null )
+        {
+            PRIVATE_AUTHORITIES.put( clazz, privateAuth );
+        }
+    }
 
     static
     {
-        SUPPORTED_TYPES.put( "document", Document.class );
-        PUBLIC_AUTHORITIES.put( Document.class, "F_DOCUMENT_PUBLIC_ADD" );
-        PRIVATE_AUTHORITIES.put( Document.class, "F_DOCUMENT_PRIVATE_ADD" );
+        addType( Document.class, "document", null, "F_DOCUMENT_PUBLIC_ADD", "F_DOCUMENT_PRIVATE_ADD" );
+        addType( Report.class, "report", null, "F_REPORT_PUBLIC_ADD", "F_REPORT_PRIVATE_ADD" );
+        addType( DataSet.class, "dataSet", null, "F_DATASET_PUBLIC_ADD", "F_DATASET_PRIVATE_ADD" );
+        addType( DataDictionary.class, "dataDictionary", null, "F_DATADICTIONARY_PUBLIC_ADD", "F_DATADICTIONARY_PRIVATE_ADD" );
+        addType( Indicator.class, "indicator", null, "F_INDICATOR_PUBLIC_ADD", "F_INDICATOR_PRIVATE_ADD" );
+        addType( IndicatorGroup.class, "indicatorGroup", null, "F_INDICATORGROUP_PUBLIC_ADD", "F_INDICATORGROUP_PRIVATE_ADD" );
+        addType( IndicatorGroupSet.class, "indicatorGroupSet", null, "F_INDICATORGROUPSET_PUBLIC_ADD", "F_INDICATORGROUPSET_PRIVATE_ADD" );
+        addType( Program.class, "program", null, "F_PROGRAM_PUBLIC_ADD", "F_PROGRAM_PRIVATE_ADD" );
+        addType( UserGroup.class, "userGroup", null, "F_USERGROUP_PUBLIC_ADD", null );
+        addType( PatientTabularReport.class, "patientTabularReport", null, "F_PATIENT_TABULAR_REPORT_PUBLIC_ADD", null );
+        addType( PatientAggregateReport.class, "patientAggregateReport", null, "F_PATIENT_TABULAR_REPORT_PUBLIC_ADD", null );
 
-        SUPPORTED_TYPES.put( "report", Report.class );
-        PUBLIC_AUTHORITIES.put( Report.class, "F_REPORT_PUBLIC_ADD" );
-        PRIVATE_AUTHORITIES.put( Report.class, "F_REPORT_PRIVATE_ADD" );
+        addType( org.hisp.dhis.mapping.Map.class, "map", "F_MAP_EXTERNAL", "F_MAP_PUBLIC_ADD", null );
+        addType( Chart.class, "chart", "F_CHART_EXTERNAL", "F_CHART_PUBLIC_ADD", null );
+        addType( ReportTable.class, "reportTable", "F_REPORTTABLE_EXTERNAL", "F_REPORTTABLE_PUBLIC_ADD", null );
+        addType( Report.class, "report", "F_REPORT_EXTERNAL", "F_REPORT_PUBLIC_ADD", "F_REPORT_PRIVATE_ADD" );
+        addType( Document.class, "document", "F_DOCUMENT_EXTERNAL", "F_DOCUMENT_PUBLIC_ADD", "F_DOCUMENT_PRIVATE_ADD" );
 
-        SUPPORTED_TYPES.put( "dataSet", DataSet.class );
-        PUBLIC_AUTHORITIES.put( DataSet.class, "F_DATASET_PUBLIC_ADD" );
-        PRIVATE_AUTHORITIES.put( DataSet.class, "F_DATASET_PRIVATE_ADD" );
-
-        SUPPORTED_TYPES.put( "dataDictionary", DataDictionary.class );
-        PUBLIC_AUTHORITIES.put( DataDictionary.class, "F_DATADICTIONARY_PUBLIC_ADD" );
-        PRIVATE_AUTHORITIES.put( DataDictionary.class, "F_DATADICTIONARY_PRIVATE_ADD" );
-
-        SUPPORTED_TYPES.put( "indicator", Indicator.class );
-        PUBLIC_AUTHORITIES.put( Indicator.class, "F_INDICATOR_PUBLIC_ADD" );
-        PRIVATE_AUTHORITIES.put( Indicator.class, "F_INDICATOR_PRIVATE_ADD" );
-
-        SUPPORTED_TYPES.put( "indicatorGroup", IndicatorGroup.class );
-        PUBLIC_AUTHORITIES.put( IndicatorGroup.class, "F_INDICATORGROUP_PUBLIC_ADD" );
-        PRIVATE_AUTHORITIES.put( IndicatorGroup.class, "F_INDICATORGROUP_PRIVATE_ADD" );
-
-        SUPPORTED_TYPES.put( "indicatorGroupSet", IndicatorGroupSet.class );
-        PUBLIC_AUTHORITIES.put( IndicatorGroupSet.class, "F_INDICATORGROUPSET_PUBLIC_ADD" );
-        PRIVATE_AUTHORITIES.put( IndicatorGroupSet.class, "F_INDICATORGROUPSET_PRIVATE_ADD" );
-
-        SUPPORTED_TYPES.put( "program", Program.class );
-        PUBLIC_AUTHORITIES.put( Program.class, "F_PROGRAM_PUBLIC_ADD" );
-        PRIVATE_AUTHORITIES.put( Program.class, "F_PROGRAM_PRIVATE_ADD" );
-
-        SUPPORTED_TYPES.put( "userGroup", UserGroup.class );
-        PUBLIC_AUTHORITIES.put( UserGroup.class, "F_USERGROUP_PUBLIC_ADD" );
-
-        SUPPORTED_TYPES.put( "reportTable", ReportTable.class );
-        PUBLIC_AUTHORITIES.put( ReportTable.class, "F_REPORTTABLE_PUBLIC_ADD" );
-
-        SUPPORTED_TYPES.put( "map", org.hisp.dhis.mapping.Map.class );
-        PUBLIC_AUTHORITIES.put( org.hisp.dhis.mapping.Map.class, "F_MAP_PUBLIC_ADD" );
-
-        SUPPORTED_TYPES.put( "chart", Chart.class );
-        PUBLIC_AUTHORITIES.put( Chart.class, "F_CHART_PUBLIC_ADD" );
-        
-        SUPPORTED_TYPES.put( "patientTabularReport", PatientTabularReport.class );
-        PUBLIC_AUTHORITIES.put( PatientTabularReport.class, "F_PATIENT_TABULAR_REPORT_PUBLIC_ADD" );
-        
-        SUPPORTED_TYPES.put( "patientAggregateReport", PatientAggregateReport.class );
-        PUBLIC_AUTHORITIES.put( PatientAggregateReport.class, "F_PATIENT_TABULAR_REPORT_PUBLIC_ADD" );
+        addType( Dashboard.class, "dashboard", null, "F_DASHBOARD_PUBLIC_ADD", null );
     }
 
     public static boolean isSupported( String type )
@@ -147,7 +148,12 @@ public final class SharingUtils
     public static <T extends IdentifiableObject> boolean canCreatePublic( User user, Class<T> clazz )
     {
         Set<String> authorities = user != null ? user.getUserCredentials().getAllAuthorities() : new HashSet<String>();
-        return authorities.contains( SHARING_OVERRIDE_AUTHORITY ) || authorities.contains( PUBLIC_AUTHORITIES.get( clazz ) );
+        return CollectionUtils.containsAny( authorities, SHARING_OVERRIDE_AUTHORITIES ) || authorities.contains( PUBLIC_AUTHORITIES.get( clazz ) );
+    }
+
+    public static <T> boolean defaultPublic( Class<T> clazz )
+    {
+        return !Dashboard.class.isAssignableFrom( clazz );
     }
 
     public static boolean canCreatePublic( User user, IdentifiableObject identifiableObject )
@@ -173,7 +179,7 @@ public final class SharingUtils
     public static <T extends IdentifiableObject> boolean canCreatePrivate( User user, Class<T> clazz )
     {
         Set<String> authorities = user != null ? user.getUserCredentials().getAllAuthorities() : new HashSet<String>();
-        return authorities.contains( SHARING_OVERRIDE_AUTHORITY )
+        return CollectionUtils.containsAny( authorities, SHARING_OVERRIDE_AUTHORITIES )
             || PRIVATE_AUTHORITIES.get( clazz ) == null
             || authorities.contains( PRIVATE_AUTHORITIES.get( clazz ) );
     }
@@ -290,7 +296,7 @@ public final class SharingUtils
     }
 
     /**
-     * Can user read this object
+     * Can user manage (make public) this object
      * <p/>
      * 1. Does user have SHARING_OVERRIDE_AUTHORITY authority?
      * 2. Can user write to this object?
@@ -321,9 +327,29 @@ public final class SharingUtils
         return false;
     }
 
+    /**
+     * Can user make this object external? (read with no login)
+     *
+     * @param user   User to check against
+     * @param object Object to check
+     * @return Result of test
+     */
+    public static <T extends IdentifiableObject> boolean canExternalize( User user, T object )
+    {
+        if ( user == null )
+        {
+            return false;
+        }
+
+        Set<String> authorities = user.getUserCredentials().getAllAuthorities();
+
+        return EXTERNAL_AUTHORITIES.get( object.getClass() ) != null &&
+            (sharingOverrideAuthority( user ) || authorities.contains( EXTERNAL_AUTHORITIES.get( object.getClass() ) ));
+    }
+
     private static boolean sharingOverrideAuthority( User user )
     {
-        return user == null || user.getUserCredentials().getAllAuthorities().contains( SHARING_OVERRIDE_AUTHORITY );
+        return user == null || CollectionUtils.containsAny( user.getUserCredentials().getAllAuthorities(), SHARING_OVERRIDE_AUTHORITIES );
     }
 
     private SharingUtils()

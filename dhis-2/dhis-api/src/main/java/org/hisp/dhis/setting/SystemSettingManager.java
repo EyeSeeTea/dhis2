@@ -1,19 +1,20 @@
 package org.hisp.dhis.setting;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -47,6 +48,7 @@ public interface SystemSettingManager
     final String KEY_APPLICATION_TITLE = "applicationTitle";
     final String KEY_APPLICATION_INTRO = "keyApplicationIntro";
     final String KEY_APPLICATION_NOTIFICATION = "keyApplicationNotification";
+    final String KEY_APPLICATION_FOOTER = "keyApplicationFooter";
     final String KEY_FLAG = "keyFlag";
     final String KEY_FLAG_IMAGE = "keyFlagImage";
     final String KEY_START_MODULE = "startModule";
@@ -77,6 +79,7 @@ public interface SystemSettingManager
     final String KEY_SCHEDULE_AGGREGATE_QUERY_BUILDER_TASKS = "scheduleAggregateQueryBuilder";
     final String KEY_SCHEDULE_AGGREGATE_QUERY_BUILDER_TASK_STRATEGY = "scheduleAggregateQueryBuilderTackStrategy";
     final String DEFAULT_SCHEDULE_AGGREGATE_QUERY_BUILDER_TASK_STRATEGY = "lastMonth";
+    final String DEFAULT_FLAG = "dhis2";
     
     final String KEY_CONFIGURATION = "keyConfig";
     final String KEY_ACCOUNT_RECOVERY = "keyAccountRecovery";

@@ -1,19 +1,20 @@
 package org.hisp.dhis.dataset.action;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,12 +28,7 @@ package org.hisp.dhis.dataset.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.system.util.TextUtils.nullIfEmpty;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
+import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
@@ -42,7 +38,11 @@ import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.user.UserGroupService;
 import org.hisp.dhis.user.UserService;
 
-import com.opensymphony.xwork2.Action;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.hisp.dhis.system.util.TextUtils.nullIfEmpty;
 
 /**
  * @author Kristian
@@ -128,14 +128,14 @@ public class AddDataSetAction
     {
         this.expiryDays = expiryDays;
     }
-    
+
     private int notificationRecipients;
-    
+
     public void setNotificationRecipients( int notificationRecipients )
     {
         this.notificationRecipients = notificationRecipients;
     }
-    
+
     private boolean notifyCompletingUser;
 
     public void setNotifyCompletingUser( boolean notifyCompletingUser )
@@ -165,12 +165,12 @@ public class AddDataSetAction
     }
 
     private boolean fieldCombinationRequired;
-    
+
     public void setFieldCombinationRequired( boolean fieldCombinationRequired )
     {
         this.fieldCombinationRequired = fieldCombinationRequired;
     }
-    
+
     private boolean validCompleteOnly;
 
     public void setValidCompleteOnly( boolean validCompleteOnly )
@@ -183,6 +183,27 @@ public class AddDataSetAction
     public void setSkipOffline( boolean skipOffline )
     {
         this.skipOffline = skipOffline;
+    }
+
+    private boolean dataElementDecoration;
+
+    public void setDataElementDecoration( boolean dataElementDecoration )
+    {
+        this.dataElementDecoration = dataElementDecoration;
+    }
+
+    private boolean renderAsTabs;
+
+    public void setRenderAsTabs( boolean renderAsTabs )
+    {
+        this.renderAsTabs = renderAsTabs;
+    }
+
+    private boolean renderHorizontally;
+
+    public void setRenderHorizontally( boolean renderHorizontally )
+    {
+        this.renderHorizontally = renderHorizontally;
     }
 
     private Collection<String> dataElementsSelectedList = new HashSet<String>();
@@ -209,7 +230,7 @@ public class AddDataSetAction
         // ---------------------------------------------------------------------
         // Prepare values
         // ---------------------------------------------------------------------
-        
+
         code = nullIfEmpty( code );
         shortName = nullIfEmpty( shortName );
         description = nullIfEmpty( description );
@@ -232,7 +253,7 @@ public class AddDataSetAction
         {
             indicators.add( indicatorService.getIndicator( Integer.parseInt( id ) ) );
         }
-        
+
         dataSet.setDescription( description );
         dataSet.setVersion( 1 );
         dataSet.setMobile( false );
@@ -243,7 +264,10 @@ public class AddDataSetAction
         dataSet.setValidCompleteOnly( validCompleteOnly );
         dataSet.setNotifyCompletingUser( notifyCompletingUser );
         dataSet.setSkipOffline( skipOffline );
-        
+        dataSet.setDataElementDecoration( dataElementDecoration );		
+        dataSet.setRenderAsTabs( renderAsTabs );
+        dataSet.setRenderHorizontally( renderHorizontally );
+
         dataSetService.addDataSet( dataSet );
 
         userService.assignDataSetToUserRole( dataSet );
