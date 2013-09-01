@@ -35,6 +35,7 @@ import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.indicator.Indicator;
@@ -260,10 +261,18 @@ public class DefaultMetaDataDependencyService
         {
             List<Indicator> indicators = new ArrayList<Indicator>();
             indicators.add( ( Indicator ) identifiableObject );
+
             Set<DataElement> dataElementSet = expressionService.getDataElementsInIndicators( indicators );
 
             resultSet.addAll( dataElementSet );
             resultSet.addAll( getDependencySet( dataElementSet ) );
+
+            Set<DataElementCategoryOptionCombo> dataElementCategoryOptionComboSet = new HashSet<DataElementCategoryOptionCombo>();
+            dataElementCategoryOptionComboSet.addAll( expressionService.getOptionCombosInExpression( ( ( Indicator ) identifiableObject ).getNumerator() ) );
+            dataElementCategoryOptionComboSet.addAll( expressionService.getOptionCombosInExpression( ( ( Indicator ) identifiableObject ).getDenominator() ) );
+
+            resultSet.addAll( dataElementCategoryOptionComboSet );
+            resultSet.addAll( getDependencySet( dataElementCategoryOptionComboSet ) );
 
             return resultSet;
         } else if ( identifiableObject instanceof ValidationRule )
@@ -278,6 +287,13 @@ public class DefaultMetaDataDependencyService
 
             resultSet.addAll( dataElementSet );
             resultSet.addAll( getDependencySet( dataElementSet ) );
+
+            Set<DataElementCategoryOptionCombo> dataElementCategoryOptionComboSet = new HashSet<DataElementCategoryOptionCombo>();
+            dataElementCategoryOptionComboSet.addAll( expressionService.getOptionCombosInExpression( leftSide.getExpression() ) );
+            dataElementCategoryOptionComboSet.addAll( expressionService.getOptionCombosInExpression( rightSide.getExpression() ) );
+
+            resultSet.addAll( dataElementCategoryOptionComboSet );
+            resultSet.addAll( getDependencySet( dataElementCategoryOptionComboSet ) );
 
             return resultSet;
         } else
