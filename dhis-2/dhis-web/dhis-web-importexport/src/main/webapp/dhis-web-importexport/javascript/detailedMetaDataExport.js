@@ -256,7 +256,7 @@ function loadMetaDataAccordionEvents()
 function selectMetaDataCategory( categoryName )
 {
     var metaDataCategoryName = categoryName.data.metaDataCategoryName;
-    if ( $( "#checkbox" + metaDataCategoryName ).not( ":checked" ) )
+    if ( !$( "#checkbox" + metaDataCategoryName ).is( ":checked" ) )
     {
         $( "#checkbox" + metaDataCategoryName ).prop( "checked", true );
         insertMetaDataDesign( metaDataCategoryName );
@@ -291,7 +291,7 @@ function selectAllCheckboxes()
 {
     for ( var i = 0; i < metaDataArray.length; i++ )
     {
-        if ( $( "#checkbox" + metaDataArray[i] ).not( ":checked" ) )
+        if ( !$( "#checkbox" + metaDataArray[i] ).is( ":checked" ) )
         {
             $( "#checkbox" + metaDataArray[i] ).prop( "checked", true );
             insertMetaDataDesign( metaDataArray[i] );
@@ -319,7 +319,7 @@ function deselectAllCheckboxes()
 // Select a MetaData type checkbox
 function selectCheckbox( metaDataCategoryName )
 {
-    if ( $( "#checkbox" + metaDataCategoryName ).not( ":checked" ) )
+    if ( !$( "#checkbox" + metaDataCategoryName ).is( ":checked" ) )
     {
         $( "#checkbox" + metaDataCategoryName ).prop( "checked", true );
         insertMetaDataDesign( metaDataCategoryName );
