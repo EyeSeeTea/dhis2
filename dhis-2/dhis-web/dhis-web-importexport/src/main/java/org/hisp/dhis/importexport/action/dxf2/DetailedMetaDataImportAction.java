@@ -28,21 +28,15 @@ package org.hisp.dhis.importexport.action.dxf2;
  */
 
 import com.opensymphony.xwork2.Action;
-import org.hisp.dhis.dxf2.metadata.ImportOptions;
-import org.hisp.dhis.dxf2.metadata.ImportService;
-import org.hisp.dhis.importexport.ImportStrategy;
-import org.hisp.dhis.importexport.action.util.ImportMetaDataTask;
-import org.hisp.dhis.scheduling.TaskCategory;
-import org.hisp.dhis.scheduling.TaskId;
-import org.hisp.dhis.system.notification.Notifier;
-import org.hisp.dhis.system.scheduling.Scheduler;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.dxf2.metadata.MetaData;
+import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.system.util.StreamUtils;
-import org.hisp.dhis.user.CurrentUserService;
-import org.hisp.dhis.user.User;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -55,17 +49,7 @@ public class DetailedMetaDataImportAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    @Autowired
-    private ImportService importService;
-
-    @Autowired
-    private CurrentUserService currentUserService;
-
-    @Autowired
-    private Scheduler scheduler;
-
-    @Autowired
-    private Notifier notifier;
+    private static final Log log = LogFactory.getLog( DetailedMetaDataImportAction.class );
 
     // -------------------------------------------------------------------------
     // Input
@@ -78,18 +62,11 @@ public class DetailedMetaDataImportAction
         this.upload = upload;
     }
 
-    private boolean dryRun;
+    private String metaDataJson;
 
-    public void setDryRun( boolean dryRun )
+    public void setMetaDataJson( String metaDataJson )
     {
-        this.dryRun = dryRun;
-    }
-
-    private ImportStrategy strategy;
-
-    public void setStrategy( String strategy )
-    {
-        this.strategy = ImportStrategy.valueOf( strategy );
+        this.metaDataJson = metaDataJson;
     }
 
     // -------------------------------------------------------------------------
@@ -99,22 +76,25 @@ public class DetailedMetaDataImportAction
     @Override
     public String execute() throws Exception
     {
-        strategy = strategy != null ? strategy : ImportStrategy.NEW_AND_UPDATES;
-
-        User user = currentUserService.getCurrentUser();
-
-        TaskId taskId = new TaskId( TaskCategory.METADATA_IMPORT, user );
-
-        notifier.clear( taskId );
-
         InputStream in = new FileInputStream( upload );
         in = StreamUtils.wrapAndCheckCompressionFormat( in );
 
-        ImportOptions importOptions = new ImportOptions();
-        importOptions.setStrategy( strategy.toString() );
-        importOptions.setDryRun( dryRun );
-
-        scheduler.executeTask( new ImportMetaDataTask( ( user != null ? user.getUid() : null ), importService, importOptions, in, taskId ) );
+        MetaData metaData;
+        try
+        {
+            metaData = JacksonUtils.fromXml( in, MetaData.class );
+            metaDataJson = JacksonUtils.toJsonAsString( metaData );
+        } catch ( IOException ignored )
+        {
+            try
+            {
+                metaData = JacksonUtils.fromJson( in, MetaData.class );
+                metaDataJson = JacksonUtils.toJsonAsString( metaData );
+            } catch ( IOException ex )
+            {
+                log.error( "(IOException) Unable to parse meta-data while reading input stream", ex );
+            }
+        }
 
         return SUCCESS;
     }

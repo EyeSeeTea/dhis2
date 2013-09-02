@@ -289,7 +289,7 @@
       <result name="success" type="velocity">/main.vm</result>
       <param name="menu">/dhis-web-importexport/mainMenu.vm</param>
       <param name="page">/dhis-web-importexport/dxf2MetaDataImport.vm</param>
-      <param name="javascripts">javascript/importMetaData.js</param>
+      <param name="javascripts">javascript/detailedMetaDataImport.js</param>
       <param name="requiredAuthorities">F_METADATA_IMPORT</param>
     </action>
 
@@ -345,12 +345,15 @@
         <result name="success" type="velocity">/main.vm</result>
         <param name="menu">/dhis-web-importexport/mainMenu.vm</param>
         <param name="page">/dhis-web-importexport/dxf2DetailedMetaDataImport.vm</param>
-        <param name="javascripts">javascript/detailedMetaDataImport.js</param>
         <param name="requiredAuthorities">F_METADATA_IMPORT</param>
     </action>
 
     <action name="importDetailedMetaData" class="org.hisp.dhis.importexport.action.dxf2.DetailedMetaDataImportAction">
-        <result name="success" type="redirect">dxf2DetailedMetaDataImport.action</result>
+        <result name="success" type="velocity">/main.vm</result>
+        <param name="menu">/dhis-web-importexport/mainMenu.vm</param>
+        <param name="page">/dhis-web-importexport/dxf2ProcessDetailedMetaDataImport.vm</param>
+        <param name="javascripts">javascript/detailedMetaDataImport.js,javascript/utils.js</param>
+        <param name="requiredAuthorities">F_METADATA_IMPORT</param>
         <interceptor-ref name="fileUploadStack" />
     </action>
 
@@ -373,7 +376,7 @@
         <result name="success" type="velocity">/main.vm</result>
         <param name="menu">/dhis-web-importexport/mainMenu.vm</param>
         <param name="page">/dhis-web-importexport/filterExportForm.vm</param>
-        <param name="javascripts">javascript/detailedMetaDataExport.js</param>
+        <param name="javascripts">javascript/detailedMetaDataExport.js,javascript/utils.js</param>
         <param name="requiredAuthorities">F_METADATA_EXPORT</param>
     </action>
 
