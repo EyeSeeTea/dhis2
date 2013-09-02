@@ -349,6 +349,11 @@
         <param name="requiredAuthorities">F_METADATA_IMPORT</param>
     </action>
 
+    <action name="importDetailedMetaData" class="org.hisp.dhis.importexport.action.dxf2.DetailedMetaDataImportAction">
+        <result name="success" type="redirect">dxf2DetailedMetaDataImport.action</result>
+        <interceptor-ref name="fileUploadStack" />
+    </action>
+
     <action name="dxf2DetailedMetaDataExport" class="org.hisp.dhis.importexport.action.dxf2.FilterListAction">
         <result name="success" type="velocity">/main.vm</result>
         <param name="menu">/dhis-web-importexport/mainMenu.vm</param>
