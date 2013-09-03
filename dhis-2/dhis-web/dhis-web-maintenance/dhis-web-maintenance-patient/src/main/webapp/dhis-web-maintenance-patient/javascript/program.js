@@ -15,19 +15,10 @@ function showProgramDetails( programId )
 			type = i18n_single_event_with_registration;
 		else if( json.program.type == "3"  )
 			type = i18n_single_event_without_registration;
-		setInnerHTML( 'typeField', type );  
-		
-		var displayProvidedOtherFacility = ( json.program.displayProvidedOtherFacility == 'true') ? i18n_yes : i18n_no;
-		setInnerHTML( 'displayProvidedOtherFacilityField', displayProvidedOtherFacility );   	
-		
-		var blockEntryForm = ( json.program.blockEntryForm == 'true') ? i18n_yes : i18n_no;
-		setInnerHTML( 'blockEntryFormField', blockEntryForm );   	
+		setInnerHTML( 'typeField', type ); 
 		
 		var displayIncidentDate = ( json.program.displayIncidentDate == 'true') ? i18n_yes : i18n_no;
 		setInnerHTML( 'displayIncidentDateField', displayIncidentDate );   	
-		
-		var generatedByEnrollmentDate = ( json.program.generatedByEnrollmentDate == 'true') ? i18n_yes : i18n_no;
-		setInnerHTML( 'generatedByEnrollmentDateField', generatedByEnrollmentDate );   	
 		
 		var ignoreOverdueEvents = ( json.program.ignoreOverdueEvents == 'true') ? i18n_yes : i18n_no;
 		setInnerHTML( 'ignoreOverdueEventsField', ignoreOverdueEvents );   	
@@ -38,14 +29,17 @@ function showProgramDetails( programId )
 		var displayOnAllOrgunit= ( json.program.displayOnAllOrgunit == 'true') ? i18n_yes : i18n_no;
 		setInnerHTML( 'displayOnAllOrgunitField', displayOnAllOrgunit );   	
 		
-		var remindCompleted = ( json.program.remindCompleted == 'true') ? i18n_yes : i18n_no;
-		setInnerHTML( 'remindCompletedField', remindCompleted );   	
-		
 		var useBirthDateAsIncidentDate = ( json.program.useBirthDateAsIncidentDate == 'true') ? i18n_yes : i18n_no;
 		setInnerHTML( 'useBirthDateAsIncidentDateField', useBirthDateAsIncidentDate );   	
 		
 		var useBirthDateAsEnrollmentDate = ( json.program.useBirthDateAsEnrollmentDate == 'true') ? i18n_yes : i18n_no;
 		setInnerHTML( 'useBirthDateAsEnrollmentDateField', useBirthDateAsEnrollmentDate );   	
+		
+		var selectEnrollmentDatesInFuture= ( json.program.selectEnrollmentDatesInFuture == 'true') ? i18n_yes : i18n_no;
+		setInnerHTML( 'selectEnrollmentDatesInFutureField', selectEnrollmentDatesInFuture );   	
+		
+		var selectIncidentDatesInFuture= ( json.program.selectIncidentDatesInFuture == 'true') ? i18n_yes : i18n_no;
+		setInnerHTML( 'selectIncidentDatesInFutureField', selectIncidentDatesInFuture );   	
 		
 		setInnerHTML( 'dateOfEnrollmentDescriptionField', json.program.dateOfEnrollmentDescription );   
 		setInnerHTML( 'dateOfIncidentDescriptionField', json.program.dateOfIncidentDescription );   		

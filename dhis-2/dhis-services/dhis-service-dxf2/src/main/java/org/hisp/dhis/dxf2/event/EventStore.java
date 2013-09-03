@@ -28,50 +28,34 @@ package org.hisp.dhis.dxf2.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
-import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.program.ProgramStageInstance;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface EventService
+public interface EventStore
 {
-    ImportSummary saveEventXml( InputStream inputStream ) throws IOException;
+    List<Event> getAll( Program program, OrganisationUnit organisationUnit );
 
-    ImportSummaries saveEventsXml( InputStream inputStream ) throws IOException;
+    List<Event> getAll( Program program, OrganisationUnit organisationUnit, Date startDate, Date endDate );
 
-    ImportSummary saveEventJson( InputStream inputStream ) throws IOException;
+    List<Event> getAll( ProgramStage programStage, OrganisationUnit organisationUnit );
 
-    ImportSummaries saveEventsJson( InputStream inputStream ) throws IOException;
+    List<Event> getAll( ProgramStage programStage, OrganisationUnit organisationUnit, Date startDate, Date endDate );
 
-    Events getEvents( Program program, OrganisationUnit organisationUnit );
+    List<Event> getAll( Program program, ProgramStage programStage, OrganisationUnit organisationUnit );
 
-    Events getEvents( Program program, OrganisationUnit organisationUnit, Date startDate, Date endDate );
+    List<Event> getAll( Program program, ProgramStage programStage, OrganisationUnit organisationUnit, Date startDate, Date endDate );
 
-    Events getEvents( ProgramStage programStage, OrganisationUnit organisationUnit );
+    List<Event> getAll( Program program, List<ProgramStage> programStages, OrganisationUnit organisationUnit );
 
-    Events getEvents( ProgramStage programStage, OrganisationUnit organisationUnit, Date startDate, Date endDate );
+    List<Event> getAll( Program program, List<ProgramStage> programStages, OrganisationUnit organisationUnit, Date startDate, Date endDate );
 
-    Events getEvents( Program program, ProgramStage programStage, OrganisationUnit organisationUnit );
-
-    Events getEvents( Program program, ProgramStage programStage, OrganisationUnit organisationUnit, Date startDate, Date endDate );
-
-    Events getEvents( List<Program> programs, List<ProgramStage> programStages, List<OrganisationUnit> organisationUnits, Date startDate, Date endDate );
-
-    Event getEvent( String uid );
-
-    Event getEvent( ProgramStageInstance programStageInstance );
-
-    void updateEvent( Event event );
-
-    void deleteEvent( Event event );
+    List<Event> getAll( List<Program> programs, List<ProgramStage> programStages, List<OrganisationUnit> organisationUnits,
+        Date startDate, Date endDate );
 }
