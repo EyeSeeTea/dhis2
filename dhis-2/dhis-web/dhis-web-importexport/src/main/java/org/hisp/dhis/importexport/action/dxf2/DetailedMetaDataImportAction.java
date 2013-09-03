@@ -27,17 +27,16 @@ package org.hisp.dhis.importexport.action.dxf2;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opensymphony.xwork2.Action;
+import com.thoughtworks.xstream.XStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dxf2.metadata.MetaData;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.system.util.StreamUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
@@ -85,16 +84,19 @@ public class DetailedMetaDataImportAction
         {
             InputStream in = new FileInputStream( upload );
             in = StreamUtils.wrapAndCheckCompressionFormat( in );
+            MetaData metaData;
 
             try
             {
-                MetaData metaData = JacksonUtils.fromXml( in, MetaData.class );
+                metaData = JacksonUtils.fromXml( in, MetaData.class );
                 metaDataJson = JacksonUtils.toJsonAsString( metaData );
             } catch ( IOException ignored )
             {
                 try
                 {
-                    MetaData metaData = JacksonUtils.fromJson( in, MetaData.class );
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    metaData = objectMapper.readValue( upload, MetaData.class );
+
                     metaDataJson = JacksonUtils.toJsonAsString( metaData );
                 } catch ( IOException ex )
                 {
