@@ -355,8 +355,8 @@
     <div id="divValidationRules" style="margin: 5px;"></div>
 </div>
 
+<!-- METADATA ACCORDION COMMANDS -->
 <div>
-    <!-- METADATA ACCORDION COMMANDS -->
     <table id="detailsList" style="width: 500px;">
         <tr>
             <td colspan="2">
@@ -391,8 +391,8 @@
     </table>
 </div>
 
+<!-- EXPORT DIALOG -->
 #if($command == "addAdHoc")
-    <!-- EXPORT DIALOG -->
     <div id="exportDialog" style="display: none;">
         <table>
             <tr>

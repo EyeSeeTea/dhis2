@@ -64,6 +64,11 @@ public class DetailedMetaDataImportAction
 
     private String metaDataJson;
 
+    public String getMetaDataJson()
+    {
+        return metaDataJson;
+    }
+
     public void setMetaDataJson( String metaDataJson )
     {
         this.metaDataJson = metaDataJson;
@@ -76,24 +81,29 @@ public class DetailedMetaDataImportAction
     @Override
     public String execute() throws Exception
     {
-        InputStream in = new FileInputStream( upload );
-        in = StreamUtils.wrapAndCheckCompressionFormat( in );
+        if ( upload != null )
+        {
+            InputStream in = new FileInputStream( upload );
+            in = StreamUtils.wrapAndCheckCompressionFormat( in );
 
-        MetaData metaData;
-        try
-        {
-            metaData = JacksonUtils.fromXml( in, MetaData.class );
-            metaDataJson = JacksonUtils.toJsonAsString( metaData );
-        } catch ( IOException ignored )
-        {
             try
             {
-                metaData = JacksonUtils.fromJson( in, MetaData.class );
+                MetaData metaData = JacksonUtils.fromXml( in, MetaData.class );
                 metaDataJson = JacksonUtils.toJsonAsString( metaData );
-            } catch ( IOException ex )
+            } catch ( IOException ignored )
             {
-                log.error( "(IOException) Unable to parse meta-data while reading input stream", ex );
+                try
+                {
+                    MetaData metaData = JacksonUtils.fromJson( in, MetaData.class );
+                    metaDataJson = JacksonUtils.toJsonAsString( metaData );
+                } catch ( IOException ex )
+                {
+                    log.error( "(IOException) Unable to parse meta-data while reading input stream", ex );
+                }
             }
+        } else
+        {
+            metaDataJson = "{}";
         }
 
         return SUCCESS;

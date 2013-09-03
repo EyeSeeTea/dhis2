@@ -8,94 +8,70 @@ var metaDataArray = [ "AttributeTypes", "Dimensions", "Charts", "Concepts", "Con
     "Users", "ValidationRuleGroups", "ValidationRules" ];
 
 // -----------------------------------------------------------------------------
-// Import
-// -----------------------------------------------------------------------------
-
-$( document ).ready( function ()
-{
-    pingNotificationsTimeout();
-} );
-
-var pingTimeout = null;
-
-function importMetaData()
-{
-    if ( !$( "#upload" ).val() )
-    {
-        setHeaderDelayMessage( "Please select a file to upload" );
-        return false;
-    }
-
-    $( "#notificationTable" ).empty();
-    $( "#importForm" ).submit();
-}
-
-function pingNotificationsTimeout()
-{
-    pingNotifications( 'METADATA_IMPORT', 'notificationTable', displaySummaryLink );
-    pingTimeout = setTimeout( "pingNotificationsTimeout()", 2500 );
-}
-
-function displaySummaryLink()
-{
-    var html = '<tr><td></td><td><a href="javascript:displaySummary()">Display import summary</a></td></tr>';
-    $( '#notificationTable' ).prepend( html );
-}
-
-function displaySummary()
-{
-    $( '#notificationDiv' ).hide();
-    $( '#importSummaryDiv' ).show( 'fast' ).load( 'getMetaDataImportSummary.action' );
-}
-
-// -----------------------------------------------------------------------------
 // MetaData Category Accordion
 // -----------------------------------------------------------------------------
 jQuery( function ()
 {
-    loadMetaDataCategories();
-    $( "#mainDivAccordion" ).accordion(
-        {
-            active: false,
-            collapsible: true,
-            clearStyle: true,
-            autoHeight: false
-        } );
+    var metaData = getMetaDataJson();
 
-    loadMetaDataAccordionEvents();
+    if ( !jQuery.isEmptyObject( metaData ) )
+    {
+        loadMetaDataCategories( metaData );
+        $( "#mainDivAccordion" ).accordion(
+            {
+                active: false,
+                collapsible: true,
+                clearStyle: true,
+                autoHeight: false
+            } );
+
+        selectAllCheckboxes();
+        selectAllValues();
+        loadMetaDataAccordionEvents( metaData );
+    }
+
+    loadFile();
 } );
 
 // Collapsed MetaData Category information
-function loadMetaDataCategories()
+function loadMetaDataCategories( metaData )
 {
     for ( var i = 0; i < metaDataArray.length; i++ )
     {
-        insertMetaDataCategoryDesign( metaDataArray[i] );
-        $( "#checkbox" + metaDataArray[i] ).change( function ()
+        if ( metaData.hasOwnProperty( lowercaseFirstLetter( metaDataArray[i] ) ) )
         {
-            var metaDataCategoryName = $( this ).attr( "name" );
+            $( "#heading" + metaDataArray[i] ).show();
+            $( "#div" + metaDataArray[i] ).show();
+            $("#metaDataCommands" ).show();
 
-            if ( $( this ).is( ":checked" ) )
-            {
-                insertMetaDataDesign( metaDataCategoryName );
-            } else
-            {
-                removeMetaDataDesign( metaDataCategoryName );
-            }
-        } );
+            insertMetaDataCategoryDesign( metaDataArray[i] );
 
-        $( "#checkboxSelectAll" + metaDataArray[i] ).change( function ()
-        {
-            var metaDataCategoryName = $( this ).attr( "name" );
+            $( "#checkbox" + metaDataArray[i] ).change( function ()
+            {
+                var metaDataCategoryName = $( this ).attr( "name" );
 
-            if ( $( this ).is( ":checked" ) )
+                if ( $( this ).is( ":checked" ) )
+                {
+                    insertMetaDataDesign( metaDataCategoryName );
+                } else
+                {
+                    removeMetaDataDesign( metaDataCategoryName );
+                }
+            } );
+
+            $( "#checkboxSelectAll" + metaDataArray[i] ).change( function ()
             {
-                selectAllValuesByCategory( metaDataCategoryName );
-            } else
-            {
-                deselectValuesByCategory( metaDataCategoryName );
-            }
-        } );
+                var metaDataCategoryName = $( this ).attr( "name" );
+
+                if ( $( this ).is( ":checked" ) )
+                {
+                    selectAllValuesByCategory( metaDataCategoryName );
+                } else
+                {
+                    deselectValuesByCategory( metaDataCategoryName );
+                }
+            } );
+        }
     }
 }
 
@@ -166,7 +142,7 @@ function generateMetaDataDesign( metaDataCategoryName )
                 +        '<tbody>'
                 +            '<tr>'
                 +                '<td>'
-                +                   '<select id="available' + metaDataCategoryName + '" multiple="multiple" style="height: 200px; width: 100%;"></select>'
+                +                   '<select id="available' + metaDataCategoryName + '" multiple="multiple" style="height: 200px; width: 100%; margin-top: 10px;"></select>'
                 +               '</td>'
                 +               '<td>'
                 +                   '<input id="moveSelected' + metaDataCategoryName +'" type="button" value="&gt;" title="' + i18n_move_selected + '" style="width:50px"'
@@ -179,8 +155,7 @@ function generateMetaDataDesign( metaDataCategoryName )
                 +                       'onclick="removeAll( \'' + metaDataCategoryName + '\' );"/><br/>'
                 +               '</td>'
                 +               '<td>'
-                +                   '<select id="selected' + metaDataCategoryName + '" name="selected' + metaDataCategoryName + '" multiple="multiple"'
-                +                   'style="height: 200px; width: 100%; margin-top: 25px;"></select>'
+                +                   '<select id="selected' + metaDataCategoryName + '" name="selected' + metaDataCategoryName + '" multiple="multiple" style="height: 200px; width: 100%; margin-top: 10px;"></select>'
                 +               '</td>'
                 +           '</tr>'
                 +       '</tbody>'
@@ -193,14 +168,39 @@ function generateMetaDataDesign( metaDataCategoryName )
 // Move all selected items
 function moveSelected( metaDataCategoryName )
 {
-    dhisAjaxSelect_moveAllSelected( "available" + metaDataCategoryName );
-    $( "#heading" + metaDataCategoryName ).css( "background", "#CFFFB3 50% 50% repeat-x" );
+    $( "#available" + metaDataCategoryName + " option:selected" ).each( function ()
+    {
+        var option = jQuery( "<option/>" );
+        option.text( $( this ).attr( "name" ) );
+        option.attr( "name", $( this ).attr( "name" ) );
+        option.attr( "value", $( this ).attr( "value" ) );
+        option.attr( "selected", "selected" );
+
+        $( "#selected" + metaDataCategoryName ).append( option );
+        $( this ).remove();
+    } );
+
+    if ( $( "#selected" + metaDataCategoryName + " option" ).length > 0 )
+    {
+        $( "#heading" + metaDataCategoryName ).css( "background", "#CFFFB3 50% 50% repeat-x" );
+    }
 }
 
 // Remove all selected items
 function removeSelected( metaDataCategoryName )
 {
-    dhisAjaxSelect_moveAllSelected( "selected" + metaDataCategoryName );
+    $( "#selected" + metaDataCategoryName + " option:selected" ).each( function ()
+    {
+        var option = jQuery( "<option/>" );
+        option.text( $( this ).attr( "name" ) );
+        option.attr( "name", $( this ).attr( "name" ) );
+        option.attr( "value", $( this ).attr( "value" ) );
+        option.attr( "selected", "selected" );
+
+        $( "#available" + metaDataCategoryName ).append( option );
+        $( this ).remove();
+    } );
+
     if ( $( "#selected" + metaDataCategoryName + " option" ).length == 0 )
     {
         $( "#heading" + metaDataCategoryName ).css( "background", "" );
@@ -210,14 +210,36 @@ function removeSelected( metaDataCategoryName )
 // Move all items
 function moveAll( metaDataCategoryName )
 {
-    dhisAjaxSelect_moveAll( "available" + metaDataCategoryName );
+    $( "#available" + metaDataCategoryName + " option" ).each( function ()
+    {
+        var option = jQuery( "<option/>" );
+        option.text( $( this ).attr( "name" ) );
+        option.attr( "name", $( this ).attr( "name" ) );
+        option.attr( "value", $( this ).attr( "value" ) );
+        option.attr( "selected", "selected" );
+
+        $( "#selected" + metaDataCategoryName ).append( option );
+        $( this ).remove();
+    } );
+
     $( "#heading" + metaDataCategoryName ).css( "background", "#CFFFB3 50% 50% repeat-x" );
 }
 
 // Remove all items
 function removeAll( metaDataCategoryName )
 {
-    dhisAjaxSelect_moveAll( "selected" + metaDataCategoryName );
+    $( "#selected" + metaDataCategoryName + " option" ).each( function ()
+    {
+        var option = jQuery( "<option/>" );
+        option.text( $( this ).attr( "name" ) );
+        option.attr( "name", $( this ).attr( "name" ) );
+        option.attr( "value", $( this ).attr( "value" ) );
+        option.attr( "selected", "selected" );
+
+        $( "#available" + metaDataCategoryName ).append( option );
+        $( this ).remove();
+    } );
+
     $( "#heading" + metaDataCategoryName ).css( "background", "" );
 }
 
@@ -240,21 +262,23 @@ function removeMetaDataDesign( metaDataCategoryName )
 // Load MetaData by Category
 function loadMetaData( metaDataCategoryName )
 {
-    $( "#available" + metaDataCategoryName ).dhisAjaxSelect(
+    var metaData = getMetaDataJson();
+    var metaDataCategoryProperty = lowercaseFirstLetter( metaDataCategoryName );
+    if ( metaData.hasOwnProperty( metaDataCategoryProperty ) )
+    {
+        var metaDataCategoryArray = metaData[metaDataCategoryProperty];
+        for ( var i = 0; i < metaDataCategoryArray.length; i++ )
         {
-            source: "../api/" + lowercaseFirstLetter( metaDataCategoryName ) + ".json?links=false&paging=false",
-            iterator: lowercaseFirstLetter( metaDataCategoryName ),
-            connectedTo: "selected" + metaDataCategoryName,
-            handler: function ( item )
-            {
-                var option = jQuery( "<option/>" );
-                option.text( item.name );
-                option.attr( "name", item.name );
-                option.attr( "value", item.id );
+            var option = jQuery( "<option/>" );
+            option.text( metaDataCategoryArray[i].name );
+            option.attr( "name", metaDataCategoryArray[i].name );
+            option.attr( "value", metaDataCategoryArray[i].id );
+            option.attr( "selected", "selected" );
 
-                return option;
-            }
-        } );
+            $( "#selected" + metaDataCategoryName ).append( option );
+            $( "#heading" + metaDataCategoryName ).css( "background", "#CFFFB3 50% 50% repeat-x" );
+        }
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -262,11 +286,14 @@ function loadMetaData( metaDataCategoryName )
 // -----------------------------------------------------------------------------
 
 // Load MetaData Category Accordion Events
-function loadMetaDataAccordionEvents()
+function loadMetaDataAccordionEvents( metaData )
 {
     for ( var i = 0; i < metaDataArray.length; i++ )
     {
-        $( "#heading" + metaDataArray[i] ).click( {metaDataCategoryName: metaDataArray[i]}, selectMetaDataCategory );
+        if ( metaData.hasOwnProperty( lowercaseFirstLetter( metaDataArray[i] ) ) )
+        {
+            $( "#heading" + metaDataArray[i] ).click( {metaDataCategoryName: metaDataArray[i]}, selectMetaDataCategory );
+        }
     }
 }
 
@@ -309,16 +336,6 @@ function deselectAllCheckboxes()
     }
 
     deselectAllValues();
-}
-
-// Select a MetaData type checkbox
-function selectCheckbox( metaDataCategoryName )
-{
-    if ( !$( "#checkbox" + metaDataCategoryName ).is( ":checked" ) )
-    {
-        $( "#checkbox" + metaDataCategoryName ).prop( "checked", true );
-        insertMetaDataDesign( metaDataCategoryName );
-    }
 }
 
 // Select all values
@@ -366,4 +383,55 @@ function deselectValuesByCategory( metaDataCategoryName )
     {
         $( this ).prop( "selected", false );
     } );
+}
+
+// -----------------------------------------------------------------------------
+// Process MetaData object
+// -----------------------------------------------------------------------------
+
+// Get MetaData object
+function getMetaDataJson()
+{
+    return JSON.parse( $( "#metaDataJson" ).val() );
+}
+
+// -----------------------------------------------------------------------------
+// Process file
+// -----------------------------------------------------------------------------
+
+// Load file
+function loadFile()
+{
+    $( "#upload" ).change( function ()
+    {
+        $( "#loadFile" ).submit();
+    } );
+}
+
+// -----------------------------------------------------------------------------
+// Import
+// -----------------------------------------------------------------------------
+
+function importMetaData()
+{
+    if ( !$( "#upload" ).val() )
+    {
+        setHeaderDelayMessage( "Please select a file to upload" );
+        return false;
+    }
+
+    $( "#notificationTable" ).empty();
+    $( "#importForm" ).submit();
+}
+
+function displaySummaryLink()
+{
+    var html = '<tr><td></td><td><a href="javascript:displaySummary()">Display import summary</a></td></tr>';
+    $( '#notificationTable' ).prepend( html );
+}
+
+function displaySummary()
+{
+    $( '#notificationDiv' ).hide();
+    $( '#importSummaryDiv' ).show( 'fast' ).load( 'getMetaDataImportSummary.action' );
 }

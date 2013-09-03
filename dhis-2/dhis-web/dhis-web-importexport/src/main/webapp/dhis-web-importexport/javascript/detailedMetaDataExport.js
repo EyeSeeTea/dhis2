@@ -148,8 +148,7 @@ function generateMetaDataDesign( metaDataCategoryName )
         +                       'onclick="removeAll( \'' + metaDataCategoryName + '\' );"/><br/>'
         +               '</td>'
         +               '<td>'
-        +                   '<select id="selected' + metaDataCategoryName + '" name="selected' + metaDataCategoryName + '" multiple="multiple"'
-        +                   'style="height: 200px; width: 100%; margin-top: 25px;"></select>'
+        +                   '<select id="selected' + metaDataCategoryName + '" name="selected' + metaDataCategoryName + '" multiple="multiple" style="height: 200px; width: 100%; margin-top: 25px;"></select>'
         +               '</td>'
         +           '</tr>'
         +       '</tbody>'
@@ -163,7 +162,10 @@ function generateMetaDataDesign( metaDataCategoryName )
 function moveSelected( metaDataCategoryName )
 {
     dhisAjaxSelect_moveAllSelected( "available" + metaDataCategoryName );
-    $( "#heading" + metaDataCategoryName ).css( "background", "#CFFFB3 50% 50% repeat-x" );
+    if ( $( "#selected" + metaDataCategoryName + " option" ).length > 0 )
+    {
+        $( "#heading" + metaDataCategoryName ).css( "background", "#CFFFB3 50% 50% repeat-x" );
+    }
 }
 
 // Remove all selected items
@@ -314,16 +316,6 @@ function deselectAllCheckboxes()
     }
 
     deselectAllValues();
-}
-
-// Select a MetaData type checkbox
-function selectCheckbox( metaDataCategoryName )
-{
-    if ( !$( "#checkbox" + metaDataCategoryName ).is( ":checked" ) )
-    {
-        $( "#checkbox" + metaDataCategoryName ).prop( "checked", true );
-        insertMetaDataDesign( metaDataCategoryName );
-    }
 }
 
 // Select all values
@@ -479,7 +471,7 @@ function updateFilter()
             } );
     } else
     {
-        setHeaderDelayMessage( i18n_validate_filter );
+        //TODO : Input validation
     }
 }
 
