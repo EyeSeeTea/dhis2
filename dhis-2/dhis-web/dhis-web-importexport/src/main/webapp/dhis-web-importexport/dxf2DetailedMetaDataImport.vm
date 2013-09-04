@@ -313,8 +313,8 @@
 </div>
 
 <!-- METADATA ACCORDION COMMANDS -->
-<div id="metaDataCommands" style="display: none;">
-    <table id="detailsList" style="width: 500px;">
+<div id="metaDataCommands" style="display: none; margin-bottom: 10px;">
+    <table id="detailsList">
         <tr>
             <td colspan="2">
                 <input type="button" value="$i18n.getString( 'select_all_tables' )" style="width:125px;" onclick="selectAllCheckboxes();"/>
@@ -334,7 +334,6 @@
 <div id="inputCriteria" class="inputCriteria" style="width: 380px">
     <div>
         <form id="loadFile" name="loadFile" method="post" enctype="multipart/form-data" action="dxf2DetailedMetaDataImport.action">
-            <input type="hidden" id="metaDataJson" name="metaDataJson" value='$metaDataJson'>
             <table>
                 <col width="140">
                 <col>
@@ -346,7 +345,8 @@
         </form>
     </div>
     <div>
-        <form id="importForm" name="importForm" method="post" enctype="multipart/form-data" action="importMetaData.action">
+        <form id="importForm" name="importForm" method="post" action="importDetailedMetaData.action">
+            <input type="hidden" id="metaDataJson" name="metaDataJson" value='$metaDataJson'>
             <table>
                 <col width="140">
                 <col>
@@ -372,7 +372,7 @@
                 <tr>
                     <td></td>
                     <td>
-                        <input type="button" value="$i18n.getString( 'import' )" style="width:120px" onclick="importMetaData()"/>
+                        <input type="button" value="$i18n.getString( 'import' )" style="width:120px" onclick="importDetailedMetaData()"/>
                     </td>
                 </tr>
             </table>

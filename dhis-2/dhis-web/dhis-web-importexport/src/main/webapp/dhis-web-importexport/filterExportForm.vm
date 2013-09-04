@@ -357,7 +357,7 @@
 
 <!-- METADATA ACCORDION COMMANDS -->
 <div>
-    <table id="detailsList" style="width: 500px;">
+    <table id="detailsList">
         <tr>
             <td colspan="2">
                 <input type="button" value="$i18n.getString( 'select_all_tables' )" style="width:125px;" onclick="selectAllCheckboxes();"/>

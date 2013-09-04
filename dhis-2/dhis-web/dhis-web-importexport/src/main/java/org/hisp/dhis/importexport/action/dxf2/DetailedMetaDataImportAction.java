@@ -29,7 +29,6 @@ package org.hisp.dhis.importexport.action.dxf2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opensymphony.xwork2.Action;
-import com.thoughtworks.xstream.XStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dxf2.metadata.MetaData;
@@ -60,6 +59,10 @@ public class DetailedMetaDataImportAction
     {
         this.upload = upload;
     }
+
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
 
     private String metaDataJson;
 

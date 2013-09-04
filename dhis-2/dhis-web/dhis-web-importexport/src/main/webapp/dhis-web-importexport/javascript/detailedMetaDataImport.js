@@ -7,13 +7,14 @@ var metaDataArray = [ "AttributeTypes", "Dimensions", "Charts", "Concepts", "Con
     "OrganisationUnitLevels", "OrganisationUnits", "ReportTables", "Reports", "SqlViews", "UserGroups", "UserRoles",
     "Users", "ValidationRuleGroups", "ValidationRules" ];
 
+var metaData;
+
 // -----------------------------------------------------------------------------
 // MetaData Category Accordion
 // -----------------------------------------------------------------------------
 jQuery( function ()
 {
-    var metaData = getMetaDataJson();
-
+    metaData = JSON.parse( $( "#metaDataJson" ).val() );
     if ( !jQuery.isEmptyObject( metaData ) )
     {
         loadMetaDataCategories( metaData );
@@ -262,7 +263,6 @@ function removeMetaDataDesign( metaDataCategoryName )
 // Load MetaData by Category
 function loadMetaData( metaDataCategoryName )
 {
-    var metaData = getMetaDataJson();
     var metaDataCategoryProperty = lowercaseFirstLetter( metaDataCategoryName );
     if ( metaData.hasOwnProperty( metaDataCategoryProperty ) )
     {
@@ -386,16 +386,6 @@ function deselectValuesByCategory( metaDataCategoryName )
 }
 
 // -----------------------------------------------------------------------------
-// Process MetaData object
-// -----------------------------------------------------------------------------
-
-// Get MetaData object
-function getMetaDataJson()
-{
-    return JSON.parse( $( "#metaDataJson" ).val() );
-}
-
-// -----------------------------------------------------------------------------
 // Process file
 // -----------------------------------------------------------------------------
 
@@ -409,27 +399,59 @@ function loadFile()
 }
 
 // -----------------------------------------------------------------------------
+// Process import MetaData Json
+// -----------------------------------------------------------------------------
+
+// Process import MetaData Json
+function processImportMetaDataJson()
+{
+    var importMetaDataJson = JSON.parse( JSON.stringify( metaData ) );
+    for ( var i = 0; i < metaDataArray.length; i++ )
+    {
+        var metaDataCategoryProperty = lowercaseFirstLetter( metaDataArray[i] );
+
+        if ( importMetaDataJson.hasOwnProperty( metaDataCategoryProperty ) )
+        {
+            var metaDataCategoryArray = importMetaDataJson[metaDataCategoryProperty];
+            for ( var j = 0; j < metaDataCategoryArray.length; j++ )
+            {
+                var existsMetaDataValue = $( "#selected" + metaDataArray[i] + " option[value='" + metaDataCategoryArray[j].id + "']" ).length !== 0;
+
+                if ( !existsMetaDataValue )
+                {
+                    (importMetaDataJson[metaDataCategoryProperty]).splice( j, 1 );
+                    j--;
+                }
+            }
+
+            if ( importMetaDataJson[metaDataCategoryProperty].length == 0 )
+            {
+                delete importMetaDataJson[metaDataCategoryProperty];
+            }
+        }
+    }
+
+    return importMetaDataJson;
+}
+
+// -----------------------------------------------------------------------------
 // Import
 // -----------------------------------------------------------------------------
 
-function importMetaData()
+// Import detailed MetaData
+function importDetailedMetaData()
 {
-    if ( !$( "#upload" ).val() )
-    {
-        setHeaderDelayMessage( "Please select a file to upload" );
-        return false;
-    }
-
-    $( "#notificationTable" ).empty();
-    $( "#importForm" ).submit();
+    var importMetaDataJson = processImportMetaDataJson();
 }
 
+// Display summary link
 function displaySummaryLink()
 {
     var html = '<tr><td></td><td><a href="javascript:displaySummary()">Display import summary</a></td></tr>';
     $( '#notificationTable' ).prepend( html );
 }
 
+// Display summary
 function displaySummary()
 {
     $( '#notificationDiv' ).hide();
