@@ -28,6 +28,12 @@ package org.hisp.dhis.dxf2.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dxf2.InputValidationService;
@@ -52,17 +58,12 @@ import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
+@Transactional
 public abstract class BaseEventService implements EventService
 {
     // -------------------------------------------------------------------------
@@ -95,6 +96,9 @@ public abstract class BaseEventService implements EventService
 
     @Autowired
     private InputValidationService inputValidationService;
+
+    @Autowired
+    private EventStore eventStore;
 
     @Autowired
     private I18nManager i18nManager;
@@ -342,45 +346,71 @@ public abstract class BaseEventService implements EventService
     }
 
     @Override
-    public Events getEvents( Program program )
-    {
-        return getEvents( program, null );
-    }
-
-    @Override
     public Events getEvents( Program program, OrganisationUnit organisationUnit )
     {
+        List<Event> eventList = eventStore.getAll( program, organisationUnit );
         Events events = new Events();
-
-        ProgramStage programStage = program.getProgramStageByStage( 1 );
-
-        List<ProgramStageInstance> programStageInstances;
-
-        programStageInstances = new ArrayList<ProgramStageInstance>(
-            programStageInstanceService.getProgramStageInstances( programStage, organisationUnit ) );
-
-        List<Event> convertedEvents = convertProgramStageInstances( programStageInstances );
-
-        events.setEvents( convertedEvents );
+        events.setEvents( eventList );
 
         return events;
     }
 
     @Override
-    public Events getEvents( Program program, OrganisationUnit organisationUnit, Date start, Date end )
+    public Events getEvents( Program program, OrganisationUnit organisationUnit, Date startDate, Date endDate )
     {
+        List<Event> eventList = eventStore.getAll( program, organisationUnit, startDate, endDate );
         Events events = new Events();
+        events.setEvents( eventList );
 
-        ProgramStage programStage = program.getProgramStageByStage( 1 );
+        return events;
+    }
 
-        List<ProgramStageInstance> programStageInstances;
+    @Override
+    public Events getEvents( ProgramStage programStage, OrganisationUnit organisationUnit )
+    {
+        List<Event> eventList = eventStore.getAll( programStage, organisationUnit );
+        Events events = new Events();
+        events.setEvents( eventList );
 
-        programStageInstances = new ArrayList<ProgramStageInstance>(
-            programStageInstanceService.getProgramStageInstances( programStage, organisationUnit, start, end ) );
+        return events;
+    }
 
-        List<Event> convertedEvents = convertProgramStageInstances( programStageInstances );
+    @Override
+    public Events getEvents( ProgramStage programStage, OrganisationUnit organisationUnit, Date startDate, Date endDate )
+    {
+        List<Event> eventList = eventStore.getAll( programStage, organisationUnit, startDate, endDate );
+        Events events = new Events();
+        events.setEvents( eventList );
 
-        events.setEvents( convertedEvents );
+        return events;
+    }
+
+    @Override
+    public Events getEvents( Program program, ProgramStage programStage, OrganisationUnit organisationUnit )
+    {
+        List<Event> eventList = eventStore.getAll( program, programStage, organisationUnit );
+        Events events = new Events();
+        events.setEvents( eventList );
+
+        return events;
+    }
+
+    @Override
+    public Events getEvents( Program program, ProgramStage programStage, OrganisationUnit organisationUnit, Date startDate, Date endDate )
+    {
+        List<Event> eventList = eventStore.getAll( program, programStage, organisationUnit, startDate, endDate );
+        Events events = new Events();
+        events.setEvents( eventList );
+
+        return events;
+    }
+
+    @Override
+    public Events getEvents( List<Program> programs, List<ProgramStage> programStages, List<OrganisationUnit> organisationUnits, Date startDate, Date endDate )
+    {
+        List<Event> eventList = eventStore.getAll( programs, programStages, organisationUnits, startDate, endDate );
+        Events events = new Events();
+        events.setEvents( eventList );
 
         return events;
     }
@@ -408,7 +438,7 @@ public abstract class BaseEventService implements EventService
             return;
         }
 
-        OrganisationUnit organisationUnit = null;
+        OrganisationUnit organisationUnit;
 
         if ( event.getOrgUnit() != null )
         {
@@ -467,18 +497,6 @@ public abstract class BaseEventService implements EventService
         }
     }
 
-    private List<Event> convertProgramStageInstances( List<ProgramStageInstance> programStageInstances )
-    {
-        List<Event> events = new ArrayList<Event>();
-
-        for ( ProgramStageInstance programStageInstance : programStageInstances )
-        {
-            events.add( convertProgramStageInstance( programStageInstance ) );
-        }
-
-        return events;
-    }
-
     private Event convertProgramStageInstance( ProgramStageInstance programStageInstance )
     {
         if ( programStageInstance == null )
@@ -491,10 +509,10 @@ public abstract class BaseEventService implements EventService
         event.setCompleted( programStageInstance.isCompleted() );
         event.setEvent( programStageInstance.getUid() );
         event.setEventDate( programStageInstance.getExecutionDate().toString() );
+        event.setStoredBy( programStageInstance.getCompletedUser() );
         event.setOrgUnit( programStageInstance.getOrganisationUnit().getUid() );
         event.setProgram( programStageInstance.getProgramInstance().getProgram().getUid() );
         event.setProgramStage( programStageInstance.getProgramStage().getUid() );
-        event.setStoredBy( programStageInstance.getCompletedUser() );
 
         Collection<PatientDataValue> patientDataValues = patientDataValueService.getPatientDataValues( programStageInstance );
 

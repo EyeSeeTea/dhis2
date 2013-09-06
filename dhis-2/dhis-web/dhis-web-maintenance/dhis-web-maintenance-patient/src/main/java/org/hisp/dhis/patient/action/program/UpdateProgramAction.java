@@ -276,6 +276,13 @@ public class UpdateProgramAction
         this.selectEnrollmentDatesInFuture = selectEnrollmentDatesInFuture;
     }
 
+    private Boolean selectIncidentDatesInFuture;
+
+    public void setSelectIncidentDatesInFuture( Boolean selectIncidentDatesInFuture )
+    {
+        this.selectIncidentDatesInFuture = selectIncidentDatesInFuture;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -293,7 +300,8 @@ public class UpdateProgramAction
         useBirthDateAsIncidentDate = (useBirthDateAsIncidentDate == null) ? false : useBirthDateAsIncidentDate;
         useBirthDateAsEnrollmentDate = (useBirthDateAsEnrollmentDate == null) ? false : useBirthDateAsEnrollmentDate;
         selectEnrollmentDatesInFuture = (selectEnrollmentDatesInFuture == null) ? false : selectEnrollmentDatesInFuture;
-        
+        selectIncidentDatesInFuture = (selectIncidentDatesInFuture == null) ? false : selectIncidentDatesInFuture;
+
         Program program = programService.getProgram( id );
         program.setName( name );
         program.setDescription( description );
@@ -301,24 +309,20 @@ public class UpdateProgramAction
         program.setDateOfEnrollmentDescription( dateOfEnrollmentDescription );
         program.setDateOfIncidentDescription( dateOfIncidentDescription );
         program.setType( type );
-        program.setDisplayProvidedOtherFacility( displayProvidedOtherFacility );
         program.setDisplayIncidentDate( displayIncidentDate );
-        program.setBlockEntryForm( blockEntryForm );
         program.setOnlyEnrollOnce( onlyEnrollOnce );
-        program.setRemindCompleted( remindCompleted );
         program.setDisplayOnAllOrgunit( displayOnAllOrgunit );
         program.setUseBirthDateAsIncidentDate( useBirthDateAsIncidentDate );
         program.setUseBirthDateAsEnrollmentDate( useBirthDateAsEnrollmentDate );
         program.setSelectEnrollmentDatesInFuture( selectEnrollmentDatesInFuture );
+        program.setSelectIncidentDatesInFuture( selectIncidentDatesInFuture );
 
         if ( type == Program.MULTIPLE_EVENTS_WITH_REGISTRATION )
         {
-            program.setGeneratedByEnrollmentDate( generateBydEnrollmentDate );
             program.setIgnoreOverdueEvents( ignoreOverdueEvents );
         }
         else
         {
-            program.setGeneratedByEnrollmentDate( true );
             program.setIgnoreOverdueEvents( false );
         }
 
@@ -360,7 +364,7 @@ public class UpdateProgramAction
             reminder.setDateToCompare( datesToCompare.get( i ) );
             reminder.setSendTo( sendTo.get( i ) );
             reminder.setWhenToSend( whenToSend.get( i ) );
-            
+
             if ( reminder.getSendTo() == PatientReminder.SEND_TO_USER_GROUP )
             {
                 UserGroup selectedUserGroup = userGroupService.getUserGroup( userGroup.get( i ) );

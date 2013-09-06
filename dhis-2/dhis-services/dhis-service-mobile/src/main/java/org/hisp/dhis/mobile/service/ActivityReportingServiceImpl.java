@@ -101,10 +101,6 @@ public class ActivityReportingServiceImpl
 
     private static final String PROGRAM_STAGE_SECTION_UPLOADED = "program_stage_section_uploaded";
 
-    private static final String ANONYMOUS_PROGRAM_UPLOADED = "anonymous_program_uploaded";
-
-    private static final String PATIENT_REGISTERED = "patient_registered";
-
     private static final String SINGLE_EVENT_UPLOADED = "single_event_uploaded";
 
     private ActivityComparator activityComparator = new ActivityComparator();
@@ -695,7 +691,7 @@ public class ActivityReportingServiceImpl
                 programStageInstance.setProgramInstance( programInstance );
                 programStageInstance.setProgramStage( programStage );
                 Date dateCreatedEvent = new Date();
-                if ( program.getGeneratedByEnrollmentDate() )
+                if ( programStage.getGeneratedByEnrollmentDate() )
                 {
                     // dateCreatedEvent = sdf.parseDateTime( enrollmentDate
                     // ).toDate();
@@ -1717,7 +1713,7 @@ public class ActivityReportingServiceImpl
     public org.hisp.dhis.api.mobile.model.LWUITmodel.Patient findLatestPatient()
         throws NotAllowedException
     {
-        Patient patient = (Patient) this.patientService.getPatient( this.patientId );
+        Patient patient = patientService.getPatient( this.patientId );
 
         org.hisp.dhis.api.mobile.model.LWUITmodel.Patient patientMobile = getPatientModel( patient );
         return patientMobile;

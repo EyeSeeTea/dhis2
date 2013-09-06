@@ -33,6 +33,7 @@ function dobTypeOnChange( container ){
 	{
 		jQuery('#' + container + ' [id=age]').rules("remove");
 		jQuery('#' + container + ' [id=age]').css("display","none");
+		jQuery('#' + container + ' [id=age]').val("");
 		
 		jQuery('#' + container + ' [id=birthDate]').rules("add",{required:true});
 		datePickerValid( container + ' [id=birthDate]' );
@@ -43,6 +44,7 @@ function dobTypeOnChange( container ){
 		jQuery('#' + container + ' [id=age]').rules("add",{required:true, number: true});
 		jQuery('#' + container + ' [id=age]').css("display","");
 		
+		jQuery('#' + container + ' [id=birthDate]').val("");
 		jQuery('#' + container + ' [id=birthDate]').rules("remove","required");
 		$('#' + container+ ' [id=birthDate]').datepicker("destroy");
 		jQuery('#' + container + ' [id=birthDate]').css("display","none");
@@ -553,11 +555,18 @@ function showCreateNewEvent( programInstanceId, programStageId )
 			height: 160
 		}).show('fast');
 		
-	if( programStageId != undefined )
-	{
-		jQuery('#repeatableProgramStage_' + programInstanceId).val(programStageId);
+	var flag = false;
+	jQuery('#repeatableProgramStage_' + programInstanceId + " option ").each(function(){
+		if( jQuery(this).css("display")!='none' && !flag){
+			jQuery(this).attr("selected","selected");
+			setSuggestedDueDate( programInstanceId );
+			flag = true;
+		}
+	});
+	
+	if(!flag){
+		jQuery('#repeatableProgramStage_' + programInstanceId).val("");
 	}
-	setSuggestedDueDate( programInstanceId );
 }
 
 function setSuggestedDueDate( programInstanceId )
@@ -1306,7 +1315,7 @@ function programOnchange( programId )
 			
 			jQuery("#dateOfIncidentField").datepicker("destroy");
 			jQuery("#enrollmentDateField").datepicker("destroy");
-			if(program.attr("selectEnrollmentDatesInFuture")=='true'){
+			if(program.attr("selectEnrollmentDatesInFuture")=='true' || program.attr("selectIncidentDatesInFuture")=='true' ){
 				datePickerInRange( 'dateOfIncidentField' , 'enrollmentDateField', false, true );
 			}
 			else{
