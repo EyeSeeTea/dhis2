@@ -28,22 +28,22 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patientcomment.PatientComment;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
 /**
  * @author Abyot Asalefew
- * @version $Id$
  */
-public class ProgramStageInstance extends BaseIdentifiableObject
+public class ProgramStageInstance
+    extends BaseIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -51,9 +51,13 @@ public class ProgramStageInstance extends BaseIdentifiableObject
     private static final long serialVersionUID = 6239130884678145713L;
 
     public static final int COMPLETED_STATUS = 1;
+
     public static final int VISITED_STATUS = 2;
+
     public static final int FUTURE_VISIT_STATUS = 3;
+
     public static final int LATE_VISIT_STATUS = 4;
+
     public static final int SKIPPED_STATUS = 5;
 
     private ProgramInstance programInstance;
@@ -70,7 +74,7 @@ public class ProgramStageInstance extends BaseIdentifiableObject
 
     private List<OutboundSms> outboundSms;
 
-    private Set<PatientComment> patientComments;
+    private PatientComment patientComment;
 
     private Integer status;
 
@@ -79,7 +83,7 @@ public class ProgramStageInstance extends BaseIdentifiableObject
     private String completedUser;
 
     private Date completedDate;
-    
+
     private Set<Patient> patients;
 
     // -------------------------------------------------------------------------
@@ -252,14 +256,14 @@ public class ProgramStageInstance extends BaseIdentifiableObject
         this.outboundSms = outboundSms;
     }
 
-    public Set<PatientComment> getPatientComments()
+    public PatientComment getPatientComment()
     {
-        return patientComments;
+        return patientComment;
     }
 
-    public void setPatientComments( Set<PatientComment> patientComments )
+    public void setPatientComment( PatientComment patientComment )
     {
-        this.patientComments = patientComments;
+        this.patientComment = patientComment;
     }
 
     public Date getCompletedDate()

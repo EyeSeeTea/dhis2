@@ -70,6 +70,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -306,9 +307,9 @@ public class CurrentUserController
         JacksonUtils.toJsonWithView( response.getOutputStream(), userOrganisationUnits, viewClass );
     }
 
-    @RequestMapping( value = { "/assignedPrograms" }, produces = { "application/json", "text/*" } )
+    @RequestMapping(value = { "/assignedPrograms" }, produces = { "application/json", "text/*" })
     public void getPrograms( HttpServletResponse response, @RequestParam Map<String, String> parameters,
-        @RequestParam( defaultValue = "1" ) Integer type )
+        @RequestParam(required = false) Integer type )
         throws IOException, NotAuthenticatedException
     {
         User currentUser = currentUserService.getCurrentUser();
@@ -322,8 +323,18 @@ public class CurrentUserController
         Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
         Set<Program> programs = new HashSet<Program>();
         Map<String, List<Program>> programAssociations = new HashMap<String, List<Program>>();
+        List<Program> userPrograms;
 
-        if ( currentUser.getOrganisationUnits().isEmpty() && currentUser.getUserCredentials().getAllAuthorities().contains( "ALL" ) )
+        if ( type == null )
+        {
+            userPrograms = new ArrayList<Program>( programService.getProgramsByCurrentUser() );
+        }
+        else
+        {
+            userPrograms = new ArrayList<Program>( programService.getProgramsByCurrentUser( type ) );
+        }
+
+        if ( currentUserService.currentUserIsSuper() && currentUser.getOrganisationUnits().isEmpty() )
         {
             userOrganisationUnits.addAll( organisationUnitService.getRootOrganisationUnits() );
         }
@@ -349,14 +360,27 @@ public class CurrentUserController
 
         for ( OrganisationUnit organisationUnit : userOrganisationUnits )
         {
-            List<Program> ouPrograms = new ArrayList<Program>(
-                programService.getPrograms( Program.SINGLE_EVENT_WITHOUT_REGISTRATION, organisationUnit ) );
+            List<Program> ouPrograms = new ArrayList<Program>( programService.getPrograms( organisationUnit ) );
 
             if ( !ouPrograms.isEmpty() )
             {
-                organisationUnits.add( organisationUnit );
-                programs.addAll( ouPrograms );
-                programAssociations.put( organisationUnit.getUid(), ouPrograms );
+                for ( Program program : ouPrograms )
+                {
+                    if ( userPrograms.contains( program ) )
+                    {
+                        organisationUnits.add( organisationUnit );
+                        programs.add( program );
+
+                        if ( programAssociations.get( organisationUnit.getUid() ) != null )
+                        {
+                            programAssociations.get( organisationUnit.getUid() ).add( program );
+                        }
+                        else
+                        {
+                            programAssociations.put( organisationUnit.getUid(), Arrays.asList( program ) );
+                        }
+                    }
+                }
             }
         }
 

@@ -57,15 +57,11 @@
 
 		<property name="captureCoordinates" />
 
-		<property name="relatedPatient" />
-		
 		<property name="generatedByEnrollmentDate" />
 
 		<property name="blockEntryForm" />
 
 		<property name="remindCompleted" />
-
-		<property name="displayProvidedOtherFacility" />
 
 	</class>
 </hibernate-mapping>

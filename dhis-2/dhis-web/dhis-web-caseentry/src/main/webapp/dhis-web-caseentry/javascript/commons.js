@@ -123,6 +123,11 @@ function searchObjectOnChange( this_ )
 	{
 		element.replaceWith( getAgeTextBox() );
 	}
+	else if ( attributeId=='fixedAttr_registrationDate' )
+	{
+		element.replaceWith( getRegistrationDate(container) );
+		datePickerValid( 'searchText_' + container );
+	}
 	else if ( valueType=='bool' )
 	{
 		element.replaceWith( getTrueFalseBox() );
@@ -157,6 +162,13 @@ function getAgeTextBox( container )
 	var ageField = '<select id="dateOperator" name="dateOperator" style="width:40px"><option value=">"> > </option><option value=">="> >= </option><option value="="> = </option><option value="<"> < </option><option value="<="> <= </option></select>';
 	ageField += '<input type="text" id="searchText_' + container + '" name="searchText" style="width:160px;">';
 	return ageField;
+}
+
+function getRegistrationDate( container )
+{
+	var registrationDateField = '<select id="dateOperator" name="dateOperator" style="width:40px"><option value=">"> > </option><option value=">="> >= </option><option value="="> = </option><option value="<"> < </option><option value="<="> <= </option></select>';
+	registrationDateField += '<input type="text" id="searchText_' + container + '" name="searchText" style="width:160px;">';
+	return registrationDateField;
 }
 
 function getDateField( container )
@@ -544,29 +556,47 @@ function showColorHelp()
 
 function showCreateNewEvent( programInstanceId, programStageId )
 {
-	setInnerHTML('createEventMessage_' + programInstanceId, '');
-	jQuery('#createNewEncounterDiv_' + programInstanceId ).dialog({
-			title: i18n_create_new_event,
-			maximize: true, 
-			closable: true,
-			modal:false,
-			overlay:{background:'#000000', opacity:0.1},
-			width: 450,
-			height: 160
-		}).show('fast');
-		
 	var flag = false;
-	jQuery('#repeatableProgramStage_' + programInstanceId + " option ").each(function(){
-		if( jQuery(this).css("display")!='none' && !flag){
-			jQuery(this).attr("selected","selected");
-			setSuggestedDueDate( programInstanceId );
-			flag = true;
-		}
-	});
+	if(programStageId!=undefined)
+	{
+		jQuery('#repeatableProgramStage_' + programInstanceId + " option ").each(function(){
+			if( jQuery(this).css("display")!='none' && programStageId==jQuery(this).val()){
+				jQuery(this).attr("selected","selected");
+				setSuggestedDueDate( programInstanceId );
+				flag = true;
+			}
+		});
+		jQuery('#repeatableProgramStage_' + programInstanceId ).attr('disabled',true);
+	}
+	else
+	{
+		jQuery('#repeatableProgramStage_' + programInstanceId ).attr('disabled',false);
+	}
+	
+	if(!flag){
+		jQuery('#repeatableProgramStage_' + programInstanceId + " option ").each(function(){
+			if( jQuery(this).css("display")!='none' && !flag ){
+				jQuery(this).attr("selected","selected");
+				setSuggestedDueDate( programInstanceId );
+				flag = true;
+			}
+		});
+	}
 	
 	if(!flag){
 		jQuery('#repeatableProgramStage_' + programInstanceId).val("");
 	}
+	
+	setInnerHTML('createEventMessage_' + programInstanceId, '');
+	jQuery('#createNewEncounterDiv_' + programInstanceId ).dialog({
+		title: i18n_create_new_event,
+		maximize: true, 
+		closable: true,
+		modal:false,
+		overlay:{background:'#000000', opacity:0.1},
+		width: 450,
+		height: 160
+	}).show('fast');
 }
 
 function setSuggestedDueDate( programInstanceId )
@@ -1726,7 +1756,23 @@ function loadActiveProgramStageRecords(programInstanceId, activeProgramStageInst
 		{
 			showById('programEnrollmentDiv');
 			var hasDataEntry = getFieldValue('hasDataEntry');
-			var type = jQuery('#tb_'+programInstanceId).attr('programType');
+			var type = jQuery( '#tb_' + programInstanceId ).attr('programType');
+			
+			var program = jQuery( '#tr1_' + programInstanceId )
+			var relationshipText=program.attr('relationshipText');
+			var relatedProgramId=program.attr('relatedProgram');
+			var patientId = getFieldValue('patientId');
+			var selectedProgram = program.attr('programId');
+			
+			if( relationshipText != "")
+			{
+				setInnerHTML('patientRelatedStageSpan',"&#8226; <a href='javascript:showAddPatientForm( " + relatedProgramId + "," + patientId + "," + selectedProgram + " );' id='relatedPatient_$!programStageInstance.id' >" + relationshipText + "</a><br>&nbsp;");
+			}
+			else
+			{
+				setInnerHTML('patientRelatedStageSpan','&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>&nbsp;');
+			}
+			
 			if(type=='2'){
 				hideById('colorHelpLink');
 				hideById('programInstanceDiv');
@@ -1912,7 +1958,7 @@ function addComment( field, programStageInstanceId )
 		return;
 	}
 	
-	jQuery.postUTF8( 'addPatientComment.action',
+	jQuery.postUTF8( 'savePatientComment.action',
 		{
 			programStageInstanceId: programStageInstanceId,
 			commentText: commentText 

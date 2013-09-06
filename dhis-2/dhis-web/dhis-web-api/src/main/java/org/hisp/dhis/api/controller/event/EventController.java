@@ -35,16 +35,24 @@ import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.dxf2.event.Event;
 import org.hisp.dhis.dxf2.event.EventService;
 import org.hisp.dhis.dxf2.event.Events;
+import org.hisp.dhis.dxf2.event.tasks.ImportEventTask;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.scheduling.TaskCategory;
+import org.hisp.dhis.scheduling.TaskId;
+import org.hisp.dhis.system.scheduling.Scheduler;
+import org.hisp.dhis.system.util.StreamUtils;
+import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,6 +65,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.Map;
 
@@ -64,7 +73,7 @@ import java.util.Map;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping(value = EventController.RESOURCE_PATH)
+@RequestMapping( value = EventController.RESOURCE_PATH )
 public class EventController
 {
     public static final String RESOURCE_PATH = "/events";
@@ -77,21 +86,29 @@ public class EventController
     private IdentifiableObjectManager manager;
 
     @Autowired
+    private CurrentUserService currentUserService;
+
+    @Autowired
+    private Scheduler scheduler;
+
+    @Autowired
     private EventService eventService;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     // -------------------------------------------------------------------------
     // Controller
     // -------------------------------------------------------------------------
 
-    @RequestMapping(value = "", method = RequestMethod.GET)
+    @RequestMapping( value = "", method = RequestMethod.GET )
     public String getEvents(
         @RequestParam( value = "program", required = false ) String programUid,
-        @RequestParam(value = "programStage", required = false) String programStageUid,
-        @RequestParam(value = "orgUnit") String orgUnitUid,
-        @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
-        @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
-        @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request,
-        HttpServletResponse response ) throws Exception
+        @RequestParam( value = "programStage", required = false ) String programStageUid,
+        @RequestParam( value = "orgUnit" ) String orgUnitUid,
+        @RequestParam @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date startDate,
+        @RequestParam @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date endDate,
+        @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request ) throws Exception
     {
         WebOptions options = new WebOptions( parameters );
         Program program = manager.get( Program.class, programUid );
@@ -177,48 +194,87 @@ public class EventController
 
     @RequestMapping( method = RequestMethod.POST, consumes = "application/xml" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_PATIENT_DATAVALUE_ADD')" )
-    public void postXmlEvent( HttpServletResponse response, HttpServletRequest request ) throws Exception
+    public void postXmlEvent( HttpServletResponse response, HttpServletRequest request, ImportOptions importOptions ) throws Exception
     {
-        ImportSummaries importSummaries = eventService.saveEventsXml( request.getInputStream() );
+        InputStream inputStream = StreamUtils.wrapAndCheckCompressionFormat( request.getInputStream() );
 
-        for ( ImportSummary importSummary : importSummaries.getImportSummaries() )
+        if ( !importOptions.isAsync() )
         {
-            importSummary.setHref( ContextUtils.getRootPath( request ) + RESOURCE_PATH + "/" + importSummary.getReference() );
-        }
+            ImportSummaries importSummaries = eventService.saveEventsXml( inputStream, importOptions );
 
-        if ( importSummaries.getImportSummaries().size() == 1 )
+            for ( ImportSummary importSummary : importSummaries.getImportSummaries() )
+            {
+                if ( !importOptions.isDryRun() )
+                {
+                    importSummary.setHref( ContextUtils.getRootPath( request ) + RESOURCE_PATH + "/" + importSummary.getReference() );
+                }
+            }
+
+            if ( importSummaries.getImportSummaries().size() == 1 )
+            {
+                ImportSummary importSummary = importSummaries.getImportSummaries().get( 0 );
+
+                if ( !importOptions.isDryRun() )
+                {
+                    response.setHeader( "Location", ContextUtils.getRootPath( request ) + RESOURCE_PATH + "/" + importSummary.getReference() );
+                }
+            }
+
+            JacksonUtils.toXml( response.getOutputStream(), importSummaries );
+        }
+        else
         {
-            ImportSummary importSummary = importSummaries.getImportSummaries().get( 0 );
-            response.setHeader( "Location", ContextUtils.getRootPath( request ) + RESOURCE_PATH + "/" + importSummary.getReference() );
+            TaskId taskId = new TaskId( TaskCategory.EVENT_IMPORT, currentUserService.getCurrentUser() );
+            scheduler.executeTask( new ImportEventTask( inputStream, eventService, importOptions, taskId, false ) );
+            response.setHeader( "Location", ContextUtils.getRootPath( request ) + "/system/tasks/" + TaskCategory.EVENT_IMPORT );
+            response.setStatus( HttpServletResponse.SC_NO_CONTENT );
         }
-
-        JacksonUtils.toXml( response.getOutputStream(), importSummaries );
     }
 
     @RequestMapping( method = RequestMethod.POST, consumes = "application/json" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_PATIENT_DATAVALUE_ADD')" )
-    public void postJsonEvent( HttpServletResponse response, HttpServletRequest request ) throws Exception
+    public void postJsonEvent( HttpServletResponse response, HttpServletRequest request, ImportOptions importOptions ) throws Exception
     {
-        ImportSummaries importSummaries = eventService.saveEventsJson( request.getInputStream() );
+        InputStream inputStream = StreamUtils.wrapAndCheckCompressionFormat( request.getInputStream() );
 
-        for ( ImportSummary importSummary : importSummaries.getImportSummaries() )
+        if ( !importOptions.isAsync() )
         {
-            importSummary.setHref( ContextUtils.getRootPath( request ) + RESOURCE_PATH + "/" + importSummary.getReference() );
+            ImportSummaries importSummaries = eventService.saveEventsJson( inputStream, importOptions );
+
+            for ( ImportSummary importSummary : importSummaries.getImportSummaries() )
+            {
+                if ( !importOptions.isDryRun() )
+                {
+                    importSummary.setHref( ContextUtils.getRootPath( request ) + RESOURCE_PATH + "/" + importSummary.getReference() );
+                }
+            }
+
+            if ( importSummaries.getImportSummaries().size() == 1 )
+            {
+                ImportSummary importSummary = importSummaries.getImportSummaries().get( 0 );
+
+                if ( !importOptions.isDryRun() )
+                {
+                    response.setHeader( "Location", ContextUtils.getRootPath( request ) + RESOURCE_PATH + "/" + importSummary.getReference() );
+                }
+            }
+
+            JacksonUtils.toJson( response.getOutputStream(), importSummaries );
+        }
+        else
+        {
+            TaskId taskId = new TaskId( TaskCategory.EVENT_IMPORT, currentUserService.getCurrentUser() );
+            scheduler.executeTask( new ImportEventTask( inputStream, eventService, importOptions, taskId, true ) );
+            response.setHeader( "Location", ContextUtils.getRootPath( request ) + "/system/tasks/" + TaskCategory.EVENT_IMPORT );
+            response.setStatus( HttpServletResponse.SC_NO_CONTENT );
         }
 
-        if ( importSummaries.getImportSummaries().size() == 1 )
-        {
-            ImportSummary importSummary = importSummaries.getImportSummaries().get( 0 );
-            response.setHeader( "Location", ContextUtils.getRootPath( request ) + RESOURCE_PATH + "/" + importSummary.getReference() );
-        }
-
-        JacksonUtils.toJson( response.getOutputStream(), importSummaries );
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE )
     @ResponseStatus( value = HttpStatus.NO_CONTENT )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_PATIENT_DATAVALUE_DELETE')" )
-    public void deleteEvent( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid )
+    public void deleteEvent( HttpServletResponse response, @PathVariable( "uid" ) String uid )
     {
         Event event = eventService.getEvent( uid );
 
@@ -268,12 +324,4 @@ public class EventController
         eventService.updateEvent( updatedEvent );
         ContextUtils.okResponse( response, "Event updated: " + uid );
     }
-
-    /*
-    @ExceptionHandler( IllegalArgumentException.class )
-    public void handleError( IllegalArgumentException ex, HttpServletResponse response )
-    {
-        ContextUtils.conflictResponse( response, ex.getMessage() );
-    }
-    */
 }

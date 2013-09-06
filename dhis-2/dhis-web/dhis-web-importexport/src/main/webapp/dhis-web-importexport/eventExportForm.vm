@@ -6,10 +6,11 @@ $( function() {
 
     $( '#submit' ).on( 'click', function() {
         var format = $( '#format' ).val();
+        var compression = $( '#compression' ).val();
         var program = $( '#programs' ).val();
         var programStage = $( '#programStages' ).val();
 
-        var url = '../api/events' + format + "?program=" + program;
+        var url = '../api/events' + format + compression + "?program=" + program;
 
         if( programStage && programStage.length > 0 ) {
             url += "&programStage=" + programStage;
@@ -46,8 +47,8 @@ $( function() {
     } ).done(function(data) {
         var options = [];
 
-        $.each(data.programs, function(idx, item) {
-            var option = $( '<option/>' ).html( item.name ).val(item.id);
+        $.each(data.programs, function() {
+            var option = $( '<option/>' ).html( this.name ).val(this.id);
             options.push( option );
         });
 
@@ -58,22 +59,21 @@ $( function() {
             $( '#programs' ).attr('disabled', true);
         }
 
-        $( '#programs' ).html( options );
-        $( '#programs' ).trigger('change');
+        $( '#programs' ).html( options ).trigger('change');
     });
 
     $( '#programs' ).on( 'change', function( e ) {
         var program = $( '#programs' ).val();
-        $( '#programStages' ).attr('disabled', true);
-        $( '#programStages' ).html($( '<option/>' ).html('$i18n.getString( "no_program_stages_available" )'));
+        $( '#programStages' ).attr('disabled', true)
+                .html($( '<option/>' ).html('$i18n.getString( "no_program_stages_available" )'));
 
         $.ajax({
            url: '../api/programs/' + program + '.json'
         } ).done(function(data) {
             var options = [];
 
-            $.each(data.programStages, function(idx, item) {
-                var option = $( '<option/>' ).html( item.name ).val(item.id);
+            $.each(data.programStages, function() {
+                var option = $( '<option/>' ).html( this.name ).val(this.id);
                 options.push( option );
             });
 
@@ -92,8 +92,10 @@ $( function() {
 <div id="inputCriteria" class="inputCriteria" style="width: 730px;">
 <form id="importForm" name="importForm" method="post" enctype="multipart/form-data" action="importMetaData.action">
 <table>
-<col width="140">
-<col>
+    <colgroup>
+        <col style="width: 150px;" />
+        <col />
+    </colgroup>
 
 <tr>
    <td colspan="2">$i18n.getString( "organisation_unit" )</td>
@@ -121,31 +123,30 @@ $( function() {
 
 <tr>
     <td>$i18n.getString("start_date")</td>
-    <td><input type="text" id="startDate" name="startDate" value="$!startDate" style="width:300px"></td>
+    <td><input type="text" id="startDate" name="startDate" value="$!startDate" style="width:296px"></td>
 </tr>
 
 <tr>
     <td>$i18n.getString("end_date")</td>
-    <td><input type="text" id="endDate" name="endDate" value="$!endDate" style="width:300px"></td>
+    <td><input type="text" id="endDate" name="endDate" value="$!endDate" style="width:296px"></td>
 </tr>
+
+    <tr>
+        <td>$i18n.getString( "format" )</td>
+        <td>
+            <select id="format" style="width: 300px;">
+                <option value=".xml">XML</option>
+                <option value=".json">Json</option>
+            </select>
+        </td>
+    </tr>
 
 <tr>
     <td>$i18n.getString( "compression" )</td>
     <td>
-        <select disabled="disabled" id="compression" style="width: 300px;">
+        <select id="compression" style="width: 300px;">
             <option value="">$i18n.getString( "uncompressed" )</option>
-            <option value=".zip">$i18n.getString( "compression_zip" )</option>
             <option value=".gz">$i18n.getString( "compression_gzip" )</option>
-        </select>
-    </td>
-</tr>
-
-<tr>
-    <td>$i18n.getString( "format" )</td>
-    <td>
-        <select id="format" style="width: 300px;">
-            <option value=".xml">XML</option>
-            <option value=".json">Json</option>
         </select>
     </td>
 </tr>

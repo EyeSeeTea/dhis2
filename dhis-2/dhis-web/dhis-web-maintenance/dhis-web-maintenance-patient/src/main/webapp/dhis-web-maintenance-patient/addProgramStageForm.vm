@@ -45,11 +45,6 @@
 		<td><input type="checkbox" id="autoGenerateEvent" name="autoGenerateEvent" value='true' checked /></td>
 	</tr>
 	
-	<tr>
-		<td><label>$i18n.getString( "related_patient" )</em></label></td>
-		<td><input type="checkbox" id="relatedPatient" name="relatedPatient" value='true'/></td>
-	</tr>
-	
 	<tr><th colspan="2">$i18n.getString( "repeatable_program_stage_details" )</th></tr>
 	
 	<tr>
@@ -70,12 +65,6 @@
 	#end
 	
 	<tr><th colspan="2">$i18n.getString( "form_details" )</th></tr>
-	
-	<tr>
-		<td><label>$i18n.getString( "show_provided_provided_elsewhere" )</label></td>
-		<td><input type="checkbox" id="displayProvidedOtherFacility" name="displayProvidedOtherFacility" value='true' checked></td>
-		<td></td>
-	</tr>
 	
 	<tr>
 		<td><label>$i18n.getString( "block_entry_form_after_completed" )</label></td>

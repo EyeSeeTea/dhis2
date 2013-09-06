@@ -33,6 +33,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientReminder;
@@ -146,7 +147,7 @@ public class CompleteDataEntryAction
         programStageInstance.setCompletedUser( currentUserService.getCurrentUsername() );
 
         // Send message when to completed the event
-        
+
         List<OutboundSms> psiOutboundSms = programStageInstance.getOutboundSms();
         if ( psiOutboundSms == null )
         {
@@ -157,7 +158,7 @@ public class CompleteDataEntryAction
             PatientReminder.SEND_WHEN_TO_C0MPLETED_EVENT, format ) );
 
         programStageInstanceService.updateProgramStageInstance( programStageInstance );
-
+        
         // ---------------------------------------------------------------------
         // Check Completed status for all of ProgramStageInstance of
         // ProgramInstance

@@ -104,16 +104,6 @@ public class JacksonJsonView
         this.callbackParameter = callbackParameter;
     }
 
-    public void setPaddingFunction( String paddingFunction )
-    {
-        this.paddingFunction = paddingFunction;
-    }
-
-    public void setWithCompression( boolean withCompression )
-    {
-        this.withCompression = withCompression;
-    }
-
     @Override
     protected void renderMergedOutputModel( Map<String, Object> model, HttpServletRequest request,
         HttpServletResponse response ) throws Exception
@@ -130,9 +120,18 @@ public class JacksonJsonView
         }
         else
         {
-            response.setContentType( ContextUtils.CONTENT_TYPE_GZIP );
-            response.addHeader( ContextUtils.HEADER_CONTENT_TRANSFER_ENCODING, "binary" );
-            outputStream = new GZIPOutputStream( response.getOutputStream() );
+            if ( !withPadding )
+            {
+                response.setContentType( CONTENT_TYPE_APPLICATION_JSON_GZIP );
+                response.addHeader( ContextUtils.HEADER_CONTENT_TRANSFER_ENCODING, "binary" );
+                outputStream = new GZIPOutputStream( response.getOutputStream() );
+            }
+            else
+            {
+                response.setContentType( CONTENT_TYPE_APPLICATION_JAVASCRIPT_GZIP );
+                response.addHeader( ContextUtils.HEADER_CONTENT_TRANSFER_ENCODING, "binary" );
+                outputStream = new GZIPOutputStream( response.getOutputStream() );
+            }
         }
 
         if ( withPadding )

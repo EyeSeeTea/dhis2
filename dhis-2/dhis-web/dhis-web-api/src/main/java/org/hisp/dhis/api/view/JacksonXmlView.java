@@ -74,11 +74,6 @@ public class JacksonXmlView
         }
     }
 
-    public void setWithCompression( boolean withCompression )
-    {
-        this.withCompression = withCompression;
-    }
-
     @Override
     protected void renderMergedOutputModel( Map<String, Object> model, HttpServletRequest request,
         HttpServletResponse response ) throws Exception
@@ -96,7 +91,7 @@ public class JacksonXmlView
         }
         else
         {
-            response.setContentType( ContextUtils.CONTENT_TYPE_GZIP );
+            response.setContentType( CONTENT_TYPE_APPLICATION_XML_GZIP );
             response.addHeader( ContextUtils.HEADER_CONTENT_TRANSFER_ENCODING, "binary" );
             outputStream = new GZIPOutputStream( response.getOutputStream() );
         }

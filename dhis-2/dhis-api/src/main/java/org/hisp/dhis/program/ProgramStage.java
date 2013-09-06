@@ -91,10 +91,6 @@ public class ProgramStage
 
     private Boolean captureCoordinates = false;
 
-    private Boolean relatedPatient = false;
-
-    private Boolean displayProvidedOtherFacility;
-
     private Boolean blockEntryForm = false;
 
     /**
@@ -188,20 +184,7 @@ public class ProgramStage
     {
         this.blockEntryForm = blockEntryForm;
     }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Boolean getDisplayProvidedOtherFacility()
-    {
-        return displayProvidedOtherFacility;
-    }
-
-    public void setDisplayProvidedOtherFacility( Boolean displayProvidedOtherFacility )
-    {
-        this.displayProvidedOtherFacility = displayProvidedOtherFacility;
-    }
-
+    
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
@@ -416,16 +399,6 @@ public class ProgramStage
     public void setCaptureCoordinates( Boolean captureCoordinates )
     {
         this.captureCoordinates = captureCoordinates;
-    }
-
-    public Boolean getRelatedPatient()
-    {
-        return relatedPatient;
-    }
-
-    public void setRelatedPatient( Boolean relatedPatient )
-    {
-        this.relatedPatient = relatedPatient;
     }
 
 }

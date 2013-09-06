@@ -33,6 +33,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+import org.hisp.dhis.dxf2.metadata.ImportOptions;
+import org.hisp.dhis.scheduling.TaskId;
+import org.hisp.dhis.system.notification.NotificationLevel;
+import org.hisp.dhis.system.notification.Notifier;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
@@ -44,8 +49,11 @@ import java.nio.charset.Charset;
  *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class JacksonEventService extends BaseEventService
+public class JacksonEventService extends AbstractEventService
 {
+    @Autowired
+    private Notifier notifier;
+
     // -------------------------------------------------------------------------
     // EventService Impl
     // -------------------------------------------------------------------------
@@ -90,9 +98,23 @@ public class JacksonEventService extends BaseEventService
     @Override
     public ImportSummaries saveEventsXml( InputStream inputStream ) throws IOException
     {
+        return saveEventsXml( inputStream, null, null );
+    }
+
+    @Override
+    public ImportSummaries saveEventsXml( InputStream inputStream, ImportOptions importOptions ) throws IOException
+    {
+        return saveEventsXml( inputStream, null, importOptions );
+    }
+
+    @Override
+    public ImportSummaries saveEventsXml( InputStream inputStream, TaskId taskId, ImportOptions importOptions ) throws IOException
+    {
         ImportSummaries importSummaries = new ImportSummaries();
 
         String input = StreamUtils.copyToString( inputStream, Charset.forName( "UTF-8" ) );
+
+        notifier.clear( taskId ).notify( taskId, "Importing events" );
 
         try
         {
@@ -100,14 +122,17 @@ public class JacksonEventService extends BaseEventService
 
             for ( Event event : events.getEvents() )
             {
-                importSummaries.getImportSummaries().add( saveEvent( event ) );
+                importSummaries.addImportSummary( saveEvent( event, importOptions ) );
             }
         }
         catch ( Exception ex )
         {
             Event event = fromXml( input, Event.class );
-            importSummaries.getImportSummaries().add( saveEvent( event ) );
+            importSummaries.addImportSummary( saveEvent( event, importOptions ) );
         }
+
+        notifier.notify( taskId, NotificationLevel.INFO, "Import done", true ).
+            addTaskSummary( taskId, importSummaries );
 
         return importSummaries;
     }
@@ -115,16 +140,36 @@ public class JacksonEventService extends BaseEventService
     @Override
     public ImportSummary saveEventXml( InputStream inputStream ) throws IOException
     {
+        return saveEventXml( inputStream, null );
+    }
+
+    @Override
+    public ImportSummary saveEventXml( InputStream inputStream, ImportOptions importOptions ) throws IOException
+    {
         Event event = fromXml( inputStream, Event.class );
-        return saveEvent( event );
+        return saveEvent( event, importOptions );
     }
 
     @Override
     public ImportSummaries saveEventsJson( InputStream inputStream ) throws IOException
     {
+        return saveEventsJson( inputStream, null, null );
+    }
+
+    @Override
+    public ImportSummaries saveEventsJson( InputStream inputStream, ImportOptions importOptions ) throws IOException
+    {
+        return saveEventsJson( inputStream, null, importOptions );
+    }
+
+    @Override
+    public ImportSummaries saveEventsJson( InputStream inputStream, TaskId taskId, ImportOptions importOptions ) throws IOException
+    {
         ImportSummaries importSummaries = new ImportSummaries();
 
         String input = StreamUtils.copyToString( inputStream, Charset.forName( "UTF-8" ) );
+
+        notifier.clear( taskId ).notify( taskId, "Importing events" );
 
         try
         {
@@ -132,14 +177,17 @@ public class JacksonEventService extends BaseEventService
 
             for ( Event event : events.getEvents() )
             {
-                importSummaries.getImportSummaries().add( saveEvent( event ) );
+                importSummaries.addImportSummary( saveEvent( event, importOptions ) );
             }
         }
         catch ( Exception ex )
         {
             Event event = fromJson( input, Event.class );
-            importSummaries.getImportSummaries().add( saveEvent( event ) );
+            importSummaries.addImportSummary( saveEvent( event, importOptions ) );
         }
+
+        notifier.notify( taskId, NotificationLevel.INFO, "Import done", true ).
+            addTaskSummary( taskId, importSummaries );
 
         return importSummaries;
     }
@@ -147,7 +195,13 @@ public class JacksonEventService extends BaseEventService
     @Override
     public ImportSummary saveEventJson( InputStream inputStream ) throws IOException
     {
+        return saveEventJson( inputStream, null );
+    }
+
+    @Override
+    public ImportSummary saveEventJson( InputStream inputStream, ImportOptions importOptions ) throws IOException
+    {
         Event event = fromJson( inputStream, Event.class );
-        return saveEvent( event );
+        return saveEvent( event, importOptions );
     }
 }
