@@ -124,6 +124,15 @@ function selectDataElements()
 			else{
 				html += "<td align='center'><input type='hidden' name='allowDateInFuture'></td>";
 			}
+			
+			if( jQuery(item).attr('valuetype') =='optionset')
+			{
+				html += "<td align='center'><input type='checkbox' name='displayAsRadioButton'></td>";
+			}
+			else{
+				html += "<td align='center'><input type='hidden' name='displayAsRadioButton'></td>";
+			}
+			
 			html += "</tr>";
 			selectedList.append( html );
 			jQuery( item ).remove();
@@ -140,12 +149,22 @@ function selectAllDataElements()
 		html += "<td align='center'><input type='checkbox' name='compulsory'></td>";
 		html += "<td align='center'><input type='checkbox' name='allowProvided'></td>";
 		html += "<td align='center'><input type='checkbox' name='displayInReport'></td>";
+		
 		if( jQuery(item).attr('valuetype') =='date'){
 			html += "<td align='center'><input type='checkbox' name='allowDateInFuture'></td>";
 		}
 		else{
 			html += "<td align='center'><input type='hidden' name='allowDateInFuture'></td>";
 		}
+		
+		if( jQuery(item).attr('valuetype') =='optionset')
+		{
+			html += "<td align='center'><input type='checkbox' name='displayAsRadioButton'></td>";
+		}
+		else{
+			html += "<td align='center'><input type='hidden' name='displayAsRadioButton'></td>";
+		}
+		
 		html += "</tr>";
 		selectedList.append( html );
 		jQuery( item ).remove();
@@ -296,23 +315,31 @@ function generateTemplateMessageForm()
 				+ 	'<td><label>' + i18n_send_when_to + '</label></td>'
 				+ 	'<td>'
 				+ 		'<select id="whenToSend' + rowId + '" name="whenToSend' + rowId + '" class="whenToSend" onchange="whenToSendOnChange(' + rowId + ')">'
-				+ 			'<option value="">' + i18n_scheduled + '</option>'
+				+ 			'<option value="">' + i18n_days_scheduled + '</option>'
 				+ 			'<option value="2">' + i18n_complete_event + '</option>'
 				+ 		'</select>'
 				+	'</td>'
 				+ '</tr>'
 				+ '<tr name="tr' + rowId + '">'
 				+ 	'<td><label>' + i18n_days_before_after_due_date + '</label></td>'
-				+ 	'<td><input type="text" id="daysAllowedSendMessage' + rowId + '" name="daysAllowedSendMessage' + rowId + '" class="daysAllowedSendMessage {validate:{required:true,number:true}}"/></td>'
+				+ 	'<td>'
+				+		'<input type="text" onchange="setRealDays(' + rowId + ')" style="width:100px;" realvalue="" id="daysAllowedSendMessage' + rowId + '" name="daysAllowedSendMessage' + rowId + '" class="daysAllowedSendMessage {validate:{required:true,number:true}}"/> '
+				+ 		i18n_days
+				+		' <select id="time' + rowId + '" name="time' + rowId + '" style="width:100px;" onchange="setRealDays(' + rowId + ')" >'
+				+			'<option value="1">' + i18n_before + '</option>'
+				+			'<option value="-1">' + i18n_after + '</option>'
+				+		'</select> '
+				+		i18n_scheduled_date
+				+   ' </td>'
 				+ '</tr>'
 				+ '<tr name="tr' + rowId + '">'
 				+ 	'<td><label>' + i18n_recipients + '</label></td>'
 				+ 	'<td>'
 				+ 		'<select id="sendTo' + rowId + '" name="sendTo' + rowId + '" class="sendTo" onchange="onchangeUserGroup('+ rowId +')">'
-				+ 			'<option value="1">' + i18n_patient + '</option>'
-				+ 			'<option value="2">' + i18n_health_worker + '</option>'
-				+ 			'<option value="3">' + i18n_orgunit_registered + '</option>'
-				+ 			'<option value="4">' + i18n_all_users_in_orgunit_registered + '</option>'
+				+ 			'<option value="1">' + i18n_patient_sms_only + '</option>'
+				+ 			'<option value="3">' + i18n_orgunit_phone_number_sms_only + '</option>'
+				+ 			'<option value="2">' + i18n_health_worker_assigned_to_person + '</option>'
+				+ 			'<option value="4">' + i18n_all_users_at_orgunit + '</option>'
 				+ 			'<option value="5">' + i18n_user_group + '</option>'
 				+ 		'</select>'
 				+	'</td>'
@@ -338,7 +365,11 @@ function generateTemplateMessageForm()
 				+ '</tr>'
 				+ '<tr name="tr' + rowId + '">'
 				+	'<td><label>' + i18n_message + '</label></td>'
-				+	'<td><textarea id="templateMessage' + rowId + '" name="templateMessage' + rowId + '" style="width:320px" class="templateMessage {validate:{required:true, rangelength:[3,160]}}"></textarea></td>'
+				+	'<td><textarea id="templateMessage' + rowId + '" name="templateMessage' + rowId + '" style="width:320px" class="templateMessage {validate:{required:true}}"></textarea></td>'
+				+ '</tr>'
+				+ '<tr>'
+				+	'<td></td>'
+				+ 	'<td id="messageLengthTD' + rowId + '"></td>'
 				+ '</tr>';
 
 	jQuery('#programStageMessage').append( contend );
@@ -355,9 +386,11 @@ function whenToSendOnChange(index)
 	var whenToSend = getFieldValue('whenToSend' + index );
 	if(whenToSend==2){
 		disable('daysAllowedSendMessage' + index );
+		disable('time' + index );
 	}
 	else{
 		enable('daysAllowedSendMessage' + index );
+		enable('time' + index );
 	}
 }
 function showHideUserGroup()
@@ -380,3 +413,37 @@ function onchangeUserGroup( id )
 		showById( 'tr'+id );
 	}
 };
+
+
+function getMessageLength(rowId)
+{
+	var message = getFieldValue( 'templateMessage' + rowId );
+	var length = 0;
+	var idx = message.indexOf('{');
+	while( idx >=0 ){
+		length += message.substr(0,idx).length;
+		var end = message.indexOf('}');
+		if(end>=0){
+			message = message.substr(end + 1, message.length);
+			idx = message.indexOf('{');
+		}
+	}
+	length += message.length;
+	setInnerHTML('messageLengthTD' + rowId, length + " " + i18n_characters_without_params);
+	if( length>=160 )
+	{
+		jQuery('#templateMessage' + rowId ).attr('maxlength', 160);
+	}
+	else
+	{
+		jQuery('#templateMessage' + rowId ).removeAttr('maxlength');
+	}
+}
+
+function setRealDays(rowId)
+{
+	var daysAllowedSendMessage = jQuery("#daysAllowedSendMessage" + rowId);
+	var time = jQuery("#time" + rowId + " option:selected ").val();
+	daysAllowedSendMessage.attr("realvalue", time * eval(daysAllowedSendMessage).val());
+	var aasdf= 0;
+}
