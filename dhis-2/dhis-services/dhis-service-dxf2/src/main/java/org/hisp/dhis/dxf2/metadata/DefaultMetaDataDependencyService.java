@@ -34,11 +34,16 @@ import org.hibernate.proxy.HibernateProxy;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.constant.Constant;
+import org.hisp.dhis.constant.ConstantService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.system.util.ReflectionUtils;
 import org.hisp.dhis.validation.ValidationRule;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +60,8 @@ public class DefaultMetaDataDependencyService
 {
     private static final Log log = LogFactory.getLog( DefaultMetaDataDependencyService.class );
 
+    private final Class[] specialCases = new Class[]{ DataElement.class, Indicator.class, OrganisationUnit.class, ValidationRule.class };
+
     //-------------------------------------------------------------------------------------------------------
     // Dependencies
     //-------------------------------------------------------------------------------------------------------
@@ -64,6 +71,12 @@ public class DefaultMetaDataDependencyService
 
     @Autowired
     private ExpressionService expressionService;
+
+    @Autowired
+    private ConstantService constantService;
+
+    @Autowired
+    private OrganisationUnitService organisationUnitService;
 
     //--------------------------------------------------------------------------
     // Get MetaData dependency Map
@@ -173,7 +186,7 @@ public class DefaultMetaDataDependencyService
         {
             for ( IdentifiableObject dependency : dependencies )
             {
-                log.info( "[ COMPUTING DEPENDENCY ] : " + dependency.getName() );
+                log.debug( "[ COMPUTING DEPENDENCY ] : " + dependency.getName() );
 
                 finalDependencies.add( dependency );
 
@@ -201,7 +214,7 @@ public class DefaultMetaDataDependencyService
 
                     if ( dependencyObject != null && isExportView( getterMethod ) )
                     {
-                        log.info( "[ DEPENDENCY OBJECT ] : " + dependencyObject.getName() );
+                        log.debug( "[ DEPENDENCY OBJECT ] : " + dependencyObject.getName() );
 
                         if ( dependencyObject instanceof HibernateProxy )
                         {
@@ -223,7 +236,7 @@ public class DefaultMetaDataDependencyService
                     {
                         for ( IdentifiableObject dependencyElement : dependencyCollection )
                         {
-                            log.info( "[ DEPENDENCY COLLECTION ELEMENT ] : " + dependencyElement.getName() );
+                            log.debug( "[ DEPENDENCY COLLECTION ELEMENT ] : " + dependencyElement.getName() );
 
                             if ( dependencyElement instanceof HibernateProxy )
                             {
@@ -250,7 +263,15 @@ public class DefaultMetaDataDependencyService
 
     private boolean isSpecialCase( IdentifiableObject identifiableObject )
     {
-        return ( identifiableObject instanceof Indicator || identifiableObject instanceof ValidationRule );
+        for ( Class specialCase : specialCases )
+        {
+            if ( identifiableObject.getClass().equals( specialCase ) )
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private Set<IdentifiableObject> computeSpecialDependencyCase( IdentifiableObject identifiableObject )
@@ -274,6 +295,12 @@ public class DefaultMetaDataDependencyService
             resultSet.addAll( dataElementCategoryOptionComboSet );
             resultSet.addAll( getDependencySet( dataElementCategoryOptionComboSet ) );
 
+            Set<Constant> constantSet = new HashSet<Constant>();
+            constantSet.addAll( constantService.getAllConstants() );
+
+            resultSet.addAll( constantSet );
+            resultSet.addAll( getDependencySet( constantSet ) );
+
             return resultSet;
         } else if ( identifiableObject instanceof ValidationRule )
         {
@@ -294,6 +321,36 @@ public class DefaultMetaDataDependencyService
 
             resultSet.addAll( dataElementCategoryOptionComboSet );
             resultSet.addAll( getDependencySet( dataElementCategoryOptionComboSet ) );
+
+            Set<Constant> constantSet = new HashSet<Constant>();
+            constantSet.addAll( constantService.getAllConstants() );
+
+            resultSet.addAll( constantSet );
+            resultSet.addAll( getDependencySet( constantSet ) );
+
+            return resultSet;
+        } else if ( identifiableObject instanceof DataElement )
+        {
+            Set<DataElementCategoryOptionCombo> dataElementCategoryOptionComboSet = new HashSet<DataElementCategoryOptionCombo>();
+            dataElementCategoryOptionComboSet.addAll( ( ( DataElement ) identifiableObject ).getCategoryCombo().getOptionCombos() );
+
+            resultSet.addAll( dataElementCategoryOptionComboSet );
+            resultSet.addAll( getDependencySet( dataElementCategoryOptionComboSet ) );
+
+            return resultSet;
+        } else if ( identifiableObject instanceof OrganisationUnit )
+        {
+            Set<OrganisationUnitLevel> organisationUnitLevelSet = new HashSet<OrganisationUnitLevel>();
+            int level = ( ( OrganisationUnit ) identifiableObject ).getOrganisationUnitLevel();
+
+            while (level > 0)
+            {
+                organisationUnitLevelSet.add( organisationUnitService.getOrganisationUnitLevelByLevel( level ) );
+                level--;
+            }
+
+            resultSet.addAll( organisationUnitLevelSet );
+            resultSet.addAll( getDependencySet( organisationUnitLevelSet ) );
 
             return resultSet;
         } else
