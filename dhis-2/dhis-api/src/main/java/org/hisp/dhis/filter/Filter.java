@@ -39,7 +39,7 @@ import org.hisp.dhis.common.view.ExportView;
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
-@JacksonXmlRootElement(localName = "filter", namespace = DxfNamespaces.DXF_2_0)
+@JacksonXmlRootElement( localName = "filter", namespace = DxfNamespaces.DXF_2_0 )
 public class Filter
         extends BaseIdentifiableObject
 {
@@ -76,8 +76,8 @@ public class Filter
     // -------------------------------------------------------------------------
 
     @JsonProperty
-    @JsonView({ DetailedView.class, ExportView.class })
-    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getMetaDataUids()
     {
         return metaDataUids;

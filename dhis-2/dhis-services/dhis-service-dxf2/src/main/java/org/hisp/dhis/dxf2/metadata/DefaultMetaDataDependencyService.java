@@ -288,13 +288,6 @@ public class DefaultMetaDataDependencyService
             resultSet.addAll( dataElementSet );
             resultSet.addAll( getDependencySet( dataElementSet ) );
 
-            Set<DataElementCategoryOptionCombo> dataElementCategoryOptionComboSet = new HashSet<DataElementCategoryOptionCombo>();
-            dataElementCategoryOptionComboSet.addAll( expressionService.getOptionCombosInExpression( ( ( Indicator ) identifiableObject ).getNumerator() ) );
-            dataElementCategoryOptionComboSet.addAll( expressionService.getOptionCombosInExpression( ( ( Indicator ) identifiableObject ).getDenominator() ) );
-
-            resultSet.addAll( dataElementCategoryOptionComboSet );
-            resultSet.addAll( getDependencySet( dataElementCategoryOptionComboSet ) );
-
             Set<Constant> constantSet = new HashSet<Constant>();
             constantSet.addAll( constantService.getAllConstants() );
 
@@ -314,13 +307,6 @@ public class DefaultMetaDataDependencyService
 
             resultSet.addAll( dataElementSet );
             resultSet.addAll( getDependencySet( dataElementSet ) );
-
-            Set<DataElementCategoryOptionCombo> dataElementCategoryOptionComboSet = new HashSet<DataElementCategoryOptionCombo>();
-            dataElementCategoryOptionComboSet.addAll( expressionService.getOptionCombosInExpression( leftSide.getExpression() ) );
-            dataElementCategoryOptionComboSet.addAll( expressionService.getOptionCombosInExpression( rightSide.getExpression() ) );
-
-            resultSet.addAll( dataElementCategoryOptionComboSet );
-            resultSet.addAll( getDependencySet( dataElementCategoryOptionComboSet ) );
 
             Set<Constant> constantSet = new HashSet<Constant>();
             constantSet.addAll( constantService.getAllConstants() );
