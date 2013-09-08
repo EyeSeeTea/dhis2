@@ -300,10 +300,7 @@ function selectAllMetaDataCategories()
 {
     for ( var i = 0; i < metaDataArray.length; i++ )
     {
-        if ( $( "#mainDiv" + metaDataArray[i] ).children().length == 0 )
-        {
-            insertMetaDataCategoryDesign( metaDataArray[i] );
-        }
+        selectMetaDataCategory( metaDataArray[i] );
     }
 }
 

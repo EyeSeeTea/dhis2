@@ -143,7 +143,6 @@ function generateMetaDataCategoryDesign( metaDataCategoryName )
 function moveSelected( metaDataCategoryName )
 {
     dhisAjaxSelect_moveAllSelected( "available" + metaDataCategoryName );
-
     if ( $( "#selected" + metaDataCategoryName + " option" ).length > 0 )
     {
         $( "#heading" + metaDataCategoryName ).css( "background", "#CFFFB3 50% 50% repeat-x" );
@@ -283,10 +282,7 @@ function selectAllMetaDataCategories()
 {
     for ( var i = 0; i < metaDataArray.length; i++ )
     {
-        if ( $( "#mainDiv" + metaDataArray[i] ).children().length == 0 )
-        {
-            insertMetaDataCategoryDesign( metaDataArray[i] );
-        }
+        insertMetaDataCategoryDesign( metaDataArray[i] );
     }
 }
 

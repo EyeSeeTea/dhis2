@@ -1,7 +1,5 @@
 <script type="text/javascript">
     var i18n_export = '$i18n.getString( "export" )';
-    var i18n_edit = '$i18n.getString( "edit" )';
-    var i18n_remove = '$i18n.getString( "remove" )';
 </script>
 
 ##@author Ovidiu Rosu <rosu.ovi@gmail.com>
