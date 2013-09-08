@@ -1,4 +1,8 @@
 <script>
+
+//    MetaData Json
+    var metaDataJson = ${metaDataJson};
+
     var i18n_select_all = '$i18n.getString( "select_all" )';
 
     var i18n_available_attributeTypes = '$i18n.getString( "available_attribute_types" )';
@@ -282,7 +286,7 @@
     </div>
     <div>
         <form id="importForm" name="importForm">
-            <input type="hidden" id="metaDataJson" name="metaDataJson" value='$metaDataJson'>
+            <input type="hidden" id="metaDataJson" name="metaDataJson" value='${metaDataJson}'/>
             <table>
                 <col width="140">
                 <col>

@@ -7,14 +7,11 @@ var metaDataArray = [ "AttributeTypes", "Dimensions", "Charts", "Concepts", "Con
     "OrganisationUnitLevels", "OrganisationUnits", "ReportTables", "Reports", "SqlViews", "UserGroups", "UserRoles",
     "Users", "ValidationRuleGroups", "ValidationRules" ];
 
-var metaDataJson;
-
 // -----------------------------------------------------------------------------
 // MetaData Category Accordion
 // -----------------------------------------------------------------------------
 jQuery( function ()
 {
-    metaDataJson = JSON.parse( $( "#metaDataJson" ).val() );
     if ( !jQuery.isEmptyObject( metaDataJson ) )
     {
         loadMetaDataCategories( metaDataJson );
@@ -363,7 +360,6 @@ function loadFile()
 // Process import MetaData Json
 function processImportMetaDataJson()
 {
-    var importMetaDataJson = JSON.parse( $( "#metaDataJson" ).val() );
     for ( var i = 0; i < metaDataArray.length; i++ )
     {
         var metaDataCategoryProperty = lowercaseFirstLetter( metaDataArray[i] );
