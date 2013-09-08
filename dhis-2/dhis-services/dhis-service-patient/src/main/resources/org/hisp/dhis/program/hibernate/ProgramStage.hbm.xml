@@ -32,7 +32,7 @@
 		</set>
 
 		<many-to-one name="dataEntryForm"
-			class="org.hisp.dhis.dataentryform.DataEntryForm" foreign-key="fk_programstage_dataentryform" />
+			class="org.hisp.dhis.dataentryform.DataEntryForm" foreign-key="fk_programstage_dataentryform" cascade="all" />
 
 		<property name="standardInterval" />
 
@@ -56,8 +56,12 @@
 		<property name="displayGenerateEventBox" />
 
 		<property name="captureCoordinates" />
-		
-		<property name="relatedPatient" />
+
+		<property name="generatedByEnrollmentDate" />
+
+		<property name="blockEntryForm" />
+
+		<property name="remindCompleted" />
 
 	</class>
 </hibernate-mapping>

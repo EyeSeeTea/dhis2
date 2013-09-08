@@ -31,12 +31,10 @@ package org.hisp.dhis.api.mobile.model.LWUITmodel;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
 import org.hisp.dhis.api.mobile.model.DataStreamSerializable;
-import org.hisp.dhis.api.mobile.model.Model;
 
 /**
  * @author Nguyen Kim Lai
@@ -62,7 +60,6 @@ public class MobileModel
         else
         {
             dout.writeInt( programs.size() );
-            System.out.println( programs.size() );
             for ( Program prog : programs )
             {
                 prog.setClientVersion( DataStreamSerializable.TWO_POINT_TEN );

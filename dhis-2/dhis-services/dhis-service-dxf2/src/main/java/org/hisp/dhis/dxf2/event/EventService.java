@@ -30,12 +30,17 @@ package org.hisp.dhis.dxf2.event;
 
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageInstance;
+import org.hisp.dhis.scheduling.TaskId;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -44,15 +49,37 @@ public interface EventService
 {
     ImportSummary saveEventXml( InputStream inputStream ) throws IOException;
 
+    ImportSummary saveEventXml( InputStream inputStream, ImportOptions importOptions ) throws IOException;
+
     ImportSummaries saveEventsXml( InputStream inputStream ) throws IOException;
+
+    ImportSummaries saveEventsXml( InputStream inputStream, ImportOptions importOptions ) throws IOException;
+
+    ImportSummaries saveEventsXml( InputStream inputStream, TaskId taskId, ImportOptions importOptions ) throws IOException;
 
     ImportSummary saveEventJson( InputStream inputStream ) throws IOException;
 
+    ImportSummary saveEventJson( InputStream inputStream, ImportOptions importOptions ) throws IOException;
+
     ImportSummaries saveEventsJson( InputStream inputStream ) throws IOException;
 
-    Events getEvents( Program program );
+    ImportSummaries saveEventsJson( InputStream inputStream, ImportOptions importOptions ) throws IOException;
+
+    ImportSummaries saveEventsJson( InputStream inputStream, TaskId taskId, ImportOptions importOptions ) throws IOException;
 
     Events getEvents( Program program, OrganisationUnit organisationUnit );
+
+    Events getEvents( Program program, OrganisationUnit organisationUnit, Date startDate, Date endDate );
+
+    Events getEvents( ProgramStage programStage, OrganisationUnit organisationUnit );
+
+    Events getEvents( ProgramStage programStage, OrganisationUnit organisationUnit, Date startDate, Date endDate );
+
+    Events getEvents( Program program, ProgramStage programStage, OrganisationUnit organisationUnit );
+
+    Events getEvents( Program program, ProgramStage programStage, OrganisationUnit organisationUnit, Date startDate, Date endDate );
+
+    Events getEvents( List<Program> programs, List<ProgramStage> programStages, List<OrganisationUnit> organisationUnits, Date startDate, Date endDate );
 
     Event getEvent( String uid );
 

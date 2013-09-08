@@ -28,10 +28,7 @@ package org.hisp.dhis.patient.action.programstage;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.opensymphony.xwork2.Action;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
@@ -43,12 +40,15 @@ import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 
-import com.opensymphony.xwork2.Action;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Abyot Asalefew Gizaw
- * @modified Tran Thanh Tri
  * @version $Id$
+ * @modified Tran Thanh Tri
  */
 public class UpdateProgramStageAction
     implements Action
@@ -250,6 +250,34 @@ public class UpdateProgramStageAction
         this.relatedPatient = relatedPatient;
     }
 
+    private Boolean generatedByEnrollmentDate;
+
+    public void setGeneratedByEnrollmentDate( Boolean generatedByEnrollmentDate )
+    {
+        this.generatedByEnrollmentDate = generatedByEnrollmentDate;
+    }
+
+    private Boolean blockEntryForm;
+
+    public void setBlockEntryForm( Boolean blockEntryForm )
+    {
+        this.blockEntryForm = blockEntryForm;
+    }
+
+    private Boolean remindCompleted = false;
+
+    public void setRemindCompleted( Boolean remindCompleted )
+    {
+        this.remindCompleted = remindCompleted;
+    }
+
+    private List<Boolean> displayAsRadioButtons = new ArrayList<Boolean>();
+
+    public void setDisplayAsRadioButtons( List<Boolean> displayAsRadioButtons )
+    {
+        this.displayAsRadioButtons = displayAsRadioButtons;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -264,6 +292,9 @@ public class UpdateProgramStageAction
         displayGenerateEventBox = (displayGenerateEventBox == null) ? false : displayGenerateEventBox;
         captureCoordinates = (captureCoordinates == null) ? false : captureCoordinates;
         relatedPatient = (relatedPatient == null) ? false : relatedPatient;
+        generatedByEnrollmentDate = (generatedByEnrollmentDate == null) ? false : generatedByEnrollmentDate;
+        blockEntryForm = (blockEntryForm == null) ? false : blockEntryForm;
+        remindCompleted = (remindCompleted == null) ? false : remindCompleted;
 
         ProgramStage programStage = programStageService.getProgramStage( id );
 
@@ -275,12 +306,15 @@ public class UpdateProgramStageAction
         programStage.setIrregular( irregular );
         programStage.setMinDaysFromStart( minDaysFromStart );
         programStage.setDisplayGenerateEventBox( displayGenerateEventBox );
-        programStage.setRelatedPatient( relatedPatient );
+        programStage.setBlockEntryForm( blockEntryForm );
+        programStage.setRemindCompleted( remindCompleted );
+        programStage.setGeneratedByEnrollmentDate( generatedByEnrollmentDate );
 
         if ( !programStage.getProgram().isSingleEvent() )
         {
             programStage.setAutoGenerateEvent( autoGenerateEvent );
         }
+
         programStage.setValidCompleteOnly( validCompleteOnly );
         programStage.setCaptureCoordinates( captureCoordinates );
 
@@ -317,6 +351,7 @@ public class UpdateProgramStageAction
             Boolean allowed = allowProvidedElsewhere.get( i ) == null ? false : allowProvidedElsewhere.get( i );
             Boolean displayInReport = displayInReports.get( i ) == null ? false : displayInReports.get( i );
             Boolean allowDate = allowDateInFutures.get( i ) == null ? false : allowDateInFutures.get( i );
+            Boolean displayRadioButton = displayAsRadioButtons.get( i ) == null ? false : displayAsRadioButtons.get( i );
 
             ProgramStageDataElement programStageDataElement = programStageDataElementService.get( programStage,
                 dataElement );
@@ -324,19 +359,21 @@ public class UpdateProgramStageAction
             if ( programStageDataElement == null )
             {
                 programStageDataElement = new ProgramStageDataElement( programStage, dataElement,
-                    this.compulsories.get( i ), new Integer( i ) );
+                    this.compulsories.get( i ), i );
                 programStageDataElement.setAllowProvidedElsewhere( allowed );
                 programStageDataElement.setDisplayInReports( displayInReport );
-                programStageDataElement.setAllowDateInFuture( allowDate );
+                programStageDataElement.setAllowDateInFuture( allowDate ); 
+                programStageDataElement.setDisplayAsRadioButton( displayRadioButton );
                 programStageDataElementService.addProgramStageDataElement( programStageDataElement );
             }
             else
             {
                 programStageDataElement.setCompulsory( this.compulsories.get( i ) );
-                programStageDataElement.setSortOrder( new Integer( i ) );
+                programStageDataElement.setSortOrder( i );
                 programStageDataElement.setAllowProvidedElsewhere( allowed );
                 programStageDataElement.setDisplayInReports( displayInReport );
                 programStageDataElement.setAllowDateInFuture( allowDate );
+                programStageDataElement.setDisplayAsRadioButton( displayRadioButton );
                 programStageDataElementService.updateProgramStageDataElement( programStageDataElement );
 
                 programStageDataElements.remove( programStageDataElement );

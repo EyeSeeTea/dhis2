@@ -131,7 +131,7 @@ public class DefaultSmsSender
     
     @Transactional
     @Override
-    public String sendMessage( String subject, String text, User sender, Set<User> users, boolean forceSend )
+    public String sendMessage( String subject, String text, User sender, List<User> users, boolean forceSend )
     {
         String message = null;
 
@@ -141,17 +141,27 @@ public class DefaultSmsSender
             return message;
         }
 
-        Set<User> toSendList = new HashSet<User>();
+        List<User> toSendList = new ArrayList<User>();
 
         String gatewayId = transportService.getDefaultGateway();
 
         if ( gatewayId != null && !gatewayId.trim().isEmpty() )
         {
-            for ( User user : users )
+            if ( !forceSend )
             {
-                if ( currentUserService.getCurrentUser() != null )
+                for ( User user : users )
                 {
-                    if ( !currentUserService.getCurrentUser().equals( user ) )
+                    if ( currentUserService.getCurrentUser() != null )
+                    {
+                        if ( !currentUserService.getCurrentUser().equals( user ) )
+                        {
+                            if ( isQualifiedReceiver( user ) )
+                            {
+                                toSendList.add( user );
+                            }
+                        }
+                    }
+                    else if ( currentUserService.getCurrentUser() == null )
                     {
                         if ( isQualifiedReceiver( user ) )
                         {
@@ -159,14 +169,12 @@ public class DefaultSmsSender
                         }
                     }
                 }
-                else if ( currentUserService.getCurrentUser() == null )
-                {
-                    if ( isQualifiedReceiver( user ) )
-                    {
-                        toSendList.add( user );
-                    }
-                }
             }
+            else
+            {
+                toSendList.addAll( users );
+            }
+            
 
             Set<String> phoneNumbers = null;
 
@@ -284,7 +292,7 @@ public class DefaultSmsSender
         return (length > 160) ? text.substring( 0, 157 ) + "..." : text;
     }
 
-    private Set<String> getRecipientsPhoneNumber( Set<User> users )
+    private Set<String> getRecipientsPhoneNumber( List<User> users )
     {
         Set<String> recipients = new HashSet<String>();
 

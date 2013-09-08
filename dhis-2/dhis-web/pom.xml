@@ -53,6 +53,7 @@
             <org.mortbay.jetty.Request.maxFormContentSize>10000000</org.mortbay.jetty.Request.maxFormContentSize>
           </systemPropertyVariables>
           <contextPath>/</contextPath>
+		  <webDefaultXml>E:/Projects/GSOC-Work/webdefault.xml</webDefaultXml>
         </configuration>
       </plugin>
     </plugins>

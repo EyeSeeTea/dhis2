@@ -28,12 +28,7 @@ package org.hisp.dhis.caseentry.action.patient;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.opensymphony.xwork2.Action;
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.i18n.I18n;
@@ -50,11 +45,13 @@ import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.validation.ValidationCriteria;
 
-import com.opensymphony.xwork2.Action;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Abyot Asalefew Gizaw
- * @version $Id$
  */
 public class ValidatePatientAction
     implements Action
@@ -84,8 +81,6 @@ public class ValidatePatientAction
     private String fullName;
 
     private String birthDate;
-
-    private char ageType;
 
     private Integer age;
 
@@ -161,7 +156,7 @@ public class ValidatePatientAction
                     boolean flagDuplicate = false;
                     for ( Patient p : patients )
                     {
-                        if ( id == null || (id != null && p.getId().intValue() != id.intValue()) )
+                        if ( id == null || (id != null && p.getId() != id) )
                         {
                             flagDuplicate = true;
                             Collection<PatientAttributeValue> patientAttributeValues = patientAttributeValueService
@@ -222,7 +217,7 @@ public class ValidatePatientAction
                         PatientIdentifier identifier = patientIdentifierService.get( idType, value );
 
                         if ( identifier != null
-                            && (id == null || identifier.getPatient().getId().intValue() != id.intValue()) )
+                            && (id == null || identifier.getPatient().getId() != id) )
                         {
                             idDuplicate += idType.getName() + ", ";
                         }
@@ -248,7 +243,7 @@ public class ValidatePatientAction
             p.setGender( gender );
         }
 
-        if ( birthDate != null )
+        if ( birthDate != null && !birthDate.isEmpty() )
         {
             birthDate = birthDate.trim();
             p.setBirthDate( format.parseDate( birthDate ) );
@@ -256,7 +251,7 @@ public class ValidatePatientAction
         }
         else if ( age != null )
         {
-            p.setBirthDateFromAge( age.intValue(), ageType );
+            p.setBirthDateFromAge( age, Patient.AGE_TYPE_YEAR );
         }
 
         if ( programId != null )
@@ -267,30 +262,7 @@ public class ValidatePatientAction
             if ( criteria != null )
             {
                 message = i18n.getString( "patient_could_not_be_enrolled_due_to_following_enrollment_criteria" ) + ": "
-                    + i18n.getString( criteria.getProperty() );
-
-                switch ( criteria.getOperator() )
-                {
-                case ValidationCriteria.OPERATOR_EQUAL_TO:
-                    message += " = ";
-                    break;
-                case ValidationCriteria.OPERATOR_GREATER_THAN:
-                    message += " > ";
-                    break;
-                default:
-                    message += " < ";
-                    break;
-                }
-
-                if ( criteria.getProperty() == "birthDate" )
-                {
-                    message += " " + format.formatValue( criteria.getValue() );
-                }
-                else
-                {
-                    message += " " + criteria.getValue().toString();
-                }
-
+                    + criteria.getDescription();
                 return INPUT;
             }
         }
@@ -411,10 +383,5 @@ public class ValidatePatientAction
     public void setRelationshipTypeId( Integer relationshipTypeId )
     {
         this.relationshipTypeId = relationshipTypeId;
-    }
-
-    public void setAgeType( char ageType )
-    {
-        this.ageType = ageType;
     }
 }

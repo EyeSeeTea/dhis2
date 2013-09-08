@@ -381,6 +381,11 @@ a.alert, .alert
   background-color: #ebf0f6;
 }
 
+.recipientsDiv
+{ 
+  padding-left: 38px;
+}
+
 .messageDiv
 {
   width: 700px;
@@ -428,8 +433,8 @@ a.alert, .alert
 
 .replyArea
 {
-  width: 530px;
-  height: 80px;
+  width: 650px;
+  height: 100px;
   border: 1px solid #ccc;
   resize: none;
   overflow: auto;

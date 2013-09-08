@@ -18,6 +18,7 @@
 <input type='hidden' name='currentUsername' id='currentUsername'>
 <input type='hidden' name='blockEntryForm' id='blockEntryForm'>
 <input type='hidden' name='remindCompleted' id='remindCompleted'>
+<input type='hidden' name='displayOptionSetAsRadioButton' id='displayOptionSetAsRadioButton'>
 
 <div id='entryForm' class='hidden'>
 	<table style="width:600px;margin-top:-30px" class="listTable">
@@ -33,17 +34,7 @@
 			</th>
 		</tr>
 		#end
-
-		<tr id='entryPostComment'>
-			<th class='coordinates1'><label for="postComment">$i18n.getString('post_comment'):</label></th>
-			<th colspan='3'>
-				<input type="text" class="{validate:{maxlength:160}} criteria" id="commentInput" name='commentInput'
-                        style="width:380px;#if($programStage.captureCoordinates=='false') margin-left:11px; padding-left: 2px;  #end "
-                       onkeypress="keypressOnComment( event, this );">
-				<input id="commentButton" name='commentButton' type="button" style='width:40px' value="$i18n.getString('add')" onclick='addComment( byId("commentInput"), $programStageInstance.id )'>
-			</th>
-		</tr>
-
+		
 		#if( $programStage.getDataEntryType()=='section' )
 		<tr id="filterDataSetSectionTr" class='coordinates1'>
 			<th class='coordinates1'><label for="filterDataSetSection">$i18n.getString( "filter_on_section" )</label></th>
@@ -85,7 +76,21 @@
 	#end
 </div>
 
-<div id='inputCriteriaDiv' class="page inputCriteria hidden" style="width:490px; height:29px;">
+<table id='entryPostComment' class='listTable hidden' style="width:100%;">
+<tr>
+	<th width="10%"><label for="postComment">$i18n.getString('post_comment'):</label></th>
+	<th width="85%">
+		<textarea type="text" class="criteria" id="commentInput" name='commentInput'
+			style="width:100%;height:12px;" onkeyup='commentKeyup()'></textarea>
+	</th>
+	<th width="5%">
+		<input id="commentButton" name='commentButton' type="button" style='width:40px;' value="$i18n.getString('add')" onclick='addComment( byId("commentInput"), $programStageInstance.id )'>
+	</th>
+</tr>
+</table>
+
+
+<div id='inputCriteriaDiv' class="page inputCriteria hidden" style="width:580px; height:29px;">
 	<input type="button" id="completeBtn" class="button" value="$i18n.getString('complete')" onClick="doComplete()">
 	<input type="button" id="uncompleteBtn" value="$i18n.getString('incomplete')" onclick="doUnComplete()">
 	<input type="button" id="validateBtn" class='button' id="validationBtn" value="$i18n.getString('run_validation')" onClick="javascript: runValidation();">
@@ -122,10 +127,5 @@
 			disable('validateBtn');
 		}
 	}
-					
-	#if($programStage.relatedPatient=='true')
-		setInnerHTML('patientRelatedStageSpan',"&#8226; <a href='javascript:showAddRelationshipPatient( $programStageInstance.programInstance.patient.id, false, $programStageInstance.id );' id='relatedPatient_$!programStageInstance.id' >" + i18n_add_patient_related_the_selected_event + "</a>");
-	#else
-		setInnerHTML('patientRelatedStageSpan','<br>&nbsp;');
-	#end
+	
 </script>
