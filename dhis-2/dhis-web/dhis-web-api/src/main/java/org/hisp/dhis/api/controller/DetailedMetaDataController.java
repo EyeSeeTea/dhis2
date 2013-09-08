@@ -32,13 +32,17 @@ import net.sf.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.api.utils.ContextUtils;
-import org.hisp.dhis.dxf2.metadata.ExportService;
-import org.hisp.dhis.dxf2.metadata.FilterOptions;
-import org.hisp.dhis.dxf2.metadata.MetaData;
+import org.hisp.dhis.dxf2.metadata.*;
+import org.hisp.dhis.dxf2.metadata.tasks.ImportMetaDataTask;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.filter.Filter;
+import org.hisp.dhis.importexport.ImportStrategy;
+import org.hisp.dhis.scheduling.TaskCategory;
+import org.hisp.dhis.scheduling.TaskId;
+import org.hisp.dhis.system.notification.Notifier;
 import org.hisp.dhis.system.scheduling.Scheduler;
 import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -48,8 +52,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,11 +81,21 @@ public class DetailedMetaDataController
     private Scheduler scheduler;
 
     @Autowired
+    private ImportService importService;
+
+    @Autowired
     private CurrentUserService currentUserService;
+
+    @Autowired
+    private Notifier notifier;
 
     private String detailedMetaDataString;
 
     private String format;
+
+    private boolean dryRun;
+
+    private ImportStrategy strategy;
 
     //--------------------------------------------------------------------------
     // Getters & Setters
@@ -106,6 +119,16 @@ public class DetailedMetaDataController
     public void setDetailedMetaDataString( String detailedMetaDataString )
     {
         this.detailedMetaDataString = detailedMetaDataString;
+    }
+
+    public void setDryRun( boolean dryRun )
+    {
+        this.dryRun = dryRun;
+    }
+
+    public void setStrategy( String strategy )
+    {
+        this.strategy = ImportStrategy.valueOf( strategy );
     }
 
     //--------------------------------------------------------------------------
@@ -290,5 +313,28 @@ public class DetailedMetaDataController
         {
             outputStream.close();
         }
+    }
+
+    //--------------------------------------------------------------------------
+    // Detailed MetaData Import - POST Requests
+    //--------------------------------------------------------------------------
+
+    @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/importDetailedMetaData" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_IMPORT')" )
+    public void importDetailedMetaData( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
+    {
+        strategy = ImportStrategy.valueOf( json.getString( "strategy" ) );
+        dryRun = json.getBoolean( "dryRun" );
+
+        TaskId taskId = new TaskId( TaskCategory.METADATA_IMPORT, currentUserService.getCurrentUser() );
+        User user = currentUserService.getCurrentUser();
+
+        MetaData metaData = new ObjectMapper().readValue( json.getString( "metaData" ), MetaData.class );
+
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setStrategy( strategy.toString() );
+        importOptions.setDryRun( dryRun );
+
+        scheduler.executeTask( new ImportMetaDataTask( user.getUid(), importService, importOptions, taskId, metaData ) );
     }
 }

@@ -72,7 +72,8 @@ function exportFilterButton( filterUid )
         {
             $( "#exportJson" ).attr( "value", filters[i].metaDataUids );
             jQuery( "#exportDialog" ).dialog( {
-                title: i18n_export
+                title: i18n_export,
+                modal: true
             } );
         }
     }
