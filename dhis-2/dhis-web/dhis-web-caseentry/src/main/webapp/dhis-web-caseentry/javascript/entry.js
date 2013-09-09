@@ -769,8 +769,11 @@ function loadProgramStageInstance( programStageInstanceId, always ) {
                     $( '#latitude' ).val( obj.coordinate.latitude );
                 }
 
-                if ( obj.executionDate.completed !== undefined ) {
-                    $( "#entryFormContainer input[id='completed']" ).val( obj.executionDate.completed );
+                if(obj.executionDate) {
+                    $( "input[id='executionDate']" ).val( obj.executionDate.executionDate );
+                    $("#entryFormContainer input[id='completed']").val(obj.executionDate.completed);
+                    $( '#entryForm' ).removeClass( 'hidden' ).addClass( 'visible' );
+                    $( '#inputCriteriaDiv' ).removeClass( 'hidden' );
                 }
             }
 
@@ -804,12 +807,13 @@ function loadProgramStageInstance( programStageInstanceId, always ) {
             $( "#entryFormContainer input[id='currentUsername']" ).val( data.currentUsername );
             $( "#entryFormContainer input[id='blockEntryForm']" ).val( data.programStage.blockEntryForm );
             $( "#entryFormContainer input[id='remindCompleted']" ).val( data.programStage.remindCompleted );
-			$( "#entryFormContainer input[id='commentInput']" ).val( data.comment );
 			$( "#entryFormContainer input[id='displayOptionSetAsRadioButton']" ).val( data.displayOptionSetAsRadioButton );
 
             $( "input[id='dueDate']" ).val( data.dueDate );
             $( "input[id='executionDate']" ).val( data.executionDate );
-
+			$( "#commentInput" ).val( data.comment );
+			$( "#commentInput" ).height(data.comment.split('\n').length * 15  + 12);
+			
             if ( data.program.type != '1' ) {
                 hideById( 'newEncounterBtn' );
             }
@@ -831,6 +835,7 @@ function loadProgramStageInstance( programStageInstanceId, always ) {
                 $( '#longitude' ).val( data.longitude );
                 $( '#latitude' ).val( data.latitude );
             }
+
             _.each( data.dataValues, function ( value, key ) {
                 var fieldId = getProgramStageUid() + '-' + key + '-val';
                 var field = $('#' + fieldId);
@@ -1004,7 +1009,7 @@ function autocompletedField( idField )
 		delay: 0,
 		minLength: 0,
 		source: function( request, response ){
-            searchOptionSet( dataElementUid, input.val(), response );
+            searchOptionSet( input.data('optionset'), input.val(), response );
 		},
 		minLength: 0,
 		select: function( event, ui ) {
