@@ -61,10 +61,16 @@ public class ValidationRule
      */
     private static final long serialVersionUID = -9058559806538024350L;
 
+    public static final String IMPORTANCE_HIGH = "high";
+    public static final String IMPORTANCE_MEDIUM = "medium";
+    public static final String IMPORTANCE_LOW = "low";
+
     public static final String TYPE_STATISTICAL = "statistical";
     public static final String TYPE_ABSOLUTE = "absolute";
 
     private String description;
+
+    private String importance;
 
     private String type;
 
@@ -174,6 +180,19 @@ public class ValidationRule
     public void setDescription( String description )
     {
         this.description = description;
+    }
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public String getImportance()
+    {
+        return importance != null && !importance.isEmpty() ? importance : IMPORTANCE_MEDIUM;
+    }
+
+    public void setImportance( String importance )
+    {
+        this.importance = importance;
     }
 
     @JsonProperty

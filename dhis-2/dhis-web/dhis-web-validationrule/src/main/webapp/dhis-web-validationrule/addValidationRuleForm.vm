@@ -14,6 +14,16 @@
 		<td><textarea name="description"></textarea></td>
 	</tr>
 	<tr>
+		<td><label for="importance">$encoder.htmlEncode( $i18n.getString( "importance" ) )<em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td>
+			<select type="text" id="importance" name="importance">
+				<option value="low">$i18n.getString( "low" )</option>
+				<option value="medium" selected="selected">$i18n.getString( "medium" )</option>
+				<option value="high">$i18n.getString( "high" )</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
 		<td><label for="periodType">$encoder.htmlEncode( $i18n.getString( "period_type" ) )<em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 		<td>
 			<select type="text" id="periodTypeName" name="periodTypeName">

@@ -52,6 +52,7 @@
 	<colgroup>
 	    <col>
 	    <col>
+	    <col width="60px">
 	    <col>
 	    <col>
 	    <col width="40">
@@ -63,6 +64,7 @@
 		<tr>
 			<th>$i18n.getString( "organisation_unit" )</th>
 			<th>$i18n.getString( "period" )</th>
+			<th>$i18n.getString( "importance" )</th>
 			<th class="{sorter: false}">$i18n.getString( "left_side_description" )</th>
 			<th class="{sorter: false}">$i18n.getString( "value" )</th>
 			<th class="{sorter: false}">$i18n.getString( "operator" )</th>
@@ -76,6 +78,7 @@
 		<tr id="tr${result.id}">
 		  <td>$!result.source.name</td>
 		  <td>$!format.formatPeriod( $result.period )</td>
+		  <td>$encoder.htmlEncode( $i18n.getString( $!result.validationRule.importance ) )</td>
 		  <td>$!result.validationRule.leftSide.description</td>
 		  <td>$!result.leftsideValue</td>
 		  <td style="text-align:center">$i18n.getString( $!result.validationRule.operator.mathematicalOperator )</td>

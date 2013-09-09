@@ -91,6 +91,13 @@ public class AddValidationRuleAction
         this.description = description;
     }
 
+    private String importance;
+
+    public void setImportance( String importance )
+    {
+        this.importance = importance;
+    }
+
     private String operator;
 
     public void setOperator( String operator )
@@ -173,6 +180,7 @@ public class AddValidationRuleAction
         
         validationRule.setName( name );
         validationRule.setDescription( description );
+        validationRule.setImportance( importance );
         validationRule.setType( ValidationRule.TYPE_ABSOLUTE );
         validationRule.setOperator( Operator.valueOf(operator) );
         validationRule.setLeftSide( leftSide );

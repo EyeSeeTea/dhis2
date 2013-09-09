@@ -19,6 +19,8 @@
 
     <property name="description" type="text" />
 
+    <property name="importance" length="16" />
+
     <property name="type" />
 
     <property name="operator" type="org.hisp.dhis.expression.OperatorUserType">
