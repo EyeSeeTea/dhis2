@@ -148,9 +148,9 @@ function moveSelected( metaDataCategoryName )
         $( "#heading" + metaDataCategoryName ).css( "background", "#CFFFB3 50% 50% repeat-x" );
     }
 
-    if ( $( "#available" + metaDataCategoryName + " option" ).length > 0 )
+    if ( $( "#available" + metaDataCategoryName + " option" ).length == 0 )
     {
-        $( "#checkboxSelectAll" + metaDataCategoryName ).attr( "checked", false );
+        $( "#checkboxSelectAll" + metaDataCategoryName ).attr( "checked", true );
     }
 }
 
