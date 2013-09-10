@@ -49,15 +49,6 @@ function dobTypeOnChange( container ){
 		$('#' + container+ ' [id=birthDate]').datepicker("destroy");
 		jQuery('#' + container + ' [id=birthDate]').css("display","none");
 	}
-	else 
-	{
-		jQuery('#' + container + ' [id=age]').rules("remove");
-		jQuery('#' + container + ' [id=age]').css("display","");
-		
-		jQuery('#' + container + ' [id=birthDate]').rules("remove","required");
-		$('#' + container+ ' [id=birthDate]').datepicker("destroy");
-		jQuery('#' + container + ' [id=birthDate]').css("display","none");
-	}
 }
 
 // -----------------------------------------------------------------------------
@@ -233,6 +224,11 @@ function getSearchParams()
 {
 	var params = "";
 	var programIds = "";
+	if(getFieldValue('programIdAddPatient')!='')
+	{
+		programIds += "&programIds=" + getFieldValue('programIdAddPatient');
+		params += "prg_" + getFieldValue('programIdAddPatient');
+	}
 	var programStageId = jQuery('#programStageAddPatient').val();
 	if( getFieldValue('searchByProgramStage') == "true" ){
 		var statusEvent = jQuery('#programStageAddPatientTR [id=statusEvent]').val();
@@ -257,7 +253,7 @@ function getSearchParams()
 				if( idx == 0){
 					p = "&searchTexts=" + item.value;
 					if(item.value=='prg'){
-						programIds += '&programIds=';
+						params += '&prg=';
 						flag = true;
 					}
 				}
@@ -1726,7 +1722,7 @@ function showPatientDashboardForm( patientId )
 
 function activeProgramInstanceDiv( programInstanceId )
 {
-	jQuery(".selected").each(function(){
+	jQuery("#patientDashboard .selected").each(function(){
 		jQuery(this).removeClass();
 	});
 	
@@ -1922,6 +1918,7 @@ function sendSmsOnePatient( field, id )
 					+ "<td>" + field.value + "</td>"+
 					+ "<td>" + field.value + "</td></tr>");
 				field.style.backgroundColor = SUCCESS_COLOR;
+				field.value="";
 				hideById('smsError');
 				setInnerHTML('smsSuccess', json.message);
 			

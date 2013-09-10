@@ -63,7 +63,11 @@ public class DefaultPatientReminderService
         String incidentDate = format.formatDate( programInstance.getDateOfIncident() );
         String erollmentDate = format.formatDate( programInstance.getEnrollmentDate() );
 
-        templateMessage = templateMessage.replace( PatientReminder.TEMPLATE_MESSSAGE_PATIENT_NAME, patientName );
+        if ( patientName != null )
+        {
+            templateMessage = templateMessage.replace( PatientReminder.TEMPLATE_MESSSAGE_PATIENT_NAME, patientName );
+        }
+
         templateMessage = templateMessage.replace( PatientReminder.TEMPLATE_MESSSAGE_PROGRAM_NAME, programName );
         templateMessage = templateMessage
             .replace( PatientReminder.TEMPLATE_MESSSAGE_ORGUNIT_NAME, organisationunitName );
@@ -91,7 +95,10 @@ public class DefaultPatientReminderService
         String daysSinceDueDate = DateUtils.daysBetween( new Date(), programStageInstance.getDueDate() ) + "";
         String dueDate = format.formatDate( programStageInstance.getDueDate() );
 
-        templateMessage = templateMessage.replace( PatientReminder.TEMPLATE_MESSSAGE_PATIENT_NAME, patientName );
+        if ( patientName != null )
+        {
+            templateMessage = templateMessage.replace( PatientReminder.TEMPLATE_MESSSAGE_PATIENT_NAME, patientName );
+        }
         templateMessage = templateMessage.replace( PatientReminder.TEMPLATE_MESSSAGE_PROGRAM_NAME, programName );
         templateMessage = templateMessage.replace( PatientReminder.TEMPLATE_MESSSAGE_PROGAM_STAGE_NAME,
             programStageName );
@@ -108,7 +115,6 @@ public class DefaultPatientReminderService
     public Set<String> getPhonenumbers( PatientReminder patientReminder, Patient patient )
     {
         Set<String> phoneNumbers = new HashSet<String>();
-
         switch ( patientReminder.getSendTo() )
         {
         case PatientReminder.SEND_TO_ALL_USERS_IN_ORGUGNIT_REGISTERED:
@@ -162,5 +168,32 @@ public class DefaultPatientReminderService
             break;
         }
         return phoneNumbers;
+    }
+
+    public Set<User> getUsers( PatientReminder patientReminder, Patient patient )
+    {
+        Set<User> users = new HashSet<User>();
+
+        switch ( patientReminder.getSendTo() )
+        {
+        case PatientReminder.SEND_TO_ALL_USERS_IN_ORGUGNIT_REGISTERED:
+            users.addAll( patient.getOrganisationUnit().getUsers() );
+            break;
+        case PatientReminder.SEND_TO_HEALTH_WORKER:
+            if ( patient.getHealthWorker() != null && patient.getHealthWorker().getPhoneNumber() != null )
+            {
+                users.add( patient.getHealthWorker() );
+            }
+            break;
+        case PatientReminder.SEND_TO_USER_GROUP:
+            if ( patientReminder.getUserGroup().getMembers().size() > 0 )
+            {
+                users.addAll( patientReminder.getUserGroup().getMembers() );
+            }
+            break;
+        default:
+            break;
+        }
+        return users;
     }
 }

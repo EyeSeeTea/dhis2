@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.event;
+package org.hisp.dhis.dxf2.event.person;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,24 +28,32 @@ package org.hisp.dhis.dxf2.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.patient.Patient;
-
-import java.util.Collection;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.hisp.dhis.common.DxfNamespaces;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface PersonService
+@JacksonXmlRootElement( localName = "contact", namespace = DxfNamespaces.DXF_2_0 )
+public class Contact
 {
-    Persons getPersons();
+    private String phoneNumber;
 
-    Persons getPersons( Collection<Patient> patients );
+    public Contact()
+    {
+    }
 
-    Person getPerson( String uid );
+    @JsonProperty( required = true )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getPhoneNumber()
+    {
+        return phoneNumber;
+    }
 
-    Person getPerson( Patient patient );
-
-    void updatePerson( Person person );
-
-    void deletePerson( Person person );
+    public void setPhoneNumber( String phoneNumber )
+    {
+        this.phoneNumber = phoneNumber;
+    }
 }

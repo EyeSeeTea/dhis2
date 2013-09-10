@@ -31,6 +31,7 @@ package org.hisp.dhis.api.mobile.model.LWUITmodel;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -85,7 +86,13 @@ public class Patient
     private String phoneNumber;
 
     private String organisationUnitName;
+    
+    private List<Program> completedPrograms;
 
+    // -------------------------------------------------------------------------
+    // Getters and setters
+    // -------------------------------------------------------------------------
+    
     public List<PatientIdentifier> getIdentifiers()
     {
         return identifiers;
@@ -312,6 +319,20 @@ public class Patient
         this.organisationUnitName = organisationUnitName;
     }
 
+    public List<Program> getCompletedPrograms()
+    {
+        return completedPrograms;
+    }
+
+    public void setCompletedPrograms( List<Program> completedPrograms )
+    {
+        this.completedPrograms = completedPrograms;
+    }
+    
+    // -------------------------------------------------------------------------
+    // Override Methods
+    // -------------------------------------------------------------------------
+
     @Override
     public void serialize( DataOutputStream out )
         throws IOException
@@ -414,12 +435,13 @@ public class Patient
             dout.writeInt( 0 );
         }
 
-        // Write Program
+        // Write Programs
         dout.writeInt( programs.size() );
         for ( Program each : programs )
         {
             each.serialize( dout );
         }
+        
         /*dout.writeInt( programsID.size() );
         for ( Integer each : programsID )
         {
@@ -456,6 +478,13 @@ public class Patient
         {
             each.serialize( dout );
         }
+        
+        // Write completed Programs
+        dout.writeInt( completedPrograms.size() );
+        for ( Program each : completedPrograms )
+        {
+            each.serialize( dout );
+        }
 
         bout.flush();
         bout.writeTo( out );
@@ -463,7 +492,7 @@ public class Patient
 
     @Override
     public void deSerialize( DataInputStream din )
-        throws IOException
+        throws IOException, EOFException
     {
         this.setId( din.readInt() );
         this.setFirstName( din.readUTF() );
@@ -536,6 +565,7 @@ public class Patient
         
         // Patient Attribute & Identifiers
         int attsNumb = din.readInt();
+        System.out.println("Att numb: " + attsNumb);
         if( attsNumb > 0 )
         {
             this.patientAttValues = new ArrayList<PatientAttribute>();
@@ -552,9 +582,10 @@ public class Patient
         }
 
         int numbIdentifiers = din.readInt();
+        System.out.println("Ids numb: " + attsNumb);
+        this.identifiers = new ArrayList<PatientIdentifier>();
         if ( numbIdentifiers > 0 )
         {
-            this.identifiers = new ArrayList<PatientIdentifier>();
             for ( int i = 0; i < numbIdentifiers; i++ )
             {
                 PatientIdentifier identifier = new PatientIdentifier();
@@ -562,10 +593,6 @@ public class Patient
                 this.identifiers.add( identifier );
     
             }
-        }
-        else
-        {
-            this.identifiers = null;
         }
         
         // Program & Relationship
@@ -635,6 +662,23 @@ public class Patient
         else
         {
             this.enrollmentRelationships = null;
+        }
+        
+        int numbCompletedPrograms = din.readInt();
+        if ( numbCompletedPrograms > 0 )
+        {
+            this.completedPrograms = new ArrayList<Program>();
+            for ( int i = 0; i < numbCompletedPrograms; i++ )
+            {
+                Program program = new Program();
+                program.deSerialize( din );
+                this.completedPrograms.add( program );
+    
+            }
+        }
+        else
+        {
+            this.completedPrograms = null;
         }
     }
 

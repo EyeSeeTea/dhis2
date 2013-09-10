@@ -28,15 +28,15 @@ package org.hisp.dhis.dashboard;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.document.Document;
 import org.hisp.dhis.mapping.Map;
 import org.hisp.dhis.patientreport.PatientTabularReport;
@@ -44,18 +44,24 @@ import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.user.User;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
+ * Represents an item in the dashboard. An item can represent an embedded object
+ * or represent links to other objects.
+ * 
  * @author Lars Helge Overland
  */
 @JacksonXmlRootElement( localName = "dashboardItem", namespace = DxfNamespaces.DXF_2_0 )
 public class DashboardItem
     extends BaseIdentifiableObject
 {
-    public static final int MAX_CONTENT = 9;
+    public static final int MAX_CONTENT = 8;
 
     public static final String TYPE_CHART = "chart";
     public static final String TYPE_MAP = "map";
@@ -136,6 +142,59 @@ public class DashboardItem
         {
             return TYPE_PATIENT_TABULAR_REPORTS;
         }
+        
+        return null;
+    }
+    
+    /**
+     * Returns the actual item object if this dashboard item represents an 
+     * embedded item and not links to items.
+     */
+    public IdentifiableObject getEmbeddedItem()
+    {
+        if ( chart != null )
+        {
+            return chart;
+        }
+        else if ( map != null )
+        {
+            return map;
+        }
+        else if ( reportTable != null )
+        {
+            return reportTable;
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Returns a list of the actual item objects if this dashboard item 
+     * represents a list of objects and not an embedded item.
+     */
+    public List<? extends IdentifiableObject> getLinkItems()
+    {
+        if ( !users.isEmpty() )
+        {
+            return users;
+        }
+        else if ( !reportTables.isEmpty() )
+        {
+            return reportTables;
+        }
+        else if ( !reports.isEmpty() )
+        {
+            return reports;
+        }
+        else if ( !resources.isEmpty() )
+        {
+            return resources;
+        }
+        else if ( !patientTabularReports.isEmpty() )
+        {
+            return patientTabularReports;
+        }
+        
         return null;
     }
 
@@ -151,6 +210,7 @@ public class DashboardItem
         count += reportTables.size();
         count += reports.size();
         count += resources.size();
+        count += patientTabularReports.size();
         return count;
     }
 
@@ -175,9 +235,13 @@ public class DashboardItem
         {
             return removeContent( uid, reports );
         }
-        else
+        else if ( !resources.isEmpty() )
         {
             return removeContent( uid, resources );
+        }
+        else
+        {
+            return removeContent( uid, patientTabularReports );
         }
     }
 
@@ -202,6 +266,7 @@ public class DashboardItem
     // -------------------------------------------------------------------------
 
     @JsonProperty
+    @JsonView( { DetailedView.class } )
     @JsonSerialize( as = BaseIdentifiableObject.class )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Chart getChart()
@@ -215,6 +280,7 @@ public class DashboardItem
     }
 
     @JsonProperty
+    @JsonView( { DetailedView.class } )
     @JsonSerialize( as = BaseIdentifiableObject.class )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Map getMap()
@@ -227,7 +293,22 @@ public class DashboardItem
         this.map = map;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class } )
+    @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public ReportTable getReportTable()
+    {
+        return reportTable;
+    }
+
+    public void setReportTable( ReportTable reportTable )
+    {
+        this.reportTable = reportTable;
+    }
+
     @JsonProperty( value = "users" )
+    @JsonView( { DetailedView.class } )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JacksonXmlElementWrapper( localName = "users", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "user", namespace = DxfNamespaces.DXF_2_0 )
@@ -241,20 +322,8 @@ public class DashboardItem
         this.users = users;
     }
 
-    @JsonProperty
-    @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public ReportTable getReportTable()
-    {
-        return reportTable;
-    }
-
-    public void setReportTable( ReportTable reportTable )
-    {
-        this.reportTable = reportTable;
-    }
-
     @JsonProperty( value = "reportTables" )
+    @JsonView( { DetailedView.class } )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JacksonXmlElementWrapper( localName = "reportTables", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "reportTableItem", namespace = DxfNamespaces.DXF_2_0 )
@@ -269,6 +338,7 @@ public class DashboardItem
     }
 
     @JsonProperty( value = "reports" )
+    @JsonView( { DetailedView.class } )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JacksonXmlElementWrapper( localName = "reports", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "report", namespace = DxfNamespaces.DXF_2_0 )
@@ -283,6 +353,7 @@ public class DashboardItem
     }
 
     @JsonProperty( value = "resources" )
+    @JsonView( { DetailedView.class } )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JacksonXmlElementWrapper( localName = "resources", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "resource", namespace = DxfNamespaces.DXF_2_0 )
@@ -297,6 +368,7 @@ public class DashboardItem
     }
 
     @JsonProperty( value = "patientTabularReports" )
+    @JsonView( { DetailedView.class } )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JacksonXmlElementWrapper( localName = "patientTabularReports", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "patientTabularReport", namespace = DxfNamespaces.DXF_2_0 )
@@ -313,7 +385,6 @@ public class DashboardItem
     // -------------------------------------------------------------------------
     // Merge with
     // -------------------------------------------------------------------------
-
 
     @Override
     public void mergeWith( IdentifiableObject other )

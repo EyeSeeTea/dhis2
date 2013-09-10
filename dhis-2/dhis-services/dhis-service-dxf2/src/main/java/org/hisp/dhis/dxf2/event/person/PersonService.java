@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.event;
+package org.hisp.dhis.dxf2.event.person;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,59 +28,43 @@ package org.hisp.dhis.dxf2.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.dxf2.event.person.Gender;
+import org.hisp.dhis.dxf2.event.person.Person;
+import org.hisp.dhis.dxf2.event.person.Persons;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.program.Program;
+
+import java.util.Collection;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "person", namespace = DxfNamespaces.DXF_2_0 )
-public class Person
+public interface PersonService
 {
-    private String person;
+    Persons getPersons();
 
-    public Person()
-    {
-    }
+    Persons getPersons( OrganisationUnit organisationUnit );
 
-    @JsonProperty( required = true )
-    @JacksonXmlProperty( isAttribute = true )
-    public String getPerson()
-    {
-        return person;
-    }
+    Persons getPersons( Gender gender );
 
-    public void setPerson( String person )
-    {
-        this.person = person;
-    }
+    Persons getPersons( Program program );
 
-    @Override
-    public boolean equals( Object o )
-    {
-        if ( this == o ) return true;
-        if ( o == null || getClass() != o.getClass() ) return false;
+    Persons getPersons( Program program, Gender gender );
 
-        Person person = (Person) o;
+    Persons getPersons( OrganisationUnit organisationUnit, Program program );
 
-        if ( person != null ? !person.equals( person.person ) : person.person != null ) return false;
+    Persons getPersons( OrganisationUnit organisationUnit, Gender gender );
 
-        return true;
-    }
+    Persons getPersons( OrganisationUnit organisationUnit, Program program, Gender gender );
 
-    @Override
-    public int hashCode()
-    {
-        return person != null ? person.hashCode() : 0;
-    }
+    Persons getPersons( Collection<Patient> patients );
 
-    @Override
-    public String toString()
-    {
-        return "Person{" +
-            "person='" + person + '\'' +
-            '}';
-    }
+    Person getPerson( String uid );
+
+    Person getPerson( Patient patient );
+
+    void updatePerson( Person person );
+
+    void deletePerson( Person person );
 }
