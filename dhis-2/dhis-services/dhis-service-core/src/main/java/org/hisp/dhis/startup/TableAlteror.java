@@ -620,13 +620,65 @@ public class TableAlteror
         executeSql( "ALTER TABLE dataelement ALTER COLUMN domaintype SET NOT NULL" );
         executeSql( "update dataelementcategory set datadimension = false where datadimension is null" );
         
-		executeSql( "UPDATE dataset SET dataelementdecoration=false WHERE dataelementdecoration is null" );
+	executeSql( "UPDATE dataset SET dataelementdecoration=false WHERE dataelementdecoration is null" );
 
         executeSql( "alter table validationrulegroup rename column validationgroupid to validationrulegroupid" );
         executeSql( "alter table sqlview rename column viewid to sqlviewid" );
 
         executeSql( "UPDATE optionset SET version=1 WHERE version IS NULL" );
+        
+        // Check 'country' column on 'translation' table.  Add it if does not exists.
+        if( !checkColumn( "translation", "country" ) )
+        {
+            if ( executeSql( "alter table translation add column country varchar(15);" ) >= 0 )
+            {
+                executeSql( "update translation set country='' where country is null;" );
+                executeSql( "alter table translation drop constraint translation_pkey;" );
+                executeSql( "alter table translation add constraint translation_pkey primary key(objectclass, objectid, locale, country, objectproperty);" );
+            }
+        }
+        
+        // Check i18nlocale data count.  If empty, add list.
+        if( checkRowEmpty( "SELECT * FROM i18nlocale;" ) )
+        {
+            String i18nlocalesInsert = "INSERT INTO i18nlocale(i18nlocaleid, created, lastupdated, name, language, country)"
+                + " SELECT nextval('hibernate_sequence'), now(), now(), LANG.name, LANG.code, ''"
+                + " FROM"
+                + "  ((SELECT 'af' AS code, 'Afrikaans' AS name)"
+                + "   UNION ALL (SELECT 'am' AS code, 'Amharic' AS name)"
+                + "   UNION ALL (SELECT 'ar' AS code, 'Arabic' AS name)"
+                + "   UNION ALL (SELECT 'bi' AS code, 'Bislama' AS name)"
+                + "   UNION ALL (SELECT 'my' AS code, 'Burmese' AS name)"
+                + "   UNION ALL (SELECT 'zh' AS code, 'Chinese' AS name)"
+                + "   UNION ALL (SELECT 'nl' AS code, 'Dutch' AS name)"
+                + "   UNION ALL (SELECT 'en' AS code, 'English' AS name)"
+                + "   UNION ALL (SELECT 'fr' AS code, 'French' AS name)"
+                + "   UNION ALL (SELECT 'de' AS code, 'German' AS name)"
+                + "   UNION ALL (SELECT 'gu' AS code, 'Gujarati' AS name)"
+                + "   UNION ALL (SELECT 'hi' AS code, 'Hindi' AS name)"
+                + "   UNION ALL (SELECT 'id' AS code, 'Indonesian' AS name)"
+                + "   UNION ALL (SELECT 'it' AS code, 'Italian' AS name)"
+                + "   UNION ALL (SELECT 'rw' AS code, 'Kinyarwanda' AS name)"        
+                + "   UNION ALL (SELECT 'no' AS code, 'Norwegian' AS name)"
+                + "   UNION ALL (SELECT 'fa' AS code, 'Persian' AS name)"
+                + "   UNION ALL (SELECT 'pt' AS code, 'Portuguese' AS name)"
+                + "   UNION ALL (SELECT 'ps' AS code, 'Pushto' AS name)"  
+                + "   UNION ALL (SELECT 'ru' AS code, 'Russian' AS name)"
+                + "   UNION ALL (SELECT 'es' AS code, 'Spanish / Castilian' AS name)"
+                + "   UNION ALL (SELECT 'sw' AS code, 'Swahili' AS name)"
+                + "   UNION ALL (SELECT 'tg' AS code, 'Tajik' AS name)"
+                + "   UNION ALL (SELECT 'vi' AS code, 'Vietnamese' AS name)"
+                + "   ) AS LANG"
+                + "  LEFT OUTER JOIN i18nlocale as I18N"
+                + "    ON LANG.code = I18N.language"
+                + "       and I18N.country = ''"
+                + " WHERE I18N.i18nlocaleid is null"
+                + " ORDER BY LANG.name";
+            
+            executeSql( i18nlocalesInsert );
+        }
 
+        
         log.info( "Tables updated" );
     }
 
@@ -949,7 +1001,7 @@ public class TableAlteror
             return -1;
         }
     }
-
+    
     private boolean updateDataSetAssociation()
     {
         StatementHolder holder = statementManager.getHolder();
@@ -1013,6 +1065,69 @@ public class TableAlteror
                 }
             }
             return true;
+        }
+        catch ( Exception ex )
+        {
+            log.debug( ex );
+            return false;
+        }
+        finally
+        {
+            holder.close();
+        }
+    }
+    
+    private boolean checkColumn(String tableName, String columnName)
+    {
+        StatementHolder holder = statementManager.getHolder();
+
+        try
+        {
+            Statement statement = holder.getStatement();
+
+            ResultSet rs = statement
+                .executeQuery( "SELECT attname FROM pg_attribute WHERE attrelid = (SELECT oid FROM pg_class WHERE relname = '" 
+            + tableName + "') AND attname = '" + columnName + "';");
+
+            if ( rs.next() )
+            {
+                return true;
+            }
+
+            return false;
+
+        }
+        catch ( Exception ex )
+        {
+            log.debug( ex );
+            return false;
+        }
+        finally
+        {
+            holder.close();
+        }
+    }
+    
+
+    private boolean checkRowEmpty(String query)
+    {
+        StatementHolder holder = statementManager.getHolder();
+
+        try
+        {
+            Statement statement = holder.getStatement();
+
+            ResultSet rs = statement.executeQuery( query );
+
+            if ( rs.next() )
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+
         }
         catch ( Exception ex )
         {
