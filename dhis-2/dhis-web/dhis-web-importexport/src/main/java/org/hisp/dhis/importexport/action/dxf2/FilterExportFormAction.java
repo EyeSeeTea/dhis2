@@ -64,16 +64,16 @@ public class FilterExportFormAction
         this.uid = uid;
     }
 
-    private String code;
+    private String description;
 
-    public String getCode()
+    public String getDescription()
     {
-        return code;
+        return description;
     }
 
-    public void setCode( String code )
+    public void setDescription( String description )
     {
-        this.code = code;
+        this.description = description;
     }
 
     private String metaDataUids;
@@ -125,7 +125,7 @@ public class FilterExportFormAction
     {
         filter.setName( name );
         filter.setUid( uid );
-        filter.setCode( code );
+        filter.setDescription( description );
         filter.setMetaDataUids( metaDataUids );
         return SUCCESS;
     }

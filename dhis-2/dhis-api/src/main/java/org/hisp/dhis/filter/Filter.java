@@ -31,7 +31,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
@@ -41,7 +41,7 @@ import org.hisp.dhis.common.view.ExportView;
  */
 @JacksonXmlRootElement( localName = "filter", namespace = DxfNamespaces.DXF_2_0 )
 public class Filter
-        extends BaseIdentifiableObject
+        extends BaseNameableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -65,9 +65,9 @@ public class Filter
         this.name = name;
     }
 
-    public Filter( String uid, String code, String name, String metaDataUids )
+    public Filter( String uid, String description, String name, String metaDataUids )
     {
-        super( uid, code, name );
+        super( uid, description, name );
         this.metaDataUids = metaDataUids;
     }
 

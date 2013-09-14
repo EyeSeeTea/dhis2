@@ -85,27 +85,12 @@ function exportDetailedMetaData()
     var exportJson = {};
     exportJson.exportDependencies = $( "#exportDependencies" ).is( ":checked" ).toString();
     exportJson.metaDataUids = $( "#exportJson" ).val();
-    var url = getURL();
-    $.ajax(
-        {
-            type: "POST",
-            url: url,
-            data: JSON.stringify( exportJson ),
-            contentType: "application/json",
-            dataType: "xml",
-            success: function ()
-            {
-                console.log( "Exported JSON: " + JSON.stringify( exportJson ) );
-                $( "#exportDialog" ).dialog( "close" );
-                window.location = "../api/detailedMetaData/getMetaDataFile";
-            },
-            error: function ( request, status, error )
-            {
-                console.log( request.responseText );
-                console.log( arguments );
-                alert( "Export process failed." );
-            }
-        } );
+
+    $( "#exportJsonValue" ).val( JSON.stringify( exportJson ) );
+
+    document.getElementById( 'exportForm' ).action = getURL();
+    $( "#exportForm" ).submit();
+    $( "#exportDialog" ).dialog( "close" );
 }
 
 // Generate Export URL
@@ -114,15 +99,15 @@ function getURL()
     var url = "../api/detailedMetaData";
     var format = $( "#format" ).val();
     var compression = $( "#compression" ).val();
-    url += "/set" + format;
+    url += "." + format;
 
-    if ( compression == "zip" )
+    if(compression == "zip")
     {
-        url += "Zip";
+        url += ".zip";
     }
-    else if ( compression == "gz" )
+    else if(compression == "gz")
     {
-        url += "Gz";
+        url += ".gz";
     }
 
     return url;
@@ -140,7 +125,7 @@ function editFilterButton( filterUid )
         if ( filters[i].id == filterUid )
         {
             $( "input[name='name']" ).val( filters[i].name );
-            $( "input[name='code']" ).val( filters[i].code );
+            $( "input[name='description']" ).val( filters[i].description );
             $( "input[name='uid']" ).val( filters[i].id );
             $( "input[name='metaDataUids']" ).val( filters[i].metaDataUids );
             $( "input[name='command']" ).val( "update" );

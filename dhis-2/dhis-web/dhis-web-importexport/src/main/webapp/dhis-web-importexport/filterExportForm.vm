@@ -133,9 +133,9 @@
                     </td>
                 </tr>
                 <tr>
-                    <td><label>$i18n.getString( "code" )</label></td>
+                    <td><label>$i18n.getString( "description" )</label></td>
                     <td>
-                        <input type="text" id="code" name="code" maxlength="25" value="$filter.code" style="width: 100%;">
+                        <input type="text" id="description" name="description" maxlength="25" value="$filter.description" style="width: 100%;">
                     </td>
                 </tr>
             </table>
@@ -329,12 +329,15 @@
 <!-- EXPORT DIALOG -->
 #if($command == "addAdHoc")
     <div id="exportDialog" style="display: none;">
+        <form id="exportForm" action="" method="post">
+            <input type="hidden" id="exportJsonValue" name="exportJsonValue" >
+        </form>
         <table>
             <tr>
                 <td colspan="2">
                     <select id="format" style="width: 250px; font-size: 10pt;">
-                        <option value="Xml">XML</option>
-                        <option value="Json">Json</option>
+                        <option value="xml">XML</option>
+                        <option value="json">Json</option>
                     </select>
                 </td>
             </tr>

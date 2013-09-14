@@ -350,10 +350,10 @@
         <interceptor-ref name="fileUploadStack" />
     </action>
 
-    <action name="dxf2DetailedMetaDataExport" class="org.hisp.dhis.importexport.action.dxf2.FilterListAction">
+    <action name="dxf2FilteredMetaDataExport" class="org.hisp.dhis.importexport.action.dxf2.FilterListAction">
         <result name="success" type="velocity">/main.vm</result>
         <param name="menu">/dhis-web-importexport/mainMenu.vm</param>
-        <param name="page">/dhis-web-importexport/dxf2DetailedMetaDataExport.vm</param>
+        <param name="page">/dhis-web-importexport/dxf2FilteredMetaDataExport.vm</param>
         <param name="javascripts">javascript/filter.js</param>
         <param name="requiredAuthorities">F_METADATA_EXPORT</param>
     </action>
@@ -369,12 +369,12 @@
         <result name="success" type="velocity">/main.vm</result>
         <param name="menu">/dhis-web-importexport/mainMenu.vm</param>
         <param name="page">/dhis-web-importexport/filterExportForm.vm</param>
-        <param name="javascripts">javascript/detailedMetaDataExport.js,javascript/utils.js</param>
+        <param name="javascripts">javascript/filteredMetaDataExport.js,javascript/utils.js</param>
         <param name="requiredAuthorities">F_METADATA_EXPORT</param>
     </action>
 
     <action name="saveFilterListSortOrder" class="org.hisp.dhis.importexport.action.dxf2.SaveFilterListSortOrderAction">
-        <result name="success" type="redirect">dxf2DetailedMetaDataExport.action</result>
+        <result name="success" type="redirect">dxf2FilteredMetaDataExport.action</result>
         <param name="requiredAuthorities">F_METADATA_EXPORT</param>
     </action>
 

@@ -51,6 +51,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.regex.Matcher;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
@@ -289,7 +290,20 @@ public class DefaultMetaDataDependencyService
             resultSet.addAll( getDependencySet( dataElementSet ) );
 
             Set<Constant> constantSet = new HashSet<Constant>();
-            constantSet.addAll( constantService.getAllConstants() );
+
+            Matcher matcher = ExpressionService.CONSTANT_PATTERN.matcher( ( ( Indicator ) identifiableObject ).getNumerator() );
+            while (matcher.find())
+            {
+                String co = matcher.group( 1 );
+                constantSet.add( constantService.getConstant( co ) );
+            }
+
+            matcher = ExpressionService.CONSTANT_PATTERN.matcher( ( ( Indicator ) identifiableObject ).getDenominator() );
+            while (matcher.find())
+            {
+                String co = matcher.group( 1 );
+                constantSet.add( constantService.getConstant( co ) );
+            }
 
             resultSet.addAll( constantSet );
             resultSet.addAll( getDependencySet( constantSet ) );

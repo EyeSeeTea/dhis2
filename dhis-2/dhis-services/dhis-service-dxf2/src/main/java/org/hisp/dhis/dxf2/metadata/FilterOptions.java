@@ -27,7 +27,7 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Map;
+import net.sf.json.JSONObject;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
@@ -35,28 +35,28 @@ import java.util.Map;
 public class FilterOptions
         extends Options
 {
-    private Map<Object, Object> restrictionsMap;
+    private JSONObject restrictionsJson;
 
     //--------------------------------------------------------------------------
     // Constructors
     //--------------------------------------------------------------------------
 
-    public FilterOptions( Map<Object, Object> restrictionsMap )
+    public FilterOptions( JSONObject restrictionsJson )
     {
-        this.restrictionsMap = restrictionsMap;
+        this.restrictionsJson = restrictionsJson;
     }
 
     //--------------------------------------------------------------------------
     // Getters & Setters
     //--------------------------------------------------------------------------
 
-    public Map<Object, Object> getRestrictionsMap()
+    public JSONObject getRestrictionsJson()
     {
-        return restrictionsMap;
+        return restrictionsJson;
     }
 
-    public void setRestrictionsMap( Map<Object, Object> restrictionsMap )
+    public void setRestrictionsJson( JSONObject restrictionsJson )
     {
-        this.restrictionsMap = restrictionsMap;
+        this.restrictionsJson = restrictionsJson;
     }
 }

@@ -31,6 +31,7 @@ package org.hisp.dhis.dxf2.metadata;
 import java.io.IOException;
 import java.util.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.json.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -169,10 +170,18 @@ public class DefaultExportService
             notifier.notify( taskId, "Exporting meta-data" );
         }
 
-        Map<String, List<String>> identifiableObjectUidMap = ( Map<String, List<String>> ) filterOptions.getRestrictionsMap().get( "metaDataUids" );
+        Map<String, List<String>> identifiableObjectUidMap = null;
         Map<String, List<IdentifiableObject>> identifiableObjectMap;
 
-        if ( filterOptions.getRestrictionsMap().get( "exportDependencies" ).equals( "true" ) )
+        try
+        {
+            identifiableObjectUidMap = new ObjectMapper().readValue( filterOptions.getRestrictionsJson().get( "metaDataUids" ).toString(), HashMap.class );
+        } catch ( IOException e )
+        {
+            e.printStackTrace();
+        }
+
+        if ( filterOptions.getRestrictionsJson().get( "exportDependencies" ).equals( "true" ) )
         {
             identifiableObjectMap = metaDataDependencyService.getIdentifiableObjectWithDependencyMap( identifiableObjectUidMap );
         } else
