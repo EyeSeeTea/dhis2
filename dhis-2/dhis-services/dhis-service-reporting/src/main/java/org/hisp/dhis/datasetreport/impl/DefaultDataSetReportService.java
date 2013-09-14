@@ -1,19 +1,20 @@
 package org.hisp.dhis.datasetreport.impl;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -35,6 +36,7 @@ import static org.hisp.dhis.datasetreport.DataSetReportStore.SEPARATOR;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +45,7 @@ import java.util.regex.Matcher;
 
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
+import org.hisp.dhis.common.GridValue;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -78,6 +81,9 @@ public class DefaultDataSetReportService
     private static final String DEFAULT_HEADER = "Value";
     private static final String TOTAL_HEADER = "Total";
     private static final String SPACE = " ";
+    
+    private static final String ATTR_DE = "de";
+    private static final String ATTR_CO = "co";
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -193,10 +199,14 @@ public class DefaultDataSetReportService
             for ( DataElement dataElement : dataElements )
             {
                 grid.addRow();
-                grid.addValue( dataElement.getName() ); // Data element name
+                grid.addValue( new GridValue( dataElement.getName() ) ); // Data element name
 
                 for ( DataElementCategoryOptionCombo optionCombo : optionCombos ) // Values
                 {
+                    Map<Object, Object> attributes = new HashMap<Object, Object>();
+                    attributes.put( ATTR_DE, dataElement.getUid() );
+                    attributes.put( ATTR_CO, optionCombo.getUid() );
+                    
                     Double value = null;
 
                     if ( selectedUnitOnly )
@@ -210,7 +220,7 @@ public class DefaultDataSetReportService
                         value = valueMap.get( dataElement.getUid() + SEPARATOR + optionCombo.getUid() );
                     }
 
-                    grid.addValue( value );
+                    grid.addValue( new GridValue( value, attributes ) );
                 }
 
                 if ( categoryCombo.doSubTotals() && !selectedUnitOnly ) // Sub-total
@@ -219,7 +229,7 @@ public class DefaultDataSetReportService
                     {
                         Double value = subTotalMap.get( dataElement.getUid() + SEPARATOR + categoryOption.getUid() );
 
-                        grid.addValue( value );
+                        grid.addValue( new GridValue( value ) );
                     }
                 }
 
@@ -227,7 +237,7 @@ public class DefaultDataSetReportService
                 {
                     Double value = totalMap.get( String.valueOf( dataElement.getUid() ) );
 
-                    grid.addValue( value );
+                    grid.addValue( new GridValue( value ) );
                 }
             }
 
@@ -237,6 +247,8 @@ public class DefaultDataSetReportService
         return grids;
     }
 
+    // TODO convert to sections and render similarily
+    
     public Grid getDefaultDataSetReport( DataSet dataSet, Period period, OrganisationUnit unit, Set<OrganisationUnitGroup> groups, boolean selectedUnitOnly, I18nFormat format, I18n i18n )
     {
         List<DataElement> dataElements = new ArrayList<DataElement>( dataSet.getDataElements() );

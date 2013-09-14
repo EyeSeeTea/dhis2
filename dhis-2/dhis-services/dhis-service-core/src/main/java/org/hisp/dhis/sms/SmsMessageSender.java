@@ -1,17 +1,20 @@
+package org.hisp.dhis.sms;
+
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,17 +28,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.sms;
-
 import java.lang.Character.UnicodeBlock;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.message.MessageSender;
-import org.hisp.dhis.sms.SmsServiceException;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
 import org.hisp.dhis.user.CurrentUserService;
@@ -99,11 +100,21 @@ public class SmsMessageSender
 
         if ( gatewayId != null && !gatewayId.trim().isEmpty() )
         {
-            for ( User user : users )
+            if( !forceSend )
             {
-                if ( currentUserService.getCurrentUser() != null )
+                for ( User user : users )
                 {
-                    if ( !currentUserService.getCurrentUser().equals( user ) )
+                    if ( currentUserService.getCurrentUser() != null )
+                    {
+                        if ( !currentUserService.getCurrentUser().equals( user ) )
+                        {
+                            if ( isQualifiedReceiver( user ) )
+                            {
+                                toSendList.add( user );
+                            }
+                        }
+                    }
+                    else if ( currentUserService.getCurrentUser() == null )
                     {
                         if ( isQualifiedReceiver( user ) )
                         {
@@ -111,13 +122,10 @@ public class SmsMessageSender
                         }
                     }
                 }
-                else if ( currentUserService.getCurrentUser() == null )
-                {
-                    if ( isQualifiedReceiver( user ) )
-                    {
-                        toSendList.add( user );
-                    }
-                }
+            }
+            else
+            {
+                toSendList.addAll( users );
             }
 
             Set<String> phoneNumbers = null;

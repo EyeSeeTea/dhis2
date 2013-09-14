@@ -1,19 +1,20 @@
 package org.hisp.dhis.startup;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -159,8 +160,6 @@ public class TableAlteror
         executeSql( "ALTER TABLE mapview RENAME COLUMN maplegendtype TO legendtype" );
         executeSql( "ALTER TABLE mapview RENAME COLUMN maplegendsetid TO legendsetid" );
         executeSql( "ALTER TABLE mapview ALTER COLUMN opacity TYPE double precision" );
-
-        //TODO executeSql( "ALTER TABLE datavalue ALTER COLUMN storedby TYPE character varying(100)" );
 
         executeSql( "ALTER TABLE maplegend DROP CONSTRAINT maplegend_name_key" );
 
@@ -625,8 +624,16 @@ public class TableAlteror
         executeSql( "alter table validationrulegroup rename column validationgroupid to validationrulegroupid" );
         executeSql( "alter table sqlview rename column viewid to sqlviewid" );
 
+        executeSql( "UPDATE dashboard SET publicaccess='--------' WHERE publicaccess is null" );
+
         executeSql( "UPDATE optionset SET version=1 WHERE version IS NULL" );
         
+        executeSql( "ALTER TABLE datavalue ALTER COLUMN lastupdated TYPE timestamp" );
+        executeSql( "ALTER TABLE message ALTER COLUMN userid DROP NOT NULL" );
+        
+        executeSql( "delete from usersetting where name = 'dashboardConfig' or name = 'dashboardConfiguration'" );
+        executeSql( "ALTER TABLE interpretation ALTER COLUMN userid DROP NOT NULL" );
+
         // Check 'country' column on 'translation' table.  Add it if does not exists.
         if( !checkColumn( "translation", "country" ) )
         {
@@ -637,7 +644,7 @@ public class TableAlteror
                 executeSql( "alter table translation add constraint translation_pkey primary key(objectclass, objectid, locale, country, objectproperty);" );
             }
         }
-        
+
         // Check i18nlocale data count.  If empty, add list.
         if( checkRowEmpty( "SELECT * FROM i18nlocale;" ) )
         {
@@ -678,7 +685,6 @@ public class TableAlteror
             executeSql( i18nlocalesInsert );
         }
 
-        
         log.info( "Tables updated" );
     }
 

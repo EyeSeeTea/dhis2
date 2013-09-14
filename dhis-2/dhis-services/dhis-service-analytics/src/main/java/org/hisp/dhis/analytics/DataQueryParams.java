@@ -1,19 +1,20 @@
 package org.hisp.dhis.analytics;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -95,7 +96,7 @@ public class DataQueryParams
     public static final List<String> DATA_DIMS = Arrays.asList( INDICATOR_DIM_ID, DATAELEMENT_DIM_ID, DATAELEMENT_OPERAND_ID, DATASET_DIM_ID );
     public static final List<String> FIXED_DIMS = Arrays.asList( DATA_X_DIM_ID, INDICATOR_DIM_ID, DATAELEMENT_DIM_ID, DATASET_DIM_ID, PERIOD_DIM_ID, ORGUNIT_DIM_ID );
     
-    public static final int MAX_DIM_OPT_PERM = 20000;
+    public static final int MAX_DIM_OPT_PERM = 50000;
 
     private static final List<DimensionType> COMPLETENESS_DIMENSION_TYPES = Arrays.asList( DATASET, ORGANISATIONUNIT, ORGANISATIONUNIT_GROUPSET );
     
@@ -118,10 +119,8 @@ public class DataQueryParams
     // Transient properties
     // -------------------------------------------------------------------------
     
-    private transient String tableName;
+    private transient Partitions partitions;
 
-    private ListMap<String, NameableObject> tableNamePeriodMap;
-    
     private transient String periodType;
         
     private transient PeriodType dataPeriodType;
@@ -143,11 +142,10 @@ public class DataQueryParams
         this.aggregationType = params.getAggregationType();
         this.measureCriteria = params.getMeasureCriteria();
         
-        this.tableName = params.getTableName();
+        this.partitions = params.getPartitions();
         this.periodType = params.getPeriodType();
         this.dataPeriodType = params.getDataPeriodType();
         this.skipPartitioning = params.isSkipPartitioning();
-        this.tableNamePeriodMap = params.getTableNamePeriodMap();
     }
 
     // -------------------------------------------------------------------------
@@ -187,39 +185,11 @@ public class DataQueryParams
      * If true it means that a period filter exists and that the periods span
      * multiple years.
      */
-    public boolean filterSpansMultiplePartitions()
+    public boolean spansMultiplePartitions()
     {
-        return tableNamePeriodMap != null && tableNamePeriodMap.size() > 1;
+        return partitions != null && partitions.isMultiple();
     }
-    
-    /**
-     * If the filters of this query spans more than partition, this method will
-     * return a list of queries with a query for each partition, generated from 
-     * this query, where the table name and filter period items are set according 
-     * to the relevant partition.
-     */
-    public List<DataQueryParams> getPartitionFilterParams()
-    {
-        List<DataQueryParams> filters = new ArrayList<DataQueryParams>();
         
-        if ( !filterSpansMultiplePartitions() )
-        {
-            return filters;
-        }   
-        
-        for ( String tableName : tableNamePeriodMap.keySet() )
-        {
-            List<NameableObject> periods = tableNamePeriodMap.get( tableName );
-            
-            DataQueryParams params = new DataQueryParams( this );
-            params.setTableName( tableName );
-            params.updateFilterOptions( PERIOD_DIM_ID, periods );
-            filters.add( params );
-        }
-        
-        return filters;
-    }
-    
     /**
      * Creates a mapping between dimension identifiers and filter dimensions. Filters 
      * are guaranteed not to be null.
@@ -1057,24 +1027,14 @@ public class DataQueryParams
     // Get and set methods for transient properties
     // -------------------------------------------------------------------------
 
-    public String getTableName()
+    public Partitions getPartitions()
     {
-        return tableName;
+        return partitions;
     }
 
-    public void setTableName( String tableName )
+    public void setPartitions( Partitions partitions )
     {
-        this.tableName = tableName;
-    }
-
-    public ListMap<String, NameableObject> getTableNamePeriodMap()
-    {
-        return tableNamePeriodMap;
-    }
-
-    public void setTableNamePeriodMap( ListMap<String, NameableObject> tableNamePeriodMap )
-    {
-        this.tableNamePeriodMap = tableNamePeriodMap;
+        this.partitions = partitions;
     }
 
     public String getPeriodType()

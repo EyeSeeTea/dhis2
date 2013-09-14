@@ -1,19 +1,20 @@
 package org.hisp.dhis.message;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -50,6 +51,8 @@ import java.util.*;
 public class MessageConversation
     extends BaseIdentifiableObject
 {
+    private static final int RECIPIENTS_MAX_DISPLAY = 25;
+    
     // --------------------------------------------------------------------------
     // Persistent fields
     // --------------------------------------------------------------------------
@@ -80,7 +83,6 @@ public class MessageConversation
 
     private transient int messageCount;
 
-
     // --------------------------------------------------------------------------
     // Constructors
     // --------------------------------------------------------------------------
@@ -99,35 +101,6 @@ public class MessageConversation
     // --------------------------------------------------------------------------
     // Logic
     // --------------------------------------------------------------------------
-
-    @Override
-    public int hashCode()
-    {
-        return uid.hashCode();
-    }
-
-    @Override
-    public boolean equals( Object object )
-    {
-        if ( this == object )
-        {
-            return true;
-        }
-
-        if ( object == null )
-        {
-            return false;
-        }
-
-        if ( getClass() != object.getClass() )
-        {
-            return false;
-        }
-
-        final MessageConversation other = (MessageConversation) object;
-
-        return uid.equals( other.uid );
-    }
 
     @Override
     public String toString()
@@ -266,6 +239,35 @@ public class MessageConversation
     {
         userMessages.clear();
     }
+    
+    public String getLastSenderName()
+    {
+        boolean hasName = lastSenderFirstname != null || lastSenderSurname != null;
+                
+        return hasName ? ( lastSenderFirstname + " " + lastSenderSurname ) : null;
+    }
+    
+    public Set<User> getTopRecipients()
+    {
+        Set<User> recipients = new HashSet<User>();
+        
+        for ( UserMessage userMessage : userMessages )
+        {
+            recipients.add( userMessage.getUser() );
+            
+            if ( recipients.size() > RECIPIENTS_MAX_DISPLAY )
+            {
+                break;
+            }
+        }
+        
+        return recipients;
+    }
+    
+    public int getBottomRecipients()
+    {
+        return userMessages.size() - RECIPIENTS_MAX_DISPLAY;
+    }
 
     // -------------------------------------------------------------------------------------------------------
     // Persistent fields
@@ -373,11 +375,6 @@ public class MessageConversation
         this.followUp = followUp;
     }
 
-    public String getLastSenderName()
-    {
-        return lastSenderFirstname + " " + lastSenderSurname;
-    }
-
     public String getLastSenderSurname()
     {
         return lastSenderSurname;
@@ -419,8 +416,7 @@ public class MessageConversation
 
             subject = messageConversation.getSubject() == null ? subject : messageConversation.getSubject();
             lastSender = messageConversation.getLastSender() == null ? lastSender : messageConversation.getLastSender();
-            lastMessage = messageConversation.getLastMessage() == null ? lastMessage : messageConversation
-                .getLastMessage();
+            lastMessage = messageConversation.getLastMessage() == null ? lastMessage : messageConversation.getLastMessage();
 
             removeAllUserMessages();
             userMessages.addAll( messageConversation.getUserMessages() );

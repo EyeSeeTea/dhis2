@@ -1,19 +1,20 @@
 package org.hisp.dhis.api.mobile.model;
 
 /*
- * Copyright (c) 2010, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,6 +28,12 @@ package org.hisp.dhis.api.mobile.model;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -34,15 +41,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-
 @XmlRootElement
-@XmlAccessorType( XmlAccessType.FIELD )
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Beneficiary
     implements DataStreamSerializable
 {
@@ -52,25 +52,19 @@ public class Beneficiary
     private int id;
 
     @XmlAttribute
-    private String firstName;
-
-    @XmlAttribute
-    private String middleName;
-
-    @XmlAttribute
-    private String lastName;
+    private String name;
 
     @XmlAttribute
     private int age;
 
-    @XmlElementWrapper( name = "attributes" )
-    @XmlElement( name = "attribute" )
+    @XmlElementWrapper(name = "attributes")
+    @XmlElement(name = "attribute")
     private List<PatientAttribute> patientAttValues;
 
     private PatientAttribute groupAttribute;
 
-    @XmlElementWrapper( name = "identifiers" )
-    @XmlElement( name = "identifier" )
+    @XmlElementWrapper(name = "identifiers")
+    @XmlElement(name = "identifier")
     private List<PatientIdentifier> identifiers;
 
     private String gender;
@@ -89,32 +83,6 @@ public class Beneficiary
     public void setIdentifiers( List<PatientIdentifier> identifiers )
     {
         this.identifiers = identifiers;
-    }
-
-    public String getFullName()
-    {
-        boolean space = false;
-        String name = "";
-
-        if ( firstName != null && firstName.length() != 0 )
-        {
-            name = firstName;
-            space = true;
-        }
-        if ( middleName != null && middleName.length() != 0 )
-        {
-            if ( space )
-                name += " ";
-            name += middleName;
-            space = true;
-        }
-        if ( lastName != null && lastName.length() != 0 )
-        {
-            if ( space )
-                name += " ";
-            name += lastName;
-        }
-        return name;
     }
 
     public int getAge()
@@ -197,34 +165,14 @@ public class Beneficiary
         this.id = id;
     }
 
-    public String getFirstName()
+    public String getName()
     {
-        return firstName;
+        return name;
     }
 
-    public void setFirstName( String firstName )
+    public void setName( String name )
     {
-        this.firstName = firstName;
-    }
-
-    public String getMiddleName()
-    {
-        return middleName;
-    }
-
-    public void setMiddleName( String middleName )
-    {
-        this.middleName = middleName;
-    }
-
-    public String getLastName()
-    {
-        return lastName;
-    }
-
-    public void setLastName( String lastName )
-    {
-        this.lastName = lastName;
+        this.name = name;
     }
 
     public String getClientVersion()
@@ -245,9 +193,7 @@ public class Beneficiary
         DataOutputStream dout = new DataOutputStream( bout );
 
         dout.writeInt( this.getId() );
-        dout.writeUTF( this.getFirstName() );
-        dout.writeUTF( this.getMiddleName() );
-        dout.writeUTF( this.getLastName() );
+        dout.writeUTF( this.getName() );
         dout.writeInt( this.getAge() );
 
         if ( gender != null )
@@ -348,9 +294,9 @@ public class Beneficiary
         {
             return false;
         }
-        
+
         final Beneficiary otherBeneficiary = (Beneficiary) otherObject;
-        
+
         if ( birthDate == null )
         {
             if ( otherBeneficiary.birthDate != null )
@@ -362,15 +308,15 @@ public class Beneficiary
         {
             return false;
         }
-        
-        if ( firstName == null )
+
+        if ( name == null )
         {
-            if ( otherBeneficiary.firstName != null )
+            if ( otherBeneficiary.name != null )
             {
                 return false;
             }
         }
-        else if ( !firstName.equals( otherBeneficiary.firstName ) )
+        else if ( !name.equals( otherBeneficiary.name ) )
         {
             return false;
         }
@@ -385,30 +331,6 @@ public class Beneficiary
             return false;
         }
 
-        if ( lastName == null )
-        {
-            if ( otherBeneficiary.lastName != null )
-            {
-                return false;
-            }
-        }
-        else if ( !lastName.equals( otherBeneficiary.lastName ) )
-        {
-            return false;
-        }
-
-        if ( middleName == null )
-        {
-            if ( otherBeneficiary.middleName != null )
-            {
-                return false;
-            }
-        }
-        else if ( !middleName.equals( otherBeneficiary.middleName ) )
-        {
-            return false;
-        }
-        
         return true;
     }
 
@@ -417,12 +339,10 @@ public class Beneficiary
     {
         final int prime = 31;
         int result = 1;
-        
+
         result = prime * result + ((birthDate == null) ? 0 : birthDate.hashCode());
-        result = prime * result + ((firstName == null) ? 0 : firstName.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((gender == null) ? 0 : gender.hashCode());
-        result = prime * result + ((lastName == null) ? 0 : lastName.hashCode());
-        result = prime * result + ((middleName == null) ? 0 : middleName.hashCode());
 
         return result;
     }
@@ -435,9 +355,7 @@ public class Beneficiary
         DataOutputStream dout = new DataOutputStream( bout );
 
         dout.writeInt( this.getId() );
-        dout.writeUTF( this.getFirstName() );
-        dout.writeUTF( this.getMiddleName() );
-        dout.writeUTF( this.getLastName() );
+        dout.writeUTF( this.getName() );
         dout.writeInt( this.getAge() );
 
         if ( gender != null )
@@ -519,9 +437,7 @@ public class Beneficiary
         throws IOException
     {
         dout.writeInt( this.getId() );
-        dout.writeUTF( this.getFirstName() );
-        dout.writeUTF( this.getMiddleName() );
-        dout.writeUTF( this.getLastName() );
+        dout.writeUTF( this.getName() );
         dout.writeInt( this.getAge() );
 
         if ( gender != null )

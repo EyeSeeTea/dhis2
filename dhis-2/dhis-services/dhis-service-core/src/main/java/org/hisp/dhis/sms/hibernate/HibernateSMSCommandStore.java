@@ -1,19 +1,20 @@
 package org.hisp.dhis.sms.hibernate;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -33,7 +34,6 @@ import java.util.Set;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.sms.parse.ParserType;
@@ -41,6 +41,7 @@ import org.hisp.dhis.smscommand.SMSCode;
 import org.hisp.dhis.smscommand.SMSCommand;
 import org.hisp.dhis.smscommand.SMSCommandStore;
 import org.springframework.beans.factory.annotation.Required;
+import org.springframework.transaction.annotation.Transactional;
 
 public class HibernateSMSCommandStore
     implements SMSCommandStore
@@ -62,26 +63,23 @@ public class HibernateSMSCommandStore
         return criteria.list();
     }
 
+    @Transactional
     public int save( SMSCommand cmd )
     {
-        Session s = sessionFactory.getCurrentSession();
-        Transaction t = s.beginTransaction();
-        s.saveOrUpdate( cmd );
-        t.commit();
-        s.flush();
+        Session session = sessionFactory.getCurrentSession();
+        session.saveOrUpdate( cmd );
         return 0;
     }
 
+    @Transactional
     public void save( Set<SMSCode> codes )
     {
-        Session s = sessionFactory.getCurrentSession();
-        Transaction t = s.beginTransaction();
+        Session session = sessionFactory.getCurrentSession();
+        
         for ( SMSCode x : codes )
         {
-            s.saveOrUpdate( x );
+            session.saveOrUpdate( x );
         }
-        t.commit();
-        s.flush();
     }
 
     public SMSCommand getSMSCommand( int id )
@@ -97,17 +95,17 @@ public class HibernateSMSCommandStore
         return null;
     }
 
+    @Transactional
     public void delete( SMSCommand cmd )
     {
-        Session s = sessionFactory.getCurrentSession();
-        Transaction t = s.beginTransaction();
+        Session session = sessionFactory.getCurrentSession();
+        
         for ( SMSCode x : cmd.getCodes() )
         {
-            s.delete( x );
+            session.delete( x );
         }
-        s.delete( cmd );
-        t.commit();
-        s.flush();
+        
+        session.delete( cmd );
     }
 
     @SuppressWarnings( "unchecked" )

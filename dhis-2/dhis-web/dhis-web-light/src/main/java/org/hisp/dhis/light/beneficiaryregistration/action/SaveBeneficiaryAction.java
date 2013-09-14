@@ -1,17 +1,20 @@
+package org.hisp.dhis.light.beneficiaryregistration.action;
+
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,17 +28,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.light.beneficiaryregistration.action;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
+import com.opensymphony.xwork2.Action;
+import com.opensymphony.xwork2.ActionContext;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.struts2.StrutsStatics;
 import org.hisp.dhis.light.utils.FormUtils;
@@ -50,16 +44,24 @@ import org.hisp.dhis.patient.PatientIdentifierService;
 import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.patient.PatientIdentifierTypeService;
 import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.patient.util.PatientIdentifierGenerator;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.util.ContextUtils;
-import org.hisp.dhis.patient.util.PatientIdentifierGenerator;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import com.opensymphony.xwork2.Action;
-import com.opensymphony.xwork2.ActionContext;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class SaveBeneficiaryAction
     implements Action
@@ -338,13 +340,13 @@ public class SaveBeneficiaryAction
         patientIdentifierTypes = patientIdentifierTypeService.getAllPatientIdentifierTypes();
         patientAttributes = patientAttributeService.getAllPatientAttributes();
         Collection<Program> programs = programService.getAllPrograms();
-        
+
         for ( Program program : programs )
         {
             patientIdentifierTypes.removeAll( program.getPatientIdentifierTypes() );
             patientAttributes.removeAll( program.getPatientAttributes() );
         }
-        
+
         patient.setOrganisationUnit( organisationUnitService.getOrganisationUnit( orgUnitId ) );
 
         if ( this.patientFullName.trim().length() < 7 )
@@ -353,33 +355,7 @@ public class SaveBeneficiaryAction
         }
         else
         {
-            patientFullName = patientFullName.trim();
-
-            int startIndex = patientFullName.indexOf( ' ' );
-            int endIndex = patientFullName.lastIndexOf( ' ' );
-
-            String firstName = patientFullName.toString();
-            String middleName = "";
-            String lastName = "";
-
-            if ( patientFullName.indexOf( ' ' ) != -1 )
-            {
-                firstName = patientFullName.substring( 0, startIndex );
-                if ( startIndex == endIndex )
-                {
-                    middleName = "";
-                    lastName = patientFullName.substring( startIndex + 1, patientFullName.length() );
-                }
-                else
-                {
-                    middleName = patientFullName.substring( startIndex + 1, endIndex );
-                    lastName = patientFullName.substring( endIndex + 1, patientFullName.length() );
-                }
-            }
-
-            patient.setFirstName( firstName );
-            patient.setMiddleName( middleName );
-            patient.setLastName( lastName );
+            patient.setName( patientFullName.trim() );
         }
 
         patient.setGender( gender );
@@ -428,7 +404,7 @@ public class SaveBeneficiaryAction
         Collection<PatientIdentifierType> patientIdentifierTypes = patientIdentifierTypeService
             .getAllPatientIdentifierTypes();
         Collection<PatientAttribute> patientAttributes = patientAttributeService.getAllPatientAttributes();
-        
+
 
         for ( Program program : programs )
         {
@@ -476,15 +452,15 @@ public class SaveBeneficiaryAction
                 }
             }
         }
-        
+
         String identifier = PatientIdentifierGenerator.getNewIdentifier( patient.getBirthDate(), gender );
 
         PatientIdentifier systemGenerateIdentifier = patientIdentifierService.get( null, identifier );
         systemGenerateIdentifier = new PatientIdentifier();
         systemGenerateIdentifier.setIdentifier( identifier );
         systemGenerateIdentifier.setPatient( patient );
-        patientIdentifierSet.add(systemGenerateIdentifier);
-        
+        patientIdentifierSet.add( systemGenerateIdentifier );
+
         for ( PatientAttribute patientAttribute : patientAttributes )
         {
             patientAttributeSet.add( patientAttribute );

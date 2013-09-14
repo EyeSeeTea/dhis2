@@ -1,19 +1,20 @@
 package org.hisp.dhis.mobile.service;
 
 /*
- * Copyright (c) 2010, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -28,6 +29,8 @@ package org.hisp.dhis.mobile.service;
  */
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -53,7 +56,7 @@ public class DefaultProgramService
     private org.hisp.dhis.program.ProgramService programService;
 
     private org.hisp.dhis.mobile.service.ModelMapping modelMapping;
-
+    
     // -------------------------------------------------------------------------
     // ProgramService
     // -------------------------------------------------------------------------
@@ -72,13 +75,19 @@ public class DefaultProgramService
     
     public List<org.hisp.dhis.api.mobile.model.LWUITmodel.Program> getProgramsLWUIT( OrganisationUnit unit )
     {
+        Collection<org.hisp.dhis.program.Program> programByUnit = programService.getPrograms( unit );
+        
+        Collection<org.hisp.dhis.program.Program> programByCurrentUser = new HashSet<org.hisp.dhis.program.Program>( programService.getProgramsByCurrentUser());
+        
+        programByCurrentUser.retainAll( programByUnit );
+        
         List<org.hisp.dhis.api.mobile.model.LWUITmodel.Program> programs = new ArrayList<org.hisp.dhis.api.mobile.model.LWUITmodel.Program>();
 
-        for ( org.hisp.dhis.program.Program program : programService.getPrograms( unit ) )
+        for ( org.hisp.dhis.program.Program program : programByCurrentUser )
         {
             programs.add( getProgramLWUIT( program.getId()) );
         }
-
+        
         return programs;
     }
 
@@ -188,7 +197,13 @@ public class DefaultProgramService
             //programStage = i18n( i18nService, locale, programStage );
 
             org.hisp.dhis.api.mobile.model.LWUITmodel.ProgramStage prStg = new org.hisp.dhis.api.mobile.model.LWUITmodel.ProgramStage();
-
+            
+            //add report date
+            
+            prStg.setReportDate( "" );
+            
+            prStg.setReportDateDescription( programStage.getReportDateDescription() );
+            
             prStg.setId( programStage.getId() );
 
             prStg.setName( programStage.getName() );

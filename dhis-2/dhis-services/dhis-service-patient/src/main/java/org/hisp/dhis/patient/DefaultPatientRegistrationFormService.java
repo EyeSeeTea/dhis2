@@ -1,17 +1,20 @@
+package org.hisp.dhis.patient;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,8 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.patient;
 
 import java.util.Collection;
 import java.util.Date;
@@ -53,6 +54,10 @@ public class DefaultPatientRegistrationFormService
     private static final String TAG_OPEN = "<";
 
     private static final String TAG_CLOSE = "/>";
+
+    private static final String PROGRAM_INCIDENT_DATE = "dateOfIncident";
+
+    private static final String PROGRAM_ENROLLMENT_DATE = "enrollmentDate";
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -140,15 +145,15 @@ public class DefaultPatientRegistrationFormService
     }
 
     @Override
-    public String prepareDataEntryFormForAdd( String htmlCode, Collection<User> healthWorkers, Patient patient,
-        ProgramInstance programInstance, I18n i18n, I18nFormat format )
+    public String prepareDataEntryFormForAdd( String htmlCode, Program program, Collection<User> healthWorkers,
+        Patient patient, ProgramInstance programInstance, I18n i18n, I18nFormat format )
     {
         int index = 1;
 
         StringBuffer sb = new StringBuffer();
 
         Matcher inputMatcher = INPUT_PATTERN.matcher( htmlCode );
-        
+
         while ( inputMatcher.find() )
         {
             // -----------------------------------------------------------------
@@ -162,7 +167,7 @@ public class DefaultPatientRegistrationFormService
             Matcher programMatcher = PROGRAM_PATTERN.matcher( inputHtml );
             Matcher suggestedMarcher = SUGGESTED_VALUE_PATTERN.matcher( inputHtml );
             Matcher classMarcher = CLASS_PATTERN.matcher( inputHtml );
-            
+
             index++;
 
             if ( fixedAttrMatcher.find() && fixedAttrMatcher.groupCount() > 0 )
@@ -174,7 +179,7 @@ public class DefaultPatientRegistrationFormService
                 String hidden = "";
                 if ( patient != null )
                 {
-                    Object object = getValueFromPatient( StringUtils.capitalize( fixedAttr ), patient );
+                    Object object = getValueFromPatient( fixedAttr, patient );
                     if ( object != null )
                     {
                         if ( object instanceof Date )
@@ -191,17 +196,18 @@ public class DefaultPatientRegistrationFormService
                         }
                     }
                 }
-                else if( suggestedMarcher.find())
+                else if ( suggestedMarcher.find() )
                 {
                     value = suggestedMarcher.group( 2 );
                 }
-                
-                if( classMarcher.find() )
+
+                if ( classMarcher.find() )
                 {
                     hidden = classMarcher.group( 1 );
                 }
-                
-                inputHtml = getFixedAttributeField( inputHtml, fixedAttr, value.toString(), hidden, healthWorkers, i18n, index );
+
+                inputHtml = getFixedAttributeField( inputHtml, fixedAttr, value.toString(), hidden, healthWorkers,
+                    i18n, index );
             }
             else if ( identifierMatcher.find() && identifierMatcher.groupCount() > 0 )
             {
@@ -252,7 +258,7 @@ public class DefaultPatientRegistrationFormService
             {
                 String uid = dynamicAttrMatcher.group( 1 );
                 PatientAttribute attribute = attributeService.getPatientAttribute( uid );
-                
+
                 if ( attribute == null )
                 {
                     inputHtml = "<input value='[" + i18n.getString( "missing_patient_attribute" ) + " " + uid
@@ -290,7 +296,28 @@ public class DefaultPatientRegistrationFormService
 
                 inputHtml = "<input id=\"" + property + "\" name=\"" + property + "\" tabindex=\"" + index
                     + "\" value=\"" + value + "\" " + TAG_CLOSE;
-                inputHtml += "<script>datePicker(\"" + property + "\", true);</script>";
+                if ( property.equals( PROGRAM_ENROLLMENT_DATE ) )
+                {
+                    if ( program != null && program.getSelectEnrollmentDatesInFuture() )
+                    {
+                        inputHtml += "<script>datePicker(\"" + property + "\", true);</script>";
+                    }
+                    else
+                    {
+                        inputHtml += "<script>datePickerValid(\"" + property + "\", true);</script>";
+                    }
+                }
+                else if ( property.equals( PROGRAM_INCIDENT_DATE ) )
+                {
+                    if ( program != null && program.getSelectIncidentDatesInFuture() )
+                    {
+                        inputHtml += "<script>datePicker(\"" + property + "\", true);</script>";
+                    }
+                    else
+                    {
+                        inputHtml += "<script>datePickerValid(\"" + property + "\", true);</script>";
+                    }
+                }
             }
 
             inputMatcher.appendReplacement( sb, inputHtml );
@@ -396,13 +423,13 @@ public class DefaultPatientRegistrationFormService
             inputHtml += " class=\"{validate:{phone:true}}\" " + hidden + " " + TAG_CLOSE;
             inputHtml += " <input type=\"button\" value=\"+\" style=\"width:20px;\" class=\"phoneNumberTR\" onclick=\"addCustomPhoneNumberField(\'\');\" />";
         }
-        
+
         // Age fields
         else if ( fixedAttr.equals( PatientRegistrationForm.FIXED_ATTRIBUTE_AGE ) )
         {
             inputHtml += " class=\"{validate:{number:true}}\" " + hidden + " " + TAG_CLOSE;
         }
-        
+
         // Gender selector
         if ( fixedAttr.equals( PatientRegistrationForm.FIXED_ATTRIBUTE_GENDER ) )
         {
@@ -434,22 +461,22 @@ public class DefaultPatientRegistrationFormService
             || fixedAttr.equals( PatientRegistrationForm.FIXED_ATTRIBUTE_DEATH_DATE )
             || fixedAttr.equals( PatientRegistrationForm.FIXED_ATTRIBUTE_REGISTRATION_DATE ) )
         {
-            inputHtml += " class='" + hidden + "' "+ TAG_CLOSE;
+            inputHtml += " class='" + hidden + "' " + TAG_CLOSE;
             if ( fixedAttr.equals( PatientRegistrationForm.FIXED_ATTRIBUTE_BIRTHDATE )
                 || fixedAttr.equals( PatientRegistrationForm.FIXED_ATTRIBUTE_REGISTRATION_DATE ) )
             {
-                inputHtml += "<script>datePicker(\"" + fixedAttr + "\", true);</script>";
+                inputHtml += "<script>datePickerValid(\"" + fixedAttr + "\", true);</script>";
             }
             else
             {
-                inputHtml += "<script>datePicker(\"" + fixedAttr + "\", false);</script>";
+                inputHtml += "<script>datePickerValid(\"" + fixedAttr + "\", false);</script>";
             }
         }
 
         // DobType field
         else if ( fixedAttr.equals( PatientRegistrationForm.FIXED_ATTRIBUTE_DOB_TYPE ) )
         {
-            inputHtml = inputHtml.replaceFirst( "input", "select" ) + " class='" + hidden + "' >" ;
+            inputHtml = inputHtml.replaceFirst( "input", "select" ) + " class='" + hidden + "' >";
 
             if ( value.equals( "" ) || value.equals( Patient.DOB_TYPE_VERIFIED + "" ) )
             {
@@ -463,7 +490,7 @@ public class DefaultPatientRegistrationFormService
                 inputHtml += "<option value=\"D\" selected >" + i18n.getString( "declared" ) + "</option>";
                 inputHtml += "<option value=\"A\">" + i18n.getString( "approximated" ) + "</option>";
             }
-            else if ( value.equals( Patient.DOB_TYPE_APPROXIATED + "" ) )
+            else if ( value.equals( Patient.DOB_TYPE_APPROXIMATED + "" ) )
             {
                 inputHtml += "<option value=\"V\">" + i18n.getString( "verified" ) + "</option>";
                 inputHtml += "<option value=\"D\">" + i18n.getString( "declared" ) + "</option>";
@@ -509,6 +536,12 @@ public class DefaultPatientRegistrationFormService
 
     private Object getValueFromPatient( String property, Patient patient )
     {
+        if ( property.equals( Patient.FIXED_ATTR_AGE ) )
+        {
+            property = Patient.FIXED_ATTR_INTEGER_AGE;
+        }
+        property = StringUtils.capitalize( property );
+
         try
         {
             return Patient.class.getMethod( "get" + property ).invoke( patient );
@@ -524,7 +557,6 @@ public class DefaultPatientRegistrationFormService
     {
         try
         {
-
             return ProgramInstance.class.getMethod( "get" + property ).invoke( programInstance );
         }
         catch ( Exception ex )

@@ -1,17 +1,20 @@
+package org.hisp.dhis.program;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,7 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.program;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -32,6 +34,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.view.DetailedView;
@@ -50,9 +53,11 @@ public class ProgramStage
     extends BaseIdentifiableObject
 {
     public static final String TYPE_DEFAULT = "default";
+
     public static final String TYPE_SECTION = "section";
+
     public static final String TYPE_CUSTOM = "custom";
-    
+
     /**
      * Determines if a de-serialized file is compatible with this class.
      */
@@ -83,10 +88,20 @@ public class ProgramStage
     private Boolean validCompleteOnly = false;
 
     private Boolean displayGenerateEventBox = true;
-    
+
     private Boolean captureCoordinates = false;
-    
-    private Boolean relatedPatient = false;
+
+    private Boolean blockEntryForm = false;
+
+    /**
+     * Enabled this property to show a pop-up for confirming Complete a program
+     * after to complete a progam-stage
+     */
+    private Boolean remindCompleted = false;
+
+    private Boolean generatedByEnrollmentDate;
+
+    private Boolean allowGenerateNextVisit = false;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -104,47 +119,47 @@ public class ProgramStage
     }
 
     // -------------------------------------------------------------------------
-    // hashCode, equals and toString
-    // -------------------------------------------------------------------------
-
-    @Override
-    public int hashCode()
-    {
-        return name.hashCode();
-    }
-
-    @Override
-    public boolean equals( Object object )
-    {
-        if ( this == object )
-        {
-            return true;
-        }
-
-        if ( object == null )
-        {
-            return false;
-        }
-
-        if ( getClass() != object.getClass() )
-        {
-            return false;
-        }
-
-        final ProgramStage other = (ProgramStage) object;
-
-        return name.equals( other.getName() );
-    }
-
-    @Override
-    public String toString()
-    {
-        return "[" + name + "]";
-    }
-
-    // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Boolean getGeneratedByEnrollmentDate()
+    {
+        return generatedByEnrollmentDate;
+    }
+
+    public void setGeneratedByEnrollmentDate( Boolean generatedByEnrollmentDate )
+    {
+        this.generatedByEnrollmentDate = generatedByEnrollmentDate;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Boolean getBlockEntryForm()
+    {
+        return blockEntryForm;
+    }
+
+    public void setBlockEntryForm( Boolean blockEntryForm )
+    {
+        this.blockEntryForm = blockEntryForm;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Boolean getRemindCompleted()
+    {
+        return remindCompleted;
+    }
+
+    public void setRemindCompleted( Boolean remindCompleted )
+    {
+        this.remindCompleted = remindCompleted;
+    }
 
     public Set<PatientReminder> getPatientReminders()
     {
@@ -349,14 +364,17 @@ public class ProgramStage
         this.captureCoordinates = captureCoordinates;
     }
 
-    public Boolean getRelatedPatient()
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Boolean getAllowGenerateNextVisit()
     {
-        return relatedPatient;
+        return allowGenerateNextVisit;
     }
 
-    public void setRelatedPatient( Boolean relatedPatient )
+    public void setAllowGenerateNextVisit( Boolean allowGenerateNextVisit )
     {
-        this.relatedPatient = relatedPatient;
+        this.allowGenerateNextVisit = allowGenerateNextVisit;
     }
-    
+
 }

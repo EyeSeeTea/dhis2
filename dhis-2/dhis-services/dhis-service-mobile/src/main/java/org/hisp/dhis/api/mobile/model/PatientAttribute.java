@@ -1,19 +1,20 @@
 package org.hisp.dhis.api.mobile.model;
 
 /*
- * Copyright (c) 2010, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -30,6 +31,8 @@ package org.hisp.dhis.api.mobile.model;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
@@ -42,14 +45,20 @@ public class PatientAttribute
 
     private String value;
 
+    private String type;
+
+    private List<String> predefinedValues = new ArrayList<String>();
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
-    public PatientAttribute( String name, String value )
+    public PatientAttribute( String name, String value, String type, List<String> predefinedValues )
     {
         this.name = name;
         this.value = value;
+        this.type = type;
+        this.predefinedValues = predefinedValues;
     }
 
     public PatientAttribute()
@@ -92,12 +101,44 @@ public class PatientAttribute
         this.clientVersion = clientVersion;
     }
 
+    public String getType()
+    {
+        return type;
+    }
+
+    public void setType( String type )
+    {
+        this.type = type;
+    }
+
+    public List<String> getPredefinedValues()
+    {
+        return predefinedValues;
+    }
+
+    public void setPredefinedValues( List<String> predefinedValues )
+    {
+        this.predefinedValues = predefinedValues;
+    }
+
     @Override
     public void serialize( DataOutputStream dout )
         throws IOException
     {
         dout.writeUTF( this.name );
         dout.writeUTF( this.value );
+        dout.writeUTF( this.type );
+
+        int valueSize = this.predefinedValues.size();
+        dout.writeInt( valueSize );
+        if ( valueSize > 0 )
+        {
+            for ( String option : predefinedValues )
+            {
+                dout.writeUTF( option );
+            }
+        }
+
     }
 
     @Override
@@ -106,6 +147,17 @@ public class PatientAttribute
     {
         name = dataInputStream.readUTF();
         value = dataInputStream.readUTF();
+        type = dataInputStream.readUTF();
+
+        List<String> optionList = new ArrayList<String>();
+
+        int size = dataInputStream.readInt();
+
+        for ( int i = 0; i < size; i++ )
+        {
+            optionList.add( dataInputStream.readUTF() );
+        }
+        predefinedValues = optionList;
     }
 
     @Override
@@ -129,7 +181,7 @@ public class PatientAttribute
         throws IOException
     {
         // TODO Auto-generated method stub
-        
+
     }
 
 }

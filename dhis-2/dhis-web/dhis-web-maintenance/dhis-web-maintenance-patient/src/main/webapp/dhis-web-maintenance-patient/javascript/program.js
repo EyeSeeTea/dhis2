@@ -15,19 +15,10 @@ function showProgramDetails( programId )
 			type = i18n_single_event_with_registration;
 		else if( json.program.type == "3"  )
 			type = i18n_single_event_without_registration;
-		setInnerHTML( 'typeField', type );  
-		
-		var displayProvidedOtherFacility = ( json.program.displayProvidedOtherFacility == 'true') ? i18n_yes : i18n_no;
-		setInnerHTML( 'displayProvidedOtherFacilityField', displayProvidedOtherFacility );   	
-		
-		var blockEntryForm = ( json.program.blockEntryForm == 'true') ? i18n_yes : i18n_no;
-		setInnerHTML( 'blockEntryFormField', blockEntryForm );   	
+		setInnerHTML( 'typeField', type ); 
 		
 		var displayIncidentDate = ( json.program.displayIncidentDate == 'true') ? i18n_yes : i18n_no;
 		setInnerHTML( 'displayIncidentDateField', displayIncidentDate );   	
-		
-		var generatedByEnrollmentDate = ( json.program.generatedByEnrollmentDate == 'true') ? i18n_yes : i18n_no;
-		setInnerHTML( 'generatedByEnrollmentDateField', generatedByEnrollmentDate );   	
 		
 		var ignoreOverdueEvents = ( json.program.ignoreOverdueEvents == 'true') ? i18n_yes : i18n_no;
 		setInnerHTML( 'ignoreOverdueEventsField', ignoreOverdueEvents );   	
@@ -38,14 +29,17 @@ function showProgramDetails( programId )
 		var displayOnAllOrgunit= ( json.program.displayOnAllOrgunit == 'true') ? i18n_yes : i18n_no;
 		setInnerHTML( 'displayOnAllOrgunitField', displayOnAllOrgunit );   	
 		
-		var remindCompleted = ( json.program.remindCompleted == 'true') ? i18n_yes : i18n_no;
-		setInnerHTML( 'remindCompletedField', remindCompleted );   	
-		
 		var useBirthDateAsIncidentDate = ( json.program.useBirthDateAsIncidentDate == 'true') ? i18n_yes : i18n_no;
 		setInnerHTML( 'useBirthDateAsIncidentDateField', useBirthDateAsIncidentDate );   	
 		
 		var useBirthDateAsEnrollmentDate = ( json.program.useBirthDateAsEnrollmentDate == 'true') ? i18n_yes : i18n_no;
 		setInnerHTML( 'useBirthDateAsEnrollmentDateField', useBirthDateAsEnrollmentDate );   	
+		
+		var selectEnrollmentDatesInFuture= ( json.program.selectEnrollmentDatesInFuture == 'true') ? i18n_yes : i18n_no;
+		setInnerHTML( 'selectEnrollmentDatesInFutureField', selectEnrollmentDatesInFuture );   	
+		
+		var selectIncidentDatesInFuture= ( json.program.selectIncidentDatesInFuture == 'true') ? i18n_yes : i18n_no;
+		setInnerHTML( 'selectIncidentDatesInFutureField', selectIncidentDatesInFuture );   	
 		
 		setInnerHTML( 'dateOfEnrollmentDescriptionField', json.program.dateOfEnrollmentDescription );   
 		setInnerHTML( 'dateOfIncidentDescriptionField', json.program.dateOfIncidentDescription );   		
@@ -64,6 +58,21 @@ function showProgramDetails( programId )
 function removeProgram( programId, name )
 {
 	removeItem( programId, name, i18n_confirm_delete, 'removeProgram.action' );
+}
+
+function relationshipTypeOnchange()
+{
+	clearListById( 'relationshipSide' );
+	var relationshipType = jQuery('#relationshipTypeId option:selected');
+	if( relationshipType.val() != "")
+	{
+		var aIsToB = relationshipType.attr('aIsToB');
+		var bIsToA = relationshipType.attr('bIsToA');
+		
+		var relationshipSide = jQuery("#relationshipFromA");
+		relationshipSide.append( '<option value="false">' + aIsToB + '</option>' );
+		relationshipSide.append( '<option value="true">' + bIsToA + '</option>' );
+	}
 }
 
 function programOnChange()
@@ -265,7 +274,6 @@ function moveDownPropertyList()
 function generateTemplateMessageForm()
 {
 	var rowId = jQuery('.daysAllowedSendMessage').length + 1;
-	
 	var contend = '<tr name="tr' + rowId + '" class="listAlternateRow" >'
 				+ 	'<td colspan="2">' + i18n_reminder + ' ' + rowId + '<a href="javascript:removeTemplateMessageForm('+ rowId +')"> ( '+ i18n_remove_reminder + ' )</a></td>'
 				+ '</tr>'
@@ -273,7 +281,7 @@ function generateTemplateMessageForm()
 				+ 	'<td><label>' + i18n_send_when_to + '</label></td>'
 				+ 	'<td>'
 				+ 		'<select id="whenToSend' + rowId + '" name="whenToSend' + rowId + '" class="whenToSend" onchange="whenToSendOnChange(' + rowId + ')" >'
-				+ 			'<option value="">' + i18n_scheduled + '</option>'
+				+ 			'<option value="">' + i18n_days_scheduled + '</option>'
 				+ 			'<option value="3">' + i18n_complete_program + '</option>'
 				+ 			'<option value="1">' + i18n_program_enrollment + '</option>'
 				+ 		'</select>'
@@ -289,17 +297,25 @@ function generateTemplateMessageForm()
 				+   '</td>'
 				+ '</tr>'
 				+ '<tr name="tr' + rowId + '">'
-				+ 	'<td><label>' + i18n_days_before_after_comparison_date + '</label></td>'
-				+ 	'<td><input type="text" id="daysAllowedSendMessage' + rowId + '" name="daysAllowedSendMessage' + rowId + '" class="daysAllowedSendMessage {validate:{required:true,number:true}}"/></td>'
+				+ 	'<td><label>' + i18n_send_message + '</label></td>'
+				+ 	'<td>'
+				+		'<input type="text" onchange="setRealDays(' + rowId + ')" style="width:100px;" realvalue="" id="daysAllowedSendMessage' + rowId + '" name="daysAllowedSendMessage' + rowId + '" class="daysAllowedSendMessage {validate:{required:true,number:true}}"/> '
+				+ 		i18n_days
+				+		' <select id="time' + rowId + '" name="time' + rowId + '" style="width:100px;" onchange="setRealDays(' + rowId + ')" >'
+				+			'<option value="1">' + i18n_before + '</option>'
+				+			'<option value="-1">' + i18n_after + '</option>'
+				+		'</select> '
+				+		i18n_scheduled_date
+				+   ' </td>'
 				+ '</tr>'
 				+ '<tr name="tr' + rowId + '">'
 				+ 	'<td><label>' + i18n_recipients + '</label></td>'
 				+ 	'<td>'
 				+ 		'<select id="sendTo' + rowId + '" name="sendTo' + rowId + '" class="sendTo" onchange="onchangeUserGroup('+ rowId +')">'
-				+ 			'<option value="1">' + i18n_patient + '</option>'
-				+ 			'<option value="2">' + i18n_health_worker + '</option>'
-				+ 			'<option value="3">' + i18n_orgunit_registered + '</option>'
-				+ 			'<option value="4">' + i18n_all_users_in_orgunit_registered + '</option>'
+				+ 			'<option value="1">' + i18n_patient_sms_only + '</option>'
+				+ 			'<option value="3">' + i18n_orgunit_phone_number_sms_only + '</option>'
+				+ 			'<option value="2">' + i18n_health_worker_assigned_to_person + '</option>'
+				+ 			'<option value="4">' + i18n_all_users_at_orgunit + '</option>'
 				+ 			'<option value="5">' + i18n_user_group + '</option>'
 				+ 		'</select>'
 				+	'</td>'
@@ -310,6 +326,16 @@ function generateTemplateMessageForm()
 				+	program_SMS_reminder_form
 				+	'</td>'
 				+ '/<tr>'
+				+ '<tr name="tr' + rowId + '">'
+				+ '	<td><label>' + i18n_message_type + '</label></td>'
+				+ '	<td>'
+				+ '		<select type="text" id="messageType' + rowId + '" name="messageType' + rowId + '" class="messageType {validate:{required:true,number:true}}" >'
+				+ '			<option value="1">' + i18n_direct_sms + '</option>'
+				+ '			<option value="2">' + i18n_message + '</option>'
+				+ '			<option value="3">' + i18n_both + '</option>'
+				+ '		</select>'
+				+ '	</td>'
+				+ '</tr>'
 				+ '<tr name="tr' + rowId + '">'
 				+	'<td>' + i18n_params + '</td>'
 				+	'<td>'
@@ -326,7 +352,11 @@ function generateTemplateMessageForm()
 				+ '</tr>'
 				+ '<tr name="tr' + rowId + '">'
 				+	'<td><label>' + i18n_message + '</label></td>'
-				+	'<td><textarea id="templateMessage' + rowId + '" name="templateMessage' + rowId + '" style="width:320px" class="templateMessage {validate:{required:true, rangelength:[3,160]}}"></textarea></td>'
+				+	'<td><textarea onkeyup="getMessageLength( ' + rowId + ');" id="templateMessage' + rowId + '" name="templateMessage' + rowId + '" style="width:320px" class="templateMessage {validate:{required:true}}"></textarea></td>'
+				+ '</tr>'
+				+ '<tr>'
+				+	'<td></td>'
+				+ 	'<td id="messageLengthTD' + rowId + '"></td>'
 				+ '</tr>';
 
 	jQuery('#programStageMessage').append( contend );
@@ -354,6 +384,7 @@ function insertParams( paramValue, rowId )
 {
 	var templateMessage = paramValue;
 	insertTextCommon('templateMessage' + rowId, templateMessage);
+	getMessageLength(rowId );
 }
 
 function whenToSendOnChange(index)
@@ -362,9 +393,61 @@ function whenToSendOnChange(index)
 	if(whenToSend==""){
 		enable('dateToCompare' + index );
 		enable('daysAllowedSendMessage' + index );
+		enable('time' + index );
 	}
 	else{
 		disable('dateToCompare' + index );
 		disable('daysAllowedSendMessage' + index );
+		disable('time' + index );
+	}
+}
+
+function getMessageLength(rowId)
+{
+	var message = getFieldValue( 'templateMessage' + rowId );
+	var length = 0;
+	var idx = message.indexOf('{');
+	while( idx >=0 ){
+		length += message.substr(0,idx).length;
+		var end = message.indexOf('}');
+		if(end>=0){
+			message = message.substr(end + 1, message.length);
+			idx = message.indexOf('{');
+		}
+	}
+	length += message.length;
+	setInnerHTML('messageLengthTD' + rowId, length + " " + i18n_characters_without_params);
+	if( length>=160 )
+	{
+		jQuery('#templateMessage' + rowId ).attr('maxlength', 160);
+	}
+	else
+	{
+		jQuery('#templateMessage' + rowId ).removeAttr('maxlength');
+	}
+}
+
+function setRealDays(rowId)
+{
+	var daysAllowedSendMessage = jQuery("#daysAllowedSendMessage" + rowId);
+	var time = jQuery("#time" + rowId + " option:selected ").val();
+	daysAllowedSendMessage.attr("realvalue", time * eval(daysAllowedSendMessage).val());
+	var aasdf= 0;
+}
+
+function onchangeUserGroup( id )
+{
+	var value = document.getElementById( 'sendTo' + id ).value;
+	hideById( 'tr'+id );
+	
+	if( value=="1" || value=="3" ){
+		setFieldValue('messageType' + id , '1');
+		disable('messageType' + id );
+	}
+	else{
+		if ( value == "5") {
+			showById( 'tr' + id );
+		}
+		enable ('messageType' + id );
 	}
 }

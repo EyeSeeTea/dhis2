@@ -1,17 +1,20 @@
+package org.hisp.dhis.patient;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,16 +28,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient;
-
-import java.io.Serializable;
+import org.hisp.dhis.common.BaseIdentifiableObject;
 
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
 public class PatientIdentifier
-    implements Serializable
+    extends BaseIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -43,69 +44,20 @@ public class PatientIdentifier
 
     public static final int IDENTIFIER_INDEX_LENGTH = 5;
 
-    private int id;
-
     private PatientIdentifierType identifierType;
 
     private Patient patient;
 
     private String identifier;
 
-    // -------------------------------------------------------------------------
-    // hashCode, equals and toString
-    // -------------------------------------------------------------------------
-
-    public int hashCode()
+    public PatientIdentifier()
     {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((identifierType == null) ? 0 : identifierType.hashCode());
-        result = prime * result + ((identifier == null) ? 0 : identifier.hashCode());
-        
-        return result;
-    }
-
-    public boolean equals( Object object )
-    {
-        if ( this == object )
-        {
-            return true;
-        }
-
-        if ( object == null )
-        {
-            return false;
-        }
-
-        if ( getClass() != object.getClass() )
-        {
-            return false;
-        }
-
-        PatientIdentifier other = (PatientIdentifier) object;
-
-        return identifier.equals( other.getIdentifier() ) && identifierType.equals( other.getIdentifierType() );
-    }
-
-    @Override
-    public String toString()
-    {
-        return "[" + identifierType.getName() + ":"  + identifier + "]";
+        setAutoFields();
     }
 
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
-
-    public int getId()
-    {
-        return id;
-    }
-
-    public void setId( int id )
-    {
-        this.id = id;
-    }
 
     public Patient getPatient()
     {
@@ -136,5 +88,5 @@ public class PatientIdentifier
     {
         return identifierType;
     }
-    
+
 }

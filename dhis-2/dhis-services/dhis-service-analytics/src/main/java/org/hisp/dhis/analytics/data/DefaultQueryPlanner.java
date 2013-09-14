@@ -1,19 +1,20 @@
 package org.hisp.dhis.analytics.data;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -53,6 +54,7 @@ import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.analytics.DataQueryGroups;
 import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.IllegalQueryException;
+import org.hisp.dhis.analytics.Partitions;
 import org.hisp.dhis.analytics.QueryPlanner;
 import org.hisp.dhis.analytics.table.PartitionUtils;
 import org.hisp.dhis.common.BaseDimensionalObject;
@@ -223,7 +225,7 @@ public class DefaultQueryPlanner
                             
                             for ( DataQueryParams byDataPeriodType : groupedByDataPeriodType )
                             {
-                                byDataPeriodType.setTableName( byPartition.getTableName() );
+                                byDataPeriodType.setPartitions( byPartition.getPartitions() );
                                 byDataPeriodType.setPeriodType( byPeriodType.getPeriodType() );
                                 byDataPeriodType.setAggregationType( byAggregationType.getAggregationType() );
                                 
@@ -232,7 +234,7 @@ public class DefaultQueryPlanner
                         }
                         else
                         {
-                            byAggregationType.setTableName( byPartition.getTableName() );
+                            byAggregationType.setPartitions( byPartition.getPartitions() );
                             byAggregationType.setPeriodType( byPeriodType.getPeriodType() );
                             
                             queries.add( byAggregationType );
@@ -322,7 +324,7 @@ public class DefaultQueryPlanner
 
         if ( subQueries.size() > queryGroups.getAllQueries().size() )
         {
-            log.info( "Split on " + dimension + ": " + ( subQueries.size() / queryGroups.getAllQueries().size() ) );
+            log.debug( "Split on " + dimension + ": " + ( subQueries.size() / queryGroups.getAllQueries().size() ) );
         }
         
         return new DataQueryGroups( subQueries );
@@ -344,28 +346,25 @@ public class DefaultQueryPlanner
 
         if ( params.isSkipPartitioning() )
         {
-            params.setTableName( tableName );
+            params.setPartitions( new Partitions().add( tableName ) );
             queries.add( params );
         }
         else if ( params.getPeriods() != null && !params.getPeriods().isEmpty() )
         {
-            ListMap<String, NameableObject> tableNamePeriodMap = PartitionUtils.getTableNamePeriodMap( params.getPeriods(), tableName );
+            ListMap<Partitions, NameableObject> partitionPeriodMap = PartitionUtils.getPartitionPeriodMap( params.getPeriods(), tableName );
             
-            for ( String table : tableNamePeriodMap.keySet() )
+            for ( Partitions partitions : partitionPeriodMap.keySet() )
             {
                 DataQueryParams query = new DataQueryParams( params );
-                query.setPeriods( tableNamePeriodMap.get( table ) );
-                query.setTableName( table );
+                query.setPeriods( partitionPeriodMap.get( partitions ) );
+                query.setPartitions( partitions );
                 queries.add( query );            
             }
         }
         else if ( params.getFilterPeriods() != null && !params.getFilterPeriods().isEmpty() )
         {
-            ListMap<String, NameableObject> tableNamePeriodMap = PartitionUtils.getTableNamePeriodMap( params.getFilterPeriods(), tableName );
-            
-            DataQueryParams query = new DataQueryParams( params );
-            query.setTableNamePeriodMap( tableNamePeriodMap );            
-            query.setTableName( tableNamePeriodMap.keySet().iterator().next() );
+            DataQueryParams query = new DataQueryParams( params );    
+            query.setPartitions( PartitionUtils.getPartitions( params.getFilterPeriods(), tableName ) );
             queries.add( query );
         }
         else
@@ -375,7 +374,7 @@ public class DefaultQueryPlanner
         
         if ( queries.size() > 1 )
         {
-            log.info( "Split on partition: " + queries.size() );
+            log.debug( "Split on partition: " + queries.size() );
         }
         
         return queries;
@@ -430,7 +429,7 @@ public class DefaultQueryPlanner
 
         if ( queries.size() > 1 )
         {
-            log.info( "Split on period type: " + queries.size() );
+            log.debug( "Split on period type: " + queries.size() );
         }
         
         return queries;        
@@ -559,7 +558,7 @@ public class DefaultQueryPlanner
 
         if ( queries.size() > 1 )
         {
-            log.info( "Split on aggregation type: " + queries.size() );
+            log.debug( "Split on aggregation type: " + queries.size() );
         }
         
         return queries;
@@ -591,7 +590,7 @@ public class DefaultQueryPlanner
 
         if ( queries.size() > 1 )
         {
-            log.info( "Split on data period type: " + queries.size() );
+            log.debug( "Split on data period type: " + queries.size() );
         }
         
         return queries;

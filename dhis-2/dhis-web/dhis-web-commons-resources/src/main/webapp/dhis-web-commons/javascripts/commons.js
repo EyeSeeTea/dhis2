@@ -1,17 +1,18 @@
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,6 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 
 dhis2.util.namespace( 'dhis2.commons' );
 
@@ -1822,34 +1824,35 @@ function pingNotifications( category, tableId, completedCallback )
 {
 	var lastUid = $( '#' + tableId ).prop( 'lastUid' ); // Store on table property
 	
-	var param = lastUid ? '&lastUid=' + lastUid : '';
+	var param = ( undefined !== lastUid ) ? '?lastId=' + lastUid : '';
 	
-	$.getJSON( '../dhis-web-commons-ajax-json/getNotifications.action?category=' + category + param, function( notifications )
+	$.getJSON( '../api/system/tasks/' + category + param, function( notifications )
 	{
 		var html = '', 
 			isComplete = false;
-		
+
 		if ( isDefined( notifications ) && notifications.length )
 		{
 			$.each( notifications, function( i, notification )
 			{
 				var first = i == 0,
-					loaderHtml = '';			
-				
-				if ( notification.completed == "true" )
-				{
-					isComplete = true;
-				}
-				
-				if ( first )
+					loaderHtml = '';
+
+                if( notification.completed === "true" || notification.completed === true ) {
+                    isComplete = true;
+                }
+
+                if ( first )
 				{
 					$( '#' + tableId ).prop( 'lastUid', notification.uid );
 					loaderHtml = _loading_bar_html;
 					$( '#loaderSpan' ).replaceWith ( '' ); // Hide previous loader bar
 				}
 				
-				html += '<tr><td>' + notification.time + '</td><td>' + notification.message + ' &nbsp;';
-				html += notification.completed == 'true' ?  '<img src="../images/completed.png">' : loaderHtml;
+				var time = ( undefined != notification.time ) ? notification.time.replace( 'T', ' ' ).substring( 0, 19 ) : '';
+				
+				html += '<tr><td>' + time + '</td><td>' + notification.message + ' &nbsp;';
+				html += isComplete ?  '<img src="../images/completed.png">' : loaderHtml;
 				html += '</td></tr>';
 			} );
 		

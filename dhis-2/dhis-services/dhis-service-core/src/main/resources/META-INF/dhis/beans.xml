@@ -217,6 +217,7 @@
   <bean id="org.hisp.dhis.user.UserGroupStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
     <property name="clazz" value="org.hisp.dhis.user.UserGroup" />
     <property name="sessionFactory" ref="sessionFactory" />
+    <property name="cacheable" value="true" />
   </bean>
 
   <bean id="org.hisp.dhis.user.UserGroupAccessStore" class="org.hisp.dhis.hibernate.HibernateGenericStore">
@@ -344,12 +345,8 @@
     class="org.hisp.dhis.sms.hibernate.HibernateOutboundSmsStore">
      <property name="clazz" value="org.hisp.dhis.sms.outbound.OutboundSms" />	
      <property name="sessionFactory" ref="sessionFactory" />
-    <property name="jdbcTemplate" ref="jdbcTemplate" />
   </bean>
   
-  
-  
-
   <!-- Service definitions -->
 
   <bean id="org.hisp.dhis.dataelement.DataElementOperandService" class="org.hisp.dhis.dataelement.DefaultDataElementOperandService">
@@ -610,6 +607,7 @@
         <value>congo_brazzaville</value>
         <value>congo_kinshasa</value>
         <value>ecuador</value>
+        <value>east_africa_community</value>
         <value>ethiopia</value>
         <value>gambia</value>
         <value>ghana</value>
@@ -705,6 +703,8 @@
   
   <bean id="org.hisp.dhis.appmanager.AppManagerService" class="org.hisp.dhis.appmanager.DefaultAppManagerService" />
   
+  <bean id="org.hisp.dhis.system.SystemService" class="org.hisp.dhis.system.DefaultSystemService" />
+  
   <!-- SMS Services -->
     
   <bean id="org.hisp.dhis.sms.MessageQueue" class="org.hisp.dhis.sms.DatabaseSupportedInternalMemoryMessageQueue">
@@ -767,6 +767,7 @@
     <property name="messageService" ref="org.hisp.dhis.message.MessageService" />
     <property name="smsMessageSender" ref="org.hisp.dhis.sms.SmsMessageSender" />
     <property name="userService" ref="org.hisp.dhis.user.UserService" />
+    <property name="incomingSmsService" ref="org.hisp.dhis.sms.incoming.IncomingSmsService"/>
   </bean>
   
   <bean id="org.hisp.dhis.sms.DHISMessageAlertListener" class="org.hisp.dhis.sms.DHISMessageAlertListener">
@@ -781,12 +782,10 @@
     <property name="userService" ref="org.hisp.dhis.user.UserService" />
   </bean>
 
-
  <bean id="org.hisp.dhis.i18n.I18nLocaleStore" class="org.hisp.dhis.i18n.hibernate.HibernateI18nLocaleStore">
     <property name="clazz" value="org.hisp.dhis.i18n.locale.I18nLocale" />
     <property name="sessionFactory" ref="sessionFactory" />
   </bean>
-
 
   <!-- I18nService -->
 
@@ -1216,14 +1215,17 @@
     <property name="skipInTests" value="true" />
   </bean>
   
-  <!--  <bean id="org.hisp.dhis.user.UserDefaultPopulator"
-    class="org.hisp.dhis.user.UserDefaultPopulator">
+  <bean id="org.hisp.dhis.startup.ConfigurationPopulator" class="org.hisp.dhis.startup.ConfigurationPopulator">
+    <property name="runlevel" value="7" />
+    <property name="skipInTests" value="true" />
+  </bean>
+  
+  <bean id="org.hisp.dhis.user.UserDefaultPopulator" class="org.hisp.dhis.user.UserDefaultPopulator">
     <property name="userService" ref="org.hisp.dhis.user.UserService" />
     <property name="runlevel" value="5" />
     <property name="skipInTests" value="true" />
   </bean>
-  -->
-
+  
   <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
     <property name="targetObject" ref="org.hisp.dhis.system.startup.StartupRoutineExecutor" />
     <property name="targetMethod" value="addStartupRoutines" />
@@ -1239,7 +1241,8 @@
           <ref local="org.hisp.dhis.organisationunit.OrganisationUnitGroupSetPopulator" />
           <ref local="org.hisp.dhis.dataentryform.DataEntryFormUpgrader" />
           <ref local="org.hisp.dhis.startup.ExpressionUpgrader" />
-          <!--<ref local="org.hisp.dhis.user.UserDefaultPopulator" />-->
+          <ref local="org.hisp.dhis.startup.ConfigurationPopulator" />
+          <ref local="org.hisp.dhis.user.UserDefaultPopulator" />
         </list>
       </list>
     </property>
@@ -1356,14 +1359,7 @@
     <property name="userService" ref="org.hisp.dhis.user.UserService" />
   </bean>
 
-  <bean id="org.hisp.dhis.user.UserCredentialsDeletionHandler" class="org.hisp.dhis.user.UserCredentialsDeletionHandler">
-    <property name="userService" ref="org.hisp.dhis.user.UserService" />
-  </bean>
-
-  <bean id="org.hisp.dhis.user.UserSettingDeletionHandler" class="org.hisp.dhis.user.UserSettingDeletionHandler">
-    <property name="userSettingService" ref="org.hisp.dhis.user.UserSettingService" />
-    <property name="userService" ref="org.hisp.dhis.user.UserService" />
-  </bean>
+  <bean id="org.hisp.dhis.user.UserSettingDeletionHandler" class="org.hisp.dhis.user.UserSettingDeletionHandler"/>
 
   <bean id="org.hisp.dhis.dataelement.DataElementCategoryDeletionHandler"
     class="org.hisp.dhis.dataelement.DataElementCategoryDeletionHandler">
@@ -1403,6 +1399,10 @@
     <property name="operandService" ref="org.hisp.dhis.dataelement.DataElementOperandService" />
   </bean>
   
+  <bean id="org.hisp.dhis.mapping.MapDeletionHandler" class="org.hisp.dhis.mapping.MapDeletionHandler">
+    <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
+  </bean>
+  
   <!-- DeletionManager -->
 
   <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
@@ -1435,7 +1435,6 @@
           <ref local="org.hisp.dhis.user.UserDeletionHandler" />
           <ref local="org.hisp.dhis.user.UserGroupDeletionHandler" />
           <ref local="org.hisp.dhis.user.UserAuthorityGroupDeletionHandler" />
-          <ref local="org.hisp.dhis.user.UserCredentialsDeletionHandler" />
           <ref local="org.hisp.dhis.user.UserSettingDeletionHandler" />
           <ref local="org.hisp.dhis.dataelement.DataElementCategoryDeletionHandler" />
           <ref local="org.hisp.dhis.dataelement.DataElementGroupSetDeletionHandler" />
@@ -1476,7 +1475,8 @@
       <aop:before pointcut="execution( * org.hisp.dhis.mapping.MappingService.deleteMapLegendSet(..) )" method="intercept" />
       <aop:before pointcut="execution( * org.hisp.dhis.mapping.MappingService.deleteMapView(..) )" method="intercept" />
       <aop:before pointcut="execution( * org.hisp.dhis.i18n.I18nService.delete*(..) )" method="intercept" />
-	</aop:aspect>
+      <aop:before pointcut="execution( * org.hisp.dhis.mapping.MappingService.deleteMap(..) )" method="intercept" />
+    </aop:aspect>
 
     <!-- <aop:aspect ref="i18nTranslationInterceptor"> <aop:after-returning pointcut="execution( * org.hisp.dhis.dataelement.DataElementService.get*(..) 
       )" method="intercept" returning="idObject"/> <aop:after-returning pointcut="execution( * org.hisp.dhis.dataelement.DataElementCategoryService.get*(..)

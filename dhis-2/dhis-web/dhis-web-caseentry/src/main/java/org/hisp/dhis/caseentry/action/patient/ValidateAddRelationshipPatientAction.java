@@ -1,19 +1,20 @@
 package org.hisp.dhis.caseentry.action.patient;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,13 +28,7 @@ package org.hisp.dhis.caseentry.action.patient;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.opensymphony.xwork2.Action;
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.i18n.I18n;
@@ -48,7 +43,11 @@ import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
 
-import com.opensymphony.xwork2.Action;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ValidateAddRelationshipPatientAction
     implements Action
@@ -159,39 +158,19 @@ public class ValidateAddRelationshipPatientAction
         // Check duplicated patient
         // ---------------------------------------------------------------------
 
-        int startIndex = fullName.indexOf( ' ' );
-        int endIndex = fullName.lastIndexOf( ' ' );
-
-        String firstName = fullName.substring( 0, startIndex );
-        String middleName = "";
-        String lastName = "";
-
-        if ( startIndex == endIndex )
-        {
-            middleName = "";
-            lastName = fullName.substring( startIndex, fullName.length() );
-        }
-        else
-        {
-            middleName = fullName.substring( startIndex + 1, endIndex );
-            lastName = fullName.substring( endIndex, fullName.length() );
-        }
-
         if ( !checkedDuplicate )
         {
-
             // Check duplication name, birthdate, gender
-            patients = patientService.getPatients( firstName, middleName, lastName, format.parseDate( birthDate ),
-                gender );
+            patients = patientService.getPatients( fullName, format.parseDate( birthDate ), gender );
 
             if ( patients != null && patients.size() > 0 )
             {
                 message = i18n.getString( "patient_duplicate" );
-
                 boolean flagDuplicate = false;
+
                 for ( Patient p : patients )
                 {
-                    if ( id == null || (id != null && p.getId().intValue() != id.intValue()) )
+                    if ( id == null || (id != null && p.getId() != id) )
                     {
                         flagDuplicate = true;
                         Collection<PatientAttributeValue> patientAttributeValues = patientAttributeValueService
@@ -220,7 +199,7 @@ public class ValidateAddRelationshipPatientAction
         }
         else
         {
-            p.setBirthDateFromAge( age.intValue(), ageType );
+            p.setBirthDateFromAge( age, ageType );
         }
 
         HttpServletRequest request = ServletActionContext.getRequest();
@@ -229,8 +208,9 @@ public class ValidateAddRelationshipPatientAction
 
         if ( identifiers != null && identifiers.size() > 0 )
         {
-            String value = null;
+            String value;
             String idDuplicate = "";
+
             for ( PatientIdentifierType idType : identifiers )
             {
                 // If underAge is TRUE : Only check duplicate on
@@ -242,7 +222,7 @@ public class ValidateAddRelationshipPatientAction
                     {
                         PatientIdentifier identifier = patientIdentifierService.get( idType, value );
                         if ( identifier != null
-                            && (id == null || identifier.getPatient().getId().intValue() != id.intValue()) )
+                            && (id == null || identifier.getPatient().getId() != id) )
                         {
                             idDuplicate += idType.getName() + ", ";
                         }

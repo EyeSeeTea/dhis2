@@ -1,19 +1,20 @@
 package org.hisp.dhis.oust.manager;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,18 +28,17 @@ package org.hisp.dhis.oust.manager;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
+import com.opensymphony.xwork2.ActionContext;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 
-import com.opensymphony.xwork2.ActionContext;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -47,9 +47,9 @@ import com.opensymphony.xwork2.ActionContext;
 public class DefaultSelectionTreeManager
     implements SelectionTreeManager
 {
-    private static final String SESSION_KEY_SELECTED_ORG_UNITS = "dhis-oust-selected-org-units";    
+    private static final String SESSION_KEY_SELECTED_ORG_UNITS = "dhis-oust-selected-org-units";
     private static final String SESSION_KEY_ROOT_ORG_UNITS = "dhis-oust-root-org-units";
-    
+
     private static final double PERCENTAGE_OF_MULTIPLE_RELOADING_ORG_UNITS = 0.2;
 
     // -------------------------------------------------------------------------
@@ -62,7 +62,7 @@ public class DefaultSelectionTreeManager
     {
         this.organisationUnitService = organisationUnitService;
     }
-    
+
     private CurrentUserService currentUserService;
 
     public void setCurrentUserService( CurrentUserService currentUserService )
@@ -111,7 +111,7 @@ public class DefaultSelectionTreeManager
 
         return reloadOrganisationUnits( rootUnits );
     }
-    
+
     public OrganisationUnit getRootOrganisationUnitsParent()
     {
         Collection<OrganisationUnit> rootUnits = getCollectionFromSession( SESSION_KEY_ROOT_ORG_UNITS );
@@ -153,7 +153,7 @@ public class DefaultSelectionTreeManager
             saveToSession( SESSION_KEY_SELECTED_ORG_UNITS, selectedUnits );
         }
     }
-    
+
     public Collection<OrganisationUnit> getSelectedOrganisationUnits()
     {
         Collection<OrganisationUnit> selectedUnits = getCollectionFromSession( SESSION_KEY_SELECTED_ORG_UNITS );
@@ -165,12 +165,12 @@ public class DefaultSelectionTreeManager
 
         return selectedUnits;
     }
-    
+
     public Collection<OrganisationUnit> getReloadedSelectedOrganisationUnits()
     {
         return reloadOrganisationUnits( getSelectedOrganisationUnits() );
     }
-    
+
     public OrganisationUnit getReloadedSelectedOrganisationUnit()
     {
         return reloadOrganisationUnit( getSelectedOrganisationUnit() );
@@ -208,16 +208,16 @@ public class DefaultSelectionTreeManager
     public boolean setCurrentUserOrganisationUnitAsSelected()
     {
         User user = currentUserService.getCurrentUser();
-        
+
         if ( user != null && user.getOrganisationUnit() != null )
         {
             setSelectedOrganisationUnit( user.getOrganisationUnit() );
             return true;
         }
-        
+
         return false;
     }
-    
+
     // -------------------------------------------------------------------------
     // Session methods
     // -------------------------------------------------------------------------
@@ -232,7 +232,7 @@ public class DefaultSelectionTreeManager
         getSession().put( key, object );
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     private final Collection<OrganisationUnit> getCollectionFromSession( String key )
     {
         return (Collection<OrganisationUnit>) getSession().get( key );
@@ -257,13 +257,13 @@ public class DefaultSelectionTreeManager
         Set<OrganisationUnit> reloadedUnits = new HashSet<OrganisationUnit>();
 
         int noTotal = organisationUnitService.getNumberOfOrganisationUnits();
-        
+
         int noSelected = units.size();
 
         if ( (double) noSelected / noTotal > PERCENTAGE_OF_MULTIPLE_RELOADING_ORG_UNITS ) // Select all at once
         {
             Collection<OrganisationUnit> allOrgUnits = organisationUnitService.getAllOrganisationUnits();
-            
+
             for ( OrganisationUnit unit : allOrgUnits )
             {
                 if ( units.contains( unit ) )
@@ -294,27 +294,27 @@ public class DefaultSelectionTreeManager
     private Collection<OrganisationUnit> getUnitsInTree( Collection<OrganisationUnit> rootUnits, Collection<OrganisationUnit> selectedUnits )
     {
         Collection<OrganisationUnit> unitsInTree = new ArrayList<OrganisationUnit>();
-        
+
         for ( OrganisationUnit selectedUnit : selectedUnits )
         {
-            if  ( rootUnits.contains( selectedUnit ) )
+            if ( rootUnits.contains( selectedUnit ) )
             {
                 unitsInTree.add( selectedUnit );
             }
-            
+
             OrganisationUnit parent = selectedUnit.getParent();
-            
+
             while ( parent != null )
             {
                 if ( rootUnits.contains( parent ) )
                 {
                     unitsInTree.add( selectedUnit );
                 }
-                
+
                 parent = parent.getParent();
             }
         }
-        
+
         return unitsInTree;
     }
 }

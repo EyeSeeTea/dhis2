@@ -1,19 +1,20 @@
 package org.hisp.dhis.analytics.event.data;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -30,17 +31,22 @@ package org.hisp.dhis.analytics.event.data;
 import static org.hisp.dhis.analytics.DataQueryParams.OPTION_SEP;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.hisp.dhis.analytics.AnalyticsService;
 import org.hisp.dhis.analytics.IllegalQueryException;
 import org.hisp.dhis.analytics.event.EventAnalyticsManager;
 import org.hisp.dhis.analytics.event.EventAnalyticsService;
 import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.analytics.event.QueryItem;
+import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -62,7 +68,15 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class DefaultEventAnalyticsService
     implements EventAnalyticsService
-{   
+{
+    private static final String ITEM_EVENT = "psi";
+    private static final String ITEM_PROGRAM_STAGE = "ps";
+    private static final String ITEM_EXECUTION_DATE = "executiondate";
+    private static final String ITEM_ORG_UNIT = "ou";
+    private static final String ITEM_ORG_UNIT_NAME = "ouname";
+    private static final String ITEM_GENDER = "gender";
+    private static final String ITEM_ISDEAD = "isdead";
+    
     @Autowired
     private ProgramService programService;
     
@@ -88,37 +102,67 @@ public class DefaultEventAnalyticsService
     // EventAnalyticsService implementation
     // -------------------------------------------------------------------------
 
-    //TODO org unit children / descendants
-    //TODO paging
-    //TODO sorting
+    //TODO order the event analytics tables up front to avoid default sorting in queries
     
     public Grid getEvents( EventQueryParams params )
     {
         Grid grid = new ListGrid();
                 
-        grid.addHeader( new GridHeader( "Event", "psi" ) );
-        grid.addHeader( new GridHeader( "Program stage", "ps" ) );
-        grid.addHeader( new GridHeader( "Execution date", "executiondate" ) );
-        grid.addHeader( new GridHeader( "Organisation unit", "ou" ) );
-        
+        grid.addHeader( new GridHeader( "Event", ITEM_EVENT ) );
+        grid.addHeader( new GridHeader( "Program stage", ITEM_PROGRAM_STAGE ) );
+        grid.addHeader( new GridHeader( "Execution date", ITEM_EXECUTION_DATE ) );
+        grid.addHeader( new GridHeader( "Organisation unit", ITEM_ORG_UNIT ) );
+        grid.addHeader( new GridHeader( "Organisation unit name", ITEM_ORG_UNIT_NAME ) );
+
+        // ---------------------------------------------------------------------
+        // Headers
+        // ---------------------------------------------------------------------
+
         for ( QueryItem queryItem : params.getItems() )
         {
             IdentifiableObject item = queryItem.getItem();
             
             grid.addHeader( new GridHeader( item.getName(), item.getUid() ) );
         }
-        
+
+        // ---------------------------------------------------------------------
+        // Data
+        // ---------------------------------------------------------------------
+
         List<EventQueryParams> queries = EventQueryPlanner.planQuery( params );
+        
+        int count = 0;
         
         for ( EventQueryParams query : queries )
         {
+            if ( params.isPaging() )
+            {
+                count += analyticsManager.getEventCount( query );
+            }
+            
             analyticsManager.getEvents( query, grid );
         }
+        
+        // ---------------------------------------------------------------------
+        // Meta-data
+        // ---------------------------------------------------------------------
+
+        Map<Object, Object> metaData = new HashMap<Object, Object>();        
+        metaData.put( AnalyticsService.NAMES_META_KEY, getUidNameMap( params ) );
+
+        if ( params.isPaging() )
+        {
+            Pager pager = new Pager( params.getPageWithDefault(), count, params.getPageSizeWithDefault() );
+            metaData.put( AnalyticsService.PAGER_META_KEY, pager );
+        }
+        
+        grid.setMetaData( metaData );
         
         return grid;
     }
     
-    public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate, String ou, Set<String> item )
+    public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate, String ou, String ouMode,
+        Set<String> item, Set<String> asc, Set<String> desc, Integer page, Integer pageSize )
     {
         EventQueryParams params = new EventQueryParams();
         
@@ -165,7 +209,7 @@ public class DefaultEventAnalyticsService
             {
                 if ( it != null && !it.contains( OPTION_SEP ) )
                 {
-                    params.getItems().add( new QueryItem( getItem( it ) ) );
+                    params.getItems().add( new QueryItem( getItem( it, pr ) ) );
                 }
                 else if ( it != null )
                 {
@@ -176,8 +220,24 @@ public class DefaultEventAnalyticsService
                         throw new IllegalQueryException( "Item filter has invalid format: " + it );
                     }
                     
-                    params.getItems().add( new QueryItem( getItem( split[0] ), split[1], split[2] ) );
+                    params.getItems().add( new QueryItem( getItem( split[0], pr ), split[1], split[2] ) );
                 }
+            }
+        }
+        
+        if ( asc != null )
+        {
+            for ( String sort : asc )
+            {
+                params.getAsc().add( getSortItem( sort, pr ) );
+            }
+        }
+
+        if ( desc != null )
+        {
+            for ( String sort : desc )
+            {
+                params.getDesc().add( getSortItem( sort, pr ) );
             }
         }
         
@@ -191,42 +251,107 @@ public class DefaultEventAnalyticsService
                 
                 if ( orgUnit != null )
                 {
+                    orgUnit.setLevel( organisationUnitService.getLevelOfOrganisationUnit( orgUnit.getId() ) );
+                    
                     params.getOrganisationUnits().add( orgUnit );
                 }
             }
+        }
+        
+        if ( params.getOrganisationUnits().isEmpty() )
+        {
+            throw new IllegalQueryException( "At least one organisation unit must be specified" );
+        }
+        
+        if ( page != null && page <= 0 )
+        {
+            throw new IllegalQueryException( "Page number must be positive: " + page );
+        }
+        
+        if ( pageSize != null && pageSize < 0 )
+        {
+            throw new IllegalQueryException( "Page size must be zero or positive: " + pageSize );
         }
         
         params.setProgram( pr );
         params.setProgramStage( ps );
         params.setStartDate( start );
         params.setEndDate( end );
+        params.setOrganisationUnitMode( ouMode );
+        params.setPage( page );
+        
+        if ( pageSize != null )
+        {
+            params.setPageSize( pageSize );
+        }
         
         return params;
     }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
     
-    private IdentifiableObject getItem( String item )
+    private Map<String, String> getUidNameMap( EventQueryParams params )
     {
+        Map<String, String> map = new HashMap<String, String>();
+        
+        Program program = params.getProgram();
+        ProgramStage stage = params.getProgramStage();
+        
+        map.put( program.getUid(), program.getName() );
+        
+        if ( stage != null )
+        {
+            map.put( stage.getUid(), stage.getName() );
+        }
+        
+        return map;
+    }
+    
+    private String getSortItem( String item, Program program )
+    {
+        if ( !ITEM_EXECUTION_DATE.equals( item ) && getItem( item, program ) == null )
+        {
+            throw new IllegalQueryException( "Descending sort item is invalid: " + item );
+        }
+        
+        return item;
+    }
+    
+    private IdentifiableObject getItem( String item, Program program )
+    {
+        if ( ITEM_GENDER.equalsIgnoreCase( item ) )
+        {
+            return new BaseIdentifiableObject( ITEM_GENDER, ITEM_GENDER, ITEM_GENDER );
+        }
+        
+        if ( ITEM_ISDEAD.equalsIgnoreCase( item ) )
+        {
+            return new BaseIdentifiableObject( ITEM_ISDEAD, ITEM_ISDEAD, ITEM_ISDEAD );
+        }
+        
         DataElement de = dataElementService.getDataElement( item );
         
-        if ( de != null )
+        if ( de != null && program.getAllDataElements().contains( de ) )
         {
             return de;
         }
         
         PatientAttribute at = attributeService.getPatientAttribute( item );
         
-        if ( at != null )
+        if ( at != null && program.getPatientAttributes().contains( at ) )
         {
             return at;
         }
         
         PatientIdentifierType it = identifierTypeService.getPatientIdentifierType( item );
         
-        if ( it != null )
+        if ( it != null && program.getPatientIdentifierTypes().contains( it ) )
         {
             return it;
         }
         
-        throw new IllegalQueryException( "Item identifier does not reference any item: " + item );           
+        throw new IllegalQueryException( "Item identifier does not reference any item part of the program: " + item );           
     }
 }

@@ -1,19 +1,20 @@
 package org.hisp.dhis.jdbc;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -43,12 +44,36 @@ public interface StatementBuilder
     //--------------------------------------------------------------------------
 
     /**
-     * Encodes the provided SQL value.
+     * Encodes the provided SQL value. Value will be wrapped in quotes.
      * 
      * @param value the value.
      * @return the SQL encoded value.
      */
     String encode( String value );
+
+    /**
+     * Encodes the provided SQL value.
+     * 
+     * @param value the value.
+     * @param quote whether to wrap the resulting value in quotes.
+     * @return the SQL encoded value.
+     */
+    String encode( String value, boolean quote );
+    
+    /**
+     * Returns the character used to quote database table and column names.
+     * 
+     * @return a quote character.
+     */
+    String getColumnQuote();
+    
+    /**
+     * Wraps the given column or table in quotes.
+     * 
+     * @param column the column or table name.
+     * @return the column or table name wrapped in quotes.
+     */
+    String columnQuote( String column );
     
     /**
      * Returns statement for vacuum and analyze operations for a table. Returns

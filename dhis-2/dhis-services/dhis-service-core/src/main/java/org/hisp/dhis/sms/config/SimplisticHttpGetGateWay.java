@@ -1,19 +1,20 @@
 package org.hisp.dhis.sms.config;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -38,11 +39,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.smslib.AGateway;
 import org.smslib.GatewayException;
 import org.smslib.OutboundMessage;
 import org.smslib.TimeoutException;
-import org.smslib.helper.Logger;
 
 /**
  * Simplistic http gateway sending smses through a get to a url constructed from
@@ -74,6 +76,8 @@ import org.smslib.helper.Logger;
 public class SimplisticHttpGetGateWay
     extends AGateway
 {
+    private static final Log log = LogFactory.getLog( SimplisticHttpGetGateWay.class );
+    
     private static final String SENDER = "sender";
 
     private static final String RECIPIENT = "recipient";
@@ -98,7 +102,7 @@ public class SimplisticHttpGetGateWay
     public void startGateway()
         throws TimeoutException, GatewayException, IOException, InterruptedException
     {
-        Logger.getInstance().logDebug( "Starting gateway.", null, getGatewayId() );
+        log.debug( "Starting gateway. " + getGatewayId() );
         super.startGateway();
     }
 
@@ -106,7 +110,7 @@ public class SimplisticHttpGetGateWay
     public void stopGateway()
         throws TimeoutException, GatewayException, IOException, InterruptedException
     {
-        Logger.getInstance().logDebug( "Stopping gateway.", null, getGatewayId() );
+        log.debug( "Stopping gateway. " + getGatewayId() );
         super.stopGateway();
     }
 
@@ -114,7 +118,7 @@ public class SimplisticHttpGetGateWay
     public boolean sendMessage( OutboundMessage msg )
         throws TimeoutException, GatewayException, IOException, InterruptedException
     {
-        Logger.getInstance().logDebug( "Sending message " + msg, null, getGatewayId() );
+        log.debug( "Sending message " + msg + " " + getGatewayId() );
 
         Map<String, String> requestParameters = new HashMap<String, String>( parameters );
 
@@ -125,7 +129,7 @@ public class SimplisticHttpGetGateWay
         
         if ( sender != null )
         {
-            Logger.getInstance().logDebug( "Adding sender " + sender, null, getGatewayId() );
+            log.debug( "Adding sender " + sender + " " + getGatewayId() );
             requestParameters.put( SENDER, sender );
         }
         try
@@ -141,7 +145,7 @@ public class SimplisticHttpGetGateWay
                 }
             }
             
-            Logger.getInstance().logInfo( "RequestURL: " + urlString, null, getGatewayId() );
+            log.info( "RequestURL: " + urlString + " " + getGatewayId() );
             URL requestURL = new URL( urlString );
             URLConnection conn = requestURL.openConnection();
             BufferedReader reader = new BufferedReader( new InputStreamReader( conn.getInputStream() ) );
@@ -155,7 +159,7 @@ public class SimplisticHttpGetGateWay
             HttpURLConnection httpConnection = (HttpURLConnection) conn;
             if ( httpConnection.getResponseCode() != HttpURLConnection.HTTP_OK )
             {
-                Logger.getInstance().logWarn( "Couldn't send message, got response " + response, null, getGatewayId() );
+                log.warn( "Couldn't send message, got response " + response + " " + getGatewayId() );
                 return false;
             }
 
@@ -164,7 +168,7 @@ public class SimplisticHttpGetGateWay
         }
         catch ( Exception e )
         {
-            Logger.getInstance().logWarn( "Couldn't send message " + msg, e, getGatewayId() );
+            log.warn( "Couldn't send message " + getGatewayId() );
             return false;
         }
 

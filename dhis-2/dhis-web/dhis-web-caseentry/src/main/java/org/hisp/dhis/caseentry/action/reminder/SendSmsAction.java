@@ -1,17 +1,20 @@
+package org.hisp.dhis.caseentry.action.reminder;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,8 +28,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.caseentry.action.reminder;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -34,6 +35,8 @@ import java.util.Set;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.patient.PatientReminder;
 import org.hisp.dhis.patient.PatientReminderService;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.sms.SmsSender;
@@ -56,7 +59,7 @@ public class SendSmsAction
     // -------------------------------------------------------------------------
 
     private SmsSender smsSender;
-    
+
     public void setSmsSender( SmsSender smsSender )
     {
         this.smsSender = smsSender;
@@ -83,6 +86,13 @@ public class SendSmsAction
         this.patientReminderService = patientReminderService;
     }
 
+    private ProgramInstanceService programInstanceService;
+
+    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
+    {
+        this.programInstanceService = programInstanceService;
+    }
+
     private I18n i18n;
 
     public void setI18n( I18n i18n )
@@ -99,6 +109,13 @@ public class SendSmsAction
     public void setProgramStageInstanceId( Integer programStageInstanceId )
     {
         this.programStageInstanceId = programStageInstanceId;
+    }
+
+    private Integer programInstanceId;
+
+    public void setProgramInstanceId( Integer programInstanceId )
+    {
+        this.programInstanceId = programInstanceId;
     }
 
     private String msg;
@@ -130,6 +147,24 @@ public class SendSmsAction
     public String execute()
         throws Exception
     {
+        if ( programStageInstanceId != null )
+        {
+            sendSMSToEvent();
+        }
+        else if ( programInstanceId != null )
+        {
+            sendSMSToProgram();
+        }
+
+        return SUCCESS;
+    }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    private String sendSMSToEvent()
+    {
         ProgramStageInstance programStageInstance = programStageInstanceService
             .getProgramStageInstance( programStageInstanceId );
 
@@ -154,10 +189,11 @@ public class SendSmsAction
                 outboundSmsList = new ArrayList<OutboundSms>();
             }
             outboundSmsList.add( outboundSms );
+
             programStageInstance.setOutboundSms( outboundSmsList );
             programStageInstanceService.updateProgramStageInstance( programStageInstance );
-
-            message = i18n.getString( "message_is_sent" );
+            message = i18n.getString( "message_is_sent" + " " + phoneNumbers );
+            return ERROR;
         }
         catch ( SmsServiceException e )
         {
@@ -165,8 +201,45 @@ public class SendSmsAction
 
             return ERROR;
         }
-
-        return SUCCESS;
     }
 
+    private String sendSMSToProgram()
+    {
+        ProgramInstance programInstance = programInstanceService
+            .getProgramInstance( programInstanceId );
+
+        PatientReminder patientReminder = new PatientReminder();
+        patientReminder.setTemplateMessage( msg );
+        patientReminder.setSendTo( sendTo );
+
+        Set<String> phoneNumbers = patientReminderService.getPhonenumbers( patientReminder, programInstance.getPatient() );
+
+        try
+        {
+            OutboundSms outboundSms = new OutboundSms();
+            outboundSms.setMessage( msg );
+            outboundSms.setRecipients( phoneNumbers );
+            outboundSms.setSender( currentUserService.getCurrentUsername() );
+            smsSender.sendMessage( outboundSms, null );
+
+            List<OutboundSms> outboundSmsList = programInstance.getOutboundSms();
+            if ( outboundSmsList == null )
+            {
+                outboundSmsList = new ArrayList<OutboundSms>();
+            }
+            outboundSmsList.add( outboundSms );
+
+            programInstance.setOutboundSms( outboundSmsList );
+            programInstanceService.updateProgramInstance( programInstance );
+            message = i18n.getString( "message_is_sent" + " " + phoneNumbers );
+
+            return SUCCESS;
+        }
+        catch ( SmsServiceException e )
+        {
+            message = e.getMessage();
+
+            return ERROR;
+        }
+    }
 }

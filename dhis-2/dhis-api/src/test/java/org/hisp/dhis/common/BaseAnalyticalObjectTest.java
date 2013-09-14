@@ -1,19 +1,20 @@
 package org.hisp.dhis.common;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -32,7 +33,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.dataset.DataSet;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -108,5 +111,41 @@ public class BaseAnalyticalObjectTest
         assertEquals( "a1-b1-c1", BaseAnalyticalObject.getIdentifer( column, row ) );
         assertEquals( "b1", BaseAnalyticalObject.getIdentifer( new ArrayList<NameableObject>(), row ) );
         assertEquals( "b1", BaseAnalyticalObject.getIdentifer( null, row ) );
+    }
+    
+    @Test
+    public void testEquals()
+    {
+        DataElement deA = new DataElement();
+        deA.setUid( "A" );
+        deA.setCode( "A" );
+        deA.setName( "A" );
+
+        DataElement deB = new DataElement();
+        deB.setUid( "B" );
+        deB.setCode( "B" );
+        deB.setName( "B" );
+
+        DataElement deC = new DataElement();
+        deC.setUid( "A" );
+        deC.setCode( "A" );
+        deC.setName( "A" );
+        
+        DataSet dsA = new DataSet();
+        dsA.setUid( "A" );
+        dsA.setCode( "A" );
+        dsA.setName( "A" );
+
+        DataSet dsD = new DataSet();
+        dsD.setUid( "D" );
+        dsD.setCode( "D" );
+        dsD.setName( "D" );
+        
+        assertTrue( deA.equals( deC ) );
+        
+        assertFalse( deA.equals( deB ) );
+        assertFalse( deA.equals( dsA ) );
+        assertFalse( deA.equals( dsD ) );
+        assertFalse( dsA.equals( dsD ) );        
     }
 }

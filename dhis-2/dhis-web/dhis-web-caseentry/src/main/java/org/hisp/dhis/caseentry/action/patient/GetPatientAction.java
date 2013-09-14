@@ -1,17 +1,20 @@
+package org.hisp.dhis.caseentry.action.patient;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,7 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.caseentry.action.patient;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -79,8 +81,6 @@ public class GetPatientAction
 
     private PatientAttributeValueService patientAttributeValueService;
 
-    private PatientAttributeService patientAttributeService;
-
     private PatientIdentifierTypeService patientIdentifierTypeService;
 
     private RelationshipService relationshipService;
@@ -92,6 +92,8 @@ public class GetPatientAction
     private ProgramInstanceService programInstanceService;
 
     private PatientAttributeGroupService attributeGroupService;
+
+    private PatientAttributeService attributeService;
 
     private I18n i18n;
 
@@ -133,6 +135,8 @@ public class GetPatientAction
 
     private Integer programId;
 
+    private Map<String, List<PatientAttribute>> attributesMap = new HashMap<String, List<PatientAttribute>>();
+
     public void setProgramId( Integer programId )
     {
         this.programId = programId;
@@ -155,6 +159,16 @@ public class GetPatientAction
     public void setProgramStageInstanceId( Integer programStageInstanceId )
     {
         this.programStageInstanceId = programStageInstanceId;
+    }
+
+    public void setAttributeService( PatientAttributeService attributeService )
+    {
+        this.attributeService = attributeService;
+    }
+
+    public Map<String, List<PatientAttribute>> getAttributesMap()
+    {
+        return attributesMap;
     }
 
     // -------------------------------------------------------------------------
@@ -189,8 +203,8 @@ public class GetPatientAction
             if ( patientRegistrationForm != null )
             {
                 customRegistrationForm = patientRegistrationFormService.prepareDataEntryFormForAdd(
-                    patientRegistrationForm.getDataEntryForm().getHtmlCode(), healthWorkers, patient, null, i18n,
-                    format );
+                    patientRegistrationForm.getDataEntryForm().getHtmlCode(), patientRegistrationForm.getProgram(),
+                    healthWorkers, patient, null, i18n, format );
             }
         }
         else
@@ -212,49 +226,50 @@ public class GetPatientAction
             if ( patientRegistrationForm != null )
             {
                 customRegistrationForm = patientRegistrationFormService.prepareDataEntryFormForAdd(
-                    patientRegistrationForm.getDataEntryForm().getHtmlCode(), healthWorkers, patient, programInstance,
-                    i18n, format );
+                    patientRegistrationForm.getDataEntryForm().getHtmlCode(), patientRegistrationForm.getProgram(),
+                    healthWorkers, patient, programInstance, i18n, format );
             }
         }
 
+        List<PatientAttribute> attributes = new ArrayList<PatientAttribute>();
+
         if ( customRegistrationForm == null )
         {
-            // -------------------------------------------------------------------------
-            // Get identifier-types && attributes
-            // -------------------------------------------------------------------------
-
-            programs = programService.getAllPrograms();
-
-            // -------------------------------------------------------------------------
-            // Get identifier-types && attributes
-            // -------------------------------------------------------------------------
-
-            identifierTypes = patientIdentifierTypeService.getAllPatientIdentifierTypes();
-            Collection<PatientAttribute> patientAttributesInProgram = new HashSet<PatientAttribute>();
-
-            noGroupAttributes = patientAttributeService.getPatientAttributesWithoutGroup();
-
-            Collection<Program> programs = programService.getAllPrograms();
-            programs.remove( program );
-
-            for ( Program _program : programs )
-            {
-                identifierTypes.removeAll( _program.getPatientIdentifierTypes() );
-                patientAttributesInProgram.removeAll( _program.getPatientAttributes() );
-                noGroupAttributes.removeAll( _program.getPatientAttributes() );
-            }
-
             attributeGroups = new ArrayList<PatientAttributeGroup>(
                 attributeGroupService.getAllPatientAttributeGroups() );
             Collections.sort( attributeGroups, new PatientAttributeGroupSortOrderComparator() );
-            for ( PatientAttributeGroup attributeGroup : attributeGroups )
-            {
-                List<PatientAttribute> attributes = attributeGroup.getAttributes();
-                attributes.removeAll( patientAttributesInProgram );
 
-                if ( attributes.size() > 0 )
+            if ( program == null )
+            {
+                identifierTypes = patientIdentifierTypeService.getAllPatientIdentifierTypes();
+                attributes = new ArrayList<PatientAttribute>( attributeService.getAllPatientAttributes() );
+                Collection<Program> programs = programService.getAllPrograms();
+                for ( Program p : programs )
                 {
-                    attributeGroupsMap.put( attributeGroup.getId(), attributes );
+                    identifierTypes.removeAll( p.getPatientIdentifierTypes() );
+                    attributes.removeAll( p.getPatientAttributes() );
+                }
+            }
+            else
+            {
+                identifierTypes = program.getPatientIdentifierTypes();
+                attributes = program.getPatientAttributes();
+            }
+
+            for ( PatientAttribute attribute : attributes )
+            {
+                PatientAttributeGroup patientAttributeGroup = attribute.getPatientAttributeGroup();
+                String groupName = (patientAttributeGroup == null) ? "" : patientAttributeGroup.getDisplayName();
+                if ( attributesMap.containsKey( groupName ) )
+                {
+                    List<PatientAttribute> attrs = attributesMap.get( groupName );
+                    attrs.add( attribute );
+                }
+                else
+                {
+                    List<PatientAttribute> attrs = new ArrayList<PatientAttribute>();
+                    attrs.add( attribute );
+                    attributesMap.put( groupName, attrs );
                 }
             }
 
@@ -385,11 +400,6 @@ public class GetPatientAction
     public void setPatientAttributeValueService( PatientAttributeValueService patientAttributeValueService )
     {
         this.patientAttributeValueService = patientAttributeValueService;
-    }
-
-    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
-    {
-        this.patientAttributeService = patientAttributeService;
     }
 
     public void setPatientIdentifierTypeService( PatientIdentifierTypeService patientIdentifierTypeService )

@@ -1,19 +1,20 @@
 package org.hisp.dhis.security.action;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,17 +28,16 @@ package org.hisp.dhis.security.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-
+import com.opensymphony.xwork2.Action;
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.i18n.resourcebundle.ResourceBundleManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mobile.device.Device;
 import org.springframework.mobile.device.DeviceResolver;
 
-import com.opensymphony.xwork2.Action;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * @author mortenoh
@@ -55,7 +55,7 @@ public class LoginAction
     {
         this.deviceResolver = deviceResolver;
     }
-    
+
     @Autowired
     private ResourceBundleManager resourceBundleManager;
 
@@ -74,7 +74,7 @@ public class LoginAction
     {
         return failed;
     }
-    
+
     private List<Locale> availableLocales;
 
     public List<Locale> getAvailableLocales()
@@ -94,13 +94,13 @@ public class LoginAction
 
         ServletActionContext.getResponse().addHeader( "Login-Page", "true" );
 
-        if ( device.isMobile() )
+        if ( device.isMobile() || device.isTablet() )
         {
             return "mobile";
         }
 
         availableLocales = new ArrayList<Locale>( resourceBundleManager.getAvailableLocales() );
-        
+
         return "standard";
     }
 }

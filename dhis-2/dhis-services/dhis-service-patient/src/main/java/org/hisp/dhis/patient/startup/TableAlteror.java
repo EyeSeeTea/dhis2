@@ -1,17 +1,20 @@
+package org.hisp.dhis.patient.startup;
+
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,8 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.patient.startup;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -191,7 +192,7 @@ public class TableAlteror
         executeSql( "UPDATE patientidentifiertype SET type='string' WHERE type='text'" );
 
         executeSql( "UPDATE program SET onlyEnrollOnce='false' WHERE onlyEnrollOnce is null" );
-        executeSql( "UPDATE programStage SET captureCoordinates='false' WHERE captureCoordinates is null or captureCoordinates != true" );
+        executeSql( "UPDATE programStage SET captureCoordinates=false WHERE captureCoordinates is null" );
 
         executeSql( "update caseaggregationcondition set \"operator\"='times' where \"operator\"='SUM'" );
 
@@ -221,8 +222,24 @@ public class TableAlteror
         executeSql( "update patientattribute set displayonvisitschedule = false where displayonvisitschedule is null");
         executeSql( "update program set useBirthDateAsIncidentDate = false where useBirthDateAsIncidentDate is null");
         executeSql( "update program set useBirthDateAsEnrollmentDate = false where useBirthDateAsEnrollmentDate is null");
-        executeSql( "update program set selectEnrollmentDatesInFuture = true where selectEnrollmentDatesInFuture is null");
-        executeSql( "update programstage set relatedPatient = false where relatedPatient is null");
+        executeSql( "update program set selectEnrollmentDatesInFuture = false where selectEnrollmentDatesInFuture is null");
+        executeSql( "update program set selectIncidentDatesInFuture = false where selectIncidentDatesInFuture is null");
+        executeSql( "update validationcriteria set description = name where description is null or description='' ");
+        executeSql( "update programstage set generatedByEnrollmentDate = false where generatedByEnrollmentDate is null ");
+        executeSql( "update programstage set blockEntryForm = false where blockEntryForm is null ");
+        executeSql( "update programstage set remindCompleted = false where remindCompleted is null ");
+        executeSql( "ALTER TABLE program DROP COLUMN generatedByEnrollmentDate" );
+        executeSql( "ALTER TABLE program DROP COLUMN blockEntryForm" );
+        executeSql( "ALTER TABLE program DROP COLUMN remindCompleted" );
+        executeSql( "ALTER TABLE program DROP COLUMN displayProvidedOtherFacility" );
+        executeSql( "UPDATE programstage_dataelements SET displayAsRadioButton=false WHERE displayAsRadioButton is null" );
+        executeSql( "UPDATE patientreminder SET messageType=1 WHERE messageType is null" );
+        executeSql( "UPDATE programstage SET allowGenerateNextVisit=false WHERE allowGenerateNextVisit is null" );
+
+        executeSql( "update patient set name=concat_ws(' ', trim(firstname), trim(middlename), trim(lastname))" );
+        executeSql( "alter table patient drop column firstname" );
+        executeSql( "alter table patient drop column middlename" );
+        executeSql( "alter table patient drop column lastname" );
     }
 
     // -------------------------------------------------------------------------
@@ -301,7 +318,6 @@ public class TableAlteror
                 while ( inputMatcher.find() )
                 {
                     String inputHTML = inputMatcher.group();
-                    inputHTML = inputHTML.replace( ">", "" );
 
                     // -----------------------------------------------------------------
                     // Get HTML input field code

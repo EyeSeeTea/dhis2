@@ -1,17 +1,20 @@
+package org.hisp.dhis.caseentry.action.reminder;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,15 +28,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.caseentry.action.reminder;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
-import org.hisp.dhis.patientcomment.PatientComment;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.sms.outbound.OutboundSms;
@@ -63,7 +63,7 @@ public class GetProgramTrackingListAction
     }
 
     private PatientAttributeValueService patientAttributeValueService;
-    
+
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
@@ -73,8 +73,6 @@ public class GetProgramTrackingListAction
     private ProgramStageInstance programStageInstance;
 
     private List<OutboundSms> outboundSms;
-
-    private List<PatientComment> comments;
 
     private String currentUsername;
 
@@ -109,11 +107,6 @@ public class GetProgramTrackingListAction
         return currentUsername;
     }
 
-    public List<PatientComment> getComments()
-    {
-        return comments;
-    }
-
     public void setProgramStageInstanceId( Integer programStageInstanceId )
     {
         this.programStageInstanceId = programStageInstanceId;
@@ -133,15 +126,14 @@ public class GetProgramTrackingListAction
         throws Exception
     {
         programStageInstance = programStageInstanceService.getProgramStageInstance( programStageInstanceId );
-        
+
         outboundSms = new ArrayList<OutboundSms>( programStageInstance.getOutboundSms() );
-       
-        comments = new ArrayList<PatientComment>( programStageInstance.getPatientComments() );
 
         currentUsername = currentUserService.getCurrentUsername();
 
-        attributeValues = patientAttributeValueService.getPatientAttributeValues( programStageInstance.getProgramInstance().getPatient() );
-        
+        attributeValues = patientAttributeValueService.getPatientAttributeValues( programStageInstance
+            .getProgramInstance().getPatient() );
+
         return SUCCESS;
     }
 

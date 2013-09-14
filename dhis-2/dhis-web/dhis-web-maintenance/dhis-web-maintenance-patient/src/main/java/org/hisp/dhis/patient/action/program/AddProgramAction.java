@@ -1,17 +1,20 @@
+package org.hisp.dhis.patient.action.program;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,8 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.patient.action.program;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -45,6 +46,8 @@ import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
+import org.hisp.dhis.relationship.RelationshipType;
+import org.hisp.dhis.relationship.RelationshipTypeService;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 
@@ -101,10 +104,17 @@ public class AddProgramAction
     }
 
     private UserGroupService userGroupService;
-    
+
     public void setUserGroupService( UserGroupService userGroupService )
     {
         this.userGroupService = userGroupService;
+    }
+
+    private RelationshipTypeService relationshipTypeService;
+
+    public void setRelationshipTypeService( RelationshipTypeService relationshipTypeService )
+    {
+        this.relationshipTypeService = relationshipTypeService;
     }
 
     // -------------------------------------------------------------------------
@@ -146,13 +156,6 @@ public class AddProgramAction
         this.type = type;
     }
 
-    private Boolean displayProvidedOtherFacility;
-
-    public void setDisplayProvidedOtherFacility( Boolean displayProvidedOtherFacility )
-    {
-        this.displayProvidedOtherFacility = displayProvidedOtherFacility;
-    }
-
     private Boolean displayIncidentDate;
 
     public void setDisplayIncidentDate( Boolean displayIncidentDate )
@@ -174,13 +177,6 @@ public class AddProgramAction
         this.personDisplayNames = personDisplayNames;
     }
 
-    private Boolean generateBydEnrollmentDate;
-
-    public void setGenerateBydEnrollmentDate( Boolean generateBydEnrollmentDate )
-    {
-        this.generateBydEnrollmentDate = generateBydEnrollmentDate;
-    }
-
     private Boolean ignoreOverdueEvents;
 
     public void setIgnoreOverdueEvents( Boolean ignoreOverdueEvents )
@@ -188,25 +184,11 @@ public class AddProgramAction
         this.ignoreOverdueEvents = ignoreOverdueEvents;
     }
 
-    private Boolean blockEntryForm;
-
-    public void setBlockEntryForm( Boolean blockEntryForm )
-    {
-        this.blockEntryForm = blockEntryForm;
-    }
-
     private Boolean onlyEnrollOnce = false;
 
     public void setOnlyEnrollOnce( Boolean onlyEnrollOnce )
     {
         this.onlyEnrollOnce = onlyEnrollOnce;
-    }
-
-    private Boolean remindCompleted = false;
-
-    public void setRemindCompleted( Boolean remindCompleted )
-    {
-        this.remindCompleted = remindCompleted;
     }
 
     private List<Integer> daysAllowedSendMessages = new ArrayList<Integer>();
@@ -257,9 +239,9 @@ public class AddProgramAction
     {
         this.useBirthDateAsEnrollmentDate = useBirthDateAsEnrollmentDate;
     }
-    
+
     private List<Integer> userGroup = new ArrayList<Integer>();
-    
+
     public void setUserGroup( List<Integer> userGroup )
     {
         this.userGroup = userGroup;
@@ -272,12 +254,55 @@ public class AddProgramAction
         this.whenToSend = whenToSend;
     }
 
+    private List<Integer> messageType = new ArrayList<Integer>();
+
+    public void setMessageType( List<Integer> messageType )
+    {
+        this.messageType = messageType;
+    }
+
     private Boolean selectEnrollmentDatesInFuture;
 
     public void setSelectEnrollmentDatesInFuture( Boolean selectEnrollmentDatesInFuture )
     {
         this.selectEnrollmentDatesInFuture = selectEnrollmentDatesInFuture;
     }
+
+    private Boolean selectIncidentDatesInFuture;
+
+    public void setSelectIncidentDatesInFuture( Boolean selectIncidentDatesInFuture )
+    {
+        this.selectIncidentDatesInFuture = selectIncidentDatesInFuture;
+    }
+
+    private String relationshipText;
+
+    public void setRelationshipText( String relationshipText )
+    {
+        this.relationshipText = relationshipText;
+    }
+
+    private Integer relationshipTypeId;
+
+    public void setRelationshipTypeId( Integer relationshipTypeId )
+    {
+        this.relationshipTypeId = relationshipTypeId;
+    }
+
+    private Integer relatedProgramId;
+
+    public void setRelatedProgramId( Integer relatedProgramId )
+    {
+        this.relatedProgramId = relatedProgramId;
+    }
+
+    private Boolean relationshipFromA;
+
+    public void setRelationshipFromA( Boolean relationshipFromA )
+    {
+        this.relationshipFromA = relationshipFromA;
+    }
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -285,17 +310,14 @@ public class AddProgramAction
     public String execute()
         throws Exception
     {
-        displayProvidedOtherFacility = (displayProvidedOtherFacility == null) ? false : displayProvidedOtherFacility;
         displayIncidentDate = (displayIncidentDate == null) ? false : displayIncidentDate;
-        generateBydEnrollmentDate = (generateBydEnrollmentDate == null) ? false : generateBydEnrollmentDate;
         ignoreOverdueEvents = (ignoreOverdueEvents == null) ? false : ignoreOverdueEvents;
-        blockEntryForm = (blockEntryForm == null) ? false : blockEntryForm;
         onlyEnrollOnce = (onlyEnrollOnce == null) ? false : onlyEnrollOnce;
-        remindCompleted = (remindCompleted == null) ? false : remindCompleted;
         displayOnAllOrgunit = (displayOnAllOrgunit == null) ? false : displayOnAllOrgunit;
         useBirthDateAsIncidentDate = (useBirthDateAsIncidentDate == null) ? false : useBirthDateAsIncidentDate;
         useBirthDateAsEnrollmentDate = (useBirthDateAsEnrollmentDate == null) ? false : useBirthDateAsEnrollmentDate;
         selectEnrollmentDatesInFuture = (selectEnrollmentDatesInFuture == null) ? false : selectEnrollmentDatesInFuture;
+        selectIncidentDatesInFuture = (selectIncidentDatesInFuture == null) ? false : selectIncidentDatesInFuture;
 
         Program program = new Program();
 
@@ -305,26 +327,36 @@ public class AddProgramAction
         program.setDateOfEnrollmentDescription( dateOfEnrollmentDescription );
         program.setDateOfIncidentDescription( dateOfIncidentDescription );
         program.setType( type );
-        program.setDisplayProvidedOtherFacility( displayProvidedOtherFacility );
         program.setDisplayIncidentDate( displayIncidentDate );
-        program.setBlockEntryForm( blockEntryForm );
         program.setOnlyEnrollOnce( onlyEnrollOnce );
-        program.setRemindCompleted( remindCompleted );
         program.setDisplayOnAllOrgunit( displayOnAllOrgunit );
         program.setUseBirthDateAsIncidentDate( useBirthDateAsIncidentDate );
         program.setUseBirthDateAsEnrollmentDate( useBirthDateAsEnrollmentDate );
         program.setSelectEnrollmentDatesInFuture( selectEnrollmentDatesInFuture );
-
+        program.setSelectIncidentDatesInFuture( selectIncidentDatesInFuture );
+        
         if ( type == Program.MULTIPLE_EVENTS_WITH_REGISTRATION )
         {
-            program.setGeneratedByEnrollmentDate( generateBydEnrollmentDate );
             program.setIgnoreOverdueEvents( ignoreOverdueEvents );
         }
         else
         {
-            program.setGeneratedByEnrollmentDate( true );
             program.setIgnoreOverdueEvents( false );
         }
+
+        if ( relatedProgramId != null )
+        {
+            Program relatedProgram = programService.getProgram( relatedProgramId );
+            program.setRelatedProgram( relatedProgram );
+        }
+
+        if ( relationshipTypeId != null )
+        {
+            RelationshipType relationshipType = relationshipTypeService.getRelationshipType( relationshipTypeId );
+            program.setRelationshipType( relationshipType );
+        }
+        program.setRelationshipFromA( relationshipFromA );
+        program.setRelationshipText( relationshipText );
 
         List<PatientIdentifierType> identifierTypes = new ArrayList<PatientIdentifierType>();
         List<PatientAttribute> patientAttributes = new ArrayList<PatientAttribute>();
@@ -365,6 +397,7 @@ public class AddProgramAction
             reminder.setDateToCompare( datesToCompare.get( i ) );
             reminder.setSendTo( sendTo.get( i ) );
             reminder.setWhenToSend( whenToSend.get( i ) );
+            reminder.setMessageType( messageType.get( i ) );
             if ( sendTo.get( i ) == PatientReminder.SEND_TO_USER_GROUP )
             {
                 UserGroup selectedUserGroup = userGroupService.getUserGroup( userGroup.get( i ) );

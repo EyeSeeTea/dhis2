@@ -26,7 +26,7 @@
 					#end
 				#end
 				#if($value=="")
-					#set($value=$!patient.getFullName())
+					#set($value=$!patient.name)
 					#set($title= $encoder.htmlEncode($i18n.getString( "full_name" )))
 				#end
 				#if($value=="")
@@ -172,7 +172,8 @@
 				<td>
 					<input type="text" id="smsMessage" name="smsMessage" class="{validate:{required:true,maxlength:160}}" onkeypress="keypressOnMessage(event, this,'$programStageInstance.id');" style='height:50px;'></input>
 				</td>
-				<td id="smsError" style="color:red;"></td>
+				<td id="smsSuccess" style="color:green;"></td>
+				<td id="smsError" style="color:green;"></td>
 			</tr>
 			<tr>
 				<td></td>

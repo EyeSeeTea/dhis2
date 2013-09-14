@@ -1,19 +1,20 @@
 package org.hisp.dhis.patient.action.dataentryform;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -102,7 +103,7 @@ public class ViewPatientRegistrationFormAction
     // -------------------------------------------------------------------------
     // Getters & Setters
     // -------------------------------------------------------------------------
-    
+
     private Integer programId;
 
     public void setProgramId( Integer programId )
@@ -112,12 +113,12 @@ public class ViewPatientRegistrationFormAction
 
     private Collection<PatientAttribute> attributes = new HashSet<PatientAttribute>();
 
-    private Collection<PatientIdentifierType> identifierTypes = new HashSet<PatientIdentifierType>();
-
     public Collection<PatientAttribute> getAttributes()
     {
         return attributes;
     }
+
+    private Collection<PatientIdentifierType> identifierTypes = new HashSet<PatientIdentifierType>();
 
     public Collection<PatientIdentifierType> getIdentifierTypes()
     {
@@ -166,30 +167,23 @@ public class ViewPatientRegistrationFormAction
         if ( programId == null )
         {
             registrationForm = patientRegistrationFormService.getCommonPatientRegistrationForm();
+
+            identifierTypes = patientIdentifierTypeService.getAllPatientIdentifierTypes();
+            attributes = patientAttributeService.getAllPatientAttributes();
+            for ( Program p : programs )
+            {
+                identifierTypes.remove( p.getPatientIdentifierTypes() );
+                attributes.remove( p.getPatientAttributes() );
+            }
         }
         else
         {
             program = programService.getProgram( programId );
+            identifierTypes = program.getPatientIdentifierTypes();
+            attributes = program.getPatientAttributes();
             registrationForm = patientRegistrationFormService.getPatientRegistrationForm( program );
         }
-
-        // ---------------------------------------------------------------------
-        // Get dynamic attributes and identifier-types
-        // ---------------------------------------------------------------------
-
-        identifierTypes = patientIdentifierTypeService.getAllPatientIdentifierTypes();
-
-        attributes = patientAttributeService.getAllPatientAttributes();
-
-        for ( Program program : programs )
-        {
-            if ( programId == null || program.getId() != programId )
-            {
-                identifierTypes.removeAll( program.getPatientIdentifierTypes() );
-                attributes.removeAll( program.getPatientAttributes() );
-            }
-        }
-
+        
         // ---------------------------------------------------------------------
         // Get images
         // ---------------------------------------------------------------------

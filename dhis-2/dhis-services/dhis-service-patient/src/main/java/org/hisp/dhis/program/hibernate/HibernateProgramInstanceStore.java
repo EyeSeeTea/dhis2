@@ -1,17 +1,20 @@
+package org.hisp.dhis.program.hibernate;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,8 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.program.hibernate;
 
 import java.util.Collection;
 import java.util.Date;
@@ -47,7 +48,6 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 /**
  * @author Abyot Asalefew
- * @version $Id$
  */
 public class HibernateProgramInstanceStore
     extends HibernateGenericStore<ProgramInstance>
@@ -234,7 +234,7 @@ public class HibernateProgramInstanceStore
             for ( int i = 1; i <= cols; i++ )
             {
                 message = rs.getString( "templatemessage" );
-                String patientName = rs.getString( "firstName" );
+                String patientName = rs.getString( "name" );
                 String organisationunitName = rs.getString( "orgunitName" );
                 String programName = rs.getString( "programName" );
                 String incidentDate = rs.getString( "dateofincident" ).split( " " )[0];// just
@@ -276,7 +276,7 @@ public class HibernateProgramInstanceStore
     private String sendToPatientSql( String dateToCompare )
     {
         return "SELECT pi.programinstanceid, p.phonenumber, prm.templatemessage, "
-            + "         p.firstname, p.middlename, p.lastname, org.name as orgunitName, "
+            + "         p.name, org.name as orgunitName, "
             + "         pg.name as programName, pi.dateofincident , "
             + "         pi.enrollmentdate,(DATE(now()) - DATE(pi.enrollmentdate) ) as days_since_erollment_date, "
             + "         (DATE(now()) - DATE(pi.dateofincident) ) as days_since_incident_date "
@@ -295,7 +295,7 @@ public class HibernateProgramInstanceStore
 
     private String sendToHealthWorkerSql( String dateToCompare )
     {
-        return "SELECT pi.programinstanceid, uif.phonenumber, prm.templatemessage, p.firstname, p.middlename, p.lastname, org.name as orgunitName, "
+        return "SELECT pi.programinstanceid, uif.phonenumber, prm.templatemessage, p.name, org.name as orgunitName, "
             + "   pg.name as programName, pi.dateofincident, pi.enrollmentdate,(DATE(now()) - DATE(pi.enrollmentdate) ) as days_since_erollment_date, "
             + "       (DATE(now()) - DATE(pi.dateofincident) ) as days_since_incident_date "
             + "    FROM patient p INNER JOIN programinstance pi "
@@ -320,7 +320,7 @@ public class HibernateProgramInstanceStore
 
     private String sendMessageToOrgunitRegisteredSql( String dateToCompare )
     {
-        return "SELECT pi.programinstanceid, org.phonenumber, prm.templatemessage, p.firstname, p.middlename, p.lastname, org.name as orgunitName, "
+        return "SELECT pi.programinstanceid, org.phonenumber, prm.templatemessage, p.name, org.name as orgunitName, "
             + "   pg.name as programName, pi.dateofincident, pi.enrollmentdate,(DATE(now()) - DATE(pi.enrollmentdate) ) as days_since_erollment_date, "
             + "       (DATE(now()) - DATE(pi.dateofincident) ) as days_since_incident_date "
             + "    FROM patient p INNER JOIN programinstance pi "
@@ -343,7 +343,7 @@ public class HibernateProgramInstanceStore
 
     private String sendMessageToUsersSql( String dateToCompare )
     {
-        return "SELECT pi.programinstanceid, uif.phonenumber, prm.templatemessage, p.firstname, p.middlename, p.lastname, org.name as orgunitName, pg.name as programName, pi.dateofincident ,"
+        return "SELECT pi.programinstanceid, uif.phonenumber, prm.templatemessage, p.name, org.name as orgunitName, pg.name as programName, pi.dateofincident ,"
             + "pi.enrollmentdate,(DATE(now()) - DATE(pi.enrollmentdate) ) as days_since_erollment_date, "
             + "(DATE(now()) - DATE(pi.dateofincident) ) as days_since_incident_date "
             + "FROM patient p INNER JOIN programinstance pi "
@@ -368,7 +368,7 @@ public class HibernateProgramInstanceStore
     
     private String sendMessageToUserGroupsSql( String dateToCompare )
     {
-        return "select pi.programinstanceid, uif.phonenumber,prm.templatemessage, p.firstname, p.middlename, p.lastname, org.name as orgunitName ,"
+        return "select pi.programinstanceid, uif.phonenumber,prm.templatemessage, p.name, org.name as orgunitName ,"
             + " pg.name as programName, pi.dateofincident, pi.enrollmentdate, (DATE(now()) - DATE(pi.enrollmentdate) ) as days_since_erollment_date, "
             + "(DATE(now()) - DATE(pi.dateofincident) ) as days_since_incident_date "
             + "  from patient p INNER JOIN programinstance pi "

@@ -1,17 +1,20 @@
+package org.hisp.dhis.caseaggregation.jdbc;
+
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,8 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.caseaggregation.jdbc;
 
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_ORGUNIT_COMPLETE_PROGRAM_STAGE;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PATIENT;
@@ -413,7 +414,7 @@ public class JdbcCaseAggregationConditionManager
         {
             if ( hasPatients || operator.equals( CaseAggregationCondition.AGGRERATION_COUNT ) )
             {
-                sql += "p.firstName, p.middleName, p.lastName, p.gender, p.birthDate, p.phoneNumber, ";
+                sql += "p.name, p.gender, p.birthDate, p.phoneNumber, ";
             }
 
             if ( hasDataelement )
@@ -502,7 +503,7 @@ public class JdbcCaseAggregationConditionManager
                 // Aggregation
                 // ---------------------------------------------------------------------
 
-                if ( _orgunitIds.size() > 0 )
+                if ( !orgunitIds.isEmpty() )
                 {
                     insertAggregateValue( caseExpression, caseOperator, dataelementId, optionComboId, deSumId,
                         orgunitIds, period );
@@ -775,7 +776,7 @@ public class JdbcCaseAggregationConditionManager
             sql = sql
                 .replace( CaseAggregationCondition.MINUS_DATAELEMENT_OPERATOR + "_" + key, minus2SQLMap.get( key ) );
         }
-        
+
         return sql + " ) ";
     }
 

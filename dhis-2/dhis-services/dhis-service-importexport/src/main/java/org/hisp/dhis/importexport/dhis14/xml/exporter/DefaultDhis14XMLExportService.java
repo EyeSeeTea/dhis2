@@ -1,19 +1,20 @@
 package org.hisp.dhis.importexport.dhis14.xml.exporter;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,25 +28,45 @@ package org.hisp.dhis.importexport.dhis14.xml.exporter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.amplecode.quick.StatementManager;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
 import org.amplecode.staxwax.factory.XMLFactory;
 import org.amplecode.staxwax.writer.XMLWriter;
 import org.hibernate.SessionFactory;
-import org.hisp.dhis.aggregation.AggregatedDataValueService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.importexport.ExportParams;
 import org.hisp.dhis.importexport.ExportPipeThread;
 import org.hisp.dhis.importexport.ExportService;
-import org.hisp.dhis.importexport.dhis14.xml.converter.*;
-import org.hisp.dhis.importexport.dhis14.xml.converter.xsd.*;
+import org.hisp.dhis.importexport.dhis14.xml.converter.DataElementConverter;
+import org.hisp.dhis.importexport.dhis14.xml.converter.DataTypeConverter;
+import org.hisp.dhis.importexport.dhis14.xml.converter.DataValueConverter;
+import org.hisp.dhis.importexport.dhis14.xml.converter.IndicatorConverter;
+import org.hisp.dhis.importexport.dhis14.xml.converter.IndicatorTypeConverter;
+import org.hisp.dhis.importexport.dhis14.xml.converter.OrganisationUnitConverter;
+import org.hisp.dhis.importexport.dhis14.xml.converter.OrganisationUnitHierarchyConverter;
+import org.hisp.dhis.importexport.dhis14.xml.converter.PeriodTypeConverter;
+import org.hisp.dhis.importexport.dhis14.xml.converter.UserConverter;
+import org.hisp.dhis.importexport.dhis14.xml.converter.UserRoleConverter;
+import org.hisp.dhis.importexport.dhis14.xml.converter.xsd.DataElementXSDConverter;
+import org.hisp.dhis.importexport.dhis14.xml.converter.xsd.DataRootXSDConverter;
+import org.hisp.dhis.importexport.dhis14.xml.converter.xsd.DataTypeXSDConverter;
+import org.hisp.dhis.importexport.dhis14.xml.converter.xsd.IndicatorTypeXSDConverter;
+import org.hisp.dhis.importexport.dhis14.xml.converter.xsd.IndicatorXSDConverter;
+import org.hisp.dhis.importexport.dhis14.xml.converter.xsd.OrganisationUnitHierarchyXSDConverter;
+import org.hisp.dhis.importexport.dhis14.xml.converter.xsd.OrganisationUnitXSDConverter;
+import org.hisp.dhis.importexport.dhis14.xml.converter.xsd.PeriodTypeXSDConverter;
+import org.hisp.dhis.importexport.dhis14.xml.converter.xsd.UserRoleXSDConverter;
+import org.hisp.dhis.importexport.dhis14.xml.converter.xsd.UserXSDConverter;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.PeriodService;
-
-import java.io.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 
 /**

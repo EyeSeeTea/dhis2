@@ -1,19 +1,20 @@
 package org.hisp.dhis.resourcetable.scheduling;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,6 +28,7 @@ package org.hisp.dhis.resourcetable.scheduling;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.resourcetable.ResourceTableService;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.notification.NotificationLevel;
@@ -45,6 +47,9 @@ public class ResourceTableTask
     @Autowired
     private Notifier notifier;
 
+    @Autowired
+    private MessageService messageService;
+
     private TaskId taskId;
 
     public void setTaskId( TaskId taskId )
@@ -61,8 +66,19 @@ public class ResourceTableTask
     {
         notifier.notify( taskId, "Generating resource tables" );
         
-        resourceTableService.generateAll();
-        
-        notifier.notify( taskId, NotificationLevel.INFO, "Resource tables generated", true );
+        try
+        {
+            resourceTableService.generateAll();
+            
+            notifier.notify( taskId, NotificationLevel.INFO, "Resource tables generated", true );
+        }
+        catch ( RuntimeException ex )
+        {
+            notifier.notify( taskId, NotificationLevel.ERROR, "Process failed: " + ex.getMessage(), true );
+            
+            messageService.sendFeedback( "Resource table process failed", "Resource table process failed, please check the logs.", null );
+            
+            throw ex;
+        }
     }
 }

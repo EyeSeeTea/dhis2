@@ -1,17 +1,20 @@
+package org.hisp.dhis.program;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,24 +27,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.program;
+
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.message.MessageConversation;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patientcomment.PatientComment;
+import org.hisp.dhis.sms.outbound.OutboundSms;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patientcomment.PatientComment;
-import org.hisp.dhis.sms.outbound.OutboundSms;
-
 /**
  * @author Abyot Asalefew
- * @version $Id$
  */
-public class ProgramStageInstance extends BaseIdentifiableObject
+public class ProgramStageInstance
+    extends BaseIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -49,9 +52,13 @@ public class ProgramStageInstance extends BaseIdentifiableObject
     private static final long serialVersionUID = 6239130884678145713L;
 
     public static final int COMPLETED_STATUS = 1;
+
     public static final int VISITED_STATUS = 2;
+
     public static final int FUTURE_VISIT_STATUS = 3;
+
     public static final int LATE_VISIT_STATUS = 4;
+
     public static final int SKIPPED_STATUS = 5;
 
     private ProgramInstance programInstance;
@@ -68,7 +75,9 @@ public class ProgramStageInstance extends BaseIdentifiableObject
 
     private List<OutboundSms> outboundSms;
 
-    private Set<PatientComment> patientComments;
+    private List<MessageConversation> messageConversations;
+
+    private PatientComment patientComment;
 
     private Integer status;
 
@@ -77,7 +86,7 @@ public class ProgramStageInstance extends BaseIdentifiableObject
     private String completedUser;
 
     private Date completedDate;
-    
+
     private Set<Patient> patients;
 
     // -------------------------------------------------------------------------
@@ -111,11 +120,13 @@ public class ProgramStageInstance extends BaseIdentifiableObject
             return false;
         }
 
-        if ( getClass() != object.getClass() )
+        if ( !getClass().isAssignableFrom( object.getClass() ) )
         {
             return false;
         }
 
+        // TODO include due date and execution date to make consistent with hashcode
+        
         final ProgramStageInstance other = (ProgramStageInstance) object;
 
         return programInstance.equals( other.getProgramInstance() ) && programStage.equals( other.getProgramStage() );
@@ -250,14 +261,14 @@ public class ProgramStageInstance extends BaseIdentifiableObject
         this.outboundSms = outboundSms;
     }
 
-    public Set<PatientComment> getPatientComments()
+    public PatientComment getPatientComment()
     {
-        return patientComments;
+        return patientComment;
     }
 
-    public void setPatientComments( Set<PatientComment> patientComments )
+    public void setPatientComment( PatientComment patientComment )
     {
-        this.patientComments = patientComments;
+        this.patientComment = patientComment;
     }
 
     public Date getCompletedDate()
@@ -298,6 +309,16 @@ public class ProgramStageInstance extends BaseIdentifiableObject
     public void setPatients( Set<Patient> patients )
     {
         this.patients = patients;
+    }
+
+    public List<MessageConversation> getMessageConversations()
+    {
+        return messageConversations;
+    }
+
+    public void setMessageConversations( List<MessageConversation> messageConversations )
+    {
+        this.messageConversations = messageConversations;
     }
 
     public Integer getEventStatus()

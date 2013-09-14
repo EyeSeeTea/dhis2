@@ -1,17 +1,20 @@
+package org.hisp.dhis.patient;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,44 +28,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient;
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 import java.util.Collection;
-
-import org.hisp.dhis.common.GenericStore;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
 public interface PatientIdentifierStore
-    extends GenericStore<PatientIdentifier>
+    extends GenericIdentifiableObjectStore<PatientIdentifier>
 {
     String ID = PatientIdentifierStore.class.getName();
 
     PatientIdentifier get( Patient patient );
 
     PatientIdentifier get( String identifier, OrganisationUnit organisationUnit );
-    
+
     PatientIdentifier get( PatientIdentifierType type, String identifier );
 
-    Collection<PatientIdentifier> getByIdentifier( String identifier );
-    
-    Collection<PatientIdentifier> getByType( PatientIdentifierType identifierType );
-    
-    PatientIdentifier getPatientIdentifier(String identifier, Patient patient);
+    /* We need this since we have allowed identifiers with duplicate values in the past. This returns a list instead. */
+    Collection<PatientIdentifier> getAll( PatientIdentifierType type, String identifier );
 
-    PatientIdentifier getPatientIdentifier(PatientIdentifierType identifierType, Patient patient);
-    
+    Collection<PatientIdentifier> getByIdentifier( String identifier );
+
+    Collection<PatientIdentifier> getByType( PatientIdentifierType identifierType );
+
+    PatientIdentifier getPatientIdentifier( String identifier, Patient patient );
+
+    PatientIdentifier getPatientIdentifier( PatientIdentifierType identifierType, Patient patient );
+
     Collection<PatientIdentifier> getPatientIdentifiers( Patient patient );
-    
-    Patient getPatient( PatientIdentifierType idenType, String value);
-    
+
+    Patient getPatient( PatientIdentifierType idenType, String value );
+
     Collection<Patient> getPatientsByIdentifier( String identifier, int min, int max );
-    
+
     int countGetPatientsByIdentifier( String identifier );
-        
-    Collection<PatientIdentifier> get(Collection<PatientIdentifierType> identifierTypes, Patient patient);
+
+    Collection<PatientIdentifier> get( Collection<PatientIdentifierType> identifierTypes, Patient patient );
+
+    boolean checkDuplicateIdentifier( String identifier );
 
 }

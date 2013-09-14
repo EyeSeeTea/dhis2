@@ -1,19 +1,20 @@
 package org.hisp.dhis.sms;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -36,6 +37,8 @@ import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.sms.incoming.IncomingSms;
 import org.hisp.dhis.sms.incoming.IncomingSmsListener;
+import org.hisp.dhis.sms.incoming.IncomingSmsService;
+import org.hisp.dhis.sms.incoming.SmsMessageStatus;
 import org.hisp.dhis.sms.parse.ParserType;
 import org.hisp.dhis.sms.parse.SMSParserException;
 import org.hisp.dhis.smscommand.SMSCommand;
@@ -56,6 +59,8 @@ public class UnregisteredSMSListener
     private MessageService messageService;
 
     private SmsMessageSender smsMessageSender;
+
+    private IncomingSmsService incomingSmsService;
 
     @Transactional
     @Override
@@ -120,23 +125,13 @@ public class UnregisteredSMSListener
             {
                 Set<User> receivers = new HashSet<User>( userGroup.getMembers() );
 
-                UserCredentials anonymousUser = userService.getUserCredentialsByUsername( "system" );
+                UserCredentials anonymousUser = userService.getUserCredentialsByUsername( "anonymous" );
 
                 if ( anonymousUser == null )
                 {
                     anonymousUser = userService.getUserCredentialsByUsername( "admin" );
                 }
-                /*MessageConversation conversation = new MessageConversation( smsCommand.getName(),
-                    anonymousUser.getUser() );
-
-                conversation.addMessage( new Message( message, null, anonymousUser.getUser() ) );
-
-                for ( User receiver : receivers )
-                {
-                    boolean read = false;
-
-                    conversation.addUserMessage( new UserMessage( receiver, read ) );
-                }*/
+                
                 // forward to user group by SMS, E-mail, DHIS conversation
 
                 messageService.sendMessage( smsCommand.getName(), message, null, receivers, anonymousUser.getUser(),
@@ -149,6 +144,11 @@ public class UnregisteredSMSListener
                 feedbackList.add( sender );
                 smsMessageSender.sendMessage( smsCommand.getName(), smsCommand.getReceivedMessage(), null,
                     feedbackList, true );
+
+                // update the status of the sms after process
+                sms.setStatus( SmsMessageStatus.PROCESSED );
+                incomingSmsService.update( sms );
+
             }
         }
     }
@@ -171,6 +171,11 @@ public class UnregisteredSMSListener
     public void setSmsMessageSender( SmsMessageSender smsMessageSender )
     {
         this.smsMessageSender = smsMessageSender;
+    }
+
+    public void setIncomingSmsService( IncomingSmsService incomingSmsService )
+    {
+        this.incomingSmsService = incomingSmsService;
     }
     
 }

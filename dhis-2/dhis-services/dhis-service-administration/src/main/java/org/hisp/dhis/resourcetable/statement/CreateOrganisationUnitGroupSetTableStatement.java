@@ -1,19 +1,20 @@
 package org.hisp.dhis.resourcetable.statement;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -47,10 +48,13 @@ public class CreateOrganisationUnitGroupSetTableStatement
     private static final String LONG_TEXT_COLUMN_TYPE = "VARCHAR (250)";
     
     private List<OrganisationUnitGroupSet> groupSets;
+
+    private String quote;
     
-    public CreateOrganisationUnitGroupSetTableStatement( List<OrganisationUnitGroupSet> groupSets )
+    public CreateOrganisationUnitGroupSetTableStatement( List<OrganisationUnitGroupSet> groupSets, String quote )
     {
         this.groupSets = groupSets;
+        this.quote = quote;
     }
     
     public String getStatement()
@@ -61,6 +65,7 @@ public class CreateOrganisationUnitGroupSetTableStatement
                 
         for ( OrganisationUnitGroupSet groupSet : groupSets )
         {
+            statement += quote + groupSet.getName() + quote + SPACE + LONG_TEXT_COLUMN_TYPE + SEPARATOR;
             statement += groupSet.getUid() + SPACE + "CHARACTER(11)" + SEPARATOR;
         }
         

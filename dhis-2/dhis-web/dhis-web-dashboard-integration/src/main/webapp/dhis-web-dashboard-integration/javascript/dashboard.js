@@ -6,6 +6,8 @@ dhis2.db.currentItem;
 dhis2.db.currentItemPos;
 dhis2.db.currentShareType;
 dhis2.db.currentShareId;
+dhis2.db.currentMaxType = [];
+dhis2.db.maxItems = 40;
 
 // TODO remove position from template
 // TODO support table as link and embedded
@@ -41,17 +43,19 @@ $( document ).ready( function()
 
 dhis2.db.tmpl = {
 	dashboardLink: "<li id='dashboard-${id}'><a href='javascript:dhis2.db.renderDashboard( \"${id}\" )'>${name}</a></li>",
-	
+
 	moduleIntro: "<li><div class='dasboardIntro'>${i18n_click}</div></li>",
-	
+
 	dashboardIntro: "<li><div class='dasboardIntro'>${i18n_add}</div>" +
 			        "<div class='dasboardTip'>${i18n_arrange}</div></li>",
 	
-	hitHeader: "<li class='hitHeader'>${title}</li>",
+	hitHeader: "<li class='hitHeader'>${title} &nbsp; " +
+	           "<a id='hitMore-${type}' href='javascript:dhis2.db.searchMore( \"${type}\" )'>${i18n_see_more_hits} &raquo;</a>" +
+	           "<a id='hitFewer-${type}' href='javascript:dhis2.db.searchFewer( \"${type}\" )' style='display:none'>&laquo; ${i18n_see_fewer_hits}</a></li>",
 	
 	hitItem: "<li><a class='viewLink' href='${link}'><img src='../images/${img}.png'>${name}</a>" +
-	         "<a class='addLink' href='javascript:dhis2.db.addItemContent( \"${type}\", \"${id}\" )'>Add</a></li>",
-		         
+	         "{{if canManage}}<a class='addLink' href='javascript:dhis2.db.addItemContent( \"${type}\", \"${id}\" )'>${i18n_add}</a>{{/if}}</li>",
+
 	chartItem: "<li id='liDrop-${itemId}' class='liDropItem'><div class='dropItem' id='drop-${itemId}' data-item='${itemId}'></div></li>" +
 	           "<li id='li-${itemId}' class='liItem'><div class='item' id='${itemId}'><div class='itemHeader'><a href='javascript:dhis2.db.removeItem( \"${itemId}\" )'>${i18n_remove}</a>" +
 	           "<a href='javascript:dhis2.db.viewImage( \"../api/charts/${id}/data?width=820&height=550\", \"${name}\" )'>${i18n_view}</a>" +
@@ -168,7 +172,7 @@ dhis2.db.openAddDashboardForm = function()
 	$( "#addDashboardForm" ).dialog( {
 		autoOpen: true,
 		modal: true,
-		width: 405,
+		width: 415,
 		height: 100,
 		resizable: false,
 		title: "Add new dashboard"
@@ -260,6 +264,46 @@ dhis2.db.removeDashboard = function()
 	}
 }
 
+function updateSharing( dashboard ) {
+    $( '#dashboardMenu' ).data( 'canManage', dashboard.access.manage );
+
+    if ( dashboard.access.manage ) {
+        var manageLink = $( '<a/>' )
+            .addClass( 'bold' )
+            .text( i18n_manage )
+            .attr( 'href', 'javascript:dhis2.db.openManageDashboardForm()' );
+        $( '#manageDashboard' ).html( manageLink );
+
+        var sharingLink = $( '<a/>' )
+            .addClass( 'bold' )
+            .text( i18n_share )
+            .attr( 'href', 'javascript:showSharingDialog("dashboard", "' + dashboard.id + '")' );
+        $( '#manageSharing' ).html( sharingLink );
+    } 
+    else 
+    {
+        var manageLink = $( '<a/>' )
+            .addClass( 'bold' )
+            .css( {
+                'cursor': 'default',
+                'text-decoration': 'none',
+                'color': '#888'
+            } )
+            .text( i18n_manage );
+        $( '#manageDashboard' ).html( manageLink );
+
+        var sharingLink = $( '<a/>' )
+            .addClass( 'bold' )
+            .css( {
+                'cursor': 'default',
+                'text-decoration': 'none',
+                'color': '#888'
+            } )
+            .text( i18n_share );
+        $( '#manageSharing' ).html( sharingLink );
+    }
+}
+
 dhis2.db.renderDashboardListLoadFirst = function()
 {
 	var $l = $( "#dashboardList" );
@@ -275,8 +319,8 @@ dhis2.db.renderDashboardListLoadFirst = function()
 			$.each( data.dashboards, function( index, dashboard )
 			{
 				$l.append( $.tmpl( dhis2.db.tmpl.dashboardLink, { "id": dashboard.id, "name": dashboard.name } ) );
-	
-				if ( index == 0 )
+
+                if ( index == 0 )
 				{
 					first = dashboard.id;
 				}
@@ -314,8 +358,10 @@ dhis2.db.renderDashboard = function( id )
 	
 	$.getJSON( "../api/dashboards/" + id, function( data )
 	{
-		if ( undefined !== data.items )
-		{
+        updateSharing( data );
+
+        if( undefined !== data.items )
+        {
 			$.each( data.items, function( index, item )
 			{
 				var position = index - 1;
@@ -422,6 +468,9 @@ dhis2.db.addItemContent = function( type, id )
 	    	},
 	    	success: function() {
 	    		dhis2.db.renderDashboard( dhis2.db.current );
+	    	},
+	    	error: function( xhr ) {
+	    		setHeaderDelayMessage( xhr.responseText );
 	    	}
 	    } );
 	}
@@ -481,6 +530,18 @@ dhis2.db.renderReportTable = function( tableId, itemId )
 // Search
 //------------------------------------------------------------------------------
 
+dhis2.db.searchMore = function( type )
+{
+	dhis2.db.currentMaxType.push( type );
+	dhis2.db.search();
+}
+
+dhis2.db.searchFewer = function( type )
+{
+	dhis2.db.currentMaxType.splice( $.inArray( type, dhis2.db.currentMaxType ), 1 );
+	dhis2.db.search();
+}
+
 dhis2.db.search = function()
 {
 	var query = $.trim( $( "#searchField" ).val() );
@@ -490,94 +551,123 @@ dhis2.db.search = function()
 		dhis2.db.hideSearch();
 		return false;
 	}
-	
-	var hits = $.get( "../api/dashboards/q/" + query, function( data ) {
+		
+	var hits = $.get( "../api/dashboards/q/" + query + dhis2.db.getMaxParams(), function( data ) {
 		var $h = $( "#hitDiv" );
 		dhis2.db.renderSearch( data, $h );
+		dhis2.db.setHitLinks();
 		$h.show();
+		$( "#searchField" ).focus();
 	} );		
+}
+
+dhis2.db.setHitLinks = function()
+{
+	for ( var i = 0; i < dhis2.db.currentMaxType.length; i++ )
+	{
+		var type = dhis2.db.currentMaxType[i];
+		
+		$( "#hitMore-" + type ).hide();
+		$( "#hitFewer-" + type ).show();
+	}
+}
+
+dhis2.db.getMaxParams = function()
+{
+	var params = "?";
+	
+	if ( dhis2.db.currentMaxType.length )
+	{		
+		for ( var i = 0; i < dhis2.db.currentMaxType.length; i++ )
+		{
+			params += "max=" + dhis2.db.currentMaxType[i] + "&";
+		}
+	}
+	
+	return params.substring( 0, ( params.length - 1 ) );
 }
 
 dhis2.db.renderSearch = function( data, $h )
 {
 	$h.empty().append( "<ul>" );
-	
+    var canManage = $( '#dashboardMenu' ).data( 'canManage' );
+
 	if ( data.searchCount > 0 )
 	{
 		if ( data.userCount > 0 )
 		{
-			$h.append( $.tmpl( dhis2.db.tmpl.hitHeader, { "title": "Users" } ) );
+			$h.append( $.tmpl( dhis2.db.tmpl.hitHeader, { "title": "Users", "type": "users", "i18n_see_more_hits": i18n_see_more_hits, "i18n_see_fewer_hits": i18n_see_fewer_hits } ) );
 			
 			for ( var i in data.users )
 			{
 				var o = data.users[i];
-				$h.append( $.tmpl( dhis2.db.tmpl.hitItem, { "link": "profile.action?id=" + o.id, "img": "user_small", "name": o.name, "type": "users", "id": o.id } ) );
+				$h.append( $.tmpl( dhis2.db.tmpl.hitItem, { "canManage": canManage, "link": "profile.action?id=" + o.id, "img": "user_small", "name": o.name, "type": "users", "id": o.id, "i18n_add": i18n_add } ) );
 			}
 		}
 		
 		if ( data.chartCount > 0 )
 		{
-			$h.append( $.tmpl( dhis2.db.tmpl.hitHeader, { "title": "Charts" } ) );
+			$h.append( $.tmpl( dhis2.db.tmpl.hitHeader, { "title": "Charts", "type": "chart", "i18n_see_more_hits": i18n_see_more_hits, "i18n_see_fewer_hits": i18n_see_fewer_hits } ) );
 			
 			for ( var i in data.charts )
 			{
 				var o = data.charts[i];
-				$h.append( $.tmpl( dhis2.db.tmpl.hitItem, { "link": "../dhis-web-visualizer/app/index.html?id=" + o.id, "img": "chart_small", "name": o.name, "type": "chart", "id": o.id } ) );
+				$h.append( $.tmpl( dhis2.db.tmpl.hitItem, { "canManage": canManage, "link": "../dhis-web-visualizer/app/index.html?id=" + o.id, "img": "chart_small", "name": o.name, "type": "chart", "id": o.id, "i18n_add": i18n_add } ) );
 			}
 		}
 		
 		if ( data.mapCount > 0 )
 		{
-			$h.append( $.tmpl( dhis2.db.tmpl.hitHeader, { "title": "Maps" } ) );
+			$h.append( $.tmpl( dhis2.db.tmpl.hitHeader, { "title": "Maps", "type": "map", "i18n_see_more_hits": i18n_see_more_hits, "i18n_see_fewer_hits": i18n_see_fewer_hits } ) );
 			
 			for ( var i in data.maps )
 			{
 				var o = data.maps[i];
-				$h.append( $.tmpl( dhis2.db.tmpl.hitItem, { "link": "../dhis-web-mapping/app/index.html?id=" + o.id, "img": "map_small", "name": o.name, "type": "map", "id": o.id } ) );
+				$h.append( $.tmpl( dhis2.db.tmpl.hitItem, { "canManage": canManage, "link": "../dhis-web-mapping/app/index.html?id=" + o.id, "img": "map_small", "name": o.name, "type": "map", "id": o.id, "i18n_add": i18n_add } ) );
 			}
 		}
 		
 		if ( data.reportTableCount > 0 )
 		{
-			$h.append( $.tmpl( dhis2.db.tmpl.hitHeader, { "title": "Pivot tables" } ) );
+			$h.append( $.tmpl( dhis2.db.tmpl.hitHeader, { "title": "Pivot tables", "type": "reportTable", "i18n_see_more_hits": i18n_see_more_hits, "i18n_see_fewer_hits": i18n_see_fewer_hits } ) );
 			
 			for ( var i in data.reportTables )
 			{
 				var o = data.reportTables[i];
-				$h.append( $.tmpl( dhis2.db.tmpl.hitItem, { "link": "../dhis-web-pivot/app/index.html?id=" + o.id, "img": "table_small", "name": o.name, "type": "reportTable", "id": o.id } ) );
+				$h.append( $.tmpl( dhis2.db.tmpl.hitItem, { "canManage": canManage, "link": "../dhis-web-pivot/app/index.html?id=" + o.id, "img": "table_small", "name": o.name, "type": "reportTable", "id": o.id, "i18n_add": i18n_add } ) );
 			}
 		}
 		
 		if ( data.reportCount > 0 )
 		{
-			$h.append( $.tmpl( dhis2.db.tmpl.hitHeader, { "title": "Standard reports" } ) );
+			$h.append( $.tmpl( dhis2.db.tmpl.hitHeader, { "title": "Standard reports", "type": "reports", "i18n_see_more_hits": i18n_see_more_hits, "i18n_see_fewer_hits": i18n_see_fewer_hits } ) );
 			
 			for ( var i in data.reports )
 			{
 				var o = data.reports[i];
-				$h.append( $.tmpl( dhis2.db.tmpl.hitItem, { "link": "../dhis-web-reporting/getReportParams.action?uid=" + o.id, "img": "standard_report_small", "name": o.name, "type": "reports", "id": o.id } ) );
+				$h.append( $.tmpl( dhis2.db.tmpl.hitItem, { "canManage": canManage, "link": "../dhis-web-reporting/getReportParams.action?uid=" + o.id, "img": "standard_report_small", "name": o.name, "type": "reports", "id": o.id, "i18n_add": i18n_add } ) );
 			}
 		}
 		
 		if ( data.resourceCount > 0 )
 		{
-			$h.append( $.tmpl( dhis2.db.tmpl.hitHeader, { "title": "Resources" } ) );
+			$h.append( $.tmpl( dhis2.db.tmpl.hitHeader, { "title": "Resources", "type": "resources", "i18n_see_more_hits": i18n_see_more_hits, "i18n_see_fewer_hits": i18n_see_fewer_hits } ) );
 			
 			for ( var i in data.resources )
 			{
 				var o = data.resources[i];
-				$h.append( $.tmpl( dhis2.db.tmpl.hitItem, { "link": "../api/documents/" + o.id, "img": "document_small", "name": o.name, "type": "resources", "id": o.id } ) );
+				$h.append( $.tmpl( dhis2.db.tmpl.hitItem, { "canManage": canManage, "link": "../api/documents/" + o.id, "img": "document_small", "name": o.name, "type": "resources", "id": o.id, "i18n_add": i18n_add } ) );
 			}
 		}
 		
 		if ( data.patientTabularReportCount > 0 )
 		{
-			$h.append( $.tmpl( dhis2.db.tmpl.hitHeader, { "title": "Tabular reports" } ) );
+			$h.append( $.tmpl( dhis2.db.tmpl.hitHeader, { "title": "Tabular reports", "type": "tabularReports", "i18n_see_more_hits": i18n_see_more_hits, "i18n_see_fewer_hits": i18n_see_fewer_hits } ) );
 			
 			for ( var i in data.patientTabularReports )
 			{
 				var o = data.patientTabularReports[i];
-				$h.append( $.tmpl( dhis2.db.tmpl.hitItem, { "link": "../dhis-web-caseentry/generateTabularReport.action?uid=" + o.id, "img": "document_small", "name": o.name, "type": "patientTabularReports", "id": o.id} ) );
+				$h.append( $.tmpl( dhis2.db.tmpl.hitItem, { "canManage": canManage, "link": "../dhis-web-caseentry/generateTabularReport.action?uid=" + o.id, "img": "document_small", "name": o.name, "type": "patientTabularReports", "id": o.id, "i18n_add": i18n_add } ) );
 			}
 		}
 	}

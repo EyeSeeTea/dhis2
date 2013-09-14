@@ -1,19 +1,20 @@
 package org.hisp.dhis.dashboard.impl;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -30,14 +31,16 @@ package org.hisp.dhis.dashboard.impl;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 import static org.hisp.dhis.dashboard.DashboardItem.TYPE_CHART;
 import static org.hisp.dhis.dashboard.DashboardItem.TYPE_MAP;
-import static org.hisp.dhis.dashboard.DashboardItem.TYPE_REPORT_TABLE;
+import static org.hisp.dhis.dashboard.DashboardItem.TYPE_PATIENT_TABULAR_REPORTS;
 import static org.hisp.dhis.dashboard.DashboardItem.TYPE_REPORTS;
+import static org.hisp.dhis.dashboard.DashboardItem.TYPE_REPORT_TABLE;
 import static org.hisp.dhis.dashboard.DashboardItem.TYPE_REPORT_TABLES;
 import static org.hisp.dhis.dashboard.DashboardItem.TYPE_RESOURCES;
 import static org.hisp.dhis.dashboard.DashboardItem.TYPE_USERS;
-import static org.hisp.dhis.dashboard.DashboardItem.TYPE_PATIENT_TABULAR_REPORT;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.IdentifiableObjectManager;
@@ -64,7 +67,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultDashboardService
     implements DashboardService
 {
-    private static final int MAX_PER_OBJECT = 5;
+    private static final int HITS_PER_OBJECT = 5;
+    private static final int MAX_HITS_PER_OBJECT = 25;
     
     // -------------------------------------------------------------------------
     // Dependencies
@@ -87,23 +91,34 @@ public class DefaultDashboardService
     @Override
     public DashboardSearchResult search( String query )
     {
+        return search( query, new HashSet<String>() );
+    }
+    
+    @Override
+    public DashboardSearchResult search( String query, Set<String> maxTypes )
+    {
         DashboardSearchResult result = new DashboardSearchResult();
         
-        result.setUsers( objectManager.getBetweenByName( User.class, query, 0, MAX_PER_OBJECT ) );
-        result.setCharts( objectManager.getBetweenByName( Chart.class, query, 0, MAX_PER_OBJECT ) );
-        result.setMaps( objectManager.getBetweenByName( Map.class, query, 0, MAX_PER_OBJECT ) );
-        result.setReportTables( objectManager.getBetweenByName( ReportTable.class, query, 0, MAX_PER_OBJECT ) );
-        result.setReports( objectManager.getBetweenByName( Report.class, query, 0, MAX_PER_OBJECT ) );
-        result.setResources( objectManager.getBetweenByName( Document.class, query, 0, MAX_PER_OBJECT ) );
-        result.setPatientTabularReports( objectManager.getBetweenByName( PatientTabularReport.class, query, 0, MAX_PER_OBJECT ) );
+        result.setUsers( objectManager.getBetweenByName( User.class, query, 0, getMax( TYPE_USERS, maxTypes ) ) );
+        result.setCharts( objectManager.getBetweenByName( Chart.class, query, 0, getMax( TYPE_CHART, maxTypes ) ) );
+        result.setMaps( objectManager.getBetweenByName( Map.class, query, 0, getMax( TYPE_MAP, maxTypes ) ) );
+        result.setReportTables( objectManager.getBetweenByName( ReportTable.class, query, 0, getMax( TYPE_REPORT_TABLE, maxTypes ) ) );
+        result.setReports( objectManager.getBetweenByName( Report.class, query, 0, getMax( TYPE_REPORTS, maxTypes ) ) );
+        result.setResources( objectManager.getBetweenByName( Document.class, query, 0, getMax( TYPE_RESOURCES, maxTypes ) ) );
+        result.setPatientTabularReports( objectManager.getBetweenByName( PatientTabularReport.class, query, 0, getMax( TYPE_PATIENT_TABULAR_REPORTS, maxTypes ) ) );
         
         return result;
     }
 
     @Override
-    public void addItemContent( String dashboardUid, String type, String contentUid )
+    public boolean addItemContent( String dashboardUid, String type, String contentUid )
     {
         Dashboard dashboard = getDashboard( dashboardUid );               
+        
+        if ( dashboard == null )
+        {
+            return false;
+        }
         
         if ( TYPE_CHART.equals( type ) )
         {
@@ -145,7 +160,7 @@ public class DefaultDashboardService
             {
                 item.getResources().add( objectManager.get( Document.class, contentUid ) );
             }
-            else if ( TYPE_PATIENT_TABULAR_REPORT.equals( type ) )
+            else if ( TYPE_PATIENT_TABULAR_REPORTS.equals( type ) )
             {
                 item.getPatientTabularReports().add( objectManager.get( PatientTabularReport.class, contentUid ) );
             }
@@ -154,8 +169,15 @@ public class DefaultDashboardService
                 dashboard.getItems().add( 0, item );
             }
         }
+
+        if ( dashboard.getItemCount() > Dashboard.MAX_ITEMS )
+        {
+            return false;
+        }
         
         updateDashboard( dashboard );
+        
+        return true;
     }
     
     public void mergeDashboard( Dashboard dashboard )
@@ -241,5 +263,13 @@ public class DefaultDashboardService
     public List<Dashboard> getByUser( User user )
     {
         return dashboardStore.getByUser( user );
+    }
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    private int getMax( String type, Set<String> maxTypes )
+    {
+        return maxTypes != null && maxTypes.contains( type ) ? MAX_HITS_PER_OBJECT : HITS_PER_OBJECT;
     }
 }

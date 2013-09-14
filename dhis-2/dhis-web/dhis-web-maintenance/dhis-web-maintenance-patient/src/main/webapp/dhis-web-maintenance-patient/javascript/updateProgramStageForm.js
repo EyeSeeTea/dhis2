@@ -3,23 +3,8 @@ jQuery( document ).ready( function()
 {
 	showHideUserGroup();
 	validation( 'updateProgramStageForm', function( form ){ 
-		if( duplicate==true) 
-			return false;
-		else
-			form.submit();
+		form.submit();
 	}, function(){
-		duplicate = false;
-		var COLOR_RED = '#ff8a8a';
-		jQuery(".daysAllowedSendMessage").each( function( i, a ){ 
-			jQuery(".daysAllowedSendMessage").each( function(j, b){ 
-				if( i!=j && a.value==b.value){
-					jQuery( a ).css( 'background-color', COLOR_RED );
-					jQuery( b ).css( 'background-color', COLOR_RED );
-					duplicate = true;
-				}
-			});
-		});
-		
 		var selectedDataElementsValidator = jQuery( "#selectedDataElementsValidator" );
 		selectedDataElementsValidator.empty();
 		
@@ -31,6 +16,9 @@ jQuery( document ).ready( function()
 		
 		var allowDateInFutures = jQuery( "#allowDateInFutures" );
 		allowDateInFutures.empty();
+		
+		var displayAsRadioButtons = jQuery( "#displayAsRadioButtons" );
+		displayAsRadioButtons.empty();
 		
 		var daysAllowedSendMessages = jQuery( "#daysAllowedSendMessages" );
 		daysAllowedSendMessages.empty();
@@ -50,6 +38,9 @@ jQuery( document ).ready( function()
 		var userGroup = jQuery( "#userGroup" );
 		userGroup.empty();
 		
+		var messageType = jQuery( "#messageType" );
+		messageType.empty();
+
 		jQuery("#selectedList").find("tr").each( function( i, item ){ 
 			
 			selectedDataElementsValidator.append( "<option value='" + item.id + "' selected='true'>" + item.id + "</option>" );
@@ -69,21 +60,29 @@ jQuery( document ).ready( function()
 			var allowDateInFuture = jQuery( item ).find( "input[name='allowDateInFuture']:first");
 			checked = allowDateInFuture.attr('checked') ? true : false;
 			allowDateInFutures.append( "<option value='" + checked + "' selected='true'>" + checked + "</option>" );
+			
+			var displayAsRadioButton = jQuery( item ).find( "input[name='displayAsRadioButton']:first");
+			checked = displayAsRadioButton.attr('checked') ? true : false;
+			displayAsRadioButtons.append( "<option value='" + checked + "' selected='true'>" + checked + "</option>" );
 		});
 		jQuery(".daysAllowedSendMessage").each( function( i, item ){ 
-			daysAllowedSendMessages.append( "<option value='" + item.value + "' selected='true'>" + item.value +"</option>" );
+			var days = (jQuery(item).attr('realvalue')==undefined) ? 0 : jQuery(item).attr('realvalue');
+			daysAllowedSendMessages.append( "<option value='" + days + "' selected='true'>" + days + "</option>" );
 		});
 		jQuery(".templateMessage").each( function( i, item ){ 
-			templateMessages.append( "<option value='" + item.value + "' selected='true'>" +item.value+"</option>" );
+			templateMessages.append( "<option value='" + item.value + "' selected='true'>" + item.value + "</option>" );
 		});
 		jQuery(".sendTo").each( function( i, item ){ 
-			sendTo.append( "<option value='" + item.value + "' selected='true'>" + item.value +"</option>" );
+			sendTo.append( "<option value='" + item.value + "' selected='true'>" + item.value + "</option>" );
 		});
 		jQuery(".whenToSend").each( function( i, item ){ 
-			whenToSend.append( "<option value='" + item.value + "' selected='true'>" + item.value +"</option>" );
+			whenToSend.append( "<option value='" + item.value + "' selected='true'>" + item.value + "</option>" );
+		});
+		jQuery(".messageType").each( function( i, item ){ 
+			messageType.append( "<option value='" + item.value + "' selected='true'>" + item.value + "</option>" );
 		});
 		jQuery(".userGroup").each( function( i, item ){ 
-			userGroup.append( "<option value='" + item.value + "' selected='true'>" + item.value +"</option>" );
+			userGroup.append( "<option value='" + item.value + "' selected='true'>" + item.value + "</option>" );
 		});
 	});
 	
@@ -98,6 +97,13 @@ jQuery( document ).ready( function()
 			option.text( item.name );
 			option.attr( "value", item.id );
 			
+			if( item.optionSet == "true"){
+				option.attr( "valuetype", "optionset" );
+			}
+			else{
+				option.attr( "valuetype", item.type );
+			}
+			
 			var flag = false;
 			jQuery("#selectedList").find("tr").each( function( k, selectedItem ){ 
 				if(selectedItem.id == item.id )
@@ -111,23 +117,3 @@ jQuery( document ).ready( function()
 		}
 	});
 });
-function showHideUserGroup()
-{
-	jQuery(".sendTo").each( function( i, item ){
-		var numb = i+1;
-		if( item.value == 5){
-			showById( 'tr'+numb );
-		}
-		else
-			hideById ( 'tr'+numb );
-	});
-}
-
-function onchangeUserGroup( id )
-{
-	var value = document.getElementById( 'sendTo'+id ).value;
-	hideById( 'tr'+id );
-	if ( value == 5) {
-		showById( 'tr'+id );
-	}
-};

@@ -1,19 +1,20 @@
 package org.hisp.dhis.mobile.action;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -32,6 +33,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hisp.dhis.paging.ActionPagingSupport;
 import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.program.SchedulingProgramObject;
 import org.hisp.dhis.sms.outbound.OutboundSms;
@@ -40,10 +42,8 @@ import org.hisp.dhis.sms.outbound.OutboundSmsStatus;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
 
-import com.opensymphony.xwork2.Action;
-
 public class ShowSentSMSAction
-    implements Action
+    extends ActionPagingSupport<OutboundSms>
 {
 
     // -------------------------------------------------------------------------
@@ -113,6 +113,13 @@ public class ShowSentSMSAction
         return recipientNames;
     }
 
+    private Integer total;
+
+    public Integer getTotal()
+    {
+        return total;
+    }
+
     // -------------------------------------------------------------------------
     // Action Implementation
     // -------------------------------------------------------------------------
@@ -121,58 +128,55 @@ public class ShowSentSMSAction
     public String execute()
         throws Exception
     {
-        List<OutboundSms> tempListOutboundSMS = outboundSmsService.getAllOutboundSms();
-        
         listOutboundSMS = new ArrayList<OutboundSms>();
-
+        
         if ( filterStatusType != null && filterStatusType == 0 )
         {
-            for ( OutboundSms each : tempListOutboundSMS )
-            {
-                if ( each.getStatus().equals( OutboundSmsStatus.OUTBOUND ) )
-                {
-                    this.listOutboundSMS.add( each );
-                }
-            }
+            total = outboundSmsService.getOutboundSms( OutboundSmsStatus.OUTBOUND ).size();
+            paging = createPaging( total );
+            listOutboundSMS = outboundSmsService.getOutboundSms( OutboundSmsStatus.OUTBOUND, paging.getStartPos(), paging.getPageSize() );
         }
         if ( filterStatusType != null && filterStatusType == 1 )
         {
-            for ( OutboundSms each : tempListOutboundSMS )
-            {
-                if ( each.getStatus().equals( OutboundSmsStatus.SENT ) )
-                {
-                    this.listOutboundSMS.add( each );
-                }
-            }
+            total = outboundSmsService.getOutboundSms( OutboundSmsStatus.SENT ).size();
+            paging = createPaging( total );
+            listOutboundSMS = outboundSmsService.getOutboundSms( OutboundSmsStatus.SENT, paging.getStartPos(), paging.getPageSize() );
         }
-        if ( filterStatusType != null && filterStatusType == 2 || filterStatusType == null )
+        if ( filterStatusType != null && filterStatusType == 2 )
         {
-            for ( OutboundSms each : tempListOutboundSMS )
-            {
-                this.listOutboundSMS.add( each );
-            }
+            total = outboundSmsService.getOutboundSms( OutboundSmsStatus.ERROR ).size();
+            paging = createPaging( total );
+            listOutboundSMS = outboundSmsService.getOutboundSms( OutboundSmsStatus.ERROR, paging.getStartPos(), paging.getPageSize() );
+        }
+        if ( filterStatusType != null && filterStatusType == 3 || filterStatusType == null )
+        {
+            filterStatusType = 3;
+            total = outboundSmsService.getAllOutboundSms().size();
+            paging = createPaging( total );
+            listOutboundSMS = outboundSmsService.getAllOutboundSms( paging.getStartPos(), paging.getPageSize() );
         }
 
+        //Get the name of recipients
         recipientNames = new ArrayList<String>();
         recipientNames.add( "" );
+        String tempString;
         for ( OutboundSms outboundSms : listOutboundSMS )
         {
-            String tempString = "";
+            tempString = "";
             for ( String phoneNumber : outboundSms.getRecipients() )
             {
-                if ( userService.getUsersByPhoneNumber( phoneNumber ) == null
-                    || userService.getUsersByPhoneNumber( phoneNumber ).size() == 0 )
+                Collection<User> users = userService.getUsersByPhoneNumber( phoneNumber );
+                if ( users == null || users.size() == 0 )
                 {
                     tempString += "[unknown]";
                 }
-                else if ( userService.getUsersByPhoneNumber( phoneNumber ) != null
-                    && userService.getUsersByPhoneNumber( phoneNumber ).size() > 0 )
+                else if ( users.size() > 0 )
                 {
 
-                    Iterator<User> users = userService.getUsersByPhoneNumber( phoneNumber ).iterator();
-                    while ( users.hasNext() )
+                    Iterator<User> usersIterator = users.iterator();
+                    while ( usersIterator.hasNext() )
                     {
-                        User user = users.next();
+                        User user = usersIterator.next();
                         tempString += "[" + user.getUsername() + "]";
                     }
                 }

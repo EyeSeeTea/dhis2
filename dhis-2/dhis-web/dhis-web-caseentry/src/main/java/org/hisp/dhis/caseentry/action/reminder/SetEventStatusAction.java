@@ -1,17 +1,20 @@
+package org.hisp.dhis.caseentry.action.reminder;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,12 +28,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.caseentry.action.reminder;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.message.MessageConversation;
 import org.hisp.dhis.patient.PatientReminder;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
@@ -99,7 +101,10 @@ public class SetEventStatusAction
             programStageInstance.setCompleted( true );
             programStageInstance.setStatus( null );
 
-            // Send message when to completed the event
+            // -----------------------------------------------------------------
+            // Send sms when to completed program
+            // -----------------------------------------------------------------
+
             List<OutboundSms> psiOutboundSms = programStageInstance.getOutboundSms();
             if ( psiOutboundSms == null )
             {
@@ -107,6 +112,20 @@ public class SetEventStatusAction
             }
             psiOutboundSms.addAll( programStageInstanceService.sendMessages( programStageInstance,
                 PatientReminder.SEND_WHEN_TO_C0MPLETED_EVENT, format ) );
+
+            // -----------------------------------------------------------------
+            // Send DHIS message when to completed the event
+            // -----------------------------------------------------------------
+
+            List<MessageConversation> psiMessageConversations = programStageInstance.getMessageConversations();
+            if ( psiMessageConversations == null )
+            {
+                psiMessageConversations = new ArrayList<MessageConversation>();
+            }
+
+            psiMessageConversations.addAll( programStageInstanceService.sendMessageConversations( programStageInstance,
+                PatientReminder.SEND_WHEN_TO_C0MPLETED_EVENT, format ) );
+
             break;
         case ProgramStageInstance.VISITED_STATUS:
             programStageInstance.setCompleted( false );

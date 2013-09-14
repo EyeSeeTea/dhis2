@@ -1,17 +1,20 @@
+package org.hisp.dhis.patient;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,8 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.patient;
 
 import java.io.Serializable;
 
@@ -65,6 +66,10 @@ public class PatientReminder
     public static final int SEND_WHEN_TO_C0MPLETED_EVENT = 2;
     public static final int SEND_WHEN_TO_C0MPLETED_PROGRAM = 3;
 
+    public static final int MESSAGE_TYPE_DIRECT_SMS = 1;
+    public static final int MESSAGE_TYPE_DHIS_MESSAGE = 2;
+    public static final int MESSAGE_TYPE_BOTH = 3;
+    
     private int id;
 
     private String name;
@@ -79,6 +84,8 @@ public class PatientReminder
 
     private Integer whenToSend;
 
+    private Integer messageType;
+    
     private UserGroup userGroup;
 
     // -------------------------------------------------------------------------
@@ -180,5 +187,15 @@ public class PatientReminder
     public void setUserGroup( UserGroup userGroup )
     {
         this.userGroup = userGroup;
+    }
+
+    public Integer getMessageType()
+    {
+        return messageType;
+    }
+
+    public void setMessageType( Integer messageType )
+    {
+        this.messageType = messageType;
     }
 }

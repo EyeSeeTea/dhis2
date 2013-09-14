@@ -270,11 +270,7 @@
 
   <!-- About -->
 
-  <bean id="org.hisp.dhis.about.action.AboutAction" class="org.hisp.dhis.about.action.AboutAction" scope="prototype">
-    <property name="locationManager" ref="locationManager" />
-    <property name="databaseInfoProvider" ref="databaseInfoProvider" />
-    <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
-  </bean>
+  <bean id="org.hisp.dhis.about.action.AboutAction" class="org.hisp.dhis.about.action.AboutAction" scope="prototype" />
 
   <bean id="org.hisp.dhis.about.action.HelpAction" class="org.hisp.dhis.about.action.HelpAction" scope="prototype">
     <property name="localeManager" ref="org.hisp.dhis.i18n.locale.LocaleManager" />
@@ -296,9 +292,6 @@
   </bean>
 
   <!-- Common actions -->
-
-  <bean id="org.hisp.dhis.commons.action.GetNotificationsAction" class="org.hisp.dhis.commons.action.GetNotificationsAction"
-    scope="prototype" />
 
   <bean id="org.hisp.dhis.commons.action.GetUserAction" class="org.hisp.dhis.commons.action.GetUserAction" scope="prototype">
     <property name="userService" ref="org.hisp.dhis.user.UserService" />

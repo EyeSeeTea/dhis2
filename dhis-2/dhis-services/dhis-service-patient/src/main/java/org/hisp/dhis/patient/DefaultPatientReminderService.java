@@ -1,17 +1,20 @@
+package org.hisp.dhis.patient;
+
 /*
  * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,8 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.patient;
 
 import java.util.Collection;
 import java.util.Date;
@@ -54,7 +55,7 @@ public class DefaultPatientReminderService
         Patient patient = programInstance.getPatient();
         String templateMessage = patientReminder.getTemplateMessage();
 
-        String patientName = patient.getFirstName();
+        String patientName = patient.getName();
         String organisationunitName = patient.getOrganisationUnit().getName();
         String programName = programInstance.getProgram().getName();
         String daysSinceEnrollementDate = DateUtils.daysBetween( new Date(), programInstance.getEnrollmentDate() ) + "";
@@ -62,7 +63,11 @@ public class DefaultPatientReminderService
         String incidentDate = format.formatDate( programInstance.getDateOfIncident() );
         String erollmentDate = format.formatDate( programInstance.getEnrollmentDate() );
 
-        templateMessage = templateMessage.replace( PatientReminder.TEMPLATE_MESSSAGE_PATIENT_NAME, patientName );
+        if ( patientName != null )
+        {
+            templateMessage = templateMessage.replace( PatientReminder.TEMPLATE_MESSSAGE_PATIENT_NAME, patientName );
+        }
+
         templateMessage = templateMessage.replace( PatientReminder.TEMPLATE_MESSSAGE_PROGRAM_NAME, programName );
         templateMessage = templateMessage
             .replace( PatientReminder.TEMPLATE_MESSSAGE_ORGUNIT_NAME, organisationunitName );
@@ -83,14 +88,17 @@ public class DefaultPatientReminderService
         Patient patient = programStageInstance.getProgramInstance().getPatient();
         String templateMessage = patientReminder.getTemplateMessage();
 
-        String patientName = patient.getFirstName();
+        String patientName = patient.getName();
         String organisationunitName = patient.getOrganisationUnit().getName();
         String programName = programStageInstance.getProgramInstance().getProgram().getName();
         String programStageName = programStageInstance.getProgramStage().getName();
         String daysSinceDueDate = DateUtils.daysBetween( new Date(), programStageInstance.getDueDate() ) + "";
         String dueDate = format.formatDate( programStageInstance.getDueDate() );
 
-        templateMessage = templateMessage.replace( PatientReminder.TEMPLATE_MESSSAGE_PATIENT_NAME, patientName );
+        if ( patientName != null )
+        {
+            templateMessage = templateMessage.replace( PatientReminder.TEMPLATE_MESSSAGE_PATIENT_NAME, patientName );
+        }
         templateMessage = templateMessage.replace( PatientReminder.TEMPLATE_MESSSAGE_PROGRAM_NAME, programName );
         templateMessage = templateMessage.replace( PatientReminder.TEMPLATE_MESSSAGE_PROGAM_STAGE_NAME,
             programStageName );
@@ -107,7 +115,6 @@ public class DefaultPatientReminderService
     public Set<String> getPhonenumbers( PatientReminder patientReminder, Patient patient )
     {
         Set<String> phoneNumbers = new HashSet<String>();
-
         switch ( patientReminder.getSendTo() )
         {
         case PatientReminder.SEND_TO_ALL_USERS_IN_ORGUGNIT_REGISTERED:
@@ -145,10 +152,48 @@ public class DefaultPatientReminderService
         default:
             if ( patient.getPhoneNumber() != null && !patient.getPhoneNumber().isEmpty() )
             {
-                phoneNumbers.add( patient.getPhoneNumber() );
+                if ( patient.getPhoneNumber().contains( ";" ) )
+                {
+                    String token[] = patient.getPhoneNumber().split( ";" );
+                    for ( String phoneNumber : token )
+                    {
+                        phoneNumbers.add( phoneNumber );
+                    }
+                }
+                else
+                {
+                    phoneNumbers.add( patient.getPhoneNumber() );
+                }
             }
             break;
         }
         return phoneNumbers;
+    }
+
+    public Set<User> getUsers( PatientReminder patientReminder, Patient patient )
+    {
+        Set<User> users = new HashSet<User>();
+
+        switch ( patientReminder.getSendTo() )
+        {
+        case PatientReminder.SEND_TO_ALL_USERS_IN_ORGUGNIT_REGISTERED:
+            users.addAll( patient.getOrganisationUnit().getUsers() );
+            break;
+        case PatientReminder.SEND_TO_HEALTH_WORKER:
+            if ( patient.getHealthWorker() != null && patient.getHealthWorker().getPhoneNumber() != null )
+            {
+                users.add( patient.getHealthWorker() );
+            }
+            break;
+        case PatientReminder.SEND_TO_USER_GROUP:
+            if ( patientReminder.getUserGroup().getMembers().size() > 0 )
+            {
+                users.addAll( patientReminder.getUserGroup().getMembers() );
+            }
+            break;
+        default:
+            break;
+        }
+        return users;
     }
 }

@@ -1,19 +1,20 @@
 package org.hisp.dhis.resourcetable.jdbc;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -35,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
+import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.resourcetable.ResourceTableStore;
@@ -62,6 +64,13 @@ public class JdbcResourceTableStore
     public void setJdbcTemplate( JdbcTemplate jdbcTemplate )
     {
         this.jdbcTemplate = jdbcTemplate;
+    }
+    
+    private StatementBuilder statementBuilder;
+
+    public void setStatementBuilder( StatementBuilder statementBuilder )
+    {
+        this.statementBuilder = statementBuilder;
     }
 
     // -------------------------------------------------------------------------
@@ -158,7 +167,7 @@ public class JdbcResourceTableStore
             // Do nothing, table does not exist
         }
         
-        Statement statement = new CreateDataElementGroupSetTableStatement( groupSets );
+        Statement statement = new CreateDataElementGroupSetTableStatement( groupSets, statementBuilder.getColumnQuote() );
         
         jdbcTemplate.execute( statement.getStatement() );
     }
@@ -178,7 +187,7 @@ public class JdbcResourceTableStore
             // Do nothing, table does not exist
         }
         
-        Statement statement = new CreateIndicatorGroupSetTableStatement( groupSets );
+        Statement statement = new CreateIndicatorGroupSetTableStatement( groupSets, statementBuilder.getColumnQuote() );
         
         jdbcTemplate.execute( statement.getStatement() );
     }
@@ -198,7 +207,7 @@ public class JdbcResourceTableStore
             // Do nothing, table does not exist
         }
         
-        Statement statement = new CreateOrganisationUnitGroupSetTableStatement( groupSets );
+        Statement statement = new CreateOrganisationUnitGroupSetTableStatement( groupSets, statementBuilder.getColumnQuote() );
         
         jdbcTemplate.execute( statement.getStatement() );
     }
@@ -218,7 +227,7 @@ public class JdbcResourceTableStore
             // Do nothing, table does not exist
         }
         
-        Statement statement = new CreateCategoryTableStatement( categories );
+        Statement statement = new CreateCategoryTableStatement( categories, statementBuilder.getColumnQuote() );
         
         jdbcTemplate.execute( statement.getStatement() );
     }

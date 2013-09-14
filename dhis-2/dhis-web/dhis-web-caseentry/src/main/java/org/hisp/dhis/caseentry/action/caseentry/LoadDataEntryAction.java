@@ -6,14 +6,15 @@ package org.hisp.dhis.caseentry.action.caseentry;
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -55,6 +56,7 @@ import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.program.comparator.ProgramStageDataElementSortOrderComparator;
 import org.hisp.dhis.program.comparator.ProgramStageSectionSortOrderComparator;
 import org.hisp.dhis.system.util.ValidationUtils;
+import org.hisp.dhis.user.UserSettingService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -118,6 +120,20 @@ public class LoadDataEntryAction
         this.organisationUnitService = organisationUnitService;
     }
 
+    private UserSettingService userSettingService;
+
+    public void setUserSettingService( UserSettingService userSettingService )
+    {
+        this.userSettingService = userSettingService;
+    }
+
+    private String displayOptionSetAsRadioButton;
+
+    public String getDisplayOptionSetAsRadioButton()
+    {
+        return displayOptionSetAsRadioButton;
+    }
+
     // -------------------------------------------------------------------------
     // Input && Output
     // -------------------------------------------------------------------------
@@ -153,7 +169,7 @@ public class LoadDataEntryAction
     // -------------------------------------------------------------------------
     // Getters && Setters
     // -------------------------------------------------------------------------
-    
+
     public void setProgramIndicatorService( ProgramIndicatorService programIndicatorService )
     {
         this.programIndicatorService = programIndicatorService;
@@ -296,8 +312,6 @@ public class LoadDataEntryAction
         Collections.sort( programStageDataElements, new ProgramStageDataElementSortOrderComparator() );
 
         DataEntryForm dataEntryForm = programStage.getDataEntryForm();
-        Boolean displayProvidedOtherFacility = program.getDisplayProvidedOtherFacility() == null
-            || !program.getDisplayProvidedOtherFacility();
 
         if ( programStage.getDataEntryType().equals( ProgramStage.TYPE_SECTION ) )
         {
@@ -308,8 +322,7 @@ public class LoadDataEntryAction
         else if ( programStage.getDataEntryType().equals( ProgramStage.TYPE_CUSTOM ) )
         {
             customDataEntryFormCode = programDataEntryService.prepareDataEntryFormForEntry(
-                dataEntryForm.getHtmlCode(), null, displayProvidedOtherFacility.toString(), i18n, programStage, null,
-                organisationUnit );
+                dataEntryForm.getHtmlCode(), null, i18n, programStage, null, organisationUnit );
         }
 
         if ( programStageInstance != null )
@@ -346,8 +359,8 @@ public class LoadDataEntryAction
             if ( programStage.getDataEntryType().equals( ProgramStage.TYPE_CUSTOM ) )
             {
                 customDataEntryFormCode = programDataEntryService.prepareDataEntryFormForEntry(
-                    dataEntryForm.getHtmlCode(), patientDataValues, displayProvidedOtherFacility.toString(), i18n,
-                    programStage, programStageInstance, organisationUnit );
+                    dataEntryForm.getHtmlCode(), patientDataValues, i18n, programStage, programStageInstance,
+                    organisationUnit );
             }
 
             // -----------------------------------------------------------------
@@ -357,6 +370,9 @@ public class LoadDataEntryAction
             longitude = ValidationUtils.getLongitude( programStageInstance.getCoordinates() );
             latitude = ValidationUtils.getLatitude( programStageInstance.getCoordinates() );
         }
+
+        displayOptionSetAsRadioButton = (String) userSettingService.getUserSetting(
+            UserSettingService.KEY_DISPLAY_OPTION_SET_AS_RADIO_BUTTON, "" );
 
         return SUCCESS;
     }

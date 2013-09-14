@@ -1,19 +1,20 @@
 package org.hisp.dhis.datamart;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -365,8 +366,8 @@ public class DataMartServiceTest
         assertEquals( aggregatedDataValueService.getAggregatedValue( dataElementB, categoryOptionCombo, periodD, unitA ), 66.8, 0.5 );
         assertEquals( aggregatedDataValueService.getAggregatedValue( dataElementB, categoryOptionCombo, periodD, unitB ), 66.8, 0.5 );
         assertEquals( aggregatedDataValueService.getAggregatedValue( dataElementB, categoryOptionCombo, periodD, unitC ), 65.9, 0.5 );
-        assertEquals( aggregatedDataValueService.getAggregatedValue( dataElementB, categoryOptionCombo, periodD, unitD ), 67.0, 0.5 );
-        assertEquals( aggregatedDataValueService.getAggregatedValue( dataElementB, categoryOptionCombo, periodD, unitE ), 33.0, 0.5 );
+        assertEquals( aggregatedDataValueService.getAggregatedValue( dataElementB, categoryOptionCombo, periodD, unitD ), 67.0, 1.1 );
+        assertEquals( aggregatedDataValueService.getAggregatedValue( dataElementB, categoryOptionCombo, periodD, unitE ), 33.0, 1.2 );
         assertEquals( aggregatedDataValueService.getAggregatedValue( dataElementB, categoryOptionCombo, periodD, unitF ), 78.0, 0.5 );
         assertEquals( aggregatedDataValueService.getAggregatedValue( dataElementB, categoryOptionCombo, periodD, unitG ), 34.1, 0.5 );
         assertEquals( aggregatedDataValueService.getAggregatedValue( dataElementB, categoryOptionCombo, periodD, unitH ), 100.0, 0.5 );

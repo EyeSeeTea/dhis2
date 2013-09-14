@@ -1,19 +1,20 @@
 package org.hisp.dhis.resourcetable;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -176,6 +177,7 @@ public class DefaultResourceTableService
         log.info( "Data element category option combo table generated" );
         
         sqlViewService.createAllViewTables();
+        log.info( "Sql views created" );
     }
     
     // -------------------------------------------------------------------------
@@ -292,13 +294,14 @@ public class DefaultResourceTableService
             {
                 DataElementGroup group = groupSet.getGroup( dataElement );
                 
+                values.add( group != null ? group.getName() : null );
                 values.add( group != null ? group.getUid() : null );
             }
             
             batchArgs.add( values.toArray() );
         }
         
-        resourceTableStore.batchUpdate( groupSets.size() + 2, CreateDataElementGroupSetTableStatement.TABLE_NAME, batchArgs );
+        resourceTableStore.batchUpdate( ( groupSets.size() * 2 ) + 2, CreateDataElementGroupSetTableStatement.TABLE_NAME, batchArgs );
     }
 
     // -------------------------------------------------------------------------
@@ -338,13 +341,14 @@ public class DefaultResourceTableService
             {
                 IndicatorGroup group = groupSet.getGroup( indicator );
                 
+                values.add( group != null ? group.getName() : null );
                 values.add( group != null ? group.getUid() : null );
             }
             
             batchArgs.add( values.toArray() );
         }
         
-        resourceTableStore.batchUpdate( groupSets.size() + 2, CreateIndicatorGroupSetTableStatement.TABLE_NAME, batchArgs );
+        resourceTableStore.batchUpdate( ( groupSets.size() * 2 ) + 2, CreateIndicatorGroupSetTableStatement.TABLE_NAME, batchArgs );
     }
     
     // -------------------------------------------------------------------------
@@ -386,13 +390,14 @@ public class DefaultResourceTableService
             {
                 OrganisationUnitGroup group = groupSet.getGroup( unit );
                 
+                values.add( group != null ? group.getName() : null );
                 values.add( group != null ? group.getUid() : null );
             }
 
             batchArgs.add( values.toArray() );
         }
 
-        resourceTableStore.batchUpdate( groupSets.size() + 2, CreateOrganisationUnitGroupSetTableStatement.TABLE_NAME, batchArgs );
+        resourceTableStore.batchUpdate( ( groupSets.size() * 2 ) + 2, CreateOrganisationUnitGroupSetTableStatement.TABLE_NAME, batchArgs );
     }
     
     // -------------------------------------------------------------------------

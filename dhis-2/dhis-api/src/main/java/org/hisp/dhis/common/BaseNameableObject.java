@@ -1,19 +1,20 @@
 package org.hisp.dhis.common;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -93,14 +94,31 @@ public class BaseNameableObject
     }
 
     @Override
+    public int hashCode()
+    {
+        int result = super.hashCode();
+        result = 31 * result + (getShortName() != null ? getShortName().hashCode() : 0);
+        result = 31 * result + (getDescription() != null ? getDescription().hashCode() : 0);
+        return result;
+    }
+
+    /**
+     * Class check uses isAssignableFrom and get-methods to handle proxied objects.
+     */
+    @Override
     public boolean equals( Object o )
     {
         if ( this == o )
         {
             return true;
         }
+
+        if ( o == null )
+        {
+            return false;
+        }
         
-        if ( o == null || getClass() != o.getClass() )
+        if ( !getClass().isAssignableFrom( o.getClass() ) )
         {
             return false;
         }
@@ -110,21 +128,19 @@ public class BaseNameableObject
             return false;
         }
 
-        BaseNameableObject that = (BaseNameableObject) o;
+        final BaseNameableObject other = (BaseNameableObject) o;
 
-        if ( description != null ? !description.equals( that.description ) : that.description != null ) return false;
-        if ( shortName != null ? !shortName.equals( that.shortName ) : that.shortName != null ) return false;
+        if ( getShortName() != null ? !getShortName().equals( other.getShortName() ) : other.getShortName() != null )
+        {
+            return false;
+        }
+        
+        if ( getDescription() != null ? !getDescription().equals( other.getDescription() ) : other.getDescription() != null )
+        {
+            return false;
+        }
 
         return true;
-    }
-
-    @Override
-    public int hashCode()
-    {
-        int result = super.hashCode();
-        result = 31 * result + (shortName != null ? shortName.hashCode() : 0);
-        result = 31 * result + (description != null ? description.hashCode() : 0);
-        return result;
     }
 
     @JsonProperty

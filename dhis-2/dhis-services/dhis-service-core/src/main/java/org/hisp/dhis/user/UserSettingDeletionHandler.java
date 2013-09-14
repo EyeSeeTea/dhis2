@@ -1,19 +1,20 @@
 package org.hisp.dhis.user;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -29,6 +30,7 @@ package org.hisp.dhis.user;
 
 import org.hisp.dhis.datadictionary.DataDictionary;
 import org.hisp.dhis.system.deletion.DeletionHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Lars Helge Overland
@@ -43,20 +45,9 @@ public class UserSettingDeletionHandler
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private UserSettingService userSettingService;
-
-    public void setUserSettingService( UserSettingService userSettingService )
-    {
-        this.userSettingService = userSettingService;
-    }
-    
+    @Autowired
     private UserService userService;
-
-    public void setUserService( UserService userService )
-    {
-        this.userService = userService;
-    }
-
+    
     // -------------------------------------------------------------------------
     // DeletionHandler implementation
     // -------------------------------------------------------------------------
@@ -70,14 +61,11 @@ public class UserSettingDeletionHandler
     @Override
     public void deleteDataDictionary( DataDictionary dataDictionary )
     {
-        for ( UserSetting setting : userSettingService.getAllUserSettings() )
+        for ( UserSetting setting : userService.getUserSettings( SETTING_NAME_DATADICTIONARY ) )
         {
-            if ( setting.getName().equals( SETTING_NAME_DATADICTIONARY ) )
+            if ( setting.getValue() != null && (Integer) setting.getValue() == dataDictionary.getId() )
             {
-                if ( setting.getValue() != null && (Integer) setting.getValue() == dataDictionary.getId() )
-                {
-                    userSettingService.deleteUserSetting( SETTING_NAME_DATADICTIONARY );
-                }
+                userService.deleteUserSetting( setting );
             }
         }
     }
@@ -85,6 +73,10 @@ public class UserSettingDeletionHandler
     @Override
     public void deleteUser( User user )
     {
-        userService.removeUserSettings( user );
+        System.out.println("yes");
+        for ( UserSetting setting : userService.getAllUserSettings( user ) )
+        {
+            userService.deleteUserSetting( setting );
+        }
     }
 }

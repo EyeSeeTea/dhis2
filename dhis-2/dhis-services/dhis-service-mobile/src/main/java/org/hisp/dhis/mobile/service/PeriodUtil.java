@@ -1,19 +1,20 @@
 package org.hisp.dhis.mobile.service;
 
 /*
- * Copyright (c) 2010, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,6 +28,7 @@ package org.hisp.dhis.mobile.service;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -158,6 +160,41 @@ public class PeriodUtil
 
         throw new IllegalArgumentException( "Couldn't make a period of type " + periodType.getName() + " and name "
             + periodName );
+    }
+
+    public static String dateToString( Date date )
+    {
+        DateFormat dateFormat = new SimpleDateFormat( "dd-MM-yyyy" );
+        return dateFormat.format( date );
+    }
+
+    public static Date stringToDate( String dateString )
+    {
+        SimpleDateFormat dateFormat = new SimpleDateFormat( "dd-MM-yyyy" );
+        Date date = null;
+        try
+        {
+            date = dateFormat.parse( dateString );
+        }
+        catch ( Exception e )
+        {
+            return null;
+        }
+
+        return date;
+    }
+
+    public static String convertDateFormat( String standardDate )
+    {
+        try
+        {
+            String[] tokens = standardDate.split( "-" );
+            return tokens[2] + "-" + tokens[1] + "-" + tokens[0];
+        }
+        catch ( Exception e )
+        {
+            return standardDate;
+        }
     }
 
 }

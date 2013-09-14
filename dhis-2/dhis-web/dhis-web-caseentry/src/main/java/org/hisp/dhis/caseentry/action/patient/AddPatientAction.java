@@ -1,17 +1,20 @@
+package org.hisp.dhis.caseentry.action.patient;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,15 +28,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.caseentry.action.patient;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.opensymphony.xwork2.Action;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.struts2.ServletActionContext;
@@ -60,7 +55,11 @@ import org.hisp.dhis.relationship.RelationshipTypeService;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.user.UserService;
 
-import com.opensymphony.xwork2.Action;
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -152,39 +151,10 @@ public class AddPatientAction
         Patient patient = new Patient();
 
         // ---------------------------------------------------------------------
-        // Set FirstName, MiddleName, LastName by FullName
+        // Set FullName
         // ---------------------------------------------------------------------
 
-        if ( fullName != null )
-        {
-            fullName = fullName.trim();
-
-            int startIndex = fullName.indexOf( ' ' );
-            int endIndex = fullName.lastIndexOf( ' ' );
-
-            String firstName = fullName.toString();
-            String middleName = "";
-            String lastName = "";
-
-            if ( fullName.indexOf( ' ' ) != -1 )
-            {
-                firstName = fullName.substring( 0, startIndex );
-                if ( startIndex == endIndex )
-                {
-                    middleName = "";
-                    lastName = fullName.substring( startIndex + 1, fullName.length() );
-                }
-                else
-                {
-                    middleName = fullName.substring( startIndex + 1, endIndex );
-                    lastName = fullName.substring( endIndex + 1, fullName.length() );
-                }
-            }
-
-            patient.setFirstName( firstName );
-            patient.setMiddleName( middleName );
-            patient.setLastName( lastName );
-        }
+        patient.setName( fullName );
 
         // ---------------------------------------------------------------------
         // Set Other information for patient
@@ -211,6 +181,7 @@ public class AddPatientAction
         patient.setUnderAge( underAge );
         patient.setOrganisationUnit( organisationUnit );
         patient.setIsDead( isDead );
+
         if ( deathDate != null )
         {
             deathDate = deathDate.trim();

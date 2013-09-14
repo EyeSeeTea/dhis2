@@ -1,19 +1,20 @@
 package org.hisp.dhis.common;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -28,6 +29,7 @@ package org.hisp.dhis.common;
  */
 
 import org.hisp.dhis.chart.Chart;
+import org.hisp.dhis.dashboard.Dashboard;
 import org.hisp.dhis.datadictionary.DataDictionary;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.document.Document;
@@ -107,6 +109,10 @@ public final class SharingUtils
         addType( org.hisp.dhis.mapping.Map.class, "map", "F_MAP_EXTERNAL", "F_MAP_PUBLIC_ADD", null );
         addType( Chart.class, "chart", "F_CHART_EXTERNAL", "F_CHART_PUBLIC_ADD", null );
         addType( ReportTable.class, "reportTable", "F_REPORTTABLE_EXTERNAL", "F_REPORTTABLE_PUBLIC_ADD", null );
+        addType( Report.class, "report", "F_REPORT_EXTERNAL", "F_REPORT_PUBLIC_ADD", "F_REPORT_PRIVATE_ADD" );
+        addType( Document.class, "document", "F_DOCUMENT_EXTERNAL", "F_DOCUMENT_PUBLIC_ADD", "F_DOCUMENT_PRIVATE_ADD" );
+
+        addType( Dashboard.class, "dashboard", null, "F_DASHBOARD_PUBLIC_ADD", null );
     }
 
     public static boolean isSupported( String type )
@@ -143,6 +149,11 @@ public final class SharingUtils
     {
         Set<String> authorities = user != null ? user.getUserCredentials().getAllAuthorities() : new HashSet<String>();
         return CollectionUtils.containsAny( authorities, SHARING_OVERRIDE_AUTHORITIES ) || authorities.contains( PUBLIC_AUTHORITIES.get( clazz ) );
+    }
+
+    public static <T> boolean defaultPublic( Class<T> clazz )
+    {
+        return !Dashboard.class.isAssignableFrom( clazz );
     }
 
     public static boolean canCreatePublic( User user, IdentifiableObject identifiableObject )
@@ -325,6 +336,11 @@ public final class SharingUtils
      */
     public static <T extends IdentifiableObject> boolean canExternalize( User user, T object )
     {
+        if ( user == null )
+        {
+            return false;
+        }
+
         Set<String> authorities = user.getUserCredentials().getAllAuthorities();
 
         return EXTERNAL_AUTHORITIES.get( object.getClass() ) != null &&

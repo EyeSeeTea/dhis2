@@ -1,19 +1,20 @@
 package org.hisp.dhis.sms.hibernate;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -27,17 +28,17 @@ package org.hisp.dhis.sms.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+
+import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.sms.outbound.OutboundSmsStatus;
 import org.hisp.dhis.sms.outbound.OutboundSmsStore;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 
 public class HibernateOutboundSmsStore
     extends HibernateGenericStore<OutboundSms>
@@ -46,13 +47,6 @@ public class HibernateOutboundSmsStore
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private JdbcTemplate jdbcTemplate;
-
-    public void setJdbcTemplate( JdbcTemplate jdbcTemplate )
-    {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     // -------------------------------------------------------------------------
     // Implementation
@@ -86,49 +80,19 @@ public class HibernateOutboundSmsStore
         return getCriteria().addOrder( Order.desc( "date" ) ).list();
     }
 
+    @SuppressWarnings( "unchecked" )
     @Override
     public List<OutboundSms> get( OutboundSmsStatus status )
     {
-        int realStatus = 0;
-
-        if ( status.equals( OutboundSmsStatus.OUTBOUND ) )
+        Session session = sessionFactory.getCurrentSession();
+        
+        Criteria criteria = session.createCriteria( OutboundSms.class ).addOrder( Order.desc( "date" ) );
+        
+        if ( status != null )
         {
-            realStatus = OutboundSmsStatus.OUTBOUND.ordinal();
+            criteria.add( Restrictions.eq( "status", status ) );
         }
-        else if ( status.equals( OutboundSmsStatus.SENT ) )
-        {
-            realStatus = OutboundSmsStatus.SENT.ordinal();
-        }
-        else
-        {
-            realStatus = OutboundSmsStatus.ERROR.ordinal();
-        }
-
-        String sql = "select osm.id as outboundsmsid, message, ore.elt as phonenumber, date "
-            + "from outbound_sms osm inner join outbound_sms_recipients ore "
-            + "on osm.id=ore.outbound_sms_id where status = " + realStatus;
-
-        try
-        {
-            List<OutboundSms> OutboundSmsList = jdbcTemplate.query( sql, new RowMapper<OutboundSms>()
-            {
-                public OutboundSms mapRow( ResultSet rs, int rowNum )
-                    throws SQLException
-                {
-                    OutboundSms outboundSms = new OutboundSms( rs.getString( 2 ), rs.getString( 3 ) );
-                    outboundSms.setId( rs.getInt( 1 ) );
-                    outboundSms.setDate( rs.getDate( 4 ) );
-                    return outboundSms;
-                }
-            } );
-
-            return OutboundSmsList;
-        }
-        catch ( Exception ex )
-        {
-            ex.printStackTrace();
-            return null;
-        }
+        return criteria.list();
     }
 
     @Override
@@ -141,5 +105,40 @@ public class HibernateOutboundSmsStore
     public void deleteOutboundSms( OutboundSms sms )
     {
         delete( sms );
+    }
+
+    @SuppressWarnings( "unchecked" )
+    @Override
+    public List<OutboundSms> get( OutboundSmsStatus status, Integer min, Integer max )
+    {
+        Session session = sessionFactory.getCurrentSession();
+        
+        Criteria criteria = session.createCriteria( OutboundSms.class ).addOrder( Order.desc( "date" ) );
+        
+        if ( status != null )
+        {
+            criteria.add( Restrictions.eq( "status", status ) );
+        }
+        
+        if ( min != null && max != null)
+        {
+            criteria.setFirstResult( min ).setMaxResults( max );
+        }
+        return criteria.list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    @Override
+    public List<OutboundSms> getAllOutboundSms( Integer min, Integer max )
+    {
+        Session session = sessionFactory.getCurrentSession();
+        
+        Criteria criteria = session.createCriteria( OutboundSms.class ).addOrder( Order.desc( "date" ) );
+        
+        if ( min != null && max != null)
+        {
+            criteria.setFirstResult( min ).setMaxResults( max );
+        }
+        return criteria.list();
     }
 }

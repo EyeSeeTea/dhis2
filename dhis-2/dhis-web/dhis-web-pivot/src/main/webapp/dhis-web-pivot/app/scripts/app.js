@@ -147,7 +147,7 @@ Ext.onReady( function() {
 					return unescape(output);
 				}
 			};
-			
+
 			util.window = util.window || {};
 
 			util.window.setAnchorPosition = function(w, target) {
@@ -343,7 +343,7 @@ Ext.onReady( function() {
 									r.set('id', r.data.dataElementId + '-' + r.data.optionComboId);
 									r.set('name', r.data.operandName);
 								});
-								
+
 								util.multiselect.filterAvailable({store: this}, {store: store.dataElementSelected});
 							}
 						});
@@ -430,7 +430,7 @@ Ext.onReady( function() {
 				isLoaded: false,
 				pageSize: 10,
 				page: 1,
-				defaultUrl: init.contextPath + '/api/reportTables.json?links=false',
+				defaultUrl: init.contextPath + '/api/reportTables.json?viewClass=sharing&links=false',
 				loadStore: function(url) {
 					this.proxy.url = url || this.defaultUrl;
 
@@ -484,7 +484,7 @@ Ext.onReady( function() {
 					{property: 'name', direction: 'ASC'}
 				]
 			});
-			
+
 			pt.store = store;
 		}());
 
@@ -539,7 +539,7 @@ Ext.onReady( function() {
 					nameDimArrayMap[dimConf.dataElement.objectName],
 					nameDimArrayMap[dimConf.operand.objectName],
 					nameDimArrayMap[dimConf.dataSet.objectName]
-				));			
+				));
 
 				// Columns, rows, filters
 				for (var i = 0, nameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], dimNames; i < nameArrays.length; i++) {
@@ -897,7 +897,7 @@ Ext.onReady( function() {
 				}
 			],
 			listeners: {
-				show: function(w) {					
+				show: function(w) {
 					if (pt.viewport.layoutButton.rendered) {
 						pt.util.window.setAnchorPosition(w, pt.viewport.layoutButton);
 
@@ -1317,7 +1317,7 @@ Ext.onReady( function() {
 				delete favorite.parentOrganisationUnit;
 
 				delete favorite.parentGraphMap;
-				
+
 				// Replace operand id characters
 				for (var i = 0; i < dimensions.length; i++) {
 					if (dimensions[i].dimension === pt.conf.finals.dimension.operand.objectName) {
@@ -1490,7 +1490,7 @@ Ext.onReady( function() {
 						this.currentValue = this.getValue();
 
 						var value = this.getValue(),
-							url = value ? pt.init.contextPath + '/api/reportTables/query/' + value + '.json?links=false' : null,
+							url = value ? pt.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
 							store = pt.store.reportTable;
 
 						store.page = 1;
@@ -1504,7 +1504,7 @@ Ext.onReady( function() {
 			text: PT.i18n.prev,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? pt.init.contextPath + '/api/reportTables/query/' + value + '.json?links=false' : null,
+					url = value ? pt.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
 					store = pt.store.reportTable;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
@@ -1516,7 +1516,7 @@ Ext.onReady( function() {
 			text: PT.i18n.next,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? pt.init.contextPath + '/api/reportTables/query/' + value + '.json?links=false' : null,
+					url = value ? pt.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
 					store = pt.store.reportTable;
 
 				store.page = store.page + 1;
@@ -2087,7 +2087,7 @@ Ext.onReady( function() {
 					var reportTableUrl = pt.init.contextPath + '/dhis-web-pivot/app/index.html?id=' + pt.favorite.id,
 						apiUrl = pt.init.contextPath + '/api/reportTables/' + pt.favorite.id + '/data.html',
 						html = '';
-					
+
 					html += '<div><b>Pivot link: </b><span class="user-select"><a href="' + reportTableUrl + '" target="_blank">' + reportTableUrl + '</a></span></div>';
 					html += '<div style="padding-top:3px"><b>API link: </b><span class="user-select"><a href="' + apiUrl + '" target="_blank">' + apiUrl + '</a></span></div>';
 					return html;
@@ -2121,7 +2121,7 @@ Ext.onReady( function() {
 			});
 
 			window = Ext.create('Ext.window.Window', {
-				title: PT.i18n.share + ' ' + PT.i18n.interpretation + '<span style="font-weight:normal; font-size:11px"> (' + pt.favorite.name + ') </span>',
+				title: pt.favorite.name,
 				layout: 'fit',
 				//iconCls: 'pt-window-title-interpretation',
 				width: 500,
@@ -3415,7 +3415,7 @@ Ext.onReady( function() {
 						return;
 					}
 				}
-				
+
 				this.enable();
 			},
 			listeners: {
@@ -3525,16 +3525,22 @@ Ext.onReady( function() {
 			showSeparator: false,
 			menuValue: 'orgunit',
 			clickHandler: function(param) {
+				if (!param) {
+					return;
+				}
+				
 				var items = this.items.items;
 				this.menuValue = param;
 
 				// Menu item icon cls
 				for (var i = 0; i < items.length; i++) {
-					if (items[i].param === param) {
-						items[i].setIconCls('pt-menu-item-selected');
-					}
-					else {
-						items[i].setIconCls('');
+					if (items[i].setIconCls) {
+						if (items[i].param === param) {
+							items[i].setIconCls('pt-menu-item-selected');
+						}
+						else {
+							items[i].setIconCls('pt-menu-item-unselected');
+						}
 					}
 				}
 
@@ -3569,17 +3575,24 @@ Ext.onReady( function() {
 			},
 			items: [
 				{
+					xtype: 'label',
+					text: 'Selection mode',
+					style: 'padding:7px 5px 5px 7px; font-weight:bold; border:0 none'
+				},
+				{
 					text: PT.i18n.select_organisation_units + '&nbsp;&nbsp;',
 					param: 'orgunit',
 					iconCls: 'pt-menu-item-selected'
 				},
 				{
-					text: PT.i18n.select_boundaries_and_levels + '&nbsp;&nbsp;',
-					param: 'level'
+					text: 'Select levels' + '&nbsp;&nbsp;',
+					param: 'level',
+					iconCls: 'pt-menu-item-unselected'
 				},
 				{
-					text: PT.i18n.select_boundaries_and_groups + '&nbsp;&nbsp;',
-					param: 'group'
+					text: 'Select groups' + '&nbsp;&nbsp;',
+					param: 'group',
+					iconCls: 'pt-menu-item-unselected'
 				}
 			],
 			listeners: {
@@ -3951,7 +3964,7 @@ Ext.onReady( function() {
 		update = function() {
 			var config = pt.engine.getLayoutConfig(),
 				layout = pt.api.layout.Layout(config);
-			
+
 			if (!layout) {
 				return;
 			}
@@ -4054,7 +4067,7 @@ Ext.onReady( function() {
 
 		openTableLayoutTab = function(type, isNewTab) {
 			if (pt.init.contextPath && pt.paramString) {
-				var url = pt.init.contextPath + '/api/analytics.' + type + pt.util.pivot.getParamString(pt.xLayout);
+				var url = pt.init.contextPath + '/api/analytics.' + type + pt.engine.getParamString(pt.xLayout);
 				url += '&tableLayout=true&columns=' + pt.xLayout.columnDimensionNames.join(';') + '&rows=' + pt.xLayout.rowDimensionNames.join(';');
 
 				window.open(url, isNewTab ? '_blank' : '_top');
@@ -4072,7 +4085,7 @@ Ext.onReady( function() {
 					{
 						xtype: 'label',
 						text: PT.i18n.table_layout,
-						style: 'padding:7px 5px 5px 7px; font-weight:bold'
+						style: 'padding:7px 5px 5px 7px; font-weight:bold; border:0 none'
 					},
 					{
 						text: 'Microsoft Excel (.xls)',
@@ -4265,7 +4278,7 @@ Ext.onReady( function() {
 										disabled: !PT.isSessionStorage || !pt.layout,
 										handler: function() {
 											if (PT.isSessionStorage) {
-												pt.util.pivot.setSessionStorage(pt.layout, 'analytical', pt.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
+												pt.engine.setSessionStorage(pt.layout, 'analytical', pt.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
 											}
 										}
 									},
@@ -4354,7 +4367,7 @@ Ext.onReady( function() {
 				isOugc = false,
 				levels = [],
 				groups = [];
-				
+
 			// State
 			pt.viewport.interpretationButton.enable();
 
@@ -4524,12 +4537,12 @@ Ext.onReady( function() {
 					}
 				}
 			}
-			
-			if (levels.length) {					
+
+			if (levels.length) {
 				toolMenu.clickHandler('level');
 				organisationUnitLevel.setValue(levels);
 			}
-			else if (groups.length) {					
+			else if (groups.length) {
 				toolMenu.clickHandler('group');
 				organisationUnitGroup.setValue(groups);
 			}
@@ -4582,7 +4595,7 @@ Ext.onReady( function() {
 					pt.viewport.layoutWindow = PT.app.LayoutWindow();
 					pt.viewport.layoutWindow.hide();
 					pt.viewport.optionsWindow = PT.app.OptionsWindow();
-					pt.viewport.optionsWindow.hide();						
+					pt.viewport.optionsWindow.hide();
 				},
 				afterrender: function() {
 					pt.init.afterRender();
@@ -4609,7 +4622,7 @@ Ext.onReady( function() {
 	};
 
 	initialize = function() {
-	
+
 		// ext configuration
 		Ext.QuickTips.init();
 
@@ -4618,7 +4631,7 @@ Ext.onReady( function() {
 				this.callParent();
 			}
 		});
-		
+
 		// right click handler
 		document.body.oncontextmenu = function() {
 			return false;
@@ -4630,7 +4643,7 @@ Ext.onReady( function() {
 				pt = PT.core.getInstance(Ext.decode(r.responseText));
 
 				PT.app.extendInstance(pt);
-								
+
 				pt.viewport = createViewport();
 			}
 		});

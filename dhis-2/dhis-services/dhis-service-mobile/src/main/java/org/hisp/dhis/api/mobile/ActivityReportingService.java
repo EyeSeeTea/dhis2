@@ -1,19 +1,20 @@
 package org.hisp.dhis.api.mobile;
 
 /*
- * Copyright (c) 2010, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -60,6 +61,9 @@ public interface ActivityReportingService
     public Patient findPatient( int patientId )
         throws NotAllowedException;
 
+    public Patient findPatientInAdvanced( String keyword, int orgUnitId, int programId )
+        throws NotAllowedException;
+
     public String saveProgramStage( ProgramStage programStage, int patientId, int orgUnitId )
         throws NotAllowedException;
 
@@ -68,15 +72,15 @@ public interface ActivityReportingService
 
     public Collection<PatientIdentifierType> getIdentifierTypes();
 
-    public Collection<org.hisp.dhis.patient.PatientAttribute> getPatientAtts();
+    public Collection<org.hisp.dhis.patient.PatientAttribute> getPatientAtts(String programId);
 
-    public Collection<PatientIdentifierType> getIdentifiers();
+    public Collection<PatientIdentifierType> getIdentifiers( String programId );
 
     public Collection<PatientAttribute> getAttsForMobile();
 
-    public Collection<org.hisp.dhis.api.mobile.model.PatientIdentifier> getIdentifiersForMobile();
+    public Collection<org.hisp.dhis.api.mobile.model.PatientIdentifier> getIdentifiersForMobile( String programId );
 
-    public Collection<PatientAttribute> getPatientAttributesForMobile();
+    public Collection<PatientAttribute> getPatientAttributesForMobile( String programId );
 
     public Patient addRelationship( Relationship enrollmentRelationship, int orgUnitId )
         throws NotAllowedException;
@@ -90,7 +94,7 @@ public interface ActivityReportingService
     public Patient findLatestPatient()
         throws NotAllowedException;
 
-    public Integer savePatient( Patient patient, int orgUnitId )
+    public Integer savePatient( Patient patient, int orgUnitId, String programId )
         throws NotAllowedException;
 
 }

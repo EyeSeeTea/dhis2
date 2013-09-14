@@ -1,19 +1,20 @@
 package org.hisp.dhis.api.controller;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -34,7 +35,10 @@ import org.hisp.dhis.analytics.scheduling.AnalyticsTableTask;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.resourcetable.scheduling.ResourceTableTask;
 import org.hisp.dhis.scheduling.DataMartTask;
+import org.hisp.dhis.scheduling.TaskCategory;
+import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.scheduling.Scheduler;
+import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -62,28 +66,39 @@ public class ResourceTableController
     @Autowired
     private Scheduler scheduler;
     
-    @RequestMapping( value = "/analytics", method = RequestMethod.PUT )
+    @Autowired
+    private CurrentUserService currentUserService;
+    
+    //TODO make tasks prototypes to avoid potential concurrency issues?
+    
+    @RequestMapping( value = "/analytics", method = { RequestMethod.PUT, RequestMethod.POST } )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_DATA_MART_ADMIN')" )
     public void analytics( HttpServletResponse response )
     {
+        analyticsTableTask.setTaskId( new TaskId( TaskCategory.DATAMART, currentUserService.getCurrentUser() ) );
+        
         scheduler.executeTask( analyticsTableTask );
         
         ContextUtils.okResponse( response, "Initiated analytics table update" );
     }
 
-    @RequestMapping( value = "/dataMart", method = RequestMethod.PUT )
+    @RequestMapping( value = "/dataMart", method = { RequestMethod.PUT, RequestMethod.POST } )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_DATA_MART_ADMIN')" )
     public void data( HttpServletResponse response )
     {
+        dataMartTask.setTaskId( new TaskId( TaskCategory.DATAMART, currentUserService.getCurrentUser() ) );
+        
         scheduler.executeTask( dataMartTask );
         
         ContextUtils.okResponse( response, "Initiated data mart update" );
     }
     
-    @RequestMapping( method = RequestMethod.PUT )
+    @RequestMapping( method = { RequestMethod.PUT, RequestMethod.POST } )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_PERFORM_MAINTENANCE')" )
     public void resourceTables( HttpServletResponse response )
     {
+        resourceTableTask.setTaskId( new TaskId( TaskCategory.RESOURCETABLE_UPDATE, currentUserService.getCurrentUser() ) );
+        
         scheduler.executeTask( resourceTableTask );
         
         ContextUtils.okResponse( response, "Initiated resource table update" );

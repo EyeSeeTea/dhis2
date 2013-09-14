@@ -91,7 +91,7 @@ div#rightBar
 #detailsArea 
 {
   display: none;
-  border: 1px solid #ececec;
+  border: 1px solid #ddd;
   position: fixed;
   top: 150px;
   width: 233px;
@@ -99,6 +99,7 @@ div#rightBar
   padding: 15px;
   overflow: auto;
   color: #222;
+  box-shadow: #f2f2f2 0 1px 1px 0;
 }
 
 #detailsArea label 
@@ -365,7 +366,8 @@ div#headerMessage
   left: 155px;
   position: fixed;
   display: none;
-  padding: 9px;
+  padding: 10px;
+  padding-bottom: 9px;
   width: 410px;
   background-color: #f8eab0;
   border: 1px solid #dbae56;
@@ -707,7 +709,7 @@ ul.pageSizeSelection input
   margin-right: 4px;
   font-family: LiberationSansBold, arial;
   font-size: 13px;
-  background-color: #3685D5;
+  background-color: #3581CE;
   color: #fff !important;
   text-decoration: none !important;
 }
@@ -715,7 +717,7 @@ ul.pageSizeSelection input
 .blueButtonLink:hover
 {
   text-decoration: none;
-  background-color: #2C7CCE;
+  background-color: #3176BD;
 }
 
 /*----------------------------------------------------------------------------*/

@@ -1,19 +1,20 @@
 package org.hisp.dhis.api.controller;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -31,14 +32,17 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.hisp.dhis.analytics.IllegalQueryException;
 import org.hisp.dhis.analytics.event.EventAnalyticsService;
 import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.api.utils.ContextUtils.CacheStrategy;
 import org.hisp.dhis.common.Grid;
+import org.hisp.dhis.system.grid.GridUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -65,17 +69,55 @@ public class EventAnalyticsController
         @RequestParam(required=false) String stage,
         @RequestParam String startDate,
         @RequestParam String endDate,
-        @RequestParam(required=false) String ou,
+        @RequestParam String ou,
+        @RequestParam(required=false) String ouMode,
         @RequestParam Set<String> item,
+        @RequestParam(required=false) Set<String> asc,
+        @RequestParam(required=false) Set<String> desc,
+        @RequestParam(required=false) Integer page,
+        @RequestParam(required=false) Integer pageSize,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        EventQueryParams params = analyticsService.getFromUrl( program, stage, startDate, endDate, ou, item );
+        EventQueryParams params = analyticsService.getFromUrl( program, stage, startDate, endDate, ou, ouMode, item, asc, desc, page, pageSize );
         
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_JSON, CacheStrategy.RESPECT_SYSTEM_SETTING );
         Grid grid = analyticsService.getEvents( params );
         model.addAttribute( "model", grid );
         model.addAttribute( "viewClass", "detailed" );
         return "grid";
+    }
+
+    @RequestMapping( value = RESOURCE_PATH + "/{program}.xls", method = RequestMethod.GET )
+    public void getXls(
+        @PathVariable String program,
+        @RequestParam(required=false) String stage,
+        @RequestParam String startDate,
+        @RequestParam String endDate,
+        @RequestParam String ou,
+        @RequestParam(required=false) String ouMode,
+        @RequestParam Set<String> item,
+        @RequestParam(required=false) Set<String> asc,
+        @RequestParam(required=false) Set<String> desc,
+        @RequestParam(required=false) Integer page,
+        @RequestParam(required=false) Integer pageSize,
+        Model model,
+        HttpServletResponse response ) throws Exception
+    {
+        EventQueryParams params = analyticsService.getFromUrl( program, stage, startDate, endDate, ou, ouMode, item, asc, desc, page, pageSize );
+        
+        contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_EXCEL, CacheStrategy.RESPECT_SYSTEM_SETTING, "events.xls", true );
+        Grid grid = analyticsService.getEvents( params );
+        GridUtils.toXls( grid, response.getOutputStream() );
+    }
+    
+    // -------------------------------------------------------------------------
+    // Exception handling
+    // -------------------------------------------------------------------------
+  
+    @ExceptionHandler(IllegalQueryException.class)
+    public void handleError( IllegalQueryException ex, HttpServletResponse response )
+    {
+        ContextUtils.conflictResponse( response, ex.getMessage() );
     }
 }

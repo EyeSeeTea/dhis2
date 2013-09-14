@@ -396,7 +396,7 @@ Ext.onReady( function() {
                     engine.loadChart(id, dv);
                 }
                 else if (Ext.isString(session) && DV.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
-                    layout = api.layout.Layout(util.chart.analytical2layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]));
+                    layout = api.layout.Layout(engine.analytical2layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]));
 
                     if (layout) {
                         dv.viewport.setFavorite(layout);
@@ -470,7 +470,7 @@ Ext.onReady( function() {
 
                     this.setProxy({
                         type: 'ajax',
-                        url: conf.finals.ajax.path_api + path,
+                        url: init.contextPath + conf.finals.ajax.path_api + path,
                         reader: {
                             type: 'json',
                             root: 'dataElements'
@@ -587,7 +587,7 @@ Ext.onReady( function() {
                 isLoaded: false,
                 pageSize: 10,
                 page: 1,
-                defaultUrl: init.contextPath + '/api/charts.json?links=false',
+                defaultUrl: init.contextPath + '/api/charts.json?viewClass=sharing&links=false',
                 loadStore: function(url) {
                     this.proxy.url = url || this.defaultUrl;
 
@@ -1172,7 +1172,7 @@ Ext.onReady( function() {
 							headers: {'Content-Type': 'application/json'},
 							params: Ext.encode(favorite),
 							failure: function(r) {
-								dv.util.mask.hideMask();
+								dv.util.mask.hideMask(dv.viewport.centerRegion);
 								alert(r.responseText);
 							},
 							success: function(r) {
@@ -1201,7 +1201,7 @@ Ext.onReady( function() {
 							url: dv.init.contextPath + '/api/charts/' + id + '.json?viewClass=dimensional&links=false',
 							method: 'GET',
 							failure: function(r) {
-								dv.util.mask.hideMask();
+								dv.util.mask.hideMask(dv.viewport.centerRegion);
 								alert(r.responseText);
 							},
 							success: function(r) {
@@ -1214,7 +1214,7 @@ Ext.onReady( function() {
 									headers: {'Content-Type': 'application/json'},
 									params: Ext.encode(favorite),
 									failure: function(r) {
-										dv.util.mask.hideMask();
+										dv.util.mask.hideMask(dv.viewport.centerRegion);
 										alert(r.responseText);
 									},
 									success: function(r) {
@@ -1293,7 +1293,7 @@ Ext.onReady( function() {
 						this.currentValue = this.getValue();
 
 						var value = this.getValue(),
-							url = value ? dv.init.contextPath + '/api/charts/query/' + value + '.json?links=false' : null,
+							url = value ? dv.init.contextPath + '/api/charts/query/' + value + '.json?viewClass=sharing&links=false' : null,
 							store = dv.store.chart;
 
 						store.page = 1;
@@ -1307,7 +1307,7 @@ Ext.onReady( function() {
 			text: DV.i18n.prev,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? dv.init.contextPath + '/api/charts/query/' + value + '.json?links=false' : null,
+					url = value ? dv.init.contextPath + '/api/charts/query/' + value + '.json?viewClass=sharing&links=false' : null,
 					store = dv.store.chart;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
@@ -1319,7 +1319,7 @@ Ext.onReady( function() {
 			text: DV.i18n.next,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? dv.init.contextPath + '/api/charts/query/' + value + '.json?links=false' : null,
+					url = value ? dv.init.contextPath + '/api/charts/query/' + value + '.json?viewClass=sharing&links=false' : null,
 					store = dv.store.chart;
 
 				store.page = store.page + 1;
@@ -1431,7 +1431,7 @@ Ext.onReady( function() {
 										url: dv.init.contextPath + '/api/sharing?type=chart&id=' + record.data.id,
 										method: 'GET',
 										failure: function(r) {
-											dv.util.mask.hideMask();
+											dv.util.mask.hideMask(dv.viewport.centerRegion);
 											alert(r.responseText);
 										},
 										success: function(r) {
@@ -1924,7 +1924,7 @@ Ext.onReady( function() {
 			});
 
 			window = Ext.create('Ext.window.Window', {
-				title: DV.i18n.share + ' ' + DV.i18n.interpretation + '<span style="font-weight:normal; font-size:11px"> (' + dv.favorite.name + ') </span>',
+				title: dv.favorite.name,
 				layout: 'fit',
 				//iconCls: 'dv-window-title-interpretation',
 				width: 500,
@@ -3641,16 +3641,22 @@ Ext.onReady( function() {
 			showSeparator: false,
 			menuValue: 'orgunit',
 			clickHandler: function(param) {
+				if (!param) {
+					return;
+				}
+				
 				var items = this.items.items;
 				this.menuValue = param;
 
 				// Menu item icon cls
 				for (var i = 0; i < items.length; i++) {
-					if (items[i].param === param) {
-						items[i].setIconCls('dv-menu-item-selected');
-					}
-					else {
-						items[i].setIconCls('');
+					if (items[i].setIconCls) {
+						if (items[i].param === param) {
+							items[i].setIconCls('dv-menu-item-selected');
+						}
+						else {
+							items[i].setIconCls('dv-menu-item-unselected');
+						}
 					}
 				}
 
@@ -3685,17 +3691,24 @@ Ext.onReady( function() {
 			},
 			items: [
 				{
+					xtype: 'label',
+					text: 'Selection mode',
+					style: 'padding:7px 5px 5px 7px; font-weight:bold; border:0 none'
+				},
+				{
 					text: DV.i18n.select_organisation_units + '&nbsp;&nbsp;',
 					param: 'orgunit',
 					iconCls: 'dv-menu-item-selected'
 				},
 				{
-					text: DV.i18n.select_boundaries_and_levels + '&nbsp;&nbsp;',
-					param: 'level'
+					text: 'Select levels' + '&nbsp;&nbsp;',
+					param: 'level',
+					iconCls: 'dv-menu-item-unselected'
 				},
 				{
-					text: DV.i18n.select_boundaries_and_groups + '&nbsp;&nbsp;',
-					param: 'group'
+					text: 'Select groups' + '&nbsp;&nbsp;',
+					param: 'group',
+					iconCls: 'dv-menu-item-unselected'
 				}
 			],
 			listeners: {

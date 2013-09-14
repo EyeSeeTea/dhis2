@@ -1,17 +1,20 @@
+package org.hisp.dhis.patient.action.program;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,18 +28,21 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.program;
-
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.patient.PatientAttributeService;
 import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.patient.PatientIdentifierTypeService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.relationship.RelationshipType;
+import org.hisp.dhis.relationship.RelationshipTypeService;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 
@@ -73,14 +79,21 @@ public class ShowAddProgramFormAction
     {
         this.patientAttributeService = patientAttributeService;
     }
-    
+
     private UserGroupService userGroupService;
-    
+
     public void setUserGroupService( UserGroupService userGroupService )
     {
         this.userGroupService = userGroupService;
     }
-    
+
+    private RelationshipTypeService relationshipTypeService;
+
+    public void setRelationshipTypeService( RelationshipTypeService relationshipTypeService )
+    {
+        this.relationshipTypeService = relationshipTypeService;
+    }
+
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
@@ -98,12 +111,26 @@ public class ShowAddProgramFormAction
     {
         return availableAttributes;
     }
-    
+
     private List<UserGroup> userGroups;
-    
+
     public List<UserGroup> getUserGroups()
     {
         return userGroups;
+    }
+
+    private List<RelationshipType> relationshipTypes;
+
+    public List<RelationshipType> getRelationshipTypes()
+    {
+        return relationshipTypes;
+    }
+
+    private List<Program> programs;
+
+    public List<Program> getPrograms()
+    {
+        return programs;
     }
 
     // -------------------------------------------------------------------------
@@ -112,19 +139,24 @@ public class ShowAddProgramFormAction
 
     public String execute()
     {
-        availableIdentifierTypes = patientIdentifierTypeService.getAllPatientIdentifierTypes();
 
+        programs = new ArrayList<Program>( programService.getAllPrograms() );
+        Collections.sort( programs, IdentifiableObjectNameComparator.INSTANCE );
+       
+      
         availableAttributes = patientAttributeService.getAllPatientAttributes();
-
-        Collection<Program> programs = programService.getAllPrograms();
-        
-        for ( Program program : programs )
+ 
+        availableIdentifierTypes = patientIdentifierTypeService.getAllPatientIdentifierTypes();
+        for ( Program p : programs )
         {
-            availableIdentifierTypes.removeAll( program.getPatientIdentifierTypes() );
-            availableAttributes.removeAll( program.getPatientAttributes() );
+            availableIdentifierTypes
+                .removeAll( new HashSet<PatientIdentifierType>( p.getPatientIdentifierTypes() ) );
         }
         
         userGroups = new ArrayList<UserGroup>( userGroupService.getAllUserGroups() );
+        
+        relationshipTypes = new ArrayList<RelationshipType>(relationshipTypeService.getAllRelationshipTypes());
+        Collections.sort( relationshipTypes, IdentifiableObjectNameComparator.INSTANCE );
         
         return SUCCESS;
     }

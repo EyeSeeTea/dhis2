@@ -1,17 +1,20 @@
+package org.hisp.dhis.caseentry.action.patient;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,14 +28,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.caseentry.action.patient;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.opensymphony.xwork2.Action;
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.i18n.I18n;
@@ -49,11 +45,13 @@ import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.validation.ValidationCriteria;
 
-import com.opensymphony.xwork2.Action;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Abyot Asalefew Gizaw
- * @version $Id$
  */
 public class ValidatePatientAction
     implements Action
@@ -83,8 +81,6 @@ public class ValidatePatientAction
     private String fullName;
 
     private String birthDate;
-
-    private char ageType;
 
     private Integer age;
 
@@ -126,32 +122,9 @@ public class ValidatePatientAction
         {
             fullName = fullName.trim();
 
-            int startIndex = fullName.indexOf( ' ' );
-            int endIndex = fullName.lastIndexOf( ' ' );
-
-            String firstName = fullName.toString();
-            String middleName = "";
-            String lastName = "";
-
-            if ( fullName.indexOf( ' ' ) != -1 )
-            {
-                firstName = fullName.substring( 0, startIndex );
-                if ( startIndex == endIndex )
-                {
-                    middleName = "";
-                    lastName = fullName.substring( startIndex + 1, fullName.length() );
-                }
-                else
-                {
-                    middleName = fullName.substring( startIndex + 1, endIndex );
-                    lastName = fullName.substring( endIndex + 1, fullName.length() );
-                }
-            }
-
             if ( !checkedDuplicate && birthDate != null && gender != null )
             {
-                patients = patientService.getPatients( firstName, middleName, lastName, format.parseDate( birthDate ),
-                    gender );
+                patients = patientService.getPatients( fullName, format.parseDate( birthDate ), gender );
 
                 if ( patients != null && patients.size() > 0 )
                 {
@@ -160,7 +133,7 @@ public class ValidatePatientAction
                     boolean flagDuplicate = false;
                     for ( Patient p : patients )
                     {
-                        if ( id == null || (id != null && p.getId().intValue() != id.intValue()) )
+                        if ( id == null || (id != null && p.getId() != id) )
                         {
                             flagDuplicate = true;
                             Collection<PatientAttributeValue> patientAttributeValues = patientAttributeValueService
@@ -218,12 +191,11 @@ public class ValidatePatientAction
 
                     if ( StringUtils.isNotBlank( value ) )
                     {
-                        PatientIdentifier identifier = patientIdentifierService.get( idType, value );
+                        boolean isDuplicate = patientIdentifierService.checkDuplicateIdentifier( value );
 
-                        if ( identifier != null
-                            && (id == null || identifier.getPatient().getId().intValue() != id.intValue()) )
+                        if ( isDuplicate )
                         {
-                            idDuplicate += idType.getName() + ", ";
+                            idDuplicate += value + ", ";
                         }
                     }
                 }
@@ -247,7 +219,7 @@ public class ValidatePatientAction
             p.setGender( gender );
         }
 
-        if ( birthDate != null )
+        if ( birthDate != null && !birthDate.isEmpty() )
         {
             birthDate = birthDate.trim();
             p.setBirthDate( format.parseDate( birthDate ) );
@@ -255,7 +227,7 @@ public class ValidatePatientAction
         }
         else if ( age != null )
         {
-            p.setBirthDateFromAge( age.intValue(), ageType );
+            p.setBirthDateFromAge( age, Patient.AGE_TYPE_YEAR );
         }
 
         if ( programId != null )
@@ -266,30 +238,7 @@ public class ValidatePatientAction
             if ( criteria != null )
             {
                 message = i18n.getString( "patient_could_not_be_enrolled_due_to_following_enrollment_criteria" ) + ": "
-                    + i18n.getString( criteria.getProperty() );
-
-                switch ( criteria.getOperator() )
-                {
-                case ValidationCriteria.OPERATOR_EQUAL_TO:
-                    message += " = ";
-                    break;
-                case ValidationCriteria.OPERATOR_GREATER_THAN:
-                    message += " > ";
-                    break;
-                default:
-                    message += " < ";
-                    break;
-                }
-
-                if ( criteria.getProperty() == "birthDate" )
-                {
-                    message += " " + format.formatValue( criteria.getValue() );
-                }
-                else
-                {
-                    message += " " + criteria.getValue().toString();
-                }
-
+                    + criteria.getDescription();
                 return INPUT;
             }
         }
@@ -410,10 +359,5 @@ public class ValidatePatientAction
     public void setRelationshipTypeId( Integer relationshipTypeId )
     {
         this.relationshipTypeId = relationshipTypeId;
-    }
-
-    public void setAgeType( char ageType )
-    {
-        this.ageType = ageType;
     }
 }

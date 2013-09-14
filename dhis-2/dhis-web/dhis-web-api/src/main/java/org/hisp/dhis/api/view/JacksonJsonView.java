@@ -1,19 +1,20 @@
 package org.hisp.dhis.api.view;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -28,12 +29,16 @@ package org.hisp.dhis.api.view;
  */
 
 import com.fasterxml.jackson.databind.util.JSONPObject;
+import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.view.AbstractView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStream;
 import java.util.Map;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -43,41 +48,60 @@ public class JacksonJsonView
 {
     private static String CONTENT_TYPE_APPLICATION_JSON = "application/json";
 
+    private static String CONTENT_TYPE_APPLICATION_JSON_GZIP = "application/json+gzip";
+
     private static String CONTENT_TYPE_APPLICATION_JAVASCRIPT = "application/javascript";
 
+    private static String CONTENT_TYPE_APPLICATION_JAVASCRIPT_GZIP = "application/javascript+gzip";
+
     private boolean withPadding = false;
+
+    private boolean withCompression = false;
 
     private String callbackParameter = "callback";
 
     private String paddingFunction = "callback";
+
+    @Autowired
+    private ContextUtils contextUtils;
 
     public JacksonJsonView()
     {
         setContentType( CONTENT_TYPE_APPLICATION_JSON );
     }
 
-    public JacksonJsonView( boolean withPadding )
+    public JacksonJsonView( boolean withPadding, boolean withCompression )
     {
         this.withPadding = withPadding;
+        this.withCompression = withCompression;
 
         if ( !withPadding )
         {
-            setContentType( CONTENT_TYPE_APPLICATION_JSON );
+            if ( !withCompression )
+            {
+                setContentType( CONTENT_TYPE_APPLICATION_JSON );
+            }
+            else
+            {
+                setContentType( CONTENT_TYPE_APPLICATION_JSON_GZIP );
+            }
         }
         else
         {
-            setContentType( CONTENT_TYPE_APPLICATION_JAVASCRIPT );
+            if ( !withCompression )
+            {
+                setContentType( CONTENT_TYPE_APPLICATION_JAVASCRIPT );
+            }
+            else
+            {
+                setContentType( CONTENT_TYPE_APPLICATION_JAVASCRIPT_GZIP );
+            }
         }
     }
 
     public void setCallbackParameter( String callbackParameter )
     {
         this.callbackParameter = callbackParameter;
-    }
-
-    public void setPaddingFunction( String paddingFunction )
-    {
-        this.paddingFunction = paddingFunction;
     }
 
     @Override
@@ -87,6 +111,28 @@ public class JacksonJsonView
         Object object = model.get( "model" );
         Class<?> viewClass = JacksonUtils.getViewClass( model.get( "viewClass" ) );
         response.setContentType( getContentType() + "; charset=UTF-8" );
+
+        OutputStream outputStream;
+
+        if ( !withCompression )
+        {
+            outputStream = response.getOutputStream();
+        }
+        else
+        {
+            if ( !withPadding )
+            {
+                response.setContentType( CONTENT_TYPE_APPLICATION_JSON_GZIP );
+                response.addHeader( ContextUtils.HEADER_CONTENT_TRANSFER_ENCODING, "binary" );
+                outputStream = new GZIPOutputStream( response.getOutputStream() );
+            }
+            else
+            {
+                response.setContentType( CONTENT_TYPE_APPLICATION_JAVASCRIPT_GZIP );
+                response.addHeader( ContextUtils.HEADER_CONTENT_TRANSFER_ENCODING, "binary" );
+                outputStream = new GZIPOutputStream( response.getOutputStream() );
+            }
+        }
 
         if ( withPadding )
         {
@@ -102,11 +148,11 @@ public class JacksonJsonView
 
         if ( viewClass != null )
         {
-            JacksonUtils.toJsonWithView( response.getOutputStream(), object, viewClass );
+            JacksonUtils.toJsonWithView( outputStream, object, viewClass );
         }
         else
         {
-            JacksonUtils.toJson( response.getOutputStream(), object );
+            JacksonUtils.toJson( outputStream, object );
         }
     }
 }

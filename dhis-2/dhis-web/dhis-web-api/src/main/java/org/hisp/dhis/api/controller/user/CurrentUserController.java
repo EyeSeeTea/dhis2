@@ -6,14 +6,15 @@ package org.hisp.dhis.api.controller.user;
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -28,6 +29,7 @@ package org.hisp.dhis.api.controller.user;
  */
 
 import org.apache.commons.collections.CollectionUtils;
+import org.hisp.dhis.api.controller.exception.FilterTooShortException;
 import org.hisp.dhis.api.controller.exception.NotAuthenticatedException;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.api.utils.ContextUtils.CacheStrategy;
@@ -68,9 +70,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -78,7 +81,7 @@ import java.util.Set;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping( value = CurrentUserController.RESOURCE_PATH, method = RequestMethod.GET )
+@RequestMapping(value = CurrentUserController.RESOURCE_PATH, method = RequestMethod.GET)
 public class CurrentUserController
 {
     public static final String RESOURCE_PATH = "/currentUser";
@@ -117,7 +120,7 @@ public class CurrentUserController
     @Autowired
     private I18nService i18nService;
 
-    @RequestMapping( produces = { "application/json", "text/*" } )
+    @RequestMapping(produces = { "application/json", "text/*" })
     public void getCurrentUser( HttpServletResponse response ) throws Exception
     {
         User currentUser = currentUserService.getCurrentUser();
@@ -130,7 +133,7 @@ public class CurrentUserController
         JacksonUtils.toJson( response.getOutputStream(), currentUser );
     }
 
-    @RequestMapping( value = "/inbox", produces = { "application/json", "text/*" } )
+    @RequestMapping(value = "/inbox", produces = { "application/json", "text/*" })
     public void getInbox( HttpServletResponse response ) throws Exception
     {
         User currentUser = currentUserService.getCurrentUser();
@@ -147,7 +150,7 @@ public class CurrentUserController
         JacksonUtils.toJson( response.getOutputStream(), inbox );
     }
 
-    @RequestMapping( value = "/dashboard", produces = { "application/json", "text/*" } )
+    @RequestMapping(value = "/dashboard", produces = { "application/json", "text/*" })
     public void getDashboard( HttpServletResponse response ) throws Exception
     {
         User currentUser = currentUserService.getCurrentUser();
@@ -164,7 +167,7 @@ public class CurrentUserController
         JacksonUtils.toJson( response.getOutputStream(), dashboard );
     }
 
-    @RequestMapping( value = "/user-account", produces = { "application/json", "text/*" } )
+    @RequestMapping(value = { "/profile", "/user-account" }, produces = { "application/json", "text/*" })
     public void getUserAccount( HttpServletResponse response ) throws Exception
     {
         User currentUser = currentUserService.getCurrentUser();
@@ -201,7 +204,7 @@ public class CurrentUserController
         JacksonUtils.toJson( response.getOutputStream(), userAccount );
     }
 
-    @RequestMapping( value = "/user-account", method = RequestMethod.POST, consumes = "application/json" )
+    @RequestMapping(value = { "/profile", "/user-account" }, method = RequestMethod.POST, consumes = "application/json")
     public void postUserAccountJson( HttpServletResponse response, HttpServletRequest request ) throws Exception
     {
         UserAccount userAccount = JacksonUtils.fromJson( request.getInputStream(), UserAccount.class );
@@ -237,9 +240,9 @@ public class CurrentUserController
         userService.updateUser( currentUser );
     }
 
-    @RequestMapping( value = "/recipients", produces = { "application/json", "text/*" } )
+    @RequestMapping(value = "/recipients", produces = { "application/json", "text/*" })
     public void recipientsJson( HttpServletResponse response,
-        @RequestParam( value = "filter" ) String filter ) throws IOException, NotAuthenticatedException
+        @RequestParam(value = "filter") String filter ) throws IOException, NotAuthenticatedException, FilterTooShortException
     {
         User currentUser = currentUserService.getCurrentUser();
 
@@ -248,6 +251,11 @@ public class CurrentUserController
         if ( currentUser == null )
         {
             throw new NotAuthenticatedException();
+        }
+
+        if ( 3 > filter.length() )
+        {
+            throw new FilterTooShortException();
         }
 
         Recipients recipients = new Recipients();
@@ -259,8 +267,8 @@ public class CurrentUserController
         JacksonUtils.toJson( response.getOutputStream(), recipients );
     }
 
-    @RequestMapping( value = "/assignedOrganisationUnits", produces = { "application/json", "text/*" } )
-    public void getAssignedOrganisationUnits( HttpServletResponse response ) throws IOException, NotAuthenticatedException
+    @RequestMapping(value = "/assignedOrganisationUnits", produces = { "application/json", "text/*" })
+    public void getAssignedOrganisationUnits( HttpServletResponse response, @RequestParam Map<String, String> parameters ) throws IOException, NotAuthenticatedException
     {
         User currentUser = currentUserService.getCurrentUser();
 
@@ -269,12 +277,40 @@ public class CurrentUserController
             throw new NotAuthenticatedException();
         }
 
-        JacksonUtils.toJson( response.getOutputStream(), currentUser.getOrganisationUnits() );
+        Set<OrganisationUnit> userOrganisationUnits = new HashSet<OrganisationUnit>();
+        userOrganisationUnits.add( currentUser.getOrganisationUnit() );
+
+        if ( parameters.containsKey( "includeChildren" ) && Boolean.parseBoolean( parameters.get( "includeChildren" ) ) )
+        {
+            for ( OrganisationUnit organisationUnit : userOrganisationUnits )
+            {
+                userOrganisationUnits.addAll( organisationUnit.getChildren() );
+            }
+        }
+        else if ( parameters.containsKey( "includeDescendants" ) && Boolean.parseBoolean( parameters.get( "includeDescendants" ) ) )
+        {
+            for ( OrganisationUnit organisationUnit : userOrganisationUnits )
+            {
+                userOrganisationUnits.addAll( organisationUnitService.getOrganisationUnitsWithChildren( organisationUnit.getUid() ) );
+            }
+        }
+
+        String viewName = parameters.get( "viewClass" );
+
+        if ( viewName == null )
+        {
+            viewName = "detailed";
+        }
+
+        Class<?> viewClass = JacksonUtils.getViewClass( viewName );
+
+        JacksonUtils.toJsonWithView( response.getOutputStream(), userOrganisationUnits, viewClass );
     }
 
-    @SuppressWarnings( "unchecked" )
-    @RequestMapping( value = { "/assignedPrograms" }, produces = { "application/json", "text/*" } )
-    public void getPrograms( HttpServletResponse response, @RequestParam Map<String, String> parameters ) throws IOException, NotAuthenticatedException
+    @RequestMapping(value = { "/assignedPrograms" }, produces = { "application/json", "text/*" })
+    public void getPrograms( HttpServletResponse response, @RequestParam Map<String, String> parameters,
+        @RequestParam(required = false) Integer type )
+        throws IOException, NotAuthenticatedException
     {
         User currentUser = currentUserService.getCurrentUser();
 
@@ -286,9 +322,19 @@ public class CurrentUserController
         Set<OrganisationUnit> userOrganisationUnits = new HashSet<OrganisationUnit>();
         Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
         Set<Program> programs = new HashSet<Program>();
-        Map<String, Collection<Program>> programAssociations = new HashMap<String, Collection<Program>>();
+        Map<String, List<Program>> programAssociations = new HashMap<String, List<Program>>();
+        List<Program> userPrograms;
 
-        if ( currentUser.getOrganisationUnits().isEmpty() && currentUser.getUserCredentials().getAllAuthorities().contains( "ALL" ) )
+        if ( type == null )
+        {
+            userPrograms = new ArrayList<Program>( programService.getProgramsByCurrentUser() );
+        }
+        else
+        {
+            userPrograms = new ArrayList<Program>( programService.getProgramsByCurrentUser( type ) );
+        }
+
+        if ( currentUserService.currentUserIsSuper() && currentUser.getOrganisationUnits().isEmpty() )
         {
             userOrganisationUnits.addAll( organisationUnitService.getRootOrganisationUnits() );
         }
@@ -314,13 +360,27 @@ public class CurrentUserController
 
         for ( OrganisationUnit organisationUnit : userOrganisationUnits )
         {
-            Collection<Program> ouPrograms = programService.getPrograms( Program.SINGLE_EVENT_WITHOUT_REGISTRATION, organisationUnit );
+            List<Program> ouPrograms = new ArrayList<Program>( programService.getPrograms( organisationUnit ) );
 
             if ( !ouPrograms.isEmpty() )
             {
-                organisationUnits.add( organisationUnit );
-                programs.addAll( ouPrograms );
-                programAssociations.put( organisationUnit.getUid(), ouPrograms );
+                for ( Program program : ouPrograms )
+                {
+                    if ( userPrograms.contains( program ) )
+                    {
+                        organisationUnits.add( organisationUnit );
+                        programs.add( program );
+
+                        if ( programAssociations.get( organisationUnit.getUid() ) != null )
+                        {
+                            programAssociations.get( organisationUnit.getUid() ).add( program );
+                        }
+                        else
+                        {
+                            programAssociations.put( organisationUnit.getUid(), Arrays.asList( program ) );
+                        }
+                    }
+                }
             }
         }
 
