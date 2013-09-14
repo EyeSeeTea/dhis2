@@ -28,17 +28,18 @@ package org.hisp.dhis.api.mobile.model.LWUITmodel;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.api.mobile.model.DataStreamSerializable;
+import org.hisp.dhis.api.mobile.model.PatientAttribute;
+import org.hisp.dhis.api.mobile.model.PatientIdentifier;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import org.hisp.dhis.api.mobile.model.DataStreamSerializable;
-import org.hisp.dhis.api.mobile.model.PatientAttribute;
-import org.hisp.dhis.api.mobile.model.PatientIdentifier;
 
 /**
  * @author Nguyen Kim Lai
@@ -50,11 +51,7 @@ public class Patient
 
     private int id;
 
-    private String firstName;
-
-    private String middleName;
-
-    private String lastName;
+    private String name;
 
     private int age;
 
@@ -64,16 +61,16 @@ public class Patient
 
     private String gender;
 
-    private Date birthDate;
+    private String birthDate;
 
     private Date registrationDate;
 
     private Character dobType;
 
     private List<Program> programs;
-    
+
     //private List<Integer> programsID;
-    
+
     //private Map<Integer, String> patientDataValues;
 
     private List<Program> enrollmentPrograms;
@@ -85,6 +82,12 @@ public class Patient
     private String phoneNumber;
 
     private String organisationUnitName;
+
+    private List<Program> completedPrograms;
+
+    // -------------------------------------------------------------------------
+    // Getters and setters
+    // -------------------------------------------------------------------------
 
     public List<PatientIdentifier> getIdentifiers()
     {
@@ -146,32 +149,6 @@ public class Patient
         this.enrollmentPrograms = enrollmentPrograms;
     }
 
-    public String getFullName()
-    {
-        boolean space = false;
-        String name = "";
-
-        if ( firstName != null && firstName.length() != 0 )
-        {
-            name = firstName;
-            space = true;
-        }
-        if ( middleName != null && middleName.length() != 0 )
-        {
-            if ( space )
-                name += " ";
-            name += middleName;
-            space = true;
-        }
-        if ( lastName != null && lastName.length() != 0 )
-        {
-            if ( space )
-                name += " ";
-            name += lastName;
-        }
-        return name;
-    }
-
     public int getAge()
     {
         return age;
@@ -187,12 +164,12 @@ public class Patient
         this.gender = gender;
     }
 
-    public Date getBirthDate()
+    public String getBirthDate()
     {
         return birthDate;
     }
 
-    public void setBirthDate( Date birthDate )
+    public void setBirthDate( String birthDate )
     {
         this.birthDate = birthDate;
     }
@@ -242,34 +219,14 @@ public class Patient
         this.id = id;
     }
 
-    public String getFirstName()
+    public String getName()
     {
-        return firstName;
+        return name;
     }
 
-    public void setFirstName( String firstName )
+    public void setName( String name )
     {
-        this.firstName = firstName;
-    }
-
-    public String getMiddleName()
-    {
-        return middleName;
-    }
-
-    public void setMiddleName( String middleName )
-    {
-        this.middleName = middleName;
-    }
-
-    public String getLastName()
-    {
-        return lastName;
-    }
-
-    public void setLastName( String lastName )
-    {
-        this.lastName = lastName;
+        this.name = name;
     }
 
     public String getClientVersion()
@@ -312,6 +269,20 @@ public class Patient
         this.organisationUnitName = organisationUnitName;
     }
 
+    public List<Program> getCompletedPrograms()
+    {
+        return completedPrograms;
+    }
+
+    public void setCompletedPrograms( List<Program> completedPrograms )
+    {
+        this.completedPrograms = completedPrograms;
+    }
+
+    // -------------------------------------------------------------------------
+    // Override Methods
+    // -------------------------------------------------------------------------
+
     @Override
     public void serialize( DataOutputStream out )
         throws IOException
@@ -320,10 +291,8 @@ public class Patient
         DataOutputStream dout = new DataOutputStream( bout );
 
         dout.writeInt( this.getId() );
-        dout.writeUTF( this.getFirstName() );
-        dout.writeUTF( this.getMiddleName() );
-        dout.writeUTF( this.getLastName() );
-        
+        dout.writeUTF( this.getName() );
+
         if ( organisationUnitName != null )
         {
             dout.writeBoolean( true );
@@ -357,7 +326,7 @@ public class Patient
         if ( birthDate != null )
         {
             dout.writeBoolean( true );
-            dout.writeLong( birthDate.getTime() );
+            dout.writeUTF( birthDate );
         }
         else
         {
@@ -399,7 +368,7 @@ public class Patient
         {
             dout.writeInt( 0 );
         }
-        
+
         // Write PatientIdentifier
         if ( identifiers != null )
         {
@@ -414,12 +383,13 @@ public class Patient
             dout.writeInt( 0 );
         }
 
-        // Write Program
+        // Write Programs
         dout.writeInt( programs.size() );
         for ( Program each : programs )
         {
             each.serialize( dout );
         }
+        
         /*dout.writeInt( programsID.size() );
         for ( Integer each : programsID )
         {
@@ -433,7 +403,7 @@ public class Patient
             dout.writeInt( key );
             dout.writeUTF( patientDataValues.get( key ) );
         }*/
-        
+
         // Write Relationships
         dout.writeInt( relationships.size() );
         for ( Relationship each : relationships )
@@ -457,19 +427,24 @@ public class Patient
             each.serialize( dout );
         }
 
+        // Write completed Programs
+        dout.writeInt( completedPrograms.size() );
+        for ( Program each : completedPrograms )
+        {
+            each.serialize( dout );
+        }
+
         bout.flush();
         bout.writeTo( out );
     }
 
     @Override
     public void deSerialize( DataInputStream din )
-        throws IOException
+        throws IOException, EOFException
     {
         this.setId( din.readInt() );
-        this.setFirstName( din.readUTF() );
-        this.setMiddleName( din.readUTF() );
-        this.setLastName( din.readUTF() );
-        
+        this.setName( din.readUTF() );
+
         // Org Name
         if ( din.readBoolean() )
         {
@@ -479,7 +454,7 @@ public class Patient
         {
             this.setOrganisationUnitName( null );
         }
-        
+
         // Gender
         if ( din.readBoolean() )
         {
@@ -489,7 +464,7 @@ public class Patient
         {
             this.setGender( null );
         }
-        
+
         // DOB Type
         if ( din.readBoolean() )
         {
@@ -500,11 +475,11 @@ public class Patient
         {
             this.setDobType( null );
         }
-        
+
         // DOB
         if ( din.readBoolean() )
         {
-            this.setBirthDate( new Date( din.readLong() ) );
+            this.setBirthDate( din.readUTF() );
         }
         else
         {
@@ -513,7 +488,7 @@ public class Patient
 
         // doesn't transfer blood group to client
         din.readBoolean();
-        
+
         // Registration Date
         if ( din.readBoolean() )
         {
@@ -533,10 +508,10 @@ public class Patient
         {
             this.setPhoneNumber( null );
         }
-        
+
         // Patient Attribute & Identifiers
         int attsNumb = din.readInt();
-        if( attsNumb > 0 )
+        if ( attsNumb > 0 )
         {
             this.patientAttValues = new ArrayList<PatientAttribute>();
             for ( int j = 0; j < attsNumb; j++ )
@@ -552,22 +527,18 @@ public class Patient
         }
 
         int numbIdentifiers = din.readInt();
+        this.identifiers = new ArrayList<PatientIdentifier>();
         if ( numbIdentifiers > 0 )
         {
-            this.identifiers = new ArrayList<PatientIdentifier>();
             for ( int i = 0; i < numbIdentifiers; i++ )
             {
                 PatientIdentifier identifier = new PatientIdentifier();
                 identifier.deSerialize( din );
                 this.identifiers.add( identifier );
-    
+
             }
         }
-        else
-        {
-            this.identifiers = null;
-        }
-        
+
         // Program & Relationship
         int numbPrograms = din.readInt();
         if ( numbPrograms > 0 )
@@ -578,14 +549,13 @@ public class Patient
                 Program program = new Program();
                 program.deSerialize( din );
                 this.programs.add( program );
-    
             }
         }
         else
         {
             this.programs = null;
         }
-        
+
         int numbRelationships = din.readInt();
         if ( numbRelationships > 0 )
         {
@@ -595,14 +565,13 @@ public class Patient
                 Relationship relationship = new Relationship();
                 relationship.deSerialize( din );
                 this.relationships.add( relationship );
-    
             }
         }
         else
         {
             this.relationships = null;
         }
-        
+
         int numbEnrollmentPrograms = din.readInt();
         if ( numbEnrollmentPrograms > 0 )
         {
@@ -612,14 +581,13 @@ public class Patient
                 Program program = new Program();
                 program.deSerialize( din );
                 this.enrollmentPrograms.add( program );
-    
             }
         }
         else
         {
             this.enrollmentPrograms = null;
         }
-        
+
         int numbEnrollmentRelationships = din.readInt();
         if ( numbEnrollmentRelationships > 0 )
         {
@@ -629,12 +597,27 @@ public class Patient
                 Relationship relationship = new Relationship();
                 relationship.deSerialize( din );
                 this.enrollmentRelationships.add( relationship );
-    
             }
         }
         else
         {
             this.enrollmentRelationships = null;
+        }
+
+        int numbCompletedPrograms = din.readInt();
+        if ( numbCompletedPrograms > 0 )
+        {
+            this.completedPrograms = new ArrayList<Program>();
+            for ( int i = 0; i < numbCompletedPrograms; i++ )
+            {
+                Program program = new Program();
+                program.deSerialize( din );
+                this.completedPrograms.add( program );
+            }
+        }
+        else
+        {
+            this.completedPrograms = null;
         }
     }
 
@@ -670,14 +653,14 @@ public class Patient
             return false;
         }
 
-        if ( firstName == null )
+        if ( name == null )
         {
-            if ( otherPatient.firstName != null )
+            if ( otherPatient.name != null )
             {
                 return false;
             }
         }
-        else if ( !firstName.equals( otherPatient.firstName ) )
+        else if ( !name.equals( otherPatient.name ) )
         {
             return false;
         }
@@ -692,30 +675,6 @@ public class Patient
             return false;
         }
 
-        if ( lastName == null )
-        {
-            if ( otherPatient.lastName != null )
-            {
-                return false;
-            }
-        }
-        else if ( !lastName.equals( otherPatient.lastName ) )
-        {
-            return false;
-        }
-
-        if ( middleName == null )
-        {
-            if ( otherPatient.middleName != null )
-            {
-                return false;
-            }
-        }
-        else if ( !middleName.equals( otherPatient.middleName ) )
-        {
-            return false;
-        }
-
         return true;
     }
 
@@ -726,10 +685,8 @@ public class Patient
         int result = 1;
 
         result = prime * result + ((birthDate == null) ? 0 : birthDate.hashCode());
-        result = prime * result + ((firstName == null) ? 0 : firstName.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((gender == null) ? 0 : gender.hashCode());
-        result = prime * result + ((lastName == null) ? 0 : lastName.hashCode());
-        result = prime * result + ((middleName == null) ? 0 : middleName.hashCode());
 
         return result;
     }

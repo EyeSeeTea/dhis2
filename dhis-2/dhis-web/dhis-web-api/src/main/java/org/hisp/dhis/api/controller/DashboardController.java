@@ -29,12 +29,15 @@ package org.hisp.dhis.api.controller;
  */
 
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hisp.dhis.api.utils.ContextUtils;
+import org.hisp.dhis.api.utils.WebUtils;
+import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.dashboard.Dashboard;
 import org.hisp.dhis.dashboard.DashboardItem;
 import org.hisp.dhis.dashboard.DashboardSearchResult;
@@ -49,6 +52,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import static org.hisp.dhis.dashboard.Dashboard.MAX_ITEMS;
 
 /**
  * @author Lars Helge Overland
@@ -152,9 +157,16 @@ public class DashboardController
     public void postJsonItemContent( HttpServletResponse response, HttpServletRequest request, 
         @PathVariable String dashboardUid, @RequestParam String type, @RequestParam( "id" ) String contentUid ) throws Exception
     {
-        dashboardService.addItemContent( dashboardUid, type, contentUid );
+        boolean result = dashboardService.addItemContent( dashboardUid, type, contentUid );
         
-        ContextUtils.okResponse( response, "Dashboard item added" );
+        if ( !result )
+        {
+            ContextUtils.conflictResponse( response, "Max number of dashboard items reached: " + MAX_ITEMS );
+        }
+        else
+        {
+            ContextUtils.okResponse( response, "Dashboard item added" );
+        }
     }
     
     @RequestMapping( value = "/{dashboardUid}/items/{itemUid}/position/{position}", method = RequestMethod.POST )
@@ -219,9 +231,42 @@ public class DashboardController
         
         if ( item.removeItemContent( contentUid ) )
         {
-            dashboardService.updateDashboard( dashboard );
+            if ( item.getContentCount() == 0 )
+            {
+                dashboard.removeItem( item.getUid() ); // Remove if empty
+            }
+            
+            dashboardService.updateDashboard( dashboard );            
             
             ContextUtils.okResponse( response, "Dashboard item content removed" );
         }        
+    }
+
+    // -------------------------------------------------------------------------
+    // Hooks
+    // -------------------------------------------------------------------------
+
+    @Override
+    protected void postProcessEntity( Dashboard entity, WebOptions options, Map<String, String> parameters ) throws Exception
+    {
+        for ( DashboardItem item : entity.getItems() )
+        {
+            if ( item != null )
+            {                
+                item.setHref( null ); // Null item link, not relevant
+            
+                if ( item.getEmbeddedItem() != null )
+                {
+                    WebUtils.generateLinks( item.getEmbeddedItem() );
+                }
+                else if ( item.getLinkItems() != null )
+                {
+                    for ( IdentifiableObject link : item.getLinkItems() )
+                    {
+                        WebUtils.generateLinks( link );
+                    }
+                }
+            }
+        }
     }
 }

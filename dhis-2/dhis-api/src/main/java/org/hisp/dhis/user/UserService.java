@@ -199,13 +199,6 @@ public interface UserService
     void setLastLogin( String username );
 
     /**
-     * Deletes a UserCredentials.
-     *
-     * @param userCredentials the UserCredentials.
-     */
-    void deleteUserCredentials( UserCredentials userCredentials );
-
-    /**
      * Get the UserCredentials with the corresponding identifiers.
      *
      * @param identifiers the collection of identifiers.
@@ -353,6 +346,8 @@ public interface UserService
      * @return a Collection of UserSettings.
      */
     Collection<UserSetting> getAllUserSettings( User user );
+    
+    Collection<UserSetting> getUserSettings( String name );
 
     /**
      * Deletes a UserSetting.

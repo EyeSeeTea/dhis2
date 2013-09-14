@@ -33,11 +33,14 @@ import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
 import static org.hisp.dhis.system.util.TextUtils.getQuotedCommaDelimitedString;
 import static org.hisp.dhis.system.util.TextUtils.removeLast;
 
+import java.util.Arrays;
+
 import org.hisp.dhis.analytics.event.EventAnalyticsManager;
 import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.analytics.event.QueryItem;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.system.util.TextUtils;
 import org.hisp.dhis.system.util.Timer;
@@ -46,6 +49,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 /**
+ * TODO could use row_number() and filtering for paging, but not supported on MySQL.
+ * 
  * @author Lars Helge Overland
  */
 public class JdbcEventAnalyticsManager
@@ -53,6 +58,9 @@ public class JdbcEventAnalyticsManager
 {
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    
+    @Autowired
+    private StatementBuilder statementBuilder;
 
     // -------------------------------------------------------------------------
     // EventAnalyticsManager implementation
@@ -74,48 +82,13 @@ public class JdbcEventAnalyticsManager
         }
         
         sql = removeLast( sql, 1 ) + " ";
-        
-        sql += "from " + params.getTableName() + " ";
-        sql += "where executiondate >= '" + getMediumDateString( params.getStartDate() ) + "' ";
-        sql += "and executiondate <= '" + getMediumDateString( params.getEndDate() ) + "' ";
-        
-        if ( params.isOrganisationUnitMode( EventQueryParams.OU_MODE_SELECTED ) )
-        {
-            sql += "and ou in (" + getQuotedCommaDelimitedString( getUids( params.getOrganisationUnits() ) ) + ") ";
-        }
-        else if ( params.isOrganisationUnitMode( EventQueryParams.OU_MODE_CHILDREN ) )
-        {
-            sql += "and ou in (" + getQuotedCommaDelimitedString( getUids( params.getOrganisationUnitChildren() ) ) + ") ";
-        }
-        else // Descendants
-        {
-            sql += "and (";
-            
-            for ( OrganisationUnit unit : params.getOrganisationUnits() )
-            {
-                sql += "uidlevel" + unit.getLevel() + " = '" + unit.getUid() + "' or ";
-            }
-            
-            sql = TextUtils.removeLast( sql, 3 ) + ") ";
-        }
-        
-        if ( params.getProgramStage() != null )
-        {
-            sql += "and ps = '" + params.getProgramStage().getUid() + "' ";
-        }
 
         // ---------------------------------------------------------------------
-        // Filters
+        // Criteria
         // ---------------------------------------------------------------------
 
-        for ( QueryItem filter : params.getItems() )
-        {
-            if ( filter.hasFilter() )
-            {
-                sql += "and lower(" + filter.getItem().getUid() + ") " + filter.getSqlOperator() + " " + filter.getSqlFilter() + " ";
-            }
-        }
-
+        sql += getFromWhereClause( params );
+        
         // ---------------------------------------------------------------------
         // Sorting
         // ---------------------------------------------------------------------
@@ -172,4 +145,93 @@ public class JdbcEventAnalyticsManager
         
         return grid;
     }
+
+    public int getEventCount( EventQueryParams params )
+    {
+        String sql = "select count(psi) ";
+        
+        sql += getFromWhereClause( params );
+        
+        Timer t = new Timer().start();
+        
+        int count = jdbcTemplate.queryForObject( sql, Integer.class );
+
+        t.getTime( "Analytics event count SQL: " + sql );
+        
+        return count;
+    }
+    
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    private String getFromWhereClause( EventQueryParams params )
+    {
+        String sql = "";
+        
+        sql += "from " + params.getTableName() + " ";
+        sql += "where executiondate >= '" + getMediumDateString( params.getStartDate() ) + "' ";
+        sql += "and executiondate <= '" + getMediumDateString( params.getEndDate() ) + "' ";
+        
+        if ( params.isOrganisationUnitMode( EventQueryParams.OU_MODE_SELECTED ) )
+        {
+            sql += "and ou in (" + getQuotedCommaDelimitedString( getUids( params.getOrganisationUnits() ) ) + ") ";
+        }
+        else if ( params.isOrganisationUnitMode( EventQueryParams.OU_MODE_CHILDREN ) )
+        {
+            sql += "and ou in (" + getQuotedCommaDelimitedString( getUids( params.getOrganisationUnitChildren() ) ) + ") ";
+        }
+        else // Descendants
+        {
+            sql += "and (";
+            
+            for ( OrganisationUnit unit : params.getOrganisationUnits() )
+            {
+                sql += "uidlevel" + unit.getLevel() + " = '" + unit.getUid() + "' or ";
+            }
+            
+            sql = TextUtils.removeLast( sql, 3 ) + ") ";
+        }
+        
+        if ( params.getProgramStage() != null )
+        {
+            sql += "and ps = '" + params.getProgramStage().getUid() + "' ";
+        }
+
+        for ( QueryItem filter : params.getItems() )
+        {
+            if ( filter.hasFilter() )
+            {                
+                sql += "and lower(" + filter.getItem().getUid() + ") " + filter.getSqlOperator() + " " + getSqlFilter( filter ) + " ";
+            }
+        }
+
+        return sql;
+    }
+    
+    private String getSqlFilter( QueryItem item )
+    {
+        String operator = item.getOperator();
+        String filter = item.getFilter();
+        
+        if ( operator == null || filter == null )
+        {
+            return null;
+        }
+        
+        filter = statementBuilder.encode( filter, false );
+        
+        if ( operator.equals( "like" ) )
+        {
+            return "'%" + filter.toLowerCase() + "%'";
+        }
+        else if ( operator.equals( "in" ) )
+        {
+            String[] split = filter.toLowerCase().split( ":" );
+                        
+            return "(" + TextUtils.getQuotedCommaDelimitedString( Arrays.asList( split ) ) + ")";
+        }
+        
+        return "'" + filter.toLowerCase() + "'";
+    }    
 }

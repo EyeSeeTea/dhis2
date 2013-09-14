@@ -61,16 +61,14 @@ public interface PatientService
     Collection<Patient> getAllPatients();
 
     /**
-     * Search Patient base on firstname/middlename/lastname/birthDate/gender
+     * Search Patient base on name/birthDate/gender
      *
-     * @param firstName
-     * @param middleName
-     * @param lastName
+     * @param name
      * @param birthdate
      * @param gender
      * @return Patient List
      */
-    Collection<Patient> getPatients( String firstName, String middleName, String lastName, Date birthdate, String gender );
+    Collection<Patient> getPatients( String name, Date birthdate, String gender );
 
     /**
      * Search Patient base on gender
@@ -83,7 +81,7 @@ public interface PatientService
     /**
      * Search Patient base on birthDate
      *
-     * @param birthdate
+     * @param birthDate
      * @return Patient List
      */
     Collection<Patient> getPatientsByBirthDate( Date birthDate );
@@ -122,6 +120,62 @@ public interface PatientService
     Collection<Patient> getPatients( OrganisationUnit organisationUnit, Integer min, Integer max );
 
     /**
+     * Search Patient base on organization unit with result limited
+     *
+     * @param organisationUnit organisationUnit
+     * @return Patient List
+     */
+    Collection<Patient> getPatients( OrganisationUnit organisationUnit );
+
+    /**
+     *
+     * @param program
+     * @return
+     */
+    Collection<Patient> getPatients( Program program );
+
+    /**
+     *
+     * @param program
+     * @param gender
+     * @return
+     */
+    Collection<Patient> getPatients( Program program, String gender );
+
+    /**
+     *
+     * @param organisationUnit
+     * @param program
+     * @param gender
+     * @return
+     */
+    Collection<Patient> getPatients( OrganisationUnit organisationUnit, Program program, String gender );
+
+    /**
+     *
+     * @param organisationUnit
+     * @param program
+     * @return
+     */
+    Collection<Patient> getPatients( OrganisationUnit organisationUnit, Program program );
+
+    /**
+     * Search Patient base on organization unit with result limited
+     *
+     * @param organisationUnit organisationUnit
+     * @return Patient List
+     */
+    Collection<Patient> getPatients( OrganisationUnit organisationUnit, String gender, Integer min, Integer max );
+
+    /**
+     * Search Patient base on organization unit with result limited
+     *
+     * @param organisationUnit organisationUnit
+     * @return Patient List
+     */
+    Collection<Patient> getPatients( OrganisationUnit organisationUnit, String gender );
+
+    /**
      * Search Patient base on organization unit and sort the result by
      * PatientAttribute
      *
@@ -143,7 +197,7 @@ public interface PatientService
      * @param max
      * @return
      */
-    Collection<Patient> getPatients( OrganisationUnit organisationUnit, String searchText, Integer min, Integer max );
+    Collection<Patient> getPatientsLikeName( OrganisationUnit organisationUnit, String name, Integer min, Integer max );
 
     /**
      * Search Patient base on PatientIdentifierType or Attribute or Patient's
@@ -188,7 +242,7 @@ public interface PatientService
     int countGetPatients( String searchText );
 
     /**
-     * Search Patient base on firstname/middlename/lastname and get number of
+     * Search Patient base on name and get number of
      * result
      *
      * @param name
@@ -233,5 +287,4 @@ public interface PatientService
 
     Grid getTrackingEventsReport( Program program, List<String> searchKeys, Collection<OrganisationUnit> orgunit,
         Boolean followup, I18n i18n );
-
 }

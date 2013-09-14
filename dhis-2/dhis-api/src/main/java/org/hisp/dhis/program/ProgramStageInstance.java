@@ -29,6 +29,7 @@ package org.hisp.dhis.program;
  */
 
 import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.message.MessageConversation;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patientcomment.PatientComment;
@@ -74,6 +75,8 @@ public class ProgramStageInstance
 
     private List<OutboundSms> outboundSms;
 
+    private List<MessageConversation> messageConversations;
+
     private PatientComment patientComment;
 
     private Integer status;
@@ -117,11 +120,13 @@ public class ProgramStageInstance
             return false;
         }
 
-        if ( getClass() != object.getClass() )
+        if ( !getClass().isAssignableFrom( object.getClass() ) )
         {
             return false;
         }
 
+        // TODO include due date and execution date to make consistent with hashcode
+        
         final ProgramStageInstance other = (ProgramStageInstance) object;
 
         return programInstance.equals( other.getProgramInstance() ) && programStage.equals( other.getProgramStage() );
@@ -304,6 +309,16 @@ public class ProgramStageInstance
     public void setPatients( Set<Patient> patients )
     {
         this.patients = patients;
+    }
+
+    public List<MessageConversation> getMessageConversations()
+    {
+        return messageConversations;
+    }
+
+    public void setMessageConversations( List<MessageConversation> messageConversations )
+    {
+        this.messageConversations = messageConversations;
     }
 
     public Integer getEventStatus()

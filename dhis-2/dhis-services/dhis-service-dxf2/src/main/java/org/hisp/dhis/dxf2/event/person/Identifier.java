@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.event;
+package org.hisp.dhis.dxf2.event.person;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -36,25 +36,50 @@ import org.hisp.dhis.common.DxfNamespaces;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "person", namespace = DxfNamespaces.DXF_2_0 )
-public class Person
+@JacksonXmlRootElement( localName = "identifier", namespace = DxfNamespaces.DXF_2_0 )
+public class Identifier
 {
-    private String person;
+    private String type;
 
-    public Person()
+    private String value;
+
+    public Identifier()
     {
     }
 
-    @JsonProperty( required = true )
+    public Identifier( String value )
+    {
+        this.value = value;
+    }
+
+    public Identifier( String type, String value )
+    {
+        this.type = type;
+        this.value = value;
+    }
+
+    @JsonProperty
     @JacksonXmlProperty( isAttribute = true )
-    public String getPerson()
+    public String getType()
     {
-        return person;
+        return type;
     }
 
-    public void setPerson( String person )
+    public void setType( String type )
     {
-        this.person = person;
+        this.type = type;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( isAttribute = true )
+    public String getValue()
+    {
+        return value;
+    }
+
+    public void setValue( String value )
+    {
+        this.value = value;
     }
 
     @Override
@@ -63,9 +88,10 @@ public class Person
         if ( this == o ) return true;
         if ( o == null || getClass() != o.getClass() ) return false;
 
-        Person person = (Person) o;
+        Identifier that = (Identifier) o;
 
-        if ( person != null ? !person.equals( person.person ) : person.person != null ) return false;
+        if ( type != null ? !type.equals( that.type ) : that.type != null ) return false;
+        if ( value != null ? !value.equals( that.value ) : that.value != null ) return false;
 
         return true;
     }
@@ -73,14 +99,17 @@ public class Person
     @Override
     public int hashCode()
     {
-        return person != null ? person.hashCode() : 0;
+        int result = type != null ? type.hashCode() : 0;
+        result = 31 * result + (value != null ? value.hashCode() : 0);
+        return result;
     }
 
     @Override
     public String toString()
     {
-        return "Person{" +
-            "person='" + person + '\'' +
+        return "Identifier{" +
+            "type='" + type + '\'' +
+            ", value='" + value + '\'' +
             '}';
     }
 }

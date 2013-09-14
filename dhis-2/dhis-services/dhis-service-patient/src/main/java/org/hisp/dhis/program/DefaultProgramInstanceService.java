@@ -28,19 +28,13 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.message.MessageConversation;
+import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientAttribute;
@@ -59,6 +53,14 @@ import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Abyot Asalefew
@@ -119,6 +121,13 @@ public class DefaultProgramInstanceService
     public void setPatientReminderService( PatientReminderService patientReminderService )
     {
         this.patientReminderService = patientReminderService;
+    }
+
+    private MessageService messageService;
+
+    public void setMessageService( MessageService messageService )
+    {
+        this.messageService = messageService;
     }
 
     // -------------------------------------------------------------------------
@@ -238,13 +247,13 @@ public class DefaultProgramInstanceService
 
         Grid attrGrid = new ListGrid();
 
-        if ( patient.getFirstName() == null && patient.getMiddleName() == null && patient.getLastName() == null )
+        if ( patient.getName() == null )
         {
             attrGrid.setTitle( "" );
         }
         else
         {
-            attrGrid.setTitle( patient.getFullName() );
+            attrGrid.setTitle( patient.getName() );
         }
         attrGrid.setSubtitle( "" );
 
@@ -478,6 +487,18 @@ public class DefaultProgramInstanceService
             grid.addValue( messasge.getMessage() );
         }
 
+        // Get message conversations of the program-instance
+
+        List<MessageConversation> conversations = programInstance.getMessageConversations();
+
+        for ( MessageConversation conversation : conversations )
+        {
+            grid.addRow();
+            grid.addValue( i18n.getString( "message" ) + " " + i18n.getString( "on" ) + " "
+                + format.formatDateTime( conversation.getLastUpdated() ) );
+            grid.addValue( conversation.getMessages().get( 0 ) );
+        }
+
         // Program-instance attributes
 
         if ( programInstance.getProgram().getDisplayIncidentDate() != null
@@ -528,7 +549,10 @@ public class DefaultProgramInstanceService
         Collection<PatientReminder> reminders = programInstance.getProgram().getPatientReminders();
         for ( PatientReminder rm : reminders )
         {
-            if ( rm != null && rm.getWhenToSend() != null && rm.getWhenToSend() == status )
+            if ( rm != null
+                && rm.getWhenToSend() != null
+                && rm.getWhenToSend() == status
+                && (rm.getMessageType() == PatientReminder.MESSAGE_TYPE_DIRECT_SMS || rm.getMessageType() == PatientReminder.MESSAGE_TYPE_BOTH) )
             {
                 OutboundSms outboundSms = sendProgramMessage( rm, programInstance, patient, format );
                 if ( outboundSms != null )
@@ -539,6 +563,30 @@ public class DefaultProgramInstanceService
         }
 
         return outboundSmsList;
+    }
+
+    @Override
+    public Collection<MessageConversation> sendMessageConversations( ProgramInstance programInstance, int status,
+        I18nFormat format )
+    {
+        Collection<MessageConversation> messageConversations = new HashSet<MessageConversation>();
+
+        Collection<PatientReminder> reminders = programInstance.getProgram().getPatientReminders();
+        for ( PatientReminder rm : reminders )
+        {
+            if ( rm != null
+                && rm.getWhenToSend() != null
+                && rm.getWhenToSend() == status
+                && (rm.getMessageType() == PatientReminder.MESSAGE_TYPE_DHIS_MESSAGE || rm.getMessageType() == PatientReminder.MESSAGE_TYPE_BOTH) )
+            {
+                int id = messageService.sendMessage( programInstance.getProgram().getDisplayName(),
+                    patientReminderService.getMessageFromTemplate( rm, programInstance, format ), null,
+                    patientReminderService.getUsers( rm, programInstance.getPatient() ), null, false, true );
+                messageConversations.add( messageService.getMessageConversation( id ) );
+            }
+        }
+
+        return messageConversations;
     }
 
     // -------------------------------------------------------------------------
@@ -579,10 +627,13 @@ public class DefaultProgramInstanceService
 
             PatientComment comment = programStageInstance.getPatientComment();
 
-            grid.addRow();
-            grid.addValue( i18n.getString( "comment" ) + " " + i18n.getString( "on" ) + " "
-                + format.formatDateTime( comment.getCreatedDate() ) );
-            grid.addValue( comment.getCommentText() );
+            if ( comment != null )
+            {
+                grid.addRow();
+                grid.addValue( i18n.getString( "comment" ) + " " + i18n.getString( "on" ) + " "
+                    + format.formatDateTime( comment.getCreatedDate() ) );
+                grid.addValue( comment.getCommentText() );
+            }
 
             // SMS messages
 

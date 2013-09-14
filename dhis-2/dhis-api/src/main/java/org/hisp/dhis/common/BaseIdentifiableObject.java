@@ -37,6 +37,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.apache.commons.lang.Validate;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.SharingView;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserGroupAccess;
 
@@ -250,7 +251,7 @@ public class BaseIdentifiableObject
 
     @Override
     @JsonProperty
-    @JsonView( { DetailedView.class } )
+    @JsonView( { SharingView.class, DetailedView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getPublicAccess()
     {
@@ -264,7 +265,7 @@ public class BaseIdentifiableObject
 
     @Override
     @JsonProperty
-    @JsonView( { DetailedView.class } )
+    @JsonView( { SharingView.class, DetailedView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public boolean getExternalAccess()
     {
@@ -278,7 +279,7 @@ public class BaseIdentifiableObject
 
     @Override
     @JsonProperty
-    @JsonView( { DetailedView.class } )
+    @JsonView( { SharingView.class, DetailedView.class } )
     @JsonSerialize( as = BaseIdentifiableObject.class )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public User getUser()
@@ -292,7 +293,7 @@ public class BaseIdentifiableObject
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class } )
+    @JsonView( { SharingView.class, DetailedView.class } )
     @JacksonXmlElementWrapper( localName = "userGroupAccesses", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "userGroupAccess", namespace = DxfNamespaces.DXF_2_0 )
     public Set<UserGroupAccess> getUserGroupAccesses()
@@ -306,7 +307,7 @@ public class BaseIdentifiableObject
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class } )
+    @JsonView( { SharingView.class, DetailedView.class } )
     @JacksonXmlProperty( localName = "access", namespace = DxfNamespaces.DXF_2_0 )
     public Access getAccess()
     {
@@ -335,16 +336,17 @@ public class BaseIdentifiableObject
     @Override
     public int hashCode()
     {
-        int result = uid != null ? uid.hashCode() : 0;
-        result = 31 * result + (code != null ? code.hashCode() : 0);
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (lastUpdated != null ? lastUpdated.hashCode() : 0);
-        result = 31 * result + (created != null ? created.hashCode() : 0);
+        int result = getUid() != null ? getUid().hashCode() : 0;
+        result = 31 * result + (getCode() != null ? getCode().hashCode() : 0);
+        result = 31 * result + (getName() != null ? getName().hashCode() : 0);
 
         return result;
     }
 
-    @Override
+    /**
+     * Class check uses isAssignableFrom and get-methods to handle proxied objects.
+     */
+    @Override   
     public boolean equals( Object o )
     {
         if ( this == o )
@@ -352,24 +354,29 @@ public class BaseIdentifiableObject
             return true;
         }
 
-        if ( o == null || getClass() != o.getClass() )
+        if ( o == null )
+        {
+            return false;
+        }
+        
+        if ( !getClass().isAssignableFrom( o.getClass() ) )
         {
             return false;
         }
 
-        final BaseIdentifiableObject that = (BaseIdentifiableObject) o;
+        final BaseIdentifiableObject other = (BaseIdentifiableObject) o;
 
-        if ( uid != null ? !uid.equals( that.uid ) : that.uid != null )
+        if ( getUid() != null ? !getUid().equals( other.getUid() ) : other.getUid() != null )
         {
             return false;
         }
 
-        if ( code != null ? !code.equals( that.code ) : that.code != null )
+        if ( getCode() != null ? !getCode().equals( other.getCode() ) : other.getCode() != null )
         {
             return false;
         }
 
-        if ( name != null ? !name.equals( that.name ) : that.name != null )
+        if ( getName() != null ? !getName().equals( other.getName() ) : other.getName() != null )
         {
             return false;
         }
@@ -470,7 +477,6 @@ public class BaseIdentifiableObject
             "', name='" + name +
             "', created='" + created +
             "', lastUpdated='" + lastUpdated +
-            "', class='" + getClass().getSimpleName() +
             "']";
     }
 

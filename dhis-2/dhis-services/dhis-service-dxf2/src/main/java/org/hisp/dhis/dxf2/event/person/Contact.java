@@ -1,4 +1,4 @@
-package org.hisp.dhis.patient;
+package org.hisp.dhis.dxf2.event.person;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,34 +28,59 @@ package org.hisp.dhis.patient;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.junit.Assert.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.hisp.dhis.common.DxfNamespaces;
 
-import org.junit.Test;
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
+@JacksonXmlRootElement( localName = "contact", namespace = DxfNamespaces.DXF_2_0 )
+public class Contact
+{
+    private String phoneNumber;
 
-public class PatientTest
-{    
-    @Test
-    public void testFullname() {
+    public Contact()
+    {
+    }
 
-        Patient patient = new Patient();
-        
-        assertEquals( "", patient.getFullName() );
-        
-        patient.setFirstName( "firstName" );
-        assertEquals( "firstName", patient.getFullName() );
-        
-        patient.setLastName( "lastName" );
-        assertEquals( "firstName lastName", patient.getFullName() );
+    @JsonProperty( required = true )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getPhoneNumber()
+    {
+        return phoneNumber;
+    }
 
-        patient.setMiddleName( "middleName" );
-        assertEquals( "firstName middleName lastName", patient.getFullName() );
+    public void setPhoneNumber( String phoneNumber )
+    {
+        this.phoneNumber = phoneNumber;
+    }
 
-        patient.setFirstName( "" );
-        assertEquals( "middleName lastName", patient.getFullName() );
+    @Override
+    public boolean equals( Object o )
+    {
+        if ( this == o ) return true;
+        if ( o == null || getClass() != o.getClass() ) return false;
 
-        patient.setFirstName( "firstName middleName lastName" );
-        patient.setMiddleName( null );
-        patient.setLastName( null );
-        assertEquals( "firstName middleName lastName", patient.getFullName() );
+        Contact contact = (Contact) o;
+
+        if ( phoneNumber != null ? !phoneNumber.equals( contact.phoneNumber ) : contact.phoneNumber != null ) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return phoneNumber != null ? phoneNumber.hashCode() : 0;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Contact{" +
+            "phoneNumber='" + phoneNumber + '\'' +
+            '}';
     }
 }

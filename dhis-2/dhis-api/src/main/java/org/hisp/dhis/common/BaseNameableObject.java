@@ -94,14 +94,31 @@ public class BaseNameableObject
     }
 
     @Override
+    public int hashCode()
+    {
+        int result = super.hashCode();
+        result = 31 * result + (getShortName() != null ? getShortName().hashCode() : 0);
+        result = 31 * result + (getDescription() != null ? getDescription().hashCode() : 0);
+        return result;
+    }
+
+    /**
+     * Class check uses isAssignableFrom and get-methods to handle proxied objects.
+     */
+    @Override
     public boolean equals( Object o )
     {
         if ( this == o )
         {
             return true;
         }
+
+        if ( o == null )
+        {
+            return false;
+        }
         
-        if ( o == null || getClass() != o.getClass() )
+        if ( !getClass().isAssignableFrom( o.getClass() ) )
         {
             return false;
         }
@@ -111,21 +128,19 @@ public class BaseNameableObject
             return false;
         }
 
-        BaseNameableObject that = (BaseNameableObject) o;
+        final BaseNameableObject other = (BaseNameableObject) o;
 
-        if ( description != null ? !description.equals( that.description ) : that.description != null ) return false;
-        if ( shortName != null ? !shortName.equals( that.shortName ) : that.shortName != null ) return false;
+        if ( getShortName() != null ? !getShortName().equals( other.getShortName() ) : other.getShortName() != null )
+        {
+            return false;
+        }
+        
+        if ( getDescription() != null ? !getDescription().equals( other.getDescription() ) : other.getDescription() != null )
+        {
+            return false;
+        }
 
         return true;
-    }
-
-    @Override
-    public int hashCode()
-    {
-        int result = super.hashCode();
-        result = 31 * result + (shortName != null ? shortName.hashCode() : 0);
-        result = 31 * result + (description != null ? description.hashCode() : 0);
-        return result;
     }
 
     @JsonProperty

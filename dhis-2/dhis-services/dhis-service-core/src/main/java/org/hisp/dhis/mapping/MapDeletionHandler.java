@@ -1,4 +1,4 @@
-package org.hisp.dhis.dashboard;
+package org.hisp.dhis.mapping;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,26 +28,57 @@ package org.hisp.dhis.dashboard;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import java.util.Iterator;
 
-import org.hisp.dhis.common.GenericStore;
-import org.hisp.dhis.document.Document;
-import org.hisp.dhis.mapping.Map;
-import org.hisp.dhis.report.Report;
-import org.hisp.dhis.reporttable.ReportTable;
+import org.hisp.dhis.system.deletion.DeletionHandler;
+import org.hisp.dhis.user.User;
 
 /**
  * @author Lars Helge Overland
  */
-@Deprecated
-public interface DashboardContentStore
-    extends GenericStore<DashboardContent>
+public class MapDeletionHandler
+    extends DeletionHandler
 {
-    Collection<DashboardContent> getByDocument( Document document );
+    private MappingService mappingService;
+
+    public void setMappingService( MappingService mappingService )
+    {
+        this.mappingService = mappingService;
+    }
+
+    // -------------------------------------------------------------------------
+    // DeletionHandler implementation
+    // -------------------------------------------------------------------------
+
+    @Override
+    protected String getClassName()
+    {
+        return Map.class.getSimpleName();
+    }
     
-    Collection<DashboardContent> getByMap( Map map );
+    @Override
+    public void deleteUser( User user )
+    {
+        for ( Map map : mappingService.getAllMaps() )
+        {
+            if ( map.getUser() != null && map.getUser().equals( user ) )
+            {
+                map.setUser( null );
+                mappingService.updateMap( map );
+            }
+        }
+    }
     
-    Collection<DashboardContent> getByReport( Report report );
-    
-    Collection<DashboardContent> getByReportTable( ReportTable reportTable );
+    @Override
+    public void deleteMap( Map map )
+    {
+        Iterator<MapView> views = map.getMapViews().iterator();
+
+        while ( views.hasNext() )
+        {
+            MapView view = views.next();
+            views.remove();
+            mappingService.deleteMapView( view );
+        }
+    }    
 }

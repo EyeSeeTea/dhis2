@@ -198,10 +198,9 @@ public class DefaultPatientService
     }
 
     @Override
-    public Collection<Patient> getPatients( String firstName, String middleName, String lastName, Date birthdate,
-        String gender )
+    public Collection<Patient> getPatients( String name, Date birthdate, String gender )
     {
-        return patientStore.get( firstName, middleName, lastName, birthdate, gender );
+        return patientStore.get( name, birthdate, gender );
     }
 
     @Override
@@ -292,6 +291,48 @@ public class DefaultPatientService
     }
 
     @Override
+    public Collection<Patient> getPatients( OrganisationUnit organisationUnit )
+    {
+        return patientStore.getByOrgUnit( organisationUnit, 0, Integer.MAX_VALUE );
+    }
+
+    @Override
+    public Collection<Patient> getPatients( Program program )
+    {
+        return patientStore.getByProgram( program, 0, Integer.MAX_VALUE );
+    }
+
+    @Override
+    public Collection<Patient> getPatients( Program program, String gender )
+    {
+        return patientStore.getByProgram( program, gender, 0, Integer.MAX_VALUE );
+    }
+
+    @Override
+    public Collection<Patient> getPatients( OrganisationUnit organisationUnit, Program program, String gender )
+    {
+        return patientStore.getByOrgUnitProgramGender( organisationUnit, program, gender, 0, Integer.MAX_VALUE );
+    }
+
+    @Override
+    public Collection<Patient> getPatients( OrganisationUnit organisationUnit, Program program )
+    {
+        return patientStore.getByOrgUnitProgram( organisationUnit, program, 0, Integer.MAX_VALUE );
+    }
+
+    @Override
+    public Collection<Patient> getPatients( OrganisationUnit organisationUnit, String gender, Integer min, Integer max )
+    {
+        return patientStore.getByOrgUnitAndGender( organisationUnit, gender, min, max );
+    }
+
+    @Override
+    public Collection<Patient> getPatients( OrganisationUnit organisationUnit, String gender )
+    {
+        return patientStore.getByOrgUnitAndGender( organisationUnit, gender, 0, Integer.MAX_VALUE );
+    }
+
+    @Override
     public Collection<Patient> getPatients( OrganisationUnit organisationUnit, PatientAttribute patientAttribute,
         Integer min, Integer max )
     {
@@ -308,12 +349,12 @@ public class DefaultPatientService
     }
 
     @Override
-    public Collection<Patient> getPatients( OrganisationUnit organisationUnit, String searchText, Integer min,
+    public Collection<Patient> getPatientsLikeName( OrganisationUnit organisationUnit, String name, Integer min,
         Integer max )
     {
         Collection<Patient> patients = new ArrayList<Patient>();
 
-        Collection<Patient> allPatients = getPatientsByNames( searchText, min, max );
+        Collection<Patient> allPatients = getPatientsByNames( name, min, max );
 
         if ( allPatients.retainAll( getPatients( organisationUnit, min, max ) ) )
         {

@@ -90,11 +90,14 @@ function showProgramStageDetails( programStageId )
 		var remindCompleted = ( json.programStage.remindCompleted == 'true') ? i18n_yes : i18n_no;
 		setInnerHTML( 'remindCompletedField', remindCompleted );   	
 		
+		var allowGenerateNextVisit = ( json.programStage.allowGenerateNextVisit == 'true') ? i18n_yes : i18n_no;
+		setInnerHTML( 'allowGenerateNextVisitField', allowGenerateNextVisit );   	
+		
 		var templateMessage = "";
 		for(var i in json.programStage.patientReminders){
 			var index = eval(i) + 1;
 			templateMessage += "<p class='bold'>" + i18n_template_reminder_message + " " + index + "</p>";
-			templateMessage += "<p class='bold'>" + i18n_days_before_after_due_date + ":</p>" ;
+			templateMessage += "<p class='bold'>" + i18n_send_message + ":</p>" ;
 			templateMessage	+= "<p>" + json.programStage.patientReminders[i].daysAllowedSendMessage + "</p>";
 			templateMessage	+= "<p class='bold'>" + i18n_message + ":</p>";
 			templateMessage	+= "<p>" + json.programStage.patientReminders[i].templateMessage + "</p>";
@@ -321,7 +324,7 @@ function generateTemplateMessageForm()
 				+	'</td>'
 				+ '</tr>'
 				+ '<tr name="tr' + rowId + '">'
-				+ 	'<td><label>' + i18n_days_before_after_due_date + '</label></td>'
+				+ 	'<td><label>' + i18n_send_message + '</label></td>'
 				+ 	'<td>'
 				+		'<input type="text" onchange="setRealDays(' + rowId + ')" style="width:100px;" realvalue="" id="daysAllowedSendMessage' + rowId + '" name="daysAllowedSendMessage' + rowId + '" class="daysAllowedSendMessage {validate:{required:true,number:true}}"/> '
 				+ 		i18n_days
@@ -350,6 +353,16 @@ function generateTemplateMessageForm()
 				+	program_stage_SMS_reminder_form
 				+	'</td>'
 				+ '/<tr>'
+				+ '<tr name="tr' + rowId + '">'
+				+ '	<td><label>' + i18n_message_type + '</label></td>'
+				+ '	<td>'
+				+ '		<select type="text" id="messageType' + rowId + '" name="messageType' + rowId + '" class="messageType {validate:{required:true,number:true}}" >'
+				+ '			<option value="1">' + i18n_direct_sms + '</option>'
+				+ '			<option value="2">' + i18n_message + '</option>'
+				+ '			<option value="3">' + i18n_both + '</option>'
+				+ '		</select>'
+				+ '	</td>'
+				+ '</tr>'
 				+ '<tr name="tr' + rowId + '">'
 				+	'<td>' + i18n_params + '</td>'
 				+	'<td>'
@@ -407,13 +420,20 @@ function showHideUserGroup()
 
 function onchangeUserGroup( id )
 {
-	var value = document.getElementById( 'sendTo'+id ).value;
+	var value = document.getElementById( 'sendTo' + id ).value;
 	hideById( 'tr'+id );
-	if ( value == 5) {
-		showById( 'tr'+id );
+	
+	if( value=="1" || value=="3" ){
+		setFieldValue('messageType' + id , '1');
+		disable('messageType' + id );
 	}
-};
-
+	else{
+		if ( value == "5") {
+			showById( 'tr' + id );
+		}
+		enable ('messageType' + id );
+	}
+}
 
 function getMessageLength(rowId)
 {

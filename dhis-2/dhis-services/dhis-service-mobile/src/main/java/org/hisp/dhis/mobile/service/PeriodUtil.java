@@ -164,13 +164,13 @@ public class PeriodUtil
 
     public static String dateToString( Date date )
     {
-        DateFormat dateFormat = new SimpleDateFormat( "yyyy-MM-dd" );
+        DateFormat dateFormat = new SimpleDateFormat( "dd-MM-yyyy" );
         return dateFormat.format( date );
     }
 
     public static Date stringToDate( String dateString )
     {
-        SimpleDateFormat dateFormat = new SimpleDateFormat( "yyyy-MM-dd" );
+        SimpleDateFormat dateFormat = new SimpleDateFormat( "dd-MM-yyyy" );
         Date date = null;
         try
         {
@@ -182,6 +182,19 @@ public class PeriodUtil
         }
 
         return date;
+    }
+
+    public static String convertDateFormat( String standardDate )
+    {
+        try
+        {
+            String[] tokens = standardDate.split( "-" );
+            return tokens[2] + "-" + tokens[1] + "-" + tokens[0];
+        }
+        catch ( Exception e )
+        {
+            return standardDate;
+        }
     }
 
 }

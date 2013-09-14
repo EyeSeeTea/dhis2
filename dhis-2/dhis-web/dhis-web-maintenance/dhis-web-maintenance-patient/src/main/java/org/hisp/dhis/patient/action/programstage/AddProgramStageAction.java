@@ -208,6 +208,13 @@ public class AddProgramStageAction
         this.whenToSend = whenToSend;
     }
 
+    private List<Integer> messageType = new ArrayList<Integer>();
+
+    public void setMessageType( List<Integer> messageType )
+    {
+        this.messageType = messageType;
+    }
+
     private Boolean autoGenerateEvent;
 
     public void setAutoGenerateEvent( Boolean autoGenerateEvent )
@@ -285,6 +292,13 @@ public class AddProgramStageAction
         this.remindCompleted = remindCompleted;
     }
 
+    private Boolean allowGenerateNextVisit;
+
+    public void setAllowGenerateNextVisit( Boolean allowGenerateNextVisit )
+    {
+        this.allowGenerateNextVisit = allowGenerateNextVisit;
+    }
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -302,6 +316,7 @@ public class AddProgramStageAction
         generatedByEnrollmentDate = (generatedByEnrollmentDate == null) ? false : generatedByEnrollmentDate;
         blockEntryForm = (blockEntryForm == null) ? false : blockEntryForm;
         remindCompleted = (remindCompleted == null) ? false : remindCompleted;
+        allowGenerateNextVisit = (allowGenerateNextVisit == null) ? false : allowGenerateNextVisit;
 
         ProgramStage programStage = new ProgramStage();
         Program program = programService.getProgram( id );
@@ -320,6 +335,7 @@ public class AddProgramStageAction
         programStage.setBlockEntryForm( blockEntryForm );
         programStage.setRemindCompleted( remindCompleted );
         programStage.setGeneratedByEnrollmentDate( generatedByEnrollmentDate );
+        programStage.setAllowGenerateNextVisit( allowGenerateNextVisit );
 
         Set<PatientReminder> patientReminders = new HashSet<PatientReminder>();
         for ( int i = 0; i < daysAllowedSendMessages.size(); i++ )
@@ -329,6 +345,7 @@ public class AddProgramStageAction
             reminder.setDateToCompare( PatientReminder.DUE_DATE_TO_COMPARE );
             reminder.setSendTo( sendTo.get( i ) );
             reminder.setWhenToSend( whenToSend.get( i ) );
+            reminder.setMessageType( messageType.get( i ) );
             if ( sendTo.get( i ) == PatientReminder.SEND_TO_USER_GROUP )
             {
                 UserGroup selectedUserGroup = userGroupService.getUserGroup( userGroup.get( i ) );

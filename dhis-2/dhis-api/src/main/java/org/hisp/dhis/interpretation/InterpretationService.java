@@ -49,6 +49,8 @@ public interface InterpretationService
     
     List<Interpretation> getInterpretations( int first, int max );
 
+    List<Interpretation> getInterpretations( User user );
+    
     List<Interpretation> getInterpretations( User user, int first, int max );
     
     void addInterpretationComment( String uid, String text );

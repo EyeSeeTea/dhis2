@@ -178,9 +178,11 @@ public class DefaultUserService
     {
         AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), user, AuditLogUtil.ACTION_DELETE );
 
+        userCredentialsStore.deleteUserCredentials( user.getUserCredentials() );
+        
         userStore.delete( user );
     }
-
+    
     public Collection<User> getAllUsers()
     {
         return userStore.getAll();
@@ -371,11 +373,6 @@ public class DefaultUserService
         userCredentialsStore.updateUserCredentials( userCredentials );
     }
 
-    public void deleteUserCredentials( UserCredentials userCredentials )
-    {
-        userCredentialsStore.deleteUserCredentials( userCredentials );
-    }
-
     public Collection<UserCredentials> getAllUserCredentials()
     {
         return userCredentialsStore.getAllUserCredentials();
@@ -498,6 +495,11 @@ public class DefaultUserService
     {
         return userCredentialsStore.getAllUserSettings( user );
     }
+    
+    public Collection<UserSetting> getUserSettings( String name )
+    {
+        return userCredentialsStore.getUserSettings( name );
+    }
 
     public UserSetting getUserSetting( User user, String name )
     {
@@ -529,6 +531,5 @@ public class DefaultUserService
     public Collection<String> getUsernames( String query, Integer max )
     {
         return userCredentialsStore.getUsernames( query, max );
-    }
-    
+    }    
 }

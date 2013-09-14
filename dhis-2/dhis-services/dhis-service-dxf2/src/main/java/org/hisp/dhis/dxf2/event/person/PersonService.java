@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.event;
+package org.hisp.dhis.dxf2.event.person;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,8 +28,14 @@ package org.hisp.dhis.dxf2.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
+import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.program.Program;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 
 /**
@@ -37,7 +43,25 @@ import java.util.Collection;
  */
 public interface PersonService
 {
+    // -------------------------------------------------------------------------
+    // READ
+    // -------------------------------------------------------------------------
+
     Persons getPersons();
+
+    Persons getPersons( OrganisationUnit organisationUnit );
+
+    Persons getPersons( Gender gender );
+
+    Persons getPersons( Program program );
+
+    Persons getPersons( Program program, Gender gender );
+
+    Persons getPersons( OrganisationUnit organisationUnit, Program program );
+
+    Persons getPersons( OrganisationUnit organisationUnit, Gender gender );
+
+    Persons getPersons( OrganisationUnit organisationUnit, Program program, Gender gender );
 
     Persons getPersons( Collection<Patient> patients );
 
@@ -45,7 +69,29 @@ public interface PersonService
 
     Person getPerson( Patient patient );
 
-    void updatePerson( Person person );
+    // -------------------------------------------------------------------------
+    // CREATE
+    // -------------------------------------------------------------------------
+
+    ImportSummaries savePersonXml( InputStream inputStream ) throws IOException;
+
+    ImportSummaries savePersonJson( InputStream inputStream ) throws IOException;
+
+    ImportSummary savePerson( Person person );
+
+    // -------------------------------------------------------------------------
+    // UPDATE
+    // -------------------------------------------------------------------------
+
+    ImportSummary updatePersonXml( String id, InputStream inputStream ) throws IOException;
+
+    ImportSummary updatePersonJson( String id, InputStream inputStream ) throws IOException;
+
+    ImportSummary updatePerson( Person person );
+
+    // -------------------------------------------------------------------------
+    // DELETE
+    // -------------------------------------------------------------------------
 
     void deletePerson( Person person );
 }

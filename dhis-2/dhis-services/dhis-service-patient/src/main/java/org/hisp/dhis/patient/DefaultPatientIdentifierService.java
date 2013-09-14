@@ -28,9 +28,9 @@ package org.hisp.dhis.patient;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collection;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -69,7 +69,7 @@ public class DefaultPatientIdentifierService
     {
         patientIdentifierStore.update( patientIdentifier );
     }
-    
+
     public PatientIdentifier getPatientIdentifier( int id )
     {
         return patientIdentifierStore.get( id );
@@ -79,7 +79,7 @@ public class DefaultPatientIdentifierService
     {
         return patientIdentifierStore.get( patient );
     }
-    
+
     public Collection<PatientIdentifier> getAllPatientIdentifiers()
     {
         return patientIdentifierStore.getAll();
@@ -94,12 +94,12 @@ public class DefaultPatientIdentifierService
     {
         return patientIdentifierStore.getByIdentifier( identifier );
     }
-    
+
     public PatientIdentifier getPatientIdentifier( String identifier, Patient patient )
     {
         return patientIdentifierStore.getPatientIdentifier( identifier, patient );
     }
-    
+
     public PatientIdentifier getPatientIdentifier( PatientIdentifierType identifierType, Patient patient )
     {
         return patientIdentifierStore.getPatientIdentifier( identifierType, patient );
@@ -109,30 +109,41 @@ public class DefaultPatientIdentifierService
     {
         return patientIdentifierStore.getPatientIdentifiers( patient );
     }
-    
+
     public PatientIdentifier get( PatientIdentifierType type, String identifier )
     {
         return patientIdentifierStore.get( type, identifier );
+    }
+
+    public Collection<PatientIdentifier> getAll( PatientIdentifierType type, String identifier )
+    {
+        return patientIdentifierStore.getAll( type, identifier );
     }
 
     public Patient getPatient( PatientIdentifierType idenType, String value )
     {
         return patientIdentifierStore.getPatient( idenType, value );
     }
-    
+
     public Collection<Patient> getPatientsByIdentifier( String identifier, int min, int max )
     {
         return patientIdentifierStore.getPatientsByIdentifier( identifier, min, max );
     }
-    
+
     public int countGetPatientsByIdentifier( String identifier )
     {
         return patientIdentifierStore.countGetPatientsByIdentifier( identifier );
     }
-    
-    public Collection<PatientIdentifier> getPatientIdentifiers(Collection<PatientIdentifierType> identifierTypes, Patient patient)
+
+    public Collection<PatientIdentifier> getPatientIdentifiers( Collection<PatientIdentifierType> identifierTypes,
+        Patient patient )
     {
         return patientIdentifierStore.get( identifierTypes, patient );
     }
 
+    @Override
+    public boolean checkDuplicateIdentifier( String identifier )
+    {
+        return patientIdentifierStore.checkDuplicateIdentifier( identifier );
+    }
 }

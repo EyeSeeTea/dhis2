@@ -1034,14 +1034,7 @@
     <property name="userService" ref="org.hisp.dhis.user.UserService" />
   </bean>
 
-  <bean id="org.hisp.dhis.user.UserCredentialsDeletionHandler" class="org.hisp.dhis.user.UserCredentialsDeletionHandler">
-    <property name="userService" ref="org.hisp.dhis.user.UserService" />
-  </bean>
-
-  <bean id="org.hisp.dhis.user.UserSettingDeletionHandler" class="org.hisp.dhis.user.UserSettingDeletionHandler">
-    <property name="userSettingService" ref="org.hisp.dhis.user.UserSettingService" />
-    <property name="userService" ref="org.hisp.dhis.user.UserService" />
-  </bean>
+  <bean id="org.hisp.dhis.user.UserSettingDeletionHandler" class="org.hisp.dhis.user.UserSettingDeletionHandler"/>
 
   <bean id="org.hisp.dhis.dataelement.DataElementCategoryDeletionHandler"
     class="org.hisp.dhis.dataelement.DataElementCategoryDeletionHandler">
@@ -1080,6 +1073,10 @@
     <property name="operandService" ref="org.hisp.dhis.dataelement.DataElementOperandService" />
   </bean>
   
+  <bean id="org.hisp.dhis.mapping.MapDeletionHandler" class="org.hisp.dhis.mapping.MapDeletionHandler">
+    <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
+  </bean>
+  
   <!-- DeletionManager -->
 
   <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
@@ -1112,7 +1109,6 @@
           <ref local="org.hisp.dhis.user.UserDeletionHandler" />
           <ref local="org.hisp.dhis.user.UserGroupDeletionHandler" />
           <ref local="org.hisp.dhis.user.UserAuthorityGroupDeletionHandler" />
-          <ref local="org.hisp.dhis.user.UserCredentialsDeletionHandler" />
           <ref local="org.hisp.dhis.user.UserSettingDeletionHandler" />
           <ref local="org.hisp.dhis.dataelement.DataElementCategoryDeletionHandler" />
           <ref local="org.hisp.dhis.dataelement.DataElementGroupSetDeletionHandler" />
@@ -1152,6 +1148,7 @@
       <aop:before pointcut="execution( * org.hisp.dhis.mapping.MappingService.deleteMapLegend(..) )" method="intercept" />
       <aop:before pointcut="execution( * org.hisp.dhis.mapping.MappingService.deleteMapLegendSet(..) )" method="intercept" />
       <aop:before pointcut="execution( * org.hisp.dhis.mapping.MappingService.deleteMapView(..) )" method="intercept" />
+      <aop:before pointcut="execution( * org.hisp.dhis.mapping.MappingService.deleteMap(..) )" method="intercept" />
     </aop:aspect>
 
     <!-- <aop:aspect ref="i18nTranslationInterceptor"> <aop:after-returning pointcut="execution( * org.hisp.dhis.dataelement.DataElementService.get*(..) 

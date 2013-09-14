@@ -148,26 +148,17 @@ public class HibernatePatientStore
 
     @Override
     @SuppressWarnings( "unchecked" )
-    public Collection<Patient> get( String firstName, String middleName, String lastName, Date birthdate, String gender )
+    public Collection<Patient> get( String name, Date birthdate, String gender )
 
     {
         Criteria crit = getCriteria();
         Conjunction con = Restrictions.conjunction();
-
-        if ( StringUtils.isNotBlank( firstName ) )
-            con.add( Restrictions.ilike( "firstName", firstName ) );
-
-        if ( StringUtils.isNotBlank( middleName ) )
-            con.add( Restrictions.ilike( "middleName", middleName ) );
-
-        if ( StringUtils.isNotBlank( lastName ) )
-            con.add( Restrictions.ilike( "lastName", lastName ) );
-
+        con.add( Restrictions.ilike( "name", name ) );
         con.add( Restrictions.eq( "gender", gender ) );
         con.add( Restrictions.eq( "birthDate", birthdate ) );
         crit.add( con );
 
-        crit.addOrder( Order.asc( "firstName" ) );
+        crit.addOrder( Order.asc( "name" ) );
 
         return crit.list();
     }
@@ -190,12 +181,37 @@ public class HibernatePatientStore
 
     @Override
     @SuppressWarnings( "unchecked" )
+    public Collection<Patient> getByOrgUnitAndGender( OrganisationUnit organisationUnit, String gender, Integer min, Integer max )
+    {
+        String hql = "select p from Patient p where p.organisationUnit = :organisationUnit and p.gender = :gender order by p.id DESC";
+
+        Query query = getQuery( hql );
+        query.setEntity( "organisationUnit", organisationUnit );
+        query.setString( "gender", gender );
+
+        if ( min != null && max != null )
+        {
+            query.setFirstResult( min ).setMaxResults( max );
+        }
+
+        return query.list();
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
     public Collection<Patient> getByOrgUnitProgram( OrganisationUnit organisationUnit, Program program, Integer min,
         Integer max )
     {
-        Criteria criteria = getCriteria( Restrictions.eq( "organisationUnit", organisationUnit ) ).createAlias(
-            "programs", "program" ).add( Restrictions.eq( "program.id", program.getId() ) );
-
+        Criteria criteria;
+        if ( organisationUnit != null )
+        {
+            criteria = getCriteria( Restrictions.eq( "organisationUnit", organisationUnit ) ).createAlias(
+                "programs", "program" ).add( Restrictions.eq( "program.id", program.getId() ) );
+        }
+        else
+        {
+            criteria = getCriteria().createAlias( "programs", "program" ).add( Restrictions.eq( "program.id", program.getId() ) );
+        }
         criteria.addOrder( Order.desc( "id" ) );
 
         if ( min != null && max != null )
@@ -203,6 +219,53 @@ public class HibernatePatientStore
             criteria.setFirstResult( min ).setMaxResults( max );
         }
         return criteria.list();
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public Collection<Patient> getByOrgUnitProgramGender( OrganisationUnit organisationUnit, Program program, String gender, int min, int max )
+    {
+        String hql = "select p from Patient p where p.organisationUnit = :organisationUnit and p.gender = :gender "
+            + " and :program member of p.programs"
+            + " order by p.id DESC";
+
+        Query query = getQuery( hql );
+        query.setEntity( "organisationUnit", organisationUnit );
+        query.setEntity( "program", program );
+        query.setString( "gender", gender );
+
+        query.setFirstResult( min ).setMaxResults( max );
+
+        return query.list();
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public Collection<Patient> getByProgram( Program program, int min, int max )
+    {
+        String hql = "select p from Patient p where :program member of p.programs order by p.id DESC";
+
+        Query query = getQuery( hql );
+        query.setEntity( "program", program );
+
+        query.setFirstResult( min ).setMaxResults( max );
+
+        return query.list();
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public Collection<Patient> getByProgram( Program program, String gender, int min, int max )
+    {
+        String hql = "select p from Patient p where p.gender = :gender and :program member of p.programs order by p.id DESC";
+
+        Query query = getQuery( hql );
+        query.setString( "gender", gender );
+        query.setEntity( "program", program );
+
+        query.setFirstResult( min ).setMaxResults( max );
+
+        return query.list();
     }
 
     @Override
@@ -366,7 +429,7 @@ public class HibernatePatientStore
         String selector = count ? "count(*) " : "* ";
 
         String sql = "select " + selector
-            + " from ( select distinct p.patientid, p.firstname, p.middlename, p.lastname, p.gender, p.phonenumber,";
+            + " from ( select distinct p.patientid, p.name, p.gender, p.phonenumber,";
 
         if ( identifierTypes != null )
         {
@@ -394,14 +457,18 @@ public class HibernatePatientStore
 
         String patientWhere = "";
         String patientOperator = " where ";
-        String patientGroupBy = " GROUP BY  p.patientid, p.firstname, p.middlename, p.lastname, p.gender, p.phonenumber ";
+        String patientGroupBy = " GROUP BY  p.patientid, p.name, p.gender, p.phonenumber ";
         String otherWhere = "";
         String operator = " where ";
         String orderBy = "";
         boolean hasIdentifier = false;
         boolean isSearchEvent = false;
         boolean isPriorityEvent = false;
-        Collection<Integer> orgunitChilrenIds = getOrgunitChildren( orgunits );
+        Collection<Integer> orgunitChilrenIds = null;
+        if ( orgunits != null )
+        {
+            orgunitChilrenIds = getOrgunitChildren( orgunits );
+        }
 
         for ( String searchKey : searchKeys )
         {
@@ -437,7 +504,7 @@ public class HibernatePatientStore
             else if ( keys[0].equals( Patient.PREFIX_IDENTIFIER_TYPE ) )
             {
                 patientWhere += patientOperator + "( ( lower( " + statementBuilder.getPatientFullName() + " ) like '%"
-                    + id + "%' ) or lower(pi.identifier)='" + id + "' ";
+                    + id + "%' ) or lower(pi.identifier) like '%" + id + "%' ";
 
                 String[] keyValues = id.split( " " );
                 if ( keyValues.length == 2 )
@@ -490,7 +557,7 @@ public class HibernatePatientStore
                                 patientWhere += " and psi.organisationunitid in( "
                                     + TextUtils.getCommaDelimitedString( orgunitChilrenIds ) + " )";
                             }
-                            // get events by selected
+                            // get events by selected orgunit
                             else if ( !keys[4].equals( "0" ) )
                             {
                                 patientWhere += " and psi.organisationunitid=" + keys[4];
@@ -510,7 +577,7 @@ public class HibernatePatientStore
                                 patientWhere += " and psi.organisationunitid in( "
                                     + TextUtils.getCommaDelimitedString( orgunitChilrenIds ) + " )";
                             }
-                            // get events by selected
+                            // get events by selected orgunit
                             else if ( !keys[4].equals( "0" ) )
                             {
                                 patientWhere += " and psi.organisationunitid=" + keys[4];
@@ -529,7 +596,7 @@ public class HibernatePatientStore
                                 patientWhere += " and p.organisationunitid in( "
                                     + TextUtils.getCommaDelimitedString( orgunitChilrenIds ) + " )";
                             }
-                            // get events by selected
+                            // get events by selected orgunit
                             else if ( !keys[4].equals( "0" ) )
                             {
                                 patientWhere += " and p.organisationunitid=" + keys[4];
@@ -548,7 +615,7 @@ public class HibernatePatientStore
                                 patientWhere += " and p.organisationunitid in( "
                                     + TextUtils.getCommaDelimitedString( orgunitChilrenIds ) + " )";
                             }
-                            // get events by selected
+                            // get events by selected orgunit
                             else if ( !keys[4].equals( "0" ) )
                             {
                                 patientWhere += " and p.organisationunitid=" + keys[4];
@@ -566,7 +633,7 @@ public class HibernatePatientStore
                                 patientWhere += " and psi.organisationunitid in( "
                                     + TextUtils.getCommaDelimitedString( orgunitChilrenIds ) + " )";
                             }
-                            // get events by selected
+                            // get events by selected orgunit
                             else if ( !keys[4].equals( "0" ) )
                             {
                                 patientWhere += " and p.organisationunitid=" + keys[4];
@@ -635,12 +702,12 @@ public class HibernatePatientStore
             if ( isPriorityEvent )
             {
                 subSQL += ",pgi.followup ";
-                orderBy = " ORDER BY pgi.followup desc, p.patientid, p.firstname, p.middlename, p.lastname, duedate asc ";
+                orderBy = " ORDER BY pgi.followup desc, p.patientid, p.name, duedate asc ";
                 patientGroupBy += ",pgi.followup ";
             }
             else
             {
-                orderBy = " ORDER BY p.patientid, p.firstname, p.middlename, p.lastname, duedate asc ";
+                orderBy = " ORDER BY p.patientid, p.name, duedate asc ";
             }
             sql = sql + subSQL + from + " inner join programinstance pgi on " + " (pgi.patientid=p.patientid) "
                 + " inner join programstageinstance psi on " + " (psi.programinstanceid=pgi.programinstanceid) "
@@ -750,7 +817,8 @@ public class HibernatePatientStore
             for ( OrganisationUnit orgunit : orgunits )
             {
 
-                orgUnitIds.addAll( organisationUnitService.getOrganisationUnitHierarchy().getChildren( orgunit.getId() ) );
+                orgUnitIds
+                    .addAll( organisationUnitService.getOrganisationUnitHierarchy().getChildren( orgunit.getId() ) );
                 orgUnitIds.remove( orgunit.getId() );
             }
         }
