@@ -18,6 +18,8 @@
         &identifiableProperties;
         
         <property name="name" column="name" not-null="true" unique="true" length="160"/>
+
+        <property name="description" type="text"/>
         
         <property name="metaDataUids" column="metadatauids" type="text"/>
 

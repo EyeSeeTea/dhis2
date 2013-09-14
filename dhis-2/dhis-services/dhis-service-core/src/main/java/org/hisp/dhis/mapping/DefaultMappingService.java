@@ -275,11 +275,6 @@ public class DefaultMappingService
         return mapStore.getAllLikeNameOrderedName( name, first, max );
     }
 
-    public List<Map> getAllMaps()
-    {
-        return mapStore.getAll();
-    }
-
     // -------------------------------------------------------------------------
     // MapView
     // -------------------------------------------------------------------------

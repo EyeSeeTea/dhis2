@@ -22,10 +22,6 @@
                     <td> <xsl:value-of select="@lastUpdated" /> </td>
                 </tr>
                 <tr>
-                    <td>Description</td>
-                    <td> <xsl:value-of select="@description" /> </td>
-                </tr>
-                <tr>
                     <td>MetaData UIDs</td>
                     <td> <xsl:value-of select="d:metaDataUids" /> </td>
                 </tr>

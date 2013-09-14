@@ -135,7 +135,7 @@
                 <tr>
                     <td><label>$i18n.getString( "description" )</label></td>
                     <td>
-                        <input type="text" id="description" name="description" maxlength="25" value="$filter.description" style="width: 100%;">
+                        <input type="text" id="description" name="description" value="$filter.description" style="width: 100%;">
                     </td>
                 </tr>
             </table>

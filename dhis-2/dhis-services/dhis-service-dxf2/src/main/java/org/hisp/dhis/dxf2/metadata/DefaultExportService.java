@@ -226,7 +226,7 @@ public class DefaultExportService
     public void saveFilter( JSONObject json ) throws IOException
     {
         Filter filter = new Filter( json.getString( "name" ) );
-        filter.setCode( json.getString( "code" ) );
+        filter.setDescription( json.getString( "description" ) );
         filter.setMetaDataUids( json.getString( "metaDataUids" ) );
         filter.setAutoFields();
 
@@ -238,7 +238,7 @@ public class DefaultExportService
     {
         Filter filter = filterService.getFilterByUid( json.getString( "uid" ) );
         filter.setName( json.getString( "name" ) );
-        filter.setCode( json.getString( "code" ) );
+        filter.setDescription( json.getString( "description" ) );
         filter.setMetaDataUids( json.getString( "metaDataUids" ) );
         filter.setLastUpdated( new Date() );
 
