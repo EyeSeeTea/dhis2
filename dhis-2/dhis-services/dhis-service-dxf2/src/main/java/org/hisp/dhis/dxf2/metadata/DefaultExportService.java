@@ -31,6 +31,8 @@ package org.hisp.dhis.dxf2.metadata;
 import java.io.IOException;
 import java.util.*;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.json.JSONObject;
 import org.apache.commons.logging.Log;
@@ -151,14 +153,13 @@ public class DefaultExportService
 
     //@author Ovidiu Rosu <rosu.ovi@gmail.com>
     @Override
-    public MetaData getFilteredMetaData( FilterOptions filterOptions )
+    public MetaData getFilteredMetaData( FilterOptions filterOptions ) throws IOException
     {
         return getFilteredMetaData( filterOptions, null );
     }
 
-    @SuppressWarnings( "unchecked" )
     @Override
-    public MetaData getFilteredMetaData( FilterOptions filterOptions, TaskId taskId )
+    public MetaData getFilteredMetaData( FilterOptions filterOptions, TaskId taskId ) throws IOException
     {
         MetaData metaData = new MetaData();
         metaData.setCreated( new Date() );
@@ -170,16 +171,9 @@ public class DefaultExportService
             notifier.notify( taskId, "Exporting meta-data" );
         }
 
-        Map<String, List<String>> identifiableObjectUidMap = null;
+        String json = filterOptions.getRestrictionsJson().get( "metaDataUids" ).toString();
+        Map<String, List<String>> identifiableObjectUidMap = new ObjectMapper().readValue( json, new TypeReference<HashMap<String, List<String>>>(){} );
         Map<String, List<IdentifiableObject>> identifiableObjectMap;
-
-        try
-        {
-            identifiableObjectUidMap = new ObjectMapper().readValue( filterOptions.getRestrictionsJson().get( "metaDataUids" ).toString(), HashMap.class );
-        } catch ( IOException e )
-        {
-            e.printStackTrace();
-        }
 
         if ( filterOptions.getRestrictionsJson().get( "exportDependencies" ).equals( "true" ) )
         {

@@ -291,18 +291,17 @@ public class DefaultMetaDataDependencyService
 
             Set<Constant> constantSet = new HashSet<Constant>();
 
-            Matcher matcher = ExpressionService.CONSTANT_PATTERN.matcher( ( ( Indicator ) identifiableObject ).getNumerator() );
-            while (matcher.find())
-            {
-                String co = matcher.group( 1 );
-                constantSet.add( constantService.getConstant( co ) );
-            }
+            List<String> expressions = new ArrayList<String>();
+            Collections.addAll( expressions, ( ( Indicator ) identifiableObject ).getNumerator(), ( ( Indicator ) identifiableObject ).getDenominator() );
 
-            matcher = ExpressionService.CONSTANT_PATTERN.matcher( ( ( Indicator ) identifiableObject ).getDenominator() );
-            while (matcher.find())
+            for ( String expression : expressions )
             {
-                String co = matcher.group( 1 );
-                constantSet.add( constantService.getConstant( co ) );
+                Matcher matcher = ExpressionService.CONSTANT_PATTERN.matcher( expression );
+                while (matcher.find())
+                {
+                    String co = matcher.group( 1 );
+                    constantSet.add( constantService.getConstant( co ) );
+                }
             }
 
             resultSet.addAll( constantSet );
@@ -314,7 +313,7 @@ public class DefaultMetaDataDependencyService
             Set<DataElement> dataElementSet = new HashSet<DataElement>();
 
             Expression leftSide = ReflectionUtils.invokeGetterMethod( "leftSide", identifiableObject );
-            Expression rightSide = ReflectionUtils.invokeGetterMethod( "leftSide", identifiableObject );
+            Expression rightSide = ReflectionUtils.invokeGetterMethod( "rightSide", identifiableObject );
 
             dataElementSet.addAll( expressionService.getDataElementsInExpression( leftSide.getExpression() ) );
             dataElementSet.addAll( expressionService.getDataElementsInExpression( rightSide.getExpression() ) );

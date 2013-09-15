@@ -44,9 +44,10 @@ public interface ExportService
 
     MetaData getMetaData( Options options, TaskId taskId );
 
-    MetaData getFilteredMetaData( FilterOptions filterOptions );
+//  @author Ovidiu Rosu <rosu.ovi@gmail.com>
+    MetaData getFilteredMetaData( FilterOptions filterOptions ) throws IOException;
 
-    MetaData getFilteredMetaData( FilterOptions filterOptions, TaskId taskId );
+    MetaData getFilteredMetaData( FilterOptions filterOptions, TaskId taskId ) throws IOException;
 
     List<Filter> getFilters();
 

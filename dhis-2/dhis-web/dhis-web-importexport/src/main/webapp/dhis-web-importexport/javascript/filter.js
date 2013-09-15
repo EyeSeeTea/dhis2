@@ -55,6 +55,7 @@ function showFilterDetails( filterUid )
         if ( filters[i].id == filterUid )
         {
             setInnerHTML( 'nameField', filters[i].name );
+            setInnerHTML( 'descriptionField', filters[i].description );
         }
     }
 }
