@@ -76,7 +76,6 @@ function insertMetaDataCategoryDesign( metaDataCategoryName )
         loadMetaData( metaDataCategoryName );
     } else
     {
-        $( "#mainDiv" + metaDataCategoryName ).show();
         deselectAllValues();
     }
 }
@@ -289,18 +288,9 @@ function selectAllMetaDataCategories()
 // Select all values
 function selectAllValues()
 {
-    selectAllMetaDataCategories();
-    $( "body" ).ajaxComplete( function ()
-    {
-        for ( var i = 0; i < metaDataArray.length; i++ )
-        {
-            $( "#select" + metaDataArray[i] ).click();
-        }
-    } );
-
     for ( var i = 0; i < metaDataArray.length; i++ )
     {
-        $( "#select" + metaDataArray[i] ).click();
+        selectAllValuesByCategory( metaDataArray[i] );
     }
 }
 
@@ -309,11 +299,7 @@ function deselectAllValues()
 {
     for ( var i = 0; i < metaDataArray.length; i++ )
     {
-        $( "#deselect" + metaDataArray[i] ).click();
-        $( "#available" + metaDataArray[i] ).find( "option" ).each( function ()
-        {
-            $( this ).prop( "selected", false );
-        } );
+        deselectValuesByCategory( metaDataArray[i] );
     }
 }
 
