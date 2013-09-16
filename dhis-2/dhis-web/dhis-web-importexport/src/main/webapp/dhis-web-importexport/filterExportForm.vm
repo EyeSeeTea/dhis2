@@ -108,7 +108,7 @@
 #elseif($command == "update")
     <h3>$i18n.getString( "edit_filter" )</h3>
 #elseif($command == "addAdHoc")
-    <h3>$i18n.getString( "create_ad_hoc_filter" )</h3>
+    <h3>$i18n.getString( "ad_hoc_export" )</h3>
 #end
 
 <!-- FILTER FORM -->
