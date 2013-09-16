@@ -3335,7 +3335,8 @@ Ext.onReady( function() {
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
-					url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'getOrganisationUnitChildren.action'
+					url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'getOrganisationUnitChildren.action',
+					noCache: false
 				},
 				root: {
 					id: 'root',
@@ -5002,13 +5003,15 @@ console.log(view);
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
-					url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'getOrganisationUnitChildren.action'
+					url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'getOrganisationUnitChildren.action',
+					noCache: false
 				},
 				root: {
 					id: 'root',
 					expanded: true,
 					children: gis.init.rootNodes
-				}
+				},
+					noCache: false
 			}),
 			listeners: {
 				afterrender: function() {
