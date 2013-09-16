@@ -2,22 +2,43 @@
 function showValidationRuleDetails( validationId )
 {
     jQuery.post( 'getValidationRule.action', { id: validationId }, function ( json ) {
-		setInnerHTML( 'nameField', json.validationRule.name );
+		setText( 'nameField', json.validationRule.name );
 		
 		var description = json.validationRule.description;
-		setInnerHTML( 'descriptionField', description ? description : '[' + i18n_none + ']' );
+		setText( 'descriptionField', description ? description : '[' + i18n_none + ']' );
+		
+		var importance = json.validationRule.importance;
+		setText( 'importanceField', i18nalizeImportance( importance ) );
 		
 		var leftSideDescription = json.validationRule.leftSideDescription;
-		setInnerHTML( 'leftSideDescriptionField', leftSideDescription ? leftSideDescription : '[' + i18n_none + ']' );
+		setText( 'leftSideDescriptionField', leftSideDescription ? leftSideDescription : '[' + i18n_none + ']' );
 		
 		var operator = json.validationRule.operator;
-		setInnerHTML( 'operatorField', i18nalizeOperator( operator ) );
+		setText( 'operatorField', i18nalizeOperator( operator ) );
 		
 		var rightSideDescription = json.validationRule.rightSideDescription;
-		setInnerHTML( 'rightSideDescriptionField', rightSideDescription ? rightSideDescription : '[' + i18n_none + ']' );
+		setText( 'rightSideDescriptionField', rightSideDescription ? rightSideDescription : '[' + i18n_none + ']' );
 
 		showDetails();
 	});
+}
+
+function i18nalizeImportance ( importance )
+{
+	if ( importance == "high" )
+	{
+		return i18n_high;
+	}
+	else if ( importance == "medium" )
+	{
+		return i18n_medium;
+	}
+	if ( importance == "low" )
+	{
+		return i18n_low;
+	}
+	
+	return null;
 }
 
 function i18nalizeOperator( operator )

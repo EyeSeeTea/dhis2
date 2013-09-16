@@ -1,4 +1,4 @@
-<h3>$i18n.getString( "dhis-web-validationrule" )</h3>
+<h3>$encoder.htmlEncode( $i18n.getString( "dhis-web-validationrule" ) )</h3>
 
 <ul class="introList">
     #introListImgItem( "validationRule.action" "validation_rule" "validationrule" )

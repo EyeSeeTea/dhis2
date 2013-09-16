@@ -15,7 +15,7 @@
 	});
 </script>
 
-<h3>$i18n.getString( "edit_validation_rule_group" )</h3>
+<h3>$encoder.htmlEncode( $i18n.getString( "edit_validation_rule_group" ) )</h3>
 
 <form id="updateValidationRuleGroupForm" action="updateValidationRuleGroup.action" method="post" class="inputForm">
 
@@ -25,16 +25,16 @@
 
 <table>
     <tr>
-        <th colspan="2">$i18n.getString( "details" )</th>
+        <th colspan="2">$encoder.htmlEncode( $i18n.getString( "details" ) )</th>
     </tr>
 
     <tr>
-        <td><label for="name">$i18n.getString( "name" )</label></td>
+        <td><label for="name">$encoder.htmlEncode( $i18n.getString( "name" ) )</label></td>
         <td><input type="text" id="name" name="name" value="$encoder.htmlEncode( $validationRuleGroup.name )"></td>
     </tr>
 
     <tr>
-        <td><label for="description">$i18n.getString( "description" )<em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+        <td><label for="description">$encoder.htmlEncode( $i18n.getString( "description" ) )<em title="$i18n.getString( "required" )" class="required">*</em></label></td>
         <td><input type="text" id="description" name="description" value="$encoder.htmlEncode( $validationRuleGroup.description )"></td>
     </tr>
 
@@ -48,9 +48,9 @@
     </colgroup>
 
     <tr>
-        <th>$i18n.getString( "available_validation_rules" )</th>
+        <th>$encoder.htmlEncode( $i18n.getString( "available_validation_rules" ) )</th>
         <th></th>
-        <th>$i18n.getString( "group_members" )</th>
+        <th>$encoder.htmlEncode( $i18n.getString( "group_members" ) )</th>
     </tr>
 
     <tr>

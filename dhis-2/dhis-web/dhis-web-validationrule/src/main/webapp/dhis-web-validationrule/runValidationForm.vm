@@ -19,11 +19,11 @@
 
 <table>
 	<tr>
-		<th colspan="2">$i18n.getString( 'select_parameters' )</th>
+		<th colspan="2">$encoder.htmlEncode( $i18n.getString( 'select_parameters' ) )</th>
 	</tr>
     <tr>
     	<td>
-        	<label for="startDate">$i18n.getString( 'start_date' )</label>
+        	<label for="startDate">$encoder.htmlEncode( $i18n.getString( 'start_date' ) )</label>
         </td>
         <td>
         	<input type="text" id="startDate" name="startDate" style="width:20em">        	
@@ -31,7 +31,7 @@
     </tr>
     <tr>    	
         <td>
-        	<label for="endDate">$i18n.getString( 'end_date' )</label>
+        	<label for="endDate">$encoder.htmlEncode( $i18n.getString( 'end_date' ) )</label>
         </td>
         <td>
         	<input type="text" id="endDate" name="endDate" style="width:20em">        	
@@ -39,13 +39,13 @@
     </tr>
     <tr>
     	<td>
-    		<label for="validationRuleGroup">$i18n.getString( "validation_rule_group" )</label>
+    		<label for="validationRuleGroup">$encoder.htmlEncode( $i18n.getString( "validation_rule_group" ) )</label>
 	    </td>
 	    <td>
 	    	<select id="validationRuleGroupId" name="validationRuleGroupId" style="width:20em">
-	    		<option value="-1">[ $i18n.getString( "all_validation_rules" ) ]</option>
+	    		<option value="-1">[ $encoder.htmlEncode( $i18n.getString( "all_validation_rules" ) ) ]</option>
 	    		#foreach( $group in $validationRuleGroups )
-	    			<option value="$group.id">$group.name</option>
+	    			<option value="$group.id">$encoder.htmlEncode( $group.name )</option>
 		    	#end
             </select>
     	</td>
@@ -54,7 +54,7 @@
     	<td colspan="2" style="height:20px"></td>
     </tr>
     <tr>
-        <th colspan="2">$i18n.getString( "select_parent_organisation_unit" )</th>
+        <th colspan="2">$encoder.htmlEncode( $i18n.getString( "select_parent_organisation_unit" ) )</th>
     </tr>
     <tr>
         <td colspan="2">

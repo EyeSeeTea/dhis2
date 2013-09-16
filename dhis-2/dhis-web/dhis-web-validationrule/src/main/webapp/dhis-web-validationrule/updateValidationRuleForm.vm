@@ -13,7 +13,7 @@
 
 <table>
 	<tr>
-		<th colspan="2">$i18n.getString( "details" )</th>
+		<th colspan="2">$encoder.htmlEncode( $i18n.getString( "details" ) )</th>
 	</tr>
 	<tr>
 		<td style="width:120px"><label for="name">$encoder.htmlEncode( $i18n.getString( "name" ) ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
@@ -27,9 +27,9 @@
 		<td><label for="importance">$encoder.htmlEncode( $i18n.getString( "importance" ) )<em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 		<td>
 			<select type="text" id="importance" name="importance">
-				<option value="low" #if( $validationRule.importance == 'low' ) selected #end>$i18n.getString( "low" )</option>
-				<option value="medium" #if( $validationRule.importance == 'medium' ) selected #end>$i18n.getString( "medium" )</option>
-				<option value="high" #if( $validationRule.importance == 'high' ) selected #end>$i18n.getString( "high" )</option>
+				<option value="low" #if( $validationRule.importance == 'low' ) selected #end>$encoder.htmlEncode( $i18n.getString( "low" ) )</option>
+				<option value="medium" #if( $validationRule.importance == 'medium' ) selected #end>$encoder.htmlEncode( $i18n.getString( "medium" ) )</option>
+				<option value="high" #if( $validationRule.importance == 'high' ) selected #end>$encoder.htmlEncode( $i18n.getString( "high" ) )</option>
 			</select>
 		</td>
 	</tr>
@@ -37,7 +37,7 @@
 		<td><label for="periodType">$encoder.htmlEncode( $i18n.getString( "period_type" ) )<em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 		<td><select type="text" id="periodTypeName" name="periodTypeName" disabled>
 					#foreach ( $periodType in $periodTypes )
-             		 <option value="$periodType.name" #if( $validationRule.periodType.name.equals($periodType.name ) ) selected #end>$i18n.getString($periodType.name)</option>
+             		 <option value="$periodType.name" #if( $validationRule.periodType.name.equals($periodType.name ) ) selected #end>$encoder.htmlEncode( $i18n.getString($periodType.name) )</option>
             		#end						
 			</select>
 			<img title="$i18n.getString('clear_expression')" onclick='setNullExpression();' src='../images/edit-clear.png' style='width: 20px;cursor:pointer' />

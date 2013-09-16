@@ -15,7 +15,7 @@
 
 #if ( $dataValues.size() == 0 )
 
-<span id="info">$i18n.getString( "no_values_found" )</span>
+<span id="info">$encoder.htmlEncode( $i18n.getString( "no_values_found" ) )</span>
 
 <input type="button" onclick="window.location.href='viewAnalysisForm.action?key=$!{key}'" value="Back" style="width:120px">
 
@@ -32,13 +32,13 @@
 <table class="listTable" id="listTable" style="width:100%">
 	<thead>
 	<tr>
-		<th>$i18n.getString( "data_element" )</th>
-		<th>$i18n.getString( "organisation_unit" )</th>
-		<th class="{sorter: false}">$i18n.getString( "period" )</th>
-		<th style="text-align:center" class="{sorter: false}">$i18n.getString( "min" )</th>
-		<th style="width: 100px; text-align:center" class="{sorter: false}">$i18n.getString( "value" )</th>
-		<th style="text-align:center" class="{sorter: false}">$i18n.getString( "max" )</th>
-		<th style="text-align:center" class="{sorter: false}">$i18n.getString( "mark" )</th>
+		<th>$encoder.htmlEncode( $i18n.getString( "data_element" ) )</th>
+		<th>$encoder.htmlEncode( $i18n.getString( "organisation_unit" ) )</th>
+		<th class="{sorter: false}">$encoder.htmlEncode( $i18n.getString( "period" ) )</th>
+		<th style="text-align:center" class="{sorter: false}">$encoder.htmlEncode( $i18n.getString( "min" ) )</th>
+		<th style="width: 100px; text-align:center" class="{sorter: false}">$encoder.htmlEncode( $i18n.getString( "value" ) )</th>
+		<th style="text-align:center" class="{sorter: false}">$encoder.htmlEncode( $i18n.getString( "max" ) )</th>
+		<th style="text-align:center" class="{sorter: false}">$encoder.htmlEncode( $i18n.getString( "mark" ) )</th>
 	</tr>
 	</thead>
 	#set( $count = 0 )	
@@ -46,9 +46,9 @@
 	#foreach( $value in $dataValues )	
 	#set( $count = $count + 1 )	
 	<tr>	
-		<td><span id="value-${count}-name">$value.dataElementName $value.categoryOptionComboNameParsed</span></td>
+		<td><span id="value-${count}-name">$encoder.htmlEncode( $value.dataElementName ) $encoder.htmlEncode( $value.categoryOptionComboNameParsed )</span></td>
 		
-		<td>$value.sourceName</td>
+		<td>$encoder.htmlEncode( $value.sourceName )</td>
 		
 		<td value="$format.formatDate($value.period.startDate)">$format.formatPeriod( $value.period )</td>
 		

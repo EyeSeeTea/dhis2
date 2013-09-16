@@ -2,6 +2,7 @@
   {
 	"name": "$!encoder.jsonEncode( ${validationRule.name} )",
 	"description": "$!encoder.jsonEncode( ${validationRule.description} )",
+	"importance": "$!encoder.jsonEncode( ${validationRule.importance} )",
 	"type": "$!encoder.jsonEncode( ${validationRule.type} )",
 	"operator": "${validationRule.operator}",
 	"leftSideDescription": "$!encoder.jsonEncode( ${validationRule.leftSide.description} )",

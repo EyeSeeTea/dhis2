@@ -3,7 +3,7 @@
 <form id="addValidationRuleForm" action="addValidationRule.action" method="post" onsubmit="enable('periodTypeName');" class="inputForm">
 <table>
 	<tr>
-		<th colspan="2">$i18n.getString( "details" )</th>
+		<th colspan="2">$encoder.htmlEncode( $i18n.getString( "details" ) )</th>
 	</tr>
 	<tr>
 		<td style="width:120px"><label for="name">$encoder.htmlEncode( $i18n.getString( "name" ) ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
@@ -17,9 +17,9 @@
 		<td><label for="importance">$encoder.htmlEncode( $i18n.getString( "importance" ) )<em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 		<td>
 			<select type="text" id="importance" name="importance">
-				<option value="low">$i18n.getString( "low" )</option>
-				<option value="medium" selected="selected">$i18n.getString( "medium" )</option>
-				<option value="high">$i18n.getString( "high" )</option>
+				<option value="low">$encoder.htmlEncode( $i18n.getString( "low" ) )</option>
+				<option value="medium" selected="selected">$encoder.htmlEncode( $i18n.getString( "medium" ) )</option>
+				<option value="high">$encoder.htmlEncode( $i18n.getString( "high" ) )</option>
 			</select>
 		</td>
 	</tr>
@@ -28,7 +28,7 @@
 		<td>
 			<select type="text" id="periodTypeName" name="periodTypeName">
 				#foreach ( $periodType in $periodTypes )
-				 <option value="$periodType.name" #if( $periodType.name.equals( ${monthlyPeriodTypeName} ) ) selected #end>$i18n.getString($periodType.name)</option>
+				 <option value="$periodType.name" #if( $periodType.name.equals( ${monthlyPeriodTypeName} ) ) selected #end>$encoder.htmlEncode( $i18n.getString($periodType.name) )</option>
 				#end						
 			</select>
 			<img title="$i18n.getString('clear_expression')" onclick='setNullExpression();' src='../images/edit-clear.png' style='width: 20px;cursor:pointer' />
@@ -38,7 +38,7 @@
 		<td><label for="operatorId">$encoder.htmlEncode( $i18n.getString( "operator" ) ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 		<td>
 			<select id="operator" name="operator">
-				<option value="">[ $i18n.getString( "select_operator" ) ]</option>
+				<option value="">[ $encoder.htmlEncode( $i18n.getString( "select_operator" ) ) ]</option>
 				<option value="equal_to">$encoder.htmlEncode( $i18n.getString( "equal_to" ) )</option>
 				<option value="not_equal_to">$encoder.htmlEncode( $i18n.getString( "not_equal_to" ) )</option>
 				<option value="greater_than">$encoder.htmlEncode( $i18n.getString( "greater_than" ) )</option>

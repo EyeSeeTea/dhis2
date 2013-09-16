@@ -372,6 +372,9 @@ var validationRules = {
         "description" : {
             "rangelength" : [ 2, 160 ]
         },
+        "importance" : {
+            "required" : true
+        },
         "periodTypeName" : {
             "required" : true
         },

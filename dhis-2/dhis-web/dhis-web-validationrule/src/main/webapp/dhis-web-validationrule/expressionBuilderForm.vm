@@ -18,14 +18,14 @@
 		<col />
 	</colgroup>
 	<tr>
-		<th colspan="2">$i18n.getString( "description" )</th>		
-		<th>$i18n.getString( "constants" )</th>		
+		<th colspan="2">$encoder.htmlEncode( $i18n.getString( "description" ) )</th>		
+		<th>$encoder.htmlEncode( $i18n.getString( "constants" ) )</th>		
 	</tr>
 	<tr>
 		<td colspan="2">
 			<input type="text" id="description" name="description" style="width:250px" class="{validate:{required:true}}"/><br>
-			<input type="checkbox" id="nullIfBlank" name="nullIfBlank" value="true">&nbsp;<label for="nullIfBlank">$i18n.getString( "skip_for_missing_values" )</label>
-			<div class="tipText" style="margin-top: 4px">$i18n.getString( "tip" ): $i18n.getString( "use" ) abs(x) ln(x) log(x) sqrt(x) mod(x,y)</div>
+			<input type="checkbox" id="nullIfBlank" name="nullIfBlank" value="true">&nbsp;<label for="nullIfBlank">$encoder.htmlEncode( $i18n.getString( "skip_for_missing_values" ) )</label>
+			<div class="tipText" style="margin-top: 4px">$encoder.htmlEncode( $i18n.getString( "tip" ) ): $encoder.htmlEncode( $i18n.getString( "use" ) ) abs(x) ln(x) log(x) sqrt(x) mod(x,y)</div>
 		</td>
 		<td>
 			<select id="constantId" name="constantId" size="3" style="min-width:450px" ondblclick="insertText( 'expression', this.value )">
@@ -36,8 +36,8 @@
 		<td colspan="3"></td>
 	</tr>
 	<tr>
-		<th colspan="2">$i18n.getString( "expression" )</th>
-		<th style="width:100%">$i18n.getString( "available_data_elements" )</th>
+		<th colspan="2">$encoder.htmlEncode( $i18n.getString( "expression" ) )</th>
+		<th style="width:100%">$encoder.htmlEncode( $i18n.getString( "available_data_elements" ) )</th>
 	</tr>
 	<tr>
 		<td valign="top">
@@ -61,7 +61,7 @@
 		</td>
 	</tr>
 	<tr>
-		<th colspan="3" style="width:100%">$i18n.getString( "description" )</th>		
+		<th colspan="3" style="width:100%">$encoder.htmlEncode( $i18n.getString( "description" ) )</th>		
 	</tr>
 	<tr>
 		<td colspan="3" style="width:100%"><div id="formulaText" style="width:740px;height:100px;overflow:auto"></div></td>
