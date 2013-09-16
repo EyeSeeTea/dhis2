@@ -50,7 +50,7 @@ import java.util.Set;
 /**
  * @author Abyot Asalefew Gizaw
  */
-@JacksonXmlRootElement( localName = "person", namespace = DxfNamespaces.DXF_2_0 )
+@JacksonXmlRootElement(localName = "person", namespace = DxfNamespaces.DXF_2_0)
 public class Patient
     extends BaseIdentifiableObject
 {
@@ -84,12 +84,6 @@ public class Patient
     public static String FIXED_ATTR_REGISTRATION_DATE = "registrationDate";
 
     public static String FIXED_ATTR_FULL_NAME = "fullName";
-
-    private String firstName;
-
-    private String middleName;
-
-    private String lastName;
 
     private String gender;
 
@@ -128,109 +122,13 @@ public class Patient
     }
 
     // -------------------------------------------------------------------------
-    // hashCode and equals
-    // -------------------------------------------------------------------------
-
-    @Override
-    public int hashCode()
-    {
-        final int prime = 31;
-        int result = 1;
-
-        result = prime * result + ((uid == null) ? 0 : uid.hashCode());
-        result = prime * result + ((birthDate == null) ? 0 : birthDate.hashCode());
-        result = prime * result + ((firstName == null) ? 0 : firstName.hashCode());
-        result = prime * result + ((gender == null) ? 0 : gender.hashCode());
-        result = prime * result + ((lastName == null) ? 0 : lastName.hashCode());
-        result = prime * result + ((middleName == null) ? 0 : middleName.hashCode());
-
-        return result;
-    }
-
-    @Override
-    public boolean equals( Object object )
-    {
-        if ( this == object )
-        {
-            return true;
-        }
-
-        if ( object == null )
-        {
-            return false;
-        }
-
-        if ( getClass() != object.getClass() )
-        {
-            return false;
-        }
-
-        final Patient other = (Patient) object;
-
-        if ( birthDate == null )
-        {
-            if ( other.birthDate != null )
-            {
-                return false;
-            }
-        }
-        else if ( !birthDate.equals( other.birthDate ) )
-        {
-            return false;
-        }
-
-        if ( firstName == null )
-        {
-            if ( other.firstName != null )
-            {
-                return false;
-            }
-        }
-        else if ( !firstName.equals( other.firstName ) )
-        {
-            return false;
-        }
-
-        if ( gender == null )
-        {
-            if ( other.gender != null )
-                return false;
-        }
-        else if ( !gender.equals( other.gender ) )
-        {
-            return false;
-        }
-
-        if ( lastName == null )
-        {
-            if ( other.lastName != null )
-            {
-                return false;
-            }
-        }
-        else if ( !lastName.equals( other.lastName ) )
-        {
-            return false;
-        }
-
-        if ( middleName == null )
-        {
-            if ( other.middleName != null )
-            {
-                return false;
-            }
-        }
-        else if ( !middleName.equals( other.middleName ) )
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
+
+    public String getFullName()
+    {
+        return name;
+    }
 
     public Set<PatientAttribute> getAttributes()
     {
@@ -243,9 +141,9 @@ public class Patient
     }
 
     @JsonProperty
-    @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JsonSerialize(as = BaseIdentifiableObject.class)
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public OrganisationUnit getOrganisationUnit()
     {
         return organisationUnit;
@@ -257,47 +155,8 @@ public class Patient
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getFirstName()
-    {
-        return firstName;
-    }
-
-    public void setFirstName( String firstName )
-    {
-        this.firstName = firstName;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getMiddleName()
-    {
-        return middleName;
-    }
-
-    public void setMiddleName( String middleName )
-    {
-        this.middleName = middleName;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getLastName()
-    {
-        return lastName;
-    }
-
-    public void setLastName( String lastName )
-    {
-        this.lastName = lastName;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public String getGender()
     {
         return gender;
@@ -309,8 +168,8 @@ public class Patient
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public Date getBirthDate()
     {
         return birthDate;
@@ -322,8 +181,8 @@ public class Patient
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public Date getDeathDate()
     {
         return deathDate;
@@ -335,8 +194,8 @@ public class Patient
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public Boolean getIsDead()
     {
         return isDead;
@@ -358,9 +217,9 @@ public class Patient
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlElementWrapper( localName = "programs", namespace = DxfNamespaces.DXF_2_0)
-    @JacksonXmlProperty( localName = "program", namespace = DxfNamespaces.DXF_2_0)
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlElementWrapper(localName = "programs", namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty(localName = "program", namespace = DxfNamespaces.DXF_2_0)
     public Set<Program> getPrograms()
     {
         return programs;
@@ -372,9 +231,9 @@ public class Patient
     }
 
     @JsonProperty
-    @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JsonSerialize(as = BaseIdentifiableObject.class)
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public User getHealthWorker()
     {
         return healthWorker;
@@ -386,8 +245,8 @@ public class Patient
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public Date getRegistrationDate()
     {
         return registrationDate;
@@ -399,9 +258,9 @@ public class Patient
     }
 
     @JsonProperty
-    @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JsonSerialize(as = BaseIdentifiableObject.class)
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public Patient getRepresentative()
     {
         return representative;
@@ -450,6 +309,11 @@ public class Patient
 
     public int getIntegerValueOfAge()
     {
+        return getIntegerValueOfAge( birthDate );
+    }
+
+    public static int getIntegerValueOfAge( Date birthDate )
+    {
         if ( birthDate == null )
         {
             return 0;
@@ -475,7 +339,7 @@ public class Patient
         return age;
     }
 
-    public void setBirthDateFromAge( int age, char ageType )
+    public static Date getBirthFromAge( int age, char ageType )
     {
         Calendar todayCalendar = Calendar.getInstance();
         todayCalendar.clear( Calendar.MILLISECOND );
@@ -500,7 +364,13 @@ public class Patient
             todayCalendar.add( Calendar.DATE, -1 * age );
         }
 
-        setBirthDate( todayCalendar.getTime() );
+        return todayCalendar.getTime();
+    }
+
+    public void setBirthDateFromAge( int age, char ageType )
+    {
+        Date fromAge = getBirthFromAge( age, ageType );
+        setBirthDate( fromAge );
     }
 
     public char getAgeType()
@@ -533,41 +403,6 @@ public class Patient
     // -------------------------------------------------------------------------
     // Getter && Setter
     // -------------------------------------------------------------------------
-
-    public String getFullName()
-    {
-        boolean space = false;
-        String name = "";
-
-        if ( firstName != null && firstName.length() != 0 )
-        {
-            name = firstName;
-            space = true;
-        }
-
-        if ( middleName != null && middleName.length() != 0 )
-        {
-            if ( space )
-            {
-                name += " ";
-            }
-
-            name += middleName;
-            space = true;
-        }
-
-        if ( lastName != null && lastName.length() != 0 )
-        {
-            if ( space )
-            {
-                name += " ";
-            }
-
-            name += lastName;
-        }
-
-        return name;
-    }
 
     public String getPhoneNumber()
     {

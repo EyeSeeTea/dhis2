@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.event.person;
+package org.hisp.dhis.dxf2.person;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -31,12 +31,15 @@ package org.hisp.dhis.dxf2.event.person;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import org.hisp.dhis.dxf2.event.person.AbstractPersonService;
+import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
+import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.system.notification.Notifier;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -85,5 +88,83 @@ public class JacksonPersonService extends AbstractPersonService
         jsonMapper.configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true );
         jsonMapper.configure( DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true );
         jsonMapper.configure( DeserializationFeature.WRAP_EXCEPTIONS, true );
+    }
+
+    // -------------------------------------------------------------------------
+    // CREATE
+    // -------------------------------------------------------------------------
+
+    @Override
+    public ImportSummaries savePersonXml( InputStream inputStream ) throws IOException
+    {
+        ImportSummaries importSummaries = new ImportSummaries();
+        String input = StreamUtils.copyToString( inputStream, Charset.forName( "UTF-8" ) );
+
+        try
+        {
+            Persons persons = fromXml( input, Persons.class );
+
+            for ( Person person : persons.getPersons() )
+            {
+                person.setPerson( null );
+                importSummaries.addImportSummary( savePerson( person ) );
+            }
+        }
+        catch ( Exception ex )
+        {
+            Person person = fromXml( input, Person.class );
+            person.setPerson( null );
+            importSummaries.addImportSummary( savePerson( person ) );
+        }
+
+        return importSummaries;
+    }
+
+    @Override
+    public ImportSummaries savePersonJson( InputStream inputStream ) throws IOException
+    {
+        ImportSummaries importSummaries = new ImportSummaries();
+        String input = StreamUtils.copyToString( inputStream, Charset.forName( "UTF-8" ) );
+
+        try
+        {
+            Persons persons = fromJson( input, Persons.class );
+
+            for ( Person person : persons.getPersons() )
+            {
+                person.setPerson( null );
+                importSummaries.addImportSummary( savePerson( person ) );
+            }
+        }
+        catch ( Exception ex )
+        {
+            Person person = fromJson( input, Person.class );
+            person.setPerson( null );
+            importSummaries.addImportSummary( savePerson( person ) );
+        }
+
+        return importSummaries;
+    }
+
+    // -------------------------------------------------------------------------
+    // UPDATE
+    // -------------------------------------------------------------------------
+
+    @Override
+    public ImportSummary updatePersonXml( String id, InputStream inputStream ) throws IOException
+    {
+        Person person = fromXml( inputStream, Person.class );
+        person.setPerson( id );
+
+        return updatePerson( person );
+    }
+
+    @Override
+    public ImportSummary updatePersonJson( String id, InputStream inputStream ) throws IOException
+    {
+        Person person = fromJson( inputStream, Person.class );
+        person.setPerson( id );
+
+        return updatePerson( person );
     }
 }

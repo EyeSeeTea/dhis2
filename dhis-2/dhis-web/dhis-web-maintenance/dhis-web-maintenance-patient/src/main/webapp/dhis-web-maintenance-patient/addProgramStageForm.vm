@@ -79,6 +79,12 @@
 		<td></td>
 	</tr>
 	
+	<tr>
+		<td><label>$i18n.getString( "remind_creating_next_event_on_this_event_completed" )</label></td>
+		<td><input type="checkbox" id="allowGenerateNextVisit" name="allowGenerateNextVisit" value='true' ></td>
+		<td></td>
+	</tr>
+	
 	#if($program.type==1)
 	<tr>
 		<td><label>$i18n.getString( "generated_events_by_enrollment_date" )</label></td>
@@ -122,7 +128,6 @@
 			<select id="allowProvidedElsewhere" name='allowProvidedElsewhere' multiple="multiple" class="hidden"></select>     
 			<select id="displayInReports" name='displayInReports' multiple="multiple" class="hidden"></select>     
 			<select id="allowDateInFutures" name='allowDateInFutures' multiple="multiple" class="hidden"></select>   
-			<select id="displayAsRadioButtons" name='displayAsRadioButtons' multiple="multiple" class="hidden"></select>      
 		</th>
       </tr>
     </thead>

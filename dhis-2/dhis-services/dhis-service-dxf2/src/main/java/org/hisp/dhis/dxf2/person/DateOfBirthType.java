@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.event.person;
+package org.hisp.dhis.dxf2.person;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,43 +28,37 @@ package org.hisp.dhis.dxf2.event.person;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dxf2.event.person.Gender;
-import org.hisp.dhis.dxf2.event.person.Person;
-import org.hisp.dhis.dxf2.event.person.Persons;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.program.Program;
-
-import java.util.Collection;
-
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface PersonService
+public enum DateOfBirthType
 {
-    Persons getPersons();
+    VERIFIED( "V" ),
+    DECLARED( "D" ),
+    APPROXIMATE( "A" );
 
-    Persons getPersons( OrganisationUnit organisationUnit );
+    private final String value;
 
-    Persons getPersons( Gender gender );
+    private DateOfBirthType( String value )
+    {
+        this.value = value;
+    }
 
-    Persons getPersons( Program program );
+    public String getValue()
+    {
+        return value;
+    }
 
-    Persons getPersons( Program program, Gender gender );
+    public static DateOfBirthType fromString( String text )
+    {
+        for ( DateOfBirthType dateOfBirthType : DateOfBirthType.values() )
+        {
+            if ( text.equals( dateOfBirthType.getValue() ) )
+            {
+                return dateOfBirthType;
+            }
+        }
 
-    Persons getPersons( OrganisationUnit organisationUnit, Program program );
-
-    Persons getPersons( OrganisationUnit organisationUnit, Gender gender );
-
-    Persons getPersons( OrganisationUnit organisationUnit, Program program, Gender gender );
-
-    Persons getPersons( Collection<Patient> patients );
-
-    Person getPerson( String uid );
-
-    Person getPerson( Patient patient );
-
-    void updatePerson( Person person );
-
-    void deletePerson( Person person );
+        throw new IllegalArgumentException();
+    }
 }

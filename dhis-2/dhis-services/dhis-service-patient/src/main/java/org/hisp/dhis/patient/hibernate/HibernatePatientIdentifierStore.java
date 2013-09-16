@@ -65,6 +65,13 @@ public class HibernatePatientIdentifierStore
     }
 
     @SuppressWarnings( "unchecked" )
+    public Collection<PatientIdentifier> getAll( PatientIdentifierType type, String identifier )
+    {
+        return getCriteria( Restrictions.eq( "identifierType", type ),
+            Restrictions.eq( "identifier", identifier ) ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
     public Collection<PatientIdentifier> getByIdentifier( String identifier )
     {
         return getCriteria( Restrictions.ilike( "identifier", "%" + identifier + "%" ) ).list();
@@ -104,8 +111,8 @@ public class HibernatePatientIdentifierStore
     @SuppressWarnings( "unchecked" )
     public Collection<Patient> getPatientsByIdentifier( String identifier, int min, int max )
     {
-        return getCriteria( Restrictions.ilike( "identifier", "%" + identifier + "%" ) ).setProjection(
-            Projections.property( "patient" ) ).setFirstResult( min ).setMaxResults( max ).list();
+        return getCriteria( Restrictions.ilike( "identifier", "%" + identifier + "%" ) )
+            .setProjection( Projections.property( "patient" ) ).setFirstResult( min ).setMaxResults( max ).list();
     }
 
     public int countGetPatientsByIdentifier( String identifier )
@@ -122,4 +129,10 @@ public class HibernatePatientIdentifierStore
             .list();
     }
 
+    public boolean checkDuplicateIdentifier( Integer patientId, String identifier )
+    {
+        Number rs = (Number) getCriteria( Restrictions.eq( "patient.id", patientId ) , Restrictions.ilike( "identifier", identifier ) ).setProjection(
+            Projections.rowCount() ).uniqueResult();
+        return ( rs != null & rs.intValue() > 0 )? true: false;
+    }
 }

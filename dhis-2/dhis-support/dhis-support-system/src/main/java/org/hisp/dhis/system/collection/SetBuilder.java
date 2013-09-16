@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.event.person;
+package org.hisp.dhis.system.collection;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,39 +28,49 @@ package org.hisp.dhis.dxf2.event.person;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.DxfNamespaces;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-@JacksonXmlRootElement( localName = "gender", namespace = DxfNamespaces.DXF_2_0 )
-public enum Gender
+public class SetBuilder<E>
 {
-    MALE( "M" ), FEMALE( "F" ), TRANSGENDER( "T" );
-
-    private final String value;
-
-    private Gender( String value )
+    private Set<E> set;
+    
+    public SetBuilder()
     {
-        this.value = value;
+        set = new HashSet<E>();
     }
-
-    public String getValue()
+    
+    public SetBuilder<E> add( E element )
     {
-        return value;
+        set.add( element );
+        return this;
     }
-
-    public static Gender fromString( String text )
+    
+    public SetBuilder<E> add( E... elements )
     {
-        for ( Gender gender : Gender.values() )
+        for ( E element : elements )
         {
-            if ( text.equals( gender.getValue() ) )
-            {
-                return gender;
-            }
+            set.add( element );
         }
-
-        throw new IllegalArgumentException();
+        
+        return this;
+    }
+    
+    public SetBuilder<E> addAll( Collection<? extends E> collection )
+    {
+        set.addAll( collection );
+        return this;
+    }
+    
+    /**
+     * Returns an immutable Set based on the content of the builder.
+     */
+    public Set<E> build()
+    {
+        return new HashSet<E>( set );
     }
 }

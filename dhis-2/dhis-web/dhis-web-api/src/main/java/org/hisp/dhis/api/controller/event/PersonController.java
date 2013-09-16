@@ -29,31 +29,40 @@ package org.hisp.dhis.api.controller.event;
  */
 
 import org.hisp.dhis.api.controller.WebOptions;
+import org.hisp.dhis.api.controller.exception.NotFoundException;
+import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.common.IdentifiableObjectManager;
-import org.hisp.dhis.dxf2.event.person.Gender;
-import org.hisp.dhis.dxf2.event.person.Person;
-import org.hisp.dhis.dxf2.event.person.PersonService;
-import org.hisp.dhis.dxf2.event.person.Persons;
+import org.hisp.dhis.dxf2.person.Gender;
+import org.hisp.dhis.dxf2.person.Person;
+import org.hisp.dhis.dxf2.person.PersonService;
+import org.hisp.dhis.dxf2.person.Persons;
+import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
+import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.client.HttpClientErrorException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping(value = PersonController.RESOURCE_PATH)
+@RequestMapping( value = PersonController.RESOURCE_PATH )
 public class PersonController
 {
     public static final String RESOURCE_PATH = "/persons";
@@ -63,6 +72,10 @@ public class PersonController
 
     @Autowired
     private IdentifiableObjectManager manager;
+
+    // -------------------------------------------------------------------------
+    // READ
+    // -------------------------------------------------------------------------
 
     @RequestMapping( value = "", method = RequestMethod.GET )
     public String getPersons(
@@ -123,18 +136,6 @@ public class PersonController
         return "persons";
     }
 
-    private Program getProgram( String programUid )
-    {
-        Program program = manager.get( Program.class, programUid );
-
-        if ( program == null )
-        {
-            throw new HttpClientErrorException( HttpStatus.BAD_REQUEST, "program is not valid uid." );
-        }
-
-        return program;
-    }
-
     private OrganisationUnit getOrganisationUnit( String orgUnitUid )
     {
         OrganisationUnit organisationUnit = manager.get( OrganisationUnit.class, orgUnitUid );
@@ -148,7 +149,7 @@ public class PersonController
     }
 
     @RequestMapping( value = "/{id}", method = RequestMethod.GET )
-    public String getPerson( @PathVariable String id, @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request )
+    public String getPerson( @PathVariable String id, @RequestParam Map<String, String> parameters, Model model )
     {
         WebOptions options = new WebOptions( parameters );
         Person person = personService.getPerson( id );
@@ -157,5 +158,116 @@ public class PersonController
         model.addAttribute( "viewClass", options.getViewClass( "detailed" ) );
 
         return "person";
+    }
+
+    // -------------------------------------------------------------------------
+    // CREATE
+    // -------------------------------------------------------------------------
+
+    @RequestMapping( value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE )
+    public void postPersonXml( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    {
+        ImportSummaries importSummaries = personService.savePersonXml( request.getInputStream() );
+
+        if ( importSummaries.getImportSummaries().size() > 1 )
+        {
+            response.setStatus( HttpServletResponse.SC_CREATED );
+            JacksonUtils.toXml( response.getOutputStream(), importSummaries );
+        }
+        else
+        {
+            response.setStatus( HttpServletResponse.SC_CREATED );
+            ImportSummary importSummary = importSummaries.getImportSummaries().get( 0 );
+            response.setHeader( "Location", getResourcePath( request, importSummary ) );
+            JacksonUtils.toXml( response.getOutputStream(), importSummary );
+        }
+    }
+
+    @RequestMapping( value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE )
+    public void postPersonJson( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    {
+        ImportSummaries importSummaries = personService.savePersonJson( request.getInputStream() );
+
+        if ( importSummaries.getImportSummaries().size() > 1 )
+        {
+            response.setStatus( HttpServletResponse.SC_CREATED );
+            JacksonUtils.toJson( response.getOutputStream(), importSummaries );
+        }
+        else
+        {
+            response.setStatus( HttpServletResponse.SC_CREATED );
+            ImportSummary importSummary = importSummaries.getImportSummaries().get( 0 );
+            response.setHeader( "Location", getResourcePath( request, importSummary ) );
+            JacksonUtils.toJson( response.getOutputStream(), importSummary );
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // UPDATE
+    // -------------------------------------------------------------------------
+
+    @RequestMapping( value = "/{id}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_XML_VALUE )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    public void updatePersonXml( @PathVariable String id, HttpServletRequest request, HttpServletResponse response ) throws IOException
+    {
+        ImportSummary importSummary = personService.updatePersonXml( id, request.getInputStream() );
+        JacksonUtils.toXml( response.getOutputStream(), importSummary );
+    }
+
+    @RequestMapping( value = "/{id}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    public void updatePersonJson( @PathVariable String id, HttpServletRequest request, HttpServletResponse response ) throws IOException
+    {
+        ImportSummary importSummary = personService.updatePersonJson( id, request.getInputStream() );
+        JacksonUtils.toJson( response.getOutputStream(), importSummary );
+    }
+
+    // -------------------------------------------------------------------------
+    // DELETE
+    // -------------------------------------------------------------------------
+
+    @RequestMapping( value = "/{id}", method = RequestMethod.DELETE )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    public void deletePerson( @PathVariable String id ) throws NotFoundException
+    {
+        Person person = getPerson( id );
+        personService.deletePerson( person );
+    }
+
+    // -------------------------------------------------------------------------
+    // ENROLLMENT
+    // -------------------------------------------------------------------------
+
+
+    // -------------------------------------------------------------------------
+    // HELPERS
+    // -------------------------------------------------------------------------
+
+    private Person getPerson( String id ) throws NotFoundException
+    {
+        Person person = personService.getPerson( id );
+
+        if ( person == null )
+        {
+            throw new NotFoundException( "Person", id );
+        }
+        return person;
+    }
+
+    private Program getProgram( String id ) throws NotFoundException
+    {
+        Program program = manager.get( Program.class, id );
+
+        if ( program == null )
+        {
+            throw new NotFoundException( "Person", id );
+        }
+
+        return program;
+    }
+
+    private String getResourcePath( HttpServletRequest request, ImportSummary importSummary )
+    {
+        return ContextUtils.getContextPath( request ) + "/api/" + "persons" + "/" + importSummary.getReference();
     }
 }

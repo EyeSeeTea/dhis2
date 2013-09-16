@@ -90,6 +90,9 @@ function showProgramStageDetails( programStageId )
 		var remindCompleted = ( json.programStage.remindCompleted == 'true') ? i18n_yes : i18n_no;
 		setInnerHTML( 'remindCompletedField', remindCompleted );   	
 		
+		var allowGenerateNextVisit = ( json.programStage.allowGenerateNextVisit == 'true') ? i18n_yes : i18n_no;
+		setInnerHTML( 'allowGenerateNextVisitField', allowGenerateNextVisit );   	
+		
 		var templateMessage = "";
 		for(var i in json.programStage.patientReminders){
 			var index = eval(i) + 1;
@@ -125,14 +128,6 @@ function selectDataElements()
 				html += "<td align='center'><input type='hidden' name='allowDateInFuture'></td>";
 			}
 			
-			if( jQuery(item).attr('valuetype') =='optionset')
-			{
-				html += "<td align='center'><input type='checkbox' name='displayAsRadioButton'></td>";
-			}
-			else{
-				html += "<td align='center'><input type='hidden' name='displayAsRadioButton'></td>";
-			}
-			
 			html += "</tr>";
 			selectedList.append( html );
 			jQuery( item ).remove();
@@ -155,14 +150,6 @@ function selectAllDataElements()
 		}
 		else{
 			html += "<td align='center'><input type='hidden' name='allowDateInFuture'></td>";
-		}
-		
-		if( jQuery(item).attr('valuetype') =='optionset')
-		{
-			html += "<td align='center'><input type='checkbox' name='displayAsRadioButton'></td>";
-		}
-		else{
-			html += "<td align='center'><input type='hidden' name='displayAsRadioButton'></td>";
 		}
 		
 		html += "</tr>";

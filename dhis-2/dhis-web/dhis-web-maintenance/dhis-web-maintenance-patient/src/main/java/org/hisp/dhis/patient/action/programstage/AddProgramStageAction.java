@@ -152,13 +152,6 @@ public class AddProgramStageAction
         this.allowProvidedElsewhere = allowProvidedElsewhere;
     }
 
-    private List<Boolean> displayAsRadioButtons = new ArrayList<Boolean>();
-
-    public void setDisplayAsRadioButtons( List<Boolean> displayAsRadioButtons )
-    {
-        this.displayAsRadioButtons = displayAsRadioButtons;
-    }
-
     private Boolean irregular;
 
     public void setIrregular( Boolean irregular )
@@ -292,6 +285,13 @@ public class AddProgramStageAction
         this.remindCompleted = remindCompleted;
     }
 
+    private Boolean allowGenerateNextVisit;
+
+    public void setAllowGenerateNextVisit( Boolean allowGenerateNextVisit )
+    {
+        this.allowGenerateNextVisit = allowGenerateNextVisit;
+    }
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -309,6 +309,7 @@ public class AddProgramStageAction
         generatedByEnrollmentDate = (generatedByEnrollmentDate == null) ? false : generatedByEnrollmentDate;
         blockEntryForm = (blockEntryForm == null) ? false : blockEntryForm;
         remindCompleted = (remindCompleted == null) ? false : remindCompleted;
+        allowGenerateNextVisit = (allowGenerateNextVisit == null) ? false : allowGenerateNextVisit;
 
         ProgramStage programStage = new ProgramStage();
         Program program = programService.getProgram( id );
@@ -327,6 +328,7 @@ public class AddProgramStageAction
         programStage.setBlockEntryForm( blockEntryForm );
         programStage.setRemindCompleted( remindCompleted );
         programStage.setGeneratedByEnrollmentDate( generatedByEnrollmentDate );
+        programStage.setAllowGenerateNextVisit( allowGenerateNextVisit );
 
         Set<PatientReminder> patientReminders = new HashSet<PatientReminder>();
         for ( int i = 0; i < daysAllowedSendMessages.size(); i++ )
@@ -358,14 +360,12 @@ public class AddProgramStageAction
             Boolean allowed = allowProvidedElsewhere.get( i ) == null ? false : allowProvidedElsewhere.get( i );
             Boolean displayInReport = displayInReports.get( i ) == null ? false : displayInReports.get( i );
             Boolean allowDate = allowDateInFutures.get( i ) == null ? false : allowDateInFutures.get( i );
-            Boolean displayRadioButton = displayAsRadioButtons.get( i ) == null ? false : displayAsRadioButtons.get( i );
-
+           
             ProgramStageDataElement programStageDataElement = new ProgramStageDataElement( programStage, dataElement,
                 this.compulsories.get( i ), new Integer( i ) );
             programStageDataElement.setAllowProvidedElsewhere( allowed );
             programStageDataElement.setDisplayInReports( displayInReport );
             programStageDataElement.setAllowDateInFuture( allowDate );
-            programStageDataElement.setDisplayAsRadioButton( displayRadioButton );
             programStageDataElementService.addProgramStageDataElement( programStageDataElement );
         }
 

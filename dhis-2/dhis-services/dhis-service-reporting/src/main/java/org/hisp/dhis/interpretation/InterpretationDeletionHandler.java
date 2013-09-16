@@ -1,4 +1,4 @@
-package org.hisp.dhis.patient;
+package org.hisp.dhis.interpretation;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,34 +28,38 @@ package org.hisp.dhis.patient;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.junit.Assert.*;
+import java.util.List;
 
-import org.junit.Test;
+import org.hisp.dhis.system.deletion.DeletionHandler;
+import org.hisp.dhis.user.User;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class PatientTest
-{    
-    @Test
-    public void testFullname() {
+/**
+ * @author Lars Helge Overland
+ */
+public class InterpretationDeletionHandler
+    extends DeletionHandler
+{
+    @Autowired
+    private InterpretationService interpretationService;
+    
+    @Override
+    protected String getClassName()
+    {
+        return DeletionHandler.class.getSimpleName();
+    }
 
-        Patient patient = new Patient();
+    public void deleteUser( User user )
+    {
+        List<Interpretation> interpretations = interpretationService.getInterpretations( user );
         
-        assertEquals( "", patient.getFullName() );
-        
-        patient.setFirstName( "firstName" );
-        assertEquals( "firstName", patient.getFullName() );
-        
-        patient.setLastName( "lastName" );
-        assertEquals( "firstName lastName", patient.getFullName() );
-
-        patient.setMiddleName( "middleName" );
-        assertEquals( "firstName middleName lastName", patient.getFullName() );
-
-        patient.setFirstName( "" );
-        assertEquals( "middleName lastName", patient.getFullName() );
-
-        patient.setFirstName( "firstName middleName lastName" );
-        patient.setMiddleName( null );
-        patient.setLastName( null );
-        assertEquals( "firstName middleName lastName", patient.getFullName() );
+        for ( Interpretation interpretation : interpretations )
+        {
+            if ( interpretation.getUser() != null && interpretation.getUser().equals( user ) )
+            {
+                interpretation.setUser( null );
+                interpretationService.updateInterpretation( interpretation );
+            }
+        }
     }
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.event.person;
+package org.hisp.dhis.dxf2.person;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,37 +28,59 @@ package org.hisp.dhis.dxf2.event.person;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.hisp.dhis.common.DxfNamespaces;
+
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public enum DateOfBirthType
+@JacksonXmlRootElement( localName = "contact", namespace = DxfNamespaces.DXF_2_0 )
+public class Contact
 {
-    VERIFIED( "V" ),
-    DECLARED( "D" ),
-    APPROXIMATE( "A" );
+    private String phoneNumber;
 
-    private final String value;
-
-    private DateOfBirthType( String value )
+    public Contact()
     {
-        this.value = value;
     }
 
-    public String getValue()
+    @JsonProperty( required = true )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getPhoneNumber()
     {
-        return value;
+        return phoneNumber;
     }
 
-    public static DateOfBirthType fromString( String text )
+    public void setPhoneNumber( String phoneNumber )
     {
-        for ( DateOfBirthType dateOfBirthType : DateOfBirthType.values() )
-        {
-            if ( text.equals( dateOfBirthType.getValue() ) )
-            {
-                return dateOfBirthType;
-            }
-        }
+        this.phoneNumber = phoneNumber;
+    }
 
-        throw new IllegalArgumentException();
+    @Override
+    public boolean equals( Object o )
+    {
+        if ( this == o ) return true;
+        if ( o == null || getClass() != o.getClass() ) return false;
+
+        Contact contact = (Contact) o;
+
+        if ( phoneNumber != null ? !phoneNumber.equals( contact.phoneNumber ) : contact.phoneNumber != null ) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return phoneNumber != null ? phoneNumber.hashCode() : 0;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Contact{" +
+            "phoneNumber='" + phoneNumber + '\'' +
+            '}';
     }
 }

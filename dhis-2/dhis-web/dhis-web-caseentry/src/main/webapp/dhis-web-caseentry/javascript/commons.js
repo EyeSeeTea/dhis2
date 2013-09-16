@@ -227,7 +227,7 @@ function getSearchParams()
 	if(getFieldValue('programIdAddPatient')!='')
 	{
 		programIds += "&programIds=" + getFieldValue('programIdAddPatient');
-		params += "prg_" + getFieldValue('programIdAddPatient');
+		params += "searchTexts=prg_" + getFieldValue('programIdAddPatient');
 	}
 	var programStageId = jQuery('#programStageAddPatient').val();
 	if( getFieldValue('searchByProgramStage') == "true" ){
@@ -238,7 +238,7 @@ function getSearchParams()
 			orgunitid = 0;
 		}
 		var endDueDate = getFieldValue('endDueDate');
-		params = '&searchTexts=stat_' + getFieldValue('programIdAddPatient') 
+		params += '&searchTexts=stat_' + getFieldValue('programIdAddPatient') 
 			   + '_' + startDueDate + '_' + endDueDate
 			   + "_" + orgunitid
 			   + '_' + followup + '_' + statusEvent;
@@ -253,7 +253,6 @@ function getSearchParams()
 				if( idx == 0){
 					p = "&searchTexts=" + item.value;
 					if(item.value=='prg'){
-						params += '&prg=';
 						flag = true;
 					}
 				}
@@ -553,8 +552,17 @@ function showColorHelp()
 function showCreateNewEvent( programInstanceId, programStageId )
 {
 	var flag = false;
+	
 	if(programStageId!=undefined)
 	{
+		jQuery('#repeatableProgramStage_' + programInstanceId + " option ").each(function(){
+			if( jQuery(this).css("display")!='none' && programStageId==jQuery(this).attr('prevStageId')){
+				jQuery(this).attr("selected","selected");
+				setSuggestedDueDate( programInstanceId );
+				flag = true;
+			}
+		});
+		
 		jQuery('#repeatableProgramStage_' + programInstanceId + " option ").each(function(){
 			if( jQuery(this).css("display")!='none' && programStageId==jQuery(this).val()){
 				jQuery(this).attr("selected","selected");

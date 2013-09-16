@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.event.person;
+package org.hisp.dhis.common;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,57 +28,79 @@ package org.hisp.dhis.dxf2.event.person;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.DxfNamespaces;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-@JacksonXmlRootElement( localName = "identifier", namespace = DxfNamespaces.DXF_2_0 )
-public class Identifier
+public class GridValue
 {
-    private String type;
+    private Object value;
+    
+    private Map<Object, Object> attributes = new HashMap<Object, Object>();
 
-    private String value;
+    // ---------------------------------------------------------------------
+    // Constructors
+    // ---------------------------------------------------------------------
 
-    public Identifier()
-    {
-    }
-
-    public Identifier( String value )
+    public GridValue( Object value )
     {
         this.value = value;
     }
-
-    public Identifier( String type, String value )
+    
+    public GridValue( Object value, Map<Object, Object> attributes )
     {
-        this.type = type;
         this.value = value;
+        this.attributes = attributes;
     }
+    
+    // ---------------------------------------------------------------------
+    // Logic
+    // ---------------------------------------------------------------------
 
-    @JsonProperty
-    @JacksonXmlProperty( isAttribute = true )
-    public String getType()
+    public void attr( Object attribute, Object value )
     {
-        return type;
+        this.attributes.put( attribute, value );
     }
-
-    public void setType( String type )
+    
+    public Object attr( Object attribute )
     {
-        this.type = type;
+        return this.attributes.get( attribute );
+    }
+    
+    public boolean hasAttr( Object attribute )
+    {
+        return this.attributes.containsKey( attribute );
     }
 
-    @JsonProperty
-    @JacksonXmlProperty( isAttribute = true )
-    public String getValue()
+    @Override
+    public String toString()
+    {
+        return value != null ? value.toString() : null;
+    }
+
+    // ---------------------------------------------------------------------
+    // Get and set methods
+    // ---------------------------------------------------------------------
+
+    public Object getValue()
     {
         return value;
     }
 
-    public void setValue( String value )
+    public void setValue( Object value )
     {
         this.value = value;
+    }
+
+    public Map<Object, Object> getAttributes()
+    {
+        return attributes;
+    }
+
+    public void setAttributes( Map<Object, Object> attributes )
+    {
+        this.attributes = attributes;
     }
 }

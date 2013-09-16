@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.event.person;
+package org.hisp.dhis.dxf2.person;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -32,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.patient.Patient;
 
 import java.util.Date;
 
@@ -45,20 +46,33 @@ public class DateOfBirth
 
     private DateOfBirthType type;
 
+    private Integer age;
+
     public DateOfBirth()
     {
+        this.type = DateOfBirthType.APPROXIMATE;
+        this.age = 0;
     }
 
     public DateOfBirth( Date date )
     {
-        this.date = date;
         this.type = DateOfBirthType.VERIFIED;
+        this.age = Patient.getIntegerValueOfAge( date );
+        this.date = date;
     }
 
     public DateOfBirth( Date date, DateOfBirthType type )
     {
-        this.date = date;
         this.type = type;
+        this.age = Patient.getIntegerValueOfAge( date );
+        this.date = date;
+    }
+
+    public DateOfBirth( Integer age )
+    {
+        this.type = DateOfBirthType.APPROXIMATE;
+        this.age = age;
+        this.date = Patient.getBirthFromAge( age, Patient.AGE_TYPE_YEAR );
     }
 
     @JsonProperty( required = true )
@@ -73,5 +87,46 @@ public class DateOfBirth
     public DateOfBirthType getType()
     {
         return type;
+    }
+
+    @JsonProperty( required = true )
+    @JacksonXmlProperty( isAttribute = true )
+    public Integer getAge()
+    {
+        return age;
+    }
+
+    @Override
+    public boolean equals( Object o )
+    {
+        if ( this == o ) return true;
+        if ( o == null || getClass() != o.getClass() ) return false;
+
+        DateOfBirth that = (DateOfBirth) o;
+
+        if ( age != null ? !age.equals( that.age ) : that.age != null ) return false;
+        if ( date != null ? !date.equals( that.date ) : that.date != null ) return false;
+        if ( type != that.type ) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int result = date != null ? date.hashCode() : 0;
+        result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (age != null ? age.hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "DateOfBirth{" +
+            "date=" + date +
+            ", type=" + type +
+            ", age=" + age +
+            '}';
     }
 }

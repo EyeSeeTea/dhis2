@@ -81,6 +81,12 @@
 				<td></td>
 			</tr>
 			
+			<tr>
+				<td><label>$i18n.getString( "remind_creating_next_event_on_this_event_completed" )</label></td>
+				<td><input type="checkbox" id="allowGenerateNextVisit" name="allowGenerateNextVisit" value='true' #if( $programStage.allowGenerateNextVisit=='true' ) checked #end ></td>
+				<td></td>
+			</tr>
+			
 			#if($programStage.program.type==1)
 			<tr>
 				<td><label>$i18n.getString( "generated_events_by_enrollment_date" )</label></td>
@@ -124,7 +130,6 @@
 					<select id="allowProvidedElsewhere" name='allowProvidedElsewhere' multiple="multiple" class="hidden"></select>
 					<select id="displayInReports" name='displayInReports' multiple="multiple" class="hidden"></select>
 					<select id="allowDateInFutures" name='allowDateInFutures' multiple="multiple" class="hidden"></select>     
-					<select id="displayAsRadioButtons" name='displayAsRadioButtons' multiple="multiple" class="hidden"></select>     
 				</th>
 			</tr>
 		</thead>
@@ -159,7 +164,6 @@
 								<th>$i18n.getString( "allow_provided_elsewhere" )</th>
 								<th>$i18n.getString( "display_in_reports" )</th>
 								<th>$i18n.getString( "date_in_future" )</th>
-								<th>$i18n.getString( "display_as_radio_button" )</th>
 							</tr>
 						</thead>
 						<tbody id="selectedList">
@@ -174,13 +178,6 @@
 										<input type="checkbox" name="allowDateInFuture" value="$programStageDataElement.dataElement.id" #if($programStageDataElement.allowDateInFuture == 'true' ) checked #end />
 										#else
 										<input type="hidden" name="allowDateInFuture" />
-										#end
-									</td>
-									<td align="center">
-										#if($programStageDataElement.dataElement.optionSet)
-										<input type="checkbox" name="displayAsRadioButton" value="$programStageDataElement.dataElement.id" #if($programStageDataElement.displayAsRadioButton == 'true' ) checked #end />
-										#else
-										<input type="hidden" name="displayAsRadioButton" />
 										#end
 									</td>
 								</tr>

@@ -101,6 +101,8 @@ public class ProgramStage
 
     private Boolean generatedByEnrollmentDate;
 
+    private Boolean allowGenerateNextVisit = false;
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -114,45 +116,6 @@ public class ProgramStage
     {
         this.name = name;
         this.program = program;
-    }
-
-    // -------------------------------------------------------------------------
-    // hashCode, equals and toString
-    // -------------------------------------------------------------------------
-
-    @Override
-    public int hashCode()
-    {
-        return name.hashCode();
-    }
-
-    @Override
-    public boolean equals( Object object )
-    {
-        if ( this == object )
-        {
-            return true;
-        }
-
-        if ( object == null )
-        {
-            return false;
-        }
-
-        if ( getClass() != object.getClass() )
-        {
-            return false;
-        }
-
-        final ProgramStage other = (ProgramStage) object;
-
-        return name.equals( other.getName() );
-    }
-
-    @Override
-    public String toString()
-    {
-        return "[" + name + "]";
     }
 
     // -------------------------------------------------------------------------
@@ -184,7 +147,7 @@ public class ProgramStage
     {
         this.blockEntryForm = blockEntryForm;
     }
-    
+
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
@@ -399,6 +362,19 @@ public class ProgramStage
     public void setCaptureCoordinates( Boolean captureCoordinates )
     {
         this.captureCoordinates = captureCoordinates;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Boolean getAllowGenerateNextVisit()
+    {
+        return allowGenerateNextVisit;
+    }
+
+    public void setAllowGenerateNextVisit( Boolean allowGenerateNextVisit )
+    {
+        this.allowGenerateNextVisit = allowGenerateNextVisit;
     }
 
 }

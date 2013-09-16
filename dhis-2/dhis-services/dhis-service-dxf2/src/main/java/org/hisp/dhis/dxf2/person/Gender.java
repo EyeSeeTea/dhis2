@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.event.person;
+package org.hisp.dhis.dxf2.person;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,45 +28,39 @@ package org.hisp.dhis.dxf2.event.person;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.DxfNamespaces;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "persons", namespace = DxfNamespaces.DXF_2_0 )
-public class Persons
+@JacksonXmlRootElement( localName = "gender", namespace = DxfNamespaces.DXF_2_0 )
+public enum Gender
 {
-    private List<Person> persons = new ArrayList<Person>();
+    MALE( "M" ), FEMALE( "F" ), TRANSGENDER( "T" );
 
-    public Persons()
+    private final String value;
+
+    private Gender( String value )
     {
+        this.value = value;
     }
 
-    @JsonProperty( "personList" )
-    @JacksonXmlElementWrapper( localName = "personList", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "person", namespace = DxfNamespaces.DXF_2_0 )
-    public List<Person> getPersons()
+    public String getValue()
     {
-        return persons;
+        return value;
     }
 
-    public void setPersons( List<Person> persons )
+    public static Gender fromString( String text )
     {
-        this.persons = persons;
-    }
+        for ( Gender gender : Gender.values() )
+        {
+            if ( text.equals( gender.getValue() ) )
+            {
+                return gender;
+            }
+        }
 
-    @Override
-    public String toString()
-    {
-        return "Persons{" +
-            "persons=" + persons +
-            '}';
+        throw new IllegalArgumentException();
     }
 }

@@ -178,9 +178,11 @@ public class DefaultUserService
     {
         AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), user, AuditLogUtil.ACTION_DELETE );
 
+        userCredentialsStore.deleteUserCredentials( user.getUserCredentials() );
+        
         userStore.delete( user );
     }
-
+    
     public Collection<User> getAllUsers()
     {
         return userStore.getAll();
@@ -371,11 +373,6 @@ public class DefaultUserService
         userCredentialsStore.updateUserCredentials( userCredentials );
     }
 
-    public void deleteUserCredentials( UserCredentials userCredentials )
-    {
-        userCredentialsStore.deleteUserCredentials( userCredentials );
-    }
-
     public Collection<UserCredentials> getAllUserCredentials()
     {
         return userCredentialsStore.getAllUserCredentials();
@@ -483,6 +480,21 @@ public class DefaultUserService
     {
         userCredentialsStore.addUserSetting( userSetting );
     }
+    
+    public void addOrUpdateUserSetting( UserSetting userSetting )
+    {
+        UserSetting setting = getUserSetting( userSetting.getUser(), userSetting.getName() );
+        
+        if ( setting != null )
+        {
+            setting.mergeWith( userSetting );
+            updateUserSetting( setting );
+        }
+        else
+        {
+            addUserSetting( userSetting );
+        }
+    }
 
     public void updateUserSetting( UserSetting userSetting )
     {
@@ -498,10 +510,22 @@ public class DefaultUserService
     {
         return userCredentialsStore.getAllUserSettings( user );
     }
+    
+    public Collection<UserSetting> getUserSettings( String name )
+    {
+        return userCredentialsStore.getUserSettings( name );
+    }
 
     public UserSetting getUserSetting( User user, String name )
     {
         return userCredentialsStore.getUserSetting( user, name );
+    }
+    
+    public Serializable getUserSettingValue( User user, String name, Serializable defaultValue )
+    {
+        UserSetting setting = getUserSetting( user, name );
+        
+        return setting != null && setting.getValue() != null ? setting.getValue() : defaultValue;
     }
 
     public Map<User, Serializable> getUserSettings( String name, Serializable defaultValue )
@@ -529,6 +553,5 @@ public class DefaultUserService
     public Collection<String> getUsernames( String query, Integer max )
     {
         return userCredentialsStore.getUsernames( query, max );
-    }
-    
+    }    
 }

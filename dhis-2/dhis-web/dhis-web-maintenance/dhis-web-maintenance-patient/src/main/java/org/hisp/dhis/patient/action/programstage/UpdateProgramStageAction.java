@@ -278,11 +278,11 @@ public class UpdateProgramStageAction
         this.remindCompleted = remindCompleted;
     }
 
-    private List<Boolean> displayAsRadioButtons = new ArrayList<Boolean>();
+    private Boolean allowGenerateNextVisit;
 
-    public void setDisplayAsRadioButtons( List<Boolean> displayAsRadioButtons )
+    public void setAllowGenerateNextVisit( Boolean allowGenerateNextVisit )
     {
-        this.displayAsRadioButtons = displayAsRadioButtons;
+        this.allowGenerateNextVisit = allowGenerateNextVisit;
     }
 
     // -------------------------------------------------------------------------
@@ -302,6 +302,7 @@ public class UpdateProgramStageAction
         generatedByEnrollmentDate = (generatedByEnrollmentDate == null) ? false : generatedByEnrollmentDate;
         blockEntryForm = (blockEntryForm == null) ? false : blockEntryForm;
         remindCompleted = (remindCompleted == null) ? false : remindCompleted;
+        allowGenerateNextVisit = (allowGenerateNextVisit == null) ? false : allowGenerateNextVisit;
 
         ProgramStage programStage = programStageService.getProgramStage( id );
 
@@ -316,6 +317,7 @@ public class UpdateProgramStageAction
         programStage.setBlockEntryForm( blockEntryForm );
         programStage.setRemindCompleted( remindCompleted );
         programStage.setGeneratedByEnrollmentDate( generatedByEnrollmentDate );
+        programStage.setAllowGenerateNextVisit( allowGenerateNextVisit );
 
         if ( !programStage.getProgram().isSingleEvent() )
         {
@@ -359,8 +361,7 @@ public class UpdateProgramStageAction
             Boolean allowed = allowProvidedElsewhere.get( i ) == null ? false : allowProvidedElsewhere.get( i );
             Boolean displayInReport = displayInReports.get( i ) == null ? false : displayInReports.get( i );
             Boolean allowDate = allowDateInFutures.get( i ) == null ? false : allowDateInFutures.get( i );
-            Boolean displayRadioButton = displayAsRadioButtons.get( i ) == null ? false : displayAsRadioButtons.get( i );
-
+           
             ProgramStageDataElement programStageDataElement = programStageDataElementService.get( programStage,
                 dataElement );
 
@@ -371,7 +372,6 @@ public class UpdateProgramStageAction
                 programStageDataElement.setAllowProvidedElsewhere( allowed );
                 programStageDataElement.setDisplayInReports( displayInReport );
                 programStageDataElement.setAllowDateInFuture( allowDate );
-                programStageDataElement.setDisplayAsRadioButton( displayRadioButton );
                 programStageDataElementService.addProgramStageDataElement( programStageDataElement );
             }
             else
@@ -381,7 +381,6 @@ public class UpdateProgramStageAction
                 programStageDataElement.setAllowProvidedElsewhere( allowed );
                 programStageDataElement.setDisplayInReports( displayInReport );
                 programStageDataElement.setAllowDateInFuture( allowDate );
-                programStageDataElement.setDisplayAsRadioButton( displayRadioButton );
                 programStageDataElementService.updateProgramStageDataElement( programStageDataElement );
 
                 programStageDataElements.remove( programStageDataElement );

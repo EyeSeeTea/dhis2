@@ -143,6 +143,8 @@ public class Program
     private Boolean relationshipFromA;
 
     private Program relatedProgram;
+    
+    private Boolean dataEntryMethod;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -156,39 +158,6 @@ public class Program
     {
         this.name = name;
         this.description = description;
-    }
-
-    // -------------------------------------------------------------------------
-    // hashCode, equals and toString
-    // -------------------------------------------------------------------------
-
-    @Override
-    public boolean equals( Object object )
-    {
-        if ( this == object )
-        {
-            return true;
-        }
-
-        if ( object == null )
-        {
-            return false;
-        }
-
-        if ( getClass() != object.getClass() )
-        {
-            return false;
-        }
-
-        final Program other = (Program) object;
-
-        return name.equals( other.getName() );
-    }
-
-    @Override
-    public int hashCode()
-    {
-        return name.hashCode();
     }
 
     // -------------------------------------------------------------------------
@@ -648,6 +617,19 @@ public class Program
     public void setRelationshipFromA( Boolean relationshipFromA )
     {
         this.relationshipFromA = relationshipFromA;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Boolean getDataEntryMethod()
+    {
+        return dataEntryMethod;
+    }
+
+    public void setDataEntryMethod( Boolean dataEntryMethod )
+    {
+        this.dataEntryMethod = dataEntryMethod;
     }
 
 }
