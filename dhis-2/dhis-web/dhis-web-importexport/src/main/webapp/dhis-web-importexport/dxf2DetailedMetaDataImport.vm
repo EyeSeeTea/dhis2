@@ -1,6 +1,5 @@
-<script>
-
-//    MetaData Json
+<script type="text/javascript">
+//  MetaData Json
     var metaDataJson = ${metaDataJson};
 
     var i18n_select_all = '$i18n.getString( "select_all" )';
