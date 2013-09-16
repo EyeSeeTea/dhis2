@@ -34,7 +34,13 @@ import java.util.Collection;
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.configuration.ConfigurationService;
+import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.indicator.IndicatorGroup;
+import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -65,6 +71,20 @@ public class InitializeAction
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
+    }
+
+    private IndicatorService indicatorService;
+
+    public void setIndicatorService( IndicatorService indicatorService )
+    {
+        this.indicatorService = indicatorService;
+    }
+
+    private DataElementService dataElementService;
+
+    public void setDataElementService( DataElementService dataElementService )
+    {
+        this.dataElementService = dataElementService;
     }
 
     // -------------------------------------------------------------------------
@@ -121,6 +141,20 @@ public class InitializeAction
     {
         return levels;
     }
+    
+    private Collection<IndicatorGroup> indicatorGroups;
+
+    public Collection<IndicatorGroup> getIndicatorGroups()
+    {
+        return indicatorGroups;
+    }
+    
+    private Collection<DataElementGroup> dataElementGroups;
+
+    public Collection<DataElementGroup> getDataElementGroups()
+    {
+        return dataElementGroups;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -143,6 +177,10 @@ public class InitializeAction
         }
         
         levels = organisationUnitService.getOrganisationUnitLevels();
+        
+        indicatorGroups = indicatorService.getAllIndicatorGroups();
+        
+        dataElementGroups = dataElementService.getAllDataElementGroups();
 
         return SUCCESS;
     }

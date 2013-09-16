@@ -299,75 +299,21 @@ Ext.onReady( function() {
 
 		// init
 		(function() {
+			
+			// root nodes
 			for (var i = 0; i < init.rootNodes.length; i++) {
 				init.rootNodes[i].path = '/root/' + init.rootNodes[i].id;
 			}
+			
+			// sort indicator groups
+			gis.util.object.sortObjectsByString(init.indicatorGroups);
+			
+			// sort data element groups
+			gis.util.object.sortObjectsByString(init.dataElementGroups);			
 		}());
 
 		// store
 		(function() {
-			store.indicatorGroups = Ext.create('Ext.data.Store', {
-				fields: ['id', 'name'],
-				proxy: {
-					type: 'ajax',
-					url: gis.init.contextPath + gis.conf.finals.url.path_api + 'indicatorGroups.json?links=false&paging=false',
-					reader: {
-						type: 'json',
-						root: 'indicatorGroups'
-					}
-				},
-				cmp: [],
-				isLoaded: false,
-				loadFn: function(fn) {
-					if (this.isLoaded) {
-						fn.call();
-					}
-					else {
-						this.load(fn);
-					}
-				},
-				listeners: {
-					load: function() {
-						if (!this.isLoaded) {
-							this.isLoaded = true;
-							gis.util.gui.combo.setQueryMode(this.cmp, 'local');
-						}
-						this.sort('name', 'ASC');
-					}
-				}
-			});
-
-			store.dataElementGroups = Ext.create('Ext.data.Store', {
-				fields: ['id', 'name'],
-				proxy: {
-					type: 'ajax',
-					url: gis.init.contextPath + gis.conf.finals.url.path_api + 'dataElementGroups.json?links=false&paging=false',
-					reader: {
-						type: 'json',
-						root: 'dataElementGroups'
-					}
-				},
-				cmp: [],
-				isLoaded: false,
-				loadFn: function(fn) {
-					if (this.isLoaded) {
-						fn.call();
-					}
-					else {
-						this.load(fn);
-					}
-				},
-				listeners: {
-					load: function() {
-						if (!this.isLoaded) {
-							this.isLoaded = true;
-							gis.util.gui.combo.setQueryMode(this.cmp, 'local');
-						}
-						this.sort('name', 'ASC');
-					}
-				}
-			});
-
 			store.periodTypes = Ext.create('Ext.data.Store', {
 				fields: ['id', 'name'],
 				data: gis.conf.period.periodTypes
@@ -3867,19 +3813,24 @@ Ext.onReady( function() {
 			valueField: 'id',
 			displayField: 'name',
 			forceSelection: true,
+			queryMode: 'local',
 			width: gis.conf.layout.widget.item_width,
 			labelWidth: gis.conf.layout.widget.itemlabel_width,
-			store: gis.store.indicatorGroups,
+			store: {
+				fields: ['id', 'name'],
+				data: gis.init.indicatorGroups
+				//listeners: {
+					//load: function() {
+						//this.sort('name', 'ASC');
+					//}
+				//}
+			},
 			listeners: {
-				added: function() {
-					this.store.cmp.push(this);
-				},
 				select: function() {
 					indicator.clearValue();
-
-					var store = indicator.store;
-					store.proxy.url = gis.init.contextPath + gis.conf.finals.url.path_api +  'indicatorGroups/' + this.getValue() + '.json?links=false&paging=false';
-					store.load();
+					
+					indicator.store.proxy.url = gis.init.contextPath + gis.conf.finals.url.path_api +  'indicatorGroups/' + this.getValue() + '.json?links=false&paging=false';
+					indicator.store.load();
 				}
 			}
 		});
@@ -3933,7 +3884,10 @@ Ext.onReady( function() {
 			hidden: true,
 			width: gis.conf.layout.widget.item_width,
 			labelWidth: gis.conf.layout.widget.itemlabel_width,
-			store: gis.store.dataElementGroups,
+			store: {
+				fields: ['id', 'name'],
+				data: gis.init.dataElementGroups
+			},
 			loadAvailable: function(preventLoad) {
 				var store = dataElementsByGroupStore,
 					detailLevel = dataElementDetailLevel.getValue(),
@@ -3949,9 +3903,6 @@ Ext.onReady( function() {
 				}
 			},
 			listeners: {
-				added: function() {
-					this.store.cmp.push(this);
-				},
 				select: function(cb) {
 					dataElement.clearValue();
 					cb.loadAvailable();
@@ -5657,7 +5608,8 @@ console.log(view);
 
 				GIS.app.extendInstance(gis);
 
-				gis.viewport = createViewport();
+				gis.viewport = createViewport();				
+console.log("gis", gis);
 			}
 		});
 	}();
