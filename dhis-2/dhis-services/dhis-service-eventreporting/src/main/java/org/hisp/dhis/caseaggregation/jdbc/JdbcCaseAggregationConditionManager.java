@@ -414,7 +414,7 @@ public class JdbcCaseAggregationConditionManager
         {
             if ( hasPatients || operator.equals( CaseAggregationCondition.AGGRERATION_COUNT ) )
             {
-                sql += "p.firstName, p.middleName, p.lastName, p.gender, p.birthDate, p.phoneNumber, ";
+                sql += "p.name, p.gender, p.birthDate, p.phoneNumber, ";
             }
 
             if ( hasDataelement )
@@ -503,7 +503,7 @@ public class JdbcCaseAggregationConditionManager
                 // Aggregation
                 // ---------------------------------------------------------------------
 
-                if ( _orgunitIds.size() > 0 )
+                if ( !orgunitIds.isEmpty() )
                 {
                     insertAggregateValue( caseExpression, caseOperator, dataelementId, optionComboId, deSumId,
                         orgunitIds, period );
@@ -776,7 +776,7 @@ public class JdbcCaseAggregationConditionManager
             sql = sql
                 .replace( CaseAggregationCondition.MINUS_DATAELEMENT_OPERATOR + "_" + key, minus2SQLMap.get( key ) );
         }
-        
+
         return sql + " ) ";
     }
 

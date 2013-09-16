@@ -28,16 +28,16 @@ package org.hisp.dhis.patient;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
 import org.hisp.dhis.program.Program;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -56,23 +56,23 @@ public interface PatientService
 
     Patient getPatient( int id );
 
+    Patient getPatient( String uid );
+
     Collection<Patient> getAllPatients();
 
     /**
-     * Search Patient base on firstname/middlename/lastname/birthDate/gender
-     * 
-     * @param firstName
-     * @param middleName
-     * @param lastName
+     * Search Patient base on name/birthDate/gender
+     *
+     * @param name
      * @param birthdate
      * @param gender
      * @return Patient List
      */
-    Collection<Patient> getPatients( String firstName, String middleName, String lastName, Date birthdate, String gender );
+    Collection<Patient> getPatients( String name, Date birthdate, String gender );
 
     /**
      * Search Patient base on gender
-     * 
+     *
      * @param gender
      * @return Patient List
      */
@@ -80,15 +80,15 @@ public interface PatientService
 
     /**
      * Search Patient base on birthDate
-     * 
-     * @param birthdate
+     *
+     * @param birthDate
      * @return Patient List
      */
     Collection<Patient> getPatientsByBirthDate( Date birthDate );
 
     /**
      * Search Patient base on fullName
-     * 
+     *
      * @param name fullName
      * @return Patient List
      */
@@ -96,7 +96,7 @@ public interface PatientService
 
     /**
      * Search Patient base on full-name or identifier value
-     * 
+     *
      * @param searchText value
      * @return Patient List
      */
@@ -104,7 +104,7 @@ public interface PatientService
 
     /**
      * Search Patient for mobile base on identifier value
-     * 
+     *
      * @param searchText value
      * @param orgUnitId
      * @return Patient List
@@ -113,16 +113,72 @@ public interface PatientService
 
     /**
      * Search Patient base on organization unit with result limited
-     * 
+     *
      * @param organisationUnit organisationUnit
      * @return Patient List
      */
     Collection<Patient> getPatients( OrganisationUnit organisationUnit, Integer min, Integer max );
 
     /**
+     * Search Patient base on organization unit with result limited
+     *
+     * @param organisationUnit organisationUnit
+     * @return Patient List
+     */
+    Collection<Patient> getPatients( OrganisationUnit organisationUnit );
+
+    /**
+     *
+     * @param program
+     * @return
+     */
+    Collection<Patient> getPatients( Program program );
+
+    /**
+     *
+     * @param program
+     * @param gender
+     * @return
+     */
+    Collection<Patient> getPatients( Program program, String gender );
+
+    /**
+     *
+     * @param organisationUnit
+     * @param program
+     * @param gender
+     * @return
+     */
+    Collection<Patient> getPatients( OrganisationUnit organisationUnit, Program program, String gender );
+
+    /**
+     *
+     * @param organisationUnit
+     * @param program
+     * @return
+     */
+    Collection<Patient> getPatients( OrganisationUnit organisationUnit, Program program );
+
+    /**
+     * Search Patient base on organization unit with result limited
+     *
+     * @param organisationUnit organisationUnit
+     * @return Patient List
+     */
+    Collection<Patient> getPatients( OrganisationUnit organisationUnit, String gender, Integer min, Integer max );
+
+    /**
+     * Search Patient base on organization unit with result limited
+     *
+     * @param organisationUnit organisationUnit
+     * @return Patient List
+     */
+    Collection<Patient> getPatients( OrganisationUnit organisationUnit, String gender );
+
+    /**
      * Search Patient base on organization unit and sort the result by
      * PatientAttribute
-     * 
+     *
      * @param organisationUnit organisationUnit
      * @param patientAttribute
      * @param min
@@ -134,19 +190,19 @@ public interface PatientService
 
     /**
      * Search Patient base on organisationUnit and identifier value name
-     * 
+     *
      * @param organisationUnit
-     * @param searchText identifier value
+     * @param searchText       identifier value
      * @param min
      * @param max
      * @return
      */
-    Collection<Patient> getPatients( OrganisationUnit organisationUnit, String searchText, Integer min, Integer max );
+    Collection<Patient> getPatientsLikeName( OrganisationUnit organisationUnit, String name, Integer min, Integer max );
 
     /**
      * Search Patient base on PatientIdentifierType or Attribute or Patient's
      * name
-     * 
+     *
      * @param identifierTypeId
      * @param attributeId
      * @param value
@@ -157,7 +213,7 @@ public interface PatientService
     /**
      * Search Patient base on OrganisationUnit and Program with result limited
      * name
-     * 
+     *
      * @param organisationUnit
      * @param program
      * @param min
@@ -168,7 +224,7 @@ public interface PatientService
 
     /**
      * Sort the result by PatientAttribute
-     * 
+     *
      * @param patients
      * @param patientAttribute
      * @return Patient List
@@ -179,16 +235,16 @@ public interface PatientService
 
     /**
      * Search Patient base on identifier value and get number of result
-     * 
+     *
      * @param searchText
      * @return number of patients
      */
     int countGetPatients( String searchText );
 
     /**
-     * Search Patient base on firstname/middlename/lastname and get number of
+     * Search Patient base on name and get number of
      * result
-     * 
+     *
      * @param name
      * @return number of patients
      */
@@ -231,5 +287,4 @@ public interface PatientService
 
     Grid getTrackingEventsReport( Program program, List<String> searchKeys, Collection<OrganisationUnit> orgunit,
         Boolean followup, I18n i18n );
-
 }

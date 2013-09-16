@@ -28,24 +28,25 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.message.MessageConversation;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patientcomment.PatientComment;
+import org.hisp.dhis.sms.outbound.OutboundSms;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.DxfNamespaces;
-import org.hisp.dhis.common.view.DetailedView;
-import org.hisp.dhis.common.view.ExportView;
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patientcomment.PatientComment;
-import org.hisp.dhis.sms.outbound.OutboundSms;
-
-import java.io.Serializable;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author Abyot Asalefew
@@ -53,10 +54,12 @@ import java.util.Set;
  */
 @JacksonXmlRootElement( localName = "programInstance", namespace = DxfNamespaces.DXF_2_0 )
 public class ProgramInstance
-    implements Serializable
+    extends BaseIdentifiableObject
 {
     public static int STATUS_ACTIVE = 0;
+
     public static int STATUS_COMPLETED = 1;
+
     public static int STATUS_CANCELLED = 2;
 
     /**
@@ -82,6 +85,8 @@ public class ProgramInstance
 
     private List<OutboundSms> outboundSms;
 
+    private List<MessageConversation> messageConversations;
+
     private Boolean followup;
 
     private PatientComment patientComment;
@@ -106,24 +111,16 @@ public class ProgramInstance
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    /**
-     * @return the id
-     */
-    public int getId()
-    {
-        return id;
-    }
-
     @Override
     public int hashCode()
     {
         final int prime = 31;
         int result = 1;
 
-        result = prime * result + ( ( dateOfIncident == null) ? 0 : dateOfIncident.hashCode() );
-        result = prime * result + ( ( enrollmentDate == null) ? 0 : enrollmentDate.hashCode() );
-        result = prime * result + ( ( patient == null) ? 0 : patient.hashCode() );
-        result = prime * result + ( ( program == null) ? 0 : program.hashCode() );
+        result = prime * result + ((dateOfIncident == null) ? 0 : dateOfIncident.hashCode());
+        result = prime * result + ((enrollmentDate == null) ? 0 : enrollmentDate.hashCode());
+        result = prime * result + ((patient == null) ? 0 : patient.hashCode());
+        result = prime * result + ((program == null) ? 0 : program.hashCode());
 
         return result;
     }
@@ -141,7 +138,7 @@ public class ProgramInstance
             return false;
         }
 
-        if ( getClass() != object.getClass() )
+        if ( !getClass().isAssignableFrom( object.getClass() ) )
         {
             return false;
         }
@@ -197,6 +194,14 @@ public class ProgramInstance
         }
 
         return true;
+    }
+
+    /**
+     * @return the id
+     */
+    public int getId()
+    {
+        return id;
     }
 
     /**
@@ -372,6 +377,16 @@ public class ProgramInstance
     public void setPatientComment( PatientComment patientComment )
     {
         this.patientComment = patientComment;
+    }
+
+    public List<MessageConversation> getMessageConversations()
+    {
+        return messageConversations;
+    }
+
+    public void setMessageConversations( List<MessageConversation> messageConversations )
+    {
+        this.messageConversations = messageConversations;
     }
 
     // -------------------------------------------------------------------------

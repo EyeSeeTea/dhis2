@@ -43,6 +43,7 @@ import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.common.view.UuidView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.user.User;
@@ -308,16 +309,16 @@ public class OrganisationUnit
 
         return grandChildren;
     }
-    
+
     public List<OrganisationUnit> getSortedGrandChildren()
     {
         List<OrganisationUnit> grandChildren = new ArrayList<OrganisationUnit>();
-        
+
         for ( OrganisationUnit child : getSortedChildren() )
         {
             grandChildren.addAll( child.getSortedChildren() );
         }
-        
+
         return grandChildren;
     }
 
@@ -559,7 +560,7 @@ public class OrganisationUnit
         }
 
         this.level = currentLevel;
-        
+
         return currentLevel;
     }
 
@@ -600,33 +601,6 @@ public class OrganisationUnit
     }
 
     // -------------------------------------------------------------------------
-    // hashCode, equals and toString
-    // -------------------------------------------------------------------------
-
-    @Override
-    public boolean equals( Object o )
-    {
-        if ( this == o )
-        {
-            return true;
-        }
-
-        if ( o == null )
-        {
-            return false;
-        }
-
-        if ( !(o instanceof OrganisationUnit) )
-        {
-            return false;
-        }
-
-        final OrganisationUnit other = (OrganisationUnit) o;
-
-        return name.equals( other.getName() );
-    }
-
-    // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
 
@@ -636,6 +610,9 @@ public class OrganisationUnit
         return false;
     }
 
+    @JsonProperty
+    @JsonView( UuidView.class )
+    @JacksonXmlProperty( isAttribute = true, namespace = DxfNamespaces.DXF_2_0 )
     public String getUuid()
     {
         return uuid;

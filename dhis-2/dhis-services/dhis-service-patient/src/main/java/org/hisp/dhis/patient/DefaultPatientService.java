@@ -28,14 +28,6 @@ package org.hisp.dhis.patient;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
@@ -51,6 +43,14 @@ import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.relationship.RelationshipTypeService;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -186,16 +186,21 @@ public class DefaultPatientService
     }
 
     @Override
+    public Patient getPatient( String uid )
+    {
+        return patientStore.getByUid( uid );
+    }
+
+    @Override
     public Collection<Patient> getAllPatients()
     {
         return patientStore.getAll();
     }
 
     @Override
-    public Collection<Patient> getPatients( String firstName, String middleName, String lastName, Date birthdate,
-        String gender )
+    public Collection<Patient> getPatients( String name, Date birthdate, String gender )
     {
-        return patientStore.get( firstName, middleName, lastName, birthdate, gender );
+        return patientStore.get( name, birthdate, gender );
     }
 
     @Override
@@ -259,8 +264,8 @@ public class DefaultPatientService
         patients.addAll( getPatientsByNames( searchText, 0, Integer.MAX_VALUE ) );
         patients.addAll( getPatientsByPhone( searchText, 0, Integer.MAX_VALUE ) );
 
-        // if an orgunit has been selected, filter out every patient that has a
-        // different ou
+        // if an org-unit has been selected, filter out every patient that has a
+        // different org-unit
         if ( orgUnitId != 0 )
         {
             Set<Patient> toRemoveList = new HashSet<Patient>();
@@ -286,6 +291,48 @@ public class DefaultPatientService
     }
 
     @Override
+    public Collection<Patient> getPatients( OrganisationUnit organisationUnit )
+    {
+        return patientStore.getByOrgUnit( organisationUnit, 0, Integer.MAX_VALUE );
+    }
+
+    @Override
+    public Collection<Patient> getPatients( Program program )
+    {
+        return patientStore.getByProgram( program, 0, Integer.MAX_VALUE );
+    }
+
+    @Override
+    public Collection<Patient> getPatients( Program program, String gender )
+    {
+        return patientStore.getByProgram( program, gender, 0, Integer.MAX_VALUE );
+    }
+
+    @Override
+    public Collection<Patient> getPatients( OrganisationUnit organisationUnit, Program program, String gender )
+    {
+        return patientStore.getByOrgUnitProgramGender( organisationUnit, program, gender, 0, Integer.MAX_VALUE );
+    }
+
+    @Override
+    public Collection<Patient> getPatients( OrganisationUnit organisationUnit, Program program )
+    {
+        return patientStore.getByOrgUnitProgram( organisationUnit, program, 0, Integer.MAX_VALUE );
+    }
+
+    @Override
+    public Collection<Patient> getPatients( OrganisationUnit organisationUnit, String gender, Integer min, Integer max )
+    {
+        return patientStore.getByOrgUnitAndGender( organisationUnit, gender, min, max );
+    }
+
+    @Override
+    public Collection<Patient> getPatients( OrganisationUnit organisationUnit, String gender )
+    {
+        return patientStore.getByOrgUnitAndGender( organisationUnit, gender, 0, Integer.MAX_VALUE );
+    }
+
+    @Override
     public Collection<Patient> getPatients( OrganisationUnit organisationUnit, PatientAttribute patientAttribute,
         Integer min, Integer max )
     {
@@ -302,12 +349,12 @@ public class DefaultPatientService
     }
 
     @Override
-    public Collection<Patient> getPatients( OrganisationUnit organisationUnit, String searchText, Integer min,
+    public Collection<Patient> getPatientsLikeName( OrganisationUnit organisationUnit, String name, Integer min,
         Integer max )
     {
         Collection<Patient> patients = new ArrayList<Patient>();
 
-        Collection<Patient> allPatients = getPatientsByNames( searchText, min, max );
+        Collection<Patient> allPatients = getPatientsByNames( name, min, max );
 
         if ( allPatients.retainAll( getPatients( organisationUnit, min, max ) ) )
         {
@@ -465,7 +512,7 @@ public class DefaultPatientService
         if ( representativeId == null )
             return false;
 
-        return patient.getRepresentative() == null || !patient.getRepresentative().getId().equals( representativeId );
+        return patient.getRepresentative() == null || !(patient.getRepresentative().getId() == representativeId);
     }
 
     @Override

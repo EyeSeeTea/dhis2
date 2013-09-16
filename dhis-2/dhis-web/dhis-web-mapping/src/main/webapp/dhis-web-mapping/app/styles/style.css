@@ -564,6 +564,10 @@ gis-combo .x-form-item-label {
     background-image:url('../images/check.png');
     padding-left: 18px;
 }
+.gis-menu-item-unselected {
+    background-image:url('../images/check-un.png');
+    padding-left: 18px;
+}
 
 	/* Menu align */
 .gis-btn-menu {

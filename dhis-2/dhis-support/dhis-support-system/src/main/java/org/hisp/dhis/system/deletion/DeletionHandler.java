@@ -54,6 +54,7 @@ import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
 import org.hisp.dhis.indicator.IndicatorType;
+import org.hisp.dhis.interpretation.Interpretation;
 import org.hisp.dhis.mapping.Map;
 import org.hisp.dhis.mapping.MapLegend;
 import org.hisp.dhis.mapping.MapLegendSet;
@@ -88,7 +89,6 @@ import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAuthorityGroup;
-import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserSetting;
 import org.hisp.dhis.validation.ValidationCriteria;
@@ -418,15 +418,6 @@ public abstract class DeletionHandler
         return null;
     }
 
-    public void deleteUserCredentials( UserCredentials credentials )
-    {
-    }
-
-    public String allowDeleteUserCredentials( UserCredentials credentials )
-    {
-        return null;
-    }
-
     public void deleteUserAuthorityGroup( UserAuthorityGroup authorityGroup )
     {
     }
@@ -714,5 +705,13 @@ public abstract class DeletionHandler
     {
         return null;
     }
-
+    
+    public void deleteIntepretation( Interpretation interpretation )
+    {
+    }
+    
+    public String allowDeleteInterpretation( Interpretation interpretation )
+    {
+        return null;
+    }
 }

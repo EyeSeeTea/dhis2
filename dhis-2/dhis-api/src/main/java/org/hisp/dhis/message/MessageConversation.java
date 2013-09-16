@@ -51,6 +51,8 @@ import java.util.*;
 public class MessageConversation
     extends BaseIdentifiableObject
 {
+    private static final int RECIPIENTS_MAX_DISPLAY = 25;
+    
     // --------------------------------------------------------------------------
     // Persistent fields
     // --------------------------------------------------------------------------
@@ -81,7 +83,6 @@ public class MessageConversation
 
     private transient int messageCount;
 
-
     // --------------------------------------------------------------------------
     // Constructors
     // --------------------------------------------------------------------------
@@ -100,35 +101,6 @@ public class MessageConversation
     // --------------------------------------------------------------------------
     // Logic
     // --------------------------------------------------------------------------
-
-    @Override
-    public int hashCode()
-    {
-        return uid.hashCode();
-    }
-
-    @Override
-    public boolean equals( Object object )
-    {
-        if ( this == object )
-        {
-            return true;
-        }
-
-        if ( object == null )
-        {
-            return false;
-        }
-
-        if ( getClass() != object.getClass() )
-        {
-            return false;
-        }
-
-        final MessageConversation other = (MessageConversation) object;
-
-        return uid.equals( other.uid );
-    }
 
     @Override
     public String toString()
@@ -267,6 +239,35 @@ public class MessageConversation
     {
         userMessages.clear();
     }
+    
+    public String getLastSenderName()
+    {
+        boolean hasName = lastSenderFirstname != null || lastSenderSurname != null;
+                
+        return hasName ? ( lastSenderFirstname + " " + lastSenderSurname ) : null;
+    }
+    
+    public Set<User> getTopRecipients()
+    {
+        Set<User> recipients = new HashSet<User>();
+        
+        for ( UserMessage userMessage : userMessages )
+        {
+            recipients.add( userMessage.getUser() );
+            
+            if ( recipients.size() > RECIPIENTS_MAX_DISPLAY )
+            {
+                break;
+            }
+        }
+        
+        return recipients;
+    }
+    
+    public int getBottomRecipients()
+    {
+        return userMessages.size() - RECIPIENTS_MAX_DISPLAY;
+    }
 
     // -------------------------------------------------------------------------------------------------------
     // Persistent fields
@@ -374,11 +375,6 @@ public class MessageConversation
         this.followUp = followUp;
     }
 
-    public String getLastSenderName()
-    {
-        return lastSenderFirstname + " " + lastSenderSurname;
-    }
-
     public String getLastSenderSurname()
     {
         return lastSenderSurname;
@@ -420,8 +416,7 @@ public class MessageConversation
 
             subject = messageConversation.getSubject() == null ? subject : messageConversation.getSubject();
             lastSender = messageConversation.getLastSender() == null ? lastSender : messageConversation.getLastSender();
-            lastMessage = messageConversation.getLastMessage() == null ? lastMessage : messageConversation
-                .getLastMessage();
+            lastMessage = messageConversation.getLastMessage() == null ? lastMessage : messageConversation.getLastMessage();
 
             removeAllUserMessages();
             userMessages.addAll( messageConversation.getUserMessages() );

@@ -47,14 +47,12 @@ import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.util.JRProperties;
 
 import org.apache.velocity.VelocityContext;
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.constant.ConstantService;
-import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -171,9 +169,6 @@ public class DefaultReportService
 
         try
         {
-            JRProperties.setProperty( "net.sf.jasperreports.awt.ignore.missing.font", "true" );
-            JRProperties.setProperty( "net.sf.jasperreports.default.font.name", "DejaVu Sans" );
-
             JasperReport jasperReport = JasperCompileManager.compileReport( StreamUtils.getInputStream( report.getDesignContent() ) );
 
             if ( report.hasReportTable() ) // Use JR data source

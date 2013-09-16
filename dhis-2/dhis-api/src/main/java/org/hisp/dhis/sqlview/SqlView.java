@@ -80,37 +80,6 @@ public class SqlView
     }
 
     // -------------------------------------------------------------------------
-    // hashCode, equals and toString
-    // -------------------------------------------------------------------------
-
-    @Override
-    public boolean equals( Object obj )
-    {
-        if ( this == obj )
-        {
-            return true;
-        }
-        if ( obj == null )
-        {
-            return false;
-        }
-        if ( getClass() != obj.getClass() )
-        {
-            return false;
-        }
-
-        final SqlView other = (SqlView) obj;
-
-        return name.equals( other.name );
-    }
-
-    @Override
-    public String toString()
-    {
-        return "[ Name: " + name + ", sql query: " + sqlQuery + " ]";
-    }
-
-    // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
 
@@ -118,7 +87,7 @@ public class SqlView
     {
         final Pattern p = Pattern.compile( "\\W" );
 
-        String input = new String( this.name );
+        String input = name;
         
         String[] items = p.split( input.trim().replaceAll( "_", "" ) );
 
@@ -126,7 +95,7 @@ public class SqlView
 
         for ( String s : items )
         {
-            input += (s.equals( "" ) == true) ? "" : ("_" + s);
+            input += s.isEmpty() ? "" : ( "_" + s );
         }
 
         return PREFIX_VIEWNAME + input;

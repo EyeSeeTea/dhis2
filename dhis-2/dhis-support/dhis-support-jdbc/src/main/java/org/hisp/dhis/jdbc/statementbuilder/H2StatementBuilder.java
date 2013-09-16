@@ -41,6 +41,12 @@ public class H2StatementBuilder
     {
         return "double";
     }
+    
+    @Override
+    public String getColumnQuote()
+    {
+        return "\"";
+    }
 
     @Override
     public String getVacuum( String table )
@@ -164,7 +170,7 @@ public class H2StatementBuilder
     @Override
     public String getPatientFullName()
     {
-        return  "concat( firstname, \" \",middleName , \" \" , lastname)";
+        return  "name";
     }
 
     @Override

@@ -50,12 +50,14 @@ public interface UserSettingService
     final String KEY_STYLE_DIRECTORY = "stylesheetDirectory";
     final String KEY_MESSAGE_EMAIL_NOTIFICATION = "keyMessageEmailNotification";
     final String KEY_MESSAGE_SMS_NOTIFICATION = "keyMessageSmsNotification";
+    final String KEY_UI_LOCALE = "currentLocale";
     final String KEY_DB_LOCALE = "keyLocaleUserSetting";
     final String KEY_GENERATE_REPORT_INTERFACE = "keyGenerateReportInterface";
     final String KEY_ANALYSIS_DISPLAY_PROPERTY = "keyAnalysisDisplayProperty";
     final String AUTO_SAVE_CASE_ENTRY_FORM = "autoSaveCaseEntryForm";
     final String AUTO_SAVE_PATIENT_REGISTRATION_ENTRY_FORM = "autoSavePatientRegistration";
     final String DEFAULT_ANALYSIS_DISPLAY_PROPERTY = "name";
+    final String KEY_DISPLAY_OPTION_SET_AS_RADIO_BUTTON = "displayOptionSetAsRadioButton";
     
     final List<Integer> DASHBOARD_CHARTS_TO_DISPLAY = Arrays.asList( 4, 6, 8 );
 

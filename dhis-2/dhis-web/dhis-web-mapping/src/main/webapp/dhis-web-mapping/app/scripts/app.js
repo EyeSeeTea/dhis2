@@ -509,7 +509,7 @@ Ext.onReady( function() {
 				isLoaded: false,
 				pageSize: 10,
 				page: 1,
-				defaultUrl: gis.init.contextPath + gis.conf.finals.url.path_api + 'maps.json?links=false',
+				defaultUrl: gis.init.contextPath + gis.conf.finals.url.path_api + 'maps.json?viewClass=sharing&links=false',
 				loadStore: function(url) {
 					this.proxy.url = url || this.defaultUrl;
 
@@ -2009,7 +2009,7 @@ Ext.onReady( function() {
 						this.currentValue = this.getValue();
 
 						var value = this.getValue(),
-							url = value ? gis.init.contextPath + gis.conf.finals.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
+							url = value ? gis.init.contextPath + gis.conf.finals.url.path_api + 'maps/query/' + value + '.json?viewClass=sharing&links=false' : null,
 							store = gis.store.maps;
 
 						store.page = 1;
@@ -2023,7 +2023,7 @@ Ext.onReady( function() {
 			text: GIS.i18n.prev,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? gis.init.contextPath + gis.conf.finals.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
+					url = value ? gis.init.contextPath + gis.conf.finals.url.path_api +  'maps/query/' + value + '.json?viewClass=sharing&links=false' : null,
 					store = gis.store.maps;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
@@ -2035,7 +2035,7 @@ Ext.onReady( function() {
 			text: GIS.i18n.next,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? gis.init.contextPath + gis.conf.finals.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
+					url = value ? gis.init.contextPath + gis.conf.finals.url.path_api +  'maps/query/' + value + '.json?viewClass=sharing&links=false' : null,
 					store = gis.store.maps;
 
 				store.page = store.page + 1;
@@ -3157,11 +3157,21 @@ Ext.onReady( function() {
 			fieldStyle: 'padding-left: 4px; padding-top: 3px',
 			emptyText: GIS.i18n.write_your_interpretation
 		});
+		console.log(gis);
 
 		panel = Ext.create('Ext.panel.Panel', {
 			cls: 'gis-container-inner',
-			html: '<b>' + GIS.i18n.link_ + ': </b>' + gis.init.contextPath + '/dhis-web-mapping/app/index.html?id=' + gis.map.id,
-			style: 'padding:6px 0 6px 1px'
+			html: function() {
+				var moduleUrl = gis.init.contextPath + '/dhis-web-mapping/app/index.html?id=' + gis.map.id,
+					apiUrl = gis.init.contextPath + '/api/maps/' + gis.map.id + '/data.html',
+					html = '';
+					
+				html += '<div><b>GIS link: </b><span class="user-select"><a href="' + moduleUrl + '" target="_blank">' + moduleUrl + '</a></span></div>';
+				html += '<div style="padding-top:3px"><b>API link: </b><span class="user-select"><a href="' + apiUrl + '" target="_blank">' + apiUrl + '</a></span></div>';
+				
+				return html;
+			}(),
+			style: 'padding-top: 8px; padding-bottom: 5px'
 		});
 
 		button = Ext.create('Ext.button.Button', {
@@ -3182,11 +3192,11 @@ Ext.onReady( function() {
 		});
 
 		window = Ext.create('Ext.window.Window', {
-			title: GIS.i18n.share_interpretation,
+			title: gis.map.name,
 			layout: 'fit',
 			iconCls: 'gis-window-title-icon-interpretation',
 			cls: 'gis-container-default',
-            bodyStyle: 'padding:5px 5px 0',
+            bodyStyle: 'padding:5px 5px 2px',
 			width: 500,
 			resizable: true,
 			modal: true,
@@ -3200,7 +3210,7 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function() {
-					this.setPosition(325, 37);
+					this.setPosition(325, 33);
 				},
 				destroy: function() {
 					document.body.oncontextmenu = function(){
@@ -4518,16 +4528,22 @@ Ext.onReady( function() {
 			showSeparator: false,
 			menuValue: 'orgunit',
 			clickHandler: function(param) {
+				if (!param) {
+					return;
+				}
+				
 				var items = this.items.items;
 				this.menuValue = param;
 
 				// Menu item icon cls
 				for (var i = 0; i < items.length; i++) {
-					if (items[i].param === param) {
-						items[i].setIconCls('gis-menu-item-selected');
-					}
-					else {
-						items[i].setIconCls('');
+					if (items[i].setIconCls) {
+						if (items[i].param === param) {
+							items[i].setIconCls('gis-menu-item-selected');
+						}
+						else {
+							items[i].setIconCls('');
+						}
 					}
 				}
 
@@ -4562,17 +4578,24 @@ Ext.onReady( function() {
 			},
 			items: [
 				{
+					xtype: 'label',
+					text: 'Selection mode',
+					style: 'padding:7px 5px 5px 7px; font-weight:bold; border:0 none'
+				},
+				{
 					text: GIS.i18n.select_organisation_units + '&nbsp;&nbsp;',
 					param: 'orgunit',
 					iconCls: 'gis-menu-item-selected'
 				},
 				{
-					text: GIS.i18n.select_boundaries_and_levels + '&nbsp;&nbsp;',
-					param: 'level'
+					text: 'Select levels' + '&nbsp;&nbsp;',
+					param: 'level',
+					iconCls: 'gis-menu-item-unselected'
 				},
 				{
-					text: GIS.i18n.select_boundaries_and_groups + '&nbsp;&nbsp;',
-					param: 'group'
+					text: 'Select groups' + '&nbsp;&nbsp;',
+					param: 'group',
+					iconCls: 'gis-menu-item-unselected'
 				}
 			],
 			listeners: {

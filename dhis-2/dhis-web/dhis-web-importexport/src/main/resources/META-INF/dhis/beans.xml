@@ -17,10 +17,13 @@
   <bean id="org.hisp.dhis.importexport.action.datavalue.ExportDataValueAction"
     class="org.hisp.dhis.importexport.action.datavalue.ExportDataValueAction" />
 
-  <!-- Event Import -->
+  <!-- Events -->
 
   <bean id="org.hisp.dhis.importexport.action.event.ImportEventAction"
     class="org.hisp.dhis.importexport.action.event.ImportEventAction" />
+
+  <bean id="org.hisp.dhis.importexport.action.event.ExportEventAction"
+    class="org.hisp.dhis.importexport.action.event.ExportEventAction" />
 
   <!-- Import -->
 
@@ -214,6 +217,10 @@
   <bean id="org.hisp.dhis.importexport.action.dxf2.GetImportSummaryAction"
     class="org.hisp.dhis.importexport.action.dxf2.GetImportSummaryAction" scope="prototype">
     <property name="category" value="METADATA_IMPORT" />
+  </bean>
+
+  <bean id="org.hisp.dhis.importexport.action.event.GetImportEventSummariesAction"
+    class="org.hisp.dhis.importexport.action.event.GetImportEventSummariesAction" scope="prototype">
   </bean>
 
 </beans>

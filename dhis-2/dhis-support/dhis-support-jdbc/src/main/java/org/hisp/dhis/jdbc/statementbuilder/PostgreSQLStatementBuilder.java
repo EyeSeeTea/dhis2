@@ -43,6 +43,12 @@ public class PostgreSQLStatementBuilder
     }
 
     @Override
+    public String getColumnQuote()
+    {
+        return "\"";
+    }
+
+    @Override
     public String getVacuum( String table )
     {
         return "vacuum analyze " + table + ";";
@@ -167,7 +173,7 @@ public class PostgreSQLStatementBuilder
     @Override
     public String getPatientFullName()
     {
-        return  "firstname || ' ' || middleName || ' ' || lastname";
+        return  "name";
     }
 
     @Override

@@ -37,6 +37,8 @@ import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.sms.incoming.IncomingSms;
 import org.hisp.dhis.sms.incoming.IncomingSmsListener;
+import org.hisp.dhis.sms.incoming.IncomingSmsService;
+import org.hisp.dhis.sms.incoming.SmsMessageStatus;
 import org.hisp.dhis.sms.parse.ParserType;
 import org.hisp.dhis.sms.parse.SMSParserException;
 import org.hisp.dhis.smscommand.SMSCommand;
@@ -57,6 +59,8 @@ public class UnregisteredSMSListener
     private MessageService messageService;
 
     private SmsMessageSender smsMessageSender;
+
+    private IncomingSmsService incomingSmsService;
 
     @Transactional
     @Override
@@ -121,23 +125,13 @@ public class UnregisteredSMSListener
             {
                 Set<User> receivers = new HashSet<User>( userGroup.getMembers() );
 
-                UserCredentials anonymousUser = userService.getUserCredentialsByUsername( "system" );
+                UserCredentials anonymousUser = userService.getUserCredentialsByUsername( "anonymous" );
 
                 if ( anonymousUser == null )
                 {
                     anonymousUser = userService.getUserCredentialsByUsername( "admin" );
                 }
-                /*MessageConversation conversation = new MessageConversation( smsCommand.getName(),
-                    anonymousUser.getUser() );
-
-                conversation.addMessage( new Message( message, null, anonymousUser.getUser() ) );
-
-                for ( User receiver : receivers )
-                {
-                    boolean read = false;
-
-                    conversation.addUserMessage( new UserMessage( receiver, read ) );
-                }*/
+                
                 // forward to user group by SMS, E-mail, DHIS conversation
 
                 messageService.sendMessage( smsCommand.getName(), message, null, receivers, anonymousUser.getUser(),
@@ -150,6 +144,11 @@ public class UnregisteredSMSListener
                 feedbackList.add( sender );
                 smsMessageSender.sendMessage( smsCommand.getName(), smsCommand.getReceivedMessage(), null,
                     feedbackList, true );
+
+                // update the status of the sms after process
+                sms.setStatus( SmsMessageStatus.PROCESSED );
+                incomingSmsService.update( sms );
+
             }
         }
     }
@@ -172,6 +171,11 @@ public class UnregisteredSMSListener
     public void setSmsMessageSender( SmsMessageSender smsMessageSender )
     {
         this.smsMessageSender = smsMessageSender;
+    }
+
+    public void setIncomingSmsService( IncomingSmsService incomingSmsService )
+    {
+        this.incomingSmsService = incomingSmsService;
     }
     
 }

@@ -172,38 +172,13 @@ public class AddRelationshipPatientAction
         patient = new Patient();
 
         // ---------------------------------------------------------------------
-        // Set FirstName, MiddleName, LastName by FullName
+        // Set FullName
         // ---------------------------------------------------------------------
 
         if ( fullName != null )
         {
             fullName = fullName.trim();
-
-            int startIndex = fullName.indexOf( ' ' );
-            int endIndex = fullName.lastIndexOf( ' ' );
-
-            String firstName = fullName.toString();
-            String middleName = "";
-            String lastName = "";
-
-            if ( fullName.indexOf( ' ' ) != -1 )
-            {
-                firstName = fullName.substring( 0, startIndex );
-                if ( startIndex == endIndex )
-                {
-                    middleName = "";
-                    lastName = fullName.substring( startIndex + 1, fullName.length() );
-                }
-                else
-                {
-                    middleName = fullName.substring( startIndex + 1, endIndex );
-                    lastName = fullName.substring( endIndex + 1, fullName.length() );
-                }
-            }
-
-            patient.setFirstName( firstName );
-            patient.setMiddleName( middleName );
-            patient.setLastName( lastName );
+            patient.setName( fullName );
         }
 
         // ---------------------------------------------------------------------

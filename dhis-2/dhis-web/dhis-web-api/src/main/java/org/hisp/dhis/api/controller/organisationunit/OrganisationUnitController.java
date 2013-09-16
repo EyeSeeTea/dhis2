@@ -206,11 +206,10 @@ public class OrganisationUnitController
         }
 
         postProcessEntity( entity );
-        postProcessEntity( entity, parameters );
+        postProcessEntity( entity, options, parameters );
 
         model.addAttribute( "viewClass", options.getViewClass( "detailed" ) );
 
         return StringUtils.uncapitalize( getEntitySimpleName() );
     }
-
 }

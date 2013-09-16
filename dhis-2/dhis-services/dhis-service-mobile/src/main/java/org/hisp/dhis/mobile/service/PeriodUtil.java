@@ -28,6 +28,7 @@ package org.hisp.dhis.mobile.service;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -159,6 +160,41 @@ public class PeriodUtil
 
         throw new IllegalArgumentException( "Couldn't make a period of type " + periodType.getName() + " and name "
             + periodName );
+    }
+
+    public static String dateToString( Date date )
+    {
+        DateFormat dateFormat = new SimpleDateFormat( "dd-MM-yyyy" );
+        return dateFormat.format( date );
+    }
+
+    public static Date stringToDate( String dateString )
+    {
+        SimpleDateFormat dateFormat = new SimpleDateFormat( "dd-MM-yyyy" );
+        Date date = null;
+        try
+        {
+            date = dateFormat.parse( dateString );
+        }
+        catch ( Exception e )
+        {
+            return null;
+        }
+
+        return date;
+    }
+
+    public static String convertDateFormat( String standardDate )
+    {
+        try
+        {
+            String[] tokens = standardDate.split( "-" );
+            return tokens[2] + "-" + tokens[1] + "-" + tokens[0];
+        }
+        catch ( Exception e )
+        {
+            return standardDate;
+        }
     }
 
 }

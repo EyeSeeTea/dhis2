@@ -40,7 +40,9 @@ import org.hisp.dhis.common.view.BasicView;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.DimensionalView;
 import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.common.view.SharingView;
 import org.hisp.dhis.common.view.ShortNameView;
+import org.hisp.dhis.common.view.UuidView;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -73,7 +75,7 @@ public class JacksonUtils
             objectMapper.configure( SerializationFeature.FAIL_ON_EMPTY_BEANS, false );
             objectMapper.configure( SerializationFeature.WRAP_EXCEPTIONS, true );
 
-            objectMapper.configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true );
+            objectMapper.configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false );
             objectMapper.configure( DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true );
             objectMapper.configure( DeserializationFeature.WRAP_EXCEPTIONS, true );
 
@@ -91,8 +93,10 @@ public class JacksonUtils
 
         viewClasses.put( "default", BasicView.class );
         viewClasses.put( "basic", BasicView.class );
+        viewClasses.put( "sharing", SharingView.class );
         viewClasses.put( "shortName", ShortNameView.class );
         viewClasses.put( "detailed", DetailedView.class );
+        viewClasses.put( "uuid", UuidView.class );
         viewClasses.put( "export", ExportView.class );
         viewClasses.put( "dimensional", DimensionalView.class );
     }
@@ -145,7 +149,7 @@ public class JacksonUtils
         return jsonMapper.writerWithView( viewClass ).writeValueAsString( value );
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public static <T> T fromJson( InputStream input, Class<?> clazz ) throws IOException
     {
         return (T) jsonMapper.readValue( input, clazz );
@@ -181,7 +185,7 @@ public class JacksonUtils
         return xmlMapper.writerWithView( viewClass ).writeValueAsString( value );
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public static <T> T fromXml( InputStream input, Class<?> clazz ) throws IOException
     {
         return (T) xmlMapper.readValue( input, clazz );

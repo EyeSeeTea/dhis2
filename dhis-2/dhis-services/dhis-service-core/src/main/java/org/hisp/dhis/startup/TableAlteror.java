@@ -619,7 +619,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE dataelement ALTER COLUMN domaintype SET NOT NULL" );
         executeSql( "update dataelementcategory set datadimension = false where datadimension is null" );
         
-		executeSql( "UPDATE dataset SET dataelementdecoration=false WHERE dataelementdecoration is null" );
+	executeSql( "UPDATE dataset SET dataelementdecoration=false WHERE dataelementdecoration is null" );
 
         executeSql( "alter table validationrulegroup rename column validationgroupid to validationrulegroupid" );
         executeSql( "alter table sqlview rename column viewid to sqlviewid" );
@@ -629,6 +629,11 @@ public class TableAlteror
         executeSql( "UPDATE optionset SET version=1 WHERE version IS NULL" );
         
         executeSql( "ALTER TABLE datavalue ALTER COLUMN lastupdated TYPE timestamp" );
+        executeSql( "ALTER TABLE completedatasetregistration ALTER COLUMN date TYPE timestamp" );
+        executeSql( "ALTER TABLE message ALTER COLUMN userid DROP NOT NULL" );
+        
+        executeSql( "delete from usersetting where name = 'dashboardConfig' or name = 'dashboardConfiguration'" );
+        executeSql( "ALTER TABLE interpretation ALTER COLUMN userid DROP NOT NULL" );
 
         log.info( "Tables updated" );
     }

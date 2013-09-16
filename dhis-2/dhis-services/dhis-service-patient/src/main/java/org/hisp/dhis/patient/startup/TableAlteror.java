@@ -222,8 +222,24 @@ public class TableAlteror
         executeSql( "update patientattribute set displayonvisitschedule = false where displayonvisitschedule is null");
         executeSql( "update program set useBirthDateAsIncidentDate = false where useBirthDateAsIncidentDate is null");
         executeSql( "update program set useBirthDateAsEnrollmentDate = false where useBirthDateAsEnrollmentDate is null");
-        executeSql( "update program set selectEnrollmentDatesInFuture = true where selectEnrollmentDatesInFuture is null");
-        executeSql( "update programstage set relatedPatient = false where relatedPatient is null");
+        executeSql( "update program set selectEnrollmentDatesInFuture = false where selectEnrollmentDatesInFuture is null");
+        executeSql( "update program set selectIncidentDatesInFuture = false where selectIncidentDatesInFuture is null");
+        executeSql( "update validationcriteria set description = name where description is null or description='' ");
+        executeSql( "update programstage set generatedByEnrollmentDate = false where generatedByEnrollmentDate is null ");
+        executeSql( "update programstage set blockEntryForm = false where blockEntryForm is null ");
+        executeSql( "update programstage set remindCompleted = false where remindCompleted is null ");
+        executeSql( "ALTER TABLE program DROP COLUMN generatedByEnrollmentDate" );
+        executeSql( "ALTER TABLE program DROP COLUMN blockEntryForm" );
+        executeSql( "ALTER TABLE program DROP COLUMN remindCompleted" );
+        executeSql( "ALTER TABLE program DROP COLUMN displayProvidedOtherFacility" );
+        executeSql( "UPDATE programstage_dataelements SET displayAsRadioButton=false WHERE displayAsRadioButton is null" );
+        executeSql( "UPDATE patientreminder SET messageType=1 WHERE messageType is null" );
+        executeSql( "UPDATE programstage SET allowGenerateNextVisit=false WHERE allowGenerateNextVisit is null" );
+
+        executeSql( "update patient set name=concat_ws(' ', trim(firstname), trim(middlename), trim(lastname))" );
+        executeSql( "alter table patient drop column firstname" );
+        executeSql( "alter table patient drop column middlename" );
+        executeSql( "alter table patient drop column lastname" );
     }
 
     // -------------------------------------------------------------------------
@@ -302,7 +318,6 @@ public class TableAlteror
                 while ( inputMatcher.find() )
                 {
                     String inputHTML = inputMatcher.group();
-                    inputHTML = inputHTML.replace( ">", "" );
 
                     // -----------------------------------------------------------------
                     // Get HTML input field code

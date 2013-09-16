@@ -102,7 +102,7 @@ public class DefaultProgramDataEntryService
 
     @Override
     public String prepareDataEntryFormForEntry( String htmlCode, Collection<PatientDataValue> dataValues,
-        String disabled, I18n i18n, ProgramStage programStage, ProgramStageInstance programStageInstance,
+        I18n i18n, ProgramStage programStage, ProgramStageInstance programStageInstance,
         OrganisationUnit organisationUnit )
     {
         Map<String, Collection<PatientDataValue>> mapDataValue = new HashMap<String, Collection<PatientDataValue>>();
@@ -271,7 +271,7 @@ public class DefaultProgramDataEntryService
                 // If programStagsInstance is completed then disabled it
                 // -----------------------------------------------------------
 
-                disabled = "";
+                String disabled = "";
                 if ( !programStageUid.equals( programStage.getUid() ) )
                 {
                     disabled = "disabled=\"\"";
@@ -674,7 +674,7 @@ public class DefaultProgramDataEntryService
         }
         else
         {
-            inputHTML += " class=\"optionset\" ";
+            inputHTML += " class=\"optionset\"  data-optionset=\"" + dataElement.getOptionSet().getUid() + "\" ";
         }
 
         if ( DataElement.VALUE_TYPE_LONG_TEXT.equals( dataElement.getDetailedTextType() ) )

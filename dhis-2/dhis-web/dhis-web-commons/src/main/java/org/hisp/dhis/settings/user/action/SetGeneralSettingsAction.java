@@ -28,16 +28,16 @@ package org.hisp.dhis.settings.user.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.user.UserSettingService.*;
+import static org.hisp.dhis.user.UserSettingService.KEY_ANALYSIS_DISPLAY_PROPERTY;
+import static org.hisp.dhis.user.UserSettingService.KEY_DB_LOCALE;
+import static org.hisp.dhis.user.UserSettingService.KEY_DISPLAY_OPTION_SET_AS_RADIO_BUTTON;
 import static org.hisp.dhis.user.UserSettingService.KEY_MESSAGE_EMAIL_NOTIFICATION;
 import static org.hisp.dhis.user.UserSettingService.KEY_MESSAGE_SMS_NOTIFICATION;
 
-import java.util.Locale;
-
-import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.locale.LocaleManager;
 import org.hisp.dhis.setting.StyleManager;
+import org.hisp.dhis.system.util.LocaleUtils;
 import org.hisp.dhis.user.UserSettingService;
 
 import com.opensymphony.xwork2.Action;
@@ -120,6 +120,13 @@ public class SetGeneralSettingsAction
         this.messageSmsNotification = messageSmsNotification;
     }
 
+    private String displayOptionSetAsRadioButton;
+
+    public void setDisplayOptionSetAsRadioButton( String displayOptionSetAsRadioButton )
+    {
+        this.displayOptionSetAsRadioButton = displayOptionSetAsRadioButton;
+    }
+
     private String message;
 
     public String getMessage()
@@ -141,55 +148,22 @@ public class SetGeneralSettingsAction
     public String execute()
         throws Exception
     {
-        localeManager.setCurrentLocale( getRespectiveLocale( currentLocale ) );
+        localeManager.setCurrentLocale( LocaleUtils.getLocale( currentLocale ) );
 
-        userSettingService.saveUserSetting( KEY_DB_LOCALE, getRespectiveLocale( StringUtils
-            .trimToNull( currentLocaleDb ) ) );
+        userSettingService.saveUserSetting( KEY_DB_LOCALE, LocaleUtils.getLocale( currentLocaleDb ) );
 
         styleManager.setUserStyle( currentStyle );
-        
+
         userSettingService.saveUserSetting( KEY_ANALYSIS_DISPLAY_PROPERTY, analysisDisplayProperty );
-        
+
         userSettingService.saveUserSetting( KEY_MESSAGE_EMAIL_NOTIFICATION, messageEmailNotification );
 
         userSettingService.saveUserSetting( KEY_MESSAGE_SMS_NOTIFICATION, messageSmsNotification );
 
+        userSettingService.saveUserSetting( KEY_DISPLAY_OPTION_SET_AS_RADIO_BUTTON, displayOptionSetAsRadioButton );
+
         message = i18n.getString( "settings_updated" );
 
         return SUCCESS;
-    }
-
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-
-    private Locale getRespectiveLocale( String locale )
-    {
-        if ( locale == null )
-        {
-            return null;
-        }
-
-        String[] tokens = locale.split( "_" );
-        Locale newLocale = null;
-
-        switch ( tokens.length )
-        {
-        case 1:
-            newLocale = new Locale( tokens[0] );
-            break;
-
-        case 2:
-            newLocale = new Locale( tokens[0], tokens[1] );
-            break;
-
-        case 3:
-            newLocale = new Locale( tokens[0], tokens[1], tokens[2] );
-            break;
-
-        default:
-        }
-
-        return newLocale;
     }
 }

@@ -32,11 +32,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeService;
 import org.hisp.dhis.patient.PatientIdentifierType;
-import org.hisp.dhis.patient.PatientIdentifierTypeService;
 import org.hisp.dhis.patientreport.PatientTabularReport;
 import org.hisp.dhis.patientreport.PatientTabularReportService;
 import org.hisp.dhis.program.ProgramStage;
@@ -60,27 +57,6 @@ public class GetTabularReportAction
     public void setTabularReportService( PatientTabularReportService tabularReportService )
     {
         this.tabularReportService = tabularReportService;
-    }
-
-    private DataElementService dataElementService;
-
-    public void setDataElementService( DataElementService dataElementService )
-    {
-        this.dataElementService = dataElementService;
-    }
-
-    private PatientIdentifierTypeService patientIdentifierTypeService;
-
-    public void setPatientIdentifierTypeService( PatientIdentifierTypeService patientIdentifierTypeService )
-    {
-        this.patientIdentifierTypeService = patientIdentifierTypeService;
-    }
-
-    private PatientAttributeService patientAttributeService;
-
-    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
-    {
-        this.patientAttributeService = patientAttributeService;
     }
 
     // -------------------------------------------------------------------------
@@ -176,41 +152,41 @@ public class GetTabularReportAction
 
         programStage = tabularReport.getProgramStage();
 
-        for ( String filterValue : tabularReport.getFilterValues() )
-        {
-            String[] values = filterValue.split( "_" );
-            String filter = "";
-            if ( values.length == 5 )
-            {
-                filter =  values[3] + "_" + values[4].trim().substring( 1, values[4].length() - 1 );
-            }
-
-            if ( values[0].equals( PatientTabularReport.PREFIX_FIXED_ATTRIBUTE ) )
-            {
-                selectedFixedAttributes.add( values[1] );
-                fixedAttributeFilters.add( filter );
-            }
-            else
-            {
-                int id = Integer.parseInt( values[1] );
-
-                if ( values[0].equals( PatientTabularReport.PREFIX_IDENTIFIER_TYPE ) )
-                {
-                    selectedIdentifierTypes.add( patientIdentifierTypeService.getPatientIdentifierType( id ) );
-                    identifierTypeFilters.add( filter );
-                }
-                else if ( values[0].equals( PatientTabularReport.PREFIX_PATIENT_ATTRIBUTE ) )
-                {
-                    selectedAttributes.add( patientAttributeService.getPatientAttribute( id ) );
-                    patientAttributeFilters.add( filter );
-                }
-                else if ( values[0].equals( PatientTabularReport.PREFIX_DATA_ELEMENT ) )
-                {
-                    selectedDataElements.add( dataElementService.getDataElement( id ) );
-                    dataelementFilters.add( filter );
-                }
-            }
-        }
+//        for ( String filterValue : tabularReport.getItems() )
+//        {
+//            String[] values = filterValue.split( "_" );
+//            String filter = "";
+//            if ( values.length == 5 )
+//            {
+//                filter =  values[3] + "_" + values[4].trim().substring( 1, values[4].length() - 1 );
+//            }
+//
+//            if ( values[0].equals( PatientTabularReport.PREFIX_FIXED_ATTRIBUTE ) )
+//            {
+//                selectedFixedAttributes.add( values[1] );
+//                fixedAttributeFilters.add( filter );
+//            }
+//            else
+//            {
+//                int id = Integer.parseInt( values[1] );
+//
+//                if ( values[0].equals( PatientTabularReport.PREFIX_IDENTIFIER_TYPE ) )
+//                {
+//                    selectedIdentifierTypes.add( patientIdentifierTypeService.getPatientIdentifierType( id ) );
+//                    identifierTypeFilters.add( filter );
+//                }
+//                else if ( values[0].equals( PatientTabularReport.PREFIX_PATIENT_ATTRIBUTE ) )
+//                {
+//                    selectedAttributes.add( patientAttributeService.getPatientAttribute( id ) );
+//                    patientAttributeFilters.add( filter );
+//                }
+//                else if ( values[0].equals( PatientTabularReport.PREFIX_DATA_ELEMENT ) )
+//                {
+//                    selectedDataElements.add( dataElementService.getDataElement( id ) );
+//                    dataelementFilters.add( filter );
+//                }
+//            }
+//        }
 
         return SUCCESS;
     }

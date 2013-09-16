@@ -152,6 +152,13 @@ public class AddProgramStageAction
         this.allowProvidedElsewhere = allowProvidedElsewhere;
     }
 
+    private List<Boolean> displayAsRadioButtons = new ArrayList<Boolean>();
+
+    public void setDisplayAsRadioButtons( List<Boolean> displayAsRadioButtons )
+    {
+        this.displayAsRadioButtons = displayAsRadioButtons;
+    }
+
     private Boolean irregular;
 
     public void setIrregular( Boolean irregular )
@@ -199,6 +206,13 @@ public class AddProgramStageAction
     public void setWhenToSend( List<Integer> whenToSend )
     {
         this.whenToSend = whenToSend;
+    }
+
+    private List<Integer> messageType = new ArrayList<Integer>();
+
+    public void setMessageType( List<Integer> messageType )
+    {
+        this.messageType = messageType;
     }
 
     private Boolean autoGenerateEvent;
@@ -257,6 +271,34 @@ public class AddProgramStageAction
         this.relatedPatient = relatedPatient;
     }
 
+    private Boolean generatedByEnrollmentDate;
+
+    public void setGeneratedByEnrollmentDate( Boolean generatedByEnrollmentDate )
+    {
+        this.generatedByEnrollmentDate = generatedByEnrollmentDate;
+    }
+
+    private Boolean blockEntryForm;
+
+    public void setBlockEntryForm( Boolean blockEntryForm )
+    {
+        this.blockEntryForm = blockEntryForm;
+    }
+
+    private Boolean remindCompleted = false;
+
+    public void setRemindCompleted( Boolean remindCompleted )
+    {
+        this.remindCompleted = remindCompleted;
+    }
+
+    private Boolean allowGenerateNextVisit;
+
+    public void setAllowGenerateNextVisit( Boolean allowGenerateNextVisit )
+    {
+        this.allowGenerateNextVisit = allowGenerateNextVisit;
+    }
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -270,7 +312,11 @@ public class AddProgramStageAction
         validCompleteOnly = (validCompleteOnly == null) ? false : validCompleteOnly;
         displayGenerateEventBox = (displayGenerateEventBox == null) ? false : displayGenerateEventBox;
         captureCoordinates = (captureCoordinates == null) ? false : captureCoordinates;
-        relatedPatient = ( relatedPatient == null ) ? false : relatedPatient;
+        relatedPatient = (relatedPatient == null) ? false : relatedPatient;
+        generatedByEnrollmentDate = (generatedByEnrollmentDate == null) ? false : generatedByEnrollmentDate;
+        blockEntryForm = (blockEntryForm == null) ? false : blockEntryForm;
+        remindCompleted = (remindCompleted == null) ? false : remindCompleted;
+        allowGenerateNextVisit = (allowGenerateNextVisit == null) ? false : allowGenerateNextVisit;
 
         ProgramStage programStage = new ProgramStage();
         Program program = programService.getProgram( id );
@@ -286,7 +332,10 @@ public class AddProgramStageAction
         programStage.setValidCompleteOnly( validCompleteOnly );
         programStage.setAutoGenerateEvent( autoGenerateEvent );
         programStage.setCaptureCoordinates( captureCoordinates );
-        programStage.setRelatedPatient( relatedPatient );
+        programStage.setBlockEntryForm( blockEntryForm );
+        programStage.setRemindCompleted( remindCompleted );
+        programStage.setGeneratedByEnrollmentDate( generatedByEnrollmentDate );
+        programStage.setAllowGenerateNextVisit( allowGenerateNextVisit );
 
         Set<PatientReminder> patientReminders = new HashSet<PatientReminder>();
         for ( int i = 0; i < daysAllowedSendMessages.size(); i++ )
@@ -296,6 +345,7 @@ public class AddProgramStageAction
             reminder.setDateToCompare( PatientReminder.DUE_DATE_TO_COMPARE );
             reminder.setSendTo( sendTo.get( i ) );
             reminder.setWhenToSend( whenToSend.get( i ) );
+            reminder.setMessageType( messageType.get( i ) );
             if ( sendTo.get( i ) == PatientReminder.SEND_TO_USER_GROUP )
             {
                 UserGroup selectedUserGroup = userGroupService.getUserGroup( userGroup.get( i ) );
@@ -317,12 +367,14 @@ public class AddProgramStageAction
             Boolean allowed = allowProvidedElsewhere.get( i ) == null ? false : allowProvidedElsewhere.get( i );
             Boolean displayInReport = displayInReports.get( i ) == null ? false : displayInReports.get( i );
             Boolean allowDate = allowDateInFutures.get( i ) == null ? false : allowDateInFutures.get( i );
+            Boolean displayRadioButton = displayAsRadioButtons.get( i ) == null ? false : displayAsRadioButtons.get( i );
 
             ProgramStageDataElement programStageDataElement = new ProgramStageDataElement( programStage, dataElement,
                 this.compulsories.get( i ), new Integer( i ) );
             programStageDataElement.setAllowProvidedElsewhere( allowed );
             programStageDataElement.setDisplayInReports( displayInReport );
             programStageDataElement.setAllowDateInFuture( allowDate );
+            programStageDataElement.setDisplayAsRadioButton( displayRadioButton );
             programStageDataElementService.addProgramStageDataElement( programStageDataElement );
         }
 

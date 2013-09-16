@@ -43,6 +43,12 @@ public class MySQLStatementBuilder
     }
 
     @Override
+    public String getColumnQuote()
+    {
+        return "`";
+    }
+
+    @Override
     public String getVacuum( String table )
     {
         return "optimize table " + table + ";";
@@ -167,7 +173,7 @@ public class MySQLStatementBuilder
     @Override
     public String getPatientFullName()
     {
-        return  "concat( firstname, \" \",middleName , \" \" , lastname)";
+        return  "name";
     }
 
     @Override

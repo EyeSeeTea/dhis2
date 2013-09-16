@@ -28,21 +28,21 @@ package org.hisp.dhis.patient;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-
-import org.hisp.dhis.common.GenericStore;
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
 public interface PatientStore
-    extends GenericStore<Patient>
+    extends GenericIdentifiableObjectStore<Patient>
 {
     String ID = PatientStore.class.getName();
 
@@ -52,9 +52,11 @@ public interface PatientStore
 
     Collection<Patient> getByNames( String name, Integer min, Integer max );
 
-    Collection<Patient> get( String firstName, String middleName, String lastName, Date birthdate, String gender );
+    Collection<Patient> get( String name, Date birthdate, String gender );
 
     Collection<Patient> getByOrgUnit( OrganisationUnit organisationUnit, Integer min, Integer max );
+
+    Collection<Patient> getByOrgUnitAndGender( OrganisationUnit organisationUnit, String gender, Integer min, Integer max );
 
     Collection<Patient> getByOrgUnitProgram( OrganisationUnit organisationUnit, Program program, Integer min,
         Integer max );
@@ -91,5 +93,9 @@ public interface PatientStore
         Collection<PatientAttribute> patientAttributes, Collection<PatientIdentifierType> identifierTypes, Integer min,
         Integer max );
 
+    Collection<Patient> getByOrgUnitProgramGender( OrganisationUnit organisationUnit, Program program, String gender, int min, int max );
 
+    Collection<Patient> getByProgram( Program program, int min, int max );
+
+    Collection<Patient> getByProgram( Program program, String gender, int min, int max );
 }

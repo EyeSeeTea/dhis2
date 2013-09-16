@@ -436,7 +436,7 @@ Ext.onReady( function() {
 				isLoaded: false,
 				pageSize: 10,
 				page: 1,
-				defaultUrl: init.contextPath + '/api/reportTables.json?links=false',
+				defaultUrl: init.contextPath + '/api/reportTables.json?viewClass=sharing&links=false',
 				loadStore: function(url) {
 					this.proxy.url = url || this.defaultUrl;
 
@@ -1496,7 +1496,7 @@ Ext.onReady( function() {
 						this.currentValue = this.getValue();
 
 						var value = this.getValue(),
-							url = value ? pt.init.contextPath + '/api/reportTables/query/' + value + '.json?links=false' : null,
+							url = value ? pt.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
 							store = pt.store.reportTable;
 
 						store.page = 1;
@@ -1510,7 +1510,7 @@ Ext.onReady( function() {
 			text: PT.i18n.prev,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? pt.init.contextPath + '/api/reportTables/query/' + value + '.json?links=false' : null,
+					url = value ? pt.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
 					store = pt.store.reportTable;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
@@ -1522,7 +1522,7 @@ Ext.onReady( function() {
 			text: PT.i18n.next,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? pt.init.contextPath + '/api/reportTables/query/' + value + '.json?links=false' : null,
+					url = value ? pt.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
 					store = pt.store.reportTable;
 
 				store.page = store.page + 1;
@@ -2127,7 +2127,7 @@ Ext.onReady( function() {
 			});
 
 			window = Ext.create('Ext.window.Window', {
-				title: PT.i18n.share + ' ' + PT.i18n.interpretation + '<span style="font-weight:normal; font-size:11px"> (' + pt.favorite.name + ') </span>',
+				title: pt.favorite.name,
 				layout: 'fit',
 				//iconCls: 'pt-window-title-interpretation',
 				width: 500,
@@ -3531,16 +3531,22 @@ Ext.onReady( function() {
 			showSeparator: false,
 			menuValue: 'orgunit',
 			clickHandler: function(param) {
+				if (!param) {
+					return;
+				}
+				
 				var items = this.items.items;
 				this.menuValue = param;
 
 				// Menu item icon cls
 				for (var i = 0; i < items.length; i++) {
-					if (items[i].param === param) {
-						items[i].setIconCls('pt-menu-item-selected');
-					}
-					else {
-						items[i].setIconCls('');
+					if (items[i].setIconCls) {
+						if (items[i].param === param) {
+							items[i].setIconCls('pt-menu-item-selected');
+						}
+						else {
+							items[i].setIconCls('pt-menu-item-unselected');
+						}
 					}
 				}
 
@@ -3575,17 +3581,24 @@ Ext.onReady( function() {
 			},
 			items: [
 				{
+					xtype: 'label',
+					text: 'Selection mode',
+					style: 'padding:7px 5px 5px 7px; font-weight:bold; border:0 none'
+				},
+				{
 					text: PT.i18n.select_organisation_units + '&nbsp;&nbsp;',
 					param: 'orgunit',
 					iconCls: 'pt-menu-item-selected'
 				},
 				{
-					text: PT.i18n.select_boundaries_and_levels + '&nbsp;&nbsp;',
-					param: 'level'
+					text: 'Select levels' + '&nbsp;&nbsp;',
+					param: 'level',
+					iconCls: 'pt-menu-item-unselected'
 				},
 				{
-					text: PT.i18n.select_boundaries_and_groups + '&nbsp;&nbsp;',
-					param: 'group'
+					text: 'Select groups' + '&nbsp;&nbsp;',
+					param: 'group',
+					iconCls: 'pt-menu-item-unselected'
 				}
 			],
 			listeners: {
@@ -4078,7 +4091,7 @@ Ext.onReady( function() {
 					{
 						xtype: 'label',
 						text: PT.i18n.table_layout,
-						style: 'padding:7px 5px 5px 7px; font-weight:bold'
+						style: 'padding:7px 5px 5px 7px; font-weight:bold; border:0 none'
 					},
 					{
 						text: 'Microsoft Excel (.xls)',

@@ -28,11 +28,13 @@ package org.hisp.dhis.analytics.scheduling;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.system.notification.NotificationLevel.ERROR;
 import static org.hisp.dhis.system.notification.NotificationLevel.INFO;
 
 import javax.annotation.Resource;
 
 import org.hisp.dhis.analytics.AnalyticsTableService;
+import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.resourcetable.ResourceTableService;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.notification.Notifier;
@@ -61,6 +63,9 @@ public class AnalyticsTableTask
     
     @Autowired
     private Notifier notifier;
+    
+    @Autowired
+    private MessageService messageService;
 
     private boolean last3Years;
 
@@ -84,25 +89,36 @@ public class AnalyticsTableTask
     public void run()
     {
         notifier.clear( taskId ).notify( taskId, "Updating resource tables" );
-        
-        resourceTableService.generateAll();
 
-        notifier.notify( taskId, "Updating analytics tables" );
-        
-        analyticsTableService.update( last3Years, taskId );
-        
-        notifier.notify( taskId, "Updating completeness tables" );
-        
-        completenessTableService.update( last3Years, taskId );
-
-        notifier.notify( taskId, "Updating compeleteness target table" );
-        
-        completenessTargetTableService.update( last3Years, taskId );
-        
-        notifier.notify( taskId, "Updating event analytics tables" );
-        
-        eventAnalyticsTableService.update( last3Years, taskId );
-        
-        notifier.notify( taskId, INFO, "Analytics tables updated", true );
+        try
+        {
+            resourceTableService.generateAll();
+    
+            notifier.notify( taskId, "Updating analytics tables" );
+            
+            analyticsTableService.update( last3Years, taskId );
+            
+            notifier.notify( taskId, "Updating completeness tables" );
+            
+            completenessTableService.update( last3Years, taskId );
+    
+            notifier.notify( taskId, "Updating compeleteness target table" );
+            
+            completenessTargetTableService.update( last3Years, taskId );
+            
+            notifier.notify( taskId, "Updating event analytics tables" );
+            
+            eventAnalyticsTableService.update( last3Years, taskId );
+            
+            notifier.notify( taskId, INFO, "Analytics tables updated", true );
+        }
+        catch ( RuntimeException ex )
+        {
+            notifier.notify( taskId, ERROR, "Process failed: " + ex.getMessage(), true );
+            
+            messageService.sendFeedback( "Analytics table process failed", "Analytics table process failed, please check the logs.", null );
+            
+            throw ex;
+        }
     }
 }

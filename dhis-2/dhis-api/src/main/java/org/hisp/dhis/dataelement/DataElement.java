@@ -208,45 +208,6 @@ public class DataElement
     }
 
     // -------------------------------------------------------------------------
-    // hashCode, equals and toString
-    // -------------------------------------------------------------------------
-
-    @Override
-    public int hashCode()
-    {
-        return name.hashCode();
-    }
-
-    @Override
-    public boolean equals( Object o )
-    {
-        if ( this == o )
-        {
-            return true;
-        }
-
-        if ( o == null )
-        {
-            return false;
-        }
-
-        if ( !(o instanceof DataElement) )
-        {
-            return false;
-        }
-
-        final DataElement other = (DataElement) o;
-
-        return name.equals( other.getName() );
-    }
-
-    @Override
-    public String toString()
-    {
-        return "[" + name + "]";
-    }
-
-    // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
 
@@ -492,6 +453,9 @@ public class DataElement
         this.domainType = domainType;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
     public String getTextType()
     {
         return textType;
@@ -691,6 +655,7 @@ public class DataElement
             domainType = dataElement.getDomainType() == null ? domainType : dataElement.getDomainType();
             type = dataElement.getType() == null ? type : dataElement.getType();
             numberType = dataElement.getNumberType() == null ? numberType : dataElement.getNumberType();
+            textType = dataElement.getTextType() == null ? textType : dataElement.getTextType();
             aggregationOperator = dataElement.getAggregationOperator() == null ? aggregationOperator : dataElement
                 .getAggregationOperator();
             categoryCombo = dataElement.getCategoryCombo() == null ? categoryCombo : dataElement.getCategoryCombo();

@@ -14,7 +14,11 @@
   <bean id="org.hisp.dhis.dxf2.datavalueset.DataValueSetStore"
     class="org.hisp.dhis.dxf2.datavalueset.SpringDataValueSetStore" />
 
+  <bean id="org.hisp.dhis.dxf2.event.EventStore" class="org.hisp.dhis.dxf2.event.DefaultEventStore" />
+
   <bean id="org.hisp.dhis.dxf2.event.EventService" class="org.hisp.dhis.dxf2.event.JacksonEventService" />
+
+  <bean id="org.hisp.dhis.dxf2.event.PersonService" class="org.hisp.dhis.dxf2.event.person.JacksonPersonService" />
 
   <bean id="org.hisp.dhis.dxf2.InputValidationService" class="org.hisp.dhis.dxf2.DefaultInputValidationService" />
 
@@ -195,7 +199,7 @@
     class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
     <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.datadictionary.DataDictionary" />
   </bean>
-  
+
   <bean id="pdfDataEntryFormService" class="org.hisp.dhis.dxf2.pdfform.DefaultPdfDataEntryFormService" scope="prototype">
   </bean>
 

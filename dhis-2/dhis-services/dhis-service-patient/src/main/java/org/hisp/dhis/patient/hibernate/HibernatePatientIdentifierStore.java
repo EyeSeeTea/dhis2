@@ -29,6 +29,7 @@ package org.hisp.dhis.patient.hibernate;
  */
 
 import java.util.Collection;
+import java.util.Set;
 
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -62,6 +63,13 @@ public class HibernatePatientIdentifierStore
     {
         return (PatientIdentifier) getCriteria( Restrictions.eq( "identifierType", type ),
             Restrictions.eq( "identifier", identifier ) ).uniqueResult();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<PatientIdentifier> getAll( PatientIdentifierType type, String identifier )
+    {
+        return getCriteria( Restrictions.eq( "identifierType", type ),
+            Restrictions.eq( "identifier", identifier ) ).list();
     }
 
     @SuppressWarnings( "unchecked" )
@@ -104,8 +112,8 @@ public class HibernatePatientIdentifierStore
     @SuppressWarnings( "unchecked" )
     public Collection<Patient> getPatientsByIdentifier( String identifier, int min, int max )
     {
-        return getCriteria( Restrictions.ilike( "identifier", "%" + identifier + "%" ) ).setProjection(
-            Projections.property( "patient" ) ).setFirstResult( min ).setMaxResults( max ).list();
+        return getCriteria( Restrictions.ilike( "identifier", "%" + identifier + "%" ) )
+            .setProjection( Projections.property( "patient" ) ).setFirstResult( min ).setMaxResults( max ).list();
     }
 
     public int countGetPatientsByIdentifier( String identifier )
@@ -122,4 +130,10 @@ public class HibernatePatientIdentifierStore
             .list();
     }
 
+    public boolean checkDuplicateIdentifier( String identifier )
+    {
+        Number rs = (Number) getCriteria( Restrictions.ilike( "identifier", identifier ) ).setProjection(
+            Projections.rowCount() ).uniqueResult();
+        return ( rs != null & rs.intValue() > 0 )? true: false;
+    }
 }

@@ -30,8 +30,6 @@ TR.conf = {
 					obj.system.level.push({value: r.levels[i].value, name: r.levels[i].name});
 				}
 				
-				obj.system.accessPatientAttributes = r.user.accessPatientAttributes;
-				
 				obj.report={};
 				obj.report.id = r.id;
 				
@@ -47,7 +45,6 @@ TR.conf = {
             path_api: '../../api/',
             path_images: 'images/',
 			initialize: 'tabularInitialize.action',
-			patientproperties_get: 'loadPatientProperties.action',
 			programstages_get: '../api/programs/',
 			programstagesections_get: 'loadProgramStageSections.action',
 			dataelements_get: 'loadDataElements.action',
@@ -90,10 +87,6 @@ TR.conf = {
                 warning: {
 					filter: TR.i18n.wm_multiple_filter_orgunit
 				}
-            },
-            patientProperties: {
-                value: 'patientProperties',
-                rawvalue: TR.i18n.patientProperties
             },
             programStage: {
                 value: 'programStage',
@@ -254,6 +247,7 @@ Ext.onReady( function() {
 	var reportId = TR.conf.util.getURLParameters('id');
     Ext.Ajax.request({
         url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.initialize + "?id=" + reportId,
+		disableCaching: false,
         success: function(r) {
             
     TR.init = TR.conf.init.ajax.jsonfy(r);    
@@ -267,7 +261,6 @@ Ext.onReady( function() {
         params: {
             program:{},
 			programStage: {},
-			patientProperty: {},
 			dataelement: {},
 			organisationunit: {},
 			relativeperiod: {
@@ -338,8 +331,7 @@ Ext.onReady( function() {
                 return ((screen.height/2)-((cmp.height/2)-100));
             },
             resizeParams: function() {
-				var a = [TR.cmp.params.patientProperty.panel,
-						 TR.cmp.params.dataelement.panel, 
+				var a = [TR.cmp.params.dataelement.panel, 
 						 TR.cmp.params.organisationunit.treepanel];
 				for (var i = 0; i < a.length; i++) {
 					if (!a[i].collapsed) {
@@ -358,7 +350,7 @@ Ext.onReady( function() {
 						var data = a.store.findExact('id', item);
 						var name = a.store.getAt(data).data.name;
 						var valueType = a.store.getAt(data).data.valueType;
-						array.push({id: item, localid:a.store.getAt(data).data.localid, name:name, valueType:valueType});
+						array.push({id: item, name:name, valueType:valueType});
 						if(f!=undefined)
 						{
 							TR.util.multiselect.addFilterField( f, item, name, valueType );
@@ -375,15 +367,15 @@ Ext.onReady( function() {
 				for( var i=0; i< elements.length; i++ )
 				{
 					if( elements[i].style.display != 'none' )
-					{
-						var localid = a.store.getAt(i).data.localid;
+					{		
+						var id = a.store.getAt(i).data.id;
 						var name = a.store.getAt(i).data.name;
 						var valueType = a.store.getAt(i).data.valueType;
 						
-						array.push({id: a.store.getAt(i).data.id, localid:localid, name: name, valueType: valueType});
+						array.push({id: a.store.getAt(i).data.id, name: name, valueType: valueType});
 						if(f!=undefined)
 						{
-							TR.util.multiselect.addFilterField( f, localid, name, valueType );
+							TR.util.multiselect.addFilterField( f, a.store.getAt(i).data.id, name, valueType );
 						}
 					}
 				}
@@ -491,7 +483,7 @@ Ext.onReady( function() {
 				var filter = "";
 				if( filterValue!=undefined && filterValue != "" )
 				{
-					var arrFilter = filterValue.split("_");
+					var arrFilter = filterValue.split(";");
 					opt = arrFilter[0];
 					filter = arrFilter[1];
 				}
@@ -1073,6 +1065,7 @@ Ext.onReady( function() {
 						TR.util.mask.showMask(TR.cmp.caseBasedFavorite.window, TR.i18n.renaming + '...');
 						Ext.Ajax.request({
 							url:  TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.casebasedfavorite_rename,
+							disableCaching: false,
 							method: 'POST',
 							params: {id: id, name: name},
 							success: function() {
@@ -1096,6 +1089,7 @@ Ext.onReady( function() {
 						
 						Ext.Ajax.request({
 							url: baseurl,
+							disableCaching: false,
 							method: 'POST',
 							success: function() {
 								TR.store.caseBasedFavorite.load({callback: function() {
@@ -1110,69 +1104,17 @@ Ext.onReady( function() {
 					run: function(id) {
 						Ext.Ajax.request({
 							url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.casebasedfavorite_get + '?id=' + id,
+							disableCaching: false,
 							scope: this,
 							success: function(r) {
 								var f = Ext.JSON.decode(r.responseText);
 								
-								Ext.getCmp('programCombobox').setValue( f.programId );
-								TR.store.programStage.removeAll();
-								TR.store.programStage.add({'id': f.programStageId, 'localid': f.programStageLocalid, 'name': f.programStageName});
 								Ext.getCmp('startDate').setValue( f.startDate );
 								Ext.getCmp('endDate').setValue( f.endDate );
-								Ext.getCmp('facilityLBCombobox').setValue( f.facilityLB );
-								Ext.getCmp('levelCombobox').setValue( f.level );
-								Ext.getCmp('userOrgunit').setValue( f.userOrganisationUnit );
-								Ext.getCmp('userOrgunitChildren').setValue( f.userOrganisationUnitChildren );								
-								Ext.getCmp('completedEventsOpt').setValue(f.useCompletedEvents);
-								Ext.getCmp('displayOrgunitCode').setValue(f.displayOrgunitCode);
 								
-								// Orgunits
-								
-								var treepanel = TR.cmp.params.organisationunit.treepanel;
-								treepanel.getSelectionModel().deselectAll();
-								TR.state.orgunitIds = [];
-								var orgunitUids = [];
-								for (var i = 0; i < f.orgunitIds.length; i++) {
-									TR.state.orgunitIds.push( f.orgunitIds[i].localid );
-									orgunitUids.push( f.orgunitIds[i].id );
-								}
-								treepanel.selectByIds(orgunitUids);
-								
-								 // Patient properties
-								 Ext.getCmp('filterPropPanel').removeAll();
-								 Ext.getCmp('filterPropPanel').doLayout(); 
-								 TR.store.patientProperty.selected.removeAll();
-								 
-								 // programs with registration
-								 TR.cmp.params.patientProperty.objects = [];
-								 if (f.patientProperties && f.type != "3" ) {
-									 for (var i = 0; i < f.patientProperties.length; i++) {
-										var name = TR.util.string.getEncodedString(f.patientProperties[i].name);
-										TR.cmp.params.patientProperty.objects.push({id: f.patientProperties[i].id, name: name});
-										TR.util.multiselect.addFilterField( 'filterPropPanel', f.patientProperties[i].id, name, f.patientProperties[i].valueType, f.patientProperties[i].filter );
-									 }
-
-									 TR.store.patientProperty.selected.add(TR.cmp.params.patientProperty.objects);
-							 
-									 var storePatientProperty = TR.store.patientProperty.available;
-									 storePatientProperty.parent = f.programId;
-									 if (TR.util.store.containsParent(storePatientProperty)) {
-										 TR.util.store.loadFromStorage(storePatientProperty);
-										 TR.util.multiselect.filterAvailable(TR.cmp.params.patientProperty.available, TR.cmp.params.patientProperty.selected);
-									 }
-									 else {
-										 storePatientProperty.load({params: {programId: f.programId}});
-									 }
-								 }
-                                        
-								// Program stage									
-								
-								var storeProgramStage = TR.store.programStage;
-								storeProgramStage.parent = f.programStageId;
-								storeProgramStage.isLoadFromFavorite = true;
-								
-								TR.cmp.params.organisationunit.treepanel.getSelectionModel().deselectAll();
-								
+								Ext.getCmp('programCombobox').setValue( f.programId );
+								TR.store.programStage.parent = f.programStageId;
+								TR.store.programStage.isLoadFromFavorite = true;
 								TR.store.programStage.removeAll();
 								for (var i = 0; i < f.programStages.length; i++)
 								{
@@ -1181,6 +1123,18 @@ Ext.onReady( function() {
 									);
 								}
 								Ext.getCmp('programStageCombobox').setValue( f.programStageId );
+								Ext.getCmp('facilityLBCombobox').setValue( f.facilityLB );
+								Ext.getCmp('levelCombobox').setValue( f.level );
+								
+								// Orgunits
+								
+								var treepanel = TR.cmp.params.organisationunit.treepanel;
+								treepanel.getSelectionModel().deselectAll();
+								TR.state.orgunitIds = [];
+								for (var i = 0; i < f.orgunitIds.length; i++) {
+									TR.state.orgunitIds.push( f.orgunitIds[i].id );
+								}
+								treepanel.selectByIds(TR.state.orgunitIds);
 								
 								// Data element
 								
@@ -1188,13 +1142,19 @@ Ext.onReady( function() {
 								Ext.getCmp('filterPanel').doLayout();
 	
 								TR.store.dataelement.selected.removeAll();
-								if (f.dataElements) {
-									for (var i = 0; i < f.dataElements.length; i++) {
-										var name = TR.util.string.getEncodedString(f.dataElements[i].name);
-										var valueType = f.dataElements[i].valueType;
-										var localid = f.dataElements[i].localid;
-										TR.store.dataelement.selected.add({id: f.dataElements[i].id, name: name, valueType: valueType, localid:localid});
-										TR.util.multiselect.addFilterField( 'filterPanel', f.dataElements[i].id, name, valueType, f.dataElements[i].filter );
+								if (f.items) {
+									for (var i = 0; i < f.items.length; i++) {
+										var filter = f.items[i].id.split(';');
+										var id = filter[0];
+										var filterVal = "";
+										if( filter.length == 3 ){
+											filterVal = filter[1] + ";" + filter[2];
+										}
+										
+										var name = TR.util.string.getEncodedString(f.items[i].name);
+										var valueType = f.items[i].valueType;
+										TR.store.dataelement.selected.add({id: id, name: name, valueType: valueType});
+										TR.util.multiselect.addFilterField( 'filterPanel', id, name, valueType, filterVal );
 									}
 									
 									if( f.singleEvent == 'false' )
@@ -1241,12 +1201,14 @@ Ext.onReady( function() {
 						Ext.Ajax.request({
 							url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.aggregatefavorite_validate,
 							method: 'POST',
+							disableCaching: false,
 							params: {name:name},
 							success: function(r) {
 									var json = Ext.JSON.decode(r.responseText);
 									if(json.response=='success'){
 										Ext.Ajax.request({
 											url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.aggregatefavorite_save,
+											disableCaching: false,
 											method: 'POST',
 											params: p,
 											success: function() {
@@ -1272,6 +1234,7 @@ Ext.onReady( function() {
 						
 						Ext.Ajax.request({
 							url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.aggregatefavorite_validate,
+							disableCaching: false,
 							method: 'POST',
 							params: {id:id, name:name},
 							success: function(r) {
@@ -1279,6 +1242,7 @@ Ext.onReady( function() {
 									if(json.response=='success'){
 										Ext.Ajax.request({
 											url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.aggregatefavorite_rename,
+											disableCaching: false,
 											method: 'POST',
 											params: {id: id, name: name},
 											success: function() {
@@ -1309,6 +1273,7 @@ Ext.onReady( function() {
 						});
 						Ext.Ajax.request({
 							url: baseurl,
+							disableCaching: false,
 							method: 'POST',
 							success: function() {
 								TR.store.aggregateFavorite.load({callback: function() {
@@ -1323,6 +1288,7 @@ Ext.onReady( function() {
 					run: function(id) {
 						Ext.Ajax.request({
 							url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.aggregatefavorite_get + '?id=' + id,
+							disableCaching: false,
 							scope: this,
 							success: function(r) {
 								var f = Ext.JSON.decode(r.responseText);
@@ -1376,12 +1342,10 @@ Ext.onReady( function() {
 								var treepanel = TR.cmp.params.organisationunit.treepanel;
 								treepanel.getSelectionModel().deselectAll();
 								TR.state.orgunitIds = [];
-								var orgunitUids = [];
 								for (var i = 0; i < f.orgunitIds.length; i++) {
-									TR.state.orgunitIds.push( f.orgunitIds[i].localid );
-									orgunitUids.push( f.orgunitIds[i].id );
+									TR.state.orgunitIds.push( f.orgunitIds[i].id );
 								}
-								treepanel.selectByIds(orgunitUids);
+								treepanel.selectByIds(TR.state.orgunitIds);
 								
 								// Selected data elements
 								
@@ -1473,7 +1437,7 @@ Ext.onReady( function() {
 								storeProgramStage.parent = f.programStageId;
 								storeProgramStage.isLoadFromFavorite = true;
 								
-								var url = storeProgramStage.getProxy().url + f.programId + ".json?viewClass=export";
+								var url = storeProgramStage.getProxy().url + f.programId + ".json";
 								storeProgramStage.load({url:url});
 								Ext.getCmp('programStageCombobox').setValue( f.programStageId );
 								
@@ -1515,32 +1479,6 @@ Ext.onReady( function() {
 				}
 			}
 		}),
-		patientProperty: {
-			available: Ext.create('Ext.data.Store', {
-				 fields: ['id', 'name', 'valueType'],
-				 proxy: {
-					 type: 'ajax',
-					 url: TR.conf.finals.ajax.path_commons + TR.conf.finals.ajax.patientproperties_get,
-					 reader: {
-						 type: 'json',
-						 root: 'patientProperties'
-					 }
-				 },
-				 isloaded: false,
-				 storage: {},
-				 listeners: {
-					 load: function(s) {
-						 this.isloaded = true;
-						 TR.util.store.addToStorage(s);
-						 TR.util.multiselect.filterAvailable(TR.cmp.params.patientProperty.available, TR.cmp.params.patientProperty.selected);
-					 }
-				 }
-			 }),
-			 selected: Ext.create('Ext.data.Store', {
-				 fields: ['id', 'name'],
-				 data: []
-			 })
-		},
 		programStage: Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
 			proxy: {
@@ -1611,7 +1549,7 @@ Ext.onReady( function() {
 			}
 		}),
 		programStageSection: Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'localid'],
+			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
 				url: TR.conf.finals.ajax.path_commons + TR.conf.finals.ajax.programstagesections_get,
@@ -1645,13 +1583,13 @@ Ext.onReady( function() {
 		}),
 		dataelement: {
             available: Ext.create('Ext.data.Store', {
-                fields: ['id', 'name', 'valueType', 'localid'],
+                fields: ['id', 'name', 'valueType'],
                 proxy: {
                     type: 'ajax',
                     url: TR.conf.finals.ajax.path_commons + TR.conf.finals.ajax.dataelements_get,
                     reader: {
                         type: 'json',
-                        root: 'dataElements'
+                        root: 'items'
                     }
                 },
                 isloaded: false,
@@ -1688,7 +1626,7 @@ Ext.onReady( function() {
 				}
             }),
             selected: Ext.create('Ext.data.Store', {
-                fields: ['id', 'name', 'valueType', 'localid'],
+                fields: ['id', 'name', 'valueType'],
                 data: []
             })
         },
@@ -1853,14 +1791,13 @@ Ext.onReady( function() {
         currentPage: 1,
 		total: 1,
 		totalRecords: 0,
-		isFilter:false,
-		orderByOrgunitAsc: true,
-		orderByExecutionDateByAsc: true,
+		asc: "",
+		desc: "",
 		orgunitIds: [],
-		generateReport: function( type, isSorted ) {
+		generateReport: function( type ) {
 			if(Ext.getCmp('reportTypeGroup').getValue().reportType=='true')
 			{
-				this.caseBasedReport.generate( type, isSorted );
+				this.caseBasedReport.generate( type );
 			}
 			else
 			{
@@ -1873,16 +1810,16 @@ Ext.onReady( function() {
 				this.caseBasedReport.generate();
 			}
 		},
-		getParams: function(isSorted){
+		getParams: function(){
 			if(Ext.getCmp('reportTypeGroup').getValue().reportType=='true')
 			{
-				return this.caseBasedReport.getParams(isSorted);
+				return this.caseBasedReport.getParams();
 			}
 			return this.aggregateReport.getParams();
 		},
-		getURLParams: function( type, isSorted ){
+		getURLParams: function( type ){
 			if(Ext.getCmp('reportTypeGroup').getValue().reportType=='true'){
-				this.caseBasedReport.getURLParams( type, isSorted );
+				this.caseBasedReport.getURLParams( type );
 			}
 			else{
 				this.aggregateReport.getURLParams( type );
@@ -1890,7 +1827,7 @@ Ext.onReady( function() {
 		},
 		
 		caseBasedReport: {
-			generate: function( type, isSorted ) {
+			generate: function( type ) {
 				
 				// Validation
 				
@@ -1928,17 +1865,18 @@ Ext.onReady( function() {
 				// Show report on grid
 				else
 				{
-					url += programId + ".json?stage=" + programStageId + "&viewClass=export";
+					url += programId + ".json?stage=" + programStageId;
 					TR.util.mask.showMask(TR.cmp.region.center, TR.i18n.loading);
 					Ext.Ajax.request({
 						url: url,
 						method: "GET",
+						disableCaching: false,
 						scope: this,
-						params: this.getParams(isSorted),
+						params: this.getParams(),
 						success: function(r) {
 							var json = Ext.JSON.decode(r.responseText);
 							
-							if( isSorted ){
+							if( TR.state.asc != "" || TR.state.desc != "" ){
 								TR.store.datatable.loadData(TR.value.values,false);
 							}
 							else{
@@ -1946,21 +1884,18 @@ Ext.onReady( function() {
 								TR.value.values = json.rows;
 								
 								// Get fields
+								
 								var fields = [];
 								for( var index=0; index < TR.value.columns.length; index++ )
 								{
-									fields[index] = 'col' + TR.value.columns[index].column;
+									fields[index] = TR.value.columns[index].column;
 								}
 								TR.value.fields = fields;
 								
 								// Set data for grid
+								
 								TR.store.getDataTableStore();
 								TR.datatable.getDataTable();
-								
-								if( json.rows.length>1 )
-								{
-									Ext.getCmp('btnSortBy').enable();
-								}
 							}
 							TR.util.mask.hideMask();
 						}
@@ -1968,21 +1903,27 @@ Ext.onReady( function() {
 				}
 				TR.util.notification.ok();
 			},
-			getParams: function(isSorted) {
+			getParams: function() {
 				var p = {};
 				p.startDate = TR.cmp.settings.startDate.rawValue;
 				p.endDate = TR.cmp.settings.endDate.rawValue;
-				p.facilityLB = TR.cmp.settings.facilityLB.getValue();
-				p.level = Ext.getCmp('levelCombobox').getValue();
+				if(TR.cmp.settings.facilityLB.getValue()!="" ){
+					p.ouMode = TR.cmp.settings.facilityLB.getValue();
+				}
 				
-				// orders
-				p.asc = TR.state.asc;
-				p.desc= TR.state.desc;
+				// order-by
 				
-				p.programStageId = TR.cmp.params.programStage.getValue();
+				if(TR.state.asc!=""){				
+					p.asc = TR.state.asc;
+				}
+				else if(TR.state.desc!=""){
+					p.desc= TR.state.desc;
+				}
+				
 				p.currentPage = TR.state.currentPage;
 				
 				// organisation unit
+				
 				p.ou = "";
 				for( var i in TR.state.orgunitIds){
 					p.ou += TR.state.orgunitIds[i];
@@ -1990,8 +1931,12 @@ Ext.onReady( function() {
 						p.ou +=";"
 					}
 				}
-				p.userOrganisationUnit = Ext.getCmp('userOrgunit').getValue();
-				p.userOrganisationUnitChildren = Ext.getCmp('userOrgunitChildren').getValue();
+				if( Ext.getCmp('userOrgunit').getValue() == "true" ){
+					p.userOrganisationUnit = Ext.getCmp('userOrgunit').getValue();
+				}
+				if( Ext.getCmp('userOrgunitChildren').getValue() == "true" ){
+					p.userOrganisationUnitChildren = Ext.getCmp('userOrgunitChildren').getValue();
+				}
 				if( Ext.getCmp('completedEventsOpt').getValue() == true )
 				{
 					p.useCompletedEvents = Ext.getCmp('completedEventsOpt').getValue();
@@ -2002,69 +1947,11 @@ Ext.onReady( function() {
 					p.displayOrgunitCode = Ext.getCmp('displayOrgunitCode').getValue();
 				}
 				
-				if( Ext.getCmp('useFormNameDataElementOpt').getValue()== true )
-				{
-					p.useFormNameDataElement = Ext.getCmp('useFormNameDataElementOpt').getValue();
-				}
-				else
-				{
-					p.useFormNameDataElement = "false";
-				}
-				
 				// Get searching values
 				
 				p.item = [];
 				
-				// Patient properties
-				
-				TR.cmp.params.patientProperty.selected.store.each( function(r) {
-					var propId = r.data.id;
-					var valueType = r.data.valueType;
-					var length = Ext.getCmp('filterPropPanel_' + propId).items.length/4;
-					var hidden = TR.state.caseBasedReport.isColHidden(propId);
-					
-					for(var idx=0;idx<length;idx++)
-					{
-						var id = propId + '_' + idx;
-						var filterField = Ext.getCmp('filter_' + id);
-						var filterValue = "";
-						if( filterField.xtype == 'combobox' )
-						{
-							var values = Ext.getCmp('filter_' + id).getValue();
-							for( var i in values ){
-								filterValue += values[i] + ";";
-							}
-							filterValue = filterValue.substring(0,filterValue.length - 1  );
-						}
-						else{
-							filterValue = filterField.rawValue;
-						}
-						
-						var filter = propId;
-						if( filterValue!=null && filterValue!=''){
-							var filterOpt = Ext.getCmp('filter_opt_' + id).getValue();
-							filter += ';' + filterOpt + ';';
-							if( filterOpt == 'IN' )
-							{
-								var filterValues = filterValue.split(";");
-								filter +="(";
-								for(var i=0;i<filterValues.length;i++)
-								{
-									filter += "'"+ filterValues[i] +"',";
-								}
-								filter = filter.substr(0,filter.length - 1) + ")";
-							}
-							else
-							{
-								filter += filterValue;
-							}
-						}
-						if( idx < length - 1 ){
-							filter +=";"
-						}
-						p.item.push( filter );
-					}
-				});
+				// Filter
 				
 				var idx = 0;
 				TR.cmp.params.dataelement.selected.store.each( function(r) {
@@ -2088,12 +1975,11 @@ Ext.onReady( function() {
 							if( filterOpt == 'IN' )
 							{
 								var filterValues = filterValue.split(";");
-								filter +="(";
 								for(var i=0;i<filterValues.length;i++)
 								{
-									filter += "'"+ filterValues[i] +"',";
+									filter += filterValues[i] +":";
 								}
-								filter = filter.substr(0,filter.length - 1) + ")";
+								filter = filter.substr(0,filter.length - 1);
 							}
 							else
 							{
@@ -2107,24 +1993,16 @@ Ext.onReady( function() {
 					
 				return p;
 			},
-			getURLParams: function( isSorted ) {
+			getURLParams: function() {
 				
 				document.getElementById('startDate').value = TR.cmp.settings.startDate.rawValue;
 				document.getElementById('endDate').value = TR.cmp.settings.endDate.rawValue;
 				document.getElementById('facilityLB').value =  TR.cmp.settings.facilityLB.getValue();
 				document.getElementById('level').value = Ext.getCmp('levelCombobox').getValue();
-				document.getElementById('programStageId').value = TR.cmp.params.programStage.getValue();				
 				document.getElementById('userOrganisationUnit').value = Ext.getCmp('userOrgunit').getValue();
 				document.getElementById('userOrganisationUnitChildren').value = Ext.getCmp('userOrgunitChildren').getValue();
-
-				if( Ext.getCmp('useFormNameDataElementOpt').getValue()== true )
-				{
-					document.getElementById('useFormNameDataElement').value = Ext.getCmp('useFormNameDataElementOpt').getValue();
-				}
-				else
-				{
-					document.getElementById('useFormNameDataElement').value = "false";
-				}
+				document.getElementById('desc').value = TR.state.desc;
+				document.getElementById('asc').value = TR.state.asc;
 				
 				// organisation unit
 				var ous = "";
@@ -2141,56 +2019,7 @@ Ext.onReady( function() {
 				var filterValueList = document.getElementById('item');
 				TR.util.list.clearList(filterValueList);				
 				
-				// Patient properties
-				
-				TR.cmp.params.patientProperty.selected.store.each( function(r) {
-					var propId = r.data.id;
-					var valueType = r.data.valueType;
-					var length = Ext.getCmp('filterPropPanel_' + propId).items.length/4;
-					var hidden = TR.state.caseBasedReport.isColHidden(propId);
-					
-					for(var idx=0;idx<length;idx++)
-					{
-						var id = propId + '_' + idx;
-						var filterField = Ext.getCmp('filter_' + id);
-						var filterValue = "";
-						if( filterField.xtype == 'combobox' )
-						{
-							var values = Ext.getCmp('filter_' + id).getValue();
-							for( var i in values ){
-								filterValue += values[i] + ";";
-							}
-							filterValue = filterValue.substring(0,filterValue.length - 1  );
-						}
-						else{
-							filterValue = filterField.rawValue;
-						}
-						
-						var filter = propId;
-						if( filterValue!=null && filterValue!=''){
-							var filterOpt = Ext.getCmp('filter_opt_' + id).getValue();
-							filter += ';' + filterOpt + ';';
-							if( filterOpt == 'IN' )
-							{
-								var filterValues = filterValue.split(";");
-								filter +="(";
-								for(var i=0;i<filterValues.length;i++)
-								{
-									filter += "'"+ filterValues[i] +"',";
-								}
-								filter = filter.substr(0,filter.length - 1) + ")";
-							}
-							else
-							{
-								filter += filterValue;
-							}
-						}
-						if( idx < length - 1 ){
-							filter +=";"
-						}
-						TR.util.list.addOptionToList(filterValueList, filter, '');
-					}
-				});
+				// Data filter
 				
 				var idx = 0;
 				TR.cmp.params.dataelement.selected.store.each( function(r) {
@@ -2340,6 +2169,7 @@ Ext.onReady( function() {
 					TR.util.mask.showMask(TR.cmp.region.center, TR.i18n.loading);
 					Ext.Ajax.request({
 						url: url,
+						disableCaching: false,
 						method: "POST",
 						scope: this,
 						params: this.getParams(),
@@ -2358,7 +2188,7 @@ Ext.onReady( function() {
 								var fields = [];
 								for( var index=0; index < TR.value.columns.length; index++ )
 								{
-									fields[index] = 'col' + index;
+									fields[index] = index;
 								}
 								TR.value.fields = fields;
 								
@@ -2546,7 +2376,7 @@ Ext.onReady( function() {
 						var id = deId + '_' + idx;
 						var filterOpt = Ext.getCmp('filter_opt_' + id).rawValue;
 						var filterValue = Ext.getCmp('filter_' + id).rawValue;
-						var filter = r.data.localid.split('_')[1] + "_" + filterOpt + '_';
+						var filter = r.data.id.split('_')[1] + "_" + filterOpt + '_';
 					
 						if( filterValue!=TR.i18n.please_select)
 						{
@@ -2962,7 +2792,25 @@ Ext.onReady( function() {
 			this.datatable = Ext.create('Ext.grid.Panel', {
                 height: TR.util.viewport.getSize().y - 58,
 				id: 'gridTable',
-				columns: cols,
+				columns: {
+					items: cols,
+					listeners: {
+						headerclick: function(container, column, e) {
+							if( column.sortable )
+							{
+								if(column.sortState=='ASC'){
+									TR.state.asc = column.dataIndex;
+									TR.state.desc = "";
+								}
+								else{
+									TR.state.asc = "";
+									TR.state.desc = column.dataIndex;
+								}
+								TR.exe.execute(false, true );
+							}
+						}
+					}
+				},
 				scroll: 'both',
 				title: title,
 				selType: 'cellmodel',
@@ -3065,29 +2913,52 @@ Ext.onReady( function() {
 		createColTable: function(){
 			var cols = [];
 			
-			cols[0] = {
-				header: TR.value.columns[0].name, 
-				dataIndex: 'col' + TR.value.columns[0].column,
-				height: TR.conf.layout.east_gridcolumn_height,
-				name: 'meta_' + TR.value.columns[0].column,
-				sortable: false,
-				draggable: false,
-				hidden: true,
-				hideable: true,
-				menuDisabled: true
-			}
-			
-			for( var i = 1; i <TR.value.columns.length; i++ )
+			for( var i =0; i <TR.value.columns.length; i++ )
 			{
-				cols[i] = {
-					header: TR.value.columns[i].name, 
-					dataIndex: 'col' + TR.value.columns[i].column,
-					height: TR.conf.layout.east_gridcolumn_height,
-					name: 'meta_' + TR.value.columns[i].column,
-					sortable: false,
-					draggable: false,
-					hideable: false,
-					menuDisabled: true
+				// Hiden event UID column and programstage UID column
+				
+				if( i==0 || i==1 || i ==3 ){
+					cols[i] = {
+						header: TR.value.columns[i].name, 
+						dataIndex: TR.value.columns[i].column,
+						height: TR.conf.layout.east_gridcolumn_height,
+						name: TR.value.columns[i].column,
+						sortable: false,
+						draggable: false,
+						hidden: true,
+						hideable: true,
+						menuDisabled: false
+					}
+				}
+				
+				// don't sort by orgunit name column
+				
+				else if( i ==4){
+					cols[i] = {
+						header: TR.value.columns[i].name, 
+						dataIndex: TR.value.columns[i].column,
+						height: TR.conf.layout.east_gridcolumn_height,
+						name: TR.value.columns[i].column,
+						sortable: false,
+						draggable: false,
+						hideable: false,
+						menuDisabled: true
+					}
+				}
+				
+				// Sortable columns
+				
+				else if( i==2 || i> 3 ){
+					cols[i] = {
+						header: TR.value.columns[i].name, 
+						dataIndex: TR.value.columns[i].column,
+						height: TR.conf.layout.east_gridcolumn_height,
+						name: TR.value.columns[i].column,
+						sortable: true,
+						draggable: false,
+						hideable: false,
+						menuDisabled: true
+					}
 				}
 			}
 				
@@ -3099,7 +2970,7 @@ Ext.onReady( function() {
 			
 			var params = {};
 			params.header = colname;
-			params.dataIndex = 'col' + index;
+			params.dataIndex = index;
 			params.name = id;
 			params.hidden = eval(TR.value.columns[index].hidden );
 			params.menuFilterText = TR.value.filter;
@@ -3135,12 +3006,10 @@ Ext.onReady( function() {
 				Ext.getCmp('lastPageBtn').disable();
 	
 				Ext.getCmp('btnClean').disable();
-				Ext.getCmp('btnSortBy').disable();
 			}
 			else
 			{
 				Ext.getCmp('btnClean').enable();
-				Ext.getCmp('btnSortBy').enable();
 				Ext.getCmp('currentPage').setValue(TR.state.currentPage);
 				
 				if( TR.state.currentPage == TR.state.total 
@@ -3209,8 +3078,8 @@ Ext.onReady( function() {
     };
         
 	TR.exe = {
-		execute: function( type, isSorted ) {
-			TR.state.generateReport( type, isSorted );
+		execute: function( type) {
+			TR.state.generateReport( type );
 		},
 		paging: function( currentPage )
 		{
@@ -3312,6 +3181,7 @@ Ext.onReady( function() {
 						
 						Ext.Ajax.request({
 							url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.casebasedfavorite_validate,
+							disableCaching: false,
 							method: 'POST',
 							params: {name:name},
 							success: function(r) {
@@ -3319,6 +3189,7 @@ Ext.onReady( function() {
 									if(json.response=='success'){
 										Ext.Ajax.request({
 											url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.casebasedfavorite_save,
+											disableCaching: false,
 											method: 'POST',
 											params: p,
 											success: function() {
@@ -3349,6 +3220,7 @@ Ext.onReady( function() {
 						
 						Ext.Ajax.request({
 							url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.casebasedfavorite_validate,
+							disableCaching: false,
 							method: 'POST',
 							params: {id:id, name:name},
 							success: function(r) {
@@ -3356,6 +3228,7 @@ Ext.onReady( function() {
 									if(json.response=='success'){
 										Ext.Ajax.request({
 											url:  TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.casebasedfavorite_rename,
+											disableCaching: false,
 											method: 'POST',
 											params: {id: id, name: name},
 											failure: function(r) {
@@ -3490,7 +3363,7 @@ Ext.onReady( function() {
 								element.addClsOnOver('link');
 								element.load = function() {
 									favoriteWindow.hide();
-									TR.util.crud.favorite.run( record.data.uid );
+									TR.util.crud.favorite.run( record.data.id );
 								};
 								element.dom.setAttribute('onclick', 'Ext.get(this).load();');
 							}
@@ -3528,6 +3401,7 @@ Ext.onReady( function() {
 								if (record.data.access.manage) {
 									Ext.Ajax.request({
 										url:TR.conf.finals.ajax.path_api + 'sharing?type=patientTabularReport&id=' + record.data.id,
+										disableCaching: false,
 										method: 'GET',
 										failure: function(r) {
 											TR.util.mask.hideMask();
@@ -3561,6 +3435,7 @@ Ext.onReady( function() {
 									
 									Ext.Ajax.request({
 										url: baseurl,
+										disableCaching: false,
 										method: 'POST',
 										success: function() {
 											TR.store.caseBasedFavorite.loadStore();
@@ -3763,12 +3638,14 @@ Ext.onReady( function() {
 						Ext.Ajax.request({
 							url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.aggregatefavorite_validate,
 							method: 'POST',
+							disableCaching: false,
 							params: {name:name},
 							success: function(r) {
 									var json = Ext.JSON.decode(r.responseText);
 									if(json.response=='success'){
 										Ext.Ajax.request({
 											url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.aggregatefavorite_save,
+											disableCaching: false,
 											method: 'POST',
 											params: p,
 											success: function() {
@@ -3806,6 +3683,7 @@ Ext.onReady( function() {
 						var r = TR.cmp.aggregateFavorite.grid.getSelectionModel().getSelection()[0];
 						Ext.Ajax.request({
 							url: TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.aggregatefavorite_rename,
+							disableCaching: false,
 							method: 'POST',
 							params: {id: id, name: name},
 							success: function() {
@@ -3965,7 +3843,8 @@ Ext.onReady( function() {
 
 								if (record.data.access.manage) {
 									Ext.Ajax.request({
-										url:TR.conf.finals.ajax.path_api + 'sharing?type=patientAggregateReport&id=' + record.data.uid,
+										url:TR.conf.finals.ajax.path_api + 'sharing?type=patientAggregateReport&id=' + record.data.id,
+										disableCaching: false,
 										method: 'GET',
 										failure: function(r) {
 											TR.util.mask.hideMask();
@@ -3999,6 +3878,7 @@ Ext.onReady( function() {
 									
 									Ext.Ajax.request({
 										url: baseurl,
+										disableCaching: false,
 										method: 'POST',
 										success: function() {
 											TR.store.aggregateFavorite.loadStore();
@@ -4237,17 +4117,6 @@ Ext.onReady( function() {
 			labelWidth: 135
 		});
 		
-		var useFormNameDataElementField = Ext.create('Ext.form.field.Checkbox', {
-			xtype: 'checkbox',
-			cls: 'tr-checkbox',
-			id: 'useFormNameDataElementOpt',
-			style:'padding-left: 20px;',
-			boxLabel: TR.i18n.use_data_element_form_names,
-			boxLabelAlign: 'before',
-			labelWidth: 135,
-			checked: true
-		});
-		
 		var facilityLBField = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'tr-combo',
 			id: 'facilityLBCombobox',
@@ -4261,9 +4130,9 @@ Ext.onReady( function() {
 			width: TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor - 40,
 			store:  new Ext.data.ArrayStore({
 				fields: ['value', 'name'],
-				data: [['all', TR.i18n.all], ['childrenOnly', TR.i18n.children_only], ['selected', TR.i18n.selected]],
+				data: [['', TR.i18n.all], ['CHILDREN', TR.i18n.children_only], ['SELECTED', TR.i18n.selected]],
 			}),
-			value: 'all',
+			value: '',
 			listeners: {
 				added: function() {
 					TR.cmp.settings.facilityLB = this;
@@ -4392,8 +4261,7 @@ Ext.onReady( function() {
 							items:[
 								completedEventsField,
 								displayTotalsOptField,
-								displayOrgunitCodeField,
-								useFormNameDataElementField
+								displayOrgunitCodeField
 							]
 						},
 						facilityLBField,
@@ -4664,6 +4532,7 @@ Ext.onReady( function() {
 					handler: function() {
 						Ext.Ajax.request({
 							url: getURL(sharing.object.id),
+							disableCaching: false,
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json'
@@ -4995,7 +4864,6 @@ Ext.onReady( function() {
 												if(nv)
 												{
 													// for case-based report
-													dataElementTabTitle.innerHTML = TR.i18n.data_elements;
 													Ext.getCmp('limitOption').setVisible(false);
 													Ext.getCmp('dataElementGroupByCbx').setVisible(false);
 													Ext.getCmp('aggregateType').setVisible(false);
@@ -5015,11 +4883,6 @@ Ext.onReady( function() {
 														Ext.getCmp('levelCombobox').setValue('1');
 													}
 													Ext.getCmp('dateRangeDiv').setVisible(true);
-													if( TR.init.system.accessPatientAttributes=='true')
-													{
-														Ext.getCmp('patientPropertiesDiv').setVisible(false);
-													}
-													Ext.getCmp('btnSortBy').setVisible(true);
 													Ext.getCmp('relativePeriodsDiv').setVisible(false); 
 													Ext.getCmp('fixedPeriodsDiv').setVisible(false);
 													Ext.getCmp('dateRangeDiv').expand();
@@ -5038,7 +4901,6 @@ Ext.onReady( function() {
 												if(nv)
 												{
 													// For aggregate report
-													dataElementTabTitle.innerHTML = TR.i18n.data_filter;
 													Ext.getCmp('limitOption').setVisible(true);
 													Ext.getCmp('dataElementGroupByCbx').setVisible(true);
 													Ext.getCmp('aggregateType').setVisible(true);
@@ -5049,8 +4911,6 @@ Ext.onReady( function() {
 													Ext.getCmp('dateRangeDiv').setVisible(false);
 													Ext.getCmp('levelCombobox').setVisible(false);
 													Ext.getCmp('caseBasedFavoriteBtn').setVisible(false);
-													Ext.getCmp('btnSortBy').setVisible(false);
-													Ext.getCmp('patientPropertiesDiv').setVisible(false);
 													Ext.getCmp('displayOrgunitCode').setVisible(false);
 													
 													Ext.getCmp('datePeriodRangeDiv').setVisible(true);
@@ -5102,47 +4962,25 @@ Ext.onReady( function() {
 											TR.cmp.settings.program = this;
 										},
 										select: function(cb) {
-											TR.state.isFilter = false;
 											var pid = cb.getValue();
-											var pLocalid = cb.displayTplData[0].localid;
-											
-											// Registration programs
-											if( cb.displayTplData[0].type !='3' )
-											{
-												// IDENTIFIER TYPE && PATIENT ATTRIBUTES
-												var storePatientProperty = TR.store.patientProperty.available;
-												TR.store.patientProperty.selected.removeAll();
-												storePatientProperty.parent = pLocalid;
-												
-												if (TR.util.store.containsParent(storePatientProperty)) {
-													TR.util.store.loadFromStorage(storePatientProperty);
-													TR.util.multiselect.filterAvailable(TR.cmp.params.patientProperty.available, TR.cmp.params.patientProperty.selected);
-												}
-												else {
-													storePatientProperty.load({params: {programId: pid}});
-												}
-											}
-											else
-											{
-												TR.store.patientProperty.available.removeAll();
-												TR.store.patientProperty.selected.removeAll();
-											}
 											
 											TR.store.programStageSection.loadData([],false);
 										
-											// PROGRAM-STAGE										
-											var storeProgramStage = TR.store.programStage;
-											TR.store.dataelement.available.removeAll();
-											TR.store.dataelement.selected.removeAll();
-											storeProgramStage.parent = pid;
-											TR.store.dataelement.isLoadFromFavorite = false;
+											// Program-stage
 											
-											var url = storeProgramStage.getProxy().url + pid  + ".json?viewClass=export";
+											var storeProgramStage = TR.store.programStage;
+											storeProgramStage.parent = pid;
+											
+											var url = storeProgramStage.getProxy().url + pid  + ".json";
 											storeProgramStage.load({url:url});
 											
-											// FILTER-VALUES FIELDS
+											TR.store.dataelement.available.removeAll();
+											TR.store.dataelement.selected.removeAll();
+											TR.store.dataelement.isLoadFromFavorite = false;
+											
+											// Filter value fields
+											
 											Ext.getCmp('filterPanel').removeAll();
-											Ext.getCmp('filterPropPanel').removeAll();
 										}
 									}
 								},
@@ -5169,7 +5007,6 @@ Ext.onReady( function() {
 											TR.cmp.params.programStage = this;
 										},  
 										select: function(cb) {
-											var psLocalid = cb.displayTplData[0].id;
 											var psid = cb.getValue();
 											
 											// Get section from the selected program stage
@@ -5187,7 +5024,6 @@ Ext.onReady( function() {
 											
 											// Get data element from the selected program stage
 											
-											TR.state.isFilter = false;
 											var store = TR.store.dataelement.available;
 											TR.store.dataelement.selected.loadData([],false);
 											store.parent = psid;
@@ -5200,7 +5036,7 @@ Ext.onReady( function() {
 												store.load({params: {programStageId: psid}});
 											}
 											
-											// FILTER-VALUES FIELDS
+											// Filter value fields
 											Ext.getCmp('filterPanel').removeAll();
 										} 
 									}
@@ -5733,7 +5569,7 @@ Ext.onReady( function() {
 																icon: 'images/arrowright.png',
 																width: 22,
 																handler: function() {
-																	TR.util.multiselect.select(TR.cmp.params.fixedperiod.available, TR.cmp.params.fixedperiod.selected,'filterPropPanel');
+																	TR.util.multiselect.select(TR.cmp.params.fixedperiod.available, TR.cmp.params.fixedperiod.selected);
 																}
 															},
 															{
@@ -5741,7 +5577,7 @@ Ext.onReady( function() {
 																icon: 'images/arrowrightdouble.png',
 																width: 22,
 																handler: function() {
-																	TR.util.multiselect.selectAll(TR.cmp.params.fixedperiod.available, TR.cmp.params.fixedperiod.selected,'filterPropPanel');
+																	TR.util.multiselect.selectAll(TR.cmp.params.fixedperiod.available, TR.cmp.params.fixedperiod.selected);
 																}
 															},
 															' '
@@ -5996,7 +5832,7 @@ Ext.onReady( function() {
 														this.getSelectionModel().select(this.recordsToSelect);
 														TR.state.orgunitIds = [];
 														for( var i in this.recordsToSelect){
-															TR.state.orgunitIds.push( this.recordsToSelect[i].data.localid );
+															TR.state.orgunitIds.push( this.recordsToSelect[i].data.id );
 														}
 														this.recordsToSelect = [];
 														this.numberOfRecords = 0;
@@ -6015,6 +5851,7 @@ Ext.onReady( function() {
 													}
 													Ext.Ajax.request({
 														url: url,
+														disableCaching: false,
 														method: 'GET',
 														params: params,
 														scope: this,
@@ -6093,7 +5930,7 @@ Ext.onReady( function() {
 														TR.state.orgunitIds = [];
 														var selectedNodes = TR.cmp.params.organisationunit.treepanel.getSelectionModel().getSelection();
 														for( var i=0; i<selectedNodes.length; i++ ){
-															TR.state.orgunitIds.push( selectedNodes[i].data.localid);
+															TR.state.orgunitIds.push( selectedNodes[i].data.id);
 														}
 													},
 													itemcontextmenu: function(v, r, h, i, e) {
@@ -6118,7 +5955,7 @@ Ext.onReady( function() {
 																		
 																		TR.state.orgunitIds = [];
 																		for( var i in r.childNodes){
-																			 TR.state.orgunitIds.push( r.childNodes[i].data.localid );
+																			 TR.state.orgunitIds.push( r.childNodes[i].data.id );
 																		}
 																	});
 																}
@@ -6140,192 +5977,6 @@ Ext.onReady( function() {
 											expand: function() {
 												TR.cmp.params.organisationunit.treepanel.setHeight(TR.cmp.params.organisationunit.panel.getHeight() - TR.conf.layout.west_fill_accordion_organisationunit - 60 );
 												TR.cmp.params.organisationunit.treepanel.selectRootIf();
-											}
-										}
-									},
-									
-									// IDENTIFIER TYPE AND PATIENT-ATTRIBUTE
-									{
-										title: '<div style="height:17px;background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px">' + TR.i18n.identifiers_and_attributes + '</div>',
-										id:'patientPropertiesDiv',
-										hideCollapseTool: true,
-										items: [
-											{
-												xtype: 'panel',
-												layout: 'column',
-												bodyStyle: 'border-style:none',
-												items: [
-													{
-														xtype: 'multiselect',
-														id: 'availablePatientProperties',
-														name: 'availablePatientProperties',
-														cls: 'tr-toolbar-multiselect-left',
-														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2,
-														height: TR.conf.layout.west_properties_multiselect,
-														displayField: 'name',
-														valueField: 'id',
-														queryMode: 'local',
-														store: TR.store.patientProperty.available,
-														tbar: [
-															{
-																xtype: 'label',
-																text: TR.i18n.available,
-																cls: 'tr-toolbar-multiselect-left-label'
-															},
-															'->',
-															{
-																xtype: 'button',
-																icon: 'images/arrowright.png',
-																width: 22,
-																handler: function() {
-																	TR.util.multiselect.select(TR.cmp.params.patientProperty.available, TR.cmp.params.patientProperty.selected,'filterPropPanel');
-																}
-															},
-															{
-																xtype: 'button',
-																icon: 'images/arrowrightdouble.png',
-																width: 22,
-																handler: function() {
-																	TR.util.multiselect.selectAll(TR.cmp.params.patientProperty.available, TR.cmp.params.patientProperty.selected,'filterPropPanel');
-																}
-															},
-															' '
-														],
-														listeners: {
-															added: function() {
-																TR.cmp.params.patientProperty.available = this;
-															},                                                                
-															afterrender: function() {
-																this.boundList.on('itemdblclick', function() {
-																	TR.util.multiselect.select(this, TR.cmp.params.patientProperty.selected,'filterPropPanel');
-																}, this);
-															}
-														}
-													},                                            
-													{
-														xtype: 'multiselect',
-														id: 'selectedPatientProperties',
-														name: 'selectedPatientProperties',
-														cls: 'tr-toolbar-multiselect-right',
-														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2,
-														height: TR.conf.layout.west_properties_multiselect,
-														displayField: 'name',
-														valueField: 'id',
-														ddReorder: true,
-														queryMode: 'local',
-														store: TR.store.patientProperty.selected,
-														tbar: [
-															' ',
-															{
-																xtype: 'button',
-																icon: 'images/arrowleftdouble.png',
-																width: 22,
-																handler: function() {
-																	TR.util.multiselect.unselectAll(TR.cmp.params.patientProperty.available, TR.cmp.params.patientProperty.selected,'filterPropPanel');
-																}
-															},
-															{
-																xtype: 'button',
-																icon: 'images/arrowleft.png',
-																width: 22,
-																handler: function() {
-																	TR.util.multiselect.unselect(TR.cmp.params.patientProperty.available, TR.cmp.params.patientProperty.selected,'filterPropPanel');
-																}
-															},
-															'->',
-															{
-																xtype: 'label',
-																text: TR.i18n.selected,
-																cls: 'tr-toolbar-multiselect-right-label'
-															}
-														],
-														listeners: {
-															added: function() {
-																TR.cmp.params.patientProperty.selected = this;
-															},          
-															afterrender: function() {
-																this.boundList.on('itemdblclick', function() {
-																	TR.util.multiselect.unselect(TR.cmp.params.patientProperty.available, this,'filterPropPanel');
-																}, this);
-															}
-														}
-													},
-													{
-														xtype: 'toolbar',
-														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor),
-														cls: 'tr-toolbar-multiselect-left',
-														style: 'margin-top:10px;',
-														items: [
-															{
-																xtype: 'label',	
-																text: TR.i18n.filter_values,
-																cls: 'tr-toolbar-multiselect-left-label'
-															},
-															'->',
-															{
-																xtype: 'button',
-																icon: 'images/arrowup.png',
-																tooltip: TR.i18n.show_hide_filter_values,
-																up: true,
-																width: 22,
-																handler: function() {
-																	if(this.up==true){
-																		Ext.getCmp('availablePatientProperties').setVisible(false);
-																		Ext.getCmp('selectedPatientProperties').setVisible(false);
-																		if(Ext.getCmp('reportTypeGroup').getValue().reportType=='true'){
-																			Ext.getCmp('filterPropPanel').setHeight(TR.conf.layout.west_properties_expand_filter_panel);
-																		}
-																		else{
-																			Ext.getCmp('filterPropPanel').setHeight(TR.conf.layout.west_properties_collapse_filter_panel);
-																		}
-																		this.setIcon('images/arrowdown.png');
-																		this.up = false;
-																	}
-																	else{
-																		Ext.getCmp('availablePatientProperties').setVisible(true);
-																		Ext.getCmp('selectedPatientProperties').setVisible(true);
-																		if(Ext.getCmp('reportTypeGroup').getValue().reportType=='true'){
-																			Ext.getCmp('filterPropPanel').setHeight(TR.conf.layout.west_properties_collapse_filter_panel);
-																		}
-																		else{
-																			Ext.getCmp('filterPropPanel').setHeight(TR.conf.layout.west_properties_expand_filter_panel);
-																		}
-																		this.setIcon('images/arrowup.png');
-																		this.up = true;
-																	}
-																}
-															}
-														]
-													},
-													{
-														xtype: 'panel',
-														layout: 'column',
-														id: 'filterPropPanel',
-														height: TR.conf.layout.west_properties_filter_panel,
-														bodyStyle: 'background-color:transparent; padding:10px 10px 0px 3px',
-														autoScroll: true,
-														overflowX: 'hidden',
-														overflowY: 'auto',
-														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) ,
-														items: []
-													}
-												]
-											}
-											
-										],
-										listeners: {
-											added: function() {
-												TR.cmp.params.patientProperty.panel = this;
-											},
-											expand: function() {
-												var programId = TR.cmp.settings.program.getValue();	
-												if( programId != null )
-												{
-													var programType = TR.cmp.settings.program.displayTplData[0].type;											
-													if (programId != null && !TR.store.patientProperty.available.isloaded && programType !='3') {
-														TR.store.patientProperty.available.load({params: {programId: programId}});
-													}
-												}
 											}
 										}
 									},
@@ -6753,44 +6404,6 @@ Ext.onReady( function() {
 					},
 					{
 						xtype: 'button',
-						text: TR.i18n.sort_by,
-						id: 'btnSortBy',
-						disabled: true,
-						menu: {},
-						listeners: {
-							afterrender: function(b) {
-								this.menu = Ext.create('Ext.menu.Menu', {
-									margin: '2 0 0 0',
-									shadow: false,
-									showSeparator: false,
-									items: [
-										{
-											text: TR.i18n.asc,
-											iconCls: 'tr-menu-item-asc',
-											minWidth: 105,
-											handler: function() {
-												TR.state.desc = "";
-												TR.state.asc = "executiondate";
-												TR.exe.execute(false, true );
-											}
-										},
-										{
-											text: TR.i18n.desc,
-											iconCls: 'tr-menu-item-desc',
-											minWidth: 105,
-											handler: function() {
-												TR.state.asc = "";
-												TR.state.desc = "executiondate";
-												TR.exe.execute(false, true );
-											}
-										}
-									]                                            
-								});
-							}
-						}
-					},
-					{
-						xtype: 'button',
 						cls: 'tr-toolbar-btn-2',
 						id: 'caseBasedFavoriteBtn',
 						text: TR.i18n.favorites,
@@ -6930,10 +6543,7 @@ Ext.onReady( function() {
 				TR.cmp.layoutWindow.window = TR.app.LayoutWindow();
 				TR.cmp.layoutWindow.window.hide();
 				
-				Ext.getCmp('patientPropertiesDiv').setVisible(TR.init.system.accessPatientAttributes);
 				Ext.getCmp('reportTypeGroup').setValue(true);
-				Ext.getCmp('limitOption').setVisible(false);
-				dataElementTabTitle.innerHTML = TR.i18n.data_elements;
 				Ext.getCmp('limitOption').setVisible(false);
 				Ext.getCmp('dataElementGroupByCbx').setVisible(false);
 				Ext.getCmp('deSumCbx').setVisible(false);
@@ -6953,7 +6563,7 @@ Ext.onReady( function() {
 				
 				TR.state.orgunitIds = [];
 				for( var i in TR.init.system.rootnodes){
-					TR.state.orgunitIds.push( TR.init.system.rootnodes[i].localid );
+					TR.state.orgunitIds.push( TR.init.system.rootnodes[i].id );
 				}
 				
 				if( TR.init.report.id != "")

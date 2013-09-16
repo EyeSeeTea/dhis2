@@ -8,26 +8,10 @@
 	jQuery( document ).ready( function()
 	{	
 		validation( 'addProgramForm', function( form ){ 
-		if( duplicate==true) 
-			return false;
-		else{
-			enable('dateOfEnrollmentDescription');
-			enable('dateOfIncidentDescription');
-			form.submit();
-		}
+		enable('dateOfEnrollmentDescription');
+		enable('dateOfIncidentDescription');
+		form.submit();
 	}, function(){
-		duplicate = false;
-		var COLOR_RED = '#ff8a8a';
-		jQuery(".daysAllowedSendMessage").each( function( i, a ){ 
-			jQuery(".daysAllowedSendMessage").each( function(j, b){ 
-				if( i!=j && a.value==b.value){
-					jQuery( a ).css( 'background-color', COLOR_RED );
-					jQuery( b ).css( 'background-color', COLOR_RED );
-					duplicate = true;
-				}
-			});
-		});
-		
 		var daysAllowedSendMessages = jQuery( "#daysAllowedSendMessages" );
 		daysAllowedSendMessages.empty();
 		
@@ -42,32 +26,40 @@
 		
 		var whenToSend = jQuery( "#whenToSend" );
 		whenToSend.empty();
+		
+		var messageType = jQuery( "#messageType" );
+		messageType.empty();
 
 		var userGroup = jQuery( "#userGroup" );
 		userGroup.empty();		
 		
 		jQuery(".daysAllowedSendMessage").each( function( i, item ){ 
-			daysAllowedSendMessages.append( "<option value='" + item.value + "' selected='true'>" + item.value +"</option>" );
+			var days = (jQuery(item).attr('realvalue')==undefined) ? 0 : jQuery(item).attr('realvalue');
+			daysAllowedSendMessages.append( "<option value='" + days + "' selected='true'>" + days + "</option>" );
 		});
 		
 		jQuery(".templateMessage").each( function( i, item ){ 
-			templateMessages.append( "<option value='" + item.value + "' selected='true'>" +item.value+"</option>" );
+			templateMessages.append( "<option value='" + item.value + "' selected='true'>" + item.value + "</option>" );
 		});
 		
 		jQuery(".dateToCompare").each( function( i, item ){ 
-			datesToCompare.append( "<option value='" + item.value + "' selected='true'>" +item.value+"</option>" );
+			datesToCompare.append( "<option value='" + item.value + "' selected='true'>" + item.value + "</option>" );
 		});
 		
 		jQuery(".sendTo").each( function( i, item ){ 
-			sendTo.append( "<option value='" + item.value + "' selected='true'>" + item.value +"</option>" );
+			sendTo.append( "<option value='" + item.value + "' selected='true'>" + item.value + "</option>" );
 		}); 
 		
 		jQuery(".whenToSend").each( function( i, item ){ 
-			whenToSend.append( "<option value='" + item.value + "' selected='true'>" + item.value +"</option>" );
+			whenToSend.append( "<option value='" + item.value + "' selected='true'>" + item.value + "</option>" );
+		});
+		
+		jQuery(".messageType").each( function( i, item ){ 
+			messageType.append( "<option value='" + item.value + "' selected='true'>" + item.value + "</option>" );
 		});
 		
 		jQuery(".userGroup").each( function( i, item ){ 
-			userGroup.append( "<option value='" + item.value + "' selected='true'>" + item.value +"</option>" );
+			userGroup.append( "<option value='" + item.value + "' selected='true'>" + item.value + "</option>" );
 		});
 		
 		var selectedPropertyIds = jQuery( "#selectedPropertyIds" );
@@ -100,6 +92,7 @@
 	<select id='datesToCompare' name="datesToCompare" multiple="multiple" class="hidden"></select>
 	<select id='sendTo' name="sendTo" multiple="multiple" class="hidden"></select>
 	<select id='whenToSend' name="whenToSend" multiple="multiple" class="hidden"></select>
+	<select id='messageType' name="messageType" multiple="multiple" class="hidden"></select>
 	<select id='userGroup' name="userGroup" multiple="multiple" class="hidden"></select>
 	
 <table>	 
@@ -134,35 +127,19 @@
 			<td></td>
 		</tr>
 		
-		<tr>
-			<th colspan="2">$i18n.getString( "form_details" )</th>
-		</tr>
-	
-		<tr>
-			<td><label>$i18n.getString( "show_provided_provided_elsewhere" )</label></td>
-			<td><input type="checkbox" id="displayProvidedOtherFacility" name="displayProvidedOtherFacility" value='true' checked></td>
-			<td></td>
-		</tr>
-		
-		<tr>
-			<td><label>$i18n.getString( "block_entry_form_after_completed" )</label></td>
-			<td><input type="checkbox" id="blockEntryForm" name="blockEntryForm" value='true'></td>
-			<td></td>
-		</tr>
-		
-		<tr>
-			<td><label>$i18n.getString( "remind_completing_program_after_program_stage_completed" )</label></td>
-			<td><input type="checkbox" id="remindCompleted" name="remindCompleted" value='true' ></td>
-			<td></td>
-		</tr>
-		
 		<tr name='nonAnonymous'>
 			<th colspan="2">$i18n.getString( "enrollment_details" )</th>
 		</tr>
 		
 		<tr name='nonAnonymous'>
-			<td><label>$i18n.getString( "generated_events_by_enrollment_date" )</label></td>
-			<td><input type="checkbox" id="generatedByEnrollmentDate" name="generatedByEnrollmentDate" value='true'></td>
+			<td><label>$i18n.getString( "allow_select_enrollment_date_in_future" )</label></td>
+			<td><input type="checkbox" id="selectEnrollmentDatesInFuture" name="selectEnrollmentDatesInFuture" value='true'></td>
+			<td></td>
+		</tr>
+		
+		<tr name='nonAnonymous'>
+			<td><label>$i18n.getString( "allow_select_incident_date_in_future" )</label></td>
+			<td><input type="checkbox" id="selectIncidentDatesInFuture" name="selectIncidentDatesInFuture" value='true' ></td>
 			<td></td>
 		</tr>
 		
@@ -212,6 +189,46 @@
 			<td><label>$i18n.getString( "date_of_enrollment_description" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 			<td><input style="width: 330px;" type="text" id="dateOfEnrollmentDescription" name="dateOfEnrollmentDescription" class="{validate:{required:true,minlength:4}}"></td>
 			<td></td>
+		</tr>
+			
+		<tr name='nonAnonymous'>
+			<th colspan="2">$i18n.getString( "program_management" )</th>
+		</tr>
+		
+		<tr name='nonAnonymous'>
+			<td>$i18n.getString("relationship_text")</td>
+			<td><input type='text' id='relationshipText' name='relationshipText' ></td>
+		</tr>
+		
+		<tr name='nonAnonymous'>
+			<td>$i18n.getString("relationship_type")</td>
+			<td>
+				<select type='text' id='relationshipTypeId' name='relationshipTypeId' onchange='relationshipTypeOnchange()' >
+					<option value=''>[$i18n.getString("please_select")]</option>
+					#foreach($relationshipType in $relationshipTypes)
+						<option value='$relationshipType.id' aIsToB='$relationshipType.aIsToB' bIsToA='$relationshipType.bIsToA'>$relationshipType.name</option>
+					#end
+				</select>
+			</td>
+		</tr>
+		
+		<tr name='nonAnonymous'>
+			<td>$i18n.getString("relationship_details")</td>
+			<td>
+				<select type='text' id='relationshipFromA' name='relationshipFromA'></select>
+			</td>
+		</tr>
+		
+		<tr name='nonAnonymous'>
+			<td>$i18n.getString("program_related")</td>
+			<td>
+				<select type='text' id='relatedProgramId' name='relatedProgramId' >
+					<option value=''>[$i18n.getString("please_select")]</option>
+					#foreach($program in $programs)
+						<option value='$program.id'>$program.name</option>
+					#end
+				</select>
+			</td>
 		</tr>
 		
 		<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
@@ -314,13 +331,24 @@
 	var i18n_name_exists = '$encoder.jsEscape( $i18n.getString( "name_exists" ) , "'")';   
 	var i18n_date_to_compare = '$encoder.jsEscape( $i18n.getString( "date_to_compare" ) , "'")'; 
 	var i18n_recipients = '$encoder.jsEscape( $i18n.getString( "recipients" ) , "'")'; 
-	var i18n_patient = '$encoder.jsEscape( $i18n.getString( "patient" ) , "'")'; 
-	var i18n_health_worker = '$encoder.jsEscape( $i18n.getString( "health_worker" ) , "'")'; 
-	var i18n_orgunit_registered = '$encoder.jsEscape( $i18n.getString( "orgunit_registered" ) , "'")'; 
-	var i18n_all_users_in_orgunit_registered = '$encoder.jsEscape( $i18n.getString( "all_users_in_orgunit_registered" ) , "'")'; 
-	var i18n_send_when_to = '$encoder.jsEscape( $i18n.getString( "send_when_to" ) , "'")';
-	var i18n_scheduled = '$encoder.jsEscape( $i18n.getString( "scheduled" ) , "'")';
+	var i18n_patient_sms_only = '$encoder.jsEscape( $i18n.getString( "patient_sms_only" ) , "'")'; 
+	var i18n_health_worker_assigned_to_person = '$encoder.jsEscape( $i18n.getString( "health_worker_assigned_to_person" ) , "'")'; 
+	var i18n_orgunit_phone_number_sms_only = '$encoder.jsEscape( $i18n.getString( "orgunit_phone_number_sms_only" ) , "'")'; 
+	var i18n_all_users_at_orgunit = '$encoder.jsEscape( $i18n.getString( "all_users_at_orgunit" ) , "'")'; 
+	var i18n_send_when_to = '$encoder.jsEscape( $i18n.getString( "send_base_on" ) , "'")';
+	var i18n_days_scheduled = '$encoder.jsEscape( $i18n.getString( "days_scheduled" ) , "'")';
 	var i18n_complete_program = '$encoder.jsEscape( $i18n.getString( "complete_program" ) , "'")';
 	var i18n_program_enrollment = '$encoder.jsEscape( $i18n.getString( "program_enrollment" ) , "'")';
 	var i18n_user_group = '$encoder.jsEscape( $i18n.getString( "user_group" ) , "'")';
+	var i18n_characters_without_params = '$encoder.jsEscape( $i18n.getString( "characters_without_params" ) , "'")';
+	var i18n_send_message = '$encoder.jsEscape( $i18n.getString( "send_message" ) , "'")';
+	var i18n_days = '$encoder.jsEscape( $i18n.getString( "days" ) , "'")';
+	var i18n_send_message = '$encoder.jsEscape( $i18n.getString( "send_message" ) , "'")';
+	var i18n_before = '$encoder.jsEscape( $i18n.getString( "before" ) , "'")';
+	var i18n_after = '$encoder.jsEscape( $i18n.getString( "after" ) , "'")';
+	var i18n_scheduled_date = '$encoder.jsEscape( $i18n.getString( "scheduled_date" ) , "'")';
+	var i18n_message_type = '$encoder.jsEscape( $i18n.getString( "message_type" ) , "'")';
+	var i18n_direct_sms = '$encoder.jsEscape( $i18n.getString( "direct_sms" ) , "'")';
+	var i18n_message = '$encoder.jsEscape( $i18n.getString( "message" ) , "'")';
+	var i18n_both = '$encoder.jsEscape( $i18n.getString( "both" ) , "'")';
 </script>

@@ -28,11 +28,20 @@ package org.hisp.dhis.patient;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.user.User;
 
-import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -41,8 +50,9 @@ import java.util.Set;
 /**
  * @author Abyot Asalefew Gizaw
  */
+@JacksonXmlRootElement(localName = "person", namespace = DxfNamespaces.DXF_2_0)
 public class Patient
-    implements Serializable
+    extends BaseIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -51,11 +61,11 @@ public class Patient
 
     public static final String MALE = "M";
     public static final String FEMALE = "F";
-    public static final String TRANSGENDER = "M";
+    public static final String TRANSGENDER = "T";
 
     public static final char DOB_TYPE_VERIFIED = 'V';
     public static final char DOB_TYPE_DECLARED = 'D';
-    public static final char DOB_TYPE_APPROXIATED = 'A';
+    public static final char DOB_TYPE_APPROXIMATED = 'A';
 
     public static final char AGE_TYPE_YEAR = 'Y';
     public static final char AGE_TYPE_MONTH = 'M';
@@ -70,14 +80,10 @@ public class Patient
 
     public static String FIXED_ATTR_BIRTH_DATE = "birthDate";
     public static String FIXED_ATTR_AGE = "age";
+    public static String FIXED_ATTR_INTEGER_AGE = "integerValueOfAge";
+    public static String FIXED_ATTR_REGISTRATION_DATE = "registrationDate";
 
-    private Integer id;
-
-    private String firstName;
-
-    private String middleName;
-
-    private String lastName;
+    public static String FIXED_ATTR_FULL_NAME = "fullName";
 
     private String gender;
 
@@ -116,113 +122,12 @@ public class Patient
     }
 
     // -------------------------------------------------------------------------
-    // hashCode and equals
-    // -------------------------------------------------------------------------
-
-    @Override
-    public int hashCode()
-    {
-        final int prime = 31;
-        int result = 1;
-
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((birthDate == null) ? 0 : birthDate.hashCode());
-        result = prime * result + ((firstName == null) ? 0 : firstName.hashCode());
-        result = prime * result + ((gender == null) ? 0 : gender.hashCode());
-        result = prime * result + ((lastName == null) ? 0 : lastName.hashCode());
-        result = prime * result + ((middleName == null) ? 0 : middleName.hashCode());
-
-        return result;
-    }
-
-    @Override
-    public boolean equals( Object object )
-    {
-        if ( this == object )
-        {
-            return true;
-        }
-
-        if ( object == null )
-        {
-            return false;
-        }
-
-        if ( getClass() != object.getClass() )
-        {
-            return false;
-        }
-
-        final Patient other = (Patient) object;
-
-        if ( birthDate == null )
-        {
-            if ( other.birthDate != null )
-            {
-                return false;
-            }
-        }
-        else if ( !birthDate.equals( other.birthDate ) )
-        {
-            return false;
-        }
-
-        if ( firstName == null )
-        {
-            if ( other.firstName != null )
-            {
-                return false;
-            }
-        }
-        else if ( !firstName.equals( other.firstName ) )
-        {
-            return false;
-        }
-
-        if ( gender == null )
-        {
-            if ( other.gender != null )
-                return false;
-        }
-        else if ( !gender.equals( other.gender ) )
-        {
-            return false;
-        }
-
-        if ( lastName == null )
-        {
-            if ( other.lastName != null )
-            {
-                return false;
-            }
-        }
-        else if ( !lastName.equals( other.lastName ) )
-        {
-            return false;
-        }
-
-        if ( middleName == null )
-        {
-            if ( other.middleName != null )
-            {
-                return false;
-            }
-        }
-        else if ( !middleName.equals( other.middleName ) )
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    public Integer getId()
+    public String getFullName()
     {
-        return id;
+        return name;
     }
 
     public Set<PatientAttribute> getAttributes()
@@ -230,6 +135,15 @@ public class Patient
         return attributes;
     }
 
+    public void setAttributes( Set<PatientAttribute> attributes )
+    {
+        this.attributes = attributes;
+    }
+
+    @JsonProperty
+    @JsonSerialize(as = BaseIdentifiableObject.class)
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public OrganisationUnit getOrganisationUnit()
     {
         return organisationUnit;
@@ -240,46 +154,9 @@ public class Patient
         this.organisationUnit = organisationUnit;
     }
 
-    public void setAttributes( Set<PatientAttribute> attributes )
-    {
-        this.attributes = attributes;
-    }
-
-    public void setId( Integer id )
-    {
-        this.id = id;
-    }
-
-    public String getFirstName()
-    {
-        return firstName;
-    }
-
-    public void setFirstName( String firstName )
-    {
-        this.firstName = firstName;
-    }
-
-    public String getMiddleName()
-    {
-        return middleName;
-    }
-
-    public void setMiddleName( String middleName )
-    {
-        this.middleName = middleName;
-    }
-
-    public String getLastName()
-    {
-        return lastName;
-    }
-
-    public void setLastName( String lastName )
-    {
-        this.lastName = lastName;
-    }
-
+    @JsonProperty
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public String getGender()
     {
         return gender;
@@ -290,6 +167,9 @@ public class Patient
         this.gender = gender;
     }
 
+    @JsonProperty
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public Date getBirthDate()
     {
         return birthDate;
@@ -300,6 +180,9 @@ public class Patient
         this.birthDate = birthDate;
     }
 
+    @JsonProperty
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public Date getDeathDate()
     {
         return deathDate;
@@ -310,6 +193,9 @@ public class Patient
         this.deathDate = deathDate;
     }
 
+    @JsonProperty
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public Boolean getIsDead()
     {
         return isDead;
@@ -330,6 +216,10 @@ public class Patient
         this.identifiers = identifiers;
     }
 
+    @JsonProperty
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlElementWrapper(localName = "programs", namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty(localName = "program", namespace = DxfNamespaces.DXF_2_0)
     public Set<Program> getPrograms()
     {
         return programs;
@@ -340,6 +230,10 @@ public class Patient
         this.programs = programs;
     }
 
+    @JsonProperty
+    @JsonSerialize(as = BaseIdentifiableObject.class)
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public User getHealthWorker()
     {
         return healthWorker;
@@ -350,24 +244,31 @@ public class Patient
         this.healthWorker = healthWorker;
     }
 
-    public void setRegistrationDate( Date registrationDate )
-    {
-        this.registrationDate = registrationDate;
-    }
-
+    @JsonProperty
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public Date getRegistrationDate()
     {
         return registrationDate;
     }
 
-    public void setRepresentative( Patient representative )
+    public void setRegistrationDate( Date registrationDate )
     {
-        this.representative = representative;
+        this.registrationDate = registrationDate;
     }
 
+    @JsonProperty
+    @JsonSerialize(as = BaseIdentifiableObject.class)
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public Patient getRepresentative()
     {
         return representative;
+    }
+
+    public void setRepresentative( Patient representative )
+    {
+        this.representative = representative;
     }
 
     // -------------------------------------------------------------------------
@@ -402,11 +303,16 @@ public class Patient
         {
             return "< 1 yr";
         }
-        
+
         return age + " yr";
     }
 
     public int getIntegerValueOfAge()
+    {
+        return getIntegerValueOfAge( birthDate );
+    }
+
+    public static int getIntegerValueOfAge( Date birthDate )
     {
         if ( birthDate == null )
         {
@@ -433,7 +339,7 @@ public class Patient
         return age;
     }
 
-    public void setBirthDateFromAge( int age, char ageType )
+    public static Date getBirthFromAge( int age, char ageType )
     {
         Calendar todayCalendar = Calendar.getInstance();
         todayCalendar.clear( Calendar.MILLISECOND );
@@ -458,7 +364,13 @@ public class Patient
             todayCalendar.add( Calendar.DATE, -1 * age );
         }
 
-        setBirthDate( todayCalendar.getTime() );
+        return todayCalendar.getTime();
+    }
+
+    public void setBirthDateFromAge( int age, char ageType )
+    {
+        Date fromAge = getBirthFromAge( age, ageType );
+        setBirthDate( fromAge );
     }
 
     public char getAgeType()
@@ -491,41 +403,6 @@ public class Patient
     // -------------------------------------------------------------------------
     // Getter && Setter
     // -------------------------------------------------------------------------
-
-    public String getFullName()
-    {
-        boolean space = false;
-        String name = "";
-
-        if ( firstName != null && firstName.length() != 0 )
-        {
-            name = firstName;
-            space = true;
-        }
-
-        if ( middleName != null && middleName.length() != 0 )
-        {
-            if ( space )
-            {
-                name += " ";
-            }
-
-            name += middleName;
-            space = true;
-        }
-
-        if ( lastName != null && lastName.length() != 0 )
-        {
-            if ( space )
-            {
-                name += " ";
-            }
-
-            name += lastName;
-        }
-
-        return name;
-    }
 
     public String getPhoneNumber()
     {
@@ -566,12 +443,12 @@ public class Patient
     {
         switch ( dobType )
         {
-        case DOB_TYPE_VERIFIED:
-            return "Verified";
-        case DOB_TYPE_DECLARED:
-            return "Declared";
-        default:
-            return "Approxiated";
+            case DOB_TYPE_VERIFIED:
+                return "Verified";
+            case DOB_TYPE_DECLARED:
+                return "Declared";
+            default:
+                return "Approxiated";
         }
     }
 }

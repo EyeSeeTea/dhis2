@@ -44,7 +44,10 @@ public class ImportSummary
 
     private String description;
 
+    /* we want to phase out this at some point, use importCount instead */
     private ImportCount dataValueCount = new ImportCount();
+
+    private ImportCount importCount = new ImportCount();
 
     private List<ImportConflict> conflicts = new ArrayList<ImportConflict>();
 
@@ -101,6 +104,18 @@ public class ImportSummary
     }
 
     @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public ImportCount getImportCount()
+    {
+        return importCount;
+    }
+
+    public void setImportCount( ImportCount importCount )
+    {
+        this.importCount = importCount;
+    }
+
+    @JsonProperty
     @JacksonXmlElementWrapper( localName = "conflicts", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "conflict", namespace = DxfNamespaces.DXF_2_0 )
     public List<ImportConflict> getConflicts()
@@ -147,5 +162,19 @@ public class ImportSummary
     public void setHref( String href )
     {
         this.href = href;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "ImportSummary{" +
+            "status=" + status +
+            ", description='" + description + '\'' +
+            ", dataValueCount=" + dataValueCount +
+            ", conflicts=" + conflicts +
+            ", dataSetComplete='" + dataSetComplete + '\'' +
+            ", reference='" + reference + '\'' +
+            ", href='" + href + '\'' +
+            '}';
     }
 }
