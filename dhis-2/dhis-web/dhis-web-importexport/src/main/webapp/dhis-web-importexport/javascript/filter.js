@@ -30,7 +30,7 @@ function loadFilters()
     $.ajax(
         {
             type: "GET",
-            url: "../api/detailedMetaData/getFilters",
+            url: "../api/filteredMetaData/getFilters",
             dataType: "json",
             success: function ( response )
             {
@@ -61,7 +61,7 @@ function showFilterDetails( filterUid )
 }
 
 // -----------------------------------------------------------------------------
-// Export Detailed MetaData
+// Export Filtered MetaData
 // -----------------------------------------------------------------------------
 
 // Start export
@@ -81,7 +81,7 @@ function exportFilterButton( filterUid )
 }
 
 // Export MetaData
-function exportDetailedMetaData()
+function exportFilteredMetaData()
 {
     var exportJson = {};
     exportJson.exportDependencies = $( "#exportDependencies" ).is( ":checked" ).toString();
@@ -97,7 +97,7 @@ function exportDetailedMetaData()
 // Generate Export URL
 function getURL()
 {
-    var url = "../api/detailedMetaData";
+    var url = "../api/filteredMetaData";
     var format = $( "#format" ).val();
     var compression = $( "#compression" ).val();
     url += "." + format;
@@ -156,7 +156,7 @@ function removeFilterButton( filterUid )
     $.ajax(
         {
             type: "POST",
-            url: "../api/detailedMetaData/deleteFilter",
+            url: "../api/filteredMetaData/deleteFilter",
             contentType: "application/json",
             data: json,
             success: function ()

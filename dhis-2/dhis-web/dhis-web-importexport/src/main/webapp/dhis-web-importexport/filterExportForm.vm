@@ -359,7 +359,7 @@
             <tr>
                 <td colspan="2">
                     <input type="hidden" id="exportJson" value=''/>
-                    <input type="button" id="exportButton" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only ui-state-active2" value="$i18n.getString( 'export' )" style="width:250px; font-size: 10pt;" onclick="exportDetailedMetaData();"/>
+                    <input type="button" id="exportButton" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only ui-state-active2" value="$i18n.getString( 'export' )" style="width:250px; font-size: 10pt;" onclick="exportFilteredMetaData();"/>
                 </td>
             </tr>
         </table>

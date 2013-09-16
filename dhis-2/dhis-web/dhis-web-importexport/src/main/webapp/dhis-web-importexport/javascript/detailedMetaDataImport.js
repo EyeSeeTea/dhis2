@@ -364,28 +364,28 @@ function processImportMetaDataJson()
     {
         var metaDataCategoryProperty = lowercaseFirstLetter( metaDataArray[i] );
 
-        if ( importMetaDataJson.hasOwnProperty( metaDataCategoryProperty ) )
+        if ( metaDataJson.hasOwnProperty( metaDataCategoryProperty ) )
         {
-            var metaDataCategoryArray = importMetaDataJson[metaDataCategoryProperty];
+            var metaDataCategoryArray = metaDataJson[metaDataCategoryProperty];
             for ( var j = 0; j < metaDataCategoryArray.length; j++ )
             {
                 var existsMetaDataCategoryOption = $( "#selected" + metaDataArray[i] + " option[value='" + metaDataCategoryArray[j].id + "']" ).length !== 0;
 
                 if ( !existsMetaDataCategoryOption )
                 {
-                    (importMetaDataJson[metaDataCategoryProperty]).splice( j, 1 );
+                    (metaDataJson[metaDataCategoryProperty]).splice( j, 1 );
                     j--;
                 }
             }
 
-            if ( importMetaDataJson[metaDataCategoryProperty].length == 0 )
+            if ( metaDataJson[metaDataCategoryProperty].length == 0 )
             {
-                delete importMetaDataJson[metaDataCategoryProperty];
+                delete metaDataJson[metaDataCategoryProperty];
             }
         }
     }
 
-    return importMetaDataJson;
+    return metaDataJson;
 }
 
 // -----------------------------------------------------------------------------
@@ -404,7 +404,7 @@ function importDetailedMetaData()
     $.ajax(
         {
             type: "POST",
-            url: "../api/detailedMetaData/importDetailedMetaData",
+            url: "../api/filteredMetaData/importDetailedMetaData",
             data: JSON.stringify( importMetaDataJson ),
             contentType: "application/json",
             success: function ()

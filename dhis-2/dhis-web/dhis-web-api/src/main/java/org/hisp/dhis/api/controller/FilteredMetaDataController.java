@@ -62,9 +62,9 @@ import java.util.zip.ZipOutputStream;
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
 @Controller
-public class DetailedMetaDataController
+public class FilteredMetaDataController
 {
-    public static final String RESOURCE_PATH = "/detailedMetaData";
+    public static final String RESOURCE_PATH = "/filteredMetaData";
 
     @Autowired
     private ExportService exportService;
@@ -107,7 +107,7 @@ public class DetailedMetaDataController
     // Detailed MetaData Export - POST Requests
     //--------------------------------------------------------------------------
 
-    @RequestMapping( value = DetailedMetaDataController.RESOURCE_PATH, headers = "Accept=application/json" )
+    @RequestMapping( value = FilteredMetaDataController.RESOURCE_PATH, headers = "Accept=application/json" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public String detailedExport( @RequestParam Map<String, String> parameters, Model model ) throws IOException
     {
@@ -120,7 +120,7 @@ public class DetailedMetaDataController
         return "export";
     }
 
-    @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + ".xml", produces = "*/*" )
+    @RequestMapping( method = RequestMethod.POST, value = FilteredMetaDataController.RESOURCE_PATH + ".xml", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportXml( @RequestParam String exportJsonValue, HttpServletResponse response ) throws IOException
     {
@@ -131,7 +131,7 @@ public class DetailedMetaDataController
         JacksonUtils.toXmlWithView( response.getOutputStream(), metaData, ExportView.class );
     }
 
-    @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + ".json", produces = "*/*" )
+    @RequestMapping( method = RequestMethod.POST, value = FilteredMetaDataController.RESOURCE_PATH + ".json", produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportJson( @RequestParam String exportJsonValue, HttpServletResponse response ) throws IOException
     {
@@ -142,7 +142,7 @@ public class DetailedMetaDataController
         JacksonUtils.toJsonWithView( response.getOutputStream(), metaData, ExportView.class );
     }
 
-    @RequestMapping( method = RequestMethod.POST, value = { DetailedMetaDataController.RESOURCE_PATH + ".xml.zip" }, produces = "*/*" )
+    @RequestMapping( method = RequestMethod.POST, value = { FilteredMetaDataController.RESOURCE_PATH + ".xml.zip" }, produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportZippedXML( @RequestParam String exportJsonValue, HttpServletResponse response ) throws IOException
     {
@@ -158,7 +158,7 @@ public class DetailedMetaDataController
         JacksonUtils.toXmlWithView( zip, metaData, ExportView.class );
     }
 
-    @RequestMapping( method = RequestMethod.POST, value = { DetailedMetaDataController.RESOURCE_PATH + ".json.zip" }, produces = "*/*" )
+    @RequestMapping( method = RequestMethod.POST, value = { FilteredMetaDataController.RESOURCE_PATH + ".json.zip" }, produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportZippedJSON( @RequestParam String exportJsonValue, HttpServletResponse response ) throws IOException
     {
@@ -174,7 +174,7 @@ public class DetailedMetaDataController
         JacksonUtils.toJsonWithView( zip, metaData, ExportView.class );
     }
 
-    @RequestMapping( method = RequestMethod.POST, value = { DetailedMetaDataController.RESOURCE_PATH + ".xml.gz" }, produces = "*/*" )
+    @RequestMapping( method = RequestMethod.POST, value = { FilteredMetaDataController.RESOURCE_PATH + ".xml.gz" }, produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportGZippedXML( @RequestParam String exportJsonValue, HttpServletResponse response ) throws IOException
     {
@@ -188,7 +188,7 @@ public class DetailedMetaDataController
         JacksonUtils.toXmlWithView( gzip, metaData, ExportView.class );
     }
 
-    @RequestMapping( method = RequestMethod.POST, value = { DetailedMetaDataController.RESOURCE_PATH + ".json.gz" }, produces = "*/*" )
+    @RequestMapping( method = RequestMethod.POST, value = { FilteredMetaDataController.RESOURCE_PATH + ".json.gz" }, produces = "*/*" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportGZippedJSON( @RequestParam String exportJsonValue, HttpServletResponse response ) throws IOException
     {
@@ -206,7 +206,7 @@ public class DetailedMetaDataController
     // Detailed MetaData Export - Filter functionality
     //--------------------------------------------------------------------------
 
-    @RequestMapping( method = RequestMethod.GET, value = DetailedMetaDataController.RESOURCE_PATH + "/getFilters" )
+    @RequestMapping( method = RequestMethod.GET, value = FilteredMetaDataController.RESOURCE_PATH + "/getFilters" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public @ResponseBody String getFilters( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
@@ -215,21 +215,21 @@ public class DetailedMetaDataController
         return JacksonUtils.toJsonAsString( filters );
     }
 
-    @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/saveFilter" )
+    @RequestMapping( method = RequestMethod.POST, value = FilteredMetaDataController.RESOURCE_PATH + "/saveFilter" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void saveFilter( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
         exportService.saveFilter( json );
     }
 
-    @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/updateFilter" )
+    @RequestMapping( method = RequestMethod.POST, value = FilteredMetaDataController.RESOURCE_PATH + "/updateFilter" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void updateFilter( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
         exportService.updateFilter( json );
     }
 
-    @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/deleteFilter" )
+    @RequestMapping( method = RequestMethod.POST, value = FilteredMetaDataController.RESOURCE_PATH + "/deleteFilter" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void deleteFilter( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
@@ -240,7 +240,7 @@ public class DetailedMetaDataController
     // Detailed MetaData Import - POST Requests
     //--------------------------------------------------------------------------
 
-    @RequestMapping( method = RequestMethod.POST, value = DetailedMetaDataController.RESOURCE_PATH + "/importDetailedMetaData" )
+    @RequestMapping( method = RequestMethod.POST, value = FilteredMetaDataController.RESOURCE_PATH + "/importDetailedMetaData" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_IMPORT')" )
     public void importDetailedMetaData( @RequestBody JSONObject json, HttpServletResponse response ) throws IOException
     {
