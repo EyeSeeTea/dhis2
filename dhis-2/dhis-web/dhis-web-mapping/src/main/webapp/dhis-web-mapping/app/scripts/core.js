@@ -1196,28 +1196,38 @@ console.log(view);
 			view = view || layer.core.view;
 			features = features || layer.features.slice(0);
 
-			var type = view.valueType,
-				dimConf = gis.conf.finals.dimension,
+			var dimConf = gis.conf.finals.dimension,
 				paramString = '?',
-				indicator = gis.conf.finals.dimension.indicator,
-				dataElement = gis.conf.finals.dimension.dataElement,
-				period = gis.conf.finals.dimension.period,
-				organisationUnit = gis.conf.finals.dimension.organisationUnit,
-				dx;
+				dxItems = view.columns[0].items,
+				dxDimension = view.columns[0].dimension,
+				peItems = view.filters[0].items,
+				ouItems = view.rows[0].items;
 
 			// ou
-			paramString += 'dimension=ou:LEVEL-' + view.organisationUnitLevel.level + '-' + view.parentOrganisationUnit.id;
+			paramString += 'dimension=ou:';
+			
+			for (var i = 0; i < ouItems.length; i++) {
+				paramString += ouItems[i].id;
+				paramString += i < ouItems.length - 1 ? ';' : '';
+			}
 
 			// dx
-			if (view[type] && Ext.isString(view[type].id) && view[type].id.indexOf('-') !== -1) {
-				paramString += '&dimension=co&dimension=dx:' + view[type].id.substr(0, view[type].id.indexOf('-'));
+			paramString += '&dimension=dx:';
+			
+			for (var i = 0; i < dxItems.length; i++) {
+				paramString += dxItems[i].id;
+				paramString += i < dxItems.length - 1 ? ';' : '';
 			}
-			else if (view[type] && Ext.isString(view[type].id)) {
-				paramString += '&dimension=dx:' + view[type].id;
+			
+			paramString += dxDimension === dimConf.operand.objectName ? '&dimension=co' : '';
+			
+			// pe
+			paramString += '&filter=pe:';
+			
+			for (var i = 0; i < peItems.length; i++) {
+				paramString += peItems[i].id;
+				paramString += i < peItems.length - 1 ? ';' : '';
 			}
-
-			// Filter
-			paramString += '&filter=pe:' + view.period.id;
 
 			// Skip metaData
 			paramString += '&skipMeta=true';
