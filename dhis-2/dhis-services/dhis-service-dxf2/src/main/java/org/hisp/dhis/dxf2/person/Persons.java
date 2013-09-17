@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.util;
+package org.hisp.dhis.dxf2.person;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,47 +28,45 @@ package org.hisp.dhis.system.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Locale;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.hisp.dhis.common.DxfNamespaces;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * @author Oyvind Brucker
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class LocaleUtils
+@JacksonXmlRootElement( localName = "persons", namespace = DxfNamespaces.DXF_2_0 )
+public class Persons
 {
-    /**
-     * Creates a Locale object based on the input String
-     *
-     * @param localeStr String to parse
-     * @return A locale object or null if not valid
-     */
-    public static Locale getLocale( String localeStr ) 
+    private List<Person> persons = new ArrayList<Person>();
+
+    public Persons()
     {
-        if ( localeStr == null || localeStr.trim().isEmpty() )
-        {
-            return null;
-        }
-                
-        String[] parts = localeStr.split( "_" );
+    }
 
-        Locale thisLocale;
+    @JsonProperty( "personList" )
+    @JacksonXmlElementWrapper( localName = "personList", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "person", namespace = DxfNamespaces.DXF_2_0 )
+    public List<Person> getPersons()
+    {
+        return persons;
+    }
 
-        if ( parts.length == 1 )
-        {
-            thisLocale = new Locale( parts[0] );
-        }
-        else if ( parts.length == 2 )
-        {
-            thisLocale = new Locale( parts[0], parts[1] );
-        }
-        else if ( parts.length == 3 )
-        {
-            thisLocale = new Locale( parts[0], parts[1], parts[2] );
-        }
-        else
-        {
-            return null;
-        }
+    public void setPersons( List<Person> persons )
+    {
+        this.persons = persons;
+    }
 
-        return thisLocale;        
+    @Override
+    public String toString()
+    {
+        return "Persons{" +
+            "persons=" + persons +
+            '}';
     }
 }

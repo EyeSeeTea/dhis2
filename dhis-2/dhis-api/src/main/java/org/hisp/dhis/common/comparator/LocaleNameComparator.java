@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.util;
+package org.hisp.dhis.common.comparator;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,47 +28,20 @@ package org.hisp.dhis.system.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Comparator;
 import java.util.Locale;
 
 /**
- * @author Oyvind Brucker
+ * @author Lars Helge Overland
  */
-public class LocaleUtils
+public class LocaleNameComparator
+    implements Comparator<Locale>
 {
-    /**
-     * Creates a Locale object based on the input String
-     *
-     * @param localeStr String to parse
-     * @return A locale object or null if not valid
-     */
-    public static Locale getLocale( String localeStr ) 
+    public static final LocaleNameComparator INSTANCE = new LocaleNameComparator();
+    
+    @Override
+    public int compare( Locale o1, Locale o2 )
     {
-        if ( localeStr == null || localeStr.trim().isEmpty() )
-        {
-            return null;
-        }
-                
-        String[] parts = localeStr.split( "_" );
-
-        Locale thisLocale;
-
-        if ( parts.length == 1 )
-        {
-            thisLocale = new Locale( parts[0] );
-        }
-        else if ( parts.length == 2 )
-        {
-            thisLocale = new Locale( parts[0], parts[1] );
-        }
-        else if ( parts.length == 3 )
-        {
-            thisLocale = new Locale( parts[0], parts[1], parts[2] );
-        }
-        else
-        {
-            return null;
-        }
-
-        return thisLocale;        
+        return o1.getDisplayName().compareTo( o2.getDisplayName() );
     }
 }

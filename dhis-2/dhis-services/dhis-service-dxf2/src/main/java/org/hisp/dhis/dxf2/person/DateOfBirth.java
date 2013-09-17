@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.event.person;
+package org.hisp.dhis.dxf2.person;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -32,29 +32,68 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.patient.Patient;
+
+import java.util.Date;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "contact", namespace = DxfNamespaces.DXF_2_0 )
-public class Contact
+@JacksonXmlRootElement( localName = "dateOfBirth", namespace = DxfNamespaces.DXF_2_0 )
+public class DateOfBirth
 {
-    private String phoneNumber;
+    private Date date;
 
-    public Contact()
+    private DateOfBirthType type;
+
+    private Integer age;
+
+    public DateOfBirth()
     {
+        this.type = DateOfBirthType.APPROXIMATE;
+        this.age = 0;
+    }
+
+    public DateOfBirth( Date date )
+    {
+        this.type = DateOfBirthType.VERIFIED;
+        this.age = Patient.getIntegerValueOfAge( date );
+        this.date = date;
+    }
+
+    public DateOfBirth( Date date, DateOfBirthType type )
+    {
+        this.type = type;
+        this.age = Patient.getIntegerValueOfAge( date );
+        this.date = date;
+    }
+
+    public DateOfBirth( Integer age )
+    {
+        this.type = DateOfBirthType.APPROXIMATE;
+        this.age = age;
+        this.date = Patient.getBirthFromAge( age, Patient.AGE_TYPE_YEAR );
     }
 
     @JsonProperty( required = true )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getPhoneNumber()
+    @JacksonXmlProperty( isAttribute = true )
+    public Date getDate()
     {
-        return phoneNumber;
+        return date;
     }
 
-    public void setPhoneNumber( String phoneNumber )
+    @JsonProperty( required = true )
+    @JacksonXmlProperty( isAttribute = true )
+    public DateOfBirthType getType()
     {
-        this.phoneNumber = phoneNumber;
+        return type;
+    }
+
+    @JsonProperty( required = true )
+    @JacksonXmlProperty( isAttribute = true )
+    public Integer getAge()
+    {
+        return age;
     }
 
     @Override
@@ -63,9 +102,11 @@ public class Contact
         if ( this == o ) return true;
         if ( o == null || getClass() != o.getClass() ) return false;
 
-        Contact contact = (Contact) o;
+        DateOfBirth that = (DateOfBirth) o;
 
-        if ( phoneNumber != null ? !phoneNumber.equals( contact.phoneNumber ) : contact.phoneNumber != null ) return false;
+        if ( age != null ? !age.equals( that.age ) : that.age != null ) return false;
+        if ( date != null ? !date.equals( that.date ) : that.date != null ) return false;
+        if ( type != that.type ) return false;
 
         return true;
     }
@@ -73,14 +114,19 @@ public class Contact
     @Override
     public int hashCode()
     {
-        return phoneNumber != null ? phoneNumber.hashCode() : 0;
+        int result = date != null ? date.hashCode() : 0;
+        result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (age != null ? age.hashCode() : 0);
+        return result;
     }
 
     @Override
     public String toString()
     {
-        return "Contact{" +
-            "phoneNumber='" + phoneNumber + '\'' +
+        return "DateOfBirth{" +
+            "date=" + date +
+            ", type=" + type +
+            ", age=" + age +
             '}';
     }
 }

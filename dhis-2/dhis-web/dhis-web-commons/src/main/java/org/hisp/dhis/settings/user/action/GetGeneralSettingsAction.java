@@ -28,13 +28,12 @@ package org.hisp.dhis.settings.user.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.user.UserSettingService.DEFAULT_ANALYSIS_DISPLAY_PROPERTY;
+import static org.hisp.dhis.user.UserSettingService.KEY_ANALYSIS_DISPLAY_PROPERTY;
+import static org.hisp.dhis.user.UserSettingService.KEY_DISPLAY_OPTION_SET_AS_RADIO_BUTTON;
 import static org.hisp.dhis.user.UserSettingService.KEY_MESSAGE_EMAIL_NOTIFICATION;
 import static org.hisp.dhis.user.UserSettingService.KEY_MESSAGE_SMS_NOTIFICATION;
-import static org.hisp.dhis.user.UserSettingService.KEY_ANALYSIS_DISPLAY_PROPERTY;
-import static org.hisp.dhis.user.UserSettingService.DEFAULT_ANALYSIS_DISPLAY_PROPERTY;
-import static org.hisp.dhis.user.UserSettingService.KEY_DISPLAY_OPTION_SET_AS_RADIO_BUTTON;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -44,7 +43,6 @@ import java.util.SortedMap;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.hisp.dhis.i18n.locale.LocaleManager;
-import org.hisp.dhis.i18n.resourcebundle.ResourceBundleManager;
 import org.hisp.dhis.setting.StyleManager;
 import org.hisp.dhis.user.UserSettingService;
 
@@ -52,8 +50,6 @@ import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version $ GetAvailableUserSettingsAction.java May 31, 2011 9:31:54 AM $
- * 
  */
 public class GetGeneralSettingsAction
     implements Action
@@ -61,13 +57,6 @@ public class GetGeneralSettingsAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private ResourceBundleManager resourceBundleManager;
-
-    public void setResourceBundleManager( ResourceBundleManager resourceBundleManager )
-    {
-        this.resourceBundleManager = resourceBundleManager;
-    }
 
     private I18nService i18nService;
 
@@ -179,10 +168,10 @@ public class GetGeneralSettingsAction
         throws Exception
     {
         // ---------------------------------------------------------------------
-        // Get available locales
+        // Get available UI locales
         // ---------------------------------------------------------------------
 
-        availableLocales = new ArrayList<Locale>( resourceBundleManager.getAvailableLocales() );
+        availableLocales = localeManager.getAvailableLocales();
 
         Collections.sort( availableLocales, new Comparator<Locale>()
         {
@@ -191,9 +180,9 @@ public class GetGeneralSettingsAction
                 return locale0.getDisplayName().compareTo( locale1.getDisplayName() );
             }
         } );
-
+        
         currentLocale = localeManager.getCurrentLocale();
-
+        
         if ( !availableLocales.contains( currentLocale ) )
         {
             currentLocale = localeManager.getFallbackLocale();

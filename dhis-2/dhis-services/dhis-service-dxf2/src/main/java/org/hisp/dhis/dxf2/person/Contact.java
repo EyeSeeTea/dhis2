@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.event.person;
+package org.hisp.dhis.dxf2.person;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -36,50 +36,25 @@ import org.hisp.dhis.common.DxfNamespaces;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "identifier", namespace = DxfNamespaces.DXF_2_0 )
-public class Identifier
+@JacksonXmlRootElement( localName = "contact", namespace = DxfNamespaces.DXF_2_0 )
+public class Contact
 {
-    private String type;
+    private String phoneNumber;
 
-    private String value;
-
-    public Identifier()
+    public Contact()
     {
     }
 
-    public Identifier( String value )
+    @JsonProperty( required = true )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getPhoneNumber()
     {
-        this.value = value;
+        return phoneNumber;
     }
 
-    public Identifier( String type, String value )
+    public void setPhoneNumber( String phoneNumber )
     {
-        this.type = type;
-        this.value = value;
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( isAttribute = true )
-    public String getType()
-    {
-        return type;
-    }
-
-    public void setType( String type )
-    {
-        this.type = type;
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( isAttribute = true )
-    public String getValue()
-    {
-        return value;
-    }
-
-    public void setValue( String value )
-    {
-        this.value = value;
+        this.phoneNumber = phoneNumber;
     }
 
     @Override
@@ -88,10 +63,9 @@ public class Identifier
         if ( this == o ) return true;
         if ( o == null || getClass() != o.getClass() ) return false;
 
-        Identifier that = (Identifier) o;
+        Contact contact = (Contact) o;
 
-        if ( type != null ? !type.equals( that.type ) : that.type != null ) return false;
-        if ( value != null ? !value.equals( that.value ) : that.value != null ) return false;
+        if ( phoneNumber != null ? !phoneNumber.equals( contact.phoneNumber ) : contact.phoneNumber != null ) return false;
 
         return true;
     }
@@ -99,17 +73,14 @@ public class Identifier
     @Override
     public int hashCode()
     {
-        int result = type != null ? type.hashCode() : 0;
-        result = 31 * result + (value != null ? value.hashCode() : 0);
-        return result;
+        return phoneNumber != null ? phoneNumber.hashCode() : 0;
     }
 
     @Override
     public String toString()
     {
-        return "Identifier{" +
-            "type='" + type + '\'' +
-            ", value='" + value + '\'' +
+        return "Contact{" +
+            "phoneNumber='" + phoneNumber + '\'' +
             '}';
     }
 }

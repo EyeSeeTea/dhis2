@@ -133,6 +133,8 @@ public class DefaultI18nService
     public void setCountries( Map<String, String> countries )
     {
         this.countries = countries;
+
+        //Collections.sort( locales, LocaleNameComparator.INSTANCE );
     }
 
     // -------------------------------------------------------------------------
