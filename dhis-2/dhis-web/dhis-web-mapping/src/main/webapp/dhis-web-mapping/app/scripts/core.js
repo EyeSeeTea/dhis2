@@ -1228,25 +1228,21 @@ console.log(view);
 				paramString += peItems[i].id;
 				paramString += i < peItems.length - 1 ? ';' : '';
 			}
-
-			// Skip metaData
-			paramString += '&skipMeta=true';
-
-			Ext.Ajax.request({
-				url: gis.init.contextPath + '/api/analytics.json' + paramString,
+			
+			Ext.data.JsonP.request({
+				url: gis.init.contextPath + '/api/analytics.jsonp' + paramString,
 				disableCaching: false,
 				scope: this,
 				success: function(r) {
-					var response = Ext.decode(r.responseText),
-						dimConf = gis.conf.finals.dimension,
+					var response = gis.api.response.Response(r),
 						featureMap = {},
 						valueMap = {},
 						ouIndex,
 						dxIndex,
 						valueIndex,
 						newFeatures = [];
-
-					if (!(Ext.isObject(response) && Ext.isArray(response.rows) && response.rows.length)) {
+						
+					if (!response) {
 						alert(GIS.i18n.current_selection_no_data);
 						olmap.mask.hide();
 						return;
@@ -1257,9 +1253,6 @@ console.log(view);
 						if (response.headers[i].name === dimConf.organisationUnit.dimensionName) {
 							ouIndex = i;
 						}
-						else if (response.headers[i].name === dimConf.data.dimensionName) {
-							dxIndex = i;
-						}
 						else if (response.headers[i].name === dimConf.value.dimensionName) {
 							valueIndex = i;
 						}
@@ -1268,6 +1261,7 @@ console.log(view);
 					// Feature map
 					for (var i = 0, id; i < features.length; i++) {
 						var id = features[i].attributes.id;
+						
 						featureMap[id] = true;
 					}
 
@@ -1275,12 +1269,14 @@ console.log(view);
 					for (var i = 0; i < response.rows.length; i++) {
 						var id = response.rows[i][ouIndex],
 							value = parseFloat(response.rows[i][valueIndex]);
+							
 						valueMap[id] = value;
 					}
 
 					for (var i = 0; i < features.length; i++) {
 						var feature = features[i],
 							id = feature.attributes.id;
+							
 						if (featureMap.hasOwnProperty(id) && valueMap.hasOwnProperty(id)) {
 							feature.attributes.value = valueMap[id];
 							feature.attributes.label = feature.attributes.name + ' (' + feature.attributes.value + ')';
