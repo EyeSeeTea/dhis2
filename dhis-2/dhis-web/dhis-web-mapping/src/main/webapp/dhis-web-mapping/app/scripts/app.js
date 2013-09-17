@@ -323,7 +323,7 @@ Ext.onReady( function() {
 				fields: ['id', 'name'],
 				proxy: {
 					type: 'ajax',
-					url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'getPeriodsByPeriodType.action',
+					url: gis.init.contextPath + gis.conf.finals.url.path_module + 'getPeriodsByPeriodType.action',
 					reader: {
 						type: 'json',
 						root: 'periods'
@@ -1891,7 +1891,7 @@ Ext.onReady( function() {
 					var name = nameTextfield.getValue();
 
 					Ext.Ajax.request({
-						url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'renameMap.action?id=' + id + '&name=' + name + '&user=true',
+						url: gis.init.contextPath + gis.conf.finals.url.path_module + 'renameMap.action?id=' + id + '&name=' + name + '&user=true',
 						success: function() {
 							gis.store.maps.loadStore();
 
@@ -2146,7 +2146,7 @@ Ext.onReady( function() {
 
 									if (confirm(message)) {
 										Ext.Ajax.request({
-											url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'addMapViewToDashboard.action',
+											url: gis.init.contextPath + gis.conf.finals.url.path_module + 'addMapViewToDashboard.action',
 											params: {
 												id: record.data.id
 											}
@@ -3291,7 +3291,7 @@ Ext.onReady( function() {
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
-					url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'getOrganisationUnitChildren.action',
+					url: gis.init.contextPath + gis.conf.finals.url.path_module + 'getOrganisationUnitChildren.action',
 					noCache: false
 				},
 				root: {
@@ -4977,7 +4977,7 @@ console.log(view);
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
-					url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'getOrganisationUnitChildren.action',
+					url: gis.init.contextPath + gis.conf.finals.url.path_module + 'getOrganisationUnitChildren.action',
 					noCache: false
 				},
 				root: {
@@ -5495,7 +5495,7 @@ console.log(view);
 						center = gis.viewport.centerRegion;
 
 					Ext.Ajax.request({
-						url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'updateOrganisationUnitCoordinates.action',
+						url: gis.init.contextPath + gis.conf.finals.url.path_module + 'updateOrganisationUnitCoordinates.action',
 						method: 'POST',
 						params: {id: gis.olmap.relocate.feature.attributes.id, coordinates: coordinates},
 						success: function(r) {

@@ -125,16 +125,7 @@ public class GetGeoJsonAction
         
         for ( String id : ids )
         {
-            if ( ouParams.size() != 0 )
-            {
-                ouParams.add( ";" );
-            }            
-            else
-            {
-                id = "ou:" + id;
-            }
-            
-            ouParams.add( id );
+            ouParams.add( "ou:" + id );
         }
         
         DataQueryParams params = analyticsService.getFromUrl( ouParams, null, AggregationType.SUM, null, false, false, null );

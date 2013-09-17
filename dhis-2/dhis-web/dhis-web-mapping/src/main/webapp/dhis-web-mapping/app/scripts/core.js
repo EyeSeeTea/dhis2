@@ -283,7 +283,7 @@ Ext.onReady( function() {
 			// Infrastructural data
 			showInfo = function() {
 				Ext.Ajax.request({
-					url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'getFacilityInfo.action',
+					url: gis.init.contextPath + gis.conf.finals.url.path_module + 'getFacilityInfo.action',
 					params: {
 						id: feature.attributes.id
 					},
@@ -889,7 +889,7 @@ Ext.onReady( function() {
 
 		loadOrganisationUnits = function(view) {
 			Ext.data.JsonP.request({
-				url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'getGeoJson.action',
+				url: gis.init.contextPath + gis.conf.finals.url.path_module + 'getGeoJson.action',
 				params: {
 					parentId: view.parentOrganisationUnit.id,
 					level: view.organisationUnitLevel.id
@@ -1152,9 +1152,18 @@ Ext.onReady( function() {
 		};
 
 		loadOrganisationUnits = function(view) {
-console.log(view);			
+console.log(view);
+
+			var items = view.rows[0].items,
+				idParamString = '';
+			
+			for (var i = 0; i < items.length; i++) {
+				idParamString += 'ids=' + items[i].id;
+				idParamString += i !== items.length - 1 ? '&' : '';
+			}
+			
 			Ext.data.JsonP.request({
-				url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'getGeoJson.action?ids=LEVEL-2&ids=ImspTQPwCqd',
+				url: gis.init.contextPath + gis.conf.finals.url.path_module + 'getGeoJson.action?' + idParamString,
 				scope: this,
 				disableCaching: false,
 				success: function(r) {
@@ -1472,7 +1481,7 @@ console.log(view);
 
 		loadOrganisationUnits = function(view) {
 			Ext.data.JsonP.request({
-				url: gis.init.contextPath + gis.conf.finals.url.path_gis + 'getGeoJsonFacilities.action',
+				url: gis.init.contextPath + gis.conf.finals.url.path_module + 'getGeoJsonFacilities.action',
 				params: {
 					parentId: view.parentOrganisationUnit.id,
 					level: view.organisationUnitLevel.id
@@ -1526,7 +1535,7 @@ console.log(view);
 			var store = gis.store.groupsByGroupSet,
 				options;
 
-			store.proxy.url = gis.init.contextPath + gis.conf.finals.url.path_gis + 'getOrganisationUnitGroupsByGroupSet.action?id=' + view.organisationUnitGroupSet.id;
+			store.proxy.url = gis.init.contextPath + gis.conf.finals.url.path_module + 'getOrganisationUnitGroupsByGroupSet.action?id=' + view.organisationUnitGroupSet.id;
 			store.load({
 				scope: this,
 				callback: function() {

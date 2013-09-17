@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.event.person;
+package org.hisp.dhis.dxf2.person;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,39 +28,87 @@ package org.hisp.dhis.dxf2.event.person;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.DxfNamespaces;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "gender", namespace = DxfNamespaces.DXF_2_0 )
-public enum Gender
+@JacksonXmlRootElement( localName = "attribute", namespace = DxfNamespaces.DXF_2_0 )
+public class Attribute
 {
-    MALE( "M" ), FEMALE( "F" ), TRANSGENDER( "T" );
+    private String type;
 
-    private final String value;
+    private String value;
 
-    private Gender( String value )
+    public Attribute()
+    {
+    }
+
+    public Attribute( String value )
     {
         this.value = value;
     }
 
+    public Attribute( String type, String value )
+    {
+        this.type = type;
+        this.value = value;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( isAttribute = true )
+    public String getType()
+    {
+        return type;
+    }
+
+    public void setType( String type )
+    {
+        this.type = type;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( isAttribute = true )
     public String getValue()
     {
         return value;
     }
 
-    public static Gender fromString( String text )
+    public void setValue( String value )
     {
-        for ( Gender gender : Gender.values() )
-        {
-            if ( text.equals( gender.getValue() ) )
-            {
-                return gender;
-            }
-        }
+        this.value = value;
+    }
 
-        throw new IllegalArgumentException();
+    @Override
+    public boolean equals( Object o )
+    {
+        if ( this == o ) return true;
+        if ( o == null || getClass() != o.getClass() ) return false;
+
+        Attribute attribute = (Attribute) o;
+
+        if ( type != null ? !type.equals( attribute.type ) : attribute.type != null ) return false;
+        if ( value != null ? !value.equals( attribute.value ) : attribute.value != null ) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int result = type != null ? type.hashCode() : 0;
+        result = 31 * result + (value != null ? value.hashCode() : 0);
+        return result;
+    }
+
+    @Override public String toString()
+    {
+        return "Attribute{" +
+            "type='" + type + '\'' +
+            ", value='" + value + '\'' +
+            '}';
     }
 }
