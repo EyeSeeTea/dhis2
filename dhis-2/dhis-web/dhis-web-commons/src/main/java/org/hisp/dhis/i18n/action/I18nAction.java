@@ -186,19 +186,19 @@ public class I18nAction
                return locale1.getDisplayName().compareTo( locale2.getDisplayName() );
            }
         });
-        
-
+                
         translations = i18nService.getTranslationsWithoutDefault( className, objectId );
         
         // For Maintanence Appearance Setting translation case, check 'SystemSettng' as className and use 'Value' property.
         // Otherwise, perform the general Identifiable interface properties listing.
         
         if( className.equals( SystemSetting.class.getSimpleName() ))
-        {            
+        {       
             SystemSetting systemSettingObject = systemSettingManager.getSystemSettingObject( objectId );
-
+            
             referenceTranslations = new HashMap<String, String> ();
-            referenceTranslations.put( SystemSetting.SYSTEMSETTING_PROPERTY_VALUE, systemSettingObject.getValue().toString() );
+            referenceTranslations.put( SystemSetting.SYSTEMSETTING_PROPERTY_VALUE
+                , systemSettingObject.getValue() == null ? "" : systemSettingObject.getValue().toString() );
                         
             propertyNames = new ArrayList<String>();
             propertyNames.add( SystemSetting.SYSTEMSETTING_PROPERTY_VALUE );

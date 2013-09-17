@@ -30,7 +30,7 @@
 			    $('#currentLocale').val(localeFromCookie);
 			            	            	                                   
 			});
-			
+
         </script>
         <link type="text/css" rel="stylesheet" href="../css/widgets.css">
         <link type="text/css" rel="stylesheet" href="../css/login.css">
