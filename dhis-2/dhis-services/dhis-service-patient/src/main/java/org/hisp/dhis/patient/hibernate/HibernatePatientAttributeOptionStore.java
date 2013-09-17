@@ -38,8 +38,6 @@ import org.hisp.dhis.patient.PatientAttributeOptionStore;
 
 /**
  * @author Viet
- * 
- * @version $Id$
  */
 public class HibernatePatientAttributeOptionStore
     extends HibernateGenericStore<PatientAttributeOption>

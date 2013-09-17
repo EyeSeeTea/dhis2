@@ -1,4 +1,4 @@
-package org.hisp.dhis.common;
+package org.hisp.dhis.setting.hibernate;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,46 +28,20 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
+import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.setting.SystemSetting;
+import org.hisp.dhis.setting.SystemSettingStore;
 
 /**
  * @author Lars Helge Overland
  */
-public interface GenericNameableObjectStore<T>
-    extends GenericIdentifiableObjectStore<T>
+public class HibernateSystemSettingStore
+    extends HibernateGenericStore<SystemSetting> implements SystemSettingStore
 {
-    /**
-     * Retrieves the object with the given short name.
-     *
-     * @param shortName the short name.
-     * @return the object with the given short name.
-     */
-    T getByShortName( String shortName );
-
-    /**
-     * Return the number of objects where the name is equal the given name.
-     * <p/>
-     * This count is _unfiltered_ (no ACL!), so this is not the same as
-     * getAllEqShortName().size().
-     *
-     * @param shortName the name.
-     * @return Count of objects.
-     */
-    int getCountEqShortNameNoAcl( String shortName );
-
-    /**
-     * Retrieves a List of objects where the name is like the given name.
-     *
-     * @param shortName the name.
-     * @return a List of objects.
-     */
-    List<T> getAllEqShortName( String shortName );
-
-    /**
-     * Retrieves a List of objects where the name is like the given name (ignore case).
-     *
-     * @param shortName the name.
-     * @return a List of objects.
-     */
-    List<T> getAllEqShortNameIgnoreCase( String shortName );
+    @Override
+    public SystemSetting getByName( String name )
+    {
+        return (SystemSetting) getCriteria( Restrictions.eq( "name", name ) ).uniqueResult();
+    }
 }
