@@ -4819,7 +4819,6 @@ console.log(view);
 				{
 					xtype: 'form',
 					cls: 'el-border-0',
-					//width: 270,
 					items: [
 						{
 							html: GIS.i18n.data_options,
@@ -4843,12 +4842,9 @@ console.log(view);
 						lowPanel,
 						highPanel,
 						{
-							html: GIS.i18n.user_organisation_units,
+							html: GIS.i18n.organisation_units,
 							cls: 'gis-form-subtitle'
 						},
-						//level,
-						//parent
-
 						{
 							layout: 'column',
 							bodyStyle: 'border:0 none',

@@ -1075,7 +1075,7 @@ Ext.onReady( function() {
 				var viewIds = [],
 					viewColumn = view.columns[0],					
 					srcIds = [],
-					srcColumn = view.columns[0];			
+					srcColumn = src.columns[0];			
 					
 				if (viewColumn.items.length === srcColumn.items.length) {					
 					for (var i = 0; i < viewColumn.items.length; i++) {
@@ -1106,7 +1106,7 @@ Ext.onReady( function() {
 				var viewIds = [],
 					viewFilter = view.filters[0],					
 					srcIds = [],
-					srcFilter = view.filters[0];
+					srcFilter = src.filters[0];
 					
 				if (viewFilter.items.length === srcFilter.items.length) {					
 					for (var i = 0; i < viewFilter.items.length; i++) {
