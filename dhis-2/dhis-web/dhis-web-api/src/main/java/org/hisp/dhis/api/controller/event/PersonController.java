@@ -32,12 +32,13 @@ import org.hisp.dhis.api.controller.WebOptions;
 import org.hisp.dhis.api.controller.exception.NotFoundException;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.common.IdentifiableObjectManager;
-import org.hisp.dhis.dxf2.person.Gender;
-import org.hisp.dhis.dxf2.person.Person;
-import org.hisp.dhis.dxf2.person.PersonService;
-import org.hisp.dhis.dxf2.person.Persons;
+import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+import org.hisp.dhis.dxf2.events.person.Gender;
+import org.hisp.dhis.dxf2.events.person.Person;
+import org.hisp.dhis.dxf2.events.person.PersonService;
+import org.hisp.dhis.dxf2.events.person.Persons;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
@@ -136,23 +137,11 @@ public class PersonController
         return "persons";
     }
 
-    private OrganisationUnit getOrganisationUnit( String orgUnitUid )
-    {
-        OrganisationUnit organisationUnit = manager.get( OrganisationUnit.class, orgUnitUid );
-
-        if ( organisationUnit == null )
-        {
-            throw new HttpClientErrorException( HttpStatus.BAD_REQUEST, "orgUnit is not a valid uid." );
-        }
-
-        return organisationUnit;
-    }
-
     @RequestMapping( value = "/{id}", method = RequestMethod.GET )
-    public String getPerson( @PathVariable String id, @RequestParam Map<String, String> parameters, Model model )
+    public String getPerson( @PathVariable String id, @RequestParam Map<String, String> parameters, Model model ) throws NotFoundException
     {
         WebOptions options = new WebOptions( parameters );
-        Person person = personService.getPerson( id );
+        Person person = getPerson( id );
 
         model.addAttribute( "model", person );
         model.addAttribute( "viewClass", options.getViewClass( "detailed" ) );
@@ -178,7 +167,12 @@ public class PersonController
         {
             response.setStatus( HttpServletResponse.SC_CREATED );
             ImportSummary importSummary = importSummaries.getImportSummaries().get( 0 );
-            response.setHeader( "Location", getResourcePath( request, importSummary ) );
+
+            if ( !importSummary.getStatus().equals( ImportStatus.ERROR ) )
+            {
+                response.setHeader( "Location", getResourcePath( request, importSummary ) );
+            }
+
             JacksonUtils.toXml( response.getOutputStream(), importSummary );
         }
     }
@@ -197,7 +191,12 @@ public class PersonController
         {
             response.setStatus( HttpServletResponse.SC_CREATED );
             ImportSummary importSummary = importSummaries.getImportSummaries().get( 0 );
-            response.setHeader( "Location", getResourcePath( request, importSummary ) );
+
+            if ( !importSummary.getStatus().equals( ImportStatus.ERROR ) )
+            {
+                response.setHeader( "Location", getResourcePath( request, importSummary ) );
+            }
+
             JacksonUtils.toJson( response.getOutputStream(), importSummary );
         }
     }
@@ -235,11 +234,6 @@ public class PersonController
     }
 
     // -------------------------------------------------------------------------
-    // ENROLLMENT
-    // -------------------------------------------------------------------------
-
-
-    // -------------------------------------------------------------------------
     // HELPERS
     // -------------------------------------------------------------------------
 
@@ -269,5 +263,17 @@ public class PersonController
     private String getResourcePath( HttpServletRequest request, ImportSummary importSummary )
     {
         return ContextUtils.getContextPath( request ) + "/api/" + "persons" + "/" + importSummary.getReference();
+    }
+
+    private OrganisationUnit getOrganisationUnit( String orgUnitUid )
+    {
+        OrganisationUnit organisationUnit = manager.get( OrganisationUnit.class, orgUnitUid );
+
+        if ( organisationUnit == null )
+        {
+            throw new HttpClientErrorException( HttpStatus.BAD_REQUEST, "orgUnit is not a valid uid." );
+        }
+
+        return organisationUnit;
     }
 }

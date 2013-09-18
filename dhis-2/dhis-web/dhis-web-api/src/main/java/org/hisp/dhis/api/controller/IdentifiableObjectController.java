@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.event;
+package org.hisp.dhis.api.controller;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,34 +28,23 @@ package org.hisp.dhis.dxf2.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramStage;
-
-import java.util.Date;
-import java.util.List;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-public interface EventStore
+@Controller
+@RequestMapping( value = IdentifiableObjectController.RESOURCE_PATH )
+public class IdentifiableObjectController
+    extends AbstractCrudController<BaseIdentifiableObject>
 {
-    List<Event> getAll( Program program, OrganisationUnit organisationUnit );
-
-    List<Event> getAll( Program program, OrganisationUnit organisationUnit, Date startDate, Date endDate );
-
-    List<Event> getAll( ProgramStage programStage, OrganisationUnit organisationUnit );
-
-    List<Event> getAll( ProgramStage programStage, OrganisationUnit organisationUnit, Date startDate, Date endDate );
-
-    List<Event> getAll( Program program, ProgramStage programStage, OrganisationUnit organisationUnit );
-
-    List<Event> getAll( Program program, ProgramStage programStage, OrganisationUnit organisationUnit, Date startDate, Date endDate );
-
-    List<Event> getAll( Program program, List<ProgramStage> programStages, OrganisationUnit organisationUnit );
-
-    List<Event> getAll( Program program, List<ProgramStage> programStages, OrganisationUnit organisationUnit, Date startDate, Date endDate );
-
-    List<Event> getAll( List<Program> programs, List<ProgramStage> programStages, List<OrganisationUnit> organisationUnits,
-        Date startDate, Date endDate );
+    public static final String RESOURCE_PATH = "/identifiableObjects";
+    
+    @Override
+    public BaseIdentifiableObject getEntity( String uid )
+    {
+        return manager.get( uid );
+    }
 }

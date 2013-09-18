@@ -447,16 +447,9 @@ mapfish.GeoStat.createThematic = function(name) {
 		},
 
 		getLegendConfig: function() {
-			var indicator = this.view.indicator,
-				dataElement = this.view.dataElement,
-				period = this.view.period,
-				orgUnit = this.view.parentOrganisationUnit,
-				orgUnitLevel = this.view.organisationUnitLevel,
-				parent = orgUnit ? orgUnit.name : '',
-				level = orgUnitLevel ? orgUnitLevel.name : '',
-				what = this.view.valueType === this.gis.conf.finals.dimension.indicator.id ? indicator.name : dataElement.name,
-				when = period ? period.id : '',
-				where = parent + ' / ' + level;
+			var what = this.view.columns[0].items[0].name,
+				when = this.view.filters[0].items[0].name,
+				where = this.view.rows[0].items[0].name;
 
 			return {
 				what: what,
@@ -490,8 +483,8 @@ mapfish.GeoStat.createThematic = function(name) {
 
 		createColorInterpolation: function() {
 			var numColors = this.classification.bins.length;
-
-			if (this.view.legendType === this.gis.conf.finals.widget.legendtype_automatic) {
+			
+			if (!this.view.legendSet) {
 				this.colorInterpolation = mapfish.ColorRgb.getColorsArrayByRgbInterpolation(this.colors[0], this.colors[1], numColors);
 			}
 		},
@@ -571,8 +564,9 @@ mapfish.GeoStat.createThematic = function(name) {
 				legendType = this.view.legendType,
 				automatic = this.gis.conf.finals.widget.legendtype_automatic,
 				predefined = this.gis.conf.finals.widget.legendtype_predefined,
-				legendNames = this.view.legendSet.names,
-				config = this.getLegendConfig();
+				//legendNames = this.view.legendSet.names,
+				config = this.getLegendConfig(),
+				legendNames;
 
 			for (var key in config) {
 				if (config.hasOwnProperty(key)) {
@@ -594,26 +588,8 @@ mapfish.GeoStat.createThematic = function(name) {
 			child.style.height = "5px";
 			element.appendChild(child);
 
-			if (legendType === automatic) {
-				for (var i = 0; i < this.classification.bins.length; i++) {
-					child = document.createElement("div");
-					child.style.backgroundColor = this.colorInterpolation[i].toHexString();
-					child.style.width = "30px";
-					child.style.height = "15px";
-					child.style.cssFloat = "left";
-					child.style.marginRight = "8px";
-					element.appendChild(child);
-
-					child = document.createElement("div");
-					child.innerHTML = this.classification.bins[i].label;
-					element.appendChild(child);
-
-					child = document.createElement("div");
-					child.style.clear = "left";
-					element.appendChild(child);
-				}
-			}
-			else if (legendType === predefined) {
+			if (this.view.legendSet) {
+				legendNames = ['a', 'b', 'c', 'd', 'e'];
 				for (var i = 0; i < this.classification.bins.length; i++) {
 					child = document.createElement("div");
 					child.style.backgroundColor = this.colorInterpolation[i].toHexString();
@@ -633,7 +609,26 @@ mapfish.GeoStat.createThematic = function(name) {
 					element.appendChild(child);
 				}
 			}
+			else {
+				for (var i = 0; i < this.classification.bins.length; i++) {
+					child = document.createElement("div");
+					child.style.backgroundColor = this.colorInterpolation[i].toHexString();
+					child.style.width = "30px";
+					child.style.height = "15px";
+					child.style.cssFloat = "left";
+					child.style.marginRight = "8px";
+					element.appendChild(child);
 
+					child = document.createElement("div");
+					child.innerHTML = this.classification.bins[i].label;
+					element.appendChild(child);
+
+					child = document.createElement("div");
+					child.style.clear = "left";
+					element.appendChild(child);
+				}
+			}
+			
 			this.layer.legendPanel.update(element.outerHTML);
 		},
 

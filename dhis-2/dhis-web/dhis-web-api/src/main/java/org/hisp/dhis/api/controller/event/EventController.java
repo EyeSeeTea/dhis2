@@ -32,10 +32,11 @@ import org.hisp.dhis.api.controller.WebOptions;
 import org.hisp.dhis.api.controller.exception.NotFoundException;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.common.IdentifiableObjectManager;
-import org.hisp.dhis.dxf2.event.Event;
-import org.hisp.dhis.dxf2.event.EventService;
-import org.hisp.dhis.dxf2.event.Events;
-import org.hisp.dhis.dxf2.event.ImportEventTask;
+import org.hisp.dhis.dxf2.events.event.Event;
+import org.hisp.dhis.dxf2.events.event.EventService;
+import org.hisp.dhis.dxf2.events.event.Events;
+import org.hisp.dhis.dxf2.events.event.ImportEventTask;
+import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
@@ -206,7 +207,10 @@ public class EventController
             {
                 if ( !importOptions.isDryRun() )
                 {
-                    importSummary.setHref( ContextUtils.getRootPath( request ) + RESOURCE_PATH + "/" + importSummary.getReference() );
+                    if ( !importSummary.getStatus().equals( ImportStatus.ERROR ) )
+                    {
+                        importSummary.setHref( ContextUtils.getRootPath( request ) + RESOURCE_PATH + "/" + importSummary.getReference() );
+                    }
                 }
             }
 
@@ -216,7 +220,10 @@ public class EventController
 
                 if ( !importOptions.isDryRun() )
                 {
-                    response.setHeader( "Location", ContextUtils.getRootPath( request ) + RESOURCE_PATH + "/" + importSummary.getReference() );
+                    if ( !importSummary.getStatus().equals( ImportStatus.ERROR ) )
+                    {
+                        response.setHeader( "Location", ContextUtils.getRootPath( request ) + RESOURCE_PATH + "/" + importSummary.getReference() );
+                    }
                 }
             }
 
@@ -245,7 +252,10 @@ public class EventController
             {
                 if ( !importOptions.isDryRun() )
                 {
-                    importSummary.setHref( ContextUtils.getRootPath( request ) + RESOURCE_PATH + "/" + importSummary.getReference() );
+                    if ( !importSummary.getStatus().equals( ImportStatus.ERROR ) )
+                    {
+                        importSummary.setHref( ContextUtils.getRootPath( request ) + RESOURCE_PATH + "/" + importSummary.getReference() );
+                    }
                 }
             }
 
@@ -255,7 +265,10 @@ public class EventController
 
                 if ( !importOptions.isDryRun() )
                 {
-                    response.setHeader( "Location", ContextUtils.getRootPath( request ) + RESOURCE_PATH + "/" + importSummary.getReference() );
+                    if ( !importSummary.getStatus().equals( ImportStatus.ERROR ) )
+                    {
+                        response.setHeader( "Location", ContextUtils.getRootPath( request ) + RESOURCE_PATH + "/" + importSummary.getReference() );
+                    }
                 }
             }
 

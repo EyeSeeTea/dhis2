@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.person;
+package org.hisp.dhis.setting.hibernate;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,59 +28,20 @@ package org.hisp.dhis.dxf2.person;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.DxfNamespaces;
+import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.setting.SystemSetting;
+import org.hisp.dhis.setting.SystemSettingStore;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-@JacksonXmlRootElement( localName = "contact", namespace = DxfNamespaces.DXF_2_0 )
-public class Contact
+public class HibernateSystemSettingStore
+    extends HibernateGenericStore<SystemSetting> implements SystemSettingStore
 {
-    private String phoneNumber;
-
-    public Contact()
-    {
-    }
-
-    @JsonProperty( required = true )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getPhoneNumber()
-    {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber( String phoneNumber )
-    {
-        this.phoneNumber = phoneNumber;
-    }
-
     @Override
-    public boolean equals( Object o )
+    public SystemSetting getByName( String name )
     {
-        if ( this == o ) return true;
-        if ( o == null || getClass() != o.getClass() ) return false;
-
-        Contact contact = (Contact) o;
-
-        if ( phoneNumber != null ? !phoneNumber.equals( contact.phoneNumber ) : contact.phoneNumber != null ) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode()
-    {
-        return phoneNumber != null ? phoneNumber.hashCode() : 0;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "Contact{" +
-            "phoneNumber='" + phoneNumber + '\'' +
-            '}';
+        return (SystemSetting) getCriteria( Restrictions.eq( "name", name ) ).uniqueResult();
     }
 }

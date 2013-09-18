@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.person;
+package org.hisp.dhis.dxf2.events.event;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -29,86 +29,74 @@ package org.hisp.dhis.dxf2.person;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.DxfNamespaces;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "attribute", namespace = DxfNamespaces.DXF_2_0 )
-public class Attribute
+@JacksonXmlRootElement( localName = "events", namespace = DxfNamespaces.DXF_2_0 )
+public class Events
 {
-    private String type;
+    private String program;
 
-    private String value;
+    private String programInstance;
 
-    public Attribute()
+    private List<Event> events = new ArrayList<Event>();
+
+    public Events()
     {
-    }
-
-    public Attribute( String value )
-    {
-        this.value = value;
-    }
-
-    public Attribute( String type, String value )
-    {
-        this.type = type;
-        this.value = value;
     }
 
     @JsonProperty
     @JacksonXmlProperty( isAttribute = true )
-    public String getType()
+    public String getProgram()
     {
-        return type;
+        return program;
     }
 
-    public void setType( String type )
+    public void setProgram( String program )
     {
-        this.type = type;
+        this.program = program;
     }
 
     @JsonProperty
     @JacksonXmlProperty( isAttribute = true )
-    public String getValue()
+    public String getProgramInstance()
     {
-        return value;
+        return programInstance;
     }
 
-    public void setValue( String value )
+    public void setProgramInstance( String programInstance )
     {
-        this.value = value;
+        this.programInstance = programInstance;
+    }
+
+    @JsonProperty( "eventList" )
+    @JacksonXmlElementWrapper( localName = "eventList", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "event", namespace = DxfNamespaces.DXF_2_0 )
+    public List<Event> getEvents()
+    {
+        return events;
+    }
+
+    public void setEvents( List<Event> events )
+    {
+        this.events = events;
     }
 
     @Override
-    public boolean equals( Object o )
+    public String toString()
     {
-        if ( this == o ) return true;
-        if ( o == null || getClass() != o.getClass() ) return false;
-
-        Attribute attribute = (Attribute) o;
-
-        if ( type != null ? !type.equals( attribute.type ) : attribute.type != null ) return false;
-        if ( value != null ? !value.equals( attribute.value ) : attribute.value != null ) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode()
-    {
-        int result = type != null ? type.hashCode() : 0;
-        result = 31 * result + (value != null ? value.hashCode() : 0);
-        return result;
-    }
-
-    @Override public String toString()
-    {
-        return "Attribute{" +
-            "type='" + type + '\'' +
-            ", value='" + value + '\'' +
+        return "Events{" +
+            "program='" + program + '\'' +
+            ", programInstance='" + programInstance + '\'' +
+            ", events=" + events +
             '}';
     }
 }

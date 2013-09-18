@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.event;
+package org.hisp.dhis.dxf2.events.person;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -40,63 +40,33 @@ import java.util.List;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "events", namespace = DxfNamespaces.DXF_2_0 )
-public class Events
+@JacksonXmlRootElement( localName = "persons", namespace = DxfNamespaces.DXF_2_0 )
+public class Persons
 {
-    private String program;
+    private List<Person> persons = new ArrayList<Person>();
 
-    private String programInstance;
-
-    private List<Event> events = new ArrayList<Event>();
-
-    public Events()
+    public Persons()
     {
     }
 
-    @JsonProperty
-    @JacksonXmlProperty( isAttribute = true )
-    public String getProgram()
+    @JsonProperty( "personList" )
+    @JacksonXmlElementWrapper( localName = "personList", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "person", namespace = DxfNamespaces.DXF_2_0 )
+    public List<Person> getPersons()
     {
-        return program;
+        return persons;
     }
 
-    public void setProgram( String program )
+    public void setPersons( List<Person> persons )
     {
-        this.program = program;
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( isAttribute = true )
-    public String getProgramInstance()
-    {
-        return programInstance;
-    }
-
-    public void setProgramInstance( String programInstance )
-    {
-        this.programInstance = programInstance;
-    }
-
-    @JsonProperty( "eventList" )
-    @JacksonXmlElementWrapper( localName = "eventList", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "event", namespace = DxfNamespaces.DXF_2_0 )
-    public List<Event> getEvents()
-    {
-        return events;
-    }
-
-    public void setEvents( List<Event> events )
-    {
-        this.events = events;
+        this.persons = persons;
     }
 
     @Override
     public String toString()
     {
-        return "Events{" +
-            "program='" + program + '\'' +
-            ", programInstance='" + programInstance + '\'' +
-            ", events=" + events +
+        return "Persons{" +
+            "persons=" + persons +
             '}';
     }
 }

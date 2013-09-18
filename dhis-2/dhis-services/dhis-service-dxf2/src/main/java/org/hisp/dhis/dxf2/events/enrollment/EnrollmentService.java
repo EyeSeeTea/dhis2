@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.person;
+package org.hisp.dhis.dxf2.events.enrollment;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,70 +28,49 @@ package org.hisp.dhis.dxf2.person;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
-import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramInstance;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collection;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface PersonService
+public interface EnrollmentService
 {
     // -------------------------------------------------------------------------
     // READ
     // -------------------------------------------------------------------------
 
-    Persons getPersons();
+    Enrollments getEnrollments();
 
-    Persons getPersons( OrganisationUnit organisationUnit );
+    Enrollments getEnrollments( Patient patient );
 
-    Persons getPersons( Gender gender );
+    Enrollments getEnrollments( Program program );
 
-    Persons getPersons( Program program );
+    Enrollments getEnrollments( OrganisationUnit organisationUnit );
 
-    Persons getPersons( Program program, Gender gender );
+    Enrollments getEnrollments( Program program, OrganisationUnit organisationUnit );
 
-    Persons getPersons( OrganisationUnit organisationUnit, Program program );
+    Enrollments getEnrollments( Collection<ProgramInstance> programInstances );
 
-    Persons getPersons( OrganisationUnit organisationUnit, Gender gender );
+    Enrollment getEnrollment( String id );
 
-    Persons getPersons( OrganisationUnit organisationUnit, Program program, Gender gender );
-
-    Persons getPersons( Collection<Patient> patients );
-
-    Person getPerson( String uid );
-
-    Person getPerson( Patient patient );
+    Enrollment getEnrollment( ProgramInstance programInstance );
 
     // -------------------------------------------------------------------------
     // CREATE
     // -------------------------------------------------------------------------
 
-    ImportSummaries savePersonXml( InputStream inputStream ) throws IOException;
-
-    ImportSummaries savePersonJson( InputStream inputStream ) throws IOException;
-
-    ImportSummary savePerson( Person person );
 
     // -------------------------------------------------------------------------
     // UPDATE
     // -------------------------------------------------------------------------
 
-    ImportSummary updatePersonXml( String id, InputStream inputStream ) throws IOException;
-
-    ImportSummary updatePersonJson( String id, InputStream inputStream ) throws IOException;
-
-    ImportSummary updatePerson( Person person );
 
     // -------------------------------------------------------------------------
     // DELETE
     // -------------------------------------------------------------------------
-
-    void deletePerson( Person person );
 }

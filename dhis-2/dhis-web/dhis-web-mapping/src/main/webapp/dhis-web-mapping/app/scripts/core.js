@@ -899,7 +899,10 @@ Ext.onReady( function() {
 				success: function(r) {
 					var geojson = gis.util.geojson.decode(r),
 						format = new OpenLayers.Format.GeoJSON(),
-						features = gis.util.map.getTransformedFeatureArray(format.read(geojson));
+						f = format.read(geojson);
+						
+						
+						var features = gis.util.map.getTransformedFeatureArray(f);
 
 					if (!Ext.isArray(features)) {
 						olmap.mask.hide();
@@ -1168,7 +1171,7 @@ console.log(view);
 				disableCaching: false,
 				success: function(r) {
 					var geojson = gis.util.geojson.decode(r),
-						format = new OpenLayers.Format.GeoJSON(),
+						format = new OpenLayers.Format.GeoJSON(),						
 						features = gis.util.map.getTransformedFeatureArray(format.read(geojson));
 
 					if (!Ext.isArray(features)) {
@@ -1319,8 +1322,8 @@ console.log(view);
 					maxSize: view.radiusHigh
 				};
 
-				view.legendSet = view.legendSet || {};
-				view.legendSet.names = names;
+				//view.legendSet = view.legendSet || {};
+				//view.legendSet.names = names;
 				layer.core.view = view;
 				layer.core.colorInterpolation = colors;
 				layer.core.applyClassification(options);
@@ -1328,7 +1331,7 @@ console.log(view);
 				afterLoad(view);
 			};
 
-			if (view.legendType === gis.conf.finals.widget.legendtype_predefined) {
+			if (view.legendSet) {
 					bounds = [];
 					colors = [];
 					names = [];

@@ -33,6 +33,7 @@ import static org.hisp.dhis.util.ContextUtils.clearIfNotModified;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -120,13 +121,17 @@ public class GetGeoJsonAction
 
     public String execute()
         throws Exception
-    {
-        Set<String> ouParams = new HashSet<String>();
+    {        
+        String paramString = "ou:";
         
         for ( String id : ids )
         {
-            ouParams.add( "ou:" + id );
+            paramString += id + ";";
         }
+
+        Set<String> ouParams = new HashSet<String>();
+        
+        ouParams.add( paramString.substring( 0, paramString.length() ) );
         
         DataQueryParams params = analyticsService.getFromUrl( ouParams, null, AggregationType.SUM, null, false, false, null );
         

@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.event;
+package org.hisp.dhis.dxf2.events.person;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -33,9 +33,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
-import org.hisp.dhis.dxf2.metadata.ImportOptions;
-import org.hisp.dhis.scheduling.TaskId;
-import org.hisp.dhis.system.notification.NotificationLevel;
 import org.hisp.dhis.system.notification.Notifier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StreamUtils;
@@ -45,17 +42,15 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 
 /**
- * Implementation of EventService that uses Jackson for serialization and deserialization.
- *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class JacksonEventService extends AbstractEventService
+public class JacksonPersonService extends AbstractPersonService
 {
     @Autowired
     private Notifier notifier;
 
     // -------------------------------------------------------------------------
-    // EventService Impl
+    // Implementation
     // -------------------------------------------------------------------------
 
     private static ObjectMapper xmlMapper = new XmlMapper();
@@ -95,113 +90,81 @@ public class JacksonEventService extends AbstractEventService
         jsonMapper.configure( DeserializationFeature.WRAP_EXCEPTIONS, true );
     }
 
-    @Override
-    public ImportSummaries saveEventsXml( InputStream inputStream ) throws IOException
-    {
-        return saveEventsXml( inputStream, null, null );
-    }
+    // -------------------------------------------------------------------------
+    // CREATE
+    // -------------------------------------------------------------------------
 
     @Override
-    public ImportSummaries saveEventsXml( InputStream inputStream, ImportOptions importOptions ) throws IOException
-    {
-        return saveEventsXml( inputStream, null, importOptions );
-    }
-
-    @Override
-    public ImportSummaries saveEventsXml( InputStream inputStream, TaskId taskId, ImportOptions importOptions ) throws IOException
+    public ImportSummaries savePersonXml( InputStream inputStream ) throws IOException
     {
         ImportSummaries importSummaries = new ImportSummaries();
-
         String input = StreamUtils.copyToString( inputStream, Charset.forName( "UTF-8" ) );
-
-        notifier.clear( taskId ).notify( taskId, "Importing events" );
 
         try
         {
-            Events events = fromXml( input, Events.class );
+            Persons persons = fromXml( input, Persons.class );
 
-            for ( Event event : events.getEvents() )
+            for ( Person person : persons.getPersons() )
             {
-                importSummaries.addImportSummary( saveEvent( event, importOptions ) );
+                person.setPerson( null );
+                importSummaries.addImportSummary( savePerson( person ) );
             }
         }
         catch ( Exception ex )
         {
-            Event event = fromXml( input, Event.class );
-            importSummaries.addImportSummary( saveEvent( event, importOptions ) );
+            Person person = fromXml( input, Person.class );
+            person.setPerson( null );
+            importSummaries.addImportSummary( savePerson( person ) );
         }
-
-        notifier.notify( taskId, NotificationLevel.INFO, "Import done", true ).
-            addTaskSummary( taskId, importSummaries );
 
         return importSummaries;
     }
 
     @Override
-    public ImportSummary saveEventXml( InputStream inputStream ) throws IOException
-    {
-        return saveEventXml( inputStream, null );
-    }
-
-    @Override
-    public ImportSummary saveEventXml( InputStream inputStream, ImportOptions importOptions ) throws IOException
-    {
-        Event event = fromXml( inputStream, Event.class );
-        return saveEvent( event, importOptions );
-    }
-
-    @Override
-    public ImportSummaries saveEventsJson( InputStream inputStream ) throws IOException
-    {
-        return saveEventsJson( inputStream, null, null );
-    }
-
-    @Override
-    public ImportSummaries saveEventsJson( InputStream inputStream, ImportOptions importOptions ) throws IOException
-    {
-        return saveEventsJson( inputStream, null, importOptions );
-    }
-
-    @Override
-    public ImportSummaries saveEventsJson( InputStream inputStream, TaskId taskId, ImportOptions importOptions ) throws IOException
+    public ImportSummaries savePersonJson( InputStream inputStream ) throws IOException
     {
         ImportSummaries importSummaries = new ImportSummaries();
-
         String input = StreamUtils.copyToString( inputStream, Charset.forName( "UTF-8" ) );
-
-        notifier.clear( taskId ).notify( taskId, "Importing events" );
 
         try
         {
-            Events events = fromJson( input, Events.class );
+            Persons persons = fromJson( input, Persons.class );
 
-            for ( Event event : events.getEvents() )
+            for ( Person person : persons.getPersons() )
             {
-                importSummaries.addImportSummary( saveEvent( event, importOptions ) );
+                person.setPerson( null );
+                importSummaries.addImportSummary( savePerson( person ) );
             }
         }
         catch ( Exception ex )
         {
-            Event event = fromJson( input, Event.class );
-            importSummaries.addImportSummary( saveEvent( event, importOptions ) );
+            Person person = fromJson( input, Person.class );
+            person.setPerson( null );
+            importSummaries.addImportSummary( savePerson( person ) );
         }
-
-        notifier.notify( taskId, NotificationLevel.INFO, "Import done", true ).
-            addTaskSummary( taskId, importSummaries );
 
         return importSummaries;
     }
 
+    // -------------------------------------------------------------------------
+    // UPDATE
+    // -------------------------------------------------------------------------
+
     @Override
-    public ImportSummary saveEventJson( InputStream inputStream ) throws IOException
+    public ImportSummary updatePersonXml( String id, InputStream inputStream ) throws IOException
     {
-        return saveEventJson( inputStream, null );
+        Person person = fromXml( inputStream, Person.class );
+        person.setPerson( id );
+
+        return updatePerson( person );
     }
 
     @Override
-    public ImportSummary saveEventJson( InputStream inputStream, ImportOptions importOptions ) throws IOException
+    public ImportSummary updatePersonJson( String id, InputStream inputStream ) throws IOException
     {
-        Event event = fromJson( inputStream, Event.class );
-        return saveEvent( event, importOptions );
+        Person person = fromJson( inputStream, Person.class );
+        person.setPerson( id );
+
+        return updatePerson( person );
     }
 }

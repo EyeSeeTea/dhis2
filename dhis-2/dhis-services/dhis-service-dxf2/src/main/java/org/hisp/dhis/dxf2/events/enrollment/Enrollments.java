@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.event;
+package org.hisp.dhis.dxf2.events.enrollment;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -29,71 +29,36 @@ package org.hisp.dhis.dxf2.event;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.DxfNamespaces;
-import org.hisp.dhis.system.util.ValidationUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "coordinate", namespace = DxfNamespaces.DXF_2_0 )
-public class Coordinate
+@JacksonXmlRootElement( localName = "enrollments", namespace = DxfNamespaces.DXF_2_0 )
+public class Enrollments
 {
-    private Double latitude;
+    private List<Enrollment> enrollments = new ArrayList<Enrollment>();
 
-    private Double longitude;
-
-    public Coordinate()
+    public Enrollments()
     {
     }
 
-    public Coordinate( Double longitude, Double latitude )
+    @JsonProperty( "enrollmentList" )
+    @JacksonXmlElementWrapper( localName = "enrollmentList", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "enrollment", namespace = DxfNamespaces.DXF_2_0 )
+    public List<Enrollment> getEnrollments()
     {
-        this.longitude = longitude;
-        this.latitude = latitude;
+        return enrollments;
     }
 
-    @JsonProperty( required = true )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
-    public Double getLatitude()
+    public void setEnrollments( List<Enrollment> enrollments )
     {
-        return latitude;
-    }
-
-    public void setLatitude( Double latitude )
-    {
-        this.latitude = latitude;
-    }
-
-    @JsonProperty( required = true )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0, isAttribute = true )
-    public Double getLongitude()
-    {
-        return longitude;
-    }
-
-    public void setLongitude( Double longitude )
-    {
-        this.longitude = longitude;
-    }
-
-    public boolean isValid()
-    {
-        return ValidationUtils.coordinateIsValid( getCoordinateString() );
-    }
-
-    public String getCoordinateString()
-    {
-        return "[" + longitude + "," + latitude + "]";
-    }
-
-    @Override
-    public String toString()
-    {
-        return "Coordinate{" +
-            "latitude=" + latitude +
-            ", longitude=" + longitude +
-            '}';
+        this.enrollments = enrollments;
     }
 }

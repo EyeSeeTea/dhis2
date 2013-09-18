@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.person;
+package org.hisp.dhis.setting;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,45 +28,13 @@ package org.hisp.dhis.dxf2.person;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.DxfNamespaces;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.hisp.dhis.common.GenericStore;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-@JacksonXmlRootElement( localName = "persons", namespace = DxfNamespaces.DXF_2_0 )
-public class Persons
+public interface SystemSettingStore
+    extends GenericStore<SystemSetting>
 {
-    private List<Person> persons = new ArrayList<Person>();
-
-    public Persons()
-    {
-    }
-
-    @JsonProperty( "personList" )
-    @JacksonXmlElementWrapper( localName = "personList", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "person", namespace = DxfNamespaces.DXF_2_0 )
-    public List<Person> getPersons()
-    {
-        return persons;
-    }
-
-    public void setPersons( List<Person> persons )
-    {
-        this.persons = persons;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "Persons{" +
-            "persons=" + persons +
-            '}';
-    }
+    SystemSetting getByName( String name );
 }
