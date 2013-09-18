@@ -33,6 +33,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.DxfNamespaces;
 
+import java.util.Date;
+
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
@@ -44,6 +46,12 @@ public class Enrollment
     private String person;
 
     private String program;
+
+    private EnrollmentStatus status;
+
+    private Date dateOfEnrollment;
+
+    private Date dateOfIncident;
 
     public Enrollment()
     {
@@ -83,5 +91,41 @@ public class Enrollment
     public void setProgram( String program )
     {
         this.program = program;
+    }
+
+    @JsonProperty( required = true )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public EnrollmentStatus getStatus()
+    {
+        return status;
+    }
+
+    public void setStatus( EnrollmentStatus status )
+    {
+        this.status = status;
+    }
+
+    @JsonProperty( required = true )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Date getDateOfEnrollment()
+    {
+        return dateOfEnrollment;
+    }
+
+    public void setDateOfEnrollment( Date dateOfEnrollment )
+    {
+        this.dateOfEnrollment = dateOfEnrollment;
+    }
+
+    @JsonProperty( required = true )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Date getDateOfIncident()
+    {
+        return dateOfIncident;
+    }
+
+    public void setDateOfIncident( Date dateOfIncident )
+    {
+        this.dateOfIncident = dateOfIncident;
     }
 }

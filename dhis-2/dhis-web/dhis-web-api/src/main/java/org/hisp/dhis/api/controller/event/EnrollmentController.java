@@ -34,28 +34,37 @@ import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
 import org.hisp.dhis.dxf2.events.enrollment.EnrollmentService;
+import org.hisp.dhis.dxf2.events.enrollment.EnrollmentStatus;
 import org.hisp.dhis.dxf2.events.enrollment.Enrollments;
 import org.hisp.dhis.dxf2.events.person.Person;
 import org.hisp.dhis.dxf2.events.person.PersonService;
+import org.hisp.dhis.dxf2.importsummary.ImportStatus;
+import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping(value = EnrollmentController.RESOURCE_PATH)
+@RequestMapping( value = EnrollmentController.RESOURCE_PATH )
 public class EnrollmentController
 {
     public static final String RESOURCE_PATH = "/enrollments";
@@ -75,9 +84,10 @@ public class EnrollmentController
 
     @RequestMapping( value = "", method = RequestMethod.GET )
     public String getEnrollments(
-        @RequestParam(value = "orgUnit", required = false) String orgUnitUid,
-        @RequestParam(value = "program", required = false) String programUid,
-        @RequestParam(value = "person", required = false) String personUid,
+        @RequestParam( value = "orgUnit", required = false ) String orgUnitUid,
+        @RequestParam( value = "program", required = false ) String programUid,
+        @RequestParam( value = "person", required = false ) String personUid,
+        @RequestParam( value = "status", required = false ) EnrollmentStatus status,
         @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request ) throws NotFoundException
     {
         WebOptions options = new WebOptions( parameters );
@@ -85,7 +95,7 @@ public class EnrollmentController
 
         if ( orgUnitUid == null && programUid == null && personUid == null )
         {
-            enrollments = enrollmentService.getEnrollments();
+            enrollments = status != null ? enrollmentService.getEnrollments( status ) : enrollmentService.getEnrollments();
         }
         else if ( orgUnitUid != null && programUid != null )
         {
@@ -99,22 +109,24 @@ public class EnrollmentController
             Program program = getProgram( programUid );
             Person person = getPerson( personUid );
 
-            enrollments = enrollmentService.getEnrollments( program, person );
+            enrollments = status != null ? enrollmentService.getEnrollments( program, person, status )
+                : enrollmentService.getEnrollments( program, person );
         }
         else if ( orgUnitUid != null )
         {
             OrganisationUnit organisationUnit = getOrganisationUnit( orgUnitUid );
-            enrollments = enrollmentService.getEnrollments( organisationUnit );
+            enrollments = status != null ? enrollmentService.getEnrollments( organisationUnit, status )
+                : enrollmentService.getEnrollments( organisationUnit );
         }
         else if ( programUid != null )
         {
             Program program = getProgram( programUid );
-            enrollments = enrollmentService.getEnrollments( program );
+            enrollments = status != null ? enrollmentService.getEnrollments( program, status ) : enrollmentService.getEnrollments( program );
         }
         else
         {
-            Person person = getPerson( personUid );
-            enrollments = enrollmentService.getEnrollments( person );
+                Person person = getPerson( personUid );
+            enrollments = status != null ? enrollmentService.getEnrollments( person, status ) : enrollmentService.getEnrollments( person );
         }
 
         model.addAttribute( "model", enrollments );
@@ -133,6 +145,90 @@ public class EnrollmentController
         model.addAttribute( "viewClass", options.getViewClass( "detailed" ) );
 
         return "person";
+    }
+
+    // -------------------------------------------------------------------------
+    // CREATE
+    // -------------------------------------------------------------------------
+
+    @RequestMapping( value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE )
+    public void postEnrollmentXml( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    {
+        ImportSummaries importSummaries = enrollmentService.saveEnrollmentsXml( request.getInputStream() );
+
+        if ( importSummaries.getImportSummaries().size() > 1 )
+        {
+            response.setStatus( HttpServletResponse.SC_CREATED );
+            JacksonUtils.toXml( response.getOutputStream(), importSummaries );
+        }
+        else
+        {
+            response.setStatus( HttpServletResponse.SC_CREATED );
+            ImportSummary importSummary = importSummaries.getImportSummaries().get( 0 );
+
+            if ( !importSummary.getStatus().equals( ImportStatus.ERROR ) )
+            {
+                response.setHeader( "Location", getResourcePath( request, importSummary ) );
+            }
+
+            JacksonUtils.toXml( response.getOutputStream(), importSummary );
+        }
+    }
+
+    @RequestMapping( value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE )
+    public void postEnrollmentJson( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    {
+        ImportSummaries importSummaries = enrollmentService.saveEnrollmentsJson( request.getInputStream() );
+
+        if ( importSummaries.getImportSummaries().size() > 1 )
+        {
+            response.setStatus( HttpServletResponse.SC_CREATED );
+            JacksonUtils.toJson( response.getOutputStream(), importSummaries );
+        }
+        else
+        {
+            response.setStatus( HttpServletResponse.SC_CREATED );
+            ImportSummary importSummary = importSummaries.getImportSummaries().get( 0 );
+
+            if ( !importSummary.getStatus().equals( ImportStatus.ERROR ) )
+            {
+                response.setHeader( "Location", getResourcePath( request, importSummary ) );
+            }
+
+            JacksonUtils.toJson( response.getOutputStream(), importSummary );
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // UPDATE
+    // -------------------------------------------------------------------------
+
+    @RequestMapping( value = "/{id}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_XML_VALUE )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    public void updateEnrollmentXml( @PathVariable String id, HttpServletRequest request, HttpServletResponse response ) throws IOException
+    {
+        ImportSummary importSummary = personService.updatePersonXml( id, request.getInputStream() );
+        JacksonUtils.toXml( response.getOutputStream(), importSummary );
+    }
+
+    @RequestMapping( value = "/{id}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    public void updateEnrollmentJson( @PathVariable String id, HttpServletRequest request, HttpServletResponse response ) throws IOException
+    {
+        ImportSummary importSummary = enrollmentService.updateEnrollmentJson( id, request.getInputStream() );
+        JacksonUtils.toJson( response.getOutputStream(), importSummary );
+    }
+
+    // -------------------------------------------------------------------------
+    // DELETE
+    // -------------------------------------------------------------------------
+
+    @RequestMapping( value = "/{id}", method = RequestMethod.DELETE )
+    @ResponseStatus( HttpStatus.NO_CONTENT )
+    public void deleteEnrollment( @PathVariable String id, @RequestParam Map<String, String> parameters, Model model ) throws NotFoundException
+    {
+        Enrollment enrollment = getEnrollment( id );
+        enrollmentService.cancelEnrollment( enrollment );
     }
 
     // -------------------------------------------------------------------------
