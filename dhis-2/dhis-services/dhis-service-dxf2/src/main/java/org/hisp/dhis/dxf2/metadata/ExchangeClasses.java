@@ -149,9 +149,9 @@ final public class ExchangeClasses
         allExportClasses.put( MapView.class, "mapViews" );
         allExportClasses.put( org.hisp.dhis.mapping.Map.class, "maps" );
 
+        allExportClasses.put( UserAuthorityGroup.class, "userRoles" );
         allExportClasses.put( User.class, "users" );
         allExportClasses.put( UserGroup.class, "userGroups" );
-        allExportClasses.put( UserAuthorityGroup.class, "userRoles" );
 
         allExportClasses.put( MessageConversation.class, "messageConversations" );
         allExportClasses.put( Interpretation.class, "interpretations" );
@@ -165,7 +165,7 @@ final public class ExchangeClasses
         importClasses = new LinkedHashMap<Class<? extends IdentifiableObject>, String>( allExportClasses );
 
         // for now, do not allow user/userGroup to be imported
-        importClasses.remove( User.class );
+        //importClasses.remove( User.class );
         importClasses.remove( UserGroup.class );
 
         // this is considered data, and is not available for meta-data export/import
