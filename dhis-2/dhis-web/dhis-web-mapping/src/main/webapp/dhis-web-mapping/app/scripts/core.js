@@ -1044,7 +1044,7 @@ Ext.onReady( function() {
 				var viewIds = [],
 					viewRow = view.rows[0],					
 					srcIds = [],
-					srcRow = view.rows[0];			
+					srcRow = src.rows[0];			
 					
 				if (viewRow.items.length === srcRow.items.length) {					
 					for (var i = 0; i < viewRow.items.length; i++) {
@@ -1243,7 +1243,9 @@ console.log(view);
 						ouIndex,
 						dxIndex,
 						valueIndex,
-						newFeatures = [];
+						newFeatures = [],
+						dimensions,
+						items = [];
 						
 					if (!response) {
 						alert(GIS.i18n.current_selection_no_data);
@@ -1291,50 +1293,56 @@ console.log(view);
 					layer.addFeatures(newFeatures);
 
 					layer.core.featureStore.loadFeatures(layer.features.slice(0));
+					
+					// Add names for all dimensions
+					dimensions = [].concat(view.columns || [], view.rows || [], view.filters || []);
+					
+					for (var i = 0; i < dimensions.length; i++) {
+						items = items.concat(dimensions[i].items);
+					}
+					
+					for (var i = 0; i < items.length; i++) {
+						items[i].name = response.metaData.names[items[i].id];
+					}
+					
+					// Period
+					view.filters[0].items[0].id = response.metaData['pe'][0];
+					view.filters[0].items[0].name = response.metaData.names[view.filters[0].items[0].id];
 
 					loadLegend(view);
 				}
 			});
 		};
 
-		loadLegend = function(view) {
+		loadLegend = function(view) {			
+			var bounds,
+				fn;
+			
 			view = view || layer.core.view;
 
-			var options,
-				predefined = gis.conf.finals.widget.legendtype_predefined,
-				classificationMethod = mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS,
-				method = view.legendType === predefined ? classificationMethod : view.method,
-				bounds,
-				colors,
-				names,
-				legend,
-				legends,
-				fn;
-
 			fn = function() {
-				options = {
+				var options = {
 					indicator: gis.conf.finals.widget.value,
-					method: method,
+					method: view.legendSet ? mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS : view.method,
 					numClasses: view.classes,
 					bounds: bounds,
 					colors: layer.core.getColors(view.colorLow, view.colorHigh),
 					minSize: view.radiusLow,
 					maxSize: view.radiusHigh
 				};
-
-				//view.legendSet = view.legendSet || {};
-				//view.legendSet.names = names;
+				
 				layer.core.view = view;
 				layer.core.colorInterpolation = colors;
 				layer.core.applyClassification(options);
 
 				afterLoad(view);
 			};
-
+			
 			if (view.legendSet) {
-					bounds = [];
-					colors = [];
-					names = [];
+				var bounds = [],
+					colors = [],
+					names = [],
+					legends = [];
 
 				Ext.Ajax.request({
 					url: gis.init.contextPath + gis.conf.finals.url.path_api + 'mapLegendSets/' + view.legendSet.id + '.json?links=false&paging=false',
@@ -1359,6 +1367,10 @@ console.log(view);
 							names.push(legends[i].name);
 							bounds.push(legends[i].endValue);
 						}
+						
+						view.legendSet.names = names;
+						view.legendSet.bounds = bounds;
+						view.legendSet.colors = colors;
 
 						fn();
 					}

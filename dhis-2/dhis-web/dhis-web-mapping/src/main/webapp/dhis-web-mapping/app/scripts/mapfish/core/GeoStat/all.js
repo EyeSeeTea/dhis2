@@ -446,18 +446,6 @@ mapfish.GeoStat.createThematic = function(name) {
 			return view;
 		},
 
-		getLegendConfig: function() {
-			var what = this.view.columns[0].items[0].name,
-				when = this.view.filters[0].items[0].name,
-				where = this.view.rows[0].items[0].name;
-
-			return {
-				what: what,
-				when: when,
-				where: where
-			};
-		},
-
 		getImageLegendConfig: function() {
 			var bins = this.classification.bins,
 				rgb = this.colorInterpolation,
@@ -561,47 +549,52 @@ mapfish.GeoStat.createThematic = function(name) {
 		updateLegend: function() {
 			var	element = document.createElement("div"),
 				child,
-				legendType = this.view.legendType,
-				automatic = this.gis.conf.finals.widget.legendtype_automatic,
-				predefined = this.gis.conf.finals.widget.legendtype_predefined,
-				//legendNames = this.view.legendSet.names,
-				config = this.getLegendConfig(),
 				legendNames;
+				
+			// data
+			child = document.createElement("div");
+			child.style.height = "14px";
+			child.style.overflow = "hidden";
+			child.title = this.view.columns[0].items[0].name;
+			child.innerHTML = this.view.columns[0].items[0].name;
+			element.appendChild(child);
 
-			for (var key in config) {
-				if (config.hasOwnProperty(key)) {
-					child = document.createElement("div");
-					child.style.height = "14px";
-					child.style.overflow = "hidden";
-					child.title = config[key];
-					child.innerHTML = config[key];
-					element.appendChild(child);
+			child = document.createElement("div");
+			child.style.clear = "left";
+			element.appendChild(child);
+				
+			// period
+			child = document.createElement("div");
+			child.style.height = "14px";
+			child.style.overflow = "hidden";
+			child.title = this.view.filters[0].items[0].name;
+			child.innerHTML = this.view.filters[0].items[0].name;
+			element.appendChild(child);
 
-					child = document.createElement("div");
-					child.style.clear = "left";
-					element.appendChild(child);
-				}
-			}
-
+			child = document.createElement("div");
+			child.style.clear = "left";
+			element.appendChild(child);
+			
+			// separator
 			child = document.createElement("div");
 			child.style.width = "1px";
 			child.style.height = "5px";
 			element.appendChild(child);
-
+			
+			// legends
 			if (this.view.legendSet) {
-				legendNames = ['a', 'b', 'c', 'd', 'e'];
 				for (var i = 0; i < this.classification.bins.length; i++) {
 					child = document.createElement("div");
 					child.style.backgroundColor = this.colorInterpolation[i].toHexString();
 					child.style.width = "30px";
-					child.style.height = legendNames[i] ? "25px" : "20px";
+					child.style.height = this.view.legendSet.names[i] ? "25px" : "20px";
 					child.style.cssFloat = "left";
 					child.style.marginRight = "8px";
 					element.appendChild(child);
 
 					child = document.createElement("div");
-					child.style.lineHeight = legendNames[i] ? "12px" : "7px";
-					child.innerHTML = '<b style="color:#222; font-size:10px !important">' + (legendNames[i] || '') + '</b><br/>' + this.classification.bins[i].label;
+					child.style.lineHeight = this.view.legendSet.names[i] ? "12px" : "7px";
+					child.innerHTML = '<b style="color:#222; font-size:10px !important">' + (this.view.legendSet.names[i] || '') + '</b><br/>' + this.classification.bins[i].label;
 					element.appendChild(child);
 
 					child = document.createElement("div");
