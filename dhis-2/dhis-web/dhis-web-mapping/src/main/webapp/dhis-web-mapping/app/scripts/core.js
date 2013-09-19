@@ -491,7 +491,7 @@ Ext.onReady( function() {
 				Ext.create('Ext.menu.Item', {
 					text: 'Float up',
 					iconCls: 'gis-menu-item-icon-float',
-					disabled: !feature.attributes.hasCoordinatesUp,
+					disabled: !feature.attributes.hcu,
 					handler: function() {
 						drill('up');
 					}
@@ -500,7 +500,7 @@ Ext.onReady( function() {
 					text: 'Drill down',
 					iconCls: 'gis-menu-item-icon-drill',
 					cls: 'gis-menu-item-first',
-					disabled: !feature.attributes.hcwc,
+					disabled: !feature.attributes.hcd,
 					handler: function() {
 						drill('down');
 					}
@@ -1884,11 +1884,11 @@ console.log(view);
 							id: doc.geojson[i].uid,
 							internalId: doc.geojson[i].iid,
 							name: doc.geojson[i].na,
-							hcwc: doc.geojson[i].hc,
+							hcd: doc.geojson[i].hcd,
+							hcu: doc.geojson[i].hcu,
 							path: doc.geojson[i].path,
 							parentId: doc.geojson[i].pi,
-							parentName: doc.geojson[i].pn,
-							hasCoordinatesUp: doc.properties.hasCoordinatesUp
+							parentName: doc.geojson[i].pn
 						}
 					});
 				}
@@ -2033,6 +2033,8 @@ console.log(view);
 				// radiusHigh: integer (15)
 
 				// opacity: integer (0.8) - 0-1
+				
+				// legendSet: object
 
 				getValidatedDimensionArray = function(dimensionArray) {
 					var dimensions = [];
@@ -2214,6 +2216,8 @@ console.log(view);
 					layout.userOrganisationUnitGrandChildren = isOugc;
 
 					layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
+					
+					layout.legendSet = config.legendSet;
 
 					if (!validateSpecialCases()) {
 						return;

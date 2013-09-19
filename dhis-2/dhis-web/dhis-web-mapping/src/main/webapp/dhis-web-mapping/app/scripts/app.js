@@ -4797,7 +4797,7 @@ Ext.onReady( function() {
 			view.radiusHigh = parseInt(radiusHigh.getValue());
 			view.opacity = layer.item.getOpacity();
 			
-			if (legendSet.getValue()) {
+			if (legendType.getValue() === gis.conf.finals.widget.legendtype_predefined && legendSet.getValue()) {
 				view.legendSet = {
 					id: legendSet.getValue()
 				};
