@@ -4766,12 +4766,17 @@ Ext.onReady( function() {
 
 		getView = function(config) {
 			var vType = valueType.getValue(),
+				objectNameCmpMap = {},
 				view = {};
+				
+			objectNameCmpMap[dimConf.indicator.objectName] = indicator;
+			objectNameCmpMap[dimConf.dataElement.objectName] = dataElement;
+			objectNameCmpMap[dimConf.dataSet.objectName] = dataSet;
 
 			view.columns = [{
 				dimension: vType,
 				items: [{
-					id: vType === dimConf.indicator.objectName ? indicator.getValue() : dataElement.getValue()
+					id: objectNameCmpMap[vType].getValue()
 				}]
 			}];
 			

@@ -1044,9 +1044,9 @@ Ext.onReady( function() {
 			}
 			
 			// organisation units
-			viewIds = [],
-			viewDim = view.rows[0],
-			srcIds = [],
+			viewIds = [];
+			viewDim = view.rows[0];
+			srcIds = [];
 			srcDim = src.rows[0];
 				
 			if (viewDim.items.length === srcDim.items.length) {					
@@ -1073,12 +1073,12 @@ Ext.onReady( function() {
 			}
 			
 			// data
-			viewIds = [],
-			viewDim = view.rows[0],
-			srcIds = [],
-			srcDim = src.rows[0];
+			viewIds = [];
+			viewDim = view.columns[0];
+			srcIds = [];
+			srcDim = src.columns[0];
 					
-			if (viewDim.items.length === srcDim.items.length) {					
+			if (viewDim.items.length === srcDim.items.length) {
 				for (var i = 0; i < viewDim.items.length; i++) {
 					viewIds.push(viewDim.items[i].id);
 				}
@@ -1102,10 +1102,10 @@ Ext.onReady( function() {
 			}
 			
 			// period
-			viewIds = [],
-			viewDim = view.rows[0],
-			srcIds = [],
-			srcDim = src.rows[0];
+			viewIds = [];
+			viewDim = view.filters[0];
+			srcIds = [];
+			srcDim = src.filters[0];
 					
 			if (viewDim.items.length === srcDim.items.length) {					
 				for (var i = 0; i < viewDim.items.length; i++) {
@@ -1301,27 +1301,64 @@ console.log(view);
 
 		loadLegend = function(view) {
 			var bounds,
+				addNames,
 				fn;
 			
 			view = view || layer.core.view;
+			
+			addNames = function(response) {				
+				
+				// Period id
+				view.filters[0].items[0].id = gis.response.metaData['pe'][0];
+					
+				// All dimensions
+				var dimensions = [].concat(view.columns || [], view.rows || [], view.filters || []),
+					metaData = response.metaData;
+					
+				for (var i = 0, dimension; i < dimensions.length; i++) {
+					dimension = dimensions[i];
+					
+					for (var j = 0, item; j < dimension.items.length; j++) {
+						item = dimension.items[j];
+						
+						if (item.id.indexOf('-') !== -1) {
+							var ids = item.id.split('-');							
+							item.name = metaData.names[ids[0]] + ' ' + metaData.names[ids[1]];
+						}
+						else {
+							item.name = metaData.names[item.id];
+						}
+					}
+				}
+				
+				// Period
+				//view.filters[0].items[0].id = gis.response.metaData['pe'][0];
+				//view.filters[0].items[0].name = gis.response.metaData.names[view.filters[0].items[0].id];
+				
+				// Detailed data elements
+				//for (var i = 0; i < response.headers.length; i++) {
+					//if (response.headers[i].name === dimConf.category.objectName) {
+						//coIndex = i;
+						//break;
+					//}
+				//}
+				
+				//if (coIndex) {
+					//for (var i = 0; i < view.columns.length; i++) {						
+						//if (view.columns[i].dimension === dimConf.dataElement.objectName) {
+							//for (var j = 0, item; j < view.columns[i].length; j++) {
+								//item = view.columns[i][j];
+								//item.name = gis.response.
+							//items[i].name = gis.response.metaData.names[items[i].id];
+					//}
+					
+			};
+					
+				
 
 			fn = function() {
-					
-				// Add names for all dimensions
-				var dimensions = [].concat(view.columns || [], view.rows || [], view.filters || []),
-					items = [];
 				
-				for (var i = 0; i < dimensions.length; i++) {
-					items = items.concat(dimensions[i].items);
-				}
-				
-				for (var i = 0; i < items.length; i++) {
-					items[i].name = gis.response.metaData.names[items[i].id];
-				}
-				
-					// Period
-				view.filters[0].items[0].id = gis.response.metaData['pe'][0];
-				view.filters[0].items[0].name = gis.response.metaData.names[view.filters[0].items[0].id];
+				addNames(gis.response);
 				
 				// Classification options
 				var options = {
