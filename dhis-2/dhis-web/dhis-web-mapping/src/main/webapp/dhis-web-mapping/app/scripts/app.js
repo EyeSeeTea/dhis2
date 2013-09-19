@@ -1,7 +1,7 @@
 Ext.onReady( function() {
 	var createViewport,
-		initialize,
-		gis;
+		initialize;
+		//gis;
 
 	GIS.app = {};
 
