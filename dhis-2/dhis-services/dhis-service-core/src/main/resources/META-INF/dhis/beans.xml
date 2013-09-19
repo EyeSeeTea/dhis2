@@ -125,7 +125,7 @@
     <property name="cacheable" value="true" />
   </bean>
 
-  <bean id="org.hisp.dhis.validation.ValidationRuleGroupStore" class="org.hisp.dhis.hibernate.HibernateGenericStore">
+  <bean id="org.hisp.dhis.validation.ValidationRuleGroupStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
     <property name="clazz" value="org.hisp.dhis.validation.ValidationRuleGroup" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
@@ -144,8 +144,7 @@
     <property name="cacheable" value="true" />
   </bean>
 
-  <bean id="org.hisp.dhis.dataelement.DataElementCategoryComboStore"
-    class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
+  <bean id="org.hisp.dhis.dataelement.DataElementCategoryComboStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
     <property name="clazz" value="org.hisp.dhis.dataelement.DataElementCategoryCombo" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
@@ -294,7 +293,7 @@
     <property name="cacheable" value="true" />
   </bean>
 
-  <bean id="org.hisp.dhis.setting.SystemSettingStore" class="org.hisp.dhis.hibernate.HibernateGenericStore">
+  <bean id="org.hisp.dhis.setting.SystemSettingStore" class="org.hisp.dhis.setting.hibernate.HibernateSystemSettingStore">
     <property name="clazz" value="org.hisp.dhis.setting.SystemSetting" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
@@ -614,11 +613,13 @@
         <value>global_fund</value>
         <value>guinea</value>
         <value>guinea_bissau</value>
+        <value>Haiti</value>
         <value>india</value>
         <value>indonesia</value>
         <value>irc</value>
         <value>ivory_coast</value>
         <value>kenya</value>
+		<value>laos</value>
         <value>lesotho</value>
         <value>liberia</value>
         <value>malawi</value>
@@ -802,6 +803,8 @@
         <value>hi</value>
         <value>id</value>
         <value>it</value>
+		<value>km</value>
+		<value>lo</value>
         <value>my</value>
         <value>nl</value>
         <value>no</value>
@@ -882,11 +885,11 @@
     <property name="skipInTests" value="true" />
   </bean>
   
-  <bean id="org.hisp.dhis.user.UserDefaultPopulator" class="org.hisp.dhis.user.UserDefaultPopulator">
+  <!--<bean id="org.hisp.dhis.user.UserDefaultPopulator" class="org.hisp.dhis.user.UserDefaultPopulator">
     <property name="userService" ref="org.hisp.dhis.user.UserService" />
     <property name="runlevel" value="5" />
     <property name="skipInTests" value="true" />
-  </bean>
+  </bean>-->
   
   <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
     <property name="targetObject" ref="org.hisp.dhis.system.startup.StartupRoutineExecutor" />
@@ -904,7 +907,7 @@
           <ref local="org.hisp.dhis.dataentryform.DataEntryFormUpgrader" />
           <ref local="org.hisp.dhis.startup.ExpressionUpgrader" />
           <ref local="org.hisp.dhis.startup.ConfigurationPopulator" />
-          <ref local="org.hisp.dhis.user.UserDefaultPopulator" />
+          <!--<ref local="org.hisp.dhis.user.UserDefaultPopulator" />-->
         </list>
       </list>
     </property>
@@ -1057,7 +1060,6 @@
 
   <bean id="org.hisp.dhis.mapping.MapViewDeletionHandler" class="org.hisp.dhis.mapping.MapViewDeletionHandler">
     <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
-    <property name="operandService" ref="org.hisp.dhis.dataelement.DataElementOperandService" />
   </bean>
   
   <bean id="org.hisp.dhis.mapping.MapDeletionHandler" class="org.hisp.dhis.mapping.MapDeletionHandler">

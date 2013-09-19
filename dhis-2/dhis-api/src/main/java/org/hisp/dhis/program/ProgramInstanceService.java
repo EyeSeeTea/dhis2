@@ -28,10 +28,6 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Date;
-import java.util.Collection;
-import java.util.List;
-
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
@@ -39,6 +35,10 @@ import org.hisp.dhis.message.MessageConversation;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.sms.outbound.OutboundSms;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Abyot Asalefew
@@ -56,6 +56,8 @@ public interface ProgramInstanceService
 
     ProgramInstance getProgramInstance( int id );
 
+    ProgramInstance getProgramInstance( String id );
+
     Collection<ProgramInstance> getAllProgramInstances();
 
     Collection<ProgramInstance> getProgramInstances( Integer status );
@@ -63,6 +65,10 @@ public interface ProgramInstanceService
     Collection<ProgramInstance> getProgramInstances( Program program );
 
     Collection<ProgramInstance> getProgramInstances( Collection<Program> programs );
+
+    Collection<ProgramInstance> getProgramInstances( Collection<Program> programs, OrganisationUnit organisationUnit );
+
+    Collection<ProgramInstance> getProgramInstances( Collection<Program> programs, OrganisationUnit organisationUnit, int status );
 
     Collection<ProgramInstance> getProgramInstances( Program program, Integer status );
 
@@ -108,4 +114,18 @@ public interface ProgramInstanceService
     Collection<MessageConversation> sendMessageConversations( ProgramInstance programInstance,
         int sendWhenToC0mpletedEvent, I18nFormat format );
 
+    ProgramInstance enrollPatient( Patient patient, Program program, Date enrollmentDate, Date dateOfIncident,
+        OrganisationUnit orgunit, I18nFormat format );
+
+    boolean canAutoCompleteProgramInstanceStatus( ProgramInstance programInstance );
+
+    void completeProgramInstanceStatus( ProgramInstance programInstance, I18nFormat format );
+
+    /**
+     * Set status as skipped for overdue events; Remove scheduled events
+     * <p/>
+     * *
+     */
+
+    void cancelProgramInstanceStatus( ProgramInstance programInstance );
 }

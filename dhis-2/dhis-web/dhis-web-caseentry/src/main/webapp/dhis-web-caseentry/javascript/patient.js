@@ -79,25 +79,8 @@ function Patient()
 				var patientId = json.message.split('_')[0];
 				var	dateOfIncident = jQuery('#patientForm [id=dateOfIncident]').val();
 				var enrollmentDate = jQuery('#patientForm [id=enrollmentDate]').val();
-					
-				var originalPatientId = getFieldValue('patientId');
-				var relatedPatientId = patientId;
-				if(getFieldValue('relationshipFromA')=='false')
-				{
-					originalPatientId = patientId;
-					relatedPatientId = getFieldValue('patientId');
-				}
-				var relatedPatientId = 
-				jQuery.postJSON( "saveProgramEnrollment.action",
-				{
-					originalPatientId: originalPatientId,
-					relationshipTypeId: getFieldValue('relationshipTypeId'),
-					relatedPatientId: relatedPatientId
-				}, 
-				function( json ) 
-				{
-				});
-					
+				
+				// Enroll patient into the program
 				if( programId !='' && enrollmentDate != '')
 				{
 					jQuery.postJSON( "saveProgramEnrollment.action",
@@ -446,5 +429,13 @@ function loadDataEntry( programStageInstanceId )
 			resize();
 			hideLoader();
 			hideById('contentDiv');
+			
+			var reportDateToUse = selectedProgramStageInstance.attr('reportDateToUse');
+			if(reportDateToUse!='' && $('#executionDate').val() == '' ){
+				$('#executionDate').val(reportDateToUse);
+				$('#executionDate').change();
+			}
+		
 		} );
+	
 }

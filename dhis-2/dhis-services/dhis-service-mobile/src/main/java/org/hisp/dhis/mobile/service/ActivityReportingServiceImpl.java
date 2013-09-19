@@ -437,8 +437,8 @@ public class ActivityReportingServiceImpl
 
                 for ( Patient each : patients )
                 {
-                    patientsInfo += each.getId() + "/" + each.getName() + "/"
-                        + dateFormat.format( each.getBirthDate() ) + "$";
+                    patientsInfo += each.getId() + "/" + each.getName() + "/" + dateFormat.format( each.getBirthDate() )
+                        + "$";
                 }
 
                 throw new NotAllowedException( patientsInfo );
@@ -489,9 +489,6 @@ public class ActivityReportingServiceImpl
             programInstance.setProgram( programStage.getProgram() );
             programInstance.setStatus( ProgramInstance.STATUS_COMPLETED );
             programInstance.setPatient( patient );
-
-            patient.getPrograms().add( programStage.getProgram() );
-            patientService.updatePatient( patient );
 
             programInstanceService.addProgramInstance( programInstance );
 
@@ -676,8 +673,6 @@ public class ActivityReportingServiceImpl
         programInstance.setPatient( patient );
         programInstance.setStatus( ProgramInstance.STATUS_ACTIVE );
         programInstanceService.addProgramInstance( programInstance );
-        patient.getPrograms().add( program );
-        patientService.updatePatient( patient );
         for ( ProgramStage programStage : program.getProgramStages() )
         {
             if ( programStage.getAutoGenerateEvent() )
@@ -889,7 +884,6 @@ public class ActivityReportingServiceImpl
                         new ArrayList<String>() ) );
                 }
             }
-
         }
 
         // Set all identifier
@@ -981,20 +975,12 @@ public class ActivityReportingServiceImpl
                 relationshipMobile.setName( eachRelationship.getRelationshipType().getaIsToB() );
                 relationshipMobile.setPersonBName( eachRelationship.getPatientB().getName() );
                 relationshipMobile.setPersonBId( eachRelationship.getPatientB().getId() );
-                // relationshipMobile.setPersonAName(
-                // eachRelationship.getPatientA().getName() );
-                // relationshipMobile.setPersonAId(
-                // eachRelationship.getPatientA().getId() );
             }
             else
             {
                 relationshipMobile.setName( eachRelationship.getRelationshipType().getbIsToA() );
                 relationshipMobile.setPersonBName( eachRelationship.getPatientA().getName() );
                 relationshipMobile.setPersonBId( eachRelationship.getPatientA().getId() );
-                // relationshipMobile.setPersonAName(
-                // eachRelationship.getPatientB().getName() );
-                // relationshipMobile.setPersonAId(
-                // eachRelationship.getPatientB().getId() );
             }
             relationshipList.add( relationshipMobile );
         }
@@ -1290,8 +1276,8 @@ public class ActivityReportingServiceImpl
 
                 for ( Patient each : patients )
                 {
-                    patientsInfo += each.getId() + "/" + each.getName() + "/"
-                        + dateFormat.format( each.getBirthDate() ) + "$";
+                    patientsInfo += each.getId() + "/" + each.getName() + "/" + dateFormat.format( each.getBirthDate() )
+                        + "$";
                 }
 
                 throw new NotAllowedException( patientsInfo );
@@ -1847,7 +1833,6 @@ public class ActivityReportingServiceImpl
         }
 
         patientWeb.setIdentifiers( patientIdentifierSet );
-        patientWeb.setAttributes( patientAttributeSet );
 
         patientId = patientService.createPatient( patientWeb, null, null, patientAttributeValues );
 
@@ -1921,8 +1906,8 @@ public class ActivityReportingServiceImpl
                 }
                 if ( each.getBirthDate() != null )
                 {
-                    patientsInfo += each.getId() + "/" + each.getName() + "/"
-                        + dateFormat.format( each.getBirthDate() ) + "$";
+                    patientsInfo += each.getId() + "/" + each.getName() + "/" + dateFormat.format( each.getBirthDate() )
+                        + "$";
                 }
                 else
                 {
