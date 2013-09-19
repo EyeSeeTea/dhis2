@@ -1292,33 +1292,38 @@ console.log(view);
 
 					layer.core.featureStore.loadFeatures(layer.features.slice(0));
 					
-					// Add names for all dimensions
-					dimensions = [].concat(view.columns || [], view.rows || [], view.filters || []);
-					
-					for (var i = 0; i < dimensions.length; i++) {
-						items = items.concat(dimensions[i].items);
-					}
-					
-					for (var i = 0; i < items.length; i++) {
-						items[i].name = response.metaData.names[items[i].id];
-					}
-					
-					// Period
-					view.filters[0].items[0].id = response.metaData['pe'][0];
-					view.filters[0].items[0].name = response.metaData.names[view.filters[0].items[0].id];
+					gis.response = response;
 
 					loadLegend(view);
 				}
 			});
 		};
 
-		loadLegend = function(view) {			
+		loadLegend = function(view) {
 			var bounds,
 				fn;
 			
 			view = view || layer.core.view;
 
 			fn = function() {
+					
+				// Add names for all dimensions
+				var dimensions = [].concat(view.columns || [], view.rows || [], view.filters || []),
+					items = [];
+				
+				for (var i = 0; i < dimensions.length; i++) {
+					items = items.concat(dimensions[i].items);
+				}
+				
+				for (var i = 0; i < items.length; i++) {
+					items[i].name = gis.response.metaData.names[items[i].id];
+				}
+				
+					// Period
+				view.filters[0].items[0].id = gis.response.metaData['pe'][0];
+				view.filters[0].items[0].name = gis.response.metaData.names[view.filters[0].items[0].id];
+				
+				// Classification options
 				var options = {
 					indicator: gis.conf.finals.widget.value,
 					method: view.legendSet ? mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS : view.method,
