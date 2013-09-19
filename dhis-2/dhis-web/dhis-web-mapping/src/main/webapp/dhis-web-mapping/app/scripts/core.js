@@ -1032,8 +1032,8 @@ Ext.onReady( function() {
 		compareView = function(view, doExecute) {
 			var src = layer.core.view,
 				viewIds,
-				srcIds,
 				viewDim,
+				srcIds,
 				srcDim;
 
 			if (!src) {
@@ -1306,10 +1306,7 @@ console.log(view);
 			
 			view = view || layer.core.view;
 			
-			addNames = function(response) {				
-				
-				// Period id
-				view.filters[0].items[0].id = gis.response.metaData['pe'][0];
+			addNames = function(response) {
 					
 				// All dimensions
 				var dimensions = [].concat(view.columns || [], view.rows || [], view.filters || []),
@@ -1330,32 +1327,11 @@ console.log(view);
 						}
 					}
 				}
-				
-				// Period
-				//view.filters[0].items[0].id = gis.response.metaData['pe'][0];
-				//view.filters[0].items[0].name = gis.response.metaData.names[view.filters[0].items[0].id];
-				
-				// Detailed data elements
-				//for (var i = 0; i < response.headers.length; i++) {
-					//if (response.headers[i].name === dimConf.category.objectName) {
-						//coIndex = i;
-						//break;
-					//}
-				//}
-				
-				//if (coIndex) {
-					//for (var i = 0; i < view.columns.length; i++) {						
-						//if (view.columns[i].dimension === dimConf.dataElement.objectName) {
-							//for (var j = 0, item; j < view.columns[i].length; j++) {
-								//item = view.columns[i][j];
-								//item.name = gis.response.
-							//items[i].name = gis.response.metaData.names[items[i].id];
-					//}
-					
+								
+				// Period name without changing the id
+				view.filters[0].items[0].name = metaData.names[gis.response.metaData['pe'][0]];
 			};
-					
-				
-
+			
 			fn = function() {
 				
 				addNames(gis.response);
@@ -1395,7 +1371,7 @@ console.log(view);
 						});
 
 						for (var i = 0; i < legends.length; i++) {
-							if (bounds[bounds.length-1] !== legends[i].startValue) {
+							if (bounds[bounds.length - 1] !== legends[i].startValue) {
 								if (bounds.length !== 0) {
 									colors.push(new mapfish.ColorRgb(240,240,240));
 									names.push('');
