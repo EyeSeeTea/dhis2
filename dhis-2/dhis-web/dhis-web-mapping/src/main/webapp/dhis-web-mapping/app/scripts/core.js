@@ -1515,12 +1515,17 @@ Ext.onReady( function() {
 		};
 
 		loadOrganisationUnits = function(view) {
+			var items = view.rows[0].items,
+				idParamString = '';
+			
+			for (var i = 0; i < items.length; i++) {
+				idParamString += 'ids=' + items[i].id;
+				idParamString += i !== items.length - 1 ? '&' : '';
+			}
+			
 			Ext.data.JsonP.request({
-				url: gis.init.contextPath + gis.conf.finals.url.path_module + 'getGeoJsonFacilities.action',
-				params: {
-					parentId: view.parentOrganisationUnit.id,
-					level: view.organisationUnitLevel.id
-				},
+				url: gis.init.contextPath + gis.conf.finals.url.path_module + 'getGeoJsonFacilities.action?' + idParamString,
+				scope: this,
 				disableCaching: false,
 				success: function(r) {
 					var geojson = layer.core.decode(r),

@@ -4942,7 +4942,7 @@ Ext.onReady( function() {
             editable: false,
             valueField: 'id',
             displayField: 'name',
-            emptyText: GIS.i18n.organisationunit_groupset,
+            emptyText: GIS.i18n.select_groupset,
             mode: 'remote',
             forceSelection: true,
             width: gis.conf.layout.widget.item_width,
@@ -5398,87 +5398,39 @@ Ext.onReady( function() {
 		};
 
 		getView = function(config) {
-			var parentArray = parent.getSelectionModel().getSelection(),
-				store = gis.store.organisationUnitLevels,
-				view;
-
-			parentArray = parentArray.length ? parentArray : [{raw: gis.init.rootNodes[0]}];
-
-			view = {
-				organisationUnitGroupSet: {
-					id: groupSet.getValue(),
-					name: groupSet.getRawValue()
-				},
-				organisationUnitLevel: {
-					id: level.getValue(),
-					name: level.getRawValue(),
-					level: store.data.items.length && level.getValue() ? store.getById(level.getValue()).data.level : null
-				},
-				parentOrganisationUnit: {
-					id: parentArray[0].raw.id,
-					name: parentArray[0].raw.text
-				},
-				areaRadius: areaRadius.getValue() ? areaRadius.getNumber() : null,
-				parentLevel: parentArray[0].raw.level,
-				parentGraph: parentArray[0].raw.path,
-				opacity: layer.item.getOpacity()
+			var view = {};
+			
+			view.rows = [treePanel.getDimension()];
+			
+			view.organisationUnitGroupSet = {
+				id: groupSet.getValue()
 			};
-
-			if (config && Ext.isObject(config)) {
-				view = layer.core.extendView(view, config);
-			}
-
+			
+			view.areaRadius = areaRadius.getValue() ? areaRadius.getNumber() : null;
+			
+			view.opacity = layer.item.getOpacity();
+			
 			return validateView(view);
 		};
 
 		validateView = function(view) {
-			if (!view.organisationUnitGroupSet.id || !Ext.isString(view.organisationUnitGroupSet.id)) {
+			if (!(Ext.isObject(view.organisationUnitGroupSet) && Ext.isString(view.organisationUnitGroupSet.id))) {
 				GIS.logg.push([view.organisationUnitGroupSet.id, layer.id + '.organisationUnitGroupSet.id: string']);
 				alert(GIS.i18n.no_groupset_selected);
 				return false;
 			}
-
-			if (!view.organisationUnitLevel.id || !Ext.isString(view.organisationUnitLevel.id)) {
-				GIS.logg.push([view.organisationUnitLevel.id, layer.id + '.organisationUnitLevel.id: string']);
-				alert(GIS.i18n.no_level_selected);
+			
+			if (!(Ext.isArray(view.rows) && view.rows.length && Ext.isString(view.rows[0].dimension) && Ext.isArray(view.rows[0].items) && view.rows[0].items.length)) {
+				GIS.logg.push([view.rows, layer.id + '.rows: dimension array']);
+				alert('No organisation units selected');
 				return false;
 			}
-			if (!view.organisationUnitLevel.name || !Ext.isString(view.organisationUnitLevel.name)) {
-				GIS.logg.push([view.organisationUnitLevel.name, layer.id + '.organisationUnitLevel.name: string']);
-					//alert("validation failed"); //todo
-				return false;
-			}
-			if (!view.organisationUnitLevel.level || !Ext.isNumber(view.organisationUnitLevel.level)) {
-				GIS.logg.push([view.organisationUnitLevel.level, layer.id + '.organisationUnitLevel.level: number']);
-					//alert("validation failed"); //todo
-				return false;
-			}
-			if (!view.parentOrganisationUnit.id || !Ext.isString(view.parentOrganisationUnit.id)) {
-				GIS.logg.push([view.parentOrganisationUnit.id, layer.id + '.parentOrganisationUnit.id: string']);
-				alert(GIS.i18n.no_parent_organisationunit_selected);
-				return false;
-			}
-			if (!view.parentOrganisationUnit.name || !Ext.isString(view.parentOrganisationUnit.name)) {
-				GIS.logg.push([view.parentOrganisationUnit.name, layer.id + '.parentOrganisationUnit.name: string']);
-					//alert("validation failed"); //todo
-				return false;
-			}
-			if (!view.parentLevel || !Ext.isNumber(view.parentLevel)) {
-				GIS.logg.push([view.parentLevel, layer.id + '.parentLevel: number']);
-					//alert("validation failed"); //todo
-				return false;
-			}
-			if (!view.parentGraph || !Ext.isString(view.parentGraph)) {
-				GIS.logg.push([view.parentGraph, layer.id + '.parentGraph: string']);
-					//alert("validation failed"); //todo
-				return false;
-			}
-
-			if (view.parentOrganisationUnit.level > view.organisationUnitLevel.level) {
-				GIS.logg.push([view.parentOrganisationUnit.level, view.organisationUnitLevel.level, layer.id + '.parentOrganisationUnit.level: number <= ' + layer.id + '.organisationUnitLevel.level']);
-				alert(GIS.i18n.level_not_higher_than_parent_level);
-				return false;
-			}
+			
+			//if (!view.parentGraph || !Ext.isString(view.parentGraph)) {
+				//GIS.logg.push([view.parentGraph, layer.id + '.parentGraph: string']);
+					////alert("validation failed"); //todo
+				//return false;
+			//}
 
 			return view;
 		};

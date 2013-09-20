@@ -33,7 +33,6 @@ import static org.hisp.dhis.util.ContextUtils.clearIfNotModified;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -44,7 +43,6 @@ import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.NameableObjectUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.system.filter.OrganisationUnitWithValidCoordinatesFilter;
 import org.hisp.dhis.system.util.FilterUtils;
 
@@ -59,13 +57,6 @@ public class GetGeoJsonAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private OrganisationUnitService organisationUnitService;
-
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
-    }
     
     private AnalyticsService analyticsService;
 
@@ -107,13 +98,6 @@ public class GetGeoJsonAction
     {
         return object;
     }
-    
-    private boolean hasCoordinatesUp;
-
-    public boolean isHasCoordinatesUp()
-    {
-        return hasCoordinatesUp;
-    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -121,7 +105,7 @@ public class GetGeoJsonAction
 
     public String execute()
         throws Exception
-    {        
+    {
         String paramString = "ou:";
         
         for ( String id : ids )
@@ -163,9 +147,6 @@ public class GetGeoJsonAction
                 object.add( unit );
             }
         }
-        
-        //tmp
-        hasCoordinatesUp = false;
 
         return SUCCESS;
     }
