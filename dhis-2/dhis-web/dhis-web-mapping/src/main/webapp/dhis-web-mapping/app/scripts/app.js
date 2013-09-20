@@ -5378,12 +5378,8 @@ Ext.onReady( function() {
             gis.store.groupSets.loadFn( function() {
                 groupSet.setValue(view.organisationUnitGroupSet.id);
             });
-
-			gis.store.organisationUnitLevels.loadFn( function() {
-				level.setValue(view.organisationUnitLevel.id);
-			});
-
-			parent.selectPath('/root' + view.parentGraph);
+//todo
+			treePanel.selectPath('/root' + view.parentGraph);
 
 			// Layer item
 			layer.item.setValue(true, view.opacity);
