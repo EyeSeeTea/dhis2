@@ -130,7 +130,7 @@ function saveVal( dataElementId, optionComboId )
 
     if ( value != '' )
     {
-        if ( type == 'int' || type == 'number' || type == 'positiveNumber' || type == 'negativeNumber' )
+        if ( type == 'int' || type == 'number' || type == 'positiveNumber' || type == 'negativeNumber' || type == 'zeroPositiveInt'  )
         {
             if ( value.length > 255 )
             {
@@ -151,6 +151,10 @@ function saveVal( dataElementId, optionComboId )
             if ( type == 'negativeNumber' && !isNegativeInt( value ) )
             {
                 return alertField( fieldId, i18n_value_must_negative_integer + ': ' + dataElementName );
+            }
+			if ( type == 'zeroPositiveInt' && !isZeroOrPositiveInt( value ) )
+            {
+                return alertField( fieldId, i18n_value_must_zero_or_positive_integer + ': ' + dataElementName );
             }
             if ( isValidZeroNumber( value ) )
             {

@@ -382,6 +382,16 @@ public class SaveSectionFormAction
                                 "\"" + value + "\"" + " " + i18n.getString( "is_invalid_negative_integer" ) );
                         }
                     }
+                    else if ( type.equals( DataElement.VALUE_TYPE_INT)
+                            && numberType.equals( DataElement.VALUE_TYPE_ZERO_OR_POSITIVE_INT ) )
+                        {
+                            if ( !FormUtils.isZeroOrPositiveInteger( value ) )
+                            {
+                                correctType = false;
+								typeViolations.put( key,
+                                "\"" + value + "\"" + " " + i18n.getString( "is_invalid_zero_or_positive_integer" ) );
+                            }
+                        }
                 }
 
                 // nothing entered

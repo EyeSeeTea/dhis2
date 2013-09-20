@@ -522,7 +522,7 @@ function saveValue( dataElementId, dataElementName )
     
     if( field.value != '' )
     {
-        if ( type == 'int' || type == 'number' || type == 'positiveNumber' || type == 'negativeNumber' )
+        if ( type == 'int' || type == 'number' || type == 'positiveNumber' || type == 'negativeNumber'  || type == 'zeroPositiveInt')
         {
             if (  type == 'int' && !isInt( field.value ))
             {
@@ -557,6 +557,15 @@ function saveValue( dataElementId, dataElementName )
             {
                 field.style.backgroundColor = '#ffcc00';
                 window.alert( i18n_value_must_negative_number + '\n\n' + dataElementName );
+                field.select();
+                field.focus();
+
+                return;
+            }
+			else if (  type == 'zeroPositiveInt' && !isZeroOrPositiveInt( field.value ))
+            {
+                field.style.backgroundColor = '#ffcc00';
+                window.alert( i18n_value_must_zero_or_positive_integer + '\n\n' + dataElementName );
                 field.select();
                 field.focus();
 

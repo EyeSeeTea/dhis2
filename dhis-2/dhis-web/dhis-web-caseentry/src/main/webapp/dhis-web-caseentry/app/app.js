@@ -2744,7 +2744,7 @@ Ext.onReady( function() {
 			{
 				return 'float';
 			}
-			if( type == 'int' || type == 'positiveNumber'  || type == 'negativeNumber' )
+			if( type == 'int' || type == 'positiveNumber'  || type == 'negativeNumber' || type == 'zeroPositiveInt' )
 			{
 				return 'numeric';
 			}
@@ -2764,7 +2764,7 @@ Ext.onReady( function() {
 			{
 				return 'datefield';
 			}
-			if( type == 'number' || type == 'int' || type == 'positiveNumber'  || type == 'negativeNumber' )
+			if( type == 'number' || type == 'int' || type == 'positiveNumber'  || type == 'negativeNumber' || type == 'zeroPositiveInt' )
 			{
 				return 'numberfield';
 			}
