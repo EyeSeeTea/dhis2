@@ -707,10 +707,24 @@ Ext.onReady( function() {
 				this.numberField.disable();
 			},
 			initComponent: function() {
-				var that = this;
+				var that = this,
+					padding = 6;
+
+				this.numberField = Ext.create('Ext.form.field.Number', {
+					cls: 'gis-numberfield',
+					fieldStyle: 'border-top-left-radius: 1px; border-bottom-left-radius: 1px',
+					style: 'padding-bottom: 3px',
+					width: 70,
+					height: 21,
+					minValue: 0,
+					maxValue: 9999999,
+					value: this.number,
+					allowBlank: false,
+					disabled: true
+				});
 
 				this.checkbox = Ext.create('Ext.form.field.Checkbox', {
-					width: 191,
+					width: this.width - this.numberField.width - padding,
 					boxLabel: this.text,
 					checked: this.value,
 					disabled: this.disabled,
@@ -727,22 +741,9 @@ Ext.onReady( function() {
 					}
 				});
 
-				this.numberField = Ext.create('Ext.form.field.Number', {
-					cls: 'gis-numberfield',
-					fieldStyle: 'border-top-left-radius: 1px; border-bottom-left-radius: 1px',
-					style: 'padding-bottom: 3px',
-					width: 65,
-					height: 21,
-					minValue: 0,
-					maxValue: 999999,
-					value: this.number,
-					allowBlank: false,
-					disabled: true
-				});
-
 				this.items = [
 					{
-						width: this.checkbox.width + 6,
+						width: this.checkbox.width + padding,
 						items: this.checkbox
 					},
 					{
@@ -4937,10 +4938,11 @@ Ext.onReady( function() {
 		// Components
 
 		groupSet = Ext.create('Ext.form.field.ComboBox', {
-            fieldLabel: GIS.i18n.groupset,
+			cls: 'gis-combo',
             editable: false,
             valueField: 'id',
             displayField: 'name',
+            emptyText: GIS.i18n.organisationunit_groupset,
             mode: 'remote',
             forceSelection: true,
             width: gis.conf.layout.widget.item_width,
@@ -5332,7 +5334,7 @@ Ext.onReady( function() {
 		});
 
 		areaRadius = Ext.create('Ext.ux.panel.CheckTextNumber', {
-			width: 262,
+			width: gis.conf.layout.widget.item_width,
 			text: GIS.i18n.show_circular_area + ':'
 		});
 
@@ -5505,6 +5507,10 @@ Ext.onReady( function() {
 						},
 						groupSet,
 						{
+							html: GIS.i18n.organisation_units,
+							cls: 'gis-form-subtitle'
+						},
+						{
 							layout: 'column',
 							bodyStyle: 'border:0 none',
 							style: 'padding-bottom:2px',
@@ -5525,6 +5531,10 @@ Ext.onReady( function() {
 							]
 						},
 						treePanel,
+						{
+							html: GIS.i18n.surrounding_areas,
+							cls: 'gis-form-subtitle'
+						},
 						areaRadius
 					]
 				}
