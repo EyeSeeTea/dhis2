@@ -1153,8 +1153,6 @@ Ext.onReady( function() {
 		};
 
 		loadOrganisationUnits = function(view) {
-console.log(view);
-
 			var items = view.rows[0].items,
 				idParamString = '';
 			

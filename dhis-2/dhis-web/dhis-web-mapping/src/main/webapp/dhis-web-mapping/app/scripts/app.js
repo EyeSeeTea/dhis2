@@ -653,7 +653,7 @@ Ext.onReady( function() {
 						bodyStyle: 'padding-top: 4px'
 					},
 					{
-						width: 103,
+						width: 104,
 						html: this.text,
 						bodyStyle: 'padding-top: 4px'
 					},
@@ -714,6 +714,7 @@ Ext.onReady( function() {
 					boxLabel: this.text,
 					checked: this.value,
 					disabled: this.disabled,
+					boxLabelCls: 'x-form-cb-label-alt1',
 					listeners: {
 						change: function(chb, value) {
 							if (value) {
@@ -3489,8 +3490,7 @@ Ext.onReady( function() {
 			colorHigh,
 			radiusLow,
 			radiusHigh,
-			//level,
-			//parent,
+			
 			treePanel,
 			userOrganisationUnit,
 			userOrganisationUnitChildren,
@@ -4802,7 +4802,6 @@ Ext.onReady( function() {
 					id: legendSet.getValue()
 				};
 			}
-console.log(view);	
 
 			return gis.api.layout.Layout(view);
 		};
@@ -4888,16 +4887,21 @@ console.log(view);
 
 		// Components
 			groupSet,
-			level,
-			parent,
+			
+			treePanel,
+			userOrganisationUnit,
+			userOrganisationUnitChildren,
+			userOrganisationUnitGrandChildren,
+			organisationUnitLevel,
+			organisationUnitGroup,
+			toolMenu,
+			tool,
+			toolPanel,
+			
 			areaRadius,
 
-			periodTypePanel,
-			methodPanel,
-			lowPanel,
-			highPanel,
-
 		// Functions
+		
 			//createSelectHandlers,
 			reset,
 			setGui,
@@ -4945,54 +4949,386 @@ console.log(view);
             store: gis.store.groupSets
         });
 
-		level = Ext.create('Ext.form.field.ComboBox', {
-			fieldLabel: GIS.i18n.level,
-			editable: false,
-			valueField: 'id',
-			displayField: 'name',
-			mode: 'remote',
-			forceSelection: true,
+		treePanel = Ext.create('Ext.tree.Panel', {
+			cls: 'gis-tree',
+			height: 300,
+			style: 'border-top: 1px solid #ddd; padding-top: 1px',
 			width: gis.conf.layout.widget.item_width,
-			labelWidth: gis.conf.layout.widget.itemlabel_width,
-			style: 'margin-bottom: 4px',
-			store: gis.store.organisationUnitLevels,
-			listeners: {
-				added: function() {
-					this.store.cmp.push(this);
-				}
-			}
-		});
-
-		parent = Ext.create('Ext.tree.Panel', {
-			autoScroll: true,
-			lines: false,
 			rootVisible: false,
-			multiSelect: false,
-			width: gis.conf.layout.widget.item_width,
-			height: 210,
+			autoScroll: true,
+			multiSelect: true,
+			rendered: false,
 			reset: function() {
+				var rootNode = this.getRootNode().findChild('id', gis.init.rootNodes[0].id);
 				this.collapseAll();
-				this.expandPath(gis.init.rootNodes[0].path);
-				this.selectPath(gis.init.rootNodes[0].path);
+				this.expandPath(rootNode.getPath());
+				this.getSelectionModel().select(rootNode);
+			},
+			selectRootIf: function() {
+				if (this.getSelectionModel().getSelection().length < 1) {
+					var node = this.getRootNode().findChild('id', gis.init.rootNodes[0].id);
+					if (this.rendered) {
+						this.getSelectionModel().select(node);
+					}
+					return node;
+				}
+			},
+			numberOfRecords: 0,
+			recordsToSelect: [],
+			multipleSelectIf: function(doUpdate) {
+				if (this.recordsToSelect.length === this.numberOfRecords) {
+					this.getSelectionModel().select(this.recordsToSelect);
+					this.recordsToSelect = [];
+					this.numberOfRecords = 0;
+
+					if (doUpdate) {
+						update();
+					}
+				}
+			},
+			multipleExpand: function(id, path, doUpdate) {
+				this.expandPath('/' + gis.conf.finals.root.id + path, 'id', '/', function() {
+					var record = this.getRootNode().findChild('id', id, true);
+					this.recordsToSelect.push(record);
+					this.multipleSelectIf(doUpdate);
+				}, this);
+			},
+			select: function(url, params) {
+				if (!params) {
+					params = {};
+				}
+				Ext.Ajax.request({
+					url: url,
+					method: 'GET',
+					params: params,
+					scope: this,
+					success: function(r) {
+						var a = Ext.decode(r.responseText).organisationUnits;
+						this.numberOfRecords = a.length;
+						for (var i = 0; i < a.length; i++) {
+							this.multipleExpand(a[i].id, a[i].path);
+						}
+					}
+				});
+			},
+			selectByGroup: function(id) {
+				if (id) {
+					var url = gis.init.contextPath + gis.conf.finals.url.path_module + gis.conf.finals.url.organisationunit_getbygroup,
+						params = {id: id};
+					this.select(url, params);
+				}
+			},
+			selectByLevel: function(level) {
+				if (level) {
+					var url = gis.init.contextPath + gis.conf.finals.url.path_module + gis.conf.finals.url.organisationunit_getbylevel,
+						params = {level: level};
+					this.select(url, params);
+				}
+			},
+			selectByIds: function(ids) {
+				if (ids) {
+					var url = gis.init.contextPath + gis.conf.finals.url.path_module + gis.conf.finals.url.organisationunit_getbyids;
+					Ext.Array.each(ids, function(item) {
+						url = Ext.String.urlAppend(url, 'ids=' + item);
+					});
+					if (!this.rendered) {
+						gis.cmp.dimension.organisationUnit.panel.expand();
+					}
+					this.select(url);
+				}
 			},
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
-					url: gis.init.contextPath + gis.conf.finals.url.path_module + 'getOrganisationUnitChildren.action',
-					noCache: false
+					url: gis.init.contextPath + gis.conf.finals.url.path_module + gis.conf.finals.url.organisationunitchildren_get
 				},
 				root: {
-					id: 'root',
+					id: gis.conf.finals.root.id,
 					expanded: true,
 					children: gis.init.rootNodes
-				},
-					noCache: false
+				}
 			}),
-			listeners: {
+			xable: function(values) {
+				for (var i = 0; i < values.length; i++) {
+					if (!!values[i]) {
+						this.disable();
+						return;
+					}
+				}
+
+				this.enable();
+			},
+			getDimension: function() {
+				var r = treePanel.getSelectionModel().getSelection(),
+					config = {
+						dimension: gis.conf.finals.dimension.organisationUnit.objectName,
+						items: []
+					};
+
+				if (toolMenu.menuValue === 'orgunit') {
+					if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue() || userOrganisationUnitGrandChildren.getValue()) {
+						if (userOrganisationUnit.getValue()) {
+							config.items.push({
+								id: 'USER_ORGUNIT',
+								name: ''
+							});
+						}
+						if (userOrganisationUnitChildren.getValue()) {
+							config.items.push({
+								id: 'USER_ORGUNIT_CHILDREN',
+								name: ''
+							});
+						}
+						if (userOrganisationUnitGrandChildren.getValue()) {
+							config.items.push({
+								id: 'USER_ORGUNIT_GRANDCHILDREN',
+								name: ''
+							});
+						}
+					}
+					else {
+						for (var i = 0; i < r.length; i++) {
+							config.items.push({id: r[i].data.id});
+						}
+					}
+				}
+				else if (toolMenu.menuValue === 'level') {
+					var levels = organisationUnitLevel.getValue();
+
+					for (var i = 0; i < levels.length; i++) {
+						config.items.push({
+							id: 'LEVEL-' + levels[i],
+							name: ''
+						});
+					}
+
+					for (var i = 0; i < r.length; i++) {
+						config.items.push({
+							id: r[i].data.id,
+							name: ''
+						});
+					}
+				}
+				else if (toolMenu.menuValue === 'group') {
+					var groupIds = organisationUnitGroup.getValue();
+
+					for (var i = 0; i < groupIds.length; i++) {
+						config.items.push({
+							id: 'OU_GROUP-' + groupIds[i],
+							name: ''
+						});
+					}
+
+					for (var i = 0; i < r.length; i++) {
+						config.items.push({
+							id: r[i].data.id,
+							name: ''
+						});
+					}
+				}
+
+				return config.items.length ? config : null;
+			},
+            listeners: {
+				render: function() {
+					this.rendered = true;
+				},
 				afterrender: function() {
 					this.getSelectionModel().select(0);
+				},
+				itemcontextmenu: function(v, r, h, i, e) {
+					v.getSelectionModel().select(r, false);
+
+					if (v.menu) {
+						v.menu.destroy();
+					}
+					v.menu = Ext.create('Ext.menu.Menu', {
+						id: 'treepanel-contextmenu',
+						showSeparator: false,
+						shadow: false
+					});
+					if (!r.data.leaf) {
+						v.menu.add({
+							id: 'treepanel-contextmenu-item',
+							text: GIS.i18n.select_all_children,
+							icon: 'images/node-select-child.png',
+							handler: function() {
+								r.expand(false, function() {
+									v.getSelectionModel().select(r.childNodes, true);
+									v.getSelectionModel().deselect(r);
+								});
+							}
+						});
+					}
+					else {
+						return;
+					}
+
+					v.menu.showAt(e.xy);
 				}
 			}
+		});
+
+		userOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
+			columnWidth: 0.30,
+			style: 'padding-top:2px; padding-left:3px; margin-bottom:0',
+			boxLabelCls: 'x-form-cb-label-alt1',
+			boxLabel: 'User OU',
+			labelWidth: gis.conf.layout.form_label_width,
+			handler: function(chb, checked) {
+				treePanel.xable([checked, userOrganisationUnitChildren.getValue(), userOrganisationUnitGrandChildren.getValue()]);
+			}
+		});
+
+		userOrganisationUnitChildren = Ext.create('Ext.form.field.Checkbox', {
+			columnWidth: 0.30,
+			style: 'padding-top:2px; margin-bottom:0',
+			boxLabelCls: 'x-form-cb-label-alt1',
+			boxLabel: 'Children',
+			labelWidth: gis.conf.layout.form_label_width,
+			handler: function(chb, checked) {
+				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitGrandChildren.getValue()]);
+			}
+		});
+
+		userOrganisationUnitGrandChildren = Ext.create('Ext.form.field.Checkbox', {
+			columnWidth: 0.40,
+			style: 'padding-top:2px; margin-bottom:0',
+			boxLabelCls: 'x-form-cb-label-alt1',
+			boxLabel: 'Grand children',
+			labelWidth: gis.conf.layout.form_label_width,
+			handler: function(chb, checked) {
+				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitChildren.getValue()]);
+			}
+		});
+
+		organisationUnitLevel = Ext.create('Ext.form.field.ComboBox', {
+			cls: 'gis-combo',
+			multiSelect: true,
+			style: 'margin-bottom:0',
+			width: gis.conf.layout.widget.item_width - 38,
+			valueField: 'level',
+			displayField: 'name',
+			emptyText: GIS.i18n.select_organisation_unit_levels,
+			editable: false,
+			hidden: true,
+			store: {
+				fields: ['id', 'name', 'level'],
+				data: gis.init.organisationUnitLevels
+			}
+		});
+
+		organisationUnitGroup = Ext.create('Ext.form.field.ComboBox', {
+			cls: 'gis-combo',
+			multiSelect: true,
+			style: 'margin-bottom:0',
+			width: gis.conf.layout.widget.item_width - 38,
+			valueField: 'id',
+			displayField: 'name',
+			emptyText: GIS.i18n.select_organisation_unit_groups,
+			editable: false,
+			hidden: true,
+			store: gis.store.organisationUnitGroup
+		});
+
+		toolMenu = Ext.create('Ext.menu.Menu', {
+			shadow: false,
+			showSeparator: false,
+			menuValue: 'orgunit',
+			clickHandler: function(param) {
+				if (!param) {
+					return;
+				}
+				
+				var items = this.items.items;
+				this.menuValue = param;
+
+				// Menu item icon cls
+				for (var i = 0; i < items.length; i++) {
+					if (items[i].setIconCls) {
+						if (items[i].param === param) {
+							items[i].setIconCls('gis-menu-item-selected');
+						}
+						else {
+							items[i].setIconCls('');
+						}
+					}
+				}
+
+				// Gui
+				if (param === 'orgunit') {
+					userOrganisationUnit.show();
+					userOrganisationUnitChildren.show();
+					userOrganisationUnitGrandChildren.show();
+					organisationUnitLevel.hide();
+					organisationUnitGroup.hide();
+
+					if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue()) {
+						treePanel.disable();
+					}
+				}
+				else if (param === 'level') {
+					userOrganisationUnit.hide();
+					userOrganisationUnitChildren.hide();
+					userOrganisationUnitGrandChildren.hide();
+					organisationUnitLevel.show();
+					organisationUnitGroup.hide();
+					treePanel.enable();
+				}
+				else if (param === 'group') {
+					userOrganisationUnit.hide();
+					userOrganisationUnitChildren.hide();
+					userOrganisationUnitGrandChildren.hide();
+					organisationUnitLevel.hide();
+					organisationUnitGroup.show();
+					treePanel.enable();
+				}
+			},
+			items: [
+				{
+					xtype: 'label',
+					text: 'Selection mode',
+					style: 'padding:7px 5px 5px 7px; font-weight:bold; border:0 none'
+				},
+				{
+					text: GIS.i18n.select_organisation_units + '&nbsp;&nbsp;',
+					param: 'orgunit',
+					iconCls: 'gis-menu-item-selected'
+				},
+				{
+					text: 'Select levels' + '&nbsp;&nbsp;',
+					param: 'level',
+					iconCls: 'gis-menu-item-unselected'
+				},
+				{
+					text: 'Select groups' + '&nbsp;&nbsp;',
+					param: 'group',
+					iconCls: 'gis-menu-item-unselected'
+				}
+			],
+			listeners: {
+				afterrender: function() {
+					this.getEl().addCls('gis-btn-menu');
+				},
+				click: function(menu, item) {
+					this.clickHandler(item.param);
+				}
+			}
+		});
+
+		tool = Ext.create('Ext.button.Button', {
+			cls: 'gis-button-organisationunitselection',
+			iconCls: 'gis-button-icon-gear',
+			width: 36,
+			height: 24,
+			menu: toolMenu
+		});
+
+		toolPanel = Ext.create('Ext.panel.Panel', {
+			width: 36,
+			bodyStyle: 'border:0 none; text-align:right',
+			style: 'margin-right:2px',
+			items: tool
 		});
 
 		areaRadius = Ext.create('Ext.ux.panel.CheckTextNumber', {
@@ -5169,15 +5505,26 @@ console.log(view);
 						},
 						groupSet,
 						{
-							html: GIS.i18n.organisation_unit_level_parent,
-							cls: 'gis-form-subtitle'
+							layout: 'column',
+							bodyStyle: 'border:0 none',
+							style: 'padding-bottom:2px',
+							items: [
+								toolPanel,
+								{
+									width: gis.conf.layout.widget.item_width - 38,
+									layout: 'column',
+									bodyStyle: 'border:0 none',
+									items: [
+										userOrganisationUnit,
+										userOrganisationUnitChildren,
+										userOrganisationUnitGrandChildren,
+										organisationUnitLevel,
+										organisationUnitGroup
+									]
+								}
+							]
 						},
-						level,
-						parent,
-						{
-							html: GIS.i18n.surrounding_areas,
-							cls: 'gis-form-subtitle'
-						},
+						treePanel,
 						areaRadius
 					]
 				}
@@ -5392,7 +5739,7 @@ console.log(view);
 
 				a.push({
 					title: GIS.i18n.layer_stack_transparency,
-					bodyStyle: 'padding: 3px 2px 2px 6px',
+					bodyStyle: 'padding: 3px 2px 2px 5px',
 					items: layersPanel,
 					collapsible: true,
 					animCollapse: false
