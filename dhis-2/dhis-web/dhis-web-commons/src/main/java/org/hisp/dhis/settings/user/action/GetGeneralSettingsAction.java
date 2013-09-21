@@ -28,22 +28,17 @@ package org.hisp.dhis.settings.user.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.user.UserSettingService.DEFAULT_ANALYSIS_DISPLAY_PROPERTY;
+import static org.hisp.dhis.user.UserSettingService.KEY_ANALYSIS_DISPLAY_PROPERTY;
 import static org.hisp.dhis.user.UserSettingService.KEY_MESSAGE_EMAIL_NOTIFICATION;
 import static org.hisp.dhis.user.UserSettingService.KEY_MESSAGE_SMS_NOTIFICATION;
-import static org.hisp.dhis.user.UserSettingService.KEY_ANALYSIS_DISPLAY_PROPERTY;
-import static org.hisp.dhis.user.UserSettingService.DEFAULT_ANALYSIS_DISPLAY_PROPERTY;
-import static org.hisp.dhis.user.UserSettingService.KEY_DISPLAY_OPTION_SET_AS_RADIO_BUTTON;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.SortedMap;
 
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.i18n.locale.LocaleManager;
-import org.hisp.dhis.i18n.resourcebundle.ResourceBundleManager;
 import org.hisp.dhis.setting.StyleManager;
 import org.hisp.dhis.user.UserSettingService;
 
@@ -51,8 +46,6 @@ import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version $ GetAvailableUserSettingsAction.java May 31, 2011 9:31:54 AM $
- * 
  */
 public class GetGeneralSettingsAction
     implements Action
@@ -60,13 +53,6 @@ public class GetGeneralSettingsAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private ResourceBundleManager resourceBundleManager;
-
-    public void setResourceBundleManager( ResourceBundleManager resourceBundleManager )
-    {
-        this.resourceBundleManager = resourceBundleManager;
-    }
 
     private I18nService i18nService;
 
@@ -163,13 +149,6 @@ public class GetGeneralSettingsAction
         return messageSmsNotification;
     }
 
-    private String displayOptionSetAsRadioButton;
-
-    public String getDisplayOptionSetAsRadioButton()
-    {
-        return displayOptionSetAsRadioButton;
-    }
-
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -178,39 +157,18 @@ public class GetGeneralSettingsAction
         throws Exception
     {
         // ---------------------------------------------------------------------
-        // Get available locales
+        // Get available UI locales
         // ---------------------------------------------------------------------
 
-        availableLocales = new ArrayList<Locale>( resourceBundleManager.getAvailableLocales() );
-
-        Collections.sort( availableLocales, new Comparator<Locale>()
-        {
-            public int compare( Locale locale0, Locale locale1 )
-            {
-                return locale0.getDisplayName().compareTo( locale1.getDisplayName() );
-            }
-        } );
+        availableLocales = localeManager.getAvailableLocales();
 
         currentLocale = localeManager.getCurrentLocale();
 
-        if ( !availableLocales.contains( currentLocale ) )
-        {
-            currentLocale = localeManager.getFallbackLocale();
-        }
-
         // ---------------------------------------------------------------------
-        // Get available locales in db
+        // Get available DB locales
         // ---------------------------------------------------------------------
 
-        availableLocalesDb = new ArrayList<Locale>( i18nService.getAvailableLocales() );
-
-        Collections.sort( availableLocalesDb, new Comparator<Locale>()
-        {
-            public int compare( Locale locale0, Locale locale1 )
-            {
-                return locale0.getDisplayName().compareTo( locale1.getDisplayName() );
-            }
-        } );
+        availableLocalesDb = i18nService.getAvailableLocales();
 
         currentLocaleDb = i18nService.getCurrentLocale();
 
@@ -228,9 +186,6 @@ public class GetGeneralSettingsAction
         messageEmailNotification = (Boolean) userSettingService.getUserSetting( KEY_MESSAGE_EMAIL_NOTIFICATION, false );
 
         messageSmsNotification = (Boolean) userSettingService.getUserSetting( KEY_MESSAGE_SMS_NOTIFICATION, false );
-
-        displayOptionSetAsRadioButton = (String) userSettingService.getUserSetting(
-            KEY_DISPLAY_OPTION_SET_AS_RADIO_BUTTON, "" );
 
         return SUCCESS;
     }

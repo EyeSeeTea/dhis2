@@ -35,7 +35,7 @@ import java.util.HashSet;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientReminder;
@@ -50,7 +50,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
  * @author Abyot Asalefew
  */
 public class HibernateProgramInstanceStore
-    extends HibernateGenericStore<ProgramInstance>
+    extends HibernateIdentifiableObjectStore<ProgramInstance>
     implements ProgramInstanceStore
 {
     // -------------------------------------------------------------------------
@@ -84,6 +84,22 @@ public class HibernateProgramInstanceStore
     public Collection<ProgramInstance> get( Collection<Program> programs )
     {
         return getCriteria( Restrictions.in( "program", programs ) ).list();
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public Collection<ProgramInstance> get( Collection<Program> programs, OrganisationUnit organisationUnit )
+    {
+        return getCriteria( Restrictions.in( "program", programs ) ).createAlias( "patient", "patient" )
+            .add( Restrictions.eq( "patient.organisationUnit", organisationUnit ) ).list();
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public Collection<ProgramInstance> get( Collection<Program> programs, OrganisationUnit organisationUnit, int status )
+    {
+        return getCriteria( Restrictions.eq( "status", status ), Restrictions.in( "program", programs ) ).createAlias( "patient", "patient" )
+            .add( Restrictions.eq( "patient.organisationUnit", organisationUnit ) ).list();
     }
 
     @SuppressWarnings( "unchecked" )
@@ -217,9 +233,9 @@ public class HibernateProgramInstanceStore
         sql += " UNION ( " + sendToHealthWorkerSql( dateToCompare ) + " ) ";
 
         sql += " UNION ( " + sendMessageToOrgunitRegisteredSql( dateToCompare ) + " ) ";
-        
+
         sql += " UNION ( " + sendMessageToUsersSql( dateToCompare ) + " ) ";
-        
+
         sql += " UNION ( " + sendMessageToUserGroupsSql( dateToCompare ) + " ) ";
 
         SqlRowSet rs = jdbcTemplate.queryForRowSet( sql );
@@ -268,10 +284,10 @@ public class HibernateProgramInstanceStore
 
             schedulingProgramObjects.add( schedulingProgramObject );
         }
-        
+
         return schedulingProgramObjects;
     }
-    
+
 
     private String sendToPatientSql( String dateToCompare )
     {
@@ -365,7 +381,7 @@ public class HibernateProgramInstanceStore
             + "'        and prm.sendto = "
             + PatientReminder.SEND_TO_ALL_USERS_IN_ORGUGNIT_REGISTERED;
     }
-    
+
     private String sendMessageToUserGroupsSql( String dateToCompare )
     {
         return "select pi.programinstanceid, uif.phonenumber,prm.templatemessage, p.name, org.name as orgunitName ,"

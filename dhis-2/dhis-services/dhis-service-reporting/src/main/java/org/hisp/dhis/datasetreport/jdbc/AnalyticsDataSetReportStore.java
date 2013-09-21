@@ -72,9 +72,9 @@ public class AnalyticsDataSetReportStore
         Set<OrganisationUnitGroup> groups, boolean rawData )
     {
         List<DataElement> dataElements = new ArrayList<DataElement>( dataSet.getDataElements() );
-
+        
         FilterUtils.filter( dataElements, new AggregatableDataElementFilter() );
-
+        
         if ( dataElements.isEmpty() )
         {
             return new HashMap<String, Double>();
@@ -127,6 +127,11 @@ public class AnalyticsDataSetReportStore
             
             for ( DataElementCategory category : categories )
             {
+                if ( category.isDefault() )
+                {
+                    continue;
+                }
+                
                 DataQueryParams params = new DataQueryParams();
                 
                 params.setDataElements( dataElements );

@@ -54,6 +54,17 @@ public class UserSetting
 
     private Serializable value;
 
+    public UserSetting()
+    {
+    }
+    
+    public UserSetting( User user, String name, Serializable value )
+    {
+        this.user = user;
+        this.name = name;
+        this.value = value;
+    }
+    
     // -------------------------------------------------------------------------
     // hashCode and equals
     // -------------------------------------------------------------------------
@@ -91,6 +102,13 @@ public class UserSetting
         result = result * prime + name.hashCode();
 
         return result;
+    }
+
+    public void mergeWith( UserSetting other )
+    {
+        user = other.getUser() != null ? other.getUser() : user;
+        name = other.getName() != null ? other.getName() : name;
+        value = other.getValue() != null ? other.getValue() : value;
     }
 
     // -------------------------------------------------------------------------

@@ -89,6 +89,7 @@
 		class="org.hisp.dhis.patient.hibernate.HibernatePatientIdentifierStore">
 		<property name="clazz" value="org.hisp.dhis.patient.PatientIdentifier" />
 		<property name="sessionFactory" ref="sessionFactory" />
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
 	</bean>
 
 	<bean id="org.hisp.dhis.patient.PatientIdentifierTypeStore"
@@ -208,6 +209,8 @@
 		<property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
 		<property name="patientReminderService" ref="org.hisp.dhis.patient.PatientReminderService" />
 		<property name="messageService" ref="org.hisp.dhis.message.MessageService" />
+		<property name="programStageInstanceService"
+			ref="org.hisp.dhis.program.ProgramStageInstanceService" />
 	</bean>
 
 	<bean id="org.hisp.dhis.program.ProgramStageService" class="org.hisp.dhis.program.DefaultProgramStageService">
@@ -261,6 +264,7 @@
 		<property name="patientIdentifierTypeStore"
 			ref="org.hisp.dhis.patient.PatientIdentifierTypeStore" />
 		<property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
+		<property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
 	</bean>
 
 	<bean id="org.hisp.dhis.patient.PatientAttributeService" class="org.hisp.dhis.patient.DefaultPatientAttributeService">
@@ -333,7 +337,6 @@
 		class="org.hisp.dhis.patientattributevalue.PatientAttributeValueDeletionHandler">
 		<property name="patientAttributeValueService"
 			ref="org.hisp.dhis.patientattributevalue.PatientAttributeValueService" />
-		<property name="patientService" ref="org.hisp.dhis.patient.PatientService" />
 	</bean>
 
 	<bean id="org.hisp.dhis.program.ProgramDeletionHandler" class="org.hisp.dhis.program.ProgramDeletionHandler">
@@ -342,7 +345,6 @@
 
 	<bean id="org.hisp.dhis.patient.PatientDeletionHandler" class="org.hisp.dhis.patient.PatientDeletionHandler">
 		<property name="patientService" ref="org.hisp.dhis.patient.PatientService" />
-		<property name="jdbcTemplate" ref="jdbcTemplate" />
 	</bean>
 
 	<bean id="org.hisp.dhis.program.ProgramStageDataElementDeletionHandler"

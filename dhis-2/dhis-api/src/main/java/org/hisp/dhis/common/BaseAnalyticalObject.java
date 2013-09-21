@@ -214,8 +214,9 @@ public abstract class BaseAnalyticalObject
     }
         
     /**
-     * Assembles a DimensionalObject. Collapses indicators, data elements, data
-     * element operands and data sets into the dx dimension.
+     * Assembles a DimensionalObject based on the persisted properties of this
+     * AnalyticalObject. Collapses indicators, data elements, data element 
+     * operands and data sets into the dx dimension.
      * 
      * Collapses fixed and relative periods into the pe dimension. Collapses
      * fixed and user organisation units into the ou dimension.
@@ -290,9 +291,9 @@ public abstract class BaseAnalyticalObject
                 items.addAll( organisationUnitsAtLevel ); // Must be set externally
             }
             
-            if ( itemOrganisationUnitGroups != null && !itemOrganisationUnitGroups.isEmpty() )
+            if ( itemOrganisationUnitGroups != null && !itemOrganisationUnitGroups.isEmpty() && organisationUnitsInGroups != null )
             {
-                items.addAll( organisationUnitGroups ); // Must be set externally
+                items.addAll( organisationUnitsInGroups ); // Must be set externally
             }
             
             type = DimensionType.ORGANISATIONUNIT;
@@ -362,6 +363,8 @@ public abstract class BaseAnalyticalObject
      * RelativePeriods object is represented by enums (e.g. LAST_MONTH). Merges 
      * fixed and user organisation units into the ou dimension, where user 
      * organisation units properties are represented by enums (e.g. USER_ORG_UNIT).
+     * 
+     * This method is useful when serializing the AnalyticalObject.
      * 
      * @param dimension the dimension identifier.
      * @return a list of DimensionalObjects.

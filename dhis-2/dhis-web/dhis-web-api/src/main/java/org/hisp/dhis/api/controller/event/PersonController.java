@@ -29,14 +29,16 @@ package org.hisp.dhis.api.controller.event;
  */
 
 import org.hisp.dhis.api.controller.WebOptions;
+import org.hisp.dhis.api.controller.exception.NotFoundException;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.common.IdentifiableObjectManager;
-import org.hisp.dhis.dxf2.event.person.Gender;
-import org.hisp.dhis.dxf2.event.person.Person;
-import org.hisp.dhis.dxf2.event.person.PersonService;
-import org.hisp.dhis.dxf2.event.person.Persons;
+import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+import org.hisp.dhis.dxf2.events.person.Gender;
+import org.hisp.dhis.dxf2.events.person.Person;
+import org.hisp.dhis.dxf2.events.person.PersonService;
+import org.hisp.dhis.dxf2.events.person.Persons;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
@@ -135,35 +137,11 @@ public class PersonController
         return "persons";
     }
 
-    private Program getProgram( String programUid )
-    {
-        Program program = manager.get( Program.class, programUid );
-
-        if ( program == null )
-        {
-            throw new HttpClientErrorException( HttpStatus.BAD_REQUEST, "program is not valid uid." );
-        }
-
-        return program;
-    }
-
-    private OrganisationUnit getOrganisationUnit( String orgUnitUid )
-    {
-        OrganisationUnit organisationUnit = manager.get( OrganisationUnit.class, orgUnitUid );
-
-        if ( organisationUnit == null )
-        {
-            throw new HttpClientErrorException( HttpStatus.BAD_REQUEST, "orgUnit is not a valid uid." );
-        }
-
-        return organisationUnit;
-    }
-
     @RequestMapping( value = "/{id}", method = RequestMethod.GET )
-    public String getPerson( @PathVariable String id, @RequestParam Map<String, String> parameters, Model model )
+    public String getPerson( @PathVariable String id, @RequestParam Map<String, String> parameters, Model model ) throws NotFoundException
     {
         WebOptions options = new WebOptions( parameters );
-        Person person = personService.getPerson( id );
+        Person person = getPerson( id );
 
         model.addAttribute( "model", person );
         model.addAttribute( "viewClass", options.getViewClass( "detailed" ) );
@@ -189,7 +167,12 @@ public class PersonController
         {
             response.setStatus( HttpServletResponse.SC_CREATED );
             ImportSummary importSummary = importSummaries.getImportSummaries().get( 0 );
-            response.setHeader( "Location", getResourcePath( request, importSummary ) );
+
+            if ( !importSummary.getStatus().equals( ImportStatus.ERROR ) )
+            {
+                response.setHeader( "Location", getResourcePath( request, importSummary ) );
+            }
+
             JacksonUtils.toXml( response.getOutputStream(), importSummary );
         }
     }
@@ -208,14 +191,14 @@ public class PersonController
         {
             response.setStatus( HttpServletResponse.SC_CREATED );
             ImportSummary importSummary = importSummaries.getImportSummaries().get( 0 );
-            response.setHeader( "Location", getResourcePath( request, importSummary ) );
+
+            if ( !importSummary.getStatus().equals( ImportStatus.ERROR ) )
+            {
+                response.setHeader( "Location", getResourcePath( request, importSummary ) );
+            }
+
             JacksonUtils.toJson( response.getOutputStream(), importSummary );
         }
-    }
-
-    public String getResourcePath( HttpServletRequest request, ImportSummary importSummary )
-    {
-        return ContextUtils.getContextPath( request ) + "/api/" + "persons" + "/" + importSummary.getReference();
     }
 
     // -------------------------------------------------------------------------
@@ -244,9 +227,53 @@ public class PersonController
 
     @RequestMapping( value = "/{id}", method = RequestMethod.DELETE )
     @ResponseStatus( value = HttpStatus.NO_CONTENT )
-    public void deletePerson( @PathVariable String id )
+    public void deletePerson( @PathVariable String id ) throws NotFoundException
+    {
+        Person person = getPerson( id );
+        personService.deletePerson( person );
+    }
+
+    // -------------------------------------------------------------------------
+    // HELPERS
+    // -------------------------------------------------------------------------
+
+    private Person getPerson( String id ) throws NotFoundException
     {
         Person person = personService.getPerson( id );
-        personService.deletePerson( person );
+
+        if ( person == null )
+        {
+            throw new NotFoundException( "Person", id );
+        }
+        return person;
+    }
+
+    private Program getProgram( String id ) throws NotFoundException
+    {
+        Program program = manager.get( Program.class, id );
+
+        if ( program == null )
+        {
+            throw new NotFoundException( "Person", id );
+        }
+
+        return program;
+    }
+
+    private String getResourcePath( HttpServletRequest request, ImportSummary importSummary )
+    {
+        return ContextUtils.getContextPath( request ) + "/api/" + "persons" + "/" + importSummary.getReference();
+    }
+
+    private OrganisationUnit getOrganisationUnit( String orgUnitUid )
+    {
+        OrganisationUnit organisationUnit = manager.get( OrganisationUnit.class, orgUnitUid );
+
+        if ( organisationUnit == null )
+        {
+            throw new HttpClientErrorException( HttpStatus.BAD_REQUEST, "orgUnit is not a valid uid." );
+        }
+
+        return organisationUnit;
     }
 }

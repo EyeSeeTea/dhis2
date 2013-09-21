@@ -28,19 +28,19 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Date;
-import java.util.Collection;
-
-import org.hisp.dhis.common.GenericStore;
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
+
+import java.util.Collection;
+import java.util.Date;
 
 /**
  * @author Abyot Asalefew
  * @version $Id$
  */
 public interface ProgramInstanceStore
-    extends GenericStore<ProgramInstance>
+    extends GenericIdentifiableObjectStore<ProgramInstance>
 {
     String ID = ProgramInstanceStore.class.getName();
 
@@ -49,6 +49,10 @@ public interface ProgramInstanceStore
     Collection<ProgramInstance> get( Program program );
 
     Collection<ProgramInstance> get( Collection<Program> programs );
+
+    Collection<ProgramInstance> get( Collection<Program> programs, OrganisationUnit organisationUnit );
+
+    Collection<ProgramInstance> get( Collection<Program> programs, OrganisationUnit organisationUnit, int status );
 
     Collection<ProgramInstance> get( Program program, Integer status );
 
@@ -72,15 +76,15 @@ public interface ProgramInstanceStore
         int min, int max );
 
     int count( Program program, OrganisationUnit organisationUnit );
-    
+
     int count( Program program, Collection<Integer> orgunitIds, Date startDate, Date endDate );
-    
+
     void removeProgramEnrollment( ProgramInstance programInstance );
-    
+
     int countByStatus( Integer status, Program program, Collection<Integer> orgunitIds, Date startDate, Date endDate );
-    
+
     Collection<ProgramInstance> getByStatus( Integer status, Program program, Collection<Integer> orgunitIds,
         Date startDate, Date endDate );
-    
+
     Collection<SchedulingProgramObject> getSendMesssageEvents( String dateToCompare );
 }

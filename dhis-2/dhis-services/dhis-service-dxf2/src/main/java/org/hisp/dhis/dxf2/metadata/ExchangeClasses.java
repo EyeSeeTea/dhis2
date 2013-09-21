@@ -65,6 +65,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.sqlview.SqlView;
@@ -159,6 +160,7 @@ final public class ExchangeClasses
 
         allExportClasses.put( Program.class, "programs" );
         allExportClasses.put( ProgramStage.class, "programStages" );
+        allExportClasses.put( RelationshipType.class, "relationshipTypes" );
 
         allExportClasses.put( BaseDimensionalObject.class, "dimensions" );
 
@@ -182,8 +184,10 @@ final public class ExchangeClasses
         // tracker types are not enabled for meta-data import-export yet
         exportClasses.remove( Program.class );
         exportClasses.remove( ProgramStage.class );
+        exportClasses.remove( RelationshipType.class );
         importClasses.remove( Program.class );
         importClasses.remove( ProgramStage.class );
+        importClasses.remove( RelationshipType.class );
 
         // special class which is created on demand in association with other objects
         exportClasses.remove( DataElementOperand.class );

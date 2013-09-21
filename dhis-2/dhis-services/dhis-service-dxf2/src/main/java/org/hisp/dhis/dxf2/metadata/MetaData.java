@@ -69,6 +69,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.sqlview.SqlView;
@@ -119,7 +120,7 @@ public class MetaData
     private List<DataElementCategoryOptionCombo> categoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>();
 
     private List<Dashboard> dashboards = new ArrayList<Dashboard>();
-    
+
     private List<DataElement> dataElements = new ArrayList<DataElement>();
 
     private List<DataElementGroup> dataElementGroups = new ArrayList<DataElementGroup>();
@@ -127,7 +128,7 @@ public class MetaData
     private List<DataElementGroupSet> dataElementGroupSets = new ArrayList<DataElementGroupSet>();
 
     private List<DimensionalObject> dimensions = new ArrayList<DimensionalObject>();
-    
+
     private List<Indicator> indicators = new ArrayList<Indicator>();
 
     private List<IndicatorGroup> indicatorGroups = new ArrayList<IndicatorGroup>();
@@ -175,6 +176,8 @@ public class MetaData
     private List<Program> programs = new ArrayList<Program>();
 
     private List<ProgramStage> programStages = new ArrayList<ProgramStage>();
+
+    private List<RelationshipType> relationshipTypes = new ArrayList<RelationshipType>();
 
     //@author Ovidiu Rosu <rosu.ovi@gmail.com>
     private List<Filter> filters = new ArrayList<Filter>();
@@ -739,6 +742,19 @@ public class MetaData
     public void setProgramStages( List<ProgramStage> programStages )
     {
         this.programStages = programStages;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "relationshipTypes", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "relationshipType", namespace = DxfNamespaces.DXF_2_0 )
+    public List<RelationshipType> getRelationshipTypes()
+    {
+        return relationshipTypes;
+    }
+
+    public void setRelationshipTypes( List<RelationshipType> relationshipTypes )
+    {
+        this.relationshipTypes = relationshipTypes;
     }
 
     @JsonProperty

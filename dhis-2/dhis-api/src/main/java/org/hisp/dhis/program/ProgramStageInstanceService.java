@@ -73,6 +73,9 @@ public interface ProgramStageInstanceService
 
     Collection<ProgramStageInstance> getProgramStageInstances( Collection<ProgramInstance> programInstances );
 
+    Collection<ProgramStageInstance> getProgramStageInstances( Collection<ProgramInstance> programInstances,
+        boolean completed );
+
     Collection<ProgramStageInstance> getProgramStageInstances( Date dueDate );
 
     Collection<ProgramStageInstance> getProgramStageInstances( Date dueDate, Boolean completed );
@@ -146,9 +149,8 @@ public interface ProgramStageInstanceService
 
     Collection<OutboundSms> sendMessages( ProgramStageInstance programStageInstance, int status, I18nFormat format );
 
-    Collection<ProgramStageInstance> getProgramStageInstance( Patient patient );
-
     Collection<MessageConversation> sendMessageConversations( ProgramStageInstance programStageInstance, int status,
         I18nFormat format );
 
+    void completeProgramStageInstance( ProgramStageInstance programStageInstance, I18nFormat format );
 }

@@ -69,8 +69,6 @@ public interface PatientStore
 
     int countGetPatientsByOrgUnitProgram( OrganisationUnit organisationUnit, Program program );
 
-    void removeErollmentPrograms( Program program );
-
     int countSearch( List<String> searchKeys, Collection<OrganisationUnit> orgunit, Boolean followup );
 
     Collection<Patient> getByPhoneNumber( String phoneNumber, Integer min, Integer max );
@@ -93,9 +91,9 @@ public interface PatientStore
         Collection<PatientAttribute> patientAttributes, Collection<PatientIdentifierType> identifierTypes, Integer min,
         Integer max );
 
-    Collection<Patient> getByOrgUnitProgramGender( OrganisationUnit organisationUnit, Program program, String gender, int min, int max );
+    Collection<Patient> getByOrgUnitProgramGender( OrganisationUnit organisationUnit, Program program, String gender, Integer min, Integer max );
 
-    Collection<Patient> getByProgram( Program program, int min, int max );
+    Collection<Patient> getByProgram( Program program, Integer min, Integer max );
 
-    Collection<Patient> getByProgram( Program program, String gender, int min, int max );
+    Collection<Patient> getByProgram( Program program, String gender, Integer min, Integer max );
 }

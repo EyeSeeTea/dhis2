@@ -28,7 +28,7 @@ package org.hisp.dhis.i18n.resourcebundle;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -47,5 +47,5 @@ public interface ResourceBundleManager
 
     ResourceBundle getGlobalResourceBundle( Locale locale ) throws ResourceBundleManagerException;
 
-    Collection<Locale> getAvailableLocales() throws ResourceBundleManagerException;
+    List<Locale> getAvailableLocales() throws ResourceBundleManagerException;
 }

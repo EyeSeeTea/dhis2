@@ -29,25 +29,45 @@ package org.hisp.dhis.patient.hibernate;
  */
 
 import java.util.Collection;
-import java.util.Set;
+import java.util.Date;
 
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientIdentifier;
 import org.hisp.dhis.patient.PatientIdentifierStore;
 import org.hisp.dhis.patient.PatientIdentifierType;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.system.util.DateUtils;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * @author Abyot Asalefew Gizaw
  * @version $Id$
  */
 public class HibernatePatientIdentifierStore
-    extends HibernateGenericStore<PatientIdentifier>
+    extends HibernateIdentifiableObjectStore<PatientIdentifier>
     implements PatientIdentifierStore
 {
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
+    private JdbcTemplate jdbcTemplate;
+
+    public void setJdbcTemplate( JdbcTemplate jdbcTemplate )
+    {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    // -------------------------------------------------------------------------
+    // Implementation methods
+    // -------------------------------------------------------------------------
+
     public PatientIdentifier get( Patient patient )
     {
         return (PatientIdentifier) getCriteria( Restrictions.eq( "patient", patient ) ).uniqueResult();
@@ -68,8 +88,8 @@ public class HibernatePatientIdentifierStore
     @SuppressWarnings( "unchecked" )
     public Collection<PatientIdentifier> getAll( PatientIdentifierType type, String identifier )
     {
-        return getCriteria( Restrictions.eq( "identifierType", type ),
-            Restrictions.eq( "identifier", identifier ) ).list();
+        return getCriteria( Restrictions.eq( "identifierType", type ), Restrictions.eq( "identifier", identifier ) )
+            .list();
     }
 
     @SuppressWarnings( "unchecked" )
@@ -130,10 +150,31 @@ public class HibernatePatientIdentifierStore
             .list();
     }
 
-    public boolean checkDuplicateIdentifier( String identifier )
+    @SuppressWarnings( "deprecation" )
+    public boolean checkDuplicateIdentifier( PatientIdentifierType patientIdentifierType, String identifier,
+        OrganisationUnit orgunit, Program program, PeriodType periodType )
     {
-        Number rs = (Number) getCriteria( Restrictions.ilike( "identifier", identifier ) ).setProjection(
-            Projections.rowCount() ).uniqueResult();
-        return ( rs != null & rs.intValue() > 0 )? true: false;
+        String sql = "select count(*) from patientidentifier pi inner join patient p on pi.patientid=p.patientid "
+            + "inner join programinstance pis on pis.patientid=pi.patientid where pi.patientidentifiertypeid="
+            + patientIdentifierType.getId() + " and pi.identifier='" + identifier + "' ";
+        if ( orgunit != null )
+        {
+            sql += " and p.organisationunitid=" + orgunit.getId();
+        }
+
+        if ( program != null )
+        {
+            sql += " and pis.programid=" + program.getId();
+        }
+
+        if ( periodType != null )
+        {
+            Date currentDate = new Date();
+            Period period = periodType.createPeriod( currentDate );
+            sql += " and pis.enrollmentdate >='" + period.getStartDateString() + "' and pis.enrollmentdate <='"
+                + DateUtils.getMediumDateString( period.getEndDate() )  + "'";
+        }
+
+        return jdbcTemplate.queryForInt( sql ) == 0 ? false : true;
     }
 }
