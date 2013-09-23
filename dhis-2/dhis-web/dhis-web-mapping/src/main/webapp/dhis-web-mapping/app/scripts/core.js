@@ -861,7 +861,11 @@ Ext.onReady( function() {
 			loader;
 
 		compareView = function(view, doExecute) {
-			var src = layer.core.view;
+			var src = layer.core.view,
+				viewIds,
+				viewDim,
+				srcIds,
+				srcDim;
 
 			if (!src) {
 				if (doExecute) {
@@ -869,15 +873,30 @@ Ext.onReady( function() {
 				}
 				return gis.conf.finals.widget.loadtype_organisationunit;
 			}
-
-			if (view.organisationUnitLevel.id !== src.organisationUnitLevel.id) {
-				if (doExecute) {
-					loadOrganisationUnits(view);
+			
+			viewIds = [];
+			viewDim = view.rows[0];
+			srcIds = [];
+			srcDim = src.rows[0];
+			
+			// organisation units
+			if (viewDim.items.length === srcDim.items.length) {					
+				for (var i = 0; i < viewDim.items.length; i++) {
+					viewIds.push(viewDim.items[i].id);
 				}
-				return gis.conf.finals.widget.loadtype_organisationunit;
+				
+				for (var i = 0; i < srcDim.items.length; i++) {
+					srcIds.push(srcDim.items[i].id);
+				}
+				
+				if (Ext.Array.difference(viewIds, srcIds).length !== 0) {
+					if (doExecute) {
+						loadOrganisationUnits(view);
+					}
+					return gis.conf.finals.widget.loadtype_organisationunit;
+				}
 			}
-
-			if (view.parentOrganisationUnit.id !== src.parentOrganisationUnit.id) {
+			else {
 				if (doExecute) {
 					loadOrganisationUnits(view);
 				}
@@ -888,21 +907,22 @@ Ext.onReady( function() {
 		};
 
 		loadOrganisationUnits = function(view) {
+			var items = view.rows[0].items,
+				idParamString = '';
+			
+			for (var i = 0; i < items.length; i++) {
+				idParamString += 'ids=' + items[i].id;
+				idParamString += i !== items.length - 1 ? '&' : '';
+			}
+			
 			Ext.data.JsonP.request({
-				url: gis.init.contextPath + gis.conf.finals.url.path_module + 'getGeoJson.action',
-				params: {
-					parentId: view.parentOrganisationUnit.id,
-					level: view.organisationUnitLevel.id
-				},
+				url: gis.init.contextPath + gis.conf.finals.url.path_module + 'getGeoJson.action?' + idParamString,
 				scope: this,
 				disableCaching: false,
 				success: function(r) {
 					var geojson = gis.util.geojson.decode(r),
-						format = new OpenLayers.Format.GeoJSON(),
-						f = format.read(geojson);
-						
-						
-						var features = gis.util.map.getTransformedFeatureArray(f);
+						format = new OpenLayers.Format.GeoJSON(),						
+						features = gis.util.map.getTransformedFeatureArray(format.read(geojson));
 
 					if (!Ext.isArray(features)) {
 						olmap.mask.hide();
