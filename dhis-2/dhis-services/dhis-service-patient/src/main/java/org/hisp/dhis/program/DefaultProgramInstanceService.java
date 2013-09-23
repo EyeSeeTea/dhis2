@@ -190,6 +190,18 @@ public class DefaultProgramInstanceService
         return programInstanceStore.get( programs );
     }
 
+    public Collection<ProgramInstance> getProgramInstances( Collection<Program> programs,
+        OrganisationUnit organisationUnit )
+    {
+        return programInstanceStore.get( programs, organisationUnit );
+    }
+
+    public Collection<ProgramInstance> getProgramInstances( Collection<Program> programs,
+        OrganisationUnit organisationUnit, int status )
+    {
+        return programInstanceStore.get( programs, organisationUnit, status );
+    }
+
     public Collection<ProgramInstance> getProgramInstances( Collection<Program> programs, Integer status )
     {
         return programInstanceStore.get( programs, status );
@@ -606,8 +618,8 @@ public class DefaultProgramInstanceService
     }
 
     @Override
-    public ProgramInstance enrollmentPatient( Patient patient, Program program, Date enrollmentDate,
-        Date dateOfIncident, OrganisationUnit orgunit, I18nFormat format )
+    public ProgramInstance enrollPatient( Patient patient, Program program, Date enrollmentDate, Date dateOfIncident,
+        OrganisationUnit organisationUnit, I18nFormat format )
     {
         if ( enrollmentDate == null )
         {
@@ -651,8 +663,12 @@ public class DefaultProgramInstanceService
             if ( programStage.getAutoGenerateEvent() )
             {
                 ProgramStageInstance programStageInstance = generateEvent( programInstance, programStage,
-                    enrollmentDate, dateOfIncident, orgunit );
-                programStageInstanceService.addProgramStageInstance( programStageInstance );
+                    enrollmentDate, dateOfIncident, organisationUnit );
+
+                if ( programStageInstance != null )
+                {
+                    programStageInstanceService.addProgramStageInstance( programStageInstance );
+                }
             }
         }
 
@@ -752,6 +768,7 @@ public class DefaultProgramInstanceService
         Date currentDate = today.getTime();
 
         programInstance.setEndDate( currentDate );
+        programInstance.setStatus( ProgramInstance.STATUS_CANCELLED );
         updateProgramInstance( programInstance );
 
         // ---------------------------------------------------------------------

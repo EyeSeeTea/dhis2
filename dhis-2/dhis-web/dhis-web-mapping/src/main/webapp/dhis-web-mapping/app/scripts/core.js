@@ -1572,15 +1572,14 @@ Ext.onReady( function() {
 		loadLegend = function(view) {
 			view = view || layer.core.view;
 
-			var store = gis.store.groupsByGroupSet,
-				options;
+			var store = gis.store.groupsByGroupSet;
 
 			store.proxy.url = gis.init.contextPath + gis.conf.finals.url.path_module + 'getOrganisationUnitGroupsByGroupSet.action?id=' + view.organisationUnitGroupSet.id;
 			store.load({
 				scope: this,
 				callback: function() {
-					options = {
-						indicator: view.organisationUnitGroupSet.name
+					var options = {
+						indicator: view.organisationUnitGroupSet.id
 					};
 
 					layer.core.view = view;
@@ -2079,19 +2078,19 @@ Ext.onReady( function() {
 
 							// Indicators as filter
 							if (layout.filters[i].dimension === dimConf.indicator.objectName) {
-								util.message.alert(PT.i18n.indicators_cannot_be_specified_as_filter || 'Indicators cannot be specified as filter');
+								util.message.alert(GIS.i18n.indicators_cannot_be_specified_as_filter || 'Indicators cannot be specified as filter');
 								return;
 							}
 
 							// Categories as filter
 							if (layout.filters[i].dimension === dimConf.category.objectName) {
-								util.message.alert(PT.i18n.categories_cannot_be_specified_as_filter || 'Categories cannot be specified as filter');
+								util.message.alert(GIS.i18n.categories_cannot_be_specified_as_filter || 'Categories cannot be specified as filter');
 								return;
 							}
 
 							// Data sets as filter
 							if (layout.filters[i].dimension === dimConf.dataSet.objectName) {
-								util.message.alert(PT.i18n.data_sets_cannot_be_specified_as_filter || 'Data sets cannot be specified as filter');
+								util.message.alert(GIS.i18n.data_sets_cannot_be_specified_as_filter || 'Data sets cannot be specified as filter');
 								return;
 							}
 						}
@@ -2125,7 +2124,7 @@ Ext.onReady( function() {
 					//if (Ext.Array.contains(dimensionNames, dimConf.data.dimensionName) && store.dataSetSelected.data.length) {
 						//for (var i = 0; i < init.degs.length; i++) {
 							//if (Ext.Array.contains(dimensionNames, init.degs[i].id)) {
-								//alert(PT.i18n.data_element_group_sets_cannot_be_specified_together_with_data_sets);
+								//alert(GIS.i18n.data_element_group_sets_cannot_be_specified_together_with_data_sets);
 								//return;
 							//}
 						//}
@@ -2196,7 +2195,7 @@ Ext.onReady( function() {
 
 					// At least one period
 					if (!Ext.Array.contains(objectNames, dimConf.period.objectName)) {
-						alert(PT.i18n.at_least_one_period_must_be_specified_as_column_row_or_filter);
+						alert(GIS.i18n.at_least_one_period_must_be_specified_as_column_row_or_filter);
 						return;
 					}
 

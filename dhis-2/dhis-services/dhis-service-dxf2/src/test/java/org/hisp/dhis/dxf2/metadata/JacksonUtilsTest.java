@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf.metadata;
+package org.hisp.dhis.dxf2.metadata;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -30,7 +30,6 @@ package org.hisp.dhis.dxf.metadata;
 
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
-import org.hisp.dhis.dxf2.metadata.MetaData;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.junit.Test;
 

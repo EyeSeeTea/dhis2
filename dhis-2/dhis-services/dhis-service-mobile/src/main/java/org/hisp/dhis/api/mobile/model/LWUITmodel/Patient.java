@@ -69,10 +69,6 @@ public class Patient
 
     private List<Program> programs;
 
-    //private List<Integer> programsID;
-
-    //private Map<Integer, String> patientDataValues;
-
     private List<Program> enrollmentPrograms;
 
     private List<Relationship> relationships;
@@ -108,26 +104,6 @@ public class Patient
     {
         this.programs = programs;
     }
-
-    /*public List<Integer> getProgramsID()
-    {
-        return programsID;
-    }
-
-    public void setProgramsID( List<Integer> programsID )
-    {
-        this.programsID = programsID;
-    }
-    
-    public Map<Integer, String> getPatientDataValues()
-    {
-        return patientDataValues;
-    }
-
-    public void setPatientDataValues( Map<Integer, String> patientDataValues )
-    {
-        this.patientDataValues = patientDataValues;
-    }*/
 
     public List<Relationship> getRelationships()
     {
@@ -291,8 +267,16 @@ public class Patient
         DataOutputStream dout = new DataOutputStream( bout );
 
         dout.writeInt( this.getId() );
-        dout.writeUTF( this.getName() );
-
+        
+        if ( name != null )
+        {
+            dout.writeBoolean( true );
+            dout.writeUTF( name );
+        }
+        else
+        {
+            dout.writeBoolean( false );
+        }
         if ( organisationUnitName != null )
         {
             dout.writeBoolean( true );
@@ -332,8 +316,6 @@ public class Patient
         {
             dout.writeBoolean( false );
         }
-        // doesn't transfer blood group to client
-        dout.writeBoolean( false );
 
         if ( registrationDate != null )
         {
@@ -389,20 +371,6 @@ public class Patient
         {
             each.serialize( dout );
         }
-        
-        /*dout.writeInt( programsID.size() );
-        for ( Integer each : programsID )
-        {
-            dout.writeInt( each );
-        }
-
-        // Write Patient Data Value
-        dout.writeInt( patientDataValues.keySet().size() );
-        for ( Integer key : patientDataValues.keySet() )
-        {
-            dout.writeInt( key );
-            dout.writeUTF( patientDataValues.get( key ) );
-        }*/
 
         // Write Relationships
         dout.writeInt( relationships.size() );
@@ -485,9 +453,6 @@ public class Patient
         {
             this.setBirthDate( null );
         }
-
-        // doesn't transfer blood group to client
-        din.readBoolean();
 
         // Registration Date
         if ( din.readBoolean() )

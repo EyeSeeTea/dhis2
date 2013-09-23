@@ -93,6 +93,11 @@ function showProgramStageDetails( programStageId )
 		var allowGenerateNextVisit = ( json.programStage.allowGenerateNextVisit == 'true') ? i18n_yes : i18n_no;
 		setInnerHTML( 'allowGenerateNextVisitField', allowGenerateNextVisit );   	
 		
+		var openAfterEnrollment = ( json.programStage.openAfterEnrollment == 'true') ? i18n_yes : i18n_no;
+		setInnerHTML( 'openAfterEnrollmentField', openAfterEnrollment );   	
+		
+		setInnerHTML( 'reportDateToUseField', json.programStage.reportDateToUse );   	
+		
 		var templateMessage = "";
 		for(var i in json.programStage.patientReminders){
 			var index = eval(i) + 1;
@@ -451,3 +456,27 @@ function setRealDays(rowId)
 	daysAllowedSendMessage.attr("realvalue", time * eval(daysAllowedSendMessage).val());
 	var aasdf= 0;
 }
+
+function openAfterEnrollmentOnchange()
+{
+	if(byId('openAfterEnrollment').checked){
+		enable('reportDateToUse');
+	}
+	else{
+		disable('reportDateToUse');
+	}
+}
+
+function autoGenerateEventOnChange(openAfterEnrollment)
+{
+	if(openAfterEnrollment==''){
+		if( byId('autoGenerateEvent').checked ){
+			enable('openAfterEnrollment');
+		}
+		else{
+			disable('openAfterEnrollment');
+			disable('reportDateToUse');
+		}
+	}
+}
+

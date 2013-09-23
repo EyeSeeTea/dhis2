@@ -4494,7 +4494,7 @@ Ext.onReady( function() {
 							items[i].setIconCls('gis-menu-item-selected');
 						}
 						else {
-							items[i].setIconCls('');
+							items[i].setIconCls('gis-menu-item-unselected');
 						}
 					}
 				}
@@ -5252,7 +5252,7 @@ Ext.onReady( function() {
 							items[i].setIconCls('gis-menu-item-selected');
 						}
 						else {
-							items[i].setIconCls('');
+							items[i].setIconCls('gis-menu-item-unselected');
 						}
 					}
 				}
@@ -5704,6 +5704,19 @@ Ext.onReady( function() {
 				});
 
 				a.push({
+					title: GIS.i18n.facility_layer_legend,
+					bodyStyle: 'padding: 4px 6px 6px; border: 0 none',
+					collapsible: true,
+					collapsed: true,
+					animCollapse: false,
+					listeners: {
+						added: function() {
+							gis.layer.facility.legendPanel = this;
+						}
+					}
+				});
+
+				a.push({
 					title: GIS.i18n.thematic_layer_1_legend,
 					bodyStyle: 'padding: 4px 6px 6px; border: 0 none',
 					collapsible: true,
@@ -5751,19 +5764,6 @@ Ext.onReady( function() {
 					listeners: {
 						added: function() {
 							gis.layer.thematic4.legendPanel = this;
-						}
-					}
-				});
-
-				a.push({
-					title: GIS.i18n.facility_layer_legend,
-					bodyStyle: 'padding: 4px 6px 6px; border: 0 none',
-					collapsible: true,
-					collapsed: true,
-					animCollapse: false,
-					listeners: {
-						added: function() {
-							gis.layer.facility.legendPanel = this;
 						}
 					}
 				});

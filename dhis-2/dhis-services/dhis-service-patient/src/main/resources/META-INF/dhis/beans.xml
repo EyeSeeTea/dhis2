@@ -337,7 +337,6 @@
 		class="org.hisp.dhis.patientattributevalue.PatientAttributeValueDeletionHandler">
 		<property name="patientAttributeValueService"
 			ref="org.hisp.dhis.patientattributevalue.PatientAttributeValueService" />
-		<property name="patientService" ref="org.hisp.dhis.patient.PatientService" />
 	</bean>
 
 	<bean id="org.hisp.dhis.program.ProgramDeletionHandler" class="org.hisp.dhis.program.ProgramDeletionHandler">
@@ -346,7 +345,6 @@
 
 	<bean id="org.hisp.dhis.patient.PatientDeletionHandler" class="org.hisp.dhis.patient.PatientDeletionHandler">
 		<property name="patientService" ref="org.hisp.dhis.patient.PatientService" />
-		<property name="jdbcTemplate" ref="jdbcTemplate" />
 	</bean>
 
 	<bean id="org.hisp.dhis.program.ProgramStageDataElementDeletionHandler"

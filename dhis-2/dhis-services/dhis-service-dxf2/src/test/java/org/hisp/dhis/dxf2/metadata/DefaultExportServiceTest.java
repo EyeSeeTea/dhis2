@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf.metadata;
+package org.hisp.dhis.dxf2.metadata;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,9 +28,7 @@ package org.hisp.dhis.dxf.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.IOException;
-import java.util.HashMap;
-import javax.xml.xpath.XPathExpressionException;
+import org.hisp.dhis.DhisConvenienceTest;
 import org.hisp.dhis.DhisTest;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
@@ -41,9 +39,6 @@ import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.dxf2.datavalueset.DataValueSetService;
-import org.hisp.dhis.dxf2.metadata.ExportService;
-import org.hisp.dhis.dxf2.metadata.MetaData;
-import org.hisp.dhis.dxf2.metadata.Options;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -52,10 +47,14 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.xml.xpath.XPathExpressionException;
+import java.io.IOException;
+import java.util.HashMap;
+
 import static org.junit.Assert.assertEquals;
 
 /**
- *
  * @author bobj
  */
 public class DefaultExportServiceTest
@@ -66,25 +65,25 @@ public class DefaultExportServiceTest
 
     @Autowired
     private DataElementService dataElementService;
-    
+
     @Autowired
     private DataElementCategoryService categoryService;
-    
+
     @Autowired
     private DataSetService dataSetService;
 
     @Autowired
     private OrganisationUnitService organisationUnitService;
-    
+
     @Autowired
     private PeriodService periodService;
-    
+
     @Autowired
     private DataValueSetService dataValueSetService;
-    
+
     @Autowired
     private DataValueService dataValueService;
-    
+
     @Autowired
     private CompleteDataSetRegistrationService registrationService;
 
@@ -125,14 +124,14 @@ public class DefaultExportServiceTest
     @Override
     public void setUpTest()
     {
-        deA = createDataElement( 'A' );
-        deB = createDataElement( 'B' );
-        deC = createDataElement( 'C' );
-        dsA = createDataSet( 'A', new MonthlyPeriodType() );
-        ouA = createOrganisationUnit( 'A' );
-        ouB = createOrganisationUnit( 'B' );
-        peA = createPeriod( getDate( 2012, 1, 1 ), getDate( 2012, 1, 31 ) );
-        peB = createPeriod( getDate( 2012, 2, 1 ), getDate( 2012, 2, 29 ) );
+        deA = DhisConvenienceTest.createDataElement( 'A' );
+        deB = DhisConvenienceTest.createDataElement( 'B' );
+        deC = DhisConvenienceTest.createDataElement( 'C' );
+        dsA = DhisConvenienceTest.createDataSet( 'A', new MonthlyPeriodType() );
+        ouA = DhisConvenienceTest.createOrganisationUnit( 'A' );
+        ouB = DhisConvenienceTest.createOrganisationUnit( 'B' );
+        peA = DhisConvenienceTest.createPeriod( DhisConvenienceTest.getDate( 2012, 1, 1 ), DhisConvenienceTest.getDate( 2012, 1, 31 ) );
+        peB = DhisConvenienceTest.createPeriod( DhisConvenienceTest.getDate( 2012, 2, 1 ), DhisConvenienceTest.getDate( 2012, 2, 29 ) );
         optionComboA = categoryService.getDefaultDataElementCategoryOptionCombo();
 
         deA.setUid( "f7n9E0hX8qk" );
@@ -158,18 +157,18 @@ public class DefaultExportServiceTest
         periodService.addPeriod( peA );
         periodService.addPeriod( peB );
     }
-    
+
     @Test
     public void exportMetaDataTest() throws IOException, XPathExpressionException
     {
-        Options options = new Options(new HashMap<String,String>() );
-        MetaData metaData = exportService.getMetaData( options);
-        
-        String metaDataXml = JacksonUtils.toXmlAsString( metaData);
-        
-        assertEquals("1", xpathTest("count(//d:organisationUnits)", metaDataXml));
-        assertEquals("2", xpathTest("count(//d:organisationUnit)", metaDataXml));
-        assertEquals("3", xpathTest("count(//d:dataElement)", metaDataXml));
-        assertEquals("DE_A", xpathTest("//d:dataElement[@name='DataElementA']/@code", metaDataXml));
+        Options options = new Options( new HashMap<String, String>() );
+        MetaData metaData = exportService.getMetaData( options );
+
+        String metaDataXml = JacksonUtils.toXmlAsString( metaData );
+
+        assertEquals( "1", xpathTest( "count(//d:organisationUnits)", metaDataXml ) );
+        assertEquals( "2", xpathTest( "count(//d:organisationUnit)", metaDataXml ) );
+        assertEquals( "3", xpathTest( "count(//d:dataElement)", metaDataXml ) );
+        assertEquals( "DE_A", xpathTest( "//d:dataElement[@name='DataElementA']/@code", metaDataXml ) );
     }
 }

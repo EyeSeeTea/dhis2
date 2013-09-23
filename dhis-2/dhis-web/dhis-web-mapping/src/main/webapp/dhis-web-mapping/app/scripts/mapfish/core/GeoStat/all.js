@@ -270,18 +270,6 @@ mapfish.GeoStat.Facility = OpenLayers.Class(mapfish.GeoStat, {
 		return view;
 	},
 
-	getLegendConfig: function() {
-		var orgUnit = this.view.parentOrganisationUnit,
-			orgUnitLevel = this.view.organisationUnitLevel,
-			parent = orgUnit ? orgUnit.name : '',
-			level = orgUnitLevel ? orgUnitLevel.name : '',
-			where = parent + ' / ' + level;
-
-		return {
-			where: where
-		};
-	},
-
     updateOptions: function(newOptions) {
         this.addOptions(newOptions);
     },
@@ -314,32 +302,30 @@ mapfish.GeoStat.Facility = OpenLayers.Class(mapfish.GeoStat, {
     updateLegend: function() {
 		var	element = document.createElement("div"),
 			child = document.createElement("div"),
-			items = this.gis.store.groupsByGroupSet.data.items,
-			config = this.getLegendConfig();
+			items = this.gis.store.groupsByGroupSet.data.items;
 
-        child.style.height = "14px";
-		child.style.overflow = "hidden";
-		child.title = config.where;
-        child.innerHTML = config.where;
-        element.appendChild(child);
+        //child.style.height = "14px";
+		//child.style.overflow = "hidden";
+		//child.title = config.where;
+        //child.innerHTML = config.where;
+        //element.appendChild(child);
 
-        child = document.createElement("div");
-        child.style.clear = "left";
-        element.appendChild(child);
+        //child = document.createElement("div");
+        //child.style.clear = "left";
+        //element.appendChild(child);
 
-        child = document.createElement("div");
-        child.style.width = "1px";
-        child.style.height = "5px";
-        element.appendChild(child);
+        //child = document.createElement("div");
+        //child.style.width = "1px";
+        //child.style.height = "5px";
+        //element.appendChild(child);
 
         for (var i = 0; i < items.length; i++) {
             child = document.createElement("div");
             child.style.backgroundImage = 'url(../../images/orgunitgroup/' + items[i].data.symbol + ')';
             child.style.backgroundRepeat = 'no-repeat';
-            child.style.width = "25px";
+            child.style.width = "21px";
             child.style.height = "18px";
             child.style.cssFloat = "left";
-            child.style.marginLeft = "3px";
             element.appendChild(child);
 
             child = document.createElement("div");
@@ -531,7 +517,9 @@ mapfish.GeoStat.createThematic = function(name) {
 			var rules = new Array(boundsArray.length - 1);
 			for (var i = 0; i < boundsArray.length - 1; i++) {
 				var rule = new OpenLayers.Rule({
-					symbolizer: {fillColor: this.colorInterpolation[i].toHexString()},
+					symbolizer: {
+						fillColor: this.colorInterpolation[i].toHexString()
+					},
 					filter: new OpenLayers.Filter.Comparison({
 						type: OpenLayers.Filter.Comparison.BETWEEN,
 						property: this.indicator,

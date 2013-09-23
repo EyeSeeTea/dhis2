@@ -613,11 +613,13 @@
         <value>global_fund</value>
         <value>guinea</value>
         <value>guinea_bissau</value>
+        <value>Haiti</value>
         <value>india</value>
         <value>indonesia</value>
         <value>irc</value>
         <value>ivory_coast</value>
         <value>kenya</value>
+		<value>laos</value>
         <value>lesotho</value>
         <value>liberia</value>
         <value>malawi</value>
@@ -801,6 +803,8 @@
         <value>hi</value>
         <value>id</value>
         <value>it</value>
+		<value>km</value>
+		<value>lo</value>
         <value>my</value>
         <value>nl</value>
         <value>no</value>

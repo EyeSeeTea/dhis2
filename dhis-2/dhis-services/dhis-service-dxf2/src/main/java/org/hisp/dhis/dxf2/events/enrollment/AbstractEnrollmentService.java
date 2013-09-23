@@ -28,11 +28,21 @@ package org.hisp.dhis.dxf2.events.enrollment;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dxf2.events.person.Person;
+import org.hisp.dhis.dxf2.events.person.PersonService;
+import org.hisp.dhis.dxf2.importsummary.ImportStatus;
+import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.i18n.I18nManager;
+import org.hisp.dhis.i18n.I18nManagerException;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
+import org.hisp.dhis.program.ProgramService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -47,6 +57,47 @@ public abstract class AbstractEnrollmentService implements EnrollmentService
     @Autowired
     private ProgramInstanceService programInstanceService;
 
+    @Autowired
+    private ProgramService programService;
+
+    @Autowired
+    private PersonService personService;
+
+    @Autowired
+    private PatientService patientService;
+
+    @Autowired
+    private OrganisationUnitService organisationUnitService;
+
+    @Autowired
+    private I18nManager i18nManager;
+
+    private I18nFormat _format;
+
+    @Override
+    public void setFormat( I18nFormat format )
+    {
+        this._format = format;
+    }
+
+    public I18nFormat getFormat()
+    {
+        if ( _format != null )
+        {
+            return _format;
+        }
+
+        try
+        {
+            _format = i18nManager.getI18nFormat();
+        }
+        catch ( I18nManagerException ignored )
+        {
+        }
+
+        return _format;
+    }
+
     // -------------------------------------------------------------------------
     // READ
     // -------------------------------------------------------------------------
@@ -54,33 +105,108 @@ public abstract class AbstractEnrollmentService implements EnrollmentService
     @Override
     public Enrollments getEnrollments()
     {
-        List<ProgramInstance> programInstances = new ArrayList<ProgramInstance>( programInstanceService.getAllProgramInstances() );
+        List<Program> programs = getProgramsWithRegistration();
+
+        List<ProgramInstance> programInstances = new ArrayList<ProgramInstance>( programInstanceService.getProgramInstances( programs ) );
         return getEnrollments( programInstances );
+    }
+
+    @Override
+    public Enrollments getEnrollments( EnrollmentStatus status )
+    {
+        List<Program> programs = getProgramsWithRegistration();
+
+        List<ProgramInstance> programInstances = new ArrayList<ProgramInstance>(
+            programInstanceService.getProgramInstances( programs, status.getValue() ) );
+
+        return getEnrollments( programInstances );
+    }
+
+    @Override
+    public Enrollments getEnrollments( Person person )
+    {
+        Patient patient = getPatient( person.getPerson() );
+        return getEnrollments( patient );
+    }
+
+    @Override
+    public Enrollments getEnrollments( Person person, EnrollmentStatus status )
+    {
+        Patient patient = getPatient( person.getPerson() );
+        return getEnrollments( patient, status );
     }
 
     @Override
     public Enrollments getEnrollments( Patient patient )
     {
-        List<ProgramInstance> programInstances = new ArrayList<ProgramInstance>( programInstanceService.getProgramInstances( patient ) );
+        List<ProgramInstance> programInstances = new ArrayList<ProgramInstance>(
+            programInstanceService.getProgramInstances( patient ) );
+
+        return getEnrollments( programInstances );
+    }
+
+    @Override
+    public Enrollments getEnrollments( Patient patient, EnrollmentStatus status )
+    {
+        List<ProgramInstance> programInstances = new ArrayList<ProgramInstance>(
+            programInstanceService.getProgramInstances( patient, status.getValue() ) );
+
         return getEnrollments( programInstances );
     }
 
     @Override
     public Enrollments getEnrollments( Program program )
     {
-        return null;
+        List<ProgramInstance> programInstances = new ArrayList<ProgramInstance>( programInstanceService.getProgramInstances( program ) );
+        return getEnrollments( programInstances );
+    }
+
+    @Override
+    public Enrollments getEnrollments( Program program, EnrollmentStatus status )
+    {
+        List<ProgramInstance> programInstances = new ArrayList<ProgramInstance>(
+            programInstanceService.getProgramInstances( program, status.getValue() ) );
+
+        return getEnrollments( programInstances );
     }
 
     @Override
     public Enrollments getEnrollments( OrganisationUnit organisationUnit )
     {
-        return null;
+        List<Program> programs = getProgramsWithRegistration();
+        List<ProgramInstance> programInstances = new ArrayList<ProgramInstance>( programInstanceService.getProgramInstances( programs, organisationUnit ) );
+
+        return getEnrollments( programInstances );
+    }
+
+    @Override
+    public Enrollments getEnrollments( OrganisationUnit organisationUnit, EnrollmentStatus status )
+    {
+        List<Program> programs = getProgramsWithRegistration();
+        List<ProgramInstance> programInstances = new ArrayList<ProgramInstance>(
+            programInstanceService.getProgramInstances( programs, organisationUnit, status.getValue() ) );
+
+        return getEnrollments( programInstances );
     }
 
     @Override
     public Enrollments getEnrollments( Program program, OrganisationUnit organisationUnit )
     {
-        return null;
+        return getEnrollments( programInstanceService.getProgramInstances( program, organisationUnit ) );
+    }
+
+    @Override
+    public Enrollments getEnrollments( Program program, Person person )
+    {
+        Patient patient = getPatient( person.getPerson() );
+        return getEnrollments( programInstanceService.getProgramInstances( patient, program ) );
+    }
+
+    @Override
+    public Enrollments getEnrollments( Program program, Person person, EnrollmentStatus status )
+    {
+        Patient patient = getPatient( person.getPerson() );
+        return getEnrollments( programInstanceService.getProgramInstances( patient, program, status.getValue() ) );
     }
 
     @Override
@@ -110,7 +236,134 @@ public abstract class AbstractEnrollmentService implements EnrollmentService
         enrollment.setEnrollment( programInstance.getUid() );
         enrollment.setPerson( programInstance.getPatient().getUid() );
         enrollment.setProgram( programInstance.getProgram().getUid() );
+        enrollment.setStatus( EnrollmentStatus.fromInt( programInstance.getStatus() ) );
+        enrollment.setDateOfEnrollment( programInstance.getEnrollmentDate() );
+        enrollment.setDateOfIncident( programInstance.getDateOfIncident() );
 
         return enrollment;
     }
+
+    // -------------------------------------------------------------------------
+    // CREATE
+    // -------------------------------------------------------------------------
+
+    @Override
+    public ImportSummary saveEnrollment( Enrollment enrollment )
+    {
+        Patient patient = getPatient( enrollment.getPerson() );
+        Person person = personService.getPerson( patient );
+        Program program = getProgram( enrollment.getProgram() );
+
+        Enrollments enrollments = getEnrollments( program, person, EnrollmentStatus.ACTIVE );
+
+        if ( !enrollments.getEnrollments().isEmpty() )
+        {
+            ImportSummary importSummary = new ImportSummary( ImportStatus.ERROR, "Person " + person.getPerson() + " already have an active enrollment in program "
+                + program.getUid() );
+            importSummary.getImportCount().incrementIgnored();
+
+            return importSummary;
+        }
+
+        ProgramInstance programInstance = programInstanceService.enrollPatient( patient, program, enrollment.getDateOfEnrollment(), enrollment.getDateOfIncident(),
+            patient.getOrganisationUnit(), getFormat() );
+
+        if ( programInstance == null )
+        {
+            return new ImportSummary( ImportStatus.ERROR, "Could not enroll person " + enrollment.getPerson()
+                + " into program " + enrollment.getProgram() );
+        }
+
+        ImportSummary importSummary = new ImportSummary( ImportStatus.SUCCESS );
+        importSummary.setReference( programInstance.getUid() );
+        importSummary.setDataValueCount( null );
+        importSummary.getImportCount().incrementImported();
+
+        return importSummary;
+    }
+
+    // -------------------------------------------------------------------------
+    // UPDATE
+    // -------------------------------------------------------------------------
+
+    @Override
+    public ImportSummary updateEnrollment( Enrollment enrollment )
+    {
+        return null;
+    }
+
+    // -------------------------------------------------------------------------
+    // DELETE
+    // -------------------------------------------------------------------------
+
+    @Override
+    public void deleteEnrollment( Enrollment enrollment )
+    {
+        ProgramInstance programInstance = programInstanceService.getProgramInstance( enrollment.getEnrollment() );
+        programInstanceService.deleteProgramInstance( programInstance );
+    }
+
+    @Override
+    public void cancelEnrollment( Enrollment enrollment )
+    {
+        ProgramInstance programInstance = programInstanceService.getProgramInstance( enrollment.getEnrollment() );
+        programInstanceService.cancelProgramInstanceStatus( programInstance );
+    }
+
+    @Override
+    public void completeEnrollment( Enrollment enrollment )
+    {
+        ProgramInstance programInstance = programInstanceService.getProgramInstance( enrollment.getEnrollment() );
+        programInstanceService.completeProgramInstanceStatus( programInstance, getFormat() );
+    }
+
+    // -------------------------------------------------------------------------
+    // HELPERS
+    // -------------------------------------------------------------------------
+
+    private List<Program> getProgramsWithRegistration()
+    {
+        List<Program> programs = new ArrayList<Program>();
+        programs.addAll( programService.getPrograms( Program.SINGLE_EVENT_WITH_REGISTRATION ) );
+        programs.addAll( programService.getPrograms( Program.MULTIPLE_EVENTS_WITH_REGISTRATION ) );
+
+        return programs;
+    }
+
+    private Patient getPatient( String person )
+    {
+        Patient patient = patientService.getPatient( person );
+
+        if ( patient == null )
+        {
+            throw new IllegalArgumentException( "Person does not exist." );
+        }
+
+        return patient;
+    }
+
+    private Program getProgram( String id )
+    {
+        Program program = programService.getProgram( id );
+
+        if ( program == null )
+        {
+            throw new IllegalArgumentException( "Program does not exist." );
+        }
+
+        return program;
+    }
+
+    private OrganisationUnit getOrganisationUnit( String id )
+    {
+        OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( id );
+
+        if ( organisationUnit == null )
+        {
+            throw new IllegalArgumentException( "OrganisationUnit does not exist." );
+        }
+
+        return organisationUnit;
+    }
+
 }

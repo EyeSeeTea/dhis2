@@ -103,9 +103,9 @@ public class Program
 
     private Integer type;
 
-    private Boolean displayIncidentDate;
+    private Boolean displayIncidentDate = true;
 
-    private Boolean ignoreOverdueEvents;
+    private Boolean ignoreOverdueEvents = false;
 
     private List<PatientIdentifierType> patientIdentifierTypes;
 
@@ -128,13 +128,13 @@ public class Program
      */
     private Boolean displayOnAllOrgunit = true;
 
-    private Boolean useBirthDateAsIncidentDate;
+    private Boolean useBirthDateAsIncidentDate = false;
 
-    private Boolean useBirthDateAsEnrollmentDate;
+    private Boolean useBirthDateAsEnrollmentDate = false;
 
-    private Boolean selectEnrollmentDatesInFuture;
+    private Boolean selectEnrollmentDatesInFuture = false;
 
-    private Boolean selectIncidentDatesInFuture;
+    private Boolean selectIncidentDatesInFuture = false;
 
     private String relationshipText;
 
@@ -144,7 +144,7 @@ public class Program
 
     private Program relatedProgram;
     
-    private Boolean dataEntryMethod;
+    private Boolean dataEntryMethod = false;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -250,11 +250,6 @@ public class Program
         this.description = description;
     }
 
-    public void setOrganisationUnits( Set<OrganisationUnit> organisationUnits )
-    {
-        this.organisationUnits = organisationUnits;
-    }
-
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
@@ -276,6 +271,11 @@ public class Program
     public Set<OrganisationUnit> getOrganisationUnits()
     {
         return organisationUnits;
+    }
+
+    public void setOrganisationUnits( Set<OrganisationUnit> organisationUnits )
+    {
+        this.organisationUnits = organisationUnits;
     }
 
     @JsonProperty( value = "programInstances" )
@@ -504,6 +504,7 @@ public class Program
     }
 
     @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Boolean getDisplayOnAllOrgunit()
     {

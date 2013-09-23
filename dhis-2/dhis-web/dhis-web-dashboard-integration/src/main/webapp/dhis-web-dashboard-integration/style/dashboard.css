@@ -388,14 +388,15 @@ a.alert, .alert
 
 .recipientsDiv
 { 
-  padding-left: 38px;
+  width: 660px;
+  padding-left: 40px;
 }
 
 .messageDiv
 {
-  width: 700px;
+  width: 660px;
   border-bottom: 1px solid #cccccc;
-  padding-left: 38px;
+  padding-left: 40px;
   padding-top: 16px;
   padding-bottom: 22px;
 }
@@ -482,9 +483,9 @@ div#selectionTree
   width: 580px;
   border: 1px solid #ddd;
   border-radius: 3px;
-  padding: 30px 20px 20px 20px;
+  padding: 25px 20px 20px 20px;
   margin-bottom: 25px;
-  box-shadow: #ddd 0 1px 1px 0;
+  box-shadow: #e1e1e1 0 1px 1px 0;
 }
 
 .interpretationSymbol
@@ -620,8 +621,7 @@ div#selectionTree
   width: 610px;
   margin-left: 40px;
   margin-top: 15px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #ccc;
+  padding-bottom: 15px;
 }
 
 #profileInterpretationFeed

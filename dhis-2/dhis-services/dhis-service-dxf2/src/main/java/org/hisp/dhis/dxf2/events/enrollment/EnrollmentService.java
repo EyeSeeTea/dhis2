@@ -28,11 +28,17 @@ package org.hisp.dhis.dxf2.events.enrollment;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dxf2.events.person.Person;
+import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
+import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 
 /**
@@ -40,17 +46,35 @@ import java.util.Collection;
  */
 public interface EnrollmentService
 {
+    public void setFormat(I18nFormat format);
+
     // -------------------------------------------------------------------------
     // READ
     // -------------------------------------------------------------------------
 
     Enrollments getEnrollments();
 
+    Enrollments getEnrollments( EnrollmentStatus status );
+
+    Enrollments getEnrollments( Person person );
+
+    Enrollments getEnrollments( Person person, EnrollmentStatus status );
+
     Enrollments getEnrollments( Patient patient );
+
+    Enrollments getEnrollments( Patient patient, EnrollmentStatus status );
 
     Enrollments getEnrollments( Program program );
 
+    Enrollments getEnrollments( Program program, EnrollmentStatus status );
+
+    Enrollments getEnrollments( Program program, Person person );
+
+    Enrollments getEnrollments( Program program, Person person, EnrollmentStatus status );
+
     Enrollments getEnrollments( OrganisationUnit organisationUnit );
+
+    Enrollments getEnrollments( OrganisationUnit organisationUnit, EnrollmentStatus status );
 
     Enrollments getEnrollments( Program program, OrganisationUnit organisationUnit );
 
@@ -64,13 +88,29 @@ public interface EnrollmentService
     // CREATE
     // -------------------------------------------------------------------------
 
+    ImportSummary saveEnrollment( Enrollment enrollment );
+
+    ImportSummaries saveEnrollmentsJson( InputStream inputStream ) throws IOException;
+
+    ImportSummaries saveEnrollmentsXml( InputStream inputStream ) throws IOException;
 
     // -------------------------------------------------------------------------
     // UPDATE
     // -------------------------------------------------------------------------
 
+    ImportSummary updateEnrollment( Enrollment enrollment );
+
+    ImportSummary updateEnrollmentJson( String id, InputStream inputStream ) throws IOException;
+
+    ImportSummary updateEnrollmentXml( String id, InputStream inputStream ) throws IOException;
 
     // -------------------------------------------------------------------------
     // DELETE
     // -------------------------------------------------------------------------
+
+    void deleteEnrollment( Enrollment enrollment );
+
+    void cancelEnrollment( Enrollment enrollment );
+
+    void completeEnrollment( Enrollment enrollment );
 }

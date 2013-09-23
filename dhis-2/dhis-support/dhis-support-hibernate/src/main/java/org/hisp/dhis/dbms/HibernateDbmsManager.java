@@ -97,6 +97,15 @@ public class HibernateDbmsManager
         emptyTable( "reporttable_filters" );
         emptyTable( "reporttable" );
 
+        emptyTable( "userrolemembers" );
+        emptyTable( "userroledataset" );
+        emptyTable( "userroleauthorities" );
+        emptyTable( "usergroupmembers" );
+        emptyTable( "usergroup" );
+        emptyTable( "users" );
+        emptyTable( "userinfo" );
+        emptyTable( "userrole" );
+
         emptyTable( "orgunitgroupsetmembers" );
         emptyTable( "orgunitgroupset" );
         emptyTable( "orgunitgroupmembers" );
@@ -115,6 +124,17 @@ public class HibernateDbmsManager
         emptyTable( "datasetindicators" );
         emptyTable( "datasetoperands" );
         emptyTable( "dataset" );
+
+        emptyTable( "patientdatavalue" );
+        emptyTable( "programstageinstance" );
+        emptyTable( "programinstance" );
+        emptyTable( "programstage_dataelements" );
+        emptyTable( "programstage" );
+        emptyTable( "program_organisationunits" );
+        emptyTable( "program" );
+        emptyTable( "patientidentifier" );
+        emptyTable( "patientidentifier_patient" );
+        emptyTable( "patient" );
 
         emptyTable( "minmaxdataelement" );
         emptyTable( "expressiondataelement" );
@@ -149,14 +169,14 @@ public class HibernateDbmsManager
         emptyTable( "categorycombo" );
         emptyTable( "dataelementcategory" );
         emptyTable( "dataelementcategoryoption" );
-        
+
         emptyTable( "optionsetmembers" );
         emptyTable( "optionset" );
 
         dropTable( "aggregateddatavalue" );
         dropTable( "aggregatedindicatorvalue" );
         dropTable( "aggregateddatasetcompleteness" );
-        
+
         dropTable( "aggregatedorgunitdatavalue" );
         dropTable( "aggregatedorgunitindicatorvalue" );
         dropTable( "aggregatedorgunitdatasetcompleteness" );
