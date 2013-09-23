@@ -1802,7 +1802,7 @@ Ext.onReady( function() {
 					window_width: 310
 				},
 				tool: {
-					item_width: 222,
+					item_width: 228,
 					itemlabel_width: 95,
 					window_width: 250
 				},
