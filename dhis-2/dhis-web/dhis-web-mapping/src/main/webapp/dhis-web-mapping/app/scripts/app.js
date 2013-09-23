@@ -566,6 +566,10 @@ Ext.onReady( function() {
 			setOpacity: function(opacity) {
 				this.opacity = opacity === 0 ? 0.01 : opacity;
 				this.layer.setLayerOpacity(this.opacity);
+				
+				if (this.layer.circleLayer) {
+					this.layer.circleLayer.setOpacity(this.opacity);
+				}
 			},
 			disableItem: function() {
 				this.checkbox.setValue(false);
