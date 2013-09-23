@@ -1785,7 +1785,9 @@ Ext.onReady( function() {
 
 		// Vars
 			windowWidth = 500,
-			windowCmpWidth = windowWidth - 22;
+			windowCmpWidth = windowWidth - 22,
+			
+			dimConf = gis.conf.finals.dimension;
 
 		gis.store.maps.on('load', function(store, records) {
 			var pager = store.proxy.reader.jsonData.pager;
@@ -1825,8 +1827,7 @@ Ext.onReady( function() {
 			createButton = Ext.create('Ext.button.Button', {
 				text: GIS.i18n.create,
 				handler: function() {
-					var dimConf = gis.conf.finals.dimension,
-						name = nameTextfield.getValue(),
+					var name = nameTextfield.getValue(),
 						layers = gis.util.map.getVisibleVectorLayers(),
 						layer,
 						lonlat = gis.olmap.getCenter(),
@@ -1841,16 +1842,21 @@ Ext.onReady( function() {
 								view = layer.widget.getView();
 
 								// Operand
-								if (view.valueType === dimConf.dataElement.value && Ext.isObject(view.dataElement) && Ext.isString(view.dataElement.id) && view.dataElement.id.indexOf('-') !== -1) {
-									view.dataElementOperand = {id: view.dataElement.id.replace('-', '.')};
-									view.dataElement = null;
+								if (Ext.isArray(view.columns) && view.columns.length) {
+									for (var i = 0; i < view.columns.length; i++) {
+										for (var j = 0, item; j < view.columns[i].items.length; j++) {
+											item = view.columns[i].items[j];
+											
+											if (item.id.indexOf('-') !== -1) {
+												item.id = item.id.replace('-', '.');
+											}
+										}
+									}
 								}
 
 								// add
 								view.layer = layer.id;
 
-								// remove
-								delete view.periodType;
 								views.push(view);
 							}
 
