@@ -197,7 +197,8 @@ Ext.onReady( function() {
 			infrastructuralPeriod,
 			onHoverSelect,
 			onHoverUnselect,
-			onClickSelect;
+			onClickSelect,
+			dimConf = gis.conf.finals.dimension;
 
 		onHoverSelect = function fn(feature) {
 			if (window) {
@@ -431,59 +432,28 @@ Ext.onReady( function() {
 			};
 
 			// Drill or float
-			drill = function(direction) {
-				var store = gis.store.organisationUnitLevels,
-					view = layer.core.view,
-					config,
+			drill = function(parent, level) {
+				var view = Ext.clone(layer.core.view),
+					items,
 					loader;
+					
+				items = [
+					{id: parent},
+					{id: 'LEVEL-' + level}
+				];
+				
+				view.rows = [{
+					dimension: dimConf.organisationUnit.objectName,
+					items: items
+				}];
 
-				store.loadFn( function() {
-					if (direction === 'up') {
-						var rootNode = gis.init.rootNodes[0],
-							level = store.getAt(store.find('level', view.organisationUnitLevel.level - 1));
-
-						config = {
-							organisationUnitLevel: {
-								id: level.data.id,
-								name: level.data.name,
-								level: level.data.level
-							},
-							parentOrganisationUnit: {
-								id: rootNode.id,
-								name: rootNode.text,
-								level: rootNode.level
-							},
-							parentGraph: '/' + gis.init.rootNodes[0].id
-						};
-					}
-					else if (direction === 'down') {
-						var level = store.getAt(store.find('level', view.organisationUnitLevel.level + 1));
-
-						config = {
-							organisationUnitLevel: {
-								id: level.data.id,
-								name: level.data.name,
-								level: level.data.level
-							},
-							parentOrganisationUnit: {
-								id: feature.attributes.id,
-								name: feature.attributes.name,
-								level: view.organisationUnitLevel.level
-							},
-							parentGraph: feature.attributes.path
-						};
-					}
-
-					view = layer.core.extendView(null, config);
-
-					if (view) {
-						loader = layer.core.getLoader();
-						loader.updateGui = true;
-						loader.zoomToVisibleExtent = true;
-						loader.hideMask = true;
-						loader.load(view);
-					}
-				});
+				if (view) {
+					loader = layer.core.getLoader();
+					loader.updateGui = true;
+					loader.zoomToVisibleExtent = true;
+					loader.hideMask = true;
+					loader.load(view);
+				}
 			};
 
 			// Menu
@@ -491,18 +461,18 @@ Ext.onReady( function() {
 				Ext.create('Ext.menu.Item', {
 					text: 'Float up',
 					iconCls: 'gis-menu-item-icon-float',
-					disabled: !feature.attributes.hcu,
+					disabled: !feature.attributes.hasCoordinatesUp,
 					handler: function() {
-						drill('up');
+						drill(feature.attributes.grandParentId, parseInt(feature.attributes.level) - 1);
 					}
 				}),
 				Ext.create('Ext.menu.Item', {
 					text: 'Drill down',
 					iconCls: 'gis-menu-item-icon-drill',
 					cls: 'gis-menu-item-first',
-					disabled: !feature.attributes.hcd,
+					disabled: !feature.attributes.hasCoordinatesDown,
 					handler: function() {
-						drill('down');
+						drill(feature.attributes.id, parseInt(feature.attributes.level) + 1);
 					}
 				})
 			];
@@ -1906,8 +1876,11 @@ Ext.onReady( function() {
 							id: doc.geojson[i].uid,
 							internalId: doc.geojson[i].iid,
 							name: doc.geojson[i].na,
-							hcd: doc.geojson[i].hcd,
-							hcu: doc.geojson[i].hcu,
+							hasCoordinatesDown: doc.geojson[i].hcd,
+							hasCoordinatesUp: doc.geojson[i].hcu,
+							level: doc.geojson[i].le,
+							grandParentParentGraph: doc.geojson[i].gppg,
+							grandParentId: doc.geojson[i].gpuid,
 							path: doc.geojson[i].path,
 							parentId: doc.geojson[i].pi,
 							parentName: doc.geojson[i].pn
