@@ -1843,9 +1843,9 @@ Ext.onReady( function() {
 
 								// Operand
 								if (Ext.isArray(view.columns) && view.columns.length) {
-									for (var i = 0; i < view.columns.length; i++) {
-										for (var j = 0, item; j < view.columns[i].items.length; j++) {
-											item = view.columns[i].items[j];
+									for (var j = 0; j < view.columns.length; j++) {
+										for (var k = 0, item; k < view.columns[j].items.length; k++) {
+											item = view.columns[j].items[k];
 											
 											if (item.id.indexOf('-') !== -1) {
 												item.id = item.id.replace('-', '.');
@@ -3690,13 +3690,56 @@ Ext.onReady( function() {
 		};
 
 		setGui = function(view) {
+			var ouDim = view.rows[0],
+				isOu = false,
+				isOuc = false,
+				isOugc = false,
+				levels = [],
+				groups = [];
 
-			// Level and parent
-			//gis.store.organisationUnitLevels.loadFn( function() {
-				//level.setValue(view.organisationUnitLevel.id);
-			//});
+			// Organisation units
+			for (var i = 0, item; i < ouDim.items.length; i++) {
+				item = ouDim.items[i];
+				
+				if (item.id === 'USER_ORGUNIT') {
+					isOu = true;
+				}
+				else if (item.id === 'USER_ORGUNIT_CHILDREN') {
+					isOuc = true;
+				}
+				else if (item.id === 'USER_ORGUNIT_GRANDCHILDREN') {
+					isOugc = true;
+				}
+				else if (item.id.substr(0,5) === 'LEVEL') {
+					levels.push(parseInt(item.id.split('-')[1]));
+				}
+				else if (item.id.substr(0,8) === 'OU_GROUP') {
+					groups.push(parseInt(item.id.split('-')[1]));
+				}
+			}
 
-			//parent.selectPath('/root' + view.parentGraph);
+			if (levels.length) {
+				toolMenu.clickHandler('level');
+				organisationUnitLevel.setValue(levels);
+			}
+			else if (groups.length) {
+				toolMenu.clickHandler('group');
+				organisationUnitGroup.setValue(groups);
+			}
+			else {
+				toolMenu.clickHandler('orgunit');
+				userOrganisationUnit.setValue(isOu);
+				userOrganisationUnitChildren.setValue(isOuc);
+				userOrganisationUnitGrandChildren.setValue(isOugc);
+			}
+			
+			treePanel.numberOfRecords = gis.util.object.getLength(view.parentGraphMap);
+			
+			for (var key in view.parentGraphMap) {
+				if (view.parentGraphMap.hasOwnProperty(key)) {
+					treePanel.multipleExpand(key, view.parentGraphMap[key], false);
+				}
+			}
 
 			// Layer item
 			layer.item.setValue(true, view.opacity);
@@ -5038,7 +5081,7 @@ Ext.onReady( function() {
 			objectNameCmpMap[dimConf.dataSet.objectName] = dataSet;
 			
 			// Reset
-			//reset(true);
+			reset(true);
 
 			// Value type
 			valueType.setValue(vType);
@@ -5116,22 +5159,6 @@ Ext.onReady( function() {
 					treePanel.multipleExpand(key, view.parentGraphMap[key], false);
 				}
 			}
-			
-			
-
-			// If fav has organisation units, wait for tree callback before update
-			//if (recMap[dimConf.organisationUnit.objectName] && Ext.isObject(graphMap)) {
-				//treePanel.numberOfRecords = pt.util.object.getLength(graphMap);
-
-				//for (var i = 0, a = xLayout.objectNameItemsMap[dimConf.organisationUnit.objectName]; i < a.length; i++) {
-					//if (graphMap.hasOwnProperty(a[i].id)) {
-						//treePanel.multipleExpand(a[i].id, graphMap[a[i].id], false);
-					//}
-				//}
-			//}
-			//else {
-				//treePanel.reset();
-			//}
 
 			// Layer item
 			layer.item.setValue(true, view.opacity);
@@ -5762,12 +5789,64 @@ Ext.onReady( function() {
 		};
 
 		setGui = function(view) {
-			// Components
-            gis.store.groupSets.loadFn( function() {
-                groupSet.setValue(view.organisationUnitGroupSet.id);
-            });
-//todo
-			treePanel.selectPath('/root' + view.parentGraph);
+			var ouDim = view.rows[0],
+				isOu = false,
+				isOuc = false,
+				isOugc = false,
+				levels = [],
+				groups = [];
+				
+			// Group set
+			groupSet.store.removeAll();
+			groupSet.store.add(view.organisationUnitGroupSet);
+			groupSet.setValue(view.organisationUnitGroupSet.id);
+
+			// Organisation units
+			for (var i = 0, item; i < ouDim.items.length; i++) {
+				item = ouDim.items[i];
+				
+				if (item.id === 'USER_ORGUNIT') {
+					isOu = true;
+				}
+				else if (item.id === 'USER_ORGUNIT_CHILDREN') {
+					isOuc = true;
+				}
+				else if (item.id === 'USER_ORGUNIT_GRANDCHILDREN') {
+					isOugc = true;
+				}
+				else if (item.id.substr(0,5) === 'LEVEL') {
+					levels.push(parseInt(item.id.split('-')[1]));
+				}
+				else if (item.id.substr(0,8) === 'OU_GROUP') {
+					groups.push(parseInt(item.id.split('-')[1]));
+				}
+			}
+
+			if (levels.length) {
+				toolMenu.clickHandler('level');
+				organisationUnitLevel.setValue(levels);
+			}
+			else if (groups.length) {
+				toolMenu.clickHandler('group');
+				organisationUnitGroup.setValue(groups);
+			}
+			else {
+				toolMenu.clickHandler('orgunit');
+				userOrganisationUnit.setValue(isOu);
+				userOrganisationUnitChildren.setValue(isOuc);
+				userOrganisationUnitGrandChildren.setValue(isOugc);
+			}
+			
+			treePanel.numberOfRecords = gis.util.object.getLength(view.parentGraphMap);
+			
+			for (var key in view.parentGraphMap) {
+				if (view.parentGraphMap.hasOwnProperty(key)) {
+					treePanel.multipleExpand(key, view.parentGraphMap[key], false);
+				}
+			}
+			
+			// Area radius
+			areaRadius.setValue(true, view.areaRadius);
 
 			// Layer item
 			layer.item.setValue(true, view.opacity);
@@ -5809,12 +5888,6 @@ Ext.onReady( function() {
 				alert('No organisation units selected');
 				return false;
 			}
-			
-			//if (!view.parentGraph || !Ext.isString(view.parentGraph)) {
-				//GIS.logg.push([view.parentGraph, layer.id + '.parentGraph: string']);
-					////alert("validation failed"); //todo
-				//return false;
-			//}
 
 			return view;
 		};
