@@ -44,6 +44,7 @@ import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -72,7 +73,31 @@ public abstract class AbstractEnrollmentService implements EnrollmentService
     @Autowired
     private I18nManager i18nManager;
 
-    private I18nFormat format;
+    private I18nFormat _format;
+
+    @Override
+    public void setFormat( I18nFormat format )
+    {
+        this._format = format;
+    }
+
+    public I18nFormat getFormat()
+    {
+        if ( _format != null )
+        {
+            return _format;
+        }
+
+        try
+        {
+            _format = i18nManager.getI18nFormat();
+        }
+        catch ( I18nManagerException ignored )
+        {
+        }
+
+        return _format;
+    }
 
     // -------------------------------------------------------------------------
     // READ
@@ -226,18 +251,6 @@ public abstract class AbstractEnrollmentService implements EnrollmentService
     @Override
     public ImportSummary saveEnrollment( Enrollment enrollment )
     {
-        try
-        {
-            format = i18nManager.getI18nFormat();
-        }
-        catch ( I18nManagerException ex )
-        {
-            ImportSummary importSummary = new ImportSummary( ImportStatus.ERROR, ex.getMessage() );
-            importSummary.getImportCount().incrementIgnored();
-
-            return importSummary;
-        }
-
         Patient patient = getPatient( enrollment.getPerson() );
         Person person = personService.getPerson( patient );
         Program program = getProgram( enrollment.getProgram() );
@@ -254,7 +267,7 @@ public abstract class AbstractEnrollmentService implements EnrollmentService
         }
 
         ProgramInstance programInstance = programInstanceService.enrollPatient( patient, program, enrollment.getDateOfEnrollment(), enrollment.getDateOfIncident(),
-            patient.getOrganisationUnit(), format );
+            patient.getOrganisationUnit(), getFormat() );
 
         if ( programInstance == null )
         {
@@ -288,6 +301,8 @@ public abstract class AbstractEnrollmentService implements EnrollmentService
     public void deleteEnrollment( Enrollment enrollment )
     {
         ProgramInstance programInstance = programInstanceService.getProgramInstance( enrollment.getEnrollment() );
+        Assert.notNull( programInstance );
+
         programInstanceService.deleteProgramInstance( programInstance );
     }
 
@@ -295,22 +310,18 @@ public abstract class AbstractEnrollmentService implements EnrollmentService
     public void cancelEnrollment( Enrollment enrollment )
     {
         ProgramInstance programInstance = programInstanceService.getProgramInstance( enrollment.getEnrollment() );
+        Assert.notNull( programInstance );
+
         programInstanceService.cancelProgramInstanceStatus( programInstance );
     }
 
     @Override
     public void completeEnrollment( Enrollment enrollment )
     {
-        try
-        {
-            format = i18nManager.getI18nFormat();
-        }
-        catch ( I18nManagerException ignored )
-        {
-        }
-
         ProgramInstance programInstance = programInstanceService.getProgramInstance( enrollment.getEnrollment() );
-        programInstanceService.completeProgramInstanceStatus( programInstance, format );
+        Assert.notNull( programInstance );
+
+        programInstanceService.completeProgramInstanceStatus( programInstance, getFormat() );
     }
 
     // -------------------------------------------------------------------------

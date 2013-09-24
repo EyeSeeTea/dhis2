@@ -19,10 +19,10 @@
 		</p>
 		<div class="contentProviderTable">
 			<table>
-				#if( $!patient.getFullName()!='' )
+				#if( $!patient.name!='' )
 				<tr>
 					<td>$i18n.getString("full_name")</td>
-					<td>$encoder.htmlEncode($!patient.getFullName())</td>
+					<td>$encoder.htmlEncode($!patient.name)</td>
 				</tr>
 				#end
 				
@@ -62,7 +62,7 @@
 					<td>$i18n.getString("health_worker")</td>
 					<td>
 						#if($!patient.healthWorker )
-							$encoder.htmlEncode($!patient.healthWorker.name)
+							$!encoder.htmlEncode($patient.healthWorker.name)
 						#else
 							[$i18n.getString('none')]
 						#end
@@ -88,7 +88,8 @@
 				<tr>
 					<td>$attributeValue.patientAttribute.displayName</td>
 					<td id='dashboard_attr$attributeValue.patientAttribute.id'>
-						#if($attributeValue.patientAttribute.valueType=='bool')
+						#if($attributeValue.patientAttribute.valueType=='bool' 
+							|| $attributeValue.patientAttribute.valueType=='trueOnly')
 							#if($attributeValue.value)
 								$i18n.getString("yes")
 							#else
@@ -121,8 +122,8 @@
 		</p>
 		<div class="contentProviderTable">
 			<table id='activeTB' name='activeTB' style='cursor:pointer;'>
-				#foreach( $programInstance in $activeProgramInstances )
-					#set($programStageInstance='')
+				#foreach( $programInstance in $activeProgramInstances ) 
+					#set($programStageInstance='') 
 					#foreach ( $psi in $programInstance.programStageInstances )
 						#if( $psi.programStage.openAfterEnrollment=='true' && $psi.getStatus() != 1 && $psi.getStatus() != 5 )
 							#set($programStageInstance=$psi)
@@ -130,31 +131,29 @@
 					#end
 					
 					#if($programStageInstance=='')
-						#foreach( $psi in $programInstance.programStageInstances )
-							#if ( $psi.getStatus() != 1 && $psi.getStatus() != 5  )
-								#set($programStageInstance=$psi)
+							#foreach( $psi in $programInstance.programStageInstances )
+								#if ( $psi.getStatus() != 1 && $psi.getStatus() != 5  )
+									#set($programStageInstance=$psi)
+								#end
 							#end
-						#end
 					#end
-
-					#set($programStageInstance = $programInstance.getActiveProgramStageInstance())
-					#if( $!programStageInstance)
+					#if( $!programStageInstance!='')
 						#set( $status = $programStageInstance.getEventStatus() )
-							<tr id='tr1_$programInstance.id' type='$programInstance.program.type'
-								programStageInstanceId='$programStageInstance.id' 
-								relationshipText='$!programInstance.program.relationshipText'
-								relationshipType='$!programInstance.program.relationshipType.id'
-								relationshipSide='$!programInstance.program.relationshipSide'
-								relatedProgram='$!programInstance.program.relatedProgram.id'
-								programId='$programInstance.program.id'
-								style='cursor:pointer;'
-								onclick='javascript:setFieldValue("programIdAddPatient",$programInstance.program.id);loadActiveProgramStageRecords("$programInstance.id", "$programStageInstance.id")' >
-								<td id='td_$programInstance.id'>
-									<a><span id='infor_$programInstance.id'>$programInstance.program.displayName ($format.formatDate($programInstance.enrollmentDate))</span></a>
-									<img id='followup_$programInstance.id' src='images/risk_small.png' #if($programInstance.followup=='true') #else class='hidden' #end >
-								</td>
-							</tr>
-							#if($programInstance.program.type==1 && $programStageInstance)
+						<tr id='tr1_$programInstance.id' type='$programInstance.program.type'
+						programStageInstanceId='$programStageInstance.id' 
+						relationshipText='$!programInstance.program.relationshipText'
+						relationshipType='$!programInstance.program.relationshipType.id'
+						relationshipSide='$!programInstance.program.relationshipSide'
+						relatedProgram='$!programInstance.program.relatedProgram.id'
+						programId='$programInstance.program.id'
+						style='cursor:pointer;'
+						onclick='javascript:setFieldValue("programIdAddPatient",$programInstance.program.id);loadActiveProgramStageRecords("$programInstance.id", "$programStageInstance.id")' >
+							<td id='td_$programInstance.id'>
+								<a><span id='infor_$programInstance.id'>$programInstance.program.displayName ($format.formatDate($programInstance.enrollmentDate))</span></a>
+								<img id='followup_$programInstance.id' src='images/risk_small.png' #if($programInstance.followup=='true') #else class='hidden' #end >
+							</td>
+						</tr>
+						#if($programInstance.program.type==1 && $programStageInstance)
 							<tr>
 								<td id='tr2_$programInstance.id' 
 									onclick='javascript:loadActiveProgramStageRecords("$programInstance.id", "$programStageInstance.id")'
@@ -162,7 +161,7 @@
 									<a>&#8226; $programStageInstance.programStage.displayName ($format.formatDate($programStageInstance.dueDate))</a>
 								</td>
 							</tr>
-							#end
+						#end
 					#else
 					<tr id='tr1_$programInstance.id' type='$programInstance.program.type'
 						programStageInstanceId='$programStageInstance.id' style='cursor:pointer;'
@@ -229,11 +228,11 @@
 			<table>
 				#foreach( $rel in $relationships )
 					#if($rel.patientA.id==$patient.id)
-						<tr onclick="showPatientDashboardForm($rel.patientB.id)" title='$i18n.getString( "move_to_dashboard_of" ) $rel.patientB.getFullName()'>
+						<tr onclick="showPatientDashboardForm($rel.patientB.id)" title='$i18n.getString( "move_to_dashboard_of" ) $rel.patientB.name'>
 							<td><a href='#'>$rel.relationshipType.bIsToA</a></td>
 							<td>
 								#set($patient=$rel.patientB)
-								#set($value=$!patient.getFullName())
+								#set($value=$!patient.name)
 								#foreach( $identifier in $patient.identifiers)
 									#if($!identifier.identifierType)
 										#set($value=$identifier.identifier)
@@ -249,11 +248,11 @@
 							</td>
 						</tr>
 					#else
-						<tr onclick="showPatientDashboardForm($rel.patientA.id)" title='$i18n.getString( "move_to_dashboard_of" ) $rel.patientB.getFullName()'>
-							<td><a href='#'>$rel.relationshipType.aIsToB</a></td>
+						<tr onclick="showPatientDashboardForm($rel.patientA.id)" title='$i18n.getString( "move_to_dashboard_of" ) $!rel.patientB.name'>
+							<td><a href='#'>$!rel.relationshipType.aIsToB</a></td>
 							<td><a href='#'>
-								#set($patient=$rel.patientA)
-								#set($value=$!patient.getFullName())
+								#set($patient=$!rel.patientA)
+								#set($value=$!patient.name)
 								#foreach( $identifier in $patient.identifiers)
 									#if($!identifier.identifierType)
 										#set($value=$identifier.identifier)
@@ -308,7 +307,7 @@
 			#foreach( $patientAudit in $patientAudits )
 			<tr #alternate( $mark )>
 				<td>$format.formatDate($patientAudit.date)</td>
-				<td>$encoder.htmlEncode($patientAudit.visitor)</td>
+				<td>$!encoder.htmlEncode($patientAudit.visitor)</td>
 				<td>$i18n.getString($patientAudit.accessedModule)</td>
 			</tr>
 			#set( $mark = !$mark )

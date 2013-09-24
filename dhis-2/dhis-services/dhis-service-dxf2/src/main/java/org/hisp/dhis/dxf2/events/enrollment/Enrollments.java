@@ -61,4 +61,31 @@ public class Enrollments
     {
         this.enrollments = enrollments;
     }
+
+    @Override
+    public boolean equals( Object o )
+    {
+        if ( this == o ) return true;
+        if ( o == null || getClass() != o.getClass() ) return false;
+
+        Enrollments that = (Enrollments) o;
+
+        if ( enrollments != null ? !enrollments.equals( that.enrollments ) : that.enrollments != null ) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return enrollments != null ? enrollments.hashCode() : 0;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Enrollments{" +
+            "enrollments=" + enrollments +
+            '}';
+    }
 }

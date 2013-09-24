@@ -28,13 +28,6 @@ package org.hisp.dhis.dxf2.events.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.common.IdentifiableObjectUtils.getIdList;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
@@ -42,6 +35,13 @@ import org.hisp.dhis.system.util.TextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
+import static org.hisp.dhis.common.IdentifiableObjectUtils.getIdList;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -119,6 +119,7 @@ public class DefaultEventStore implements EventStore
 
                 event.setCompleted( rowSet.getBoolean( "psi_completed" ) );
                 event.setEvent( rowSet.getString( "psi_uid" ) );
+                event.setStatus( EventStatus.fromInt( rowSet.getInt( "psi_status" ) ) );
                 event.setProgram( rowSet.getString( "p_uid" ) );
                 event.setProgramStage( rowSet.getString( "ps_uid" ) );
                 event.setStoredBy( rowSet.getString( "psi_completeduser" ) );
@@ -142,7 +143,7 @@ public class DefaultEventStore implements EventStore
 
     private String buildSql( List<Integer> programIds, List<Integer> programStageIds, List<Integer> orgUnitIds, Date startDate, Date endDate )
     {
-        String sql = "select p.uid as p_uid, ps.uid as ps_uid, psi.uid as psi_uid, ou.uid as ou_uid, psi.executiondate as psi_executiondate," +
+        String sql = "select p.uid as p_uid, ps.uid as ps_uid, psi.uid as psi_uid, psi.status as psi_status, ou.uid as ou_uid, psi.executiondate as psi_executiondate," +
             " psi.completeduser as psi_completeduser, psi.completed as psi_completed," +
             " pdv.value as pdv_value, pdv.storedby as pdv_storedby, pdv.providedelsewhere as pdv_providedelsewhere, de.uid as de_uid" +
             " from program p" +
