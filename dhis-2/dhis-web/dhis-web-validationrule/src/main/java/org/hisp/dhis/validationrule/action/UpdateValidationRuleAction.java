@@ -103,6 +103,13 @@ public class UpdateValidationRuleAction
         this.importance = importance;
     }
 
+    private String ruleType;
+
+    public void setRuleType( String ruleType )
+    {
+        this.ruleType = ruleType;
+    }
+
     private String operator;
 
     public void setOperator( String operator )
@@ -152,11 +159,53 @@ public class UpdateValidationRuleAction
         this.rightSideNullIfBlank = rightSideNullIfBlank;
     }
 
+    private String organisationUnitLevel;
+
+    public void setOrganisationUnitLevel( String organisationUnitLevel )
+    {
+        this.organisationUnitLevel = organisationUnitLevel;
+    }
+
     private String periodTypeName;
 
     public void setPeriodTypeName( String periodTypeName )
     {
         this.periodTypeName = periodTypeName;
+    }
+
+    private String periodExtent;
+
+    public void setPeriodExtent( String periodExtent )
+    {
+        this.periodExtent = periodExtent;
+    }
+
+    private String precedingSampleCount;
+
+    public void setPrecedingSampleCount( String precedingSampleCount )
+    {
+        this.precedingSampleCount = precedingSampleCount;
+    }
+
+    private String precedingSampleType;
+
+    public void setPrecedingSampleType( String precedingSampleType )
+    {
+        this.precedingSampleType = precedingSampleType;
+    }
+
+    private String highOutliers;
+
+    public void setHighOutliers( String highOutliers )
+    {
+        this.highOutliers = highOutliers;
+    }
+
+    private String lowOutliers;
+
+    public void setLowOutliers( String lowOutliers )
+    {
+        this.lowOutliers = lowOutliers;
     }
 
     // -------------------------------------------------------------------------
@@ -170,6 +219,7 @@ public class UpdateValidationRuleAction
         validationRule.setName( name );
         validationRule.setDescription( description );
         validationRule.setImportance( importance );
+        validationRule.setRuleType( ruleType );
         validationRule.setOperator( Operator.valueOf( operator ) );
 
         validationRule.getLeftSide().setExpression( leftSideExpression );
@@ -183,9 +233,16 @@ public class UpdateValidationRuleAction
         validationRule.getRightSide().setNullIfBlank( rightSideNullIfBlank );
         validationRule.getRightSide().setDataElementsInExpression( expressionService.getDataElementsInExpression( rightSideExpression ) );
         validationRule.getRightSide().setOptionCombosInExpression( expressionService.getOptionCombosInExpression( rightSideExpression ) );
-
+        validationRule.setOrganisationUnitLevel( organisationUnitLevel != null && !organisationUnitLevel.isEmpty() ? Integer.parseInt( organisationUnitLevel ) : null );
+        
         PeriodType periodType = periodService.getPeriodTypeByName( periodTypeName );
-        validationRule.setPeriodType( periodService.getPeriodTypeByClass( periodType.getClass() ) );
+        validationRule.setPeriodType( periodType == null ? null : periodService.getPeriodTypeByClass( periodType.getClass() ) );
+
+        validationRule.setPeriodExtent( periodExtent != null && !periodExtent.isEmpty() ? Integer.parseInt( periodExtent ) : null );
+        validationRule.setPrecedingSampleCount( precedingSampleCount != null && !precedingSampleCount.isEmpty() ? Integer.parseInt( precedingSampleCount ) : null );
+        validationRule.setPrecedingSampleType( precedingSampleType );
+        validationRule.setHighOutliers( highOutliers != null && !highOutliers.isEmpty() ? Integer.parseInt( highOutliers ) : null );
+        validationRule.setLowOutliers( lowOutliers != null && !lowOutliers.isEmpty() ? Integer.parseInt( lowOutliers ) : null );
 
         validationRuleService.updateValidationRule( validationRule );
 

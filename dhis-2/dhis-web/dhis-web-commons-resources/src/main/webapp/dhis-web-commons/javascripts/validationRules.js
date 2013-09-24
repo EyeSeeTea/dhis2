@@ -375,8 +375,36 @@ var validationRules = {
         "importance" : {
             "required" : true
         },
+        "ruleType" : {
+            "required" : true
+        },
+        "organisationUnitLevel" : {
+        	"number" : true,
+        	"min": 1,
+        	"max": 999
+        },
         "periodTypeName" : {
             "required" : true
+        },
+        "periodExtent" : {
+        	"number" : true,
+        	"min": 1,
+        	"max": 999
+        },
+        "precedingSampleCount" : {
+        	"number" : true,
+        	"min": 1,
+        	"max": 999
+        },
+        "highOutliers" : {
+        	"number" : true,
+        	"min": 0,
+        	"max": 999
+        },
+        "lowOutliers" : {
+        	"number" : true,
+        	"min": 0,
+        	"max": 999
         },
         "operator" : {
             "required" : true

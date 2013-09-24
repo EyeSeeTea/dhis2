@@ -65,12 +65,20 @@ public class ValidationRule
     public static final String IMPORTANCE_MEDIUM = "medium";
     public static final String IMPORTANCE_LOW = "low";
 
+    public static final String RULE_TYPE_VALIDATION = "validation";
+    public static final String RULE_TYPE_MONITORING = "monitoring";
+    
     public static final String TYPE_STATISTICAL = "statistical";
     public static final String TYPE_ABSOLUTE = "absolute";
+
+    public static final String PRECEDING_SAMPLE_TYPE_ANNUAL = "annual";
+    public static final String PRECEDING_SAMPLE_TYPE_SEQUENTIAL = "sequential";
 
     private String description;
 
     private String importance;
+    
+    private String ruleType;
 
     private String type;
 
@@ -82,7 +90,19 @@ public class ValidationRule
 
     private Set<ValidationRuleGroup> groups = new HashSet<ValidationRuleGroup>();
 
+    private Integer organisationUnitLevel; // Org unit level at which monitoring rules are evaluated
+
     private PeriodType periodType;
+    
+    private Integer periodExtent; // Number of periods in right-side sample
+    
+    private Integer precedingSampleCount; // Number of preceding right side samples to average.
+    
+    private String precedingSampleType;
+    
+    private Integer highOutliers;
+    
+    private Integer lowOutliers;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -161,6 +181,32 @@ public class ValidationRule
     }
 
     @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public Integer getOrganisationUnitLevel()
+    {
+        return organisationUnitLevel;
+    }
+
+    public void setOrganisationUnitLevel( Integer organisationUnitLevel )
+    {
+        this.organisationUnitLevel = organisationUnitLevel;
+    }
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public String getRuleType()
+    {
+        return ruleType != null && !ruleType.isEmpty() ? ruleType : RULE_TYPE_VALIDATION;
+    }
+
+    public void setRuleType( String ruleType )
+    {
+        this.ruleType = ruleType;
+    }
+
+    @JsonProperty
     @JsonSerialize( using = JacksonPeriodTypeSerializer.class )
     @JsonDeserialize( using = JacksonPeriodTypeDeserializer.class )
     @JsonView( {DetailedView.class, ExportView.class} )
@@ -173,6 +219,71 @@ public class ValidationRule
     public void setPeriodType( PeriodType periodType )
     {
         this.periodType = periodType;
+    }
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public Integer getPeriodExtent()
+    {
+        return periodExtent;
+    }
+
+    public void setPeriodExtent( Integer periodExtent )
+    {
+        this.periodExtent = periodExtent;
+    }
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public Integer getPrecedingSampleCount()
+    {
+        return precedingSampleCount;
+    }
+
+    public void setPrecedingSampleCount( Integer precedingSampleCount )
+    {
+        this.precedingSampleCount = precedingSampleCount;
+    }
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public String getPrecedingSampleType()
+    {
+        return precedingSampleType;
+    }
+
+    public void setPrecedingSampleType( String precedingSampleType )
+    {
+        this.precedingSampleType = precedingSampleType;
+    }
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public Integer getHighOutliers()
+    {
+        return highOutliers;
+    }
+
+    public void setHighOutliers( Integer highOutliers )
+    {
+        this.highOutliers = highOutliers;
+    }
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public Integer getLowOutliers()
+    {
+        return lowOutliers;
+    }
+
+    public void setLowOutliers( Integer lowOutliers )
+    {
+        this.lowOutliers = lowOutliers;
     }
 
     @JsonProperty

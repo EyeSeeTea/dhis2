@@ -21,6 +21,8 @@
 
     <property name="importance" length="16" />
 
+    <property name="ruleType" column="ruletype" length="16" />
+
     <property name="type" />
 
     <property name="operator" type="org.hisp.dhis.expression.OperatorUserType">
@@ -37,9 +39,21 @@
       <key column="validationruleid" />
       <many-to-many class="org.hisp.dhis.validation.ValidationRuleGroup" column="validationgroupid" />
     </set>
-
+    
+    <property name="organisationUnitLevel" column="organisationunitlevel" />
+    
     <many-to-one name="periodType" class="org.hisp.dhis.period.PeriodType" column="periodtypeid"
       foreign-key="fk_validationrule_periodtypeid" />
 
+    <property name="periodExtent" column="periodextent" />
+    
+    <property name="precedingSampleCount" column="precedingsamplecount" />
+    
+    <property name="precedingSampleType" column="precedingsampletype" length="16" />
+    
+    <property name="highOutliers" column="highoutliers" />
+    
+    <property name="lowOutliers" column="lowoutliers" />
+    
   </class>
 </hibernate-mapping>

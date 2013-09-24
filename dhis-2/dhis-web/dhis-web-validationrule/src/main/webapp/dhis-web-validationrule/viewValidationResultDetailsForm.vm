@@ -17,8 +17,8 @@
     	<td>$encoder.htmlEncode( $!validationRule.description )</td>
     </tr>
     <tr>
-    	<td>$encoder.htmlEncode( $i18n.getString( "importance" ) )</td>
-    	<td>$encoder.htmlEncode( $i18n.getString( $!validationRule.importance ) )</td>
+    	<td>$encoder.htmlEncode( $i18n.getString( "rule_type" ) )</td>
+    	<td>$encoder.htmlEncode( $i18n.getString( $!validationRule.ruleType ) )</td>
     </tr>
 </table>
 

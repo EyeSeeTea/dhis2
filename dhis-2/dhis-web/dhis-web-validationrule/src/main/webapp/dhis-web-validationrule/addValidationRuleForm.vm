@@ -24,6 +24,26 @@
 		</td>
 	</tr>
 	<tr>
+		<td><label for="ruleType">$encoder.htmlEncode( $i18n.getString( "rule_type" ) )<em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td>
+			<select type="text" id="ruleType" name="ruleType" onchange="changeRuleType( this.value )">
+				<option value="validation" selected="selected">$encoder.htmlEncode( $i18n.getString( "validation" ) )</option>
+				<option value="monitoring">$encoder.htmlEncode( $i18n.getString( "monitoring" ) )</option>
+			</select>
+		</td>
+	</tr>
+	<tr id="organisationUnitLevelTR" style="display:none">
+		<td><label for="organisationUnitLevel">$encoder.htmlEncode( $i18n.getString( "organisation_unit_level" ) )<em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td>
+			<select type="text" id="organisationUnitLevel" name="organisationUnitLevel">
+				<option value="">[ $encoder.htmlEncode( $i18n.getString( "select_level" ) ) ]</option>
+				#foreach( $level in $organisationUnitLevels )
+				<option value="${level.level}">${level.level} $encoder.htmlEncode( $!level.name )</option>
+			    #end
+			</select>
+		</td>
+	</tr>
+	<tr>
 		<td><label for="periodType">$encoder.htmlEncode( $i18n.getString( "period_type" ) )<em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 		<td>
 			<select type="text" id="periodTypeName" name="periodTypeName">
@@ -33,6 +53,31 @@
 			</select>
 			<img title="$i18n.getString('clear_expression')" onclick='setNullExpression();' src='../images/edit-clear.png' style='width: 20px;cursor:pointer' />
 		</td>
+	</tr>
+	<tr id="periodExtentTR" style="display:none">
+		<td><label for="periodExtent">$encoder.htmlEncode( $i18n.getString( "period_extent" ) )</label></td>
+		<td><input type="text" id="periodExtent" name="periodExtent"></td>
+	</tr>
+	<tr id="precedingSampleCountTR" style="display:none">
+		<td><label for="precedingSampleCount">$encoder.htmlEncode( $i18n.getString( "preceding_sample_count" ) )</label></td>
+		<td><input type="text" id="precedingSampleCount" name="precedingSampleCount"></td>
+	</tr>
+	<tr id="precedingSampleTypeTR" style="display:none">
+		<td><label for="operatorId">$encoder.htmlEncode( $i18n.getString( "preceding_sample_type" ) )</label></td>
+		<td>
+			<select id="precedingSampleType" name="precedingSampleType">
+				<option value="annual">$encoder.htmlEncode( $i18n.getString( "annual" ) )</option>
+				<option value="sequential">$encoder.htmlEncode( $i18n.getString( "sequential" ) )</option>
+			</select>
+		</td>
+	</tr>
+	<tr id="highOutliersTR" style="display:none">
+		<td><label for="highOutliers">$encoder.htmlEncode( $i18n.getString( "high_outliers" ) )</label></td>
+		<td><input type="text" id="highOutliers" name="highOutliers"></td>
+	</tr>
+	<tr id="lowOutliersTR" style="display:none">
+		<td><label for="lowOutliers">$encoder.htmlEncode( $i18n.getString( "low_outliers" ) )</label></td>
+		<td><input type="text" id="lowOutliers" name="lowOutliers"></td>
 	</tr>
 	<tr>
 		<td><label for="operatorId">$encoder.htmlEncode( $i18n.getString( "operator" ) ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>

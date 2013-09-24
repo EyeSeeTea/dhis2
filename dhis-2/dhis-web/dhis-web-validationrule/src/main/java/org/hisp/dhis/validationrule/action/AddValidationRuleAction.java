@@ -98,6 +98,13 @@ public class AddValidationRuleAction
         this.importance = importance;
     }
 
+    private String ruleType;
+
+    public void setRuleType( String ruleType )
+    {
+        this.ruleType = ruleType;
+    }
+
     private String operator;
 
     public void setOperator( String operator )
@@ -147,6 +154,13 @@ public class AddValidationRuleAction
         this.rightSideNullIfBlank = rightSideNullIfBlank;
     }
 
+    private Integer organisationUnitLevel;
+    
+    public void setOrganizationUnitLevel(Integer organisationUnitLevel) 
+    {
+        this.organisationUnitLevel = organisationUnitLevel;
+    }
+
     private String periodTypeName;
     
     public void setPeriodTypeName(String periodTypeName) 
@@ -154,6 +168,41 @@ public class AddValidationRuleAction
         this.periodTypeName = periodTypeName;
     }
     
+    private Integer periodExtent;
+    
+    public void setPeriodExtent(Integer periodExtent) 
+    {
+        this.periodExtent = periodExtent;
+    }
+
+    private Integer precedingSampleCount;
+    
+    public void setPrecedingSampleCount(Integer precedingSampleCount) 
+    {
+        this.precedingSampleCount = precedingSampleCount;
+    }
+
+    private String precedingSampleType;
+    
+    public void setPrecedingSampleType(String precedingSampleType) 
+    {
+        this.precedingSampleType = precedingSampleType;
+    }
+
+    private Integer highOutliers;
+    
+    public void setHighOutliers(Integer highOutliers) 
+    {
+        this.highOutliers = highOutliers;
+    }
+
+    private Integer lowOutliers;
+    
+    public void setLowOutliers(Integer lowOutliers) 
+    {
+        this.lowOutliers = lowOutliers;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -181,14 +230,21 @@ public class AddValidationRuleAction
         validationRule.setName( name );
         validationRule.setDescription( description );
         validationRule.setImportance( importance );
+        validationRule.setRuleType( ruleType );
         validationRule.setType( ValidationRule.TYPE_ABSOLUTE );
         validationRule.setOperator( Operator.valueOf(operator) );
         validationRule.setLeftSide( leftSide );
         validationRule.setRightSide( rightSide );
+        validationRule.setOrganisationUnitLevel( organisationUnitLevel );
 
         PeriodType periodType = periodService.getPeriodTypeByName(periodTypeName);
         validationRule.setPeriodType(periodType);
-        
+
+        validationRule.setPeriodExtent( periodExtent );
+        validationRule.setPrecedingSampleCount( precedingSampleCount );
+        validationRule.setPrecedingSampleType( precedingSampleType );
+        validationRule.setHighOutliers( highOutliers );
+        validationRule.setLowOutliers( lowOutliers );
         validationRuleService.saveValidationRule( validationRule );
         
         return SUCCESS;

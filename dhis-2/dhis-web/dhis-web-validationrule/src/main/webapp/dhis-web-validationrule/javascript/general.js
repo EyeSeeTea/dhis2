@@ -1,4 +1,3 @@
-
 function showValidationRuleDetails( validationId )
 {
     jQuery.post( 'getValidationRule.action', { id: validationId }, function ( json ) {
@@ -9,6 +8,46 @@ function showValidationRuleDetails( validationId )
 		
 		var importance = json.validationRule.importance;
 		setText( 'importanceField', i18nalizeImportance( importance ) );
+		
+		var ruleType = json.validationRule.ruleType;
+		setText( 'ruleTypeField', i18nalizeRuleType( ruleType ) );
+		
+		if (ruleType == 'monitoring') {
+
+			var organisationUnitLevel = string( json.validationRule.organisationUnitLevel );
+			setText( 'organisationUnitLevelField', organisationUnitLevel ? organisationUnitLevel : '[' + i18n_none + ']' );
+			
+			var periodExtent = string( json.validationRule.periodExtent );
+			setText( 'periodExtentField', periodExtent ? periodExtent : '[' + i18n_none + ']' );
+			
+			var precedingSampleCount = string( json.validationRule.precedingSampleCount );
+			setText( 'precedingSampleCountField', precedingSampleCount ? precedingSampleCount : '[' + i18n_none + ']' );
+			
+			var precedingSampleType = json.validationRule.precedingSampleType;
+			setText( 'precedingSampleTypeField', precedingSampleType ? precedingSampleType : '[' + i18n_none + ']' );
+			
+			var highOutliers = string( json.validationRule.highOutliers );
+			setText( 'highOutliersField', highOutliers ? highOutliers : '[' + i18n_none + ']' );
+			
+			var lowOutliers = string( json.validationRule.lowOutliers );
+			setText( 'lowOutliersField', lowOutliers ? lowOutliers : '[' + i18n_none + ']' );
+
+			document.getElementById('organisationUnitLevelP').style.display = '';
+			document.getElementById('periodExtentP').style.display = '';
+			document.getElementById('precedingSampleCountP').style.display = '';
+			document.getElementById('precedingSampleTypeP').style.display = '';
+			document.getElementById('highOutliersP').style.display = '';
+			document.getElementById('lowOutliersP').style.display = '';
+
+		} else {
+
+			document.getElementById('organisationUnitLevelP').style.display = 'none';
+			document.getElementById('periodExtentP').style.display = 'none';
+			document.getElementById('precedingSampleCountP').style.display = 'none';
+			document.getElementById('precedingSampleTypeP').style.display = 'none';
+			document.getElementById('highOutliersP').style.display = 'none';
+			document.getElementById('lowOutliersP').style.display = 'none';
+		}
 		
 		var leftSideDescription = json.validationRule.leftSideDescription;
 		setText( 'leftSideDescriptionField', leftSideDescription ? leftSideDescription : '[' + i18n_none + ']' );
@@ -36,6 +75,20 @@ function i18nalizeImportance ( importance )
 	if ( importance == "low" )
 	{
 		return i18n_low;
+	}
+	
+	return null;
+}
+
+function i18nalizeRuleType ( ruleType )
+{
+	if ( ruleType == "validation" )
+	{
+		return i18n_validation;
+	}
+	else if ( ruleType == "monitoring" )
+	{
+		return i18n_monitoring;
 	}
 	
 	return null;

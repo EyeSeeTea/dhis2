@@ -34,6 +34,25 @@
 		</td>
 	</tr>
 	<tr>
+		<td><label for="ruleType">$encoder.htmlEncode( $i18n.getString( "rule_type" ) )<em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td>
+			<select type="text" id="ruleType" name="ruleType" onchange="changeRuleType( this.value )">
+				<option value="validation" #if( $validationRule.ruleType == 'validation' ) selected #end>$encoder.htmlEncode( $i18n.getString( "validation" ) )</option>
+				<option value="monitoring" #if( $validationRule.ruleType == 'monitoring' ) selected #end>$encoder.htmlEncode( $i18n.getString( "monitoring" ) )</option>
+			</select>
+		</td>
+	</tr>
+	<tr id="organisationUnitLevelTR" #if( $!validationRule.ruleType != 'monitoring' ) style='display:none;' #end>
+		<td><label for="organisationUnitLevel">$encoder.htmlEncode( $i18n.getString( "organisation_unit_level" ) )<em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+		<td>
+			<select type="text" id="organisationUnitLevel" name="organisationUnitLevel">
+				#foreach( $level in $organisationUnitLevels )
+				<option value="${level.level}"#if( $validationRule.organisationUnitLevel == '${level.level}' ) selected #end>${level.level} $encoder.htmlEncode( $!level.name )</option>
+			    #end
+			</select>
+		</td>
+	</tr>
+	<tr>
 		<td><label for="periodType">$encoder.htmlEncode( $i18n.getString( "period_type" ) )<em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 		<td><select type="text" id="periodTypeName" name="periodTypeName" disabled>
 					#foreach ( $periodType in $periodTypes )
@@ -42,6 +61,31 @@
 			</select>
 			<img title="$i18n.getString('clear_expression')" onclick='setNullExpression();' src='../images/edit-clear.png' style='width: 20px;cursor:pointer' />
 		</td>
+	</tr>
+	<tr id="periodExtentTR" #if( $!validationRule.ruleType != 'monitoring' ) style='display:none;' #end>
+		<td><label for="periodExtent">$encoder.htmlEncode( $i18n.getString( "period_extent" ) )</label></td>
+		<td><input type="text" id="periodExtent" name="periodExtent" value="$!validationRule.periodExtent"></td>
+	</tr>
+	<tr id="precedingSampleCountTR" #if( $!validationRule.ruleType != 'monitoring' ) style='display:none;' #end>
+		<td><label for="precedingSampleCount">$encoder.htmlEncode( $i18n.getString( "preceding_sample_count" ) )</label></td>
+		<td><input type="text" id="precedingSampleCount" name="precedingSampleCount" value="$!validationRule.precedingSampleCount"></td>
+	</tr>
+	<tr id="precedingSampleTypeTR" #if( $!validationRule.ruleType != 'monitoring' ) style='display:none;' #end>
+		<td><label for="operatorId">$encoder.htmlEncode( $i18n.getString( "preceding_sample_type" ) )</label></td>
+		<td>
+			<select id="precedingSampleType" name="precedingSampleType">
+				<option value="annual" #if( $validationRule.precedingSampleType == 'annual' ) selected #end>$encoder.htmlEncode( $i18n.getString( "annual" ) )</option>
+				<option value="sequential" #if( $validationRule.precedingSampleType == 'sequential' ) selected #end>$encoder.htmlEncode( $i18n.getString( "sequential" ) )</option>
+			</select>
+		</td>
+	</tr>
+	<tr id="highOutliersTR" #if( $!validationRule.ruleType != 'monitoring' ) style='display:none;' #end>
+		<td><label for="highOutliers">$encoder.htmlEncode( $i18n.getString( "high_outliers" ) )</label></td>
+		<td><input type="text" id="highOutliers" name="highOutliers" value="$!validationRule.highOutliers"></td>
+	</tr>
+	<tr id="lowOutliersTR" #if( $!validationRule.ruleType != 'monitoring' ) style='display:none;' #end>
+		<td><label for="lowOutliers">$encoder.htmlEncode( $i18n.getString( "low_outliers" ) )</label></td>
+		<td><input type="text" id="lowOutliers" name="lowOutliers" value="$!validationRule.lowOutliers"></td>
 	</tr>
 	<tr>
 		<td><label for="operatorId">$encoder.htmlEncode( $i18n.getString( "operator" ) ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
