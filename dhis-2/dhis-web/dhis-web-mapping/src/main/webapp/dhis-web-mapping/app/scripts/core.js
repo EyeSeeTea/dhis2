@@ -720,7 +720,7 @@ Ext.onReady( function() {
 
 		getMap = function() {
 			Ext.data.JsonP.request({
-				url: gis.init.contextPath + gis.conf.finals.url.path_api + 'maps/' + gis.map.id + '.jsonp?links=false',
+				url: gis.init.contextPath + gis.conf.finals.url.path_api + 'maps/' + gis.map.id + '.jsonp?viewClass=dimensional&links=false',
 				success: function(r) {
 
 					// Operand
@@ -729,10 +729,18 @@ Ext.onReady( function() {
 							view = r.mapViews[i];
 
 							if (view) {
-								if (Ext.isObject(view.dataElementOperand) && Ext.isString(view.dataElementOperand.id)) {
-									view.dataElement = Ext.clone(view.dataElementOperand);
-									view.dataElement.id = view.dataElement.id.replace('.', '-');
-									delete view.dataElementOperand;
+								if (Ext.isArray(view.columns) && view.columns.length) {
+									for (var j = 0, dim; j < view.columns.length; j++) {
+										dim = view.columns[j];
+										
+										if (Ext.isArray(dim.items) && dim.items.length) {
+											for (var k = 0, item; k < dim.items.length; k++) {
+												item = dim.items[k];
+												
+												item.id = item.id.replace('.', '-');
+											}
+										}
+									}
 								}
 							}
 						}
@@ -768,6 +776,8 @@ Ext.onReady( function() {
 
 			for (var i = 0; i < views.length; i++) {
 				view = views[i];
+				
+				
 				loader = gis.layer[view.layer].core.getLoader();
 				loader.updateGui = !gis.el;
 				loader.callBack = callBack;
@@ -1188,7 +1198,7 @@ Ext.onReady( function() {
 			var dimConf = gis.conf.finals.dimension,
 				paramString = '?',
 				dxItems = view.columns[0].items,
-				dxDimension = view.columns[0].dimension,
+				isOperand = view.columns[0].dimension === dimConf.operand.objectName,
 				peItems = view.filters[0].items,
 				ouItems = view.rows[0].items;
 
@@ -1204,11 +1214,11 @@ Ext.onReady( function() {
 			paramString += '&dimension=dx:';
 			
 			for (var i = 0; i < dxItems.length; i++) {
-				paramString += dxItems[i].id;
+				paramString += isOperand ? dxItems[i].id.split('-')[0] : dxItems[i].id;
 				paramString += i < dxItems.length - 1 ? ';' : '';
 			}
 			
-			paramString += dxDimension === dimConf.operand.objectName ? '&dimension=co' : '';
+			paramString += isOperand ? '&dimension=co' : '';
 			
 			// pe
 			paramString += '&filter=pe:';

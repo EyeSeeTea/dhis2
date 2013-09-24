@@ -5079,12 +5079,13 @@ Ext.onReady( function() {
 		};
 
 		getView = function(config) {
-			var vType = valueType.getValue(),
+			var vType = valueType.getValue() === dimConf.dataElement.objectName ? dataElementDetailLevel.getValue() : valueType.getValue(),
 				objectNameCmpMap = {},
 				view = {};
 				
 			objectNameCmpMap[dimConf.indicator.objectName] = indicator;
 			objectNameCmpMap[dimConf.dataElement.objectName] = dataElement;
+			objectNameCmpMap[dimConf.operand.objectName] = dataElement;
 			objectNameCmpMap[dimConf.dataSet.objectName] = dataSet;
 
 			view.columns = [{

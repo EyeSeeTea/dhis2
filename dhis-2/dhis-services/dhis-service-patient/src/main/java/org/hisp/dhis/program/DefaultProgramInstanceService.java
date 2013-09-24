@@ -726,6 +726,7 @@ public class DefaultProgramInstanceService
         // ---------------------------------------------------------------------
 
         List<OutboundSms> outboundSms = programInstance.getOutboundSms();
+
         if ( outboundSms == null )
         {
             outboundSms = new ArrayList<OutboundSms>();
@@ -738,6 +739,7 @@ public class DefaultProgramInstanceService
         // -----------------------------------------------------------------
 
         List<MessageConversation> messageConversations = programInstance.getMessageConversations();
+
         if ( messageConversations == null )
         {
             messageConversations = new ArrayList<MessageConversation>();
@@ -751,7 +753,6 @@ public class DefaultProgramInstanceService
         // -----------------------------------------------------------------
 
         programInstance.setStatus( ProgramInstance.STATUS_COMPLETED );
-
         programInstance.setEndDate( new Date() );
 
         updateProgramInstance( programInstance );

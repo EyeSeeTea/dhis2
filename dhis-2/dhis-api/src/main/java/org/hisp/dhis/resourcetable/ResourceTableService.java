@@ -36,11 +36,6 @@ public interface ResourceTableService
     String ID = ResourceTableService.class.getName();
 
     /**
-     * Generates all resource tables.
-     */
-    void generateAll();
-    
-    /**
      * Generates a resource table containing the hierarchy graph for each
      * OrganisationUnit.
      */
@@ -76,6 +71,11 @@ public interface ResourceTableService
      * Generates a resource table for all data elements.
      */
     void generateDataElementTable();
+
+    /**
+     * Generates a resource table for dates and associated periods.
+     */
+    void generateDatePeriodTable();
     
     /**
      * Generates a resource table for all periods.
