@@ -777,7 +777,6 @@ Ext.onReady( function() {
 			for (var i = 0; i < views.length; i++) {
 				view = views[i];
 				
-				
 				loader = gis.layer[view.layer].core.getLoader();
 				loader.updateGui = !gis.el;
 				loader.callBack = callBack;
@@ -1928,6 +1927,18 @@ Ext.onReady( function() {
 				});
 				return array;
 			};
+			
+			util.object.getLength = function(object) {
+				var size = 0;
+
+				for (var key in object) {
+					if (object.hasOwnProperty(key)) {
+						size++;
+					}
+				}
+
+				return size;
+			};
 		}());
 
 		gis.init = init;
@@ -2018,6 +2029,8 @@ Ext.onReady( function() {
 				var layout = {},
 					getValidatedDimensionArray,
 					validateSpecialCases;
+					
+				// layer: string
 
 				// columns: [Dimension]
 
@@ -2208,6 +2221,7 @@ Ext.onReady( function() {
 					layout.filters = config.filters;
 
 					// Properties
+					layout.layer = Ext.isString(config.layer) && !Ext.isEmpty(config.layer) ? config.layer : 'thematic1';
 					layout.classes = Ext.isNumber(config.classes) && !Ext.isEmpty(config.classes) ? config.classes : 5;
 					layout.method = Ext.isNumber(config.method) && !Ext.isEmpty(config.method) ? config.method : 2;
 					layout.colorLow = Ext.isString(config.colorLow) && !Ext.isEmpty(config.colorLow) ? config.colorLow : 'ff0000';

@@ -3665,8 +3665,15 @@ Ext.onReady( function() {
 		reset = function() {
 
 			// Components
-			level.clearValue();
-			parent.reset();
+			toolMenu.clickHandler('orgunit');
+			treePanel.reset();
+			
+			userOrganisationUnit.setValue(false);
+			userOrganisationUnitChildren.setValue(false);
+			userOrganisationUnitGrandChildren.setValue(false);
+			
+			organisationUnitLevel.clearValue();
+			organisationUnitGroup.clearValue();
 
 			// Layer options
 			if (layer.searchWindow) {
@@ -4947,31 +4954,52 @@ Ext.onReady( function() {
 
 		// Functions
 
-		reset = function() {
+		reset = function(skipTree) {
 
 			// Components
 			valueType.reset();
-			valueTypeToggler(gis.conf.finals.dimension.indicator.id);
+			valueTypeToggler(dimConf.indicator.objectName);
 
 			indicatorGroup.clearValue();
 			indicator.clearValue();
+			indicator.store.removeAll();
+			
 			dataElementGroup.clearValue();
 			dataElement.clearValue();
+			dataElement.store.removeAll();
+			
+			dataSet.clearValue();
+			dataSet.store.removeAll();
 
 			periodType.clearValue();
 			period.clearValue();
+			period.store.removeAll();
 
 			legendType.reset();
 			legendTypeToggler(gis.conf.finals.widget.legendtype_automatic);
 			legendSet.clearValue();
+			legendSet.store.removeAll();
+			
 			classes.reset();
 			method.reset();
 			colorLow.reset();
 			colorHigh.reset();
 			radiusLow.reset();
 			radiusHigh.reset();
-			level.clearValue();
-			parent.reset();
+			
+			toolMenu.clickHandler('orgunit');
+			
+			if (!skipTree) {
+				toolMenu.clickHandler('orgunit');
+				treePanel.reset();
+			}
+			
+			userOrganisationUnit.setValue(false);
+			userOrganisationUnitChildren.setValue(false);
+			userOrganisationUnitGrandChildren.setValue(false);
+			
+			organisationUnitLevel.clearValue();
+			organisationUnitGroup.clearValue();
 
 			// Layer options
 			if (layer.searchWindow) {
@@ -4992,60 +5020,47 @@ Ext.onReady( function() {
 		};
 
 		setGui = function(view) {
+			var dxDim = view.columns[0],
+				peDim = view.filters[0],
+				ouDim = view.rows[0],
+				vType = dxDim.dimension === dimConf.operand.objectName ? dimConf.dataElement.objectName : dxDim.dimension,
+				lType = Ext.isObject(view.legendSet) && Ext.isString(view.legendSet.id) ? gis.conf.finals.widget.legendtype_predefined : gis.conf.finals.widget.legendtype_automatic,
+				objectNameCmpMap = {},
+				isOu = false,
+				isOuc = false,
+				isOugc = false,
+				levels = [],
+				groups = [];
+				
+			objectNameCmpMap[dimConf.indicator.objectName] = indicator;
+			objectNameCmpMap[dimConf.dataElement.objectName] = dataElement;
+			objectNameCmpMap[dimConf.operand.objectName] = dataElement;
+			objectNameCmpMap[dimConf.dataSet.objectName] = dataSet;
+			
+			// Reset
+			//reset(true);
 
 			// Value type
-			valueType.setValue(view.valueType);
-
-			// Indicator and data element
-			valueTypeToggler(view.valueType);
-
-			var	indeGroupView = view.valueType === dimConf.indicator.id ? indicatorGroup : dataElementGroup,
-				indeGroupStore = indeGroupView.store,
-				indeGroupRecord = view.valueType === dimConf.indicator.id ? view.indicatorGroup : view.dataElementGroup,
-
-				indeStore = view.valueType === dimConf.indicator.id ? indicatorsByGroupStore : dataElementsByGroupStore,
-				indeView = view.valueType === dimConf.indicator.id ? indicator : dataElement,
-				indeRecord = view.valueType === dimConf.indicator.id ? view.indicator : view.dataElement;
-
-			// in/de group
-			indeGroupStore.removeAll();
-			indeGroupStore.add(indeGroupRecord);
-			indeGroupView.setValue(indeGroupRecord.id);
-
-			// in/de/dc
-			if (view.valueType === dimConf.dataElement.id) {
-				if (Ext.isObject(view.dataElement) && Ext.isString(view.dataElement.id) && view.dataElement.id.indexOf('-') !== -1) {
-					dataElementDetailLevel.setValue(dimConf.operand.objectName);
-					indeStore.setDetailsProxy(indeGroupRecord.id, false, function() {
-						indeView.setValue(indeRecord.id);
-					});
-				}
-				else {
-					dataElementDetailLevel.setValue(dimConf.dataElement.objectName);
-					indeStore.setTotalsProxy(indeGroupRecord.id, false, function() {
-						indeView.setValue(indeRecord.id);
-					});
-				}
+			valueType.setValue(vType);
+			valueTypeToggler(vType);			
+			
+			if (vType === dimConf.dataElement.objectName) {
+				dataElementDetailLevel.setValue(dxDim.dimension);
 			}
-			else {
-				indeStore.proxy.url = gis.init.contextPath + '/api/indicatorGroups/' + indeGroupRecord.id + '.json?links=false&paging=false';
-				indeStore.load({
-					callback: function() {
-						indeView.setValue(indeRecord.id);
-					}
-				});
-			}
-
+			
+			// Data
+			objectNameCmpMap[dxDim.dimension].store.add(dxDim.items[0]);
+			objectNameCmpMap[dxDim.dimension].setValue(dxDim.items[0].id);
+			
 			// Period
-			periodType.setValue(view.periodType);
-			periodType.fireEvent('select');
-			period.setValue(view.period.id);
-
+			period.store.add(peDim.items[0])
+			period.setValue(peDim.items[0].id);
+			
 			// Legend
-			legendType.setValue(view.legendType);
-			legendTypeToggler(view.legendType);
-
-			if (view.legendType === gis.conf.finals.widget.legendtype_automatic) {
+			legendType.setValue(lType);
+			legendTypeToggler(lType);
+			
+			if (lType === gis.conf.finals.widget.legendtype_automatic) {
 				classes.setValue(view.classes);
 				method.setValue(view.method);
 				colorLow.setValue(view.colorLow);
@@ -5053,18 +5068,70 @@ Ext.onReady( function() {
 				radiusLow.setValue(view.radiusLow);
 				radiusHigh.setValue(view.radiusHigh);
 			}
-			else if (view.legendType === gis.conf.finals.widget.legendtype_predefined) {
-				gis.store.legendSets.loadFn( function() {
-					legendSet.setValue(view.legendSet.id);
-				});
+			else if (lType === gis.conf.finals.widget.legendtype_predefined) {
+				legendSet.store.add(view.legendSet);
+				legendSet.setValue(view.legendSet.id);
 			}
 
-			// Level and parent
-			gis.store.organisationUnitLevels.loadFn( function() {
-				level.setValue(view.organisationUnitLevel.id);
-			});
+			// Organisation units
+			for (var i = 0, item; i < ouDim.items.length; i++) {
+				item = ouDim.items[i];
+				
+				if (item.id === 'USER_ORGUNIT') {
+					isOu = true;
+				}
+				else if (item.id === 'USER_ORGUNIT_CHILDREN') {
+					isOuc = true;
+				}
+				else if (item.id === 'USER_ORGUNIT_GRANDCHILDREN') {
+					isOugc = true;
+				}
+				else if (item.id.substr(0,5) === 'LEVEL') {
+					levels.push(parseInt(item.id.split('-')[1]));
+				}
+				else if (item.id.substr(0,8) === 'OU_GROUP') {
+					groups.push(parseInt(item.id.split('-')[1]));
+				}
+			}
 
-			parent.selectPath('/root' + view.parentGraph);
+			if (levels.length) {
+				toolMenu.clickHandler('level');
+				organisationUnitLevel.setValue(levels);
+			}
+			else if (groups.length) {
+				toolMenu.clickHandler('group');
+				organisationUnitGroup.setValue(groups);
+			}
+			else {
+				toolMenu.clickHandler('orgunit');
+				userOrganisationUnit.setValue(isOu);
+				userOrganisationUnitChildren.setValue(isOuc);
+				userOrganisationUnitGrandChildren.setValue(isOugc);
+			}
+			
+			treePanel.numberOfRecords = gis.util.object.getLength(view.parentGraphMap);
+			
+			for (var key in view.parentGraphMap) {
+				if (view.parentGraphMap.hasOwnProperty(key)) {
+					treePanel.multipleExpand(key, view.parentGraphMap[key], false);
+				}
+			}
+			
+			
+
+			// If fav has organisation units, wait for tree callback before update
+			//if (recMap[dimConf.organisationUnit.objectName] && Ext.isObject(graphMap)) {
+				//treePanel.numberOfRecords = pt.util.object.getLength(graphMap);
+
+				//for (var i = 0, a = xLayout.objectNameItemsMap[dimConf.organisationUnit.objectName]; i < a.length; i++) {
+					//if (graphMap.hasOwnProperty(a[i].id)) {
+						//treePanel.multipleExpand(a[i].id, graphMap[a[i].id], false);
+					//}
+				//}
+			//}
+			//else {
+				//treePanel.reset();
+			//}
 
 			// Layer item
 			layer.item.setValue(true, view.opacity);
@@ -5658,9 +5725,16 @@ Ext.onReady( function() {
 
 			// Components
 			groupSet.clearValue();
-
-			level.clearValue();
-			parent.reset();
+			
+			toolMenu.clickHandler('orgunit');
+			treePanel.reset();
+			
+			userOrganisationUnit.setValue(false);
+			userOrganisationUnitChildren.setValue(false);
+			userOrganisationUnitGrandChildren.setValue(false);
+			
+			organisationUnitLevel.clearValue();
+			organisationUnitGroup.clearValue();
 
 			areaRadius.reset();
 
