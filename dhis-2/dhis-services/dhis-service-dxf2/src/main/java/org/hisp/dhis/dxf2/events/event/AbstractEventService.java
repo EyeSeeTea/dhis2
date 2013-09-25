@@ -233,9 +233,18 @@ public abstract class AbstractEventService implements EventService
                 {
                     programStageInstance = programStageInstanceService.getProgramStageInstance( programInstance, programStage );
                 }
+
                 else
                 {
-                    return new ImportSummary( ImportStatus.ERROR, "ERROR!" );
+                    if ( event.getEvent() != null )
+                    {
+                        programStageInstance = programStageInstanceService.getProgramStageInstance( event.getEvent() );
+
+                        if ( programStageInstance == null )
+                        {
+                            return new ImportSummary( ImportStatus.ERROR, "Event.event did not point to a valid event" );
+                        }
+                    }
                 }
             }
         }
@@ -452,7 +461,6 @@ public abstract class AbstractEventService implements EventService
 
         Event event = new Event();
 
-        event.setCompleted( programStageInstance.isCompleted() );
         event.setEvent( programStageInstance.getUid() );
         event.setStatus( EventStatus.fromInt( programStageInstance.getStatus() ) );
         event.setEventDate( programStageInstance.getExecutionDate().toString() );
@@ -639,12 +647,12 @@ public abstract class AbstractEventService implements EventService
             if ( programStageInstance == null )
             {
                 programStageInstance = createProgramStageInstance( programStage, programInstance, organisationUnit, eventDate,
-                    event.getCompleted(), event.getCoordinate(), storedBy );
+                    EventStatus.COMPLETED.equals( event.getStatus() ), event.getCoordinate(), storedBy );
             }
             else
             {
                 updateProgramStageInstance( programStage, programInstance, organisationUnit, eventDate,
-                    event.getCompleted(), event.getCoordinate(), storedBy, programStageInstance );
+                    EventStatus.COMPLETED.equals( event.getStatus() ), event.getCoordinate(), storedBy, programStageInstance );
             }
 
             importSummary.setReference( programStageInstance.getUid() );
