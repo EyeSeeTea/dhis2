@@ -151,7 +151,7 @@ Ext.onReady( function() {
 		});
 		layers.openStreetMap.id = 'openStreetMap';
 
-		layers.facility = GIS.core.VectorLayer(gis, 'facility', GIS.i18n.facility_layer, {opacity: 0.8});
+		layers.facility = GIS.core.VectorLayer(gis, 'facility', GIS.i18n.facility_layer, {opacity: 1});
 		layers.facility.core = new mapfish.GeoStat.Facility(gis.olmap, {
 			layer: layers.facility,
 			gis: gis

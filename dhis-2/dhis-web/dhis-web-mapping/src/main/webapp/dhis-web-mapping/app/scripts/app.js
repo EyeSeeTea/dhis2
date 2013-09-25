@@ -912,6 +912,7 @@ Ext.onReady( function() {
 				imageUrl: 'images/' + layer.id + '_14.png',
 				value: layer.id === visibleLayer.id && window.google ? true : false,
 				opacity: layer.layerOpacity,
+				defaultOpacity: layer.layerOpacity,
 				numberFieldDisabled: layer.id !== visibleLayer.id
 			});
 
@@ -5785,7 +5786,7 @@ Ext.onReady( function() {
 			}
 
 			// Item
-			layer.item.setValue(false);
+			layer.item.setValue(false, layer.item.defaultOpacity);
 		};
 
 		setGui = function(view) {
@@ -6166,7 +6167,7 @@ Ext.onReady( function() {
 
 				a.push({
 					title: GIS.i18n.facility_layer_legend,
-					bodyStyle: 'padding: 4px 6px 6px; border: 0 none',
+					bodyStyle: 'padding: 4px 6px 3px; border: 0 none',
 					collapsible: true,
 					collapsed: true,
 					animCollapse: false,
