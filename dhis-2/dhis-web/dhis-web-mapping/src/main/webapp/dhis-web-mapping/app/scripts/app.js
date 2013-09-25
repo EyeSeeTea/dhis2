@@ -6159,7 +6159,7 @@ Ext.onReady( function() {
 
 				a.push({
 					title: GIS.i18n.layer_stack_transparency,
-					bodyStyle: 'padding: 3px 2px 2px 5px; border:0 none; border-bottom: 1px solid #d0d0d0',
+					bodyStyle: 'padding: 3px 2px 2px 5px; border:0 none; border-bottom: 1px solid #d0d0d0; border-top: 1px solid #d0d0d0',
 					style: 'border:0 none',
 					items: layersPanel,
 					collapsible: true,
@@ -6168,7 +6168,7 @@ Ext.onReady( function() {
 
 				a.push({
 					title: GIS.i18n.facility_layer_legend,
-					bodyStyle: 'padding: 4px 6px 3px; border: 0 none; border-bottom: 1px solid #d0d0d0',
+					bodyStyle: 'padding: 5px 6px 3px; border: 0 none; border-bottom: 1px solid #d0d0d0; border-top: 1px solid #d0d0d0',
 					collapsible: true,
 					collapsed: true,
 					animCollapse: false,
@@ -6181,7 +6181,7 @@ Ext.onReady( function() {
 
 				a.push({
 					title: GIS.i18n.thematic_layer_1_legend,
-					bodyStyle: 'padding: 4px 6px 6px; border: 0 none; border-bottom: 1px solid #d0d0d0',
+					bodyStyle: 'padding: 4px 6px 6px; border: 0 none; border-bottom: 1px solid #d0d0d0; border-top: 1px solid #d0d0d0',
 					collapsible: true,
 					collapsed: true,
 					animCollapse: false,
@@ -6194,7 +6194,7 @@ Ext.onReady( function() {
 
 				a.push({
 					title: GIS.i18n.thematic_layer_2_legend,
-					bodyStyle: 'padding: 4px 6px 6px; border: 0 none; border-bottom: 1px solid #d0d0d0',
+					bodyStyle: 'padding: 4px 6px 6px; border: 0 none; border-bottom: 1px solid #d0d0d0; border-top: 1px solid #d0d0d0',
 					collapsible: true,
 					collapsed: true,
 					animCollapse: false,
