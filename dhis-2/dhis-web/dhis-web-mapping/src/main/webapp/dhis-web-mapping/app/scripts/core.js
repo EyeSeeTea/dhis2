@@ -768,7 +768,7 @@ Ext.onReady( function() {
 				return;
 			}
 
-			if (gis.viewport.favoriteWindow && gis.viewport.favoriteWindow.isVisible()) {
+			if (gis.viewport && gis.viewport.favoriteWindow && gis.viewport.favoriteWindow.isVisible()) {
 				gis.viewport.favoriteWindow.destroy();
 			}
 
@@ -815,13 +815,19 @@ Ext.onReady( function() {
 		};
 
 		loader = {
-			load: function() {
+			load: function(views) {
 				gis.olmap.mask.show();
-
-				if (gis.map.id) {
+				
+				if (gis.map && gis.map.id) {
 					getMap();
 				}
 				else {
+					if (views) {
+						gis.map = {
+							mapViews: views
+						};
+					}
+						
 					setMap();
 				}
 			}
@@ -1947,9 +1953,11 @@ Ext.onReady( function() {
 
 		// api
 		(function() {
+			var dimConf = gis.conf.finals.dimension;
+			
 			api.layout = {};
 			api.response = {};
-
+			
 			api.layout.Record = function(config) {
 				var record = {};
 
@@ -2074,80 +2082,39 @@ Ext.onReady( function() {
 					return dimensionArray.length ? dimensionArray : null;
 				};
 
-				validateSpecialCases = function() {
-					var dimConf = conf.finals.dimension,
-						dimensions,
-						objectNameDimensionMap = {};
-
-					if (!layout) {
-						return;
-					}
-
-					dimensions = Ext.Array.clean([].concat(layout.columns, layout.rows, layout.filters));
-
-					for (var i = 0; i < dimensions.length; i++) {
-						objectNameDimensionMap[dimensions[i].dimension] = dimensions[i];
-					}
-
-					if (layout.filters && layout.filters.length) {
-						for (var i = 0; i < layout.filters.length; i++) {
-
-							// Indicators as filter
-							if (layout.filters[i].dimension === dimConf.indicator.objectName) {
-								util.message.alert(GIS.i18n.indicators_cannot_be_specified_as_filter || 'Indicators cannot be specified as filter');
-								return;
-							}
-
-							// Categories as filter
-							if (layout.filters[i].dimension === dimConf.category.objectName) {
-								util.message.alert(GIS.i18n.categories_cannot_be_specified_as_filter || 'Categories cannot be specified as filter');
-								return;
-							}
-
-							// Data sets as filter
-							if (layout.filters[i].dimension === dimConf.dataSet.objectName) {
-								util.message.alert(GIS.i18n.data_sets_cannot_be_specified_as_filter || 'Data sets cannot be specified as filter');
-								return;
-							}
+				validateSpecialCases = function(config) {
+					var dimensions = [].concat(config.columns || [], config.rows || [], config.filters || []),
+						dxDim,
+						peDim,
+						ouDim;
+					
+					for (var i = 0, dim; i < dimensions.length; i++) {
+						dim = dimensions[i];
+						
+						if (dim.dimension === dimConf.indicator.objectName ||
+							dim.dimension === dimConf.dataElement.objectName ||
+							dim.dimension === dimConf.operand.objectName ||
+							dim.dimension === dimConf.dataSet.objectName) {
+							dxDim = dim;
+						}
+						else if (dim.dimension === dimConf.period.objectName) {
+							peDim = dim;
+						}
+						else if (dim.dimension === dimConf.organisationUnit.objectName) {
+							ouDim = dim;
 						}
 					}
-
-					// dc and in
-					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.indicator.objectName]) {
-						util.message.alert('Indicators and detailed data elements cannot be specified together');
+					
+					if (!(dxDim && peDim && ouDim)) {
 						return;
 					}
-
-					// dc and de
-					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataElement.objectName]) {
-						util.message.alert('Detailed data elements and totals cannot be specified together');
-						return;
-					}
-
-					// dc and ds
-					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataSet.objectName]) {
-						util.message.alert('Data sets and detailed data elements cannot be specified together');
-						return;
-					}
-
-					// dc and co
-					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.category.objectName]) {
-						util.message.alert('Categories and detailed data elements cannot be specified together');
-						return;
-					}
-
-					// Degs and datasets in the same query
-					//if (Ext.Array.contains(dimensionNames, dimConf.data.dimensionName) && store.dataSetSelected.data.length) {
-						//for (var i = 0; i < init.degs.length; i++) {
-							//if (Ext.Array.contains(dimensionNames, init.degs[i].id)) {
-								//alert(GIS.i18n.data_element_group_sets_cannot_be_specified_together_with_data_sets);
-								//return;
-							//}
-						//}
-					//}
-
-					return true;
-				};
+					
+					config.columns = [dxDim];
+					config.rows = [ouDim];
+					config.filters = [peDim];
+					
+					return config;
+				};						
 
 				return function() {
 					var a = [],
@@ -2160,24 +2127,12 @@ Ext.onReady( function() {
 					config.columns = getValidatedDimensionArray(config.columns);
 					config.rows = getValidatedDimensionArray(config.rows);
 					config.filters = getValidatedDimensionArray(config.filters);
+					
+					config = validateSpecialCases(config);
 
 					// Config must be an object
 					if (!(config && Ext.isObject(config))) {
-						alert(init.el + ': Layout config is not an object');
-						return;
-					}
-
-					// Columns, rows, filter
-					if (!config.columns) {
-						alert('No data specified');
-						return;
-					}
-					if (!config.rows) {
-						alert('No organisation units specified');
-						return;
-					}
-					if (!config.filters) {
-						alert('No periods specified');
+						alert(init.el + ': Data, period and organisation unit dimensions required');
 						return;
 					}
 
@@ -2237,10 +2192,6 @@ Ext.onReady( function() {
 					layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
 					
 					layout.legendSet = config.legendSet;
-
-					if (!validateSpecialCases()) {
-						return;
-					}
 
 					return Ext.clone(layout);
 				}();

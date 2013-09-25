@@ -4279,7 +4279,7 @@ Ext.onReady( function() {
 									},
 									'-',
 									{
-										text: 'View table as chart' + '&nbsp;&nbsp;', //i18n
+										text: 'Open this table as chart' + '&nbsp;&nbsp;', //i18n
 										cls: 'pt-menu-item-noicon',
 										disabled: !PT.isSessionStorage || !pt.layout,
 										handler: function() {
@@ -4289,7 +4289,7 @@ Ext.onReady( function() {
 										}
 									},
 									{
-										text: 'View last chart' + '&nbsp;&nbsp;', //i18n
+										text: 'Open last chart' + '&nbsp;&nbsp;', //i18n
 										cls: 'pt-menu-item-noicon',
 										disabled: !(PT.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['chart']),
 										handler: function() {
@@ -4318,9 +4318,55 @@ Ext.onReady( function() {
 						text: PT.i18n.map,
 						iconCls: 'pt-button-icon-map',
 						toggleGroup: 'module',
-						//menu: {},
+						menu: {},
 						handler: function(b) {
-							window.location.href = pt.init.contextPath + '/dhis-web-mapping/app/index.html';
+							b.menu = Ext.create('Ext.menu.Menu', {
+								closeAction: 'destroy',
+								shadow: false,
+								showSeparator: false,
+								items: [
+									{
+										text: 'Go to maps' + '&nbsp;&nbsp;', //i18n
+										cls: 'pt-menu-item-noicon',
+										handler: function() {
+											window.location.href = pt.init.contextPath + '/dhis-web-mapping/app/index.html';
+										}
+									},
+									'-',
+									{
+										text: 'Open this table as map' + '&nbsp;&nbsp;', //i18n
+										cls: 'pt-menu-item-noicon',
+										disabled: !PT.isSessionStorage || !pt.layout,
+										handler: function() {
+											if (PT.isSessionStorage) {
+												pt.engine.setSessionStorage(pt.layout, 'analytical', pt.init.contextPath + '/dhis-web-mapping/app/index.html?s=analytical');
+											}
+										}
+									},
+									{
+										text: 'Open last chart' + '&nbsp;&nbsp;', //i18n
+										cls: 'pt-menu-item-noicon',
+										disabled: !(PT.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['map']),
+										handler: function() {
+											window.location.href = pt.init.contextPath + '/dhis-web-mapping/app/index.html?s=chart';
+										}
+									}
+								],
+								listeners: {
+									show: function() {
+										pt.util.window.setAnchorPosition(b.menu, b);
+									},
+									hide: function() {
+										b.menu.destroy();
+										defaultButton.toggle();
+									},
+									destroy: function(m) {
+										b.menu = null;
+									}
+								}
+							});
+
+							b.menu.show();
 						}
 					},
 					{

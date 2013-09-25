@@ -6282,13 +6282,26 @@ Ext.onReady( function() {
 
 			// Favorite
 			var id = gis.util.url.getUrlParam('id'),
-				base = gis.util.url.getUrlParam('base');
+				session = gis.util.url.getUrlParam('s'),
+				base = gis.util.url.getUrlParam('base'),
+				layout;
 
 			if (id) {
 				gis.map = {
 					id: id
 				};
 				GIS.core.MapLoader(gis).load();
+			}
+			else if (Ext.isString(session) && GIS.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
+				var d1 = sessionStorage.getItem('dhis2');
+				var d2 = JSON.parse(d1);
+				var d3 = d2[session];
+				
+				layout = gis.api.layout.Layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]);
+
+				if (layout) {
+					GIS.core.MapLoader(gis).load([layout]);
+				}
 			}
 
 			if (base.length) {
