@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.hisp.dhis.api.mobile.ActivityReportingService;
 import org.hisp.dhis.api.mobile.FacilityReportingService;
@@ -53,7 +54,6 @@ import org.hisp.dhis.api.mobile.model.LWUITmodel.Program;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.ProgramStage;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.Relationship;
 import org.hisp.dhis.i18n.I18nService;
-import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.smscommand.SMSCommandService;
@@ -121,7 +121,7 @@ public class MobileOrganisationUnitController
         mobileModel.setPrograms( programService.getPrograms( unit, locale ) );
         mobileModel.setDatasets( facilityReportingService.getMobileDataSetsForUnit( unit, locale ) );
         mobileModel.setServerCurrentDate( new Date() );
-        mobileModel.setLocales( getI18nLocalStrings( i18nService.getAvailableLocales() ) );
+        mobileModel.setLocales( getLocalStrings( i18nService.getAvailableLocales() ) );
         return mobileModel;
     }
 
@@ -211,7 +211,7 @@ public class MobileOrganisationUnitController
         mobileModel.setPrograms( programService.getPrograms( unit, locale ) );
         mobileModel.setDatasets( facilityReportingService.getMobileDataSetsForUnit( unit, locale ) );
         mobileModel.setServerCurrentDate( new Date() );
-        mobileModel.setLocales( getI18nLocalStrings( i18nService.getAvailableLocales() ) );
+        mobileModel.setLocales( getLocalStrings( i18nService.getAvailableLocales() ) );
         mobileModel.setSmsCommands( this.getMobileSMSCommands( smsCommandService.getJ2MESMSCommands() ) );
         return mobileModel;
     }
@@ -396,7 +396,7 @@ public class MobileOrganisationUnitController
 
     // Supportive methods
 
-    private Collection<String> getI18nLocalStrings( Collection<I18nLocale> locales )
+    private Collection<String> getLocalStrings( Collection<Locale> locales )
     {
         if ( locales == null || locales.isEmpty() )
         {
@@ -404,7 +404,7 @@ public class MobileOrganisationUnitController
         }
         Collection<String> localeStrings = new ArrayList<String>();
 
-        for ( I18nLocale locale : locales )
+        for ( Locale locale : locales )
         {
             localeStrings.add( locale.getLanguage() + "-" + locale.getCountry() );
         }

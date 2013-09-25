@@ -10,13 +10,11 @@ public class I18nLocale
      */
     private static final long serialVersionUID = -8425127015696485061L;
 
-    public static final String DEFAULT_COUNTRY = "";
+    //public static final String DEFAULT_COUNTRY = "";
     
-    private String name;
+    //private String name;
     
-    private String language;
-
-    private String country;
+    private String locale;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -24,16 +22,14 @@ public class I18nLocale
 
     public I18nLocale()
     {
-        this.name = "English, UNITED STATES";
-        this.language = "en";
-        this.country = "US";
+        this.name = "English";
+        this.locale = "en";
     }
 
-    public I18nLocale( String name, String language, String country )
+    public I18nLocale( String name, String locale )
     {
         this.name = name;
-        this.language = language;
-        this.country = country;
+        this.locale = locale;
     }
 
 
@@ -74,36 +70,14 @@ public class I18nLocale
     // Getters and setters
     // -------------------------------------------------------------------------
 
-
-    public String getName()
+    public String getLocale()
     {
-        return name;
-    }
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
-    public String getLanguage()
-    {
-        return language;
+        return locale;
     }
     
-    public void setLanguage( String language )
+    public void setLocale( String locale )
     {
-        this.language = language;
+        this.locale = locale;
     }
-
-    public String getCountry()
-    {
-        return country;
-    }
-
-    public void setCountry( String country )
-    {
-        this.country = country;
-    }
-
 
 }

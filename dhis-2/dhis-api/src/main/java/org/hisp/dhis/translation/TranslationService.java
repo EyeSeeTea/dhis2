@@ -29,9 +29,7 @@ package org.hisp.dhis.translation;
  */
 
 import java.util.Collection;
-
-import org.hisp.dhis.i18n.locale.I18nLocale;
-//import java.util.I18nLocale;
+import java.util.Locale;
 
 /**
  * @author Lars Helge Overland
@@ -64,7 +62,7 @@ public interface TranslationService
      * @param property the property.
      * @return a Translation.
      */
-    Translation getTranslation( String className, int id, I18nLocale locale, String property );
+    Translation getTranslation( String className, int id, Locale locale, String property );
 
     /**
      * Retrieves a Collection of Translations.
@@ -74,7 +72,7 @@ public interface TranslationService
      * @param locale the locale.
      * @return a Collection of Translations.
      */
-    Collection<Translation> getTranslations( String className, int id, I18nLocale locale );
+    Collection<Translation> getTranslations( String className, int id, Locale locale );
 
     /**
      * Retrieves a Collection of Translations.
@@ -83,36 +81,39 @@ public interface TranslationService
      * @param locale the locale.
      * @return a Collection of Translations.
      */
-    Collection<Translation> getTranslations( String className, I18nLocale locale );
+    Collection<Translation> getTranslations( String className, Locale locale );
 
     /**
-     * Retrieves a Translation without Default Language fallback.
+     * Retrieves a Translation.
      * 
      * @param className the class name.
      * @param id the id.
      * @param locale the locale.
      * @param property the property.
+     * @param useDefault is enabling defaulting or not.
      * @return a Translation.
      */
-    Translation getTranslationWithoutDefault( String className, int id, I18nLocale locale, String property );
+    Translation getTranslation( String className, int id, Locale locale, String property, boolean useDefault );
 
     /**
-     * Retrieves a Collection of Translations without Default Language fallback.
+     * Retrieves a Collection of Translations.
      * 
      * @param locale the locale.
+     * @param useDefault is enabling defaulting or not.
      * @return a Collection of Translations.
      */
-    Collection<Translation> getTranslationsWithoutDefault( I18nLocale locale );
+    Collection<Translation> getTranslations( Locale locale, boolean useDefault );
 
     /**
-     * Retrieves a Collection of Translations without Default Language fallback.
+     * Retrieves a Collection of Translations.
      * 
      * @param className the class name.
      * @param id the id.
      * @param locale the locale.
+     * @param useDefault is enabling defaulting or not.
      * @return a Collection of Translations.
      */
-    Collection<Translation> getTranslationsWithoutDefault( String className, int id, I18nLocale locale );
+    Collection<Translation> getTranslations( String className, int id, Locale locale, boolean useDefault );
 
     /**
      * Retrieves a Collection of all Translations.

@@ -56,7 +56,6 @@ import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataelement.comparator.DataElementSortOrderComparator;
 import org.hisp.dhis.dataset.CompleteDataSetRegistration;
 import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
-import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -130,8 +129,6 @@ public class FacilityReportingServiceImpl
                         
         Locale locale = LocaleUtil.getLocale( localeString );
         
-        I18nLocale i18nlocale = i18nService.getI18nLocaleByLocale( locale.getLanguage(), locale.getCountry() );
-
         if ( DEBUG )
             log.debug( "Getting data sets for unit " + unit.getName() );
 
@@ -145,7 +142,7 @@ public class FacilityReportingServiceImpl
                 if ( DEBUG )
                     log.debug( "Found data set " + dataSet.getName() );
 
-                datasets.add( getDataSetForLocale( dataSet.getId(), i18nlocale ) );
+                datasets.add( getDataSetForLocale( dataSet.getId(), locale ) );
             }
             else
             {
@@ -228,7 +225,7 @@ public class FacilityReportingServiceImpl
         return getDataSetForLocale( id, null );
     }
 
-    public DataSet getDataSetForLocale( int dataSetId, I18nLocale locale )
+    public DataSet getDataSetForLocale( int dataSetId, Locale locale )
     {
         org.hisp.dhis.dataset.DataSet dataSet = dataSetService.getDataSet( dataSetId );
 
@@ -312,7 +309,7 @@ public class FacilityReportingServiceImpl
         return ds;
     }
 
-    private List<DataElement> getDataElements( I18nLocale locale, List<org.hisp.dhis.dataelement.DataElement> dataElements )
+    private List<DataElement> getDataElements( Locale locale, List<org.hisp.dhis.dataelement.DataElement> dataElements )
     {
         List<DataElement> dataElementList = new ArrayList<DataElement>();
 

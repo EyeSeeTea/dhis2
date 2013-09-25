@@ -165,11 +165,11 @@ public class SetupTreeAction
         return currentLocale;
     }
 
-    private List<I18nLocale> availableLocalesDb;
+    private List<I18nLocale> availableI18nLocalesDb;
 
-    public List<I18nLocale> getAvailableLocalesDb()
+    public List<I18nLocale> getAvailableI18nLocalesDb()
     {
-        return availableLocalesDb;
+        return availableI18nLocalesDb;
     }
 
     private Locale currentLocaleDb;
@@ -206,7 +206,7 @@ public class SetupTreeAction
 
         availableLocales = localeManager.getAvailableLocales();
         
-        availableLocalesDb = i18nService.getAvailableLocales();
+        availableI18nLocalesDb = i18nService.getAvailableI18nLocales();
         
         if ( id != null )
         {

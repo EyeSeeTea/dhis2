@@ -30,12 +30,9 @@ package org.hisp.dhis.settings.user.action;
 
 import static org.hisp.dhis.user.UserSettingService.DEFAULT_ANALYSIS_DISPLAY_PROPERTY;
 import static org.hisp.dhis.user.UserSettingService.KEY_ANALYSIS_DISPLAY_PROPERTY;
-import static org.hisp.dhis.user.UserSettingService.KEY_DISPLAY_OPTION_SET_AS_RADIO_BUTTON;
 import static org.hisp.dhis.user.UserSettingService.KEY_MESSAGE_EMAIL_NOTIFICATION;
 import static org.hisp.dhis.user.UserSettingService.KEY_MESSAGE_SMS_NOTIFICATION;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.SortedMap;
@@ -104,16 +101,16 @@ public class GetGeneralSettingsAction
         return currentLocale;
     }
 
-    private List<I18nLocale> availableLocalesDb;
+    private List<I18nLocale> availableI18nLocalesDb;
 
-    public List<I18nLocale> getAvailableLocalesDb()
+    public List<I18nLocale> getAvailableI18nLocalesDb()
     {
-        return availableLocalesDb;
+        return availableI18nLocalesDb;
     }
 
-    private I18nLocale currentLocaleDb;
+    private Locale currentLocaleDb;
 
-    public I18nLocale getCurrentLocaleDb()
+    public Locale getCurrentLocaleDb()
     {
         return currentLocaleDb;
     }
@@ -172,34 +169,14 @@ public class GetGeneralSettingsAction
         // ---------------------------------------------------------------------
 
         availableLocales = localeManager.getAvailableLocales();
-
-        Collections.sort( availableLocales, new Comparator<Locale>()
-        {
-            public int compare( Locale locale0, Locale locale1 )
-            {
-                return locale0.getDisplayName().compareTo( locale1.getDisplayName() );
-            }
-        } );
         
         currentLocale = localeManager.getCurrentLocale();
         
-        if ( !availableLocales.contains( currentLocale ) )
-        {
-            currentLocale = localeManager.getFallbackLocale();
-        }
+        // ---------------------------------------------------------------------
+        // Get available DB locales
+        // ---------------------------------------------------------------------
 
-        // ---------------------------------------------------------------------
-        // Get available locales in db
-        // ---------------------------------------------------------------------
-        availableLocalesDb = i18nService.getAllI18nLocales();
-               
-        Collections.sort( availableLocalesDb, new Comparator<I18nLocale>()
-        {
-            public int compare( I18nLocale locale0, I18nLocale locale1 )
-            {
-                return locale0.getDisplayName().compareTo( locale1.getDisplayName() );
-            }
-        } );
+        availableI18nLocalesDb = i18nService.getAvailableI18nLocales();
 
         currentLocaleDb = i18nService.getCurrentLocale();
 
@@ -217,9 +194,6 @@ public class GetGeneralSettingsAction
         messageEmailNotification = (Boolean) userSettingService.getUserSetting( KEY_MESSAGE_EMAIL_NOTIFICATION, false );
 
         messageSmsNotification = (Boolean) userSettingService.getUserSetting( KEY_MESSAGE_SMS_NOTIFICATION, false );
-
-        displayOptionSetAsRadioButton = (String) userSettingService.getUserSetting(
-            KEY_DISPLAY_OPTION_SET_AS_RADIO_BUTTON, "" );
 
         return SUCCESS;
     }

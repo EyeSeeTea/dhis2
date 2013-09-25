@@ -635,22 +635,11 @@ public class TableAlteror
         executeSql( "delete from usersetting where name = 'dashboardConfig' or name = 'dashboardConfiguration'" );
         executeSql( "ALTER TABLE interpretation ALTER COLUMN userid DROP NOT NULL" );
 
-        // Check 'country' column on 'translation' table.  Add it if does not exists.
-        if( !checkColumn( "translation", "country" ) )
-        {
-            if ( executeSql( "alter table translation add column country varchar(15);" ) >= 0 )
-            {
-                executeSql( "update translation set country='' where country is null;" );
-                executeSql( "alter table translation drop constraint translation_pkey;" );
-                executeSql( "alter table translation add constraint translation_pkey primary key(objectclass, objectid, locale, country, objectproperty);" );
-            }
-        }
-
-        // Check i18nlocale data count.  If empty, add list.
+        // Adding basic locale list for I18nLocale table.
         if( checkRowEmpty( "SELECT * FROM i18nlocale;" ) )
         {
-            String i18nlocalesInsert = "INSERT INTO i18nlocale(i18nlocaleid, created, lastupdated, name, language, country)"
-                + " SELECT nextval('hibernate_sequence'), now(), now(), LANG.name, LANG.code, ''"
+            String i18nlocalesInsert = "INSERT INTO i18nlocale(i18nlocaleid, created, lastupdated, name, locale)"
+                + " SELECT nextval('hibernate_sequence'), now(), now(), LANG.name, LANG.code"
                 + " FROM"
                 + "  ((SELECT 'af' AS code, 'Afrikaans' AS name)"
                 + "   UNION ALL (SELECT 'am' AS code, 'Amharic' AS name)"
@@ -678,8 +667,7 @@ public class TableAlteror
                 + "   UNION ALL (SELECT 'vi' AS code, 'Vietnamese' AS name)"
                 + "   ) AS LANG"
                 + "  LEFT OUTER JOIN i18nlocale as I18N"
-                + "    ON LANG.code = I18N.language"
-                + "       and I18N.country = ''"
+                + "    ON LANG.code = I18N.locale"
                 + " WHERE I18N.i18nlocaleid is null"
                 + " ORDER BY LANG.name";
             

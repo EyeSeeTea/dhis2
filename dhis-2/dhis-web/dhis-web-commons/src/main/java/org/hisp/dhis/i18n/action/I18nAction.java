@@ -29,11 +29,10 @@ package org.hisp.dhis.i18n.action;
  */
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.hisp.dhis.common.IdentifiableObject;
@@ -62,9 +61,9 @@ public class I18nAction
 
     private String message;
 
-    private I18nLocale currentLocale;
+    private Locale currentLocale;
 
-    private List<I18nLocale> availableLocales = new ArrayList<I18nLocale>();
+    private List<I18nLocale> availableI18nLocales = new ArrayList<I18nLocale>();
 
     private Map<String, String> translations = new Hashtable<String, String>();
 
@@ -145,14 +144,14 @@ public class I18nAction
         return message;
     }
 
-    public I18nLocale getCurrentLocale()
+    public Locale getCurrentLocale()
     {
         return currentLocale;
     }
 
-    public List<I18nLocale> getAvailableLocales()
+    public List<I18nLocale> getAvailableI18nLocales()
     {
-        return availableLocales;
+        return availableI18nLocales;
     }
 
     public Map<String, String> getReferenceTranslations()
@@ -179,15 +178,9 @@ public class I18nAction
     {
         currentLocale = i18nService.getCurrentLocale();
 
-        availableLocales = i18nService.getAvailableLocales();
+        availableI18nLocales = i18nService.getAvailableI18nLocales();
         
-        Collections.sort( availableLocales, new Comparator<I18nLocale>() {
-           public int compare(I18nLocale locale1, I18nLocale locale2) {
-               return locale1.getDisplayName().compareTo( locale2.getDisplayName() );
-           }
-        });
-                
-        translations = i18nService.getTranslationsWithoutDefault( className, objectId );
+        translations = i18nService.getTranslations( className, objectId, false );
         
         // For Maintanence Appearance Setting translation case, check 'SystemSettng' as className and use 'Value' property.
         // Otherwise, perform the general Identifiable interface properties listing.
@@ -217,23 +210,5 @@ public class I18nAction
         return SUCCESS;
     }
 }
-
-
-
-/*  ToDo: To be deleted.
-public Map<String, String> getObjectPropertyValues( Object object )
-{
-    List<String> properties = getObjectPropertyNames( object );
-
-    Map<String, String> translations = new HashMap<String, String>();
-
-    for ( String property : properties )
-    {
-        translations.put( property, getProperty( object, property ) );
-    }
-
-    return translations;
-}
-*/          
 
 

@@ -37,13 +37,17 @@ import static org.hisp.dhis.system.util.ReflectionUtils.setProperty;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.NameableObject;
+import org.hisp.dhis.common.comparator.LocaleNameComparator;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.hisp.dhis.translation.Translation;
@@ -87,28 +91,19 @@ public class DefaultI18nService
     // Properties
     // -------------------------------------------------------------------------
 
-    // -------------------------------------------------------------------------
-    // I18nLocale Properties
-    // -------------------------------------------------------------------------
-
-    public I18nLocale getCurrentLocale()
+    public Locale getCurrentLocale()
     {
-        I18nLocale i18nLocale = null;
+        Locale locale = null;
 
         try
         {
-            String i18nLocaleId = (String) userSettingService.getUserSetting( UserSettingService.KEY_DB_LOCALE );
-
-            if ( i18nLocaleId != "None" )
-            {
-                i18nLocale = getI18nLocale( Integer.valueOf( i18nLocaleId ) );
-            }
+            locale = (Locale) userSettingService.getUserSetting( UserSettingService.KEY_DB_LOCALE );
         }
         catch ( Exception ex )
         {
         }
 
-        return i18nLocale;
+        return locale;
     }
 
     public boolean currentLocaleIsBase()
@@ -116,11 +111,44 @@ public class DefaultI18nService
         return getCurrentLocale() == null;
     }
 
-    public List<I18nLocale> getAvailableLocales()
+    public List<Locale> getAvailableLocales()
     {
-        return i18nLocaleStore.getAll();
+        List<Locale> locales = new ArrayList<Locale> ();
+        
+        List<I18nLocale> i18nLocales = i18nLocaleStore.getAll();
+                
+        for ( I18nLocale i18nLocale: i18nLocales )
+        {
+            Locale locale = org.hisp.dhis.system.util.LocaleUtils.getLocale( i18nLocale.getLocale() );
+
+            if ( locale != null )
+            {
+                locales.add( locale );
+            }                    
+        }
+
+        Collections.sort( locales, LocaleNameComparator.INSTANCE );
+        
+        return locales;
+        
     }
 
+    public List<I18nLocale> getAvailableI18nLocales()
+    {
+        List<I18nLocale> i18nLocales = i18nLocaleStore.getAll();                
+        
+        // Sort them.
+        Collections.sort( i18nLocales, new Comparator<I18nLocale>()
+        {
+            public int compare( I18nLocale locale0, I18nLocale locale1 )
+            {
+                return locale0.getDisplayName().compareTo( locale1.getDisplayName() );
+            }
+        } );        
+        
+        return i18nLocales;        
+    }
+    
     private Map<String, String> languages;
 
     public void setLanguages( Map<String, String> languages )
@@ -153,7 +181,7 @@ public class DefaultI18nService
         }
     }
 
-    public void internationalise( Object object, I18nLocale locale )
+    public void internationalise( Object object, Locale locale )
     {
         if ( isCollection( object ) )
         {
@@ -165,7 +193,7 @@ public class DefaultI18nService
         }
     }
 
-    private void internationaliseObject( Object object, I18nLocale locale )
+    private void internationaliseObject( Object object, Locale locale )
     {
         if ( locale == null || object == null )
         {
@@ -190,7 +218,7 @@ public class DefaultI18nService
         }
     }
 
-    private void internationaliseCollection( Collection<?> objects, I18nLocale locale )
+    private void internationaliseCollection( Collection<?> objects, Locale locale )
     {
         if ( locale == null || objects == null || objects.size() == 0 )
         {
@@ -265,7 +293,7 @@ public class DefaultI18nService
     // Translation
     // -------------------------------------------------------------------------
 
-    public void updateTranslation( String className, int id, I18nLocale locale, Map<String, String> translations )
+    public void updateTranslation( String className, int id, Locale locale, Map<String, String> translations )
     {
         if ( locale != null && className != null )
         {
@@ -274,7 +302,7 @@ public class DefaultI18nService
                 String key = translationEntry.getKey();
                 String value = translationEntry.getValue();
 
-                Translation translation = translationService.getTranslationWithoutDefault( className, id, locale, key );
+                Translation translation = translationService.getTranslation( className, id, locale, key, false );
 
                 if ( value != null && !value.trim().isEmpty() )
                 {
@@ -285,8 +313,7 @@ public class DefaultI18nService
                     }
                     else
                     {
-                        translation = new Translation( className, id, locale.getLanguage(), locale.getCountry(), key,
-                            value );
+                        translation = new Translation( className, id, locale.toString(), key, value );
 
                         translationService.addTranslation( translation );
                     }
@@ -304,7 +331,7 @@ public class DefaultI18nService
         return getTranslations( className, id, getCurrentLocale() );
     }
 
-    public Map<String, String> getTranslations( String className, I18nLocale locale )
+    public Map<String, String> getTranslations( String className, Locale locale )
     {
         if ( locale != null && className != null )
         {
@@ -314,26 +341,21 @@ public class DefaultI18nService
         return new HashMap<String, String>();
     }
 
-    public Map<String, String> getTranslations( String className, int id, I18nLocale locale )
+    public Map<String, String> getTranslations( String className, int id, Locale locale )
+    {
+        return getTranslations( className, id, locale, true );
+    }
+
+    public Map<String, String> getTranslations( String className, int id, boolean useDefault )
+    {
+        return getTranslations( className, id, getCurrentLocale(), useDefault );
+    }
+    
+    public Map<String, String> getTranslations( String className, int id, Locale locale, boolean useDefault )
     {
         if ( locale != null && className != null )
         {
-            return convertTranslations( translationService.getTranslations( className, id, locale ) );
-        }
-
-        return new HashMap<String, String>();
-    }
-
-    public Map<String, String> getTranslationsWithoutDefault( String className, int id )
-    {
-        return getTranslationsWithoutDefault( className, id, getCurrentLocale() );
-    }
-
-    public Map<String, String> getTranslationsWithoutDefault( String className, int id, I18nLocale locale )
-    {
-        if ( locale != null && className != null )
-        {
-            return convertTranslations( translationService.getTranslationsWithoutDefault( className, id, locale ) );
+            return convertTranslations( translationService.getTranslations( className, id, locale, useDefault ) );
         }
 
         return new HashMap<String, String>();

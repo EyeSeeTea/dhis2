@@ -35,7 +35,6 @@ import java.util.Map;
 
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nManager;
-import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.hisp.dhis.setting.SystemSetting;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.translation.Translation;
@@ -140,11 +139,8 @@ public class GetStringsFromLocaleAction
         // Database Locale
 
         if ( page.compareTo( PAGE_LOGIN ) == 0 )
-        {        
-            // TODO - i18nLocale create it by using i18nService?         
-            I18nLocale i18nLocale = new I18nLocale("", language, I18nLocale.DEFAULT_COUNTRY);
-                        
-            translations = convertTranslations_SystemSetting( translationService.getTranslations( SystemSetting.class.getSimpleName(), i18nLocale ) );
+        {                                
+            translations = convertTranslations_SystemSetting( translationService.getTranslations( SystemSetting.class.getSimpleName(), locale ) );
         }
         
         return SUCCESS;

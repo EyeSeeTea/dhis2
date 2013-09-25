@@ -28,10 +28,11 @@ package org.hisp.dhis.i18n.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Locale;
 import java.util.Map;
 
 import org.hisp.dhis.i18n.I18nService;
-import org.hisp.dhis.i18n.locale.I18nLocale;
+import org.hisp.dhis.system.util.LocaleUtils;
 
 import com.opensymphony.xwork2.ActionSupport;
 
@@ -45,7 +46,7 @@ public class GetTranslationsAction
 
     private Integer id;
 
-    private Integer loc;
+    private String loc;
 
     private Map<String, String> translations;
 
@@ -74,7 +75,7 @@ public class GetTranslationsAction
         this.id = id;
     }
 
-    public void setLoc( Integer locale )
+    public void setLoc( String locale )
     {
         this.loc = locale;
     }
@@ -91,9 +92,9 @@ public class GetTranslationsAction
     public String execute()
         throws Exception
     {
-        I18nLocale locale = i18nService.getI18nLocale( loc );
+        Locale locale = LocaleUtils.getLocale( loc );
 
-        translations = i18nService.getTranslationsWithoutDefault( className, id, locale );
+        translations = i18nService.getTranslations( className, id, locale, false );
         
         return SUCCESS;
     }

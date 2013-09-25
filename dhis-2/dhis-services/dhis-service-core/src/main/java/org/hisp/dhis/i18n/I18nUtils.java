@@ -29,11 +29,10 @@ package org.hisp.dhis.i18n;
  */
 
 import java.util.Collection;
-//import java.util.I18nLocale;
+import java.util.Locale;
 
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.hisp.dhis.system.paging.Paging;
 
 /**
@@ -53,13 +52,13 @@ public class I18nUtils
         return objects;
     }
     
-    public static <T> T i18n( I18nService i18nService, I18nLocale locale, T object )
+    public static <T> T i18n( I18nService i18nService, Locale locale, T object )
     {
         i18nService.internationalise( object, locale );        
         return object;
     }
     
-    public static <T> Collection<T> i18n( I18nService i18nService, I18nLocale locale, Collection<T> objects )
+    public static <T> Collection<T> i18n( I18nService i18nService, Locale locale, Collection<T> objects )
     {
         i18nService.internationalise( objects, locale );        
         return objects;

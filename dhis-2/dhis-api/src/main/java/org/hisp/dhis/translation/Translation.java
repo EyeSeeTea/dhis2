@@ -47,8 +47,6 @@ public class Translation
 
     private String locale;
     
-    private String country;
-
     private String property;
 
     private String value;
@@ -61,12 +59,11 @@ public class Translation
     {
     }
 
-    public Translation( String className, int id, String locale, String country, String property, String value )
+    public Translation( String className, int id, String locale, String property, String value )
     {
         this.className = className;
         this.id = id;
         this.locale = locale;
-        this.country = country;
         this.property = property;
         this.value = value;
     }
@@ -105,16 +102,6 @@ public class Translation
         this.locale = locale;
     }
     
-    public String getCountry()
-    {
-        return country;
-    }
-
-    public void setCountry( String country )
-    {
-        this.country = country;
-    }
-
     public String getProperty()
     {
         return property;
@@ -148,7 +135,6 @@ public class Translation
         result = result * prime + className.hashCode();
         result = result * prime + id;
         result = result * prime + locale.hashCode();
-        result = result * prime + country.hashCode();
         result = result * prime + property.hashCode();
         
         return result;
@@ -175,12 +161,12 @@ public class Translation
         Translation translation = (Translation) o;
 
         return className.equals( translation.getClassName() ) && id == translation.getId() &&
-            locale.equals( translation.getLocale() ) && country.equals( translation.getCountry() ) && property.equals( translation.getProperty());
+            locale.equals( translation.getLocale() ) && property.equals( translation.getProperty());
     }
 
     @Override
     public String toString()
     {
-        return "[Class name: " + className + " id: " + id + " locale: " + locale + " country: " + country + " property: " + property + " value: " + value + "]";
+        return "[Class name: " + className + " id: " + id + " locale: " + locale + " property: " + property + " value: " + value + "]";
     }
 }

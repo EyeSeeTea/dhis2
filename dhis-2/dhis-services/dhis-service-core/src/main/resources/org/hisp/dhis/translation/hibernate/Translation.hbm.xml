@@ -12,7 +12,6 @@
       <key-property name="className" column="objectclass" length="127" />
       <key-property name="id" column="objectid" />
       <key-property name="locale" column="locale" length="15" />
-      <key-property name="country" column="country" length="15" />
       <key-property name="property" column="objectproperty" length="63" />
     </composite-id>
 

@@ -27,8 +27,10 @@
 
 package org.hisp.dhis.dataadmin.action.locale;
 
-import org.hisp.dhis.i18n.locale.I18nLocale;
+import java.util.Locale;
+
 import org.hisp.dhis.i18n.I18nService;
+import org.hisp.dhis.i18n.locale.I18nLocale;
 
 import com.opensymphony.xwork2.Action;
 
@@ -83,11 +85,7 @@ public class AddLocaleAction
     public String execute()
         throws Exception
     {
-        I18nLocale i18nLocale = new I18nLocale();
-
-        i18nLocale.setName( name );
-        i18nLocale.setLanguage(language);
-        i18nLocale.setCountry(country);
+        I18nLocale i18nLocale = new I18nLocale( name, (new Locale( language, country )).toString() );
 
         i18nService.saveI18nLocale( i18nLocale );
 

@@ -2,7 +2,6 @@
   {
     "id": "${i18nLocale.id}",
 	"name": "$!encoder.jsonEncode( ${i18nLocale.name} )",
-	"language": "$!encoder.jsonEncode( ${i18nLocale.language} )",
-	"country": "$!encoder.jsonEncode( ${i18nLocale.country} )"
+	"locale": "$!encoder.jsonEncode( ${i18nLocale.locale} )"
   }
 }

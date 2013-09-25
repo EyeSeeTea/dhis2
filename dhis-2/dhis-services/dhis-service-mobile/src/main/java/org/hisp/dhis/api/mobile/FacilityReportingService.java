@@ -29,12 +29,12 @@ package org.hisp.dhis.api.mobile;
  */
 
 import java.util.List;
+import java.util.Locale;
 
 import org.hisp.dhis.api.mobile.model.Contact;
 import org.hisp.dhis.api.mobile.model.DataSet;
 import org.hisp.dhis.api.mobile.model.DataSetList;
 import org.hisp.dhis.api.mobile.model.DataSetValue;
-import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 /**
@@ -47,7 +47,7 @@ public interface FacilityReportingService
 
     public DataSet getDataSet( int id );
 
-    public DataSet getDataSetForLocale( int dataSetId, I18nLocale locale );
+    public DataSet getDataSetForLocale( int dataSetId, Locale locale );
 
     /**
      * Save {@link DataSetValue} to given {@link OrganisationUnit}

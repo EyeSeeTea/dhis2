@@ -30,7 +30,7 @@ package org.hisp.dhis.i18n;
 
 import java.util.Collection;
 import java.util.List;
-//import java.util.I18nLocale;
+import java.util.Locale;
 import java.util.Map;
 
 import org.hisp.dhis.i18n.locale.I18nLocale;
@@ -50,7 +50,7 @@ public interface I18nService
 
     void internationalise( Object object );
     
-    void internationalise( Object object, I18nLocale locale );
+    void internationalise( Object object, Locale locale );
     
     Map<String, String> getObjectPropertyValues( Object object );
     
@@ -66,27 +66,29 @@ public interface I18nService
     // Translation
     // -------------------------------------------------------------------------
 
-    void updateTranslation( String className, int id, I18nLocale thisLocale, Map<String, String> translations );
+    void updateTranslation( String className, int id, Locale thisLocale, Map<String, String> translations );
 
     Map<String, String> getTranslations( String className, int id );
 
-    Map<String, String> getTranslations( String className, I18nLocale locale );
+    Map<String, String> getTranslations( String className, Locale locale );
 
-    Map<String, String> getTranslations( String className, int id, I18nLocale locale );
+    Map<String, String> getTranslations( String className, int id, Locale locale );
     
-    Map<String, String> getTranslationsWithoutDefault( String className, int id );
+    Map<String, String> getTranslations( String className, int id, boolean useDefault );
 
-    Map<String, String> getTranslationsWithoutDefault( String className, int id, I18nLocale locale );
+    Map<String, String> getTranslations( String className, int id, Locale locale, boolean useDefault );
     
     // -------------------------------------------------------------------------
     // I18nLocale
     // -------------------------------------------------------------------------
 
-    I18nLocale getCurrentLocale();
+    Locale getCurrentLocale();
     
     boolean currentLocaleIsBase();
     
-    List<I18nLocale> getAvailableLocales();
+    List<Locale> getAvailableLocales();
+    
+    List<I18nLocale> getAvailableI18nLocales();
 
     Map<String, String> getAvailableLanguages();
 

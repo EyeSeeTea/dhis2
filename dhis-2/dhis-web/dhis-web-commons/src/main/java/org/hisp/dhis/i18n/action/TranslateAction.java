@@ -31,6 +31,7 @@ package org.hisp.dhis.i18n.action;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,8 +42,8 @@ import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.i18n.I18nService;
-import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.hisp.dhis.setting.SystemSetting;
+import org.hisp.dhis.system.util.LocaleUtils;
 
 import com.opensymphony.xwork2.Action;
 
@@ -145,16 +146,6 @@ public class TranslateAction
     public String execute()
         throws Exception
     {
-
-        I18nLocale localeObj = null;
-
-        if ( loc != null && !loc.equals( "NONE" ) )
-        {
-            localeObj = i18nService.getI18nLocale( Integer.valueOf( loc ) );
-
-            locale = localeObj.getName();
-        }
-
         log.info( "Classname: " + className + ", id: " + objectId + ", loc: " + locale );
 
         List<String> propertyNames = null;
@@ -171,6 +162,7 @@ public class TranslateAction
             propertyNames = i18nService.getObjectPropertyNames( object );
         }        
         
+        Locale thisLocale = LocaleUtils.getLocale( loc );
         
         HttpServletRequest request = ServletActionContext.getRequest();
 
@@ -189,9 +181,9 @@ public class TranslateAction
 
         log.info( "Translations: " + translations );
 
-        if ( localeObj != null )
+        if ( thisLocale != null && !loc.equals( "NONE" ) )
         {
-            i18nService.updateTranslation( className, Integer.parseInt( objectId ), localeObj, translations );
+            i18nService.updateTranslation( className, Integer.parseInt( objectId ), thisLocale, translations );
         }
 
         return SUCCESS;

@@ -29,6 +29,7 @@ package org.hisp.dhis.translation;
  */
 
 import java.util.Collection;
+import java.util.Locale;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementGroup;
@@ -36,7 +37,6 @@ import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.Section;
 import org.hisp.dhis.i18n.I18nService;
-import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
@@ -66,19 +66,19 @@ public class TranslationDeletionHandler
     {
         this.translationService = translationService;
     }
-    
+
     @Override
     protected String getClassName()
     {
         return Translation.class.getSimpleName();
     }
-    
+
     @Override
     public void deleteDataElement( DataElement dataElement )
     {
         i18nService.removeObject( dataElement );
     }
-    
+
     @Override
     public void deleteDataElementGroup( DataElementGroup dataElementGroup )
     {
@@ -96,7 +96,7 @@ public class TranslationDeletionHandler
     {
         i18nService.removeObject( dataSet );
     }
-    
+
     @Override
     public void deleteSection( Section section )
     {
@@ -150,21 +150,22 @@ public class TranslationDeletionHandler
     {
         i18nService.removeObject( groupSet );
     }
-    
+
     @Override
-    public String allowDeleteI18nLocale( I18nLocale i18nLocale )
+    public String allowDeleteI18nLocale( Locale locale )
     {
-        Collection<Translation> translations = translationService.getTranslationsWithoutDefault( i18nLocale );
-             
-        if ( translations.size() == 0 ) 
+        Collection<Translation> translations = translationService.getTranslations( locale, false );
+
+        if ( translations.size() == 0 )
         {
             return null;
         }
         else
         {
             Translation translation = translations.iterator().next();
-            
-            return translation.getLocale() + "_" + translation.getCountry();
+
+            return translation.getLocale();
         }
     }
+
 }

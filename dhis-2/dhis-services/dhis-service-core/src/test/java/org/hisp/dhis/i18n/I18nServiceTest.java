@@ -36,12 +36,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -52,7 +52,7 @@ public class I18nServiceTest
     extends DhisSpringTest
 {
     private I18nService i18nService;
-    private I18nLocale locale;
+    private Locale locale;
     
     
     // -------------------------------------------------------------------------
@@ -67,7 +67,7 @@ public class I18nServiceTest
         
         dataElementService = (DataElementService) getBean( DataElementService.ID );
         
-        locale = new I18nLocale("FRANCE", "fr", "FR");
+        locale = new Locale("fr", "FR");
     }
 
     // -------------------------------------------------------------------------

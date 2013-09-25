@@ -29,12 +29,8 @@ package org.hisp.dhis.translation;
  */
 
 import java.util.Collection;
-//import java.util.I18nLocale;
+import java.util.Locale;
 
-import org.hisp.dhis.i18n.locale.I18nLocale;
-import org.hisp.dhis.translation.Translation;
-import org.hisp.dhis.translation.TranslationService;
-import org.hisp.dhis.translation.TranslationStore;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -70,34 +66,34 @@ public class DefaultTranslationService
         translationStore.updateTranslation( translation );
     }
 
-    public Translation getTranslation( String className, int id, I18nLocale locale, String property )
+    public Translation getTranslation( String className, int id, Locale locale, String property )
     {
         return translationStore.getTranslation( className, id, locale, property );
     }
 
-    public Collection<Translation> getTranslations( String className, int id, I18nLocale locale )
+    public Translation getTranslation( String className, int id, Locale locale, String property, boolean useDefault )
+    {
+        return translationStore.getTranslation( className, id, locale, property, useDefault );
+    }
+
+    public Collection<Translation> getTranslations( String className, int id, Locale locale )
     {
         return translationStore.getTranslations( className, id, locale );
     }
 
-    public Collection<Translation> getTranslations( String className, I18nLocale locale )
+    public Collection<Translation> getTranslations( String className, Locale locale )
     {
         return translationStore.getTranslations( className, locale );
     }
 
-    public Translation getTranslationWithoutDefault( String className, int id, I18nLocale locale, String property )
+    public Collection<Translation> getTranslations( Locale locale, boolean useDefault )
     {
-        return translationStore.getTranslationWithoutDefault( className, id, locale, property );
+        return translationStore.getTranslations( locale, useDefault );
     }
 
-    public Collection<Translation> getTranslationsWithoutDefault( I18nLocale locale )
+    public Collection<Translation> getTranslations( String className, int id, Locale locale, boolean useDefault )
     {
-        return translationStore.getTranslationsWithoutDefault( locale );
-    }
-
-    public Collection<Translation> getTranslationsWithoutDefault( String className, int id, I18nLocale locale )
-    {
-        return translationStore.getTranslationsWithoutDefault( className, id, locale );
+        return translationStore.getTranslations( className, id, locale, useDefault );
     }
 
     public Collection<Translation> getAllTranslations()
