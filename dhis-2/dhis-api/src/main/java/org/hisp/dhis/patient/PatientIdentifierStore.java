@@ -30,6 +30,8 @@ package org.hisp.dhis.patient;
 
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.program.Program;
 
 import java.util.Collection;
 
@@ -48,7 +50,10 @@ public interface PatientIdentifierStore
 
     PatientIdentifier get( PatientIdentifierType type, String identifier );
 
-    /* We need this since we have allowed identifiers with duplicate values in the past. This returns a list instead. */
+    /*
+     * We need this since we have allowed identifiers with duplicate values in
+     * the past. This returns a list instead.
+     */
     Collection<PatientIdentifier> getAll( PatientIdentifierType type, String identifier );
 
     Collection<PatientIdentifier> getByIdentifier( String identifier );
@@ -63,12 +68,13 @@ public interface PatientIdentifierStore
 
     Patient getPatient( PatientIdentifierType idenType, String value );
 
-    Collection<Patient> getPatientsByIdentifier( String identifier, int min, int max );
+    Collection<Patient> getPatientsByIdentifier( String identifier, Integer min, Integer max );
 
     int countGetPatientsByIdentifier( String identifier );
 
     Collection<PatientIdentifier> get( Collection<PatientIdentifierType> identifierTypes, Patient patient );
 
-    boolean checkDuplicateIdentifier( Integer patientId, String identifier );
+    boolean checkDuplicateIdentifier( PatientIdentifierType patientIdentifierType, String identifier,
+        Integer patientId, OrganisationUnit orgunit, Program program, PeriodType periodType );
 
 }

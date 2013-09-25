@@ -31,14 +31,12 @@ package org.hisp.dhis.program;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.message.MessageConversation;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patientcomment.PatientComment;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Abyot Asalefew
@@ -50,6 +48,8 @@ public class ProgramStageInstance
      * Determines if a de-serialized file is compatible with this class.
      */
     private static final long serialVersionUID = 6239130884678145713L;
+
+    public static final int ACTIVE_STATUS = 0;
 
     public static final int COMPLETED_STATUS = 1;
 
@@ -79,7 +79,7 @@ public class ProgramStageInstance
 
     private PatientComment patientComment;
 
-    private Integer status;
+    private Integer status = ACTIVE_STATUS;
 
     private String coordinates;
 
@@ -87,18 +87,18 @@ public class ProgramStageInstance
 
     private Date completedDate;
 
-    private Set<Patient> patients;
-
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
     public ProgramStageInstance()
     {
+        setAutoFields();
     }
 
     public ProgramStageInstance( ProgramInstance programInstance, ProgramStage programStage )
     {
+        this();
         this.programInstance = programInstance;
         this.programStage = programStage;
     }
@@ -125,8 +125,9 @@ public class ProgramStageInstance
             return false;
         }
 
-        // TODO include due date and execution date to make consistent with hashcode
-        
+        // TODO include due date and execution date to make consistent with
+        // hashcode
+
         final ProgramStageInstance other = (ProgramStageInstance) object;
 
         return programInstance.equals( other.getProgramInstance() ) && programStage.equals( other.getProgramStage() );
@@ -301,16 +302,6 @@ public class ProgramStageInstance
         this.coordinates = coordinates;
     }
 
-    public Set<Patient> getPatients()
-    {
-        return patients;
-    }
-
-    public void setPatients( Set<Patient> patients )
-    {
-        this.patients = patients;
-    }
-
     public List<MessageConversation> getMessageConversations()
     {
         return messageConversations;
@@ -354,5 +345,25 @@ public class ProgramStageInstance
 
             return ProgramStageInstance.FUTURE_VISIT_STATUS;
         }
+    }
+
+    @Override
+    public String toString()
+    {
+        return "ProgramStageInstance{" +
+            "programInstance=" + programInstance +
+            ", programStage=" + programStage +
+            ", dueDate=" + dueDate +
+            ", executionDate=" + executionDate +
+            ", organisationUnit=" + organisationUnit +
+            ", completed=" + completed +
+            ", outboundSms=" + outboundSms +
+            ", messageConversations=" + messageConversations +
+            ", patientComment=" + patientComment +
+            ", status=" + status +
+            ", coordinates='" + coordinates + '\'' +
+            ", completedUser='" + completedUser + '\'' +
+            ", completedDate=" + completedDate +
+            '}';
     }
 }

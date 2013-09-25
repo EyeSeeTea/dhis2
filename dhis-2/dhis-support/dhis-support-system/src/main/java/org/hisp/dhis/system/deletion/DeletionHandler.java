@@ -28,8 +28,6 @@ package org.hisp.dhis.system.deletion;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Locale;
-
 import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.caseaggregation.CaseAggregationCondition;
@@ -717,7 +715,7 @@ public abstract class DeletionHandler
     {
     }
 
-    public String allowDeleteI18nLocale( Locale locale )
+    public String allowDeleteI18nLocale( I18nLocale i18nLocale )
     {        
         return null;
     }

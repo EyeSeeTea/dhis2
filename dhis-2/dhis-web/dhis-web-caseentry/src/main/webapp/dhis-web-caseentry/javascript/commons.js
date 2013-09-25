@@ -114,7 +114,8 @@ function searchObjectOnChange( this_ )
 	{
 		element.replaceWith( getAgeTextBox() );
 	}
-	else if ( attributeId=='fixedAttr_registrationDate' )
+	else if ( attributeId=='fixedAttr_registrationDate' ||
+		attributeId=='pi_enrollmentDate' )
 	{
 		element.replaceWith( getRegistrationDate(container) );
 		datePickerValid( 'searchText_' + container );
@@ -245,6 +246,7 @@ function getSearchParams()
 	}
 	
 	var flag = false;
+	var addProgramId = false;
 	jQuery( '#advancedSearchTB tr' ).each( function( i, row ){
 		var dateOperator = "";
 		var p = "";
@@ -252,8 +254,9 @@ function getSearchParams()
 			if(item.type!="button"){
 				if( idx == 0){
 					p = "&searchTexts=" + item.value;
-					if(item.value=='prg'){
+					if(item.value=='prg' || item.value=='pi_enrollmentDate'){
 						flag = true;
+						addProgramId = true;
 					}
 				}
 				else if( item.name == 'dateOperator'){
@@ -286,6 +289,11 @@ function getSearchParams()
 		if( getFieldValue('searchByProgramStage') == "false" && !searchInAllFacility ){
 			p += "_" + getFieldValue('orgunitId');
 		}
+		
+		if( addProgramId ){
+			p += "_" + getFieldValue('programIdAddPatient');
+		}
+		
 		params += p;
 	});
 		
@@ -605,15 +613,20 @@ function showCreateNewEvent( programInstanceId, programStageId )
 
 function setSuggestedDueDate( programInstanceId )
 {
-	var lastVisit = jQuery('.stage-object-selected').attr('reportDate');
-	jQuery('#tb_' + programInstanceId + ' input').each(function()
+	var lastVisit = "";
+	if( jQuery('.stage-object-selected').length!=0 )
 	{
-		var reportDate = jQuery(this).attr('reportDate');
-		if( reportDate > lastVisit )
+		var lastVisit = jQuery('.stage-object-selected').attr('reportDate');
+		jQuery('#tb_' + programInstanceId + ' input').each(function()
 		{
-			lastVisit = reportDate;
-		}
-	});
+			var reportDate = jQuery(this).attr('reportDate');
+			if( reportDate > lastVisit )
+			{
+				lastVisit = reportDate;
+			}
+		});
+	}
+	
 	if( lastVisit == ''){
 		lastVisit = getCurrentDate();
 	}
@@ -637,15 +650,13 @@ function closeDueDateDiv( programInstanceId )
 // Register Irregular-encounter
 //------------------------------------------------------
 
-function registerIrregularEncounter( programInstanceId, programStageId, programStageName, dueDate )
+function registerIrregularEncounter( programInstanceId, programStageId, programStageUid, programStageName, dueDate )
 {
 	if(dueDate==''){
 		showById("spanDueDateNewEncounter_" + programInstanceId);
 	}
 	else
 	{
-		hideById("spanDueDateNewEncounter_" + programInstanceId);
-		
 		jQuery.postJSON( "registerIrregularEncounter.action",
 		{ 
 			programInstanceId:programInstanceId,
@@ -660,47 +671,44 @@ function registerIrregularEncounter( programInstanceId, programStageId, programS
 			var elementId = prefixId + programStageInstanceId;
 			var flag = false;
 			var programType = jQuery('.stage-object-selected').attr('type');
-			
+			var selectedStage = jQuery('#repeatableProgramStage_' + programInstanceId + ' option:selected');
+			var elementBox = '<td>'
+				+ '<div class="orgunit-object" id="org_' + programStageInstanceId + '">&nbsp;</div>'
+				+ '<input name="programStageBtn" '
+				+ 'pi="' + programInstanceId + '" ' 
+				+ 'id="' + elementId + '" ' 
+				+ 'psid="' + programStageId + '" '
+				+ 'psuid="' + programStageUid + '" '
+				+ 'psname="' + programStageName + '" '
+				+ 'status=3'
+				+ 'programType="' + selectedStage.attr('programType') + '" '
+				+ 'reportDate="" '
+				+ 'reportDateDes="' + selectedStage.attr('reportDateDes') + '" '
+				+ 'dueDate="' + dueDate + '" '
+				+ 'openAfterEnrollment="' + selectedStage.attr('openAfterEnrollment') + '" '
+				+ 'reportDateToUse="' + selectedStage.attr('reportDateToUse') + '" '
+				+ 'class="stage-object" '
+				+ 'value="'+ programStageName + '&#13;&#10;&nbsp;' + dueDate + '" '
+				+ 'onclick="javascript:loadDataEntry(' + programStageInstanceId + ')" '
+				+ 'type="button" '
+				+ '></td>';
+				
 			jQuery("#programStageIdTR_" + programInstanceId + " input[name='programStageBtn']").each(function(i,item){
 				var element = jQuery(item);
 				var dueDateInStage = element.attr('dueDate');
+						
 				if( dueDate < dueDateInStage && !flag)
 				{	
-					jQuery('<td>'
-						+ '<div class="orgunit-object" id="org_' + programStageInstanceId + '">&nbsp;</div>'
-						+ '<input name="programStageBtn" '
-						+ 'pi="' + programInstanceId + '" ' 
-						+ 'id="' + elementId + '" ' 
-						+ 'psid="' + programStageId + '" '
-						+ 'programType="' + programType + '" '
-						+ 'psname="' + programStageName + '" '
-						+ 'dueDate="' + dueDate + '" '
-						+ 'value="'+ programStageName + '&#13;&#10;' + dueDate + '" '
-						+ 'onclick="javascript:loadDataEntry(' + programStageInstanceId + ')" '
-						+ 'type="button" class="stage-object" '
-						+ '></td>'
-						+ '<td id="arrow_' + programStageInstanceId + '"><img src="images/rightarrow.png"></td>')
-					.insertBefore(element.parent());
+					jQuery(elementBox + '<td id="arrow_' + programStageInstanceId + '"><img src="images/rightarrow.png"></td>').insertBefore(element.parent());
 					flag = true;
 				}
 			});
 			
 			if( !flag )
 			{
-				jQuery("#programStageIdTR_" + programInstanceId).append('<td id="arrow_' + programStageInstanceId + '"><img src="images/rightarrow.png"></td>'
-					+ '<td>'
-					+ '<div class="orgunit-object" id="org_' + programStageInstanceId + '">&nbsp;</div>'
-						+ '<input name="programStageBtn" '
-						+ 'pi="' + programInstanceId + '" ' 
-						+ 'id="' + elementId + '" ' 
-						+ 'psid="' + programStageId + '" '
-						+ 'programType="' + programType + '" '
-						+ 'psname="' + programStageName + '" '
-						+ 'dueDate="' + dueDate + '" '
-						+ 'value="'+ programStageName + '&#13;&#10;' + dueDate + '" '
-						+ 'onclick="javascript:loadDataEntry(' + programStageInstanceId + ')" '
-						+ 'type="button" class="stage-object" '
-						+ '></td>');
+				jQuery("#programStageIdTR_" + programInstanceId).append(
+					'<td id="arrow_' + programStageInstanceId + '">'
+					+ '<img src="images/rightarrow.png"></td>' + elementBox );
 			}
 			if( jQuery('#tb_' + programInstanceId + " :input" ).length > 4 ){
 				jQuery('#tb_' + programInstanceId + ' .arrow-left').removeClass("hidden");
@@ -722,6 +730,21 @@ function registerIrregularEncounter( programInstanceId, programStageId, programS
 			jQuery('#createNewEncounterDiv_' + programInstanceId).dialog("close");
 			resetActiveEvent(programInstanceId);
 			loadDataEntry( programStageInstanceId );
+			
+			// Disable Create new event button in the entry form if doesn't have any stage for register
+			flag = true;
+			jQuery('#repeatableProgramStage_' + programInstanceId + " option ").each(function(){
+				if( jQuery(this).attr('localid')== programStageId){
+					jQuery(this).css("display","none");
+				}
+				if( jQuery(this).css('display')!= "none"){
+					flag = false;
+				}
+			});
+			if( flag ){
+				disable( 'newEncounterBtn_' + programInstanceId  );
+			}
+			closeDueDateDiv( programInstanceId );
 			showSuccessMessage(i18n_create_event_success);
 		});
 	}
@@ -991,6 +1014,14 @@ function removeEvent( programStageInstanceId, isEvent )
 					jQuery('#arrow_' + programStageInstanceId).remove();
 					jQuery('#org_' + programStageInstanceId).remove();
 					resetActiveEvent( programInstanceId );
+					
+					jQuery('#repeatableProgramStage_' + programInstanceId + " option ").each(function(){
+						if( jQuery(this).attr('localid')== programStageId){
+							jQuery(this).css('display','block');
+						}
+					});
+					enable( 'newEncounterBtn_' + programInstanceId  );
+					
 					showSuccessMessage( i18n_delete_success );
     	    	}
     	    	else if ( json.response == "error" )
@@ -1392,7 +1423,7 @@ function saveSingleEnrollment(patientId, programId)
 			
 			jQuery('#activeTB' ).append(activedRow);
 			jQuery('#enrollmentDiv').dialog("close");
-			saveIdentifierAndAttribute( patientId, programId,'identifierAndAttributeDiv' );
+			validateIdentifier( patientId, programId,'identifierAndAttributeDiv' );
 			loadActiveProgramStageRecords( programInstanceId );
 			showSuccessMessage(i18n_enrol_success);
 		});
@@ -1603,11 +1634,29 @@ function removeProgramInstance( programInstanceId )
 // Identifiers && Attributes for selected program
 // ----------------------------------------------------------------
 
-function saveIdentifierAndAttribute( patientId, programId, paramsDiv)
+function validateIdentifier(  patientId, programId, paramsDiv)
 {
 	var params  = getParamsForDiv(paramsDiv);
 		params += "&patientId=" + patientId;
 		params +="&programId=" + programId;
+	$.ajax({
+		type: "POST",
+		url: 'validatePatientIdentifier.action',
+		data: params,
+		success: function(json) 
+		{
+			if( json.response=='success'){
+				saveIdentifierAndAttribute( params);
+			}
+			else{
+				showErrorMessage( json.message );
+			}
+		}
+	});
+}
+
+function saveIdentifierAndAttribute(params)
+{
 	$.ajax({
 			type: "POST",
 			url: 'savePatientIdentifierAndAttribute.action',

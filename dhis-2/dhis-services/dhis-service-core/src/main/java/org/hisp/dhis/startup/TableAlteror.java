@@ -28,6 +28,13 @@ package org.hisp.dhis.startup;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
 import org.amplecode.quick.StatementHolder;
@@ -40,13 +47,6 @@ import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.system.startup.AbstractStartupRoutine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Lars Helge Overland
@@ -674,9 +674,39 @@ public class TableAlteror
             executeSql( i18nlocalesInsert );
         }
 
+        upgradeMapViewsToAnalyticalObject();
+        
         log.info( "Tables updated" );
     }
 
+    private void upgradeMapViewsToAnalyticalObject()
+    {
+        executeSql( "insert into mapview_dataelements ( mapviewid, sort_order, dataelementid ) select mapviewid, 0, dataelementid from mapview where dataelementid is not null" );
+        executeSql( "alter table mapview drop column dataelementid" );
+
+        executeSql( "insert into mapview_dataelementoperands ( mapviewid, sort_order, dataelementoperandid ) select mapviewid, 0, dataelementoperandid from mapview where dataelementoperandid is not null" );
+        executeSql( "alter table mapview drop column dataelementoperandid" );
+
+        executeSql( "insert into mapview_indicators ( mapviewid, sort_order, indicatorid ) select mapviewid, 0, indicatorid from mapview where indicatorid is not null" );
+        executeSql( "alter table mapview drop column indicatorid" );
+
+        executeSql( "insert into mapview_organisationunits ( mapviewid, sort_order, organisationunitid ) select mapviewid, 0, parentorganisationunitid from mapview where parentorganisationunitid is not null" );
+        executeSql( "alter table mapview drop column parentorganisationunitid" );
+
+        executeSql( "insert into mapview_periods ( mapviewid, sort_order, periodid ) select mapviewid, 0, periodid from mapview where periodid is not null" );
+        executeSql( "alter table mapview drop column periodid" );
+
+        executeSql( "insert into mapview_orgunitlevels ( mapviewid, sort_order, orgunitlevel ) select m.mapviewid, 0, o.level " + 
+            "from mapview m join orgunitlevel o on (m.organisationunitlevelid=o.orgunitlevelid) where m.organisationunitlevelid is not null" );                
+        executeSql( "alter table mapview drop column organisationunitlevelid" );
+        
+        executeSql( "alter table mapview drop column dataelementgroupid" );        
+        executeSql( "alter table mapview drop column indicatorgroupid" );
+        
+        executeSql( "update mapview set userorganisationunit = false where userorganisationunit is null" );
+        executeSql( "update mapview set userorganisationunitchildren = false where userorganisationunitchildren is null" );
+    }
+    
     private void upgradeChartRelativePeriods()
     {
         BatchHandler<RelativePeriods> batchHandler = batchHandlerFactory.createBatchHandler( RelativePeriodsBatchHandler.class ).init();

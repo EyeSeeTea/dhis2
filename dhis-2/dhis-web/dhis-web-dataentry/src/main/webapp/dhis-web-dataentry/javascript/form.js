@@ -1054,6 +1054,7 @@ function insertDataValues()
 
     $( '.entryfield' ).css( 'background-color', COLOR_WHITE ).css( 'border', '1px solid ' + COLOR_BORDER );
     $( '.entryselect' ).css( 'background-color', COLOR_WHITE ).css( 'border', '1px solid ' + COLOR_BORDER );
+    $( '.indicator' ).css( 'background-color', COLOR_WHITE ).css( 'border', '1px solid ' + COLOR_BORDER );
     $( '.entrytrueonly' ).css( 'background-color', COLOR_WHITE );
     $( '.entryoptionset' ).css( 'background-color', COLOR_WHITE );
 
@@ -1082,7 +1083,7 @@ function insertDataValues()
 	    {
 	    	if ( json.locked )
 	    	{
-	            $( '#contentDiv input').attr( 'disabled', 'disabled' );
+	            $( '#contentDiv input').attr( 'readonly', 'readonly' );
 	            $( '.entryoptionset').autocomplete( 'disable' );
                 $( '.sectionFilter').removeAttr( 'disabled' );
                 $( '#completenessDiv' ).hide();
@@ -1091,8 +1092,7 @@ function insertDataValues()
 	    	else
 	    	{
                 $( '.entryoptionset' ).autocomplete( 'enable' );
-                $( '#contentDiv input' ).removeAttr( 'disabled' );
-                $( '#contentDiv input' ).css( 'backgroundColor', '#fff' );
+                $( '#contentDiv input' ).removeAttr( 'readonly' );
 	    		$( '#completenessDiv' ).show();
 	    	}
 	    	
@@ -1187,6 +1187,10 @@ function insertDataValues()
                 $( '#contentDiv input' ).css( 'backgroundColor', '#eee' );
                 $( '.sectionFilter' ).css( 'backgroundColor', '#fff' );
             }
+        },
+        complete: function()
+        {
+	    	$( '.indicator' ).attr( 'readonly', 'readonly' );	    	
         }
 	} );
 }

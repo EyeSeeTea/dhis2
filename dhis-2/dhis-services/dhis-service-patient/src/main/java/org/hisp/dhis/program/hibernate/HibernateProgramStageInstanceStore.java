@@ -155,7 +155,7 @@ public class HibernateProgramStageInstanceStore
     // Implemented methods
     // -------------------------------------------------------------------------
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public ProgramStageInstance get( ProgramInstance programInstance, ProgramStage programStage )
     {
         List<ProgramStageInstance> list = new ArrayList<ProgramStageInstance>( getCriteria(
@@ -163,6 +163,15 @@ public class HibernateProgramStageInstanceStore
             .addOrder( Order.asc( "id" ) ).list() );
 
         return list.isEmpty() ? null : list.get( list.size() - 1 );
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<ProgramStageInstance> getAll( ProgramInstance programInstance, ProgramStage programStage )
+    {
+        Criteria criteria = getCriteria( Restrictions.eq( "programInstance", programInstance ), Restrictions.eq( "programStage", programStage ) )
+            .addOrder( Order.asc( "id" ) );
+
+        return criteria.list();
     }
 
     @SuppressWarnings("unchecked")
@@ -175,6 +184,12 @@ public class HibernateProgramStageInstanceStore
     public Collection<ProgramStageInstance> get( Collection<ProgramInstance> programInstances )
     {
         return getCriteria( Restrictions.in( "programInstance", programInstances ) ).list();
+    }
+
+    @SuppressWarnings("unchecked")
+    public Collection<ProgramStageInstance> get( Collection<ProgramInstance> programInstances, boolean completed )
+    {
+        return getCriteria( Restrictions.in( "programInstance", programInstances ), Restrictions.eq( "completed", completed ) ).list();
     }
 
     @SuppressWarnings("unchecked")
@@ -785,13 +800,6 @@ public class HibernateProgramStageInstanceStore
         GridUtils.addRows( grid, rs );
 
         return grid;
-    }
-
-    @SuppressWarnings("unchecked")
-    public Collection<ProgramStageInstance> get( Patient patient )
-    {
-        return getCriteria().createAlias( "patients", "patient" )
-            .add( Restrictions.eq( "patient.id", patient.getId() ) ).list();
     }
 
     // -------------------------------------------------------------------------

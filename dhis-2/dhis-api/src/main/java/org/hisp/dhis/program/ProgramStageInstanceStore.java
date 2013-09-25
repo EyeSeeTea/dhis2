@@ -55,6 +55,8 @@ public interface ProgramStageInstanceStore
 
     ProgramStageInstance get( ProgramInstance programInstance, ProgramStage programStage );
 
+    Collection<ProgramStageInstance> getAll( ProgramInstance programInstance, ProgramStage programStage );
+
     Collection<ProgramStageInstance> get( ProgramStage programStage );
 
     Collection<ProgramStageInstance> get( Date dueDate );
@@ -67,14 +69,16 @@ public interface ProgramStageInstanceStore
 
     Collection<ProgramStageInstance> get( Collection<ProgramInstance> programInstances );
 
+    Collection<ProgramStageInstance> get( Collection<ProgramInstance> programInstances, boolean completed );
+
     /**
      * Get all {@link ProgramStageInstance program stage instances} for unit.
-     *
-     * @param unit      - the unit to get instances for.
-     * @param after     - optional date the instance should be on or after.
-     * @param before    - optional date the instance should be on or before.
+     * 
+     * @param unit - the unit to get instances for.
+     * @param after - optional date the instance should be on or after.
+     * @param before - optional date the instance should be on or before.
      * @param completed - optional flag to only get completed (<code>true</code>
-     *                  ) or uncompleted (<code>false</code>) instances.
+     *        ) or uncompleted (<code>false</code>) instances.
      * @return
      */
     public List<ProgramStageInstance> get( OrganisationUnit unit, Date after, Date before, Boolean completed );
@@ -128,7 +132,4 @@ public interface ProgramStageInstanceStore
     Collection<Integer> getOrgunitIds( Date startDate, Date endDate );
 
     Grid getCompleteness( Collection<Integer> orgunitIds, Program program, String startDate, String endDate, I18n i18n );
-
-    Collection<ProgramStageInstance> get( Patient patient );
-
 }

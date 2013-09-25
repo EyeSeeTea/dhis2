@@ -29,10 +29,13 @@ package org.hisp.dhis.caseentry.action.patient;
  */
 
 import com.opensymphony.xwork2.Action;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientIdentifier;
 import org.hisp.dhis.patient.PatientIdentifierService;
@@ -46,6 +49,7 @@ import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.validation.ValidationCriteria;
 
 import javax.servlet.http.HttpServletRequest;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,6 +77,8 @@ public class ValidatePatientAction
     private PatientIdentifierTypeService identifierTypeService;
 
     private ProgramService programService;
+
+    private OrganisationUnitSelectionManager selectionManager;
 
     // -------------------------------------------------------------------------
     // Input
@@ -191,11 +197,18 @@ public class ValidatePatientAction
 
                     if ( StringUtils.isNotBlank( value ) )
                     {
-                        boolean isDuplicate = patientIdentifierService.checkDuplicateIdentifier( id, value );
+                        boolean isDuplicate = false;
+
+                        OrganisationUnit orgunit = (idType.getOrgunitScope()) ? selectionManager
+                            .getSelectedOrganisationUnit() : null;
+                        Program program = (idType.getProgramScope()) ? programService.getProgram( programId ) : null;
+
+                        isDuplicate = patientIdentifierService.checkDuplicateIdentifier( idType, value, id,
+                            orgunit, program, idType.getPeriodType() );
 
                         if ( isDuplicate )
                         {
-                            idDuplicate += value + ", ";
+                            idDuplicate += idType.getName() + ", ";
                         }
                     }
                 }
@@ -289,6 +302,11 @@ public class ValidatePatientAction
     public void setPatientService( PatientService patientService )
     {
         this.patientService = patientService;
+    }
+
+    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
+    {
+        this.selectionManager = selectionManager;
     }
 
     public void setPatientAttributeValueService( PatientAttributeValueService patientAttributeValueService )

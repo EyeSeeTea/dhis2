@@ -150,13 +150,6 @@ public class GetGeneralSettingsAction
         return messageSmsNotification;
     }
 
-    private String displayOptionSetAsRadioButton;
-
-    public String getDisplayOptionSetAsRadioButton()
-    {
-        return displayOptionSetAsRadioButton;
-    }
-
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -171,7 +164,7 @@ public class GetGeneralSettingsAction
         availableLocales = localeManager.getAvailableLocales();
         
         currentLocale = localeManager.getCurrentLocale();
-        
+
         // ---------------------------------------------------------------------
         // Get available DB locales
         // ---------------------------------------------------------------------

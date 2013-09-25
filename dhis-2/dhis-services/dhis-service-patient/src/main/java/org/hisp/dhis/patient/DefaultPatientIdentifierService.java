@@ -28,6 +28,9 @@ package org.hisp.dhis.patient;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.program.Program;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
@@ -125,7 +128,7 @@ public class DefaultPatientIdentifierService
         return patientIdentifierStore.getPatient( idenType, value );
     }
 
-    public Collection<Patient> getPatientsByIdentifier( String identifier, int min, int max )
+    public Collection<Patient> getPatientsByIdentifier( String identifier, Integer min, Integer max )
     {
         return patientIdentifierStore.getPatientsByIdentifier( identifier, min, max );
     }
@@ -142,8 +145,10 @@ public class DefaultPatientIdentifierService
     }
 
     @Override
-    public boolean checkDuplicateIdentifier( Integer patientId, String identifier )
+    public boolean checkDuplicateIdentifier( PatientIdentifierType patientIdentifierType, String identifier,
+        Integer patientId, OrganisationUnit orgunit, Program program, PeriodType periodType )
     {
-        return patientIdentifierStore.checkDuplicateIdentifier( patientId, identifier );
+        return patientIdentifierStore.checkDuplicateIdentifier( patientIdentifierType, identifier, patientId, orgunit,
+            program, periodType );
     }
 }

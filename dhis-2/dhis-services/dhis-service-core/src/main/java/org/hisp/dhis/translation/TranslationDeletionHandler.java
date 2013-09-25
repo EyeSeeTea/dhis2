@@ -29,23 +29,11 @@ package org.hisp.dhis.translation;
  */
 
 import java.util.Collection;
-import java.util.Locale;
 
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementGroup;
-import org.hisp.dhis.dataelement.DataElementGroupSet;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.Section;
 import org.hisp.dhis.i18n.I18nService;
-import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.indicator.IndicatorGroup;
-import org.hisp.dhis.indicator.IndicatorGroupSet;
-import org.hisp.dhis.indicator.IndicatorType;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
+import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.hisp.dhis.system.deletion.DeletionHandler;
-import org.hisp.dhis.validation.ValidationRule;
-import org.hisp.dhis.validation.ValidationRuleGroup;
+import org.hisp.dhis.system.util.LocaleUtils;
 
 /**
  * @author Lars Helge Overland
@@ -53,12 +41,6 @@ import org.hisp.dhis.validation.ValidationRuleGroup;
 public class TranslationDeletionHandler
     extends DeletionHandler
 {
-    private I18nService i18nService;
-
-    public void setI18nService( I18nService service )
-    {
-        i18nService = service;
-    }
 
     private TranslationService translationService;
 
@@ -74,87 +56,9 @@ public class TranslationDeletionHandler
     }
 
     @Override
-    public void deleteDataElement( DataElement dataElement )
+    public String allowDeleteI18nLocale( I18nLocale i18nLocale )
     {
-        i18nService.removeObject( dataElement );
-    }
-
-    @Override
-    public void deleteDataElementGroup( DataElementGroup dataElementGroup )
-    {
-        i18nService.removeObject( dataElementGroup );
-    }
-
-    @Override
-    public void deleteDataElementGroupSet( DataElementGroupSet dataElementGroupSet )
-    {
-        i18nService.removeObject( dataElementGroupSet );
-    }
-
-    @Override
-    public void deleteDataSet( DataSet dataSet )
-    {
-        i18nService.removeObject( dataSet );
-    }
-
-    @Override
-    public void deleteSection( Section section )
-    {
-        i18nService.removeObject( section );
-    }
-
-    @Override
-    public void deleteIndicator( Indicator indicator )
-    {
-        i18nService.removeObject( indicator );
-    }
-
-    @Override
-    public void deleteIndicatorGroup( IndicatorGroup indicatorGroup )
-    {
-        i18nService.removeObject( indicatorGroup );
-    }
-
-    @Override
-    public void deleteIndicatorGroupSet( IndicatorGroupSet indicatorGroupSet )
-    {
-        i18nService.removeObject( indicatorGroupSet );
-    }
-
-    @Override
-    public void deleteIndicatorType( IndicatorType indicatorType )
-    {
-        i18nService.removeObject( indicatorType );
-    }
-
-    @Override
-    public void deleteValidationRule( ValidationRule validationRule )
-    {
-        i18nService.removeObject( validationRule );
-    }
-
-    @Override
-    public void deleteValidationRuleGroup( ValidationRuleGroup validationRuleGroup )
-    {
-        i18nService.removeObject( validationRuleGroup );
-    }
-
-    @Override
-    public void deleteOrganisationUnitGroup( OrganisationUnitGroup group )
-    {
-        i18nService.removeObject( group );
-    }
-
-    @Override
-    public void deleteOrganisationUnitGroupSet( OrganisationUnitGroupSet groupSet )
-    {
-        i18nService.removeObject( groupSet );
-    }
-
-    @Override
-    public String allowDeleteI18nLocale( Locale locale )
-    {
-        Collection<Translation> translations = translationService.getTranslations( locale, false );
+        Collection<Translation> translations = translationService.getTranslations( LocaleUtils.getLocale( i18nLocale.getLocale() ), false );
 
         if ( translations.size() == 0 )
         {
