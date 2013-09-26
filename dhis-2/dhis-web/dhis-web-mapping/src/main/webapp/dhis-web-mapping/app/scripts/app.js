@@ -295,6 +295,65 @@ Ext.onReady( function() {
 
 				w.hasDestroyOnBlurHandler = true;
 			};
+		
+			util.gui.window.setAnchorPosition = function(w, target) {
+				var vpw = gis.viewport.getWidth(),
+					targetx = target ? target.getPosition()[0] : 4,
+					winw = w.getWidth(),
+					y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
+
+				if ((targetx + winw) > vpw) {
+					w.setPosition((vpw - winw - 2), y);
+				}
+				else {
+					w.setPosition(targetx, y);
+				}
+			};
+		
+			util.layout = {};
+			
+			util.layout.getAnalytical = function(map) {
+				var layout,
+					id;
+					
+				map = map || gis.map;
+				
+				if (!(Ext.isObject(map) && Ext.isArray(map.mapViews) && map.mapViews.length)) {
+					return;
+				}
+				
+				for (var key in gis.layer) {
+					if (gis.layer.hasOwnProperty(key) && gis.layer[key].layerCategory === gis.conf.finals.layer.category_thematic) {
+						id = gis.layer[key].id;
+						
+						for (var j = 0, view; j < map.mapViews.length; j++) {
+							view = map.mapViews[j];
+							
+							if (view.layer === id) {
+								layout = gis.api.layout.Layout(Ext.clone(view));
+								
+								if (layout) {
+									return layout;
+								}
+							}
+						}
+					}
+				}
+				
+				return;
+			};
+		
+			util.layout.setSessionStorage = function(obj, session, url) {
+				if (GIS.isSessionStorage) {
+					var dhis2 = JSON.parse(sessionStorage.getItem('dhis2')) || {};
+					dhis2[session] = obj;
+					sessionStorage.setItem('dhis2', JSON.stringify(dhis2));
+
+					if (Ext.isString(url)) {
+						window.location.href = url;
+					}
+				}
+			};
 		}());
 
 		// init
@@ -5961,6 +6020,7 @@ Ext.onReady( function() {
 			eastRegion,
 			downloadButton,
 			interpretationButton,
+			defaultButton,
 			layersPanel,
 			resizeButton,
 			viewport,
@@ -5974,6 +6034,18 @@ Ext.onReady( function() {
 			}
 		});
 
+		defaultButton = Ext.create('Ext.button.Button', {
+			text: GIS.i18n.map,
+			iconCls: 'gis-button-icon-table',
+			toggleGroup: 'module',
+			pressed: true,
+			handler: function() {
+				if (!this.pressed) {
+					this.toggle();
+				}
+			}
+		});
+		
 		centerRegion = new GeoExt.panel.Map({
 			region: 'center',
 			map: gis.olmap,
@@ -6103,8 +6175,55 @@ Ext.onReady( function() {
 						text: GIS.i18n.table,
 						iconCls: 'gis-button-icon-table',
 						toggleGroup: 'module',
+						menu: {},
 						handler: function(b) {
-							window.location.href = '../../dhis-web-pivot/app/index.html';
+							b.menu = Ext.create('Ext.menu.Menu', {
+								closeAction: 'destroy',
+								shadow: false,
+								showSeparator: false,
+								items: [
+									{
+										text: 'Go to pivot tables' + '&nbsp;&nbsp;', //i18n
+										cls: 'gis-menu-item-noicon',
+										handler: function() {
+											window.location.href = gis.init.contextPath + '/dhis-web-pivot/app/index.html';
+										}
+									},
+									'-',
+									{
+										text: 'Open this map as table' + '&nbsp;&nbsp;', //i18n
+										cls: 'gis-menu-item-noicon',
+										disabled: !GIS.isSessionStorage || !gis.util.layout.getAnalytical(),
+										handler: function() {
+											if (GIS.isSessionStorage) {
+												gis.util.layout.setSessionStorage(gis.util.layout.getAnalytical(), 'analytical', gis.init.contextPath + '/dhis-web-pivot/app/index.html?s=analytical');
+											}
+										}
+									},
+									{
+										text: 'Open last table' + '&nbsp;&nbsp;', //i18n
+										cls: 'gis-menu-item-noicon',
+										disabled: !(GIS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['chart']),
+										handler: function() {
+											window.location.href = gis.init.contextPath + '/dhis-web-pivot/app/index.html?s=chart';
+										}
+									}
+								],
+								listeners: {
+									show: function() {
+										gis.util.gui.window.setAnchorPosition(b.menu, b);
+									},
+									hide: function() {
+										b.menu.destroy();
+										defaultButton.toggle();
+									},
+									destroy: function(m) {
+										b.menu = null;
+									}
+								}
+							});
+
+							b.menu.show();
 						}
 					});
 
@@ -6112,17 +6231,59 @@ Ext.onReady( function() {
 						text: GIS.i18n.chart,
 						iconCls: 'gis-button-icon-chart',
 						toggleGroup: 'module',
+						menu: {},
 						handler: function(b) {
-							window.location.href = '../../dhis-web-visualizer/app/index.html';
+							b.menu = Ext.create('Ext.menu.Menu', {
+								closeAction: 'destroy',
+								shadow: false,
+								showSeparator: false,
+								items: [
+									{
+										text: 'Go to charts' + '&nbsp;&nbsp;', //i18n
+										cls: 'gis-menu-item-noicon',
+										handler: function() {
+											window.location.href = gis.init.contextPath + '/dhis-web-visualizer/app/index.html';
+										}
+									},
+									'-',
+									{
+										text: 'Open this map as chart' + '&nbsp;&nbsp;', //i18n
+										cls: 'gis-menu-item-noicon',
+										disabled: !GIS.isSessionStorage || !gis.util.layout.getAnalytical(),
+										handler: function() {
+											if (GIS.isSessionStorage) {
+												gis.util.layout.setSessionStorage(gis.util.layout.getAnalytical(), 'analytical', gis.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
+											}
+										}
+									},
+									{
+										text: 'Open last chart' + '&nbsp;&nbsp;', //i18n
+										cls: 'gis-menu-item-noicon',
+										disabled: !(GIS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['chart']),
+										handler: function() {
+											window.location.href = gis.init.contextPath + '/dhis-web-visualizer/app/index.html?s=chart';
+										}
+									}
+								],
+								listeners: {
+									show: function() {
+										gis.util.gui.window.setAnchorPosition(b.menu, b);
+									},
+									hide: function() {
+										b.menu.destroy();
+										defaultButton.toggle();
+									},
+									destroy: function(m) {
+										b.menu = null;
+									}
+								}
+							});
+
+							b.menu.show();
 						}
 					});
 
-					a.push({
-						text: GIS.i18n.map,
-						iconCls: 'gis-button-icon-map',
-						toggleGroup: 'module',
-						pressed: true
-					});
+					a.push(defaultButton);
 
 					a.push({
 						xtype: 'tbseparator',
@@ -6292,11 +6453,7 @@ Ext.onReady( function() {
 				};
 				GIS.core.MapLoader(gis).load();
 			}
-			else if (Ext.isString(session) && GIS.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
-				var d1 = sessionStorage.getItem('dhis2');
-				var d2 = JSON.parse(d1);
-				var d3 = d2[session];
-				
+			else if (Ext.isString(session) && GIS.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {				
 				layout = gis.api.layout.Layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]);
 
 				if (layout) {

@@ -4526,7 +4526,7 @@ Ext.onReady( function() {
                                     },
                                     '-',
                                     {
-                                        text: 'View chart as table' + '&nbsp;&nbsp;', //i18n
+                                        text: 'Open this chart as table' + '&nbsp;&nbsp;', //i18n
                                         cls: 'dv-menu-item-noicon',
                                         disabled: !DV.isSessionStorage || !dv.layout,
                                         handler: function() {
@@ -4536,7 +4536,7 @@ Ext.onReady( function() {
                                         }
                                     },
                                     {
-                                        text: 'View last table' + '&nbsp;&nbsp;', //i18n
+                                        text: 'Open last table' + '&nbsp;&nbsp;', //i18n
                                         cls: 'dv-menu-item-noicon',
                                         disabled: !(DV.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['table']),
                                         handler: function() {

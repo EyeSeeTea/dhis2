@@ -106,7 +106,8 @@ Ext.onReady( function() {
 
 	GIS.core.getLayers = function(gis) {
 		var layers = {},
-			createSelectionHandlers;
+			createSelectionHandlers,
+			layerNumbers = ['1', '2', '3', '4'];
 
 		if (window.google) {
 			layers.googleStreets = new OpenLayers.Layer.Google('Google Streets', {
@@ -162,30 +163,17 @@ Ext.onReady( function() {
 			layer: layers.boundary,
 			gis: gis
 		});
-
-		layers.thematic1 = GIS.core.VectorLayer(gis, 'thematic1', GIS.i18n.thematic_layer + ' 1', {opacity: 0.8});
-		layers.thematic1.core = new mapfish.GeoStat.Thematic1(gis.olmap, {
-			layer: layers.thematic1,
-			gis: gis
-		});
-
-		layers.thematic2 = GIS.core.VectorLayer(gis, 'thematic2', GIS.i18n.thematic_layer + ' 2', {opacity: 0.8});
-		layers.thematic2.core = new mapfish.GeoStat.Thematic2(gis.olmap, {
-			layer: layers.thematic2,
-			gis: gis
-		});
-
-		layers.thematic3 = GIS.core.VectorLayer(gis, 'thematic3', GIS.i18n.thematic_layer + ' 3', {opacity: 0.8});
-		layers.thematic3.core = new mapfish.GeoStat.Thematic3(gis.olmap, {
-			layer: layers.thematic3,
-			gis: gis
-		});
-
-		layers.thematic4 = GIS.core.VectorLayer(gis, 'thematic4', GIS.i18n.thematic_layer + ' 4', {opacity: 0.8});
-		layers.thematic4.core = new mapfish.GeoStat.Thematic4(gis.olmap, {
-			layer: layers.thematic4,
-			gis: gis
-		});
+		
+		for (var i = 0, number; i < layerNumbers.length; i++) {
+			number = layerNumbers[i];			
+		
+			layers['thematic' + number] = GIS.core.VectorLayer(gis, 'thematic' + number, GIS.i18n.thematic_layer + ' ' + number, {opacity: 0.8});
+			layers['thematic' + number].layerCategory = gis.conf.finals.layer.category_thematic,
+			layers['thematic' + number].core = new mapfish.GeoStat['Thematic' + number](gis.olmap, {
+				layer: layers['thematic' + number],
+				gis: gis
+			});
+		}
 
 		return layers;
 	};
@@ -1694,7 +1682,8 @@ Ext.onReady( function() {
 				},
 				layer: {
 					type_base: 'base',
-					type_vector: 'vector'
+					type_vector: 'vector',
+					category_thematic: 'thematic'
 				},
 				dimension: {
 					data: {
@@ -2291,6 +2280,7 @@ Ext.onReady( function() {
 
 		gis.olmap = GIS.core.getOLMap(gis);
 		gis.layer = GIS.core.getLayers(gis);
+		gis.thematicLayers = [gis.layer.thematic1, gis.layer.thematic2, gis.layer.thematic3, gis.layer.thematic4];
 
 		if (window.google) {
 			layers.push(gis.layer.googleStreets, gis.layer.googleHybrid);
