@@ -3353,55 +3353,48 @@ Ext.onReady( function() {
 				}
 			},
 			multipleExpand: function(id, path, doUpdate) {
-				this.expandPath('/' + pt.conf.finals.root.id + path, 'id', '/', function() {
+				var rootId = pt.conf.finals.root.id;
+				
+				if (path.substr(0, rootId.length + 1) !== ('/' + rootId)) {
+					path = '/' + rootId + path;
+				}
+				
+				this.expandPath('/' + path, 'id', '/', function() {
 					var record = this.getRootNode().findChild('id', id, true);
 					this.recordsToSelect.push(record);
 					this.multipleSelectIf(doUpdate);
 				}, this);
 			},
-			select: function(url, params) {
-				if (!params) {
-					params = {};
-				}
-				Ext.Ajax.request({
-					url: url,
-					method: 'GET',
-					params: params,
-					scope: this,
-					success: function(r) {
-						var a = Ext.decode(r.responseText).organisationUnits;
-						this.numberOfRecords = a.length;
-						for (var i = 0; i < a.length; i++) {
-							this.multipleExpand(a[i].id, a[i].path);
-						}
+            select: function(url, params) {
+                if (!params) {
+                    params = {};
+                }
+                Ext.Ajax.request({
+                    url: url,
+                    method: 'GET',
+                    params: params,
+                    scope: this,
+                    success: function(r) {
+                        var a = Ext.decode(r.responseText).organisationUnits;
+                        this.numberOfRecords = a.length;
+                        for (var i = 0; i < a.length; i++) {
+                            this.multipleExpand(a[i].id, a[i].path);
+                        }
+                    }
+                });
+            },
+			getParentGraphMap: function() {
+				var selection = this.getSelectionModel().getSelection(),
+					map = {};
+				
+				if (Ext.isArray(selection) && selection.length) {
+					for (var i = 0, pathArray, key; i < selection.length; i++) {
+						pathArray = selection[i].getPath().split('/');
+						map[pathArray.pop()] = pathArray.join('/');
 					}
-				});
-			},
-			selectByGroup: function(id) {
-				if (id) {
-					var url = pt.init.contextPath + pt.conf.finals.url.path_module + pt.conf.finals.url.organisationunit_getbygroup,
-						params = {id: id};
-					this.select(url, params);
 				}
-			},
-			selectByLevel: function(level) {
-				if (level) {
-					var url = pt.init.contextPath + pt.conf.finals.url.path_module + pt.conf.finals.url.organisationunit_getbylevel,
-						params = {level: level};
-					this.select(url, params);
-				}
-			},
-			selectByIds: function(ids) {
-				if (ids) {
-					var url = pt.init.contextPath + pt.conf.finals.url.path_module + pt.conf.finals.url.organisationunit_getbyids;
-					Ext.Array.each(ids, function(item) {
-						url = Ext.String.urlAppend(url, 'ids=' + item);
-					});
-					if (!this.rendered) {
-						pt.cmp.dimension.organisationUnit.panel.expand();
-					}
-					this.select(url);
-				}
+				
+				return map;
 			},
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
@@ -4284,6 +4277,7 @@ Ext.onReady( function() {
 										disabled: !PT.isSessionStorage || !pt.layout,
 										handler: function() {
 											if (PT.isSessionStorage) {
+												pt.layout.parentGraphMap = treePanel.getParentGraphMap();
 												pt.engine.setSessionStorage(pt.layout, 'analytical', pt.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
 											}
 										}

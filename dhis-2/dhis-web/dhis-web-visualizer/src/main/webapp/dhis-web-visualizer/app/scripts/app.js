@@ -3539,12 +3539,18 @@ Ext.onReady( function() {
                 }
             },
             multipleExpand: function(id, path, doUpdate) {
-                this.expandPath('/' + dv.conf.finals.root.id + path, 'id', '/', function() {
-                    var record = this.getRootNode().findChild('id', id, true);
-                    this.recordsToSelect.push(record);
-                    this.multipleSelectIf(doUpdate);
-                }, this);
-            },
+				var rootId = dv.conf.finals.root.id;
+				
+				if (path.substr(0, rootId.length + 1) !== ('/' + rootId)) {
+					path = '/' + rootId + path;
+				}
+				
+				this.expandPath('/' + path, 'id', '/', function() {
+					var record = this.getRootNode().findChild('id', id, true);
+					this.recordsToSelect.push(record);
+					this.multipleSelectIf(doUpdate);
+				}, this);
+			},
             select: function(url, params) {
                 if (!params) {
                     params = {};
@@ -3562,32 +3568,6 @@ Ext.onReady( function() {
                         }
                     }
                 });
-            },
-            selectByGroup: function(id) {
-                if (id) {
-                    var url = dv.conf.finals.ajax.path_module + dv.conf.finals.ajax.organisationunit_getbygroup,
-                        params = {id: id};
-                    this.select(url, params);
-                }
-            },
-            selectByLevel: function(level) {
-                if (level) {
-                    var url = dv.conf.finals.ajax.path_module + dv.conf.finals.ajax.organisationunit_getbylevel,
-                        params = {level: level};
-                    this.select(url, params);
-                }
-            },
-            selectByIds: function(ids) {
-                if (ids) {
-                    var url = dv.conf.finals.ajax.path_module + dv.conf.finals.ajax.organisationunit_getbyids;
-                    Ext.Array.each(ids, function(item) {
-                        url = Ext.String.urlAppend(url, 'ids=' + item);
-                    });
-                    if (!this.rendered) {
-                        dv.cmp.dimension.organisationUnit.panel.expand();
-                    }
-                    this.select(url);
-                }
             },
             store: Ext.create('Ext.data.TreeStore', {
                 proxy: {
