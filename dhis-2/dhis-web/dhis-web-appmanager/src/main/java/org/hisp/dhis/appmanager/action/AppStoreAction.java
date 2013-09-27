@@ -28,7 +28,7 @@ package org.hisp.dhis.appmanager.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.appmanager.AppManagerService;
+import org.hisp.dhis.appmanager.AppManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
@@ -44,7 +44,7 @@ public class AppStoreAction
     // -------------------------------------------------------------------------
 
     @Autowired
-    private AppManagerService appManagerService;
+    private AppManager appManager;
 
     // -------------------------------------------------------------------------
     // Input & Output
@@ -54,7 +54,7 @@ public class AppStoreAction
 
     public String getAppStoreUrl()
     {
-        return appManagerService.getAppStoreUrl();
+        return appStoreUrl;
     }
 
     // -------------------------------------------------------------------------
@@ -65,6 +65,8 @@ public class AppStoreAction
     public String execute()
         throws Exception
     {
+        appStoreUrl = appManager.getAppStoreUrl();
+        
         return SUCCESS;
     }
 }

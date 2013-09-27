@@ -31,27 +31,21 @@ package org.hisp.dhis.appmanager.action;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.ant.compress.taskdefs.Unzip;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts2.ServletActionContext;
-import org.apache.tools.zip.ZipEntry;
-import org.apache.tools.zip.ZipFile;
-import org.hisp.dhis.appmanager.App;
-import org.hisp.dhis.appmanager.AppManagerService;
+import org.hisp.dhis.appmanager.AppManager;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.system.util.StreamUtils;
 import org.hisp.dhis.util.ContextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opensymphony.xwork2.Action;
 
 /**
@@ -69,7 +63,7 @@ public class AddAppAction
     // -------------------------------------------------------------------------
 
     @Autowired
-    private AppManagerService appManagerService;
+    private AppManager appManager;
 
     // -------------------------------------------------------------------------
     // Input & Output
@@ -145,45 +139,8 @@ public class AddAppAction
         
         try
         {
-            InputStream inputStream = zip.getInputStream( entry );
-            String appManifest = StreamUtils.convertStreamToString( inputStream );
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.configure( DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false );
-            App app = mapper.readValue( appManifest, App.class );
-
-            // Delete if app is already installed
-            if ( appManagerService.getInstalledApps().contains( app ) )
-            {
-                String folderPath = appManagerService.getAppFolderPath() + File.separator
-                    + appManagerService.getAppFolderName( app );
-                FileUtils.forceDelete( new File( folderPath ) );
-            }
-
-            String dest = appManagerService.getAppFolderPath() + File.separator
-                + fileName.substring( 0, fileName.lastIndexOf( '.' ) );
-            Unzip unzip = new Unzip();
-            unzip.setSrc( file );
-            unzip.setDest( new File( dest ) );
-            unzip.execute();
-
-            // Updating dhis server location
-            File updateManifest = new File( dest + File.separator + "manifest.webapp" );
-            App installedApp = mapper.readValue( updateManifest, App.class );
-
-            if ( installedApp.getActivities().getDhis().getHref().equals( "*" ) )
-            {
-                // TODO: Check why ContextUtils.getContextPath is not working
-                // String rootPath = ContextUtils.getContextPath(ServletActionContext.getRequest());
-                HttpServletRequest req = ServletActionContext.getRequest();
-                StringBuffer fullUrl = req.getRequestURL();
-                String baseUrl = ContextUtils.getBaseUrl( req );
-                String rootPath = fullUrl.substring( 0, fullUrl.indexOf( "/", baseUrl.length() ) );
-
-                installedApp.getActivities().getDhis().setHref( rootPath );
-                mapper.writeValue( updateManifest, installedApp );
-            }
-
-            zip.close();
+            appManager.installApp( file, fileName, getRootPath() );
+            
             message = i18n.getString( "appmanager_install_success" );
         }
         catch ( JsonParseException ex )
@@ -198,5 +155,15 @@ public class AddAppAction
         }
 
         return SUCCESS;
+    }
+    
+    private String getRootPath()
+    {
+        HttpServletRequest req = ServletActionContext.getRequest();
+        StringBuffer fullUrl = req.getRequestURL();
+        String baseUrl = ContextUtils.getBaseUrl( req );
+        String rootPath = fullUrl.substring( 0, fullUrl.indexOf( "/", baseUrl.length() ) );
+        
+        return rootPath;
     }
 }

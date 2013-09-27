@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hisp.dhis.appmanager.App;
-import org.hisp.dhis.appmanager.AppManagerService;
+import org.hisp.dhis.appmanager.AppManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
@@ -48,7 +48,7 @@ public class AppListAction
     // -------------------------------------------------------------------------
 
     @Autowired
-    private AppManagerService appManagerService;
+    private AppManager appManager;
 
     // -------------------------------------------------------------------------
     // Input & Output
@@ -58,23 +58,17 @@ public class AppListAction
 
     public List<App> getAppList()
     {
-        return appManagerService.getInstalledApps();
+        return appList;
     }
 
-    private List<String> appFolderNames = new ArrayList<String>();
+    //TODO create settings to set for external server like Apache2/nginx
+    //TODO Should be a per-app setting
+    
+    private String appBaseUrl;
 
-    public List<String> getAppFolderNames()
+    public String getAppBaseUrl()
     {
-        return appFolderNames;
-    }
-
-    //TODO: create settings to set for external server like Apache2/nginx
-    // Should be a per-app setting
-    private String appsRootUrl = new String();
-
-    public String getAppsRootUrl()
-    {
-        return appManagerService.getAppBaseUrl();
+        return appBaseUrl;
     }
 
     // -------------------------------------------------------------------------
@@ -85,11 +79,10 @@ public class AppListAction
     public String execute()
         throws Exception
     {
-        for ( App app : getAppList() )
-        {
-            appFolderNames.add( appManagerService.getAppFolderName( app ) );
-        }
-
+        appList = appManager.getInstalledApps();
+        
+        appBaseUrl = appManager.getAppBaseUrl();
+        
         return SUCCESS;
     }
 }

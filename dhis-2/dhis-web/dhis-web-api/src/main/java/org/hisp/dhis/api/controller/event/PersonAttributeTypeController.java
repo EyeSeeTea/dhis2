@@ -1,4 +1,4 @@
-package org.hisp.dhis.appmanager;
+package org.hisp.dhis.api.controller.event;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,69 +28,17 @@ package org.hisp.dhis.appmanager;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
+import org.hisp.dhis.api.controller.AbstractCrudController;
+import org.hisp.dhis.patient.PatientAttribute;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * @author Saptarshi Purkayastha
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface AppManagerService
+@Controller
+@RequestMapping( value = PersonAttributeTypeController.RESOURCE_PATH )
+public class PersonAttributeTypeController extends AbstractCrudController<PatientAttribute>
 {
-
-    String ID = AppManagerService.class.getName();
-
-    final String KEY_APP_FOLDER_PATH = "appFolderPath";
-    
-    final String KEY_APP_BASE_URL = "appBaseUrl";
-
-    final String KEY_APP_STORE_URL = "appStoreUrl";
-    
-    /**
-     * Gets the Base URL for accessing the apps
-     * @return the apps baseurl
-     */
-    String getAppBaseUrl();
-    
-    /**
-     * Returns the full path to the folder where apps are extracted
-     * @return app folder path 
-     */
-    String getAppFolderPath();
-
-    /**
-     * Returns the url of the app repository
-     * @return url of appstore 
-     */
-    String getAppStoreUrl();
-
-    /**
-     * Returns a list of all the installed apps at @see getAppFolderPath
-     * @return list of installed apps
-     */
-    List<App> getInstalledApps();
-
-    /**
-     * Returns the name of the specfic app folder
-     * @param app
-     * @return folder name of where app is installed
-     */
-    String getAppFolderName( App app );
-
-    /**
-     * Saves the folder in which apps will be expanded 
-     * @param appFolderPath
-     */
-    void setAppFolderPath( String appFolderPath );
-
-    /**
-     * Saves the URL of the apps repository
-     * @param appStoreUrl
-     */
-    void setAppStoreUrl( String appStoreUrl );
-    
-    /**
-     * Saves the base URL where apps are installed
-     * @param appBaseUrl 
-     */
-    void setAppBaseUrl( String appBaseUrl );
-
+    public static final String RESOURCE_PATH = "/personAttributeTypes";
 }
