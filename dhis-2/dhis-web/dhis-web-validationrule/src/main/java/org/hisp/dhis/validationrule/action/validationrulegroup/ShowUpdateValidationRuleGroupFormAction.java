@@ -29,10 +29,13 @@ package org.hisp.dhis.validationrule.action.validationrulegroup;
  */
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.user.UserAuthorityGroup;
+import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleGroup;
 import org.hisp.dhis.validation.ValidationRuleService;
@@ -57,6 +60,13 @@ public class ShowUpdateValidationRuleGroupFormAction
     public void setValidationRuleService( ValidationRuleService validationRuleService )
     {
         this.validationRuleService = validationRuleService;
+    }
+    
+    private UserService userService;
+
+    public void setUserService( UserService userService )
+    {
+        this.userService = userService;
     }
 
     // -------------------------------------------------------------------------
@@ -95,6 +105,20 @@ public class ShowUpdateValidationRuleGroupFormAction
         return availableValidationRules;
     }
 
+    private List<UserAuthorityGroup> availableUserRolesToAlert = new ArrayList<UserAuthorityGroup>();
+    
+    public List<UserAuthorityGroup> getAvailableUserRolesToAlert()
+    {
+        return availableUserRolesToAlert;
+    }
+
+    private List<UserAuthorityGroup> selectedUserRolesToAlert = new ArrayList<UserAuthorityGroup>();
+    
+    public List<UserAuthorityGroup> getSelectedUserRolesToAlert()
+    {
+        return selectedUserRolesToAlert;
+    }
+   
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -110,6 +134,12 @@ public class ShowUpdateValidationRuleGroupFormAction
         groupMembers = new ArrayList<ValidationRule>( validationRuleGroup.getMembers() );
 
         Collections.sort( groupMembers, IdentifiableObjectNameComparator.INSTANCE );
+        
+        availableUserRolesToAlert = new ArrayList<UserAuthorityGroup>( userService.getAllUserAuthorityGroups() );
+
+        selectedUserRolesToAlert = new ArrayList<UserAuthorityGroup>( validationRuleGroup.getUserAuthorityGroupsToAlert() );
+        
+        Collections.sort( selectedUserRolesToAlert, IdentifiableObjectNameComparator.INSTANCE );
 
         return SUCCESS;
     }
