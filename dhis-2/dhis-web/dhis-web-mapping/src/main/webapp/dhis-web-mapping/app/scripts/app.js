@@ -1761,8 +1761,7 @@ Ext.onReady( function() {
 
 		window = Ext.create('Ext.window.Window', {
 			title: 'Sharing settings',
-			bodyStyle: 'padding:8px 8px 3px; background-color:#fff',
-			width: 434,
+			bodyStyle: 'padding:6px 6px 0; background-color:#fff',
 			resizable: false,
 			modal: true,
 			destroyOnBlur: true,

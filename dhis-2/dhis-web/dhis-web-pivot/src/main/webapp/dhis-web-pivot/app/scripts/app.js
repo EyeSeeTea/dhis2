@@ -2021,7 +2021,6 @@ Ext.onReady( function() {
 		window = Ext.create('Ext.window.Window', {
 			title: PT.i18n.sharing_settings,
 			bodyStyle: 'padding:6px 6px 0px; background-color:#fff',
-			width: 434,
 			resizable: false,
 			modal: true,
 			destroyOnBlur: true,
