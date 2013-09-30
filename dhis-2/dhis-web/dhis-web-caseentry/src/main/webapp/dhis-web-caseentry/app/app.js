@@ -1838,7 +1838,7 @@ Ext.onReady( function() {
 						method: "GET",
 						disableCaching: false,
 						scope: this,
-						params: Ext.urlEncode(this.getParams()).replace(/%3B/g,";"),
+						params: this.getParams(),
 						success: function(r) {
 							var json = Ext.JSON.decode(r.responseText);
 							
