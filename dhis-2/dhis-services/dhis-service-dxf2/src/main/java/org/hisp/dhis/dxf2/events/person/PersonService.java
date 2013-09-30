@@ -44,7 +44,7 @@ import java.util.Collection;
  */
 public interface PersonService
 {
-    public void setFormat(I18nFormat format);
+    public void setFormat( I18nFormat format );
 
     // -------------------------------------------------------------------------
     // READ
@@ -52,7 +52,11 @@ public interface PersonService
 
     Persons getPersons();
 
+    Person getPerson( Identifier identifier );
+
     Persons getPersons( OrganisationUnit organisationUnit );
+
+    Persons getPersons( OrganisationUnit organisationUnit, String nameLike );
 
     Persons getPersons( Gender gender );
 

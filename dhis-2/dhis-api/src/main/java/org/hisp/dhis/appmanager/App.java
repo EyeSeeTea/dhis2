@@ -75,10 +75,17 @@ public class App
     private String permissions;
 
     private AppActivities activities;
+    
+    @JsonIgnore
+    private String folderName;
+
+    @JsonIgnore
+    private String baseUrl;
 
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
+    
     public String getVersion()
     {
         return version;
@@ -188,29 +195,65 @@ public class App
     {
         this.activities = activities;
     }
+
+    public String getFolderName()
+    {
+        return folderName;
+    }
+
+    public void setFolderName( String folderName )
+    {
+        this.folderName = folderName;
+    }
+
+    public String getBaseUrl()
+    {
+        return baseUrl;
+    }
+
+    public void setBaseUrl( String baseUrl )
+    {
+        this.baseUrl = baseUrl;
+    }
+
+    // -------------------------------------------------------------------------
+    // hashCode, equals, toString
+    // -------------------------------------------------------------------------
     
-    // -------------------------------------------------------------------------
-    // Hashcode & Equals 
-    // -------------------------------------------------------------------------
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         int hash = 7;
         hash = 79 * hash + (this.name != null ? this.name.hashCode() : 0);
         return hash;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
+    public boolean equals( Object obj )
+    {
+        if ( obj == null )
+        {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        
+        if ( getClass() != obj.getClass() )
+        {
             return false;
         }
+        
         final App other = (App) obj;
-        if ((this.name == null) ? (other.name != null) : !this.name.equals(other.name)) {
+        
+        if ( (this.name == null) ? (other.name != null) : !this.name.equals( other.name ) )
+        {
             return false;
         }
+        
         return true;
+    }
+    
+    @Override
+    public String toString()
+    {
+        return "[" + name + " " + version + "]";
     }
 }

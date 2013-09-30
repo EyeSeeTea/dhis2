@@ -41,6 +41,7 @@ import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.patient.PatientIdentifier;
 import org.hisp.dhis.patient.PatientIdentifierService;
 import org.hisp.dhis.patient.PatientIdentifierType;
+import org.hisp.dhis.patient.PatientIdentifierTypeService;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.patient.util.PatientIdentifierGenerator;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
@@ -79,6 +80,9 @@ public abstract class AbstractPersonService implements PersonService
 
     @Autowired
     private PatientIdentifierService patientIdentifierService;
+
+    @Autowired
+    private PatientIdentifierTypeService patientIdentifierTypeService;
 
     @Autowired
     private PatientAttributeValueService patientAttributeValueService;
@@ -133,9 +137,24 @@ public abstract class AbstractPersonService implements PersonService
     }
 
     @Override
+    public Person getPerson( Identifier identifier )
+    {
+        PatientIdentifierType patientIdentifierType = patientIdentifierTypeService.getPatientIdentifierTypeByUid( identifier.getType() );
+        Patient patient = patientIdentifierService.getPatient( patientIdentifierType, identifier.getValue() );
+        return getPerson( patient );
+    }
+
+    @Override
     public Persons getPersons( OrganisationUnit organisationUnit )
     {
         List<Patient> patients = new ArrayList<Patient>( patientService.getPatients( organisationUnit ) );
+        return getPersons( patients );
+    }
+
+    @Override
+    public Persons getPersons( OrganisationUnit organisationUnit, String nameLike )
+    {
+        List<Patient> patients = new ArrayList<Patient>( patientService.getPatientsLikeName( organisationUnit, nameLike, 0, Integer.MAX_VALUE ) );
         return getPersons( patients );
     }
 
@@ -544,11 +563,11 @@ public abstract class AbstractPersonService implements PersonService
         Collection<PatientAttribute> patientAttributes = manager.getAll( PatientAttribute.class );
         Set<String> cache = new HashSet<String>();
 
-        for ( Identifier identifier : person.getIdentifiers() )
+        for ( Attribute attribute : person.getAttributes() )
         {
-            if ( identifier.getValue() != null )
+            if ( attribute.getValue() != null )
             {
-                cache.add( identifier.getType() );
+                cache.add( attribute.getType() );
             }
         }
 
