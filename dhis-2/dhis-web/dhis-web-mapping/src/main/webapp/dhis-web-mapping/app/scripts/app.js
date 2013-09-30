@@ -1563,6 +1563,7 @@ Ext.onReady( function() {
 			userGroupField,
 			userGroupButton,
 			userGroupRowContainer,
+			externalAccess,
 			publicGroup,
 			window;
 
@@ -1658,6 +1659,7 @@ Ext.onReady( function() {
 					id: sharing.object.id,
 					name: sharing.object.name,
 					publicAccess: publicGroup.down('combobox').getValue(),
+					externalAccess: externalAccess ? externalAccess.getValue() : false,
 					user: {
 						id: gis.init.user.id,
 						name: gis.init.user.name
@@ -1733,6 +1735,16 @@ Ext.onReady( function() {
 		userGroupRowContainer = Ext.create('Ext.container.Container', {
 			bodyStyle: 'border:0 none'
 		});
+		
+		if (sharing.meta.allowExternalAccess) {
+			externalAccess = userGroupRowContainer.add({
+				xtype: 'checkbox',
+				fieldLabel: GIS.i18n.allow_external_access,
+				labelSeparator: '',
+				labelWidth: 250,
+				checked: !!sharing.object.externalAccess
+			});
+		}
 
 		publicGroup = userGroupRowContainer.add(UserGroupRow({
 			id: sharing.object.id,

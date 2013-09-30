@@ -1695,6 +1695,7 @@ Ext.onReady( function() {
 			userGroupField,
 			userGroupButton,
 			userGroupRowContainer,
+			externalAccess,
 			publicGroup,
 			window;
 
@@ -1791,6 +1792,7 @@ Ext.onReady( function() {
 					id: sharing.object.id,
 					name: sharing.object.name,
 					publicAccess: publicGroup.down('combobox').getValue(),
+					externalAccess: externalAccess ? externalAccess.getValue() : false,
 					user: {
 						id: dv.init.user.id,
 						name: dv.init.user.name
@@ -1866,6 +1868,16 @@ Ext.onReady( function() {
 		userGroupRowContainer = Ext.create('Ext.container.Container', {
 			bodyStyle: 'border:0 none'
 		});
+		
+		if (sharing.meta.allowExternalAccess) {
+			externalAccess = userGroupRowContainer.add({
+				xtype: 'checkbox',
+				fieldLabel: DV.i18n.allow_external_access,
+				labelSeparator: '',
+				labelWidth: 250,
+				checked: !!sharing.object.externalAccess
+			});
+		}
 
 		publicGroup = userGroupRowContainer.add(UserGroupRow({
 			id: sharing.object.id,
