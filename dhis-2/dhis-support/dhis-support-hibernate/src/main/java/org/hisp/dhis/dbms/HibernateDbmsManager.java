@@ -194,11 +194,7 @@ public class HibernateDbmsManager
         sessionFactory.getCurrentSession().clear();
     }
 
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-
-    private void emptyTable( String table )
+    public void emptyTable( String table )
     {
         try
         {
@@ -209,6 +205,10 @@ public class HibernateDbmsManager
             log.debug( "Table " + table + " does not exist" );
         }
     }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
 
     private void dropTable( String table )
     {

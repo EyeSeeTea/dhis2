@@ -66,7 +66,6 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.system.util.PaginatedList;
@@ -199,7 +198,7 @@ public class DefaultQueryPlanner
         // Group queries by partition, period type and organisation unit level
         // ---------------------------------------------------------------------
         
-        params = new DataQueryParams( params );
+        params = params.instance();
         
         List<DataQueryParams> queries = new ArrayList<DataQueryParams>();
         
@@ -308,7 +307,7 @@ public class DefaultQueryPlanner
 
             if ( dim == null || ( values = dim.getItems() ) == null || values.isEmpty() )
             {
-                subQueries.add( new DataQueryParams( query ) );
+                subQueries.add( query.instance() );
                 continue;
             }
 
@@ -316,7 +315,7 @@ public class DefaultQueryPlanner
             
             for ( List<NameableObject> valuePage : valuePages )
             {
-                DataQueryParams subQuery = new DataQueryParams( query );
+                DataQueryParams subQuery = query.instance();
                 subQuery.setDimensionOptions( dim.getDimension(), dim.getType(), dim.getDimensionName(), valuePage );
                 subQueries.add( subQuery );
             }
@@ -355,7 +354,7 @@ public class DefaultQueryPlanner
             
             for ( Partitions partitions : partitionPeriodMap.keySet() )
             {
-                DataQueryParams query = new DataQueryParams( params );
+                DataQueryParams query = params.instance();
                 query.setPeriods( partitionPeriodMap.get( partitions ) );
                 query.setPartitions( partitions );
                 queries.add( query );            
@@ -363,7 +362,7 @@ public class DefaultQueryPlanner
         }
         else if ( params.getFilterPeriods() != null && !params.getFilterPeriods().isEmpty() )
         {
-            DataQueryParams query = new DataQueryParams( params );    
+            DataQueryParams query = params.instance();
             query.setPartitions( PartitionUtils.getPartitions( params.getFilterPeriods(), tableName ) );
             queries.add( query );
         }
@@ -387,7 +386,7 @@ public class DefaultQueryPlanner
      * with one filter for each period type. Sets the dimension names and filter
      * names respectively.
      */
-    private List<DataQueryParams> groupByPeriodType( DataQueryParams params )
+    public List<DataQueryParams> groupByPeriodType( DataQueryParams params )
     {
         List<DataQueryParams> queries = new ArrayList<DataQueryParams>();
 
@@ -397,11 +396,11 @@ public class DefaultQueryPlanner
         }
         else if ( params.getPeriods() != null && !params.getPeriods().isEmpty() )
         {
-            ListMap<String, NameableObject> periodTypePeriodMap = getPeriodTypePeriodMap( params.getPeriods() );
+            ListMap<String, NameableObject> periodTypePeriodMap = PartitionUtils.getPeriodTypePeriodMap( params.getPeriods() );
     
             for ( String periodType : periodTypePeriodMap.keySet() )
             {
-                DataQueryParams query = new DataQueryParams( params );
+                DataQueryParams query = params.instance();
                 query.setDimensionOptions( PERIOD_DIM_ID, DimensionType.PERIOD, periodType, periodTypePeriodMap.get( periodType ) );
                 query.setPeriodType( periodType );
                 queries.add( query );
@@ -411,7 +410,7 @@ public class DefaultQueryPlanner
         {
             DimensionalObject filter = params.getFilter( PERIOD_DIM_ID );
             
-            ListMap<String, NameableObject> periodTypePeriodMap = getPeriodTypePeriodMap( filter.getItems() );
+            ListMap<String, NameableObject> periodTypePeriodMap = PartitionUtils.getPeriodTypePeriodMap( filter.getItems() );
             
             params.removeFilter( PERIOD_DIM_ID ).setPeriodType( periodTypePeriodMap.keySet().iterator().next() ); // Using first period type
             
@@ -424,7 +423,8 @@ public class DefaultQueryPlanner
         }
         else
         {
-            throw new IllegalQueryException( "Query does not contain any period dimension items" );
+            queries.add( params.instance() );
+            return queries;
         }
 
         if ( queries.size() > 1 )
@@ -435,14 +435,7 @@ public class DefaultQueryPlanner
         return queries;        
     }
     
-    /**
-     * If organisation units appear as dimensions; groups the given query into 
-     * sub queries based on the level of the organisation units. Sets the organisation 
-     * unit level on each query. If organisation units appear as filter; replaces
-     * the organisation unit filter with one filter for each level. Sets the dimension
-     * names and filter names respectively.
-     */
-    private List<DataQueryParams> groupByOrgUnitLevel( DataQueryParams params )
+    public List<DataQueryParams> groupByOrgUnitLevel( DataQueryParams params )
     {
         List<DataQueryParams> queries = new ArrayList<DataQueryParams>();
 
@@ -452,7 +445,7 @@ public class DefaultQueryPlanner
             
             for ( Integer level : levelOrgUnitMap.keySet() )
             {
-                DataQueryParams query = new DataQueryParams( params );
+                DataQueryParams query = params.instance();
                 query.setDimensionOptions( ORGUNIT_DIM_ID, DimensionType.ORGANISATIONUNIT, LEVEL_PREFIX + level, levelOrgUnitMap.get( level ) );
                 queries.add( query );
             }
@@ -474,7 +467,7 @@ public class DefaultQueryPlanner
         }
         else
         {
-            queries.add( new DataQueryParams( params ) );
+            queries.add( params.instance() );
             return queries;
         }
 
@@ -512,7 +505,7 @@ public class DefaultQueryPlanner
         
         if ( params.getAggregationType() != null )
         {
-            queries.add( new DataQueryParams( params ) );
+            queries.add( params.instance() );
             return queries;
         }
         
@@ -524,7 +517,7 @@ public class DefaultQueryPlanner
             
             for ( AggregationType aggregationType : aggregationTypeDataElementMap.keySet() )
             {
-                DataQueryParams query = new DataQueryParams( params );
+                DataQueryParams query = params.instance();
                 query.setDataElements( aggregationTypeDataElementMap.get( aggregationType ) );
                 query.setAggregationType( aggregationType );
                 queries.add( query );
@@ -535,7 +528,7 @@ public class DefaultQueryPlanner
             DimensionalObject degs = params.getDataElementGroupSets().get( 0 );
             DataElementGroup deg = (DataElementGroup) ( degs.hasItems() ? degs.getItems().get( 0 ) : null );
             
-            DataQueryParams query = new DataQueryParams( params );
+            DataQueryParams query = params.instance();
             
             if ( deg != null && !deg.getMembers().isEmpty() )
             {
@@ -551,7 +544,7 @@ public class DefaultQueryPlanner
         }
         else
         {
-            DataQueryParams query = new DataQueryParams( params );
+            DataQueryParams query = params.instance();
             query.setAggregationType( SUM );
             queries.add( query );
         }
@@ -574,7 +567,7 @@ public class DefaultQueryPlanner
 
         if ( params.getDataElements() == null || params.getDataElements().isEmpty() )
         {
-            queries.add( new DataQueryParams( params ) );
+            queries.add( params.instance() );
             return queries;
         }
         
@@ -582,7 +575,7 @@ public class DefaultQueryPlanner
         
         for ( PeriodType periodType : periodTypeDataElementMap.keySet() )
         {
-            DataQueryParams query = new DataQueryParams( params );
+            DataQueryParams query = params.instance();
             query.setDataElements( periodTypeDataElementMap.get( periodType ) );
             query.setDataPeriodType( periodType );
             queries.add( query );
@@ -599,23 +592,6 @@ public class DefaultQueryPlanner
     // -------------------------------------------------------------------------
     // Supportive - get mapping methods
     // -------------------------------------------------------------------------
-    
-    /**
-     * Creates a mapping between period type name and period for the given periods.
-     */
-    private ListMap<String, NameableObject> getPeriodTypePeriodMap( Collection<NameableObject> periods )
-    {
-        ListMap<String, NameableObject> map = new ListMap<String, NameableObject>();
-        
-        for ( NameableObject period : periods )
-        {
-            String periodTypeName = ((Period) period).getPeriodType().getName();
-            
-            map.putValue( periodTypeName, period );
-        }
-        
-        return map;
-    }
     
     /**
      * Creates a mapping between level and organisation unit for the given organisation

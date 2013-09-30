@@ -45,6 +45,7 @@ public interface DimensionalObject
     final String CATEGORYOPTIONCOMBO_DIM_ID = "co";
     final String PERIOD_DIM_ID = "pe";
     final String ORGUNIT_DIM_ID = "ou";
+    final String ITEM_DIM_ID = "item";
     
     final String DIMENSION_SEP = "-";
 
@@ -56,12 +57,26 @@ public interface DimensionalObject
         PERIOD_DIM_ID, "Period",
         ORGUNIT_DIM_ID, "Organisation unit" );
     
+    /**
+     * Gets the dimension identifier.
+     */
     String getDimension();
     
+    /**
+     * Gets the dimension type.
+     */
     DimensionType getType();
     
+    /**
+     * Gets the dimension name, which corresponds to a column in the analytics
+     * tables.
+     */
     String getDimensionName();
     
+    /**
+     * Gets the dimension display name, which is a readable name describing the
+     * dimension.
+     */
     String getDisplayName();
         
     List<NameableObject> getItems();

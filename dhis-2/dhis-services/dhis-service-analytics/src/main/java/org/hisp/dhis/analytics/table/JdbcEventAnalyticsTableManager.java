@@ -164,7 +164,9 @@ public class JdbcEventAnalyticsTableManager
                 "left join _dateperiodstructure dps on psi.executiondate=dps.dateperiod " +
                 "where psi.executiondate >= '" + start + "' " +
                 "and psi.executiondate <= '" + end + "' " +
-                "and pr.programid=" + table.getProgram().getId() + ";";
+                "and pr.programid=" + table.getProgram().getId() + " " +
+                "and psi.organisationunitid is not null " +
+                "and psi.executiondate is not null";
 
             log.info( "Populate SQL: "+ sql );
             
@@ -230,9 +232,10 @@ public class JdbcEventAnalyticsTableManager
         String[] ps = { "ps", "character(11) not null", "ps.uid" };
         String[] ed = { "executiondate", "date", "psi.executiondate" };
         String[] ou = { "ou", "character(11) not null", "ou.uid" };
-        String[] oun = { "ouname", "character varying(160) not null", "ou.name" };
+        String[] oun = { "ouname", "character varying(230) not null", "ou.name" };
+        String[] ouc = { "oucode", "character varying(50)", "ou.code" };
         
-        columns.addAll( Arrays.asList( gender, isdead, psi, ps, ed, ou, oun ) );
+        columns.addAll( Arrays.asList( gender, isdead, psi, ps, ed, ou, oun, ouc ) );
         
         return columns;
     }
