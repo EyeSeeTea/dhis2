@@ -80,6 +80,7 @@ function Patient()
 				var	dateOfIncident = jQuery('#patientForm [id=dateOfIncident]').val();
 				var enrollmentDate = jQuery('#patientForm [id=enrollmentDate]').val();
 				
+				// Enroll patient into the program
 				if( programId !='' && enrollmentDate != '')
 				{
 					jQuery.postJSON( "saveProgramEnrollment.action",
@@ -408,14 +409,6 @@ function loadDataEntry( programStageInstanceId )
 					}
 				}
 				
-				var linkedEvent = jQuery(".stage-object-selected").attr("linkedEvent");
-				if( linkedEvent=='true' ) {
-					blockEntryForm();
-					disable('executionDate');
-				}
-				else{
-					enable('executionDate');
-				}
 				$(window).scrollTop(200);
 			}
 			else
@@ -428,5 +421,13 @@ function loadDataEntry( programStageInstanceId )
 			resize();
 			hideLoader();
 			hideById('contentDiv');
+			
+			var reportDateToUse = selectedProgramStageInstance.attr('reportDateToUse');
+			if(reportDateToUse!='' && $('#executionDate').val() == '' ){
+				$('#executionDate').val(reportDateToUse);
+				$('#executionDate').change();
+			}
+		
 		} );
+	
 }

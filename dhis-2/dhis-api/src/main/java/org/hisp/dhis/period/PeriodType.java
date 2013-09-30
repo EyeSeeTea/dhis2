@@ -54,6 +54,9 @@ public abstract class PeriodType
     // Available PeriodTypes
     // -------------------------------------------------------------------------
 
+    /**
+     * All period types in descending order according to frequency.
+     */
     public static final List<PeriodType> PERIOD_TYPES = new ArrayList<PeriodType>()
     {
         {
@@ -352,6 +355,7 @@ public abstract class PeriodType
      * @param externalId the external identifier.
      * @return the period.
      */
+    @Deprecated
     public static Period createPeriodExternalId( String externalId )
     {
         if ( externalId == null || externalId.split( "_" ).length <= 1 )

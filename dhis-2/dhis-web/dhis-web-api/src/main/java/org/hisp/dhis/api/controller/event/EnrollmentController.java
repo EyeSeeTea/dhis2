@@ -125,7 +125,7 @@ public class EnrollmentController
         }
         else
         {
-                Person person = getPerson( personUid );
+            Person person = getPerson( personUid );
             enrollments = status != null ? enrollmentService.getEnrollments( person, status ) : enrollmentService.getEnrollments( person );
         }
 
@@ -144,7 +144,7 @@ public class EnrollmentController
         model.addAttribute( "model", enrollment );
         model.addAttribute( "viewClass", options.getViewClass( "detailed" ) );
 
-        return "person";
+        return "enrollment";
     }
 
     // -------------------------------------------------------------------------
@@ -207,7 +207,7 @@ public class EnrollmentController
     @ResponseStatus( value = HttpStatus.NO_CONTENT )
     public void updateEnrollmentXml( @PathVariable String id, HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
-        ImportSummary importSummary = personService.updatePersonXml( id, request.getInputStream() );
+        ImportSummary importSummary = enrollmentService.updateEnrollmentXml( id, request.getInputStream() );
         JacksonUtils.toXml( response.getOutputStream(), importSummary );
     }
 
@@ -219,6 +219,22 @@ public class EnrollmentController
         JacksonUtils.toJson( response.getOutputStream(), importSummary );
     }
 
+    @RequestMapping( value = "/{id}/cancelled", method = RequestMethod.PUT )
+    @ResponseStatus( HttpStatus.NO_CONTENT )
+    public void cancelEnrollment( @PathVariable String id, @RequestParam Map<String, String> parameters, Model model ) throws NotFoundException
+    {
+        Enrollment enrollment = getEnrollment( id );
+        enrollmentService.cancelEnrollment( enrollment );
+    }
+
+    @RequestMapping( value = "/{id}/completed", method = RequestMethod.PUT )
+    @ResponseStatus( HttpStatus.NO_CONTENT )
+    public void completedEnrollment( @PathVariable String id, @RequestParam Map<String, String> parameters, Model model ) throws NotFoundException
+    {
+        Enrollment enrollment = getEnrollment( id );
+        enrollmentService.completeEnrollment( enrollment );
+    }
+
     // -------------------------------------------------------------------------
     // DELETE
     // -------------------------------------------------------------------------
@@ -228,7 +244,7 @@ public class EnrollmentController
     public void deleteEnrollment( @PathVariable String id, @RequestParam Map<String, String> parameters, Model model ) throws NotFoundException
     {
         Enrollment enrollment = getEnrollment( id );
-        enrollmentService.cancelEnrollment( enrollment );
+        enrollmentService.deleteEnrollment( enrollment );
     }
 
     // -------------------------------------------------------------------------

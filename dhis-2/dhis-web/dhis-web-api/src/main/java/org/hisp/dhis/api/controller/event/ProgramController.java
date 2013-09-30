@@ -33,8 +33,6 @@ import org.hisp.dhis.api.controller.WebMetaData;
 import org.hisp.dhis.api.controller.WebOptions;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -47,14 +45,11 @@ import java.util.List;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping(value = ProgramController.RESOURCE_PATH)
+@RequestMapping( value = ProgramController.RESOURCE_PATH )
 public class ProgramController
     extends AbstractCrudController<Program>
 {
     public static final String RESOURCE_PATH = "/programs";
-
-    @Autowired
-    private ProgramService programService;
 
     protected List<Program> getEntityList( WebMetaData metaData, WebOptions options )
     {

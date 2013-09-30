@@ -28,8 +28,11 @@ package org.hisp.dhis.analytics.event.data;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.analytics.DataQueryParams.OPTION_SEP;
+import static org.hisp.dhis.analytics.DataQueryParams.DIMENSION_NAME_SEP;
+import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -37,15 +40,19 @@ import java.util.Map;
 import java.util.Set;
 
 import org.hisp.dhis.analytics.AnalyticsService;
+import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.IllegalQueryException;
 import org.hisp.dhis.analytics.event.EventAnalyticsManager;
 import org.hisp.dhis.analytics.event.EventAnalyticsService;
 import org.hisp.dhis.analytics.event.EventQueryParams;
+import org.hisp.dhis.analytics.event.EventQueryPlanner;
 import org.hisp.dhis.analytics.event.QueryItem;
 import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
@@ -61,6 +68,7 @@ import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.system.util.DateUtils;
+import org.hisp.dhis.system.util.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -74,6 +82,7 @@ public class DefaultEventAnalyticsService
     private static final String ITEM_EXECUTION_DATE = "executiondate";
     private static final String ITEM_ORG_UNIT = "ou";
     private static final String ITEM_ORG_UNIT_NAME = "ouname";
+    private static final String ITEM_ORG_UNIT_CODE = "oucode";
     private static final String ITEM_GENDER = "gender";
     private static final String ITEM_ISDEAD = "isdead";
     
@@ -97,26 +106,82 @@ public class DefaultEventAnalyticsService
     
     @Autowired
     private EventAnalyticsManager analyticsManager;
+    
+    @Autowired
+    private EventQueryPlanner queryPlanner;
+    
+    @Autowired
+    private AnalyticsService analyticsService;
 
     // -------------------------------------------------------------------------
     // EventAnalyticsService implementation
     // -------------------------------------------------------------------------
 
     //TODO order the event analytics tables up front to avoid default sorting in queries
+    //TODO filter items support
     
-    public Grid getEvents( EventQueryParams params )
+    public Grid getAggregatedEventData( EventQueryParams params )
     {
+        queryPlanner.validate( params );
+
         Grid grid = new ListGrid();
-                
-        grid.addHeader( new GridHeader( "Event", ITEM_EVENT ) );
-        grid.addHeader( new GridHeader( "Program stage", ITEM_PROGRAM_STAGE ) );
-        grid.addHeader( new GridHeader( "Execution date", ITEM_EXECUTION_DATE ) );
-        grid.addHeader( new GridHeader( "Organisation unit", ITEM_ORG_UNIT ) );
-        grid.addHeader( new GridHeader( "Organisation unit name", ITEM_ORG_UNIT_NAME ) );
 
         // ---------------------------------------------------------------------
         // Headers
         // ---------------------------------------------------------------------
+
+        for ( DimensionalObject dimension : params.getDimensions() )
+        {
+            grid.addHeader( new GridHeader( dimension.getDimension(), dimension.getDisplayName() ) );
+        }
+        
+        for ( QueryItem item : params.getItems() )
+        {
+            grid.addHeader( new GridHeader( item.getItem().getUid(), item.getItem().getName() ) );
+        }
+        
+        grid.addHeader( new GridHeader( "value", "Value" ) );
+
+        // ---------------------------------------------------------------------
+        // Data
+        // ---------------------------------------------------------------------
+
+        //TODO relative periods
+                
+        List<EventQueryParams> queries = queryPlanner.planQuery( params );
+
+        for ( EventQueryParams query : queries )
+        {
+            analyticsManager.getAggregatedEventData( query, grid );
+        }        
+
+        // ---------------------------------------------------------------------
+        // Meta-data
+        // ---------------------------------------------------------------------
+
+        Map<Object, Object> metaData = new HashMap<Object, Object>();        
+        metaData.put( AnalyticsService.NAMES_META_KEY, getUidNameMap( params ) );
+        grid.setMetaData( metaData );
+
+        return grid;        
+    }
+    
+    public Grid getEvents( EventQueryParams params )
+    {
+        queryPlanner.validate( params );
+
+        Grid grid = new ListGrid();
+
+        // ---------------------------------------------------------------------
+        // Headers
+        // ---------------------------------------------------------------------
+
+        grid.addHeader( new GridHeader( ITEM_EVENT, "Event" ) );
+        grid.addHeader( new GridHeader( ITEM_PROGRAM_STAGE, "Program stage" ) );
+        grid.addHeader( new GridHeader( ITEM_EXECUTION_DATE, "Execution date" ) );
+        grid.addHeader( new GridHeader( ITEM_ORG_UNIT_NAME, "Organisation unit name" ) );
+        grid.addHeader( new GridHeader( ITEM_ORG_UNIT_CODE, "Organisation unit code" ) );
+        grid.addHeader( new GridHeader( ITEM_ORG_UNIT, "Organisation unit" ) );
 
         for ( QueryItem queryItem : params.getItems() )
         {
@@ -129,7 +194,11 @@ public class DefaultEventAnalyticsService
         // Data
         // ---------------------------------------------------------------------
 
-        List<EventQueryParams> queries = EventQueryPlanner.planQuery( params );
+        Timer t = new Timer().start();
+        
+        List<EventQueryParams> queries = queryPlanner.planQuery( params );
+        
+        t.getSplitTime( "Planned query, got: " + queries.size() );
         
         int count = 0;
         
@@ -142,6 +211,8 @@ public class DefaultEventAnalyticsService
             
             analyticsManager.getEvents( query, grid );
         }
+        
+        t.getTime( "Queried events, got: " + grid.getHeight() );
         
         // ---------------------------------------------------------------------
         // Meta-data
@@ -160,9 +231,15 @@ public class DefaultEventAnalyticsService
         
         return grid;
     }
+
+    public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate, 
+        Set<String> dimension, Set<String> filter, String ouMode )
+    {
+        return getFromUrl( program, stage, startDate, endDate, dimension, filter, ouMode, null, null, null, null );
+    }
     
-    public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate, String ou, String ouMode,
-        Set<String> item, Set<String> asc, Set<String> desc, Integer page, Integer pageSize )
+    public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate, 
+        Set<String> dimension, Set<String> filter, String ouMode, Set<String> asc, Set<String> desc, Integer page, Integer pageSize )
     {
         EventQueryParams params = new EventQueryParams();
         
@@ -183,46 +260,59 @@ public class DefaultEventAnalyticsService
         Date start = null;
         Date end = null;
         
-        try
+        if ( startDate != null && endDate != null )
         {
-            start = DateUtils.getMediumDate( startDate );
-            end = DateUtils.getMediumDate( endDate );
-        }
-        catch ( RuntimeException ex )
-        {
-            throw new IllegalQueryException( "Start date or end date is invalid: " + startDate + " - " + endDate );
-        }
-        
-        if ( start == null || end == null )
-        {
-            throw new IllegalQueryException( "Start date or end date is invalid: " + startDate + " - " + endDate );
-        }
-        
-        if ( start.after( end ) )
-        {
-            throw new IllegalQueryException( "Start date is after end date: " + startDate + " - " + endDate );
-        }
-        
-        if ( item != null )
-        {
-            for ( String it : item )
+            try
             {
-                if ( it != null && !it.contains( OPTION_SEP ) )
+                start = DateUtils.getMediumDate( startDate );
+                end = DateUtils.getMediumDate( endDate );
+            }
+            catch ( RuntimeException ex )
+            {
+                throw new IllegalQueryException( "Start date or end date is invalid: " + startDate + " - " + endDate );
+            }
+        }
+        
+        if ( dimension != null )
+        {
+            for ( String dim : dimension )
+            {
+                String dimensionId = DataQueryParams.getDimensionFromParam( dim );
+                
+                if ( ORGUNIT_DIM_ID.equals( dimensionId ) || PERIOD_DIM_ID.equals( dimensionId ) )
                 {
-                    params.getItems().add( new QueryItem( getItem( it, pr ) ) );
+                    List<String> items = DataQueryParams.getDimensionItemsFromParam( dim );
+                    params.getDimensions().addAll( analyticsService.getDimension( dimensionId, items, null, null ) );
                 }
-                else if ( it != null )
+                else
                 {
-                    String[] split = it.split( OPTION_SEP );
-                    
-                    if ( split == null || split.length != 3 )
-                    {
-                        throw new IllegalQueryException( "Item filter has invalid format: " + it );
-                    }
-                    
-                    params.getItems().add( new QueryItem( getItem( split[0], pr ), split[1], split[2] ) );
+                    params.getItems().addAll( getQueryItems( dim, pr ) );
                 }
             }
+        }
+        
+        if ( filter != null )
+        {
+            for ( String dim : filter )
+            {
+                String dimensionId = DataQueryParams.getDimensionFromParam( dim );
+                
+                if ( ORGUNIT_DIM_ID.equals( dimensionId ) || PERIOD_DIM_ID.equals( dimensionId ) )
+                {
+                    List<String> items = DataQueryParams.getDimensionItemsFromParam( dim );
+                    params.getFilters().addAll( analyticsService.getDimension( dimensionId, items, null, null ) );
+                }
+                else
+                {
+                    params.getItemFilters().addAll( getQueryItems( dim, pr ) );
+                }            
+            }
+        }
+        
+        for ( NameableObject object : params.getDimensionOrFilter( ORGUNIT_DIM_ID ) )
+        {
+            OrganisationUnit unit = (OrganisationUnit) object;
+            unit.setLevel( organisationUnitService.getLevelOfOrganisationUnit( unit.getUid() ) );
         }
         
         if ( asc != null )
@@ -241,38 +331,6 @@ public class DefaultEventAnalyticsService
             }
         }
         
-        if ( ou != null )
-        {
-            String[] split = ou.split( OPTION_SEP );
-            
-            for ( String ouId : split )
-            {
-                OrganisationUnit orgUnit = organisationUnitService.getOrganisationUnit( ouId );
-                
-                if ( orgUnit != null )
-                {
-                    orgUnit.setLevel( organisationUnitService.getLevelOfOrganisationUnit( orgUnit.getId() ) );
-                    
-                    params.getOrganisationUnits().add( orgUnit );
-                }
-            }
-        }
-        
-        if ( params.getOrganisationUnits().isEmpty() )
-        {
-            throw new IllegalQueryException( "At least one organisation unit must be specified" );
-        }
-        
-        if ( page != null && page <= 0 )
-        {
-            throw new IllegalQueryException( "Page number must be positive: " + page );
-        }
-        
-        if ( pageSize != null && pageSize < 0 )
-        {
-            throw new IllegalQueryException( "Page size must be zero or positive: " + pageSize );
-        }
-        
         params.setProgram( pr );
         params.setProgramStage( ps );
         params.setStartDate( start );
@@ -284,13 +342,36 @@ public class DefaultEventAnalyticsService
         {
             params.setPageSize( pageSize );
         }
-        
+
         return params;
     }
 
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
+    
+    private List<QueryItem> getQueryItems( String dimension, Program program )
+    {
+        List<QueryItem> items = new ArrayList<QueryItem>();
+        
+        if ( !dimension.contains( DIMENSION_NAME_SEP ) )
+        {
+            items.add( getItem( program, dimension, null, null ) );
+        }
+        else // Filter
+        {
+            String[] split = dimension.split( DIMENSION_NAME_SEP );
+            
+            if ( split == null || split.length != 3 )
+            {
+                throw new IllegalQueryException( "Item filter has invalid format: " + dimension );
+            }
+            
+            items.add( getItem( program, split[0], split[1], split[2] ) );
+        }
+        
+        return items;
+    }
     
     private Map<String, String> getUidNameMap( EventQueryParams params )
     {
@@ -311,7 +392,7 @@ public class DefaultEventAnalyticsService
     
     private String getSortItem( String item, Program program )
     {
-        if ( !ITEM_EXECUTION_DATE.equals( item ) && getItem( item, program ) == null )
+        if ( !ITEM_EXECUTION_DATE.equals( item ) && getItem( program, item, null, null ) == null )
         {
             throw new IllegalQueryException( "Descending sort item is invalid: " + item );
         }
@@ -319,37 +400,37 @@ public class DefaultEventAnalyticsService
         return item;
     }
     
-    private IdentifiableObject getItem( String item, Program program )
+    private QueryItem getItem( Program program, String item, String operator, String filter )
     {
         if ( ITEM_GENDER.equalsIgnoreCase( item ) )
         {
-            return new BaseIdentifiableObject( ITEM_GENDER, ITEM_GENDER, ITEM_GENDER );
+            return new QueryItem( new BaseIdentifiableObject( ITEM_GENDER, ITEM_GENDER, ITEM_GENDER ), operator, filter );
         }
         
         if ( ITEM_ISDEAD.equalsIgnoreCase( item ) )
         {
-            return new BaseIdentifiableObject( ITEM_ISDEAD, ITEM_ISDEAD, ITEM_ISDEAD );
+            return new QueryItem( new BaseIdentifiableObject( ITEM_ISDEAD, ITEM_ISDEAD, ITEM_ISDEAD ), operator, filter );
         }
         
         DataElement de = dataElementService.getDataElement( item );
         
         if ( de != null && program.getAllDataElements().contains( de ) )
         {
-            return de;
+            return new QueryItem( de, operator, filter );
         }
         
         PatientAttribute at = attributeService.getPatientAttribute( item );
         
         if ( at != null && program.getPatientAttributes().contains( at ) )
         {
-            return at;
+            return new QueryItem( at, operator, filter );
         }
         
         PatientIdentifierType it = identifierTypeService.getPatientIdentifierType( item );
         
         if ( it != null && program.getPatientIdentifierTypes().contains( it ) )
         {
-            return it;
+            return new QueryItem( it, operator, filter );
         }
         
         throw new IllegalQueryException( "Item identifier does not reference any item part of the program: " + item );           

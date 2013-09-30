@@ -62,8 +62,12 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
+import org.hisp.dhis.patient.PatientAttribute;
+import org.hisp.dhis.patient.PatientAttributeGroup;
+import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.sqlview.SqlView;
@@ -158,6 +162,10 @@ final public class ExchangeClasses
 
         allExportClasses.put( Program.class, "programs" );
         allExportClasses.put( ProgramStage.class, "programStages" );
+        allExportClasses.put( RelationshipType.class, "relationshipTypes" );
+        allExportClasses.put( PatientIdentifierType.class, "personIdentifierTypes" );
+        allExportClasses.put( PatientAttribute.class, "personAttributeTypes" );
+        allExportClasses.put( PatientAttributeGroup.class, "personAttributeGroups" );
 
         allExportClasses.put( BaseDimensionalObject.class, "dimensions" );
 
@@ -181,8 +189,16 @@ final public class ExchangeClasses
         // tracker types are not enabled for meta-data import-export yet
         exportClasses.remove( Program.class );
         exportClasses.remove( ProgramStage.class );
+        exportClasses.remove( RelationshipType.class );
+        exportClasses.remove( PatientIdentifierType.class );
+        exportClasses.remove( PatientAttribute.class );
+        exportClasses.remove( PatientAttributeGroup.class );
         importClasses.remove( Program.class );
         importClasses.remove( ProgramStage.class );
+        importClasses.remove( RelationshipType.class );
+        importClasses.remove( PatientIdentifierType.class );
+        importClasses.remove( PatientAttribute.class );
+        importClasses.remove( PatientAttributeGroup.class );
 
         // special class which is created on demand in association with other objects
         exportClasses.remove( DataElementOperand.class );

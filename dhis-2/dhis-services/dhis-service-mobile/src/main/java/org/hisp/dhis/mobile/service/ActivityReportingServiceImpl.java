@@ -28,6 +28,22 @@ package org.hisp.dhis.mobile.service;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.hisp.dhis.api.mobile.ActivityReportingService;
 import org.hisp.dhis.api.mobile.NotAllowedException;
 import org.hisp.dhis.api.mobile.PatientMobileSettingService;
@@ -36,9 +52,9 @@ import org.hisp.dhis.api.mobile.model.ActivityPlan;
 import org.hisp.dhis.api.mobile.model.ActivityValue;
 import org.hisp.dhis.api.mobile.model.Beneficiary;
 import org.hisp.dhis.api.mobile.model.DataValue;
-import org.hisp.dhis.api.mobile.model.LWUITmodel.Section;
 import org.hisp.dhis.api.mobile.model.PatientAttribute;
 import org.hisp.dhis.api.mobile.model.Task;
+import org.hisp.dhis.api.mobile.model.LWUITmodel.Section;
 import org.hisp.dhis.api.mobile.model.comparator.ActivityComparator;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
@@ -79,21 +95,6 @@ import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class ActivityReportingServiceImpl
     implements ActivityReportingService
@@ -838,8 +839,11 @@ public class ActivityReportingServiceImpl
         List<org.hisp.dhis.patient.PatientAttribute> atts;
 
         patientModel.setId( patient.getId() );
-        patientModel.setName( patient.getName() );
-
+        
+        if ( patient.getName() != null )
+        {
+            patientModel.setName( patient.getName() );
+        }
         Period period = new Period( new DateTime( patient.getBirthDate() ), new DateTime() );
         patientModel.setAge( period.getYears() );
         /*
@@ -850,7 +854,10 @@ public class ActivityReportingServiceImpl
         {
             patientModel.setOrganisationUnitName( patient.getOrganisationUnit().getName() );
         }
-        patientModel.setPhoneNumber( patient.getPhoneNumber() );
+        if ( patient.getPhoneNumber() != null )
+        {
+            patientModel.setPhoneNumber( patient.getPhoneNumber() );
+        }
 
         this.setSetting( getSettings() );
 
@@ -864,7 +871,7 @@ public class ActivityReportingServiceImpl
             {
                 patientModel.setDobType( patient.getDobType() );
             }
-            if ( setting.getBirthdate() )
+            if ( setting.getBirthdate() && patient.getBirthDate()!=null )
             {
                 DateFormat dateFormat = new SimpleDateFormat( "dd-MM-yyyy" );
                 patientModel.setBirthDate( dateFormat.format( patient.getBirthDate() ) );
@@ -908,9 +915,8 @@ public class ActivityReportingServiceImpl
                 identifiers
                     .add( new org.hisp.dhis.api.mobile.model.PatientIdentifier( idTypeName, id.getIdentifier() ) );
             }
-
-            patientModel.setIdentifiers( identifiers );
         }
+        patientModel.setIdentifiers( identifiers );
 
         patientModel.setPatientAttValues( patientAtts );
 
@@ -1313,15 +1319,24 @@ public class ActivityReportingServiceImpl
     }
 
     @Override
-    public org.hisp.dhis.api.mobile.model.LWUITmodel.Program getAllAnonymousProgram( int orgUnitId )
+    public org.hisp.dhis.api.mobile.model.LWUITmodel.Program getAllProgramByOrgUnit( int orgUnitId, String programType )
         throws NotAllowedException
     {
         String programsInfo = "";
 
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( orgUnitId );
 
-        List<Program> tempPrograms = new ArrayList<Program>(
-            programService.getProgramsByCurrentUser( Program.SINGLE_EVENT_WITHOUT_REGISTRATION ) );
+        List<Program> tempPrograms = null;
+        
+        if ( Integer.valueOf( programType )==( Program.SINGLE_EVENT_WITHOUT_REGISTRATION ) )
+        {
+            tempPrograms = new ArrayList<Program>( programService.getProgramsByCurrentUser( Program.SINGLE_EVENT_WITHOUT_REGISTRATION ) );
+        }
+        else if ( Integer.valueOf( programType )==( Program.MULTIPLE_EVENTS_WITH_REGISTRATION ) )
+        {
+            tempPrograms = new ArrayList<Program>( programService.getProgramsByCurrentUser( Program.MULTIPLE_EVENTS_WITH_REGISTRATION ) );
+        }
+            
         List<Program> programs = new ArrayList<Program>();
 
         for ( Program program : tempPrograms )
@@ -1336,9 +1351,9 @@ public class ActivityReportingServiceImpl
         {
             if ( programs.size() == 1 )
             {
-                Program anonymousProgram = programs.get( 0 );
+                Program program = programs.get( 0 );
 
-                return getMobileAnonymousProgram( anonymousProgram );
+                return getMobileAnonymousProgram( program );
             }
             else
             {
@@ -1418,6 +1433,18 @@ public class ActivityReportingServiceImpl
         mobileProgramStage.setRepeatable( false );
         mobileProgramStage.setSingleEvent( true );
         mobileProgramStage.setSections( new ArrayList<Section>() );
+        
+        // get report date
+        mobileProgramStage.setReportDate( PeriodUtil.dateToString( new Date()) );
+
+        if ( programStage.getReportDateDescription() == null )
+        {
+            mobileProgramStage.setReportDateDescription( "Report Date" );
+        }
+        else
+        {
+            mobileProgramStage.setReportDateDescription( programStage.getReportDateDescription() );
+        }
 
         for ( ProgramStageDataElement programStageDataElement : programStageDataElements )
         {
@@ -1833,7 +1860,6 @@ public class ActivityReportingServiceImpl
         }
 
         patientWeb.setIdentifiers( patientIdentifierSet );
-        patientWeb.setAttributes( patientAttributeSet );
 
         patientId = patientService.createPatient( patientWeb, null, null, patientAttributeValues );
 
@@ -1899,21 +1925,32 @@ public class ActivityReportingServiceImpl
             DateFormat dateFormat = new SimpleDateFormat( "dd-MM-yyyy" );
 
             int i = 1;
+            String name = "";
+            String DOB = "";
             for ( Patient each : patients )
             {
                 if ( i > 10 )
                 {
                     break;
                 }
-                if ( each.getBirthDate() != null )
+                
+                if ( each.getName() != null )
                 {
-                    patientsInfo += each.getId() + "/" + each.getName() + "/" + dateFormat.format( each.getBirthDate() )
-                        + "$";
+                    name = each.getName();
                 }
                 else
                 {
-                    patientsInfo += each.getId() + "/" + each.getName() + "/DOB$";
+                    name = "unknown";
                 }
+                if ( each.getBirthDate() != null )
+                {
+                    DOB = dateFormat.format( each.getBirthDate() );
+                }
+                else
+                {
+                    DOB = "unknown";
+                }
+                patientsInfo += each.getId() + "/" + name + "/" + DOB + "$";
                 i++;
             }
 
@@ -1933,5 +1970,12 @@ public class ActivityReportingServiceImpl
             }
             return patientMobile;
         }
+    }
+
+    @Override
+    public String findLostToFollowUp( int orgUnitId, String programId )
+        throws NotAllowedException
+    {
+        return "";
     }
 }

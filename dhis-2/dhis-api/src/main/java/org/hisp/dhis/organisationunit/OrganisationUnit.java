@@ -326,6 +326,11 @@ public class OrganisationUnit
     {
         return !this.children.isEmpty();
     }
+    
+    public boolean isLeaf()
+    {
+        return children == null || children.isEmpty();
+    }
 
     public boolean hasChildrenWithCoordinates()
     {
@@ -338,6 +343,11 @@ public class OrganisationUnit
         }
 
         return false;
+    }
+    
+    public boolean hasCoordinatesUp()
+    {
+        return parent != null && parent.parent != null && parent.parent.hasChildrenWithCoordinates();
     }
 
     public boolean hasCoordinates()

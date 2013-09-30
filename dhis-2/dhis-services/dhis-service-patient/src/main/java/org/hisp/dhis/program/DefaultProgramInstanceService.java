@@ -190,12 +190,14 @@ public class DefaultProgramInstanceService
         return programInstanceStore.get( programs );
     }
 
-    public Collection<ProgramInstance> getProgramInstances( Collection<Program> programs, OrganisationUnit organisationUnit )
+    public Collection<ProgramInstance> getProgramInstances( Collection<Program> programs,
+        OrganisationUnit organisationUnit )
     {
         return programInstanceStore.get( programs, organisationUnit );
     }
 
-    public Collection<ProgramInstance> getProgramInstances( Collection<Program> programs, OrganisationUnit organisationUnit, int status )
+    public Collection<ProgramInstance> getProgramInstances( Collection<Program> programs,
+        OrganisationUnit organisationUnit, int status )
     {
         return programInstanceStore.get( programs, organisationUnit, status );
     }
@@ -616,8 +618,8 @@ public class DefaultProgramInstanceService
     }
 
     @Override
-    public ProgramInstance enrollPatient( Patient patient, Program program, Date enrollmentDate,
-        Date dateOfIncident, OrganisationUnit organisationUnit, I18nFormat format )
+    public ProgramInstance enrollPatient( Patient patient, Program program, Date enrollmentDate, Date dateOfIncident,
+        OrganisationUnit organisationUnit, I18nFormat format )
     {
         if ( enrollmentDate == null )
         {
@@ -662,7 +664,11 @@ public class DefaultProgramInstanceService
             {
                 ProgramStageInstance programStageInstance = generateEvent( programInstance, programStage,
                     enrollmentDate, dateOfIncident, organisationUnit );
-                programStageInstanceService.addProgramStageInstance( programStageInstance );
+
+                if ( programStageInstance != null )
+                {
+                    programStageInstanceService.addProgramStageInstance( programStageInstance );
+                }
             }
         }
 
@@ -720,6 +726,7 @@ public class DefaultProgramInstanceService
         // ---------------------------------------------------------------------
 
         List<OutboundSms> outboundSms = programInstance.getOutboundSms();
+
         if ( outboundSms == null )
         {
             outboundSms = new ArrayList<OutboundSms>();
@@ -732,6 +739,7 @@ public class DefaultProgramInstanceService
         // -----------------------------------------------------------------
 
         List<MessageConversation> messageConversations = programInstance.getMessageConversations();
+
         if ( messageConversations == null )
         {
             messageConversations = new ArrayList<MessageConversation>();
@@ -745,7 +753,6 @@ public class DefaultProgramInstanceService
         // -----------------------------------------------------------------
 
         programInstance.setStatus( ProgramInstance.STATUS_COMPLETED );
-
         programInstance.setEndDate( new Date() );
 
         updateProgramInstance( programInstance );
@@ -803,7 +810,8 @@ public class DefaultProgramInstanceService
         ProgramStageInstance programStageInstance = null;
 
         Date currentDate = new Date();
-        Date dateCreatedEvent = null;
+        Date dateCreatedEvent;
+
         if ( programStage.getGeneratedByEnrollmentDate() )
         {
             dateCreatedEvent = enrollmentDate;
@@ -815,8 +823,7 @@ public class DefaultProgramInstanceService
 
         Date dueDate = DateUtils.getDateAfterAddition( dateCreatedEvent, programStage.getMinDaysFromStart() );
 
-        if ( !programInstance.getProgram().getIgnoreOverdueEvents()
-            || !(programInstance.getProgram().getIgnoreOverdueEvents() && dueDate.before( currentDate )) )
+        if ( !programInstance.getProgram().getIgnoreOverdueEvents() || dueDate.before( currentDate ) )
         {
             programStageInstance = new ProgramStageInstance();
             programStageInstance.setProgramInstance( programInstance );

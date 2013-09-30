@@ -56,6 +56,8 @@ public interface PatientStore
 
     Collection<Patient> getByOrgUnit( OrganisationUnit organisationUnit, Integer min, Integer max );
 
+    Collection<Patient> getByOrgUnitAndNameLike( OrganisationUnit organisationUnit, String nameLike, Integer min, Integer max );
+
     Collection<Patient> getByOrgUnitAndGender( OrganisationUnit organisationUnit, String gender, Integer min, Integer max );
 
     Collection<Patient> getByOrgUnitProgram( OrganisationUnit organisationUnit, Program program, Integer min,
@@ -91,9 +93,9 @@ public interface PatientStore
         Collection<PatientAttribute> patientAttributes, Collection<PatientIdentifierType> identifierTypes, Integer min,
         Integer max );
 
-    Collection<Patient> getByOrgUnitProgramGender( OrganisationUnit organisationUnit, Program program, String gender, int min, int max );
+    Collection<Patient> getByOrgUnitProgramGender( OrganisationUnit organisationUnit, Program program, String gender, Integer min, Integer max );
 
-    Collection<Patient> getByProgram( Program program, int min, int max );
+    Collection<Patient> getByProgram( Program program, Integer min, Integer max );
 
-    Collection<Patient> getByProgram( Program program, String gender, int min, int max );
+    Collection<Patient> getByProgram( Program program, String gender, Integer min, Integer max );
 }

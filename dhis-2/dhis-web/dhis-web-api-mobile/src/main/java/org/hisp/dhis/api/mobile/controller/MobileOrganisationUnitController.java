@@ -380,10 +380,10 @@ public class MobileOrganisationUnitController
 
     @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/LWUIT/orgUnits/{id}/downloadAnonymousProgramUrl" )
     @ResponseBody
-    public Program getAnonymousProgram( @PathVariable int id, @RequestHeader( "useless-part" ) String enrollInfo )
+    public Program getAnonymousProgram( @PathVariable int id, @RequestHeader( "programType" ) String programType )
         throws NotAllowedException
     {
-        return activityReportingService.getAllAnonymousProgram( id );
+        return activityReportingService.getAllProgramByOrgUnit( id, programType );
     }
 
     @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/LWUIT/orgUnits/{id}/findProgram" )
@@ -392,6 +392,14 @@ public class MobileOrganisationUnitController
         throws NotAllowedException
     {
         return activityReportingService.findProgram( programInfo );
+    }
+    
+    @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/LWUIT/orgUnits/{id}/findLostToFollowUp" )
+    @ResponseBody
+    public String findLostToFollowUp( @PathVariable int id, @RequestHeader( "programId" ) String programId )
+        throws NotAllowedException
+    {
+        return "";
     }
 
     // Supportive methods
