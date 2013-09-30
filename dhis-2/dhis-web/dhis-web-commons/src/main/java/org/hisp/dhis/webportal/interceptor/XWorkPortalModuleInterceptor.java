@@ -50,6 +50,7 @@ public class XWorkPortalModuleInterceptor
 
     private static final String KEY_MAINTENANCE_MODULES = "maintenanceModules";
     private static final String KEY_SERVICE_MODULES = "serviceModules";
+    private static final String KEY_MENU_MODULES = "menuModules";
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -84,7 +85,8 @@ public class XWorkPortalModuleInterceptor
         Map<String, Object> handle = new HashMap<String, Object>( 2 );
 
         handle.put( KEY_MAINTENANCE_MODULES, moduleManager.getAccessibleMaintenanceModules() );
-        handle.put( KEY_SERVICE_MODULES, moduleManager.getAccessibleServiceModules() );
+        handle.put( KEY_SERVICE_MODULES, moduleManager.getAccessibleServiceModulesAndApps() );
+        handle.put( KEY_MENU_MODULES, moduleManager.getAccessibleMenuModulesAndApps() );
 
         actionInvocation.getStack().push( handle );
         

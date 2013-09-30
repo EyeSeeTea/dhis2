@@ -37,8 +37,13 @@ import org.hisp.dhis.common.Grid;
  */
 public interface EventAnalyticsService
 {
+    Grid getAggregatedEventData( EventQueryParams params );
+    
     Grid getEvents( EventQueryParams params );
 
-    EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate, String ou, String ouMode,
-        Set<String> item, Set<String> asc, Set<String> desc, Integer page, Integer pageSize );
+    EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate, 
+        Set<String> dimension, Set<String> filter, String ouMode );
+    
+    EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate, 
+        Set<String> dimension, Set<String> filter, String ouMode, Set<String> asc, Set<String> desc, Integer page, Integer pageSize );
 }

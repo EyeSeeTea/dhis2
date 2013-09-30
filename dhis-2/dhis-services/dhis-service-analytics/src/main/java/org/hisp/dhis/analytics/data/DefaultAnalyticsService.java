@@ -223,7 +223,7 @@ public class DefaultAnalyticsService
             
             expressionService.explodeAndSubstituteExpressions( indicators, null );
             
-            DataQueryParams dataSourceParams = new DataQueryParams( params );
+            DataQueryParams dataSourceParams = params.instance();
             dataSourceParams.removeDimension( DATAELEMENT_DIM_ID );
             dataSourceParams.removeDimension( DATASET_DIM_ID );
             
@@ -274,7 +274,7 @@ public class DefaultAnalyticsService
 
         if ( params.getDataElements() != null )
         {
-            DataQueryParams dataSourceParams = new DataQueryParams( params );
+            DataQueryParams dataSourceParams = params.instance();
             dataSourceParams.removeDimension( INDICATOR_DIM_ID );
             dataSourceParams.removeDimension( DATASET_DIM_ID );
             
@@ -298,7 +298,7 @@ public class DefaultAnalyticsService
             // Get complete data set registrations
             // -----------------------------------------------------------------
 
-            DataQueryParams dataSourceParams = new DataQueryParams( params );
+            DataQueryParams dataSourceParams = params.instance();
             dataSourceParams.removeDimension( INDICATOR_DIM_ID );
             dataSourceParams.removeDimension( DATAELEMENT_DIM_ID );
             dataSourceParams.setAggregationType( AggregationType.COUNT );
@@ -312,7 +312,7 @@ public class DefaultAnalyticsService
             List<Integer> completenessDimIndexes = dataSourceParams.getCompletenessDimensionIndexes();
             List<Integer> completenessFilterIndexes = dataSourceParams.getCompletenessFilterIndexes();
             
-            DataQueryParams targetParams = new DataQueryParams( dataSourceParams );
+            DataQueryParams targetParams = dataSourceParams.instance();
 
             targetParams.setDimensions( ListUtils.getAtIndexes( targetParams.getDimensions(), completenessDimIndexes ) );
             targetParams.setFilters( ListUtils.getAtIndexes( targetParams.getFilters(), completenessFilterIndexes ) );
@@ -361,7 +361,7 @@ public class DefaultAnalyticsService
 
         if ( params.getIndicators() == null && params.getDataElements() == null && params.getDataSets() == null )
         {
-            Map<String, Double> aggregatedDataMap = getAggregatedDataValueMap( new DataQueryParams( params ) );
+            Map<String, Double> aggregatedDataMap = getAggregatedDataValueMap( params.instance() );
             
             for ( Map.Entry<String, Double> entry : aggregatedDataMap.entrySet() )
             {
@@ -656,29 +656,7 @@ public class DefaultAnalyticsService
         return params;
     }
     
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-    
-    /**
-     * Returns a list of persisted DimensionalObjects generated from the given 
-     * dimension identifier and list of dimension options. The dx dimension
-     * will be exploded into concrete in|de|ds object identifiers and returned
-     * as separate DimensionalObjects. 
-     * 
-     * For the pe dimension items, relative periods represented by enums will be 
-     * replaced by real ISO periods relative to the current date. For the ou 
-     * dimension items, the user  organisation unit enums 
-     * USER_ORG_UNIT|USER_ORG_UNIT_CHILDREN will be replaced by the persisted 
-     * organisation units for the current user.
-     * 
-     * @param dimension the dimension identifier.
-     * @param items the dimension items.
-     * @param relativePeriodDate the date to use for generating relative periods, can be null.
-     * @parma format the I18nFormat, can be null.
-     * @return list of DimensionalObjects.
-     */
-    private List<DimensionalObject> getDimension( String dimension, List<String> items, Date relativePeriodDate, I18nFormat format )
+    public List<DimensionalObject> getDimension( String dimension, List<String> items, Date relativePeriodDate, I18nFormat format )
     {        
         if ( DATA_X_DIM_ID.equals( dimension ) )
         {
@@ -918,7 +896,11 @@ public class DefaultAnalyticsService
         
         throw new IllegalQueryException( "Dimension identifier does not reference any dimension: " + dimension );
     }
-        
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+    
     private DataQueryParams replaceIndicatorsWithDataElements( DataQueryParams params, int indicatorIndex )
     {
         List<Indicator> indicators = asTypedList( params.getIndicators() );        

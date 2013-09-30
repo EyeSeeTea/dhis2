@@ -83,4 +83,22 @@ public interface QueryPlanner
      */
     DataQueryGroups planQuery( DataQueryParams params, int optimalQueries, String tableName )
         throws IllegalQueryException;
+
+    /**
+     * If organisation units appear as dimensions; groups the given query into 
+     * sub queries based on the level of the organisation units. Sets the organisation 
+     * unit level on each query. If organisation units appear as filter; replaces
+     * the organisation unit filter with one filter for each level. Sets the dimension
+     * names and filter names respectively.
+     */
+    List<DataQueryParams> groupByOrgUnitLevel( DataQueryParams params );
+
+    /**
+     * If periods appear as dimensions in the given query; groups the query into 
+     * sub queries based on the period type of the periods. Sets the period type 
+     * name on each query. If periods appear as filters; replaces the period filter
+     * with one filter for each period type. Sets the dimension names and filter
+     * names respectively.
+     */
+    List<DataQueryParams> groupByPeriodType( DataQueryParams params );
 }

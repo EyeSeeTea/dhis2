@@ -53,7 +53,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -95,21 +94,19 @@ public class EventController
     @Autowired
     private EventService eventService;
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
     // -------------------------------------------------------------------------
     // Controller
     // -------------------------------------------------------------------------
 
-    @RequestMapping(value = "", method = RequestMethod.GET)
+    @RequestMapping( value = "", method = RequestMethod.GET )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_PATIENT_DATAVALUE_ADD')" )
     public String getEvents(
         @RequestParam(value = "program", required = false) String programUid,
         @RequestParam(value = "programStage", required = false) String programStageUid,
         @RequestParam(value = "orgUnit") String orgUnitUid,
         @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
         @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
-        @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request ) throws Exception
+        @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request ) throws NotFoundException
     {
         WebOptions options = new WebOptions( parameters );
         Program program = manager.get( Program.class, programUid );
@@ -170,6 +167,7 @@ public class EventController
     }
 
     @RequestMapping(value = "/{uid}", method = RequestMethod.GET)
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_PATIENT_DATAVALUE_ADD')" )
     public String getEvent( @PathVariable("uid") String uid, @RequestParam Map<String, String> parameters,
         Model model, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
