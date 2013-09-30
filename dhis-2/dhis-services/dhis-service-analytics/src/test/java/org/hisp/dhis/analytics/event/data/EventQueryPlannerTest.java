@@ -30,30 +30,54 @@ package org.hisp.dhis.analytics.event.data;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Arrays;
 import java.util.List;
 
+import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.analytics.event.EventQueryParams;
+import org.hisp.dhis.analytics.event.EventQueryPlanner;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Cal;
 import org.hisp.dhis.program.Program;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Lars Helge Overland
  */
 public class EventQueryPlannerTest
+    extends DhisSpringTest
 {
-    @Test
-    public void testPlanQueryA()
+    private Program prA;
+    private OrganisationUnit ouA;
+    private OrganisationUnit ouB;
+    
+    @Autowired
+    private EventQueryPlanner queryPlanner;
+    
+    @Override
+    public void setUpTest()
     {
-        Program prA = new Program();
+        prA = new Program();
         prA.setUid( "programuidA" );
         
+        ouA = createOrganisationUnit( 'A' );
+        ouB = createOrganisationUnit( 'B' );
+        
+        ouA.setLevel( 1 );
+        ouB.setLevel( 2 );        
+    }
+    
+    @Test
+    public void testPlanQueryA()
+    {        
         EventQueryParams params = new EventQueryParams();
         params.setProgram( prA );
         params.setStartDate( new Cal( 2010, 6, 1 ).time() );
         params.setEndDate( new Cal( 2012, 3, 20 ).time() );
+        params.setOrganisationUnits( Arrays.asList( ouA ) );
         
-        List<EventQueryParams> queries = EventQueryPlanner.planQuery( params );
+        List<EventQueryParams> queries = queryPlanner.planQuery( params );
         
         assertEquals( 3, queries.size() );
         
@@ -71,16 +95,14 @@ public class EventQueryPlannerTest
 
     @Test
     public void testPlanQueryB()
-    {
-        Program prA = new Program();
-        prA.setUid( "programuidA" );
-        
+    {        
         EventQueryParams params = new EventQueryParams();
         params.setProgram( prA );
         params.setStartDate( new Cal( 2010, 3, 1 ).time() );
         params.setEndDate( new Cal( 2010, 9, 20 ).time() );
+        params.setOrganisationUnits( Arrays.asList( ouA ) );
         
-        List<EventQueryParams> queries = EventQueryPlanner.planQuery( params );
+        List<EventQueryParams> queries = queryPlanner.planQuery( params );
 
         assertEquals( 1, queries.size() );
         
@@ -88,5 +110,19 @@ public class EventQueryPlannerTest
         assertEquals( new Cal( 2010, 9, 20 ).time(), queries.get( 0 ).getEndDate() );
 
         assertEquals( "analytics_event_2010_programuidA", queries.get( 0 ).getTableName() );
-    }        
+    }    
+
+    @Test
+    public void testPlanQueryC()
+    {        
+        EventQueryParams params = new EventQueryParams();
+        params.setProgram( prA );
+        params.setStartDate( new Cal( 2010, 6, 1 ).time() );
+        params.setEndDate( new Cal( 2012, 3, 20 ).time() );
+        params.setOrganisationUnits( Arrays.asList( ouA, ouB ) );
+        
+        List<EventQueryParams> queries = queryPlanner.planQuery( params );
+        
+        assertEquals( 6, queries.size() );
+    }
 }

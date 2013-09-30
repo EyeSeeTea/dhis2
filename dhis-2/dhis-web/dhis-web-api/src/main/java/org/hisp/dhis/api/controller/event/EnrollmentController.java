@@ -144,7 +144,7 @@ public class EnrollmentController
         model.addAttribute( "model", enrollment );
         model.addAttribute( "viewClass", options.getViewClass( "detailed" ) );
 
-        return "person";
+        return "enrollment";
     }
 
     // -------------------------------------------------------------------------
@@ -207,7 +207,7 @@ public class EnrollmentController
     @ResponseStatus( value = HttpStatus.NO_CONTENT )
     public void updateEnrollmentXml( @PathVariable String id, HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
-        ImportSummary importSummary = personService.updatePersonXml( id, request.getInputStream() );
+        ImportSummary importSummary = enrollmentService.updateEnrollmentXml( id, request.getInputStream() );
         JacksonUtils.toXml( response.getOutputStream(), importSummary );
     }
 

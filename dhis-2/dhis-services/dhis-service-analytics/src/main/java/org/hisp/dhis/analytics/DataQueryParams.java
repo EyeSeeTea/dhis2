@@ -103,11 +103,11 @@ public class DataQueryParams
     private static final DimensionItem[] DIM_OPT_ARR = new DimensionItem[0];
     private static final DimensionItem[][] DIM_OPT_2D_ARR = new DimensionItem[0][];
     
-    private List<DimensionalObject> dimensions = new ArrayList<DimensionalObject>();
+    protected List<DimensionalObject> dimensions = new ArrayList<DimensionalObject>();
     
-    private List<DimensionalObject> filters = new ArrayList<DimensionalObject>();
+    protected List<DimensionalObject> filters = new ArrayList<DimensionalObject>();
 
-    private AggregationType aggregationType;
+    protected AggregationType aggregationType;
     
     private Map<MeasureFilter, Double> measureCriteria = new HashMap<MeasureFilter, Double>();
     
@@ -119,9 +119,9 @@ public class DataQueryParams
     // Transient properties
     // -------------------------------------------------------------------------
     
-    private transient Partitions partitions;
+    protected transient Partitions partitions;
 
-    private transient String periodType;
+    protected transient String periodType;
         
     private transient PeriodType dataPeriodType;
     
@@ -134,18 +134,24 @@ public class DataQueryParams
     public DataQueryParams()
     {
     }
-    
-    public DataQueryParams( DataQueryParams params )
+
+    public DataQueryParams instance()
     {
-        this.dimensions = new ArrayList<DimensionalObject>( params.getDimensions() );
-        this.filters = new ArrayList<DimensionalObject>( params.getFilters() );
-        this.aggregationType = params.getAggregationType();
-        this.measureCriteria = params.getMeasureCriteria();
+        DataQueryParams params = new DataQueryParams();
         
-        this.partitions = params.getPartitions();
-        this.periodType = params.getPeriodType();
-        this.dataPeriodType = params.getDataPeriodType();
-        this.skipPartitioning = params.isSkipPartitioning();
+        params.dimensions = new ArrayList<DimensionalObject>( this.dimensions );
+        params.filters = new ArrayList<DimensionalObject>( this.filters );
+        params.aggregationType = this.aggregationType;
+        params.measureCriteria = this.measureCriteria;
+        params.skipMeta = this.skipMeta;
+        params.ignoreLimit = this.ignoreLimit;
+        
+        params.partitions = this.partitions;
+        params.periodType = this.periodType;
+        params.dataPeriodType = this.dataPeriodType;
+        params.skipPartitioning = this.skipPartitioning;
+        
+        return params;
     }
 
     // -------------------------------------------------------------------------
@@ -371,7 +377,7 @@ public class DataQueryParams
     {
         return CollectionUtils.intersection( dimensions, filters );
     }
-        
+    
     /**
      * Indicates whether periods are present as a dimension or as a filter. If
      * not this object is in an illegal state.
@@ -380,6 +386,17 @@ public class DataQueryParams
     {
         List<NameableObject> dimOpts = getDimensionOptions( PERIOD_DIM_ID );
         List<NameableObject> filterOpts = getFilterOptions( PERIOD_DIM_ID );
+        
+        return ( dimOpts != null && !dimOpts.isEmpty() ) || ( filterOpts != null && !filterOpts.isEmpty() );
+    }
+    
+    /**
+     * Indicates whether organisation units are present as dimensio or filter.
+     */
+    public boolean hasOrganisationUnits()
+    {
+        List<NameableObject> dimOpts = getDimensionOptions( ORGUNIT_DIM_ID );
+        List<NameableObject> filterOpts = getFilterOptions( ORGUNIT_DIM_ID );
         
         return ( dimOpts != null && !dimOpts.isEmpty() ) || ( filterOpts != null && !filterOpts.isEmpty() );
     }
@@ -424,7 +441,7 @@ public class DataQueryParams
     {
         int total = 1;
         
-        DataQueryParams query = new DataQueryParams( this );
+        DataQueryParams query = this.instance();
         
         query.getDimensions().add( new BaseDimensionalObject( DATA_X_DIM_ID ) );
         

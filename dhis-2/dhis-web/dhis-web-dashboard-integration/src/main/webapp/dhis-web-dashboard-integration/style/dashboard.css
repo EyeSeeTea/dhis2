@@ -230,7 +230,7 @@
   left: 411px;
   width: 498px;
   max-height: 520px;
-  overflow-y: scroll;
+  overflow-y: auto;
   border-right: 1px solid #bbb;
   border-bottom: 1px solid #bbb;
   border-left: 1px solid #bbb;
@@ -365,6 +365,11 @@ a.alert, .alert
   color: #E92B2B;
 }
 
+.listTable th
+{
+  background-color: rgba( 0, 0, 0, 0 );
+}
+
 /*----------------------------------------------------------------------------*/
 /* Message                                                                    */
 /*----------------------------------------------------------------------------*/
@@ -388,14 +393,15 @@ a.alert, .alert
 
 .recipientsDiv
 { 
-  padding-left: 38px;
+  width: 660px;
+  padding-left: 40px;
 }
 
 .messageDiv
 {
-  width: 700px;
+  width: 660px;
   border-bottom: 1px solid #cccccc;
-  padding-left: 38px;
+  padding-left: 40px;
   padding-top: 16px;
   padding-bottom: 22px;
 }

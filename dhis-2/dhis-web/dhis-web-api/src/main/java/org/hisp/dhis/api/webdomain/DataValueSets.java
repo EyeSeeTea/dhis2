@@ -41,7 +41,7 @@ import java.util.List;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "dxf2", namespace = DxfNamespaces.DXF_2_0 )
+@JacksonXmlRootElement( localName = "dataValueSets", namespace = DxfNamespaces.DXF_2_0 )
 public class DataValueSets
 {
     private List<DataValueSet> dataValueSets = new ArrayList<DataValueSet>();

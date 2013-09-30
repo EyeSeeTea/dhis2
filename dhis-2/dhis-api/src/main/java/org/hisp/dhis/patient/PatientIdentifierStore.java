@@ -66,15 +66,15 @@ public interface PatientIdentifierStore
 
     Collection<PatientIdentifier> getPatientIdentifiers( Patient patient );
 
-    Patient getPatient( PatientIdentifierType idenType, String value );
+    Patient getPatient( PatientIdentifierType identifierType, String value );
 
-    Collection<Patient> getPatientsByIdentifier( String identifier, int min, int max );
+    Collection<Patient> getPatientsByIdentifier( String identifier, Integer min, Integer max );
 
     int countGetPatientsByIdentifier( String identifier );
 
     Collection<PatientIdentifier> get( Collection<PatientIdentifierType> identifierTypes, Patient patient );
 
     boolean checkDuplicateIdentifier( PatientIdentifierType patientIdentifierType, String identifier,
-        OrganisationUnit orgunit, Program program, PeriodType periodType );
+        Integer patientId, OrganisationUnit organisationUnit, Program program, PeriodType periodType );
 
 }

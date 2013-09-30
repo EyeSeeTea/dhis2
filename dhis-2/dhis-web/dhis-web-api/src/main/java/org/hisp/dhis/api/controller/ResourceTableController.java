@@ -84,7 +84,7 @@ public class ResourceTableController
 
     @RequestMapping( value = "/dataMart", method = { RequestMethod.PUT, RequestMethod.POST } )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_DATA_MART_ADMIN')" )
-    public void data( HttpServletResponse response )
+    public void dataMart( HttpServletResponse response )
     {
         dataMartTask.setTaskId( new TaskId( TaskCategory.DATAMART, currentUserService.getCurrentUser() ) );
         
@@ -102,5 +102,5 @@ public class ResourceTableController
         scheduler.executeTask( resourceTableTask );
         
         ContextUtils.okResponse( response, "Initiated resource table update" );
-    }
+    }    
 }

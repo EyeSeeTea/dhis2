@@ -592,11 +592,12 @@
     <property name="flags">
       <list>
         <value>afghanistan</value>
+        <value>akros</value>
         <value>algeria</value>
         <value>armenia</value>
         <value>bangladesh</value>
         <value>benin</value>
-		<value>bhutan</value>
+        <value>bhutan</value>
         <value>botswana</value>
         <value>burkina_faso</value>
         <value>burkina_faso_coat_of_arms</value>
@@ -608,17 +609,19 @@
         <value>ecuador</value>
         <value>east_africa_community</value>
         <value>ethiopia</value>
+        <value>fhi360</value>
         <value>gambia</value>
         <value>ghana</value>
         <value>global_fund</value>
         <value>guinea</value>
         <value>guinea_bissau</value>
-        <value>Haiti</value>
+        <value>haiti</value>
         <value>india</value>
         <value>indonesia</value>
         <value>irc</value>
         <value>ivory_coast</value>
         <value>kenya</value>
+        <value>laos</value>
         <value>lesotho</value>
         <value>liberia</value>
         <value>malawi</value>
@@ -627,7 +630,7 @@
         <value>mozambique</value>
         <value>namibia</value>
         <value>nicaragua</value>
-		<value>nepal</value>
+        <value>nepal</value>
         <value>niger</value>
         <value>nigeria</value>
         <value>norway</value>
@@ -701,7 +704,7 @@
 
   <bean id="org.hisp.dhis.common.DimensionService" class="org.hisp.dhis.common.DefaultDimensionService" />
   
-  <bean id="org.hisp.dhis.appmanager.AppManagerService" class="org.hisp.dhis.appmanager.DefaultAppManagerService" />
+  <bean id="org.hisp.dhis.appmanager.AppManager" class="org.hisp.dhis.appmanager.DefaultAppManager" />
   
   <bean id="org.hisp.dhis.system.SystemService" class="org.hisp.dhis.system.DefaultSystemService" />
   
@@ -794,6 +797,7 @@
         <value>bi</value>
         <value>am</value>
         <value>de</value>
+        <value>dz</value>
         <value>en</value>
         <value>es</value>
         <value>fa</value>
@@ -802,7 +806,10 @@
         <value>hi</value>
         <value>id</value>
         <value>it</value>
+        <value>km</value>
+        <value>lo</value>
         <value>my</value>
+        <value>ne</value>
         <value>nl</value>
         <value>no</value>
         <value>ps</value>

@@ -42,6 +42,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.system.util.DateUtils;
@@ -160,9 +161,12 @@ public class JdbcEventAnalyticsTableManager
                 "left join patient pa on pi.patientid=pa.patientid " +
                 "left join organisationunit ou on psi.organisationunitid=ou.organisationunitid " +
                 "left join _orgunitstructure ous on psi.organisationunitid=ous.organisationunitid " +
+                "left join _dateperiodstructure dps on psi.executiondate=dps.dateperiod " +
                 "where psi.executiondate >= '" + start + "' " +
                 "and psi.executiondate <= '" + end + "' " +
-                "and pr.programid=" + table.getProgram().getId() + ";";
+                "and pr.programid=" + table.getProgram().getId() + " " +
+                "and psi.organisationunitid is not null " +
+                "and psi.executiondate is not null";
 
             log.info( "Populate SQL: "+ sql );
             
@@ -183,6 +187,15 @@ public class JdbcEventAnalyticsTableManager
         {
             String column = PREFIX_ORGUNITLEVEL + level.getLevel();
             String[] col = { column, "character(11)", "ous." + column };
+            columns.add( col );
+        }
+
+        List<PeriodType> periodTypes = PeriodType.getAvailablePeriodTypes();
+        
+        for ( PeriodType periodType : periodTypes )
+        {
+            String column = periodType.getName().toLowerCase();
+            String[] col = { column, "character varying(10)", "dps." + column };
             columns.add( col );
         }
         
@@ -219,9 +232,10 @@ public class JdbcEventAnalyticsTableManager
         String[] ps = { "ps", "character(11) not null", "ps.uid" };
         String[] ed = { "executiondate", "date", "psi.executiondate" };
         String[] ou = { "ou", "character(11) not null", "ou.uid" };
-        String[] oun = { "ouname", "character varying(160) not null", "ou.name" };
+        String[] oun = { "ouname", "character varying(230) not null", "ou.name" };
+        String[] ouc = { "oucode", "character varying(50) not null", "ou.code" };
         
-        columns.addAll( Arrays.asList( gender, isdead, psi, ps, ed, ou, oun ) );
+        columns.addAll( Arrays.asList( gender, isdead, psi, ps, ed, ou, oun, ouc ) );
         
         return columns;
     }

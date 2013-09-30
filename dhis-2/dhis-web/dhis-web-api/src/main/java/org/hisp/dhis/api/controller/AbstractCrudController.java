@@ -90,7 +90,14 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         ReflectionUtils.invokeSetterMethod( ExchangeClasses.getAllExportMap().get( getEntityClass() ), metaData, entityList );
 
-        handleLinksAndAccess( options, metaData, entityList );
+        if ( options.getViewClass( "basic" ).equals( "basic" ) )
+        {
+            handleLinksAndAccess( options, metaData, entityList, false );
+        }
+        else
+        {
+            handleLinksAndAccess( options, metaData, entityList, true );
+        }
 
         postProcessEntities( entityList );
         postProcessEntities( entityList, options, parameters );
@@ -110,13 +117,22 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         ReflectionUtils.invokeSetterMethod( ExchangeClasses.getAllExportMap().get( getEntityClass() ), metaData, entityList );
 
-        handleLinksAndAccess( options, metaData, entityList );
+        String viewClass = options.getViewClass( "basic" );
+
+        if ( viewClass.equals( "basic" ) || viewClass.equals( "sharingBasic" ) )
+        {
+            handleLinksAndAccess( options, metaData, entityList, false );
+        }
+        else
+        {
+            handleLinksAndAccess( options, metaData, entityList, true );
+        }
 
         postProcessEntities( entityList );
         postProcessEntities( entityList, options, parameters );
 
         model.addAttribute( "model", metaData );
-        model.addAttribute( "viewClass", options.getViewClass( "basic" ) );
+        model.addAttribute( "viewClass", viewClass );
 
         return StringUtils.uncapitalize( getEntitySimpleName() ) + "List";
     }
@@ -157,7 +173,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         Model model, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         WebOptions options = new WebOptions( parameters );
-        T entity = manager.search( getEntityClass(), query );
+        T entity = searchForEntity( getEntityClass(), query );
 
         if ( entity == null )
         {
@@ -266,6 +282,11 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     // Helpers
     //--------------------------------------------------------------------------
 
+    protected T searchForEntity( Class<T> clazz, String query )
+    {
+        return manager.search( clazz, query );
+    }
+
     protected List<T> getEntityList( WebMetaData metaData, WebOptions options )
     {
         List<T> entityList;
@@ -295,24 +316,22 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
     protected List<T> queryForEntityList( WebMetaData metaData, WebOptions options, String query )
     {
-        List<T> entityList;
+        List<T> entityList = queryForList( getEntityClass(), query );
 
         if ( options.hasPaging() )
         {
-            entityList = new ArrayList<T>( manager.filter( getEntityClass(), query ) );
-
             Pager pager = new Pager( options.getPage(), entityList.size(), options.getPageSize() );
             metaData.setPager( pager );
 
             entityList = PagerUtils.pageCollection( entityList, pager );
-
-        }
-        else
-        {
-            entityList = new ArrayList<T>( manager.filter( getEntityClass(), query ) );
         }
 
         return entityList;
+    }
+
+    protected List<T> queryForList( Class<T> clazz, String query )
+    {
+        return new ArrayList<T>( manager.filter( getEntityClass(), query ) );
     }
 
     protected T getEntity( String uid )
@@ -333,11 +352,11 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         ((BaseIdentifiableObject) object).setAccess( access );
     }
 
-    protected void handleLinksAndAccess( WebOptions options, WebMetaData metaData, List<T> entityList )
+    protected void handleLinksAndAccess( WebOptions options, WebMetaData metaData, List<T> entityList, boolean deep )
     {
         if ( options != null && options.hasLinks() )
         {
-            WebUtils.generateLinks( metaData );
+            WebUtils.generateLinks( metaData, deep );
         }
 
         if ( entityList != null && SharingUtils.isSupported( getEntityClass() ) )
@@ -348,7 +367,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             }
         }
     }
-    
+
     //--------------------------------------------------------------------------
     // Reflection helpers
     //--------------------------------------------------------------------------
