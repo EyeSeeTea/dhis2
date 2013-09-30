@@ -49,9 +49,16 @@
 			GIS.getMap({
 				url: url,
 				el: "map2",
-				columns: [{dimension: 'in', items: [{id: 'Uvn6LCg7dVU'}]}], // data
-				rows: [{dimension: 'ou', items: [{id: 'LEVEL-2'}, {id: 'ImspTQPwCqd'}]}], // organisation units
-				filters: [{dimension: 'pe', items: [{id: 'LAST_3_MONTHS'}]}]
+				mapViews: [{
+					columns: [{dimension: 'in', items: [{id: 'Uvn6LCg7dVU'}]}], // data
+					rows: [{dimension: 'ou', items: [{id: 'LEVEL-3'}, {id: 'ImspTQPwCqd'}]}], // organisation units
+					filters: [{dimension: 'pe', items: [{id: 'LAST_3_MONTHS'}]}], // period
+					classes: 7,
+					colorLow: '02079c',
+					colorHigh: 'e5ecff',
+					opacity: 0.9
+					//legendSet: {id: 'fqs276KXCXi'}
+				}]
 			});
 
 		});
