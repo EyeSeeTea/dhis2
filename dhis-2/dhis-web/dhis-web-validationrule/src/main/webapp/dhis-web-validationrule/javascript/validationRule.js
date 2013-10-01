@@ -4,16 +4,16 @@ function changeRuleType( ruleType )
 	{
 		hideById( 'organisationUnitLevelTR');
 		hideById( 'periodExtentTR');
-		hideById( 'precedingSampleCountTR');
-		hideById( 'precedingSampleTypeTR');
+		hideById( 'sequentialSampleCountTR');
+		hideById( 'annualSampleCountTR');
 		hideById( 'highOutliersTR');
 		hideById( 'lowOutliersTR');
 	} else
 	{
 		showById( 'organisationUnitLevelTR');
 		showById( 'periodExtentTR');
-		showById( 'precedingSampleCountTR');
-		showById( 'precedingSampleTypeTR');
+		showById( 'sequentialSampleCountTR');
+		showById( 'annualSampleCountTR');
 		showById( 'highOutliersTR');
 		showById( 'lowOutliersTR');
     }

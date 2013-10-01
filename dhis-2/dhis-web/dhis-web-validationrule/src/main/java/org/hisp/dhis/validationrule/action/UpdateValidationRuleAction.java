@@ -180,18 +180,18 @@ public class UpdateValidationRuleAction
         this.periodExtent = periodExtent;
     }
 
-    private String precedingSampleCount;
+    private String sequentialSampleCount;
 
-    public void setPrecedingSampleCount( String precedingSampleCount )
+    public void setSequentialSampleCount( String sequentialSampleCount )
     {
-        this.precedingSampleCount = precedingSampleCount;
+        this.sequentialSampleCount = sequentialSampleCount;
     }
 
-    private String precedingSampleType;
+    private String annualSampleCount;
 
-    public void setPrecedingSampleType( String precedingSampleType )
+    public void setAnnualSampleCount( String annualSampleCount )
     {
-        this.precedingSampleType = precedingSampleType;
+        this.annualSampleCount = annualSampleCount;
     }
 
     private String highOutliers;
@@ -239,8 +239,8 @@ public class UpdateValidationRuleAction
         validationRule.setPeriodType( periodType == null ? null : periodService.getPeriodTypeByClass( periodType.getClass() ) );
 
         validationRule.setPeriodExtent( periodExtent != null && !periodExtent.isEmpty() ? Integer.parseInt( periodExtent ) : null );
-        validationRule.setPrecedingSampleCount( precedingSampleCount != null && !precedingSampleCount.isEmpty() ? Integer.parseInt( precedingSampleCount ) : null );
-        validationRule.setPrecedingSampleType( precedingSampleType );
+        validationRule.setSequentialSampleCount( sequentialSampleCount != null && !sequentialSampleCount.isEmpty() ? Integer.parseInt( sequentialSampleCount ) : null );
+        validationRule.setAnnualSampleCount( annualSampleCount != null && !annualSampleCount.isEmpty() ? Integer.parseInt( annualSampleCount ) : null );
         validationRule.setHighOutliers( highOutliers != null && !highOutliers.isEmpty() ? Integer.parseInt( highOutliers ) : null );
         validationRule.setLowOutliers( lowOutliers != null && !lowOutliers.isEmpty() ? Integer.parseInt( lowOutliers ) : null );
 

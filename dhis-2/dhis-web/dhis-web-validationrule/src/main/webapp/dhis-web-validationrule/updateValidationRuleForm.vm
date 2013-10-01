@@ -66,18 +66,13 @@
 		<td><label for="periodExtent">$encoder.htmlEncode( $i18n.getString( "period_extent" ) )</label></td>
 		<td><input type="text" id="periodExtent" name="periodExtent" value="$!validationRule.periodExtent"></td>
 	</tr>
-	<tr id="precedingSampleCountTR" #if( $!validationRule.ruleType != 'monitoring' ) style='display:none;' #end>
-		<td><label for="precedingSampleCount">$encoder.htmlEncode( $i18n.getString( "preceding_sample_count" ) )</label></td>
-		<td><input type="text" id="precedingSampleCount" name="precedingSampleCount" value="$!validationRule.precedingSampleCount"></td>
+	<tr id="sequentialSampleCountTR"  #if( $!validationRule.ruleType != 'monitoring' ) style='display:none;' #end>
+		<td><label for="sequentialSampleCount">$encoder.htmlEncode( $i18n.getString( "sequential_sample_count" ) )</label></td>
+		<td><input type="text" id="sequentialSampleCount" name="sequentialSampleCount" value="$!validationRule.sequentialSampleCount"></td>
 	</tr>
-	<tr id="precedingSampleTypeTR" #if( $!validationRule.ruleType != 'monitoring' ) style='display:none;' #end>
-		<td><label for="operatorId">$encoder.htmlEncode( $i18n.getString( "preceding_sample_type" ) )</label></td>
-		<td>
-			<select id="precedingSampleType" name="precedingSampleType">
-				<option value="annual" #if( $validationRule.precedingSampleType == 'annual' ) selected #end>$encoder.htmlEncode( $i18n.getString( "annual" ) )</option>
-				<option value="sequential" #if( $validationRule.precedingSampleType == 'sequential' ) selected #end>$encoder.htmlEncode( $i18n.getString( "sequential" ) )</option>
-			</select>
-		</td>
+	<tr id="annualSampleCountTR" #if( $!validationRule.ruleType != 'monitoring' ) style='display:none;' #end">
+		<td><label for="annualSampleCount">$encoder.htmlEncode( $i18n.getString( "annual_sample_count" ) )</label></td>
+		<td><input type="text" id="annualSampleCount" name="annualSampleCount" value="$!validationRule.annualSampleCount"></td>
 	</tr>
 	<tr id="highOutliersTR" #if( $!validationRule.ruleType != 'monitoring' ) style='display:none;' #end>
 		<td><label for="highOutliers">$encoder.htmlEncode( $i18n.getString( "high_outliers" ) )</label></td>

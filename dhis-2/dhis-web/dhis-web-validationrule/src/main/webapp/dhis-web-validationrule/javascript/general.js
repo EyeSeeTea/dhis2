@@ -20,11 +20,11 @@ function showValidationRuleDetails( validationId )
 			var periodExtent = string( json.validationRule.periodExtent );
 			setText( 'periodExtentField', periodExtent ? periodExtent : '[' + i18n_none + ']' );
 			
-			var precedingSampleCount = string( json.validationRule.precedingSampleCount );
-			setText( 'precedingSampleCountField', precedingSampleCount ? precedingSampleCount : '[' + i18n_none + ']' );
+			var sequentialSampleCount = string( json.validationRule.sequentialSampleCount );
+			setText( 'sequentialSampleCountField', sequentialSampleCount ? sequentialSampleCount : '[' + i18n_none + ']' );
 			
-			var precedingSampleType = json.validationRule.precedingSampleType;
-			setText( 'precedingSampleTypeField', precedingSampleType ? precedingSampleType : '[' + i18n_none + ']' );
+			var annualSampleCount = json.validationRule.annualSampleCount;
+			setText( 'annualSampleCountField', annualSampleCount ? annualSampleCount : '[' + i18n_none + ']' );
 			
 			var highOutliers = string( json.validationRule.highOutliers );
 			setText( 'highOutliersField', highOutliers ? highOutliers : '[' + i18n_none + ']' );
@@ -34,8 +34,8 @@ function showValidationRuleDetails( validationId )
 
 			document.getElementById('organisationUnitLevelP').style.display = '';
 			document.getElementById('periodExtentP').style.display = '';
-			document.getElementById('precedingSampleCountP').style.display = '';
-			document.getElementById('precedingSampleTypeP').style.display = '';
+			document.getElementById('sequentialSampleCountP').style.display = '';
+			document.getElementById('annualSampleCountP').style.display = '';
 			document.getElementById('highOutliersP').style.display = '';
 			document.getElementById('lowOutliersP').style.display = '';
 
@@ -43,8 +43,8 @@ function showValidationRuleDetails( validationId )
 
 			document.getElementById('organisationUnitLevelP').style.display = 'none';
 			document.getElementById('periodExtentP').style.display = 'none';
-			document.getElementById('precedingSampleCountP').style.display = 'none';
-			document.getElementById('precedingSampleTypeP').style.display = 'none';
+			document.getElementById('sequentialSampleCountP').style.display = 'none';
+			document.getElementById('annualSampleCountP').style.display = 'none';
 			document.getElementById('highOutliersP').style.display = 'none';
 			document.getElementById('lowOutliersP').style.display = 'none';
 		}

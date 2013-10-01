@@ -175,18 +175,18 @@ public class AddValidationRuleAction
         this.periodExtent = periodExtent;
     }
 
-    private Integer precedingSampleCount;
+    private Integer sequentialSampleCount;
     
-    public void setPrecedingSampleCount(Integer precedingSampleCount) 
+    public void setSequentialSampleCount(Integer sequentialSampleCount) 
     {
-        this.precedingSampleCount = precedingSampleCount;
+        this.sequentialSampleCount = sequentialSampleCount;
     }
 
-    private String precedingSampleType;
+    private Integer annualSampleCount;
     
-    public void setPrecedingSampleType(String precedingSampleType) 
+    public void setAnnualSampleCount(Integer annualSampleCount) 
     {
-        this.precedingSampleType = precedingSampleType;
+        this.annualSampleCount = annualSampleCount;
     }
 
     private Integer highOutliers;
@@ -241,8 +241,8 @@ public class AddValidationRuleAction
         validationRule.setPeriodType(periodType);
 
         validationRule.setPeriodExtent( periodExtent );
-        validationRule.setPrecedingSampleCount( precedingSampleCount );
-        validationRule.setPrecedingSampleType( precedingSampleType );
+        validationRule.setSequentialSampleCount( sequentialSampleCount );
+        validationRule.setAnnualSampleCount( annualSampleCount );
         validationRule.setHighOutliers( highOutliers );
         validationRule.setLowOutliers( lowOutliers );
         validationRuleService.saveValidationRule( validationRule );

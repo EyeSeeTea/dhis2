@@ -391,10 +391,15 @@ var validationRules = {
         	"min": 1,
         	"max": 999
         },
-        "precedingSampleCount" : {
+        "sequentialSampleCount" : {
         	"number" : true,
-        	"min": 1,
-        	"max": 999
+        	"min": 0,
+        	"max": 10
+        },
+        "annualSampleCount" : {
+        	"number" : true,
+        	"min": 0,
+        	"max": 10
         },
         "highOutliers" : {
         	"number" : true,

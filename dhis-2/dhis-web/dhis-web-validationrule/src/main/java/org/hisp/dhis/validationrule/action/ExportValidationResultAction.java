@@ -144,8 +144,8 @@ public class ExportValidationResultAction
         grid.addHeader( new GridHeader( i18n.getString( "rule_type" ), false, true ) );
         grid.addHeader( new GridHeader( i18n.getString( "organisation_unit_level" ), false, true ) );
         grid.addHeader( new GridHeader( i18n.getString( "period_extent" ), false, true ) );
-        grid.addHeader( new GridHeader( i18n.getString( "preceding_sample_count" ), false, true ) );
-        grid.addHeader( new GridHeader( i18n.getString( "preceding_sample_type" ), false, true ) );
+        grid.addHeader( new GridHeader( i18n.getString( "sequential_sample_count" ), false, true ) );
+        grid.addHeader( new GridHeader( i18n.getString( "annual_sample_count" ), false, true ) );
         grid.addHeader( new GridHeader( i18n.getString( "high_outliers" ), false, true ) );
         grid.addHeader( new GridHeader( i18n.getString( "low_outliers" ), false, true ) );
         grid.addHeader( new GridHeader( i18n.getString( "left_side_description" ), false, true ) );
@@ -166,8 +166,8 @@ public class ExportValidationResultAction
             grid.addValue( i18n.getString( validationResult.getValidationRule().getRuleType() ) );
             grid.addValue( validationResult.getValidationRule().getOrganisationUnitLevel() );
             grid.addValue( validationResult.getValidationRule().getPeriodExtent() );
-            grid.addValue( validationResult.getValidationRule().getPrecedingSampleCount() );
-            grid.addValue( i18n.getString( validationResult.getValidationRule().getPrecedingSampleType() ) );
+            grid.addValue( validationResult.getValidationRule().getSequentialSampleCount() );
+            grid.addValue( validationResult.getValidationRule().getAnnualSampleCount() );
             grid.addValue( validationResult.getValidationRule().getHighOutliers() );
             grid.addValue( validationResult.getValidationRule().getLowOutliers() );
             grid.addValue( validationResult.getValidationRule().getLeftSide().getDescription() ); //TODO lazy prone

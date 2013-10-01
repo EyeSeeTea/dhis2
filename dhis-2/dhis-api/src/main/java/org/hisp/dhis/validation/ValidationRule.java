@@ -71,9 +71,6 @@ public class ValidationRule
     public static final String TYPE_STATISTICAL = "statistical";
     public static final String TYPE_ABSOLUTE = "absolute";
 
-    public static final String PRECEDING_SAMPLE_TYPE_ANNUAL = "annual";
-    public static final String PRECEDING_SAMPLE_TYPE_SEQUENTIAL = "sequential";
-
     private String description;
 
     private String importance;
@@ -96,9 +93,9 @@ public class ValidationRule
     
     private Integer periodExtent; // Number of periods in right-side sample
     
-    private Integer precedingSampleCount; // Number of preceding right side samples to average.
+    private Integer sequentialSampleCount; // Number of sequential right-side samples to average.
     
-    private String precedingSampleType;
+    private Integer annualSampleCount; // Number of (previous) annual right-side samples to average.
     
     private Integer highOutliers;
     
@@ -237,27 +234,27 @@ public class ValidationRule
     @JsonProperty
     @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
-    public Integer getPrecedingSampleCount()
+    public Integer getSequentialSampleCount()
     {
-        return precedingSampleCount;
+        return sequentialSampleCount;
     }
 
-    public void setPrecedingSampleCount( Integer precedingSampleCount )
+    public void setSequentialSampleCount( Integer sequentialSampleCount )
     {
-        this.precedingSampleCount = precedingSampleCount;
+        this.sequentialSampleCount = sequentialSampleCount;
     }
 
     @JsonProperty
     @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
-    public String getPrecedingSampleType()
+    public Integer getAnnualSampleCount()
     {
-        return precedingSampleType;
+        return annualSampleCount;
     }
 
-    public void setPrecedingSampleType( String precedingSampleType )
+    public void setAnnualSampleCount( Integer annualSampleCount )
     {
-        this.precedingSampleType = precedingSampleType;
+        this.annualSampleCount = annualSampleCount;
     }
 
     @JsonProperty

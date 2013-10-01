@@ -58,18 +58,14 @@
 		<td><label for="periodExtent">$encoder.htmlEncode( $i18n.getString( "period_extent" ) )</label></td>
 		<td><input type="text" id="periodExtent" name="periodExtent"></td>
 	</tr>
-	<tr id="precedingSampleCountTR" style="display:none">
-		<td><label for="precedingSampleCount">$encoder.htmlEncode( $i18n.getString( "preceding_sample_count" ) )</label></td>
-		<td><input type="text" id="precedingSampleCount" name="precedingSampleCount"></td>
+	<tr id="sequentialSampleCountTR" style="display:none">
+		<td><label for="sequentialSampleCount">$encoder.htmlEncode( $i18n.getString( "sequential_sample_count" ) )</label></td>
+		<td><input type="text" id="sequentialSampleCount" name="sequentialSampleCount"></td>
 	</tr>
-	<tr id="precedingSampleTypeTR" style="display:none">
-		<td><label for="operatorId">$encoder.htmlEncode( $i18n.getString( "preceding_sample_type" ) )</label></td>
-		<td>
-			<select id="precedingSampleType" name="precedingSampleType">
-				<option value="annual">$encoder.htmlEncode( $i18n.getString( "annual" ) )</option>
-				<option value="sequential">$encoder.htmlEncode( $i18n.getString( "sequential" ) )</option>
-			</select>
-		</td>
+	</tr>
+	<tr id="annualSampleCountTR" style="display:none">
+		<td><label for="annualSampleCount">$encoder.htmlEncode( $i18n.getString( "annual_sample_count" ) )</label></td>
+		<td><input type="text" id="annualSampleCount" name="annualSampleCount"></td>
 	</tr>
 	<tr id="highOutliersTR" style="display:none">
 		<td><label for="highOutliers">$encoder.htmlEncode( $i18n.getString( "high_outliers" ) )</label></td>
