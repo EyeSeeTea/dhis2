@@ -3750,7 +3750,7 @@ Ext.onReady( function() {
 			}
 
 			// Components
-			toolMenu.clickHandler('orgunit');
+			toolMenu.clickHandler(toolMenu.menuValue);
 			treePanel.reset();
 			
 			userOrganisationUnit.setValue(false);
@@ -3788,6 +3788,8 @@ Ext.onReady( function() {
 					layer.window.view = view;
 					return;
 				}
+				
+				reset();
 
 				// Organisation units
 				for (var i = 0, item; i < ouDim.items.length; i++) {
@@ -5150,10 +5152,9 @@ Ext.onReady( function() {
 			radiusLow.reset();
 			radiusHigh.reset();
 			
-			toolMenu.clickHandler('orgunit');
+			toolMenu.clickHandler(toolMenu.menuValue);
 			
 			if (!skipTree) {
-				toolMenu.clickHandler('orgunit');
 				treePanel.reset();
 			}
 			
@@ -5901,7 +5902,7 @@ Ext.onReady( function() {
 			
 			groupSet.clearValue();
 			
-			toolMenu.clickHandler('orgunit');
+			toolMenu.clickHandler(toolMenu.menuValue);
 			treePanel.reset();
 			
 			userOrganisationUnit.setValue(false);
