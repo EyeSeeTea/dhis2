@@ -53,7 +53,6 @@ Ext.onReady( function() {
 		var validateConfig,
 			onRender,
 			afterRender,
-			getViews,
 			createViewport,
 			//gis,
 			initialize;
@@ -63,11 +62,17 @@ Ext.onReady( function() {
 				alert('Invalid url (' + config.el + ')');
 				return;
 			}
+			
+			if (config.url.split('').pop() === '/') {
+				config.url = config.url.substr(0, config.url.length - 1);
+			}
 
 			if (!Ext.isString(config.el)) {
 				alert('Invalid html element id (' + config.el + ')');
 				return;
 			}
+			
+			config.id = config.id || config.uid;
 			
 			if (config.id && !Ext.isString(config.id)) {
 				alert('Invalid map id (' + config.el + ')');
@@ -87,55 +92,7 @@ Ext.onReady( function() {
 				Ext.query('.measureButton')[i].innerHTML = '<img src="images/measure_24.png" />';
 			}
 		};
-
-		getViews = function() {
-			var view,
-				views = [],
-				indicator = gis.conf.finals.dimension.indicator.id,
-				dataElement = gis.conf.finals.dimension.dataElement.id,
-				automatic = gis.conf.finals.widget.legendtype_automatic,
-				predefined = gis.conf.finals.widget.legendtype_predefined;
-
-			config.mapViews = config.mapViews || [];
-
-			for (var i = 0; i < config.mapViews.length; i++) {
-				view = config.mapViews[i];
-
-				view = {
-					layer: view.layer || 'thematic1',
-					valueType: view.indicator ? indicator : dataElement,
-					indicator: {
-						id: view.indicator
-					},
-					dataElement: {
-						id: view.dataelement
-					},
-					period: {
-						id: view.period
-					},
-					legendType: view.legendSet ? predefined : automatic,
-					legendSet: view.legendSet,
-					classes: parseInt(view.classes) || 5,
-					method: parseInt(view.method) || 2,
-					colorLow: view.colorLow || 'ff0000',
-					colorHigh: view.colorHigh || '00ff00',
-					radiusLow: parseInt(view.radiusLow) || 5,
-					radiusHigh: parseInt(view.radiusHigh) || 15,
-					organisationUnitLevel: {
-						level: parseInt(view.level) || 2
-					},
-					parentOrganisationUnit: {
-						id: view.parent
-					},
-					opacity: parseFloat(view.opacity) || 0.8
-				};
-
-				views.push(view);
-			}
-
-			return views;
-		};
-
+		
 		createViewport = function() {
 			var viewport,
 				eastRegion,
