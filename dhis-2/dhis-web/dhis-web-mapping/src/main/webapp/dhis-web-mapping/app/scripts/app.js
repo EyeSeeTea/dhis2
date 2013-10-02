@@ -3740,7 +3740,7 @@ Ext.onReady( function() {
 
 		// Functions
 
-		reset = function() {
+		reset = function(skipTree) {
 
 			// Item
 			layer.item.setValue(false);
@@ -3751,7 +3751,10 @@ Ext.onReady( function() {
 
 			// Components
 			toolMenu.clickHandler(toolMenu.menuValue);
-			treePanel.reset();
+			
+			if (!skipTree) {
+				treePanel.reset();
+			}
 			
 			userOrganisationUnit.setValue(false);
 			userOrganisationUnitChildren.setValue(false);
@@ -3789,7 +3792,7 @@ Ext.onReady( function() {
 					return;
 				}
 				
-				reset();
+				reset(true);
 
 				// Organisation units
 				for (var i = 0, item; i < ouDim.items.length; i++) {
@@ -5871,7 +5874,7 @@ Ext.onReady( function() {
 
 		// Functions
 
-		reset = function() {
+		reset = function(skipTree) {
 
 			// Item
 			layer.item.setValue(false, layer.item.defaultOpacity);
@@ -5903,7 +5906,10 @@ Ext.onReady( function() {
 			groupSet.clearValue();
 			
 			toolMenu.clickHandler(toolMenu.menuValue);
-			treePanel.reset();
+			
+			if (!skipTree) {
+				treePanel.reset();
+			}
 			
 			userOrganisationUnit.setValue(false);
 			userOrganisationUnitChildren.setValue(false);
@@ -5932,6 +5938,8 @@ Ext.onReady( function() {
 					layer.window.view = view;
 					return;
 				}
+				
+				reset(true);
 					
 				// Group set
 				groupSet.store.removeAll();
