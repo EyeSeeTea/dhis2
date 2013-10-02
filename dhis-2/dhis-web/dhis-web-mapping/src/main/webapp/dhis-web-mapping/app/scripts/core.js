@@ -2188,6 +2188,7 @@ Ext.onReady( function() {
 					layout.legendSet = config.legendSet;
 					
 					layout.organisationUnitGroupSet = config.organisationUnitGroupSet;
+					layout.areaRadius = config.areaRadius;
 
 					return Ext.clone(layout);
 				}();

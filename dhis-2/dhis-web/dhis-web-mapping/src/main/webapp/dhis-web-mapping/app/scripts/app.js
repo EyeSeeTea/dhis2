@@ -5982,7 +5982,7 @@ Ext.onReady( function() {
 				}
 				
 				// Area radius
-				areaRadius.setValue(true, view.areaRadius);
+				areaRadius.setValue(!!view.areaRadius, !!view.areaRadius ? view.areaRadius : null);
 			}();
 			
 			setLayerGui = function() {
