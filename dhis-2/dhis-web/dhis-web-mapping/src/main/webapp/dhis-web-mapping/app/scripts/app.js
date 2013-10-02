@@ -2163,7 +2163,7 @@ Ext.onReady( function() {
 												view = layer.core.view;
 
 												// add
-												view.layer = layer[record.data.id];
+												view.layer = layer.id;
 
 												// remove
 												delete view.periodType;
@@ -6002,6 +6002,8 @@ Ext.onReady( function() {
 
 		getView = function(config) {
 			var view = {};
+			
+			view.layer = layer.id;
 			
 			view.rows = [treePanel.getDimension()];
 			
