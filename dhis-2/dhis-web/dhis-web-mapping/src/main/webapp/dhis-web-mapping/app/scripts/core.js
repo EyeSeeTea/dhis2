@@ -1043,6 +1043,8 @@ Ext.onReady( function() {
 				viewDim,
 				srcIds,
 				srcDim;
+				
+			loader.zoomToVisibleExtent = true;
 
 			if (!src) {
 				if (doExecute) {
@@ -1081,6 +1083,8 @@ Ext.onReady( function() {
 			}
 			
 			// data
+			loader.zoomToVisibleExtent = false;
+			
 			viewIds = [];
 			viewDim = view.columns[0];
 			srcIds = [];
@@ -1156,8 +1160,15 @@ Ext.onReady( function() {
 					}
 					return gis.conf.finals.widget.loadtype_legend;
 			}
+			
+			// if no changes - reload legend but do not zoom
+			if (doExecute) {
+				loader.zoomToVisibleExtent = false;
+				loadLegend(view);
+				return gis.conf.finals.widget.loadtype_legend;
+			}
 
-			gis.olmap.mask.hide();
+			//gis.olmap.mask.hide();
 		};
 
 		loadOrganisationUnits = function(view) {
