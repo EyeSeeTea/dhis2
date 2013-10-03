@@ -1335,7 +1335,7 @@ Ext.onReady( function() {
 				}
 								
 				// Period name without changing the id
-				view.filters[0].items[0].name = metaData.names[gis.response.metaData['pe'][0]];
+				view.filters[0].items[0].name = metaData.names[gis.response.metaData[dimConf.period.objectName][0]];
 			};
 			
 			fn = function() {
