@@ -240,22 +240,23 @@ Ext.onReady( function() {
 					layout;
 
 				if (id) {
-					engine.loadTable(id, pt);
+					engine.loadTable(id, pt, true, true);
 				}
 				else if (Ext.isString(session) && PT.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
 					layout = api.layout.Layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]);
 
 					if (layout) {
-						pt.viewport.setFavorite(layout);
+						pt.engine.createTable(layout, pt, true);
+						//pt.viewport.setFavorite(layout);
 					}
 				}
 
 				// Fade in
 				Ext.defer( function() {
 					Ext.getBody().fadeIn({
-						duration: 400
+						duration: 300
 					});
-				}, 500 );
+				}, 400 );
 			};
 		}());
 
@@ -1554,7 +1555,7 @@ Ext.onReady( function() {
 								element.addClsOnOver('link');
 								element.load = function() {
 									favoriteWindow.hide();
-									pt.engine.loadTable(record.data.id, pt);
+									pt.engine.loadTable(record.data.id, pt, true, true);
 								};
 								element.dom.setAttribute('onclick', 'Ext.get(this).load();');
 							}
@@ -2225,7 +2226,7 @@ Ext.onReady( function() {
 			westRegion,
 			centerRegion,
 
-			setFavorite,
+			setGui,
 
 			viewport,
 			addListeners;
@@ -4409,12 +4410,10 @@ Ext.onReady( function() {
 			}
 		});
 
-		setFavorite = function(layout) {
+		setGui = function(layout, xLayout, graphMap, updateGui, isFavorite) {
 			var dimConf = pt.conf.finals.dimension,
-				xLayout,
 				dimMap,
 				recMap,
-				graphMap,
 				objectName,
 				periodRecords,
 				fixedPeriodRecords = [],
@@ -4426,17 +4425,17 @@ Ext.onReady( function() {
 				groups = [];
 
 			// State
-			pt.viewport.interpretationButton.enable();
-
-			// Create chart
-			pt.engine.createTable(layout, pt);
+			downloadButton.enable();
+			
+			if (isFavorite) {
+				interpretationButton.enable();
+			}
 
 			// Set gui
-
-			xLayout = pt.engine.getExtendedLayout(layout);
+			
 			dimMap = xLayout.objectNameDimensionsMap;
 			recMap = xLayout.objectNameItemsMap;
-			graphMap = layout.parentGraphMap;
+			graphMap = graphMap || {};
 
 			// Indicators
 			pt.store.indicatorSelected.removeAll();
@@ -4640,7 +4639,7 @@ Ext.onReady( function() {
 			userOrganisationUnit: userOrganisationUnit,
 			userOrganisationUnitChildren: userOrganisationUnitChildren,
 			dataElementDetailLevel: dataElementDetailLevel,
-			setFavorite: setFavorite,
+			setGui: setGui,
 			items: [
 				westRegion,
 				centerRegion

@@ -1148,7 +1148,7 @@ Ext.onReady( function() {
 				}
 			};
 
-			engine.createTable = function(layout, pt) {
+			engine.createTable = function(layout, pt, updateGui, isFavorite) {
 				var legendSet = layout.legendSet ? pt.init.idLegendSetMap[layout.legendSet.id] : null,
 					getSyncronizedXLayout,
 					getExtendedResponse,
@@ -1157,6 +1157,7 @@ Ext.onReady( function() {
 					setMouseHandlers,
 					getTableHtml,
 					initialize,
+					afterLoad,
 					tableUuid = pt.init.el + '_' + Ext.data.IdGenerator.get('uuid').generate(),
 					uuidDimUuidsMap = {},
 					uuidObjectMap = {};
@@ -2382,6 +2383,52 @@ Ext.onReady( function() {
 					return getHtml(htmlArray);
 				};
 
+				afterLoad = function(layout, xLayout, xResponse) {
+					
+					if (pt.isPlugin) {
+						
+						// Resize render elements
+						var baseEl = Ext.get(pt.init.el),
+							baseElBorderW = parseInt(baseEl.getStyle('border-left-width')) + parseInt(baseEl.getStyle('border-right-width')),
+							baseElBorderH = parseInt(baseEl.getStyle('border-top-width')) + parseInt(baseEl.getStyle('border-bottom-width')),
+							baseElPaddingW = parseInt(baseEl.getStyle('padding-left')) + parseInt(baseEl.getStyle('padding-right')),
+							baseElPaddingH = parseInt(baseEl.getStyle('padding-top')) + parseInt(baseEl.getStyle('padding-bottom')),
+							el = Ext.get(tableUuid);
+
+						pt.viewport.centerRegion.setWidth(el.getWidth());
+						pt.viewport.centerRegion.setHeight(el.getHeight());
+						baseEl.setWidth(el.getWidth() + baseElBorderW + baseElPaddingW);
+						baseEl.setHeight(el.getHeight() + baseElBorderH + baseElPaddingH);
+					}
+					else {
+						if (PT.isSessionStorage) {
+							setMouseHandlers();
+							engine.setSessionStorage(layout, 'table');
+						}
+						
+						if (updateGui) {
+							pt.viewport.setGui(layout, xLayout, xResponse.metaData[dimConf.organisationUnit.objectName], updateGui, isFavorite);
+						}
+					}
+
+					// Hide mask
+					util.mask.hideMask(pt.viewport.centerRegion);
+
+					// Add uuid maps to instance
+					pt.uuidDimUuidsMap = uuidDimUuidsMap;
+					pt.uuidObjectMap = uuidObjectMap;
+
+					// Add objects to instance
+					pt.layout = layout;
+					pt.xLayout = xLayout;
+					pt.xResponse = xResponse;
+
+					if (PT.isDebug) {
+						console.log("xResponse", xResponse);
+						console.log("xLayout", xLayout);
+					}
+				};					
+
 				initialize = function() {
 					var url,
 						xLayout,
@@ -2448,58 +2495,15 @@ Ext.onReady( function() {
 							// Update viewport
 							pt.viewport.centerRegion.removeAll(true);
 							pt.viewport.centerRegion.update(html);
-
-							// After table success
-
-							// Resize render elements if plugin
-							if (pt.isPlugin) {
-								var baseEl = Ext.get(pt.init.el),
-									baseElBorderW = parseInt(baseEl.getStyle('border-left-width')) + parseInt(baseEl.getStyle('border-right-width')),
-									baseElBorderH = parseInt(baseEl.getStyle('border-top-width')) + parseInt(baseEl.getStyle('border-bottom-width')),
-									baseElPaddingW = parseInt(baseEl.getStyle('padding-left')) + parseInt(baseEl.getStyle('padding-right')),
-									baseElPaddingH = parseInt(baseEl.getStyle('padding-top')) + parseInt(baseEl.getStyle('padding-bottom')),
-									el = Ext.get(tableUuid);
-
-								pt.viewport.centerRegion.setWidth(el.getWidth());
-								pt.viewport.centerRegion.setHeight(el.getHeight());
-								baseEl.setWidth(el.getWidth() + baseElBorderW + baseElPaddingW);
-								baseEl.setHeight(el.getHeight() + baseElBorderH + baseElPaddingH);
-							}
-
-							// Hide mask
-							util.mask.hideMask(pt.viewport.centerRegion);
-
-							// Gui state
-							if (pt.viewport.downloadButton) {
-								pt.viewport.downloadButton.enable();
-							}
-
-							// Add uuid maps to instance
-							pt.uuidDimUuidsMap = uuidDimUuidsMap;
-							pt.uuidObjectMap = uuidObjectMap;
-
-							// Add value event handlers, set session storage
-							if (!pt.isPlugin && PT.isSessionStorage) {
-								setMouseHandlers();
-								engine.setSessionStorage(layout, 'table');
-							}
-
-							// Add objects to instance
-							pt.layout = layout;
-							pt.xLayout = xLayout;
-							pt.xResponse = xResponse;
-
-							if (PT.isDebug) {
-								console.log("xResponse", xResponse);
-								console.log("xLayout", xLayout);
-							}
+							
+							afterLoad(layout, xLayout, xResponse);
 						}
 					});
 
 				}();
 			};
 
-			engine.loadTable = function(id, pt) {
+			engine.loadTable = function(id, pt, updateGui, isFavorite) {
 				var url = init.contextPath + '/api/reportTables/' + id,
 					params = '?viewClass=dimensional&links=false',
 					method = 'GET',
@@ -2519,7 +2523,8 @@ Ext.onReady( function() {
 						pt.favorite.id = layoutConfig.id;
 						pt.favorite.name = layoutConfig.name;
 
-						pt.viewport.setFavorite(layout);
+						//pt.viewport.setFavorite(layout);
+						engine.createTable(layout, pt, updateGui, isFavorite);
 					}
 				};
 
