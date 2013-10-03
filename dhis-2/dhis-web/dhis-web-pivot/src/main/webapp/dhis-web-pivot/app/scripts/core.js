@@ -940,7 +940,7 @@ Ext.onReady( function() {
 				// Columns, rows, filters
 				if (layout.columns) {
 					for (var i = 0, dim, items, xDim; i < layout.columns.length; i++) {
-						dim = layout.columns[i];
+						dim = Ext.clone(layout.columns[i]);
 						items = dim.items;
 						xDim = {};
 
@@ -974,7 +974,7 @@ Ext.onReady( function() {
 
 				if (layout.rows) {
 					for (var i = 0, dim, items, xDim; i < layout.rows.length; i++) {
-						dim = layout.rows[i];
+						dim = Ext.clone(layout.rows[i]);
 						items = dim.items;
 						xDim = {};
 
@@ -1008,7 +1008,7 @@ Ext.onReady( function() {
 
 				if (layout.filters) {
 					for (var i = 0, dim, items, xDim; i < layout.filters.length; i++) {
-						dim = layout.filters[i];
+						dim = Ext.clone(layout.filters[i]);
 						items = dim.items;
 						xDim = {};
 

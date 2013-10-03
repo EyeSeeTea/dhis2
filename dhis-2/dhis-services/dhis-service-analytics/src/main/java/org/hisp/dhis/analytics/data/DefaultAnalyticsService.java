@@ -59,6 +59,8 @@ import static org.hisp.dhis.period.PeriodType.getPeriodTypeFromIsoString;
 import static org.hisp.dhis.reporttable.ReportTable.IRT2D;
 import static org.hisp.dhis.reporttable.ReportTable.addIfEmpty;
 import static org.hisp.dhis.system.util.DateUtils.daysBetween;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.getParentGrapMap;
+import static org.hisp.dhis.system.util.CollectionUtils.emptyIfNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -386,7 +388,8 @@ public class DefaultAnalyticsService
             
             Map<String, String> uidNameMap = getUidNameMap( params );
             Map<String, String> cocNameMap = getCocNameMap( grid, cocIndex );
-            Map<String, String> ouParentGraphMap = getParentGrapMap( asTypedList( params.getDimensionOrFilter( ORGUNIT_DIM_ID ), OrganisationUnit.class ) );
+            Map<String, String> ouParentGraphMap = getParentGrapMap( asTypedList( 
+                emptyIfNull( params.getDimensionOrFilter( ORGUNIT_DIM_ID ) ), OrganisationUnit.class ) );
             
             uidNameMap.putAll( cocNameMap );
             
@@ -931,29 +934,13 @@ public class DefaultAnalyticsService
         return map;
     }
 
-    /**
-     * Returns a mapping between the uid and the uid parent graph of the given
-     * organisation units.
-     */
-    private Map<String, String> getParentGrapMap( List<OrganisationUnit> organisationUnits )
-    {
-        Map<String, String> map = new HashMap<String, String>();
-        
-        for ( OrganisationUnit unit : organisationUnits )
-        {
-            map.put( unit.getUid(), unit.getParentGraph() );
-        }
-        
-        return map;
-    }
-
     private Map<String, String> getUidNameMap( List<DimensionalObject> dimensions, boolean hierarchyMeta )
     {
         Map<String, String> map = new HashMap<String, String>();
         
         for ( DimensionalObject dimension : dimensions )
         {
-            List<NameableObject> options = new ArrayList<NameableObject>( dimension.getItems() );
+            List<NameableObject> items = new ArrayList<NameableObject>( dimension.getItems() );
 
             boolean hierarchy = hierarchyMeta && DimensionType.ORGANISATIONUNIT.equals( dimension.getType() );
             
@@ -961,19 +948,19 @@ public class DefaultAnalyticsService
             // If dimension is not fixed and has no options, insert all options
             // -----------------------------------------------------------------
             
-            if ( !FIXED_DIMS.contains( dimension.getDimension() ) && options.isEmpty() )
+            if ( !FIXED_DIMS.contains( dimension.getDimension() ) && items.isEmpty() )
             {
                 if ( DimensionType.ORGANISATIONUNIT_GROUPSET.equals( dimension.getType() ) )
                 {
-                    options = asList( organisationUnitGroupService.getOrganisationUnitGroupSet( dimension.getDimension() ).getOrganisationUnitGroups() );
+                    items = asList( organisationUnitGroupService.getOrganisationUnitGroupSet( dimension.getDimension() ).getOrganisationUnitGroups() );
                 }
                 else if ( DimensionType.DATAELEMENT_GROUPSET.equals( dimension.getType() ) )
                 {
-                    options = asList( dataElementService.getDataElementGroupSet( dimension.getDimension() ).getMembers() );
+                    items = asList( dataElementService.getDataElementGroupSet( dimension.getDimension() ).getMembers() );
                 }
                 else if ( DimensionType.CATEGORY.equals( dimension.getType() ) )
                 {
-                    options = asList( categoryService.getDataElementCategory( dimension.getDimension() ).getCategoryOptions() );
+                    items = asList( categoryService.getDataElementCategory( dimension.getDimension() ).getCategoryOptions() );
                 }
             }
 
@@ -981,7 +968,7 @@ public class DefaultAnalyticsService
             // Insert UID and name into map
             // -----------------------------------------------------------------
             
-            for ( IdentifiableObject idObject : options )
+            for ( IdentifiableObject idObject : items )
             {
                 map.put( idObject.getUid(), idObject.getDisplayName() );
                 
