@@ -1272,15 +1272,15 @@ Ext.onReady( function() {
 									}
 									if (isUserOrgunitGrandChildren) {
 										var userOuOuc = [].concat(pt.init.user.ou, pt.init.user.ouc),
-											responseOu = response.metaData.ou;
+											responseOu = response.metaData[ou];
 
 										userOugc = [];
-
-										for (var j = 0; j < responseOu.length; j++) {
-											if (!Ext.Array.contains(userOuOuc, responseOu[j])) {
+										
+										for (var key in responseOu) {
+											if (responseOu.hasOwnProperty(key) && !Ext.Array.contains(userOuOuc, key)) {
 												userOugc.push({
-													id: responseOu[j],
-													name: response.metaData.names[responseOu[j]]
+													id: key,
+													name: response.metaData.names[key]
 												});
 											}
 										}
@@ -1291,13 +1291,15 @@ Ext.onReady( function() {
 									dim.items = [].concat(userOu || [], userOuc || [], userOugc || []);
 								}
 								else if (isLevel || isGroup) {
-									var responseOu = response.metaData.ou;
+									var responseOu = response.metaData[ou];
 
-									for (var j = 0; j < responseOu.length; j++) {
-										dim.items.push({
-											id: responseOu[j],
-											name: response.metaData.names[responseOu[j]]
-										});
+									for (var key in responseOu) {
+										if (responseOu.hasOwnProperty(key)) {
+											dim.items.push({
+												id: key,
+												name: response.metaData.names[key]
+											});
+										}
 									}
 
 									dim.items = pt.util.array.sortObjectsByString(dim.items);
@@ -1308,12 +1310,26 @@ Ext.onReady( function() {
 							}
 							else {
 								// Items: get ids from metadata -> items
-								if (Ext.isArray(metaDataDim)) {
-									for (var j = 0, ids = Ext.clone(response.metaData[dim.dimensionName]); j < ids.length; j++) {
-										dim.items.push({
-											id: ids[j],
-											name: response.metaData.names[ids[j]]
-										});
+								if (metaDataDim) {
+									var ids = Ext.clone(response.metaData[dim.dimensionName]);
+									
+									if (dim.dimensionName === dimConf.organisationUnit.objectName) {
+										for (var key in ids) {
+											if (ids.hasOwnProperty(key)) {
+												dim.items.push({
+													id: key,
+													name: response.metaData.names[key]
+												});
+											}
+										}
+									}
+									else {										
+										for (var j = 0; j < ids.length; j++) {
+											dim.items.push({
+												id: ids[j],
+												name: response.metaData.names[ids[j]]
+											});
+										}
 									}
 								}
 								// Items: get items from xLayout
