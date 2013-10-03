@@ -1313,7 +1313,7 @@ Ext.onReady( function() {
 								if (metaDataDim) {
 									var ids = Ext.clone(response.metaData[dim.dimensionName]);
 									
-									if (dim.dimensionName === dimConf.organisationUnit.objectName) {
+									if (dim.dimensionName === ou) {
 										for (var key in ids) {
 											if (ids.hasOwnProperty(key)) {
 												dim.items.push({
