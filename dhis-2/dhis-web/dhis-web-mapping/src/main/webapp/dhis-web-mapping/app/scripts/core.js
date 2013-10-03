@@ -1143,23 +1143,23 @@ Ext.onReady( function() {
 			}
 			
 			// legend			
-			if (typeof view.legendSet !== typeof src.legendSet) {
-				if (doExecute) {
-					loadLegend(view);
-				}
-				return gis.conf.finals.widget.loadtype_legend;
-			}
-			else if (view.classes !== src.classes ||
-				view.method !== src.method ||
-				view.colorLow !== src.colorLow ||
-				view.radiusLow !== src.radiusLow ||
-				view.colorHigh !== src.colorHigh ||
-				view.radiusHigh !== src.radiusHigh) {
-					if (doExecute) {
-						loadLegend(view);
-					}
-					return gis.conf.finals.widget.loadtype_legend;
-			}
+			//if (typeof view.legendSet !== typeof src.legendSet) {
+				//if (doExecute) {
+					//loadLegend(view);
+				//}
+				//return gis.conf.finals.widget.loadtype_legend;
+			//}
+			//else if (view.classes !== src.classes ||
+				//view.method !== src.method ||
+				//view.colorLow !== src.colorLow ||
+				//view.radiusLow !== src.radiusLow ||
+				//view.colorHigh !== src.colorHigh ||
+				//view.radiusHigh !== src.radiusHigh) {
+					//if (doExecute) {
+						//loadLegend(view);
+					//}
+					//return gis.conf.finals.widget.loadtype_legend;
+			//}
 			
 			// if no changes - reload legend but do not zoom
 			if (doExecute) {
