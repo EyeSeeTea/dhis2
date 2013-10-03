@@ -247,7 +247,6 @@ Ext.onReady( function() {
 
 					if (layout) {
 						pt.engine.createTable(layout, pt, true);
-						//pt.viewport.setFavorite(layout);
 					}
 				}
 
@@ -4608,14 +4607,17 @@ Ext.onReady( function() {
 				userOrganisationUnitChildren.setValue(isOuc);
 				userOrganisationUnitGrandChildren.setValue(isOugc);
 			}
+			
+			if (!(isOu || isOuc || isOugc)) {
 
-			// If fav has organisation units, wait for tree callback before update
-			if (recMap[dimConf.organisationUnit.objectName] && Ext.isObject(graphMap)) {
-				treePanel.numberOfRecords = pt.util.object.getLength(graphMap);
+				// If fav has organisation units, wait for tree callback before update
+				if (recMap[dimConf.organisationUnit.objectName] && Ext.isObject(graphMap)) {
+					treePanel.numberOfRecords = pt.util.object.getLength(graphMap);
 
-				for (var i = 0, a = xLayout.objectNameItemsMap[dimConf.organisationUnit.objectName]; i < a.length; i++) {
-					if (graphMap.hasOwnProperty(a[i].id)) {
-						treePanel.multipleExpand(a[i].id, graphMap[a[i].id], false);
+					for (var i = 0, a = xLayout.objectNameItemsMap[dimConf.organisationUnit.objectName]; i < a.length; i++) {
+						if (graphMap.hasOwnProperty(a[i].id)) {
+							treePanel.multipleExpand(a[i].id, graphMap[a[i].id], false);
+						}
 					}
 				}
 			}
