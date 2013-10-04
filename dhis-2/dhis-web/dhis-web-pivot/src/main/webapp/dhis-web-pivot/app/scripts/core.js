@@ -25,6 +25,7 @@ Ext.onReady( function() {
         var conf = {},
             util = {},
             api = {},
+            service = {},
             engine = {},
             dimConf;
 
@@ -488,7 +489,6 @@ Ext.onReady( function() {
 		// api
 		(function() {
 			api.layout = {};
-			api.response = {};
 
 			api.layout.Record = function(config) {
 				var record = {};
@@ -802,6 +802,8 @@ Ext.onReady( function() {
 				}();
 			};
 
+			api.response = {};
+			
 			api.response.Header = function(config) {
 				var header = {};
 
@@ -884,6 +886,45 @@ Ext.onReady( function() {
 					return response;
 				}();
 			};
+		}());
+		
+		// service
+		(function() {
+			service.layout = {};
+			
+			service.layout.getObjectNameDimensionMap = function(dimensionArray) {
+				var map = {};
+				
+				if (Ext.isArray(dimensionArray) && dimensionArray.length) {					
+					for (var i = 0, dim; i < dimensionArray.length; i++) {
+						dim = api.layout.Dimension(dimensionArray[i]);
+						
+						if (dim) {
+							map[dim.dimension] = dim;
+						}
+					}
+				}
+				
+				return map;
+			};				
+			
+			service.layout.getObjectNameDimensionItemsMap = function(dimensionArray) {
+				var map = {};
+				
+				if (Ext.isArray(dimensionArray) && dimensionArray.length) {					
+					for (var i = 0, dim; i < dimensionArray.length; i++) {
+						dim = api.layout.Dimension(dimensionArray[i]);
+						
+						if (dim) {
+							map[dim.dimension] = dim.items;
+						}
+					}
+				}
+				
+				return map;
+			};
+							
+			service.response = {};
 		}());
 
 		// engine
@@ -974,7 +1015,7 @@ Ext.onReady( function() {
 
 				if (layout.rows) {
 					for (var i = 0, dim, items, xDim; i < layout.rows.length; i++) {
-						dim = layout.rows[i];
+						dim = Ext.clone(layout.rows[i]);
 						items = dim.items;
 						xDim = {};
 
@@ -2680,6 +2721,7 @@ Ext.onReady( function() {
 			util: util,
 			init: init,
 			api: api,
+			service: service,
 			engine: engine
 		});
 

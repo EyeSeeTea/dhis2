@@ -4411,8 +4411,9 @@ Ext.onReady( function() {
 
 		setGui = function(layout, xLayout, graphMap, updateGui, isFavorite) {
 			var dimConf = pt.conf.finals.dimension,
-				dimMap,
-				recMap,
+				dimensions = [].concat(layout.columns || [], layout.rows || [], layout.filters || []),
+				dimMap = pt.service.layout.getObjectNameDimensionMap(dimensions),
+				recMap = pt.service.layout.getObjectNameDimensionItemsMap(dimensions),
 				objectName,
 				periodRecords,
 				fixedPeriodRecords = [],
@@ -4421,7 +4422,8 @@ Ext.onReady( function() {
 				isOuc = false,
 				isOugc = false,
 				levels = [],
-				groups = [];
+				groups = [],
+				orgunits = [];
 
 			// State
 			downloadButton.enable();
@@ -4431,10 +4433,6 @@ Ext.onReady( function() {
 			}
 
 			// Set gui
-			
-			dimMap = xLayout.objectNameDimensionsMap;
-			recMap = xLayout.objectNameItemsMap;
-			graphMap = graphMap || {};
 
 			// Indicators
 			pt.store.indicatorSelected.removeAll();
@@ -4578,17 +4576,20 @@ Ext.onReady( function() {
 					if (ouRecords[i].id === 'USER_ORGUNIT') {
 						isOu = true;
 					}
-					if (ouRecords[i].id === 'USER_ORGUNIT_CHILDREN') {
+					else if (ouRecords[i].id === 'USER_ORGUNIT_CHILDREN') {
 						isOuc = true;
 					}
-					if (ouRecords[i].id === 'USER_ORGUNIT_GRANDCHILDREN') {
+					else if (ouRecords[i].id === 'USER_ORGUNIT_GRANDCHILDREN') {
 						isOugc = true;
 					}
-					if (ouRecords[i].id.substr(0,5) === 'LEVEL') {
+					else if (ouRecords[i].id.substr(0,5) === 'LEVEL') {
 						levels.push(parseInt(ouRecords[i].id.split('-')[1]));
 					}
-					if (ouRecords[i].id.substr(0,8) === 'OU_GROUP') {
+					else if (ouRecords[i].id.substr(0,8) === 'OU_GROUP') {
 						groups.push(parseInt(ouRecords[i].id.split('-')[1]));
+					}
+					else {
+						orgunits.push(ouRecords[i].id);
 					}
 				}
 			}
@@ -4611,12 +4612,14 @@ Ext.onReady( function() {
 			if (!(isOu || isOuc || isOugc)) {
 
 				// If fav has organisation units, wait for tree callback before update
-				if (recMap[dimConf.organisationUnit.objectName] && Ext.isObject(graphMap)) {
-					treePanel.numberOfRecords = pt.util.object.getLength(graphMap);
+				if (orgunits.length) {
+					treePanel.numberOfRecords = orgunits.length;
 
-					for (var i = 0, a = xLayout.objectNameItemsMap[dimConf.organisationUnit.objectName]; i < a.length; i++) {
-						if (graphMap.hasOwnProperty(a[i].id)) {
-							treePanel.multipleExpand(a[i].id, graphMap[a[i].id], false);
+					for (var i = 0, id; orgunits.length; i++) {
+						id = orgunits[i];
+						
+						if (graphMap.hasOwnProperty(id)) {
+							treePanel.multipleExpand(id, graphMap[id], false);
 						}
 					}
 				}
