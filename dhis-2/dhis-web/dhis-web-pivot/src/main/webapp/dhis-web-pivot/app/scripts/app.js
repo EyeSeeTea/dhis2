@@ -4425,6 +4425,8 @@ Ext.onReady( function() {
 				groups = [],
 				orgunits = [];
 
+graphMap = layout.parentGraphMap;				
+
 			// State
 			downloadButton.enable();
 			
@@ -4612,14 +4614,12 @@ Ext.onReady( function() {
 			if (!(isOu || isOuc || isOugc)) {
 
 				// If fav has organisation units, wait for tree callback before update
-				if (orgunits.length) {
-					treePanel.numberOfRecords = orgunits.length;
+				if (Ext.isObject(graphMap)) {
+					treePanel.numberOfRecords = pt.util.object.getLength(graphMap);
 
-					for (var i = 0, id; orgunits.length; i++) {
-						id = orgunits[i];
-						
-						if (graphMap.hasOwnProperty(id)) {
-							treePanel.multipleExpand(id, graphMap[id], false);
+					for (var key in graphMap) {						
+						if (graphMap.hasOwnProperty(key)) {
+							treePanel.multipleExpand(key, graphMap[key], false);
 						}
 					}
 				}
