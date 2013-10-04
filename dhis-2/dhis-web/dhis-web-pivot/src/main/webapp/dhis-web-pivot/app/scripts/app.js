@@ -4701,7 +4701,11 @@ Ext.onReady( function() {
 		Ext.Ajax.request({
 			url: '../initialize.action',
 			success: function(r) {
-				pt = PT.core.getInstance(Ext.decode(r.responseText));
+				var init = Ext.decode(r.responseText);
+				
+				PT.i18n = init.i18n;
+				
+				pt = PT.core.getInstance(init);				
 
 				PT.app.extendInstance(pt);
 

@@ -2,24 +2,16 @@ Ext.onReady( function() {
 
 	// ext config
 	Ext.Ajax.method = 'GET';
-
-	// namespace
-	if (!('PT' in window)) {
-		PT = {
-			i18n: {}
-		};
-	}
-
-	// mode
-	PT.isDebug = false;
-
-	// html5
-	PT.isSessionStorage = 'sessionStorage' in window && window['sessionStorage'] !== null;
-
-	// core
-
-	PT.core = {};
-	PT.core.instances = [];
+	
+	// pt	
+	PT = {
+		core: {
+			instances: []
+		},		
+		i18n: {},		
+		isDebug: false,		
+		isSessionStorage: 'sessionStorage' in window && window['sessionStorage'] !== null
+	};
 
 	PT.core.getInstance = function(init) {
         var conf = {},
