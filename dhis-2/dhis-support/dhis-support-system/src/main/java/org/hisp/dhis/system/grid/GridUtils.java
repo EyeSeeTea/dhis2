@@ -572,7 +572,18 @@ public class GridUtils
      */
     public static String getValue( TagNode cell )
     {
-        return cell.getFirstChild() != null ? cell.getFirstChild().getText().trim().replaceAll( "&nbsp;", EMPTY ) : EMPTY;
+        String master = new String(EMPTY);
+        for (Node child : cell.getChildren().toNodeArray())
+        {
+            if (child instanceof Span) {
+               master = master + ((Span)child).getStringText().trim().replaceAll( "&nbsp;", EMPTY );
+            }
+            else
+            {
+                master = master + child.getText().trim().replaceAll( "&nbsp;", EMPTY );
+            }
+        }
+        return master;
     }
     
     // -------------------------------------------------------------------------
