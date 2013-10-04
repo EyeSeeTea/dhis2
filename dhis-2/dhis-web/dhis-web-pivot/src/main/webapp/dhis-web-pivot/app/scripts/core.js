@@ -1310,11 +1310,13 @@ Ext.onReady( function() {
 
 										userOugc = [];
 										
-										for (var key in responseOu) {
-											if (responseOu.hasOwnProperty(key) && !Ext.Array.contains(userOuOuc, key)) {
+										for (var i = 0, id; i < responseOu.length; i++) {
+											id = responseOu[i];
+											
+											if (!Ext.Array.contains(userOuOuc, id)) {
 												userOugc.push({
-													id: key,
-													name: response.metaData.names[key]
+													id: id,
+													name: response.metaData.names[id]
 												});
 											}
 										}
@@ -1324,16 +1326,14 @@ Ext.onReady( function() {
 
 									dim.items = [].concat(userOu || [], userOuc || [], userOugc || []);
 								}
-								else if (isLevel || isGroup) {
-									var responseOu = response.metaData[ou];
-
-									for (var key in responseOu) {
-										if (responseOu.hasOwnProperty(key)) {
-											dim.items.push({
-												id: key,
-												name: response.metaData.names[key]
-											});
-										}
+								else if (isLevel || isGroup) {										
+									for (var i = 0, responseOu = response.metaData[ou], id; i < responseOu.length; i++) {
+										id = responseOu[i];
+										
+										dim.items.push({
+											id: id,
+											name: response.metaData.names[id]
+										});
 									}
 
 									dim.items = pt.util.array.sortObjectsByString(dim.items);
@@ -1346,24 +1346,11 @@ Ext.onReady( function() {
 								// Items: get ids from metadata -> items
 								if (metaDataDim) {
 									var ids = Ext.clone(response.metaData[dim.dimensionName]);
-									
-									if (dim.dimensionName === ou) {
-										for (var key in ids) {
-											if (ids.hasOwnProperty(key)) {
-												dim.items.push({
-													id: key,
-													name: response.metaData.names[key]
-												});
-											}
-										}
-									}
-									else {										
-										for (var j = 0; j < ids.length; j++) {
-											dim.items.push({
-												id: ids[j],
-												name: response.metaData.names[ids[j]]
-											});
-										}
+									for (var j = 0; j < ids.length; j++) {
+										dim.items.push({
+											id: ids[j],
+											name: response.metaData.names[ids[j]]
+										});
 									}
 								}
 								// Items: get items from xLayout
