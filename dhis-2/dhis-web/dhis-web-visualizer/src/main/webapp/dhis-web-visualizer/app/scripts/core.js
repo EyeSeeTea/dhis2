@@ -2,28 +2,16 @@ Ext.onReady( function() {
 
 	// ext config
 	Ext.Ajax.method = 'GET';
-
-	// namespace
-	if (!('DV' in window)) {
-		DV = {
-			i18n: {
-                trend: 'Trend',
-                target: 'Target',
-                base: 'Base'
-            }
-		};
-	}
-
-	// mode
-	DV.isDebug = false;
-
-	// html5
-	DV.isSessionStorage = 'sessionStorage' in window && window['sessionStorage'] !== null;
-
-	// core
-
-	DV.core = {};
-	DV.core.instances = [];
+	
+	// pt	
+	DV = {
+		core: {
+			instances: []
+		},		
+		i18n: {},		
+		isDebug: false,		
+		isSessionStorage: 'sessionStorage' in window && window['sessionStorage'] !== null
+	};
 
 	DV.core.getInstance = function(init) {
         var conf = {},
