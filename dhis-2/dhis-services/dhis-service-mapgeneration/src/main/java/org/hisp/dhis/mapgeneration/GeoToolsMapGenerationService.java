@@ -255,11 +255,13 @@ public class GeoToolsMapGenerationService
         
         if ( hasLegendSet )
         {
-            IntervalSet.getIntervalSet( mapLayer, mapView.getLegendSet() );
+            mapLayer.setIntervalSetFromLegendSet( mapView.getLegendSet() );
+            mapLayer.distributeAndUpdateMapObjectsInIntervalSet();
         }
         else
         {
-            IntervalSet.applyIntervalSetToMapLayer( DistributionStrategy.STRATEGY_EQUAL_RANGE, mapLayer, mapLayer.getClasses() );
+            mapLayer.applyIntervalSetToMapLayer( DistributionStrategy.STRATEGY_EQUAL_RANGE, mapLayer.getClasses() );
+            mapLayer.distributeAndUpdateMapObjectsInIntervalSet();
         }
         
         // Update the radius of each map object in this map layer according to
