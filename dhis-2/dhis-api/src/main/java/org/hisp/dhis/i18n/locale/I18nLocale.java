@@ -28,8 +28,15 @@ package org.hisp.dhis.i18n.locale;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Locale;
+
 import org.hisp.dhis.common.BaseIdentifiableObject;
 
+/**
+ * Wrapper for java.util.Locale for persistence purposes.
+ * 
+ * @author larshelg
+ */
 public class I18nLocale
     extends BaseIdentifiableObject
 {    
@@ -45,12 +52,12 @@ public class I18nLocale
         this.locale = "en_GB";
     }
 
-    public I18nLocale( String name, String locale )
+    public I18nLocale( Locale locale )
     {
-        this.name = name;
-        this.locale = locale;
+        this.name = locale.getDisplayName();
+        this.locale = locale.toString();
     }
-
+    
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
