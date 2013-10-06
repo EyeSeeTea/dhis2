@@ -32,9 +32,7 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
 
 public class I18nLocale
     extends BaseIdentifiableObject
-{
-    private String name;
-    
+{    
     private String locale;
 
     // -------------------------------------------------------------------------
@@ -43,7 +41,7 @@ public class I18nLocale
 
     public I18nLocale()
     {
-        this.name = "English, United Kingdom";
+        this.name = "English (United Kingdom)";
         this.locale = "en_GB";
     }
 
@@ -56,16 +54,6 @@ public class I18nLocale
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
-
-    public String getName()
-    {
-        return name;
-    }
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
 
     public String getLocale()
     {

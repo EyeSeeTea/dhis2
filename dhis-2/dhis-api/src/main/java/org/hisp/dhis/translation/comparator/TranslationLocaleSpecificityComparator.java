@@ -1,4 +1,4 @@
-package org.hisp.dhis.i18n.action;
+package org.hisp.dhis.translation.comparator;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,51 +28,27 @@ package org.hisp.dhis.i18n.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.i18n.I18nManager;
-import org.hisp.dhis.system.util.LocaleUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Comparator;
 
-import java.util.Locale;
+import org.hisp.dhis.translation.Translation;
 
 /**
+ * Compares two Translation objects based on how specific the Locales are. The
+ * Translation with least specific Locale appears first.
+ * 
  * @author Lars Helge Overland
  */
-public class GetStringsFromLocaleAction
-    implements Action
+public class TranslationLocaleSpecificityComparator
+    implements Comparator<Translation>
 {
-    @Autowired
-    private I18nManager manager;
-
-    private String loc;
-
-    public void setLoc( String loc )
-    {
-        this.loc = loc;
-    }
-
-    private I18n i18nObject;
-
-    public I18n getI18nObject()
-    {
-        return i18nObject;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
-        throws Exception
-    {
-        if ( loc != null )
-        {
-            Locale locale = LocaleUtils.getLocale( loc );
+    public static final TranslationLocaleSpecificityComparator INSTANCE = new TranslationLocaleSpecificityComparator();
     
-            i18nObject = manager.getI18n( this.getClass(), locale );
-        }
+    @Override
+    public int compare( Translation t1, Translation t2 )
+    {
+        Integer l1 = Integer.valueOf( t1.getLocale().length() );
+        Integer l2 = Integer.valueOf( t2.getLocale().length() );
         
-        return SUCCESS;
+        return l1.compareTo( l2 );
     }
 }
