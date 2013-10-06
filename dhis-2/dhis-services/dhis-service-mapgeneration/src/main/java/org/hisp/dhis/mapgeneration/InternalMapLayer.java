@@ -32,6 +32,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.springframework.util.Assert;
 
@@ -128,6 +129,34 @@ public class InternalMapLayer
     public void addMapObject( InternalMapObject mapObject )
     {
         this.mapObjects.add( mapObject );
+    }
+
+    /**
+     * Creates a map object and adds it to this map layer. Sets this map layer
+     * on the map object.
+     * 
+     * @param mapValue the map values to set on the map object.
+     * @param orgUnit the organisation unit which name to set on the map object.
+     */
+    public void addSingleGeoToolsMapObject( double mapValue, OrganisationUnit orgUnit )
+    {
+        // Create and setup an internal map object
+        InternalMapObject mapObject = new InternalMapObject();
+        mapObject.setName( orgUnit.getName() );
+        mapObject.setValue( mapValue );
+        mapObject.setFillOpacity( opacity );
+        mapObject.setStrokeColor( strokeColor );
+        mapObject.setStrokeWidth( strokeWidth );
+
+        // Build and set the GeoTools-specific geometric primitive that outlines
+        // the org unit on the map
+        mapObject.setGeometry( InternalMapObject.buildAndApplyGeometryForOrganisationUnit( orgUnit ) );
+
+        // Add the map object to the map layer
+        this.addMapObject( mapObject );
+
+        // Set the map layer for the map object
+        mapObject.setMapLayer( this );
     }
 
     /**
