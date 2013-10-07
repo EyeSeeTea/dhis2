@@ -1173,71 +1173,58 @@ Ext.onReady( function() {
                                     userOuc = dv.util.array.sortObjectsByString(userOuc);
                                 }
                                 if (isUserOrgunitGrandChildren) {
-										var userOuOuc = [].concat(dv.init.user.ou, dv.init.user.ouc),
-											responseOu = response.metaData[ou];
+									var userOuOuc = [].concat(dv.init.user.ou, dv.init.user.ouc),
+										responseOu = response.metaData[ou];
 
-										userOugc = [];
+									userOugc = [];
+									
+									for (var j = 0, id; j < responseOu.length; j++) {
+										id = responseOu[j];
 										
-										for (var key in responseOu) {
-											if (responseOu.hasOwnProperty(key) && !Ext.Array.contains(userOuOuc, key)) {
-												userOugc.push({
-													id: key,
-													name: response.metaData.names[key]
-												});
-											}
+										if (!Ext.Array.contains(userOuOuc, id)) {
+											userOugc.push({
+												id: id,
+												name: response.metaData.names[id]
+											});
 										}
-
-										userOugc = dv.util.array.sortObjectsByString(userOugc);
 									}
+
+									userOugc = dv.util.array.sortObjectsByString(userOugc);
+								}
 
                                 dim.items = [].concat(userOu || [], userOuc || [], userOugc || []);
                             }
                             else if (isLevel || isGroup) {
-									var responseOu = response.metaData[ou];
-
-									for (var key in responseOu) {
-										if (responseOu.hasOwnProperty(key)) {
-											dim.items.push({
-												id: key,
-												name: response.metaData.names[key]
-											});
-										}
-									}
-
-									dim.items = dv.util.array.sortObjectsByString(dim.items);
+								for (var j = 0, responseOu = response.metaData[ou], id; j < responseOu.length; j++) {
+									id = responseOu[j];
+									
+									dim.items.push({
+										id: id,
+										name: response.metaData.names[id]
+									});
 								}
-                            else {
-                                dim.items = Ext.clone(xLayout.dimensionNameItemsMap[dim.dimensionName]);
-                            }
+
+								dim.items = pt.util.array.sortObjectsByString(dim.items);
+							}
+							else {
+								dim.items = Ext.clone(xLayout.dimensionNameItemsMap[dim.dimensionName]);
+							}
                         }
                         else {
                             // Items: get ids from metadata -> items
-                            if (metaDataDim) {
-									var ids = Ext.clone(response.metaData[dim.dimensionName]);
-									
-									if (dim.dimensionName === ou) {
-										for (var key in ids) {
-											if (ids.hasOwnProperty(key)) {
-												dim.items.push({
-													id: key,
-													name: response.metaData.names[key]
-												});
-											}
-										}
-									}
-									else {
-										for (var j = 0; j < ids.length; j++) {
-											dim.items.push({
-												id: ids[j],
-												name: response.metaData.names[ids[j]]
-											});
-										}
-									}
+                            if (Ext.isArray(metaDataDim) && metaDataDim.length) {
+								var ids = Ext.clone(response.metaData[dim.dimensionName]);
+								for (var j = 0; j < ids.length; j++) {
+									dim.items.push({
+										id: ids[j],
+										name: response.metaData.names[ids[j]]
+									});
 								}
-                            // Items: get items from xLayout
-                            else {
-                                dim.items = Ext.clone(xLayout.objectNameItemsMap[dim.objectName]);
-                            }
+							}
+							// Items: get items from xLayout
+							else {
+								dim.items = Ext.clone(xLayout.objectNameItemsMap[dim.objectName]);
+							}
                         }
                     }
 
@@ -1245,7 +1232,7 @@ Ext.onReady( function() {
                     layout = dv.api.layout.Layout(xLayout);
 
                     if (layout) {
-                        dimensions = [].concat(layout.columns, layout.rows, layout.filters);
+                        dimensions = [].concat(layout.columns || [], layout.rows || [], layout.filters || []);
 
                         for (var i = 0, idNameMap = response.metaData.names, dimItems; i < dimensions.length; i++) {
                             dimItems = dimensions[i].items;

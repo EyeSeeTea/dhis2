@@ -1417,7 +1417,7 @@ Ext.onReady( function() {
 								}
 							}
 
-							return pt.engine.getExtendedLayout(layout);
+							return engine.getExtendedLayout(layout);
 						}
 
 						return null;
