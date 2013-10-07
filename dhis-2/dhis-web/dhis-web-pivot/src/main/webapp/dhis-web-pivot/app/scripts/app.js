@@ -1089,7 +1089,7 @@ Ext.onReady( function() {
 
 		topLimit = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'pt-combo',
-			style: 'margin-bottom:3px',
+			style: 'margin-bottom:0',
 			width: 250,
 			labelWidth: 130,
 			fieldLabel: PT.i18n.top_limit,
@@ -1134,7 +1134,7 @@ Ext.onReady( function() {
 		};
 
 		parameters = {
-			bodyStyle: 'border:0 none',
+			bodyStyle: 'border:0 none; background:transparent',
 			style: 'margin-left:14px',
 			items: [
 				reportingPeriod,
@@ -1149,7 +1149,7 @@ Ext.onReady( function() {
 
 		window = Ext.create('Ext.window.Window', {
 			title: PT.i18n.table_options,
-			bodyStyle: 'background-color:#fff; padding:8px 8px 8px',
+			bodyStyle: 'background-color:#fff; padding:5px',
 			closeAction: 'hide',
 			autoShow: true,
 			modal: true,
@@ -1209,11 +1209,15 @@ Ext.onReady( function() {
 					bodyStyle: 'border:0 none; padding:7px'
 				},
 				{
-					bodyStyle: 'border:0 none; color:#222; font-size:12px',
-					style: 'margin-bottom:6px',
-					html: '<b>' + PT.i18n.parameters + '</b> <span style="font-size:11px"> (' + PT.i18n.for_standard_reports_only + ')</span>'
-				},
-				parameters
+					bodyStyle: 'border:1px solid #d5d5d5; padding:5px; background-color:#f0f0f0',
+					items: [
+						{
+							bodyStyle: 'border:0 none; padding:0 5px 6px; background-color:transparent; color:#222; font-size:12px',
+							html: '<b>' + PT.i18n.parameters + '</b> <span style="font-size:11px"> (' + PT.i18n.for_standard_reports_only + ')</span>'
+						},
+						parameters
+					]
+				}
 			],
 			bbar: [
 				'->',
