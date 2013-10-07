@@ -393,13 +393,13 @@ Ext.onReady( function() {
                     layout;
 
                 if (id) {
-                    engine.loadChart(id, dv);
+                    engine.loadChart(id, dv, true, true);
                 }
                 else if (Ext.isString(session) && DV.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
                     layout = api.layout.Layout(engine.analytical2layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]));
 
                     if (layout) {
-                        dv.viewport.setFavorite(layout);
+						dv.engine.createChart(layout, dv, true);
                     }
                 }
 
@@ -2123,7 +2123,7 @@ Ext.onReady( function() {
             westRegion,
             centerRegion,
 
-            setFavorite,
+            setGui,
 
             viewport,
             addListeners;
@@ -4584,11 +4584,11 @@ Ext.onReady( function() {
             }
         });
 
-        setFavorite = function(layout) {
-            var xLayout,
-                dimMap,
-                recMap,
-                graphMap,
+        setGui = function(layout, updateGui, isFavorite) {
+			var dimensions = [].concat(layout.columns || [], layout.rows || [], layout.filters || []),
+				dimMap = pt.service.layout.getObjectNameDimensionMap(dimensions),
+				recMap = pt.service.layout.getObjectNameDimensionItemsMap(dimensions),
+				graphMap = layout.parentGraphMap,
                 objectName,
                 periodRecords,
                 fixedPeriodRecords = [],
@@ -4597,20 +4597,17 @@ Ext.onReady( function() {
 				isOugc = false,
                 isLevel = false,
 				levels = [],
-				groups = [];
+				groups = [],
+				orgunits = [];
 
-            // State
-            dv.viewport.interpretationButton.enable();
-
-            // Create chart
-            dv.engine.createChart(layout, dv);
+			// State
+			downloadButton.enable();
+			
+			if (isFavorite) {
+				interpretationButton.enable();
+			}
 
             // Set gui
-
-            xLayout = dv.engine.getExtendedLayout(layout);
-            dimMap = xLayout.objectNameDimensionsMap;
-            recMap = xLayout.objectNameItemsMap;
-            graphMap = layout.parentGraphMap;
 
             // Indicators
             dv.store.indicatorSelected.removeAll();
@@ -4710,8 +4707,11 @@ Ext.onReady( function() {
                     if (ouRecords[i].id.substr(0,5) === 'LEVEL') {
                         isLevel = true;
                     }
-					if (ouRecords[i].id.substr(0,8) === 'OU_GROUP') {
+					else if (ouRecords[i].id.substr(0,8) === 'OU_GROUP') {
 						groups.push(parseInt(ouRecords[i].id.split('-')[1]));
+					}
+					else {
+						orgunits.push(ouRecords[i].id);
 					}
                 }
             }
@@ -4730,20 +4730,23 @@ Ext.onReady( function() {
 				userOrganisationUnitChildren.setValue(isOuc);
 				userOrganisationUnitGrandChildren.setValue(isOugc);
 			}
+			
+			if (!(isOu || isOuc || isOugc)) {
 
-            // If fav has organisation units, wait for tree callback before update
-            if (recMap[dimConf.organisationUnit.objectName] && Ext.isObject(graphMap)) {
-                treePanel.numberOfRecords = dv.util.object.getLength(graphMap);
+				// If fav has organisation units, wait for tree callback before update
+				if (Ext.isObject(graphMap)) {
+					treePanel.numberOfRecords = pt.util.object.getLength(graphMap);
 
-                for (var i = 0, a = xLayout.objectNameItemsMap[dimConf.organisationUnit.objectName]; i < a.length; i++) {
-                    if (graphMap.hasOwnProperty(a[i].id)) {
-                        treePanel.multipleExpand(a[i].id, graphMap[a[i].id], false);
-                    }
-                }
-            }
-            else {
-                treePanel.reset();
-            }
+					for (var key in graphMap) {						
+						if (graphMap.hasOwnProperty(key)) {
+							treePanel.multipleExpand(key, graphMap[key], false);
+						}
+					}
+				}
+			}
+			else {
+				treePanel.reset();
+			}
         };
 
         viewport = Ext.create('Ext.container.Viewport', {
@@ -4764,7 +4767,7 @@ Ext.onReady( function() {
             userOrganisationUnit: userOrganisationUnit,
             userOrganisationUnitChildren: userOrganisationUnitChildren,
             dataElementDetailLevel: dataElementDetailLevel,
-            setFavorite: setFavorite,
+            setGui: setGui,
             items: [
                 westRegion,
                 centerRegion
@@ -4800,8 +4803,6 @@ Ext.onReady( function() {
         return viewport;
     };
 
-	
-	
 	initialize = function(r) {
 
 		// ext configuration

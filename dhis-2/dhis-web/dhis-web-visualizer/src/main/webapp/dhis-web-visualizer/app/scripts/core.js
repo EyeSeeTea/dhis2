@@ -2278,7 +2278,7 @@ Ext.onReady( function() {
                 }();
             };
 
-            engine.loadChart = function(id, dv) {
+            engine.loadChart = function(id, dv, updateGui, isFavorite) {
                 var url = init.contextPath + '/api/charts/' + id,
                     params = '?viewClass=dimensional&links=false',
                     method = 'GET',
@@ -2298,7 +2298,7 @@ Ext.onReady( function() {
                         dv.favorite.id = layoutConfig.id;
                         dv.favorite.name = layoutConfig.name;
 
-                        dv.viewport.setFavorite(layout);
+						engine.createChart(layout, dv, updateGui, isFavorite);
                     }
                 };
 
