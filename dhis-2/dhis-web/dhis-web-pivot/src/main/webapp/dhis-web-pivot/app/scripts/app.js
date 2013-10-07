@@ -4409,11 +4409,12 @@ Ext.onReady( function() {
 			}
 		});
 
-		setGui = function(layout, xLayout, graphMap, updateGui, isFavorite) {
+		setGui = function(layout, updateGui, isFavorite) {
 			var dimConf = pt.conf.finals.dimension,
 				dimensions = [].concat(layout.columns || [], layout.rows || [], layout.filters || []),
 				dimMap = pt.service.layout.getObjectNameDimensionMap(dimensions),
 				recMap = pt.service.layout.getObjectNameDimensionItemsMap(dimensions),
+				graphMap = layout.parentGraphMap,
 				objectName,
 				periodRecords,
 				fixedPeriodRecords = [],
@@ -4424,8 +4425,6 @@ Ext.onReady( function() {
 				levels = [],
 				groups = [],
 				orgunits = [];
-
-graphMap = layout.parentGraphMap;				
 
 			// State
 			downloadButton.enable();

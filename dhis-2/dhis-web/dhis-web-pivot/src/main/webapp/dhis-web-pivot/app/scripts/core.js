@@ -2427,7 +2427,7 @@ Ext.onReady( function() {
 						}
 						
 						if (updateGui) {
-							pt.viewport.setGui(layout, xLayout, xResponse.metaData[dimConf.organisationUnit.objectName], updateGui, isFavorite);
+							pt.viewport.setGui(layout, updateGui, isFavorite);
 						}
 					}
 
