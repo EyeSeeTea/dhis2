@@ -1196,7 +1196,7 @@ Ext.onReady( function() {
 					uuidDimUuidsMap = {},
 					uuidObjectMap = {};
 
-				getItemName = function(id, response) {
+				getItemName = function(id, response, isHtml) {
 					var metaData = response.metaData,
 						name = '';
 					
@@ -1204,7 +1204,7 @@ Ext.onReady( function() {
 						var a = Ext.clean(metaData.ouHierarchy[id].split('/'));
 						
 						for (var i = 0; i < a.length; i++) {
-							name += '<span class="text-weak">' + metaData.names[a[i]] + '</span> / ';
+							name += (isHtml ? '<span class="text-weak">' : '') + metaData.names[a[i]] + (isHtml ? '</span>' : '') + ' / ';
 						}
 					}
 					
@@ -1352,6 +1352,8 @@ Ext.onReady( function() {
 											id: id,
 											name: getItemName(id, response)
 										});
+										
+										console.log(dim.items[dim.items.length-1].name);
 									}
 
 									dim.items = pt.util.array.sortObjectsByString(dim.items);
@@ -1927,7 +1929,7 @@ Ext.onReady( function() {
 								obj.cls = 'pivot-dim';
 								obj.noBreak = false;
 								obj.hidden = !(obj.rowSpan || obj.colSpan);
-								obj.htmlValue = getItemName(obj.id, xResponse);
+								obj.htmlValue = getItemName(obj.id, xResponse, true);
 
 								dimHtml.push(getTdHtml(obj));
 
@@ -1993,7 +1995,7 @@ Ext.onReady( function() {
 									obj.cls = 'pivot-dim td-nobreak';
 									obj.noBreak = true;
 									obj.hidden = !(obj.rowSpan || obj.colSpan);
-									obj.htmlValue = getItemName(obj.id, xResponse);
+									obj.htmlValue = getItemName(obj.id, xResponse, true);
 
 									row.push(obj);
 								}
