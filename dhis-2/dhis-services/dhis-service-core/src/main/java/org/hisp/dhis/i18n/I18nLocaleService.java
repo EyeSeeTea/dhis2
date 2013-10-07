@@ -28,15 +28,25 @@ package org.hisp.dhis.i18n;
  */
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.hisp.dhis.i18n.locale.I18nLocale;
 
 public interface I18nLocaleService
 {
+    /**
+     * Returns available languages in a mapping between code and name.
+     */
     Map<String, String> getAvailableLanguages();
     
+    /**
+     * Returns available countries in a mapping between code and name.
+     */
     Map<String, String> getAvailableCountries();
+    
+    boolean addI18nLocale( String language, String country );
     
     void saveI18nLocale( I18nLocale locale );
     
@@ -53,4 +63,6 @@ public interface I18nLocaleService
     Collection<I18nLocale> getI18nLocalesBetween( int first, int max );
     
     Collection<I18nLocale> getI18nLocalesBetweenLikeName( String name, int first, int max );
+    
+    List<Locale> getAllLocales();
 }

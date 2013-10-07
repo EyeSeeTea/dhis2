@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.filter;
+package org.hisp.dhis.translation.comparator;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,18 +28,27 @@ package org.hisp.dhis.system.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.system.util.Filter;
+import java.util.Comparator;
+
+import org.hisp.dhis.translation.Translation;
 
 /**
+ * Compares two Translation objects based on how specific the Locales are. The
+ * Translation with least specific Locale appears first.
+ * 
  * @author Lars Helge Overland
  */
-public class OrganisationUnitWithCoordinatesFilter
-    implements Filter<OrganisationUnit>
+public class TranslationLocaleSpecificityComparator
+    implements Comparator<Translation>
 {
+    public static final TranslationLocaleSpecificityComparator INSTANCE = new TranslationLocaleSpecificityComparator();
+    
     @Override
-    public boolean retain( OrganisationUnit object )
+    public int compare( Translation t1, Translation t2 )
     {
-        return object != null && object.hasFeatureType() && object.hasCoordinates();
-    }    
+        Integer l1 = Integer.valueOf( t1.getLocale().length() );
+        Integer l2 = Integer.valueOf( t2.getLocale().length() );
+        
+        return l1.compareTo( l2 );
+    }
 }

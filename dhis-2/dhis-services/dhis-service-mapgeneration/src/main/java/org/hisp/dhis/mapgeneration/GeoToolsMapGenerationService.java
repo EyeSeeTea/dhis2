@@ -47,6 +47,8 @@ import org.hisp.dhis.mapping.MapView;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.system.filter.OrganisationUnitWithCoordinatesFilter;
+import org.hisp.dhis.system.util.FilterUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -126,17 +128,24 @@ public class GeoToolsMapGenerationService
             return null;
         }
         
+        boolean dataLayer = map.getMapViews().get( 0 ).isDataLayer();
+        
         // Build representation of a map using GeoTools, then render as image
         BufferedImage mapImage = MapUtils.render( internalMap, width, height );
 
-        // Build the legend set, then render it to an image
-        LegendSet legendSet = new LegendSet( internalMap.getLayers().get( 0 ) ); //TODO
-        BufferedImage legendImage = legendSet.render();
-
-        // Combine the legend image and the map image into one image
-        BufferedImage finalImage = combineLegendAndMapImages( legendImage, mapImage );
-
-        return finalImage;
+        if ( !dataLayer )
+        {
+            return mapImage;
+        }
+        else
+        {
+            // Build the legend set, then render it to an image
+            LegendSet legendSet = new LegendSet( internalMap.getLayers().get( 0 ) ); //TODO
+            BufferedImage legendImage = legendSet.render();
+    
+            // Combine the legend image and the map image into one image
+            return combineLegendAndMapImages( legendImage, mapImage );
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -144,18 +153,14 @@ public class GeoToolsMapGenerationService
     // -------------------------------------------------------------------------
 
     private static final String DEFAULT_COLOR_HIGH = "#ff0000";
-
     private static final String DEFAULT_COLOR_LOW = "#ffff00";
 
     private static final float DEFAULT_OPACITY = 0.75f;
-
     private static final String DEFAULT_STROKE_COLOR = "#ffffff";
 
     private static final int DEFAULT_STROKE_WIDTH = 1;
-
-    private static final int DEFAULT_RADIUS_HIGH = 35;
-
-    private static final int DEFAULT_RADIUS_LOW = 15;
+    private static final Integer DEFAULT_RADIUS_HIGH = 35;
+    private static final Integer DEFAULT_RADIUS_LOW = 15;
 
     private InternalMapLayer getSingleInternalMapLayer( MapView mapView )
     {
@@ -183,6 +188,8 @@ public class GeoToolsMapGenerationService
         
         List<OrganisationUnit> organisationUnits = mapView.getAllOrganisationUnits();
 
+        FilterUtils.filter( organisationUnits, new OrganisationUnitWithCoordinatesFilter() );
+        
         java.util.Map<String, OrganisationUnit> uidOuMap = new HashMap<String, OrganisationUnit>();
         
         for ( OrganisationUnit ou : organisationUnits )
@@ -190,26 +197,15 @@ public class GeoToolsMapGenerationService
             uidOuMap.put( ou.getUid(), ou );
         }
         
-        DataQueryParams params = analyticsService.getFromAnalyticalObject( mapView, null );
-        
-        Grid grid = analyticsService.getAggregatedDataValues( params );
-
-        Collection<MapValue> mapValues = getMapValues( grid );
-
-        if ( mapValues.isEmpty() )
-        {
-            return null;
-        }
-        
         // Get the name from the external layer
         String name = mapView.getName();
 
         // Get the period
-        Period period = mapView.getPeriods().get( 0 ); //TODO make more robust
+        Period period = !mapView.getPeriods().isEmpty() ? mapView.getPeriods().get( 0 ) : null;
 
         // Get the low and high radii
-        int radiusLow = !isIndicator ? mapView.getRadiusLow() : DEFAULT_RADIUS_LOW;
-        int radiusHigh = !isIndicator ? mapView.getRadiusHigh() : DEFAULT_RADIUS_HIGH;
+        Integer radiusLow = !isIndicator ? mapView.getRadiusLow() : DEFAULT_RADIUS_LOW;
+        Integer radiusHigh = !isIndicator ? mapView.getRadiusHigh() : DEFAULT_RADIUS_HIGH;
 
         // Get the low and high colors, typically in hexadecimal form, e.g. #ff3200
         Color colorLow = MapUtils.createColorFromString( StringUtils.trimToNull( mapView.getColorLow() ) != null ? mapView.getColorLow()
@@ -225,6 +221,8 @@ public class GeoToolsMapGenerationService
 
         // TODO MapView might be extended to feature stroke width
         int strokeWidth = DEFAULT_STROKE_WIDTH;
+        
+        boolean hasLegendSet = mapView.hasLegendSet();
 
         // Create and setup an internal layer
         InternalMapLayer mapLayer = new InternalMapLayer();
@@ -235,37 +233,78 @@ public class GeoToolsMapGenerationService
         mapLayer.setColorLow( colorLow );
         mapLayer.setColorHigh( colorHigh );
         mapLayer.setOpacity( opacity );
+        mapLayer.setClasses( mapView.getClasses() );
         mapLayer.setStrokeColor( strokeColor );
         mapLayer.setStrokeWidth( strokeWidth );
 
-        // Build and set the internal GeoTools map objects for the layer
-        
-        for ( MapValue mapValue : mapValues )
+        if ( !mapView.isDataLayer() ) // Boundary (and facility) layer
         {
-            // Get the org unit for this map value
-            OrganisationUnit orgUnit = uidOuMap.get( mapValue.getOu() );
-            
-            if ( orgUnit != null && orgUnit.hasCoordinates() && orgUnit.hasFeatureType() )
+            for ( OrganisationUnit unit : organisationUnits )
             {
-                buildSingleGeoToolsMapObjectForMapLayer( mapLayer, mapValue.getValue(), orgUnit );
+                mapLayer.addBoundaryMapObject( unit );
             }
         }
-
-        // Create an interval set for this map layer that distributes its map
-        // objects into their respective intervals
-        // TODO Make interval length a parameter
-        IntervalSet.applyIntervalSetToMapLayer( DistributionStrategy.STRATEGY_EQUAL_RANGE, mapLayer, 5 );
-
-        // Update the radius of each map object in this map layer according to
-        // its map object's highest and lowest values
-        if ( !isIndicator )
+        else // Thematic layer
         {
-            mapLayer.applyInterpolatedRadii();
+            Collection<MapValue> mapValues = getAggregatedMapValues( mapView );
+    
+            if ( mapValues.isEmpty() )
+            {
+                return null;
+            }
+            
+            // Build and set the internal GeoTools map objects for the layer
+            
+            for ( MapValue mapValue : mapValues )
+            {
+                // Get the org unit for this map value
+                OrganisationUnit orgUnit = uidOuMap.get( mapValue.getOu() );
+                
+                if ( orgUnit != null )
+                {
+                    mapLayer.addDataMapObject( mapValue.getValue(), orgUnit );
+                }
+            }
+    
+            // Create an interval set for this map layer that distributes its map
+            // objects into their respective intervals
+            
+            if ( hasLegendSet )
+            {
+                mapLayer.setIntervalSetFromLegendSet( mapView.getLegendSet() );
+                mapLayer.distributeAndUpdateMapObjectsInIntervalSet();
+            }
+            else
+            {
+                mapLayer.applyIntervalSetToMapLayer( DistributionStrategy.STRATEGY_EQUAL_RANGE, mapLayer.getClasses() );
+                mapLayer.distributeAndUpdateMapObjectsInIntervalSet();
+            }
+            
+            // Update the radius of each map object in this map layer according to
+            // its map object's highest and lowest values
+            
+            if ( !isIndicator )
+            {
+                mapLayer.applyInterpolatedRadii();
+            }
         }
 
         return mapLayer;
     }
+    
+    /**
+     * Returns a list of map values for the given map view. If the map view is
+     * not a data layer, an empty list is returned.
+     */
+    private List<MapValue> getAggregatedMapValues( MapView mapView )
+    {
+        DataQueryParams params = analyticsService.getFromAnalyticalObject( mapView, null );
+        
+        Grid grid = analyticsService.getAggregatedDataValues( params );
 
+        return getMapValues( grid );
+    }
+    
     /**
      * Creates a list of aggregated map values.
      */
@@ -287,30 +326,6 @@ public class GeoToolsMapGenerationService
         return mapValues;
     }
     
-    private InternalMapObject buildSingleGeoToolsMapObjectForMapLayer( InternalMapLayer mapLayer,
-        double mapValue, OrganisationUnit orgUnit )
-    {
-        // Create and setup an internal map object
-        InternalMapObject mapObject = new InternalMapObject();
-        mapObject.setName( orgUnit.getName() );
-        mapObject.setValue( mapValue );
-        mapObject.setFillOpacity( mapLayer.getOpacity() );
-        mapObject.setStrokeColor( mapLayer.getStrokeColor() );
-        mapObject.setStrokeWidth( mapLayer.getStrokeWidth() );
-
-        // Build and set the GeoTools-specific geometric primitive that outlines
-        // the org unit on the map
-        mapObject.setGeometry( InternalMapObject.buildAndApplyGeometryForOrganisationUnit( orgUnit ) );
-
-        // Add the map object to the map layer
-        mapLayer.addMapObject( mapObject );
-
-        // Set the map layer for the map object
-        mapObject.setMapLayer( mapLayer );
-
-        return mapObject;
-    }
-
     private BufferedImage combineLegendAndMapImages( BufferedImage legendImage, BufferedImage mapImage )
     {
         Assert.isTrue( legendImage != null );

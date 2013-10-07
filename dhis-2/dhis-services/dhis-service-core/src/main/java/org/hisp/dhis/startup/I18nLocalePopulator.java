@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.filter;
+package org.hisp.dhis.startup;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,18 +28,50 @@ package org.hisp.dhis.system.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.system.util.Filter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.i18n.I18nLocaleService;
+import org.hisp.dhis.i18n.locale.I18nLocale;
+import org.hisp.dhis.system.startup.AbstractStartupRoutine;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
+ * Populates default I18nLocales if none exists.
+ * 
  * @author Lars Helge Overland
  */
-public class OrganisationUnitWithCoordinatesFilter
-    implements Filter<OrganisationUnit>
+public class I18nLocalePopulator
+    extends AbstractStartupRoutine
 {
+    private static final Log log = LogFactory.getLog( I18nLocalePopulator.class );
+    
+    @Autowired
+    private I18nLocaleService localeService;
+    
+    private static final List<String> DEFAULT_LOCALES = Arrays.asList( 
+        "af","ar","bi","am","de","dz","en","es","fa","fr","gu","hi","id","it",
+        "km","lo","my","ne","nl","no","ps","pt","ru","rw","sw","tg","vi","zh" );
+    
     @Override
-    public boolean retain( OrganisationUnit object )
+    public void execute()
+        throws Exception
     {
-        return object != null && object.hasFeatureType() && object.hasCoordinates();
-    }    
+        int count = localeService.getI18nLocaleCount();
+        
+        if ( count > 0 )
+        {
+            return;
+        }
+        
+        for ( String locale : DEFAULT_LOCALES )
+        {
+            localeService.saveI18nLocale( new I18nLocale( new Locale( locale ) ) );
+        }
+
+        log.info( "Populated default locales" );
+    }
 }

@@ -1183,6 +1183,7 @@ Ext.onReady( function() {
 
 			engine.createTable = function(layout, pt, updateGui, isFavorite) {
 				var legendSet = layout.legendSet ? pt.init.idLegendSetMap[layout.legendSet.id] : null,
+					getItemName,
 					getSyncronizedXLayout,
 					getExtendedResponse,
 					getExtendedAxis,
@@ -1195,6 +1196,23 @@ Ext.onReady( function() {
 					uuidDimUuidsMap = {},
 					uuidObjectMap = {};
 
+				getItemName = function(id, response) {
+					var metaData = response.metaData,
+						name = '';
+					
+					if (Ext.isObject(metaData.ouHierarchy) && metaData.ouHierarchy.hasOwnProperty(id)) {
+						var a = Ext.clean(metaData.ouHierarchy[id].split('/'));
+						
+						for (var i = 0; i < a.length; i++) {
+							name += '<span class="text-weak">' + metaData.names[a[i]] + '</span> / ';
+						}
+					}
+					
+					name += metaData.names[id];
+					
+					return name;
+				};
+				
 				getSyncronizedXLayout = function(xLayout, response) {
 					var removeDimensionFromXLayout,
 						getHeaderNames,
@@ -1289,7 +1307,7 @@ Ext.onReady( function() {
 									if (isUserOrgunit) {
 										userOu = [{
 											id: pt.init.user.ou,
-											name: response.metaData.names[pt.init.user.ou]
+											name: getItemName(pt.init.user.ou, response)
 										}];
 									}
 									if (isUserOrgunitChildren) {
@@ -1298,7 +1316,7 @@ Ext.onReady( function() {
 										for (var j = 0; j < pt.init.user.ouc.length; j++) {
 											userOuc.push({
 												id: pt.init.user.ouc[j],
-												name: response.metaData.names[pt.init.user.ouc[j]]
+												name: getItemName(pt.init.user.ouc[j], response)
 											});
 										}
 
@@ -1316,7 +1334,7 @@ Ext.onReady( function() {
 											if (!Ext.Array.contains(userOuOuc, id)) {
 												userOugc.push({
 													id: id,
-													name: response.metaData.names[id]
+													name: getItemName(id, response)
 												});
 											}
 										}
@@ -1326,13 +1344,13 @@ Ext.onReady( function() {
 
 									dim.items = [].concat(userOu || [], userOuc || [], userOugc || []);
 								}
-								else if (isLevel || isGroup) {										
+								else if (isLevel || isGroup) {
 									for (var i = 0, responseOu = response.metaData[ou], id; i < responseOu.length; i++) {
 										id = responseOu[i];
 										
 										dim.items.push({
 											id: id,
-											name: response.metaData.names[id]
+											name: getItemName(id, response)
 										});
 									}
 
@@ -1909,7 +1927,7 @@ Ext.onReady( function() {
 								obj.cls = 'pivot-dim';
 								obj.noBreak = false;
 								obj.hidden = !(obj.rowSpan || obj.colSpan);
-								obj.htmlValue = xResponse.metaData.names[obj.id];
+								obj.htmlValue = getItemName(obj.id, xResponse);
 
 								dimHtml.push(getTdHtml(obj));
 
@@ -1975,7 +1993,7 @@ Ext.onReady( function() {
 									obj.cls = 'pivot-dim td-nobreak';
 									obj.noBreak = true;
 									obj.hidden = !(obj.rowSpan || obj.colSpan);
-									obj.htmlValue = xResponse.metaData.names[obj.id];
+									obj.htmlValue = getItemName(obj.id, xResponse);
 
 									row.push(obj);
 								}
@@ -2461,7 +2479,7 @@ Ext.onReady( function() {
 
 					// Param string
 					pt.paramString = engine.getParamString(xLayout, true);
-					url = pt.init.contextPath + '/api/analytics.json' + pt.paramString;
+					url = pt.init.contextPath + '/api/analytics.json' + pt.paramString + '&hierarchyMeta=true';
 
 					// Validate request size
 					if (!validateUrl(url)) {

@@ -28,17 +28,29 @@ package org.hisp.dhis.i18n;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
+import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.common.comparator.LocaleNameComparator;
 import org.hisp.dhis.i18n.locale.I18nLocale;
+import org.hisp.dhis.system.util.LocaleUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 public class DefaultI18nLocaleService
     implements I18nLocaleService
-{
+{    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -49,19 +61,42 @@ public class DefaultI18nLocaleService
     {
         this.localeStore = localeStore;
     }
-
-    private Map<String, String> languages;
     
-    public void setLanguages( Map<String, String> languages )
-    {
-        this.languages = languages;
-    }
+    private Map<String, String> languages = new LinkedHashMap<String, String>();
 
-    private Map<String, String> countries;
-
-    public void setCountries( Map<String, String> countries )
-    {
-        this.countries = countries;
+    private Map<String, String> countries = new LinkedHashMap<String, String>();
+    
+    /**
+     * Load all ISO languages and countries into mappings.
+     */
+    @PostConstruct
+    public void init()
+    {   
+        List<IdentifiableObject> langs = new ArrayList<IdentifiableObject>();
+        List<IdentifiableObject> countrs = new ArrayList<IdentifiableObject>();
+        
+        for ( String lang : Locale.getISOLanguages() )
+        {
+            langs.add( new BaseIdentifiableObject( lang, lang, new Locale( lang ).getDisplayLanguage() ) );
+        }
+        
+        for ( String country : Locale.getISOCountries() )
+        {
+            countrs.add( new BaseIdentifiableObject( country, country, new Locale( "en", country ).getDisplayCountry() ) );
+        }
+        
+        Collections.sort( langs, IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( countrs, IdentifiableObjectNameComparator.INSTANCE );
+        
+        for ( IdentifiableObject lang : langs )
+        {
+            languages.put( lang.getCode(), lang.getName() );
+        }
+        
+        for ( IdentifiableObject countr : countrs )
+        {
+            countries.put( countr.getCode(), countr.getName() );
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -76,6 +111,31 @@ public class DefaultI18nLocaleService
     public Map<String, String> getAvailableCountries()
     {
         return countries;
+    }
+    
+    public boolean addI18nLocale( String language, String country )
+    {
+        String languageName = languages.get( language );
+        String countryName = countries.get( country );
+        
+        if ( language == null || languageName == null )
+        {
+            return false; // Language is required
+        }
+        
+        if ( country != null && countryName == null )
+        {
+            return false; // Country not valid
+        }
+        
+        String localeStr = LocaleUtils.getLocaleString( language, country, null );
+        Locale locale = LocaleUtils.getLocale( localeStr );
+        
+        I18nLocale i18nLocale = new I18nLocale( locale );
+        
+        saveI18nLocale( i18nLocale );
+        
+        return true;
     }
     
     public void saveI18nLocale( I18nLocale locale )
@@ -116,5 +176,19 @@ public class DefaultI18nLocaleService
     public Collection<I18nLocale> getI18nLocalesBetweenLikeName( String name, int first, int max )
     {
         return localeStore.getAllLikeNameOrderedName( name, first, max );
+    }
+    
+    public List<Locale> getAllLocales()
+    {
+        List<Locale> locales = new ArrayList<Locale>();
+        
+        for ( I18nLocale locale : localeStore.getAll() )
+        {
+            locales.add( LocaleUtils.getLocale( locale.getLocale() ) );
+        }
+        
+        Collections.sort( locales, LocaleNameComparator.INSTANCE );
+        
+        return locales;
     }
 }

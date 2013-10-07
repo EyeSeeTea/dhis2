@@ -31,7 +31,7 @@ package org.hisp.dhis.mapgeneration;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -57,9 +57,9 @@ public class Legend
     public Legend( InternalMapLayer mapLayer )
     {
         this.mapLayer = mapLayer;
-        this.legendItems = new LinkedList<LegendItem>();
+        this.legendItems = new ArrayList<LegendItem>();
 
-        for ( Interval interval : mapLayer.getIntervalSet().getAllIntervals() )
+        for ( Interval interval : mapLayer.getIntervalSet().getIntervals() )
         {
             addLegendItem( new LegendItem( interval ) );
         }
