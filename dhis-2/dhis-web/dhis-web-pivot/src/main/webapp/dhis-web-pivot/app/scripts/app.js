@@ -958,7 +958,7 @@ Ext.onReady( function() {
 		pt.viewport.hideEmptyRows = hideEmptyRows;
 
 		showHierarchy = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: PT.i18n.show_hierarchy_names,
+			boxLabel: PT.i18n.show_hierarchy,
 			style: 'margin-bottom:4px'
 		});
 		pt.viewport.showHierarchy = showHierarchy;
