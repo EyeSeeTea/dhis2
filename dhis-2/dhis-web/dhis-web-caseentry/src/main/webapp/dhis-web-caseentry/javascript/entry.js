@@ -15,15 +15,12 @@ function saveVal( dataElementUid )
 
     var fieldValue = jQuery.trim( field.value );
     var arrData = jQuery( "#" + fieldId ).attr( 'data' ).replace( '{', '' ).replace( '}', '' ).replace( /'/g, "" ).split( ',' );
-    var data = new Array();
+    var data = [];
 
-    for ( var i in arrData ) {
-        var values = arrData[i].split( ':' );
-        var key = jQuery.trim( values[0] );
-        var value = jQuery.trim( values[1] );
-
-        data[key] = value;
-    }
+    $.each(arrData, function() {
+        var values = $.trimArray(this.split(':'));
+        data[values[0]] = values[1];
+    });
 
     var dataElementName = data['deName'];
     var type = data['deType'];
@@ -160,69 +157,62 @@ function valueFocus(e)
     var str = e.target.id;
 	
     var match = /.*\[(.*)\]/.exec( str ); //value[-dataElementUid-]
-	
-    if ( ! match )
-    {
+
+    if( !match ) {
         return;
     }
 
     var deId = match[1];
-	
+
     //Get the data element name
     var nameContainer = document.getElementById('value[' + deId + '].name');
-	
-    if ( ! nameContainer )
-    {
+
+    if( !nameContainer ) {
         return;
     }
 
     var name = '';
-	
+
     var as = nameContainer.getElementsByTagName('a');
 
-    if ( as.length > 0 )	//Admin rights: Name is in a link
+    if( as.length > 0 )	//Admin rights: Name is in a link
     {
         name = as[0].firstChild.nodeValue;
     }
-    else
-    {
+    else {
         name = nameContainer.firstChild.nodeValue;
     }
-	
 }
 
 function keyPress( event, field )
 {
     var key = 0;
-    if ( event.charCode )
-    {
-        key = event.charCode; /* Safari2 (Mac) (and probably Konqueror on Linux, untested) */
+
+    if( event.charCode ) {
+        key = event.charCode;
+        /* Safari2 (Mac) (and probably Konqueror on Linux, untested) */
     }
-    else
-    {
-        if ( event.keyCode )
-        {
-            key = event.keyCode; /* Firefox1.5 (Mac/Win), Opera9 (Mac/Win), IE6, IE7Beta2, Netscape7.2 (Mac) */
+    else {
+        if( event.keyCode ) {
+            key = event.keyCode;
+            /* Firefox1.5 (Mac/Win), Opera9 (Mac/Win), IE6, IE7Beta2, Netscape7.2 (Mac) */
         }
-        else
-        {
-            if ( event.which )
-            {
-                key = event.which; /* Older Netscape? (No browsers triggered yet) */
+        else {
+            if( event.which ) {
+                key = event.which;
+                /* Older Netscape? (No browsers triggered yet) */
             }
         }
     }
-	
-    if ( key == 13 )
-    { 
-        nextField = getNextEntryField( field );
-        if ( nextField )
-        {
+
+    if( key == 13 ) {
+        nextField = getNextEntryField(field);
+        if( nextField ) {
             nextField.focus();
         }
         return true;
     }
-    
+
     return true;
 }
 
