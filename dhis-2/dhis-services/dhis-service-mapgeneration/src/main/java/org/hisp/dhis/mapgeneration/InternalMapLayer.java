@@ -30,9 +30,11 @@ package org.hisp.dhis.mapgeneration;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.hisp.dhis.mapgeneration.IntervalSet.DistributionStrategy;
+import org.hisp.dhis.mapgeneration.comparator.IntervalLowValueAscComparator;
 import org.hisp.dhis.mapping.MapLegend;
 import org.hisp.dhis.mapping.MapLegendSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -136,7 +138,15 @@ public class InternalMapLayer
      */
     public void addMapObject( InternalMapObject mapObject )
     {
-        this.mapObjects.add( mapObject );
+        mapObjects.add( mapObject );
+    }
+    
+    /**
+     * Indicates whether this map layer has any map objects.
+     */
+    public boolean hasMapObjects()
+    {
+        return mapObjects != null && !mapObjects.isEmpty();
     }
 
     /**
@@ -166,6 +176,11 @@ public class InternalMapLayer
         mapObject.setMapLayer( this );
     }
     
+    /**
+     * Adds a map object for the given organisation unit to this map layer.
+     * 
+     * @param unit the organisation unit.
+     */
     public void addBoundaryMapObject( OrganisationUnit unit )
     {
         InternalMapObject mapObject = new InternalMapObject();
@@ -197,6 +212,8 @@ public class InternalMapLayer
             
             intervalSet.getIntervals().add( interval );
         }
+
+        Collections.sort( intervalSet.getIntervals(), IntervalLowValueAscComparator.INSTANCE );
         
         this.intervalSet = intervalSet;
     }
@@ -264,11 +281,11 @@ public class InternalMapLayer
      * @param length the number of intervals in the set
      * @return the created interval set that was applied to this map layer
      */
-    public void applyIntervalSetToMapLayer( DistributionStrategy strategy, int length )
+    public void setAutomaticIntervalSet( DistributionStrategy strategy, int length )
     {
         if ( DistributionStrategy.STRATEGY_EQUAL_RANGE == strategy )
         {
-            applyEqualRangeIntervalSetToMapLayer( length );
+            setEqualRangeIntervalSetToMapLayer( length );
         }
         else if ( DistributionStrategy.STRATEGY_EQUAL_SIZE == strategy )
         {
@@ -276,7 +293,7 @@ public class InternalMapLayer
         }
         else
         {
-            throw new RuntimeException( "The interval distribution strategy " + strategy + " is not implemented (yet)!" );
+            throw new RuntimeException( "Unsupported distribution strategy: " + strategy );
         }
     }
 
@@ -288,7 +305,7 @@ public class InternalMapLayer
      * @param length the number of equal sized intervals
      * @return the created interval set that was applied to this map layer
      */
-    public void applyEqualRangeIntervalSetToMapLayer( int length )
+    public void setEqualRangeIntervalSetToMapLayer( int length )
     {
         Assert.isTrue( length > 0 );
         Assert.isTrue( mapObjects != null );
@@ -329,7 +346,8 @@ public class InternalMapLayer
             intervalSet.getIntervals().add( interval );
         }
 
-        // Set this interval set for the map layer
+        Collections.sort( intervalSet.getIntervals(), IntervalLowValueAscComparator.INSTANCE );
+        
         this.intervalSet = intervalSet;
     }
 

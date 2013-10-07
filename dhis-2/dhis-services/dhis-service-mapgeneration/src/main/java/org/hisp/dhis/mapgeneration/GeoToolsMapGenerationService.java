@@ -34,6 +34,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -96,10 +97,10 @@ public class GeoToolsMapGenerationService
 
     public BufferedImage generateMapImage( Map map )
     {
-        return generateMapImage( map, 512, null );
+        return generateMapImage( map, new Date(), null, 512, null );
     }
     
-    public BufferedImage generateMapImage( Map map, Integer width, Integer height )
+    public BufferedImage generateMapImage( Map map, Date date, OrganisationUnit unit, Integer width, Integer height )
     {
         Assert.isTrue( map != null );
         
@@ -115,7 +116,7 @@ public class GeoToolsMapGenerationService
         
         for ( MapView mapView : mapViews )
         {        
-            InternalMapLayer mapLayer = getSingleInternalMapLayer( mapView );
+            InternalMapLayer mapLayer = getSingleInternalMapLayer( mapView, date );
             
             if ( mapLayer != null )
             {
@@ -162,7 +163,7 @@ public class GeoToolsMapGenerationService
     private static final Integer DEFAULT_RADIUS_HIGH = 35;
     private static final Integer DEFAULT_RADIUS_LOW = 15;
 
-    private InternalMapLayer getSingleInternalMapLayer( MapView mapView )
+    private InternalMapLayer getSingleInternalMapLayer( MapView mapView, Date date )
     {
         if ( mapView == null )
         {
@@ -184,7 +185,9 @@ public class GeoToolsMapGenerationService
             inGroups.addAll( organisationUnitService.getOrganisationUnits( mapView.getItemOrganisationUnitGroups(), mapView.getOrganisationUnits() ) );
         }
 
-        mapView.init( null, null, null, atLevels, inGroups, null );
+        date = date != null ? date : new Date();
+        
+        mapView.init( null, date, null, atLevels, inGroups, null );
         
         List<OrganisationUnit> organisationUnits = mapView.getAllOrganisationUnits();
 
@@ -197,13 +200,10 @@ public class GeoToolsMapGenerationService
             uidOuMap.put( ou.getUid(), ou );
         }
         
-        // Get the name from the external layer
         String name = mapView.getName();
 
-        // Get the period
         Period period = !mapView.getPeriods().isEmpty() ? mapView.getPeriods().get( 0 ) : null;
 
-        // Get the low and high radii
         Integer radiusLow = !isIndicator ? mapView.getRadiusLow() : DEFAULT_RADIUS_LOW;
         Integer radiusHigh = !isIndicator ? mapView.getRadiusHigh() : DEFAULT_RADIUS_HIGH;
 
@@ -213,8 +213,7 @@ public class GeoToolsMapGenerationService
         Color colorHigh = MapUtils.createColorFromString( StringUtils.trimToNull( mapView.getColorHigh() ) != null ? mapView.getColorHigh()
             : DEFAULT_COLOR_HIGH );
 
-        // TODO MapView should be extended to feature opacity
-        float opacity = DEFAULT_OPACITY;
+        Float opacity = mapView.getOpacity() != null ? mapView.getOpacity().floatValue() : DEFAULT_OPACITY;
 
         // TODO MapView should be extended to feature stroke color
         Color strokeColor = MapUtils.createColorFromString( DEFAULT_STROKE_COLOR );
@@ -257,7 +256,6 @@ public class GeoToolsMapGenerationService
             
             for ( MapValue mapValue : mapValues )
             {
-                // Get the org unit for this map value
                 OrganisationUnit orgUnit = uidOuMap.get( mapValue.getOu() );
                 
                 if ( orgUnit != null )
@@ -266,6 +264,11 @@ public class GeoToolsMapGenerationService
                 }
             }
     
+            if ( !mapLayer.hasMapObjects() )
+            {
+                return null;
+            }
+            
             // Create an interval set for this map layer that distributes its map
             // objects into their respective intervals
             
@@ -276,7 +279,7 @@ public class GeoToolsMapGenerationService
             }
             else
             {
-                mapLayer.applyIntervalSetToMapLayer( DistributionStrategy.STRATEGY_EQUAL_RANGE, mapLayer.getClasses() );
+                mapLayer.setAutomaticIntervalSet( DistributionStrategy.STRATEGY_EQUAL_RANGE, mapLayer.getClasses() );
                 mapLayer.distributeAndUpdateMapObjectsInIntervalSet();
             }
             

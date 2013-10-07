@@ -30,6 +30,7 @@ package org.hisp.dhis.api.controller.mapping;
 
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.Iterator;
 
 import javax.imageio.ImageIO;
@@ -58,6 +59,7 @@ import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -226,13 +228,23 @@ public class MapController
     @RequestMapping(value = { "/{uid}/data", "/{uid}/data.png" }, method = RequestMethod.GET)
     public void getMapData( 
         @PathVariable String uid, 
+        @RequestParam( value = "date", required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date date,
+        @RequestParam( value = "ou", required = false ) String ou,
         @RequestParam( required = false ) Integer width, 
         @RequestParam( required = false ) Integer height, 
         HttpServletResponse response ) throws Exception
     {
-        Map map = mappingService.getMap( uid );
+        Map map = mappingService.getMapNoAcl( uid );
 
-        renderMapViewPng( map, width, height, response );
+        if ( map == null )
+        {
+            ContextUtils.notFoundResponse( response, "Map does not exist: " + uid );
+            return;
+        }
+
+        OrganisationUnit unit = ou != null ? organisationUnitService.getOrganisationUnit( ou ) : null;
+        
+        renderMapViewPng( map, date, unit, width, height, response );
     }
 
     //--------------------------------------------------------------------------
@@ -266,10 +278,10 @@ public class MapController
         }
     }
 
-    private void renderMapViewPng( Map map, Integer width, Integer height, HttpServletResponse response )
+    private void renderMapViewPng( Map map, Date date, OrganisationUnit unit, Integer width, Integer height, HttpServletResponse response )
         throws Exception
     {
-        BufferedImage image = mapGenerationService.generateMapImage( map, width, height );
+        BufferedImage image = mapGenerationService.generateMapImage( map, date, unit, width, height );
 
         if ( image != null )
         {
