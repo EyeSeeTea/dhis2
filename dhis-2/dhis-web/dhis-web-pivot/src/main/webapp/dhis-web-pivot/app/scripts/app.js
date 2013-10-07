@@ -922,6 +922,7 @@ Ext.onReady( function() {
 		var showTotals,
 			showSubTotals,
 			hideEmptyRows,
+			showHierarchy,
 			digitGroupSeparator,
 			displayDensity,
 			fontSize,
@@ -933,6 +934,7 @@ Ext.onReady( function() {
 			style,
 			parameters,
 
+			comboboxWidth = 262,
 			window;
 
 		showTotals = Ext.create('Ext.form.field.Checkbox', {
@@ -955,10 +957,16 @@ Ext.onReady( function() {
 		});
 		pt.viewport.hideEmptyRows = hideEmptyRows;
 
+		showHierarchy = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: PT.i18n.show_hierarchy_names,
+			style: 'margin-bottom:4px'
+		});
+		pt.viewport.showHierarchy = showHierarchy;
+		
 		displayDensity = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'pt-combo',
 			style: 'margin-bottom:3px',
-			width: 250,
+			width: comboboxWidth,
 			labelWidth: 130,
 			fieldLabel: PT.i18n.display_density,
 			labelStyle: 'color:#333',
@@ -980,7 +988,7 @@ Ext.onReady( function() {
 		fontSize = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'pt-combo',
 			style: 'margin-bottom:3px',
-			width: 250,
+			width: comboboxWidth,
 			labelWidth: 130,
 			fieldLabel: PT.i18n.font_size,
 			labelStyle: 'color:#333',
@@ -1003,7 +1011,7 @@ Ext.onReady( function() {
 			labelStyle: 'color:#333',
 			cls: 'pt-combo',
 			style: 'margin-bottom:3px',
-			width: 250,
+			width: comboboxWidth,
 			labelWidth: 130,
 			fieldLabel: PT.i18n.digit_group_separator,
 			queryMode: 'local',
@@ -1024,7 +1032,7 @@ Ext.onReady( function() {
 		legendSet = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'pt-combo',
 			style: 'margin-bottom:3px',
-			width: 250,
+			width: comboboxWidth,
 			labelWidth: 130,
 			fieldLabel: PT.i18n.legend_set,
 			valueField: 'id',
@@ -1121,6 +1129,14 @@ Ext.onReady( function() {
 				hideEmptyRows
 			]
 		};
+		
+		organisationUnits = {
+			bodyStyle: 'border:0 none',
+			style: 'margin-left:14px',
+			items: [
+				showHierarchy
+			]
+		};
 
 		style = {
 			bodyStyle: 'border:0 none',
@@ -1160,6 +1176,7 @@ Ext.onReady( function() {
 					showTotals: showTotals.getValue(),
 					showSubTotals: showSubTotals.getValue(),
 					hideEmptyRows: hideEmptyRows.getValue(),
+					showHierarchy: showHierarchy.getValue(),
 					displayDensity: displayDensity.getValue(),
 					fontSize: fontSize.getValue(),
 					digitGroupSeparator: digitGroupSeparator.getValue(),
@@ -1177,6 +1194,7 @@ Ext.onReady( function() {
 				showTotals.setValue(Ext.isBoolean(layout.showTotals) ? layout.showTotals : true);
 				showSubTotals.setValue(Ext.isBoolean(layout.showSubTotals) ? layout.showSubTotals : true);
 				hideEmptyRows.setValue(Ext.isBoolean(layout.hideEmptyRows) ? layout.hideEmptyRows : false);
+				showHierarchy.setValue(Ext.isBoolean(layout.showHierarchy) ? layout.showHierarchy : false);
 				displayDensity.setValue(Ext.isString(layout.displayDensity) ? layout.displayDensity : 'normal');
 				fontSize.setValue(Ext.isString(layout.fontSize) ? layout.fontSize : 'normal');
 				digitGroupSeparator.setValue(Ext.isString(layout.digitGroupSeparator) ? layout.digitGroupSeparator : 'space');
@@ -1192,7 +1210,7 @@ Ext.onReady( function() {
 			items: [
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
-					style: 'margin-bottom:6px',
+					style: 'margin-bottom:6px; margin-left:2px',
 					html: PT.i18n.data
 				},
 				data,
@@ -1201,18 +1219,27 @@ Ext.onReady( function() {
 				},
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
-					style: 'margin-bottom:6px',
+					style: 'margin-bottom:6px; margin-left:2px',
+					html: PT.i18n.organisation_units
+				},
+				organisationUnits,
+				{
+					bodyStyle: 'border:0 none; padding:7px'
+				},
+				{
+					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
+					style: 'margin-bottom:6px; margin-left:2px',
 					html: PT.i18n.style
 				},
 				style,
 				{
-					bodyStyle: 'border:0 none; padding:7px'
+					bodyStyle: 'border:0 none; padding:4px'
 				},
 				{
 					bodyStyle: 'border:1px solid #d5d5d5; padding:5px; background-color:#f0f0f0',
 					items: [
 						{
-							bodyStyle: 'border:0 none; padding:0 5px 6px; background-color:transparent; color:#222; font-size:12px',
+							bodyStyle: 'border:0 none; padding:0 5px 6px 2px; background-color:transparent; color:#222; font-size:12px',
 							html: '<b>' + PT.i18n.parameters + '</b> <span style="font-size:11px"> (' + PT.i18n.for_standard_reports_only + ')</span>'
 						},
 						parameters

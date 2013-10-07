@@ -765,6 +765,8 @@ Ext.onReady( function() {
 					layout.showTotals = Ext.isBoolean(config.totals) ? config.totals : (Ext.isBoolean(config.showTotals) ? config.showTotals : true);
 					layout.showSubTotals = Ext.isBoolean(config.subtotals) ? config.subtotals : (Ext.isBoolean(config.showSubTotals) ? config.showSubTotals : true);
 					layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : false;
+					
+					layout.showHierarchy = Ext.isBoolean(config.showHierarchy) ? config.showHierarchy : false;
 
 					layout.displayDensity = Ext.isString(config.displayDensity) && !Ext.isEmpty(config.displayDensity) ? config.displayDensity : 'normal';
 					layout.fontSize = Ext.isString(config.fontSize) && !Ext.isEmpty(config.fontSize) ? config.fontSize : 'normal';
@@ -1200,7 +1202,7 @@ Ext.onReady( function() {
 					var metaData = response.metaData,
 						name = '';
 					
-					if (Ext.isObject(metaData.ouHierarchy) && metaData.ouHierarchy.hasOwnProperty(id)) {
+					if (layout.showHierarchy && Ext.isObject(metaData.ouHierarchy) && metaData.ouHierarchy.hasOwnProperty(id)) {
 						var a = Ext.clean(metaData.ouHierarchy[id].split('/'));
 						
 						for (var i = 0; i < a.length; i++) {
