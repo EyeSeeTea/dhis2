@@ -4443,7 +4443,7 @@ Ext.onReady( function() {
 			}
 		});
 
-		setGui = function(layout, updateGui, isFavorite) {
+		setGui = function(layout, xLayout, updateGui, isFavorite) {
 			var dimensions = [].concat(layout.columns || [], layout.rows || [], layout.filters || []),
 				dimMap = pt.service.layout.getObjectNameDimensionMap(dimensions),
 				recMap = pt.service.layout.getObjectNameDimensionItemsMap(dimensions),

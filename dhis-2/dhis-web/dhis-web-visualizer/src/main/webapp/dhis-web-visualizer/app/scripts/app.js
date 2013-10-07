@@ -4584,18 +4584,18 @@ Ext.onReady( function() {
             }
         });
 
-        setGui = function(layout, updateGui, isFavorite) {
+        setGui = function(layout, xLayout, updateGui, isFavorite) {
 			var dimensions = [].concat(layout.columns || [], layout.rows || [], layout.filters || []),
-				dimMap = pt.service.layout.getObjectNameDimensionMap(dimensions),
-				recMap = pt.service.layout.getObjectNameDimensionItemsMap(dimensions),
+				dimMap = dv.service.layout.getObjectNameDimensionMap(dimensions),
+				recMap = dv.service.layout.getObjectNameDimensionItemsMap(dimensions),
 				graphMap = layout.parentGraphMap,
                 objectName,
                 periodRecords,
                 fixedPeriodRecords = [],
-                isOu = false,
-                isOuc = false,
+				dimNames = [],
+				isOu = false,
+				isOuc = false,
 				isOugc = false,
-                isLevel = false,
 				levels = [],
 				groups = [],
 				orgunits = [];
@@ -4677,7 +4677,7 @@ Ext.onReady( function() {
             }
 
             // Layout
-            dv.viewport.chartType.setChartType(xLayout.type);
+            dv.viewport.chartType.setChartType(layout.type);
 
             dv.viewport.series.setValue(xLayout.columnDimensionNames[0]);
             dv.viewport.series.filterNext();
@@ -4692,29 +4692,29 @@ Ext.onReady( function() {
                 dv.viewport.optionsWindow.setOptions(layout);
             }
 
-            // Organisation units
-            if (recMap[dimConf.organisationUnit.objectName]) {
-                for (var i = 0, ouRecords = recMap[dimConf.organisationUnit.objectName]; i < ouRecords.length; i++) {
-                    if (ouRecords[i].id === 'USER_ORGUNIT') {
-                        isOu = true;
-                    }
-                    if (ouRecords[i].id === 'USER_ORGUNIT_CHILDREN') {
-                        isOuc = true;
-                    }
-					if (ouRecords[i].id === 'USER_ORGUNIT_GRANDCHILDREN') {
+			// Organisation units
+			if (recMap[dimConf.organisationUnit.objectName]) {
+				for (var i = 0, ouRecords = recMap[dimConf.organisationUnit.objectName]; i < ouRecords.length; i++) {
+					if (ouRecords[i].id === 'USER_ORGUNIT') {
+						isOu = true;
+					}
+					else if (ouRecords[i].id === 'USER_ORGUNIT_CHILDREN') {
+						isOuc = true;
+					}
+					else if (ouRecords[i].id === 'USER_ORGUNIT_GRANDCHILDREN') {
 						isOugc = true;
 					}
-                    if (ouRecords[i].id.substr(0,5) === 'LEVEL') {
-                        isLevel = true;
-                    }
+					else if (ouRecords[i].id.substr(0,5) === 'LEVEL') {
+						levels.push(parseInt(ouRecords[i].id.split('-')[1]));
+					}
 					else if (ouRecords[i].id.substr(0,8) === 'OU_GROUP') {
 						groups.push(parseInt(ouRecords[i].id.split('-')[1]));
 					}
 					else {
 						orgunits.push(ouRecords[i].id);
 					}
-                }
-            }
+				}
+			}
 
 			if (levels.length) {
 				toolMenu.clickHandler('level');
@@ -4735,7 +4735,7 @@ Ext.onReady( function() {
 
 				// If fav has organisation units, wait for tree callback before update
 				if (Ext.isObject(graphMap)) {
-					treePanel.numberOfRecords = pt.util.object.getLength(graphMap);
+					treePanel.numberOfRecords = dv.util.object.getLength(graphMap);
 
 					for (var key in graphMap) {						
 						if (graphMap.hasOwnProperty(key)) {

@@ -2456,7 +2456,7 @@ Ext.onReady( function() {
 						}
 						
 						if (updateGui) {
-							pt.viewport.setGui(layout, updateGui, isFavorite);
+							pt.viewport.setGui(layout, xLayout, updateGui, isFavorite);
 						}
 					}
 

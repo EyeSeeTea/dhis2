@@ -3,7 +3,7 @@ Ext.onReady( function() {
 	// ext config
 	Ext.Ajax.method = 'GET';
 	
-	// pt	
+	// dv	
 	DV = {
 		core: {
 			instances: []
@@ -1085,7 +1085,7 @@ Ext.onReady( function() {
                 }
             };
 
-            engine.createChart = function(layout, dv) {
+            engine.createChart = function(layout, dv, updateGui, isFavorite) {
                 var getSyncronizedXLayout,
                     getExtendedResponse,
                     validateUrl,
@@ -2228,7 +2228,7 @@ Ext.onReady( function() {
 						}
 						
 						if (updateGui) {
-							dv.viewport.setGui(layout, updateGui, isFavorite);
+							dv.viewport.setGui(layout, xLayout, updateGui, isFavorite);
 						}
 					}
 
@@ -2236,7 +2236,6 @@ Ext.onReady( function() {
 					util.mask.hideMask(dv.viewport.centerRegion);
 
 					// Add objects to instance
-					dv.chart = chart;
 					dv.layout = layout;
 					dv.xLayout = xLayout;
 					dv.xResponse = xResponse;
@@ -2287,7 +2286,7 @@ Ext.onReady( function() {
 								response = dv.api.response.Response(Ext.decode(r.responseText));
 
 							if (!response) {
-								dv.util.mask.hideMask(pt.viewport.centerRegion);
+								dv.util.mask.hideMask(dv.viewport.centerRegion);
 								return;
 							}
 
