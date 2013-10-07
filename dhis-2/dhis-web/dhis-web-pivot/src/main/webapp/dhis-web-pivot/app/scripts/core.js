@@ -1354,8 +1354,6 @@ Ext.onReady( function() {
 											id: id,
 											name: getItemName(id, response)
 										});
-										
-										console.log(dim.items[dim.items.length-1].name);
 									}
 
 									dim.items = pt.util.array.sortObjectsByString(dim.items);
