@@ -4319,7 +4319,7 @@ Ext.onReady( function() {
 									{
 										text: 'Open this table as chart' + '&nbsp;&nbsp;', //i18n
 										cls: 'pt-menu-item-noicon',
-										disabled: !PT.isSessionStorage || !pt.layout,
+										disabled: !(PT.isSessionStorage && pt.layout),
 										handler: function() {
 											if (PT.isSessionStorage) {
 												pt.layout.parentGraphMap = treePanel.getParentGraphMap();
@@ -4375,7 +4375,7 @@ Ext.onReady( function() {
 									{
 										text: 'Open this table as map' + '&nbsp;&nbsp;', //i18n
 										cls: 'pt-menu-item-noicon',
-										disabled: !PT.isSessionStorage || !pt.layout,
+										disabled: !(PT.isSessionStorage && pt.layout),
 										handler: function() {
 											if (PT.isSessionStorage) {
 												pt.layout.parentGraphMap = treePanel.getParentGraphMap();

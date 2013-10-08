@@ -314,11 +314,10 @@ Ext.onReady( function() {
 
 			util.layout.getAnalytical = function(map) {
 				var layout,
-					view,
-					id;
+					layer;
 
 				if (Ext.isObject(map) && Ext.isArray(map.mapViews) && map.mapViews.length) {
-					for (var i = 0; i < map.mapViews.length; i++) {
+					for (var i = 0, view, id; i < map.mapViews.length; i++) {
 						view = map.mapViews[i];
 						id = view.layer;
 
@@ -334,9 +333,14 @@ Ext.onReady( function() {
 				else {
 					for (var key in gis.layer) {
 						if (gis.layer.hasOwnProperty(key) && gis.layer[key].layerCategory === gis.conf.finals.layer.category_thematic && gis.layer[key].core.view) {
-							layout = gis.api.layout.Layout(Ext.clone(gis.layer[key].core.view));
+							layer = gis.layer[key];
+							layout = gis.api.layout.Layout(Ext.clone(layer.core.view));
 
 							if (layout) {
+								if (!layout.parentGraphMap && layer.widget) {
+									layout.parentGraphMap = layer.widget.getParentGraphMap();
+								}
+
 								return layout;
 							}
 						}
@@ -3864,6 +3868,9 @@ Ext.onReady( function() {
 			reset: reset,
 			setGui: setGui,
 			getView: getView,
+			getParentGraphMap: function() {
+				return treePanel.getParentGraphMap();
+			},
 
 			infrastructuralDataElementValuesStore: infrastructuralDataElementValuesStore,
 
@@ -5319,6 +5326,9 @@ Ext.onReady( function() {
 			reset: reset,
 			setGui: setGui,
 			getView: getView,
+			getParentGraphMap: function() {
+				return treePanel.getParentGraphMap();
+			},
 
 			infrastructuralDataElementValuesStore: infrastructuralDataElementValuesStore,
 
@@ -6012,6 +6022,9 @@ Ext.onReady( function() {
 			reset: reset,
 			setGui: setGui,
 			getView: getView,
+			getParentGraphMap: function() {
+				return treePanel.getParentGraphMap();
+			},
 
 			infrastructuralDataElementValuesStore: infrastructuralDataElementValuesStore,
 
@@ -6234,8 +6247,6 @@ Ext.onReady( function() {
 						toggleGroup: 'module',
 						menu: {},
 						handler: function(b) {
-var a = gis.util.layout.getAnalytical();
-
 							b.menu = Ext.create('Ext.menu.Menu', {
 								closeAction: 'destroy',
 								shadow: false,
@@ -6607,7 +6618,6 @@ var a = gis.util.layout.getAnalytical();
 				GIS.app.extendInstance(gis);
 
 				gis.viewport = createViewport();
-console.log("gis", gis);
 			}
 		});
 	}();
