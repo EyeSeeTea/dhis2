@@ -30,11 +30,8 @@ package org.hisp.dhis.dashboard.interpretation.action;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.interpretation.Interpretation;
 import org.hisp.dhis.interpretation.InterpretationService;
-import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
@@ -46,14 +43,11 @@ public class GetInterpretationsAction
     implements Action
 {
     private static final int PAGE_SIZE = 5;
-    
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    @Autowired
-    private UserService userService;
-    
     @Autowired
     private InterpretationService interpretationService;
 
@@ -67,48 +61,30 @@ public class GetInterpretationsAction
     {
         this.page = page;
     }
-    
-    private String userId;
-
-    public void setUserId( String userId )
-    {
-        this.userId = userId;
-    }
 
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
 
     private List<Interpretation> interpretations;
-    
+
     public List<Interpretation> getInterpretations()
     {
         return interpretations;
     }
-    
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
     {
-        userId = StringUtils.trimToNull( userId );
-        
         int first = page != null ? ( page * PAGE_SIZE ) : 0;
-        
-        if ( userId != null )
-        {
-            User user = userService.getUser( userId );
-            
-            interpretations = interpretationService.getInterpretations( user, first, PAGE_SIZE );
-        }
-        else
-        {
-            interpretationService.updateCurrentUserLastChecked();
-            
-            interpretations = interpretationService.getInterpretations( first, PAGE_SIZE );
-        }
-        
+
+        interpretationService.updateCurrentUserLastChecked();
+
+        interpretations = interpretationService.getInterpretations( first, PAGE_SIZE );
+
         return SUCCESS;
     }
 }

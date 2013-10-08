@@ -53,8 +53,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -347,7 +349,15 @@ public class OrganisationUnit
     
     public boolean hasCoordinatesUp()
     {
-        return parent != null && parent.parent != null && parent.parent.hasChildrenWithCoordinates();
+        if ( parent != null )
+        {
+            if ( parent.getParent() != null )
+            {
+                return parent.getParent().hasChildrenWithCoordinates();
+            }
+        }
+        
+        return false;
     }
 
     public boolean hasCoordinates()
@@ -608,6 +618,25 @@ public class OrganisationUnit
         }
 
         return allDataSets;
+    }
+
+    /**
+     * Returns a mapping between the uid and the uid parent graph of the given
+     * organisation units.
+     */
+    public static Map<String, String> getParentGraphMap( List<OrganisationUnit> organisationUnits )
+    {
+        Map<String, String> map = new HashMap<String, String>();
+        
+        if ( organisationUnits != null )
+        {
+            for ( OrganisationUnit unit : organisationUnits )
+            {
+                map.put( unit.getUid(), unit.getParentGraph() );
+            }
+        }
+        
+        return map;
     }
 
     // -------------------------------------------------------------------------

@@ -55,6 +55,7 @@ import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_ORGUNIT_GROUP;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_CHILDREN;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_GRANDCHILDREN;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.getParentGraphMap;
 import static org.hisp.dhis.period.PeriodType.getPeriodTypeFromIsoString;
 import static org.hisp.dhis.reporttable.ReportTable.IRT2D;
 import static org.hisp.dhis.reporttable.ReportTable.addIfEmpty;
@@ -222,7 +223,7 @@ public class DefaultAnalyticsService
             int indicatorIndex = params.getIndicatorDimensionIndex();
             List<Indicator> indicators = asTypedList( params.getIndicators() );
             
-            expressionService.explodeAndSubstituteExpressions( indicators, null );
+            expressionService.explodeExpressions( indicators );
             
             DataQueryParams dataSourceParams = params.instance();
             dataSourceParams.removeDimension( DATAELEMENT_DIM_ID );
@@ -248,24 +249,26 @@ public class DefaultAnalyticsService
 
                     Map<DataElementOperand, Double> valueMap = permutationOperandValueMap.get( permKey );
                     
-                    if ( valueMap != null )
+                    if ( valueMap == null )
                     {
-                        Period period = filterPeriod != null ? filterPeriod : (Period) DimensionItem.getPeriodItem( options );
+                        continue;
+                    }
+                    
+                    Period period = filterPeriod != null ? filterPeriod : (Period) DimensionItem.getPeriodItem( options );
 
-                        int days = daysBetween( period.getStartDate(), period.getEndDate() );
+                    int days = daysBetween( period.getStartDate(), period.getEndDate() );
+                    
+                    Double value = expressionService.getIndicatorValue( indicator, period, valueMap, constantMap, days );
+
+                    if ( value != null )
+                    {
+                        List<DimensionItem> row = new ArrayList<DimensionItem>( options );
                         
-                        Double value = expressionService.getIndicatorValue( indicator, period, valueMap, constantMap, days );
-                        
-                        if ( value != null )
-                        {
-                            List<DimensionItem> row = new ArrayList<DimensionItem>( options );
-                            
-                            row.add( indicatorIndex, new DimensionItem( INDICATOR_DIM_ID, indicator ) );
-                                                        
-                            grid.addRow();
-                            grid.addValues( DimensionItem.getItemIdentifiers( row ) );
-                            grid.addValue( MathUtils.getRounded( value ) );
-                        }
+                        row.add( indicatorIndex, new DimensionItem( INDICATOR_DIM_ID, indicator ) );
+                                                    
+                        grid.addRow();
+                        grid.addValues( DimensionItem.getItemIdentifiers( row ) );
+                        grid.addValue( MathUtils.getRounded( value ) );
                     }
                 }
             }
@@ -385,17 +388,17 @@ public class DefaultAnalyticsService
             Map<Object, Object> metaData = new HashMap<Object, Object>();
             
             Map<String, String> uidNameMap = getUidNameMap( params );
-            Map<String, String> cocNameMap = getCocNameMap( grid, cocIndex );
-            
+            Map<String, String> cocNameMap = getCocNameMap( grid, cocIndex );            
             uidNameMap.putAll( cocNameMap );
             
             metaData.put( NAMES_META_KEY, uidNameMap );
             metaData.put( PERIOD_DIM_ID, getUids( params.getDimensionOrFilter( PERIOD_DIM_ID ) ) );
             metaData.put( ORGUNIT_DIM_ID, getUids( params.getDimensionOrFilter( ORGUNIT_DIM_ID ) ) );
+            metaData.put( CATEGORYOPTIONCOMBO_DIM_ID, cocNameMap.keySet() );
             
-            if ( cocIndex != null )
+            if ( params.isHierarchyMeta() )
             {
-                metaData.put( CATEGORYOPTIONCOMBO_DIM_ID, cocNameMap.keySet() );
+                metaData.put( OU_HIERARCHY_KEY, getParentGraphMap( asTypedList( params.getDimensionOrFilter( ORGUNIT_DIM_ID ), OrganisationUnit.class ) ) );
             }
             
             grid.setMetaData( metaData );
@@ -403,7 +406,7 @@ public class DefaultAnalyticsService
         
         return grid;
     }
-
+    
     @Override
     public Grid getAggregatedDataValues( DataQueryParams params, boolean tableLayout, List<String> columns, List<String> rows )
     {
@@ -491,7 +494,7 @@ public class DefaultAnalyticsService
         
         return getAggregatedDataValueMapping( params );
     }
-    
+
     /**
      * Generates aggregated values for the given query. Creates a mapping between 
      * a dimension key and the aggregated value. The dimension key is a 
@@ -584,7 +587,7 @@ public class DefaultAnalyticsService
     
     @Override
     public DataQueryParams getFromUrl( Set<String> dimensionParams, Set<String> filterParams, 
-        AggregationType aggregationType, String measureCriteria, boolean skipMeta, boolean ignoreLimit, I18nFormat format )
+        AggregationType aggregationType, String measureCriteria, boolean skipMeta, boolean hierarchyMeta, boolean ignoreLimit, I18nFormat format )
     {
         DataQueryParams params = new DataQueryParams();
 
@@ -625,6 +628,7 @@ public class DefaultAnalyticsService
         }
         
         params.setSkipMeta( skipMeta );
+        params.setHierarchyMeta( hierarchyMeta );
 
         return params;
     }
@@ -915,41 +919,47 @@ public class DefaultAnalyticsService
         return params;
     }
     
+    /**
+     * Returns a mapping between the uid and the name of all dimension and filter
+     * items for the given params.
+     */
     private Map<String, String> getUidNameMap( DataQueryParams params )
     {
         Map<String, String> map = new HashMap<String, String>();
-        map.putAll( getUidNameMap( params.getDimensions() ) );
-        map.putAll( getUidNameMap( params.getFilters() ) );
+        map.putAll( getUidNameMap( params.getDimensions(), params.isHierarchyMeta() ) );
+        map.putAll( getUidNameMap( params.getFilters(), params.isHierarchyMeta() ) );
         map.put( DATA_X_DIM_ID, DISPLAY_NAME_DATA_X );
         
         return map;
     }
-    
-    private Map<String, String> getUidNameMap( List<DimensionalObject> dimensions )
+
+    private Map<String, String> getUidNameMap( List<DimensionalObject> dimensions, boolean hierarchyMeta )
     {
         Map<String, String> map = new HashMap<String, String>();
         
         for ( DimensionalObject dimension : dimensions )
         {
-            List<NameableObject> options = new ArrayList<NameableObject>( dimension.getItems() );
+            List<NameableObject> items = new ArrayList<NameableObject>( dimension.getItems() );
 
+            boolean hierarchy = hierarchyMeta && DimensionType.ORGANISATIONUNIT.equals( dimension.getType() );
+            
             // -----------------------------------------------------------------
             // If dimension is not fixed and has no options, insert all options
             // -----------------------------------------------------------------
             
-            if ( !FIXED_DIMS.contains( dimension.getDimension() ) && options.isEmpty() )
+            if ( !FIXED_DIMS.contains( dimension.getDimension() ) && items.isEmpty() )
             {
                 if ( DimensionType.ORGANISATIONUNIT_GROUPSET.equals( dimension.getType() ) )
                 {
-                    options = asList( organisationUnitGroupService.getOrganisationUnitGroupSet( dimension.getDimension() ).getOrganisationUnitGroups() );
+                    items = asList( organisationUnitGroupService.getOrganisationUnitGroupSet( dimension.getDimension() ).getOrganisationUnitGroups() );
                 }
                 else if ( DimensionType.DATAELEMENT_GROUPSET.equals( dimension.getType() ) )
                 {
-                    options = asList( dataElementService.getDataElementGroupSet( dimension.getDimension() ).getMembers() );
+                    items = asList( dataElementService.getDataElementGroupSet( dimension.getDimension() ).getMembers() );
                 }
                 else if ( DimensionType.CATEGORY.equals( dimension.getType() ) )
                 {
-                    options = asList( categoryService.getDataElementCategory( dimension.getDimension() ).getCategoryOptions() );
+                    items = asList( categoryService.getDataElementCategory( dimension.getDimension() ).getCategoryOptions() );
                 }
             }
 
@@ -957,9 +967,16 @@ public class DefaultAnalyticsService
             // Insert UID and name into map
             // -----------------------------------------------------------------
             
-            for ( IdentifiableObject idObject : options )
+            for ( IdentifiableObject idObject : items )
             {
                 map.put( idObject.getUid(), idObject.getDisplayName() );
+                
+                if ( hierarchy )
+                {
+                    OrganisationUnit unit = (OrganisationUnit) idObject;
+                    
+                    map.putAll( IdentifiableObjectUtils.getUidNameMap( unit.getAncestors() ) );
+                }
             }
             
             if ( dimension.getDisplayName() != null )
@@ -971,6 +988,11 @@ public class DefaultAnalyticsService
         return map;
     }
     
+    /**
+     * Returns a mapping between the category option combo identifiers and names
+     * in the given grid. Returns an empty map if the grid or cocIndex parameters
+     * are null.
+     */
     private Map<String, String> getCocNameMap( Grid grid, Integer cocIndex )
     {
         Map<String, String> metaData = new HashMap<String, String>();

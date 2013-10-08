@@ -33,11 +33,13 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hisp.dhis.analytics.IllegalQueryException;
+import org.hisp.dhis.analytics.SortOrder;
 import org.hisp.dhis.analytics.event.EventAnalyticsService;
 import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.api.utils.ContextUtils.CacheStrategy;
 import org.hisp.dhis.common.Grid;
+import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.system.grid.GridUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -62,6 +64,9 @@ public class EventAnalyticsController
     @Autowired
     private ContextUtils contextUtils;
 
+    @Autowired
+    private I18nManager i18nManager;
+    
     // -------------------------------------------------------------------------
     // Aggregate
     // -------------------------------------------------------------------------
@@ -74,11 +79,13 @@ public class EventAnalyticsController
         @RequestParam(required=false) String endDate,
         @RequestParam Set<String> dimension,
         @RequestParam(required=false) Set<String> filter,
-        @RequestParam(required=false) String ouMode,
+        @RequestParam(required=false) boolean hierarchyMeta,
+        @RequestParam(required=false) Integer limit,
+        @RequestParam(required=false) SortOrder sortOrder,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        EventQueryParams params = analyticsService.getFromUrl( program, stage, startDate, endDate, dimension, filter, ouMode );
+        EventQueryParams params = analyticsService.getFromUrl( program, stage, startDate, endDate, dimension, filter, hierarchyMeta, sortOrder, limit, i18nManager.getI18nFormat() );
         
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_JSON, CacheStrategy.RESPECT_SYSTEM_SETTING );
         Grid grid = analyticsService.getAggregatedEventData( params );
@@ -95,11 +102,13 @@ public class EventAnalyticsController
         @RequestParam(required=false) String endDate,
         @RequestParam Set<String> dimension,
         @RequestParam(required=false) Set<String> filter,
-        @RequestParam(required=false) String ouMode,
+        @RequestParam(required=false) boolean hierarchyMeta,
+        @RequestParam(required=false) Integer limit,
+        @RequestParam(required=false) SortOrder sortOrder,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        EventQueryParams params = analyticsService.getFromUrl( program, stage, startDate, endDate, dimension, filter, ouMode );
+        EventQueryParams params = analyticsService.getFromUrl( program, stage, startDate, endDate, dimension, filter, hierarchyMeta, sortOrder, limit, i18nManager.getI18nFormat() );
         
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_EXCEL, CacheStrategy.RESPECT_SYSTEM_SETTING, "events.xls", true );
         Grid grid = analyticsService.getAggregatedEventData( params );
@@ -121,12 +130,14 @@ public class EventAnalyticsController
         @RequestParam(required=false) String ouMode,
         @RequestParam(required=false) Set<String> asc,
         @RequestParam(required=false) Set<String> desc,
+        @RequestParam(required=false) boolean hierarchyMeta,
         @RequestParam(required=false) Integer page,
         @RequestParam(required=false) Integer pageSize,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        EventQueryParams params = analyticsService.getFromUrl( program, stage, startDate, endDate, dimension, filter, ouMode, asc, desc, page, pageSize );
+        EventQueryParams params = analyticsService.getFromUrl( program, stage, startDate, endDate, dimension, filter, ouMode, 
+            asc, desc, hierarchyMeta, page, pageSize, i18nManager.getI18nFormat() );
         
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_JSON, CacheStrategy.RESPECT_SYSTEM_SETTING );
         Grid grid = analyticsService.getEvents( params );
@@ -146,12 +157,14 @@ public class EventAnalyticsController
         @RequestParam(required=false) String ouMode,
         @RequestParam(required=false) Set<String> asc,
         @RequestParam(required=false) Set<String> desc,
+        @RequestParam(required=false) boolean hierarchyMeta,
         @RequestParam(required=false) Integer page,
         @RequestParam(required=false) Integer pageSize,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        EventQueryParams params = analyticsService.getFromUrl( program, stage, startDate, endDate, dimension, filter, ouMode, asc, desc, page, pageSize );
+        EventQueryParams params = analyticsService.getFromUrl( program, stage, startDate, endDate, dimension, filter, 
+            ouMode, asc, desc, hierarchyMeta, page, pageSize, i18nManager.getI18nFormat() );
         
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_EXCEL, CacheStrategy.RESPECT_SYSTEM_SETTING, "events.xls", true );
         Grid grid = analyticsService.getEvents( params );

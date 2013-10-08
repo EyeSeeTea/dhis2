@@ -393,13 +393,13 @@ Ext.onReady( function() {
                     layout;
 
                 if (id) {
-                    engine.loadChart(id, dv);
+                    engine.loadChart(id, dv, true, true);
                 }
                 else if (Ext.isString(session) && DV.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
                     layout = api.layout.Layout(engine.analytical2layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]));
 
                     if (layout) {
-                        dv.viewport.setFavorite(layout);
+						dv.engine.createChart(layout, dv, true);
                     }
                 }
 
@@ -1427,7 +1427,7 @@ Ext.onReady( function() {
 								element.addClsOnOver('link');
 								element.load = function() {
 									favoriteWindow.hide();
-									dv.engine.loadChart(record.data.id, dv);
+									dv.engine.loadChart(record.data.id, dv, true, true);
 								};
 								element.dom.setAttribute('onclick', 'Ext.get(this).load();');
 							}
@@ -1868,7 +1868,7 @@ Ext.onReady( function() {
 		userGroupRowContainer = Ext.create('Ext.container.Container', {
 			bodyStyle: 'border:0 none'
 		});
-		
+
 		if (sharing.meta.allowExternalAccess) {
 			externalAccess = userGroupRowContainer.add({
 				xtype: 'checkbox',
@@ -2123,7 +2123,7 @@ Ext.onReady( function() {
             westRegion,
             centerRegion,
 
-            setFavorite,
+            setGui,
 
             viewport,
             addListeners;
@@ -3552,11 +3552,11 @@ Ext.onReady( function() {
             },
             multipleExpand: function(id, path, doUpdate) {
 				var rootId = dv.conf.finals.root.id;
-				
+
 				if (path.substr(0, rootId.length + 1) !== ('/' + rootId)) {
 					path = '/' + rootId + path;
 				}
-				
+
 				this.expandPath('/' + path, 'id', '/', function() {
 					var record = this.getRootNode().findChild('id', id, true);
 					this.recordsToSelect.push(record);
@@ -3581,6 +3581,19 @@ Ext.onReady( function() {
                     }
                 });
             },
+			getParentGraphMap: function() {
+				var selection = this.getSelectionModel().getSelection(),
+					map = {};
+
+				if (Ext.isArray(selection) && selection.length) {
+					for (var i = 0, pathArray, key; i < selection.length; i++) {
+						pathArray = selection[i].getPath().split('/');
+						map[pathArray.pop()] = pathArray.join('/');
+					}
+				}
+
+				return map;
+			},
             store: Ext.create('Ext.data.TreeStore', {
                 proxy: {
                     type: 'ajax',
@@ -3712,7 +3725,7 @@ Ext.onReady( function() {
 				if (!param) {
 					return;
 				}
-				
+
 				var items = this.items.items;
 				this.menuValue = param;
 
@@ -4523,7 +4536,8 @@ Ext.onReady( function() {
                                         disabled: !DV.isSessionStorage || !dv.layout,
                                         handler: function() {
                                             if (DV.isSessionStorage) {
-                                                dv.engine.setSessionStorage(dv.layout, 'analytical', dv.init.contextPath + '/dhis-web-pivot/app/index.html?s=analytical');
+												dv.layout.parentGraphMap = treePanel.getParentGraphMap();
+                                                dv.engine.setSessionStorage('analytical', dv.layout, dv.init.contextPath + '/dhis-web-pivot/app/index.html?s=analytical');
                                             }
                                         }
                                     },
@@ -4555,14 +4569,61 @@ Ext.onReady( function() {
                     },
                     defaultButton,
                     {
-                        text: DV.i18n.map,
-                        iconCls: 'dv-button-icon-map',
-                        toggleGroup: 'module',
-                        //menu: {},
-                        handler: function(b) {
-                            window.location.href = dv.init.contextPath + '/dhis-web-mapping/app/index.html';
-                        }
-                    },
+						text: DV.i18n.map,
+						iconCls: 'dv-button-icon-map',
+						toggleGroup: 'module',
+						menu: {},
+						handler: function(b) {
+							b.menu = Ext.create('Ext.menu.Menu', {
+								closeAction: 'destroy',
+								shadow: false,
+								showSeparator: false,
+								items: [
+									{
+										text: 'Go to maps' + '&nbsp;&nbsp;', //i18n
+										cls: 'dv-menu-item-noicon',
+										handler: function() {
+											window.location.href = dv.init.contextPath + '/dhis-web-mapping/app/index.html';
+										}
+									},
+									'-',
+									{
+										text: 'Open this chart as map' + '&nbsp;&nbsp;', //i18n
+										cls: 'dv-menu-item-noicon',
+										disabled: !DV.isSessionStorage || !dv.layout,
+										handler: function() {
+											if (DV.isSessionStorage) {
+												dv.layout.parentGraphMap = treePanel.getParentGraphMap();
+												dv.engine.setSessionStorage('analytical', dv.layout, dv.init.contextPath + '/dhis-web-mapping/app/index.html?s=analytical');
+											}
+										}
+									},
+									{
+										text: 'Open last map' + '&nbsp;&nbsp;', //i18n
+										cls: 'dv-menu-item-noicon',
+										disabled: !(DV.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['map']),
+										handler: function() {
+											window.location.href = dv.init.contextPath + '/dhis-web-mapping/app/index.html?s=chart';
+										}
+									}
+								],
+								listeners: {
+									show: function() {
+										dv.util.window.setAnchorPosition(b.menu, b);
+									},
+									hide: function() {
+										b.menu.destroy();
+										defaultButton.toggle();
+									},
+									destroy: function(m) {
+										b.menu = null;
+									}
+								}
+							});
+
+							b.menu.show();
+						}
+					},
                     getSeparator(),
                     {
                         xtype: 'button',
@@ -4584,33 +4645,30 @@ Ext.onReady( function() {
             }
         });
 
-        setFavorite = function(layout) {
-            var xLayout,
-                dimMap,
-                recMap,
-                graphMap,
+        setGui = function(layout, xLayout, updateGui, isFavorite) {
+			var dimensions = [].concat(layout.columns || [], layout.rows || [], layout.filters || []),
+				dimMap = dv.service.layout.getObjectNameDimensionMap(dimensions),
+				recMap = dv.service.layout.getObjectNameDimensionItemsMap(dimensions),
+				graphMap = layout.parentGraphMap,
                 objectName,
                 periodRecords,
                 fixedPeriodRecords = [],
-                isOu = false,
-                isOuc = false,
+				dimNames = [],
+				isOu = false,
+				isOuc = false,
 				isOugc = false,
-                isLevel = false,
 				levels = [],
-				groups = [];
+				groups = [],
+				orgunits = [];
 
-            // State
-            dv.viewport.interpretationButton.enable();
+			// State
+			downloadButton.enable();
 
-            // Create chart
-            dv.engine.createChart(layout, dv);
+			if (isFavorite) {
+				interpretationButton.enable();
+			}
 
             // Set gui
-
-            xLayout = dv.engine.getExtendedLayout(layout);
-            dimMap = xLayout.objectNameDimensionsMap;
-            recMap = xLayout.objectNameItemsMap;
-            graphMap = layout.parentGraphMap;
 
             // Indicators
             dv.store.indicatorSelected.removeAll();
@@ -4680,7 +4738,7 @@ Ext.onReady( function() {
             }
 
             // Layout
-            dv.viewport.chartType.setChartType(xLayout.type);
+            dv.viewport.chartType.setChartType(layout.type);
 
             dv.viewport.series.setValue(xLayout.columnDimensionNames[0]);
             dv.viewport.series.filterNext();
@@ -4695,26 +4753,29 @@ Ext.onReady( function() {
                 dv.viewport.optionsWindow.setOptions(layout);
             }
 
-            // Organisation units
-            if (recMap[dimConf.organisationUnit.objectName]) {
-                for (var i = 0, ouRecords = recMap[dimConf.organisationUnit.objectName]; i < ouRecords.length; i++) {
-                    if (ouRecords[i].id === 'USER_ORGUNIT') {
-                        isOu = true;
-                    }
-                    if (ouRecords[i].id === 'USER_ORGUNIT_CHILDREN') {
-                        isOuc = true;
-                    }
-					if (ouRecords[i].id === 'USER_ORGUNIT_GRANDCHILDREN') {
+			// Organisation units
+			if (recMap[dimConf.organisationUnit.objectName]) {
+				for (var i = 0, ouRecords = recMap[dimConf.organisationUnit.objectName]; i < ouRecords.length; i++) {
+					if (ouRecords[i].id === 'USER_ORGUNIT') {
+						isOu = true;
+					}
+					else if (ouRecords[i].id === 'USER_ORGUNIT_CHILDREN') {
+						isOuc = true;
+					}
+					else if (ouRecords[i].id === 'USER_ORGUNIT_GRANDCHILDREN') {
 						isOugc = true;
 					}
-                    if (ouRecords[i].id.substr(0,5) === 'LEVEL') {
-                        isLevel = true;
-                    }
-					if (ouRecords[i].id.substr(0,8) === 'OU_GROUP') {
+					else if (ouRecords[i].id.substr(0,5) === 'LEVEL') {
+						levels.push(parseInt(ouRecords[i].id.split('-')[1]));
+					}
+					else if (ouRecords[i].id.substr(0,8) === 'OU_GROUP') {
 						groups.push(parseInt(ouRecords[i].id.split('-')[1]));
 					}
-                }
-            }
+					else {
+						orgunits.push(ouRecords[i].id);
+					}
+				}
+			}
 
 			if (levels.length) {
 				toolMenu.clickHandler('level');
@@ -4731,19 +4792,22 @@ Ext.onReady( function() {
 				userOrganisationUnitGrandChildren.setValue(isOugc);
 			}
 
-            // If fav has organisation units, wait for tree callback before update
-            if (recMap[dimConf.organisationUnit.objectName] && Ext.isObject(graphMap)) {
-                treePanel.numberOfRecords = dv.util.object.getLength(graphMap);
+			if (!(isOu || isOuc || isOugc)) {
 
-                for (var i = 0, a = xLayout.objectNameItemsMap[dimConf.organisationUnit.objectName]; i < a.length; i++) {
-                    if (graphMap.hasOwnProperty(a[i].id)) {
-                        treePanel.multipleExpand(a[i].id, graphMap[a[i].id], false);
-                    }
-                }
-            }
-            else {
-                treePanel.reset();
-            }
+				// If fav has organisation units, wait for tree callback before update
+				if (Ext.isObject(graphMap)) {
+					treePanel.numberOfRecords = dv.util.object.getLength(graphMap);
+
+					for (var key in graphMap) {
+						if (graphMap.hasOwnProperty(key)) {
+							treePanel.multipleExpand(key, graphMap[key], false);
+						}
+					}
+				}
+			}
+			else {
+				treePanel.reset();
+			}
         };
 
         viewport = Ext.create('Ext.container.Viewport', {
@@ -4764,7 +4828,7 @@ Ext.onReady( function() {
             userOrganisationUnit: userOrganisationUnit,
             userOrganisationUnitChildren: userOrganisationUnitChildren,
             dataElementDetailLevel: dataElementDetailLevel,
-            setFavorite: setFavorite,
+            setGui: setGui,
             items: [
                 westRegion,
                 centerRegion
@@ -4819,7 +4883,11 @@ Ext.onReady( function() {
         Ext.Ajax.request({
             url: '../initialize.action',
             success: function(r) {
-                dv = DV.core.getInstance(Ext.decode(r.responseText));
+				var init = Ext.decode(r.responseText);
+
+				DV.i18n = init.i18n;
+
+                dv = DV.core.getInstance(init);
 
                 DV.app.extendInstance(dv);
 

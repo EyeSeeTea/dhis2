@@ -95,6 +95,7 @@ public interface AnalyticsService
 {
     final String NAMES_META_KEY = "names";
     final String PAGER_META_KEY = "pager";
+    final String OU_HIERARCHY_KEY = "ouHierarchy";
     
     /**
      * Generates aggregated values for the given query.
@@ -147,12 +148,14 @@ public interface AnalyticsService
      * @param aggregationType the aggregation type.
      * @param measureCriteria the measure criteria.
      * @param skipMeta whether to skip the meta data part of the response.
+     * @param hierarchyMeta whether to include meta data about the org units 
+     *        in the hierarchy.
      * @param ignoreLimit whether to ignore the max number of cells limit.
      * @param format the i18n format.
      * @return a data query parameter object created based on the given URL info.
      */
     DataQueryParams getFromUrl( Set<String> dimensionParams, Set<String> filterParams, 
-        AggregationType aggregationType, String measureCriteria, boolean skipMeta, boolean ignoreLimit, I18nFormat format );
+        AggregationType aggregationType, String measureCriteria, boolean skipMeta, boolean hierarchyMeta, boolean ignoreLimit, I18nFormat format );
     
     /**
      * Creates a data query parameter object from the given BaseAnalyticalObject.

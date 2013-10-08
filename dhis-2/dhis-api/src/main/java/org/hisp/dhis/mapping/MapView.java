@@ -31,6 +31,7 @@ package org.hisp.dhis.mapping;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -65,12 +66,12 @@ public class MapView
     extends BaseAnalyticalObject
 {
     public static final String LAYER_BOUNDARY = "boundary";
+    public static final String LAYER_FACILITY = "facility";
+    public static final String LAYER_SYMBOL = "symbol";
     public static final String LAYER_THEMATIC1 = "thematic1";
     public static final String LAYER_THEMATIC2 = "thematic2";
     public static final String LAYER_THEMATIC3 = "thematic3";
     public static final String LAYER_THEMATIC4 = "thematic4";
-    public static final String LAYER_FACILITY = "facility";
-    public static final String LAYER_SYMBOL = "symbol";
 
     public static final String VALUE_TYPE_INDICATOR = "indicator";
     public static final String VALUE_TYPE_DATAELEMENT = "dataelement";
@@ -78,8 +79,9 @@ public class MapView
     public static final String LEGEND_TYPE_AUTOMATIC = "automatic";
     public static final String LEGEND_TYPE_PREDEFINED = "predefined";
 
-    private static final long serialVersionUID = 1866358818802275436L;
-
+    public static final List<String> DATA_LAYERS = Arrays.asList( 
+        LAYER_THEMATIC1, LAYER_THEMATIC2, LAYER_THEMATIC3, LAYER_THEMATIC4 );
+    
     private String layer;
 
     private String valueType;
@@ -152,11 +154,22 @@ public class MapView
         DimensionalObject object = getDimensionalObject( ORGUNIT_DIM_ID, relativePeriodDate, user, true, organisationUnitsAtLevel, organisationUnitsInGroups, format );
 
         return object != null ? NameableObjectUtils.asTypedList( object.getItems(), OrganisationUnit.class ) : null;
-    }    
+    }
     
-    // -------------------------------------------------------------------------
-    // Getters and setters
-    // -------------------------------------------------------------------------
+    public boolean hasLegendSet()
+    {
+        return legendSet != null;
+    }
+    
+    public boolean hasColors()
+    {
+        return colorLow != null && !colorLow.trim().isEmpty() && colorHigh != null && !colorHigh.trim().isEmpty();
+    }
+    
+    public boolean isDataLayer()
+    {
+        return DATA_LAYERS.contains( layer );
+    }
 
     @Override
     public boolean haveUniqueNames()
@@ -170,6 +183,10 @@ public class MapView
         return ( indicators != null && !indicators.isEmpty() ) ? indicators.get( 0 ).getName() : 
             ( dataElements != null && !dataElements.isEmpty() ) ? dataElements.get( 0 ).getName() : uid;
     }
+    
+    // -------------------------------------------------------------------------
+    // Getters and setters
+    // -------------------------------------------------------------------------
 
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )

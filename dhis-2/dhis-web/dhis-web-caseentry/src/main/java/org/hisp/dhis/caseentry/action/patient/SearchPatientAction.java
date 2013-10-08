@@ -28,14 +28,8 @@ package org.hisp.dhis.caseentry.action.patient;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.paging.ActionPagingSupport;
 import org.hisp.dhis.patient.Patient;
@@ -45,13 +39,25 @@ import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.user.CurrentUserService;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author Abyot Asalefew Gizaw
- * @version $Id$
  */
 public class SearchPatientAction
     extends ActionPagingSupport<Patient>
 {
+    private final String SEARCH_IN_ALL_ORGUNITS = "searchInAllOrgunits";
+
+    private final String SEARCH_IN_USER_ORGUNITS = "searchInUserOrgunits";
+
+    private final String SEARCH_IN_BELOW_SELECTED_ORGUNIT = "searchInBelowSelectedOrgunit";
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -64,15 +70,17 @@ public class SearchPatientAction
 
     private CurrentUserService currentUserService;
 
+    private OrganisationUnitService organisationUnitService;
+
     // -------------------------------------------------------------------------
     // Input/output
     // -------------------------------------------------------------------------
 
     private List<String> searchTexts = new ArrayList<String>();
 
-    private Boolean searchBySelectedOrgunit;
+    private Integer statusEnrollment;
 
-    private Boolean searchByUserOrgunits;
+    private String facilityLB;
 
     private boolean listAll;
 
@@ -82,9 +90,24 @@ public class SearchPatientAction
     // Getters && Setters
     // -------------------------------------------------------------------------
 
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitService = organisationUnitService;
+    }
+
     public void setCurrentUserService( CurrentUserService currentUserService )
     {
         this.currentUserService = currentUserService;
+    }
+
+    public void setStatusEnrollment( Integer statusEnrollment )
+    {
+        this.statusEnrollment = statusEnrollment;
+    }
+
+    public void setFacilityLB( String facilityLB )
+    {
+        this.facilityLB = facilityLB;
     }
 
     public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
@@ -92,19 +115,9 @@ public class SearchPatientAction
         this.selectionManager = selectionManager;
     }
 
-    public void setSearchByUserOrgunits( Boolean searchByUserOrgunits )
-    {
-        this.searchByUserOrgunits = searchByUserOrgunits;
-    }
-
     public void setProgramService( ProgramService programService )
     {
         this.programService = programService;
-    }
-
-    public void setSearchBySelectedOrgunit( Boolean searchBySelectedOrgunit )
-    {
-        this.searchBySelectedOrgunit = searchBySelectedOrgunit;
     }
 
     public void setPatientService( PatientService patientService )
@@ -146,11 +159,11 @@ public class SearchPatientAction
         return mapPatientOrgunit;
     }
 
-    private List<Integer> programIds;
+    private Integer programId;
 
-    public void setProgramIds( List<Integer> programIds )
+    public void setProgramId( Integer programId )
     {
-        this.programIds = programIds;
+        this.programId = programId;
     }
 
     private List<PatientIdentifierType> identifierTypes = new ArrayList<PatientIdentifierType>();
@@ -160,6 +173,13 @@ public class SearchPatientAction
         return identifierTypes;
     }
 
+    private OrganisationUnit organisationUnit;
+
+    public OrganisationUnit getOrganisationUnit()
+    {
+        return organisationUnit;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -167,9 +187,9 @@ public class SearchPatientAction
     public String execute()
         throws Exception
     {
-        Collection<OrganisationUnit> orgunits = new HashSet<OrganisationUnit>();
+        organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
-        OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
+        Collection<OrganisationUnit> orgunits = new HashSet<OrganisationUnit>();
 
         // List all patients
         if ( listAll )
@@ -183,26 +203,34 @@ public class SearchPatientAction
         // search patients
         else if ( searchTexts.size() > 0 )
         {
-            if ( searchByUserOrgunits )
+            // selected orgunit
+            if ( facilityLB == null || facilityLB.trim().isEmpty() )
+            {
+                orgunits.add( organisationUnit );
+            }
+            else if ( facilityLB.equals( SEARCH_IN_USER_ORGUNITS ) )
             {
                 Collection<OrganisationUnit> userOrgunits = currentUserService.getCurrentUser().getOrganisationUnits();
                 orgunits.addAll( userOrgunits );
             }
-            else if ( searchBySelectedOrgunit )
+            else if ( facilityLB.equals( SEARCH_IN_BELOW_SELECTED_ORGUNIT ) )
             {
-                orgunits.add( organisationUnit );
+                Collection<Integer> orgunitIds = organisationUnitService.getOrganisationUnitHierarchy().getChildren(
+                    organisationUnit.getId() );
+
+                orgunits.addAll( organisationUnitService.getOrganisationUnits( orgunitIds ) );
             }
-            else
+            else if ( facilityLB.equals( SEARCH_IN_ALL_ORGUNITS ) )
             {
                 orgunits = null;
             }
 
-            total = patientService.countSearchPatients( searchTexts, orgunits, null );
+            total = patientService.countSearchPatients( searchTexts, orgunits, null, statusEnrollment );
             this.paging = createPaging( total );
-            patients = patientService.searchPatients( searchTexts, orgunits, null, null, paging.getStartPos(),
-                paging.getPageSize() );
+            patients = patientService.searchPatients( searchTexts, orgunits, null, null, statusEnrollment,
+                paging.getStartPos(), paging.getPageSize() );
 
-            if ( !searchBySelectedOrgunit || searchByUserOrgunits )
+            if ( facilityLB != null )
             {
                 for ( Patient patient : patients )
                 {
@@ -210,13 +238,10 @@ public class SearchPatientAction
                 }
             }
 
-            if ( programIds != null )
+            if ( programId != null )
             {
-                for ( Integer programId : programIds )
-                {
-                    Program progam = programService.getProgram( programId );
-                    identifierTypes.addAll( progam.getPatientIdentifierTypes() );
-                }
+                Program progam = programService.getProgram( programId );
+                identifierTypes.addAll( progam.getPatientIdentifierTypes() );
             }
         }
 

@@ -28,9 +28,13 @@ package org.hisp.dhis.analytics.event.data;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.analytics.AnalyticsService.NAMES_META_KEY;
+import static org.hisp.dhis.analytics.AnalyticsService.OU_HIERARCHY_KEY;
 import static org.hisp.dhis.analytics.DataQueryParams.DIMENSION_NAME_SEP;
-import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
+import static org.hisp.dhis.common.NameableObjectUtils.asTypedList;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.getParentGraphMap;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,20 +46,24 @@ import java.util.Set;
 import org.hisp.dhis.analytics.AnalyticsService;
 import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.IllegalQueryException;
+import org.hisp.dhis.analytics.SortOrder;
 import org.hisp.dhis.analytics.event.EventAnalyticsManager;
 import org.hisp.dhis.analytics.event.EventAnalyticsService;
 import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.analytics.event.EventQueryPlanner;
 import org.hisp.dhis.analytics.event.QueryItem;
 import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.patient.PatientAttribute;
@@ -119,6 +127,7 @@ public class DefaultEventAnalyticsService
 
     //TODO order the event analytics tables up front to avoid default sorting in queries
     //TODO filter items support
+    //TODO remove org unit name / code columns and use names / codes from meta data
     
     public Grid getAggregatedEventData( EventQueryParams params )
     {
@@ -145,8 +154,6 @@ public class DefaultEventAnalyticsService
         // ---------------------------------------------------------------------
         // Data
         // ---------------------------------------------------------------------
-
-        //TODO relative periods
                 
         List<EventQueryParams> queries = queryPlanner.planQuery( params );
 
@@ -160,7 +167,16 @@ public class DefaultEventAnalyticsService
         // ---------------------------------------------------------------------
 
         Map<Object, Object> metaData = new HashMap<Object, Object>();        
-        metaData.put( AnalyticsService.NAMES_META_KEY, getUidNameMap( params ) );
+        
+        Map<String, String> uidNameMap = getUidNameMap( params );
+        
+        metaData.put( NAMES_META_KEY, uidNameMap );
+        
+        if ( params.isHierarchyMeta() )
+        {
+            metaData.put( OU_HIERARCHY_KEY, getParentGraphMap( asTypedList( params.getDimensionOrFilter( ORGUNIT_DIM_ID ), OrganisationUnit.class ) ) );
+        }
+        
         grid.setMetaData( metaData );
 
         return grid;        
@@ -218,8 +234,16 @@ public class DefaultEventAnalyticsService
         // Meta-data
         // ---------------------------------------------------------------------
 
-        Map<Object, Object> metaData = new HashMap<Object, Object>();        
-        metaData.put( AnalyticsService.NAMES_META_KEY, getUidNameMap( params ) );
+        Map<Object, Object> metaData = new HashMap<Object, Object>();
+        
+        Map<String, String> uidNameMap = getUidNameMap( params );
+        
+        metaData.put( NAMES_META_KEY, uidNameMap );
+        
+        if ( params.isHierarchyMeta() )
+        {        
+            metaData.put( OU_HIERARCHY_KEY, getParentGraphMap( asTypedList( params.getDimensionOrFilter( ORGUNIT_DIM_ID ), OrganisationUnit.class ) ) );
+        }
 
         if ( params.isPaging() )
         {
@@ -232,16 +256,28 @@ public class DefaultEventAnalyticsService
         return grid;
     }
 
+    /**
+     * Used for aggregate query.
+     */
     public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate, 
-        Set<String> dimension, Set<String> filter, String ouMode )
+        Set<String> dimension, Set<String> filter, boolean hierarchyMeta, SortOrder sortOrder, Integer limit, I18nFormat format )
     {
-        return getFromUrl( program, stage, startDate, endDate, dimension, filter, ouMode, null, null, null, null );
+        EventQueryParams params = getFromUrl( program, stage, startDate, endDate, dimension, filter, null, null, null, hierarchyMeta, null, null, format );
+        params.setSortOrder( sortOrder );
+        params.setLimit( limit );
+        
+        return params;
     }
     
-    public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate, 
-        Set<String> dimension, Set<String> filter, String ouMode, Set<String> asc, Set<String> desc, Integer page, Integer pageSize )
+    /**
+     * Used for event query.
+     */
+    public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate, Set<String> dimension, Set<String> filter, 
+        String ouMode, Set<String> asc, Set<String> desc, boolean hierarchyMeta, Integer page, Integer pageSize, I18nFormat format )
     {
         EventQueryParams params = new EventQueryParams();
+        
+        Date date = new Date();
         
         Program pr = programService.getProgram( program );
         
@@ -282,7 +318,7 @@ public class DefaultEventAnalyticsService
                 if ( ORGUNIT_DIM_ID.equals( dimensionId ) || PERIOD_DIM_ID.equals( dimensionId ) )
                 {
                     List<String> items = DataQueryParams.getDimensionItemsFromParam( dim );
-                    params.getDimensions().addAll( analyticsService.getDimension( dimensionId, items, null, null ) );
+                    params.getDimensions().addAll( analyticsService.getDimension( dimensionId, items, date, format ) );
                 }
                 else
                 {
@@ -300,7 +336,7 @@ public class DefaultEventAnalyticsService
                 if ( ORGUNIT_DIM_ID.equals( dimensionId ) || PERIOD_DIM_ID.equals( dimensionId ) )
                 {
                     List<String> items = DataQueryParams.getDimensionItemsFromParam( dim );
-                    params.getFilters().addAll( analyticsService.getDimension( dimensionId, items, null, null ) );
+                    params.getFilters().addAll( analyticsService.getDimension( dimensionId, items, date, format ) );
                 }
                 else
                 {
@@ -336,12 +372,9 @@ public class DefaultEventAnalyticsService
         params.setStartDate( start );
         params.setEndDate( end );
         params.setOrganisationUnitMode( ouMode );
+        params.setHierarchyMeta( hierarchyMeta );
         params.setPage( page );
-        
-        if ( pageSize != null )
-        {
-            params.setPageSize( pageSize );
-        }
+        params.setPageSize( pageSize );
 
         return params;
     }
@@ -385,6 +418,43 @@ public class DefaultEventAnalyticsService
         if ( stage != null )
         {
             map.put( stage.getUid(), stage.getName() );
+        }
+        
+        for ( QueryItem item : params.getItems() )
+        {
+            map.put( item.getItem().getUid(), item.getItem().getDisplayName() );
+        }
+
+        for ( QueryItem item : params.getItemFilters() )
+        {
+            map.put( item.getItem().getUid(), item.getItem().getDisplayName() );
+        }
+        
+        map.putAll( getUidNameMap( params.getDimensions(), params.isHierarchyMeta() ) );
+        map.putAll( getUidNameMap( params.getFilters(), params.isHierarchyMeta() ) );
+                
+        return map;
+    }
+    
+    private Map<String, String> getUidNameMap( List<DimensionalObject> dimensions, boolean hierarchyMeta )
+    {
+        Map<String, String> map = new HashMap<String, String>();
+
+        for ( DimensionalObject dimension : dimensions )
+        {
+            boolean hierarchy = hierarchyMeta && DimensionType.ORGANISATIONUNIT.equals( dimension.getType() );
+            
+            for ( IdentifiableObject idObject : dimension.getItems() )
+            {
+                map.put( idObject.getUid(), idObject.getDisplayName() );
+                
+                if ( hierarchy )
+                {
+                    OrganisationUnit unit = (OrganisationUnit) idObject;
+                    
+                    map.putAll( IdentifiableObjectUtils.getUidNameMap( unit.getAncestors() ) );
+                }
+            }
         }
         
         return map;

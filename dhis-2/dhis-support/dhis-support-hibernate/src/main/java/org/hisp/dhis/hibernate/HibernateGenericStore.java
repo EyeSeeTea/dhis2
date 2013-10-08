@@ -28,9 +28,6 @@ package org.hisp.dhis.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashSet;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
@@ -50,12 +47,16 @@ import org.hisp.dhis.hibernate.exception.CreateAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.DeleteAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.ReadAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.UpdateAccessDeniedException;
+import org.hisp.dhis.interpretation.Interpretation;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.UserGroupAccess;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.CollectionUtils;
+
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * @author Lars Helge Overland
@@ -126,14 +127,14 @@ public class HibernateGenericStore<T>
 
     /**
      * Returns the current session.
-     * 
+     *
      * @return the current session.
      */
     protected final Session getSession()
     {
         return sessionFactory.getCurrentSession();
     }
-    
+
     /**
      * Creates a Query.
      *
@@ -223,7 +224,7 @@ public class HibernateGenericStore<T>
     @Override
     public int save( T object )
     {
-        if ( currentUserService.getCurrentUser() != null && SharingUtils.isSupported( clazz ) )
+        if ( !Interpretation.class.isAssignableFrom( clazz ) && currentUserService.getCurrentUser() != null && SharingUtils.isSupported( clazz ) )
         {
             BaseIdentifiableObject identifiableObject = (BaseIdentifiableObject) object;
 
@@ -271,7 +272,7 @@ public class HibernateGenericStore<T>
     @Override
     public void update( T object )
     {
-        if ( !isUpdateAllowed( object ) )
+        if ( !Interpretation.class.isAssignableFrom( clazz ) && !isUpdateAllowed( object ) )
         {
             AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_UPDATE_DENIED );
             throw new UpdateAccessDeniedException( object.toString() );

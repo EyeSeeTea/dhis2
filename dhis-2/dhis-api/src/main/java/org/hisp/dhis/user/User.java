@@ -200,16 +200,6 @@ public class User
         return userCredentials != null ? userCredentials.getUsername() : null;
     }
 
-    public void removeAllOrganisationUnits()
-    {
-        organisationUnits.clear();
-    }
-
-    public void removeAllAttributeValues()
-    {
-        attributeValues.clear();
-    }
-
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
@@ -389,6 +379,9 @@ public class User
         this.languages = languages;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Date getLastCheckedInterpretations()
     {
         return lastCheckedInterpretations;
@@ -412,6 +405,11 @@ public class User
         this.userCredentials = userCredentials;
     }
 
+    @JsonProperty
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class } )
+    @JacksonXmlElementWrapper( localName = "userGroups", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "userGroup", namespace = DxfNamespaces.DXF_2_0 )
     public Set<UserGroup> getGroups()
     {
         return groups;
@@ -466,10 +464,10 @@ public class User
             phoneNumber = user.getPhoneNumber() == null ? phoneNumber : user.getPhoneNumber();
             userCredentials = user.getUserCredentials() == null ? userCredentials : user.getUserCredentials();
 
-            removeAllAttributeValues();
+            attributeValues.clear();
             attributeValues.addAll( user.getAttributeValues() );
 
-            removeAllOrganisationUnits();
+            organisationUnits.clear();
             organisationUnits.addAll( user.getOrganisationUnits() );
         }
     }

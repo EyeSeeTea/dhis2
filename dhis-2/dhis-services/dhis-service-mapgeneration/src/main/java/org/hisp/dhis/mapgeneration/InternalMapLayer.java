@@ -30,8 +30,14 @@ package org.hisp.dhis.mapgeneration;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import org.hisp.dhis.mapgeneration.IntervalSet.DistributionStrategy;
+import org.hisp.dhis.mapgeneration.comparator.IntervalLowValueAscComparator;
+import org.hisp.dhis.mapping.MapLegend;
+import org.hisp.dhis.mapping.MapLegendSet;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.springframework.util.Assert;
 
@@ -57,15 +63,17 @@ public class InternalMapLayer
 
     protected Period period;
 
-    protected int radiusHigh;
+    protected Integer radiusHigh;
 
-    protected int radiusLow;
+    protected Integer radiusLow;
 
     protected Color colorHigh;
 
     protected Color colorLow;
 
     protected float opacity;
+    
+    protected Integer classes;
 
     protected Color strokeColor;
 
@@ -75,13 +83,18 @@ public class InternalMapLayer
 
     protected List<InternalMapObject> mapObjects;
 
-    /**
-     * Constructs a map layer with no initial map objects.
-     */
+    // -------------------------------------------------------------------------
+    // Constructors
+    // -------------------------------------------------------------------------
+
     public InternalMapLayer()
     {
         this.mapObjects = new ArrayList<InternalMapObject>();
     }
+
+    // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------
 
     /**
      * Interpolates the radii of this map layer's set of map objects according
@@ -125,23 +138,231 @@ public class InternalMapLayer
      */
     public void addMapObject( InternalMapObject mapObject )
     {
-        this.mapObjects.add( mapObject );
+        mapObjects.add( mapObject );
+    }
+    
+    /**
+     * Indicates whether this map layer has any map objects.
+     */
+    public boolean hasMapObjects()
+    {
+        return mapObjects != null && !mapObjects.isEmpty();
     }
 
     /**
-     * Gets the collection of all the map objects associated with this map
-     * layer.
+     * Creates a map object and adds it to this map layer. Sets this map layer
+     * on the map object.
      * 
-     * @return the list of map objects
+     * @param mapValue the map values to set on the map object.
+     * @param unit the organisation unit which name to set on the map object.
      */
+    public void addDataMapObject( double mapValue, OrganisationUnit unit )
+    {
+        InternalMapObject mapObject = new InternalMapObject();
+        
+        mapObject.setName( unit.getName() );
+        mapObject.setValue( mapValue );
+        mapObject.setFillOpacity( opacity );
+        mapObject.setStrokeColor( strokeColor );
+        mapObject.setStrokeWidth( strokeWidth );
+
+        // Build and set the geometric primitive that outlines org unit on the map
+        mapObject.setGeometry( InternalMapObject.buildAndApplyGeometryForOrganisationUnit( unit ) );
+
+        // Add the map object to the map layer
+        addMapObject( mapObject );
+
+        // Set the map layer for the map object
+        mapObject.setMapLayer( this );
+    }
+    
+    /**
+     * Adds a map object for the given organisation unit to this map layer.
+     * 
+     * @param unit the organisation unit.
+     */
+    public void addBoundaryMapObject( OrganisationUnit unit )
+    {
+        InternalMapObject mapObject = new InternalMapObject();
+        
+        mapObject.setName( unit.getName() );
+        mapObject.setFillOpacity( opacity );
+        mapObject.setStrokeColor( Color.BLACK );
+        mapObject.setStrokeWidth( 1 );
+
+        mapObject.setGeometry( InternalMapObject.buildAndApplyGeometryForOrganisationUnit( unit ) );
+        addMapObject( mapObject );
+        mapObject.setMapLayer( this );
+    }
+    
+    /**
+     * Sets an interval set on this map layer based on the given legend set.
+     * 
+     * @param legendSet the legend set.
+     */
+    public void setIntervalSetFromLegendSet( MapLegendSet legendSet )
+    {
+        IntervalSet intervalSet = new IntervalSet();
+        
+        for ( MapLegend legend : legendSet.getMapLegends() )
+        {
+            Color color = MapUtils.createColorFromString( legend.getColor() );
+            
+            Interval interval = new Interval( color, legend.getStartValue(), legend.getEndValue() );
+            
+            intervalSet.getIntervals().add( interval );
+        }
+
+        Collections.sort( intervalSet.getIntervals(), IntervalLowValueAscComparator.INSTANCE );
+        
+        this.intervalSet = intervalSet;
+    }
+
+    /**
+     * Distribute this map layer's map objects into the given interval set and
+     * update each map object with its interval.
+     */
+    public void distributeAndUpdateMapObjectsInIntervalSet()
+    {
+        for ( InternalMapObject mapObject : mapObjects )
+        {
+            for ( Interval interval : intervalSet.getIntervals() )
+            {
+                // If the map object's value is within this interval's
+                // boundaries, add it to this interval
+                if ( mapObject.getValue() >= interval.getValueLow() && mapObject.getValue() <= interval.getValueHigh() )
+                {
+                    // Add map object to interval and set interval for map object
+                    interval.addMember( mapObject );
+                    mapObject.setInterval( interval );
+
+                    // Do not add to more than one interval
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Creates and applies a fixed length interval set to the given map layer.
+     * 
+     * How map objects are distributed among intervals depends on the
+     * distribution strategy that is used, which may be either 'equal range' or
+     * 'equal size'.
+     * 
+     * The 'equal range' strategy is defined by passing
+     * DistributionStrategy.STRATEGY_EQUAL_RANGE to this method. It creates and
+     * applies to the given map layer a fixed length interval set distributing
+     * map objects into intervals that has the same range.
+     * 
+     * The 'equal size' strategy is defined by passing
+     * DistributionStrategy.STRATEGY_EQUAL_SIZE to this method. It creates and
+     * applies to the given map layer a fixed length interval set distributing
+     * map objects into intervals that has (optimally) the same amount of map
+     * objects.
+     * 
+     * For example, given the map object collection of a map layer
+     * [a:3,b:2,c:5,d:18,e:0,f:50,g:22], where the objects with the lowest and
+     * highest values are e:0 and f:50, this collection of map objects will
+     * distribute differently into intervals depending on the distribution
+     * strategy chosen.
+     * 
+     * Strategy 'equal range' with length 5: interval [e:0,b:2,a:3,c:5] range
+     * 0-10 size 4 interval [d:18] range 11-20 size 1 interval [g:22] range
+     * 21-30 size 1 interval [] range 31-40 size 0 interval [f:50] range 41-50
+     * size 1
+     * 
+     * Strategy 'equal size' with length 5: interval [e:0,b:2] range 0-2 size 2
+     * interval [a:3,c:5] range 3-5 size 2 interval [d:18] range 5-18 size 1
+     * interval [g:22] range 18-22 size 1 interval [f:50] range 22-50 size 1
+     * 
+     * @param strategy the desired distribution strategy
+     * @param mapLayer the map layer whose map objects to distribute
+     * @param length the number of intervals in the set
+     * @return the created interval set that was applied to this map layer
+     */
+    public void setAutomaticIntervalSet( DistributionStrategy strategy, int length )
+    {
+        if ( DistributionStrategy.STRATEGY_EQUAL_RANGE == strategy )
+        {
+            setEqualRangeIntervalSetToMapLayer( length );
+        }
+        else if ( DistributionStrategy.STRATEGY_EQUAL_SIZE == strategy )
+        {
+            throw new RuntimeException( "This distribution strategy is not implemented yet!" );
+        }
+        else
+        {
+            throw new RuntimeException( "Unsupported distribution strategy: " + strategy );
+        }
+    }
+
+    /**
+     * Creates and applies to the given map layer a fixed length interval set
+     * distributing map objects into intervals that has the same range.
+     * 
+     * @param mapLayer the map layer whose map objects to distribute
+     * @param length the number of equal sized intervals
+     * @return the created interval set that was applied to this map layer
+     */
+    public void setEqualRangeIntervalSetToMapLayer( int length )
+    {
+        Assert.isTrue( length > 0 );
+        Assert.isTrue( mapObjects != null );
+        Assert.isTrue( mapObjects.size() > 0 );
+
+        IntervalSet intervalSet = new IntervalSet();
+
+        // Determine the objects with the min and max values
+        for ( InternalMapObject mapObject : mapObjects )
+        {
+            if ( intervalSet.getObjectLow() == null || mapObject.getValue() < intervalSet.getObjectLow().getValue() )
+            {
+                intervalSet.setObjectLow( mapObject );
+            }
+            
+            if ( intervalSet.getObjectHigh() == null || mapObject.getValue() > intervalSet.getObjectHigh().getValue() )
+            {
+                intervalSet.setObjectHigh( mapObject );
+            }
+        }
+
+        // Determine and set the color for each of the intervals according to
+        // the highest and lowest values
+        for ( int i = 0; i < length; i++ )
+        {
+            // Determine the boundaries the interval covers
+            double low = MapUtils.lerp( intervalSet.getObjectLow().getValue(), intervalSet.getObjectHigh().getValue(), (i + 0.0) / length );
+            double high = MapUtils.lerp( intervalSet.getObjectLow().getValue(), intervalSet.getObjectHigh().getValue(), (i + 1.0) / length );
+
+            // Determine the color of the interval
+            Color color = MapUtils.lerp( colorLow, colorHigh, (i + 0.5) / length );
+
+            // Create and setup a new interval
+            Interval interval = new Interval( low, high );
+            interval.setColor( color );
+
+            // Add it to the set
+            intervalSet.getIntervals().add( interval );
+        }
+
+        Collections.sort( intervalSet.getIntervals(), IntervalLowValueAscComparator.INSTANCE );
+        
+        this.intervalSet = intervalSet;
+    }
+
+    // -------------------------------------------------------------------------
+    // Getters and setters
+    // -------------------------------------------------------------------------
+
     public List<InternalMapObject> getMapObjects()
     {
-        return this.mapObjects;
+        return mapObjects;
     }
 
     public String getName()
     {
-        return this.name;
+        return name;
     }
 
     public void setName( String name )
@@ -151,7 +372,7 @@ public class InternalMapLayer
 
     public Period getPeriod()
     {
-        return this.period;
+        return period;
     }
 
     public void setPeriod( Period period )
@@ -159,29 +380,29 @@ public class InternalMapLayer
         this.period = period;
     }
 
-    public int getRadiusHigh()
+    public Integer getRadiusHigh()
     {
-        return this.radiusHigh;
+        return radiusHigh;
     }
 
-    public void setRadiusHigh( int radiusHigh )
+    public void setRadiusHigh( Integer radiusHigh )
     {
         this.radiusHigh = radiusHigh;
     }
 
-    public int getRadiusLow()
+    public Integer getRadiusLow()
     {
-        return this.radiusLow;
+        return radiusLow;
     }
 
-    public void setRadiusLow( int radiusLow )
+    public void setRadiusLow( Integer radiusLow )
     {
         this.radiusLow = radiusLow;
     }
 
     public Color getColorHigh()
     {
-        return this.colorHigh;
+        return colorHigh;
     }
 
     public void setColorHigh( Color colorHigh )
@@ -191,7 +412,7 @@ public class InternalMapLayer
 
     public Color getColorLow()
     {
-        return this.colorLow;
+        return colorLow;
     }
 
     public void setColorLow( Color colorLow )
@@ -201,7 +422,7 @@ public class InternalMapLayer
 
     public float getOpacity()
     {
-        return this.opacity;
+        return opacity;
     }
 
     public void setOpacity( float opacity )
@@ -209,9 +430,19 @@ public class InternalMapLayer
         this.opacity = opacity;
     }
 
+    public Integer getClasses()
+    {
+        return classes;
+    }
+
+    public void setClasses( Integer classes )
+    {
+        this.classes = classes;
+    }
+
     public Color getStrokeColor()
     {
-        return this.strokeColor;
+        return strokeColor;
     }
 
     public void setStrokeColor( Color strokeColor )
@@ -221,7 +452,7 @@ public class InternalMapLayer
 
     public int getStrokeWidth()
     {
-        return this.strokeWidth;
+        return strokeWidth;
     }
 
     public void setStrokeWidth( int strokeWidth )
@@ -231,7 +462,7 @@ public class InternalMapLayer
 
     public IntervalSet getIntervalSet()
     {
-        return this.intervalSet;
+        return intervalSet;
     }
 
     public void setIntervalSet( IntervalSet intervalSet )

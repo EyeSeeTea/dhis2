@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.hisp.dhis.analytics.DataQueryParams;
+import org.hisp.dhis.analytics.SortOrder;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -75,6 +76,10 @@ public class EventQueryParams
     
     private Integer pageSize;
 
+    private SortOrder sortOrder;
+    
+    private Integer limit;
+    
     // -------------------------------------------------------------------------
     // Transient properties
     // -------------------------------------------------------------------------
@@ -113,6 +118,8 @@ public class EventQueryParams
         params.tableName = this.tableName;
         params.page = this.page;
         params.pageSize = this.pageSize;
+        params.sortOrder = this.sortOrder;
+        params.limit = this.limit;
         params.periodType = this.periodType;
         
         return params;
@@ -168,6 +175,16 @@ public class EventQueryParams
     public int getOffset()
     {
         return ( getPageWithDefault() - 1 ) * getPageSizeWithDefault();
+    }
+    
+    public boolean hasSortOrder()
+    {
+        return sortOrder != null;
+    }
+    
+    public boolean hasLimit()
+    {
+        return limit != null && limit > 0;
     }
     
     public String toString()
@@ -314,6 +331,26 @@ public class EventQueryParams
     public void setPageSize( Integer pageSize )
     {
         this.pageSize = pageSize;
+    }
+
+    public SortOrder getSortOrder()
+    {
+        return sortOrder;
+    }
+
+    public void setSortOrder( SortOrder sortOrder )
+    {
+        this.sortOrder = sortOrder;
+    }
+
+    public Integer getLimit()
+    {
+        return limit;
+    }
+
+    public void setLimit( Integer limit )
+    {
+        this.limit = limit;
     }
 
     public String getPeriodType()

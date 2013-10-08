@@ -31,6 +31,7 @@ package org.hisp.dhis.i18n.action;
 import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nManager;
+import org.hisp.dhis.system.util.LocaleUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Locale;
@@ -44,18 +45,11 @@ public class GetStringsFromLocaleAction
     @Autowired
     private I18nManager manager;
 
-    private String language;
+    private String loc;
 
-    public void setLanguage( String language )
+    public void setLoc( String loc )
     {
-        this.language = language;
-    }
-
-    private String country;
-
-    public void setCountry( String country )
-    {
-        this.country = country;
+        this.loc = loc;
     }
 
     private I18n i18nObject;
@@ -72,26 +66,13 @@ public class GetStringsFromLocaleAction
     public String execute()
         throws Exception
     {
-        Locale locale;
-
-        if ( language != null )
+        if ( loc != null )
         {
-            if ( country != null )
-            {
-                locale = new Locale( language, country );
-            }
-            else
-            {
-                locale = new Locale( language );
-            }
+            Locale locale = LocaleUtils.getLocale( loc );
+    
+            i18nObject = manager.getI18n( this.getClass(), locale );
         }
-        else
-        {
-            locale = null;
-        }
-
-        i18nObject = manager.getI18n( this.getClass(), locale );
-
+        
         return SUCCESS;
     }
 }

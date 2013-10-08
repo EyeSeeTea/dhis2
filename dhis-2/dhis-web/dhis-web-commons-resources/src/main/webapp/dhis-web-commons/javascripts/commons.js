@@ -1682,6 +1682,15 @@ function isPositiveInt( value )
 }
 
 /**
+ * Allow only zero or positive integers, no thousands seperators
+ */
+function isZeroOrPositiveInt( value )
+{
+	var regex = /(^0$)|(^[1-9]\d*$)/;
+	return regex.test( value );
+}
+
+/**
  * Allow only negative integers, not Zero and no thousands seperators
  */
 function isNegativeInt( value )

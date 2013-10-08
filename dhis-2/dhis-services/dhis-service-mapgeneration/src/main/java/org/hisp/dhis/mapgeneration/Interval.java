@@ -29,7 +29,7 @@ package org.hisp.dhis.mapgeneration;
  */
 
 import java.awt.Color;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -49,22 +49,62 @@ public class Interval
     private Color color;
 
     /**
-     * The low and high boundaries of values this interval covers.
+     * The low boundary of values this interval covers.
      */
-    private double valueLow, valueHigh;
+    private double valueLow;
+
+    /**
+     * The high boundary of values this interval covers.
+     */
+    private double valueHigh;
 
     /**
      * The map object members that fall into this interval category.
      */
     private List<InternalMapObject> members;
 
+    // -------------------------------------------------------------------------
+    // Constructors
+    // -------------------------------------------------------------------------
+
     public Interval( double valueLow, double valueHigh )
     {
         this.valueLow = valueLow;
         this.valueHigh = valueHigh;
-
-        this.members = new LinkedList<InternalMapObject>();
+        this.members = new ArrayList<InternalMapObject>();
     }
+
+    public Interval( Color color, double valueLow, double valueHigh )
+    {
+        this.color = color;
+        this.valueLow = valueLow;
+        this.valueHigh = valueHigh;
+        this.members = new ArrayList<InternalMapObject>();
+    }
+
+    // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------
+
+    /**
+     * Adds a map object to this interval category.
+     * 
+     * @param member the member to add
+     */
+    public void addMember( InternalMapObject member )
+    {
+        this.members.add( member );
+    }
+
+    @Override
+    public String toString()
+    {
+        return "[Low value: " + valueLow + ", high value: " + valueHigh + ", color: " + color + "]";
+    }
+
+    // -------------------------------------------------------------------------
+    // Getters and setters
+    // -------------------------------------------------------------------------
 
     /**
      * Gets the low value of this interval.
@@ -73,7 +113,7 @@ public class Interval
      */
     public double getValueLow()
     {
-        return this.valueLow;
+        return valueLow;
     }
 
     /**
@@ -93,7 +133,7 @@ public class Interval
      */
     public double getValueHigh()
     {
-        return this.valueHigh;
+        return valueHigh;
     }
 
     /**
@@ -113,7 +153,7 @@ public class Interval
      */
     public Color getColor()
     {
-        return this.color;
+        return color;
     }
 
     /**
@@ -127,16 +167,6 @@ public class Interval
     }
 
     /**
-     * Adds a map object to this interval category.
-     * 
-     * @param member the member to add
-     */
-    public void addMember( InternalMapObject member )
-    {
-        this.members.add( member );
-    }
-
-    /**
      * Returns a list of the members that have fallen into this interval
      * category, or null if none.
      * 
@@ -144,6 +174,6 @@ public class Interval
      */
     public List<InternalMapObject> getMembers()
     {
-        return this.members;
+        return members;
     }
 }

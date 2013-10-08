@@ -158,11 +158,11 @@ public class HibernatePatientStore
 
     @Override
     @SuppressWarnings( "unchecked" )
-    public Collection<Patient> getByOrgUnitAndNameLike( OrganisationUnit organisationUnit, String nameLike, Integer min, Integer max )
+    public Collection<Patient> getByOrgUnitAndNameLike( OrganisationUnit organisationUnit, String nameLike,
+        Integer min, Integer max )
     {
         String hql = "select p from Patient p where p.organisationUnit = :organisationUnit "
-            + " and lower(p.name) like :nameLike"
-            + " order by p.name";
+            + " and lower(p.name) like :nameLike" + " order by p.name";
 
         Query query = getQuery( hql );
         query.setEntity( "organisationUnit", organisationUnit );
@@ -370,9 +370,11 @@ public class HibernatePatientStore
 
     @Override
     public Collection<Patient> search( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer min, Integer max )
+        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer statusEnrollment, Integer min,
+        Integer max )
     {
-        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, null, min, max );
+        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, null,
+            statusEnrollment, min, max );
         Collection<Patient> patients = new HashSet<Patient>();
         try
         {
@@ -394,9 +396,11 @@ public class HibernatePatientStore
 
     @Override
     public Collection<String> getPatientPhoneNumbers( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer min, Integer max )
+        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer statusEnrollment, Integer min,
+        Integer max )
     {
-        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, null, min, max );
+        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, null,
+            statusEnrollment, min, max );
         Collection<String> phoneNumbers = new HashSet<String>();
         try
         {
@@ -420,10 +424,11 @@ public class HibernatePatientStore
     @Override
     public List<Integer> getProgramStageInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
         Boolean followup, Collection<PatientAttribute> patientAttributes,
-        Collection<PatientIdentifierType> identifierTypes, Integer min, Integer max )
+        Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min, Integer max )
     {
-        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, identifierTypes, min,
-            max );
+        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, identifierTypes,
+            statusEnrollment, min, max );
+
         List<Integer> programStageInstanceIds = new ArrayList<Integer>();
         try
         {
@@ -444,23 +449,24 @@ public class HibernatePatientStore
         return programStageInstanceIds;
     }
 
-    public int countSearch( List<String> searchKeys, Collection<OrganisationUnit> orgunits, Boolean followup )
+    public int countSearch( List<String> searchKeys, Collection<OrganisationUnit> orgunits, Boolean followup,
+        Integer statusEnrollment )
     {
-        String sql = searchPatientSql( true, searchKeys, orgunits, followup, null, null, null, null );
+        String sql = searchPatientSql( true, searchKeys, orgunits, followup, null, null, statusEnrollment, null, null );
         return jdbcTemplate.queryForObject( sql, Integer.class );
     }
 
     @Override
     public Grid getPatientEventReport( Grid grid, List<String> searchKeys, Collection<OrganisationUnit> orgunits,
         Boolean followup, Collection<PatientAttribute> patientAttributes,
-        Collection<PatientIdentifierType> identifierTypes, Integer min, Integer max )
+        Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min, Integer max )
     {
         // ---------------------------------------------------------------------
         // Get SQL and build grid
         // ---------------------------------------------------------------------
 
-        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, identifierTypes, null,
-            null );
+        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, identifierTypes,
+            statusEnrollment, null, null );
 
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet( sql );
 
@@ -475,10 +481,9 @@ public class HibernatePatientStore
 
     private String searchPatientSql( boolean count, List<String> searchKeys, Collection<OrganisationUnit> orgunits,
         Boolean followup, Collection<PatientAttribute> patientAttributes,
-        Collection<PatientIdentifierType> identifierTypes, Integer min, Integer max )
+        Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min, Integer max )
     {
         String selector = count ? "count(*) " : "* ";
-
         String sql = "select " + selector + " from ( select distinct p.patientid, p.name, p.gender, p.phonenumber,";
 
         if ( identifierTypes != null )
@@ -515,6 +520,7 @@ public class HibernatePatientStore
         boolean isSearchEvent = false;
         boolean isPriorityEvent = false;
         Collection<Integer> orgunitChilrenIds = null;
+
         if ( orgunits != null )
         {
             orgunitChilrenIds = getOrgunitChildren( orgunits );
@@ -523,6 +529,12 @@ public class HibernatePatientStore
         for ( String searchKey : searchKeys )
         {
             String[] keys = searchKey.split( "_" );
+
+            if ( keys.length <= 1 || keys[1] == null || keys[1].trim().isEmpty() || keys[1].equals( "null" ) )
+            {
+                continue;
+            }
+
             String id = keys[1];
             String value = "";
 
@@ -594,8 +606,12 @@ public class HibernatePatientStore
             }
             else if ( keys[0].equals( Patient.PREFIX_PROGRAM ) )
             {
-                sql += "(select programid from programinstance pi where patientid=p.patientid and programid=" + id
-                    + "  and pi.status=0 ) as " + Patient.PREFIX_PROGRAM + "_" + id + ",";
+                sql += "(select programid from programinstance pi where patientid=p.patientid and programid=" + id;
+                if ( statusEnrollment != null )
+                {
+                    sql += " and pi.status=" + statusEnrollment;
+                }
+                sql += " limit 1 ) as " + Patient.PREFIX_PROGRAM + "_" + id + ",";
                 otherWhere += operator + Patient.PREFIX_PROGRAM + "_" + id + "=" + id;
                 operator = " and ";
             }
@@ -691,7 +707,7 @@ public class HibernatePatientStore
                         case ProgramStageInstance.LATE_VISIT_STATUS:
                             patientWhere += condition + operatorStatus + "( psi.executiondate is null and  psi.duedate>='"
                                 + keys[2] + "' and psi.duedate<='" + keys[3]
-                                + "' and psi.status is null  and (DATE(now()) - DATE(psi.duedate) > 0) ";
+                                + "' and psi.status is not null  and (DATE(now()) - DATE(psi.duedate) > 0) ";
                             // get events by orgunit children
                             if ( keys[4].equals( "-1" ) )
                             {
@@ -796,7 +812,8 @@ public class HibernatePatientStore
                 + " inner join programstageinstance psi on " + " (psi.programinstanceid=pgi.programinstanceid) "
                 + " inner join programstage pgs on (pgs.programstageid=psi.programstageid) ";
 
-            patientGroupBy += ",psi.programstageinstanceid, pgs.name ";
+            //patientGroupBy += ",psi.programstageinstanceid, pgs.name ";
+            patientGroupBy += ",psi.programstageinstanceid, pgs.name, psi.duedate ";
 
             from = " ";
         }

@@ -397,8 +397,16 @@ public class MobileOrganisationUnitController
     @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/LWUIT/orgUnits/{id}/findLostToFollowUp" )
     @ResponseBody
     public String findLostToFollowUp( @PathVariable int id, @RequestHeader( "programId" ) String programId )
+        throws NotAllowedException
     {
-        return "";
+        return activityReportingService.findLostToFollowUp( id, programId );
+    }
+    
+    @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/LWUIT/orgUnits/{id}/findLostToFollowUpDetail" )
+    @ResponseBody
+    public Patient findLostToFollowUpDetail( @PathVariable int id, @RequestHeader( "programStageInstanceId" ) String programStageInstanceId )
+    {
+        return null;
     }
 
     // Supportive methods
