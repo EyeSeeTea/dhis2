@@ -27,7 +27,10 @@ package org.hisp.dhis.dataadmin.action.locale;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Locale;
+
 import org.hisp.dhis.i18n.I18nLocaleService;
+import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
@@ -46,12 +49,22 @@ public class ValidateLocaleAction
     private I18nLocaleService localeService;
 
     // -------------------------------------------------------------------------
-    // I18n
-    // -------------------------------------------------------------------------
-
-    // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
+
+    private String language;
+
+    public void setLanguage( String language )
+    {
+        this.language = language;
+    }
+
+    private String country;
+
+    public void setCountry( String country )
+    {
+        this.country = country;
+    }
 
     // -------------------------------------------------------------------------
     // Output
@@ -70,6 +83,13 @@ public class ValidateLocaleAction
 
     public String execute()
     {
+        I18nLocale locale = localeService.getI18nLocale( new Locale( language, country ) );
+        
+        if ( locale != null )
+        {
+            return INPUT;
+        }
+        
         return SUCCESS;
     }
 }
