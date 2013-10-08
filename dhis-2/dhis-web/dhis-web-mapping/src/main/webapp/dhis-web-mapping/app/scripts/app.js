@@ -4743,6 +4743,15 @@ Ext.onReady( function() {
 
 				return map;
 			},
+			selectGraphMap: function(map, doUpdate) {
+				this.numberOfRecords = gis.util.object.getLength(map);
+
+				for (var key in map) {
+					if (map.hasOwnProperty(key)) {
+						treePanel.multipleExpand(key, map[key], doUpdate);
+					}
+				}
+			},
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
@@ -4836,6 +4845,14 @@ Ext.onReady( function() {
 				return config.items.length ? config : null;
 			},
             listeners: {
+				load: function() {
+					if (treePanel.tmpSelection) {
+						treePanel.selectGraphMap(treePanel.tmpSelection);
+					}
+				},
+				beforeitemexpand: function() {
+					treePanel.tmpSelection = treePanel.getParentGraphMap();
+				},
 				render: function() {
 					this.rendered = true;
 				},
@@ -5259,13 +5276,7 @@ Ext.onReady( function() {
 					userOrganisationUnitGrandChildren.setValue(isOugc);
 				}
 
-				treePanel.numberOfRecords = gis.util.object.getLength(view.parentGraphMap);
-
-				for (var key in view.parentGraphMap) {
-					if (view.parentGraphMap.hasOwnProperty(key)) {
-						treePanel.multipleExpand(key, view.parentGraphMap[key], false);
-					}
-				}
+				treePanel.selectGraphMap(view.parentGraphMap);
 			}();
 
 			setLayerGui = function() {
@@ -5553,6 +5564,15 @@ Ext.onReady( function() {
 
 				return map;
 			},
+			selectGraphMap: function(map, doUpdate) {
+				this.numberOfRecords = gis.util.object.getLength(map);
+
+				for (var key in map) {
+					if (map.hasOwnProperty(key)) {
+						treePanel.multipleExpand(key, map[key], doUpdate);
+					}
+				}
+			},
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
@@ -5646,6 +5666,14 @@ Ext.onReady( function() {
 				return config.items.length ? config : null;
 			},
             listeners: {
+				load: function() {
+					if (treePanel.tmpSelection) {
+						treePanel.selectGraphMap(treePanel.tmpSelection);
+					}
+				},
+				beforeitemexpand: function() {
+					treePanel.tmpSelection = treePanel.getParentGraphMap();
+				},
 				render: function() {
 					this.rendered = true;
 				},
@@ -5959,13 +5987,7 @@ Ext.onReady( function() {
 					userOrganisationUnitGrandChildren.setValue(isOugc);
 				}
 
-				treePanel.numberOfRecords = gis.util.object.getLength(view.parentGraphMap);
-
-				for (var key in view.parentGraphMap) {
-					if (view.parentGraphMap.hasOwnProperty(key)) {
-						treePanel.multipleExpand(key, view.parentGraphMap[key], false);
-					}
-				}
+				treePanel.selectGraphMap(view.parentGraphMap);
 
 				// Area radius
 				areaRadius.setValue(!!view.areaRadius, !!view.areaRadius ? view.areaRadius : null);
