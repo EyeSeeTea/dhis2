@@ -295,7 +295,7 @@ Ext.onReady( function() {
 
 				w.hasDestroyOnBlurHandler = true;
 			};
-		
+
 			util.gui.window.setAnchorPosition = function(w, target) {
 				var vpw = gis.viewport.getWidth(),
 					targetx = target ? target.getPosition()[0] : 4,
@@ -309,41 +309,44 @@ Ext.onReady( function() {
 					w.setPosition(targetx, y);
 				}
 			};
-		
+
 			util.layout = {};
-			
+
 			util.layout.getAnalytical = function(map) {
 				var layout,
+					view,
 					id;
-					
-				map = map || gis.map;
-				
-				if (!(Ext.isObject(map) && Ext.isArray(map.mapViews) && map.mapViews.length)) {
-					return;
-				}
-				
-				for (var key in gis.layer) {
-					if (gis.layer.hasOwnProperty(key) && gis.layer[key].layerCategory === gis.conf.finals.layer.category_thematic) {
-						id = gis.layer[key].id;
-						
-						for (var j = 0, view; j < map.mapViews.length; j++) {
-							view = map.mapViews[j];
-							
-							if (view.layer === id) {
-								layout = gis.api.layout.Layout(Ext.clone(view));
-								
-								if (layout) {
-									return layout;
-								}
+
+				if (Ext.isObject(map) && Ext.isArray(map.mapViews) && map.mapViews.length) {
+					for (var i = 0; i < map.mapViews.length; i++) {
+						view = map.mapViews[i];
+						id = view.layer;
+
+						if (gis.layer.hasOwnProperty(id) && gis.layer[id].layerCategory === gis.conf.finals.layer.category_thematic) {
+							layout = gis.api.layout.Layout(Ext.clone(view));
+
+							if (layout) {
+								return layout;
 							}
 						}
 					}
 				}
-				
+				else {
+					for (var key in gis.layer) {
+						if (gis.layer.hasOwnProperty(key) && gis.layer[key].layerCategory === gis.conf.finals.layer.category_thematic && gis.layer[key].core.view) {
+							layout = gis.api.layout.Layout(Ext.clone(gis.layer[key].core.view));
+
+							if (layout) {
+								return layout;
+							}
+						}
+					}
+				}
+
 				return;
 			};
-		
-			util.layout.setSessionStorage = function(obj, session, url) {
+
+			util.layout.setSessionStorage = function(session, obj, url) {
 				if (GIS.isSessionStorage) {
 					var dhis2 = JSON.parse(sessionStorage.getItem('dhis2')) || {};
 					dhis2[session] = obj;
@@ -358,17 +361,17 @@ Ext.onReady( function() {
 
 		// init
 		(function() {
-			
+
 			// root nodes
 			for (var i = 0; i < init.rootNodes.length; i++) {
 				init.rootNodes[i].path = '/root/' + init.rootNodes[i].id;
 			}
-			
+
 			// sort indicator groups
 			gis.util.object.sortObjectsByString(init.indicatorGroups);
-			
+
 			// sort data element groups
-			gis.util.object.sortObjectsByString(init.dataElementGroups);			
+			gis.util.object.sortObjectsByString(init.dataElementGroups);
 		}());
 
 		// store
@@ -606,11 +609,11 @@ Ext.onReady( function() {
 			getValue: function() {
 				return this.checkbox.getValue();
 			},
-			setValue: function(value, opacity) {				
+			setValue: function(value, opacity) {
 				this.checkbox.setValue(value);
 				this.numberField.setDisabled(!value);
 				this.layer.setVisibility(value);
-				
+
 				if (value) {
 					opacity = Ext.isNumber(parseFloat(opacity)) ? parseFloat(opacity) : this.opacity;
 
@@ -630,7 +633,7 @@ Ext.onReady( function() {
 			setOpacity: function(opacity) {
 				this.opacity = opacity === 0 ? 0.01 : opacity;
 				this.layer.setLayerOpacity(this.opacity);
-				
+
 				if (this.layer.circleLayer) {
 					this.layer.circleLayer.setOpacity(this.opacity);
 				}
@@ -1034,12 +1037,12 @@ Ext.onReady( function() {
 				show: function() {
 					if (!this.isRendered) {
 						this.isRendered = true;
-						
-						if (this.view) {
-							this.widget.setGui(this.view);
+
+						if (layer.core.view) {
+							this.widget.setGui(layer.core.view);
 						}
 					}
-					
+
 					gis.util.gui.window.setPositionTopLeft(this);
 				}
 			}
@@ -1742,7 +1745,7 @@ Ext.onReady( function() {
 		userGroupRowContainer = Ext.create('Ext.container.Container', {
 			bodyStyle: 'border:0 none'
 		});
-		
+
 		if (sharing.meta.allowExternalAccess) {
 			externalAccess = userGroupRowContainer.add({
 				xtype: 'checkbox',
@@ -1864,7 +1867,7 @@ Ext.onReady( function() {
 		// Vars
 			windowWidth = 500,
 			windowCmpWidth = windowWidth - 22,
-			
+
 			dimConf = gis.conf.finals.dimension;
 
 		gis.store.maps.on('load', function(store, records) {
@@ -1924,7 +1927,7 @@ Ext.onReady( function() {
 									for (var j = 0; j < view.columns.length; j++) {
 										for (var k = 0, item; k < view.columns[j].items.length; k++) {
 											item = view.columns[j].items[k];
-											
+
 											if (item.id.indexOf('-') !== -1) {
 												item.id = item.id.replace('-', '.');
 											}
@@ -3201,10 +3204,10 @@ Ext.onReady( function() {
 				var moduleUrl = gis.init.contextPath + '/dhis-web-mapping/app/index.html?id=' + gis.map.id,
 					apiUrl = gis.init.contextPath + '/api/maps/' + gis.map.id + '/data.html',
 					html = '';
-					
+
 				html += '<div><b>GIS link: </b><span class="user-select"><a href="' + moduleUrl + '" target="_blank">' + moduleUrl + '</a></span></div>';
 				html += '<div style="padding-top:3px"><b>API link: </b><span class="user-select"><a href="' + apiUrl + '" target="_blank">' + apiUrl + '</a></span></div>';
-				
+
 				return html;
 			}(),
 			style: 'padding-top: 8px; padding-bottom: 5px'
@@ -3311,7 +3314,7 @@ Ext.onReady( function() {
 		var infrastructuralDataElementValuesStore,
 
 		// Components
-		
+
 			treePanel,
 			userOrganisationUnit,
 			userOrganisationUnitChildren,
@@ -3418,31 +3421,18 @@ Ext.onReady( function() {
 					}
 				});
 			},
-			selectByGroup: function(id) {
-				if (id) {
-					var url = gis.init.contextPath + gis.conf.finals.url.path_module + gis.conf.finals.url.organisationunit_getbygroup,
-						params = {id: id};
-					this.select(url, params);
-				}
-			},
-			selectByLevel: function(level) {
-				if (level) {
-					var url = gis.init.contextPath + gis.conf.finals.url.path_module + gis.conf.finals.url.organisationunit_getbylevel,
-						params = {level: level};
-					this.select(url, params);
-				}
-			},
-			selectByIds: function(ids) {
-				if (ids) {
-					var url = gis.init.contextPath + gis.conf.finals.url.path_module + gis.conf.finals.url.organisationunit_getbyids;
-					Ext.Array.each(ids, function(item) {
-						url = Ext.String.urlAppend(url, 'ids=' + item);
-					});
-					if (!this.rendered) {
-						gis.cmp.dimension.organisationUnit.panel.expand();
+			getParentGraphMap: function() {
+				var selection = this.getSelectionModel().getSelection(),
+					map = {};
+
+				if (Ext.isArray(selection) && selection.length) {
+					for (var i = 0, pathArray, key; i < selection.length; i++) {
+						pathArray = selection[i].getPath().split('/');
+						map[pathArray.pop()] = pathArray.join('/');
 					}
-					this.select(url);
 				}
+
+				return map;
 			},
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
@@ -3646,7 +3636,7 @@ Ext.onReady( function() {
 				if (!param) {
 					return;
 				}
-				
+
 				var items = this.items.items;
 				this.menuValue = param;
 
@@ -3744,22 +3734,22 @@ Ext.onReady( function() {
 
 			// Item
 			layer.item.setValue(false);
-			
+
 			if (!layer.window.isRendered) {
 				return;
 			}
 
 			// Components
 			toolMenu.clickHandler(toolMenu.menuValue);
-			
+
 			if (!skipTree) {
 				treePanel.reset();
 			}
-			
+
 			userOrganisationUnit.setValue(false);
 			userOrganisationUnitChildren.setValue(false);
 			userOrganisationUnitGrandChildren.setValue(false);
-			
+
 			organisationUnitLevel.clearValue();
 			organisationUnitGroup.clearValue();
 
@@ -3783,21 +3773,20 @@ Ext.onReady( function() {
 				groups = [],
 				setWidgetGui,
 				setLayerGui;
-				
+
 			setWidgetGui = function() {
-				
-				// Components			
+
+				// Components
 				if (!layer.window.isRendered) {
-					layer.window.view = view;
 					return;
 				}
-				
+
 				reset(true);
 
 				// Organisation units
 				for (var i = 0, item; i < ouDim.items.length; i++) {
 					item = ouDim.items[i];
-					
+
 					if (item.id === 'USER_ORGUNIT') {
 						isOu = true;
 					}
@@ -3829,16 +3818,16 @@ Ext.onReady( function() {
 					userOrganisationUnitChildren.setValue(isOuc);
 					userOrganisationUnitGrandChildren.setValue(isOugc);
 				}
-				
+
 				treePanel.numberOfRecords = gis.util.object.getLength(view.parentGraphMap);
-				
+
 				for (var key in view.parentGraphMap) {
 					if (view.parentGraphMap.hasOwnProperty(key)) {
 						treePanel.multipleExpand(key, view.parentGraphMap[key], false);
 					}
 				}
 			}();
-			
+
 			setLayerGui = function() {
 
 				// Layer item
@@ -3851,13 +3840,13 @@ Ext.onReady( function() {
 
 		getView = function(config) {
 			var view = {};
-			
+
 			view.rows = [treePanel.getDimension()];
-			
+
 			return validateView(view);
 		};
 
-		validateView = function(view) {			
+		validateView = function(view) {
 			if (!(Ext.isArray(view.rows) && view.rows.length && Ext.isString(view.rows[0].dimension) && Ext.isArray(view.rows[0].items) && view.rows[0].items.length)) {
 				GIS.logg.push([view.rows, layer.id + '.rows: dimension array']);
 				alert('No organisation units selected');
@@ -3960,7 +3949,7 @@ Ext.onReady( function() {
 			colorHigh,
 			radiusLow,
 			radiusHigh,
-			
+
 			treePanel,
 			userOrganisationUnit,
 			userOrganisationUnitChildren,
@@ -4298,7 +4287,7 @@ Ext.onReady( function() {
 			listeners: {
 				select: function() {
 					indicator.clearValue();
-					
+
 					indicator.store.proxy.url = gis.init.contextPath + gis.conf.finals.url.path_api +  'indicatorGroups/' + this.getValue() + '.json?links=false&paging=false';
 					indicator.store.load();
 				}
@@ -4724,31 +4713,18 @@ Ext.onReady( function() {
 					}
 				});
 			},
-			selectByGroup: function(id) {
-				if (id) {
-					var url = gis.init.contextPath + gis.conf.finals.url.path_module + gis.conf.finals.url.organisationunit_getbygroup,
-						params = {id: id};
-					this.select(url, params);
-				}
-			},
-			selectByLevel: function(level) {
-				if (level) {
-					var url = gis.init.contextPath + gis.conf.finals.url.path_module + gis.conf.finals.url.organisationunit_getbylevel,
-						params = {level: level};
-					this.select(url, params);
-				}
-			},
-			selectByIds: function(ids) {
-				if (ids) {
-					var url = gis.init.contextPath + gis.conf.finals.url.path_module + gis.conf.finals.url.organisationunit_getbyids;
-					Ext.Array.each(ids, function(item) {
-						url = Ext.String.urlAppend(url, 'ids=' + item);
-					});
-					if (!this.rendered) {
-						gis.cmp.dimension.organisationUnit.panel.expand();
+			getParentGraphMap: function() {
+				var selection = this.getSelectionModel().getSelection(),
+					map = {};
+
+				if (Ext.isArray(selection) && selection.length) {
+					for (var i = 0, pathArray, key; i < selection.length; i++) {
+						pathArray = selection[i].getPath().split('/');
+						map[pathArray.pop()] = pathArray.join('/');
 					}
-					this.select(url);
 				}
+
+				return map;
 			},
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
@@ -4950,7 +4926,7 @@ Ext.onReady( function() {
 				if (!param) {
 					return;
 				}
-				
+
 				var items = this.items.items;
 				this.menuValue = param;
 
@@ -5120,22 +5096,22 @@ Ext.onReady( function() {
 				layer.labelWindow = null;
 			}
 
-			// Components			
+			// Components
 			if (!layer.window.isRendered) {
 				return;
 			}
-			
+
 			valueType.reset();
 			valueTypeToggler(dimConf.indicator.objectName);
 
 			indicatorGroup.clearValue();
 			indicator.clearValue();
 			indicator.store.removeAll();
-			
+
 			dataElementGroup.clearValue();
 			dataElement.clearValue();
 			dataElement.store.removeAll();
-			
+
 			dataSet.clearValue();
 			dataSet.store.removeAll();
 
@@ -5147,24 +5123,24 @@ Ext.onReady( function() {
 			legendTypeToggler(gis.conf.finals.widget.legendtype_automatic);
 			legendSet.clearValue();
 			legendSet.store.removeAll();
-			
+
 			classes.reset();
 			method.reset();
 			colorLow.reset();
 			colorHigh.reset();
 			radiusLow.reset();
 			radiusHigh.reset();
-			
+
 			toolMenu.clickHandler(toolMenu.menuValue);
-			
+
 			if (!skipTree) {
 				treePanel.reset();
 			}
-			
+
 			userOrganisationUnit.setValue(false);
 			userOrganisationUnitChildren.setValue(false);
 			userOrganisationUnitGrandChildren.setValue(false);
-			
+
 			organisationUnitLevel.clearValue();
 			organisationUnitGroup.clearValue();
 		};
@@ -5183,43 +5159,42 @@ Ext.onReady( function() {
 				groups = [],
 				setLayerGui,
 				setWidgetGui;
-				
+
 			objectNameCmpMap[dimConf.indicator.objectName] = indicator;
 			objectNameCmpMap[dimConf.dataElement.objectName] = dataElement;
 			objectNameCmpMap[dimConf.operand.objectName] = dataElement;
 			objectNameCmpMap[dimConf.dataSet.objectName] = dataSet;
-			
+
 			setWidgetGui = function() {
-				
-				// Components			
+
+				// Components
 				if (!layer.window.isRendered) {
-					layer.window.view = view;
 					return;
 				}
-				
+
 				// Reset
 				reset(true);
 
 				// Value type
 				valueType.setValue(vType);
-				valueTypeToggler(vType);			
-				
+				valueTypeToggler(vType);
+
 				if (vType === dimConf.dataElement.objectName) {
 					dataElementDetailLevel.setValue(dxDim.dimension);
 				}
-				
+
 				// Data
 				objectNameCmpMap[dxDim.dimension].store.add(dxDim.items[0]);
 				objectNameCmpMap[dxDim.dimension].setValue(dxDim.items[0].id);
-				
+
 				// Period
 				period.store.add(peDim.items[0])
 				period.setValue(peDim.items[0].id);
-				
+
 				// Legend
 				legendType.setValue(lType);
 				legendTypeToggler(lType);
-				
+
 				if (lType === gis.conf.finals.widget.legendtype_automatic) {
 					classes.setValue(view.classes);
 					method.setValue(view.method);
@@ -5236,7 +5211,7 @@ Ext.onReady( function() {
 				// Organisation units
 				for (var i = 0, item; i < ouDim.items.length; i++) {
 					item = ouDim.items[i];
-					
+
 					if (item.id === 'USER_ORGUNIT') {
 						isOu = true;
 					}
@@ -5268,16 +5243,16 @@ Ext.onReady( function() {
 					userOrganisationUnitChildren.setValue(isOuc);
 					userOrganisationUnitGrandChildren.setValue(isOugc);
 				}
-				
+
 				treePanel.numberOfRecords = gis.util.object.getLength(view.parentGraphMap);
-				
+
 				for (var key in view.parentGraphMap) {
 					if (view.parentGraphMap.hasOwnProperty(key)) {
 						treePanel.multipleExpand(key, view.parentGraphMap[key], false);
 					}
 				}
 			}();
-			
+
 			setLayerGui = function() {
 
 				// Layer item
@@ -5290,14 +5265,14 @@ Ext.onReady( function() {
 				if (layer.filterWindow && layer.filterWindow.isVisible()) {
 					layer.filterWindow.filter();
 				}
-			}();			
+			}();
 		};
 
 		getView = function(config) {
 			var vType = valueType.getValue() === dimConf.dataElement.objectName ? dataElementDetailLevel.getValue() : valueType.getValue(),
 				objectNameCmpMap = {},
 				view = {};
-				
+
 			objectNameCmpMap[dimConf.indicator.objectName] = indicator;
 			objectNameCmpMap[dimConf.dataElement.objectName] = dataElement;
 			objectNameCmpMap[dimConf.operand.objectName] = dataElement;
@@ -5309,16 +5284,16 @@ Ext.onReady( function() {
 					id: objectNameCmpMap[vType].getValue()
 				}]
 			}];
-			
+
 			view.rows = [treePanel.getDimension()];
-			
+
 			view.filters = [{
 				dimension: dimConf.period.objectName,
 				items: [{
 					id: period.getValue()
 				}]
 			}];
-			
+
 			view.classes = parseInt(classes.getValue());
 			view.method = parseInt(method.getValue());
 			view.colorLow = colorLow.getValue();
@@ -5326,7 +5301,7 @@ Ext.onReady( function() {
 			view.radiusLow = parseInt(radiusLow.getValue());
 			view.radiusHigh = parseInt(radiusHigh.getValue());
 			view.opacity = layer.item.getOpacity();
-			
+
 			if (legendType.getValue() === gis.conf.finals.widget.legendtype_predefined && legendSet.getValue()) {
 				view.legendSet = {
 					id: legendSet.getValue()
@@ -5422,7 +5397,7 @@ Ext.onReady( function() {
 
 		// Components
 			groupSet,
-			
+
 			treePanel,
 			userOrganisationUnit,
 			userOrganisationUnitChildren,
@@ -5432,11 +5407,11 @@ Ext.onReady( function() {
 			toolMenu,
 			tool,
 			toolPanel,
-			
+
 			areaRadius,
 
 		// Functions
-		
+
 			//createSelectHandlers,
 			reset,
 			setGui,
@@ -5547,31 +5522,18 @@ Ext.onReady( function() {
 					}
 				});
 			},
-			selectByGroup: function(id) {
-				if (id) {
-					var url = gis.init.contextPath + gis.conf.finals.url.path_module + gis.conf.finals.url.organisationunit_getbygroup,
-						params = {id: id};
-					this.select(url, params);
-				}
-			},
-			selectByLevel: function(level) {
-				if (level) {
-					var url = gis.init.contextPath + gis.conf.finals.url.path_module + gis.conf.finals.url.organisationunit_getbylevel,
-						params = {level: level};
-					this.select(url, params);
-				}
-			},
-			selectByIds: function(ids) {
-				if (ids) {
-					var url = gis.init.contextPath + gis.conf.finals.url.path_module + gis.conf.finals.url.organisationunit_getbyids;
-					Ext.Array.each(ids, function(item) {
-						url = Ext.String.urlAppend(url, 'ids=' + item);
-					});
-					if (!this.rendered) {
-						gis.cmp.dimension.organisationUnit.panel.expand();
+			getParentGraphMap: function() {
+				var selection = this.getSelectionModel().getSelection(),
+					map = {};
+
+				if (Ext.isArray(selection) && selection.length) {
+					for (var i = 0, pathArray, key; i < selection.length; i++) {
+						pathArray = selection[i].getPath().split('/');
+						map[pathArray.pop()] = pathArray.join('/');
 					}
-					this.select(url);
 				}
+
+				return map;
 			},
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
@@ -5775,7 +5737,7 @@ Ext.onReady( function() {
 				if (!param) {
 					return;
 				}
-				
+
 				var items = this.items.items;
 				this.menuValue = param;
 
@@ -5898,23 +5860,23 @@ Ext.onReady( function() {
 				layer.circleLayer = null;
 			}
 
-			// Components			
+			// Components
 			if (!layer.window.isRendered) {
 				return;
 			}
-			
+
 			groupSet.clearValue();
-			
+
 			toolMenu.clickHandler(toolMenu.menuValue);
-			
+
 			if (!skipTree) {
 				treePanel.reset();
 			}
-			
+
 			userOrganisationUnit.setValue(false);
 			userOrganisationUnitChildren.setValue(false);
 			userOrganisationUnitGrandChildren.setValue(false);
-			
+
 			organisationUnitLevel.clearValue();
 			organisationUnitGroup.clearValue();
 
@@ -5930,17 +5892,16 @@ Ext.onReady( function() {
 				groups = [],
 				setWidgetGui,
 				setLayerGui;
-				
+
 			setWidgetGui = function() {
-			
-				// Components			
+
+				// Components
 				if (!layer.window.isRendered) {
-					layer.window.view = view;
 					return;
 				}
-				
+
 				reset(true);
-					
+
 				// Group set
 				groupSet.store.removeAll();
 				groupSet.store.add(view.organisationUnitGroupSet);
@@ -5949,7 +5910,7 @@ Ext.onReady( function() {
 				// Organisation units
 				for (var i = 0, item; i < ouDim.items.length; i++) {
 					item = ouDim.items[i];
-					
+
 					if (item.id === 'USER_ORGUNIT') {
 						isOu = true;
 					}
@@ -5981,19 +5942,19 @@ Ext.onReady( function() {
 					userOrganisationUnitChildren.setValue(isOuc);
 					userOrganisationUnitGrandChildren.setValue(isOugc);
 				}
-				
+
 				treePanel.numberOfRecords = gis.util.object.getLength(view.parentGraphMap);
-				
+
 				for (var key in view.parentGraphMap) {
 					if (view.parentGraphMap.hasOwnProperty(key)) {
 						treePanel.multipleExpand(key, view.parentGraphMap[key], false);
 					}
 				}
-				
+
 				// Area radius
 				areaRadius.setValue(!!view.areaRadius, !!view.areaRadius ? view.areaRadius : null);
 			}();
-			
+
 			setLayerGui = function() {
 
 				// Layer item
@@ -6011,19 +5972,19 @@ Ext.onReady( function() {
 
 		getView = function(config) {
 			var view = {};
-			
+
 			view.layer = layer.id;
-			
+
 			view.rows = [treePanel.getDimension()];
-			
+
 			view.organisationUnitGroupSet = {
 				id: groupSet.getValue()
 			};
-			
+
 			view.areaRadius = areaRadius.getValue() ? areaRadius.getNumber() : null;
-			
+
 			view.opacity = layer.item.getOpacity();
-			
+
 			return validateView(view);
 		};
 
@@ -6033,7 +5994,7 @@ Ext.onReady( function() {
 				alert(GIS.i18n.no_groupset_selected);
 				return false;
 			}
-			
+
 			if (!(Ext.isArray(view.rows) && view.rows.length && Ext.isString(view.rows[0].dimension) && Ext.isArray(view.rows[0].items) && view.rows[0].items.length)) {
 				GIS.logg.push([view.rows, layer.id + '.rows: dimension array']);
 				alert('No organisation units selected');
@@ -6132,7 +6093,7 @@ Ext.onReady( function() {
 
 		defaultButton = Ext.create('Ext.button.Button', {
 			text: GIS.i18n.map,
-			iconCls: 'gis-button-icon-table',
+			iconCls: 'gis-button-icon-map',
 			toggleGroup: 'module',
 			pressed: true,
 			handler: function() {
@@ -6141,7 +6102,7 @@ Ext.onReady( function() {
 				}
 			}
 		});
-		
+
 		centerRegion = new GeoExt.panel.Map({
 			region: 'center',
 			map: gis.olmap,
@@ -6273,6 +6234,8 @@ Ext.onReady( function() {
 						toggleGroup: 'module',
 						menu: {},
 						handler: function(b) {
+var a = gis.util.layout.getAnalytical();
+
 							b.menu = Ext.create('Ext.menu.Menu', {
 								closeAction: 'destroy',
 								shadow: false,
@@ -6289,19 +6252,19 @@ Ext.onReady( function() {
 									{
 										text: 'Open this map as table' + '&nbsp;&nbsp;', //i18n
 										cls: 'gis-menu-item-noicon',
-										disabled: !GIS.isSessionStorage || !gis.util.layout.getAnalytical(),
+										disabled: !(GIS.isSessionStorage && gis.util.layout.getAnalytical()),
 										handler: function() {
 											if (GIS.isSessionStorage) {
-												gis.util.layout.setSessionStorage(gis.util.layout.getAnalytical(), 'analytical', gis.init.contextPath + '/dhis-web-pivot/app/index.html?s=analytical');
+												gis.util.layout.setSessionStorage('analytical', gis.util.layout.getAnalytical(), gis.init.contextPath + '/dhis-web-pivot/app/index.html?s=analytical');
 											}
 										}
 									},
 									{
 										text: 'Open last table' + '&nbsp;&nbsp;', //i18n
 										cls: 'gis-menu-item-noicon',
-										disabled: !(GIS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['chart']),
+										disabled: !(GIS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['table']),
 										handler: function() {
-											window.location.href = gis.init.contextPath + '/dhis-web-pivot/app/index.html?s=chart';
+											window.location.href = gis.init.contextPath + '/dhis-web-pivot/app/index.html?s=table';
 										}
 									}
 								],
@@ -6348,7 +6311,7 @@ Ext.onReady( function() {
 										disabled: !GIS.isSessionStorage || !gis.util.layout.getAnalytical(),
 										handler: function() {
 											if (GIS.isSessionStorage) {
-												gis.util.layout.setSessionStorage(gis.util.layout.getAnalytical(), 'analytical', gis.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
+												gis.util.layout.setSessionStorage('analytical', gis.util.layout.getAnalytical(), gis.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
 											}
 										}
 									},
@@ -6549,7 +6512,7 @@ Ext.onReady( function() {
 				};
 				GIS.core.MapLoader(gis).load();
 			}
-			else if (Ext.isString(session) && GIS.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {				
+			else if (Ext.isString(session) && GIS.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
 				layout = gis.api.layout.Layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]);
 
 				if (layout) {
@@ -6643,7 +6606,7 @@ Ext.onReady( function() {
 
 				GIS.app.extendInstance(gis);
 
-				gis.viewport = createViewport();				
+				gis.viewport = createViewport();
 console.log("gis", gis);
 			}
 		});
