@@ -228,7 +228,8 @@ Ext.onReady( function() {
 				drill,
 				menu,
 				selectHandlers,
-				isPoint = feature.geometry.CLASS_NAME === gis.conf.finals.openLayers.point_classname;
+				isPoint = feature.geometry.CLASS_NAME === gis.conf.finals.openLayers.point_classname,
+				att = feature.attributes;
 
 			// Relocate
 			showRelocate = function() {
@@ -245,7 +246,7 @@ Ext.onReady( function() {
 						this.setWidth(this.getWidth() < minWidth ? minWidth : this.getWidth());
 					},
 					items: {
-						html: feature.attributes.name,
+						html: att.name,
 						cls: 'gis-container-inner'
 					},
 					bbar: [
@@ -280,7 +281,7 @@ Ext.onReady( function() {
 				Ext.Ajax.request({
 					url: gis.init.contextPath + gis.conf.finals.url.path_module + 'getFacilityInfo.action',
 					params: {
-						id: feature.attributes.id
+						id: att.id
 					},
 					success: function(r) {
 						var ou = Ext.decode(r.responseText);
@@ -305,8 +306,8 @@ Ext.onReady( function() {
 									items: function() {
 										var a = [];
 
-										if (feature.attributes.name) {
-											a.push({html: GIS.i18n.name, cls: 'gis-panel-html-title'}, {html: feature.attributes.name, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
+										if (att.name) {
+											a.push({html: GIS.i18n.name, cls: 'gis-panel-html-title'}, {html: att.name, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
 										}
 
 										if (ou.pa) {
@@ -367,7 +368,7 @@ Ext.onReady( function() {
 													layer.widget.infrastructuralDataElementValuesStore.load({
 														params: {
 															periodId: infrastructuralPeriod,
-															organisationUnitId: feature.attributes.internalId
+															organisationUnitId: att.internalId
 														}
 													});
 												}
@@ -411,7 +412,7 @@ Ext.onReady( function() {
 										infrastructuralDataElementValuesStore.load({
 											params: {
 												periodId: infrastructuralPeriod,
-												organisationUnitId: feature.attributes.internalId
+												organisationUnitId: att.internalId
 											}
 										});
 									}
@@ -426,19 +427,21 @@ Ext.onReady( function() {
 			};
 
 			// Drill or float
-			drill = function(parent, level) {
+			drill = function(parentId, parentGraph, level) {
 				var view = Ext.clone(layer.core.view),
-					items,
 					loader;
 
-				items = [
-					{id: parent},
-					{id: 'LEVEL-' + level}
-				];
+				// parent graph map
+				view.parentGraphMap = {};
+				view.parentGraphMap[parentId] = parentGraph;
 
+				// dimension
 				view.rows = [{
 					dimension: dimConf.organisationUnit.objectName,
-					items: items
+					items: [
+						{id: parentId},
+						{id: 'LEVEL-' + level}
+					]
 				}];
 
 				if (view) {
@@ -455,18 +458,18 @@ Ext.onReady( function() {
 				Ext.create('Ext.menu.Item', {
 					text: 'Float up',
 					iconCls: 'gis-menu-item-icon-float',
-					disabled: !feature.attributes.hasCoordinatesUp,
+					disabled: !att.hasCoordinatesUp,
 					handler: function() {
-						drill(feature.attributes.grandParentId, parseInt(feature.attributes.level) - 1);
+						drill(att.grandParentId, att.grandParentParentGraph, parseInt(att.level) - 1);
 					}
 				}),
 				Ext.create('Ext.menu.Item', {
 					text: 'Drill down',
 					iconCls: 'gis-menu-item-icon-drill',
 					cls: 'gis-menu-item-first',
-					disabled: !feature.attributes.hasCoordinatesDown,
+					disabled: !att.hasCoordinatesDown,
 					handler: function() {
-						drill(feature.attributes.id, parseInt(feature.attributes.level) + 1);
+						drill(att.id, att.parentGraph, parseInt(att.level) + 1);
 					}
 				})
 			];
@@ -1350,7 +1353,6 @@ Ext.onReady( function() {
 			};
 
 			fn = function() {
-
 				addNames(gis.response);
 
 				// Classification options
