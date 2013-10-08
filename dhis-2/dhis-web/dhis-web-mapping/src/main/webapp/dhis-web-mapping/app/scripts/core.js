@@ -434,7 +434,7 @@ Ext.onReady( function() {
 				// parent graph map
 				view.parentGraphMap = {};
 				view.parentGraphMap[parentId] = parentGraph;
-
+console.log(view.parentGraphMap);
 				// dimension
 				view.rows = [{
 					dimension: dimConf.organisationUnit.objectName,
@@ -1943,7 +1943,7 @@ Ext.onReady( function() {
 							level: doc.geojson[i].le,
 							grandParentParentGraph: doc.geojson[i].gppg,
 							grandParentId: doc.geojson[i].gpuid,
-							path: doc.geojson[i].path,
+							parentGraph: doc.geojson[i].parentGraph,
 							parentId: doc.geojson[i].pi,
 							parentName: doc.geojson[i].pn
 						}
