@@ -7,7 +7,6 @@
 	"ruleType": "$!encoder.jsonEncode( ${validationRule.ruleType} )",
 	"organisationUnitLevel": "$!encoder.jsonEncode( ${validationRule.organisationUnitLevel} )",
 	"periodType": "$!encoder.jsonEncode( ${validationRule.periodType} )",
-	"periodExtent": "$!encoder.jsonEncode( ${validationRule.periodExtent} )",
 	"sequentialSampleCount": "$!encoder.jsonEncode( ${validationRule.sequentialSampleCount} )",
 	"annualSampleCount": "$!encoder.jsonEncode( ${validationRule.annualSampleCount} )",
 	"highOutliers": "$!encoder.jsonEncode( ${validationRule.highOutliers} )",

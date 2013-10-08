@@ -45,8 +45,6 @@
     <many-to-one name="periodType" class="org.hisp.dhis.period.PeriodType" column="periodtypeid"
       foreign-key="fk_validationrule_periodtypeid" />
 
-    <property name="periodExtent" column="periodextent" />
-    
     <property name="sequentialSampleCount" column="sequentialsamplecount" />
     
     <property name="annualSampleCount" column="annualsamplecount" />

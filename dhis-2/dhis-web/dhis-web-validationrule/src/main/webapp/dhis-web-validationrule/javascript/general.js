@@ -17,9 +17,6 @@ function showValidationRuleDetails( validationId )
 			var organisationUnitLevel = string( json.validationRule.organisationUnitLevel );
 			setText( 'organisationUnitLevelField', organisationUnitLevel ? organisationUnitLevel : '[' + i18n_none + ']' );
 			
-			var periodExtent = string( json.validationRule.periodExtent );
-			setText( 'periodExtentField', periodExtent ? periodExtent : '[' + i18n_none + ']' );
-			
 			var sequentialSampleCount = string( json.validationRule.sequentialSampleCount );
 			setText( 'sequentialSampleCountField', sequentialSampleCount ? sequentialSampleCount : '[' + i18n_none + ']' );
 			
@@ -33,7 +30,6 @@ function showValidationRuleDetails( validationId )
 			setText( 'lowOutliersField', lowOutliers ? lowOutliers : '[' + i18n_none + ']' );
 
 			document.getElementById('organisationUnitLevelP').style.display = '';
-			document.getElementById('periodExtentP').style.display = '';
 			document.getElementById('sequentialSampleCountP').style.display = '';
 			document.getElementById('annualSampleCountP').style.display = '';
 			document.getElementById('highOutliersP').style.display = '';
@@ -42,7 +38,6 @@ function showValidationRuleDetails( validationId )
 		} else {
 
 			document.getElementById('organisationUnitLevelP').style.display = 'none';
-			document.getElementById('periodExtentP').style.display = 'none';
 			document.getElementById('sequentialSampleCountP').style.display = 'none';
 			document.getElementById('annualSampleCountP').style.display = 'none';
 			document.getElementById('highOutliersP').style.display = 'none';

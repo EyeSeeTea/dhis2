@@ -54,10 +54,6 @@
 			<img title="$i18n.getString('clear_expression')" onclick='setNullExpression();' src='../images/edit-clear.png' style='width: 20px;cursor:pointer' />
 		</td>
 	</tr>
-	<tr id="periodExtentTR" style="display:none">
-		<td><label for="periodExtent">$encoder.htmlEncode( $i18n.getString( "period_extent" ) )</label></td>
-		<td><input type="text" id="periodExtent" name="periodExtent"></td>
-	</tr>
 	<tr id="sequentialSampleCountTR" style="display:none">
 		<td><label for="sequentialSampleCount">$encoder.htmlEncode( $i18n.getString( "sequential_sample_count" ) )</label></td>
 		<td><input type="text" id="sequentialSampleCount" name="sequentialSampleCount"></td>

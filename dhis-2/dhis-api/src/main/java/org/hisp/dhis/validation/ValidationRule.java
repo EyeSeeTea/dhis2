@@ -28,13 +28,11 @@ package org.hisp.dhis.validation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
@@ -42,12 +40,18 @@ import org.hisp.dhis.common.adapter.JacksonPeriodTypeDeserializer;
 import org.hisp.dhis.common.adapter.JacksonPeriodTypeSerializer;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.Operator;
 import org.hisp.dhis.period.PeriodType;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * @author Kristian Nordal
@@ -71,34 +75,79 @@ public class ValidationRule
     public static final String TYPE_STATISTICAL = "statistical";
     public static final String TYPE_ABSOLUTE = "absolute";
 
+    /**
+     * A description of the ValidationRule.
+     */
     private String description;
 
+    /**
+     * The user-assigned importance of this rule (e.g. high, medium or low).
+     */
     private String importance;
     
+    /**
+     * Whether this is a VALIDATION or MONITORING type rule.
+     */
     private String ruleType;
 
+    /**
+     * Whether this is a STATISTICAL or ABSOLUTE rule (only ABSOLUTE rules are currently implemented!)
+     */
     private String type;
 
+    /**
+     * The comparison operator to compare left and right expressions in the rule.
+     */
     private Operator operator;
 
+    /**
+     * The left-side expression to be compared against the right side.
+     */
     private Expression leftSide;
 
+    /**
+     * The right-side expression to be compared against the left side.
+     */
     private Expression rightSide;
 
+    /**
+     * The set of ValidationRuleGroups to which this ValidationRule belongs.
+     */
     private Set<ValidationRuleGroup> groups = new HashSet<ValidationRuleGroup>();
 
-    private Integer organisationUnitLevel; // Org unit level at which monitoring rules are evaluated
+    /**
+     * The organisation unit level at which this rule is evaluated (Monitoring-type rules only).
+     */
+    private Integer organisationUnitLevel;
 
+    /**
+     * The type of period in which this rule is evaluated.
+     */
     private PeriodType periodType;
     
-    private Integer periodExtent; // Number of periods in right-side sample
-    
+    /**
+     * The number of sequential right-side periods from which to collect samples
+     * to average (Monitoring-type rules only). Sequential periods are those
+     * immediately preceding (or immediately following in previous years) the selected period.
+     */
     private Integer sequentialSampleCount; // Number of sequential right-side samples to average.
-    
+
+    /**
+     * The number of annual right-side periods from which to collect samples
+     * to average (Monitoring-type rules only). Annual periods are from previous
+     * years. Samples collected from previous years can also include sequential
+     * periods adjacent to the equivalent period in previous years.
+     */
     private Integer annualSampleCount; // Number of (previous) annual right-side samples to average.
-    
+
+    /**
+     * The number of high values sampled from previous periods that are discarded before averaging.
+     */
     private Integer highOutliers;
     
+    /**
+     * The number of low values sampled from previous periods that are discarded before averaging.
+     */
     private Integer lowOutliers;
 
     // -------------------------------------------------------------------------
@@ -121,30 +170,107 @@ public class ValidationRule
     }
 
     // -------------------------------------------------------------------------
+    // toString
+    // ------------------------------------------------------------------------- 
+
+    public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+		.append("name", name)
+//		.append("ruleType", ruleType)
+//		.append("operator", operator)
+//		.append("leftSide", leftSide)
+//		.append("organisationUnitLevel", organisationUnitLevel)
+//		.append("periodType", periodType)
+//		.append("sequentialSampleCount", sequentialSampleCount)
+//		.append("annualSampleCount", annualSampleCount)
+//		.append("highOutliers", highOutliers)
+//		.append("lowOutliers", lowOutliers)
+		.toString();
+    }
+    
+    // -------------------------------------------------------------------------
     // Logic
     // ------------------------------------------------------------------------- 
 
+    /**
+     * Clears the left-side and right-side expressions. This can be useful, for example,
+     * before changing the validation rule period type, because the data elements
+     * allowed in the expressions depend on the period type.
+     */
     public void clearExpressions()
     {
         this.leftSide = null;
         this.rightSide = null;
     }
 
+    /**
+     * Joins a validation rule group.
+     * 
+     * @param validationRuleGroup the group to join.
+     */
     public void addValidationRuleGroup( ValidationRuleGroup validationRuleGroup )
     {
         groups.add( validationRuleGroup );
         validationRuleGroup.getMembers().add( this );
     }
 
+    /**
+     * Leaves a validation rule group.
+     * 
+     * @param validationRuleGroup the group to leave.
+     */
     public void removeValidationRuleGroup( ValidationRuleGroup validationRuleGroup )
     {
         groups.remove( validationRuleGroup );
         validationRuleGroup.getMembers().remove( this );
     }
-    
+
+    /**
+     * Gets the validation rule description, but returns the validation rule name
+     * if there is no description.
+     * 
+     * @return the description (or name).
+     */
     public String getDescriptionNameFallback()
     {
         return description != null && !description.trim().isEmpty() ? description : name;
+    }
+
+    /**
+     * Gets the data elements to evaluate for the current period. For validation-type
+     * rules this means all data elements. For monitoring-type rules this means just
+     * the left side elements.
+     * 
+     * @return the data elements to evaluate for the current period.
+     */
+    public Set<DataElement> getCurrentDataElements()
+    {
+    	Set<DataElement> currentDataElements = leftSide.getDataElementsInExpression();
+    	if ( RULE_TYPE_VALIDATION.equals( ruleType ) )
+    	{
+    		currentDataElements = new HashSet<DataElement>( currentDataElements ); // Make a copy so we can add to it.
+    		currentDataElements.addAll( rightSide.getDataElementsInExpression() );
+    	}
+    	return currentDataElements;
+    }
+
+    /**
+     * Gets the data elements to compare against for past periods. For validation-type
+     * rules this returns null. For monitoring-type rules this is just the
+     * right side elements.
+     * 
+     * @return the data elements to evaluate for past periods.
+     */
+    public Set<DataElement> getPastDataElements()
+    {
+    	if ( RULE_TYPE_VALIDATION.equals( ruleType ) )
+    	{
+    		return null;
+    	}
+    	else
+    	{
+    		return rightSide.getDataElementsInExpression();
+    	}
     }
 
     // -------------------------------------------------------------------------
@@ -216,19 +342,6 @@ public class ValidationRule
     public void setPeriodType( PeriodType periodType )
     {
         this.periodType = periodType;
-    }
-
-    @JsonProperty
-    @JsonView( {DetailedView.class, ExportView.class} )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
-    public Integer getPeriodExtent()
-    {
-        return periodExtent;
-    }
-
-    public void setPeriodExtent( Integer periodExtent )
-    {
-        this.periodExtent = periodExtent;
     }
 
     @JsonProperty

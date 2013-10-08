@@ -64,7 +64,6 @@ public class GetPeriodTypesAction
         this.organisationUnitService = organisationUnitService;
     }
     
-
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------

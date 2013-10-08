@@ -386,11 +386,6 @@ var validationRules = {
         "periodTypeName" : {
             "required" : true
         },
-        "periodExtent" : {
-        	"number" : true,
-        	"min": 1,
-        	"max": 999
-        },
         "sequentialSampleCount" : {
         	"number" : true,
         	"min": 0,
@@ -404,12 +399,12 @@ var validationRules = {
         "highOutliers" : {
         	"number" : true,
         	"min": 0,
-        	"max": 999
+        	"max": 99
         },
         "lowOutliers" : {
         	"number" : true,
         	"min": 0,
-        	"max": 999
+        	"max": 99
         },
         "operator" : {
             "required" : true

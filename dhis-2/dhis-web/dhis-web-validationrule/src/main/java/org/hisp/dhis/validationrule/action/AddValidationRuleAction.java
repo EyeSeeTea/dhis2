@@ -168,13 +168,6 @@ public class AddValidationRuleAction
         this.periodTypeName = periodTypeName;
     }
     
-    private Integer periodExtent;
-    
-    public void setPeriodExtent(Integer periodExtent) 
-    {
-        this.periodExtent = periodExtent;
-    }
-
     private Integer sequentialSampleCount;
     
     public void setSequentialSampleCount(Integer sequentialSampleCount) 
@@ -240,7 +233,6 @@ public class AddValidationRuleAction
         PeriodType periodType = periodService.getPeriodTypeByName(periodTypeName);
         validationRule.setPeriodType(periodType);
 
-        validationRule.setPeriodExtent( periodExtent );
         validationRule.setSequentialSampleCount( sequentialSampleCount );
         validationRule.setAnnualSampleCount( annualSampleCount );
         validationRule.setHighOutliers( highOutliers );

@@ -103,7 +103,6 @@
 				<p><label>$encoder.htmlEncode( $i18n.getString( "description" ) ):</label><br><span id="descriptionField"></span></p>
 				<p><label>$encoder.htmlEncode( $i18n.getString( "rule_type" ) ):</label><br><span id="ruleTypeField"></span></p>
 				<p id="organisationUnitLevelP"><label>$encoder.htmlEncode( $i18n.getString( "organisation_unit_level" ) ):</label><br><span id="organisationUnitLevelField"></span></p>
-				<p id="periodExtentP"><label>$encoder.htmlEncode( $i18n.getString( "period_extent" ) ):</label><br><span id="periodExtentField"></span></p>
 				<p id="sequentialSampleCountP"><label>$encoder.htmlEncode( $i18n.getString( "sequential_sample_count" ) ):</label><br><span id="sequentialSampleCountField"></span></p>
 				<p id="annualSampleCountP"><label>$encoder.htmlEncode( $i18n.getString( "annual_sample_count" ) ):</label><br><span id="annualSampleCountField"></span></p>
 				<p id="highOutliersP"><label>$encoder.htmlEncode( $i18n.getString( "high_outliers" ) ):</label><br><span id="highOutliersField"></span></p>
