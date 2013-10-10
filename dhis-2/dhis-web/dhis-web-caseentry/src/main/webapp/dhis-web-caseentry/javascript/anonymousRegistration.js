@@ -941,21 +941,36 @@ function removeEmptyEvents() {
 }
 
 function removeCurrentEvent() {
+    var programStageInstanceId = getFieldValue( 'programStageInstanceId' );
+
+    DAO.store.get('dataValues', programStageInstanceId).done(function(obj) {
+        if(obj) {
+            if( confirm(i18n_comfirm_delete_event) ) {
+                DAO.store.delete('dataValues', programStageInstanceId).always(function() {
+                    setTimeout(backEventList, 200);
+                });
+            }
+        } else {
+            removeCurrentEventFromServer();
+        }
+    });
+}
+
+function removeCurrentEventFromServer() {
     var result = window.confirm( i18n_comfirm_delete_event );
+
     if ( result ) {
-        $.postJSON(
-            "removeCurrentEncounter.action",
-            {
-                "id": getFieldValue( 'programStageInstanceId' )
-            },
-            function ( json ) {
-                if ( json.response == "success" ) {
-                    backEventList();
-                }
-                else if ( json.response == "error" ) {
-                    showWarningMessage( json.message );
-                }
-            } );
+        $.postJSON( "removeCurrentEncounter.action", {
+            "id": getFieldValue( 'programStageInstanceId' )
+        },
+        function ( json ) {
+            if ( json.response == "success" ) {
+                backEventList();
+            }
+            else if ( json.response == "error" ) {
+                showWarningMessage( json.message );
+            }
+        } );
     }
 }
 
@@ -1026,16 +1041,16 @@ var service = (function () {
 
                         programStageInstanceId = "local"+i;
 
-                        setFieldValue( 'programStageInstanceId', programStageInstanceId );
-                        $( "#executionDate" ).css( 'background-color', SUCCESS_COLOR );
-                        showUpdateEvent( programStageInstanceId );
-
                         var data = {};
                         data.id = programStageInstanceId;
                         data.executionDate = createExecutionDate(programId, programStageInstanceId, executionDate, organisationUnitId);
                         data.executionDate.completed = 'false';
 
-                        this.set( 'dataValues', data );
+                        this.set( 'dataValues', data).done(function() {
+                            setFieldValue( 'programStageInstanceId', programStageInstanceId );
+                            $( "#executionDate" ).css( 'background-color', SUCCESS_COLOR );
+                            showUpdateEvent( programStageInstanceId );
+                        });
                     });
                 } else {
                     // if we have a programStageInstanceId, just reuse that one
