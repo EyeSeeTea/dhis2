@@ -2393,19 +2393,22 @@ function searchByIdsOnclick()
 function advancedSearchOnclick()
 {
 	jQuery('#advanced-search').toggle();
-	if(jQuery('#advanced-search').is(':visible')){
-		hideById('searchByIdTR');
-	}
-	else{
-		showById('searchByIdTR');
+	if( getFieldValue('showSearchIdField')=='true' )
+	{
+		if(jQuery('#advanced-search').is(':visible')){
+			hideById('searchByIdTR');
+		}
+		else{
+			showById('searchByIdTR');
+		}
 	}
 }
 
 function clearAndCloseSearch()
 {
-	jQuery('#advancedSearchTB tr').each( function()
+	jQuery('#advancedSearchTB tr').each( function(i, item)
 	{
-		if(jQuery(this).id==undefined){
+		if( i>0 && jQuery(this).id==undefined){
 			jQuery(this).remove();
 		}
 	});
@@ -2417,7 +2420,10 @@ function clearAndCloseSearch()
 function hideSearchCriteria()
 {
 	hideById('advanced-search');
-	showById('showSearchCriteriaDiv');
+	if( getFieldValue('showSearchIdField')=='true' )
+	{
+		showById('showSearchCriteriaDiv');
+	}
 }
 
 function showSearchCriteria()

@@ -41,6 +41,10 @@ function loadProgramStages( metaData ) {
         promise = promise.then( makeProgramStageRequest( id ));
     } );
 
+    promise = promise.then(function() {
+        return $.Deferred().resolve(metaData);
+    });
+
     def.resolve( metaData );
 
     return promise;
@@ -203,7 +207,7 @@ function uploadOfflineData( event ) {
         data: JSON.stringify( event ),
         cache: false
     } ).done( function ( json ) {
-        if ( json.response == 'success' ) {
+        if ( json.response === 'success' ) {
             DAO.store.delete( 'dataValues', event.id ).done( function () {
                 updateOfflineEvents();
                 searchEvents( eval( getFieldValue( 'listAll' ) ) );
@@ -267,7 +271,7 @@ $( document ).ready( function () {
         promise = promise.then( loadOptionSets );
         promise = promise.then( updateOfflineEvents );
         promise = promise.then( checkOfflineData );
-        promise = promise.then( function () {
+        promise.then( function () {
             $("#programId").removeAttr('disabled');
 
             selection.setListenerFunction( organisationUnitSelected );
@@ -386,7 +390,7 @@ function organisationUnitSelected( orgUnits, orgUnitNames ) {
     setFieldValue( "programStageId", '' );
     setFieldValue( "programId", '' );
 
-    jQuery( '#advancedSearchTB [name=searchText]' ).val( '' );
+    $( '#advancedSearchTB [name=searchText]' ).val( '' );
 
     setFieldValue( 'orgunitId', orgUnits[0] );
     setFieldValue( 'orgunitName', orgUnitNames[0] );
@@ -409,15 +413,15 @@ function organisationUnitSelected( orgUnits, orgUnitNames ) {
 }
 
 function updateProgramList( arr ) {
-    jQuery( '#searchingAttributeIdTD [id=searchObjectId] option' ).remove();
-    jQuery( '#advancedSearchTB [id=searchObjectId] option' ).remove();
+    $( '#searchingAttributeIdTD [id=searchObjectId] option' ).remove();
+    $( '#advancedSearchTB [id=searchObjectId] option' ).remove();
     clearListById( 'displayInReports' );
     clearListById( 'programId' );
 
-    jQuery( '#programId' ).append( '<option value="" psid="" reportDateDes="' + i18n_report_date + '">[' + i18n_please_select + ']</option>' );
+    $( '#programId' ).append( '<option value="" psid="" reportDateDes="' + i18n_report_date + '">[' + i18n_please_select + ']</option>' );
 
     for ( var i = 0; i < arr.length; i++ ) {
-        jQuery( '#programId' ).append(
+        $( '#programId' ).append(
             '<option value="' + arr[i].id
             + '" puid="' + arr[i].uid
             + '" programType="' + arr[i].type
@@ -437,7 +441,7 @@ function disableCriteriaDiv() {
     disable( 'addBtn' );
     disable( 'filterBtn' );
     disable( 'removeBtn' );
-    jQuery( '#criteriaDiv :input' ).each( function ( idx, item ) {
+    $( '#criteriaDiv :input' ).each( function ( idx, item ) {
         disable( this.id );
     } );
 }
@@ -447,7 +451,7 @@ function enableCriteriaDiv() {
     enable( 'addBtn' );
     enable( 'filterBtn' );
     enable( 'removeBtn' );
-    jQuery( '#criteriaDiv :input' ).each( function ( idx, item ) {
+    $( '#criteriaDiv :input' ).each( function ( idx, item ) {
         enable( this.id );
     } );
 }
@@ -455,12 +459,12 @@ function enableCriteriaDiv() {
 function getDataElements() {
     hideById( 'dataEntryInfor' );
     hideById( 'listDiv' );
-    jQuery( '#searchingAttributeIdTD [id=searchObjectId] option' ).remove();
-    jQuery( '#advancedSearchTB [id=searchObjectId] option' ).remove();
-    programStageId = jQuery( '#programId option:selected' ).attr( 'psid' );
+    $( '#searchingAttributeIdTD [id=searchObjectId] option' ).remove();
+    $( '#advancedSearchTB [id=searchObjectId] option' ).remove();
+    var programStageId = $( '#programId option:selected' ).attr( 'psid' );
     setFieldValue( 'programStageId', programStageId );
-    setInnerHTML( 'reportDateDescriptionField', jQuery( '#programId option:selected' ).attr( 'reportDateDes' ) );
-    setInnerHTML( 'reportDateDescriptionField2', jQuery( '#programId option:selected' ).attr( 'reportDateDes' ) );
+    setInnerHTML( 'reportDateDescriptionField', $( '#programId option:selected' ).attr( 'reportDateDes' ) );
+    setInnerHTML( 'reportDateDescriptionField2', $( '#programId option:selected' ).attr( 'reportDateDes' ) );
 
     if ( programStageId == '' ) {
         removeAllAttributeOption();
@@ -473,66 +477,65 @@ function getDataElements() {
         return;
     }
 
-    jQuery.getJSON( "getProgramStageDataElementList.action",
-        {
-            programStageId: getFieldValue( 'programStageId' )
-        },
-        function ( json ) {
-            jQuery( '#advancedSearchTB [name=searchText]' ).val( '' );
-            jQuery( '.stage-object-selected' ).attr( 'psid', jQuery( '#programId option:selected' ).attr( "psid" ) );
+    $.getJSON( "getProgramStageDataElementList.action", {
+        programStageId: getFieldValue( 'programStageId' )
+    }, function ( json ) {
+        $( '#advancedSearchTB [name=searchText]' ).val( '' );
+        $( '.stage-object-selected' ).attr( 'psid', $( '#programId option:selected' ).attr( "psid" ) );
 
-            clearListById( 'searchObjectId' );
-            clearListById( 'displayInReports' );
+        clearListById( 'searchObjectId' );
+        clearListById( 'displayInReports' );
 
-            jQuery( '[name=searchObjectId]' ).append( '<option value="" >[' + i18n_please_select + ']</option>' );
-            for ( i in json.programStageDataElements ) {
-                jQuery( '[name=searchObjectId]' ).append( '<option value="' + json.programStageDataElements[i].id + '" uid="' + json.programStageDataElements[i].uid + '" type="' + json.programStageDataElements[i].type + '">' + json.programStageDataElements[i].name + '</option>' );
-                if ( json.programStageDataElements[i].displayInReports == 'true' ) {
-                    jQuery( '#displayInReports' ).append( '<option value="' + json.programStageDataElements[i].id + '" uid="' + json.programStageDataElements[i].uid + '" ></option>' );
-                }
+        $('[name=searchObjectId]').append('<option value="" >[' + i18n_please_select + ']</option>');
+
+        $.each(json.programStageDataElements, function() {
+            $('[name=searchObjectId]').append('<option value="' + this.id + '" uid="' + this.uid + '" type="' + this.type + '">' + this.name + '</option>');
+
+            if( this.displayInReports == 'true' ) {
+                $('#displayInReports').append('<option value="' + this.id + '" uid="' + this.uid + '" ></option>');
             }
-
-            enableCriteriaDiv();
-            validateSearchEvents( true );
-        } ).fail(function() {
-            enable( 'addBtn' );
         });
+
+        enableCriteriaDiv();
+        validateSearchEvents( true );
+    } ).fail(function() {
+        enable( 'addBtn' );
+    });
 
     updateOfflineEvents();
 }
 
 function dataElementOnChange( this_ ) {
-    var container = jQuery( this_ ).parent().parent().attr( 'id' );
-    var element = jQuery( '#' + container + ' [id=searchText]' );
-    var valueType = jQuery( '#' + container + ' [id=searchObjectId] option:selected' ).attr( 'type' );
+    var container = $(this_).parent().parent().attr('id');
+    var element = $('#' + container + ' [id=searchText]');
+    var valueType = $('#' + container + ' [id=searchObjectId] option:selected').attr('type');
 
-    if ( valueType == 'date' ) {
-        element.replaceWith( getDateField( container ) );
-        datePickerValid( 'searchText_' + container );
-        return;
+    if( valueType == 'date' ) {
+        element.replaceWith(getDateField(container));
+        datePickerValid('searchText_' + container);
     }
     else {
-        $( '#searchText_' + container ).datepicker( "destroy" );
-        $( '#' + container + ' [id=dateOperator]' ).replaceWith( "" );
+        $('#searchText_' + container).datepicker("destroy");
+        $('#' + container + ' [id=dateOperator]').replaceWith("");
 
-        if ( valueType == 'bool' ) {
-            element.replaceWith( getTrueFalseBox() );
+        if( valueType == 'bool' ) {
+            element.replaceWith(getTrueFalseBox());
         }
-        else if ( valueType == 'optionset' ) {
-            element.replaceWith( searchTextBox );
-            autocompletedFilterField( container + " [id=searchText]", jQuery(this_).find("option:selected").attr('uid') );
+        else if( valueType == 'optionset' ) {
+            element.replaceWith(searchTextBox);
+            autocompletedFilterField(container + " [id=searchText]", $(this_).find("option:selected").attr('uid'));
         }
-        else if ( valueType == 'username' ) {
-            autocompletedUsernameField( jQuery( this_ ).attr( 'id' ) );
+        else if( valueType == 'username' ) {
+            autocompletedUsernameField($(this_).attr('id'));
         }
         else {
-            element.replaceWith( searchTextBox );
+            element.replaceWith(searchTextBox);
         }
     }
 }
 
 function autocompletedFilterField( idField, searchObjectId ) {
-    var input = jQuery( "#" + idField );
+    var input = $( "#" + idField );
     input.css( "width", "237px" );
     input.autocomplete( {
         delay: 0,
@@ -593,7 +596,7 @@ function autocompletedFilterField( idField, searchObjectId ) {
 }
 
 function autocompletedUsernameField( idField ) {
-    var input = jQuery( "#" + idField );
+    var input = $( "#" + idField );
     input.parent().width( input.width() + 200 );
     var dataElementId = input.attr( 'id' ).split( '-' )[1];
 
@@ -615,7 +618,6 @@ function autocompletedUsernameField( idField ) {
                 }
             } );
         },
-        minLength: 0,
         select: function ( event, ui ) {
             var fieldValue = ui.item.value;
 
@@ -680,9 +682,9 @@ function autocompletedUsernameField( idField ) {
 }
 
 function removeAllAttributeOption() {
-    jQuery( '#advancedSearchTB tbody tr' ).each( function ( i, item ) {
+    $( '#advancedSearchTB tbody tr' ).each( function ( i, item ) {
         if ( i > 0 ) {
-            jQuery( item ).remove();
+            $( item ).remove();
         }
     } )
 }
@@ -698,11 +700,11 @@ function validateSearchEvents( listAll ) {
             flag = false;
         }
 
-        if ( flag && !listAll && jQuery( '#filterBtn' ).attr( "disabled" ) == "disabled" ) {
-            jQuery( '#advancedSearchTB tr' ).each( function ( index, row ) {
+        if ( flag && !listAll && $( '#filterBtn' ).attr( "disabled" ) == "disabled" ) {
+            $( '#advancedSearchTB tr' ).each( function ( index, row ) {
                 if ( index > 1 ) {
-                    jQuery( row ).find( ':input' ).each( function ( idx, item ) {
-                        var input = jQuery( item );
+                    $( row ).find( ':input' ).each( function ( idx, item ) {
+                        var input = $( item );
                         if ( input.attr( 'type' ) != 'button' && idx == 0 && input.val() == '' ) {
                             showWarningMessage( i18n_specify_data_element );
                             flag = false;
@@ -729,8 +731,8 @@ function searchEvents( listAll ) {
     hideById( 'listDiv' );
 
     var params = 'anonynousEntryForm=true';
-    jQuery( '#displayInReports option' ).each( function ( i, item ) {
-        var input = jQuery( item );
+    $( '#displayInReports option' ).each( function ( i, item ) {
+        var input = $( item );
         params += '&filterValues=de_' + input.val() + '_false_';
     } );
 
@@ -746,16 +748,16 @@ function searchEvents( listAll ) {
         if ( byId( "incompleted" ).checked ) {
             params += '&useCompletedEvents=false';
         }
-        jQuery( '#advancedSearchTB tr' ).each( function ( index, row ) {
+        $( '#advancedSearchTB tr' ).each( function ( index, row ) {
             if ( index > 1 ) {
-                jQuery( row ).find( ':input' ).each( function ( idx, item ) {
-                    var input = jQuery( item );
+                $( row ).find( ':input' ).each( function ( idx, item ) {
+                    var input = $( item );
                     if ( input.attr( 'type' ) != 'button' ) {
                         if ( idx == 0 && input.val() != '' ) {
                             searchingValue = 'de_' + input.val() + '_false_';
                         }
                         else if ( input.val() != '' ) {
-                            value += jQuery.trim( input.val() ).toLowerCase();
+                            value += $.trim( input.val() ).toLowerCase();
                         }
                     }
                 } );
@@ -773,7 +775,7 @@ function searchEvents( listAll ) {
     params += '&facilityLB=selected';
     params += '&level=0';
     params += '&orgunitIds=' + getFieldValue( 'orgunitId' );
-    params += '&programStageId=' + jQuery( '#programId option:selected' ).attr( 'psid' );
+    params += '&programStageId=' + $( '#programId option:selected' ).attr( 'psid' );
     params += '&orderByOrgunitAsc=false';
     params += '&userOrganisationUnit=false';
     params += '&userOrganisationUnitChildren=false';
@@ -803,7 +805,7 @@ function searchEvents( listAll ) {
         var searchInfor = (listAll) ? i18n_list_all_events : i18n_search_events_by_dataelements;
         setInnerHTML( 'searchInforTD', searchInfor );
 
-        if ( !listAll && jQuery( '#filterBtn' ).attr( "disabled" ) == "disabled" ) {
+        if ( !listAll && $( '#filterBtn' ).attr( "disabled" ) == "disabled" ) {
             showById( 'minimized-advanced-search' );
             hideById( 'advanced-search' );
         }
@@ -821,24 +823,20 @@ function getValueFormula( value ) {
     if ( value.indexOf( '"' ) != value.lastIndexOf( '"' ) ) {
         value = value.replace( /"/g, "'" );
     }
-    // if key is [xyz] && [=xyz]
-    if ( value.indexOf( "'" ) == -1 ) {
-        var flag = value.match( /[>|>=|<|<=|=|!=]+[ ]*/ );
 
-        if ( flag == null ) {
+    var flag = value.match( /[>|>=|<|<=|=|!=]+[ ]*/ );
+
+    if( value.indexOf("'") == -1 ) {
+        if( flag == null ) {
             value = "='" + value + "'";
         }
         else {
-            value = value.replace( flag, flag + "'" );
+            value = value.replace(flag, flag + "'");
             value += "'";
         }
     }
-    // if key is ['xyz'] && [='xyz']
-    // if( value.indexOf("'") != value.lastIndexOf("'") )
     else {
-        var flag = value.match( /[>|>=|<|<=|=|!=]+[ ]*/ );
-
-        if ( flag == null ) {
+        if( flag == null ) {
             value = "=" + value;
         }
     }
@@ -847,26 +845,25 @@ function getValueFormula( value ) {
 }
 
 function removeEvent( programStageId ) {
-    var s = "" + programStageId;
-
-    if( s.indexOf("local") != -1) {
-        if ( confirm( i18n_comfirm_delete_event ) ) {
-            DAO.store.delete( 'dataValues', programStageId ).always( function () {
-                updateOfflineEvents();
-
-                // needed, seemed that from time-to-time the events are updated too early, could be idb related
-                setTimeout(updateOfflineEvents, 400);
-            } );
+    DAO.store.get('dataValues', programStageId).done(function(obj) {
+        if(obj) {
+            if( confirm(i18n_comfirm_delete_event) ) {
+                DAO.store.delete('dataValues', programStageId).always(function() {
+                    updateOfflineEvents();
+                    // needed, seemed that from time-to-time the events are updated too early, could be idb related
+                    setTimeout(updateOfflineEvents, 100);
+                });
+            }
+        } else {
+            removeItem( programStageId, '', i18n_comfirm_delete_event, 'removeCurrentEncounter.action' );
         }
-    } else {
-        removeItem( programStageId, '', i18n_comfirm_delete_event, 'removeCurrentEncounter.action' );
-    }
+    });
 }
 
 function showUpdateEvent( programStageInstanceId ) {
     hideById( 'dataEntryMenu' );
     showById( 'eventActionMenu' );
-    jQuery( "[name=eventActionLink]" ).hide();
+    $( "[name=eventActionLink]" ).hide();
     hideById( 'selectDiv' );
     hideById( 'searchDiv' );
     hideById( 'listDiv' );
@@ -894,7 +891,7 @@ function backEventList() {
 
 function showAddEventForm( isCreateEvent ) {
     showById( 'eventActionMenu' );
-    jQuery( "[name=eventActionLink]" ).hide();
+    $( "[name=eventActionLink]" ).hide();
     hideById( 'dataEntryMenu' );
     setInnerHTML( 'dataEntryFormDiv', '' );
     hideById( 'selectDiv' );
@@ -905,7 +902,7 @@ function showAddEventForm( isCreateEvent ) {
     hideById( 'actionDiv' );
     showById( 'dataEntryInfor' );
     setFieldValue( 'programStageInstanceId', '0' );
-    setInnerHTML( 'programName', jQuery( '#programId option:selected' ).text() );
+    setInnerHTML( 'programName', $( '#programId option:selected' ).text() );
 	if( isCreateEvent != undefined ){
 		addNewEvent();
 	}
@@ -913,11 +910,11 @@ function showAddEventForm( isCreateEvent ) {
 
 function addNewEvent() {
     var programStageInstanceId = getFieldValue( 'programStageInstanceId' );
-    var programId = jQuery( '#programId option:selected' ).val();
+    var programId = $( '#programId option:selected' ).val();
     var executionDate = getFieldValue( 'executionDate' );
     var orgunitId = getFieldValue( 'orgunitId' );
 
-    jQuery( "#executionDate" ).css( 'background-color', SAVING_COLOR );
+    $( "#executionDate" ).css( 'background-color', SAVING_COLOR );
 
     service.saveExecutionDate( programId, programStageInstanceId, executionDate, orgunitId );
 }
@@ -930,9 +927,9 @@ function removeEmptyEvents() {
     var result = window.confirm( i18n_confirm_remove_empty_events );
 
     if ( result ) {
-        jQuery.getJSON( "removeEmptyEvents.action",
+        $.getJSON( "removeEmptyEvents.action",
             {
-                programStageId: jQuery( '#selectDiv [id=programId] option:selected' ).attr( 'psid' )
+                programStageId: $( '#selectDiv [id=programId] option:selected' ).attr( 'psid' )
             },
             function ( json ) {
                 if ( json.response == 'success' ) {
@@ -971,21 +968,23 @@ function showFilterForm() {
 
 function removeAllOption() {
     enable( 'filterBtn' );
-    jQuery( '#advancedSearchTB tr' ).each( function ( i, row ) {
-        if ( i > 2 ) {
-            jQuery( this ).remove();
+
+    $( '#advancedSearchTB tr' ).each( function ( idx ) {
+        if( idx > 2 ) {
+            $(this).remove();
         }
-        else if ( i == 2 ) {
-            jQuery( this ).find( ':input' ).each( function ( idx, item ) {
-                var input = jQuery( item );
-                if ( input.attr( 'type' ) != 'button' ) {
-                    input.val( '' );
+        else if( idx == 2 ) {
+            $(this).find(':input').each(function( idx, item ) {
+                var input = $(item);
+                if( input.attr('type') != 'button' ) {
+                    input.val('');
                 }
-            } );
+            });
         }
     } );
-    jQuery( '#searchObjectId' ).val( "" );
-    jQuery( '#searchText' ).val( "" );
+
+    $( '#searchObjectId' ).val( "" );
+    $( '#searchText' ).val( "" );
     searchEvents( eval( getFieldValue( "listAll" ) ) );
 }
 
@@ -1005,7 +1004,7 @@ var service = (function () {
         saveExecutionDate: function( programId, programStageInstanceId, executionDate, organisationUnitId ) {
             ajaxExecutionDate(programId, programStageInstanceId, executionDate, organisationUnitId).done(function ( json ) {
                 if ( json.response == 'success' ) {
-                    jQuery( "#executionDate" ).css( 'background-color', SUCCESS_COLOR );
+                    $( "#executionDate" ).css( 'background-color', SUCCESS_COLOR );
                     setFieldValue( 'programStageInstanceId', json.message );
 
                     if ( programStageInstanceId != json.message ) {
@@ -1013,7 +1012,7 @@ var service = (function () {
                     }
                 }
                 else {
-                    jQuery( "#executionDate" ).css( 'background-color', ERROR_COLOR );
+                    $( "#executionDate" ).css( 'background-color', ERROR_COLOR );
                     showWarningMessage( json.message );
                 }
             } ).fail( function () {
@@ -1028,7 +1027,7 @@ var service = (function () {
                         programStageInstanceId = "local"+i;
 
                         setFieldValue( 'programStageInstanceId', programStageInstanceId );
-                        jQuery( "#executionDate" ).css( 'background-color', SUCCESS_COLOR );
+                        $( "#executionDate" ).css( 'background-color', SUCCESS_COLOR );
                         showUpdateEvent( programStageInstanceId );
 
                         var data = {};
@@ -1041,7 +1040,7 @@ var service = (function () {
                 } else {
                     // if we have a programStageInstanceId, just reuse that one
                     setFieldValue( 'programStageInstanceId', programStageInstanceId );
-                    jQuery( "#executionDate" ).css( 'background-color', SUCCESS_COLOR );
+                    $( "#executionDate" ).css( 'background-color', SUCCESS_COLOR );
                     showUpdateEvent( programStageInstanceId );
                 }
             } );
@@ -1060,15 +1059,15 @@ var service = (function () {
 })();
 
 function updateDataForm() {
-    jQuery( '#inputCriteriaDiv' ).remove();
+    $( '#inputCriteriaDiv' ).remove();
     showById( 'programName' );
     showById( 'actionDiv' );
-    var programName = jQuery( '#programId option:selected' ).text();
-    var programStageId = jQuery( '#programId option:selected' ).attr( 'psid' );
-    jQuery( '.stage-object-selected' ).attr( 'psid', programStageId );
+    var programName = $( '#programId option:selected' ).text();
+    var programStageId = $( '#programId option:selected' ).attr( 'psid' );
+    $( '.stage-object-selected' ).attr( 'psid', programStageId );
     setInnerHTML( 'programName', programName );
-    jQuery('#executionDate').css('width',430);
-    jQuery('#executionDate').css('margin-right',34);
+    $('#executionDate').css('width',430);
+    $('#executionDate').css('margin-right',34);
 
     if ( getFieldValue( 'completed' ) == 'true' ) {
         disable( "completeBtn" );
@@ -1083,10 +1082,10 @@ function updateDataForm() {
     showById( 'dataEntryInfor' );
     showById( 'entryFormContainer' );
 
-    jQuery( "#entryForm :input" ).each( function () {
-        if ( ( jQuery( this ).attr( 'options' ) != null && jQuery( this ).attr( 'options' ) == 'true' )
-            || ( jQuery( this ).attr( 'username' ) != null && jQuery( this ).attr( 'username' ) == 'true' ) ) {
-            var input = jQuery( this );
+    $( "#entryForm :input" ).each( function () {
+        if ( ( $( this ).attr( 'options' ) != null && $( this ).attr( 'options' ) == 'true' )
+            || ( $( this ).attr( 'username' ) != null && $( this ).attr( 'username' ) == 'true' ) ) {
+            var input = $( this );
             input.parent().width( input.width() + 200 );
         }
     } );
