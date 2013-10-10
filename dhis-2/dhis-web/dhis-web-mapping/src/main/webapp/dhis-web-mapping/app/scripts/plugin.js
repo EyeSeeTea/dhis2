@@ -15,7 +15,7 @@ Ext.onReady( function() {
 				alert('Invalid url (' + config.el + ')');
 				return;
 			}
-			
+
 			if (config.url.split('').pop() === '/') {
 				config.url = config.url.substr(0, config.url.length - 1);
 			}
@@ -24,14 +24,14 @@ Ext.onReady( function() {
 				alert('Invalid html element id (' + config.el + ')');
 				return;
 			}
-			
+
 			config.id = config.id || config.uid;
-			
+
 			if (config.id && !Ext.isString(config.id)) {
 				alert('Invalid map id (' + config.el + ')');
 				return;
 			}
-			
+
 			return true;
 		};
 
@@ -79,7 +79,7 @@ Ext.onReady( function() {
 			css += '.gis-menu-item-icon-float { background: url("' + gis.init.contextPath + '/dhis-web-mapping/app/images/float_16.png") no-repeat; } \n';
 			css += '.x-color-picker a { padding: 0; } \n';
 			css += '.x-color-picker em span { width: 14px; height: 14px; } \n';
-			
+
 			Ext.util.CSS.createStyleSheet(css);
 		};
 
@@ -93,7 +93,7 @@ Ext.onReady( function() {
 				Ext.query('.measureButton')[i].innerHTML = '<img src="' + gis.init.contextPath + '/dhis-web-mapping/app/images/measure_24.png" />';
 			}
 		};
-		
+
 		createViewport = function() {
 			var viewport,
 				eastRegion,
@@ -208,9 +208,13 @@ Ext.onReady( function() {
 			Ext.data.JsonP.request({
 				url: config.url + '/dhis-web-mapping/initialize.action',
 				success: function(r) {
-					gis = GIS.core.getInstance(r);
+					var init = r;
+
+					GIS.i18n = init.i18n;
+
+					gis = GIS.core.getInstance(init);
 					gis.el = config.el;
-					
+
 					applyCss();
 
 					GIS.core.createSelectHandlers(gis, gis.layer.boundary);
