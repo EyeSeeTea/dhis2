@@ -101,7 +101,7 @@ Ext.onReady(function() {
 			}
 
 			Ext.data.JsonP.request({
-				url: config.url + '/dhis-web-pivot/initialize.action',
+				//url: config.url + '/api/organisationUnits.jsonp?userOnly=true&
 				success: function(r) {
 					PT.i18n = r.i18n;
 					
@@ -125,6 +125,32 @@ Ext.onReady(function() {
 					}
 				}
 			});
+
+			//Ext.data.JsonP.request({
+				//url: config.url + '/dhis-web-pivot/initialize.action',
+				//success: function(r) {
+					//PT.i18n = r.i18n;
+					
+					//pt = PT.core.getInstance(r);
+                    //extendInstance(pt);
+
+					//pt.viewport = createViewport();
+					//pt.isPlugin = true;
+
+					//if (config.uid) {
+						//pt.engine.loadTable(config.uid, pt);
+					//}
+					//else {
+						//layout = pt.api.layout.Layout(config);
+
+						//if (!layout) {
+							//return;
+						//}
+
+						//pt.engine.createTable(layout, pt);
+					//}
+				//}
+			//});
 		}();
 	};
 });
