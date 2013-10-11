@@ -28,6 +28,8 @@ package org.hisp.dhis.patient.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.criterion.Conjunction;
@@ -69,6 +71,8 @@ public class HibernatePatientStore
     extends HibernateIdentifiableObjectStore<Patient>
     implements PatientStore
 {
+    private static final Log log = LogFactory.getLog( HibernatePatientStore.class );
+    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -153,6 +157,7 @@ public class HibernatePatientStore
         {
             query.setFirstResult( min ).setMaxResults( max );
         }
+        
         return query.list();
     }
 
@@ -349,14 +354,13 @@ public class HibernatePatientStore
     }
 
     @Override
-    @SuppressWarnings( "deprecation" )
     public int countGetPatientsByOrgUnitProgram( OrganisationUnit organisationUnit, Program program )
     {
         String sql = "select count(p.patientid) from patient p join programinstance pi on p.patientid=pi.patientid "
             + "where p.organisationunitid=" + organisationUnit.getId() + " and pi.programid=" + program.getId()
             + " and pi.status=" + ProgramInstance.STATUS_ACTIVE;
 
-        return jdbcTemplate.queryForInt( sql );
+        return jdbcTemplate.queryForObject( sql, Integer.class );
     }
 
     @Override
@@ -568,7 +572,7 @@ public class HibernatePatientStore
             {
 
                 String[] keyValues = id.split( " " );
-                patientWhere += patientOperator + "(";
+                patientWhere += patientOperator + " pi.patientidentifiertypeid is not null AND (";
                 String opt = "";
                 for ( String v : keyValues )
                 {
@@ -841,7 +845,9 @@ public class HibernatePatientStore
         {
             sql += statementBuilder.limitRecord( min, max );
         }
-
+        
+        log.debug( "Search patient SQL: " + sql );
+        
         return sql;
     }
 

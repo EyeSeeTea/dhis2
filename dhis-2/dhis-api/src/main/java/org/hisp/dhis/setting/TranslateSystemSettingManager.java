@@ -1,4 +1,4 @@
-package org.hisp.dhis.encoding.velocity;
+package org.hisp.dhis.setting;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,37 +28,13 @@ package org.hisp.dhis.encoding.velocity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.velocity.VelocityContext;
-import org.hisp.dhis.system.util.Encoder;
+import java.util.Map;
 
 /**
- * @author Torgeir Lorange Ostby
+ * @author James Chang
  */
-public class EncoderVelocityContext
-    extends VelocityContext
+
+public interface TranslateSystemSettingManager
 {
-    public static final String KEY = "encoder";
-
-    private static final Encoder ENCODER = new Encoder();
-
-    // -------------------------------------------------------------------------
-    // Override VelocityContext methods
-    // -------------------------------------------------------------------------
-
-    @Override
-    public Object internalGet( String key )
-    {
-        if ( KEY.equals( key ) )
-        {
-            return ENCODER;
-        }
-
-        return super.internalGet( key );
-    }
-
-    @Override
-    public boolean containsKey( Object key )
-    {
-        return KEY.equals( key ) || super.containsKey( key );
-    }
+    Map<String, String> getTranslation_SystemAppearanceSetting( String localeStr );
 }

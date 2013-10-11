@@ -225,6 +225,7 @@ function getSearchParams() {
     if( getFieldValue('programIdAddPatient') != '' ) {
         params += "&programId=" + getFieldValue('programIdAddPatient');
         params += "&searchTexts=prg_" + getFieldValue('programIdAddPatient');
+		params += '&statusEnrollment=' + getFieldValue('statusEnrollment');
     }
 
     var programStageId = jQuery('#programStageAddPatient').val();
@@ -234,7 +235,8 @@ function getSearchParams() {
         var startDueDate = getFieldValue('startDueDate');
         var orgunitid = getFieldValue('orgunitId');
 
-        if( byId('searchInAllFacility').checked ) {
+		var facilityLB = getFieldValue('facilityLB');
+        if( facilityLB=='searchInAllOrgunits') {
             orgunitid = 0;
         }
 
@@ -276,9 +278,7 @@ function getSearchParams() {
             }
         });
 
-        var searchInAllFacility = byId('searchInAllFacility').checked;
-
-        if( getFieldValue('searchByProgramStage') == "false" && !searchInAllFacility ) {
+        if( getFieldValue('searchByProgramStage') == "false" && getFieldValue('facilityLB')!='searchInAllOrgunits' ) {
             p += "_" + getFieldValue('orgunitId');
         }
 
@@ -286,18 +286,8 @@ function getSearchParams() {
     });
 
     params += '&listAll=false';
-    params += '&statusEnrollment=' + getFieldValue('statusEnrollment');
 
-    params += '&facilityLB=';
-    if( byId('searchInAllFacility').checked ) {
-        params += getFieldValue('searchInAllFacility');
-    }
-    else if( byId('searchInUserOrgunits').checked ) {
-        params += getFieldValue('searchInUserOrgunits');
-    }
-    else if( byId('searchBelowOrgunit').checked ) {
-        params += getFieldValue('searchBelowOrgunit');
-    }
+    params += '&facilityLB=' + getFieldValue('facilityLB');
 
     return params;
 }
@@ -1126,24 +1116,7 @@ function updatePatient()
       url: 'updatePatient.action',
       data: params,
       success: function( json ) {
-			if( getFieldValue('programIdAddPatient')!='')
-			{
-				jQuery.postJSON( "saveProgramEnrollment.action",
-				{
-					patientId: getFieldValue('id'),
-					programId: getFieldValue('programIdAddPatient'),
-					dateOfIncident: jQuery('#patientForm [id=dateOfIncident]').val(),
-					enrollmentDate: jQuery('#patientForm [id=enrollmentDate]').val()
-				}, 
-				function( json ) 
-				{ 
-					showPatientDashboardForm( getFieldValue('id') );
-				});
-			}
-			else
-			{
-				showPatientDashboardForm( getFieldValue('id') );
-			}
+			showPatientDashboardForm( getFieldValue('id') );
       }
      });
 }
@@ -2356,14 +2329,17 @@ function removeCustomPhoneNumberField(idx)
 
 function searchByIdsOnclick()
 {
-	var params = "searchText=" + getFieldValue("searchByIds");
+	var params = "searchTexts=iden_" + getFieldValue("searchPatientByIds") + "_" + getFieldValue("orgunitId");
 	params += "&listAll=false";
+	params += "&facilityLB=";
 	
-	if( getFieldValue('programIdAddPatient')=="" ){
+	if( getFieldValue('programIdAddPatient')!="" ){
 		params += "&programIds=" + getFieldValue('programIdAddPatient');
 		params += "&searchText=prg_" + getFieldValue('programIdAddPatient');
 	}
 	
+	hideById( 'listPatientDiv');
+	jQuery( "#loaderDiv" ).show();
 	$.ajax({
 		url: 'searchRegistrationPatient.action',
 		type:"POST",
@@ -2393,14 +2369,12 @@ function searchByIdsOnclick()
 function advancedSearchOnclick()
 {
 	jQuery('#advanced-search').toggle();
-	if( getFieldValue('showSearchIdField')=='true' )
-	{
-		if(jQuery('#advanced-search').is(':visible')){
-			hideById('searchByIdTR');
-		}
-		else{
-			showById('searchByIdTR');
-		}
+	
+	if(jQuery('#advanced-search').is(':visible')){
+		hideById('searchByIdTR');
+	}
+	else{
+		showById('searchByIdTR');
 	}
 }
 
@@ -2414,16 +2388,13 @@ function clearAndCloseSearch()
 	});
 	addAttributeOption();
 	hideById('advanced-search');
-	hideById('listPatientDiv');
+	showById('searchByIdTR');
 }
 
 function hideSearchCriteria()
 {
 	hideById('advanced-search');
-	if( getFieldValue('showSearchIdField')=='true' )
-	{
-		showById('showSearchCriteriaDiv');
-	}
+	showById('showSearchCriteriaDiv');
 }
 
 function showSearchCriteria()

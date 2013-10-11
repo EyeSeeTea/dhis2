@@ -81,32 +81,25 @@
 		<tr>
 			<td colspan='4'>
 				$i18n.getString('select_orgunit_for_search'): <span id='orgunitForSearch'>$!organisationUnit.name</span>
-				<input type='button' id='selectOtherOrgunitBtn' value='$i18n.getString("select_other_orgunit")' />
-				<input type='button' id='clearAndCloseSearchBtn' value='$i18n.getString("clear_and_close")' onclick='clearAndCloseSearch();'/>
+				&nbsp;&nbsp;&nbsp;<input type='button' id='clearAndCloseSearchBtn' value='$i18n.getString("clear_and_close")' onclick='clearAndCloseSearch();'/>
 			</td>
 		</tr>
-		<tr id='searchBySelectedUnitTD'>
-			 #if( $auth.hasAccess( "dhis-web-caseentry", "searchAllFacilities" ) )
-				<td>
-					$i18n.getString('search_in_all_facilities') 
-					<input type='checkbox' id='searchInAllFacility' name='searchInAllFacility' value='searchInAllOrgunits' />&nbsp;&nbsp;&nbsp;
-				</td>
-			 #else
-					 <input type='checkbox' class='hidden' id='searchInAllFacility' name='searchInAllFacility' value='searchInAllOrgunits' />
-			 #end
-			 
-			<td class='hidden'>
-				$i18n.getString('search_by_user_orgunits') 
-				<input type='checkbox' id='searchInUserOrgunits' name='searchInUserOrgunits' value='searchInUserOrgunits' />&nbsp;&nbsp;&nbsp;
-			</td>
-			
+		<tr>
+			<td>$i18n.getString('orgunit_search_type')</td>
 			<td>
-				$i18n.getString('search_all_below_selected_orgunit') 
-				<input type='checkbox' id='searchBelowOrgunit' name='searchBelowOrgunit' value='searchInBelowSelectedOrgunit' />&nbsp;&nbsp;&nbsp;
+				<select id='facilityLB' name='facilityLB'>
+					<option value='' />$i18n.getString('selected')</option>
+					#if( $auth.hasAccess( "dhis-web-caseentry", "searchInOtherOrgunits" ) )
+						<option value='searchInBelowSelectedOrgunit' />$i18n.getString('selected_and_all_below')</option>
+					#end
+					<option value='searchInUserOrgunits' />$i18n.getString('all_visible')</option>
+					#if( $auth.hasAccess( "dhis-web-caseentry", "searchAllFacilities" ) )
+						<option value='searchInAllOrgunits' />$i18n.getString('all_in_system')</option>
+					#end
+				</select>
 			</td>
-		
 		</tr>
-		<tr id='enrollmentSelectTR' class='hidden' >
+		<tr id="enrollmentSelectTR" class='hidden' >
 			<td>$i18n.getString('show')</td>
 			<td>
 				<select id='statusEnrollment'>

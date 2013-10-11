@@ -743,6 +743,34 @@ TOGGLE = {
     }
 };
 
+function checkAndSetCheckbox( $field, value ) {
+    if( $field.attr('type') === 'checkbox' ) {
+        if( value === "true" || value === true ) {
+            $field.attr('checked', true);
+        } else {
+            $field.removeAttr('checked');
+        }
+    }
+}
+
+function checkAndSetRadio( $field, value ) {
+    if( $field.attr('type') === 'radio' ) {
+        var $fields = $("." + $field.attr('id'));
+
+        $.each($fields, function() {
+            var $f = $(this);
+
+            if( $.trim(value) === $.trim($f.val()) ) {
+                $f.attr("checked", true);
+            }
+        });
+
+        return true;
+    }
+
+    return false;
+}
+
 function loadProgramStageInstance( programStageInstanceId, always ) {
     $( "#programStageInstanceId" ).val( programStageInstanceId );
     $( "#entryFormContainer input[id='programStageInstanceId']" ).val( programStageInstanceId );
@@ -756,7 +784,12 @@ function loadProgramStageInstance( programStageInstanceId, always ) {
                         var field = $('#' + fieldId);
 
                         if ( field ) {
-                            field.val( decodeURI( obj.values[key].value ) );
+                            var value = obj.values[key].value;
+
+                            if( !checkAndSetRadio(field, value) ) {
+                                field.val(decodeURI(value));
+                                checkAndSetCheckbox(field, value);
+                            }
                         }
                     });
                 }
@@ -851,7 +884,12 @@ function loadProgramStageFromServer( programStageInstanceId ) {
             var field = $('#' + fieldId);
 
             if ( field ) {
-                field.val( decodeURI( value.value ));
+                var value = value.value;
+
+                if( !checkAndSetRadio(field, value) ) {
+                    field.val(decodeURI(value));
+                    checkAndSetCheckbox(field, value);
+                }
             }
         } );
 
