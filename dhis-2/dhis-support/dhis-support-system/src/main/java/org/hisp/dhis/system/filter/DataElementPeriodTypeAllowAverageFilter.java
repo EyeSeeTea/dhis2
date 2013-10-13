@@ -1,4 +1,4 @@
-package org.hisp.dhis.expression;
+package org.hisp.dhis.system.filter;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,13 +28,41 @@ package org.hisp.dhis.expression;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.hibernate.EnumUserType;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.system.util.Filter;
 
-public class OperatorUserType
-    extends EnumUserType<Operator>
+public class DataElementPeriodTypeAllowAverageFilter
+    implements Filter<DataElement>
 {
-    public OperatorUserType()
+    private String periodType;
+    
+    public DataElementPeriodTypeAllowAverageFilter( String periodType )
     {
-        super( Operator.class );
+        this.periodType = periodType;
+    }
+
+    @Override
+    public boolean retain( DataElement dataElement )
+    {
+        if ( dataElement == null || dataElement.getPeriodType() == null )
+        {
+            return false;
+        }
+        
+        final PeriodType type = PeriodType.getPeriodTypeByName( periodType );
+        
+        if ( dataElement.getPeriodType().equals( type ) )
+        {
+            return true;
+        }
+        
+        if ( DataElement.AGGREGATION_OPERATOR_AVERAGE.equals( dataElement.getAggregationOperator() ) && 
+            dataElement.getPeriodType().getFrequencyOrder() >= type.getFrequencyOrder() )
+        {
+            return true;
+        }
+        
+        return false;
     }
 }
