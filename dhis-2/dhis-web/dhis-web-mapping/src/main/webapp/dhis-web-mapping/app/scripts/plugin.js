@@ -1,21 +1,21 @@
 Ext.onReady( function() {
-
-	GIS.i18n = {
-		facility_layer: 'Facility layer',
-		thematic_layer_1: 'Thematic layer 1',
-		thematic_layer_2: 'Thematic layer 2',
-		thematic_layer_3: 'Thematic layer 3',
-		thematic_layer_4: 'Thematic layer 4'
-	};
-
-	GIS.plugin = {};
-
 	var init = {},
 		configs = [],
 		isInitialized = false,
 		getInit,
 		applyCss,
 		execute;
+
+	GIS.i18n = {
+		facility_layer_legend: 'Facility layer legend',
+		thematic_layer_1_legend: 'Thematic layer 1 legend',
+		thematic_layer_2_legend: 'Thematic layer 2 legend',
+		thematic_layer_3_legend: 'Thematic layer 3 legend',
+		thematic_layer_4_legend: 'Thematic layer 4 legend',
+		measure_distance: 'Measure distance'
+	};
+
+	GIS.plugin = {};
 
 	getInit = function(config) {
 		var requests = [],
@@ -35,9 +35,9 @@ Ext.onReady( function() {
 		};
 
 		requests.push({
-			url: config.url + '/api/system/info.json',
+			url: config.url + '/api/system/info.jsonp',
 			success: function(r) {
-				init.contextPath = Ext.decode(r.responseText).contextPath;
+				init.contextPath = r.contextPath;
 				fn();
 			}
 		});
@@ -69,12 +69,7 @@ Ext.onReady( function() {
 		});
 
 		for (var i = 0; i < requests.length; i++) {
-			if (i === 0) {
-				Ext.Ajax.request(requests[i]);
-			}
-			else {
-				Ext.data.JsonP.request(requests[i]);
-			}
+			Ext.data.JsonP.request(requests[i]);
 		}
 	};
 
@@ -305,6 +300,10 @@ Ext.onReady( function() {
 	};
 
 	GIS.plugin.getMap = function(config) {
+		if (Ext.isString(config.url) && config.url.split('').pop() === '/') {
+			config.url = config.url.substr(0, config.url.length - 1);
+		}
+
 		configs.push(config);
 
 		if (!isInitialized) {
