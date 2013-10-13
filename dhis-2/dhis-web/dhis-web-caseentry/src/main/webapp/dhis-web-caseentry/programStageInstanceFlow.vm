@@ -86,8 +86,19 @@
 							#else
 								#set($standardInterval=0)
 							#end
-							<option value="$programStage.uid" localid='$programStage.id' prevStageId='$prevStageId'
-								standardInterval='$standardInterval' selected repeatable="true">$!programStage.displayName</option>
+							<option 
+								value="$programStage.uid" 
+								localid='$programStage.id' 
+								prevStageId='$prevStageId'
+								standardInterval='$standardInterval' 
+								selected repeatable="true"
+								allowGenerateNextVisit='$allowGenerateNextVisit' 
+								programType = '$programStage.program.type'
+								reportDateDes='$programStage.reportDateDescription'
+								repeatable="false"
+								openAfterEnrollment="$programStage.openAfterEnrollment"
+								reportDateToUse="$reportDateToUse"
+							>$!programStage.displayName</option>
 						#else
 							#set($hasEvent="false")
 							#foreach( $programStageInstance in $programInstance.programStageInstances )
@@ -106,14 +117,16 @@
 							#end
 							<option 
 								#if($hasEvent=="true") style="display:none;" #else selected #end 
-								value="$programStage.uid" localid='$programStage.id' prevStageId='$prevStageId'
-								standardInterval='$programStage.minDaysFromStart' allowGenerateNextVisit='$allowGenerateNextVisit' 
+								value="$programStage.uid" localid='$programStage.id' 
+								prevStageId='$prevStageId'
+								standardInterval='$programStage.minDaysFromStart' 
+								allowGenerateNextVisit='$allowGenerateNextVisit' 
 								programType = '$programStage.program.type'
 								reportDateDes='$programStage.reportDateDescription'
 								repeatable="false"
 								openAfterEnrollment="$programStage.openAfterEnrollment"
 								reportDateToUse="$reportDateToUse"
-								>$!programStage.displayName</option>
+							>$!programStage.displayName</option>
 							
 						#end
 						
@@ -134,7 +147,7 @@
 			<td>$i18n.getString( 'due_date' )</td>
 			<td><input id='dueDateNewEncounter_$!programInstance.id' name='dueDateNewEncounter_$!programInstance.id' style='width:260px;'></td>
 			<script type="text/javascript">
-			   datePickerFuture( 'dueDateNewEncounter_$!programInstance.id', false );
+			   datePickerValid( 'dueDateNewEncounter_$!programInstance.id', false );
 			</script>
 		</tr>
 		<tr>
@@ -168,10 +181,6 @@
 		}
 		else{
 			jQuery("[name=newEncounterBtn]").addClass("show-new-event");
-		}
-		
-		if( jQuery('.stage-object').length > 0 ){
-			disable( 'newEncounterBtn_$programInstance.id' );
 		}
 		resize();
 	});

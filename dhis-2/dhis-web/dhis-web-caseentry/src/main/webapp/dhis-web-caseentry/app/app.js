@@ -141,7 +141,7 @@ TR.conf = {
         west_fill: 117,
         west_fill_accordion_organisationunit: 43,
         west_maxheight_accordion_organisationunit: 225,
-        center_tbar_height: 31,
+        center_tbar_height: 30,
         east_gridcolumn_height: 30,
         form_label_width: 90,
 		grid_row_height: 27,
@@ -152,7 +152,7 @@ TR.conf = {
 		window_record_width: 450,
 		window_record_height: 300,
 		west_dataelements_multiselect: 120,
-		west_dataelements_filter_panel: 130,
+		west_dataelements_filter_panel: 250,
 		west_dataelements_expand_filter_panel: 280,
 		west_dataelements_collapse_filter_panel: 130,
 		west_dataelements_expand_aggregate_filter_panel: 230,
@@ -439,7 +439,7 @@ Ext.onReady( function() {
 					subPanel = Ext.getCmp(panelid);
 				}
 				else {
-					idx = subPanel.items.length/4;
+					idx = subPanel.items.length/5;
 				}
 				
 				var items = [];
@@ -448,7 +448,7 @@ Ext.onReady( function() {
 					xtype: 'label',
 					id: 'filter_lb_' + fieldid,
 					text:name,
-					width:(TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2 - 60
+					width:(TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2 - 100
 				};
 				
 				var opt = "";
@@ -463,10 +463,12 @@ Ext.onReady( function() {
 				items[2] = this.createFilterField(valueType, fieldid, filter);
 				if( idx == 0 ){
 					items[3] = this.addFieldBtn( p, id, name, valueType, idx );
+					items[4] = this.addFitlerOptionBox( p, id, name, valueType, idx );
 				}
 				else
 				{
 					items[3] = this.removeFieldBtn( panelid, fieldid );
+					items[4] = {};
 				}
 				
 				subPanel.add(items);
@@ -551,7 +553,7 @@ Ext.onReady( function() {
 				params.id = 'filter_' + id;
 				params.cls = 'tr-textfield-alt1';
 				params.emptyText = TR.i18n.filter_value;
-				params.width = (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2 - 50;
+				params.width = (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2 - 80;
 				xtype = xtype.toLowerCase();
 				if( valueType=='GENDER'){
 					params.xtype = 'combobox';
@@ -675,6 +677,23 @@ Ext.onReady( function() {
 					Ext.getCmp(p).remove(e3);
 					Ext.getCmp(p).remove(e4);
 				}
+				return params;
+			},
+			addFitlerOptionBox: function( p, id ){
+				var params = {};
+				params.xtype = 'combobox';
+				params.id = 'filter_dimension_' + id;
+				params.width = 75;
+				params.queryMode = 'local';
+				params.valueField = 'value';
+				params.displayField = 'name';
+				params.editable = false;
+				params.store = new Ext.data.ArrayStore({
+						fields: ['value','name'],
+						data: [ ['dimension',TR.i18n.dimension],['filter',TR.i18n.filter] ]
+					});
+				params.value = 'dimension';
+				
 				return params;
 			}
         },
@@ -1110,6 +1129,10 @@ Ext.onReady( function() {
 										var valueType = f.items[i].valueType;
 										TR.store.dataelement.selected.add({id: id, name: name, valueType: valueType});
 										TR.util.multiselect.addFilterField( 'filterPanel', id, name, valueType, f.filters[id] );
+										var dimension = f.items[i].dimension;
+										if(dimension=='false'){
+											Ext.getCmp('filter_dimension_' + id).setValue( 'filter' );
+										}
 									}
 									
 									if( f.singleEvent == 'false' )
@@ -1119,6 +1142,10 @@ Ext.onReady( function() {
 										if (TR.util.store.containsParent(store)) {
 											TR.util.store.loadFromStorage(store);
 											TR.util.multiselect.filterAvailable(TR.cmp.params.dataelement.available, TR.cmp.params.dataelement.selected);
+											var dimension = f.items[i].dimension;
+											if(dimension=='false'){
+												Ext.getCmp('filter_dimension_' + id).setValue( 'filter' );
+											}
 										}
 										else {
 											store.load({params: {programStageId: f.programStageId}});
@@ -1245,6 +1272,10 @@ Ext.onReady( function() {
 										TR.store.dataelement.selected.add({id: id, name: name, valueType: valueType});
 										
 										TR.util.multiselect.addFilterField( 'filterPanel', id, name, valueType, f.filters[id] );
+										var dimension = f.items[i].dimension;
+										if(dimension=='false'){
+											Ext.getCmp('filter_dimension_' + id).setValue( 'filter' );
+										}
 									}
 									
 									if( f.singleEvent == 'false' )
@@ -1254,6 +1285,10 @@ Ext.onReady( function() {
 										if (TR.util.store.containsParent(store)) {
 											TR.util.store.loadFromStorage(store);
 											TR.util.multiselect.filterAvailable(TR.cmp.params.dataelement.available, TR.cmp.params.dataelement.selected);
+											var dimension = f.items[i].dimension;
+											if(dimension=='false'){
+												Ext.getCmp('filter_dimension_' + id).setValue( 'filter' );
+											}
 										}
 										else {
 											store.load({params: {programStageId: f.programStageId}});
@@ -1598,16 +1633,20 @@ Ext.onReady( function() {
 			p.startDate = TR.cmp.settings.startDate.rawValue;
 			p.endDate = TR.cmp.settings.endDate.rawValue;
 			
-			if( TR.cmp.settings.ouMode.getValue()!== null ){
+			if( TR.cmp.settings.ouMode.getValue()!== null ||  TR.cmp.settings.ouMode.getValue()!='' ){
 				p.ouMode = TR.cmp.settings.ouMode.getValue();
 			}
 			
 			// Paging
+			if(TR.state.currentPage==undefined){
+				TR.state.currentPage = 1;
+			}
 			p.page = TR.state.currentPage;
 			
 			// Get searching values
 			
 			p.dimension = [];
+			p.filter = [];
 			
 			// User orgunits
 			
@@ -1638,12 +1677,17 @@ Ext.onReady( function() {
 			TR.cmp.params.dataelement.selected.store.each( function(r) {
 				var valueType = r.data.valueType;
 				var deId = r.data.id;
-				var length = Ext.getCmp('filterPanel_' + deId).items.length/4;
+				var length = Ext.getCmp('filterPanel_' + deId).items.length/5;
 				var hidden = TR.state.caseBasedReport.isColHidden(deId);
+				var dimensionOption = 'dimension';
 				
 				for(var idx=0;idx<length;idx++)
 				{
 					var id = deId + '_' + idx;
+					if( idx==0 )
+					{
+						dimensionOption = Ext.getCmp('filter_dimension_' + deId ).getValue();
+					}
 					
 					var filterOpt = Ext.getCmp('filter_opt_' + id).getValue();
 					var filterValue = Ext.getCmp('filter_' + id).rawValue.toLowerCase();;
@@ -1666,7 +1710,12 @@ Ext.onReady( function() {
 						}
 					}
 					
-					p.dimension.push( filter );
+					if( dimensionOption=='dimension' ){
+						p.dimension.push( filter );
+					}
+					else{
+						p.filter.push( filter );
+					}
 				}
 			});
 					
@@ -1749,12 +1798,17 @@ Ext.onReady( function() {
 			TR.cmp.params.dataelement.selected.store.each( function(r) {
 				var valueType = r.data.valueType;
 				var deId = r.data.id;
-				var length = Ext.getCmp('filterPanel_' + deId).items.length/4;
+				var length = Ext.getCmp('filterPanel_' + deId).items.length/45;
 				var hidden = TR.state.caseBasedReport.isColHidden(deId);
-				
+				var dimensionOption = 'dimension';
+
 				for(var idx=0;idx<length;idx++)
 				{
 					var id = deId + '_' + idx;
+					if( idx==0 )
+					{
+						dimensionOption = Ext.getCmp('filter_dimension_' + deId ).getValue();
+					}
 					
 					var filterOpt = Ext.getCmp('filter_opt_' + id).getValue();						
 					var filterValue = Ext.getCmp('filter_' + id).rawValue;
@@ -1774,7 +1828,12 @@ Ext.onReady( function() {
 						}
 					}
 					
-					params += '&dimension=' + filter;
+					if( dimensionOption=='dimension' ){
+						params += '&dimension=' + filter;
+					}
+					else{
+						params += '&filter=' + filter;
+					}
 				}
 			});
 			
@@ -4290,19 +4349,19 @@ Ext.onReady( function() {
         layout: 'border',
         renderTo: Ext.getBody(),
         isrendered: false,
-        items: [
+		items: [
             {
                 region: 'west',
                 preventHeader: true,
                 collapsible: true,
                 collapseMode: 'mini',
                 items: [
-				{
-					xtype: 'toolbar',
-					style: 'padding-top:1px; border-style:none',
-					width: TR.conf.layout.west_fieldset_width + 50,
-					bodyStyle: 'border-style:none; background-color:transparent; padding:4px 0 0 8px',
-                    items: [
+					{
+						xtype: 'toolbar',
+						style: 'padding-top:1px; border-style:none;',
+						width: TR.conf.layout.west_fieldset_width + 50,
+						bodyStyle: 'border-style:none; background-color:transparent; padding:4px 0 0 8px',
+						items: [
 						{
 							xtype: 'panel',
 							bodyStyle: 'border-style:none; background-color:transparent; padding:10px 0 0 8px',
@@ -4480,16 +4539,16 @@ Ext.onReady( function() {
 					},                            
 					{
 						xtype: 'panel',
-                        bodyStyle: 'border-style:none; border-top:2px groove #eee; padding:10px 10px 0 10px;',
+                        bodyStyle: 'border-style:none; border-top:2px groove #eee; padding:2px 2px 0 2px;magrin-left:32px;',
                         layout: 'fit',
                         items: [
 							{
 								xtype: 'panel',
 								layout: 'accordion',
+								bodyStyle: 'border-style:none;',
 								activeOnTop: true,
 								cls: 'tr-accordion',
-								bodyStyle: 'border:0 none',
-								height: 475,
+								height: 554,
 								items: [
 							
 									// DATE-RANGE
@@ -4852,7 +4911,7 @@ Ext.onReady( function() {
 												fieldLabel: TR.i18n.orgunit_groups,
 												labelWidth: 135,
 												emptyText: TR.i18n.please_select,
-												width: TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor,
+												width: TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor + 28,
 												store: TR.store.orgunitGroup,
 												listeners: {
 													added: function() {
@@ -4908,7 +4967,7 @@ Ext.onReady( function() {
 												xtype: 'toolbar',
 												id: 'organisationunit_t',
 												style: 'margin-bottom: 5px',
-												width: TR.conf.layout.west_fieldset_width - 18,
+												width: TR.conf.layout.west_fieldset_width + 10,
 												xable: function(checked, value) {
 													if (checked || value) {
 														this.disable();
@@ -4993,7 +5052,7 @@ Ext.onReady( function() {
 												xtype: 'treepanel',
 												id: 'treeOrg',
 												cls: 'tr-tree',
-												width: TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor,
+												width: TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor + 28,
 												rootVisible: false,
 												autoScroll: true,
 												multiSelect: true,
@@ -5165,20 +5224,21 @@ Ext.onReady( function() {
 									
 									// DATA ELEMENTS
 									{
-										title: '<div id="dataElementTabTitle" style="height:17px;background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px;">' + TR.i18n.data_filter + '</div>',
+										title: '<div id="dataElementTabTitle" style="height:17px;background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px;">' + TR.i18n.data_items + '</div>',
 										hideCollapseTool: true,
 										items: [
 											{
 												xtype: 'combobox',
 												cls: 'tr-combo',
 												id: 'sectionCombobox',
+												style: 'magrin-left:2px;',
 												fieldLabel: TR.i18n.section,
 												emptyText: TR.i18n.please_select,
 												queryMode: 'local',
 												editable: false,
 												valueField: 'id',
 												displayField: 'name',
-												width: TR.conf.layout.west_fieldset_width - 20,
+												width: TR.conf.layout.west_fieldset_width - 10,
 												store: TR.store.programStageSection,
 												listeners: {
 													added: function() {
@@ -5208,12 +5268,12 @@ Ext.onReady( function() {
 											{
 												xtype: 'panel',
 												layout: 'column',
-												bodyStyle: 'border-style:none',
+												bodyStyle: 'border-style:none;magrin-left:2px;height:7005px;',
 												items: [
 													{
 														xtype: 'toolbar',
 														id: 'avalableDEBar',
-														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2,
+														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2 + 14,
 														cls: 'tr-toolbar-multiselect-left',
 														items: [
 															{
@@ -5246,7 +5306,7 @@ Ext.onReady( function() {
 													{
 														xtype: 'toolbar',
 														id: 'selectedDEBar',
-														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2,
+														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2 + 14,
 														cls: 'tr-toolbar-multiselect-left',
 														items: [
 															' ',
@@ -5281,7 +5341,7 @@ Ext.onReady( function() {
 														id: 'availableDataelements',
 														name: 'availableDataelements',
 														cls: 'tr-toolbar-multiselect-left',
-														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2,
+														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2 + 14,
 														height: TR.conf.layout.west_dataelements_multiselect,
 														displayField: 'name',
 														valueField: 'id',
@@ -5345,7 +5405,7 @@ Ext.onReady( function() {
 														id: 'selectedDataelements',
 														name: 'selectedDataelements',
 														cls: 'tr-toolbar-multiselect-right',
-														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2,
+														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2 + 14,
 														height: TR.conf.layout.west_dataelements_multiselect,
 														displayField: 'name',
 														valueField: 'id',
@@ -5407,20 +5467,20 @@ Ext.onReady( function() {
 													},
 													{
 														xtype: 'toolbar',
-														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor),
+														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) + 28,
 														cls: 'tr-toolbar-multiselect-left',
-														style: 'margin-top:10px;',
+														style: 'margin-top:2px;',
 														items: [
 															{
 																xtype: 'label',	
-																text: TR.i18n.filter_values,
+																text: TR.i18n.selected_items,
 																cls: 'tr-toolbar-multiselect-left-label'
 															},
 															'->',
 															{
 																xtype: 'button',
 																icon: 'images/arrowup.png',
-																tooltip: TR.i18n.show_hide_filter_values,
+																tooltip: TR.i18n.show_hide_selected_values,
 																up: true,
 																width: 22,
 																handler: function() {
@@ -5460,10 +5520,10 @@ Ext.onReady( function() {
 														xtype: 'panel',
 														layout: 'column',
 														id: 'filterPanel',
-														bodyStyle: 'background-color:transparent; padding:10px 10px 0px 3px;overflow-x: hidden; overflow-y: auto;',
+														bodyStyle: 'background-color:transparent; padding:2px 2px 2px 2px;overflow-x:hidden;overflow-y:auto;',
 														overflowX: 'hidden',
 														height: TR.conf.layout.west_dataelements_filter_panel,
-														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor),
+														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) + 28,
 														items: []
 													}
 												]
@@ -5500,7 +5560,7 @@ Ext.onReady( function() {
                 id: 'center',
                 region: 'center',
                 layout: 'fit',
-                bodyStyle: 'padding-top:0px, padding-bottom:0px',
+                bodyStyle: 'padding-top:0px, padding-bottom:0px;',
                 tbar: {
                     xtype: 'toolbar',
                     cls: 'tr-toolbar',
