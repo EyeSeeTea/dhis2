@@ -204,12 +204,6 @@ public class DefaultPatientService
     }
 
     @Override
-    public Collection<Patient> getPatiensByGender( String gender )
-    {
-        return patientStore.getByGender( gender );
-    }
-
-    @Override
     public Collection<Patient> getPatientsByBirthDate( Date birthDate )
     {
         return patientStore.getByBirthDate( birthDate );
@@ -303,33 +297,9 @@ public class DefaultPatientService
     }
 
     @Override
-    public Collection<Patient> getPatients( Program program, String gender )
-    {
-        return patientStore.getByProgram( program, gender, 0, Integer.MAX_VALUE );
-    }
-
-    @Override
-    public Collection<Patient> getPatients( OrganisationUnit organisationUnit, Program program, String gender )
-    {
-        return patientStore.getByOrgUnitProgramGender( organisationUnit, program, gender, 0, Integer.MAX_VALUE );
-    }
-
-    @Override
     public Collection<Patient> getPatients( OrganisationUnit organisationUnit, Program program )
     {
         return patientStore.getByOrgUnitProgram( organisationUnit, program, 0, Integer.MAX_VALUE );
-    }
-
-    @Override
-    public Collection<Patient> getPatients( OrganisationUnit organisationUnit, String gender, Integer min, Integer max )
-    {
-        return patientStore.getByOrgUnitAndGender( organisationUnit, gender, min, max );
-    }
-
-    @Override
-    public Collection<Patient> getPatients( OrganisationUnit organisationUnit, String gender )
-    {
-        return patientStore.getByOrgUnitAndGender( organisationUnit, gender, 0, Integer.MAX_VALUE );
     }
 
     @Override
@@ -349,8 +319,7 @@ public class DefaultPatientService
     }
 
     @Override
-    public Collection<Patient> getPatientsLikeName( OrganisationUnit organisationUnit, String name, Integer min,
-        Integer max )
+    public Collection<Patient> getPatientsLikeName( OrganisationUnit organisationUnit, String name, Integer min, Integer max )
     {
         return patientStore.getByOrgUnitAndNameLike( organisationUnit, name, min, max );
     }
@@ -683,9 +652,9 @@ public class DefaultPatientService
     }
 
     @Override
-    public Collection<Patient> getPatientByFullname( String fullName, Integer orgunitId )
+    public Collection<Patient> getPatientByFullname( String fullName, OrganisationUnit organisationUnit )
     {
-        return patientStore.getByFullName( fullName, orgunitId );
+        return patientStore.getByFullName( fullName, organisationUnit );
     }
 
     @Override

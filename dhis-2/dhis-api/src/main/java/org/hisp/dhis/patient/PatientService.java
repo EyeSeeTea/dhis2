@@ -60,23 +60,7 @@ public interface PatientService
 
     Collection<Patient> getAllPatients();
 
-    /**
-     * Search Patient base on name/birthDate/gender
-     *
-     * @param name
-     * @param birthdate
-     * @param gender
-     * @return Patient List
-     */
     Collection<Patient> getPatients( String name, Date birthdate, String gender );
-
-    /**
-     * Search Patient base on gender
-     *
-     * @param gender
-     * @return Patient List
-     */
-    Collection<Patient> getPatiensByGender( String gender );
 
     /**
      * Search Patient base on birthDate
@@ -136,44 +120,11 @@ public interface PatientService
 
     /**
      *
-     * @param program
-     * @param gender
-     * @return
-     */
-    Collection<Patient> getPatients( Program program, String gender );
-
-    /**
-     *
-     * @param organisationUnit
-     * @param program
-     * @param gender
-     * @return
-     */
-    Collection<Patient> getPatients( OrganisationUnit organisationUnit, Program program, String gender );
-
-    /**
-     *
      * @param organisationUnit
      * @param program
      * @return
      */
     Collection<Patient> getPatients( OrganisationUnit organisationUnit, Program program );
-
-    /**
-     * Search Patient base on organization unit with result limited
-     *
-     * @param organisationUnit organisationUnit
-     * @return Patient List
-     */
-    Collection<Patient> getPatients( OrganisationUnit organisationUnit, String gender, Integer min, Integer max );
-
-    /**
-     * Search Patient base on organization unit with result limited
-     *
-     * @param organisationUnit organisationUnit
-     * @return Patient List
-     */
-    Collection<Patient> getPatients( OrganisationUnit organisationUnit, String gender );
 
     /**
      * Search Patient base on organization unit and sort the result by
@@ -279,7 +230,7 @@ public interface PatientService
 
     Collection<Patient> getPatientsByPhone( String phoneNumber, Integer min, Integer max );
 
-    Collection<Patient> getPatientByFullname( String fullName, Integer orgunitId );
+    Collection<Patient> getPatientByFullname( String fullName, OrganisationUnit organisationUnit );
 
     Collection<Integer> getRegistrationOrgunitIds( Date startDate, Date endDate );
 
