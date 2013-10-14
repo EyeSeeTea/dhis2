@@ -100,6 +100,8 @@ Ext.onReady(function() {
 				return;
 			}
 
+			config.id = config.id || config.uid;
+
 			return true;
 		};
 
