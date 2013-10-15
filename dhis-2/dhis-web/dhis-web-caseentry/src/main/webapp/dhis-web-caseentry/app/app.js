@@ -5197,13 +5197,14 @@ Ext.onReady( function() {
 											{
 												xtype: 'panel',
 												layout: 'column',
-												bodyStyle: 'border-style:none;magrin-left:2px;height:700px;',
+												bodyStyle: 'border-style:none;height:700px;',
 												items: [
 													{
 														xtype: 'toolbar',
 														id: 'avalableDEBar',
 														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2 + 14,
 														cls: 'tr-toolbar-multiselect-left',
+														style: 'border-bottom:0 none; border-radius: 0',
 														items: [
 															{
 																xtype: 'label',	
@@ -5229,14 +5230,15 @@ Ext.onReady( function() {
 																	TR.util.multiselect.filterSelector( TR.cmp.params.dataelement.available, Ext.getCmp('deFilterAvailable').getValue());
 																}
 															},
-															''
+															' '
 														]
 													},
 													{
 														xtype: 'toolbar',
 														id: 'selectedDEBar',
 														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2 + 14,
-														cls: 'tr-toolbar-multiselect-left',
+														cls: 'tr-toolbar-multiselect-right',
+														style: 'border-bottom:0 none; border-radius: 0',
 														items: [
 															' ',
 															{
