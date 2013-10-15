@@ -487,6 +487,7 @@ Ext.onReady( function() {
 				params.valueField = 'value';
 				params.displayField = 'name';
 				params.editable = false;
+				params.style = 'margin-bottom:2px';
 				valueType = valueType.split('_')[0];
 				if( filterOperator != undefined || filterOperator!= '')
 				{
@@ -553,6 +554,7 @@ Ext.onReady( function() {
 				params.xtype = xtype;
 				params.id = 'filter_' + id;
 				params.cls = 'tr-textfield-alt1';
+				params.style = 'margin-bottom:2px';
 				params.emptyText = TR.i18n.filter_value;
 				params.width = (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2 - 50;
 				xtype = xtype.toLowerCase();
@@ -655,6 +657,7 @@ Ext.onReady( function() {
 				var params = {};
 				params.xtype = 'button';
 				params.text = "+";
+				params.style = 'margin-bottom:2px';
 				params.tooltip = TR.i18n.add,
 				params.handler = function() {
 					TR.util.multiselect.addFilterField(p, id, name, valueType);
@@ -667,6 +670,7 @@ Ext.onReady( function() {
 				params.xtype = 'button';
 				params.id = 'filter_rmv_' + id;	
 				params.text = "-";
+				params.style = 'margin-bottom:2px';
 				params.tooltip = TR.i18n.remove,
 				params.handler = function() {
 					var e1 = Ext.getCmp( 'filter_' + id );
@@ -688,6 +692,7 @@ Ext.onReady( function() {
 				params.queryMode = 'local';
 				params.valueField = 'value';
 				params.displayField = 'name';
+				params.style = 'margin-bottom:2px';
 				params.editable = false;
 				params.store = new Ext.data.ArrayStore({
 						fields: ['value','name'],
@@ -4364,16 +4369,15 @@ Ext.onReady( function() {
                 items: [
 					{
 						xtype: 'toolbar',
-						width: TR.conf.layout.west_fieldset_width + 50,
+						width: TR.conf.layout.west_fieldset_width + 20,
 						style: 'padding:2px 0 0 2px; border:0 none; border-bottom:1px solid #ccc; background-color:transparent',
 						items: [
 						{
 							xtype: 'panel',
-							bodyStyle: 'border-style:none; background-color:transparent; padding:5px 0 0 8px',
+							bodyStyle: 'border-style:none; background-color:transparent; padding:2px',
 							items: [
 								Ext.create('Ext.form.Panel', {
 								bodyStyle: 'border-style:none; background-color:transparent; padding:3px 30px 0 8px',
-                                width: TR.conf.layout.west_fieldset_width + 50,
 								items: [
 								{
 									xtype: 'radiogroup',
@@ -4446,14 +4450,14 @@ Ext.onReady( function() {
 									name: TR.init.system.programs,
 									id: 'programCombobox',
 									fieldLabel: TR.i18n.program,
-									labelStyle: 'font-weight:bold',
+									labelStyle: 'font-weight:bold; margin-bottom:2px',
 									labelAlign: 'top',
 									emptyText: TR.i18n.please_select,
 									queryMode: 'local',
 									editable: false,
 									valueField: 'id',
 									displayField: 'name',
-									width: TR.conf.layout.west_fieldset_width / 2 - 10,
+									width: TR.conf.layout.west_fieldset_width / 2 - 3,
 									store: TR.store.program,
 									listeners: {
 										added: function() {
@@ -4487,14 +4491,14 @@ Ext.onReady( function() {
 									id:'programStageCombobox',
 									style: 'margin-left:2px',
 									fieldLabel: TR.i18n.program_stage,
-									labelStyle: 'font-weight:bold',
+									labelStyle: 'font-weight:bold; margin-bottom:2px',
 									labelAlign: 'top',
 									emptyText: TR.i18n.please_select,
 									queryMode: 'local',
 									editable: false,
 									valueField: 'id',
 									displayField: 'name',
-									width:  TR.conf.layout.west_fieldset_width / 2 - 10,
+									width:  TR.conf.layout.west_fieldset_width / 2 - 3,
 									store: TR.store.programStage,
 									listeners: {
 										added: function() {
