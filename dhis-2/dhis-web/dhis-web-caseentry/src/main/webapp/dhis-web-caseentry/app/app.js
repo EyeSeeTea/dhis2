@@ -5400,7 +5400,7 @@ Ext.onReady( function() {
 														xtype: 'toolbar',
 														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) + 28,
 														cls: 'tr-toolbar-multiselect-left',
-														style: 'margin-top:2px;',
+														style: 'margin-top:2px; border-bottom:0 none',
 														items: [
 															{
 																xtype: 'label',	
