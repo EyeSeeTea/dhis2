@@ -621,24 +621,6 @@ tr.utilbody {
 	border-top-right-radius: 1px;
 }
 
-	/* accordion title dock, default, collapsed */
-.tr-accordion .collapsed .x-accordion-hd {
-	padding-bottom: 5px !important;
-}
-	/* accordion title dock outer, shared */
-.tr-accordion .x-accordion-item {
-	border-radius: 1px;
-}
-	/* accordion title dock outer, default */
-.tr-accordion .x-accordion-item {
-	border: 1px solid #c5c5c5;
-	border-bottom: 0 none;
-}
-	/* accordion title dock outer, last */
-.tr-accordion .tr-accordion-last {
-	border: 1px solid #c5c5c5;
-}
-
 .tr-accordion .x-accordion-item .x-accordion-hd { /* accordion title dock, default */
     background-image: none;
     background-color: #e0e0e0;
@@ -672,6 +654,9 @@ tr.utilbody {
 }
 .tr-accordion .tr-accordion-options { /* accordion title dock outer, options */
 	border: 1px solid #c0c0c0;
+}	
+.tr-accordion .tr-accordion-last { /* accordion title dock outer, last */
+	border: 1px solid #c5c5c5;
 }
 
 .tr-accordion .x-accordion-hd .x-panel-header-text { /* accordion title dock text, shared */
@@ -697,7 +682,7 @@ tr.utilbody {
 
 .tr-accordion .tr-combo .x-form-text, .tr-accordion .tr-combo .x-form-trigger { /* accordion combo box */
 	height: 24px;
-	padding-top: 2px;
+	padding-top: 1px;
 }
 .tr-accordion .tr-combo .x-form-item-label { /* accordion combo box label */
 	padding: 4px 0 0;

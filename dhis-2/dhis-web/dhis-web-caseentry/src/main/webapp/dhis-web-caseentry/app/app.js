@@ -4556,7 +4556,6 @@ Ext.onReady( function() {
 									{
 										title: '<div style="height:17px; background-image:url(images/period.png); background-repeat:no-repeat; padding-left:20px">' + TR.i18n.period_range + '</div>',
 										id: 'dateRangeDiv',
-										cls: 'tr-accordion-last',
 										hideCollapseTool: true,
 										autoScroll: true,
 										items: [
@@ -5228,6 +5227,7 @@ Ext.onReady( function() {
 									{
 										title: '<div id="dataElementTabTitle" style="height:17px;background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px;">' + TR.i18n.data_items + '</div>',
 										hideCollapseTool: true,
+										cls: 'tr-accordion-last',
 										items: [
 											{
 												xtype: 'combobox',
