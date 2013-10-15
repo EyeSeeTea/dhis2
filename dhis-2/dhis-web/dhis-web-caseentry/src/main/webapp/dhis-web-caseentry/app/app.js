@@ -4364,13 +4364,12 @@ Ext.onReady( function() {
                 items: [
 					{
 						xtype: 'toolbar',
-						style: 'padding-top:1px; border-style:none;',
 						width: TR.conf.layout.west_fieldset_width + 50,
-						bodyStyle: 'border-style:none; background-color:transparent; padding:4px 0 0 8px',
+						style: 'padding:2px 0 0 2px; border:0 none; border-bottom:1px solid #ccc; background-color:transparent',
 						items: [
 						{
 							xtype: 'panel',
-							bodyStyle: 'border-style:none; background-color:transparent; padding:10px 0 0 8px',
+							bodyStyle: 'border-style:none; background-color:transparent; padding:5px 0 0 8px',
 							items: [
 								Ext.create('Ext.form.Panel', {
 								bodyStyle: 'border-style:none; background-color:transparent; padding:3px 30px 0 8px',
@@ -4483,13 +4482,10 @@ Ext.onReady( function() {
 									}
 								},
 								{
-									xtyle:'label',
-									text: ''
-								},
-								{
 									xtype: 'combobox',
 									cls: 'tr-combo',
 									id:'programStageCombobox',
+									style: 'margin-left:2px',
 									fieldLabel: TR.i18n.program_stage,
 									labelStyle: 'font-weight:bold',
 									labelAlign: 'top',
@@ -4545,15 +4541,14 @@ Ext.onReady( function() {
 					},                            
 					{
 						xtype: 'panel',
-                        bodyStyle: 'border-style:none; border-top:2px groove #eee; padding:2px 2px 0 2px;magrin-left:32px;',
-                        layout: 'fit',
+                        bodyStyle: 'border:0 none; padding:2px 2px 0',
                         items: [
 							{
 								xtype: 'panel',
 								layout: 'accordion',
-								bodyStyle: 'border-style:none;',
 								activeOnTop: true,
 								cls: 'tr-accordion',
+								bodyStyle: 'border:0 none; margin-bottom:2px',
 								height: 554,
 								items: [
 							
@@ -4561,6 +4556,7 @@ Ext.onReady( function() {
 									{
 										title: '<div style="height:17px; background-image:url(images/period.png); background-repeat:no-repeat; padding-left:20px">' + TR.i18n.period_range + '</div>',
 										id: 'dateRangeDiv',
+										cls: 'tr-accordion-last',
 										hideCollapseTool: true,
 										autoScroll: true,
 										items: [
@@ -5237,14 +5233,15 @@ Ext.onReady( function() {
 												xtype: 'combobox',
 												cls: 'tr-combo',
 												id: 'sectionCombobox',
-												style: 'magrin-left:2px;',
+												style: 'margin:0 2px 2px;',
 												fieldLabel: TR.i18n.section,
+												labelStyle: 'padding-left:2px',
 												emptyText: TR.i18n.please_select,
 												queryMode: 'local',
 												editable: false,
 												valueField: 'id',
 												displayField: 'name',
-												width: TR.conf.layout.west_fieldset_width - 10,
+												width: TR.conf.layout.west_fieldset_width + 8,
 												store: TR.store.programStageSection,
 												listeners: {
 													added: function() {

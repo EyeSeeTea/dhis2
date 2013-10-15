@@ -620,6 +620,25 @@ tr.utilbody {
 	-webkit-border-top-right-radius: 1px;
 	border-top-right-radius: 1px;
 }
+
+	/* accordion title dock, default, collapsed */
+.tr-accordion .collapsed .x-accordion-hd {
+	padding-bottom: 5px !important;
+}
+	/* accordion title dock outer, shared */
+.tr-accordion .x-accordion-item {
+	border-radius: 1px;
+}
+	/* accordion title dock outer, default */
+.tr-accordion .x-accordion-item {
+	border: 1px solid #c5c5c5;
+	border-bottom: 0 none;
+}
+	/* accordion title dock outer, last */
+.tr-accordion .tr-accordion-last {
+	border: 1px solid #c5c5c5;
+}
+
 .tr-accordion .x-accordion-item .x-accordion-hd { /* accordion title dock, default */
     background-image: none;
     background-color: #e0e0e0;
@@ -672,7 +691,7 @@ tr.utilbody {
 }
 
 .tr-accordion .x-accordion-body { /* accordion item body */
-	padding: 8px 2px 2px 2px;
+	padding: 2px;
 	border-top: 1px solid #c5c5c5 !important;
 	border-bottom: 1px solid #C5C5C5 !important;
 }
