@@ -50,7 +50,6 @@ import org.hisp.dhis.program.Program;
 import org.hisp.dhis.relationship.Relationship;
 import org.hisp.dhis.relationship.RelationshipService;
 import org.hisp.dhis.relationship.RelationshipType;
-import org.hisp.dhis.relationship.RelationshipTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
@@ -69,7 +68,7 @@ import static org.hisp.dhis.system.util.TextUtils.nullIfEmpty;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public abstract class AbstractPersonService 
+public abstract class AbstractPersonService
     implements PersonService
 {
     // -------------------------------------------------------------------------
@@ -92,9 +91,6 @@ public abstract class AbstractPersonService
     private RelationshipService relationshipService;
 
     @Autowired
-    private RelationshipTypeService relationshipTypeService;
-
-    @Autowired
     private IdentifiableObjectManager manager;
 
     @Autowired
@@ -108,7 +104,7 @@ public abstract class AbstractPersonService
         this._format = format;
     }
 
-    public I18nFormat getFormat()
+    I18nFormat getFormat()
     {
         if ( _format != null )
         {
