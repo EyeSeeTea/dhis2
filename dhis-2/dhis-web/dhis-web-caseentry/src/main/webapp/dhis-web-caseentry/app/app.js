@@ -4558,7 +4558,7 @@ Ext.onReady( function() {
 										id: 'dateRangeDiv',
 										hideCollapseTool: true,
 										autoScroll: true,
-										bodyStyle: 'padding:4px',
+										bodyStyle: 'padding:3px 4px',
 										items: [
 											{
 												xtype: 'datefield',
@@ -4626,7 +4626,7 @@ Ext.onReady( function() {
 													{
 														xtype: 'panel',
 														columnWidth: 0.32,
-														bodyStyle: 'border-style:none; padding:0 0 0 8px',
+														bodyStyle: 'border-style:none; padding:0 0 0 6px',
 														defaults: {
 															labelSeparator: '',
 															style: 'margin-bottom:2px',
@@ -4672,6 +4672,7 @@ Ext.onReady( function() {
 														columnWidth: 0.32,
 														bodyStyle: 'border-style:none; padding:0 0 0 10px',
 														defaults: {
+															style: 'margin-bottom:2px',
 															labelSeparator: '',
 															listeners: {
 																added: function(chb) {
@@ -4720,6 +4721,7 @@ Ext.onReady( function() {
 														columnWidth: 0.32,
 														bodyStyle: 'border-style:none; padding:0 0 0 10px',
 														defaults: {
+															style: 'margin-bottom:2px',
 															labelSeparator: '',
 															listeners: {
 																added: function(chb) {
@@ -4762,12 +4764,12 @@ Ext.onReady( function() {
 											{
 												xtype: 'panel',
 												layout: 'column',
-												bodyStyle: 'border-style:none',
+												bodyStyle: 'border-style:none; padding-top:6px',
 												items: [
 												{
 													xtype: 'panel',
 													columnWidth: 0.32,
-													bodyStyle: 'border-style:none; padding:0 0 0 2px',
+													bodyStyle: 'border-style:none; padding:0 0 0 6px',
 													defaults: {
 														labelSeparator: '',
 														style: 'margin-bottom:2px',
@@ -4849,9 +4851,10 @@ Ext.onReady( function() {
 														{
 															xtype: 'panel',
 															layout: 'anchor',
-															bodyStyle: 'border-style:none; padding:5px 0 0 5px',
+															bodyStyle: 'border-style:none; padding:0 0 0 5px',
 															defaults: {
 																labelSeparator: '',
+																style: 'margin-bottom:2px',
 																listeners: {
 																	added: function(chb) {
 																		if (chb.xtype === 'checkbox') {
@@ -4925,7 +4928,8 @@ Ext.onReady( function() {
 											},
 											{
 												layout: 'column',
-												bodyStyle: 'border:0 none; padding-bottom:4px',
+												bodyStyle: 'border:0 none; padding-bottom:3px',
+												style: 'margin-top:2px; margin-left:2px',
 												items: [
 													{
 														xtype: 'checkbox',
@@ -4966,91 +4970,6 @@ Ext.onReady( function() {
 														}
 													}
 												]
-											},
-											{
-												xtype: 'toolbar',
-												id: 'organisationunit_t',
-												style: 'margin-bottom: 5px',
-												width: TR.conf.layout.west_fieldset_width + 10,
-												xable: function(checked, value) {
-													if (checked || value) {
-														this.disable();
-													}
-													else {
-														this.enable();
-													}
-												},
-												defaults: {
-													height: 24
-												},
-												items: [
-													{
-														xtype: 'label',
-														text: TR.i18n.auto_select_orgunit_by,
-														style: 'padding-left:8px; color:#666; line-height:24px'
-													},
-													'->',
-													{
-														text: 'Group..',
-														handler: function() {},
-														listeners: {
-															added: function() {
-																this.menu = Ext.create('Ext.menu.Menu', {
-																	shadow: false,
-																	showSeparator: false,
-																	width: TR.conf.layout.treepanel_toolbar_menu_width_group,
-																	items: [
-																		{
-																			xtype: 'grid',
-																			cls: 'tr-menugrid',
-																			width: TR.conf.layout.treepanel_toolbar_menu_width_group,
-																			scroll: 'vertical',
-																			columns: [
-																				{
-																					dataIndex: 'name',
-																					width: TR.conf.layout.treepanel_toolbar_menu_width_group,
-																					style: 'display:none'
-																				}
-																			],
-																			setHeightInMenu: function(store) {
-																				var h = store.getCount() * 16,
-																					sh = TR.util.viewport.getSize().y * 0.4;
-																				this.setHeight(h > sh ? sh : h);
-																				this.doLayout();
-																				this.up('menu').doLayout();
-																			},
-																			store: TR.store.orgunitGroup,
-																			listeners: {
-																				itemclick: function(g, r) {
-																					g.getSelectionModel().select([], false);
-																					this.up('menu').hide();
-																					TR.cmp.params.organisationunit.treepanel.selectByGroup(r.data.id);
-																				}
-																			}
-																		}
-																	],
-																	listeners: {
-																		show: function() {
-																			if (!TR.store.orgunitGroup.isloaded) {
-																				TR.store.orgunitGroup.load({scope: this, callback: function() {
-																					this.down('grid').setHeightInMenu(TR.store.orgunitGroup);
-																				}});
-																			}
-																			else {
-																				this.down('grid').setHeightInMenu(TR.store.orgunitGroup);
-																			}
-																		}
-																	}
-																});
-															}
-														}
-													}
-												],
-												listeners: {
-													added: function() {
-														TR.cmp.params.organisationunit.toolbar = this;
-													}
-												}
 											},
 											{
 												xtype: 'treepanel',
