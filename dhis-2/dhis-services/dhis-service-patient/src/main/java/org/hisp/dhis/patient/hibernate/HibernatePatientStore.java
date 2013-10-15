@@ -57,7 +57,6 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
-import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.patient.Patient;
@@ -92,13 +91,6 @@ public class HibernatePatientStore
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
-    }
-
-    private StatementBuilder statementBuilder;
-
-    public void setStatementBuilder( StatementBuilder statementBuilder )
-    {
-        this.statementBuilder = statementBuilder;
     }
 
     // -------------------------------------------------------------------------
@@ -177,71 +169,40 @@ public class HibernatePatientStore
     }
 
     @Override
-    //TODO this method must be changed - cannot retrieve one by one
+    @SuppressWarnings("unchecked")
     public Collection<Patient> getByOrgUnitProgram( OrganisationUnit organisationUnit, Program program, Integer min,
         Integer max )
     {
-        List<Patient> patients = new ArrayList<Patient>();
-
-        String sql = "select p.patientid from patient p join programinstance pi on p.patientid=pi.patientid "
-            + "where p.organisationunitid=" + organisationUnit.getId() + " and pi.programid=" + program.getId()
-            + " and pi.status=" + ProgramInstance.STATUS_ACTIVE;
-
-        if ( min != null && max != null )
-        {
-            sql += statementBuilder.limitRecord( min, max );
-        }
-
-        try
-        {
-            patients = jdbcTemplate.query( sql, new RowMapper<Patient>()
-            {
-                public Patient mapRow( ResultSet rs, int rowNum )
-                    throws SQLException
-                {
-                    return get( rs.getInt( 1 ) );
-                }
-            } );
-        }
-        catch ( Exception ex )
-        {
-            ex.printStackTrace();
-        }
-
-        return patients;
+        String hql = 
+            "select pt from Patient pt " +
+            "inner join pt.programInstances pi " +
+            "where pt.organisationUnit = :organisationUnit " +
+            "and pi.program = :program " +
+            "and pi.status = :status";
+        
+        Query query = getQuery( hql );
+        query.setEntity( "organisationUnit", organisationUnit );
+        query.setEntity( "program", program );
+        query.setInteger( "status", ProgramInstance.STATUS_ACTIVE );
+        
+        return query.list();
     }
 
     @Override
-    //TODO this method must be changed - cannot retrieve one by one
+    @SuppressWarnings("unchecked")
     public Collection<Patient> getByProgram( Program program, Integer min, Integer max )
     {
-        List<Patient> patients = new ArrayList<Patient>();
-
-        String sql = "select p.patientid from patient p join programinstance pi on p.patientid=pi.patientid "
-            + "where pi.programid=" + program.getId() + " and pi.status=" + ProgramInstance.STATUS_ACTIVE;
-
-        if ( min != null && max != null )
-        {
-            sql += statementBuilder.limitRecord( min, max );
-        }
-
-        try
-        {
-            patients = jdbcTemplate.query( sql, new RowMapper<Patient>()
-            {
-                public Patient mapRow( ResultSet rs, int rowNum )
-                    throws SQLException
-                {
-                    return get( rs.getInt( 1 ) );
-                }
-            } );
-        }
-        catch ( Exception ex )
-        {
-            ex.printStackTrace();
-        }
-
-        return patients;
+        String hql = 
+            "select pt from Patient pt " +
+            "inner join pt.programInstances pi " +
+            "where pi.program = :program " +
+            "and pi.status = :status";
+        
+        Query query = getQuery( hql );
+        query.setEntity( "program", program );
+        query.setInteger( "status", ProgramInstance.STATUS_ACTIVE );
+        
+        return query.list();
     }
 
     @Override
@@ -287,9 +248,10 @@ public class HibernatePatientStore
     @Override
     //TODO this method must be changed - cannot retrieve one by one
     public Collection<Patient> search( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer statusEnrollment, Integer min, Integer max )
+        Boolean followup, Collection<PatientAttribute> patientAttributes, Collection<PatientIdentifierType> identifierTypes, 
+        Integer statusEnrollment, Integer min, Integer max )
     {
-        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, null,
+        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, identifierTypes,
             statusEnrollment, min, max );
         Collection<Patient> patients = new HashSet<Patient>();
         try
@@ -311,36 +273,9 @@ public class HibernatePatientStore
     }
 
     @Override
-    public Collection<String> getPatientPhoneNumbers( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer statusEnrollment, Integer min,
-        Integer max )
-    {
-        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, null,
-            statusEnrollment, min, max );
-        Collection<String> phoneNumbers = new HashSet<String>();
-        try
-        {
-            phoneNumbers = jdbcTemplate.query( sql, new RowMapper<String>()
-            {
-                public String mapRow( ResultSet rs, int rowNum )
-                    throws SQLException
-                {
-                    String phoneNumber = rs.getString( "phonenumber" );
-                    return (phoneNumber == null || phoneNumber.isEmpty()) ? "0" : phoneNumber;
-                }
-            } );
-        }
-        catch ( Exception ex )
-        {
-            ex.printStackTrace();
-        }
-        return phoneNumbers;
-    }
-
-    @Override
     public List<Integer> getProgramStageInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Collection<PatientAttribute> patientAttributes,
-        Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min, Integer max )
+        Boolean followup, Collection<PatientAttribute> patientAttributes, Collection<PatientIdentifierType> identifierTypes, 
+        Integer statusEnrollment, Integer min, Integer max )
     {
         String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, identifierTypes,
             statusEnrollment, min, max );
@@ -371,16 +306,12 @@ public class HibernatePatientStore
         String sql = searchPatientSql( true, searchKeys, orgunits, followup, null, null, statusEnrollment, null, null );
         return jdbcTemplate.queryForObject( sql, Integer.class );
     }
-
+    
     @Override
     public Grid getPatientEventReport( Grid grid, List<String> searchKeys, Collection<OrganisationUnit> orgunits,
         Boolean followup, Collection<PatientAttribute> patientAttributes,
         Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min, Integer max )
     {
-        // ---------------------------------------------------------------------
-        // Get SQL and build grid
-        // ---------------------------------------------------------------------
-
         String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, identifierTypes,
             statusEnrollment, null, null );
 
@@ -390,9 +321,50 @@ public class HibernatePatientStore
 
         return grid;
     }
+    
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public Collection<Patient> getByPhoneNumber( String phoneNumber, Integer min, Integer max )
+    {
+        String hql = "select p from Patient p where p.phoneNumber like '%" + phoneNumber + "%'";
+        Query query = getQuery( hql );
+
+        if ( min != null && max != null )
+        {
+            query.setFirstResult( min ).setMaxResults( max );
+        }
+
+        return query.list();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Collection<Patient> getByFullName( String name, OrganisationUnit organisationUnit )
+    {
+        Criteria criteria = getCriteria( Restrictions.eq( "name", name ).ignoreCase() );
+        
+        if ( organisationUnit != null )
+        {
+            criteria.add( Restrictions.eq( "organisationUnit", organisationUnit ) );
+        }
+        
+        return criteria.setMaxResults( MAX_RESULTS ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public Collection<Integer> getRegistrationOrgunitIds( Date startDate, Date endDate )
+    {
+        Criteria criteria = getCriteria();
+        criteria.add( Restrictions.between( "registrationDate", startDate, endDate ) );
+        criteria.createAlias( "organisationUnit", "orgunit" );
+        criteria.setProjection( Projections.distinct( Projections.projectionList().add(
+            Projections.property( "orgunit.id" ), "orgunitid" ) ) );
+
+        return criteria.list();
+    }
 
     // -------------------------------------------------------------------------
-    // Supportive methods
+    // Supportive methods TODO Remplement all this!
     // -------------------------------------------------------------------------
 
     private String searchPatientSql( boolean count, List<String> searchKeys, Collection<OrganisationUnit> orgunits,
@@ -771,58 +743,13 @@ public class HibernatePatientStore
 
         if ( min != null && max != null )
         {
-            sql += statementBuilder.limitRecord( min, max );
+            sql += " limit " + max + " offset " + min;
         }
         
-        log.debug( "Search patient SQL: " + sql );
+        log.info( "Search patient SQL: " + sql );
         
         return sql;
     }
-
-    @Override
-    @SuppressWarnings( "unchecked" )
-    public Collection<Patient> getByPhoneNumber( String phoneNumber, Integer min, Integer max )
-    {
-        String hql = "select p from Patient p where p.phoneNumber like '%" + phoneNumber + "%'";
-        Query query = getQuery( hql );
-
-        if ( min != null && max != null )
-        {
-            query.setFirstResult( min ).setMaxResults( max );
-        }
-
-        return query.list();
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public Collection<Patient> getByFullName( String name, OrganisationUnit organisationUnit )
-    {
-        Criteria criteria = getCriteria( Restrictions.eq( "name", name ).ignoreCase() );
-        
-        if ( organisationUnit != null )
-        {
-            criteria.add( Restrictions.eq( "organisationUnit", organisationUnit ) );
-        }
-        
-        return criteria.setMaxResults( MAX_RESULTS ).list();
-    }
-
-    @SuppressWarnings( "unchecked" )
-    public Collection<Integer> getRegistrationOrgunitIds( Date startDate, Date endDate )
-    {
-        Criteria criteria = getCriteria();
-        criteria.add( Restrictions.between( "registrationDate", startDate, endDate ) );
-        criteria.createAlias( "organisationUnit", "orgunit" );
-        criteria.setProjection( Projections.distinct( Projections.projectionList().add(
-            Projections.property( "orgunit.id" ), "orgunitid" ) ) );
-
-        return criteria.list();
-    }
-
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
 
     private Collection<Integer> getOrgunitChildren( Collection<OrganisationUnit> orgunits )
     {

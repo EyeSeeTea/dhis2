@@ -28,14 +28,14 @@ package org.hisp.dhis.patient;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
-
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -77,18 +77,14 @@ public interface PatientStore
     Collection<Integer> getRegistrationOrgunitIds( Date startDate, Date endDate );
 
     Collection<Patient> search( List<String> searchKeys, Collection<OrganisationUnit> orgunit, Boolean followup,
-        Collection<PatientAttribute> patientAttributes, Integer statusEnrollment, Integer min, Integer max );
-
-    Collection<String> getPatientPhoneNumbers( List<String> searchKeys, Collection<OrganisationUnit> orgunits, Boolean followup,
-        Collection<PatientAttribute> patientAttributes, Integer statusEnrollment, Integer min, Integer max );
-
-    Grid getPatientEventReport( Grid grid, List<String> searchKeys, Collection<OrganisationUnit> orgunit, Boolean followup,
-        Collection<PatientAttribute> patientAttributes, Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min,
-        Integer max );
+        Collection<PatientAttribute> patientAttributes, Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min, Integer max );
 
     List<Integer> getProgramStageInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits, Boolean followup,
         Collection<PatientAttribute> patientAttributes, Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min,
         Integer max );
 
     Collection<Patient> getByProgram( Program program, Integer min, Integer max );
+    
+    Grid getPatientEventReport( Grid grid, List<String> searchKeys, Collection<OrganisationUnit> orgunit, Boolean followup,
+        Collection<PatientAttribute> patientAttributes, Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min, Integer max );
 }

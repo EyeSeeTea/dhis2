@@ -529,10 +529,10 @@ public class DefaultPatientService
     }
 
     public Collection<Patient> searchPatients( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer statusEnrollment, Integer min,
-        Integer max )
+        Boolean followup, Collection<PatientAttribute> patientAttributes, Collection<PatientIdentifierType> identifierTypes, 
+        Integer statusEnrollment, Integer min, Integer max )
     {
-        return patientStore.search( searchKeys, orgunits, followup, patientAttributes, statusEnrollment, min, max );
+        return patientStore.search( searchKeys, orgunits, followup, patientAttributes, identifierTypes, statusEnrollment, min, max );
     }
 
     public int countSearchPatients( List<String> searchKeys, Collection<OrganisationUnit> orgunits, Boolean followup,
@@ -544,7 +544,19 @@ public class DefaultPatientService
     public Collection<String> getPatientPhoneNumbers( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
         Boolean followup, Integer statusEnrollment, Integer min, Integer max )
     {
-        return patientStore.getPatientPhoneNumbers( searchKeys, orgunits, followup, null, statusEnrollment, min, max );
+        Collection<Patient> patients = patientStore.search( searchKeys, orgunits, followup, null, null, statusEnrollment, min, max );
+        
+        Set<String> phoneNumbers = new HashSet<String>();
+        
+        for ( Patient patient : patients )
+        {
+            if ( patient.getPhoneNumber() != null )
+            {
+                phoneNumbers.add( patient.getPhoneNumber() );
+            }
+        }
+        
+        return phoneNumbers;
     }
 
     public List<Integer> getProgramStageInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
@@ -603,7 +615,6 @@ public class DefaultPatientService
 
         return patientStore.getPatientEventReport( grid, searchKeys, orgunits, followup, patientAttributes, null,
             statusEnrollment, min, max );
-
     }
 
     @Override
@@ -648,7 +659,6 @@ public class DefaultPatientService
 
         return patientStore.getPatientEventReport( grid, searchKeys, orgunits, followup, null, patientIdentifierTypes,
             statusEnrollment, null, null );
-
     }
 
     @Override
@@ -662,5 +672,4 @@ public class DefaultPatientService
     {
         return patientStore.getRegistrationOrgunitIds( startDate, endDate );
     }
-
 }
