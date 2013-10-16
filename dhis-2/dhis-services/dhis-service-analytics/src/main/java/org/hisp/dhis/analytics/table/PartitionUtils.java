@@ -67,7 +67,6 @@ public class PartitionUtils
         return periods;
     }
 
-    //TODO allow periods spanning more than two years
     //TODO optimize by including required filter periods only
     
     public static Partitions getPartitions( Period period, String tablePrefix, String tableSuffix )
@@ -77,14 +76,13 @@ public class PartitionUtils
 
         Partitions partitions = new Partitions();
         
-        Period startYear = PERIODTYPE.createPeriod( period.getStartDate() );
-        Period endYear = PERIODTYPE.createPeriod( period.getEndDate() );
+        int startYear = year( period.getStartDate() );
+        int endYear = year( period.getEndDate() );
         
-        partitions.add( tablePrefix + SEP + startYear.getIsoDate() + tableSuffix );
-        
-        if ( !startYear.equals( endYear ) )
+        while ( startYear <= endYear )
         {
-            partitions.add( tablePrefix + SEP + endYear.getIsoDate() + tableSuffix );            
+            partitions.add( tablePrefix + SEP + startYear + tableSuffix );
+            startYear++;
         }
 
         return partitions;
