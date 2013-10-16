@@ -135,31 +135,38 @@ public class DefaultEventQueryPlanner
         
         if ( params.hasStartEndDate() )
         {
-            Date startDate = params.getStartDate();
-            Date endDate = params.getEndDate();
-            
-            Date currentStartDate = startDate;
-            Date currentEndDate = endDate;
-            
-            while ( true )
+            if ( params.isAggregate() ) // Multiple partitions/years in one query
             {
-                if ( year( currentStartDate ) < year( endDate ) ) // Spans multiple
+                
+            }
+            else // Event query - split in one query per partition/year
+            {
+                Date startDate = params.getStartDate();
+                Date endDate = params.getEndDate();
+                
+                Date currentStartDate = startDate;
+                Date currentEndDate = endDate;
+                
+                while ( true )
                 {
-                    // Set end date to max of current year
-                    
-                    currentEndDate = maxOfYear( currentStartDate ); 
-                    
-                    queries.add( getQuery( params, currentStartDate, currentEndDate, program ) );
-                    
-                    // Set start date to start of next year
-                    
-                    currentStartDate = new Cal( ( year( currentStartDate ) + 1 ), 1, 1 ).time();                 
-                }
-                else
-                {
-                    queries.add( getQuery( params, currentStartDate, endDate, program ) );
-                    
-                    break;
+                    if ( PartitionUtils.year( currentStartDate ) < PartitionUtils.year( endDate ) ) // Spans multiple
+                    {
+                        // Set end date to max of current year
+                        
+                        currentEndDate = PartitionUtils.maxOfYear( currentStartDate ); 
+                        
+                        queries.add( getQuery( params, currentStartDate, currentEndDate, program ) );
+                        
+                        // Set start date to start of next year
+                        
+                        currentStartDate = new Cal( ( PartitionUtils.year( currentStartDate ) + 1 ), 1, 1 ).time();                 
+                    }
+                    else
+                    {
+                        queries.add( getQuery( params, currentStartDate, endDate, program ) );
+                        
+                        break;
+                    }
                 }
             }
         }
@@ -186,21 +193,11 @@ public class DefaultEventQueryPlanner
         EventQueryParams query = params.instance();
         query.setStartDate( startDate );
         query.setEndDate( endDate );
-        String tableName = TABLE_PREFIX + "_" + year( startDate ) + "_" + program.getUid();
+        String tableName = TABLE_PREFIX + "_" + PartitionUtils.year( startDate ) + "_" + program.getUid();
         query.setPartitions( new Partitions().add( tableName ) );
         return query;
     }
     
-    private static int year( Date date )
-    {
-        return new Cal( date ).getYear();
-    }
-    
-    private static Date maxOfYear( Date date )
-    {
-        return new Cal( year( date ), 12, 31 ).time();
-    }
-
     private static List<EventQueryParams> convert( List<DataQueryParams> params )
     {
         List<EventQueryParams> eventParams = new ArrayList<EventQueryParams>();

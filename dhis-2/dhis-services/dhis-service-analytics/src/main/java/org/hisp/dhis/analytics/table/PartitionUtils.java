@@ -39,6 +39,7 @@ import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.analytics.Partitions;
 import org.hisp.dhis.common.ListMap;
 import org.hisp.dhis.common.NameableObject;
+import org.hisp.dhis.period.Cal;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.YearlyPeriodType;
 
@@ -128,5 +129,21 @@ public class PartitionUtils
         }
         
         return map;
+    }
+    
+    /**
+     * Returns the year of the given date.
+     */
+    public static int year( Date date )
+    {
+        return new Cal( date ).getYear();
+    }
+    
+    /**
+     * Returns the max date within the year of the given date.
+     */
+    public static Date maxOfYear( Date date )
+    {
+        return new Cal( year( date ), 12, 31 ).time();
     }
 }
