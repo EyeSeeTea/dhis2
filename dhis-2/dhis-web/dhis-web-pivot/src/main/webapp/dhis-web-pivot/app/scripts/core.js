@@ -2662,7 +2662,7 @@ Ext.onReady( function() {
 				}
 
 				// clear layoutConfig dimension items
-				for (var i = 0, a = [].concat(layoutConfig.columns, layoutConfig.rows); i < a.length; i++) {
+				for (var i = 0, a = [].concat(layoutConfig.columns || [], layoutConfig.rows || []); i < a.length; i++) {
 					a[i].items = [];
 				}
 
