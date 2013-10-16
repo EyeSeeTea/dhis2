@@ -1748,7 +1748,7 @@ function loadActiveProgramStageRecords(programInstanceId, activeProgramStageInst
         var hasDataEntry = getFieldValue('hasDataEntry');
         var type = $( '#tb_' + programInstanceId ).attr('programType');
 
-        var program = $( '#tr1_' + programInstanceId )
+        var program = $( '#tr1_' + programInstanceId );
         var relationshipText=program.attr('relationshipText');
         var relatedProgramId=program.attr('relatedProgram');
         var patientId = getFieldValue('patientId');
@@ -2283,13 +2283,19 @@ function removeCustomPhoneNumberField(idx)
 
 function searchByIdsOnclick()
 {
+	if( getFieldValue("searchPatientByIds")=='')
+	{
+		hideById('listPatientDiv');
+		return;
+	}
+	
 	var params = "searchTexts=iden_" + getFieldValue("searchPatientByIds").toLowerCase() + "_" + getFieldValue("orgunitId");
 	params += "&listAll=false";
 	params += "&facilityLB=";
 
     if( getFieldValue('programIdAddPatient') != "" ) {
         params += "&programIds=" + getFieldValue('programIdAddPatient');
-        params += "&searchText=prg_" + getFieldValue('programIdAddPatient');
+        params += "&searchTexts=prg_" + getFieldValue('programIdAddPatient');
     }
 
     hideById( 'listPatientDiv');
