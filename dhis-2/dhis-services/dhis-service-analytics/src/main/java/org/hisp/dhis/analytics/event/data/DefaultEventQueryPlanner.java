@@ -46,6 +46,7 @@ import org.hisp.dhis.analytics.table.PartitionUtils;
 import org.hisp.dhis.common.ListMap;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.period.Cal;
+import org.hisp.dhis.period.Period;
 import org.hisp.dhis.program.Program;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -132,12 +133,20 @@ public class DefaultEventQueryPlanner
         List<EventQueryParams> queries = new ArrayList<EventQueryParams>();
         
         Program program = params.getProgram();
+
+        String tableSuffix = "_" + program.getUid();
         
         if ( params.hasStartEndDate() )
         {
             if ( params.isAggregate() ) // Multiple partitions/years in one query
             {
+                Period queryPeriod = new Period();
+                queryPeriod.setStartDate( params.getStartDate() );
+                queryPeriod.setEndDate( params.getEndDate() );
                 
+                EventQueryParams query = params.instance();
+                query.setPartitions( PartitionUtils.getPartitions( queryPeriod, TABLE_PREFIX, tableSuffix ) );
+                queries.add( query );
             }
             else // Event query - split in one query per partition/year
             {
@@ -172,8 +181,6 @@ public class DefaultEventQueryPlanner
         }
         else
         {
-            String tableSuffix = "_" + program.getUid();
-            
             ListMap<Partitions, NameableObject> partitionPeriodMap = PartitionUtils.getPartitionPeriodMap( params.getDimensionOrFilter( PERIOD_DIM_ID ), TABLE_PREFIX, tableSuffix );
             
             for ( Partitions partitions : partitionPeriodMap.keySet() )
