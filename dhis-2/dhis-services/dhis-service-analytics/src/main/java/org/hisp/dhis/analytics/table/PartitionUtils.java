@@ -35,9 +35,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.analytics.Partitions;
 import org.hisp.dhis.common.ListMap;
 import org.hisp.dhis.common.NameableObject;
+import org.hisp.dhis.period.Cal;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.YearlyPeriodType;
 
@@ -65,45 +67,46 @@ public class PartitionUtils
         return periods;
     }
 
-    //TODO allow periods spanning more than two years
     //TODO optimize by including required filter periods only
     
-    public static Partitions getPartitions( Period period, String tableName )
+    public static Partitions getPartitions( Period period, String tablePrefix, String tableSuffix )
     {
+        tablePrefix = StringUtils.trimToEmpty( tablePrefix );
+        tableSuffix = StringUtils.trimToEmpty( tableSuffix );
+
         Partitions partitions = new Partitions();
         
-        Period startYear = PERIODTYPE.createPeriod( period.getStartDate() );
-        Period endYear = PERIODTYPE.createPeriod( period.getEndDate() );
+        int startYear = year( period.getStartDate() );
+        int endYear = year( period.getEndDate() );
         
-        partitions.add( tableName + SEP + startYear.getIsoDate() );
-        
-        if ( !startYear.equals( endYear ) )
+        while ( startYear <= endYear )
         {
-            partitions.add( tableName + SEP + endYear.getIsoDate() );            
+            partitions.add( tablePrefix + SEP + startYear + tableSuffix );
+            startYear++;
         }
 
         return partitions;
     }
     
-    public static Partitions getPartitions( List<NameableObject> periods, String tableName )
+    public static Partitions getPartitions( List<NameableObject> periods, String tablePrefix, String tableSuffix )
     {
         Set<String> partitions = new HashSet<String>();
         
         for ( NameableObject period : periods )
         {
-            partitions.addAll( getPartitions( (Period) period, tableName ).getPartitions() );
+            partitions.addAll( getPartitions( (Period) period, tablePrefix, tableSuffix ).getPartitions() );
         }
         
         return new Partitions( new ArrayList<String>( partitions ) );
     }
     
-    public static ListMap<Partitions, NameableObject> getPartitionPeriodMap( List<NameableObject> periods, String tableName )
+    public static ListMap<Partitions, NameableObject> getPartitionPeriodMap( List<NameableObject> periods, String tablePrefix, String tableSuffix )
     {
         ListMap<Partitions, NameableObject> map = new ListMap<Partitions, NameableObject>();
         
         for ( NameableObject period : periods )
         {
-            map.putValue( getPartitions( (Period) period, tableName ), period );
+            map.putValue( getPartitions( (Period) period, tablePrefix, tableSuffix ), period );
         }
         
         return map;
@@ -124,5 +127,21 @@ public class PartitionUtils
         }
         
         return map;
+    }
+    
+    /**
+     * Returns the year of the given date.
+     */
+    public static int year( Date date )
+    {
+        return new Cal( date ).getYear();
+    }
+    
+    /**
+     * Returns the max date within the year of the given date.
+     */
+    public static Date maxOfYear( Date date )
+    {
+        return new Cal( year( date ), 12, 31 ).time();
     }
 }

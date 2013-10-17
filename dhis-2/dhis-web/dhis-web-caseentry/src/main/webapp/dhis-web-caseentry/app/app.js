@@ -100,7 +100,6 @@ TR.conf = {
 		},
 		download: {
             xls: 'xls',
-			pdf: 'pdf',
 			csv: 'csv'
         },
         cmd: {
@@ -1613,7 +1612,7 @@ Ext.onReady( function() {
 		total: 0,
 		asc: "",
 		desc: "",
-		sortOrder: "",
+		sortOrder: "ASC",
 		orgunitIds: [],
 		generateReport: function( type ) {
 			if(Ext.getCmp('reportTypeGroup').getValue().reportType=='true')
@@ -1770,7 +1769,7 @@ Ext.onReady( function() {
 			
 			params += '&startDate=' + TR.cmp.settings.startDate.rawValue;
 			params += '&endDate=' + TR.cmp.settings.endDate.rawValue;
-			if(TR.cmp.settings.ouMode.getValue()!="" ){
+			if(TR.cmp.settings.ouMode != null && TR.cmp.settings.ouMode.getValue()!="" ){
 				params += '&ouMode=' + TR.cmp.settings.ouMode.getValue();
 			}
 			
@@ -1879,9 +1878,7 @@ Ext.onReady( function() {
 				}
 				
 				// Sort-order
-				if( TR.state.sortOrder!= '' ){
-					params += '&sortOrder=' + TR.state.sortOrder;
-				}
+				params += '&sortOrder=' + TR.state.sortOrder;
 			}
 			
 			return params;
@@ -1905,7 +1902,7 @@ Ext.onReady( function() {
 				
 				if( type)
 				{
-					document.location =  url + programId + ".xls?stage=" + programStageId + TR.state.getURLParams();
+					document.location =  url + programId + "." + type + "?stage=" + programStageId + TR.state.getURLParams();
 				}
 				// Show report on grid
 				else
@@ -2072,7 +2069,7 @@ Ext.onReady( function() {
 				// Export to XLS
 				if( type)
 				{
-					document.location =  url + programId + ".xls?stage=" + programStageId + TR.state.getURLParams();
+					document.location =  url + programId + "." + type + "?stage=" + programStageId + TR.state.getURLParams();
 				}
 				// Show report on grid
 				else
@@ -2529,7 +2526,12 @@ Ext.onReady( function() {
 									}
 								}
 								else{
-									TR.state.sortOrder = column.sortState;
+									if( column.sortState=='ASC'){
+										TR.state.sortOrder = "DESC";
+									}
+									else{
+										TR.state.sortOrder = "ASC";
+									}
 								}
 								TR.exe.execute(false, true );
 							}
@@ -2679,15 +2681,15 @@ Ext.onReady( function() {
 		},
 		createAggColTable: function(){
 			var cols = [];
-			var i=0;
-			for( i =0; i <TR.value.columns.length; i++ )
+			var i = 0;
+			for( i=0; i <TR.value.columns.length - 1; i++ )
 			{
 				cols[i] = {
 					header: TR.value.columns[i].column, 
 					dataIndex: TR.value.columns[i].name,
 					height: TR.conf.layout.east_gridcolumn_height,
 					name: TR.value.columns[i].column,
-					sortable: true,
+					sortable: false,
 					draggable: false,
 					hideable: false,
 					menuDisabled: true
@@ -2695,16 +2697,16 @@ Ext.onReady( function() {
 			}
 			
 			cols[i] = {
-					header: TR.value.columns[i].column, 
-					dataIndex: TR.value.columns[i].name,
-					height: TR.conf.layout.east_gridcolumn_height,
-					name: TR.value.columns[i].column,
-					sortable: true,
-					draggable: false,
-					hideable: false,
-					menuDisabled: true
-				}
-				
+				header: TR.value.columns[i].column, 
+				dataIndex: TR.value.columns[i].name,
+				height: TR.conf.layout.east_gridcolumn_height,
+				name: TR.value.columns[i].column,
+				sortable: true,
+				draggable: false,
+				hideable: false,
+				menuDisabled: true
+			}
+			
 			return cols;
 		},
 		createColumn: function( type, id, colname, index ){
@@ -4464,7 +4466,6 @@ Ext.onReady( function() {
 													// for case-based report
 													Ext.getCmp('limitOption').setVisible(false);
 													Ext.getCmp('aggregateType').setVisible(false);
-													Ext.getCmp('downloadPdfIcon').setVisible(false);
 													Ext.getCmp('downloadCvsIcon').setVisible(false);
 													Ext.getCmp('aggregateFavoriteBtn').setVisible(false);
 													Ext.getCmp('deSumCbx').setVisible(false);
@@ -4487,7 +4488,6 @@ Ext.onReady( function() {
 													// For aggregate report
 													Ext.getCmp('limitOption').setVisible(true);
 													Ext.getCmp('aggregateType').setVisible(true);
-													Ext.getCmp('downloadPdfIcon').setVisible(true);
 													Ext.getCmp('downloadCvsIcon').setVisible(true);
 													Ext.getCmp('aggregateFavoriteBtn').setVisible(true);
 													Ext.getCmp('deSumCbx').setVisible(true);
@@ -5622,10 +5622,9 @@ Ext.onReady( function() {
 						handler: function() {
 							if(Ext.getCmp('reportTypeGroup').getValue().reportType=='true')
 							{
-							
 								TR.cmp.params.dataelement.selected.store.each( function(r) {
 									var deId = r.data.id;
-									var length = Ext.getCmp('filterPanel_' + deId).items.length/4;
+									var length = Ext.getCmp('filterPanel_' + deId).items.length/5;
 									for(var idx=0;idx<length;idx++)
 									{					
 										var id = deId + '_' + idx;
@@ -5706,15 +5705,6 @@ Ext.onReady( function() {
 											}
 										},
 										{
-											text: TR.i18n.pdf,
-											iconCls: 'tr-menu-item-pdf',
-											id: 'downloadPdfIcon',
-											minWidth: 105,
-											handler: function() {
-												b.execute(TR.conf.finals.download.pdf);
-											}
-										},
-										{
 											text: TR.i18n.csv,
 											iconCls: 'tr-menu-item-csv',
 											id: 'downloadCvsIcon',
@@ -5789,7 +5779,6 @@ Ext.onReady( function() {
 				Ext.getCmp('limitOption').setVisible(false);
 				Ext.getCmp('deSumCbx').setVisible(false);
 				Ext.getCmp('aggregateType').setVisible(false);
-				Ext.getCmp('downloadPdfIcon').setVisible(false);
 				Ext.getCmp('downloadCvsIcon').setVisible(false);
 				Ext.getCmp('aggregateFavoriteBtn').setVisible(false);
 				Ext.getCmp('caseBasedFavoriteBtn').setVisible(true);
