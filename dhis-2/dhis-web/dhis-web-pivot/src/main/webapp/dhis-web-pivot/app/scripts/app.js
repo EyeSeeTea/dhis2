@@ -10,6 +10,7 @@ Ext.onReady( function() {
             conf = pt.conf,
             util = pt.util,
             api = pt.api,
+            support = pt.support,
             engine = pt.engine,
             store = {},
             cmp = {},
@@ -260,6 +261,68 @@ Ext.onReady( function() {
 			};
 		}());
 
+		// support
+		(function() {
+
+			// storage
+			support.storage = {};
+
+			support.storage.add = function(store, storage, parent, records) {
+				if (!Ext.isObject(store)) {
+					console.log('support.storeage.add: store is not an object');
+					return null;
+				}
+
+				storage = storage || store.storage;
+				parent = parent || store.parent;
+
+				if (!Ext.isObject(storage)) {
+					console.log('support.storeage.add: storage is not an object');
+					return null;
+				}
+
+				store.each( function(r) {
+					if (storage[r.data.id]) {
+						storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: parent};
+					}
+				});
+
+				if (records) {
+					Ext.Array.each(records, function(r) {
+						if (storage[r.data.id]) {
+							storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: parent};
+						}
+					});
+				}
+			};
+
+			support.storage.load = function(store, storage, parent) {
+				var records = [];
+
+				if (!Ext.isObject(store)) {
+					console.log('support.storeage.load: store is not an object');
+					return null;
+				}
+
+				storage = storage || store.storage;
+				parent = parent || store.parent;
+
+				store.removeAll();
+
+				for (var key in storage) {
+					var record = storage[key];
+
+					if (storage.hasOwnProperty(key) && record.parent === parent) {
+						records.push(record);
+					}
+				}
+
+				store.add(records);
+				store.sort('name', 'ASC');
+			};
+
+
+
 		// store
 		(function() {
 			store.indicatorAvailable = Ext.create('Ext.data.Store', {
@@ -272,12 +335,13 @@ Ext.onReady( function() {
 					}
 				},
 				storage: {},
+				parent: null,
 				sortStore: function() {
 					this.sort('name', 'ASC');
 				},
 				listeners: {
 					load: function(s) {
-						util.store.addToStorage(s);
+						support.storage.add(s);
 						util.multiselect.filterAvailable({store: s}, {store: store.indicatorSelected});
 					}
 				}
@@ -361,7 +425,7 @@ Ext.onReady( function() {
 				},
 				listeners: {
 					load: function(s) {
-						util.store.addToStorage(s);
+						support.storage.add(s);
 						util.multiselect.filterAvailable({store: s}, {store: store.dataElementSelected});
 					}
 				}
@@ -391,7 +455,7 @@ Ext.onReady( function() {
 					load: function(s) {
 						this.isLoaded = true;
 
-						util.store.addToStorage(s);
+						support.storage.add(s);
 						util.multiselect.filterAvailable({store: s}, {store: store.dataSetSelected});
 					}
 				}
@@ -2412,20 +2476,22 @@ Ext.onReady( function() {
 					},
 					listeners: {
 						select: function(cb) {
-							var store = pt.store.indicatorAvailable;
-							store.parent = cb.getValue();
+							var store = pt.store.indicatorAvailable,
+								id = cb.getValue();
 
-							if (pt.util.store.containsParent(store)) {
-								pt.util.store.loadFromStorage(store);
+							store.parent = id;
+
+							if (pt.support.prototype.object.hasObject(store.storage, 'parent', id)) {
+								pt.support.store.loadFromStorage(store);
 								pt.util.multiselect.filterAvailable(indicatorAvailable, indicatorSelected);
 							}
 							else {
-								if (cb.getValue() === 0) {
+								if (id === 0) {
 									store.proxy.url = pt.init.contextPath + '/api/indicators.json?paging=false&links=false';
 									store.load();
 								}
 								else {
-									store.proxy.url = pt.init.contextPath + '/api/indicatorGroups/' + cb.getValue() + '.json';
+									store.proxy.url = pt.init.contextPath + '/api/indicatorGroups/' + id + '.json';
 									store.load();
 								}
 							}
@@ -3827,7 +3893,7 @@ Ext.onReady( function() {
 					listeners: {
 						load: function(s) {
 							s.isLoaded = true;
-							pt.util.store.addToStorage(s);
+							pt.support.storage.add(s);
 						}
 					}
 				});

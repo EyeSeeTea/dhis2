@@ -190,42 +190,6 @@ Ext.onReady( function() {
 		// util
 		(function() {
 
-			util.store = {
-				addToStorage: function(s, records) {
-					s.each( function(r) {
-						if (!s.storage[r.data.id]) {
-							s.storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: s.parent};
-						}
-					});
-					if (records) {
-						Ext.Array.each(records, function(r) {
-							if (!s.storage[r.data.id]) {
-								s.storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: s.parent};
-							}
-						});
-					}
-				},
-				loadFromStorage: function(s) {
-					var items = [];
-					s.removeAll();
-					for (var obj in s.storage) {
-						if (s.storage[obj].parent === s.parent) {
-							items.push(s.storage[obj]);
-						}
-					}
-					s.add(items);
-					s.sort('name', 'ASC');
-				},
-				containsParent: function(s) {
-					for (var obj in s.storage) {
-						if (s.storage[obj].parent === s.parent) {
-							return true;
-						}
-					}
-					return false;
-				}
-			};
-
 			util.number = {
 				getNumberOfDecimals: function(x) {
 					var tmp = new String(x);
@@ -251,12 +215,6 @@ Ext.onReady( function() {
 					}
 
 					return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.pivot.digitGroupSeparator[nf]);
-				}
-			};
-
-			util.str = {
-				replaceAll: function(str, find, replace) {
-					return str.replace(new RegExp(find, 'g'), replace);
 				}
 			};
 
@@ -668,7 +626,10 @@ Ext.onReady( function() {
 
 		// support
 		(function() {
+
+			// prototype
 			support.prototype = {};
+
 			support.prototype.array = {};
 
 			support.prototype.array.getLength = function(array) {
@@ -722,10 +683,32 @@ Ext.onReady( function() {
 				return size;
 			};
 
-			support.gui = {};
-			support.gui.mask = {};
+			support.prototype.object.hasObject = function(object, property, value) {
+				if (!support.prototype.object.getLength(object)) {
+					return null;
+				}
 
-			support.gui.mask.show = function(component, message) {
+				for (var key in object) {
+					var record = object[key];
+
+					if (object.hasOwnProperty(key) && record[property] === value) {
+						return true;
+					}
+				}
+
+				return null;
+			};
+
+			support.prototype.str = {};
+
+			support.prototype.str.replaceAll = function(str, find, replace) {
+				return str.replace(new RegExp(find, 'g'), replace);
+			};
+
+			// mask
+			support.mask = {};
+
+			support.mask.show = function(component, message) {
 				if (!Ext.isObject(component)) {
 					console.log('support.gui.mask.show: component not an object');
 					return null;
@@ -748,7 +731,7 @@ Ext.onReady( function() {
 				component.mask.show();
 			};
 
-			support.gui.mask.hide = function(component) {
+			support.mask.hide = function(component) {
 				if (!Ext.isObject(component)) {
 					console.log('support.gui.mask.hide: component not an object');
 					return null;
@@ -817,7 +800,7 @@ Ext.onReady( function() {
 				return array.length ? array : null;
 			};
 
-			service.layout.sortDimensionArray: function(dimensionArray, key) {
+			service.layout.sortDimensionArray = function(dimensionArray, key) {
 				if (!support.prototype.array.getLength(dimensionArray)) {
 					return null;
 				}
@@ -1966,7 +1949,7 @@ Ext.onReady( function() {
 								uuids = [];
 
 								// meta data uid
-								id = (xColAxis ? pt.util.str.replaceAll(xColAxis.ids[j], '-', '') : '') + (xRowAxis ? pt.util.str.replaceAll(xRowAxis.ids[i], '-', '') : '');
+								id = (xColAxis ? pt.support.prototype.str.replaceAll(xColAxis.ids[j], '-', '') : '') + (xRowAxis ? pt.support.prototype.str.replaceAll(xRowAxis.ids[i], '-', '') : '');
 
 								// value html element id
 								uuid = Ext.data.IdGenerator.get('uuid').generate();
