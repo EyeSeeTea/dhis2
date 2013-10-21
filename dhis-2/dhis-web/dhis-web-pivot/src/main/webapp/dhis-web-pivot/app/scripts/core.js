@@ -189,41 +189,6 @@ Ext.onReady( function() {
 
 		// util
 		(function() {
-			util.object = {
-				getLength: function(object) {
-					var size = 0;
-
-					for (var key in object) {
-						if (object.hasOwnProperty(key)) {
-							size++;
-						}
-					}
-
-					return size;
-				}
-			};
-
-			util.mask = {
-				showMask: function(cmp, msg) {
-					msg = msg || 'Loading..';
-
-					if (cmp.mask) {
-						cmp.mask.destroy();
-					}
-					cmp.mask = new Ext.create('Ext.LoadMask', cmp, {
-						shadow: false,
-						msg: msg,
-						style: 'box-shadow:0',
-						bodyStyle: 'box-shadow:0'
-					});
-					cmp.mask.show();
-				},
-				hideMask: function(cmp) {
-					if (cmp.mask) {
-						cmp.mask.hide();
-					}
-				}
-			};
 
 			util.store = {
 				addToStorage: function(s, records) {
@@ -258,55 +223,6 @@ Ext.onReady( function() {
 						}
 					}
 					return false;
-				}
-			};
-
-			util.array = {
-				sortDimensions: function(dimensions, key) {
-					key = key || 'dimensionName';
-
-					// Sort object order
-					Ext.Array.sort(dimensions, function(a,b) {
-						if (a[key] < b[key]) {
-							return -1;
-						}
-						if (a[key] > b[key]) {
-							return 1;
-						}
-						return 0;
-					});
-
-					// Sort object items, ids
-					for (var i = 0, dim; i < dimensions.length; i++) {
-						dim = dimensions[i];
-
-						if (dim.items) {
-							dimensions[i].items = util.array.sortDimensions(dim.items, 'id');
-						}
-
-						if (dim.ids) {
-							dimensions[i].ids = dim.ids.sort();
-						}
-					}
-
-					return dimensions;
-				},
-
-				sortObjectsByString: function(array, key) {
-					key = key || 'name';
-					array.sort( function(a, b) {
-						var nameA = a[key].toLowerCase(),
-							nameB = b[key].toLowerCase();
-
-						if (nameA < nameB) {
-							return -1;
-						}
-						if (nameA > nameB) {
-							return 1;
-						}
-						return 0;
-					});
-					return array;
 				}
 			};
 
@@ -383,7 +299,7 @@ Ext.onReady( function() {
 		(function() {
 			// sort and extend dynamic dimensions
 			if (init.dimensions) {
-				init.dimensions = util.array.sortObjectsByString(init.dimensions);
+				init.dimensions = support.prototype.array.sortObjectsByObjectKey(init.dimensions);
 
 				for (var i = 0, dim; i < init.dimensions.length; i++) {
 					dim = init.dimensions[i];
@@ -764,6 +680,31 @@ Ext.onReady( function() {
 				return array.length;
 			};
 
+			support.prototype.array.sortObjectsByObjectKey = function(array, key) {
+				if (!support.prototype.array.getLength(array)) {
+					return null;
+				}
+
+				key = key || 'name';
+
+				array.sort( function(a, b) {
+					var nameA = a[key].toLowerCase(),
+						nameB = b[key].toLowerCase();
+
+					if (nameA < nameB) {
+						return -1;
+					}
+					if (nameA > nameB) {
+						return 1;
+					}
+					return 0;
+				});
+
+				return array;
+			};
+
+			support.prototype.object = {};
+
 			support.prototype.object.getLength = function(object) {
 				if (!Ext.isObject(object)) {
 					console.log('support.prototype.object.getLength: not an object');
@@ -779,6 +720,44 @@ Ext.onReady( function() {
 				}
 
 				return size;
+			};
+
+			support.gui = {};
+			support.gui.mask = {};
+
+			support.gui.mask.show = function(component, message) {
+				if (!Ext.isObject(component)) {
+					console.log('support.gui.mask.show: component not an object');
+					return null;
+				}
+
+				message = message || 'Loading..';
+
+				if (component.mask) {
+					component.mask.destroy();
+					component.mask = null;
+				}
+
+				component.mask = new Ext.create('Ext.LoadMask', component, {
+					shadow: false,
+					message: message,
+					style: 'box-shadow:0',
+					bodyStyle: 'box-shadow:0'
+				});
+
+				component.mask.show();
+			};
+
+			support.gui.mask.hide = function(component) {
+				if (!Ext.isObject(component)) {
+					console.log('support.gui.mask.hide: component not an object');
+					return null;
+				}
+
+				if (component.mask) {
+					component.mask.destroy();
+					component.mask = null;
+				}
 			};
 		}());
 
@@ -820,6 +799,60 @@ Ext.onReady( function() {
 				}
 
 				support.prototype.object.getLength(map) ? map : null;
+			};
+
+			service.layout.cleanDimensionArray = function(dimensionArray) {
+				if (!support.prototype.array.getLength(dimensionArray)) {
+					return null;
+				}
+
+				var array = [];
+
+				for (var i = 0; i < dimensionArray.length; i++) {
+					array.push(api.layout.Dimension(dimensionArray[i]));
+				}
+
+				array = Ext.Array.clean(array);
+
+				return array.length ? array : null;
+			};
+
+			service.layout.sortDimensionArray: function(dimensionArray, key) {
+				if (!support.prototype.array.getLength(dimensionArray)) {
+					return null;
+				}
+
+				// Clean dimension array
+				dimensionArray = service.layout.cleanDimensionArray(dimensionArray);
+
+				if (!dimensionArray) {
+					console.log('service.layout.sortDimensionArray: no valid dimensions');
+					return null;
+				}
+
+				key = key || 'dimensionName';
+
+				// Dimension order
+				Ext.Array.sort(dimensionArray, function(a,b) {
+					if (a[key] < b[key]) {
+						return -1;
+					}
+					if (a[key] > b[key]) {
+						return 1;
+					}
+					return 0;
+				});
+
+				// Sort object items, ids
+				for (var i = 0, items; i < dimensionArray.length; i++) {
+					dimensionArray[i].items = support.prototype.array.sortObjectsByObjectKey(dimensionArray[i].items, 'id');
+
+					if (support.prototype.array.getLength(dimensionArray[i].ids)) {
+						dimensionArray[i].ids.sort();
+					}
+				}
+
+				return dimensionArray;
 			};
 
 			service.response = {};
@@ -986,7 +1019,7 @@ Ext.onReady( function() {
 
 					// For param string
 				xLayout.sortedAxisDimensionNames = Ext.clone(xLayout.axisDimensionNames).sort();
-				xLayout.sortedFilterDimensions = util.array.sortDimensions(Ext.clone(xLayout.filterDimensions));
+				xLayout.sortedFilterDimensions = service.layout.sortDimensionArray(Ext.clone(xLayout.filterDimensions));
 
 				// All
 				xLayout.dimensions = [].concat(xLayout.axisDimensions, xLayout.filterDimensions);
@@ -1236,7 +1269,7 @@ Ext.onReady( function() {
 											});
 										}
 
-										userOuc = pt.util.array.sortObjectsByString(userOuc);
+										userOuc = pt.support.prototype.array.sortObjectsByObjectKey(userOuc);
 									}
 									if (isUserOrgunitGrandChildren) {
 										var userOuOuc = [].concat(pt.init.user.ou, pt.init.user.ouc),
@@ -1255,7 +1288,7 @@ Ext.onReady( function() {
 											}
 										}
 
-										userOugc = pt.util.array.sortObjectsByString(userOugc);
+										userOugc = pt.support.prototype.array.sortObjectsByObjectKey(userOugc);
 									}
 
 									dim.items = [].concat(userOu || [], userOuc || [], userOugc || []);
@@ -1270,7 +1303,7 @@ Ext.onReady( function() {
 										});
 									}
 
-									dim.items = pt.util.array.sortObjectsByString(dim.items);
+									dim.items = pt.support.prototype.array.sortObjectsByObjectKey(dim.items);
 								}
 								else {
 									dim.items = Ext.clone(xLayout.dimensionNameItemsMap[dim.dimensionName]);
@@ -2369,7 +2402,7 @@ Ext.onReady( function() {
 					}
 
 					// Hide mask
-					util.mask.hideMask(pt.viewport.centerRegion);
+					support.mask.hide(pt.viewport.centerRegion);
 
 					// Add uuid maps to instance
 					pt.uuidDimUuidsMap = uuidDimUuidsMap;
@@ -2399,7 +2432,7 @@ Ext.onReady( function() {
 							response = pt.api.response.Response(response);
 
 						if (!response) {
-							pt.util.mask.hideMask(pt.viewport.centerRegion);
+							pt.support.mask.hide(pt.viewport.centerRegion);
 							return;
 						}
 
@@ -2407,7 +2440,7 @@ Ext.onReady( function() {
 						xLayout = getSyncronizedXLayout(xLayout, response);
 
 						if (!xLayout) {
-							pt.util.mask.hideMask(pt.viewport.centerRegion);
+							pt.support.mask.hide(pt.viewport.centerRegion);
 							return;
 						}
 
@@ -2436,7 +2469,7 @@ Ext.onReady( function() {
                     }
 
 					// Show load mask
-                    util.mask.showMask(pt.viewport.centerRegion);
+                    support.mask.show(pt.viewport.centerRegion);
 
                     if (pt.isPlugin) {
 						Ext.data.JsonP.request({
@@ -2457,7 +2490,7 @@ Ext.onReady( function() {
 							},
 							disableCaching: false,
 							failure: function(r) {
-								util.mask.hideMask(pt.viewport.centerRegion);
+								support.mask.hide(pt.viewport.centerRegion);
 								alert(r.responseText);
 							},
 							success: function(r) {
@@ -2493,7 +2526,7 @@ Ext.onReady( function() {
 				};
 
 				failure = function(responseText) {
-					util.mask.hideMask(pt.viewport.centerRegion);
+					support.mask.hide(pt.viewport.centerRegion);
 					alert(responseText);
 				};
 

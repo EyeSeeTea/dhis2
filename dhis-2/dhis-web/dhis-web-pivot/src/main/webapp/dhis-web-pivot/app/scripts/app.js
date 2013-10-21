@@ -3439,7 +3439,7 @@ Ext.onReady( function() {
 				return map;
 			},
 			selectGraphMap: function(map, doUpdate) {
-				this.numberOfRecords = pt.util.object.getLength(map);
+				this.numberOfRecords = pt.support.prototype.object.getLength(map);
 
 				for (var key in map) {
 					if (map.hasOwnProperty(key)) {
@@ -4046,7 +4046,7 @@ Ext.onReady( function() {
 				],
 				dims = Ext.clone(pt.init.dimensions);
 
-				pt.util.array.sortObjectsByString(dims);
+				pt.support.prototype.array.sortObjectsByObjectKey(dims);
 
 				panels = panels.concat(getDimensionPanels(dims, 'pt-panel-title-dimension'));
 
