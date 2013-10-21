@@ -693,7 +693,7 @@ Ext.onReady( function() {
 
 					// Config must be an object
 					if (!(config && Ext.isObject(config))) {
-						alert(init.el + ': Layout config is not an object');
+						alert('Layout: config is not an object (' + init.el + ')');
 						return;
 					}
 
@@ -788,55 +788,42 @@ Ext.onReady( function() {
 			};
 
 			api.response.Response = function(config) {
-				var response = {};
+				var config = Ext.clone(config);
 
 				// headers: [Header]
 
 				return function() {
-					var headers = [];
-
 					if (!(config && Ext.isObject(config))) {
-						alert('Data response invalid');
-						return false;
+						console.log('Response: config is not an object');
+						return;
 					}
 
 					if (!(config.headers && Ext.isArray(config.headers))) {
-						alert('Data response invalid');
-						return false;
+						console.log('Response: headers is not an array');
+						return;
 					}
 
 					for (var i = 0, header; i < config.headers.length; i++) {
-						header = api.response.Header(config.headers[i]);
-
-						if (header) {
-							headers.push(header);
-						}
+						config.headers[i] = api.response.Header(config.headers[i]);
 					}
 
-					config.headers = headers;
+					config.headers = Ext.Array.clean(config.headers);
 
 					if (!config.headers.length) {
-						alert('No valid response headers');
+						console.log('Response: no valid headers');
 						return;
 					}
 
 					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
 						alert('No values found');
-						return false;
+						return;
 					}
 
 					if (config.headers.length !== config.rows[0].length) {
-						alert('Data invalid');
-						return false;
+						console.log('Response: headers.length !== rows[0].length');
 					}
 
-					response.headers = config.headers;
-					response.metaData = config.metaData;
-					response.width = config.width;
-					response.height = config.height;
-					response.rows = config.rows;
-
-					return response;
+					return config;
 				}();
 			};
 		}());
