@@ -287,7 +287,7 @@ Ext.onReady( function() {
 					}
 				});
 
-				if (records) {
+				if (support.prototype.array.getLength(records)) {
 					Ext.Array.each(records, function(r) {
 						if (storage[r.data.id]) {
 							storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: parent};
@@ -296,8 +296,8 @@ Ext.onReady( function() {
 				}
 			};
 
-			support.storage.load = function(store, storage, parent) {
-				var records = [];
+			support.storage.load = function(store, storage, parent, records) {
+				var a = [];
 
 				if (!Ext.isObject(store)) {
 					console.log('support.storeage.load: store is not an object');
@@ -313,15 +313,18 @@ Ext.onReady( function() {
 					var record = storage[key];
 
 					if (storage.hasOwnProperty(key) && record.parent === parent) {
-						records.push(record);
+						a.push(record);
 					}
 				}
 
-				store.add(records);
+				if (support.prototype.array.getLength(records)) {
+					a = a.concat(records);
+				}
+
+				store.add(a);
 				store.sort('name', 'ASC');
 			};
-
-
+		}());
 
 		// store
 		(function() {
@@ -2482,7 +2485,7 @@ Ext.onReady( function() {
 							store.parent = id;
 
 							if (pt.support.prototype.object.hasObject(store.storage, 'parent', id)) {
-								pt.support.store.loadFromStorage(store);
+								pt.support.store.load(store);
 								pt.util.multiselect.filterAvailable(indicatorAvailable, indicatorSelected);
 							}
 							else {
@@ -3886,7 +3889,7 @@ Ext.onReady( function() {
 					reset: function() {
 						if (this.isLoaded) {
 							this.removeAll();
-							pt.util.store.loadFromStorage(this);
+							pt.support.storage.load(this);
 							this.sortStore();
 						}
 					},
