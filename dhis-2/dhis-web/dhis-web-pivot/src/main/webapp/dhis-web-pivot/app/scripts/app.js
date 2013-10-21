@@ -2151,7 +2151,7 @@ Ext.onReady( function() {
 				handler: function() {
 					if (textArea.getValue()) {
 						Ext.Ajax.request({
-							url: pt.init.contextPath + pt.conf.finals.url.path_api + 'interpretations/reportTable/' + pt.favorite.id,
+							url: pt.init.contextPath + '/api/interpretations/reportTable/' + pt.favorite.id,
 							method: 'POST',
 							params: textArea.getValue(),
 							headers: {'Content-Type': 'text/html'},
@@ -4460,8 +4460,8 @@ Ext.onReady( function() {
 
 		setGui = function(layout, xLayout, updateGui, isFavorite) {
 			var dimensions = [].concat(layout.columns || [], layout.rows || [], layout.filters || []),
-				dimMap = pt.service.layout.getObjectNameDimensionMap(dimensions),
-				recMap = pt.service.layout.getObjectNameDimensionItemsMap(dimensions),
+				dimMap = pt.service.layout.getObjectNameDimensionMapFromDimensionArray(dimensions),
+				recMap = pt.service.layout.getObjectNameDimensionItemsMapFromDimensionArray(dimensions),
 				graphMap = layout.parentGraphMap,
 				objectName,
 				periodRecords,

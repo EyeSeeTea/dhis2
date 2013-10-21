@@ -17,6 +17,7 @@ Ext.onReady( function() {
         var conf = {},
             util = {},
             api = {},
+            support = {},
             service = {},
             engine = {},
             dimConf;
@@ -26,7 +27,6 @@ Ext.onReady( function() {
 			conf.finals = {
 				url: {
 					path_module: '/dhis-web-pivot/',
-					path_api: '/api/',
 					organisationunitchildren_get: 'getOrganisationUnitChildren.action'
 				},
 				dimension: {
@@ -113,63 +113,6 @@ Ext.onReady( function() {
 			dimConf.objectNameMap[dimConf.dimension.objectName] = dimConf.dimension;
 
 			conf.period = {
-				relativePeriods: {
-					'LAST_WEEK': 1,
-					'LAST_4_WEEKS': 4,
-					'LAST_12_WEEKS': 12,
-					'LAST_MONTH': 1,
-					'LAST_3_MONTHS': 3,
-					'LAST_BIMONTH': 1,
-					'LAST_6_BIMONTHS': 6,
-					'LAST_12_MONTHS': 12,
-					'LAST_QUARTER': 1,
-					'LAST_4_QUARTERS': 4,
-					'LAST_SIX_MONTH': 1,
-					'LAST_2_SIXMONTHS': 2,
-					'LAST_FINANCIAL_YEAR': 1,
-					'LAST_5_FINANCIAL_YEARS': 6,
-					'THIS_YEAR': 1,
-					'LAST_YEAR': 1,
-					'LAST_5_YEARS': 5
-				},
-				relativePeriodValueKeys: {
-					'LAST_WEEK': 'lastWeek',
-					'LAST_4_WEEKS': 'last4Weeks',
-					'LAST_12_WEEKS': 'last12Weeks',
-					'LAST_MONTH': 'lastMonth',
-					'LAST_3_MONTHS': 'last3Months',
-					'LAST_12_MONTHS': 'last12Months',
-					'LAST_BIMONTH': 'lastBimonth',
-					'LAST_6_BIMONTHS': 'last6BiMonths',
-					'LAST_QUARTER': 'lastQuarter',
-					'LAST_4_QUARTERS': 'last4Quarters',
-					'LAST_SIX_MONTH': 'lastSixMonth',
-					'LAST_2_SIXMONTHS': 'last2SixMonths',
-					'LAST_FINANCIAL_YEAR': 'lastFinancialYear',
-					'LAST_5_FINANCIAL_YEARS': 'last5FinancialYears',
-					'THIS_YEAR': 'thisYear',
-					'LAST_YEAR': 'lastYear',
-					'LAST_5_YEARS': 'last5Years'
-				},
-				relativePeriodParamKeys: {
-					'lastWeek': 'LAST_WEEK',
-					'last4Weeks': 'LAST_4_WEEKS',
-					'last12Weeks': 'LAST_12_WEEKS',
-					'lastMonth': 'LAST_MONTH',
-					'last3Months': 'LAST_3_MONTHS',
-					'last12Months': 'LAST_12_MONTHS',
-					'lastBimonth': 'LAST_BIMONTH',
-					'last6BiMonths': 'LAST_6_BIMONTHS',
-					'lastQuarter': 'LAST_QUARTER',
-					'last4Quarters': 'LAST_4_QUARTERS',
-					'lastSixMonth': 'LAST_SIX_MONTH',
-					'last2SixMonths': 'LAST_2_SIXMONTHS',
-					'lastFinancialYear': 'LAST_FINANCIAL_YEAR',
-					'last5FinancialYears': 'LAST_5_FINANCIAL_YEARS',
-					'thisYear': 'THIS_YEAR',
-					'lastYear': 'LAST_YEAR',
-					'last5Years': 'LAST_5_YEARS'
-				},
 				periodTypes: [
 					{id: 'Daily', name: 'Daily'},
 					{id: 'Weekly', name: 'Weekly'},
@@ -807,40 +750,76 @@ Ext.onReady( function() {
 			};
 		}());
 
+		// support
+		(function() {
+			support.prototype = {};
+			support.prototype.array = {};
+
+			support.prototype.array.getLength = function(array) {
+				if (!Ext.isArray) {
+					console.log('support.prototype.array.getLength: not an array');
+					return null;
+				}
+
+				return array.length;
+			};
+
+			support.prototype.object.getLength = function(object) {
+				if (!Ext.isObject(object)) {
+					console.log('support.prototype.object.getLength: not an object');
+					return null;
+				}
+
+				var size = 0;
+
+				for (var key in object) {
+					if (object.hasOwnProperty(key)) {
+						size++;
+					}
+				}
+
+				return size;
+			};
+		}());
+
 		// service
 		(function() {
 			service.layout = {};
 
-			service.layout.getObjectNameDimensionMap = function(dimensionArray) {
+			service.layout.getObjectNameDimensionMapFromDimensionArray = function(dimensionArray) {
 				var map = {};
 
-				if (Ext.isArray(dimensionArray) && dimensionArray.length) {
-					for (var i = 0, dim; i < dimensionArray.length; i++) {
-						dim = api.layout.Dimension(dimensionArray[i]);
+				if (!support.prototype.array.getLength(dimensionArray)) {
+					return null;
+				}
 
-						if (dim) {
-							map[dim.dimension] = dim;
-						}
+				for (var i = 0, dimension; i < dimensionArray.length; i++) {
+					dimension = api.layout.Dimension(dimensionArray[i]);
+
+					if (dimension) {
+						map[dimension.dimension] = dimension;
 					}
 				}
 
-				return map;
+				support.prototype.object.getLength(map) ? map : null;
 			};
 
-			service.layout.getObjectNameDimensionItemsMap = function(dimensionArray) {
+			service.layout.getObjectNameDimensionItemsMapFromDimensionArray = function(dimensionArray) {
 				var map = {};
 
-				if (Ext.isArray(dimensionArray) && dimensionArray.length) {
-					for (var i = 0, dim; i < dimensionArray.length; i++) {
-						dim = api.layout.Dimension(dimensionArray[i]);
+				if (!support.prototype.array.getLength(dimensionArray)) {
+					return null;
+				}
 
-						if (dim) {
-							map[dim.dimension] = dim.items;
-						}
+				for (var i = 0, dimension; i < dimensionArray.length; i++) {
+					dimension = api.layout.Dimension(dimensionArray[i]);
+
+					if (dimension) {
+						map[dimension.dimension] = dimension.items;
 					}
 				}
 
-				return map;
+				support.prototype.object.getLength(map) ? map : null;
 			};
 
 			service.response = {};
