@@ -485,18 +485,19 @@ Ext.onReady( function() {
 			api.layout = {};
 
 			api.layout.Record = function(config) {
-				var record = {};
+				var config = Ext.clone(config),
+					record = {};
 
 				// id: string
 
 				return function() {
 					if (!Ext.isObject(config)) {
-						console.log('Record config is not an object: ' + config);
+						console.log('Record: config is not an object: ' + config);
 						return;
 					}
 
 					if (!Ext.isString(config.id)) {
-						alert('Record id is not text: ' + config);
+						alert('Record: id is not text: ' + config);
 						return;
 					}
 
@@ -506,12 +507,13 @@ Ext.onReady( function() {
 						record.name = config.name;
 					}
 
-					return Ext.clone(record);
+					return record;
 				}();
 			};
 
 			api.layout.Dimension = function(config) {
-				var dimension = {};
+				var config = Ext.clone(config),
+					dimension = {};
 
 				// dimension: string
 
@@ -519,12 +521,12 @@ Ext.onReady( function() {
 
 				return function() {
 					if (!Ext.isObject(config)) {
-						console.log('Dimension config is not an object: ' + config);
+						console.log('Dimension: config is not an object: ' + config);
 						return;
 					}
 
 					if (!Ext.isString(config.dimension)) {
-						console.log('Dimension name is not text: ' + config);
+						console.log('Dimension: name is not a string: ' + config);
 						return;
 					}
 
@@ -532,22 +534,18 @@ Ext.onReady( function() {
 						var records = [];
 
 						if (!Ext.isArray(config.items)) {
-							console.log('Dimension items is not an array: ' + config);
+							console.log('Dimension: items is not an array: ' + config);
 							return;
 						}
 
 						for (var i = 0; i < config.items.length; i++) {
-							record = api.layout.Record(config.items[i]);
-
-							if (record) {
-								records.push(record);
-							}
+							records.push(api.layout.Record(config.items[i]));
 						}
 
-						config.items = records;
+						config.items = Ext.Array.clean(records);
 
 						if (!config.items.length) {
-							console.log('Dimension has no valid items: ' + config);
+							console.log('Dimension: has no valid items: ' + config);
 							return;
 						}
 					}
@@ -555,12 +553,13 @@ Ext.onReady( function() {
 					dimension.dimension = config.dimension;
 					dimension.items = config.items;
 
-					return Ext.clone(dimension);
+					return dimension;
 				}();
 			};
 
 			api.layout.Layout = function(config) {
-				var layout = {},
+				var config = Ext.clone(config),
+					layout = {},
 					getValidatedDimensionArray,
 					validateSpecialCases;
 
@@ -576,6 +575,8 @@ Ext.onReady( function() {
 
 				// hideEmptyRows: boolean (false)
 
+				// showHierarchy: boolean (false)
+
 				// displayDensity: string ('normal') - 'compact', 'normal', 'comfortable'
 
 				// fontSize: string ('normal') - 'small', 'normal', 'large'
@@ -583,10 +584,6 @@ Ext.onReady( function() {
 				// digitGroupSeparator: string ('space') - 'none', 'comma', 'space'
 
 				// legendSet: object
-
-				// userOrganisationUnit: boolean (false)
-
-				// userOrganisationUnitChildren: boolean (false)
 
 				// parentGraphMap: object
 
@@ -605,21 +602,17 @@ Ext.onReady( function() {
 				// topLimit: integer (100) //5, 10, 20, 50, 100
 
 				getValidatedDimensionArray = function(dimensionArray) {
-					var dimensions = [];
+					var dimensionArray = Ext.clone(dimensionArray);
 
 					if (!(dimensionArray && Ext.isArray(dimensionArray) && dimensionArray.length)) {
 						return;
 					}
 
-					for (var i = 0, dimension; i < dimensionArray.length; i++) {
-						dimension = api.layout.Dimension(dimensionArray[i]);
-
-						if (dimension) {
-							dimensions.push(dimension);
-						}
+					for (var i = 0; i < dimensionArray.length; i++) {
+						dimensionArray[i] = api.layout.Dimension(dimensionArray[i]);
 					}
 
-					dimensionArray = dimensions;
+					dimensionArray = Ext.Array.clean(dimensionArray);
 
 					return dimensionArray.length ? dimensionArray : null;
 				};
@@ -633,7 +626,7 @@ Ext.onReady( function() {
 						return;
 					}
 
-					dimensions = Ext.Array.clean([].concat(layout.columns, layout.rows, layout.filters));
+					dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || []));
 
 					for (var i = 0; i < dimensions.length; i++) {
 						objectNameDimensionMap[dimensions[i].dimension] = dimensions[i];
@@ -686,27 +679,13 @@ Ext.onReady( function() {
 						return;
 					}
 
-					// Degs and datasets in the same query
-					//if (Ext.Array.contains(dimensionNames, dimConf.data.dimensionName) && store.dataSetSelected.data.length) {
-						//for (var i = 0; i < init.degs.length; i++) {
-							//if (Ext.Array.contains(dimensionNames, init.degs[i].id)) {
-								//alert(PT.i18n.data_element_group_sets_cannot_be_specified_together_with_data_sets);
-								//return;
-							//}
-						//}
-					//}
-
 					return true;
 				};
 
 				return function() {
-					var a = [],
-						objectNames = [],
+					var objectNames = [],
 						dimConf = conf.finals.dimension,
-						dims,
-						isOu = false,
-						isOuc = false,
-						isOugc = false;
+						dims;
 
 					config.columns = getValidatedDimensionArray(config.columns);
 					config.rows = getValidatedDimensionArray(config.rows);
@@ -724,31 +703,12 @@ Ext.onReady( function() {
 						return;
 					}
 
-					// Get object names and user orgunits
-					for (var i = 0, dim, dims = [].concat(config.columns || [], config.rows || [], config.filters || []); i < dims.length; i++) {
-						dim = dims[i];
+					// Get object names
+					for (var i = 0, dims = Ext.Array.clean([].concat(config.columns || [], config.rows || [], config.filters || [])); i < dims.length; i++) {
 
-						if (dim) {
-
-							// Object names
-							if (Ext.isString(dim.dimension)) {
-								objectNames.push(dim.dimension);
-							}
-
-							// user orgunits
-							if (dim.dimension === dimConf.organisationUnit.objectName && Ext.isArray(dim.items)) {
-								for (var j = 0; j < dim.items.length; j++) {
-									if (dim.items[j].id === 'USER_ORGUNIT') {
-										isOu = true;
-									}
-									else if (dim.items[j].id === 'USER_ORGUNIT_CHILDREN') {
-										isOuc = true;
-									}
-									else if (dim.items[j].id === 'USER_ORGUNIT_GRANDCHILDREN') {
-										isOugc = true;
-									}
-								}
-							}
+						// Object names
+						if (api.layout.Dimension(dims[i])) {
+							objectNames.push(dims[i].dimension);
 						}
 					}
 
@@ -773,11 +733,7 @@ Ext.onReady( function() {
 					layout.displayDensity = Ext.isString(config.displayDensity) && !Ext.isEmpty(config.displayDensity) ? config.displayDensity : 'normal';
 					layout.fontSize = Ext.isString(config.fontSize) && !Ext.isEmpty(config.fontSize) ? config.fontSize : 'normal';
 					layout.digitGroupSeparator = Ext.isString(config.digitGroupSeparator) && !Ext.isEmpty(config.digitGroupSeparator) ? config.digitGroupSeparator : 'space';
-					layout.legendSet = Ext.isObject(config.legendSet) && Ext.isString(config.legendSet.id) ? config.legendSet : null;
-
-					layout.userOrganisationUnit = isOu;
-					layout.userOrganisationUnitChildren = isOuc;
-					layout.userOrganisationUnitGrandChildren = isOugc;
+					layout.legendSet = api.layout.Record(config.legendSet) ? config.legendSet : null;
 
 					layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
 
@@ -794,14 +750,15 @@ Ext.onReady( function() {
 						return;
 					}
 
-					return Ext.clone(layout);
+					return layout;
 				}();
 			};
 
 			api.response = {};
 
 			api.response.Header = function(config) {
-				var header = {};
+				var config = Ext.clone(config),
+					header = {};
 
 				// name: string
 
@@ -809,24 +766,24 @@ Ext.onReady( function() {
 
 				return function() {
 					if (!Ext.isObject(config)) {
-						console.log('Header is not an object: ' + config);
+						console.log('Header: config is not an object: ' + config);
 						return;
 					}
 
 					if (!Ext.isString(config.name)) {
-						console.log('Header name is not text: ' + config);
+						console.log('Header: name is not a string: ' + config);
 						return;
 					}
 
 					if (!Ext.isBoolean(config.meta)) {
-						console.log('Header meta is not boolean: ' + config);
+						console.log('Header: meta is not boolean: ' + config);
 						return;
 					}
 
 					header.name = config.name;
 					header.meta = config.meta;
 
-					return Ext.clone(header);
+					return header;
 				}();
 			};
 
