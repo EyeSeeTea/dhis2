@@ -305,20 +305,20 @@ Ext.onReady( function() {
 					var path;
 
 					if (Ext.isString(uid)) {
-						path = conf.finals.url.dataelement_get + uid + '.json?links=false&paging=false';
+						path = 'dataElementGroups/' + uid + '.json?links=false&paging=false';
 					}
 					else if (uid === 0) {
-						path = conf.finals.url.dataelement_getall;
+						path = 'dataElements.json?paging=false&links=false';
 					}
 
 					if (!path) {
-						alert('Invalid parameter');
+						alert('Available data elements: invalid id');
 						return;
 					}
 
 					this.setProxy({
 						type: 'ajax',
-						url: init.contextPath + conf.finals.url.path_api + path,
+						url: init.contextPath + '/api' + path,
 						reader: {
 							type: 'json',
 							root: 'dataElements'
@@ -336,7 +336,7 @@ Ext.onReady( function() {
 					if (Ext.isString(uid)) {
 						this.setProxy({
 							type: 'ajax',
-							url: init.contextPath + conf.finals.url.path_commons + 'getOperands.action?uid=' + uid,
+							url: init.contextPath + '/dhis-web-commons-ajax-json/getOperands.action?uid=' + uid,
 							reader: {
 								type: 'json',
 								root: 'operands'
@@ -376,7 +376,7 @@ Ext.onReady( function() {
 				fields: ['id', 'name'],
 				proxy: {
 					type: 'ajax',
-					url: init.contextPath + conf.finals.url.path_api + conf.finals.url.dataset_get,
+					url: init.contextPath + '/api/dataSets.json?paging=false&links=false',
 					reader: {
 						type: 'json',
 						root: 'dataSets'
@@ -471,7 +471,7 @@ Ext.onReady( function() {
 				fields: ['id', 'name'],
 				proxy: {
 					type: 'ajax',
-					url: init.contextPath + conf.finals.url.path_api + conf.finals.url.organisationunitgroup_getall,
+					url: init.contextPath + '/api/organisationUnitGroups.json?paging=false&links=false',
 					reader: {
 						type: 'json',
 						root: 'organisationUnitGroups'
@@ -2384,7 +2384,7 @@ Ext.onReady( function() {
 						fields: ['id', 'name', 'index'],
 						proxy: {
 							type: 'ajax',
-							url: pt.init.contextPath + pt.conf.finals.url.path_api + pt.conf.finals.url.indicatorgroup_get,
+							url: pt.init.contextPath + '/api/indicatorGroups.json?paging=false&links=false',
 							reader: {
 								type: 'json',
 								root: 'indicatorGroups'
@@ -2421,11 +2421,11 @@ Ext.onReady( function() {
 							}
 							else {
 								if (cb.getValue() === 0) {
-									store.proxy.url = pt.init.contextPath + pt.conf.finals.url.path_api + pt.conf.finals.url.indicator_getall;
+									store.proxy.url = pt.init.contextPath + '/api/indicators.json?paging=false&links=false';
 									store.load();
 								}
 								else {
-									store.proxy.url = pt.init.contextPath + pt.conf.finals.url.path_api + pt.conf.finals.url.indicator_get + cb.getValue() + '.json';
+									store.proxy.url = pt.init.contextPath + '/api/indicatorGroups/' + cb.getValue() + '.json';
 									store.load();
 								}
 							}
@@ -2535,7 +2535,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name', 'index'],
 			proxy: {
 				type: 'ajax',
-				url: pt.init.contextPath + pt.conf.finals.url.path_api + pt.conf.finals.url.dataelementgroup_get,
+				url: pt.init.contextPath + '/api/dataElementGroups.json?paging=false&links=false',
 				reader: {
 					type: 'json',
 					root: 'dataElementGroups'
