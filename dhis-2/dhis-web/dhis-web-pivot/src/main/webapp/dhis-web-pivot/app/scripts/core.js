@@ -191,21 +191,21 @@ Ext.onReady( function() {
 		(function() {
 
 			util.number = {
-				getNumberOfDecimals: function(x) {
-					var tmp = new String(x);
-					return (tmp.indexOf('.') > -1) ? (tmp.length - tmp.indexOf('.') - 1) : 0;
-				},
+				//getNumberOfDecimals: function(x) {
+					//var tmp = new String(x);
+					//return (tmp.indexOf('.') > -1) ? (tmp.length - tmp.indexOf('.') - 1) : 0;
+				//},
 
-				roundIf: function(x, prec) {
-					x = parseFloat(x);
-					prec = parseFloat(prec);
+				//roundIf: function(x, prec) {
+					//x = parseFloat(x);
+					//prec = parseFloat(prec);
 
-					if (Ext.isNumber(x) && Ext.isNumber(prec)) {
-						var dec = util.number.getNumberOfDecimals(x);
-						return dec > prec ? Ext.Number.toFixed(x, prec) : x;
-					}
-					return x;
-				},
+					//if (Ext.isNumber(x) && Ext.isNumber(prec)) {
+						//var dec = support.prototype.number.getNumberOfDecimals(x);
+						//return dec > prec ? Ext.Number.toFixed(x, prec) : x;
+					//}
+					//return x;
+				//},
 
 				pp: function(x, nf) {
 					nf = nf || 'space';
@@ -630,6 +630,7 @@ Ext.onReady( function() {
 			// prototype
 			support.prototype = {};
 
+				// array
 			support.prototype.array = {};
 
 			support.prototype.array.getLength = function(array) {
@@ -664,6 +665,7 @@ Ext.onReady( function() {
 				return array;
 			};
 
+				// object
 			support.prototype.object = {};
 
 			support.prototype.object.getLength = function(object) {
@@ -699,10 +701,41 @@ Ext.onReady( function() {
 				return null;
 			};
 
+				// str
 			support.prototype.str = {};
 
 			support.prototype.str.replaceAll = function(str, find, replace) {
 				return str.replace(new RegExp(find, 'g'), replace);
+			};
+
+				// number
+			support.prototype.number = {};
+
+			support.prototype.number.getNumberOfDecimals = function(number) {
+				var str = new String(number);
+				return (str.indexOf('.') > -1) ? (str.length - str.indexOf('.') - 1) : 0;
+			};
+
+			support.prototype.number.roundIf = function(number, precision) {
+				number = parseFloat(number);
+				precision = parseFloat(precision);
+
+				if (Ext.isNumber(number) && Ext.isNumber(precision)) {
+					var numberOfDecimals = support.prototype.number.getNumberOfDecimals(number);
+					return numberOfDecimals > precision ? Ext.Number.toFixed(number, precision) : number;
+				}
+
+				return number;
+			};
+
+			support.prototype.number.prettyPrint = function(number, separator) {
+				separator = separator || 'space';
+
+				if (separator === 'none') {
+					return number;
+				}
+
+				return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.pivot.digitGroupSeparator[separator]);
 			};
 
 			// mask
@@ -1732,7 +1765,7 @@ Ext.onReady( function() {
 
 					getRoundedHtmlValue = function(value, dec) {
 						dec = dec || 2;
-						return parseFloat(pt.util.number.roundIf(value, 2)).toString();
+						return parseFloat(pt.support.prototype.number.roundIf(value, 2)).toString();
 					};
 
 					getTdHtml = function(config) {
@@ -1769,7 +1802,7 @@ Ext.onReady( function() {
 						colSpan = config.colSpan ? 'colspan="' + config.colSpan + '" ' : '';
 						rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '" ' : '';
 						htmlValue = config.collapsed ? '' : config.htmlValue || config.value || '';
-						htmlValue = config.type !== 'dimension' ? pt.util.number.pp(htmlValue, layout.digitGroupSeparator) : htmlValue;
+						htmlValue = config.type !== 'dimension' ? pt.support.prototype.number.prettyPrint(htmlValue, layout.digitGroupSeparator) : htmlValue;
 						displayDensity = conf.pivot.displayDensity[config.displayDensity] || conf.pivot.displayDensity[layout.displayDensity];
 						fontSize = conf.pivot.fontSize[config.fontSize] || conf.pivot.fontSize[layout.fontSize];
 
