@@ -190,8 +190,7 @@ Ext.onReady( function() {
 			api.layout = {};
 
 			api.layout.Record = function(config) {
-				var config = Ext.clone(config),
-					record = {};
+				var config = Ext.clone(config);
 
 				// id: string
 
@@ -206,19 +205,14 @@ Ext.onReady( function() {
 						return;
 					}
 
-					record.id = config.id.replace('.', '-');
-
-					if (Ext.isString(config.name)) {
-						record.name = config.name;
-					}
+					config.id = config.id.replace('.', '-');
 
 					return record;
 				}();
 			};
 
 			api.layout.Dimension = function(config) {
-				var config = Ext.clone(config),
-					dimension = {};
+				var config = Ext.clone(config);
 
 				// dimension: string
 
@@ -255,10 +249,7 @@ Ext.onReady( function() {
 						}
 					}
 
-					dimension.dimension = config.dimension;
-					dimension.items = config.items;
-
-					return dimension;
+					return config;
 				}();
 			};
 
@@ -278,7 +269,7 @@ Ext.onReady( function() {
 
 				// showSubTotals: boolean (true)
 
-				// hideEmnsyRows: boolean (false)
+				// hideEmptyRows: boolean (false)
 
 				// showHierarchy: boolean (false)
 
@@ -431,14 +422,14 @@ Ext.onReady( function() {
 					// Properties
 					layout.showTotals = Ext.isBoolean(config.totals) ? config.totals : (Ext.isBoolean(config.showTotals) ? config.showTotals : true);
 					layout.showSubTotals = Ext.isBoolean(config.subtotals) ? config.subtotals : (Ext.isBoolean(config.showSubTotals) ? config.showSubTotals : true);
-					layout.hideEmnsyRows = Ext.isBoolean(config.hideEmnsyRows) ? config.hideEmnsyRows : false;
+					layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : false;
 
 					layout.showHierarchy = Ext.isBoolean(config.showHierarchy) ? config.showHierarchy : false;
 
-					layout.displayDensity = Ext.isString(config.displayDensity) && !Ext.isEmnsy(config.displayDensity) ? config.displayDensity : 'normal';
-					layout.fontSize = Ext.isString(config.fontSize) && !Ext.isEmnsy(config.fontSize) ? config.fontSize : 'normal';
-					layout.digitGroupSeparator = Ext.isString(config.digitGroupSeparator) && !Ext.isEmnsy(config.digitGroupSeparator) ? config.digitGroupSeparator : 'space';
-					layout.legendSet = api.layout.Record(config.legendSet) ? config.legendSet : null;
+					layout.displayDensity = Ext.isString(config.displayDensity) && !Ext.isEmpty(config.displayDensity) ? config.displayDensity : 'normal';
+					layout.fontSize = Ext.isString(config.fontSize) && !Ext.isEmpty(config.fontSize) ? config.fontSize : 'normal';
+					layout.digitGroupSeparator = Ext.isString(config.digitGroupSeparator) && !Ext.isEmpty(config.digitGroupSeparator) ? config.digitGroupSeparator : 'space';
+					layout.legendSet = Ext.isObject(config.legendSet) && Ext.isString(config.legendSet.id) ? config.legendSet : null;
 
 					layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
 
@@ -462,8 +453,7 @@ Ext.onReady( function() {
 			api.response = {};
 
 			api.response.Header = function(config) {
-				var config = Ext.clone(config),
-					header = {};
+				var config = Ext.clone(config);
 
 				// name: string
 
@@ -485,10 +475,7 @@ Ext.onReady( function() {
 						return;
 					}
 
-					header.name = config.name;
-					header.meta = config.meta;
-
-					return header;
+					return config;
 				}();
 			};
 
@@ -542,9 +529,12 @@ Ext.onReady( function() {
 				// array
 			support.prototype.array = {};
 
-			support.prototype.array.getLength = function(array) {
+			support.prototype.array.getLength = function(array, suppressWarning) {
 				if (!Ext.isArray(array)) {
-					console.log('support.prototype.array.getLength: not an array');
+					if (!suppressWarning) {
+						console.log('support.prototype.array.getLength: not an array');
+					}
+
 					return null;
 				}
 
@@ -577,9 +567,12 @@ Ext.onReady( function() {
 				// object
 			support.prototype.object = {};
 
-			support.prototype.object.getLength = function(object) {
+			support.prototype.object.getLength = function(object, suppressWarning) {
 				if (!Ext.isObject(object)) {
-					console.log('support.prototype.object.getLength: not an object');
+					if (!suppressWarning) {
+						console.log('support.prototype.object.getLength: not an object');
+					}
+
 					return null;
 				}
 
@@ -770,7 +763,7 @@ Ext.onReady( function() {
 			};
 
 			service.layout.sortDimensionArray = function(dimensionArray, key) {
-				if (!support.prototype.array.getLength(dimensionArray)) {
+				if (!support.prototype.array.getLength(dimensionArray, true)) {
 					return null;
 				}
 
@@ -1476,7 +1469,7 @@ Ext.onReady( function() {
 								aSpan.push(nCols); //if just one item and top level, span all
 							}
 							else {
-								if (layout.hideEmnsyRows && type === 'row') {
+								if (layout.hideEmptyRows && type === 'row') {
 									aSpan.push(nCols / aAccNumCols[i]);
 								}
 								else {
@@ -1736,8 +1729,8 @@ Ext.onReady( function() {
 							displayDensity,
 							fontSize,
 							isLegendSet = Ext.isObject(legendSet) && Ext.isArray(legendSet.mapLegends) && legendSet.mapLegends.length,
-							isNumeric = Ext.isObject(config) && Ext.isString(config.type) && config.type.substr(0,5) === 'value' && !config.emnsy,
-							isValue = Ext.isObject(config) && Ext.isString(config.type) && config.type === 'value' && !config.emnsy,
+							isNumeric = Ext.isObject(config) && Ext.isString(config.type) && config.type.substr(0,5) === 'value' && !config.empty,
+							isValue = Ext.isObject(config) && Ext.isString(config.type) && config.type === 'value' && !config.empty,
 							cls = '',
 							html = '';
 
@@ -1827,11 +1820,11 @@ Ext.onReady( function() {
 
 					getColAxisHtmlArray = function() {
 						var a = [],
-							getEmnsyHtmlArray;
+							getEmptyHtmlArray;
 
-						getEmnsyHtmlArray = function() {
+						getEmptyHtmlArray = function() {
 							return (xColAxis && xRowAxis) ? getTdHtml({
-								cls: 'pivot-dim-emnsy',
+								cls: 'pivot-dim-empty',
 								colSpan: xRowAxis.dims,
 								rowSpan: xColAxis.dims
 							}) : '';
@@ -1845,7 +1838,7 @@ Ext.onReady( function() {
 							dimHtml = [];
 
 							if (i === 0) {
-								dimHtml.push(getEmnsyHtmlArray());
+								dimHtml.push(getEmptyHtmlArray());
 							}
 
 							for (var j = 0, obj, spanCount = 0; j < xColAxis.size; j++) {
@@ -1936,8 +1929,8 @@ Ext.onReady( function() {
 							valueItemsRow = [];
 							valueObjectsRow = [];
 
-							for (var j = 0, id, value, htmlValue, emnsy, uuid, uuids; j < colSize; j++) {
-								emnsy = false;
+							for (var j = 0, id, value, htmlValue, empty, uuid, uuids; j < colSize; j++) {
+								empty = false;
 								uuids = [];
 
 								// meta data uid
@@ -1961,7 +1954,7 @@ Ext.onReady( function() {
 								else {
 									value = 0;
 									htmlValue = '';
-									emnsy = true;
+									empty = true;
 								}
 
 								valueItemsRow.push(value);
@@ -1971,7 +1964,7 @@ Ext.onReady( function() {
 									cls: 'pivot-value',
 									value: value,
 									htmlValue: htmlValue,
-									emnsy: emnsy,
+									empty: empty,
 									uuids: uuids
 								});
 
@@ -1985,11 +1978,11 @@ Ext.onReady( function() {
 
 						// Value total objects
 						if (xColAxis && doTotals()) {
-							for (var i = 0, emnsy = [], total = 0; i < valueObjects.length; i++) {
+							for (var i = 0, empty = [], total = 0; i < valueObjects.length; i++) {
 								for (j = 0, obj; j < valueObjects[i].length; j++) {
 									obj = valueObjects[i][j];
 
-									emnsy.push(obj.emnsy);
+									empty.push(obj.empty);
 									total += obj.value;
 								}
 
@@ -1997,27 +1990,27 @@ Ext.onReady( function() {
 									type: 'valueTotal',
 									cls: 'pivot-value-total',
 									value: total,
-									htmlValue: Ext.Array.contains(emnsy, false) ? getRoundedHtmlValue(total) : '',
-									emnsy: !Ext.Array.contains(emnsy, false)
+									htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '',
+									empty: !Ext.Array.contains(empty, false)
 								});
 
-								emnsy = [];
+								empty = [];
 								total = 0;
 							}
 						}
 
-						// Hide emnsy rows (dims/values/totals)
+						// Hide empty rows (dims/values/totals)
 						if (xColAxis && xRowAxis) {
-							if (layout.hideEmnsyRows) {
-								for (var i = 0, valueRow, emnsy, parent; i < valueObjects.length; i++) {
+							if (layout.hideEmptyRows) {
+								for (var i = 0, valueRow, empty, parent; i < valueObjects.length; i++) {
 									valueRow = valueObjects[i];
-									emnsy = [];
+									empty = [];
 
 									for (var j = 0; j < valueRow.length; j++) {
-										emnsy.push(!!valueRow[j].emnsy);
+										empty.push(!!valueRow[j].empty);
 									}
 
-									if (!Ext.Array.contains(emnsy, false) && xRowAxis) {
+									if (!Ext.Array.contains(empty, false) && xRowAxis) {
 
 										// Hide values
 										for (var j = 0; j < valueRow.length; j++) {
@@ -2048,10 +2041,10 @@ Ext.onReady( function() {
 								rowSubTotal = 0;
 								colCount = 0;
 
-								for (var j = 0, item, collapsed = [], emnsy = []; j < xValueObjects[i].length; j++) {
+								for (var j = 0, item, collapsed = [], empty = []; j < xValueObjects[i].length; j++) {
 									item = xValueObjects[i][j];
 									rowSubTotal += item.value;
-									emnsy.push(!!item.emnsy);
+									empty.push(!!item.empty);
 									collapsed.push(!!item.collapsed);
 									colCount++;
 
@@ -2062,14 +2055,14 @@ Ext.onReady( function() {
 											type: 'valueSubtotal',
 											cls: 'pivot-value-subtotal',
 											value: rowSubTotal,
-											htmlValue: Ext.Array.contains(emnsy, false) ? getRoundedHtmlValue(rowSubTotal) : '',
-											emnsy: !Ext.Array.contains(emnsy, false),
+											htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(rowSubTotal) : '',
+											empty: !Ext.Array.contains(empty, false),
 											collapsed: !Ext.Array.contains(collapsed, false)
 										});
 
 										colCount = 0;
 										rowSubTotal = 0;
-										emnsy = [];
+										empty = [];
 										collapsed = [];
 									}
 								}
@@ -2129,11 +2122,11 @@ Ext.onReady( function() {
 							}
 
 							for (var i = 0; i < xValueObjects[0].length; i++) {
-								for (var j = 0, rowCount = 0, tmpCount = 0, subTotal = 0, emnsy = [], collapsed, item; j < xValueObjects.length; j++) {
+								for (var j = 0, rowCount = 0, tmpCount = 0, subTotal = 0, empty = [], collapsed, item; j < xValueObjects.length; j++) {
 									item = xValueObjects[j][i];
 									tmpValueObjects[tmpCount++].push(item);
 									subTotal += item.value;
-									emnsy.push(!!item.emnsy);
+									empty.push(!!item.empty);
 									rowCount++;
 
 									if (axisObjects[j][0].root) {
@@ -2144,24 +2137,24 @@ Ext.onReady( function() {
 										tmpValueObjects[tmpCount++].push({
 											type: item.type === 'value' ? 'valueSubtotal' : 'valueSubtotalTotal',
 											value: subTotal,
-											htmlValue: Ext.Array.contains(emnsy, false) ? getRoundedHtmlValue(subTotal) : '',
+											htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(subTotal) : '',
 											collapsed: collapsed,
 											cls: item.type === 'value' ? 'pivot-value-subtotal' : 'pivot-value-subtotal-total'
 										});
 										rowCount = 0;
 										subTotal = 0;
-										emnsy = [];
+										empty = [];
 									}
 								}
 							}
 
 							// tmpTotalValueObjects
-							for (var i = 0, obj, collapsed = [], emnsy = [], subTotal = 0, count = 0; i < totalValueObjects.length; i++) {
+							for (var i = 0, obj, collapsed = [], empty = [], subTotal = 0, count = 0; i < totalValueObjects.length; i++) {
 								obj = totalValueObjects[i];
 								tmpTotalValueObjects.push(obj);
 
 								collapsed.push(!!obj.collapsed);
-								emnsy.push(!!obj.emnsy);
+								empty.push(!!obj.empty);
 								subTotal += obj.value;
 								count++;
 
@@ -2170,13 +2163,13 @@ Ext.onReady( function() {
 										type: 'valueTotalSubgrandtotal',
 										cls: 'pivot-value-total-subgrandtotal',
 										value: subTotal,
-										htmlValue: Ext.Array.contains(emnsy, false) ? getRoundedHtmlValue(subTotal) : '',
-										emnsy: !Ext.Array.contains(emnsy, false),
+										htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(subTotal) : '',
+										empty: !Ext.Array.contains(empty, false),
 										collapsed: !Ext.Array.contains(collapsed, false)
 									});
 
 									collapsed = [];
-									emnsy = [];
+									empty = [];
 									subTotal = 0;
 									count = 0;
 								}
@@ -2225,24 +2218,24 @@ Ext.onReady( function() {
 							var xTotalColObjects;
 
 							// Total col items
-							for (var i = 0, total = 0, emnsy = []; i < valueObjects[0].length; i++) {
+							for (var i = 0, total = 0, empty = []; i < valueObjects[0].length; i++) {
 								for (var j = 0, obj; j < valueObjects.length; j++) {
 									obj = valueObjects[j][i];
 
 									total += obj.value;
-									emnsy.push(!!obj.emnsy);
+									empty.push(!!obj.empty);
 								}
 
 								totalColObjects.push({
 									type: 'valueTotal',
 									value: total,
-									htmlValue: Ext.Array.contains(emnsy, false) ? getRoundedHtmlValue(total) : '',
-									emnsy: !Ext.Array.contains(emnsy, false),
+									htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '',
+									empty: !Ext.Array.contains(empty, false),
 									cls: 'pivot-value-total'
 								});
 
 								total = 0;
-								emnsy = [];
+								empty = [];
 							}
 
 							xTotalColObjects = Ext.clone(totalColObjects);
@@ -2250,19 +2243,19 @@ Ext.onReady( function() {
 							if (xColAxis && doSubTotals(xColAxis)) {
 								var tmp = [];
 
-								for (var i = 0, item, subTotal = 0, emnsy = [], colCount = 0; i < xTotalColObjects.length; i++) {
+								for (var i = 0, item, subTotal = 0, empty = [], colCount = 0; i < xTotalColObjects.length; i++) {
 									item = xTotalColObjects[i];
 									tmp.push(item);
 									subTotal += item.value;
-									emnsy.push(!!item.emnsy);
+									empty.push(!!item.empty);
 									colCount++;
 
 									if (colCount === colUniqueFactor) {
 										tmp.push({
 											type: 'valueTotalSubgrandtotal',
 											value: subTotal,
-											htmlValue: Ext.Array.contains(emnsy, false) ? getRoundedHtmlValue(subTotal) : '',
-											emnsy: !Ext.Array.contains(emnsy, false),
+											htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(subTotal) : '',
+											empty: !Ext.Array.contains(empty, false),
 											cls: 'pivot-value-total-subgrandtotal'
 										});
 
@@ -2285,7 +2278,7 @@ Ext.onReady( function() {
 
 					getGrandTotalHtmlArray = function() {
 						var total = 0,
-							emnsy = [],
+							empty = [],
 							a = [];
 
 						if (doTotals()) {
@@ -2293,15 +2286,15 @@ Ext.onReady( function() {
 								obj = totalColObjects[i];
 
 								total += obj.value;
-								emnsy.push(obj.emnsy);
+								empty.push(obj.empty);
 							}
 
 							if (xColAxis && xRowAxis) {
 								a.push(getTdHtml({
 									type: 'valueGrandTotal',
 									cls: 'pivot-value-grandtotal',
-									htmlValue: Ext.Array.contains(emnsy, false) ? getRoundedHtmlValue(total) : '',
-									emnsy: !Ext.Array.contains(emnsy, false)
+									htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '',
+									empty: !Ext.Array.contains(empty, false)
 								}));
 							}
 						}

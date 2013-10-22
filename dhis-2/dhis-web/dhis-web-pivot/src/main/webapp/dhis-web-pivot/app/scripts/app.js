@@ -289,7 +289,7 @@ ns.util = util;
 					}
 				});
 
-				if (support.prototype.array.getLength(records)) {
+				if (support.prototype.array.getLength(records, true)) {
 					Ext.Array.each(records, function(r) {
 						if (storage[r.data.id]) {
 							storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: parent};
@@ -988,7 +988,7 @@ ns.util = util;
 	NS.app.OnsionsWindow = function() {
 		var showTotals,
 			showSubTotals,
-			hideEmnsyRows,
+			hideEmptyRows,
 			showHierarchy,
 			digitGroupSeparator,
 			displayDensity,
@@ -1018,11 +1018,11 @@ ns.util = util;
 		});
 		ns.viewport.showSubTotals = showSubTotals;
 
-		hideEmnsyRows = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: NS.i18n.hide_emnsy_rows,
+		hideEmptyRows = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.hide_empty_rows,
 			style: 'margin-bottom:4px'
 		});
-		ns.viewport.hideEmnsyRows = hideEmnsyRows;
+		ns.viewport.hideEmptyRows = hideEmptyRows;
 
 		showHierarchy = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.show_hierarchy,
@@ -1193,7 +1193,7 @@ ns.util = util;
 			items: [
 				showTotals,
 				showSubTotals,
-				hideEmnsyRows
+				hideEmptyRows
 			]
 		};
 
@@ -1242,7 +1242,7 @@ ns.util = util;
 				return {
 					showTotals: showTotals.getValue(),
 					showSubTotals: showSubTotals.getValue(),
-					hideEmnsyRows: hideEmnsyRows.getValue(),
+					hideEmptyRows: hideEmptyRows.getValue(),
 					showHierarchy: showHierarchy.getValue(),
 					displayDensity: displayDensity.getValue(),
 					fontSize: fontSize.getValue(),
@@ -1260,7 +1260,7 @@ ns.util = util;
 			setOnsions: function(layout) {
 				showTotals.setValue(Ext.isBoolean(layout.showTotals) ? layout.showTotals : true);
 				showSubTotals.setValue(Ext.isBoolean(layout.showSubTotals) ? layout.showSubTotals : true);
-				hideEmnsyRows.setValue(Ext.isBoolean(layout.hideEmnsyRows) ? layout.hideEmnsyRows : false);
+				hideEmptyRows.setValue(Ext.isBoolean(layout.hideEmptyRows) ? layout.hideEmptyRows : false);
 				showHierarchy.setValue(Ext.isBoolean(layout.showHierarchy) ? layout.showHierarchy : false);
 				displayDensity.setValue(Ext.isString(layout.displayDensity) ? layout.displayDensity : 'normal');
 				fontSize.setValue(Ext.isString(layout.fontSize) ? layout.fontSize : 'normal');
@@ -1444,7 +1444,7 @@ ns.util = util;
 				width: 371,
 				fieldStyle: 'padding-left: 6px; border-radius: 1px; border-color: #bbb; font-size:11px',
 				style: 'margin-bottom:0',
-				emnsyText: 'Favorite name',
+				emptyText: 'Favorite name',
 				value: id ? record.data.name : '',
 				listeners: {
 					afterrender: function() {
@@ -1585,7 +1585,7 @@ ns.util = util;
 			width: windowCmpWidth - addButton.width - 11,
 			height: 26,
 			fieldStyle: 'padding-right: 0; padding-left: 6px; border-radius: 1px; border-color: #bbb; font-size:11px',
-			emnsyText: NS.i18n.search_for_favorites,
+			emptyText: NS.i18n.search_for_favorites,
 			enableKeyEvents: true,
 			currentValue: '',
 			listeners: {
@@ -2051,7 +2051,7 @@ ns.util = util;
 		userGroupField = Ext.create('Ext.form.field.ComboBox', {
 			valueField: 'id',
 			displayField: 'name',
-			emnsyText: NS.i18n.search_for_user_groups,
+			emptyText: NS.i18n.search_for_user_groups,
 			queryParam: 'key',
 			queryDelay: 200,
 			minChars: 1,
@@ -2188,7 +2188,7 @@ ns.util = util;
 				cls: 'ns-textarea',
 				height: 130,
 				fieldStyle: 'padding-left: 4px; padding-top: 3px',
-				emnsyText: NS.i18n.write_your_interpretation,
+				emptyText: NS.i18n.write_your_interpretation,
 				enableKeyEvents: true,
 				listeners: {
 					keyup: function() {
@@ -2446,7 +2446,7 @@ ns.util = util;
 					width: ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding,
 					valueField: 'id',
 					displayField: 'name',
-					emnsyText: NS.i18n.select_indicator_group,
+					emptyText: NS.i18n.select_indicator_group,
 					editable: false,
 					store: {
 						xtype: 'store',
@@ -2636,7 +2636,7 @@ ns.util = util;
 			width: ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding - 90,
 			valueField: 'id',
 			displayField: 'name',
-			emnsyText: NS.i18n.select_data_element_group,
+			emptyText: NS.i18n.select_data_element_group,
 			editable: false,
 			store: dataElementGroupStore,
 			loadAvailable: function() {
@@ -3358,7 +3358,7 @@ ns.util = util;
 							width: ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding - 62 - 62 - 4,
 							valueField: 'id',
 							displayField: 'name',
-							emnsyText: NS.i18n.select_period_type,
+							emptyText: NS.i18n.select_period_type,
 							editable: false,
 							queryMode: 'remote',
 							store: ns.store.periodType,
@@ -3627,7 +3627,7 @@ ns.util = util;
 			width: ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding - 38,
 			valueField: 'level',
 			displayField: 'name',
-			emnsyText: NS.i18n.select_organisation_unit_levels,
+			emptyText: NS.i18n.select_organisation_unit_levels,
 			editable: false,
 			hidden: true,
 			store: {
@@ -3643,7 +3643,7 @@ ns.util = util;
 			width: ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding - 38,
 			valueField: 'id',
 			displayField: 'name',
-			emnsyText: NS.i18n.select_organisation_unit_groups,
+			emptyText: NS.i18n.select_organisation_unit_groups,
 			editable: false,
 			hidden: true,
 			store: ns.store.organisationUnitGroup
