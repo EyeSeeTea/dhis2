@@ -1,47 +1,49 @@
 Ext.onReady( function() {
-	var createViewport,
+	var NS = PT,
+		createViewport,
 		initialize,
-		pt;
+		ns;
 
-	PT.app = {};
+	NS.app = {};
 
-	PT.app.extendInstance = function(pt) {
-        var init = pt.init,
-            conf = pt.conf,
-            util = pt.util,
-            api = pt.api,
-            support = pt.support,
-            engine = pt.engine,
+	NS.app.extendInstance = function(ns) {
+        var init = ns.init,
+            conf = ns.conf,
+            util = {},
+            api = ns.api,
+            support = ns.support,
+            engine = ns.engine,
             store = {},
             cmp = {},
             dimConf = conf.finals.dimension;
-
-        pt.init.el = 'app';
+//tmp
+ns.util = util;
+        ns.init.el = 'app';
 
 		// util
 		(function() {
 			util.dimension = {
 				panel: {
 					setHeight: function(mx) {
-						var panelHeight = pt.cmp.dimension.panels.length * 28,
+						var panelHeight = ns.cmp.dimension.panels.length * 28,
 							height;
 
-						if (pt.viewport.westRegion.hasScrollbar) {
+						if (ns.viewport.westRegion.hasScrollbar) {
 							height = panelHeight + mx;
-							pt.viewport.accordion.setHeight(pt.viewport.getHeight() - 2);
-							pt.viewport.accordionBody.setHeight(height - 2);
+							ns.viewport.accordion.setHeight(ns.viewport.getHeight() - 2);
+							ns.viewport.accordionBody.setHeight(height - 2);
 						}
 						else {
-							height = pt.viewport.westRegion.getHeight() - conf.layout.west_fill;
+							height = ns.viewport.westRegion.getHeight() - conf.layout.west_fill;
 							mx += panelHeight;
-							pt.viewport.accordion.setHeight((height > mx ? mx : height) - 2);
-							pt.viewport.accordionBody.setHeight((height > mx ? mx : height) - 2);
+							ns.viewport.accordion.setHeight((height > mx ? mx : height) - 2);
+							ns.viewport.accordionBody.setHeight((height > mx ? mx : height) - 2);
 						}
 					},
 
 					getExpanded: function() {
-						for (var i = 0, panel; i < pt.cmp.dimension.panels.length; i++) {
-							panel = pt.cmp.dimension.panels[i];
+						for (var i = 0, panel; i < ns.cmp.dimension.panels.length; i++) {
+							panel = ns.cmp.dimension.panels[i];
 
 							if (!panel.collapsed) {
 								return panel;
@@ -152,7 +154,7 @@ Ext.onReady( function() {
 			util.window = util.window || {};
 
 			util.window.setAnchorPosition = function(w, target) {
-				var vpw = pt.viewport.getWidth(),
+				var vpw = ns.viewport.getWidth(),
 					targetx = target ? target.getPosition()[0] : 4,
 					winw = w.getWidth(),
 					y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
@@ -208,7 +210,7 @@ Ext.onReady( function() {
 			init.afterRender = function() {
 
 				// Resize event handler
-				pt.viewport.westRegion.on('resize', function() {
+				ns.viewport.westRegion.on('resize', function() {
 					var panel = util.dimension.panel.getExpanded();
 
 					if (panel) {
@@ -217,20 +219,20 @@ Ext.onReady( function() {
 				});
 
 				// Left gui
-				var viewportHeight = pt.viewport.westRegion.getHeight(),
+				var viewportHeight = ns.viewport.westRegion.getHeight(),
 					numberOfTabs = init.dimensions.length + 5,
 					tabHeight = 28,
 					minPeriodHeight = 380;
 
 				if (viewportHeight > numberOfTabs * tabHeight + minPeriodHeight) {
 					if (!Ext.isIE) {
-						pt.viewport.accordion.setAutoScroll(false);
-						pt.viewport.westRegion.setWidth(conf.layout.west_width);
-						pt.viewport.accordion.doLayout();
+						ns.viewport.accordion.setAutoScroll(false);
+						ns.viewport.westRegion.setWidth(conf.layout.west_width);
+						ns.viewport.accordion.doLayout();
 					}
 				}
 				else {
-					pt.viewport.westRegion.hasScrollbar = true;
+					ns.viewport.westRegion.hasScrollbar = true;
 				}
 
                 // Expand first panel
@@ -242,13 +244,13 @@ Ext.onReady( function() {
 					layout;
 
 				if (id) {
-					engine.loadTable(id, pt, true, true);
+					engine.loadTable(id, ns, true, true);
 				}
-				else if (Ext.isString(session) && PT.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
+				else if (Ext.isString(session) && NS.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
 					layout = api.layout.Layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]);
 
 					if (layout) {
-						pt.engine.createTable(layout, pt, true);
+						ns.engine.createTable(layout, ns, true);
 					}
 				}
 
@@ -356,7 +358,7 @@ Ext.onReady( function() {
 			});
 
 			store.dataElementAvailable = Ext.create('Ext.data.Store', {
-				fields: ['id', 'name', 'dataElementId', 'optionComboId', 'operandName'],
+				fields: ['id', 'name', 'dataElementId', 'onsionComboId', 'operandName'],
 				proxy: {
 					type: 'ajax',
 					reader: {
@@ -414,7 +416,7 @@ Ext.onReady( function() {
 							scope: this,
 							callback: function() {
 								this.each(function(r) {
-									r.set('id', r.data.dataElementId + '-' + r.data.optionComboId);
+									r.set('id', r.data.dataElementId + '-' + r.data.onsionComboId);
 									r.set('name', r.data.operandName);
 								});
 
@@ -550,7 +552,7 @@ Ext.onReady( function() {
 				fields: ['id', 'name', 'index'],
 				data: function() {
 					var data = init.legendSets;
-					data.unshift({id: 0, name: PT.i18n.none, index: -1});
+					data.unshift({id: 0, name: NS.i18n.none, index: -1});
 					return data;
 				}(),
 				sorters: [
@@ -559,7 +561,7 @@ Ext.onReady( function() {
 				]
 			});
 
-			pt.store = store;
+			ns.store = store;
 		}());
 
 		// cmp
@@ -580,17 +582,17 @@ Ext.onReady( function() {
 				favorite: {}
 			};
 
-			pt.cmp = cmp;
+			ns.cmp = cmp;
 		}());
 
 		// engine
 		(function() {
 			engine.getLayoutConfig = function() {
-				var panels = pt.cmp.dimension.panels,
-					columnDimNames = pt.viewport.colStore.getDimensionNames(),
-					rowDimNames = pt.viewport.rowStore.getDimensionNames(),
-					filterDimNames = pt.viewport.filterStore.getDimensionNames(),
-					config = pt.viewport.optionsWindow.getOptions(),
+				var panels = ns.cmp.dimension.panels,
+					columnDimNames = ns.viewport.colStore.getDimensionNames(),
+					rowDimNames = ns.viewport.rowStore.getDimensionNames(),
+					filterDimNames = ns.viewport.filterStore.getDimensionNames(),
+					config = ns.viewport.onsionsWindow.getOnsions(),
 					dx = dimConf.data.dimensionName,
 					co = dimConf.category.dimensionName,
 					nameDimArrayMap = {};
@@ -646,7 +648,7 @@ Ext.onReady( function() {
 		}());
 	};
 
-	PT.app.LayoutWindow = function() {
+	NS.app.LayoutWindow = function() {
 		var dimension,
 			dimensionStore,
 			row,
@@ -670,9 +672,9 @@ Ext.onReady( function() {
 			margin = 2,
 			defaultWidth = 160,
 			defaultHeight = 158,
-			maxHeight = (pt.viewport.getHeight() - 100) / 2,
+			maxHeight = (ns.viewport.getHeight() - 100) / 2,
 
-			dimConf = pt.conf.finals.dimension;
+			dimConf = ns.conf.finals.dimension;
 
 		getData = function(all) {
 			var data = [];
@@ -688,7 +690,7 @@ Ext.onReady( function() {
 				data.push({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
 			}
 
-			return data.concat(Ext.clone(pt.init.dimensions));
+			return data.concat(Ext.clone(ns.init.dimensions));
 		};
 
 		getStore = function(data) {
@@ -731,18 +733,18 @@ Ext.onReady( function() {
 			dimensionStore.removeAll();
 			dimensionStore.add(getData(all));
 		};
-		pt.viewport.dimensionStore = dimensionStore;
+		ns.viewport.dimensionStore = dimensionStore;
 
 		rowStore = getStore();
-		pt.viewport.rowStore = rowStore;
+		ns.viewport.rowStore = rowStore;
 		rowStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
 
 		colStore = getStore();
-		pt.viewport.colStore = colStore;
+		ns.viewport.colStore = colStore;
 		colStore.add({id: dimConf.data.dimensionName, name: dimConf.data.name});
 
 		filterStore = getStore();
-		pt.viewport.filterStore = filterStore;
+		ns.viewport.filterStore = filterStore;
 		filterStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
 
 		getCmpHeight = function() {
@@ -762,7 +764,7 @@ Ext.onReady( function() {
 		};
 
 		dimension = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'pt-toolbar-multiselect-leftright',
+			cls: 'ns-toolbar-multiselect-leftright',
 			width: defaultWidth,
 			height: (getCmpHeight() * 2) + margin,
 			style: 'margin-right:' + margin + 'px; margin-bottom:0px',
@@ -776,8 +778,8 @@ Ext.onReady( function() {
 				height: 25,
 				items: {
 					xtype: 'label',
-					text: PT.i18n.dimensions,
-					cls: 'pt-toolbar-multiselect-leftright-label'
+					text: NS.i18n.dimensions,
+					cls: 'ns-toolbar-multiselect-leftright-label'
 				}
 			},
 			listeners: {
@@ -792,7 +794,7 @@ Ext.onReady( function() {
 		});
 
 		row = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'pt-toolbar-multiselect-leftright',
+			cls: 'ns-toolbar-multiselect-leftright',
 			width: defaultWidth,
 			height: getCmpHeight(),
 			style: 'margin-bottom:0px',
@@ -805,8 +807,8 @@ Ext.onReady( function() {
 				height: 25,
 				items: {
 					xtype: 'label',
-					text: PT.i18n.row,
-					cls: 'pt-toolbar-multiselect-leftright-label'
+					text: NS.i18n.row,
+					cls: 'ns-toolbar-multiselect-leftright-label'
 				}
 			},
 			listeners: {
@@ -826,7 +828,7 @@ Ext.onReady( function() {
 		});
 
 		col = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'pt-toolbar-multiselect-leftright',
+			cls: 'ns-toolbar-multiselect-leftright',
 			width: defaultWidth,
 			height: getCmpHeight(),
 			style: 'margin-bottom:' + margin + 'px',
@@ -839,8 +841,8 @@ Ext.onReady( function() {
 				height: 25,
 				items: {
 					xtype: 'label',
-					text: PT.i18n.column,
-					cls: 'pt-toolbar-multiselect-leftright-label'
+					text: NS.i18n.column,
+					cls: 'ns-toolbar-multiselect-leftright-label'
 				}
 			},
 			listeners: {
@@ -860,7 +862,7 @@ Ext.onReady( function() {
 		});
 
 		filter = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'pt-toolbar-multiselect-leftright',
+			cls: 'ns-toolbar-multiselect-leftright',
 			width: defaultWidth,
 			height: getCmpHeight(),
 			style: 'margin-right:' + margin + 'px; margin-bottom:' + margin + 'px',
@@ -873,8 +875,8 @@ Ext.onReady( function() {
 				height: 25,
 				items: {
 					xtype: 'label',
-					text: PT.i18n.filter,
-					cls: 'pt-toolbar-multiselect-leftright-label'
+					text: NS.i18n.filter,
+					cls: 'ns-toolbar-multiselect-leftright-label'
 				}
 			},
 			listeners: {
@@ -923,7 +925,7 @@ Ext.onReady( function() {
 		};
 
 		window = Ext.create('Ext.window.Window', {
-			title: PT.i18n.table_layout,
+			title: NS.i18n.table_layout,
 			bodyStyle: 'background-color:#fff; padding:2px',
 			closeAction: 'hide',
 			autoShow: true,
@@ -946,7 +948,7 @@ Ext.onReady( function() {
 			bbar: [
 				'->',
 				{
-					text: PT.i18n.hide,
+					text: NS.i18n.hide,
 					listeners: {
 						added: function(b) {
 							b.on('click', function() {
@@ -956,11 +958,11 @@ Ext.onReady( function() {
 					}
 				},
 				{
-					text: '<b>' + PT.i18n.update + '</b>',
+					text: '<b>' + NS.i18n.update + '</b>',
 					listeners: {
 						added: function(b) {
 							b.on('click', function() {
-								pt.viewport.updateViewport();
+								ns.viewport.updateViewport();
 								window.hide();
 							});
 						}
@@ -969,11 +971,11 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function(w) {
-					if (pt.viewport.layoutButton.rendered) {
-						pt.util.window.setAnchorPosition(w, pt.viewport.layoutButton);
+					if (ns.viewport.layoutButton.rendered) {
+						ns.util.window.setAnchorPosition(w, ns.viewport.layoutButton);
 
 						if (!w.hasHideOnBlurHandler) {
-							pt.util.window.addHideOnBlurHandler(w);
+							ns.util.window.addHideOnBlurHandler(w);
 						}
 					}
 				}
@@ -983,10 +985,10 @@ Ext.onReady( function() {
 		return window;
 	};
 
-	PT.app.OptionsWindow = function() {
+	NS.app.OnsionsWindow = function() {
 		var showTotals,
 			showSubTotals,
-			hideEmptyRows,
+			hideEmnsyRows,
 			showHierarchy,
 			digitGroupSeparator,
 			displayDensity,
@@ -1003,37 +1005,37 @@ Ext.onReady( function() {
 			window;
 
 		showTotals = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: PT.i18n.show_totals,
+			boxLabel: NS.i18n.show_totals,
 			style: 'margin-bottom:4px',
 			checked: true
 		});
-		pt.viewport.showTotals = showTotals;
+		ns.viewport.showTotals = showTotals;
 
 		showSubTotals = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: PT.i18n.show_subtotals,
+			boxLabel: NS.i18n.show_subtotals,
 			style: 'margin-bottom:4px',
 			checked: true
 		});
-		pt.viewport.showSubTotals = showSubTotals;
+		ns.viewport.showSubTotals = showSubTotals;
 
-		hideEmptyRows = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: PT.i18n.hide_empty_rows,
+		hideEmnsyRows = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.hide_emnsy_rows,
 			style: 'margin-bottom:4px'
 		});
-		pt.viewport.hideEmptyRows = hideEmptyRows;
+		ns.viewport.hideEmnsyRows = hideEmnsyRows;
 
 		showHierarchy = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: PT.i18n.show_hierarchy,
+			boxLabel: NS.i18n.show_hierarchy,
 			style: 'margin-bottom:4px'
 		});
-		pt.viewport.showHierarchy = showHierarchy;
+		ns.viewport.showHierarchy = showHierarchy;
 
 		displayDensity = Ext.create('Ext.form.field.ComboBox', {
-			cls: 'pt-combo',
+			cls: 'ns-combo',
 			style: 'margin-bottom:3px',
 			width: comboboxWidth,
 			labelWidth: 130,
-			fieldLabel: PT.i18n.display_density,
+			fieldLabel: NS.i18n.display_density,
 			labelStyle: 'color:#333',
 			queryMode: 'local',
 			valueField: 'id',
@@ -1042,20 +1044,20 @@ Ext.onReady( function() {
 			store: Ext.create('Ext.data.Store', {
 				fields: ['id', 'text'],
 				data: [
-					{id: 'comfortable', text: PT.i18n.comfortable},
-					{id: 'normal', text: PT.i18n.normal},
-					{id: 'compact', text: PT.i18n.compact}
+					{id: 'comfortable', text: NS.i18n.comfortable},
+					{id: 'normal', text: NS.i18n.normal},
+					{id: 'compact', text: NS.i18n.compact}
 				]
 			})
 		});
-		pt.viewport.displayDensity = displayDensity;
+		ns.viewport.displayDensity = displayDensity;
 
 		fontSize = Ext.create('Ext.form.field.ComboBox', {
-			cls: 'pt-combo',
+			cls: 'ns-combo',
 			style: 'margin-bottom:3px',
 			width: comboboxWidth,
 			labelWidth: 130,
-			fieldLabel: PT.i18n.font_size,
+			fieldLabel: NS.i18n.font_size,
 			labelStyle: 'color:#333',
 			queryMode: 'local',
 			valueField: 'id',
@@ -1064,21 +1066,21 @@ Ext.onReady( function() {
 			store: Ext.create('Ext.data.Store', {
 				fields: ['id', 'text'],
 				data: [
-					{id: 'large', text: PT.i18n.large},
-					{id: 'normal', text: PT.i18n.normal},
-					{id: 'small', text: PT.i18n.small_}
+					{id: 'large', text: NS.i18n.large},
+					{id: 'normal', text: NS.i18n.normal},
+					{id: 'small', text: NS.i18n.small_}
 				]
 			})
 		});
-		pt.viewport.fontSize = fontSize;
+		ns.viewport.fontSize = fontSize;
 
 		digitGroupSeparator = Ext.create('Ext.form.field.ComboBox', {
 			labelStyle: 'color:#333',
-			cls: 'pt-combo',
+			cls: 'ns-combo',
 			style: 'margin-bottom:3px',
 			width: comboboxWidth,
 			labelWidth: 130,
-			fieldLabel: PT.i18n.digit_group_separator,
+			fieldLabel: NS.i18n.digit_group_separator,
 			queryMode: 'local',
 			valueField: 'id',
 			editable: false,
@@ -1092,58 +1094,58 @@ Ext.onReady( function() {
 				]
 			})
 		});
-		pt.viewport.digitGroupSeparator = digitGroupSeparator;
+		ns.viewport.digitGroupSeparator = digitGroupSeparator;
 
 		legendSet = Ext.create('Ext.form.field.ComboBox', {
-			cls: 'pt-combo',
+			cls: 'ns-combo',
 			style: 'margin-bottom:3px',
 			width: comboboxWidth,
 			labelWidth: 130,
-			fieldLabel: PT.i18n.legend_set,
+			fieldLabel: NS.i18n.legend_set,
 			valueField: 'id',
 			displayField: 'name',
 			editable: false,
 			value: 0,
-			store: pt.store.legendSet
+			store: ns.store.legendSet
 		});
-		pt.viewport.legendSet = legendSet;
+		ns.viewport.legendSet = legendSet;
 
 		reportingPeriod = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: PT.i18n.reporting_period,
+			boxLabel: NS.i18n.reporting_period,
 			style: 'margin-bottom:4px',
 		});
-		pt.viewport.reportingPeriod = reportingPeriod;
+		ns.viewport.reportingPeriod = reportingPeriod;
 
 		organisationUnit = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: PT.i18n.organisation_unit,
+			boxLabel: NS.i18n.organisation_unit,
 			style: 'margin-bottom:4px',
 		});
-		pt.viewport.organisationUnit = organisationUnit;
+		ns.viewport.organisationUnit = organisationUnit;
 
 		parentOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: PT.i18n.parent_organisation_unit,
+			boxLabel: NS.i18n.parent_organisation_unit,
 			style: 'margin-bottom:4px',
 		});
-		pt.viewport.parentOrganisationUnit = parentOrganisationUnit;
+		ns.viewport.parentOrganisationUnit = parentOrganisationUnit;
 
 		regression = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: PT.i18n.include_regression,
+			boxLabel: NS.i18n.include_regression,
 			style: 'margin-bottom:4px',
 		});
-		pt.viewport.regression = regression;
+		ns.viewport.regression = regression;
 
 		cumulative = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: PT.i18n.include_cumulative,
+			boxLabel: NS.i18n.include_cumulative,
 			style: 'margin-bottom:6px',
 		});
-		pt.viewport.cumulative = cumulative;
+		ns.viewport.cumulative = cumulative;
 
 		sortOrder = Ext.create('Ext.form.field.ComboBox', {
-			cls: 'pt-combo',
+			cls: 'ns-combo',
 			style: 'margin-bottom:3px',
 			width: 250,
 			labelWidth: 130,
-			fieldLabel: PT.i18n.sort_order,
+			fieldLabel: NS.i18n.sort_order,
 			labelStyle: 'color:#333',
 			queryMode: 'local',
 			valueField: 'id',
@@ -1152,20 +1154,20 @@ Ext.onReady( function() {
 			store: Ext.create('Ext.data.Store', {
 				fields: ['id', 'text'],
 				data: [
-					{id: 0, text: PT.i18n.none},
-					{id: 1, text: PT.i18n.low_to_high},
-					{id: 2, text: PT.i18n.high_to_low}
+					{id: 0, text: NS.i18n.none},
+					{id: 1, text: NS.i18n.low_to_high},
+					{id: 2, text: NS.i18n.high_to_low}
 				]
 			})
 		});
-		pt.viewport.sortOrder = sortOrder;
+		ns.viewport.sortOrder = sortOrder;
 
 		topLimit = Ext.create('Ext.form.field.ComboBox', {
-			cls: 'pt-combo',
+			cls: 'ns-combo',
 			style: 'margin-bottom:0',
 			width: 250,
 			labelWidth: 130,
-			fieldLabel: PT.i18n.top_limit,
+			fieldLabel: NS.i18n.top_limit,
 			labelStyle: 'color:#333',
 			queryMode: 'local',
 			valueField: 'id',
@@ -1174,7 +1176,7 @@ Ext.onReady( function() {
 			store: Ext.create('Ext.data.Store', {
 				fields: ['id', 'text'],
 				data: [
-					{id: 0, text: PT.i18n.none},
+					{id: 0, text: NS.i18n.none},
 					{id: 5, text: 5},
 					{id: 10, text: 10},
 					{id: 20, text: 20},
@@ -1183,7 +1185,7 @@ Ext.onReady( function() {
 				]
 			})
 		});
-		pt.viewport.topLimit = topLimit;
+		ns.viewport.topLimit = topLimit;
 
 		data = {
 			bodyStyle: 'border:0 none',
@@ -1191,7 +1193,7 @@ Ext.onReady( function() {
 			items: [
 				showTotals,
 				showSubTotals,
-				hideEmptyRows
+				hideEmnsyRows
 			]
 		};
 
@@ -1229,18 +1231,18 @@ Ext.onReady( function() {
 		};
 
 		window = Ext.create('Ext.window.Window', {
-			title: PT.i18n.table_options,
+			title: NS.i18n.table_onsions,
 			bodyStyle: 'background-color:#fff; padding:5px',
 			closeAction: 'hide',
 			autoShow: true,
 			modal: true,
 			resizable: false,
 			hideOnBlur: true,
-			getOptions: function() {
+			getOnsions: function() {
 				return {
 					showTotals: showTotals.getValue(),
 					showSubTotals: showSubTotals.getValue(),
-					hideEmptyRows: hideEmptyRows.getValue(),
+					hideEmnsyRows: hideEmnsyRows.getValue(),
 					showHierarchy: showHierarchy.getValue(),
 					displayDensity: displayDensity.getValue(),
 					fontSize: fontSize.getValue(),
@@ -1255,10 +1257,10 @@ Ext.onReady( function() {
 					topLimit: topLimit.getValue()
 				};
 			},
-			setOptions: function(layout) {
+			setOnsions: function(layout) {
 				showTotals.setValue(Ext.isBoolean(layout.showTotals) ? layout.showTotals : true);
 				showSubTotals.setValue(Ext.isBoolean(layout.showSubTotals) ? layout.showSubTotals : true);
-				hideEmptyRows.setValue(Ext.isBoolean(layout.hideEmptyRows) ? layout.hideEmptyRows : false);
+				hideEmnsyRows.setValue(Ext.isBoolean(layout.hideEmnsyRows) ? layout.hideEmnsyRows : false);
 				showHierarchy.setValue(Ext.isBoolean(layout.showHierarchy) ? layout.showHierarchy : false);
 				displayDensity.setValue(Ext.isString(layout.displayDensity) ? layout.displayDensity : 'normal');
 				fontSize.setValue(Ext.isString(layout.fontSize) ? layout.fontSize : 'normal');
@@ -1276,7 +1278,7 @@ Ext.onReady( function() {
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
 					style: 'margin-bottom:6px; margin-left:2px',
-					html: PT.i18n.data
+					html: NS.i18n.data
 				},
 				data,
 				{
@@ -1285,7 +1287,7 @@ Ext.onReady( function() {
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
 					style: 'margin-bottom:6px; margin-left:2px',
-					html: PT.i18n.organisation_units
+					html: NS.i18n.organisation_units
 				},
 				organisationUnits,
 				{
@@ -1294,7 +1296,7 @@ Ext.onReady( function() {
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
 					style: 'margin-bottom:6px; margin-left:2px',
-					html: PT.i18n.style
+					html: NS.i18n.style
 				},
 				style,
 				{
@@ -1305,7 +1307,7 @@ Ext.onReady( function() {
 					items: [
 						{
 							bodyStyle: 'border:0 none; padding:0 5px 6px 2px; background-color:transparent; color:#222; font-size:12px',
-							html: '<b>' + PT.i18n.parameters + '</b> <span style="font-size:11px"> (' + PT.i18n.for_standard_reports_only + ')</span>'
+							html: '<b>' + NS.i18n.parameters + '</b> <span style="font-size:11px"> (' + NS.i18n.for_standard_reports_only + ')</span>'
 						},
 						parameters
 					]
@@ -1314,26 +1316,26 @@ Ext.onReady( function() {
 			bbar: [
 				'->',
 				{
-					text: PT.i18n.hide,
+					text: NS.i18n.hide,
 					handler: function() {
 						window.hide();
 					}
 				},
 				{
-					text: '<b>' + PT.i18n.update + '</b>',
+					text: '<b>' + NS.i18n.update + '</b>',
 					handler: function() {
-						pt.viewport.updateViewport();
+						ns.viewport.updateViewport();
 						window.hide();
 					}
 				}
 			],
 			listeners: {
 				show: function(w) {
-					if (pt.viewport.optionsButton.rendered) {
-						pt.util.window.setAnchorPosition(w, pt.viewport.optionsButton);
+					if (ns.viewport.onsionsButton.rendered) {
+						ns.util.window.setAnchorPosition(w, ns.viewport.onsionsButton);
 
 						if (!w.hasHideOnBlurHandler) {
-							pt.util.window.addHideOnBlurHandler(w);
+							ns.util.window.addHideOnBlurHandler(w);
 						}
 					}
 
@@ -1347,7 +1349,7 @@ Ext.onReady( function() {
 		return window;
 	};
 
-	PT.app.FavoriteWindow = function() {
+	NS.app.FavoriteWindow = function() {
 
 		// Objects
 		var NameWindow,
@@ -1377,7 +1379,7 @@ Ext.onReady( function() {
 			windowWidth = 500,
 			windowCmpWidth = windowWidth - 22;
 
-		pt.store.reportTable.on('load', function(store, records) {
+		ns.store.reportTable.on('load', function(store, records) {
 			var pager = store.proxy.reader.jsonData.pager;
 
 			info.setText('Page ' + pager.page + ' of ' + pager.pageCount);
@@ -1398,8 +1400,8 @@ Ext.onReady( function() {
 			var favorite,
 				dimensions;
 
-			if (pt.layout) {
-				favorite = Ext.clone(pt.layout);
+			if (ns.layout) {
+				favorite = Ext.clone(ns.layout);
 				dimensions = [].concat(favorite.columns || [], favorite.rows || [], favorite.filters || []);
 
 				// Server sync
@@ -1422,7 +1424,7 @@ Ext.onReady( function() {
 
 				// Replace operand id characters
 				for (var i = 0; i < dimensions.length; i++) {
-					if (dimensions[i].dimension === pt.conf.finals.dimension.operand.objectName) {
+					if (dimensions[i].dimension === ns.conf.finals.dimension.operand.objectName) {
 						for (var j = 0; j < dimensions[i].items.length; j++) {
 							dimensions[i].items[j].id = dimensions[i].items[j].id.replace('-', '.');
 						}
@@ -1435,14 +1437,14 @@ Ext.onReady( function() {
 
 		NameWindow = function(id) {
 			var window,
-				record = pt.store.reportTable.getById(id);
+				record = ns.store.reportTable.getById(id);
 
 			nameTextfield = Ext.create('Ext.form.field.Text', {
 				height: 26,
 				width: 371,
 				fieldStyle: 'padding-left: 6px; border-radius: 1px; border-color: #bbb; font-size:11px',
 				style: 'margin-bottom:0',
-				emptyText: 'Favorite name',
+				emnsyText: 'Favorite name',
 				value: id ? record.data.name : '',
 				listeners: {
 					afterrender: function() {
@@ -1452,7 +1454,7 @@ Ext.onReady( function() {
 			});
 
 			createButton = Ext.create('Ext.button.Button', {
-				text: PT.i18n.create,
+				text: NS.i18n.create,
 				handler: function() {
 					var favorite = getBody();
 					favorite.name = nameTextfield.getValue();
@@ -1462,22 +1464,22 @@ Ext.onReady( function() {
 
 					if (favorite && favorite.name) {
 						Ext.Ajax.request({
-							url: pt.init.contextPath + '/api/reportTables/',
+							url: ns.init.contextPath + '/api/reportTables/',
 							method: 'POST',
 							headers: {'Content-Type': 'application/json'},
 							params: Ext.encode(favorite),
 							failure: function(r) {
-								pt.viewport.mask.show();
+								ns.viewport.mask.show();
 								alert(r.responseText);
 							},
 							success: function(r) {
 								var id = r.getAllResponseHeaders().location.split('/').pop();
 
-								pt.favorite = favorite;
+								ns.favorite = favorite;
 
-								pt.store.reportTable.loadStore();
+								ns.store.reportTable.loadStore();
 
-								//pt.viewport.interpretationButton.enable();
+								//ns.viewport.interpretationButton.enable();
 
 								window.destroy();
 							}
@@ -1487,17 +1489,17 @@ Ext.onReady( function() {
 			});
 
 			updateButton = Ext.create('Ext.button.Button', {
-				text: PT.i18n.update,
+				text: NS.i18n.update,
 				handler: function() {
 					var name = nameTextfield.getValue(),
 						reportTable;
 
 					if (id && name) {
 						Ext.Ajax.request({
-							url: pt.init.contextPath + '/api/reportTables/' + id + '.json?viewClass=dimensional&links=false',
+							url: ns.init.contextPath + '/api/reportTables/' + id + '.json?viewClass=dimensional&links=false',
 							method: 'GET',
 							failure: function(r) {
-								pt.viewport.mask.show();
+								ns.viewport.mask.show();
 								alert(r.responseText);
 							},
 							success: function(r) {
@@ -1508,16 +1510,16 @@ Ext.onReady( function() {
 								//delete reportTable.legendSet;
 
 								Ext.Ajax.request({
-									url: pt.init.contextPath + '/api/reportTables/' + reportTable.id,
+									url: ns.init.contextPath + '/api/reportTables/' + reportTable.id,
 									method: 'PUT',
 									headers: {'Content-Type': 'application/json'},
 									params: Ext.encode(reportTable),
 									failure: function(r) {
-										pt.viewport.mask.show();
+										ns.viewport.mask.show();
 										alert(r.responseText);
 									},
 									success: function(r) {
-										pt.store.reportTable.loadStore();
+										ns.store.reportTable.loadStore();
 										window.destroy();
 									}
 								});
@@ -1528,7 +1530,7 @@ Ext.onReady( function() {
 			});
 
 			cancelButton = Ext.create('Ext.button.Button', {
-				text: PT.i18n.cancel,
+				text: NS.i18n.cancel,
 				handler: function() {
 					window.destroy();
 				}
@@ -1536,7 +1538,7 @@ Ext.onReady( function() {
 
 			window = Ext.create('Ext.window.Window', {
 				title: id ? 'Rename favorite' : 'Create new favorite',
-				//iconCls: 'pt-window-title-icon-favorite',
+				//iconCls: 'ns-window-title-icon-favorite',
 				bodyStyle: 'padding:2px; background:#fff',
 				resizable: false,
 				modal: true,
@@ -1549,16 +1551,16 @@ Ext.onReady( function() {
 				],
 				listeners: {
 					show: function(w) {
-						pt.util.window.setAnchorPosition(w, addButton);
+						ns.util.window.setAnchorPosition(w, addButton);
 
 						if (!w.hasDestroyBlurHandler) {
-							pt.util.window.addDestroyOnBlurHandler(w);
+							ns.util.window.addDestroyOnBlurHandler(w);
 						}
 
-						pt.viewport.favoriteWindow.destroyOnBlur = false;
+						ns.viewport.favoriteWindow.destroyOnBlur = false;
 					},
 					destroy: function() {
-						pt.viewport.favoriteWindow.destroyOnBlur = true;
+						ns.viewport.favoriteWindow.destroyOnBlur = true;
 					}
 				}
 			});
@@ -1567,12 +1569,12 @@ Ext.onReady( function() {
 		};
 
 		addButton = Ext.create('Ext.button.Button', {
-			text: PT.i18n.add_new,
+			text: NS.i18n.add_new,
 			width: 67,
 			height: 26,
 			style: 'border-radius: 1px;',
 			menu: {},
-			disabled: !Ext.isObject(pt.xLayout),
+			disabled: !Ext.isObject(ns.xLayout),
 			handler: function() {
 				nameWindow = new NameWindow(null, 'create');
 				nameWindow.show();
@@ -1583,7 +1585,7 @@ Ext.onReady( function() {
 			width: windowCmpWidth - addButton.width - 11,
 			height: 26,
 			fieldStyle: 'padding-right: 0; padding-left: 6px; border-radius: 1px; border-color: #bbb; font-size:11px',
-			emptyText: PT.i18n.search_for_favorites,
+			emnsyText: NS.i18n.search_for_favorites,
 			enableKeyEvents: true,
 			currentValue: '',
 			listeners: {
@@ -1592,8 +1594,8 @@ Ext.onReady( function() {
 						this.currentValue = this.getValue();
 
 						var value = this.getValue(),
-							url = value ? pt.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
-							store = pt.store.reportTable;
+							url = value ? ns.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
+							store = ns.store.reportTable;
 
 						store.page = 1;
 						store.loadStore(url);
@@ -1603,11 +1605,11 @@ Ext.onReady( function() {
 		});
 
 		prevButton = Ext.create('Ext.button.Button', {
-			text: PT.i18n.prev,
+			text: NS.i18n.prev,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? pt.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
-					store = pt.store.reportTable;
+					url = value ? ns.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
+					store = ns.store.reportTable;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
 				store.loadStore(url);
@@ -1615,11 +1617,11 @@ Ext.onReady( function() {
 		});
 
 		nextButton = Ext.create('Ext.button.Button', {
-			text: PT.i18n.next,
+			text: NS.i18n.next,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? pt.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
-					store = pt.store.reportTable;
+					url = value ? ns.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
+					store = ns.store.reportTable;
 
 				store.page = store.page + 1;
 				store.loadStore(url);
@@ -1627,13 +1629,13 @@ Ext.onReady( function() {
 		});
 
 		info = Ext.create('Ext.form.Label', {
-			cls: 'pt-label-info',
+			cls: 'ns-label-info',
 			width: 300,
 			height: 22
 		});
 
 		grid = Ext.create('Ext.grid.Panel', {
-			cls: 'pt-grid',
+			cls: 'ns-grid',
 			scroll: false,
 			hideHeaders: true,
 			columns: [
@@ -1650,7 +1652,7 @@ Ext.onReady( function() {
 								element.addClsOnOver('link');
 								element.load = function() {
 									favoriteWindow.hide();
-									pt.engine.loadTable(record.data.id, pt, true, true);
+									ns.engine.loadTable(record.data.id, ns, true, true);
 								};
 								element.dom.setAttribute('onclick', 'Ext.get(this).load();');
 							}
@@ -1667,7 +1669,7 @@ Ext.onReady( function() {
 					width: 80,
 					items: [
 						{
-							iconCls: 'pt-grid-row-icon-edit',
+							iconCls: 'ns-grid-row-icon-edit',
 							getClass: function(value, metaData, record) {
 								return 'tooltip-favorite-edit' + (!record.data.access.update ? ' disabled' : '');
 							},
@@ -1681,7 +1683,7 @@ Ext.onReady( function() {
 							}
 						},
 						{
-							iconCls: 'pt-grid-row-icon-overwrite',
+							iconCls: 'ns-grid-row-icon-overwrite',
 							getClass: function(value, metaData, record) {
 								return 'tooltip-favorite-overwrite' + (!record.data.access.update ? ' disabled' : '');
 							},
@@ -1691,7 +1693,7 @@ Ext.onReady( function() {
 									favorite;
 
 								if (record.data.access.update) {
-									message = PT.i18n.overwrite_favorite + '?\n\n' + record.data.name;
+									message = NS.i18n.overwrite_favorite + '?\n\n' + record.data.name;
 									favorite = getBody();
 
 									if (favorite) {
@@ -1699,26 +1701,26 @@ Ext.onReady( function() {
 
 										if (confirm(message)) {
 											Ext.Ajax.request({
-												url: pt.init.contextPath + '/api/reportTables/' + record.data.id,
+												url: ns.init.contextPath + '/api/reportTables/' + record.data.id,
 												method: 'PUT',
 												headers: {'Content-Type': 'application/json'},
 												params: Ext.encode(favorite),
 												success: function() {
-													pt.favorite = favorite;
-													pt.viewport.interpretationButton.enable();
-													pt.store.reportTable.loadStore();
+													ns.favorite = favorite;
+													ns.viewport.interpretationButton.enable();
+													ns.store.reportTable.loadStore();
 												}
 											});
 										}
 									}
 									else {
-										alert(PT.i18n.please_create_a_table_first);
+										alert(NS.i18n.please_create_a_table_first);
 									}
 								}
 							}
 						},
 						{
-							iconCls: 'pt-grid-row-icon-sharing',
+							iconCls: 'ns-grid-row-icon-sharing',
 							getClass: function(value, metaData, record) {
 								return 'tooltip-favorite-sharing' + (!record.data.access.manage ? ' disabled' : '');
 							},
@@ -1727,15 +1729,15 @@ Ext.onReady( function() {
 
 								if (record.data.access.manage) {
 									Ext.Ajax.request({
-										url: pt.init.contextPath + '/api/sharing?type=reportTable&id=' + record.data.id,
+										url: ns.init.contextPath + '/api/sharing?type=reportTable&id=' + record.data.id,
 										method: 'GET',
 										failure: function(r) {
-											pt.viewport.mask.hide();
+											ns.viewport.mask.hide();
 											alert(r.responseText);
 										},
 										success: function(r) {
 											var sharing = Ext.decode(r.responseText),
-												window = PT.app.SharingWindow(sharing);
+												window = NS.app.SharingWindow(sharing);
 											window.show();
 										}
 									});
@@ -1743,7 +1745,7 @@ Ext.onReady( function() {
 							}
 						},
 						{
-							iconCls: 'pt-grid-row-icon-delete',
+							iconCls: 'ns-grid-row-icon-delete',
 							getClass: function(value, metaData, record) {
 								return 'tooltip-favorite-delete' + (!record.data.access['delete'] ? ' disabled' : '');
 							},
@@ -1752,14 +1754,14 @@ Ext.onReady( function() {
 									message;
 
 								if (record.data.access['delete']) {
-									message = PT.i18n.delete_favorite + '?\n\n' + record.data.name;
+									message = NS.i18n.delete_favorite + '?\n\n' + record.data.name;
 
 									if (confirm(message)) {
 										Ext.Ajax.request({
-											url: pt.init.contextPath + '/api/reportTables/' + record.data.id,
+											url: ns.init.contextPath + '/api/reportTables/' + record.data.id,
 											method: 'DELETE',
 											success: function() {
-												pt.store.reportTable.loadStore();
+												ns.store.reportTable.loadStore();
 											}
 										});
 									}
@@ -1773,7 +1775,7 @@ Ext.onReady( function() {
 					width: 6
 				}
 			],
-			store: pt.store.reportTable,
+			store: ns.store.reportTable,
 			bbar: [
 				info,
 				'->',
@@ -1782,15 +1784,15 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				added: function() {
-					pt.viewport.favoriteGrid = this;
+					ns.viewport.favoriteGrid = this;
 				},
 				render: function() {
-					var size = Math.floor((pt.viewport.centerRegion.getHeight() - 155) / pt.conf.layout.grid_row_height);
+					var size = Math.floor((ns.viewport.centerRegion.getHeight() - 155) / ns.conf.layout.grid_row_height);
 					this.store.pageSize = size;
 					this.store.page = 1;
 					this.store.loadStore();
 
-					pt.store.reportTable.on('load', function() {
+					ns.store.reportTable.on('load', function() {
 						if (this.isVisible()) {
 							this.fireEvent('afterrender');
 						}
@@ -1809,7 +1811,7 @@ Ext.onReady( function() {
 							var el = editArray[i];
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
-								html: PT.i18n.rename,
+								html: NS.i18n.rename,
 								'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
@@ -1820,7 +1822,7 @@ Ext.onReady( function() {
 							el = overwriteArray[i];
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
-								html: PT.i18n.overwrite,
+								html: NS.i18n.overwrite,
 								'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
@@ -1831,7 +1833,7 @@ Ext.onReady( function() {
 							el = sharingArray[i];
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
-								html: PT.i18n.share_with_other_people,
+								html: NS.i18n.share_with_other_people,
 								'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
@@ -1842,7 +1844,7 @@ Ext.onReady( function() {
 							el = deleteArray[i];
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
-								html: PT.i18n.delete_,
+								html: NS.i18n.delete_,
 								'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
@@ -1866,8 +1868,8 @@ Ext.onReady( function() {
 		});
 
 		favoriteWindow = Ext.create('Ext.window.Window', {
-			title: PT.i18n.manage_favorites,
-			//iconCls: 'pt-window-title-icon-favorite',
+			title: NS.i18n.manage_favorites,
+			//iconCls: 'ns-window-title-icon-favorite',
 			bodyStyle: 'padding:5px; background-color:#fff',
 			resizable: false,
 			modal: true,
@@ -1893,10 +1895,10 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function(w) {
-					pt.util.window.setAnchorPosition(w, pt.viewport.favoriteButton);
+					ns.util.window.setAnchorPosition(w, ns.viewport.favoriteButton);
 
 					if (!w.hasDestroyOnBlurHandler) {
-						pt.util.window.addDestroyOnBlurHandler(w);
+						ns.util.window.addDestroyOnBlurHandler(w);
 					}
 				}
 			}
@@ -1905,7 +1907,7 @@ Ext.onReady( function() {
 		return favoriteWindow;
 	};
 
-	PT.app.SharingWindow = function(sharing) {
+	NS.app.SharingWindow = function(sharing) {
 
 		// Objects
 		var UserGroupRow,
@@ -1932,12 +1934,12 @@ Ext.onReady( function() {
 
 			getData = function() {
 				var data = [
-					{id: 'r-------', name: PT.i18n.can_view},
-					{id: 'rw------', name: PT.i18n.can_edit_and_view}
+					{id: 'r-------', name: NS.i18n.can_view},
+					{id: 'rw------', name: NS.i18n.can_edit_and_view}
 				];
 
 				if (isPublicAccess) {
-					data.unshift({id: '-------', name: PT.i18n.none});
+					data.unshift({id: '-------', name: NS.i18n.none});
 				}
 
 				return data;
@@ -1952,9 +1954,9 @@ Ext.onReady( function() {
 				var items = [];
 
 				combo = Ext.create('Ext.form.field.ComboBox', {
-					fieldLabel: isPublicAccess ? PT.i18n.public_access : obj.name,
+					fieldLabel: isPublicAccess ? NS.i18n.public_access : obj.name,
 					labelStyle: 'color:#333',
-					cls: 'pt-combo',
+					cls: 'ns-combo',
 					width: 380,
 					labelWidth: 250,
 					queryMode: 'local',
@@ -2016,8 +2018,8 @@ Ext.onReady( function() {
 					publicAccess: publicGroup.down('combobox').getValue(),
 					externalAccess: externalAccess ? externalAccess.getValue() : false,
 					user: {
-						id: pt.init.user.id,
-						name: pt.init.user.name
+						id: ns.init.user.id,
+						name: ns.init.user.name
 					}
 				}
 			};
@@ -2038,7 +2040,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: pt.init.contextPath + '/api/sharing/search',
+				url: ns.init.contextPath + '/api/sharing/search',
 				reader: {
 					type: 'json',
 					root: 'userGroups'
@@ -2049,7 +2051,7 @@ Ext.onReady( function() {
 		userGroupField = Ext.create('Ext.form.field.ComboBox', {
 			valueField: 'id',
 			displayField: 'name',
-			emptyText: PT.i18n.search_for_user_groups,
+			emnsyText: NS.i18n.search_for_user_groups,
 			queryParam: 'key',
 			queryDelay: 200,
 			minChars: 1,
@@ -2094,7 +2096,7 @@ Ext.onReady( function() {
 		if (sharing.meta.allowExternalAccess) {
 			externalAccess = userGroupRowContainer.add({
 				xtype: 'checkbox',
-				fieldLabel: PT.i18n.allow_external_access,
+				fieldLabel: NS.i18n.allow_external_access,
 				labelSeparator: '',
 				labelWidth: 250,
 				checked: !!sharing.object.externalAccess
@@ -2115,7 +2117,7 @@ Ext.onReady( function() {
 		}
 
 		window = Ext.create('Ext.window.Window', {
-			title: PT.i18n.sharing_settings,
+			title: NS.i18n.sharing_settings,
 			bodyStyle: 'padding:6px 6px 0px; background-color:#fff',
 			resizable: false,
 			modal: true,
@@ -2140,10 +2142,10 @@ Ext.onReady( function() {
 			bbar: [
 				'->',
 				{
-					text: PT.i18n.save,
+					text: NS.i18n.save,
 					handler: function() {
 						Ext.Ajax.request({
-							url: pt.init.contextPath + '/api/sharing?type=reportTable&id=' + sharing.object.id,
+							url: ns.init.contextPath + '/api/sharing?type=reportTable&id=' + sharing.object.id,
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json'
@@ -2157,17 +2159,17 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function(w) {
-					var pos = pt.viewport.favoriteWindow.getPosition();
+					var pos = ns.viewport.favoriteWindow.getPosition();
 					w.setPosition(pos[0] + 5, pos[1] + 5);
 
 					if (!w.hasDestroyOnBlurHandler) {
-						pt.util.window.addDestroyOnBlurHandler(w);
+						ns.util.window.addDestroyOnBlurHandler(w);
 					}
 
-					pt.viewport.favoriteWindow.destroyOnBlur = false;
+					ns.viewport.favoriteWindow.destroyOnBlur = false;
 				},
 				destroy: function() {
-					pt.viewport.favoriteWindow.destroyOnBlur = true;
+					ns.viewport.favoriteWindow.destroyOnBlur = true;
 				}
 			}
 		});
@@ -2175,18 +2177,18 @@ Ext.onReady( function() {
 		return window;
 	};
 
-	PT.app.InterpretationWindow = function() {
+	NS.app.InterpretationWindow = function() {
 		var textArea,
 			linkPanel,
 			shareButton,
 			window;
 
-		if (Ext.isObject(pt.favorite) && Ext.isString(pt.favorite.id)) {
+		if (Ext.isObject(ns.favorite) && Ext.isString(ns.favorite.id)) {
 			textArea = Ext.create('Ext.form.field.TextArea', {
-				cls: 'pt-textarea',
+				cls: 'ns-textarea',
 				height: 130,
 				fieldStyle: 'padding-left: 4px; padding-top: 3px',
-				emptyText: PT.i18n.write_your_interpretation,
+				emnsyText: NS.i18n.write_your_interpretation,
 				enableKeyEvents: true,
 				listeners: {
 					keyup: function() {
@@ -2197,8 +2199,8 @@ Ext.onReady( function() {
 
 			linkPanel = Ext.create('Ext.panel.Panel', {
 				html: function() {
-					var reportTableUrl = pt.init.contextPath + '/dhis-web-pivot/app/index.html?id=' + pt.favorite.id,
-						apiUrl = pt.init.contextPath + '/api/reportTables/' + pt.favorite.id + '/data.html',
+					var reportTableUrl = ns.init.contextPath + '/dhis-web-pivot/app/index.html?id=' + ns.favorite.id,
+						apiUrl = ns.init.contextPath + '/api/reportTables/' + ns.favorite.id + '/data.html',
 						html = '';
 
 					html += '<div><b>Pivot link: </b><span class="user-select"><a href="' + reportTableUrl + '" target="_blank">' + reportTableUrl + '</a></span></div>';
@@ -2210,7 +2212,7 @@ Ext.onReady( function() {
 			});
 
 			shareButton = Ext.create('Ext.button.Button', {
-				text: PT.i18n.share,
+				text: NS.i18n.share,
 				disabled: true,
 				xable: function() {
 					this.setDisabled(!textArea.getValue());
@@ -2218,15 +2220,15 @@ Ext.onReady( function() {
 				handler: function() {
 					if (textArea.getValue()) {
 						Ext.Ajax.request({
-							url: pt.init.contextPath + '/api/interpretations/reportTable/' + pt.favorite.id,
+							url: ns.init.contextPath + '/api/interpretations/reportTable/' + ns.favorite.id,
 							method: 'POST',
 							params: textArea.getValue(),
 							headers: {'Content-Type': 'text/html'},
 							success: function() {
 								textArea.reset();
-								pt.viewport.interpretationButton.disable();
+								ns.viewport.interpretationButton.disable();
 								window.hide();
-								//PT.util.notification.interpretation(PT.i18n.interpretation_was_shared + '.');
+								//NS.util.notification.interpretation(NS.i18n.interpretation_was_shared + '.');
 							}
 						});
 					}
@@ -2234,9 +2236,9 @@ Ext.onReady( function() {
 			});
 
 			window = Ext.create('Ext.window.Window', {
-				title: pt.favorite.name,
+				title: ns.favorite.name,
 				layout: 'fit',
-				//iconCls: 'pt-window-title-interpretation',
+				//iconCls: 'ns-window-title-interpretation',
 				width: 500,
 				bodyStyle: 'padding:5px 5px 3px; background-color:#fff',
 				resizable: true,
@@ -2247,7 +2249,7 @@ Ext.onReady( function() {
 					linkPanel
 				],
 				bbar: {
-					cls: 'pt-toolbar-bbar',
+					cls: 'ns-toolbar-bbar',
 					defaults: {
 						height: 24
 					},
@@ -2258,19 +2260,19 @@ Ext.onReady( function() {
 				},
 				listeners: {
 					show: function(w) {
-						pt.util.window.setAnchorPosition(w, pt.viewport.interpretationButton);
+						ns.util.window.setAnchorPosition(w, ns.viewport.interpretationButton);
 
 						document.body.oncontextmenu = true;
 
 						if (!w.hasDestroyOnBlurHandler) {
-							pt.util.window.addDestroyOnBlurHandler(w);
+							ns.util.window.addDestroyOnBlurHandler(w);
 						}
 					},
 					hide: function() {
 						document.body.oncontextmenu = function(){return false;};
 					},
 					destroy: function() {
-						pt.viewport.interpretationWindow = null;
+						ns.viewport.interpretationWindow = null;
 					}
 				}
 			});
@@ -2282,7 +2284,7 @@ Ext.onReady( function() {
 	};
 
 	createViewport = function() {
-        var dimConf = pt.conf.finals.dimension,
+        var dimConf = ns.conf.finals.dimension,
 
 			indicatorAvailable,
 			indicatorSelected,
@@ -2313,7 +2315,7 @@ Ext.onReady( function() {
 			update,
 
 			layoutButton,
-			optionsButton,
+			onsionsButton,
 			favoriteButton,
 			openTableLayoutTab,
 			downloadButton,
@@ -2329,16 +2331,16 @@ Ext.onReady( function() {
 			addListeners;
 
 		indicatorAvailable = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'pt-toolbar-multiselect-left',
-			width: (pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding) / 2,
+			cls: 'ns-toolbar-multiselect-left',
+			width: (ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding) / 2,
 			valueField: 'id',
 			displayField: 'name',
-			store: pt.store.indicatorAvailable,
+			store: ns.store.indicatorAvailable,
 			tbar: [
 				{
 					xtype: 'label',
-					text: PT.i18n.available,
-					cls: 'pt-toolbar-multiselect-left-label'
+					text: NS.i18n.available,
+					cls: 'ns-toolbar-multiselect-left-label'
 				},
 				'->',
 				{
@@ -2346,7 +2348,7 @@ Ext.onReady( function() {
 					icon: 'images/arrowright.png',
 					width: 22,
 					handler: function() {
-						pt.util.multiselect.select(indicatorAvailable, indicatorSelected);
+						ns.util.multiselect.select(indicatorAvailable, indicatorSelected);
 					}
 				},
 				{
@@ -2354,33 +2356,33 @@ Ext.onReady( function() {
 					icon: 'images/arrowrightdouble.png',
 					width: 22,
 					handler: function() {
-						pt.util.multiselect.selectAll(indicatorAvailable, indicatorSelected);
+						ns.util.multiselect.selectAll(indicatorAvailable, indicatorSelected);
 					}
 				}
 			],
 			listeners: {
 				afterrender: function() {
 					this.boundList.on('itemdblclick', function() {
-						pt.util.multiselect.select(this, indicatorSelected);
+						ns.util.multiselect.select(this, indicatorSelected);
 					}, this);
 				}
 			}
 		});
 
 		indicatorSelected = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'pt-toolbar-multiselect-right',
-			width: (pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding) / 2,
+			cls: 'ns-toolbar-multiselect-right',
+			width: (ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding) / 2,
 			valueField: 'id',
 			displayField: 'name',
 			ddReorder: true,
-			store: pt.store.indicatorSelected,
+			store: ns.store.indicatorSelected,
 			tbar: [
 				{
 					xtype: 'button',
 					icon: 'images/arrowleftdouble.png',
 					width: 22,
 					handler: function() {
-						pt.util.multiselect.unselectAll(indicatorAvailable, indicatorSelected);
+						ns.util.multiselect.unselectAll(indicatorAvailable, indicatorSelected);
 					}
 				},
 				{
@@ -2388,20 +2390,20 @@ Ext.onReady( function() {
 					icon: 'images/arrowleft.png',
 					width: 22,
 					handler: function() {
-						pt.util.multiselect.unselect(indicatorAvailable, indicatorSelected);
+						ns.util.multiselect.unselect(indicatorAvailable, indicatorSelected);
 					}
 				},
 				'->',
 				{
 					xtype: 'label',
-					text: PT.i18n.selected,
-					cls: 'pt-toolbar-multiselect-right-label'
+					text: NS.i18n.selected,
+					cls: 'ns-toolbar-multiselect-right-label'
 				}
 			],
 			listeners: {
 				afterrender: function() {
 					this.boundList.on('itemdblclick', function() {
-						pt.util.multiselect.unselect(indicatorAvailable, this);
+						ns.util.multiselect.unselect(indicatorAvailable, this);
 					}, this);
 				}
 			}
@@ -2409,15 +2411,15 @@ Ext.onReady( function() {
 
 		indicator = {
 			xtype: 'panel',
-			title: '<div class="pt-panel-title-data">' + PT.i18n.indicators + '</div>',
+			title: '<div class="ns-panel-title-data">' + NS.i18n.indicators + '</div>',
 			hideCollapseTool: true,
 			getDimension: function() {
 				var config = {
-					dimension: pt.conf.finals.dimension.indicator.objectName,
+					dimension: ns.conf.finals.dimension.indicator.objectName,
 					items: []
 				};
 
-				pt.store.indicatorSelected.each( function(r) {
+				ns.store.indicatorSelected.each( function(r) {
 					config.items.push({
 						id: r.data.id,
 						name: r.data.name
@@ -2427,31 +2429,31 @@ Ext.onReady( function() {
 				return config.items.length ? config : null;
 			},
 			onExpand: function() {
-				var h = pt.viewport.westRegion.hasScrollbar ?
-					pt.conf.layout.west_scrollbarheight_accordion_indicator : pt.conf.layout.west_maxheight_accordion_indicator;
-				pt.util.dimension.panel.setHeight(h);
-				pt.util.multiselect.setHeight(
+				var h = ns.viewport.westRegion.hasScrollbar ?
+					ns.conf.layout.west_scrollbarheight_accordion_indicator : ns.conf.layout.west_maxheight_accordion_indicator;
+				ns.util.dimension.panel.setHeight(h);
+				ns.util.multiselect.setHeight(
 					[indicatorAvailable, indicatorSelected],
 					this,
-					pt.conf.layout.west_fill_accordion_indicator
+					ns.conf.layout.west_fill_accordion_indicator
 				);
 			},
 			items: [
 				{
 					xtype: 'combobox',
-					cls: 'pt-combo',
+					cls: 'ns-combo',
 					style: 'margin-bottom:2px; margin-top:0px',
-					width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding,
+					width: ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding,
 					valueField: 'id',
 					displayField: 'name',
-					emptyText: PT.i18n.select_indicator_group,
+					emnsyText: NS.i18n.select_indicator_group,
 					editable: false,
 					store: {
 						xtype: 'store',
 						fields: ['id', 'name', 'index'],
 						proxy: {
 							type: 'ajax',
-							url: pt.init.contextPath + '/api/indicatorGroups.json?paging=false&links=false',
+							url: ns.init.contextPath + '/api/indicatorGroups.json?paging=false&links=false',
 							reader: {
 								type: 'json',
 								root: 'indicatorGroups'
@@ -2461,7 +2463,7 @@ Ext.onReady( function() {
 							load: function(s) {
 								s.add({
 									id: 0,
-									name: PT.i18n.all_indicator_groups,
+									name: NS.i18n.all_indicator_groups,
 									index: -1
 								});
 								s.sort([
@@ -2479,22 +2481,22 @@ Ext.onReady( function() {
 					},
 					listeners: {
 						select: function(cb) {
-							var store = pt.store.indicatorAvailable,
+							var store = ns.store.indicatorAvailable,
 								id = cb.getValue();
 
 							store.parent = id;
 
-							if (pt.support.prototype.object.hasObject(store.storage, 'parent', id)) {
-								pt.support.store.load(store);
-								pt.util.multiselect.filterAvailable(indicatorAvailable, indicatorSelected);
+							if (ns.support.prototype.object.hasObject(store.storage, 'parent', id)) {
+								ns.support.store.load(store);
+								ns.util.multiselect.filterAvailable(indicatorAvailable, indicatorSelected);
 							}
 							else {
 								if (id === 0) {
-									store.proxy.url = pt.init.contextPath + '/api/indicators.json?paging=false&links=false';
+									store.proxy.url = ns.init.contextPath + '/api/indicators.json?paging=false&links=false';
 									store.load();
 								}
 								else {
-									store.proxy.url = pt.init.contextPath + '/api/indicatorGroups/' + id + '.json';
+									store.proxy.url = ns.init.contextPath + '/api/indicatorGroups/' + id + '.json';
 									store.load();
 								}
 							}
@@ -2513,7 +2515,7 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				added: function() {
-					pt.cmp.dimension.panels.push(this);
+					ns.cmp.dimension.panels.push(this);
 				},
 				expand: function(p) {
 					p.onExpand();
@@ -2522,16 +2524,16 @@ Ext.onReady( function() {
 		};
 
 		dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'pt-toolbar-multiselect-left',
-			width: (pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding) / 2,
+			cls: 'ns-toolbar-multiselect-left',
+			width: (ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding) / 2,
 			valueField: 'id',
 			displayField: 'name',
-			store: pt.store.dataElementAvailable,
+			store: ns.store.dataElementAvailable,
 			tbar: [
 				{
 					xtype: 'label',
-					text: PT.i18n.available,
-					cls: 'pt-toolbar-multiselect-left-label'
+					text: NS.i18n.available,
+					cls: 'ns-toolbar-multiselect-left-label'
 				},
 				'->',
 				{
@@ -2539,7 +2541,7 @@ Ext.onReady( function() {
 					icon: 'images/arrowright.png',
 					width: 22,
 					handler: function() {
-						pt.util.multiselect.select(dataElementAvailable, dataElementSelected);
+						ns.util.multiselect.select(dataElementAvailable, dataElementSelected);
 					}
 				},
 				{
@@ -2547,33 +2549,33 @@ Ext.onReady( function() {
 					icon: 'images/arrowrightdouble.png',
 					width: 22,
 					handler: function() {
-						pt.util.multiselect.selectAll(dataElementAvailable, dataElementSelected);
+						ns.util.multiselect.selectAll(dataElementAvailable, dataElementSelected);
 					}
 				}
 			],
 			listeners: {
 				afterrender: function() {
 					this.boundList.on('itemdblclick', function() {
-						pt.util.multiselect.select(this, dataElementSelected);
+						ns.util.multiselect.select(this, dataElementSelected);
 					}, this);
 				}
 			}
 		});
 
 		dataElementSelected = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'pt-toolbar-multiselect-right',
-			width: (pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding) / 2,
+			cls: 'ns-toolbar-multiselect-right',
+			width: (ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding) / 2,
 			valueField: 'id',
 			displayField: 'name',
 			ddReorder: true,
-			store: pt.store.dataElementSelected,
+			store: ns.store.dataElementSelected,
 			tbar: [
 				{
 					xtype: 'button',
 					icon: 'images/arrowleftdouble.png',
 					width: 22,
 					handler: function() {
-						pt.util.multiselect.unselectAll(dataElementAvailable, dataElementSelected);
+						ns.util.multiselect.unselectAll(dataElementAvailable, dataElementSelected);
 					}
 				},
 				{
@@ -2581,20 +2583,20 @@ Ext.onReady( function() {
 					icon: 'images/arrowleft.png',
 					width: 22,
 					handler: function() {
-						pt.util.multiselect.unselect(dataElementAvailable, dataElementSelected);
+						ns.util.multiselect.unselect(dataElementAvailable, dataElementSelected);
 					}
 				},
 				'->',
 				{
 					xtype: 'label',
-					text: PT.i18n.selected,
-					cls: 'pt-toolbar-multiselect-right-label'
+					text: NS.i18n.selected,
+					cls: 'ns-toolbar-multiselect-right-label'
 				}
 			],
 			listeners: {
 				afterrender: function() {
 					this.boundList.on('itemdblclick', function() {
-						pt.util.multiselect.unselect(dataElementAvailable, this);
+						ns.util.multiselect.unselect(dataElementAvailable, this);
 					}, this);
 				}
 			}
@@ -2604,7 +2606,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name', 'index'],
 			proxy: {
 				type: 'ajax',
-				url: pt.init.contextPath + '/api/dataElementGroups.json?paging=false&links=false',
+				url: ns.init.contextPath + '/api/dataElementGroups.json?paging=false&links=false',
 				reader: {
 					type: 'json',
 					root: 'dataElementGroups'
@@ -2612,10 +2614,10 @@ Ext.onReady( function() {
 			},
 			listeners: {
 				load: function(s) {
-					if (dataElementDetailLevel.getValue() === pt.conf.finals.dimension.dataElement.objectName) {
+					if (dataElementDetailLevel.getValue() === ns.conf.finals.dimension.dataElement.objectName) {
 						s.add({
 							id: 0,
-							name: '[ ' + PT.i18n.all_data_element_groups + ' ]',
+							name: '[ ' + NS.i18n.all_data_element_groups + ' ]',
 							index: -1
 						});
 					}
@@ -2629,21 +2631,21 @@ Ext.onReady( function() {
 		});
 
 		dataElementGroupComboBox = Ext.create('Ext.form.field.ComboBox', {
-			cls: 'pt-combo',
+			cls: 'ns-combo',
 			style: 'margin:0 2px 2px 0',
-			width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding - 90,
+			width: ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding - 90,
 			valueField: 'id',
 			displayField: 'name',
-			emptyText: PT.i18n.select_data_element_group,
+			emnsyText: NS.i18n.select_data_element_group,
 			editable: false,
 			store: dataElementGroupStore,
 			loadAvailable: function() {
-				var store = pt.store.dataElementAvailable,
+				var store = ns.store.dataElementAvailable,
 					detailLevel = dataElementDetailLevel.getValue(),
 					value = this.getValue();
 
 				if (value !== null) {
-					if (detailLevel === pt.conf.finals.dimension.dataElement.objectName) {
+					if (detailLevel === ns.conf.finals.dimension.dataElement.objectName) {
 						store.setTotalsProxy(value);
 					}
 					else {
@@ -2659,7 +2661,7 @@ Ext.onReady( function() {
 		});
 
 		dataElementDetailLevel = Ext.create('Ext.form.field.ComboBox', {
-			cls: 'pt-combo',
+			cls: 'ns-combo',
 			style: 'margin-bottom:2px',
 			baseBodyCls: 'small',
 			queryMode: 'local',
@@ -2667,39 +2669,39 @@ Ext.onReady( function() {
 			valueField: 'id',
 			displayField: 'text',
 			width: 90 - 2,
-			value: pt.conf.finals.dimension.dataElement.objectName,
+			value: ns.conf.finals.dimension.dataElement.objectName,
 			store: {
 				fields: ['id', 'text'],
 				data: [
-					{id: pt.conf.finals.dimension.dataElement.objectName, text: PT.i18n.totals},
-					{id: pt.conf.finals.dimension.operand.objectName, text: PT.i18n.details}
+					{id: ns.conf.finals.dimension.dataElement.objectName, text: NS.i18n.totals},
+					{id: ns.conf.finals.dimension.operand.objectName, text: NS.i18n.details}
 				]
 			},
 			listeners: {
 				select: function(cb) {
 					var record = dataElementGroupStore.getById(0);
 
-					if (cb.getValue() === pt.conf.finals.dimension.operand.objectName && record) {
+					if (cb.getValue() === ns.conf.finals.dimension.operand.objectName && record) {
 						dataElementGroupStore.remove(record);
 					}
 
-					if (cb.getValue() === pt.conf.finals.dimension.dataElement.objectName && !record) {
+					if (cb.getValue() === ns.conf.finals.dimension.dataElement.objectName && !record) {
 						dataElementGroupStore.insert(0, {
 							id: 0,
-							name: '[ ' + PT.i18n.all_data_element_groups + ' ]',
+							name: '[ ' + NS.i18n.all_data_element_groups + ' ]',
 							index: -1
 						});
 					}
 
 					dataElementGroupComboBox.loadAvailable();
-					pt.store.dataElementSelected.removeAll();
+					ns.store.dataElementSelected.removeAll();
 				}
 			}
 		});
 
 		dataElement = {
 			xtype: 'panel',
-			title: '<div class="pt-panel-title-data">' + PT.i18n.data_elements + '</div>',
+			title: '<div class="ns-panel-title-data">' + NS.i18n.data_elements + '</div>',
 			hideCollapseTool: true,
 			getDimension: function() {
 				var config = {
@@ -2707,7 +2709,7 @@ Ext.onReady( function() {
 					items: []
 				};
 
-				pt.store.dataElementSelected.each( function(r) {
+				ns.store.dataElementSelected.each( function(r) {
 					config.items.push({
 						id: r.data.id,
 						name: r.data.name
@@ -2717,13 +2719,13 @@ Ext.onReady( function() {
 				return config.items.length ? config : null;
 			},
 			onExpand: function() {
-				var h = pt.viewport.westRegion.hasScrollbar ?
-					pt.conf.layout.west_scrollbarheight_accordion_dataelement : pt.conf.layout.west_maxheight_accordion_dataelement;
-				pt.util.dimension.panel.setHeight(h);
-				pt.util.multiselect.setHeight(
+				var h = ns.viewport.westRegion.hasScrollbar ?
+					ns.conf.layout.west_scrollbarheight_accordion_dataelement : ns.conf.layout.west_maxheight_accordion_dataelement;
+				ns.util.dimension.panel.setHeight(h);
+				ns.util.multiselect.setHeight(
 					[dataElementAvailable, dataElementSelected],
 					this,
-					pt.conf.layout.west_fill_accordion_indicator
+					ns.conf.layout.west_fill_accordion_indicator
 				);
 			},
 			items: [
@@ -2747,7 +2749,7 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				added: function() {
-					pt.cmp.dimension.panels.push(this);
+					ns.cmp.dimension.panels.push(this);
 				},
 				expand: function(p) {
 					p.onExpand();
@@ -2756,16 +2758,16 @@ Ext.onReady( function() {
 		};
 
 		dataSetAvailable = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'pt-toolbar-multiselect-left',
-			width: (pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding) / 2,
+			cls: 'ns-toolbar-multiselect-left',
+			width: (ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding) / 2,
 			valueField: 'id',
 			displayField: 'name',
-			store: pt.store.dataSetAvailable,
+			store: ns.store.dataSetAvailable,
 			tbar: [
 				{
 					xtype: 'label',
-					text: PT.i18n.available,
-					cls: 'pt-toolbar-multiselect-left-label'
+					text: NS.i18n.available,
+					cls: 'ns-toolbar-multiselect-left-label'
 				},
 				'->',
 				{
@@ -2773,7 +2775,7 @@ Ext.onReady( function() {
 					icon: 'images/arrowright.png',
 					width: 22,
 					handler: function() {
-						pt.util.multiselect.select(dataSetAvailable, dataSetSelected);
+						ns.util.multiselect.select(dataSetAvailable, dataSetSelected);
 					}
 				},
 				{
@@ -2781,33 +2783,33 @@ Ext.onReady( function() {
 					icon: 'images/arrowrightdouble.png',
 					width: 22,
 					handler: function() {
-						pt.util.multiselect.selectAll(dataSetAvailable, dataSetSelected);
+						ns.util.multiselect.selectAll(dataSetAvailable, dataSetSelected);
 					}
 				}
 			],
 			listeners: {
 				afterrender: function() {
 					this.boundList.on('itemdblclick', function() {
-						pt.util.multiselect.select(this, dataSetSelected);
+						ns.util.multiselect.select(this, dataSetSelected);
 					}, this);
 				}
 			}
 		});
 
 		dataSetSelected = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'pt-toolbar-multiselect-right',
-			width: (pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding) / 2,
+			cls: 'ns-toolbar-multiselect-right',
+			width: (ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding) / 2,
 			valueField: 'id',
 			displayField: 'name',
 			ddReorder: true,
-			store: pt.store.dataSetSelected,
+			store: ns.store.dataSetSelected,
 			tbar: [
 				{
 					xtype: 'button',
 					icon: 'images/arrowleftdouble.png',
 					width: 22,
 					handler: function() {
-						pt.util.multiselect.unselectAll(dataSetAvailable, dataSetSelected);
+						ns.util.multiselect.unselectAll(dataSetAvailable, dataSetSelected);
 					}
 				},
 				{
@@ -2815,20 +2817,20 @@ Ext.onReady( function() {
 					icon: 'images/arrowleft.png',
 					width: 22,
 					handler: function() {
-						pt.util.multiselect.unselect(dataSetAvailable, dataSetSelected);
+						ns.util.multiselect.unselect(dataSetAvailable, dataSetSelected);
 					}
 				},
 				'->',
 				{
 					xtype: 'label',
-					text: PT.i18n.selected,
-					cls: 'pt-toolbar-multiselect-right-label'
+					text: NS.i18n.selected,
+					cls: 'ns-toolbar-multiselect-right-label'
 				}
 			],
 			listeners: {
 				afterrender: function() {
 					this.boundList.on('itemdblclick', function() {
-						pt.util.multiselect.unselect(dataSetAvailable, this);
+						ns.util.multiselect.unselect(dataSetAvailable, this);
 					}, this);
 				}
 			}
@@ -2836,15 +2838,15 @@ Ext.onReady( function() {
 
 		dataSet = {
 			xtype: 'panel',
-			title: '<div class="pt-panel-title-data">' + PT.i18n.reporting_rates + '</div>',
+			title: '<div class="ns-panel-title-data">' + NS.i18n.reporting_rates + '</div>',
 			hideCollapseTool: true,
 			getDimension: function() {
 				var config = {
-					dimension: pt.conf.finals.dimension.dataSet.objectName,
+					dimension: ns.conf.finals.dimension.dataSet.objectName,
 					items: []
 				};
 
-				pt.store.dataSetSelected.each( function(r) {
+				ns.store.dataSetSelected.each( function(r) {
 					config.items.push({
 						id: r.data.id,
 						name: r.data.name
@@ -2854,17 +2856,17 @@ Ext.onReady( function() {
 				return config.items.length ? config : null;
 			},
 			onExpand: function() {
-				var h = pt.viewport.westRegion.hasScrollbar ?
-					pt.conf.layout.west_scrollbarheight_accordion_dataset : pt.conf.layout.west_maxheight_accordion_dataset;
-				pt.util.dimension.panel.setHeight(h);
-				pt.util.multiselect.setHeight(
+				var h = ns.viewport.westRegion.hasScrollbar ?
+					ns.conf.layout.west_scrollbarheight_accordion_dataset : ns.conf.layout.west_maxheight_accordion_dataset;
+				ns.util.dimension.panel.setHeight(h);
+				ns.util.multiselect.setHeight(
 					[dataSetAvailable, dataSetSelected],
 					this,
-					pt.conf.layout.west_fill_accordion_dataset
+					ns.conf.layout.west_fill_accordion_dataset
 				);
 
-				if (!pt.store.dataSetAvailable.isLoaded) {
-					pt.store.dataSetAvailable.load();
+				if (!ns.store.dataSetAvailable.isLoaded) {
+					ns.store.dataSetAvailable.load();
 				}
 			},
 			items: [
@@ -2880,7 +2882,7 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				added: function() {
-					pt.cmp.dimension.panels.push(this);
+					ns.cmp.dimension.panels.push(this);
 				},
 				expand: function(p) {
 					p.onExpand();
@@ -2892,7 +2894,7 @@ Ext.onReady( function() {
 			relativePeriodId: 'rewind',
 			boxLabel: 'Rewind one period',
 			xable: function() {
-				this.setDisabled(pt.util.checkbox.isAllFalse());
+				this.setDisabled(ns.util.checkbox.isAllFalse());
 			}
 		});
 
@@ -2918,7 +2920,7 @@ Ext.onReady( function() {
 								listeners: {
 									added: function(chb) {
 										if (chb.xtype === 'checkbox') {
-											pt.cmp.dimension.relativePeriod.checkbox.push(chb);
+											ns.cmp.dimension.relativePeriod.checkbox.push(chb);
 											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
 										}
 									},
@@ -2930,23 +2932,23 @@ Ext.onReady( function() {
 							items: [
 								{
 									xtype: 'label',
-									text: PT.i18n.weeks,
-									cls: 'pt-label-period-heading'
+									text: NS.i18n.weeks,
+									cls: 'ns-label-period-heading'
 								},
 								{
 									xtype: 'checkbox',
 									relativePeriodId: 'LAST_WEEK',
-									boxLabel: PT.i18n.last_week
+									boxLabel: NS.i18n.last_week
 								},
 								{
 									xtype: 'checkbox',
 									relativePeriodId: 'LAST_4_WEEKS',
-									boxLabel: PT.i18n.last_4_weeks
+									boxLabel: NS.i18n.last_4_weeks
 								},
 								{
 									xtype: 'checkbox',
 									relativePeriodId: 'LAST_12_WEEKS',
-									boxLabel: PT.i18n.last_12_weeks
+									boxLabel: NS.i18n.last_12_weeks
 								}
 							]
 						},
@@ -2960,7 +2962,7 @@ Ext.onReady( function() {
 								listeners: {
 									added: function(chb) {
 										if (chb.xtype === 'checkbox') {
-											pt.cmp.dimension.relativePeriod.checkbox.push(chb);
+											ns.cmp.dimension.relativePeriod.checkbox.push(chb);
 											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
 										}
 									},
@@ -2972,23 +2974,23 @@ Ext.onReady( function() {
 							items: [
 								{
 									xtype: 'label',
-									text: PT.i18n.months,
-									cls: 'pt-label-period-heading'
+									text: NS.i18n.months,
+									cls: 'ns-label-period-heading'
 								},
 								{
 									xtype: 'checkbox',
 									relativePeriodId: 'LAST_MONTH',
-									boxLabel: PT.i18n.last_month
+									boxLabel: NS.i18n.last_month
 								},
 								{
 									xtype: 'checkbox',
 									relativePeriodId: 'LAST_3_MONTHS',
-									boxLabel: PT.i18n.last_3_months
+									boxLabel: NS.i18n.last_3_months
 								},
 								{
 									xtype: 'checkbox',
 									relativePeriodId: 'LAST_12_MONTHS',
-									boxLabel: PT.i18n.last_12_months,
+									boxLabel: NS.i18n.last_12_months,
 									checked: true
 								}
 							]
@@ -3003,7 +3005,7 @@ Ext.onReady( function() {
 								listeners: {
 									added: function(chb) {
 										if (chb.xtype === 'checkbox') {
-											pt.cmp.dimension.relativePeriod.checkbox.push(chb);
+											ns.cmp.dimension.relativePeriod.checkbox.push(chb);
 											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
 										}
 									},
@@ -3015,18 +3017,18 @@ Ext.onReady( function() {
 							items: [
 								{
 									xtype: 'label',
-									text: PT.i18n.bimonths,
-									cls: 'pt-label-period-heading'
+									text: NS.i18n.bimonths,
+									cls: 'ns-label-period-heading'
 								},
 								{
 									xtype: 'checkbox',
 									relativePeriodId: 'LAST_BIMONTH',
-									boxLabel: PT.i18n.last_bimonth
+									boxLabel: NS.i18n.last_bimonth
 								},
 								{
 									xtype: 'checkbox',
 									relativePeriodId: 'LAST_6_BIMONTHS',
-									boxLabel: PT.i18n.last_6_bimonths
+									boxLabel: NS.i18n.last_6_bimonths
 								}
 							]
 						}
@@ -3047,7 +3049,7 @@ Ext.onReady( function() {
 								listeners: {
 									added: function(chb) {
 										if (chb.xtype === 'checkbox') {
-											pt.cmp.dimension.relativePeriod.checkbox.push(chb);
+											ns.cmp.dimension.relativePeriod.checkbox.push(chb);
 											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
 										}
 									},
@@ -3059,18 +3061,18 @@ Ext.onReady( function() {
 							items: [
 								{
 									xtype: 'label',
-									text: PT.i18n.quarters,
-									cls: 'pt-label-period-heading'
+									text: NS.i18n.quarters,
+									cls: 'ns-label-period-heading'
 								},
 								{
 									xtype: 'checkbox',
 									relativePeriodId: 'LAST_QUARTER',
-									boxLabel: PT.i18n.last_quarter
+									boxLabel: NS.i18n.last_quarter
 								},
 								{
 									xtype: 'checkbox',
 									relativePeriodId: 'LAST_4_QUARTERS',
-									boxLabel: PT.i18n.last_4_quarters
+									boxLabel: NS.i18n.last_4_quarters
 								}
 							]
 						},
@@ -3084,7 +3086,7 @@ Ext.onReady( function() {
 								listeners: {
 									added: function(chb) {
 										if (chb.xtype === 'checkbox') {
-											pt.cmp.dimension.relativePeriod.checkbox.push(chb);
+											ns.cmp.dimension.relativePeriod.checkbox.push(chb);
 											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
 										}
 									},
@@ -3096,18 +3098,18 @@ Ext.onReady( function() {
 							items: [
 								{
 									xtype: 'label',
-									text: PT.i18n.sixmonths,
-									cls: 'pt-label-period-heading'
+									text: NS.i18n.sixmonths,
+									cls: 'ns-label-period-heading'
 								},
 								{
 									xtype: 'checkbox',
 									relativePeriodId: 'LAST_SIX_MONTH',
-									boxLabel: PT.i18n.last_sixmonth
+									boxLabel: NS.i18n.last_sixmonth
 								},
 								{
 									xtype: 'checkbox',
 									relativePeriodId: 'LAST_2_SIXMONTHS',
-									boxLabel: PT.i18n.last_2_sixmonths
+									boxLabel: NS.i18n.last_2_sixmonths
 								}
 							]
 						},
@@ -3121,7 +3123,7 @@ Ext.onReady( function() {
 								listeners: {
 									added: function(chb) {
 										if (chb.xtype === 'checkbox') {
-											pt.cmp.dimension.relativePeriod.checkbox.push(chb);
+											ns.cmp.dimension.relativePeriod.checkbox.push(chb);
 											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
 										}
 									},
@@ -3133,18 +3135,18 @@ Ext.onReady( function() {
 							items: [
 								{
 									xtype: 'label',
-									text: PT.i18n.financial_years,
-									cls: 'pt-label-period-heading'
+									text: NS.i18n.financial_years,
+									cls: 'ns-label-period-heading'
 								},
 								{
 									xtype: 'checkbox',
 									relativePeriodId: 'LAST_FINANCIAL_YEAR',
-									boxLabel: PT.i18n.last_financial_year
+									boxLabel: NS.i18n.last_financial_year
 								},
 								{
 									xtype: 'checkbox',
 									relativePeriodId: 'LAST_5_FINANCIAL_YEARS',
-									boxLabel: PT.i18n.last_5_financial_years
+									boxLabel: NS.i18n.last_5_financial_years
 								}
 							]
 						}
@@ -3160,8 +3162,8 @@ Ext.onReady( function() {
 							//items: [
 								//{
 									//xtype: 'label',
-									//text: 'Options',
-									//cls: 'pt-label-period-heading-options'
+									//text: 'Onsions',
+									//cls: 'ns-label-period-heading-onsions'
 								//},
 								//rewind
 							//]
@@ -3183,7 +3185,7 @@ Ext.onReady( function() {
 								listeners: {
 									added: function(chb) {
 										if (chb.xtype === 'checkbox') {
-											pt.cmp.dimension.relativePeriod.checkbox.push(chb);
+											ns.cmp.dimension.relativePeriod.checkbox.push(chb);
 											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
 										}
 									},
@@ -3195,23 +3197,23 @@ Ext.onReady( function() {
 							items: [
 								{
 									xtype: 'label',
-									text: PT.i18n.years,
-									cls: 'pt-label-period-heading'
+									text: NS.i18n.years,
+									cls: 'ns-label-period-heading'
 								},
 								{
 									xtype: 'checkbox',
 									relativePeriodId: 'THIS_YEAR',
-									boxLabel: PT.i18n.this_year
+									boxLabel: NS.i18n.this_year
 								},
 								{
 									xtype: 'checkbox',
 									relativePeriodId: 'LAST_YEAR',
-									boxLabel: PT.i18n.last_year
+									boxLabel: NS.i18n.last_year
 								},
 								{
 									xtype: 'checkbox',
 									relativePeriodId: 'LAST_5_YEARS',
-									boxLabel: PT.i18n.last_5_years
+									boxLabel: NS.i18n.last_5_years
 								}
 							]
 						}
@@ -3221,17 +3223,17 @@ Ext.onReady( function() {
 		};
 
 		fixedPeriodAvailable = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'pt-toolbar-multiselect-left',
-			width: (pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding) / 2,
+			cls: 'ns-toolbar-multiselect-left',
+			width: (ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding) / 2,
 			height: 180,
 			valueField: 'id',
 			displayField: 'name',
-			store: pt.store.fixedPeriodAvailable,
+			store: ns.store.fixedPeriodAvailable,
 			tbar: [
 				{
 					xtype: 'label',
-					text: PT.i18n.available,
-					cls: 'pt-toolbar-multiselect-left-label'
+					text: NS.i18n.available,
+					cls: 'ns-toolbar-multiselect-left-label'
 				},
 				'->',
 				{
@@ -3239,7 +3241,7 @@ Ext.onReady( function() {
 					icon: 'images/arrowright.png',
 					width: 22,
 					handler: function() {
-						pt.util.multiselect.select(fixedPeriodAvailable, fixedPeriodSelected);
+						ns.util.multiselect.select(fixedPeriodAvailable, fixedPeriodSelected);
 					}
 				},
 				{
@@ -3247,7 +3249,7 @@ Ext.onReady( function() {
 					icon: 'images/arrowrightdouble.png',
 					width: 22,
 					handler: function() {
-						pt.util.multiselect.selectAll(fixedPeriodAvailable, fixedPeriodSelected, true);
+						ns.util.multiselect.selectAll(fixedPeriodAvailable, fixedPeriodSelected, true);
 					}
 				},
 				' '
@@ -3255,20 +3257,20 @@ Ext.onReady( function() {
 			listeners: {
 				afterrender: function() {
 					this.boundList.on('itemdblclick', function() {
-						pt.util.multiselect.select(fixedPeriodAvailable, fixedPeriodSelected);
+						ns.util.multiselect.select(fixedPeriodAvailable, fixedPeriodSelected);
 					}, this);
 				}
 			}
 		});
 
 		fixedPeriodSelected = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'pt-toolbar-multiselect-right',
-			width: (pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding) / 2,
+			cls: 'ns-toolbar-multiselect-right',
+			width: (ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding) / 2,
 			height: 180,
 			valueField: 'id',
 			displayField: 'name',
 			ddReorder: false,
-			store: pt.store.fixedPeriodSelected,
+			store: ns.store.fixedPeriodSelected,
 			tbar: [
 				' ',
 				{
@@ -3276,7 +3278,7 @@ Ext.onReady( function() {
 					icon: 'images/arrowleftdouble.png',
 					width: 22,
 					handler: function() {
-						pt.util.multiselect.unselectAll(fixedPeriodAvailable, fixedPeriodSelected);
+						ns.util.multiselect.unselectAll(fixedPeriodAvailable, fixedPeriodSelected);
 					}
 				},
 				{
@@ -3284,20 +3286,20 @@ Ext.onReady( function() {
 					icon: 'images/arrowleft.png',
 					width: 22,
 					handler: function() {
-						pt.util.multiselect.unselect(fixedPeriodAvailable, fixedPeriodSelected);
+						ns.util.multiselect.unselect(fixedPeriodAvailable, fixedPeriodSelected);
 					}
 				},
 				'->',
 				{
 					xtype: 'label',
-					text: PT.i18n.selected,
-					cls: 'pt-toolbar-multiselect-right-label'
+					text: NS.i18n.selected,
+					cls: 'ns-toolbar-multiselect-right-label'
 				}
 			],
 			listeners: {
 				afterrender: function() {
 					this.boundList.on('itemdblclick', function() {
-						pt.util.multiselect.unselect(fixedPeriodAvailable, fixedPeriodSelected);
+						ns.util.multiselect.unselect(fixedPeriodAvailable, fixedPeriodSelected);
 					}, this);
 				}
 			}
@@ -3305,16 +3307,16 @@ Ext.onReady( function() {
 
 		period = {
 			xtype: 'panel',
-			title: '<div class="pt-panel-title-period">Periods</div>',
+			title: '<div class="ns-panel-title-period">Periods</div>',
 			hideCollapseTool: true,
 			getDimension: function() {
 				var config = {
-						dimension: pt.conf.finals.dimension.period.objectName,
+						dimension: ns.conf.finals.dimension.period.objectName,
 						items: []
 					},
-					chb = pt.cmp.dimension.relativePeriod.checkbox;
+					chb = ns.cmp.dimension.relativePeriod.checkbox;
 
-				pt.store.fixedPeriodSelected.each( function(r) {
+				ns.store.fixedPeriodSelected.each( function(r) {
 					config.items.push({
 						id: r.data.id,
 						name: r.data.name
@@ -3333,13 +3335,13 @@ Ext.onReady( function() {
 				return config.items.length ? config : null;
 			},
 			onExpand: function() {
-				var h = pt.viewport.westRegion.hasScrollbar ?
-					pt.conf.layout.west_scrollbarheight_accordion_period : pt.conf.layout.west_maxheight_accordion_period;
-				pt.util.dimension.panel.setHeight(h);
-				pt.util.multiselect.setHeight(
+				var h = ns.viewport.westRegion.hasScrollbar ?
+					ns.conf.layout.west_scrollbarheight_accordion_period : ns.conf.layout.west_maxheight_accordion_period;
+				ns.util.dimension.panel.setHeight(h);
+				ns.util.multiselect.setHeight(
 					[fixedPeriodAvailable, fixedPeriodSelected],
 					this,
-					pt.conf.layout.west_fill_accordion_period
+					ns.conf.layout.west_fill_accordion_period
 				);
 			},
 			items: [
@@ -3351,36 +3353,36 @@ Ext.onReady( function() {
 					items: [
 						{
 							xtype: 'combobox',
-							cls: 'pt-combo',
+							cls: 'ns-combo',
 							style: 'margin-bottom:2px',
-							width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding - 62 - 62 - 4,
+							width: ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding - 62 - 62 - 4,
 							valueField: 'id',
 							displayField: 'name',
-							emptyText: PT.i18n.select_period_type,
+							emnsyText: NS.i18n.select_period_type,
 							editable: false,
 							queryMode: 'remote',
-							store: pt.store.periodType,
+							store: ns.store.periodType,
 							periodOffset: 0,
 							listeners: {
 								select: function() {
-									var ptype = new PeriodType(),
+									var nsype = new PeriodType(),
 										periodType = this.getValue();
 
-									var periods = ptype.get(periodType).generatePeriods({
+									var periods = nsype.get(periodType).generatePeriods({
 										offset: this.periodOffset,
 										filterFuturePeriods: true,
 										reversePeriods: true
 									});
 
-									pt.store.fixedPeriodAvailable.setIndex(periods);
-									pt.store.fixedPeriodAvailable.loadData(periods);
-									pt.util.multiselect.filterAvailable(fixedPeriodAvailable, fixedPeriodSelected);
+									ns.store.fixedPeriodAvailable.setIndex(periods);
+									ns.store.fixedPeriodAvailable.loadData(periods);
+									ns.util.multiselect.filterAvailable(fixedPeriodAvailable, fixedPeriodSelected);
 								}
 							}
 						},
 						{
 							xtype: 'button',
-							text: PT.i18n.prev_year,
+							text: NS.i18n.prev_year,
 							style: 'margin-left:2px; border-radius:2px',
 							height: 24,
 							handler: function() {
@@ -3393,7 +3395,7 @@ Ext.onReady( function() {
 						},
 						{
 							xtype: 'button',
-							text: PT.i18n.next_year,
+							text: NS.i18n.next_year,
 							style: 'margin-left:2px; border-radius:2px',
 							height: 24,
 							handler: function() {
@@ -3419,7 +3421,7 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				added: function() {
-					pt.cmp.dimension.panels.push(this);
+					ns.cmp.dimension.panels.push(this);
 				},
 				expand: function(p) {
 					p.onExpand();
@@ -3428,22 +3430,22 @@ Ext.onReady( function() {
 		};
 
 		treePanel = Ext.create('Ext.tree.Panel', {
-			cls: 'pt-tree',
+			cls: 'ns-tree',
 			style: 'border-top: 1px solid #ddd; padding-top: 1px',
-			width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding,
+			width: ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding,
 			rootVisible: false,
 			autoScroll: true,
 			multiSelect: true,
 			rendered: false,
 			reset: function() {
-				var rootNode = this.getRootNode().findChild('id', pt.init.rootNodes[0].id);
+				var rootNode = this.getRootNode().findChild('id', ns.init.rootNodes[0].id);
 				this.collapseAll();
 				this.expandPath(rootNode.getPath());
 				this.getSelectionModel().select(rootNode);
 			},
 			selectRootIf: function() {
 				if (this.getSelectionModel().getSelection().length < 1) {
-					var node = this.getRootNode().findChild('id', pt.init.rootNodes[0].id);
+					var node = this.getRootNode().findChild('id', ns.init.rootNodes[0].id);
 					if (this.rendered) {
 						this.getSelectionModel().select(node);
 					}
@@ -3464,7 +3466,7 @@ Ext.onReady( function() {
 				}
 			},
 			multipleExpand: function(id, path, doUpdate) {
-				var rootId = pt.conf.finals.root.id;
+				var rootId = ns.conf.finals.root.id;
 
 				if (path.substr(0, rootId.length + 1) !== ('/' + rootId)) {
 					path = '/' + rootId + path;
@@ -3508,7 +3510,7 @@ Ext.onReady( function() {
 				return map;
 			},
 			selectGraphMap: function(map, doUpdate) {
-				this.numberOfRecords = pt.support.prototype.object.getLength(map);
+				this.numberOfRecords = ns.support.prototype.object.getLength(map);
 
 				for (var key in map) {
 					if (map.hasOwnProperty(key)) {
@@ -3519,12 +3521,12 @@ Ext.onReady( function() {
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
-					url: pt.init.contextPath + pt.conf.finals.url.path_module + pt.conf.finals.url.organisationunitchildren_get
+					url: ns.init.contextPath + ns.conf.finals.url.path_module + ns.conf.finals.url.organisationunitchildren_get
 				},
 				root: {
-					id: pt.conf.finals.root.id,
+					id: ns.conf.finals.root.id,
 					expanded: true,
-					children: pt.init.rootNodes
+					children: ns.init.rootNodes
 				}
 			}),
 			xable: function(values) {
@@ -3547,7 +3549,7 @@ Ext.onReady( function() {
 					treePanel.tmpSelection = treePanel.getParentGraphMap();
 				},
 				added: function() {
-					pt.cmp.dimension.organisationUnit.treepanel = this;
+					ns.cmp.dimension.organisationUnit.treepanel = this;
 				},
 				render: function() {
 					this.rendered = true;
@@ -3569,7 +3571,7 @@ Ext.onReady( function() {
 					if (!r.data.leaf) {
 						v.menu.add({
 							id: 'treepanel-contextmenu-item',
-							text: PT.i18n.select_all_children,
+							text: NS.i18n.select_all_children,
 							icon: 'images/node-select-child.png',
 							handler: function() {
 								r.expand(false, function() {
@@ -3591,8 +3593,8 @@ Ext.onReady( function() {
 		userOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
 			columnWidth: 0.28,
 			style: 'padding-top:2px; padding-left:3px; margin-bottom:0',
-			boxLabel: PT.i18n.user_organisation_unit,
-			labelWidth: pt.conf.layout.form_label_width,
+			boxLabel: NS.i18n.user_organisation_unit,
+			labelWidth: ns.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnitChildren.getValue(), userOrganisationUnitGrandChildren.getValue()]);
 			}
@@ -3601,8 +3603,8 @@ Ext.onReady( function() {
 		userOrganisationUnitChildren = Ext.create('Ext.form.field.Checkbox', {
 			columnWidth: 0.31,
 			style: 'padding-top:2px; margin-bottom:0',
-			boxLabel: PT.i18n.user_organisation_unit_children,
-			labelWidth: pt.conf.layout.form_label_width,
+			boxLabel: NS.i18n.user_organisation_unit_children,
+			labelWidth: ns.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitGrandChildren.getValue()]);
 			}
@@ -3611,40 +3613,40 @@ Ext.onReady( function() {
 		userOrganisationUnitGrandChildren = Ext.create('Ext.form.field.Checkbox', {
 			columnWidth: 0.41,
 			style: 'padding-top:2px; margin-bottom:0',
-			boxLabel: PT.i18n.user_organisation_unit_grandchildren,
-			labelWidth: pt.conf.layout.form_label_width,
+			boxLabel: NS.i18n.user_organisation_unit_grandchildren,
+			labelWidth: ns.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitChildren.getValue()]);
 			}
 		});
 
 		organisationUnitLevel = Ext.create('Ext.form.field.ComboBox', {
-			cls: 'pt-combo',
+			cls: 'ns-combo',
 			multiSelect: true,
 			style: 'margin-bottom:0',
-			width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding - 38,
+			width: ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding - 38,
 			valueField: 'level',
 			displayField: 'name',
-			emptyText: PT.i18n.select_organisation_unit_levels,
+			emnsyText: NS.i18n.select_organisation_unit_levels,
 			editable: false,
 			hidden: true,
 			store: {
 				fields: ['id', 'name', 'level'],
-				data: pt.init.organisationUnitLevels
+				data: ns.init.organisationUnitLevels
 			}
 		});
 
 		organisationUnitGroup = Ext.create('Ext.form.field.ComboBox', {
-			cls: 'pt-combo',
+			cls: 'ns-combo',
 			multiSelect: true,
 			style: 'margin-bottom:0',
-			width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding - 38,
+			width: ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding - 38,
 			valueField: 'id',
 			displayField: 'name',
-			emptyText: PT.i18n.select_organisation_unit_groups,
+			emnsyText: NS.i18n.select_organisation_unit_groups,
 			editable: false,
 			hidden: true,
-			store: pt.store.organisationUnitGroup
+			store: ns.store.organisationUnitGroup
 		});
 
 		toolMenu = Ext.create('Ext.menu.Menu', {
@@ -3663,10 +3665,10 @@ Ext.onReady( function() {
 				for (var i = 0; i < items.length; i++) {
 					if (items[i].setIconCls) {
 						if (items[i].param === param) {
-							items[i].setIconCls('pt-menu-item-selected');
+							items[i].setIconCls('ns-menu-item-selected');
 						}
 						else {
-							items[i].setIconCls('pt-menu-item-unselected');
+							items[i].setIconCls('ns-menu-item-unselected');
 						}
 					}
 				}
@@ -3707,24 +3709,24 @@ Ext.onReady( function() {
 					style: 'padding:7px 5px 5px 7px; font-weight:bold; border:0 none'
 				},
 				{
-					text: PT.i18n.select_organisation_units + '&nbsp;&nbsp;',
+					text: NS.i18n.select_organisation_units + '&nbsp;&nbsp;',
 					param: 'orgunit',
-					iconCls: 'pt-menu-item-selected'
+					iconCls: 'ns-menu-item-selected'
 				},
 				{
 					text: 'Select levels' + '&nbsp;&nbsp;',
 					param: 'level',
-					iconCls: 'pt-menu-item-unselected'
+					iconCls: 'ns-menu-item-unselected'
 				},
 				{
 					text: 'Select groups' + '&nbsp;&nbsp;',
 					param: 'group',
-					iconCls: 'pt-menu-item-unselected'
+					iconCls: 'ns-menu-item-unselected'
 				}
 			],
 			listeners: {
 				afterrender: function() {
-					this.getEl().addCls('pt-btn-menu');
+					this.getEl().addCls('ns-btn-menu');
 				},
 				click: function(menu, item) {
 					this.clickHandler(item.param);
@@ -3733,8 +3735,8 @@ Ext.onReady( function() {
 		});
 
 		tool = Ext.create('Ext.button.Button', {
-			cls: 'pt-button-organisationunitselection',
-			iconCls: 'pt-button-icon-gear',
+			cls: 'ns-button-organisationunitselection',
+			iconCls: 'ns-button-icon-gear',
 			width: 36,
 			height: 24,
 			menu: toolMenu
@@ -3749,14 +3751,14 @@ Ext.onReady( function() {
 
 		organisationUnit = {
 			xtype: 'panel',
-			title: '<div class="pt-panel-title-organisationunit">' + PT.i18n.organisation_units + '</div>',
+			title: '<div class="ns-panel-title-organisationunit">' + NS.i18n.organisation_units + '</div>',
 			bodyStyle: 'padding:2px',
 			hideCollapseTool: true,
 			collapsed: false,
 			getDimension: function() {
 				var r = treePanel.getSelectionModel().getSelection(),
 					config = {
-						dimension: pt.conf.finals.dimension.organisationUnit.objectName,
+						dimension: ns.conf.finals.dimension.organisationUnit.objectName,
 						items: []
 					};
 
@@ -3825,10 +3827,10 @@ Ext.onReady( function() {
 				return config.items.length ? config : null;
 			},
             onExpand: function() {
-                var h = pt.viewport.westRegion.hasScrollbar ?
-                    pt.conf.layout.west_scrollbarheight_accordion_organisationunit : pt.conf.layout.west_maxheight_accordion_organisationunit;
-                pt.util.dimension.panel.setHeight(h);
-                treePanel.setHeight(this.getHeight() - pt.conf.layout.west_fill_accordion_organisationunit);
+                var h = ns.viewport.westRegion.hasScrollbar ?
+                    ns.conf.layout.west_scrollbarheight_accordion_organisationunit : ns.conf.layout.west_maxheight_accordion_organisationunit;
+                ns.util.dimension.panel.setHeight(h);
+                treePanel.setHeight(this.getHeight() - ns.conf.layout.west_fill_accordion_organisationunit);
             },
             items: [
                 {
@@ -3838,7 +3840,7 @@ Ext.onReady( function() {
                     items: [
                         toolPanel,
                         {
-                            width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding - 38,
+                            width: ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding - 38,
                             layout: 'column',
                             bodyStyle: 'border:0 none',
                             items: [
@@ -3855,7 +3857,7 @@ Ext.onReady( function() {
             ],
             listeners: {
                 added: function() {
-                    pt.cmp.dimension.panels.push(this);
+                    ns.cmp.dimension.panels.push(this);
                 },
                 expand: function(p) {
                     p.onExpand();
@@ -3875,7 +3877,7 @@ Ext.onReady( function() {
 					fields: ['id', 'name'],
 					proxy: {
 						type: 'ajax',
-						url: pt.init.contextPath + '/api/dimensions/' + dimension.id + '.json',
+						url: ns.init.contextPath + '/api/dimensions/' + dimension.id + '.json',
 						reader: {
 							type: 'json',
 							root: 'items'
@@ -3889,14 +3891,14 @@ Ext.onReady( function() {
 					reset: function() {
 						if (this.isLoaded) {
 							this.removeAll();
-							pt.support.storage.load(this);
+							ns.support.storage.load(this);
 							this.sortStore();
 						}
 					},
 					listeners: {
 						load: function(s) {
 							s.isLoaded = true;
-							pt.support.storage.add(s);
+							ns.support.storage.add(s);
 						}
 					}
 				});
@@ -3922,16 +3924,16 @@ Ext.onReady( function() {
 
 				getAvailable = function(availableStore) {
 					return Ext.create('Ext.ux.form.MultiSelect', {
-						cls: 'pt-toolbar-multiselect-left',
-						width: (pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding) / 2,
+						cls: 'ns-toolbar-multiselect-left',
+						width: (ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding) / 2,
 						valueField: 'id',
 						displayField: 'name',
 						store: availableStore,
 						tbar: [
 							{
 								xtype: 'label',
-								text: PT.i18n.available,
-								cls: 'pt-toolbar-multiselect-left-label'
+								text: NS.i18n.available,
+								cls: 'ns-toolbar-multiselect-left-label'
 							},
 							'->',
 							{
@@ -3939,7 +3941,7 @@ Ext.onReady( function() {
 								icon: 'images/arrowright.png',
 								width: 22,
 								handler: function() {
-									pt.util.multiselect.select(available, selected);
+									ns.util.multiselect.select(available, selected);
 								}
 							},
 							{
@@ -3947,14 +3949,14 @@ Ext.onReady( function() {
 								icon: 'images/arrowrightdouble.png',
 								width: 22,
 								handler: function() {
-									pt.util.multiselect.selectAll(available, selected);
+									ns.util.multiselect.selectAll(available, selected);
 								}
 							}
 						],
 						listeners: {
 							afterrender: function() {
 								this.boundList.on('itemdblclick', function() {
-									pt.util.multiselect.select(available, selected);
+									ns.util.multiselect.select(available, selected);
 								}, this);
 							}
 						}
@@ -3963,8 +3965,8 @@ Ext.onReady( function() {
 
 				getSelected = function(selectedStore) {
 					return Ext.create('Ext.ux.form.MultiSelect', {
-						cls: 'pt-toolbar-multiselect-right',
-						width: (pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding) / 2,
+						cls: 'ns-toolbar-multiselect-right',
+						width: (ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding) / 2,
 						valueField: 'id',
 						displayField: 'name',
 						ddReorder: true,
@@ -3975,7 +3977,7 @@ Ext.onReady( function() {
 								icon: 'images/arrowleftdouble.png',
 								width: 22,
 								handler: function() {
-									pt.util.multiselect.unselectAll(available, selected);
+									ns.util.multiselect.unselectAll(available, selected);
 								}
 							},
 							{
@@ -3983,20 +3985,20 @@ Ext.onReady( function() {
 								icon: 'images/arrowleft.png',
 								width: 22,
 								handler: function() {
-									pt.util.multiselect.unselect(available, selected);
+									ns.util.multiselect.unselect(available, selected);
 								}
 							},
 							'->',
 							{
 								xtype: 'label',
-								text: PT.i18n.selected,
-								cls: 'pt-toolbar-multiselect-right-label'
+								text: NS.i18n.selected,
+								cls: 'ns-toolbar-multiselect-right-label'
 							}
 						],
 						listeners: {
 							afterrender: function() {
 								this.boundList.on('itemdblclick', function() {
-									pt.util.multiselect.unselect(available, selected);
+									ns.util.multiselect.unselect(available, selected);
 								}, this);
 							}
 						}
@@ -4013,7 +4015,7 @@ Ext.onReady( function() {
 				selected = getSelected(selectedStore);
 
 				availableStore.on('load', function() {
-					pt.util.multiselect.filterAvailable(available, selected);
+					ns.util.multiselect.filterAvailable(available, selected);
 				});
 
 				panel = {
@@ -4039,14 +4041,14 @@ Ext.onReady( function() {
 							availableStore.load();
 						}
 
-						var h = pt.viewport.westRegion.hasScrollbar ?
-							pt.conf.layout.west_scrollbarheight_accordion_group : pt.conf.layout.west_maxheight_accordion_group;
-						pt.util.dimension.panel.setHeight(h);
+						var h = ns.viewport.westRegion.hasScrollbar ?
+							ns.conf.layout.west_scrollbarheight_accordion_group : ns.conf.layout.west_maxheight_accordion_group;
+						ns.util.dimension.panel.setHeight(h);
 
-						pt.util.multiselect.setHeight(
+						ns.util.multiselect.setHeight(
 							[available, selected],
 							this,
-							pt.conf.layout.west_fill_accordion_dataset
+							ns.conf.layout.west_fill_accordion_dataset
 						);
 					},
 					items: [
@@ -4062,7 +4064,7 @@ Ext.onReady( function() {
 					],
 					listeners: {
 						added: function() {
-							pt.cmp.dimension.panels.push(this);
+							ns.cmp.dimension.panels.push(this);
 						},
 						expand: function(p) {
 							p.onExpand();
@@ -4089,20 +4091,20 @@ Ext.onReady( function() {
 		};
 
 		update = function() {
-			var config = pt.engine.getLayoutConfig(),
-				layout = pt.api.layout.Layout(config);
+			var config = ns.engine.getLayoutConfig(),
+				layout = ns.api.layout.Layout(config);
 
 			if (!layout) {
 				return;
 			}
 
-			pt.engine.createTable(layout, pt);
+			ns.engine.createTable(layout, ns);
 		};
 
 		accordionBody = Ext.create('Ext.panel.Panel', {
 			layout: 'accordion',
 			activeOnTop: true,
-			cls: 'pt-accordion',
+			cls: 'ns-accordion',
 			bodyStyle: 'border:0 none; margin-bottom:2px',
 			height: 700,
 			items: function() {
@@ -4113,14 +4115,14 @@ Ext.onReady( function() {
 					period,
 					organisationUnit
 				],
-				dims = Ext.clone(pt.init.dimensions);
+				dims = Ext.clone(ns.init.dimensions);
 
-				pt.support.prototype.array.sortObjectsByObjectKey(dims);
+				ns.support.prototype.array.sortObjectsByObjectKey(dims);
 
-				panels = panels.concat(getDimensionPanels(dims, 'pt-panel-title-dimension'));
+				panels = panels.concat(getDimensionPanels(dims, 'ns-panel-title-dimension'));
 
 				last = panels[panels.length - 1];
-				last.cls = 'pt-accordion-last';
+				last.cls = 'ns-accordion-last';
 
 				return panels;
 			}()
@@ -4131,7 +4133,7 @@ Ext.onReady( function() {
 			items: accordionBody,
 			listeners: {
 				added: function() {
-					pt.cmp.dimension.accordion = this;
+					ns.cmp.dimension.accordion = this;
 				}
 			}
 		});
@@ -4143,13 +4145,13 @@ Ext.onReady( function() {
 			collapseMode: 'mini',
 			width: function() {
 				if (Ext.isWebKit) {
-					return pt.conf.layout.west_width + 8;
+					return ns.conf.layout.west_width + 8;
 				}
 				else {
 					if (Ext.isLinux && Ext.isGecko) {
-						return pt.conf.layout.west_width + 13;
+						return ns.conf.layout.west_width + 13;
 					}
-					return pt.conf.layout.west_width + 17;
+					return ns.conf.layout.west_width + 17;
 				}
 			}(),
 			items: accordion
@@ -4159,23 +4161,23 @@ Ext.onReady( function() {
 			text: 'Layout',
 			menu: {},
 			handler: function() {
-				if (!pt.viewport.layoutWindow) {
-					pt.viewport.layoutWindow = PT.app.LayoutWindow(pt);
+				if (!ns.viewport.layoutWindow) {
+					ns.viewport.layoutWindow = NS.app.LayoutWindow(ns);
 				}
 
-				pt.viewport.layoutWindow.show();
+				ns.viewport.layoutWindow.show();
 			}
 		});
 
-		optionsButton = Ext.create('Ext.button.Button', {
-			text: 'Options',
+		onsionsButton = Ext.create('Ext.button.Button', {
+			text: 'Onsions',
 			menu: {},
 			handler: function() {
-				if (!pt.viewport.optionsWindow) {
-					pt.viewport.optionsWindow = PT.app.OptionsWindow();
+				if (!ns.viewport.onsionsWindow) {
+					ns.viewport.onsionsWindow = NS.app.OnsionsWindow();
 				}
 
-				pt.viewport.optionsWindow.show();
+				ns.viewport.onsionsWindow.show();
 			}
 		});
 
@@ -4183,19 +4185,19 @@ Ext.onReady( function() {
 			text: 'Favorites',
 			menu: {},
 			handler: function() {
-				if (pt.viewport.favoriteWindow) {
-					pt.viewport.favoriteWindow.destroy();
+				if (ns.viewport.favoriteWindow) {
+					ns.viewport.favoriteWindow.destroy();
 				}
 
-				pt.viewport.favoriteWindow = PT.app.FavoriteWindow();
-				pt.viewport.favoriteWindow.show();
+				ns.viewport.favoriteWindow = NS.app.FavoriteWindow();
+				ns.viewport.favoriteWindow.show();
 			}
 		});
 
 		openTableLayoutTab = function(type, isNewTab) {
-			if (pt.init.contextPath && pt.paramString) {
-				var url = pt.init.contextPath + '/api/analytics.' + type + pt.engine.getParamString(pt.xLayout);
-				url += '&tableLayout=true&columns=' + pt.xLayout.columnDimensionNames.join(';') + '&rows=' + pt.xLayout.rowDimensionNames.join(';');
+			if (ns.init.contextPath && ns.paramString) {
+				var url = ns.init.contextPath + '/api/analytics.' + type + ns.engine.getParamString(ns.xLayout);
+				url += '&tableLayout=true&columns=' + ns.xLayout.columnDimensionNames.join(';') + '&rows=' + ns.xLayout.rowDimensionNames.join(';');
 
 				window.open(url, isNewTab ? '_blank' : '_top');
 			}
@@ -4205,106 +4207,106 @@ Ext.onReady( function() {
 			text: 'Download',
 			disabled: true,
 			menu: {
-				cls: 'pt-menu',
+				cls: 'ns-menu',
 				shadow: false,
 				showSeparator: false,
 				items: [
 					{
 						xtype: 'label',
-						text: PT.i18n.table_layout,
+						text: NS.i18n.table_layout,
 						style: 'padding:7px 5px 5px 7px; font-weight:bold; border:0 none'
 					},
 					{
 						text: 'Microsoft Excel (.xls)',
-						iconCls: 'pt-menu-item-tablelayout',
+						iconCls: 'ns-menu-item-tablelayout',
 						handler: function() {
 							openTableLayoutTab('xls');
 						}
 					},
 					{
 						text: 'CSV (.csv)',
-						iconCls: 'pt-menu-item-tablelayout',
+						iconCls: 'ns-menu-item-tablelayout',
 						handler: function() {
 							openTableLayoutTab('csv');
 						}
 					},
 					{
 						text: 'HTML (.html)',
-						iconCls: 'pt-menu-item-tablelayout',
+						iconCls: 'ns-menu-item-tablelayout',
 						handler: function() {
 							openTableLayoutTab('html', true);
 						}
 					},
 					{
 						xtype: 'label',
-						text: PT.i18n.plain_data_sources,
+						text: NS.i18n.plain_data_sources,
 						style: 'padding:7px 5px 5px 7px; font-weight:bold'
 					},
 					{
 						text: 'JSON',
-						iconCls: 'pt-menu-item-datasource',
+						iconCls: 'ns-menu-item-datasource',
 						handler: function() {
-							if (pt.init.contextPath && pt.paramString) {
-								window.open(pt.init.contextPath + '/api/analytics.json' + pt.paramString, '_blank');
+							if (ns.init.contextPath && ns.paramString) {
+								window.open(ns.init.contextPath + '/api/analytics.json' + ns.paramString, '_blank');
 							}
 						}
 					},
 					{
 						text: 'XML',
-						iconCls: 'pt-menu-item-datasource',
+						iconCls: 'ns-menu-item-datasource',
 						handler: function() {
-							if (pt.init.contextPath && pt.paramString) {
-								window.open(pt.init.contextPath + '/api/analytics.xml' + pt.paramString, '_blank');
+							if (ns.init.contextPath && ns.paramString) {
+								window.open(ns.init.contextPath + '/api/analytics.xml' + ns.paramString, '_blank');
 							}
 						}
 					},
 					{
 						text: 'Microsoft Excel',
-						iconCls: 'pt-menu-item-datasource',
+						iconCls: 'ns-menu-item-datasource',
 						handler: function() {
-							if (pt.init.contextPath && pt.paramString) {
-								window.location.href = pt.init.contextPath + '/api/analytics.xls' + pt.paramString;
+							if (ns.init.contextPath && ns.paramString) {
+								window.location.href = ns.init.contextPath + '/api/analytics.xls' + ns.paramString;
 							}
 						}
 					},
 					{
 						text: 'CSV',
-						iconCls: 'pt-menu-item-datasource',
+						iconCls: 'ns-menu-item-datasource',
 						handler: function() {
-							if (pt.init.contextPath && pt.paramString) {
-								window.location.href = pt.init.contextPath + '/api/analytics.csv' + pt.paramString;
+							if (ns.init.contextPath && ns.paramString) {
+								window.location.href = ns.init.contextPath + '/api/analytics.csv' + ns.paramString;
 							}
 						}
 					},
 					{
 						text: 'JRXML',
-						iconCls: 'pt-menu-item-datasource',
+						iconCls: 'ns-menu-item-datasource',
 						handler: function() {
-							if (pt.init.contextPath && pt.paramString) {
-								window.open(pt.init.contextPath + '/api/analytics.jrxml' + pt.paramString, '_blank');
+							if (ns.init.contextPath && ns.paramString) {
+								window.open(ns.init.contextPath + '/api/analytics.jrxml' + ns.paramString, '_blank');
 							}
 						}
 					}
 				],
 				listeners: {
 					afterrender: function() {
-						this.getEl().addCls('pt-toolbar-btn-menu');
+						this.getEl().addCls('ns-toolbar-btn-menu');
 					}
 				}
 			}
 		});
 
 		interpretationButton = Ext.create('Ext.button.Button', {
-			text: PT.i18n.share,
+			text: NS.i18n.share,
 			menu: {},
 			disabled: true,
 			xable: function() {
-				if (pt.favorite) {
+				if (ns.favorite) {
 					this.enable();
 					this.disabledTooltip.destroy();
 				}
 				else {
-					if (pt.xLayout) {
+					if (ns.xLayout) {
 						this.disable();
 						this.createTooltip();
 					}
@@ -4314,26 +4316,26 @@ Ext.onReady( function() {
 			createTooltip: function() {
 				this.disabledTooltip = Ext.create('Ext.tip.ToolTip', {
 					target: this.getEl(),
-					html: PT.i18n.save_load_favorite_before_sharing,
+					html: NS.i18n.save_load_favorite_before_sharing,
 					'anchor': 'bottom'
 				});
 			},
 			handler: function() {
-				if (pt.viewport.interpretationWindow) {
-					pt.viewport.interpretationWindow.destroy();
+				if (ns.viewport.interpretationWindow) {
+					ns.viewport.interpretationWindow.destroy();
 				}
 
-				pt.viewport.interpretationWindow = PT.app.InterpretationWindow();
+				ns.viewport.interpretationWindow = NS.app.InterpretationWindow();
 
-				if (pt.viewport.interpretationWindow) {
-					pt.viewport.interpretationWindow.show();
+				if (ns.viewport.interpretationWindow) {
+					ns.viewport.interpretationWindow.show();
 				}
 			}
 		});
 
 		defaultButton = Ext.create('Ext.button.Button', {
-			text: PT.i18n.table,
-			iconCls: 'pt-button-icon-table',
+			text: NS.i18n.table,
+			iconCls: 'ns-button-icon-table',
 			toggleGroup: 'module',
 			pressed: true,
 			handler: function() {
@@ -4363,13 +4365,13 @@ Ext.onReady( function() {
 						}
 					},
 					{
-						text: '<b>' + PT.i18n.update + '</b>',
+						text: '<b>' + NS.i18n.update + '</b>',
 						handler: function() {
 							update();
 						}
 					},
 					layoutButton,
-					optionsButton,
+					onsionsButton,
 					{
 						xtype: 'tbseparator',
 						height: 18,
@@ -4381,8 +4383,8 @@ Ext.onReady( function() {
 					'->',
 					defaultButton,
 					{
-						text: PT.i18n.chart,
-						iconCls: 'pt-button-icon-chart',
+						text: NS.i18n.chart,
+						iconCls: 'ns-button-icon-chart',
 						toggleGroup: 'module',
 						menu: {},
 						handler: function(b) {
@@ -4393,35 +4395,35 @@ Ext.onReady( function() {
 								items: [
 									{
 										text: 'Go to charts' + '&nbsp;&nbsp;', //i18n
-										cls: 'pt-menu-item-noicon',
+										cls: 'ns-menu-item-noicon',
 										handler: function() {
-											window.location.href = pt.init.contextPath + '/dhis-web-visualizer/app/index.html';
+											window.location.href = ns.init.contextPath + '/dhis-web-visualizer/app/index.html';
 										}
 									},
 									'-',
 									{
 										text: 'Open this table as chart' + '&nbsp;&nbsp;', //i18n
-										cls: 'pt-menu-item-noicon',
-										disabled: !(PT.isSessionStorage && pt.layout),
+										cls: 'ns-menu-item-noicon',
+										disabled: !(NS.isSessionStorage && ns.layout),
 										handler: function() {
-											if (PT.isSessionStorage) {
-												pt.layout.parentGraphMap = treePanel.getParentGraphMap();
-												pt.engine.setSessionStorage('analytical', pt.layout, pt.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
+											if (NS.isSessionStorage) {
+												ns.layout.parentGraphMap = treePanel.getParentGraphMap();
+												ns.engine.setSessionStorage('analytical', ns.layout, ns.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
 											}
 										}
 									},
 									{
 										text: 'Open last chart' + '&nbsp;&nbsp;', //i18n
-										cls: 'pt-menu-item-noicon',
-										disabled: !(PT.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['chart']),
+										cls: 'ns-menu-item-noicon',
+										disabled: !(NS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['chart']),
 										handler: function() {
-											window.location.href = pt.init.contextPath + '/dhis-web-visualizer/app/index.html?s=chart';
+											window.location.href = ns.init.contextPath + '/dhis-web-visualizer/app/index.html?s=chart';
 										}
 									}
 								],
 								listeners: {
 									show: function() {
-										pt.util.window.setAnchorPosition(b.menu, b);
+										ns.util.window.setAnchorPosition(b.menu, b);
 									},
 									hide: function() {
 										b.menu.destroy();
@@ -4437,8 +4439,8 @@ Ext.onReady( function() {
 						}
 					},
 					{
-						text: PT.i18n.map,
-						iconCls: 'pt-button-icon-map',
+						text: NS.i18n.map,
+						iconCls: 'ns-button-icon-map',
 						toggleGroup: 'module',
 						menu: {},
 						handler: function(b) {
@@ -4449,35 +4451,35 @@ Ext.onReady( function() {
 								items: [
 									{
 										text: 'Go to maps' + '&nbsp;&nbsp;', //i18n
-										cls: 'pt-menu-item-noicon',
+										cls: 'ns-menu-item-noicon',
 										handler: function() {
-											window.location.href = pt.init.contextPath + '/dhis-web-mapping/app/index.html';
+											window.location.href = ns.init.contextPath + '/dhis-web-mapping/app/index.html';
 										}
 									},
 									'-',
 									{
 										text: 'Open this table as map' + '&nbsp;&nbsp;', //i18n
-										cls: 'pt-menu-item-noicon',
-										disabled: !(PT.isSessionStorage && pt.layout),
+										cls: 'ns-menu-item-noicon',
+										disabled: !(NS.isSessionStorage && ns.layout),
 										handler: function() {
-											if (PT.isSessionStorage) {
-												pt.layout.parentGraphMap = treePanel.getParentGraphMap();
-												pt.engine.setSessionStorage('analytical', pt.layout, pt.init.contextPath + '/dhis-web-mapping/app/index.html?s=analytical');
+											if (NS.isSessionStorage) {
+												ns.layout.parentGraphMap = treePanel.getParentGraphMap();
+												ns.engine.setSessionStorage('analytical', ns.layout, ns.init.contextPath + '/dhis-web-mapping/app/index.html?s=analytical');
 											}
 										}
 									},
 									{
 										text: 'Open last map' + '&nbsp;&nbsp;', //i18n
-										cls: 'pt-menu-item-noicon',
-										disabled: !(PT.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['map']),
+										cls: 'ns-menu-item-noicon',
+										disabled: !(NS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['map']),
 										handler: function() {
-											window.location.href = pt.init.contextPath + '/dhis-web-mapping/app/index.html?s=chart';
+											window.location.href = ns.init.contextPath + '/dhis-web-mapping/app/index.html?s=chart';
 										}
 									}
 								],
 								listeners: {
 									show: function() {
-										pt.util.window.setAnchorPosition(b.menu, b);
+										ns.util.window.setAnchorPosition(b.menu, b);
 									},
 									hide: function() {
 										b.menu.destroy();
@@ -4499,9 +4501,9 @@ Ext.onReady( function() {
 					},
 					{
 						xtype: 'button',
-						text: PT.i18n.home,
+						text: NS.i18n.home,
 						handler: function() {
-							window.location.href = pt.init.contextPath + '/dhis-web-commons-about/redirect.action';
+							window.location.href = ns.init.contextPath + '/dhis-web-commons-about/redirect.action';
 						}
 					}
 				]
@@ -4512,14 +4514,14 @@ Ext.onReady( function() {
 						html = '';
 
 					html += '<div style="padding:20px">';
-					html += '<div style="font-size:14px; padding-bottom:8px">' + PT.i18n.example1 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + PT.i18n.example2 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + PT.i18n.example3 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + PT.i18n.example4 + '</div>';
-					html += '<div style="font-size:14px; padding-top:20px; padding-bottom:8px">' + PT.i18n.example5 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + PT.i18n.example6 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + PT.i18n.example7 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + PT.i18n.example8 + '</div>';
+					html += '<div style="font-size:14px; padding-bottom:8px">' + NS.i18n.example1 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example2 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example3 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example4 + '</div>';
+					html += '<div style="font-size:14px; padding-top:20px; padding-bottom:8px">' + NS.i18n.example5 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example6 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example7 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example8 + '</div>';
 					html += '</div>';
 
 					p.update(html);
@@ -4529,8 +4531,8 @@ Ext.onReady( function() {
 
 		setGui = function(layout, xLayout, updateGui, isFavorite) {
 			var dimensions = [].concat(layout.columns || [], layout.rows || [], layout.filters || []),
-				dimMap = pt.service.layout.getObjectNameDimensionMapFromDimensionArray(dimensions),
-				recMap = pt.service.layout.getObjectNameDimensionItemsMapFromDimensionArray(dimensions),
+				dimMap = ns.service.layout.getObjectNameDimensionMapFromDimensionArray(dimensions),
+				recMap = ns.service.layout.getObjectNameDimensionItemsMapFromDimensionArray(dimensions),
 				graphMap = layout.parentGraphMap,
 				objectName,
 				periodRecords,
@@ -4556,41 +4558,41 @@ Ext.onReady( function() {
 			}
 
 			// Indicators
-			pt.store.indicatorSelected.removeAll();
+			ns.store.indicatorSelected.removeAll();
 			objectName = dimConf.indicator.objectName;
 			if (dimMap[objectName]) {
-				pt.store.indicatorSelected.add(Ext.clone(recMap[objectName]));
-				pt.util.multiselect.filterAvailable({store: pt.store.indicatorAvailable}, {store: pt.store.indicatorSelected});
+				ns.store.indicatorSelected.add(Ext.clone(recMap[objectName]));
+				ns.util.multiselect.filterAvailable({store: ns.store.indicatorAvailable}, {store: ns.store.indicatorSelected});
 			}
 
 			// Data elements
-			pt.store.dataElementSelected.removeAll();
+			ns.store.dataElementSelected.removeAll();
 			objectName = dimConf.dataElement.objectName;
 			if (dimMap[objectName]) {
-				pt.store.dataElementSelected.add(Ext.clone(recMap[objectName]));
-				pt.util.multiselect.filterAvailable({store: pt.store.dataElementAvailable}, {store: pt.store.dataElementSelected});
+				ns.store.dataElementSelected.add(Ext.clone(recMap[objectName]));
+				ns.util.multiselect.filterAvailable({store: ns.store.dataElementAvailable}, {store: ns.store.dataElementSelected});
 				dataElementDetailLevel.setValue(objectName);
 			}
 
 			// Operands
 			objectName = dimConf.operand.objectName;
 			if (dimMap[objectName]) {
-				pt.store.dataElementSelected.add(Ext.clone(recMap[objectName]));
-				pt.util.multiselect.filterAvailable({store: pt.store.dataElementAvailable}, {store: pt.store.dataElementSelected});
+				ns.store.dataElementSelected.add(Ext.clone(recMap[objectName]));
+				ns.util.multiselect.filterAvailable({store: ns.store.dataElementAvailable}, {store: ns.store.dataElementSelected});
 				dataElementDetailLevel.setValue(objectName);
 			}
 
 			// Data sets
-			pt.store.dataSetSelected.removeAll();
+			ns.store.dataSetSelected.removeAll();
 			objectName = dimConf.dataSet.objectName;
 			if (dimMap[objectName]) {
-				pt.store.dataSetSelected.add(Ext.clone(recMap[objectName]));
-				pt.util.multiselect.filterAvailable({store: pt.store.dataSetAvailable}, {store: pt.store.dataSetSelected});
+				ns.store.dataSetSelected.add(Ext.clone(recMap[objectName]));
+				ns.util.multiselect.filterAvailable({store: ns.store.dataSetAvailable}, {store: ns.store.dataSetSelected});
 			}
 
 			// Periods
-			pt.store.fixedPeriodSelected.removeAll();
-			pt.util.checkbox.setAllFalse();
+			ns.store.fixedPeriodSelected.removeAll();
+			ns.util.checkbox.setAllFalse();
 			periodRecords = recMap[dimConf.period.objectName] || [];
 			for (var i = 0, peroid, checkbox; i < periodRecords.length; i++) {
 				period = periodRecords[i];
@@ -4602,8 +4604,8 @@ Ext.onReady( function() {
 					fixedPeriodRecords.push(period);
 				}
 			}
-			pt.store.fixedPeriodSelected.add(fixedPeriodRecords);
-			pt.util.multiselect.filterAvailable({store: pt.store.fixedPeriodAvailable}, {store: pt.store.fixedPeriodSelected});
+			ns.store.fixedPeriodSelected.add(fixedPeriodRecords);
+			ns.util.multiselect.filterAvailable({store: ns.store.fixedPeriodAvailable}, {store: ns.store.fixedPeriodSelected});
 
 			// Group sets
 			for (var key in dimensionIdSelectedStoreMap) {
@@ -4618,16 +4620,16 @@ Ext.onReady( function() {
 
 					if (recMap[key]) {
 						s.add(recMap[key]);
-						pt.util.multiselect.filterAvailable({store: a}, {store: s});
+						ns.util.multiselect.filterAvailable({store: a}, {store: s});
 					}
 				}
 			}
 
 			// Layout
-			pt.viewport.dimensionStore.reset(true);
-			pt.viewport.colStore.removeAll();
-			pt.viewport.rowStore.removeAll();
-			pt.viewport.filterStore.removeAll();
+			ns.viewport.dimensionStore.reset(true);
+			ns.viewport.colStore.removeAll();
+			ns.viewport.rowStore.removeAll();
+			ns.viewport.filterStore.removeAll();
 
 			if (layout.columns) {
 				dimNames = [];
@@ -4636,7 +4638,7 @@ Ext.onReady( function() {
 					dim = dimConf.objectNameMap[layout.columns[i].dimension];
 
 					if (!Ext.Array.contains(dimNames, dim.dimensionName)) {
-						pt.viewport.colStore.add({
+						ns.viewport.colStore.add({
 							id: dim.dimensionName,
 							name: dimConf.objectNameMap[dim.dimensionName].name
 						});
@@ -4644,7 +4646,7 @@ Ext.onReady( function() {
 						dimNames.push(dim.dimensionName);
 					}
 
-					pt.viewport.dimensionStore.remove(pt.viewport.dimensionStore.getById(dim.dimensionName));
+					ns.viewport.dimensionStore.remove(ns.viewport.dimensionStore.getById(dim.dimensionName));
 				}
 			}
 
@@ -4655,7 +4657,7 @@ Ext.onReady( function() {
 					dim = dimConf.objectNameMap[layout.rows[i].dimension];
 
 					if (!Ext.Array.contains(dimNames, dim.dimensionName)) {
-						pt.viewport.rowStore.add({
+						ns.viewport.rowStore.add({
 							id: dim.dimensionName,
 							name: dimConf.objectNameMap[dim.dimensionName].name
 						});
@@ -4663,7 +4665,7 @@ Ext.onReady( function() {
 						dimNames.push(dim.dimensionName);
 					}
 
-					pt.viewport.dimensionStore.remove(pt.viewport.dimensionStore.getById(dim.dimensionName));
+					ns.viewport.dimensionStore.remove(ns.viewport.dimensionStore.getById(dim.dimensionName));
 				}
 			}
 
@@ -4674,7 +4676,7 @@ Ext.onReady( function() {
 					dim = dimConf.objectNameMap[layout.filters[i].dimension];
 
 					if (!Ext.Array.contains(dimNames, dim.dimensionName)) {
-						pt.viewport.filterStore.add({
+						ns.viewport.filterStore.add({
 							id: dim.dimensionName,
 							name: dimConf.objectNameMap[dim.dimensionName].name
 						});
@@ -4682,13 +4684,13 @@ Ext.onReady( function() {
 						dimNames.push(dim.dimensionName);
 					}
 
-					pt.viewport.dimensionStore.remove(pt.viewport.dimensionStore.getById(dim.dimensionName));
+					ns.viewport.dimensionStore.remove(ns.viewport.dimensionStore.getById(dim.dimensionName));
 				}
 			}
 
-			// Options
-			if (pt.viewport.optionsWindow) {
-				pt.viewport.optionsWindow.setOptions(layout);
+			// Onsions
+			if (ns.viewport.onsionsWindow) {
+				ns.viewport.onsionsWindow.setOnsions(layout);
 			}
 
 			// Organisation units
@@ -4748,7 +4750,7 @@ Ext.onReady( function() {
 			centerRegion: centerRegion,
 			updateViewport: update,
 			layoutButton: layoutButton,
-			optionsButton: optionsButton,
+			onsionsButton: onsionsButton,
 			favoriteButton: favoriteButton,
 			downloadButton: downloadButton,
 			interpretationButton: interpretationButton,
@@ -4763,30 +4765,30 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				render: function(vp) {
-					pt.viewport = vp;
+					ns.viewport = vp;
 
-					pt.viewport.layoutWindow = PT.app.LayoutWindow();
-					pt.viewport.layoutWindow.hide();
-					pt.viewport.optionsWindow = PT.app.OptionsWindow();
-					pt.viewport.optionsWindow.hide();
+					ns.viewport.layoutWindow = NS.app.LayoutWindow();
+					ns.viewport.layoutWindow.hide();
+					ns.viewport.onsionsWindow = NS.app.OnsionsWindow();
+					ns.viewport.onsionsWindow.hide();
 				},
 				afterrender: function() {
-					pt.init.afterRender();
+					ns.init.afterRender();
 				}
 			}
 		});
 
 		addListeners = function() {
-			pt.store.indicatorAvailable.on('load', function() {
-				pt.util.multiselect.filterAvailable(indicatorAvailable, indicatorSelected);
+			ns.store.indicatorAvailable.on('load', function() {
+				ns.util.multiselect.filterAvailable(indicatorAvailable, indicatorSelected);
 			});
 
-			pt.store.dataElementAvailable.on('load', function() {
-				pt.util.multiselect.filterAvailable(dataElementAvailable, dataElementSelected);
+			ns.store.dataElementAvailable.on('load', function() {
+				ns.util.multiselect.filterAvailable(dataElementAvailable, dataElementSelected);
 			});
 
-			pt.store.dataSetAvailable.on('load', function(s) {
-				pt.util.multiselect.filterAvailable(dataSetAvailable, dataSetSelected);
+			ns.store.dataSetAvailable.on('load', function(s) {
+				ns.util.multiselect.filterAvailable(dataSetAvailable, dataSetSelected);
 				s.sort('name', 'ASC');
 			});
 		}();
@@ -4815,13 +4817,13 @@ Ext.onReady( function() {
 			success: function(r) {
 				var init = Ext.decode(r.responseText);
 
-				PT.i18n = init.i18n;
+				NS.i18n = init.i18n;
 
-				pt = PT.core.getInstance(init);
+				ns = NS.core.getInstance(init);
 
-				PT.app.extendInstance(pt);
+				NS.app.extendInstance(ns);
 
-				pt.viewport = createViewport();
+				ns.viewport = createViewport();
 			}
 		});
 	}();
