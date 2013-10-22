@@ -2,7 +2,7 @@ Ext.onReady( function() {
 	var NS = PT,
 		createViewport,
 		initialize,
-		ns;
+		ns = {};
 
 	NS.app = {};
 
@@ -592,7 +592,7 @@ ns.util = util;
 					columnDimNames = ns.viewport.colStore.getDimensionNames(),
 					rowDimNames = ns.viewport.rowStore.getDimensionNames(),
 					filterDimNames = ns.viewport.filterStore.getDimensionNames(),
-					config = ns.viewport.onsionsWindow.getOnsions(),
+					config = ns.viewport.optionsWindow.getOptions(),
 					dx = dimConf.data.dimensionName,
 					co = dimConf.category.dimensionName,
 					nameDimArrayMap = {};
@@ -985,7 +985,7 @@ ns.util = util;
 		return window;
 	};
 
-	NS.app.OnsionsWindow = function() {
+	NS.app.OptionsWindow = function() {
 		var showTotals,
 			showSubTotals,
 			hideEmptyRows,
@@ -1231,14 +1231,14 @@ ns.util = util;
 		};
 
 		window = Ext.create('Ext.window.Window', {
-			title: NS.i18n.table_onsions,
+			title: NS.i18n.table_options,
 			bodyStyle: 'background-color:#fff; padding:5px',
 			closeAction: 'hide',
 			autoShow: true,
 			modal: true,
 			resizable: false,
 			hideOnBlur: true,
-			getOnsions: function() {
+			getOptions: function() {
 				return {
 					showTotals: showTotals.getValue(),
 					showSubTotals: showSubTotals.getValue(),
@@ -1257,7 +1257,7 @@ ns.util = util;
 					topLimit: topLimit.getValue()
 				};
 			},
-			setOnsions: function(layout) {
+			setOptions: function(layout) {
 				showTotals.setValue(Ext.isBoolean(layout.showTotals) ? layout.showTotals : true);
 				showSubTotals.setValue(Ext.isBoolean(layout.showSubTotals) ? layout.showSubTotals : true);
 				hideEmptyRows.setValue(Ext.isBoolean(layout.hideEmptyRows) ? layout.hideEmptyRows : false);
@@ -1331,8 +1331,8 @@ ns.util = util;
 			],
 			listeners: {
 				show: function(w) {
-					if (ns.viewport.onsionsButton.rendered) {
-						ns.util.window.setAnchorPosition(w, ns.viewport.onsionsButton);
+					if (ns.viewport.optionsButton.rendered) {
+						ns.util.window.setAnchorPosition(w, ns.viewport.optionsButton);
 
 						if (!w.hasHideOnBlurHandler) {
 							ns.util.window.addHideOnBlurHandler(w);
@@ -2315,7 +2315,7 @@ ns.util = util;
 			update,
 
 			layoutButton,
-			onsionsButton,
+			optionsButton,
 			favoriteButton,
 			openTableLayoutTab,
 			downloadButton,
@@ -3162,8 +3162,8 @@ ns.util = util;
 							//items: [
 								//{
 									//xtype: 'label',
-									//text: 'Onsions',
-									//cls: 'ns-label-period-heading-onsions'
+									//text: 'Options',
+									//cls: 'ns-label-period-heading-options'
 								//},
 								//rewind
 							//]
@@ -4169,15 +4169,15 @@ ns.util = util;
 			}
 		});
 
-		onsionsButton = Ext.create('Ext.button.Button', {
-			text: 'Onsions',
+		optionsButton = Ext.create('Ext.button.Button', {
+			text: 'Options',
 			menu: {},
 			handler: function() {
-				if (!ns.viewport.onsionsWindow) {
-					ns.viewport.onsionsWindow = NS.app.OnsionsWindow();
+				if (!ns.viewport.optionsWindow) {
+					ns.viewport.optionsWindow = NS.app.OptionsWindow();
 				}
 
-				ns.viewport.onsionsWindow.show();
+				ns.viewport.optionsWindow.show();
 			}
 		});
 
@@ -4371,7 +4371,7 @@ ns.util = util;
 						}
 					},
 					layoutButton,
-					onsionsButton,
+					optionsButton,
 					{
 						xtype: 'tbseparator',
 						height: 18,
@@ -4688,9 +4688,9 @@ ns.util = util;
 				}
 			}
 
-			// Onsions
-			if (ns.viewport.onsionsWindow) {
-				ns.viewport.onsionsWindow.setOnsions(layout);
+			// Options
+			if (ns.viewport.optionsWindow) {
+				ns.viewport.optionsWindow.setOptions(layout);
 			}
 
 			// Organisation units
@@ -4750,7 +4750,7 @@ ns.util = util;
 			centerRegion: centerRegion,
 			updateViewport: update,
 			layoutButton: layoutButton,
-			onsionsButton: onsionsButton,
+			optionsButton: optionsButton,
 			favoriteButton: favoriteButton,
 			downloadButton: downloadButton,
 			interpretationButton: interpretationButton,
@@ -4769,8 +4769,8 @@ ns.util = util;
 
 					ns.viewport.layoutWindow = NS.app.LayoutWindow();
 					ns.viewport.layoutWindow.hide();
-					ns.viewport.onsionsWindow = NS.app.OnsionsWindow();
-					ns.viewport.onsionsWindow.hide();
+					ns.viewport.optionsWindow = NS.app.OptionsWindow();
+					ns.viewport.optionsWindow.hide();
 				},
 				afterrender: function() {
 					ns.init.afterRender();
@@ -4819,7 +4819,7 @@ ns.util = util;
 
 				NS.i18n = init.i18n;
 
-				ns = NS.core.getInstance(init);
+				ns = NS.getCore(init);
 
 				NS.app.extendInstance(ns);
 
