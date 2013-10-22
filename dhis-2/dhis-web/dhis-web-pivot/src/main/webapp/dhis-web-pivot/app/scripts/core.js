@@ -15,7 +15,6 @@ Ext.onReady( function() {
 
 	PT.core.getInstance = function(init) {
         var conf = {},
-            util = {},
             api = {},
             support = {},
             service = {},
@@ -183,72 +182,6 @@ Ext.onReady( function() {
 					'small': '10px',
 					'normal': '11px',
 					'large': '13px'
-				}
-			};
-		}());
-
-		// util
-		(function() {
-
-			util.number = {
-				//getNumberOfDecimals: function(x) {
-					//var tmp = new String(x);
-					//return (tmp.indexOf('.') > -1) ? (tmp.length - tmp.indexOf('.') - 1) : 0;
-				//},
-
-				//roundIf: function(x, prec) {
-					//x = parseFloat(x);
-					//prec = parseFloat(prec);
-
-					//if (Ext.isNumber(x) && Ext.isNumber(prec)) {
-						//var dec = support.prototype.number.getNumberOfDecimals(x);
-						//return dec > prec ? Ext.Number.toFixed(x, prec) : x;
-					//}
-					//return x;
-				//},
-
-				pp: function(x, nf) {
-					nf = nf || 'space';
-
-					if (nf === 'none') {
-						return x;
-					}
-
-					return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.pivot.digitGroupSeparator[nf]);
-				}
-			};
-
-			util.color = {
-				hexToRgb: function(hex) {
-					var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-					hex = hex.replace(shorthandRegex, function(m, r, g, b) {
-						return r + r + g + g + b + b;
-					});
-
-					var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-					return result ? {
-						r: parseInt(result[1], 16),
-						g: parseInt(result[2], 16),
-						b: parseInt(result[3], 16)
-					} : null;
-				},
-				getContrast: function(hex) {
-					if (Ext.isString(hex)) {
-						var rgb = util.color.hexToRgb(hex),
-							factor = (rgb.r + rgb.g + rgb.b);
-
-						if (factor < 210) {
-							return '#ffffff';
-						}
-					}
-
-					return '#000000';
-				}
-			};
-
-			util.message = {
-				alert: function(message) {
-                    alert(message);
 				}
 			};
 		}());
@@ -774,6 +707,33 @@ Ext.onReady( function() {
 					component.mask.destroy();
 					component.mask = null;
 				}
+			};
+
+			// color
+			support.color = {};
+
+			support.color.hexToRgb = function(hex) {
+				var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i,
+					result;
+
+				hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+					return r + r + g + g + b + b;
+				});
+
+				result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
+				return result ? {
+					r: parseInt(result[1], 16),
+					g: parseInt(result[2], 16),
+					b: parseInt(result[3], 16)
+				} : null;
+			};
+
+			// message
+			support.message = {};
+
+			support.message.alert = function(message) {
+				alert(message);
 			};
 		}());
 
