@@ -660,12 +660,6 @@ Ext.onReady( function() {
 				} : null;
 			};
 
-			// message
-			support.message = {};
-
-			support.message.alert = function(message) {
-				alert(message);
-			};
 		}());
 
 		// service
@@ -1531,6 +1525,13 @@ Ext.onReady( function() {
 				}
 			};
 
+			// message
+			web.message = {};
+
+			web.message.alert = function(message) {
+				alert(message);
+			};
+
 			// analytics
 			web.analytics = {};
 
@@ -2284,7 +2285,7 @@ Ext.onReady( function() {
 			}
 		}());
 
-		// todo
+		// engine
 		(function() {
 
 

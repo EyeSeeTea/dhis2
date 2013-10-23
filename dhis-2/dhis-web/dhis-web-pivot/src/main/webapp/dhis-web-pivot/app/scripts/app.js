@@ -1,22 +1,88 @@
 Ext.onReady( function() {
 	var NS = PT,
+
+// LayoutWindow etc -> extendCore -> api?/web?
+
+		getInitData,
+		extendCore,
+		LayoutWindow,
+		OptionsWindow,
+		FavoriteWindow,
+		SharingWindow,
 		createViewport,
 		initialize,
-		ns = {};
+		init,
+		ns = {
+			core: null,
+			app: null
+		};
 
-	NS.app = {};
+	getInitData = function(config) {
+		var requests = [],
+			callbacks = 0,
+			fn;
 
-	NS.app.extendInstance = function(ns) {
-        var init = ns.init,
-            conf = ns.conf,
+		init.user = {};
+
+		fn = function() {
+			if (++callbacks === requests.length) {
+				for (var i = 0; i < configs.length; i++) {
+					execute(configs[i]);
+				}
+			}
+		};
+
+		requests.push({
+			url: config.url + '/api/system/context.jsonp',
+			success: function(r) {
+				init.contextPath = r.contextPath;
+				fn();
+			}
+		});
+
+		requests.push({
+			url: config.url + '/api/organisationUnits.jsonp?userOnly=true&viewClass=detailed&links=false',
+			success: function(r) {
+				var ou = r.organisationUnits[0];
+				init.user.ou = ou.id;
+				init.user.ouc = Ext.Array.pluck(ou.children, 'id');
+				fn();
+			}
+		});
+
+		requests.push({
+			url: config.url + '/api/mapLegendSets.jsonp?viewClass=detailed&links=false&paging=false',
+			success: function(r) {
+				init.legendSets = r.mapLegendSets;
+				fn();
+			}
+		});
+
+		requests.push({
+			url: config.url + '/api/dimensions.jsonp?links=false&paging=false',
+			success: function(r) {
+				init.dimensions = r.dimensions;
+				fn();
+			}
+		});
+
+		for (var i = 0; i < requests.length; i++) {
+			Ext.data.JsonP.request(requests[i]);
+		}
+	};
+
+	extendCore = function(core) {
+        var init = core.init,
+            conf = core.conf,
             util = {},
-            api = ns.api,
-            support = ns.support,
-            service = ns.service,
-            web = ns.web,
+            api = core.api,
+            support = core.support,
+            service = core.service,
+            web = core.web,
             store = {},
             cmp = {},
             dimConf = conf.finals.dimension;
+
 		//tmp
 		ns.util = util;
         ns.init.el = 'app';
@@ -649,7 +715,7 @@ Ext.onReady( function() {
 		}());
 	};
 
-	NS.app.LayoutWindow = function() {
+	LayoutWindow = function() {
 		var dimension,
 			dimensionStore,
 			row,
@@ -986,7 +1052,7 @@ Ext.onReady( function() {
 		return window;
 	};
 
-	NS.app.OptionsWindow = function() {
+	OptionsWindow = function() {
 		var showTotals,
 			showSubTotals,
 			hideEmptyRows,
@@ -1350,7 +1416,7 @@ Ext.onReady( function() {
 		return window;
 	};
 
-	NS.app.FavoriteWindow = function() {
+	FavoriteWindow = function() {
 
 		// Objects
 		var NameWindow,
@@ -1908,7 +1974,7 @@ Ext.onReady( function() {
 		return favoriteWindow;
 	};
 
-	NS.app.SharingWindow = function(sharing) {
+	SharingWindow = function(sharing) {
 
 		// Objects
 		var UserGroupRow,
@@ -2178,7 +2244,7 @@ Ext.onReady( function() {
 		return window;
 	};
 
-	NS.app.InterpretationWindow = function() {
+	InterpretationWindow = function() {
 		var textArea,
 			linkPanel,
 			shareButton,
@@ -4799,32 +4865,34 @@ Ext.onReady( function() {
 
 	initialize = function() {
 
-		// ext configuration
-		Ext.QuickTips.init();
+		// configuration
+		(function() {
 
-		Ext.override(Ext.LoadMask, {
-			onHide: function() {
-				this.callParent();
-			}
-		});
+			// ext configuration
+			Ext.QuickTips.init();
 
-		// right click handler
-		document.body.oncontextmenu = function() {
-			return false;
-		};
+			Ext.override(Ext.LoadMask, {
+				onHide: function() {
+					this.callParent();
+				}
+			});
+
+			// right click handler
+			document.body.oncontextmenu = function() {
+				return false;
+			};
+		}());
 
 		Ext.Ajax.request({
 			url: '../initialize.action',
 			success: function(r) {
-				var init = Ext.decode(r.responseText);
+				init = Ext.decode(r.responseText);
 
 				NS.i18n = init.i18n;
 
-				ns = NS.getCore(init);
+				ns.core = extendCore(NS.getCore(init));
 
-				NS.app.extendInstance(ns);
-
-				ns.viewport = createViewport();
+				ns.app.viewport = createViewport();
 			}
 		});
 	}();
