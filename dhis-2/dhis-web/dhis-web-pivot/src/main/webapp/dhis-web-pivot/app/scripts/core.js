@@ -18,7 +18,6 @@ Ext.onReady( function() {
             support = {},
             service = {},
             web = {},
-            engine = {},
             dimConf;
 
 		// conf
@@ -639,44 +638,6 @@ Ext.onReady( function() {
 				}
 
 				return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.pivot.digitGroupSeparator[separator]);
-			};
-
-			// mask
-			support.mask = {};
-
-			support.mask.show = function(component, message) {
-				if (!Ext.isObject(component)) {
-					console.log('support.gui.mask.show: component not an object');
-					return null;
-				}
-
-				message = message || 'Loading..';
-
-				if (component.mask) {
-					component.mask.destroy();
-					component.mask = null;
-				}
-
-				component.mask = new Ext.create('Ext.LoadMask', component, {
-					shadow: false,
-					message: message,
-					style: 'box-shadow:0',
-					bodyStyle: 'box-shadow:0'
-				});
-
-				component.mask.show();
-			};
-
-			support.mask.hide = function(component) {
-				if (!Ext.isObject(component)) {
-					console.log('support.gui.mask.hide: component not an object');
-					return null;
-				}
-
-				if (component.mask) {
-					component.mask.destroy();
-					component.mask = null;
-				}
 			};
 
 			// color
@@ -1532,6 +1493,44 @@ Ext.onReady( function() {
 		// web
 		(function() {
 
+			// mask
+			web.mask = {};
+
+			web.mask.show = function(component, message) {
+				if (!Ext.isObject(component)) {
+					console.log('support.gui.mask.show: component not an object');
+					return null;
+				}
+
+				message = message || 'Loading..';
+
+				if (component.mask) {
+					component.mask.destroy();
+					component.mask = null;
+				}
+
+				component.mask = new Ext.create('Ext.LoadMask', component, {
+					shadow: false,
+					message: message,
+					style: 'box-shadow:0',
+					bodyStyle: 'box-shadow:0'
+				});
+
+				component.mask.show();
+			};
+
+			web.mask.hide = function(component) {
+				if (!Ext.isObject(component)) {
+					console.log('support.gui.mask.hide: component not an object');
+					return null;
+				}
+
+				if (component.mask) {
+					component.mask.destroy();
+					component.mask = null;
+				}
+			};
+
 			// analytics
 			web.analytics = {};
 
@@ -1593,10 +1592,10 @@ Ext.onReady( function() {
 				return paramString;
 			};
 
-			// engine
-			web.engine = {};
+			// pivot
+			web.pivot = {};
 
-			web.engine.create = function(xColAxis, xRowAxis, xResponse) {
+			web.pivot.create = function(xColAxis, xRowAxis, xResponse) {
 				var getRoundedHtmlValue,
 					getTdHtml,
 					doSubTotals,
@@ -1635,7 +1634,7 @@ Ext.onReady( function() {
 
 				getRoundedHtmlValue = function(value, dec) {
 					dec = dec || 2;
-					return parseFloat(ns.support.prototype.number.roundIf(value, 2)).toString();
+					return parseFloat(support.prototype.number.roundIf(value, 2)).toString();
 				};
 
 				getTdHtml = function(config) {
@@ -1672,7 +1671,7 @@ Ext.onReady( function() {
 					colSpan = config.colSpan ? 'colspan="' + config.colSpan + '" ' : '';
 					rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '" ' : '';
 					htmlValue = config.collapsed ? '' : config.htmlValue || config.value || '';
-					htmlValue = config.type !== 'dimension' ? ns.support.prototype.number.prettyPrint(htmlValue, layout.digitGroupSeparator) : htmlValue;
+					htmlValue = config.type !== 'dimension' ? support.prototype.number.prettyPrint(htmlValue, layout.digitGroupSeparator) : htmlValue;
 					displayDensity = conf.pivot.displayDensity[config.displayDensity] || conf.pivot.displayDensity[layout.displayDensity];
 					fontSize = conf.pivot.fontSize[config.fontSize] || conf.pivot.fontSize[layout.fontSize];
 
@@ -1852,7 +1851,7 @@ Ext.onReady( function() {
 							uuids = [];
 
 							// meta data uid
-							id = (xColAxis ? ns.support.prototype.str.replaceAll(xColAxis.ids[j], '-', '') : '') + (xRowAxis ? ns.support.prototype.str.replaceAll(xRowAxis.ids[i], '-', '') : '');
+							id = (xColAxis ? support.prototype.str.replaceAll(xColAxis.ids[j], '-', '') : '') + (xRowAxis ? support.prototype.str.replaceAll(xRowAxis.ids[i], '-', '') : '');
 
 							// value html element id
 							uuid = Ext.data.IdGenerator.get('uuid').generate();
@@ -2260,7 +2259,6 @@ Ext.onReady( function() {
 
 				return getHtml(htmlArray);
 			};
-
 		}());
 
 		// init
@@ -2286,13 +2284,13 @@ Ext.onReady( function() {
 			}
 		}());
 
-		// engine
+		// todo
 		(function() {
 
 
 
 
-			engine.setSessionStorage = function(session, obj, url) {
+			pivot.setSessionStorage = function(session, obj, url) {
 				if (NS.isSessionStorage) {
 					var dhis2 = JSON.parse(sessionStorage.getItem('dhis2')) || {};
 					dhis2[session] = obj;
@@ -2304,7 +2302,7 @@ Ext.onReady( function() {
 				}
 			};
 
-			engine.createTable = function(layout, ns, updateGui, isFavorite) {
+			pivot.createTable = function(layout, ns, updateGui, isFavorite) {
 				var legendSet = layout.legendSet ? ns.init.idLegendSetMap[layout.legendSet.id] : null,
 					isHierarchy,
 					getItemName,
@@ -2357,7 +2355,7 @@ Ext.onReady( function() {
 
 							if (parseFloat(valueElement.dom.textContent)) {
 								valueElement.dom.ns = ns;
-								valueElement.dom.setAttribute('onclick', 'this.ns.engine.onMouseClick(this.id, this.ns);');
+								valueElement.dom.setAttribute('onclick', 'this.ns.pivot.onMouseClick(this.id, this.ns);');
 							}
 						}
 					}
@@ -2383,14 +2381,14 @@ Ext.onReady( function() {
 					else {
 						if (NS.isSessionStorage) {
 							setMouseHandlers();
-							engine.setSessionStorage('table', layout);
+							pivot.setSessionStorage('table', layout);
 						}
 
 						ns.viewport.setGui(layout, xLayout, updateGui, isFavorite);
 					}
 
 					// Hide mask
-					support.mask.hide(ns.viewport.centerRegion);
+					web.mask.hide(ns.viewport.centerRegion);
 
 					// Add uuid maps to instance
 					ns.uuidDimUuidsMap = uuidDimUuidsMap;
@@ -2420,7 +2418,7 @@ Ext.onReady( function() {
 							response = ns.api.response.Response(response);
 
 						if (!response) {
-							ns.support.mask.hide(ns.viewport.centerRegion);
+							web.mask.mask.hide(ns.viewport.centerRegion);
 							return;
 						}
 
@@ -2428,7 +2426,7 @@ Ext.onReady( function() {
 						xLayout = service.layout.getSyncronizedXLayout(xLayout, response);
 
 						if (!xLayout) {
-							ns.support.mask.hide(ns.viewport.centerRegion);
+							web.mask.hide(ns.viewport.centerRegion);
 							return;
 						}
 
@@ -2440,7 +2438,7 @@ Ext.onReady( function() {
 						xRowAxis = service.layout.getExtendedAxis('row', xLayout.rowDimensionNames, xResponse);
 
 						// Create html
-						html = web.engine.create(xColAxis, xRowAxis, xResponse);
+						html = web.pivot.create(xColAxis, xRowAxis, xResponse);
 
 						// Update viewport
 						ns.viewport.centerRegion.removeAll(true);
@@ -2457,7 +2455,7 @@ Ext.onReady( function() {
                     }
 
 					// Show load mask
-                    support.mask.show(ns.viewport.centerRegion);
+                    web.mask.show(ns.viewport.centerRegion);
 
                     if (ns.isPlugin) {
 						Ext.data.JsonP.request({
@@ -2478,7 +2476,7 @@ Ext.onReady( function() {
 							},
 							disableCaching: false,
 							failure: function(r) {
-								support.mask.hide(ns.viewport.centerRegion);
+								web.mask.hide(ns.viewport.centerRegion);
 								alert(r.responseText);
 							},
 							success: function(r) {
@@ -2489,7 +2487,7 @@ Ext.onReady( function() {
                 }();
 			};
 
-			engine.loadTable = function(id, ns, updateGui, isFavorite) {
+			pivot.loadTable = function(id, ns, updateGui, isFavorite) {
 				var url = init.contextPath + '/api/reportTables/' + id,
 					params = '?viewClass=dimensional&links=false',
 					method = 'GET',
@@ -2509,12 +2507,12 @@ Ext.onReady( function() {
 						ns.favorite.id = layoutConfig.id;
 						ns.favorite.name = layoutConfig.name;
 
-						engine.createTable(layout, ns, updateGui, isFavorite);
+						pivot.createTable(layout, ns, updateGui, isFavorite);
 					}
 				};
 
 				failure = function(responseText) {
-					support.mask.hide(ns.viewport.centerRegion);
+					web.mask.hide(ns.viewport.centerRegion);
 					alert(responseText);
 				};
 
@@ -2544,7 +2542,7 @@ Ext.onReady( function() {
 				}
 			};
 
-			engine.onMouseHover = function(uuid, event, param, ns) {
+			pivot.onMouseHover = function(uuid, event, param, ns) {
 				var dimUuids;
 
 				if (param === 'chart') {
@@ -2567,7 +2565,7 @@ Ext.onReady( function() {
 				}
 			};
 
-			engine.onMouseClick = function(uuid, ns) {
+			pivot.onMouseClick = function(uuid, ns) {
 				var that = this,
 					uuids = ns.uuidDimUuidsMap[uuid],
 					layoutConfig = Ext.clone(ns.layout),
@@ -2678,8 +2676,7 @@ Ext.onReady( function() {
 			api: api,
 			support: support,
 			service: service,
-			web: web,
-			engine: engine
+			web: web
 		});
 
         return NS.instances[NS.instances.length - 1];

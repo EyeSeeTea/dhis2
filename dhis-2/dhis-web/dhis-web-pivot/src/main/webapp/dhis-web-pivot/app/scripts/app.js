@@ -12,12 +12,13 @@ Ext.onReady( function() {
             util = {},
             api = ns.api,
             support = ns.support,
-            engine = ns.engine,
+            service = ns.service,
+            web = ns.web,
             store = {},
             cmp = {},
             dimConf = conf.finals.dimension;
-//tmp
-ns.util = util;
+		//tmp
+		ns.util = util;
         ns.init.el = 'app';
 
 		// util
@@ -244,13 +245,13 @@ ns.util = util;
 					layout;
 
 				if (id) {
-					engine.loadTable(id, ns, true, true);
+					web.loadTable(id, ns, true, true);
 				}
 				else if (Ext.isString(session) && NS.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
 					layout = api.layout.Layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]);
 
 					if (layout) {
-						ns.engine.createTable(layout, ns, true);
+						web.createTable(layout, ns, true);
 					}
 				}
 
