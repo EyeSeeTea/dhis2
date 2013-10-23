@@ -1,75 +1,36 @@
 Ext.onReady( function() {
 	var NS = PT,
-
-// LayoutWindow etc -> extendCore -> api?/web?
-
-		getInitData,
 		extendCore,
+
 		LayoutWindow,
 		OptionsWindow,
 		FavoriteWindow,
 		SharingWindow,
+
 		createViewport,
 		initialize,
-		init,
 		ns = {
 			core: null,
 			app: null
 		};
 
-	getInitData = function(config) {
-		var requests = [],
-			callbacks = 0,
-			fn;
+	// config
+	(function() {
 
-		init.user = {};
+		// ext configuration
+		Ext.QuickTips.init();
 
-		fn = function() {
-			if (++callbacks === requests.length) {
-				for (var i = 0; i < configs.length; i++) {
-					execute(configs[i]);
-				}
+		Ext.override(Ext.LoadMask, {
+			onHide: function() {
+				this.callParent();
 			}
+		});
+
+		// right click handler
+		document.body.oncontextmenu = function() {
+			return false;
 		};
-
-		requests.push({
-			url: config.url + '/api/system/context.jsonp',
-			success: function(r) {
-				init.contextPath = r.contextPath;
-				fn();
-			}
-		});
-
-		requests.push({
-			url: config.url + '/api/organisationUnits.jsonp?userOnly=true&viewClass=detailed&links=false',
-			success: function(r) {
-				var ou = r.organisationUnits[0];
-				init.user.ou = ou.id;
-				init.user.ouc = Ext.Array.pluck(ou.children, 'id');
-				fn();
-			}
-		});
-
-		requests.push({
-			url: config.url + '/api/mapLegendSets.jsonp?viewClass=detailed&links=false&paging=false',
-			success: function(r) {
-				init.legendSets = r.mapLegendSets;
-				fn();
-			}
-		});
-
-		requests.push({
-			url: config.url + '/api/dimensions.jsonp?links=false&paging=false',
-			success: function(r) {
-				init.dimensions = r.dimensions;
-				fn();
-			}
-		});
-
-		for (var i = 0; i < requests.length; i++) {
-			Ext.data.JsonP.request(requests[i]);
-		}
-	};
+	}());
 
 	extendCore = function(core) {
         var init = core.init,
@@ -4863,37 +4824,70 @@ Ext.onReady( function() {
 		return viewport;
 	};
 
-	initialize = function() {
+	// initialize
+	(function() {
+		var requests = [],
+			callbacks = 0,
+			init = {},
+			fn;
 
-		// configuration
-		(function() {
+		init.user = {};
 
-			// ext configuration
-			Ext.QuickTips.init();
-
-			Ext.override(Ext.LoadMask, {
-				onHide: function() {
-					this.callParent();
-				}
-			});
-
-			// right click handler
-			document.body.oncontextmenu = function() {
-				return false;
-			};
-		}());
-
-		Ext.Ajax.request({
-			url: '../initialize.action',
-			success: function(r) {
-				init = Ext.decode(r.responseText);
-
-				NS.i18n = init.i18n;
+		fn = function() {
+			if (++callbacks === requests.length) {
 
 				ns.core = extendCore(NS.getCore(init));
 
 				ns.app.viewport = createViewport();
 			}
+		};
+
+		// requests
+
+		Ext.Ajax.request({
+			url: 'manifest.webapp',
+			success: function(r) {
+				init.contextPath = '..'; //init.contextPath = Ext.decode(r.responseText).activities.dhis.href;
+
+				// requests
+				requests.push({
+					url: init.contextPath + '/api/organisationUnits.jsonp?userOnly=true&viewClass=detailed&links=false',
+					success: function(r) {
+						var ou = Ext.decode(r.responseText).organisationUnits[0];
+						init.user.ou = ou.id;
+						init.user.ouc = Ext.Array.pluck(ou.children, 'id');
+						fn();
+					}
+				});
+
+				requests.push({
+					url: init.contextPath + '/api/mapLegendSets.jsonp?viewClass=detailed&links=false&paging=false',
+					success: function(r) {
+						init.legendSets = Ext.decode(r.responseText).mapLegendSets;
+						fn();
+					}
+				});
+
+				requests.push({
+					url: init.contextPath + '/api/dimensions.jsonp?links=false&paging=false',
+					success: function(r) {
+						init.dimensions = Ext.decode(r.responseText).dimensions;
+						fn();
+					}
+				});
+
+				requests.push({
+					url: init.contextPath + '/dhis-web-pivot/i18n.action',
+					success: function(r) {
+						NS.i18n = Ext.decode(r.responseText);
+						fn();
+					}
+				});
+
+				for (var i = 0; i < requests.length; i++) {
+					Ext.Ajax.request(requests[i]);
+				}
+			}
 		});
-	}();
+	}());
 });
