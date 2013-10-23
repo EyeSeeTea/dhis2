@@ -5,9 +5,11 @@ Ext.onReady( function() {
 		OptionsWindow,
 		FavoriteWindow,
 		SharingWindow,
+		InterpretationWindow,
 
 		extendCore,
 		createViewport,
+		update,
 		initialize,
 		ns = {
 			core: {},
@@ -2412,9 +2414,9 @@ Ext.onReady( function() {
 				return config.items.length ? config : null;
 			},
 			onExpand: function() {
-				var h = ns.viewport.westRegion.hasScrollbar ?
+				var h = westRegion.hasScrollbar ?
 					ns.conf.layout.west_scrollbarheight_accordion_indicator : ns.conf.layout.west_maxheight_accordion_indicator;
-				ns.util.dimension.panel.setHeight(h);
+				accordion.setThisHeight(h);
 				ns.util.multiselect.setHeight(
 					[indicatorAvailable, indicatorSelected],
 					this,
@@ -4170,7 +4172,12 @@ Ext.onReady( function() {
 					return ns.conf.layout.west_width + 17;
 				}
 			}(),
-			items: accordion
+			items: accordion,
+			listeners: {
+				added: function() {
+					ns.app.westRegion = this;
+				}
+			}
 		});
 
 		layoutButton = Ext.create('Ext.button.Button', {
@@ -4525,6 +4532,9 @@ Ext.onReady( function() {
 				]
 			},
 			listeners: {
+				added: function() {
+					ns.app.centerRegion = this;
+				},
 				afterrender: function(p) {
 					var liStyle = 'padding:3px 10px; color:#333',
 						html = '';
@@ -4813,7 +4823,9 @@ Ext.onReady( function() {
 		return viewport;
 	};
 
-	update
+	update = function() {
+
+	};
 
 	// initialize
 	(function() {
