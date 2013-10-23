@@ -1487,6 +1487,26 @@ Ext.onReady( function() {
 		// web
 		(function() {
 
+			// storage
+			web.storage = {};
+
+				// session
+			web.storage.session = {};
+
+			web.storage.session.set = function(session, obj, url) {
+				if (NS.isSessionStorage) {
+					var dhis2 = JSON.parse(sessionStorage.getItem('dhis2')) || {};
+
+					dhis2[session] = obj;
+
+					sessionStorage.setItem('dhis2', JSON.stringify(dhis2));
+
+					if (Ext.isString(url)) {
+						window.location.href = url;
+					}
+				}
+			};
+
 			// mask
 			web.mask = {};
 
@@ -1596,7 +1616,7 @@ Ext.onReady( function() {
 			// pivot
 			web.pivot = {};
 
-			web.pivot.create = function(xColAxis, xRowAxis, xResponse) {
+			web.pivot.getHtml = function(xColAxis, xRowAxis, xResponse) {
 				var getRoundedHtmlValue,
 					getTdHtml,
 					doSubTotals,
@@ -2260,12 +2280,14 @@ Ext.onReady( function() {
 
 				return getHtml(htmlArray);
 			};
+
 		}());
 
-		// init
+		// extend init
 		(function() {
+
 			// sort and extend dynamic dimensions
-			if (init.dimensions) {
+			if (Ext.isArray(init.dimensions)) {
 				init.dimensions = support.prototype.array.sortObjectsByObjectKey(init.dimensions);
 
 				for (var i = 0, dim; i < init.dimensions.length; i++) {
@@ -2291,17 +2313,6 @@ Ext.onReady( function() {
 
 
 
-			pivot.setSessionStorage = function(session, obj, url) {
-				if (NS.isSessionStorage) {
-					var dhis2 = JSON.parse(sessionStorage.getItem('dhis2')) || {};
-					dhis2[session] = obj;
-					sessionStorage.setItem('dhis2', JSON.stringify(dhis2));
-
-					if (Ext.isString(url)) {
-						window.location.href = url;
-					}
-				}
-			};
 
 			pivot.createTable = function(layout, ns, updateGui, isFavorite) {
 				var legendSet = layout.legendSet ? ns.init.idLegendSetMap[layout.legendSet.id] : null,
@@ -2439,7 +2450,7 @@ Ext.onReady( function() {
 						xRowAxis = service.layout.getExtendedAxis('row', xLayout.rowDimensionNames, xResponse);
 
 						// Create html
-						html = web.pivot.create(xColAxis, xRowAxis, xResponse);
+						html = web.pivot.getHtml(xColAxis, xRowAxis, xResponse);
 
 						// Update viewport
 						ns.viewport.centerRegion.removeAll(true);
