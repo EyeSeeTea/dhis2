@@ -1613,6 +1613,16 @@ Ext.onReady( function() {
 				return paramString;
 			};
 
+			web.analytics.validateUrl = function(url) {
+				if (!Ext.isString(url) || url.length > 2000) {
+					var percent = ((url.length - 2000) / url.length) * 100;
+					alert('Too many parameters selected. Please reduce the number of parameters by at least ' + Ext.Number.toFixed(percent, 0) + '%.');
+					return;
+				}
+
+				return true;
+			};
+
 			// pivot
 			web.pivot = {};
 
@@ -2348,15 +2358,15 @@ Ext.onReady( function() {
 					return name;
 				};
 
-				validateUrl = function(url) {
-					if (!Ext.isString(url) || url.length > 2000) {
-						var percent = ((url.length - 2000) / url.length) * 100;
-						alert('Too many parameters selected. Please reduce the number of parameters by at least ' + Ext.Number.toFixed(percent, 0) + '%.');
-						return;
-					}
+				//validateUrl = function(url) {
+					//if (!Ext.isString(url) || url.length > 2000) {
+						//var percent = ((url.length - 2000) / url.length) * 100;
+						//alert('Too many parameters selected. Please reduce the number of parameters by at least ' + Ext.Number.toFixed(percent, 0) + '%.');
+						//return;
+					//}
 
-					return true;
-				};
+					//return true;
+				//};
 
 				setMouseHandlers = function() {
 					var valueElement;
@@ -2418,84 +2428,83 @@ Ext.onReady( function() {
 				};
 
                 initialize = function() {
-                    var xLayout = service.layout.getExtendedLayout(layout),
-                        paramString = web.analytics.getParamString(xLayout, true),
-						method = 'GET',
-						success;
+                    //var xLayout = service.layout.getExtendedLayout(layout),
+                        //paramString = web.analytics.getParamString(xLayout, true),
+						//method = 'GET',
+						//success;
 
-					success = function(response) {
-						var xResponse,
-							chart,
-							html,
-							response = ns.api.response.Response(response);
+					//success = function(response) {
+						//var xResponse,
+							//html,
+							//response = ns.api.response.Response(response);
 
-						if (!response) {
-							web.mask.mask.hide(ns.viewport.centerRegion);
-							return;
-						}
+						//if (!response) {
+							//web.mask.hide(ns.viewport.centerRegion);
+							//return;
+						//}
 
 						// Synchronize xLayout
-						xLayout = service.layout.getSyncronizedXLayout(xLayout, response);
+						//xLayout = service.layout.getSyncronizedXLayout(xLayout, response);
 
-						if (!xLayout) {
-							web.mask.hide(ns.viewport.centerRegion);
-							return;
-						}
+						//if (!xLayout) {
+							//web.mask.hide(ns.viewport.centerRegion);
+							//return;
+						//}
 
 						// Extended response
-						xResponse = service.response.getExtendedResponse(response, xLayout);
+						//xResponse = service.response.getExtendedResponse(response, xLayout);
 
 						// Extended axes
-						xColAxis = service.layout.getExtendedAxis('col', xLayout.columnDimensionNames, xResponse);
-						xRowAxis = service.layout.getExtendedAxis('row', xLayout.rowDimensionNames, xResponse);
+						//xColAxis = service.layout.getExtendedAxis('col', xLayout.columnDimensionNames, xResponse);
+						//xRowAxis = service.layout.getExtendedAxis('row', xLayout.rowDimensionNames, xResponse);
 
 						// Create html
-						html = web.pivot.getHtml(xColAxis, xRowAxis, xResponse);
+						//html = web.pivot.getHtml(xColAxis, xRowAxis, xResponse);
 
 						// Update viewport
-						ns.viewport.centerRegion.removeAll(true);
-						ns.viewport.centerRegion.update(html);
+						//ns.viewport.centerRegion.removeAll(true);
+						//ns.viewport.centerRegion.update(html);
 
 						ns.paramString = paramString;
 
 						afterLoad(layout, xLayout, xResponse);
-					};
+					//};
 
 					// Validate request size
-                    if (!validateUrl(init.contextPath + '/api/analytics.jsonp' + paramString)) {
-                        return;
-                    }
+                    //if (!validateUrl(init.contextPath + '/api/analytics.jsonp' + paramString)) {
+                        //return;
+                    //}
 
 					// Show load mask
-                    web.mask.show(ns.viewport.centerRegion);
+                    //web.mask.show(ns.viewport.centerRegion);
 
-                    if (ns.isPlugin) {
-						Ext.data.JsonP.request({
-							method: method,
-							url: init.contextPath + '/api/analytics.jsonp' + paramString,
-							disableCaching: false,
-							success: success
-						});
-					}
-					else {
-						Ext.Ajax.request({
-							method: method,
-							url: init.contextPath + '/api/analytics.json' + paramString,
-							timeout: 60000,
-							headers: {
-								'Content-Type': 'application/json',
-								'Accens': 'application/json'
-							},
-							disableCaching: false,
-							failure: function(r) {
-								web.mask.hide(ns.viewport.centerRegion);
-								alert(r.responseText);
-							},
-							success: function(r) {
-								success(Ext.decode(r.responseText));
-							}
-						});
-					}
+                    //if (ns.isPlugin) {
+						//Ext.data.JsonP.request({
+							//method: method,
+							//url: init.contextPath + '/api/analytics.jsonp' + paramString,
+							//disableCaching: false,
+							//success: success
+						//});
+					//}
+					//else {
+						//Ext.Ajax.request({
+							//method: method,
+							//url: init.contextPath + '/api/analytics.json' + paramString,
+							//timeout: 60000,
+							//headers: {
+								//'Content-Type': 'application/json',
+								//'Accens': 'application/json'
+							//},
+							//disableCaching: false,
+							//failure: function(r) {
+								//web.mask.hide(ns.viewport.centerRegion);
+								//alert(r.responseText);
+							//},
+							//success: function(r) {
+								//success(Ext.decode(r.responseText));
+							//}
+						//});
+					//}
                 }();
 			};
 

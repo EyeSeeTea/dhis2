@@ -4823,8 +4823,87 @@ Ext.onReady( function() {
 		return viewport;
 	};
 
-	update = function() {
+	update = function(layout) {
+		if (!layout) {
+			return;
+		}
 
+		var xLayout = ns.service.layout.getExtendedLayout(layout),
+			paramString = web.analytics.getParamString(xLayout, true);
+
+		if (!web.analytics.validateUrl(init.contextPath + '/api/analytics.json' + paramString)) {
+			return;
+		}
+
+		ns.web.mask.show(ns.centerRegion);
+
+		Ext.Ajax.request({
+			url: init.contextPath + '/api/analytics.json' + paramString,
+			timeout: 60000,
+			headers: {
+				'Content-Type': 'application/json',
+				'Accens': 'application/json'
+			},
+			disableCaching: false,
+			failure: function(r) {
+				web.mask.hide(ns.centerRegion);
+				alert(r.responseText);
+			},
+			success: function(r) {
+				var response = ns.api.response.Response(Ext.decode(r.responseText)),
+					xResponse,
+					xColAxis,
+					xRowAxis;
+
+				if (!response) {
+					ns.web.mask.hide(ns.centerRegion);
+					return;
+				}
+
+				// sync xLayout with response
+				xLayout = ns.service.layout.getSyncronizedXLayout(xLayout, response);
+
+				if (!xLayout) {
+					ns.web.mask.hide(ns.centerRegion);
+					return;
+				}
+
+				// extend response
+				xResponse = ns.service.response.getExtendedResponse(response, xLayout);
+
+				// extended axes
+				xColAxis = ns.service.layout.getExtendedAxis('col', xLayout.columnDimensionNames, xResponse);
+				xRowAxis = ns.service.layout.getExtendedAxis('row', xLayout.rowDimensionNames, xResponse);
+
+				// update viewport
+				ns.centerRegion.removeAll(true);
+				ns.centerRegion.update(web.pivot.getHtml(xColAxis, xRowAxis, xResponse));
+
+				// after render
+				if (NS.isSessionStorage) {
+					setMouseHandlers();
+					pivot.setSessionStorage('table', layout);
+				}
+
+				ns.app.viewport.setGui(layout, xLayout, updateGui);
+
+				web.mask.hide(ns.app.centerRegion);
+
+				// Add uuid maps to instance
+				//ns.app.uuidDimUuidsMap = uuidDimUuidsMap;
+				//ns.app.uuidObjectMap = uuidObjectMap;
+
+				// Add objects to instance
+				ns.app.layout = layout;
+				ns.app.xLayout = xLayout;
+				ns.app.xResponse = xResponse;
+
+				if (NS.isDebug) {
+					console.log("xResponse", xResponse);
+					console.log("xLayout", xLayout);
+				}
+			}
+		});
 	};
 
 	// initialize
