@@ -758,6 +758,24 @@ Ext.onReady( function() {
 				support.prototype.object.getLength(map) ? map : null;
 			};
 
+			service.layout.getItemName = function(layout, response, id, isHtml) {
+				var metaData = response.metaData,
+					name = '';
+
+				if (service.layout.isHierarchy(layout, response, id)) {
+					var a = Ext.clean(metaData.ouHierarchy[id].split('/'));
+					a.shift();
+
+					for (var i = 0; i < a.length; i++) {
+						name += (isHtml ? '<span class="text-weak">' : '') + metaData.names[a[i]] + (isHtml ? '</span>' : '') + ' / ';
+					}
+				}
+
+				name += metaData.names[id];
+
+				return name;
+			};
+
 			service.layout.getExtendedLayout = function(layout) {
 				var layout = Ext.clone(layout),
 					xLayout;
@@ -1047,7 +1065,7 @@ Ext.onReady( function() {
 								if (isUserOrgunit) {
 									userOu = [{
 										id: ns.init.user.ou,
-										name: getItemName(ns.init.user.ou, response)
+										name: getItemName(xLayout, response, ns.init.user.ou, false)
 									}];
 								}
 								if (isUserOrgunitChildren) {
@@ -1056,7 +1074,7 @@ Ext.onReady( function() {
 									for (var j = 0; j < ns.init.user.ouc.length; j++) {
 										userOuc.push({
 											id: ns.init.user.ouc[j],
-											name: getItemName(ns.init.user.ouc[j], response)
+											name: getItemName(xLayout, response, ns.init.user.ouc[j], false)
 										});
 									}
 
@@ -1074,7 +1092,7 @@ Ext.onReady( function() {
 										if (!Ext.Array.contains(userOuOuc, id)) {
 											userOugc.push({
 												id: id,
-												name: getItemName(id, response)
+												name: getItemName(xLayout, response, id, false)
 											});
 										}
 									}
@@ -1801,7 +1819,7 @@ Ext.onReady( function() {
 							obj.cls = 'pivot-dim';
 							obj.noBreak = false;
 							obj.hidden = !(obj.rowSpan || obj.colSpan);
-							obj.htmlValue = getItemName(obj.id, xResponse, true);
+							obj.htmlValue = getItemName(layout, xResponse, obj.id, true);
 
 							dimHtml.push(getTdHtml(obj));
 
@@ -1867,7 +1885,7 @@ Ext.onReady( function() {
 								obj.cls = 'pivot-dim td-nobreak' + (service.layout.isHierarchy(layout, xResponse, obj.id) ? ' align-left' : '');
 								obj.noBreak = true;
 								obj.hidden = !(obj.rowSpan || obj.colSpan);
-								obj.htmlValue = getItemName(obj.id, xResponse, true);
+								obj.htmlValue = getItemName(layout, xResponse, obj.id, true);
 
 								row.push(obj);
 							}
@@ -2330,8 +2348,8 @@ Ext.onReady( function() {
 
 			pivot.createTable = function(layout, ns, updateGui, isFavorite) {
 				var legendSet = layout.legendSet ? ns.init.idLegendSetMap[layout.legendSet.id] : null,
-					isHierarchy,
-					getItemName,
+					//isHierarchy,
+					//getItemName,
 					validateUrl,
 					setMouseHandlers,
 					initialize,
@@ -2340,27 +2358,27 @@ Ext.onReady( function() {
 					uuidDimUuidsMap = {},
 					uuidObjectMap = {};
 
-				isHierarchy = function(id, response) {
-					return layout.showHierarchy && Ext.isObject(response.metaData.ouHierarchy) && response.metaData.ouHierarchy.hasOwnProperty(id);
-				};
+				//isHierarchy = function(id, response) {
+					//return layout.showHierarchy && Ext.isObject(response.metaData.ouHierarchy) && response.metaData.ouHierarchy.hasOwnProperty(id);
+				//};
 
-				getItemName = function(id, response, isHtml) {
-					var metaData = response.metaData,
-						name = '';
+				//getItemName = function(id, response, isHtml) {
+					//var metaData = response.metaData,
+						//name = '';
 
-					if (isHierarchy(id, response)) {
-						var a = Ext.clean(metaData.ouHierarchy[id].split('/'));
-						a.shift();
+					//if (isHierarchy(id, response)) {
+						//var a = Ext.clean(metaData.ouHierarchy[id].split('/'));
+						//a.shift();
 
-						for (var i = 0; i < a.length; i++) {
-							name += (isHtml ? '<span class="text-weak">' : '') + metaData.names[a[i]] + (isHtml ? '</span>' : '') + ' / ';
-						}
-					}
+						//for (var i = 0; i < a.length; i++) {
+							//name += (isHtml ? '<span class="text-weak">' : '') + metaData.names[a[i]] + (isHtml ? '</span>' : '') + ' / ';
+						//}
+					//}
 
-					name += metaData.names[id];
+					//name += metaData.names[id];
 
-					return name;
-				};
+					//return name;
+				//};
 
 				//validateUrl = function(url) {
 					//if (!Ext.isString(url) || url.length > 2000) {
