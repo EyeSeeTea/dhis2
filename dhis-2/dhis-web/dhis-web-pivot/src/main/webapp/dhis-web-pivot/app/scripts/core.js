@@ -1396,6 +1396,10 @@ Ext.onReady( function() {
 				};
 			};
 
+			service.layout.isHierarchy = function(layout, response, id) {
+				return layout.showHierarchy && Ext.isObject(response.metaData.ouHierarchy) && response.metaData.ouHierarchy.hasOwnProperty(id);
+			};
+
 			// response
 			service.response = {};
 
@@ -1626,7 +1630,7 @@ Ext.onReady( function() {
 			// pivot
 			web.pivot = {};
 
-			web.pivot.getHtml = function(xColAxis, xRowAxis, xResponse) {
+			web.pivot.getHtml = function(layout, xResponse, xColAxis, xRowAxis) {
 				var getRoundedHtmlValue,
 					getTdHtml,
 					doSubTotals,
@@ -1860,7 +1864,7 @@ Ext.onReady( function() {
 							for (var j = 0, obj, newObj; j < xRowAxis.dims; j++) {
 								obj = xRowAxis.objects.all[j][i];
 								obj.type = 'dimension';
-								obj.cls = 'pivot-dim td-nobreak' + (isHierarchy(obj.id, xResponse) ? ' align-left' : '');
+								obj.cls = 'pivot-dim td-nobreak' + (service.layout.isHierarchy(layout, xResponse, obj.id) ? ' align-left' : '');
 								obj.noBreak = true;
 								obj.hidden = !(obj.rowSpan || obj.colSpan);
 								obj.htmlValue = getItemName(obj.id, xResponse, true);

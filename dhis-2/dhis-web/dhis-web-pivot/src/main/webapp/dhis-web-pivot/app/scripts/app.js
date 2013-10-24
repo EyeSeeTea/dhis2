@@ -4828,14 +4828,14 @@ Ext.onReady( function() {
 			return;
 		}
 
-		var xLayout = ns.service.layout.getExtendedLayout(layout),
+		var xLayout = ns.core.service.layout.getExtendedLayout(layout),
 			paramString = web.analytics.getParamString(xLayout, true);
 
 		if (!web.analytics.validateUrl(init.contextPath + '/api/analytics.json' + paramString)) {
 			return;
 		}
 
-		ns.web.mask.show(ns.centerRegion);
+		ns.core.web.mask.show(ns.app.centerRegion);
 
 		Ext.Ajax.request({
 			url: init.contextPath + '/api/analytics.json' + paramString,
@@ -4846,38 +4846,38 @@ Ext.onReady( function() {
 			},
 			disableCaching: false,
 			failure: function(r) {
-				web.mask.hide(ns.centerRegion);
+				web.mask.hide(ns.app.centerRegion);
 				alert(r.responseText);
 			},
 			success: function(r) {
-				var response = ns.api.response.Response(Ext.decode(r.responseText)),
+				var response = ns.core.api.response.Response(Ext.decode(r.responseText)),
 					xResponse,
 					xColAxis,
 					xRowAxis;
 
 				if (!response) {
-					ns.web.mask.hide(ns.centerRegion);
+					ns.core.web.mask.hide(ns.app.centerRegion);
 					return;
 				}
 
 				// sync xLayout with response
-				xLayout = ns.service.layout.getSyncronizedXLayout(xLayout, response);
+				xLayout = ns.core.service.layout.getSyncronizedXLayout(xLayout, response);
 
 				if (!xLayout) {
-					ns.web.mask.hide(ns.centerRegion);
+					ns.core.web.mask.hide(ns.app.centerRegion);
 					return;
 				}
 
 				// extend response
-				xResponse = ns.service.response.getExtendedResponse(response, xLayout);
+				xResponse = ns.core.service.response.getExtendedResponse(response, xLayout);
 
 				// extended axes
-				xColAxis = ns.service.layout.getExtendedAxis('col', xLayout.columnDimensionNames, xResponse);
-				xRowAxis = ns.service.layout.getExtendedAxis('row', xLayout.rowDimensionNames, xResponse);
+				xColAxis = ns.core.service.layout.getExtendedAxis('col', xLayout.columnDimensionNames, xResponse);
+				xRowAxis = ns.core.service.layout.getExtendedAxis('row', xLayout.rowDimensionNames, xResponse);
 
 				// update viewport
-				ns.centerRegion.removeAll(true);
-				ns.centerRegion.update(web.pivot.getHtml(xColAxis, xRowAxis, xResponse));
+				ns.app.centerRegion.removeAll(true);
+				ns.app.centerRegion.update(web.pivot.getHtml(layout, xResponse, xColAxis, xRowAxis));
 
 				// after render
 				if (NS.isSessionStorage) {
@@ -4887,7 +4887,7 @@ Ext.onReady( function() {
 
 				ns.app.viewport.setGui(layout, xLayout, updateGui);
 
-				web.mask.hide(ns.app.centerRegion);
+				ns.core.web.mask.hide(ns.app.centerRegion);
 
 				// Add uuid maps to instance
 				//ns.app.uuidDimUuidsMap = uuidDimUuidsMap;
