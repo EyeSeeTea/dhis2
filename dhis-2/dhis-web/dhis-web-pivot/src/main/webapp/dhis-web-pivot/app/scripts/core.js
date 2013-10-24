@@ -1186,9 +1186,9 @@ Ext.onReady( function() {
 					aFloorSpan = [],
 					aaGuiFloorIds = [],
 					aaAllFloorIds = [],
-					aColIds = [],
-					aAllObjects = [],
-					aaUniqueFloorIds;
+					aaUniqueFloorIds,
+					aCondoId = [],
+					aaAllFloorObjects = [];
 	//dimensionNames = ['pe', 'ou'];
 
 				// aDimensions: array of dimension objects with dimensionName property
@@ -1299,20 +1299,20 @@ Ext.onReady( function() {
 	//		  	  	  ]
 
 
+				// aCondoId
 				for (var i = 0, id; i < nAxisWidth; i++) {
 					id = '';
 
-					for (var j = 0; j < aaAllFloorIds.length; j++) {
+					for (var j = 0; j < nAxisHeight; j++) {
 						id += aaAllFloorIds[j][i];
 					}
 
-					aColIds.push(id);
+					aCondoId.push(id);
 				}
-	//aColIds	= [ abc, bcd, ... ]
+	//aCondoId	= [ id11+id21+id31, id12+id22+id32, ... ]
 
 
 				// allObjects
-
 				for (var i = 0, allFloor; i < aaAllFloorIds.length; i++) {
 					allFloor = [];
 
@@ -1325,13 +1325,13 @@ Ext.onReady( function() {
 						});
 					}
 
-					aAllObjects.push(allFloor);
+					aaAllFloorObjects.push(allFloor);
 				}
 
 				// add span and children
-				for (var i = 0; i < aAllObjects.length; i++) {
-					for (var j = 0, obj, doorCount = 0, oldestObj; j < aAllObjects[i].length; j += aFloorSpan[i]) {
-						obj = aAllObjects[i][j];
+				for (var i = 0; i < aaAllFloorObjects.length; i++) {
+					for (var j = 0, obj, doorCount = 0, oldestObj; j < aaAllFloorObjects[i].length; j += aFloorSpan[i]) {
+						obj = aaAllFloorObjects[i][j];
 
 						if (doorCount === 0) {
 
@@ -1365,16 +1365,16 @@ Ext.onReady( function() {
 				// add parents if more than 1 floor
 				if (nAxisHeight > 1) {
 					for (var i = 1, allFloor; i < nAxisHeight; i++) {
-						allFloor = aAllObjects[i];
+						allFloor = aaAllFloorObjects[i];
 
-						//for (var j = 0, obj, doorCount = 0, span = aFloorSpan[i - 1], parentObj = aAllObjects[i - 1][0]; j < allFloor.length; j++) {
+						//for (var j = 0, obj, doorCount = 0, span = aFloorSpan[i - 1], parentObj = aaAllFloorObjects[i - 1][0]; j < allFloor.length; j++) {
 						for (var j = 0, doorCount = 0, span = aFloorSpan[i - 1]; j < allFloor.length; j++) {
-							allFloor[j].parent = aAllObjects[i - 1][j];
+							allFloor[j].parent = aaAllFloorObjects[i - 1][j];
 
 							//doorCount++;
 
 							//if (doorCount === span) {
-								//parentObj = aAllObjects[i - 1][j + 1];
+								//parentObj = aaAllFloorObjects[i - 1][j + 1];
 								//doorCount = 0;
 							//}
 						}
@@ -1382,11 +1382,11 @@ Ext.onReady( function() {
 				}
 
 				// add uuids array to leaves
-				if (aAllObjects.length) {
+				if (aaAllFloorObjects.length) {
 
 					// Span = second-last in aFloorSpan - or axis size (instead of 1 - to highlight all leaves when dim == 1 )
-					var span = aAllObjects.length > 1 ? aFloorSpan[aAllObjects.length - 2] : nAxisWidth,
-						allObjectsFloorLast = aAllObjects[aAllObjects.length - 1];
+					var span = aaAllFloorObjects.length > 1 ? aFloorSpan[aaAllFloorObjects.length - 2] : nAxisWidth,
+						allObjectsFloorLast = aaAllFloorObjects[aaAllFloorObjects.length - 1];
 
 					for (var i = 0, leaf, parentUuids, obj, leafUuids = []; i < allObjectsFloorLast.length; i++) {
 						leaf = allObjectsFloorLast[i];
@@ -1416,15 +1416,15 @@ Ext.onReady( function() {
 				}
 
 				// populate uuidObject map
-				for (var i = 0; i < aAllObjects.length; i++) {
-					for (var j = 0, object; j < aAllObjects[i].length; j++) {
-						object = aAllObjects[i][j];
+				for (var i = 0; i < aaAllFloorObjects.length; i++) {
+					for (var j = 0, object; j < aaAllFloorObjects[i].length; j++) {
+						object = aaAllFloorObjects[i][j];
 //console.log(object.uuid, object);
 						uuidObjectMap[object.uuid] = object;
 					}
 				}
 
-//console.log("aAllObjects", aAllObjects);
+//console.log("aaAllFloorObjects", aaAllFloorObjects);
 
 				return {
 					type: type,
@@ -1435,9 +1435,9 @@ Ext.onReady( function() {
 						all: aaAllFloorIds
 					},
 					objects: {
-						all: aAllObjects
+						all: aaAllFloorObjects
 					},
-					ids: aColIds,
+					ids: aCondoId,
 					span: aFloorSpan,
 					dims: nAxisHeight,
 					size: nAxisWidth
