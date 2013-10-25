@@ -81,7 +81,7 @@ public class SystemController
     // UID Generator
     //--------------------------------------------------------------------------
 
-    @RequestMapping( value = "/uid", method = RequestMethod.GET )
+    @RequestMapping( value = { "/uid", "/id" }, method = RequestMethod.GET )
     public void getUid( @RequestParam(required = false) Integer n, HttpServletResponse response ) throws IOException
     {
         response.setContentType( ContextUtils.CONTENT_TYPE_JSON );
@@ -145,8 +145,8 @@ public class SystemController
         JacksonUtils.toJson( response.getOutputStream(), importSummary );
     }
     
-    @RequestMapping( value = "/info", method = RequestMethod.GET, produces = { "*/*", "application/json" } )
-    public void getSystemInfo( HttpServletRequest request, HttpServletResponse response ) throws IOException
+    @RequestMapping( value = "/info", method = RequestMethod.GET, produces = { "application/json", "application/javascript" } )
+    public String getSystemInfo( Model model, HttpServletRequest request, HttpServletResponse response )
     {
         SystemInfo info = systemService.getSystemInfo();
         
@@ -157,8 +157,23 @@ public class SystemController
         {
             info.clearSensitiveInfo();
         }
+
+        model.addAttribute( "model", info );
         
-        JacksonUtils.toJson( response.getOutputStream(), info );
+        return "info";
+    }
+    
+    @RequestMapping( value = "/context", method = RequestMethod.GET, produces = { "application/json", "application/javascript" } )
+    public String getContextInfo( Model model, HttpServletRequest request, HttpServletResponse response )
+    {
+        SystemInfo info = new SystemInfo();
+
+        info.setContextPath( ContextUtils.getContextPath( request ) );
+        info.setUserAgent( request.getHeader( ContextUtils.HEADER_USER_AGENT ) );
+
+        model.addAttribute( "model", info );
+        
+        return "info";
     }
     
     @RequestMapping( value = "/ping", method = RequestMethod.GET, produces = "text/plain" )

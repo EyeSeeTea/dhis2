@@ -36,7 +36,6 @@ import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.i18n.I18nManagerException;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.program.Program;
@@ -68,9 +67,6 @@ public abstract class AbstractEnrollmentService implements EnrollmentService
     private PatientService patientService;
 
     @Autowired
-    private OrganisationUnitService organisationUnitService;
-
-    @Autowired
     private I18nManager i18nManager;
 
     private I18nFormat _format;
@@ -81,7 +77,7 @@ public abstract class AbstractEnrollmentService implements EnrollmentService
         this._format = format;
     }
 
-    public I18nFormat getFormat()
+    I18nFormat getFormat()
     {
         if ( _format != null )
         {
@@ -290,7 +286,59 @@ public abstract class AbstractEnrollmentService implements EnrollmentService
     @Override
     public ImportSummary updateEnrollment( Enrollment enrollment )
     {
-        return null;
+        if ( enrollment.getEnrollment() == null )
+        {
+            ImportSummary importSummary = new ImportSummary( ImportStatus.ERROR, "No enrollment ID was supplied" );
+            importSummary.getImportCount().incrementIgnored();
+
+            return importSummary;
+        }
+
+        ProgramInstance programInstance = programInstanceService.getProgramInstance( enrollment.getEnrollment() );
+
+        if ( programInstance == null )
+        {
+            ImportSummary importSummary = new ImportSummary( ImportStatus.ERROR, "Enrollment ID was not valid." );
+            importSummary.getImportCount().incrementIgnored();
+
+            return importSummary;
+        }
+
+        Patient patient = getPatient( enrollment.getPerson() );
+        Program program = getProgram( enrollment.getProgram() );
+
+        programInstance.setProgram( program );
+        programInstance.setPatient( patient );
+        programInstance.setDateOfIncident( enrollment.getDateOfIncident() );
+        programInstance.setEnrollmentDate( enrollment.getDateOfEnrollment() );
+
+        if ( programInstance.getStatus() != enrollment.getStatus().getValue() )
+        {
+            if ( enrollment.getStatus().equals( EnrollmentStatus.CANCELLED ) )
+            {
+                programInstanceService.cancelProgramInstanceStatus( programInstance );
+            }
+            else if ( enrollment.getStatus().equals( EnrollmentStatus.COMPLETED ) )
+            {
+                programInstanceService.completeProgramInstanceStatus( programInstance, getFormat() );
+            }
+            else
+            {
+                ImportSummary importSummary = new ImportSummary( ImportStatus.ERROR, "Re-enrollment is not allowed, please create a new enrollment." );
+                importSummary.getImportCount().incrementIgnored();
+
+                return importSummary;
+            }
+        }
+
+        programInstanceService.updateProgramInstance( programInstance );
+
+        ImportSummary importSummary = new ImportSummary( ImportStatus.SUCCESS );
+        importSummary.setReference( enrollment.getEnrollment() );
+        importSummary.setDataValueCount( null );
+        importSummary.getImportCount().incrementImported();
+
+        return importSummary;
     }
 
     // -------------------------------------------------------------------------

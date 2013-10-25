@@ -1,13 +1,16 @@
-function changeRuleType( ruleType )
+function changeRuleType()
 {
-	if (ruleType == 'validation')
+	var ruleType = $( '#ruleType' ).val();
+	
+	if ( ruleType == 'validation' )
 	{
 		hideById( 'organisationUnitLevelTR');
 		hideById( 'sequentialSampleCountTR');
 		hideById( 'annualSampleCountTR');
 		hideById( 'highOutliersTR');
 		hideById( 'lowOutliersTR');
-	} else
+	} 
+	else
 	{
 		showById( 'organisationUnitLevelTR');
 		showById( 'sequentialSampleCountTR');

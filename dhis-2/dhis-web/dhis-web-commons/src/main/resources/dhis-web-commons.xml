@@ -18,6 +18,7 @@
 
   <package name="dhis-web-commons" extends="struts-default" namespace="/dhis-web-commons">
 
+	
     <result-types>
       <result-type name="plainTextErrorResult" class="org.hisp.dhis.result.PlainTextErrorResult" />
       <result-type name="chart" class="org.hisp.dhis.result.ChartResult" />
@@ -861,12 +862,6 @@
 
     <action name="getHelpItems" class="org.hisp.dhis.help.action.GetHelpItemsAction">
       <result name="success" type="outputStreamResult"></result>
-    </action>
-
-    <action name="software" class="org.hisp.dhis.commons.action.NoAction">
-      <result name="success" type="velocity">/main.vm</result>
-      <param name="page">/dhis-web-commons/about/software.vm</param>
-      <param name="menu">/dhis-web-commons/about/menu.vm</param>
     </action>
 
     <action name="showUpdateUserAccountForm" class="org.hisp.dhis.useraccount.action.GetCurrentUserAction">

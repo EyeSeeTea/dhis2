@@ -10,7 +10,7 @@
 		<td><input type="text" id="name" name="name"></td>
 	</tr>
 	<tr>
-		<td><label for="description">$i18n.getString( "description" ) ($i18n.getString( "visible_in_validation_violations" ))</label></td>
+		<td><label for="description">$i18n.getString( "description" ) ($i18n.getString( "visible_in_validation_alerts" ))</label></td>
 		<td><textarea name="description"></textarea></td>
 	</tr>
 	<tr>
@@ -26,9 +26,9 @@
 	<tr>
 		<td><label for="ruleType">$i18n.getString( "rule_type" )<em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 		<td>
-			<select type="text" id="ruleType" name="ruleType" onchange="changeRuleType( this.value )">
+			<select type="text" id="ruleType" name="ruleType" onchange="changeRuleType()">
 				<option value="validation" selected="selected">$i18n.getString( "validation" )</option>
-				<option value="monitoring">$i18n.getString( "monitoring" )</option>
+				<option value="surveillance">$i18n.getString( "surveillance" )</option>
 			</select>
 		</td>
 	</tr>

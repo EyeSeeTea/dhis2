@@ -1,7 +1,7 @@
 jQuery( document ).ready( function()
 {
     jQuery( "#name" ).focus();
-
+    
     validation2( 'updateValidationRuleGroupForm', function( form )
     {
         form.submit();
@@ -9,6 +9,7 @@ jQuery( document ).ready( function()
         'beforeValidateHandler' : function()
         {
             selectAllById( 'groupMembers' );
+            selectAllById( 'userRolesToAlert' );
         },
         'rules' : getValidationRules( "validationRuleGroup" )
     } );

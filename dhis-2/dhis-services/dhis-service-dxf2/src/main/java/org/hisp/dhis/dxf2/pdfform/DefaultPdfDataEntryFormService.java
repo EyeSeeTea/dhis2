@@ -93,9 +93,9 @@ public class DefaultPdfDataEntryFormService
 
     private static final int PERIODRANGE_FUTUREYEARS = 2;
 
-    private static Integer MAX_OPTIONS_DISPLAYED = 30;
+    private static final Integer MAX_OPTIONS_DISPLAYED = 30;
 
-    private static Integer PROGRAM_FORM_ROW_NUMBER = 10;
+    private static final Integer PROGRAM_FORM_ROW_NUMBER = 10;
 
     private PdfFormFontSettings pdfFormFontSettings;
 
@@ -151,7 +151,7 @@ public class DefaultPdfDataEntryFormService
     }
 
     private void setDataSet_DocumentContent( Document document, PdfWriter writer, String dataSetUid )
-        throws IOException, DocumentException, ParseException, Exception
+        throws Exception
     {
         DataSet dataSet = dataSetService.getDataSet( dataSetUid );
                        
@@ -313,7 +313,7 @@ public class DefaultPdfDataEntryFormService
     }
 
     private void setProgramStage_DocumentContent( Document document, PdfWriter writer, String programStageUid )
-        throws IOException, DocumentException, ParseException, Exception
+        throws Exception
     {
         ProgramStage programStage = programStageService.getProgramStage( programStageUid );
 

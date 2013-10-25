@@ -73,20 +73,10 @@ public class MapView
     public static final String LAYER_THEMATIC3 = "thematic3";
     public static final String LAYER_THEMATIC4 = "thematic4";
 
-    public static final String VALUE_TYPE_INDICATOR = "indicator";
-    public static final String VALUE_TYPE_DATAELEMENT = "dataelement";
-
-    public static final String LEGEND_TYPE_AUTOMATIC = "automatic";
-    public static final String LEGEND_TYPE_PREDEFINED = "predefined";
-
     public static final List<String> DATA_LAYERS = Arrays.asList( 
         LAYER_THEMATIC1, LAYER_THEMATIC2, LAYER_THEMATIC3, LAYER_THEMATIC4 );
     
     private String layer;
-
-    private String valueType;
-
-    private String legendType;
 
     private Integer method;
 
@@ -180,8 +170,20 @@ public class MapView
     @Override
     public String getName()
     {
-        return ( indicators != null && !indicators.isEmpty() ) ? indicators.get( 0 ).getName() : 
-            ( dataElements != null && !dataElements.isEmpty() ) ? dataElements.get( 0 ).getName() : uid;
+        if ( indicators != null && !indicators.isEmpty() )
+        {
+            return indicators.get( 0 ).getName();
+        }
+        else if ( dataElements != null && !dataElements.isEmpty() )
+        {
+            return dataElements.get( 0 ).getName();
+        }
+        else if ( dataElementOperands != null && !dataElementOperands.isEmpty() )
+        {
+            return dataElementOperands.get( 0 ).getName();
+        }
+        
+        return uid;
     }
     
     // -------------------------------------------------------------------------
@@ -199,32 +201,6 @@ public class MapView
     public void setLayer( String layer )
     {
         this.layer = layer;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
-    public String getValueType()
-    {
-        return valueType;
-    }
-
-    public void setValueType( String valueType )
-    {
-        this.valueType = valueType;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
-    public String getLegendType()
-    {
-        return legendType;
-    }
-
-    public void setLegendType( String legendType )
-    {
-        this.legendType = legendType;
     }
 
     @JsonProperty
@@ -395,8 +371,6 @@ public class MapView
             MapView mapView = (MapView) other;
 
             layer = mapView.getLayer() == null ? layer : mapView.getLayer();
-            valueType = mapView.getValueType() == null ? valueType : mapView.getValueType();
-            legendType = mapView.getLegendType() == null ? legendType : mapView.getLegendType();
             method = mapView.getMethod() == null ? method : mapView.getMethod();
             classes = mapView.getClasses() == null ? classes : mapView.getClasses();
             colorLow = mapView.getColorLow() == null ? colorLow : mapView.getColorLow();

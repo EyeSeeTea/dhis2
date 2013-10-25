@@ -204,7 +204,7 @@ public class SearchPatientAction
         else if ( searchTexts.size() > 0 )
         {
             // selected orgunit
-            if ( facilityLB == null || facilityLB.trim().isEmpty() )
+            if ( facilityLB == null || facilityLB.isEmpty() )
             {
                 orgunits.add( organisationUnit );
             }
@@ -217,7 +217,7 @@ public class SearchPatientAction
             {
                 Collection<Integer> orgunitIds = organisationUnitService.getOrganisationUnitHierarchy().getChildren(
                     organisationUnit.getId() );
-
+                orgunits.add( organisationUnit );
                 orgunits.addAll( organisationUnitService.getOrganisationUnits( orgunitIds ) );
             }
             else if ( facilityLB.equals( SEARCH_IN_ALL_ORGUNITS ) )
@@ -227,10 +227,10 @@ public class SearchPatientAction
 
             total = patientService.countSearchPatients( searchTexts, orgunits, null, statusEnrollment );
             this.paging = createPaging( total );
-            patients = patientService.searchPatients( searchTexts, orgunits, null, null, statusEnrollment,
+            patients = patientService.searchPatients( searchTexts, orgunits, null, null, null, statusEnrollment,
                 paging.getStartPos(), paging.getPageSize() );
 
-            if ( facilityLB != null )
+            if ( facilityLB != null && !facilityLB.isEmpty())
             {
                 for ( Patient patient : patients )
                 {

@@ -96,6 +96,13 @@ public class InternalMapLayer
     // Logic
     // -------------------------------------------------------------------------
 
+    @Override
+    public String toString()
+    {
+        return "[Name: " + name + ", period: " + period + ", radius high: " + radiusHigh + ", radius low: " + radiusLow +
+            ", color high: " + colorHigh + ", color low: " + colorLow + ", classes: " + classes + "]";
+    }
+    
     /**
      * Interpolates the radii of this map layer's set of map objects according
      * the highest and lowest values among them.
@@ -167,7 +174,7 @@ public class InternalMapLayer
         mapObject.setStrokeWidth( strokeWidth );
 
         // Build and set the geometric primitive that outlines org unit on the map
-        mapObject.setGeometry( InternalMapObject.buildAndApplyGeometryForOrganisationUnit( unit ) );
+        mapObject.buildGeometryForOrganisationUnit( unit );
 
         // Add the map object to the map layer
         addMapObject( mapObject );
@@ -190,7 +197,7 @@ public class InternalMapLayer
         mapObject.setStrokeColor( Color.BLACK );
         mapObject.setStrokeWidth( 1 );
 
-        mapObject.setGeometry( InternalMapObject.buildAndApplyGeometryForOrganisationUnit( unit ) );
+        mapObject.buildGeometryForOrganisationUnit( unit );
         addMapObject( mapObject );
         mapObject.setMapLayer( this );
     }

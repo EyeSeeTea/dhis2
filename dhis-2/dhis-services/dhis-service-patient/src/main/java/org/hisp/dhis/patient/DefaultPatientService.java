@@ -204,12 +204,6 @@ public class DefaultPatientService
     }
 
     @Override
-    public Collection<Patient> getPatiensByGender( String gender )
-    {
-        return patientStore.getByGender( gender );
-    }
-
-    @Override
     public Collection<Patient> getPatientsByBirthDate( Date birthDate )
     {
         return patientStore.getByBirthDate( birthDate );
@@ -303,33 +297,9 @@ public class DefaultPatientService
     }
 
     @Override
-    public Collection<Patient> getPatients( Program program, String gender )
-    {
-        return patientStore.getByProgram( program, gender, 0, Integer.MAX_VALUE );
-    }
-
-    @Override
-    public Collection<Patient> getPatients( OrganisationUnit organisationUnit, Program program, String gender )
-    {
-        return patientStore.getByOrgUnitProgramGender( organisationUnit, program, gender, 0, Integer.MAX_VALUE );
-    }
-
-    @Override
     public Collection<Patient> getPatients( OrganisationUnit organisationUnit, Program program )
     {
         return patientStore.getByOrgUnitProgram( organisationUnit, program, 0, Integer.MAX_VALUE );
-    }
-
-    @Override
-    public Collection<Patient> getPatients( OrganisationUnit organisationUnit, String gender, Integer min, Integer max )
-    {
-        return patientStore.getByOrgUnitAndGender( organisationUnit, gender, min, max );
-    }
-
-    @Override
-    public Collection<Patient> getPatients( OrganisationUnit organisationUnit, String gender )
-    {
-        return patientStore.getByOrgUnitAndGender( organisationUnit, gender, 0, Integer.MAX_VALUE );
     }
 
     @Override
@@ -560,10 +530,11 @@ public class DefaultPatientService
     }
 
     public Collection<Patient> searchPatients( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer statusEnrollment, Integer min,
-        Integer max )
+        Boolean followup, Collection<PatientAttribute> patientAttributes,
+        Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min, Integer max )
     {
-        return patientStore.search( searchKeys, orgunits, followup, patientAttributes, statusEnrollment, min, max );
+        return patientStore.search( searchKeys, orgunits, followup, patientAttributes, identifierTypes,
+            statusEnrollment, min, max );
     }
 
     public int countSearchPatients( List<String> searchKeys, Collection<OrganisationUnit> orgunits, Boolean followup,
@@ -575,7 +546,20 @@ public class DefaultPatientService
     public Collection<String> getPatientPhoneNumbers( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
         Boolean followup, Integer statusEnrollment, Integer min, Integer max )
     {
-        return patientStore.getPatientPhoneNumbers( searchKeys, orgunits, followup, null, statusEnrollment, min, max );
+        Collection<Patient> patients = patientStore.search( searchKeys, orgunits, followup, null, null,
+            statusEnrollment, min, max );
+
+        Set<String> phoneNumbers = new HashSet<String>();
+
+        for ( Patient patient : patients )
+        {
+            if ( patient.getPhoneNumber() != null )
+            {
+                phoneNumbers.add( patient.getPhoneNumber() );
+            }
+        }
+
+        return phoneNumbers;
     }
 
     public List<Integer> getProgramStageInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
@@ -634,7 +618,6 @@ public class DefaultPatientService
 
         return patientStore.getPatientEventReport( grid, searchKeys, orgunits, followup, patientAttributes, null,
             statusEnrollment, min, max );
-
     }
 
     @Override
@@ -679,13 +662,12 @@ public class DefaultPatientService
 
         return patientStore.getPatientEventReport( grid, searchKeys, orgunits, followup, null, patientIdentifierTypes,
             statusEnrollment, null, null );
-
     }
 
     @Override
-    public Collection<Patient> getPatientByFullname( String fullName, Integer orgunitId )
+    public Collection<Patient> getPatientByFullname( String fullName, OrganisationUnit organisationUnit )
     {
-        return patientStore.getByFullName( fullName, orgunitId );
+        return patientStore.getByFullName( fullName, organisationUnit );
     }
 
     @Override
@@ -694,4 +676,9 @@ public class DefaultPatientService
         return patientStore.getRegistrationOrgunitIds( startDate, endDate );
     }
 
+    @Override
+    public int validatePatient( Patient patient, Program program )
+    {
+        return patientStore.validate( patient, program );
+    }
 }

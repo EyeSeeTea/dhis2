@@ -156,6 +156,8 @@ public class TableAlteror
         executeSql( "ALTER TABLE mapview DROP COLUMN mapdatetype" );
         executeSql( "ALTER TABLE mapview DROP COLUMN featuretype" );
         executeSql( "ALTER TABLE mapview DROP COLUMN bounds" );
+        executeSql( "ALTER TABLE mapview DROP COLUMN valuetype" );
+        executeSql( "ALTER TABLE mapview DROP COLUMN legendtype" );
         executeSql( "ALTER TABLE mapview RENAME COLUMN mapvaluetype TO valuetype" );
         executeSql( "ALTER TABLE mapview RENAME COLUMN maplegendtype TO legendtype" );
         executeSql( "ALTER TABLE mapview RENAME COLUMN maplegendsetid TO legendsetid" );
@@ -435,6 +437,7 @@ public class TableAlteror
         executeSql( "update reporttable set cumulative = false where cumulative is null" );
         executeSql( "update reporttable set userorganisationunit = false where userorganisationunit is null" );
         executeSql( "update reporttable set userorganisationunitchildren = false where userorganisationunitchildren is null" );
+        executeSql( "update reporttable set userorganisationunitgrandchildren = false where userorganisationunitgrandchildren is null" );
         executeSql( "update reporttable set totals = true where totals is null" );
         executeSql( "update reporttable set subtotals = true where subtotals is null" );
         executeSql( "update reporttable set hideemptyrows = false where hideemptyrows is null" );
@@ -463,8 +466,9 @@ public class TableAlteror
         executeSql( "update chart set last4quarters = false where last4quarters is null" );
         executeSql( "update chart set last2sixmonths = false where last2sixmonths is null" );
         executeSql( "update chart set showdata = false where showdata is null" );
-        executeSql( "update chart set userorganisationunitchildren = false where userorganisationunitchildren is null" );
         executeSql( "update chart set userorganisationunit = false where userorganisationunit is null" );
+        executeSql( "update chart set userorganisationunitchildren = false where userorganisationunitchildren is null" );
+        executeSql( "update chart set userorganisationunitgrandchildren = false where userorganisationunitgrandchildren is null" );
         executeSql( "update chart set hidetitle = false where hidetitle is null" );
 
         // Move chart filters to chart_filters table
@@ -513,7 +517,6 @@ public class TableAlteror
         executeSql( "UPDATE categorycombo SET skiptotal = false WHERE skiptotal IS NULL" );
 
         // short names
-
         executeSql( "ALTER TABLE dataelement ALTER COLUMN shortname TYPE character varying(50)" );
         executeSql( "ALTER TABLE indicator ALTER COLUMN shortname TYPE character varying(50)" );
         executeSql( "ALTER TABLE dataset ALTER COLUMN shortname TYPE character varying(50)" );
@@ -523,7 +526,6 @@ public class TableAlteror
         executeSql( "update report set type='jasperJdbc' where type is null and reporttableid is null" );
 
         // upgrade authorities
-
         executeSql( "UPDATE userroleauthorities SET authority='F_DOCUMENT_PUBLIC_ADD' WHERE authority='F_DOCUMENT_ADD'" );
         executeSql( "UPDATE userroleauthorities SET authority='F_REPORT_PUBLIC_ADD' WHERE authority='F_REPORT_ADD'" );
         executeSql( "UPDATE userroleauthorities SET authority='F_REPORTTABLE_PUBLIC_ADD' WHERE authority='F_REPORTTABLE_ADD'" );
@@ -533,6 +535,8 @@ public class TableAlteror
         executeSql( "UPDATE userroleauthorities SET authority='F_DATAELEMENT_PUBLIC_ADD' WHERE authority='F_DATAELEMENT_ADD'" );
         executeSql( "UPDATE userroleauthorities SET authority='F_DATAELEMENTGROUP_PUBLIC_ADD' WHERE authority='F_DATAELEMENTGROUP_ADD'" );
         executeSql( "UPDATE userroleauthorities SET authority='F_DATAELEMENTGROUPSET_PUBLIC_ADD' WHERE authority='F_DATAELEMENTGROUPSET_ADD'" );
+
+        executeSql( "UPDATE userroleauthorities SET authority='F_ORGUNITGROUP_PUBLIC_ADD' WHERE authority='F_ORGUNITGROUP_ADD'" );
 
         executeSql( "UPDATE userroleauthorities SET authority='F_INDICATOR_PUBLIC_ADD' WHERE authority='F_INDICATOR_ADD'" );
         executeSql( "UPDATE userroleauthorities SET authority='F_INDICATORGROUP_PUBLIC_ADD' WHERE authority='F_INDICATORGROUP_ADD'" );
@@ -643,7 +647,7 @@ public class TableAlteror
 
         upgradeMapViewsToAnalyticalObject();
 
-		executeSql( "ALTER TABLE users ALTER COLUMN password DROP NOT NULL" );
+	executeSql( "ALTER TABLE users ALTER COLUMN password DROP NOT NULL" );
         
         log.info( "Tables updated" );
     }
@@ -674,6 +678,7 @@ public class TableAlteror
         
         executeSql( "update mapview set userorganisationunit = false where userorganisationunit is null" );
         executeSql( "update mapview set userorganisationunitchildren = false where userorganisationunitchildren is null" );
+        executeSql( "update mapview set userorganisationunitgrandchildren = false where userorganisationunitgrandchildren is null" );
     }
     
     private void upgradeChartRelativePeriods()

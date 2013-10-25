@@ -141,7 +141,10 @@ public class GeoToolsMapGenerationService
         else
         {
             // Build the legend set, then render it to an image
-            LegendSet legendSet = new LegendSet( internalMap.getLayers().get( 0 ) ); //TODO
+            InternalMapLayer mapLayer = internalMap.getLayers().get( 0 ); //TODO improve
+            
+            LegendSet legendSet = new LegendSet( mapLayer ); //TODO
+            
             BufferedImage legendImage = legendSet.render();
     
             // Combine the legend image and the map image into one image
@@ -169,8 +172,6 @@ public class GeoToolsMapGenerationService
         {
             return null;
         }
-
-        boolean isIndicator = MapView.VALUE_TYPE_INDICATOR.equals( mapView.getValueType() );
 
         List<OrganisationUnit> atLevels = new ArrayList<OrganisationUnit>();
         List<OrganisationUnit> inGroups = new ArrayList<OrganisationUnit>();
@@ -202,10 +203,19 @@ public class GeoToolsMapGenerationService
         
         String name = mapView.getName();
 
-        Period period = !mapView.getPeriods().isEmpty() ? mapView.getPeriods().get( 0 ) : null;
-
-        Integer radiusLow = !isIndicator ? mapView.getRadiusLow() : DEFAULT_RADIUS_LOW;
-        Integer radiusHigh = !isIndicator ? mapView.getRadiusHigh() : DEFAULT_RADIUS_HIGH;
+        Period period = null;
+        
+        if ( !mapView.getPeriods().isEmpty() ) // TODO integrate with BaseAnalyticalObject
+        {
+            period = mapView.getPeriods().get( 0 );
+        }
+        else if ( mapView.getRelatives() != null )
+        {
+            period = mapView.getRelatives().getRelativePeriods( date, null, false ).get( 0 );
+        }
+        
+        Integer radiusLow = mapView.getRadiusLow() != null ? mapView.getRadiusLow() : DEFAULT_RADIUS_LOW;
+        Integer radiusHigh = mapView.getRadiusHigh() != null ? mapView.getRadiusHigh() : DEFAULT_RADIUS_HIGH;
 
         // Get the low and high colors, typically in hexadecimal form, e.g. #ff3200
         Color colorLow = MapUtils.createColorFromString( StringUtils.trimToNull( mapView.getColorLow() ) != null ? mapView.getColorLow()
@@ -286,10 +296,7 @@ public class GeoToolsMapGenerationService
             // Update the radius of each map object in this map layer according to
             // its map object's highest and lowest values
             
-            if ( !isIndicator )
-            {
-                mapLayer.applyInterpolatedRadii();
-            }
+            mapLayer.applyInterpolatedRadii();
         }
 
         return mapLayer;
@@ -319,8 +326,11 @@ public class GeoToolsMapGenerationService
         {
             if ( row != null && row.size() >= 3 )
             {
-                String ou = (String) row.get( 1 );
-                Double value = (Double) row.get( ( row.size() - 1 ) );
+                int ouIndex = row.size() - 2;
+                int valueIndex = row.size() - 1;
+                
+                String ou = (String) row.get( ouIndex );
+                Double value = (Double) row.get( ( valueIndex ) );
                 
                 mapValues.add( new MapValue( ou, value ) );
             }

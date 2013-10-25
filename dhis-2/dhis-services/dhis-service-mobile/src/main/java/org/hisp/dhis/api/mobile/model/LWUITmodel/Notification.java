@@ -46,9 +46,8 @@ public class Notification implements DataStreamSerializable
         throws IOException
     {
         dataOutputStream.writeUTF( message );
-        
     }
-
+    
     @Override
     public void deSerialize( DataInputStream dataInputStream )
         throws IOException

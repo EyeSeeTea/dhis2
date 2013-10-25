@@ -317,7 +317,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
                         if ( attribute == null )
                         {
-                            log.warn( "Unknown reference to " + attributeValue.getAttribute() + " on object " + attributeValue );
+                            log.debug( "Unknown reference to " + attributeValue.getAttribute() + " on object " + attributeValue );
                             return;
                         }
 
@@ -395,7 +395,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             summaryType.getImportConflicts().add(
                 new ImportConflict( ImportUtils.getDisplayName( object ), "You do not have create access to class type." ) );
 
-            log.warn( "You do have create access to class type." );
+            log.debug( "You do not have create access to class type." );
 
             return false;
         }
@@ -757,10 +757,10 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         else if ( Period.class.isAssignableFrom( identifiableObject.getClass() ) )
         {
             Period period = (Period) identifiableObject;
-            period = periodService.reloadPeriod( period );
 
             if ( !options.isDryRun() )
             {
+                period = periodService.reloadPeriod( period );
                 sessionFactory.getCurrentSession().flush();
             }
 
@@ -810,7 +810,10 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
             // if ( !options.isDryRun() ) { }
             // TODO why do we have to invoke the setter on dryRun?
-            ReflectionUtils.invokeSetterMethod( field.getName(), object, reference );
+            if ( !options.isDryRun() )
+            {
+                ReflectionUtils.invokeSetterMethod( field.getName(), object, reference );
+            }
         }
     }
 
@@ -915,7 +918,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         String logMsg = "Unknown reference to " + identifiableObjectToString( reference ) + " (" + referenceName + ")" +
             " on object " + identifiableObjectToString( object ) + " (" + objectName + ").";
 
-        log.warn( logMsg );
+        log.debug( logMsg );
 
         ImportConflict importConflict = new ImportConflict( ImportUtils.getDisplayName( object ), logMsg );
         summaryType.getImportConflicts().add( importConflict );

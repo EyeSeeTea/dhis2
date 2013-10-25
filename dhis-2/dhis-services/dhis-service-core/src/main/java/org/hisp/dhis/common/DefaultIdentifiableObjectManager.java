@@ -34,7 +34,6 @@ import org.hibernate.criterion.Criterion;
 import org.hisp.dhis.common.IdentifiableObject.IdentifiableProperty;
 import org.hisp.dhis.common.NameableObject.NameableProperty;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,9 +56,6 @@ public class DefaultIdentifiableObjectManager
     implements IdentifiableObjectManager
 {
     private static final Log log = LogFactory.getLog( DefaultIdentifiableObjectManager.class );
-
-    @Autowired
-    private CurrentUserService currentUserService;
 
     @Autowired
     private Set<GenericIdentifiableObjectStore<IdentifiableObject>> identifiableObjectStores;
@@ -133,13 +129,13 @@ public class DefaultIdentifiableObjectManager
         for ( GenericIdentifiableObjectStore<IdentifiableObject> store : identifiableObjectStores )
         {
             T object = (T) store.getByUid( uid );
-            
+
             if ( object != null )
             {
                 return object;
             }
         }
-        
+
         return null;
     }
 

@@ -32,11 +32,8 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeService;
 import org.hisp.dhis.patient.PatientIdentifierType;
-import org.hisp.dhis.patient.PatientIdentifierTypeService;
 import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageDataElement;
 import org.hisp.dhis.program.ProgramStageSection;
@@ -57,13 +54,6 @@ public class LoadDataElementsAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ProgramService programService;
-
-    public void setProgramService( ProgramService programService )
-    {
-        this.programService = programService;
-    }
-
     private ProgramStageService programStageService;
 
     public void setProgramStageService( ProgramStageService programStageService )
@@ -76,20 +66,6 @@ public class LoadDataElementsAction
     public void setProgramStageSectionService( ProgramStageSectionService programStageSectionService )
     {
         this.programStageSectionService = programStageSectionService;
-    }
-
-    private PatientIdentifierTypeService identifierTypeService;
-
-    public void setIdentifierTypeService( PatientIdentifierTypeService identifierTypeService )
-    {
-        this.identifierTypeService = identifierTypeService;
-    }
-
-    private PatientAttributeService attributeService;
-
-    public void setAttributeService( PatientAttributeService attributeService )
-    {
-        this.attributeService = attributeService;
     }
 
     // -------------------------------------------------------------------------
@@ -155,19 +131,11 @@ public class LoadDataElementsAction
 
         if ( program != null && program.isRegistration() )
         {
-            Collection<PatientIdentifierType> identifierTypes = identifierTypeService.getAllPatientIdentifierTypes();
-            Collection<PatientAttribute> patientAttributes = attributeService.getAllPatientAttributes();
+            identifierTypes = program.getPatientIdentifierTypes();
+            patientAttributes = program.getPatientAttributes();
 
-            Collection<Program> programs = programService.getAllPrograms();
-            programs.remove( program );
-
-            for ( Program _program : programs )
-            {
-                identifierTypes.removeAll( _program.getPatientIdentifierTypes() );
-                patientAttributes.removeAll( _program.getPatientAttributes() );
-            }
         }
-        
+
         return SUCCESS;
     }
 }

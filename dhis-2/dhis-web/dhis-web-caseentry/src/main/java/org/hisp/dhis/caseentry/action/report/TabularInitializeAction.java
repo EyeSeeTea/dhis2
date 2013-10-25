@@ -29,7 +29,6 @@ package org.hisp.dhis.caseentry.action.report;
  */
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -92,9 +91,9 @@ public class TabularInitializeAction
         this.id = id;
     }
 
-    private Collection<Program> programs;
+    private List<Program> programs;
 
-    public Collection<Program> getPrograms()
+    public List<Program> getPrograms()
     {
         return programs;
     }
@@ -120,12 +119,12 @@ public class TabularInitializeAction
     public String execute()
         throws Exception
     {
-        orgunitGroups = new ArrayList<OrganisationUnitGroup>(
-            organisationUnitGroupService.getAllOrganisationUnitGroups() );
+        orgunitGroups = new ArrayList<OrganisationUnitGroup>( organisationUnitGroupService.getAllOrganisationUnitGroups() );
         Collections.sort( orgunitGroups, IdentifiableObjectNameComparator.INSTANCE );
 
-        programs = programService.getAllPrograms();
+        programs = new ArrayList<Program>( programService.getAllPrograms() );
         programs.retainAll( programService.getProgramsByCurrentUser() );
+        Collections.sort( programs, IdentifiableObjectNameComparator.INSTANCE );
 
         levels = organisationUnitService.getOrganisationUnitLevels();
         

@@ -71,6 +71,13 @@ public class AppListAction
         return appBaseUrl;
     }
 
+    private String appStoreUrl;
+
+    public String getAppStoreUrl()
+    {
+        return appStoreUrl;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -79,9 +86,11 @@ public class AppListAction
     public String execute()
         throws Exception
     {
-        appList = appManager.getInstalledApps();
+        appList = appManager.getApps();
         
         appBaseUrl = appManager.getAppBaseUrl();
+
+        appStoreUrl = appManager.getAppStoreUrl();
         
         return SUCCESS;
     }

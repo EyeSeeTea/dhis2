@@ -28,31 +28,28 @@ package org.hisp.dhis.caseentry.action.patient;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.ServletActionContext;
-import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientIdentifier;
-import org.hisp.dhis.patient.PatientIdentifierService;
 import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.patient.PatientIdentifierTypeService;
 import org.hisp.dhis.patient.PatientService;
-import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
-import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.validation.ValidationCriteria;
 
-import javax.servlet.http.HttpServletRequest;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -69,10 +66,6 @@ public class ValidatePatientAction
     private I18nFormat format;
 
     private PatientService patientService;
-
-    private PatientAttributeValueService patientAttributeValueService;
-
-    private PatientIdentifierService patientIdentifierService;
 
     private PatientIdentifierTypeService identifierTypeService;
 
@@ -94,13 +87,7 @@ public class ValidatePatientAction
 
     private Integer id;
 
-    private boolean checkedDuplicate;
-
     private boolean underAge;
-
-    private Integer representativeId;
-
-    private Integer relationshipTypeId;
 
     private Integer programId;
 
@@ -109,8 +96,6 @@ public class ValidatePatientAction
     // -------------------------------------------------------------------------
 
     private String message;
-
-    private I18n i18n;
 
     private Map<String, String> patientAttributeValueMap = new HashMap<String, String>();
 
@@ -124,143 +109,78 @@ public class ValidatePatientAction
 
     public String execute()
     {
-        if ( fullName != null )
+        OrganisationUnit orgunit = selectionManager.getSelectedOrganisationUnit();
+        Program program = null;
+        if ( programId != null )
         {
-            fullName = fullName.trim();
-
-            if ( !checkedDuplicate && birthDate != null && gender != null )
-            {
-                patients = patientService.getPatients( fullName, format.parseDate( birthDate ), gender );
-
-                if ( patients != null && patients.size() > 0 )
-                {
-                    message = i18n.getString( "patient_duplicate" );
-
-                    boolean flagDuplicate = false;
-                    for ( Patient p : patients )
-                    {
-                        if ( id == null || (id != null && p.getId() != id) )
-                        {
-                            flagDuplicate = true;
-                            Collection<PatientAttributeValue> patientAttributeValues = patientAttributeValueService
-                                .getPatientAttributeValues( p );
-
-                            for ( PatientAttributeValue patientAttributeValue : patientAttributeValues )
-                            {
-                                patientAttributeValueMap.put( p.getId() + "_"
-                                    + patientAttributeValue.getPatientAttribute().getId(),
-                                    patientAttributeValue.getValue() );
-                            }
-                        }
-                    }
-
-                    if ( flagDuplicate )
-                    {
-                        return PATIENT_DUPLICATE;
-                    }
-                }
-            }
+            program = programService.getProgram( programId );
         }
 
-        // ---------------------------------------------------------------------
-        // Check Under age information
-        // ---------------------------------------------------------------------
-
-        if ( underAge )
+        Patient patient = null;
+        if ( id != null )
         {
-            if ( representativeId == null )
-            {
-                message = i18n.getString( "please_choose_representative_for_this_under_age_patient" );
-                return INPUT;
-            }
-            if ( relationshipTypeId == null )
-            {
-                message = i18n.getString( "please_choose_relationshipType_for_this_under_age_patient" );
-                return INPUT;
-            }
+            patient = patientService.getPatient( id );
+        }
+        else
+        {
+            patient = new Patient();
         }
 
-        HttpServletRequest request = ServletActionContext.getRequest();
-
-        Collection<PatientIdentifierType> identifiers = identifierTypeService.getAllPatientIdentifierTypes();
-
-        if ( identifiers != null && identifiers.size() > 0 )
-        {
-            String value = null;
-            String idDuplicate = "";
-
-            for ( PatientIdentifierType idType : identifiers )
-            {
-                if ( !underAge || (underAge && !idType.isRelated()) )
-                {
-                    value = request.getParameter( AddPatientAction.PREFIX_IDENTIFIER + idType.getId() );
-
-                    if ( StringUtils.isNotBlank( value ) )
-                    {
-                        boolean isDuplicate = false;
-
-                        OrganisationUnit orgunit = (idType.getOrgunitScope()) ? selectionManager
-                            .getSelectedOrganisationUnit() : null;
-                        Program program = (idType.getProgramScope()) ? programService.getProgram( programId ) : null;
-
-                        isDuplicate = patientIdentifierService.checkDuplicateIdentifier( idType, value, id,
-                            orgunit, program, idType.getPeriodType() );
-
-                        if ( isDuplicate )
-                        {
-                            idDuplicate += idType.getName() + ", ";
-                        }
-                    }
-                }
-            }
-
-            if ( StringUtils.isNotBlank( idDuplicate ) )
-            {
-                idDuplicate = StringUtils.substringBeforeLast( idDuplicate, "," );
-                message = i18n.getString( "identifier_duplicate" ) + ": " + idDuplicate;
-                return INPUT;
-            }
-        }
-
-        // ---------------------------------------------------------------------
-        // Check Enrollment for adding patient single event with registration
-        // ---------------------------------------------------------------------
-
-        Patient p = new Patient();
         if ( gender != null )
         {
-            p.setGender( gender );
+            patient.setGender( gender );
         }
 
         if ( birthDate != null && !birthDate.isEmpty() )
         {
             birthDate = birthDate.trim();
-            p.setBirthDate( format.parseDate( birthDate ) );
+            patient.setBirthDate( format.parseDate( birthDate ) );
 
         }
         else if ( age != null )
         {
-            p.setBirthDateFromAge( age, Patient.AGE_TYPE_YEAR );
+            patient.setBirthDateFromAge( age, Patient.AGE_TYPE_YEAR );
         }
+        patient.setName( fullName );
+        patient.setOrganisationUnit( orgunit );
 
-        if ( programId != null )
+        HttpServletRequest request = ServletActionContext.getRequest();
+
+        Collection<PatientIdentifierType> identifierTypes = identifierTypeService.getAllPatientIdentifierTypes();
+
+        if ( identifierTypes != null && identifierTypes.size() > 0 )
         {
-            Program program = programService.getProgram( programId );
-            ValidationCriteria criteria = program.isValid( p );
+            String value = null;
 
-            if ( criteria != null )
+            Set<PatientIdentifier> patientIdentifiers = new HashSet<PatientIdentifier>();
+
+            for ( PatientIdentifierType idType : identifierTypes )
             {
-                message = i18n.getString( "patient_could_not_be_enrolled_due_to_following_enrollment_criteria" ) + ": "
-                    + criteria.getDescription();
-                return INPUT;
+                if ( !underAge || (underAge && !idType.isRelated()) )
+                {
+                    value = request.getParameter( AddPatientAction.PREFIX_IDENTIFIER + idType.getId() );
+                    if ( StringUtils.isNotBlank( value ) )
+                    {
+                        PatientIdentifier patientIdentifier = new PatientIdentifier();
+                        patientIdentifier.setPatient( patient );
+                        patientIdentifier.setIdentifierType( idType );
+                        patientIdentifier.setIdentifier( value );
+
+                        patientIdentifiers.add( patientIdentifier );
+                    }
+                }
             }
+
+            patient.setIdentifiers( patientIdentifiers );
         }
 
         // ---------------------------------------------------------------------
-        // Validation success
+        // Validate patient
         // ---------------------------------------------------------------------
 
-        message = i18n.getString( "everything_is_ok" );
+        int errorCode = patientService.validatePatient( patient, program );
+
+        message = errorCode + "";
 
         return SUCCESS;
     }
@@ -289,11 +209,6 @@ public class ValidatePatientAction
         this.identifierTypeService = identifierTypeService;
     }
 
-    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
-    {
-        this.patientIdentifierService = patientIdentifierService;
-    }
-
     public void setFormat( I18nFormat format )
     {
         this.format = format;
@@ -307,11 +222,6 @@ public class ValidatePatientAction
     public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
         this.selectionManager = selectionManager;
-    }
-
-    public void setPatientAttributeValueService( PatientAttributeValueService patientAttributeValueService )
-    {
-        this.patientAttributeValueService = patientAttributeValueService;
     }
 
     public void setFullName( String fullName )
@@ -334,11 +244,6 @@ public class ValidatePatientAction
         return message;
     }
 
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
-    }
-
     public Map<String, String> getPatientAttributeValueMap()
     {
         return patientAttributeValueMap;
@@ -354,11 +259,6 @@ public class ValidatePatientAction
         this.id = id;
     }
 
-    public void setCheckedDuplicate( boolean checkedDuplicate )
-    {
-        this.checkedDuplicate = checkedDuplicate;
-    }
-
     public void setGender( String gender )
     {
         this.gender = gender;
@@ -369,13 +269,4 @@ public class ValidatePatientAction
         this.underAge = underAge;
     }
 
-    public void setRepresentativeId( Integer representativeId )
-    {
-        this.representativeId = representativeId;
-    }
-
-    public void setRelationshipTypeId( Integer relationshipTypeId )
-    {
-        this.relationshipTypeId = relationshipTypeId;
-    }
 }

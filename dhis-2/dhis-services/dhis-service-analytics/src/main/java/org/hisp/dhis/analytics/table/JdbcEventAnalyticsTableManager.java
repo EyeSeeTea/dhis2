@@ -222,7 +222,7 @@ public class JdbcEventAnalyticsTableManager
             String select = "(select identifier from patientidentifier where patientid=pi.patientid and " +
                 "patientidentifiertypeid=" + identifierType.getId() + ") as " + identifierType.getUid();
             
-            String[] col = { identifierType.getUid() + "character varying(31)", select };
+            String[] col = { identifierType.getUid(), "character varying(31)", select };
             columns.add( col );
         }
         
@@ -242,14 +242,14 @@ public class JdbcEventAnalyticsTableManager
     
     public Date getEarliestData()
     {
-        final String sql = "select min(pdv.timestamp) from patientdatavalue pdv";
+        final String sql = "select min(psi.executiondate) from programstageinstance psi;";
         
         return jdbcTemplate.queryForObject( sql, Date.class );
     }
 
     public Date getLatestData()
     {
-        final String sql = "select max(pdv.timestamp) from patientdatavalue pdv";
+        final String sql = "select max(psi.executiondate) from programstageinstance psi;";
         
         return jdbcTemplate.queryForObject( sql, Date.class );
     }

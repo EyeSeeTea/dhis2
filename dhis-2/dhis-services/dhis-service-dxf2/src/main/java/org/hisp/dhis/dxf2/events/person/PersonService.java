@@ -58,17 +58,9 @@ public interface PersonService
 
     Persons getPersons( OrganisationUnit organisationUnit, String nameLike );
 
-    Persons getPersons( Gender gender );
-
     Persons getPersons( Program program );
 
-    Persons getPersons( Program program, Gender gender );
-
     Persons getPersons( OrganisationUnit organisationUnit, Program program );
-
-    Persons getPersons( OrganisationUnit organisationUnit, Gender gender );
-
-    Persons getPersons( OrganisationUnit organisationUnit, Program program, Gender gender );
 
     Persons getPersons( Collection<Patient> patients );
 

@@ -32,6 +32,7 @@ import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
 import static org.hisp.dhis.system.util.TextUtils.getQuotedCommaDelimitedString;
 import static org.hisp.dhis.system.util.TextUtils.removeLast;
+import static org.hisp.dhis.system.util.TextUtils.trimEnd;
 import static org.hisp.dhis.common.DimensionalObject.*;
 
 import java.util.Arrays;
@@ -41,7 +42,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.event.EventAnalyticsManager;
 import org.hisp.dhis.analytics.event.EventQueryParams;
-import org.hisp.dhis.analytics.event.QueryItem;
+import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.IdentifiableObject;
@@ -88,7 +89,14 @@ public class JdbcEventAnalyticsManager
         // Criteria
         // ---------------------------------------------------------------------
 
-        sql += getFromWhereClause( params );
+        if ( params.spansMultiplePartitions() )
+        {
+            sql += getFromWhereMultiplePartitionsClause( params );
+        }
+        else
+        {
+            sql += getFromWhereClause( params, params.getPartitions().getSinglePartition() );
+        }
 
         // ---------------------------------------------------------------------
         // Group by
@@ -176,7 +184,7 @@ public class JdbcEventAnalyticsManager
         // Criteria
         // ---------------------------------------------------------------------
 
-        sql += getFromWhereClause( params );
+        sql += getFromWhereClause( params, params.getPartitions().getSinglePartition() );
         
         // ---------------------------------------------------------------------
         // Sorting
@@ -255,7 +263,7 @@ public class JdbcEventAnalyticsManager
     {
         String sql = "select count(psi) ";
         
-        sql += getFromWhereClause( params );
+        sql += getFromWhereClause( params, params.getPartitions().getSinglePartition() );
         
         int count = 0;
         
@@ -308,12 +316,28 @@ public class JdbcEventAnalyticsManager
         
         return removeLast( sql, 1 );
     }
-    
-    private String getFromWhereClause( EventQueryParams params )
+
+    private String getFromWhereMultiplePartitionsClause( EventQueryParams params )
     {
-        String sql = "";
+        String sql = "from (";
         
-        sql += "from " + params.getTableName() + " ";
+        for ( String partition : params.getPartitions().getPartitions() )
+        {
+            sql += "select psi, " + getSelectColumns( params );
+            
+            sql += " " + getFromWhereClause( params, partition );
+            
+            sql += "union all ";
+        }
+
+        sql = trimEnd( sql, "union all ".length() ) + ") as data ";
+        
+        return sql;
+    }
+    
+    private String getFromWhereClause( EventQueryParams params, String partition )
+    {
+        String sql = "from " + partition + " ";
         
         if ( params.hasStartEndDate() )
         {        

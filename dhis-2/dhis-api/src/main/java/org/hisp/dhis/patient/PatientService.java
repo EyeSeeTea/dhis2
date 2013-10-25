@@ -48,6 +48,12 @@ public interface PatientService
 {
     String ID = PatientService.class.getName();
 
+    public static final int ERROR_NONE = 0;
+
+    public static final int ERROR_DUPLICATE_IDENTIFIER = 1;
+
+    public static final int ERROR_ENROLLMENT = 2;
+
     int savePatient( Patient patient );
 
     void deletePatient( Patient patient );
@@ -60,27 +66,11 @@ public interface PatientService
 
     Collection<Patient> getAllPatients();
 
-    /**
-     * Search Patient base on name/birthDate/gender
-     *
-     * @param name
-     * @param birthdate
-     * @param gender
-     * @return Patient List
-     */
     Collection<Patient> getPatients( String name, Date birthdate, String gender );
 
     /**
-     * Search Patient base on gender
-     *
-     * @param gender
-     * @return Patient List
-     */
-    Collection<Patient> getPatiensByGender( String gender );
-
-    /**
      * Search Patient base on birthDate
-     *
+     * 
      * @param birthDate
      * @return Patient List
      */
@@ -88,7 +78,7 @@ public interface PatientService
 
     /**
      * Search Patient base on fullName
-     *
+     * 
      * @param name fullName
      * @return Patient List
      */
@@ -96,7 +86,7 @@ public interface PatientService
 
     /**
      * Search Patient base on full-name or identifier value
-     *
+     * 
      * @param searchText value
      * @return Patient List
      */
@@ -104,7 +94,7 @@ public interface PatientService
 
     /**
      * Search Patient for mobile base on identifier value
-     *
+     * 
      * @param searchText value
      * @param orgUnitId
      * @return Patient List
@@ -113,7 +103,7 @@ public interface PatientService
 
     /**
      * Search Patient base on organization unit with result limited
-     *
+     * 
      * @param organisationUnit organisationUnit
      * @return Patient List
      */
@@ -121,38 +111,21 @@ public interface PatientService
 
     /**
      * Search Patient base on organization unit with result limited
-     *
+     * 
      * @param organisationUnit organisationUnit
      * @return Patient List
      */
     Collection<Patient> getPatients( OrganisationUnit organisationUnit );
 
     /**
-     *
+     * 
      * @param program
      * @return
      */
     Collection<Patient> getPatients( Program program );
 
     /**
-     *
-     * @param program
-     * @param gender
-     * @return
-     */
-    Collection<Patient> getPatients( Program program, String gender );
-
-    /**
-     *
-     * @param organisationUnit
-     * @param program
-     * @param gender
-     * @return
-     */
-    Collection<Patient> getPatients( OrganisationUnit organisationUnit, Program program, String gender );
-
-    /**
-     *
+     * 
      * @param organisationUnit
      * @param program
      * @return
@@ -160,25 +133,9 @@ public interface PatientService
     Collection<Patient> getPatients( OrganisationUnit organisationUnit, Program program );
 
     /**
-     * Search Patient base on organization unit with result limited
-     *
-     * @param organisationUnit organisationUnit
-     * @return Patient List
-     */
-    Collection<Patient> getPatients( OrganisationUnit organisationUnit, String gender, Integer min, Integer max );
-
-    /**
-     * Search Patient base on organization unit with result limited
-     *
-     * @param organisationUnit organisationUnit
-     * @return Patient List
-     */
-    Collection<Patient> getPatients( OrganisationUnit organisationUnit, String gender );
-
-    /**
      * Search Patient base on organization unit and sort the result by
      * PatientAttribute
-     *
+     * 
      * @param organisationUnit organisationUnit
      * @param patientAttribute
      * @param min
@@ -190,9 +147,9 @@ public interface PatientService
 
     /**
      * Search Patient base on organisationUnit and identifier value name
-     *
+     * 
      * @param organisationUnit
-     * @param searchText       identifier value
+     * @param searchText identifier value
      * @param min
      * @param max
      * @return
@@ -202,7 +159,7 @@ public interface PatientService
     /**
      * Search Patient base on PatientIdentifierType or Attribute or Patient's
      * name
-     *
+     * 
      * @param identifierTypeId
      * @param attributeId
      * @param value
@@ -213,7 +170,7 @@ public interface PatientService
     /**
      * Search Patient base on OrganisationUnit and Program with result limited
      * name
-     *
+     * 
      * @param organisationUnit
      * @param program
      * @param min
@@ -224,7 +181,7 @@ public interface PatientService
 
     /**
      * Sort the result by PatientAttribute
-     *
+     * 
      * @param patients
      * @param patientAttribute
      * @return Patient List
@@ -235,16 +192,15 @@ public interface PatientService
 
     /**
      * Search Patient base on identifier value and get number of result
-     *
+     * 
      * @param searchText
      * @return number of patients
      */
     int countGetPatients( String searchText );
 
     /**
-     * Search Patient base on name and get number of
-     * result
-     *
+     * Search Patient base on name and get number of result
+     * 
      * @param name
      * @return number of patients
      */
@@ -262,11 +218,13 @@ public interface PatientService
     int countGetPatientsByOrgUnitProgram( OrganisationUnit organisationUnit, Program program );
 
     Object getObjectValue( String property, String value, I18nFormat format );
-    
-    Collection<Patient> searchPatients( List<String> searchKeys, Collection<OrganisationUnit> orgunit,
-        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer statusEnrollment, Integer min, Integer max );
 
-    int countSearchPatients( List<String> searchKeys, Collection<OrganisationUnit> orgunit, Boolean followup, Integer statusEnrollment );
+    Collection<Patient> searchPatients( List<String> searchKeys, Collection<OrganisationUnit> orgunit,
+        Boolean followup, Collection<PatientAttribute> patientAttributes,
+        Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min, Integer max );
+
+    int countSearchPatients( List<String> searchKeys, Collection<OrganisationUnit> orgunit, Boolean followup,
+        Integer statusEnrollment );
 
     Collection<String> getPatientPhoneNumbers( List<String> searchKeys, Collection<OrganisationUnit> orgunit,
         Boolean followup, Integer statusEnrollment, Integer min, Integer max );
@@ -274,15 +232,17 @@ public interface PatientService
     List<Integer> getProgramStageInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunit,
         Boolean followup, Integer statusEnrollment, Integer min, Integer max );
 
-    Grid getScheduledEventsReport( List<String> searchKeys, Collection<OrganisationUnit> orgunits, Boolean followup, Integer statusEnrollment,
-        Integer min, Integer max, I18n i18n );
+    Grid getScheduledEventsReport( List<String> searchKeys, Collection<OrganisationUnit> orgunits, Boolean followup,
+        Integer statusEnrollment, Integer min, Integer max, I18n i18n );
 
     Collection<Patient> getPatientsByPhone( String phoneNumber, Integer min, Integer max );
 
-    Collection<Patient> getPatientByFullname( String fullName, Integer orgunitId );
+    Collection<Patient> getPatientByFullname( String fullName, OrganisationUnit organisationUnit );
 
     Collection<Integer> getRegistrationOrgunitIds( Date startDate, Date endDate );
 
     Grid getTrackingEventsReport( Program program, List<String> searchKeys, Collection<OrganisationUnit> orgunit,
         Boolean followup, Integer statusEnrollment, I18n i18n );
+
+    int validatePatient( Patient patient, Program program );
 }

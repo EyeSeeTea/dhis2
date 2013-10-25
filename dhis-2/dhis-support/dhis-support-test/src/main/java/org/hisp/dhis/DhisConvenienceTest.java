@@ -807,7 +807,7 @@ public abstract class DhisConvenienceTest
         validationRule.setName( "MonitoringRule" + uniqueCharacter );
         validationRule.setDescription( "Description" + uniqueCharacter );
         validationRule.setType( ValidationRule.TYPE_ABSOLUTE );
-        validationRule.setRuleType( ValidationRule.RULE_TYPE_MONITORING );
+        validationRule.setRuleType( ValidationRule.RULE_TYPE_SURVEILLANCE );
         validationRule.setOperator( operator );
         validationRule.setLeftSide( leftSide );
         validationRule.setRightSide( rightSide );
@@ -986,7 +986,7 @@ public abstract class DhisConvenienceTest
         Patient patient = new Patient();
         patient.setAutoFields();
 
-        patient.setName( "FirstName" + uniqueChar );
+        patient.setName( "Name" + uniqueChar );
         patient.setGender( Patient.MALE );
         patient.setDobType( Patient.DOB_TYPE_VERIFIED );
         patient.setBirthDate( getDate( 1970, 1, 1 ) );
@@ -1001,7 +1001,7 @@ public abstract class DhisConvenienceTest
         Patient patient = new Patient();
         patient.setAutoFields();
 
-        patient.setName( "FirstName" + uniqueChar );
+        patient.setName( "Name" + uniqueChar );
         patient.setGender( gender );
         patient.setDobType( Patient.DOB_TYPE_VERIFIED );
         patient.setBirthDate( getDate( 1970, 1, 1 ) );

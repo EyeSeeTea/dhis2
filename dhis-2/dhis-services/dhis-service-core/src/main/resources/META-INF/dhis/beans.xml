@@ -440,13 +440,17 @@
     <property name="expressionService" ref="org.hisp.dhis.expression.ExpressionService" />
     <property name="dataEntryFormService" ref="org.hisp.dhis.dataentryform.DataEntryFormService" />
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
-    <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-    <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
     <property name="constantService" ref="org.hisp.dhis.constant.ConstantService" />
     <property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
-    <property name="messageService" ref="org.hisp.dhis.message.MessageService" />
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
+    <property name="messageService" ref="org.hisp.dhis.message.MessageService" />
+    <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+    <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
   </bean>
+  
+  <!-- Scheduled task for data monitoring -->
+  
+  <bean id="monitoringLastDayTask" class="org.hisp.dhis.validation.scheduling.MonitoringTask" />
 
   <bean id="org.hisp.dhis.dataelement.DataElementCategoryService" class="org.hisp.dhis.dataelement.DefaultDataElementCategoryService">
     <property name="dataElementCategoryStore" ref="org.hisp.dhis.dataelement.DataElementCategoryStore" />
@@ -627,6 +631,7 @@
         <value>colombia</value>
         <value>congo_brazzaville</value>
         <value>congo_kinshasa</value>
+        <value>ecowas</value>
         <value>ecuador</value>
         <value>east_africa_community</value>
         <value>ethiopia</value>
@@ -683,6 +688,10 @@
         <value>who</value>
       </list>
     </property>
+  </bean>
+
+  <bean id="org.hisp.dhis.setting.TranslateSystemSettingManager" class="org.hisp.dhis.setting.DefaultTranslateSystemSettingManager">
+    <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
   </bean>
 
   <bean id="org.hisp.dhis.setting.StyleManager" class="org.hisp.dhis.setting.DefaultStyleManager">

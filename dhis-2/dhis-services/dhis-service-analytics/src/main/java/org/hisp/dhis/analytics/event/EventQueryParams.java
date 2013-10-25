@@ -35,9 +35,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.hisp.dhis.analytics.DataQueryParams;
+import org.hisp.dhis.analytics.Partitions;
 import org.hisp.dhis.analytics.SortOrder;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.NameableObject;
+import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
@@ -69,9 +71,7 @@ public class EventQueryParams
     private List<String> desc = new ArrayList<String>();
     
     private String organisationUnitMode;
-    
-    private String tableName;
-    
+        
     private Integer page;
     
     private Integer pageSize;
@@ -85,6 +85,8 @@ public class EventQueryParams
     // -------------------------------------------------------------------------
     
     private String periodType;
+    
+    private boolean aggregate;
     
     // -------------------------------------------------------------------------
     // Constructors
@@ -103,7 +105,7 @@ public class EventQueryParams
         params.filters = new ArrayList<DimensionalObject>( this.filters );
         params.aggregationType = this.aggregationType;
 
-        params.partitions = this.partitions;
+        params.partitions = new Partitions( this.partitions );
         params.periodType = this.periodType;
         
         params.program = this.program;
@@ -115,12 +117,13 @@ public class EventQueryParams
         params.asc = new ArrayList<String>( this.asc );
         params.desc = new ArrayList<String>( this.desc );
         params.organisationUnitMode = this.organisationUnitMode;
-        params.tableName = this.tableName;
         params.page = this.page;
         params.pageSize = this.pageSize;
         params.sortOrder = this.sortOrder;
         params.limit = this.limit;
+        
         params.periodType = this.periodType;
+        params.aggregate = this.aggregate;
         
         return params;
     }
@@ -303,16 +306,6 @@ public class EventQueryParams
         this.organisationUnitMode = organisationUnitMode;
     }
 
-    public String getTableName()
-    {
-        return tableName;
-    }
-
-    public void setTableName( String tableName )
-    {
-        this.tableName = tableName;
-    }
-
     public Integer getPage()
     {
         return page;
@@ -361,5 +354,15 @@ public class EventQueryParams
     public void setPeriodType( String periodType )
     {
         this.periodType = periodType;
+    }
+
+    public boolean isAggregate()
+    {
+        return aggregate;
+    }
+
+    public void setAggregate( boolean aggregate )
+    {
+        this.aggregate = aggregate;
     }
 }

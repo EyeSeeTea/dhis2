@@ -44,8 +44,8 @@ public interface ValidationRuleService
 {
     String ID = ValidationRuleService.class.getName();
 
-    int MAX_INTERACTIVE_VIOLATIONS = 500;
-    int MAX_ALERT_VIOLATIONS = 100000;
+    int MAX_INTERACTIVE_ALERTS = 500;
+    int MAX_SCHEDULED_ALERTS = 100000;
 
     // -------------------------------------------------------------------------
     // ValidationRule business logic
@@ -93,9 +93,10 @@ public interface ValidationRuleService
     Collection<ValidationResult> validate( Date startDate, Date endDate, OrganisationUnit source );
 
     /**
-     * For a nightly alert run, run validation tests and notify users as requested of any validations.
+     * Evaluates all the validation rules that could generate alerts,
+     * and sends results (if any) to users who should be notified.
      */
-    void alertRun();
+    void scheduledRun();
     
     // -------------------------------------------------------------------------
     // ValidationRule

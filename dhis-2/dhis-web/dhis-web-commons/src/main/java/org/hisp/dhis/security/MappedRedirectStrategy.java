@@ -40,6 +40,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hisp.dhis.security.filter.CustomAuthenticationFilter.*;
+
 /**
  * @author mortenoh
  */
@@ -79,7 +81,20 @@ public class MappedRedirectStrategy
     public void sendRedirect( HttpServletRequest request, HttpServletResponse response, String url )
         throws IOException
     {
-        Device device = deviceResolver.resolveDevice( request );
+        // ---------------------------------------------------------------------
+        // Check if redirect should be skipped - for cookie authentication only
+        // ---------------------------------------------------------------------
+
+        String authOnly = (String) request.getAttribute( PARAM_AUTH_ONLY );
+        
+        if ( "true".equals( authOnly ) )
+        {
+            return;
+        }
+
+        // ---------------------------------------------------------------------
+        // Ignore certain ajax requests
+        // ---------------------------------------------------------------------
 
         for ( String key : redirectMap.keySet() )
         {
@@ -89,7 +104,13 @@ public class MappedRedirectStrategy
             }
         }
 
-        String mobileVersion = (String) request.getAttribute( "mobileVersion" );
+        // ---------------------------------------------------------------------
+        // Redirect to mobile start pages
+        // ---------------------------------------------------------------------
+
+        Device device = deviceResolver.resolveDevice( request );
+
+        String mobileVersion = (String) request.getAttribute( PARAM_MOBILE_VERSION );
         mobileVersion = mobileVersion == null ? "desktop" : mobileVersion;
 
         if ( (device.isMobile() || device.isTablet()) && mobileVersion.equals( "basic" ) )

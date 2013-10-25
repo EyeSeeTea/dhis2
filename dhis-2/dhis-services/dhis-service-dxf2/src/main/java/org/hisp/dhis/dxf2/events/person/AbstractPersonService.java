@@ -50,7 +50,6 @@ import org.hisp.dhis.program.Program;
 import org.hisp.dhis.relationship.Relationship;
 import org.hisp.dhis.relationship.RelationshipService;
 import org.hisp.dhis.relationship.RelationshipType;
-import org.hisp.dhis.relationship.RelationshipTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
@@ -69,7 +68,8 @@ import static org.hisp.dhis.system.util.TextUtils.nullIfEmpty;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public abstract class AbstractPersonService implements PersonService
+public abstract class AbstractPersonService
+    implements PersonService
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -91,9 +91,6 @@ public abstract class AbstractPersonService implements PersonService
     private RelationshipService relationshipService;
 
     @Autowired
-    private RelationshipTypeService relationshipTypeService;
-
-    @Autowired
     private IdentifiableObjectManager manager;
 
     @Autowired
@@ -107,7 +104,7 @@ public abstract class AbstractPersonService implements PersonService
         this._format = format;
     }
 
-    public I18nFormat getFormat()
+    I18nFormat getFormat()
     {
         if ( _format != null )
         {
@@ -159,13 +156,6 @@ public abstract class AbstractPersonService implements PersonService
     }
 
     @Override
-    public Persons getPersons( Gender gender )
-    {
-        List<Patient> patients = new ArrayList<Patient>( patientService.getPatiensByGender( gender.getValue() ) );
-        return getPersons( patients );
-    }
-
-    @Override
     public Persons getPersons( Program program )
     {
         List<Patient> patients = new ArrayList<Patient>( patientService.getPatients( program ) );
@@ -173,30 +163,9 @@ public abstract class AbstractPersonService implements PersonService
     }
 
     @Override
-    public Persons getPersons( Program program, Gender gender )
-    {
-        List<Patient> patients = new ArrayList<Patient>( patientService.getPatients( program, gender.getValue() ) );
-        return getPersons( patients );
-    }
-
-    @Override
     public Persons getPersons( OrganisationUnit organisationUnit, Program program )
     {
         List<Patient> patients = new ArrayList<Patient>( patientService.getPatients( organisationUnit, program ) );
-        return getPersons( patients );
-    }
-
-    @Override
-    public Persons getPersons( OrganisationUnit organisationUnit, Gender gender )
-    {
-        List<Patient> patients = new ArrayList<Patient>( patientService.getPatients( organisationUnit, gender.getValue() ) );
-        return getPersons( patients );
-    }
-
-    @Override
-    public Persons getPersons( OrganisationUnit organisationUnit, Program program, Gender gender )
-    {
-        List<Patient> patients = new ArrayList<Patient>( patientService.getPatients( organisationUnit, program, gender.getValue() ) );
         return getPersons( patients );
     }
 

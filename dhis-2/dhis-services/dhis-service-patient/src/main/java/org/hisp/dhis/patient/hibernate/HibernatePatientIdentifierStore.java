@@ -28,6 +28,9 @@ package org.hisp.dhis.patient.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
+import java.util.Date;
+
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
@@ -40,30 +43,14 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.system.util.DateUtils;
-import org.springframework.jdbc.core.JdbcTemplate;
-
-import java.util.Collection;
-import java.util.Date;
 
 /**
  * @author Abyot Asalefew Gizaw
- * @version $Id$
  */
 public class HibernatePatientIdentifierStore
     extends HibernateIdentifiableObjectStore<PatientIdentifier>
     implements PatientIdentifierStore
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private JdbcTemplate jdbcTemplate;
-
-    public void setJdbcTemplate( JdbcTemplate jdbcTemplate )
-    {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
     // -------------------------------------------------------------------------
     // Implementation methods
     // -------------------------------------------------------------------------
@@ -164,39 +151,5 @@ public class HibernatePatientIdentifierStore
     {
         return getCriteria( Restrictions.in( "identifierType", identifierTypes ), Restrictions.eq( "patient", patient ) )
             .list();
-    }
-
-    @SuppressWarnings("deprecation")
-    public boolean checkDuplicateIdentifier( PatientIdentifierType patientIdentifierType, String identifier,
-        Integer patientId, OrganisationUnit organisationUnit, Program program, PeriodType periodType )
-    {
-        String sql = "select count(*) from patientidentifier pi inner join patient p on pi.patientid=p.patientid "
-            + "inner join programinstance pis on pis.patientid=pi.patientid where pi.patientidentifiertypeid="
-            + patientIdentifierType.getId() + " and pi.identifier='" + identifier + "' ";
-
-        if ( patientId != null )
-        {
-            sql += " and pi.patientid!=" + patientId;
-        }
-
-        if ( patientIdentifierType.getType().equals( PatientIdentifierType.VALUE_TYPE_LOCAL_ID ) && organisationUnit != null )
-        {
-            sql += " and p.organisationunitid=" + organisationUnit.getId();
-        }
-
-        if ( patientIdentifierType.getType().equals( PatientIdentifierType.VALUE_TYPE_LOCAL_ID ) && program != null )
-        {
-            sql += " and pis.programid=" + program.getId();
-        }
-
-        if ( patientIdentifierType.getType().equals( PatientIdentifierType.VALUE_TYPE_LOCAL_ID ) && periodType != null )
-        {
-            Date currentDate = new Date();
-            Period period = periodType.createPeriod( currentDate );
-            sql += " and pis.enrollmentdate >='" + period.getStartDateString() + "' and pis.enrollmentdate <='"
-                + DateUtils.getMediumDateString( period.getEndDate() ) + "'";
-        }
-
-        return jdbcTemplate.queryForInt( sql ) == 0 ? false : true;
     }
 }

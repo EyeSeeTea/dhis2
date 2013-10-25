@@ -162,19 +162,11 @@ Ext.onReady( function() {
 				for (var i = 0; i < layers.length; i++) {
 					var layer = layers[i],
 						id = layer.id,
-						legendConfig = layer.core.getLegendConfig(),
 						imageLegendConfig = layer.core.getImageLegendConfig(),
 						what,
 						when,
 						where,
 						legend;
-
-					// Html encode
-					for (var key in legendConfig) {
-						if (legendConfig.hasOwnProperty(key)) {
-							legendConfig[key] = Ext.htmlEncode(legendConfig[key]);
-						}
-					}
 
 					// SVG
 					svgArray.push(layer.div.innerHTML);
@@ -183,19 +175,13 @@ Ext.onReady( function() {
 					if (id !== gis.layer.boundary.id && id !== gis.layer.facility.id) {
 						what = '<g id="indicator" style="display: block; visibility: visible;">' +
 							   '<text id="indicator" x="' + x + '" y="' + y + '" font-size="12">' +
-							   '<tspan>' + legendConfig.what + '</tspan></text></g>';
+							   '<tspan>' + layer.core.view.columns[0].items[0].name + '</tspan></text></g>';
 
 						y += 15;
 
 						when = '<g id="period" style="display: block; visibility: visible;">' +
 							   '<text id="period" x="' + x + '" y="' + y + '" font-size="12">' +
-							   '<tspan>' + legendConfig.when + '</tspan></text></g>';
-
-						y += 15;
-
-						where = '<g id="period" style="display: block; visibility: visible;">' +
-							   '<text id="period" x="' + x + '" y="' + y + '" font-size="12">' +
-							   '<tspan>' + legendConfig.where + '</tspan></text></g>';
+							   '<tspan>' + layer.core.view.filters[0].items[0].name + '</tspan></text></g>';
 
 						y += 8;
 
@@ -2450,8 +2436,6 @@ Ext.onReady( function() {
 			update,
 			cancel,
 			info,
-			error1Window,
-			error2Window,
 
 		// Functions
 			showUpdateLegendSet,
@@ -2603,7 +2587,7 @@ Ext.onReady( function() {
 								el = editArray[i];
 								Ext.create('Ext.tip.ToolTip', {
 									target: el,
-									html: 'Rename',
+									html: 'Edit',
 									'anchor': 'bottom',
 									anchorOffset: -14,
 									showDelay: 1000

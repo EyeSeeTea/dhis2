@@ -37,6 +37,7 @@ import static org.hisp.dhis.common.NameableObjectUtils.asTypedList;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.getParentGraphMap;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +52,7 @@ import org.hisp.dhis.analytics.event.EventAnalyticsManager;
 import org.hisp.dhis.analytics.event.EventAnalyticsService;
 import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.analytics.event.EventQueryPlanner;
-import org.hisp.dhis.analytics.event.QueryItem;
+import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DimensionalObject;
@@ -87,12 +88,16 @@ public class DefaultEventAnalyticsService
 {
     private static final String ITEM_EVENT = "psi";
     private static final String ITEM_PROGRAM_STAGE = "ps";
-    private static final String ITEM_EXECUTION_DATE = "executiondate";
+    private static final String ITEM_EXECUTION_DATE = "eventdate";
     private static final String ITEM_ORG_UNIT = "ou";
     private static final String ITEM_ORG_UNIT_NAME = "ouname";
     private static final String ITEM_ORG_UNIT_CODE = "oucode";
     private static final String ITEM_GENDER = "gender";
     private static final String ITEM_ISDEAD = "isdead";
+    
+    private static final String COL_NAME_EVENTDATE = "executiondate";
+
+    private static final List<String> SORTABLE_ITEMS = Arrays.asList( ITEM_EXECUTION_DATE, ITEM_ORG_UNIT_NAME, ITEM_ORG_UNIT_CODE );
     
     @Autowired
     private ProgramService programService;
@@ -127,7 +132,8 @@ public class DefaultEventAnalyticsService
 
     //TODO order the event analytics tables up front to avoid default sorting in queries
     //TODO filter items support
-    //TODO remove org unit name / code columns and use names / codes from meta data
+    //TODO parallel processing of queries
+    //TODO proper query when start/end period or period filter span multiple partitions
     
     public Grid getAggregatedEventData( EventQueryParams params )
     {
@@ -154,7 +160,7 @@ public class DefaultEventAnalyticsService
         // ---------------------------------------------------------------------
         // Data
         // ---------------------------------------------------------------------
-                
+        
         List<EventQueryParams> queries = queryPlanner.planQuery( params );
 
         for ( EventQueryParams query : queries )
@@ -194,7 +200,7 @@ public class DefaultEventAnalyticsService
 
         grid.addHeader( new GridHeader( ITEM_EVENT, "Event" ) );
         grid.addHeader( new GridHeader( ITEM_PROGRAM_STAGE, "Program stage" ) );
-        grid.addHeader( new GridHeader( ITEM_EXECUTION_DATE, "Execution date" ) );
+        grid.addHeader( new GridHeader( ITEM_EXECUTION_DATE, "Event date" ) );
         grid.addHeader( new GridHeader( ITEM_ORG_UNIT_NAME, "Organisation unit name" ) );
         grid.addHeader( new GridHeader( ITEM_ORG_UNIT_CODE, "Organisation unit code" ) );
         grid.addHeader( new GridHeader( ITEM_ORG_UNIT, "Organisation unit" ) );
@@ -256,22 +262,17 @@ public class DefaultEventAnalyticsService
         return grid;
     }
 
-    /**
-     * Used for aggregate query.
-     */
     public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate, 
         Set<String> dimension, Set<String> filter, boolean hierarchyMeta, SortOrder sortOrder, Integer limit, I18nFormat format )
     {
         EventQueryParams params = getFromUrl( program, stage, startDate, endDate, dimension, filter, null, null, null, hierarchyMeta, null, null, format );
         params.setSortOrder( sortOrder );
         params.setLimit( limit );
+        params.setAggregate( true );
         
         return params;
     }
     
-    /**
-     * Used for event query.
-     */
     public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate, Set<String> dimension, Set<String> filter, 
         String ouMode, Set<String> asc, Set<String> desc, boolean hierarchyMeta, Integer page, Integer pageSize, I18nFormat format )
     {
@@ -375,6 +376,7 @@ public class DefaultEventAnalyticsService
         params.setHierarchyMeta( hierarchyMeta );
         params.setPage( page );
         params.setPageSize( pageSize );
+        params.setAggregate( false );
 
         return params;
     }
@@ -462,12 +464,14 @@ public class DefaultEventAnalyticsService
     
     private String getSortItem( String item, Program program )
     {
-        if ( !ITEM_EXECUTION_DATE.equals( item ) && getItem( program, item, null, null ) == null )
+        if ( !SORTABLE_ITEMS.contains( item.toLowerCase() ) && getItem( program, item, null, null ) == null )
         {
             throw new IllegalQueryException( "Descending sort item is invalid: " + item );
         }
         
-        return item;
+        item = ITEM_EXECUTION_DATE.equalsIgnoreCase( item ) ? COL_NAME_EVENTDATE : item;
+        
+        return item.toLowerCase();
     }
     
     private QueryItem getItem( Program program, String item, String operator, String filter )

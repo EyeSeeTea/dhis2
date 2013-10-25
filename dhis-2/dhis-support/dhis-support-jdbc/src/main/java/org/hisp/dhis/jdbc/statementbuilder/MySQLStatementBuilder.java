@@ -159,21 +159,9 @@ public class MySQLStatementBuilder
     }
 
     @Override
-    public String limitRecord( int min, int max )
-    {
-        return " LIMIT " + min + " ," + max;
-    }
-
-    @Override
     public String getAddDate( String dateField, int days )
     {
         return "ADDDATE(" + dateField + "," + days + ")";
-    }
-
-    @Override
-    public String getPatientFullName()
-    {
-        return  "name";
     }
 
     @Override
