@@ -53,7 +53,7 @@ import java.util.Set;
  */
 @Transactional
 public class DefaultIdentifiableObjectManager
-    implements IdentifiableObjectManager
+        implements IdentifiableObjectManager
 {
     private static final Log log = LogFactory.getLog( DefaultIdentifiableObjectManager.class );
 

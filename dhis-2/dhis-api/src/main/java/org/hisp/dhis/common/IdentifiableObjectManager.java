@@ -47,7 +47,7 @@ public interface IdentifiableObjectManager
     void update( IdentifiableObject object );
 
     <T extends IdentifiableObject> T get( String uid );
-    
+
     <T extends IdentifiableObject> T get( Class<T> clazz, int id );
 
     <T extends IdentifiableObject> T get( Class<T> clazz, String uid );

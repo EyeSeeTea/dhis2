@@ -39,7 +39,7 @@ import java.util.Map;
  * @author Lars Helge Overland
  */
 public interface GenericIdentifiableObjectStore<T>
-    extends GenericStore<T>
+        extends GenericStore<T>
 {
     /**
      * Retrieves the object with the given uid.

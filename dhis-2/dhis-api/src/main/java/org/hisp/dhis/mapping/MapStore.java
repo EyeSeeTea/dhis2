@@ -34,7 +34,7 @@ import org.hisp.dhis.common.GenericIdentifiableObjectStore;
  * @author Lars Helge Overland
  */
 public interface MapStore
-    extends GenericIdentifiableObjectStore<Map>
+        extends GenericIdentifiableObjectStore<Map>
 {
     String ID = MapStore.class.getName();
 }

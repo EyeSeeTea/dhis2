@@ -37,7 +37,7 @@ import org.hisp.dhis.user.User;
  * @author Lars Helge Overland
  */
 public interface  ChartStore
-    extends GenericIdentifiableObjectStore<Chart>
+        extends GenericIdentifiableObjectStore<Chart>
 {
     Collection<Chart> getSystemAndUserCharts( User user );
 }
