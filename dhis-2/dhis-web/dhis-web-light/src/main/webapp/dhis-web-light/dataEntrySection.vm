@@ -29,7 +29,7 @@
 
 <input type="hidden" id="organisationUnitId" name="organisationUnitId" value="$organisationUnitId" />
 <input type="hidden" id="dataSetId" name="dataSetId" value="$dataSetId" />
-<input type="hidden" id="periodId" name="periodId" value="$periodId" />
+<input type="hidden" id="isoPeriod" name="isoPeriod" value="$isoPeriod" />
 
 #if( $sectionId)
 <input type="hidden" id="sectionId" name="sectionId" value="$sectionId" />
@@ -84,6 +84,8 @@
 					<input type="text" maxlength="255" size="24" name="$key" value="$!dataValues.get($key)" />
 				#elseif( $dataElement.type == "int" && $dataElement.numberType == "negativeNumber" )
 					<input type="text" maxlength="255" size="24" name="$key" value="$!dataValues.get($key)" />
+				#elseif( $dataElement.type == "int" && $dataElement.numberType == "zeroPositiveInt" )
+					<input type="text" maxlength="255" size="24" name="$key" value="$!dataValues.get($key)" />
 				#elseif($dataElement.type=="trueOnly")
 					<input name="$key" type="checkbox" #if($!dataValues.get($key) == "on" ) checked #end/>
 				#end
@@ -107,7 +109,7 @@
 <div id="footer">
 <h2>$i18n.getString( "navigate_to" )</h2>
 <ul>
-	<li><a href="dataEntry.action?organisationUnitId=$organisationUnitId&dataSetId=$dataSetId&periodId=$periodId">$i18n.getString("data_entry_overview")</a></li>
+	<li><a href="dataEntry.action?organisationUnitId=$organisationUnitId&dataSetId=$dataSetId&isoPeriod=$isoPeriod">$i18n.getString("data_entry_overview")</a></li>
 	<li><a href="index.action">$i18n.getString("home")</a></li>
 </ul>
 </div>

@@ -483,6 +483,17 @@ function getRootElementAttribute( rootElement, attributeName )
 }
 
 /**
+ * Sets the text (HTML is not interpreted) on the given element.
+ * 
+ * @param fieldId the identifier of the element.
+ * @param txt the text to set.
+ */
+function setText( fieldId, txt )
+{
+    jQuery("#" + fieldId).text( txt );
+}
+
+/**
  * Sets a value on the given element.
  * 
  * @param fieldId the identifier of the element.
@@ -1667,6 +1678,15 @@ function isInt(value)
 function isPositiveInt( value )
 {
 	var regex = /^[1-9]\d*$/;
+	return regex.test( value );
+}
+
+/**
+ * Allow only zero or positive integers, no thousands seperators
+ */
+function isZeroOrPositiveInt( value )
+{
+	var regex = /(^0$)|(^[1-9]\d*$)/;
 	return regex.test( value );
 }
 

@@ -28,47 +28,112 @@ package org.hisp.dhis.system.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+
+import org.hisp.dhis.translation.Translation;
+import org.hisp.dhis.translation.comparator.TranslationLocaleSpecificityComparator;
 
 /**
  * @author Oyvind Brucker
  */
 public class LocaleUtils
 {
+    private static final String SEP = "_";
+    
     /**
-     * Creates a Locale object based on the input String
+     * Creates a Locale object based on the input string.
      *
      * @param localeStr String to parse
      * @return A locale object or null if not valid
      */
     public static Locale getLocale( String localeStr ) 
     {
-        if ( localeStr == null || localeStr.trim().isEmpty() )
+        return org.apache.commons.lang.LocaleUtils.toLocale( localeStr );
+    }
+        
+    /**
+     * Createa a locale string based on the given language, country and variant.
+     * 
+     * @param language the language, cannot be null.
+     * @param country the country, can be null.
+     * @param variant the variant, can be null.
+     * @return a locale string.
+     */
+    public static String getLocaleString( String language, String country, String variant )
+    {
+        if ( language == null )
         {
             return null;
         }
-                
-        String[] parts = localeStr.split( "_" );
-
-        Locale thisLocale;
-
-        if ( parts.length == 1 )
+        
+        String locale = language;
+        
+        if ( country != null )
         {
-            thisLocale = new Locale( parts[0] );
+            locale += SEP + country;
         }
-        else if ( parts.length == 2 )
+        
+        if ( variant != null )
         {
-            thisLocale = new Locale( parts[0], parts[1] );
+            locale += SEP + variant;
         }
-        else if ( parts.length == 3 )
+        
+        return locale;
+    }
+    
+    /**
+     * Creates a list of locales of all possible specifities based on the given
+     * Locale. As an example, for the given locale "en_UK", the locales "en" and
+     * "en_UK" are returned.
+     * 
+     * @param locale the Locale.
+     * @return a list of locale strings.
+     */
+    public static List<String> getLocaleFallbacks( Locale locale )
+    {
+        List<String> locales = new ArrayList<String>();
+        
+        locales.add( locale.getLanguage() );
+        
+        if ( !locale.getCountry().isEmpty() )
         {
-            thisLocale = new Locale( parts[0], parts[1], parts[2] );
+            locales.add( locale.getLanguage() + SEP + locale.getCountry() );
         }
-        else
+        
+        if ( !locale.getVariant().isEmpty() )
         {
-            return null;
+            locales.add( locale.toString() );
         }
-
-        return thisLocale;        
+        
+        return locales;
+    }
+    
+    /**
+     * Filters the given list of translations in a way where only the most specific
+     * locales are kept for every base locale.
+     * 
+     * @param translations the list of translations.
+     * @return a list of translations.
+     */
+    public static List<Translation> getTranslationsHighestSpecifity( Collection<Translation> translations )
+    {
+        Map<String, Translation> translationMap = new HashMap<String, Translation>();
+        
+        List<Translation> trans = new ArrayList<Translation>( translations );
+        
+        Collections.sort( trans, TranslationLocaleSpecificityComparator.INSTANCE );
+        
+        for ( Translation tr : trans )
+        {
+            translationMap.put( tr.getClassIdPropKey(), tr );
+        }
+        
+        return new ArrayList<Translation>( translationMap.values() );
     }
 }

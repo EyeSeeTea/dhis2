@@ -29,8 +29,10 @@ package org.hisp.dhis.settings.action.system;
  */
 
 import java.util.List;
+import java.util.Locale;
 import java.util.SortedMap;
 
+import org.hisp.dhis.i18n.locale.LocaleManager;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.setting.StyleManager;
 import org.hisp.dhis.system.util.Filter;
@@ -74,6 +76,13 @@ public class GetAppearanceSettingsAction
         this.styleManager = styleManager;
     }
 
+    private LocaleManager localeManager;
+
+    public void setLocaleManager( LocaleManager localeManager )
+    {
+        this.localeManager = localeManager;
+    }
+    
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
@@ -106,12 +115,37 @@ public class GetAppearanceSettingsAction
         return currentStyle;
     }
 
+    private List<Locale> availableLocales;
+
+    public List<Locale> getAvailableLocales()
+    {
+        return availableLocales;
+    }
+
+//    private Locale currentLocale;
+//
+//    public Locale getCurrentLocale()
+//    {
+//        return currentLocale;
+//    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
     {
+        // ---------------------------------------------------------------------
+        // Get available UI locales
+        // ---------------------------------------------------------------------
+        availableLocales = localeManager.getAvailableLocales();
+
+        //currentLocale = localeManager.getCurrentLocale();
+        
+        // ---------------------------------------------------------------------
+        // Others
+        // ---------------------------------------------------------------------
+        
         styles = styleManager.getStyles();
         
         currentStyle = styleManager.getSystemStyle();

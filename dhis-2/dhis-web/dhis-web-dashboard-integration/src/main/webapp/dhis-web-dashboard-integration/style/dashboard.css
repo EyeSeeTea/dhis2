@@ -43,6 +43,7 @@
   width: auto;
   height: 29px;
   padding: 0;
+  margin-right: 9px;
   overflow: hidden;
   box-shadow: #f1f1f1 0 1px 1px 0;
 }
@@ -229,11 +230,12 @@
   margin-top: 29px;
   left: 411px;
   width: 498px;
-  max-height: 520px;
-  overflow-y: scroll;
+  max-height: 518px;
+  overflow-y: auto;
   border-right: 1px solid #bbb;
   border-bottom: 1px solid #bbb;
   border-left: 1px solid #bbb;
+  padding-bottom: 4px;
   background-color: #fff;
   display: none;
   z-index: 5;
@@ -365,6 +367,11 @@ a.alert, .alert
   color: #E92B2B;
 }
 
+.listTable th
+{
+  background-color: rgba( 0, 0, 0, 0 );
+}
+
 /*----------------------------------------------------------------------------*/
 /* Message                                                                    */
 /*----------------------------------------------------------------------------*/
@@ -483,7 +490,7 @@ div#selectionTree
   width: 580px;
   border: 1px solid #ddd;
   border-radius: 3px;
-  padding: 25px 20px 20px 20px;
+  padding: 25px;
   margin-bottom: 25px;
   box-shadow: #e1e1e1 0 1px 1px 0;
 }

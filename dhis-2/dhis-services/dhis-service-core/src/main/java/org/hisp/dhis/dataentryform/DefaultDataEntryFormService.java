@@ -52,9 +52,10 @@ import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.hisp.dhis.dataelement.DataElement.*;
+
 /**
  * @author Bharath Kumar
- * @version $Id$
  */
 @Transactional
 public class DefaultDataEntryFormService
@@ -267,6 +268,7 @@ public class DefaultDataEntryFormService
             String inputHtml = inputMatcher.group();
 
             Matcher identifierMatcher = IDENTIFIER_PATTERN.matcher( inputHtml );
+            Matcher indicatorMatcher = INDICATOR_PATTERN.matcher( inputHtml );
 
             if ( identifierMatcher.find() && identifierMatcher.groupCount() > 0 )
             {
@@ -296,7 +298,7 @@ public class DefaultDataEntryFormService
                 
                 String appendCode = "";
 
-                if ( dataElement.getType().equals( DataElement.VALUE_TYPE_BOOL ) )
+                if ( VALUE_TYPE_BOOL.equals( dataElement.getType() ) )
                 {
                     inputHtml = inputHtml.replace( "input", "select" );
                     inputHtml = inputHtml.replaceAll( "value=\".*?\"", "" );
@@ -308,23 +310,33 @@ public class DefaultDataEntryFormService
                     appendCode += "<option value=\"false\">" + i18n.getString( "no" ) + "</option>";
                     appendCode += "</select>";
                 }
-                else if ( dataElement.getType().equals( DataElement.VALUE_TYPE_TRUE_ONLY ) )
+                else if ( VALUE_TYPE_TRUE_ONLY.equals( dataElement.getType() ) )
                 {
                     appendCode += " name=\"entrytrueonly\" class=\"entrytrueonly\" type=\"checkbox\" tabindex=\"" + i++ + "\"" + TAG_CLOSE;
                 }
-                else if ( dataElement.getOptionSet() != null )
+                else if ( dataElement.hasOptionSet() )
                 {
                     appendCode += " name=\"entryoptionset\" class=\"entryoptionset\" tabindex=\"" + i++ + "\"" + TAG_CLOSE;
+                }
+                else if ( VALUE_TYPE_LONG_TEXT.equals( dataElement.getTextType() ) )
+                {
+                    inputHtml = inputHtml.replace( "input", "textarea" );
+                    
+                    appendCode += " name=\"entryfield\" class=\"entryfield entryarea\" tabindex=\"" + i++ + "\"" + "></textarea>";
                 }
                 else
                 {
                     appendCode += " name=\"entryfield\" class=\"entryfield\" tabindex=\"" + i++ + "\"" + TAG_CLOSE;
                 }
-
-                inputHtml = inputHtml.replace( TAG_CLOSE, appendCode );
                 
+                inputHtml = inputHtml.replace( TAG_CLOSE, appendCode );
+
                 inputHtml += "<span id=\"" + dataElement.getUid() + "-dataelement\" style=\"display:none\">" + dataElement.getFormNameFallback() + "</span>";
                 inputHtml += "<span id=\"" + categoryOptionCombo.getUid() + "-optioncombo\" style=\"display:none\">" + categoryOptionCombo.getName() + "</span>";
+            }
+            else if ( indicatorMatcher.find() && indicatorMatcher.groupCount() > 0 )
+            {
+                inputHtml = inputHtml.replace( TAG_CLOSE, " class=\"indicator\"" + TAG_CLOSE );
             }
 
             inputMatcher.appendReplacement( sb, inputHtml );            

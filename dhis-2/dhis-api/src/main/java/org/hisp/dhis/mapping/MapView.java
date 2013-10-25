@@ -31,6 +31,7 @@ package org.hisp.dhis.mapping;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -41,6 +42,7 @@ import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.NameableObjectUtils;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.DimensionalView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -64,10 +66,12 @@ public class MapView
     extends BaseAnalyticalObject
 {
     public static final String LAYER_BOUNDARY = "boundary";
-    public static final String LAYER_THEMATIC1 = "thematic1";
-    public static final String LAYER_THEMATIC2 = "thematic2";
     public static final String LAYER_FACILITY = "facility";
     public static final String LAYER_SYMBOL = "symbol";
+    public static final String LAYER_THEMATIC1 = "thematic1";
+    public static final String LAYER_THEMATIC2 = "thematic2";
+    public static final String LAYER_THEMATIC3 = "thematic3";
+    public static final String LAYER_THEMATIC4 = "thematic4";
 
     public static final String VALUE_TYPE_INDICATOR = "indicator";
     public static final String VALUE_TYPE_DATAELEMENT = "dataelement";
@@ -75,8 +79,9 @@ public class MapView
     public static final String LEGEND_TYPE_AUTOMATIC = "automatic";
     public static final String LEGEND_TYPE_PREDEFINED = "predefined";
 
-    private static final long serialVersionUID = 1866358818802275436L;
-
+    public static final List<String> DATA_LAYERS = Arrays.asList( 
+        LAYER_THEMATIC1, LAYER_THEMATIC2, LAYER_THEMATIC3, LAYER_THEMATIC4 );
+    
     private String layer;
 
     private String valueType;
@@ -139,8 +144,8 @@ public class MapView
     @Override
     public void populateAnalyticalProperties()
     {
-        columns.addAll( getDimensionalObjectList( DimensionalObject.ORGUNIT_DIM_ID ) );
         columns.addAll( getDimensionalObjectList( DimensionalObject.DATA_X_DIM_ID ) );
+        rows.addAll( getDimensionalObjectList( DimensionalObject.ORGUNIT_DIM_ID ) );
         filters.addAll( getDimensionalObjectList( DimensionalObject.PERIOD_DIM_ID ) );
     }
     
@@ -149,11 +154,22 @@ public class MapView
         DimensionalObject object = getDimensionalObject( ORGUNIT_DIM_ID, relativePeriodDate, user, true, organisationUnitsAtLevel, organisationUnitsInGroups, format );
 
         return object != null ? NameableObjectUtils.asTypedList( object.getItems(), OrganisationUnit.class ) : null;
-    }    
+    }
     
-    // -------------------------------------------------------------------------
-    // Getters and setters
-    // -------------------------------------------------------------------------
+    public boolean hasLegendSet()
+    {
+        return legendSet != null;
+    }
+    
+    public boolean hasColors()
+    {
+        return colorLow != null && !colorLow.trim().isEmpty() && colorHigh != null && !colorHigh.trim().isEmpty();
+    }
+    
+    public boolean isDataLayer()
+    {
+        return DATA_LAYERS.contains( layer );
+    }
 
     @Override
     public boolean haveUniqueNames()
@@ -164,11 +180,16 @@ public class MapView
     @Override
     public String getName()
     {
-        return indicators != null ? indicators.get( 0 ).getName() : dataElements != null ? dataElements.get( 0 ).getName() : uid;
+        return ( indicators != null && !indicators.isEmpty() ) ? indicators.get( 0 ).getName() : 
+            ( dataElements != null && !dataElements.isEmpty() ) ? dataElements.get( 0 ).getName() : uid;
     }
+    
+    // -------------------------------------------------------------------------
+    // Getters and setters
+    // -------------------------------------------------------------------------
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
     public String getLayer()
     {
@@ -207,7 +228,7 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
     public Integer getMethod()
     {
@@ -220,7 +241,7 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
     public Integer getClasses()
     {
@@ -233,7 +254,7 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
     public String getColorLow()
     {
@@ -246,7 +267,7 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
     public String getColorHigh()
     {
@@ -260,7 +281,7 @@ public class MapView
 
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
     public MapLegendSet getLegendSet()
     {
@@ -273,7 +294,7 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
     public Integer getRadiusLow()
     {
@@ -286,7 +307,7 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
     public Integer getRadiusHigh()
     {
@@ -299,7 +320,7 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
     public Double getOpacity()
     {
@@ -313,7 +334,7 @@ public class MapView
 
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
     public OrganisationUnitGroupSet getOrganisationUnitGroupSet()
     {
@@ -326,7 +347,7 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
     public Integer getAreaRadius()
     {

@@ -726,6 +726,7 @@ public class DefaultProgramInstanceService
         // ---------------------------------------------------------------------
 
         List<OutboundSms> outboundSms = programInstance.getOutboundSms();
+
         if ( outboundSms == null )
         {
             outboundSms = new ArrayList<OutboundSms>();
@@ -738,6 +739,7 @@ public class DefaultProgramInstanceService
         // -----------------------------------------------------------------
 
         List<MessageConversation> messageConversations = programInstance.getMessageConversations();
+
         if ( messageConversations == null )
         {
             messageConversations = new ArrayList<MessageConversation>();
@@ -751,7 +753,6 @@ public class DefaultProgramInstanceService
         // -----------------------------------------------------------------
 
         programInstance.setStatus( ProgramInstance.STATUS_COMPLETED );
-
         programInstance.setEndDate( new Date() );
 
         updateProgramInstance( programInstance );
@@ -809,7 +810,8 @@ public class DefaultProgramInstanceService
         ProgramStageInstance programStageInstance = null;
 
         Date currentDate = new Date();
-        Date dateCreatedEvent = null;
+        Date dateCreatedEvent;
+
         if ( programStage.getGeneratedByEnrollmentDate() )
         {
             dateCreatedEvent = enrollmentDate;
@@ -821,8 +823,7 @@ public class DefaultProgramInstanceService
 
         Date dueDate = DateUtils.getDateAfterAddition( dateCreatedEvent, programStage.getMinDaysFromStart() );
 
-        if ( !programInstance.getProgram().getIgnoreOverdueEvents()
-            || !(programInstance.getProgram().getIgnoreOverdueEvents() && dueDate.before( currentDate )) )
+        if ( !programInstance.getProgram().getIgnoreOverdueEvents() || dueDate.before( currentDate ) )
         {
             programStageInstance = new ProgramStageInstance();
             programStageInstance.setProgramInstance( programInstance );

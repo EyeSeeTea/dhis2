@@ -1,5 +1,10 @@
 package org.hisp.dhis.webportal.module;
 
+import java.io.File;
+
+import org.hisp.dhis.appmanager.App;
+import org.hisp.dhis.system.util.TextUtils;
+
 /*
  * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
@@ -39,6 +44,12 @@ public class Module
     private String namespace;
 
     private String defaultAction;
+    
+    // Apps only
+    
+    private String icon;
+    
+    private String description;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -46,6 +57,11 @@ public class Module
 
     public Module()
     {
+    }
+    
+    public Module( String name )
+    {
+        this.name = name;
     }
 
     public Module( String name, String namespace )
@@ -60,6 +76,23 @@ public class Module
         this.defaultAction = defaultAction;
     }
 
+    // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------
+
+    public static Module getModule( App app )
+    {
+        String defaultAction = app.getLaunchUrl();
+        String icon = app.getFolderName() + File.separator + app.getIcons().getIcon48();
+        String description = TextUtils.subString( app.getDescription(), 0, 80 );
+        
+        Module module = new Module( app.getName(), app.getName(), defaultAction );
+        module.setIcon( icon );
+        module.setDescription( description );
+        
+        return module;
+    }
+    
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
@@ -93,4 +126,57 @@ public class Module
     {
         this.defaultAction = defaultAction;
     }
+
+    public String getIcon()
+    {
+        return icon;
+    }
+
+    public void setIcon( String icon )
+    {
+        this.icon = icon;
+    }
+
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription( String description )
+    {
+        this.description = description;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ( ( name == null ) ? 0 : name.hashCode() );
+        return result;
+    }
+
+    @Override
+    public boolean equals( Object object )
+    {
+        if ( this == object )
+        {
+            return true;
+        }
+        
+        if ( object == null )
+        {
+            return false;
+        }
+        
+        if ( getClass() != object.getClass() )
+        {
+            return false;
+        }
+        
+        final Module other = (Module) object;
+        
+        return name.equals( other.getName() );
+    }
+    
 }

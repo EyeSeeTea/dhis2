@@ -137,6 +137,24 @@ public interface ExpressionService
         Map<String, Double> constantMap, Integer days );
     
     /**
+     * Generates the calculated value for the given expression base on the values
+     * supplied in the value map, constant map and days.
+     * 
+     * @param expression the expression which holds the formula for the calculation.
+     * @param valueMap the mapping between data element operands and values to
+     *        use in the calculation.
+     * @param constantMap the mapping between the constant uid and value to use
+     *        in the calculation.
+     * @param days the number of days to use in the calculation.
+     * @param set of data element operands that have values but they are incomplete
+     *        (for example due to aggregation from organisationUnit children where
+     *        not all children had a value.)
+     * @return the calculated value as a double.
+     */
+    Double getExpressionValue( Expression expression, Map<DataElementOperand, Double> valueMap, 
+        Map<String, Double> constantMap, Integer days, Set<DataElementOperand> incompleteValues );
+    
+    /**
      * Returns the uids of the data element totals in the given expression.
      * 
      * @param expression the expression.
@@ -234,14 +252,23 @@ public interface ExpressionService
      * Populates the explodedNumerator and explodedDenominator property on all
      * indicators in the given collection. This method uses
      * explodeExpression( String ) internally to generate the exploded expressions.
-     * This method will perform compared to calling explodeExpression( String )
+     * This method will perform better compared to calling explodeExpression( String )
      * multiple times outside a transactional context as the transactional
      * overhead is avoided.
      * 
      * @param indicators the collection of indicators.
-     * @param 
+     * @param days the number of days in aggregation period.
      */
     void explodeAndSubstituteExpressions( Collection<Indicator> indicators, Integer days );
+
+    /**
+     * Populates the explodedNumerator and explodedDenominator property on all
+     * indicators in the given collection. This method uses
+     * explodeExpression( String ) internally to generate the exploded expressions.
+     * 
+     * @param indicators the collection of indicators.
+     */    
+    void explodeExpressions( Collection<Indicator> indicators );
     
     /**
      * Replaces references to data element totals with references to all

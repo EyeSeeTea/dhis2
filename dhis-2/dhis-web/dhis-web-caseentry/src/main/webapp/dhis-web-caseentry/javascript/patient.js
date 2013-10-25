@@ -16,6 +16,9 @@ function organisationUnitSelected( orgUnits, orgUnitNames )
 	enable('addPatientBtn');
 	enable('advancedSearchBtn');
 	enable('searchObjectId');
+	setInnerHTML('patientDashboard','');
+	setInnerHTML('editPatientDiv','');
+	
 	setFieldValue("orgunitName", orgUnitNames[0]);
 	
 	clearListById('programIdAddPatient');
@@ -57,6 +60,7 @@ function Patient()
 					setInnerHTML( 'listPatientDiv', html );
 					showById('listPatientDiv');
 					setFieldValue('listAll',false);
+					showById('hideSearchCriteriaDiv');
 					jQuery( "#loaderDiv" ).hide();
 				}
 			});
@@ -156,8 +160,9 @@ Patient.listAll = function()
 				listAll:false,
 				searchByUserOrgunits: false,
 				searchBySelectedOrgunit: true,
-				programIds: getFieldValue('programIdAddPatient'),
-				searchTexts: 'prg_' + getFieldValue('programIdAddPatient')
+				programId: getFieldValue('programIdAddPatient'),
+				searchTexts: 'prg_' + getFieldValue('programIdAddPatient'),
+				statusEnrollment: getFieldValue('statusEnrollment')
 			},
 			function(){
 				setTableStyles();
@@ -333,7 +338,9 @@ function loadPatientList()
 	hideById('dataRecordingSelectDiv');
 	hideById('dataEntryFormDiv');
 	hideById('migrationPatientDiv');
-	
+	setInnerHTML('patientDashboard','');
+	setInnerHTML('editPatientDiv','');
+
 	showById('mainLinkLbl');
 	showById('selectDiv');
 	showById('searchDiv');
@@ -409,14 +416,6 @@ function loadDataEntry( programStageInstanceId )
 					}
 				}
 				
-				var linkedEvent = jQuery(".stage-object-selected").attr("linkedEvent");
-				if( linkedEvent=='true' ) {
-					blockEntryForm();
-					disable('executionDate');
-				}
-				else{
-					enable('executionDate');
-				}
 				$(window).scrollTop(200);
 			}
 			else

@@ -57,7 +57,6 @@ public interface SystemSettingManager
     final String KEY_REPORT_TEMPLATE_DIRECTORY = "reportTemplateDirectory";
     final String KEY_GOOGLE_MAPS_API_KEY = "googleMapsAPIKey";
     final String KEY_FACTOR_OF_DEVIATION = "factorDeviation";
-    final String KEY_COMPLETENESS_OFFSET = "completenessOffset";
     final String KEY_PATIENT_EXCEL_TEMPLATE_FILE_NAME = "patientExcelTemplateFileName";
     final String KEY_DATAMART_TASK = "keyDataMartTask";
     final String KEY_DATASETCOMPLETENESS_TASK = "keyDataSetCompletenessTask";
@@ -80,6 +79,7 @@ public interface SystemSettingManager
     final String KEY_SCHEDULE_AGGREGATE_QUERY_BUILDER_TASK_STRATEGY = "scheduleAggregateQueryBuilderTackStrategy";
     final String KEY_CONFIGURATION = "keyConfig";
     final String KEY_ACCOUNT_RECOVERY = "keyAccountRecovery";
+    final String KEY_LAST_ALERT_RUN = "keyLastAlertRun";
 
     final String DEFAULT_SCHEDULE_AGGREGATE_QUERY_BUILDER_TASK_STRATEGY = "lastMonth";
     final String DEFAULT_FLAG = "dhis2";

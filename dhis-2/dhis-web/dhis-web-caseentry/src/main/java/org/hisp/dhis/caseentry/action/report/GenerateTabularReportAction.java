@@ -1,20 +1,17 @@
-package org.hisp.dhis.caseentry.action.report;
-
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- *
- * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- * Neither the name of the HISP project nor the names of its contributors may
- * be used to endorse or promote products derived from this software without
- * specific prior written permission.
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ * * Neither the name of the HISP project nor the names of its contributors may
+ *   be used to endorse or promote products derived from this software without
+ *   specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -28,11 +25,10 @@ package org.hisp.dhis.caseentry.action.report;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.hisp.dhis.caseentry.action.report;
+
 import static org.hisp.dhis.patientreport.PatientTabularReport.PREFIX_DATA_ELEMENT;
-import static org.hisp.dhis.patientreport.PatientTabularReport.PREFIX_FIXED_ATTRIBUTE;
-import static org.hisp.dhis.patientreport.PatientTabularReport.PREFIX_IDENTIFIER_TYPE;
 import static org.hisp.dhis.patientreport.PatientTabularReport.PREFIX_NUMBER_DATA_ELEMENT;
-import static org.hisp.dhis.patientreport.PatientTabularReport.PREFIX_PATIENT_ATTRIBUTE;
 import static org.hisp.dhis.patientreport.PatientTabularReport.VALUE_TYPE_OPTION_SET;
 
 import java.util.ArrayList;
@@ -54,10 +50,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.paging.ActionPagingSupport;
 import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeOption;
-import org.hisp.dhis.patient.PatientAttributeService;
 import org.hisp.dhis.patient.PatientIdentifierType;
-import org.hisp.dhis.patient.PatientIdentifierTypeService;
 import org.hisp.dhis.patientreport.TabularReportColumn;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageInstance;
@@ -110,20 +103,6 @@ public class GenerateTabularReportAction
     public void setCurrentUserService( CurrentUserService currentUserService )
     {
         this.currentUserService = currentUserService;
-    }
-
-    private PatientAttributeService patientAttributeService;
-
-    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
-    {
-        this.patientAttributeService = patientAttributeService;
-    }
-
-    private PatientIdentifierTypeService patientIdentifierTypeService;
-
-    public void setPatientIdentifierTypeService( PatientIdentifierTypeService patientIdentifierTypeService )
-    {
-        this.patientIdentifierTypeService = patientIdentifierTypeService;
     }
 
     // -------------------------------------------------------------------------
@@ -221,13 +200,13 @@ public class GenerateTabularReportAction
         this.userOrganisationUnitChildren = userOrganisationUnitChildren;
     }
 
-    private Integer pageSize;
-
+	private Integer pageSize;
+  
     public void setPageSize( Integer pageSize )
     {
-        this.pageSize = pageSize;
+         this.pageSize = pageSize;
     }
-
+ 
     private Grid grid;
 
     public Grid getGrid()
@@ -243,7 +222,7 @@ public class GenerateTabularReportAction
     }
 
     private Integer total;
-
+	
     public void setTotal( Integer total )
     {
         this.total = total;
@@ -468,6 +447,17 @@ public class GenerateTabularReportAction
         return (totalRecord % size == 0) ? (totalRecord / size) : (totalRecord / size + 1);
     }
 
+    public int getStartPos()
+    {
+        if ( currentPage == null )
+        {
+            return paging.getStartPos();
+        }
+        int startPos = currentPage <= 0 ? 0 : (currentPage - 1) * paging.getPageSize();
+        startPos = (startPos > total) ? total : startPos;
+        return startPos;
+    }
+
     private List<TabularReportColumn> getTableColumns()
     {
         List<TabularReportColumn> columns = new ArrayList<TabularReportColumn>();
@@ -489,39 +479,8 @@ public class GenerateTabularReportAction
 
                 column.setOperator( values.length > 3 ? TextUtils.lower( values[3] ) : TextUtils.EMPTY);
                 column.setQuery( values.length > 4 ? TextUtils.lower( values[4] ) : TextUtils.EMPTY );
-                if ( PREFIX_FIXED_ATTRIBUTE.equals( prefix ) )
-                {
-                    column.setName( values[1] );
-                    if ( column.getIdentifier().equals( "birthDate" ) || column.getIdentifier().equals( "deathdate" ) )
-                    {
-                        column.setDateType( true );
-                    }
-                    accessPrivateInfo = true;
-                }
-                else if ( PREFIX_IDENTIFIER_TYPE.equals( prefix ) )
-                {
-                    PatientIdentifierType identifierType = patientIdentifierTypeService
-                        .getPatientIdentifierType( column.getIdentifierAsInt() );
-
-                    column.setName( identifierType.getName() );
-                    accessPrivateInfo = true;
-                }
-                else if ( PREFIX_PATIENT_ATTRIBUTE.equals( prefix ) )
-                {
-                    PatientAttribute attribute = patientAttributeService.getPatientAttribute( column
-                        .getIdentifierAsInt() );
-                    patientAttributes.add( attribute );
-                    valueTypes.add( attribute.getValueType() );
-                    mapSuggestedValues.put( index, getSuggestedAttributeValues( attribute ) );
-
-                    column.setName( attribute.getName() );
-                    if ( attribute.getValueType().equals( PatientAttribute.TYPE_DATE ) )
-                    {
-                        column.setDateType( true );
-                    }
-                    accessPrivateInfo = true;
-                }
-                else if ( PREFIX_DATA_ELEMENT.equals( prefix ) )
+				
+               if ( PREFIX_DATA_ELEMENT.equals( prefix ) )
                 {
                     int objectId = Integer.parseInt( values[1] );
                     DataElement dataElement = dataElementService.getDataElement( objectId );
@@ -539,47 +498,26 @@ public class GenerateTabularReportAction
                     {
                         column.setDateType( true );
                     }
-
+                    
                     if ( useFormNameDataElement != null && useFormNameDataElement )
                     {
                         column.setName( dataElement.getFormNameFallback() );
                     }
                     else
                     {
-                        column.setName( dataElement.getDisplayName() );
+                        column.setName( dataElement.getDisplayName() );  
                     }
-                    
-                    columns.add( column );
                 }
 
-               index++;
+                columns.add( column );
+
+                index++;
             }
         }
 
         return columns;
     }
-
-    private List<String> getSuggestedAttributeValues( PatientAttribute patientAttribute )
-    {
-        List<String> values = new ArrayList<String>();
-        String valueType = patientAttribute.getValueType();
-
-        if ( valueType.equals( PatientAttribute.TYPE_BOOL ) )
-        {
-            values.add( i18n.getString( "yes" ) );
-            values.add( i18n.getString( "no" ) );
-        }
-        else if ( valueType.equals( PatientAttribute.TYPE_COMBO ) )
-        {
-            for ( PatientAttributeOption attributeOption : patientAttribute.getAttributeOptions() )
-            {
-                values.add( attributeOption.getName() );
-            }
-        }
-
-        return values;
-    }
-
+    
     private List<String> getSuggestedDataElementValues( DataElement dataElement )
     {
         List<String> values = new ArrayList<String>();

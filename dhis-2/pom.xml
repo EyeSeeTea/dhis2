@@ -268,17 +268,7 @@
       </dependency>
       <dependency>
         <groupId>org.hisp.dhis</groupId>
-        <artifactId>dhis-service-aggregationengine-default</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.hisp.dhis</groupId>
         <artifactId>dhis-service-importexport</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.hisp.dhis</groupId>
-        <artifactId>dhis-service-integration</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -427,7 +417,7 @@
       <dependency>
         <groupId>org.springframework.hateoas</groupId>
         <artifactId>spring-hateoas</artifactId>
-        <version>0.5.0.RELEASE</version>
+        <version>0.8.0.RELEASE</version>
       </dependency>
       <dependency>
         <groupId>cglib</groupId>
@@ -475,6 +465,11 @@
       </dependency>
       <dependency>
         <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-aspects</artifactId>
+        <version>${spring.security.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-config</artifactId>
         <version>${spring.security.version}</version>
       </dependency>
@@ -482,7 +477,7 @@
       <dependency>
         <groupId>org.springframework.mobile</groupId>
         <artifactId>spring-mobile-device</artifactId>
-        <version>1.0.1.RELEASE</version>
+        <version>1.0.2.RELEASE</version>
       </dependency>
       <!--Other -->
       <dependency>
@@ -567,6 +562,11 @@
         <artifactId>json-lib</artifactId>
         <version>2.4</version>
         <classifier>jdk15</classifier>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.ant</groupId>
+        <artifactId>ant-compress</artifactId>
+        <version>1.2</version>
       </dependency>
       <!-- Apache Commons -->
       <dependency>
@@ -896,33 +896,6 @@
         <groupId>com.sun.xml.bind</groupId>
         <artifactId>jaxb-impl</artifactId>
         <version>2.2.6</version>
-      </dependency>
-
-      <!-- Apache Camel -->
-      <dependency>
-        <groupId>org.apache.camel</groupId>
-        <artifactId>camel-core</artifactId>
-        <version>${camel.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.camel</groupId>
-        <artifactId>camel-spring</artifactId>
-        <version>${camel.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.camel</groupId>
-        <artifactId>camel-mail</artifactId>
-        <version>${camel.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.camel</groupId>
-        <artifactId>camel-http</artifactId>
-        <version>${camel.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.camel</groupId>
-        <artifactId>camel-quartz</artifactId>
-        <version>${camel.version}</version>
       </dependency>
 
       <!-- SMS -->

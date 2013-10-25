@@ -45,14 +45,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * @author Lars Helge Overland
  */
 @Controller
-@RequestMapping( value = SystemSettingController.RESOURCE_PATH )
+@RequestMapping( "/systemSettings" )
 public class SystemSettingController
 {
-    public static final String RESOURCE_PATH = "/systemSettings";
-
     @Autowired
     private SystemSettingManager systemSettingManager;
-        
+    
     @RequestMapping( value = "/{key}", method = RequestMethod.POST )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_SYSTEM_SETTING')" )
     public void setSystemSetting( @PathVariable( "key" ) String key, @RequestParam String value, HttpServletResponse response )
@@ -76,7 +74,7 @@ public class SystemSettingController
     
     @RequestMapping( value = "/{key}", method = RequestMethod.DELETE )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_SYSTEM_SETTING')" )
-    public void removeSystemSetting( @PathVariable( "key" ) String key, HttpServletResponse response )
+    public void removeSystemSetting( @PathVariable( "key" ) String key )
     {
         systemSettingManager.deleteSystemSetting( key );
     }

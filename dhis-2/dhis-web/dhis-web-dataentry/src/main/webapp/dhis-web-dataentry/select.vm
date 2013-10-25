@@ -10,6 +10,7 @@ var i18n_value_too_long = '$encoder.jsEscape( $i18n.getString( "value_is_too_lon
 var i18n_value_must_integer = '$encoder.jsEscape( $i18n.getString( "value_must_integer" ) , "'")';
 var i18n_value_must_number = '$encoder.jsEscape( $i18n.getString( "value_must_number" ) , "'")';
 var i18n_value_must_positive_integer = '$encoder.jsEscape( $i18n.getString( "value_must_positive_integer" ) , "'")';
+var i18n_value_must_zero_or_positive_integer = '$encoder.jsEscape( $i18n.getString( "value_must_zero_or_positive_integer" ) , "'")';
 var i18n_value_must_negative_integer = '$encoder.jsEscape( $i18n.getString( "value_must_negative_integer" ) , "'")';
 var i18n_field_unallowed_save_zero = '$encoder.jsEscape( $i18n.getString( "field_unallowed_save_zero" ) , "'")';
 var i18n_saving_value_failed_status_code = '$encoder.jsEscape( $i18n.getString( "saving_value_failed_status_code" ) , "'")';
@@ -48,11 +49,7 @@ var i18n_view_comment = '$encoder.jsEscape( $i18n.getString( "view_comment" ) , 
 </script>
 
 <style type="text/css" media="print">
-#moduleHeader, #currentSelection, #actions, #selectionBox, #completenessDiv {
-    display: none;
-}
-
-#contentDiv input, select {
+#moduleHeader, #currentSelection, #actions, #selectionBox, #completenessDiv, .ui-helper-hidden-accessible {
     display: none;
 }
 </style>
@@ -67,7 +64,8 @@ var i18n_view_comment = '$encoder.jsEscape( $i18n.getString( "view_comment" ) , 
 
 <div id="actions">	
     <input type="button" value="$i18n.getString( 'run_validation' )" onclick="validate( false )" id="validationButton" style="width:120px;" disabled="disabled"/><br>
-    <input type="button" value="$i18n.getString( 'print' )" onclick="window.print()" id="printButton" style="width:120px"/>
+    <input type="button" value="$i18n.getString( 'print_form' )" onclick="window.print()" id="printButton" style="width:120px"/><br>
+    <input type="button" value="$i18n.getString( 'print_blank_form' )" onclick="printBlankForm()" style="width:120px"/><br>                                                                                                                      </br>
 </div>
 
 <div id="selectionBox" class="inputCriteria" style="width:534px">

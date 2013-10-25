@@ -115,24 +115,6 @@ public interface PeriodService
     Collection<Period> getPeriods( Collection<Integer> identifiers );
     
     /**
-     * Generates the Period with the corresponding external identifier. If the
-     * Period doesn't exist it will be created and persisted.
-     * 
-     * @param externalId the external identifier.
-     * @return a Period.
-     */
-    Period getPeriodByExternalId( String externalId );
-    
-    /**
-     * Generates all Periods with the corresponding external identifiers in the
-     * given Collection. The Periods which don't exist are created and persisted.
-     * 
-     * @param externalIds the external identifiers.
-     * @return a Collection of Periods.
-     */
-    Collection<Period> getPeriodsByExternalIds( Collection<String> externalIds );
-    
-    /**
      * Returns all Periods with start date after or equal the specified start
      * date and end date before or equal the specified end date.
      * 

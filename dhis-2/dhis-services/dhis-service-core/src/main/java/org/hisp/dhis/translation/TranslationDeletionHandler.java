@@ -28,12 +28,15 @@ package org.hisp.dhis.translation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
+
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.Section;
 import org.hisp.dhis.i18n.I18nService;
+import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
@@ -41,6 +44,7 @@ import org.hisp.dhis.indicator.IndicatorType;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.system.deletion.DeletionHandler;
+import org.hisp.dhis.system.util.LocaleUtils;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleGroup;
 
@@ -57,6 +61,13 @@ public class TranslationDeletionHandler
         i18nService = service;
     }
 
+    private TranslationService translationService;
+
+    public void setTranslationService( TranslationService translationService )
+    {
+        this.translationService = translationService;
+    }
+    
     @Override
     protected String getClassName()
     {
@@ -139,5 +150,13 @@ public class TranslationDeletionHandler
     public void deleteOrganisationUnitGroupSet( OrganisationUnitGroupSet groupSet )
     {
         i18nService.removeObject( groupSet );
+    }
+    
+    @Override
+    public String allowDeleteI18nLocale( I18nLocale i18nLocale )
+    {
+        Collection<Translation> translations = translationService.getTranslations( LocaleUtils.getLocale( i18nLocale.getLocale() ) );
+
+        return translations.isEmpty() ? null : translations.iterator().next().getLocale();
     }
 }

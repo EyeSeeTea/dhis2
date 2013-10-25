@@ -33,11 +33,13 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hisp.dhis.analytics.IllegalQueryException;
+import org.hisp.dhis.analytics.SortOrder;
 import org.hisp.dhis.analytics.event.EventAnalyticsService;
 import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.api.utils.ContextUtils.CacheStrategy;
 import org.hisp.dhis.common.Grid;
+import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.system.grid.GridUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -54,7 +56,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class EventAnalyticsController
 {
-    private static final String RESOURCE_PATH = "/analytics/events/query";
+    private static final String RESOURCE_PATH = "/analytics/events";
 
     @Autowired
     private EventAnalyticsService analyticsService;
@@ -62,27 +64,80 @@ public class EventAnalyticsController
     @Autowired
     private ContextUtils contextUtils;
 
+    @Autowired
+    private I18nManager i18nManager;
+    
     // -------------------------------------------------------------------------
-    // Resources
+    // Aggregate
     // -------------------------------------------------------------------------
     
-    @RequestMapping( value = RESOURCE_PATH + "/{program}", method = RequestMethod.GET, produces = { "application/json", "application/javascript" } )
-    public String getJson( // JSON, JSONP
+    @RequestMapping( value = RESOURCE_PATH + "/aggregate/{program}", method = RequestMethod.GET, produces = { "application/json", "application/javascript" } )
+    public String getAggregateJson( // JSON, JSONP
         @PathVariable String program,
         @RequestParam(required=false) String stage,
-        @RequestParam String startDate,
-        @RequestParam String endDate,
-        @RequestParam String ou,
+        @RequestParam(required=false) String startDate,
+        @RequestParam(required=false) String endDate,
+        @RequestParam Set<String> dimension,
+        @RequestParam(required=false) Set<String> filter,
+        @RequestParam(required=false) boolean hierarchyMeta,
+        @RequestParam(required=false) Integer limit,
+        @RequestParam(required=false) SortOrder sortOrder,
+        Model model,
+        HttpServletResponse response ) throws Exception
+    {
+        EventQueryParams params = analyticsService.getFromUrl( program, stage, startDate, endDate, dimension, filter, hierarchyMeta, sortOrder, limit, i18nManager.getI18nFormat() );
+        
+        contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_JSON, CacheStrategy.RESPECT_SYSTEM_SETTING );
+        Grid grid = analyticsService.getAggregatedEventData( params );
+        model.addAttribute( "model", grid );
+        model.addAttribute( "viewClass", "detailed" );
+        return "grid";
+    }
+
+    @RequestMapping( value = RESOURCE_PATH + "/aggregate/{program}.xls", method = RequestMethod.GET )
+    public void getAggregateXls(
+        @PathVariable String program,
+        @RequestParam(required=false) String stage,
+        @RequestParam(required=false) String startDate,
+        @RequestParam(required=false) String endDate,
+        @RequestParam Set<String> dimension,
+        @RequestParam(required=false) Set<String> filter,
+        @RequestParam(required=false) boolean hierarchyMeta,
+        @RequestParam(required=false) Integer limit,
+        @RequestParam(required=false) SortOrder sortOrder,
+        Model model,
+        HttpServletResponse response ) throws Exception
+    {
+        EventQueryParams params = analyticsService.getFromUrl( program, stage, startDate, endDate, dimension, filter, hierarchyMeta, sortOrder, limit, i18nManager.getI18nFormat() );
+        
+        contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_EXCEL, CacheStrategy.RESPECT_SYSTEM_SETTING, "events.xls", true );
+        Grid grid = analyticsService.getAggregatedEventData( params );
+        GridUtils.toXls( grid, response.getOutputStream() );
+    }
+    
+    // -------------------------------------------------------------------------
+    // Query
+    // -------------------------------------------------------------------------
+    
+    @RequestMapping( value = RESOURCE_PATH + "/query/{program}", method = RequestMethod.GET, produces = { "application/json", "application/javascript" } )
+    public String getQueryJson( // JSON, JSONP
+        @PathVariable String program,
+        @RequestParam(required=false) String stage,
+        @RequestParam(required=false) String startDate,
+        @RequestParam(required=false) String endDate,
+        @RequestParam Set<String> dimension,
+        @RequestParam(required=false) Set<String> filter,
         @RequestParam(required=false) String ouMode,
-        @RequestParam Set<String> item,
         @RequestParam(required=false) Set<String> asc,
         @RequestParam(required=false) Set<String> desc,
+        @RequestParam(required=false) boolean hierarchyMeta,
         @RequestParam(required=false) Integer page,
         @RequestParam(required=false) Integer pageSize,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        EventQueryParams params = analyticsService.getFromUrl( program, stage, startDate, endDate, ou, ouMode, item, asc, desc, page, pageSize );
+        EventQueryParams params = analyticsService.getFromUrl( program, stage, startDate, endDate, dimension, filter, ouMode, 
+            asc, desc, hierarchyMeta, page, pageSize, i18nManager.getI18nFormat() );
         
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_JSON, CacheStrategy.RESPECT_SYSTEM_SETTING );
         Grid grid = analyticsService.getEvents( params );
@@ -91,23 +146,25 @@ public class EventAnalyticsController
         return "grid";
     }
 
-    @RequestMapping( value = RESOURCE_PATH + "/{program}.xls", method = RequestMethod.GET )
-    public void getXls(
+    @RequestMapping( value = RESOURCE_PATH + "/query/{program}.xls", method = RequestMethod.GET )
+    public void getQueryXls(
         @PathVariable String program,
         @RequestParam(required=false) String stage,
-        @RequestParam String startDate,
-        @RequestParam String endDate,
-        @RequestParam String ou,
+        @RequestParam(required=false) String startDate,
+        @RequestParam(required=false) String endDate,
+        @RequestParam Set<String> dimension,
+        @RequestParam(required=false) Set<String> filter,
         @RequestParam(required=false) String ouMode,
-        @RequestParam Set<String> item,
         @RequestParam(required=false) Set<String> asc,
         @RequestParam(required=false) Set<String> desc,
+        @RequestParam(required=false) boolean hierarchyMeta,
         @RequestParam(required=false) Integer page,
         @RequestParam(required=false) Integer pageSize,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        EventQueryParams params = analyticsService.getFromUrl( program, stage, startDate, endDate, ou, ouMode, item, asc, desc, page, pageSize );
+        EventQueryParams params = analyticsService.getFromUrl( program, stage, startDate, endDate, dimension, filter, 
+            ouMode, asc, desc, hierarchyMeta, page, pageSize, i18nManager.getI18nFormat() );
         
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_EXCEL, CacheStrategy.RESPECT_SYSTEM_SETTING, "events.xls", true );
         Grid grid = analyticsService.getEvents( params );

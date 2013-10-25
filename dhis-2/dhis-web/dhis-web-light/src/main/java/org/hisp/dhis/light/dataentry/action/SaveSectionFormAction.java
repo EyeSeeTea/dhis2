@@ -166,16 +166,16 @@ public class SaveSectionFormAction
         return organisationUnitId;
     }
 
-    private String periodId;
+    private String isoPeriod;
 
-    public void setPeriodId( String periodId )
+    public String getIsoPeriod()
     {
-        this.periodId = periodId;
+        return isoPeriod;
     }
 
-    public String getPeriodId()
+    public void setIsoPeriod( String isoPeriod )
     {
-        return periodId;
+        this.isoPeriod = isoPeriod;
     }
 
     private Integer dataSetId;
@@ -276,12 +276,12 @@ public class SaveSectionFormAction
     public String execute()
     {
         Validate.notNull( organisationUnitId );
-        Validate.notNull( periodId );
+        Validate.notNull( isoPeriod );
         Validate.notNull( dataSetId );
 
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
 
-        Period period = periodService.getPeriodByExternalId( periodId );
+        Period period = periodService.getPeriod( isoPeriod );
 
         boolean needsValidation = false;
 
@@ -331,8 +331,7 @@ public class SaveSectionFormAction
                         if ( !valueIsEmpty && !FormUtils.isBoolean( value ) )
                         {
                             correctType = false;
-                            typeViolations
-                                .put( key, "\"" + value + "\"" + " " + i18n.getString( "is_invalid_boolean" ) );
+                            typeViolations.put( key, "\"" + value + "\"" + " " + i18n.getString( "is_invalid_boolean" ) );
                         }
                     }
                     else if ( type.equals( DataElement.VALUE_TYPE_DATE ) )
@@ -358,8 +357,7 @@ public class SaveSectionFormAction
                         if ( !FormUtils.isInteger( value ) )
                         {
                             correctType = false;
-                            typeViolations
-                                .put( key, "\"" + value + "\"" + " " + i18n.getString( "is_invalid_integer" ) );
+                            typeViolations.put( key, "\"" + value + "\"" + " " + i18n.getString( "is_invalid_integer" ) );
                         }
                     }
                     else if ( type.equals( DataElement.VALUE_TYPE_INT )
@@ -368,8 +366,7 @@ public class SaveSectionFormAction
                         if ( !FormUtils.isPositiveInteger( value ) )
                         {
                             correctType = false;
-                            typeViolations.put( key,
-                                "\"" + value + "\"" + " " + i18n.getString( "is_invalid_positive_integer" ) );
+                            typeViolations.put( key, "\"" + value + "\"" + " " + i18n.getString( "is_invalid_positive_integer" ) );
                         }
                     }
                     else if ( type.equals( DataElement.VALUE_TYPE_INT )
@@ -378,8 +375,16 @@ public class SaveSectionFormAction
                         if ( !FormUtils.isNegativeInteger( value ) )
                         {
                             correctType = false;
-                            typeViolations.put( key,
-                                "\"" + value + "\"" + " " + i18n.getString( "is_invalid_negative_integer" ) );
+                            typeViolations.put( key, "\"" + value + "\"" + " " + i18n.getString( "is_invalid_negative_integer" ) );
+                        }
+                    }
+                    else if ( type.equals( DataElement.VALUE_TYPE_INT)
+                        && numberType.equals( DataElement.VALUE_TYPE_ZERO_OR_POSITIVE_INT ) )
+                    {
+                        if ( !FormUtils.isZeroOrPositiveInteger( value ) )
+                        {
+                            correctType = false;
+                            typeViolations.put( key, "\"" + value + "\"" + " " + i18n.getString( "is_invalid_zero_or_positive_integer" ) );
                         }
                     }
                 }
@@ -417,7 +422,6 @@ public class SaveSectionFormAction
                         }
                     }
                 }
-
             }
         }
 

@@ -61,8 +61,7 @@ import org.hisp.dhis.system.util.CollectionUtils;
 import org.hisp.dhis.system.util.ReflectionUtils;
 import org.hisp.dhis.system.util.functional.Function1;
 import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserAuthorityGroup;
-import org.hisp.dhis.user.UserGroup;
+import org.hisp.dhis.user.UserCredentials;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.Field;
@@ -111,7 +110,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     @Autowired
     private SessionFactory sessionFactory;
 
-    @Autowired(required = false)
+    @Autowired( required = false )
     private List<ObjectHandler<T>> objectHandlers;
 
     //-------------------------------------------------------------------------------------------------------
@@ -397,7 +396,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
                 new ImportConflict( ImportUtils.getDisplayName( object ), "You do not have create access to class type." ) );
 
             log.warn( "You do have create access to class type." );
-            
+
             return false;
         }
 
@@ -408,6 +407,21 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
         NonIdentifiableObjects nonIdentifiableObjects = new NonIdentifiableObjects();
         nonIdentifiableObjects.extract( object );
+
+        UserCredentials userCredentials = null;
+
+        if ( object instanceof User )
+        {
+            userCredentials = ((User) object).getUserCredentials();
+
+            if ( userCredentials == null )
+            {
+                summaryType.getImportConflicts().add(
+                    new ImportConflict( ImportUtils.getDisplayName( object ), "User is missing userCredentials part." ) );
+
+                return false;
+            }
+        }
 
         Map<Field, Object> fields = detachFields( object );
         Map<Field, Collection<Object>> collectionFields = detachCollectionFields( object );
@@ -421,6 +435,24 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         reattachCollectionFields( object, collectionFields );
 
         objectBridge.updateObject( object );
+
+        if ( object instanceof User && !options.isDryRun() )
+        {
+            userCredentials.setUser( (User) object );
+            userCredentials.setId( object.getId() );
+
+            Map<Field, Collection<Object>> collectionFieldsUserCredentials = detachCollectionFields( userCredentials );
+
+            sessionFactory.getCurrentSession().save( userCredentials );
+
+            reattachCollectionFields( userCredentials, collectionFieldsUserCredentials );
+
+            sessionFactory.getCurrentSession().saveOrUpdate( userCredentials );
+
+            ((User) object).setUserCredentials( userCredentials );
+
+            objectBridge.updateObject( object );
+        }
 
         if ( !options.isDryRun() )
         {
@@ -442,14 +474,6 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
      */
     protected boolean updateObject( User user, T object, T persistedObject )
     {
-        if ( newOnly( object ) )
-        {
-            summaryType.getImportConflicts().add(
-                new ImportConflict( ImportUtils.getDisplayName( object ), "This object type only allows creation of new objects." ) );
-
-            return false;
-        }
-
         if ( !SharingUtils.canUpdate( user, persistedObject ) )
         {
             summaryType.getImportConflicts().add(
@@ -461,6 +485,21 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         NonIdentifiableObjects nonIdentifiableObjects = new NonIdentifiableObjects();
         nonIdentifiableObjects.extract( object );
         nonIdentifiableObjects.delete( persistedObject );
+
+        UserCredentials userCredentials = null;
+
+        if ( object instanceof User )
+        {
+            userCredentials = ((User) object).getUserCredentials();
+
+            if ( userCredentials == null )
+            {
+                summaryType.getImportConflicts().add(
+                    new ImportConflict( ImportUtils.getDisplayName( object ), "User is missing userCredentials part." ) );
+
+                return false;
+            }
+        }
 
         Map<Field, Object> fields = detachFields( object );
         Map<Field, Collection<Object>> collectionFields = detachCollectionFields( object );
@@ -476,6 +515,14 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             .getSimpleName() + ")" );
 
         objectBridge.updateObject( persistedObject );
+
+        if ( object instanceof User && !options.isDryRun() )
+        {
+            Map<Field, Collection<Object>> collectionFieldsUserCredentials = detachCollectionFields( userCredentials );
+
+            reattachCollectionFields( ((User) persistedObject).getUserCredentials(), collectionFieldsUserCredentials );
+            sessionFactory.getCurrentSession().saveOrUpdate( ((User) persistedObject).getUserCredentials() );
+        }
 
         if ( !options.isDryRun() )
         {
@@ -551,13 +598,6 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     //-------------------------------------------------------------------------------------------------------
     // Helpers
     //-------------------------------------------------------------------------------------------------------
-
-    // until we have proper update of UserGroup/UserAuthorityGroup, only allow new instances to be created
-    private boolean newOnly( T object )
-    {
-        return UserGroup.class.isInstance( object ) || UserAuthorityGroup.class.isInstance( object );
-    }
-
     private void importObjectLocal( User user, T object )
     {
         if ( validateIdentifiableObject( object ) )
@@ -768,10 +808,9 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
                 }
             }
 
-            if ( !options.isDryRun() )
-            {
-                ReflectionUtils.invokeSetterMethod( field.getName(), object, reference );
-            }
+            // if ( !options.isDryRun() ) { }
+            // TODO why do we have to invoke the setter on dryRun?
+            ReflectionUtils.invokeSetterMethod( field.getName(), object, reference );
         }
     }
 
@@ -819,7 +858,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
                     }
                     else
                     {
-                        if ( ExchangeClasses.getImportMap().get( idObject.getClass() ) != null )
+                        if ( ExchangeClasses.getImportMap().get( idObject.getClass() ) != null || UserCredentials.class.isAssignableFrom( idObject.getClass() ) )
                         {
                             reportReferenceError( idObject, object );
                         }

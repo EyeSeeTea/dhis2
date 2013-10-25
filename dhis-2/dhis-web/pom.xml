@@ -30,7 +30,6 @@
     <module>dhis-web-light</module>
     <module>dhis-web-mobile</module>
     <module>dhis-web-sms</module>
-    <module>dhis-web-appmanager</module>
     <module>dhis-web-portal</module>
   </modules>
   <build>
@@ -53,6 +52,7 @@
             <org.mortbay.jetty.Request.maxFormContentSize>10000000</org.mortbay.jetty.Request.maxFormContentSize>
           </systemPropertyVariables>
           <contextPath>/</contextPath>
+		  <webDefaultXml>E:/Projects/GSOC-Work/webdefault.xml</webDefaultXml>
         </configuration>
       </plugin>
     </plugins>

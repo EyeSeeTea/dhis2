@@ -29,6 +29,8 @@ package org.hisp.dhis.appmanager;
  */
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.io.File;
 import java.io.Serializable;
 
 /**
@@ -37,7 +39,6 @@ import java.io.Serializable;
 public class App
     implements Serializable
 {
-
     /**
      * Determines if a de-serialized file is compatible with this class.
      */
@@ -46,8 +47,10 @@ public class App
     /**
      * Required.
      */
+    @JsonProperty
     private String version;
 
+    @JsonProperty
     private String name;
 
     @JsonProperty( "launch_path" )
@@ -62,6 +65,7 @@ public class App
     /**
      * Optional.
      */
+    @JsonProperty
     private String description;
 
     private AppIcons icons;
@@ -75,10 +79,23 @@ public class App
     private String permissions;
 
     private AppActivities activities;
+    
+    @JsonIgnore
+    private String folderName;
+
+    @JsonIgnore
+    private String baseUrl;
 
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
+    
+    @JsonProperty
+    public String getLaunchUrl()
+    {
+        return getBaseUrl() + File.separator + getFolderName() + File.separator + getLaunchPath();
+    }
+    
     public String getVersion()
     {
         return version;
@@ -188,29 +205,65 @@ public class App
     {
         this.activities = activities;
     }
+
+    public String getFolderName()
+    {
+        return folderName;
+    }
+
+    public void setFolderName( String folderName )
+    {
+        this.folderName = folderName;
+    }
+
+    public String getBaseUrl()
+    {
+        return baseUrl;
+    }
+
+    public void setBaseUrl( String baseUrl )
+    {
+        this.baseUrl = baseUrl;
+    }
+
+    // -------------------------------------------------------------------------
+    // hashCode, equals, toString
+    // -------------------------------------------------------------------------
     
-    // -------------------------------------------------------------------------
-    // Hashcode & Equals 
-    // -------------------------------------------------------------------------
     @Override
-    public int hashCode() {
+    public int hashCode()
+    {
         int hash = 7;
         hash = 79 * hash + (this.name != null ? this.name.hashCode() : 0);
         return hash;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
+    public boolean equals( Object obj )
+    {
+        if ( obj == null )
+        {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        
+        if ( getClass() != obj.getClass() )
+        {
             return false;
         }
+        
         final App other = (App) obj;
-        if ((this.name == null) ? (other.name != null) : !this.name.equals(other.name)) {
+        
+        if ( (this.name == null) ? (other.name != null) : !this.name.equals( other.name ) )
+        {
             return false;
         }
+        
         return true;
+    }
+    
+    @Override
+    public String toString()
+    {
+        return "[" + name + " " + version + "]";
     }
 }

@@ -73,7 +73,7 @@ public class ProgramStage
 
     private int minDaysFromStart;
 
-    private Boolean irregular;
+    private Boolean irregular = false;
 
     private Program program;
 
@@ -105,7 +105,7 @@ public class ProgramStage
      */
     private Boolean remindCompleted = false;
 
-    private Boolean generatedByEnrollmentDate;
+    private Boolean generatedByEnrollmentDate = false;
 
     private Boolean allowGenerateNextVisit = false;
 
@@ -119,11 +119,12 @@ public class ProgramStage
 
     public ProgramStage()
     {
-
+        setAutoFields();
     }
 
     public ProgramStage( String name, Program program )
     {
+        this();
         this.name = name;
         this.program = program;
     }
@@ -232,9 +233,9 @@ public class ProgramStage
         this.description = description;
     }
 
-    @JsonProperty
+    @JsonProperty("repeatable")
     @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "repeatable", namespace = DxfNamespaces.DXF_2_0 )
     public Boolean getIrregular()
     {
         return irregular;

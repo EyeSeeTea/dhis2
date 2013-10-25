@@ -63,6 +63,9 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
+import org.hisp.dhis.patient.PatientAttribute;
+import org.hisp.dhis.patient.PatientAttributeGroup;
+import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.relationship.RelationshipType;
@@ -136,8 +139,13 @@ final public class ExchangeClasses
 
         allExportClasses.put( DataDictionary.class, "dataDictionaries" );
 
+        allExportClasses.put( User.class, "users" );
+        allExportClasses.put( UserGroup.class, "userGroups" );
+
         allExportClasses.put( DataSet.class, "dataSets" );
         allExportClasses.put( Section.class, "sections" );
+
+        allExportClasses.put( UserAuthorityGroup.class, "userRoles" );
 
         allExportClasses.put( ReportTable.class, "reportTables" );
         allExportClasses.put( Report.class, "reports" );
@@ -151,25 +159,20 @@ final public class ExchangeClasses
         allExportClasses.put( MapView.class, "mapViews" );
         allExportClasses.put( org.hisp.dhis.mapping.Map.class, "maps" );
 
-        allExportClasses.put( User.class, "users" );
-        allExportClasses.put( UserGroup.class, "userGroups" );
-        allExportClasses.put( UserAuthorityGroup.class, "userRoles" );
-
         allExportClasses.put( MessageConversation.class, "messageConversations" );
         allExportClasses.put( Interpretation.class, "interpretations" );
 
         allExportClasses.put( Program.class, "programs" );
         allExportClasses.put( ProgramStage.class, "programStages" );
         allExportClasses.put( RelationshipType.class, "relationshipTypes" );
+        allExportClasses.put( PatientIdentifierType.class, "personIdentifierTypes" );
+        allExportClasses.put( PatientAttribute.class, "personAttributeTypes" );
+        allExportClasses.put( PatientAttributeGroup.class, "personAttributeGroups" );
 
         allExportClasses.put( BaseDimensionalObject.class, "dimensions" );
 
         exportClasses = new LinkedHashMap<Class<? extends IdentifiableObject>, String>( allExportClasses );
         importClasses = new LinkedHashMap<Class<? extends IdentifiableObject>, String>( allExportClasses );
-
-        // for now, do not allow user/userGroup to be imported
-        importClasses.remove( User.class );
-        importClasses.remove( UserGroup.class );
 
         // this is considered data, and is not available for meta-data export/import
         exportClasses.remove( MessageConversation.class );
@@ -185,9 +188,15 @@ final public class ExchangeClasses
         exportClasses.remove( Program.class );
         exportClasses.remove( ProgramStage.class );
         exportClasses.remove( RelationshipType.class );
+        exportClasses.remove( PatientIdentifierType.class );
+        exportClasses.remove( PatientAttribute.class );
+        exportClasses.remove( PatientAttributeGroup.class );
         importClasses.remove( Program.class );
         importClasses.remove( ProgramStage.class );
         importClasses.remove( RelationshipType.class );
+        importClasses.remove( PatientIdentifierType.class );
+        importClasses.remove( PatientAttribute.class );
+        importClasses.remove( PatientAttributeGroup.class );
 
         // special class which is created on demand in association with other objects
         exportClasses.remove( DataElementOperand.class );

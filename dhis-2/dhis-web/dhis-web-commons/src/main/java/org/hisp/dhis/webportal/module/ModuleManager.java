@@ -45,6 +45,10 @@ public interface ModuleManager
     
     List<Module> getMenuModules();
     
+    List<Module> getAccessibleMenuModules();
+    
+    List<Module> getAccessibleMenuModulesAndApps();
+    
     List<Module> getMaintenanceMenuModules();
     
     List<Module> getAccessibleMaintenanceModules();
@@ -52,6 +56,8 @@ public interface ModuleManager
     List<Module> getServiceMenuModules();
 
     List<Module> getAccessibleServiceModules();
+    
+    List<Module> getAccessibleServiceModulesAndApps();
     
     Collection<Module> getAllModules();
 

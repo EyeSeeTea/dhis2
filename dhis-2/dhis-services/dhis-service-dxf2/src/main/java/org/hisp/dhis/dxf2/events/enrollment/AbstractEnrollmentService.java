@@ -44,6 +44,7 @@ import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -300,6 +301,8 @@ public abstract class AbstractEnrollmentService implements EnrollmentService
     public void deleteEnrollment( Enrollment enrollment )
     {
         ProgramInstance programInstance = programInstanceService.getProgramInstance( enrollment.getEnrollment() );
+        Assert.notNull( programInstance );
+
         programInstanceService.deleteProgramInstance( programInstance );
     }
 
@@ -307,6 +310,8 @@ public abstract class AbstractEnrollmentService implements EnrollmentService
     public void cancelEnrollment( Enrollment enrollment )
     {
         ProgramInstance programInstance = programInstanceService.getProgramInstance( enrollment.getEnrollment() );
+        Assert.notNull( programInstance );
+
         programInstanceService.cancelProgramInstanceStatus( programInstance );
     }
 
@@ -314,6 +319,8 @@ public abstract class AbstractEnrollmentService implements EnrollmentService
     public void completeEnrollment( Enrollment enrollment )
     {
         ProgramInstance programInstance = programInstanceService.getProgramInstance( enrollment.getEnrollment() );
+        Assert.notNull( programInstance );
+
         programInstanceService.completeProgramInstanceStatus( programInstance, getFormat() );
     }
 
@@ -353,17 +360,4 @@ public abstract class AbstractEnrollmentService implements EnrollmentService
 
         return program;
     }
-
-    private OrganisationUnit getOrganisationUnit( String id )
-    {
-        OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( id );
-
-        if ( organisationUnit == null )
-        {
-            throw new IllegalArgumentException( "OrganisationUnit does not exist." );
-        }
-
-        return organisationUnit;
-    }
-
 }

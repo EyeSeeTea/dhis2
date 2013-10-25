@@ -352,16 +352,7 @@ public class DefaultPatientService
     public Collection<Patient> getPatientsLikeName( OrganisationUnit organisationUnit, String name, Integer min,
         Integer max )
     {
-        Collection<Patient> patients = new ArrayList<Patient>();
-
-        Collection<Patient> allPatients = getPatientsByNames( name, min, max );
-
-        if ( allPatients.retainAll( getPatients( organisationUnit, min, max ) ) )
-        {
-            patients = allPatients;
-        }
-
-        return patients;
+        return patientStore.getByOrgUnitAndNameLike( organisationUnit, name, min, max );
     }
 
     @Override
@@ -377,10 +368,12 @@ public class DefaultPatientService
         }
         else if ( identifierTypeId != null )
         {
-            PatientIdentifierType idenType = patientIdentifierTypeService.getPatientIdentifierType( identifierTypeId );
-            if ( idenType != null )
+            PatientIdentifierType identifierType = patientIdentifierTypeService
+                .getPatientIdentifierType( identifierTypeId );
+
+            if ( identifierType != null )
             {
-                Patient p = patientIdentifierService.getPatient( idenType, value );
+                Patient p = patientIdentifierService.getPatient( identifierType, value );
                 if ( p != null )
                 {
                     Set<Patient> set = new HashSet<Patient>();
@@ -567,26 +560,29 @@ public class DefaultPatientService
     }
 
     public Collection<Patient> searchPatients( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer min, Integer max )
+        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer statusEnrollment, Integer min,
+        Integer max )
     {
-        return patientStore.search( searchKeys, orgunits, followup, patientAttributes, min, max );
+        return patientStore.search( searchKeys, orgunits, followup, patientAttributes, statusEnrollment, min, max );
     }
 
-    public int countSearchPatients( List<String> searchKeys, Collection<OrganisationUnit> orgunits, Boolean followup )
+    public int countSearchPatients( List<String> searchKeys, Collection<OrganisationUnit> orgunits, Boolean followup,
+        Integer statusEnrollment )
     {
-        return patientStore.countSearch( searchKeys, orgunits, followup );
+        return patientStore.countSearch( searchKeys, orgunits, followup, statusEnrollment );
     }
 
     public Collection<String> getPatientPhoneNumbers( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Integer min, Integer max )
+        Boolean followup, Integer statusEnrollment, Integer min, Integer max )
     {
-        return patientStore.getPatientPhoneNumbers( searchKeys, orgunits, followup, null, min, max );
+        return patientStore.getPatientPhoneNumbers( searchKeys, orgunits, followup, null, statusEnrollment, min, max );
     }
 
     public List<Integer> getProgramStageInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Integer min, Integer max )
+        Boolean followup, Integer statusEnrollment, Integer min, Integer max )
     {
-        return patientStore.getProgramStageInstances( searchKeys, orgunits, followup, null, null, min, max );
+        return patientStore.getProgramStageInstances( searchKeys, orgunits, followup, null, null, statusEnrollment,
+            min, max );
     }
 
     @Override
@@ -597,7 +593,7 @@ public class DefaultPatientService
 
     @Override
     public Grid getScheduledEventsReport( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Integer min, Integer max, I18n i18n )
+        Boolean followup, Integer statusEnrollment, Integer min, Integer max, I18n i18n )
     {
         String startDate = "";
         String endDate = "";
@@ -636,14 +632,14 @@ public class DefaultPatientService
         grid.addHeader( new GridHeader( i18n.getString( "program_stage" ), false, true ) );
         grid.addHeader( new GridHeader( i18n.getString( "due_date" ), false, true ) );
 
-        return patientStore.getPatientEventReport( grid, searchKeys, orgunits, followup, patientAttributes, null, min,
-            max );
+        return patientStore.getPatientEventReport( grid, searchKeys, orgunits, followup, patientAttributes, null,
+            statusEnrollment, min, max );
 
     }
 
     @Override
     public Grid getTrackingEventsReport( Program program, List<String> searchKeys,
-        Collection<OrganisationUnit> orgunits, Boolean followup, I18n i18n )
+        Collection<OrganisationUnit> orgunits, Boolean followup, Integer statusEnrollment, I18n i18n )
     {
         String startDate = "";
         String endDate = "";
@@ -682,7 +678,7 @@ public class DefaultPatientService
         grid.addHeader( new GridHeader( i18n.getString( "risk" ), false, true ) );
 
         return patientStore.getPatientEventReport( grid, searchKeys, orgunits, followup, null, patientIdentifierTypes,
-            null, null );
+            statusEnrollment, null, null );
 
     }
 

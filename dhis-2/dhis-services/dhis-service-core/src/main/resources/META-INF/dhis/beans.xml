@@ -349,8 +349,13 @@
   
    <bean id="org.hisp.dhis.sms.hibernate.OutboundSmsStore"
     class="org.hisp.dhis.sms.hibernate.HibernateOutboundSmsStore">
-     <property name="clazz" value="org.hisp.dhis.sms.outbound.OutboundSms" />	
-     <property name="sessionFactory" ref="sessionFactory" />
+    <property name="clazz" value="org.hisp.dhis.sms.outbound.OutboundSms" />	
+    <property name="sessionFactory" ref="sessionFactory" />
+  </bean>
+  
+  <bean id="org.hisp.dhis.i18n.I18nLocaleStore" class="org.hisp.dhis.i18n.hibernate.HibernateI18nLocaleStore">
+    <property name="clazz" value="org.hisp.dhis.i18n.locale.I18nLocale" />
+    <property name="sessionFactory" ref="sessionFactory" />
   </bean>
   
   <!-- Service definitions -->
@@ -435,8 +440,11 @@
     <property name="expressionService" ref="org.hisp.dhis.expression.ExpressionService" />
     <property name="dataEntryFormService" ref="org.hisp.dhis.dataentryform.DataEntryFormService" />
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
+    <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+    <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
     <property name="constantService" ref="org.hisp.dhis.constant.ConstantService" />
     <property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
+    <property name="messageService" ref="org.hisp.dhis.message.MessageService" />
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
 
@@ -605,11 +613,12 @@
     <property name="flags">
       <list>
         <value>afghanistan</value>
+        <value>akros</value>
         <value>algeria</value>
         <value>armenia</value>
         <value>bangladesh</value>
         <value>benin</value>
-		<value>bhutan</value>
+        <value>bhutan</value>
         <value>botswana</value>
         <value>burkina_faso</value>
         <value>burkina_faso_coat_of_arms</value>
@@ -621,18 +630,19 @@
         <value>ecuador</value>
         <value>east_africa_community</value>
         <value>ethiopia</value>
+        <value>fhi360</value>
         <value>gambia</value>
         <value>ghana</value>
         <value>global_fund</value>
         <value>guinea</value>
         <value>guinea_bissau</value>
-        <value>Haiti</value>
+        <value>haiti</value>
         <value>india</value>
         <value>indonesia</value>
         <value>irc</value>
         <value>ivory_coast</value>
         <value>kenya</value>
-		<value>laos</value>
+        <value>laos</value>
         <value>lesotho</value>
         <value>liberia</value>
         <value>malawi</value>
@@ -641,7 +651,7 @@
         <value>mozambique</value>
         <value>namibia</value>
         <value>nicaragua</value>
-		<value>nepal</value>
+        <value>nepal</value>
         <value>niger</value>
         <value>nigeria</value>
         <value>norway</value>
@@ -715,7 +725,7 @@
 
   <bean id="org.hisp.dhis.common.DimensionService" class="org.hisp.dhis.common.DefaultDimensionService" />
   
-  <bean id="org.hisp.dhis.appmanager.AppManagerService" class="org.hisp.dhis.appmanager.DefaultAppManagerService" />
+  <bean id="org.hisp.dhis.appmanager.AppManager" class="org.hisp.dhis.appmanager.DefaultAppManager" />
   
   <bean id="org.hisp.dhis.system.SystemService" class="org.hisp.dhis.system.DefaultSystemService" />
   
@@ -800,37 +810,12 @@
 
   <bean id="org.hisp.dhis.i18n.I18nService" class="org.hisp.dhis.i18n.DefaultI18nService">
     <property name="translationService" ref="org.hisp.dhis.translation.TranslationService" />
+    <property name="localeService" ref="org.hisp.dhis.i18n.118nLocaleService" />
     <property name="userSettingService" ref="org.hisp.dhis.user.UserSettingService" />
-    <property name="locales">
-      <list>
-        <value>af</value>
-        <value>ar</value>
-        <value>bi</value>
-        <value>am</value>
-        <value>de</value>
-        <value>en</value>
-        <value>es</value>
-        <value>fa</value>
-        <value>fr</value>
-        <value>gu</value>
-        <value>hi</value>
-        <value>id</value>
-        <value>it</value>
-		<value>km</value>
-		<value>lo</value>
-        <value>my</value>
-        <value>nl</value>
-        <value>no</value>
-        <value>ps</value>
-        <value>pt</value>
-        <value>ru</value>
-        <value>rw</value>
-        <value>sw</value>
-        <value>tg</value>
-        <value>vi</value>
-        <value>zh</value>
-      </list>
-    </property>
+  </bean>
+  
+  <bean id="org.hisp.dhis.i18n.118nLocaleService" class="org.hisp.dhis.i18n.DefaultI18nLocaleService">
+    <property name="localeStore" ref="org.hisp.dhis.i18n.I18nLocaleStore" />
   </bean>
 
   <!-- Startup routine definitions -->
@@ -875,13 +860,6 @@
     <property name="runlevel" value="3" />
   </bean>
 
-  <bean id="org.hisp.dhis.organisationunit.OrganisationUnitGroupSetPopulator"
-    class="org.hisp.dhis.organisationunit.OrganisationUnitGroupSetPopulator">
-    <property name="organisationUnitGroupService" ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
-    <property name="runlevel" value="5" />
-    <property name="skipInTests" value="true" />
-  </bean>
-
   <bean id="org.hisp.dhis.dataentryform.DataEntryFormUpgrader" class="org.hisp.dhis.dataentryform.DataEntryFormUpgrader">
     <property name="dataEntryFormService" ref="org.hisp.dhis.dataentryform.DataEntryFormService" />
     <property name="runlevel" value="5" />
@@ -894,6 +872,11 @@
   </bean>
   
   <bean id="org.hisp.dhis.startup.ConfigurationPopulator" class="org.hisp.dhis.startup.ConfigurationPopulator">
+    <property name="runlevel" value="7" />
+    <property name="skipInTests" value="true" />
+  </bean>
+  
+  <bean id="org.hisp.dhis.startup.I18nLocalePopulator" class="org.hisp.dhis.startup.I18nLocalePopulator">
     <property name="runlevel" value="7" />
     <property name="skipInTests" value="true" />
   </bean>
@@ -916,10 +899,10 @@
           <ref local="org.hisp.dhis.period.PeriodTypePopulator" />
           <ref local="org.hisp.dhis.startup.TableCreator" />
           <ref local="org.hisp.dhis.dataelement.DataElementDefaultDimensionPopulator" />
-          <ref local="org.hisp.dhis.organisationunit.OrganisationUnitGroupSetPopulator" />
           <ref local="org.hisp.dhis.dataentryform.DataEntryFormUpgrader" />
           <ref local="org.hisp.dhis.startup.ExpressionUpgrader" />
           <ref local="org.hisp.dhis.startup.ConfigurationPopulator" />
+          <ref local="org.hisp.dhis.startup.I18nLocalePopulator" />
           <!--<ref local="org.hisp.dhis.user.UserDefaultPopulator" />-->
         </list>
       </list>
@@ -1060,6 +1043,7 @@
 
   <bean id="org.hisp.dhis.translation.TranslationDeletionHandler" class="org.hisp.dhis.translation.TranslationDeletionHandler">
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
+    <property name="translationService" ref="org.hisp.dhis.translation.TranslationService" />
   </bean>
 
   <bean id="org.hisp.dhis.attribute.AttributeValueDeletionHandler" class="org.hisp.dhis.attribute.AttributeValueDeletionHandler">
@@ -1151,6 +1135,7 @@
       <aop:before pointcut="execution( * org.hisp.dhis.mapping.MappingService.deleteMapLegendSet(..) )" method="intercept" />
       <aop:before pointcut="execution( * org.hisp.dhis.mapping.MappingService.deleteMapView(..) )" method="intercept" />
       <aop:before pointcut="execution( * org.hisp.dhis.mapping.MappingService.deleteMap(..) )" method="intercept" />
+      <aop:before pointcut="execution( * org.hisp.dhis.i18n.I18nLocaleService.delete*(..) )" method="intercept" />      
     </aop:aspect>
 
     <!-- <aop:aspect ref="i18nTranslationInterceptor"> <aop:after-returning pointcut="execution( * org.hisp.dhis.dataelement.DataElementService.get*(..) 
@@ -1162,7 +1147,7 @@
       )" method="intercept" returning="idObject"/> <aop:after-returning pointcut="execution( * org.hisp.dhis.organisationunit.OrganisationUnitGroupService.get*(..)
       )" method="intercept" returning="idObject"/> </aop:aspect> -->
   </aop:config>
-
+  
   <!-- Security import -->
   <import resource="security.xml" />
 </beans>

@@ -39,7 +39,10 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts2.dispatcher.Dispatcher;
+import org.hisp.dhis.appmanager.App;
+import org.hisp.dhis.appmanager.AppManager;
 import org.hisp.dhis.security.ActionAccessResolver;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.config.Configuration;
 import com.opensymphony.xwork2.config.entities.PackageConfig;
@@ -71,6 +74,9 @@ public class DefaultModuleManager
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
+    private AppManager appManager;
+    
     private ActionAccessResolver actionAccessResolver;
 
     public void setActionAccessResolver( ActionAccessResolver actionAccessResolver )
@@ -129,6 +135,27 @@ public class DefaultModuleManager
         return menuModules;
     }
 
+    public List<Module> getAccessibleMenuModules()
+    {
+        detectModules();
+        
+        return getAccessibleModules( menuModules );
+    }
+    
+    public List<Module> getAccessibleMenuModulesAndApps()
+    {
+        List<Module> modules = getAccessibleMenuModules();
+        
+        List<App> apps = appManager.getInstalledApps();
+        
+        for ( App app : apps )
+        {   
+            modules.add( Module.getModule( app ) );
+        }
+        
+        return modules;
+    }
+
     public List<Module> getMaintenanceMenuModules()
     {
         detectModules();
@@ -156,6 +183,20 @@ public class DefaultModuleManager
         
         return getAccessibleModules( serviceMenuModules );
     }
+
+    public List<Module> getAccessibleServiceModulesAndApps()
+    {
+        List<Module> modules = getAccessibleServiceModules();
+
+        List<App> apps = appManager.getInstalledApps();
+        
+        for ( App app : apps )
+        {   
+            modules.add( Module.getModule( app ) );
+        }
+        
+        return modules;
+    }
     
     public Collection<Module> getAllModules()
     {
@@ -163,7 +204,7 @@ public class DefaultModuleManager
 
         return modulesByName.values();
     }
-
+    
     public Module getCurrentModule()
     {
         return currentModule.get();

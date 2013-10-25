@@ -83,5 +83,4 @@ public class AppIcons
     {
         this.icon128 = icon128;
     }
-
 }

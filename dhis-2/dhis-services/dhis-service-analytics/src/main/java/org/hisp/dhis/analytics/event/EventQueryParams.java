@@ -34,6 +34,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hisp.dhis.analytics.DataQueryParams;
+import org.hisp.dhis.analytics.SortOrder;
+import org.hisp.dhis.common.DimensionalObject;
+import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
@@ -42,6 +46,7 @@ import org.hisp.dhis.program.ProgramStage;
  * @author Lars Helge Overland
  */
 public class EventQueryParams
+    extends DataQueryParams
 {
     public static final String OU_MODE_SELECTED = "selected";
     public static final String OU_MODE_CHILDREN = "children";
@@ -57,12 +62,12 @@ public class EventQueryParams
     
     private List<QueryItem> items = new ArrayList<QueryItem>();
     
+    private List<QueryItem> itemFilters = new ArrayList<QueryItem>();
+
     private List<String> asc = new ArrayList<String>();
     
     private List<String> desc = new ArrayList<String>();
     
-    private List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>();
-
     private String organisationUnitMode;
     
     private String tableName;
@@ -71,6 +76,16 @@ public class EventQueryParams
     
     private Integer pageSize;
 
+    private SortOrder sortOrder;
+    
+    private Integer limit;
+    
+    // -------------------------------------------------------------------------
+    // Transient properties
+    // -------------------------------------------------------------------------
+    
+    private String periodType;
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -79,19 +94,35 @@ public class EventQueryParams
     {
     }
     
-    public EventQueryParams( EventQueryParams params )
+    @Override
+    public EventQueryParams instance()
     {
-        this.program = params.getProgram();
-        this.programStage = params.getProgramStage();
-        this.startDate = params.getStartDate();
-        this.endDate = params.getEndDate();
-        this.items = new ArrayList<QueryItem>( params.getItems() );
-        this.asc = new ArrayList<String>( params.getAsc() );
-        this.desc = new ArrayList<String>( params.getDesc() );
-        this.organisationUnits = new ArrayList<OrganisationUnit>( params.getOrganisationUnits() );
-        this.tableName = params.getTableName();
-        this.page = params.getPage();
-        this.pageSize = params.getPageSize();
+        EventQueryParams params = new EventQueryParams();
+
+        params.dimensions = new ArrayList<DimensionalObject>( this.dimensions );
+        params.filters = new ArrayList<DimensionalObject>( this.filters );
+        params.aggregationType = this.aggregationType;
+
+        params.partitions = this.partitions;
+        params.periodType = this.periodType;
+        
+        params.program = this.program;
+        params.programStage = this.programStage;
+        params.startDate = this.startDate;
+        params.endDate = this.endDate;
+        params.items = new ArrayList<QueryItem>( this.items );
+        params.itemFilters = new ArrayList<QueryItem>( this.itemFilters );
+        params.asc = new ArrayList<String>( this.asc );
+        params.desc = new ArrayList<String>( this.desc );
+        params.organisationUnitMode = this.organisationUnitMode;
+        params.tableName = this.tableName;
+        params.page = this.page;
+        params.pageSize = this.pageSize;
+        params.sortOrder = this.sortOrder;
+        params.limit = this.limit;
+        params.periodType = this.periodType;
+        
+        return params;
     }
 
     // -------------------------------------------------------------------------
@@ -103,12 +134,18 @@ public class EventQueryParams
         return organisationUnitMode != null && organisationUnitMode.equalsIgnoreCase( mode );
     }
     
+    public boolean hasStartEndDate()
+    {
+        return startDate != null && endDate != null;
+    }
+        
     public Set<OrganisationUnit> getOrganisationUnitChildren()
     {
         Set<OrganisationUnit> children = new HashSet<OrganisationUnit>();
         
-        for ( OrganisationUnit unit : organisationUnits )
+        for ( NameableObject object : getDimensionOrFilter( DimensionalObject.ORGUNIT_DIM_ID ) )
         {
+            OrganisationUnit unit = (OrganisationUnit) object;            
             children.addAll( unit.getChildren() );
         }
         
@@ -138,6 +175,28 @@ public class EventQueryParams
     public int getOffset()
     {
         return ( getPageWithDefault() - 1 ) * getPageSizeWithDefault();
+    }
+    
+    public boolean hasSortOrder()
+    {
+        return sortOrder != null;
+    }
+    
+    public boolean hasLimit()
+    {
+        return limit != null && limit > 0;
+    }
+    
+    public String toString()
+    {
+        return "[" +
+            "Program: " + program + ", " +
+            "Stage: " + programStage + ", " +
+            "Start date: " + startDate + ", " +
+            "End date: " + endDate + ", " +
+            "Items " + items + ", " +
+            "Item filters: " + itemFilters + ", " +
+            "Dimensions " + dimensions + "]";
     }
     
     // -------------------------------------------------------------------------
@@ -194,9 +253,29 @@ public class EventQueryParams
         this.items = items;
     }
 
+    public List<QueryItem> getItemFilters()
+    {
+        return itemFilters;
+    }
+
+    public void setItemFilters( List<QueryItem> itemFilters )
+    {
+        this.itemFilters = itemFilters;
+    }
+
     public List<String> getAsc()
     {
         return asc;
+    }
+
+    public List<DimensionalObject> getDimensions()
+    {
+        return dimensions;
+    }
+
+    public void setDimensions( List<DimensionalObject> dimensions )
+    {
+        this.dimensions = dimensions;
     }
 
     public void setAsc( List<String> asc )
@@ -212,16 +291,6 @@ public class EventQueryParams
     public void setDesc( List<String> desc )
     {
         this.desc = desc;
-    }
-
-    public List<OrganisationUnit> getOrganisationUnits()
-    {
-        return organisationUnits;
-    }
-
-    public void setOrganisationUnits( List<OrganisationUnit> organisationUnits )
-    {
-        this.organisationUnits = organisationUnits;
     }
 
     public String getOrganisationUnitMode()
@@ -262,5 +331,35 @@ public class EventQueryParams
     public void setPageSize( Integer pageSize )
     {
         this.pageSize = pageSize;
+    }
+
+    public SortOrder getSortOrder()
+    {
+        return sortOrder;
+    }
+
+    public void setSortOrder( SortOrder sortOrder )
+    {
+        this.sortOrder = sortOrder;
+    }
+
+    public Integer getLimit()
+    {
+        return limit;
+    }
+
+    public void setLimit( Integer limit )
+    {
+        this.limit = limit;
+    }
+
+    public String getPeriodType()
+    {
+        return periodType;
+    }
+
+    public void setPeriodType( String periodType )
+    {
+        this.periodType = periodType;
     }
 }

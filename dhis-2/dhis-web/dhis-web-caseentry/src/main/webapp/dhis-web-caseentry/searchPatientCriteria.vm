@@ -11,10 +11,10 @@
 		<td>
 			<input type="text" id='orgunitName' readonly="readonly" #if( $organisationUnit ) value="$encoder.htmlEncode( $organisationUnit.name )" #else value="[$i18n.getString( 'please_select_village' )]" #end >
 		</td>
-		<td rowspan='5' valign='bottom'>
+		<td rowspan='4' valign='bottom' id='criteriaBtnTD'>
 			<input type="button" style='width:130px' id='listPatientBtn' style='260px;' value="$i18n.getString( 'list_all_patients' )" onclick="javascript:listAllPatient();" >
 			<input type="button" style='width:130px' id='addPatientBtn' name='addPatientBtn' class='large-button' value='$i18n.getString( "add_new" )' onclick="showAddPatientForm(getFieldValue('programIdAddPatient'),'', '');" >
-			<input type="button" style='width:130px' id='advancedSearchBtn' value='$i18n.getString( "advanced_search" )' onclick="jQuery('#advanced-search').toggle();" >
+			<input type="button" style='width:130px' id='advancedSearchBtn' value='$i18n.getString( "advanced_search" )' onclick="advancedSearchOnclick();" >
 		</td>
 	</tr>
 	<tr id='programAddPatientTR'>
@@ -67,24 +67,54 @@
 			<input type='checkbox' id='followup' name='followup' />
 		</td>
 	</tr>
+	<tr id='searchByIdTR' class='hidden'>
+		<td colspan='2' ><input type='text' id='searchPatientByIds' name='searchPatientByIds' onchange='searchByIdsOnclick();' style='width:350px;' placeholder='$i18n.getString("search_by_name_identifier")' /></td>
+		<td><input type='button' value='$i18n.getString("search")' onclick='searchByIdsOnclick();' ></td>
+	</tr>
+	
 </table>
+
+<div id='showSearchCriteriaDiv' class='hidden green-background'><img src='../images/move_bottom.png' onclick='showSearchCriteria();' >&nbsp;&nbsp; $i18n.getString("there_are_active_search_filter_click_on_arrow_to_show_them")</div>
 <div id='advanced-search' name='advanced-search' class='hidden advanced-search'>
+	<div id='hideSearchCriteriaDiv' class='hidden'><img src='../images/move_top.png' onclick='hideSearchCriteria();' >&nbsp;&nbsp; $i18n.getString("hide_search_criteria")</div>
 	<table>	
+		<tr>
+			<td colspan='4'>
+				$i18n.getString('select_orgunit_for_search'): <span id='orgunitForSearch'>$!organisationUnit.name</span>
+				<input type='button' id='selectOtherOrgunitBtn' value='$i18n.getString("select_other_orgunit")' />
+				<input type='button' id='clearAndCloseSearchBtn' value='$i18n.getString("clear_and_close")' onclick='clearAndCloseSearch();'/>
+			</td>
+		</tr>
 		<tr id='searchBySelectedUnitTD'>
 			 #if( $auth.hasAccess( "dhis-web-caseentry", "searchAllFacilities" ) )
 				<td>
 					$i18n.getString('search_in_all_facilities') 
-					<input type='checkbox' id='searchInAllFacility' name='searchInAllFacility' />&nbsp;&nbsp;&nbsp;
+					<input type='checkbox' id='searchInAllFacility' name='searchInAllFacility' value='searchInAllOrgunits' />&nbsp;&nbsp;&nbsp;
 				</td>
 			 #else
-					 <input type='checkbox' class='hidden' id='searchInAllFacility' name='searchInAllFacility' />
+					 <input type='checkbox' class='hidden' id='searchInAllFacility' name='searchInAllFacility' value='searchInAllOrgunits' />
 			 #end
 			 
-			<td>
+			<td class='hidden'>
 				$i18n.getString('search_by_user_orgunits') 
-				<input type='checkbox' id='searchByUserOrgunits' name='searchByUserOrgunits' />&nbsp;&nbsp;&nbsp;
+				<input type='checkbox' id='searchInUserOrgunits' name='searchInUserOrgunits' value='searchInUserOrgunits' />&nbsp;&nbsp;&nbsp;
+			</td>
+			
+			<td>
+				$i18n.getString('search_all_below_selected_orgunit') 
+				<input type='checkbox' id='searchBelowOrgunit' name='searchBelowOrgunit' value='searchInBelowSelectedOrgunit' />&nbsp;&nbsp;&nbsp;
 			</td>
 		
+		</tr>
+		<tr id='enrollmentSelectTR' class='hidden' >
+			<td>$i18n.getString('show')</td>
+			<td>
+				<select id='statusEnrollment'>
+					<option value='0'>$i18n.getString('active_enrollments_only')</option>
+					<option value='1'>$i18n.getString('completed_enrollments_only')</option>
+					<option value=''>$i18n.getString('active_and_completed_enrolments')</option>
+				</select>
+			</td>
 		</tr>
 		<tr id='dueDateTR' class='hidden'>
 			<td>$i18n.getString('due_date_from_to')</td>
@@ -98,11 +128,6 @@
 			  <select class='search-field' id="searchObjectId" name="searchObjectId" #if( $patientAttributes.size() == 0 ) disabled="disabled" #end onchange="searchObjectOnChange(this)">
 				#if( $auth.hasAccess( "dhis-web-caseentry", "accessPatientAttributes" ) )
 					<option value="iden">$i18n.getString( "search_by_name_identifier" )</option>
-				#end
-				
-				<option value="prg">$i18n.getString( "search_by_program" )</option>
-				
-				#if( $auth.hasAccess( "dhis-web-caseentry", "accessPatientAttributes" ) )
 					<option value="fixedAttr_registrationDate">$i18n.getString( "registration_date" )</option>
 					<option value="fixedAttr_birthDate">$i18n.getString( "date_of_birth" )</option>
 					<option value="fixedAttr_age">$i18n.getString( "age_year" )</option>
@@ -121,11 +146,11 @@
 			<tr>
 				<td></td>
 				<td></td>
-				<td name='addAndSearchBtn' rowspan='2' style='padding-bottom:2px;' valign='bottom'>
-					<input type="button" class='normal-button' value='$i18n.getString( "add" )' onclick='addAttributeOption();'>
-				</td>
 				<td name='addAndSearchBtn' rowspan='2' style='padding-bottom:2px;' valign='bottom' align="right" align="bottom">
 					<input type="button" class='normal-button' value='$i18n.getString( "search" )' onclick='validateAdvancedSearch();' id='searchPatientBtn'>
+				</td>
+				<td name='addAndSearchBtn' rowspan='2' style='padding-bottom:2px;' valign='bottom'>
+					<input type="button" class='normal-button' value='$i18n.getString( "add" )' onclick='addAttributeOption();'>
 				</td>
 				<td name='addAndSearchBtn' rowspan='2' style='padding-bottom:2px;' valign='bottom' align="right" align="bottom">
 					<input type="button" class='normal-button hidden' id='sendSmsToListBtn' value="$i18n.getString('sms')" onclick="setFieldValue('sendToList', true);showSendSmsForm();" >
@@ -136,10 +161,6 @@
 				  <select class='search-field' id="searchObjectId" name="searchObjectId" #if( $patientAttributes.size() == 0 ) disabled="disabled" #end onchange="searchObjectOnChange(this)">
 					#if( $auth.hasAccess( "dhis-web-caseentry", "accessPatientAttributes" ) )
 						<option value="iden">$i18n.getString( "search_by_name_identifier" )</option>
-					#end
-					<option value="prg">$i18n.getString( "search_by_program" )</option>
-					
-					#if( $auth.hasAccess( "dhis-web-caseentry", "accessPatientAttributes" ) )
 						<option value="fixedAttr_registrationDate">$i18n.getString( "registration_date" )</option>
 						<option value="fixedAttr_birthDate">$i18n.getString( "date_of_birth" )</option>
 						<option value="fixedAttr_age">$i18n.getString( "age_year" )</option>
@@ -155,7 +176,7 @@
 				</td>		
 				<td>
 					<input type="text" id="searchText" name="searchText" value="$!searchText" onkeyup='searchPatientsOnKeyUp( event );' style='width:200px;'>
-					<input type="button" class='normal-button' name="clearSearchBtn" value='$i18n.getString( "clear" )' onclick="removeAttributeOption('advSearchBox0');" align='bottom'>
+					<input type="button" class='normal-button' name="clearSearchBtn" value='$i18n.getString( "clear" )' disabled onclick="removeAttributeOption('advSearchBox0');" align='bottom'>
 				</td>
 			</tr>
 		</tbody>
@@ -178,9 +199,4 @@
 	datePicker( 'endDueDate', true );
 	
 	var searchTextBox = '<input type="text" id="searchText" name="searchText" onkeyup="searchPatientsOnKeyUp( event );" style="width:202px;">';
-	var programComboBox = '<select class="search-field" id="searchText" name="searchText" style="width:205px;">';
-	#foreach ( $program in $programs ) 
-		programComboBox += '<option value="$program.id">$program.displayName</option>';
-	#end
-	programComboBox += '</select>';
 </script>

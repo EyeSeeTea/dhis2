@@ -40,7 +40,6 @@ import org.hisp.dhis.message.MessageConversation;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patientreport.TabularReportColumn;
-import org.hisp.dhis.period.Period;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 
 /**
@@ -62,6 +61,8 @@ public interface ProgramStageInstanceService
     ProgramStageInstance getProgramStageInstance( String uid );
 
     ProgramStageInstance getProgramStageInstance( ProgramInstance programInstance, ProgramStage programStage );
+
+    Collection<ProgramStageInstance> getProgramStageInstances( ProgramInstance programInstance, ProgramStage programStage );
 
     Collection<ProgramStageInstance> getProgramStageInstances( ProgramStage programStage );
 
@@ -91,12 +92,12 @@ public interface ProgramStageInstanceService
     /**
      * Get all {@link ProgramStageInstance program stage instances} for unit,
      * optionally filtering by date or completed.
-     * 
-     * @param unit - the unit to get instances for.
-     * @param after - optional date the instance should be on or after.
-     * @param before - optional date the instance should be on or before.
+     *
+     * @param unit      - the unit to get instances for.
+     * @param after     - optional date the instance should be on or after.
+     * @param before    - optional date the instance should be on or before.
      * @param completed - optional flag to only get completed (<code>true</code>
-     *        ) or uncompleted (<code>false</code>) instances.
+     *                  ) or uncompleted (<code>false</code>) instances.
      * @return
      */
     List<ProgramStageInstance> get( OrganisationUnit unit, Date after, Date before, Boolean completed );
@@ -124,12 +125,7 @@ public interface ProgramStageInstanceService
 
     List<ProgramStageInstance> getStatisticalProgramStageDetailsReport( ProgramStage programStage,
         Collection<Integer> orgunitIds, Date startDate, Date endDate, int status, Integer max, Integer min );
-
-    Grid getAggregateReport( int position, ProgramStage programStage, Collection<Integer> orgunitIds,
-        String facilityLB, Integer deGroupBy, Integer deSum, Map<Integer, Collection<String>> deFilters,
-        List<Period> periods, String aggregateType, Integer limit, Boolean useCompletedEvents, Boolean displayTotals,
-        Boolean useFormNameDataElement, I18nFormat format, I18n i18n );
-
+    
     // -------------------------------------------------------------------------
     // Statistical
     // -------------------------------------------------------------------------

@@ -28,6 +28,16 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.dataelement.DataElement;
@@ -44,7 +54,6 @@ import org.hisp.dhis.patient.PatientReminderService;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.patientreport.TabularReportColumn;
-import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.sms.SmsSender;
 import org.hisp.dhis.sms.SmsServiceException;
@@ -52,16 +61,6 @@ import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Abyot Asalefew
@@ -164,6 +163,12 @@ public class DefaultProgramStageInstanceService
     public ProgramStageInstance getProgramStageInstance( ProgramInstance programInstance, ProgramStage programStage )
     {
         return programStageInstanceStore.get( programInstance, programStage );
+    }
+
+    @Override
+    public Collection<ProgramStageInstance> getProgramStageInstances( ProgramInstance programInstance, ProgramStage programStage )
+    {
+        return programStageInstanceStore.getAll( programInstance, programStage );
     }
 
     public Collection<ProgramStageInstance> getProgramStageInstances( ProgramStage programStage )
@@ -554,17 +559,6 @@ public class DefaultProgramStageInstanceService
     }
 
     @Override
-    public Grid getAggregateReport( int position, ProgramStage programStage, Collection<Integer> orgunitIds,
-        String facilityLB, Integer deGroupBy, Integer deSum, Map<Integer, Collection<String>> deFilters,
-        List<Period> periods, String aggregateType, Integer limit, Boolean useCompletedEvents, Boolean displayTotals,
-        Boolean useFormNameDataElement, I18nFormat format, I18n i18n )
-    {
-        return programStageInstanceStore.getAggregateReport( position, programStage, orgunitIds, facilityLB, deGroupBy,
-            deSum, deFilters, periods, aggregateType, limit, useCompletedEvents, displayTotals, useFormNameDataElement,
-            format, i18n );
-    }
-
-    @Override
     public int getOverDueEventCount( ProgramStage programStage, Collection<Integer> orgunitIds, Date startDate,
         Date endDate )
     {
@@ -651,6 +645,7 @@ public class DefaultProgramStageInstanceService
         PeriodType.clearTimeOfDay( today );
         Date date = today.getTime();
 
+        programStageInstance.setStatus( ProgramStageInstance.COMPLETED_STATUS );
         programStageInstance.setCompletedDate( date );
         programStageInstance.setCompletedUser( currentUserService.getCurrentUsername() );
 
@@ -659,6 +654,7 @@ public class DefaultProgramStageInstanceService
         // ---------------------------------------------------------------------
 
         List<OutboundSms> outboundSms = programStageInstance.getOutboundSms();
+
         if ( outboundSms == null )
         {
             outboundSms = new ArrayList<OutboundSms>();
@@ -671,6 +667,7 @@ public class DefaultProgramStageInstanceService
         // ---------------------------------------------------------------------
 
         List<MessageConversation> messageConversations = programStageInstance.getMessageConversations();
+
         if ( messageConversations == null )
         {
             messageConversations = new ArrayList<MessageConversation>();
@@ -678,7 +675,7 @@ public class DefaultProgramStageInstanceService
 
         messageConversations.addAll( sendMessageConversations( programStageInstance,
             PatientReminder.SEND_WHEN_TO_C0MPLETED_EVENT, format ) );
-      
+
         // ---------------------------------------------------------------------
         // Update the event
         // ---------------------------------------------------------------------

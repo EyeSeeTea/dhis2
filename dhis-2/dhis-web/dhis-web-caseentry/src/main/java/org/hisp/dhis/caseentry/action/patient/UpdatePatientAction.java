@@ -151,21 +151,23 @@ public class UpdatePatientAction
         // ---------------------------------------------------------------------
 
         String phone = "";
-
-        for ( String _phoneNumber : phoneNumber )
+        if ( phoneNumber != null )
         {
-            _phoneNumber = (_phoneNumber != null && _phoneNumber.isEmpty() && _phoneNumber.trim().equals(
-                systemSettingManager.getSystemSetting( SystemSettingManager.KEY_PHONE_NUMBER_AREA_CODE ) )) ? null
-                : _phoneNumber;
-            if ( _phoneNumber != null )
+            for ( String _phoneNumber : phoneNumber )
             {
-                phone += _phoneNumber + ";";
+                _phoneNumber = (_phoneNumber != null && _phoneNumber.isEmpty() && _phoneNumber.trim().equals(
+                    systemSettingManager.getSystemSetting( SystemSettingManager.KEY_PHONE_NUMBER_AREA_CODE ) )) ? null
+                    : _phoneNumber;
+                if ( _phoneNumber != null )
+                {
+                    phone += _phoneNumber + ";";
+                }
             }
+
+            phone = (phone.isEmpty()) ? null : phone.substring( 0, phone.length() - 1 );
+            patient.setPhoneNumber( phone );
         }
-
-        phone = (phone.isEmpty()) ? null : phone.substring( 0, phone.length() - 1 );
-
-        patient.setPhoneNumber( phone );
+        
         patient.setGender( gender );
         patient.setIsDead( false );
         patient.setUnderAge( underAge );
@@ -292,12 +294,12 @@ public class UpdatePatientAction
                             if ( option != null )
                             {
                                 attributeValue.setPatientAttributeOption( option );
-                                attributeValue.setValue( option.getName() );
                             }
                             else
                             {
                                 // This option was deleted ???
                             }
+                            attributeValue.setValue( value );
                         }
                         else
                         {
@@ -314,17 +316,13 @@ public class UpdatePatientAction
                             if ( option != null )
                             {
                                 attributeValue.setPatientAttributeOption( option );
-                                attributeValue.setValue( option.getName() );
                             }
                             else
                             {
                                 // This option was deleted ???
                             }
                         }
-                        else
-                        {
-                            attributeValue.setValue( value.trim() );
-                        }
+                        attributeValue.setValue( value.trim() );
                         valuesForUpdate.add( attributeValue );
                         valuesForDelete.remove( attributeValue );
                     }

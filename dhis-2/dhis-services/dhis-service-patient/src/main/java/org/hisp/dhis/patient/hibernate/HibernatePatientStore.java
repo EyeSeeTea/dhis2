@@ -28,14 +28,6 @@ package org.hisp.dhis.patient.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.criterion.Conjunction;
@@ -60,6 +52,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -115,33 +115,12 @@ public class HibernatePatientStore
     @Override
     public Collection<Patient> getByNames( String fullName, Integer min, Integer max )
     {
-        List<Patient> patients = new ArrayList<Patient>();
-
-        fullName = fullName.toLowerCase();
-        String sql = "SELECT patientid FROM patient where lower( name ) " + "like '%" + fullName + "%'";
-
-        if ( min != null && max != null )
+        if ( min == null || max == null )
         {
-            sql += statementBuilder.limitRecord( min, max );
+            return getAllLikeNameOrderedName( fullName, 0, Integer.MAX_VALUE );
         }
 
-        try
-        {
-            patients = jdbcTemplate.query( sql, new RowMapper<Patient>()
-            {
-                public Patient mapRow( ResultSet rs, int rowNum )
-                    throws SQLException
-                {
-                    return get( rs.getInt( 1 ) );
-                }
-            } );
-        }
-        catch ( Exception ex )
-        {
-            ex.printStackTrace();
-        }
-
-        return patients;
+        return getAllLikeNameOrderedName( fullName, min, max );
     }
 
     @Override
@@ -149,16 +128,16 @@ public class HibernatePatientStore
     public Collection<Patient> get( String name, Date birthdate, String gender )
 
     {
-        Criteria crit = getCriteria();
+        Criteria criteria = getCriteria();
         Conjunction con = Restrictions.conjunction();
         con.add( Restrictions.ilike( "name", name ) );
         con.add( Restrictions.eq( "gender", gender ) );
         con.add( Restrictions.eq( "birthDate", birthdate ) );
-        crit.add( con );
+        criteria.add( con );
 
-        crit.addOrder( Order.asc( "name" ) );
+        criteria.addOrder( Order.asc( "name" ) );
 
-        return crit.list();
+        return criteria.list();
     }
 
     @Override
@@ -169,6 +148,25 @@ public class HibernatePatientStore
 
         Query query = getQuery( hql );
         query.setEntity( "organisationUnit", organisationUnit );
+
+        if ( min != null && max != null )
+        {
+            query.setFirstResult( min ).setMaxResults( max );
+        }
+        return query.list();
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public Collection<Patient> getByOrgUnitAndNameLike( OrganisationUnit organisationUnit, String nameLike,
+        Integer min, Integer max )
+    {
+        String hql = "select p from Patient p where p.organisationUnit = :organisationUnit "
+            + " and lower(p.name) like :nameLike" + " order by p.name";
+
+        Query query = getQuery( hql );
+        query.setEntity( "organisationUnit", organisationUnit );
+        query.setString( "nameLike", "%" + nameLike.toLowerCase() + "%" );
 
         if ( min != null && max != null )
         {
@@ -304,7 +302,7 @@ public class HibernatePatientStore
         String sql = "select p.patientid from patient p join programinstance pi on p.patientid=pi.patientid "
             + "where pi.programid=" + program.getId() + " and pi.status=" + ProgramInstance.STATUS_ACTIVE
             + " and p.gender='" + gender + "'";
-        
+
         if ( min != null && max != null )
         {
             sql += statementBuilder.limitRecord( min, max );
@@ -357,7 +355,7 @@ public class HibernatePatientStore
         String sql = "select count(p.patientid) from patient p join programinstance pi on p.patientid=pi.patientid "
             + "where p.organisationunitid=" + organisationUnit.getId() + " and pi.programid=" + program.getId()
             + " and pi.status=" + ProgramInstance.STATUS_ACTIVE;
-        
+
         return jdbcTemplate.queryForInt( sql );
     }
 
@@ -372,9 +370,11 @@ public class HibernatePatientStore
 
     @Override
     public Collection<Patient> search( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer min, Integer max )
+        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer statusEnrollment, Integer min,
+        Integer max )
     {
-        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, null, min, max );
+        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, null,
+            statusEnrollment, min, max );
         Collection<Patient> patients = new HashSet<Patient>();
         try
         {
@@ -396,9 +396,11 @@ public class HibernatePatientStore
 
     @Override
     public Collection<String> getPatientPhoneNumbers( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer min, Integer max )
+        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer statusEnrollment, Integer min,
+        Integer max )
     {
-        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, null, min, max );
+        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, null,
+            statusEnrollment, min, max );
         Collection<String> phoneNumbers = new HashSet<String>();
         try
         {
@@ -422,10 +424,11 @@ public class HibernatePatientStore
     @Override
     public List<Integer> getProgramStageInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
         Boolean followup, Collection<PatientAttribute> patientAttributes,
-        Collection<PatientIdentifierType> identifierTypes, Integer min, Integer max )
+        Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min, Integer max )
     {
-        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, identifierTypes, min,
-            max );
+        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, identifierTypes,
+            statusEnrollment, min, max );
+
         List<Integer> programStageInstanceIds = new ArrayList<Integer>();
         try
         {
@@ -446,23 +449,24 @@ public class HibernatePatientStore
         return programStageInstanceIds;
     }
 
-    public int countSearch( List<String> searchKeys, Collection<OrganisationUnit> orgunits, Boolean followup )
+    public int countSearch( List<String> searchKeys, Collection<OrganisationUnit> orgunits, Boolean followup,
+        Integer statusEnrollment )
     {
-        String sql = searchPatientSql( true, searchKeys, orgunits, followup, null, null, null, null );
+        String sql = searchPatientSql( true, searchKeys, orgunits, followup, null, null, statusEnrollment, null, null );
         return jdbcTemplate.queryForObject( sql, Integer.class );
     }
 
     @Override
     public Grid getPatientEventReport( Grid grid, List<String> searchKeys, Collection<OrganisationUnit> orgunits,
         Boolean followup, Collection<PatientAttribute> patientAttributes,
-        Collection<PatientIdentifierType> identifierTypes, Integer min, Integer max )
+        Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min, Integer max )
     {
         // ---------------------------------------------------------------------
         // Get SQL and build grid
         // ---------------------------------------------------------------------
 
-        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, identifierTypes, null,
-            null );
+        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, identifierTypes,
+            statusEnrollment, null, null );
 
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet( sql );
 
@@ -477,10 +481,9 @@ public class HibernatePatientStore
 
     private String searchPatientSql( boolean count, List<String> searchKeys, Collection<OrganisationUnit> orgunits,
         Boolean followup, Collection<PatientAttribute> patientAttributes,
-        Collection<PatientIdentifierType> identifierTypes, Integer min, Integer max )
+        Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min, Integer max )
     {
         String selector = count ? "count(*) " : "* ";
-
         String sql = "select " + selector + " from ( select distinct p.patientid, p.name, p.gender, p.phonenumber,";
 
         if ( identifierTypes != null )
@@ -517,6 +520,7 @@ public class HibernatePatientStore
         boolean isSearchEvent = false;
         boolean isPriorityEvent = false;
         Collection<Integer> orgunitChilrenIds = null;
+
         if ( orgunits != null )
         {
             orgunitChilrenIds = getOrgunitChildren( orgunits );
@@ -525,6 +529,12 @@ public class HibernatePatientStore
         for ( String searchKey : searchKeys )
         {
             String[] keys = searchKey.split( "_" );
+
+            if ( keys.length <= 1 || keys[1] == null || keys[1].trim().isEmpty() || keys[1].equals( "null" ) )
+            {
+                continue;
+            }
+
             String id = keys[1];
             String value = "";
 
@@ -596,8 +606,12 @@ public class HibernatePatientStore
             }
             else if ( keys[0].equals( Patient.PREFIX_PROGRAM ) )
             {
-                sql += "(select programid from programinstance pi where patientid=p.patientid and programid=" + id
-                    + "  and pi.status=0 ) as " + Patient.PREFIX_PROGRAM + "_" + id + ",";
+                sql += "(select programid from programinstance pi where patientid=p.patientid and programid=" + id;
+                if ( statusEnrollment != null )
+                {
+                    sql += " and pi.status=" + statusEnrollment;
+                }
+                sql += " limit 1 ) as " + Patient.PREFIX_PROGRAM + "_" + id + ",";
                 otherWhere += operator + Patient.PREFIX_PROGRAM + "_" + id + "=" + id;
                 operator = " and ";
             }
@@ -632,103 +646,103 @@ public class HibernatePatientStore
                     int statusEvent = Integer.parseInt( keys[index] );
                     switch ( statusEvent )
                     {
-                    case ProgramStageInstance.COMPLETED_STATUS:
-                        patientWhere += condition + operatorStatus
-                            + "( psi.executiondate is not null and  psi.executiondate>='" + keys[2]
-                            + "' and psi.executiondate<='" + keys[3] + "' and psi.completed=true ";
-                        // get events by orgunit children
-                        if ( keys[4].equals( "-1" ) )
-                        {
-                            patientWhere += " and psi.organisationunitid in( "
-                                + TextUtils.getCommaDelimitedString( orgunitChilrenIds ) + " )";
-                        }
-                        // get events by selected orgunit
-                        else if ( !keys[4].equals( "0" ) )
-                        {
-                            patientWhere += " and psi.organisationunitid=" + keys[4];
-                        }
-                        patientWhere += ")";
-                        operatorStatus = " OR ";
-                        condition = "";
-                        continue;
-                    case ProgramStageInstance.VISITED_STATUS:
-                        patientWhere += condition + operatorStatus
-                            + "( psi.executiondate is not null and psi.executiondate>='" + keys[2]
-                            + "' and psi.executiondate<='" + keys[3] + "' and psi.completed=false ";
+                        case ProgramStageInstance.COMPLETED_STATUS:
+                            patientWhere += condition + operatorStatus
+                                + "( psi.executiondate is not null and  psi.executiondate>='" + keys[2]
+                                + "' and psi.executiondate<='" + keys[3] + "' and psi.completed=true ";
+                            // get events by orgunit children
+                            if ( keys[4].equals( "-1" ) )
+                            {
+                                patientWhere += " and psi.organisationunitid in( "
+                                    + TextUtils.getCommaDelimitedString( orgunitChilrenIds ) + " )";
+                            }
+                            // get events by selected orgunit
+                            else if ( !keys[4].equals( "0" ) )
+                            {
+                                patientWhere += " and psi.organisationunitid=" + keys[4];
+                            }
+                            patientWhere += ")";
+                            operatorStatus = " OR ";
+                            condition = "";
+                            continue;
+                        case ProgramStageInstance.VISITED_STATUS:
+                            patientWhere += condition + operatorStatus
+                                + "( psi.executiondate is not null and psi.executiondate>='" + keys[2]
+                                + "' and psi.executiondate<='" + keys[3] + "' and psi.completed=false ";
 
-                        // get events by orgunit children
-                        if ( keys[4].equals( "-1" ) )
-                        {
-                            patientWhere += " and psi.organisationunitid in( "
-                                + TextUtils.getCommaDelimitedString( orgunitChilrenIds ) + " )";
-                        }
-                        // get events by selected orgunit
-                        else if ( !keys[4].equals( "0" ) )
-                        {
-                            patientWhere += " and psi.organisationunitid=" + keys[4];
-                        }
-                        patientWhere += ")";
-                        operatorStatus = " OR ";
-                        condition = "";
-                        continue;
-                    case ProgramStageInstance.FUTURE_VISIT_STATUS:
-                        patientWhere += condition + operatorStatus + "( psi.executiondate is null and psi.duedate>='"
-                            + keys[2] + "' and psi.duedate<='" + keys[3]
-                            + "' and psi.status is null and (DATE(now()) - DATE(psi.duedate) <= 0) ";
-                        // get events by orgunit children
-                        if ( keys[4].equals( "-1" ) )
-                        {
-                            patientWhere += " and p.organisationunitid in( "
-                                + TextUtils.getCommaDelimitedString( orgunitChilrenIds ) + " )";
-                        }
-                        // get events by selected orgunit
-                        else if ( !keys[4].equals( "0" ) )
-                        {
-                            patientWhere += " and p.organisationunitid=" + keys[4];
-                        }
-                        patientWhere += ")";
-                        operatorStatus = " OR ";
-                        condition = "";
-                        continue;
-                    case ProgramStageInstance.LATE_VISIT_STATUS:
-                        patientWhere += condition + operatorStatus + "( psi.executiondate is null and  psi.duedate>='"
-                            + keys[2] + "' and psi.duedate<='" + keys[3]
-                            + "' and psi.status is null  and (DATE(now()) - DATE(psi.duedate) > 0) ";
-                        // get events by orgunit children
-                        if ( keys[4].equals( "-1" ) )
-                        {
-                            patientWhere += " and p.organisationunitid in( "
-                                + TextUtils.getCommaDelimitedString( orgunitChilrenIds ) + " )";
-                        }
-                        // get events by selected orgunit
-                        else if ( !keys[4].equals( "0" ) )
-                        {
-                            patientWhere += " and p.organisationunitid=" + keys[4];
-                        }
-                        patientWhere += ")";
-                        operatorStatus = " OR ";
-                        condition = "";
-                        continue;
-                    case ProgramStageInstance.SKIPPED_STATUS:
-                        patientWhere += condition + operatorStatus + "( psi.status=5 and  psi.duedate>='" + keys[2]
-                            + "' and psi.duedate<='" + keys[3] + "' ";
-                        // get events by orgunit children
-                        if ( keys[4].equals( "-1" ) )
-                        {
-                            patientWhere += " and psi.organisationunitid in( "
-                                + TextUtils.getCommaDelimitedString( orgunitChilrenIds ) + " )";
-                        }
-                        // get events by selected orgunit
-                        else if ( !keys[4].equals( "0" ) )
-                        {
-                            patientWhere += " and p.organisationunitid=" + keys[4];
-                        }
-                        patientWhere += ")";
-                        operatorStatus = " OR ";
-                        condition = "";
-                        continue;
-                    default:
-                        continue;
+                            // get events by orgunit children
+                            if ( keys[4].equals( "-1" ) )
+                            {
+                                patientWhere += " and psi.organisationunitid in( "
+                                    + TextUtils.getCommaDelimitedString( orgunitChilrenIds ) + " )";
+                            }
+                            // get events by selected orgunit
+                            else if ( !keys[4].equals( "0" ) )
+                            {
+                                patientWhere += " and psi.organisationunitid=" + keys[4];
+                            }
+                            patientWhere += ")";
+                            operatorStatus = " OR ";
+                            condition = "";
+                            continue;
+                        case ProgramStageInstance.FUTURE_VISIT_STATUS:
+                            patientWhere += condition + operatorStatus + "( psi.executiondate is null and psi.duedate>='"
+                                + keys[2] + "' and psi.duedate<='" + keys[3]
+                                + "' and psi.status is null and (DATE(now()) - DATE(psi.duedate) <= 0) ";
+                            // get events by orgunit children
+                            if ( keys[4].equals( "-1" ) )
+                            {
+                                patientWhere += " and p.organisationunitid in( "
+                                    + TextUtils.getCommaDelimitedString( orgunitChilrenIds ) + " )";
+                            }
+                            // get events by selected orgunit
+                            else if ( !keys[4].equals( "0" ) )
+                            {
+                                patientWhere += " and p.organisationunitid=" + keys[4];
+                            }
+                            patientWhere += ")";
+                            operatorStatus = " OR ";
+                            condition = "";
+                            continue;
+                        case ProgramStageInstance.LATE_VISIT_STATUS:
+                            patientWhere += condition + operatorStatus + "( psi.executiondate is null and  psi.duedate>='"
+                                + keys[2] + "' and psi.duedate<='" + keys[3]
+                                + "' and psi.status is not null  and (DATE(now()) - DATE(psi.duedate) > 0) ";
+                            // get events by orgunit children
+                            if ( keys[4].equals( "-1" ) )
+                            {
+                                patientWhere += " and p.organisationunitid in( "
+                                    + TextUtils.getCommaDelimitedString( orgunitChilrenIds ) + " )";
+                            }
+                            // get events by selected orgunit
+                            else if ( !keys[4].equals( "0" ) )
+                            {
+                                patientWhere += " and p.organisationunitid=" + keys[4];
+                            }
+                            patientWhere += ")";
+                            operatorStatus = " OR ";
+                            condition = "";
+                            continue;
+                        case ProgramStageInstance.SKIPPED_STATUS:
+                            patientWhere += condition + operatorStatus + "( psi.status=5 and  psi.duedate>='" + keys[2]
+                                + "' and psi.duedate<='" + keys[3] + "' ";
+                            // get events by orgunit children
+                            if ( keys[4].equals( "-1" ) )
+                            {
+                                patientWhere += " and psi.organisationunitid in( "
+                                    + TextUtils.getCommaDelimitedString( orgunitChilrenIds ) + " )";
+                            }
+                            // get events by selected orgunit
+                            else if ( !keys[4].equals( "0" ) )
+                            {
+                                patientWhere += " and p.organisationunitid=" + keys[4];
+                            }
+                            patientWhere += ")";
+                            operatorStatus = " OR ";
+                            condition = "";
+                            continue;
+                        default:
+                            continue;
                     }
                 }
                 if ( condition.isEmpty() )
@@ -749,20 +763,20 @@ public class HibernatePatientStore
                 int statusEvent = Integer.parseInt( keys[2] );
                 switch ( statusEvent )
                 {
-                case ProgramStageInstance.COMPLETED_STATUS:
-                    patientWhere += "psi.completed=true";
-                    break;
-                case ProgramStageInstance.VISITED_STATUS:
-                    patientWhere += "psi.executiondate is not null and psi.completed=false";
-                    break;
-                case ProgramStageInstance.FUTURE_VISIT_STATUS:
-                    patientWhere += "psi.executiondate is null and psi.duedate >= now()";
-                    break;
-                case ProgramStageInstance.LATE_VISIT_STATUS:
-                    patientWhere += "psi.executiondate is null and psi.duedate < now()";
-                    break;
-                default:
-                    break;
+                    case ProgramStageInstance.COMPLETED_STATUS:
+                        patientWhere += "psi.completed=true";
+                        break;
+                    case ProgramStageInstance.VISITED_STATUS:
+                        patientWhere += "psi.executiondate is not null and psi.completed=false";
+                        break;
+                    case ProgramStageInstance.FUTURE_VISIT_STATUS:
+                        patientWhere += "psi.executiondate is null and psi.duedate >= now()";
+                        break;
+                    case ProgramStageInstance.LATE_VISIT_STATUS:
+                        patientWhere += "psi.executiondate is null and psi.duedate < now()";
+                        break;
+                    default:
+                        break;
                 }
 
                 patientWhere += " and pgi.status=" + ProgramInstance.STATUS_ACTIVE + " ";
@@ -798,7 +812,8 @@ public class HibernatePatientStore
                 + " inner join programstageinstance psi on " + " (psi.programinstanceid=pgi.programinstanceid) "
                 + " inner join programstage pgs on (pgs.programstageid=psi.programstageid) ";
 
-            patientGroupBy += ",psi.programstageinstanceid, pgs.name ";
+            //patientGroupBy += ",psi.programstageinstanceid, pgs.name ";
+            patientGroupBy += ",psi.programstageinstanceid, pgs.name, psi.duedate ";
 
             from = " ";
         }

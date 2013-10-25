@@ -187,6 +187,12 @@ Ext.onReady( function() {
 
 				w.hasDestroyOnBlurHandler = true;
 			};
+			
+			util.message = {
+				alert: function(message) {
+					alert(message);
+				}
+			}			
 		}());
 
         // init
@@ -226,30 +232,31 @@ Ext.onReady( function() {
 					pt.viewport.westRegion.hasScrollbar = true;
 				}
 
+                // Expand first panel
 				cmp.dimension.panels[0].expand();
 
-				// Load favorite from url
+                // Look for url params
 				var id = util.url.getUrlParam('id'),
 					session = util.url.getUrlParam('s'),
 					layout;
 
 				if (id) {
-					engine.loadTable(id, pt);
+					engine.loadTable(id, pt, true, true);
 				}
 				else if (Ext.isString(session) && PT.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
 					layout = api.layout.Layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]);
 
 					if (layout) {
-						pt.viewport.setFavorite(layout);
+						pt.engine.createTable(layout, pt, true);
 					}
 				}
 
 				// Fade in
 				Ext.defer( function() {
 					Ext.getBody().fadeIn({
-						duration: 400
+						duration: 300
 					});
-				}, 500 );
+				}, 400 );
 			};
 		}());
 
@@ -298,10 +305,10 @@ Ext.onReady( function() {
 					var path;
 
 					if (Ext.isString(uid)) {
-						path = conf.finals.ajax.dataelement_get + uid + '.json?links=false&paging=false';
+						path = conf.finals.url.dataelement_get + uid + '.json?links=false&paging=false';
 					}
 					else if (uid === 0) {
-						path = conf.finals.ajax.dataelement_getall;
+						path = conf.finals.url.dataelement_getall;
 					}
 
 					if (!path) {
@@ -311,7 +318,7 @@ Ext.onReady( function() {
 
 					this.setProxy({
 						type: 'ajax',
-						url: init.contextPath + conf.finals.ajax.path_api + path,
+						url: init.contextPath + conf.finals.url.path_api + path,
 						reader: {
 							type: 'json',
 							root: 'dataElements'
@@ -329,7 +336,7 @@ Ext.onReady( function() {
 					if (Ext.isString(uid)) {
 						this.setProxy({
 							type: 'ajax',
-							url: init.contextPath + conf.finals.ajax.path_commons + 'getOperands.action?uid=' + uid,
+							url: init.contextPath + conf.finals.url.path_commons + 'getOperands.action?uid=' + uid,
 							reader: {
 								type: 'json',
 								root: 'operands'
@@ -369,7 +376,7 @@ Ext.onReady( function() {
 				fields: ['id', 'name'],
 				proxy: {
 					type: 'ajax',
-					url: init.contextPath + conf.finals.ajax.path_api + conf.finals.ajax.dataset_get,
+					url: init.contextPath + conf.finals.url.path_api + conf.finals.url.dataset_get,
 					reader: {
 						type: 'json',
 						root: 'dataSets'
@@ -464,7 +471,7 @@ Ext.onReady( function() {
 				fields: ['id', 'name'],
 				proxy: {
 					type: 'ajax',
-					url: init.contextPath + conf.finals.ajax.path_api + conf.finals.ajax.organisationunitgroup_getall,
+					url: init.contextPath + conf.finals.url.path_api + conf.finals.url.organisationunitgroup_getall,
 					reader: {
 						type: 'json',
 						root: 'organisationUnitGroups'
@@ -916,6 +923,7 @@ Ext.onReady( function() {
 		var showTotals,
 			showSubTotals,
 			hideEmptyRows,
+			showHierarchy,
 			digitGroupSeparator,
 			displayDensity,
 			fontSize,
@@ -927,6 +935,7 @@ Ext.onReady( function() {
 			style,
 			parameters,
 
+			comboboxWidth = 262,
 			window;
 
 		showTotals = Ext.create('Ext.form.field.Checkbox', {
@@ -949,10 +958,16 @@ Ext.onReady( function() {
 		});
 		pt.viewport.hideEmptyRows = hideEmptyRows;
 
+		showHierarchy = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: PT.i18n.show_hierarchy,
+			style: 'margin-bottom:4px'
+		});
+		pt.viewport.showHierarchy = showHierarchy;
+		
 		displayDensity = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'pt-combo',
 			style: 'margin-bottom:3px',
-			width: 250,
+			width: comboboxWidth,
 			labelWidth: 130,
 			fieldLabel: PT.i18n.display_density,
 			labelStyle: 'color:#333',
@@ -974,7 +989,7 @@ Ext.onReady( function() {
 		fontSize = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'pt-combo',
 			style: 'margin-bottom:3px',
-			width: 250,
+			width: comboboxWidth,
 			labelWidth: 130,
 			fieldLabel: PT.i18n.font_size,
 			labelStyle: 'color:#333',
@@ -997,7 +1012,7 @@ Ext.onReady( function() {
 			labelStyle: 'color:#333',
 			cls: 'pt-combo',
 			style: 'margin-bottom:3px',
-			width: 250,
+			width: comboboxWidth,
 			labelWidth: 130,
 			fieldLabel: PT.i18n.digit_group_separator,
 			queryMode: 'local',
@@ -1018,7 +1033,7 @@ Ext.onReady( function() {
 		legendSet = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'pt-combo',
 			style: 'margin-bottom:3px',
-			width: 250,
+			width: comboboxWidth,
 			labelWidth: 130,
 			fieldLabel: PT.i18n.legend_set,
 			valueField: 'id',
@@ -1083,7 +1098,7 @@ Ext.onReady( function() {
 
 		topLimit = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'pt-combo',
-			style: 'margin-bottom:3px',
+			style: 'margin-bottom:0',
 			width: 250,
 			labelWidth: 130,
 			fieldLabel: PT.i18n.top_limit,
@@ -1115,6 +1130,14 @@ Ext.onReady( function() {
 				hideEmptyRows
 			]
 		};
+		
+		organisationUnits = {
+			bodyStyle: 'border:0 none',
+			style: 'margin-left:14px',
+			items: [
+				showHierarchy
+			]
+		};
 
 		style = {
 			bodyStyle: 'border:0 none',
@@ -1128,7 +1151,7 @@ Ext.onReady( function() {
 		};
 
 		parameters = {
-			bodyStyle: 'border:0 none',
+			bodyStyle: 'border:0 none; background:transparent',
 			style: 'margin-left:14px',
 			items: [
 				reportingPeriod,
@@ -1143,7 +1166,7 @@ Ext.onReady( function() {
 
 		window = Ext.create('Ext.window.Window', {
 			title: PT.i18n.table_options,
-			bodyStyle: 'background-color:#fff; padding:8px 8px 8px',
+			bodyStyle: 'background-color:#fff; padding:5px',
 			closeAction: 'hide',
 			autoShow: true,
 			modal: true,
@@ -1154,6 +1177,7 @@ Ext.onReady( function() {
 					showTotals: showTotals.getValue(),
 					showSubTotals: showSubTotals.getValue(),
 					hideEmptyRows: hideEmptyRows.getValue(),
+					showHierarchy: showHierarchy.getValue(),
 					displayDensity: displayDensity.getValue(),
 					fontSize: fontSize.getValue(),
 					digitGroupSeparator: digitGroupSeparator.getValue(),
@@ -1171,6 +1195,7 @@ Ext.onReady( function() {
 				showTotals.setValue(Ext.isBoolean(layout.showTotals) ? layout.showTotals : true);
 				showSubTotals.setValue(Ext.isBoolean(layout.showSubTotals) ? layout.showSubTotals : true);
 				hideEmptyRows.setValue(Ext.isBoolean(layout.hideEmptyRows) ? layout.hideEmptyRows : false);
+				showHierarchy.setValue(Ext.isBoolean(layout.showHierarchy) ? layout.showHierarchy : false);
 				displayDensity.setValue(Ext.isString(layout.displayDensity) ? layout.displayDensity : 'normal');
 				fontSize.setValue(Ext.isString(layout.fontSize) ? layout.fontSize : 'normal');
 				digitGroupSeparator.setValue(Ext.isString(layout.digitGroupSeparator) ? layout.digitGroupSeparator : 'space');
@@ -1186,7 +1211,7 @@ Ext.onReady( function() {
 			items: [
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
-					style: 'margin-bottom:6px',
+					style: 'margin-bottom:6px; margin-left:2px',
 					html: PT.i18n.data
 				},
 				data,
@@ -1195,19 +1220,32 @@ Ext.onReady( function() {
 				},
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
-					style: 'margin-bottom:6px',
-					html: PT.i18n.style
+					style: 'margin-bottom:6px; margin-left:2px',
+					html: PT.i18n.organisation_units
 				},
-				style,
+				organisationUnits,
 				{
 					bodyStyle: 'border:0 none; padding:7px'
 				},
 				{
-					bodyStyle: 'border:0 none; color:#222; font-size:12px',
-					style: 'margin-bottom:6px',
-					html: '<b>' + PT.i18n.parameters + '</b> <span style="font-size:11px"> (' + PT.i18n.for_standard_reports_only + ')</span>'
+					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
+					style: 'margin-bottom:6px; margin-left:2px',
+					html: PT.i18n.style
 				},
-				parameters
+				style,
+				{
+					bodyStyle: 'border:0 none; padding:4px'
+				},
+				{
+					bodyStyle: 'border:1px solid #d5d5d5; padding:5px; background-color:#f0f0f0',
+					items: [
+						{
+							bodyStyle: 'border:0 none; padding:0 5px 6px 2px; background-color:transparent; color:#222; font-size:12px',
+							html: '<b>' + PT.i18n.parameters + '</b> <span style="font-size:11px"> (' + PT.i18n.for_standard_reports_only + ')</span>'
+						},
+						parameters
+					]
+				}
 			],
 			bbar: [
 				'->',
@@ -1548,7 +1586,7 @@ Ext.onReady( function() {
 								element.addClsOnOver('link');
 								element.load = function() {
 									favoriteWindow.hide();
-									pt.engine.loadTable(record.data.id, pt);
+									pt.engine.loadTable(record.data.id, pt, true, true);
 								};
 								element.dom.setAttribute('onclick', 'Ext.get(this).load();');
 							}
@@ -1816,6 +1854,7 @@ Ext.onReady( function() {
 			userGroupField,
 			userGroupButton,
 			userGroupRowContainer,
+			externalAccess,
 			publicGroup,
 			window;
 
@@ -1911,6 +1950,7 @@ Ext.onReady( function() {
 					id: sharing.object.id,
 					name: sharing.object.name,
 					publicAccess: publicGroup.down('combobox').getValue(),
+					externalAccess: externalAccess ? externalAccess.getValue() : false,
 					user: {
 						id: pt.init.user.id,
 						name: pt.init.user.name
@@ -1986,6 +2026,16 @@ Ext.onReady( function() {
 		userGroupRowContainer = Ext.create('Ext.container.Container', {
 			bodyStyle: 'border:0 none'
 		});
+		
+		if (sharing.meta.allowExternalAccess) {
+			externalAccess = userGroupRowContainer.add({
+				xtype: 'checkbox',
+				fieldLabel: PT.i18n.allow_external_access,
+				labelSeparator: '',
+				labelWidth: 250,
+				checked: !!sharing.object.externalAccess
+			});
+		}
 
 		publicGroup = userGroupRowContainer.add(UserGroupRow({
 			id: sharing.object.id,
@@ -2003,7 +2053,6 @@ Ext.onReady( function() {
 		window = Ext.create('Ext.window.Window', {
 			title: PT.i18n.sharing_settings,
 			bodyStyle: 'padding:6px 6px 0px; background-color:#fff',
-			width: 434,
 			resizable: false,
 			modal: true,
 			destroyOnBlur: true,
@@ -2105,7 +2154,7 @@ Ext.onReady( function() {
 				handler: function() {
 					if (textArea.getValue()) {
 						Ext.Ajax.request({
-							url: pt.init.contextPath + pt.conf.finals.ajax.path_api + 'interpretations/reportTable/' + pt.favorite.id,
+							url: pt.init.contextPath + pt.conf.finals.url.path_api + 'interpretations/reportTable/' + pt.favorite.id,
 							method: 'POST',
 							params: textArea.getValue(),
 							headers: {'Content-Type': 'text/html'},
@@ -2169,7 +2218,9 @@ Ext.onReady( function() {
 	};
 
 	createViewport = function() {
-		var indicatorAvailable,
+        var dimConf = pt.conf.finals.dimension,
+        
+			indicatorAvailable,
 			indicatorSelected,
 			indicator,
 			dataElementAvailable,
@@ -2208,7 +2259,7 @@ Ext.onReady( function() {
 			westRegion,
 			centerRegion,
 
-			setFavorite,
+			setGui,
 
 			viewport,
 			addListeners;
@@ -2336,7 +2387,7 @@ Ext.onReady( function() {
 						fields: ['id', 'name', 'index'],
 						proxy: {
 							type: 'ajax',
-							url: pt.init.contextPath + pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.indicatorgroup_get,
+							url: pt.init.contextPath + pt.conf.finals.url.path_api + pt.conf.finals.url.indicatorgroup_get,
 							reader: {
 								type: 'json',
 								root: 'indicatorGroups'
@@ -2373,11 +2424,11 @@ Ext.onReady( function() {
 							}
 							else {
 								if (cb.getValue() === 0) {
-									store.proxy.url = pt.init.contextPath + pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.indicator_getall;
+									store.proxy.url = pt.init.contextPath + pt.conf.finals.url.path_api + pt.conf.finals.url.indicator_getall;
 									store.load();
 								}
 								else {
-									store.proxy.url = pt.init.contextPath + pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.indicator_get + cb.getValue() + '.json';
+									store.proxy.url = pt.init.contextPath + pt.conf.finals.url.path_api + pt.conf.finals.url.indicator_get + cb.getValue() + '.json';
 									store.load();
 								}
 							}
@@ -2487,7 +2538,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name', 'index'],
 			proxy: {
 				type: 'ajax',
-				url: pt.init.contextPath + pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.dataelementgroup_get,
+				url: pt.init.contextPath + pt.conf.finals.url.path_api + pt.conf.finals.url.dataelementgroup_get,
 				reader: {
 					type: 'json',
 					root: 'dataElementGroups'
@@ -3347,60 +3398,62 @@ Ext.onReady( function() {
 				}
 			},
 			multipleExpand: function(id, path, doUpdate) {
-				this.expandPath('/' + pt.conf.finals.root.id + path, 'id', '/', function() {
+				var rootId = pt.conf.finals.root.id;
+				
+				if (path.substr(0, rootId.length + 1) !== ('/' + rootId)) {
+					path = '/' + rootId + path;
+				}
+				
+				this.expandPath('/' + path, 'id', '/', function() {
 					var record = this.getRootNode().findChild('id', id, true);
 					this.recordsToSelect.push(record);
 					this.multipleSelectIf(doUpdate);
 				}, this);
 			},
-			select: function(url, params) {
-				if (!params) {
-					params = {};
-				}
-				Ext.Ajax.request({
-					url: url,
-					method: 'GET',
-					params: params,
-					scope: this,
-					success: function(r) {
-						var a = Ext.decode(r.responseText).organisationUnits;
-						this.numberOfRecords = a.length;
-						for (var i = 0; i < a.length; i++) {
-							this.multipleExpand(a[i].id, a[i].path);
-						}
+            select: function(url, params) {
+                if (!params) {
+                    params = {};
+                }
+                Ext.Ajax.request({
+                    url: url,
+                    method: 'GET',
+                    params: params,
+                    scope: this,
+                    success: function(r) {
+                        var a = Ext.decode(r.responseText).organisationUnits;
+                        this.numberOfRecords = a.length;
+                        for (var i = 0; i < a.length; i++) {
+                            this.multipleExpand(a[i].id, a[i].path);
+                        }
+                    }
+                });
+            },
+			getParentGraphMap: function() {
+				var selection = this.getSelectionModel().getSelection(),
+					map = {};
+				
+				if (Ext.isArray(selection) && selection.length) {
+					for (var i = 0, pathArray, key; i < selection.length; i++) {
+						pathArray = selection[i].getPath().split('/');
+						map[pathArray.pop()] = pathArray.join('/');
 					}
-				});
-			},
-			selectByGroup: function(id) {
-				if (id) {
-					var url = pt.init.contextPath + pt.conf.finals.ajax.path_module + pt.conf.finals.ajax.organisationunit_getbygroup,
-						params = {id: id};
-					this.select(url, params);
 				}
+				
+				return map;
 			},
-			selectByLevel: function(level) {
-				if (level) {
-					var url = pt.init.contextPath + pt.conf.finals.ajax.path_module + pt.conf.finals.ajax.organisationunit_getbylevel,
-						params = {level: level};
-					this.select(url, params);
-				}
-			},
-			selectByIds: function(ids) {
-				if (ids) {
-					var url = pt.init.contextPath + pt.conf.finals.ajax.path_module + pt.conf.finals.ajax.organisationunit_getbyids;
-					Ext.Array.each(ids, function(item) {
-						url = Ext.String.urlAppend(url, 'ids=' + item);
-					});
-					if (!this.rendered) {
-						pt.cmp.dimension.organisationUnit.panel.expand();
+			selectGraphMap: function(map, doUpdate) {
+				this.numberOfRecords = pt.util.object.getLength(map);
+
+				for (var key in map) {
+					if (map.hasOwnProperty(key)) {
+						treePanel.multipleExpand(key, map[key], doUpdate);
 					}
-					this.select(url);
 				}
 			},
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
-					url: pt.init.contextPath + pt.conf.finals.ajax.path_module + pt.conf.finals.ajax.organisationunitchildren_get
+					url: pt.init.contextPath + pt.conf.finals.url.path_module + pt.conf.finals.url.organisationunitchildren_get
 				},
 				root: {
 					id: pt.conf.finals.root.id,
@@ -3419,6 +3472,14 @@ Ext.onReady( function() {
 				this.enable();
 			},
 			listeners: {
+				load: function() {
+					if (treePanel.tmpSelection) {
+						treePanel.selectGraphMap(treePanel.tmpSelection);
+					}
+				},
+				beforeitemexpand: function() {
+					treePanel.tmpSelection = treePanel.getParentGraphMap();
+				},
 				added: function() {
 					pt.cmp.dimension.organisationUnit.treepanel = this;
 				},
@@ -4273,17 +4334,18 @@ Ext.onReady( function() {
 									},
 									'-',
 									{
-										text: 'View table as chart' + '&nbsp;&nbsp;', //i18n
+										text: 'Open this table as chart' + '&nbsp;&nbsp;', //i18n
 										cls: 'pt-menu-item-noicon',
-										disabled: !PT.isSessionStorage || !pt.layout,
+										disabled: !(PT.isSessionStorage && pt.layout),
 										handler: function() {
 											if (PT.isSessionStorage) {
-												pt.engine.setSessionStorage(pt.layout, 'analytical', pt.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
+												pt.layout.parentGraphMap = treePanel.getParentGraphMap();
+												pt.engine.setSessionStorage('analytical', pt.layout, pt.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
 											}
 										}
 									},
 									{
-										text: 'View last chart' + '&nbsp;&nbsp;', //i18n
+										text: 'Open last chart' + '&nbsp;&nbsp;', //i18n
 										cls: 'pt-menu-item-noicon',
 										disabled: !(PT.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['chart']),
 										handler: function() {
@@ -4312,9 +4374,56 @@ Ext.onReady( function() {
 						text: PT.i18n.map,
 						iconCls: 'pt-button-icon-map',
 						toggleGroup: 'module',
-						//menu: {},
+						menu: {},
 						handler: function(b) {
-							window.location.href = pt.init.contextPath + '/dhis-web-mapping/app/index.html';
+							b.menu = Ext.create('Ext.menu.Menu', {
+								closeAction: 'destroy',
+								shadow: false,
+								showSeparator: false,
+								items: [
+									{
+										text: 'Go to maps' + '&nbsp;&nbsp;', //i18n
+										cls: 'pt-menu-item-noicon',
+										handler: function() {
+											window.location.href = pt.init.contextPath + '/dhis-web-mapping/app/index.html';
+										}
+									},
+									'-',
+									{
+										text: 'Open this table as map' + '&nbsp;&nbsp;', //i18n
+										cls: 'pt-menu-item-noicon',
+										disabled: !(PT.isSessionStorage && pt.layout),
+										handler: function() {
+											if (PT.isSessionStorage) {
+												pt.layout.parentGraphMap = treePanel.getParentGraphMap();
+												pt.engine.setSessionStorage('analytical', pt.layout, pt.init.contextPath + '/dhis-web-mapping/app/index.html?s=analytical');
+											}
+										}
+									},
+									{
+										text: 'Open last map' + '&nbsp;&nbsp;', //i18n
+										cls: 'pt-menu-item-noicon',
+										disabled: !(PT.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['map']),
+										handler: function() {
+											window.location.href = pt.init.contextPath + '/dhis-web-mapping/app/index.html?s=chart';
+										}
+									}
+								],
+								listeners: {
+									show: function() {
+										pt.util.window.setAnchorPosition(b.menu, b);
+									},
+									hide: function() {
+										b.menu.destroy();
+										defaultButton.toggle();
+									},
+									destroy: function(m) {
+										b.menu = null;
+									}
+								}
+							});
+
+							b.menu.show();
 						}
 					},
 					{
@@ -4352,12 +4461,11 @@ Ext.onReady( function() {
 			}
 		});
 
-		setFavorite = function(layout) {
-			var dimConf = pt.conf.finals.dimension,
-				xLayout,
-				dimMap,
-				recMap,
-				graphMap,
+		setGui = function(layout, xLayout, updateGui, isFavorite) {
+			var dimensions = [].concat(layout.columns || [], layout.rows || [], layout.filters || []),
+				dimMap = pt.service.layout.getObjectNameDimensionMap(dimensions),
+				recMap = pt.service.layout.getObjectNameDimensionItemsMap(dimensions),
+				graphMap = layout.parentGraphMap,
 				objectName,
 				periodRecords,
 				fixedPeriodRecords = [],
@@ -4366,20 +4474,17 @@ Ext.onReady( function() {
 				isOuc = false,
 				isOugc = false,
 				levels = [],
-				groups = [];
+				groups = [],
+				orgunits = [];
 
 			// State
-			pt.viewport.interpretationButton.enable();
-
-			// Create chart
-			pt.engine.createTable(layout, pt);
+			downloadButton.enable();
+			
+			if (isFavorite) {
+				interpretationButton.enable();
+			}
 
 			// Set gui
-
-			xLayout = pt.engine.getExtendedLayout(layout);
-			dimMap = xLayout.objectNameDimensionsMap;
-			recMap = xLayout.objectNameItemsMap;
-			graphMap = layout.parentGraphMap;
 
 			// Indicators
 			pt.store.indicatorSelected.removeAll();
@@ -4523,17 +4628,20 @@ Ext.onReady( function() {
 					if (ouRecords[i].id === 'USER_ORGUNIT') {
 						isOu = true;
 					}
-					if (ouRecords[i].id === 'USER_ORGUNIT_CHILDREN') {
+					else if (ouRecords[i].id === 'USER_ORGUNIT_CHILDREN') {
 						isOuc = true;
 					}
-					if (ouRecords[i].id === 'USER_ORGUNIT_GRANDCHILDREN') {
+					else if (ouRecords[i].id === 'USER_ORGUNIT_GRANDCHILDREN') {
 						isOugc = true;
 					}
-					if (ouRecords[i].id.substr(0,5) === 'LEVEL') {
+					else if (ouRecords[i].id.substr(0,5) === 'LEVEL') {
 						levels.push(parseInt(ouRecords[i].id.split('-')[1]));
 					}
-					if (ouRecords[i].id.substr(0,8) === 'OU_GROUP') {
+					else if (ouRecords[i].id.substr(0,8) === 'OU_GROUP') {
 						groups.push(parseInt(ouRecords[i].id.split('-')[1]));
+					}
+					else {
+						orgunits.push(ouRecords[i].id);
 					}
 				}
 			}
@@ -4553,14 +4661,9 @@ Ext.onReady( function() {
 				userOrganisationUnitGrandChildren.setValue(isOugc);
 			}
 
-			// If fav has organisation units, wait for tree callback before update
-			if (recMap[dimConf.organisationUnit.objectName] && Ext.isObject(graphMap)) {
-				treePanel.numberOfRecords = pt.util.object.getLength(graphMap);
-
-				for (var i = 0, a = xLayout.objectNameItemsMap[dimConf.organisationUnit.objectName]; i < a.length; i++) {
-					if (graphMap.hasOwnProperty(a[i].id)) {
-						treePanel.multipleExpand(a[i].id, graphMap[a[i].id], false);
-					}
+			if (!(isOu || isOuc || isOugc)) {
+				if (Ext.isObject(graphMap)) {
+					treePanel.selectGraphMap(graphMap);
 				}
 			}
 			else {
@@ -4583,7 +4686,7 @@ Ext.onReady( function() {
 			userOrganisationUnit: userOrganisationUnit,
 			userOrganisationUnitChildren: userOrganisationUnitChildren,
 			dataElementDetailLevel: dataElementDetailLevel,
-			setFavorite: setFavorite,
+			setGui: setGui,
 			items: [
 				westRegion,
 				centerRegion
@@ -4640,7 +4743,11 @@ Ext.onReady( function() {
 		Ext.Ajax.request({
 			url: '../initialize.action',
 			success: function(r) {
-				pt = PT.core.getInstance(Ext.decode(r.responseText));
+				var init = Ext.decode(r.responseText);
+				
+				PT.i18n = init.i18n;
+				
+				pt = PT.core.getInstance(init);				
 
 				PT.app.extendInstance(pt);
 

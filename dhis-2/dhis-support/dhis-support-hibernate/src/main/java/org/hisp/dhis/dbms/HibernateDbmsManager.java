@@ -115,6 +115,7 @@ public class HibernateDbmsManager
         emptyTable( "datadictionaryindicators" );
         emptyTable( "datadictionary" );
 
+        emptyTable( "validationrulegroupuserrolestoalert" );
         emptyTable( "validationrulegroupmembers" );
         emptyTable( "validationrulegroup" );
         emptyTable( "validationrule" );
@@ -125,6 +126,7 @@ public class HibernateDbmsManager
         emptyTable( "datasetoperands" );
         emptyTable( "dataset" );
 
+        emptyTable( "patientdatavalue" );
         emptyTable( "programstageinstance" );
         emptyTable( "programinstance" );
         emptyTable( "programstage_dataelements" );
@@ -192,11 +194,7 @@ public class HibernateDbmsManager
         sessionFactory.getCurrentSession().clear();
     }
 
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-
-    private void emptyTable( String table )
+    public void emptyTable( String table )
     {
         try
         {
@@ -207,6 +205,10 @@ public class HibernateDbmsManager
             log.debug( "Table " + table + " does not exist" );
         }
     }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
 
     private void dropTable( String table )
     {

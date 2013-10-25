@@ -36,6 +36,7 @@ import org.hisp.dhis.document.Document;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
+import org.hisp.dhis.interpretation.Interpretation;
 import org.hisp.dhis.patientreport.PatientAggregateReport;
 import org.hisp.dhis.patientreport.PatientTabularReport;
 import org.hisp.dhis.program.Program;
@@ -113,6 +114,7 @@ public final class SharingUtils
         addType( Document.class, "document", "F_DOCUMENT_EXTERNAL", "F_DOCUMENT_PUBLIC_ADD", "F_DOCUMENT_PRIVATE_ADD" );
 
         addType( Dashboard.class, "dashboard", null, "F_DASHBOARD_PUBLIC_ADD", null );
+        addType( Interpretation.class, "interpretation", null, null, null );
     }
 
     public static boolean isSupported( String type )
@@ -209,9 +211,12 @@ public final class SharingUtils
      */
     public static boolean canWrite( User user, IdentifiableObject object )
     {
+        //TODO ( (object instanceof User) && canCreatePrivate( user, object ) ): review possible security breaches and best way to give update access upon user import
         if ( sharingOverrideAuthority( user )
             || (object.getUser() == null && canCreatePublic( user, object ) && PRIVATE_AUTHORITIES.get( object.getClass() ) != null)
-            || user.equals( object.getUser() )
+            || (user != null && user.equals( object.getUser() ))
+            //|| authorities.contains( PRIVATE_AUTHORITIES.get( object.getClass() ) )
+            || ((object instanceof User) && canCreatePrivate( user, object ))
             || AccessStringHelper.canWrite( object.getPublicAccess() ) )
         {
             return true;

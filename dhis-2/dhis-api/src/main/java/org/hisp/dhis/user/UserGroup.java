@@ -39,6 +39,7 @@ import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 
@@ -57,6 +58,7 @@ public class UserGroup
     /**
      * Set of related users
      */
+    @Scanned
     private Set<User> members = new HashSet<User>();
 
     /**
@@ -86,11 +88,6 @@ public class UserGroup
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
-
-    public void removeAllUsers()
-    {
-        members.clear();
-    }
 
     public void addUser( User user )
     {
@@ -180,7 +177,7 @@ public class UserGroup
         {
             UserGroup userGroup = (UserGroup) other;
 
-            removeAllUsers();
+            members.clear();
             members.addAll( userGroup.getMembers() );
 
             attributeValues.clear();

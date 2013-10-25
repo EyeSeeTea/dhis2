@@ -56,7 +56,6 @@ import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.util.ArrayList;
@@ -154,7 +153,7 @@ public abstract class AbstractEventService implements EventService
     public ImportSummary saveEvent( Event event, ImportOptions importOptions )
     {
         Program program = programService.getProgram( event.getProgram() );
-        ProgramInstance programInstance = null;
+        ProgramInstance programInstance;
         ProgramStage programStage = programStageService.getProgramStage( event.getProgramStage() );
         ProgramStageInstance programStageInstance = null;
 
@@ -165,9 +164,9 @@ public abstract class AbstractEventService implements EventService
 
         if ( programStage == null && !program.isSingleEvent() )
         {
-            return new ImportSummary( ImportStatus.ERROR, "Event.programStage does not point to a valid programStage, and program is multi-event" );
+            return new ImportSummary( ImportStatus.ERROR, "Event.programStage does not point to a valid programStage, and program is multi stage" );
         }
-        else
+        else if ( programStage == null )
         {
             programStage = program.getProgramStageByStage( 1 );
         }
@@ -217,16 +216,36 @@ public abstract class AbstractEventService implements EventService
 
                 if ( programStageInstances.isEmpty() )
                 {
-                    return new ImportSummary( ImportStatus.ERROR, "No active event exists for single event registration program " + program.getUid()
-                        + ", please check and correct your database." );
+                    return new ImportSummary( ImportStatus.ERROR, "Person " + patient.getUid() + " is not enrolled in programStage " + programStage.getUid() );
                 }
                 else if ( programStageInstances.size() > 1 )
                 {
-                    return new ImportSummary( ImportStatus.ERROR, "Multiple active events exists for single event registration program " + program.getUid()
-                        + ", please check and correct your database." );
+                    return new ImportSummary( ImportStatus.ERROR,
+                        "Person " + patient.getUid() + " have multiple active enrollments into programStage " + programStage.getUid()
+                            + " please check and correct your database for multiple active stages." );
                 }
 
                 programStageInstance = programStageInstances.get( 0 );
+            }
+            else
+            {
+                if ( !programStage.getIrregular() )
+                {
+                    programStageInstance = programStageInstanceService.getProgramStageInstance( programInstance, programStage );
+                }
+
+                else
+                {
+                    if ( event.getEvent() != null )
+                    {
+                        programStageInstance = programStageInstanceService.getProgramStageInstance( event.getEvent() );
+
+                        if ( programStageInstance == null )
+                        {
+                            return new ImportSummary( ImportStatus.ERROR, "Event.event did not point to a valid event" );
+                        }
+                    }
+                }
             }
         }
         else
@@ -246,6 +265,7 @@ public abstract class AbstractEventService implements EventService
             }
 
             programInstance = programInstances.get( 0 );
+            programStageInstance = programInstance.getProgramStageInstanceByStage( 1 );
         }
 
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( event.getOrgUnit() );
@@ -442,8 +462,8 @@ public abstract class AbstractEventService implements EventService
 
         Event event = new Event();
 
-        event.setCompleted( programStageInstance.isCompleted() );
         event.setEvent( programStageInstance.getUid() );
+        event.setStatus( EventStatus.fromInt( programStageInstance.getStatus() ) );
         event.setEventDate( programStageInstance.getExecutionDate().toString() );
         event.setStoredBy( programStageInstance.getCompletedUser() );
         event.setOrgUnit( programStageInstance.getOrganisationUnit().getUid() );
@@ -497,7 +517,7 @@ public abstract class AbstractEventService implements EventService
 
     private boolean validateDataElement( DataElement dataElement, String value, ImportSummary importSummary )
     {
-        InputValidationService.Status status = inputValidationService.validateDataElement( dataElement, value );
+        InputValidationService.Status status = inputValidationService.validateDataElement( dataElement, value, getFormat() );
 
         if ( !status.isSuccess() )
         {
@@ -567,6 +587,14 @@ public abstract class AbstractEventService implements EventService
         Coordinate coordinate, String storedBy )
     {
         ProgramStageInstance programStageInstance = new ProgramStageInstance();
+        updateProgramStageInstance( programStage, programInstance, organisationUnit, date, completed, coordinate, storedBy, programStageInstance );
+        programStageInstanceService.addProgramStageInstance( programStageInstance );
+
+        return programStageInstance;
+    }
+
+    private void updateProgramStageInstance( ProgramStage programStage, ProgramInstance programInstance, OrganisationUnit organisationUnit, Date date, Boolean completed, Coordinate coordinate, String storedBy, ProgramStageInstance programStageInstance )
+    {
         programStageInstance.setProgramInstance( programInstance );
         programStageInstance.setProgramStage( programStage );
         programStageInstance.setDueDate( date );
@@ -585,16 +613,15 @@ public abstract class AbstractEventService implements EventService
             }
         }
 
-        if ( completed != null )
+        programStageInstance.setCompleted( completed );
+
+        if ( programStageInstance.isCompleted() )
         {
-            programStageInstance.setCompleted( completed );
+            programStageInstance.setStatus( ProgramStageInstance.COMPLETED_STATUS );
             programStageInstance.setCompletedDate( new Date() );
             programStageInstance.setCompletedUser( storedBy );
+            programStageInstanceService.completeProgramStageInstance( programStageInstance, getFormat() );
         }
-
-        programStageInstanceService.addProgramStageInstance( programStageInstance );
-
-        return programStageInstance;
     }
 
     private ImportSummary saveEvent( Program program, ProgramInstance programInstance, ProgramStage programStage, ProgramStageInstance programStageInstance, OrganisationUnit organisationUnit, Event event, ImportOptions importOptions )
@@ -607,11 +634,6 @@ public abstract class AbstractEventService implements EventService
         importSummary.setStatus( ImportStatus.SUCCESS );
         boolean dryRun = importOptions != null && importOptions.isDryRun();
 
-        if ( !program.isSingleEvent() )
-        {
-            return new ImportSummary( ImportStatus.ERROR, "Multi-event programs are not supported right now." );
-        }
-
         Date eventDate = getFormat().parseDate( event.getEventDate() );
 
         if ( eventDate == null )
@@ -621,10 +643,18 @@ public abstract class AbstractEventService implements EventService
 
         String storedBy = getStoredBy( event, importSummary );
 
-        if ( !dryRun && programStageInstance == null )
+        if ( !dryRun )
         {
-            programStageInstance = createProgramStageInstance( programStage, programInstance, organisationUnit, eventDate,
-                event.getCompleted(), event.getCoordinate(), storedBy );
+            if ( programStageInstance == null )
+            {
+                programStageInstance = createProgramStageInstance( programStage, programInstance, organisationUnit, eventDate,
+                    EventStatus.COMPLETED.equals( event.getStatus() ), event.getCoordinate(), storedBy );
+            }
+            else
+            {
+                updateProgramStageInstance( programStage, programInstance, organisationUnit, eventDate,
+                    EventStatus.COMPLETED.equals( event.getStatus() ), event.getCoordinate(), storedBy, programStageInstance );
+            }
 
             importSummary.setReference( programStageInstance.getUid() );
         }

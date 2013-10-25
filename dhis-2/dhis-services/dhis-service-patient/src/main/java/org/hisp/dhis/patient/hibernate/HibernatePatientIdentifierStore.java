@@ -28,9 +28,6 @@ package org.hisp.dhis.patient.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.Date;
-
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
@@ -44,6 +41,9 @@ import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.system.util.DateUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.util.Collection;
+import java.util.Date;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -85,20 +85,20 @@ public class HibernatePatientIdentifierStore
             Restrictions.eq( "identifier", identifier ) ).uniqueResult();
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public Collection<PatientIdentifier> getAll( PatientIdentifierType type, String identifier )
     {
         return getCriteria( Restrictions.eq( "identifierType", type ), Restrictions.eq( "identifier", identifier ) )
             .list();
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public Collection<PatientIdentifier> getByIdentifier( String identifier )
     {
         return getCriteria( Restrictions.ilike( "identifier", "%" + identifier + "%" ) ).list();
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public Collection<PatientIdentifier> getByType( PatientIdentifierType identifierType )
     {
         return getCriteria( Restrictions.eq( "identifierType", identifierType ) ).list();
@@ -116,24 +116,40 @@ public class HibernatePatientIdentifierStore
             Restrictions.eq( "patient", patient ) ).uniqueResult();
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public Collection<PatientIdentifier> getPatientIdentifiers( Patient patient )
     {
         return getCriteria( Restrictions.eq( "patient", patient ) ).list();
     }
 
-    public Patient getPatient( PatientIdentifierType idenType, String value )
+    public Patient getPatient( PatientIdentifierType identifierType, String value )
     {
+        if ( identifierType == null )
+        {
+            // assume system identifier
+            return (Patient) getCriteria(
+                Restrictions.and( Restrictions.eq( "identifier", value ), Restrictions.isNull( "identifierType" ) ) )
+                .setProjection( Projections.property( "patient" ) ).uniqueResult();
+        }
+
         return (Patient) getCriteria(
-            Restrictions.and( Restrictions.eq( "identifierType", idenType ), Restrictions.eq( "identifier", value ) ) )
+            Restrictions.and( Restrictions.eq( "identifierType", identifierType ), Restrictions.eq( "identifier", value ) ) )
             .setProjection( Projections.property( "patient" ) ).uniqueResult();
     }
 
     @SuppressWarnings( "unchecked" )
-    public Collection<Patient> getPatientsByIdentifier( String identifier, int min, int max )
+    public Collection<Patient> getPatientsByIdentifier( String identifier, Integer min, Integer max )
     {
-        return getCriteria( Restrictions.ilike( "identifier", "%" + identifier + "%" ) )
-            .setProjection( Projections.property( "patient" ) ).setFirstResult( min ).setMaxResults( max ).list();
+        if ( min != null & max != null )
+        {
+            return getCriteria( Restrictions.ilike( "identifier", "%" + identifier + "%" ) )
+                .setProjection( Projections.property( "patient" ) ).setFirstResult( min ).setMaxResults( max ).list();
+        }
+        else
+        {
+            return getCriteria( Restrictions.ilike( "identifier", "%" + identifier + "%" ) )
+                .setProjection( Projections.property( "patient" ) ).list();
+        }
     }
 
     public int countGetPatientsByIdentifier( String identifier )
@@ -143,36 +159,42 @@ public class HibernatePatientIdentifierStore
         return rs != null ? rs.intValue() : 0;
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public Collection<PatientIdentifier> get( Collection<PatientIdentifierType> identifierTypes, Patient patient )
     {
         return getCriteria( Restrictions.in( "identifierType", identifierTypes ), Restrictions.eq( "patient", patient ) )
             .list();
     }
 
-    @SuppressWarnings( "deprecation" )
+    @SuppressWarnings("deprecation")
     public boolean checkDuplicateIdentifier( PatientIdentifierType patientIdentifierType, String identifier,
-        OrganisationUnit orgunit, Program program, PeriodType periodType )
+        Integer patientId, OrganisationUnit organisationUnit, Program program, PeriodType periodType )
     {
         String sql = "select count(*) from patientidentifier pi inner join patient p on pi.patientid=p.patientid "
             + "inner join programinstance pis on pis.patientid=pi.patientid where pi.patientidentifiertypeid="
             + patientIdentifierType.getId() + " and pi.identifier='" + identifier + "' ";
-        if ( orgunit != null )
+
+        if ( patientId != null )
         {
-            sql += " and p.organisationunitid=" + orgunit.getId();
+            sql += " and pi.patientid!=" + patientId;
         }
 
-        if ( program != null )
+        if ( patientIdentifierType.getType().equals( PatientIdentifierType.VALUE_TYPE_LOCAL_ID ) && organisationUnit != null )
+        {
+            sql += " and p.organisationunitid=" + organisationUnit.getId();
+        }
+
+        if ( patientIdentifierType.getType().equals( PatientIdentifierType.VALUE_TYPE_LOCAL_ID ) && program != null )
         {
             sql += " and pis.programid=" + program.getId();
         }
 
-        if ( periodType != null )
+        if ( patientIdentifierType.getType().equals( PatientIdentifierType.VALUE_TYPE_LOCAL_ID ) && periodType != null )
         {
             Date currentDate = new Date();
             Period period = periodType.createPeriod( currentDate );
             sql += " and pis.enrollmentdate >='" + period.getStartDateString() + "' and pis.enrollmentdate <='"
-                + DateUtils.getMediumDateString( period.getEndDate() )  + "'";
+                + DateUtils.getMediumDateString( period.getEndDate() ) + "'";
         }
 
         return jdbcTemplate.queryForInt( sql ) == 0 ? false : true;

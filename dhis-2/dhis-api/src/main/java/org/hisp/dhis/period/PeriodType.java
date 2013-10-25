@@ -54,6 +54,9 @@ public abstract class PeriodType
     // Available PeriodTypes
     // -------------------------------------------------------------------------
 
+    /**
+     * All period types in descending order according to frequency.
+     */
     public static final List<PeriodType> PERIOD_TYPES = new ArrayList<PeriodType>()
     {
         {
@@ -343,25 +346,6 @@ public abstract class PeriodType
         }
         
         return null;
-    }
-
-    /**
-     * Creates a period based on the given external identifier, which is on the
-     * format [PeriodType]_[StartDate]. The start date is on the form yyyy-MM-dd.
-     *
-     * @param externalId the external identifier.
-     * @return the period.
-     */
-    public static Period createPeriodExternalId( String externalId )
-    {
-        if ( externalId == null || externalId.split( "_" ).length <= 1 )
-        {
-            return null;
-        }
-
-        final String[] id = externalId.split( "_" );
-        final PeriodType periodType = getPeriodTypeByName( id[0] );
-        return periodType.createPeriod( getMediumDate( id[1] ) );
     }
 
     /**

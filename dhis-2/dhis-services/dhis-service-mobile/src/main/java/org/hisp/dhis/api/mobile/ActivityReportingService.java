@@ -33,6 +33,8 @@ import java.util.Collection;
 import org.hisp.dhis.api.mobile.model.ActivityPlan;
 import org.hisp.dhis.api.mobile.model.ActivityValue;
 import org.hisp.dhis.api.mobile.model.PatientAttribute;
+import org.hisp.dhis.api.mobile.model.LWUITmodel.LostEvent;
+import org.hisp.dhis.api.mobile.model.LWUITmodel.Notification;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.Patient;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.Program;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.ProgramStage;
@@ -72,7 +74,7 @@ public interface ActivityReportingService
 
     public Collection<PatientIdentifierType> getIdentifierTypes();
 
-    public Collection<org.hisp.dhis.patient.PatientAttribute> getPatientAtts(String programId);
+    public Collection<org.hisp.dhis.patient.PatientAttribute> getPatientAtts( String programId );
 
     public Collection<PatientIdentifierType> getIdentifiers( String programId );
 
@@ -85,7 +87,7 @@ public interface ActivityReportingService
     public Patient addRelationship( Relationship enrollmentRelationship, int orgUnitId )
         throws NotAllowedException;
 
-    public Program getAllAnonymousProgram( int orgUnitId )
+    public Program getAllProgramByOrgUnit( int orgUnitId, String programType )
         throws NotAllowedException;
 
     public Program findProgram( String programInfo )
@@ -97,4 +99,9 @@ public interface ActivityReportingService
     public Integer savePatient( Patient patient, int orgUnitId, String programId )
         throws NotAllowedException;
 
+    public String findLostToFollowUp( int orgUnitId, String programId )
+        throws NotAllowedException;
+    
+    public Notification handleLostToFollowUp( LostEvent lostEvent )
+        throws NotAllowedException;
 }

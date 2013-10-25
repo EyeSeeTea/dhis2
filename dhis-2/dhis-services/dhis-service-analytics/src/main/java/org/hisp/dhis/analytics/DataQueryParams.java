@@ -68,6 +68,7 @@ import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
@@ -102,30 +103,62 @@ public class DataQueryParams
     
     private static final DimensionItem[] DIM_OPT_ARR = new DimensionItem[0];
     private static final DimensionItem[][] DIM_OPT_2D_ARR = new DimensionItem[0][];
-    
-    private List<DimensionalObject> dimensions = new ArrayList<DimensionalObject>();
-    
-    private List<DimensionalObject> filters = new ArrayList<DimensionalObject>();
 
-    private AggregationType aggregationType;
+    protected List<DimensionalObject> dimensions = new ArrayList<DimensionalObject>();
+    
+    protected List<DimensionalObject> filters = new ArrayList<DimensionalObject>();
+
+    protected AggregationType aggregationType;
     
     private Map<MeasureFilter, Double> measureCriteria = new HashMap<MeasureFilter, Double>();
     
+    /**
+     * Indicates if the meta data part of the query response should be omitted.
+     */
     private boolean skipMeta;
+
+    /**
+     * Indicates i) if the names of all ancestors of the organisation units part
+     * of the query should be included in the "names" key and ii) if the hierarchy 
+     * path of all organisation units part of the query should be included as a
+     * "ouHierarchy" key in the meta-data part of the response.
+     */
+    private boolean hierarchyMeta;
     
+    /**
+     * Indicates whether the maximum number of records to include the response
+     * should be ignored.
+     */
     private boolean ignoreLimit;
     
     // -------------------------------------------------------------------------
     // Transient properties
     // -------------------------------------------------------------------------
     
-    private transient Partitions partitions;
+    /**
+     * The partitions containing data relevant to this query.
+     */
+    protected transient Partitions partitions;
 
-    private transient String periodType;
-        
+    /**
+     * The aggregation period type for this query.
+     */
+    protected transient String periodType;
+    
+    /**
+     * The period type of the data values to query.
+     */
     private transient PeriodType dataPeriodType;
     
+    /**
+     * Indicates whether to skip partitioning during query planning.
+     */
     private transient boolean skipPartitioning;
+    
+    /**
+     * Organisation units which were explicitly part of the original request.
+     */
+    private List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>();
     
     // -------------------------------------------------------------------------
     // Constructors
@@ -134,18 +167,26 @@ public class DataQueryParams
     public DataQueryParams()
     {
     }
-    
-    public DataQueryParams( DataQueryParams params )
+
+    public DataQueryParams instance()
     {
-        this.dimensions = new ArrayList<DimensionalObject>( params.getDimensions() );
-        this.filters = new ArrayList<DimensionalObject>( params.getFilters() );
-        this.aggregationType = params.getAggregationType();
-        this.measureCriteria = params.getMeasureCriteria();
+        DataQueryParams params = new DataQueryParams();
         
-        this.partitions = params.getPartitions();
-        this.periodType = params.getPeriodType();
-        this.dataPeriodType = params.getDataPeriodType();
-        this.skipPartitioning = params.isSkipPartitioning();
+        params.dimensions = new ArrayList<DimensionalObject>( this.dimensions );
+        params.filters = new ArrayList<DimensionalObject>( this.filters );
+        params.aggregationType = this.aggregationType;
+        params.measureCriteria = this.measureCriteria;
+        params.skipMeta = this.skipMeta;
+        params.hierarchyMeta = this.hierarchyMeta;
+        params.ignoreLimit = this.ignoreLimit;
+        
+        params.partitions = this.partitions;
+        params.periodType = this.periodType;
+        params.dataPeriodType = this.dataPeriodType;
+        params.skipPartitioning = this.skipPartitioning;
+        params.organisationUnits = new ArrayList<OrganisationUnit>( this.organisationUnits );
+        
+        return params;
     }
 
     // -------------------------------------------------------------------------
@@ -371,7 +412,7 @@ public class DataQueryParams
     {
         return CollectionUtils.intersection( dimensions, filters );
     }
-        
+    
     /**
      * Indicates whether periods are present as a dimension or as a filter. If
      * not this object is in an illegal state.
@@ -380,6 +421,17 @@ public class DataQueryParams
     {
         List<NameableObject> dimOpts = getDimensionOptions( PERIOD_DIM_ID );
         List<NameableObject> filterOpts = getFilterOptions( PERIOD_DIM_ID );
+        
+        return ( dimOpts != null && !dimOpts.isEmpty() ) || ( filterOpts != null && !filterOpts.isEmpty() );
+    }
+    
+    /**
+     * Indicates whether organisation units are present as dimensio or filter.
+     */
+    public boolean hasOrganisationUnits()
+    {
+        List<NameableObject> dimOpts = getDimensionOptions( ORGUNIT_DIM_ID );
+        List<NameableObject> filterOpts = getFilterOptions( ORGUNIT_DIM_ID );
         
         return ( dimOpts != null && !dimOpts.isEmpty() ) || ( filterOpts != null && !filterOpts.isEmpty() );
     }
@@ -424,7 +476,7 @@ public class DataQueryParams
     {
         int total = 1;
         
-        DataQueryParams query = new DataQueryParams( this );
+        DataQueryParams query = this.instance();
         
         query.getDimensions().add( new BaseDimensionalObject( DATA_X_DIM_ID ) );
         
@@ -1011,6 +1063,16 @@ public class DataQueryParams
     public void setSkipMeta( boolean skipMeta )
     {
         this.skipMeta = skipMeta;
+    }
+
+    public boolean isHierarchyMeta()
+    {
+        return hierarchyMeta;
+    }
+
+    public void setHierarchyMeta( boolean hierarchyMeta )
+    {
+        this.hierarchyMeta = hierarchyMeta;
     }
 
     public boolean isIgnoreLimit()

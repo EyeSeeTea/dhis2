@@ -34,17 +34,26 @@ import static org.hisp.dhis.api.utils.ContextUtils.CONTENT_TYPE_JSON;
 import static org.hisp.dhis.api.utils.ContextUtils.CONTENT_TYPE_TEXT;
 import static org.hisp.dhis.api.utils.ContextUtils.CONTENT_TYPE_XML;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.api.utils.ContextUtils;
+import org.hisp.dhis.api.view.ClassPathUriResolver;
 import org.hisp.dhis.api.webdomain.DataValueSets;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.dxf2.datavalueset.DataValueSet;
@@ -52,9 +61,9 @@ import org.hisp.dhis.dxf2.datavalueset.DataValueSetService;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
-import org.hisp.dhis.integration.IntegrationService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -69,15 +78,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class DataValueSetController
 {
     public static final String RESOURCE_PATH = "/dataValueSets";
-
+    public static final String SDMXCROSS2DXF2_TRANSFORM = "/templates/cross2dxf2.xsl";
+    
     private static final Log log = LogFactory.getLog( DataValueSetController.class );
 
     @Autowired
     private DataValueSetService dataValueSetService;
 
-    @Autowired
-    private IntegrationService integrationService;
-    
     @Autowired
     private OrganisationUnitService organisationUnitService;
 
@@ -195,14 +202,23 @@ public class DataValueSetController
     @RequestMapping(method = RequestMethod.POST, consumes = "application/sdmx+xml")
     @PreAuthorize("hasRole('ALL') or hasRole('F_DATAVALUE_ADD')")
     public void postSDMXDataValueSet( ImportOptions importOptions,
-        HttpServletResponse response, InputStream in, Model model ) throws IOException
+        HttpServletResponse response, InputStream in, Model model ) throws 
+        IOException, TransformerConfigurationException, TransformerException
     {
-        ImportSummary summary = integrationService.importSDMXDataValueSet( in, importOptions );
+        TransformerFactory tf = TransformerFactory.newInstance();
+        tf.setURIResolver( new ClassPathUriResolver() );
+        
+        Transformer transformer = tf.newTransformer( new StreamSource( new ClassPathResource( SDMXCROSS2DXF2_TRANSFORM ).getInputStream() ) );
 
-        log.info( "Data values set saved " + importOptions );
-
-        response.setContentType( CONTENT_TYPE_XML );
-        JacksonUtils.toXml( response.getOutputStream(), summary );
+        StringWriter dxf2 = new StringWriter();
+        transformer.transform( new StreamSource( in ), new StreamResult( dxf2 ) );
+        
+        // override id scheme 
+        importOptions.setOrgUnitIdScheme( "CODE");
+        importOptions.setDataElementIdScheme( "CODE");
+        
+        dataValueSetService.saveDataValueSetJson( 
+            new ByteArrayInputStream(dxf2.toString().getBytes( "UTF-8") ), importOptions );
     }
 
     // -------------------------------------------------------------------------

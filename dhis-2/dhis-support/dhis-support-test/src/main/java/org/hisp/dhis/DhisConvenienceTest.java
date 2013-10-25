@@ -28,13 +28,30 @@ package org.hisp.dhis;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.io.File;
+import java.io.StringReader;
+import java.lang.reflect.Method;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import javax.xml.XMLConstants;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.aggregation.AggregatedDataValueService;
 import org.hisp.dhis.aggregation.AggregatedOrgUnitDataValueService;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.DimensionalObject;
-import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.constant.ConstantService;
@@ -86,7 +103,6 @@ import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.resourcetable.ResourceTableService;
 import org.hisp.dhis.sqlview.SqlView;
 import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserService;
@@ -97,32 +113,7 @@ import org.hisp.dhis.validation.ValidationRuleGroup;
 import org.hisp.dhis.validation.ValidationRuleService;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.xml.sax.InputSource;
-
-import javax.xml.XMLConstants;
-import javax.xml.namespace.NamespaceContext;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-import java.io.File;
-import java.io.StringReader;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author Lars Helge Overland
@@ -794,6 +785,43 @@ public abstract class DhisConvenienceTest
     }
 
     /**
+     * Creates a ValidationRule of RULE_TYPE_MONITORING
+     * 
+     * @param uniqueCharacter A unique character to identify the object.
+     * @param operator               The operator.
+     * @param leftSide               The left side expression.
+     * @param rightSide              The right side expression.
+     * @param periodType             The period-type.
+     * @param organisationUnitLevel  The unit level of organisations to be evaluated by this rule.
+     * @param sequentialSampleCount  How many sequential past periods to sample.
+     * @param annualSampleCount      How many years of past periods to sample.
+     * @param highOutliers           How many high outlying past samples to discard before averaging.
+     * @param lowOutliers            How many low outlying past samples to discard before averaging.
+     */
+    public static ValidationRule createMonitoringRule( char uniqueCharacter, Operator operator, Expression leftSide,
+        Expression rightSide, PeriodType periodType, int organisationUnitLevel, int sequentialSampleCount,
+        int annualSampleCount, int highOutliers, int lowOutliers )
+    {
+        ValidationRule validationRule = new ValidationRule();
+
+        validationRule.setName( "MonitoringRule" + uniqueCharacter );
+        validationRule.setDescription( "Description" + uniqueCharacter );
+        validationRule.setType( ValidationRule.TYPE_ABSOLUTE );
+        validationRule.setRuleType( ValidationRule.RULE_TYPE_MONITORING );
+        validationRule.setOperator( operator );
+        validationRule.setLeftSide( leftSide );
+        validationRule.setRightSide( rightSide );
+        validationRule.setPeriodType( periodType );
+        validationRule.setOrganisationUnitLevel( organisationUnitLevel );
+        validationRule.setSequentialSampleCount( sequentialSampleCount );
+        validationRule.setAnnualSampleCount( annualSampleCount );
+        validationRule.setHighOutliers( highOutliers );
+        validationRule.setLowOutliers( lowOutliers );
+
+        return validationRule;
+    }
+
+    /**
      * @param uniqueCharacter A unique character to identify the object.
      * @return ValidationRuleGroup
      */
@@ -945,7 +973,7 @@ public abstract class DhisConvenienceTest
     {
         ProgramStage programStage = new ProgramStage();
 
-        programStage.setName( "name" + uniqueCharacter );
+        programStage.setName( "ProgramStage" + uniqueCharacter );
         programStage.setDescription( "description" + uniqueCharacter );
         programStage.setMinDaysFromStart( minDays );
         programStage.setIrregular( irregular );
@@ -1109,7 +1137,6 @@ public abstract class DhisConvenienceTest
     protected class Dxf2NamespaceResolver
         implements NamespaceContext
     {
-
         @Override
         public String getNamespaceURI( String prefix )
         {

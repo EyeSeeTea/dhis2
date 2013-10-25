@@ -28,6 +28,14 @@ package org.hisp.dhis.light.utils;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.Validate;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
@@ -58,14 +66,6 @@ import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleService;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -327,9 +327,16 @@ public class FormUtils
         return true;
     }
 
+    //TODO re-use ValidationUtils
+    
     public static boolean isPositiveInteger( String value )
     {
         return valueHigher( value, 0 );
+    }
+    
+    public static boolean isZeroOrPositiveInteger( String value )
+    {
+        return valueHigherOrEqual( value, 0 );
     }
 
     public static boolean isNegativeInteger( String value )
@@ -346,6 +353,26 @@ public class FormUtils
             integerValue = Integer.parseInt( value );
 
             if ( integerValue > max )
+            {
+                return true;
+            }
+        }
+        catch ( NumberFormatException ignored )
+        {
+        }
+
+        return false;
+    }
+    
+    public static boolean valueHigherOrEqual( String value, int max )
+    {
+        int integerValue;
+
+        try
+        {
+            integerValue = Integer.parseInt( value );
+
+            if ( integerValue >= max )
             {
                 return true;
             }
@@ -397,4 +424,5 @@ public class FormUtils
 
         return false;
     }
+    
 }

@@ -48,6 +48,7 @@ import org.hisp.dhis.api.mobile.model.MobileModel;
 import org.hisp.dhis.api.mobile.model.ModelList;
 import org.hisp.dhis.api.mobile.model.SMSCode;
 import org.hisp.dhis.api.mobile.model.SMSCommand;
+import org.hisp.dhis.api.mobile.model.LWUITmodel.LostEvent;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.Patient;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.PatientIdentifierAndAttribute;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.Program;
@@ -207,8 +208,8 @@ public class MobileOrganisationUnitController
         MobileModel mobileModel = new MobileModel();
         mobileModel.setClientVersion( clientVersion );
         OrganisationUnit unit = getUnit( id );
-        mobileModel.setActivityPlan( activityReportingService.getCurrentActivityPlan( unit, locale ) );
-        mobileModel.setPrograms( programService.getPrograms( unit, locale ) );
+//        mobileModel.setActivityPlan( activityReportingService.getCurrentActivityPlan( unit, locale ) );
+//        mobileModel.setPrograms( programService.getPrograms( unit, locale ) );
         mobileModel.setDatasets( facilityReportingService.getMobileDataSetsForUnit( unit, locale ) );
         mobileModel.setServerCurrentDate( new Date() );
         mobileModel.setLocales( getLocalStrings( i18nService.getAvailableLocales() ) );
@@ -383,7 +384,7 @@ public class MobileOrganisationUnitController
     public Program getAnonymousProgram( @PathVariable int id, @RequestHeader( "programType" ) String programType )
         throws NotAllowedException
     {
-        return activityReportingService.getAllAnonymousProgram( id );
+        return activityReportingService.getAllProgramByOrgUnit( id, programType );
     }
 
     @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/LWUIT/orgUnits/{id}/findProgram" )
@@ -392,6 +393,22 @@ public class MobileOrganisationUnitController
         throws NotAllowedException
     {
         return activityReportingService.findProgram( programInfo );
+    }
+    
+    @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/LWUIT/orgUnits/{id}/findLostToFollowUp" )
+    @ResponseBody
+    public String findLostToFollowUp( @PathVariable int id, @RequestHeader( "programId" ) String programId )
+        throws NotAllowedException
+    {
+        return activityReportingService.findLostToFollowUp( id, programId );
+    }
+    
+    @RequestMapping( method = RequestMethod.POST, value = "{clientVersion}/LWUIT/orgUnits/{id}/handleLostToFollowUpUrl" )
+    @ResponseBody
+    public Patient handleLostToFollowUp( @PathVariable int id, @RequestBody LostEvent lostEvent )
+    {
+        System.out.println(lostEvent);
+        return null;
     }
 
     // Supportive methods

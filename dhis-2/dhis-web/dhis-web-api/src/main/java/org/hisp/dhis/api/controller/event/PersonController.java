@@ -32,19 +32,21 @@ import org.hisp.dhis.api.controller.WebOptions;
 import org.hisp.dhis.api.controller.exception.NotFoundException;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.common.IdentifiableObjectManager;
-import org.hisp.dhis.dxf2.importsummary.ImportStatus;
-import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
-import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.dxf2.events.person.Gender;
+import org.hisp.dhis.dxf2.events.person.Identifier;
 import org.hisp.dhis.dxf2.events.person.Person;
 import org.hisp.dhis.dxf2.events.person.PersonService;
 import org.hisp.dhis.dxf2.events.person.Persons;
+import org.hisp.dhis.dxf2.importsummary.ImportStatus;
+import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
+import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -64,6 +66,7 @@ import java.util.Map;
  */
 @Controller
 @RequestMapping( value = PersonController.RESOURCE_PATH )
+@PreAuthorize( "hasRole('ALL') or hasRole('F_PATIENT_LIST')" )
 public class PersonController
 {
     public static final String RESOURCE_PATH = "/persons";
@@ -79,56 +82,58 @@ public class PersonController
     // -------------------------------------------------------------------------
 
     @RequestMapping( value = "", method = RequestMethod.GET )
+    @PreAuthorize("hasRole('ALL') or hasRole('F_ACCESS_PATIENT_ATTRIBUTES')")
     public String getPersons(
         @RequestParam( value = "orgUnit", required = false ) String orgUnitUid,
         @RequestParam( required = false ) Gender gender,
         @RequestParam( value = "program", required = false ) String programUid,
-        @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request ) throws Exception
+        @RequestParam( required = false ) String identifierType,
+        @RequestParam( required = false ) String identifier,
+        @RequestParam( required = false ) String nameLike,
+        @RequestParam Map<String, String> parameters, Model model ) throws Exception
     {
         WebOptions options = new WebOptions( parameters );
-        Persons persons;
+        Persons persons = new Persons();
 
-        // it will be required in the future to have at least orgUnitUid, but for now, we allow no parameters
-        if ( gender == null && orgUnitUid == null && programUid == null )
+        if ( identifier != null )
         {
-            persons = personService.getPersons();
-        }
-        else if ( orgUnitUid != null && programUid != null && gender != null )
-        {
-            OrganisationUnit organisationUnit = getOrganisationUnit( orgUnitUid );
-            Program program = getProgram( programUid );
-            persons = personService.getPersons( organisationUnit, program, gender );
-        }
-        else if ( orgUnitUid != null && gender != null )
-        {
-            OrganisationUnit organisationUnit = getOrganisationUnit( orgUnitUid );
-            persons = personService.getPersons( organisationUnit, gender );
-        }
-        else if ( orgUnitUid != null && programUid != null )
-        {
-            OrganisationUnit organisationUnit = getOrganisationUnit( orgUnitUid );
-            Program program = getProgram( programUid );
-
-            persons = personService.getPersons( organisationUnit, program );
-        }
-        else if ( programUid != null && gender != null )
-        {
-            Program program = getProgram( programUid );
-            persons = personService.getPersons( program, gender );
+            Identifier id = new Identifier( identifierType, identifier );
+            persons.getPersons().add( personService.getPerson( id ) );
         }
         else if ( orgUnitUid != null )
         {
-            OrganisationUnit organisationUnit = getOrganisationUnit( orgUnitUid );
-            persons = personService.getPersons( organisationUnit );
-        }
-        else if ( programUid != null )
-        {
-            Program program = getProgram( programUid );
-            persons = personService.getPersons( program );
+            if ( nameLike != null )
+            {
+                OrganisationUnit organisationUnit = getOrganisationUnit( orgUnitUid );
+                persons = personService.getPersons( organisationUnit, nameLike );
+            }
+            else if ( programUid != null && gender != null )
+            {
+                OrganisationUnit organisationUnit = getOrganisationUnit( orgUnitUid );
+                Program program = getProgram( programUid );
+                persons = personService.getPersons( organisationUnit, program, gender );
+            }
+            else if ( gender != null )
+            {
+                OrganisationUnit organisationUnit = getOrganisationUnit( orgUnitUid );
+                persons = personService.getPersons( organisationUnit, gender );
+            }
+            else if ( programUid != null )
+            {
+                OrganisationUnit organisationUnit = getOrganisationUnit( orgUnitUid );
+                Program program = getProgram( programUid );
+
+                persons = personService.getPersons( organisationUnit, program );
+            }
+            else
+            {
+                OrganisationUnit organisationUnit = getOrganisationUnit( orgUnitUid );
+                persons = personService.getPersons( organisationUnit );
+            }
         }
         else
         {
-            persons = new Persons();
+            throw new HttpClientErrorException( HttpStatus.BAD_REQUEST, "Missing required orgUnit parameter." );
         }
 
         model.addAttribute( "model", persons );
@@ -138,6 +143,7 @@ public class PersonController
     }
 
     @RequestMapping( value = "/{id}", method = RequestMethod.GET )
+    @PreAuthorize("hasRole('ALL') or hasRole('F_ACCESS_PATIENT_ATTRIBUTES')")
     public String getPerson( @PathVariable String id, @RequestParam Map<String, String> parameters, Model model ) throws NotFoundException
     {
         WebOptions options = new WebOptions( parameters );
@@ -154,6 +160,7 @@ public class PersonController
     // -------------------------------------------------------------------------
 
     @RequestMapping( value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_PATIENT_ADD')" )
     public void postPersonXml( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         ImportSummaries importSummaries = personService.savePersonXml( request.getInputStream() );
@@ -178,6 +185,7 @@ public class PersonController
     }
 
     @RequestMapping( value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_PATIENT_ADD')" )
     public void postPersonJson( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         ImportSummaries importSummaries = personService.savePersonJson( request.getInputStream() );
@@ -207,6 +215,7 @@ public class PersonController
 
     @RequestMapping( value = "/{id}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_XML_VALUE )
     @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_PATIENT_ADD')" )
     public void updatePersonXml( @PathVariable String id, HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         ImportSummary importSummary = personService.updatePersonXml( id, request.getInputStream() );
@@ -215,6 +224,7 @@ public class PersonController
 
     @RequestMapping( value = "/{id}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE )
     @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_PATIENT_ADD')" )
     public void updatePersonJson( @PathVariable String id, HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         ImportSummary importSummary = personService.updatePersonJson( id, request.getInputStream() );
@@ -227,6 +237,7 @@ public class PersonController
 
     @RequestMapping( value = "/{id}", method = RequestMethod.DELETE )
     @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_PATIENT_DELETE')" )
     public void deletePerson( @PathVariable String id ) throws NotFoundException
     {
         Person person = getPerson( id );

@@ -408,6 +408,10 @@ public class TableAlteror
         executeSql( "update dataset set expirydays = 0 where expirydays is null" );
         executeSql( "update expression set nullifblank = true where nullifblank is null" );
 
+        // move timelydays from system setting => dataset property
+        executeSql( "update dataset set timelydays = 15 where timelydays is null" );
+        executeSql( "delete from systemsetting where name='completenessOffset'" );
+
         executeSql( "update reporttable set reportingmonth = false where reportingmonth is null" );
         executeSql( "update reporttable set reportingbimonth = false where reportingbimonth is null" );
         executeSql( "update reporttable set reportingquarter = false where reportingquarter is null" );
@@ -439,6 +443,7 @@ public class TableAlteror
         executeSql( "update reporttable set digitgroupseparator = 'space' where digitgroupseparator is null" );
         executeSql( "update reporttable set sortorder = 0 where sortorder is null" );
         executeSql( "update reporttable set toplimit = 0 where toplimit is null" );
+        executeSql( "update reporttable set showhierarchy = false where showhierarchy is null" );        
 
         executeSql( "update chart set reportingmonth = false where reportingmonth is null" );
         executeSql( "update chart set reportingbimonth = false where reportingbimonth is null" );
@@ -619,7 +624,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE dataelement ALTER COLUMN domaintype SET NOT NULL" );
         executeSql( "update dataelementcategory set datadimension = false where datadimension is null" );
         
-	executeSql( "UPDATE dataset SET dataelementdecoration=false WHERE dataelementdecoration is null" );
+		executeSql( "UPDATE dataset SET dataelementdecoration=false WHERE dataelementdecoration is null" );
 
         executeSql( "alter table validationrulegroup rename column validationgroupid to validationrulegroupid" );
         executeSql( "alter table sqlview rename column viewid to sqlviewid" );
@@ -634,8 +639,11 @@ public class TableAlteror
         
         executeSql( "delete from usersetting where name = 'dashboardConfig' or name = 'dashboardConfiguration'" );
         executeSql( "ALTER TABLE interpretation ALTER COLUMN userid DROP NOT NULL" );
+        executeSql( "UPDATE interpretation SET publicaccess='r-------' WHERE publicaccess IS NULL;" );
 
         upgradeMapViewsToAnalyticalObject();
+
+		executeSql( "ALTER TABLE users ALTER COLUMN password DROP NOT NULL" );
         
         log.info( "Tables updated" );
     }
