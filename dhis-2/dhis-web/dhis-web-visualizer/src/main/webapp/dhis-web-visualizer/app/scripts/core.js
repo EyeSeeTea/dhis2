@@ -1778,6 +1778,8 @@ Ext.onReady( function() {
 
                 getDefaultChartSizeHandler = function() {
                     return function() {
+console.log("w", dv.viewport.centerRegion.getWidth());
+console.log("h", dv.viewport.centerRegion.getHeight());
                         this.animate = false;
                         this.setWidth(dv.viewport.centerRegion.getWidth());
                         this.setHeight(dv.viewport.centerRegion.getHeight() - 25);
@@ -2270,6 +2272,7 @@ Ext.onReady( function() {
 						dv.viewport.centerRegion.add(chart);
 
 						dv.paramString = paramString;
+						dv.chart = chart;
 
 						afterLoad(layout, xLayout, xResponse);
 					};
