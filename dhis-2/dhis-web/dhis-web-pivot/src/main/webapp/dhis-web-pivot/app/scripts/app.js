@@ -1706,82 +1706,8 @@ Ext.onReady( function() {
 				}
 			};
 
-			util.multiselect = {
-				select: function(a, s) {
-					var selected = a.getValue();
-					if (selected.length) {
-						var array = [];
-						Ext.Array.each(selected, function(item) {
-							array.push({id: item, name: a.store.getAt(a.store.findExact('id', item)).data.name});
-						});
-						s.store.add(array);
-					}
-					this.filterAvailable(a, s);
-				},
-				selectAll: function(a, s, isReverse) {
-					var array = [];
-					a.store.each( function(r) {
-						array.push({id: r.data.id, name: r.data.name});
-					});
-					if (isReverse) {
-						array.reverse();
-					}
-					s.store.add(array);
-					this.filterAvailable(a, s);
-				},
-				unselect: function(a, s) {
-					var selected = s.getValue();
-					if (selected.length) {
-						Ext.Array.each(selected, function(item) {
-							s.store.remove(s.store.getAt(s.store.findExact('id', item)));
-						});
-						this.filterAvailable(a, s);
-					}
-				},
-				unselectAll: function(a, s) {
-					s.store.removeAll();
-					a.store.clearFilter();
-					this.filterAvailable(a, s);
-				},
-				filterAvailable: function(a, s) {
-					a.store.filterBy( function(r) {
-						var keep = true;
-						s.store.each( function(r2) {
-							if (r.data.id == r2.data.id) {
-								keep = false;
-							}
-
-						});
-						return keep;
-					});
-					a.store.sortStore();
-				},
-				setHeight: function(ms, panel, fill) {
-					for (var i = 0; i < ms.length; i++) {
-						ms[i].setHeight(panel.getHeight() - fill);
-					}
-				}
-			};
-
 			util.url = {
-				getUrlParam: function(s) {
-					var output = '';
-					var href = window.location.href;
-					if (href.indexOf('?') > -1 ) {
-						var query = href.substr(href.indexOf('?') + 1);
-						var query = query.split('&');
-						for (var i = 0; i < query.length; i++) {
-							if (query[i].indexOf('=') > -1) {
-								var a = query[i].split('=');
-								if (a[0].toLowerCase() === s) {
-									output = a[1];
-									break;
-								}
-							}
-						}
-					}
-					return unescape(output);
-				}
+
 			};
 
 			util.window = util.window || {};
@@ -1907,6 +1833,28 @@ Ext.onReady( function() {
 				for (var i = 0; i < ms.length; i++) {
 					ms[i].setHeight(panel.getHeight() - fill);
 				}
+			};
+
+			// url
+			web.url = web.url || {};
+
+			web.url.getParam: function(s) {
+				var output = '';
+				var href = window.location.href;
+				if (href.indexOf('?') > -1 ) {
+					var query = href.substr(href.indexOf('?') + 1);
+					var query = query.split('&');
+					for (var i = 0; i < query.length; i++) {
+						if (query[i].indexOf('=') > -1) {
+							var a = query[i].split('=');
+							if (a[0].toLowerCase() === s) {
+								output = a[1];
+								break;
+							}
+						}
+					}
+				}
+				return unescape(output);
 			};
 
 			// storage
@@ -2327,7 +2275,7 @@ Ext.onReady( function() {
 				listeners: {
 					load: function(s) {
 						support.storage.add(s);
-						util.multiselect.filterAvailable({store: s}, {store: store.indicatorSelected});
+						web.multiSelect.filterAvailable({store: s}, {store: store.indicatorSelected});
 					}
 				}
 			});
@@ -2377,7 +2325,7 @@ Ext.onReady( function() {
 					this.load({
 						scope: this,
 						callback: function() {
-							util.multiselect.filterAvailable({store: this}, {store: store.dataElementSelected});
+							web.multiSelect.filterAvailable({store: this}, {store: store.dataElementSelected});
 						}
 					});
 				},
@@ -2400,7 +2348,7 @@ Ext.onReady( function() {
 									r.set('name', r.data.operandName);
 								});
 
-								util.multiselect.filterAvailable({store: this}, {store: store.dataElementSelected});
+								web.multiSelect.filterAvailable({store: this}, {store: store.dataElementSelected});
 							}
 						});
 					}
@@ -2411,7 +2359,7 @@ Ext.onReady( function() {
 				listeners: {
 					load: function(s) {
 						support.storage.add(s);
-						util.multiselect.filterAvailable({store: s}, {store: store.dataElementSelected});
+						web.multiSelect.filterAvailable({store: s}, {store: store.dataElementSelected});
 					}
 				}
 			});
@@ -2441,7 +2389,7 @@ Ext.onReady( function() {
 						this.isLoaded = true;
 
 						support.storage.add(s);
-						util.multiselect.filterAvailable({store: s}, {store: store.dataSetSelected});
+						web.multiSelect.filterAvailable({store: s}, {store: store.dataSetSelected});
 					}
 				}
 			});
@@ -2612,7 +2560,7 @@ Ext.onReady( function() {
 					icon: 'images/arrowright.png',
 					width: 22,
 					handler: function() {
-						ns.util.multiselect.select(indicatorAvailable, indicatorSelected);
+						ns.core.web.multiSelect.select(indicatorAvailable, indicatorSelected);
 					}
 				},
 				{
@@ -2620,14 +2568,14 @@ Ext.onReady( function() {
 					icon: 'images/arrowrightdouble.png',
 					width: 22,
 					handler: function() {
-						ns.util.multiselect.selectAll(indicatorAvailable, indicatorSelected);
+						ns.core.web.multiSelect.selectAll(indicatorAvailable, indicatorSelected);
 					}
 				}
 			],
 			listeners: {
 				afterrender: function() {
 					this.boundList.on('itemdblclick', function() {
-						ns.util.multiselect.select(this, indicatorSelected);
+						ns.core.web.multiSelect.select(this, indicatorSelected);
 					}, this);
 				}
 			}
@@ -2646,7 +2594,7 @@ Ext.onReady( function() {
 					icon: 'images/arrowleftdouble.png',
 					width: 22,
 					handler: function() {
-						ns.util.multiselect.unselectAll(indicatorAvailable, indicatorSelected);
+						ns.core.web.multiSelect.unselectAll(indicatorAvailable, indicatorSelected);
 					}
 				},
 				{
@@ -2654,7 +2602,7 @@ Ext.onReady( function() {
 					icon: 'images/arrowleft.png',
 					width: 22,
 					handler: function() {
-						ns.util.multiselect.unselect(indicatorAvailable, indicatorSelected);
+						ns.core.web.multiSelect.unselect(indicatorAvailable, indicatorSelected);
 					}
 				},
 				'->',
@@ -2667,7 +2615,7 @@ Ext.onReady( function() {
 			listeners: {
 				afterrender: function() {
 					this.boundList.on('itemdblclick', function() {
-						ns.util.multiselect.unselect(indicatorAvailable, this);
+						ns.core.web.multiSelect.unselect(indicatorAvailable, this);
 					}, this);
 				}
 			}
@@ -2752,7 +2700,7 @@ Ext.onReady( function() {
 
 							if (ns.support.prototype.object.hasObject(store.storage, 'parent', id)) {
 								ns.support.store.load(store);
-								ns.util.multiselect.filterAvailable(indicatorAvailable, indicatorSelected);
+								ns.core.web.multiSelect.filterAvailable(indicatorAvailable, indicatorSelected);
 							}
 							else {
 								if (id === 0) {
@@ -2805,7 +2753,7 @@ Ext.onReady( function() {
 					icon: 'images/arrowright.png',
 					width: 22,
 					handler: function() {
-						ns.util.multiselect.select(dataElementAvailable, dataElementSelected);
+						ns.core.web.multiSelect.select(dataElementAvailable, dataElementSelected);
 					}
 				},
 				{
@@ -2813,14 +2761,14 @@ Ext.onReady( function() {
 					icon: 'images/arrowrightdouble.png',
 					width: 22,
 					handler: function() {
-						ns.util.multiselect.selectAll(dataElementAvailable, dataElementSelected);
+						ns.core.web.multiSelect.selectAll(dataElementAvailable, dataElementSelected);
 					}
 				}
 			],
 			listeners: {
 				afterrender: function() {
 					this.boundList.on('itemdblclick', function() {
-						ns.util.multiselect.select(this, dataElementSelected);
+						ns.core.web.multiSelect.select(this, dataElementSelected);
 					}, this);
 				}
 			}
@@ -2839,7 +2787,7 @@ Ext.onReady( function() {
 					icon: 'images/arrowleftdouble.png',
 					width: 22,
 					handler: function() {
-						ns.util.multiselect.unselectAll(dataElementAvailable, dataElementSelected);
+						ns.core.web.multiSelect.unselectAll(dataElementAvailable, dataElementSelected);
 					}
 				},
 				{
@@ -2847,7 +2795,7 @@ Ext.onReady( function() {
 					icon: 'images/arrowleft.png',
 					width: 22,
 					handler: function() {
-						ns.util.multiselect.unselect(dataElementAvailable, dataElementSelected);
+						ns.core.web.multiSelect.unselect(dataElementAvailable, dataElementSelected);
 					}
 				},
 				'->',
@@ -2860,7 +2808,7 @@ Ext.onReady( function() {
 			listeners: {
 				afterrender: function() {
 					this.boundList.on('itemdblclick', function() {
-						ns.util.multiselect.unselect(dataElementAvailable, this);
+						ns.core.web.multiSelect.unselect(dataElementAvailable, this);
 					}, this);
 				}
 			}
@@ -3039,7 +2987,7 @@ Ext.onReady( function() {
 					icon: 'images/arrowright.png',
 					width: 22,
 					handler: function() {
-						ns.util.multiselect.select(dataSetAvailable, dataSetSelected);
+						ns.core.web.multiSelect.select(dataSetAvailable, dataSetSelected);
 					}
 				},
 				{
@@ -3047,14 +2995,14 @@ Ext.onReady( function() {
 					icon: 'images/arrowrightdouble.png',
 					width: 22,
 					handler: function() {
-						ns.util.multiselect.selectAll(dataSetAvailable, dataSetSelected);
+						ns.core.web.multiSelect.selectAll(dataSetAvailable, dataSetSelected);
 					}
 				}
 			],
 			listeners: {
 				afterrender: function() {
 					this.boundList.on('itemdblclick', function() {
-						ns.util.multiselect.select(this, dataSetSelected);
+						ns.core.web.multiSelect.select(this, dataSetSelected);
 					}, this);
 				}
 			}
@@ -3073,7 +3021,7 @@ Ext.onReady( function() {
 					icon: 'images/arrowleftdouble.png',
 					width: 22,
 					handler: function() {
-						ns.util.multiselect.unselectAll(dataSetAvailable, dataSetSelected);
+						ns.core.web.multiSelect.unselectAll(dataSetAvailable, dataSetSelected);
 					}
 				},
 				{
@@ -3081,7 +3029,7 @@ Ext.onReady( function() {
 					icon: 'images/arrowleft.png',
 					width: 22,
 					handler: function() {
-						ns.util.multiselect.unselect(dataSetAvailable, dataSetSelected);
+						ns.core.web.multiSelect.unselect(dataSetAvailable, dataSetSelected);
 					}
 				},
 				'->',
@@ -3094,7 +3042,7 @@ Ext.onReady( function() {
 			listeners: {
 				afterrender: function() {
 					this.boundList.on('itemdblclick', function() {
-						ns.util.multiselect.unselect(dataSetAvailable, this);
+						ns.core.web.multiSelect.unselect(dataSetAvailable, this);
 					}, this);
 				}
 			}
@@ -3506,7 +3454,7 @@ Ext.onReady( function() {
 					icon: 'images/arrowright.png',
 					width: 22,
 					handler: function() {
-						ns.util.multiselect.select(fixedPeriodAvailable, fixedPeriodSelected);
+						ns.core.web.multiSelect.select(fixedPeriodAvailable, fixedPeriodSelected);
 					}
 				},
 				{
@@ -3514,7 +3462,7 @@ Ext.onReady( function() {
 					icon: 'images/arrowrightdouble.png',
 					width: 22,
 					handler: function() {
-						ns.util.multiselect.selectAll(fixedPeriodAvailable, fixedPeriodSelected, true);
+						ns.core.web.multiSelect.selectAll(fixedPeriodAvailable, fixedPeriodSelected, true);
 					}
 				},
 				' '
@@ -3522,7 +3470,7 @@ Ext.onReady( function() {
 			listeners: {
 				afterrender: function() {
 					this.boundList.on('itemdblclick', function() {
-						ns.util.multiselect.select(fixedPeriodAvailable, fixedPeriodSelected);
+						ns.core.web.multiSelect.select(fixedPeriodAvailable, fixedPeriodSelected);
 					}, this);
 				}
 			}
@@ -3543,7 +3491,7 @@ Ext.onReady( function() {
 					icon: 'images/arrowleftdouble.png',
 					width: 22,
 					handler: function() {
-						ns.util.multiselect.unselectAll(fixedPeriodAvailable, fixedPeriodSelected);
+						ns.core.web.multiSelect.unselectAll(fixedPeriodAvailable, fixedPeriodSelected);
 					}
 				},
 				{
@@ -3551,7 +3499,7 @@ Ext.onReady( function() {
 					icon: 'images/arrowleft.png',
 					width: 22,
 					handler: function() {
-						ns.util.multiselect.unselect(fixedPeriodAvailable, fixedPeriodSelected);
+						ns.core.web.multiSelect.unselect(fixedPeriodAvailable, fixedPeriodSelected);
 					}
 				},
 				'->',
@@ -3564,7 +3512,7 @@ Ext.onReady( function() {
 			listeners: {
 				afterrender: function() {
 					this.boundList.on('itemdblclick', function() {
-						ns.util.multiselect.unselect(fixedPeriodAvailable, fixedPeriodSelected);
+						ns.core.web.multiSelect.unselect(fixedPeriodAvailable, fixedPeriodSelected);
 					}, this);
 				}
 			}
@@ -3641,7 +3589,7 @@ Ext.onReady( function() {
 
 									ns.store.fixedPeriodAvailable.setIndex(periods);
 									ns.store.fixedPeriodAvailable.loadData(periods);
-									ns.util.multiselect.filterAvailable(fixedPeriodAvailable, fixedPeriodSelected);
+									ns.core.web.multiSelect.filterAvailable(fixedPeriodAvailable, fixedPeriodSelected);
 								}
 							}
 						},
@@ -4208,7 +4156,7 @@ Ext.onReady( function() {
 								icon: 'images/arrowright.png',
 								width: 22,
 								handler: function() {
-									ns.util.multiselect.select(available, selected);
+									ns.core.web.multiSelect.select(available, selected);
 								}
 							},
 							{
@@ -4216,14 +4164,14 @@ Ext.onReady( function() {
 								icon: 'images/arrowrightdouble.png',
 								width: 22,
 								handler: function() {
-									ns.util.multiselect.selectAll(available, selected);
+									ns.core.web.multiSelect.selectAll(available, selected);
 								}
 							}
 						],
 						listeners: {
 							afterrender: function() {
 								this.boundList.on('itemdblclick', function() {
-									ns.util.multiselect.select(available, selected);
+									ns.core.web.multiSelect.select(available, selected);
 								}, this);
 							}
 						}
@@ -4244,7 +4192,7 @@ Ext.onReady( function() {
 								icon: 'images/arrowleftdouble.png',
 								width: 22,
 								handler: function() {
-									ns.util.multiselect.unselectAll(available, selected);
+									ns.core.web.multiSelect.unselectAll(available, selected);
 								}
 							},
 							{
@@ -4252,7 +4200,7 @@ Ext.onReady( function() {
 								icon: 'images/arrowleft.png',
 								width: 22,
 								handler: function() {
-									ns.util.multiselect.unselect(available, selected);
+									ns.core.web.multiSelect.unselect(available, selected);
 								}
 							},
 							'->',
@@ -4265,7 +4213,7 @@ Ext.onReady( function() {
 						listeners: {
 							afterrender: function() {
 								this.boundList.on('itemdblclick', function() {
-									ns.util.multiselect.unselect(available, selected);
+									ns.core.web.multiSelect.unselect(available, selected);
 								}, this);
 							}
 						}
@@ -4282,7 +4230,7 @@ Ext.onReady( function() {
 				selected = getSelected(selectedStore);
 
 				availableStore.on('load', function() {
-					ns.util.multiselect.filterAvailable(available, selected);
+					ns.core.web.multiSelect.filterAvailable(available, selected);
 				});
 
 				panel = {
@@ -4867,7 +4815,7 @@ Ext.onReady( function() {
 			objectName = dimConf.indicator.objectName;
 			if (dimMap[objectName]) {
 				ns.store.indicatorSelected.add(Ext.clone(recMap[objectName]));
-				ns.util.multiselect.filterAvailable({store: ns.store.indicatorAvailable}, {store: ns.store.indicatorSelected});
+				ns.core.web.multiSelect.filterAvailable({store: ns.store.indicatorAvailable}, {store: ns.store.indicatorSelected});
 			}
 
 			// Data elements
@@ -4875,7 +4823,7 @@ Ext.onReady( function() {
 			objectName = dimConf.dataElement.objectName;
 			if (dimMap[objectName]) {
 				ns.store.dataElementSelected.add(Ext.clone(recMap[objectName]));
-				ns.util.multiselect.filterAvailable({store: ns.store.dataElementAvailable}, {store: ns.store.dataElementSelected});
+				ns.core.web.multiSelect.filterAvailable({store: ns.store.dataElementAvailable}, {store: ns.store.dataElementSelected});
 				dataElementDetailLevel.setValue(objectName);
 			}
 
@@ -4883,7 +4831,7 @@ Ext.onReady( function() {
 			objectName = dimConf.operand.objectName;
 			if (dimMap[objectName]) {
 				ns.store.dataElementSelected.add(Ext.clone(recMap[objectName]));
-				ns.util.multiselect.filterAvailable({store: ns.store.dataElementAvailable}, {store: ns.store.dataElementSelected});
+				ns.core.web.multiSelect.filterAvailable({store: ns.store.dataElementAvailable}, {store: ns.store.dataElementSelected});
 				dataElementDetailLevel.setValue(objectName);
 			}
 
@@ -4892,7 +4840,7 @@ Ext.onReady( function() {
 			objectName = dimConf.dataSet.objectName;
 			if (dimMap[objectName]) {
 				ns.store.dataSetSelected.add(Ext.clone(recMap[objectName]));
-				ns.util.multiselect.filterAvailable({store: ns.store.dataSetAvailable}, {store: ns.store.dataSetSelected});
+				ns.core.web.multiSelect.filterAvailable({store: ns.store.dataSetAvailable}, {store: ns.store.dataSetSelected});
 			}
 
 			// Periods
@@ -4910,7 +4858,7 @@ Ext.onReady( function() {
 				}
 			}
 			ns.store.fixedPeriodSelected.add(fixedPeriodRecords);
-			ns.util.multiselect.filterAvailable({store: ns.store.fixedPeriodAvailable}, {store: ns.store.fixedPeriodSelected});
+			ns.core.web.multiSelect.filterAvailable({store: ns.store.fixedPeriodAvailable}, {store: ns.store.fixedPeriodSelected});
 
 			// Group sets
 			for (var key in dimensionIdSelectedStoreMap) {
@@ -4925,7 +4873,7 @@ Ext.onReady( function() {
 
 					if (recMap[key]) {
 						s.add(recMap[key]);
-						ns.util.multiselect.filterAvailable({store: a}, {store: s});
+						ns.core.web.multiSelect.filterAvailable({store: a}, {store: s});
 					}
 				}
 			}
@@ -5109,8 +5057,8 @@ Ext.onReady( function() {
 					ns.app.accordion.getFirstPanel().expand();
 
 					// look for url params
-					var id = ns.util.url.getUrlParam('id'),
-						session = ns.util.url.getUrlParam('s'),
+					var id = ns.core.web.url.getParam('id'),
+						session = ns.core.web.url.getParam('s'),
 						layout;
 
 					if (id) {
@@ -5137,15 +5085,15 @@ Ext.onReady( function() {
 		// add listeners
 		(function() {
 			ns.store.indicatorAvailable.on('load', function() {
-				ns.core.util.multiselect.filterAvailable(indicatorAvailable, indicatorSelected);
+				ns.core.web.multiSelect.filterAvailable(indicatorAvailable, indicatorSelected);
 			});
 
 			ns.store.dataElementAvailable.on('load', function() {
-				ns.core.util.multiselect.filterAvailable(dataElementAvailable, dataElementSelected);
+				ns.core.web.multiSelect.filterAvailable(dataElementAvailable, dataElementSelected);
 			});
 
 			ns.store.dataSetAvailable.on('load', function(s) {
-				ns.core.util.multiselect.filterAvailable(dataSetAvailable, dataSetSelected);
+				ns.core.web.multiSelect.filterAvailable(dataSetAvailable, dataSetSelected);
 				s.sort('name', 'ASC');
 			});
 		}());
