@@ -9,8 +9,8 @@ Ext.onReady( function() {
 
 		extendCore,
 		createViewport,
-		update,
 		initialize,
+
 		ns = {
 			core: {},
 			app: {}
@@ -61,7 +61,7 @@ Ext.onReady( function() {
 			defaultHeight = 158,
 			maxHeight = (ns.viewport.getHeight() - 100) / 2,
 
-			dimConf = ns.conf.finals.dimension;
+			dimConf = ns.core.conf.finals.dimension;
 
 		getData = function(all) {
 			var data = [];
@@ -77,7 +77,7 @@ Ext.onReady( function() {
 				data.push({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
 			}
 
-			return data.concat(Ext.clone(ns.init.dimensions));
+			return data.concat(Ext.clone(ns.core.init.dimensions));
 		};
 
 		getStore = function(data) {
@@ -811,7 +811,7 @@ Ext.onReady( function() {
 
 				// Replace operand id characters
 				for (var i = 0; i < dimensions.length; i++) {
-					if (dimensions[i].dimension === ns.conf.finals.dimension.operand.objectName) {
+					if (dimensions[i].dimension === ns.core.conf.finals.dimension.operand.objectName) {
 						for (var j = 0; j < dimensions[i].items.length; j++) {
 							dimensions[i].items[j].id = dimensions[i].items[j].id.replace('-', '.');
 						}
@@ -851,7 +851,7 @@ Ext.onReady( function() {
 
 					if (favorite && favorite.name) {
 						Ext.Ajax.request({
-							url: ns.init.contextPath + '/api/reportTables/',
+							url: ns.core.init.contextPath + '/api/reportTables/',
 							method: 'POST',
 							headers: {'Content-Type': 'application/json'},
 							params: Ext.encode(favorite),
@@ -883,7 +883,7 @@ Ext.onReady( function() {
 
 					if (id && name) {
 						Ext.Ajax.request({
-							url: ns.init.contextPath + '/api/reportTables/' + id + '.json?viewClass=dimensional&links=false',
+							url: ns.core.init.contextPath + '/api/reportTables/' + id + '.json?viewClass=dimensional&links=false',
 							method: 'GET',
 							failure: function(r) {
 								ns.viewport.mask.show();
@@ -897,7 +897,7 @@ Ext.onReady( function() {
 								//delete reportTable.legendSet;
 
 								Ext.Ajax.request({
-									url: ns.init.contextPath + '/api/reportTables/' + reportTable.id,
+									url: ns.core.init.contextPath + '/api/reportTables/' + reportTable.id,
 									method: 'PUT',
 									headers: {'Content-Type': 'application/json'},
 									params: Ext.encode(reportTable),
@@ -981,7 +981,7 @@ Ext.onReady( function() {
 						this.currentValue = this.getValue();
 
 						var value = this.getValue(),
-							url = value ? ns.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
+							url = value ? ns.core.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
 							store = ns.store.reportTable;
 
 						store.page = 1;
@@ -995,7 +995,7 @@ Ext.onReady( function() {
 			text: NS.i18n.prev,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? ns.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
+					url = value ? ns.core.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
 					store = ns.store.reportTable;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
@@ -1007,7 +1007,7 @@ Ext.onReady( function() {
 			text: NS.i18n.next,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? ns.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
+					url = value ? ns.core.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
 					store = ns.store.reportTable;
 
 				store.page = store.page + 1;
@@ -1088,7 +1088,7 @@ Ext.onReady( function() {
 
 										if (confirm(message)) {
 											Ext.Ajax.request({
-												url: ns.init.contextPath + '/api/reportTables/' + record.data.id,
+												url: ns.core.init.contextPath + '/api/reportTables/' + record.data.id,
 												method: 'PUT',
 												headers: {'Content-Type': 'application/json'},
 												params: Ext.encode(favorite),
@@ -1116,7 +1116,7 @@ Ext.onReady( function() {
 
 								if (record.data.access.manage) {
 									Ext.Ajax.request({
-										url: ns.init.contextPath + '/api/sharing?type=reportTable&id=' + record.data.id,
+										url: ns.core.init.contextPath + '/api/sharing?type=reportTable&id=' + record.data.id,
 										method: 'GET',
 										failure: function(r) {
 											ns.viewport.mask.hide();
@@ -1145,7 +1145,7 @@ Ext.onReady( function() {
 
 									if (confirm(message)) {
 										Ext.Ajax.request({
-											url: ns.init.contextPath + '/api/reportTables/' + record.data.id,
+											url: ns.core.init.contextPath + '/api/reportTables/' + record.data.id,
 											method: 'DELETE',
 											success: function() {
 												ns.store.reportTable.loadStore();
@@ -1174,7 +1174,7 @@ Ext.onReady( function() {
 					ns.viewport.favoriteGrid = this;
 				},
 				render: function() {
-					var size = Math.floor((ns.viewport.centerRegion.getHeight() - 155) / ns.conf.layout.grid_row_height);
+					var size = Math.floor((ns.viewport.centerRegion.getHeight() - 155) / ns.core.conf.layout.grid_row_height);
 					this.store.pageSize = size;
 					this.store.page = 1;
 					this.store.loadStore();
@@ -1405,8 +1405,8 @@ Ext.onReady( function() {
 					publicAccess: publicGroup.down('combobox').getValue(),
 					externalAccess: externalAccess ? externalAccess.getValue() : false,
 					user: {
-						id: ns.init.user.id,
-						name: ns.init.user.name
+						id: ns.core.init.user.id,
+						name: ns.core.init.user.name
 					}
 				}
 			};
@@ -1427,7 +1427,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: ns.init.contextPath + '/api/sharing/search',
+				url: ns.core.init.contextPath + '/api/sharing/search',
 				reader: {
 					type: 'json',
 					root: 'userGroups'
@@ -1532,7 +1532,7 @@ Ext.onReady( function() {
 					text: NS.i18n.save,
 					handler: function() {
 						Ext.Ajax.request({
-							url: ns.init.contextPath + '/api/sharing?type=reportTable&id=' + sharing.object.id,
+							url: ns.core.init.contextPath + '/api/sharing?type=reportTable&id=' + sharing.object.id,
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json'
@@ -1586,8 +1586,8 @@ Ext.onReady( function() {
 
 			linkPanel = Ext.create('Ext.panel.Panel', {
 				html: function() {
-					var reportTableUrl = ns.init.contextPath + '/dhis-web-pivot/app/index.html?id=' + ns.favorite.id,
-						apiUrl = ns.init.contextPath + '/api/reportTables/' + ns.favorite.id + '/data.html',
+					var reportTableUrl = ns.core.init.contextPath + '/dhis-web-pivot/app/index.html?id=' + ns.favorite.id,
+						apiUrl = ns.core.init.contextPath + '/api/reportTables/' + ns.favorite.id + '/data.html',
 						html = '';
 
 					html += '<div><b>Pivot link: </b><span class="user-select"><a href="' + reportTableUrl + '" target="_blank">' + reportTableUrl + '</a></span></div>';
@@ -1607,7 +1607,7 @@ Ext.onReady( function() {
 				handler: function() {
 					if (textArea.getValue()) {
 						Ext.Ajax.request({
-							url: ns.init.contextPath + '/api/interpretations/reportTable/' + ns.favorite.id,
+							url: ns.core.init.contextPath + '/api/interpretations/reportTable/' + ns.favorite.id,
 							method: 'POST',
 							params: textArea.getValue(),
 							headers: {'Content-Type': 'text/html'},
@@ -2485,7 +2485,7 @@ Ext.onReady( function() {
 
 	// viewport
 	createViewport = function() {
-        var dimConf = ns.conf.finals.dimension,
+        var dimConf = ns.core.conf.finals.dimension,
 
 			indicatorAvailable,
 			indicatorSelected,
@@ -2533,7 +2533,7 @@ Ext.onReady( function() {
 		// data
 		indicatorAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-left',
-			width: (ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding) / 2,
+			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
 			valueField: 'id',
 			displayField: 'name',
 			store: ns.store.indicatorAvailable,
@@ -2572,7 +2572,7 @@ Ext.onReady( function() {
 
 		indicatorSelected = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-right',
-			width: (ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding) / 2,
+			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
 			valueField: 'id',
 			displayField: 'name',
 			ddReorder: true,
@@ -2616,7 +2616,7 @@ Ext.onReady( function() {
 			hideCollapseTool: true,
 			getDimension: function() {
 				var config = {
-					dimension: ns.conf.finals.dimension.indicator.objectName,
+					dimension: ns.core.conf.finals.dimension.indicator.objectName,
 					items: []
 				};
 
@@ -2631,12 +2631,12 @@ Ext.onReady( function() {
 			},
 			onExpand: function() {
 				var h = westRegion.hasScrollbar ?
-					ns.conf.layout.west_scrollbarheight_accordion_indicator : ns.conf.layout.west_maxheight_accordion_indicator;
+					ns.core.conf.layout.west_scrollbarheight_accordion_indicator : ns.core.conf.layout.west_maxheight_accordion_indicator;
 				accordion.setThisHeight(h);
 				ns.util.multiselect.setHeight(
 					[indicatorAvailable, indicatorSelected],
 					this,
-					ns.conf.layout.west_fill_accordion_indicator
+					ns.core.conf.layout.west_fill_accordion_indicator
 				);
 			},
 			items: [
@@ -2644,7 +2644,7 @@ Ext.onReady( function() {
 					xtype: 'combobox',
 					cls: 'ns-combo',
 					style: 'margin-bottom:2px; margin-top:0px',
-					width: ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding,
+					width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding,
 					valueField: 'id',
 					displayField: 'name',
 					emptyText: NS.i18n.select_indicator_group,
@@ -2654,7 +2654,7 @@ Ext.onReady( function() {
 						fields: ['id', 'name', 'index'],
 						proxy: {
 							type: 'ajax',
-							url: ns.init.contextPath + '/api/indicatorGroups.json?paging=false&links=false',
+							url: ns.core.init.contextPath + '/api/indicatorGroups.json?paging=false&links=false',
 							reader: {
 								type: 'json',
 								root: 'indicatorGroups'
@@ -2693,11 +2693,11 @@ Ext.onReady( function() {
 							}
 							else {
 								if (id === 0) {
-									store.proxy.url = ns.init.contextPath + '/api/indicators.json?paging=false&links=false';
+									store.proxy.url = ns.core.init.contextPath + '/api/indicators.json?paging=false&links=false';
 									store.load();
 								}
 								else {
-									store.proxy.url = ns.init.contextPath + '/api/indicatorGroups/' + id + '.json';
+									store.proxy.url = ns.core.init.contextPath + '/api/indicatorGroups/' + id + '.json';
 									store.load();
 								}
 							}
@@ -2726,7 +2726,7 @@ Ext.onReady( function() {
 
 		dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-left',
-			width: (ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding) / 2,
+			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
 			valueField: 'id',
 			displayField: 'name',
 			store: ns.store.dataElementAvailable,
@@ -2765,7 +2765,7 @@ Ext.onReady( function() {
 
 		dataElementSelected = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-right',
-			width: (ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding) / 2,
+			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
 			valueField: 'id',
 			displayField: 'name',
 			ddReorder: true,
@@ -2807,7 +2807,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name', 'index'],
 			proxy: {
 				type: 'ajax',
-				url: ns.init.contextPath + '/api/dataElementGroups.json?paging=false&links=false',
+				url: ns.core.init.contextPath + '/api/dataElementGroups.json?paging=false&links=false',
 				reader: {
 					type: 'json',
 					root: 'dataElementGroups'
@@ -2815,7 +2815,7 @@ Ext.onReady( function() {
 			},
 			listeners: {
 				load: function(s) {
-					if (dataElementDetailLevel.getValue() === ns.conf.finals.dimension.dataElement.objectName) {
+					if (dataElementDetailLevel.getValue() === ns.core.conf.finals.dimension.dataElement.objectName) {
 						s.add({
 							id: 0,
 							name: '[ ' + NS.i18n.all_data_element_groups + ' ]',
@@ -2834,7 +2834,7 @@ Ext.onReady( function() {
 		dataElementGroupComboBox = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
 			style: 'margin:0 2px 2px 0',
-			width: ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding - 90,
+			width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 90,
 			valueField: 'id',
 			displayField: 'name',
 			emptyText: NS.i18n.select_data_element_group,
@@ -2846,7 +2846,7 @@ Ext.onReady( function() {
 					value = this.getValue();
 
 				if (value !== null) {
-					if (detailLevel === ns.conf.finals.dimension.dataElement.objectName) {
+					if (detailLevel === ns.core.conf.finals.dimension.dataElement.objectName) {
 						store.setTotalsProxy(value);
 					}
 					else {
@@ -2870,23 +2870,23 @@ Ext.onReady( function() {
 			valueField: 'id',
 			displayField: 'text',
 			width: 90 - 2,
-			value: ns.conf.finals.dimension.dataElement.objectName,
+			value: ns.core.conf.finals.dimension.dataElement.objectName,
 			store: {
 				fields: ['id', 'text'],
 				data: [
-					{id: ns.conf.finals.dimension.dataElement.objectName, text: NS.i18n.totals},
-					{id: ns.conf.finals.dimension.operand.objectName, text: NS.i18n.details}
+					{id: ns.core.conf.finals.dimension.dataElement.objectName, text: NS.i18n.totals},
+					{id: ns.core.conf.finals.dimension.operand.objectName, text: NS.i18n.details}
 				]
 			},
 			listeners: {
 				select: function(cb) {
 					var record = dataElementGroupStore.getById(0);
 
-					if (cb.getValue() === ns.conf.finals.dimension.operand.objectName && record) {
+					if (cb.getValue() === ns.core.conf.finals.dimension.operand.objectName && record) {
 						dataElementGroupStore.remove(record);
 					}
 
-					if (cb.getValue() === ns.conf.finals.dimension.dataElement.objectName && !record) {
+					if (cb.getValue() === ns.core.conf.finals.dimension.dataElement.objectName && !record) {
 						dataElementGroupStore.insert(0, {
 							id: 0,
 							name: '[ ' + NS.i18n.all_data_element_groups + ' ]',
@@ -2921,12 +2921,12 @@ Ext.onReady( function() {
 			},
 			onExpand: function() {
 				var h = ns.viewport.westRegion.hasScrollbar ?
-					ns.conf.layout.west_scrollbarheight_accordion_dataelement : ns.conf.layout.west_maxheight_accordion_dataelement;
+					ns.core.conf.layout.west_scrollbarheight_accordion_dataelement : ns.core.conf.layout.west_maxheight_accordion_dataelement;
 				ns.util.dimension.panel.setHeight(h);
 				ns.util.multiselect.setHeight(
 					[dataElementAvailable, dataElementSelected],
 					this,
-					ns.conf.layout.west_fill_accordion_indicator
+					ns.core.conf.layout.west_fill_accordion_indicator
 				);
 			},
 			items: [
@@ -2960,7 +2960,7 @@ Ext.onReady( function() {
 
 		dataSetAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-left',
-			width: (ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding) / 2,
+			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
 			valueField: 'id',
 			displayField: 'name',
 			store: ns.store.dataSetAvailable,
@@ -2999,7 +2999,7 @@ Ext.onReady( function() {
 
 		dataSetSelected = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-right',
-			width: (ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding) / 2,
+			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
 			valueField: 'id',
 			displayField: 'name',
 			ddReorder: true,
@@ -3043,7 +3043,7 @@ Ext.onReady( function() {
 			hideCollapseTool: true,
 			getDimension: function() {
 				var config = {
-					dimension: ns.conf.finals.dimension.dataSet.objectName,
+					dimension: ns.core.conf.finals.dimension.dataSet.objectName,
 					items: []
 				};
 
@@ -3058,12 +3058,12 @@ Ext.onReady( function() {
 			},
 			onExpand: function() {
 				var h = ns.viewport.westRegion.hasScrollbar ?
-					ns.conf.layout.west_scrollbarheight_accordion_dataset : ns.conf.layout.west_maxheight_accordion_dataset;
+					ns.core.conf.layout.west_scrollbarheight_accordion_dataset : ns.core.conf.layout.west_maxheight_accordion_dataset;
 				ns.util.dimension.panel.setHeight(h);
 				ns.util.multiselect.setHeight(
 					[dataSetAvailable, dataSetSelected],
 					this,
-					ns.conf.layout.west_fill_accordion_dataset
+					ns.core.conf.layout.west_fill_accordion_dataset
 				);
 
 				if (!ns.store.dataSetAvailable.isLoaded) {
@@ -3426,7 +3426,7 @@ Ext.onReady( function() {
 
 		fixedPeriodAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-left',
-			width: (ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding) / 2,
+			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
 			height: 180,
 			valueField: 'id',
 			displayField: 'name',
@@ -3467,7 +3467,7 @@ Ext.onReady( function() {
 
 		fixedPeriodSelected = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-right',
-			width: (ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding) / 2,
+			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
 			height: 180,
 			valueField: 'id',
 			displayField: 'name',
@@ -3513,7 +3513,7 @@ Ext.onReady( function() {
 			hideCollapseTool: true,
 			getDimension: function() {
 				var config = {
-						dimension: ns.conf.finals.dimension.period.objectName,
+						dimension: ns.core.conf.finals.dimension.period.objectName,
 						items: []
 					},
 					chb = ns.cmp.dimension.relativePeriod.checkbox;
@@ -3538,12 +3538,12 @@ Ext.onReady( function() {
 			},
 			onExpand: function() {
 				var h = ns.viewport.westRegion.hasScrollbar ?
-					ns.conf.layout.west_scrollbarheight_accordion_period : ns.conf.layout.west_maxheight_accordion_period;
+					ns.core.conf.layout.west_scrollbarheight_accordion_period : ns.core.conf.layout.west_maxheight_accordion_period;
 				ns.util.dimension.panel.setHeight(h);
 				ns.util.multiselect.setHeight(
 					[fixedPeriodAvailable, fixedPeriodSelected],
 					this,
-					ns.conf.layout.west_fill_accordion_period
+					ns.core.conf.layout.west_fill_accordion_period
 				);
 			},
 			items: [
@@ -3557,7 +3557,7 @@ Ext.onReady( function() {
 							xtype: 'combobox',
 							cls: 'ns-combo',
 							style: 'margin-bottom:2px',
-							width: ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding - 62 - 62 - 4,
+							width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 62 - 62 - 4,
 							valueField: 'id',
 							displayField: 'name',
 							emptyText: NS.i18n.select_period_type,
@@ -3635,20 +3635,20 @@ Ext.onReady( function() {
 		treePanel = Ext.create('Ext.tree.Panel', {
 			cls: 'ns-tree',
 			style: 'border-top: 1px solid #ddd; padding-top: 1px',
-			width: ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding,
+			width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding,
 			rootVisible: false,
 			autoScroll: true,
 			multiSelect: true,
 			rendered: false,
 			reset: function() {
-				var rootNode = this.getRootNode().findChild('id', ns.init.rootNodes[0].id);
+				var rootNode = this.getRootNode().findChild('id', ns.core.init.rootNodes[0].id);
 				this.collapseAll();
 				this.expandPath(rootNode.getPath());
 				this.getSelectionModel().select(rootNode);
 			},
 			selectRootIf: function() {
 				if (this.getSelectionModel().getSelection().length < 1) {
-					var node = this.getRootNode().findChild('id', ns.init.rootNodes[0].id);
+					var node = this.getRootNode().findChild('id', ns.core.init.rootNodes[0].id);
 					if (this.rendered) {
 						this.getSelectionModel().select(node);
 					}
@@ -3669,7 +3669,7 @@ Ext.onReady( function() {
 				}
 			},
 			multipleExpand: function(id, path, doUpdate) {
-				var rootId = ns.conf.finals.root.id;
+				var rootId = ns.core.conf.finals.root.id;
 
 				if (path.substr(0, rootId.length + 1) !== ('/' + rootId)) {
 					path = '/' + rootId + path;
@@ -3724,12 +3724,12 @@ Ext.onReady( function() {
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
-					url: ns.init.contextPath + ns.conf.finals.url.path_module + ns.conf.finals.url.organisationunitchildren_get
+					url: ns.core.init.contextPath + ns.core.conf.finals.url.path_module + ns.core.conf.finals.url.organisationunitchildren_get
 				},
 				root: {
-					id: ns.conf.finals.root.id,
+					id: ns.core.conf.finals.root.id,
 					expanded: true,
-					children: ns.init.rootNodes
+					children: ns.core.init.rootNodes
 				}
 			}),
 			xable: function(values) {
@@ -3797,7 +3797,7 @@ Ext.onReady( function() {
 			columnWidth: 0.28,
 			style: 'padding-top:2px; padding-left:3px; margin-bottom:0',
 			boxLabel: NS.i18n.user_organisation_unit,
-			labelWidth: ns.conf.layout.form_label_width,
+			labelWidth: ns.core.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnitChildren.getValue(), userOrganisationUnitGrandChildren.getValue()]);
 			}
@@ -3807,7 +3807,7 @@ Ext.onReady( function() {
 			columnWidth: 0.31,
 			style: 'padding-top:2px; margin-bottom:0',
 			boxLabel: NS.i18n.user_organisation_unit_children,
-			labelWidth: ns.conf.layout.form_label_width,
+			labelWidth: ns.core.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitGrandChildren.getValue()]);
 			}
@@ -3817,7 +3817,7 @@ Ext.onReady( function() {
 			columnWidth: 0.41,
 			style: 'padding-top:2px; margin-bottom:0',
 			boxLabel: NS.i18n.user_organisation_unit_grandchildren,
-			labelWidth: ns.conf.layout.form_label_width,
+			labelWidth: ns.core.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitChildren.getValue()]);
 			}
@@ -3827,7 +3827,7 @@ Ext.onReady( function() {
 			cls: 'ns-combo',
 			multiSelect: true,
 			style: 'margin-bottom:0',
-			width: ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding - 38,
+			width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 38,
 			valueField: 'level',
 			displayField: 'name',
 			emptyText: NS.i18n.select_organisation_unit_levels,
@@ -3835,7 +3835,7 @@ Ext.onReady( function() {
 			hidden: true,
 			store: {
 				fields: ['id', 'name', 'level'],
-				data: ns.init.organisationUnitLevels
+				data: ns.core.init.organisationUnitLevels
 			}
 		});
 
@@ -3843,7 +3843,7 @@ Ext.onReady( function() {
 			cls: 'ns-combo',
 			multiSelect: true,
 			style: 'margin-bottom:0',
-			width: ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding - 38,
+			width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 38,
 			valueField: 'id',
 			displayField: 'name',
 			emptyText: NS.i18n.select_organisation_unit_groups,
@@ -3961,7 +3961,7 @@ Ext.onReady( function() {
 			getDimension: function() {
 				var r = treePanel.getSelectionModel().getSelection(),
 					config = {
-						dimension: ns.conf.finals.dimension.organisationUnit.objectName,
+						dimension: ns.core.conf.finals.dimension.organisationUnit.objectName,
 						items: []
 					};
 
@@ -4031,9 +4031,9 @@ Ext.onReady( function() {
 			},
             onExpand: function() {
                 var h = ns.viewport.westRegion.hasScrollbar ?
-                    ns.conf.layout.west_scrollbarheight_accordion_organisationunit : ns.conf.layout.west_maxheight_accordion_organisationunit;
+                    ns.core.conf.layout.west_scrollbarheight_accordion_organisationunit : ns.core.conf.layout.west_maxheight_accordion_organisationunit;
                 ns.util.dimension.panel.setHeight(h);
-                treePanel.setHeight(this.getHeight() - ns.conf.layout.west_fill_accordion_organisationunit);
+                treePanel.setHeight(this.getHeight() - ns.core.conf.layout.west_fill_accordion_organisationunit);
             },
             items: [
                 {
@@ -4043,7 +4043,7 @@ Ext.onReady( function() {
                     items: [
                         toolPanel,
                         {
-                            width: ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding - 38,
+                            width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 38,
                             layout: 'column',
                             bodyStyle: 'border:0 none',
                             items: [
@@ -4081,7 +4081,7 @@ Ext.onReady( function() {
 					fields: ['id', 'name'],
 					proxy: {
 						type: 'ajax',
-						url: ns.init.contextPath + '/api/dimensions/' + dimension.id + '.json',
+						url: ns.core.init.contextPath + '/api/dimensions/' + dimension.id + '.json',
 						reader: {
 							type: 'json',
 							root: 'items'
@@ -4129,7 +4129,7 @@ Ext.onReady( function() {
 				getAvailable = function(availableStore) {
 					return Ext.create('Ext.ux.form.MultiSelect', {
 						cls: 'ns-toolbar-multiselect-left',
-						width: (ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding) / 2,
+						width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
 						valueField: 'id',
 						displayField: 'name',
 						store: availableStore,
@@ -4170,7 +4170,7 @@ Ext.onReady( function() {
 				getSelected = function(selectedStore) {
 					return Ext.create('Ext.ux.form.MultiSelect', {
 						cls: 'ns-toolbar-multiselect-right',
-						width: (ns.conf.layout.west_fieldset_width - ns.conf.layout.west_width_padding) / 2,
+						width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
 						valueField: 'id',
 						displayField: 'name',
 						ddReorder: true,
@@ -4246,13 +4246,13 @@ Ext.onReady( function() {
 						}
 
 						var h = ns.viewport.westRegion.hasScrollbar ?
-							ns.conf.layout.west_scrollbarheight_accordion_group : ns.conf.layout.west_maxheight_accordion_group;
+							ns.core.conf.layout.west_scrollbarheight_accordion_group : ns.core.conf.layout.west_maxheight_accordion_group;
 						ns.util.dimension.panel.setHeight(h);
 
 						ns.util.multiselect.setHeight(
 							[available, selected],
 							this,
-							ns.conf.layout.west_fill_accordion_dataset
+							ns.core.conf.layout.west_fill_accordion_dataset
 						);
 					},
 					items: [
@@ -4320,7 +4320,7 @@ Ext.onReady( function() {
 					period,
 					organisationUnit
 				],
-				dims = Ext.clone(ns.init.dimensions);
+				dims = Ext.clone(ns.core.init.dimensions);
 
 				ns.support.prototype.array.sortObjectsByObjectKey(dims);
 
@@ -4379,13 +4379,13 @@ Ext.onReady( function() {
 			collapseMode: 'mini',
 			width: function() {
 				if (Ext.isWebKit) {
-					return ns.conf.layout.west_width + 8;
+					return ns.core.conf.layout.west_width + 8;
 				}
 				else {
 					if (Ext.isLinux && Ext.isGecko) {
-						return ns.conf.layout.west_width + 13;
+						return ns.core.conf.layout.west_width + 13;
 					}
-					return ns.conf.layout.west_width + 17;
+					return ns.core.conf.layout.west_width + 17;
 				}
 			}(),
 			items: accordion,
@@ -4434,8 +4434,8 @@ Ext.onReady( function() {
 		});
 
 		openTableLayoutTab = function(type, isNewTab) {
-			if (ns.init.contextPath && ns.paramString) {
-				var url = ns.init.contextPath + '/api/analytics.' + type + ns.engine.getParamString(ns.xLayout);
+			if (ns.core.init.contextPath && ns.paramString) {
+				var url = ns.core.init.contextPath + '/api/analytics.' + type + ns.engine.getParamString(ns.xLayout);
 				url += '&tableLayout=true&columns=' + ns.xLayout.columnDimensionNames.join(';') + '&rows=' + ns.xLayout.rowDimensionNames.join(';');
 
 				window.open(url, isNewTab ? '_blank' : '_top');
@@ -4485,8 +4485,8 @@ Ext.onReady( function() {
 						text: 'JSON',
 						iconCls: 'ns-menu-item-datasource',
 						handler: function() {
-							if (ns.init.contextPath && ns.paramString) {
-								window.open(ns.init.contextPath + '/api/analytics.json' + ns.paramString, '_blank');
+							if (ns.core.init.contextPath && ns.paramString) {
+								window.open(ns.core.init.contextPath + '/api/analytics.json' + ns.paramString, '_blank');
 							}
 						}
 					},
@@ -4494,8 +4494,8 @@ Ext.onReady( function() {
 						text: 'XML',
 						iconCls: 'ns-menu-item-datasource',
 						handler: function() {
-							if (ns.init.contextPath && ns.paramString) {
-								window.open(ns.init.contextPath + '/api/analytics.xml' + ns.paramString, '_blank');
+							if (ns.core.init.contextPath && ns.paramString) {
+								window.open(ns.core.init.contextPath + '/api/analytics.xml' + ns.paramString, '_blank');
 							}
 						}
 					},
@@ -4503,8 +4503,8 @@ Ext.onReady( function() {
 						text: 'Microsoft Excel',
 						iconCls: 'ns-menu-item-datasource',
 						handler: function() {
-							if (ns.init.contextPath && ns.paramString) {
-								window.location.href = ns.init.contextPath + '/api/analytics.xls' + ns.paramString;
+							if (ns.core.init.contextPath && ns.paramString) {
+								window.location.href = ns.core.init.contextPath + '/api/analytics.xls' + ns.paramString;
 							}
 						}
 					},
@@ -4512,8 +4512,8 @@ Ext.onReady( function() {
 						text: 'CSV',
 						iconCls: 'ns-menu-item-datasource',
 						handler: function() {
-							if (ns.init.contextPath && ns.paramString) {
-								window.location.href = ns.init.contextPath + '/api/analytics.csv' + ns.paramString;
+							if (ns.core.init.contextPath && ns.paramString) {
+								window.location.href = ns.core.init.contextPath + '/api/analytics.csv' + ns.paramString;
 							}
 						}
 					},
@@ -4521,8 +4521,8 @@ Ext.onReady( function() {
 						text: 'JRXML',
 						iconCls: 'ns-menu-item-datasource',
 						handler: function() {
-							if (ns.init.contextPath && ns.paramString) {
-								window.open(ns.init.contextPath + '/api/analytics.jrxml' + ns.paramString, '_blank');
+							if (ns.core.init.contextPath && ns.paramString) {
+								window.open(ns.core.init.contextPath + '/api/analytics.jrxml' + ns.paramString, '_blank');
 							}
 						}
 					}
@@ -4636,7 +4636,7 @@ Ext.onReady( function() {
 										text: 'Go to charts' + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
 										handler: function() {
-											window.location.href = ns.init.contextPath + '/dhis-web-visualizer/app/index.html';
+											window.location.href = ns.core.init.contextPath + '/dhis-web-visualizer/app/index.html';
 										}
 									},
 									'-',
@@ -4647,7 +4647,7 @@ Ext.onReady( function() {
 										handler: function() {
 											if (NS.isSessionStorage) {
 												ns.layout.parentGraphMap = treePanel.getParentGraphMap();
-												ns.engine.setSessionStorage('analytical', ns.layout, ns.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
+												ns.engine.setSessionStorage('analytical', ns.layout, ns.core.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
 											}
 										}
 									},
@@ -4656,7 +4656,7 @@ Ext.onReady( function() {
 										cls: 'ns-menu-item-noicon',
 										disabled: !(NS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['chart']),
 										handler: function() {
-											window.location.href = ns.init.contextPath + '/dhis-web-visualizer/app/index.html?s=chart';
+											window.location.href = ns.core.init.contextPath + '/dhis-web-visualizer/app/index.html?s=chart';
 										}
 									}
 								],
@@ -4692,7 +4692,7 @@ Ext.onReady( function() {
 										text: 'Go to maps' + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
 										handler: function() {
-											window.location.href = ns.init.contextPath + '/dhis-web-mapping/app/index.html';
+											window.location.href = ns.core.init.contextPath + '/dhis-web-mapping/app/index.html';
 										}
 									},
 									'-',
@@ -4703,7 +4703,7 @@ Ext.onReady( function() {
 										handler: function() {
 											if (NS.isSessionStorage) {
 												ns.layout.parentGraphMap = treePanel.getParentGraphMap();
-												ns.engine.setSessionStorage('analytical', ns.layout, ns.init.contextPath + '/dhis-web-mapping/app/index.html?s=analytical');
+												ns.engine.setSessionStorage('analytical', ns.layout, ns.core.init.contextPath + '/dhis-web-mapping/app/index.html?s=analytical');
 											}
 										}
 									},
@@ -4712,7 +4712,7 @@ Ext.onReady( function() {
 										cls: 'ns-menu-item-noicon',
 										disabled: !(NS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['map']),
 										handler: function() {
-											window.location.href = ns.init.contextPath + '/dhis-web-mapping/app/index.html?s=chart';
+											window.location.href = ns.core.init.contextPath + '/dhis-web-mapping/app/index.html?s=chart';
 										}
 									}
 								],
@@ -4742,7 +4742,7 @@ Ext.onReady( function() {
 						xtype: 'button',
 						text: NS.i18n.home,
 						handler: function() {
-							window.location.href = ns.init.contextPath + '/dhis-web-commons-about/redirect.action';
+							window.location.href = ns.core.init.contextPath + '/dhis-web-commons-about/redirect.action';
 						}
 					}
 				]
@@ -5027,14 +5027,14 @@ Ext.onReady( function() {
 
 					// left gui
 					var viewportHeight = ns.app.westRegion.getHeight(),
-						numberOfTabs = ns.init.dimensions.length + 5,
+						numberOfTabs = ns.core.init.dimensions.length + 5,
 						tabHeight = 28,
 						minPeriodHeight = 380;
 
 					if (viewportHeight > numberOfTabs * tabHeight + minPeriodHeight) {
 						if (!Ext.isIE) {
 							ns.app.accordion.setAutoScroll(false);
-							ns.app.westRegion.setWidth(ns.conf.layout.west_width);
+							ns.app.westRegion.setWidth(ns.core.conf.layout.west_width);
 							ns.app.accordion.doLayout();
 						}
 					}
@@ -5102,7 +5102,9 @@ Ext.onReady( function() {
 		fn = function() {
 			if (++callbacks === requests.length) {
 
-				ns.core = extendCore(NS.getCore(init));
+				ns.core = NS.getCore(init);
+
+				extendCore(ns.core);
 
 				ns.app.viewport = createViewport();
 			}
