@@ -1718,12 +1718,12 @@ Ext.onReady( function() {
 					}
 					this.filterAvailable(a, s);
 				},
-				selectAll: function(a, s, doReverse) {
+				selectAll: function(a, s, isReverse) {
 					var array = [];
 					a.store.each( function(r) {
 						array.push({id: r.data.id, name: r.data.name});
 					});
-					if (doReverse) {
+					if (isReverse) {
 						array.reverse();
 					}
 					s.store.add(array);
@@ -1845,6 +1845,69 @@ Ext.onReady( function() {
 
 		// web
 		(function() {
+
+			// multiSelect
+			web.multiSelect = web.multiSelect || {};
+
+			web.multiSelect.select = function(a, s) {
+				var selected = a.getValue();
+				if (selected.length) {
+					var array = [];
+					Ext.Array.each(selected, function(item) {
+						array.push({id: item, name: a.store.getAt(a.store.findExact('id', item)).data.name});
+					});
+					s.store.add(array);
+				}
+				this.filterAvailable(a, s);
+			};
+
+			web.multiSelect.selectAll = function(a, s, isReverse) {
+				var array = [];
+				a.store.each( function(r) {
+					array.push({id: r.data.id, name: r.data.name});
+				});
+				if (isReverse) {
+					array.reverse();
+				}
+				s.store.add(array);
+				this.filterAvailable(a, s);
+			};
+
+			web.multiSelect.unselect = function(a, s) {
+				var selected = s.getValue();
+				if (selected.length) {
+					Ext.Array.each(selected, function(item) {
+						s.store.remove(s.store.getAt(s.store.findExact('id', item)));
+					});
+					this.filterAvailable(a, s);
+				}
+			};
+
+			web.multiSelect.unselectAll = function(a, s) {
+				s.store.removeAll();
+				a.store.clearFilter();
+				this.filterAvailable(a, s);
+			};
+
+			web.multiSelect.filterAvailable = function(a, s) {
+				a.store.filterBy( function(r) {
+					var keep = true;
+					s.store.each( function(r2) {
+						if (r.data.id == r2.data.id) {
+							keep = false;
+						}
+
+					});
+					return keep;
+				});
+				a.store.sortStore();
+			};
+
+			web.multiSelect.setHeight = function(ms, panel, fill) {
+				for (var i = 0; i < ms.length; i++) {
+					ms[i].setHeight(panel.getHeight() - fill);
+				}
+			};
 
 			// storage
 			web.storage = web.storage || {};
