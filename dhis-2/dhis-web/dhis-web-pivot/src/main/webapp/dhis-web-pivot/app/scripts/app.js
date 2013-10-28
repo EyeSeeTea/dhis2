@@ -4829,7 +4829,7 @@ Ext.onReady( function() {
 			}
 		});
 
-		setGui = function(layout, xLayout, updateGui, isFavorite) {
+		setGui = function(layout, xLayout, updateGui) {
 			var dimensions = [].concat(layout.columns || [], layout.rows || [], layout.filters || []),
 				dimMap = ns.service.layout.getObjectNameDimensionMapFromDimensionArray(dimensions),
 				recMap = ns.service.layout.getObjectNameDimensionItemsMapFromDimensionArray(dimensions),
@@ -4848,7 +4848,7 @@ Ext.onReady( function() {
 			// State
 			downloadButton.enable();
 
-			if (isFavorite) {
+			if (layout.id) {
 				interpretationButton.enable();
 			}
 
@@ -5096,8 +5096,6 @@ Ext.onReady( function() {
 
 		return viewport;
 	};
-
-	update = function(layout) {
 
 	// initialize
 	(function() {

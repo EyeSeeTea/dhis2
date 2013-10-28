@@ -1724,6 +1724,7 @@ Ext.onReady( function() {
 					valueObjects = [],
 					totalColObjects = [],
 					uuidDimUuidsMap = {},
+					isLegendSet = Ext.isObject(xLayout.legendSet) && Ext.isArray(xLayout.legendSet.mapLegends) && xLayout.legendSet.mapLegends.length,
 					htmlArray;
 
 				getRoundedHtmlValue = function(value, dec) {
@@ -1739,7 +1740,6 @@ Ext.onReady( function() {
 						htmlValue,
 						displayDensity,
 						fontSize,
-						isLegendSet = Ext.isObject(xLayout.legendSet) && Ext.isArray(xLayout.legendSet.mapLegends) && xLayout.legendSet.mapLegends.length,
 						isNumeric = Ext.isObject(config) && Ext.isString(config.type) && config.type.substr(0,5) === 'value' && !config.empty,
 						isValue = Ext.isObject(config) && Ext.isString(config.type) && config.type === 'value' && !config.empty,
 						cls = '',
@@ -2399,8 +2399,8 @@ Ext.onReady( function() {
 					//getItemName,
 					//validateUrl,
 					//setMouseHandlers,
-					initialize,
-					afterLoad,
+					//initialize,
+					//afterLoad,
 					//tableUuid = ns.init.el + '_' + Ext.data.IdGenerator.get('uuid').generate(),
 					//uuidDimUuidsMap = {},
 					//uuidObjectMap = {};
@@ -2470,30 +2470,30 @@ Ext.onReady( function() {
 						baseEl.setHeight(el.getHeight() + baseElBorderH + baseElPaddingH);
 					}
 					else {
-						if (NS.isSessionStorage) {
-							setMouseHandlers();
-							pivot.setSessionStorage('table', layout);
-						}
+						//if (NS.isSessionStorage) {
+							//setMouseHandlers();
+							//pivot.setSessionStorage('table', layout);
+						//}
 
-						ns.viewport.setGui(layout, xLayout, updateGui, isFavorite);
+						//ns.viewport.setGui(layout, xLayout, updateGui, isFavorite);
 					}
 
-					// Hide mask
-					web.mask.hide(ns.viewport.centerRegion);
+					//// Hide mask
+					//web.mask.hide(ns.viewport.centerRegion);
 
-					// Add uuid maps to instance
-					ns.uuidDimUuidsMap = uuidDimUuidsMap;
-					ns.uuidObjectMap = uuidObjectMap;
+					//// Add uuid maps to instance
+					//ns.uuidDimUuidsMap = uuidDimUuidsMap;
+					//ns.uuidObjectMap = uuidObjectMap;
 
-					// Add objects to instance
-					ns.layout = layout;
-					ns.xLayout = xLayout;
-					ns.xResponse = xResponse;
+					//// Add objects to instance
+					//ns.layout = layout;
+					//ns.xLayout = xLayout;
+					//ns.xResponse = xResponse;
 
-					if (NS.isDebug) {
-						console.log("xResponse", xResponse);
-						console.log("xLayout", xLayout);
-					}
+					//if (NS.isDebug) {
+						//console.log("xResponse", xResponse);
+						//console.log("xLayout", xLayout);
+					//}
 				};
 
                 initialize = function() {
