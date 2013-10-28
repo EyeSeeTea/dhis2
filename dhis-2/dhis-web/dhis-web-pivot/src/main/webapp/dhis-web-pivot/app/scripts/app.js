@@ -5084,8 +5084,8 @@ Ext.onReady( function() {
 				ns.app.xLayout = xLayout;
 				ns.app.response = response;
 				ns.app.xResponse = xResponse;
-				ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
 				ns.app.uuidDimUuidsMap = config.uuidDimUuidsMap;
+				ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
 
 				if (NS.isSessionStorage) {
 					setMouseHandlers(layout, response, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
@@ -5097,6 +5097,7 @@ Ext.onReady( function() {
 				ns.core.web.mask.hide(ns.app.centerRegion);
 
 				if (NS.isDebug) {
+					console.log("core", ns.core);
 					console.log("app", ns.app);
 				}
 			}
