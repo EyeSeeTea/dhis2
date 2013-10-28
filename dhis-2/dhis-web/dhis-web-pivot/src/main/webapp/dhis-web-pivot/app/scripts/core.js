@@ -1065,7 +1065,7 @@ Ext.onReady( function() {
 								if (isUserOrgunit) {
 									userOu = [{
 										id: ns.init.user.ou,
-										name: getItemName(xLayout, response, ns.init.user.ou, false)
+										name: service.layout.getItemName(xLayout, response, ns.init.user.ou, false)
 									}];
 								}
 								if (isUserOrgunitChildren) {
@@ -1074,7 +1074,7 @@ Ext.onReady( function() {
 									for (var j = 0; j < ns.init.user.ouc.length; j++) {
 										userOuc.push({
 											id: ns.init.user.ouc[j],
-											name: getItemName(xLayout, response, ns.init.user.ouc[j], false)
+											name: service.layout.getItemName(xLayout, response, ns.init.user.ouc[j], false)
 										});
 									}
 
@@ -1092,7 +1092,7 @@ Ext.onReady( function() {
 										if (!Ext.Array.contains(userOuOuc, id)) {
 											userOugc.push({
 												id: id,
-												name: getItemName(xLayout, response, id, false)
+												name: service.layout.getItemName(xLayout, response, id, false)
 											});
 										}
 									}
@@ -1108,7 +1108,7 @@ Ext.onReady( function() {
 
 									dim.items.push({
 										id: id,
-										name: getItemName(id, response)
+										name: service.layout.getItemName(id, response)
 									});
 								}
 
@@ -1850,7 +1850,7 @@ Ext.onReady( function() {
 							obj.cls = 'pivot-dim';
 							obj.noBreak = false;
 							obj.hidden = !(obj.rowSpan || obj.colSpan);
-							obj.htmlValue = getItemName(layout, xResponse, obj.id, true);
+							obj.htmlValue = service.layout.getItemName(layout, xResponse, obj.id, true);
 
 							dimHtml.push(getTdHtml(obj));
 
@@ -1916,7 +1916,7 @@ Ext.onReady( function() {
 								obj.cls = 'pivot-dim td-nobreak' + (service.layout.isHierarchy(layout, xResponse, obj.id) ? ' align-left' : '');
 								obj.noBreak = true;
 								obj.hidden = !(obj.rowSpan || obj.colSpan);
-								obj.htmlValue = getItemName(layout, xResponse, obj.id, true);
+								obj.htmlValue = service.layout.getItemName(layout, xResponse, obj.id, true);
 
 								row.push(obj);
 							}
@@ -2567,60 +2567,60 @@ Ext.onReady( function() {
                 }();
 			};
 
-			pivot.loadTable = function(id, ns, updateGui, isFavorite) {
-				var url = init.contextPath + '/api/reportTables/' + id,
-					params = '?viewClass=dimensional&links=false',
-					method = 'GET',
-					success,
-					failure;
+			//pivot.loadTable = function(id, ns, updateGui, isFavorite) {
+				//var url = init.contextPath + '/api/reportTables/' + id,
+					//params = '?viewClass=dimensional&links=false',
+					//method = 'GET',
+					//success,
+					//failure;
 
-				if (!Ext.isString(id)) {
-					alert('Invalid uid');
-					return;
-				}
+				//if (!Ext.isString(id)) {
+					//alert('Invalid uid');
+					//return;
+				//}
 
-				success = function(layoutConfig) {
-					var layout = api.layout.Layout(layoutConfig);
+				//success = function(layoutConfig) {
+					//var layout = api.layout.Layout(layoutConfig);
 
-					if (layout) {
-						ns.favorite = Ext.clone(layout);
-						ns.favorite.id = layoutConfig.id;
-						ns.favorite.name = layoutConfig.name;
+					//if (layout) {
+						//ns.favorite = Ext.clone(layout);
+						//ns.favorite.id = layoutConfig.id;
+						//ns.favorite.name = layoutConfig.name;
 
-						pivot.createTable(layout, ns, updateGui, isFavorite);
-					}
-				};
+						//pivot.createTable(layout, ns, updateGui, isFavorite);
+					//}
+				//};
 
-				failure = function(responseText) {
-					web.mask.hide(ns.viewport.centerRegion);
-					alert(responseText);
-				};
+				//failure = function(responseText) {
+					//web.mask.hide(ns.viewport.centerRegion);
+					//alert(responseText);
+				//};
 
-				if (ns.isPlugin) {
-					Ext.data.JsonP.request({
-						url: url + '.jsonp' + params,
-						method: method,
-						failure: function(r) {
-							failure(r);
-						},
-						success: function(r) {
-							success(r);
-						}
-					});
-				}
-				else {
-					Ext.Ajax.request({
-						url: url + '.json' + params,
-						method: method,
-						failure: function(r) {
-							failure(r.responseText);
-						},
-						success: function(r) {
-							success(Ext.decode(r.responseText));
-						}
-					});
-				}
-			};
+				//if (ns.isPlugin) {
+					//Ext.data.JsonP.request({
+						//url: url + '.jsonp' + params,
+						//method: method,
+						//failure: function(r) {
+							//failure(r);
+						//},
+						//success: function(r) {
+							//success(r);
+						//}
+					//});
+				//}
+				//else {
+					//Ext.Ajax.request({
+						//url: url + '.json' + params,
+						//method: method,
+						//failure: function(r) {
+							//failure(r.responseText);
+						//},
+						//success: function(r) {
+							//success(Ext.decode(r.responseText));
+						//}
+					//});
+				//}
+			//};
 
 			//pivot.onMouseHover = function(uuid, event, param, ns) {
 				//var dimUuids;
