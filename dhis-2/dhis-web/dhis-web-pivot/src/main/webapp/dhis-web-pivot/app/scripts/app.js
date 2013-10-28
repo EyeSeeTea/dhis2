@@ -2145,14 +2145,11 @@ Ext.onReady( function() {
 							layout = api.layout.Layout(layoutConfig);
 
 						if (layout) {
-							//ns.favorite = Ext.clone(layout);
-							//ns.favorite.id = layoutConfig.id;
-							//ns.favorite.name = layoutConfig.name;
-
 							web.pivot.createTable(layout, true);
 						}
 					};
 				});
+			};
 
 			web.pivot.createTable = function(layout, isUpdateGui) {
 				var xLayout,
