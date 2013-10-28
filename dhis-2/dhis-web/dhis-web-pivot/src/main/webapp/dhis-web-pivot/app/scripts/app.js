@@ -1834,66 +1834,13 @@ Ext.onReady( function() {
         // init
         (function() {
 
+			//tmp
+			init.rootNodes = [{id: 'ImspTQPwCqd', name: 'Sierra'}];
+
 			// root nodes
 			for (var i = 0; i < init.rootNodes.length; i++) {
 				init.rootNodes[i].path = '/' + conf.finals.root.id + '/' + init.rootNodes[i].id;
 			}
-
-			// viewport afterrender
-			init.afterRender = function() {
-
-				// Resize event handler
-				ns.viewport.westRegion.on('resize', function() {
-					var panel = util.dimension.panel.getExpandedPanel();
-
-					if (panel) {
-						panel.onExpand();
-					}
-				});
-
-				// Left gui
-				var viewportHeight = ns.viewport.westRegion.getHeight(),
-					numberOfTabs = init.dimensions.length + 5,
-					tabHeight = 28,
-					minPeriodHeight = 380;
-
-				if (viewportHeight > numberOfTabs * tabHeight + minPeriodHeight) {
-					if (!Ext.isIE) {
-						ns.viewport.accordion.setAutoScroll(false);
-						ns.viewport.westRegion.setWidth(conf.layout.west_width);
-						ns.viewport.accordion.doLayout();
-					}
-				}
-				else {
-					ns.viewport.westRegion.hasScrollbar = true;
-				}
-
-                // Expand first panel
-				cmp.dimension.panels[0].expand();
-
-                // Look for url params
-				var id = util.url.getUrlParam('id'),
-					session = util.url.getUrlParam('s'),
-					layout;
-
-				if (id) {
-					web.loadTable(id, ns, true, true);
-				}
-				else if (Ext.isString(session) && NS.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
-					layout = api.layout.Layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]);
-
-					if (layout) {
-						web.createTable(layout, ns, true);
-					}
-				}
-
-				// Fade in
-				Ext.defer( function() {
-					Ext.getBody().fadeIn({
-						duration: 300
-					});
-				}, 400 );
-			};
 		}());
 
 		// web
@@ -2140,14 +2087,14 @@ Ext.onReady( function() {
 						web.mask.hide(ns.app.centerRegion);
 						alert(r.responseText);
 					},
-					success: function(r) {,
+					success: function(r) {
 						var layoutConfig = Ext.decode(r.responseText),
 							layout = api.layout.Layout(layoutConfig);
 
 						if (layout) {
 							web.pivot.createTable(layout, true);
 						}
-					};
+					}
 				});
 			};
 
@@ -5069,8 +5016,59 @@ Ext.onReady( function() {
 					ns.app.optionsWindow = OptionsWindow();
 					ns.app.optionsWindow.hide();
 				},
-				afterrender: function() {
-					ns.init.afterRender();
+				afterrender: function(vp) {
+
+					// resize event handler
+					ns.app.westRegion.on('resize', function() {
+						var panel = ns.app.accordion.getExpandedPanel();
+
+						if (panel) {
+							panel.onExpand();
+						}
+					});
+
+					// left gui
+					var viewportHeight = ns.app.westRegion.getHeight(),
+						numberOfTabs = ns.init.dimensions.length + 5,
+						tabHeight = 28,
+						minPeriodHeight = 380;
+
+					if (viewportHeight > numberOfTabs * tabHeight + minPeriodHeight) {
+						if (!Ext.isIE) {
+							ns.app.accordion.setAutoScroll(false);
+							ns.app.westRegion.setWidth(ns.conf.layout.west_width);
+							ns.app.accordion.doLayout();
+						}
+					}
+					else {
+						ns.app.westRegion.hasScrollbar = true;
+					}
+
+					// expand first panel
+					ns.app.accordion.getFirstPanel().expand();
+
+					// look for url params
+					var id = ns.util.url.getUrlParam('id'),
+						session = ns.util.url.getUrlParam('s'),
+						layout;
+
+					if (id) {
+						ns.core.web.pivot.loadTable(id);
+					}
+					else if (Ext.isString(session) && NS.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
+						layout = ns.core.api.layout.Layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]);
+
+						if (layout) {
+							ns.core.web.pivot.createTable(layout, true);
+						}
+					}
+
+					// fade in
+					Ext.defer( function() {
+						Ext.getBody().fadeIn({
+							duration: 300
+						});
+					}, 400 );
 				}
 			}
 		});
@@ -5078,15 +5076,15 @@ Ext.onReady( function() {
 		// add listeners
 		(function() {
 			ns.store.indicatorAvailable.on('load', function() {
-				ns.util.multiselect.filterAvailable(indicatorAvailable, indicatorSelected);
+				ns.core.util.multiselect.filterAvailable(indicatorAvailable, indicatorSelected);
 			});
 
 			ns.store.dataElementAvailable.on('load', function() {
-				ns.util.multiselect.filterAvailable(dataElementAvailable, dataElementSelected);
+				ns.core.util.multiselect.filterAvailable(dataElementAvailable, dataElementSelected);
 			});
 
 			ns.store.dataSetAvailable.on('load', function(s) {
-				ns.util.multiselect.filterAvailable(dataSetAvailable, dataSetSelected);
+				ns.core.util.multiselect.filterAvailable(dataSetAvailable, dataSetSelected);
 				s.sort('name', 'ASC');
 			});
 		}());
