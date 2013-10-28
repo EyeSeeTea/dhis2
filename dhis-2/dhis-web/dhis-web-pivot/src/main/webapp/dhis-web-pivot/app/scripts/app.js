@@ -2075,6 +2075,65 @@ Ext.onReady( function() {
 			// pivot
 			web.pivot = web.pivot || {};
 
+			web.pivot.getLayoutConfig = function() {
+				var panels = ns.app.accorion.panels,
+					columnDimNames = ns.app.viewport.colStore.getDimensionNames(),
+					rowDimNames = ns.app.viewport.rowStore.getDimensionNames(),
+					filterDimNames = ns.app.viewport.filterStore.getDimensionNames(),
+					config = ns.app.optionsWindow.getOptions(),
+					dx = dimConf.data.dimensionName,
+					co = dimConf.category.dimensionName,
+					nameDimArrayMap = {};
+
+				config.columns = [];
+				config.rows = [];
+				config.filters = [];
+
+				// Panel data
+				for (var i = 0, dim, dimName; i < panels.length; i++) {
+					dim = panels[i].getDimension();
+
+					if (dim) {
+						nameDimArrayMap[dim.dimension] = [dim];
+					}
+				}
+
+				nameDimArrayMap[dx] = Ext.Array.clean([].concat(
+					nameDimArrayMap[dimConf.indicator.objectName] || [],
+					nameDimArrayMap[dimConf.dataElement.objectName] || [],
+					nameDimArrayMap[dimConf.operand.objectName] || [],
+					nameDimArrayMap[dimConf.dataSet.objectName] || []
+				));
+
+				// Columns, rows, filters
+				for (var i = 0, nameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], dimNames; i < nameArrays.length; i++) {
+					dimNames = nameArrays[i];
+
+					for (var j = 0, dimName, dim; j < dimNames.length; j++) {
+						dimName = dimNames[j];
+
+						if (dimName === co) {
+							axes[i].push({
+								dimension: co,
+								items: []
+							});
+						}
+						else if (dimName === dx && nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
+							for (var k = 0; k < nameDimArrayMap[dx].length; k++) {
+								axes[i].push(Ext.clone(nameDimArrayMap[dx][k]));
+							}
+						}
+						else if (nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
+							for (var k = 0; k < nameDimArrayMap[dimName].length; k++) {
+								axes[i].push(Ext.clone(nameDimArrayMap[dimName][k]));
+							}
+						}
+					}
+				}
+
+				return config;
+			};
+
 			web.pivot.loadTable = function(id) {
 				if (!Ext.isString(id)) {
 					alert('Invalid report table id');
@@ -2422,67 +2481,6 @@ Ext.onReady( function() {
 			ns.store = store;
 		}());
 
-		// engine
-		(function() {
-			engine.getLayoutConfig = function() {
-				var panels = ns.cmp.dimension.panels,
-					columnDimNames = ns.viewport.colStore.getDimensionNames(),
-					rowDimNames = ns.viewport.rowStore.getDimensionNames(),
-					filterDimNames = ns.viewport.filterStore.getDimensionNames(),
-					config = ns.viewport.optionsWindow.getOptions(),
-					dx = dimConf.data.dimensionName,
-					co = dimConf.category.dimensionName,
-					nameDimArrayMap = {};
-
-				config.columns = [];
-				config.rows = [];
-				config.filters = [];
-
-				// Panel data
-				for (var i = 0, dim, dimName; i < panels.length; i++) {
-					dim = panels[i].getDimension();
-
-					if (dim) {
-						nameDimArrayMap[dim.dimension] = [dim];
-					}
-				}
-
-				nameDimArrayMap[dx] = Ext.Array.clean([].concat(
-					nameDimArrayMap[dimConf.indicator.objectName],
-					nameDimArrayMap[dimConf.dataElement.objectName],
-					nameDimArrayMap[dimConf.operand.objectName],
-					nameDimArrayMap[dimConf.dataSet.objectName]
-				));
-
-				// Columns, rows, filters
-				for (var i = 0, nameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], dimNames; i < nameArrays.length; i++) {
-					dimNames = nameArrays[i];
-
-					for (var j = 0, dimName, dim; j < dimNames.length; j++) {
-						dimName = dimNames[j];
-
-						if (dimName === co) {
-							axes[i].push({
-								dimension: co,
-								items: []
-							});
-						}
-						else if (dimName === dx && nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
-							for (var k = 0; k < nameDimArrayMap[dx].length; k++) {
-								axes[i].push(Ext.clone(nameDimArrayMap[dx][k]));
-							}
-						}
-						else if (nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
-							for (var k = 0; k < nameDimArrayMap[dimName].length; k++) {
-								axes[i].push(Ext.clone(nameDimArrayMap[dimName][k]));
-							}
-						}
-					}
-				}
-
-				return config;
-			};
-		}());
 	};
 
 	// viewport
@@ -4298,14 +4296,14 @@ Ext.onReady( function() {
 
 		// viewport
 		update = function() {
-			var config = ns.engine.getLayoutConfig(),
-				layout = ns.api.layout.Layout(config);
+			var config = ns.core.web.pivot.getLayoutConfig(),
+				layout = ns.core.api.layout.Layout(config);
 
 			if (!layout) {
 				return;
 			}
 
-			ns.engine.createTable(layout, ns);
+			ns.core.web.pivot.createTable(layout);
 		};
 
 		accordionBody = Ext.create('Ext.panel.Panel', {
