@@ -2128,56 +2128,36 @@ Ext.onReady( function() {
 			// pivot
 			web.pivot = web.pivot || {};
 
-			web.pivot.loadTable = function(id, ns, updateGui, isFavorite) {
-				var url = init.contextPath + '/api/reportTables/' + id,
-					params = '?viewClass=dimensional&links=false',
-					method = 'GET',
-					success,
-					failure;
-
+			web.pivot.loadTable = function(id) {
 				if (!Ext.isString(id)) {
-					alert('Invalid id');
+					alert('Invalid report table id');
 					return;
 				}
 
-				success = function(layoutConfig) {
-					var layout = api.layout.Layout(layoutConfig);
-
-					if (layout) {
-						ns.favorite = Ext.clone(layout);
-						ns.favorite.id = layoutConfig.id;
-						ns.favorite.name = layoutConfig.name;
-
-						pivot.createTable(layout, ns, updateGui, isFavorite);
-					}
-				};
-
-				failure = function(responseText) {
-					web.mask.hide(ns.viewport.centerRegion);
-					alert(responseText);
-				};
-
 				Ext.Ajax.request({
-					url: url + '.json' + params,
-					method: method,
+					url: init.contextPath + '/api/reportTables/.json?viewClass=dimensional&links=false',
 					failure: function(r) {
 						web.mask.hide(ns.app.centerRegion);
 						alert(r.responseText);
 					},
-					success: function(r) {
-						var layout = api.layout.Layout(Ext.decode(r.responseText));
+					success: function(r) {,
+						var layoutConfig = Ext.decode(r.responseText),
+							layout = api.layout.Layout(layoutConfig);
 
 						if (layout) {
-							ns.favorite = Ext.clone(layout);
-							ns.favorite.id = layoutConfig.id;
-							ns.favorite.name = layoutConfig.name;
+							//ns.favorite = Ext.clone(layout);
+							//ns.favorite.id = layoutConfig.id;
+							//ns.favorite.name = layoutConfig.name;
 
-							pivot.createTable(layout, ns, updateGui, isFavorite);
+							web.pivot.createTable(layout, true);
 						}
 					};
-						success(Ext.decode(r.responseText));
-					}
 				});
+
+			web.pivot.createTable = function(layout, isUpdateGui) {
+
+
+
 			};
 		}());
 
@@ -5038,7 +5018,8 @@ Ext.onReady( function() {
 
 	update = function(layout) {
 		var xLayout,
-			paramString;
+			paramString,
+			tableUuid;
 
 		if (!layout) {
 			return;
@@ -5046,6 +5027,7 @@ Ext.onReady( function() {
 
 		xLayout = ns.core.service.layout.getExtendedLayout(layout);
 		paramString = web.analytics.getParamString(xLayout, true);
+		tableUuid = ns.init.el + '_' + Ext.data.IdGenerator.get('uuid').generate(),
 
 		if (!web.analytics.validateUrl(init.contextPath + '/api/analytics.json' + paramString)) {
 			return;
@@ -5098,6 +5080,10 @@ Ext.onReady( function() {
 				ns.app.centerRegion.update(config.html);
 
 				// after render
+				ns.app.layout = layout;
+				ns.app.xLayout = xLayout;
+				ns.app.response = response;
+				ns.app.xResponse = xResponse;
 				ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
 				ns.app.uuidDimUuidsMap = config.uuidDimUuidsMap;
 
@@ -5106,22 +5092,12 @@ Ext.onReady( function() {
 					ns.core.web.storage.session.set(layout, 'table');
 				}
 
-				ns.app.viewport.setGui(layout, xLayout, updateGui);
+				ns.app.viewport.setGui(layout, xLayout, isUpdateGui);
 
 				ns.core.web.mask.hide(ns.app.centerRegion);
 
-				// Add uuid maps to instance
-				//ns.app.uuidDimUuidsMap = uuidDimUuidsMap;
-				//ns.app.uuidObjectMap = uuidObjectMap;
-
-				// Add objects to instance
-				ns.app.layout = layout;
-				ns.app.xLayout = xLayout;
-				ns.app.xResponse = xResponse;
-
 				if (NS.isDebug) {
-					console.log("xResponse", xResponse);
-					console.log("xLayout", xLayout);
+					console.log("app", ns.app);
 				}
 			}
 		});

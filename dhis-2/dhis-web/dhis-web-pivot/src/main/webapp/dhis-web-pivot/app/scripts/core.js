@@ -387,19 +387,19 @@ Ext.onReady( function() {
 					config.rows = getValidatedDimensionArray(config.rows);
 					config.filters = getValidatedDimensionArray(config.filters);
 
-					// Config must be an object
+					// config must be an object
 					if (!(config && Ext.isObject(config))) {
 						alert('Layout: config is not an object (' + init.el + ')');
 						return;
 					}
 
-					// At least one dimension specified as column or row
+					// at least one dimension specified as column or row
 					if (!(config.columns || config.rows)) {
 						alert(NS.i18n.at_least_one_dimension_must_be_specified_as_row_or_column);
 						return;
 					}
 
-					// Get object names
+					// get object names
 					for (var i = 0, dims = Ext.Array.clean([].concat(config.columns || [], config.rows || [], config.filters || [])); i < dims.length; i++) {
 
 						// Object names
@@ -408,18 +408,27 @@ Ext.onReady( function() {
 						}
 					}
 
-					// At least one period
+					// at least one period
 					if (!Ext.Array.contains(objectNames, dimConf.period.objectName)) {
 						alert(NS.i18n.at_least_one_period_must_be_specified_as_column_row_or_filter);
 						return;
 					}
 
-					// Layout
+					// favorite
+					if (config.id) {
+						layout.id = config.id;
+					}
+
+					if (config.name) {
+						layout.name = config.name;
+					}
+
+					// layout
 					layout.columns = config.columns;
 					layout.rows = config.rows;
 					layout.filters = config.filters;
 
-					// Properties
+					// properties
 					layout.showTotals = Ext.isBoolean(config.totals) ? config.totals : (Ext.isBoolean(config.showTotals) ? config.showTotals : true);
 					layout.showSubTotals = Ext.isBoolean(config.subtotals) ? config.subtotals : (Ext.isBoolean(config.showSubTotals) ? config.showSubTotals : true);
 					layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : false;
@@ -790,12 +799,12 @@ Ext.onReady( function() {
 					rowObjectNames: [],
 					rowDimensionNames: [],
 
-					// Axis
+					// axis
 					axisDimensions: [],
 					axisObjectNames: [],
 					axisDimensionNames: [],
 
-						// For param string
+						// for param string
 					sortedAxisDimensionNames: [],
 
 					// Filter
@@ -803,31 +812,31 @@ Ext.onReady( function() {
 					filterObjectNames: [],
 					filterDimensionNames: [],
 
-						// For param string
+						// for param string
 					sortedFilterDimensions: [],
 
-					// All
+					// all
 					dimensions: [],
 					objectNames: [],
 					dimensionNames: [],
 
-					// Object name maps
+					// oject name maps
 					objectNameDimensionsMap: {},
 					objectNameItemsMap: {},
 					objectNameIdsMap: {},
 
-					// Dimension name maps
+					// dimension name maps
 					dimensionNameDimensionsMap: {},
 					dimensionNameItemsMap: {},
 					dimensionNameIdsMap: {},
 
-						// For param string
+						// for param string
 					dimensionNameSortedIdsMap: {}
 				};
 
 				Ext.applyIf(xLayout, layout);
 
-				// Columns, rows, filters
+				// columns, rows, filters
 				if (layout.columns) {
 					for (var i = 0, dim, items, xDim; i < layout.columns.length; i++) {
 						dim = layout.columns[i];
@@ -927,7 +936,10 @@ Ext.onReady( function() {
 					}
 				}
 
-				// Unique dimension names
+				// legend set
+				layout.legendSet = layout.legendSet ? init.idLegendSetMap[layout.legendSet.id] : null;
+
+				// unique dimension names
 				xLayout.axisDimensionNames = Ext.Array.unique(xLayout.axisDimensionNames);
 				xLayout.filterDimensionNames = Ext.Array.unique(xLayout.filterDimensionNames);
 
@@ -935,16 +947,16 @@ Ext.onReady( function() {
 				xLayout.rowDimensionNames = Ext.Array.unique(xLayout.rowDimensionNames);
 				xLayout.filterDimensionNames = Ext.Array.unique(xLayout.filterDimensionNames);
 
-					// For param string
+					// for param string
 				xLayout.sortedAxisDimensionNames = Ext.clone(xLayout.axisDimensionNames).sort();
 				xLayout.sortedFilterDimensions = service.layout.sortDimensionArray(Ext.clone(xLayout.filterDimensions));
 
-				// All
+				// all
 				xLayout.dimensions = [].concat(xLayout.axisDimensions, xLayout.filterDimensions);
 				xLayout.objectNames = [].concat(xLayout.axisObjectNames, xLayout.filterObjectNames);
 				xLayout.dimensionNames = [].concat(xLayout.axisDimensionNames, xLayout.filterDimensionNames);
 
-				// Dimension name maps
+				// dimension name maps
 				for (var i = 0, dimName; i < xLayout.dimensionNames.length; i++) {
 					dimName = xLayout.dimensionNames[i];
 
@@ -961,7 +973,7 @@ Ext.onReady( function() {
 					xLayout.dimensionNameIdsMap[xDim.dimensionName] = xLayout.dimensionNameIdsMap[xDim.dimensionName].concat(xDim.ids);
 				}
 
-					// For param string
+					// for param string
 				for (var key in xLayout.dimensionNameIdsMap) {
 					if (xLayout.dimensionNameIdsMap.hasOwnProperty(key)) {
 						xLayout.dimensionNameSortedIdsMap[key] = Ext.clone(xLayout.dimensionNameIdsMap[key]).sort();
@@ -1698,12 +1710,7 @@ Ext.onReady( function() {
 						var unique = xAxis.xItems.unique;
 
 						if (unique) {
-							if (unique.length < 2) {
-								return 1;
-							}
-							else {
-								return xAxis.size / unique[0].length;
-							}
+							return unique.length < 2 ? 1 : (xAxis.size / unique[0].length);
 						}
 
 						return null;
