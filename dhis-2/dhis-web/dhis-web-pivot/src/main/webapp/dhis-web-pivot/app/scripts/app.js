@@ -1705,56 +1705,6 @@ Ext.onReady( function() {
 					return true;
 				}
 			};
-
-			util.url = {
-
-			};
-
-			util.window = util.window || {};
-
-			util.window.setAnchorPosition = function(w, target) {
-				var vpw = ns.viewport.getWidth(),
-					targetx = target ? target.getPosition()[0] : 4,
-					winw = w.getWidth(),
-					y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
-
-				if ((targetx + winw) > vpw) {
-					w.setPosition((vpw - winw - 2), y);
-				}
-				else {
-					w.setPosition(targetx, y);
-				}
-			};
-
-			util.window.addHideOnBlurHandler = function(w) {
-				var el = Ext.get(Ext.query('.x-mask')[0]);
-
-				el.on('click', function() {
-					if (w.hideOnBlur) {
-						w.hide();
-					}
-				});
-
-				w.hasHideOnBlurHandler = true;
-			};
-
-			util.window.addDestroyOnBlurHandler = function(w) {
-				var el = Ext.get(Ext.query('.x-mask')[0]);
-
-				el.on('click', function() {
-					if (w.destroyOnBlur) {
-						w.destroy();
-					}
-				});
-
-				w.hasDestroyOnBlurHandler = true;
-			};
-
-			util.message = {
-				alert: function(message) {
-					alert(message);
-				}
-			}
 		}());
 
         // init
@@ -1835,10 +1785,58 @@ Ext.onReady( function() {
 				}
 			};
 
+			// window
+			web.window = web.window || {};
+
+			web.window.setAnchorPosition = function(w, target) {
+				var vpw = ns.app.viewport.getWidth(),
+					targetx = target ? target.getPosition()[0] : 4,
+					winw = w.getWidth(),
+					y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
+
+				if ((targetx + winw) > vpw) {
+					w.setPosition((vpw - winw - 2), y);
+				}
+				else {
+					w.setPosition(targetx, y);
+				}
+			};
+
+			web.window.addHideOnBlurHandler = function(w) {
+				var el = Ext.get(Ext.query('.x-mask')[0]);
+
+				el.on('click', function() {
+					if (w.hideOnBlur) {
+						w.hide();
+					}
+				});
+
+				w.hasHideOnBlurHandler = true;
+			};
+
+			web.window.addDestroyOnBlurHandler = function(w) {
+				var el = Ext.get(Ext.query('.x-mask')[0]);
+
+				el.on('click', function() {
+					if (w.destroyOnBlur) {
+						w.destroy();
+					}
+				});
+
+				w.hasDestroyOnBlurHandler = true;
+			};
+
+			// message
+			web.message = web.message || {};
+
+			web.message.alert = alert = function(message) {
+				alert(message);
+			};
+
 			// url
 			web.url = web.url || {};
 
-			web.url.getParam: function(s) {
+			web.url.getParam = function(s) {
 				var output = '';
 				var href = window.location.href;
 				if (href.indexOf('?') > -1 ) {

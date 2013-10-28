@@ -1616,7 +1616,7 @@ Ext.onReady( function() {
 			web.message = {};
 
 			web.message.alert = function(message) {
-				alert(message);
+				console.log(message);
 			};
 
 			// analytics
