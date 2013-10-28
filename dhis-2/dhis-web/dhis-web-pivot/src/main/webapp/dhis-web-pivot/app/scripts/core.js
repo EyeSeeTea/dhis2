@@ -980,6 +980,9 @@ Ext.onReady( function() {
 					}
 				}
 
+				// Uuid
+				xLayout.tableUuid = init.el + '_' + Ext.data.IdGenerator.get('uuid').generate();
+
 				return xLayout;
 			};
 
@@ -1690,7 +1693,7 @@ Ext.onReady( function() {
 			// pivot
 			web.pivot = {};
 
-			web.pivot.getHtml = function(layout, xResponse, xColAxis, xRowAxis) {
+			web.pivot.getHtml = function(xLayout, xResponse, xColAxis, xRowAxis) {
 				var getRoundedHtmlValue,
 					getTdHtml,
 					doSubTotals,
@@ -1736,7 +1739,7 @@ Ext.onReady( function() {
 						htmlValue,
 						displayDensity,
 						fontSize,
-						isLegendSet = Ext.isObject(legendSet) && Ext.isArray(legendSet.mapLegends) && legendSet.mapLegends.length,
+						isLegendSet = Ext.isObject(xLayout.legendSet) && Ext.isArray(xLayout.legendSet.mapLegends) && xLayout.legendSet.mapLegends.length,
 						isNumeric = Ext.isObject(config) && Ext.isString(config.type) && config.type.substr(0,5) === 'value' && !config.empty,
 						isValue = Ext.isObject(config) && Ext.isString(config.type) && config.type === 'value' && !config.empty,
 						cls = '',
@@ -1748,7 +1751,7 @@ Ext.onReady( function() {
 
 					// Background color from legend set
 					if (isNumeric && isLegendSet) {
-						mapLegends = legendSet.mapLegends;
+						mapLegends = xLayout.legendSet.mapLegends;
 
 						for (var i = 0, value; i < mapLegends.length; i++) {
 							value = parseFloat(config.value);
@@ -1762,9 +1765,9 @@ Ext.onReady( function() {
 					colSpan = config.colSpan ? 'colspan="' + config.colSpan + '" ' : '';
 					rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '" ' : '';
 					htmlValue = config.collapsed ? '' : config.htmlValue || config.value || '';
-					htmlValue = config.type !== 'dimension' ? support.prototype.number.prettyPrint(htmlValue, layout.digitGroupSeparator) : htmlValue;
-					displayDensity = conf.pivot.displayDensity[config.displayDensity] || conf.pivot.displayDensity[layout.displayDensity];
-					fontSize = conf.pivot.fontSize[config.fontSize] || conf.pivot.fontSize[layout.fontSize];
+					htmlValue = config.type !== 'dimension' ? support.prototype.number.prettyPrint(htmlValue, xLayout.digitGroupSeparator) : htmlValue;
+					displayDensity = conf.pivot.displayDensity[config.displayDensity] || conf.pivot.displayDensity[xLayout.displayDensity];
+					fontSize = conf.pivot.fontSize[config.fontSize] || conf.pivot.fontSize[xLayout.fontSize];
 
 					cls += config.hidden ? ' td-hidden' : '';
 					cls += config.collapsed ? ' td-collapsed' : '';
@@ -1802,12 +1805,12 @@ Ext.onReady( function() {
 				};
 
 				doSubTotals = function(xAxis) {
-					return !!layout.showSubTotals && xAxis && xAxis.dims > 1;
+					return !!xLayout.showSubTotals && xAxis && xAxis.dims > 1;
 
 					//var multiItemDimension = 0,
 						//unique;
 
-					//if (!(layout.showSubTotals && xAxis && xAxis.dims > 1)) {
+					//if (!(xLayout.showSubTotals && xAxis && xAxis.dims > 1)) {
 						//return false;
 					//}
 
@@ -1823,7 +1826,7 @@ Ext.onReady( function() {
 				};
 
 				doTotals = function() {
-					return !!layout.showTotals;
+					return !!xLayout.showTotals;
 				};
 
 				getColAxisHtmlArray = function() {
@@ -1857,7 +1860,7 @@ Ext.onReady( function() {
 							obj.cls = 'pivot-dim';
 							obj.noBreak = false;
 							obj.hidden = !(obj.rowSpan || obj.colSpan);
-							obj.htmlValue = service.layout.getItemName(layout, xResponse, obj.id, true);
+							obj.htmlValue = service.layout.getItemName(xLayout, xResponse, obj.id, true);
 
 							dimHtml.push(getTdHtml(obj));
 
@@ -1920,10 +1923,10 @@ Ext.onReady( function() {
 							for (var j = 0, obj, newObj; j < xRowAxis.dims; j++) {
 								obj = xRowAxis.objects.all[j][i];
 								obj.type = 'dimension';
-								obj.cls = 'pivot-dim td-nobreak' + (service.layout.isHierarchy(layout, xResponse, obj.id) ? ' align-left' : '');
+								obj.cls = 'pivot-dim td-nobreak' + (service.layout.isHierarchy(xLayout, xResponse, obj.id) ? ' align-left' : '');
 								obj.noBreak = true;
 								obj.hidden = !(obj.rowSpan || obj.colSpan);
-								obj.htmlValue = service.layout.getItemName(layout, xResponse, obj.id, true);
+								obj.htmlValue = service.layout.getItemName(xLayout, xResponse, obj.id, true);
 
 								row.push(obj);
 							}
@@ -2009,7 +2012,7 @@ Ext.onReady( function() {
 
 					// Hide empty rows (dims/values/totals)
 					if (xColAxis && xRowAxis) {
-						if (layout.hideEmptyRows) {
+						if (xLayout.hideEmptyRows) {
 							for (var i = 0, valueRow, empty, parent; i < valueObjects.length; i++) {
 								valueRow = valueObjects[i];
 								empty = [];
@@ -2391,16 +2394,16 @@ Ext.onReady( function() {
 
 
 			pivot.createTable = function(layout, ns, updateGui, isFavorite) {
-				var legendSet = layout.legendSet ? ns.init.idLegendSetMap[layout.legendSet.id] : null,
+				//var legendSet = layout.legendSet ? ns.init.idLegendSetMap[layout.legendSet.id] : null,
 					//isHierarchy,
 					//getItemName,
-					validateUrl,
-					setMouseHandlers,
+					//validateUrl,
+					//setMouseHandlers,
 					initialize,
 					afterLoad,
-					tableUuid = ns.init.el + '_' + Ext.data.IdGenerator.get('uuid').generate(),
-					uuidDimUuidsMap = {},
-					uuidObjectMap = {};
+					//tableUuid = ns.init.el + '_' + Ext.data.IdGenerator.get('uuid').generate(),
+					//uuidDimUuidsMap = {},
+					//uuidObjectMap = {};
 
 				//isHierarchy = function(id, response) {
 					//return layout.showHierarchy && Ext.isObject(response.metaData.ouHierarchy) && response.metaData.ouHierarchy.hasOwnProperty(id);

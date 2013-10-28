@@ -1814,6 +1814,7 @@ Ext.onReady( function() {
 
 					getTdHtml = function(config) {
 						var bgColor,
+							mapLegends,
 							colSpan,
 							rowSpan,
 							htmlValue,
@@ -1831,11 +1832,13 @@ Ext.onReady( function() {
 
 						// Background color from legend set
 						if (isNumeric && isLegendSet) {
-							for (var i = 0, value; i < legendSet.mapLegends.length; i++) {
+							mapLegends = legendSet.mapLegends;
+
+							for (var i = 0, value; i < mapLegends.length; i++) {
 								value = parseFloat(config.value);
 
-								if (Ext.Number.constrain(value, legendSet.mapLegends[i].sv, legendSet.mapLegends[i].ev) === value) {
-									bgColor = legendSet.mapLegends[i].color;
+								if (Ext.Number.constrain(value, mapLegends[i].sv, mapLegends[i].ev) === value) {
+									bgColor = mapLegends[i].color;
 								}
 							}
 						}

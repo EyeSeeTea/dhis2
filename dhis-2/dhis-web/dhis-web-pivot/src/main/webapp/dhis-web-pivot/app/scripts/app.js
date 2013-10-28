@@ -2156,8 +2156,7 @@ Ext.onReady( function() {
 
 			web.pivot.createTable = function(layout, isUpdateGui) {
 				var xLayout,
-					paramString,
-					tableUuid;
+					paramString;
 
 				if (!layout) {
 					return;
@@ -2165,7 +2164,6 @@ Ext.onReady( function() {
 
 				xLayout = service.layout.getExtendedLayout(layout);
 				paramString = web.analytics.getParamString(xLayout, true);
-				tableUuid = init.el + '_' + Ext.data.IdGenerator.get('uuid').generate();
 
 				if (!web.analytics.validateUrl(init.contextPath + '/api/analytics.json' + paramString)) {
 					return;
@@ -2214,7 +2212,7 @@ Ext.onReady( function() {
 						xRowAxis = service.layout.getExtendedAxis('row', xLayout.rowDimensionNames, xResponse);
 
 						// update viewport
-						config = web.pivot.getHtml(layout, xResponse, xColAxis, xRowAxis);
+						config = web.pivot.getHtml(xLayout, xResponse, xColAxis, xRowAxis);
 						ns.app.centerRegion.removeAll(true);
 						ns.app.centerRegion.update(config.html);
 
