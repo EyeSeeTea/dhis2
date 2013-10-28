@@ -1687,10 +1687,6 @@ Ext.onReady( function() {
 
 		// util
 		(function() {
-			util.dimension = {
-				panel: {
-				}
-			};
 
 			util.checkbox = {
 				setAllFalse: function() {
@@ -1965,6 +1961,168 @@ Ext.onReady( function() {
 
 				store.add(a);
 				store.sort('name', 'ASC');
+			};
+
+				// session
+			web.storage.session = {};
+
+			web.storage.session.set = function(session, obj, url) {
+				if (NS.isSessionStorage) {
+					var dhis2 = JSON.parse(sessionStorage.getItem('dhis2')) || {};
+					dhis2[session] = obj;
+					sessionStorage.setItem('dhis2', JSON.stringify(dhis2));
+
+					if (Ext.isString(url)) {
+						window.location.href = url;
+					}
+				}
+			};
+
+			// mouse events
+			web.events = {};
+
+			web.events.setMouseHandlers = function(layout, response, uuidDimUuidsMap, uuidObjectMap) {
+				var valueEl;
+
+				for (var key in uuidDimUuidsMap) {
+					if (uuidDimUuidsMap.hasOwnProperty(key)) {
+						valueEl = Ext.get(key);
+
+						if (parseFloat(valueEl.dom.textContent)) {
+							valueEl.dom.onMouseClick = web.events.onMouseClick;
+							valueEl.dom.layout = layout;
+							valueEl.dom.response = response;
+							valueEl.dom.uuidDimUuidsMap = uuidDimUuidsMap;
+							valueEl.dom.uuidObjectMap = uuidObjectMap;
+							valueEl.dom.setAttribute('onclick', 'this.onMouseClick(this.layout, this.response, this.uuidDimUuidsMap, this.uuidObjectMap, this.id);');
+						}
+					}
+				}
+			};
+
+			web.events.onMouseClick = function(layout, response, uuidDimUuidsMap, uuidObjectMap, uuid) {
+				var uuids = uuidDimUuidsMap[uuid],
+					layoutConfig = Ext.clone(layout),
+					parentGraphMap = ns.app.viewport.treePanel.getParentGraphMap(),
+					objects = [],
+					menu;
+
+				// modify layout dimension items based on uuid objects
+
+				// get objects
+				for (var i = 0; i < uuids.length; i++) {
+					objects.push(uuidObjectMap[uuids[i]]);
+				}
+
+				// clear layoutConfig dimension items
+				for (var i = 0, a = Ext.Array.clean([].concat(layoutConfig.columns || [], layoutConfig.rows || [])); i < a.length; i++) {
+					a[i].items = [];
+				}
+
+				// add new items
+				for (var i = 0, obj, axis; i < objects.length; i++) {
+					obj = objects[i];
+
+					axis = obj.axis === 'col' ? layoutConfig.columns || [] : layoutConfig.rows || [];
+
+					if (axis.length) {
+						axis[obj.dim].items.push({
+							id: obj.id,
+							name: response.metaData.names[obj.id]
+						});
+					}
+				}
+
+				// parent graph map
+				layoutConfig.parentGraphMap = {};
+
+				for (var i = 0, id; i < objects.length; i++) {
+					id = objects[i].id;
+
+					if (parentGraphMap.hasOwnProperty(id)) {
+						layoutConfig.parentGraphMap[id] = parentGraphMap[id];
+					}
+				}
+
+				// menu
+				menu = Ext.create('Ext.menu.Menu', {
+					shadow: true,
+					showSeparator: false,
+					items: [
+						{
+							text: 'Open selection as chart' + '&nbsp;&nbsp;', //i18n
+							iconCls: 'ns-button-icon-chart',
+							param: 'chart',
+							handler: function() {
+								web.storage.session.set('analytical', layoutConfig, init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
+							},
+							listeners: {
+								render: function() {
+									this.getEl().on('mouseover', function() {
+										web.events.onMouseHover(uuidDimUuidsMap, uuid, 'mouseover', 'chart');
+									});
+
+									this.getEl().on('mouseout', function() {
+										web.events.onMouseHover(uuidDimUuidsMap, uuid, 'mouseout', 'chart');
+									});
+								}
+							}
+						},
+						{
+							text: 'Open selection as map' + '&nbsp;&nbsp;', //i18n
+							iconCls: 'ns-button-icon-map',
+							param: 'map',
+							disabled: true,
+							handler: function() {
+								web.storage.session.set('analytical', layoutConfig, init.contextPath + '/dhis-web-mapping/app/index.html?s=analytical');
+							},
+							listeners: {
+								render: function() {
+									this.getEl().on('mouseover', function() {
+										web.events.onMouseHover(uuidDimUuidsMap, uuid, 'mouseover', 'map');
+									});
+
+									this.getEl().on('mouseout', function() {
+										web.events.onMouseHover(uuidDimUuidsMap, uuid, 'mouseout', 'map');
+									});
+								}
+							}
+						}
+					]
+				});
+
+				menu.showAt(function() {
+					var el = Ext.get(uuid),
+						xy = el.getXY();
+
+					xy[0] += el.getWidth() - 5;
+					xy[1] += el.getHeight() - 5;
+
+					return xy;
+				}());
+			};
+
+			web.events.onMouseHover = function(uuidDimUuidsMap, uuid, event, param) {
+				var dimUuids;
+
+				if (param === 'chart') {
+					if (Ext.isString(uuid) && Ext.isArray(uuidDimUuidsMap[uuid])) {
+						dimUuids = uuidDimUuidsMap[uuid];
+
+						for (var i = 0, el; i < dimUuids.length; i++) {
+							el = Ext.get(dimUuids[i]);
+
+							if (el) {
+								if (event === 'mouseover') {
+									el.addCls('highlighted');
+								}
+								else if (event === 'mouseout') {
+									el.removeCls('highlighted');
+								}
+							}
+						}
+					}
+				}
 			};
 		}());
 
@@ -4824,12 +4982,15 @@ Ext.onReady( function() {
 	};
 
 	update = function(layout) {
+		var xLayout,
+			paramString;
+
 		if (!layout) {
 			return;
 		}
 
-		var xLayout = ns.core.service.layout.getExtendedLayout(layout),
-			paramString = web.analytics.getParamString(xLayout, true);
+		xLayout = ns.core.service.layout.getExtendedLayout(layout);
+		paramString = web.analytics.getParamString(xLayout, true);
 
 		if (!web.analytics.validateUrl(init.contextPath + '/api/analytics.json' + paramString)) {
 			return;
@@ -4853,7 +5014,8 @@ Ext.onReady( function() {
 				var response = ns.core.api.response.Response(Ext.decode(r.responseText)),
 					xResponse,
 					xColAxis,
-					xRowAxis;
+					xRowAxis,
+					config;
 
 				if (!response) {
 					ns.core.web.mask.hide(ns.app.centerRegion);
@@ -4876,12 +5038,16 @@ Ext.onReady( function() {
 				xRowAxis = ns.core.service.layout.getExtendedAxis('row', xLayout.rowDimensionNames, xResponse);
 
 				// update viewport
+				config = web.pivot.getHtml(layout, xResponse, xColAxis, xRowAxis);
 				ns.app.centerRegion.removeAll(true);
-				ns.app.centerRegion.update(web.pivot.getHtml(layout, xResponse, xColAxis, xRowAxis));
+				ns.app.centerRegion.update(config.html);
 
 				// after render
+				ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
+				ns.app.uuidDimUuidsMap = config.uuidDimUuidsMap;
+
 				if (NS.isSessionStorage) {
-					setMouseHandlers();
+					setMouseHandlers(layout, response, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
 					pivot.setSessionStorage('table', layout);
 				}
 

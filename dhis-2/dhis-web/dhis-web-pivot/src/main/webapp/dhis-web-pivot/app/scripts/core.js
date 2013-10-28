@@ -1713,6 +1713,7 @@ Ext.onReady( function() {
 					valueItems = [],
 					valueObjects = [],
 					totalColObjects = [],
+					uuidDimUuidsMap = {},
 					htmlArray;
 
 				getRoundedHtmlValue = function(value, dec) {
@@ -2337,10 +2338,16 @@ Ext.onReady( function() {
 					return s += '</table>';
 				};
 
-				htmlArray = [].concat(getColAxisHtmlArray(), getRowHtmlArray(), getTotalHtmlArray());
-				htmlArray = Ext.Array.clean(htmlArray);
+				// get html
+				return function() {
+					htmlArray = [].concat(getColAxisHtmlArray(), getRowHtmlArray(), getTotalHtmlArray());
+					htmlArray = Ext.Array.clean(htmlArray);
 
-				return getHtml(htmlArray);
+					return {
+						html: getHtml(htmlArray),
+						uuidDimUuidsMap: uuidDimUuidsMap
+					};
+				}();
 			};
 
 		}());
@@ -2420,20 +2427,20 @@ Ext.onReady( function() {
 					//return true;
 				//};
 
-				setMouseHandlers = function() {
-					var valueElement;
+				//setMouseHandlers = function() {
+					//var valueEl;
 
-					for (var key in uuidDimUuidsMap) {
-						if (uuidDimUuidsMap.hasOwnProperty(key)) {
-							valueElement = Ext.get(key);
+					//for (var key in uuidDimUuidsMap) {
+						//if (uuidDimUuidsMap.hasOwnProperty(key)) {
+							//valueEl = Ext.get(key);
 
-							if (parseFloat(valueElement.dom.textContent)) {
-								valueElement.dom.ns = ns;
-								valueElement.dom.setAttribute('onclick', 'this.ns.pivot.onMouseClick(this.id, this.ns);');
-							}
-						}
-					}
-				};
+							//if (parseFloat(valueEl.dom.textContent)) {
+								//valueEl.dom.ns = ns;
+								//valueEl.dom.setAttribute('onclick', 'this.ns.pivot.onMouseClick(this.id, this.ns);');
+							//}
+						//}
+					//}
+				//};
 
 				afterLoad = function(layout, xLayout, xResponse) {
 
@@ -2517,10 +2524,10 @@ Ext.onReady( function() {
 						//ns.viewport.centerRegion.removeAll(true);
 						//ns.viewport.centerRegion.update(html);
 
-						ns.paramString = paramString;
+						//ns.paramString = paramString;
 
-						afterLoad(layout, xLayout, xResponse);
-					//};
+						//afterLoad(layout, xLayout, xResponse);
+					////};
 
 					// Validate request size
                     //if (!validateUrl(init.contextPath + '/api/analytics.jsonp' + paramString)) {
@@ -2615,132 +2622,132 @@ Ext.onReady( function() {
 				}
 			};
 
-			pivot.onMouseHover = function(uuid, event, param, ns) {
-				var dimUuids;
+			//pivot.onMouseHover = function(uuid, event, param, ns) {
+				//var dimUuids;
 
-				if (param === 'chart') {
-					if (Ext.isString(uuid) && Ext.isArray(ns.uuidDimUuidsMap[uuid])) {
-						dimUuids = ns.uuidDimUuidsMap[uuid];
+				//if (param === 'chart') {
+					//if (Ext.isString(uuid) && Ext.isArray(ns.uuidDimUuidsMap[uuid])) {
+						//dimUuids = ns.uuidDimUuidsMap[uuid];
 
-						for (var i = 0, el; i < dimUuids.length; i++) {
-							el = Ext.get(dimUuids[i]);
+						//for (var i = 0, el; i < dimUuids.length; i++) {
+							//el = Ext.get(dimUuids[i]);
 
-							if (el) {
-								if (event === 'mouseover') {
-									el.addCls('highlighted');
-								}
-								else if (event === 'mouseout') {
-									el.removeCls('highlighted');
-								}
-							}
-						}
-					}
-				}
-			};
+							//if (el) {
+								//if (event === 'mouseover') {
+									//el.addCls('highlighted');
+								//}
+								//else if (event === 'mouseout') {
+									//el.removeCls('highlighted');
+								//}
+							//}
+						//}
+					//}
+				//}
+			//};
 
-			pivot.onMouseClick = function(uuid, ns) {
-				var that = this,
-					uuids = ns.uuidDimUuidsMap[uuid],
-					layoutConfig = Ext.clone(ns.layout),
-					objects = [],
-					parentGraphMap = ns.viewport.treePanel.getParentGraphMap(),
-					menu;
+			//pivot.onMouseClick = function(uuid, ns) {
+				//var that = this,
+					//uuids = ns.uuidDimUuidsMap[uuid],
+					//layoutConfig = Ext.clone(ns.layout),
+					//objects = [],
+					//parentGraphMap = ns.viewport.treePanel.getParentGraphMap(),
+					//menu;
 
-				// modify layout dimension items based on uuid objects
+				//// modify layout dimension items based on uuid objects
 
-				// get objects
-				for (var i = 0; i < uuids.length; i++) {
-					objects.push(ns.uuidObjectMap[uuids[i]]);
-				}
+				//// get objects
+				//for (var i = 0; i < uuids.length; i++) {
+					//objects.push(ns.uuidObjectMap[uuids[i]]);
+				//}
 
-				// clear layoutConfig dimension items
-				for (var i = 0, a = [].concat(layoutConfig.columns || [], layoutConfig.rows || []); i < a.length; i++) {
-					a[i].items = [];
-				}
+				//// clear layoutConfig dimension items
+				//for (var i = 0, a = [].concat(layoutConfig.columns || [], layoutConfig.rows || []); i < a.length; i++) {
+					//a[i].items = [];
+				//}
 
-				// add new items
-				for (var i = 0, obj, axis; i < objects.length; i++) {
-					obj = objects[i];
+				//// add new items
+				//for (var i = 0, obj, axis; i < objects.length; i++) {
+					//obj = objects[i];
 
-					axis = obj.axis === 'col' ? layoutConfig.columns || [] : layoutConfig.rows || [];
+					//axis = obj.axis === 'col' ? layoutConfig.columns || [] : layoutConfig.rows || [];
 
-					if (axis.length) {
-						axis[obj.dim].items.push({
-							id: obj.id,
-							name: ns.xResponse.metaData.names[obj.id]
-						});
-					}
-				}
+					//if (axis.length) {
+						//axis[obj.dim].items.push({
+							//id: obj.id,
+							//name: ns.xResponse.metaData.names[obj.id]
+						//});
+					//}
+				//}
 
-				// parent graph map
-				layoutConfig.parentGraphMap = {};
+				//// parent graph map
+				//layoutConfig.parentGraphMap = {};
 
-				for (var i = 0, id; i < objects.length; i++) {
-					id = objects[i].id;
+				//for (var i = 0, id; i < objects.length; i++) {
+					//id = objects[i].id;
 
-					if (parentGraphMap.hasOwnProperty(id)) {
-						layoutConfig.parentGraphMap[id] = parentGraphMap[id];
-					}
-				}
+					//if (parentGraphMap.hasOwnProperty(id)) {
+						//layoutConfig.parentGraphMap[id] = parentGraphMap[id];
+					//}
+				//}
 
-				// menu
+				//// menu
 
-				menu = Ext.create('Ext.menu.Menu', {
-					shadow: true,
-					showSeparator: false,
-					items: [
-						{
-							text: 'Open selection as chart' + '&nbsp;&nbsp;', //i18n
-							iconCls: 'ns-button-icon-chart',
-							param: 'chart',
-							handler: function() {
-								that.setSessionStorage('analytical', layoutConfig, ns.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
-							},
-							listeners: {
-								render: function() {
-									this.getEl().on('mouseover', function() {
-										that.onMouseHover(uuid, 'mouseover', 'chart', ns);
-									});
+				//menu = Ext.create('Ext.menu.Menu', {
+					//shadow: true,
+					//showSeparator: false,
+					//items: [
+						//{
+							//text: 'Open selection as chart' + '&nbsp;&nbsp;', //i18n
+							//iconCls: 'ns-button-icon-chart',
+							//param: 'chart',
+							//handler: function() {
+								//that.setSessionStorage('analytical', layoutConfig, ns.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
+							//},
+							//listeners: {
+								//render: function() {
+									//this.getEl().on('mouseover', function() {
+										//that.onMouseHover(uuid, 'mouseover', 'chart', ns);
+									//});
 
-									this.getEl().on('mouseout', function() {
-										that.onMouseHover(uuid, 'mouseout', 'chart', ns);
-									});
-								}
-							}
-						},
-						{
-							text: 'Open selection as map' + '&nbsp;&nbsp;', //i18n
-							iconCls: 'ns-button-icon-map',
-							param: 'map',
-							disabled: true,
-							handler: function() {
-								that.setSessionStorage('analytical', layoutConfig, ns.init.contextPath + '/dhis-web-mapping/app/index.html?s=analytical');
-							},
-							listeners: {
-								render: function() {
-									this.getEl().on('mouseover', function() {
-										that.onMouseHover(uuid, 'mouseover', 'map', ns);
-									});
+									//this.getEl().on('mouseout', function() {
+										//that.onMouseHover(uuid, 'mouseout', 'chart', ns);
+									//});
+								//}
+							//}
+						//},
+						//{
+							//text: 'Open selection as map' + '&nbsp;&nbsp;', //i18n
+							//iconCls: 'ns-button-icon-map',
+							//param: 'map',
+							//disabled: true,
+							//handler: function() {
+								//that.setSessionStorage('analytical', layoutConfig, ns.init.contextPath + '/dhis-web-mapping/app/index.html?s=analytical');
+							//},
+							//listeners: {
+								//render: function() {
+									//this.getEl().on('mouseover', function() {
+										//that.onMouseHover(uuid, 'mouseover', 'map', ns);
+									//});
 
-									this.getEl().on('mouseout', function() {
-										that.onMouseHover(uuid, 'mouseout', 'map', ns);
-									});
-								}
-							}
-						}
-					]
-				});
+									//this.getEl().on('mouseout', function() {
+										//that.onMouseHover(uuid, 'mouseout', 'map', ns);
+									//});
+								//}
+							//}
+						//}
+					//]
+				//});
 
-				menu.showAt(function() {
-					var el = Ext.get(uuid),
-						xy = el.getXY();
+				//menu.showAt(function() {
+					//var el = Ext.get(uuid),
+						//xy = el.getXY();
 
-					xy[0] += el.getWidth() - 5;
-					xy[1] += el.getHeight() - 5;
+					//xy[0] += el.getWidth() - 5;
+					//xy[1] += el.getHeight() - 5;
 
-					return xy;
-				}());
-			};
+					//return xy;
+				//}());
+			//};
 		}());
 
 		// instance
