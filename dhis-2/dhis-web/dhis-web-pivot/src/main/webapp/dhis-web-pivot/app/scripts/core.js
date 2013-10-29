@@ -558,8 +558,8 @@ Ext.onReady( function() {
 				key = key || 'name';
 
 				array.sort( function(a, b) {
-					var nameA = a[key].toLowerCase(),
-						nameB = b[key].toLowerCase();
+					var nameA = a[key].toString().toLowerCase(),
+						nameB = b[key].toString().toLowerCase();
 
 					if (nameA < nameB) {
 						return -1;
@@ -1093,7 +1093,7 @@ Ext.onReady( function() {
 										});
 									}
 
-									userOuc = ns.support.prototype.array.sortObjectsByObjectKey(userOuc);
+									userOuc = support.prototype.array.sortObjectsByObjectKey(userOuc);
 								}
 								if (isUserOrgunitGrandChildren) {
 									var userOuOuc = [].concat(ns.init.user.ou, ns.init.user.ouc),
@@ -1112,7 +1112,7 @@ Ext.onReady( function() {
 										}
 									}
 
-									userOugc = ns.support.prototype.array.sortObjectsByObjectKey(userOugc);
+									userOugc = support.prototype.array.sortObjectsByObjectKey(userOugc);
 								}
 
 								dim.items = [].concat(userOu || [], userOuc || [], userOugc || []);
@@ -1127,7 +1127,7 @@ Ext.onReady( function() {
 									});
 								}
 
-								dim.items = ns.support.prototype.array.sortObjectsByObjectKey(dim.items);
+								dim.items = support.prototype.array.sortObjectsByObjectKey(dim.items);
 							}
 							else {
 								dim.items = Ext.clone(xLayout.dimensionNameItemsMap[dim.dimensionName]);
