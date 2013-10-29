@@ -2327,7 +2327,7 @@ Ext.onReady( function() {
 				load: function(s) {
 					s.add({
 						id: 0,
-						name: '[ ' + NS.i18n.all_indicator_groups + ' ]',
+						name: '[ ' + NS.i18n.all_indicators + ' ]',
 						index: -1
 					});
 					s.sort([
@@ -2362,7 +2362,7 @@ Ext.onReady( function() {
 				var path;
 
 				if (Ext.isString(uid)) {
-					path = 'dataElementGroups/' + uid + '.json?links=false&paging=false';
+					path = '/dataElementGroups/' + uid + '.json?links=false&paging=false';
 				}
 				else if (uid === 0) {
 					path = 'dataElements.json?paging=false&links=false';
@@ -2926,10 +2926,10 @@ Ext.onReady( function() {
 				return config.items.length ? config : null;
 			},
 			onExpand: function() {
-				var h = ns.app.viewport.westRegion.hasScrollbar ?
+				var h = ns.app.westRegion.hasScrollbar ?
 					ns.core.conf.layout.west_scrollbarheight_accordion_dataelement : ns.core.conf.layout.west_maxheight_accordion_dataelement;
 				ns.core.web.multiSelect.setHeight(h);
-				ns.core.web.multiselect.setHeight(
+				ns.core.web.multiSelect.setHeight(
 					[dataElementAvailable, dataElementSelected],
 					this,
 					ns.core.conf.layout.west_fill_accordion_indicator
@@ -3063,10 +3063,10 @@ Ext.onReady( function() {
 				return config.items.length ? config : null;
 			},
 			onExpand: function() {
-				var h = ns.app.viewport.westRegion.hasScrollbar ?
+				var h = ns.app.westRegion.hasScrollbar ?
 					ns.core.conf.layout.west_scrollbarheight_accordion_dataset : ns.core.conf.layout.west_maxheight_accordion_dataset;
 				ns.core.web.multiSelect.setHeight(h);
-				ns.core.web.multiselect.setHeight(
+				ns.core.web.multiSelect.setHeight(
 					[dataSetAvailable, dataSetSelected],
 					this,
 					ns.core.conf.layout.west_fill_accordion_dataset
