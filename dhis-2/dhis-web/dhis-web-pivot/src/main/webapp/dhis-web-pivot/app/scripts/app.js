@@ -2300,8 +2300,8 @@ Ext.onReady( function() {
 			},
 			listeners: {
 				load: function(s) {
-					ns.core.support.storage.add(s);
-					ns.core.web.multiSelect.filterAvailable({store: s}, {store: store.indicatorSelected});
+					ns.core.web.storage.internal.add(s);
+					ns.core.web.multiSelect.filterAvailable({store: s}, {store: indicatorSelectedStore});
 				}
 			}
 		});
@@ -2385,7 +2385,7 @@ Ext.onReady( function() {
 				this.load({
 					scope: this,
 					callback: function() {
-						ns.core.web.multiSelect.filterAvailable({store: this}, {store: store.dataElementSelected});
+						ns.core.web.multiSelect.filterAvailable({store: this}, {store: dataElementSelectedStore});
 					}
 				});
 			},
@@ -2408,7 +2408,7 @@ Ext.onReady( function() {
 								r.set('name', r.data.operandName);
 							});
 
-							ns.core.web.multiSelect.filterAvailable({store: this}, {store: store.dataElementSelected});
+							ns.core.web.multiSelect.filterAvailable({store: this}, {store: dataElementSelectedStore});
 						}
 					});
 				}
@@ -2418,8 +2418,8 @@ Ext.onReady( function() {
 			},
 			listeners: {
 				load: function(s) {
-					ns.core.support.storage.add(s);
-					ns.core.web.multiSelect.filterAvailable({store: s}, {store: store.dataElementSelected});
+					ns.core.web.storage.internal.add(s);
+					ns.core.web.multiSelect.filterAvailable({store: s}, {store: dataElementSelectedStore});
 				}
 			}
 		});
@@ -2722,7 +2722,7 @@ Ext.onReady( function() {
 							store.parent = id;
 
 							if (ns.core.support.prototype.object.hasObject(store.storage, 'parent', id)) {
-								ns.core.support.store.load(store);
+								ns.core.web.storage.internal.load(store);
 								ns.core.web.multiSelect.filterAvailable(indicatorAvailable, indicatorSelected);
 							}
 							else {
@@ -3776,11 +3776,15 @@ Ext.onReady( function() {
 					id: ns.core.conf.finals.root.id,
 					expanded: true,
 					children: ns.core.init.rootNodes
+				},
+				listeners: {
+					load: function() {
+						console.log(arguments);
+					}
 				}
 			}),
 			listeners: {
-				load: function(s, node, records, successful) {
-					console.log(arguments);
+				load: function() {
 					if (treePanel.tmpSelection) {
 						treePanel.selectGraphMap(treePanel.tmpSelection);
 					}
