@@ -2945,7 +2945,7 @@ Ext.onReady( function() {
 			onExpand: function() {
 				var h = ns.app.westRegion.hasScrollbar ?
 					ns.core.conf.layout.west_scrollbarheight_accordion_dataelement : ns.core.conf.layout.west_maxheight_accordion_dataelement;
-				ns.core.web.multiSelect.setHeight(h);
+				accordion.setThisHeight(h);
 				ns.core.web.multiSelect.setHeight(
 					[dataElementAvailable, dataElementSelected],
 					this,
@@ -3082,7 +3082,7 @@ Ext.onReady( function() {
 			onExpand: function() {
 				var h = ns.app.westRegion.hasScrollbar ?
 					ns.core.conf.layout.west_scrollbarheight_accordion_dataset : ns.core.conf.layout.west_maxheight_accordion_dataset;
-				ns.core.web.multiSelect.setHeight(h);
+				accordion.setThisHeight(h);
 				ns.core.web.multiSelect.setHeight(
 					[dataSetAvailable, dataSetSelected],
 					this,
@@ -3562,7 +3562,7 @@ Ext.onReady( function() {
 			onExpand: function() {
 				var h = ns.app.westRegion.hasScrollbar ?
 					ns.core.conf.layout.west_scrollbarheight_accordion_period : ns.core.conf.layout.west_maxheight_accordion_period;
-				ns.app.accordion.setThisHeight(h);
+				accordion.setThisHeight(h);
 				ns.core.web.multiSelect.setHeight(
 					[fixedPeriodAvailable, fixedPeriodSelected],
 					this,
@@ -4084,7 +4084,7 @@ Ext.onReady( function() {
             onExpand: function() {
                 var h = ns.app.westRegion.hasScrollbar ?
                     ns.core.conf.layout.west_scrollbarheight_accordion_organisationunit : ns.core.conf.layout.west_maxheight_accordion_organisationunit;
-                ns.core.web.multiSelect.setHeight(h);
+                accordion.setThisHeight(h);
                 treePanel.setHeight(this.getHeight() - ns.core.conf.layout.west_fill_accordion_organisationunit);
             },
             items: [
@@ -4299,8 +4299,7 @@ Ext.onReady( function() {
 
 						var h = ns.app.westRegion.hasScrollbar ?
 							ns.core.conf.layout.west_scrollbarheight_accordion_group : ns.core.conf.layout.west_maxheight_accordion_group;
-						ns.core.web.multiSelect.setHeight(h);
-
+						accordion.setThisHeight(h);
 						ns.core.web.multiSelect.setHeight(
 							[available, selected],
 							this,
