@@ -1203,7 +1203,8 @@ Ext.onReady( function() {
 					aaAllFloorIds = [],
 					aaUniqueFloorIds,
 					aCondoId = [],
-					aaAllFloorObjects = [];
+					aaAllFloorObjects = [],
+					uuidObjectMap = {};
 	//dimensionNames = ['pe', 'ou'];
 
 				// aDimensions: array of dimension objects with dimensionName property
@@ -1455,7 +1456,8 @@ Ext.onReady( function() {
 					ids: aCondoId,
 					span: aFloorSpan,
 					dims: nAxisHeight,
-					size: nAxisWidth
+					size: nAxisWidth,
+					uuidObjectMap: uuidObjectMap
 				};
 			};
 
@@ -2339,7 +2341,7 @@ Ext.onReady( function() {
 				};
 
 				getHtml = function() {
-					var s = '<table id="' + tableUuid + '" class="pivot">';
+					var s = '<table id="' + xLayout.tableUuid + '" class="pivot">';
 
 					for (var i = 0; i < htmlArray.length; i++) {
 						s += '<tr>' + htmlArray[i].join('') + '</tr>';
