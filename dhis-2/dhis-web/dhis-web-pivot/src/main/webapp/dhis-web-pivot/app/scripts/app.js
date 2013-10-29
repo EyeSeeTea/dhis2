@@ -3660,6 +3660,7 @@ Ext.onReady( function() {
 			cls: 'ns-tree',
 			style: 'border-top: 1px solid #ddd; padding-top: 1px',
 			width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding,
+			displayField: 'name',
 			rootVisible: false,
 			autoScroll: true,
 			multiSelect: true,
@@ -3756,9 +3757,11 @@ Ext.onReady( function() {
 				this.enable();
 			},
 			store: Ext.create('Ext.data.TreeStore', {
+				fields: ['id', 'name'],
 				proxy: {
 					type: 'rest',
-					//url: ns.core.init.contextPath + ns.core.conf.finals.url.path_module + ns.core.conf.finals.url.organisationunitchildren_get,
+					format: 'json',
+					noCache: false,
 					url: ns.core.init.contextPath + '/api/organisationUnits',
 					reader: {
 						type: 'json',
@@ -3772,7 +3775,8 @@ Ext.onReady( function() {
 				}
 			}),
 			listeners: {
-				load: function() {
+				load: function(s, node, records, successful) {
+					console.log(arguments);
 					if (treePanel.tmpSelection) {
 						treePanel.selectGraphMap(treePanel.tmpSelection);
 					}
@@ -5097,9 +5101,9 @@ Ext.onReady( function() {
 					// fade in
 					Ext.defer( function() {
 						Ext.getBody().fadeIn({
-							duration: 300
+							duration: 500
 						});
-					}, 400 );
+					}, 300 );
 				}
 			}
 		});
