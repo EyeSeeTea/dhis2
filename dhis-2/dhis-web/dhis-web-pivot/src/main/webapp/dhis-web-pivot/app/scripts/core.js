@@ -2389,11 +2389,11 @@ Ext.onReady( function() {
 		// instance
 		return {
 			conf: conf,
-			init: init,
 			api: api,
 			support: support,
 			service: service,
-			web: web
+			web: web,
+			init: init
 		};
 	};
 });
