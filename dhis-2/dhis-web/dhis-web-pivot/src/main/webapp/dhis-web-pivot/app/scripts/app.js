@@ -3745,17 +3745,6 @@ Ext.onReady( function() {
 					}
 				}
 			},
-			store: Ext.create('Ext.data.TreeStore', {
-				proxy: {
-					type: 'ajax',
-					url: ns.core.init.contextPath + ns.core.conf.finals.url.path_module + ns.core.conf.finals.url.organisationunitchildren_get
-				},
-				root: {
-					id: ns.core.conf.finals.root.id,
-					expanded: true,
-					children: ns.core.init.rootNodes
-				}
-			}),
 			xable: function(values) {
 				for (var i = 0; i < values.length; i++) {
 					if (!!values[i]) {
@@ -3766,6 +3755,22 @@ Ext.onReady( function() {
 
 				this.enable();
 			},
+			store: Ext.create('Ext.data.TreeStore', {
+				proxy: {
+					type: 'rest',
+					//url: ns.core.init.contextPath + ns.core.conf.finals.url.path_module + ns.core.conf.finals.url.organisationunitchildren_get,
+					url: ns.core.init.contextPath + '/api/organisationUnits',
+					reader: {
+						type: 'json',
+						root: 'children'
+					}
+				},
+				root: {
+					id: ns.core.conf.finals.root.id,
+					expanded: true,
+					children: ns.core.init.rootNodes
+				}
+			}),
 			listeners: {
 				load: function() {
 					if (treePanel.tmpSelection) {
@@ -4267,7 +4272,7 @@ Ext.onReady( function() {
 							ns.core.conf.layout.west_scrollbarheight_accordion_group : ns.core.conf.layout.west_maxheight_accordion_group;
 						ns.core.web.multiSelect.setHeight(h);
 
-						ns.core.web.multiselect.setHeight(
+						ns.core.web.multiSelect.setHeight(
 							[available, selected],
 							this,
 							ns.core.conf.layout.west_fill_accordion_dataset
@@ -5189,6 +5194,7 @@ Ext.onReady( function() {
 				// i18n
 				requests.push({
 					url: init.contextPath + '/dhis-web-pivot/i18n.action',
+					disableCaching: false,
 					success: function(r) {
 						NS.i18n = Ext.decode(r.responseText);
 						fn();
