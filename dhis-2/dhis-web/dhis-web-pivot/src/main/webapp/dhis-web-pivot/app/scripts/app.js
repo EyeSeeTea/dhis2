@@ -1679,9 +1679,6 @@ Ext.onReady( function() {
         // init
         (function() {
 
-			//tmp
-			init.rootNodes = [{id: 'ImspTQPwCqd', name: 'Sierra'}];
-
 			// root nodes
 			for (var i = 0; i < init.rootNodes.length; i++) {
 				init.rootNodes[i].path = '/' + conf.finals.root.id + '/' + init.rootNodes[i].id;
@@ -3762,12 +3759,19 @@ Ext.onReady( function() {
 					type: 'rest',
 					format: 'json',
 					noCache: false,
+					extraParams: {
+						links: 'false'
+					},
 					url: ns.core.init.contextPath + '/api/organisationUnits',
 					reader: {
 						type: 'json',
 						root: 'children'
 					}
 				},
+				sorters: [{
+					property: 'name',
+					direction: 'ASC'
+				}],
 				root: {
 					id: ns.core.conf.finals.root.id,
 					expanded: true,
@@ -5155,15 +5159,11 @@ Ext.onReady( function() {
 			success: function(r) {
 				init.contextPath = '../..'; //init.contextPath = Ext.decode(r.responseText).activities.dhis.href;
 
-				// user orgunits and children
+				// root nodes
 				requests.push({
-					url: init.contextPath + '/api/organisationUnits.json?userOnly=true&viewClass=detailed&links=false',
+					url: init.contextPath + '/api/organisationUnits.json?level=1&paging=false&links=false',
 					success: function(r) {
-						var ou = Ext.decode(r.responseText).organisationUnits[0];
-						init.user = {
-							ou: ou.id,
-							ouc: Ext.Array.pluck(ou.children, 'id')
-						};
+						init.rootNodes = Ext.decode(r.responseText).organisationUnits;
 						fn();
 					}
 				});
@@ -5173,6 +5173,19 @@ Ext.onReady( function() {
 					url: init.contextPath + '/api/organisationUnitLevels.json?paging=false&links=false',
 					success: function(r) {
 						init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels;
+						fn();
+					}
+				});
+
+				// user orgunits and children
+				requests.push({
+					url: init.contextPath + '/api/organisationUnits.json?userOnly=true&viewClass=detailed&links=false',
+					success: function(r) {
+						var ou = Ext.decode(r.responseText).organisationUnits[0];
+						init.user = {
+							ou: ou.id,
+							ouc: Ext.Array.pluck(ou.children, 'id')
+						};
 						fn();
 					}
 				});
