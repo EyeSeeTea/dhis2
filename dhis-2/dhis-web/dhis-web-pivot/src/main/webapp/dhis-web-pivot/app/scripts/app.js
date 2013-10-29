@@ -764,7 +764,7 @@ Ext.onReady( function() {
 			windowWidth = 500,
 			windowCmpWidth = windowWidth - 22;
 
-		ns.store.reportTable.on('load', function(store, records) {
+		ns.app.stores.reportTable.on('load', function(store, records) {
 			var pager = store.proxy.reader.jsonData.pager;
 
 			info.setText('Page ' + pager.page + ' of ' + pager.pageCount);
@@ -822,7 +822,7 @@ Ext.onReady( function() {
 
 		NameWindow = function(id) {
 			var window,
-				record = ns.store.reportTable.getById(id);
+				record = ns.app.stores.reportTable.getById(id);
 
 			nameTextfield = Ext.create('Ext.form.field.Text', {
 				height: 26,
@@ -862,7 +862,7 @@ Ext.onReady( function() {
 
 								ns.favorite = favorite;
 
-								ns.store.reportTable.loadStore();
+								ns.app.stores.reportTable.loadStore();
 
 								//ns.app.viewport.interpretationButton.enable();
 
@@ -904,7 +904,7 @@ Ext.onReady( function() {
 										alert(r.responseText);
 									},
 									success: function(r) {
-										ns.store.reportTable.loadStore();
+										ns.app.stores.reportTable.loadStore();
 										window.destroy();
 									}
 								});
@@ -980,7 +980,7 @@ Ext.onReady( function() {
 
 						var value = this.getValue(),
 							url = value ? ns.core.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
-							store = ns.store.reportTable;
+							store = ns.app.stores.reportTable;
 
 						store.page = 1;
 						store.loadStore(url);
@@ -994,7 +994,7 @@ Ext.onReady( function() {
 			handler: function() {
 				var value = searchTextfield.getValue(),
 					url = value ? ns.core.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
-					store = ns.store.reportTable;
+					store = ns.app.stores.reportTable;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
 				store.loadStore(url);
@@ -1006,7 +1006,7 @@ Ext.onReady( function() {
 			handler: function() {
 				var value = searchTextfield.getValue(),
 					url = value ? ns.core.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
-					store = ns.store.reportTable;
+					store = ns.app.stores.reportTable;
 
 				store.page = store.page + 1;
 				store.loadStore(url);
@@ -1093,7 +1093,7 @@ Ext.onReady( function() {
 												success: function() {
 													ns.favorite = favorite;
 													ns.app.viewport.interpretationButton.enable();
-													ns.store.reportTable.loadStore();
+													ns.app.stores.reportTable.loadStore();
 												}
 											});
 										}
@@ -1146,7 +1146,7 @@ Ext.onReady( function() {
 											url: ns.core.init.contextPath + '/api/reportTables/' + record.data.id,
 											method: 'DELETE',
 											success: function() {
-												ns.store.reportTable.loadStore();
+												ns.app.stores.reportTable.loadStore();
 											}
 										});
 									}
@@ -1160,7 +1160,7 @@ Ext.onReady( function() {
 					width: 6
 				}
 			],
-			store: ns.store.reportTable,
+			store: ns.app.stores.reportTable,
 			bbar: [
 				info,
 				'->',
@@ -1177,7 +1177,7 @@ Ext.onReady( function() {
 					this.store.page = 1;
 					this.store.loadStore();
 
-					ns.store.reportTable.on('load', function() {
+					ns.app.stores.reportTable.on('load', function() {
 						if (this.isVisible()) {
 							this.fireEvent('afterrender');
 						}
@@ -2901,7 +2901,7 @@ Ext.onReady( function() {
 					}
 
 					dataElementGroupComboBox.loadAvailable();
-					ns.store.dataElementSelected.removeAll();
+					dataElementSelectedStore.removeAll();
 				}
 			}
 		});
@@ -4857,40 +4857,40 @@ Ext.onReady( function() {
 			}
 
 			// Indicators
-			ns.store.indicatorSelected.removeAll();
+			indicatorSelectedStore.removeAll();
 			objectName = dimConf.indicator.objectName;
 			if (dimMap[objectName]) {
-				ns.store.indicatorSelected.add(Ext.clone(recMap[objectName]));
-				ns.core.web.multiSelect.filterAvailable({store: ns.store.indicatorAvailable}, {store: ns.store.indicatorSelected});
+				indicatorSelectedStore.add(Ext.clone(recMap[objectName]));
+				ns.core.web.multiSelect.filterAvailable({store: indicatorAvailableStore}, {store: indicatorSelectedStore});
 			}
 
 			// Data elements
-			ns.store.dataElementSelected.removeAll();
+			dataElementSelectedStore.removeAll();
 			objectName = dimConf.dataElement.objectName;
 			if (dimMap[objectName]) {
-				ns.store.dataElementSelected.add(Ext.clone(recMap[objectName]));
-				ns.core.web.multiSelect.filterAvailable({store: ns.store.dataElementAvailable}, {store: ns.store.dataElementSelected});
+				dataElementSelectedStore.add(Ext.clone(recMap[objectName]));
+				ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
 				dataElementDetailLevel.setValue(objectName);
 			}
 
 			// Operands
 			objectName = dimConf.operand.objectName;
 			if (dimMap[objectName]) {
-				ns.store.dataElementSelected.add(Ext.clone(recMap[objectName]));
-				ns.core.web.multiSelect.filterAvailable({store: ns.store.dataElementAvailable}, {store: ns.store.dataElementSelected});
+				dataElementSelectedStore.add(Ext.clone(recMap[objectName]));
+				ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
 				dataElementDetailLevel.setValue(objectName);
 			}
 
 			// Data sets
-			ns.store.dataSetSelected.removeAll();
+			dataSetSelectedStore.removeAll();
 			objectName = dimConf.dataSet.objectName;
 			if (dimMap[objectName]) {
-				ns.store.dataSetSelected.add(Ext.clone(recMap[objectName]));
-				ns.core.web.multiSelect.filterAvailable({store: ns.store.dataSetAvailable}, {store: ns.store.dataSetSelected});
+				dataSetSelectedStore.add(Ext.clone(recMap[objectName]));
+				ns.core.web.multiSelect.filterAvailable({store: dataSetAvailableStore}, {store: dataSetSelectedStore});
 			}
 
 			// Periods
-			ns.store.fixedPeriodSelected.removeAll();
+			fixedPeriodSelectedStore.removeAll();
 			period.resetRelativePeriods();
 			periodRecords = recMap[dimConf.period.objectName] || [];
 			for (var i = 0, peroid, checkbox; i < periodRecords.length; i++) {
@@ -4903,8 +4903,8 @@ Ext.onReady( function() {
 					fixedPeriodRecords.push(period);
 				}
 			}
-			ns.store.fixedPeriodSelected.add(fixedPeriodRecords);
-			ns.core.web.multiSelect.filterAvailable({store: ns.store.fixedPeriodAvailable}, {store: ns.store.fixedPeriodSelected});
+			fixedPeriodSelectedStore.add(fixedPeriodRecords);
+			ns.core.web.multiSelect.filterAvailable({store: fixedPeriodAvailableStore}, {store: fixedPeriodSelectedStore});
 
 			// Group sets
 			for (var key in dimensionIdSelectedStoreMap) {
