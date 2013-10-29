@@ -4995,11 +4995,6 @@ Ext.onReady( function() {
 
 		viewport = Ext.create('Ext.container.Viewport', {
 			layout: 'border',
-			accordion: accordion,
-			accordionBody: accordionBody,
-			westRegion: westRegion,
-			centerRegion: centerRegion,
-			updateViewport: update,
 			layoutButton: layoutButton,
 			optionsButton: optionsButton,
 			favoriteButton: favoriteButton,
@@ -5015,19 +5010,19 @@ Ext.onReady( function() {
 				centerRegion
 			],
 			listeners: {
-				render: function(vp) {
-					ns.app.viewport = vp;
+				render: function() {
+					ns.app.viewport = this;
 
 					ns.app.layoutWindow = LayoutWindow();
 					ns.app.layoutWindow.hide();
 					ns.app.optionsWindow = OptionsWindow();
 					ns.app.optionsWindow.hide();
 				},
-				afterrender: function(vp) {
+				afterrender: function() {
 
 					// resize event handler
-					ns.app.westRegion.on('resize', function() {
-						var panel = ns.app.accordion.getExpandedPanel();
+					westRegion.on('resize', function() {
+						var panel = accordion.getExpandedPanel();
 
 						if (panel) {
 							panel.onExpand();
@@ -5035,24 +5030,24 @@ Ext.onReady( function() {
 					});
 
 					// left gui
-					var viewportHeight = ns.app.westRegion.getHeight(),
+					var viewportHeight = westRegion.getHeight(),
 						numberOfTabs = ns.core.init.dimensions.length + 5,
 						tabHeight = 28,
 						minPeriodHeight = 380;
 
 					if (viewportHeight > numberOfTabs * tabHeight + minPeriodHeight) {
 						if (!Ext.isIE) {
-							ns.app.accordion.setAutoScroll(false);
-							ns.app.westRegion.setWidth(ns.core.conf.layout.west_width);
-							ns.app.accordion.doLayout();
+							accordion.setAutoScroll(false);
+							westRegion.setWidth(ns.core.conf.layout.west_width);
+							accordion.doLayout();
 						}
 					}
 					else {
-						ns.app.westRegion.hasScrollbar = true;
+						westRegion.hasScrollbar = true;
 					}
 
 					// expand first panel
-					ns.app.accordion.getFirstPanel().expand();
+					accordion.getFirstPanel().expand();
 
 					// look for url params
 					var id = ns.core.web.url.getParam('id'),
