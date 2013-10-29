@@ -2700,7 +2700,7 @@ Ext.onReady( function() {
 				var h = westRegion.hasScrollbar ?
 					ns.core.conf.layout.west_scrollbarheight_accordion_indicator : ns.core.conf.layout.west_maxheight_accordion_indicator;
 				accordion.setThisHeight(h);
-				ns.core.web.multiselect.setHeight(
+				ns.core.web.multiSelect.setHeight(
 					[indicatorAvailable, indicatorSelected],
 					this,
 					ns.core.conf.layout.west_fill_accordion_indicator
@@ -3549,7 +3549,7 @@ Ext.onReady( function() {
 				var h = ns.app.viewport.westRegion.hasScrollbar ?
 					ns.core.conf.layout.west_scrollbarheight_accordion_period : ns.core.conf.layout.west_maxheight_accordion_period;
 				ns.core.web.multiSelect.setHeight(h);
-				ns.core.web.multiselect.setHeight(
+				ns.core.web.multiSelect.setHeight(
 					[fixedPeriodAvailable, fixedPeriodSelected],
 					this,
 					ns.core.conf.layout.west_fill_accordion_period
@@ -4048,7 +4048,7 @@ Ext.onReady( function() {
 				return config.items.length ? config : null;
 			},
             onExpand: function() {
-                var h = ns.app.viewport.westRegion.hasScrollbar ?
+                var h = ns.app.westRegion.hasScrollbar ?
                     ns.core.conf.layout.west_scrollbarheight_accordion_organisationunit : ns.core.conf.layout.west_maxheight_accordion_organisationunit;
                 ns.core.web.multiSelect.setHeight(h);
                 treePanel.setHeight(this.getHeight() - ns.core.conf.layout.west_fill_accordion_organisationunit);
@@ -4365,7 +4365,7 @@ Ext.onReady( function() {
 					accordionBody.setHeight(height - 2);
 				}
 				else {
-					height = westRegion.getHeight() - conf.layout.west_fill;
+					height = westRegion.getHeight() - ns.core.conf.layout.west_fill;
 					mx += panelHeight;
 					accordion.setHeight((height > mx ? mx : height) - 2);
 					accordionBody.setHeight((height > mx ? mx : height) - 2);
@@ -5101,15 +5101,15 @@ Ext.onReady( function() {
 
 		// add listeners
 		(function() {
-			ns.store.indicatorAvailable.on('load', function() {
+			ns.app.stores.indicatorAvailable.on('load', function() {
 				ns.core.web.multiSelect.filterAvailable(indicatorAvailable, indicatorSelected);
 			});
 
-			ns.store.dataElementAvailable.on('load', function() {
+			ns.app.stores.dataElementAvailable.on('load', function() {
 				ns.core.web.multiSelect.filterAvailable(dataElementAvailable, dataElementSelected);
 			});
 
-			ns.store.dataSetAvailable.on('load', function(s) {
+			ns.app.stores.dataSetAvailable.on('load', function(s) {
 				ns.core.web.multiSelect.filterAvailable(dataSetAvailable, dataSetSelected);
 				s.sort('name', 'ASC');
 			});
