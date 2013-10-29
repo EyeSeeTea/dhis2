@@ -16,7 +16,7 @@ Ext.onReady( function() {
 			app: {}
 		};
 
-	// set config
+	// set app config
 	(function() {
 
 		// ext configuration
@@ -359,10 +359,10 @@ Ext.onReady( function() {
 			listeners: {
 				show: function(w) {
 					if (ns.viewport.layoutButton.rendered) {
-						ns.util.window.setAnchorPosition(w, ns.viewport.layoutButton);
+						ns.core.web.window.setAnchorPosition(w, ns.app.layoutButton);
 
 						if (!w.hasHideOnBlurHandler) {
-							ns.util.window.addHideOnBlurHandler(w);
+							ns.core.web.window.addHideOnBlurHandler(w);
 						}
 					}
 				}
@@ -719,10 +719,10 @@ Ext.onReady( function() {
 			listeners: {
 				show: function(w) {
 					if (ns.viewport.optionsButton.rendered) {
-						ns.util.window.setAnchorPosition(w, ns.viewport.optionsButton);
+						ns.core.web.window.setAnchorPosition(w, ns.app.optionsButton);
 
 						if (!w.hasHideOnBlurHandler) {
-							ns.util.window.addHideOnBlurHandler(w);
+							ns.core.web.window.addHideOnBlurHandler(w);
 						}
 					}
 
@@ -938,13 +938,13 @@ Ext.onReady( function() {
 				],
 				listeners: {
 					show: function(w) {
-						ns.util.window.setAnchorPosition(w, addButton);
+						ns.core.web.window.setAnchorPosition(w, addButton);
 
 						if (!w.hasDestroyBlurHandler) {
-							ns.util.window.addDestroyOnBlurHandler(w);
+							ns.core.web.window.addDestroyOnBlurHandler(w);
 						}
 
-						ns.viewport.favoriteWindow.destroyOnBlur = false;
+						ns.app.favoriteWindow.destroyOnBlur = false;
 					},
 					destroy: function() {
 						ns.viewport.favoriteWindow.destroyOnBlur = true;
@@ -1282,10 +1282,10 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function(w) {
-					ns.util.window.setAnchorPosition(w, ns.viewport.favoriteButton);
+					ns.core.web.window.setAnchorPosition(w, ns.app.favoriteButton);
 
 					if (!w.hasDestroyOnBlurHandler) {
-						ns.util.window.addDestroyOnBlurHandler(w);
+						ns.core.web.window.addDestroyOnBlurHandler(w);
 					}
 				}
 			}
@@ -1546,14 +1546,14 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function(w) {
-					var pos = ns.viewport.favoriteWindow.getPosition();
+					var pos = ns.app.favoriteWindow.getPosition();
 					w.setPosition(pos[0] + 5, pos[1] + 5);
 
 					if (!w.hasDestroyOnBlurHandler) {
-						ns.util.window.addDestroyOnBlurHandler(w);
+						ns.core.web.window.addDestroyOnBlurHandler(w);
 					}
 
-					ns.viewport.favoriteWindow.destroyOnBlur = false;
+					ns.app.favoriteWindow.destroyOnBlur = false;
 				},
 				destroy: function() {
 					ns.viewport.favoriteWindow.destroyOnBlur = true;
@@ -1613,9 +1613,8 @@ Ext.onReady( function() {
 							headers: {'Content-Type': 'text/html'},
 							success: function() {
 								textArea.reset();
-								ns.viewport.interpretationButton.disable();
+								ns.app.interpretationButton.disable();
 								window.hide();
-								//NS.util.notification.interpretation(NS.i18n.interpretation_was_shared + '.');
 							}
 						});
 					}
@@ -1647,12 +1646,12 @@ Ext.onReady( function() {
 				},
 				listeners: {
 					show: function(w) {
-						ns.util.window.setAnchorPosition(w, ns.viewport.interpretationButton);
+						ns.core.web.window.setAnchorPosition(w, ns.viewport.interpretationButton);
 
 						document.body.oncontextmenu = true;
 
 						if (!w.hasDestroyOnBlurHandler) {
-							ns.util.window.addDestroyOnBlurHandler(w);
+							ns.core.web.window.addDestroyOnBlurHandler(w);
 						}
 					},
 					hide: function() {
@@ -1674,16 +1673,12 @@ Ext.onReady( function() {
 	extendCore = function(core) {
         var init = core.init,
             conf = core.conf,
-            util = {},
             api = core.api,
             support = core.support,
             service = core.service,
             web = core.web,
             store = {},
             dimConf = conf.finals.dimension;
-
-		//tmp
-		ns.util = util;
 
         // init
         (function() {
@@ -2620,7 +2615,7 @@ Ext.onReady( function() {
 				var h = westRegion.hasScrollbar ?
 					ns.core.conf.layout.west_scrollbarheight_accordion_indicator : ns.core.conf.layout.west_maxheight_accordion_indicator;
 				accordion.setThisHeight(h);
-				ns.util.multiselect.setHeight(
+				ns.core.web.multiselect.setHeight(
 					[indicatorAvailable, indicatorSelected],
 					this,
 					ns.core.conf.layout.west_fill_accordion_indicator
@@ -2909,8 +2904,8 @@ Ext.onReady( function() {
 			onExpand: function() {
 				var h = ns.viewport.westRegion.hasScrollbar ?
 					ns.core.conf.layout.west_scrollbarheight_accordion_dataelement : ns.core.conf.layout.west_maxheight_accordion_dataelement;
-				ns.util.dimension.panel.setHeight(h);
-				ns.util.multiselect.setHeight(
+				ns.core.web.multiSelect.setHeight(h);
+				ns.core.web.multiselect.setHeight(
 					[dataElementAvailable, dataElementSelected],
 					this,
 					ns.core.conf.layout.west_fill_accordion_indicator
@@ -3046,8 +3041,8 @@ Ext.onReady( function() {
 			onExpand: function() {
 				var h = ns.viewport.westRegion.hasScrollbar ?
 					ns.core.conf.layout.west_scrollbarheight_accordion_dataset : ns.core.conf.layout.west_maxheight_accordion_dataset;
-				ns.util.dimension.panel.setHeight(h);
-				ns.util.multiselect.setHeight(
+				ns.core.web.multiSelect.setHeight(h);
+				ns.core.web.multiselect.setHeight(
 					[dataSetAvailable, dataSetSelected],
 					this,
 					ns.core.conf.layout.west_fill_accordion_dataset
@@ -3527,8 +3522,8 @@ Ext.onReady( function() {
 			onExpand: function() {
 				var h = ns.viewport.westRegion.hasScrollbar ?
 					ns.core.conf.layout.west_scrollbarheight_accordion_period : ns.core.conf.layout.west_maxheight_accordion_period;
-				ns.util.dimension.panel.setHeight(h);
-				ns.util.multiselect.setHeight(
+				ns.core.web.multiSelect.setHeight(h);
+				ns.core.web.multiselect.setHeight(
 					[fixedPeriodAvailable, fixedPeriodSelected],
 					this,
 					ns.core.conf.layout.west_fill_accordion_period
@@ -4035,7 +4030,7 @@ Ext.onReady( function() {
             onExpand: function() {
                 var h = ns.viewport.westRegion.hasScrollbar ?
                     ns.core.conf.layout.west_scrollbarheight_accordion_organisationunit : ns.core.conf.layout.west_maxheight_accordion_organisationunit;
-                ns.util.dimension.panel.setHeight(h);
+                ns.core.web.multiSelect.setHeight(h);
                 treePanel.setHeight(this.getHeight() - ns.core.conf.layout.west_fill_accordion_organisationunit);
             },
             items: [
@@ -4250,9 +4245,9 @@ Ext.onReady( function() {
 
 						var h = ns.viewport.westRegion.hasScrollbar ?
 							ns.core.conf.layout.west_scrollbarheight_accordion_group : ns.core.conf.layout.west_maxheight_accordion_group;
-						ns.util.dimension.panel.setHeight(h);
+						ns.core.web.multiSelect.setHeight(h);
 
-						ns.util.multiselect.setHeight(
+						ns.core.web.multiselect.setHeight(
 							[available, selected],
 							this,
 							ns.core.conf.layout.west_fill_accordion_dataset
@@ -4687,7 +4682,7 @@ Ext.onReady( function() {
 								],
 								listeners: {
 									show: function() {
-										ns.util.window.setAnchorPosition(b.menu, b);
+										ns.core.web.window.setAnchorPosition(b.menu, b);
 									},
 									hide: function() {
 										b.menu.destroy();
@@ -4743,7 +4738,7 @@ Ext.onReady( function() {
 								],
 								listeners: {
 									show: function() {
-										ns.util.window.setAnchorPosition(b.menu, b);
+										ns.core.web.window.setAnchorPosition(b.menu, b);
 									},
 									hide: function() {
 										b.menu.destroy();
