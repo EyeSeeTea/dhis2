@@ -347,7 +347,15 @@ Ext.onReady( function() {
 					listeners: {
 						added: function(b) {
 							b.on('click', function() {
-								ns.app.viewport.updateViewport();
+								var config = ns.core.web.pivot.getLayoutConfig(),
+									layout = ns.core.api.layout.Layout(config);
+
+								if (!layout) {
+									return;
+								}
+
+								ns.core.web.pivot.createTable(layout, false);
+
 								window.hide();
 							});
 						}
@@ -709,7 +717,15 @@ Ext.onReady( function() {
 				{
 					text: '<b>' + NS.i18n.update + '</b>',
 					handler: function() {
-						ns.app.viewport.updateViewport();
+						var config = ns.core.web.pivot.getLayoutConfig(),
+							layout = ns.core.api.layout.Layout(config);
+
+						if (!layout) {
+							return;
+						}
+
+						ns.core.web.pivot.createTable(layout, false);
+
 						window.hide();
 					}
 				}
@@ -2187,8 +2203,8 @@ Ext.onReady( function() {
 						xResponse = service.response.getExtendedResponse(response, xLayout);
 
 						// extended axes
-						xColAxis = service.layout.getExtendedAxis('col', xLayout.columnDimensionNames, xResponse);
-						xRowAxis = service.layout.getExtendedAxis('row', xLayout.rowDimensionNames, xResponse);
+						xColAxis = service.layout.getExtendedAxis(xLayout, xResponse, 'col');
+						xRowAxis = service.layout.getExtendedAxis(xLayout, xResponse, 'row');
 
 						// update viewport
 						config = web.pivot.getHtml(xLayout, xResponse, xColAxis, xRowAxis);
@@ -2204,8 +2220,8 @@ Ext.onReady( function() {
 						ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
 
 						if (NS.isSessionStorage) {
-							setMouseHandlers(layout, response, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
-							ns.core.web.storage.session.set(layout, 'table');
+							web.events.setMouseHandlers(layout, response, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
+							web.storage.session.set(layout, 'table');
 						}
 
 						ns.app.viewport.setGui(layout, xLayout, isUpdateGui);
@@ -3546,7 +3562,7 @@ Ext.onReady( function() {
 			onExpand: function() {
 				var h = ns.app.westRegion.hasScrollbar ?
 					ns.core.conf.layout.west_scrollbarheight_accordion_period : ns.core.conf.layout.west_maxheight_accordion_period;
-				ns.core.web.multiSelect.setHeight(h);
+				ns.app.accordion.setThisHeight(h);
 				ns.core.web.multiSelect.setHeight(
 					[fixedPeriodAvailable, fixedPeriodSelected],
 					this,
@@ -3780,7 +3796,7 @@ Ext.onReady( function() {
 				},
 				listeners: {
 					load: function() {
-						console.log(arguments);
+						//console.log(arguments);
 					}
 				}
 			}),

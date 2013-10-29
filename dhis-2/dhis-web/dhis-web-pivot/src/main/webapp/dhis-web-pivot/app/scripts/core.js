@@ -1186,12 +1186,12 @@ Ext.onReady( function() {
 				}();
 			};
 
-			service.layout.getExtendedAxis = function(type, dimensionNames, xResponse) {
+			service.layout.getExtendedAxis = function(xLayout, xResponse, type) {
 				if (!(Ext.isArray(dimensionNames) && dimensionNames.length)) {
 					return;
 				}
 
-				var dimensionNames = Ext.clone(dimensionNames),
+				var dimensionNames = type === 'col' ? Ext.clone(xLayout.columnDimensionNames) : Ext.clone(xLayout.rowDimensionNames),
 					aDimensions = [],
 					spanType = type === 'col' ? 'colSpan' : 'rowSpan',
 					nAxisWidth = 1,
@@ -1256,7 +1256,7 @@ Ext.onReady( function() {
 							aFloorSpan.push(nAxisWidth); // span max
 						}
 						else {
-							if (layout.hideEmptyRows && type === 'row') {
+							if (xLayout.hideEmptyRows && type === 'row') {
 								aFloorSpan.push(nAxisWidth / aAccFloorWidth[i]);
 							}
 							else {
