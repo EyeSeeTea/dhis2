@@ -326,7 +326,7 @@ table.pivot {
 
 	/* Combobox border-radius */
 .ns-combo input {
-    border-radius: 2px 0px 0px 0px;
+    border-radius: 1px 0px 0px 0px;
 }
 
 
@@ -365,14 +365,14 @@ table.pivot {
 }
 
 .ns-toolbar-multiselect-left .x-docked-top {
-	border-top-left-radius: 2px;
+	border-top-left-radius: 1px;
 }
 .ns-toolbar-multiselect-right .x-docked-top {
-	border-top-right-radius: 2px;
+	border-top-right-radius: 1px;
 }
 .ns-toolbar-multiselect-leftright .x-docked-top {
-	border-top-left-radius: 2px;
-	border-top-right-radius: 2px;
+	border-top-left-radius: 1px;
+	border-top-right-radius: 1px;
 }
 
 	/* Multiselect docked bar font size */

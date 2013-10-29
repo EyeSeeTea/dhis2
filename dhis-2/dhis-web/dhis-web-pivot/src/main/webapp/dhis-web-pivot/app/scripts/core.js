@@ -2387,15 +2387,13 @@ Ext.onReady( function() {
 		}());
 
 		// instance
-		NS.instances.push({
+		return {
 			conf: conf,
 			init: init,
 			api: api,
 			support: support,
 			service: service,
 			web: web
-		});
-
-        return NS.instances[NS.instances.length - 1];
+		};
 	};
 });

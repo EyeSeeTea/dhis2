@@ -1671,14 +1671,10 @@ Ext.onReady( function() {
 
 	// core
 	extendCore = function(core) {
-        var init = core.init,
-            conf = core.conf,
-            api = core.api,
-            support = core.support,
-            service = core.service,
-            web = core.web,
-            store = {},
-            dimConf = conf.finals.dimension;
+        var dimConf = core.conf.finals.dimension,
+
+			init = core.init,
+            web = core.web;
 
         // init
         (function() {
@@ -2226,248 +2222,24 @@ Ext.onReady( function() {
 				});
 			};
 		}());
-
-		// store
-		(function() {
-			store.indicatorAvailable = Ext.create('Ext.data.Store', {
-				fields: ['id', 'name'],
-				proxy: {
-					type: 'ajax',
-					reader: {
-						type: 'json',
-						root: 'indicators'
-					}
-				},
-				storage: {},
-				parent: null,
-				sortStore: function() {
-					this.sort('name', 'ASC');
-				},
-				listeners: {
-					load: function(s) {
-						support.storage.add(s);
-						web.multiSelect.filterAvailable({store: s}, {store: store.indicatorSelected});
-					}
-				}
-			});
-
-			store.indicatorSelected = Ext.create('Ext.data.Store', {
-				fields: ['id', 'name'],
-				data: []
-			});
-
-			store.dataElementAvailable = Ext.create('Ext.data.Store', {
-				fields: ['id', 'name', 'dataElementId', 'onsionComboId', 'operandName'],
-				proxy: {
-					type: 'ajax',
-					reader: {
-						type: 'json',
-						root: 'dataElements'
-					}
-				},
-				storage: {},
-				sortStore: function() {
-					this.sort('name', 'ASC');
-				},
-				setTotalsProxy: function(uid) {
-					var path;
-
-					if (Ext.isString(uid)) {
-						path = 'dataElementGroups/' + uid + '.json?links=false&paging=false';
-					}
-					else if (uid === 0) {
-						path = 'dataElements.json?paging=false&links=false';
-					}
-
-					if (!path) {
-						alert('Available data elements: invalid id');
-						return;
-					}
-
-					this.setProxy({
-						type: 'ajax',
-						url: init.contextPath + '/api' + path,
-						reader: {
-							type: 'json',
-							root: 'dataElements'
-						}
-					});
-
-					this.load({
-						scope: this,
-						callback: function() {
-							web.multiSelect.filterAvailable({store: this}, {store: store.dataElementSelected});
-						}
-					});
-				},
-				setDetailsProxy: function(uid) {
-					if (Ext.isString(uid)) {
-						this.setProxy({
-							type: 'ajax',
-							url: init.contextPath + '/dhis-web-commons-ajax-json/getOperands.action?uid=' + uid,
-							reader: {
-								type: 'json',
-								root: 'operands'
-							}
-						});
-
-						this.load({
-							scope: this,
-							callback: function() {
-								this.each(function(r) {
-									r.set('id', r.data.dataElementId + '-' + r.data.onsionComboId);
-									r.set('name', r.data.operandName);
-								});
-
-								web.multiSelect.filterAvailable({store: this}, {store: store.dataElementSelected});
-							}
-						});
-					}
-					else {
-						alert('Invalid parameter');
-					}
-				},
-				listeners: {
-					load: function(s) {
-						support.storage.add(s);
-						web.multiSelect.filterAvailable({store: s}, {store: store.dataElementSelected});
-					}
-				}
-			});
-
-			store.dataElementSelected = Ext.create('Ext.data.Store', {
-				fields: ['id', 'name'],
-				data: []
-			});
-
-			store.dataSetAvailable = Ext.create('Ext.data.Store', {
-				fields: ['id', 'name'],
-				proxy: {
-					type: 'ajax',
-					url: init.contextPath + '/api/dataSets.json?paging=false&links=false',
-					reader: {
-						type: 'json',
-						root: 'dataSets'
-					}
-				},
-				storage: {},
-				sortStore: function() {
-					this.sort('name', 'ASC');
-				},
-				isLoaded: false,
-				listeners: {
-					load: function(s) {
-						this.isLoaded = true;
-
-						support.storage.add(s);
-						web.multiSelect.filterAvailable({store: s}, {store: store.dataSetSelected});
-					}
-				}
-			});
-
-			store.dataSetSelected = Ext.create('Ext.data.Store', {
-				fields: ['id', 'name'],
-				data: []
-			});
-
-			store.periodType = Ext.create('Ext.data.Store', {
-				fields: ['id', 'name'],
-				data: conf.period.periodTypes
-			});
-
-			store.fixedPeriodAvailable = Ext.create('Ext.data.Store', {
-				fields: ['id', 'name', 'index'],
-				data: [],
-				setIndex: function(periods) {
-					for (var i = 0; i < periods.length; i++) {
-						periods[i].index = i;
-					}
-				},
-				sortStore: function() {
-					this.sort('index', 'ASC');
-				}
-			});
-
-			store.fixedPeriodSelected = Ext.create('Ext.data.Store', {
-				fields: ['id', 'name'],
-				data: []
-			});
-
-			store.reportTable = Ext.create('Ext.data.Store', {
-				fields: ['id', 'name', 'lastUpdated', 'access'],
-				proxy: {
-					type: 'ajax',
-					reader: {
-						type: 'json',
-						root: 'reportTables'
-					}
-				},
-				isLoaded: false,
-				pageSize: 10,
-				page: 1,
-				defaultUrl: init.contextPath + '/api/reportTables.json?viewClass=sharing&links=false',
-				loadStore: function(url) {
-					this.proxy.url = url || this.defaultUrl;
-
-					this.load({
-						params: {
-							pageSize: this.pageSize,
-							page: this.page
-						}
-					});
-				},
-				loadFn: function(fn) {
-					if (this.isLoaded) {
-						fn.call();
-					}
-					else {
-						this.load(fn);
-					}
-				},
-				listeners: {
-					load: function(s) {
-						if (!this.isLoaded) {
-							this.isLoaded = true;
-						}
-
-						this.sort('name', 'ASC');
-					}
-				}
-			});
-
-			store.organisationUnitGroup = Ext.create('Ext.data.Store', {
-				fields: ['id', 'name'],
-				proxy: {
-					type: 'ajax',
-					url: init.contextPath + '/api/organisationUnitGroups.json?paging=false&links=false',
-					reader: {
-						type: 'json',
-						root: 'organisationUnitGroups'
-					}
-				}
-			});
-
-			store.legendSet = Ext.create('Ext.data.Store', {
-				fields: ['id', 'name', 'index'],
-				data: function() {
-					var data = init.legendSets;
-					data.unshift({id: 0, name: NS.i18n.none, index: -1});
-					return data;
-				}(),
-				sorters: [
-					{property: 'index', direction: 'ASC'},
-					{property: 'name', direction: 'ASC'}
-				]
-			});
-
-			ns.store = store;
-		}());
-
 	};
 
 	// viewport
 	createViewport = function() {
         var dimConf = ns.core.conf.finals.dimension,
+
+			indicatorAvailableStore,
+			indicatorSelectedStore,
+			dataElementAvailableStore,
+			dataElementSelectedStore,
+			dataSetAvailableStore,
+			dataSetSelectedStore,
+			periodTypeStore,
+			fixedPeriodAvailableStore,
+			fixedPeriodSelectedStore,
+			reportTableStore,
+			organisationUnitGroupStore,
+			legendSetStore,
 
 			indicatorAvailable,
 			indicatorSelected,
@@ -2511,6 +2283,238 @@ Ext.onReady( function() {
 			setGui,
 
 			viewport;
+
+		indicatorAvailableStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			proxy: {
+				type: 'ajax',
+				reader: {
+					type: 'json',
+					root: 'indicators'
+				}
+			},
+			storage: {},
+			parent: null,
+			sortStore: function() {
+				this.sort('name', 'ASC');
+			},
+			listeners: {
+				load: function(s) {
+					ns.core.support.storage.add(s);
+					ns.core.web.multiSelect.filterAvailable({store: s}, {store: store.indicatorSelected});
+				}
+			}
+		});
+
+		indicatorSelectedStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: []
+		});
+
+		dataElementAvailableStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name', 'dataElementId', 'onsionComboId', 'operandName'],
+			proxy: {
+				type: 'ajax',
+				reader: {
+					type: 'json',
+					root: 'dataElements'
+				}
+			},
+			storage: {},
+			sortStore: function() {
+				this.sort('name', 'ASC');
+			},
+			setTotalsProxy: function(uid) {
+				var path;
+
+				if (Ext.isString(uid)) {
+					path = 'dataElementGroups/' + uid + '.json?links=false&paging=false';
+				}
+				else if (uid === 0) {
+					path = 'dataElements.json?paging=false&links=false';
+				}
+
+				if (!path) {
+					alert('Available data elements: invalid id');
+					return;
+				}
+
+				this.setProxy({
+					type: 'ajax',
+					url: ns.core.init.contextPath + '/api' + path,
+					reader: {
+						type: 'json',
+						root: 'dataElements'
+					}
+				});
+
+				this.load({
+					scope: this,
+					callback: function() {
+						ns.core.web.multiSelect.filterAvailable({store: this}, {store: store.dataElementSelected});
+					}
+				});
+			},
+			setDetailsProxy: function(uid) {
+				if (Ext.isString(uid)) {
+					this.setProxy({
+						type: 'ajax',
+						url: ns.core.init.contextPath + '/dhis-web-commons-ajax-json/getOperands.action?uid=' + uid,
+						reader: {
+							type: 'json',
+							root: 'operands'
+						}
+					});
+
+					this.load({
+						scope: this,
+						callback: function() {
+							this.each(function(r) {
+								r.set('id', r.data.dataElementId + '-' + r.data.onsionComboId);
+								r.set('name', r.data.operandName);
+							});
+
+							ns.core.web.multiSelect.filterAvailable({store: this}, {store: store.dataElementSelected});
+						}
+					});
+				}
+				else {
+					alert('Invalid parameter');
+				}
+			},
+			listeners: {
+				load: function(s) {
+					ns.core.support.storage.add(s);
+					ns.core.web.multiSelect.filterAvailable({store: s}, {store: store.dataElementSelected});
+				}
+			}
+		});
+
+		dataElementSelectedStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: []
+		});
+
+		dataSetAvailableStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			proxy: {
+				type: 'ajax',
+				url: ns.core.init.contextPath + '/api/dataSets.json?paging=false&links=false',
+				reader: {
+					type: 'json',
+					root: 'dataSets'
+				}
+			},
+			storage: {},
+			sortStore: function() {
+				this.sort('name', 'ASC');
+			},
+			isLoaded: false,
+			listeners: {
+				load: function(s) {
+					this.isLoaded = true;
+
+					ns.core.support.storage.add(s);
+					ns.core.web.multiSelect.filterAvailable({store: s}, {store: store.dataSetSelected});
+				}
+			}
+		});
+
+		dataSetSelectedStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: []
+		});
+
+		periodTypeStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: ns.core.conf.period.periodTypes
+		});
+
+		fixedPeriodAvailableStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name', 'index'],
+			data: [],
+			setIndex: function(periods) {
+				for (var i = 0; i < periods.length; i++) {
+					periods[i].index = i;
+				}
+			},
+			sortStore: function() {
+				this.sort('index', 'ASC');
+			}
+		});
+
+		fixedPeriodSelectedStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: []
+		});
+
+		reportTableStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name', 'lastUpdated', 'access'],
+			proxy: {
+				type: 'ajax',
+				reader: {
+					type: 'json',
+					root: 'reportTables'
+				}
+			},
+			isLoaded: false,
+			pageSize: 10,
+			page: 1,
+			defaultUrl: ns.core.init.contextPath + '/api/reportTables.json?viewClass=sharing&links=false',
+			loadStore: function(url) {
+				this.proxy.url = url || this.defaultUrl;
+
+				this.load({
+					params: {
+						pageSize: this.pageSize,
+						page: this.page
+					}
+				});
+			},
+			loadFn: function(fn) {
+				if (this.isLoaded) {
+					fn.call();
+				}
+				else {
+					this.load(fn);
+				}
+			},
+			listeners: {
+				load: function(s) {
+					if (!this.isLoaded) {
+						this.isLoaded = true;
+					}
+
+					this.sort('name', 'ASC');
+				}
+			}
+		});
+
+		organisationUnitGroupStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			proxy: {
+				type: 'ajax',
+				url: ns.core.init.contextPath + '/api/organisationUnitGroups.json?paging=false&links=false',
+				reader: {
+					type: 'json',
+					root: 'organisationUnitGroups'
+				}
+			}
+		});
+
+		legendSetStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name', 'index'],
+			data: function() {
+				var data = ns.core.init.legendSets;
+				data.unshift({id: 0, name: NS.i18n.none, index: -1});
+				return data;
+			}(),
+			sorters: [
+				{property: 'index', direction: 'ASC'},
+				{property: 'name', direction: 'ASC'}
+			]
+		});
+
 
 		// data
 		indicatorAvailable = Ext.create('Ext.ux.form.MultiSelect', {
@@ -5105,16 +5109,18 @@ Ext.onReady( function() {
 			init = {},
 			fn;
 
-		init.user = {};
-
 		fn = function() {
 			if (++callbacks === requests.length) {
+
+				NS.instances.push(ns);
 
 				ns.core = NS.getCore(init);
 
 				extendCore(ns.core);
 
 				ns.app.viewport = createViewport();
+
+				NS.instances.push(ns);
 			}
 		};
 
@@ -5129,8 +5135,10 @@ Ext.onReady( function() {
 					url: init.contextPath + '/api/organisationUnits.json?userOnly=true&viewClass=detailed&links=false',
 					success: function(r) {
 						var ou = Ext.decode(r.responseText).organisationUnits[0];
-						init.user.ou = ou.id;
-						init.user.ouc = Ext.Array.pluck(ou.children, 'id');
+						init.user = {
+							ou: ou.id,
+							ouc: Ext.Array.pluck(ou.children, 'id')
+						};
 						fn();
 					}
 				});
