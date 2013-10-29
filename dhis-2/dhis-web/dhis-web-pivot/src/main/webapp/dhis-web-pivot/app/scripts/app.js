@@ -1681,6 +1681,7 @@ Ext.onReady( function() {
 
 			// root nodes
 			for (var i = 0; i < init.rootNodes.length; i++) {
+				init.rootNodes[i].expanded = true;
 				init.rootNodes[i].path = '/' + conf.finals.root.id + '/' + init.rootNodes[i].id;
 			}
 		}());
@@ -2051,7 +2052,7 @@ Ext.onReady( function() {
 			web.pivot = web.pivot || {};
 
 			web.pivot.getLayoutConfig = function() {
-				var panels = ns.app.accorion.panels,
+				var panels = ns.app.accordion.panels,
 					columnDimNames = ns.app.viewport.colStore.getDimensionNames(),
 					rowDimNames = ns.app.viewport.rowStore.getDimensionNames(),
 					filterDimNames = ns.app.viewport.filterStore.getDimensionNames(),
@@ -2479,8 +2480,8 @@ Ext.onReady( function() {
 				load: function(s) {
 					this.isLoaded = true;
 
-					ns.core.support.storage.add(s);
-					ns.core.web.multiSelect.filterAvailable({store: s}, {store: store.dataSetSelected});
+					ns.core.web.storage.internal.add(s);
+					ns.core.web.multiSelect.filterAvailable({store: s}, {store: dataSetSelectedStore});
 				}
 			}
 		});
@@ -3543,7 +3544,7 @@ Ext.onReady( function() {
 				return config.items.length ? config : null;
 			},
 			onExpand: function() {
-				var h = ns.app.viewport.westRegion.hasScrollbar ?
+				var h = ns.app.westRegion.hasScrollbar ?
 					ns.core.conf.layout.west_scrollbarheight_accordion_period : ns.core.conf.layout.west_maxheight_accordion_period;
 				ns.core.web.multiSelect.setHeight(h);
 				ns.core.web.multiSelect.setHeight(
@@ -4130,14 +4131,14 @@ Ext.onReady( function() {
 					reset: function() {
 						if (this.isLoaded) {
 							this.removeAll();
-							ns.core.support.storage.load(this);
+							ns.core.web.storage.internal.load(this);
 							this.sortStore();
 						}
 					},
 					listeners: {
 						load: function(s) {
 							s.isLoaded = true;
-							ns.core.support.storage.add(s);
+							ns.core.web.storage.internal.add(s);
 						}
 					}
 				});
@@ -4280,7 +4281,7 @@ Ext.onReady( function() {
 							availableStore.load();
 						}
 
-						var h = ns.app.viewport.westRegion.hasScrollbar ?
+						var h = ns.app.westRegion.hasScrollbar ?
 							ns.core.conf.layout.west_scrollbarheight_accordion_group : ns.core.conf.layout.west_maxheight_accordion_group;
 						ns.core.web.multiSelect.setHeight(h);
 
