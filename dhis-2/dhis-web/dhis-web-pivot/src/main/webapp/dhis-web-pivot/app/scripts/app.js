@@ -1124,7 +1124,7 @@ Ext.onReady( function() {
 										},
 										success: function(r) {
 											var sharing = Ext.decode(r.responseText),
-												window = NS.app.SharingWindow(sharing);
+												window = SharingWindow(sharing);
 											window.show();
 										}
 									});
@@ -1684,28 +1684,6 @@ Ext.onReady( function() {
 
 		//tmp
 		ns.util = util;
-
-		// util
-		(function() {
-
-			util.checkbox = {
-				setAllFalse: function() {
-					var a = cmp.dimension.relativePeriod.checkbox;
-					for (var i = 0; i < a.length; i++) {
-						a[i].setValue(false);
-					}
-				},
-				isAllFalse: function() {
-					var a = cmp.dimension.relativePeriod.checkbox;
-					for (var i = 0; i < a.length; i++) {
-						if (a[i].getValue()) {
-							return false;
-						}
-					}
-					return true;
-				}
-			};
-		}());
 
         // init
         (function() {
@@ -3105,7 +3083,7 @@ Ext.onReady( function() {
 			relativePeriodId: 'rewind',
 			boxLabel: 'Rewind one period',
 			xable: function() {
-				this.setDisabled(ns.util.checkbox.isAllFalse());
+				this.setDisabled(period.isNoRelativePeriods());
 			}
 		});
 
@@ -3131,7 +3109,7 @@ Ext.onReady( function() {
 								listeners: {
 									added: function(chb) {
 										if (chb.xtype === 'checkbox') {
-											ns.cmp.dimension.relativePeriod.checkbox.push(chb);
+											period.checkboxes.push(chb);
 											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
 										}
 									},
@@ -3173,7 +3151,7 @@ Ext.onReady( function() {
 								listeners: {
 									added: function(chb) {
 										if (chb.xtype === 'checkbox') {
-											ns.cmp.dimension.relativePeriod.checkbox.push(chb);
+											period.checkboxes.push(chb);
 											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
 										}
 									},
@@ -3216,7 +3194,7 @@ Ext.onReady( function() {
 								listeners: {
 									added: function(chb) {
 										if (chb.xtype === 'checkbox') {
-											ns.cmp.dimension.relativePeriod.checkbox.push(chb);
+											period.checkboxes.push(chb);
 											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
 										}
 									},
@@ -3260,7 +3238,7 @@ Ext.onReady( function() {
 								listeners: {
 									added: function(chb) {
 										if (chb.xtype === 'checkbox') {
-											ns.cmp.dimension.relativePeriod.checkbox.push(chb);
+											period.checkboxes.push(chb);
 											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
 										}
 									},
@@ -3297,7 +3275,7 @@ Ext.onReady( function() {
 								listeners: {
 									added: function(chb) {
 										if (chb.xtype === 'checkbox') {
-											ns.cmp.dimension.relativePeriod.checkbox.push(chb);
+											period.checkboxes.push(chb);
 											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
 										}
 									},
@@ -3334,7 +3312,7 @@ Ext.onReady( function() {
 								listeners: {
 									added: function(chb) {
 										if (chb.xtype === 'checkbox') {
-											ns.cmp.dimension.relativePeriod.checkbox.push(chb);
+											period.checkboxes.push(chb);
 											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
 										}
 									},
@@ -3396,7 +3374,7 @@ Ext.onReady( function() {
 								listeners: {
 									added: function(chb) {
 										if (chb.xtype === 'checkbox') {
-											ns.cmp.dimension.relativePeriod.checkbox.push(chb);
+											period.checkboxes.push(chb);
 											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
 										}
 									},
@@ -3520,6 +3498,7 @@ Ext.onReady( function() {
 			xtype: 'panel',
 			title: '<div class="ns-panel-title-period">Periods</div>',
 			hideCollapseTool: true,
+			checkboxes: [],
 			getDimension: function() {
 				var config = {
 						dimension: ns.core.conf.finals.dimension.period.objectName,
@@ -3554,6 +3533,21 @@ Ext.onReady( function() {
 					this,
 					ns.core.conf.layout.west_fill_accordion_period
 				);
+			},
+			resetRelativePeriods: function() {
+				var a = this.checkboxes;
+				for (var i = 0; i < a.length; i++) {
+					a[i].setValue(false);
+				}
+			},
+			isNoRelativePeriods: function() {
+				var a = this.checkboxes;
+				for (var i = 0; i < a.length; i++) {
+					if (a[i].getValue()) {
+						return false;
+					}
+				}
+				return true;
 			},
 			items: [
 				{
@@ -4414,6 +4408,11 @@ Ext.onReady( function() {
 				}
 
 				ns.app.layoutWindow.show();
+			},
+			listeners: {
+				added: function() {
+					ns.app.layoutButton = this;
+				}
 			}
 		});
 
@@ -4426,6 +4425,11 @@ Ext.onReady( function() {
 				}
 
 				ns.app.optionsWindow.show();
+			},
+			listeners: {
+				added: function() {
+					ns.app.optionsButton = this;
+				}
 			}
 		});
 
@@ -4435,10 +4439,16 @@ Ext.onReady( function() {
 			handler: function() {
 				if (ns.app.favoriteWindow) {
 					ns.app.favoriteWindow.destroy();
+					ns.app.favoriteWindow = null;
 				}
 
 				ns.app.favoriteWindow = FavoriteWindow();
 				ns.app.favoriteWindow.show();
+			},
+			listeners: {
+				added: function() {
+					ns.app.favoriteButton = this;
+				}
 			}
 		});
 
@@ -4537,6 +4547,9 @@ Ext.onReady( function() {
 					}
 				],
 				listeners: {
+					added: function() {
+						ns.app.downloadButton = this;
+					},
 					afterrender: function() {
 						this.getEl().addCls('ns-toolbar-btn-menu');
 					}
@@ -4569,14 +4582,17 @@ Ext.onReady( function() {
 				});
 			},
 			handler: function() {
-				if (ns.viewport.interpretationWindow) {
-					ns.viewport.interpretationWindow.destroy();
+				if (ns.app.interpretationWindow) {
+					ns.app.interpretationWindow.destroy();
+					ns.app.interpretationWindow = null;
 				}
 
-				ns.viewport.interpretationWindow = NS.app.InterpretationWindow();
-
-				if (ns.viewport.interpretationWindow) {
-					ns.viewport.interpretationWindow.show();
+				ns.app.interpretationWindow = InterpretationWindow();
+				ns.app.interpretationWindow.show();
+			},
+			listeners: {
+				added: function() {
+					ns.app.interpretationButton = this;
 				}
 			}
 		});
@@ -4843,7 +4859,7 @@ Ext.onReady( function() {
 
 			// Periods
 			ns.store.fixedPeriodSelected.removeAll();
-			ns.util.checkbox.setAllFalse();
+			period.resetRelativePeriods();
 			periodRecords = recMap[dimConf.period.objectName] || [];
 			for (var i = 0, peroid, checkbox; i < periodRecords.length; i++) {
 				period = periodRecords[i];
@@ -4995,14 +5011,7 @@ Ext.onReady( function() {
 
 		viewport = Ext.create('Ext.container.Viewport', {
 			layout: 'border',
-			layoutButton: layoutButton,
-			optionsButton: optionsButton,
-			favoriteButton: favoriteButton,
-			downloadButton: downloadButton,
-			interpretationButton: interpretationButton,
-			userOrganisationUnit: userOrganisationUnit,
-			userOrganisationUnitChildren: userOrganisationUnitChildren,
-			dataElementDetailLevel: dataElementDetailLevel,
+			period: period,
 			treePanel: treePanel,
 			setGui: setGui,
 			items: [
