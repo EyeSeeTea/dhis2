@@ -131,6 +131,10 @@ body.x-windows {
 	cursor: pointer;
 }
 
+.cursor-default {
+	cursor: default;
+}
+
 .td-nobreak {
 	white-space: nowrap;
 }

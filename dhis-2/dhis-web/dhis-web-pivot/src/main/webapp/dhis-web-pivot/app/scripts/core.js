@@ -1950,7 +1950,7 @@ Ext.onReady( function() {
 						}
 					};
 
-					// Dimension
+					// dimension
 					if (xRowAxis) {
 						for (var i = 0, row; i < xRowAxis.size; i++) {
 							row = [];
@@ -1974,7 +1974,7 @@ Ext.onReady( function() {
 	//				     [ dim, dim ]
 	//				     [ dim, dim ] ];
 
-					// Value
+					// value
 					for (var i = 0, valueItemsRow, valueObjectsRow, idValueMap = Ext.clone(xResponse.idValueMap); i < rowAxisSize; i++) {
 						valueItemsRow = [];
 						valueObjectsRow = [];
@@ -1989,7 +1989,7 @@ Ext.onReady( function() {
 							// value html element id
 							uuid = Ext.data.IdGenerator.get('uuid').generate();
 
-							// col and row dim element ids
+							// get uuids array from colaxis/rowaxis leaf
 							if (xColAxis) {
 								uuids = uuids.concat(xColAxis.objects.all[xColAxis.dims - 1][j].uuids);
 							}
@@ -2003,7 +2003,7 @@ Ext.onReady( function() {
 							}
 							else {
 								value = 0;
-								htmlValue = '';
+								htmlValue = '&nbsp;';
 								empty = true;
 							}
 
@@ -2011,7 +2011,7 @@ Ext.onReady( function() {
 							valueObjectsRow.push({
 								uuid: uuid,
 								type: 'value',
-								cls: 'pivot-value',
+								cls: 'pivot-value' + (empty ? ' cursor-default' : ''),
 								value: value,
 								htmlValue: htmlValue,
 								empty: empty,
