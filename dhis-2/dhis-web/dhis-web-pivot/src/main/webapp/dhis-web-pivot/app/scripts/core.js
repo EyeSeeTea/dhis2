@@ -1430,7 +1430,7 @@ Ext.onReady( function() {
 					// set span to second lowest span number: if aFloorSpan == [15,3,15,1], set span to 3
 
 					//var span = nAxisHeight > 1 ? aFloorSpan[nAxisHeight - 2] : nAxisWidth,
-					var span = nAxisHeight > 1 ? aFloorSpan.sort(support.prototype.array.sortNumbersAsc)[1] : nAxisWidth,
+					var span = nAxisHeight > 1 ? Ext.clone(aFloorSpan).sort(support.prototype.array.sortNumbersAsc)[1] : nAxisWidth,
 						allFloorObjectsLast = aaAllFloorObjects[aaAllFloorObjects.length - 1];
 
 					for (var i = 0, leaf, parentUuids, obj, leafUuids = []; i < allFloorObjectsLast.length; i++) {
