@@ -1927,13 +1927,13 @@ Ext.onReady( function() {
 
 				getRowHtmlArray = function() {
 					var a = [],
-						axisObjects = [],
+						axisAllObjects = [],
 						xValueObjects,
 						totalValueObjects = [],
 						mergedObjects = [],
 						valueItemsCopy,
-						colSize = xColAxis ? xColAxis.size : 1,
-						rowSize = xRowAxis ? xRowAxis.size : 1,
+						colAxisSize = xColAxis ? xColAxis.size : 1,
+						rowAxisSize = xRowAxis ? xRowAxis.size : 1,
 						recursiveReduce;
 
 					recursiveReduce = function(obj) {
@@ -1950,7 +1950,7 @@ Ext.onReady( function() {
 						}
 					};
 
-					// Populate dimension objects
+					// Dimension
 					if (xRowAxis) {
 						for (var i = 0, row; i < xRowAxis.size; i++) {
 							row = [];
@@ -1966,16 +1966,20 @@ Ext.onReady( function() {
 								row.push(obj);
 							}
 
-							axisObjects.push(row);
+							axisAllObjects.push(row);
 						}
 					}
+	//axisAllObjects = [ [ dim, dim ]
+	//				     [ dim, dim ]
+	//				     [ dim, dim ]
+	//				     [ dim, dim ] ];
 
-					// Value objects
-					for (var i = 0, valueItemsRow, valueObjectsRow, idValueMap = Ext.clone(xResponse.idValueMap); i < rowSize; i++) {
+					// Value
+					for (var i = 0, valueItemsRow, valueObjectsRow, idValueMap = Ext.clone(xResponse.idValueMap); i < rowAxisSize; i++) {
 						valueItemsRow = [];
 						valueObjectsRow = [];
 
-						for (var j = 0, id, value, htmlValue, empty, uuid, uuids; j < colSize; j++) {
+						for (var j = 0, id, value, htmlValue, empty, uuid, uuids; j < colAxisSize; j++) {
 							empty = false;
 							uuids = [];
 
@@ -2069,7 +2073,7 @@ Ext.onReady( function() {
 									}
 
 									// Hide/reduce parent dim span
-									parent = axisObjects[i][xRowAxis.dims-1];
+									parent = axisAllObjects[i][xRowAxis.dims-1];
 									recursiveReduce(parent);
 								}
 							}
@@ -2121,7 +2125,7 @@ Ext.onReady( function() {
 
 					// Row subtotals
 					if (doSubTotals(xRowAxis)) {
-						var tmpAxisObjects = [],
+						var tmpAxisAllObjects = [],
 							tmpValueObjects = [],
 							tmpTotalValueObjects = [],
 							getAxisSubTotalRow;
@@ -2149,21 +2153,21 @@ Ext.onReady( function() {
 							return row;
 						};
 
-						// tmpAxisObjects
-						for (var i = 0, row, collapsed = []; i < axisObjects.length; i++) {
-							tmpAxisObjects.push(axisObjects[i]);
-							collapsed.push(!!axisObjects[i][0].collapsed);
+						// tmpAxisAllObjects
+						for (var i = 0, row, collapsed = []; i < axisAllObjects.length; i++) {
+							tmpAxisAllObjects.push(axisAllObjects[i]);
+							collapsed.push(!!axisAllObjects[i][0].collapsed);
 
 							// Insert subtotal after last objects
-							if (!Ext.isArray(axisObjects[i+1]) || !!axisObjects[i+1][0].root) {
-								tmpAxisObjects.push(getAxisSubTotalRow(collapsed));
+							if (!Ext.isArray(axisAllObjects[i+1]) || !!axisAllObjects[i+1][0].root) {
+								tmpAxisAllObjects.push(getAxisSubTotalRow(collapsed));
 
 								collapsed = [];
 							}
 						}
 
 						// tmpValueObjects
-						for (var i = 0; i < tmpAxisObjects.length; i++) {
+						for (var i = 0; i < tmpAxisAllObjects.length; i++) {
 							tmpValueObjects.push([]);
 						}
 
@@ -2175,11 +2179,11 @@ Ext.onReady( function() {
 								empty.push(!!item.empty);
 								rowCount++;
 
-								if (axisObjects[j][0].root) {
-									collapsed = !!axisObjects[j][0].collapsed;
+								if (axisAllObjects[j][0].root) {
+									collapsed = !!axisAllObjects[j][0].collapsed;
 								}
 
-								if (!Ext.isArray(axisObjects[j+1]) || axisObjects[j+1][0].root) {
+								if (!Ext.isArray(axisAllObjects[j+1]) || axisAllObjects[j+1][0].root) {
 									tmpValueObjects[tmpCount++].push({
 										type: item.type === 'value' ? 'valueSubtotal' : 'valueSubtotalTotal',
 										value: subTotal,
@@ -2221,7 +2225,7 @@ Ext.onReady( function() {
 							}
 						}
 
-						axisObjects = tmpAxisObjects;
+						axisAllObjects = tmpAxisAllObjects;
 						xValueObjects = tmpValueObjects;
 						totalValueObjects = tmpTotalValueObjects;
 					}
@@ -2231,7 +2235,7 @@ Ext.onReady( function() {
 						row = [];
 
 						if (xRowAxis) {
-							row = row.concat(axisObjects[i]);
+							row = row.concat(axisAllObjects[i]);
 						}
 
 						row = row.concat(xValueObjects[i]);
