@@ -1351,13 +1351,20 @@ Ext.onReady( function() {
 				for (var i = 0, allFloor; i < aaAllFloorIds.length; i++) {
 					allFloor = [];
 
-					for (var j = 0; j < aaAllFloorIds[i].length; j++) {
-						allFloor.push({
+					for (var j = 0, obj; j < aaAllFloorIds[i].length; j++) {
+						obj = {
 							id: aaAllFloorIds[i][j],
 							uuid: Ext.data.IdGenerator.get('uuid').generate(),
 							dim: i,
 							axis: type
-						});
+						};
+
+						// leaf?
+						if (i === aaAllFloorIds.length - 1) {
+							obj.leaf = true;
+						}
+
+						allFloor.push(obj);
 					}
 
 					aaAllFloorObjects.push(allFloor);
@@ -1375,7 +1382,8 @@ Ext.onReady( function() {
 							obj[spanType] = aFloorSpan[i];
 
 							// children
-							obj.children = Ext.isDefined(aFloorSpan[i + 1]) ? aFloorSpan[i] / aFloorSpan[i + 1] : 0;
+							//obj.children = Ext.isDefined(aFloorSpan[i + 1]) ? aFloorSpan[i] / aFloorSpan[i + 1] : 0;
+							obj.children = obj.leaf ? 0 : aFloorSpan[i];
 
 							// first sibling
 							obj.oldest = true;
@@ -1463,6 +1471,8 @@ Ext.onReady( function() {
 
 //console.log("aaAllFloorObjects", aaAllFloorObjects);
 
+
+	alle = aaAllFloorObjects;
 				return {
 					type: type,
 					items: aDimensions,
@@ -1860,7 +1870,8 @@ Ext.onReady( function() {
 						return (xColAxis && xRowAxis) ? getTdHtml({
 							cls: 'pivot-dim-empty',
 							colSpan: xRowAxis.dims,
-							rowSpan: xColAxis.dims
+							rowSpan: xColAxis.dims,
+							htmlValue: '&nbsp;'
 						}) : '';
 					};
 
@@ -1891,7 +1902,8 @@ Ext.onReady( function() {
 								dimHtml.push(getTdHtml({
 									type: 'dimensionSubtotal',
 									cls: 'pivot-dim-subtotal',
-									rowSpan: xColAxis.dims
+									rowSpan: xColAxis.dims,
+									htmlValue: '&nbsp;'
 								}));
 
 								spanCount = 0;
@@ -1938,7 +1950,7 @@ Ext.onReady( function() {
 						}
 					};
 
-					// Populate dim objects
+					// Populate dimension objects
 					if (xRowAxis) {
 						for (var i = 0, row; i < xRowAxis.size; i++) {
 							row = [];
@@ -2124,7 +2136,7 @@ Ext.onReady( function() {
 								obj.collapsed = Ext.Array.contains(collapsed, true);
 
 								if (i === 0) {
-									obj.htmlValue = '';
+									obj.htmlValue = '&nbsp;';
 									obj.colSpan = xRowAxis.dims;
 								}
 								else {
