@@ -1187,10 +1187,6 @@ Ext.onReady( function() {
 			};
 
 			service.layout.getExtendedAxis = function(xLayout, xResponse, type) {
-				if (!(Ext.isArray(dimensionNames) && dimensionNames.length)) {
-					return;
-				}
-
 				var dimensionNames = type === 'col' ? Ext.clone(xLayout.columnDimensionNames) : Ext.clone(xLayout.rowDimensionNames),
 					aDimensions = [],
 					spanType = type === 'col' ? 'colSpan' : 'rowSpan',
@@ -1205,6 +1201,10 @@ Ext.onReady( function() {
 					aCondoId = [],
 					aaAllFloorObjects = [],
 					uuidObjectMap = {};
+
+				if (!(Ext.isArray(dimensionNames) && dimensionNames.length)) {
+					return;
+				}
 	//dimensionNames = ['pe', 'ou'];
 
 				// aDimensions: array of dimension objects with dimensionName property
@@ -1346,7 +1346,9 @@ Ext.onReady( function() {
 
 				// add span and children
 				for (var i = 0; i < aaAllFloorObjects.length; i++) {
-					for (var j = 0, obj, doorCount = 0, oldestObj; j < aaAllFloorObjects[i].length; j += aFloorSpan[i]) {
+					//for (var j = 0, obj, doorCount = 0, oldestObj; j < aaAllFloorObjects[i].length; j += aFloorSpan[i]) {
+					for (var j = 0, obj, doorCount = 0, oldestObj; j < aaAllFloorObjects[i].length; j++) {
+
 						obj = aaAllFloorObjects[i][j];
 
 						if (doorCount === 0) {
@@ -1368,9 +1370,8 @@ Ext.onReady( function() {
 							// tmp oldest uuid
 							oldestObj = obj;
 						}
-						else {
-							obj.belongsTo = oldestObj;
-						}
+
+						obj.oldestSibling = oldestObj;
 
 						if (++doorCount === aFloorSpan[i]) {
 							doorCount = 0;
@@ -1410,10 +1411,10 @@ Ext.onReady( function() {
 						parentUuids = [];
 						obj = leaf;
 
-						// get the uuid the parent belongs to
+						// get the uuid of the oldest sibling
 						while (obj.parent) {
 							obj = obj.parent;
-							parentUuids.push(obj.belongsTo.uuid);
+							parentUuids.push(obj.oldestSibling.uuid);
 						}
 
 						// add parent uuids to leaf
@@ -1468,7 +1469,7 @@ Ext.onReady( function() {
 			// response
 			service.response = {};
 
-			service.response.getExtendedResponse = function(response, xLayout) {
+			service.response.getExtendedResponse = function(xLayout, response) {
 				var ids = [];
 
 				response.nameHeaderMap = {};
@@ -2352,8 +2353,7 @@ Ext.onReady( function() {
 
 				// get html
 				return function() {
-					htmlArray = [].concat(getColAxisHtmlArray(), getRowHtmlArray(), getTotalHtmlArray());
-					htmlArray = Ext.Array.clean(htmlArray);
+					htmlArray = Ext.Array.clean([].concat(getColAxisHtmlArray() || [], getRowHtmlArray() || [], getTotalHtmlArray() || []));
 
 					return {
 						html: getHtml(htmlArray),

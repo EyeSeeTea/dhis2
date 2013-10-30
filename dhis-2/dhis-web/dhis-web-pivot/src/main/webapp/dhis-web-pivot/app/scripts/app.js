@@ -2205,7 +2205,7 @@ Ext.onReady( function() {
 						}
 
 						// extend response
-						xResponse = service.response.getExtendedResponse(response, xLayout);
+						xResponse = service.response.getExtendedResponse(xLayout, response);
 
 						// extended axes
 						xColAxis = service.layout.getExtendedAxis(xLayout, xResponse, 'col');
