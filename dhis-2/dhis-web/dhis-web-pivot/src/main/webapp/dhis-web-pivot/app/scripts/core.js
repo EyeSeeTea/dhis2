@@ -573,6 +573,14 @@ Ext.onReady( function() {
 				return array;
 			};
 
+			support.prototype.array.sortNumbersAsc = function(a, b) {
+				return a - b;
+			};
+
+			support.prototype.array.sortNumbersDesc = function(a, b) {
+				return b - a;
+			};
+
 				// object
 			support.prototype.object = {};
 
@@ -1332,7 +1340,9 @@ Ext.onReady( function() {
 						id += aaAllFloorIds[j][i];
 					}
 
-					aCondoId.push(id);
+					if (id) {
+						aCondoId.push(id);
+					}
 				}
 	//aCondoId	= [ id11+id21+id31, id12+id22+id32, ... ]
 
@@ -1409,12 +1419,14 @@ Ext.onReady( function() {
 				// add uuids array to leaves
 				if (aaAllFloorObjects.length) {
 
-					// Span = second-last in aFloorSpan - or axis size (instead of 1 - to highlight all leaves when dim == 1 )
-					var span = aaAllFloorObjects.length > 1 ? aFloorSpan[aaAllFloorObjects.length - 2] : nAxisWidth,
-						allObjectsFloorLast = aaAllFloorObjects[aaAllFloorObjects.length - 1];
+					// set span to second lowest span number: if aFloorSpan == [15,3,15,1], set span to 3
 
-					for (var i = 0, leaf, parentUuids, obj, leafUuids = []; i < allObjectsFloorLast.length; i++) {
-						leaf = allObjectsFloorLast[i];
+					//var span = nAxisHeight > 1 ? aFloorSpan[nAxisHeight - 2] : nAxisWidth,
+					var span = nAxisHeight > 1 ? aFloorSpan.sort(support.prototype.array.sortNumbersAsc)[1] : nAxisWidth,
+						allFloorObjectsLast = aaAllFloorObjects[aaAllFloorObjects.length - 1];
+
+					for (var i = 0, leaf, parentUuids, obj, leafUuids = []; i < allFloorObjectsLast.length; i++) {
+						leaf = allFloorObjectsLast[i];
 						leafUuids.push(leaf.uuid);
 						parentUuids = [];
 						obj = leaf;
@@ -1431,7 +1443,7 @@ Ext.onReady( function() {
 						// add uuid for all leaves
 						if (leafUuids.length === span) {
 							for (var j = (i - span) + 1, leaf; j <= i; j++) {
-								leaf = allObjectsFloorLast[j];
+								leaf = allFloorObjectsLast[j];
 								leaf.uuids = leaf.uuids.concat(Ext.clone(leafUuids));
 							}
 
