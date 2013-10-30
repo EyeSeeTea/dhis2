@@ -1187,9 +1187,9 @@ Ext.onReady( function() {
 			};
 
 			service.layout.getExtendedAxis = function(xLayout, xResponse, type) {
-				var dimensionNames = type === 'col' ? Ext.clone(xLayout.columnDimensionNames) : Ext.clone(xLayout.rowDimensionNames),
+				var dimensionNames,
+					spanType,
 					aDimensions = [],
-					spanType = type === 'col' ? 'colSpan' : 'rowSpan',
 					nAxisWidth = 1,
 					nAxisHeight,
 					aFloorWidth = [],
@@ -1201,6 +1201,15 @@ Ext.onReady( function() {
 					aCondoId = [],
 					aaAllFloorObjects = [],
 					uuidObjectMap = {};
+
+				if (type === 'col') {
+					dimensionNames = Ext.clone(xLayout.columnDimensionNames);
+					spanType = 'colSpan';
+				}
+				else if (type === 'row') {
+					dimensionNames = Ext.clone(xLayout.rowDimensionNames);
+					spanType = 'rowSpan';
+				}
 
 				if (!(Ext.isArray(dimensionNames) && dimensionNames.length)) {
 					return;
@@ -1228,8 +1237,8 @@ Ext.onReady( function() {
 					return a;
 				}();
 	//aaUniqueFloorIds	= [ [de-id1, de-id2, de-id3],
-	//					[pe-id1],
-	//					[ou-id1, ou-id2, ou-id3, ou-id4] ]
+	//					    [pe-id1],
+	//					    [ou-id1, ou-id2, ou-id3, ou-id4] ]
 
 
 				// nAxisHeight
@@ -1346,7 +1355,6 @@ Ext.onReady( function() {
 
 				// add span and children
 				for (var i = 0; i < aaAllFloorObjects.length; i++) {
-					//for (var j = 0, obj, doorCount = 0, oldestObj; j < aaAllFloorObjects[i].length; j += aFloorSpan[i]) {
 					for (var j = 0, obj, doorCount = 0, oldestObj; j < aaAllFloorObjects[i].length; j++) {
 
 						obj = aaAllFloorObjects[i][j];
