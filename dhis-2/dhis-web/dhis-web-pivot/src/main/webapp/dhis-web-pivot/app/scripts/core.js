@@ -1868,7 +1868,7 @@ Ext.onReady( function() {
 
 					getEmptyHtmlArray = function() {
 						return (xColAxis && xRowAxis) ? getTdHtml({
-							cls: 'pivot-dim-empty',
+							cls: 'pivot-dim-empty cursor-default',
 							colSpan: xRowAxis.dims,
 							rowSpan: xColAxis.dims,
 							htmlValue: '&nbsp;'
@@ -1901,7 +1901,7 @@ Ext.onReady( function() {
 							if (i === 0 && spanCount === xColAxis.span[i] && doSubTotals(xColAxis) ) {
 								dimHtml.push(getTdHtml({
 									type: 'dimensionSubtotal',
-									cls: 'pivot-dim-subtotal',
+									cls: 'pivot-dim-subtotal cursor-default',
 									rowSpan: xColAxis.dims,
 									htmlValue: '&nbsp;'
 								}));
@@ -2018,7 +2018,7 @@ Ext.onReady( function() {
 								uuids: uuids
 							});
 
-							// Map element id to dim element ids
+							// map element id to dim element ids
 							uuidDimUuidsMap[uuid] = uuids;
 						}
 
@@ -2026,7 +2026,7 @@ Ext.onReady( function() {
 						valueObjects.push(valueObjectsRow);
 					}
 
-					// Value total objects
+					// totals
 					if (xColAxis && doTotals()) {
 						for (var i = 0, empty = [], total = 0; i < valueObjects.length; i++) {
 							for (j = 0, obj; j < valueObjects[i].length; j++) {
@@ -2049,7 +2049,7 @@ Ext.onReady( function() {
 						}
 					}
 
-					// Hide empty rows (dims/values/totals)
+					// hide empty rows (dims/values/totals)
 					if (xColAxis && xRowAxis) {
 						if (xLayout.hideEmptyRows) {
 							for (var i = 0, valueRow, empty, parent; i < valueObjects.length; i++) {
@@ -2082,7 +2082,7 @@ Ext.onReady( function() {
 
 					xValueObjects = Ext.clone(valueObjects);
 
-					// Col subtotals
+					// col subtotals
 					if (doSubTotals(xColAxis)) {
 						var tmpValueObjects = [];
 
@@ -2103,9 +2103,9 @@ Ext.onReady( function() {
 								if (colCount === colUniqueFactor) {
 									row.push({
 										type: 'valueSubtotal',
-										cls: 'pivot-value-subtotal',
+										cls: 'pivot-value-subtotal' + (!Ext.Array.contains(empty, false) ? ' cursor-default' : '',
 										value: rowSubTotal,
-										htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(rowSubTotal) : '',
+										htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(rowSubTotal) : '&nbsp;',
 										empty: !Ext.Array.contains(empty, false),
 										collapsed: !Ext.Array.contains(collapsed, false)
 									});
@@ -2123,7 +2123,7 @@ Ext.onReady( function() {
 						xValueObjects = tmpValueObjects;
 					}
 
-					// Row subtotals
+					// row subtotals
 					if (doSubTotals(xRowAxis)) {
 						var tmpAxisAllObjects = [],
 							tmpValueObjects = [],
@@ -2136,7 +2136,7 @@ Ext.onReady( function() {
 							for (var i = 0, obj; i < xRowAxis.dims; i++) {
 								obj = {};
 								obj.type = 'dimensionSubtotal';
-								obj.cls = 'pivot-dim-subtotal';
+								obj.cls = 'pivot-dim-subtotal cursor-default';
 								obj.collapsed = Ext.Array.contains(collapsed, true);
 
 								if (i === 0) {
@@ -2184,12 +2184,14 @@ Ext.onReady( function() {
 								}
 
 								if (!Ext.isArray(axisAllObjects[j+1]) || axisAllObjects[j+1][0].root) {
+									var isEmpty = !Ext.Array.contains(empty, false);
+
 									tmpValueObjects[tmpCount++].push({
 										type: item.type === 'value' ? 'valueSubtotal' : 'valueSubtotalTotal',
 										value: subTotal,
-										htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(subTotal) : '',
+										htmlValue: isEmpty ? '&nbsp;' : getRoundedHtmlValue(subTotal),
 										collapsed: collapsed,
-										cls: item.type === 'value' ? 'pivot-value-subtotal' : 'pivot-value-subtotal-total'
+										cls: (item.type === 'value' ? 'pivot-value-subtotal' : 'pivot-value-subtotal-total') + (isEmpty ? ' cursor-default' : '')
 									});
 									rowCount = 0;
 									subTotal = 0;
@@ -2209,12 +2211,14 @@ Ext.onReady( function() {
 							count++;
 
 							if (count === xRowAxis.span[0]) {
+								var isEmpty = !Ext.Array.contains(empty, false);
+
 								tmpTotalValueObjects.push({
 									type: 'valueTotalSubgrandtotal',
-									cls: 'pivot-value-total-subgrandtotal',
+									cls: 'pivot-value-total-subgrandtotal' + (isEmpty ? ' cursor-default' : ''),
 									value: subTotal,
-									htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(subTotal) : '',
-									empty: !Ext.Array.contains(empty, false),
+									htmlValue: isEmpty ? '&nbsp;' : getRoundedHtmlValue(subTotal),
+									empty: isEmpty,
 									collapsed: !Ext.Array.contains(collapsed, false)
 								});
 
