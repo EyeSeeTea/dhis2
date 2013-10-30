@@ -1200,12 +1200,12 @@ Ext.onReady( function() {
 					aDimensions = [],
 					nAxisWidth = 1,
 					nAxisHeight,
-					aFloorWidth = [],
+					aaUniqueFloorIds,
+					aUniqueFloorWidth = [],
 					aAccFloorWidth = [],
 					aFloorSpan = [],
 					aaGuiFloorIds = [],
 					aaAllFloorIds = [],
-					aaUniqueFloorIds,
 					aCondoId = [],
 					aaAllFloorObjects = [],
 					uuidObjectMap = {};
@@ -1254,21 +1254,21 @@ Ext.onReady( function() {
 	//nAxisHeight = 3
 
 
-				// aFloorWidth, nAxisWidth, aAccFloorWidth
-				for (var i = 0, nFloorWidth; i < nAxisHeight; i++) {
-					nFloorWidth = aaUniqueFloorIds[i].length;
+				// aUniqueFloorWidth, nAxisWidth, aAccFloorWidth
+				for (var i = 0, nUniqueFloorWidth; i < nAxisHeight; i++) {
+					nUniqueFloorWidth = aaUniqueFloorIds[i].length;
 
-					aFloorWidth.push(nFloorWidth);
-					nAxisWidth = nAxisWidth * nFloorWidth;
+					aUniqueFloorWidth.push(nUniqueFloorWidth);
+					nAxisWidth = nAxisWidth * nUniqueFloorWidth;
 					aAccFloorWidth.push(nAxisWidth);
 				}
-	//aFloorWidth		= [3, 1, 4]
+	//aUniqueFloorWidth	= [3, 1, 4]
 	//nAxisWidth		= 12 (3 * 1 * 4)
 	//aAccFloorWidth	= [3, 3, 12]
 
 				// aFloorSpan
 				for (var i = 0; i < nAxisHeight; i++) {
-					if (aFloorWidth[i] === 1) {
+					if (aUniqueFloorWidth[i] === 1) {
 						if (i === 0) { // if top floor
 							aFloorSpan.push(nAxisWidth); // span max
 						}
@@ -1294,7 +1294,7 @@ Ext.onReady( function() {
 				if (nAxisHeight.length > 1) {
 					for (var i = 1, a, n; i < nAxisHeight; i++) {
 						a = [];
-						n = aFloorWidth[i] === 1 ? aFloorWidth[0] : aAccFloorWidth[i-1];
+						n = aUniqueFloorWidth[i] === 1 ? aUniqueFloorWidth[0] : aAccFloorWidth[i-1];
 
 						for (var j = 0; j < n; j++) {
 							a = a.concat(aaUniqueFloorIds[i]);
@@ -2101,12 +2101,13 @@ Ext.onReady( function() {
 								row.push(item);
 
 								if (colCount === colUniqueFactor) {
+									var isEmpty = !Ext.Array.contains(empty, false);
 									row.push({
 										type: 'valueSubtotal',
-										cls: 'pivot-value-subtotal' + (!Ext.Array.contains(empty, false) ? ' cursor-default' : '',
+										cls: 'pivot-value-subtotal' + (isEmpty ? ' cursor-default' : ''),
 										value: rowSubTotal,
-										htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(rowSubTotal) : '&nbsp;',
-										empty: !Ext.Array.contains(empty, false),
+										htmlValue: isEmpty ? '&nbsp;' : getRoundedHtmlValue(rowSubTotal),
+										empty: isEmpty,
 										collapsed: !Ext.Array.contains(collapsed, false)
 									});
 
