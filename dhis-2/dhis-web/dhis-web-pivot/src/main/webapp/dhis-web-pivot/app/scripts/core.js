@@ -590,6 +590,43 @@ Ext.onReady( function() {
 				return b - a;
 			};
 
+			support.prototype.array.sort = function(array, direction, key) {
+				if (!support.prototype.array.getLength(array)) {
+					return;
+				}
+
+				key = key || 'name';
+
+				array.sort( function(a, b) {
+
+					// if object, get the property values
+					if (Ext.isObject(a) && Ext.isObject(b) && key) {
+						a = a[key];
+						b = b[key];
+					}
+
+					// string
+					if (Ext.isString(a) && Ext.isString(b)) {
+						a = a.toLowerCase();
+						b = b.toLowerCase();
+
+						if (direction === 'DESC') {
+							return a < b ? 1 : (a > b ? -1 : 0);
+						}
+						else {
+							return a < b ? -1 : (a > b ? 1 : 0);
+						}
+					}
+
+					// number
+					else if (Ext.isNumber(a) && Ext.isNumber(b)) {
+						return direction === 'DESC' ? b - a : a - b;
+					}
+
+					return 0;
+				});
+			};
+
 				// object
 			support.prototype.object = {};
 
@@ -738,10 +775,10 @@ Ext.onReady( function() {
 
 				// Sort object items, ids
 				for (var i = 0, items; i < dimensionArray.length; i++) {
-					support.prototype.array.sortObjectsByObjectKey(dimensionArray[i].items, 'id');
+					support.prototype.array.sort(dimensionArray[i].items, 'ASC', 'id');
 
 					if (support.prototype.array.getLength(dimensionArray[i].ids)) {
-						dimensionArray[i].ids.sort();
+						support.prototype.array.sort(dimensionArray[i].ids);
 					}
 				}
 
@@ -958,7 +995,7 @@ Ext.onReady( function() {
 
 				if (layout.legendSet) {
 					xLayout.legendSet = init.idLegendSetMap[layout.legendSet.id];
-					support.prototype.array.sortObjectsByObjectKey(xLayout.legendSet.mapLegends, 'startValue');
+					support.prototype.array.sort(xLayout.legendSet.mapLegends, 'ASC', 'startValue');
 				}
 
 				// unique dimension names
@@ -1115,7 +1152,7 @@ Ext.onReady( function() {
 										});
 									}
 
-									support.prototype.array.sortObjectsByObjectKey(userOuc);
+									support.prototype.array.sort(userOuc);
 								}
 								if (isUserOrgunitGrandChildren) {
 									var userOuOuc = [].concat(ns.init.user.ou, ns.init.user.ouc),
@@ -1134,7 +1171,7 @@ Ext.onReady( function() {
 										}
 									}
 
-									support.prototype.array.sortObjectsByObjectKey(userOugc);
+									support.prototype.array.sort(userOugc);
 								}
 
 								dim.items = [].concat(userOu || [], userOuc || [], userOugc || []);
@@ -1149,7 +1186,7 @@ Ext.onReady( function() {
 									});
 								}
 
-								support.prototype.array.sortObjectsByObjectKey(dim.items);
+								support.prototype.array.sort(dim.items);
 							}
 							else {
 								dim.items = Ext.clone(xLayout.dimensionNameItemsMap[dim.dimensionName]);
@@ -2422,7 +2459,7 @@ console.log(mapLegends[i].startValue, mapLegends[i].endValue);
 
 			// sort and extend dynamic dimensions
 			if (Ext.isArray(init.dimensions)) {
-				support.prototype.array.sortObjectsByObjectKey(init.dimensions);
+				support.prototype.array.sort(init.dimensions);
 
 				for (var i = 0, dim; i < init.dimensions.length; i++) {
 					dim = init.dimensions[i];

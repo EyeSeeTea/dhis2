@@ -1703,7 +1703,7 @@ Ext.onReady( function() {
 
 			// sort organisation unit levels
 			if (Ext.isArray(init.organisationUnitLevels)) {
-				support.prototype.array.sortObjectsByObjectKey(init.organisationUnitLevels, 'level');
+				support.prototype.array.sort(init.organisationUnitLevels, 'ASC', 'level');
 			}
 		}());
 
@@ -4377,8 +4377,6 @@ Ext.onReady( function() {
 					organisationUnit
 				],
 				dims = Ext.clone(ns.core.init.dimensions);
-
-				ns.core.support.prototype.array.sortObjectsByObjectKey(dims);
 
 				panels = panels.concat(getDimensionPanels(dims, 'ns-panel-title-dimension'));
 
