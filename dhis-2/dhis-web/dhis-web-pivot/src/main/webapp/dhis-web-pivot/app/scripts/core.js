@@ -1941,12 +1941,12 @@ Ext.onReady( function() {
 							obj.collapsed = true;
 
 							if (obj.parent) {
-								obj.parent.children = obj.parent.children - 1;
+								obj.parent.oldestSibling.children--;
 							}
 						}
 
 						if (obj.parent) {
-							recursiveReduce(obj.parent);
+							recursiveReduce(obj.parent.oldestSibling);
 						}
 					};
 
@@ -2052,29 +2052,26 @@ Ext.onReady( function() {
 					// hide empty rows (dims/values/totals)
 					if (xColAxis && xRowAxis) {
 						if (xLayout.hideEmptyRows) {
-							for (var i = 0, valueRow, empty, parent; i < valueObjects.length; i++) {
+							for (var i = 0, valueRow, isValueRowEmpty, dimLeaf; i < valueObjects.length; i++) {
 								valueRow = valueObjects[i];
-								empty = [];
+								isValueRowEmpty = !Ext.Array.contains(Ext.Array.pluck(valueRow, 'empty'), false);
 
-								for (var j = 0; j < valueRow.length; j++) {
-									empty.push(!!valueRow[j].empty);
-								}
+								// if value row is empty
+								if (isValueRowEmpty) {
 
-								if (!Ext.Array.contains(empty, false) && xRowAxis) {
-
-									// Hide values
+									// Hide values by adding collapsed = true to all items
 									for (var j = 0; j < valueRow.length; j++) {
 										valueRow[j].collapsed = true;
 									}
 
-									// Hide total
+									// Hide totals by adding collapsed = true to all items
 									if (doTotals()) {
 										totalValueObjects[i].collapsed = true;
 									}
 
 									// Hide/reduce parent dim span
-									parent = axisAllObjects[i][xRowAxis.dims-1];
-									recursiveReduce(parent);
+									dimLeaf = axisAllObjects[i][xRowAxis.dims-1];
+									recursiveReduce(dimLeaf);
 								}
 							}
 						}
