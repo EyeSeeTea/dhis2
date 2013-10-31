@@ -28,12 +28,30 @@ package org.hisp.dhis.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.GenericIdentifiableObjectStore;
+import java.util.Collection;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
-public interface FilterStore
-    extends GenericIdentifiableObjectStore<MetaDataFilter>
+public interface MetaDataFilterService
 {
+    MetaDataFilter getFilter( Integer id );
+
+    MetaDataFilter getFilterByUid( String uid );
+
+    Collection<MetaDataFilter> getAllFilters();
+
+    Collection<MetaDataFilter> getFiltersBetweenByName( String name, int first, int max );
+
+    Collection<MetaDataFilter> getFiltersBetween( int first, int max );
+
+    void saveFilter( MetaDataFilter metaDataFilter );
+
+    void updateFilter( MetaDataFilter metaDataFilter );
+
+    void deleteFilter( MetaDataFilter metaDataFilter );
+
+    int getFilterCountByName( String name );
+
+    int getFilterCount();
 }

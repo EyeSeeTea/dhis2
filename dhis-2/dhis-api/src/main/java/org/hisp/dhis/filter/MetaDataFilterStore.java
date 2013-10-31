@@ -1,4 +1,4 @@
-package org.hisp.dhis.metadatafilter.hibernate;
+package org.hisp.dhis.filter;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,15 +28,12 @@ package org.hisp.dhis.metadatafilter.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
-import org.hisp.dhis.filter.MetaDataFilter;
-import org.hisp.dhis.filter.FilterStore;
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
-public class HibernateFilterStore
-    extends HibernateIdentifiableObjectStore<MetaDataFilter>
-    implements FilterStore
+public interface MetaDataFilterStore
+    extends GenericIdentifiableObjectStore<MetaDataFilter>
 {
 }
