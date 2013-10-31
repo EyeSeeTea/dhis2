@@ -1703,7 +1703,7 @@ Ext.onReady( function() {
 
 			// sort organisation unit levels
 			if (Ext.isArray(init.organisationUnitLevels)) {
-				init.organisationUnitLevels = support.prototype.array.sortObjectsByObjectKey(init.organisationUnitLevels, 'level');
+				support.prototype.array.sortObjectsByObjectKey(init.organisationUnitLevels, 'level');
 			}
 		}());
 

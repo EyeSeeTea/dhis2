@@ -558,19 +558,28 @@ Ext.onReady( function() {
 				key = key || 'name';
 
 				array.sort( function(a, b) {
-					var nameA = a[key].toString().toLowerCase(),
-						nameB = b[key].toString().toLowerCase();
 
-					if (nameA < nameB) {
-						return -1;
+					// string
+					if (Ext.isString(a[key]) && Ext.isString(b[key])) {
+						var nameA = a[key].toLowerCase(),
+							nameB = b[key].toLowerCase();
+
+						if (nameA < nameB) {
+							return -1;
+						}
+						if (nameA > nameB) {
+							return 1;
+						}
+						return 0;
 					}
-					if (nameA > nameB) {
-						return 1;
+
+					// number
+					else if (Ext.isNumber(a[key]) && Ext.isNumber(b[key])) {
+						return a[key] - b[key];
 					}
+
 					return 0;
 				});
-
-				return array;
 			};
 
 			support.prototype.array.sortNumbersAsc = function(a, b) {
@@ -729,7 +738,7 @@ Ext.onReady( function() {
 
 				// Sort object items, ids
 				for (var i = 0, items; i < dimensionArray.length; i++) {
-					dimensionArray[i].items = support.prototype.array.sortObjectsByObjectKey(dimensionArray[i].items, 'id');
+					support.prototype.array.sortObjectsByObjectKey(dimensionArray[i].items, 'id');
 
 					if (support.prototype.array.getLength(dimensionArray[i].ids)) {
 						dimensionArray[i].ids.sort();
@@ -945,7 +954,12 @@ Ext.onReady( function() {
 				}
 
 				// legend set
-				layout.legendSet = layout.legendSet ? init.idLegendSetMap[layout.legendSet.id] : null;
+				xLayout.legendSet = layout.legendSet ? init.idLegendSetMap[layout.legendSet.id] : null;
+
+				if (layout.legendSet) {
+					xLayout.legendSet = init.idLegendSetMap[layout.legendSet.id];
+					support.prototype.array.sortObjectsByObjectKey(xLayout.legendSet.mapLegends, 'startValue');
+				}
 
 				// unique dimension names
 				xLayout.axisDimensionNames = Ext.Array.unique(xLayout.axisDimensionNames);
@@ -1101,7 +1115,7 @@ Ext.onReady( function() {
 										});
 									}
 
-									userOuc = support.prototype.array.sortObjectsByObjectKey(userOuc);
+									support.prototype.array.sortObjectsByObjectKey(userOuc);
 								}
 								if (isUserOrgunitGrandChildren) {
 									var userOuOuc = [].concat(ns.init.user.ou, ns.init.user.ouc),
@@ -1120,7 +1134,7 @@ Ext.onReady( function() {
 										}
 									}
 
-									userOugc = support.prototype.array.sortObjectsByObjectKey(userOugc);
+									support.prototype.array.sortObjectsByObjectKey(userOugc);
 								}
 
 								dim.items = [].concat(userOu || [], userOuc || [], userOugc || []);
@@ -1135,7 +1149,7 @@ Ext.onReady( function() {
 									});
 								}
 
-								dim.items = support.prototype.array.sortObjectsByObjectKey(dim.items);
+								support.prototype.array.sortObjectsByObjectKey(dim.items);
 							}
 							else {
 								dim.items = Ext.clone(xLayout.dimensionNameItemsMap[dim.dimensionName]);
@@ -1783,13 +1797,14 @@ Ext.onReady( function() {
 					}
 
 					// Background color from legend set
-					if (isNumeric && isLegendSet) {
+					if (isNumeric && xLayout.legendSet) {
+						var value = parseFloat(config.value);
 						mapLegends = xLayout.legendSet.mapLegends;
 
-						for (var i = 0, value; i < mapLegends.length; i++) {
-							value = parseFloat(config.value);
-
-							if (Ext.Number.constrain(value, mapLegends[i].sv, mapLegends[i].ev) === value) {
+						for (var i = 0; i < mapLegends.length; i++) {
+console.log(mapLegends[i].startValue, mapLegends[i].endValue);
+							// correct maplegend if value is not constrained
+							if (Ext.Number.constrain(value, mapLegends[i].startValue, mapLegends[i].endValue) === value) {
 								bgColor = mapLegends[i].color;
 							}
 						}
@@ -2407,7 +2422,7 @@ Ext.onReady( function() {
 
 			// sort and extend dynamic dimensions
 			if (Ext.isArray(init.dimensions)) {
-				init.dimensions = support.prototype.array.sortObjectsByObjectKey(init.dimensions);
+				support.prototype.array.sortObjectsByObjectKey(init.dimensions);
 
 				for (var i = 0, dim; i < init.dimensions.length; i++) {
 					dim = init.dimensions[i];
