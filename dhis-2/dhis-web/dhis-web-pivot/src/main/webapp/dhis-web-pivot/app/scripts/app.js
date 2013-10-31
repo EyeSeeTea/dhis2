@@ -2086,7 +2086,7 @@ Ext.onReady( function() {
 				config.rows = [];
 				config.filters = [];
 
-				// Panel data
+				// panel data
 				for (var i = 0, dim, dimName; i < panels.length; i++) {
 					dim = panels[i].getDimension();
 
@@ -2102,7 +2102,7 @@ Ext.onReady( function() {
 					nameDimArrayMap[dimConf.dataSet.objectName] || []
 				));
 
-				// Columns, rows, filters
+				// columns, rows, filters
 				for (var i = 0, nameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], dimNames; i < nameArrays.length; i++) {
 					dimNames = nameArrays[i];
 
@@ -2368,7 +2368,7 @@ Ext.onReady( function() {
 		ns.app.stores.indicatorGroup = indicatorGroupStore;
 
 		dataElementAvailableStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'dataElementId', 'onsionComboId', 'operandName'],
+			fields: ['id', 'name', 'dataElementId', 'optionComboId', 'operandName'],
 			proxy: {
 				type: 'ajax',
 				reader: {
@@ -2407,7 +2407,7 @@ Ext.onReady( function() {
 				this.load({
 					scope: this,
 					callback: function() {
-						ns.core.web.multiSelect.filterAvailable({store: this}, {store: dataElementSelectedStore});
+						ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
 					}
 				});
 			},
@@ -2426,11 +2426,12 @@ Ext.onReady( function() {
 						scope: this,
 						callback: function() {
 							this.each(function(r) {
-								r.set('id', r.data.dataElementId + '-' + r.data.onsionComboId);
+console.log(r.data);
+								r.set('id', r.data.dataElementId + '-' + r.data.optionComboId);
 								r.set('name', r.data.operandName);
 							});
 
-							ns.core.web.multiSelect.filterAvailable({store: this}, {store: dataElementSelectedStore});
+							ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
 						}
 					});
 				}
@@ -4352,8 +4353,8 @@ Ext.onReady( function() {
 
 		// viewport
 		update = function() {
-			var config = ns.core.web.pivot.getLayoutConfig(),
-				layout = ns.core.api.layout.Layout(config);
+			var config = ns.core.web.pivot.getLayoutConfig();
+			var layout = ns.core.api.layout.Layout(config);
 
 			if (!layout) {
 				return;
@@ -5173,8 +5174,6 @@ Ext.onReady( function() {
 
 				dimConf = ns.core.conf.finals.dimension;
 				ns.app.viewport = createViewport();
-
-				NS.instances.push(ns);
 			}
 		};
 
