@@ -975,7 +975,7 @@ Ext.onReady( function() {
 			height: 26,
 			style: 'border-radius: 1px;',
 			menu: {},
-			disabled: !Ext.isObject(ns.xLayout),
+			disabled: !Ext.isObject(ns.app.xLayout),
 			handler: function() {
 				nameWindow = new NameWindow(null, 'create');
 				nameWindow.show();
@@ -1188,7 +1188,7 @@ Ext.onReady( function() {
 					ns.app.viewport.favoriteGrid = this;
 				},
 				render: function() {
-					var size = Math.floor((ns.app.viewport.centerRegion.getHeight() - 155) / ns.core.conf.layout.grid_row_height);
+					var size = Math.floor((ns.app.centerRegion.getHeight() - 155) / ns.core.conf.layout.grid_row_height);
 					this.store.pageSize = size;
 					this.store.page = 1;
 					this.store.loadStore();
@@ -2138,7 +2138,7 @@ Ext.onReady( function() {
 				}
 
 				Ext.Ajax.request({
-					url: init.contextPath + '/api/reportTables/.json?viewClass=dimensional&links=false',
+					url: init.contextPath + '/api/reportTables/' + id + '.json?viewClass=dimensional&links=false',
 					failure: function(r) {
 						web.mask.hide(ns.app.centerRegion);
 						alert(r.responseText);
@@ -4504,9 +4504,9 @@ Ext.onReady( function() {
 		});
 
 		openTableLayoutTab = function(type, isNewTab) {
-			if (ns.core.init.contextPath && ns.paramString) {
-				var url = ns.core.init.contextPath + '/api/analytics.' + type + ns.engine.getParamString(ns.xLayout);
-				url += '&tableLayout=true&columns=' + ns.xLayout.columnDimensionNames.join(';') + '&rows=' + ns.xLayout.rowDimensionNames.join(';');
+			if (ns.core.init.contextPath && ns.app.paramString) {
+				var url = ns.core.init.contextPath + '/api/analytics.' + type + ns.core.web.analytics.getParamString(ns.app.xLayout);
+				url += '&tableLayout=true&columns=' + ns.app.xLayout.columnDimensionNames.join(';') + '&rows=' + ns.app.xLayout.rowDimensionNames.join(';');
 
 				window.open(url, isNewTab ? '_blank' : '_top');
 			}
@@ -4613,12 +4613,12 @@ Ext.onReady( function() {
 			menu: {},
 			disabled: true,
 			xable: function() {
-				if (ns.favorite) {
+				if (ns.app.layout.id) {
 					this.enable();
 					this.disabledTooltip.destroy();
 				}
 				else {
-					if (ns.xLayout) {
+					if (ns.app.xLayout) {
 						this.disable();
 						this.createTooltip();
 					}
