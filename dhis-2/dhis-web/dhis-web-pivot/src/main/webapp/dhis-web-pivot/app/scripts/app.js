@@ -1817,7 +1817,7 @@ Ext.onReady( function() {
 			// message
 			web.message = web.message || {};
 
-			web.message.alert = alert = function(message) {
+			web.message.alert = function(message) {
 				alert(message);
 			};
 
@@ -2426,7 +2426,6 @@ Ext.onReady( function() {
 						scope: this,
 						callback: function() {
 							this.each(function(r) {
-console.log(r.data);
 								r.set('id', r.data.dataElementId + '-' + r.data.optionComboId);
 								r.set('name', r.data.operandName);
 							});
