@@ -1828,6 +1828,7 @@ Ext.onReady( function() {
 						isValue = Ext.isObject(config) && Ext.isString(config.type) && config.type === 'value' && !config.empty,
 						cls = '',
 						html = '';
+//console.log(config.type);
 
 					if (!Ext.isObject(config)) {
 						return '';
@@ -1837,10 +1838,9 @@ Ext.onReady( function() {
 					if (isNumeric && xLayout.legendSet) {
 						var value = parseFloat(config.value);
 						mapLegends = xLayout.legendSet.mapLegends;
+console.log(config.type);
 
 						for (var i = 0; i < mapLegends.length; i++) {
-console.log(mapLegends[i].startValue, mapLegends[i].endValue);
-							// correct maplegend if value is not constrained
 							if (Ext.Number.constrain(value, mapLegends[i].startValue, mapLegends[i].endValue) === value) {
 								bgColor = mapLegends[i].color;
 							}
@@ -2397,6 +2397,7 @@ console.log(mapLegends[i].startValue, mapLegends[i].endValue);
 							a.push(getTdHtml({
 								type: 'valueGrandTotal',
 								cls: 'pivot-value-grandtotal',
+								value: total,
 								htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '',
 								empty: !Ext.Array.contains(empty, false)
 							}));
