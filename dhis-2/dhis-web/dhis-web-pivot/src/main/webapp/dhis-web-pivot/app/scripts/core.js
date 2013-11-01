@@ -550,47 +550,9 @@ Ext.onReady( function() {
 				return array.length;
 			};
 
-			support.prototype.array.sortObjectsByObjectKey = function(array, key) {
-				if (!support.prototype.array.getLength(array)) {
-					return null;
-				}
-
-				key = key || 'name';
-
-				array.sort( function(a, b) {
-
-					// string
-					if (Ext.isString(a[key]) && Ext.isString(b[key])) {
-						var nameA = a[key].toLowerCase(),
-							nameB = b[key].toLowerCase();
-
-						if (nameA < nameB) {
-							return -1;
-						}
-						if (nameA > nameB) {
-							return 1;
-						}
-						return 0;
-					}
-
-					// number
-					else if (Ext.isNumber(a[key]) && Ext.isNumber(b[key])) {
-						return a[key] - b[key];
-					}
-
-					return 0;
-				});
-			};
-
-			support.prototype.array.sortNumbersAsc = function(a, b) {
-				return a - b;
-			};
-
-			support.prototype.array.sortNumbersDesc = function(a, b) {
-				return b - a;
-			};
-
 			support.prototype.array.sort = function(array, direction, key) {
+				// accepts [number], [string], [{prop: number}], [{prop: string}]
+
 				if (!support.prototype.array.getLength(array)) {
 					return;
 				}
@@ -625,6 +587,8 @@ Ext.onReady( function() {
 
 					return 0;
 				});
+
+				return array;
 			};
 
 				// object
@@ -1479,9 +1443,7 @@ Ext.onReady( function() {
 				if (aaAllFloorObjects.length) {
 
 					// set span to second lowest span number: if aFloorSpan == [15,3,15,1], set span to 3
-
-					//var span = nAxisHeight > 1 ? aFloorSpan[nAxisHeight - 2] : nAxisWidth,
-					var span = nAxisHeight > 1 ? Ext.clone(aFloorSpan).sort(support.prototype.array.sortNumbersAsc)[1] : nAxisWidth,
+					var span = nAxisHeight > 1 ? support.prototype.array.sort(Ext.clone(aFloorSpan))[1] : nAxisWidth,
 						allFloorObjectsLast = aaAllFloorObjects[aaAllFloorObjects.length - 1];
 
 					for (var i = 0, leaf, parentUuids, obj, leafUuids = []; i < allFloorObjectsLast.length; i++) {
