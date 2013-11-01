@@ -803,8 +803,8 @@ Ext.onReady( function() {
 			var favorite,
 				dimensions;
 
-			if (ns.layout) {
-				favorite = Ext.clone(ns.layout);
+			if (ns.app.layout) {
+				favorite = Ext.clone(ns.app.layout);
 				dimensions = [].concat(favorite.columns || [], favorite.rows || [], favorite.filters || []);
 
 				// Server sync
@@ -878,11 +878,15 @@ Ext.onReady( function() {
 							success: function(r) {
 								var id = r.getAllResponseHeaders().location.split('/').pop();
 
-								ns.favorite = favorite;
+								ns.layout.id = id;
+								ns.xLayout.id = id;
+
+								ns.layout.name = name;
+								ns.xLayout.name = name;
 
 								ns.app.stores.reportTable.loadStore();
 
-								//ns.app.viewport.interpretationButton.enable();
+								ns.app.interpretationButton.enable();
 
 								window.destroy();
 							}
@@ -963,7 +967,7 @@ Ext.onReady( function() {
 						ns.app.favoriteWindow.destroyOnBlur = false;
 					},
 					destroy: function() {
-						ns.app.viewport.favoriteWindow.destroyOnBlur = true;
+						ns.app.favoriteWindow.destroyOnBlur = true;
 					}
 				}
 			});
@@ -1108,9 +1112,15 @@ Ext.onReady( function() {
 												method: 'PUT',
 												headers: {'Content-Type': 'application/json'},
 												params: Ext.encode(favorite),
-												success: function() {
-													ns.favorite = favorite;
-													ns.app.viewport.interpretationButton.enable();
+												success: function(r) {
+													ns.layout.id = record.data.id;
+													ns.xLayout.id = record.data.id;
+
+													ns.layout.name = true;
+													ns.xLayout.name = true;
+
+													ns.app.interpretationButton.enable();
+
 													ns.app.stores.reportTable.loadStore();
 												}
 											});
@@ -1186,9 +1196,6 @@ Ext.onReady( function() {
 				nextButton
 			],
 			listeners: {
-				added: function() {
-					ns.app.viewport.favoriteGrid = this;
-				},
 				render: function() {
 					var size = Math.floor((ns.app.centerRegion.getHeight() - 155) / ns.core.conf.layout.grid_row_height);
 					this.store.pageSize = size;
@@ -1572,7 +1579,7 @@ Ext.onReady( function() {
 					ns.app.favoriteWindow.destroyOnBlur = false;
 				},
 				destroy: function() {
-					ns.app.viewport.favoriteWindow.destroyOnBlur = true;
+					ns.app.favoriteWindow.destroyOnBlur = true;
 				}
 			}
 		});
@@ -1586,7 +1593,7 @@ Ext.onReady( function() {
 			shareButton,
 			window;
 
-		if (Ext.isObject(ns.favorite) && Ext.isString(ns.favorite.id)) {
+		if (Ext.isObject(ns.layout.id)) {
 			textArea = Ext.create('Ext.form.field.TextArea', {
 				cls: 'ns-textarea',
 				height: 130,
@@ -1602,8 +1609,8 @@ Ext.onReady( function() {
 
 			linkPanel = Ext.create('Ext.panel.Panel', {
 				html: function() {
-					var reportTableUrl = ns.core.init.contextPath + '/dhis-web-pivot/app/index.html?id=' + ns.favorite.id,
-						apiUrl = ns.core.init.contextPath + '/api/reportTables/' + ns.favorite.id + '/data.html',
+					var reportTableUrl = ns.core.init.contextPath + '/dhis-web-pivot/app/index.html?id=' + ns.layout.id,
+						apiUrl = ns.core.init.contextPath + '/api/reportTables/' + ns.layout.id + '/data.html',
 						html = '';
 
 					html += '<div><b>Pivot link: </b><span class="user-select"><a href="' + reportTableUrl + '" target="_blank">' + reportTableUrl + '</a></span></div>';
@@ -1623,7 +1630,7 @@ Ext.onReady( function() {
 				handler: function() {
 					if (textArea.getValue()) {
 						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/interpretations/reportTable/' + ns.favorite.id,
+							url: ns.core.init.contextPath + '/api/interpretations/reportTable/' + ns.layout.id,
 							method: 'POST',
 							params: textArea.getValue(),
 							headers: {'Content-Type': 'text/html'},
@@ -1638,7 +1645,7 @@ Ext.onReady( function() {
 			});
 
 			window = Ext.create('Ext.window.Window', {
-				title: ns.favorite.name,
+				title: ns.layout.name,
 				layout: 'fit',
 				//iconCls: 'ns-window-title-interpretation',
 				width: 500,
@@ -4721,11 +4728,11 @@ Ext.onReady( function() {
 									{
 										text: 'Open this table as chart' + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
-										disabled: !(NS.isSessionStorage && ns.layout),
+										disabled: !(NS.isSessionStorage && ns.app.layout),
 										handler: function() {
 											if (NS.isSessionStorage) {
-												ns.layout.parentGraphMap = treePanel.getParentGraphMap();
-												ns.engine.setSessionStorage('analytical', ns.layout, ns.core.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
+												ns.app.layout.parentGraphMap = treePanel.getParentGraphMap();
+												ns.core.web.storage.session.set('analytical', ns.app.layout, ns.core.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
 											}
 										}
 									},
@@ -4777,11 +4784,11 @@ Ext.onReady( function() {
 									{
 										text: 'Open this table as map' + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
-										disabled: !(NS.isSessionStorage && ns.layout),
+										disabled: !(NS.isSessionStorage && ns.app.layout),
 										handler: function() {
 											if (NS.isSessionStorage) {
-												ns.layout.parentGraphMap = treePanel.getParentGraphMap();
-												ns.engine.setSessionStorage('analytical', ns.layout, ns.core.init.contextPath + '/dhis-web-mapping/app/index.html?s=analytical');
+												ns.app.layout.parentGraphMap = treePanel.getParentGraphMap();
+												ns.core.web.storage.session.set('analytical', ns.app.layout, ns.core.init.contextPath + '/dhis-web-mapping/app/index.html?s=analytical');
 											}
 										}
 									},
