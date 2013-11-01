@@ -118,18 +118,18 @@ Ext.onReady( function() {
 			dimensionStore.removeAll();
 			dimensionStore.add(getData(all));
 		};
-		ns.app.viewport.dimensionStore = dimensionStore;
+		ns.app.stores.dimension = dimensionStore;
 
 		rowStore = getStore();
-		ns.app.viewport.rowStore = rowStore;
+		ns.app.stores.row = rowStore;
 		rowStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
 
 		colStore = getStore();
-		ns.app.viewport.colStore = colStore;
+		ns.app.stores.col = colStore;
 		colStore.add({id: dimConf.data.dimensionName, name: dimConf.data.name});
 
 		filterStore = getStore();
-		ns.app.viewport.filterStore = filterStore;
+		ns.app.stores.filter = filterStore;
 		filterStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
 
 		getCmpHeight = function() {
@@ -402,26 +402,22 @@ Ext.onReady( function() {
 			style: 'margin-bottom:4px',
 			checked: true
 		});
-		ns.app.viewport.showTotals = showTotals;
 
 		showSubTotals = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.show_subtotals,
 			style: 'margin-bottom:4px',
 			checked: true
 		});
-		ns.app.viewport.showSubTotals = showSubTotals;
 
 		hideEmptyRows = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.hide_empty_rows,
 			style: 'margin-bottom:4px'
 		});
-		ns.app.viewport.hideEmptyRows = hideEmptyRows;
 
 		showHierarchy = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.show_hierarchy,
 			style: 'margin-bottom:4px'
 		});
-		ns.app.viewport.showHierarchy = showHierarchy;
 
 		displayDensity = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
@@ -443,7 +439,6 @@ Ext.onReady( function() {
 				]
 			})
 		});
-		ns.app.viewport.displayDensity = displayDensity;
 
 		fontSize = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
@@ -465,7 +460,6 @@ Ext.onReady( function() {
 				]
 			})
 		});
-		ns.app.viewport.fontSize = fontSize;
 
 		digitGroupSeparator = Ext.create('Ext.form.field.ComboBox', {
 			labelStyle: 'color:#333',
@@ -487,7 +481,6 @@ Ext.onReady( function() {
 				]
 			})
 		});
-		ns.app.viewport.digitGroupSeparator = digitGroupSeparator;
 
 		legendSet = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
@@ -501,37 +494,31 @@ Ext.onReady( function() {
 			value: 0,
 			store: ns.app.stores.legendSet
 		});
-		ns.app.viewport.legendSet = legendSet;
 
 		reportingPeriod = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.reporting_period,
 			style: 'margin-bottom:4px',
 		});
-		ns.app.viewport.reportingPeriod = reportingPeriod;
 
 		organisationUnit = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.organisation_unit,
 			style: 'margin-bottom:4px',
 		});
-		ns.app.viewport.organisationUnit = organisationUnit;
 
 		parentOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.parent_organisation_unit,
 			style: 'margin-bottom:4px',
 		});
-		ns.app.viewport.parentOrganisationUnit = parentOrganisationUnit;
 
 		regression = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.include_regression,
 			style: 'margin-bottom:4px',
 		});
-		ns.app.viewport.regression = regression;
 
 		cumulative = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.include_cumulative,
 			style: 'margin-bottom:6px',
 		});
-		ns.app.viewport.cumulative = cumulative;
 
 		sortOrder = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
@@ -553,7 +540,6 @@ Ext.onReady( function() {
 				]
 			})
 		});
-		ns.app.viewport.sortOrder = sortOrder;
 
 		topLimit = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
@@ -578,7 +564,6 @@ Ext.onReady( function() {
 				]
 			})
 		});
-		ns.app.viewport.topLimit = topLimit;
 
 		data = {
 			bodyStyle: 'border:0 none',
@@ -743,6 +728,23 @@ Ext.onReady( function() {
 					if (!legendSet.store.isLoaded) {
 						legendSet.store.load();
 					}
+
+					// cmp
+					w.showTotals = showTotals;
+					w.showSubTotals = showSubTotals;
+					w.hideEmptyRows = hideEmptyRows;
+					w.showHierarchy = showHierarchy;
+					w.displayDensity = displayDensity;
+					w.fontSize = fontSize;
+					w.digitGroupSeparator = digitGroupSeparator;
+					w.legendSet = legendSet;
+					w.reportingPeriod = reportingPeriod;
+					w.organisationUnit = organisationUnit;
+					w.parentOrganisationUnit = parentOrganisationUnit;
+					w.regression = regression;
+					w.cumulative = cumulative;
+					w.sortOrder = sortOrder;
+					w.topLimit = topLimit;
 				}
 			}
 		});
@@ -2074,9 +2076,9 @@ Ext.onReady( function() {
 
 			web.pivot.getLayoutConfig = function() {
 				var panels = ns.app.accordion.panels,
-					columnDimNames = ns.app.viewport.colStore.getDimensionNames(),
-					rowDimNames = ns.app.viewport.rowStore.getDimensionNames(),
-					filterDimNames = ns.app.viewport.filterStore.getDimensionNames(),
+					columnDimNames = ns.app.stores.col.getDimensionNames(),
+					rowDimNames = ns.app.stores.row.getDimensionNames(),
+					filterDimNames = ns.app.stores.filter.getDimensionNames(),
 					config = ns.app.optionsWindow.getOptions(),
 					dx = dimConf.data.dimensionName,
 					co = dimConf.category.dimensionName,
@@ -4944,10 +4946,10 @@ Ext.onReady( function() {
 			}
 
 			// Layout
-			ns.app.viewport.dimensionStore.reset(true);
-			ns.app.viewport.colStore.removeAll();
-			ns.app.viewport.rowStore.removeAll();
-			ns.app.viewport.filterStore.removeAll();
+			ns.app.stores.dimension.reset(true);
+			ns.app.stores.col.removeAll();
+			ns.app.stores.row.removeAll();
+			ns.app.stores.filter.removeAll();
 
 			if (layout.columns) {
 				dimNames = [];
@@ -4956,7 +4958,7 @@ Ext.onReady( function() {
 					dim = dimConf.objectNameMap[layout.columns[i].dimension];
 
 					if (!Ext.Array.contains(dimNames, dim.dimensionName)) {
-						ns.app.viewport.colStore.add({
+						ns.app.stores.col.add({
 							id: dim.dimensionName,
 							name: dimConf.objectNameMap[dim.dimensionName].name
 						});
@@ -4964,7 +4966,7 @@ Ext.onReady( function() {
 						dimNames.push(dim.dimensionName);
 					}
 
-					ns.app.viewport.dimensionStore.remove(ns.app.viewport.dimensionStore.getById(dim.dimensionName));
+					ns.app.stores.dimension.remove(ns.app.stores.dimension.getById(dim.dimensionName));
 				}
 			}
 
@@ -4975,7 +4977,7 @@ Ext.onReady( function() {
 					dim = dimConf.objectNameMap[layout.rows[i].dimension];
 
 					if (!Ext.Array.contains(dimNames, dim.dimensionName)) {
-						ns.app.viewport.rowStore.add({
+						ns.app.stores.row.add({
 							id: dim.dimensionName,
 							name: dimConf.objectNameMap[dim.dimensionName].name
 						});
@@ -4983,7 +4985,7 @@ Ext.onReady( function() {
 						dimNames.push(dim.dimensionName);
 					}
 
-					ns.app.viewport.dimensionStore.remove(ns.app.viewport.dimensionStore.getById(dim.dimensionName));
+					ns.app.stores.dimension.remove(ns.app.stores.dimension.getById(dim.dimensionName));
 				}
 			}
 
@@ -4994,7 +4996,7 @@ Ext.onReady( function() {
 					dim = dimConf.objectNameMap[layout.filters[i].dimension];
 
 					if (!Ext.Array.contains(dimNames, dim.dimensionName)) {
-						ns.app.viewport.filterStore.add({
+						ns.app.stores.filter.add({
 							id: dim.dimensionName,
 							name: dimConf.objectNameMap[dim.dimensionName].name
 						});
@@ -5002,13 +5004,13 @@ Ext.onReady( function() {
 						dimNames.push(dim.dimensionName);
 					}
 
-					ns.app.viewport.dimensionStore.remove(ns.app.viewport.dimensionStore.getById(dim.dimensionName));
+					ns.app.stores.dimension.remove(ns.app.stores.dimension.getById(dim.dimensionName));
 				}
 			}
 
 			// Options
-			if (ns.app.viewport.optionsWindow) {
-				ns.app.viewport.optionsWindow.setOptions(layout);
+			if (ns.app.optionsWindow) {
+				ns.app.optionsWindow.setOptions(layout);
 			}
 
 			// Organisation units
