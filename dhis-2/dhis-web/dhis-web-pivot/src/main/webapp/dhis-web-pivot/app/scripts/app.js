@@ -872,17 +872,17 @@ Ext.onReady( function() {
 							headers: {'Content-Type': 'application/json'},
 							params: Ext.encode(favorite),
 							failure: function(r) {
-								ns.app.viewport.mask.show();
+								ns.core.web.mask.show();
 								alert(r.responseText);
 							},
 							success: function(r) {
 								var id = r.getAllResponseHeaders().location.split('/').pop();
 
-								ns.layout.id = id;
-								ns.xLayout.id = id;
+								ns.app.layout.id = id;
+								ns.app.xLayout.id = id;
 
-								ns.layout.name = name;
-								ns.xLayout.name = name;
+								ns.app.layout.name = name;
+								ns.app.xLayout.name = name;
 
 								ns.app.stores.reportTable.loadStore();
 
@@ -906,15 +906,12 @@ Ext.onReady( function() {
 							url: ns.core.init.contextPath + '/api/reportTables/' + id + '.json?viewClass=dimensional&links=false',
 							method: 'GET',
 							failure: function(r) {
-								ns.app.viewport.mask.show();
+								ns.core.web.mask.show();
 								alert(r.responseText);
 							},
 							success: function(r) {
 								reportTable = Ext.decode(r.responseText);
 								reportTable.name = name;
-
-								//tmp
-								//delete reportTable.legendSet;
 
 								Ext.Ajax.request({
 									url: ns.core.init.contextPath + '/api/reportTables/' + reportTable.id,
@@ -922,10 +919,15 @@ Ext.onReady( function() {
 									headers: {'Content-Type': 'application/json'},
 									params: Ext.encode(reportTable),
 									failure: function(r) {
-										ns.app.viewport.mask.show();
+										ns.core.web.mask.show();
 										alert(r.responseText);
 									},
 									success: function(r) {
+										if (ns.app.layout && ns.app.layout.id && ns.app.layout.id === id) {
+											ns.app.layout.name = name;
+											ns.app.xLayout.name = name;
+										}
+
 										ns.app.stores.reportTable.loadStore();
 										window.destroy();
 									}
@@ -1113,15 +1115,15 @@ Ext.onReady( function() {
 												headers: {'Content-Type': 'application/json'},
 												params: Ext.encode(favorite),
 												success: function(r) {
-													ns.layout.id = record.data.id;
-													ns.xLayout.id = record.data.id;
+													ns.app.layout.id = record.data.id;
+													ns.app.xLayout.id = record.data.id;
 
-													ns.layout.name = true;
-													ns.xLayout.name = true;
-
-													ns.app.interpretationButton.enable();
+													ns.app.layout.name = true;
+													ns.app.xLayout.name = true;
 
 													ns.app.stores.reportTable.loadStore();
+
+													ns.app.interpretationButton.enable();
 												}
 											});
 										}
@@ -1593,7 +1595,7 @@ Ext.onReady( function() {
 			shareButton,
 			window;
 
-		if (Ext.isObject(ns.layout.id)) {
+		if (Ext.isString(ns.app.layout.id)) {
 			textArea = Ext.create('Ext.form.field.TextArea', {
 				cls: 'ns-textarea',
 				height: 130,
@@ -1609,8 +1611,8 @@ Ext.onReady( function() {
 
 			linkPanel = Ext.create('Ext.panel.Panel', {
 				html: function() {
-					var reportTableUrl = ns.core.init.contextPath + '/dhis-web-pivot/app/index.html?id=' + ns.layout.id,
-						apiUrl = ns.core.init.contextPath + '/api/reportTables/' + ns.layout.id + '/data.html',
+					var reportTableUrl = ns.core.init.contextPath + '/dhis-web-pivot/app/index.html?id=' + ns.app.layout.id,
+						apiUrl = ns.core.init.contextPath + '/api/reportTables/' + ns.app.layout.id + '/data.html',
 						html = '';
 
 					html += '<div><b>Pivot link: </b><span class="user-select"><a href="' + reportTableUrl + '" target="_blank">' + reportTableUrl + '</a></span></div>';
@@ -1630,7 +1632,7 @@ Ext.onReady( function() {
 				handler: function() {
 					if (textArea.getValue()) {
 						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/interpretations/reportTable/' + ns.layout.id,
+							url: ns.core.init.contextPath + '/api/interpretations/reportTable/' + ns.app.layout.id,
 							method: 'POST',
 							params: textArea.getValue(),
 							headers: {'Content-Type': 'text/html'},
@@ -1645,12 +1647,12 @@ Ext.onReady( function() {
 			});
 
 			window = Ext.create('Ext.window.Window', {
-				title: ns.layout.name,
+				title: ns.app.layout.name,
 				layout: 'fit',
 				//iconCls: 'ns-window-title-interpretation',
 				width: 500,
 				bodyStyle: 'padding:5px 5px 3px; background-color:#fff',
-				resizable: true,
+				resizable: false,
 				destroyOnBlur: true,
 				modal: true,
 				items: [
@@ -1669,7 +1671,7 @@ Ext.onReady( function() {
 				},
 				listeners: {
 					show: function(w) {
-						ns.core.web.window.setAnchorPosition(w, ns.app.viewport.interpretationButton);
+						ns.core.web.window.setAnchorPosition(w, ns.app.interpretationButton);
 
 						document.body.oncontextmenu = true;
 
@@ -1681,7 +1683,7 @@ Ext.onReady( function() {
 						document.body.oncontextmenu = function(){return false;};
 					},
 					destroy: function() {
-						ns.app.viewport.interpretationWindow = null;
+						ns.app.interpretationWindow = null;
 					}
 				}
 			});
@@ -2230,6 +2232,7 @@ Ext.onReady( function() {
 						ns.app.xLayout = xLayout;
 						ns.app.response = response;
 						ns.app.xResponse = xResponse;
+						ns.app.paramString = paramString;
 						ns.app.uuidDimUuidsMap = config.uuidDimUuidsMap;
 						ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
 
@@ -4564,8 +4567,8 @@ Ext.onReady( function() {
 						text: 'JSON',
 						iconCls: 'ns-menu-item-datasource',
 						handler: function() {
-							if (ns.core.init.contextPath && ns.paramString) {
-								window.open(ns.core.init.contextPath + '/api/analytics.json' + ns.paramString, '_blank');
+							if (ns.core.init.contextPath && ns.app.paramString) {
+								window.open(ns.core.init.contextPath + '/api/analytics.json' + ns.app.paramString, '_blank');
 							}
 						}
 					},
@@ -4573,8 +4576,8 @@ Ext.onReady( function() {
 						text: 'XML',
 						iconCls: 'ns-menu-item-datasource',
 						handler: function() {
-							if (ns.core.init.contextPath && ns.paramString) {
-								window.open(ns.core.init.contextPath + '/api/analytics.xml' + ns.paramString, '_blank');
+							if (ns.core.init.contextPath && ns.app.paramString) {
+								window.open(ns.core.init.contextPath + '/api/analytics.xml' + ns.app.paramString, '_blank');
 							}
 						}
 					},
@@ -4582,8 +4585,8 @@ Ext.onReady( function() {
 						text: 'Microsoft Excel',
 						iconCls: 'ns-menu-item-datasource',
 						handler: function() {
-							if (ns.core.init.contextPath && ns.paramString) {
-								window.location.href = ns.core.init.contextPath + '/api/analytics.xls' + ns.paramString;
+							if (ns.core.init.contextPath && ns.app.paramString) {
+								window.location.href = ns.core.init.contextPath + '/api/analytics.xls' + ns.app.paramString;
 							}
 						}
 					},
@@ -4591,8 +4594,8 @@ Ext.onReady( function() {
 						text: 'CSV',
 						iconCls: 'ns-menu-item-datasource',
 						handler: function() {
-							if (ns.core.init.contextPath && ns.paramString) {
-								window.location.href = ns.core.init.contextPath + '/api/analytics.csv' + ns.paramString;
+							if (ns.core.init.contextPath && ns.app.paramString) {
+								window.location.href = ns.core.init.contextPath + '/api/analytics.csv' + ns.app.paramString;
 							}
 						}
 					},
@@ -4600,8 +4603,8 @@ Ext.onReady( function() {
 						text: 'JRXML',
 						iconCls: 'ns-menu-item-datasource',
 						handler: function() {
-							if (ns.core.init.contextPath && ns.paramString) {
-								window.open(ns.core.init.contextPath + '/api/analytics.jrxml' + ns.paramString, '_blank');
+							if (ns.core.init.contextPath && ns.app.paramString) {
+								window.open(ns.core.init.contextPath + '/api/analytics.jrxml' + ns.app.paramString, '_blank');
 							}
 						}
 					}
