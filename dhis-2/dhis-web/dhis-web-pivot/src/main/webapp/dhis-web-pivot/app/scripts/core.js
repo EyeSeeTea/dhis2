@@ -1182,7 +1182,7 @@ Ext.onReady( function() {
 
 									dim.items.push({
 										id: id,
-										name: service.layout.getItemName(id, response)
+										name: service.layout.getItemName(xLayout, response, id, false)
 									});
 								}
 
@@ -1637,26 +1637,6 @@ Ext.onReady( function() {
 
 		// web
 		(function() {
-
-			// storage
-			web.storage = {};
-
-				// session
-			web.storage.session = {};
-
-			web.storage.session.set = function(session, obj, url) {
-				if (NS.isSessionStorage) {
-					var dhis2 = JSON.parse(sessionStorage.getItem('dhis2')) || {};
-
-					dhis2[session] = obj;
-
-					sessionStorage.setItem('dhis2', JSON.stringify(dhis2));
-
-					if (Ext.isString(url)) {
-						window.location.href = url;
-					}
-				}
-			};
 
 			// mask
 			web.mask = {};
@@ -2469,6 +2449,9 @@ console.log(config.type);
 					conf.finals.dimension.objectNameMap[dim.id] = dim;
 				}
 			}
+
+			// sort ouc
+			support.prototype.array.sort(init.user.ouc);
 
 			// legend set map
 			init.idLegendSetMap = {};

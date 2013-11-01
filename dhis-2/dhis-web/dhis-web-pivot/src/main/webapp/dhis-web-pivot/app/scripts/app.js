@@ -2009,7 +2009,7 @@ Ext.onReady( function() {
 							iconCls: 'ns-button-icon-chart',
 							param: 'chart',
 							handler: function() {
-								web.storage.session.set('analytical', layoutConfig, init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
+								web.storage.session.set(layoutConfig, 'analytical', init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
 							},
 							listeners: {
 								render: function() {
@@ -2029,7 +2029,7 @@ Ext.onReady( function() {
 							param: 'map',
 							disabled: true,
 							handler: function() {
-								web.storage.session.set('analytical', layoutConfig, init.contextPath + '/dhis-web-mapping/app/index.html?s=analytical');
+								web.storage.session.set(layoutConfig, 'analytical', init.contextPath + '/dhis-web-mapping/app/index.html?s=analytical');
 							},
 							listeners: {
 								render: function() {
@@ -4735,7 +4735,7 @@ Ext.onReady( function() {
 										handler: function() {
 											if (NS.isSessionStorage) {
 												ns.app.layout.parentGraphMap = treePanel.getParentGraphMap();
-												ns.core.web.storage.session.set('analytical', ns.app.layout, ns.core.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
+												ns.core.web.storage.session.set(ns.app.layout, 'analytical', ns.core.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
 											}
 										}
 									},
@@ -4791,7 +4791,7 @@ Ext.onReady( function() {
 										handler: function() {
 											if (NS.isSessionStorage) {
 												ns.app.layout.parentGraphMap = treePanel.getParentGraphMap();
-												ns.core.web.storage.session.set('analytical', ns.app.layout, ns.core.init.contextPath + '/dhis-web-mapping/app/index.html?s=analytical');
+												ns.core.web.storage.session.set(ns.app.layout, 'analytical', ns.core.init.contextPath + '/dhis-web-mapping/app/index.html?s=analytical');
 											}
 										}
 									},
