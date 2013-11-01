@@ -800,7 +800,7 @@ Ext.onReady( function() {
 					}
 				}
 
-				support.prototype.object.getLength(map) ? map : null;
+				return support.prototype.object.getLength(map) ? map : null;
 			};
 
 			service.layout.getObjectNameDimensionItemsMapFromDimensionArray = function(dimensionArray) {
@@ -818,7 +818,7 @@ Ext.onReady( function() {
 					}
 				}
 
-				support.prototype.object.getLength(map) ? map : null;
+				return support.prototype.object.getLength(map) ? map : null;
 			};
 
 			service.layout.getItemName = function(layout, response, id, isHtml) {
@@ -1138,24 +1138,24 @@ Ext.onReady( function() {
 
 								if (isUserOrgunit) {
 									userOu = [{
-										id: ns.init.user.ou,
-										name: service.layout.getItemName(xLayout, response, ns.init.user.ou, false)
+										id: init.user.ou,
+										name: service.layout.getItemName(xLayout, response, init.user.ou, false)
 									}];
 								}
 								if (isUserOrgunitChildren) {
 									userOuc = [];
 
-									for (var j = 0; j < ns.init.user.ouc.length; j++) {
+									for (var j = 0; j < init.user.ouc.length; j++) {
 										userOuc.push({
-											id: ns.init.user.ouc[j],
-											name: service.layout.getItemName(xLayout, response, ns.init.user.ouc[j], false)
+											id: init.user.ouc[j],
+											name: service.layout.getItemName(xLayout, response, init.user.ouc[j], false)
 										});
 									}
 
 									support.prototype.array.sort(userOuc);
 								}
 								if (isUserOrgunitGrandChildren) {
-									var userOuOuc = [].concat(ns.init.user.ou, ns.init.user.ouc),
+									var userOuOuc = [].concat(init.user.ou, init.user.ouc),
 										responseOu = response.metaData[ou];
 
 									userOugc = [];

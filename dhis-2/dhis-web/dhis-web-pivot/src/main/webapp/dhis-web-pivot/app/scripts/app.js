@@ -3155,7 +3155,7 @@ Ext.onReady( function() {
 										}
 									},
 									change: function() {
-										rewind.xable();
+										//rewind.xable();
 									}
 								}
 							},
@@ -3197,7 +3197,7 @@ Ext.onReady( function() {
 										}
 									},
 									change: function() {
-										rewind.xable();
+										//rewind.xable();
 									}
 								}
 							},
@@ -3240,7 +3240,7 @@ Ext.onReady( function() {
 										}
 									},
 									change: function() {
-										rewind.xable();
+										//rewind.xable();
 									}
 								}
 							},
@@ -3284,7 +3284,7 @@ Ext.onReady( function() {
 										}
 									},
 									change: function() {
-										rewind.xable();
+										//rewind.xable();
 									}
 								}
 							},
@@ -3321,7 +3321,7 @@ Ext.onReady( function() {
 										}
 									},
 									change: function() {
-										rewind.xable();
+										//rewind.xable();
 									}
 								}
 							},
@@ -3358,7 +3358,7 @@ Ext.onReady( function() {
 										}
 									},
 									change: function() {
-										rewind.xable();
+										//rewind.xable();
 									}
 								}
 							},
@@ -3420,7 +3420,7 @@ Ext.onReady( function() {
 										}
 									},
 									change: function() {
-										rewind.xable();
+										//rewind.xable();
 									}
 								}
 							},
@@ -4848,7 +4848,7 @@ Ext.onReady( function() {
 		});
 
 		setGui = function(layout, xLayout, updateGui) {
-			var dimensions = [].concat(layout.columns || [], layout.rows || [], layout.filters || []),
+			var dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || [])),
 				dimMap = ns.core.service.layout.getObjectNameDimensionMapFromDimensionArray(dimensions),
 				recMap = ns.core.service.layout.getObjectNameDimensionItemsMapFromDimensionArray(dimensions),
 				graphMap = layout.parentGraphMap,
@@ -4912,14 +4912,14 @@ Ext.onReady( function() {
 			fixedPeriodSelectedStore.removeAll();
 			period.resetRelativePeriods();
 			periodRecords = recMap[dimConf.period.objectName] || [];
-			for (var i = 0, peroid, checkbox; i < periodRecords.length; i++) {
-				period = periodRecords[i];
-				checkbox = relativePeriod.valueComponentMap[period.id];
+			for (var i = 0, periodRecord, checkbox; i < periodRecords.length; i++) {
+				periodRecord = periodRecords[i];
+				checkbox = relativePeriod.valueComponentMap[periodRecord.id];
 				if (checkbox) {
 					checkbox.setValue(true);
 				}
 				else {
-					fixedPeriodRecords.push(period);
+					fixedPeriodRecords.push(periodRecord);
 				}
 			}
 			fixedPeriodSelectedStore.add(fixedPeriodRecords);
