@@ -55,6 +55,13 @@
     <property name="jdbcTemplate" ref="jdbcTemplate" />
   </bean>
 
+  <!--@author Ovidiu Rosu <rosu.ovi@gmail.com>-->
+  <bean id="org.hisp.dhis.filter.MetaDataFilterStore" class="org.hisp.dhis.metadatafilter.hibernate.HibernateMetaDataFilterStore">
+    <property name="clazz" value="org.hisp.dhis.filter.MetaDataFilter" />
+    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="cacheable" value="true" />
+  </bean>
+
   <bean id="org.hisp.dhis.indicator.IndicatorStore" class="org.hisp.dhis.indicator.hibernate.HibernateIndicatorStore">
     <property name="clazz" value="org.hisp.dhis.indicator.Indicator" />
     <property name="sessionFactory" ref="sessionFactory" />
@@ -436,6 +443,9 @@
     <property name="constantService" ref="org.hisp.dhis.constant.ConstantService" />
     <property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
+    <property name="messageService" ref="org.hisp.dhis.message.MessageService" />
+    <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+    <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
   </bean>
   
   <!-- Scheduled task for data monitoring -->
@@ -577,6 +587,12 @@
   <bean id="org.hisp.dhis.attribute.AttributeService" class="org.hisp.dhis.attribute.DefaultAttributeService">
     <property name="attributeStore" ref="org.hisp.dhis.attribute.AttributeStore" />
     <property name="attributeValueStore" ref="org.hisp.dhis.attribute.AttributeValueStore" />
+    <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
+  </bean>
+
+  <!--@author Ovidiu Rosu <rosu.ovi@gmail.com>-->
+  <bean id="org.hisp.dhis.filter.MetaDataFilterService" class="org.hisp.dhis.filter.DefaultMetaDataFilterService">
+    <property name="metaDataFilterStore" ref="org.hisp.dhis.filter.MetaDataFilterStore" />
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
 

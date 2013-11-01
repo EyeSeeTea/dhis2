@@ -702,7 +702,7 @@ function registerIrregularEncounter( programInstanceId, programStageId, programS
 			// Disable Create new event button in the entry form if doesn't have any stage for register
 			flag = true;
             $('#repeatableProgramStage_' + programInstanceId + " option ").each(function(){
-				if( $(this).attr('localid')== programStageId){
+				if( $(this).attr('localid')== programStageId && $(this).attr('repeatable')=='false'){
                     $(this).css("display","none");
 				}
 				if( $(this).css('display')!= "none"){
@@ -1048,62 +1048,6 @@ function showUpdatePatientForm( patientId )
         $('#loaderDiv').hide();
         showById('editPatientDiv');
     });
-}
-
-function validateUpdatePatient()
-{
-	$("#editPatientDiv :input").attr("disabled", true);
-	$.ajax({
-		type: "POST",
-		url: 'validatePatient.action',
-		data: getParamsForDiv('editPatientDiv'),
-		success:updateValidationCompleted
-     });
-}
-
-function updateValidationCompleted( messageElement )
-{
-    var type = $(messageElement).find('message').attr('type');
-	var message = $(messageElement).find('message').text();
-    
-    if ( type == 'success' )
-    {
-    	removeDisabledIdentifier();
-    	updatePatient();
-    }
-	else
-	{
-		$("#editPatientDiv :input").attr("disabled", true);
-
-		if ( type == 'error' )
-		{
-			showErrorMessage( i18n_saving_patient_failed + ':' + '\n' + message );
-		}
-		else if ( type == 'input' )
-		{
-			showWarningMessage( message );
-		}
-		else if( type == 'duplicate' )
-		{
-			showListPatientDuplicate(messageElement, true);
-		}
-		$("#editPatientDiv :input").attr("disabled", false);
-	}
-}
-
-function updatePatient()
-{
-	var params = 'programId=' + getFieldValue('programIdAddPatient') 
-		+ '&' + getParamsForDiv('editPatientDiv');
-
-	$.ajax({
-      type: "POST",
-      url: 'updatePatient.action',
-      data: params,
-      success: function( json ) {
-			showPatientDashboardForm( getFieldValue('id') );
-      }
-     });
 }
 
 function addEventForPatientForm( divname )
@@ -1756,7 +1700,7 @@ function loadActiveProgramStageRecords(programInstanceId, activeProgramStageInst
 
         if( relationshipText != "")
         {
-            setInnerHTML('patientRelatedStageSpan',"&#8226; <a href='javascript:showAddPatientForm( " + relatedProgramId + "," + patientId + "," + selectedProgram + " );' id='relatedPatient_$!programStageInstance.id' >" + relationshipText + "</a><br>&nbsp;");
+            setInnerHTML('patientRelatedStageSpan',"&#8226; <a href='javascript:showAddPatientForm( " + patientId + "," + relatedProgramId + "," + selectedProgram + " , false );' id='relatedPatient_$!programStageInstance.id' >" + relationshipText + "</a><br>&nbsp;");
         }
         else
         {

@@ -336,7 +336,7 @@ public class FacilityController
 
             facilities.getFacilities().add( facility );
 
-            if ( request.getRequestURL().toString().endsWith( ".json" ) )
+            if ( request.getRequestURL().toString().endsWith( ".json" ) && facility.getHref() != null )
             {
                 facility.setHref( facility.getHref() + ".json" );
             }
@@ -643,7 +643,7 @@ public class FacilityController
         organisationUnitService.deleteOrganisationUnit( organisationUnit );
 
         return new ResponseEntity<String>( MessageUtils.jsonMessage( HttpStatus.OK.toString(),
-            "{}" ), HttpStatus.OK );
+            "Deleted facility with ID " + id ), HttpStatus.OK );
     }
 
     //--------------------------------------------------------------------------

@@ -66,13 +66,94 @@ function Patient()
 			});
 	};
 	
-	this.remove = function( confirm_delete_patient )
+	this.validate = function( programId )
 	{
-		removeItem( this.patientId, this.fullName, confirm_delete_patient, 'removePatient.action' );
+		setMessage('');
+		if( byId('underAge').checked ){
+			if ( getFieldValue('representativeId') == '' )
+			{
+				setMessage( i18n_please_choose_representative_for_this_under_age_patient );
+				$("#patientForm :input").attr("disabled", false);
+				$("#patientForm").find("select").attr("disabled", false);
+				return false;
+			}
+			
+			if ( getFieldValue('relationshipTypeId') == '' )
+			{
+				setMessage( i18n_please_choose_relationshipType_for_this_under_age_patient );
+				$("#patientForm :input").attr("disabled", false);
+				$("#patientForm").find("select").attr("disabled", false);
+				return false;
+			}
+		}
+		
+		var params = "";
+		if( programId !== "undefined" ){
+			params = "programId=" + programId + "&" 
+		}
+		params += getParamsForDiv('patientForm');
+		$("#patientForm :input").attr("disabled", true);
+		$("#patientForm").find("select").attr("disabled", true);
+		var json = null;
+		$.ajax({
+			type: "POST",
+			url: 'validatePatient.action',
+			data: params,
+			datatype: "json",
+			async: false,
+			success: function(data) {
+				json = data;
+			}
+		});
+
+		var response = json.response;
+		var message = json.message;
+		
+		if ( response == 'success' )
+		{
+			if( message == 0 ){
+				removeDisabledIdentifier();
+				return true;
+			}
+			else {
+			
+				if( message == 1 ){
+					setMessage( i18n_adding_patient_failed + ':' + '\n' + i18n_duplicate_identifier );
+				}
+				else if( message == 2 ){
+					setMessage( i18n_adding_patient_failed + ':' + '\n' + i18n_this_patient_could_not_be_enrolled_please_check_validation_criteria );
+				}
+				
+				$("#patientForm :input").attr("disabled", false);
+				$("#patientForm").find("select").attr("disabled", false);
+				return false;
+			}
+		}
+		else
+		{
+			if ( response == 'error' )
+			{
+				setMessage( i18n_adding_patient_failed + ':' + '\n' + message );
+			}
+			else if ( response == 'input' )
+			{
+				setMessage( message );
+			}
+			else if( response == 'duplicate' )
+			{
+				showListPatientDuplicate(data, false);
+			}
+			
+			$("#patientForm :input").attr("disabled", false);
+			$("#patientForm").find("select").attr("disabled", false);
+			return false;
+		}
 	};
 	
-	this.add = function( programId, related, params,isContinue)
+	this.add = function( programId, related, params, isContinue)
 	{
+		if( !this.validate(programId) ) return;
+		
 		$.ajax({
 		  type: "POST",
 		  url: 'addPatient.action',
@@ -106,8 +187,6 @@ function Patient()
 									$(this).val("");
 								}
 							});
-							$("#patientForm :input").attr("disabled", false);
-							$("#patientForm").find("select").attr("disabled", false);
 						}
 						else{
 							showPatientDashboardForm( patientId );
@@ -135,7 +214,31 @@ function Patient()
 			}
 		  }
 		 });
-	}
+	};
+	
+	this.update = function()
+	{
+		if( !this.validate() ) return;
+		
+		var params = 'programId=' + getFieldValue('programIdAddPatient') 
+		+ '&' + getParamsForDiv('editPatientDiv');
+		$.ajax({
+		  type: "POST",
+		  url: 'updatePatient.action',
+		  data: params,
+		  success: function( json ) {
+				showPatientDashboardForm( getFieldValue('id') );
+				$("#patientForm :input").attr("disabled", false);
+				$("#patientForm").find("select").attr("disabled", false);
+		  }
+		 });
+	};
+	
+	this.remove = function( confirm_delete_patient )
+	{
+		removeItem( this.patientId, this.fullName, confirm_delete_patient, 'removePatient.action' );
+	};
+	
 }
 
 Patient.listAll = function()
@@ -171,6 +274,7 @@ Patient.listAll = function()
 				jQuery('#loaderDiv').hide();
 			});
 	}
+	
 }
 
 function listAllPatient()
@@ -215,12 +319,13 @@ function addPatient( programId, related, isContinue )
     return false;
 }
 
-function showAddPatientForm( programId, patientId, relatedProgramId )
+function showAddPatientForm( patientId, programId, relatedProgramId, related )
 {
 	hideById('listPatientDiv');
 	hideById('selectDiv');
 	hideById('searchDiv');
 	hideById('migrationPatientDiv');
+	hideById('listRelationshipDiv');
 	setInnerHTML('addRelationshipDiv','');
 	setInnerHTML('patientDashboard','');
 	
@@ -229,86 +334,18 @@ function showAddPatientForm( programId, patientId, relatedProgramId )
 		{
 			programId: programId,
 			patientId: patientId,
-			relatedProgramId: relatedProgramId
+			relatedProgramId: relatedProgramId,
+			related: related
 		}, function()
 		{
 			showById('editPatientDiv');
+			if(related){
+				setFieldValue('relationshipId',patientId);
+			}
 			jQuery('#loaderDiv').hide();
 		});
 	
 }
-
-function validateAddPatient( programId, related, isContinue )
-{	
-	var params = "programId=" + programId + "&" + getParamsForDiv('patientForm');
-	$("#patientForm :input").attr("disabled", true);
-	$("#patientForm").find("select").attr("disabled", true);
-	$.ajax({
-		type: "POST",
-		url: 'validatePatient.action',
-		data: params,
-		success: function(data){
-			addValidationCompleted( programId, related, data,isContinue);
-		}
-	});	
-}
-
-function addValidationCompleted( programId, related, data, isContinue )
-{
-    var type = jQuery(data).find('message').attr('type');
-	var message = jQuery(data).find('message').text();
-	
-	if ( type == 'success' )
-	{
-		removeDisabledIdentifier( );
-		addPatient( programId, related, isContinue );
-	}
-	else
-	{
-		if ( type == 'error' )
-		{
-			showErrorMessage( i18n_adding_patient_failed + ':' + '\n' + message );
-		}
-		else if ( type == 'input' )
-		{
-			showWarningMessage( message );
-		}
-		else if( type == 'duplicate' )
-		{
-			showListPatientDuplicate(data, false);
-		}
-			
-		$("#patientForm :input").attr("disabled", false);
-		$("#patientForm").find("select").attr("disabled", false);
-	}
-}
-
-function addRelationship()
-{
-	jQuery('#loaderDiv').show();
-	var params = getParamsForDiv('addRelationshipDiv');
-		params += "&relationshipFromA=" + jQuery('#patientForm option:selected').attr("relationshipFromA");
-	$.ajax({
-		type: "POST",
-		url: 'addRelationshipPatient.action',
-		data: params,
-		success: function( json ) {
-			hideById('addRelationshipDiv');
-			showById('selectDiv');
-			showById('searchDiv');
-			showById('listPatientDiv');
-			jQuery('#loaderDiv').hide();
-
-			if( getFieldValue( 'isShowPatientList' ) == 'false' ){
-				showRelationshipList( getFieldValue('relationshipId') );
-			}
-			else{
-				loadPatientList();
-			}
-		}});
-    return false;
-}
-
 
 // ----------------------------------------------------------------
 // Click Back to main form

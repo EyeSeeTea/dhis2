@@ -37,15 +37,30 @@ import org.hisp.dhis.web.webapi.v1.exception.ETagVerificationException;
 import org.hisp.dhis.web.webapi.v1.exception.FacilityNotFoundException;
 import org.hisp.dhis.web.webapi.v1.exception.UuidFormatException;
 import org.hisp.dhis.web.webapi.v1.utils.MessageUtils;
+import org.springframework.beans.ConversionNotSupportedException;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.validation.BindException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 
 import java.io.IOException;
 
@@ -53,13 +68,13 @@ import java.io.IOException;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @ControllerAdvice
-public class FacilityAdvice
+public class FacilityAdvice extends ResponseEntityExceptionHandler
 {
     //--------------------------------------------------------------------------
     // EXCEPTION HANDLERS
     //--------------------------------------------------------------------------
 
-    @ExceptionHandler( { HttpClientErrorException.class, HttpServerErrorException.class } )
+    @ExceptionHandler({ HttpClientErrorException.class, HttpServerErrorException.class })
     public ResponseEntity<String> statusCodeExceptionHandler( HttpStatusCodeException ex ) throws IOException
     {
         HttpHeaders headers = new HttpHeaders();
@@ -69,7 +84,7 @@ public class FacilityAdvice
             ex.getMessage() ), headers, ex.getStatusCode() );
     }
 
-    @ExceptionHandler( { DeleteNotAllowedException.class, HierarchyViolationException.class } )
+    @ExceptionHandler({ DeleteNotAllowedException.class, HierarchyViolationException.class })
     public ResponseEntity<String> handleForbidden( Exception ex ) throws IOException
     {
         HttpHeaders headers = new HttpHeaders();
@@ -89,7 +104,7 @@ public class FacilityAdvice
             ex.getMessage() ), headers, HttpStatus.PRECONDITION_FAILED );
     }
 
-    @ExceptionHandler( { FacilityNotFoundException.class } )
+    @ExceptionHandler({ FacilityNotFoundException.class })
     public ResponseEntity<String> handleNotFound( Exception ex ) throws IOException
     {
         HttpHeaders headers = new HttpHeaders();
@@ -99,7 +114,7 @@ public class FacilityAdvice
             ex.getMessage() ), headers, HttpStatus.NOT_FOUND );
     }
 
-    @ExceptionHandler( { DuplicateCodeException.class, DuplicateUidException.class, DuplicateUuidException.class } )
+    @ExceptionHandler({ DuplicateCodeException.class, DuplicateUidException.class, DuplicateUuidException.class })
     public ResponseEntity<String> handleConflict( Exception ex ) throws IOException
     {
         HttpHeaders headers = new HttpHeaders();
@@ -107,5 +122,131 @@ public class FacilityAdvice
 
         return new ResponseEntity<String>( MessageUtils.jsonMessage( HttpStatus.CONFLICT.toString(),
             ex.getMessage() ), headers, HttpStatus.CONFLICT );
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMediaTypeNotSupported( HttpMediaTypeNotSupportedException ex, HttpHeaders headers, HttpStatus status, WebRequest request )
+    {
+        headers.add( "Content-Type", MediaType.APPLICATION_JSON_VALUE );
+
+        return new ResponseEntity<Object>( MessageUtils.jsonMessage(
+            Integer.toString( status.value() ), ex.getMessage() ), status );
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMediaTypeNotAcceptable( HttpMediaTypeNotAcceptableException ex, HttpHeaders headers, HttpStatus status, WebRequest request )
+    {
+        headers.add( "Content-Type", MediaType.APPLICATION_JSON_VALUE );
+
+        return new ResponseEntity<Object>( MessageUtils.jsonMessage(
+            Integer.toString( status.value() ), ex.getMessage() ), status );
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal( Exception ex, Object body, HttpHeaders headers, HttpStatus status, WebRequest request )
+    {
+        headers.add( "Content-Type", MediaType.APPLICATION_JSON_VALUE );
+
+        return new ResponseEntity<Object>( MessageUtils.jsonMessage(
+            Integer.toString( status.value() ), ex.getMessage() ), status );
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleNoSuchRequestHandlingMethod( NoSuchRequestHandlingMethodException ex, HttpHeaders headers, HttpStatus status, WebRequest request )
+    {
+        headers.add( "Content-Type", MediaType.APPLICATION_JSON_VALUE );
+
+        return new ResponseEntity<Object>( MessageUtils.jsonMessage(
+            Integer.toString( status.value() ), ex.getMessage() ), status );
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpRequestMethodNotSupported( HttpRequestMethodNotSupportedException ex, HttpHeaders headers, HttpStatus status, WebRequest request )
+    {
+        headers.add( "Content-Type", MediaType.APPLICATION_JSON_VALUE );
+
+        return new ResponseEntity<Object>( MessageUtils.jsonMessage(
+            Integer.toString( status.value() ), ex.getMessage() ), status );
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMissingServletRequestParameter( MissingServletRequestParameterException ex, HttpHeaders headers, HttpStatus status, WebRequest request )
+    {
+        headers.add( "Content-Type", MediaType.APPLICATION_JSON_VALUE );
+
+        return new ResponseEntity<Object>( MessageUtils.jsonMessage(
+            Integer.toString( status.value() ), ex.getMessage() ), status );
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleServletRequestBindingException( ServletRequestBindingException ex, HttpHeaders headers, HttpStatus status, WebRequest request )
+    {
+        headers.add( "Content-Type", MediaType.APPLICATION_JSON_VALUE );
+
+        return new ResponseEntity<Object>( MessageUtils.jsonMessage(
+            Integer.toString( status.value() ), ex.getMessage() ), status );
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleConversionNotSupported( ConversionNotSupportedException ex, HttpHeaders headers, HttpStatus status, WebRequest request )
+    {
+        headers.add( "Content-Type", MediaType.APPLICATION_JSON_VALUE );
+
+        return new ResponseEntity<Object>( MessageUtils.jsonMessage(
+            Integer.toString( status.value() ), ex.getMessage() ), status );
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleTypeMismatch( TypeMismatchException ex, HttpHeaders headers, HttpStatus status, WebRequest request )
+    {
+        headers.add( "Content-Type", MediaType.APPLICATION_JSON_VALUE );
+
+        return new ResponseEntity<Object>( MessageUtils.jsonMessage(
+            Integer.toString( status.value() ), ex.getMessage() ), status );
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable( HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request )
+    {
+        headers.add( "Content-Type", MediaType.APPLICATION_JSON_VALUE );
+
+        return new ResponseEntity<Object>( MessageUtils.jsonMessage(
+            Integer.toString( status.value() ), ex.getMessage() ), status );
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotWritable( HttpMessageNotWritableException ex, HttpHeaders headers, HttpStatus status, WebRequest request )
+    {
+        headers.add( "Content-Type", MediaType.APPLICATION_JSON_VALUE );
+
+        return new ResponseEntity<Object>( MessageUtils.jsonMessage(
+            Integer.toString( status.value() ), ex.getMessage() ), status );
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid( MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request )
+    {
+        headers.add( "Content-Type", MediaType.APPLICATION_JSON_VALUE );
+
+        return new ResponseEntity<Object>( MessageUtils.jsonMessage(
+            Integer.toString( status.value() ), ex.getMessage() ), status );
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMissingServletRequestPart( MissingServletRequestPartException ex, HttpHeaders headers, HttpStatus status, WebRequest request )
+    {
+        headers.add( "Content-Type", MediaType.APPLICATION_JSON_VALUE );
+
+        return new ResponseEntity<Object>( MessageUtils.jsonMessage(
+            Integer.toString( status.value() ), ex.getMessage() ), status );
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleBindException( BindException ex, HttpHeaders headers, HttpStatus status, WebRequest request )
+    {
+        headers.add( "Content-Type", MediaType.APPLICATION_JSON_VALUE );
+
+        return new ResponseEntity<Object>( MessageUtils.jsonMessage(
+            Integer.toString( status.value() ), ex.getMessage() ), status );
     }
 }

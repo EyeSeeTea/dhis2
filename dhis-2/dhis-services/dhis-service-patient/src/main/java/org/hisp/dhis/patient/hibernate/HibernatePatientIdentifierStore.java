@@ -29,20 +29,14 @@ package org.hisp.dhis.patient.hibernate;
  */
 
 import java.util.Collection;
-import java.util.Date;
 
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientIdentifier;
 import org.hisp.dhis.patient.PatientIdentifierStore;
 import org.hisp.dhis.patient.PatientIdentifierType;
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.system.util.DateUtils;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -59,13 +53,7 @@ public class HibernatePatientIdentifierStore
     {
         return (PatientIdentifier) getCriteria( Restrictions.eq( "patient", patient ) ).uniqueResult();
     }
-
-    public PatientIdentifier get( String identifier, OrganisationUnit organisationUnit )
-    {
-        return (PatientIdentifier) getCriteria( Restrictions.eq( "identifier", identifier ),
-            Restrictions.eq( "organisationUnit", organisationUnit ) ).uniqueResult();
-    }
-
+    
     public PatientIdentifier get( PatientIdentifierType type, String identifier )
     {
         return (PatientIdentifier) getCriteria( Restrictions.eq( "identifierType", type ),
@@ -151,38 +139,5 @@ public class HibernatePatientIdentifierStore
     {
         return getCriteria( Restrictions.in( "identifierType", identifierTypes ), Restrictions.eq( "patient", patient ) )
             .list();
-    }
-
-    public boolean checkDuplicateIdentifier( PatientIdentifierType patientIdentifierType, String identifier,
-        Integer patientId, OrganisationUnit organisationUnit, Program program, PeriodType periodType )
-    {
-        String sql = "select count(*) from patientidentifier pi inner join patient p on pi.patientid=p.patientid "
-            + "inner join programinstance pis on pis.patientid=pi.patientid where pi.patientidentifiertypeid="
-            + patientIdentifierType.getId() + " and pi.identifier='" + identifier + "' ";
-
-        if ( patientId != null )
-        {
-            sql += " and pi.patientid!=" + patientId;
-        }
-
-        if ( patientIdentifierType.getType().equals( PatientIdentifierType.VALUE_TYPE_LOCAL_ID ) && organisationUnit != null )
-        {
-            sql += " and p.organisationunitid=" + organisationUnit.getId();
-        }
-
-        if ( patientIdentifierType.getType().equals( PatientIdentifierType.VALUE_TYPE_LOCAL_ID ) && program != null )
-        {
-            sql += " and pis.programid=" + program.getId();
-        }
-
-        if ( patientIdentifierType.getType().equals( PatientIdentifierType.VALUE_TYPE_LOCAL_ID ) && periodType != null )
-        {
-            Date currentDate = new Date();
-            Period period = periodType.createPeriod( currentDate );
-            sql += " and pis.enrollmentdate >='" + period.getStartDateString() + "' and pis.enrollmentdate <='"
-                + DateUtils.getMediumDateString( period.getEndDate() ) + "'";
-        }
-
-        return jdbcTemplate.queryForObject( sql, Integer.class ) == 0 ? false : true;
     }
 }
