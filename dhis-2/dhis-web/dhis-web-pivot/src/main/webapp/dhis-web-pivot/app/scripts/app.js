@@ -4800,7 +4800,7 @@ Ext.onReady( function() {
 										cls: 'ns-menu-item-noicon',
 										disabled: !(NS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['map']),
 										handler: function() {
-											window.location.href = ns.core.init.contextPath + '/dhis-web-mapping/app/index.html?s=chart';
+											window.location.href = ns.core.init.contextPath + '/dhis-web-mapping/app/index.html?s=map';
 										}
 									}
 								],

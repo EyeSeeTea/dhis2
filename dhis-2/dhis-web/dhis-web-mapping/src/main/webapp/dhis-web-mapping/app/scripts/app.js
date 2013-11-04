@@ -308,7 +308,7 @@ Ext.onReady( function() {
 						id = view.layer;
 
 						if (gis.layer.hasOwnProperty(id) && gis.layer[id].layerCategory === gis.conf.finals.layer.category_thematic) {
-							layout = gis.api.layout.Layout(Ext.clone(view));
+							layout = gis.api.layout.Layout(view);
 
 							if (layout) {
 								return layout;
@@ -320,7 +320,7 @@ Ext.onReady( function() {
 					for (var key in gis.layer) {
 						if (gis.layer.hasOwnProperty(key) && gis.layer[key].layerCategory === gis.conf.finals.layer.category_thematic && gis.layer[key].core.view) {
 							layer = gis.layer[key];
-							layout = gis.api.layout.Layout(Ext.clone(layer.core.view));
+							layout = gis.api.layout.Layout(layer.core.view);
 
 							if (layout) {
 								if (!layout.parentGraphMap && layer.widget) {

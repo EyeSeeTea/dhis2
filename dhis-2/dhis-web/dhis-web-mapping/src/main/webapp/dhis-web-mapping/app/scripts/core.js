@@ -799,8 +799,14 @@ console.log(view.parentGraphMap);
 				}
 			}
 
+			// interpretation button
 			if (gis.map.id && gis.viewport.interpretationButton) {
 				gis.viewport.interpretationButton.enable();
+			}
+
+			// session storage
+			if (GIS.isSessionStorage) {
+				gis.util.layout.setSessionStorage('map', gis.util.layout.getAnalytical());
 			}
 
 			gis.olmap.mask.hide();
@@ -1444,6 +1450,11 @@ console.log(view.parentGraphMap);
 				if (gis.viewport.interpretationButton) {
 					gis.viewport.interpretationButton.disable();
 				}
+			}
+
+			// session storage
+			if (GIS.isSessionStorage) {
+				gis.util.layout.setSessionStorage('map', gis.util.layout.getAnalytical());
 			}
 		};
 
