@@ -4075,7 +4075,7 @@ Ext.onReady( function() {
 				if (Ext.isString(uid)) {
 					this.setProxy({
 						type: 'ajax',
-						url: gis.conf.finals.url.path_commons + 'getOperands.action?uid=' + uid,
+						url: gis.init.contextPath + '/dhis-web-commons-ajax-json/getOperands.action?uid=' + uid,
 						reader: {
 							type: 'json',
 							root: 'operands'
