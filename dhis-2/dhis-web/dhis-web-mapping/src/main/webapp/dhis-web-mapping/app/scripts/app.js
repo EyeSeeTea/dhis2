@@ -5204,7 +5204,7 @@ Ext.onReady( function() {
 				objectNameCmpMap[dxDim.dimension].setValue(dxDim.items[0].id);
 
 				// Period
-				period.store.add(peDim.items[0])
+				period.store.add(gis.conf.period.relativePeriodsMap[peDim.items[0].id] ? gis.conf.period.relativePeriodsMap[peDim.items[0].id] : peDim.items[0]);
 				period.setValue(peDim.items[0].id);
 
 				// Legend
