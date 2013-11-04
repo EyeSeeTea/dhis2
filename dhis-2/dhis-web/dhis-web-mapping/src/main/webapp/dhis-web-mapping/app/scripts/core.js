@@ -2183,6 +2183,8 @@ console.log(view.parentGraphMap);
 						return;
 					}
 
+					dxDim.items = [dxDim.items[0]];
+
 					peDim.items = [peDim.items[0]];
 					peDim.items[0].id = map[peDim.items[0].id] ? map[peDim.items[0].id] : peDim.items[0].id;
 
