@@ -2137,6 +2137,9 @@ console.log(view.parentGraphMap);
 						}
 					}
 
+					dxDim.items = [dxDim.items[0]];
+					peDim.items = [peDim.items[0]];
+
 					config.columns = [dxDim];
 					config.rows = [ouDim];
 					config.filters = [peDim];
