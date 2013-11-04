@@ -799,7 +799,7 @@ console.log(view.parentGraphMap);
 				}
 			}
 
-			if (gis.viewport.interpretationButton) {
+			if (gis.map.id && gis.viewport.interpretationButton) {
 				gis.viewport.interpretationButton.enable();
 			}
 
