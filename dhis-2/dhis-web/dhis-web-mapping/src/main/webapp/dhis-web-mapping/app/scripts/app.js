@@ -3191,7 +3191,7 @@ Ext.onReady( function() {
 			cls: 'gis-container-inner',
 			html: function() {
 				var moduleUrl = gis.init.contextPath + '/dhis-web-mapping/app/index.html?id=' + gis.map.id,
-					apiUrl = gis.init.contextPath + '/api/maps/' + gis.map.id + '/data.html',
+					apiUrl = gis.init.contextPath + '/api/maps/' + gis.map.id + '/data',
 					html = '';
 
 				html += '<div><b>GIS link: </b><span class="user-select"><a href="' + moduleUrl + '" target="_blank">' + moduleUrl + '</a></span></div>';
@@ -4257,7 +4257,7 @@ Ext.onReady( function() {
 				data: [
 					[dimConf.indicator.objectName, GIS.i18n.indicator],
 					[dimConf.dataElement.objectName, GIS.i18n.dataelement],
-					[dimConf.dataSet.objectName, GIS.i18n.dataset]
+					[dimConf.dataSet.objectName, GIS.i18n.reporting_rates]
 				]
 			}),
 			listeners: {
