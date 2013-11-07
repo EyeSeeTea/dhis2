@@ -1312,6 +1312,8 @@ Ext.onReady( function() {
 					if (!w.hasDestroyOnBlurHandler) {
 						ns.core.web.window.addDestroyOnBlurHandler(w);
 					}
+
+					searchTextfield.focus(false, 500);
 				}
 			}
 		});

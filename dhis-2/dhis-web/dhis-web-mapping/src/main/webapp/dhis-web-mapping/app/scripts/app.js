@@ -2403,6 +2403,8 @@ Ext.onReady( function() {
 				show: function() {
 					this.setPosition(115, 33);
 				}
+
+				searchTextfield.focus(false, 500);
 			}
 		});
 

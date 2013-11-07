@@ -1599,6 +1599,8 @@ Ext.onReady( function() {
 					if (!w.hasDestroyOnBlurHandler) {
 						dv.util.window.addDestroyOnBlurHandler(w);
 					}
+
+					searchTextfield.focus(false, 500);
 				}
 			}
 		});
