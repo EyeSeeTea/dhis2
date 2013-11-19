@@ -3713,31 +3713,47 @@ Ext.onReady( function() {
 					return node;
 				}
 			},
-			numberOfRecords: 0,
+			isPending: false,
 			recordsToSelect: [],
-			multipleSelectIf: function(doUpdate) {
-				if (this.recordsToSelect.length === this.numberOfRecords) {
+			recordsToRestore: [],
+			multipleSelectIf: function(map, doUpdate) {
+				if (this.recordsToSelect.length === ns.core.support.prototype.object.getLength(map)) {
 					this.getSelectionModel().select(this.recordsToSelect);
 					this.recordsToSelect = [];
-					this.numberOfRecords = 0;
+					this.isPending = false;
 
 					if (doUpdate) {
 						update();
 					}
 				}
 			},
-			multipleExpand: function(id, path, doUpdate) {
-				var rootId = ns.core.conf.finals.root.id;
+			multipleExpand: function(id, map, doUpdate) {
+				var that = this,
+					rootId = ns.core.conf.finals.root.id,
+					path = map[id],
+					fn,
+					record;
+
+				fn = function() {
+					that.recordsToSelect.push(record);
+					that.multipleSelectIf(map, doUpdate);
+				};
 
 				if (path.substr(0, rootId.length + 1) !== ('/' + rootId)) {
 					path = '/' + rootId + path;
 				}
 
-				this.expandPath('/' + path, 'id', '/', function() {
-					var record = this.getRootNode().findChild('id', id, true);
-					this.recordsToSelect.push(record);
-					this.multipleSelectIf(doUpdate);
-				}, this);
+				record = Ext.clone(that.getRootNode().findChild('id', id, true));
+
+				if (record) {
+					fn();
+				}
+				else {
+					that.expandPath(path, 'id', '/', function() {
+						record = Ext.clone(that.getRootNode().findChild('id', id, true));
+						fn();
+					});
+				}
 			},
             select: function(url, params) {
                 if (!params) {
@@ -3770,24 +3786,18 @@ Ext.onReady( function() {
 
 				return map;
 			},
-			selectGraphMap: function(map, doUpdate) {
-				this.numberOfRecords = ns.core.support.prototype.object.getLength(map);
+			selectGraphMap: function(map, update) {
+				if (!ns.core.support.prototype.object.getLength(map)) {
+					return;
+				}
+
+				this.isPending = true;
 
 				for (var key in map) {
 					if (map.hasOwnProperty(key)) {
-						treePanel.multipleExpand(key, map[key], doUpdate);
+						treePanel.multipleExpand(key, map, update);
 					}
 				}
-			},
-			xable: function(values) {
-				for (var i = 0; i < values.length; i++) {
-					if (!!values[i]) {
-						this.disable();
-						return;
-					}
-				}
-
-				this.enable();
 			},
 			store: Ext.create('Ext.data.TreeStore', {
 				fields: ['id', 'name'],
@@ -3812,21 +3822,29 @@ Ext.onReady( function() {
 					id: ns.core.conf.finals.root.id,
 					expanded: true,
 					children: ns.core.init.rootNodes
-				},
-				listeners: {
-					load: function() {
-						//console.log(arguments);
-					}
 				}
 			}),
+			xable: function(values) {
+				for (var i = 0; i < values.length; i++) {
+					if (!!values[i]) {
+						this.disable();
+						return;
+					}
+				}
+
+				this.enable();
+			},
 			listeners: {
-				load: function() {
-					if (treePanel.tmpSelection) {
-						treePanel.selectGraphMap(treePanel.tmpSelection);
+				beforeitemexpand: function() {
+					if (!treePanel.isPending) {
+						treePanel.recordsToRestore = treePanel.getSelectionModel().getSelection();
 					}
 				},
-				beforeitemexpand: function() {
-					treePanel.tmpSelection = treePanel.getParentGraphMap();
+				itemexpand: function() {
+					if (!treePanel.isPending && treePanel.recordsToRestore.length) {
+						treePanel.getSelectionModel().select(treePanel.recordsToRestore);
+						treePanel.recordsToRestore = [];
+					}
 				},
 				render: function() {
 					this.rendered = true;
@@ -3866,6 +3884,7 @@ Ext.onReady( function() {
 				}
 			}
 		});
+tree = treePanel;
 
 		userOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
 			columnWidth: 0.28,
@@ -5047,26 +5066,26 @@ Ext.onReady( function() {
 						orgunits.push(ouRecords[i].id);
 					}
 				}
-			}
 
-			if (levels.length) {
-				toolMenu.clickHandler('level');
-				organisationUnitLevel.setValue(levels);
-			}
-			else if (groups.length) {
-				toolMenu.clickHandler('group');
-				organisationUnitGroup.setValue(groups);
-			}
-			else {
-				toolMenu.clickHandler('orgunit');
-				userOrganisationUnit.setValue(isOu);
-				userOrganisationUnitChildren.setValue(isOuc);
-				userOrganisationUnitGrandChildren.setValue(isOugc);
-			}
+				if (levels.length) {
+					toolMenu.clickHandler('level');
+					organisationUnitLevel.setValue(levels);
+				}
+				else if (groups.length) {
+					toolMenu.clickHandler('group');
+					organisationUnitGroup.setValue(groups);
+				}
+				else {
+					toolMenu.clickHandler('orgunit');
+					userOrganisationUnit.setValue(isOu);
+					userOrganisationUnitChildren.setValue(isOuc);
+					userOrganisationUnitGrandChildren.setValue(isOugc);
+				}
 
-			if (!(isOu || isOuc || isOugc)) {
-				if (Ext.isObject(graphMap)) {
-					treePanel.selectGraphMap(graphMap);
+				if (!(isOu || isOuc || isOugc)) {
+					if (Ext.isObject(graphMap)) {
+						treePanel.selectGraphMap(graphMap);
+					}
 				}
 			}
 			else {
@@ -5196,9 +5215,9 @@ Ext.onReady( function() {
 
 				// root nodes
 				requests.push({
-					url: init.contextPath + '/api/organisationUnits.json?level=1&paging=false&links=false',
+					url: init.contextPath + '/api/organisationUnits.json?level=1&paging=false&links=false&viewClass=detailed',
 					success: function(r) {
-						init.rootNodes = Ext.decode(r.responseText).organisationUnits;
+						init.rootNodes = Ext.decode(r.responseText).organisationUnits || [];
 						fn();
 					}
 				});
@@ -5207,7 +5226,7 @@ Ext.onReady( function() {
 				requests.push({
 					url: init.contextPath + '/api/organisationUnitLevels.json?paging=false&links=false',
 					success: function(r) {
-						init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels;
+						init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
 						fn();
 					}
 				});
@@ -5216,12 +5235,18 @@ Ext.onReady( function() {
 				requests.push({
 					url: init.contextPath + '/api/organisationUnits.json?userOnly=true&viewClass=detailed&links=false',
 					success: function(r) {
-						var ou = Ext.decode(r.responseText).organisationUnits[0];
-						init.user = {
-							ou: ou.id,
-							ouc: Ext.Array.pluck(ou.children, 'id')
-						};
-						fn();
+						var organisationUnits = Ext.decode(r.responseText).organisationUnits || [];
+
+						if (organisationUnits.length) {
+							var ou = organisationUnits[0];
+
+							init.user = {
+								ou: ou.id,
+								ouc: Ext.Array.pluck(ou.children, 'id')
+							};
+
+							fn();
+						}
 					}
 				});
 
@@ -5229,7 +5254,7 @@ Ext.onReady( function() {
 				requests.push({
 					url: init.contextPath + '/api/mapLegendSets.json?viewClass=detailed&links=false&paging=false',
 					success: function(r) {
-						init.legendSets = Ext.decode(r.responseText).mapLegendSets;
+						init.legendSets = Ext.decode(r.responseText).mapLegendSets || [];
 						fn();
 					}
 				});
@@ -5238,7 +5263,7 @@ Ext.onReady( function() {
 				requests.push({
 					url: init.contextPath + '/api/dimensions.json?links=false&paging=false',
 					success: function(r) {
-						init.dimensions = Ext.decode(r.responseText).dimensions;
+						init.dimensions = Ext.decode(r.responseText).dimensions || [];
 						fn();
 					}
 				});
