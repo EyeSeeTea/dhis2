@@ -3730,30 +3730,17 @@ Ext.onReady( function() {
 			multipleExpand: function(id, map, doUpdate) {
 				var that = this,
 					rootId = ns.core.conf.finals.root.id,
-					path = map[id],
-					fn,
-					record;
-
-				fn = function() {
-					that.recordsToSelect.push(record);
-					that.multipleSelectIf(map, doUpdate);
-				};
+					path = map[id];
 
 				if (path.substr(0, rootId.length + 1) !== ('/' + rootId)) {
 					path = '/' + rootId + path;
 				}
 
-				record = Ext.clone(that.getRootNode().findChild('id', id, true));
-
-				if (record) {
-					fn();
-				}
-				else {
-					that.expandPath(path, 'id', '/', function() {
-						record = Ext.clone(that.getRootNode().findChild('id', id, true));
-						fn();
-					});
-				}
+				that.expandPath(path, 'id', '/', function() {
+					record = Ext.clone(that.getRootNode().findChild('id', id, true));
+					that.recordsToSelect.push(record);
+					that.multipleSelectIf(map, doUpdate);
+				});
 			},
             select: function(url, params) {
                 if (!params) {
@@ -3884,7 +3871,6 @@ Ext.onReady( function() {
 				}
 			}
 		});
-tree = treePanel;
 
 		userOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
 			columnWidth: 0.28,

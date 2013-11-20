@@ -175,13 +175,13 @@ Ext.onReady( function() {
 					if (id !== gis.layer.boundary.id && id !== gis.layer.facility.id) {
 						what = '<g id="indicator" style="display: block; visibility: visible;">' +
 							   '<text id="indicator" x="' + x + '" y="' + y + '" font-size="12">' +
-							   '<tspan>' + layer.core.view.columns[0].items[0].name + '</tspan></text></g>';
+							   '<tspan>' + Ext.htmlEncode(layer.core.view.columns[0].items[0].name) + '</tspan></text></g>';
 
 						y += 15;
 
 						when = '<g id="period" style="display: block; visibility: visible;">' +
 							   '<text id="period" x="' + x + '" y="' + y + '" font-size="12">' +
-							   '<tspan>' + layer.core.view.filters[0].items[0].name + '</tspan></text></g>';
+							   '<tspan>' + Ext.htmlEncode(layer.core.view.filters[0].items[0].name) + '</tspan></text></g>';
 
 						y += 8;
 
@@ -193,10 +193,10 @@ Ext.onReady( function() {
 							}
 
 							legend += '<rect x="' + x + '" y="' + y + '" height="15" width="30" ' +
-									  'fill="' + imageLegendConfig[j].color + '" stroke="#000000" stroke-width="1"/>';
+									  'fill="' + Ext.htmlEncode(imageLegendConfig[j].color) + '" stroke="#000000" stroke-width="1"/>';
 
 							legend += '<text id="label" x="' + (x + 40) + '" y="' + (y + 12) + '" font-size="12">' +
-									  '<tspan>' + imageLegendConfig[j].label + '</tspan></text>';
+									  '<tspan>' + Ext.htmlEncode(imageLegendConfig[j].label) + '</tspan></text>';
 						}
 
 						legend += '</g>';
