@@ -2179,25 +2179,19 @@ console.log(view.parentGraphMap);
 						}
 					}
 
-					if (!dxDim) {
-						alert('No indicators, data elements or reporting rates specified');
-						return;
-					}
-
-					if (!peDim) {
-						alert('No periods specified');
-						return;
-					}
-
 					if (!ouDim) {
 						alert('No organisation units specified');
 						return;
 					}
 
-					dxDim.items = [dxDim.items[0]];
+					if (dxDim) {
+						dxDim.items = [dxDim.items[0]];
+					}
 
-					peDim.items = [peDim.items[0]];
-					peDim.items[0].id = map[peDim.items[0].id] ? map[peDim.items[0].id] : peDim.items[0].id;
+					if (peDim) {
+						peDim.items = [peDim.items[0]];
+						peDim.items[0].id = map[peDim.items[0].id] ? map[peDim.items[0].id] : peDim.items[0].id;
+					}
 
 					config.columns = [dxDim];
 					config.rows = [ouDim];
@@ -2224,18 +2218,8 @@ console.log(view.parentGraphMap);
 					config.rows = getValidatedDimensionArray(config.rows);
 					config.filters = getValidatedDimensionArray(config.filters);
 
-					if (!config.columns) {
-						console.log('Data dimension is invalid');
-						return;
-					}
-
 					if (!config.rows) {
 						console.log('Organisation unit dimension is invalid');
-						return;
-					}
-
-					if (!config.filters) {
-						console.log('Period dimension is invalid');
 						return;
 					}
 

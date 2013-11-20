@@ -845,7 +845,7 @@ Ext.onReady( function() {
 			nameTextfield = Ext.create('Ext.form.field.Text', {
 				height: 26,
 				width: 371,
-				fieldStyle: 'padding-left: 6px; border-radius: 1px; border-color: #bbb; font-size:11px',
+				fieldStyle: 'padding-left: 5px; border-radius: 1px; border-color: #bbb; font-size:11px',
 				style: 'margin-bottom:0',
 				emptyText: 'Favorite name',
 				value: id ? record.data.name : '',
@@ -967,6 +967,8 @@ Ext.onReady( function() {
 						}
 
 						ns.app.favoriteWindow.destroyOnBlur = false;
+
+						nameTextfield.focus(false, 500);
 					},
 					destroy: function() {
 						ns.app.favoriteWindow.destroyOnBlur = true;
@@ -993,7 +995,7 @@ Ext.onReady( function() {
 		searchTextfield = Ext.create('Ext.form.field.Text', {
 			width: windowCmpWidth - addButton.width - 11,
 			height: 26,
-			fieldStyle: 'padding-right: 0; padding-left: 6px; border-radius: 1px; border-color: #bbb; font-size:11px',
+			fieldStyle: 'padding-right: 0; padding-left: 5px; border-radius: 1px; border-color: #bbb; font-size:11px',
 			emptyText: NS.i18n.search_for_favorites,
 			enableKeyEvents: true,
 			currentValue: '',

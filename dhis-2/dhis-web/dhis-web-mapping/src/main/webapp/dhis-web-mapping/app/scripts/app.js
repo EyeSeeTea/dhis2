@@ -855,7 +855,7 @@ Ext.onReady( function() {
 		};
 		items.push(item);
 
-		if (layer.id !== gis.layer.boundary.id) {
+		if (!(layer.id === gis.layer.boundary.id || layer.id === gis.layer.facility.id)) {
 			item = {
 				text: GIS.i18n.filter + '..',
 				iconCls: 'gis-menu-item-icon-filter',
@@ -1884,7 +1884,7 @@ Ext.onReady( function() {
 			nameTextfield = Ext.create('Ext.form.field.Text', {
 				height: 26,
 				width: 371,
-				fieldStyle: 'padding-left: 6px; border-radius: 1px; border-color: #bbb; font-size:11px',
+				fieldStyle: 'padding-left: 5px; border-radius: 1px; border-color: #bbb; font-size:11px',
 				style: 'margin-bottom:0',
 				emptyText: 'Favorite name',
 				value: id ? record.data.name : '',
@@ -2007,6 +2007,8 @@ Ext.onReady( function() {
 				listeners: {
 					show: function() {
 						this.setPosition(favoriteWindow.x + 14, favoriteWindow.y + 67);
+
+						nameTextfield.focus(false, 500);
 					}
 				}
 			});
@@ -2029,7 +2031,7 @@ Ext.onReady( function() {
 		searchTextfield = Ext.create('Ext.form.field.Text', {
 			width: windowCmpWidth - addButton.width - 11,
 			height: 26,
-			fieldStyle: 'padding-right: 0; padding-left: 6px; border-radius: 1px; border-color: #bbb; font-size:11px',
+			fieldStyle: 'padding-right: 0; padding-left: 5px; border-radius: 1px; border-color: #bbb; font-size:11px',
 			emptyText: GIS.i18n.search_for_favorites,
 			enableKeyEvents: true,
 			currentValue: '',
@@ -3742,6 +3744,7 @@ Ext.onReady( function() {
 			layer.item.setValue(false);
 
 			if (!layer.window.isRendered) {
+				layer.core.view = null;
 				return;
 			}
 
@@ -5116,6 +5119,7 @@ Ext.onReady( function() {
 
 			// Components
 			if (!layer.window.isRendered) {
+				layer.core.view = null;
 				return;
 			}
 
@@ -5885,13 +5889,14 @@ Ext.onReady( function() {
 				layer.labelWindow = null;
 			}
 
-			if (layer.circleLayer) {
+			if (layer.circleLayer & !skipTree) {
 				layer.circleLayer.deactivateControls();
 				layer.circleLayer = null;
 			}
 
 			// Components
 			if (!layer.window.isRendered) {
+				layer.core.view = null;
 				return;
 			}
 
