@@ -87,7 +87,7 @@ public class ProgramInstance
 
     private List<MessageConversation> messageConversations;
 
-    private Boolean followup;
+    private Boolean followup = false;
 
     private PatientComment patientComment;
 
@@ -99,10 +99,11 @@ public class ProgramInstance
     {
     }
 
-    public ProgramInstance( Date enrollmentDate, Date endDate, Patient patient, Program program )
+    
+    public ProgramInstance( Date enrollmentDate, Date dateOfIncident, Patient patient, Program program )
     {
         this.enrollmentDate = enrollmentDate;
-        this.endDate = endDate;
+        this.dateOfIncident = dateOfIncident;
         this.patient = patient;
         this.program = program;
     }

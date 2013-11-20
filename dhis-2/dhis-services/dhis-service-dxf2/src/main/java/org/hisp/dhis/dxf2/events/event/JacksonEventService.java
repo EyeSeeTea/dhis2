@@ -64,25 +64,25 @@ public class JacksonEventService extends AbstractEventService
 
     private final static ObjectMapper jsonMapper = new ObjectMapper();
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     private static <T> T fromXml( InputStream inputStream, Class<?> clazz ) throws IOException
     {
         return (T) xmlMapper.readValue( inputStream, clazz );
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     private static <T> T fromXml( String input, Class<?> clazz ) throws IOException
     {
         return (T) xmlMapper.readValue( input, clazz );
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     private static <T> T fromJson( InputStream inputStream, Class<?> clazz ) throws IOException
     {
         return (T) jsonMapper.readValue( inputStream, clazz );
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     private static <T> T fromJson( String input, Class<?> clazz ) throws IOException
     {
         return (T) jsonMapper.readValue( input, clazz );

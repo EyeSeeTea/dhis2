@@ -120,10 +120,11 @@ public class HibernatePatientAttributeValueStore
 
     public void updatePatientAttributeValues( PatientAttributeOption patientAttributeOption )
     {
-        String sql = "UPDATE patientattributevalue SET value='" + patientAttributeOption.getName()
-            + "' WHERE patientattributeoptionid='" + patientAttributeOption.getId() + "'";
-
-        jdbcTemplate.execute( sql );
+        String hql = "UPDATE PatientAttributeValue SET value=:value where patientAttributeOption=:patientAttributeOption";
+        Query query = getQuery( hql );
+        query.setString( "value", patientAttributeOption.getName() );
+        query.setEntity( "patientAttributeOption", patientAttributeOption );
+        query.executeUpdate();
     }
 
     @SuppressWarnings( "unchecked" )
@@ -137,13 +138,4 @@ public class HibernatePatientAttributeValueStore
         return query.list();
     }
 
-    @SuppressWarnings( "unchecked" )
-    public Collection<PatientAttributeValue> getWithoutProgram( Patient patient )
-    {
-        String hql = "SELECT pav FROM PatientAttributeValue as pav WHERE pav.patient=:patient and pav.patientAttribute.program IS NULL";
-        Query query = getQuery( hql );
-        query.setEntity( "patient", patient );
-
-        return query.list();
-    }
 }

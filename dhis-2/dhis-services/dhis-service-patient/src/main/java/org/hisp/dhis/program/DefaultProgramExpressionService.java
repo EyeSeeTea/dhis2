@@ -53,7 +53,7 @@ public class DefaultProgramExpressionService
     implements ProgramExpressionService
 {
     private final String regExp = "\\[" + OBJECT_PROGRAM_STAGE_DATAELEMENT + SEPARATOR_OBJECT + "([a-zA-Z0-9\\- ]+["
-        + SEPARATOR_ID + "[0-9]*]*)" + "\\]";
+        + SEPARATOR_ID + "[0-9]+]*)" + "\\]";
 
     private final String INVALID_CONDITION = "Invalid condition";
 
@@ -74,7 +74,7 @@ public class DefaultProgramExpressionService
     {
         this.programStageService = programStageService;
     }
-    
+
     private DataElementService dataElementService;
 
     public void setDataElementService( DataElementService dataElementService )
@@ -132,15 +132,13 @@ public class DefaultProgramExpressionService
         else
         {
             StringBuffer description = new StringBuffer();
-
             Pattern pattern = Pattern.compile( regExp );
             Matcher matcher = pattern.matcher( programExpression.getExpression() );
+
             while ( matcher.find() )
             {
                 String key = matcher.group().replaceAll( "[\\[\\]]", "" ).split( SEPARATOR_OBJECT )[1];
-
                 String dataValue = patientDataValueMap.get( key );
-
                 if ( dataValue == null )
                 {
                     return null;
@@ -150,10 +148,11 @@ public class DefaultProgramExpressionService
             }
 
             matcher.appendTail( description );
+           
             value = description.toString();
         }
+        
         return value;
-
     }
 
     @Override
@@ -183,12 +182,12 @@ public class DefaultProgramExpressionService
             }
 
             matcher.appendReplacement( description,
-                programStage.getDisplayName() + SEPARATOR_ID + dataElement.getName() );
+                "[" + ProgramExpression.OBJECT_PROGRAM_STAGE_DATAELEMENT + ProgramExpression.SEPARATOR_OBJECT
+                    + programStage.getDisplayName() + SEPARATOR_ID + dataElement.getName() + "]" );
         }
 
         matcher.appendTail( description );
 
         return description.toString();
     }
-
 }

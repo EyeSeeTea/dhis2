@@ -44,7 +44,6 @@ import org.hisp.dhis.analytics.AnalyticsTableService;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.period.Cal;
 import org.hisp.dhis.resourcetable.ResourceTableService;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.sqlview.SqlViewService;
@@ -104,7 +103,7 @@ public class DefaultAnalyticsTableService
         
         clock.logTime( "Partition tables: " + tables + ", last 3 years: " + last3YearsOnly );
         
-        notifier.notify( taskId, "Creating analytics tables: " + tables );
+        notifier.notify( taskId, "Creating analytics tables" );
         
         createTables( tables );
         
@@ -144,7 +143,7 @@ public class DefaultAnalyticsTableService
 
     public void dropTables()
     {
-        List<AnalyticsTable> tables = tableManager.getTables( new Cal().set( 1900, 1, 1 ).time(), new Cal().set( 2100, 1, 1 ).time() );
+        List<AnalyticsTable> tables = tableManager.getTables( false );
         
         for ( AnalyticsTable table : tables )   
         {
@@ -183,6 +182,10 @@ public class DefaultAnalyticsTableService
     
     private void populateTables( List<AnalyticsTable> tables )
     {
+        int taskNo = Math.min( getProcessNo(), tables.size() );
+        
+        log.info( "Populate table task number: " + taskNo );
+        
         ConcurrentLinkedQueue<AnalyticsTable> tableQ = new ConcurrentLinkedQueue<AnalyticsTable>( tables );
         
         List<Future<?>> futures = new ArrayList<Future<?>>();

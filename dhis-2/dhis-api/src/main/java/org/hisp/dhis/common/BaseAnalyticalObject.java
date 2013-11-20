@@ -212,7 +212,7 @@ public abstract class BaseAnalyticalObject
             this.transientOrganisationUnits.add( organisationUnit );
         }
     }
-        
+    
     /**
      * Assembles a DimensionalObject based on the persisted properties of this
      * AnalyticalObject. Collapses indicators, data elements, data element 
@@ -579,6 +579,55 @@ public abstract class BaseAnalyticalObject
         
         return StringUtils.join( ids, DIMENSION_SEP );
     }
+
+    /**
+     * Returns meta-data mapping for this analytical object. Includes a identifier
+     * to name mapping for dynamic dimensions.
+     */
+    public Map<String, String> getMetaData()
+    {
+        Map<String, String> meta = new HashMap<String, String>();
+        
+        for ( DataElementGroup group : dataElementGroups )
+        {
+            meta.put( group.getGroupSet().getUid(), group.getGroupSet().getName() );
+        }
+        
+        for ( OrganisationUnitGroup group : organisationUnitGroups )
+        {
+            meta.put( group.getGroupSet().getUid(), group.getGroupSet().getName() );
+        }
+        
+        for ( DataElementCategoryDimension category : categoryDimensions )
+        {
+            meta.put( category.getDimension().getUid(), category.getDimension().getName() );
+        }
+        
+        return meta;
+    }
+    
+    /**
+     * Clear or set to false all persistent properties for this object.
+     */
+    public void clear()
+    {
+        indicators.clear();
+        dataElements.clear();
+        dataElementOperands.clear();
+        dataSets.clear();
+        periods.clear();
+        relatives = null;
+        organisationUnits.clear();
+        categoryDimensions.clear();
+        dataElementGroups.clear();
+        organisationUnitGroups.clear();
+        userOrganisationUnit = false;
+        userOrganisationUnitChildren = false;
+        userOrganisationUnitGrandChildren = false;
+        organisationUnitLevels.clear();
+        itemOrganisationUnitGroups.clear();
+        rewindRelativePeriods = false;
+    }
     
     @Override
     public void mergeWith( IdentifiableObject other )
@@ -589,37 +638,24 @@ public abstract class BaseAnalyticalObject
         {
             BaseAnalyticalObject object = (BaseAnalyticalObject) other;
             
-            indicators.clear();
+            this.clear();
+            
             indicators.addAll( object.getIndicators() );
-
-            dataElements.clear();
             dataElements.addAll( object.getDataElements() );
-
-            dataElementOperands.clear();
             dataElementOperands.addAll( object.getDataElementOperands() );
-            
-            dataSets.clear();
             dataSets.addAll( object.getDataSets() );
-            
-            periods.clear();
             periods.addAll( object.getPeriods() );
-
             relatives = object.getRelatives() == null ? relatives : object.getRelatives();
-            
-            organisationUnits.clear();
             organisationUnits.addAll( object.getOrganisationUnits() );
-            
-            dataElementGroups.clear();
-            dataElementGroups.addAll( object.getDataElementGroups() );
-            
-            organisationUnitGroups.clear();
-            organisationUnitGroups.addAll( object.getOrganisationUnitGroups() );
-            
-            categoryDimensions.clear();
             categoryDimensions.addAll( object.getCategoryDimensions() );
-            
+            dataElementGroups.addAll( object.getDataElementGroups() );
+            organisationUnitGroups.addAll( object.getOrganisationUnitGroups() );
             userOrganisationUnit = object.isUserOrganisationUnit();
             userOrganisationUnitChildren = object.isUserOrganisationUnitChildren();
+            userOrganisationUnitGrandChildren = object.isUserOrganisationUnitGrandChildren();
+            organisationUnitLevels.addAll( object.getOrganisationUnitLevels() );
+            itemOrganisationUnitGroups = object.getItemOrganisationUnitGroups();
+            rewindRelativePeriods = object.isRewindRelativePeriods();
         }
     }
 

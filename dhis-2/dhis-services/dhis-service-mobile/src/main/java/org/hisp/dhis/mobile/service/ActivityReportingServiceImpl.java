@@ -330,7 +330,7 @@ public class ActivityReportingServiceImpl
             }
         }
 
-        this.setGroupByAttribute( patientAttService.getPatientAttributeByGroupBy( true ) );
+        this.setGroupByAttribute( patientAttService.getPatientAttributeByGroupBy( ) );
 
         if ( items.isEmpty() )
         {
@@ -358,7 +358,7 @@ public class ActivityReportingServiceImpl
             }
         }
 
-        this.setGroupByAttribute( patientAttService.getPatientAttributeByGroupBy( true ) );
+        this.setGroupByAttribute( patientAttService.getPatientAttributeByGroupBy(  ) );
 
         if ( items.isEmpty() )
         {
@@ -782,10 +782,15 @@ public class ActivityReportingServiceImpl
                 }
 
                 programStageInstanceService.addProgramStageInstance( programStageInstance );
-
+                programInstance.getProgramStageInstances().add( programStageInstance );
             }
-
         }
+        programInstanceService.updateProgramInstance( programInstance );
+        patient.getProgramInstances().add( programInstance );
+        patientService.updatePatient( patient );
+        
+        patient = patientService.getPatient( patientId );
+        
         return getPatientModel( patient );
     }
 
@@ -1320,8 +1325,13 @@ public class ActivityReportingServiceImpl
                 {
                     programs.add( program );
                 }
+                else
+                {
+                    System.out.println("program name: "+program.getName());
+                }
             }
         }
+        System.out.println("final size: "+programs.size());
         return programs;
     }
 
@@ -1788,7 +1798,7 @@ public class ActivityReportingServiceImpl
 
         Set<org.hisp.dhis.patient.PatientIdentifier> patientIdentifierSet = new HashSet<org.hisp.dhis.patient.PatientIdentifier>();
         Set<org.hisp.dhis.patient.PatientAttribute> patientAttributeSet = new HashSet<org.hisp.dhis.patient.PatientAttribute>();
-        List<PatientAttributeValue> patientAttributeValues = new ArrayList<PatientAttributeValue>();
+        Set<PatientAttributeValue> patientAttributeValues = new HashSet<PatientAttributeValue>();
 
         Collection<org.hisp.dhis.api.mobile.model.PatientIdentifier> identifiersMobile = patient.getIdentifiers();
 
@@ -1864,7 +1874,7 @@ public class ActivityReportingServiceImpl
         }
 
         Patient patientNew = patientService.getPatient( this.patientId );
-        this.setPatientMobile( getPatientModel( patientNew ) );
+        setPatientMobile( getPatientModel( patientNew ) );
 
         return patientId;
 
@@ -1967,11 +1977,35 @@ public class ActivityReportingServiceImpl
     }
 
     @Override
-    public String findLostToFollowUp( int orgUnitId, String programId )
+    public String findLostToFollowUp( int orgUnitId, String searchEventInfos )
         throws NotAllowedException
     {
+        String[] searchEventInfosArray = searchEventInfos.split( "-" );
+        
+        int programStageStatus = 0;
+        
+        if ( searchEventInfosArray[1].equalsIgnoreCase("Scheduled in future") )
+        {
+            programStageStatus = ProgramStageInstance.FUTURE_VISIT_STATUS;
+        }
+        else if ( searchEventInfosArray[1].equalsIgnoreCase("Overdue") )
+        {
+            programStageStatus = ProgramStageInstance.LATE_VISIT_STATUS;
+        }
+        
+        boolean followUp;
+        
+        if ( searchEventInfosArray[2].equalsIgnoreCase( "true" ) )
+        {
+            followUp = true;
+        }
+        else
+        {
+            followUp = false;
+        }
+            
         String eventsInfo = "";
-        Boolean followUp = false;
+        
         DateFormat formatter = new SimpleDateFormat( "yyyy-MM-dd" );
 
         List<String> searchTextList = new ArrayList<String>();
@@ -1988,9 +2022,9 @@ public class ActivityReportingServiceImpl
 
         Date fromDate = fromCalendar.getTime();
 
-        String searchText = Patient.PREFIX_PROGRAM_EVENT_BY_STATUS + "_" + programId + "_"
+        String searchText = Patient.PREFIX_PROGRAM_EVENT_BY_STATUS + "_" + searchEventInfosArray[0] + "_"
             + formatter.format( fromDate ) + "_" + formatter.format( toDate ) + "_" + orgUnitId + "_" + true + "_"
-            + ProgramStageInstance.LATE_VISIT_STATUS;
+            + programStageStatus;
 
         searchTextList.add( searchText );
         orgUnitList.add( organisationUnitService.getOrganisationUnit( orgUnitId ) );

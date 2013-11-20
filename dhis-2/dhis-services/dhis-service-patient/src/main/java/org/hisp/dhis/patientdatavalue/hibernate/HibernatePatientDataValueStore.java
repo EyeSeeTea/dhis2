@@ -61,13 +61,6 @@ public class HibernatePatientDataValueStore
         return query.executeUpdate();
     }
 
-    public int delete( DataElement dataElement )
-    {
-        Query query = getQuery( "delete from PatientDataValue where dataElement = :dataElement" );
-        query.setEntity( "dataElement", dataElement );
-        return query.executeUpdate();
-    }
-
     @SuppressWarnings( "unchecked" )
     public Collection<PatientDataValue> get( ProgramStageInstance programStageInstance )
     {
@@ -81,8 +74,8 @@ public class HibernatePatientDataValueStore
         String hql = "from PatientDataValue pdv where pdv.dataElement in ( :dataElements ) "
             + "and pdv.programStageInstance = :programStageInstance";
 
-        return getQuery( hql ).setParameterList( "dataElements", dataElements ).setEntity( "programStageInstance",
-            programStageInstance ).list();
+        return getQuery( hql ).setParameterList( "dataElements", dataElements )
+            .setEntity( "programStageInstance", programStageInstance ).list();
     }
 
     @SuppressWarnings( "unchecked" )
@@ -119,5 +112,4 @@ public class HibernatePatientDataValueStore
         return (PatientDataValue) getCriteria( Restrictions.eq( "programStageInstance", programStageInstance ),
             Restrictions.eq( "dataElement", dataElement ) ).uniqueResult();
     }
-
 }

@@ -29,7 +29,6 @@ package org.hisp.dhis.web.webapi.v1.controller;
  */
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.hisp.dhis.api.controller.organisationunit.OrganisationUnitLevelController;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.dataset.DataSet;
@@ -48,7 +47,6 @@ import org.hisp.dhis.web.webapi.v1.exception.DuplicateUuidException;
 import org.hisp.dhis.web.webapi.v1.exception.ETagVerificationException;
 import org.hisp.dhis.web.webapi.v1.exception.FacilityNotFoundException;
 import org.hisp.dhis.web.webapi.v1.exception.UuidFormatException;
-import org.hisp.dhis.web.webapi.v1.utils.ContextUtils;
 import org.hisp.dhis.web.webapi.v1.utils.MessageUtils;
 import org.hisp.dhis.web.webapi.v1.utils.ValidationUtils;
 import org.hisp.dhis.web.webapi.v1.validation.group.Create;
@@ -61,7 +59,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -70,8 +67,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import javax.validation.groups.Default;
@@ -84,6 +83,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -176,7 +176,7 @@ public class FacilityController
         List<String> strings = Arrays.asList( fields.split( "," ) );
 
         // simple field filtering
-        if ( !strings.contains( "id" ) )
+        if ( !strings.contains( "uuid" ) )
         {
             facility.setUuid( null );
         }
@@ -246,42 +246,46 @@ public class FacilityController
     }
 
     @RequestMapping( value = "", method = RequestMethod.GET )
-    public String readFacilities( Model model,
+    @ResponseStatus( HttpStatus.OK )
+    public void readFacilities(
         @RequestParam( value = "updatedSince", required = false ) Date lastUpdated,
         @RequestParam( value = "allProperties", required = false, defaultValue = "true" ) Boolean allProperties,
         @RequestParam( value = "fields", required = false ) String fields,
         @RequestParam( value = "limit", required = false, defaultValue = "25" ) String limit,
         @RequestParam( value = "offset", required = false, defaultValue = "0" ) Integer offset,
-        HttpServletRequest request )
+        @RequestParam( value = "active", required = false ) List<Boolean> activeList,
+        @RequestParam( value = "name", required = false ) List<String> nameList,
+        @RequestParam( value = "uuid", required = false ) List<String> uuidList,
+        @RequestParam( value = "properties.parent", required = false ) List<String> parentList,
+        @RequestParam( value = "properties.level", required = false ) List<String> levelList,
+        HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         Facilities facilities = new Facilities();
         List<OrganisationUnit> allOrganisationUnits;
 
         Integer limitValue = getLimitValue( limit, 25 );
 
+        if ( offset < 0 )
+        {
+            offset = 0;
+        }
+
         if ( lastUpdated == null )
         {
-            if ( limitValue != null )
-            {
-                allOrganisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.getOrganisationUnitsBetween( offset, limitValue ) );
-            }
-            else
-            {
-                allOrganisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.getAllOrganisationUnits() );
-            }
+            allOrganisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.getAllOrganisationUnits() );
         }
         else
         {
-            if ( limitValue != null )
-            {
-                allOrganisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.
-                    getOrganisationUnitsBetweenByLastUpdated( lastUpdated, offset, limitValue ) );
-            }
-            else
-            {
-                allOrganisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.getAllOrganisationUnitsByLastUpdated( lastUpdated ) );
-            }
+            allOrganisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.getAllOrganisationUnitsByLastUpdated( lastUpdated ) );
         }
+
+        filterByActiveList( activeList, allOrganisationUnits );
+        filterByNameList( nameList, allOrganisationUnits );
+        filterByUuidList( uuidList, allOrganisationUnits );
+        filterByPropertiesParent( parentList, allOrganisationUnits );
+        filterByPropertiesLevel( levelList, allOrganisationUnits );
+
+        filterByLimit( offset, limitValue, allOrganisationUnits );
 
         facilities.getMeta().put( "limit", limitValue );
         facilities.getMeta().put( "offset", offset );
@@ -304,26 +308,199 @@ public class FacilityController
             }
         }
 
-        setAccessRights( model );
+        objectMapper.writeValue( response.getOutputStream(), facilities );
+    }
 
-        model.addAttribute( "esc", StringEscapeUtils.class );
-        model.addAttribute( "entity", facilities );
-        ContextUtils.populateContextPath( model, request );
-        model.addAttribute( "baseUrl", linkTo( FredController.class ).toString() );
-        model.addAttribute( "pageName", "facilities" );
-        model.addAttribute( "page", FredController.PREFIX + "/facilities.vm" );
-
-        if ( offset == 0 )
+    private void filterByLimit( Integer offset, Integer limitValue, List<OrganisationUnit> allOrganisationUnits )
+    {
+        if ( offset < 0 )
         {
-            model.addAttribute( "prevDisabled", true );
+            offset = 0;
         }
 
-        if ( (offset + (limitValue == null ? 0 : limitValue) >= organisationUnitService.getNumberOfOrganisationUnits()) )
+        if ( limitValue == null )
         {
-            model.addAttribute( "nextDisabled", true );
+            limitValue = allOrganisationUnits.size();
         }
 
-        return FredController.PREFIX + "/layout";
+        if ( offset > allOrganisationUnits.size() )
+        {
+            offset = allOrganisationUnits.size();
+        }
+
+        if ( (offset + limitValue) > allOrganisationUnits.size() )
+        {
+            limitValue = allOrganisationUnits.size() - offset;
+        }
+
+        List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>( allOrganisationUnits.subList( offset, offset + limitValue ) );
+        allOrganisationUnits.clear();
+        allOrganisationUnits.addAll( organisationUnits );
+    }
+
+    private void filterByPropertiesLevel( List<String> levelList, List<OrganisationUnit> allOrganisationUnits )
+    {
+        if ( levelList == null || levelList.isEmpty() )
+        {
+            return;
+        }
+
+        Iterator<OrganisationUnit> organisationUnitIterator = allOrganisationUnits.iterator();
+
+        while ( organisationUnitIterator.hasNext() )
+        {
+            OrganisationUnit organisationUnit = organisationUnitIterator.next();
+
+            boolean shouldRemove = true;
+
+            for ( String level : levelList )
+            {
+                try
+                {
+                    int l = Integer.parseInt( level );
+
+                    if ( organisationUnit.getOrganisationUnitLevel() == l )
+                    {
+                        shouldRemove = false;
+                        break;
+                    }
+                }
+                catch ( NumberFormatException ignored )
+                {
+                }
+            }
+
+            if ( shouldRemove )
+            {
+                organisationUnitIterator.remove();
+            }
+        }
+    }
+
+    private void filterByPropertiesParent( List<String> parentList, List<OrganisationUnit> allOrganisationUnits )
+    {
+        if ( parentList == null || parentList.isEmpty() )
+        {
+            return;
+        }
+
+        Iterator<OrganisationUnit> organisationUnitIterator = allOrganisationUnits.iterator();
+
+        while ( organisationUnitIterator.hasNext() )
+        {
+            OrganisationUnit organisationUnit = organisationUnitIterator.next();
+
+            boolean shouldRemove = true;
+
+            for ( String parent : parentList )
+            {
+                if ( organisationUnit.getParent() != null &&
+                    (organisationUnit.getParent().getUid().equals( parent ) || organisationUnit.getParent().getUuid().equals( parent )) )
+                {
+                    shouldRemove = false;
+                    break;
+                }
+            }
+
+            if ( shouldRemove )
+            {
+                organisationUnitIterator.remove();
+            }
+        }
+    }
+
+    private void filterByUuidList( List<String> uuidList, List<OrganisationUnit> allOrganisationUnits )
+    {
+        if ( uuidList == null || uuidList.isEmpty() )
+        {
+            return;
+        }
+
+        Iterator<OrganisationUnit> organisationUnitIterator = allOrganisationUnits.iterator();
+
+        while ( organisationUnitIterator.hasNext() )
+        {
+            OrganisationUnit organisationUnit = organisationUnitIterator.next();
+
+            boolean shouldRemove = true;
+
+            for ( String uuid : uuidList )
+            {
+                if ( organisationUnit.getUuid().equals( uuid ) )
+                {
+                    shouldRemove = false;
+                    break;
+                }
+            }
+
+            if ( shouldRemove )
+            {
+                organisationUnitIterator.remove();
+            }
+        }
+    }
+
+    private void filterByNameList( List<String> nameList, List<OrganisationUnit> allOrganisationUnits )
+    {
+        if ( nameList == null || nameList.isEmpty() )
+        {
+            return;
+        }
+
+        Iterator<OrganisationUnit> organisationUnitIterator = allOrganisationUnits.iterator();
+
+        while ( organisationUnitIterator.hasNext() )
+        {
+            OrganisationUnit organisationUnit = organisationUnitIterator.next();
+
+            boolean shouldRemove = true;
+
+            for ( String name : nameList )
+            {
+                if ( organisationUnit.getName().contains( name ) )
+                {
+                    shouldRemove = false;
+                    break;
+                }
+            }
+
+            if ( shouldRemove )
+            {
+                organisationUnitIterator.remove();
+            }
+        }
+    }
+
+    private void filterByActiveList( List<Boolean> activeList, List<OrganisationUnit> allOrganisationUnits )
+    {
+        if ( activeList == null || activeList.isEmpty() )
+        {
+            return;
+        }
+
+        Iterator<OrganisationUnit> organisationUnitIterator = allOrganisationUnits.iterator();
+
+        while ( organisationUnitIterator.hasNext() )
+        {
+            OrganisationUnit organisationUnit = organisationUnitIterator.next();
+
+            boolean shouldRemove = true;
+
+            // see if it matches at least one
+            for ( Boolean active : activeList )
+            {
+                if ( organisationUnit.isActive() == active )
+                {
+                    shouldRemove = false;
+                    break;
+                }
+            }
+
+            if ( shouldRemove )
+            {
+                organisationUnitIterator.remove();
+            }
+        }
     }
 
     private Integer getLimitValue( String limit, int defaultValue )
@@ -339,6 +516,11 @@ public class FacilityController
             try
             {
                 limitValue = Integer.parseInt( limit );
+
+                if ( limitValue < 0 )
+                {
+                    limitValue = 0;
+                }
             }
             catch ( NumberFormatException ignored )
             {
@@ -350,10 +532,11 @@ public class FacilityController
     }
 
     @RequestMapping( value = "/{id}", method = RequestMethod.GET )
-    public String readFacility( Model model, @PathVariable String id,
+    @ResponseStatus( HttpStatus.OK )
+    public void readFacility( @PathVariable String id,
         @RequestParam( value = "allProperties", required = false, defaultValue = "true" ) Boolean allProperties,
         @RequestParam( value = "fields", required = false ) String fields,
-        HttpServletRequest request ) throws FacilityNotFoundException
+        HttpServletRequest request, HttpServletResponse response ) throws FacilityNotFoundException, IOException
     {
         OrganisationUnit organisationUnit = getOrganisationUnit( id );
 
@@ -373,43 +556,7 @@ public class FacilityController
             facility.setHref( facility.getHref() + ".json" );
         }
 
-        setAccessRights( model );
-
-        model.addAttribute( "esc", StringEscapeUtils.class );
-        model.addAttribute( "entity", facility );
-
-        List<DataSet> dataSets = new ArrayList<DataSet>( dataSetService.getAllDataSets() );
-        Collections.sort( dataSets, IdentifiableObjectNameComparator.INSTANCE );
-        model.addAttribute( "dataSets", dataSets );
-
-        ContextUtils.populateContextPath( model, request );
-
-        model.addAttribute( "baseUrl", linkTo( FredController.class ).toString() );
-        model.addAttribute( "pageName", "facility" );
-        model.addAttribute( "page", FredController.PREFIX + "/facility.vm" );
-
-        return FredController.PREFIX + "/layout";
-    }
-
-    private void setAccessRights( Model model )
-    {
-        // TODO fix this, a proper mock currentuserservice should be implemented
-        if ( currentUserService != null && currentUserService.getCurrentUser() != null )
-        {
-            Set<String> authorities = currentUserService.getCurrentUser().getUserCredentials().getAllAuthorities();
-
-            model.addAttribute( "canCreate", authorities.contains( "F_FRED_CREATE" ) || currentUserService.currentUserIsSuper() );
-            model.addAttribute( "canRead", authorities.contains( "M-dhis-web-api-fred" ) || currentUserService.currentUserIsSuper() );
-            model.addAttribute( "canUpdate", authorities.contains( "F_FRED_UPDATE" ) || currentUserService.currentUserIsSuper() );
-            model.addAttribute( "canDelete", authorities.contains( "F_FRED_DELETE" ) || currentUserService.currentUserIsSuper() );
-        }
-        else
-        {
-            model.addAttribute( "canCreate", false );
-            model.addAttribute( "canRead", false );
-            model.addAttribute( "canUpdate", false );
-            model.addAttribute( "canDelete", false );
-        }
+        objectMapper.writeValue( response.getOutputStream(), facility );
     }
 
     private void addHierarchyPropertyToFacility( List<OrganisationUnitLevel> organisationUnitLevels, Facility facility )

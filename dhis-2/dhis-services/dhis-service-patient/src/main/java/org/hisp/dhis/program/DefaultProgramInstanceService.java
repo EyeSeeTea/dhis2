@@ -171,7 +171,7 @@ public class DefaultProgramInstanceService
 
     public Collection<ProgramInstance> getProgramInstances( Integer status )
     {
-        return programInstanceStore.get( status );
+        return programInstanceStore.getByStatus( status );
     }
 
     public void updateProgramInstance( ProgramInstance programInstance )
@@ -211,11 +211,6 @@ public class DefaultProgramInstanceService
         return programInstanceStore.get( program, status );
     }
 
-    public Collection<ProgramInstance> getProgramInstances( Patient patient )
-    {
-        return programInstanceStore.get( patient );
-    }
-
     public Collection<ProgramInstance> getProgramInstances( Patient patient, Integer status )
     {
         return programInstanceStore.get( patient, status );
@@ -231,13 +226,8 @@ public class DefaultProgramInstanceService
         return programInstanceStore.get( patient, program, status );
     }
 
-    public Collection<ProgramInstance> getProgramInstances( Program program, OrganisationUnit organisationUnit )
-    {
-        return programInstanceStore.get( program, organisationUnit );
-    }
-
     public Collection<ProgramInstance> getProgramInstances( Program program, OrganisationUnit organisationUnit,
-        int min, int max )
+        Integer min, Integer max )
     {
         return programInstanceStore.get( program, organisationUnit, min, max );
     }
@@ -249,7 +239,7 @@ public class DefaultProgramInstanceService
     }
 
     public Collection<ProgramInstance> getProgramInstances( Program program, Collection<Integer> orgunitIds,
-        Date startDate, Date endDate, int min, int max )
+        Date startDate, Date endDate, Integer min, Integer max )
     {
         return programInstanceStore.get( program, orgunitIds, startDate, endDate, min, max );
     }
@@ -403,7 +393,7 @@ public class DefaultProgramInstanceService
         // Get all program data registered
         // ---------------------------------------------------------------------
 
-        Collection<ProgramInstance> programInstances = getProgramInstances( patient );
+        Collection<ProgramInstance> programInstances = patient.getProgramInstances();
 
         if ( programInstances.size() > 0 )
         {
@@ -552,12 +542,7 @@ public class DefaultProgramInstanceService
     {
         return programInstanceStore.getByStatus( status, program, orgunitIds, startDate, endDate );
     }
-
-    public void removeProgramEnrollment( ProgramInstance programInstance )
-    {
-        programInstanceStore.removeProgramEnrollment( programInstance );
-    }
-
+    
     public Collection<SchedulingProgramObject> getScheduleMesssages()
     {
         Collection<SchedulingProgramObject> result = programInstanceStore
@@ -574,14 +559,16 @@ public class DefaultProgramInstanceService
         Collection<OutboundSms> outboundSmsList = new HashSet<OutboundSms>();
 
         Collection<PatientReminder> reminders = programInstance.getProgram().getPatientReminders();
-        
+
         for ( PatientReminder rm : reminders )
         {
-            if ( rm != null && rm.getWhenToSend() != null && rm.getWhenToSend() == status
+            if ( rm != null
+                && rm.getWhenToSend() != null
+                && rm.getWhenToSend() == status
                 && (rm.getMessageType() == PatientReminder.MESSAGE_TYPE_DIRECT_SMS || rm.getMessageType() == PatientReminder.MESSAGE_TYPE_BOTH) )
             {
                 OutboundSms outboundSms = sendProgramMessage( rm, programInstance, patient, format );
-                
+
                 if ( outboundSms != null )
                 {
                     outboundSmsList.add( outboundSms );
@@ -635,7 +622,7 @@ public class DefaultProgramInstanceService
         // ---------------------------------------------------------------------
 
         ProgramInstance programInstance = new ProgramInstance();
-        
+
         programInstance.enrollPatient( patient, program );
         programInstance.setEnrollmentDate( enrollmentDate );
         programInstance.setDateOfIncident( dateOfIncident );
@@ -666,7 +653,7 @@ public class DefaultProgramInstanceService
         // -----------------------------------------------------------------
 
         List<OutboundSms> outboundSms = programInstance.getOutboundSms();
-        
+
         if ( outboundSms == null )
         {
             outboundSms = new ArrayList<OutboundSms>();
@@ -679,7 +666,7 @@ public class DefaultProgramInstanceService
         // -----------------------------------------------------------------
 
         List<MessageConversation> messages = programInstance.getMessageConversations();
-        
+
         if ( messages == null )
         {
             messages = new ArrayList<MessageConversation>();

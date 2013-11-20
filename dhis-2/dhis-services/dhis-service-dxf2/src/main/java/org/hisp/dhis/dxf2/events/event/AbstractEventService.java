@@ -28,10 +28,13 @@ package org.hisp.dhis.dxf2.events.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dxf2.InputValidationService;
+import org.hisp.dhis.dxf2.events.person.Person;
 import org.hisp.dhis.dxf2.importsummary.ImportConflict;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
@@ -58,6 +61,7 @@ import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -114,6 +118,8 @@ public abstract class AbstractEventService implements EventService
     private I18nManager i18nManager;
 
     private I18nFormat _format;
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void setFormat( I18nFormat format )
@@ -308,6 +314,16 @@ public abstract class AbstractEventService implements EventService
     }
 
     @Override
+    public Events getEvents( Program program, OrganisationUnit organisationUnit, Person person, Date startDate, Date endDate )
+    {
+        List<Event> eventList = eventStore.getAll( program, organisationUnit, person, startDate, endDate );
+        Events events = new Events();
+        events.setEvents( eventList );
+
+        return events;
+    }
+
+    @Override
     public Events getEvents( ProgramStage programStage, OrganisationUnit organisationUnit )
     {
         List<Event> eventList = eventStore.getAll( programStage, organisationUnit );
@@ -328,6 +344,16 @@ public abstract class AbstractEventService implements EventService
     }
 
     @Override
+    public Events getEvents( ProgramStage programStage, OrganisationUnit organisationUnit, Person person, Date startDate, Date endDate )
+    {
+        List<Event> eventList = eventStore.getAll( programStage, organisationUnit, person, startDate, endDate );
+        Events events = new Events();
+        events.setEvents( eventList );
+
+        return events;
+    }
+
+    @Override
     public Events getEvents( Program program, ProgramStage programStage, OrganisationUnit organisationUnit )
     {
         List<Event> eventList = eventStore.getAll( program, programStage, organisationUnit );
@@ -338,9 +364,29 @@ public abstract class AbstractEventService implements EventService
     }
 
     @Override
+    public Events getEvents( Program program, ProgramStage programStage, OrganisationUnit organisationUnit, Person person )
+    {
+        List<Event> eventList = eventStore.getAll( program, programStage, organisationUnit, person );
+        Events events = new Events();
+        events.setEvents( eventList );
+
+        return events;
+    }
+
+    @Override
     public Events getEvents( Program program, ProgramStage programStage, OrganisationUnit organisationUnit, Date startDate, Date endDate )
     {
         List<Event> eventList = eventStore.getAll( program, programStage, organisationUnit, startDate, endDate );
+        Events events = new Events();
+        events.setEvents( eventList );
+
+        return events;
+    }
+
+    @Override
+    public Events getEvents( Program program, ProgramStage programStage, OrganisationUnit organisationUnit, Person person, Date startDate, Date endDate )
+    {
+        List<Event> eventList = eventStore.getAll( program, programStage, organisationUnit, person, startDate, endDate );
         Events events = new Events();
         events.setEvents( eventList );
 
@@ -469,6 +515,32 @@ public abstract class AbstractEventService implements EventService
         event.setOrgUnit( programStageInstance.getOrganisationUnit().getUid() );
         event.setProgram( programStageInstance.getProgramInstance().getProgram().getUid() );
         event.setProgramStage( programStageInstance.getProgramStage().getUid() );
+
+        if ( programStageInstance.getProgramStage().getCaptureCoordinates() )
+        {
+            Coordinate coordinate = new Coordinate();
+
+            if ( programStageInstance.getCoordinates() != null )
+            {
+                try
+                {
+                    List<Double> list = objectMapper.readValue( programStageInstance.getCoordinates(), new TypeReference<List<Double>>()
+                    {
+                    } );
+
+                    coordinate.setLongitude( list.get( 0 ) );
+                    coordinate.setLatitude( list.get( 1 ) );
+                }
+                catch ( IOException ignored )
+                {
+                }
+            }
+
+            if ( coordinate.isValid() )
+            {
+                event.setCoordinate( coordinate );
+            }
+        }
 
         Collection<PatientDataValue> patientDataValues = patientDataValueService.getPatientDataValues( programStageInstance );
 

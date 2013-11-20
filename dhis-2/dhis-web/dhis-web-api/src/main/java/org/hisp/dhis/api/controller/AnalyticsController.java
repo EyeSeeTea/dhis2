@@ -73,7 +73,7 @@ public class AnalyticsController
     // -------------------------------------------------------------------------
     // Resources
     // -------------------------------------------------------------------------
-  
+
     @RequestMapping( value = RESOURCE_PATH, method = RequestMethod.GET, produces = { "application/json", "application/javascript" } )
     public String getJson( // JSON, JSONP
         @RequestParam Set<String> dimension,
@@ -214,6 +214,12 @@ public class AnalyticsController
   
     @ExceptionHandler(IllegalQueryException.class)
     public void handleError( IllegalQueryException ex, HttpServletResponse response )
+    {
+        ContextUtils.conflictResponse( response, ex.getMessage() );
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public void handleError( IllegalArgumentException ex, HttpServletResponse response )
     {
         ContextUtils.conflictResponse( response, ex.getMessage() );
     }

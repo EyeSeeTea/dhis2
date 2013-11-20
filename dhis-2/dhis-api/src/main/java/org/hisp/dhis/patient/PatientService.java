@@ -38,6 +38,7 @@ import org.hisp.dhis.program.Program;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -54,16 +55,52 @@ public interface PatientService
 
     public static final int ERROR_ENROLLMENT = 2;
 
+    /**
+     * Adds an {@link Patient}
+     * 
+     * @param patient The to Patient add.
+     * 
+     * @return A generated unique id of the added {@link Patient}.
+     */
     int savePatient( Patient patient );
 
+    /**
+     * Deletes a {@link Patient}.
+     * 
+     * @param patient the Patient to delete.
+     */
     void deletePatient( Patient patient );
 
+    /**
+     * Updates a {@link Patient}.
+     * 
+     * @param patient the Patient to update.
+     */
     void updatePatient( Patient patient );
 
+    /**
+     * Returns a {@link Patient}.
+     * 
+     * @param id the id of the PatientAttribute to return.
+     * 
+     * @return the PatientAttribute with the given id
+     */
     Patient getPatient( int id );
 
+    /**
+     * Returns the {@link PatientAttribute} with the given UID.
+     * 
+     * @param uid the UID.
+     * @return the PatientAttribute with the given UID, or null if no match.
+     */
     Patient getPatient( String uid );
 
+    /**
+     * Returns all {@link Patient}
+     * 
+     * @return a collection of all Patient, or an empty collection if there are
+     *         no Patients.
+     */
     Collection<Patient> getAllPatients();
 
     /**
@@ -77,14 +114,6 @@ public interface PatientService
     Collection<Patient> getPatients( String name, Date birthdate, String gender );
 
     /**
-     * Retrieve patients base on birthDate
-     * 
-     * @param birthDate
-     * @return Patient List
-     */
-    Collection<Patient> getPatientsByBirthDate( Date birthDate );
-
-    /**
      * Retrieve patients by full name (performs partial search )
      * 
      * @param name fullName
@@ -93,9 +122,13 @@ public interface PatientService
     Collection<Patient> getPatientsByNames( String name, Integer min, Integer max );
 
     /**
-     * Retrieve patients base on full-name or identifier value
+     * Retrieve patients base on full-name or identifier value with result
+     * limited
      * 
      * @param searchText value
+     * @param min
+     * @param max
+     * 
      * @return Patient List
      */
     Collection<Patient> getPatients( String searchText, Integer min, Integer max );
@@ -105,6 +138,7 @@ public interface PatientService
      * 
      * @param searchText value
      * @param orgUnitId
+     * 
      * @return Patient List
      */
     Collection<Patient> getPatientsForMobile( String searchText, int orgUnitId );
@@ -113,17 +147,12 @@ public interface PatientService
      * Retrieve patients base on organization unit with result limited
      * 
      * @param organisationUnit organisationUnit
+     * @param min
+     * @param max
+     * 
      * @return Patient List
      */
     Collection<Patient> getPatients( OrganisationUnit organisationUnit, Integer min, Integer max );
-
-    /**
-     * Retrieve patients base on organization unit with result limited
-     * 
-     * @param organisationUnit organisationUnit
-     * @return Patient List
-     */
-    Collection<Patient> getPatients( OrganisationUnit organisationUnit );
 
     /**
      * Retrieve patients who enrolled into a program with active status
@@ -134,27 +163,15 @@ public interface PatientService
     Collection<Patient> getPatients( Program program );
 
     /**
-     * Retrieve patients registered in a orgunit and enrolled into a program with active status
+     * Retrieve patients registered in a orgunit and enrolled into a program
+     * with active status
      * 
      * @param organisationUnit
      * @param program
      * @return
      */
     Collection<Patient> getPatients( OrganisationUnit organisationUnit, Program program );
-
-    /**
-     * Retrieve patients base on organization unit and sort the result by
-     * PatientAttribute
-     * 
-     * @param organisationUnit organisationUnit
-     * @param patientAttribute
-     * @param min
-     * @param max
-     * @return Patient List
-     */
-    Collection<Patient> getPatients( OrganisationUnit organisationUnit, PatientAttribute patientAttribute, Integer min,
-        Integer max );
-
+    
     /**
      * Retrieve patients base on organisationUnit and identifier value name
      * 
@@ -231,12 +248,12 @@ public interface PatientService
      * @param patient Patient
      * @param representativeId The id of patient who is representative
      * @param relationshipTypeId The id of relationship type defined
-     * @param patientAttributeValues List of attribute values
+     * @param attributeValues Set of attribute values
      * 
      * @return The error code after registering patient
      */
     int createPatient( Patient patient, Integer representativeId, Integer relationshipTypeId,
-        List<PatientAttributeValue> patientAttributeValues );
+        Set<PatientAttributeValue> attributeValues );
 
     /**
      * Update information of an patient existed
@@ -443,7 +460,7 @@ public interface PatientService
 
     /**
      * Validate patient identifiers and validation criteria by program before
-     * registering / updating information
+     * registering or updating information
      * 
      * @param patient Patient object
      * @param program Progam which person needs to enroll. If this paramameter

@@ -627,6 +627,7 @@
         <value>burkina_faso</value>
         <value>burkina_faso_coat_of_arms</value>
         <value>cambodia</value>
+		<value>cameroon</value>
         <value>china</value>
         <value>colombia</value>
         <value>congo_brazzaville</value>
@@ -773,6 +774,7 @@
   <bean id="org.hisp.dhis.sms.SmsSender" class="org.hisp.dhis.sms.DefaultSmsSender">
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
     <property name="userService" ref="org.hisp.dhis.user.UserService" />
+    <property name="outboundSmsService" ref="org.hisp.dhis.sms.outbound.OutboundSmsService" />
   </bean>
   
   <bean id="org.hisp.dhis.sms.DataValueSMSListener" class="org.hisp.dhis.sms.DataValueSMSListener">
@@ -814,6 +816,8 @@
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
     <property name="userService" ref="org.hisp.dhis.user.UserService" />
   </bean>
+  
+   <bean id="org.hisp.dhis.sms.task.SendSmsTask" class="org.hisp.dhis.sms.task.SendSmsTask"/>
 
   <!-- I18nService -->
 

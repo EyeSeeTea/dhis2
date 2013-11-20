@@ -125,17 +125,19 @@ public class DefaultPatientService
 
     @Override
     public int createPatient( Patient patient, Integer representativeId, Integer relationshipTypeId,
-        List<PatientAttributeValue> patientAttributeValues )
+        Set<PatientAttributeValue> patientAttributeValues )
     {
-        int patientid = savePatient( patient );
+        int id = savePatient( patient );
 
         for ( PatientAttributeValue pav : patientAttributeValues )
         {
             patientAttributeValueService.savePatientAttributeValue( pav );
+            patient.getAttributeValues().add( pav );
         }
-        // -------------------------------------------------------------------------
-        // If underAge = true : save representative information.
-        // -------------------------------------------------------------------------
+        
+        // ---------------------------------------------------------------------
+        // If under age, save representative information
+        // ---------------------------------------------------------------------
 
         if ( patient.isUnderAge() )
         {
@@ -162,9 +164,10 @@ public class DefaultPatientService
                 }
             }
         }
+        
+        updatePatient( patient ); // Save patient to update associations
 
-        return patientid;
-
+        return id;
     }
 
     @Override
@@ -202,13 +205,7 @@ public class DefaultPatientService
     {
         return patientStore.get( name, birthdate, gender );
     }
-
-    @Override
-    public Collection<Patient> getPatientsByBirthDate( Date birthDate )
-    {
-        return patientStore.getByBirthDate( birthDate );
-    }
-
+    
     @Override
     public Collection<Patient> getPatients( String searchText, Integer min, Integer max )
     {
@@ -283,13 +280,7 @@ public class DefaultPatientService
     {
         return patientStore.getByOrgUnit( organisationUnit, min, max );
     }
-
-    @Override
-    public Collection<Patient> getPatients( OrganisationUnit organisationUnit )
-    {
-        return patientStore.getByOrgUnit( organisationUnit, 0, Integer.MAX_VALUE );
-    }
-
+    
     @Override
     public Collection<Patient> getPatients( Program program )
     {
@@ -300,22 +291,6 @@ public class DefaultPatientService
     public Collection<Patient> getPatients( OrganisationUnit organisationUnit, Program program )
     {
         return patientStore.getByOrgUnitProgram( organisationUnit, program, 0, Integer.MAX_VALUE );
-    }
-
-    @Override
-    public Collection<Patient> getPatients( OrganisationUnit organisationUnit, PatientAttribute patientAttribute,
-        Integer min, Integer max )
-    {
-        List<Patient> patientList = new ArrayList<Patient>( patientStore.getByOrgUnit( organisationUnit, min, max ) );
-
-        if ( patientAttribute != null )
-        {
-            List<Patient> sortedPatientList = (ArrayList<Patient>) sortPatientsByAttribute( patientList,
-                patientAttribute );
-            return sortedPatientList.subList( min, max );
-        }
-
-        return patientList.subList( min, max );
     }
 
     @Override
@@ -356,6 +331,7 @@ public class DefaultPatientService
         {
             return patientStore.getByNames( value, null, null );
         }
+        
         return null;
     }
 
@@ -424,7 +400,6 @@ public class DefaultPatientService
         List<PatientAttributeValue> valuesForSave, List<PatientAttributeValue> valuesForUpdate,
         Collection<PatientAttributeValue> valuesForDelete )
     {
-
         patientStore.update( patient );
 
         for ( PatientAttributeValue av : valuesForSave )

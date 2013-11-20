@@ -30,9 +30,14 @@
 
     <property name="dobType" column="dobType" />
 
-    <set name="identifiers" cascade="all">
+    <set name="identifiers" inverse="true">
       <key column="patientid" />
       <one-to-many class="org.hisp.dhis.patient.PatientIdentifier" />
+    </set>
+    
+    <set name="attributeValues" inverse="true">
+      <key column="patientid" />
+      <one-to-many class="org.hisp.dhis.patientattributevalue.PatientAttributeValue" />
     </set>
     
     <set name="programInstances">
@@ -44,7 +49,7 @@
       foreign-key="fk_representativeid" />
 
     <many-to-one name="organisationUnit" class="org.hisp.dhis.organisationunit.OrganisationUnit" column="organisationunitid"
-      foreign-key="fk_patient_organisationunitid" />
+      foreign-key="fk_patient_organisationunitid" not-null="true" />
 
     <many-to-one name="healthWorker" column="healthworkerid" class="org.hisp.dhis.user.User" foreign-key="fk_user_patientid" />
 

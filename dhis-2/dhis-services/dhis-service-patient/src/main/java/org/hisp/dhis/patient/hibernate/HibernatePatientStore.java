@@ -101,14 +101,7 @@ public class HibernatePatientStore
     // -------------------------------------------------------------------------
     // Implementation methods
     // -------------------------------------------------------------------------
-
-    @Override
-    @SuppressWarnings( "unchecked" )
-    public Collection<Patient> getByBirthDate( Date birthDate )
-    {
-        return getCriteria( Restrictions.eq( "birthDate", birthDate ) ).list();
-    }
-
+    
     @Override
     public Collection<Patient> getByNames( String fullName, Integer min, Integer max )
     {
@@ -194,8 +187,8 @@ public class HibernatePatientStore
     @SuppressWarnings( "unchecked" )
     public Collection<Patient> getByProgram( Program program, Integer min, Integer max )
     {
-        String hql = "select pt from Patient pt " + "inner join pt.programInstances pi "
-            + "where pi.program = :program " + "and pi.status = :status";
+        String hql = "select pt from Patient pt inner join pt.programInstances pi "
+            + "where pi.program = :program and pi.status = :status";
 
         Query query = getQuery( hql );
         query.setEntity( "program", program );
@@ -648,7 +641,7 @@ public class HibernatePatientStore
                     case ProgramStageInstance.FUTURE_VISIT_STATUS:
                         patientWhere += condition + operatorStatus + "( psi.executiondate is null and psi.duedate>='"
                             + keys[2] + "' and psi.duedate<='" + keys[3]
-                            + "' and psi.status is null and (DATE(now()) - DATE(psi.duedate) <= 0) ";
+                            + "' and psi.status is not null and (DATE(now()) - DATE(psi.duedate) <= 0) ";
 
                         // get events by orgunit children
                         if ( keys[4].equals( "-1" ) )
