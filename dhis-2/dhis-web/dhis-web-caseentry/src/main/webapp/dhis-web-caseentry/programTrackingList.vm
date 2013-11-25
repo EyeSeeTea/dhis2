@@ -1,6 +1,6 @@
 <h3>
  <a href="javascript:onClickBackBtn();">$i18n.getString( 'program_tracking' )</a>
- &#8226; <a href="javascript:showPatientDashboardForm( $programStageInstance.programInstance.patient.id );">$i18n.getString( 'patient_dashboard' )</a>
+ &#8226; <a href="javascript:showPatientDashboardForm( '$programStageInstance.programInstance.patient.uid' );">$i18n.getString( 'patient_dashboard' )</a>
  &raquo; $encoder.htmlEncode($programStageInstance.programStage.displayName)
 </h3>
 
@@ -62,8 +62,8 @@
 			<tr>
 				<td>$i18n.getString("health_worker"):</td>
 				<td>
-					#if($!programStageInstance.programInstance.patient.healthWorker )
-						$encoder.htmlEncode($!programStageInstance.programInstance.patient.healthWorker.name)
+					#if($!programStageInstance.programInstance.patient.associate )
+						$encoder.htmlEncode($!programStageInstance.programInstance.patient.associate.name)
 					#else
 						[$i18n.getString('none')]
 					#end
@@ -147,16 +147,16 @@
 					<option value='1'>$i18n.getString('patient')</option>
 					#end
 					
-					#if($!patient.healthWorker.phoneNumber)
+					#if($!patient.associate.phoneNumber)
 					<option value='2'>$i18n.getString('health_worker')</option>
 					#end
 					
-					#if($!patient.healthWorker.organisationUnit.phoneNumber)
+					#if($!patient.associate.organisationUnit.phoneNumber)
 					<option value='3'>$i18n.getString('orgunit_registered')</option>
 					#end
 					
 					#set($hasUsers = false)
-					#foreach($user in $!patient.healthWorker.organisationUnit.users)
+					#foreach($user in $!patient.associate.organisationUnit.users)
 						#if($!user.phoneNumber!='') 
 							#set($hasUsers = true)
 						#end
