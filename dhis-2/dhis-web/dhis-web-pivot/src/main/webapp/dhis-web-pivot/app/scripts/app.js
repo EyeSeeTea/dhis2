@@ -5197,78 +5197,87 @@ Ext.onReady( function() {
 
 		// requests
 		Ext.Ajax.request({
-			url: '../manifest.webapp',
+			url: 'manifest.webapp',
 			success: function(r) {
-				init.contextPath = '../..'; //init.contextPath = Ext.decode(r.responseText).activities.dhis.href;
+				init.contextPath = Ext.decode(r.responseText).activities.dhis.href;
 
-				// root nodes
-				requests.push({
-					url: init.contextPath + '/api/organisationUnits.json?level=1&paging=false&links=false&viewClass=detailed',
+				Ext.Ajax.request({
+					url: 'i18n.json',
 					success: function(r) {
-						init.rootNodes = Ext.decode(r.responseText).organisationUnits || [];
-						fn();
-					}
-				});
+						var i18nArray = Ext.decode(r.responseText);
 
-				// organisation unit levels
-				requests.push({
-					url: init.contextPath + '/api/organisationUnitLevels.json?paging=false&links=false',
-					success: function(r) {
-						init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
-						fn();
-					}
-				});
+						// i18n
+						Ext.Ajax.request({
+							url: init.contextPath + '/api/i18n',
+							method: 'POST',
+							params: Ext.encode(i18nArray),
+							success: function(r) {
+console.log(Ext.decode(r.responseText));
+								NS.i18n = Ext.decode(r.responseText);
+								fn();
+							}
+						});
 
-				// user orgunits and children
-				requests.push({
-					url: init.contextPath + '/api/organisationUnits.json?userOnly=true&viewClass=detailed&links=false',
-					success: function(r) {
-						var organisationUnits = Ext.decode(r.responseText).organisationUnits || [];
+						// root nodes
+						requests.push({
+							url: init.contextPath + '/api/organisationUnits.json?level=1&paging=false&links=false&viewClass=detailed',
+							success: function(r) {
+								init.rootNodes = Ext.decode(r.responseText).organisationUnits || [];
+								fn();
+							}
+						});
 
-						if (organisationUnits.length) {
-							var ou = organisationUnits[0];
+						// organisation unit levels
+						requests.push({
+							url: init.contextPath + '/api/organisationUnitLevels.json?paging=false&links=false',
+							success: function(r) {
+								init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
+								fn();
+							}
+						});
 
-							init.user = {
-								ou: ou.id,
-								ouc: Ext.Array.pluck(ou.children, 'id')
-							};
+						// user orgunits and children
+						requests.push({
+							url: init.contextPath + '/api/organisationUnits.json?userOnly=true&viewClass=detailed&links=false',
+							success: function(r) {
+								var organisationUnits = Ext.decode(r.responseText).organisationUnits || [];
 
-							fn();
+								if (organisationUnits.length) {
+									var ou = organisationUnits[0];
+
+									init.user = {
+										ou: ou.id,
+										ouc: Ext.Array.pluck(ou.children, 'id')
+									};
+
+									fn();
+								}
+							}
+						});
+
+						// legend sets
+						requests.push({
+							url: init.contextPath + '/api/mapLegendSets.json?viewClass=detailed&links=false&paging=false',
+							success: function(r) {
+								init.legendSets = Ext.decode(r.responseText).mapLegendSets || [];
+								fn();
+							}
+						});
+
+						// dimensions
+						requests.push({
+							url: init.contextPath + '/api/dimensions.json?links=false&paging=false',
+							success: function(r) {
+								init.dimensions = Ext.decode(r.responseText).dimensions || [];
+								fn();
+							}
+						});
+
+						for (var i = 0; i < requests.length; i++) {
+							Ext.Ajax.request(requests[i]);
 						}
 					}
 				});
-
-				// legend sets
-				requests.push({
-					url: init.contextPath + '/api/mapLegendSets.json?viewClass=detailed&links=false&paging=false',
-					success: function(r) {
-						init.legendSets = Ext.decode(r.responseText).mapLegendSets || [];
-						fn();
-					}
-				});
-
-				// dimensions
-				requests.push({
-					url: init.contextPath + '/api/dimensions.json?links=false&paging=false',
-					success: function(r) {
-						init.dimensions = Ext.decode(r.responseText).dimensions || [];
-						fn();
-					}
-				});
-
-				// i18n
-				requests.push({
-					url: init.contextPath + '/dhis-web-pivot/i18n.action',
-					disableCaching: false,
-					success: function(r) {
-						NS.i18n = Ext.decode(r.responseText);
-						fn();
-					}
-				});
-
-				for (var i = 0; i < requests.length; i++) {
-					Ext.Ajax.request(requests[i]);
-				}
 			}
 		});
 	}());
