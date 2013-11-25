@@ -4489,7 +4489,7 @@ Ext.onReady( function() {
 		});
 
 		optionsButton = Ext.create('Ext.button.Button', {
-			text: 'Options',
+			text: NS.i18n.options,
 			menu: {},
 			handler: function() {
 				if (!ns.app.optionsWindow) {
@@ -4506,7 +4506,7 @@ Ext.onReady( function() {
 		});
 
 		favoriteButton = Ext.create('Ext.button.Button', {
-			text: 'Favorites',
+			text: NS.i18n.favorites,
 			menu: {},
 			handler: function() {
 				if (ns.app.favoriteWindow) {
@@ -5207,12 +5207,15 @@ Ext.onReady( function() {
 						var i18nArray = Ext.decode(r.responseText);
 
 						// i18n
-						Ext.Ajax.request({
+						requests.push({
 							url: init.contextPath + '/api/i18n',
 							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+								'Accepts': 'application/json'
+							},
 							params: Ext.encode(i18nArray),
 							success: function(r) {
-console.log(Ext.decode(r.responseText));
 								NS.i18n = Ext.decode(r.responseText);
 								fn();
 							}
