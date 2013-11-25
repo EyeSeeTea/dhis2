@@ -3,25 +3,24 @@ Ext.onReady( function() {
 	// ext config
 	Ext.Ajax.method = 'GET';
 
-	// dv
-	DV = {
-		core: {
-			instances: []
-		},
-		i18n: {},
-		isDebug: false,
-		isSessionStorage: 'sessionStorage' in window && window['sessionStorage'] !== null
-	};
+	// namespace
+	PT = {};
+	var NS = PT;
 
-	DV.core.getInstance = function(init) {
+	NS.instances = [];
+	NS.i18n = {};
+	NS.isDebug = false;
+	NS.isSessionStorage = ('sessionStorage' in window && window['sessionStorage'] !== null);
+
+	NS.getCore = function(init) {
         var conf = {},
-            util = {},
             api = {},
-            service = {},
-            engine = {},
+            support = {},
+            service = {},
+            web = {},
             dimConf;
 
-        // conf
+		// conf
         (function() {
             conf.finals = {
                 ajax: {
@@ -158,95 +157,20 @@ Ext.onReady( function() {
             dimConf.objectNameMap[dimConf.organisationUnit.objectName] = dimConf.organisationUnit;
             dimConf.objectNameMap[dimConf.dimension.objectName] = dimConf.dimension;
 
-            conf.period = {
-                relativePeriods: {
-                    'LAST_WEEK': 1,
-                    'LAST_4_WEEKS': 4,
-                    'LAST_12_WEEKS': 12,
-                    'LAST_MONTH': 1,
-                    'LAST_3_MONTHS': 3,
-                    'LAST_BIMONTH': 1,
-                    'LAST_6_BIMONTHS': 6,
-                    'LAST_12_MONTHS': 12,
-                    'LAST_QUARTER': 1,
-                    'LAST_4_QUARTERS': 4,
-                    'LAST_SIX_MONTH': 1,
-                    'LAST_2_SIXMONTHS': 2,
-                    'LAST_FINANCIAL_YEAR': 1,
-                    'LAST_5_FINANCIAL_YEARS': 6,
-                    'THIS_YEAR': 1,
-                    'LAST_YEAR': 1,
-                    'LAST_5_YEARS': 5
-                },
-                relativePeriodValueKeys: {
-                    'LAST_WEEK': 'lastWeek',
-                    'LAST_4_WEEKS': 'last4Weeks',
-                    'LAST_12_WEEKS': 'last12Weeks',
-                    'LAST_MONTH': 'lastMonth',
-                    'LAST_3_MONTHS': 'last3Months',
-                    'LAST_12_MONTHS': 'last12Months',
-                    'LAST_BIMONTH': 'lastBimonth',
-                    'LAST_6_BIMONTHS': 'last6BiMonths',
-                    'LAST_QUARTER': 'lastQuarter',
-                    'LAST_4_QUARTERS': 'last4Quarters',
-                    'LAST_SIX_MONTH': 'lastSixMonth',
-                    'LAST_2_SIXMONTHS': 'last2SixMonths',
-                    'LAST_FINANCIAL_YEAR': 'lastFinancialYear',
-                    'LAST_5_FINANCIAL_YEARS': 'last5FinancialYears',
-                    'THIS_YEAR': 'thisYear',
-                    'LAST_YEAR': 'lastYear',
-                    'LAST_5_YEARS': 'last5Years'
-                },
-                relativePeriodParamKeys: {
-                    'lastWeek': 'LAST_WEEK',
-                    'last4Weeks': 'LAST_4_WEEKS',
-                    'last12Weeks': 'LAST_12_WEEKS',
-                    'lastMonth': 'LAST_MONTH',
-                    'last3Months': 'LAST_3_MONTHS',
-                    'last12Months': 'LAST_12_MONTHS',
-                    'lastBimonth': 'LAST_BIMONTH',
-                    'last6BiMonths': 'LAST_6_BIMONTHS',
-                    'lastQuarter': 'LAST_QUARTER',
-                    'last4Quarters': 'LAST_4_QUARTERS',
-                    'lastSixMonth': 'LAST_SIX_MONTH',
-                    'last2SixMonths': 'LAST_2_SIXMONTHS',
-                    'lastFinancialYear': 'LAST_FINANCIAL_YEAR',
-                    'last5FinancialYears': 'LAST_5_FINANCIAL_YEARS',
-                    'thisYear': 'THIS_YEAR',
-                    'lastYear': 'LAST_YEAR',
-                    'last5Years': 'LAST_5_YEARS'
-                },
-                periodTypes: [
-					{id: 'Daily', name: DV.i18n.daily},
-					{id: 'Weekly', name: DV.i18n.weekly},
-					{id: 'Monthly', name: DV.i18n.monthly},
-					{id: 'BiMonthly', name: DV.i18n.bimonthly},
-					{id: 'Quarterly', name: DV.i18n.quarterly},
-					{id: 'SixMonthly', name: DV.i18n.sixmonthly},
-					{id: 'Yearly', name: DV.i18n.yearly},
-					{id: 'FinancialOct', name: DV.i18n.financial_oct},
-					{id: 'FinancialJuly', name: DV.i18n.financial_july},
-					{id: 'FinancialApril', name: DV.i18n.financial_april}
-                ]
-            };
-
-            conf.chart = {
-                style: {
-                    inset: 30,
-                    fontFamily: 'Arial,Sans-serif,Lucida Grande,Ubuntu'
-                },
-                theme: {
-                    dv1: ['#94ae0a', '#0b3b68', '#a61120', '#ff8809', '#7c7474', '#a61187', '#ffd13e', '#24ad9a', '#a66111', '#414141', '#4500c4', '#1d5700']
-                }
-            };
-
-            conf.statusbar = {
-                icon: {
-                    error: 'error_s.png',
-                    warning: 'warning.png',
-                    ok: 'ok.png'
-                }
-            };
+			conf.period = {
+				periodTypes: [
+					{id: 'Daily', name: NS.i18n.daily},
+					{id: 'Weekly', name: NS.i18n.weekly},
+					{id: 'Monthly', name: NS.i18n.monthly},
+					{id: 'BiMonthly', name: NS.i18n.bimonthly},
+					{id: 'Quarterly', name: NS.i18n.quarterly},
+					{id: 'SixMonthly', name: NS.i18n.sixmonthly},
+					{id: 'Yearly', name: NS.i18n.yearly},
+					{id: 'FinancialOct', name: NS.i18n.financial_oct},
+					{id: 'FinancialJuly', name: NS.i18n.financial_july},
+					{id: 'FinancialApril', name: NS.i18n.financial_april}
+				]
+			};
 
             conf.layout = {
                 west_width: 424,
@@ -288,251 +212,100 @@ Ext.onReady( function() {
                 multiselect_fill_default: 345,
                 multiselect_fill_reportingrates: 315
             };
-        }());
 
-        // util
-        (function() {
-            util.array = {
-                sortDimensions: function(dimensions, key) {
-                    key = key || 'dimensionName';
-
-                    // Sort object order
-                    Ext.Array.sort(dimensions, function(a,b) {
-                        if (a[key] < b[key]) {
-                            return -1;
-                        }
-                        if (a[key] > b[key]) {
-                            return 1;
-                        }
-                        return 0;
-                    });
-
-                    // Sort object items order
-                    for (var i = 0, dim; i < dimensions.length; i++) {
-                        dim = dimensions[i];
-
-                        if (dim.items) {
-                            dimensions[i].items.sort();
-                        }
-                    }
-
-                    return dimensions;
+            conf.chart = {
+                style: {
+                    inset: 30,
+                    fontFamily: 'Arial,Sans-serif,Lucida Grande,Ubuntu'
                 },
-
-                sortObjectsByString: function(array, key) {
-                    key = key || 'name';
-                    array.sort( function(a, b) {
-                        var nameA = a[key].toLowerCase(),
-                            nameB = b[key].toLowerCase();
-
-                        if (nameA < nameB) {
-                            return -1;
-                        }
-                        if (nameA > nameB) {
-                            return 1;
-                        }
-                        return 0;
-                    });
-                    return array;
+                theme: {
+                    dv1: ['#94ae0a', '#0b3b68', '#a61120', '#ff8809', '#7c7474', '#a61187', '#ffd13e', '#24ad9a', '#a66111', '#414141', '#4500c4', '#1d5700']
                 }
             };
 
-            util.window = {
-                setAnchorPosition: function(w, target) {
-                    var vpw = dv.viewport.getWidth(),
-                        targetx = target ? target.getPosition()[0] : 4,
-                        winw = w.getWidth(),
-                        y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
-
-                    if ((targetx + winw) > vpw) {
-                        w.setPosition((vpw - winw - 2), y);
-                    }
-                    else {
-                        w.setPosition(targetx, y);
-                    }
-                },
-                addHideOnBlurHandler: function(w) {
-                    var el = Ext.get(Ext.query('.x-mask')[0]);
-
-                    el.on('click', function() {
-                        if (w.hideOnBlur) {
-                            w.hide();
-                        }
-                    });
-
-                    w.hasHideOnBlurHandler = true;
-                },
-                addDestroyOnBlurHandler: function(w) {
-                    var el = Ext.get(Ext.query('.x-mask')[0]);
-
-                    el.on('click', function() {
-                        if (w.destroyOnBlur) {
-                            w.destroy();
-                        }
-                    });
-
-                    w.hasDestroyOnBlurHandler = true;
+            conf.statusbar = {
+                icon: {
+                    error: 'error_s.png',
+                    warning: 'warning.png',
+                    ok: 'ok.png'
                 }
             };
 
-            util.mask = {
-                showMask: function(cmp, msg) {
-                    msg = msg || 'Loading..';
-
-                    if (cmp.mask) {
-                        cmp.mask.destroy();
-                    }
-                    cmp.mask = new Ext.LoadMask(cmp, {msg: msg});
-                    cmp.mask.show();
-                },
-                hideMask: function(cmp) {
-                    if (cmp.mask) {
-                        cmp.mask.hide();
-                    }
-                }
-            };
-
-            util.number = {
-                isInteger: function(n) {
-                    var str = new String(n);
-                    if (str.indexOf('-') > -1) {
-                        var d = str.substr(str.indexOf('-') + 1);
-                        return (d.length === 1 && d == '0');
-                    }
-                    return false;
-                },
-                allValuesAreIntegers: function(values) {
-                    for (var i = 0; i < values.length; i++) {
-                        if (!this.isInteger(values[i].value)) {
-                            return false;
-                        }
-                    }
-                    return true;
-                },
-                getChartAxisFormatRenderer: function() {
-                    return this.allValuesAreIntegers(DV.value.values) ? '0' : '0.0';
-                }
-            };
-
-            util.str = {
-                replaceAll: function(str, find, replace) {
-                    return str.replace(new RegExp(find, 'g'), replace);
-                }
-            };
-
-            util.value = {
-                jsonfy: function(values) {
-                    var a = [];
-                    for (var i = 0; i < values.length; i++) {
-                        var v = {
-                            value: parseFloat(values[i][0]),
-                            data: values[i][1],
-                            period: values[i][2],
-                            organisationunit: values[i][3]
-                        };
-                        a.push(v);
-                    }
-                    return a;
-                }
-            };
-        }());
-
-        // init
-        (function() {
-
-            // sort and extend dynamic dimensions
-            init.dimensions = util.array.sortObjectsByString(init.dimensions);
-
-            for (var i = 0, dim; i < init.dimensions.length; i++) {
-                dim = init.dimensions[i];
-                dim.dimensionName = dim.id;
-                dim.objectName = dimConf.dimension.objectName;
-                dimConf.objectNameMap[dim.id] = dim;
-            }
         }());
 
         // api
         (function() {
             api.layout = {};
-            api.response = {};
 
-            api.layout.Record = function(config) {
-                var record = {};
+			api.layout.Record = function(config) {
+				var config = Ext.clone(config);
 
-                // id: string
+				// id: string
 
-                return function() {
-                    if (!Ext.isObject(config)) {
-                        console.log('Record config is not an object: ' + config);
-                        return;
-                    }
+				return function() {
+					if (!Ext.isObject(config)) {
+						console.log('Record: config is not an object: ' + config);
+						return;
+					}
 
-                    if (!Ext.isString(config.id)) {
-                        alert('Record id is not text: ' + config);
-                        return;
-                    }
+					if (!Ext.isString(config.id)) {
+						alert('Record: id is not text: ' + config);
+						return;
+					}
 
-                    record.id = config.id.replace('.', '-');
+					config.id = config.id.replace('.', '-');
 
-                    if (Ext.isString(config.name)) {
-                        record.name = config.name;
-                    }
-
-                    return Ext.clone(record);
-                }();
-            };
+					return config;
+				}();
+			};
 
             api.layout.Dimension = function(config) {
-                var dimension = {};
+				var config = Ext.clone(config);
 
-                // dimension: string
+				// dimension: string
 
-                // items: [Record]
+				// items: [Record]
 
-                return function() {
-                    if (!Ext.isObject(config)) {
-                        console.log('Dimension config is not an object: ' + config);
-                        return;
-                    }
+				return function() {
+					if (!Ext.isObject(config)) {
+						console.log('Dimension: config is not an object: ' + config);
+						return;
+					}
 
-                    if (!Ext.isString(config.dimension)) {
-                        console.log('Dimension name is not text: ' + config);
-                        return;
-                    }
+					if (!Ext.isString(config.dimension)) {
+						console.log('Dimension: name is not a string: ' + config);
+						return;
+					}
 
-                    if (config.dimension !== conf.finals.dimension.category.objectName) {
-                        var records = [];
+					if (config.dimension !== conf.finals.dimension.category.objectName) {
+						var records = [];
 
-                        if (!Ext.isArray(config.items)) {
-                            console.log('Dimension items is not an array: ' + config);
-                            return;
-                        }
+						if (!Ext.isArray(config.items)) {
+							console.log('Dimension: items is not an array: ' + config);
+							return;
+						}
 
-                        for (var i = 0; i < config.items.length; i++) {
-                            record = api.layout.Record(config.items[i]);
+						for (var i = 0; i < config.items.length; i++) {
+							records.push(api.layout.Record(config.items[i]));
+						}
 
-                            if (record) {
-                                records.push(record);
-                            }
-                        }
+						config.items = Ext.Array.clean(records);
 
-                        config.items = records;
+						if (!config.items.length) {
+							console.log('Dimension: has no valid items: ' + config);
+							return;
+						}
+					}
 
-                        if (!config.items.length) {
-                            console.log('Dimension has no valid items: ' + config);
-                            return;
-                        }
-                    }
-
-                    dimension.dimension = config.dimension;
-                    dimension.items = config.items;
-
-                    return Ext.clone(dimension);
-                }();
-            };
+					return config;
+				}();
+			};
 
             api.layout.Layout = function(config) {
-                var layout = {};
+				var config = Ext.clone(config),
+					layout = {},
+					getValidatedDimensionArray,
+					validateSpecialCases;
 
                 // type: string ('column') - 'column', 'stackedcolumn', 'bar', 'stackedbar', 'line', 'area', 'pie'
 
@@ -568,37 +341,90 @@ Ext.onReady( function() {
 
                 // parentGraphMap: object
 
-                var getValidatedDimensionArray = function(dimensionArray) {
-                    var dimensions = [];
+                getValidatedDimensionArray = function(dimensionArray) {
+					var dimensionArray = Ext.clone(dimensionArray);
 
-                    if (!(dimensionArray && Ext.isArray(dimensionArray) && dimensionArray.length)) {
-                        return;
-                    }
+					if (!(dimensionArray && Ext.isArray(dimensionArray) && dimensionArray.length)) {
+						return;
+					}
 
-                    for (var i = 0, dimension; i < dimensionArray.length; i++) {
-                        dimension = api.layout.Dimension(dimensionArray[i]);
+					for (var i = 0; i < dimensionArray.length; i++) {
+						dimensionArray[i] = api.layout.Dimension(dimensionArray[i]);
+					}
 
-                        if (dimension) {
-                            dimensions.push(dimension);
-                        }
-                    }
+					dimensionArray = Ext.Array.clean(dimensionArray);
 
-                    dimensionArray = dimensions;
+					return dimensionArray.length ? dimensionArray : null;
+				};
 
-                    return dimensionArray.length ? dimensionArray : null;
-                };
+				validateSpecialCases = function() {
+					var dimConf = conf.finals.dimension,
+						dimensions,
+						objectNameDimensionMap = {};
+
+					if (!layout) {
+						return;
+					}
+
+					dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || []));
+
+					for (var i = 0; i < dimensions.length; i++) {
+						objectNameDimensionMap[dimensions[i].dimension] = dimensions[i];
+					}
+
+					if (layout.filters && layout.filters.length) {
+						for (var i = 0; i < layout.filters.length; i++) {
+
+							// Indicators as filter
+							if (layout.filters[i].dimension === dimConf.indicator.objectName) {
+								web.message.alert(NS.i18n.indicators_cannot_be_specified_as_filter || 'Indicators cannot be specified as filter');
+								return;
+							}
+
+							// Categories as filter
+							if (layout.filters[i].dimension === dimConf.category.objectName) {
+								web.message.alert(NS.i18n.categories_cannot_be_specified_as_filter || 'Categories cannot be specified as filter');
+								return;
+							}
+
+							// Data sets as filter
+							if (layout.filters[i].dimension === dimConf.dataSet.objectName) {
+								web.message.alert(NS.i18n.data_sets_cannot_be_specified_as_filter || 'Data sets cannot be specified as filter');
+								return;
+							}
+						}
+					}
+
+					// dc and in
+					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.indicator.objectName]) {
+						web.message.alert('Indicators and detailed data elements cannot be specified together');
+						return;
+					}
+
+					// dc and de
+					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataElement.objectName]) {
+						web.message.alert('Detailed data elements and totals cannot be specified together');
+						return;
+					}
+
+					// dc and ds
+					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataSet.objectName]) {
+						web.message.alert('Data sets and detailed data elements cannot be specified together');
+						return;
+					}
+
+					// dc and co
+					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.category.objectName]) {
+						web.message.alert('Categories and detailed data elements cannot be specified together');
+						return;
+					}
+
+					return true;
+				};
 
                 return function() {
-                    var a = [],
-                        objectNames = [],
-                        dims,
-                        isOu = false,
-                        isOuc = false,
-						isOugc = false;
-
-                    config.columns = getValidatedDimensionArray(config.columns);
-                    config.rows = getValidatedDimensionArray(config.rows);
-                    config.filters = getValidatedDimensionArray(config.filters);
+                    var objectNames = [],
+						dimConf = conf.finals.dimension;
 
                     // Config must be an object
                     if (!(config && Ext.isObject(config))) {
@@ -606,61 +432,48 @@ Ext.onReady( function() {
                         return;
                     }
 
-                    // Series, category, filter
-                    if (!config.columns) {
-                        alert('No series dimension specified');
-                        return;
-                    }
-                    if (!config.rows) {
-                        alert('No category dimension specified');
-                        return;
-                    }
-                    if (!config.filters) {
-                        alert('No filter dimensions specified');
-                        return;
-                    }
+                    config.columns = getValidatedDimensionArray(config.columns);
+                    config.rows = getValidatedDimensionArray(config.rows);
+                    config.filters = getValidatedDimensionArray(config.filters);
 
-                    // Get object names and user orgunits
-                    for (var i = 0, dim, dims = [].concat(config.columns, config.rows, config.filters); i < dims.length; i++) {
-                        dim = dims[i];
+					// at least one dimension specified as column or row
+					if (!(config.columns || config.rows)) {
+						alert(NS.i18n.at_least_one_dimension_must_be_specified_as_row_or_column);
+						return;
+					}
 
-                        if (dim) {
+					// get object names
+					for (var i = 0, dims = Ext.Array.clean([].concat(config.columns || [], config.rows || [], config.filters || [])); i < dims.length; i++) {
 
-                            // Object names
-                            if (Ext.isString(dim.dimension)) {
-                                objectNames.push(dim.dimension);
-                            }
+						// Object names
+						if (api.layout.Dimension(dims[i])) {
+							objectNames.push(dims[i].dimension);
+						}
+					}
 
-							// user orgunits
-                            if (dim.dimension === dimConf.organisationUnit.objectName && Ext.isArray(dim.items)) {
-                                for (var j = 0; j < dim.items.length; j++) {
-                                    if (dim.items[j].id === 'USER_ORGUNIT') {
-                                        isOu = true;
-                                    }
-                                    else if (dim.items[j].id === 'USER_ORGUNIT_CHILDREN') {
-                                        isOuc = true;
-                                    }
-									else if (dim.items[j].id === 'USER_ORGUNIT_GRANDCHILDREN') {
-										isOugc = true;
-									}
-                                }
-                            }
-                        }
-                    }
+					// at least one period
+					if (!Ext.Array.contains(objectNames, dimConf.period.objectName)) {
+						alert('At least one period must be specified as series, category or filter');
+						return;
+					}
 
-                    if (!Ext.Array.contains(objectNames, dimConf.period.objectName)) {
-                        alert('At least one period must be specified as series, category or filter');
-                        return;
-                    }
+					// favorite
+					if (config.id) {
+						layout.id = config.id;
+					}
 
-                    // Layout
+					if (config.name) {
+						layout.name = config.name;
+					}
+
+                    // layout
                     layout.type = Ext.isString(config.type) ? config.type.toLowerCase() : conf.finals.chart.column;
 
                     layout.columns = config.columns;
                     layout.rows = config.rows;
                     layout.filters = config.filters;
 
-                    // Properties
+                    // properties
                     layout.showTrendLine = Ext.isBoolean(config.regression) ? config.regression : (Ext.isBoolean(config.showTrendLine) ? config.showTrendLine : false);
                     layout.showValues = Ext.isBoolean(config.showData) ? config.showData : (Ext.isBoolean(config.showValues) ? config.showValues : true);
 
@@ -680,142 +493,310 @@ Ext.onReady( function() {
                     layout.rangeAxisTitle = Ext.isString(config.rangeAxisLabel) && !Ext.isEmpty(config.rangeAxisLabel) ? config.rangeAxisLabel :
                         (Ext.isString(config.rangeAxisTitle) && !Ext.isEmpty(config.rangeAxisTitle) ? config.rangeAxisTitle : null);
 
-                    layout.userOrganisationUnit = isOu;
-                    layout.userOrganisationUnitChildren = isOuc;
-					layout.userOrganisationUnitGrandChildren = isOugc;
-
                     layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
 
-                    return Ext.clone(layout);
+					if (!validateSpecialCases()) {
+						return;
+					}
+
+					return layout;
                 }();
             };
+
+            api.response = {};
 
             api.response.Header = function(config) {
-                var header = {};
+				var config = Ext.clone(config);
 
-                // name: string
+				// name: string
 
-                // meta: boolean
+				// meta: boolean
 
-                return function() {
-                    if (!Ext.isObject(config)) {
-                        console.log('Header is not an object: ' + config);
-                        return;
-                    }
+				return function() {
+					if (!Ext.isObject(config)) {
+						console.log('Header: config is not an object: ' + config);
+						return;
+					}
 
-                    if (!Ext.isString(config.name)) {
-                        console.log('Header name is not text: ' + config);
-                        return;
-                    }
+					if (!Ext.isString(config.name)) {
+						console.log('Header: name is not a string: ' + config);
+						return;
+					}
 
-                    if (!Ext.isBoolean(config.meta)) {
-                        console.log('Header meta is not boolean: ' + config);
-                        return;
-                    }
+					if (!Ext.isBoolean(config.meta)) {
+						console.log('Header: meta is not boolean: ' + config);
+						return;
+					}
 
-                    header.name = config.name;
-                    header.meta = config.meta;
-
-                    return Ext.clone(header);
-                }();
-            };
+					return config;
+				}();
+			};
 
             api.response.Response = function(config) {
-                var response = {};
+				var config = Ext.clone(config);
 
-                // headers: [Header]
+				// headers: [Header]
 
-                return function() {
-                    var headers = [];
+				return function() {
+					if (!(config && Ext.isObject(config))) {
+						console.log('Response: config is not an object');
+						return;
+					}
 
-                    if (!(config && Ext.isObject(config))) {
-                        alert('Data response invalid');
-                        return false;
-                    }
+					if (!(config.headers && Ext.isArray(config.headers))) {
+						console.log('Response: headers is not an array');
+						return;
+					}
 
-                    if (!(config.headers && Ext.isArray(config.headers))) {
-                        alert('Data response invalid');
-                        return false;
-                    }
+					for (var i = 0, header; i < config.headers.length; i++) {
+						config.headers[i] = api.response.Header(config.headers[i]);
+					}
 
-                    for (var i = 0, header; i < config.headers.length; i++) {
-                        header = api.response.Header(config.headers[i]);
+					config.headers = Ext.Array.clean(config.headers);
 
-                        if (header) {
-                            headers.push(header);
-                        }
-                    }
+					if (!config.headers.length) {
+						console.log('Response: no valid headers');
+						return;
+					}
 
-                    config.headers = headers;
+					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
+						alert('No values found');
+						return;
+					}
 
-                    if (!config.headers.length) {
-                        alert('No valid response headers');
-                        return;
-                    }
+					if (config.headers.length !== config.rows[0].length) {
+						console.log('Response: headers.length !== rows[0].length');
+					}
 
-                    if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
-                        alert('No values found');
-                        return false;
-                    }
-
-                    if (config.headers.length !== config.rows[0].length) {
-                        alert('Data invalid');
-                        return false;
-                    }
-
-                    response.headers = config.headers;
-                    response.metaData = config.metaData;
-                    response.width = config.width;
-                    response.height = config.height;
-                    response.rows = config.rows;
-
-                    return response;
-                }();
-            };
+					return config;
+				}();
+			};
         }());
+
+		// support
+		(function() {
+
+			// prototype
+			support.prototype = {};
+
+				// array
+			support.prototype.array = {};
+
+			support.prototype.array.getLength = function(array, suppressWarning) {
+				if (!Ext.isArray(array)) {
+					if (!suppressWarning) {
+						console.log('support.prototype.array.getLength: not an array');
+					}
+
+					return null;
+				}
+
+				return array.length;
+			};
+
+			support.prototype.array.sort = function(array, direction, key) {
+				// accepts [number], [string], [{prop: number}], [{prop: string}]
+
+				if (!support.prototype.array.getLength(array)) {
+					return;
+				}
+
+				key = key || 'name';
+
+				array.sort( function(a, b) {
+
+					// if object, get the property values
+					if (Ext.isObject(a) && Ext.isObject(b) && key) {
+						a = a[key];
+						b = b[key];
+					}
+
+					// string
+					if (Ext.isString(a) && Ext.isString(b)) {
+						a = a.toLowerCase();
+						b = b.toLowerCase();
+
+						if (direction === 'DESC') {
+							return a < b ? 1 : (a > b ? -1 : 0);
+						}
+						else {
+							return a < b ? -1 : (a > b ? 1 : 0);
+						}
+					}
+
+					// number
+					else if (Ext.isNumber(a) && Ext.isNumber(b)) {
+						return direction === 'DESC' ? b - a : a - b;
+					}
+
+					return 0;
+				});
+
+				return array;
+			};
+
+				// object
+			support.prototype.object = {};
+
+			support.prototype.object.getLength = function(object, suppressWarning) {
+				if (!Ext.isObject(object)) {
+					if (!suppressWarning) {
+						console.log('support.prototype.object.getLength: not an object');
+					}
+
+					return null;
+				}
+
+				var size = 0;
+
+				for (var key in object) {
+					if (object.hasOwnProperty(key)) {
+						size++;
+					}
+				}
+
+				return size;
+			};
+
+			support.prototype.object.hasObject = function(object, property, value) {
+				if (!support.prototype.object.getLength(object)) {
+					return null;
+				}
+
+				for (var key in object) {
+					var record = object[key];
+
+					if (object.hasOwnProperty(key) && record[property] === value) {
+						return true;
+					}
+				}
+
+				return null;
+			};
+
+				// str
+			support.prototype.str = {};
+
+			support.prototype.str.replaceAll = function(str, find, replace) {
+				return str.replace(new RegExp(find, 'g'), replace);
+			};
+		}());
 
 		// service
 		(function() {
+
+			// layout
 			service.layout = {};
 
-			service.layout.getObjectNameDimensionMap = function(dimensionArray) {
-				var map = {};
+			service.layout.cleanDimensionArray = function(dimensionArray) {
+				if (!support.prototype.array.getLength(dimensionArray)) {
+					return null;
+				}
 
-				if (Ext.isArray(dimensionArray) && dimensionArray.length) {
-					for (var i = 0, dim; i < dimensionArray.length; i++) {
-						dim = api.layout.Dimension(dimensionArray[i]);
+				var array = [];
 
-						if (dim) {
-							map[dim.dimension] = dim;
-						}
+				for (var i = 0; i < dimensionArray.length; i++) {
+					array.push(api.layout.Dimension(dimensionArray[i]));
+				}
+
+				array = Ext.Array.clean(array);
+
+				return array.length ? array : null;
+			};
+
+			service.layout.sortDimensionArray = function(dimensionArray, key) {
+				if (!support.prototype.array.getLength(dimensionArray, true)) {
+					return null;
+				}
+
+				// Clean dimension array
+				dimensionArray = service.layout.cleanDimensionArray(dimensionArray);
+
+				if (!dimensionArray) {
+					console.log('service.layout.sortDimensionArray: no valid dimensions');
+					return null;
+				}
+
+				key = key || 'dimensionName';
+
+				// Dimension order
+				Ext.Array.sort(dimensionArray, function(a,b) {
+					if (a[key] < b[key]) {
+						return -1;
+					}
+					if (a[key] > b[key]) {
+						return 1;
+					}
+					return 0;
+				});
+
+				// Sort object items, ids
+				for (var i = 0, items; i < dimensionArray.length; i++) {
+					support.prototype.array.sort(dimensionArray[i].items, 'ASC', 'id');
+
+					if (support.prototype.array.getLength(dimensionArray[i].ids)) {
+						support.prototype.array.sort(dimensionArray[i].ids);
 					}
 				}
 
-				return map;
+				return dimensionArray;
 			};
 
-			service.layout.getObjectNameDimensionItemsMap = function(dimensionArray) {
+			service.layout.getObjectNameDimensionMapFromDimensionArray = function(dimensionArray) {
 				var map = {};
 
-				if (Ext.isArray(dimensionArray) && dimensionArray.length) {
-					for (var i = 0, dim; i < dimensionArray.length; i++) {
-						dim = api.layout.Dimension(dimensionArray[i]);
+				if (!support.prototype.array.getLength(dimensionArray)) {
+					return null;
+				}
 
-						if (dim) {
-							map[dim.dimension] = dim.items;
-						}
+				for (var i = 0, dimension; i < dimensionArray.length; i++) {
+					dimension = api.layout.Dimension(dimensionArray[i]);
+
+					if (dimension) {
+						map[dimension.dimension] = dimension;
 					}
 				}
 
-				return map;
+				return support.prototype.object.getLength(map) ? map : null;
 			};
 
-			service.response = {};
-		}());
+			service.layout.getObjectNameDimensionItemsMapFromDimensionArray = function(dimensionArray) {
+				var map = {};
 
-        // engine
-        (function() {
-            engine.getExtendedLayout = function(layout) {
+				if (!support.prototype.array.getLength(dimensionArray)) {
+					return null;
+				}
+
+				for (var i = 0, dimension; i < dimensionArray.length; i++) {
+					dimension = api.layout.Dimension(dimensionArray[i]);
+
+					if (dimension) {
+						map[dimension.dimension] = dimension.items;
+					}
+				}
+
+				return support.prototype.object.getLength(map) ? map : null;
+			};
+
+			service.layout.getItemName = function(layout, response, id, isHtml) {
+				var metaData = response.metaData,
+					name = '';
+
+				if (service.layout.isHierarchy(layout, response, id)) {
+					var a = Ext.clean(metaData.ouHierarchy[id].split('/'));
+					a.shift();
+
+					for (var i = 0; i < a.length; i++) {
+						name += (isHtml ? '<span class="text-weak">' : '') + metaData.names[a[i]] + (isHtml ? '</span>' : '') + ' / ';
+					}
+				}
+
+				name += metaData.names[id];
+
+				return name;
+			};
+
+			service.layout.getExtendedLayout = function(layout) {
                 var layout = Ext.clone(layout),
                     xLayout = {
                         columns: [],
@@ -1020,7 +1001,378 @@ Ext.onReady( function() {
                 return xLayout;
             };
 
-            engine.getParamString = function(xLayout, isSorted) {
+			service.layout.getSyncronizedXLayout = function(xLayout, response) {
+				var dimensions = [].concat(xLayout.columns, xLayout.rows, xLayout.filters),
+					xOuDimension = xLayout.objectNameDimensionsMap[dimConf.organisationUnit.objectName],
+					isUserOrgunit = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT'),
+					isUserOrgunitChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_CHILDREN'),
+					isUserOrgunitGrandChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_GRANDCHILDREN'),
+					isLevel = function() {
+						if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
+							for (var i = 0; i < xOuDimension.ids.length; i++) {
+								if (xOuDimension.ids[i].substr(0,5) === 'LEVEL') {
+									return true;
+								}
+							}
+						}
+
+						return false;
+					}(),
+					isGroup = function() {
+						if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
+							for (var i = 0; i < xOuDimension.ids.length; i++) {
+								if (xOuDimension.ids[i].substr(0,8) === 'OU_GROUP') {
+									return true;
+								}
+							}
+						}
+
+						return false;
+					}(),
+					ou = dimConf.organisationUnit.objectName,
+					layout;
+
+				// Set items from init/metaData/xLayout
+				for (var i = 0, dim, metaDataDim, items; i < dimensions.length; i++) {
+					dim = dimensions[i];
+					dim.items = [];
+					metaDataDim = response.metaData[dim.objectName];
+
+					// If ou and children
+					if (dim.dimensionName === ou) {
+						if (isUserOrgunit || isUserOrgunitChildren || isUserOrgunitGrandChildren) {
+							var userOu,
+								userOuc,
+								userOugc;
+
+							if (isUserOrgunit) {
+								userOu = [{
+									id: dv.init.user.ou,
+									name: response.metaData.names[dv.init.user.ou]
+								}];
+							}
+							if (isUserOrgunitChildren) {
+								userOuc = [];
+
+								for (var j = 0; j < dv.init.user.ouc.length; j++) {
+									userOuc.push({
+										id: dv.init.user.ouc[j],
+										name: response.metaData.names[dv.init.user.ouc[j]]
+									});
+								}
+
+								userOuc = dv.util.array.sortObjectsByString(userOuc);
+							}
+							if (isUserOrgunitGrandChildren) {
+								var userOuOuc = [].concat(dv.init.user.ou, dv.init.user.ouc),
+									responseOu = response.metaData[ou];
+
+								userOugc = [];
+
+								for (var j = 0, id; j < responseOu.length; j++) {
+									id = responseOu[j];
+
+									if (!Ext.Array.contains(userOuOuc, id)) {
+										userOugc.push({
+											id: id,
+											name: response.metaData.names[id]
+										});
+									}
+								}
+
+								userOugc = dv.util.array.sortObjectsByString(userOugc);
+							}
+
+							dim.items = [].concat(userOu || [], userOuc || [], userOugc || []);
+						}
+						else if (isLevel || isGroup) {
+							for (var j = 0, responseOu = response.metaData[ou], id; j < responseOu.length; j++) {
+								id = responseOu[j];
+
+								dim.items.push({
+									id: id,
+									name: response.metaData.names[id]
+								});
+							}
+
+							dim.items = dv.util.array.sortObjectsByString(dim.items);
+						}
+						else {
+							dim.items = Ext.clone(xLayout.dimensionNameItemsMap[dim.dimensionName]);
+						}
+					}
+					else {
+						// Items: get ids from metadata -> items
+						if (Ext.isArray(metaDataDim) && metaDataDim.length) {
+							var ids = Ext.clone(response.metaData[dim.dimensionName]);
+							for (var j = 0; j < ids.length; j++) {
+								dim.items.push({
+									id: ids[j],
+									name: response.metaData.names[ids[j]]
+								});
+							}
+						}
+						// Items: get items from xLayout
+						else {
+							dim.items = Ext.clone(xLayout.objectNameItemsMap[dim.objectName]);
+						}
+					}
+				}
+
+				// Re-layout
+				layout = dv.api.layout.Layout(xLayout);
+
+				if (layout) {
+					dimensions = [].concat(layout.columns || [], layout.rows || [], layout.filters || []);
+
+					for (var i = 0, idNameMap = response.metaData.names, dimItems; i < dimensions.length; i++) {
+						dimItems = dimensions[i].items;
+
+						if (Ext.isArray(dimItems) && dimItems.length) {
+							for (var j = 0, item; j < dimItems.length; j++) {
+								item = dimItems[j];
+
+								if (Ext.isObject(item) && Ext.isString(idNameMap[item.id]) && !Ext.isString(item.name)) {
+									item.name = idNameMap[item.id] || '';
+								}
+							}
+						}
+					}
+
+					return engine.getExtendedLayout(layout);
+				}
+
+				return null;
+			};
+
+			// response
+			service.response = {};
+
+			service.response.getExtendedResponse = function(xLayout, response) {
+				var ids = [];
+
+				response.nameHeaderMap = {};
+				response.idValueMap = {};
+
+				// extend headers
+				(function() {
+
+					// extend headers: index, ids, size
+					for (var i = 0, header; i < response.headers.length; i++) {
+						header = response.headers[i];
+
+						// index
+						header.index = i;
+
+						if (header.meta) {
+
+							// ids
+							header.ids = Ext.clone(xLayout.dimensionNameIdsMap[header.name]) || [];
+
+							// size
+							header.size = header.ids.length;
+
+							// collect ids, used by extendMetaData
+							ids = ids.concat(header.ids);
+						}
+					}
+
+					// nameHeaderMap (headerName: header)
+					for (var i = 0, header; i < response.headers.length; i++) {
+						header = response.headers[i];
+
+						response.nameHeaderMap[header.name] = header;
+					}
+				}());
+
+				// extend metadata
+				(function() {
+					for (var i = 0, id, splitId ; i < ids.length; i++) {
+						id = ids[i];
+
+						if (id.indexOf('-') !== -1) {
+							splitId = id.split('-');
+							response.metaData.names[id] = response.metaData.names[splitId[0]] + ' ' + response.metaData.names[splitId[1]];
+						}
+					}
+				}());
+
+				// create value id map
+				(function() {
+					var valueHeaderIndex = response.nameHeaderMap[conf.finals.dimension.value.value].index,
+						coHeader = response.nameHeaderMap[conf.finals.dimension.category.dimensionName],
+						dx = dimConf.data.dimensionName,
+						co = dimConf.category.dimensionName,
+						axisDimensionNames = xLayout.axisDimensionNames,
+						idIndexOrder = [];
+
+					// idIndexOrder
+					for (var i = 0; i < axisDimensionNames.length; i++) {
+						idIndexOrder.push(response.nameHeaderMap[axisDimensionNames[i]].index);
+
+						// If co exists in response and is not added in layout, add co after dx
+						if (coHeader && !Ext.Array.contains(axisDimensionNames, co) && axisDimensionNames[i] === dx) {
+							idIndexOrder.push(coHeader.index);
+						}
+					}
+
+					// idValueMap
+					for (var i = 0, row, id; i < response.rows.length; i++) {
+						row = response.rows[i];
+						id = '';
+
+						for (var j = 0; j < idIndexOrder.length; j++) {
+							id += row[idIndexOrder[j]];
+						}
+
+						response.idValueMap[id] = row[valueHeaderIndex];
+					}
+				}());
+
+				return response;
+
+                    //response.nameHeaderMap = {};
+                    //response.idValueMap = {};
+                    //ids = [];
+
+                    //var extendHeaders = function() {
+                        //// Extend headers: index, items, size
+                        //for (var i = 0, header; i < response.headers.length; i++) {
+                            //header = response.headers[i];
+
+                            //// Index
+                            //header.index = i;
+
+                            //if (header.meta) {
+
+                                //// Items
+                                //header.items = Ext.clone(xLayout.dimensionNameIdsMap[header.name]) || [];
+
+                                //// Size
+                                //header.size = header.items.length;
+
+                                //// Collect ids, used by extendMetaData
+                                //ids = ids.concat(header.items);
+                            //}
+                        //}
+
+                        //// nameHeaderMap (headerName: header)
+                        //for (var i = 0, header; i < response.headers.length; i++) {
+                            //header = response.headers[i];
+
+                            //response.nameHeaderMap[header.name] = header;
+                        //}
+                    //}();
+
+                    //var extendMetaData = function() {
+                        //for (var i = 0, id, splitId ; i < ids.length; i++) {
+                            //id = ids[i];
+
+                            //if (id.indexOf('-') !== -1) {
+                                //splitId = id.split('-');
+                                //response.metaData.names[id] = response.metaData.names[splitId[0]] + ' ' + response.metaData.names[splitId[1]];
+                            //}
+                        //}
+                    //}();
+
+                    //var createValueIdMap = function() {
+                        //var valueHeaderIndex = response.nameHeaderMap[conf.finals.dimension.value.value].index,
+                            //coHeader = response.nameHeaderMap[conf.finals.dimension.category.dimensionName],
+                            //axisDimensionNames = xLayout.axisDimensionNames,
+                            //idIndexOrder = [];
+
+                        //// idIndexOrder
+                        //for (var i = 0; i < axisDimensionNames.length; i++) {
+                            //idIndexOrder.push(response.nameHeaderMap[axisDimensionNames[i]].index);
+
+                            //// If co exists in response, add co after dx
+                            //if (coHeader && axisDimensionNames[i] === conf.finals.dimension.data.dimensionName) {
+                                //idIndexOrder.push(coHeader.index);
+                            //}
+                        //}
+
+                        //// idValueMap
+                        //for (var i = 0, row, id; i < response.rows.length; i++) {
+                            //row = response.rows[i];
+                            //id = '';
+
+                            //for (var j = 0; j < idIndexOrder.length; j++) {
+                                //id += row[idIndexOrder[j]];
+                            //}
+
+                            //response.idValueMap[id] = parseFloat(row[valueHeaderIndex]);
+                        //}
+                    //}();
+
+                    //var getMinMax = function() {
+                        //var valueIndex = response.nameHeaderMap.value.index,
+                            //values = [];
+
+                        //for (var i = 0; i < response.rows.length; i++) {
+                            //values.push(parseFloat(response.rows[i][valueIndex]));
+                        //}
+
+                        //response.min = Ext.Array.min(values);
+                        //response.max = Ext.Array.max(values);
+                    //}();
+
+                    //return response;
+			};
+
+		}());
+
+		// web
+		(function() {
+
+			// mask
+			web.mask = {};
+
+			web.mask.show = function(component, message) {
+				if (!Ext.isObject(component)) {
+					console.log('support.gui.mask.show: component not an object');
+					return null;
+				}
+
+				message = message || 'Loading..';
+
+				if (component.mask) {
+					component.mask.destroy();
+					component.mask = null;
+				}
+
+				component.mask = new Ext.create('Ext.LoadMask', component, {
+					shadow: false,
+					message: message,
+					style: 'box-shadow:0',
+					bodyStyle: 'box-shadow:0'
+				});
+
+				component.mask.show();
+			};
+
+			web.mask.hide = function(component) {
+				if (!Ext.isObject(component)) {
+					console.log('support.gui.mask.hide: component not an object');
+					return null;
+				}
+
+				if (component.mask) {
+					component.mask.destroy();
+					component.mask = null;
+				}
+			};
+
+			// message
+			web.message = {};
+
+			web.message.alert = function(message) {
+				console.log(message);
+			};
+
+			// analytics
+			web.analytics = {};
+
+			web.analytics.getParamString = function(xLayout, isSorted) {
                 var axisDimensionNames = isSorted ? xLayout.sortedAxisDimensionNames : xLayout.axisDimensionNames,
                     filterDimensions = isSorted ? xLayout.sortedFilterDimensions : xLayout.filterDimensions,
                     dimensionNameIdsMap = isSorted ? xLayout.dimensionNameSortedIdsMap : xLayout.dimensionNameIdsMap,
@@ -1073,17 +1425,228 @@ Ext.onReady( function() {
                 return paramString;
             };
 
-            engine.setSessionStorage = function(session, obj, url) {
-                if (DV.isSessionStorage) {
-                    var dhis2 = JSON.parse(sessionStorage.getItem('dhis2')) || {};
-                    dhis2[session] = obj;
-                    sessionStorage.setItem('dhis2', JSON.stringify(dhis2));
+			web.analytics.validateUrl = function(url) {
+				if (!Ext.isString(url) || url.length > 2000) {
+					var percent = ((url.length - 2000) / url.length) * 100;
+					alert('Too many parameters selected. Please reduce the number of parameters by at least ' + percent.toFixed(0) + '%.');
+					return;
+				}
 
-                    if (Ext.isString(url)) {
-                        window.location.href = url;
+				return true;
+			};
+
+			// chart
+			web.chart = {};
+
+
+
+
+
+
+        // util
+        (function() {
+            util.array = {
+                sortDimensions: function(dimensions, key) {
+                    key = key || 'dimensionName';
+
+                    // Sort object order
+                    Ext.Array.sort(dimensions, function(a,b) {
+                        if (a[key] < b[key]) {
+                            return -1;
+                        }
+                        if (a[key] > b[key]) {
+                            return 1;
+                        }
+                        return 0;
+                    });
+
+                    // Sort object items order
+                    for (var i = 0, dim; i < dimensions.length; i++) {
+                        dim = dimensions[i];
+
+                        if (dim.items) {
+                            dimensions[i].items.sort();
+                        }
+                    }
+
+                    return dimensions;
+                },
+
+                sortObjectsByString: function(array, key) {
+                    key = key || 'name';
+                    array.sort( function(a, b) {
+                        var nameA = a[key].toLowerCase(),
+                            nameB = b[key].toLowerCase();
+
+                        if (nameA < nameB) {
+                            return -1;
+                        }
+                        if (nameA > nameB) {
+                            return 1;
+                        }
+                        return 0;
+                    });
+                    return array;
+                }
+            };
+
+            util.window = {
+                setAnchorPosition: function(w, target) {
+                    var vpw = dv.viewport.getWidth(),
+                        targetx = target ? target.getPosition()[0] : 4,
+                        winw = w.getWidth(),
+                        y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
+
+                    if ((targetx + winw) > vpw) {
+                        w.setPosition((vpw - winw - 2), y);
+                    }
+                    else {
+                        w.setPosition(targetx, y);
+                    }
+                },
+                addHideOnBlurHandler: function(w) {
+                    var el = Ext.get(Ext.query('.x-mask')[0]);
+
+                    el.on('click', function() {
+                        if (w.hideOnBlur) {
+                            w.hide();
+                        }
+                    });
+
+                    w.hasHideOnBlurHandler = true;
+                },
+                addDestroyOnBlurHandler: function(w) {
+                    var el = Ext.get(Ext.query('.x-mask')[0]);
+
+                    el.on('click', function() {
+                        if (w.destroyOnBlur) {
+                            w.destroy();
+                        }
+                    });
+
+                    w.hasDestroyOnBlurHandler = true;
+                }
+            };
+
+            util.mask = {
+                showMask: function(cmp, msg) {
+                    msg = msg || 'Loading..';
+
+                    if (cmp.mask) {
+                        cmp.mask.destroy();
+                    }
+                    cmp.mask = new Ext.LoadMask(cmp, {msg: msg});
+                    cmp.mask.show();
+                },
+                hideMask: function(cmp) {
+                    if (cmp.mask) {
+                        cmp.mask.hide();
                     }
                 }
             };
+
+            util.number = {
+                isInteger: function(n) {
+                    var str = new String(n);
+                    if (str.indexOf('-') > -1) {
+                        var d = str.substr(str.indexOf('-') + 1);
+                        return (d.length === 1 && d == '0');
+                    }
+                    return false;
+                },
+                allValuesAreIntegers: function(values) {
+                    for (var i = 0; i < values.length; i++) {
+                        if (!this.isInteger(values[i].value)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                },
+                getChartAxisFormatRenderer: function() {
+                    return this.allValuesAreIntegers(DV.value.values) ? '0' : '0.0';
+                }
+            };
+
+            util.str = {
+                replaceAll: function(str, find, replace) {
+                    return str.replace(new RegExp(find, 'g'), replace);
+                }
+            };
+
+            util.value = {
+                jsonfy: function(values) {
+                    var a = [];
+                    for (var i = 0; i < values.length; i++) {
+                        var v = {
+                            value: parseFloat(values[i][0]),
+                            data: values[i][1],
+                            period: values[i][2],
+                            organisationunit: values[i][3]
+                        };
+                        a.push(v);
+                    }
+                    return a;
+                }
+            };
+        }());
+
+        // init
+        (function() {
+
+            // sort and extend dynamic dimensions
+            init.dimensions = util.array.sortObjectsByString(init.dimensions);
+
+            for (var i = 0, dim; i < init.dimensions.length; i++) {
+                dim = init.dimensions[i];
+                dim.dimensionName = dim.id;
+                dim.objectName = dimConf.dimension.objectName;
+                dimConf.objectNameMap[dim.id] = dim;
+            }
+        }());
+
+		// service
+		(function() {
+			service.layout = {};
+
+			service.layout.getObjectNameDimensionMap = function(dimensionArray) {
+				var map = {};
+
+				if (Ext.isArray(dimensionArray) && dimensionArray.length) {
+					for (var i = 0, dim; i < dimensionArray.length; i++) {
+						dim = api.layout.Dimension(dimensionArray[i]);
+
+						if (dim) {
+							map[dim.dimension] = dim;
+						}
+					}
+				}
+
+				return map;
+			};
+
+			service.layout.getObjectNameDimensionItemsMap = function(dimensionArray) {
+				var map = {};
+
+				if (Ext.isArray(dimensionArray) && dimensionArray.length) {
+					for (var i = 0, dim; i < dimensionArray.length; i++) {
+						dim = api.layout.Dimension(dimensionArray[i]);
+
+						if (dim) {
+							map[dim.dimension] = dim.items;
+						}
+					}
+				}
+
+				return map;
+			};
+
+			service.response = {};
+		}());
+
+        // engine
+        //(function() {
+
+
 
             engine.createChart = function(layout, dv, updateGui, isFavorite) {
                 var getSyncronizedXLayout,
@@ -1110,248 +1673,6 @@ Ext.onReady( function() {
                     afterLoad,
                     initialize;
 
-                getSyncronizedXLayout = function(xLayout, response) {
-                    var dimensions = [].concat(xLayout.columns, xLayout.rows, xLayout.filters),
-                        xOuDimension = xLayout.objectNameDimensionsMap[dimConf.organisationUnit.objectName],
-                        isUserOrgunit = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT'),
-                        isUserOrgunitChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_CHILDREN'),
-                        isUserOrgunitGrandChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_GRANDCHILDREN'),
-                        isLevel = function() {
-                            if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
-                                for (var i = 0; i < xOuDimension.ids.length; i++) {
-                                    if (xOuDimension.ids[i].substr(0,5) === 'LEVEL') {
-                                        return true;
-                                    }
-                                }
-                            }
-
-                            return false;
-                        }(),
-                        isGroup = function() {
-                            if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
-                                for (var i = 0; i < xOuDimension.ids.length; i++) {
-                                    if (xOuDimension.ids[i].substr(0,8) === 'OU_GROUP') {
-                                        return true;
-                                    }
-                                }
-                            }
-
-                            return false;
-                        }(),
-                        ou = dimConf.organisationUnit.objectName,
-                        layout;
-
-                    // Set items from init/metaData/xLayout
-                    for (var i = 0, dim, metaDataDim, items; i < dimensions.length; i++) {
-                        dim = dimensions[i];
-                        dim.items = [];
-                        metaDataDim = response.metaData[dim.objectName];
-
-                        // If ou and children
-                        if (dim.dimensionName === ou) {
-                            if (isUserOrgunit || isUserOrgunitChildren || isUserOrgunitGrandChildren) {
-                                var userOu,
-                                    userOuc,
-                                    userOugc;
-
-                                if (isUserOrgunit) {
-                                    userOu = [{
-                                        id: dv.init.user.ou,
-                                        name: response.metaData.names[dv.init.user.ou]
-                                    }];
-                                }
-                                if (isUserOrgunitChildren) {
-                                    userOuc = [];
-
-                                    for (var j = 0; j < dv.init.user.ouc.length; j++) {
-                                        userOuc.push({
-                                            id: dv.init.user.ouc[j],
-                                            name: response.metaData.names[dv.init.user.ouc[j]]
-                                        });
-                                    }
-
-                                    userOuc = dv.util.array.sortObjectsByString(userOuc);
-                                }
-                                if (isUserOrgunitGrandChildren) {
-									var userOuOuc = [].concat(dv.init.user.ou, dv.init.user.ouc),
-										responseOu = response.metaData[ou];
-
-									userOugc = [];
-
-									for (var j = 0, id; j < responseOu.length; j++) {
-										id = responseOu[j];
-
-										if (!Ext.Array.contains(userOuOuc, id)) {
-											userOugc.push({
-												id: id,
-												name: response.metaData.names[id]
-											});
-										}
-									}
-
-									userOugc = dv.util.array.sortObjectsByString(userOugc);
-								}
-
-                                dim.items = [].concat(userOu || [], userOuc || [], userOugc || []);
-                            }
-                            else if (isLevel || isGroup) {
-								for (var j = 0, responseOu = response.metaData[ou], id; j < responseOu.length; j++) {
-									id = responseOu[j];
-
-									dim.items.push({
-										id: id,
-										name: response.metaData.names[id]
-									});
-								}
-
-								dim.items = dv.util.array.sortObjectsByString(dim.items);
-							}
-							else {
-								dim.items = Ext.clone(xLayout.dimensionNameItemsMap[dim.dimensionName]);
-							}
-                        }
-                        else {
-                            // Items: get ids from metadata -> items
-                            if (Ext.isArray(metaDataDim) && metaDataDim.length) {
-								var ids = Ext.clone(response.metaData[dim.dimensionName]);
-								for (var j = 0; j < ids.length; j++) {
-									dim.items.push({
-										id: ids[j],
-										name: response.metaData.names[ids[j]]
-									});
-								}
-							}
-							// Items: get items from xLayout
-							else {
-								dim.items = Ext.clone(xLayout.objectNameItemsMap[dim.objectName]);
-							}
-                        }
-                    }
-
-                    // Re-layout
-                    layout = dv.api.layout.Layout(xLayout);
-
-                    if (layout) {
-                        dimensions = [].concat(layout.columns || [], layout.rows || [], layout.filters || []);
-
-                        for (var i = 0, idNameMap = response.metaData.names, dimItems; i < dimensions.length; i++) {
-                            dimItems = dimensions[i].items;
-
-                            if (Ext.isArray(dimItems) && dimItems.length) {
-                                for (var j = 0, item; j < dimItems.length; j++) {
-                                    item = dimItems[j];
-
-                                    if (Ext.isObject(item) && Ext.isString(idNameMap[item.id]) && !Ext.isString(item.name)) {
-                                        item.name = idNameMap[item.id] || '';
-                                    }
-                                }
-                            }
-                        }
-
-                        return engine.getExtendedLayout(layout);
-                    }
-
-                    return null;
-                };
-
-                getExtendedResponse = function(response, xLayout) {
-                    response.nameHeaderMap = {};
-                    response.idValueMap = {};
-                    ids = [];
-
-                    var extendHeaders = function() {
-                        // Extend headers: index, items, size
-                        for (var i = 0, header; i < response.headers.length; i++) {
-                            header = response.headers[i];
-
-                            // Index
-                            header.index = i;
-
-                            if (header.meta) {
-
-                                // Items
-                                header.items = Ext.clone(xLayout.dimensionNameIdsMap[header.name]) || [];
-
-                                // Size
-                                header.size = header.items.length;
-
-                                // Collect ids, used by extendMetaData
-                                ids = ids.concat(header.items);
-                            }
-                        }
-
-                        // nameHeaderMap (headerName: header)
-                        for (var i = 0, header; i < response.headers.length; i++) {
-                            header = response.headers[i];
-
-                            response.nameHeaderMap[header.name] = header;
-                        }
-                    }();
-
-                    var extendMetaData = function() {
-                        for (var i = 0, id, splitId ; i < ids.length; i++) {
-                            id = ids[i];
-
-                            if (id.indexOf('-') !== -1) {
-                                splitId = id.split('-');
-                                response.metaData.names[id] = response.metaData.names[splitId[0]] + ' ' + response.metaData.names[splitId[1]];
-                            }
-                        }
-                    }();
-
-                    var createValueIdMap = function() {
-                        var valueHeaderIndex = response.nameHeaderMap[conf.finals.dimension.value.value].index,
-                            coHeader = response.nameHeaderMap[conf.finals.dimension.category.dimensionName],
-                            axisDimensionNames = xLayout.axisDimensionNames,
-                            idIndexOrder = [];
-
-                        // idIndexOrder
-                        for (var i = 0; i < axisDimensionNames.length; i++) {
-                            idIndexOrder.push(response.nameHeaderMap[axisDimensionNames[i]].index);
-
-                            // If co exists in response, add co after dx
-                            if (coHeader && axisDimensionNames[i] === conf.finals.dimension.data.dimensionName) {
-                                idIndexOrder.push(coHeader.index);
-                            }
-                        }
-
-                        // idValueMap
-                        for (var i = 0, row, id; i < response.rows.length; i++) {
-                            row = response.rows[i];
-                            id = '';
-
-                            for (var j = 0; j < idIndexOrder.length; j++) {
-                                id += row[idIndexOrder[j]];
-                            }
-
-                            response.idValueMap[id] = parseFloat(row[valueHeaderIndex]);
-                        }
-                    }();
-
-                    var getMinMax = function() {
-                        var valueIndex = response.nameHeaderMap.value.index,
-                            values = [];
-
-                        for (var i = 0; i < response.rows.length; i++) {
-                            values.push(parseFloat(response.rows[i][valueIndex]));
-                        }
-
-                        response.min = Ext.Array.min(values);
-                        response.max = Ext.Array.max(values);
-                    }();
-
-                    return response;
-                };
-
-                validateUrl = function(url) {
-                    if (!Ext.isString(url) || url.length > 2000) {
-                        var percent = ((url.length - 2000) / url.length) * 100;
-                        alert('Too many parameters selected. Please reduce the number of parameters by at least ' + percent.toFixed(0) + '%.');
-                        return;
-                    }
-
-                    return true;
-                };
 
                 getDefaultStore = function(xResponse, xLayout) {
                     var pe = conf.finals.dimension.period.dimensionName,
@@ -2262,7 +2583,7 @@ console.log("h", dv.viewport.centerRegion.getHeight());
 						}
 
 						// Extended response
-						xResponse = getExtendedResponse(response, xLayout);
+						xResponse = getExtendedResponse(xLayout, response);
 
 						// Create chart
 						chart = generator[xLayout.type](xResponse, xLayout);

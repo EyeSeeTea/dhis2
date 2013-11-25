@@ -2262,7 +2262,7 @@ Ext.onReady( function() {
 						}
 
 						// Extended response
-						xResponse = getExtendedResponse(response, xLayout);
+						xResponse = getExtendedResponse(xLayout, response);
 
 						// Create chart
 						chart = generator[xLayout.type](xResponse, xLayout);

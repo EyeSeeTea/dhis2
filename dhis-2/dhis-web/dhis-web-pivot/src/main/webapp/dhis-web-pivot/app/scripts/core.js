@@ -380,18 +380,17 @@ Ext.onReady( function() {
 
 				return function() {
 					var objectNames = [],
-						dimConf = conf.finals.dimension,
-						dims;
-
-					config.columns = getValidatedDimensionArray(config.columns);
-					config.rows = getValidatedDimensionArray(config.rows);
-					config.filters = getValidatedDimensionArray(config.filters);
+						dimConf = conf.finals.dimension;
 
 					// config must be an object
 					if (!(config && Ext.isObject(config))) {
 						alert('Layout: config is not an object (' + init.el + ')');
 						return;
 					}
+
+					config.columns = getValidatedDimensionArray(config.columns);
+					config.rows = getValidatedDimensionArray(config.rows);
+					config.filters = getValidatedDimensionArray(config.filters);
 
 					// at least one dimension specified as column or row
 					if (!(config.columns || config.rows)) {
