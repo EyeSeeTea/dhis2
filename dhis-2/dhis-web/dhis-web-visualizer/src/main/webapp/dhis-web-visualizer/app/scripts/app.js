@@ -119,6 +119,16 @@ Ext.onReady( function() {
 			style: 'margin-bottom:4px'
 		});
 
+		hideTitle = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.hide_chart_title,
+			style: 'margin-bottom:7px',
+			listeners: {
+				change: function() {
+					title.xable();
+				}
+			}
+		});
+
 		title = Ext.create('Ext.form.field.Text', {
 			style: 'margin-bottom:2px; margin-left:2px',
 			width: 310,
@@ -4892,8 +4902,8 @@ Ext.onReady( function() {
 				render: function() {
 					ns.app.viewport = this;
 
-					//ns.app.optionsWindow = OptionsWindow();
-					//ns.app.optionsWindow.hide();
+					ns.app.optionsWindow = OptionsWindow();
+					ns.app.optionsWindow.hide();
 				},
                 afterrender: function() {
 
