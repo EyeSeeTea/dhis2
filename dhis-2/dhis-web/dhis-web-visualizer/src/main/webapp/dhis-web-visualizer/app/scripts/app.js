@@ -198,7 +198,7 @@ Ext.onReady( function() {
 				hideTitle,
 				title,
 				domainAxisTitle,
-				rangeAxisTitle,
+				rangeAxisTitle
 			]
 		};
 
@@ -4888,14 +4888,14 @@ Ext.onReady( function() {
 				render: function() {
 					ns.app.viewport = this;
 
-					ns.app.optionsWindow = OptionsWindow();
-					ns.app.optionsWindow.hide();
+					//ns.app.optionsWindow = OptionsWindow();
+					//ns.app.optionsWindow.hide();
 				},
                 afterrender: function() {
 
 					// resize event handler
-					dv.viewport.westRegion.on('resize', function() {
-						var panel = util.dimension.panel.getExpanded();
+					westRegion.on('resize', function() {
+						var panel = accordion.getExpandedPanel();
 
 						if (panel) {
 							panel.onExpand();
@@ -4903,29 +4903,29 @@ Ext.onReady( function() {
 					});
 
 					// left gui
-					var viewportHeight = dv.viewport.westRegion.getHeight(),
-						numberOfTabs = init.dimensions.length + 5,
+					var viewportHeight = westRegion.getHeight(),
+						numberOfTabs = ns.core.init.dimensions.length + 5,
 						tabHeight = 28,
 						minPeriodHeight = 380,
 						settingsHeight = 91;
 
 					if (viewportHeight > numberOfTabs * tabHeight + minPeriodHeight + settingsHeight) {
 						if (!Ext.isIE) {
-							dv.viewport.accordion.setAutoScroll(false);
-							dv.viewport.westRegion.setWidth(ns.core.conf.layout.west_width);
-							dv.viewport.accordion.doLayout();
+							accordion.setAutoScroll(false);
+							westRegion.setWidth(ns.core.conf.layout.west_width);
+							accordion.doLayout();
 						}
 					}
 					else {
-						dv.viewport.westRegion.hasScrollbar = true;
+						westRegion.hasScrollbar = true;
 					}
 
 					// expand first panel
-					accordion.getFirstPanel().expand
+					accordion.getFirstPanel().expand();
 
 					// look for url params
-					var id = util.url.getUrlParam('id'),
-						session = util.url.getUrlParam('s'),
+					var id = ns.core.web.url.getParam('id'),
+						session = ns.core.web.url.getParam('s'),
 						layout;
 
 					if (id) {
