@@ -1164,7 +1164,7 @@ Ext.onReady( function() {
 					text: NS.i18n.save,
 					handler: function() {
 						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/sharing?type=reportTable&id=' + sharing.object.id,
+							url: ns.core.init.contextPath + '/api/sharing?type=chart&id=' + sharing.object.id,
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json'
@@ -1571,7 +1571,7 @@ Ext.onReady( function() {
 			web.chart = web.chart || {};
 
 			web.chart.getLayoutConfig = function() {
-                var panels = cmp.dimension.panels,
+				var panels = ns.app.accordion.panels,
                     columnDimNames = [dv.viewport.series.getValue()],
                     rowDimNames = [dv.viewport.category.getValue()],
                     filterDimNames = dv.viewport.filter.getValue(),
@@ -1984,8 +1984,8 @@ Ext.onReady( function() {
             radar,
             chartType,
             getDimensionStore,
-            seriesStore,
-            categoryStore,
+            colStore,
+            rowStore,
             filterStore,
             series,
             category,
@@ -2215,9 +2215,14 @@ Ext.onReady( function() {
 			});
 		};
 
-        seriesStore = getDimensionStore();
-        categoryStore = getDimensionStore();
+        colStore = getDimensionStore();
+		ns.app.stores.col = colStore;
+
+        rowStore = getDimensionStore();
+		ns.app.stores.row = rowStore;
+
         filterStore = getDimensionStore();
+		ns.app.stores.filter = filterStore;
 
         series = Ext.create('Ext.form.field.ComboBox', {
             cls: 'dv-combo',
@@ -2234,7 +2239,7 @@ Ext.onReady( function() {
                 category.filter(this.getValue());
                 filter.filter([this.getValue(), category.getValue()]);
             },
-            store: seriesStore,
+            store: colStore,
             listeners: {
                 added: function(cb) {
                     dv.cmp.layout.series = this;
@@ -2274,7 +2279,7 @@ Ext.onReady( function() {
             filterNext: function() {
                 filter.filter([series.getValue(), this.getValue()]);
             },
-            store: categoryStore,
+            store: rowStore,
             listeners: {
                 added: function(cb) {
                     dv.cmp.layout.category = this;
