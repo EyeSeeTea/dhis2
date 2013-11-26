@@ -1698,7 +1698,7 @@ Ext.onReady( function() {
 						var xResponse,
 							chart,
 							html,
-							response = ns.api.response.Response(response);
+							response = api.response.Response(Ext.decode(r.responseText));
 
 						if (!response) {
 							web.mask.hide(ns.app.centerRegion);
