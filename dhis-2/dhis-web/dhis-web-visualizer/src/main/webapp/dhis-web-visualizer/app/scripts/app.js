@@ -1741,236 +1741,6 @@ Ext.onReady( function() {
 
 		}());
 
-
-
-
-
-        // store
-        (function() {
-            store.indicatorAvailable = Ext.create('Ext.data.Store', {
-                fields: ['id', 'name'],
-                proxy: {
-                    type: 'ajax',
-                    reader: {
-                        type: 'json',
-                        root: 'indicators'
-                    }
-                },
-                storage: {},
-                sortStore: function() {
-                    this.sort('name', 'ASC');
-                },
-                listeners: {
-                    load: function(s) {
-                        util.store.addToStorage(s);
-                        util.multiselect.filterAvailable({store: s}, {store: store.indicatorSelected});
-                    }
-                }
-            });
-
-            store.indicatorSelected = Ext.create('Ext.data.Store', {
-                fields: ['id', 'name'],
-                data: []
-            });
-
-            store.dataElementAvailable = Ext.create('Ext.data.Store', {
-                fields: ['id', 'name', 'dataElementId', 'optionComboId', 'operandName'],
-                proxy: {
-                    type: 'ajax',
-                    reader: {
-                        type: 'json',
-                        root: 'dataElements'
-                    }
-                },
-                storage: {},
-                sortStore: function() {
-                    this.sort('name', 'ASC');
-                },
-                setTotalsProxy: function(uid) {
-                    var path;
-
-                    if (Ext.isString(uid)) {
-                        path = conf.finals.ajax.dataelement_get + uid + '.json?domainType=aggregate&links=false&paging=false';
-                    }
-                    else if (uid === 0) {
-                        path = conf.finals.ajax.dataelement_getall;
-                    }
-
-                    if (!path) {
-                        alert('Invalid parameter');
-                        return;
-                    }
-
-                    this.setProxy({
-                        type: 'ajax',
-                        url: init.contextPath + conf.finals.ajax.path_api + path,
-                        reader: {
-                            type: 'json',
-                            root: 'dataElements'
-                        }
-                    });
-
-                    this.load({
-                        scope: this,
-                        callback: function() {
-                            util.multiselect.filterAvailable({store: this}, {store: store.dataElementSelected});
-                        }
-                    });
-                },
-                setDetailsProxy: function(uid) {
-                    if (Ext.isString(uid)) {
-                        this.setProxy({
-                            type: 'ajax',
-							url: init.contextPath + conf.finals.ajax.path_commons + 'getOperands.action?uid=' + uid,
-                            reader: {
-                                type: 'json',
-                                root: 'operands'
-                            }
-                        });
-
-                        this.load({
-                            scope: this,
-                            callback: function() {
-                                this.each(function(r) {
-                                    r.set('id', r.data.dataElementId + '-' + r.data.optionComboId);
-                                    r.set('name', r.data.operandName);
-                                });
-
-                                util.multiselect.filterAvailable({store: this}, {store: store.dataElementSelected});
-                            }
-                        });
-                    }
-                    else {
-                        alert('Invalid parameter');
-                    }
-                },
-                listeners: {
-                    load: function(s) {
-
-                    }
-                }
-            });
-
-            store.dataElementSelected = Ext.create('Ext.data.Store', {
-                fields: ['id', 'name'],
-                data: []
-            });
-
-            store.dataSetAvailable = Ext.create('Ext.data.Store', {
-                fields: ['id', 'name'],
-                proxy: {
-                    type: 'ajax',
-					url: init.contextPath + conf.finals.ajax.path_api + conf.finals.ajax.dataset_get,
-                    reader: {
-                        type: 'json',
-                        root: 'dataSets'
-                    }
-                },
-                storage: {},
-                sortStore: function() {
-                    this.sort('name', 'ASC');
-                },
-                isLoaded: false,
-                listeners: {
-                    load: function(s) {
-                        this.isLoaded = true;
-                        util.store.addToStorage(s);
-                        util.multiselect.filterAvailable({store: s}, {store: store.dataSetSelected});
-                    }
-                }
-            });
-
-            store.dataSetSelected = Ext.create('Ext.data.Store', {
-                fields: ['id', 'name'],
-                data: []
-            });
-
-            store.periodType = Ext.create('Ext.data.Store', {
-                fields: ['id', 'name'],
-                data: conf.period.periodTypes
-            });
-
-            store.fixedPeriodAvailable = Ext.create('Ext.data.Store', {
-                fields: ['id', 'name', 'index'],
-                data: [],
-                setIndex: function(periods) {
-                    for (var i = 0; i < periods.length; i++) {
-                        periods[i].index = i;
-                    }
-                },
-                sortStore: function() {
-                    this.sort('index', 'ASC');
-                }
-            });
-
-            store.fixedPeriodSelected = Ext.create('Ext.data.Store', {
-                fields: ['id', 'name'],
-                data: []
-            });
-
-            store.chart = Ext.create('Ext.data.Store', {
-                fields: ['id', 'name', 'lastUpdated', 'access'],
-                proxy: {
-                    type: 'ajax',
-                    reader: {
-                        type: 'json',
-                        root: 'charts'
-                    }
-                },
-                isLoaded: false,
-                pageSize: 10,
-                page: 1,
-                defaultUrl: init.contextPath + '/api/charts.json?viewClass=sharing&links=false',
-                loadStore: function(url) {
-                    this.proxy.url = url || this.defaultUrl;
-
-                    this.load({
-                        params: {
-                            pageSize: this.pageSize,
-                            page: this.page
-                        }
-                    });
-                },
-                loadFn: function(fn) {
-                    if (this.isLoaded) {
-                        fn.call();
-                    }
-                    else {
-                        this.load(fn);
-                    }
-                },
-                listeners: {
-                    load: function(s) {
-                        if (!this.isLoaded) {
-                            this.isLoaded = true;
-                        }
-
-                        this.sort('name', 'ASC');
-                    }
-                }
-            });
-
-			store.organisationUnitGroup = Ext.create('Ext.data.Store', {
-				fields: ['id', 'name'],
-				proxy: {
-					type: 'ajax',
-					url: init.contextPath + conf.finals.ajax.path_api + conf.finals.ajax.organisationunitgroup_getall,
-					reader: {
-						type: 'json',
-						root: 'organisationUnitGroups'
-					}
-				}
-			});
-
-
-
-            dv.store = store;
-        }());
-
-        // engine
-        (function() {
-
-        }());
     };
 
 	// viewport
@@ -2062,9 +1832,9 @@ Ext.onReady( function() {
 
         column = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: dv.conf.finals.chart.column,
+            chartType: ns.core.conf.finals.chart.column,
             icon: 'images/column.png',
-            name: dv.conf.finals.chart.column,
+            name: ns.core.conf.finals.chart.column,
             tooltipText: NS.i18n.column_chart,
             pressed: true,
             listeners: {
@@ -2074,9 +1844,9 @@ Ext.onReady( function() {
 
         stackedcolumn = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: dv.conf.finals.chart.stackedcolumn,
+            chartType: ns.core.conf.finals.chart.stackedcolumn,
             icon: 'images/column-stacked.png',
-            name: dv.conf.finals.chart.stackedcolumn,
+            name: ns.core.conf.finals.chart.stackedcolumn,
             tooltipText: NS.i18n.stacked_column_chart,
             listeners: {
                 added: buttonAddedListener
@@ -2085,9 +1855,9 @@ Ext.onReady( function() {
 
         bar = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: dv.conf.finals.chart.bar,
+            chartType: ns.core.conf.finals.chart.bar,
             icon: 'images/bar.png',
-            name: dv.conf.finals.chart.bar,
+            name: ns.core.conf.finals.chart.bar,
             tooltipText: NS.i18n.bar_chart,
             listeners: {
                 added: buttonAddedListener
@@ -2096,9 +1866,9 @@ Ext.onReady( function() {
 
         stackedbar = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: dv.conf.finals.chart.stackedbar,
+            chartType: ns.core.conf.finals.chart.stackedbar,
             icon: 'images/bar-stacked.png',
-            name: dv.conf.finals.chart.stackedbar,
+            name: ns.core.conf.finals.chart.stackedbar,
             tooltipText: NS.i18n.stacked_bar_chart,
             listeners: {
                 added: buttonAddedListener
@@ -2107,9 +1877,9 @@ Ext.onReady( function() {
 
         line = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: dv.conf.finals.chart.line,
+            chartType: ns.core.conf.finals.chart.line,
             icon: 'images/line.png',
-            name: dv.conf.finals.chart.line,
+            name: ns.core.conf.finals.chart.line,
             tooltipText: NS.i18n.line_chart,
             listeners: {
                 added: buttonAddedListener
@@ -2118,9 +1888,9 @@ Ext.onReady( function() {
 
         area = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: dv.conf.finals.chart.area,
+            chartType: ns.core.conf.finals.chart.area,
             icon: 'images/area.png',
-            name: dv.conf.finals.chart.area,
+            name: ns.core.conf.finals.chart.area,
             tooltipText: NS.i18n.area_chart,
             listeners: {
                 added: buttonAddedListener
@@ -2129,9 +1899,9 @@ Ext.onReady( function() {
 
         pie = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: dv.conf.finals.chart.pie,
+            chartType: ns.core.conf.finals.chart.pie,
             icon: 'images/pie.png',
-            name: dv.conf.finals.chart.pie,
+            name: ns.core.conf.finals.chart.pie,
             tooltipText: NS.i18n.pie_chart,
             listeners: {
                 added: buttonAddedListener
@@ -2140,9 +1910,9 @@ Ext.onReady( function() {
 
         radar = Ext.create('Ext.button.Button', {
             xtype: 'button',
-            chartType: dv.conf.finals.chart.radar,
+            chartType: ns.core.conf.finals.chart.radar,
             icon: 'images/radar.png',
-            name: dv.conf.finals.chart.radar,
+            name: ns.core.conf.finals.chart.radar,
             tooltipText: NS.i18n.radar_chart,
             listeners: {
                 added: buttonAddedListener
@@ -2213,7 +1983,7 @@ Ext.onReady( function() {
 							{id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name}
 						];
 
-					return data.concat(Ext.clone(init.dimensions));
+					return data.concat(Ext.clone(ns.core.init.dimensions));
 				}()
 			});
 		};
@@ -2231,13 +2001,13 @@ Ext.onReady( function() {
             cls: 'dv-combo',
             baseBodyCls: 'small',
             style: 'margin-bottom:0',
-            name: dv.conf.finals.chart.series,
+            name: ns.core.conf.finals.chart.series,
             queryMode: 'local',
             editable: false,
             valueField: 'id',
             displayField: 'name',
-            width: (dv.conf.layout.west_fieldset_width / 3) - 1,
-            value: dv.conf.finals.dimension.data.dimensionName,
+            width: (ns.core.conf.layout.west_fieldset_width / 3) - 1,
+            value: ns.core.conf.finals.dimension.data.dimensionName,
             filterNext: function() {
                 category.filter(this.getValue());
                 filter.filter([this.getValue(), category.getValue()]);
@@ -2245,7 +2015,6 @@ Ext.onReady( function() {
             store: colStore,
             listeners: {
                 added: function(cb) {
-                    dv.cmp.layout.series = this;
                     cb.filterNext();
                 },
                 select: function(cb) {
@@ -2258,14 +2027,14 @@ Ext.onReady( function() {
             cls: 'dv-combo',
             baseBodyCls: 'small',
             style: 'margin-bottom:0',
-            name: dv.conf.finals.chart.category,
+            name: ns.core.conf.finals.chart.category,
             queryMode: 'local',
             editable: false,
             lastQuery: '',
             valueField: 'id',
             displayField: 'name',
-            width: (dv.conf.layout.west_fieldset_width / 3) - 1,
-            value: dv.conf.finals.dimension.period.dimensionName,
+            width: (ns.core.conf.layout.west_fieldset_width / 3) - 1,
+            value: ns.core.conf.finals.dimension.period.dimensionName,
             filter: function(value) {
                 if (Ext.isString(value)) {
                     if (value === this.getValue()) {
@@ -2285,7 +2054,6 @@ Ext.onReady( function() {
             store: rowStore,
             listeners: {
                 added: function(cb) {
-                    dv.cmp.layout.category = this;
                     cb.filterNext();
                 },
                 select: function(cb) {
@@ -2299,14 +2067,14 @@ Ext.onReady( function() {
             multiSelect: true,
             baseBodyCls: 'small',
             style: 'margin-bottom:0',
-            name: dv.conf.finals.chart.filter,
+            name: ns.core.conf.finals.chart.filter,
             queryMode: 'local',
             editable: false,
             lastQuery: '',
             valueField: 'id',
             displayField: 'name',
-            width: (dv.conf.layout.west_fieldset_width / 3) - 1,
-            value: dv.conf.finals.dimension.organisationUnit.dimensionName,
+            width: (ns.core.conf.layout.west_fieldset_width / 3) - 1,
+            value: ns.core.conf.finals.dimension.organisationUnit.dimensionName,
             filter: function(values) {
                 var a = Ext.clone(this.getValue()),
                     b = [];
@@ -2326,9 +2094,6 @@ Ext.onReady( function() {
             },
             store: filterStore,
             listeners: {
-                added: function() {
-                    dv.cmp.layout.filter = this;
-                },
                 beforedeselect: function(cb) {
                     return cb.getValue().length !== 1;
                 }
@@ -4518,23 +4283,6 @@ Ext.onReady( function() {
 			}
 		});
 
-		layoutButton = Ext.create('Ext.button.Button', {
-			text: 'Layout',
-			menu: {},
-			handler: function() {
-				if (!ns.app.layoutWindow) {
-					ns.app.layoutWindow = LayoutWindow();
-				}
-
-				ns.app.layoutWindow.show();
-			},
-			listeners: {
-				added: function() {
-					ns.app.layoutButton = this;
-				}
-			}
-		});
-
 		optionsButton = Ext.create('Ext.button.Button', {
 			text: NS.i18n.options,
 			menu: {},
@@ -4753,7 +4501,6 @@ Ext.onReady( function() {
 							update();
 						}
 					},
-					layoutButton,
 					optionsButton,
 					{
 						xtype: 'tbseparator',
@@ -5141,8 +4888,6 @@ Ext.onReady( function() {
 				render: function() {
 					ns.app.viewport = this;
 
-					ns.app.layoutWindow = LayoutWindow();
-					ns.app.layoutWindow.hide();
 					ns.app.optionsWindow = OptionsWindow();
 					ns.app.optionsWindow.hide();
 				},
@@ -5167,7 +4912,7 @@ Ext.onReady( function() {
 					if (viewportHeight > numberOfTabs * tabHeight + minPeriodHeight + settingsHeight) {
 						if (!Ext.isIE) {
 							dv.viewport.accordion.setAutoScroll(false);
-							dv.viewport.westRegion.setWidth(dv.conf.layout.west_width);
+							dv.viewport.westRegion.setWidth(ns.core.conf.layout.west_width);
 							dv.viewport.accordion.doLayout();
 						}
 					}
@@ -5331,6 +5076,6 @@ Ext.onReady( function() {
 				});
 			}
 		});
-	}();
+	}());
 });
 
