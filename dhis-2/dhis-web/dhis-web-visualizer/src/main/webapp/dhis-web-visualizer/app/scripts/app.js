@@ -1572,13 +1572,13 @@ Ext.onReady( function() {
 
 			web.chart.getLayoutConfig = function() {
 				var panels = ns.app.accordion.panels,
-                    columnDimNames = [dv.viewport.series.getValue()],
-                    rowDimNames = [dv.viewport.category.getValue()],
-                    filterDimNames = dv.viewport.filter.getValue(),
-                    config = dv.viewport.optionsWindow.getOptions(),
-                    dx = dimConf.data.dimensionName,
-                    co = dimConf.category.dimensionName,
-                    nameDimArrayMap = {};
+					columnDimNames = ns.app.stores.col.getDimensionNames(),
+					rowDimNames = ns.app.stores.row.getDimensionNames(),
+					filterDimNames = ns.app.stores.filter.getDimensionNames(),
+					config = ns.app.optionsWindow.getOptions(),
+					dx = dimConf.data.dimensionName,
+					co = dimConf.category.dimensionName,
+					nameDimArrayMap = {};
 
                 config.type = dv.viewport.chartType.getChartType();
 
@@ -1595,37 +1595,40 @@ Ext.onReady( function() {
                     }
                 }
 
-                nameDimArrayMap[dx] = Ext.Array.clean([].concat(
-                    nameDimArrayMap[dimConf.indicator.objectName],
-                    nameDimArrayMap[dimConf.dataElement.objectName],
-                    nameDimArrayMap[dimConf.operand.objectName],
-                    nameDimArrayMap[dimConf.dataSet.objectName]
-                ));
+				nameDimArrayMap[dx] = Ext.Array.clean([].concat(
+					nameDimArrayMap[dimConf.indicator.objectName] || [],
+					nameDimArrayMap[dimConf.dataElement.objectName] || [],
+					nameDimArrayMap[dimConf.operand.objectName] || [],
+					nameDimArrayMap[dimConf.dataSet.objectName] || []
+				));
 
-                // Columns, rows, filters
-                for (var i = 0, nameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], dimNames; i < nameArrays.length; i++) {
-                    dimNames = nameArrays[i];
+				// columns, rows, filters
+				for (var i = 0, nameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], dimNames; i < nameArrays.length; i++) {
+					dimNames = nameArrays[i];
 
-                    for (var j = 0, dimName, dim; j < dimNames.length; j++) {
-                        dimName = dimNames[j];
+					for (var j = 0, dimName, dim; j < dimNames.length; j++) {
+						dimName = dimNames[j];
 
-                        if (dimName === dx && nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
-                            for (var k = 0; k < nameDimArrayMap[dx].length; k++) {
-                                axes[i].push(Ext.clone(nameDimArrayMap[dx][k]));
-                            }
-                        }
-                        else if (nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
-                            for (var k = 0; k < nameDimArrayMap[dimName].length; k++) {
-                                axes[i].push(Ext.clone(nameDimArrayMap[dimName][k]));
-                            }
-                        }
-                    }
-                }
+						if (dimName === co) {
+							axes[i].push({
+								dimension: co,
+								items: []
+							});
+						}
+						else if (dimName === dx && nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
+							for (var k = 0; k < nameDimArrayMap[dx].length; k++) {
+								axes[i].push(Ext.clone(nameDimArrayMap[dx][k]));
+							}
+						}
+						else if (nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
+							for (var k = 0; k < nameDimArrayMap[dimName].length; k++) {
+								axes[i].push(Ext.clone(nameDimArrayMap[dimName][k]));
+							}
+						}
+					}
+				}
 
-                config.userOrganisationUnit = dv.viewport.userOrganisationUnit.getValue();
-                config.userOrganisationUnitChildren = dv.viewport.userOrganisationUnitChildren.getValue();
-
-                return config;
+				return config;
             };
 
             web.chart.loadChart = function(id) {
