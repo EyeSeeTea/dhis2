@@ -975,8 +975,7 @@ Ext.onReady( function() {
 				combo = Ext.create('Ext.form.field.ComboBox', {
 					fieldLabel: isPublicAccess ? NS.i18n.public_access : obj.name,
 					labelStyle: 'color:#333',
-					cls: 'dv-combo',
-					fieldStyle: 'padding-left:5px',
+					cls: 'ns-combo',
 					width: 380,
 					labelWidth: 250,
 					queryMode: 'local',
@@ -1038,8 +1037,8 @@ Ext.onReady( function() {
 					publicAccess: publicGroup.down('combobox').getValue(),
 					externalAccess: externalAccess ? externalAccess.getValue() : false,
 					user: {
-						id: dv.init.user.id,
-						name: dv.init.user.name
+						id: ns.core.init.user.id,
+						name: ns.core.init.user.name
 					}
 				}
 			};
@@ -1060,7 +1059,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: dv.init.contextPath + '/api/sharing/search',
+				url: ns.core.init.contextPath + '/api/sharing/search',
 				reader: {
 					type: 'json',
 					root: 'userGroups'
@@ -1162,10 +1161,10 @@ Ext.onReady( function() {
 			bbar: [
 				'->',
 				{
-					text: 'Save',
+					text: NS.i18n.save,
 					handler: function() {
 						Ext.Ajax.request({
-							url: dv.init.contextPath + '/api/sharing?type=chart&id=' + sharing.object.id,
+							url: ns.core.init.contextPath + '/api/sharing?type=reportTable&id=' + sharing.object.id,
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json'
@@ -1179,17 +1178,17 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function(w) {
-					var pos = dv.viewport.favoriteWindow.getPosition();
+					var pos = ns.app.favoriteWindow.getPosition();
 					w.setPosition(pos[0] + 5, pos[1] + 5);
 
 					if (!w.hasDestroyOnBlurHandler) {
-						dv.util.window.addDestroyOnBlurHandler(w);
+						ns.core.web.window.addDestroyOnBlurHandler(w);
 					}
 
-					dv.viewport.favoriteWindow.destroyOnBlur = false;
+					ns.app.favoriteWindow.destroyOnBlur = false;
 				},
 				destroy: function() {
-					dv.viewport.favoriteWindow.destroyOnBlur = true;
+					ns.app.favoriteWindow.destroyOnBlur = true;
 				}
 			}
 		});
@@ -1203,9 +1202,9 @@ Ext.onReady( function() {
 			shareButton,
 			window;
 
-		if (Ext.isObject(dv.favorite) && Ext.isString(dv.favorite.id)) {
+		if (Ext.isString(ns.app.layout.id)) {
 			textArea = Ext.create('Ext.form.field.TextArea', {
-				cls: 'dv-textarea',
+				cls: 'ns-textarea',
 				height: 130,
 				fieldStyle: 'padding-left: 4px; padding-top: 3px',
 				emptyText: NS.i18n.write_your_interpretation,
@@ -1219,11 +1218,11 @@ Ext.onReady( function() {
 
 			linkPanel = Ext.create('Ext.panel.Panel', {
 				html: function() {
-					var chartUrl = dv.init.contextPath + '/dhis-web-visualizer/app/index.html?id=' + dv.favorite.id,
-						apiUrl = dv.init.contextPath + '/api/charts/' + dv.favorite.id + '/data',
+					var url = ns.core.init.contextPath + '/dhis-web-visualizer/app/index.html?id=' + ns.app.layout.id,
+						apiUrl = ns.core.init.contextPath + '/api/charts/' + ns.app.layout.id + '/data.html',
 						html = '';
 
-					html += '<div><b>Chart link: </b><span class="user-select"><a href="' + chartUrl + '" target="_blank">' + chartUrl + '</a></span></div>';
+					html += '<div><b>Pivot link: </b><span class="user-select"><a href="' + url + '" target="_blank">' + url + '</a></span></div>';
 					html += '<div style="padding-top:3px"><b>API link: </b><span class="user-select"><a href="' + apiUrl + '" target="_blank">' + apiUrl + '</a></span></div>';
 					return html;
 				}(),
@@ -1240,15 +1239,14 @@ Ext.onReady( function() {
 				handler: function() {
 					if (textArea.getValue()) {
 						Ext.Ajax.request({
-							url: dv.init.contextPath + dv.conf.finals.ajax.path_api + 'interpretations/chart/' + dv.favorite.id,
+							url: ns.core.init.contextPath + '/api/interpretations/chart/' + ns.app.layout.id,
 							method: 'POST',
 							params: textArea.getValue(),
 							headers: {'Content-Type': 'text/html'},
 							success: function() {
 								textArea.reset();
-								dv.viewport.interpretationButton.disable();
+								ns.app.interpretationButton.disable();
 								window.hide();
-								//NS.util.notification.interpretation(NS.i18n.interpretation_was_shared + '.');
 							}
 						});
 					}
@@ -1256,20 +1254,20 @@ Ext.onReady( function() {
 			});
 
 			window = Ext.create('Ext.window.Window', {
-				title: dv.favorite.name,
+				title: ns.app.layout.name,
 				layout: 'fit',
-				//iconCls: 'dv-window-title-interpretation',
+				//iconCls: 'ns-window-title-interpretation',
 				width: 500,
 				bodyStyle: 'padding:5px 5px 3px; background-color:#fff',
-				resizable: true,
-				modal: true,
+				resizable: false,
 				destroyOnBlur: true,
+				modal: true,
 				items: [
 					textArea,
 					linkPanel
 				],
 				bbar: {
-					cls: 'dv-toolbar-bbar',
+					cls: 'ns-toolbar-bbar',
 					defaults: {
 						height: 24
 					},
@@ -1280,19 +1278,19 @@ Ext.onReady( function() {
 				},
 				listeners: {
 					show: function(w) {
-						dv.util.window.setAnchorPosition(w, dv.viewport.interpretationButton);
+						ns.core.web.window.setAnchorPosition(w, ns.app.interpretationButton);
 
 						document.body.oncontextmenu = true;
 
 						if (!w.hasDestroyOnBlurHandler) {
-							dv.util.window.addDestroyOnBlurHandler(w);
+							ns.core.web.window.addDestroyOnBlurHandler(w);
 						}
 					},
 					hide: function() {
 						document.body.oncontextmenu = function(){return false;};
 					},
 					destroy: function() {
-						dv.viewport.interpretationWindow = null;
+						ns.app.interpretationWindow = null;
 					}
 				}
 			});
