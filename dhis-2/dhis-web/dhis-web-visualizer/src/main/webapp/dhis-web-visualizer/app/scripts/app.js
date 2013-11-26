@@ -1590,7 +1590,7 @@ Ext.onReady( function() {
 					co = dimConf.category.dimensionName,
 					nameDimArrayMap = {};
 
-                config.type = dv.viewport.chartType.getChartType();
+                config.type = ns.app.viewport.chartType.getChartType();
 
                 config.columns = [];
                 config.rows = [];
@@ -1720,8 +1720,8 @@ Ext.onReady( function() {
 						chart = ns.core.web.chart.createChart(xResponse, xLayout);
 
 						// update viewport
-						dv.viewport.centerRegion.removeAll(true);
-						dv.viewport.centerRegion.add(chart);
+						ns.app.centerRegion.removeAll(true);
+						ns.app.centerRegion.add(chart);
 
 						// after render
 						ns.app.layout = layout;
@@ -1744,7 +1744,7 @@ Ext.onReady( function() {
 						}
 
 						// Hide mask
-						//util.mask.hideMask(dv.viewport.centerRegion);
+						//util.mask.hideMask(ns.app.centerRegion);
 					}
 				});
 			};
@@ -1994,7 +1994,16 @@ Ext.onReady( function() {
 						];
 
 					return data.concat(Ext.clone(ns.core.init.dimensions));
-				}()
+				}(),
+				getDimensionNames: function() {
+					var dimensionNames = [];
+
+					this.each(function(r) {
+						dimensionNames.push(r.data.id);
+					});
+
+					return Ext.clone(dimensionNames);
+				}
 			});
 		};
 
@@ -4194,7 +4203,7 @@ Ext.onReady( function() {
 
 		// viewport
 		update = function() {
-			var config = ns.core.web.pivot.getLayoutConfig(),
+			var config = ns.core.web.chart.getLayoutConfig(),
 				layout = ns.core.api.layout.Layout(config);
 
 			if (!layout) {
@@ -4891,6 +4900,7 @@ Ext.onReady( function() {
 
 		viewport = Ext.create('Ext.container.Viewport', {
 			layout: 'border',
+			chartType: chartType,
 			period: period,
 			treePanel: treePanel,
 			setGui: setGui,

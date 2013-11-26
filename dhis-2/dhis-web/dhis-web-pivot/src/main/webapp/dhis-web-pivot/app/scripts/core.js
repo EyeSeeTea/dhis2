@@ -789,7 +789,7 @@ Ext.onReady( function() {
 					name = '';
 
 				if (service.layout.isHierarchy(layout, response, id)) {
-					var a = Ext.clean(metaData.ouHierarchy[id].split('/'));
+					var a = Ext.Array.clean(metaData.ouHierarchy[id].split('/'));
 					a.shift();
 
 					for (var i = 0; i < a.length; i++) {

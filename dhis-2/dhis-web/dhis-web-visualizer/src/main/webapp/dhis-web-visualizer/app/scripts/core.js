@@ -4,8 +4,8 @@ Ext.onReady( function() {
 	Ext.Ajax.method = 'GET';
 
 	// namespace
-	PT = {};
-	var NS = PT;
+	DV = {};
+	var NS = DV;
 
 	NS.instances = [];
 	NS.i18n = {};
@@ -426,11 +426,11 @@ Ext.onReady( function() {
                     var objectNames = [],
 						dimConf = conf.finals.dimension;
 
-                    // Config must be an object
-                    if (!(config && Ext.isObject(config))) {
-                        console.log(dv.init.el + ': Layout config is not an object');
-                        return;
-                    }
+					// config must be an object
+					if (!(config && Ext.isObject(config))) {
+						alert('Layout: config is not an object (' + init.el + ')');
+						return;
+					}
 
                     config.columns = getValidatedDimensionArray(config.columns);
                     config.rows = getValidatedDimensionArray(config.rows);
@@ -783,7 +783,7 @@ Ext.onReady( function() {
 					name = '';
 
 				if (service.layout.isHierarchy(layout, response, id)) {
-					var a = Ext.clean(metaData.ouHierarchy[id].split('/'));
+					var a = Ext.Array.clean(metaData.ouHierarchy[id].split('/'));
 					a.shift();
 
 					for (var i = 0; i < a.length; i++) {
@@ -1002,7 +1002,7 @@ Ext.onReady( function() {
             };
 
 			service.layout.getSyncronizedXLayout = function(xLayout, response) {
-				var dimensions = [].concat(xLayout.columns, xLayout.rows, xLayout.filters),
+				var dimensions = Ext.Array.clean([].concat(xLayout.columns || [], xLayout.rows || [], xLayout.filters || [])),
 					xOuDimension = xLayout.objectNameDimensionsMap[dimConf.organisationUnit.objectName],
 					isUserOrgunit = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT'),
 					isUserOrgunitChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_CHILDREN'),
@@ -1047,24 +1047,24 @@ Ext.onReady( function() {
 
 							if (isUserOrgunit) {
 								userOu = [{
-									id: dv.init.user.ou,
-									name: response.metaData.names[dv.init.user.ou]
+									id: init.user.ou,
+									name: service.layout.getItemName(xLayout, response, init.user.ou, false)
 								}];
 							}
 							if (isUserOrgunitChildren) {
 								userOuc = [];
 
-								for (var j = 0; j < dv.init.user.ouc.length; j++) {
+								for (var j = 0; j < init.user.ouc.length; j++) {
 									userOuc.push({
-										id: dv.init.user.ouc[j],
-										name: response.metaData.names[dv.init.user.ouc[j]]
+										id: init.user.ouc[j],
+										name: service.layout.getItemName(xLayout, response, init.user.ouc[j], false)
 									});
 								}
 
-								userOuc = dv.util.array.sortObjectsByString(userOuc);
+								support.prototype.array.sort(userOuc);
 							}
 							if (isUserOrgunitGrandChildren) {
-								var userOuOuc = [].concat(dv.init.user.ou, dv.init.user.ouc),
+								var userOuOuc = [].concat(init.user.ou, init.user.ouc),
 									responseOu = response.metaData[ou];
 
 								userOugc = [];
@@ -1075,31 +1075,31 @@ Ext.onReady( function() {
 									if (!Ext.Array.contains(userOuOuc, id)) {
 										userOugc.push({
 											id: id,
-											name: response.metaData.names[id]
+											name: service.layout.getItemName(xLayout, response, id, false)
 										});
 									}
 								}
 
-								userOugc = dv.util.array.sortObjectsByString(userOugc);
+								support.prototype.array.sort(userOugc);
 							}
 
 							dim.items = [].concat(userOu || [], userOuc || [], userOugc || []);
 						}
 						else if (isLevel || isGroup) {
-							for (var j = 0, responseOu = response.metaData[ou], id; j < responseOu.length; j++) {
-								id = responseOu[j];
+								for (var j = 0, responseOu = response.metaData[ou], id; j < responseOu.length; j++) {
+									id = responseOu[j];
 
-								dim.items.push({
-									id: id,
-									name: response.metaData.names[id]
-								});
+									dim.items.push({
+										id: id,
+										name: service.layout.getItemName(xLayout, response, id, false)
+									});
+								}
+
+								support.prototype.array.sort(dim.items);
 							}
-
-							dim.items = dv.util.array.sortObjectsByString(dim.items);
-						}
-						else {
-							dim.items = Ext.clone(xLayout.dimensionNameItemsMap[dim.dimensionName]);
-						}
+							else {
+								dim.items = Ext.clone(xLayout.dimensionNameItemsMap[dim.dimensionName]);
+							}
 					}
 					else {
 						// Items: get ids from metadata -> items
@@ -1120,10 +1120,10 @@ Ext.onReady( function() {
 				}
 
 				// Re-layout
-				layout = dv.api.layout.Layout(xLayout);
+				layout = api.layout.Layout(xLayout);
 
 				if (layout) {
-					dimensions = [].concat(layout.columns || [], layout.rows || [], layout.filters || []);
+					dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || []));
 
 					for (var i = 0, idNameMap = response.metaData.names, dimItems; i < dimensions.length; i++) {
 						dimItems = dimensions[i].items;
@@ -1139,7 +1139,7 @@ Ext.onReady( function() {
 						}
 					}
 
-					return engine.getExtendedLayout(layout);
+					return service.layout.getExtendedLayout(layout);
 				}
 
 				return null;
@@ -1832,7 +1832,7 @@ Ext.onReady( function() {
 
                     width = (numberOfItems * itemLength) + (numberOfChars * charLength);
 
-                    if (width > dv.viewport.centerRegion.getWidth() - 50) {
+                    if (width > ns.app.centerRegion.getWidth() - 50) {
                         isVertical = true;
                         position = 'right';
                     }
@@ -1872,7 +1872,7 @@ Ext.onReady( function() {
                         text = xLayout.title;
                     }
 
-                    fontSize = (dv.viewport.centerRegion.getWidth() / text.length) < 11.6 ? 13 : 18;
+                    fontSize = (ns.app.centerRegion.getWidth() / text.length) < 11.6 ? 13 : 18;
 
                     return Ext.create('Ext.draw.Sprite', {
                         type: 'text',
@@ -1886,11 +1886,11 @@ Ext.onReady( function() {
 
                 getDefaultChartSizeHandler = function() {
                     return function() {
-console.log("w", dv.viewport.centerRegion.getWidth());
-console.log("h", dv.viewport.centerRegion.getHeight());
+console.log("w", ns.app.centerRegion.getWidth());
+console.log("h", ns.app.centerRegion.getHeight());
                         this.animate = false;
-                        this.setWidth(dv.viewport.centerRegion.getWidth());
-                        this.setHeight(dv.viewport.centerRegion.getHeight() - 25);
+                        this.setWidth(ns.app.centerRegion.getWidth());
+                        this.setHeight(ns.app.centerRegion.getHeight() - 25);
                         this.animate = true;
                     };
                 };
@@ -1929,8 +1929,8 @@ console.log("h", dv.viewport.centerRegion.getHeight());
                             animate: true,
                             shadow: false,
                             insetPadding: 35,
-                            width: dv.viewport.centerRegion.getWidth(),
-                            height: dv.viewport.centerRegion.getHeight() - 25,
+                            width: ns.app.centerRegion.getWidth(),
+                            height: ns.app.centerRegion.getHeight() - 25,
                             theme: theme || 'dv1'
                         };
 
@@ -2303,12 +2303,12 @@ console.log("h", dv.viewport.centerRegion.getHeight());
                     chart = getDefaultChart(store, axes, series, xResponse, xLayout, 'Category2');
 
                     chart.insetPadding = 40;
-                    chart.height = dv.viewport.centerRegion.getHeight() - 80;
+                    chart.height = ns.app.centerRegion.getHeight() - 80;
 
                     chart.setChartSize = function() {
                         this.animate = false;
-                        this.setWidth(dv.viewport.centerRegion.getWidth());
-                        this.setHeight(dv.viewport.centerRegion.getHeight() - 80);
+                        this.setWidth(ns.app.centerRegion.getWidth());
+                        this.setHeight(ns.app.centerRegion.getHeight() - 80);
                         this.animate = true;
                     };
 
