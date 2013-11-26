@@ -54,10 +54,9 @@ Ext.onReady( function() {
 			window;
 
 		showTrendLine = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: DV.i18n.trend_line,
+			boxLabel: NS.i18n.trend_line,
 			style: 'margin-bottom:6px'
 		});
-		dv.viewport.showTrendLine = showTrendLine;
 
 		targetLineValue = Ext.create('Ext.form.field.Number', {
 			//cls: 'gis-numberfield',
@@ -69,13 +68,12 @@ Ext.onReady( function() {
 				}
 			}
 		});
-		dv.viewport.targetLineValue = targetLineValue;
 
 		targetLineTitle = Ext.create('Ext.form.field.Text', {
 			//cls: 'dv-textfield-alt1',
 			style: 'margin-left:2px; margin-bottom:2px',
 			fieldStyle: 'padding-left:3px',
-			emptyText: DV.i18n.target,
+			emptyText: NS.i18n.target,
 			width: 120,
 			maxLength: 100,
 			enforceMaxLength: true,
@@ -84,7 +82,6 @@ Ext.onReady( function() {
 				this.setDisabled(!targetLineValue.getValue() && !Ext.isNumber(targetLineValue.getValue()));
 			}
 		});
-		dv.viewport.targetLineTitle = targetLineTitle;
 
 		baseLineValue = Ext.create('Ext.form.field.Number', {
 			//cls: 'gis-numberfield',
@@ -96,13 +93,12 @@ Ext.onReady( function() {
 				}
 			}
 		});
-		dv.viewport.baseLineValue = baseLineValue;
 
 		baseLineTitle = Ext.create('Ext.form.field.Text', {
 			//cls: 'dv-textfield-alt1',
 			style: 'margin-left:2px',
 			fieldStyle: 'padding-left:3px',
-			emptyText: DV.i18n.base,
+			emptyText: NS.i18n.base,
 			width: 120,
 			maxLength: 100,
 			enforceMaxLength: true,
@@ -111,36 +107,22 @@ Ext.onReady( function() {
 				this.setDisabled(!baseLineValue.getValue() && !Ext.isNumber(baseLineValue.getValue()));
 			}
 		});
-		dv.viewport.baseLineTitle = baseLineTitle;
 
 		showValues = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: DV.i18n.show_values,
+			boxLabel: NS.i18n.show_values,
 			style: 'margin-bottom:4px',
 			checked: true
 		});
-		dv.viewport.showValues = showValues;
 
 		hideLegend = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: DV.i18n.hide_legend,
+			boxLabel: NS.i18n.hide_legend,
 			style: 'margin-bottom:4px'
 		});
-		dv.viewport.hideLegend = hideLegend;
-
-		hideTitle = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: DV.i18n.hide_chart_title,
-			style: 'margin-bottom:7px',
-			listeners: {
-				change: function() {
-					title.xable();
-				}
-			}
-		});
-		dv.viewport.hideTitle = hideTitle;
 
 		title = Ext.create('Ext.form.field.Text', {
 			style: 'margin-bottom:2px; margin-left:2px',
 			width: 310,
-			fieldLabel: DV.i18n.chart_title,
+			fieldLabel: NS.i18n.chart_title,
 			labelStyle: 'color:#333',
 			labelWidth: 123,
 			maxLength: 100,
@@ -149,29 +131,26 @@ Ext.onReady( function() {
 				this.setDisabled(hideTitle.getValue());
 			}
 		});
-		dv.viewport.title = title;
 
 		domainAxisTitle = Ext.create('Ext.form.field.Text', {
 			style: 'margin-bottom:2px; margin-left:2px',
 			width: 310,
-			fieldLabel: DV.i18n.domain_axis_label,
+			fieldLabel: NS.i18n.domain_axis_label,
 			labelStyle: 'color:#333',
 			labelWidth: 123,
 			maxLength: 100,
 			enforceMaxLength: true
 		});
-		dv.viewport.domainAxisTitle = domainAxisTitle;
 
 		rangeAxisTitle = Ext.create('Ext.form.field.Text', {
 			style: 'margin-bottom:0; margin-left:2px',
 			width: 310,
-			fieldLabel: DV.i18n.range_axis_label,
+			fieldLabel: NS.i18n.range_axis_label,
 			labelStyle: 'color:#333',
 			labelWidth: 123,
 			maxLength: 100,
 			enforceMaxLength: true
 		});
-		dv.viewport.rangeAxisTitle = rangeAxisTitle;
 
         data = {
 			xtype: 'container',
@@ -224,7 +203,7 @@ Ext.onReady( function() {
 		};
 
 		window = Ext.create('Ext.window.Window', {
-			title: DV.i18n.table_options,
+			title: NS.i18n.table_options,
 			bodyStyle: 'background-color:#fff; padding:8px 8px 6px',
 			closeAction: 'hide',
 			autoShow: true,
@@ -310,7 +289,7 @@ Ext.onReady( function() {
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
 					style: 'margin-bottom:6px',
-					html: DV.i18n.data
+					html: NS.i18n.data
 				},
 				data,
 				{
@@ -319,35 +298,56 @@ Ext.onReady( function() {
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
 					style: 'margin-bottom:6px',
-					html: DV.i18n.style
+					html: NS.i18n.style
 				},
 				style
 			],
 			bbar: [
 				'->',
 				{
-					text: DV.i18n.hide,
+					text: NS.i18n.hide,
 					handler: function() {
 						window.hide();
 					}
 				},
 				{
-					text: '<b>' + DV.i18n.update + '</b>',
+					text: '<b>' + NS.i18n.update + '</b>',
 					handler: function() {
-						dv.viewport.updateViewport();
+						var config = ns.core.web.pivot.getLayoutConfig(),
+							layout = ns.core.api.layout.Layout(config);
+
+						if (!layout) {
+							return;
+						}
+
+						ns.core.web.pivot.createChart(layout, false);
+
 						window.hide();
 					}
 				}
 			],
 			listeners: {
 				show: function(w) {
-					if (dv.viewport.optionsButton.rendered) {
-                        dv.util.window.setAnchorPosition(w, dv.viewport.optionsButton);
+					if (ns.app.optionsButton.rendered) {
+						ns.core.web.window.setAnchorPosition(w, ns.app.optionsButton);
 
-                        if (!w.hasHideOnBlurHandler) {
-                            dv.util.window.addHideOnBlurHandler(w);
-                        }
-                    }
+						if (!w.hasHideOnBlurHandler) {
+							ns.core.web.window.addHideOnBlurHandler(w);
+						}
+					}
+
+					// cmp
+					w.showTrendLine = showTrendLine;
+					w.targetLineValue = targetLineValue;
+					w.targetLineTitle = targetLineTitle;
+					w.baseLineValue = baseLineValue;
+					w.baseLineTitle = baseLineTitle;
+					w.showValues = showValues;
+					w.hideLegend = hideLegend;
+					w.hideTitle = hideTitle;
+					w.title = title;
+					w.domainAxisTitle = domainAxisTitle;
+					w.rangeAxisTitle = rangeAxisTitle;
 				}
 			}
 		});
@@ -385,7 +385,7 @@ Ext.onReady( function() {
 			windowWidth = 500,
 			windowCmpWidth = windowWidth - 22;
 
-		dv.store.chart.on('load', function(store, records) {
+		ns.app.stores.chart.on('load', function(store, records) {
 			var pager = store.proxy.reader.jsonData.pager;
 
 			info.setText('Page ' + pager.page + ' of ' + pager.pageCount);
@@ -406,32 +406,31 @@ Ext.onReady( function() {
 			var favorite,
 				dimensions;
 
-			if (dv.layout) {
-				favorite = Ext.clone(dv.layout);
-				dimensions = [].concat(favorite.columns, favorite.rows, favorite.filters);
+			if (ns.app.layout) {
+				favorite = Ext.clone(ns.app.layout);
+				dimensions = [].concat(favorite.columns || [], favorite.rows || [], favorite.filters || []);
 
-				// Server sync: property names
-				favorite.showData = favorite.showValues;
-				delete favorite.showValues;
+				// Server sync
+				favorite.totals = favorite.showTotals;
+				delete favorite.showTotals;
 
-				favorite.regression = favorite.showTrendLine;
-				delete favorite.showTrendLine;
+				favorite.subtotals = favorite.showSubTotals;
+				delete favorite.showSubTotals;
 
-				favorite.targetLineLabel = favorite.targetLineTitle;
-				delete favorite.targetLineTitle;
+				favorite.reportParams = {
+					paramReportingPeriod: favorite.reportingPeriod,
+					paramOrganisationUnit: favorite.organisationUnit,
+					paramParentOrganisationUnit: favorite.parentOrganisationUnit
+				};
+				delete favorite.reportingPeriod;
+				delete favorite.organisationUnit;
+				delete favorite.parentOrganisationUnit;
 
-				favorite.baseLineLabel = favorite.baseLineTitle;
-				delete favorite.baseLineTitle;
-
-				favorite.domainAxisLabel = favorite.domainAxisTitle;
-				delete favorite.domainAxisTitle;
-
-				favorite.rangeAxisLabel = favorite.rangeAxisTitle;
-				delete favorite.rangeAxisTitle;
+				delete favorite.parentGraphMap;
 
 				// Replace operand id characters
 				for (var i = 0; i < dimensions.length; i++) {
-					if (dimensions[i].dimension === dv.conf.finals.dimension.operand.objectName) {
+					if (dimensions[i].dimension === ns.core.conf.finals.dimension.operand.objectName) {
 						for (var j = 0; j < dimensions[i].items.length; j++) {
 							dimensions[i].items[j].id = dimensions[i].items[j].id.replace('-', '.');
 						}
@@ -444,7 +443,7 @@ Ext.onReady( function() {
 
 		NameWindow = function(id) {
 			var window,
-				record = dv.store.chart.getById(id);
+				record = ns.app.stores.chart.getById(id);
 
 			nameTextfield = Ext.create('Ext.form.field.Text', {
 				height: 26,
@@ -461,28 +460,36 @@ Ext.onReady( function() {
 			});
 
 			createButton = Ext.create('Ext.button.Button', {
-				text: DV.i18n.create,
+				text: NS.i18n.create,
 				handler: function() {
 					var favorite = getBody();
 					favorite.name = nameTextfield.getValue();
 
+					//tmp
+					//delete favorite.legendSet;
+
 					if (favorite && favorite.name) {
 						Ext.Ajax.request({
-							url: dv.init.contextPath + '/api/charts/',
+							url: ns.core.init.contextPath + '/api/charts/',
 							method: 'POST',
 							headers: {'Content-Type': 'application/json'},
 							params: Ext.encode(favorite),
 							failure: function(r) {
-								dv.util.mask.hideMask(dv.viewport.centerRegion);
+								ns.core.web.mask.show();
 								alert(r.responseText);
 							},
 							success: function(r) {
-								favorite.id = r.getAllResponseHeaders().location.split('/').pop();
-								dv.favorite = favorite;
+								var id = r.getAllResponseHeaders().location.split('/').pop();
 
-								dv.viewport.interpretationButton.enable();
+								ns.app.layout.id = id;
+								ns.app.xLayout.id = id;
 
-								dv.store.chart.loadStore();
+								ns.app.layout.name = name;
+								ns.app.xLayout.name = name;
+
+								ns.app.stores.chart.loadStore();
+
+								ns.app.interpretationButton.enable();
 
 								window.destroy();
 							}
@@ -492,34 +499,39 @@ Ext.onReady( function() {
 			});
 
 			updateButton = Ext.create('Ext.button.Button', {
-				text: DV.i18n.update,
+				text: NS.i18n.update,
 				handler: function() {
 					var name = nameTextfield.getValue(),
-						favorite;
+						chart;
 
 					if (id && name) {
 						Ext.Ajax.request({
-							url: dv.init.contextPath + '/api/charts/' + id + '.json?viewClass=dimensional&links=false',
+							url: ns.core.init.contextPath + '/api/charts/' + id + '.json?viewClass=dimensional&links=false',
 							method: 'GET',
 							failure: function(r) {
-								dv.util.mask.hideMask(dv.viewport.centerRegion);
+								ns.core.web.mask.show();
 								alert(r.responseText);
 							},
 							success: function(r) {
-								favorite = Ext.decode(r.responseText);
-								favorite.name = name;
+								chart = Ext.decode(r.responseText);
+								chart.name = name;
 
 								Ext.Ajax.request({
-									url: dv.init.contextPath + '/api/charts/' + favorite.id,
+									url: ns.core.init.contextPath + '/api/charts/' + chart.id,
 									method: 'PUT',
 									headers: {'Content-Type': 'application/json'},
-									params: Ext.encode(favorite),
+									params: Ext.encode(chart),
 									failure: function(r) {
-										dv.util.mask.hideMask(dv.viewport.centerRegion);
+										ns.core.web.mask.show();
 										alert(r.responseText);
 									},
 									success: function(r) {
-										dv.store.chart.loadStore();
+										if (ns.app.layout && ns.app.layout.id && ns.app.layout.id === id) {
+											ns.app.layout.name = name;
+											ns.app.xLayout.name = name;
+										}
+
+										ns.app.stores.chart.loadStore();
 										window.destroy();
 									}
 								});
@@ -530,7 +542,7 @@ Ext.onReady( function() {
 			});
 
 			cancelButton = Ext.create('Ext.button.Button', {
-				text: DV.i18n.cancel,
+				text: NS.i18n.cancel,
 				handler: function() {
 					window.destroy();
 				}
@@ -538,7 +550,7 @@ Ext.onReady( function() {
 
 			window = Ext.create('Ext.window.Window', {
 				title: id ? 'Rename favorite' : 'Create new favorite',
-				//iconCls: 'dv-window-title-icon-favorite',
+				//iconCls: 'ns-window-title-icon-favorite',
 				bodyStyle: 'padding:2px; background:#fff',
 				resizable: false,
 				modal: true,
@@ -551,18 +563,18 @@ Ext.onReady( function() {
 				],
 				listeners: {
 					show: function(w) {
-						dv.util.window.setAnchorPosition(w, addButton);
+						ns.core.web.window.setAnchorPosition(w, addButton);
 
 						if (!w.hasDestroyBlurHandler) {
-							dv.util.window.addDestroyOnBlurHandler(w);
+							ns.core.web.window.addDestroyOnBlurHandler(w);
 						}
 
-						dv.viewport.favoriteWindow.destroyOnBlur = false;
+						ns.app.favoriteWindow.destroyOnBlur = false;
 
 						nameTextfield.focus(false, 500);
 					},
 					destroy: function() {
-						dv.viewport.favoriteWindow.destroyOnBlur = true;
+						ns.app.favoriteWindow.destroyOnBlur = true;
 					}
 				}
 			});
@@ -571,12 +583,12 @@ Ext.onReady( function() {
 		};
 
 		addButton = Ext.create('Ext.button.Button', {
-			text: DV.i18n.add_new,
+			text: NS.i18n.add_new,
 			width: 67,
 			height: 26,
 			style: 'border-radius: 1px;',
 			menu: {},
-			disabled: !Ext.isObject(dv.xLayout),
+			disabled: !Ext.isObject(ns.app.xLayout),
 			handler: function() {
 				nameWindow = new NameWindow(null, 'create');
 				nameWindow.show();
@@ -587,7 +599,7 @@ Ext.onReady( function() {
 			width: windowCmpWidth - addButton.width - 11,
 			height: 26,
 			fieldStyle: 'padding-right: 0; padding-left: 5px; border-radius: 1px; border-color: #bbb; font-size:11px',
-			emptyText: DV.i18n.search_for_favorites,
+			emptyText: NS.i18n.search_for_favorites,
 			enableKeyEvents: true,
 			currentValue: '',
 			listeners: {
@@ -596,8 +608,8 @@ Ext.onReady( function() {
 						this.currentValue = this.getValue();
 
 						var value = this.getValue(),
-							url = value ? dv.init.contextPath + '/api/charts/query/' + value + '.json?viewClass=sharing&links=false' : null,
-							store = dv.store.chart;
+							url = value ? ns.core.init.contextPath + '/api/charts/query/' + value + '.json?viewClass=sharing&links=false' : null,
+							store = ns.app.stores.chart;
 
 						store.page = 1;
 						store.loadStore(url);
@@ -607,11 +619,11 @@ Ext.onReady( function() {
 		});
 
 		prevButton = Ext.create('Ext.button.Button', {
-			text: DV.i18n.prev,
+			text: NS.i18n.prev,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? dv.init.contextPath + '/api/charts/query/' + value + '.json?viewClass=sharing&links=false' : null,
-					store = dv.store.chart;
+					url = value ? ns.core.init.contextPath + '/api/charts/query/' + value + '.json?viewClass=sharing&links=false' : null,
+					store = ns.app.stores.chart;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
 				store.loadStore(url);
@@ -619,11 +631,11 @@ Ext.onReady( function() {
 		});
 
 		nextButton = Ext.create('Ext.button.Button', {
-			text: DV.i18n.next,
+			text: NS.i18n.next,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? dv.init.contextPath + '/api/charts/query/' + value + '.json?viewClass=sharing&links=false' : null,
-					store = dv.store.chart;
+					url = value ? ns.core.init.contextPath + '/api/charts/query/' + value + '.json?viewClass=sharing&links=false' : null,
+					store = ns.app.stores.chart;
 
 				store.page = store.page + 1;
 				store.loadStore(url);
@@ -631,13 +643,13 @@ Ext.onReady( function() {
 		});
 
 		info = Ext.create('Ext.form.Label', {
-			cls: 'dv-label-info',
+			cls: 'ns-label-info',
 			width: 300,
 			height: 22
 		});
 
 		grid = Ext.create('Ext.grid.Panel', {
-			cls: 'dv-grid',
+			cls: 'ns-grid',
 			scroll: false,
 			hideHeaders: true,
 			columns: [
@@ -654,7 +666,7 @@ Ext.onReady( function() {
 								element.addClsOnOver('link');
 								element.load = function() {
 									favoriteWindow.hide();
-									dv.engine.loadChart(record.data.id, dv, true, true);
+									ns.core.web.pivot.loadTable(record.data.id);
 								};
 								element.dom.setAttribute('onclick', 'Ext.get(this).load();');
 							}
@@ -671,7 +683,7 @@ Ext.onReady( function() {
 					width: 80,
 					items: [
 						{
-							iconCls: 'dv-grid-row-icon-edit',
+							iconCls: 'ns-grid-row-icon-edit',
 							getClass: function(value, metaData, record) {
 								return 'tooltip-favorite-edit' + (!record.data.access.update ? ' disabled' : '');
 							},
@@ -685,7 +697,7 @@ Ext.onReady( function() {
 							}
 						},
 						{
-							iconCls: 'dv-grid-row-icon-overwrite',
+							iconCls: 'ns-grid-row-icon-overwrite',
 							getClass: function(value, metaData, record) {
 								return 'tooltip-favorite-overwrite' + (!record.data.access.update ? ' disabled' : '');
 							},
@@ -695,7 +707,7 @@ Ext.onReady( function() {
 									favorite;
 
 								if (record.data.access.update) {
-									message = DV.i18n.overwrite_favorite + '?\n\n' + record.data.name;
+									message = NS.i18n.overwrite_favorite + '?\n\n' + record.data.name;
 									favorite = getBody();
 
 									if (favorite) {
@@ -703,26 +715,32 @@ Ext.onReady( function() {
 
 										if (confirm(message)) {
 											Ext.Ajax.request({
-												url: dv.init.contextPath + '/api/charts/' + record.data.id,
+												url: ns.core.init.contextPath + '/api/charts/' + record.data.id,
 												method: 'PUT',
 												headers: {'Content-Type': 'application/json'},
 												params: Ext.encode(favorite),
-												success: function() {
-													dv.favorite = favorite;
-													dv.viewport.interpretationButton.enable();
-													dv.store.chart.loadStore();
+												success: function(r) {
+													ns.app.layout.id = record.data.id;
+													ns.app.xLayout.id = record.data.id;
+
+													ns.app.layout.name = true;
+													ns.app.xLayout.name = true;
+
+													ns.app.stores.chart.loadStore();
+
+													ns.app.interpretationButton.enable();
 												}
 											});
 										}
 									}
 									else {
-										alert(DV.i18n.please_create_a_table_first);
+										alert(NS.i18n.please_create_a_table_first);
 									}
 								}
 							}
 						},
 						{
-							iconCls: 'dv-grid-row-icon-sharing',
+							iconCls: 'ns-grid-row-icon-sharing',
 							getClass: function(value, metaData, record) {
 								return 'tooltip-favorite-sharing' + (!record.data.access.manage ? ' disabled' : '');
 							},
@@ -731,15 +749,15 @@ Ext.onReady( function() {
 
 								if (record.data.access.manage) {
 									Ext.Ajax.request({
-										url: dv.init.contextPath + '/api/sharing?type=chart&id=' + record.data.id,
+										url: ns.core.init.contextPath + '/api/sharing?type=chart&id=' + record.data.id,
 										method: 'GET',
 										failure: function(r) {
-											dv.util.mask.hideMask(dv.viewport.centerRegion);
+											ns.app.viewport.mask.hide();
 											alert(r.responseText);
 										},
 										success: function(r) {
 											var sharing = Ext.decode(r.responseText),
-												window = DV.app.SharingWindow(sharing);
+												window = SharingWindow(sharing);
 											window.show();
 										}
 									});
@@ -747,7 +765,7 @@ Ext.onReady( function() {
 							}
 						},
 						{
-							iconCls: 'dv-grid-row-icon-delete',
+							iconCls: 'ns-grid-row-icon-delete',
 							getClass: function(value, metaData, record) {
 								return 'tooltip-favorite-delete' + (!record.data.access['delete'] ? ' disabled' : '');
 							},
@@ -756,14 +774,14 @@ Ext.onReady( function() {
 									message;
 
 								if (record.data.access['delete']) {
-									message = DV.i18n.delete_favorite + '?\n\n' + record.data.name;
+									message = NS.i18n.delete_favorite + '?\n\n' + record.data.name;
 
 									if (confirm(message)) {
 										Ext.Ajax.request({
-											url: dv.init.contextPath + '/api/charts/' + record.data.id,
+											url: ns.core.init.contextPath + '/api/charts/' + record.data.id,
 											method: 'DELETE',
 											success: function() {
-												dv.store.chart.loadStore();
+												ns.app.stores.chart.loadStore();
 											}
 										});
 									}
@@ -777,7 +795,7 @@ Ext.onReady( function() {
 					width: 6
 				}
 			],
-			store: dv.store.chart,
+			store: ns.app.stores.chart,
 			bbar: [
 				info,
 				'->',
@@ -785,16 +803,13 @@ Ext.onReady( function() {
 				nextButton
 			],
 			listeners: {
-				added: function() {
-					dv.viewport.favoriteGrid = this;
-				},
 				render: function() {
-					var size = Math.floor((dv.viewport.centerRegion.getHeight() - 155) / dv.conf.layout.grid_row_height);
+					var size = Math.floor((ns.app.centerRegion.getHeight() - 155) / ns.core.conf.layout.grid_row_height);
 					this.store.pageSize = size;
 					this.store.page = 1;
 					this.store.loadStore();
 
-					dv.store.chart.on('load', function() {
+					ns.app.stores.chart.on('load', function() {
 						if (this.isVisible()) {
 							this.fireEvent('afterrender');
 						}
@@ -813,7 +828,7 @@ Ext.onReady( function() {
 							var el = editArray[i];
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
-								html: DV.i18n.rename,
+								html: NS.i18n.rename,
 								'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
@@ -824,7 +839,7 @@ Ext.onReady( function() {
 							el = overwriteArray[i];
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
-								html: DV.i18n.overwrite,
+								html: NS.i18n.overwrite,
 								'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
@@ -835,7 +850,7 @@ Ext.onReady( function() {
 							el = sharingArray[i];
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
-								html: DV.i18n.share_with_other_people,
+								html: NS.i18n.share_with_other_people,
 								'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
@@ -846,7 +861,7 @@ Ext.onReady( function() {
 							el = deleteArray[i];
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
-								html: DV.i18n.delete_,
+								html: NS.i18n.delete_,
 								'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
@@ -870,8 +885,8 @@ Ext.onReady( function() {
 		});
 
 		favoriteWindow = Ext.create('Ext.window.Window', {
-			title: DV.i18n.manage_favorites,
-			//iconCls: 'dv-window-title-icon-favorite',
+			title: NS.i18n.manage_favorites,
+			//iconCls: 'ns-window-title-icon-favorite',
 			bodyStyle: 'padding:5px; background-color:#fff',
 			resizable: false,
 			modal: true,
@@ -897,10 +912,10 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function(w) {
-					dv.util.window.setAnchorPosition(w, dv.viewport.favoriteButton);
+					ns.core.web.window.setAnchorPosition(w, ns.app.favoriteButton);
 
 					if (!w.hasDestroyOnBlurHandler) {
-						dv.util.window.addDestroyOnBlurHandler(w);
+						ns.core.web.window.addDestroyOnBlurHandler(w);
 					}
 
 					searchTextfield.focus(false, 500);
@@ -938,12 +953,12 @@ Ext.onReady( function() {
 
 			getData = function() {
 				var data = [
-					{id: 'r-------', name: DV.i18n.can_view},
-					{id: 'rw------', name: DV.i18n.can_edit_and_view}
+					{id: 'r-------', name: NS.i18n.can_view},
+					{id: 'rw------', name: NS.i18n.can_edit_and_view}
 				];
 
 				if (isPublicAccess) {
-					data.unshift({id: '-------', name: DV.i18n.none});
+					data.unshift({id: '-------', name: NS.i18n.none});
 				}
 
 				return data;
@@ -958,7 +973,7 @@ Ext.onReady( function() {
 				var items = [];
 
 				combo = Ext.create('Ext.form.field.ComboBox', {
-					fieldLabel: isPublicAccess ? DV.i18n.public_access : obj.name,
+					fieldLabel: isPublicAccess ? NS.i18n.public_access : obj.name,
 					labelStyle: 'color:#333',
 					cls: 'dv-combo',
 					fieldStyle: 'padding-left:5px',
@@ -1056,7 +1071,7 @@ Ext.onReady( function() {
 		userGroupField = Ext.create('Ext.form.field.ComboBox', {
 			valueField: 'id',
 			displayField: 'name',
-			emptyText: DV.i18n.search_for_user_groups,
+			emptyText: NS.i18n.search_for_user_groups,
 			queryParam: 'key',
 			queryDelay: 200,
 			minChars: 1,
@@ -1101,7 +1116,7 @@ Ext.onReady( function() {
 		if (sharing.meta.allowExternalAccess) {
 			externalAccess = userGroupRowContainer.add({
 				xtype: 'checkbox',
-				fieldLabel: DV.i18n.allow_external_access,
+				fieldLabel: NS.i18n.allow_external_access,
 				labelSeparator: '',
 				labelWidth: 250,
 				checked: !!sharing.object.externalAccess
@@ -1122,7 +1137,7 @@ Ext.onReady( function() {
 		}
 
 		window = Ext.create('Ext.window.Window', {
-			title: DV.i18n.sharing_settings,
+			title: NS.i18n.sharing_settings,
 			bodyStyle: 'padding:6px 6px 0px; background-color:#fff',
 			resizable: false,
 			modal: true,
@@ -1193,7 +1208,7 @@ Ext.onReady( function() {
 				cls: 'dv-textarea',
 				height: 130,
 				fieldStyle: 'padding-left: 4px; padding-top: 3px',
-				emptyText: DV.i18n.write_your_interpretation,
+				emptyText: NS.i18n.write_your_interpretation,
 				enableKeyEvents: true,
 				listeners: {
 					keyup: function() {
@@ -1217,7 +1232,7 @@ Ext.onReady( function() {
 			});
 
 			shareButton = Ext.create('Ext.button.Button', {
-				text: DV.i18n.share,
+				text: NS.i18n.share,
 				disabled: true,
 				xable: function() {
 					this.setDisabled(!textArea.getValue());
@@ -1233,7 +1248,7 @@ Ext.onReady( function() {
 								textArea.reset();
 								dv.viewport.interpretationButton.disable();
 								window.hide();
-								//DV.util.notification.interpretation(DV.i18n.interpretation_was_shared + '.');
+								//NS.util.notification.interpretation(NS.i18n.interpretation_was_shared + '.');
 							}
 						});
 					}
@@ -1946,20 +1961,7 @@ Ext.onReady( function() {
 				}
 			});
 
-            store.getDimensionStore = function() {
-                return Ext.create('Ext.data.Store', {
-                    fields: ['id', 'name'],
-                    data: function() {
-                        var data = [
-                                {id: dimConf.data.dimensionName, name: dimConf.data.name},
-                                {id: dimConf.period.dimensionName, name: dimConf.period.name},
-                                {id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name}
-                            ];
 
-                        return data.concat(Ext.clone(init.dimensions));
-                    }()
-                });
-            };
 
             dv.store = store;
         }());
@@ -1983,6 +1985,7 @@ Ext.onReady( function() {
             pie,
             radar,
             chartType,
+            getDimensionStore,
             seriesStore,
             categoryStore,
             filterStore,
@@ -2061,7 +2064,7 @@ Ext.onReady( function() {
             chartType: dv.conf.finals.chart.column,
             icon: 'images/column.png',
             name: dv.conf.finals.chart.column,
-            tooltipText: DV.i18n.column_chart,
+            tooltipText: NS.i18n.column_chart,
             pressed: true,
             listeners: {
                 added: buttonAddedListener
@@ -2073,7 +2076,7 @@ Ext.onReady( function() {
             chartType: dv.conf.finals.chart.stackedcolumn,
             icon: 'images/column-stacked.png',
             name: dv.conf.finals.chart.stackedcolumn,
-            tooltipText: DV.i18n.stacked_column_chart,
+            tooltipText: NS.i18n.stacked_column_chart,
             listeners: {
                 added: buttonAddedListener
             }
@@ -2084,7 +2087,7 @@ Ext.onReady( function() {
             chartType: dv.conf.finals.chart.bar,
             icon: 'images/bar.png',
             name: dv.conf.finals.chart.bar,
-            tooltipText: DV.i18n.bar_chart,
+            tooltipText: NS.i18n.bar_chart,
             listeners: {
                 added: buttonAddedListener
             }
@@ -2095,7 +2098,7 @@ Ext.onReady( function() {
             chartType: dv.conf.finals.chart.stackedbar,
             icon: 'images/bar-stacked.png',
             name: dv.conf.finals.chart.stackedbar,
-            tooltipText: DV.i18n.stacked_bar_chart,
+            tooltipText: NS.i18n.stacked_bar_chart,
             listeners: {
                 added: buttonAddedListener
             }
@@ -2106,7 +2109,7 @@ Ext.onReady( function() {
             chartType: dv.conf.finals.chart.line,
             icon: 'images/line.png',
             name: dv.conf.finals.chart.line,
-            tooltipText: DV.i18n.line_chart,
+            tooltipText: NS.i18n.line_chart,
             listeners: {
                 added: buttonAddedListener
             }
@@ -2117,7 +2120,7 @@ Ext.onReady( function() {
             chartType: dv.conf.finals.chart.area,
             icon: 'images/area.png',
             name: dv.conf.finals.chart.area,
-            tooltipText: DV.i18n.area_chart,
+            tooltipText: NS.i18n.area_chart,
             listeners: {
                 added: buttonAddedListener
             }
@@ -2128,7 +2131,7 @@ Ext.onReady( function() {
             chartType: dv.conf.finals.chart.pie,
             icon: 'images/pie.png',
             name: dv.conf.finals.chart.pie,
-            tooltipText: DV.i18n.pie_chart,
+            tooltipText: NS.i18n.pie_chart,
             listeners: {
                 added: buttonAddedListener
             }
@@ -2139,7 +2142,7 @@ Ext.onReady( function() {
             chartType: dv.conf.finals.chart.radar,
             icon: 'images/radar.png',
             name: dv.conf.finals.chart.radar,
-            tooltipText: DV.i18n.radar_chart,
+            tooltipText: NS.i18n.radar_chart,
             listeners: {
                 added: buttonAddedListener
             }
@@ -2185,7 +2188,7 @@ Ext.onReady( function() {
             items: [
                 {
                     xtype: 'label',
-                    text: DV.i18n.chart_type,
+                    text: NS.i18n.chart_type,
                     style: 'font-size:11px; font-weight:bold; padding:13px 8px 0 6px'
                 },
                 column,
@@ -2199,9 +2202,24 @@ Ext.onReady( function() {
             ]
         });
 
-        seriesStore = dv.store.getDimensionStore();
-        categoryStore = dv.store.getDimensionStore();
-        filterStore = dv.store.getDimensionStore();
+		getDimensionStore = function() {
+			return Ext.create('Ext.data.Store', {
+				fields: ['id', 'name'],
+				data: function() {
+					var data = [
+							{id: dimConf.data.dimensionName, name: dimConf.data.name},
+							{id: dimConf.period.dimensionName, name: dimConf.period.name},
+							{id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name}
+						];
+
+					return data.concat(Ext.clone(init.dimensions));
+				}()
+			});
+		};
+
+        seriesStore = getDimensionStore();
+        categoryStore = getDimensionStore();
+        filterStore = getDimensionStore();
 
         series = Ext.create('Ext.form.field.ComboBox', {
             cls: 'dv-combo',
@@ -2322,7 +2340,7 @@ Ext.onReady( function() {
                     items: [
                         {
                             xtype: 'label',
-                            text: DV.i18n.series,
+                            text: NS.i18n.series,
                             style: 'font-size:11px; font-weight:bold; padding:0 4px'
                         },
                         { bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
@@ -2335,7 +2353,7 @@ Ext.onReady( function() {
                     items: [
                         {
                             xtype: 'label',
-                            text: DV.i18n.category,
+                            text: NS.i18n.category,
                             style: 'font-size:11px; font-weight:bold; padding:0 4px'
                         },
                         { bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
@@ -2348,7 +2366,7 @@ Ext.onReady( function() {
                     items: [
                         {
                             xtype: 'label',
-                            text: DV.i18n.filters,
+                            text: NS.i18n.filters,
                             style: 'font-size:11px; font-weight:bold; padding:0 4px'
                         },
                         { bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
