@@ -70,7 +70,7 @@ Ext.onReady( function() {
 		});
 
 		targetLineTitle = Ext.create('Ext.form.field.Text', {
-			//cls: 'dv-textfield-alt1',
+			//cls: 'ns-textfield-alt1',
 			style: 'margin-left:2px; margin-bottom:2px',
 			fieldStyle: 'padding-left:3px',
 			emptyText: NS.i18n.target,
@@ -95,7 +95,7 @@ Ext.onReady( function() {
 		});
 
 		baseLineTitle = Ext.create('Ext.form.field.Text', {
-			//cls: 'dv-textfield-alt1',
+			//cls: 'ns-textfield-alt1',
 			style: 'margin-left:2px',
 			fieldStyle: 'padding-left:3px',
 			emptyText: NS.i18n.base,
@@ -1998,7 +1998,7 @@ Ext.onReady( function() {
 		ns.app.stores.filter = filterStore;
 
         series = Ext.create('Ext.form.field.ComboBox', {
-            cls: 'dv-combo',
+            cls: 'ns-combo',
             baseBodyCls: 'small',
             style: 'margin-bottom:0',
             name: ns.core.conf.finals.chart.series,
@@ -2024,7 +2024,7 @@ Ext.onReady( function() {
         });
 
         category = Ext.create('Ext.form.field.ComboBox', {
-            cls: 'dv-combo',
+            cls: 'ns-combo',
             baseBodyCls: 'small',
             style: 'margin-bottom:0',
             name: ns.core.conf.finals.chart.category,
@@ -2063,7 +2063,7 @@ Ext.onReady( function() {
         });
 
         filter = Ext.create('Ext.form.field.ComboBox', {
-            cls: 'dv-combo',
+            cls: 'ns-combo',
             multiSelect: true,
             baseBodyCls: 'small',
             style: 'margin-bottom:0',
@@ -4275,7 +4275,11 @@ Ext.onReady( function() {
 					return ns.core.conf.layout.west_width + 17;
 				}
 			}(),
-			items: accordion,
+			items: [
+                chartType,
+                layout,
+                accordion
+			],
 			listeners: {
 				added: function() {
 					ns.app.westRegion = this;
