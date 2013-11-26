@@ -1312,6 +1312,33 @@ Ext.onReady( function() {
 			}
 		}());
 
+		// support
+		(function() {
+
+			// svg
+			support.svg = support.svg || {};
+
+			support.svg.submitForm = function(type) {
+				var svg = Ext.query('svg'),
+					form = Ext.query('#exportForm')[0];
+
+				if (!(Ext.isArray(svg) && svg.length)) {
+					alert('Browser does not support SVG');
+					return;
+				}
+
+				svg = Ext.get(svg[0]);
+				svg = svg.parent().dom.innerHTML;
+
+				Ext.query('#svgField')[0].value = svg;
+				Ext.query('#typeField')[0].value = type;
+				Ext.query('#nameField')[0].value = 'test';
+
+				form.action = '../exportImage.action';
+				form.submit();
+			};
+		}());
+
 		// web
 		(function() {
 
@@ -1699,334 +1726,7 @@ Ext.onReady( function() {
 		}());
 
 
-						// util
-						(function() {
-							util.svg = {
-								submitForm: function(type) {
-									var svg = Ext.query('svg'),
-										form = Ext.query('#exportForm')[0];
 
-									if (!(Ext.isArray(svg) && svg.length)) {
-										alert('Browser does not support SVG');
-										return;
-									}
-
-									svg = Ext.get(svg[0]);
-									svg = svg.parent().dom.innerHTML;
-
-									Ext.query('#svgField')[0].value = svg;
-									Ext.query('#typeField')[0].value = type;
-									Ext.query('#nameField')[0].value = 'test';
-
-									form.action = '../exportImage.action';
-									form.submit();
-								}
-							};
-
-            util.dimension = {
-                panel: {
-                    setHeight: function(mx) {
-                        var settingsHeight = 91,
-                            panelHeight = settingsHeight + dv.cmp.dimension.panels.length * 28,
-                            height;
-
-                        if (dv.viewport.westRegion.hasScrollbar) {
-                            height = panelHeight + mx;
-                            dv.viewport.accordion.setHeight(dv.viewport.getHeight() - settingsHeight - 2);
-                            dv.viewport.accordionBody.setHeight(height - settingsHeight - 2);
-                        }
-                        else {
-                            height = dv.viewport.westRegion.getHeight() - conf.layout.west_fill - settingsHeight;
-                            mx += panelHeight;
-                            dv.viewport.accordion.setHeight((height > mx ? mx : height) - 2);
-                            dv.viewport.accordionBody.setHeight((height > mx ? mx : height) - 2);
-                        }
-                    },
-
-                    getExpanded: function() {
-                        for (var i = 0, panel; i < dv.cmp.dimension.panels.length; i++) {
-                            panel = dv.cmp.dimension.panels[i];
-
-                            if (!panel.collapsed) {
-                                return panel;
-                            }
-                        }
-
-                        return null;
-                    }
-                }
-            };
-
-            util.url = {
-                getUrlParam: function(s) {
-                    var output = '';
-                    var href = window.location.href;
-                    if (href.indexOf('?') > -1 ) {
-                        var query = href.substr(href.indexOf('?') + 1);
-                        var query = query.split('&');
-                        for (var i = 0; i < query.length; i++) {
-                            if (query[i].indexOf('=') > -1) {
-                                var a = query[i].split('=');
-                                if (a[0].toLowerCase() === s) {
-                                    output = a[1];
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    return unescape(output);
-                }
-            };
-
-            util.multiselect = {
-                select: function(a, s) {
-                    var selected = a.getValue();
-                    if (selected.length) {
-                        var array = [];
-                        Ext.Array.each(selected, function(item) {
-                            array.push({id: item, name: a.store.getAt(a.store.findExact('id', item)).data.name});
-                        });
-                        s.store.add(array);
-                    }
-                    this.filterAvailable(a, s);
-                },
-                selectAll: function(a, s, doReverse) {
-                    var array = [];
-                    a.store.each( function(r) {
-                        array.push({id: r.data.id, name: r.data.name});
-                    });
-                    if (doReverse) {
-                        array.reverse();
-                    }
-                    s.store.add(array);
-                    this.filterAvailable(a, s);
-                },
-                unselect: function(a, s) {
-                    var selected = s.getValue();
-                    if (selected.length) {
-                        Ext.Array.each(selected, function(item) {
-                            s.store.remove(s.store.getAt(s.store.findExact('id', item)));
-                        });
-                        this.filterAvailable(a, s);
-                    }
-                },
-                unselectAll: function(a, s) {
-                    s.store.removeAll();
-                    a.store.clearFilter();
-                    this.filterAvailable(a, s);
-                },
-                filterAvailable: function(a, s) {
-                    a.store.filterBy( function(r) {
-                        var keep = true;
-                        s.store.each( function(r2) {
-                            if (r.data.id == r2.data.id) {
-                                keep = false;
-                            }
-
-                        });
-                        return keep;
-                    });
-                    a.store.sortStore();
-                },
-                setHeight: function(ms, panel, fill) {
-                    for (var i = 0; i < ms.length; i++) {
-                        ms[i].setHeight(panel.getHeight() - fill);
-                    }
-                }
-            };
-
-            util.button = {
-                type: {
-                    getValue: function() {
-                        for (var i = 0; i < dv.cmp.charttype.length; i++) {
-                            if (dv.cmp.charttype[i].pressed) {
-                                return dv.cmp.charttype[i].name;
-                            }
-                        }
-                    },
-                    setValue: function(type) {
-                        for (var i = 0; i < dv.cmp.charttype.length; i++) {
-                            dv.cmp.charttype[i].toggle(dv.cmp.charttype[i].name === type);
-                        }
-                    },
-                    toggleHandler: function(b) {
-                        if (!b.pressed) {
-                            b.toggle();
-                        }
-                    }
-                }
-            };
-
-            util.checkbox = {
-                setRelativePeriods: function(rp) {
-                    if (rp) {
-                        for (var key in rp) {
-                            var cmp = util.getCmp('checkbox[relativePeriodId="' + key + '"]');
-                            if (cmp) {
-                                cmp.setValue(rp[key]);
-                            }
-                        }
-                    }
-                    else {
-                        util.checkbox.setAllFalse();
-                    }
-                },
-                setAllFalse: function() {
-                    var a = dv.cmp.dimension.relativePeriod.checkbox;
-                    for (var i = 0; i < a.length; i++) {
-                        a[i].setValue(false);
-                    }
-                },
-                isAllFalse: function() {
-                    var a = dv.cmp.dimension.relativePeriod.checkbox;
-                    for (var i = 0; i < a.length; i++) {
-                        if (a[i].getValue()) {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-            };
-
-            util.toolbar = {
-                separator: {
-                    xtype: 'tbseparator',
-                    height: 26,
-                    style: 'border-left: 1px solid #d1d1d1; border-right: 1px solid #f1f1f1'
-                }
-            };
-
-            util.window = util.window || {};
-
-            util.window.setAnchorPosition = function(w, target) {
-                var vpw = dv.viewport.getWidth(),
-                    targetX = target ? target.getPosition()[0] : 4,
-                    winw = w.getWidth(),
-                    y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
-
-                if ((targetX + winw) > vpw) {
-                    w.setPosition((vpw - winw - 2), y);
-                }
-                else {
-                    w.setPosition(targetX, y);
-                }
-            };
-
-            util.notification = {
-                error: function(title, text) {
-                    title = title || '';
-                    text = text || '';
-                    Ext.create('Ext.window.Window', {
-                        title: title,
-                        cls: 'dv-messagebox',
-                        iconCls: 'dv-window-title-messagebox',
-                        modal: true,
-                        width: 300,
-                        items: [
-                            {
-                                xtype: 'label',
-                                width: 40,
-                                text: text
-                            }
-                        ]
-                    }).show();
-                    dv.cmp.statusbar.panel.setWidth(dv.cmp.region.center.getWidth());
-                    dv.cmp.statusbar.panel.update('<img src="' + dv.conf.finals.ajax.path_images + conf.statusbar.icon.error + '" style="padding:0 5px 0 0"/>' + text);
-                },
-                warning: function(text) {
-                    text = text || '';
-                    dv.cmp.statusbar.panel.setWidth(dv.cmp.region.center.getWidth());
-                    dv.cmp.statusbar.panel.update('<img src="' + conf.finals.ajax.path_images + conf.statusbar.icon.warning + '" style="padding:0 5px 0 0"/>' + text);
-                },
-                ok: function() {
-                    dv.cmp.statusbar.panel.setWidth(dv.cmp.region.center.getWidth());
-                    dv.cmp.statusbar.panel.update('<img src="' + conf.finals.ajax.path_images + conf.statusbar.icon.ok + '" style="padding:0 5px 0 0"/>&nbsp;&nbsp;');
-                },
-                interpretation: function(text) {
-                    dv.cmp.statusbar.panel.setWidth(dv.cmp.region.center.getWidth());
-                    dv.cmp.statusbar.panel.update('<img src="' + conf.finals.ajax.path_images + conf.statusbar.icon.ok + '" style="padding:0 5px 0 0"/>' + text);
-                }
-            };
-
-            util.store = {
-                addToStorage: function(s, records) {
-                    s.each( function(r) {
-                        if (!s.storage[r.data.id]) {
-                            s.storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: s.parent};
-                        }
-                    });
-                    if (records) {
-                        Ext.Array.each(records, function(r) {
-                            if (!s.storage[r.data.id]) {
-                                s.storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: s.parent};
-                            }
-                        });
-                    }
-                },
-                loadFromStorage: function(s) {
-                    var items = [];
-                    s.removeAll();
-                    for (var obj in s.storage) {
-                        if (s.storage[obj].parent === s.parent) {
-                            items.push(s.storage[obj]);
-                        }
-                    }
-                    s.add(items);
-                    s.sort('name', 'ASC');
-                },
-                containsParent: function(s) {
-                    for (var obj in s.storage) {
-                        if (s.storage[obj].parent === s.parent) {
-                            return true;
-                        }
-                    }
-                    return false;
-                }
-            };
-
-            util.object = {
-                getLength: function(object) {
-                    var size = 0;
-
-                    for (var key in object) {
-                        if (object.hasOwnProperty(key)) {
-                            size++;
-                        }
-                    }
-
-                    return size;
-                }
-            };
-
-            util.number = {
-                getNumberOfDecimals: function(x) {
-                    var tmp = new String(x);
-                    return (tmp.indexOf(".") > -1) ? (tmp.length - tmp.indexOf(".") - 1) : 0;
-                },
-
-                roundIf: function(x, fix) {
-                    if (Ext.isString(x)) {
-                        x = parseFloat(x);
-                    }
-
-                    if (Ext.isNumber(x) && Ext.isNumber(fix)) {
-                        var dec = util.number.getNumberOfDecimals(x);
-                        return parseFloat(dec > fix ? x.toFixed(fix) : x);
-                    }
-                    return x;
-                },
-
-                pp: function(x, nf) {
-                    nf = nf || 'space';
-
-                    if (nf === 'none') {
-                        return x;
-                    }
-
-                    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.chart.digitGroupSeparator[nf]);
-                }
-            };
-        }());
 
 
         // store
@@ -2465,7 +2165,11 @@ Ext.onReady( function() {
             defaults: {
                 height: 40,
                 toggleGroup: 'charttype',
-                handler: dv.util.button.type.toggleHandler,
+                handler: function(b) {
+					if (!b.pressed) {
+						b.toggle();
+					}
+				},
                 listeners: {
                     afterrender: function(b) {
                         if (b.xtype === 'button') {
@@ -4731,16 +4435,17 @@ Ext.onReady( function() {
 			items: accordionBody,
 			panels: accordionPanels,
 			setThisHeight: function(mx) {
-				var panelHeight = this.panels.length * 28,
+				var settingsHeight = 91,
+					panelHeight = settingsHeight + this.panels.length * 28,
 					height;
 
 				if (westRegion.hasScrollbar) {
 					height = panelHeight + mx;
-					this.setHeight(viewport.getHeight() - 2);
-					accordionBody.setHeight(height - 2);
+					this.setHeight(viewport.getHeight() - settingsHeight - 2);
+					accordionBody.setHeight(height - settingsHeight - 2);
 				}
 				else {
-					height = westRegion.getHeight() - ns.core.conf.layout.west_fill;
+					height = westRegion.getHeight() - ns.core.conf.layout.west_fill - settingsHeight;
 					mx += panelHeight;
 					accordion.setHeight((height > mx ? mx : height) - 2);
 					accordionBody.setHeight((height > mx ? mx : height) - 2);
