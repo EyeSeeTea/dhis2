@@ -967,7 +967,7 @@ Ext.onReady( function() {
 
                     // For param string
                 xLayout.sortedAxisDimensionNames = Ext.clone(xLayout.axisDimensionNames).sort();
-                xLayout.sortedFilterDimensions = util.array.sortDimensions(Ext.clone(xLayout.filterDimensions));
+                xLayout.sortedFilterDimensions = service.layout.sortDimensionArray(Ext.clone(xLayout.filterDimensions));
 
                 // All
                 xLayout.dimensions = [].concat(xLayout.axisDimensions, xLayout.filterDimensions);
@@ -1481,7 +1481,7 @@ Ext.onReady( function() {
 
                         obj[conf.finals.data.domain] = xResponse.metaData.names[category];
                         for (var j = 0, id; j < columnIds.length; j++) {
-                            id = util.str.replaceAll(columnIds[j], '-', '') + util.str.replaceAll(rowIds[i], '-', '');
+                            id = support.prototype.str.replaceAll(columnIds[j], '-', '') + support.prototype.str.replaceAll(rowIds[i], '-', '');
                             //id = columnIds[j].replace('-', '') + rowIds[i].replace('-', '');
 
                             obj[columnIds[j]] = xResponse.idValueMap[id];

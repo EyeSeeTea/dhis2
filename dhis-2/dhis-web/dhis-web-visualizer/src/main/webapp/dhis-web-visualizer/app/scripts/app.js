@@ -1,5 +1,5 @@
 Ext.onReady( function() {
-	var NS = PT,
+	var NS = DV,
 
 	OptionsWindow,
 	FavoriteWindow,
@@ -323,14 +323,14 @@ Ext.onReady( function() {
 				{
 					text: '<b>' + NS.i18n.update + '</b>',
 					handler: function() {
-						var config = ns.core.web.pivot.getLayoutConfig(),
+						var config = ns.core.web.chart.getLayoutConfig(),
 							layout = ns.core.api.layout.Layout(config);
 
 						if (!layout) {
 							return;
 						}
 
-						ns.core.web.pivot.createChart(layout, false);
+						ns.core.web.chart.createChart(layout, false);
 
 						window.hide();
 					}
@@ -676,7 +676,7 @@ Ext.onReady( function() {
 								element.addClsOnOver('link');
 								element.load = function() {
 									favoriteWindow.hide();
-									ns.core.web.pivot.loadTable(record.data.id);
+									ns.core.web.chart.loadChart(record.data.id);
 								};
 								element.dom.setAttribute('onclick', 'Ext.get(this).load();');
 							}
@@ -1582,9 +1582,9 @@ Ext.onReady( function() {
 
 			web.chart.getLayoutConfig = function() {
 				var panels = ns.app.accordion.panels,
-					columnDimNames = ns.app.stores.col.getDimensionNames(),
-					rowDimNames = ns.app.stores.row.getDimensionNames(),
-					filterDimNames = ns.app.stores.filter.getDimensionNames(),
+                    columnDimNames = [ns.app.viewport.series.getValue()],
+                    rowDimNames = [ns.app.viewport.category.getValue()],
+                    filterDimNames = ns.app.viewport.filter.getValue(),
 					config = ns.app.optionsWindow.getOptions(),
 					dx = dimConf.data.dimensionName,
 					co = dimConf.category.dimensionName,
@@ -1994,16 +1994,7 @@ Ext.onReady( function() {
 						];
 
 					return data.concat(Ext.clone(ns.core.init.dimensions));
-				}(),
-				getDimensionNames: function() {
-					var dimensionNames = [];
-
-					this.each(function(r) {
-						dimensionNames.push(r.data.id);
-					});
-
-					return Ext.clone(dimensionNames);
-				}
+				}()
 			});
 		};
 
@@ -4210,7 +4201,7 @@ Ext.onReady( function() {
 				return;
 			}
 
-			ns.core.web.pivot.createTable(layout, false);
+			ns.core.web.chart.createChart(layout, false);
 		};
 
 		accordionBody = Ext.create('Ext.panel.Panel', {
@@ -4901,6 +4892,9 @@ Ext.onReady( function() {
 		viewport = Ext.create('Ext.container.Viewport', {
 			layout: 'border',
 			chartType: chartType,
+			series: series,
+			category: category,
+			filter: filter,
 			period: period,
 			treePanel: treePanel,
 			setGui: setGui,
@@ -4953,13 +4947,13 @@ Ext.onReady( function() {
 						layout;
 
 					if (id) {
-						ns.core.web.pivot.loadChart(id);
+						ns.core.web.chart.loadChart(id);
 					}
 					else if (Ext.isString(session) && NS.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
 						layout = ns.core.api.layout.Layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]);
 
 						if (layout) {
-							ns.core.web.pivot.createChart(layout, true);
+							ns.core.web.chart.createChart(layout, true);
 						}
 					}
 
