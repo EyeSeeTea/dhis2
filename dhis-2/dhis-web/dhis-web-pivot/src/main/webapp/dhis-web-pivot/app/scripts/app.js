@@ -4373,8 +4373,8 @@ Ext.onReady( function() {
 
 		// viewport
 		update = function() {
-			var config = ns.core.web.pivot.getLayoutConfig();
-			var layout = ns.core.api.layout.Layout(config);
+			var config = ns.core.web.pivot.getLayoutConfig(),
+				layout = ns.core.api.layout.Layout(config);
 
 			if (!layout) {
 				return;
