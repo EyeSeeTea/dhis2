@@ -4944,7 +4944,7 @@ Ext.onReady( function() {
 				init.contextPath = Ext.decode(r.responseText).activities.dhis.href;
 
 				Ext.Ajax.request({
-					url: 'i18n.json',
+					url: 'i18n.json?package=org.hisp.dhis.visualizer',
 					success: function(r) {
 						var i18nArray = Ext.decode(r.responseText);
 
