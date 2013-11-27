@@ -4756,67 +4756,15 @@ Ext.onReady( function() {
 			}
 
 			// Layout
-			ns.app.stores.dimension.reset(true);
-			ns.app.stores.col.removeAll();
-			ns.app.stores.row.removeAll();
-			ns.app.stores.filter.removeAll();
+			ns.app.viewport.chartType.setChartType(layout.type);
 
-			if (layout.columns) {
-				dimNames = [];
+			ns.app.viewport.series.setValue(xLayout.columnDimensionNames[0]);
+            ns.app.viewport.series.filterNext();
 
-				for (var i = 0, dim; i < layout.columns.length; i++) {
-					dim = dimConf.objectNameMap[layout.columns[i].dimension];
+            ns.app.viewport.category.setValue(xLayout.rowDimensionNames[0]);
+            ns.app.viewport.category.filterNext();
 
-					if (!Ext.Array.contains(dimNames, dim.dimensionName)) {
-						ns.app.stores.col.add({
-							id: dim.dimensionName,
-							name: dimConf.objectNameMap[dim.dimensionName].name
-						});
-
-						dimNames.push(dim.dimensionName);
-					}
-
-					ns.app.stores.dimension.remove(ns.app.stores.dimension.getById(dim.dimensionName));
-				}
-			}
-
-			if (layout.rows) {
-				dimNames = [];
-
-				for (var i = 0, dim; i < layout.rows.length; i++) {
-					dim = dimConf.objectNameMap[layout.rows[i].dimension];
-
-					if (!Ext.Array.contains(dimNames, dim.dimensionName)) {
-						ns.app.stores.row.add({
-							id: dim.dimensionName,
-							name: dimConf.objectNameMap[dim.dimensionName].name
-						});
-
-						dimNames.push(dim.dimensionName);
-					}
-
-					ns.app.stores.dimension.remove(ns.app.stores.dimension.getById(dim.dimensionName));
-				}
-			}
-
-			if (layout.filters) {
-				dimNames = [];
-
-				for (var i = 0, dim; i < layout.filters.length; i++) {
-					dim = dimConf.objectNameMap[layout.filters[i].dimension];
-
-					if (!Ext.Array.contains(dimNames, dim.dimensionName)) {
-						ns.app.stores.filter.add({
-							id: dim.dimensionName,
-							name: dimConf.objectNameMap[dim.dimensionName].name
-						});
-
-						dimNames.push(dim.dimensionName);
-					}
-
-					ns.app.stores.dimension.remove(ns.app.stores.dimension.getById(dim.dimensionName));
-				}
-			}
+            ns.app.viewport.filter.setValue(xLayout.filterDimensionNames);
 
 			// Options
 			if (ns.app.optionsWindow) {
