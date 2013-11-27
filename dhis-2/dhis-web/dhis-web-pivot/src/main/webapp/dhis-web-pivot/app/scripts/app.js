@@ -5208,7 +5208,7 @@ Ext.onReady( function() {
 
 						// i18n
 						requests.push({
-							url: init.contextPath + '/api/i18n',
+							url: init.contextPath + '/api/i18n?package=org.hisp.dhis.pivot',
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json',

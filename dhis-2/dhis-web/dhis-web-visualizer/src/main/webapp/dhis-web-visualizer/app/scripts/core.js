@@ -357,6 +357,75 @@ Ext.onReady( function() {
 					return dimensionArray.length ? dimensionArray : null;
 				};
 
+				analytical2layout = function(analytical) {
+					var layoutConfig = Ext.clone(analytical),
+						co = dimConf.category.objectName;
+
+					analytical = Ext.clone(analytical);
+
+					layoutConfig.columns = [];
+					layoutConfig.rows = [];
+					layoutConfig.filters = layoutConfig.filters || [];
+
+					// Series
+					if (Ext.isArray(analytical.columns) && analytical.columns.length) {
+						analytical.columns.reverse();
+
+						for (var i = 0, dim; i < analytical.columns.length; i++) {
+							dim = analytical.columns[i];
+
+							if (dim.dimension === co) {
+								continue;
+							}
+
+							if (!layoutConfig.columns.length) {
+								layoutConfig.columns.push(dim);
+							}
+							else {
+
+								// indicators cannot be set as filter
+								if (dim.dimension === dimConf.indicator.objectName) {
+									layoutConfig.filters.push(layoutConfig.columns.pop());
+									layoutConfig.columns = [dim];
+								}
+								else {
+									layoutConfig.filters.push(dim);
+								}
+							}
+						}
+					}
+
+					// Rows
+					if (Ext.isArray(analytical.rows) && analytical.rows.length) {
+						analytical.rows.reverse();
+
+						for (var i = 0, dim; i < analytical.rows.length; i++) {
+							dim = analytical.rows[i];
+
+							if (dim.dimension === co) {
+								continue;
+							}
+
+							if (!layoutConfig.rows.length) {
+								layoutConfig.rows.push(dim);
+							}
+							else {
+
+								// indicators cannot be set as filter
+								if (dim.dimension === dimConf.indicator.objectName) {
+									layoutConfig.filters.push(layoutConfig.rows.pop());
+									layoutConfig.rows = [dim];
+								}
+								else {
+									layoutConfig.filters.push(dim);
+								}
+							}
+						}
+					}
+
+					return layoutConfig;
+				};
+
 				validateSpecialCases = function() {
 					var dimConf = conf.finals.dimension,
 						dimensions,
@@ -465,6 +534,9 @@ Ext.onReady( function() {
 					if (config.name) {
 						layout.name = config.name;
 					}
+
+					// analytical2layout
+					config = analytical2layout(config);
 
                     // layout
                     layout.type = Ext.isString(config.type) ? config.type.toLowerCase() : conf.finals.chart.column;
@@ -2302,70 +2374,6 @@ Ext.onReady( function() {
                 return generator[xLayout.type]();
             };
 
-            //engine.analytical2layout = function(analytical) {
-                //var co = dimConf.category.objectName,
-                    //layoutConfig = Ext.clone(analytical);
-
-                //analytical = Ext.clone(analytical);
-
-                //layoutConfig.columns = [];
-                //layoutConfig.rows = [];
-                //layoutConfig.filters = layoutConfig.filters || [];
-
-                //// Series
-                //if (Ext.isArray(analytical.columns) && analytical.columns.length) {
-                    //for (var i = 0, dim; i < analytical.columns.length; i++) {
-                        //dim = analytical.columns[i];
-
-                        //if (dim.dimension === co) {
-                            //continue;
-                        //}
-
-                        //if (!layoutConfig.columns.length) {
-                            //layoutConfig.columns.push(dim);
-                        //}
-                        //else {
-
-                            //// in or last item (one only) - rest as filter
-                            //if (dim.dimension === dimConf.indicator.objectName || (i === analytical.columns.length - 1)) {
-                                //layoutConfig.filters.push(layoutConfig.columns.pop());
-                                //layoutConfig.columns = [dim];
-                            //}
-                            //else {
-                                //layoutConfig.filters.push(dim);
-                            //}
-                        //}
-                    //}
-                //}
-
-                //// Rows
-                //if (Ext.isArray(analytical.rows) && analytical.rows.length) {
-                    //for (var i = 0, dim; i < analytical.rows.length; i++) {
-                        //dim = analytical.rows[i];
-
-                        //if (dim.dimension === co) {
-                            //continue;
-                        //}
-
-                        //if (!layoutConfig.rows.length) {
-                            //layoutConfig.rows.push(dim);
-                        //}
-                        //else {
-
-                            //// in or last item (one only) - rest as filter
-                            //if (dim.dimension === dimConf.indicator.objectName || (i === analytical.rows.length - 1)) {
-                                //layoutConfig.filters.push(layoutConfig.rows.pop());
-                                //layoutConfig.rows = [dim];
-                            //}
-                            //else {
-                                //layoutConfig.filters.push(dim);
-                            //}
-                        //}
-                    //}
-                //}
-
-                //return layoutConfig;
-            //};
         }());
 
 		// extend init

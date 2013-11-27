@@ -4456,8 +4456,8 @@ Ext.onReady( function() {
 		});
 
 		defaultButton = Ext.create('Ext.button.Button', {
-			text: NS.i18n.table,
-			iconCls: 'ns-button-icon-table',
+			text: NS.i18n.chart,
+			iconCls: 'ns-button-icon-chart',
 			toggleGroup: 'module',
 			pressed: true,
 			handler: function() {
@@ -4502,10 +4502,9 @@ Ext.onReady( function() {
 					downloadButton,
 					interpretationButton,
 					'->',
-					defaultButton,
 					{
-						text: NS.i18n.chart,
-						iconCls: 'ns-button-icon-chart',
+						text: NS.i18n.table,
+						iconCls: 'ns-button-icon-table',
 						toggleGroup: 'module',
 						menu: {},
 						handler: function(b) {
@@ -4515,30 +4514,30 @@ Ext.onReady( function() {
 								showSeparator: false,
 								items: [
 									{
-										text: 'Go to charts' + '&nbsp;&nbsp;', //i18n
+										text: 'Go to pivot tables' + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
 										handler: function() {
-											window.location.href = ns.core.init.contextPath + '/dhis-web-visualizer/app/index.html';
+											window.location.href = ns.core.init.contextPath + '/dhis-web-pivot/app/index.html';
 										}
 									},
 									'-',
 									{
-										text: 'Open this table as chart' + '&nbsp;&nbsp;', //i18n
+										text: 'Open this table as pivot table' + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
 										disabled: !(NS.isSessionStorage && ns.app.layout),
 										handler: function() {
 											if (NS.isSessionStorage) {
 												ns.app.layout.parentGraphMap = treePanel.getParentGraphMap();
-												ns.core.web.storage.session.set(ns.app.layout, 'analytical', ns.core.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
+												ns.core.web.storage.session.set(ns.app.layout, 'analytical', ns.core.init.contextPath + '/dhis-web-pivot/app/index.html?s=analytical');
 											}
 										}
 									},
 									{
-										text: 'Open last chart' + '&nbsp;&nbsp;', //i18n
+										text: 'Open last pivot table' + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
 										disabled: !(NS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['chart']),
 										handler: function() {
-											window.location.href = ns.core.init.contextPath + '/dhis-web-visualizer/app/index.html?s=chart';
+											window.location.href = ns.core.init.contextPath + '/dhis-web-pivot/app/index.html?s=chart';
 										}
 									}
 								],
@@ -4559,6 +4558,7 @@ Ext.onReady( function() {
 							b.menu.show();
 						}
 					},
+					defaultButton,
 					{
 						text: NS.i18n.map,
 						iconCls: 'ns-button-icon-map',
