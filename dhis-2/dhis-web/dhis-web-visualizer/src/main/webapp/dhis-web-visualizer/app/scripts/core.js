@@ -1441,6 +1441,7 @@ Ext.onReady( function() {
 			web.chart.createChart = function(ns) {
 				var xResponse = ns.app.xResponse,
 					xLayout = ns.app.xLayout,
+
 					getSyncronizedXLayout,
                     getExtendedResponse,
                     validateUrl,
@@ -1888,11 +1889,9 @@ Ext.onReady( function() {
 
                 getDefaultChartSizeHandler = function() {
                     return function() {
-console.log("w", ns.app.centerRegion.getWidth());
-console.log("h", ns.app.centerRegion.getHeight());
-                        this.animate = false;
-                        this.setWidth(ns.app.centerRegion.getWidth());
-                        this.setHeight(ns.app.centerRegion.getHeight() - 25);
+						this.animate = false;
+                        this.setWidth(ns.app.centerRegion.getWidth() - 15);
+                        this.setHeight(ns.app.centerRegion.getHeight() - 40);
                         this.animate = true;
                     };
                 };
@@ -1931,8 +1930,8 @@ console.log("h", ns.app.centerRegion.getHeight());
                             animate: true,
                             shadow: false,
                             insetPadding: 35,
-                            width: ns.app.centerRegion.getWidth(),
-                            height: ns.app.centerRegion.getHeight() - 25,
+                            width: ns.app.centerRegion.getWidth() - 15,
+                            height: ns.app.centerRegion.getHeight() - 40,
                             theme: theme || 'dv1'
                         };
 

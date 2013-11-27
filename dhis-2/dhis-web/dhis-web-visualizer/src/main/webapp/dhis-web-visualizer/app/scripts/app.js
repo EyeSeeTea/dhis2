@@ -1696,7 +1696,6 @@ Ext.onReady( function() {
 					},
 					success: function(r) {
 						var xResponse,
-							chart,
 							html,
 							response = api.response.Response(Ext.decode(r.responseText));
 
@@ -1716,7 +1715,7 @@ Ext.onReady( function() {
 						// extend response
 						xResponse = service.response.getExtendedResponse(xLayout, response);
 
-						// instance
+						// references
 						ns.app.layout = layout;
 						ns.app.xLayout = xLayout;
 						ns.app.response = response;
@@ -1724,14 +1723,14 @@ Ext.onReady( function() {
 						ns.app.paramString = paramString;
 
 						// create chart
-						chart = ns.core.web.chart.createChart(ns);
+						ns.app.chart = ns.core.web.chart.createChart(ns);
 
 						// update viewport
-						ns.app.centerRegion.removeAll(true);
-						ns.app.centerRegion.add(chart);
+						ns.app.centerRegion.update();
+						ns.app.centerRegion.removeAll();
+						ns.app.centerRegion.add(ns.app.chart);
 
 						// after render
-
 						if (NS.isSessionStorage) {
 							web.storage.session.set(layout, 'table');
 						}
@@ -1744,9 +1743,6 @@ Ext.onReady( function() {
 							console.log("core", ns.core);
 							console.log("app", ns.app);
 						}
-
-						// Hide mask
-						//util.mask.hideMask(ns.app.centerRegion);
 					}
 				});
 			};
@@ -4344,100 +4340,81 @@ Ext.onReady( function() {
 		};
 
 		downloadButton = Ext.create('Ext.button.Button', {
-			text: 'Download',
-			disabled: true,
-			menu: {
-				cls: 'ns-menu',
-				shadow: false,
-				showSeparator: false,
-				items: [
-					{
-						xtype: 'label',
-						text: NS.i18n.table_layout,
-						style: 'padding:7px 5px 5px 7px; font-weight:bold; border:0 none'
-					},
-					{
-						text: 'Microsoft Excel (.xls)',
-						iconCls: 'ns-menu-item-tablelayout',
-						handler: function() {
-							openTableLayoutTab('xls');
-						}
-					},
-					{
-						text: 'CSV (.csv)',
-						iconCls: 'ns-menu-item-tablelayout',
-						handler: function() {
-							openTableLayoutTab('csv');
-						}
-					},
-					{
-						text: 'HTML (.html)',
-						iconCls: 'ns-menu-item-tablelayout',
-						handler: function() {
-							openTableLayoutTab('html', true);
-						}
-					},
-					{
-						xtype: 'label',
-						text: NS.i18n.plain_data_sources,
-						style: 'padding:7px 5px 5px 7px; font-weight:bold'
-					},
-					{
-						text: 'JSON',
-						iconCls: 'ns-menu-item-datasource',
-						handler: function() {
-							if (ns.core.init.contextPath && ns.app.paramString) {
-								window.open(ns.core.init.contextPath + '/api/analytics.json' + ns.app.paramString, '_blank');
-							}
-						}
-					},
-					{
-						text: 'XML',
-						iconCls: 'ns-menu-item-datasource',
-						handler: function() {
-							if (ns.core.init.contextPath && ns.app.paramString) {
-								window.open(ns.core.init.contextPath + '/api/analytics.xml' + ns.app.paramString, '_blank');
-							}
-						}
-					},
-					{
-						text: 'Microsoft Excel',
-						iconCls: 'ns-menu-item-datasource',
-						handler: function() {
-							if (ns.core.init.contextPath && ns.app.paramString) {
-								window.location.href = ns.core.init.contextPath + '/api/analytics.xls' + ns.app.paramString;
-							}
-						}
-					},
-					{
-						text: 'CSV',
-						iconCls: 'ns-menu-item-datasource',
-						handler: function() {
-							if (ns.core.init.contextPath && ns.app.paramString) {
-								window.location.href = ns.core.init.contextPath + '/api/analytics.csv' + ns.app.paramString;
-							}
-						}
-					},
-					{
-						text: 'JRXML',
-						iconCls: 'ns-menu-item-datasource',
-						handler: function() {
-							if (ns.core.init.contextPath && ns.app.paramString) {
-								window.open(ns.core.init.contextPath + '/api/analytics.jrxml' + ns.app.paramString, '_blank');
-							}
-						}
-					}
-				],
-				listeners: {
-					added: function() {
-						ns.app.downloadButton = this;
-					},
-					afterrender: function() {
-						this.getEl().addCls('ns-toolbar-btn-menu');
-					}
-				}
-			}
-		});
+            text: NS.i18n.download,
+            disabled: true,
+            menu: {
+                cls: 'ns-menu',
+                shadow: false,
+                showSeparator: false,
+                items: [
+                    {
+                        xtype: 'label',
+                        text: NS.i18n.graphics,
+                        style: 'padding:7px 5px 5px 7px; font-weight:bold'
+                    },
+                    {
+                        text: NS.i18n.image_png + ' (.png)',
+                        iconCls: 'ns-menu-item-image',
+                        handler: function() {
+                            ns.core.support.svg.submitForm('png');
+                        }
+                    },
+                    {
+                        text: 'PDF (.pdf)',
+                        iconCls: 'ns-menu-item-image',
+                        handler: function() {
+                            ns.core.support.svg.submitForm('pdf');
+                        }
+                    },
+                    {
+                        xtype: 'label',
+                        text: NS.i18n.plain_data_sources,
+                        style: 'padding:7px 5px 5px 7px; font-weight:bold'
+                    },
+                    {
+                        text: 'JSON',
+                        iconCls: 'ns-menu-item-datasource',
+                        handler: function() {
+                            if (ns.core.init.contextPath && ns.app.paramString) {
+                                window.open(ns.core.init.contextPath + '/api/analytics.json' + ns.core.web.getParamString(ns.app.xLayout, true));
+                            }
+                        }
+                    },
+                    {
+                        text: 'XML',
+                        iconCls: 'ns-menu-item-datasource',
+                        handler: function() {
+                            if (ns.core.init.contextPath && ns.app.paramString) {
+                                window.open(ns.core.init.contextPath + '/api/analytics.xml' + ns.core.web.getParamString(ns.app.xLayout, true));
+                            }
+                        }
+                    },
+                    {
+                        text: 'Microsoft Excel',
+                        iconCls: 'ns-menu-item-datasource',
+                        handler: function() {
+                            if (ns.core.init.contextPath && ns.app.paramString) {
+                                window.location.href = ns.core.init.contextPath + '/api/analytics.xls' + ns.core.web.getParamString(ns.app.xLayout, true);
+                            }
+                        }
+                    },
+                    {
+                        text: 'CSV',
+                        iconCls: 'ns-menu-item-datasource',
+                        handler: function() {
+                            if (ns.core.init.contextPath && ns.app.paramString) {
+                                window.location.href = ns.core.init.contextPath + '/api/analytics.csv' + ns.core.web.getParamString(ns.app.xLayout, true);
+                            }
+                        }
+                    }
+                ],
+                listeners: {
+                    afterrender: function() {
+                        this.getEl().addCls('ns-toolbar-btn-menu');
+                    }
+                }
+            }
+        });
 
 		interpretationButton = Ext.create('Ext.button.Button', {
 			text: NS.i18n.share,
@@ -4673,7 +4650,12 @@ Ext.onReady( function() {
 					html += '</div>';
 
 					p.update(html);
-				}
+				},
+                resize: function(p) {
+                    if (ns.app.xLayout && ns.app.chart) {
+                        ns.app.chart.onViewportResize();
+                    }
+                }
 			}
 		});
 
