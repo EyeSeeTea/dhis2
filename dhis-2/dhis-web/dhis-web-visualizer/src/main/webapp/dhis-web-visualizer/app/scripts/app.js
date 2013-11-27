@@ -1716,19 +1716,21 @@ Ext.onReady( function() {
 						// extend response
 						xResponse = service.response.getExtendedResponse(xLayout, response);
 
+						// instance
+						ns.app.layout = layout;
+						ns.app.xLayout = xLayout;
+						ns.app.response = response;
+						ns.app.xResponse = xResponse;
+						ns.app.paramString = paramString;
+
 						// create chart
-						chart = ns.core.web.chart.createChart(ns, xResponse, xLayout);
+						chart = ns.core.web.chart.createChart(ns);
 
 						// update viewport
 						ns.app.centerRegion.removeAll(true);
 						ns.app.centerRegion.add(chart);
 
 						// after render
-						ns.app.layout = layout;
-						ns.app.xLayout = xLayout;
-						ns.app.response = response;
-						ns.app.xResponse = xResponse;
-						ns.app.paramString = paramString;
 
 						if (NS.isSessionStorage) {
 							web.storage.session.set(layout, 'table');

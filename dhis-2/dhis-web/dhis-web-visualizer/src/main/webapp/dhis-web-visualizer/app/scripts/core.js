@@ -1438,8 +1438,10 @@ Ext.onReady( function() {
 			// chart
 			web.chart = {};
 
-			web.chart.createChart = function(ns, xResponse, xLayout) {
-                var getSyncronizedXLayout,
+			web.chart.createChart = function(ns) {
+				var xResponse = ns.app.xResponse,
+					xLayout = ns.app.xLayout,
+					getSyncronizedXLayout,
                     getExtendedResponse,
                     validateUrl,
 
@@ -1461,7 +1463,7 @@ Ext.onReady( function() {
 
                     generator = {};
 
-                getDefaultStore = function(xResponse, xLayout) {
+                getDefaultStore = function() {
                     var pe = conf.finals.dimension.period.dimensionName,
                         columnDimensionName = xLayout.columns[0].dimensionName,
                         rowDimensionName = xLayout.rows[0].dimensionName,
@@ -1594,7 +1596,7 @@ Ext.onReady( function() {
                     return store;
                 };
 
-                getDefaultNumericAxis = function(store, xResponse, xLayout) {
+                getDefaultNumericAxis = function(store) {
                     var typeConf = conf.finals.chart,
                         minimum = store.getMinimum(),
                         maximum,
@@ -1641,7 +1643,7 @@ Ext.onReady( function() {
                     return axis;
                 };
 
-                getDefaultCategoryAxis = function(store, xLayout) {
+                getDefaultCategoryAxis = function(store) {
                     var axis = {
                         type: 'Category',
                         position: 'bottom',
@@ -1660,7 +1662,7 @@ Ext.onReady( function() {
                     return axis;
                 };
 
-                getDefaultSeriesTitle = function(store, xResponse) {
+                getDefaultSeriesTitle = function(store) {
                     var a = [];
 
                     for (var i = 0, id, ids; i < store.rangeFields.length; i++) {
@@ -1671,7 +1673,7 @@ Ext.onReady( function() {
                     return a;
                 };
 
-                getDefaultSeries = function(store, xResponse, xLayout) {
+                getDefaultSeries = function(store) {
                     var main = {
                         type: 'column',
                         axis: 'left',
@@ -1686,7 +1688,7 @@ Ext.onReady( function() {
                             radius: 4
                         },
                         tips: getDefaultTips(),
-                        title: getDefaultSeriesTitle(store, xResponse)
+                        title: getDefaultSeriesTitle(store)
                     };
 
                     if (xLayout.showValues) {
@@ -1701,7 +1703,7 @@ Ext.onReady( function() {
                     return main;
                 };
 
-                getDefaultTrendLines = function(store, xResponse) {
+                getDefaultTrendLines = function(store) {
                     var a = [];
 
                     for (var i = 0; i < store.trendLineFields.length; i++) {
@@ -1726,7 +1728,7 @@ Ext.onReady( function() {
                     return a;
                 };
 
-                getDefaultTargetLine = function(store, xLayout) {
+                getDefaultTargetLine = function(store) {
                     return {
                         type: 'line',
                         axis: 'left',
@@ -1743,7 +1745,7 @@ Ext.onReady( function() {
                     };
                 };
 
-                getDefaultBaseLine = function(store, xLayout) {
+                getDefaultBaseLine = function(store) {
                     return {
                         type: 'line',
                         axis: 'left',
@@ -1770,7 +1772,7 @@ Ext.onReady( function() {
                     };
                 };
 
-                setDefaultTheme = function(store, xLayout) {
+                setDefaultTheme = function(store) {
                     var colors = conf.chart.theme.dv1.slice(0, store.rangeFields.length);
 
                     if (xLayout.targetLineValue || xLayout.baseLineValue) {
@@ -1795,7 +1797,7 @@ Ext.onReady( function() {
                     });
                 };
 
-                getDefaultLegend = function(store, xLayout, xResponse) {
+                getDefaultLegend = function(store) {
                     var itemLength = 30,
                         charLength = 7,
                         numberOfItems,
@@ -1851,7 +1853,7 @@ Ext.onReady( function() {
                     });
                 };
 
-                getDefaultChartTitle = function(store, xResponse, xLayout) {
+                getDefaultChartTitle = function(store) {
                     var ids = xLayout.filterIds,
                         a = [],
                         text = '',
@@ -1919,7 +1921,7 @@ console.log("h", ns.app.centerRegion.getHeight());
                     };
                 };
 
-                getDefaultChart = function(store, axes, series, xResponse, xLayout, theme) {
+                getDefaultChart = function(store, axes, series, theme) {
                     var chart,
                         config = {
 							//renderTo: init.el,
@@ -1936,7 +1938,7 @@ console.log("h", ns.app.centerRegion.getHeight());
 
                     // Legend
                     if (!xLayout.hideLegend) {
-                        config.legend = getDefaultLegend(store, xLayout, xResponse);
+                        config.legend = getDefaultLegend(store);
 
                         if (config.legend.position === 'right') {
                             config.insetPadding = 40;
@@ -1945,7 +1947,7 @@ console.log("h", ns.app.centerRegion.getHeight());
 
                     // Title
                     if (!xLayout.hideTitle) {
-                        config.items = [getDefaultChartTitle(store, xResponse, xLayout)];
+                        config.items = [getDefaultChartTitle(store)];
                     }
                     else {
                         config.insetPadding = 10;
@@ -1969,34 +1971,34 @@ console.log("h", ns.app.centerRegion.getHeight());
                     return chart;
                 };
 
-                generator.column = function(xResponse, xLayout) {
-                    var store = getDefaultStore(xResponse, xLayout),
-                        numericAxis = getDefaultNumericAxis(store, xResponse, xLayout),
-                        categoryAxis = getDefaultCategoryAxis(store, xLayout),
+                generator.column = function() {
+                    var store = getDefaultStore(),
+                        numericAxis = getDefaultNumericAxis(store),
+                        categoryAxis = getDefaultCategoryAxis(store),
                         axes = [numericAxis, categoryAxis],
-                        series = [getDefaultSeries(store, xResponse, xLayout)];
+                        series = [getDefaultSeries(store)];
 
                     // Options
                     if (xLayout.showTrendLine) {
-                        series = getDefaultTrendLines(store, xResponse).concat(series);
+                        series = getDefaultTrendLines(store).concat(series);
                     }
 
                     if (xLayout.targetLineValue) {
-                        series.push(getDefaultTargetLine(store, xLayout));
+                        series.push(getDefaultTargetLine(store));
                     }
 
                     if (xLayout.baseLineValue) {
-                        series.push(getDefaultBaseLine(store, xLayout));
+                        series.push(getDefaultBaseLine(store));
                     }
 
                     // Theme
-                    setDefaultTheme(store, xLayout);
+                    setDefaultTheme(store);
 
-                    return getDefaultChart(store, axes, series, xResponse, xLayout);
+                    return getDefaultChart(store, axes, series);
                 };
 
-                generator.stackedcolumn = function(xResponse, xLayout) {
-                    var chart = this.column(xResponse, xLayout);
+                generator.stackedcolumn = function() {
+                    var chart = this.column();
 
                     for (var i = 0, item; i < chart.series.items.length; i++) {
                         item = chart.series.items[i];
@@ -2009,12 +2011,12 @@ console.log("h", ns.app.centerRegion.getHeight());
                     return chart;
                 };
 
-                generator.bar = function(xResponse, xLayout) {
-                    var store = getDefaultStore(xResponse, xLayout),
-                        numericAxis = getDefaultNumericAxis(store, xResponse, xLayout),
-                        categoryAxis = getDefaultCategoryAxis(store, xLayout),
+                generator.bar = function() {
+                    var store = getDefaultStore(),
+                        numericAxis = getDefaultNumericAxis(store),
+                        categoryAxis = getDefaultCategoryAxis(store),
                         axes,
-                        series = getDefaultSeries(store, xResponse, xLayout),
+                        series = getDefaultSeries(store),
                         trendLines,
                         targetLine,
                         baseLine,
@@ -2041,7 +2043,7 @@ console.log("h", ns.app.centerRegion.getHeight());
                     series = [series];
 
                     if (xLayout.showTrendLine) {
-                        trendLines = getDefaultTrendLines(store, xResponse);
+                        trendLines = getDefaultTrendLines(store);
 
                         for (var i = 0; i < trendLines.length; i++) {
                             trendLines[i].axis = 'bottom';
@@ -2053,7 +2055,7 @@ console.log("h", ns.app.centerRegion.getHeight());
                     }
 
                     if (xLayout.targetLineValue) {
-                        targetLine = getDefaultTargetLine(store, xLayout);
+                        targetLine = getDefaultTargetLine(store);
                         targetLine.axis = 'bottom';
                         targetLine.xField = store.targetLineFields;
                         targetLine.yField = store.domainFields;
@@ -2062,7 +2064,7 @@ console.log("h", ns.app.centerRegion.getHeight());
                     }
 
                     if (xLayout.baseLineValue) {
-                        baseLine = getDefaultBaseLine(store, xLayout);
+                        baseLine = getDefaultBaseLine(store);
                         baseLine.axis = 'bottom';
                         baseLine.xField = store.baseLineFields;
                         baseLine.yField = store.domainFields;
@@ -2071,13 +2073,13 @@ console.log("h", ns.app.centerRegion.getHeight());
                     }
 
                     // Theme
-                    setDefaultTheme(store, xLayout);
+                    setDefaultTheme(store);
 
-                    return getDefaultChart(store, axes, series, xResponse, xLayout);
+                    return getDefaultChart(store, axes, series);
                 };
 
-                generator.stackedbar = function(xResponse, xLayout) {
-                    var chart = this.bar(xResponse, xLayout);
+                generator.stackedbar = function() {
+                    var chart = this.bar();
 
                     for (var i = 0, item; i < chart.series.items.length; i++) {
                         item = chart.series.items[i];
@@ -2090,14 +2092,14 @@ console.log("h", ns.app.centerRegion.getHeight());
                     return chart;
                 };
 
-                generator.line = function(xResponse, xLayout) {
-                    var store = getDefaultStore(xResponse, xLayout),
-                        numericAxis = getDefaultNumericAxis(store, xResponse, xLayout),
-                        categoryAxis = getDefaultCategoryAxis(store, xLayout),
+                generator.line = function() {
+                    var store = getDefaultStore(),
+                        numericAxis = getDefaultNumericAxis(store),
+                        categoryAxis = getDefaultCategoryAxis(store),
                         axes = [numericAxis, categoryAxis],
                         series = [],
                         colors = conf.chart.theme.dv1.slice(0, store.rangeFields.length),
-                        seriesTitles = getDefaultSeriesTitle(store, xResponse);
+                        seriesTitles = getDefaultSeriesTitle(store);
 
                     // Series
                     for (var i = 0, line; i < store.rangeFields.length; i++) {
@@ -2130,19 +2132,19 @@ console.log("h", ns.app.centerRegion.getHeight());
 
                     // Options, theme colors
                     if (xLayout.showTrendLine) {
-                        series = getDefaultTrendLines(store, xResponse).concat(series);
+                        series = getDefaultTrendLines(store).concat(series);
 
                         colors = colors.concat(colors);
                     }
 
                     if (xLayout.targetLineValue) {
-                        series.push(getDefaultTargetLine(store, xLayout));
+                        series.push(getDefaultTargetLine(store));
 
                         colors.push('#051a2e');
                     }
 
                     if (xLayout.baseLineValue) {
-                        series.push(getDefaultBaseLine(store, xLayout));
+                        series.push(getDefaultBaseLine(store));
 
                         colors.push('#051a2e');
                     }
@@ -2157,15 +2159,15 @@ console.log("h", ns.app.centerRegion.getHeight());
                         }
                     });
 
-                    return getDefaultChart(store, axes, series, xResponse, xLayout);
+                    return getDefaultChart(store, axes, series);
                 };
 
-                generator.area = function(xResponse, xLayout) {
-                    var store = getDefaultStore(xResponse, xLayout),
-                        numericAxis = getDefaultNumericAxis(store, xResponse, xLayout),
-                        categoryAxis = getDefaultCategoryAxis(store, xLayout),
+                generator.area = function() {
+                    var store = getDefaultStore(),
+                        numericAxis = getDefaultNumericAxis(store),
+                        categoryAxis = getDefaultCategoryAxis(store),
                         axes = [numericAxis, categoryAxis],
-                        series = getDefaultSeries(store, xResponse, xLayout);
+                        series = getDefaultSeries(store);
 
                     series.type = 'area';
                     series.style.opacity = 0.7;
@@ -2176,25 +2178,25 @@ console.log("h", ns.app.centerRegion.getHeight());
 
                     // Options
                     if (xLayout.showTrendLine) {
-                        series = getDefaultTrendLines(store, xResponse).concat(series);
+                        series = getDefaultTrendLines(store).concat(series);
                     }
 
                     if (xLayout.targetLineValue) {
-                        series.push(getDefaultTargetLine(store, xLayout));
+                        series.push(getDefaultTargetLine(store));
                     }
 
                     if (xLayout.baseLineValue) {
-                        series.push(getDefaultBaseLine(store, xLayout));
+                        series.push(getDefaultBaseLine(store));
                     }
 
                     // Theme
-                    setDefaultTheme(store, xLayout);
+                    setDefaultTheme(store);
 
-                    return getDefaultChart(store, axes, series, xResponse, xLayout);
+                    return getDefaultChart(store, axes, series);
                 };
 
-                generator.pie = function(xResponse, xLayout) {
-                    var store = getDefaultStore(xResponse, xLayout),
+                generator.pie = function() {
+                    var store = getDefaultStore(),
                         series,
                         colors,
                         chart,
@@ -2251,7 +2253,7 @@ console.log("h", ns.app.centerRegion.getHeight());
                     });
 
                     // Chart
-                    chart = getDefaultChart(store, null, series, xResponse, xLayout);
+                    chart = getDefaultChart(store, null, series);
                     //chart.legend.position = 'right';
                     //chart.legend.isVertical = true;
                     chart.insetPadding = 40;
@@ -2260,11 +2262,11 @@ console.log("h", ns.app.centerRegion.getHeight());
                     return chart;
                 };
 
-                generator.radar = function(xResponse, xLayout) {
-                    var store = getDefaultStore(xResponse, xLayout),
+                generator.radar = function() {
+                    var store = getDefaultStore(),
                         axes = [],
                         series = [],
-                        seriesTitles = getDefaultSeriesTitle(store, xResponse),
+                        seriesTitles = getDefaultSeriesTitle(store),
                         chart;
 
                     // Axes
@@ -2300,7 +2302,7 @@ console.log("h", ns.app.centerRegion.getHeight());
                         series.push(obj);
                     }
 
-                    chart = getDefaultChart(store, axes, series, xResponse, xLayout, 'Category2');
+                    chart = getDefaultChart(store, axes, series, 'Category2');
 
                     chart.insetPadding = 40;
                     chart.height = ns.app.centerRegion.getHeight() - 80;
@@ -2316,7 +2318,7 @@ console.log("h", ns.app.centerRegion.getHeight());
                 };
 
                 // initialize
-                return generator[xLayout.type](xResponse, xLayout);
+                return generator[xLayout.type]();
             };
 
             //engine.analytical2layout = function(analytical) {
