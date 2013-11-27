@@ -1438,7 +1438,7 @@ Ext.onReady( function() {
 			// chart
 			web.chart = {};
 
-			web.chart.createChart = function(xResponse, xLayout) {
+			web.chart.createChart = function(ns, xResponse, xLayout) {
                 var getSyncronizedXLayout,
                     getExtendedResponse,
                     validateUrl,

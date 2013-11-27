@@ -330,7 +330,7 @@ Ext.onReady( function() {
 							return;
 						}
 
-						ns.core.web.chart.createChart(layout, false);
+						ns.core.web.chart.update(layout, false);
 
 						window.hide();
 					}
@@ -1658,13 +1658,13 @@ Ext.onReady( function() {
 							layout = api.layout.Layout(layoutConfig);
 
 						if (layout) {
-							web.chart.createChart(layout, true);
+							web.chart.update(layout, true);
 						}
 					}
 				});
 			};
 
-			web.chart.createChart = function(layout, isUpdateGui) {
+			web.chart.update = function(layout, isUpdateGui) {
 				var xLayout,
 					paramString;
 
@@ -1717,7 +1717,7 @@ Ext.onReady( function() {
 						xResponse = service.response.getExtendedResponse(xLayout, response);
 
 						// create chart
-						chart = ns.core.web.chart.createChart(xResponse, xLayout);
+						chart = ns.core.web.chart.createChart(ns, xResponse, xLayout);
 
 						// update viewport
 						ns.app.centerRegion.removeAll(true);
@@ -1748,7 +1748,6 @@ Ext.onReady( function() {
 					}
 				});
 			};
-
 		}());
 
     };
@@ -4201,7 +4200,7 @@ Ext.onReady( function() {
 				return;
 			}
 
-			ns.core.web.chart.createChart(layout, false);
+			ns.core.web.chart.update(layout, false);
 		};
 
 		accordionBody = Ext.create('Ext.panel.Panel', {
@@ -4953,7 +4952,7 @@ Ext.onReady( function() {
 						layout = ns.core.api.layout.Layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]);
 
 						if (layout) {
-							ns.core.web.chart.createChart(layout, true);
+							ns.core.web.chart.update(layout, true);
 						}
 					}
 
