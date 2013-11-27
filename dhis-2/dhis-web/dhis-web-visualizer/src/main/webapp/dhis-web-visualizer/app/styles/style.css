@@ -493,8 +493,8 @@ body.x-windows {
 .x-tip {
     border-radius: 2px;
     padding: 1px 4px;
-    border: 1px solid #111;
-    background-color: #111;
+    border: 1px solid #222;
+    background-color: #222;
 }
 
 .x-tip .x-tip-body {
@@ -504,7 +504,7 @@ body.x-windows {
 }
 
 .x-tip-anchor {
-	border-top-color: #111;
+	border-top-color: #222;
 }
 
 

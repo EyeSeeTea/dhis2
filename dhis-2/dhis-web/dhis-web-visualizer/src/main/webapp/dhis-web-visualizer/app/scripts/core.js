@@ -778,24 +778,6 @@ Ext.onReady( function() {
 				return support.prototype.object.getLength(map) ? map : null;
 			};
 
-			service.layout.getItemName = function(layout, response, id, isHtml) {
-				var metaData = response.metaData,
-					name = '';
-
-				if (service.layout.isHierarchy(layout, response, id)) {
-					var a = Ext.Array.clean(metaData.ouHierarchy[id].split('/'));
-					a.shift();
-
-					for (var i = 0; i < a.length; i++) {
-						name += (isHtml ? '<span class="text-weak">' : '') + metaData.names[a[i]] + (isHtml ? '</span>' : '') + ' / ';
-					}
-				}
-
-				name += metaData.names[id];
-
-				return name;
-			};
-
 			service.layout.getExtendedLayout = function(layout) {
                 var layout = Ext.clone(layout),
                     xLayout = {
@@ -1048,7 +1030,7 @@ Ext.onReady( function() {
 							if (isUserOrgunit) {
 								userOu = [{
 									id: init.user.ou,
-									name: service.layout.getItemName(xLayout, response, init.user.ou, false)
+									name: response.metaData.names[init.user.ou]
 								}];
 							}
 							if (isUserOrgunitChildren) {
@@ -1057,7 +1039,7 @@ Ext.onReady( function() {
 								for (var j = 0; j < init.user.ouc.length; j++) {
 									userOuc.push({
 										id: init.user.ouc[j],
-										name: service.layout.getItemName(xLayout, response, init.user.ouc[j], false)
+										name: response.metaData.names[init.user.ouc[j]]
 									});
 								}
 
@@ -1065,7 +1047,7 @@ Ext.onReady( function() {
 							}
 							if (isUserOrgunitGrandChildren) {
 								var userOuOuc = [].concat(init.user.ou, init.user.ouc),
-									responseOu = response.metaData[ou];
+									responseOu = response.response.metaData[ou];
 
 								userOugc = [];
 
@@ -1075,7 +1057,7 @@ Ext.onReady( function() {
 									if (!Ext.Array.contains(userOuOuc, id)) {
 										userOugc.push({
 											id: id,
-											name: service.layout.getItemName(xLayout, response, id, false)
+											name: response.metaData.names[id]
 										});
 									}
 								}
@@ -1091,7 +1073,7 @@ Ext.onReady( function() {
 
 									dim.items.push({
 										id: id,
-										name: service.layout.getItemName(xLayout, response, id, false)
+										name: response.metaData.names[id]
 									});
 								}
 

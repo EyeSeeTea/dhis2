@@ -107,6 +107,7 @@ public abstract class AbstractEnrollmentService
 
         List<ProgramInstance> programInstances = new ArrayList<ProgramInstance>(
             programInstanceService.getProgramInstances( programs ) );
+
         return getEnrollments( programInstances );
     }
 
@@ -216,7 +217,12 @@ public abstract class AbstractEnrollmentService
 
         for ( ProgramInstance programInstance : programInstances )
         {
-            enrollments.getEnrollments().add( getEnrollment( programInstance ) );
+            // check for null, both for pi, and for pi.patient, there are DBs out there where patientid == null
+            // even if the program is of type 1/2.
+            if ( programInstance != null && programInstance.getPatient() != null )
+            {
+                enrollments.getEnrollments().add( getEnrollment( programInstance ) );
+            }
         }
 
         return enrollments;
@@ -225,9 +231,9 @@ public abstract class AbstractEnrollmentService
     @Override
     public Enrollment getEnrollment( String id )
     {
-        ProgramInstance pi = programInstanceService.getProgramInstance( id );
-        
-        return pi != null ? getEnrollment( pi ) : null;
+        ProgramInstance programInstance = programInstanceService.getProgramInstance( id );
+
+        return programInstance != null ? getEnrollment( programInstance ) : null;
     }
 
     @Override

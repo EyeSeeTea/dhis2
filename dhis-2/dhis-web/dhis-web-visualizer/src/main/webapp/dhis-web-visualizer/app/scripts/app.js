@@ -1726,7 +1726,6 @@ Ext.onReady( function() {
 						ns.app.chart = ns.core.web.chart.createChart(ns);
 
 						// update viewport
-						ns.app.centerRegion.update();
 						ns.app.centerRegion.removeAll();
 						ns.app.centerRegion.add(ns.app.chart);
 
@@ -2316,7 +2315,7 @@ Ext.onReady( function() {
 					if (dataElementDetailLevel.getValue() === ns.core.conf.finals.dimension.dataElement.objectName) {
 						s.add({
 							id: 0,
-							name: '[ ' + NS.i18n.all_data_element_groups + ' ]',
+							name: '[ ' + NS.i18n.all_data_elements + ' ]',
 							index: -1
 						});
 					}
@@ -4634,23 +4633,6 @@ Ext.onReady( function() {
 				added: function() {
 					ns.app.centerRegion = this;
 				},
-				afterrender: function(p) {
-					var liStyle = 'padding:3px 10px; color:#333',
-						html = '';
-
-					html += '<div style="padding:20px">';
-					html += '<div style="font-size:14px; padding-bottom:8px">' + NS.i18n.example1 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + NS.i18n.example2 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + NS.i18n.example3 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + NS.i18n.example4 + '</div>';
-					html += '<div style="font-size:14px; padding-top:20px; padding-bottom:8px">' + NS.i18n.example5 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + NS.i18n.example6 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + NS.i18n.example7 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + NS.i18n.example8 + '</div>';
-					html += '</div>';
-
-					p.update(html);
-				},
                 resize: function(p) {
                     if (ns.app.xLayout && ns.app.chart) {
                         ns.app.chart.onViewportResize();
@@ -4944,13 +4926,13 @@ Ext.onReady( function() {
 				init.contextPath = Ext.decode(r.responseText).activities.dhis.href;
 
 				Ext.Ajax.request({
-					url: 'i18n.json?package=org.hisp.dhis.visualizer',
+					url: 'i18n.json',
 					success: function(r) {
 						var i18nArray = Ext.decode(r.responseText);
 
 						// i18n
 						requests.push({
-							url: init.contextPath + '/api/i18n',
+							url: init.contextPath + '/api/i18n?package=org.hisp.dhis.visualizer',
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json',
