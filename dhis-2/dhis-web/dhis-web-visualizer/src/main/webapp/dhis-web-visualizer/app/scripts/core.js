@@ -1541,7 +1541,7 @@ Ext.onReady( function() {
                             id = support.prototype.str.replaceAll(columnIds[j], '-', '') + support.prototype.str.replaceAll(rowIds[i], '-', '');
                             //id = columnIds[j].replace('-', '') + rowIds[i].replace('-', '');
 
-                            obj[columnIds[j]] = xResponse.idValueMap[id];
+                            obj[columnIds[j]] = parseFloat(xResponse.idValueMap[id]);
                         }
 
                         data.push(obj);
