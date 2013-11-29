@@ -1757,7 +1757,7 @@ Ext.onReady( function() {
 					return parseFloat(support.prototype.number.roundIf(value, 2)).toString();
 				};
 
-				getTdHtml = function(config) {
+				getTdHtml = function(config, id) {
 					var bgColor,
 						mapLegends,
 						colSpan,
@@ -1770,6 +1770,7 @@ Ext.onReady( function() {
 						cls = '',
 						html = '';
 //console.log(config.type);
+console.log(id);
 
 					if (!Ext.isObject(config)) {
 						return '';
@@ -1800,7 +1801,12 @@ console.log(config.type);
 					cls += isValue ? ' pointer' : '';
 					cls += bgColor ? ' legend' : (config.cls ? ' ' + config.cls : '');
 
-					html += '<td ' + (config.uuid ? ('id="' + config.uuid + '" ') : '') + ' class="' + cls + '" ' + colSpan + rowSpan;
+					html += '<td ' + (config.uuid ? ('id="' + config.uuid + '" ') : '');
+					html += ' class="' + cls + '" ' + colSpan + rowSpan;
+
+					if (Ext.isString(id)) {
+						html += ' onclick="PT.instances[0].core.web.pivot.sort(PT.instances[0].app.xLayout, PT.instances[0].app.response, PT.id);"';
+					}
 
 					if (bgColor) {
 						html += '>';
@@ -1879,7 +1885,7 @@ console.log(config.type);
 							dimHtml.push(getEmptyHtmlArray());
 						}
 
-						for (var j = 0, obj, spanCount = 0; j < xColAxis.size; j++) {
+						for (var j = 0, obj, spanCount = 0, id; j < xColAxis.size; j++) {
 							spanCount++;
 
 							obj = xColAxis.objects.all[i][j];
@@ -1889,7 +1895,11 @@ console.log(config.type);
 							obj.hidden = !(obj.rowSpan || obj.colSpan);
 							obj.htmlValue = service.layout.getItemName(xLayout, xResponse, obj.id, true);
 
-							dimHtml.push(getTdHtml(obj));
+							if (j === xColAxis.size - 1 && !doSubTotals(xColAxis)) {
+								id = obj.id;
+							}
+
+							dimHtml.push(getTdHtml(obj, id));
 
 							if (i === 0 && spanCount === xColAxis.span[i] && doSubTotals(xColAxis) ) {
 								dimHtml.push(getTdHtml({
