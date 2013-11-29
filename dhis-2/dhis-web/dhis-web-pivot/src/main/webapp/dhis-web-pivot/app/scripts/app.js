@@ -354,7 +354,7 @@ Ext.onReady( function() {
 									return;
 								}
 
-								ns.core.web.pivot.createTable(layout, false);
+								ns.core.web.pivot.getData(layout, false);
 
 								window.hide();
 							});
@@ -709,7 +709,7 @@ Ext.onReady( function() {
 							return;
 						}
 
-						ns.core.web.pivot.createTable(layout, false);
+						ns.core.web.pivot.getData(layout, false);
 
 						window.hide();
 					}
@@ -2163,13 +2163,13 @@ Ext.onReady( function() {
 							layout = api.layout.Layout(layoutConfig);
 
 						if (layout) {
-							web.pivot.createTable(layout, true);
+							web.pivot.getData(layout, true);
 						}
 					}
 				});
 			};
 
-			web.pivot.createTable = function(layout, isUpdateGui) {
+			web.pivot.getData = function(layout, isUpdateGui) {
 				var xLayout,
 					paramString;
 
@@ -2200,62 +2200,73 @@ Ext.onReady( function() {
 						alert(r.responseText);
 					},
 					success: function(r) {
-						var response = api.response.Response(Ext.decode(r.responseText)),
-							xResponse,
-							xColAxis,
-							xRowAxis,
-							config;
+						var response = api.response.Response(Ext.decode(r.responseText));
 
 						if (!response) {
 							web.mask.hide(ns.app.centerRegion);
 							return;
 						}
 
-						// sync xLayout with response
-						xLayout = service.layout.getSyncronizedXLayout(xLayout, response);
-
-						if (!xLayout) {
-							web.mask.hide(ns.app.centerRegion);
-							return;
-						}
-
-						// extend response
-						xResponse = service.response.getExtendedResponse(xLayout, response);
-
-						// extended axes
-						xColAxis = service.layout.getExtendedAxis(xLayout, xResponse, 'col');
-						xRowAxis = service.layout.getExtendedAxis(xLayout, xResponse, 'row');
-
-						// update viewport
-						config = web.pivot.getHtml(xLayout, xResponse, xColAxis, xRowAxis);
-						ns.app.centerRegion.removeAll(true);
-						ns.app.centerRegion.update(config.html);
-
-						// after render
-						ns.app.layout = layout;
-						ns.app.xLayout = xLayout;
-						ns.app.response = response;
-						ns.app.xResponse = xResponse;
 						ns.app.paramString = paramString;
-						ns.app.uuidDimUuidsMap = config.uuidDimUuidsMap;
-						ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
 
-						if (NS.isSessionStorage) {
-							web.events.setMouseHandlers(layout, response, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
-							web.storage.session.set(layout, 'table');
-						}
-
-						ns.app.viewport.setGui(layout, xLayout, isUpdateGui);
-
-						web.mask.hide(ns.app.centerRegion);
-
-						if (NS.isDebug) {
-							console.log("core", ns.core);
-							console.log("app", ns.app);
-						}
+						web.pivot.createTable(layout, xLayout, response, isUpdateGui);
 					}
 				});
 			};
+
+			web.pivot.createTable = function(layout, xLayout, response, isUpdateGui) {
+				var xResponse,
+					xColAxis,
+					xRowAxis,
+					config;
+
+				if (!xLayout) {
+					xLayout = service.layout.getExtendedLayout(layout);
+				}
+
+				// sync xLayout with response
+				xLayout = service.layout.getSyncronizedXLayout(xLayout, response);
+
+				if (!xLayout) {
+					web.mask.hide(ns.app.centerRegion);
+					return;
+				}
+
+				// extend response
+				xResponse = service.response.getExtendedResponse(xLayout, response);
+
+				// extended axes
+				xColAxis = service.layout.getExtendedAxis(xLayout, xResponse, 'col');
+				xRowAxis = service.layout.getExtendedAxis(xLayout, xResponse, 'row');
+
+				// update viewport
+				config = web.pivot.getHtml(xLayout, xResponse, xColAxis, xRowAxis);
+				ns.app.centerRegion.removeAll(true);
+				ns.app.centerRegion.update(config.html);
+
+				// after render
+				ns.app.layout = layout;
+				ns.app.xLayout = xLayout;
+				ns.app.response = response;
+				ns.app.xResponse = xResponse;
+				ns.app.uuidDimUuidsMap = config.uuidDimUuidsMap;
+				ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
+
+				if (NS.isSessionStorage) {
+					web.events.setMouseHandlers(layout, response, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
+					web.storage.session.set(layout, 'table');
+				}
+
+				ns.app.viewport.setGui(layout, xLayout, isUpdateGui);
+
+				web.mask.hide(ns.app.centerRegion);
+
+				if (NS.isDebug) {
+					console.log("core", ns.core);
+					console.log("app", ns.app);
+				}
+			};
+
 		}());
 	};
 
@@ -4387,7 +4398,7 @@ Ext.onReady( function() {
 				return;
 			}
 
-			ns.core.web.pivot.createTable(layout, false);
+			ns.core.web.pivot.getData(layout, false);
 		};
 
 		accordionBody = Ext.create('Ext.panel.Panel', {
@@ -5149,7 +5160,7 @@ Ext.onReady( function() {
 						layout = ns.core.api.layout.Layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]);
 
 						if (layout) {
-							ns.core.web.pivot.createTable(layout, true);
+							ns.core.web.pivot.getData(layout, true);
 						}
 					}
 
