@@ -12,9 +12,9 @@
 
 <div id="contextMenu" class="contextMenu">
   <ul id="contextMenuItems" class="contextMenuItems">
-    <li><a data-target-fn="showUpdateConcept" href="#">$i18n.getString( "edit" )</a></li>
-    <li><a data-target-fn="removeConcept" href="#">$i18n.getString( "remove" )</a></li>
-    <li><a data-target-fn="showConceptDetails" href="#">$i18n.getString( "show_details" )</a></li>
+    <li><a data-target-fn="showUpdateConcept">$i18n.getString( "edit" )</a></li>
+    <li><a data-target-fn="removeConcept">$i18n.getString( "remove" )</a></li>
+    <li><a data-target-fn="showConceptDetails">$i18n.getString( "show_details" )</a></li>
   </ul>
 </div>
 
@@ -36,8 +36,8 @@
 				<tbody id="list">
 				#foreach( $concept in $concepts )
 				#if( $concept.id != $defaultConcept.id )
-				<tr id="tr${concept.id}" style="height: 40px;">
-          <td data-id="$!concept.id" data-uid="$!concept.uid" data-type="Concept" data-name="$encoder.htmlEncode( $!concept.displayName )">
+				<tr id="tr${concept.id}">
+          <td style="padding: 12px 0 12px 5px;" data-id="$!concept.id" data-uid="$!concept.uid" data-type="Concept" data-name="$encoder.htmlEncode( $!concept.displayName )">
             $encoder.htmlEncode( $!concept.displayName )
           </td>
 				</tr>

@@ -121,7 +121,19 @@ public class FormUtils
         form.getOptions().put( "type", Program.TYPE_LOOKUP.get( program.getType() ) );
 
         ProgramStage programStage = program.getProgramStageByStage( 1 );
-        Assert.notNull( programStage );
+
+        if ( programStage == null )
+        {
+            if ( (Program.SINGLE_EVENT_WITHOUT_REGISTRATION == program.getType()
+                || Program.SINGLE_EVENT_WITH_REGISTRATION == program.getType()) )
+            {
+                throw new NullPointerException();
+            }
+            else
+            {
+                return form;
+            }
+        }
 
         form.getOptions().put( "captureCoordinates", programStage.getCaptureCoordinates() );
 
