@@ -2207,6 +2207,14 @@ Ext.onReady( function() {
 							return;
 						}
 
+						// sync xLayout with response
+						xLayout = service.layout.getSyncronizedXLayout(xLayout, response);
+
+						if (!xLayout) {
+							web.mask.hide(ns.app.centerRegion);
+							return;
+						}
+
 						ns.app.paramString = paramString;
 
 						web.pivot.createTable(layout, xLayout, response, isUpdateGui);
@@ -2222,14 +2230,6 @@ Ext.onReady( function() {
 
 				if (!xLayout) {
 					xLayout = service.layout.getExtendedLayout(layout);
-				}
-
-				// sync xLayout with response
-				xLayout = service.layout.getSyncronizedXLayout(xLayout, response);
-
-				if (!xLayout) {
-					web.mask.hide(ns.app.centerRegion);
-					return;
 				}
 
 				// extend response
@@ -2267,6 +2267,37 @@ Ext.onReady( function() {
 				}
 			};
 
+			web.pivot.sort = function(xLayout, response, id) {
+				var xLayout = Ext.clone(xLayout),
+					response = Ext.clone(response),
+					dim = xLayout.rows[0],
+					valueMap = response.idValueMap,
+					layout;
+
+				dim.ids = [];
+
+				// collect values
+				for (var i = 0, item, key; i < dim.items.length; i++) {
+					item = dim.items[i];
+					key = id + item.id;
+
+					item.value = parseFloat(valueMap[key]);
+				}
+
+				// sort
+				support.prototype.array.sort(dim.items, 'DESC', 'value');
+
+				// new id order
+				for (var i = 0; i < dim.items.length; i++) {
+					dim.ids.push(dim.items[i].id);
+				}
+
+				// re-layout
+				layout = api.layout.Layout(xLayout);
+
+				// re-create table
+				web.pivot.createTable(layout, null, response, false);
+			};
 		}());
 	};
 
@@ -4857,7 +4888,9 @@ Ext.onReady( function() {
 						xtype: 'button',
 						text: NS.i18n.home,
 						handler: function() {
-							window.location.href = ns.core.init.contextPath + '/dhis-web-commons-about/redirect.action';
+							//window.location.href = ns.core.init.contextPath + '/dhis-web-commons-about/redirect.action';
+
+							ns.core.web.pivot.sort(ns.app.xLayout, ns.app.response, 'Uvn6LCg7dVU');
 						}
 					}
 				]

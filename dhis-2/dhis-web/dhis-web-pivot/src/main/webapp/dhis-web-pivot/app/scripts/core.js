@@ -550,7 +550,7 @@ Ext.onReady( function() {
 			};
 
 			support.prototype.array.sort = function(array, direction, key) {
-				// accepts [number], [string], [{prop: number}], [{prop: string}]
+				// accepts [number], [string], [{key: number}], [{key: string}]
 
 				if (!support.prototype.array.getLength(array)) {
 					return;
