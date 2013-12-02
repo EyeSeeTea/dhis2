@@ -1874,7 +1874,7 @@ Ext.onReady( function() {
 				};
 
 				doSortableColumnHeaders = function() {
-					return (xRowAxis.dims === 1);// && !doSubTotals(
+					return (xRowAxis && xRowAxis.dims === 1);// && !doSubTotals(
 				};
 
 				getColAxisHtmlArray = function() {
