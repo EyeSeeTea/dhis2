@@ -1964,6 +1964,7 @@ Ext.onReady( function() {
 					for (var i = 0, obj, el; i < xLayout.sortableIdObjects.length; i++) {
 						obj = xLayout.sortableIdObjects[i];
 						el = Ext.get(obj.uuid);
+console.log(obj.id);
 
 						el.dom.xLayout = xLayout;
 						el.dom.response = response;
@@ -2337,7 +2338,6 @@ Ext.onReady( function() {
 					value = parseFloat(valueMap[key]);
 
 					item.value = Ext.isNumber(value) ? value : (Number.MAX_VALUE * -1);
-//console.log(response.metaData.names[id], item.value);
 				}
 
 				// sort

@@ -1493,8 +1493,6 @@ Ext.onReady( function() {
 
 //console.log("aaAllFloorObjects", aaAllFloorObjects);
 
-
-	alle = aaAllFloorObjects;
 				return {
 					type: type,
 					items: aDimensions,
@@ -1904,7 +1902,7 @@ Ext.onReady( function() {
 							dimHtml.push(getEmptyHtmlArray());
 						}
 
-						for (var j = 0, obj, spanCount = 0, metaDataId; j < xColAxis.size; j++) {
+						for (var j = 0, obj, spanCount = 0, condoId; j < xColAxis.size; j++) {
 							spanCount++;
 
 							obj = xColAxis.objects.all[i][j];
@@ -1916,10 +1914,10 @@ Ext.onReady( function() {
 
 							// sortable column headers. only if last dim and no subtotals.
 							if (i === xColAxis.dims - 1 && doSortableColumnHeaders()) {
-								metaDataId = obj.id;
+								condoId = xColAxis.ids[j];
 							}
 
-							dimHtml.push(getTdHtml(obj, metaDataId));
+							dimHtml.push(getTdHtml(obj, condoId));
 
 							if (i === 0 && spanCount === xColAxis.span[i] && doSubTotals(xColAxis) ) {
 								dimHtml.push(getTdHtml({
