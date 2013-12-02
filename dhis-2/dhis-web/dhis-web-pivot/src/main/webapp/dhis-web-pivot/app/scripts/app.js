@@ -1963,34 +1963,6 @@ Ext.onReady( function() {
 				}
 			};
 
-			web.events.setColumnHeaderMouseHandlers = function(xLayout, response) {
-				if (Ext.isArray(xLayout.sortableIdObjects)) {
-					for (var i = 0, obj, el; i < xLayout.sortableIdObjects.length; i++) {
-						obj = xLayout.sortableIdObjects[i];
-						el = Ext.get(obj.uuid);
-
-						el.dom.xLayout = xLayout;
-						el.dom.response = response;
-						el.dom.metaDataId = obj.id;
-						el.dom.onColumnHeaderMouseClick = web.events.onColumnHeaderMouseClick;
-						el.dom.onColumnHeaderMouseOver = web.events.onColumnHeaderMouseOver;
-						el.dom.onColumnHeaderMouseOut = web.events.onColumnHeaderMouseOut;
-
-						el.dom.setAttribute('onclick', 'this.onColumnHeaderMouseClick(this.xLayout, this.response, this.metaDataId)');
-						el.dom.setAttribute('onmouseover', 'this.onColumnHeaderMouseOver(this)');
-						el.dom.setAttribute('onmouseout', 'this.onColumnHeaderMouseOut(this)');
-					}
-				}
-			};
-
-			web.events.onValueMouseOver = function(uuid) {
-				Ext.get(uuid).addCls('highlighted');
-			};
-
-			web.events.onValueMouseOut = function(uuid) {
-				Ext.get(uuid).removeCls('highlighted');
-			};
-
 			web.events.onValueMouseClick = function(layout, response, uuidDimUuidsMap, uuidObjectMap, uuid) {
 				var uuids = uuidDimUuidsMap[uuid],
 					layoutConfig = Ext.clone(layout),
@@ -2050,11 +2022,11 @@ Ext.onReady( function() {
 							listeners: {
 								render: function() {
 									this.getEl().on('mouseover', function() {
-										web.events.onValueMouseHover(uuidDimUuidsMap, uuid, 'mouseover', 'chart');
+										web.events.onValueMenuMouseHover(uuidDimUuidsMap, uuid, 'mouseover', 'chart');
 									});
 
 									this.getEl().on('mouseout', function() {
-										web.events.onValueMouseHover(uuidDimUuidsMap, uuid, 'mouseout', 'chart');
+										web.events.onValueMenuMouseHover(uuidDimUuidsMap, uuid, 'mouseout', 'chart');
 									});
 								}
 							}
@@ -2070,11 +2042,11 @@ Ext.onReady( function() {
 							listeners: {
 								render: function() {
 									this.getEl().on('mouseover', function() {
-										web.events.onValueMouseHover(uuidDimUuidsMap, uuid, 'mouseover', 'map');
+										web.events.onValueMenuMouseHover(uuidDimUuidsMap, uuid, 'mouseover', 'map');
 									});
 
 									this.getEl().on('mouseout', function() {
-										web.events.onValueMouseHover(uuidDimUuidsMap, uuid, 'mouseout', 'map');
+										web.events.onValueMenuMouseHover(uuidDimUuidsMap, uuid, 'mouseout', 'map');
 									});
 								}
 							}
@@ -2093,7 +2065,15 @@ Ext.onReady( function() {
 				}());
 			};
 
-			web.events.onValueMouseHover = function(uuidDimUuidsMap, uuid, event, param) {
+			web.events.onValueMouseOver = function(uuid) {
+				Ext.get(uuid).addCls('highlighted');
+			};
+
+			web.events.onValueMouseOut = function(uuid) {
+				Ext.get(uuid).removeCls('highlighted');
+			};
+
+			web.events.onValueMenuMouseHover = function(uuidDimUuidsMap, uuid, event, param) {
 				var dimUuids;
 
 				// dimension elements
@@ -2113,6 +2093,26 @@ Ext.onReady( function() {
 								}
 							}
 						}
+					}
+				}
+			};
+
+			web.events.setColumnHeaderMouseHandlers = function(xLayout, response) {
+				if (Ext.isArray(xLayout.sortableIdObjects)) {
+					for (var i = 0, obj, el; i < xLayout.sortableIdObjects.length; i++) {
+						obj = xLayout.sortableIdObjects[i];
+						el = Ext.get(obj.uuid);
+
+						el.dom.xLayout = xLayout;
+						el.dom.response = response;
+						el.dom.metaDataId = obj.id;
+						el.dom.onColumnHeaderMouseClick = web.events.onColumnHeaderMouseClick;
+						el.dom.onColumnHeaderMouseOver = web.events.onColumnHeaderMouseOver;
+						el.dom.onColumnHeaderMouseOut = web.events.onColumnHeaderMouseOut;
+
+						el.dom.setAttribute('onclick', 'this.onColumnHeaderMouseClick(this.xLayout, this.response, this.metaDataId)');
+						el.dom.setAttribute('onmouseover', 'this.onColumnHeaderMouseOver(this)');
+						el.dom.setAttribute('onmouseout', 'this.onColumnHeaderMouseOut(this)');
 					}
 				}
 			};
@@ -2138,7 +2138,6 @@ Ext.onReady( function() {
 			web.events.onColumnHeaderMouseOut = function(el) {
 				Ext.get(el).removeCls('pointer highlighted');
 			};
-
 
 			// pivot
 			web.pivot = web.pivot || {};
