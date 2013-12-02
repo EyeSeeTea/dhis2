@@ -208,6 +208,10 @@ table.pivot {
 	white-space: nowrap;
 	text-align: right;
 }
+.pivot-value.highlighted {
+	background-color: #f5f5f5;
+}
+
 .pivot-value-subtotal {
 	background-color: #f4f4f4;
 	white-space: nowrap;

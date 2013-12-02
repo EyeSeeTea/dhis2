@@ -1949,11 +1949,15 @@ Ext.onReady( function() {
 
 						if (parseFloat(valueEl.dom.textContent)) {
 							valueEl.dom.onValueMouseClick = web.events.onValueMouseClick;
+							valueEl.dom.onValueMouseOver = web.events.onValueMouseOver;
+							valueEl.dom.onValueMouseOut = web.events.onValueMouseOut;
 							valueEl.dom.layout = layout;
 							valueEl.dom.response = response;
 							valueEl.dom.uuidDimUuidsMap = uuidDimUuidsMap;
 							valueEl.dom.uuidObjectMap = uuidObjectMap;
 							valueEl.dom.setAttribute('onclick', 'this.onValueMouseClick(this.layout, this.response, this.uuidDimUuidsMap, this.uuidObjectMap, this.id);');
+							valueEl.dom.setAttribute('onmouseover', 'this.onValueMouseOver(this.id);');
+							valueEl.dom.setAttribute('onmouseout', 'this.onValueMouseOut(this.id);');
 						}
 					}
 				}
@@ -1964,7 +1968,6 @@ Ext.onReady( function() {
 					for (var i = 0, obj, el; i < xLayout.sortableIdObjects.length; i++) {
 						obj = xLayout.sortableIdObjects[i];
 						el = Ext.get(obj.uuid);
-console.log(obj.id);
 
 						el.dom.xLayout = xLayout;
 						el.dom.response = response;
@@ -1978,6 +1981,14 @@ console.log(obj.id);
 						el.dom.setAttribute('onmouseout', 'this.onColumnHeaderMouseOut(this)');
 					}
 				}
+			};
+
+			web.events.onValueMouseOver = function(uuid) {
+				Ext.get(uuid).addCls('highlighted');
+			};
+
+			web.events.onValueMouseOut = function(uuid) {
+				Ext.get(uuid).removeCls('highlighted');
 			};
 
 			web.events.onValueMouseClick = function(layout, response, uuidDimUuidsMap, uuidObjectMap, uuid) {
@@ -2085,6 +2096,7 @@ console.log(obj.id);
 			web.events.onValueMouseHover = function(uuidDimUuidsMap, uuid, event, param) {
 				var dimUuids;
 
+				// dimension elements
 				if (param === 'chart') {
 					if (Ext.isString(uuid) && Ext.isArray(uuidDimUuidsMap[uuid])) {
 						dimUuids = uuidDimUuidsMap[uuid];
