@@ -35,6 +35,7 @@ import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.interpretation.Interpretation;
+import org.hisp.dhis.interpretation.InterpretationComment;
 import org.hisp.dhis.interpretation.InterpretationService;
 import org.hisp.dhis.mapping.Map;
 import org.hisp.dhis.mapping.MappingService;
@@ -47,6 +48,7 @@ import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -54,9 +56,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -242,21 +246,130 @@ public class InterpretationController
         ContextUtils.createdResponse( response, "Interpretation created", InterpretationController.RESOURCE_PATH + "/" + interpretation.getUid() );
     }
 
+    @Override
+    public void deleteObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid ) throws Exception
+    {
+        Interpretation interpretation = interpretationService.getInterpretation( uid );
+
+        if ( interpretation == null )
+        {
+            ContextUtils.conflictResponse( response, "Interpretation does not exist: " + uid );
+            return;
+        }
+
+        if ( !currentUserService.getCurrentUser().equals( interpretation.getUser() ) &&
+            !currentUserService.currentUserIsSuper() )
+        {
+            throw new AccessDeniedException( "You are not allowed to delete this interpretation." );
+        }
+
+        interpretationService.deleteInterpretation( interpretation );
+    }
+
+    @RequestMapping( value = "/{uid}", method = RequestMethod.PUT )
+    public void updateInterpretation( @PathVariable( "uid" ) String uid, HttpServletResponse response, @RequestBody String content )
+    {
+        Interpretation interpretation = interpretationService.getInterpretation( uid );
+
+        if ( interpretation == null )
+        {
+            ContextUtils.conflictResponse( response, "Interpretation does not exist: " + uid );
+            return;
+        }
+
+        if ( !currentUserService.getCurrentUser().equals( interpretation.getUser() ) &&
+            !currentUserService.currentUserIsSuper() )
+        {
+            throw new AccessDeniedException( "You are not allowed to update this interpretation." );
+        }
+
+        System.err.println( content );
+
+        interpretation.setText( content );
+
+        interpretationService.updateInterpretation( interpretation );
+    }
+
+    @RequestMapping( value = "/{uid}/comments/{cuid}", method = RequestMethod.DELETE )
+    public void deleteComment( @PathVariable( "uid" ) String uid, @PathVariable( "cuid" ) String cuid, HttpServletResponse response )
+    {
+        Interpretation interpretation = interpretationService.getInterpretation( uid );
+
+        if ( interpretation == null )
+        {
+            ContextUtils.conflictResponse( response, "Interpretation does not exist: " + uid );
+            return;
+        }
+
+        Iterator<InterpretationComment> iterator = interpretation.getComments().iterator();
+
+        while ( iterator.hasNext() )
+        {
+            InterpretationComment comment = iterator.next();
+
+            if ( comment.getUid().equals( cuid ) )
+            {
+                if ( !currentUserService.getCurrentUser().equals( comment.getUser() ) &&
+                    !currentUserService.currentUserIsSuper() )
+                {
+                    throw new AccessDeniedException( "You are not allowed to delete this comment." );
+                }
+
+                iterator.remove();
+            }
+        }
+
+        interpretationService.updateInterpretation( interpretation );
+    }
+
+    @RequestMapping( value = "/{uid}/comments/{cuid}", method = RequestMethod.PUT )
+    public void updateComment( @PathVariable( "uid" ) String uid, @PathVariable( "cuid" ) String cuid, HttpServletResponse response,
+        @RequestBody String content )
+    {
+        Interpretation interpretation = interpretationService.getInterpretation( uid );
+
+        if ( interpretation == null )
+        {
+            ContextUtils.conflictResponse( response, "Interpretation does not exist: " + uid );
+            return;
+        }
+
+        for ( InterpretationComment comment : interpretation.getComments() )
+        {
+            if ( comment.getUid().equals( cuid ) )
+            {
+                if ( !currentUserService.getCurrentUser().equals( comment.getUser() ) &&
+                    !currentUserService.currentUserIsSuper() )
+                {
+                    throw new AccessDeniedException( "You are not allowed to update this comment." );
+                }
+
+                comment.setText( content );
+            }
+        }
+
+        interpretationService.updateInterpretation( interpretation );
+    }
+
     @RequestMapping( value = "/{uid}/comment", method = RequestMethod.POST, consumes = { "text/html", "text/plain" } )
     public void postComment(
         @PathVariable( "uid" ) String uid,
         @RequestBody String text, HttpServletResponse response )
     {
         Interpretation interpretation = interpretationService.getInterpretation( uid );
-        
+
         if ( interpretation == null )
         {
             ContextUtils.conflictResponse( response, "Interpretation does not exist: " + uid );
             return;
         }
-        
-        interpretationService.addInterpretationComment( uid, text );
 
-        ContextUtils.createdResponse( response, "Commented created", InterpretationController.RESOURCE_PATH + "/" + uid );
+        InterpretationComment comment = interpretationService.addInterpretationComment( uid, text );
+
+        StringBuilder builder = new StringBuilder();
+        builder.append( InterpretationController.RESOURCE_PATH ).append( "/" ).append( uid );
+        builder.append( "/comments/" ).append( comment.getUid() );
+
+        ContextUtils.createdResponse( response, "Commented created", builder.toString() );
     }
 }
