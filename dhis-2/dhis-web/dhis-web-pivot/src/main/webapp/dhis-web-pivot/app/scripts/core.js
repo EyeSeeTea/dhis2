@@ -283,6 +283,8 @@ Ext.onReady( function() {
 
 				// parentGraphMap: object
 
+				// sorting: transient object
+
 				// reportingPeriod: boolean (false) //report tables only
 
 				// organisationUnit: boolean (false) //report tables only
@@ -441,6 +443,8 @@ Ext.onReady( function() {
 
 					layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
 
+					layout.sorting = Ext.isObject(config.sorting) && Ext.isString(config.sorting.id) && Ext.isString(config.sorting.direction) ? config.sorting : null;
+
 					layout.reportingPeriod = Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramReportingPeriod) ? config.reportParams.paramReportingPeriod : (Ext.isBoolean(config.reportingPeriod) ? config.reportingPeriod : false);
 					layout.organisationUnit =  Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramOrganisationUnit) ? config.reportParams.paramOrganisationUnit : (Ext.isBoolean(config.organisationUnit) ? config.organisationUnit : false);
 					layout.parentOrganisationUnit =  Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramParentOrganisationUnit) ? config.reportParams.paramParentOrganisationUnit : (Ext.isBoolean(config.parentOrganisationUnit) ? config.parentOrganisationUnit : false);
@@ -584,7 +588,7 @@ Ext.onReady( function() {
 						return direction === 'DESC' ? b - a : a - b;
 					}
 
-					return 0;
+					return -1;
 				});
 
 				return array;
@@ -636,6 +640,9 @@ Ext.onReady( function() {
 				return str.replace(new RegExp(find, 'g'), replace);
 			};
 
+			support.prototype.str.toggleDirection = function(direction) {
+				return direction === 'DESC' ? 'ASC' : 'DESC';
+			};
 				// number
 			support.prototype.number = {};
 

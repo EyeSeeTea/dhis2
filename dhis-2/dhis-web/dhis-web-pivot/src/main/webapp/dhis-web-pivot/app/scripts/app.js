@@ -2105,6 +2105,16 @@ Ext.onReady( function() {
 			};
 
 			web.events.onColumnHeaderMouseClick = function(xLayout, response, id) {
+				if (xLayout.sorting && xLayout.sorting.id === id) {
+					xLayout.sorting.direction = support.prototype.str.toggleDirection(xLayout.sorting.direction);
+				}
+				else {
+					xLayout.sorting = {
+						id: id,
+						direction: 'DESC'
+					};
+				}
+
 				ns.core.web.pivot.sort(xLayout, response, id);
 			};
 
@@ -2317,6 +2327,7 @@ Ext.onReady( function() {
 					response = Ext.clone(response),
 					dim = xLayout.rows[0],
 					valueMap = response.idValueMap,
+					direction = xLayout.sorting ? xLayout.sorting.direction : 'DESC',
 					layout;
 
 				dim.ids = [];
@@ -2326,11 +2337,11 @@ Ext.onReady( function() {
 					item = dim.items[i];
 					key = id + item.id;
 
-					item.value = parseFloat(valueMap[key]);
+					item.value = parseFloat(valueMap[key]) || (Number.MAX_VALUE * -1);
 				}
 
 				// sort
-				support.prototype.array.sort(dim.items, 'DESC', 'value');
+				support.prototype.array.sort(dim.items, direction, 'value');
 
 				// new id order
 				for (var i = 0; i < dim.items.length; i++) {
