@@ -2119,13 +2119,11 @@ Ext.onReady( function() {
 			};
 
 			web.events.onColumnHeaderMouseOver = function(el) {
-				//console.log("el over");
 				Ext.get(el).addCls('pointer highlighted');
 			};
 
 			web.events.onColumnHeaderMouseOut = function(el) {
 				Ext.get(el).removeCls('pointer highlighted');
-				//console.log("el out");
 			};
 
 
@@ -2333,11 +2331,13 @@ Ext.onReady( function() {
 				dim.ids = [];
 
 				// collect values
-				for (var i = 0, item, key; i < dim.items.length; i++) {
+				for (var i = 0, item, key, value; i < dim.items.length; i++) {
 					item = dim.items[i];
 					key = id + item.id;
+					value = parseFloat(valueMap[key]);
 
-					item.value = parseFloat(valueMap[key]) || (Number.MAX_VALUE * -1);
+					item.value = Ext.isNumber(value) ? value : (Number.MAX_VALUE * -1);
+//console.log(response.metaData.names[id], item.value);
 				}
 
 				// sort
