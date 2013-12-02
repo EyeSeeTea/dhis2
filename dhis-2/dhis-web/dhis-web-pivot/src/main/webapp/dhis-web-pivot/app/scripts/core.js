@@ -848,7 +848,10 @@ Ext.onReady( function() {
 					dimensionNameIdsMap: {},
 
 						// for param string
-					dimensionNameSortedIdsMap: {}
+					dimensionNameSortedIdsMap: {},
+
+					// sort table by column
+					sortableIdObjects: []
 				};
 
 				Ext.applyIf(xLayout, layout);
@@ -1757,7 +1760,7 @@ Ext.onReady( function() {
 					return parseFloat(support.prototype.number.roundIf(value, 2)).toString();
 				};
 
-				getTdHtml = function(config, id) {
+				getTdHtml = function(config, metaDataId) {
 					var bgColor,
 						mapLegends,
 						colSpan,
@@ -1769,8 +1772,6 @@ Ext.onReady( function() {
 						isValue = Ext.isObject(config) && Ext.isString(config.type) && config.type === 'value' && !config.empty,
 						cls = '',
 						html = '';
-//console.log(config.type);
-console.log(id);
 
 					if (!Ext.isObject(config)) {
 						return '';
@@ -1780,7 +1781,6 @@ console.log(id);
 					if (isNumeric && xLayout.legendSet) {
 						var value = parseFloat(config.value);
 						mapLegends = xLayout.legendSet.mapLegends;
-console.log(config.type);
 
 						for (var i = 0; i < mapLegends.length; i++) {
 							if (Ext.Number.constrain(value, mapLegends[i].startValue, mapLegends[i].endValue) === value) {
@@ -1802,10 +1802,14 @@ console.log(config.type);
 					cls += bgColor ? ' legend' : (config.cls ? ' ' + config.cls : '');
 
 					html += '<td ' + (config.uuid ? ('id="' + config.uuid + '" ') : '');
-					html += ' class="' + cls + '" ' + colSpan + rowSpan;
+					html += ' class="' + cls + '" ' + colSpan + rowSpan
 
-					if (Ext.isString(id)) {
-						html += ' onclick="PT.instances[0].core.web.pivot.sort(PT.instances[0].app.xLayout, PT.instances[0].app.response, PT.id);"';
+					// sorting
+					if (Ext.isString(metaDataId)) {
+						xLayout.sortableIdObjects.push({
+							id: metaDataId,
+							uuid: config.uuid
+						});
 					}
 
 					if (bgColor) {
@@ -1878,6 +1882,7 @@ console.log(config.type);
 						return a;
 					}
 
+					// for each col dimension
 					for (var i = 0, dimHtml; i < xColAxis.dims; i++) {
 						dimHtml = [];
 
@@ -1885,7 +1890,7 @@ console.log(config.type);
 							dimHtml.push(getEmptyHtmlArray());
 						}
 
-						for (var j = 0, obj, spanCount = 0, id; j < xColAxis.size; j++) {
+						for (var j = 0, obj, spanCount = 0, metaDataId; j < xColAxis.size; j++) {
 							spanCount++;
 
 							obj = xColAxis.objects.all[i][j];
@@ -1895,11 +1900,12 @@ console.log(config.type);
 							obj.hidden = !(obj.rowSpan || obj.colSpan);
 							obj.htmlValue = service.layout.getItemName(xLayout, xResponse, obj.id, true);
 
-							if (j === xColAxis.size - 1 && !doSubTotals(xColAxis)) {
-								id = obj.id;
+							// if last dim and no subtotals
+							if (i === xColAxis.dims - 1 && !doSubTotals(xColAxis)) {
+								metaDataId = obj.id;
 							}
 
-							dimHtml.push(getTdHtml(obj, id));
+							dimHtml.push(getTdHtml(obj, metaDataId));
 
 							if (i === 0 && spanCount === xColAxis.span[i] && doSubTotals(xColAxis) ) {
 								dimHtml.push(getTdHtml({

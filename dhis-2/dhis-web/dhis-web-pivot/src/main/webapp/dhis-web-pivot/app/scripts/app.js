@@ -1940,7 +1940,7 @@ Ext.onReady( function() {
 			// mouse events
 			web.events = web.events || {};
 
-			web.events.setMouseHandlers = function(layout, response, uuidDimUuidsMap, uuidObjectMap) {
+			web.events.setValueMouseHandlers = function(layout, response, uuidDimUuidsMap, uuidObjectMap) {
 				var valueEl;
 
 				for (var key in uuidDimUuidsMap) {
@@ -1948,18 +1948,38 @@ Ext.onReady( function() {
 						valueEl = Ext.get(key);
 
 						if (parseFloat(valueEl.dom.textContent)) {
-							valueEl.dom.onMouseClick = web.events.onMouseClick;
+							valueEl.dom.onValueMouseClick = web.events.onValueMouseClick;
 							valueEl.dom.layout = layout;
 							valueEl.dom.response = response;
 							valueEl.dom.uuidDimUuidsMap = uuidDimUuidsMap;
 							valueEl.dom.uuidObjectMap = uuidObjectMap;
-							valueEl.dom.setAttribute('onclick', 'this.onMouseClick(this.layout, this.response, this.uuidDimUuidsMap, this.uuidObjectMap, this.id);');
+							valueEl.dom.setAttribute('onclick', 'this.onValueMouseClick(this.layout, this.response, this.uuidDimUuidsMap, this.uuidObjectMap, this.id);');
 						}
 					}
 				}
 			};
 
-			web.events.onMouseClick = function(layout, response, uuidDimUuidsMap, uuidObjectMap, uuid) {
+			web.events.setColumnHeaderMouseHandlers = function(xLayout, response) {
+				if (Ext.isArray(xLayout.sortableIdObjects)) {
+					for (var i = 0, obj, el; i < xLayout.sortableIdObjects.length; i++) {
+						obj = xLayout.sortableIdObjects[i];
+						el = Ext.get(obj.uuid);
+
+						el.dom.xLayout = xLayout;
+						el.dom.response = response;
+						el.dom.metaDataId = obj.id;
+						el.dom.onColumnHeaderMouseClick = web.events.onColumnHeaderMouseClick;
+						el.dom.onColumnHeaderMouseOver = web.events.onColumnHeaderMouseOver;
+						el.dom.onColumnHeaderMouseOut = web.events.onColumnHeaderMouseOut;
+
+						el.dom.setAttribute('onclick', 'this.onColumnHeaderMouseClick(this.xLayout, this.response, this.metaDataId)');
+						el.dom.setAttribute('onmouseover', 'this.onColumnHeaderMouseOver(this)');
+						el.dom.setAttribute('onmouseout', 'this.onColumnHeaderMouseOut(this)');
+					}
+				}
+			};
+
+			web.events.onValueMouseClick = function(layout, response, uuidDimUuidsMap, uuidObjectMap, uuid) {
 				var uuids = uuidDimUuidsMap[uuid],
 					layoutConfig = Ext.clone(layout),
 					parentGraphMap = ns.app.viewport.treePanel.getParentGraphMap(),
@@ -2018,11 +2038,11 @@ Ext.onReady( function() {
 							listeners: {
 								render: function() {
 									this.getEl().on('mouseover', function() {
-										web.events.onMouseHover(uuidDimUuidsMap, uuid, 'mouseover', 'chart');
+										web.events.onValueMouseHover(uuidDimUuidsMap, uuid, 'mouseover', 'chart');
 									});
 
 									this.getEl().on('mouseout', function() {
-										web.events.onMouseHover(uuidDimUuidsMap, uuid, 'mouseout', 'chart');
+										web.events.onValueMouseHover(uuidDimUuidsMap, uuid, 'mouseout', 'chart');
 									});
 								}
 							}
@@ -2038,11 +2058,11 @@ Ext.onReady( function() {
 							listeners: {
 								render: function() {
 									this.getEl().on('mouseover', function() {
-										web.events.onMouseHover(uuidDimUuidsMap, uuid, 'mouseover', 'map');
+										web.events.onValueMouseHover(uuidDimUuidsMap, uuid, 'mouseover', 'map');
 									});
 
 									this.getEl().on('mouseout', function() {
-										web.events.onMouseHover(uuidDimUuidsMap, uuid, 'mouseout', 'map');
+										web.events.onValueMouseHover(uuidDimUuidsMap, uuid, 'mouseout', 'map');
 									});
 								}
 							}
@@ -2061,7 +2081,7 @@ Ext.onReady( function() {
 				}());
 			};
 
-			web.events.onMouseHover = function(uuidDimUuidsMap, uuid, event, param) {
+			web.events.onValueMouseHover = function(uuidDimUuidsMap, uuid, event, param) {
 				var dimUuids;
 
 				if (param === 'chart') {
@@ -2083,6 +2103,21 @@ Ext.onReady( function() {
 					}
 				}
 			};
+
+			web.events.onColumnHeaderMouseClick = function(xLayout, response, id) {
+				ns.core.web.pivot.sort(xLayout, response, id);
+			};
+
+			web.events.onColumnHeaderMouseOver = function(el) {
+				//console.log("el over");
+				Ext.get(el).addCls('pointer highlighted');
+			};
+
+			web.events.onColumnHeaderMouseOut = function(el) {
+				Ext.get(el).removeCls('pointer highlighted');
+				//console.log("el out");
+			};
+
 
 			// pivot
 			web.pivot = web.pivot || {};
@@ -2253,9 +2288,19 @@ Ext.onReady( function() {
 				ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
 
 				if (NS.isSessionStorage) {
-					web.events.setMouseHandlers(layout, response, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
+					web.events.setValueMouseHandlers(layout, response, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
+					web.events.setColumnHeaderMouseHandlers(xLayout, response);
 					web.storage.session.set(layout, 'table');
 				}
+
+
+
+							//valueEl.dom.onValueMouseClick = web.events.onValueMouseClick;
+							//valueEl.dom.layout = layout;
+							//valueEl.dom.response = response;
+							//valueEl.dom.uuidDimUuidsMap = uuidDimUuidsMap;
+							//valueEl.dom.uuidObjectMap = uuidObjectMap;
+							//valueEl.dom.setAttribute('onclick', 'this.onValueMouseClick(this.layout, this.response, this.uuidDimUuidsMap, this.uuidObjectMap, this.id);');
 
 				ns.app.viewport.setGui(layout, xLayout, isUpdateGui);
 
