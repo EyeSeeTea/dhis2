@@ -1801,16 +1801,19 @@ Ext.onReady( function() {
 					cls += isValue ? ' pointer' : '';
 					cls += bgColor ? ' legend' : (config.cls ? ' ' + config.cls : '');
 
-					html += '<td ' + (config.uuid ? ('id="' + config.uuid + '" ') : '');
-					html += ' class="' + cls + '" ' + colSpan + rowSpan
-
 					// sorting
 					if (Ext.isString(metaDataId)) {
+						cls += ' td-sortable';
+
 						xLayout.sortableIdObjects.push({
 							id: metaDataId,
 							uuid: config.uuid
 						});
 					}
+
+					html += '<td ' + (config.uuid ? ('id="' + config.uuid + '" ') : '');
+					html += ' class="' + cls + '" ' + colSpan + rowSpan
+
 
 					if (bgColor) {
 						html += '>';
@@ -1865,6 +1868,10 @@ Ext.onReady( function() {
 					return !!xLayout.showTotals;
 				};
 
+				doSortableColumnHeaders = function() {
+					return (xRowAxis.dims === 1);// && !doSubTotals(
+				};
+
 				getColAxisHtmlArray = function() {
 					var a = [],
 						getEmptyHtmlArray;
@@ -1900,8 +1907,8 @@ Ext.onReady( function() {
 							obj.hidden = !(obj.rowSpan || obj.colSpan);
 							obj.htmlValue = service.layout.getItemName(xLayout, xResponse, obj.id, true);
 
-							// if last dim and no subtotals
-							if (i === xColAxis.dims - 1 && !doSubTotals(xColAxis)) {
+							// sortable column headers. only if last dim and no subtotals.
+							if (i === xColAxis.dims - 1 && doSortableColumnHeaders()) {
 								metaDataId = obj.id;
 							}
 

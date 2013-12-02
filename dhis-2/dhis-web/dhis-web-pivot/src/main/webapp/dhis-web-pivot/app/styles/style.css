@@ -147,6 +147,13 @@ body.x-windows {
 	display: none;
 }
 
+.td-sortable {
+	background-image: url('../images/arrowupdown.png');
+	background-repeat: no-repeat;
+	background-position: right center;
+	padding-right: 15px !important;
+}
+
 .text-weak {
 	color: #303038;
 }
