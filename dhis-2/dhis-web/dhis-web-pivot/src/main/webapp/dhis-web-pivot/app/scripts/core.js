@@ -2071,7 +2071,10 @@ Ext.onReady( function() {
 
 							// add row totals to idValueMap to make sorting on totals possible
 							if (doSortableColumnHeaders()) {
-								xResponse.idValueMap['total_' + xRowAxis.ids[i]] = total;
+								var totalId = 'total_' + xRowAxis.ids[i],
+									isEmpty = !Ext.Array.contains(empty, false);
+
+								xResponse.idValueMap[totalId] = isEmpty ? null : total;
 							}
 
 							empty = [];
