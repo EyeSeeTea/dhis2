@@ -30,19 +30,19 @@ dhis2.util.namespace('dhis2.contextmenu');
 dhis2.util.namespace('dhis2.contextmenu.utils');
 
 /**
- * Tried to find a function with fnName in window scope.
+ * Creates a resolver to search within a certain scope
  *
- * TODO: extend to search for more scopes
- *
- * @param fnName Name of function to search for
+ * @param scope Scope to search within
  * @returns Function
  */
-dhis2.contextmenu.utils.findFnInWindowScope = function( fnName ) {
-  if( typeof window[fnName] !== 'function' ) {
-    throw new Error('target-fn \'' + fnName + '\' does not point to a valid function.')
-  }
+dhis2.contextmenu.utils.findInScope = function( scope ) {
+  return function( fnName ) {
+    if( typeof scope[fnName] !== 'function' ) {
+      throw new Error('target-fn \'' + fnName + '\' does not point to a valid function.')
+    }
 
-  return window[fnName];
+    return scope[fnName];
+  }
 };
 
 dhis2.contextmenu.defaultOptions = {
@@ -50,11 +50,14 @@ dhis2.contextmenu.defaultOptions = {
   menuId: 'menu',
   menuItemActiveClass: 'menuItemActive',
   listItemProps: ['id', 'uid', 'name', 'type'],
-  functionResolver: dhis2.contextmenu.utils.findFnInWindowScope
+  functionResolver: dhis2.contextmenu.utils.findInScope(window)
 };
 
+dhis2.contextmenu.config = dhis2.contextmenu.defaultOptions;
+
 dhis2.contextmenu.makeContextMenu = function( options ) {
-  var config = $.extend({}, dhis2.contextmenu.defaultOptions, options);
+  dhis2.contextmenu.config = $.extend({}, dhis2.contextmenu.defaultOptions, options);
+  var config = dhis2.contextmenu.config;
 
   var $list = $('#' + config.listId);
   var $menu = $('#' + config.menuId);
@@ -83,12 +86,15 @@ dhis2.contextmenu.makeContextMenu = function( options ) {
   });
 
   $list.on('click.context', 'td', function( e ) {
+    if(dhis2.contextmenu.disable()) {
+      return false;
+    }
+
     $menu.show();
     $menu.css({left: e.pageX, top: e.pageY});
 
     var $target = $(e.target);
 
-    $list.find('td').removeClass(config.menuItemActiveClass);
     $target.addClass(config.menuItemActiveClass);
 
     $.each(config.listItemProps, function( idx, val ) {
@@ -99,12 +105,27 @@ dhis2.contextmenu.makeContextMenu = function( options ) {
   });
 
   $(document).on('click.context', function() {
-    if( $menu.is(":visible") ) {
-      $menu.hide();
-    }
-
-    $list.find('td').removeClass(config.menuItemActiveClass);
-
+    dhis2.contextmenu.disable();
     $menu.removeData('id');
   });
+
+  $(document).keyup(function( e ) {
+    if( e.keyCode == 27 ) {
+      dhis2.contextmenu.disable();
+    }
+  });
+};
+
+dhis2.contextmenu.disable = function() {
+  var config = dhis2.contextmenu.config;
+  var $list = $('#' + config.listId);
+  var $menu = $('#' + config.menuId);
+  $list.find('td').removeClass(config.menuItemActiveClass);
+
+  if( $menu.is(":visible") ) {
+    $menu.hide();
+    return true;
+  }
+
+  return false;
 };

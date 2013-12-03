@@ -150,7 +150,7 @@ public class LoadFormAction
         return dataEntryForm;
     }
 
-    private List<Section> sections;
+    private List<Section> sections = new ArrayList<Section>();
 
     public List<Section> getSections()
     {
@@ -234,7 +234,6 @@ public class LoadFormAction
     public String execute()
         throws Exception
     {
-
         dataSet = dataSetService.getDataSet( dataSetId, true, false, false, true );
 
         List<DataElement> dataElements = new ArrayList<DataElement>( dataElementService.getDataElements( dataSet, null,
@@ -405,8 +404,10 @@ public class LoadFormAction
 
             for ( DataElementOperand operand : section.getGreyedFields() )
             {
-                greyedFields.put( operand.getDataElement().getUid() + ":" + operand.getCategoryOptionCombo().getUid(),
-                    true );
+                if ( operand != null && operand.getDataElement() != null && operand.getCategoryOptionCombo() != null )
+                {
+                    greyedFields.put( operand.getDataElement().getUid() + ":" + operand.getCategoryOptionCombo().getUid(), true );
+                }
             }
         }
     }
