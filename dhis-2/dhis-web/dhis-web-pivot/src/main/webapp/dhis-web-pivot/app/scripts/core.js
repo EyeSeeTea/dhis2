@@ -1914,7 +1914,7 @@ Ext.onReady( function() {
 
 							// sortable column headers. last dim only.
 							if (i === xColAxis.dims - 1 && doSortableColumnHeaders()) {
-								condoId = xColAxis.ids[j];
+								condoId = xColAxis.ids[j].split('-').join('');
 							}
 
 							dimHtml.push(getTdHtml(obj, condoId));
