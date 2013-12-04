@@ -1874,7 +1874,7 @@ Ext.onReady( function() {
 				};
 
 				doSortableColumnHeaders = function() {
-					return (xRowAxis && xRowAxis.dims === 1);// && !doSubTotals(
+					return (xRowAxis && xRowAxis.dims === 1);
 				};
 
 				getColAxisHtmlArray = function() {
@@ -1902,7 +1902,7 @@ Ext.onReady( function() {
 							dimHtml.push(getEmptyHtmlArray());
 						}
 
-						for (var j = 0, obj, spanCount = 0, condoId; j < xColAxis.size; j++) {
+						for (var j = 0, obj, spanCount = 0, condoId, totalId; j < xColAxis.size; j++) {
 							spanCount++;
 
 							obj = xColAxis.objects.all[i][j];
@@ -1912,9 +1912,9 @@ Ext.onReady( function() {
 							obj.hidden = !(obj.rowSpan || obj.colSpan);
 							obj.htmlValue = service.layout.getItemName(xLayout, xResponse, obj.id, true);
 
-							// sortable column headers. only if last dim and no subtotals.
+							// sortable column headers. last dim only.
 							if (i === xColAxis.dims - 1 && doSortableColumnHeaders()) {
-								condoId = xColAxis.ids[j];
+								condoId = xColAxis.ids[j].split('-').join('');
 							}
 
 							dimHtml.push(getTdHtml(obj, condoId));
@@ -1931,12 +1931,15 @@ Ext.onReady( function() {
 							}
 
 							if (i === 0 && (j === xColAxis.size - 1) && doTotals()) {
+								totalId = doSortableColumnHeaders() ? 'total_' : null;
+
 								dimHtml.push(getTdHtml({
+									uuid: Ext.data.IdGenerator.get('uuid').generate(),
 									type: 'dimensionTotal',
 									cls: 'pivot-dim-total',
 									rowSpan: xColAxis.dims,
 									htmlValue: 'Total'
-								}));
+								}, totalId));
 							}
 						}
 
@@ -2057,6 +2060,7 @@ Ext.onReady( function() {
 								total += obj.value;
 							}
 
+							// row totals
 							totalValueObjects.push({
 								type: 'valueTotal',
 								cls: 'pivot-value-total',
@@ -2064,6 +2068,14 @@ Ext.onReady( function() {
 								htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '',
 								empty: !Ext.Array.contains(empty, false)
 							});
+
+							// add row totals to idValueMap to make sorting on totals possible
+							if (doSortableColumnHeaders()) {
+								var totalId = 'total_' + xRowAxis.ids[i],
+									isEmpty = !Ext.Array.contains(empty, false);
+
+								xResponse.idValueMap[totalId] = isEmpty ? null : total;
+							}
 
 							empty = [];
 							total = 0;
@@ -2299,6 +2311,7 @@ Ext.onReady( function() {
 								empty.push(!!obj.empty);
 							}
 
+							// col total
 							totalColObjects.push({
 								type: 'valueTotal',
 								value: total,
