@@ -1956,8 +1956,8 @@ Ext.onReady( function() {
 							valueEl.dom.uuidDimUuidsMap = uuidDimUuidsMap;
 							valueEl.dom.uuidObjectMap = uuidObjectMap;
 							valueEl.dom.setAttribute('onclick', 'this.onValueMouseClick(this.layout, this.response, this.uuidDimUuidsMap, this.uuidObjectMap, this.id);');
-							valueEl.dom.setAttribute('onmouseover', 'this.onValueMouseOver(this.id);');
-							valueEl.dom.setAttribute('onmouseout', 'this.onValueMouseOut(this.id);');
+							valueEl.dom.setAttribute('onmouseover', 'this.onValueMouseOver(this);');
+							valueEl.dom.setAttribute('onmouseout', 'this.onValueMouseOut(this);');
 						}
 					}
 				}
@@ -4721,6 +4721,20 @@ Ext.onReady( function() {
 						handler: function() {
 							if (ns.core.init.contextPath && ns.app.paramString) {
 								window.open(ns.core.init.contextPath + '/api/analytics.jrxml' + ns.app.paramString, '_blank');
+							}
+						}
+					},
+					{
+						xtype: 'label',
+						text: NS.i18n.plugin_config,
+						style: 'padding:7px 5px 5px 7px; font-weight:bold'
+					},
+					{
+						text: 'JSON',
+						iconCls: 'ns-menu-item-datasource',
+						handler: function() {
+							if (ns.app.layout) {
+								alert(JSON.stringify(ns.core.service.layout.layout2plugin(ns.app.layout)));
 							}
 						}
 					}
