@@ -1535,6 +1535,42 @@ Ext.onReady( function() {
 					}
 				}
 
+				if (layout.showTotals) {
+					delete layout.showTotals;
+				}
+
+				if (layout.showSubTotals) {
+					delete layout.showSubTotals;
+				}
+
+				if (!layout.hideEmptyRows) {
+					delete layout.hideEmptyRows;
+				}
+
+				if (!layout.showHierarchy) {
+					delete layout.showHierarchy;
+				}
+
+				if (layout.displayDensity === 'normal') {
+					delete layout.displayDensity;
+				}
+
+				if (layout.fontSize === 'normal') {
+					delete layout.fontSize;
+				}
+
+				if (layout.digitGroupSeparator === 'space') {
+					delete layout.digitGroupSeparator;
+				}
+
+				if (!layout.legendSet) {
+					delete layout.legendSet;
+				}
+
+				if (!layout.sorting) {
+					delete layout.sorting;
+				}
+
 				delete layout.parentGraphMap;
 				delete layout.reportingPeriod;
 				delete layout.organisationUnit;

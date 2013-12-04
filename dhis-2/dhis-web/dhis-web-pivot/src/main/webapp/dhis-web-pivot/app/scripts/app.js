@@ -886,7 +886,7 @@ Ext.onReady( function() {
 
 								ns.app.stores.reportTable.loadStore();
 
-								ns.app.interpretationButton.enable();
+								ns.app.shareButton.enable();
 
 								window.destroy();
 							}
@@ -1125,7 +1125,7 @@ Ext.onReady( function() {
 
 													ns.app.stores.reportTable.loadStore();
 
-													ns.app.interpretationButton.enable();
+													ns.app.shareButton.enable();
 												}
 											});
 										}
@@ -1642,7 +1642,7 @@ Ext.onReady( function() {
 							headers: {'Content-Type': 'text/html'},
 							success: function() {
 								textArea.reset();
-								ns.app.interpretationButton.disable();
+								ns.app.shareButton.disable();
 								window.hide();
 							}
 						});
@@ -1675,7 +1675,7 @@ Ext.onReady( function() {
 				},
 				listeners: {
 					show: function(w) {
-						ns.core.web.window.setAnchorPosition(w, ns.app.interpretationButton);
+						ns.core.web.window.setAnchorPosition(w, ns.app.shareButton);
 
 						document.body.oncontextmenu = true;
 
@@ -4750,29 +4750,17 @@ Ext.onReady( function() {
 			}
 		});
 
-		interpretationButton = Ext.create('Ext.button.Button', {
-			text: NS.i18n.share,
-			menu: {},
+		interpretationItem = Ext.create('Ext.menu.Item', {
+			text: 'Write interpretation' + '&nbsp;&nbsp;',
+			iconCls: 'ns-menu-item-tablelayout',
 			disabled: true,
 			xable: function() {
 				if (ns.app.layout.id) {
 					this.enable();
-					this.disabledTooltip.destroy();
 				}
 				else {
-					if (ns.app.xLayout) {
-						this.disable();
-						this.createTooltip();
-					}
+					this.disable();
 				}
-			},
-			disabledTooltip: null,
-			createTooltip: function() {
-				this.disabledTooltip = Ext.create('Ext.tip.ToolTip', {
-					target: this.getEl(),
-					html: NS.i18n.save_load_favorite_before_sharing,
-					'anchor': 'bottom'
-				});
 			},
 			handler: function() {
 				if (ns.app.interpretationWindow) {
@@ -4782,13 +4770,120 @@ Ext.onReady( function() {
 
 				ns.app.interpretationWindow = InterpretationWindow();
 				ns.app.interpretationWindow.show();
+			}
+		});
+
+		pluginItem = Ext.create('Ext.menu.Item', {
+			text: 'Embed as plugin' + '&nbsp;&nbsp;',
+			iconCls: 'ns-menu-item-datasource',
+			disabled: true,
+			xable: function() {
+				if (ns.app.layout) {
+					this.enable();
+				}
+				else {
+					this.disable();
+				}
+			},
+			handler: function() {
+				var textArea,
+					window;
+
+				textArea = Ext.create('Ext.form.field.TextArea', {
+					width: 400,
+					height: 200,
+					cls: 'ns-textarea monospaced',
+					value: JSON.stringify(ns.core.service.layout.layout2plugin(ns.app.layout)),
+					listeners: {
+						afterrender: function(ta) {
+							Ext.defer(function() {
+								ta.selectText();
+							}, 50);
+						}
+					}
+				});
+
+				window = Ext.create('Ext.window.Window', {
+					title: 'Plugin configuration',
+					layout: 'fit',
+					modal: true,
+					items: textArea,
+					bodyStyle: 'color:blue',
+					listeners: {
+						show: function(w) {
+							ns.core.web.window.setAnchorPosition(w, ns.app.shareButton);
+
+							document.body.oncontextmenu = true;
+
+							if (!w.hasDestroyOnBlurHandler) {
+								ns.core.web.window.addDestroyOnBlurHandler(w);
+							}
+						},
+						hide: function() {
+							document.body.oncontextmenu = function(){return false;};
+						}
+					}
+				});
+
+				window.show();
+			}
+		});
+
+		shareButton = Ext.create('Ext.button.Button', {
+			text: NS.i18n.share,
+			xableItems: function() {
+				interpretationItem.xable();
+				pluginItem.xable();
+			},
+			menu: {
+				cls: 'ns-menu',
+				shadow: false,
+				showSeparator: false,
+				items: [
+					interpretationItem,
+					pluginItem
+				],
+				listeners: {
+					afterrender: function() {
+						this.getEl().addCls('ns-toolbar-btn-menu');
+					},
+					show: function() {
+						shareButton.xableItems();
+					}
+				}
 			},
 			listeners: {
 				added: function() {
-					ns.app.interpretationButton = this;
+					ns.app.shareButton = this;
 				}
 			}
 		});
+
+
+
+			//disabledTooltip: null,
+			//createTooltip: function() {
+				//this.disabledTooltip = Ext.create('Ext.tip.ToolTip', {
+					//target: this.getEl(),
+					//html: NS.i18n.save_load_favorite_before_sharing,
+					//'anchor': 'bottom'
+				//});
+			//},
+			//handler: function() {
+				//if (ns.app.interpretationWindow) {
+					//ns.app.interpretationWindow.destroy();
+					//ns.app.interpretationWindow = null;
+				//}
+
+				//ns.app.interpretationWindow = InterpretationWindow();
+				//ns.app.interpretationWindow.show();
+			//},
+			//listeners: {
+				//added: function() {
+					//ns.app.shareButton = this;
+				//}
+			//}
+		//});
 
 		defaultButton = Ext.create('Ext.button.Button', {
 			text: NS.i18n.table,
@@ -4836,7 +4931,7 @@ Ext.onReady( function() {
 					},
 					favoriteButton,
 					downloadButton,
-					interpretationButton,
+					shareButton,
 					'->',
 					defaultButton,
 					{
@@ -5011,7 +5106,7 @@ Ext.onReady( function() {
 			downloadButton.enable();
 
 			if (layout.id) {
-				interpretationButton.enable();
+				shareButton.enable();
 			}
 
 			// Set gui

@@ -981,3 +981,8 @@ table.pivot {
 .ns-textarea .x-form-field {
 	font-size: 11px;
 }
+
+.ns-textarea.monospaced textarea {
+	font-family: monospace, consolas, courier new;
+	padding: 4px;
+}
