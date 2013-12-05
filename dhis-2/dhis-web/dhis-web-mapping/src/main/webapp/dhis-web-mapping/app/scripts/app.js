@@ -88,6 +88,12 @@ Ext.onReady( function() {
 				return new OpenLayers.LonLat(point.x, point.y);
 			};
 
+			util.map.map2plugin = function(map) {
+
+
+
+			};
+
 			util.url = util.url || {};
 
 			util.url.getUrlParam = function(s) {
@@ -905,7 +911,7 @@ Ext.onReady( function() {
 			text: GIS.i18n.close,
 			iconCls: 'gis-menu-item-icon-clear',
 			handler: function() {
-				gis.viewport.interpretationButton.disable();
+				//gis.viewport.shareButton.disable();
 
 				layer.core.reset();
 			}
@@ -1961,7 +1967,7 @@ Ext.onReady( function() {
 
 							gis.store.maps.loadStore();
 
-							gis.viewport.interpretationButton.enable();
+							gis.viewport.shareButton.enable();
 
 							window.destroy();
 						}
@@ -2181,7 +2187,7 @@ Ext.onReady( function() {
 												params: Ext.encode(map),
 												success: function() {
 													gis.map = map;
-													gis.viewport.interpretationButton.enable();
+													gis.viewport.shareButton.enable();
 													gis.store.maps.loadStore();
 												}
 											});
@@ -6229,7 +6235,7 @@ Ext.onReady( function() {
 		var centerRegion,
 			eastRegion,
 			downloadButton,
-			interpretationButton,
+			shareButton,
 			defaultButton,
 			layersPanel,
 			resizeButton,
@@ -6252,6 +6258,112 @@ Ext.onReady( function() {
 			handler: function() {
 				if (!this.pressed) {
 					this.toggle();
+				}
+			}
+		});
+
+		interpretationItem = Ext.create('Ext.menu.Item', {
+			text: 'Write interpretation' + '&nbsp;&nbsp;',
+			iconCls: 'gis-menu-item-tablelayout',
+			disabled: true,
+			xable: function() {
+				if (gis.map) {
+					this.enable();
+				}
+				else {
+					this.disable();
+				}
+			},
+			handler: function() {
+				if (viewport.interpretationWindow) {
+					viewport.interpretationWindow.destroy();
+					viewport.interpretationWindow = null;
+				}
+
+				viewport.interpretationWindow = InterpretationWindow();
+				viewport.interpretationWindow.show();
+			}
+		});
+
+		pluginItem = Ext.create('Ext.menu.Item', {
+			text: 'Embed as plugin' + '&nbsp;&nbsp;',
+			iconCls: 'gis-menu-item-datasource',
+			disabled: true,
+			xable: function() {
+				if (gis.util.map.hasVisibleFeatures()) {
+					this.enable();
+				}
+				else {
+					this.disable();
+				}
+			},
+			handler: function() {
+				var textArea,
+					window;
+
+				textArea = Ext.create('Ext.form.field.TextArea', {
+					width: 400,
+					height: 200,
+					readOnly: true,
+					cls: 'ns-textarea monospaced',
+					value: JSON.stringify(gis.util.map.map2plugin(gis.util.layout.getAnalytical()))
+				});
+
+				window = Ext.create('Ext.window.Window', {
+					title: 'Plugin configuration',
+					layout: 'fit',
+					modal: true,
+					resizable: false,
+					items: textArea,
+					destroyOnBlur: true,
+					bbar: [
+						'->',
+						{
+							text: 'Format',
+							handler: function() {
+								textArea.setValue(JSON.stringify(gis.util.map.map2plugin(gis.util.layout.getAnalytical())), null, 2);
+
+							}
+						},
+						{
+							text: 'Select',
+							handler: function() {
+								textArea.selectText();
+							}
+						}
+					],
+					listeners: {
+						show: function(w) {
+							this.setPosition(215, 33);
+						}
+					}
+				});
+
+				window.show();
+			}
+		});
+
+		shareButton = Ext.create('Ext.button.Button', {
+			text: GIS.i18n.share,
+			xableItems: function() {
+				interpretationItem.xable();
+				pluginItem.xable();
+			},
+			menu: {
+				cls: 'gis-menu',
+				shadow: false,
+				showSeparator: false,
+				items: [
+					interpretationItem,
+					pluginItem
+				],
+				listeners: {
+					afterrender: function() {
+						this.getEl().addCls('gis-toolbar-btn-menu');
+					},
+					show: function() {
+						shareButton.xableItems();
+					}
 				}
 			}
 		});
@@ -6361,24 +6473,7 @@ Ext.onReady( function() {
 							}
 						}
 					});
-					a.push({
-						text: GIS.i18n.share,
-						menu: {},
-						disabled: true,
-						handler: function() {
-							if (viewport.interpretationWindow && viewport.interpretationWindow.destroy) {
-								viewport.interpretationWindow.destroy();
-							}
-
-							viewport.interpretationWindow = GIS.app.InterpretationWindow();
-							viewport.interpretationWindow.show();
-						},
-						listeners: {
-							added: function() {
-								interpretationButton = this;
-							}
-						}
-					});
+					a.push(shareButton);
 					a.push('->');
 
 					a.push({
@@ -6713,7 +6808,7 @@ Ext.onReady( function() {
 			eastRegion: eastRegion,
 			centerRegion: centerRegion,
 			downloadButton: downloadButton,
-			interpretationButton: interpretationButton,
+			shareButton: shareButton,
 			layersPanel: layersPanel,
 			items: [
 				centerRegion,

@@ -803,8 +803,8 @@ console.log(view.parentGraphMap);
 			}
 
 			// interpretation button
-			if (gis.map.id && gis.viewport.interpretationButton) {
-				gis.viewport.interpretationButton.enable();
+			if (gis.map.id && gis.viewport.shareButton) {
+				gis.viewport.shareButton.enable();
 			}
 
 			// session storage
@@ -998,7 +998,7 @@ console.log(view.parentGraphMap);
 			}
 			else {
 				gis.map = null;
-				gis.viewport.interpretationButton.disable();
+				//gis.viewport.shareButton.disable();
 			}
 		};
 
@@ -1450,8 +1450,8 @@ console.log(view.parentGraphMap);
 			}
 			else {
 				gis.map = null;
-				if (gis.viewport.interpretationButton) {
-					gis.viewport.interpretationButton.disable();
+				if (gis.viewport.shareButton) {
+					//gis.viewport.shareButton.disable();
 				}
 			}
 
@@ -1692,7 +1692,7 @@ console.log(view.parentGraphMap);
 			}
 			else {
 				gis.map = null;
-				gis.viewport.interpretationButton.disable();
+				//gis.viewport.shareButton.disable();
 			}
 		};
 
