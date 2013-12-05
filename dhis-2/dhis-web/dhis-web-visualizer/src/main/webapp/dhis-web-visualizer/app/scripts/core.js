@@ -1743,12 +1743,7 @@ Ext.onReady( function() {
                             radius: 4
                         },
                         tips: getDefaultTips(),
-                        title: getDefaultSeriesTitle(store),
-                        listeners: {
-							itemmouseup: function() {
-								console.log(arguments);
-							}
-						}
+                        title: getDefaultSeriesTitle(store)
                     };
 
                     if (xLayout.showValues) {
