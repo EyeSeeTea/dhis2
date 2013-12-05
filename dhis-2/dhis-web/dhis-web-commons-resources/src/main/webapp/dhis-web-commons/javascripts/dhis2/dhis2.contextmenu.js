@@ -79,27 +79,40 @@ dhis2.contextmenu.makeContextMenu = function( options ) {
     var targetFn = $target.data('target-fn');
     var fn = config.functionResolver(targetFn);
 
-    $menu.hide();
+    dhis2.contextmenu.disable();
     fn(context);
 
     return false;
   });
 
-  $list.on('click.context', 'td', function( e ) {
-    if(dhis2.contextmenu.disable()) {
+  $list.on('click.context', 'tr', function( e ) {
+    if( dhis2.contextmenu.disable() ) {
       return false;
     }
 
-    $menu.show();
-    $menu.css({left: e.pageX, top: e.pageY});
-
     var $target = $(e.target);
+
+    if( $target.data('id') === undefined ) {
+      $target = $target.closest('tr');
+    }
 
     $target.addClass(config.menuItemActiveClass);
 
     $.each(config.listItemProps, function( idx, val ) {
       $menu.data(val, $target.data(val));
     });
+
+    $menu.find('ul > li').each(function( idx, val ) {
+      var $val = $(val);
+      var enabledProperty = $val.data('enabled');
+
+      if( enabledProperty ) {
+        $target.data(enabledProperty) ? $val.show() : $val.hide();
+      }
+    });
+
+    $menu.show();
+    $menu.css({left: e.pageX, top: e.pageY});
 
     return false;
   });
@@ -120,6 +133,8 @@ dhis2.contextmenu.disable = function() {
   var config = dhis2.contextmenu.config;
   var $list = $('#' + config.listId);
   var $menu = $('#' + config.menuId);
+
+  $list.find('tr').removeClass(config.menuItemActiveClass);
   $list.find('td').removeClass(config.menuItemActiveClass);
 
   if( $menu.is(":visible") ) {
