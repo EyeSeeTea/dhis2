@@ -89,9 +89,97 @@ Ext.onReady( function() {
 			};
 
 			util.map.map2plugin = function(map) {
+				if (map.id) {
+					return {id: map.id};
+				}
 
+				delete map.access;
+				delete map.created;
+				delete lastUpdated;
+				delete name;
 
+				for (var i = 0, dimensions, layout; i < map.mapViews.length; i++) {
+					layout = map.mapViews[i];
 
+					dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || []));dimension = dimensions[i];
+
+					for (var j = 0, dimension; j < dimensions.length; j++) {
+						dimension = dimensions[j];
+
+						delete dimension.id;
+						delete dimension.ids;
+						delete dimension.type;
+						delete dimension.dimensionName;
+						delete dimension.objectName;
+
+						for (var k = 0, item; k < dimension.items.length; k++) {
+							item = dimension.items[k];
+
+							delete item.name;
+							delete item.code;
+							delete item.created;
+							delete item.lastUpdated;
+						}
+					}
+
+					if (layout.legendSet) {
+						delete layout.method;
+						delete layout.classes;
+						delete layout.colorLow;
+						delete layout.colorHigh;
+						delete layout.radiusLow;
+						delete layout.radiusHigh;
+					}
+					else {
+						if (layout.method === 2) {
+							delete layout.method;
+						}
+
+						if (layout.classes === 5) {
+							delete layout.classes;
+						}
+
+						if (layout.colorLow === "ff0000") {
+							delete layout.colorLow;
+						}
+
+						if (layout.colorHigh === "00ff00") {
+							delete layout.colorHigh;
+						}
+
+						if (layout.radiusLow === 5) {
+							delete layout.radiusLow;
+						}
+
+						if (layout.radiusHigh === 15) {
+							delete layout.radiusHigh;
+						}
+					}
+
+					if (layout.opacity === 0.8) {
+						delete layout.opacity;
+					}
+
+					if (!layout.userOrganisationUnit) {
+						delete layout.userOrganisationUnit;
+					}
+
+					if (!layout.userOrganisationUnitChildren) {
+						delete layout.userOrganisationUnitChildren;
+					}
+
+					if (!layout.userOrganisationUnitGrandChildren) {
+						delete layout.userOrganisationUnitGrandChildren;
+					}
+
+					if (!layout.organisationUnitGroupSet) {
+						delete layout.organisationUnitGroupSet;
+					}
+
+					delete layout.parentGraphMap;
+				}
+
+				return map;
 			};
 
 			util.url = util.url || {};
@@ -340,6 +428,29 @@ Ext.onReady( function() {
 				}
 
 				return;
+			};
+
+			util.layout.getPluginConfig = function() {
+				var layers = gis.util.map.getVisibleVectorLayers(),
+					map = {};
+
+				if (gis.map) {
+					return gis.map;
+				}
+
+				map.mapViews = [];
+
+				for (var i = 0, layer; i < layers.length; i++) {
+					layer = layers[i];
+
+					if (layer.core.view) {
+						layer.core.view.layer = layer.id;
+
+						map.mapViews.push(layer.core.view);
+					}
+				}
+
+				return map;
 			};
 
 			util.layout.setSessionStorage = function(session, obj, url) {
@@ -911,8 +1022,6 @@ Ext.onReady( function() {
 			text: GIS.i18n.close,
 			iconCls: 'gis-menu-item-icon-clear',
 			handler: function() {
-				//gis.viewport.shareButton.disable();
-
 				layer.core.reset();
 			}
 		};
@@ -6305,8 +6414,8 @@ Ext.onReady( function() {
 					width: 400,
 					height: 200,
 					readOnly: true,
-					cls: 'ns-textarea monospaced',
-					value: JSON.stringify(gis.util.map.map2plugin(gis.util.layout.getAnalytical()))
+					cls: 'gis-textarea monospaced',
+					value: JSON.stringify(gis.util.map.map2plugin(gis.util.layout.getPluginConfig()))
 				});
 
 				window = Ext.create('Ext.window.Window', {
@@ -6321,7 +6430,7 @@ Ext.onReady( function() {
 						{
 							text: 'Format',
 							handler: function() {
-								textArea.setValue(JSON.stringify(gis.util.map.map2plugin(gis.util.layout.getAnalytical())), null, 2);
+								textArea.setValue(JSON.stringify(gis.util.map.map2plugin(gis.util.layout.getPluginConfig()), null, 2));
 
 							}
 						},

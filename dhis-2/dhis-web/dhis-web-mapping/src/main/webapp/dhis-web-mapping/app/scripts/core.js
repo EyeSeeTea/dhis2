@@ -998,7 +998,6 @@ console.log(view.parentGraphMap);
 			}
 			else {
 				gis.map = null;
-				//gis.viewport.shareButton.disable();
 			}
 		};
 
@@ -1451,7 +1450,6 @@ console.log(view.parentGraphMap);
 			else {
 				gis.map = null;
 				if (gis.viewport.shareButton) {
-					//gis.viewport.shareButton.disable();
 				}
 			}
 
@@ -1692,7 +1690,6 @@ console.log(view.parentGraphMap);
 			}
 			else {
 				gis.map = null;
-				//gis.viewport.shareButton.disable();
 			}
 		};
 

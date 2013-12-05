@@ -806,6 +806,12 @@ gis-combo .x-form-item-label {
 	font-size: 11px;
 }
 
+.gis-textarea.monospaced textarea {
+	font-family: monospace, consolas, courier new !important;
+	padding: 4px;
+	border: 0 none;
+}
+
 
 /*----------------------------------------------------------------------------
  * Checkbox
