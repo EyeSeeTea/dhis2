@@ -4636,18 +4636,18 @@ Ext.onReady( function() {
 
 		openTableLayoutTab = function(type, isNewTab) {
 			if (ns.core.init.contextPath && ns.app.paramString) {
-				var colDimNames = Ext.clone(pt.xLayout.columnDimensionNames),
-					colObjNames = pt.xLayout.columnObjectNames,
-					rowDimNames = Ext.clone(pt.xLayout.rowDimensionNames),
-					rowObjNames = pt.xLayout.rowObjectNames,
-					dc = pt.conf.finals.dimension.operand.objectName,
-					co = pt.conf.finals.dimension.category.dimensionName,
+				var colDimNames = Ext.clone(ns.app.xLayout.columnDimensionNames),
+					colObjNames = ns.app.xLayout.columnObjectNames,
+					rowDimNames = Ext.clone(ns.app.xLayout.rowDimensionNames),
+					rowObjNames = ns.app.xLayout.rowObjectNames,
+					dc = ns.core.conf.finals.dimension.operand.objectName,
+					co = ns.core.conf.finals.dimension.category.dimensionName,
 					columnNames = Ext.Array.clean([].concat(colDimNames, (Ext.Array.contains(colObjNames, dc) ? co : []))),
 					rowNames = Ext.Array.clean([].concat(rowDimNames, (Ext.Array.contains(rowObjNames, dc) ? co : []))),
 					url = '';
 
-				url += pt.init.contextPath + '/api/analytics.' + type;
-				url += pt.engine.getParamString(pt.xLayout);
+				url += ns.core.init.contextPath + '/api/analytics.' + type;
+				url += ns.core.web.analytics.getParamString(ns.app.xLayout);
 				url += '&tableLayout=true';
 				url += '&columns=' + columnNames.join(';');
 				url += '&rows=' + rowNames.join(';');
