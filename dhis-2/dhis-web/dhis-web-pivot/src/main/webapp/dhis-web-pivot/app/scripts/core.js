@@ -1521,10 +1521,16 @@ Ext.onReady( function() {
 				var layout = Ext.clone(layout),
 					dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || []));
 
+				if (Ext.isString(layout.id)) {
+					return {id: layout.id};
+				}
+
 				for (var i = 0, dimension, item; i < dimensions.length; i++) {
 					dimension = dimensions[i];
 
+					delete dimension.id;
 					delete dimension.ids;
+					delete dimension.type;
 					delete dimension.dimensionName;
 					delete dimension.objectName;
 
@@ -1532,6 +1538,9 @@ Ext.onReady( function() {
 						item = dimension.items[j];
 
 						delete item.name;
+						delete item.code;
+						delete item.created;
+						delete item.lastUpdated;
 					}
 				}
 

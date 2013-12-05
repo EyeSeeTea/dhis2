@@ -2409,6 +2409,9 @@ Ext.onReady( function() {
 			favoriteButton,
 			openTableLayoutTab,
 			downloadButton,
+			interpretationItem,
+			pluginItem,
+			shareButton,
 
 			accordionBody,
 			accordion,
@@ -4792,6 +4795,7 @@ Ext.onReady( function() {
 				textArea = Ext.create('Ext.form.field.TextArea', {
 					width: 400,
 					height: 200,
+					readOnly: true,
 					cls: 'ns-textarea monospaced',
 					value: JSON.stringify(ns.core.service.layout.layout2plugin(ns.app.layout)),
 					listeners: {
@@ -4807,8 +4811,10 @@ Ext.onReady( function() {
 					title: 'Plugin configuration',
 					layout: 'fit',
 					modal: true,
+					resizable: false,
 					items: textArea,
 					bodyStyle: 'color:blue',
+					destroyOnBlur: true,
 					listeners: {
 						show: function(w) {
 							ns.core.web.window.setAnchorPosition(w, ns.app.shareButton);
@@ -4858,32 +4864,6 @@ Ext.onReady( function() {
 				}
 			}
 		});
-
-
-
-			//disabledTooltip: null,
-			//createTooltip: function() {
-				//this.disabledTooltip = Ext.create('Ext.tip.ToolTip', {
-					//target: this.getEl(),
-					//html: NS.i18n.save_load_favorite_before_sharing,
-					//'anchor': 'bottom'
-				//});
-			//},
-			//handler: function() {
-				//if (ns.app.interpretationWindow) {
-					//ns.app.interpretationWindow.destroy();
-					//ns.app.interpretationWindow = null;
-				//}
-
-				//ns.app.interpretationWindow = InterpretationWindow();
-				//ns.app.interpretationWindow.show();
-			//},
-			//listeners: {
-				//added: function() {
-					//ns.app.shareButton = this;
-				//}
-			//}
-		//});
 
 		defaultButton = Ext.create('Ext.button.Button', {
 			text: NS.i18n.table,
