@@ -3304,7 +3304,6 @@ Ext.onReady( function() {
 			fieldStyle: 'padding-left: 4px; padding-top: 3px',
 			emptyText: GIS.i18n.write_your_interpretation
 		});
-		console.log(gis);
 
 		panel = Ext.create('Ext.panel.Panel', {
 			cls: 'gis-container-inner',
@@ -6389,7 +6388,7 @@ Ext.onReady( function() {
 					viewport.interpretationWindow = null;
 				}
 
-				viewport.interpretationWindow = InterpretationWindow();
+				viewport.interpretationWindow = GIS.app.InterpretationWindow();
 				viewport.interpretationWindow.show();
 			}
 		});
