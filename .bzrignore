@@ -25,3 +25,4 @@ overlays/
 ./.gitattributes
 ./.gitignore
 ./.travis.yml
+.DS_Store
