@@ -28,17 +28,16 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Map;
+import java.util.UUID;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.system.startup.AbstractStartupRoutine;
 import org.hisp.dhis.system.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-
-import java.util.Map;
-import java.util.UUID;
 
 /**
  * @author bobj
@@ -137,11 +136,9 @@ public class IdentityPopulator
                     log.info( count + " timestamps set on " + table );
                 }
             }
-            catch ( Exception ex )
+            catch ( Exception ex ) // Log and continue
             {
                 log.error( "Problem updating: " + table + ", id column: " + getIdColumn( table ), ex );
-
-                throw ex;
             }
         }
 
@@ -170,7 +167,7 @@ public class IdentityPopulator
                 final String sql = "ALTER TABLE " + table + " ADD CONSTRAINT " + table + "_uid_key UNIQUE(uid)";
                 jdbcTemplate.execute( sql );
             }
-            catch ( BadSqlGrammarException ex )
+            catch ( Exception ex ) // Log and continue, will fail after first run
             {
                 log.debug( "Could not create uid constraint on table " + table +
                     ", might already be created or column contains duplicates", ex );
@@ -198,9 +195,9 @@ public class IdentityPopulator
                 log.info( count + " UUIDs updated on organisationunit" );
             }
         }
-        catch ( BadSqlGrammarException ex )
+        catch ( Exception ex ) // Log and continue
         {
-            log.debug( "Problem updating organisationunit: ", ex );
+            log.error( "Problem updating organisationunit: ", ex );
         }
     }
 }

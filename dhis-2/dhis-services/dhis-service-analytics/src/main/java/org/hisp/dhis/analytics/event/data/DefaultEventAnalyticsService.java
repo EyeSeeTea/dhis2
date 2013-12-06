@@ -198,7 +198,7 @@ public class DefaultEventAnalyticsService
         // ---------------------------------------------------------------------
 
         grid.addHeader( new GridHeader( ITEM_EVENT, "Event" ) );
-        grid.addHeader( new GridHeader( ITEM_PROGRAM_STAGE, "Program stage" ) );
+        grid.addHeader( new GridHeader( ITEM_PROGRAM_STAGE, "Program stage", String.class.getName(), false, true ) );
         grid.addHeader( new GridHeader( ITEM_EXECUTION_DATE, "Event date" ) );
         grid.addHeader( new GridHeader( ITEM_LONGITUDE, "Longitude" ) );
         grid.addHeader( new GridHeader( ITEM_LATITUDE, "Latitude" ) );
@@ -422,7 +422,14 @@ public class DefaultEventAnalyticsService
         {
             map.put( stage.getUid(), stage.getName() );
         }
-        
+        else
+        {
+            for ( ProgramStage st : program.getProgramStages() )
+            {
+                map.put( st.getUid(), st.getName() );
+            }
+        }
+
         for ( QueryItem item : params.getItems() )
         {
             map.put( item.getItem().getUid(), item.getItem().getDisplayName() );
