@@ -7,8 +7,6 @@
 <hibernate-mapping>
   <class name="org.hisp.dhis.dataapproval.DataApproval" table="dataapproval">
 
-    <cache usage="read-write" />
-
     <id name="id" column="dataapprovalid">
       <generator class="native" />
     </id>

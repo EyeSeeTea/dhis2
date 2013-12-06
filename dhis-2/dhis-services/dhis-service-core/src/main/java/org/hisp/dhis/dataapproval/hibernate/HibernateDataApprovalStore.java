@@ -28,45 +28,33 @@ package org.hisp.dhis.dataapproval.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.dataapproval.DataApprovalStore;
 import org.hisp.dhis.dataapproval.DataApproval;
+import org.hisp.dhis.dataapproval.DataApprovalStore;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodStore;
+import org.hisp.dhis.period.PeriodService;
 
 /**
  * @author Jim Grace
  * @version $Id$
  */
 public class HibernateDataApprovalStore
-/*       extends HibernateGenericStore<DataApproval> */
-        implements DataApprovalStore
+    extends HibernateGenericStore<DataApproval>
+    implements DataApprovalStore
 {
-    private static final Log log = LogFactory.getLog(HibernateDataApprovalStore.class);
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private SessionFactory sessionFactory;
+    private PeriodService periodService;
 
-    public void setSessionFactory( SessionFactory sessionFactory )
+    public void setPeriodService( PeriodService periodService )
     {
-        this.sessionFactory = sessionFactory;
-    }
-
-    private PeriodStore periodStore;
-
-    public void setPeriodStore( PeriodStore periodStore )
-    {
-        this.periodStore = periodStore;
+        this.periodService = periodService;
     }
 
     // -------------------------------------------------------------------------
@@ -75,41 +63,28 @@ public class HibernateDataApprovalStore
 
     public void addDataApproval( DataApproval dataApproval )
     {
-        dataApproval.setPeriod( periodStore.reloadForceAddPeriod( dataApproval.getPeriod() ) );
+        dataApproval.setPeriod( periodService.reloadPeriod( dataApproval.getPeriod() ) );
 
-        Session session = sessionFactory.getCurrentSession();
-
-        session.save( dataApproval );
+        save( dataApproval );
     }
 
     public void updateDataApproval( DataApproval dataApproval )
     {
-        dataApproval.setPeriod( periodStore.reloadForceAddPeriod( dataApproval.getPeriod() ) );
+        dataApproval.setPeriod( periodService.reloadPeriod( dataApproval.getPeriod() ) );
 
-        Session session = sessionFactory.getCurrentSession();
-
-        session.update( dataApproval );
+        update( dataApproval );
     }
 
     public void deleteDataApproval( DataApproval dataApproval )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        session.delete( dataApproval );
+        delete( dataApproval );
     }
 
     public DataApproval getDataApproval( DataSet dataSet, Period period, OrganisationUnit source )
     {
-        Session session = sessionFactory.getCurrentSession();
+        Period storedPeriod = periodService.reloadPeriod( period );
 
-        Period storedPeriod = periodStore.reloadPeriod( period );
-
-        if ( storedPeriod == null )
-        {
-            return null;
-        }
-
-        Criteria criteria = session.createCriteria( DataApproval.class );
+        Criteria criteria = getCriteria();
         criteria.add( Restrictions.eq( "dataSet", dataSet ) );
         criteria.add( Restrictions.eq( "period", storedPeriod ) );
         criteria.add( Restrictions.eq( "source", source ) );

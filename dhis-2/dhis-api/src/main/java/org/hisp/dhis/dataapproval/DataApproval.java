@@ -37,9 +37,9 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.user.User;
 
 /**
- * Records the approval of DataSet values for a given OrganisationUnit
- * and Period.
- *
+ * Records the approval of DataSet values for a given OrganisationUnit and
+ * Period.
+ * 
  * @author Jim Grace
  */
 
@@ -86,8 +86,7 @@ public class DataApproval
     {
     }
 
-    public DataApproval(  DataSet dataSet, Period period, OrganisationUnit source,
-                          Date created, User creator )
+    public DataApproval( DataSet dataSet, Period period, OrganisationUnit source, Date created, User creator )
     {
         this.dataSet = dataSet;
         this.period = period;
@@ -110,43 +109,53 @@ public class DataApproval
         this.id = id;
     }
 
-    public DataSet getDataSet() {
+    public DataSet getDataSet()
+    {
         return dataSet;
     }
 
-    public void setDataSet(DataSet dataSet) {
+    public void setDataSet( DataSet dataSet )
+    {
         this.dataSet = dataSet;
     }
 
-    public Period getPeriod() {
+    public Period getPeriod()
+    {
         return period;
     }
 
-    public void setPeriod(Period period) {
+    public void setPeriod( Period period )
+    {
         this.period = period;
     }
 
-    public OrganisationUnit getSource() {
+    public OrganisationUnit getSource()
+    {
         return source;
     }
 
-    public void setSource(OrganisationUnit source) {
+    public void setSource( OrganisationUnit source )
+    {
         this.source = source;
     }
 
-    public Date getCreated() {
+    public Date getCreated()
+    {
         return created;
     }
 
-    public void setCreated(Date created) {
+    public void setCreated( Date created )
+    {
         this.created = created;
     }
 
-    public User getCreator() {
+    public User getCreator()
+    {
         return creator;
     }
 
-    public void setCreator(User creator) {
+    public void setCreator( User creator )
+    {
         this.creator = creator;
     }
 }

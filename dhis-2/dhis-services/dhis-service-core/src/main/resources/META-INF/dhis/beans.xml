@@ -56,8 +56,9 @@
   </bean>
 
   <bean id="org.hisp.dhis.dataapproval.DataApprovalStore" class="org.hisp.dhis.dataapproval.hibernate.HibernateDataApprovalStore">
+    <property name="clazz" value="org.hisp.dhis.dataapproval.DataApproval" />
     <property name="sessionFactory" ref="sessionFactory" />
-    <property name="periodStore" ref="org.hisp.dhis.period.PeriodStore" />
+    <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
   </bean>
 
     <!--@author Ovidiu Rosu <rosu.ovi@gmail.com>-->
