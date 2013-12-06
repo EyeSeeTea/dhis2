@@ -2247,7 +2247,7 @@ Ext.onReady( function() {
 					timeout: 60000,
 					headers: {
 						'Content-Type': 'application/json',
-						'Accens': 'application/json'
+						'Accepts': 'application/json'
 					},
 					disableCaching: false,
 					failure: function(r) {
