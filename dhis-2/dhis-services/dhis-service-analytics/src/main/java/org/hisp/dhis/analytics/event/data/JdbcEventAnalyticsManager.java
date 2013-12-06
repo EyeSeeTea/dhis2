@@ -36,11 +36,8 @@ import static org.hisp.dhis.system.util.TextUtils.getQuotedCommaDelimitedString;
 import static org.hisp.dhis.system.util.TextUtils.removeLast;
 import static org.hisp.dhis.system.util.TextUtils.trimEnd;
 
-import java.util.Arrays;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.event.EventAnalyticsManager;
 import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.common.DimensionalObject;
@@ -379,16 +376,16 @@ public class JdbcEventAnalyticsManager
         for ( QueryItem item : params.getItems() )
         {
             if ( item.hasFilter() )
-            {                
-                sql += "and " + statementBuilder.columnQuote( item.getItem().getUid() ) + " " + item.getSqlOperator() + " " + getSqlFilter( item ) + " ";
+            {
+                sql += "and " + getColumn( item ) + " " + item.getSqlOperator() + " " + getSqlFilter( item ) + " ";
             }
         }
         
         for ( QueryItem filter : params.getItemFilters() )
         {
             if ( filter.hasFilter() )
-            {                
-                sql += "and " + statementBuilder.columnQuote( filter.getItem().getUid() ) + " " + filter.getSqlOperator() + " " + getSqlFilter( filter ) + " ";
+            {
+                sql += "and " + getColumn( filter ) + " " + filter.getSqlOperator() + " " + getSqlFilter( filter ) + " ";
             }
         }
 
@@ -396,32 +393,22 @@ public class JdbcEventAnalyticsManager
     }
     
     /**
+     * Returns an encoded column name wrapped in lower directive if not numeric.
+     */
+    private String getColumn( QueryItem item )
+    {
+        String col = statementBuilder.columnQuote( item.getItem().getUid() );
+        
+        return item.isNumeric() ? col : "lower(" + col + ")"; 
+    }
+    
+    /**
      * Returns the filter value for the given query item.
      */
     private String getSqlFilter( QueryItem item )
     {
-        String operator = item.getOperator();
-        String filter = item.getFilter();
+        String encodedFilter = statementBuilder.encode( item.getFilter(), false );
         
-        if ( operator == null || filter == null )
-        {
-            return null;
-        }
-        
-        operator = operator.toLowerCase();
-        filter = statementBuilder.encode( filter, false );
-        
-        if ( operator.equals( "like" ) )
-        {
-            return "'%" + filter + "%'";
-        }
-        else if ( operator.equals( "in" ) )
-        {
-            String[] split = filter.split( DataQueryParams.OPTION_SEP );
-                        
-            return "(" + getQuotedCommaDelimitedString( Arrays.asList( split ) ) + ")";
-        }
-        
-        return "'" + filter + "'";
+        return item.getSqlFilter( encodedFilter );
     }
 }
