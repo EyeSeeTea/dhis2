@@ -403,7 +403,7 @@ public class DefaultEventAnalyticsService
                 throw new IllegalQueryException( "Item filter has invalid format: " + dimension );
             }
             
-            items.add( getItem( program, split[0], split[1], split[2] ) );
+            items.add( getItem( program, split[0], split[1].toLowerCase(), split[2] ) );
         }
         
         return items;
