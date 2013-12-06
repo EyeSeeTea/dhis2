@@ -113,8 +113,7 @@ public class DataApprovalStoreTest
     // -------------------------------------------------------------------------
 
     @Override
-    public void setUpTest()
-            throws Exception
+    public void setUpTest() throws Exception
     {
         dataApprovalStore = (DataApprovalStore) getBean( DataApprovalStore.ID );
 
@@ -193,28 +192,19 @@ public class DataApprovalStoreTest
     // -------------------------------------------------------------------------
 
     @Test
-    public void testAddAndGetDataApproval() throws Exception {
+    public void testAddAndGetDataApproval() throws Exception
+    {
         Date date = new Date();
         DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, sourceA, date, userA );
         DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, sourceB, date, userA );
         DataApproval dataApprovalC = new DataApproval( dataSetA, periodB, sourceA, date, userA );
         DataApproval dataApprovalD = new DataApproval( dataSetB, periodA, sourceA, date, userA );
-        DataApproval dataApprovalE = new DataApproval( dataSetA, periodA, sourceA, date, userA );
+        DataApproval dataApprovalE;
 
         dataApprovalStore.addDataApproval( dataApprovalA );
         dataApprovalStore.addDataApproval( dataApprovalB );
         dataApprovalStore.addDataApproval( dataApprovalC );
         dataApprovalStore.addDataApproval( dataApprovalD );
-
-        try
-        {
-            dataApprovalStore.addDataApproval( dataApprovalE );
-            fail("Should give unique constraint violation");
-        }
-        catch ( Exception e )
-        {
-            // Expected
-        }
 
         dataApprovalA = dataApprovalStore.getDataApproval( dataSetA, periodA, sourceA );
         assertNotNull( dataApprovalA );
@@ -253,12 +243,34 @@ public class DataApprovalStoreTest
     }
 
     @Test
-    public void testUpdateDataApproval() throws Exception {
+    public void testAddDuplicateDataApproval() throws Exception
+    {
+        Date date = new Date();
+        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, sourceA, date, userA );
+        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, sourceA, date, userA );
+
+        dataApprovalStore.addDataApproval( dataApprovalA );
+
+        try
+        {
+            dataApprovalStore.addDataApproval( dataApprovalB );
+            fail("Should give unique constraint violation");
+        }
+        catch ( Exception e )
+        {
+            // Expected
+        }
+    }
+
+    @Test
+    public void testUpdateDataApproval() throws Exception
+    {
 
     }
 
     @Test
-    public void testDeleteDataApproval() throws Exception {
+    public void testDeleteDataApproval() throws Exception
+    {
 
     }
 }
