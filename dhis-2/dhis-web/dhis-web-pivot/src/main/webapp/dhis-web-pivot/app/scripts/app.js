@@ -1642,7 +1642,6 @@ Ext.onReady( function() {
 							headers: {'Content-Type': 'text/html'},
 							success: function() {
 								textArea.reset();
-								ns.app.shareButton.disable();
 								window.hide();
 							}
 						});
