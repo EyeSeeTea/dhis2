@@ -4159,10 +4159,11 @@ Ext.onReady( function() {
 		return panel;
 	};
 
-	GIS.app.LayerWidgetBoundary = function(layer) {
+	GIS.app.LayerWidgetEvent = function(layer) {
 
 		// Stores
-		var infrastructuralDataElementValuesStore,
+		var programStore,
+			stagesByProgramStore,
 
 		// Components
 
@@ -4186,18 +4187,17 @@ Ext.onReady( function() {
 
 		// Stores
 
-		infrastructuralDataElementValuesStore = Ext.create('Ext.data.Store', {
-			fields: ['dataElementName', 'value'],
+		programStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: '../getInfrastructuralDataElementMapValues.action',
+				url: gis.init.contextPath + '/api/programs.json?links=false',
 				reader: {
 					type: 'json',
-					root: 'mapValues'
+					root: 'programs'
 				}
 			},
-			sortInfo: {field: 'dataElementName', direction: 'ASC'},
-			autoLoad: false,
+			sortInfo: {field: 'name', direction: 'ASC'},
 			isLoaded: false,
 			listeners: {
 				load: function() {
@@ -4208,7 +4208,74 @@ Ext.onReady( function() {
 			}
 		});
 
+		stagesByProgramStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name', 'legendSet'],
+			proxy: {
+				type: 'ajax',
+				url: '',
+				reader: {
+					type: 'json',
+					root: 'programStages'
+				}
+			},
+			isLoaded: false,
+			loadFn: function(fn) {
+				if (Ext.isFunction(fn)) {
+					if (this.isLoaded) {
+						fn.call();
+					}
+					else {
+						this.load({
+							callback: fn
+						});
+					}
+				}
+			},
+			listeners: {
+				load: function() {
+					if (!this.isLoaded) {
+						this.isLoaded = true;
+					}
+					this.sort('name', 'ASC');
+				}
+			}
+		});
+
 		// Components
+
+		program = Ext.create('Ext.form.field.ComboBox', {
+			fieldLabel: GIS.i18n.programs,
+			editable: false,
+			valueField: 'id',
+			displayField: 'name',
+			forceSelection: true,
+			queryMode: 'local',
+			width: gis.conf.layout.widget.item_width,
+			labelWidth: gis.conf.layout.widget.itemlabel_width,
+			store: programStore,
+			listeners: {
+				select: function() {
+					indicator.clearValue();
+
+					indicator.store.proxy.url = gis.init.contextPath + gis.conf.finals.url.path_api +  'indicatorGroups/' + this.getValue() + '.json?links=false&paging=false';
+					indicator.store.load();
+				}
+			}
+		});
+
+		stage = Ext.create('Ext.form.field.ComboBox', {
+			fieldLabel: GIS.i18n.indicator,
+			editable: false,
+			valueField: 'id',
+			displayField: 'name',
+			queryMode: 'local',
+			forceSelection: true,
+			width: gis.conf.layout.widget.item_width,
+			labelWidth: gis.conf.layout.widget.itemlabel_width,
+			listConfig: {loadMask: false},
+			store: stagesByProgramStore
+		});
+
 
 		treePanel = Ext.create('Ext.tree.Panel', {
 			cls: 'gis-tree',
@@ -4771,8 +4838,6 @@ Ext.onReady( function() {
 				return treePanel.getParentGraphMap();
 			},
 
-			infrastructuralDataElementValuesStore: infrastructuralDataElementValuesStore,
-
 			cls: 'gis-form-widget el-border-0',
 			border: false,
 			items: [
@@ -4821,7 +4886,7 @@ Ext.onReady( function() {
 		return panel;
 	};
 
-	GIS.app.LayerWidgetEvent = function(layer) {
+	GIS.app.LayerWidgetBoundary = function(layer) {
 
 		// Stores
 		var infrastructuralDataElementValuesStore,
