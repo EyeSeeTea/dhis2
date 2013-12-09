@@ -82,6 +82,7 @@ Ext.onReady( function() {
 			gis.layer.thematic3.core.reset();
 			gis.layer.thematic4.core.reset();
 			gis.layer.facility.core.reset();
+			gis.layer.event.core.reset();
 		};
 
 		addControl('zoomIn', olmap.zoomIn);
@@ -151,6 +152,12 @@ Ext.onReady( function() {
 		layers.boundary = GIS.core.VectorLayer(gis, 'boundary', GIS.i18n.boundary_layer, {opacity: 0.8});
 		layers.boundary.core = new mapfish.GeoStat.Boundary(gis.olmap, {
 			layer: layers.boundary,
+			gis: gis
+		});
+
+		layers.event = GIS.core.VectorLayer(gis, 'event', GIS.i18n.event_layer, {opacity: 0.8});
+		layers.event.core = new mapfish.GeoStat.Event(gis.olmap, {
+			layer: layers.event,
 			gis: gis
 		});
 
@@ -2389,6 +2396,7 @@ console.log(view.parentGraphMap);
 			gis.layer.thematic2,
 			gis.layer.thematic1,
 			gis.layer.boundary,
+			gis.layer.event,
 			gis.layer.facility
 		);
 

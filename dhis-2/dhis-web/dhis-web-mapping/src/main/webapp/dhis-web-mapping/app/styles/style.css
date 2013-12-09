@@ -418,15 +418,21 @@ gis-combo .x-form-item-label {
 
 	/* Toolbar btn */
 	.x-toolbar .x-btn-default-toolbar-small-icon button,
+	.x-toolbar .gis-btn-icon-facility,
+	.x-toolbar .gis-btn-icon-event,
 	.x-toolbar .gis-btn-icon-boundary,
 	.x-toolbar .gis-btn-icon-thematic1,
 	.x-toolbar .gis-btn-icon-thematic2,
 	.x-toolbar .gis-btn-icon-thematic3,
-	.x-toolbar .gis-btn-icon-thematic4,
-	.x-toolbar .gis-btn-icon-facility,
-	.x-toolbar .gis-btn-icon-symbol {
+	.x-toolbar .gis-btn-icon-thematic4 {
 		width: 24px !important;
 		height: 24px !important;
+	}
+	.x-toolbar .gis-btn-icon-facility {
+		background: url('../images/facility_20.png') no-repeat;
+	}
+	.x-toolbar .gis-btn-icon-event {
+		background: url('../images/event_20.png') no-repeat;
 	}
 	.x-toolbar .gis-btn-icon-boundary {
 		background: url('../images/boundary_20.png') no-repeat;
@@ -442,12 +448,6 @@ gis-combo .x-form-item-label {
 	}
 	.x-toolbar .gis-btn-icon-thematic4 {
 		background: url('../images/thematic4_20.png') no-repeat;
-	}
-	.x-toolbar .gis-btn-icon-facility {
-		background: url('../images/facility_20.png') no-repeat;
-	}
-	.x-toolbar .gis-btn-icon-symbol {
-		background: url('../images/symbol_20.png') no-repeat;
 	}
 
 		/* Toolbar btn menu */
@@ -650,6 +650,12 @@ gis-combo .x-form-item-label {
 	letter-spacing: 1px;
 }
 
+.gis-window-title-icon-facility {
+	background: url('../images/facility_14.png') no-repeat;
+}
+.gis-window-title-icon-event {
+	background: url('../images/event_14.png') no-repeat;
+}
 .gis-window-title-icon-boundary {
 	background: url('../images/boundary_14.png') no-repeat;
 }
@@ -664,12 +670,6 @@ gis-combo .x-form-item-label {
 }
 .gis-window-title-icon-thematic4 {
 	background: url('../images/thematic4_14.png') no-repeat;
-}
-.gis-window-title-icon-facility {
-	background: url('../images/facility_14.png') no-repeat;
-}
-.gis-window-title-icon-symbol {
-	background: url('../images/symbol_14.png') no-repeat;
 }
 
 .gis-window-title-icon-labels {
