@@ -4167,6 +4167,11 @@ Ext.onReady( function() {
 
 		// Components
 
+			program,
+			stage,
+			startDate,
+			endDate,
+			
 			treePanel,
 			userOrganisationUnit,
 			userOrganisationUnitChildren,
@@ -4248,17 +4253,24 @@ Ext.onReady( function() {
 			editable: false,
 			valueField: 'id',
 			displayField: 'name',
+			fieldLabel: 'Program',
+			labelAlign: 'top',
+			labelCls: 'gis-form-item-label-top',
+			labelSeparator: '',
+			emptyText: 'Select program',
 			forceSelection: true,
-			queryMode: 'local',
-			width: gis.conf.layout.widget.item_width,
-			labelWidth: gis.conf.layout.widget.itemlabel_width,
+			queryMode: 'remote',
+			//width: gis.conf.layout.widget.item_width,
+			columnWidth: 0.5,
+			style: 'margin-right: 1px',
+			//labelWidth: gis.conf.layout.widget.itemlabel_width,
 			store: programStore,
 			listeners: {
 				select: function() {
-					indicator.clearValue();
+					stage.clearValue();
 
-					indicator.store.proxy.url = gis.init.contextPath + gis.conf.finals.url.path_api +  'indicatorGroups/' + this.getValue() + '.json?links=false&paging=false';
-					indicator.store.load();
+					stage.store.proxy.url = gis.init.contextPath + '/api/programs/' + this.getValue() + '.json?links=false&paging=false';
+					stage.store.load();
 				}
 			}
 		});
@@ -4268,14 +4280,42 @@ Ext.onReady( function() {
 			editable: false,
 			valueField: 'id',
 			displayField: 'name',
-			queryMode: 'local',
+			fieldLabel: 'Stage',
+			labelAlign: 'top',
+			labelCls: 'gis-form-item-label-top',
+			labelSeparator: '',
+			emptyText: 'Select stage',
+			queryMode: 'remote',
 			forceSelection: true,
-			width: gis.conf.layout.widget.item_width,
-			labelWidth: gis.conf.layout.widget.itemlabel_width,
+			//width: gis.conf.layout.widget.item_width,
+			columnWidth: 0.5,
+			style: 'margin-left: 1px',
+			//labelWidth: gis.conf.layout.widget.itemlabel_width,
 			listConfig: {loadMask: false},
 			store: stagesByProgramStore
 		});
 
+		startDate = Ext.create('Ext.form.field.Date', {
+			fieldLabel: 'Start date',
+			labelAlign: 'top',
+			labelCls: 'gis-form-item-label-top',
+			labelSeparator: '',
+			columnWidth: 0.5,
+			style: 'margin-right: 1px',
+			format: 'Y-m-d',
+			value: new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))
+		});
+
+		endDate = Ext.create('Ext.form.field.Date', {
+			fieldLabel: 'End date',
+			labelAlign: 'top',
+			labelCls: 'gis-form-item-label-top',
+			labelSeparator: '',
+			columnWidth: 0.5,
+			style: 'margin-left: 1px',
+			format: 'Y-m-d',
+			value: new Date()
+		});
 
 		treePanel = Ext.create('Ext.tree.Panel', {
 			cls: 'gis-tree',
@@ -4606,7 +4646,7 @@ Ext.onReady( function() {
 		toolMenu = Ext.create('Ext.menu.Menu', {
 			shadow: false,
 			showSeparator: false,
-			menuValue: 'level',
+			menuValue: 'orgunit',
 			clickHandler: function(param) {
 				if (!param) {
 					return;
@@ -4842,37 +4882,45 @@ Ext.onReady( function() {
 			border: false,
 			items: [
 				{
-					xtype: 'form',
-					cls: 'el-border-0',
-					//width: 270,
+					layout: 'column',
 					items: [
+						program,
+						stage
+					]
+				},
+				{
+					layout: 'column',
+					style: 'margin-top: 5px',
+					items: [
+						startDate,
+						endDate
+					]
+				},
+				{
+					html: GIS.i18n.organisation_units,
+					cls: 'gis-form-subtitle'
+				},
+				{
+					layout: 'column',
+					bodyStyle: 'border:0 none',
+					style: 'padding-bottom:2px',
+					items: [
+						toolPanel,
 						{
-							html: GIS.i18n.organisation_units,
-							cls: 'gis-form-subtitle-first'
-						},
-						{
+							width: gis.conf.layout.widget.item_width - 38,
 							layout: 'column',
 							bodyStyle: 'border:0 none',
-							style: 'padding-bottom:2px',
 							items: [
-								toolPanel,
-								{
-									width: gis.conf.layout.widget.item_width - 38,
-									layout: 'column',
-									bodyStyle: 'border:0 none',
-									items: [
-										userOrganisationUnit,
-										userOrganisationUnitChildren,
-										userOrganisationUnitGrandChildren,
-										organisationUnitLevel,
-										organisationUnitGroup
-									]
-								}
+								userOrganisationUnit,
+								userOrganisationUnitChildren,
+								userOrganisationUnitGrandChildren,
+								organisationUnitLevel,
+								organisationUnitGroup
 							]
-						},
-						treePanel
+						}
 					]
-				}
+				},
+				treePanel
 			],
 			listeners: {
 				render: function() {

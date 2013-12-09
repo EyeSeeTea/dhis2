@@ -124,6 +124,15 @@ html * {
 	display: none;
 }
 
+.gis-form-item-label-top {
+	padding-left: 2px;
+	font-weight: bold;
+	float: none;
+	clear: none;
+	display: block;
+	margin-bottom: 2px !important;
+}
+
 
 /*----------------------------------------------------------------------------
  * Openlayers
@@ -309,7 +318,7 @@ gis-combo .x-form-item-label {
 
 .gis-form-subtitle,
 .gis-form-subtitle-first { /* Subtitle panel */
-	margin-bottom: 6px;
+	margin-bottom: 3px;
 }
 .gis-form-subtitle {
 	margin-top: 6px;
