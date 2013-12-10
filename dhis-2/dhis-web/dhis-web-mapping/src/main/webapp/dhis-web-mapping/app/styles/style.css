@@ -35,6 +35,8 @@
  * GIS Label
  *
  * Tooltip
+ *
+ * GIS Accorion
 */
 
 
@@ -300,15 +302,36 @@ gis-combo .x-form-item-label {
 }
 
 
-
 /*----------------------------------------------------------------------------
  * Panel
  *--------------------------------------------------------------------------*/
 
 .x-panel-header	{ /* Panel header */
-	height: 30px;
-	padding: 7px 4px 4px 7px;
+/*
+    height: 30px;
+*/
+	padding: 7px 4px 7px 7px;
     border: 0 none;
+}
+
+
+/*----------------------------------------------------------------------------
+ * GIS Panel
+ *--------------------------------------------------------------------------*/
+
+.gis-panel-title-data,
+.gis-panel-title-organisationunit {
+	background-repeat: no-repeat;
+	padding-left: 20px;
+    font-weight: bold;
+    height: 17px;
+}
+
+.gis-panel-title-data {
+	background-image: url(../images/data.png);
+}
+.gis-panel-title-organisationunit {
+	background-image: url(../images/organisationunit.png);
 }
 
 
@@ -915,4 +938,76 @@ label.x-form-cb-label-alt1 {
 	border-radius: 2px;
 	padding: 12px 14px 12px 30px;
 	opacity: 0.65;
+}
+
+
+/*----------------------------------------------------------------------------
+ * GIS Accordion
+ *--------------------------------------------------------------------------*/
+
+	/* accordion title bar, shared */
+.gis-accordion .x-accordion-item .x-accordion-hd {
+	padding: 6px 5px 4px 8px;
+	border: 0 none;
+	cursor: pointer;
+	border-radius: 0;
+    background-image: none;
+    background-color: #e0e0e0;
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #dedede), color-stop(100%, #e6e6e6)) !important;
+    background-image: -webkit-linear-gradient(top, #dddddd, #e6e6e6) !important;
+    background-image: -moz-linear-gradient(top, #dddddd, #e6e6e6) !important;
+    background-image: -o-linear-gradient(top, #dddddd, #e6e6e6) !important;
+    background-image: -ms-linear-gradient(top, #dddddd, #e6e6e6) !important;
+    background-image: linear-gradient(top, #dddddd, #e6e6e6) !important;
+}
+	/* accordion title dock, default, collapsed */
+.gis-accordion .collapsed .x-accordion-hd {
+	padding-bottom: 5px !important;
+}
+
+	/* accordion title dock outer, shared */
+.gis-accordion .x-accordion-item {
+	border-radius: 1px;
+}
+	/* accordion title dock outer, default */
+.gis-accordion .x-accordion-item {
+	border: 1px solid #c5c5c5;
+	border-bottom: 0 none;
+}
+	/* accordion title dock outer, last */
+.gis-accordion .gis-accordion-last {
+	border: 1px solid #c5c5c5;
+}
+
+	/* accordion title dock text, shared */
+.gis-accordion .x-accordion-hd .x-panel-header-text {
+	font-weight: normal;
+	cursor: pointer;
+}
+
+	/* accordion item body */
+.gis-accordion .x-accordion-body {
+	padding: 2px 2px 0px;
+	border-top: 1px solid #c5c5c5 !important;
+}
+
+.gis-accordion .x-accordion-hd-sibling-expanded {
+	-moz-box-shadow: none;
+	-webkit-box-shadow: none;
+	-o-box-shadow: none;
+	box-shadow: none;
+}
+
+.gis-accordion .gis-toolbar-multiselect-left, .gis-accordion .gis-toolbar-multiselect-right {
+	margin-bottom: 0;
+}
+
+	/* accordion combo box */
+.gis-accordion .gis-combo .x-form-text, .gis-accordion .gis-combo .x-form-trigger {
+	height: 24px;
+	padding-top: 1px;
+}
+	/* accordion combo box label */
+.gis-accordion .gis-combo .x-form-item-label {
+	padding: 4px 0 0;
 }

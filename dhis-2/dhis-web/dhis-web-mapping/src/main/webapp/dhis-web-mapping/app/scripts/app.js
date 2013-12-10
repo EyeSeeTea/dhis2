@@ -667,7 +667,7 @@ Ext.onReady( function() {
 			layer = gis.layer.event;
 			layer.menu = GIS.app.LayerMenu(layer);
 			layer.widget = GIS.app.LayerWidgetEvent(layer);
-			layer.window = GIS.app.WidgetWindow(layer);
+			layer.window = GIS.app.WidgetWindow(layer, gis.conf.layout.widget.window_width + 100);
 			layer.window.widget = layer.widget;
 			GIS.core.createSelectHandlers(gis, layer);
 
@@ -1115,7 +1115,7 @@ Ext.onReady( function() {
 		return panel;
 	};
 
-	GIS.app.WidgetWindow = function(layer) {
+	GIS.app.WidgetWindow = function(layer, width) {
 		return Ext.create('Ext.window.Window', {
 			//autoShow: true,
 			title: layer.name,
@@ -1124,7 +1124,7 @@ Ext.onReady( function() {
             bodyStyle: 'padding:5px',
 			cls: 'gis-container-default',
 			closeAction: 'hide',
-			width: gis.conf.layout.widget.window_width,
+			width: width ? width : gis.conf.layout.widget.window_width,
 			resizable: false,
 			isRendered: false,
 			items: layer.widget,
@@ -4322,7 +4322,7 @@ Ext.onReady( function() {
 			height: 300,
 			style: 'border-top: 1px solid #ddd; padding-top: 1px',
 			displayField: 'name',
-			width: gis.conf.layout.widget.item_width,
+			width: gis.conf.layout.widget.item_width + 94,
 			rootVisible: false,
 			autoScroll: true,
 			multiSelect: true,
@@ -4585,7 +4585,7 @@ Ext.onReady( function() {
 			columnWidth: 0.30,
 			style: 'padding-top:2px; padding-left:3px; margin-bottom:0',
 			boxLabelCls: 'x-form-cb-label-alt1',
-			boxLabel: 'User OU',
+			boxLabel: 'User orgunit',
 			labelWidth: gis.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnitChildren.getValue(), userOrganisationUnitGrandChildren.getValue()]);
@@ -4596,7 +4596,7 @@ Ext.onReady( function() {
 			columnWidth: 0.30,
 			style: 'padding-top:2px; margin-bottom:0',
 			boxLabelCls: 'x-form-cb-label-alt1',
-			boxLabel: 'Children',
+			boxLabel: 'UO children',
 			labelWidth: gis.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitGrandChildren.getValue()]);
@@ -4607,7 +4607,7 @@ Ext.onReady( function() {
 			columnWidth: 0.40,
 			style: 'padding-top:2px; margin-bottom:0',
 			boxLabelCls: 'x-form-cb-label-alt1',
-			boxLabel: 'Grand children',
+			boxLabel: 'UO grand children',
 			labelWidth: gis.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitChildren.getValue()]);
@@ -4618,7 +4618,7 @@ Ext.onReady( function() {
 			cls: 'gis-combo',
 			multiSelect: true,
 			style: 'margin-bottom:0',
-			width: gis.conf.layout.widget.item_width - 38,
+			width: gis.conf.layout.widget.item_width - 38 + 92,
 			valueField: 'level',
 			displayField: 'name',
 			emptyText: GIS.i18n.select_organisation_unit_levels,
@@ -4634,7 +4634,7 @@ Ext.onReady( function() {
 			cls: 'gis-combo',
 			multiSelect: true,
 			style: 'margin-bottom:0',
-			width: gis.conf.layout.widget.item_width - 38,
+			width: gis.conf.layout.widget.item_width - 38 + 92,
 			valueField: 'id',
 			displayField: 'name',
 			emptyText: GIS.i18n.select_organisation_unit_groups,
@@ -4742,6 +4742,75 @@ Ext.onReady( function() {
 			style: 'margin-right:2px',
 			items: tool
 		});
+
+        accordionBody = Ext.create('Ext.panel.Panel', {
+			layout: 'accordion',
+			activeOnTop: true,
+			cls: 'gis-accordion',
+			bodyStyle: 'border:0 none; margin-top:2px; margin-bottom:2px',
+			height: 400,
+			items: [
+                {
+                    title: '<div class="gis-panel-title-organisationunit">' + GIS.i18n.organisation_units + '</div>',
+                    bodyStyle: 'padding:2px',
+                    hideCollapseTool: true,
+                    items: [
+                        {
+                            layout: 'column',
+                            bodyStyle: 'border:0 none',
+                            style: 'padding-bottom:2px',
+                            items: [
+                                toolPanel,
+                                {
+                                    width: gis.conf.layout.widget.item_width + 100 - toolPanel.width - 10,
+                                    layout: 'column',
+                                    bodyStyle: 'border:0 none',
+                                    items: [
+                                        userOrganisationUnit,
+                                        userOrganisationUnitChildren,
+                                        userOrganisationUnitGrandChildren,
+                                        organisationUnitLevel,
+                                        organisationUnitGroup
+                                    ]
+                                }
+                            ]
+                        },
+                        treePanel
+                    ]
+                },
+                
+                {
+                    title: '<div class="gis-panel-title-data">Data items</div>',
+                    cls: 'gis-accordion-last',
+                    bodyStyle: 'padding:2px',
+                    hideCollapseTool: true,
+                    items: []
+                }
+            ]
+                    
+            //function() {
+				//var panels = [
+					//indicator,
+					//dataElement,
+					//dataSet,
+					//period,
+					//organisationUnit
+				//],
+				//dims = Ext.clone(ns.core.init.dimensions);
+
+				//panels = panels.concat(getDimensionPanels(dims, 'ns-panel-title-dimension'));
+
+				//last = panels[panels.length - 1];
+				//last.cls = 'ns-accordion-last';
+
+				//return panels;
+			//}()
+		});
+
+        //accordion = Ext.create('Ext.panel.Panel', {
+			//bodyStyle: 'border-style:none; padding:2px; padding-bottom:0; overflow-y:scroll;',
+			//items: accordionBody
+        //});
 
 		// Functions
 
@@ -4896,40 +4965,9 @@ Ext.onReady( function() {
 						endDate
 					]
 				},
-				{
-					html: GIS.i18n.organisation_units,
-					cls: 'gis-form-subtitle'
-				},
-				{
-					layout: 'column',
-					bodyStyle: 'border:0 none',
-					style: 'padding-bottom:2px',
-					items: [
-						toolPanel,
-						{
-							width: gis.conf.layout.widget.item_width - 38,
-							layout: 'column',
-							bodyStyle: 'border:0 none',
-							items: [
-								userOrganisationUnit,
-								userOrganisationUnitChildren,
-								userOrganisationUnitGrandChildren,
-								organisationUnitLevel,
-								organisationUnitGroup
-							]
-						}
-					]
-				},
-				treePanel
-			],
-			listeners: {
-				render: function() {
-					toolMenu.clickHandler('level');
-				}
-			}
+                accordionBody
+			]
 		});
-
-		//createSelectHandlers();
 
 		return panel;
 	};
