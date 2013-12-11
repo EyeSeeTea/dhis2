@@ -303,6 +303,55 @@ gis-combo .x-form-item-label {
 
 
 /*----------------------------------------------------------------------------
+ * GIS Multiselect
+ *--------------------------------------------------------------------------*/
+
+.ns-multiselect {
+    color: #111;
+}
+
+.ns-toolbar-multiselect-left .x-docked-top {
+	border-top-left-radius: 1px;
+}
+.ns-toolbar-multiselect-right .x-docked-top {
+	border-top-right-radius: 1px;
+}
+.ns-toolbar-multiselect-leftright .x-docked-top {
+	border-top-left-radius: 1px;
+	border-top-right-radius: 1px;
+}
+
+	/* Multiselect docked bar font size */
+.ns-toolbar-multiselect-left .ns-toolbar-multiselect-left-label,
+.ns-toolbar-multiselect-right .ns-toolbar-multiselect-right-label,
+.ns-toolbar-multiselect-leftright .ns-toolbar-multiselect-leftright-label {
+    font-size: 11px;
+    color: #222;
+}
+.ns-toolbar-multiselect-left .ns-toolbar-multiselect-left-label {
+	padding-left: 6px;
+}
+.ns-toolbar-multiselect-right .ns-toolbar-multiselect-right-label {
+    padding-right: 7px;
+}
+.ns-toolbar-multiselect-leftright .ns-toolbar-multiselect-leftright-label {
+    padding-left: 4px;
+}
+
+	/* Multiselect boundlist */
+.ns-toolbar-multiselect-left .x-boundlist-item-over,
+.ns-toolbar-multiselect-right .x-boundlist-item-over {
+    background-color: transparent;
+    border-color: transparent;
+}
+.ns-toolbar-multiselect-left .x-boundlist-selected,
+.ns-toolbar-multiselect-right .x-boundlist-selected {
+    background-color: #e5e5e5;
+    border-color: #e5e5e5;
+}
+
+
+/*----------------------------------------------------------------------------
  * Panel
  *--------------------------------------------------------------------------*/
 

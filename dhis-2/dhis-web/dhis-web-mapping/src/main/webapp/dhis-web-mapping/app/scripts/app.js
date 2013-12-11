@@ -657,17 +657,17 @@ Ext.onReady( function() {
 
 		// layer
 		(function() {
-			layer = gis.layer.facility;
-			layer.menu = GIS.app.LayerMenu(layer, 'gis-toolbar-btn-menu-first');
-			layer.widget = GIS.app.LayerWidgetFacility(layer);
-			layer.window = GIS.app.WidgetWindow(layer);
-			layer.window.widget = layer.widget;
-			GIS.core.createSelectHandlers(gis, layer);
-
 			layer = gis.layer.event;
 			layer.menu = GIS.app.LayerMenu(layer);
 			layer.widget = GIS.app.LayerWidgetEvent(layer);
 			layer.window = GIS.app.WidgetWindow(layer, gis.conf.layout.widget.window_width + 100);
+			layer.window.widget = layer.widget;
+			GIS.core.createSelectHandlers(gis, layer);
+
+			layer = gis.layer.facility;
+			layer.menu = GIS.app.LayerMenu(layer, 'gis-toolbar-btn-menu-first');
+			layer.widget = GIS.app.LayerWidgetFacility(layer);
+			layer.window = GIS.app.WidgetWindow(layer);
 			layer.window.widget = layer.widget;
 			GIS.core.createSelectHandlers(gis, layer);
 
@@ -4181,6 +4181,7 @@ Ext.onReady( function() {
 			toolMenu,
 			tool,
 			toolPanel,
+			dataElementAvailable,
 
 		// Functions
 			reset,
@@ -4214,7 +4215,7 @@ Ext.onReady( function() {
 		});
 
 		stagesByProgramStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'legendSet'],
+			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
 				url: '',
@@ -4246,6 +4247,11 @@ Ext.onReady( function() {
 			}
 		});
 
+		dataElementsByStageStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name', 'type'],
+			data: []
+		});
+
 		// Components
 
 		program = Ext.create('Ext.form.field.ComboBox', {
@@ -4266,14 +4272,18 @@ Ext.onReady( function() {
 			//labelWidth: gis.conf.layout.widget.itemlabel_width,
 			store: programStore,
 			listeners: {
-				select: function() {
-					stage.clearValue();
-
-					stage.store.proxy.url = gis.init.contextPath + '/api/programs/' + this.getValue() + '.json?links=false&paging=false';
-					stage.store.load();
+				select: function(cb) {
+					onProgramSelect(cb.getValue());
 				}
 			}
 		});
+
+		onProgramSelect = function(programId) {
+			stage.clearValue();
+
+			stagesByProgramStore.proxy.url = gis.init.contextPath + '/api/programs/' + programId + '.json?viewClass=withoutOrganisationUnits&links=false&paging=false';
+			stagesByProgramStore.load();
+		};			
 
 		stage = Ext.create('Ext.form.field.ComboBox', {
 			fieldLabel: GIS.i18n.indicator,
@@ -4292,8 +4302,36 @@ Ext.onReady( function() {
 			style: 'margin-left: 1px',
 			//labelWidth: gis.conf.layout.widget.itemlabel_width,
 			listConfig: {loadMask: false},
-			store: stagesByProgramStore
+			store: stagesByProgramStore,
+			listeners: {
+				select: function(cb) {
+					onStageSelect(cb.getValue());
+				}
+			}
 		});
+
+		onStageSelect = function(stageId) {
+			//dataElementsByStageStore.proxy.url = gis.init.contextPath + '/api/programStages/' + stageId + '.json?links=false&paging=false';
+			//dataElementsByStageStore.load();
+
+			loadDataElements(stageId);
+		};
+
+		loadDataElements = function(param) {
+			if (Ext.isString(param)) {
+				Ext.Ajax.request({
+					url: gis.init.contextPath + '/api/programStages/' + param + '.json?links=false&paging=false',
+					success: function(r) {
+						var dataElements = Ext.Array.pluck(Ext.decode(r.responseText).programStageDataElements, 'dataElement');
+
+						dataElementsByStageStore.loadData(dataElements);
+					}
+				});
+			}
+			else if (Ext.isArray(param)) {
+				dataElementsByStageStore.loadData(param);
+			}
+		};
 
 		startDate = Ext.create('Ext.form.field.Date', {
 			fieldLabel: 'Start date',
@@ -4743,6 +4781,45 @@ Ext.onReady( function() {
 			items: tool
 		});
 
+		dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
+			cls: 'ns-toolbar-multiselect-left',
+			width: 300,
+			valueField: 'id',
+			displayField: 'name',
+			store: dataElementsByStageStore,
+			tbar: [
+				{
+					xtype: 'label',
+					text: GIS.i18n.available,
+					cls: 'ns-toolbar-multiselect-left-label'
+				},
+				'->',
+				{
+					xtype: 'button',
+					icon: 'images/arrowright.png',
+					width: 22,
+					handler: function() {
+						//ns.core.web.multiSelect.select(indicatorAvailable, indicatorSelected);
+					}
+				},
+				{
+					xtype: 'button',
+					icon: 'images/arrowrightdouble.png',
+					width: 22,
+					handler: function() {
+						//ns.core.web.multiSelect.selectAll(indicatorAvailable, indicatorSelected);
+					}
+				}
+			],
+			listeners: {
+				afterrender: function() {
+					//this.boundList.on('itemdblclick', function() {
+						//ns.core.web.multiSelect.select(this, indicatorSelected);
+					//}, this);
+				}
+			}
+		});
+
         accordionBody = Ext.create('Ext.panel.Panel', {
 			layout: 'accordion',
 			activeOnTop: true,
@@ -4780,37 +4857,16 @@ Ext.onReady( function() {
                 },
                 
                 {
-                    title: '<div class="gis-panel-title-data">Data items</div>',
+                    title: '<div class="gis-panel-title-data">Data elements</div>',
                     cls: 'gis-accordion-last',
                     bodyStyle: 'padding:2px',
                     hideCollapseTool: true,
-                    items: []
+                    items: [
+						dataElementAvailable
+					]
                 }
             ]
-                    
-            //function() {
-				//var panels = [
-					//indicator,
-					//dataElement,
-					//dataSet,
-					//period,
-					//organisationUnit
-				//],
-				//dims = Ext.clone(ns.core.init.dimensions);
-
-				//panels = panels.concat(getDimensionPanels(dims, 'ns-panel-title-dimension'));
-
-				//last = panels[panels.length - 1];
-				//last.cls = 'ns-accordion-last';
-
-				//return panels;
-			//}()
 		});
-
-        //accordion = Ext.create('Ext.panel.Panel', {
-			//bodyStyle: 'border-style:none; padding:2px; padding-bottom:0; overflow-y:scroll;',
-			//items: accordionBody
-        //});
 
 		// Functions
 
@@ -7309,15 +7365,15 @@ Ext.onReady( function() {
 				items: function() {
 					var a = [];
 					a.push({
-						iconCls: 'gis-btn-icon-' + gis.layer.facility.id,
-						menu: gis.layer.facility.menu,
-						tooltip: GIS.i18n.symbol_layer,
-						width: 26
-					});
-					a.push({
 						iconCls: 'gis-btn-icon-' + gis.layer.event.id,
 						menu: gis.layer.event.menu,
 						tooltip: GIS.i18n.event_layer,
+						width: 26
+					});
+					a.push({
+						iconCls: 'gis-btn-icon-' + gis.layer.facility.id,
+						menu: gis.layer.facility.menu,
+						tooltip: GIS.i18n.symbol_layer,
 						width: 26
 					});
 					a.push({

@@ -76,13 +76,13 @@ Ext.onReady( function() {
 		};
 
 		olmap.closeAllLayers = function() {
+			gis.layer.event.core.reset();
+			gis.layer.facility.core.reset();
 			gis.layer.boundary.core.reset();
 			gis.layer.thematic1.core.reset();
 			gis.layer.thematic2.core.reset();
 			gis.layer.thematic3.core.reset();
 			gis.layer.thematic4.core.reset();
-			gis.layer.facility.core.reset();
-			gis.layer.event.core.reset();
 		};
 
 		addControl('zoomIn', olmap.zoomIn);
@@ -143,6 +143,12 @@ Ext.onReady( function() {
 		});
 		layers.openStreetMap.id = 'openStreetMap';
 
+		layers.event = GIS.core.VectorLayer(gis, 'event', GIS.i18n.event_layer, {opacity: 0.8});
+		layers.event.core = new mapfish.GeoStat.Event(gis.olmap, {
+			layer: layers.event,
+			gis: gis
+		});
+
 		layers.facility = GIS.core.VectorLayer(gis, 'facility', GIS.i18n.facility_layer, {opacity: 1});
 		layers.facility.core = new mapfish.GeoStat.Facility(gis.olmap, {
 			layer: layers.facility,
@@ -152,12 +158,6 @@ Ext.onReady( function() {
 		layers.boundary = GIS.core.VectorLayer(gis, 'boundary', GIS.i18n.boundary_layer, {opacity: 0.8});
 		layers.boundary.core = new mapfish.GeoStat.Boundary(gis.olmap, {
 			layer: layers.boundary,
-			gis: gis
-		});
-
-		layers.event = GIS.core.VectorLayer(gis, 'event', GIS.i18n.event_layer, {opacity: 0.8});
-		layers.event.core = new mapfish.GeoStat.Event(gis.olmap, {
-			layer: layers.event,
 			gis: gis
 		});
 
@@ -2396,8 +2396,8 @@ console.log(view.parentGraphMap);
 			gis.layer.thematic2,
 			gis.layer.thematic1,
 			gis.layer.boundary,
-			gis.layer.event,
-			gis.layer.facility
+			gis.layer.facility,
+			gis.layer.event
 		);
 
 		gis.olmap.addLayers(layers);

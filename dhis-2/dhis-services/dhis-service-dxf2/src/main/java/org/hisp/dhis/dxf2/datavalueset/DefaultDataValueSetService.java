@@ -168,6 +168,11 @@ public class DefaultDataValueSetService
     {
         Set<Period> periods = new HashSet<Period>( periodService.getPeriodsBetweenDates( startDate, endDate ) );
 
+        if ( periods.isEmpty() )
+        {
+            throw new IllegalArgumentException( "At least one period must be specified" );
+        }
+                
         dataValueSetStore.writeDataValueSetXml( null, null, null, null, getDataElements( dataSets ), periods, getOrgUnits( orgUnits ), out );
     }
 
@@ -175,6 +180,11 @@ public class DefaultDataValueSetService
     {
         Set<Period> periods = new HashSet<Period>( periodService.getPeriodsBetweenDates( startDate, endDate ) );
 
+        if ( periods.isEmpty() )
+        {
+            throw new IllegalArgumentException( "At least one period must be specified" );
+        }
+                
         dataValueSetStore.writeDataValueSetCsv( getDataElements( dataSets ), periods, getOrgUnits( orgUnits ), writer );
     }
 
@@ -399,7 +409,7 @@ public class DefaultDataValueSetService
                 internalValue.setStoredBy( dataValue.getStoredBy() );
             }
 
-            internalValue.setTimestamp( getDefaultDate( dataValue.getTimestamp() ) );
+            internalValue.setTimestamp( getDefaultDate( dataValue.getLastUpdated() ) );
             internalValue.setComment( dataValue.getComment() );
             internalValue.setFollowup( dataValue.getFollowup() );
 
