@@ -39,6 +39,8 @@
 	"gender": "Gender",
 	"f": "F",
 	"m": "M",
+	"no": "NO",
+	"yes": "YES",
 	"address": "Address",
 	"district": "District",
 	"county": "County",

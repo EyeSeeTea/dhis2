@@ -1,7 +1,6 @@
 'use strict';
 
 /* Controllers */
-
 var trackerControllers = angular.module('trackerControllers', [])
 
 //Controller for home page
@@ -58,7 +57,8 @@ var trackerControllers = angular.module('trackerControllers', [])
 		function($scope, 
 				$location,
 				LocaleFactory,
-				RegistrationAttributesFactory,				
+				RegistrationAttributesFactory,
+				PersonFactory,
 				$translate,
 				storage,
 				$filter) {	
@@ -74,22 +74,59 @@ var trackerControllers = angular.module('trackerControllers', [])
 
 	
 	//Get attributes for registration
+	$scope.registrationAttributes = '';
 	RegistrationAttributesFactory.getRegistrationAttributes()
-	.success(function(registrationAttribures){		
-		$scope.registrationAttribures = registrationAttribures;
+	.success(function(registrationAttributes){		
+		
+		angular.forEach(registrationAttributes, function(registrationAttribute){			
+			if(angular.isObject(registrationAttribute.personAttributeOptions)){
+				angular.forEach(registrationAttribute.personAttributeOptions, function(attributeOption){							
+					attributeOption.value = attributeOption.name;					
+				});
+			}			   				
+		});	
+		
+		$scope.registrationAttributes = registrationAttributes;
+
 	});	
 	
+	
+	$scope.getOptionValue = function(patientAttribute){
+		console.log('what is selected is:  ', patientAttribute);
+		
+	}
+	
 	$scope.saveAndRegisterPregnancy = function(){	
+		
+		if($scope.registrationForm.$invalid){
+            alert('please check required fields');
+            return false;
+        }
 		
 		$scope.person.orgUnit = $scope.selectedOrgUnit.id;
 		$scope.person.gender = 'FEMALE';
 		$scope.person.dateOfBirth.type = 'VERIFIED';
 		$scope.person.dateOfRegistration = $filter('date')(new Date(), 'yyyy-MM-dd');
 		
-		console.log('my input details are: ', $scope.person);
+		var attributes = [];	
+		angular.forEach($scope.registrationAttributes, function(registrationAttribute){
+			if( !angular.isUndefined(registrationAttribute.value) ){
+				var attribute = {type: registrationAttribute.id, value: registrationAttribute.value};
+				attributes.push(attribute);	
+			}							   				
+		});	
 		
-		$location.path('/enrollment');
+		$scope.person.attributes = attributes;
 		
+		PersonFactory.registerPerson($scope.person)
+		.success(function(data){
+			if(data.status == 'ERROR'){
+				alert(data.status + '  ' + data.description);
+			}
+			else{				
+				$location.path( '/enrollment' ).search({personUid: data.reference});
+			}		
+		});	
 	};
 	
 	$scope.saveAndClose = function(){

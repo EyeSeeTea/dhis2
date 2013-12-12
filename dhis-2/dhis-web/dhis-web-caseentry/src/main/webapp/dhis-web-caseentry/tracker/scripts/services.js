@@ -34,6 +34,7 @@ var trackerFactory = angular.module('trackerServices', [ 'ngResource' ])
 	};	
 })
 
+/* Factory to enroll person in a program */
 .service('EnrollmentFactory', function($http, storage, $filter) {
 	
 	var baseUrl = '../../api/enrollments';
@@ -125,13 +126,17 @@ var trackerFactory = angular.module('trackerServices', [ 'ngResource' ])
 		return $http.get( baseUrl + '?orgUnit=' + orgUnitUid );
 	}
 	
+	PersonFactory.registerPerson = function(person){		
+		return $http.post( baseUrl, person );		
+	};
+	
 	return PersonFactory;
 })
 
 /* Factory for getting person attribute types*/ 
 .factory('RegistrationAttributesFactory', function($http){
 
-	var baseUrl = '../../api/persons/registrationAttributes.json?viewClass=extended';
+	var baseUrl = '../../api/personAttributeTypes/withoutPrograms?viewClass=extended';
 	
 	var RegistrationAttributesFactory = {};
 	
@@ -158,31 +163,6 @@ var trackerFactory = angular.module('trackerServices', [ 'ngResource' ])
 	}
 	
 	return PersonAttributeTypesFactory;
-})
-
-/* Factory for getting person attribute types*/ 
-.service('PersonAttributeTypesService', function(PersonAttributeTypesFactory){	
-	
-	return {
-		getPersonAttributeTypes: function(){		
-			
-			var attributTypes = [];	
-			PersonAttributeTypesFactory.getPersonAttributeTypes()
-			.then(function(response){
-				
-				for( var i=0; i<response.data.personAttributeTypes.length; i++ ){
-					
-					PersonAttributeTypesFactory.getPersonAttributeType(response.data.personAttributeTypes[i].id)
-					.then(function(response){
-						console.log('S', response.data);
-						attributTypes.push(response.data);
-					});
-				}
-				console.log('the size of atts is:  ', attributTypes.length);
-				return attributTypes;
-			});
-		}
-	};	
 })
 
 .service('PersonService', function() {
@@ -258,11 +238,9 @@ var trackerFactory = angular.module('trackerServices', [ 'ngResource' ])
 	return {
 		setCurrentEventUid: function(uid) {	
 			currentEventUid = uid;
-			console.log(' in theservice saving:  ' , currentEventUid);
 		},
 		
 		getCurrentEventUid: function() {		
-			console.log(' in the service reading:  ', currentEventUid);
 			return currentEventUid;
 		}
 	};	
@@ -321,12 +299,8 @@ var trackerFactory = angular.module('trackerServices', [ 'ngResource' ])
 		getDataElementExpression: function(val, eventUid) {	
 			
 			DHIS2EventFactory.getDHIS2Event( eventUid )
-			.success(function(e){	
-				
+			.success(function(e){					
 				currentEvent = e;		
-				
-				console.log('current event is:  ', currentEvent);
-		
 				var regex = /#[^#]*#/g,
 		    	match,
 		    	m,
@@ -341,12 +315,8 @@ var trackerFactory = angular.module('trackerServices', [ 'ngResource' ])
 					//val = val.replace(r, '@'+mDe+'@');
 					val = val.replace(r, 100);
 				}	
-				
-				//console.log('the result is:  ', val);
-				return val;
-				
-			});			
-			
+				return val;				
+			});						
 		}
 	};	
 });

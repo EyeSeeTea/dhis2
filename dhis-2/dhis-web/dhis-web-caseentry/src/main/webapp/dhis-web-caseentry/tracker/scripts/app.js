@@ -12,7 +12,6 @@ var ancTracker = angular.module('ancTracker',
 		  'angularLocalStorage', 
 		  'pascalprecht.translate', 
 		  'angularTreeview', 
-		  'directive.contextMenu',
 		  'ui.bootstrap'])
 
 .config(function($routeProvider, $translateProvider) {	
