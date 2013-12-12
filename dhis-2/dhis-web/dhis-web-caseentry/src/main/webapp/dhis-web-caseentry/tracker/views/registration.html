@@ -1,0 +1,70 @@
+
+<h2>
+	{{'person_registration' | translate}}
+</h2>
+
+<div class="data-entry-row-1-1">
+    <div class="data-entry-row-1-3">{{'name' | translate}}</div>
+    <div class="data-entry-row-2-3"><input type="text" ng-model="person.name"/></div>
+</div>
+
+<div class="data-entry-row-1-1">
+    <div class="data-entry-row-1-3">{{'date_of_birth' | translate}}</div>
+    <div class="data-entry-row-2-3"><input type="date" ng-model="person.dateOfBirth.date"/></div>
+</div>
+
+<div class="data-entry-row-1-1">
+    <div class="data-entry-row-1-3">{{'mobile_phone' | translate}}</div>
+    <div class="data-entry-row-2-3"><input type="text" ng-model="person.contact.phoneNumber"/></div>
+</div>
+
+<div class="data-entry-row-1-1" ng-repeat="registrationAttribute in registrationAttribures">
+	<div class="data-entry-row-1-3">{{registrationAttribute.name}}</div>
+    <div class="data-entry-row-2-3"><input type="text"></div>
+</div>
+
+
+<div ng-repeat="registrationAttribute in registrationAttribures">
+		<div class="data-entry-row-1-1">
+			<div class="data-entry-row-1-3">
+				{{registrationAttribute.name}}
+			</div>
+			<div ng-switch="registrationAttribute.name.type">
+				<div ng-switch-when="int">
+					<div class="data-entry-row-2-3">
+						<input type="number" id="{{prStageDe.dataElement.code}}" ng-model="prStage.dataElement.value" disabled>
+						<!--{{dataElement.displayedTrailingUnitOnScreen}}-->
+					</div>
+				</div>
+				<div ng-switch-when="string">
+					<div class="data-entry-row-2-3">
+						<select ng-model="prStage.dataElement.value" required ng-options='option.value as option.label for option in prStage.dataElement.optionSet.options' disabled></select>
+						<!--{{dataElement.displayedTrailingUnitOnScreen}}-->
+					</div>
+				</div>
+				<div ng-switch-when="date">
+					<div class="data-entry-row-2-3">
+						<input type="date" id="{{prStageDe.dataElement.code}}" ng-model="prStage.dataElement.value" disabled>
+						<!--{{dataElement.displayedTrailingUnitOnScreen}}-->
+					</div>
+				</div>
+				<div ng-switch-when="bool">
+					<div class="data-entry-row-2-3">
+						<select ng-model="prStage.dataElement.value" disabled>
+							<option value="0">No</option>
+							<option value="1">YES</option>
+							<option value="-1">MISSING</option> 	
+						</select>
+						<!--{{dataElement.displayedTrailingUnitOnScreen}}-->
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+		
+<div class="margin-top">	
+	<button ng-click="saveAndRegisterPregnancy()" class="big-button lightblue">{{'save_and_register_pregnancy' | translate}}</button>
+	<button ng-click="saveAndClose()" class="big-button lightblue">{{'save_and_close' | translate}}</button>
+	<button ng-click="cancel()" class="big-button grey">{{'cancel' | translate}}</button>		
+</div>

@@ -34,10 +34,12 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.common.view.ExtendedView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,8 +88,8 @@ public class PatientAttributeGroup
     }
 
     @JsonProperty("personAttributes")
-    @JsonSerialize(contentAs = BaseIdentifiableObject.class)
-    @JsonView({ DetailedView.class, ExportView.class })
+    //@JsonSerialize(contentAs = BaseIdentifiableObject.class)
+    @JsonView({ DetailedView.class, ExportView.class, ExtendedView.class })
     @JacksonXmlElementWrapper(localName = "personAttributes", namespace = DxfNamespaces.DXF_2_0)
     @JacksonXmlProperty(localName = "personAttribute", namespace = DxfNamespaces.DXF_2_0)
     public List<PatientAttribute> getAttributes()

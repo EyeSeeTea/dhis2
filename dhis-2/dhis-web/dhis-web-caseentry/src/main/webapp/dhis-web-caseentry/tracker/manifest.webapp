@@ -1,0 +1,22 @@
+[
+  {
+    "activities": {
+      "dhis": {
+        "href": "*"
+      }
+    }, 
+    "name": "Tracker", 
+    "default_locale": "en", 
+    "icons": {
+      "48": "img/icons/registry.png"
+    }, 
+    "description": "Mother and Child Health Data Management", 
+    "version": "1.0", 
+    "launch_path": "index.html", 
+    "developer": {
+      "url": "http://dhis2.org", 
+      "name": "HISP"
+    }
+  }
+]
+

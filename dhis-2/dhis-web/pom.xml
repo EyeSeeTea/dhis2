@@ -52,6 +52,8 @@
             <org.mortbay.jetty.Request.maxFormContentSize>10000000</org.mortbay.jetty.Request.maxFormContentSize>
           </systemPropertyVariables>
           <contextPath>/</contextPath>
+          <stopPort>9999</stopPort>
+          <stopKey>dhis2</stopKey>
         </configuration>
       </plugin>
     </plugins>

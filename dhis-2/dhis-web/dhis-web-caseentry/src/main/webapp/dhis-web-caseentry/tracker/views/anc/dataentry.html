@@ -1,0 +1,115 @@
+<div class="information_bar">
+    <div class="info_container-1-3">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                {{'person_profile' | translate}}
+            </div>
+            <div class="list-group">            	
+              	<div class="list-group-item">{{'full_name' | translate}}: {{person.name}}</div>
+              	<div class="list-group-item">{{'date_of_birth' | translate}}: {{ person.dateOfBirth.date | date:'yyyy-MM-dd' }} ({{person.dateOfBirth.age}})</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="info_container-1-3">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+				{{'allergies' | translate}}
+			</div>
+			<div class="panel-body">
+				{{allergies}}
+			</div>
+        </div>
+    </div>
+    <div class="info_container-1-3">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+				{{'medications' | translate}}
+			</div>
+			<div class="panel-body">
+				{{medication}}
+			</div>
+        </div>
+    </div>
+</div>
+
+<div class="side_bar">
+	<div class="panel panel-primary">
+		<div class="panel-heading">
+			{{'conditions_complications' | translate}}
+		</div>
+		<br/>		 
+		<div class="list-group" ng-repeat="con in conResultGen">
+			{{con}}			
+		</div>
+	</div>
+	
+	<div class="panel panel-primary">
+		<div class="panel-heading">
+			{{'reminders' | translate}}
+		</div>
+		<br/>		 
+		<div class="list-group" ng-repeat="rem in remResultGen">
+			{{rem}}
+		</div>
+	</div>
+	
+	<div class="panel panel-primary">
+		<div class="panel-heading">
+			{{'notes' | translate}}
+		</div>
+		<br/>	
+		<div class="list-group" ng-repeat="note in notes">
+			<a href="#" class="list-group-item">{{note}}</a>
+		</div>	
+	</div>	
+</div>
+
+<div class="main_content">
+	
+	<h2>{{'consultation' | translate}}</h2>
+	
+	<div ng-repeat="dataElement in dataElements">
+		<div class="data-entry-row-1-1">
+			<div class="data-entry-row-1-3">
+				{{dataElement.labelOnScreen}}
+			</div>
+			<div ng-switch="dataElement.entryFormat">
+				<div ng-switch-when="Continuous">
+					<div class="data-entry-row-2-3">
+						<input type="number" id="{{dataElement.databaseVariableName}}" ng-model="dataElement.value" ng-blur="interventionAction(dataElement)">
+						{{dataElement.displayedTrailingUnitOnScreen}}
+					</div>
+				</div>
+				<div ng-switch-when="Cathegoric">
+					<div class="data-entry-row-2-3">
+						<select ng-model='dataElement.value' ng-blur="interventionAction(dataElement)" required ng-options='option.value as option.label for option in dataElement.labels'>
+							<option value="">{{'please_select' | translate}}</option>
+						</select>
+						{{dataElement.displayedTrailingUnitOnScreen}}
+					</div>
+				</div>
+				<div ng-switch-when="Date">
+					<div class="data-entry-row-2-3">
+						<input type="date" id="{{dataElement.databaseVariableName}}" ng-model="dataElement.value" ng-blur="interventionAction(dataElement)">
+						{{dataElement.displayedTrailingUnitOnScreen}}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+	<div class="margin-top">
+		<div ng-switch="ancPage">
+			<div ng-switch-when="GEN">
+				<button ng-click="showDepPage()" class="big-button lightblue">
+					{{'next' | translate}}
+				</button>
+			</div>
+			<div ng-switch-when="DEP">
+				<a href="#/anc/dashboard?personUid={{person.person}}" class="big-button lightblue">{{'close' | translate}}</a>				
+			</div>
+		</div>
+	</div>
+</div>

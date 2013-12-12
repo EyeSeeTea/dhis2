@@ -1,0 +1,47 @@
+<legend>
+	{{'settings' | translate}}
+</legend>
+
+<p>
+	{{'select_orgunit' | translate}}
+</p>
+<div class="container-1-4">
+	
+	<div
+	data-angular-treeview="true"
+	data-tree-id="orgunit"
+	data-tree-model="orgUnits"
+	data-node-id="id"
+	data-node-label="name"
+	data-node-children="children" ></div>
+	
+</div>
+
+<div class="container-1-4" style="margin: 20px;">
+	<table class="listTable">
+		<tr>
+			<td>{{'registering_unit'  | translate}}</td>
+			<td>
+			<input type="text" value="{{selectedOrgUnit.name | translate}}" disabled>
+			</td>
+		</tr>
+		<tr>
+			<td>{{'program'  | translate}}</td>
+			<td>
+			<select ng-model="selecteProgram" ng-options="program as program.label for program in programs">
+				<option value="">{{'please_select' | translate}}</option>
+			</select>
+		</tr>
+	</table>
+	
+	<button ng-click="saveSettings()" class="big-button lightblue">
+		{{'save' | translate}}
+	</button>
+
+</div>
+
+<!--<div ng-controller="OrgUnitTreeController">
+	<ui-tree ng-model="assets" load-fn="loadChildren" expand-to="hierarchy" selected-id="111" attr-node-id="assetId"></ui-tree>
+  	<div>selected: {{selected.name}}</div>
+<div> -->
+

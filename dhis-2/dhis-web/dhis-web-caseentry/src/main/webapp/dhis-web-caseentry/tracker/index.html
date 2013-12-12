@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="ancTracker">
+	<head>
+		<meta charset="utf-8">
+		<title>DHIS2 ANC Tracker</title>
+		
+		<script type="text/javascript" src="jquery/jquery-2.0.3.min.js"></script>
+		
+		<script type="text/javascript" src="angular/angular.js"></script>
+		<script type="text/javascript" src="angular/angular-resource.js"></script>
+		<script type="text/javascript" src="angular/angular-route.js"></script>
+		<script type="text/javascript" src="angular/angular-cookies.js"></script>
+		<script type="text/javascript" src="angular/ui-bootstrap-0.7.0.js"></script>
+		<script type="text/javascript" src="angular/ui-bootstrap-tpls-0.7.0.js"></script>
+		
+		<script type="text/javascript" src="scripts/angularLocalStorage.js"></script>
+		<script type="text/javascript" src="scripts/angular-translate.min.js"></script>
+		<script type="text/javascript" src="scripts/angular-translate-loader-static-files.min.js"></script>
+		<script type="text/javascript" src="scripts/angular-translate-loader-url.min.js"></script>
+		<script type="text/javascript" src="scripts/angular-treeview.js"></script>
+		
+		<!--<script type="text/javascript" src="scripts/context-menu-directive.js"></script>	
+		<script type="text/javascript" src="scripts/context-menu.js"></script>-->	
+
+		<script type="text/javascript" src="scripts/app.js"></script>
+		<script type="text/javascript" src="scripts/directives.js"></script>
+		<script type="text/javascript" src="scripts/services.js"></script>
+		<script type="text/javascript" src="scripts/controllers.js"></script>
+		
+		<link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">
+        <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+        
+        <link rel="stylesheet" type="text/css" href="styles/style.css">
+        
+		<link type="text/css" rel="stylesheet" href="styles/angular-treeview.css">
+
+	</head>
+	
+	 <body>
+
+        <div class='header'>
+            <div class="header-top">
+                <div class="container">
+                    <h3>{{'app_title' | translate}}</h3>
+                    <div class="header-right">
+                       	<a href="#">{{'dhis2' | translate}}</a>
+                       	<a href="#/settings">{{'settings' | translate}}</a>
+                    </div>                    	
+                </div>  
+            </div>
+            <div class="header-bottom">
+                <div class="container">
+                    <a href="#"><div class="container-link first-border"><img src="img/pregnant_woman.png"><br />{{'family_planning' | translate}}</div></a>
+                    <a href="#/anc"><div class="container-link" style="background: #266a98;"><img src="img/pregnant_woman.png"><br />{{'antenatal_care' | translate}}</div></a>
+                    <a href="#"><div class="container-link"><img src="img/pregnant_woman.png"><br />{{'intrapatrum_care' | translate}}</div></a>
+                    <a href="#"><div class="container-link"><img src="img/pregnant_woman.png"><br />{{'postpatrum_care' | translate}}</div></a>
+                    <a href="#"><div class="container-link"><img src="img/pregnant_woman.png"><br />{{'newborn_care' | translate}}</div></a>
+                    <a href="#"><div class="container-link"><img src="img/pregnant_woman.png"><br />{{'child_care' | translate}}</div></a>           
+                </div>
+            </div>
+            
+        </div>       
+        
+        <div class="container">
+             <div data-ng-view='' class="container-1-1"> </div>
+            
+        </div> 
+
+    </body>
+</html>

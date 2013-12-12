@@ -28,6 +28,8 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.io.Serializable;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.hisp.dhis.api.utils.ContextUtils;
@@ -75,11 +77,21 @@ public class UserSettingController
         ContextUtils.okResponse( response, "User setting saved" );
     }
     
-    @RequestMapping( value = "/{key}", method = RequestMethod.GET, produces = ContextUtils.CONTENT_TYPE_TEXT )
-    public @ResponseBody String getSystemSetting( @PathVariable( "key" ) String key )
-    {
-        return (String) userSettingService.getUserSetting( key );
-    }
+    @RequestMapping(value = "/{key}", method = RequestMethod.GET, produces = ContextUtils.CONTENT_TYPE_TEXT)
+	public @ResponseBody
+	String getSystemSetting(@PathVariable("key") String key) {
+		
+		Serializable userSettingValue = userSettingService.getUserSetting(key);
+
+		if (userSettingValue != null) {
+			if (userSettingValue.getClass().getName()
+					.equalsIgnoreCase("java.util.Locale")) {
+				return userSettingValue.toString();
+			}
+		}
+
+		return (String) userSettingValue;
+	}
     
     @RequestMapping( value = "/{key}", method = RequestMethod.DELETE )
     public void removeSystemSetting( @PathVariable( "key" ) String key )

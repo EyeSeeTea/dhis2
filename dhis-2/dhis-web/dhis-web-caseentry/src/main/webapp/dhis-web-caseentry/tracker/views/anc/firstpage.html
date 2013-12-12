@@ -1,0 +1,101 @@
+<h2>
+	{{'search_for_person' | translate}}
+</h2>
+
+<div class="margin-top">
+	<input type="text" placeholder="{{'personal_number' | translate}}" ng-model="personalNumber" style="height: 20px;"/>
+	<button ng-click="searchPerson()" class="button search">
+		{{'search' | translate}}
+	</button>
+	<button ng-click="searchPerson('true')" class="button search">
+		{{'list_all_persons' | translate}}
+	</button>
+	<button ng-click="showRegisterPerson()" class="button search">
+		{{'register_new' | translate}}
+	</button>
+</div>
+
+<div ng-switch="persons.length">
+	<div ng-switch-when="undefined">
+		<p>
+			{{'empty_search_result' | translate}}
+		</p>
+	</div>
+	<div ng-switch-default>
+
+		<table class="table table-hover">
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>{{'full_name' | translate}}</th>
+					<th>{{'gender' | translate}}</th>
+					<th>{{'date_of_birth (age)' | translate}}</th>
+					<th>{{'phone_number' | translate}}</th>
+					<th>{{'operations' | translate}}</th>
+				</tr>
+			</thead>
+			<tr ng-repeat="person in persons">
+				<td>[{{$index + 1}}]</td>
+				<td>{{person.name}}</td>
+				<td ng-switch="person.gender"><span ng-switch-when="MALE"> {{'m' | translate}}</span><span ng-switch-when="FEMALE"> {{'f' | translate}}</span></td>
+				<td>{{ person.dateOfBirth.date | date:'yyyy-MM-dd' }} ({{person.dateOfBirth.age}})</td>
+				<td>{{ person.contact.phoneNumber }}</td>
+				<td>
+					
+					<!--<img ng-src="img/edit.png" alt="{{'edit_person_profile' | translate}}" title="{{'edit_person_profile' | translate}}" width="24" height="24" style="border:none;" ng-click="showEditPerson(person.person)" style="border:none;"/>
+					<img ng-src="img/enroll.png" alt="{{'enrollment' | translate}}" title="{{'enrollment' | translate}}" width="24" height="24" style="border:none;" ng-click="enrollPerson(person.person)" style="border:none;"/>-->
+					
+					<a href="#/personedit?personUid={{person.person}}" title="{{'edit_person_profile' | translate}}">
+						<img src="img/edit.png" alt="{{'edit_person_profile' | translate}}" width="24" height="24" style="border:none;"/>
+					</a>
+					<a href="#/enrollment?personUid={{person.person}}" title="{{'enrollment' | translate}}">
+						<img src="img/enroll.png" alt="{{'enrollment' | translate}}" width="24" height="24" style="border:none;"/>
+					</a>
+					<a href="#/anc/dashboard?personUid={{person.person}}" title="{{'visits' | translate}}">
+						<img src="img/consultation.png" alt="{{'visits' | translate}}" width="24" height="24" style="border:none;"/>
+					</a>
+					<a href="#/anc/lab?personUid={{person.person}}" title="{{'lab_report' | translate}}">
+						<img src="img/lab.png" alt="{{'lab_report' | translate}}" width="24" height="24" style="border:none;"/>
+					</a>
+					<a href="#/anc/summary?personUid={{person.person}}" title="{{'summary_report' | translate}}">
+						<img src="img/summary.png" alt="{{'summary_report' | translate}}" width="24" height="24" style="border:none;"/>
+					</a>
+				</td>
+			</tr>
+		</table>
+
+	</div>
+</div>
+
+<!--
+ <table class="table table-bordered table-striped cell-highlight" style="margin-top: 20px">
+      <thead>
+        <tr>
+          <th>Header One</th>
+          <th>Header Two</th>
+        </tr>
+      </thead>  
+      <tbody>    
+        <tr context="context1">
+          <td>Item three</td>
+          <td>Item four</td>
+        </tr>
+        <tr context="context2">
+          <td>Item five</td>
+          <td>Item six</td>
+        </tr>
+      </tbody>
+    </table>      
+    <ul id="context1" class="dropdown-menu">
+      <li><a ng-click="edit()">Edit</a></li>
+      <li><a ng-click="link()">Link</a></li>
+      <li><a ng-click="delete()">Delete</a></li>
+      <li class="divider"></li>
+      <li><a ng-click="properties()">Properties</a></li>
+    </ul>
+    <ul id="context2" class="dropdown-menu">
+      <li><a ng-click="edit()">Edit</a></li>
+      <li class="divider"></li>
+      <li><a ng-click="properties()">Properties</a></li>
+    </ul>
+    <pre>clicked = {{clicked || json }}</pre> -->

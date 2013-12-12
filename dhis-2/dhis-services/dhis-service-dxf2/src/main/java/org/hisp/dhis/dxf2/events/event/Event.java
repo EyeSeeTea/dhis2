@@ -56,6 +56,8 @@ public class Event extends BaseLinkableObject
 
     private String person;
 
+    private String patientComment;
+    
     private String eventDate;
 
     private String storedBy;
@@ -139,6 +141,16 @@ public class Event extends BaseLinkableObject
     {
         this.person = person;
     }
+    
+    @JsonProperty
+    @JacksonXmlProperty( isAttribute = true )
+    public String getPatientComment() {
+		return patientComment;
+	}
+
+	public void setPatientComment(String patientComment) {
+		this.patientComment = patientComment;
+	}
 
     @JsonProperty( required = true )
     @JacksonXmlProperty( isAttribute = true )
@@ -242,5 +254,5 @@ public class Event extends BaseLinkableObject
             ", coordinate=" + coordinate +
             ", dataValues=" + dataValues +
             '}';
-    }
+    }	
 }

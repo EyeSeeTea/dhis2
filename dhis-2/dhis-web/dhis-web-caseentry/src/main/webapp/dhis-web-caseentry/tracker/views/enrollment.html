@@ -1,0 +1,27 @@
+<div class="information_bar">
+    <div class="info_container-1-3">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                {{'person_profile' | translate}}
+            </div>
+            <div class="list-group">            	
+              	<div class="list-group-item">{{'full_name' | translate}}: {{person.name}}</div>
+              	<div class="list-group-item">{{'date_of_birth' | translate}}: {{ person.dateOfBirth.date | date:'yyyy-MM-dd' }} ({{person.dateOfBirth.age}})</div>
+            </div>
+        </div>
+    </div>    
+</div>
+
+<div class="main_content">
+	<h2>
+		{{'enrollment' | translate}}
+	</h2>
+	<p>
+		{{enrollment}}
+	</p>
+	
+	<div class="margin-top">	
+		<button ng-click="save()" class="big-button lightblue">{{'save' | translate}}</button>
+		<button ng-click="cancel()" class="big-button grey">{{'cancel' | translate}}</button>		
+	</div>
+</div>

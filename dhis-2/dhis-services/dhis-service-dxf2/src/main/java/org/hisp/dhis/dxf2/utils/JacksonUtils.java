@@ -36,10 +36,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
+
 import org.hisp.dhis.common.view.BasicView;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.DimensionalView;
 import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.common.view.ExtendedView;
 import org.hisp.dhis.common.view.SharingBasicView;
 import org.hisp.dhis.common.view.SharingDetailedView;
 import org.hisp.dhis.common.view.SharingExportView;
@@ -105,6 +107,7 @@ public class JacksonUtils
         viewClasses.put( "export", ExportView.class );
         viewClasses.put( "sharingExport", SharingExportView.class );
         viewClasses.put( "dimensional", DimensionalView.class );
+        viewClasses.put( "extended", ExtendedView.class);
         viewClasses.put( "withoutOrganisationUnits", WithoutOrganisationUnitsView.class );
     }
 

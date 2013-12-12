@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.CombinationGenerator;
 import org.hisp.dhis.common.DxfNamespaces;
@@ -41,6 +42,7 @@ import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.common.view.ExtendedView;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -248,7 +250,7 @@ public class DataElementCategoryCombo
 
     @JsonProperty
     @JsonSerialize(contentAs = BaseIdentifiableObject.class)
-    @JsonView({ DetailedView.class, ExportView.class })
+    @JsonView({ DetailedView.class, ExportView.class, ExtendedView.class })
     @JacksonXmlElementWrapper(localName = "categories", namespace = DxfNamespaces.DXF_2_0)
     @JacksonXmlProperty(localName = "category", namespace = DxfNamespaces.DXF_2_0)
     public List<DataElementCategory> getCategories()

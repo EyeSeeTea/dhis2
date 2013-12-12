@@ -34,9 +34,11 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExtendedView;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -106,7 +108,7 @@ public class PatientAttribute
     // -------------------------------------------------------------------------
 
     @JsonProperty( "personAttributeOptions" )
-    @JsonView( { DetailedView.class } )
+    @JsonView( { DetailedView.class, ExtendedView.class } )
     @JacksonXmlElementWrapper( localName = "personAttributeOptions", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "personAttributeOption", namespace = DxfNamespaces.DXF_2_0 )
     public Set<PatientAttributeOption> getAttributeOptions()
@@ -156,7 +158,7 @@ public class PatientAttribute
     }
 
     @JsonProperty
-    @JsonView({ DetailedView.class })
+    @JsonView({ DetailedView.class, ExtendedView.class })
     @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public boolean isMandatory()
     {
@@ -169,7 +171,7 @@ public class PatientAttribute
     }
 
     @JsonProperty
-    @JsonView({ DetailedView.class })
+    @JsonView({ DetailedView.class, ExtendedView.class })
     @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public String getDescription()
     {
@@ -182,7 +184,7 @@ public class PatientAttribute
     }
 
     @JsonProperty
-    @JsonView({ DetailedView.class })
+    @JsonView({ DetailedView.class, ExtendedView.class })
     @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public String getValueType()
     {
@@ -195,7 +197,7 @@ public class PatientAttribute
     }
 
     @JsonProperty( "personAttributeGroup" )
-    @JsonView( { DetailedView.class } )
+    @JsonView( { DetailedView.class, ExtendedView.class } )
     @JsonSerialize( as = BaseIdentifiableObject.class )
     @JacksonXmlProperty( localName = "personAttributeGroup", namespace = DxfNamespaces.DXF_2_0 )
     public PatientAttributeGroup getPatientAttributeGroup()

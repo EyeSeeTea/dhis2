@@ -28,10 +28,19 @@ package org.hisp.dhis.api.controller.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.hisp.dhis.api.controller.AbstractCrudController;
+import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.patient.PatientAttribute;
+import org.hisp.dhis.patient.PatientAttributeService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -41,4 +50,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class PersonAttributeTypeController extends AbstractCrudController<PatientAttribute>
 {
     public static final String RESOURCE_PATH = "/personAttributeTypes";
+    
+    @Autowired
+    private PatientAttributeService patientAttributeService;
+    
+    @RequestMapping( value = "/withoutPrograms", method = RequestMethod.GET, produces = "application/json" )
+    public void getAttributes(@RequestParam Map<String, String> parameters, HttpServletResponse response) throws Exception
+    {   
+    	String viewName = parameters.get( "viewClass" );
+    	
+    	if ( viewName == null )
+    	{
+    		viewName = "detailed";
+    	}
+    	
+    	Class<?> viewClass = JacksonUtils.getViewClass( viewName );      
+    	
+    	JacksonUtils.toJsonWithView(response.getOutputStream(), patientAttributeService.getPatientAttributesWithoutProgram(), viewClass);  	
+    	
+    }
 }

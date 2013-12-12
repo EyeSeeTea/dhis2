@@ -1,0 +1,1264 @@
+[
+	{
+		"essentialIntervention": "EA2_Iron and folic acid supplementation during pregnancy",
+		"labelOnScreen": "Hemoglobin",
+		"databaseVariableName": "EA2_LAB_HB",
+		"pageOfEntry": "ANC1_GEN",
+		"dependency": "0",
+		"sequenceOnPage": "35",
+		"entryFormat": "Continuous",
+		"labels": "",
+		"validationLow": 3,
+		"validationHigh": 20,
+		"displayedTrailingUnitOnScreen": "g/dL",
+		"onMouseOverText": "Screening for anemia",
+		"lim1ForAction": ">=11 OR <11 OR <=7",
+		"onScreenImmediateAction": "IF =<7",
+		"actions": [
+			{
+				"value": "#EA2_LAB_HB# <= 7",
+				"task": {
+					"transferToDependencies": ["EA2_LAB_HB_nn", "EA2_TRE_ANE_SEV"],
+					"transferToConditionsComplications": ["Severe anemia"],
+					"transferToSummary": ["Severe anemia"],
+					"transferToReminders": ["Hemoglobin screening follow up (EA2_LAB_HB_nn) at next ANC visit"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}, {
+				"value": "#EA2_LAB_HB# > 7 && #EA2_LAB_HB# < 11",
+				"task": {
+					"transferToDependencies": ["EA2_LAB_HB_nn", "EA2_TRE_ANE_MOD"],
+					"transferToConditionsComplications": ["Moderate anemia"],
+					"transferToSummary": ["Moderate anemia"],
+					"transferToReminders": ["Hemoglobin screening follow up (EA2_LAB_HB_nn) at next ANC visit"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}, {
+				"value": "#EA2_LAB_HB# >= 11",
+				"task": {
+					"transferToDependencies": ["EA2_TRE_SUPP"],
+					"transferToConditionsComplications": [],
+					"transferToSummary": ["No anemia"],
+					"transferToReminders": [],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}
+		],
+		"transferToLabResults": "Transfer the value to a \"Hemoglobin\" -row, date column",
+		"definitions": "Ref 1,3",
+		"guidelines": "Ref 2 AND 3"
+	}, {
+		"essentialIntervention": "EA2_Iron and folic acid supplementation during pregnancy",
+		"labelOnScreen": "Hematocrit",
+		"databaseVariableName": "EA2_LAB_HCR",
+		"pageOfEntry": "ANC1_GEN",
+		"dependency": "0",
+		"sequenceOnPage": "36",
+		"entryFormat": "Continuous",
+		"labels": "",
+		"validationLow": 1,
+		"validationHigh": 100,
+		"displayedTrailingUnitOnScreen": "%",
+		"onMouseOverText": "Screening for anemia",
+		"lim1ForAction": "<33 OR <20",
+		"onScreenImmediateAction": "IF =<20",
+		"actions": [
+			{
+				"value": "#EA2_LAB_HCR# <= 20",
+				"task": {
+					"transferToDependencies": ["EA2_LAB_HB_nn", "EA2_TRE_ANE_SEV"],
+					"transferToConditionsComplications": ["Severe anemia"],
+					"transferToSummary": ["Severe anemia"],
+					"transferToReminders": ["Hemoglobin screening follow up at ANC_nn"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}, {
+				"value": "#EA2_LAB_HCR# > 20 && #EA2_LAB_HCR# < 33",
+				"task": {
+					"transferToDependencies": ["EA2_LAB_HB_nn", "EA2_TRE_ANE_MOD"],
+					"transferToConditionsComplications": ["Moderate anemia"],
+					"transferToSummary": ["Moderate anemia"],
+					"transferToReminders": ["Hemoglobin screening follow up at ANC_nn"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}, {
+				"value": "#EA2_LAB_HCR# >= 33",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": ["No anemia"],
+					"transferToReminders": [],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}
+		],
+		"transferToLabResults": "Transfer the value to a \"Hematocrit\" -row, date column",
+		"definitions": "Ref 2,3",
+		"guidelines": "Ref 2"
+	}, {
+		"essentialIntervention": "EA2_Iron and folic acid supplementation during pregnancy",
+		"labelOnScreen": "Extreme pallor (conjunctival AND palmar)",
+		"databaseVariableName": "EA2_CLI_PAL",
+		"pageOfEntry": "ANC1_GEN, ANCnn_GEN",
+		"dependency": "0",
+		"sequenceOnPage": "29",
+		"entryFormat": "Cathegoric",
+		"labels": [
+			{
+				"label": "No",
+				"value": "0"
+			}, {
+				"label": "Yes",
+				"value": "1"
+			}
+		],
+		"validationLow": null,
+		"validationHigh": null,
+		"displayedTrailingUnitOnScreen": "",
+		"onMouseOverText": "Screening for anemia",
+		"lim1ForAction": "1",
+		"onScreenImmediateAction": "IF 1",
+		"actions": [
+			{
+				"value": "#EA2_CLI_PAL# == 1 && (#EA2_LAB_HB# <= 7 || #EA2_LAB_HB# == -1 || #EA2_LAB_HB_nn# <= 7 || #EA2_LAB_HB_nn# == -1 || #EA2_LAB_CHR# <= 20)",
+				"task": {
+					"transferToDependencies": ["EA2_TRE_ANE_SEV"],
+					"transferToConditionsComplications": ["Severe anemia"],
+					"transferToSummary": ["Severe anemia"],
+					"transferToReminders": [],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}, {
+				"value": "#EA2_CLI_PAL# == 1 && (#EA2_LAB_HCR# <= 20 || #EA2_LAB_HCR# == -1)",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": [],
+					"transferToReminders": ["Check (EA2_LAB_HB_nn) AND/OR (EA2_LAB_HCR) to confirm anemia"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}, {
+				"value": "#EA2_CLI_PAL# == 1",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": [],
+					"transferToReminders": ["Check (EA2_LAB_HB_nn) AND/OR (EA2_LAB_HCR) to confirm anemia"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}
+		],
+		"transferToLabResults": "",
+		"definitions": "Ref 1 AND 3",
+		"guidelines": "Ref 2"
+	}, {
+		"essentialIntervention": "EA3_Tetanus immunisation in pregnancy for preventing neonatal tetanus",
+		"labelOnScreen": "Tetanus Immunization status",
+		"databaseVariableName": "EA3_STA_TET",
+		"pageOfEntry": "ANC1_GEN",
+		"dependency": "",
+		"sequenceOnPage": "32",
+		"entryFormat": "Cathegoric",
+		"labels": [
+			{
+				"label": "Unknown status or unimmunized",
+				"value": "0"
+			}, {
+				"label": "Sufficiently immunized",
+				"value": "1"
+			}, {
+				"label": ">=28 days since TT1",
+				"value": "2"
+			}, {
+				"label": ">=180 days since TT2",
+				"value": "3"
+			}, {
+				"label": ">1 year since TT3",
+				"value": "4"
+			}, {
+				"label": ">1 year since TT4",
+				"value": "5"
+			}
+		],
+		"validationLow": 0,
+		"validationHigh": 5,
+		"displayedTrailingUnitOnScreen": "",
+		"onMouseOverText": "",
+		"lim1ForAction": "IF 0 OR 2 OR 3 OR 4 OR 5",
+		"onScreenImmediateAction": "",
+		"actions": [
+			{
+				"value": "#EA3_STA_TET# == 0",
+				"task": {
+					"transferToDependencies": ["EA3_TRE_TET1"],
+					"transferToConditionsComplications": [],
+					"transferToSummary": ["Cathegoric label"],
+					"transferToReminders": [],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}, {
+				"value": "#EA3_STA_TET# == 2",
+				"task": {
+					"transferToDependencies": ["EA3_TRE_TET2"],
+					"transferToConditionsComplications": [],
+					"transferToSummary": ["Cathegoric label"],
+					"transferToReminders": [],
+					"transferToMessaging": [],
+					"transferToScheduling": ["EA3_TRE_TET2 due in 28 days"]
+				}
+			}, {
+				"value": "#EA3_STA_TET# == 3",
+				"task": {
+					"transferToDependencies": ["EA3_TRE_TET3"],
+					"transferToConditionsComplications": [],
+					"transferToSummary": ["Cathegoric label"],
+					"transferToReminders": [],
+					"transferToMessaging": [],
+					"transferToScheduling": ["EA3_TRE_TET3 due in 180 days"]
+				}
+			}, {
+				"value": "#EA3_STA_TET# == 4",
+				"task": {
+					"transferToDependencies": ["EA3_TRE_TET4"],
+					"transferToConditionsComplications": [],
+					"transferToSummary": ["Cathegoric label"],
+					"transferToReminders": [],
+					"transferToMessaging": [],
+					"transferToScheduling": ["EA3_TRE_TET4 due in 365 days"]
+				}
+			}, {
+				"value": "#EA3_STA_TET# == 5",
+				"task": {
+					"transferToDependencies": ["EA3_TRE_TET5"],
+					"transferToConditionsComplications": [],
+					"transferToSummary": ["Cathegoric label"],
+					"transferToReminders": [],
+					"transferToMessaging": [],
+					"transferToScheduling": ["EA3_TRE_TET5 due in 365 days"]
+				}
+			}
+		],
+		"transferToLabResults": "",
+		"definitions": "",
+		"guidelines": "Ref 3"
+	}, {
+		"essentialIntervention": "EA4a_Prophylactic antimalarial for preventing malaria in pregnancy",
+		"labelOnScreen": "Malaria microscopy screening",
+		"databaseVariableName": "EA4a_LAB_MAL1",
+		"pageOfEntry": "ANC1_GEN",
+		"dependency": "",
+		"sequenceOnPage": "37",
+		"entryFormat": "Cathegoric",
+		"labels": [
+			{
+				"label": "No",
+				"value": "0"
+			}, {
+				"label": "Yes",
+				"value": "1"
+			}
+		],
+		"validationLow": 0,
+		"validationHigh": 1,
+		"displayedTrailingUnitOnScreen": "",
+		"onMouseOverText": "Microscopy screening for malaria",
+		"lim1ForAction": "1",
+		"onScreenImmediateAction": "IF 1",
+		"actions": [
+			{
+				"value": "#EA4a_LAB_MAL1# == 1",
+				"task": {
+					"transferToDependencies": ["EA4a_TRE_MAL", "EA4a_LAB_MAL1_nn", "EA4a_LAB_MAL2_nn"],
+					"transferToConditionsComplications": ["Malaria confirmed"],
+					"transferToSummary": ["Malaria confirmed with parasitological microscopy"],
+					"transferToReminders": ["Malaria confirmed with parasitological microscopy, prescribe antimalarial"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}, {
+				"value": "#EA4a_LAB_MAL1# == -1",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": [],
+					"transferToReminders": ["EA4a_LAB_MAL1 missing"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}
+		],
+		"transferToLabResults": "IF1; transfer \"Malaria confirmed with parasitological microscopy\"",
+		"definitions": "",
+		"guidelines": "Ref 4"
+	}, {
+		"essentialIntervention": "EA4a_Prophylactic antimalarial for preventing malaria in pregnancy",
+		"labelOnScreen": "Malaria  RDT screening",
+		"databaseVariableName": "EA4a_LAB_MAL2",
+		"pageOfEntry": "ANC1_GEN",
+		"dependency": "",
+		"sequenceOnPage": "38",
+		"entryFormat": "Cathegoric",
+		"labels": [
+			{
+				"label": "No",
+				"value": "0"
+			}, {
+				"label": "Yes",
+				"value": "1"
+			}
+		],
+		"validationLow": 0,
+		"validationHigh": 1,
+		"displayedTrailingUnitOnScreen": "",
+		"onMouseOverText": "RDT screening for malaria",
+		"lim1ForAction": "1",
+		"onScreenImmediateAction": "IF 1",
+		"actions": [
+			{
+				"value": "#EA4a_LAB_MAL2# == 1",
+				"task": {
+					"transferToDependencies": ["EA4a_TRE_MAL", "EA4a_LAB_MAL1_nn", "EA4a_LAB_MAL2_nn"],
+					"transferToConditionsComplications": ["Malaria confirmed"],
+					"transferToSummary": ["Malaria confirmed with RDT test"],
+					"transferToReminders": ["Malaria confirmed with RDT test, prescribe antimalarial"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}, {
+				"value": "#EA4a_LAB_MAL2# == -1",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": [],
+					"transferToReminders": ["EA4a_LAB_MAL1 missing"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}
+		],
+		"transferToLabResults": "IF1; transfer \"Malaria confirmed with RDT test\"",
+		"definitions": "",
+		"guidelines": "Ref 4"
+	}, {
+		"essentialIntervention": "EA4b_Provision and promotion of Insecticide Treated Nets for preventing malaria",
+		"labelOnScreen": "Malaria prevention",
+		"databaseVariableName": "EA4b_PRE_MAL",
+		"pageOfEntry": "ANC1_GEN, ANCnn_DEP",
+		"dependency": "IF (EA4b_PRE_MAL = 0) at ANC1_GEN",
+		"sequenceOnPage": "33",
+		"entryFormat": "Cathegoric",
+		"labels": [
+			{
+				"label": "No",
+				"value": "0"
+			}, {
+				"label": "Yes",
+				"value": "1"
+			}
+		],
+		"validationLow": 0,
+		"validationHigh": 1,
+		"displayedTrailingUnitOnScreen": "",
+		"onMouseOverText": "\"Promote use of bednet dipped in insecticide every 6 months to prevent malaria",
+		"lim1ForAction": "",
+		"onScreenImmediateAction": "",
+		"actions": [
+			{
+				"value": "#EA4b_PRE_MAL# == 1",
+				"task": {
+					"transferToDependencies": ["what should I do?"],
+					"transferToConditionsComplications": [],
+					"transferToSummary": ["Promotion of preventive bednets given"],
+					"transferToReminders": [],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}, {
+				"value": "#EA4b_PRE_MAL# == 0",
+				"task": {
+					"transferToDependencies": ["what should I do?"],
+					"transferToConditionsComplications": [],
+					"transferToSummary": [],
+					"transferToReminders": ["EA4b_PRE_MAL missing"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}, {
+				"value": "#EA4b_PRE_MAL# == -1",
+				"task": {
+					"transferToDependencies": ["what should I do?"],
+					"transferToConditionsComplications": [],
+					"transferToSummary": [],
+					"transferToReminders": ["EA4b_PRE_MAL missing"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}
+		],
+		"transferToLabResults": "",
+		"definitions": "",
+		"guidelines": "Ref 5"
+	}, {
+		"essentialIntervention": "EA5_Cessation of smoking during pregnancy for improving birth outcome",
+		"labelOnScreen": "Smoking at first ANC visit?",
+		"databaseVariableName": "EA5_CLI_SMO1",
+		"pageOfEntry": "ANC1_GEN",
+		"dependency": "",
+		"sequenceOnPage": "24",
+		"entryFormat": "Cathegoric",
+		"labels": [
+			{
+				"label": "No",
+				"value": "0"
+			}, {
+				"label": "Yes",
+				"value": "1"
+			}
+		],
+		"validationLow": 0,
+		"validationHigh": 1,
+		"displayedTrailingUnitOnScreen": "",
+		"onMouseOverText": "Smoking at ANC 1",
+		"lim1ForAction": "1",
+		"onScreenImmediateAction": "",
+		"actions": [
+			{
+				"value": "#EA5_CLI_SMO1# == 1",
+				"task": {
+					"transferToDependencies": ["EA5_TRE_SMO"],
+					"transferToConditionsComplications": ["Smoking at ANC1"],
+					"transferToSummary": ["Smoking at ANC1"],
+					"transferToReminders": [],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}, {
+				"value": "#EA5_CLI_SMO1# == -1",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": [],
+					"transferToReminders": ["Smoking information missing"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}
+		],
+		"transferToLabResults": "",
+		"definitions": "Ref 3 \"pregnant woman who are smoking at ANC 1\"",
+		"guidelines": "Ref 3"
+	}, {
+		"essentialIntervention": "EA6_Screening and treatment of syphilis (during pregnancy)",
+		"labelOnScreen": "Syphilis ",
+		"databaseVariableName": "EA6_LAB_SYP",
+		"pageOfEntry": "ANC1_GEN, ANC_nn_GEN",
+		"dependency": "",
+		"sequenceOnPage": "39",
+		"entryFormat": "Cathegoric",
+		"labels": [
+			{
+				"label": "No",
+				"value": "0"
+			}, {
+				"label": "Yes",
+				"value": "1"
+			}
+		],
+		"validationLow": 0,
+		"validationHigh": 1,
+		"displayedTrailingUnitOnScreen": "",
+		"onMouseOverText": "Rapid Plasma Reagin(RPR)-test for Syphilis screening",
+		"lim1ForAction": "1",
+		"onScreenImmediateAction": "IF 1",
+		"actions": [
+			{
+				"value": "#EA6_LAB_SYP# == 1",
+				"task": {
+					"transferToDependencies": ["EA6_TRE_SYP1", "EA6_TRE_SYP2"],
+					"transferToConditionsComplications": ["Syphilis confirmed"],
+					"transferToSummary": ["Syphilis confirmed with RPR-test"],
+					"transferToReminders": ["Syphilis confirmed with RPR-test, prescribe medication"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}, {
+				"value": "#EA6_LAB_SYP# == 0",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": [],
+					"transferToReminders": ["Counsel on safe sex inc correct and consistent use of condoms to prevent infection"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}, {
+				"value": "#EA6_LAB_SYP# == -1",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": [],
+					"transferToReminders": ["EA6_LAB_SYP missing"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}
+		],
+		"transferToLabResults": "IF 1; transfer \" RPR-test positive\"",
+		"definitions": "Ref 3",
+		"guidelines": "Ref 3"
+	}, {
+		"essentialIntervention": "EA2_Iron and folic acid supplementation during pregnancy",
+		"labelOnScreen": "Hemoglobin",
+		"databaseVariableName": "EA2_LAB_HB_nn",
+		"pageOfEntry": "ANCnn_DEP",
+		"dependency": "IF (EA2_LAB_HB <11) at ANC1 or (EA2_LAB_HB_nn<11) at any ANCnn",
+		"sequenceOnPage": "",
+		"entryFormat": "Continuous",
+		"labels": "",
+		"validationLow": 3,
+		"validationHigh": 20,
+		"displayedTrailingUnitOnScreen": "g/dL",
+		"onMouseOverText": "Follow up of anemia",
+		"lim1ForAction": "<11 OR <7",
+		"onScreenImmediateAction": "IF =<7",
+		"actions": [
+			{
+				"value": "#EA2_LAB_HB_nn# <= 7",
+				"task": {
+					"transferToDependencies": ["EA2_LAB_HB_nn", "EA2_TRE_ANE_SEV"],
+					"transferToConditionsComplications": ["Severe anemia"],
+					"transferToSummary": ["Severe anemia"],
+					"transferToReminders": ["Hemoglobin screening follow up (EA2_LAB_HB_nn) at next ANC visit"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}, {
+				"value": "#EA2_LAB_HB_nn# > 7 && #EA2_LAB_HB_nn# < 11",
+				"task": {
+					"transferToDependencies": ["EA2_LAB_HB_nn", "EA2_TRE_ANE_MOD"],
+					"transferToConditionsComplications": ["Moderate anemia"],
+					"transferToSummary": ["Moderate anemia"],
+					"transferToReminders": ["Hemoglobin screening follow up (EA2_LAB_HB_nn) at next ANC visit"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}
+		],
+		"transferToLabResults": "Transfer the value to a \"Hemoglobin\" -row, date column",
+		"definitions": "Ref 1,3",
+		"guidelines": "Ref 2 AND 3"
+	}, {
+		"essentialIntervention": "EA2_Iron and folic acid supplementation during pregnancy",
+		"labelOnScreen": "Iron and folic acid supplementation ",
+		"databaseVariableName": "EA2_TRE_SUPP",
+		"pageOfEntry": "ANC1_DEP, ANCnn_DEP",
+		"dependency": "IF (EA2_LAB_HB>11) AND/OR (EA2_LAB_HCR >33) AND (EA2_CLI_PALOR=0) OR IF: (EA2_TRE_ANE_MOD) OR (EA2_TRE_ANE_SEV) are finished",
+		"sequenceOnPage": "",
+		"entryFormat": "Cathegoric",
+		"labels": [
+			{
+				"label": "No",
+				"value": "0"
+			}, {
+				"label": "Yes",
+				"value": "1"
+			}
+		],
+		"validationLow": null,
+		"validationHigh": null,
+		"displayedTrailingUnitOnScreen": "",
+		"onMouseOverText": "if prevealence of anemia <40%, dosage required is: (60 mg iron+400 mg folic acid) for 6 months, if prevalence of anemia is >40%, dosage required is: (60 mg iron+400 mg folic acid) for 6 months and continuing 3 months PPC",
+		"lim1ForAction": "",
+		"onScreenImmediateAction": "",
+		"actions": [
+			{
+				"value": "#EA2_TRE_SUPP# == 1 && PREVALANCE_OF_ANEMIA_MORE_THAN_40_PERCENT_IN_THE_AREA",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": ["iron and folic acid supplementation for 6 months"],
+					"transferToReminders": ["iron and folic acid supplementation 3 months PostPartum"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}, {
+				"value": "#EA2_TRE_SUPP# == 1 && PREVALANCE_OF_ANEMIA_LESS_THAN_40_PERCENT_IN_THE_AREA",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": ["iron and folic acid supplementation for 6 months"],
+					"transferToReminders": [],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}
+		],
+		"transferToLabResults": "",
+		"definitions": "Ref 2",
+		"guidelines": "Ref 2 "
+	}, {
+		"essentialIntervention": "EA2_Iron and folic acid supplementation during pregnancy",
+		"labelOnScreen": "Treatment for moderate anemia ",
+		"databaseVariableName": "EA2_TRE_ANE_MOD",
+		"pageOfEntry": "ANC1_DEP, ANCnn_DEP",
+		"dependency": "IF (EA2_LAB_HB < 11AND>7) OR (EA2_LAB_HB_nn<11AND>7) OR (EA2_LAB_HCR<33AND>20) AND (EA2_TRE _ANE_MOD= 0) AND (EA2_TRE_ANE_SEV = 0)",
+		"sequenceOnPage": "",
+		"entryFormat": "Cathegoric",
+		"labels": [
+			{
+				"label": "No",
+				"value": "0"
+			}, {
+				"label": "Yes",
+				"value": "1"
+			}
+		],
+		"validationLow": null,
+		"validationHigh": null,
+		"displayedTrailingUnitOnScreen": "",
+		"onMouseOverText": "Give double dose of iron = (120 mg + 400 microg folic acid) for 3 months. Counsel on compliance with treatment. Give appropriate oral antimalarial if not given in the past month. ",
+		"lim1ForAction": "",
+		"onScreenImmediateAction": "",
+		"actions": [
+			{
+				"value": "#EA2_TRE_ANE_MOD# == 1",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": ["Medical treatment for moderate anemia"],
+					"transferToSummary": ["Medical treatment for moderate anemia"],
+					"transferToReminders": ["Moderate anemia, medication prescribed. If anemia persists, refer to hospital, if not continue with (EA2_TRE_SUPP) after 3 months of medical treatment."],
+					"transferToMessaging": [],
+					"transferToScheduling": ["In 4-6 weeks; reassess moderate anemia AND check clinical progress and compliance with treatment."]
+				}
+			}
+		],
+		"transferToLabResults": "",
+		"definitions": "Ref 3",
+		"guidelines": "Ref 3"
+	}, {
+		"essentialIntervention": "EA2_Iron and folic acid supplementation during pregnancy",
+		"labelOnScreen": "Treatment for severe anemia",
+		"databaseVariableName": "EA2_TRE_ANE_SEV",
+		"pageOfEntry": "ANC1_DEP, ANCnn_DEP",
+		"dependency": "IF (EA2_LAB_HB <7) OR (EA2_LAB_HB_nn<7) OR (EA2_LAB_HCR<20) OR (EA2_LAB_PAL=1) AND (EA2_TRE_ANE_MOD = 0) AND (EA2_TRE_ANE_SEV = 0)",
+		"sequenceOnPage": "",
+		"entryFormat": "Cathegoric",
+		"labels": [
+			{
+				"label": "No",
+				"value": "0"
+			}, {
+				"label": "Yes",
+				"value": "1"
+			}
+		],
+		"validationLow": null,
+		"validationHigh": null,
+		"displayedTrailingUnitOnScreen": "",
+		"onMouseOverText": "Revise birth plan so as to deliver in a facility with blood transfusion services. Give double dose of iron (1 tablet twice daily=120 mg iron + 400 microg folic acid in total) for 3 months. Counsel on compliance with treatment. Give appropriate oral antimalarial. ",
+		"lim1ForAction": "",
+		"onScreenImmediateAction": "IF 1",
+		"actions": [
+			{
+				"value": "#EA2_TRE_ANE_SEV# == 1",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": ["Medical treatment for severe anemia"],
+					"transferToSummary": ["Medical treatment for severe anemia"],
+					"transferToReminders": ["Severe anemia, medication prescribed. If anemia persists, refer urgently to hospital, if not continue with (EA2_TRE_SUPP) after 3 months of medical treatment."],
+					"transferToMessaging": [],
+					"transferToScheduling": ["In 2 weeks; for (EA2_LAB_HB_nn) AND (EA2_SCR_HCR) AND check clinical progress and compliance with treatment."]
+				}
+			}
+		],
+		"transferToLabResults": "",
+		"definitions": "Ref 1",
+		"guidelines": "Ref 2"
+	}, {
+		"essentialIntervention": "EA3_Tetanus immunisation in pregnancy for preventing neonatal tetanus",
+		"labelOnScreen": "Date of latest immunization",
+		"databaseVariableName": "EA3_STA_TET_DAT",
+		"pageOfEntry": "ANC1_DEP",
+		"dependency": "IF (EA3_STA_TET) = 1 OR 2 OR 3 OR 4 OR 5",
+		"sequenceOnPage": "",
+		"entryFormat": "Date",
+		"labels": [
+			{
+				"label": "DD.MM.YYYY for (EA3_TRE_TET1)",
+				"value": "1"
+			}, {
+				"label": "DD.MM.YYYY for (EA3_TRE_TET2)",
+				"value": "2"
+			}, {
+				"label": "DD.MM.YYYY for (EA3_TRE_TET3)",
+				"value": "3"
+			}, {
+				"label": "DD.MM.YYYY for( EA3_TRE_TET4)",
+				"value": "4"
+			}, {
+				"label": "DD.MM.YYYY for 5th dose",
+				"value": "5"
+			}
+		],
+		"validationLow": "1",
+		"validationHigh": "5",
+		"displayedTrailingUnitOnScreen": "",
+		"onMouseOverText": "DD.MM.YYYY",
+		"lim1ForAction": "",
+		"onScreenImmediateAction": "",
+		"actions": [
+			{
+				"value": "#EA3_STA_TET_DAT# == ",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": ["Cathegoric label"],
+					"transferToReminders": [],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}
+		],
+		"transferToLabResults": "",
+		"definitions": "",
+		"guidelines": "Ref 3"
+	}, {
+		"essentialIntervention": "EA3_Tetanus immunisation in pregnancy for preventing neonatal tetanus",
+		"labelOnScreen": "Tetanus Immunization",
+		"databaseVariableName": "EA3_TRE_TET",
+		"pageOfEntry": "ANC1_DEP",
+		"dependency": "IF (EA3_STA_TET)  = 0",
+		"sequenceOnPage": "",
+		"entryFormat": "Cathegoric",
+		"labels": [
+			{
+				"label": "Dose 1",
+				"value": "1"
+			}, {
+				"label": "Dose 2",
+				"value": "2"
+			}, {
+				"label": "Dose 3",
+				"value": "3"
+			}, {
+				"label": "Dose 4",
+				"value": "4"
+			}, {
+				"label": "Dose 5",
+				"value": "5"
+			}
+		],
+		"validationLow": "0",
+		"validationHigh": "1",
+		"displayedTrailingUnitOnScreen": "",
+		"onMouseOverText": "",
+		"lim1ForAction": "",
+		"onScreenImmediateAction": "",
+		"actions": [
+			{
+				"value": "#EA3_TRE_TET# == 1",
+				"task": {
+					"transferToDependencies": ["EA3_TRE_TET2"],
+					"transferToConditionsComplications": [],
+					"transferToSummary": ["EA3_TRE_TET1"],
+					"transferToReminders": [],
+					"transferToMessaging": [],
+					"transferToScheduling": ["EA3_TRE_TET2 is due in 28 days"]
+				}
+			}, {
+				"value": "#EA3_TRE_TET# == 0 && #EA3_STA_TET# == 0",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": [],
+					"transferToReminders": ["EA3_TRE_TET missing"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}
+		],
+		"transferToLabResults": "",
+		"definitions": "",
+		"guidelines": "Ref 3"
+	}, {
+		"essentialIntervention": "EA3_Tetanus immunisation in pregnancy for preventing neonatal tetanus",
+		"labelOnScreen": "Tetanus immunization 2",
+		"databaseVariableName": "EA3_TRE_TET2",
+		"pageOfEntry": "ANC1_DEP, ANCnn_DEP",
+		"dependency": "IF (EA3_STA_TET) =2 OR (EA3_TRE_TET1) =1 ",
+		"sequenceOnPage": "",
+		"entryFormat": "Cathegoric",
+		"labels": [
+			{
+				"label": "No",
+				"value": "0"
+			}, {
+				"label": "Yes",
+				"value": "1"
+			}
+		],
+		"validationLow": 0,
+		"validationHigh": 1,
+		"displayedTrailingUnitOnScreen": "",
+		"onMouseOverText": "",
+		"lim1ForAction": "",
+		"onScreenImmediateAction": "",
+		"actions": [
+			{
+				"value": "#EA3_TRE_TET2# == 1",
+				"task": {
+					"transferToDependencies": ["EA3_TRE_TET3"],
+					"transferToConditionsComplications": [],
+					"transferToSummary": [],
+					"transferToReminders": [],
+					"transferToMessaging": [],
+					"transferToScheduling": ["EA3_TRE_TET3 is due in 180 days"]
+				}
+			}, {
+				"value": "#EA3_TRE_TET2# == 0 && #EA3_TRE_TET1# == 1",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": [],
+					"transferToReminders": ["EA3_TRE_TET2 missing"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}
+		],
+		"transferToLabResults": "",
+		"definitions": "",
+		"guidelines": "Ref 3"
+	}, {
+		"essentialIntervention": "EA3_Tetanus immunisation in pregnancy for preventing neonatal tetanus",
+		"labelOnScreen": "Tetanus immunization 3",
+		"databaseVariableName": "EA3_TRE_TET3",
+		"pageOfEntry": "ANC_DEP, ANCnn_DEP",
+		"dependency": "IF (EA3_STA_TET) = 3  OR (EA3_TRE_TET2)=1",
+		"sequenceOnPage": "",
+		"entryFormat": "Cathegoric",
+		"labels": [
+			{
+				"label": "No",
+				"value": "0"
+			}, {
+				"label": "Yes",
+				"value": "1"
+			}
+		],
+		"validationLow": 0,
+		"validationHigh": 1,
+		"displayedTrailingUnitOnScreen": "",
+		"onMouseOverText": "",
+		"lim1ForAction": "",
+		"onScreenImmediateAction": "",
+		"actions": [
+			{
+				"value": "#EA3_TRE_TET3# == 1",
+				"task": {
+					"transferToDependencies": ["EA3_TRE_TET4"],
+					"transferToConditionsComplications": [],
+					"transferToSummary": [],
+					"transferToReminders": [],
+					"transferToMessaging": [],
+					"transferToScheduling": ["EA3_TRE_TET4 is due in 365 days"]
+				}
+			}, {
+				"value": "#EA3_TRE_TET3# == 0 && #EA3_TRE_TET2# == 1",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": [],
+					"transferToReminders": ["EA3_TRE_TET3 missing"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}
+		],
+		"transferToLabResults": "IF 0 AND (EA3_TRE_TET2=1) to include \"(EA3_TRE_TET3) missing\".  IF 1; Schedule new appointment > 360  days for (EA3_TRE_TET4)",
+		"definitions": "",
+		"guidelines": "Ref 3"
+	}, {
+		"essentialIntervention": "EA3_Tetanus immunisation in pregnancy for preventing neonatal tetanus",
+		"labelOnScreen": "Tetanus immunization 4",
+		"databaseVariableName": "EA3_TRE_TET4",
+		"pageOfEntry": "ANC_DEP",
+		"dependency": "IF (EA3_STA_TET) = 4  OR (EA3_TRE_TET3)=1",
+		"sequenceOnPage": "",
+		"entryFormat": "Cathegoric",
+		"labels": [
+			{
+				"label": "No",
+				"value": "0"
+			}, {
+				"label": "Yes",
+				"value": "1"
+			}
+		],
+		"validationLow": 0,
+		"validationHigh": 1,
+		"displayedTrailingUnitOnScreen": "",
+		"onMouseOverText": "",
+		"lim1ForAction": "",
+		"onScreenImmediateAction": "",
+		"actions": [
+			{
+				"value": "#EA3_TRE_TET4# == 1",
+				"task": {
+					"transferToDependencies": ["EA3_TRE_TET5"],
+					"transferToConditionsComplications": [],
+					"transferToSummary": [],
+					"transferToReminders": [],
+					"transferToMessaging": [],
+					"transferToScheduling": ["EA3_TRE_TET5 is due in 365 days"]
+				}
+			}, {
+				"value": "#EA3_TRE_TET4# == 0 && #EA3_TRE_TET3# == 1",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": [],
+					"transferToReminders": ["EA3_TRE_TET4 missing"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}
+		],
+		"transferToLabResults": "IF 0 AND (EA3_TRE_TET3=1) to include \"(EA3_TRE_TET4) missing\".  IF 1; Schedule new appointment > 360  days for (EA3_TRE_TET5)",
+		"definitions": "",
+		"guidelines": "Ref 3"
+	}, {
+		"essentialIntervention": "EA3_Tetanus immunisation in pregnancy for preventing neonatal tetanus",
+		"labelOnScreen": "Tetanus immunization 5",
+		"databaseVariableName": "EA3_TRE_TET5",
+		"pageOfEntry": "ANC_DEP, ANCnn_DEP",
+		"dependency": "IF (EA3_STA_TET) = 5  OR (EA3_TRE_TET3)=1",
+		"sequenceOnPage": "",
+		"entryFormat": "Cathegoric",
+		"labels": [
+			{
+				"label": "No",
+				"value": "0"
+			}, {
+				"label": "Yes",
+				"value": "1"
+			}
+		],
+		"validationLow": 0,
+		"validationHigh": 1,
+		"displayedTrailingUnitOnScreen": "",
+		"onMouseOverText": "",
+		"lim1ForAction": "",
+		"onScreenImmediateAction": "",
+		"actions": [
+			{
+				"value": "#EA3_TRE_TET5# == 1",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": ["Sufficiently immunized against tetanus"],
+					"transferToReminders": [],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}, {
+				"value": "#EA3_TRE_TET5# == 0 && #EA3_TRE_TET4# == 1",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": [],
+					"transferToReminders": ["EA3_TRE_TET5 missing"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}
+		],
+		"transferToLabResults": "IF 0 AND (EA3_TRE_TET4=1) to include \"(EA3_TRE_TET5) missing\".",
+		"definitions": "",
+		"guidelines": "Ref 3"
+	}, {
+		"essentialIntervention": "EA4a_Prophylactic antimalarial for preventing malaria in pregnancy",
+		"labelOnScreen": "Malaria",
+		"databaseVariableName": "EA4a_LAB_MAL1_nn",
+		"pageOfEntry": "ANCnn_DEP",
+		"dependency": "IF (EA4a_LAB_MAL1) = 1 OR (EA4a_LAB_MAL2) =1 OR (EA4a_LAB_MAL1_nn) = 1 OR (EA4a_LAB_MAL2_nn) = 1",
+		"sequenceOnPage": "",
+		"entryFormat": "Cathegoric",
+		"labels": [
+			{
+				"label": "No",
+				"value": "0"
+			}, {
+				"label": "Yes",
+				"value": "1"
+			}
+		],
+		"validationLow": 0,
+		"validationHigh": 1,
+		"displayedTrailingUnitOnScreen": "",
+		"onMouseOverText": "Microscopy screening for malaria",
+		"lim1ForAction": "1",
+		"onScreenImmediateAction": "IF 1",
+		"actions": [
+			{
+				"value": "#EA4a_LAB_MAL1_nn# == 1",
+				"task": {
+					"transferToDependencies": ["EA4a_TRE_MAL", "EA4a_LAB_MAL1_nn", "EA4a_LAB_MAL2_nn"],
+					"transferToConditionsComplications": ["Malaria confirmed"],
+					"transferToSummary": ["Malaria confirmed with parasitological microscopy"],
+					"transferToReminders": ["Malaria confirmed with parasitological microscopy, prescribe antimalarial"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}, {
+				"value": "#EA4a_LAB_MAL1_nn# == -1",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": [],
+					"transferToReminders": ["EA4a_LAB_MAL1 missing"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}
+		],
+		"transferToLabResults": "IF1; transfer \"Postive with parasitological microscopy\"",
+		"definitions": "",
+		"guidelines": "Ref 4"
+	}, {
+		"essentialIntervention": "EA4a_Prophylactic antimalarial for preventing malaria in pregnancy",
+		"labelOnScreen": "Malaria",
+		"databaseVariableName": "EA4a_LAB_MAL2nn",
+		"pageOfEntry": "ANCnn_DEP",
+		"dependency": "IF (EA4a_LAB_MAL1) = 1 OR (EA4a_LAB_MAL2) =1 OR (EA4a_LAB_MAL1_nn) = 1 OR (EA4a_LAB_MAL2_nn) = 1",
+		"sequenceOnPage": "",
+		"entryFormat": "Cathegoric",
+		"labels": [
+			{
+				"label": "No",
+				"value": "0"
+			}, {
+				"label": "Yes",
+				"value": "1"
+			}
+		],
+		"validationLow": 0,
+		"validationHigh": 1,
+		"displayedTrailingUnitOnScreen": "",
+		"onMouseOverText": "RDT screening for malaria",
+		"lim1ForAction": "1",
+		"onScreenImmediateAction": "IF 1",
+		"actions": [
+			{
+				"value": "#EA4a_LAB_MAL2nn# == 1",
+				"task": {
+					"transferToDependencies": ["EA4a_TRE_MAL", "EA4a_LAB_MAL1_nn", "EA4a_LAB_MAL2_nn"],
+					"transferToConditionsComplications": ["Malaria confirmed"],
+					"transferToSummary": ["Malaria confirmed with RDT test"],
+					"transferToReminders": ["Malaria confirmed with RDT test, prescribe antimalarial"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}, {
+				"value": "#EA4a_LAB_MAL2nn# == -1",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": [],
+					"transferToReminders": ["EA4a_LAB_MAL1 missing"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}
+		],
+		"transferToLabResults": "IF1; transfer \"Postive with RDT\"",
+		"definitions": "",
+		"guidelines": "Ref 4"
+	}, {
+		"essentialIntervention": "EA4a_Prophylactic antimalarial for preventing malaria in pregnancy",
+		"labelOnScreen": "Malaria treatment",
+		"databaseVariableName": "EA4a_TRE_MAL",
+		"pageOfEntry": "ANC1_DEP OR ANCnn_DEP",
+		"dependency": "IF (EA4a_LAB_MAL1) = 1 OR (EA4a_LAB_MAL2) =1 OR (EA4a_LAB_MAL1_nn) = 1 OR (EA4a_LAB_MAL2_nn) = 1",
+		"sequenceOnPage": "",
+		"entryFormat": "Cathegoric",
+		"labels": [
+			{
+				"label": "No",
+				"value": "0"
+			}, {
+				"label": "Yes",
+				"value": "1"
+			}
+		],
+		"validationLow": 0,
+		"validationHigh": 1,
+		"displayedTrailingUnitOnScreen": "",
+		"onMouseOverText": "DD.MM.YYYY since LMP > 14 weeks, Antimalarial tratment according to national policies. From Essential Interventions: \"Give 3 tablets of sulfadoxine-pyrimethamine (500 mg + 25 mg pyrimethamine sulfadoxine) at the beginning of the second AND the third trimester to all women according to national policy. (Alternatively Chloroquine 150 mg for 3 days: 4+4+2 OR Chloroquin 100 mg for 3 days: 6+6+3)",
+		"lim1ForAction": "1",
+		"onScreenImmediateAction": "",
+		"actions": [
+			{
+				"value": "#EA4a_TRE_MAL# == 1",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": ["Antimalarial medicaton prescribed"],
+					"transferToSummary": ["Antimalarial medicaton prescribed"],
+					"transferToReminders": ["Dependent on national antimalarial policies, medication might be repeated twice"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}
+		],
+		"transferToLabResults": "",
+		"definitions": "",
+		"guidelines": "Ref 4"
+	}, {
+		"essentialIntervention": "EA5_Cessation of smoking during pregnancy for improving birth outcome",
+		"labelOnScreen": "Smoking cessation treatment",
+		"databaseVariableName": "EA5_TRE_SMO",
+		"pageOfEntry": "ANC1_DEP",
+		"dependency": "IF (EA5_CLI_SMO1) = 1",
+		"sequenceOnPage": "",
+		"entryFormat": "Cathegoric",
+		"labels": [
+			{
+				"label": "No",
+				"value": "0"
+			}, {
+				"label": "Yes",
+				"value": "1"
+			}
+		],
+		"validationLow": 0,
+		"validationHigh": 1,
+		"displayedTrailingUnitOnScreen": "",
+		"onMouseOverText": "Counseling and behavioral interventions on smoking cessation",
+		"lim1ForAction": "1",
+		"onScreenImmediateAction": "",
+		"actions": [
+			{
+				"value": "#EA5_TRE_SMO# == 1",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": ["Counseling and behavioral interventions on smoking cessation performed"],
+					"transferToReminders": [],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}
+		],
+		"transferToLabResults": "",
+		"definitions": "",
+		"guidelines": "Ref 3"
+	}, {
+		"essentialIntervention": "EA6_Screening and treatment of syphilis (during pregnancy)",
+		"labelOnScreen": "Syphilis treatment",
+		"databaseVariableName": "EA6_TRE_SYP1",
+		"pageOfEntry": "ANC1_DEP, ANCnn_DEP",
+		"dependency": "IF (EA6_LAB_SYP) = 1 ",
+		"sequenceOnPage": "",
+		"entryFormat": "Cathegoric",
+		"labels": [
+			{
+				"label": "No",
+				"value": "0"
+			}, {
+				"label": "Yes",
+				"value": "1"
+			}
+		],
+		"validationLow": 0,
+		"validationHigh": 1,
+		"displayedTrailingUnitOnScreen": "",
+		"onMouseOverText": "Give benzathine benzylpenicillin; 2,4 million units in 5 ml IM, as two injections at separate sites. If allergic to penicillin, give erythromycin 500 mg (2x250 mg tablets) every 6 hours for 15 days",
+		"lim1ForAction": "1",
+		"onScreenImmediateAction": "",
+		"actions": [
+			{
+				"value": "#EA6_TRE_SYP1# == 1",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": ["Syphilis treatment given"],
+					"transferToSummary": ["Syphilis treatment given"],
+					"transferToReminders": [],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}
+		],
+		"transferToLabResults": "",
+		"definitions": "Ref 3",
+		"guidelines": "Ref 3"
+	}, {
+		"essentialIntervention": "EA6_Screening and treatment of syphilis (during pregnancy)",
+		"labelOnScreen": "Syphilis counseling",
+		"databaseVariableName": "EA6_TRE_SYP2",
+		"pageOfEntry": "ANC1_DEP, ANCnn_DEP",
+		"dependency": "IF (EA6_LAB_SYP1) = 1 ",
+		"sequenceOnPage": "",
+		"entryFormat": "Cathegoric",
+		"labels": [
+			{
+				"label": "No",
+				"value": "0"
+			}, {
+				"label": "Yes",
+				"value": "1"
+			}
+		],
+		"validationLow": 0,
+		"validationHigh": 1,
+		"displayedTrailingUnitOnScreen": "",
+		"onMouseOverText": "Encourage the woman to bring her sexual partner for treatment (he can choose between erythromycin OR tetracycllin 2x250 mg tablets every 6 hours for 15 days OR doxylin 100 mg every 12 hours for 15 days, counsel on consistent use of condoms to prevent new infection. Plan to treat the baby, ",
+		"lim1ForAction": "1",
+		"onScreenImmediateAction": "",
+		"actions": [
+			{
+				"value": "#EA6_TRE_SYP2# == 1 && #EA6_TRE_SYP1# == 1",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": ["Syphilis counseling given"],
+					"transferToReminders": ["Syphilis confirmed with RPR-test, prescribe medication"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}, {
+				"value": "#EA6_TRE_SYP2# == 0 && #EA6_TRE_SYP1# == 1",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": [],
+					"transferToReminders": ["Syphilis counseling missing or not performed"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}, {
+				"value": "#EA6_TRE_SYP2# == -1 && #EA6_TRE_SYP1# == 1",
+				"task": {
+					"transferToDependencies": [],
+					"transferToConditionsComplications": [],
+					"transferToSummary": [],
+					"transferToReminders": ["Syphilis counseling missing or not performed"],
+					"transferToMessaging": [],
+					"transferToScheduling": []
+				}
+			}
+		],
+		"transferToLabResults": "",
+		"definitions": "Ref 3",
+		"guidelines": "Ref 3"
+	}
+]

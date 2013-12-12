@@ -42,6 +42,7 @@ import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.common.view.ExtendedView;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.mapping.MapLegendSet;
 import org.hisp.dhis.option.OptionSet;
@@ -482,7 +483,7 @@ public class DataElement
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, ExtendedView.class  } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
     public String getType()
     {
@@ -509,7 +510,7 @@ public class DataElement
 
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class  } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
     public DataElementCategoryCombo getCategoryCombo()
     {
@@ -628,8 +629,8 @@ public class DataElement
     }
 
     @JsonProperty
-    @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class, ExportView.class } )
+    //@JsonSerialize( as = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class, ExtendedView.class  } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
     public OptionSet getOptionSet()
     {

@@ -34,11 +34,13 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+
 import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.common.view.ExtendedView;
 import org.hisp.dhis.common.view.WithoutOrganisationUnitsView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -294,7 +296,7 @@ public class Program
 
     @JsonProperty(value = "programStages")
     @JsonSerialize(contentAs = BaseIdentifiableObject.class)
-    @JsonView({ DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class })
+    @JsonView({ DetailedView.class, ExportView.class, ExtendedView.class, WithoutOrganisationUnitsView.class })
     @JacksonXmlElementWrapper(localName = "programStages", namespace = DxfNamespaces.DXF_2_0)
     @JacksonXmlProperty(localName = "programStage", namespace = DxfNamespaces.DXF_2_0)
     public Set<ProgramStage> getProgramStages()
@@ -384,7 +386,7 @@ public class Program
 
     @JsonProperty(value = "attributes")
     @JsonSerialize(contentAs = BaseIdentifiableObject.class)
-    @JsonView({ DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class })
+    @JsonView({ DetailedView.class, ExportView.class, ExtendedView.class, WithoutOrganisationUnitsView.class })
     @JacksonXmlElementWrapper(localName = "attributes", namespace = DxfNamespaces.DXF_2_0)
     @JacksonXmlProperty(localName = "attribute", namespace = DxfNamespaces.DXF_2_0)
     public List<PatientAttribute> getPatientAttributes()
