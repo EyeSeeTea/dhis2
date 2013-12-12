@@ -708,6 +708,7 @@ Ext.onReady( function() {
 	};
 
 	GIS.app.createExtensions = function() {
+        
 		Ext.define('Ext.ux.panel.LayerItemPanel', {
 			extend: 'Ext.panel.Panel',
 			alias: 'widget.layeritempanel',
@@ -940,7 +941,65 @@ Ext.onReady( function() {
 				this.callParent();
 			}
 		});
-	};
+
+        Ext.define('Ext.ux.panel.DataElementIntegerContainer', {
+			extend: 'Ext.container.Container',
+			alias: 'widget.dataelementintegerpanel',
+			layout: 'column',
+            bodyStyle: 'border:0 none',
+            operatorCmp: null,
+            valueCmp: null,
+            addCmp: null,
+            nameCmp: null,
+            initComponent: function() {
+                var that = this;
+
+                this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
+                    valueField: 'id',
+                    displayField: 'name',
+                    queryMode: 'local',
+                    width: 60,
+                    value: 'EQ',
+                    store: {
+                        fields: ['id', 'name'],
+                        data: [
+                            {id: 'EQ', name: '='},
+                            {id: 'GT', name: '>'},
+                            {id: 'GE', name: '>='},
+                            {id: 'LT', name: '<'},
+                            {id: 'LE', name: '<='},
+                            {id: 'NE', name: '!='}
+                        ]
+                    }
+                });
+
+                this.valueCmp = Ext.create('Ext.form.field.Number', {
+                    width: 270,
+                    value: 0
+                });
+
+                this.addCmp = Ext.create('Ext.button.Button', {
+                    text: '+',
+                    width: 20
+                });
+                
+                this.nameCmp = Ext.create('Ext.form.Label', {
+                    text: this.name,
+                    width: 360,
+                    style: 'padding:2px'                    
+                });
+
+                this.items = [
+                    this.nameCmp,
+                    this.operatorCmp,
+                    this.valueCmp,
+                    this.addCmp
+                ];
+
+                this.callParent();
+            }
+        });
+    };
 
     // Objects
 
@@ -4159,7 +4218,7 @@ Ext.onReady( function() {
 		return panel;
 	};
 
-	GIS.app.LayerWidgetEvent = function(layer) {a
+	GIS.app.LayerWidgetEvent = function(layer) {
 
 		// Stores
 		var programStore,
@@ -4785,9 +4844,10 @@ Ext.onReady( function() {
 		dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-left',
 			width: 382,
-            //height: 300,
+            height: 112,
 			valueField: 'id',
 			displayField: 'name',
+            style: 'margin-bottom:2px',
 			store: dataElementsByStageStore,
 			tbar: [
 				{
@@ -4799,38 +4859,90 @@ Ext.onReady( function() {
 				'->',
 				{
 					xtype: 'button',
-					icon: 'images/arrowright.png',
+					icon: 'images/arrowdown.png',
 					width: 22,
 					height: 22,
 					handler: function() {
-						//ns.core.web.multiSelect.select(indicatorAvailable, indicatorSelected);
+						selectDataElements(ms.getValue());
 					}
 				},
 				{
 					xtype: 'button',
-					icon: 'images/arrowrightdouble.png',
+					icon: 'images/arrowdowndouble.png',
 					width: 22,
 					height: 22,
 					handler: function() {
-						//ns.core.web.multiSelect.selectAll(indicatorAvailable, indicatorSelected);
+						selectDataElements(dataElementsByStageStore.getRange());
 					}
 				}
 			],
 			listeners: {
-				afterrender: function() {
-					//this.boundList.on('itemdblclick', function() {
+				afterrender: function(ms) {
+					this.boundList.on('itemdblclick', function() {
 						//ns.core.web.multiSelect.select(this, indicatorSelected);
-					//}, this);
+                        selectDataElements(ms.getValue());
+					});
 				}
 			}
 		});
+
+        dataElementSelected = Ext.create('Ext.panel.Panel', {
+			width: 382,
+            height: 270,
+            bodyStyle: 'padding:2px 5px 5px; overflow-y: scroll',
+            tbar: {
+                height: 27,
+                items: {
+					xtype: 'label',
+					//text: GIS.i18n.available,
+                    text: 'Selected',
+                    style: 'padding-left:6px; color:#222',
+					cls: 'ns-toolbar-multiselect-left-label'
+				}
+            }
+        });
+
+        selectDataElements = function(items) {
+            var dataElements = [],
+                store = dataElementsByStageStore;
+
+            for (var i = 0, item; i < items.length; i++) {
+                if (Ext.isString(items[i])) {
+                    dataElements.push(store.getAt(store.findExact('id', items[i])).data);
+                }
+                else if (Ext.isObject(items[i])) {
+                    if (items[i].data) {
+                        dataElements.push(items[i].data);
+                    }
+                    else {
+                        dataElements.push(items[i]);
+                    }
+                }
+            }
+
+            for (var i = 0, element; i < dataElements.length; i++) {
+                element = dataElements[i];
+
+                dataElementSelected.add(Ext.create('Ext.ux.panel.DataElementIntegerContainer', {
+                    name: element.name
+                }));
+            }
+
+            console.log(dataElements);
+
+            
+
+            //var map = {
+                //'integer': 
+
+        };
 
         accordionBody = Ext.create('Ext.panel.Panel', {
 			layout: 'accordion',
 			activeOnTop: true,
 			cls: 'gis-accordion',
 			bodyStyle: 'border:0 none; margin-top:2px; margin-bottom:2px',
-			height: 400,
+			height: 450,
 			items: [
                 {
                     title: '<div class="gis-panel-title-organisationunit">' + GIS.i18n.organisation_units + '</div>',
@@ -4867,7 +4979,8 @@ Ext.onReady( function() {
                     bodyStyle: 'padding:2px',
                     hideCollapseTool: true,
                     items: [
-						dataElementAvailable
+						dataElementAvailable,
+                        dataElementSelected
 					]
                 }
             ]
@@ -5014,6 +5127,7 @@ Ext.onReady( function() {
 				{
 					layout: 'column',
                     bodyStyle: 'border:0 none',
+					style: 'margin-bottom: 5px',
 					items: [
 						program,
 						stage
@@ -5022,7 +5136,6 @@ Ext.onReady( function() {
 				{
 					layout: 'column',
                     bodyStyle: 'border:0 none',
-					style: 'margin-top: 5px',
 					items: [
 						startDate,
 						endDate
