@@ -4392,6 +4392,122 @@ Ext.onReady( function() {
 			}
 		};
 
+		dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
+			cls: 'ns-toolbar-multiselect-left',
+			width: 382,
+            height: 112,
+			valueField: 'id',
+			displayField: 'name',
+            style: 'margin-bottom:2px',
+			store: dataElementsByStageStore,
+			tbar: [
+				{
+					xtype: 'label',
+					//text: GIS.i18n.available,
+                    text: 'Available',
+					cls: 'ns-toolbar-multiselect-left-label'
+				},
+				'->',
+				{
+					xtype: 'button',
+					icon: 'images/arrowdown.png',
+					width: 22,
+					height: 22,
+					handler: function() {
+						selectDataElements(ms.getValue());
+					}
+				},
+				{
+					xtype: 'button',
+					icon: 'images/arrowdowndouble.png',
+					width: 22,
+					height: 22,
+					handler: function() {
+						selectDataElements(dataElementsByStageStore.getRange());
+					}
+				}
+			],
+			listeners: {
+				afterrender: function(ms) {
+					this.boundList.on('itemdblclick', function() {
+						//ns.core.web.multiSelect.select(this, indicatorSelected);
+                        selectDataElements(ms.getValue());
+					});
+				}
+			}
+		});
+
+        dataElementSelected = Ext.create('Ext.panel.Panel', {
+			width: 382,
+            height: 270,
+            bodyStyle: 'padding:2px 5px 5px; overflow-y: scroll',
+            tbar: {
+                height: 27,
+                items: {
+					xtype: 'label',
+					//text: GIS.i18n.available,
+                    text: 'Selected',
+                    style: 'padding-left:6px; color:#222',
+					cls: 'ns-toolbar-multiselect-left-label'
+				}
+            }
+        });
+
+        selectDataElements = function(items) {
+            var dataElements = [],
+                store = dataElementsByStageStore;
+
+            for (var i = 0, item; i < items.length; i++) {
+                if (Ext.isString(items[i])) {
+                    dataElements.push(store.getAt(store.findExact('id', items[i])).data);
+                }
+                else if (Ext.isObject(items[i])) {
+                    if (items[i].data) {
+                        dataElements.push(items[i].data);
+                    }
+                    else {
+                        dataElements.push(items[i]);
+                    }
+                }
+            }
+
+            for (var i = 0, element; i < dataElements.length; i++) {
+                element = dataElements[i];
+
+                dataElementSelected.add(Ext.create('Ext.ux.panel.DataElementIntegerContainer', {
+                    name: element.name
+                }));
+            }
+
+            console.log(dataElements);
+
+            
+
+            //var map = {
+                //'integer': 
+
+        };
+
+        dataElement = Ext.create('Ext.panel.Panel', {
+            title: '<div class="gis-panel-title-data">Data elements</div>',
+            cls: 'gis-accordion-last',
+            bodyStyle: 'padding:2px',
+            hideCollapseTool: true,
+            items: [
+                {
+					layout: 'column',
+                    bodyStyle: 'border:0 none',
+					style: 'margin-bottom: 5px',
+					items: [
+						program,
+						stage
+					]
+				},
+                dataElementAvailable,
+                dataElementSelected
+            ]
+        });
+
 		startDate = Ext.create('Ext.form.field.Date', {
 			fieldLabel: 'Start date',
 			labelAlign: 'top',
@@ -4841,102 +4957,6 @@ Ext.onReady( function() {
 			items: tool
 		});
 
-		dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'ns-toolbar-multiselect-left',
-			width: 382,
-            height: 112,
-			valueField: 'id',
-			displayField: 'name',
-            style: 'margin-bottom:2px',
-			store: dataElementsByStageStore,
-			tbar: [
-				{
-					xtype: 'label',
-					//text: GIS.i18n.available,
-                    text: 'Available',
-					cls: 'ns-toolbar-multiselect-left-label'
-				},
-				'->',
-				{
-					xtype: 'button',
-					icon: 'images/arrowdown.png',
-					width: 22,
-					height: 22,
-					handler: function() {
-						selectDataElements(ms.getValue());
-					}
-				},
-				{
-					xtype: 'button',
-					icon: 'images/arrowdowndouble.png',
-					width: 22,
-					height: 22,
-					handler: function() {
-						selectDataElements(dataElementsByStageStore.getRange());
-					}
-				}
-			],
-			listeners: {
-				afterrender: function(ms) {
-					this.boundList.on('itemdblclick', function() {
-						//ns.core.web.multiSelect.select(this, indicatorSelected);
-                        selectDataElements(ms.getValue());
-					});
-				}
-			}
-		});
-
-        dataElementSelected = Ext.create('Ext.panel.Panel', {
-			width: 382,
-            height: 270,
-            bodyStyle: 'padding:2px 5px 5px; overflow-y: scroll',
-            tbar: {
-                height: 27,
-                items: {
-					xtype: 'label',
-					//text: GIS.i18n.available,
-                    text: 'Selected',
-                    style: 'padding-left:6px; color:#222',
-					cls: 'ns-toolbar-multiselect-left-label'
-				}
-            }
-        });
-
-        selectDataElements = function(items) {
-            var dataElements = [],
-                store = dataElementsByStageStore;
-
-            for (var i = 0, item; i < items.length; i++) {
-                if (Ext.isString(items[i])) {
-                    dataElements.push(store.getAt(store.findExact('id', items[i])).data);
-                }
-                else if (Ext.isObject(items[i])) {
-                    if (items[i].data) {
-                        dataElements.push(items[i].data);
-                    }
-                    else {
-                        dataElements.push(items[i]);
-                    }
-                }
-            }
-
-            for (var i = 0, element; i < dataElements.length; i++) {
-                element = dataElements[i];
-
-                dataElementSelected.add(Ext.create('Ext.ux.panel.DataElementIntegerContainer', {
-                    name: element.name
-                }));
-            }
-
-            console.log(dataElements);
-
-            
-
-            //var map = {
-                //'integer': 
-
-        };
-
         accordionBody = Ext.create('Ext.panel.Panel', {
 			layout: 'accordion',
 			activeOnTop: true,
@@ -4944,6 +4964,7 @@ Ext.onReady( function() {
 			bodyStyle: 'border:0 none; margin-top:2px; margin-bottom:2px',
 			height: 450,
 			items: [
+                dataElement,
                 {
                     title: '<div class="gis-panel-title-organisationunit">' + GIS.i18n.organisation_units + '</div>',
                     bodyStyle: 'padding:2px',
@@ -4971,17 +4992,6 @@ Ext.onReady( function() {
                         },
                         treePanel
                     ]
-                },
-                
-                {
-                    title: '<div class="gis-panel-title-data">Data elements</div>',
-                    cls: 'gis-accordion-last',
-                    bodyStyle: 'padding:2px',
-                    hideCollapseTool: true,
-                    items: [
-						dataElementAvailable,
-                        dataElementSelected
-					]
                 }
             ]
 		});
@@ -5124,15 +5134,7 @@ Ext.onReady( function() {
 			cls: 'gis-form-widget',
 			border: false,
 			items: [
-				{
-					layout: 'column',
-                    bodyStyle: 'border:0 none',
-					style: 'margin-bottom: 5px',
-					items: [
-						program,
-						stage
-					]
-				},
+				
 				{
 					layout: 'column',
                     bodyStyle: 'border:0 none',
