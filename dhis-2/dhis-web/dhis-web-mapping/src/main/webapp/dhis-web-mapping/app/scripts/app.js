@@ -4159,7 +4159,7 @@ Ext.onReady( function() {
 		return panel;
 	};
 
-	GIS.app.LayerWidgetEvent = function(layer) {
+	GIS.app.LayerWidgetEvent = function(layer) {a
 
 		// Stores
 		var programStore,
@@ -4358,6 +4358,7 @@ Ext.onReady( function() {
 		treePanel = Ext.create('Ext.tree.Panel', {
 			cls: 'gis-tree',
 			height: 300,
+            bodyStyle: 'border:0 none',
 			style: 'border-top: 1px solid #ddd; padding-top: 1px',
 			displayField: 'name',
 			width: gis.conf.layout.widget.item_width + 94,
@@ -4783,14 +4784,16 @@ Ext.onReady( function() {
 
 		dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-left',
-			width: 300,
+			width: 382,
+            //height: 300,
 			valueField: 'id',
 			displayField: 'name',
 			store: dataElementsByStageStore,
 			tbar: [
 				{
 					xtype: 'label',
-					text: GIS.i18n.available,
+					//text: GIS.i18n.available,
+                    text: 'Available',
 					cls: 'ns-toolbar-multiselect-left-label'
 				},
 				'->',
@@ -4798,6 +4801,7 @@ Ext.onReady( function() {
 					xtype: 'button',
 					icon: 'images/arrowright.png',
 					width: 22,
+					height: 22,
 					handler: function() {
 						//ns.core.web.multiSelect.select(indicatorAvailable, indicatorSelected);
 					}
@@ -4806,6 +4810,7 @@ Ext.onReady( function() {
 					xtype: 'button',
 					icon: 'images/arrowrightdouble.png',
 					width: 22,
+					height: 22,
 					handler: function() {
 						//ns.core.web.multiSelect.selectAll(indicatorAvailable, indicatorSelected);
 					}
@@ -5003,11 +5008,12 @@ Ext.onReady( function() {
 				return treePanel.getParentGraphMap();
 			},
 
-			cls: 'gis-form-widget el-border-0',
+			cls: 'gis-form-widget',
 			border: false,
 			items: [
 				{
 					layout: 'column',
+                    bodyStyle: 'border:0 none',
 					items: [
 						program,
 						stage
@@ -5015,6 +5021,7 @@ Ext.onReady( function() {
 				},
 				{
 					layout: 'column',
+                    bodyStyle: 'border:0 none',
 					style: 'margin-top: 5px',
 					items: [
 						startDate,
