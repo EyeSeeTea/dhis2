@@ -5252,7 +5252,7 @@ Ext.onReady( function() {
 						levels.push(parseInt(ouRecords[i].id.split('-')[1]));
 					}
 					else if (ouRecords[i].id.substr(0,8) === 'OU_GROUP') {
-						groups.push(parseInt(ouRecords[i].id.split('-')[1]));
+						groups.push(ouRecords[i].id.split('-')[1]);
 					}
 					else {
 						orgunits.push(ouRecords[i].id);
