@@ -1,4 +1,4 @@
-package org.hisp.dhis.smscommand;
+package org.hisp.dhis.sms;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,33 +28,29 @@ package org.hisp.dhis.smscommand;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.Set;
-
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.sms.parse.ParserType;
+import org.hisp.dhis.smscommand.SMSCommand;
+import org.hisp.dhis.smscommand.SMSCommandService;
+import org.hisp.dhis.system.deletion.DeletionHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public interface SMSCommandStore
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
+public class SMSCommandDeletionHandler extends DeletionHandler
 {
-    Collection<SMSCommand> getSMSCommands();
+    @Autowired
+    private SMSCommandService smsCommandService;
 
-    SMSCommand getSMSCommand( int id );
+    @Override
+    protected String getClassName()
+    {
+        return SMSCommand.class.getSimpleName();
+    }
 
-    int save( SMSCommand cmd );
-
-    void delete( SMSCommand cmd );
-
-    void save( Set<SMSCode> codes );
-    
-    Collection<SMSCommand> getJ2MESMSCommands();
-    
-    SMSCommand getSMSCommand( String commandName, ParserType parserType );
-    
-    void saveSpecialCharacterSet( Set<SMSSpecialCharacter> specialCharacters );
-    
-    void deleteSpecialCharacterSet( Set<SMSSpecialCharacter> specialCharacters );
-    
-    void deleteCodeSet( Set<SMSCode> codes );
-
-    int countDataSetSmsCommands( DataSet dataSet );
+    @Override
+    public String allowDeleteDataSet( DataSet dataSet )
+    {
+        return smsCommandService.countDataSetSmsCommands( dataSet ) == 0 ? null : ERROR;
+    }
 }
