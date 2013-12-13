@@ -4227,7 +4227,15 @@ Ext.onReady( function() {
 		// Components
 
 			program,
+            onProgramSelect,
 			stage,
+            onStageSelect,
+            loadDataElements,
+            dataElementAvailable,
+            dataElementSelected,
+            selectDataElements
+            dataElement,
+            
 			startDate,
 			endDate,
 			
@@ -4240,7 +4248,7 @@ Ext.onReady( function() {
 			toolMenu,
 			tool,
 			toolPanel,
-			dataElementAvailable,
+            organisationUnit,
 
 		// Functions
 			reset,
@@ -4313,6 +4321,7 @@ Ext.onReady( function() {
 
 		// Components
 
+            // data element
 		program = Ext.create('Ext.form.field.ComboBox', {
 			fieldLabel: GIS.i18n.programs,
 			editable: false,
@@ -4327,7 +4336,7 @@ Ext.onReady( function() {
 			queryMode: 'remote',
 			//width: gis.conf.layout.widget.item_width,
 			columnWidth: 0.5,
-			style: 'margin-right: 1px',
+			style: 'margin-right: 1px; margin-bottom: 1px',
 			//labelWidth: gis.conf.layout.widget.itemlabel_width,
 			store: programStore,
 			listeners: {
@@ -4358,7 +4367,7 @@ Ext.onReady( function() {
 			forceSelection: true,
 			//width: gis.conf.layout.widget.item_width,
 			columnWidth: 0.5,
-			style: 'margin-left: 1px',
+			style: 'margin-left: 1px: margin-bottom: 1px',
 			//labelWidth: gis.conf.layout.widget.itemlabel_width,
 			listConfig: {loadMask: false},
 			store: stagesByProgramStore,
@@ -4490,14 +4499,13 @@ Ext.onReady( function() {
 
         dataElement = Ext.create('Ext.panel.Panel', {
             title: '<div class="gis-panel-title-data">Data elements</div>',
-            cls: 'gis-accordion-last',
             bodyStyle: 'padding:2px',
             hideCollapseTool: true,
             items: [
                 {
 					layout: 'column',
                     bodyStyle: 'border:0 none',
-					style: 'margin-bottom: 5px',
+					style: 'margin-bottom: 0',
 					items: [
 						program,
 						stage
@@ -4508,6 +4516,7 @@ Ext.onReady( function() {
             ]
         });
 
+            // date
 		startDate = Ext.create('Ext.form.field.Date', {
 			fieldLabel: 'Start date',
 			labelAlign: 'top',
@@ -4530,6 +4539,7 @@ Ext.onReady( function() {
 			value: new Date()
 		});
 
+            // organisation unit
 		treePanel = Ext.create('Ext.tree.Panel', {
 			cls: 'gis-tree',
 			height: 300,
@@ -4957,6 +4967,37 @@ Ext.onReady( function() {
 			items: tool
 		});
 
+        organisationUnit = Ext.create('Ext.container.Container', {
+            title: '<div class="gis-panel-title-organisationunit">' + GIS.i18n.organisation_units + '</div>',
+            cls: 'gis-accordion-last',
+            bodyStyle: 'padding:2px',
+            hideCollapseTool: true,
+            items: [
+                {
+                    layout: 'column',
+                    bodyStyle: 'border:0 none',
+                    style: 'padding-bottom:2px',
+                    items: [
+                        toolPanel,
+                        {
+                            width: gis.conf.layout.widget.item_width + 100 - toolPanel.width - 10,
+                            layout: 'column',
+                            bodyStyle: 'border:0 none',
+                            items: [
+                                userOrganisationUnit,
+                                userOrganisationUnitChildren,
+                                userOrganisationUnitGrandChildren,
+                                organisationUnitLevel,
+                                organisationUnitGroup
+                            ]
+                        }
+                    ]
+                },
+                treePanel
+            ]
+        });
+        
+            // accordion
         accordionBody = Ext.create('Ext.panel.Panel', {
 			layout: 'accordion',
 			activeOnTop: true,
@@ -4965,34 +5006,7 @@ Ext.onReady( function() {
 			height: 450,
 			items: [
                 dataElement,
-                {
-                    title: '<div class="gis-panel-title-organisationunit">' + GIS.i18n.organisation_units + '</div>',
-                    bodyStyle: 'padding:2px',
-                    hideCollapseTool: true,
-                    items: [
-                        {
-                            layout: 'column',
-                            bodyStyle: 'border:0 none',
-                            style: 'padding-bottom:2px',
-                            items: [
-                                toolPanel,
-                                {
-                                    width: gis.conf.layout.widget.item_width + 100 - toolPanel.width - 10,
-                                    layout: 'column',
-                                    bodyStyle: 'border:0 none',
-                                    items: [
-                                        userOrganisationUnit,
-                                        userOrganisationUnitChildren,
-                                        userOrganisationUnitGrandChildren,
-                                        organisationUnitLevel,
-                                        organisationUnitGroup
-                                    ]
-                                }
-                            ]
-                        },
-                        treePanel
-                    ]
-                }
+                organisationUnit
             ]
 		});
 
