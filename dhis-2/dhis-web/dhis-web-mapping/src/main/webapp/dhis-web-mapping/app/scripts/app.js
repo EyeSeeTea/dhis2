@@ -987,11 +987,14 @@ Ext.onReady( function() {
 
                 this.removeCmp = Ext.create('Ext.button.Button', {
                     text: 'x',
-                    width: 20
+                    width: 20,
+                    handler: function() {
+                        that.removeDataElement();
+                    }
                 });
                 
                 this.nameCmp = Ext.create('Ext.form.Label', {
-                    text: this.name,
+                    text: this.dataElement.name,
                     width: 360,
                     style: 'padding:2px'                    
                 });
@@ -4343,7 +4346,7 @@ Ext.onReady( function() {
 			queryMode: 'remote',
 			//width: gis.conf.layout.widget.item_width,
 			columnWidth: 0.5,
-			style: 'margin-right: 1px; margin-bottom: 2px',
+			style: 'margin:2px 1px 2px 0',
 			//labelWidth: gis.conf.layout.widget.itemlabel_width,
 			store: programStore,
 			listeners: {
@@ -4374,7 +4377,7 @@ Ext.onReady( function() {
 			forceSelection: true,
 			//width: gis.conf.layout.widget.item_width,
 			columnWidth: 0.5,
-			style: 'margin-left: 1px; margin-bottom: 2px',
+			style: 'margin:2px 0 2px 1px',
 			//labelWidth: gis.conf.layout.widget.itemlabel_width,
 			listConfig: {loadMask: false},
 			store: stagesByProgramStore,
@@ -4476,7 +4479,8 @@ Ext.onReady( function() {
 
         selectDataElements = function(items) {
             var dataElements = [],
-                store = dataElementsByStageStore;
+                store = dataElementsByStageStore,
+                row;
 
             for (var i = 0, item; i < items.length; i++) {
                 if (Ext.isString(items[i])) {
@@ -4496,7 +4500,13 @@ Ext.onReady( function() {
                 element = dataElements[i];
 
                 dataElementSelected.add(Ext.create('Ext.ux.panel.DataElementIntegerContainer', {
-                    name: element.name
+                    id: element.id,
+                    dataElement: element,
+                    removeDataElement: function() {
+                        dataElementsByStageStore.add(this.dataElement);
+                        
+                        dataElementSelected.remove(this.id);
+                    }
                 }));
 
                 store.removeAt(store.findExact('id', element.id));
