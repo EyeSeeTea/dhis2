@@ -947,10 +947,11 @@ Ext.onReady( function() {
 			alias: 'widget.dataelementintegerpanel',
 			layout: 'column',
             bodyStyle: 'border:0 none',
+            nameCmp: null,
             operatorCmp: null,
             valueCmp: null,
             addCmp: null,
-            nameCmp: null,
+            removeCmp: null,
             initComponent: function() {
                 var that = this;
 
@@ -958,6 +959,7 @@ Ext.onReady( function() {
                     valueField: 'id',
                     displayField: 'name',
                     queryMode: 'local',
+                    editable: false,
                     width: 60,
                     value: 'EQ',
                     store: {
@@ -974,12 +976,17 @@ Ext.onReady( function() {
                 });
 
                 this.valueCmp = Ext.create('Ext.form.field.Number', {
-                    width: 270,
+                    width: 250,
                     value: 0
                 });
 
                 this.addCmp = Ext.create('Ext.button.Button', {
                     text: '+',
+                    width: 20
+                });
+
+                this.removeCmp = Ext.create('Ext.button.Button', {
+                    text: 'x',
                     width: 20
                 });
                 
@@ -993,7 +1000,8 @@ Ext.onReady( function() {
                     this.nameCmp,
                     this.operatorCmp,
                     this.valueCmp,
-                    this.addCmp
+                    this.addCmp,
+                    this.removeCmp
                 ];
 
                 this.callParent();
@@ -4225,7 +4233,6 @@ Ext.onReady( function() {
 			stagesByProgramStore,
 
 		// Components
-
 			program,
             onProgramSelect,
 			stage,
@@ -4233,7 +4240,7 @@ Ext.onReady( function() {
             loadDataElements,
             dataElementAvailable,
             dataElementSelected,
-            selectDataElements
+            selectDataElements,
             dataElement,
             
 			startDate,
@@ -4250,13 +4257,13 @@ Ext.onReady( function() {
 			toolPanel,
             organisationUnit,
 
+			panel,
+
 		// Functions
 			reset,
 			setGui,
 			getView,
-			validateView,
-
-			panel;
+			validateView;
 
 		// Stores
 
@@ -4336,7 +4343,7 @@ Ext.onReady( function() {
 			queryMode: 'remote',
 			//width: gis.conf.layout.widget.item_width,
 			columnWidth: 0.5,
-			style: 'margin-right: 1px; margin-bottom: 1px',
+			style: 'margin-right: 1px; margin-bottom: 2px',
 			//labelWidth: gis.conf.layout.widget.itemlabel_width,
 			store: programStore,
 			listeners: {
@@ -4367,7 +4374,7 @@ Ext.onReady( function() {
 			forceSelection: true,
 			//width: gis.conf.layout.widget.item_width,
 			columnWidth: 0.5,
-			style: 'margin-left: 1px: margin-bottom: 1px',
+			style: 'margin-left: 1px; margin-bottom: 2px',
 			//labelWidth: gis.conf.layout.widget.itemlabel_width,
 			listConfig: {loadMask: false},
 			store: stagesByProgramStore,
@@ -4423,7 +4430,9 @@ Ext.onReady( function() {
 					width: 22,
 					height: 22,
 					handler: function() {
-						selectDataElements(ms.getValue());
+                        if (dataElementAvailable.getValue().length) {
+                            selectDataElements(dataElementAvailable.getValue());
+                        }
 					}
 				},
 				{
@@ -4432,15 +4441,18 @@ Ext.onReady( function() {
 					width: 22,
 					height: 22,
 					handler: function() {
-						selectDataElements(dataElementsByStageStore.getRange());
+                        if (dataElementsByStageStore.getRange().length) {
+                            selectDataElements(dataElementsByStageStore.getRange());
+                        }
 					}
 				}
 			],
 			listeners: {
 				afterrender: function(ms) {
 					this.boundList.on('itemdblclick', function() {
-						//ns.core.web.multiSelect.select(this, indicatorSelected);
-                        selectDataElements(ms.getValue());
+                        if (ms.getValue().length) {
+                            selectDataElements(ms.getValue());
+                        }
 					});
 				}
 			}
@@ -4486,15 +4498,9 @@ Ext.onReady( function() {
                 dataElementSelected.add(Ext.create('Ext.ux.panel.DataElementIntegerContainer', {
                     name: element.name
                 }));
+
+                store.removeAt(store.findExact('id', element.id));
             }
-
-            console.log(dataElements);
-
-            
-
-            //var map = {
-                //'integer': 
-
         };
 
         dataElement = Ext.create('Ext.panel.Panel', {
@@ -4505,7 +4511,7 @@ Ext.onReady( function() {
                 {
 					layout: 'column',
                     bodyStyle: 'border:0 none',
-					style: 'margin-bottom: 0',
+					style: 'margin-top:2px',
 					items: [
 						program,
 						stage
@@ -4967,7 +4973,7 @@ Ext.onReady( function() {
 			items: tool
 		});
 
-        organisationUnit = Ext.create('Ext.container.Container', {
+        organisationUnit = Ext.create('Ext.panel.Panel', {
             title: '<div class="gis-panel-title-organisationunit">' + GIS.i18n.organisation_units + '</div>',
             cls: 'gis-accordion-last',
             bodyStyle: 'padding:2px',
