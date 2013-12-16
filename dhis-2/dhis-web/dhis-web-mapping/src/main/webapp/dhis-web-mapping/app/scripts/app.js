@@ -658,14 +658,14 @@ Ext.onReady( function() {
 		// layer
 		(function() {
 			layer = gis.layer.event;
-			layer.menu = GIS.app.LayerMenu(layer);
+			layer.menu = GIS.app.LayerMenu(layer, 'gis-toolbar-btn-menu-first');
 			layer.widget = GIS.app.LayerWidgetEvent(layer);
 			layer.window = GIS.app.WidgetWindow(layer, gis.conf.layout.widget.window_width + 100);
 			layer.window.widget = layer.widget;
 			GIS.core.createSelectHandlers(gis, layer);
 
 			layer = gis.layer.facility;
-			layer.menu = GIS.app.LayerMenu(layer, 'gis-toolbar-btn-menu-first');
+			layer.menu = GIS.app.LayerMenu(layer);
 			layer.widget = GIS.app.LayerWidgetFacility(layer);
 			layer.window = GIS.app.WidgetWindow(layer);
 			layer.window.widget = layer.widget;
@@ -2228,17 +2228,20 @@ Ext.onReady( function() {
 			enableKeyEvents: true,
 			currentValue: '',
 			listeners: {
-				keyup: function() {
-					if (this.getValue() !== this.currentValue) {
-						this.currentValue = this.getValue();
+				keyup: {
+					fn: function() {
+						if (this.getValue() !== this.currentValue) {
+							this.currentValue = this.getValue();
 
-						var value = this.getValue(),
-							url = value ? gis.init.contextPath + gis.conf.finals.url.path_api + 'maps/query/' + value + '.json?viewClass=sharing&links=false' : null,
-							store = gis.store.maps;
+							var value = this.getValue(),
+								url = value ? gis.init.contextPath + gis.conf.finals.url.path_api + 'maps/query/' + value + '.json?viewClass=sharing&links=false' : null,
+								store = gis.store.maps;
 
-						store.page = 1;
-						store.loadStore(url);
-					}
+							store.page = 1;
+							store.loadStore(url);
+						}
+					},
+					buffer: 100
 				}
 			}
 		});
