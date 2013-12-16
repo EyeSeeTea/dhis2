@@ -27,12 +27,9 @@ package org.hisp.dhis.api.controller;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-import java.io.Serializable;
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.hisp.dhis.api.utils.ContextUtils;
-import org.hisp.dhis.system.util.TextUtils;
 import org.hisp.dhis.user.UserSettingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -81,16 +78,7 @@ public class UserSettingController
 	public @ResponseBody
 	String getSystemSetting(@PathVariable("key") String key) 
     {    	
-    	Serializable userSettingValue = userSettingService.getUserSetting(key);
-
-		if (userSettingValue != null) {
-			if (userSettingValue.getClass().getName()
-					.equalsIgnoreCase("java.util.Locale")) {
-				return userSettingValue.toString();
-			}
-		}
-
-		return (String) userSettingValue;
+    	return (String) userSettingService.getUserSetting( key );
 	}
     
     @RequestMapping( value = "/{key}", method = RequestMethod.DELETE )

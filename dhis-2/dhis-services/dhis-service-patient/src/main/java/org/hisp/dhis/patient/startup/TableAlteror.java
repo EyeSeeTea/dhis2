@@ -285,9 +285,12 @@ public class TableAlteror
         
         updateCoordinatesProgramStageInstance();
 
-        addPatientAttributes();
+        if( !fixedAttributesInserted() )
+        {
+        	addPatientAttributes();
+        }
+        
     }
-
     // -------------------------------------------------------------------------
     // Supporting methods
     // -------------------------------------------------------------------------
@@ -472,21 +475,21 @@ public class TableAlteror
         int maxOpt = jdbcTemplate.queryForInt( "select max(patientattributeoptionid) from patientattributeoption" );
         maxOpt++;
         executeSql( "INSERT INTO patientattributeoption (patientattributeoptionid, name, patientattributeid ) VALUES ('"
-            + maxOpt + "', 'F'," + max + ")" );
+            + maxOpt + "', 'Female'," + max + ")" );
         executeSql( "INSERT INTO patientattributevalue (patientid, patientattributeid, value, patientattributeoptionid ) SELECT patientid,"
-            + max + ",'F'," + maxOpt + " from patient where gender='F'" );
+            + max + ",'Female'," + maxOpt + " from patient where gender='Female'" );
 
         maxOpt++;
         executeSql( "INSERT INTO patientattributeoption (patientattributeoptionid, name, patientattributeid ) VALUES ('"
-            + maxOpt + "', 'M'," + max + ")" );
+            + maxOpt + "', 'Male'," + max + ")" );
         executeSql( "INSERT INTO patientattributevalue (patientid, patientattributeid, value, patientattributeoptionid ) SELECT patientid,"
-            + max + ",'M'," + maxOpt + " from patient where gender='M'" );
+            + max + ",'Male'," + maxOpt + " from patient where gender='Male'" );
 
         maxOpt++;
         executeSql( "INSERT INTO patientattributeoption (patientattributeoptionid, name, patientattributeid ) VALUES ('"
-            + maxOpt + "', 'T'," + max + ")" );
+            + maxOpt + "', 'Trans-gender'," + max + ")" );
         executeSql( "INSERT INTO patientattributevalue (patientid, patientattributeid, value, patientattributeoptionid ) SELECT patientid,"
-            + max + ",'T'," + maxOpt + " from patient where gender='T'" );
+            + max + ",'Trans-gender'," + maxOpt + " from patient where gender='Trans-gender'" );
 
         // Update Case Aggregate Query Builder
         String source = "[CP" + CaseAggregationCondition.SEPARATOR_OBJECT + "gender]";
@@ -568,21 +571,21 @@ public class TableAlteror
 
         maxOpt++;
         executeSql( "INSERT INTO patientattributeoption (patientattributeoptionid, name, patientattributeid ) VALUES ('"
-            + maxOpt + "', 'A'," + max + ")" );
+            + maxOpt + "', 'Approximated'," + max + ")" );
         executeSql( "INSERT INTO patientattributevalue (patientid, patientattributeid, value, patientattributeoptionid ) SELECT patientid,"
-            + max + ",'A'," + maxOpt + " from patient where dobType='A'" );
+            + max + ",'Approximated'," + maxOpt + " from patient where dobType='Approximated'" );
 
         maxOpt++;
         executeSql( "INSERT INTO patientattributeoption (patientattributeoptionid, name, patientattributeid ) VALUES ('"
-            + maxOpt + "', 'D'," + max + ")" );
+            + maxOpt + "', 'Declared'," + max + ")" );
         executeSql( "INSERT INTO patientattributevalue (patientid, patientattributeid, value, patientattributeoptionid ) SELECT patientid,"
-            + max + ",'D'," + maxOpt + " from patient where dobType='D'" );
+            + max + ",'Declared'," + maxOpt + " from patient where dobType='Declared'" );
 
         maxOpt++;
         executeSql( "INSERT INTO patientattributeoption (patientattributeoptionid, name, patientattributeid ) VALUES ('"
-            + maxOpt + "', 'V'," + max + ")" );
+            + maxOpt + "', 'Verified'," + max + ")" );
         executeSql( "INSERT INTO patientattributevalue (patientid, patientattributeid, value, patientattributeoptionid ) SELECT patientid,"
-            + max + ",'V'," + maxOpt + " from patient where dobType='V'" );
+            + max + ",'Verified'," + maxOpt + " from patient where dobType='Verified'" );
 
         // Update Case Aggregate Query Builder
         source = "[CP" + CaseAggregationCondition.SEPARATOR_OBJECT + "dobType]";
@@ -660,6 +663,36 @@ public class TableAlteror
         {
             log.debug( ex );
             return -1;
+        }
+    }
+    
+    private boolean fixedAttributesInserted(){
+    	
+    	StatementHolder holder = statementManager.getHolder();
+        try
+        {
+            Statement statement = holder.getStatement();
+
+            ResultSet resultSet = statement.executeQuery( "SELECT * FROM patientattribute where name='Gender'" );
+            
+            if( resultSet.next() )
+            {
+            	return true;
+            }
+            else
+            {
+            	return false;
+            }            	
+            
+        }
+        catch ( Exception ex )
+        {
+            log.debug( ex );
+            return false;
+        }
+        finally
+        {
+            holder.close();            
         }
     }
 }

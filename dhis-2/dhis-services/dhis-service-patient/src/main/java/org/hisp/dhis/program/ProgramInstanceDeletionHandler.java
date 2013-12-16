@@ -28,11 +28,9 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.List;
 
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientAttribute;
@@ -135,6 +133,22 @@ public class ProgramInstanceDeletionHandler
             }
             
             // ---------------------------------------------------------------------
+            // Delete Program Stage Instances
+            // ---------------------------------------------------------------------
+
+            for ( ProgramInstance programInstance : programInstances )
+            {            	
+                Set<ProgramStageInstance> programStageInstances = programInstance.getProgramStageInstances();
+             
+                for ( ProgramStageInstance programStageInstance : programStageInstances )
+                {
+                	programStageInstanceService.deleteProgramStageInstance( programStageInstance );
+                }              
+                programInstanceService.updateProgramInstance(programInstance);
+            }
+            
+            
+            // ---------------------------------------------------------------------
             // Delete Patient attribute values related to program/programInstance
             // ---------------------------------------------------------------------
             
@@ -168,21 +182,7 @@ public class ProgramInstanceDeletionHandler
                         patientCommentService.deletePatientComment(patientComment);
                     }
             	}                
-            }
-
-            // ---------------------------------------------------------------------
-            // Delete Program Stage Instances
-            // ---------------------------------------------------------------------
-
-            for ( ProgramInstance programInstance : programInstances )
-            {            	
-                Set<ProgramStageInstance> programStageInstances = programInstance.getProgramStageInstances();
-             
-                for ( ProgramStageInstance programStageInstance : programStageInstances )
-                {
-                	programStageInstanceService.deleteProgramStageInstance( programStageInstance );
-                }
-            }
+            }            
 
             // ---------------------------------------------------------------------
             // Delete Program Instances
