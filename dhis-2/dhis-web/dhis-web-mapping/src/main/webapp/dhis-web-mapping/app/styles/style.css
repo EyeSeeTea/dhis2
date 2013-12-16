@@ -128,7 +128,6 @@ html * {
 
 .gis-form-item-label-top {
 	padding-left: 2px;
-    font-weight: bold;
 	float: none;
 	clear: none;
 	display: block;
@@ -326,7 +325,7 @@ gis-combo .x-form-item-label {
 .ns-toolbar-multiselect-right .ns-toolbar-multiselect-right-label,
 .ns-toolbar-multiselect-leftright .ns-toolbar-multiselect-leftright-label {
     font-size: 11px;
-    color: #222;
+    color: #000;
 }
 .ns-toolbar-multiselect-left .ns-toolbar-multiselect-left-label {
 	padding-left: 6px;

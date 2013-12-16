@@ -1010,6 +1010,83 @@ Ext.onReady( function() {
                 this.callParent();
             }
         });
+
+        Ext.define('Ext.ux.panel.DataElementOptionContainer', {
+			extend: 'Ext.container.Container',
+			alias: 'widget.dataelementintegerpanel',
+			layout: 'column',
+            bodyStyle: 'border:0 none',
+            nameCmp: null,
+            operatorCmp: null,
+            valueCmp: null,
+            valueStore: null,
+            addCmp: null,
+            removeCmp: null,
+            initComponent: function() {
+                var that = this;
+
+                this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
+                    valueField: 'id',
+                    displayField: 'name',
+                    queryMode: 'local',
+                    editable: false,
+                    width: 60,
+                    value: 'EQ',
+                    store: {
+                        fields: ['id', 'name'],
+                        data: [
+                            {id: 'EQ', name: '='},
+                            {id: 'GT', name: '>'},
+                            {id: 'GE', name: '>='},
+                            {id: 'LT', name: '<'},
+                            {id: 'LE', name: '<='},
+                            {id: 'NE', name: '!='}
+                        ]
+                    }
+                });
+
+                //this.valueStore = Ext.create('Ext.data.Store', {
+                    //fields: [
+                    //proxy: {
+                        //url: gis.init.contextPath + '/api/dataElements/' + this.dataElement.id + /
+
+                this.valueCmp = Ext.create('Ext.form.field.ComboBox', {
+                    width: 250,
+                    emptyText: 'Select option',
+                    editable: false,
+                    queryMode: 'local'
+                });
+
+                this.addCmp = Ext.create('Ext.button.Button', {
+                    text: '+',
+                    width: 20
+                });
+
+                this.removeCmp = Ext.create('Ext.button.Button', {
+                    text: 'x',
+                    width: 20,
+                    handler: function() {
+                        that.removeDataElement();
+                    }
+                });
+                
+                this.nameCmp = Ext.create('Ext.form.Label', {
+                    text: this.dataElement.name,
+                    width: 360,
+                    style: 'padding:2px'                    
+                });
+
+                this.items = [
+                    this.nameCmp,
+                    this.operatorCmp,
+                    this.valueCmp,
+                    this.addCmp,
+                    this.removeCmp
+                ];
+
+                this.callParent();
+            }
+        });
     };
 
     // Objects
@@ -4331,7 +4408,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name', 'type'],
 			data: []
 		});
-
+        
 		// Components
 
             // data element
@@ -4349,7 +4426,7 @@ Ext.onReady( function() {
 			queryMode: 'remote',
 			//width: gis.conf.layout.widget.item_width,
 			columnWidth: 0.5,
-			style: 'margin:2px 1px 2px 0',
+			style: 'margin:1px 1px 2px 0',
 			//labelWidth: gis.conf.layout.widget.itemlabel_width,
 			store: programStore,
 			listeners: {
@@ -4380,7 +4457,7 @@ Ext.onReady( function() {
 			forceSelection: true,
 			//width: gis.conf.layout.widget.item_width,
 			columnWidth: 0.5,
-			style: 'margin:2px 0 2px 1px',
+			style: 'margin:1px 0 2px 1px',
 			//labelWidth: gis.conf.layout.widget.itemlabel_width,
 			listConfig: {loadMask: false},
 			store: stagesByProgramStore,
@@ -4426,7 +4503,7 @@ Ext.onReady( function() {
 				{
 					xtype: 'label',
 					//text: GIS.i18n.available,
-                    text: 'Available',
+                    text: 'Available data elements',
 					cls: 'ns-toolbar-multiselect-left-label'
 				},
 				'->',
@@ -4473,7 +4550,7 @@ Ext.onReady( function() {
                 items: {
 					xtype: 'label',
 					//text: GIS.i18n.available,
-                    text: 'Selected',
+                    text: 'Selected data elements',
                     style: 'padding-left:6px; color:#222',
 					cls: 'ns-toolbar-multiselect-left-label'
 				}
@@ -4540,6 +4617,7 @@ Ext.onReady( function() {
 			fieldLabel: 'Start date',
 			labelAlign: 'top',
 			labelCls: 'gis-form-item-label-top',
+            labelStyle: 'font-weight: bold',
 			labelSeparator: '',
 			columnWidth: 0.5,
 			style: 'margin-right: 1px',
@@ -4551,6 +4629,7 @@ Ext.onReady( function() {
 			fieldLabel: 'End date',
 			labelAlign: 'top',
 			labelCls: 'gis-form-item-label-top',
+            labelStyle: 'font-weight: bold',
 			labelSeparator: '',
 			columnWidth: 0.5,
 			style: 'margin-left: 1px',
@@ -5170,7 +5249,8 @@ Ext.onReady( function() {
 				
 				{
 					layout: 'column',
-                    bodyStyle: 'border:0 none',
+                    bodyStyle: 'border:0 none; padding:0',
+                    style: 'margin:0',
 					items: [
 						startDate,
 						endDate
