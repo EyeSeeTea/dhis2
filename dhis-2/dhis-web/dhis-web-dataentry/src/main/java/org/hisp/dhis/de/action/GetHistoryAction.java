@@ -34,30 +34,38 @@ import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.datavalue.DataValue;
+import org.hisp.dhis.datavalue.DataValueAudit;
+import org.hisp.dhis.datavalue.DataValueAuditService;
 import org.hisp.dhis.datavalue.DataValueService;
+import org.hisp.dhis.de.history.DataElementHistory;
+import org.hisp.dhis.de.history.HistoryRetriever;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.UserCredentials;
+import org.hisp.dhis.user.UserService;
 
-import java.util.Date;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Torgeir Lorange Ostby
  */
-public class SaveCommentAction
+public class GetHistoryAction
     implements Action
 {
+    private static final int HISTORY_LENGTH = 13;
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private CurrentUserService currentUserService;
+    private HistoryRetriever historyRetriever;
 
-    public void setCurrentUserService( CurrentUserService currentUserService )
+    public void setHistoryRetriever( HistoryRetriever historyRetriever )
     {
-        this.currentUserService = currentUserService;
+        this.historyRetriever = historyRetriever;
     }
 
     private DataElementService dataElementService;
@@ -81,6 +89,13 @@ public class SaveCommentAction
         this.categoryService = categoryService;
     }
 
+    private DataValueAuditService dataValueAuditService;
+
+    public void setDataValueAuditService( DataValueAuditService dataValueAuditService )
+    {
+        this.dataValueAuditService = dataValueAuditService;
+    }
+
     private OrganisationUnitService organisationUnitService;
 
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
@@ -88,25 +103,23 @@ public class SaveCommentAction
         this.organisationUnitService = organisationUnitService;
     }
 
-    // -------------------------------------------------------------------------
-    // Input/output
-    // -------------------------------------------------------------------------
+    private UserService userService;
 
-    private String periodId;
-
-    public void setPeriodId( String periodId )
+    public void setUserService( UserService userService )
     {
-        this.periodId = periodId;
+        this.userService = userService;
     }
 
-    private String commentValue;
-
-    public void setCommentValue( String commentValue )
-    {
-        this.commentValue = commentValue;
-    }
+    // -------------------------------------------------------------------------
+    // Input
+    // -------------------------------------------------------------------------
 
     private String dataElementId;
+
+    public String getDataElementId()
+    {
+        return dataElementId;
+    }
 
     public void setDataElementId( String dataElementId )
     {
@@ -115,23 +128,86 @@ public class SaveCommentAction
 
     private String optionComboId;
 
+    public String getOptionComboId()
+    {
+        return optionComboId;
+    }
+
     public void setOptionComboId( String optionComboId )
     {
         this.optionComboId = optionComboId;
     }
 
-    private int organisationUnitId;
+    private String periodId;
 
-    public void setOrganisationUnitId( int organisationUnitId )
+    public String getPeriodId()
+    {
+        return periodId;
+    }
+
+    public void setPeriodId( String periodId )
+    {
+        this.periodId = periodId;
+    }
+
+    private String organisationUnitId;
+
+    public void setOrganisationUnitId( String organisationUnitId )
     {
         this.organisationUnitId = organisationUnitId;
     }
 
-    private int statusCode;
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
 
-    public int getStatusCode()
+    private DataElementHistory dataElementHistory;
+
+    public DataElementHistory getDataElementHistory()
     {
-        return statusCode;
+        return dataElementHistory;
+    }
+
+    private boolean historyInvalid;
+
+    public boolean isHistoryInvalid()
+    {
+        return historyInvalid;
+    }
+    
+    private boolean minMaxInvalid;
+
+    public boolean isMinMaxInvalid()
+    {
+        return minMaxInvalid;
+    }
+
+    private DataValue dataValue;
+
+    public DataValue getDataValue()
+    {
+        return dataValue;
+    }
+
+    private List<String> standardComments;
+
+    public List<String> getStandardComments()
+    {
+        return standardComments;
+    }
+
+    private Collection<DataValueAudit> dataValueAudits;
+
+    public Collection<DataValueAudit> getDataValueAudits()
+    {
+        return dataValueAudits;
+    }
+
+    private String storedBy;
+
+    public String getStoredBy()
+    {
+        return storedBy;
     }
 
     // -------------------------------------------------------------------------
@@ -139,51 +215,45 @@ public class SaveCommentAction
     // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
-        OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
-
-        Period period = PeriodType.getPeriodFromIsoString( periodId );
-
         DataElement dataElement = dataElementService.getDataElement( dataElementId );
 
         DataElementCategoryOptionCombo optionCombo = categoryService.getDataElementCategoryOptionCombo( optionComboId );
 
-        String storedBy = currentUserService.getCurrentUsername();
-
-        if ( storedBy == null )
+        if ( optionCombo == null )
         {
-            storedBy = "[unknown]";
+            optionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
         }
 
-        if ( commentValue != null && commentValue.isEmpty() )
+        if ( dataElement == null )
         {
-            commentValue = null;
+            throw new IllegalArgumentException( "DataElement doesn't exist: " + dataElementId );
         }
+
+        Period period = PeriodType.getPeriodFromIsoString( periodId );
+
+        OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
+
+        dataValue = dataValueService.getDataValue( organisationUnit, dataElement, period, optionCombo );
+
+        if ( dataValue != null )
+        {
+            UserCredentials credentials = userService.getUserCredentialsByUsername( dataValue.getStoredBy() );
+            storedBy = credentials != null ? credentials.getName() : dataValue.getStoredBy();
+        }
+
+        dataElementHistory = historyRetriever.getHistory( dataElement, optionCombo, organisationUnit, period, HISTORY_LENGTH );
+
+        historyInvalid = dataElementHistory == null;
+
+        minMaxInvalid = !DataElement.VALUE_TYPE_INT.equals( dataElement.getType() );
 
         // ---------------------------------------------------------------------
-        // Update DB
+        // Data Value Audit
         // ---------------------------------------------------------------------
 
-        DataValue dataValue = dataValueService.getDataValue( organisationUnit, dataElement, period, optionCombo );
-
-        if ( dataValue == null )
-        {
-            if ( commentValue != null )
-            {
-                dataValue = new DataValue( dataElement, period, organisationUnit, null,
-                    storedBy, new Date(), commentValue, optionCombo );
-
-                dataValueService.addDataValue( dataValue );
-            }
-        }
-        else
-        {
-            dataValue.setComment( commentValue );
-            dataValue.setTimestamp( new Date() );
-            dataValue.setStoredBy( storedBy );
-
-            dataValueService.updateDataValue( dataValue );
-        }
+        dataValueAudits = dataValueAuditService.getDataValueAuditByDataValue( dataValue );
 
         return SUCCESS;
     }

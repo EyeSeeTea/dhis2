@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.events.person;
+package org.hisp.dhis.dashboard;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,39 +28,55 @@ package org.hisp.dhis.dxf2.events.person;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.chart.Chart;
+import org.hisp.dhis.document.Document;
+import org.hisp.dhis.mapping.Map;
+import org.hisp.dhis.report.Report;
+import org.hisp.dhis.reporttable.ReportTable;
+import org.hisp.dhis.system.deletion.DeletionHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "gender", namespace = DxfNamespaces.DXF_2_0 )
-public enum Gender
+public class DashboardItemDeletionHandler extends DeletionHandler
 {
-    MALE( "M" ), FEMALE( "F" ), TRANSGENDER( "T" );
+    @Autowired
+    private DashboardService dashboardService;
 
-    private final String value;
-
-    private Gender( String value )
+    @Override
+    protected String getClassName()
     {
-        this.value = value;
+        return DashboardItem.class.getSimpleName();
     }
 
-    public String getValue()
+    @Override
+    public String allowDeleteMap( Map map )
     {
-        return value;
+        return dashboardService.countMapDashboardItems( map ) == 0 ? null : ERROR;
     }
 
-    public static Gender fromString( String text )
+    @Override
+    public String allowDeleteChart( Chart chart )
     {
-        for ( Gender gender : Gender.values() )
-        {
-            if ( text.equals( gender.getValue() ) )
-            {
-                return gender;
-            }
-        }
+        return dashboardService.countChartDashboardItems( chart ) == 0 ? null : ERROR;
+    }
 
-        throw new IllegalArgumentException();
+    @Override
+    public String allowDeleteReportTable( ReportTable reportTable )
+    {
+        return dashboardService.countReportTableDashboardItems( reportTable ) == 0 ? null : ERROR;
+    }
+
+    @Override
+    public String allowDeleteReport( Report report )
+    {
+        return dashboardService.countReportDashboardItems( report ) == 0 ? null : ERROR;
+    }
+
+    @Override
+    public String allowDeleteDocument( Document document )
+    {
+        return dashboardService.countDocumentDashboardItems( document ) == 0 ? null : ERROR;
     }
 }

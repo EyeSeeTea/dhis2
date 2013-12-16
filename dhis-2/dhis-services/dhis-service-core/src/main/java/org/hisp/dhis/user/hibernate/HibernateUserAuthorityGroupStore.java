@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.events.person;
+package org.hisp.dhis.user.hibernate;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,37 +28,25 @@ package org.hisp.dhis.dxf2.events.person;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hibernate.Query;
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.user.UserAuthorityGroup;
+import org.hisp.dhis.user.UserAuthorityGroupStore;
+
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public enum DateOfBirthType
+public class HibernateUserAuthorityGroupStore
+    extends HibernateIdentifiableObjectStore<UserAuthorityGroup>
+    implements UserAuthorityGroupStore
 {
-    VERIFIED( "V" ),
-    DECLARED( "D" ),
-    APPROXIMATE( "A" );
-
-    private final String value;
-
-    private DateOfBirthType( String value )
+    @Override
+    public int countDataSetUserAuthorityGroups( DataSet dataSet )
     {
-        this.value = value;
-    }
+        Query query = getQuery( "select count(distinct c) from UserAuthorityGroup c where :dataSet in elements(c.dataSets)" );
+        query.setEntity( "dataSet", dataSet );
 
-    public String getValue()
-    {
-        return value;
-    }
-
-    public static DateOfBirthType fromString( String text )
-    {
-        for ( DateOfBirthType dateOfBirthType : DateOfBirthType.values() )
-        {
-            if ( text.equals( dateOfBirthType.getValue() ) )
-            {
-                return dateOfBirthType;
-            }
-        }
-
-        throw new IllegalArgumentException();
+        return ((Long) query.uniqueResult()).intValue();
     }
 }

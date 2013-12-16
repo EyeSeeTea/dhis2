@@ -43,24 +43,6 @@
     <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
   </bean>
 
-  <bean id="org.hisp.dhis.de.action.SaveValueAction" class="org.hisp.dhis.de.action.SaveValueAction" scope="prototype">
-    <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
-    <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
-    <property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
-    <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
-    <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-    <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
-  </bean>
-
-  <bean id="org.hisp.dhis.de.action.SaveCommentAction" class="org.hisp.dhis.de.action.SaveCommentAction"
-      scope="prototype">
-    <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
-    <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
-    <property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
-    <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
-    <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-  </bean>
-
   <bean id="org.hisp.dhis.de.action.SaveMinMaxLimitsAction" class="org.hisp.dhis.de.action.SaveMinMaxLimitsAction"
       scope="prototype">
     <property name="minMaxDataElementService" ref="org.hisp.dhis.minmax.MinMaxDataElementService" />
@@ -77,7 +59,7 @@
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
   </bean>
 
-  <bean id="org.hisp.dhis.de.action.HistoryAction" class="org.hisp.dhis.de.action.HistoryAction" scope="prototype">
+  <bean id="org.hisp.dhis.de.action.GetHistoryAction" class="org.hisp.dhis.de.action.GetHistoryAction" scope="prototype">
     <property name="historyRetriever" ref="org.hisp.dhis.de.history.HistoryRetriever" />
     <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
@@ -111,14 +93,6 @@
     <property name="minMaxOutlierAnalysisService" ref="org.hisp.dhis.dataanalysis.MinMaxOutlierAnalysisService" />
     <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
     <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-  </bean>
-
-  <bean id="org.hisp.dhis.de.action.MarkForFollowupAction" class="org.hisp.dhis.de.action.MarkForFollowupAction"
-      scope="prototype">
-    <property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
-    <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
-    <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-    <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
   </bean>
 
   <bean id="org.hisp.dhis.de.action.GetHistoryChartAction" class="org.hisp.dhis.de.action.GetHistoryChartAction"

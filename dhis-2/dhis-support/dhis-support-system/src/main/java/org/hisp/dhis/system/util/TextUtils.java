@@ -359,15 +359,14 @@ public class TextUtils
     }
     
     /**
-     * Returns the string representation of the object, or null if the object 
-     * is null.
+     * Returns the string representation of the object, or null if the object is
+     * null.
      * 
      * @param object the object.
      * @return the string representation.
      */
-     public static String toString( Object object )
-     {
-    	 return object != null ? object.toString() : null;
-     }
-    
+    public static String toString( Object object )
+    {
+        return object != null ? object.toString() : null;
+    }
 }

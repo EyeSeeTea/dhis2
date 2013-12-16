@@ -54,10 +54,10 @@ import org.hisp.dhis.dxf2.metadata.handlers.ObjectHandlerUtils;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.importexport.ImportStrategy;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.sqlview.SqlView;
 import org.hisp.dhis.system.util.CollectionUtils;
 import org.hisp.dhis.system.util.ReflectionUtils;
 import org.hisp.dhis.system.util.functional.Function1;
@@ -111,7 +111,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     @Autowired
     private SessionFactory sessionFactory;
 
-    @Autowired(required = false)
+    @Autowired( required = false )
     private List<ObjectHandler<T>> objectHandlers;
 
     //-------------------------------------------------------------------------------------------------------
@@ -425,18 +425,16 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
         log.debug( "Trying to delete object => " + ImportUtils.getDisplayName( persistedObject ) + " (" + persistedObject.getClass().getSimpleName() + ")" );
 
-        persistedObject.setUser( null );
-        NonIdentifiableObjects nonIdentifiableObjects = new NonIdentifiableObjects();
-        nonIdentifiableObjects.delete( persistedObject );
-
-        Map<Field, Object> fields = detachFields( persistedObject );
-        Map<Field, Collection<Object>> collectionFields = detachCollectionFields( persistedObject );
-
-        sessionFactory.getCurrentSession().flush();
-
-        objectBridge.deleteObject( persistedObject );
-
-        sessionFactory.getCurrentSession().flush();
+        try
+        {
+            objectBridge.deleteObject( persistedObject );
+        }
+        catch ( Exception ex )
+        {
+            summaryType.getImportConflicts().add(
+                new ImportConflict( ImportUtils.getDisplayName( persistedObject ), ex.getMessage() ) );
+            return false;
+        }
 
         log.debug( "Delete successful." );
 
