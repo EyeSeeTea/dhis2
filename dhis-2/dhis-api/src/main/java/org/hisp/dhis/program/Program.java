@@ -240,7 +240,7 @@ public class Program
     // -------------------------------------------------------------------------
 
     @JsonProperty
-    @JsonView({ DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class })
+    @JsonView({ DetailedView.class, ExportView.class, ExtendedView.class, WithoutOrganisationUnitsView.class })
     @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public String getDescription()
     {
@@ -281,7 +281,7 @@ public class Program
     }
 
     @JsonProperty(value = "programInstances")
-    @JsonView({ DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class })
+    @JsonView({ DetailedView.class, ExportView.class, ExtendedView.class, WithoutOrganisationUnitsView.class })
     @JacksonXmlElementWrapper(localName = "programInstances", namespace = DxfNamespaces.DXF_2_0)
     @JacksonXmlProperty(localName = "programInstance", namespace = DxfNamespaces.DXF_2_0)
     public Set<ProgramInstance> getProgramInstances()
@@ -295,7 +295,7 @@ public class Program
     }
 
     @JsonProperty(value = "programStages")
-    @JsonSerialize(contentAs = BaseIdentifiableObject.class)
+    //@JsonSerialize(contentAs = BaseIdentifiableObject.class)
     @JsonView({ DetailedView.class, ExportView.class, ExtendedView.class, WithoutOrganisationUnitsView.class })
     @JacksonXmlElementWrapper(localName = "programStages", namespace = DxfNamespaces.DXF_2_0)
     @JacksonXmlProperty(localName = "programStage", namespace = DxfNamespaces.DXF_2_0)
@@ -310,7 +310,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView({ DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class })
+    @JsonView({ DetailedView.class, ExportView.class, ExtendedView.class, WithoutOrganisationUnitsView.class })
     @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public String getDateOfEnrollmentDescription()
     {
@@ -323,7 +323,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView({ DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class })
+    @JsonView({ DetailedView.class, ExportView.class, ExtendedView.class, WithoutOrganisationUnitsView.class })
     @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public String getDateOfIncidentDescription()
     {
@@ -385,7 +385,7 @@ public class Program
     }
 
     @JsonProperty(value = "attributes")
-    @JsonSerialize(contentAs = BaseIdentifiableObject.class)
+    //@JsonSerialize(contentAs = BaseIdentifiableObject.class)
     @JsonView({ DetailedView.class, ExportView.class, ExtendedView.class, WithoutOrganisationUnitsView.class })
     @JacksonXmlElementWrapper(localName = "attributes", namespace = DxfNamespaces.DXF_2_0)
     @JacksonXmlProperty(localName = "attribute", namespace = DxfNamespaces.DXF_2_0)
@@ -400,7 +400,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView({ DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class })
+    @JsonView({ DetailedView.class, ExportView.class, ExtendedView.class, WithoutOrganisationUnitsView.class })
     @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public Boolean getDisplayIncidentDate()
     {
@@ -435,7 +435,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView({ DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class })
+    @JsonView({ DetailedView.class, ExportView.class, ExtendedView.class, WithoutOrganisationUnitsView.class })
     @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public boolean isSingleEvent()
     {

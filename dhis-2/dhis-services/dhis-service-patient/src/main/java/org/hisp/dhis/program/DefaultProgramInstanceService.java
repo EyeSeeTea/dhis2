@@ -483,10 +483,13 @@ public class DefaultProgramInstanceService
             }
         }
 
-        PatientComment patientComment = programInstance.getPatientComment();
-        if ( patientComment != null )
-        {
-            grid.addRow();
+        //Get patient comments for the program instance
+        
+        Set<PatientComment> patientComments = programInstance.getPatientComments();
+        
+        for( PatientComment patientComment : patientComments ){
+        	
+        	grid.addRow();
             grid.addValue( i18n.getString( "comment" ) + " " + i18n.getString( "on" ) + " "
                 + format.formatDateTime( patientComment.getCreatedDate() ) );
             grid.addValue( patientComment.getCommentText() );
@@ -845,19 +848,7 @@ public class DefaultProgramInstanceService
                 grid.addRow();
                 grid.addValue( programStageInstance.getProgramStage().getReportDateDescription() );
                 grid.addValue( format.formatDate( programStageInstance.getExecutionDate() ) );
-            }
-
-            // Comments
-
-            PatientComment comment = programStageInstance.getPatientComment();
-
-            if ( comment != null )
-            {
-                grid.addRow();
-                grid.addValue( i18n.getString( "comment" ) + " " + i18n.getString( "on" ) + " "
-                    + format.formatDateTime( comment.getCreatedDate() ) );
-                grid.addValue( comment.getCommentText() );
-            }
+            }          
 
             // SMS messages
 

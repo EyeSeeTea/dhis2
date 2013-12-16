@@ -72,7 +72,7 @@ public interface PatientAttributeValueService
      * 
      * @return The error code. If the code is 0, deleting success
      */
-    int deletePatientAttributeValue( Patient patient );
+    void deletePatientAttributeValueByPatient( Patient patient );
 
     /**
      * Delete all {@link PatientAttributeValue} of a {@link PatientAttribute}
@@ -81,7 +81,7 @@ public interface PatientAttributeValueService
      * 
      * @return The error code. If the code is 0, deleting success
      */
-    int deletePatientAttributeValue( PatientAttribute patientAttribute );
+    void deletePatientAttributeValueByPatientAttribute( PatientAttribute patientAttribute );
 
     /**
      * Retrieve a {@link PatientAttributeValue} on a {@link Patient} and

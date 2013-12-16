@@ -30,6 +30,7 @@ package org.hisp.dhis.dxf2.events.event;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
@@ -47,6 +48,8 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.patientcomment.PatientComment;
+import org.hisp.dhis.patientcomment.PatientCommentService;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.program.Program;
@@ -105,6 +108,9 @@ public abstract class AbstractEventService
 
     @Autowired
     private PatientService patientService;
+    
+    @Autowired
+    private PatientCommentService patientCommentService;
 
     @Autowired
     private IdentifiableObjectManager manager;
@@ -467,7 +473,7 @@ public abstract class AbstractEventService
         {
             organisationUnit = programStageInstance.getOrganisationUnit();
         }
-
+        
         Date date = new Date();
 
         String storedBy = getStoredBy( event, null );
@@ -475,9 +481,13 @@ public abstract class AbstractEventService
         programStageInstance.setDueDate( date );
         programStageInstance.setExecutionDate( date );
         programStageInstance.setOrganisationUnit( organisationUnit );
-        programStageInstance.setCompletedUser( storedBy );
-
+        programStageInstance.setCompletedUser( storedBy );       
+        
         programStageInstanceService.updateProgramStageInstance( programStageInstance );
+        
+        ProgramInstance programInstance = programStageInstance.getProgramInstance();
+        
+        savePatientCommentFromEvent( programInstance, event );
 
         Set<PatientDataValue> patientDataValues = new HashSet<PatientDataValue>(
             patientDataValueService.getPatientDataValues( programStageInstance ) );
@@ -550,7 +560,7 @@ public abstract class AbstractEventService
         if ( programStageInstance.getProgramStage().getCaptureCoordinates() )
         {
             Coordinate coordinate = null;
-            if ( programStageInstance.getLongitude() != null && programStageInstance.getLongitude() != null )
+            if ( programStageInstance.getLongitude() != null && programStageInstance.getLatitude() != null )
             {
                 coordinate = new Coordinate( programStageInstance.getLongitude(), programStageInstance.getLatitude() );
 
@@ -586,7 +596,16 @@ public abstract class AbstractEventService
             value.setStoredBy( patientDataValue.getStoredBy() );
 
             event.getDataValues().add( value );
-        }
+        }        
+        
+        ProgramInstance programInstance = programStageInstance.getProgramInstance();
+        
+        Collection<PatientComment> patientComments = programInstance.getPatientComments();
+        
+        for( PatientComment patientComment : patientComments )
+        {      	
+        	event.getNotes().add( patientComment.getCommentText() );
+        }       
 
         return event;
     }
@@ -755,13 +774,14 @@ public abstract class AbstractEventService
         }
 
         String storedBy = getStoredBy( event, importSummary );
-
+        
         if ( !dryRun )
         {
             if ( programStageInstance == null )
             {
                 programStageInstance = createProgramStageInstance( programStage, programInstance, organisationUnit,
-                    eventDate, EventStatus.COMPLETED.equals( event.getStatus() ), event.getCoordinate(), storedBy );
+                    eventDate, EventStatus.COMPLETED.equals( event.getStatus() ), event.getCoordinate(), storedBy );             
+                
             }
             else
             {
@@ -769,6 +789,8 @@ public abstract class AbstractEventService
                     EventStatus.COMPLETED.equals( event.getStatus() ), event.getCoordinate(), storedBy,
                     programStageInstance );
             }
+            
+            savePatientCommentFromEvent(programInstance, event);
 
             importSummary.setReference( programStageInstance.getUid() );
         }
@@ -801,5 +823,22 @@ public abstract class AbstractEventService
         }
 
         return importSummary;
+    }
+    
+    private void savePatientCommentFromEvent(ProgramInstance programInstance, Event event)
+    {
+    	for( String note : event.getNotes() ) //I expect only one note !
+        {
+        	PatientComment patientComment = new PatientComment();
+        	patientComment.setCreator( event.getStoredBy() );
+        	patientComment.setCreatedDate( new Date() );
+        	patientComment.setCommentText( note );    
+        	
+        	patientCommentService.addPatientComment( patientComment );
+        	
+        	programInstance.getPatientComments().add( patientComment );
+        	
+        	programInstanceService.updateProgramInstance( programInstance );
+        }    	
     }
 }

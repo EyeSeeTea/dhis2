@@ -50,7 +50,7 @@ var ancTracker = angular.module('ancTracker',
 		templateUrl : 'views/enrollment.html',
 		controller : 'EnrollmentController'		
 	}).otherwise({
-		redirectTo : '/',
+		redirectTo : '/'
 	});
 		
 	$translateProvider.useStaticFilesLoader({
@@ -58,6 +58,6 @@ var ancTracker = angular.module('ancTracker',
 		suffix: '.json'
 	});
 	
-	$translateProvider.preferredLanguage('no')	
+	$translateProvider.preferredLanguage('no');	
 });
 

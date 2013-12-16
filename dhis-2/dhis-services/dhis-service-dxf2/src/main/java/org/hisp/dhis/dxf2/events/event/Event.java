@@ -32,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+
 import org.hisp.dhis.common.BaseLinkableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 
@@ -56,8 +57,6 @@ public class Event extends BaseLinkableObject
 
     private String person;
 
-    private String patientComment;
-    
     private String eventDate;
 
     private String storedBy;
@@ -65,6 +64,8 @@ public class Event extends BaseLinkableObject
     private Coordinate coordinate;
 
     private List<DataValue> dataValues = new ArrayList<DataValue>();
+    
+    private List<String> notes = new ArrayList<String>();
 
     public Event()
     {
@@ -140,17 +141,7 @@ public class Event extends BaseLinkableObject
     public void setPerson( String person )
     {
         this.person = person;
-    }
-    
-    @JsonProperty
-    @JacksonXmlProperty( isAttribute = true )
-    public String getPatientComment() {
-		return patientComment;
-	}
-
-	public void setPatientComment(String patientComment) {
-		this.patientComment = patientComment;
-	}
+    }   	
 
     @JsonProperty( required = true )
     @JacksonXmlProperty( isAttribute = true )
@@ -200,6 +191,18 @@ public class Event extends BaseLinkableObject
     {
         this.dataValues = dataValues;
     }
+    
+    
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "notes", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "note", namespace = DxfNamespaces.DXF_2_0 )
+	public List<String> getNotes() {
+		return notes;
+	}
+
+	public void setNotes(List<String> notes) {
+		this.notes = notes;
+	}
 
     @Override
     public boolean equals( Object o )
@@ -254,5 +257,5 @@ public class Event extends BaseLinkableObject
             ", coordinate=" + coordinate +
             ", dataValues=" + dataValues +
             '}';
-    }	
+    }
 }

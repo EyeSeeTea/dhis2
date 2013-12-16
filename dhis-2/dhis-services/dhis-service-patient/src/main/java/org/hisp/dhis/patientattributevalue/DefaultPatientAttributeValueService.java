@@ -70,14 +70,14 @@ public class DefaultPatientAttributeValueService
         patientAttributeValueStore.delete( patientAttributeValue );
     }
 
-    public int deletePatientAttributeValue( Patient patient )
+    public void deletePatientAttributeValueByPatient( Patient patient )
     {
-        return patientAttributeValueStore.deleteByPatient( patient );
+        patientAttributeValueStore.deleteByPatient( patient );
     }
 
-    public int deletePatientAttributeValue( PatientAttribute patientAttribute )
+    public void deletePatientAttributeValueByPatientAttribute( PatientAttribute patientAttribute )
     {
-        return patientAttributeValueStore.deleteByAttribute( patientAttribute );
+        patientAttributeValueStore.deleteByAttribute( patientAttribute );
     }
 
     public Collection<PatientAttributeValue> getAllPatientAttributeValues()
@@ -195,7 +195,7 @@ public class DefaultPatientAttributeValueService
 
     public void copyPatientAttributeValues( Patient source, Patient destination )
     {
-        deletePatientAttributeValue( destination );
+        deletePatientAttributeValueByPatient( destination );
 
         for ( PatientAttributeValue patientAttributeValue : getPatientAttributeValues( source ) )
         {

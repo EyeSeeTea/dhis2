@@ -200,13 +200,13 @@ public class PatientAttributeValueServiceTest
         assertNotNull( attributeValueService.getPatientAttributeValue( patientA, attributeB ) );
         assertNotNull( attributeValueService.getPatientAttributeValue( patientB, attributeA ) );
 
-        attributeValueService.deletePatientAttributeValue( patientA );
+        attributeValueService.deletePatientAttributeValueByPatient( patientA );
 
         assertNull( attributeValueService.getPatientAttributeValue( patientA, attributeA ) );
         assertNull( attributeValueService.getPatientAttributeValue( patientA, attributeB ) );
         assertNotNull( attributeValueService.getPatientAttributeValue( patientB, attributeA ) );
 
-        attributeValueService.deletePatientAttributeValue( patientB );
+        attributeValueService.deletePatientAttributeValueByPatient( patientB );
         assertNull( attributeValueService.getPatientAttributeValue( patientA, attributeA ) );
         assertNull( attributeValueService.getPatientAttributeValue( patientA, attributeB ) );
         assertNull( attributeValueService.getPatientAttributeValue( patientB, attributeA ) );
@@ -223,13 +223,13 @@ public class PatientAttributeValueServiceTest
         assertNotNull( attributeValueService.getPatientAttributeValue( patientA, attributeB ) );
         assertNotNull( attributeValueService.getPatientAttributeValue( patientB, attributeA ) );
 
-        attributeValueService.deletePatientAttributeValue( attributeA );
+        attributeValueService.deletePatientAttributeValueByPatientAttribute( attributeA );
 
         assertNull( attributeValueService.getPatientAttributeValue( patientA, attributeA ) );
         assertNull( attributeValueService.getPatientAttributeValue( patientB, attributeA ) );
         assertNotNull( attributeValueService.getPatientAttributeValue( patientA, attributeB ) );
 
-        attributeValueService.deletePatientAttributeValue( attributeB );
+        attributeValueService.deletePatientAttributeValueByPatientAttribute( attributeB );
         assertNull( attributeValueService.getPatientAttributeValue( patientA, attributeA ) );
         assertNull( attributeValueService.getPatientAttributeValue( patientA, attributeB ) );
         assertNull( attributeValueService.getPatientAttributeValue( patientB, attributeA ) );

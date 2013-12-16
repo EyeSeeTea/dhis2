@@ -28,11 +28,18 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.List;
 
 import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientAttribute;
+import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
+import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
+import org.hisp.dhis.patientcomment.PatientComment;
+import org.hisp.dhis.patientcomment.PatientCommentService;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.system.deletion.DeletionHandler;
@@ -61,8 +68,22 @@ public class ProgramInstanceDeletionHandler
     {
         this.patientDataValueService = patientDataValueService;
     }
+    
+    private PatientCommentService patientCommentService;    
 
-    public ProgramStageDataElementService programStageDEService;
+    public void setPatientCommentService(PatientCommentService patientCommentService) 
+    {
+		this.patientCommentService = patientCommentService;
+	}
+    
+    private PatientAttributeValueService patientAttributeValueService;    
+
+	public void setPatientAttributeValueService( PatientAttributeValueService patientAttributeValueService )
+	{
+		this.patientAttributeValueService = patientAttributeValueService;
+	}
+
+	public ProgramStageDataElementService programStageDEService;
 
     public void setProgramStageDEService( ProgramStageDataElementService programStageDEService )
     {
@@ -112,18 +133,54 @@ public class ProgramInstanceDeletionHandler
                     }
                 }
             }
+            
+            // ---------------------------------------------------------------------
+            // Delete Patient attribute values related to program/programInstance
+            // ---------------------------------------------------------------------
+            
+            PatientAttributeValue patientAttributeValue;
+            
+            for( ProgramInstance programInstance : programInstances )
+            {
+            	Program program = programInstance.getProgram();
+            	
+            	for( PatientAttribute patientAttribute : program.getPatientAttributes() )
+            	{
+            		patientAttributeValue = patientAttributeValueService.getPatientAttributeValue( patient, patientAttribute );
+            		
+            		if( patientAttributeValue != null )
+            		{
+            			patientAttributeValueService.deletePatientAttributeValue(patientAttributeValue);
+            		}
+            	}            	
+            }
+          
+            // ---------------------------------------------------------------------
+            // Delete Patient comments
+            // ---------------------------------------------------------------------
+
+            for ( ProgramInstance programInstance : programInstances )
+            {
+            	if( programInstance.getPatientComments() != null )
+            	{
+            		for ( PatientComment patientComment : programInstance.getPatientComments() )
+                    {
+                        patientCommentService.deletePatientComment(patientComment);
+                    }
+            	}                
+            }
 
             // ---------------------------------------------------------------------
             // Delete Program Stage Instances
             // ---------------------------------------------------------------------
 
             for ( ProgramInstance programInstance : programInstances )
-            {
+            {            	
                 Set<ProgramStageInstance> programStageInstances = programInstance.getProgramStageInstances();
-
+             
                 for ( ProgramStageInstance programStageInstance : programStageInstances )
                 {
-                    programStageInstanceService.deleteProgramStageInstance( programStageInstance );
+                	programStageInstanceService.deleteProgramStageInstance( programStageInstance );
                 }
             }
 

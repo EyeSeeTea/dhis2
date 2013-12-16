@@ -428,14 +428,17 @@ public abstract class AbstractPersonService
         patient.setBirthDate( dateOfBirth.getDate() );
 
         updateSystemIdentifier( person );
+        
         removeRelationships( patient );
         removeIdentifiers( patient );
         removeAttributeValues( patient );
-        patientService.updatePatient( patient );
+        
+        //patientService.updatePatient( patient );
 
         updateRelationships( person, patient );
         updateIdentifiers( person, patient );
         updateAttributeValues( person, patient );
+        
         patientService.updatePatient( patient );
 
         importSummary.setStatus( ImportStatus.SUCCESS );
@@ -743,7 +746,7 @@ public abstract class AbstractPersonService
 
     private void removeAttributeValues( Patient patient )
     {
-        patientAttributeValueService.deletePatientAttributeValue( patient );
+        patientAttributeValueService.deletePatientAttributeValueByPatient( patient );
         patientService.updatePatient( patient );
     }
 }
