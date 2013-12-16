@@ -425,7 +425,7 @@ Ext.onReady( function() {
 				// parent graph map
 				view.parentGraphMap = {};
 				view.parentGraphMap[parentId] = parentGraph;
-console.log(view.parentGraphMap);
+				
 				// dimension
 				view.rows = [{
 					dimension: dimConf.organisationUnit.objectName,

@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.events.person;
+package org.hisp.dhis.common.hibernate;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,39 +28,43 @@ package org.hisp.dhis.dxf2.events.person;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.DxfNamespaces;
+import org.hibernate.Query;
+import org.hisp.dhis.common.AnalyticalObjectStore;
+import org.hisp.dhis.common.BaseAnalyticalObject;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.indicator.Indicator;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "gender", namespace = DxfNamespaces.DXF_2_0 )
-public enum Gender
+public class HibernateAnalyticalObjectStore<T extends BaseAnalyticalObject>
+    extends HibernateIdentifiableObjectStore<T> implements AnalyticalObjectStore<T>
 {
-    MALE( "M" ), FEMALE( "F" ), TRANSGENDER( "T" );
-
-    private final String value;
-
-    private Gender( String value )
+    @Override
+    public int countDataSetAnalyticalObject( DataSet dataSet )
     {
-        this.value = value;
+        Query query = getQuery( "select count(distinct c) from " + clazz.getName() + " c where :dataSet in elements(c.dataSets)" );
+        query.setEntity( "dataSet", dataSet );
+
+        return ((Long) query.uniqueResult()).intValue();
     }
 
-    public String getValue()
+    @Override
+    public int countIndicatorAnalyticalObject( Indicator indicator )
     {
-        return value;
+        Query query = getQuery( "select count(distinct c) from " + clazz.getName() + " c where :indicator in elements(c.indicators)" );
+        query.setEntity( "indicator", indicator );
+
+        return ((Long) query.uniqueResult()).intValue();
     }
 
-    public static Gender fromString( String text )
+    @Override
+    public int countDataElementAnalyticalObject( DataElement dataElement )
     {
-        for ( Gender gender : Gender.values() )
-        {
-            if ( text.equals( gender.getValue() ) )
-            {
-                return gender;
-            }
-        }
+        Query query = getQuery( "select count(distinct c) from " + clazz.getName() + " c where :dataElement in elements(c.dataElements)" );
+        query.setEntity( "dataElement", dataElement );
 
-        throw new IllegalArgumentException();
+        return ((Long) query.uniqueResult()).intValue();
     }
 }

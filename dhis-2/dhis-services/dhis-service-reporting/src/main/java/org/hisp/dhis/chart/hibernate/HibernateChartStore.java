@@ -28,25 +28,25 @@ package org.hisp.dhis.chart.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartStore;
-import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.common.hibernate.HibernateAnalyticalObjectStore;
 import org.hisp.dhis.user.User;
+
+import java.util.Collection;
 
 /**
  * @author Lars Helge Overland
  */
 public class HibernateChartStore
-    extends HibernateIdentifiableObjectStore<Chart> implements ChartStore
+    extends HibernateAnalyticalObjectStore<Chart> implements ChartStore
 {
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public Collection<Chart> getSystemAndUserCharts( User user )
     {
-        return getCriteria( 
-            Restrictions.or( Restrictions.isNull( "user" ), 
-            Restrictions.eq( "user", user ) ) ).list();
+        return getCriteria(
+            Restrictions.or( Restrictions.isNull( "user" ),
+                Restrictions.eq( "user", user ) ) ).list();
     }
 }

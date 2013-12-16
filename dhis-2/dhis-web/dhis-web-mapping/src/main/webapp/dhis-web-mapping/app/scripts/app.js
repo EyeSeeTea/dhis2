@@ -1035,8 +1035,8 @@ Ext.onReady( function() {
                     store: {
                         fields: ['id', 'name'],
                         data: [
-                            {id: 'EQ', name: '='},
-                            {id: 'GT', name: '>'},
+                            {id: 'LIKE', name: ''},
+                            {id: 'IN', name: '>'},
                             {id: 'GE', name: '>='},
                             {id: 'LT', name: '<'},
                             {id: 'LE', name: '<='},
@@ -1059,7 +1059,8 @@ Ext.onReady( function() {
 
                 this.addCmp = Ext.create('Ext.button.Button', {
                     text: '+',
-                    width: 20
+                    width: 20,
+                    style: 'font-weight:bold'
                 });
 
                 this.removeCmp = Ext.create('Ext.button.Button', {
@@ -4440,7 +4441,19 @@ Ext.onReady( function() {
 			stage.clearValue();
 
 			stagesByProgramStore.proxy.url = gis.init.contextPath + '/api/programs/' + programId + '.json?viewClass=withoutOrganisationUnits&links=false&paging=false';
-			stagesByProgramStore.load();
+			stagesByProgramStore.load({
+				callback: function(records) {
+					stage.enable();
+					stage.clearValue();
+					
+					if (records.length === 1) {
+						stage.setValue(records[0].data.id);
+
+						onStageSelect(records[0].data.id);
+					}
+				}
+			});						
+						
 		};			
 
 		stage = Ext.create('Ext.form.field.ComboBox', {
@@ -4458,6 +4471,7 @@ Ext.onReady( function() {
 			//width: gis.conf.layout.widget.item_width,
 			columnWidth: 0.5,
 			style: 'margin:1px 0 2px 1px',
+			disabled: true,
 			//labelWidth: gis.conf.layout.widget.itemlabel_width,
 			listConfig: {loadMask: false},
 			store: stagesByProgramStore,
@@ -4469,8 +4483,7 @@ Ext.onReady( function() {
 		});
 
 		onStageSelect = function(stageId) {
-			//dataElementsByStageStore.proxy.url = gis.init.contextPath + '/api/programStages/' + stageId + '.json?links=false&paging=false';
-			//dataElementsByStageStore.load();
+			dataElementSelected.removeAll();
 
 			loadDataElements(stageId);
 		};

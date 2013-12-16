@@ -28,13 +28,8 @@ package org.hisp.dhis.mapping;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -42,7 +37,13 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.RelativePeriods;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Jan Henrik Overland
@@ -62,9 +63,10 @@ public class DefaultMappingService
         this.mapStore = mapStore;
     }
 
-    private GenericIdentifiableObjectStore<MapView> mapViewStore;
+    private MapViewStore mapViewStore;
 
-    public void setMapViewStore( GenericIdentifiableObjectStore<MapView> mapViewStore )
+    @Autowired
+    public void setMapViewStore( MapViewStore mapViewStore )
     {
         this.mapViewStore = mapViewStore;
     }
@@ -273,7 +275,7 @@ public class DefaultMappingService
     {
         return mapStore.getAll();
     }
-    
+
     public List<Map> getMapsBetweenLikeName( String name, int first, int max )
     {
         return mapStore.getAllLikeNameOrderedName( name, first, max );
@@ -449,5 +451,29 @@ public class DefaultMappingService
     public Collection<MapLayer> getAllMapLayers()
     {
         return mapLayerStore.getAll();
+    }
+
+    @Override
+    public int countMapViewMaps( MapView mapView )
+    {
+        return mapStore.countMapViewMaps( mapView );
+    }
+
+    @Override
+    public int countDataSetCharts( DataSet dataSet )
+    {
+        return mapViewStore.countDataSetAnalyticalObject( dataSet );
+    }
+
+    @Override
+    public int countIndicatorCharts( Indicator indicator )
+    {
+        return mapViewStore.countIndicatorAnalyticalObject( indicator );
+    }
+
+    @Override
+    public int countDataElementCharts( DataElement dataElement )
+    {
+        return mapViewStore.countDataElementAnalyticalObject( dataElement );
     }
 }

@@ -28,6 +28,10 @@ package org.hisp.dhis.mapping;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.indicator.Indicator;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -55,7 +59,7 @@ public interface MappingService
 
     final String MAP_LAYER_TYPE_BASELAYER = "baselayer";
     final String MAP_LAYER_TYPE_OVERLAY = "overlay";
-    
+
     // -------------------------------------------------------------------------
     // MapLegend
     // -------------------------------------------------------------------------
@@ -63,7 +67,7 @@ public interface MappingService
     void addOrUpdateMapLegend( String name, Double startValue, Double endValue, String color, String image );
 
     int addMapLegend( MapLegend mapLegend );
-    
+
     void deleteMapLegend( MapLegend legend );
 
     MapLegend getMapLegend( int id );
@@ -99,21 +103,21 @@ public interface MappingService
     // -------------------------------------------------------------------------
 
     int addMap( Map map );
-    
+
     void updateMap( Map map );
-    
+
     Map getMap( int id );
-    
+
     Map getMap( String uid );
-    
+
     Map getMapNoAcl( String uid );
-    
+
     void deleteMap( Map map );
-        
+
     List<Map> getMapsBetweenLikeName( String name, int first, int max );
-    
+
     List<Map> getAllMaps();
-    
+
     // -------------------------------------------------------------------------
     // MapView
     // -------------------------------------------------------------------------
@@ -133,7 +137,7 @@ public interface MappingService
     MapView getIndicatorLastYearMapView( String indicatorUid, String organisationUnitUid, int level );
 
     Collection<MapView> getAllMapViews();
-    
+
     Collection<MapView> getMapViewsBetweenByName( String name, int first, int max );
 
     // -------------------------------------------------------------------------
@@ -145,7 +149,7 @@ public interface MappingService
     void updateMapLayer( MapLayer mapLayer );
 
     void addOrUpdateMapLayer( String name, String type, String url, String layers, String time, String fillColor,
-                              double fillOpacity, String strokeColor, int strokeWidth );
+        double fillOpacity, String strokeColor, int strokeWidth );
 
     void deleteMapLayer( MapLayer mapLayer );
 
@@ -160,4 +164,12 @@ public interface MappingService
     MapLayer getMapLayerByMapSource( String mapSource );
 
     Collection<MapLayer> getAllMapLayers();
+
+    int countMapViewMaps( MapView mapView );
+
+    int countDataSetCharts( DataSet dataSet );
+
+    int countIndicatorCharts( Indicator indicator );
+
+    int countDataElementCharts( DataElement dataElement );
 }

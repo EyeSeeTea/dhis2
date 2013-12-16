@@ -48,6 +48,7 @@ import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.ValidationUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -79,11 +80,13 @@ public class DataValueController
 
     @Autowired
     private DataSetService dataSetService;
-
+    
+    @PreAuthorize("hasRole('ALL') or hasRole('F_DATAVALUE_ADD')")
     @RequestMapping( method = RequestMethod.POST, produces = "text/plain" )
-    public void saveDataValue( @RequestParam String de, @RequestParam String cc, 
-        @RequestParam String pe, @RequestParam String ou, @RequestParam String value,
-        HttpServletResponse response )
+    public void saveDataValue( @RequestParam String de, @RequestParam(required=false) String co, 
+        @RequestParam String pe, @RequestParam String ou, 
+        @RequestParam(required=false) String value, @RequestParam(required=false) String comment,
+        @RequestParam(required=false) boolean followUp, HttpServletResponse response )
     {
         DataElement dataElement = dataElementService.getDataElement( de );
         
@@ -93,11 +96,20 @@ public class DataValueController
             return;
         }
         
-        DataElementCategoryOptionCombo categoryOptionCombo = categoryService.getDataElementCategoryOptionCombo( cc );
+        DataElementCategoryOptionCombo categoryOptionCombo = null;
+        
+        if ( co == null )
+        {
+            categoryOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
+        }
+        else
+        {
+            categoryOptionCombo = categoryService.getDataElementCategoryOptionCombo( co );
+        }
         
         if ( categoryOptionCombo == null )
         {
-            ContextUtils.conflictResponse( response, "Illegal category option combo identifier: " + cc );
+            ContextUtils.conflictResponse( response, "Illegal category option combo identifier: " + co );
             return;
         }
         
@@ -123,13 +135,19 @@ public class DataValueController
             return;
         }
         
-        value = StringUtils.trimToNull( value );
-
         String valid = ValidationUtils.dataValueIsValid( value, dataElement );
         
         if ( valid != null )
         {
             ContextUtils.conflictResponse( response, "Invalid value: " + value + ", must match data element type: " + dataElement.getType() );
+            return;
+        }
+        
+        valid = ValidationUtils.commentIsValid( comment );
+        
+        if ( valid != null )
+        {
+            ContextUtils.conflictResponse( response, "Invalid comment: " + comment );
             return;
         }
         
@@ -141,15 +159,37 @@ public class DataValueController
         
         if ( dataValue == null )
         {
+            dataValue = new DataValue( dataElement, period, organisationUnit, null, storedBy, now, null, categoryOptionCombo );
+            
             if ( value != null )
             {
-                dataValue = new DataValue( dataElement, period, organisationUnit, value, storedBy, now, null, categoryOptionCombo );
-                dataValueService.addDataValue( dataValue );
+                dataValue.setValue( StringUtils.trimToNull( value ) );
             }
+            
+            if ( comment != null )
+            {
+                dataValue.setComment( StringUtils.trimToNull( comment ) );
+            }
+            
+            dataValueService.addDataValue( dataValue );
         }
         else
         {
-            dataValue.setValue( value );
+            if ( value != null )
+            {
+                dataValue.setValue( StringUtils.trimToNull( value ) );
+            }
+            
+            if ( comment != null )
+            {
+                dataValue.setComment( StringUtils.trimToNull( comment ) );
+            }
+            
+            if ( followUp )
+            {
+                dataValue.toggleFollowUp();
+            }
+            
             dataValue.setTimestamp( now );
             dataValue.setStoredBy( storedBy );
 

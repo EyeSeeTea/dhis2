@@ -28,6 +28,9 @@ package org.hisp.dhis.interpretation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.chart.Chart;
+import org.hisp.dhis.mapping.Map;
+import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.system.deletion.DeletionHandler;
 import org.hisp.dhis.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,5 +64,23 @@ public class InterpretationDeletionHandler
                 interpretationService.updateInterpretation( interpretation );
             }
         }
+    }
+
+    @Override
+    public String allowDeleteMap( Map map )
+    {
+        return interpretationService.countMapInterpretations( map ) == 0 ? null : ERROR;
+    }
+
+    @Override
+    public String allowDeleteChart( Chart chart )
+    {
+        return interpretationService.countChartInterpretations( chart ) == 0 ? null : ERROR;
+    }
+
+    @Override
+    public String allowDeleteReportTable( ReportTable reportTable )
+    {
+        return interpretationService.countReportTableInterpretations( reportTable ) == 0 ? null : ERROR;
     }
 }

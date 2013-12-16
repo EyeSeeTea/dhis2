@@ -28,10 +28,10 @@ package org.hisp.dhis.mapping;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Iterator;
-
 import org.hisp.dhis.system.deletion.DeletionHandler;
 import org.hisp.dhis.user.User;
+
+import java.util.Iterator;
 
 /**
  * @author Lars Helge Overland
@@ -55,7 +55,7 @@ public class MapDeletionHandler
     {
         return Map.class.getSimpleName();
     }
-    
+
     @Override
     public void deleteUser( User user )
     {
@@ -68,7 +68,7 @@ public class MapDeletionHandler
             }
         }
     }
-    
+
     @Override
     public void deleteMap( Map map )
     {
@@ -80,5 +80,5 @@ public class MapDeletionHandler
             views.remove();
             mappingService.deleteMapView( view );
         }
-    }    
+    }
 }

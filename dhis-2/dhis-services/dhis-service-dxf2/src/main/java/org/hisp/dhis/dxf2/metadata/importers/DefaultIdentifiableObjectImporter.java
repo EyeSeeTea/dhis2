@@ -110,7 +110,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     @Autowired
     private SessionFactory sessionFactory;
 
-    @Autowired( required = false )
+    @Autowired(required = false)
     private List<ObjectHandler<T>> objectHandlers;
 
     //-------------------------------------------------------------------------------------------------------
@@ -163,7 +163,12 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
                 deleteExpression( object, "leftSide" );
                 deleteExpression( object, "rightSide" );
                 deleteDataEntryForm( object, "dataEntryForm" );
-                // deleteDataElementOperands( object, "compulsoryDataElementOperands" );
+
+                if ( options.getImportStrategy().isDelete() )
+                {
+                    deleteDataElementOperands( object, "compulsoryDataElementOperands" );
+                }
+
                 deleteDataElementOperands( object, "greyedFields" );
             }
         }
@@ -395,8 +400,46 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     }
 
     //-------------------------------------------------------------------------------------------------------
-    // Generic implementations of newObject and updatedObject
+    // Generic implementations of deleteObject, newObject, updatedObject
     //-------------------------------------------------------------------------------------------------------
+
+    /**
+     * Called every time a idObject is to be deleted.
+     *
+     * @param user            User to check
+     * @param persistedObject The current version of the idObject
+     * @return An ImportConflict instance if there was a conflict, otherwise null
+     */
+    protected boolean deleteObject( User user, T persistedObject )
+    {
+        if ( !SharingUtils.canDelete( user, persistedObject ) )
+        {
+            summaryType.getImportConflicts().add(
+                new ImportConflict( ImportUtils.getDisplayName( persistedObject ), "You do not have delete access to class type." ) );
+
+            log.debug( "You do not have delete access to class type." );
+
+            return false;
+        }
+
+        log.debug( "Trying to delete object => " + ImportUtils.getDisplayName( persistedObject ) + " (" + persistedObject.getClass().getSimpleName() + ")" );
+
+        try
+        {
+            objectBridge.deleteObject( persistedObject );
+        }
+        catch ( Exception ex )
+        {
+            summaryType.getImportConflicts().add(
+                new ImportConflict( ImportUtils.getDisplayName( persistedObject ), ex.getMessage() ) );
+            return false;
+        }
+
+        log.debug( "Delete successful." );
+
+        return true;
+    }
+
 
     /**
      * Called every time a new idObject is to be imported.
@@ -573,6 +616,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     {
         this.options = options;
         this.summaryType = new ImportTypeSummary( importerClass.getSimpleName() );
+        this.summaryType.setDataValueCount( null );
 
         if ( objects.isEmpty() )
         {
@@ -598,6 +642,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     {
         this.options = options;
         this.summaryType = new ImportTypeSummary( importerClass.getSimpleName() );
+        this.summaryType.setDataValueCount( null );
 
         ObjectHandlerUtils.preObjectHandlers( object, objectHandlers );
         importObjectLocal( user, object );
@@ -629,18 +674,18 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
     private void startImport( User user, T object )
     {
-        T oldObject = objectBridge.getObject( object );
+        T persistedObject = objectBridge.getObject( object );
 
-        if ( ImportStrategy.NEW.equals( options.getImportStrategy() ) )
+        if ( options.getImportStrategy().isCreate() )
         {
             if ( newObject( user, object ) )
             {
                 summaryType.incrementImported();
             }
         }
-        else if ( ImportStrategy.UPDATES.equals( options.getImportStrategy() ) )
+        else if ( options.getImportStrategy().isUpdate() )
         {
-            if ( updateObject( user, object, oldObject ) )
+            if ( updateObject( user, object, persistedObject ) )
             {
                 summaryType.incrementUpdated();
             }
@@ -649,11 +694,11 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
                 summaryType.incrementIgnored();
             }
         }
-        else if ( ImportStrategy.NEW_AND_UPDATES.equals( options.getImportStrategy() ) )
+        else if ( options.getImportStrategy().isCreateAndUpdate() )
         {
-            if ( oldObject != null )
+            if ( persistedObject != null )
             {
-                if ( updateObject( user, object, oldObject ) )
+                if ( updateObject( user, object, persistedObject ) )
                 {
                     summaryType.incrementUpdated();
                 }
@@ -674,12 +719,29 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
                 }
             }
         }
+        else if ( options.getImportStrategy().isDelete() )
+        {
+            if ( deleteObject( user, persistedObject ) )
+            {
+                summaryType.incrementDeleted();
+            }
+            else
+            {
+                summaryType.incrementIgnored();
+            }
+        }
     }
 
     private boolean validateIdentifiableObject( T object )
     {
         ImportConflict conflict = null;
         boolean success = true;
+
+        if ( options.getImportStrategy().isDelete() )
+        {
+            success = validateForDeleteStrategy( object );
+            return success;
+        }
 
         if ( object.getName() == null || object.getName().length() == 0 )
         {
@@ -701,15 +763,15 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             summaryType.getImportConflicts().add( conflict );
         }
 
-        if ( ImportStrategy.NEW.equals( options.getImportStrategy() ) )
+        if ( options.getImportStrategy().isCreate() )
         {
             success = validateForNewStrategy( object );
         }
-        else if ( ImportStrategy.UPDATES.equals( options.getImportStrategy() ) )
+        else if ( options.getImportStrategy().isUpdate() )
         {
             success = validateForUpdatesStrategy( object );
         }
-        else if ( ImportStrategy.NEW_AND_UPDATES.equals( options.getImportStrategy() ) )
+        else if ( options.getImportStrategy().isCreateAndUpdate() )
         {
             // if we have a match on at least one of the objects, then assume update
             if ( objectBridge.getObjects( object ).size() > 0 )
@@ -757,6 +819,30 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         if ( objects.size() > 0 )
         {
             conflict = reportConflict( object );
+            summaryType.getImportConflicts().add( conflict );
+
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean validateForDeleteStrategy( T object )
+    {
+        ImportConflict conflict = null;
+        Collection<T> objects = objectBridge.getObjects( object );
+
+        if ( objects.isEmpty() )
+        {
+            conflict = reportLookupConflict( object );
+        }
+        else if ( objects.size() > 1 )
+        {
+            conflict = reportMoreThanOneConflict( object );
+        }
+
+        if ( conflict != null )
+        {
             summaryType.getImportConflicts().add( conflict );
 
             return false;

@@ -28,11 +28,13 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Lists;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
 import org.hisp.dhis.cache.HibernateCacheManager;
-import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.dxf2.timer.SystemNanoTimer;
+import org.hisp.dhis.dxf2.timer.Timer;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.notification.NotificationLevel;
 import org.hisp.dhis.system.notification.Notifier;
@@ -41,7 +43,6 @@ import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -49,7 +50,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static org.springframework.util.Assert.notNull;
@@ -67,7 +67,7 @@ public class DefaultImportService
     // Dependencies
     //-------------------------------------------------------------------------------------------------------
 
-    @Autowired( required = false )
+    @Autowired(required = false)
     private Set<Importer> importerClasses = new HashSet<Importer>();
 
     @Autowired
@@ -116,19 +116,34 @@ public class DefaultImportService
         log.info( "User '" + username + "' started import at " + new Date() );
 
         notifier.clear( taskId ).notify( taskId, "Importing meta-data" );
+        Timer timer = new SystemNanoTimer();
+        timer.start();
 
         ImportSummary importSummary = new ImportSummary();
 
+        objectBridge.setWriteEnabled( !importOptions.isDryRun() );
+        objectBridge.setPreheatCache( importOptions.isPreheatCache() );
         objectBridge.init();
 
-        if ( importOptions.isDryRun() )
+        List<String> types;
+
+        if ( importOptions.getImportStrategy().isDelete() )
         {
-            objectBridge.setWriteEnabled( false );
+            types = Lists.reverse( Lists.newArrayList( ExchangeClasses.getDeletableMap().values() ) );
+        }
+        else
+        {
+            types = Lists.newArrayList( ExchangeClasses.getImportMap().values() );
         }
 
-        for ( Map.Entry<Class<? extends IdentifiableObject>, String> entry : ExchangeClasses.getImportMap().entrySet() )
+        /*
+        types.clear();
+        types.add( "dataSets" );
+        */
+
+        for ( String type : types )
         {
-            Object value = ReflectionUtils.invokeGetterMethod( entry.getValue(), metaData );
+            Object value = ReflectionUtils.invokeGetterMethod( type, metaData );
 
             if ( value != null )
             {
@@ -138,7 +153,7 @@ public class DefaultImportService
 
                     if ( !objects.isEmpty() )
                     {
-                        String message = "Importing " + objects.size() + " " + StringUtils.capitalize( entry.getValue() );
+                        String message = "Importing " + objects.size() + " " + StringUtils.capitalize( type );
 
                         if ( taskId != null )
                         {
@@ -160,12 +175,12 @@ public class DefaultImportService
                 }
                 else
                 {
-                    log.warn( "Getter for '" + entry.getValue() + "' did not return a collection." );
+                    log.warn( "Getter for '" + type + "' did not return a collection." );
                 }
             }
             else
             {
-                log.warn( "Can not find getter for '" + entry.getValue() + "'." );
+                log.warn( "Can not find getter for '" + type + "'." );
             }
         }
 
@@ -177,14 +192,16 @@ public class DefaultImportService
         cacheManager.clearCache();
         objectBridge.destroy();
 
+        timer.stop();
+
         if ( taskId != null )
         {
-            notifier.notify( taskId, NotificationLevel.INFO, "Import done", true ).
+            notifier.notify( taskId, NotificationLevel.INFO, "Import done. Completed in " + timer.toString() + ".", true ).
                 addTaskSummary( taskId, importSummary );
         }
         else
         {
-            log.info( "Import done." );
+            log.info( "Import done. Completed in " + timer.toString() + "." );
         }
 
         return importSummary;
