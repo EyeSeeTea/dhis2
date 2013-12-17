@@ -1105,7 +1105,20 @@ Ext.onReady( function() {
 					addOptionValue: function(option) {
 						var value = this.getValue();
 
-						this.setValue(value ? value + '; ' + option : option);
+						if (value) {
+							var a = value.split(';');
+
+							for (var i = 0; i < a.length; i++) {
+								a[i] = Ext.String.trim(a[i]);
+							};
+
+							a = Ext.Array.clean(a);
+
+							value = a.join('; ');
+							value += '; ';
+						}
+
+						this.setValue(value += option);
 					}							
 				});					
 
