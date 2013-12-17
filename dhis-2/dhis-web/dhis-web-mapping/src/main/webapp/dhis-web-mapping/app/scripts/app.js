@@ -1011,7 +1011,7 @@ Ext.onReady( function() {
             }
         });
 
-        Ext.define('Ext.ux.panel.DataElementOptionContainer', {
+		Ext.define('Ext.ux.panel.DataElementOptionContainer', {
 			extend: 'Ext.container.Container',
 			alias: 'widget.dataelementintegerpanel',
 			layout: 'column',
@@ -4409,8 +4409,6 @@ Ext.onReady( function() {
 			fields: [''],
 			data: []
 		});
-		
-nissa = dataElementsByStageStore;
         
 		// Components
 
@@ -4576,12 +4574,18 @@ nissa = dataElementsByStageStore;
         selectDataElements = function(items) {
             var dataElements = [],
                 availableStore = dataElementsByStageStore,
-                map;
+                getUx;
 
-            map = {
-				'int': 'Ext.ux.panel.DataElementIntegerContainer',
-				'string': 'Ext.ux.panel.DataElementIntegerContainer',
-				'boolean': 'Ext.ux.panel.DataElementIntegerContainer'
+            getUx = function(element) {
+				if (Ext.isObject(element.optionSet) && Ext.isString(element.optionSet.id)) {
+					return 'Ext.ux.panel.DataElementOptionContainer';
+				}
+
+				if (element.type === 'int') {
+					return 'Ext.ux.panel.DataElementIntegerContainer';
+				}
+
+				return 'Ext.ux.panel.DataElementIntegerContainer';
 			};
 
 			// data element objects
@@ -4603,7 +4607,7 @@ nissa = dataElementsByStageStore;
             for (var i = 0, element, ux, optionSetId; i < dataElements.length; i++) {
 				element = dataElements[i];
 
-				dataElementSelected.add(Ext.create(map[element.type], {
+				dataElementSelected.add(Ext.create(getUx(element), {
 					id: element.id,
 					dataElement: element,
 					removeDataElement: function() {
