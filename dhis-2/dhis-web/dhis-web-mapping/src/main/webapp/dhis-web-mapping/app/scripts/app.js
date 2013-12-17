@@ -660,7 +660,7 @@ Ext.onReady( function() {
 			layer = gis.layer.event;
 			layer.menu = GIS.app.LayerMenu(layer, 'gis-toolbar-btn-menu-first');
 			layer.widget = GIS.app.LayerWidgetEvent(layer);
-			layer.window = GIS.app.WidgetWindow(layer, gis.conf.layout.widget.window_width + 100);
+			layer.window = GIS.app.WidgetWindow(layer, gis.conf.layout.widget.window_width + 150);
 			layer.window.widget = layer.widget;
 			GIS.core.createSelectHandlers(gis, layer);
 
@@ -1018,6 +1018,7 @@ Ext.onReady( function() {
             bodyStyle: 'border:0 none',
             nameCmp: null,
             operatorCmp: null,
+            searchCmp: null,
             valueCmp: null,
             valueStore: null,
             addCmp: null,
@@ -1030,17 +1031,12 @@ Ext.onReady( function() {
                     displayField: 'name',
                     queryMode: 'local',
                     editable: false,
-                    width: 60,
-                    value: 'EQ',
+                    width: 70,
+                    value: 'IN',
                     store: {
                         fields: ['id', 'name'],
                         data: [
-                            {id: 'LIKE', name: ''},
-                            {id: 'IN', name: '>'},
-                            {id: 'GE', name: '>='},
-                            {id: 'LT', name: '<'},
-                            {id: 'LE', name: '<='},
-                            {id: 'NE', name: '!='}
+                            {id: 'IN', name: 'One of'}
                         ]
                     }
                 });
@@ -1069,40 +1065,49 @@ Ext.onReady( function() {
 										name: option
 									});
 								});
-
+								
 								that.loadData(data);
 							}
 						});
-					},
-					listeners: {
-						load: function(store, records) {
-							console.log(records);
-							//Ext.each(records, function(record) {
-								//record.set('name', record.get('id'));
-							//});
-						}
 					}
 				});
 
-                this.valueCmp = Ext.create('Ext.form.field.ComboBox', {
-                    width: 250,
-                    emptyText: 'Search for options',
+                this.searchCmp = Ext.create('Ext.form.field.ComboBox', {
+                    width: 80,
+                    emptyText: 'Search..',
                     valueField: 'id',
                     displayField: 'name',
-                    multiSelect: true,
                     hideTrigger: true,
+                    delimiter: '; ',
                     enableKeyEvents: true,
                     store: this.valueStore,
                     listeners: {
 						keyup: {
 							fn: function(cb) {
-								that.valueStore.loadStore(that.dataElement.optionSet.id, cb.getValue());
+								var optionSetId = that.dataElement.optionSet.id,
+									value = cb.getValue() ? Ext.String.trim(cb.getValue().split(';').pop()) : null;
+									
+								that.valueStore.loadStore(optionSetId, value);
 								cb.expand();
 							},
-							buffer: 50
+							buffer: 100
+						},
+						select: function(cb) {
+							that.valueCmp.addOptionValue(cb.getValue());
+
+							cb.clearValue();
 						}
 					}							
                 });
+
+                this.valueCmp = Ext.create('Ext.form.field.Text', {
+					width: 220,
+					addOptionValue: function(option) {
+						var value = this.getValue();
+
+						this.setValue(value ? value + '; ' + option : option);
+					}							
+				});					
 
                 this.addCmp = Ext.create('Ext.button.Button', {
                     text: '+',
@@ -1127,6 +1132,7 @@ Ext.onReady( function() {
                 this.items = [
                     this.nameCmp,
                     this.operatorCmp,
+                    this.searchCmp,
                     this.valueCmp,
                     this.addCmp,
                     this.removeCmp
@@ -4554,7 +4560,7 @@ Ext.onReady( function() {
 
 		dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-left',
-			width: 382,
+			width: 432,
             height: 112,
 			valueField: 'id',
 			displayField: 'name',
@@ -4603,8 +4609,8 @@ Ext.onReady( function() {
 		});
 
         dataElementSelected = Ext.create('Ext.panel.Panel', {
-			width: 382,
-            height: 200,
+			width: 432,
+            height: 220,
             bodyStyle: 'padding:2px 5px 5px; overflow-y: scroll',
             tbar: {
                 height: 27,
