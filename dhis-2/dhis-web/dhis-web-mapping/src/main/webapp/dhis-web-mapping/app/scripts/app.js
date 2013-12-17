@@ -4445,6 +4445,7 @@ Ext.onReady( function() {
 				callback: function(records) {
 					stage.enable();
 					stage.clearValue();
+					stage.queryMode = 'local';
 					
 					if (records.length === 1) {
 						stage.setValue(records[0].data.id);
@@ -4573,8 +4574,14 @@ Ext.onReady( function() {
         selectDataElements = function(items) {
             var dataElements = [],
                 store = dataElementsByStageStore,
-                row;
+                map;
 
+            map = {
+				'int': 'Ext.ux.panel.DataElementIntegerContainer',
+				'string': 'Ext.ux.panel.DataElementIntegerContainer'
+			};
+
+			// data element objects
             for (var i = 0, item; i < items.length; i++) {
                 if (Ext.isString(items[i])) {
                     dataElements.push(store.getAt(store.findExact('id', items[i])).data);
@@ -4589,20 +4596,28 @@ Ext.onReady( function() {
                 }
             }
 
-            for (var i = 0, element; i < dataElements.length; i++) {
-                element = dataElements[i];
+			// panel, store
+            for (var i = 0, element, ux, optionSetId; i < dataElements.length; i++) {
 
-                dataElementSelected.add(Ext.create('Ext.ux.panel.DataElementIntegerContainer', {
-                    id: element.id,
-                    dataElement: element,
-                    removeDataElement: function() {
-                        dataElementsByStageStore.add(this.dataElement);
-                        
-                        dataElementSelected.remove(this.id);
-                    }
-                }));
+                Ext.Ajax.request({
+					url: gis.init.contextPath + '/api/dataElements/' + dataElements[i].id + '.json?links=false',
+					success: function(r) {
+						element = Ext.decode(r.responseText);
+						ux = map[element.type];
 
-                store.removeAt(store.findExact('id', element.id));
+						dataElementSelected.add(Ext.create(ux, {
+							id: element.id,
+							dataElement: element,
+							removeDataElement: function() {
+								dataElementsByStageStore.add(this.dataElement);
+								
+								dataElementSelected.remove(this.id);
+							}
+						}));
+
+						store.removeAt(store.findExact('id', element.id));
+					}
+				});
             }
         };
 

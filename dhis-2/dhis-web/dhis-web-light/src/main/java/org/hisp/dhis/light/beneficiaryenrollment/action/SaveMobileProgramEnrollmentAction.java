@@ -40,6 +40,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.struts2.StrutsStatics;
 import org.hisp.dhis.light.utils.FormUtils;
+import org.hisp.dhis.light.utils.ValueUtils;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.patient.PatientAttributeOption;
@@ -60,6 +61,7 @@ import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.system.util.DateUtils;
+import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.util.ContextUtils;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -310,12 +312,12 @@ public class SaveMobileProgramEnrollmentAction
         Map<String, String> parameterMap = ContextUtils.getParameterMap( request );
         DateTimeFormatter sdf = ISODateTimeFormat.yearMonthDay();
 
-        if ( !FormUtils.isDate( enrollmentDate ) )
+        if ( !ValueUtils.isDate( enrollmentDate ) )
         {
             validationMap.put( "enrollmentDate", "is_invalid_date" );
         }
 
-        if ( !FormUtils.isDate( incidentDate ) )
+        if ( !ValueUtils.isDate( incidentDate ) )
         {
             validationMap.put( "incidentDate", "is_invalid_date" );
         }
@@ -341,7 +343,7 @@ public class SaveMobileProgramEnrollmentAction
                     {
                         this.validationMap.put( key, "is_mandatory" );
                     }
-                    else if ( patientIdentifierType.getType().equals( "number" ) && !FormUtils.isNumber( value ) )
+                    else if ( patientIdentifierType.getType().equals( "number" ) && !MathUtils.isNumeric( value ) )
                     {
                         this.validationMap.put( key, "is_invalid_number" );
                     }
@@ -377,13 +379,13 @@ public class SaveMobileProgramEnrollmentAction
                     }
                     else if ( value.trim().length() > 0
                         && patientAttribute.getValueType().equals( PatientAttribute.TYPE_INT )
-                        && !FormUtils.isInteger( value ) )
+                        && !MathUtils.isInteger( value ) )
                     {
                         this.validationMap.put( key, "is_invalid_number" );
                     }
                     else if ( value.trim().length() > 0
                         && patientAttribute.getValueType().equals( PatientAttribute.TYPE_DATE )
-                        && !FormUtils.isDate( value ) )
+                        && !ValueUtils.isDate( value ) )
                     {
                         this.validationMap.put( key, "is_invalid_date" );
                     }

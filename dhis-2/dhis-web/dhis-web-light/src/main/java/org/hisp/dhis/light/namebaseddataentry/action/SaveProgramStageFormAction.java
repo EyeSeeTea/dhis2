@@ -38,7 +38,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.struts2.StrutsStatics;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.light.utils.NamebasedUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -112,34 +111,12 @@ public class SaveProgramStageFormAction
 
     private PatientService patientService;
 
-    public PatientService getPatientService()
-    {
-        return patientService;
-    }
-
     public void setPatientService( PatientService patientService )
     {
         this.patientService = patientService;
     }
 
-    private DataElementCategoryService dataElementCategoryService;
-
-    public DataElementCategoryService getDataElementCategoryService()
-    {
-        return dataElementCategoryService;
-    }
-
-    public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
-    {
-        this.dataElementCategoryService = dataElementCategoryService;
-    }
-
     private ProgramStageService programStageService;
-
-    public ProgramStageService getProgramStageService()
-    {
-        return programStageService;
-    }
 
     public void setProgramStageService( ProgramStageService programStageService )
     {
@@ -148,22 +125,12 @@ public class SaveProgramStageFormAction
 
     private ProgramStageDataElementService programStageDataElementService;
 
-    public ProgramStageDataElementService getProgramStageDataElementService()
-    {
-        return programStageDataElementService;
-    }
-
     public void setProgramStageDataElementService( ProgramStageDataElementService programStageDataElementService )
     {
         this.programStageDataElementService = programStageDataElementService;
     }
 
     private PatientDataValueService patientDataValueService;
-
-    public PatientDataValueService getPatientDataValueService()
-    {
-        return patientDataValueService;
-    }
 
     public void setPatientDataValueService( PatientDataValueService patientDataValueService )
     {
@@ -172,22 +139,12 @@ public class SaveProgramStageFormAction
 
     private ProgramValidationService programValidationService;
 
-    public ProgramValidationService getProgramValidationService()
-    {
-        return programValidationService;
-    }
-
     public void setProgramValidationService( ProgramValidationService programValidationService )
     {
         this.programValidationService = programValidationService;
     }
 
     private ProgramStageInstanceService programStageInstanceService;
-
-    public ProgramStageInstanceService getProgramStageInstanceService()
-    {
-        return programStageInstanceService;
-    }
 
     public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
     {
@@ -203,22 +160,12 @@ public class SaveProgramStageFormAction
 
     private ProgramExpressionService programExpressionService;
 
-    public ProgramExpressionService getProgramExpressionService()
-    {
-        return programExpressionService;
-    }
-
     public void setProgramExpressionService( ProgramExpressionService programExpressionService )
     {
         this.programExpressionService = programExpressionService;
     }
 
     private OrganisationUnitService organisationUnitService;
-
-    public OrganisationUnitService getOrganisationUnitService()
-    {
-        return organisationUnitService;
-    }
 
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {

@@ -31,12 +31,12 @@ package org.hisp.dhis.light.namebaseddataentry.action;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hisp.dhis.api.mobile.model.Activity;
 import org.hisp.dhis.api.mobile.ActivityReportingService;
+import org.hisp.dhis.api.mobile.model.Activity;
 import org.hisp.dhis.api.mobile.model.ActivityPlan;
-import org.hisp.dhis.light.utils.NamebasedUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
+
 import com.opensymphony.xwork2.Action;
 
 public class GetActivityListAction
@@ -58,18 +58,6 @@ public class GetActivityListAction
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
-    }
-
-    private NamebasedUtils util;
-
-    public void setUtil( NamebasedUtils util )
-    {
-        this.util = util;
-    }
-
-    public NamebasedUtils getUtil()
-    {
-        return util;
     }
 
     // -------------------------------------------------------------------------
