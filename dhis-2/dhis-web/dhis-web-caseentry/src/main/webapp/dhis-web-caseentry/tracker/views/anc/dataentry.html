@@ -26,20 +26,18 @@
 	<div class="panel panel-primary">
 		<div class="panel-heading">
 			{{'conditions_complications' | translate}}
-		</div>
-		<br/>		 
+		</div>			 
 		<div class="list-group" ng-repeat="con in conResultGen">
-			{{con}}			
+                    <div class="list-group-item">{{con}}</div>
 		</div>
 	</div>
 	
 	<div class="panel panel-primary">
 		<div class="panel-heading">
 			{{'reminders' | translate}}
-		</div>
-		<br/>		 
+		</div> 
 		<div class="list-group" ng-repeat="rem in remResultGen">
-			{{rem}}
+			<div class="list-group-item">{{rem}}</div>
 		</div>
 	</div>
 	

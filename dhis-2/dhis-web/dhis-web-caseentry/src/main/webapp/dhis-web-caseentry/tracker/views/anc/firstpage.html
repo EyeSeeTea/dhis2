@@ -23,7 +23,7 @@
     </div>
     <div ng-switch-default>
 
-        <table class="table table-hover">
+        <table class="table table-striped">
             <thead>
                 <tr>
                     <th>#</th>
@@ -41,24 +41,28 @@
                 <td>{{ person.dateOfBirth.date | date:'yyyy-MM-dd' }} ({{person.dateOfBirth.age}})</td>
                 <td>{{ person.contact.phoneNumber}}</td>
                 <td>
-
-                    <!--<img ng-src="img/edit.png" alt="{{'edit_person_profile' | translate}}" title="{{'edit_person_profile' | translate}}" width="24" height="24" style="border:none;" ng-click="showEditPerson(person.person)" style="border:none;"/>
-                    <img ng-src="img/enroll.png" alt="{{'enrollment' | translate}}" title="{{'enrollment' | translate}}" width="24" height="24" style="border:none;" ng-click="enrollPerson(person.person)" style="border:none;"/>-->
-
-                    <a href="#/personedit?personUid={{person.person}}" title="{{'edit_person_profile'| translate}}">
-                        <img src="img/edit.png" alt="{{'edit_person_profile'| translate}}" width="24" height="24" style="border:none;"/>
+                    <a href="#/personedit?personUid={{person.person}}" title="{{'person_profile'| translate}}">
+                        <i class="fa fa-pencil-square-o fa-2x" title="{{'person_profile'| translate}}"></i>                        
                     </a>
+                    &nbsp;
                     <a href="#/enrollment?personUid={{person.person}}" title="{{'enrollment'| translate}}">
-                        <img src="img/enroll.png" alt="{{'enrollment'| translate}}" width="24" height="24" style="border:none;"/>
+                        <i class="fa fa-caret-square-o-left fa-2x" title="{{'enrollment'| translate}}"></i>                          
                     </a>
-                    <a href="#/anc/dashboard?personUid={{person.person}}" title="{{'visits'| translate}}">
-                        <img src="img/consultation.png" alt="{{'visits'| translate}}" width="24" height="24" style="border:none;"/>
+                    &nbsp;
+                    <a href="#/anc/dashboard?personUid={{person.person}}" title="{{'consultation'| translate}}">
+                        <i class="fa fa-user-md fa-2x" title="{{'consultation'| translate}}"></i>                       
                     </a>
+                    &nbsp;
                     <a href="#/anc/lab?personUid={{person.person}}" title="{{'lab_report'| translate}}">
-                        <img src="img/lab.png" alt="{{'lab_report'| translate}}" width="24" height="24" style="border:none;"/>
+                        <i class="fa fa-file-text-o fa-2x" title="{{'lab_report'| translate}}"></i>    
                     </a>
+                    &nbsp;
                     <a href="#/anc/summary?personUid={{person.person}}" title="{{'summary_report'| translate}}">
-                        <img src="img/summary.png" alt="{{'summary_report'| translate}}" width="24" height="24" style="border:none;"/>
+                        <i class="fa fa-list-alt fa-2x" title="{{'summary_report'| translate}}"></i>                       
+                    </a>
+                    &nbsp;
+                    <a href="#/anc/fundalheight?personUid={{person.person}}" title="{{'fundal_height'| translate}}">
+                        <i class="fa fa-bar-chart-o fa-2x" title="{{'fundal_height'| translate}}"></i>                            
                     </a>
                 </td>
             </tr>
