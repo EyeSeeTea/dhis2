@@ -318,7 +318,7 @@
   </bean>
 
   <bean id="org.hisp.dhis.mapping.MapViewStore"
-    class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
+    class="org.hisp.dhis.mapping.hibernate.HibernateMapViewStore">
     <property name="clazz" value="org.hisp.dhis.mapping.MapView" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
@@ -590,7 +590,6 @@
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
 
-  <!--@author Ovidiu Rosu <rosu.ovi@gmail.com>-->
   <bean id="org.hisp.dhis.filter.MetaDataFilterService" class="org.hisp.dhis.filter.DefaultMetaDataFilterService">
     <property name="metaDataFilterStore" ref="org.hisp.dhis.filter.MetaDataFilterStore" />
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
@@ -894,13 +893,7 @@
     <property name="runlevel" value="7" />
     <property name="skipInTests" value="true" />
   </bean>
-  
-  <!--<bean id="org.hisp.dhis.user.UserDefaultPopulator" class="org.hisp.dhis.user.UserDefaultPopulator">
-    <property name="userService" ref="org.hisp.dhis.user.UserService" />
-    <property name="runlevel" value="5" />
-    <property name="skipInTests" value="true" />
-  </bean>-->
-  
+    
   <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
     <property name="targetObject" ref="org.hisp.dhis.system.startup.StartupRoutineExecutor" />
     <property name="targetMethod" value="addStartupRoutines" />
@@ -917,7 +910,6 @@
           <ref local="org.hisp.dhis.startup.ExpressionUpgrader" />
           <ref local="org.hisp.dhis.startup.ConfigurationPopulator" />
           <ref local="org.hisp.dhis.startup.I18nLocalePopulator" />
-          <!--<ref local="org.hisp.dhis.user.UserDefaultPopulator" />-->
         </list>
       </list>
     </property>
@@ -1079,6 +1071,8 @@
 
   <bean id="org.hisp.dhis.sms.SMSCommandDeletionHandler" class="org.hisp.dhis.sms.SMSCommandDeletionHandler" />
 
+  <bean id="org.hisp.dhis.sms.SMSCodesDeletionHandler" class="org.hisp.dhis.sms.SMSCodesDeletionHandler" />
+
   <!-- DeletionManager -->
 
   <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
@@ -1121,6 +1115,7 @@
           <ref local="org.hisp.dhis.mapping.MapLegendSetDeletionHandler" />
           <ref local="org.hisp.dhis.mapping.MapViewDeletionHandler" />
           <ref local="org.hisp.dhis.sms.SMSCommandDeletionHandler" />
+          <ref local="org.hisp.dhis.sms.SMSCodesDeletionHandler" />
         </list>
       </list>
     </property>

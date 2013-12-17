@@ -32,11 +32,16 @@ import com.google.common.collect.Lists;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
+import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.cache.HibernateCacheManager;
+import org.hisp.dhis.concept.Concept;
+import org.hisp.dhis.constant.Constant;
+import org.hisp.dhis.document.Document;
 import org.hisp.dhis.dxf2.timer.SystemNanoTimer;
 import org.hisp.dhis.dxf2.timer.Timer;
-import org.hisp.dhis.importexport.ImportStrategy;
+import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.scheduling.TaskId;
+import org.hisp.dhis.sqlview.SqlView;
 import org.hisp.dhis.system.notification.NotificationLevel;
 import org.hisp.dhis.system.notification.Notifier;
 import org.hisp.dhis.system.util.ReflectionUtils;
@@ -128,19 +133,14 @@ public class DefaultImportService
 
         List<String> types;
 
-        if ( ImportStrategy.DELETES.equals( importOptions.getImportStrategy() ) )
+        if ( importOptions.getImportStrategy().isDelete() )
         {
-            types = Lists.reverse( Lists.newArrayList( ExchangeClasses.getImportMap().values() ) );
+            types = Lists.reverse( Lists.newArrayList( ExchangeClasses.getDeletableMap().values() ) );
         }
         else
         {
             types = Lists.newArrayList( ExchangeClasses.getImportMap().values() );
         }
-
-        /*
-        types.clear();
-        types.add( "dataSets" );
-        */
 
         for ( String type : types )
         {

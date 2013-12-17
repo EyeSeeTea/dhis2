@@ -28,6 +28,16 @@ package org.hisp.dhis.organisationunit.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -47,16 +57,6 @@ import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.security.access.AccessDeniedException;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Kristian Nordal
@@ -191,7 +191,8 @@ public class HibernateOrganisationUnitStore
     public Map<String, Set<String>> getOrganisationUnitDataSetAssocationMap()
     {
         final String sql = "select ds.uid as ds_uid, ou.uid as ou_uid from datasetsource d " +
-            "left join organisationunit ou on ou.organisationunitid=d.sourceid left join dataset ds on ds.datasetid=d.datasetid";
+            "left join organisationunit ou on ou.organisationunitid=d.sourceid " +
+            "left join dataset ds on ds.datasetid=d.datasetid";
 
         final Map<String, Set<String>> map = new HashMap<String, Set<String>>();
 
@@ -220,10 +221,10 @@ public class HibernateOrganisationUnitStore
     @Override
     public Map<String, Set<String>> getOrganisationUnitGroupDataSetAssocationMap()
     {
-        final String sql = "select ds.uid as ds_uid, ou.uid as ou_uid from orgunitgroupdatasets ougds\n" +
-            "\tleft join orgunitgroupmembers ougm on ougds.orgunitgroupid=ougm.orgunitgroupid\n" +
-            "\tleft join organisationunit ou on ou.organisationunitid=ougm.organisationunitid\n" +
-            "\tleft join dataset ds on ds.datasetid=ougds.datasetid;\n";
+        final String sql = "select ds.uid as ds_uid, ou.uid as ou_uid from orgunitgroupdatasets ougds " +
+            "left join orgunitgroupmembers ougm on ougds.orgunitgroupid=ougm.orgunitgroupid " +
+            "left join organisationunit ou on ou.organisationunitid=ougm.organisationunitid " +
+            "left join dataset ds on ds.datasetid=ougds.datasetid";
 
         final Map<String, Set<String>> map = new HashMap<String, Set<String>>();
 
@@ -312,7 +313,6 @@ public class HibernateOrganisationUnitStore
             + " and CAST( SUBSTRING(coordinates, LOCATE(',', o.coordinates) + 1, LOCATE(']', o.coordinates) - LOCATE(',', o.coordinates) - 1 ) AS big_decimal ) <= " + box[0]
         ).list();
     }
-
 
     // -------------------------------------------------------------------------
     // OrganisationUnitHierarchy

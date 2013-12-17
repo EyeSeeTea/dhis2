@@ -1,4 +1,4 @@
-package org.hisp.dhis.common.hibernate;
+package org.hisp.dhis.mapping.hibernate;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -29,41 +29,22 @@ package org.hisp.dhis.common.hibernate;
  */
 
 import org.hibernate.Query;
-import org.hisp.dhis.common.AnalyticalObjectStore;
-import org.hisp.dhis.common.BaseAnalyticalObject;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.common.hibernate.HibernateAnalyticalObjectStore;
+import org.hisp.dhis.mapping.MapLegendSet;
+import org.hisp.dhis.mapping.MapView;
+import org.hisp.dhis.mapping.MapViewStore;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class HibernateAnalyticalObjectStore<T extends BaseAnalyticalObject>
-    extends HibernateIdentifiableObjectStore<T> implements AnalyticalObjectStore<T>
+public class HibernateMapViewStore
+    extends HibernateAnalyticalObjectStore<MapView> implements MapViewStore
 {
     @Override
-    public int countDataSetAnalyticalObject( DataSet dataSet )
+    public int countMapLegendSetMapViews( MapLegendSet mapLegendSet )
     {
-        Query query = getQuery( "select count(distinct c) from " + clazz.getName() + " c where :dataSet in elements(c.dataSets)" );
-        query.setEntity( "dataSet", dataSet );
-
-        return ((Long) query.uniqueResult()).intValue();
-    }
-
-    @Override
-    public int countIndicatorAnalyticalObject( Indicator indicator )
-    {
-        Query query = getQuery( "select count(distinct c) from " + clazz.getName() + " c where :indicator in elements(c.indicators)" );
-        query.setEntity( "indicator", indicator );
-
-        return ((Long) query.uniqueResult()).intValue();
-    }
-
-    @Override
-    public int countDataElementAnalyticalObject( DataElement dataElement )
-    {
-        Query query = getQuery( "select count(distinct c) from " + clazz.getName() + " c where :dataElement in elements(c.dataElements)" );
-        query.setEntity( "dataElement", dataElement );
+        Query query = getQuery( "select count(distinct c) from MapView c where c.legendSet=:mapLegendSet" );
+        query.setEntity( "mapLegendSet", mapLegendSet );
 
         return ((Long) query.uniqueResult()).intValue();
     }

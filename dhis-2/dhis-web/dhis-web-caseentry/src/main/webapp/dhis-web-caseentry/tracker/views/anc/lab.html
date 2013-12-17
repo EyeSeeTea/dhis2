@@ -1,34 +1,23 @@
 <div class="information_bar">
-    <div class="info_container-1-3">
+    <div class="info_container-1-2">
         <div class="panel panel-primary">
             <div class="panel-heading">
-                {{'person_profile' | translate}}
+                {{'person_profile'| translate}}
             </div>
             <div class="list-group">            	
-              	<div class="list-group-item">{{'full_name' | translate}}: {{person.name}}</div>
-              	<div class="list-group-item">{{'date_of_birth' | translate}}: {{ person.dateOfBirth.date | date:'yyyy-MM-dd' }} ({{person.dateOfBirth.age}})</div>
+                <div class="list-group-item"><strong>{{'full_name'| translate}}:</strong> {{person.name}}</div>
+                <div class="list-group-item"><strong>{{'date_of_birth'| translate}}:</strong> {{ person.dateOfBirth.date | date:'yyyy-MM-dd' }} ({{person.dateOfBirth.age}})</div>
             </div>
         </div>
     </div>
-
-    <div class="info_container-1-3">
+    <div class="info_container-1-2">
         <div class="panel panel-primary">
             <div class="panel-heading">
-				{{'allergies' | translate}}
-			</div>
-			<div class="panel-body">
-				{{allergies}}
-			</div>
-        </div>
-    </div>
-    <div class="info_container-1-3">
-        <div class="panel panel-primary">
-            <div class="panel-heading">
-				{{'medications' | translate}}
-			</div>
-			<div class="panel-body">
-				{{medication}}
-			</div>
+                {{'additional_information'| translate}}
+            </div>
+            <div class="panel-body">
+                {{allergies}}
+            </div>
         </div>
     </div>
 </div>

@@ -21,6 +21,34 @@ var trackerDirectives = angular.module('trackerDirectives', [])
             };
         })
 
+        .directive('menu', function() {
+            return {
+                restrict: 'A',
+                link: function(scope, element, attrs) {
+
+                    if (scope.hasMenu) {
+                        element.contextmenu({
+                            menu: [
+                                {title: "Remove", "cmd": "remove"},
+                                {title: "Add", "cmd": "add"},
+                            ],
+                            select: function(event, ui) {
+                                //alert("select " + ui.cmd + " on" + ui.target.text());
+                                if (ui.cmd === 'remove') {
+                                    alert('Remove selected on ' + scope.item);
+                                }
+                                if (ui.cmd === 'add') {
+                                    alert("Add selected");
+                                }
+                            }
+                        });
+                    }
+
+                }
+            };
+        })
+
+
         .directive('uiTree', function() {
             return {
                 template: '<ul class="uiTree"><ui-tree-node ng-repeat="node in tree"></ui-tree-node></ul>',

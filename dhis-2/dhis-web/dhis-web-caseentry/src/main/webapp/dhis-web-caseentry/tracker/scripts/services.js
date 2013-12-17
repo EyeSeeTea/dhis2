@@ -79,16 +79,6 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
     };
 })
 
-/* Factory for fetching current logged in user */
-.factory('UserFactory', function($http) {
-
-    return {
-        getCurrentUser: function(data) {
-            $http.get('../../api/me/user-account').success(data);
-        }
-    };
-})
-
 /* Factory for loading OrgUnit */
 .factory('OrgUnitFactory', function($http) {
 

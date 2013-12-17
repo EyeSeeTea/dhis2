@@ -309,7 +309,7 @@ img {
 /* INFORMATION BAR */
 
 .information_bar {
-    width: 75%;
+    width: 63.5%;
     float: left;
     margin-top: 10px;
     margin-bottom: -15px;
@@ -317,6 +317,12 @@ img {
 
 .info_container-1-3 {
     width: 31.83%;
+    float: left;
+    margin-right: 1.5%;
+}
+
+.info_container-1-2 {
+    width: 48.5%;
     float: left;
     margin-right: 1.5%;
 }
@@ -332,7 +338,7 @@ img {
 /* SIDEBAR */
 
 .side_bar {
-    width: 25%;
+    width: 35%;
     float: right;
     margin-top: 10px;
 }
@@ -340,9 +346,10 @@ img {
 /* MAIN CONTENT */
 
 .main_content {
-    width: 73.5%;
+    width: 62%;
     min-height: 600px;
     float: left;
+    margin-right: 1.5%;
 }
 
 .main_content_left {
@@ -422,4 +429,18 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
 .modal.fade.in {
     z-index: 1050;
     top: 50%;
+}
+
+table.cell-highlight > tbody > tr:hover {
+    opacity: 0.5; 
+    -webkit-transition: opacity 0.15s linear;
+    -moz-transition: opacity 0.15s linear;
+    -o-transition: opacity 0.15s linear;
+    transition: opacity 0.15s linear;
+}
+
+noteSearchText {
+    border: 5px solid black; 
+    padding: 20px;
+    color: red; 
 }

@@ -212,7 +212,6 @@ var trackerControllers = angular.module('trackerControllers', [])
                 CurrentUserProfile,
                 $translate,
                 PersonFactory,
-                $filter,
                 storage) {
 
     //Get current locale
@@ -226,12 +225,9 @@ var trackerControllers = angular.module('trackerControllers', [])
 
     //Pick selected person and fetch profile from server
     $scope.personUid = ($location.search()).personUid;
-    PersonFactory.getPerson($scope.personUid)
-            .success(function(person) {
-                $scope.person = person;
-                $scope.person.dateOfBirth.date = $filter('date')($scope.person.dateOfBirth.date, 'yyyy-MM-dd');
-                console.log('The person I am going to edit is:  ', $scope.person);
-            });
+    PersonFactory.getPerson($scope.personUid).success(function(person) {
+       $scope.person = person;       
+    });
 
     $scope.cancel = function() {
         $location.path('/anc');
@@ -364,7 +360,6 @@ var trackerControllers = angular.module('trackerControllers', [])
                 $translate,
                 OrgUnitFactory,
                 ProgramFactory,
-                UtilityService,
                 storage) {
 
     //Get current locale and do translations
@@ -467,8 +462,6 @@ var trackerControllers = angular.module('trackerControllers', [])
                 $translate,
                 PersonFactory,
                 EnrollmentFactory,
-                $modal,
-                $log,
                 storage) {
 
     //Get current locale
@@ -819,13 +812,7 @@ var trackerControllers = angular.module('trackerControllers', [])
             });
         });
     };
-
-    $scope.items = ['item1', 'item2', 'item3'];
-    $scope.selected = {};
-
-    $scope.writeNote = function() {
-
-    };
+   
 })
 
 //Controller for summary page
@@ -839,4 +826,30 @@ var trackerControllers = angular.module('trackerControllers', [])
     CurrentUserProfile.getProfile(function(data) {
         $translate.uses(data.settings.keyUiLocale);
     });
+    
+    $scope.searchNoteField = false;
+    $scope.addNoteField = false;
+    
+    $scope.notes = [];  
+    
+    $scope.showAddNote = function() {
+        $scope.addNoteField = true;
+    };
+    
+    $scope.addNote = function(){
+        $scope.addNoteField = false;
+        $scope.notes.splice(0,0,$scope.note);
+        $scope.note = '';  
+    };
+    
+    $scope.closeAddNote = function(){
+         $scope.addNoteField = false;
+         $scope.note = '';           
+    };
+    
+    $scope.searchNote = function(){        
+        $scope.searchNoteField = $scope.searchNoteField === false? true : false;
+        $scope.noteSearchText = '';
+    };    
+   
 });

@@ -28,19 +28,20 @@ package org.hisp.dhis.light.utils;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.mobile.service.ModelMapping;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageDataElement;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageService;
-import org.springframework.beans.factory.annotation.Required;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import org.hisp.dhis.system.util.MathUtils;
 
 public class NamebasedUtils
 {
@@ -63,14 +64,6 @@ public class NamebasedUtils
         this.programStageService = programStageService;
     }
     
-    private org.hisp.dhis.mobile.service.ModelMapping modelMapping;
-    
-    @Required
-    public void setModelMapping( org.hisp.dhis.mobile.service.ModelMapping modelMapping )
-    {
-        this.modelMapping = modelMapping;
-    }
-
     public ProgramStage getProgramStage( int programId, int programStageId )
     {
         //Program program = programService.getProgram( programId, "" );
@@ -112,14 +105,14 @@ public class NamebasedUtils
         }
         else if ( type.equals( DataElement.VALUE_TYPE_INT ) && numberType.equals( DataElement.VALUE_TYPE_NUMBER ) )
         {
-            if ( !FormUtils.isNumber( value ) )
+            if ( !MathUtils.isNumeric( value ) )
             {
                 return "is_invalid_number";
             }
         }
         else if ( type.equals( DataElement.VALUE_TYPE_INT ) && numberType.equals( DataElement.VALUE_TYPE_INT ) )
         {
-            if ( !FormUtils.isInteger( value ) )
+            if ( !MathUtils.isInteger( value ) )
             {
                 return "is_invalid_integer";
             }
@@ -173,6 +166,7 @@ public class NamebasedUtils
         
         return des;
     }
+    
     public List<org.hisp.dhis.api.mobile.model.DataElement> transformDataElementsToMobileModel( List<ProgramStageDataElement> programStageDataElements)
     {
         List<org.hisp.dhis.api.mobile.model.DataElement> des = new ArrayList<org.hisp.dhis.api.mobile.model.DataElement>();
@@ -183,7 +177,7 @@ public class NamebasedUtils
 
             DataElement dataElement = programStagedataElement.getDataElement();
 
-            org.hisp.dhis.api.mobile.model.DataElement de = modelMapping.getDataElement( dataElement );
+            org.hisp.dhis.api.mobile.model.DataElement de = ModelMapping.getDataElement( dataElement );
 
             de.setCompulsory( programStagedataElement.isCompulsory() );
 

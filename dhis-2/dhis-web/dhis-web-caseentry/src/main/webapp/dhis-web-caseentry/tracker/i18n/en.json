@@ -28,6 +28,7 @@
 	"not_selected": "NOT_SELECTED",
 	"please_select": "---Please Select---",
 	"person_profile": "Person Profile",
+        "additional_information": "Additional Information",
 	"personal_number": "PERSONAL_NUMBER",
 	"search_for_person": "Search for Person",
 	"search": "Search",
@@ -59,6 +60,9 @@
         "enroll": "Enroll",
 	"consultation": "Consultation",
 	"new_note": "New Note",
+        "add_note": "Add Note",
+        "search_note": "Search Note",
+        "type_for_search": "TYPE_FOR_SEARCH",
 	"visit": "Visit",
 	"visits": "Visits",
 	"anc_visits": "ANC Visits",
@@ -94,6 +98,7 @@
         "person_update_error": "Person Update - ERROR",
         "enrollment_error": "Enrollment - ERROR",
         "registration_error": "Registration - ERROR",
+        "person_edit": "Edit Person Profile",
         "consultation_error": "Consultation - ERROR",
 	"app_footer": "Folkehelseinstituttet | Health Information Systems Programme | UiO"	
 }

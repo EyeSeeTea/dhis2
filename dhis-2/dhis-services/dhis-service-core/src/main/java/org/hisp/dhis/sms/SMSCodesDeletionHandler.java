@@ -1,4 +1,4 @@
-package org.hisp.dhis.common.hibernate;
+package org.hisp.dhis.sms;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,43 +28,36 @@ package org.hisp.dhis.common.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hibernate.Query;
-import org.hisp.dhis.common.AnalyticalObjectStore;
-import org.hisp.dhis.common.BaseAnalyticalObject;
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.smscommand.SMSCode;
+import org.hisp.dhis.system.deletion.DeletionHandler;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class HibernateAnalyticalObjectStore<T extends BaseAnalyticalObject>
-    extends HibernateIdentifiableObjectStore<T> implements AnalyticalObjectStore<T>
+public class SMSCodesDeletionHandler extends DeletionHandler
 {
-    @Override
-    public int countDataSetAnalyticalObject( DataSet dataSet )
-    {
-        Query query = getQuery( "select count(distinct c) from " + clazz.getName() + " c where :dataSet in elements(c.dataSets)" );
-        query.setEntity( "dataSet", dataSet );
+    private JdbcTemplate jdbcTemplate;
 
-        return ((Long) query.uniqueResult()).intValue();
+    @Autowired
+    public void setJdbcTemplate( JdbcTemplate jdbcTemplate )
+    {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
-    public int countIndicatorAnalyticalObject( Indicator indicator )
+    protected String getClassName()
     {
-        Query query = getQuery( "select count(distinct c) from " + clazz.getName() + " c where :indicator in elements(c.indicators)" );
-        query.setEntity( "indicator", indicator );
-
-        return ((Long) query.uniqueResult()).intValue();
+        return SMSCode.class.getSimpleName();
     }
 
     @Override
-    public int countDataElementAnalyticalObject( DataElement dataElement )
+    public String allowDeleteDataElement( DataElement dataElement )
     {
-        Query query = getQuery( "select count(distinct c) from " + clazz.getName() + " c where :dataElement in elements(c.dataElements)" );
-        query.setEntity( "dataElement", dataElement );
+        String sql = "SELECT COUNT(*) FROM smscodes where dataelementid=" + dataElement.getId();
 
-        return ((Long) query.uniqueResult()).intValue();
+        return jdbcTemplate.queryForObject( sql, Integer.class ) == 0 ? null : ERROR;
     }
 }
