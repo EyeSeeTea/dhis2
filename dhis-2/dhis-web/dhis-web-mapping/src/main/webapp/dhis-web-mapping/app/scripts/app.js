@@ -1045,16 +1045,63 @@ Ext.onReady( function() {
                     }
                 });
 
-                //this.valueStore = Ext.create('Ext.data.Store', {
-                    //fields: [
-                    //proxy: {
-                        //url: gis.init.contextPath + '/api/dataElements/' + this.dataElement.id + /
+                this.valueStore = Ext.create('Ext.data.Store', {
+					fields: ['id', 'name'],
+					data: [],
+					key: 'a',
+					pageSize: 25,
+					loadStore: function(optionSetId, key, pageSize) {
+						var that = this;
+						
+						Ext.Ajax.request({
+							url: gis.init.contextPath + '/api/optionSets/' + optionSetId + '/options.json',
+							params: {
+								'key': key || that.key,
+								'max': pageSize || that.pageSize
+							},
+							success: function(r) {
+								var options = Ext.decode(r.responseText),
+									data = [];
+
+								Ext.each(options, function(option) {
+									data.push({
+										id: option,
+										name: option
+									});
+								});
+
+								that.loadData(data);
+							}
+						});
+					},
+					listeners: {
+						load: function(store, records) {
+							console.log(records);
+							//Ext.each(records, function(record) {
+								//record.set('name', record.get('id'));
+							//});
+						}
+					}
+				});
 
                 this.valueCmp = Ext.create('Ext.form.field.ComboBox', {
                     width: 250,
-                    emptyText: 'Select option',
-                    editable: false,
-                    queryMode: 'local'
+                    emptyText: 'Search for options',
+                    valueField: 'id',
+                    displayField: 'name',
+                    multiSelect: true,
+                    hideTrigger: true,
+                    enableKeyEvents: true,
+                    store: this.valueStore,
+                    listeners: {
+						keyup: {
+							fn: function(cb) {
+								that.valueStore.loadStore(that.dataElement.optionSet.id, cb.getValue());
+								cb.expand();
+							},
+							buffer: 50
+						}
+					}							
                 });
 
                 this.addCmp = Ext.create('Ext.button.Button', {
