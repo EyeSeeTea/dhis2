@@ -4406,9 +4406,11 @@ Ext.onReady( function() {
 		});
 
 		dataElementsByStageStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'type'],
+			fields: [''],
 			data: []
 		});
+		
+nissa = dataElementsByStageStore;
         
 		// Components
 
@@ -4557,7 +4559,7 @@ Ext.onReady( function() {
 
         dataElementSelected = Ext.create('Ext.panel.Panel', {
 			width: 382,
-            height: 270,
+            height: 200,
             bodyStyle: 'padding:2px 5px 5px; overflow-y: scroll',
             tbar: {
                 height: 27,
@@ -4573,18 +4575,19 @@ Ext.onReady( function() {
 
         selectDataElements = function(items) {
             var dataElements = [],
-                store = dataElementsByStageStore,
+                availableStore = dataElementsByStageStore,
                 map;
 
             map = {
 				'int': 'Ext.ux.panel.DataElementIntegerContainer',
-				'string': 'Ext.ux.panel.DataElementIntegerContainer'
+				'string': 'Ext.ux.panel.DataElementIntegerContainer',
+				'boolean': 'Ext.ux.panel.DataElementIntegerContainer'
 			};
 
 			// data element objects
             for (var i = 0, item; i < items.length; i++) {
                 if (Ext.isString(items[i])) {
-                    dataElements.push(store.getAt(store.findExact('id', items[i])).data);
+                    dataElements.push(availableStore.getAt(availableStore.findExact('id', items[i])).data);
                 }
                 else if (Ext.isObject(items[i])) {
                     if (items[i].data) {
@@ -4598,26 +4601,19 @@ Ext.onReady( function() {
 
 			// panel, store
             for (var i = 0, element, ux, optionSetId; i < dataElements.length; i++) {
+				element = dataElements[i];
 
-                Ext.Ajax.request({
-					url: gis.init.contextPath + '/api/dataElements/' + dataElements[i].id + '.json?links=false',
-					success: function(r) {
-						element = Ext.decode(r.responseText);
-						ux = map[element.type];
-
-						dataElementSelected.add(Ext.create(ux, {
-							id: element.id,
-							dataElement: element,
-							removeDataElement: function() {
-								dataElementsByStageStore.add(this.dataElement);
-								
-								dataElementSelected.remove(this.id);
-							}
-						}));
-
-						store.removeAt(store.findExact('id', element.id));
+				dataElementSelected.add(Ext.create(map[element.type], {
+					id: element.id,
+					dataElement: element,
+					removeDataElement: function() {
+						dataElementsByStageStore.add(this.dataElement);
+						
+						dataElementSelected.remove(this.id);
 					}
-				});
+				}));
+
+				availableStore.removeAt(availableStore.findExact('id', element.id));
             }
         };
 
