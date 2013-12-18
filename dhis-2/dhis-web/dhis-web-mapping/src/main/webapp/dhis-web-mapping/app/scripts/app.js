@@ -955,7 +955,7 @@ Ext.onReady( function() {
                     displayField: 'name',
                     queryMode: 'local',
                     editable: false,
-                    width: 60,
+                    width: 70,
                     value: 'EQ',
                     store: {
                         fields: ['id', 'name'],
@@ -971,7 +971,7 @@ Ext.onReady( function() {
                 });
 
                 this.valueCmp = Ext.create('Ext.form.field.Number', {
-                    width: 250,
+                    width: 300,
                     value: 0
                 });
 
@@ -1061,7 +1061,7 @@ Ext.onReady( function() {
 				});
 
                 this.searchCmp = Ext.create('Ext.form.field.ComboBox', {
-                    width: 61,
+                    width: 62,
                     emptyText: 'Search..',
                     valueField: 'id',
                     displayField: 'name',
@@ -1089,18 +1089,20 @@ Ext.onReady( function() {
 							buffer: 100
 						},
 						select: function(cb) {
-                            //
+
+                            // value
 							container.valueCmp.addOptionValue(cb.getValue());
 
+                            // search
 							cb.clearValue();
 
-                            container.triggerCmp.setDisabled(cb.getValue());
+                            // trigger
+                            container.triggerCmp.enable();
 						}
 					}
                 });
 
                 this.triggerCmp = Ext.create('Ext.button.Button', {
-                    //text: 'v',
                     cls: 'gis-button-combotrigger',
                     disabledCls: 'gis-button-combotrigger-disabled',
                     width: 18,
