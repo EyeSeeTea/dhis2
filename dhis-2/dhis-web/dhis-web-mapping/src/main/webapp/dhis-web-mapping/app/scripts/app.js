@@ -4057,7 +4057,8 @@ Ext.onReady( function() {
 			columnWidth: 0.5,
 			style: 'margin-right: 1px',
 			format: 'Y-m-d',
-			value: new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))
+			//value: new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))
+            value: new Date('2012-01-01') //todo
 		});
 
 		endDate = Ext.create('Ext.form.field.Date', {
