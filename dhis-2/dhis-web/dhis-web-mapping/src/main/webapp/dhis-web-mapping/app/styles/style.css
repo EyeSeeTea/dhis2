@@ -485,8 +485,10 @@ gis-combo .x-form-item-label {
     background-position: 0 0;
     width: 17px;
 }
-.gis-button-combotrigger-disabled {
+.gis-button-combotrigger-disabled,
+.gis-button-combotrigger-disabled * {
     opacity: 0.8;
+    cursor: default !important;
 }
 
 
