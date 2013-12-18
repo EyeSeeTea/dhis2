@@ -1,20 +1,32 @@
-<div class="modal-header">
-    <h3>{{'edit_person'| translate}}</h3>
-</div>
+<div class="panel panel-primary" ng-controller="ANCVisitNotesController">
+    <div class="panel-heading">
+        {{'notes'| translate}}
+        <span class="btn-group-sm" style="float:right;">
+            <span ng-show="notes.length > 5"><a href ng-click="searchNote()" title="{{'search_note'| translate}}"><i class="fa fa-search fa-lg"></i></a></span> 
+            &nbsp;&nbsp;
+            <a href ng-click="showAddNote()" title="{{'add_note'| translate}}"><i class="fa fa-plus fa-lg"></i></a>   
+        </span>
+    </div>
+    <div ng-show="searchNoteField">
+        <div class="list-group">
+            <input class="form-control" ng-model="noteSearchText" ng-blur="searchNote()" placeholder="{{'type_for_search'| translate}}">            
+        </div>
+    </div>
 
-<div class="modal-body">
-    <ul>
-        <li ng-repeat="item in items">
-            <a ng-click="selected.item = item">{{ item}}</a>
-        </li>
-    </ul>
-    Selected: <b>{{ selected.item}}</b>
-</div>
-<div class="modal-footer">
-    <button class="btn btn-primary" ng-click="ok()">
-        OK
-    </button>
-    <button class="btn btn-warning" ng-click="cancel()">
-        Cancel
-    </button>
+    <div ng-show="addNoteField">
+        <div class="list-group">
+            <textarea class="form-control" rows="3" ng-model="note" placeholder="{{'enter_your_note_here'| translate}}"></textarea>                          
+        </div>
+        <button ng-click="addNote()" class="big-button lightblue">
+            {{'add_note'| translate}}
+        </button>
+        <button ng-click="closeAddNote()" class="big-button grey">
+            {{'cancel'| translate}}
+        </button>
+    </div>
+
+    <div class="list-group" ng-repeat="note in notes| filter:noteSearchText">
+        <a href="#" class="list-group-item">{{note}}</a>
+    </div>  
+
 </div>

@@ -5,8 +5,7 @@ var trackerControllers = angular.module('trackerControllers', [])
 
 //Controller for home page
 .controller('HomeController',
-        function($scope,
-                CurrentUserProfile,
+        function(CurrentUserProfile,
                 $translate) {
 
             //Get current locale
@@ -62,8 +61,7 @@ var trackerControllers = angular.module('trackerControllers', [])
                 PersonFactory,
                 $translate,
                 storage,
-                DialogService,
-                $filter) {
+                DialogService) {
 
     //Get current locale
     CurrentUserProfile.getProfile(function(data) {
@@ -76,30 +74,17 @@ var trackerControllers = angular.module('trackerControllers', [])
 
     //Get attributes for registration
     $scope.registrationAttributes = '';
-    RegistrationAttributesFactory.getRegistrationAttributes().success(function(registrationAttributes) {
-        angular.forEach(registrationAttributes, function(registrationAttribute) {
-            if (angular.isObject(registrationAttribute.personAttributeOptions)) {
-                angular.forEach(registrationAttribute.personAttributeOptions, function(attributeOption) {
-                    attributeOption.value = attributeOption.name;
-                });
-            }
-        });
-
-        $scope.registrationAttributes = registrationAttributes;
-    });
+    RegistrationAttributesFactory.getRegistrationAttributes(function(data) {        
+        $scope.registrationAttributes = data;
+    });   
 
     $scope.saveAndRegisterPregnancy = function() {
-
+       
         $scope.outerRegistrationForm.submitted = true;
 
         if ($scope.outerRegistrationForm.$invalid) {
             return false;
-        }
-
-        $scope.person.orgUnit = $scope.selectedOrgUnit.id;
-        //$scope.person.gender = 'FEMALE';
-        //$scope.person.dateOfBirth.type = 'VERIFIED';
-        //$scope.person.dateOfRegistration = $filter('date')(new Date(), 'yyyy-MM-dd');
+        }           
 
         var attributes = [];
         angular.forEach($scope.registrationAttributes, function(registrationAttribute) {
@@ -110,9 +95,14 @@ var trackerControllers = angular.module('trackerControllers', [])
         });
 
         $scope.person.attributes = attributes;
+        $scope.person.orgUnit = $scope.selectedOrgUnit.id;           
 
         PersonFactory.registerPerson($scope.person).success(function(data) {
-            if (data.status === 'ERROR') {
+            if (data.status === 'SUCCESS') {
+               $location.path('/enrollment').search({personUid: data.reference});
+            }
+            else {             
+                
                 var dialogOptions = {
                     headerText: 'registration_error',
                     bodyText: data.description
@@ -120,64 +110,12 @@ var trackerControllers = angular.module('trackerControllers', [])
 
                 DialogService.showDialog({}, dialogOptions);
             }
-            else {//registration is successful, proceed to enrollment
-                $location.path('/enrollment').search({personUid: data.reference});
-            }
-        });
-    };
-
-    $scope.saveAndClose = function() {
-
-        $scope.outerRegistrationForm.submitted = true;
-
-        if ($scope.outerRegistrationForm.$invalid) {
-            return false;
-        }
-
-        $scope.person.orgUnit = $scope.selectedOrgUnit.id;
-        $scope.person.gender = 'FEMALE';
-        $scope.person.dateOfBirth.type = 'VERIFIED';
-        $scope.person.dateOfRegistration = $filter('date')(new Date(), 'yyyy-MM-dd');
-
-        var attributes = [];
-        angular.forEach($scope.registrationAttributes, function(registrationAttribute) {
-            if (!angular.isUndefined(registrationAttribute.value)) {
-                var attribute = {type: registrationAttribute.id, value: registrationAttribute.value};
-                attributes.push(attribute);
-            }
-        });
-
-        $scope.person.attributes = attributes;
-
-        PersonFactory.registerPerson($scope.person).success(function(data) {
-            if (data.status === 'ERROR') {
-                var dialogOptions = {
-                    headerText: 'registration_error',
-                    bodyText: data.description
-                };
-
-                DialogService.showDialog({}, dialogOptions);
-            }
-            else {
-                $location.path('/anc');
-            }
-        });
-    };
+        });             
+    };   
 
     $scope.cancel = function() {
         
         $location.path('/anc');
-
-        /*var modalOptions = {
-         closeButtonText: 'Cancel',
-         actionButtonText: 'Delete action?',
-         headerText: 'Delete .... blah blah?',
-         bodyText: 'Are you sure you want to delete?'
-         };
-
-         ModalService.showModal({}, modalOptions).then(function(result) {
-         $location.path('/anc');
-         }); */
     };
 
     //calendar settings
@@ -316,36 +254,36 @@ var trackerControllers = angular.module('trackerControllers', [])
             status: 'ACTIVE',
             dateOfEnrollment: $filter('date')(new Date(), 'yyyy-MM-dd'),
             dateOfIncident: $filter('date')($scope.program.dateOfIncident, 'yyyy-MM-dd')
-        };
-        
-        console.log('the person I am going to enroll is:  ', $scope.person);
+        };       
 
         //Enroll person
-        EnrollmentFactory.enrollPerson(enrollment).success(function(data) {
-            if (data.status === 'ERROR') {
-                var dialogOptions = {
-                    headerText: 'enrollment_error',
-                    bodyText: data.description
-                };
-
-                DialogService.showDialog({}, dialogOptions);
-            }
-            else {//Success, proceed to update person
-                PersonFactory.updatePerson($scope.person).success(function(data) {
-                    if (data.status === 'ERROR') {
+        EnrollmentFactory.enrollPerson(enrollment).success(function(enrollment) {
+            if (enrollment.status === 'SUCCESS') {
+                
+                PersonFactory.updatePerson($scope.person).success(function(personUpdate) {
+                    if (personUpdate.status === 'SUCCESS') {                
+                        $location.path('/anc/dashboard').search({personUid: $scope.person.person});              
+                    }
+                    else {                     
                         var dialogOptions = {
-                            headerText: 'person_update_error',
-                            bodyText: data.description
+                            headerText: 'person_update_error_during_enrollment',
+                            bodyText: personUpdate.description
                         };
 
                         DialogService.showDialog({}, dialogOptions);
                     }
-                    else {//success, proceed to consultation page                        
-                        $location.path('/anc/dashboard').search({personUid: $scope.person.person});
-                    }
-                });
+                });               
             }
-        });       
+            else{
+                var dialogOptions = {
+                    headerText: 'enrollment_error',
+                    bodyText: enrollment.description
+                };
+
+                DialogService.showDialog({}, dialogOptions);
+            }
+        });         
+       
     };
 
     $scope.cancel = function() {

@@ -49,8 +49,8 @@
                             </div>
                         </div>
                         <div ng-switch-when="date">
-                            <div class="data-entry-row-2-3">
-                                <input type="text" datepicker-popup="dd/MM/yyyy" ng-model="registrationAttribute.value" is-open="opened" ng-required="registrationAttribute.mandatory" name="foo" close-text="{{'close'| translate}}" />
+                            <div class="data-entry-row-2-3">                                
+                                <input type="text" data-ng-model="registrationAttribute.value" data-ng-date='' data-ng-required="registrationAttribute.mandatory" name="foo" />
                                 <span ng-show="outerRegistrationForm.submitted && innerRegistrationForm.foo.$invalid" style="color:red;font-size:12px">{{'required'| translate}}</span>		
                             </div>
                         </div>
@@ -78,6 +78,7 @@
         </div>
         <div class="margin-top">			
             <button ng-click="saveAndRegisterPregnancy()" class="big-button lightblue">{{'save_and_register_pregnancy'| translate}}</button>
+            <!--<button ng-click="saveAndClose()" class="big-button lightblue">{{'save_and_close'| translate}}</button>-->
             <button ng-click="cancel()" class="big-button grey">{{'cancel'| translate}}</button>
         </div>
     </form>

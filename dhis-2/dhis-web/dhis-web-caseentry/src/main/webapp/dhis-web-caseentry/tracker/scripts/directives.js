@@ -10,10 +10,34 @@ var trackerDirectives = angular.module('trackerDirectives', [])
                 require: 'ngModel',
                 link: function(scope, element, attrs, ngModelCtrl) {
                     element.datepicker({
-                        dateFormat: 'dd/mm/yy',
-                        maxDate: new Date,
+                        dateFormat: 'd/m/yy',
                         onSelect: function(date) {
                             scope.date = date;
+                            scope.$apply();
+                        }
+                    });
+                }
+            };
+        })
+
+        .directive('ngDate', function() {
+            return {
+                restrict: 'A',
+                require: 'ngModel',
+                link: function(scope, element, attrs, ctrl) {
+                    element.datepicker({
+                        changeYear: true,
+                        changeMonth: true,
+                        dateFormat: 'dd/mm/yy',
+                        onSelect: function(date) {
+                            ctrl.$setViewValue(date);
+                            /*if (attrs.hasOwnAttribute('futureDate'))
+                            {
+                                var dateToCompare = scope.$eval(attrs.futureDate);
+                                if (!dateToCompare)
+                                    dateToCompare = new Date();
+                                (date > dateToCompare) ? ctrl.$setValidity('future', true) : ctrl.$setValidity('future', false);
+                            }*/
                             scope.$apply();
                         }
                     });

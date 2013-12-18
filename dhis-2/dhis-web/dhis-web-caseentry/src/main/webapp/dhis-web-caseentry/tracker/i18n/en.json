@@ -99,6 +99,7 @@
         "person_update_error": "Person Update - ERROR",
         "enrollment_error": "Enrollment - ERROR",
         "registration_error": "Registration - ERROR",
+        "person_update_error_during_enrollment": "Person Update Error During Enrollment",
         "person_edit": "Edit Person Profile",
         "consultation_error": "Consultation - ERROR",
 	"app_footer": "Folkehelseinstituttet | Health Information Systems Programme | UiO"	

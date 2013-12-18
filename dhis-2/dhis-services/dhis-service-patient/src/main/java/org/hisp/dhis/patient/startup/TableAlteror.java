@@ -284,11 +284,6 @@ public class TableAlteror
         executeSql( "ALTER TABLE programstageinstance ALTER COLUMN executiondate TYPE timestamp" );
         
         updateCoordinatesProgramStageInstance();
-
-        if( !fixedAttributesInserted() )
-        {
-        	addPatientAttributes();
-        }
         
     }
     // -------------------------------------------------------------------------
@@ -664,35 +659,6 @@ public class TableAlteror
             log.debug( ex );
             return -1;
         }
-    }
+    } 
     
-    private boolean fixedAttributesInserted(){
-    	
-    	StatementHolder holder = statementManager.getHolder();
-        try
-        {
-            Statement statement = holder.getStatement();
-
-            ResultSet resultSet = statement.executeQuery( "SELECT * FROM patientattribute where name='Gender'" );
-            
-            if( resultSet.next() )
-            {
-            	return true;
-            }
-            else
-            {
-            	return false;
-            }            	
-            
-        }
-        catch ( Exception ex )
-        {
-            log.debug( ex );
-            return false;
-        }
-        finally
-        {
-            holder.close();            
-        }
-    }
 }

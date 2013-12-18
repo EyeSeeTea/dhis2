@@ -13,6 +13,7 @@ var ancTracker = angular.module('ancTracker',
 		  'pascalprecht.translate', 
 		  'angularTreeview', 
                   'directive.contextMenu',
+                  'ui.date',
 		  'ui.bootstrap'])
 
 .config(function($routeProvider, $translateProvider) {	

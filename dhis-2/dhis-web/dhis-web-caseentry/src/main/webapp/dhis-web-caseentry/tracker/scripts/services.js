@@ -5,13 +5,12 @@
 var trackerFactory = angular.module('trackerServices', ['ngResource'])
 
 /* Factory to fetch programs */
-.factory('ProgramFactory', function($http, storage) {
+.factory('ProgramFactory', function($http) {
 
-    var baseUrl = '../../api/programs/';
     var ProgramFactory = {};
 
     ProgramFactory.getProgram = function(uid) {
-        return $http.get(baseUrl + uid + '.json?viewClass=extended');
+        return $http.get('../../api/programs/' + uid + '.json?viewClass=extended');
     };
 
     ProgramFactory.getMyPrograms = function() {
@@ -19,47 +18,40 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
     };
 
     return ProgramFactory;
-})
-
-
-/* Factory to enroll person in a program */
-.service('EnrollmentFactory', function( $http ) {
-
-    var baseUrl = '../../api/enrollments';
-
-    var EnrollmentFactory = {};
-
-    EnrollmentFactory.enrollPerson = function( enrollment ) {
-        return $http.post( baseUrl, enrollment );
-    };
-
-    return EnrollmentFactory;
-})
-
-/* Factory to fetch programStages */
-.factory('ProgramStageFactory', function($http) {
-
-    var baseUrl = '../../api/programStages/';
-    var ProgramStageFactory = {};
-
-    ProgramStageFactory.getProgramStage = function(uid) {
-        return $http.get(baseUrl + uid + '.json?viewClass=extended');
-    };
-
-    return ProgramStageFactory;
-})
-
-/* Factory for loading Essential Interventions */
-.factory('EIFactory', function($http) {
-
+    
+    /*var myPrograms;
+    var selecteProgram;
+    
     return {
-        getEI: function(data) {
-            $http.get('json/EI.json').success(data);
+        
+        getSelectedProgram: function(successCallback){
+            if(!selecteProgram){
+                $http.get('../../api/programs/' + uid + '.json?viewClass=extended').success(function(data){
+                   selecteProgram = data;
+                   successCallback(data);
+                });
+            }
+            else{
+                successCallback(selecteProgram);
+            }
+        },
+        
+        getMyPrograms: function(successCallback){
+            if(!myPrograms){
+                $http.get('../../api/me/profile').success(function(data){
+                   myPrograms = data;
+                   successCallback(data);
+                });
+            }
+            else{
+                successCallback(myPrograms);
+            }     
         }
-    };
+        
+    };*/
+
 })
 
-/* Factory for loading Current User Locale */
 .factory('CurrentUserProfile', function($http) {
     
     var profile;
@@ -77,20 +69,55 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
             }           
         }
     };
+    
+})
+
+
+/* Factory to enroll person in a program */
+.service('EnrollmentFactory', function( $http ) {
+    
+    var EnrollmentFactory = {};
+
+    EnrollmentFactory.enrollPerson = function( enrollment ) {
+        return $http.post( '../../api/enrollments', enrollment );
+    };
+
+    return EnrollmentFactory;
+})
+
+/* Factory to fetch programStages */
+.factory('ProgramStageFactory', function($http) {
+
+    var ProgramStageFactory = {};
+
+    ProgramStageFactory.getProgramStage = function(uid) {
+        return $http.get( '../../api/programStages/' + uid + '.json?viewClass=extended');
+    };
+
+    return ProgramStageFactory;
+})
+
+/* Factory for loading Essential Interventions */
+.factory('EIFactory', function($http) {
+
+    return {
+        getEI: function(data) {
+            $http.get('json/EI.json').success(data);
+        }
+    };
 })
 
 /* Factory for loading OrgUnit */
 .factory('OrgUnitFactory', function($http) {
 
-    var baseUrl = '../../api/organisationUnits/';
     var OrgUnitFactory = {};
 
     OrgUnitFactory.getAllOrgUnits = function() {
-        return $http.get(baseUrl);
+        return $http.get('../../api/organisationUnits.json');
     };
 
     OrgUnitFactory.getOrgUnit = function(uid) {
-        return $http.get(baseUrl + uid);
+        return $http.get('../../api/organisationUnits/' + uid);
     };
 
     OrgUnitFactory.getMyOrgUnits = function() {
@@ -126,17 +153,32 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
 })
 
 /* Factory for getting person attribute types*/
-.factory('RegistrationAttributesFactory', function($http) {
+.factory('RegistrationAttributesFactory', function($http) { 
 
-    var baseUrl = '../../api/personAttributeTypes/withoutPrograms?viewClass=extended';
-
-    var RegistrationAttributesFactory = {};
-
-    RegistrationAttributesFactory.getRegistrationAttributes = function() {
-        return $http.get(baseUrl);
+    var registrationAttributes;
+    
+    return {
+        getRegistrationAttributes: function(successCallback){
+            if(!registrationAttributes){
+                $http.get('../../api/personAttributeTypes/withoutPrograms?viewClass=extended').success(function(data){
+                    
+                    angular.forEach(data, function(registrationAttribute) {
+                        if (angular.isObject(registrationAttribute.personAttributeOptions)) {
+                            angular.forEach(registrationAttribute.personAttributeOptions, function(attributeOption) {
+                                attributeOption.value = attributeOption.name;
+                            });
+                        }
+                    });                  
+                    
+                   registrationAttributes = data;
+                   successCallback(data);
+                });
+            }
+            else{
+                successCallback(registrationAttributes);
+            }
+        }
     };
-
-    return RegistrationAttributesFactory;
 })
 
 /* Factory for getting person attribute types*/
@@ -155,19 +197,6 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
     };
 
     return PersonAttributeTypesFactory;
-})
-
-.service('PersonService', function() {
-    var person = null;
-
-    return {
-        setPerson: function(p) {
-            person = p;
-        },
-        getPerson: function() {
-            return person;
-        }
-    };
 })
 
 /* factory for getting data elements */
@@ -198,19 +227,15 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
 })
 
 .factory('DHIS2EventFactory', function($http) {
-
-    var eventBaseUrl = '../../api/events.json?';
-
+    
     var DHIS2EventFactory = {};
 
     DHIS2EventFactory.getDHIS2Events = function(person, orgUnit, program) {
-        var url = 'person=' + person + '&orgUnit=' + orgUnit + '&program=' + program;
-        return $http.get(eventBaseUrl + url);
+        return $http.get('../../api/events.json?' + 'person=' + person + '&orgUnit=' + orgUnit + '&program=' + program );
     };
 
     DHIS2EventFactory.getDHIS2Event = function(eventUID) {
-        eventBaseUrl = '../../api/events/';
-        return $http.get(eventBaseUrl + eventUID + '.json');
+        return $http.get('../../api/events/' + eventUID + '.json');
     };
 
     DHIS2EventFactory.getMyDHIS2Event = function(params) {
@@ -218,22 +243,10 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
     };
 
     DHIS2EventFactory.postDHIS2Event = function(DHIS2event) {
-        return $http.post(eventBaseUrl, DHIS2event);
+        return $http.post('../../api/events.json?', DHIS2event);
     };
 
     return DHIS2EventFactory;
-})
-
-.service('DHIS2EventService', function() {
-    var currentEventUid;
-    return {
-        setCurrentEventUid: function(uid) {
-            currentEventUid = uid;
-        },
-        getCurrentEventUid: function() {
-            return currentEventUid;
-        }
-    };
 })
 
 .factory('TransferHandler', function() {
@@ -298,7 +311,7 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
                         while (match = regex.exec(val)) {
                             matches.push(match);
                             m = match.toString();
-                            mDe = m.substring(1, m.length - 1)
+                            mDe = m.substring(1, m.length - 1);
                             var r = new RegExp(match, 'g');
                             //val = val.replace(r, '@'+mDe+'@');
                             val = val.replace(r, 100);

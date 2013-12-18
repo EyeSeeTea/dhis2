@@ -1,70 +1,23 @@
 <div class="information_bar">
-    <div class="info_container-1-2">
-        <div class="panel panel-primary">
-            <div class="panel-heading">
-                {{'person_profile'| translate}}
-            </div>
-            <div class="list-group">            	
-                <div class="list-group-item"><strong>{{'full_name'| translate}}:</strong> {{person.name}}</div>
-                <div class="list-group-item"><strong>{{'date_of_birth'| translate}}:</strong> {{ person.dateOfBirth.date | date:'yyyy-MM-dd' }} ({{person.dateOfBirth.age}})</div>
-            </div>
-        </div>
-    </div>
-    <div class="info_container-1-2">
-        <div class="panel panel-primary">
-            <div class="panel-heading">
-                {{'additional_information'| translate}}
-            </div>
-            <div class="panel-body">
-                {{allergies}}
-            </div>
-        </div>
-    </div>
+    <div ng-include="'views/personprofile.html'"></div>	
 </div>
 
 <div class="side_bar">
-	<div class="panel panel-primary">
-		<div class="panel-heading">
-			{{'conditions_complications' | translate}}
-		</div>
-		<br/>		 
-		<div class="list-group" ng-repeat="con in conResultGen">
-			{{con}}			
-		</div>
-	</div>
-	
-	<div class="panel panel-primary">
-		<div class="panel-heading">
-			{{'reminders' | translate}}
-		</div>
-		<br/>		 
-		<div class="list-group" ng-repeat="rem in remResultGen">
-			{{rem}}
-		</div>
-	</div>
-	
-	<div class="panel panel-primary">
-		<div class="panel-heading">
-			{{'notes' | translate}}
-		</div>
-		<br/>	
-		<div class="list-group" ng-repeat="note in notes">
-			<a href="#" class="list-group-item">{{note}}</a>
-		</div>	
-	</div>	
+    <div ng-include="'views/anc/comprem.html'"></div>
+    <div ng-include="'views/anc/notes.html'"></div>	
 </div>
 
 <div class="main_content">
-	<h2>
-		{{'summary' | translate}}
-	</h2>
-	<p>
-		{{summary}}
-	</p>
-	
-	<div class="margin-top">
-		<button ng-click="close()" class="big-button grey">
-			{{'close' | translate}}
-		</button>
-	</div>
+    <h2>
+        {{'summary'| translate}}
+    </h2>
+    <p>
+        {{summary}}
+    </p>
+
+    <div class="margin-top">
+        <button ng-click="close()" class="big-button grey">
+            {{'close'| translate}}
+        </button>
+    </div>
 </div>
