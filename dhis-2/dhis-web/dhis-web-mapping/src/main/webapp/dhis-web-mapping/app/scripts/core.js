@@ -989,147 +989,108 @@ Ext.onReady( function() {
 		};
 
 		loadOrganisationUnits = function(view) {
-			var items = view.rows[0].items,
-				idParamString = '';
-
-			for (var i = 0; i < items.length; i++) {
-				idParamString += 'ids=' + items[i].id;
-				idParamString += i !== items.length - 1 ? '&' : '';
-			}
-
-			Ext.data.JsonP.request({
-				url: gis.init.contextPath + gis.conf.finals.url.path_module + 'getGeoJson.action?' + idParamString,
-				scope: this,
-				disableCaching: false,
-				success: function(r) {
-					var geojson = gis.util.geojson.decode(r),
-						format = new OpenLayers.Format.GeoJSON(),
-						features = gis.util.map.getTransformedFeatureArray(format.read(geojson));
-
-					if (!Ext.isArray(features)) {
-						olmap.mask.hide();
-						alert(GIS.i18n.invalid_coordinates);
-						return;
-					}
-
-					if (!features.length) {
-						olmap.mask.hide();
-						alert(GIS.i18n.no_valid_coordinates_found);
-						return;
-					}
-
-					layer.core.featureStore.loadFeatures(features.slice(0));
-
-					loadData(view, features);
-				},
-				failure: function(r) {
-					olmap.mask.hide();
-					alert(GIS.i18n.coordinates_could_not_be_loaded);
-				}
-			});
+            loadData(view);
 		};
 
-		loadData = function(view, features) {
+		loadData = function(view) {
 			view = view || layer.core.view;
-			features = features || layer.core.featureStore.features;
 
-			var dimConf = gis.conf.finals.dimension,
-				paramString = '?',
-				dxItems = view.columns[0].items,
-				isOperand = view.columns[0].dimension === dimConf.operand.objectName,
-				peItems = view.filters[0].items,
-				ouItems = view.rows[0].items;
+            var paramString = '?';
 
-			// ou
-			paramString += 'dimension=ou:';
+            // stage
+            paramString += 'stage=' + view.stage.id;
 
-			for (var i = 0; i < ouItems.length; i++) {
-				paramString += ouItems[i].id;
-				paramString += i < ouItems.length - 1 ? ';' : '';
-			}
+            // dates
+            paramString += '&startDate=' + view.startDate;
+            paramString += '&endDate=' + view.endDate;
 
-			// dx
-			paramString += '&dimension=dx:';
+            // ou //todo
+            paramString += '&dimension=ou:' + view.organisationUnits[0].id;
 
-			for (var i = 0; i < dxItems.length; i++) {
-				paramString += isOperand ? dxItems[i].id.split('-')[0] : dxItems[i].id;
-				paramString += i < dxItems.length - 1 ? ';' : '';
-			}
+            // de
+            for (var i = 0, element; i < view.dataElements.length; i++) {
+                element = view.dataElements[i];
 
-			paramString += isOperand ? '&dimension=co' : '';
+                paramString += '&dimension=' + element.id;
 
-			// pe
-			paramString += '&filter=pe:';
-
-			for (var i = 0; i < peItems.length; i++) {
-				paramString += peItems[i].id;
-				paramString += i < peItems.length - 1 ? ';' : '';
-			}
+                if (element.value) {
+                    paramString += ':' + element.operator + ':' + element.value;
+                }
+            }
 
 			Ext.data.JsonP.request({
-				url: gis.init.contextPath + '/api/analytics.jsonp' + paramString,
+				url: gis.init.contextPath + '/api/analytics/events/query/' + view.program.id + '.jsonp' + paramString,
 				disableCaching: false,
 				scope: this,
 				success: function(r) {
-					var response = gis.api.response.Response(r),
-						featureMap = {},
-						valueMap = {},
-						ouIndex,
-						dxIndex,
-						valueIndex,
-						newFeatures = [],
-						dimensions,
-						items = [];
+                    console.log(r);
+                }
+            });
 
-					if (!response) {
-						olmap.mask.hide();
-						return;
-					}
 
-					// ou index, value index
-					for (var i = 0; i < response.headers.length; i++) {
-						if (response.headers[i].name === dimConf.organisationUnit.dimensionName) {
-							ouIndex = i;
-						}
-						else if (response.headers[i].name === dimConf.value.dimensionName) {
-							valueIndex = i;
-						}
-					}
 
-					// Feature map
-					for (var i = 0, id; i < features.length; i++) {
-						var id = features[i].attributes.id;
 
-						featureMap[id] = true;
-					}
 
-					// Value map
-					for (var i = 0; i < response.rows.length; i++) {
-						var id = response.rows[i][ouIndex],
-							value = parseFloat(response.rows[i][valueIndex]);
 
-						valueMap[id] = value;
-					}
+					//var response = gis.api.response.Response(r),
+						//featureMap = {},
+						//valueMap = {},
+						//ouIndex,
+						//dxIndex,
+						//valueIndex,
+						//newFeatures = [],
+						//dimensions,
+						//items = [];
 
-					for (var i = 0; i < features.length; i++) {
-						var feature = features[i],
-							id = feature.attributes.id;
+					//if (!response) {
+						//olmap.mask.hide();
+						//return;
+					//}
 
-						if (featureMap.hasOwnProperty(id) && valueMap.hasOwnProperty(id)) {
-							feature.attributes.value = valueMap[id];
-							feature.attributes.label = feature.attributes.name + ' (' + feature.attributes.value + ')';
-							newFeatures.push(feature);
-						}
-					}
+					//// ou index, value index
+					//for (var i = 0; i < response.headers.length; i++) {
+						//if (response.headers[i].name === dimConf.organisationUnit.dimensionName) {
+							//ouIndex = i;
+						//}
+						//else if (response.headers[i].name === dimConf.value.dimensionName) {
+							//valueIndex = i;
+						//}
+					//}
 
-					layer.removeFeatures(layer.features);
-					layer.addFeatures(newFeatures);
+					//// Feature map
+					//for (var i = 0, id; i < features.length; i++) {
+						//var id = features[i].attributes.id;
 
-					gis.response = response;
+						//featureMap[id] = true;
+					//}
 
-					loadLegend(view);
-				}
-			});
+					//// Value map
+					//for (var i = 0; i < response.rows.length; i++) {
+						//var id = response.rows[i][ouIndex],
+							//value = parseFloat(response.rows[i][valueIndex]);
+
+						//valueMap[id] = value;
+					//}
+
+					//for (var i = 0; i < features.length; i++) {
+						//var feature = features[i],
+							//id = feature.attributes.id;
+
+						//if (featureMap.hasOwnProperty(id) && valueMap.hasOwnProperty(id)) {
+							//feature.attributes.value = valueMap[id];
+							//feature.attributes.label = feature.attributes.name + ' (' + feature.attributes.value + ')';
+							//newFeatures.push(feature);
+						//}
+					//}
+
+					//layer.removeFeatures(layer.features);
+					//layer.addFeatures(newFeatures);
+
+					//gis.response = response;
+
+					//loadLegend(view);
+				//}
+			//});
 		};
 
 		loadLegend = function(view) {

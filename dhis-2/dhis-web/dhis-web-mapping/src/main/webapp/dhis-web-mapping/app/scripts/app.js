@@ -947,6 +947,14 @@ Ext.onReady( function() {
 			alias: 'widget.dataelementintegerpanel',
 			layout: 'column',
             bodyStyle: 'border:0 none',
+            getRecord: function() {
+                return {
+                    id: this.dataElement.id,
+                    name: this.dataElement.name,
+                    operator: this.operatorCmp.getValue(),
+                    value: this.valueCmp.getValue()
+                };
+            },
             initComponent: function() {
                 var that = this;
 
@@ -1011,6 +1019,14 @@ Ext.onReady( function() {
 			alias: 'widget.dataelementintegerpanel',
 			layout: 'column',
             bodyStyle: 'border:0 none',
+            getRecord: function() {
+                return {
+                    id: this.dataElement.id,
+                    name: this.dataElement.name,
+                    operator: this.operatorCmp.getValue(),
+                    value: this.valueCmp.getValue()
+                };
+            },
             initComponent: function() {
                 var container = this;
 
@@ -3809,6 +3825,12 @@ Ext.onReady( function() {
 			style: 'margin:1px 1px 2px 0',
 			//labelWidth: gis.conf.layout.widget.itemlabel_width,
 			store: programStore,
+            getRecord: function() {
+                return {
+                    id: this.getValue(),
+                    name: this.getRawValue()
+                };
+            },
 			listeners: {
 				select: function(cb) {
 					onProgramSelect(cb.getValue());
@@ -3855,6 +3877,12 @@ Ext.onReady( function() {
 			//labelWidth: gis.conf.layout.widget.itemlabel_width,
 			listConfig: {loadMask: false},
 			store: stagesByProgramStore,
+            getRecord: function() {
+                return {
+                    id: this.getValue(),
+                    name: this.getRawValue()
+                };
+            },
 			listeners: {
 				select: function(cb) {
 					onStageSelect(cb.getValue());
@@ -4550,6 +4578,15 @@ Ext.onReady( function() {
 			}
 
 			// Components
+            program.clearValue();
+            stage.clearValue();
+
+            dataElementAvailable.removeAll();
+            dataElementSelected.removeAll();
+
+            startDate.reset();
+            endDate.reset();
+
 			toolMenu.clickHandler(toolMenu.menuValue);
 
 			if (!skipTree) {
@@ -4564,17 +4601,13 @@ Ext.onReady( function() {
 			organisationUnitGroup.clearValue();
 
 			// Layer options
-			if (layer.searchWindow) {
-				layer.searchWindow.destroy();
-				layer.searchWindow = null;
-			}
-			if (layer.labelWindow) {
-				layer.labelWindow.destroy();
-				layer.labelWindow = null;
-			}
+			//if (layer.labelWindow) {
+				//layer.labelWindow.destroy();
+				//layer.labelWindow = null;
+			//}
 		};
 
-		setGui = function(view) {
+		setGui = function(view) { //todo
 			var ouDim = view.rows[0],
 				isOu = false,
 				isOuc = false,
@@ -4645,9 +4678,23 @@ Ext.onReady( function() {
 		getView = function(config) {
 			var view = {};
 
-			view.rows = [treePanel.getDimension()];
+            view.program = program.getRecord();
+            view.stage = stage.getRecord();
 
-			return validateView(view);
+            view.startDate = startDate.getSubmitValue();
+            view.endDate = endDate.getSubmitValue();
+
+            view.dataElements = [];
+
+            for (var i = 0, panel; i < dataElementSelected.items.items.length; i++) {
+                panel = dataElementSelected.items.items[i];
+
+                view.dataElements.push(panel.getRecord());
+            }
+
+            view.organisationUnits = treePanel.getDimension().items;
+
+			return view;
 		};
 
 		validateView = function(view) {
