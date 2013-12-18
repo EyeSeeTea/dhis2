@@ -1,0 +1,20 @@
+<div ng-show="conResultGen.length > 0">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            {{'conditions_complications'| translate}}
+        </div>  
+        <div class="list-group" ng-repeat="con in conResultGen">
+            <div class="list-group-item">{{con}}</div>
+        </div>
+    </div>
+</div>
+<div ng-show="remResultGen.length > 0">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            {{'reminders'| translate}}
+        </div>
+        <div class="list-group" ng-repeat="rem in remResultGen">            
+            <div class="list-group-item">{{rem}}</div>
+        </div>
+    </div>
+</div>

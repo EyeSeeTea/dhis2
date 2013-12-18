@@ -1,0 +1,23 @@
+<div class="info_container-1-2">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            {{'person_profile'| translate}}
+        </div>
+        <div class="list-group">            	
+            <div class="list-group-item"><strong>{{'full_name'| translate}}:</strong> {{person.name}}</div>
+            <div class="list-group-item"><strong>{{'date_of_birth'| translate}}:</strong> {{ person.dateOfBirth.date | date:'yyyy-MM-dd' }} ({{person.dateOfBirth.age}})</div>
+        </div>
+    </div>
+</div>
+<div class="info_container-1-2">
+    <div ng-show="additionalAttributes.length > 0">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                {{'additional_information'| translate}}
+            </div>
+            <div class="list-group" ng-repeat="attribute in additionalAttributes">            
+                <div class="list-group-item">{{attribute}}</div>
+            </div>
+        </div>
+    </div>
+</div>
