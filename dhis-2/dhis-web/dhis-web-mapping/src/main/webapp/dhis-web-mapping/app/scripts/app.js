@@ -1102,6 +1102,7 @@ Ext.onReady( function() {
                 this.triggerCmp = Ext.create('Ext.button.Button', {
                     //text: 'v',
                     cls: 'gis-button-combotrigger',
+                    disabledCls: 'gis-button-combotrigger-disabled',
                     width: 18,
                     height: 22,
                     pageSize: 15,
