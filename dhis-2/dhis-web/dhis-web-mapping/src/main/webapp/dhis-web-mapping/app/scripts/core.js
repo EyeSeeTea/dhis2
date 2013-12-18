@@ -914,12 +914,9 @@ Ext.onReady( function() {
                     for (var i = 0, event, point; i < events.length; i++) {
                         event = events[i];
 
-                        point = new OpenLayers.Geometry.Point(parseFloat(event.longitude), parseFloat(event.latitude));
+                        point = gis.util.map.getTransformedPointByXY(event.longitude, event.latitude);
 
-                        features.push(new OpenLayers.Feature.Vector({
-                            geometry: point,
-                            attributes: event
-                        }));
+                        features.push(new OpenLayers.Feature.Vector(point, event, new OpenLayers.StyleMap()));
                     }
 
                     layer.removeFeatures(layer.features);
