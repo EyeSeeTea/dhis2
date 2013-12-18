@@ -708,7 +708,7 @@ Ext.onReady( function() {
 	};
 
 	GIS.app.createExtensions = function() {
-        
+
 		Ext.define('Ext.ux.panel.LayerItemPanel', {
 			extend: 'Ext.panel.Panel',
 			alias: 'widget.layeritempanel',
@@ -947,11 +947,6 @@ Ext.onReady( function() {
 			alias: 'widget.dataelementintegerpanel',
 			layout: 'column',
             bodyStyle: 'border:0 none',
-            nameCmp: null,
-            operatorCmp: null,
-            valueCmp: null,
-            addCmp: null,
-            removeCmp: null,
             initComponent: function() {
                 var that = this;
 
@@ -992,11 +987,11 @@ Ext.onReady( function() {
                         that.removeDataElement();
                     }
                 });
-                
+
                 this.nameCmp = Ext.create('Ext.form.Label', {
                     text: this.dataElement.name,
                     width: 360,
-                    style: 'padding:2px'                    
+                    style: 'padding:2px'
                 });
 
                 this.items = [
@@ -1016,15 +1011,8 @@ Ext.onReady( function() {
 			alias: 'widget.dataelementintegerpanel',
 			layout: 'column',
             bodyStyle: 'border:0 none',
-            nameCmp: null,
-            operatorCmp: null,
-            searchCmp: null,
-            valueCmp: null,
-            valueStore: null,
-            addCmp: null,
-            removeCmp: null,
             initComponent: function() {
-                var that = this;
+                var container = this;
 
                 this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
                     valueField: 'id',
@@ -1047,13 +1035,13 @@ Ext.onReady( function() {
 					key: 'a',
 					pageSize: 25,
 					loadStore: function(optionSetId, key, pageSize) {
-						var that = this;
-						
+						var store = this;
+
 						Ext.Ajax.request({
 							url: gis.init.contextPath + '/api/optionSets/' + optionSetId + '/options.json',
 							params: {
-								'key': key || that.key,
-								'max': pageSize || that.pageSize
+								'key': key || store.key,
+								'max': pageSize || store.pageSize
 							},
 							success: function(r) {
 								var options = Ext.decode(r.responseText),
@@ -1065,39 +1053,87 @@ Ext.onReady( function() {
 										name: option
 									});
 								});
-								
-								that.loadData(data);
+
+								store.loadData(data);
 							}
 						});
 					}
 				});
 
                 this.searchCmp = Ext.create('Ext.form.field.ComboBox', {
-                    width: 80,
+                    width: 61,
                     emptyText: 'Search..',
                     valueField: 'id',
                     displayField: 'name',
                     hideTrigger: true,
                     delimiter: '; ',
                     enableKeyEvents: true,
+                    listConfig: {
+                        minWidth: 80
+                    },
                     store: this.valueStore,
                     listeners: {
 						keyup: {
 							fn: function(cb) {
-								var optionSetId = that.dataElement.optionSet.id,
+
+                                // search
+								var optionSetId = container.dataElement.optionSet.id,
 									value = cb.getValue() ? Ext.String.trim(cb.getValue().split(';').pop()) : null;
-									
-								that.valueStore.loadStore(optionSetId, value);
+
+								container.valueStore.loadStore(optionSetId, value);
 								cb.expand();
+
+                                // trigger
+                                container.triggerCmp.setDisabled(cb.getValue());
 							},
 							buffer: 100
 						},
 						select: function(cb) {
-							that.valueCmp.addOptionValue(cb.getValue());
+                            //
+							container.valueCmp.addOptionValue(cb.getValue());
 
 							cb.clearValue();
+
+                            container.triggerCmp.setDisabled(cb.getValue());
 						}
-					}							
+					}
+                });
+
+                this.triggerCmp = Ext.create('Ext.button.Button', {
+                    text: 'v',
+                    width: 19,
+                    pageSize: 15,
+                    storage: [],
+                    handler: function(b) {
+                        if (b.storage.length) {
+                            console.log(b.storage);
+                            container.valueStore.loadData(Ext.clone(b.storage));
+                            container.searchCmp.expand();
+                        }
+                        else {
+                            Ext.Ajax.request({
+                                url: gis.init.contextPath + '/api/optionSets/' + container.dataElement.optionSet.id + '/options.json',
+                                params: {
+                                    'max': b.pageSize
+                                },
+                                success: function(r) {
+                                    var options = Ext.decode(r.responseText),
+                                        data = [];
+
+                                    Ext.each(options, function(option) {
+                                        data.push({
+                                            id: option,
+                                            name: option
+                                        });
+                                    });
+
+                                    b.storage = Ext.clone(data);
+                                    container.valueStore.loadData(data);
+                                    container.searchCmp.expand();
+                                }
+                            });
+                        }
+                    }
                 });
 
                 this.valueCmp = Ext.create('Ext.form.field.Text', {
@@ -1119,8 +1155,8 @@ Ext.onReady( function() {
 						}
 
 						this.setValue(value += option);
-					}							
-				});					
+					}
+				});
 
                 this.addCmp = Ext.create('Ext.button.Button', {
                     text: '+',
@@ -1132,20 +1168,21 @@ Ext.onReady( function() {
                     text: 'x',
                     width: 20,
                     handler: function() {
-                        that.removeDataElement();
+                        container.removeDataElement();
                     }
                 });
-                
+
                 this.nameCmp = Ext.create('Ext.form.Label', {
                     text: this.dataElement.name,
                     width: 360,
-                    style: 'padding:2px'                    
+                    style: 'padding:2px'
                 });
 
                 this.items = [
                     this.nameCmp,
                     this.operatorCmp,
                     this.searchCmp,
+                    this.triggerCmp,
                     this.valueCmp,
                     this.addCmp,
                     this.removeCmp
@@ -4392,10 +4429,10 @@ Ext.onReady( function() {
             dataElementSelected,
             selectDataElements,
             dataElement,
-            
+
 			startDate,
 			endDate,
-			
+
 			treePanel,
 			userOrganisationUnit,
 			userOrganisationUnitChildren,
@@ -4475,7 +4512,7 @@ Ext.onReady( function() {
 			fields: [''],
 			data: []
 		});
-        
+
 		// Components
 
             // data element
@@ -4512,16 +4549,16 @@ Ext.onReady( function() {
 					stage.enable();
 					stage.clearValue();
 					stage.queryMode = 'local';
-					
+
 					if (records.length === 1) {
 						stage.setValue(records[0].data.id);
 
 						onStageSelect(records[0].data.id);
 					}
 				}
-			});						
-						
-		};			
+			});
+
+		};
 
 		stage = Ext.create('Ext.form.field.ComboBox', {
 			fieldLabel: GIS.i18n.indicator,
@@ -4678,7 +4715,7 @@ Ext.onReady( function() {
 					dataElement: element,
 					removeDataElement: function() {
 						dataElementsByStageStore.add(this.dataElement);
-						
+
 						dataElementSelected.remove(this.id);
 					}
 				}));
@@ -5188,7 +5225,7 @@ Ext.onReady( function() {
                 treePanel
             ]
         });
-        
+
             // accordion
         accordionBody = Ext.create('Ext.panel.Panel', {
 			layout: 'accordion',
@@ -5340,7 +5377,7 @@ Ext.onReady( function() {
 			cls: 'gis-form-widget',
 			border: false,
 			items: [
-				
+
 				{
 					layout: 'column',
                     bodyStyle: 'border:0 none; padding:0',
