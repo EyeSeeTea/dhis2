@@ -480,6 +480,12 @@ gis-combo .x-form-item-label {
 	width: 18px !important;
 }
 
+.gis-button-combotrigger {
+    background-image: url('../images/trigger.gif');
+    background-position: 0 0;
+    width: 17px;
+}
+
 
 /*----------------------------------------------------------------------------
  * Toolbar
