@@ -4764,7 +4764,7 @@ Ext.onReady( function() {
             labelStyle: 'font-weight: bold',
 			labelSeparator: '',
 			columnWidth: 0.5,
-			//style: 'margin-right: 1px',
+			style: 'margin-right: 1px',
 			format: 'Y-m-d',
 			value: new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))
 		});
@@ -4776,16 +4776,17 @@ Ext.onReady( function() {
             labelStyle: 'font-weight: bold',
 			labelSeparator: '',
 			columnWidth: 0.5,
-			//style: 'margin-left: 1px',
+			style: 'margin-left: 1px',
 			format: 'Y-m-d',
 			value: new Date()
 		});
 
         date = Ext.create('Ext.panel.Panel', {
+            title: '<div class="gis-panel-title-period">Periods</div>',
+            bodyStyle: 'padding:2px',
+            hideCollapseTool: true,
             layout: 'column',
-            width: baseWidth,
-            bodyStyle: 'border:0 none; padding:0',
-            style: 'margin:0',
+            width: accBaseWidth,
             items: [
                 startDate,
                 endDate
@@ -5257,10 +5258,11 @@ Ext.onReady( function() {
 			layout: 'accordion',
 			activeOnTop: true,
 			cls: 'gis-accordion',
-			bodyStyle: 'border:0 none; margin-top:2px; margin-bottom:2px',
+			bodyStyle: 'border:0 none',
 			height: 450,
 			items: [
                 dataElement,
+                date,
                 organisationUnit
             ],
             listeners: {
@@ -5409,7 +5411,6 @@ Ext.onReady( function() {
 			cls: 'gis-form-widget',
 			border: false,
 			items: [
-				date,
                 accordionBody
 			]
 		});

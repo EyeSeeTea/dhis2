@@ -368,6 +368,7 @@ gis-combo .x-form-item-label {
  *--------------------------------------------------------------------------*/
 
 .gis-panel-title-data,
+.gis-panel-title-period,
 .gis-panel-title-organisationunit {
 	background-repeat: no-repeat;
 	padding-left: 20px;
@@ -377,6 +378,9 @@ gis-combo .x-form-item-label {
 
 .gis-panel-title-data {
 	background-image: url(../images/data.png);
+}
+.gis-panel-title-period {
+	background-image: url(../images/period.png);
 }
 .gis-panel-title-organisationunit {
 	background-image: url(../images/organisationunit.png);
