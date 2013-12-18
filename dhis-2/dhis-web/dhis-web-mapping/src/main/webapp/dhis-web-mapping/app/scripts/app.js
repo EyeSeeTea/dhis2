@@ -4420,11 +4420,12 @@ Ext.onReady( function() {
 
 	GIS.app.LayerWidgetEvent = function(layer) {
 
-		// Stores
+		// stores
 		var programStore,
 			stagesByProgramStore,
+            dataElementsByStageStore,
 
-		// Components
+		// components
 			program,
             onProgramSelect,
 			stage,
@@ -4451,11 +4452,18 @@ Ext.onReady( function() {
 
 			panel,
 
-		// Functions
+		// functions
 			reset,
 			setGui,
 			getView,
-			validateView;
+			validateView,
+
+        // constants
+            baseWidth = 438,
+            toolWidth = 36,
+
+            accBaseWidth = baseWidth - 6;
+
 
 		// Stores
 
@@ -4615,7 +4623,7 @@ Ext.onReady( function() {
 
 		dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-left',
-			width: 432,
+			width: accBaseWidth,
             height: 112,
 			valueField: 'id',
 			displayField: 'name',
@@ -4664,7 +4672,7 @@ Ext.onReady( function() {
 		});
 
         dataElementSelected = Ext.create('Ext.panel.Panel', {
-			width: 432,
+			width: accBaseWidth,
             height: 220,
             bodyStyle: 'padding:2px 5px 5px; overflow-y: scroll',
             tbar: {
@@ -4756,7 +4764,7 @@ Ext.onReady( function() {
             labelStyle: 'font-weight: bold',
 			labelSeparator: '',
 			columnWidth: 0.5,
-			style: 'margin-right: 1px',
+			//style: 'margin-right: 1px',
 			format: 'Y-m-d',
 			value: new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))
 		});
@@ -4768,10 +4776,21 @@ Ext.onReady( function() {
             labelStyle: 'font-weight: bold',
 			labelSeparator: '',
 			columnWidth: 0.5,
-			style: 'margin-left: 1px',
+			//style: 'margin-left: 1px',
 			format: 'Y-m-d',
 			value: new Date()
 		});
+
+        date = Ext.create('Ext.panel.Panel', {
+            layout: 'column',
+            width: baseWidth,
+            bodyStyle: 'border:0 none; padding:0',
+            style: 'margin:0',
+            items: [
+                startDate,
+                endDate
+            ]
+        });
 
             // organisation unit
 		treePanel = Ext.create('Ext.tree.Panel', {
@@ -4780,7 +4799,6 @@ Ext.onReady( function() {
             bodyStyle: 'border:0 none',
 			style: 'border-top: 1px solid #ddd; padding-top: 1px',
 			displayField: 'name',
-			//width: gis.conf.layout.widget.item_width + 94,
 			rootVisible: false,
 			autoScroll: true,
 			multiSelect: true,
@@ -5076,7 +5094,7 @@ Ext.onReady( function() {
 			cls: 'gis-combo',
 			multiSelect: true,
 			style: 'margin-bottom:0',
-			width: gis.conf.layout.widget.item_width - 38 + 92,
+			width: accBaseWidth - toolWidth - 2,
 			valueField: 'level',
 			displayField: 'name',
 			emptyText: GIS.i18n.select_organisation_unit_levels,
@@ -5092,7 +5110,7 @@ Ext.onReady( function() {
 			cls: 'gis-combo',
 			multiSelect: true,
 			style: 'margin-bottom:0',
-			width: gis.conf.layout.widget.item_width - 38 + 92,
+			width: accBaseWidth - toolWidth - 2,
 			valueField: 'id',
 			displayField: 'name',
 			emptyText: GIS.i18n.select_organisation_unit_groups,
@@ -5100,6 +5118,19 @@ Ext.onReady( function() {
 			hidden: true,
 			store: gis.store.organisationUnitGroup
 		});
+
+        organisationUnitPanel = Ext.create('Ext.panel.Panel', {
+			width: accBaseWidth - toolWidth - 2,
+            layout: 'column',
+            bodyStyle: 'border:0 none',
+            items: [
+                userOrganisationUnit,
+                userOrganisationUnitChildren,
+                userOrganisationUnitGrandChildren,
+                organisationUnitLevel,
+                organisationUnitGroup
+            ]
+        });
 
 		toolMenu = Ext.create('Ext.menu.Menu', {
 			shadow: false,
@@ -5189,13 +5220,13 @@ Ext.onReady( function() {
 		tool = Ext.create('Ext.button.Button', {
 			cls: 'gis-button-organisationunitselection',
 			iconCls: 'gis-button-icon-gear',
-			width: 36,
+			width: toolWidth,
 			height: 24,
 			menu: toolMenu
 		});
 
 		toolPanel = Ext.create('Ext.panel.Panel', {
-			width: 36,
+			width: toolWidth,
 			bodyStyle: 'border:0 none; text-align:right',
 			style: 'margin-right:2px',
 			items: tool
@@ -5209,23 +5240,12 @@ Ext.onReady( function() {
             items: [
                 {
                     layout: 'column',
-                    width: 432,
+                    width: accBaseWidth,
                     bodyStyle: 'border:0 none',
                     style: 'padding-bottom:2px',
                     items: [
                         toolPanel,
-                        {
-                            width: 392,
-                            layout: 'column',
-                            bodyStyle: 'border:0 none',
-                            items: [
-                                userOrganisationUnit,
-                                userOrganisationUnitChildren,
-                                userOrganisationUnitGrandChildren,
-                                organisationUnitLevel,
-                                organisationUnitGroup
-                            ]
-                        }
+                        organisationUnitPanel
                     ]
                 },
                 treePanel
@@ -5242,7 +5262,13 @@ Ext.onReady( function() {
 			items: [
                 dataElement,
                 organisationUnit
-            ]
+            ],
+            listeners: {
+                afterrender: function() { // nasty workaround
+                    dataElement.collapse();
+                    dataElement.expand();
+                }
+            }
 		});
 
 		// Functions
@@ -5383,16 +5409,7 @@ Ext.onReady( function() {
 			cls: 'gis-form-widget',
 			border: false,
 			items: [
-				{
-					layout: 'column',
-                    width: 436,
-                    bodyStyle: 'border:0 none; padding:0',
-                    style: 'margin:0',
-					items: [
-						startDate,
-						endDate
-					]
-				},
+				date,
                 accordionBody
 			]
 		});
