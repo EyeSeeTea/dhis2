@@ -4673,7 +4673,7 @@ Ext.onReady( function() {
 
         dataElementSelected = Ext.create('Ext.panel.Panel', {
 			width: accBaseWidth,
-            height: 220,
+            height: 204,
             bodyStyle: 'padding:2px 5px 5px; overflow-y: scroll',
             tbar: {
                 height: 27,
@@ -4796,7 +4796,7 @@ Ext.onReady( function() {
             // organisation unit
 		treePanel = Ext.create('Ext.tree.Panel', {
 			cls: 'gis-tree',
-			height: 300,
+			height: 332,
             bodyStyle: 'border:0 none',
 			style: 'border-top: 1px solid #ddd; padding-top: 1px',
 			displayField: 'name',
@@ -5267,7 +5267,8 @@ Ext.onReady( function() {
             ],
             listeners: {
                 afterrender: function() { // nasty workaround
-                    dataElement.collapse();
+                    organisationUnit.expand();
+                    date.expand();
                     dataElement.expand();
                 }
             }
