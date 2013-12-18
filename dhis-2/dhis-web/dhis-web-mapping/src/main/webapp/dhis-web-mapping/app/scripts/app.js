@@ -4780,7 +4780,7 @@ Ext.onReady( function() {
             bodyStyle: 'border:0 none',
 			style: 'border-top: 1px solid #ddd; padding-top: 1px',
 			displayField: 'name',
-			width: gis.conf.layout.widget.item_width + 94,
+			//width: gis.conf.layout.widget.item_width + 94,
 			rootVisible: false,
 			autoScroll: true,
 			multiSelect: true,
@@ -5040,10 +5040,10 @@ Ext.onReady( function() {
 		});
 
 		userOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
-			columnWidth: 0.30,
+			columnWidth: 0.28,
 			style: 'padding-top:2px; padding-left:3px; margin-bottom:0',
 			boxLabelCls: 'x-form-cb-label-alt1',
-			boxLabel: 'User orgunit',
+			boxLabel: 'User org unit',
 			labelWidth: gis.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnitChildren.getValue(), userOrganisationUnitGrandChildren.getValue()]);
@@ -5051,10 +5051,10 @@ Ext.onReady( function() {
 		});
 
 		userOrganisationUnitChildren = Ext.create('Ext.form.field.Checkbox', {
-			columnWidth: 0.30,
+			columnWidth: 0.34,
 			style: 'padding-top:2px; margin-bottom:0',
 			boxLabelCls: 'x-form-cb-label-alt1',
-			boxLabel: 'UO children',
+			boxLabel: 'User OU children',
 			labelWidth: gis.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitGrandChildren.getValue()]);
@@ -5062,10 +5062,10 @@ Ext.onReady( function() {
 		});
 
 		userOrganisationUnitGrandChildren = Ext.create('Ext.form.field.Checkbox', {
-			columnWidth: 0.40,
+			columnWidth: 0.38,
 			style: 'padding-top:2px; margin-bottom:0',
 			boxLabelCls: 'x-form-cb-label-alt1',
-			boxLabel: 'UO grand children',
+			boxLabel: 'User OU grand children',
 			labelWidth: gis.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitChildren.getValue()]);
@@ -5209,12 +5209,13 @@ Ext.onReady( function() {
             items: [
                 {
                     layout: 'column',
+                    width: 432,
                     bodyStyle: 'border:0 none',
                     style: 'padding-bottom:2px',
                     items: [
                         toolPanel,
                         {
-                            width: gis.conf.layout.widget.item_width + 100 - toolPanel.width - 10,
+                            width: 392,
                             layout: 'column',
                             bodyStyle: 'border:0 none',
                             items: [
@@ -5382,9 +5383,9 @@ Ext.onReady( function() {
 			cls: 'gis-form-widget',
 			border: false,
 			items: [
-
 				{
 					layout: 'column',
+                    width: 436,
                     bodyStyle: 'border:0 none; padding:0',
                     style: 'margin:0',
 					items: [
