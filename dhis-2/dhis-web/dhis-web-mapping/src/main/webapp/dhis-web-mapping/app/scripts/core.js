@@ -916,7 +916,7 @@ Ext.onReady( function() {
 
                         point = gis.util.map.getTransformedPointByXY(event.longitude, event.latitude);
 
-                        features.push(new OpenLayers.Feature.Vector(point, event, new OpenLayers.StyleMap()));
+                        features.push(new OpenLayers.Feature.Vector(point, event));
                     }
 
                     layer.removeFeatures(layer.features);
@@ -2563,6 +2563,7 @@ Ext.onReady( function() {
 		gis.olmap.addLayers(layers);
 
 		GIS.core.instances.push(gis);
+e = gis.layer.event;
 
 		return gis;
 	};
