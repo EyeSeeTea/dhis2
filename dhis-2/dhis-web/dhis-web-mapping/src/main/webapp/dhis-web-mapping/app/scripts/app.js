@@ -660,7 +660,7 @@ Ext.onReady( function() {
 			layer = gis.layer.event;
 			layer.menu = GIS.app.LayerMenu(layer, 'gis-toolbar-btn-menu-first');
 			layer.widget = GIS.app.LayerWidgetEvent(layer);
-			layer.window = GIS.app.WidgetWindow(layer, gis.conf.layout.widget.window_width + 150);
+			layer.window = GIS.app.WidgetWindow(layer, gis.conf.layout.widget.window_width + 150, 3);
 			layer.window.widget = layer.widget;
 			GIS.core.createSelectHandlers(gis, layer);
 
@@ -1387,16 +1387,19 @@ Ext.onReady( function() {
 		return panel;
 	};
 
-	GIS.app.WidgetWindow = function(layer, width) {
+	GIS.app.WidgetWindow = function(layer, width, padding) {
+		width = width || gis.conf.layout.widget.window_width;
+		padding = padding || 5;
+		
 		return Ext.create('Ext.window.Window', {
 			//autoShow: true,
 			title: layer.name,
 			layout: 'fit',
 			iconCls: 'gis-window-title-icon-' + layer.id,
-            bodyStyle: 'padding:5px',
+            bodyStyle: 'padding:' + padding + 'px',
 			cls: 'gis-container-default',
 			closeAction: 'hide',
-			width: width ? width : gis.conf.layout.widget.window_width,
+			width: width,
 			resizable: false,
 			isRendered: false,
 			items: layer.widget,
