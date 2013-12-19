@@ -907,6 +907,8 @@ Ext.onReady( function() {
                             obj[r.headers[j].name] = row[j];
                         }
 
+                        obj[gis.conf.finals.widget.value] = 0;
+
                         events.push(obj);
                     }
 
@@ -935,7 +937,7 @@ Ext.onReady( function() {
             	indicator: gis.conf.finals.widget.value,
 				method: 2,
 				numClasses: 5,
-				colors: layer.core.getColors('000000', '000000'),
+				colors: layer.core.getColors('ffffff', 'ff0000'),
 				minSize: 6,
 				maxSize: 6
 			};
