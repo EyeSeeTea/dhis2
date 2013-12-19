@@ -1127,7 +1127,6 @@ Ext.onReady( function() {
                     storage: [],
                     handler: function(b) {
                         if (b.storage.length) {
-                            console.log(b.storage);
                             container.valueStore.loadData(Ext.clone(b.storage));
                             container.searchCmp.expand();
                         }
