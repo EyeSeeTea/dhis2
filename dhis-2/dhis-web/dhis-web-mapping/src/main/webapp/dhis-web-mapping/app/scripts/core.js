@@ -938,8 +938,8 @@ Ext.onReady( function() {
 				method: 2,
 				numClasses: 5,
 				colors: layer.core.getColors('ffffff', 'ff0000'),
-				minSize: 6,
-				maxSize: 6
+				minSize: 4,
+				maxSize: 4
 			};
 
             layer.core.view = view;
