@@ -881,7 +881,11 @@ Ext.onReady( function() {
                 paramString += '&dimension=' + element.id;
 
                 if (element.value) {
-                    paramString += ':' + element.operator + ':' + element.value;
+					if (element.operator) {
+						paramString += ':' + element.operator;
+					}
+
+					paramString += ':' + element.value;
                 }
             }
 
