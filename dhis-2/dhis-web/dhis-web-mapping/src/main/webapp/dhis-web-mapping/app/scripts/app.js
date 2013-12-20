@@ -4318,7 +4318,7 @@ Ext.onReady( function() {
 			fieldLabel: 'Start date',
 			labelAlign: 'top',
 			labelCls: 'gis-form-item-label-top',
-            labelStyle: 'font-weight: bold',
+            //labelStyle: 'font-weight: bold',
 			labelSeparator: '',
 			columnWidth: 0.5,
 			style: 'margin-right: 1px',
@@ -4331,7 +4331,7 @@ Ext.onReady( function() {
 			fieldLabel: 'End date',
 			labelAlign: 'top',
 			labelCls: 'gis-form-item-label-top',
-            labelStyle: 'font-weight: bold',
+            //labelStyle: 'font-weight: bold',
 			labelSeparator: '',
 			columnWidth: 0.5,
 			style: 'margin-left: 1px',
@@ -4341,7 +4341,7 @@ Ext.onReady( function() {
 
         period = Ext.create('Ext.panel.Panel', {
             title: '<div class="gis-panel-title-period">Periods</div>',
-            bodyStyle: 'padding:2px',
+            bodyStyle: 'padding:4px 2px 2px',
             hideCollapseTool: true,
             layout: 'column',
             width: accBaseWidth,
