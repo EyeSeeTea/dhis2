@@ -956,7 +956,7 @@ Ext.onReady( function() {
                 };
             },
             initComponent: function() {
-                var that = this;
+                var container = this;
 
                 this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
                     valueField: 'id',
@@ -985,14 +985,17 @@ Ext.onReady( function() {
 
                 this.addCmp = Ext.create('Ext.button.Button', {
                     text: '+',
-                    width: 20
+                    width: 20,
+                    handler: function() {
+						container.duplicateDataElement();
+					}
                 });
 
                 this.removeCmp = Ext.create('Ext.button.Button', {
                     text: 'x',
                     width: 20,
                     handler: function() {
-                        that.removeDataElement();
+                        container.removeDataElement();
                     }
                 });
 
@@ -3924,6 +3927,7 @@ Ext.onReady( function() {
             loadDataElements,
             dataElementAvailable,
             dataElementSelected,
+            addUxFromDataElement,
             selectDataElements,
             dataElement,
 
@@ -4191,15 +4195,23 @@ Ext.onReady( function() {
                     style: 'padding-left:6px; color:#222',
 					cls: 'ns-toolbar-multiselect-left-label'
 				}
-            }
+            },
+            getChildIndex: function(child) {
+				this.items.each(function(item, index) {
+					if (item.id === child.id) {
+						return index;
+					}
+				});
+			}
         });
 
-        selectDataElements = function(items) {
-            var dataElements = [],
-                availableStore = dataElementsByStageStore,
-                uxMap;
+        addUxFromDataElement = function(element, index) {
+			var getUxType,
+				ux;
 
-            getUx = function(element) {
+			index = index || dataElementSelected.items.items.length;
+
+			getUxType = function(element) {
 				if (Ext.isObject(element.optionSet) && Ext.isString(element.optionSet.id)) {
 					return 'Ext.ux.panel.DataElementOptionContainer';
 				}
@@ -4219,12 +4231,36 @@ Ext.onReady( function() {
 				return 'Ext.ux.panel.DataElementIntegerContainer';
 			};
 
+			// add
+			ux = dataElementSelected.insert(index, Ext.create(getUxType(element), {
+				dataElement: element
+			}));
+
+			ux.removeDataElement = function() {
+				dataElementSelected.remove(ux);
+				
+				dataElementsByStageStore.add(element);
+				dataElementsByStageStore.sort();
+			};
+
+			ux.duplicateDataElement = function() {
+				var index = dataElementSelected.getChildIndex(ux) + 1;
+
+				addUxFromDataElement(element, index);
+			};
+
+			dataElementsByStageStore.removeAt(dataElementsByStageStore.findExact('id', element.id));
+		};			
+
+        selectDataElements = function(items) {
+            var dataElements = [];
+
 			// data element objects
             for (var i = 0, item; i < items.length; i++) {
 				item = items[i];
 				
                 if (Ext.isString(item)) {
-                    dataElements.push(availableStore.getAt(availableStore.findExact('id', item)).data);
+                    dataElements.push(dataElementsByStageStore.getAt(dataElementsByStageStore.findExact('id', item)).data);
                 }
                 else if (Ext.isObject(item)) {
                     if (item.data) {
@@ -4237,22 +4273,11 @@ Ext.onReady( function() {
             }
 
 			// panel, store
-            for (var i = 0, element, ux, optionSetId; i < dataElements.length; i++) {
+            for (var i = 0, element, ux; i < dataElements.length; i++) {
 				element = dataElements[i];
 
-				var ux = dataElementSelected.add(Ext.create(getUx(element), {
-					dataElement: element
-				}));
-
-				ux.removeDataElement = function() {
-					dataElementSelected.remove(ux);
-					
-					availableStore.add(element);
-					availableStore.sort();
-				};
-
-				availableStore.removeAt(availableStore.findExact('id', element.id));
-            }
+				addUxFromDataElement(element);
+			}
         };
 
         dataElement = Ext.create('Ext.panel.Panel', {
