@@ -4202,7 +4202,18 @@ Ext.onReady( function() {
 						return index;
 					}
 				});
-			}
+			},
+			hasDataElement: function(dataElementId) {
+				var hasDataElement = false;
+				
+				this.items.each(function(item) {				
+					if (item.dataElement.id === dataElementId) {
+						hasDataElement = true;
+					}
+				});
+
+				return hasDataElement;
+			}					
         });
 
         addUxFromDataElement = function(element, index) {
@@ -4238,9 +4249,11 @@ Ext.onReady( function() {
 
 			ux.removeDataElement = function() {
 				dataElementSelected.remove(ux);
-				
-				dataElementsByStageStore.add(element);
-				dataElementsByStageStore.sort();
+
+				if (!dataElementSelected.hasDataElement(element.id)) {
+					dataElementsByStageStore.add(element);
+					dataElementsByStageStore.sort();
+				}
 			};
 
 			ux.duplicateDataElement = function() {
