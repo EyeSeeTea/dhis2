@@ -1230,6 +1230,12 @@ Ext.onReady( function() {
             initComponent: function() {
                 var container = this;
 
+                this.nameCmp = Ext.create('Ext.form.Label', {
+                    text: this.dataElement.name,
+                    width: 360,
+                    style: 'padding:2px 2px 2px 1px'
+                });
+
                 this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
                     valueField: 'id',
                     displayField: 'name',
@@ -1400,12 +1406,6 @@ Ext.onReady( function() {
                     handler: function() {
                         container.removeDataElement();
                     }
-                });
-
-                this.nameCmp = Ext.create('Ext.form.Label', {
-                    text: this.dataElement.name,
-                    width: 360,
-                    style: 'padding:2px'
                 });
 
                 this.items = [
@@ -4014,7 +4014,11 @@ Ext.onReady( function() {
 
 		dataElementsByStageStore = Ext.create('Ext.data.Store', {
 			fields: [''],
-			data: []
+			data: [],
+			sorters: [{
+				property: 'name',
+				direction: 'ASC'
+			}]
 		});
 
 		// components
@@ -4193,7 +4197,7 @@ Ext.onReady( function() {
         selectDataElements = function(items) {
             var dataElements = [],
                 availableStore = dataElementsByStageStore,
-                getUx;
+                uxMap;
 
             getUx = function(element) {
 				if (Ext.isObject(element.optionSet) && Ext.isString(element.optionSet.id)) {
@@ -4217,15 +4221,17 @@ Ext.onReady( function() {
 
 			// data element objects
             for (var i = 0, item; i < items.length; i++) {
-                if (Ext.isString(items[i])) {
-                    dataElements.push(availableStore.getAt(availableStore.findExact('id', items[i])).data);
+				item = items[i];
+				
+                if (Ext.isString(item)) {
+                    dataElements.push(availableStore.getAt(availableStore.findExact('id', item)).data);
                 }
-                else if (Ext.isObject(items[i])) {
-                    if (items[i].data) {
-                        dataElements.push(items[i].data);
+                else if (Ext.isObject(item)) {
+                    if (item.data) {
+                        dataElements.push(item.data);
                     }
                     else {
-                        dataElements.push(items[i]);
+                        dataElements.push(item);
                     }
                 }
             }
@@ -4234,15 +4240,16 @@ Ext.onReady( function() {
             for (var i = 0, element, ux, optionSetId; i < dataElements.length; i++) {
 				element = dataElements[i];
 
-				dataElementSelected.add(Ext.create(getUx(element), {
-					id: element.id,
-					dataElement: element,
-					removeDataElement: function() {
-						dataElementsByStageStore.add(this.dataElement);
-
-						dataElementSelected.remove(this.id);
-					}
+				var ux = dataElementSelected.add(Ext.create(getUx(element), {
+					dataElement: element
 				}));
+
+				ux.removeDataElement = function() {
+					dataElementSelected.remove(ux);
+					
+					availableStore.add(element);
+					availableStore.sort();
+				};
 
 				availableStore.removeAt(availableStore.findExact('id', element.id));
             }
