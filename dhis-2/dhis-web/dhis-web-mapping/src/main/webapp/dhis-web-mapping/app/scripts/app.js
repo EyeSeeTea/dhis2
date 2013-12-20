@@ -3933,6 +3933,7 @@ Ext.onReady( function() {
 
 			startDate,
 			endDate,
+			period,
 
 			treePanel,
 			userOrganisationUnit,
@@ -4338,7 +4339,7 @@ Ext.onReady( function() {
 			value: new Date()
 		});
 
-        date = Ext.create('Ext.panel.Panel', {
+        period = Ext.create('Ext.panel.Panel', {
             title: '<div class="gis-panel-title-period">Periods</div>',
             bodyStyle: 'padding:2px',
             hideCollapseTool: true,
@@ -4819,13 +4820,13 @@ Ext.onReady( function() {
 			height: 450,
 			items: [
                 dataElement,
-                date,
+                period,
                 organisationUnit
             ],
             listeners: {
                 afterrender: function() { // nasty workaround
                     organisationUnit.expand();
-                    date.expand();
+                    period.expand();
                     dataElement.expand();
                 }
             }
