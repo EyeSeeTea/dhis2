@@ -1031,7 +1031,7 @@ Ext.onReady( function() {
                 };
             },
             initComponent: function() {
-                var that = this;
+                var container = this;
 
                 this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
                     valueField: 'id',
@@ -1062,7 +1062,7 @@ Ext.onReady( function() {
                     text: 'x',
                     width: 20,
                     handler: function() {
-                        that.removeDataElement();
+                        container.removeDataElement();
                     }
                 });
 
@@ -1098,7 +1098,7 @@ Ext.onReady( function() {
                 };
             },
             initComponent: function() {
-                var that = this;
+                var container = this;
 
                 this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
                     valueField: 'id',
@@ -1134,7 +1134,7 @@ Ext.onReady( function() {
                     text: 'x',
                     width: 20,
                     handler: function() {
-                        that.removeDataElement();
+                        container.removeDataElement();
                     }
                 });
 
@@ -1169,7 +1169,7 @@ Ext.onReady( function() {
                 };
             },
             initComponent: function() {
-                var that = this;
+                var container = this;
 
                 this.valueCmp = Ext.create('Ext.form.field.ComboBox', {
                     valueField: 'id',
@@ -1196,7 +1196,7 @@ Ext.onReady( function() {
                     text: 'x',
                     width: 20,
                     handler: function() {
-                        that.removeDataElement();
+                        container.removeDataElement();
                     }
                 });
 
