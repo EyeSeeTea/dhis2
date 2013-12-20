@@ -613,8 +613,8 @@ public class DefaultImportObjectService<T>
         {
             DataValue dataValue = (DataValue) object;
 
-            dataValue = updateDataValue( dataValue, dataValueService.getDataValue( dataValue.getSource(), dataValue
-                .getDataElement(), dataValue.getPeriod(), dataValue.getOptionCombo() ) );
+            dataValue = updateDataValue( dataValue, dataValueService.getDataValue( dataValue.getDataElement(), 
+                dataValue.getPeriod(), dataValue.getSource(), dataValue.getCategoryOptionCombo() ) );
         }
 
         // ---------------------------------------------------------------------
@@ -719,7 +719,7 @@ public class DefaultImportObjectService<T>
         original.setStoredBy( update.getStoredBy() );
         original.setTimestamp( update.getTimestamp() );
         original.setComment( update.getComment() );
-        original.setOptionCombo( update.getOptionCombo() );
+        original.setCategoryOptionCombo( update.getCategoryOptionCombo() );
 
         return original;
     }

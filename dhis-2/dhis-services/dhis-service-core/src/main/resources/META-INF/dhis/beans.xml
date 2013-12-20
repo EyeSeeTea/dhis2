@@ -137,27 +137,27 @@
     <property name="cacheable" value="true" />
   </bean>
 
-  <bean id="org.hisp.dhis.dataelement.DataElementCategoryStore" class="org.hisp.dhis.common.hibernate.HibernateDimensionalObjectStore">
+  <bean id="org.hisp.dhis.dataelement.CategoryStore" class="org.hisp.dhis.dataelement.hibernate.HibernateCategoryStore">
     <property name="clazz" value="org.hisp.dhis.dataelement.DataElementCategory" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
   </bean>
 
-  <bean id="org.hisp.dhis.dataelement.DataElementCategoryOptionStore"
+  <bean id="org.hisp.dhis.dataelement.CategoryOptionStore"
     class="org.hisp.dhis.common.hibernate.HibernateDimensionalObjectStore">
     <property name="clazz" value="org.hisp.dhis.dataelement.DataElementCategoryOption" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
   </bean>
 
-  <bean id="org.hisp.dhis.dataelement.DataElementCategoryComboStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
+  <bean id="org.hisp.dhis.dataelement.CategoryComboStore" class="org.hisp.dhis.dataelement.hibernate.HibernateCategoryComboStore">
     <property name="clazz" value="org.hisp.dhis.dataelement.DataElementCategoryCombo" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
   </bean>
 
-  <bean id="org.hisp.dhis.dataelement.DataElementCategoryOptionComboStore"
-    class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
+  <bean id="org.hisp.dhis.dataelement.CategoryOptionComboStore"
+    class="org.hisp.dhis.dataelement.hibernate.HibernateCategoryOptionComboStore">
     <property name="clazz" value="org.hisp.dhis.dataelement.DataElementCategoryOptionCombo" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
@@ -367,6 +367,7 @@
 
   <bean id="org.hisp.dhis.datavalue.DataValueService" class="org.hisp.dhis.datavalue.DefaultDataValueService">
     <property name="dataValueStore" ref="org.hisp.dhis.datavalue.DataValueStore" />
+    <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
   </bean>
 
   <bean id="org.hisp.dhis.datavalue.DataValueAuditService" class="org.hisp.dhis.datavalue.DefaultDataValueAuditService">
@@ -452,10 +453,10 @@
   <bean id="monitoringLastDayTask" class="org.hisp.dhis.validation.scheduling.MonitoringTask" />
 
   <bean id="org.hisp.dhis.dataelement.DataElementCategoryService" class="org.hisp.dhis.dataelement.DefaultDataElementCategoryService">
-    <property name="dataElementCategoryStore" ref="org.hisp.dhis.dataelement.DataElementCategoryStore" />
-    <property name="dataElementCategoryOptionStore" ref="org.hisp.dhis.dataelement.DataElementCategoryOptionStore" />
-    <property name="dataElementCategoryComboStore" ref="org.hisp.dhis.dataelement.DataElementCategoryComboStore" />
-    <property name="dataElementCategoryOptionComboStore" ref="org.hisp.dhis.dataelement.DataElementCategoryOptionComboStore" />
+    <property name="categoryStore" ref="org.hisp.dhis.dataelement.CategoryStore" />
+    <property name="categoryOptionStore" ref="org.hisp.dhis.dataelement.CategoryOptionStore" />
+    <property name="categoryComboStore" ref="org.hisp.dhis.dataelement.CategoryComboStore" />
+    <property name="categoryOptionComboStore" ref="org.hisp.dhis.dataelement.CategoryOptionComboStore" />
     <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>

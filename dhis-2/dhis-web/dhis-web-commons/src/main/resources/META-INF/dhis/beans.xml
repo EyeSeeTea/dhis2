@@ -551,6 +551,9 @@
 
   <!-- User Account -->
 
+  <bean id="org.hisp.dhis.useraccount.action.ExpiredAccountAction" class="org.hisp.dhis.useraccount.action.ExpiredAccountAction"
+    scope="prototype" />
+
   <bean id="org.hisp.dhis.useraccount.action.GetCurrentUserAction" class="org.hisp.dhis.useraccount.action.GetCurrentUserAction"
     scope="prototype">
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
@@ -604,5 +607,7 @@
   <bean id="org.hisp.dhis.commons.action.GetAttributesAction" class="org.hisp.dhis.commons.action.GetAttributesAction">
     <property name="attributeService" ref="org.hisp.dhis.attribute.AttributeService" />
   </bean>
+
+  <bean id="org.hisp.dhis.appcache.AppCacheAction" class="org.hisp.dhis.appcache.AppCacheAction" />
 
 </beans>

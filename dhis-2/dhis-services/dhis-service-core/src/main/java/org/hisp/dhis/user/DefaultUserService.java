@@ -28,6 +28,20 @@ package org.hisp.dhis.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.common.AuditLogUtil;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.setting.SystemSettingManager;
+import org.hisp.dhis.system.filter.UserCredentialsCanUpdateFilter;
+import org.hisp.dhis.system.util.DateUtils;
+import org.hisp.dhis.system.util.Filter;
+import org.hisp.dhis.system.util.FilterUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -36,17 +50,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.common.AuditLogUtil;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.system.filter.UserCredentialsCanUpdateFilter;
-import org.hisp.dhis.system.util.Filter;
-import org.hisp.dhis.system.util.FilterUtils;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Chau Thu Tran
@@ -87,6 +90,14 @@ public class DefaultUserService
     public void setCurrentUserService( CurrentUserService currentUserService )
     {
         this.currentUserService = currentUserService;
+    }
+
+    private SystemSettingManager systemSettingManager;
+
+    @Autowired
+    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
+    {
+        this.systemSettingManager = systemSettingManager;
     }
 
     // -------------------------------------------------------------------------
@@ -593,5 +604,20 @@ public class DefaultUserService
     public int countDataSetUserAuthorityGroups( DataSet dataSet )
     {
         return userAuthorityGroupStore.countDataSetUserAuthorityGroups( dataSet );
+    }
+
+    @Override
+    public boolean credentialsNonExpired( UserCredentials credentials )
+    {
+        int credentialsExpires = systemSettingManager.credentialsExpires();
+
+        if ( credentialsExpires == 0 )
+        {
+            return true;
+        }
+
+        int months = DateUtils.monthsBetween( credentials.getPasswordLastUpdated(), new Date() );
+
+        return months < credentialsExpires;
     }
 }

@@ -333,7 +333,7 @@ public class DataValueSMSListener
 
         Period period = getPeriod( command, date );
 
-        DataValue dv = dataValueService.getDataValue( orgunit, code.getDataElement(), period, optionCombo );
+        DataValue dv = dataValueService.getDataValue( code.getDataElement(), period, orgunit, optionCombo );
 
         String value = parsedMessage.get( upperCaseCode );
         
@@ -342,7 +342,7 @@ public class DataValueSMSListener
         //Check for special character cases
         for( SMSSpecialCharacter each: specialCharacters )
         {
-            if ( each.getName().equals( value ) )
+            if ( each.getName().equalsIgnoreCase( value ) )
             {
                 value = each.getValue();
                 break;
@@ -355,7 +355,7 @@ public class DataValueSMSListener
             if ( dv == null )
             {
                 dv = new DataValue();
-                dv.setOptionCombo( optionCombo );
+                dv.setCategoryOptionCombo( optionCombo );
                 dv.setSource( orgunit );
                 dv.setDataElement( code.getDataElement() );
                 dv.setPeriod( period );
@@ -454,7 +454,7 @@ public class DataValueSMSListener
 
             period = getPeriod( command, date );
 
-            DataValue dv = dataValueService.getDataValue( orgunit, code.getDataElement(), period, optionCombo );
+            DataValue dv = dataValueService.getDataValue( code.getDataElement(), period, orgunit, optionCombo );
 
             if ( dv == null && !StringUtils.isEmpty( code.getCode() ) )
             {
@@ -493,7 +493,7 @@ public class DataValueSMSListener
 
             period = getPeriod( command, date );
 
-            DataValue dv = dataValueService.getDataValue( orgunit, code.getDataElement(), period, optionCombo );
+            DataValue dv = dataValueService.getDataValue( code.getDataElement(), period, orgunit, optionCombo );
 
             if ( dv == null && !StringUtils.isEmpty( code.getCode() ) )
             {

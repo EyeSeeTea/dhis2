@@ -710,12 +710,12 @@
       <dependency>
         <groupId>mysql</groupId>
         <artifactId>mysql-connector-java</artifactId>
-        <version>5.1.20</version>
+        <version>5.1.27</version>
       </dependency>
       <dependency>
-        <groupId>postgresql</groupId>
+        <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
-        <version>9.1-901-1.jdbc4</version>
+        <version>9.3-1100-jdbc41</version>
       </dependency>
       <!--Reporting -->
       <dependency>
@@ -940,7 +940,7 @@
   <properties>
     <rootDir></rootDir>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <spring.version>3.2.5.RELEASE</spring.version>
+    <spring.version>3.2.6.RELEASE</spring.version>
     <spring.security.version>3.1.4.RELEASE</spring.security.version>
     <hibernate.version>4.2.0.Final</hibernate.version>
     <hibernate-validator.version>4.3.1.Final</hibernate-validator.version>

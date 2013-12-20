@@ -640,18 +640,17 @@ public class HibernateCaseAggregationConditionStore
     }
 
     /**
-     * Return standard SQL of a dynamic patient-attribute expression. E.g [CA:1]
+     * Return standard SQL of a dynamic patient-attribute expression. E.g [CA:1] OR [CA:1.age]
      * 
      */
     private String getConditionForPatientAttribute( String attributeId, Collection<Integer> orgunitIds,
         boolean isExist )
     {
-
-        String sql = " EXISTS ( SELECT * FROM patientattributevalue _pav " + " WHERE _pav.patientid=pi.patientid  ";
+        String sql = " EXISTS ( SELECT * FROM patientattributevalue _pav " + " WHERE _pav.patientid=pi.patientid ";
 
         if ( attributeId.split( SEPARATOR_ID ).length==2) 
         {
-            sql += " AND _pav.patientattributeid=" + attributeId.split( "." )[0] + " AND DATE(now) - DATE( _pav.value )";
+            sql += " AND _pav.patientattributeid=" + attributeId.split( "." )[0] + " AND DATE(now) - DATE( _pav.value ) ";
         }
         if ( isExist )
         {
@@ -918,7 +917,7 @@ public class HibernateCaseAggregationConditionStore
         {
             if ( hasPatients || operator.equals( CaseAggregationCondition.AGGRERATION_COUNT ) )
             {
-                sql += "p.name, p.gender, p.birthDate, p.phoneNumber,";
+                sql += "p.name,";
             }
 
             if ( hasDataelement )
