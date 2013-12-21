@@ -93,6 +93,7 @@ public class SystemSettingInterceptor
         map.put( KEY_FACTOR_OF_DEVIATION, systemSettingManager.getSystemSetting( KEY_FACTOR_OF_DEVIATION, DEFAULT_FACTOR_OF_DEVIATION ) );
         map.put( KEY_PHONE_NUMBER_AREA_CODE, systemSettingManager.getSystemSetting( KEY_PHONE_NUMBER_AREA_CODE, "" ) );
         map.put( KEY_MULTI_ORGANISATION_UNIT_FORMS, systemSettingManager.getSystemSetting( KEY_MULTI_ORGANISATION_UNIT_FORMS, false ) );
+        map.put( KEY_ENABLE_DATA_APPROVAL, systemSettingManager.getSystemSetting( KEY_ENABLE_DATA_APPROVAL, false ) );
         map.put( KEY_ACCOUNT_RECOVERY, systemSettingManager.getSystemSetting( KEY_ACCOUNT_RECOVERY, false ) );
         map.put( KEY_CONFIGURATION, configurationService.getConfiguration() );
         map.put( KEY_APP_BASE_URL, systemSettingManager.getSystemSetting( KEY_APP_BASE_URL ) );

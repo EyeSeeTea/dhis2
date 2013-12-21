@@ -44,56 +44,83 @@ public interface DataApprovalService
     String ID = DataApprovalService.class.getName();
 
     /**
-     * Adds a DataApproval.
+     * Adds a DataApproval in order to approve data.
      *
      * @param dataApproval the DataApproval to add.
      */
     void addDataApproval( DataApproval dataApproval );
 
     /**
-     * Updates a DataApproval.
-     *
-     * @param dataApproval the DataApproval to update.
-     */
-    void updateDataApproval( DataApproval dataApproval );
-
-    /**
-     * Deletes a DataValue.
+     * Deletes a DataApproval in order to un-approve data.
+     * Any higher-level DataApprovals above this organisation unit
+     * are also deleted for the same period and data set.
      *
      * @param dataApproval the DataApproval to delete.
      */
     void deleteDataApproval( DataApproval dataApproval );
 
     /**
-     * Checks to see if a given DataSet is approved for a given Period and
-     * OrganisationUnit. If data approval is not configured to be used,
-     * always returns TRUE.
+     * Returns the DataApproval object (if any) for a given
+     * dataset, period and organisation unit.
      *
-     * @param dataSet DataSet to check for approval.
-     * @param period Period to check for approval.
-     * @param source OrganisationUnit to check for approval.
-     * @return TRUE if approved (or approval not being used), else FALSE.
+     * @param dataSet DataSet for approval
+     * @param period Period for approval
+     * @param source OrganisationUnit for approval
+     * @return matching DataApproval object, if any
      */
-    public boolean isApproved( DataSet dataSet, Period period, OrganisationUnit source );
+    DataApproval getDataApproval( DataSet dataSet, Period period, OrganisationUnit source );
 
     /**
-     * Approves a DataSet for a given Period and OrganisationUnit.
+     * Returns the DataApprovalState for a given data set, period and
+     * OrganisationUnit.
      *
      * @param dataSet DataSet to check for approval.
      * @param period Period to check for approval.
      * @param source OrganisationUnit to check for approval.
-     * @param created Date/time at which the approval was made.
-     * @param creator User who made the approval.
+     * @return the data approval state.
      */
-    public void approve( DataSet dataSet, Period period, OrganisationUnit source,
-                         Date created, User creator );
+    DataApprovalState getDataApprovalState( DataSet dataSet, Period period, OrganisationUnit source );
 
     /**
-     * Unapproves a DataSet for a given Period and OrganisationUnit.
+     * Checks to see whether a user may approve data for a given
+     * organisation unit.
      *
-     * @param dataSet DataSet to check for approval.
-     * @param period Period to check for approval.
      * @param source OrganisationUnit to check for approval.
+     * @param user The current user.
+     * @param mayApproveAtSameLevel Tells whether the user has the authority
+     *        to approve data for the user's assigned organisation unit(s).
+     * @param mayApproveAtLowerLevels Tells whether the user has the authority
+     *        to approve data below the user's assigned organisation unit(s).
+     * @return true if the user may approve, otherwise false
      */
-    public void unapprove( DataSet dataSet, Period period, OrganisationUnit source );
+    boolean mayApprove( OrganisationUnit source, User user,
+                        boolean mayApproveAtSameLevel,
+                        boolean mayApproveAtLowerLevels );
+
+    /**
+     * Checks to see whether a user may unapprove a given data approval.
+     * <p>
+     * A user may unapprove data for organisation unit A if they have the
+     * authority to approve data for organisation unit B, and B is an
+     * ancestor of A.
+     * <p>
+     * A user may also unapprove data for organisation unit A if they have
+     * the authority to approve data for organisation unit A, and A has no
+     * ancestors.
+     * <p>
+     * But a user may not unapprove data for an organisation unit if the data
+     * has been approved already at a higher level for the same period and
+     * data set, and the user is not authorized to remove that approval as well.
+     *
+     * @param dataApproval The data approval to check for access.
+     * @param user The current user.
+     * @param mayApproveAtSameLevel Tells whether the user has the authority
+     *        to approve data for the user's assigned organisation unit(s).
+     * @param mayApproveAtLowerLevels Tells whether the user has the authority
+     *        to approve data below the user's assigned organisation unit(s).
+     * @return true if the user may unapprove, otherwise false
+     */
+    boolean mayUnapprove( DataApproval dataApproval, User user,
+                          boolean mayApproveAtSameLevel,
+                          boolean mayApproveAtLowerLevels );
 }

@@ -75,6 +75,7 @@ public interface SystemSettingManager
     final String KEY_SCHEDULE_MESSAGE_TASKS = "scheduleMessage";
     final String KEY_PHONE_NUMBER_AREA_CODE = "phoneNumberAreaCode";
     final String KEY_MULTI_ORGANISATION_UNIT_FORMS = "multiOrganisationUnitForms";
+    final String KEY_ENABLE_DATA_APPROVAL = "enableDataApproval";
     final String KEY_SCHEDULE_AGGREGATE_QUERY_BUILDER_TASKS = "scheduleAggregateQueryBuilder";
     final String KEY_SCHEDULE_AGGREGATE_QUERY_BUILDER_TASK_STRATEGY = "scheduleAggregateQueryBuilderTackStrategy";
     final String KEY_CONFIGURATION = "keyConfig";

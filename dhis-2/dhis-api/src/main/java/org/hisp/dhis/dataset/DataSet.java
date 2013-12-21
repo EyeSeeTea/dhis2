@@ -167,6 +167,11 @@ public class DataSet
      */
     private boolean notifyCompletingUser;
 
+    /**
+     * Indicating whether to approve data for this data set.
+     */
+    private boolean approveData;
+
     // -------------------------------------------------------------------------
     // Form properties
     // -------------------------------------------------------------------------
@@ -647,6 +652,19 @@ public class DataSet
     public void setNotifyCompletingUser( boolean notifyCompletingUser )
     {
         this.notifyCompletingUser = notifyCompletingUser;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isApproveData()
+    {
+        return approveData;
+    }
+
+    public void setApproveData( boolean approveData )
+    {
+        this.approveData = approveData;
     }
 
     @JsonProperty

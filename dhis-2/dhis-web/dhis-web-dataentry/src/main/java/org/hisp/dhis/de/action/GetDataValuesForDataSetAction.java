@@ -29,6 +29,9 @@ package org.hisp.dhis.de.action;
  */
 
 import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.dataapproval.DataApproval;
+import org.hisp.dhis.dataapproval.DataApprovalService;
+import org.hisp.dhis.dataapproval.DataApprovalState;
 import org.hisp.dhis.dataset.CompleteDataSetRegistration;
 import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
 import org.hisp.dhis.dataset.DataSet;
@@ -90,6 +93,13 @@ public class GetDataValuesForDataSetAction
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
+    }
+
+    private DataApprovalService dataApprovalService;
+
+    public void setDataApprovalService( DataApprovalService dataApprovalService )
+    {
+        this.dataApprovalService = dataApprovalService;
     }
 
     // -------------------------------------------------------------------------
@@ -173,6 +183,41 @@ public class GetDataValuesForDataSetAction
     public String getStoredBy()
     {
         return storedBy;
+    }
+
+    private DataApprovalState dataApprovalState;
+
+    public DataApprovalState getDataApprovalState()
+    {
+        return dataApprovalState;
+    }
+
+    private Date approvedDate;
+
+    public Date getApprovedDate()
+    {
+        return approvedDate;
+    }
+
+    private String approvedBy;
+
+    public String getApprovedBy()
+    {
+        return approvedBy;
+    }
+
+    private boolean mayApprove;
+
+    public boolean isMayApprove()
+    {
+        return mayApprove;
+    }
+
+    private boolean mayUnapprove;
+
+    public boolean isMayUnapprove()
+    {
+        return mayUnapprove;
     }
 
     // -------------------------------------------------------------------------
@@ -267,6 +312,20 @@ public class GetDataValuesForDataSetAction
             }
         }
 
+        // ---------------------------------------------------------------------
+        // Data approval info
+        // ---------------------------------------------------------------------
+
+        dataApprovalState = dataApprovalService.getDataApprovalState( dataSet, period, organisationUnit );
+
+        switch ( dataApprovalState )
+        {
+            case APPROVED:
+                DataApproval dataApproval = dataApprovalService.getDataApproval( dataSet, period, organisationUnit );
+                approvedDate = dataApproval.getCreated();
+                approvedBy = dataApproval.getCreator().getName();
+                // mayUnapprove = dataApprovalService.mayUnapprove( dataApproval, user  )
+        }
         return SUCCESS;
     }
 }

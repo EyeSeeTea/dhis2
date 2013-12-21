@@ -68,29 +68,13 @@ public class DataApprovalStoreTest
     // Supporting data
     // -------------------------------------------------------------------------
 
-    private DataElement dataElementA;
-
-    private DataElement dataElementB;
-
-    private DataElement dataElementC;
-
-    private DataElement dataElementD;
-
     private DataSet dataSetA;
 
     private DataSet dataSetB;
 
-    private DataSet dataSetC;
-
-    private DataSet dataSetD;
-
     private Period periodA;
 
     private Period periodB;
-
-    private Period periodC;
-
-    private Period periodD;
 
     private OrganisationUnit sourceA;
 
@@ -104,10 +88,6 @@ public class DataApprovalStoreTest
 
     private User userB;
 
-    private User userC;
-
-    private User userD;
-
     // -------------------------------------------------------------------------
     // Set up/tear down
     // -------------------------------------------------------------------------
@@ -116,8 +96,6 @@ public class DataApprovalStoreTest
     public void setUpTest() throws Exception
     {
         dataApprovalStore = (DataApprovalStore) getBean( DataApprovalStore.ID );
-
-        dataElementService = (DataElementService) getBean( DataElementService.ID );
 
         dataSetService = (DataSetService) getBean( DataSetService.ID );
 
@@ -133,42 +111,24 @@ public class DataApprovalStoreTest
         // Add supporting data
         // ---------------------------------------------------------------------
 
-        dataElementA = createDataElement( 'A' );
-        dataElementB = createDataElement( 'B' );
-        dataElementC = createDataElement( 'C' );
-        dataElementD = createDataElement( 'D' );
-
-        dataElementService.addDataElement( dataElementA );
-        dataElementService.addDataElement( dataElementB );
-        dataElementService.addDataElement( dataElementC );
-        dataElementService.addDataElement( dataElementD );
-
         PeriodType periodType = PeriodType.getPeriodTypeByName( "Monthly" );
 
         dataSetA = createDataSet( 'A', periodType );
         dataSetB = createDataSet( 'B', periodType );
-        dataSetC = createDataSet( 'C', periodType );
-        dataSetD = createDataSet( 'D', periodType );
 
         dataSetService.addDataSet( dataSetA );
         dataSetService.addDataSet( dataSetB );
-        dataSetService.addDataSet( dataSetC );
-        dataSetService.addDataSet( dataSetD );
 
         periodA = createPeriod( getDay( 5 ), getDay( 6 ) );
         periodB = createPeriod( getDay( 6 ), getDay( 7 ) );
-        periodC = createPeriod( getDay( 7 ), getDay( 8 ) );
-        periodD = createPeriod( getDay( 8 ), getDay( 9 ) );
 
         periodStore.addPeriod( periodA );
         periodStore.addPeriod( periodB );
-        periodStore.addPeriod( periodC );
-        periodStore.addPeriod( periodD );
 
         sourceA = createOrganisationUnit( 'A' );
-        sourceB = createOrganisationUnit( 'B' );
-        sourceC = createOrganisationUnit( 'C' );
-        sourceD = createOrganisationUnit( 'D' );
+        sourceB = createOrganisationUnit( 'B', sourceA );
+        sourceC = createOrganisationUnit( 'C', sourceB );
+        sourceD = createOrganisationUnit( 'D', sourceC );
 
         organisationUnitService.addOrganisationUnit( sourceA );
         organisationUnitService.addOrganisationUnit( sourceB );
@@ -177,14 +137,9 @@ public class DataApprovalStoreTest
 
         userA = createUser( 'A' );
         userB = createUser( 'B' );
-        userC = createUser( 'C' );
-        userD = createUser( 'D' );
 
         userService.addUser( userA );
         userService.addUser( userB );
-        userService.addUser( userC );
-        userService.addUser( userD );
-
     }
 
     // -------------------------------------------------------------------------
@@ -263,14 +218,35 @@ public class DataApprovalStoreTest
     }
 
     @Test
-    public void testUpdateDataApproval() throws Exception
-    {
-
-    }
-
-    @Test
     public void testDeleteDataApproval() throws Exception
     {
+        Date date = new Date();
+        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, sourceA, date, userA );
+        DataApproval dataApprovalB = new DataApproval( dataSetB, periodB, sourceB, date, userB );
 
+        dataApprovalStore.addDataApproval( dataApprovalA );
+        dataApprovalStore.addDataApproval( dataApprovalB );
+
+        dataApprovalA = dataApprovalStore.getDataApproval( dataSetA, periodA, sourceA );
+        assertNotNull( dataApprovalA );
+
+        dataApprovalB = dataApprovalStore.getDataApproval( dataSetB, periodB, sourceB );
+        assertNotNull( dataApprovalB );
+
+        dataApprovalStore.deleteDataApproval( dataApprovalA );
+
+        dataApprovalA = dataApprovalStore.getDataApproval( dataSetA, periodA, sourceA );
+        assertNull( dataApprovalA );
+
+        dataApprovalB = dataApprovalStore.getDataApproval( dataSetB, periodB, sourceB );
+        assertNotNull( dataApprovalB );
+
+        dataApprovalStore.deleteDataApproval( dataApprovalB );
+
+        dataApprovalA = dataApprovalStore.getDataApproval( dataSetA, periodA, sourceA );
+        assertNull( dataApprovalA );
+
+        dataApprovalB = dataApprovalStore.getDataApproval( dataSetB, periodB, sourceB );
+        assertNull( dataApprovalB );
     }
 }

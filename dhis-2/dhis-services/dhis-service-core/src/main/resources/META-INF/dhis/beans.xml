@@ -381,7 +381,8 @@
   </bean>
 
   <bean id="org.hisp.dhis.dataapproval.DataApprovalService" class="org.hisp.dhis.dataapproval.DefaultDataApprovalService">
-    <property name="dataApprovalStore" ref="org.hisp.dhis.dataapproval.DataApprovalStore" />
+      <property name="dataApprovalStore" ref="org.hisp.dhis.dataapproval.DataApprovalStore" />
+      <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
   </bean>
 
   <bean id="org.hisp.dhis.dataelement.DataElementService" class="org.hisp.dhis.dataelement.DefaultDataElementService">

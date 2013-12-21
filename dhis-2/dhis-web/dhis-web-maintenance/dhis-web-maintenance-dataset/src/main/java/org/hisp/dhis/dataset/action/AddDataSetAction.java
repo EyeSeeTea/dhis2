@@ -159,6 +159,13 @@ public class AddDataSetAction
         this.notifyCompletingUser = notifyCompletingUser;
     }
 
+    private boolean approveData;
+
+    public void setApproveData( boolean approveData )
+    {
+        this.approveData = approveData;
+    }
+
     private boolean skipAggregation;
 
     public void setSkipAggregation( boolean skipAggregation )
@@ -289,6 +296,7 @@ public class AddDataSetAction
         dataSet.setFieldCombinationRequired( fieldCombinationRequired );
         dataSet.setValidCompleteOnly( validCompleteOnly );
         dataSet.setNotifyCompletingUser( notifyCompletingUser );
+        dataSet.setApproveData( approveData );
         dataSet.setSkipOffline( skipOffline );
         dataSet.setDataElementDecoration( dataElementDecoration );
         dataSet.setRenderAsTabs( renderAsTabs );

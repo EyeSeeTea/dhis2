@@ -28,12 +28,14 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.apache.commons.collections.CollectionUtils;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.user.User;
 
-import java.util.Date;
+import java.io.Serializable;
 
 /**
  * @author Jim Grace
@@ -42,6 +44,7 @@ import java.util.Date;
 public class DefaultDataApprovalService
     implements DataApprovalService
 {
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -53,6 +56,13 @@ public class DefaultDataApprovalService
         this.dataApprovalStore = dataApprovalStore;
     }
 
+    private SystemSettingManager systemSettingManager;
+
+    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
+    {
+        this.systemSettingManager = systemSettingManager;
+    }
+
     // -------------------------------------------------------------------------
     // DataApproval
     // -------------------------------------------------------------------------
@@ -62,19 +72,19 @@ public class DefaultDataApprovalService
         dataApprovalStore.addDataApproval( dataApproval );
     }
 
-    public void updateDataApproval( DataApproval dataApproval )
-    {
-        dataApprovalStore.updateDataApproval(dataApproval);
-    }
-
     public void deleteDataApproval( DataApproval dataApproval )
     {
-        dataApprovalStore.deleteDataApproval(dataApproval);
-    }
+        dataApprovalStore.deleteDataApproval( dataApproval );
 
-    public boolean isApproved ( DataSet dataSet, Period period, OrganisationUnit source )
-    {
-        return null != dataApprovalStore.getDataApproval( dataSet, period, source );
+        for ( OrganisationUnit ancestor : dataApproval.getSource().getAncestors() )
+        {
+            DataApproval ancestorApproval = dataApprovalStore.getDataApproval(
+                    dataApproval.getDataSet(), dataApproval.getPeriod(), ancestor );
+
+            if ( ancestorApproval != null ) {
+                dataApprovalStore.deleteDataApproval ( ancestorApproval );
+            }
+        }
     }
 
     public DataApproval getDataApproval( DataSet dataSet, Period period, OrganisationUnit source )
@@ -82,26 +92,147 @@ public class DefaultDataApprovalService
         return dataApprovalStore.getDataApproval( dataSet, period, source );
     }
 
-    public void approve( DataSet dataSet, Period period, OrganisationUnit source,
-                         Date created, User creator )
+    public DataApprovalState getDataApprovalState( DataSet dataSet, Period period, OrganisationUnit source )
     {
-        DataApproval existingDataApproval = dataApprovalStore.getDataApproval( dataSet, period, source );
-        if ( existingDataApproval != null )
+        //
+        // If not configured globally, or for this data set, return APPROVAL_NOT_NEEDED.
+        //
+        Serializable enableDataApprovalSetting = systemSettingManager.getSystemSetting( SystemSettingManager.KEY_ENABLE_DATA_APPROVAL );
+        if ( enableDataApprovalSetting == null || ! (Boolean) enableDataApprovalSetting || ! dataSet.isApproveData() )
         {
-            dataApprovalStore.deleteDataApproval( existingDataApproval );
+            return DataApprovalState.APPROVAL_NOT_NEEDED;
         }
 
-        DataApproval newDataApproval = new DataApproval( dataSet, period, source, created, creator );
-        dataApprovalStore.addDataApproval( newDataApproval );
+        //
+        // If approved, return APPROVED.
+        //
+        if ( null != dataApprovalStore.getDataApproval( dataSet, period, source ) )
+        {
+            return DataApprovalState.APPROVED;
+        }
+
+        boolean approvedAtLowerLevels = false; // Until proven otherwise.
+
+        for ( OrganisationUnit child : source.getChildren() )
+        {
+            switch ( getDataApprovalState( dataSet, period, child ) )
+            {
+                //
+                // If ready or waiting at a lower level, return
+                // WAITING_FOR_LOWER_LEVEL_APPROVAL at this level.
+                //
+                case READY_FOR_APPROVAL:
+                case WAITING_FOR_LOWER_LEVEL_APPROVAL:
+                    return DataApprovalState.WAITING_FOR_LOWER_LEVEL_APPROVAL;
+
+                case APPROVED:
+                    approvedAtLowerLevels = true;
+                    break;
+
+                case APPROVAL_NOT_NEEDED:
+                    break; // Do nothing.
+            }
+
+        }
+
+        //
+        // If approved at lower levels (and not ready or waiting at any),
+        // and/or if data is configured for entry at this level (whether or
+        // not it has been entered), return READY_FOR_APPROVAL.
+        //
+        if ( approvedAtLowerLevels ||
+             source.getAllDataSets().contains ( dataSet ) )
+        {
+            return DataApprovalState.READY_FOR_APPROVAL;
+        }
+
+        //
+        // Finally, if we haven't seen any approval action at lower levels,
+        // and this level is not configured for data entry from this data set,
+        // then return APPROVAL_NOT_NEEDED.
+        //
+        return DataApprovalState.APPROVAL_NOT_NEEDED;
     }
 
-    public void unapprove( DataSet dataSet, Period period, OrganisationUnit source )
+    public boolean mayApprove( OrganisationUnit source, User user,
+                               boolean mayApproveAtSameLevel,
+                               boolean mayApproveAtLowerLevels )
     {
-        DataApproval dataApproval = dataApprovalStore.getDataApproval( dataSet, period, source );
-
-        if ( dataApproval != null )
+        if ( mayApproveAtSameLevel && user.getOrganisationUnits().contains( source ) )
         {
-            dataApprovalStore.deleteDataApproval( dataApproval );
+            return true;
         }
+
+        if ( mayApproveAtLowerLevels && CollectionUtils.containsAny( user.getOrganisationUnits(), source.getAncestors() ) )
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean mayUnapprove( DataApproval dataApproval, User user,
+                                 boolean mayApproveAtSameLevel,
+                                 boolean mayApproveAtLowerLevels )
+    {
+        if ( isAuthorizedToUnapprove( dataApproval.getSource(), user, mayApproveAtSameLevel, mayApproveAtLowerLevels ) )
+        {
+            // Check approvals at higher levels that may block this unapproval:
+
+            for ( OrganisationUnit ancestor : dataApproval.getSource().getAncestors() )
+            {
+                DataApproval ancestorDataApproval = dataApprovalStore.getDataApproval(
+                        dataApproval.getDataSet(), dataApproval.getPeriod(), ancestor );
+                if ( ancestorDataApproval != null &&
+                        ! isAuthorizedToUnapprove( ancestor, user, mayApproveAtSameLevel, mayApproveAtLowerLevels ) )
+                {
+                    return false; // Could unapprove at that level, but higher-level approval is blocking.
+                }
+            }
+
+            return true; // May unapprove at that level, and no higher-level approval is blocking.
+        }
+
+        return false; // May not unapprove at that level.
+    }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    /**
+     * Tests whether the user is authorized to unapprove for this organisation
+     * unit.
+     * <p>
+     * Whether the user actually may unapprove an existing approval depends
+     * also on whether there are higher-level approvals that the user is
+     * authorized to unapprove.
+     *
+     * @param source OrganisationUnit to check for approval.
+     * @param user The current user.
+     * @param mayApproveAtSameLevel Tells whether the user has the authority
+     *        to approve data for the user's assigned organisation unit(s).
+     * @param mayApproveAtLowerLevels Tells whether the user has the authority
+     *        to approve data below the user's assigned organisation unit(s).
+     * @return true if the user may approve, otherwise false
+     */
+    private boolean isAuthorizedToUnapprove( OrganisationUnit source, User user,
+                                             boolean mayApproveAtSameLevel,
+                                             boolean mayApproveAtLowerLevels )
+    {
+        if ( mayApprove( source, user, mayApproveAtSameLevel, mayApproveAtLowerLevels ) )
+        {
+            return true;
+        }
+
+        for ( OrganisationUnit ancestor : source.getAncestors() )
+        {
+            if ( mayApprove( ancestor, user, mayApproveAtSameLevel, mayApproveAtLowerLevels ) )
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

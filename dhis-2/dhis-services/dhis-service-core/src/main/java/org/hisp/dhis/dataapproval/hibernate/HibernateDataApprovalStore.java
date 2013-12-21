@@ -68,13 +68,6 @@ public class HibernateDataApprovalStore
         save( dataApproval );
     }
 
-    public void updateDataApproval( DataApproval dataApproval )
-    {
-        dataApproval.setPeriod( periodService.reloadPeriod( dataApproval.getPeriod() ) );
-
-        update( dataApproval );
-    }
-
     public void deleteDataApproval( DataApproval dataApproval )
     {
         delete( dataApproval );

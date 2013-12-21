@@ -28,49 +28,43 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.*;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataset.DataSet;
-
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.Period;
-
 /**
- * Defines the functionality for persisting DataApproval objects.
+ * Current state of data approval for a given combination of data set, period
+ * and organisation unit.
  *
  * @author Jim Grace
+ * @version $Id$
  */
-public interface DataApprovalStore
-//        extends GenericStore<DataApproval>
+
+public enum DataApprovalState
 {
-    String ID = DataApprovalStore.class.getName();
-
-    // -------------------------------------------------------------------------
-    // Basic DataApproval
-    // -------------------------------------------------------------------------
+    /**
+     * Data in this data set is approved for this period and organisation unit.
+     */
+    APPROVED,
 
     /**
-     * Adds a DataApproval in order to approve data.
-     *
-     * @param dataApproval the DataApproval to add.
+     * Data in this data set is ready to be approved for this period and
+     * organisation unit.
      */
-    void addDataApproval( DataApproval dataApproval );
+    READY_FOR_APPROVAL,
 
     /**
-     * Deletes a DataApproval in order to un-approve data.
-     *
-     * @param dataApproval the DataApproval to delete.
+     * Data in this data set is not yet ready to be approved for this period
+     * and organisation unit, because it is waiting for approval at a
+     * lower-level organisation unit under this one.
      */
-    void deleteDataApproval( DataApproval dataApproval );
+    WAITING_FOR_LOWER_LEVEL_APPROVAL,
 
     /**
-     * Returns the DataApproval object (if any) for a given
-     * dataset, period and organisation unit.
-     *
-     * @param dataSet DataSet for approval
-     * @param period Period for approval
-     * @param source OrganisationUnit for approval
-     * @return matching DataApproval object, if any
+     * Data in this data set does not need approval for this period and
+     * organisation unit, for one of the following reasons:
+     * <ul>
+     *     <li>Data approval is not enabled globally.</li>
+     *     <li>Data approval is not enabled for this data set.</li>
+     *     <li>No data is collected for this data set for this organisation
+     *         unit or any lower-level organisation units under it.</li>
+     * </ul>
      */
-    DataApproval getDataApproval( DataSet dataSet, Period period, OrganisationUnit source );
+    APPROVAL_NOT_NEEDED
 }

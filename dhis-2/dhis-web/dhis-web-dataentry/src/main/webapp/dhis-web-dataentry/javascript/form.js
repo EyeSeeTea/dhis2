@@ -1451,29 +1451,54 @@ function disableCompleteButton()
     $( '#undoButton' ).removeAttr( 'disabled' );
 }
 
-function displayUserDetails()
+function displayCompletingUserDetails()
 {
-	if ( currentCompletedByUser )
-	{
-		var url = '../dhis-web-commons-ajax-json/getUser.action';
+    if ( currentCompletedByUser )
+    {
+        var url = '../dhis-web-commons-ajax-json/getUser.action';
 
-		$.getJSON( url, { username:currentCompletedByUser }, function( json ) 
-		{
-			$( '#userFullName' ).html( json.user.firstName + ' ' + json.user.surname );
-			$( '#userUsername' ).html( json.user.username );
-			$( '#userEmail' ).html( json.user.email );
-			$( '#userPhoneNumber' ).html( json.user.phoneNumber );
-			$( '#userOrganisationUnits' ).html( joinNameableObjects( json.user.organisationUnits ) );
-			$( '#userUserRoles' ).html( joinNameableObjects( json.user.roles ) );
+        $.getJSON( url, { username:currentCompletedByUser }, function( json )
+        {
+            $( '#userFullName' ).html( json.user.firstName + ' ' + json.user.surname );
+            $( '#userUsername' ).html( json.user.username );
+            $( '#userEmail' ).html( json.user.email );
+            $( '#userPhoneNumber' ).html( json.user.phoneNumber );
+            $( '#userOrganisationUnits' ).html( joinNameableObjects( json.user.organisationUnits ) );
+            $( '#userUserRoles' ).html( joinNameableObjects( json.user.roles ) );
 
-			$( '#completedByDiv' ).dialog( {
-	        	modal : true,
-	        	width : 350,
-	        	height : 350,
-	        	title : 'User'
-	    	} );
-		} );
-	}
+            $( '#completedByDiv' ).dialog( {
+                modal : true,
+                width : 350,
+                height : 350,
+                title : 'User'
+            } );
+        } );
+    }
+}
+
+function displayApprovingUserDetails()
+{
+    if ( currentApprovedByUser )
+    {
+        var url = '../dhis-web-commons-ajax-json/getUser.action';
+
+        $.getJSON( url, { username:currentApprovedByUser }, function( json )
+        {
+            $( '#userFullName' ).html( json.user.firstName + ' ' + json.user.surname );
+            $( '#userUsername' ).html( json.user.username );
+            $( '#userEmail' ).html( json.user.email );
+            $( '#userPhoneNumber' ).html( json.user.phoneNumber );
+            $( '#userOrganisationUnits' ).html( joinNameableObjects( json.user.organisationUnits ) );
+            $( '#userUserRoles' ).html( joinNameableObjects( json.user.roles ) );
+
+            $( '#completedByDiv' ).dialog( {
+                modal : true,
+                width : 350,
+                height : 350,
+                title : 'User'
+            } );
+        } );
+    }
 }
 
 // -----------------------------------------------------------------------------
