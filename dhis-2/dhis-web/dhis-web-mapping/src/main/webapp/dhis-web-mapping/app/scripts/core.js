@@ -178,18 +178,20 @@ Ext.onReady( function() {
 	GIS.core.createSelectHandlers = function(gis, layer) {
 		var isRelocate = !!GIS.app ? (gis.init.user.isAdmin ? true : false) : false,
 			options = {},
-			window,
 			infrastructuralPeriod,
 			defaultHoverSelect,
 			defaultHoverUnselect,
 			defaultClickSelect,
-			dimConf = gis.conf.finals.dimension;
+            selectHandlers,
+			dimConf = gis.conf.finals.dimension,
+            defaultHoverWindow,
+            eventWindow;
 
 		defaultHoverSelect = function fn(feature) {
-			if (window) {
-				window.destroy();
+			if (defaultHoverWindow) {
+				defaultHoverWindow.destroy();
 			}
-			window = Ext.create('Ext.window.Window', {
+			defaultHoverWindow = Ext.create('Ext.window.Window', {
 				cls: 'gis-window-widget-feature gis-plugin',
 				preventHeader: true,
 				shadow: false,
@@ -199,18 +201,18 @@ Ext.onReady( function() {
 				}
 			});
 
-			window.show();
+			defaultHoverWindow.show();
 
 			var eastX = gis.viewport.eastRegion.getPosition()[0],
 				centerX = gis.viewport.centerRegion.getPosition()[0],
 				centerRegionCenterX = centerX + ((eastX - centerX) / 2),
 				centerRegionY = gis.viewport.centerRegion.getPosition()[1] + (GIS.app ? 32 : 0);
 
-			window.setPosition(centerRegionCenterX - (window.getWidth() / 2), centerRegionY);
+			defaultHoverWindow.setPosition(centerRegionCenterX - (defaultHoverWindow.getWidth() / 2), centerRegionY);
 		};
 
 		defaultHoverUnselect = function fn(feature) {
-			window.destroy();
+			defaultHoverWindow.destroy();
 		};
 
 		defaultClickSelect = function fn(feature) {
@@ -532,26 +534,39 @@ Ext.onReady( function() {
 
 		if (layer.id === 'event') {
 			options.onClickSelect = function fn(feature) {
-                var defaultKeys = ['label', 'value', 'nameColumnMap', 'psi', 'ps', 'longitude', 'latitude', 'eventdate', 'ou', 'oucode', 'ouname'],
+                var ignoreKeys = ['label', 'value', 'nameColumnMap', 'psi', 'ps', 'longitude', 'latitude', 'eventdate', 'ou', 'oucode', 'ouname'],
                     attributes = feature.attributes,
-                    html = '',
-                    window;
+                    map = attributes.nameColumnMap,
+                    html = '<table>',
+                    titleStyle = ' style="font-weight:bold; padding-right:10px"';
 
                 // default properties
-
+                html += '<tr><td' + titleStyle + '>' + map['ou'] + '</td><td>' + attributes['ouname'] + '</td></tr>';
+                html += '<tr><td' + titleStyle + '>' + map['eventdate'] + '</td><td>' + attributes['eventdate'] + '</td></tr>';
+                html += '<tr><td' + titleStyle + '>' + map['longitude'] + '</td><td>' + attributes['longitude'] + '</td></tr>';
+                html += '<tr><td' + titleStyle + '>' + map['latitude'] + '</td><td>' + attributes['latitude'] + '</td></tr>';
 
                 for (var key in attributes) {
-                    if (attributes.hasOwnProperty(key) && !Ext.Array.contains(defaultKeys, key)) {
+                    if (attributes.hasOwnProperty(key) && !Ext.Array.contains(ignoreKeys, key)) {
+                        html += '<tr><td' + titleStyle + '>' + map[key] + '</td><td>' + attributes[key] + '</td></tr>';
+                    }
+                }
 
+                html += '</table>';
 
+                if (Ext.isObject(eventWindow) && eventWindow.destroy) {
+                    eventWindow.destroy();
+                }
 
-                console.log(feature.attributes);
+                eventWindow = Ext.create('Ext.window.Window', {
+                    title: 'Event',
+                    resizable: false,
+                    bodyStyle: 'background-color:#fff; padding:5px',
+                    html: html
+                });
 
-
-
-                //window = Ext.create('Ext.window.Window', {
-                    //resizable: false
-                //});
+                eventWindow.show();
+                gis.util.gui.window.setPositionTopRight(eventWindow);
             };
 		}
 
@@ -982,9 +997,9 @@ Ext.onReady( function() {
             	indicator: gis.conf.finals.widget.value,
 				method: 2,
 				numClasses: 5,
-				colors: layer.core.getColors('ffffff', 'ff0000'),
-				minSize: 4,
-				maxSize: 4
+				colors: layer.core.getColors('000000', '222222'),
+				minSize: 5,
+				maxSize: 5
 			};
 
             layer.core.view = view;

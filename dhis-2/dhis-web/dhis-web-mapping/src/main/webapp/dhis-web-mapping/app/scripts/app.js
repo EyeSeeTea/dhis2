@@ -344,8 +344,7 @@ Ext.onReady( function() {
 			util.gui.window = util.gui.window || {};
 
 			util.gui.window.setPositionTopRight = function(window) {
-				var center = gis.viewport.centerRegion;
-				window.setPosition(gis.viewport.width - (window.width + 7), center.y + 8);
+				window.setPosition(gis.viewport.centerRegion.getWidth() - (window.getWidth() + 3), gis.viewport.centerRegion.y + 58);
 			};
 
 			util.gui.window.setPositionTopLeft = function(window) {
