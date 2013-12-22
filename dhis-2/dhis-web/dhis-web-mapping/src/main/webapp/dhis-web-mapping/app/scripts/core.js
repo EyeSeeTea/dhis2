@@ -180,12 +180,12 @@ Ext.onReady( function() {
 			options = {},
 			window,
 			infrastructuralPeriod,
-			onHoverSelect,
-			onHoverUnselect,
-			onClickSelect,
+			defaultHoverSelect,
+			defaultHoverUnselect,
+			defaultClickSelect,
 			dimConf = gis.conf.finals.dimension;
 
-		onHoverSelect = function fn(feature) {
+		defaultHoverSelect = function fn(feature) {
 			if (window) {
 				window.destroy();
 			}
@@ -209,11 +209,11 @@ Ext.onReady( function() {
 			window.setPosition(centerRegionCenterX - (window.getWidth() / 2), centerRegionY);
 		};
 
-		onHoverUnselect = function fn(feature) {
+		defaultHoverUnselect = function fn(feature) {
 			window.destroy();
 		};
 
-		onClickSelect = function fn(feature) {
+		defaultClickSelect = function fn(feature) {
 			var showInfo,
 				showRelocate,
 				drill,
@@ -524,11 +524,26 @@ Ext.onReady( function() {
 			menu.showAt([gis.olmap.mouseMove.x, gis.olmap.mouseMove.y]);
 		};
 
-		options.onHoverSelect = onHoverSelect;
-		options.onHoverUnselect = onHoverUnselect;
-		
-		if (layer.id !== 'event') {
-			options.onClickSelect = onClickSelect;
+		options = {
+            onHoverSelect: defaultHoverSelect,
+            onHoverUnselect: defaultHoverUnselect,
+            onClickSelect: defaultClickSelect
+        };
+
+		if (layer.id === 'event') {
+			options.onClickSelect = function fn(feature) {
+                var attributes = {},
+                    html = '',
+                    window;
+
+                console.log(feature.attributes);
+
+
+
+                //window = Ext.create('Ext.window.Window', {
+                    //resizable: false
+                //});
+            };
 		}
 
 		selectHandlers = new OpenLayers.Control.newSelectFeature(layer, options);
@@ -902,11 +917,19 @@ Ext.onReady( function() {
 				scope: this,
 				success: function(r) {
                     var events = [],
-                        features = [];
+                        features = [],
+                        map;
 
                     if (!r.rows) {
                         alert('No coordinates found');
                         return;
+                    }
+
+                    // name-column map
+                    map = Ext.clone(r.metaData.names);
+
+                    for (var i = 0; i < r.headers.length; i++) {
+                        map[r.headers[i].name] = r.headers[i].column;
                     }
 
                     // events
@@ -919,7 +942,8 @@ Ext.onReady( function() {
                         }
 
                         obj[gis.conf.finals.widget.value] = 0;
-                        obj['label'] = obj.ouname;
+                        obj.label = obj.ouname;
+                        obj.nameColumnMap = map;
 
                         events.push(obj);
                     }
