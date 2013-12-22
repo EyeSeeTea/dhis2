@@ -532,9 +532,18 @@ Ext.onReady( function() {
 
 		if (layer.id === 'event') {
 			options.onClickSelect = function fn(feature) {
-                var attributes = {},
+                var defaultKeys = ['label', 'value', 'nameColumnMap', 'psi', 'ps', 'longitude', 'latitude', 'eventdate', 'ou', 'oucode', 'ouname'],
+                    attributes = feature.attributes,
                     html = '',
                     window;
+
+                // default properties
+
+
+                for (var key in attributes) {
+                    if (attributes.hasOwnProperty(key) && !Ext.Array.contains(defaultKeys, key)) {
+
+
 
                 console.log(feature.attributes);
 
