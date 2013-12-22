@@ -28,8 +28,19 @@ package org.hisp.dhis.de.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategory;
+import org.hisp.dhis.dataelement.DataElementCategoryCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
@@ -39,13 +50,8 @@ import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.organisationunit.OrganisationUnitDataSetAssociationSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.user.CurrentUserService;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Lars Helge Overland
@@ -92,14 +98,20 @@ public class GetMetaDataAction
         this.organisationUnitService = organisationUnitService;
     }
 
+    private DataElementCategoryService categoryService;
+    
+    public void setCategoryService( DataElementCategoryService categoryService )
+    {
+        this.categoryService = categoryService;
+    }
+
     private CurrentUserService currentUserService;
 
-    @Autowired
     public void setCurrentUserService( CurrentUserService currentUserService )
     {
         this.currentUserService = currentUserService;
     }
-
+    
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
@@ -132,9 +144,9 @@ public class GetMetaDataAction
         return indicators;
     }
 
-    private Collection<DataSet> dataSets;
+    private List<DataSet> dataSets;
 
-    public Collection<DataSet> getDataSets()
+    public List<DataSet> getDataSets()
     {
         return dataSets;
     }
@@ -158,6 +170,27 @@ public class GetMetaDataAction
     public boolean isEmptyOrganisationUnits()
     {
         return emptyOrganisationUnits;
+    }
+    
+    private List<DataElementCategoryCombo> categoryCombos;
+
+    public List<DataElementCategoryCombo> getCategoryCombos()
+    {
+        return categoryCombos;
+    }
+    
+    private List<DataElementCategory> categories;
+
+    public List<DataElementCategory> getCategories()
+    {
+        return categories;
+    }
+    
+    private DataElementCategoryCombo defaultCategoryCombo;
+
+    public DataElementCategoryCombo getDefaultCategoryCombo()
+    {
+        return defaultCategoryCombo;
     }
 
     // -------------------------------------------------------------------------
@@ -195,8 +228,30 @@ public class GetMetaDataAction
 
         organisationUnitAssociationSetMap = organisationUnitSet.getOrganisationUnitAssociationSetMap();
 
-        dataSets = dataSetService.getDataSetsByUid( organisationUnitSet.getDistinctDataSets() );
+        dataSets = new ArrayList<DataSet>( dataSetService.getDataSetsByUid( organisationUnitSet.getDistinctDataSets() ) );
 
+        Set<DataElementCategoryCombo> categoryComboSet = new HashSet<DataElementCategoryCombo>();
+        Set<DataElementCategory> categorySet = new HashSet<DataElementCategory>();
+        
+        for ( DataSet dataSet : dataSets )
+        {
+            categoryComboSet.add( dataSet.getCategoryCombo() );
+        }
+        
+        for ( DataElementCategoryCombo categoryCombo : categoryComboSet )
+        {
+            categorySet.addAll( categoryCombo.getCategories() );
+        }
+        
+        categoryCombos = new ArrayList<DataElementCategoryCombo>( categoryComboSet );
+        categories = new ArrayList<DataElementCategory>( categorySet );
+        
+        Collections.sort( dataSets, IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( categoryCombos, IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( categories, IdentifiableObjectNameComparator.INSTANCE );
+        
+        defaultCategoryCombo = categoryService.getDefaultDataElementCategoryCombo();
+        
         return SUCCESS;
     }
 }
