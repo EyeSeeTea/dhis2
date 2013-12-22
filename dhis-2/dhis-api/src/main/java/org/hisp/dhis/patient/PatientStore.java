@@ -29,7 +29,6 @@ package org.hisp.dhis.patient;
  */
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
@@ -58,16 +57,6 @@ public interface PatientStore
      * @return List of patients
      */
     Collection<Patient> getByNames( String name, Integer min, Integer max );
-
-    /**
-     * Search patients by full name, date of birth and gender
-     * 
-     * @param name Full name
-     * @param birthdate Date of birth
-     * 
-     * @return List of patients
-     */
-    Collection<Patient> get( String name, Date birthdate, String gender );
 
     /**
      * Search patients who registered in a certain organisation unit
@@ -110,7 +99,7 @@ public interface PatientStore
         Integer max );
 
     List<Patient> query( TrackedEntityQueryParams params );
-    
+
     /**
      * Search patient who has the same representative
      * 
@@ -190,16 +179,6 @@ public interface PatientStore
      * @return List of patient
      */
     Collection<Patient> getByFullName( String name, OrganisationUnit organisationUnit );
-
-    /**
-     * Retrieve ids of orgunits where patient registered in a certain period
-     * 
-     * @param startDate Start date
-     * @param endDate End date
-     * 
-     * @return List of patient
-     */
-    Collection<Integer> getRegistrationOrgunitIds( Date startDate, Date endDate );
 
     /**
      * Search events of patients who meet the criteria for searching

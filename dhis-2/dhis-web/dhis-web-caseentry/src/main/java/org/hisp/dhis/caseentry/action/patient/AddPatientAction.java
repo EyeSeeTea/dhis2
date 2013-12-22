@@ -57,7 +57,6 @@ import org.hisp.dhis.relationship.Relationship;
 import org.hisp.dhis.relationship.RelationshipService;
 import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.relationship.RelationshipTypeService;
-import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.user.UserService;
 
 import com.opensymphony.xwork2.Action;
@@ -77,15 +76,11 @@ public class AddPatientAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private I18nFormat format;
-
     private PatientService patientService;
 
     private PatientIdentifierService patientIdentifierService;
 
     private PatientIdentifierTypeService patientIdentifierTypeService;
-
-    private OrganisationUnitSelectionManager selectionManager;
 
     private PatientAttributeService patientAttributeService;
 
@@ -93,29 +88,19 @@ public class AddPatientAction
 
     private UserService userService;
 
-    private SystemSettingManager systemSettingManager;
-
     private RelationshipTypeService relationshipTypeService;
 
     private RelationshipService relationshipService;
+
+    private OrganisationUnitSelectionManager selectionManager;
+
+    private I18nFormat format;
 
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
     private String fullName;
-
-    private String birthDate;
-
-    private Integer age;
-
-    private Boolean verified;
-
-    private String gender;
-
-    private String[] phoneNumber;
-
-    private String registrationDate;
 
     private boolean underAge;
 
@@ -124,10 +109,6 @@ public class AddPatientAction
     private Integer relationshipTypeId;
 
     private Integer healthWorker;
-
-    private boolean isDead;
-
-    private String deathDate;
 
     private Integer relationshipId;
 
@@ -141,97 +122,25 @@ public class AddPatientAction
 
     public String execute()
     {
-        // ---------------------------------------------------------------------
-        // Prepare values
-        // ---------------------------------------------------------------------
-
         OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
         Patient patient = new Patient();
 
         // ---------------------------------------------------------------------
-        // Set FullName
+        // Set FullName && location
         // ---------------------------------------------------------------------
 
         patient.setName( fullName );
+
+        patient.setOrganisationUnit( organisationUnit );
 
         // ---------------------------------------------------------------------
         // Set Other information for patient
         // ---------------------------------------------------------------------
 
-        String phone = "";
-
-        if ( phoneNumber != null )
-        {
-            for ( String _phoneNumber : phoneNumber )
-            {
-                _phoneNumber = (_phoneNumber != null && _phoneNumber.isEmpty() && _phoneNumber.trim().equals(
-                    systemSettingManager.getSystemSetting( SystemSettingManager.KEY_PHONE_NUMBER_AREA_CODE ) )) ? null
-                    : _phoneNumber;
-                if ( _phoneNumber != null )
-                {
-                    phone += _phoneNumber + ";";
-                }
-            }
-
-            phone = (phone.isEmpty()) ? null : phone.substring( 0, phone.length() - 1 );
-            patient.setPhoneNumber( phone );
-        }
-
-        patient.setGender( gender );
-        patient.setIsDead( false );
-        patient.setUnderAge( underAge );
-        patient.setOrganisationUnit( organisationUnit );
-        patient.setIsDead( isDead );
-
-        if ( deathDate != null )
-        {
-            deathDate = deathDate.trim();
-            patient.setDeathDate( format.parseDate( deathDate ) );
-        }
-
         if ( healthWorker != null )
         {
             patient.setAssociate( userService.getUser( healthWorker ) );
-        }
-
-        Date _birthDate = new Date();
-        if ( birthDate != null || age != null )
-        {
-            verified = (verified == null) ? false : verified;
-
-            Character dobType = (verified) ? Patient.DOB_TYPE_VERIFIED : Patient.DOB_TYPE_DECLARED;
-
-            if ( !verified && age != null )
-            {
-                dobType = 'A';
-            }
-
-            if ( dobType == Patient.DOB_TYPE_VERIFIED || dobType == Patient.DOB_TYPE_DECLARED )
-            {
-                birthDate = birthDate.trim();
-                patient.setBirthDate( format.parseDate( birthDate ) );
-            }
-            else
-            {
-                patient.setBirthDateFromAge( age.intValue(), Patient.AGE_TYPE_YEAR );
-            }
-
-            _birthDate = patient.getBirthDate();
-            patient.setDobType( dobType );
-        }
-
-        // -----------------------------------------------------------------------------
-        // Registration Date
-        // -----------------------------------------------------------------------------
-
-        if ( registrationDate == null )
-        {
-            patient.setRegistrationDate( new Date() );
-        }
-        else
-        {
-            patient.setRegistrationDate( format.parseDate( registrationDate ) );
         }
 
         // -----------------------------------------------------------------------------
@@ -269,17 +178,12 @@ public class AddPatientAction
         // PatientIdentifierType will be null
         // --------------------------------------------------------------------------------
 
-        if ( gender == null )
-        {
-            gender = Patient.FEMALE;
-        }
-
-        String identifier = PatientIdentifierGenerator.getNewIdentifier( _birthDate, gender );
+        String identifier = PatientIdentifierGenerator.getNewIdentifier( new Date(), "F" );
 
         PatientIdentifier systemGenerateIdentifier = patientIdentifierService.get( null, identifier );
         while ( systemGenerateIdentifier != null )
         {
-            identifier = PatientIdentifierGenerator.getNewIdentifier( patient.getBirthDate(), patient.getGender() );
+            identifier = PatientIdentifierGenerator.getNewIdentifier( new Date(), "F" );
             systemGenerateIdentifier = patientIdentifierService.get( null, identifier );
         }
 
@@ -309,24 +213,21 @@ public class AddPatientAction
                     attributeValue = new PatientAttributeValue();
                     attributeValue.setPatient( patient );
                     attributeValue.setPatientAttribute( attribute );
-                    attributeValue.setValue( value );
+                    attributeValue.setValue( value.trim() );
+
+                    if ( attribute.getValueType().equals( PatientAttribute.TYPE_AGE ) )
+                    {
+                        value = format.formatDate( PatientAttribute.getDateFromAge( Integer.parseInt( value ) ) );
+                    }
 
                     if ( PatientAttribute.TYPE_COMBO.equalsIgnoreCase( attribute.getValueType() ) )
                     {
-                        PatientAttributeOption option = patientAttributeOptionService
-                            .get( NumberUtils.toInt( value, 0 ) );
+                        PatientAttributeOption option = patientAttributeOptionService.get( Integer.parseInt( value ) );
                         if ( option != null )
                         {
                             attributeValue.setPatientAttributeOption( option );
+                            attributeValue.setValue( option.getName() );
                         }
-                        else
-                        {
-                            // Someone deleted this option ...
-                        }
-                    }
-                    else
-                    {
-                        attributeValue.setValue( value.trim() );
                     }
                     patientAttributeValues.add( attributeValue );
                 }
@@ -337,8 +238,7 @@ public class AddPatientAction
         // Save patient
         // -------------------------------------------------------------------------
 
-        Integer id = patientService.createPatient( patient, representativeId, relationshipTypeId,
-            patientAttributeValues );
+        patientService.createPatient( patient, representativeId, relationshipTypeId, patientAttributeValues );
 
         // -------------------------------------------------------------------------
         // Create relationship
@@ -377,7 +277,7 @@ public class AddPatientAction
             }
         }
 
-        message = id + "_" + systemGenerateIdentifier.getIdentifier();
+        message = patient.getUid() + "_" + systemGenerateIdentifier.getIdentifier();
 
         return SUCCESS;
     }
@@ -411,19 +311,9 @@ public class AddPatientAction
         this.relationshipService = relationshipService;
     }
 
-    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
+    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
-        this.systemSettingManager = systemSettingManager;
-    }
-
-    public void setDead( boolean isDead )
-    {
-        this.isDead = isDead;
-    }
-
-    public void setDeathDate( String deathDate )
-    {
-        this.deathDate = deathDate;
+        this.selectionManager = selectionManager;
     }
 
     public String getMessage()
@@ -436,24 +326,9 @@ public class AddPatientAction
         this.healthWorker = healthWorker;
     }
 
-    public void setVerified( Boolean verified )
-    {
-        this.verified = verified;
-    }
-
     public void setPatientIdentifierTypeService( PatientIdentifierTypeService patientIdentifierTypeService )
     {
         this.patientIdentifierTypeService = patientIdentifierTypeService;
-    }
-
-    public void setBirthDate( String birthDate )
-    {
-        this.birthDate = birthDate;
-    }
-
-    public void setFormat( I18nFormat format )
-    {
-        this.format = format;
     }
 
     public void setPatientService( PatientService patientService )
@@ -461,14 +336,14 @@ public class AddPatientAction
         this.patientService = patientService;
     }
 
+    public void setFormat( I18nFormat format )
+    {
+        this.format = format;
+    }
+
     public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
     {
         this.patientIdentifierService = patientIdentifierService;
-    }
-
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
     }
 
     public void setPatientAttributeService( PatientAttributeService patientAttributeService )
@@ -479,26 +354,6 @@ public class AddPatientAction
     public void setFullName( String fullName )
     {
         this.fullName = fullName;
-    }
-
-    public void setAge( Integer age )
-    {
-        this.age = age;
-    }
-
-    public void setRegistrationDate( String registrationDate )
-    {
-        this.registrationDate = registrationDate;
-    }
-
-    public void setGender( String gender )
-    {
-        this.gender = gender;
-    }
-
-    public void setPhoneNumber( String[] phoneNumber )
-    {
-        this.phoneNumber = phoneNumber;
     }
 
     public void setPatientAttributeOptionService( PatientAttributeOptionService patientAttributeOptionService )

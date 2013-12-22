@@ -44,7 +44,6 @@ import org.hisp.dhis.patient.PatientIdentifier;
 import org.hisp.dhis.patient.PatientIdentifierService;
 import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
-import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
@@ -66,8 +65,6 @@ public class ProgramEnrollmentAction
     private ProgramInstanceService programInstanceService;
 
     private PatientIdentifierService patientIdentifierService;
-
-    private PatientAttributeValueService patientAttributeValueService;
 
     private OrganisationUnitSelectionManager selectionManager;
 
@@ -117,12 +114,7 @@ public class ProgramEnrollmentAction
     {
         return patientAttributeValueMap;
     }
-
-    public void setPatientAttributeValueService( PatientAttributeValueService patientAttributeValueService )
-    {
-        this.patientAttributeValueService = patientAttributeValueService;
-    }
-
+    
     public Map<Integer, String> getIdentiferMap()
     {
         return identiferMap;
@@ -231,8 +223,8 @@ public class ProgramEnrollmentAction
 
         if ( patientAttributes != null )
         {
-            Collection<PatientAttributeValue> patientAttributeValues = patientAttributeValueService
-                .getPatientAttributeValues( programInstance.getPatient() );
+            Collection<PatientAttributeValue> patientAttributeValues = programInstance.getPatient()
+                .getAttributeValues();
 
             for ( PatientAttributeValue patientAttributeValue : patientAttributeValues )
             {

@@ -26,31 +26,6 @@ $( document ).ready( function() {
 	});
 } );
 
-function dobTypeOnChange( container ){
-
-	var type = $('#' + container + ' [id=dobType]').val();
-	if(type == 'V' || type == 'D')
-	{
-		$('#' + container + ' [id=age]').rules("remove");
-        $('#' + container + ' [id=age]').css("display","none");
-        $('#' + container + ' [id=age]').val("");
-		
-        $('#' + container + ' [id=birthDate]').rules("add",{required:true});
-		datePickerValid( container + ' [id=birthDate]' );
-        $('#' + container + ' [id=birthDate]').css("display","");
-	}
-	else if(type == 'A')
-	{
-        $('#' + container + ' [id=age]').rules("add",{required:true, number: true});
-        $('#' + container + ' [id=age]').css("display","");
-		
-        $('#' + container + ' [id=birthDate]').val("");
-        $('#' + container + ' [id=birthDate]').rules("remove","required");
-		$('#' + container+ ' [id=birthDate]').datepicker("destroy");
-        $('#' + container + ' [id=birthDate]').css("display","none");
-	}
-}
-
 // -----------------------------------------------------------------------------
 // Advanced search
 // -----------------------------------------------------------------------------
@@ -91,30 +66,9 @@ function searchObjectOnChange( this_ )
     $('#dateOperator_' + container).remove();
     $('#searchText_' + container).val("");
 
-	if( attributeId == 'fixedAttr_birthDate' || valueType=='date')
-	{
-		element.replaceWith( getDateField( container ) );
-		datePickerValid( 'searchText_' + container );
-		return;
-	}
-	
 	$( '#searchText_' + container ).datepicker("destroy");
 	$('#' + container + ' [id=dateOperator]').replaceWith("");
-	if ( attributeId=='fixedAttr_gender' )
-	{
-		element.replaceWith( getGenderSelector() );
-	}
-	else if ( attributeId=='fixedAttr_age' )
-	{
-		element.replaceWith( getAgeTextBox() );
-	}
-	else if ( attributeId=='fixedAttr_registrationDate' ||
-		attributeId=='pi_enrollmentDate' )
-	{
-		element.replaceWith( getRegistrationDate(container) );
-		datePickerValid( 'searchText_' + container );
-	}
-	else if ( valueType=='bool' )
+	if ( valueType=='bool' )
 	{
 		element.replaceWith( getTrueFalseBox() );
 	}
@@ -131,37 +85,6 @@ function getTrueFalseBox()
 	trueFalseBox += '<option value="false">' + i18n_no + '</option>';
 	trueFalseBox += '</select>';
 	return trueFalseBox;
-}
-	
-function getGenderSelector()
-{
-	var genderSelector = '<select id="searchText" name="searchText" style="width:200px;">';
-		genderSelector += '<option value="M">' + i18n_male + '</option>';
-		genderSelector += '<option value="F">' + i18n_female + '</option>';
-		genderSelector += '<option value="T">' + i18n_transgender + '</option>';
-		genderSelector += '</select>';
-	return genderSelector;
-}
-
-function getAgeTextBox( container )
-{
-	var ageField = '<select id="dateOperator" name="dateOperator" style="width:40px"><option value=">"> > </option><option value=">="> >= </option><option value="="> = </option><option value="<"> < </option><option value="<="> <= </option></select>';
-	ageField += '<input type="text" id="searchText_' + container + '" name="searchText" style="width:160px;">';
-	return ageField;
-}
-
-function getRegistrationDate( container )
-{
-	var registrationDateField = '<select id="dateOperator" name="dateOperator" style="width:40px"><option value=">"> > </option><option value=">="> >= </option><option value="="> = </option><option value="<"> < </option><option value="<="> <= </option></select>';
-	registrationDateField += '<input type="text" id="searchText_' + container + '" name="searchText" style="width:160px;">';
-	return registrationDateField;
-}
-
-function getDateField( container )
-{
-	var dateField = '<select id="dateOperator_' + container + '" name="dateOperator" style="width:40px"><option value=">"> > </option><option value=">="> >= </option><option value="="> = </option><option value="<"> < </option><option value="<="> <= </option></select>';
-	dateField += '<input type="text" id="searchText_' + container + '" name="searchText" style="width:160px;" onkeyup="searchPatientsOnKeyUp( event );">';
-	return dateField;
 }
 
 //-----------------------------------------------------------------------------
@@ -439,11 +362,7 @@ function checkDuplicate( divname )
 {
 	$.postUTF8( 'validatePatient.action', {
         id: $( '#' + divname + ' [id=id]' ).val(),
-        fullName: $( '#' + divname + ' [id=fullName]' ).val(),
-        dobType: $( '#' + divname + ' [id=dobType]' ).val(),
-        gender: $( '#' + divname + ' [id=gender]' ).val(),
-        birthDate: $( '#' + divname + ' [id=birthDate]' ).val(),
-        age: $( '#' + divname + ' [id=age]' ).val()
+        fullName: $( '#' + divname + ' [id=fullName]' ).val()
     }, function( xmlObject, divname ) {
         checkDuplicateCompleted( xmlObject, divname );
     });
@@ -1055,10 +974,6 @@ function addEventForPatientForm( divname )
     $("#" + divname + " [id=checkDuplicateBtn]").click(function() {
 		checkDuplicate( divname );
 	});
-	
-    $("#" + divname + " [id=dobType]").change(function() {
-		dobTypeOnChange( divname );
-	});
 }
 
 function showRepresentativeInfo( patientId)
@@ -1098,10 +1013,6 @@ function showListPatientDuplicate( rootElement, validate )
 			sPatient += "<hr style='margin:5px 0px;'><table>";
 			sPatient += "<tr><td class='bold'>" + i18n_patient_system_id + "</td><td>" + $(patient).find('systemIdentifier').text() + "</td></tr>" ;
 			sPatient += "<tr><td class='bold'>" + i18n_patient_full_name + "</td><td>" + $(patient).find('fullName').text() + "</td></tr>" ;
-			sPatient += "<tr><td class='bold'>" + i18n_patient_gender + "</td><td>" + $(patient).find('gender').text() + "</td></tr>" ;
-			sPatient += "<tr><td class='bold'>" + i18n_patient_date_of_birth + "</td><td>" + $(patient).find('dateOfBirth').text() + "</td></tr>" ;
-			sPatient += "<tr><td class='bold'>" + i18n_patient_age + "</td><td>" + $(patient).find('age').text() + "</td></tr>" ;
-			sPatient += "<tr><td class='bold'>" + i18n_patient_phone_number + "</td><td>" + $(patient).find('phoneNumber').text() + "</td></tr>";
         	
 			var identifiers = $(patient).find('identifier');
 
@@ -1166,28 +1077,14 @@ function toggleUnderAge(this_)
 	if( $(this_).is(":checked")) {
         $('#representativeDiv').dialog('destroy').remove();
         $('<div id="representativeDiv">' ).load( 'showAddRepresentative.action',{}, function() {
-            $('#patientForm [id=birthDate]').attr('id','birthDate_id');
-            $('#patientForm [id=birthDate_id]').attr('name','birthDate_id');
-
-            $('#patientForm [id=registrationDate]').attr('id','registrationDate_id');
-            $('#patientForm [id=registrationDate_id]').attr('name','registrationDate_id');
-
-            datePickerValid( 'representativeDiv [id=registrationDate]' );
         }).dialog({
-            title: i18n_child_representative,
+            title: i18n_tracker_associate,
             maximize: true,
             closable: true,
             modal:true,
             overlay:{background:'#000000', opacity:0.1},
             width: 800,
-            height: 450,
-            close:function() {
-                $('#patientForm [id=birthDate_id]').attr('id','birthDate');
-                $('#patientForm [id=birthDate]').attr('name','birthDate');
-
-                $('#patientForm [id=registrationDate_id]').attr('id','registrationDate');
-                $('#patientForm [id=registrationDate]').attr('name','registrationDate');
-            }
+            height: 450
 		});
 	} else {
         $("#representativeDiv :input.idfield").each(function(){
@@ -1334,7 +1231,6 @@ function validateProgramEnrollment()
 		url: 'validatePatientProgramEnrollment.action',
 		data: getParamsForDiv('programEnrollmentSelectDiv'),
 		success: function(json) {
-			hideById('message');
 			var type = json.response;
 
             if( type == 'success' ) {
@@ -2185,40 +2081,6 @@ function saveComment( programInstanceId )
             showSuccessMessage(i18n_save_success);
         }
     });
-}
-
-function addPhoneNumberField(phoneNumberAreaCode)
-{	
-	$('.phoneNumberTR').last().after(
-		'<tr class="phoneNumberTR">'
-		+ '	<td></td>'
-		+ '	<td class="input-column">'
-		+ '		<input type="text" id="phoneNumber" name="phoneNumber" class="{validate:{phone:true}}" value="'+phoneNumberAreaCode+'"/>'
-		+ '		<input type="button" value="-" onclick="removePhoneNumberField(this)" style="width:20px;" />'
-		+ '	</td>'
-		+ '</tr>' );
-}
-
-function removePhoneNumberField(_this)
-{
-	$(_this).parent().parent().remove();
-}
-
-function addCustomPhoneNumberField( phoneNumber )
-{
-	if(phoneNumber=='')
-	{
-		phoneNumber = phoneNumberAreaCode;
-	}
-	var idx = $('.phoneNumberTR').length + 1;
-	$('.phoneNumberTR').last().after(
-		'<br/><input type="text" id="phoneNumber" name="phoneNumber" class="idxPhoneNumber' + idx + ' {validate:{phone:true}}" value=\"' + phoneNumber + '\" />'
-		+ '    <input type="button" value="-" class="phoneNumberTR idxPhoneNumber' + idx + '" onclick="removeCustomPhoneNumberField(' + idx + ')" style="width:20px;" />');
-}
-
-function removeCustomPhoneNumberField(idx)
-{
-	$('.idxPhoneNumber' + idx).remove();
 }
 
 // --------------------------------------------------------------------------

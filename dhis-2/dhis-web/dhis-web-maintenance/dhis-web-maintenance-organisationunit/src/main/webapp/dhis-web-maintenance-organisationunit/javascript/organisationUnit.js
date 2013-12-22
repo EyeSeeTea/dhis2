@@ -2,16 +2,14 @@
 // Organisation unit selection listener
 // -----------------------------------------------------------------------------
 
-$( document ).ready( function()
-{
-    selection.setAutoSelectRoot( false );
-    selection.setRootUnselectAllowed( true );
-    selection.setListenerFunction( organisationUnitSelected, true );
-} );
+$( document ).ready( function() {
+  selection.setAutoSelectRoot( false );
+  selection.setRootUnselectAllowed( true );
+  selection.setListenerFunction( organisationUnitSelected, true );
+});
 
-function organisationUnitSelected( orgUnitIds )
-{
-    window.location.href = 'organisationUnit.action';
+function organisationUnitSelected( orgUnitIds ) {
+  window.location.href = 'organisationUnit.action';
 }
 
 // -----------------------------------------------------------------------------
@@ -35,7 +33,7 @@ function showUpdateOrganisationUnitForm( context ) {
 
 function showOrganisationUnitDetails( context ) {
     jQuery.post( '../dhis-web-commons-ajax-json/getOrganisationUnit.action',
-		{ id: context.id }, function ( json ) {
+		{ id: context.uid }, function ( json ) {
 		setInnerHTML( 'nameField', json.organisationUnit.name );
 		setInnerHTML( 'shortNameField', json.organisationUnit.shortName );
 		setInnerHTML( 'descriptionField', json.organisationUnit.description );

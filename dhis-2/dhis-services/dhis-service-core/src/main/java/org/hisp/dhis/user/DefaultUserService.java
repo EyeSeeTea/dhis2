@@ -28,6 +28,20 @@ package org.hisp.dhis.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.common.AuditLogUtil;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.setting.SystemSettingManager;
+import org.hisp.dhis.system.filter.UserCredentialsCanUpdateFilter;
+import org.hisp.dhis.system.util.DateUtils;
+import org.hisp.dhis.system.util.Filter;
+import org.hisp.dhis.system.util.FilterUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -36,18 +50,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.common.AuditLogUtil;
-import org.hisp.dhis.common.GenericIdentifiableObjectStore;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.system.filter.UserCredentialsCanUpdateFilter;
-import org.hisp.dhis.system.util.Filter;
-import org.hisp.dhis.system.util.FilterUtils;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Chau Thu Tran
@@ -70,15 +72,15 @@ public class DefaultUserService
     }
 
     private UserCredentialsStore userCredentialsStore;
-    
+
     public void setUserCredentialsStore( UserCredentialsStore userCredentialsStore )
     {
         this.userCredentialsStore = userCredentialsStore;
     }
 
-    private GenericIdentifiableObjectStore<UserAuthorityGroup> userAuthorityGroupStore;
-    
-    public void setUserAuthorityGroupStore( GenericIdentifiableObjectStore<UserAuthorityGroup> userAuthorityGroupStore )
+    private UserAuthorityGroupStore userAuthorityGroupStore;
+
+    public void setUserAuthorityGroupStore( UserAuthorityGroupStore userAuthorityGroupStore )
     {
         this.userAuthorityGroupStore = userAuthorityGroupStore;
     }
@@ -88,6 +90,14 @@ public class DefaultUserService
     public void setCurrentUserService( CurrentUserService currentUserService )
     {
         this.currentUserService = currentUserService;
+    }
+
+    private SystemSettingManager systemSettingManager;
+
+    @Autowired
+    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
+    {
+        this.systemSettingManager = systemSettingManager;
     }
 
     // -------------------------------------------------------------------------
@@ -118,7 +128,7 @@ public class DefaultUserService
         {
             return false; // Cannot be last if not super user
         }
-        
+
         Collection<UserCredentials> users = userCredentialsStore.getAllUserCredentials();
 
         for ( UserCredentials user : users )
@@ -180,10 +190,10 @@ public class DefaultUserService
         AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), user, AuditLogUtil.ACTION_DELETE );
 
         userCredentialsStore.deleteUserCredentials( user.getUserCredentials() );
-        
+
         userStore.delete( user );
     }
-    
+
     public Collection<User> getAllUsers()
     {
         return userStore.getAll();
@@ -194,7 +204,7 @@ public class DefaultUserService
     {
         return userStore.getAllOrderedName( first, max );
     }
-    
+
     @Override
     public List<User> getAllUsersBetweenByName( String name, int first, int max )
     {
@@ -232,12 +242,12 @@ public class DefaultUserService
                 }
             } );
     }
-    
+
     public List<User> getUsersByUid( List<String> uids )
     {
         return userStore.getByUid( uids );
     }
-    
+
     public Collection<UserCredentials> getUsersByOrganisationUnitBetween( OrganisationUnit unit, int first, int max )
     {
         return userCredentialsStore.getUsersByOrganisationUnitBetween( unit, first, max );
@@ -263,7 +273,7 @@ public class DefaultUserService
     {
         return userStore.getUsersByPhoneNumber( phoneNumber );
     }
-    
+
     public Collection<User> getUsersByName( String name )
     {
         return userStore.getUsersByName( name );
@@ -283,33 +293,33 @@ public class DefaultUserService
     {
         return userCredentialsStore.getUsersWithoutOrganisationUnitCountByName( userName );
     }
-    
+
     public User searchForUser( String query )
     {
         User user = userStore.getByUid( query );
-        
+
         if ( user == null )
         {
             UserCredentials credentials = userCredentialsStore.getUserCredentialsByUsername( query );
             user = credentials != null ? credentials.getUser() : null;
         }
-        
+
         return user;
     }
-    
+
     public List<User> queryForUsers( String query )
     {
         List<User> users = new ArrayList<User>();
-        
+
         User uidUser = userStore.getByUid( query );
-        
+
         if ( uidUser != null )
         {
             users.add( uidUser );
         }
-                
+
         users.addAll( userStore.getAllLikeNameOrderedName( query, 0, 1000 ) ); //TODO
-        
+
         return users;
     }
 
@@ -469,7 +479,7 @@ public class DefaultUserService
     {
         return userCredentialsStore.getSelfRegisteredUserCredentialsCount();
     }
-    
+
     public Collection<UserCredentials> getInactiveUsers( int months )
     {
         Calendar cal = PeriodType.createCalendarInstance();
@@ -501,7 +511,7 @@ public class DefaultUserService
 
         return userCredentialsStore.getActiveUsersCount( cal.getTime() );
     }
-    
+
     public int getActiveUsersCount( Date since )
     {
         return userCredentialsStore.getActiveUsersCount( since );
@@ -515,11 +525,11 @@ public class DefaultUserService
     {
         userCredentialsStore.addUserSetting( userSetting );
     }
-    
+
     public void addOrUpdateUserSetting( UserSetting userSetting )
     {
         UserSetting setting = getUserSetting( userSetting.getUser(), userSetting.getName() );
-        
+
         if ( setting != null )
         {
             setting.mergeWith( userSetting );
@@ -545,7 +555,7 @@ public class DefaultUserService
     {
         return userCredentialsStore.getAllUserSettings( user );
     }
-    
+
     public Collection<UserSetting> getUserSettings( String name )
     {
         return userCredentialsStore.getUserSettings( name );
@@ -555,11 +565,11 @@ public class DefaultUserService
     {
         return userCredentialsStore.getUserSetting( user, name );
     }
-    
+
     public Serializable getUserSettingValue( User user, String name, Serializable defaultValue )
     {
         UserSetting setting = getUserSetting( user, name );
-        
+
         return setting != null && setting.getValue() != null ? setting.getValue() : defaultValue;
     }
 
@@ -579,14 +589,35 @@ public class DefaultUserService
     {
         return userStore.getUsersByOrganisationUnits( units );
     }
-    
+
     public void removeUserSettings( User user )
     {
         userStore.removeUserSettings( user );
     }
-    
+
     public Collection<String> getUsernames( String query, Integer max )
     {
         return userCredentialsStore.getUsernames( query, max );
-    }    
+    }
+
+    @Override
+    public int countDataSetUserAuthorityGroups( DataSet dataSet )
+    {
+        return userAuthorityGroupStore.countDataSetUserAuthorityGroups( dataSet );
+    }
+
+    @Override
+    public boolean credentialsNonExpired( UserCredentials credentials )
+    {
+        int credentialsExpires = systemSettingManager.credentialsExpires();
+
+        if ( credentialsExpires == 0 )
+        {
+            return true;
+        }
+
+        int months = DateUtils.monthsBetween( credentials.getPasswordLastUpdated(), new Date() );
+
+        return months < credentialsExpires;
+    }
 }

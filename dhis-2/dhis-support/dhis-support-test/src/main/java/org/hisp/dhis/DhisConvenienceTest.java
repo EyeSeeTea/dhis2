@@ -726,11 +726,14 @@ public abstract class DhisConvenienceTest
     }
 
     /**
+     * Uses the given category option combo also as attribute option combo.
+     * 
      * @param dataElement The data element.
      * @param period The period.
      * @param source The source.
      * @param value The value.
-     * @param categoryOptionCombo The data element category option combo.
+     * @param categoryOptionCombo The category option combo.
+     * @param attributeOptionCombo The attribute option combo.
      */
     public static DataValue createDataValue( DataElement dataElement, Period period, OrganisationUnit source,
         String value, DataElementCategoryOptionCombo categoryOptionCombo )
@@ -740,11 +743,12 @@ public abstract class DhisConvenienceTest
         dataValue.setDataElement( dataElement );
         dataValue.setPeriod( period );
         dataValue.setSource( source );
+        dataValue.setCategoryOptionCombo( categoryOptionCombo );
+        dataValue.setAttributeOptionCombo( categoryOptionCombo );
         dataValue.setValue( value );
         dataValue.setComment( "Comment" );
         dataValue.setStoredBy( "StoredBy" );
         dataValue.setTimestamp( date );
-        dataValue.setOptionCombo( categoryOptionCombo );
 
         return dataValue;
     }
@@ -754,22 +758,50 @@ public abstract class DhisConvenienceTest
      * @param period The period.
      * @param source The source.
      * @param value The value.
-     * @param lastupdated The date.
-     * @param categoryOptionCombo The data element category option combo.
+     * @param categoryOptionCombo The category option combo.
+     * @param attributeOptionCombo The attribute option combo.
      */
     public static DataValue createDataValue( DataElement dataElement, Period period, OrganisationUnit source,
-        String value, Date lastupdated, DataElementCategoryOptionCombo categoryOptionCombo )
+        String value, DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo )
     {
         DataValue dataValue = new DataValue();
 
         dataValue.setDataElement( dataElement );
         dataValue.setPeriod( period );
         dataValue.setSource( source );
+        dataValue.setCategoryOptionCombo( categoryOptionCombo );
+        dataValue.setAttributeOptionCombo( attributeOptionCombo );
+        dataValue.setValue( value );
+        dataValue.setComment( "Comment" );
+        dataValue.setStoredBy( "StoredBy" );
+        dataValue.setTimestamp( date );
+
+        return dataValue;
+    }
+
+    /**
+     * @param dataElement The data element.
+     * @param period The period.
+     * @param source The source.
+     * @param value The value.
+     * @param lastupdated The date.value.
+     * @param categoryOptionCombo The category option combo.
+     * @param attributeOptionCombo The attribute option combo.
+     */
+    public static DataValue createDataValue( DataElement dataElement, Period period, OrganisationUnit source,
+        String value, Date lastupdated, DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo )
+    {
+        DataValue dataValue = new DataValue();
+
+        dataValue.setDataElement( dataElement );
+        dataValue.setPeriod( period );
+        dataValue.setSource( source );
+        dataValue.setCategoryOptionCombo( categoryOptionCombo );
+        dataValue.setAttributeOptionCombo( attributeOptionCombo );
         dataValue.setValue( value );
         dataValue.setComment( "Comment" );
         dataValue.setStoredBy( "StoredBy" );
         dataValue.setTimestamp( lastupdated );
-        dataValue.setOptionCombo( categoryOptionCombo );
 
         return dataValue;
     }
@@ -1005,27 +1037,6 @@ public abstract class DhisConvenienceTest
         patient.setAutoFields();
 
         patient.setName( "Name" + uniqueChar );
-        patient.setGender( Patient.MALE );
-        patient.setDobType( Patient.DOB_TYPE_VERIFIED );
-        patient.setBirthDate( getDate( 1970, 1, 1 ) );
-        patient.setPhoneNumber( "123456789" );
-        patient.setRegistrationDate( new Date() );
-        patient.setOrganisationUnit( organisationUnit );
-
-        return patient;
-    }
-
-    public static Patient createPatient( char uniqueChar, String gender, OrganisationUnit organisationUnit )
-    {
-        Patient patient = new Patient();
-        patient.setAutoFields();
-
-        patient.setName( "Name" + uniqueChar );
-        patient.setGender( gender );
-        patient.setDobType( Patient.DOB_TYPE_VERIFIED );
-        patient.setBirthDate( getDate( 1970, 1, 1 ) );
-        patient.setPhoneNumber( "123456789" );
-        patient.setRegistrationDate( new Date() );
         patient.setOrganisationUnit( organisationUnit );
 
         return patient;
@@ -1038,10 +1049,6 @@ public abstract class DhisConvenienceTest
         patient.setAutoFields();
 
         patient.setName( "Name" + uniqueChar );
-        patient.setGender( Patient.MALE );
-        patient.setDobType( Patient.DOB_TYPE_VERIFIED );
-        patient.setBirthDate( getDate( 1970, 1, 1 ) );
-        patient.setRegistrationDate( new Date() );
         patient.setOrganisationUnit( organisationUnit );
 
         PatientIdentifier pIdentifier = new PatientIdentifier();
@@ -1144,7 +1151,7 @@ public abstract class DhisConvenienceTest
      * @return ValidationCriteria
      */
     public static ValidationCriteria createValidationCriteria( char uniqueCharacter, String property, int operator,
-        Object value )
+        String value )
     {
         ValidationCriteria validationCriteria = new ValidationCriteria();
 

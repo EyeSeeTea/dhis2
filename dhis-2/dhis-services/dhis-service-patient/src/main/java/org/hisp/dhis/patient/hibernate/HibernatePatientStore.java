@@ -28,10 +28,6 @@ package org.hisp.dhis.patient.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.patient.Patient.FIXED_ATTR_AGE;
-import static org.hisp.dhis.patient.Patient.FIXED_ATTR_BIRTH_DATE;
-import static org.hisp.dhis.patient.Patient.FIXED_ATTR_REGISTRATION_DATE;
-import static org.hisp.dhis.patient.Patient.PREFIX_FIXED_ATTRIBUTE;
 import static org.hisp.dhis.patient.Patient.PREFIX_IDENTIFIER_TYPE;
 import static org.hisp.dhis.patient.Patient.PREFIX_PATIENT_ATTRIBUTE;
 import static org.hisp.dhis.patient.Patient.PREFIX_PROGRAM;
@@ -53,7 +49,6 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.criterion.Conjunction;
 import org.hibernate.criterion.Disjunction;
-import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.Grid;
@@ -104,7 +99,7 @@ public class HibernatePatientStore
     // -------------------------------------------------------------------------
     // Implementation methods
     // -------------------------------------------------------------------------
-    
+
     @Override
     public Collection<Patient> getByNames( String fullName, Integer min, Integer max )
     {
@@ -114,22 +109,6 @@ public class HibernatePatientStore
         }
 
         return getAllLikeNameOrderedName( fullName, min, max );
-    }
-
-    @Override
-    @SuppressWarnings( "unchecked" )
-    public Collection<Patient> get( String name, Date birthdate, String gender )
-    {
-        Criteria criteria = getCriteria();
-        Conjunction con = Restrictions.conjunction();
-        con.add( Restrictions.ilike( "name", name ) );
-        con.add( Restrictions.eq( "gender", gender ) );
-        con.add( Restrictions.eq( "birthDate", birthdate ) );
-        criteria.add( con );
-
-        criteria.addOrder( Order.asc( "name" ) );
-
-        return criteria.list();
     }
 
     @Override
@@ -190,23 +169,23 @@ public class HibernatePatientStore
     public List<Patient> query( TrackedEntityQueryParams params )
     {
         SqlHelper hlp = new SqlHelper();
-        
+
         String hql = "select pt from Patient pt left join pt.attributeValues av";
-        
+
         for ( QueryItem at : params.getAttributes() )
         {
             hql += " " + hlp.whereAnd();
             hql += " (av.patientAttribute = :attr" + at.getItemId() + " and av.value = :filt" + at.getItemId() + ")";
         }
-        
+
         Query query = getQuery( hql );
-        
+
         for ( QueryItem at : params.getAttributes() )
         {
             query.setEntity( "attr" + at.getItemId(), at.getItem() );
             query.setString( "filt" + at.getItemId(), at.getFilter() );
         }
-        
+
         return query.list();
     }
 
@@ -345,15 +324,19 @@ public class HibernatePatientStore
     @SuppressWarnings( "unchecked" )
     public Collection<Patient> getByPhoneNumber( String phoneNumber, Integer min, Integer max )
     {
-        String hql = "select p from Patient p where p.phoneNumber like '%" + phoneNumber + "%'";
-        Query query = getQuery( hql );
-
+        Criteria criteria = getCriteria();
+        criteria.createAlias( "attributeValues", "attributeValue" );
+        criteria.createAlias( "attributeValue.patientAttribute", "patientAttribute" );
+        criteria.add( Restrictions.eq( "patientAttribute.valueType", PatientAttribute.TYPE_PHONE_NUMBER ) );
+        criteria.add( Restrictions.like( "attributeValue.value", phoneNumber ) );
+        
         if ( min != null && max != null )
         {
-            query.setFirstResult( min ).setMaxResults( max );
+            criteria.setFirstResult( min );
+            criteria.setMaxResults( max );
         }
 
-        return query.list();
+        return criteria.list();
     }
 
     @Override
@@ -435,7 +418,7 @@ public class HibernatePatientStore
             criteria.add( disjunction );
 
             Number rs = (Number) criteria.setProjection( Projections.rowCount() ).uniqueResult();
-          
+
             if ( rs != null && rs.intValue() > 0 )
             {
                 return PatientService.ERROR_DUPLICATE_IDENTIFIER;
@@ -464,7 +447,7 @@ public class HibernatePatientStore
         Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min, Integer max )
     {
         String selector = count ? "count(*) " : "* ";
-        String sql = "select " + selector + " from ( select distinct p.patientid, p.name, p.gender, p.phonenumber,";
+        String sql = "select " + selector + " from ( select distinct p.patientid, p.name,";
 
         if ( identifierTypes != null )
         {
@@ -487,7 +470,7 @@ public class HibernatePatientStore
 
         String patientWhere = "";
         String patientOperator = " where ";
-        String patientGroupBy = " GROUP BY  p.patientid, p.name, p.gender, p.phonenumber ";
+        String patientGroupBy = " GROUP BY  p.patientid, p.name ";
         String otherWhere = "";
         String operator = " where ";
         String orderBy = "";
@@ -518,29 +501,7 @@ public class HibernatePatientStore
                 value = keys[2];
             }
 
-            if ( keys[0].equals( PREFIX_FIXED_ATTRIBUTE ) )
-            {
-                patientWhere += patientOperator;
-
-                if ( id.equals( FIXED_ATTR_BIRTH_DATE ) )
-                {
-                    patientWhere += " p." + id + value;
-                }
-                else if ( id.equals( FIXED_ATTR_AGE ) )
-                {
-                    patientWhere += " ((DATE(now()) - DATE(birthdate))/365) " + value;
-                }
-                else if ( id.equals( FIXED_ATTR_REGISTRATION_DATE ) )
-                {
-                    patientWhere += "p." + id + value;
-                }
-                else
-                {
-                    patientWhere += " lower(p." + id + ")='" + value + "'";
-                }
-                patientOperator = " and ";
-            }
-            else if ( keys[0].equals( PREFIX_IDENTIFIER_TYPE ) )
+            if ( keys[0].equals( PREFIX_IDENTIFIER_TYPE ) )
             {
 
                 String[] keyValues = id.split( " " );
@@ -636,7 +597,7 @@ public class HibernatePatientStore
                         // get events by selected orgunit
                         else if ( !keys[4].equals( "0" ) )
                         {
-                            patientWhere += " and psi.organisationunitid=" + keys[4];
+                            patientWhere += " and psi.organisationunitid=" + getOrgUnitId( keys );
                         }
 
                         patientWhere += ")";
@@ -658,7 +619,7 @@ public class HibernatePatientStore
                         // get events by selected orgunit
                         else if ( !keys[4].equals( "0" ) )
                         {
-                            patientWhere += " and psi.organisationunitid=" + keys[4];
+                            patientWhere += " and psi.organisationunitid=" + getOrgUnitId( keys );
                         }
 
                         patientWhere += ")";
@@ -680,7 +641,7 @@ public class HibernatePatientStore
                         // get events by selected orgunit
                         else if ( !keys[4].equals( "0" ) )
                         {
-                            patientWhere += " and p.organisationunitid=" + keys[4];
+                            patientWhere += " and p.organisationunitid=" + getOrgUnitId( keys );
                         }
 
                         patientWhere += ")";
@@ -702,7 +663,7 @@ public class HibernatePatientStore
                         // get events by selected orgunit
                         else if ( !keys[4].equals( "0" ) )
                         {
-                            patientWhere += " and p.organisationunitid=" + keys[4];
+                            patientWhere += " and p.organisationunitid=" + getOrgUnitId( keys );
                         }
 
                         patientWhere += ")";
@@ -723,7 +684,7 @@ public class HibernatePatientStore
                         // get events by selected orgunit
                         else if ( !keys[4].equals( "0" ) )
                         {
-                            patientWhere += " and p.organisationunitid=" + keys[4];
+                            patientWhere += " and p.organisationunitid=" + getOrgUnitId( keys );
                         }
                         patientWhere += ")";
                         operatorStatus = " OR ";
@@ -835,6 +796,22 @@ public class HibernatePatientStore
         log.info( "Search patient SQL: " + sql );
 
         return sql;
+    }
+
+    private Integer getOrgUnitId( String[] keys )
+    {
+        Integer orgUnitId;
+        try
+        {
+            orgUnitId = Integer.parseInt( keys[4] );
+        }
+        catch ( NumberFormatException e )
+        {
+            // handle as uid
+            OrganisationUnit ou = organisationUnitService.getOrganisationUnit( keys[4] );
+            orgUnitId = ou.getId();
+        }
+        return orgUnitId;
     }
 
     private Collection<Integer> getOrgunitChildren( Collection<OrganisationUnit> orgunits )

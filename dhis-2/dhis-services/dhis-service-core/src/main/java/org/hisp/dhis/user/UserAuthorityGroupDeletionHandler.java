@@ -28,10 +28,10 @@ package org.hisp.dhis.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Iterator;
-
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.system.deletion.DeletionHandler;
+
+import java.util.Iterator;
 
 /**
  * @author Lars Helge Overland
@@ -50,7 +50,7 @@ public class UserAuthorityGroupDeletionHandler
     {
         this.userService = userService;
     }
-    
+
     // -------------------------------------------------------------------------
     // DeletionHandler implementation
     // -------------------------------------------------------------------------
@@ -72,19 +72,25 @@ public class UserAuthorityGroupDeletionHandler
             }
         }
     }
-    
+
     @Override
     public void deleteUser( User user )
     {
         UserCredentials credentials = user.getUserCredentials();
-        
+
         Iterator<UserAuthorityGroup> iterator = credentials.getUserAuthorityGroups().iterator();
-        
+
         while ( iterator.hasNext() )
         {
             UserAuthorityGroup group = iterator.next();
             group.getMembers().remove( credentials );
             userService.updateUserAuthorityGroup( group );
         }
+    }
+
+    @Override
+    public String allowDeleteDataSet( DataSet dataSet )
+    {
+        return userService.countDataSetUserAuthorityGroups( dataSet ) == 0 ? null : ERROR;
     }
 }

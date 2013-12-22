@@ -28,14 +28,11 @@ package org.hisp.dhis.dxf2.datavalueset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.importexport.ImportStrategy.NEW;
-import static org.hisp.dhis.importexport.ImportStrategy.NEW_AND_UPDATES;
-import static org.hisp.dhis.importexport.ImportStrategy.UPDATES;
+import static org.hisp.dhis.common.IdentifiableObject.IdentifiableProperty.UUID;
 import static org.hisp.dhis.system.notification.NotificationLevel.ERROR;
 import static org.hisp.dhis.system.notification.NotificationLevel.INFO;
 import static org.hisp.dhis.system.util.ConversionUtils.wrap;
 import static org.hisp.dhis.system.util.DateUtils.getDefaultDate;
-import static org.hisp.dhis.common.IdentifiableObject.IdentifiableProperty.UUID;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -129,7 +126,7 @@ public class DefaultDataValueSetService
 
     @Autowired
     private Notifier notifier;
-    
+
     //--------------------------------------------------------------------------
     // DataValueSet implementation
     //--------------------------------------------------------------------------
@@ -168,12 +165,22 @@ public class DefaultDataValueSetService
     {
         Set<Period> periods = new HashSet<Period>( periodService.getPeriodsBetweenDates( startDate, endDate ) );
 
+        if ( periods.isEmpty() )
+        {
+            throw new IllegalArgumentException( "At least one period must be specified" );
+        }
+
         dataValueSetStore.writeDataValueSetXml( null, null, null, null, getDataElements( dataSets ), periods, getOrgUnits( orgUnits ), out );
     }
 
     public void writeDataValueSetCsv( Set<String> dataSets, Date startDate, Date endDate, Set<String> orgUnits, Writer writer )
     {
         Set<Period> periods = new HashSet<Period>( periodService.getPeriodsBetweenDates( startDate, endDate ) );
+
+        if ( periods.isEmpty() )
+        {
+            throw new IllegalArgumentException( "At least one period must be specified" );
+        }
 
         dataValueSetStore.writeDataValueSetCsv( getDataElements( dataSets ), periods, getOrgUnits( orgUnits ), writer );
     }
@@ -307,7 +314,7 @@ public class DefaultDataValueSetService
         DataElementCategoryOptionCombo fallbackCategoryOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
 
         String currentUser = currentUserService.getCurrentUsername();
-        
+
         BatchHandler<DataValue> batchHandler = batchHandlerFactory.createBatchHandler( DataValueBatchHandler.class ).init();
 
         int importCount = 0;
@@ -367,7 +374,7 @@ public class DefaultDataValueSetService
             }
 
             String commentValid = ValidationUtils.commentIsValid( dataValue.getComment() );
-            
+
             if ( commentValid != null )
             {
                 summary.getConflicts().add( new ImportConflict( DataValue.class.getSimpleName(), commentValid ) );
@@ -387,7 +394,8 @@ public class DefaultDataValueSetService
             internalValue.setDataElement( dataElement );
             internalValue.setPeriod( period );
             internalValue.setSource( orgUnit );
-            internalValue.setOptionCombo( categoryOptionCombo );
+            internalValue.setCategoryOptionCombo( categoryOptionCombo );
+            internalValue.setAttributeOptionCombo( fallbackCategoryOptionCombo ); // TODO
             internalValue.setValue( dataValue.getValue() );
 
             if ( dataValue.getStoredBy() == null || dataValue.getStoredBy().trim().isEmpty() )
@@ -399,13 +407,13 @@ public class DefaultDataValueSetService
                 internalValue.setStoredBy( dataValue.getStoredBy() );
             }
 
-            internalValue.setTimestamp( getDefaultDate( dataValue.getTimestamp() ) );
+            internalValue.setTimestamp( getDefaultDate( dataValue.getLastUpdated() ) );
             internalValue.setComment( dataValue.getComment() );
             internalValue.setFollowup( dataValue.getFollowup() );
 
             if ( !skipExistingCheck && batchHandler.objectExists( internalValue ) )
             {
-                if ( NEW_AND_UPDATES.equals( strategy ) || UPDATES.equals( strategy ) )
+                if ( strategy.isCreateAndUpdate() || strategy.isUpdate() )
                 {
                     if ( !dryRun )
                     {
@@ -417,7 +425,7 @@ public class DefaultDataValueSetService
             }
             else
             {
-                if ( NEW_AND_UPDATES.equals( strategy ) || NEW.equals( strategy ) )
+                if ( strategy.isCreateAndUpdate() || strategy.isCreate() )
                 {
                     if ( !dryRun )
                     {
@@ -433,14 +441,14 @@ public class DefaultDataValueSetService
 
         int ignores = totalCount - importCount - updateCount;
 
-        summary.setDataValueCount( new ImportCount( importCount, updateCount, ignores ) );
+        summary.setDataValueCount( new ImportCount( importCount, updateCount, ignores, 0 ) );
         summary.setStatus( ImportStatus.SUCCESS );
         summary.setDescription( "Import process completed successfully" );
 
         notifier.notify( id, INFO, "Import done", true ).addTaskSummary( id, summary );
 
         dataValueSet.close();
-        
+
         return summary;
     }
 
@@ -526,14 +534,14 @@ public class DefaultDataValueSetService
     private Map<String, OrganisationUnit> getUuidOrgUnitMap()
     {
         Map<String, OrganisationUnit> orgUnitMap = new HashMap<String, OrganisationUnit>();
-        
+
         Collection<OrganisationUnit> allOrganisationUnits = organisationUnitService.getAllOrganisationUnits();
 
         for ( OrganisationUnit organisationUnit : allOrganisationUnits )
         {
             orgUnitMap.put( organisationUnit.getUuid(), organisationUnit );
         }
-        
+
         return orgUnitMap;
-    }    
+    }
 }

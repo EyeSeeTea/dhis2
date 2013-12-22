@@ -134,37 +134,34 @@ public class DefaultPatientService
             patientAttributeValueService.savePatientAttributeValue( pav );
             patient.getAttributeValues().add( pav );
         }
-        
+
         // ---------------------------------------------------------------------
         // If under age, save representative information
         // ---------------------------------------------------------------------
 
-        if ( patient.isUnderAge() )
+        if ( representativeId != null )
         {
-            if ( representativeId != null )
+            Patient representative = patientStore.get( representativeId );
+            if ( representative != null )
             {
-                Patient representative = patientStore.get( representativeId );
-                if ( representative != null )
+                patient.setRepresentative( representative );
+
+                Relationship rel = new Relationship();
+                rel.setPatientA( representative );
+                rel.setPatientB( patient );
+
+                if ( relationshipTypeId != null )
                 {
-                    patient.setRepresentative( representative );
-
-                    Relationship rel = new Relationship();
-                    rel.setPatientA( representative );
-                    rel.setPatientB( patient );
-
-                    if ( relationshipTypeId != null )
+                    RelationshipType relType = relationshipTypeService.getRelationshipType( relationshipTypeId );
+                    if ( relType != null )
                     {
-                        RelationshipType relType = relationshipTypeService.getRelationshipType( relationshipTypeId );
-                        if ( relType != null )
-                        {
-                            rel.setRelationshipType( relType );
-                            relationshipService.saveRelationship( rel );
-                        }
+                        rel.setRelationshipType( relType );
+                        relationshipService.saveRelationship( rel );
                     }
                 }
             }
         }
-        
+
         updatePatient( patient ); // Save patient to update associations
 
         return id;
@@ -200,12 +197,6 @@ public class DefaultPatientService
         return patientStore.getAll();
     }
 
-    @Override
-    public Collection<Patient> getPatients( String name, Date birthdate, String gender )
-    {
-        return patientStore.get( name, birthdate, gender );
-    }
-    
     @Override
     public Collection<Patient> getPatients( String searchText, Integer min, Integer max )
     {
@@ -280,7 +271,7 @@ public class DefaultPatientService
     {
         return patientStore.getByOrgUnit( organisationUnit, min, max );
     }
-    
+
     @Override
     public Collection<Patient> getPatients( Program program )
     {
@@ -327,12 +318,9 @@ public class DefaultPatientService
                 }
             }
         }
-        else
-        {
-            return patientStore.getByNames( value, null, null );
-        }
-        
-        return null;
+
+        return patientStore.getByNames( value, null, null );
+
     }
 
     @Override
@@ -444,11 +432,10 @@ public class DefaultPatientService
 
     private boolean shouldSaveRepresentativeInformation( Patient patient, Integer representativeId )
     {
-        if ( !patient.isUnderAge() )
-            return false;
-
         if ( representativeId == null )
+        {
             return false;
+        }
 
         return patient.getRepresentative() == null || !(patient.getRepresentative().getId() == representativeId);
     }
@@ -499,11 +486,13 @@ public class DefaultPatientService
         return null;
     }
 
+    @Override
     public Collection<Patient> getRepresentatives( Patient patient )
     {
         return patientStore.getRepresentatives( patient );
     }
 
+    @Override
     public Collection<Patient> searchPatients( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
         Boolean followup, Collection<PatientAttribute> patientAttributes,
         Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min, Integer max )
@@ -512,31 +501,41 @@ public class DefaultPatientService
             statusEnrollment, min, max );
     }
 
+    @Override
     public int countSearchPatients( List<String> searchKeys, Collection<OrganisationUnit> orgunits, Boolean followup,
         Integer statusEnrollment )
     {
         return patientStore.countSearch( searchKeys, orgunits, followup, statusEnrollment );
     }
 
+    @Override
     public Collection<String> getPatientPhoneNumbers( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
         Boolean followup, Integer statusEnrollment, Integer min, Integer max )
     {
         Collection<Patient> patients = patientStore.search( searchKeys, orgunits, followup, null, null,
             statusEnrollment, min, max );
-
         Set<String> phoneNumbers = new HashSet<String>();
-
+		
         for ( Patient patient : patients )
         {
-            if ( patient.getPhoneNumber() != null )
+            Collection<PatientAttributeValue> attributeValues = patient.getAttributeValues();
+            if ( attributeValues != null )
             {
-                phoneNumbers.add( patient.getPhoneNumber() );
+                for ( PatientAttributeValue attributeValue : attributeValues )
+                {
+                    if ( attributeValue.getPatientAttribute().getValueType()
+                        .equals( PatientAttribute.TYPE_PHONE_NUMBER ) )
+                    {
+                        phoneNumbers.add( attributeValue.getValue() );
+                    }
+                }
             }
         }
 
         return phoneNumbers;
     }
 
+    @Override
     public List<Integer> getProgramStageInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
         Boolean followup, Integer statusEnrollment, Integer min, Integer max )
     {
@@ -646,14 +645,9 @@ public class DefaultPatientService
     }
 
     @Override
-    public Collection<Integer> getRegistrationOrgunitIds( Date startDate, Date endDate )
-    {
-        return patientStore.getRegistrationOrgunitIds( startDate, endDate );
-    }
-
-    @Override
     public int validatePatient( Patient patient, Program program )
     {
         return patientStore.validate( patient, program );
     }
+
 }

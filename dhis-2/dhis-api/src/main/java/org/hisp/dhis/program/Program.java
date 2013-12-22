@@ -28,18 +28,16 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.common.view.WithoutOrganisationUnitsView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
@@ -47,14 +45,17 @@ import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.patient.PatientReminder;
+import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
 import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.validation.ValidationCriteria;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * @author Abyot Asalefew
@@ -143,7 +144,7 @@ public class Program
     private Boolean relationshipFromA = false;
 
     private Program relatedProgram;
-    
+
     private Boolean dataEntryMethod = false;
 
     // -------------------------------------------------------------------------
@@ -199,20 +200,29 @@ public class Program
         return null;
     }
 
-    @SuppressWarnings( "unchecked" )
     public ValidationCriteria isValid( Patient patient )
     {
         try
         {
             for ( ValidationCriteria criteria : patientValidationCriteria )
             {
-                Object propertyValue = getValueFromPatient( StringUtils.capitalize( criteria.getProperty() ), patient );
+                String value = "";
+                for ( PatientAttributeValue attributeValue : patient.getAttributeValues() )
+                {
+                    if ( attributeValue.getPatientAttribute().getUid().equals( criteria.getProperty() ) )
+                    {System.out.println("\n\n ===== \n attribute : " + attributeValue.getPatientAttribute().getDisplayName());
+                        value = attributeValue.getValue();
+                        break;
+                    }
+                }
 
-                if ( propertyValue != null )
+                if ( !value.isEmpty() )
                 {
                     // Compare property value with compare value
-
-                    int i = ((Comparable<Object>) propertyValue).compareTo( criteria.getValue() );
+System.out.println("\n\n value : " + value );
+System.out.println("\n\n criteria.getValue() : " + criteria.getValue() );
+System.out.println("\n\n operator : " + value.compareTo( criteria.getValue() ) );
+                    int i = value.compareTo( criteria.getValue() );
 
                     // Return validation criteria if criteria is not met
 
@@ -238,7 +248,7 @@ public class Program
     // -------------------------------------------------------------------------
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getDescription()
     {
@@ -251,7 +261,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Integer getVersion()
     {
@@ -279,7 +289,7 @@ public class Program
     }
 
     @JsonProperty( value = "programInstances" )
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlElementWrapper( localName = "programInstances", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "programInstance", namespace = DxfNamespaces.DXF_2_0 )
     public Set<ProgramInstance> getProgramInstances()
@@ -294,7 +304,7 @@ public class Program
 
     @JsonProperty( value = "programStages" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlElementWrapper( localName = "programStages", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "programStage", namespace = DxfNamespaces.DXF_2_0 )
     public Set<ProgramStage> getProgramStages()
@@ -308,7 +318,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getDateOfEnrollmentDescription()
     {
@@ -321,7 +331,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getDateOfIncidentDescription()
     {
@@ -354,7 +364,7 @@ public class Program
 
     @JsonProperty( value = "validationCriterias" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlElementWrapper( localName = "validationCriterias", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "validationCriteria", namespace = DxfNamespaces.DXF_2_0 )
     public Set<ValidationCriteria> getPatientValidationCriteria()
@@ -368,8 +378,7 @@ public class Program
     }
 
     @JsonProperty( value = "identifierTypes" )
-    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlElementWrapper( localName = "identifierTypes", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "identifierType", namespace = DxfNamespaces.DXF_2_0 )
     public List<PatientIdentifierType> getPatientIdentifierTypes()
@@ -383,8 +392,7 @@ public class Program
     }
 
     @JsonProperty( value = "attributes" )
-    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlElementWrapper( localName = "attributes", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "attribute", namespace = DxfNamespaces.DXF_2_0 )
     public List<PatientAttribute> getPatientAttributes()
@@ -398,7 +406,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Boolean getDisplayIncidentDate()
     {
@@ -411,7 +419,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     private Object getValueFromPatient( String property, Patient patient )
         throws Exception
@@ -420,7 +428,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Boolean getIgnoreOverdueEvents()
     {
@@ -433,7 +441,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public boolean isSingleEvent()
     {
@@ -441,7 +449,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public boolean isRegistration()
     {
@@ -450,7 +458,7 @@ public class Program
 
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlElementWrapper( localName = "userRoles", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "userRole", namespace = DxfNamespaces.DXF_2_0 )
     public Set<UserAuthorityGroup> getUserRoles()
@@ -464,7 +472,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Boolean getOnlyEnrollOnce()
     {
@@ -477,7 +485,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Set<PatientReminder> getPatientReminders()
     {
@@ -491,6 +499,7 @@ public class Program
 
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlElementWrapper( localName = "organisationUnitGroups", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "organisationUnitGroup", namespace = DxfNamespaces.DXF_2_0 )
     public Set<OrganisationUnitGroup> getOrganisationUnitGroups()
@@ -504,7 +513,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Boolean getDisplayOnAllOrgunit()
     {
@@ -517,7 +526,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Boolean getUseBirthDateAsIncidentDate()
     {
@@ -530,7 +539,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Boolean getUseBirthDateAsEnrollmentDate()
     {
@@ -543,7 +552,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Boolean getSelectEnrollmentDatesInFuture()
     {
@@ -556,7 +565,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Boolean getSelectIncidentDatesInFuture()
     {
@@ -569,7 +578,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getRelationshipText()
     {
@@ -582,7 +591,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public RelationshipType getRelationshipType()
     {
@@ -595,7 +604,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Program getRelatedProgram()
     {
@@ -608,7 +617,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Boolean getRelationshipFromA()
     {
@@ -621,7 +630,7 @@ public class Program
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Boolean getDataEntryMethod()
     {
@@ -632,5 +641,4 @@ public class Program
     {
         this.dataEntryMethod = dataEntryMethod;
     }
-
 }

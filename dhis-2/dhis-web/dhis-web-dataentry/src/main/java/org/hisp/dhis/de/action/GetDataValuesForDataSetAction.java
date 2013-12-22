@@ -29,6 +29,8 @@ package org.hisp.dhis.de.action;
  */
 
 import com.opensymphony.xwork2.Action;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dataapproval.DataApproval;
 import org.hisp.dhis.dataapproval.DataApprovalService;
 import org.hisp.dhis.dataapproval.DataApprovalState;
@@ -44,6 +46,8 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.security.ActionAccessResolver;
+import org.hisp.dhis.user.CurrentUserService;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,6 +60,8 @@ import java.util.Set;
 public class GetDataValuesForDataSetAction
     implements Action
 {
+    private static final Log log = LogFactory.getLog( GetDataValuesForDataSetAction.class );
+    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -102,6 +108,21 @@ public class GetDataValuesForDataSetAction
         this.dataApprovalService = dataApprovalService;
     }
 
+    private ActionAccessResolver actionAccessResolver;
+
+    public void setActionAccessResolver( ActionAccessResolver actionAccessResolver )
+    {
+        this.actionAccessResolver = actionAccessResolver;
+    }
+
+    private CurrentUserService currentUserService;
+
+    public void setCurrentUserService( CurrentUserService currentUserService )
+    {
+        this.currentUserService = currentUserService;
+    }
+
+
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -113,16 +134,16 @@ public class GetDataValuesForDataSetAction
         this.periodId = periodId;
     }
 
-    private Integer dataSetId;
+    private String dataSetId;
 
-    public void setDataSetId( Integer dataSetId )
+    public void setDataSetId( String dataSetId )
     {
         this.dataSetId = dataSetId;
     }
 
-    private Integer organisationUnitId;
+    private String organisationUnitId;
 
-    public void setOrganisationUnitId( Integer organisationUnitId )
+    public void setOrganisationUnitId( String organisationUnitId )
     {
         this.organisationUnitId = organisationUnitId;
     }
@@ -226,32 +247,33 @@ public class GetDataValuesForDataSetAction
 
     public String execute()
     {
-        OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
-        Set<OrganisationUnit> children = organisationUnit.getChildren();
-
         DataSet dataSet = dataSetService.getDataSet( dataSetId );
-        
+
         Period period = PeriodType.getPeriodFromIsoString( periodId );
 
-        // TODO null-checks
+        OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
+
+        if ( organisationUnit == null || period == null || dataSet == null )
+        {
+            log.warn( "Illegal input, org unit: " + organisationUnit + ", period: " + period + ", data set: " + dataSet );
+        }
+
+        Set<OrganisationUnit> children = organisationUnit.getChildren();
         
         // ---------------------------------------------------------------------
         // Data values & Min-max data elements
         // ---------------------------------------------------------------------
 
-        dataValues.addAll( dataValueService.getDataValues( organisationUnit, period, dataSet.getDataElements() ) );
-        
-        minMaxDataElements.addAll( minMaxDataElementService.getMinMaxDataElements( organisationUnit, dataSet
-            .getDataElements() ) );
+        minMaxDataElements.addAll( minMaxDataElementService.getMinMaxDataElements( organisationUnit, dataSet.getDataElements() ) );
 
-        if ( multiOrganisationUnit )
+        if ( !multiOrganisationUnit )
+        {
+            dataValues.addAll( dataValueService.getDataValues( organisationUnit, period, dataSet.getDataElements() ) );
+        }
+        else
         {
             for ( OrganisationUnit ou : children )
             {
-                // -------------------------------------------------------------
-                // Make sure that the org unit have this data set 
-                // -------------------------------------------------------------
-
                 if ( ou.getDataSets().contains( dataSet ) )
                 {
                     dataValues.addAll( dataValueService.getDataValues( ou, period, dataSet.getDataElements() ) );
@@ -265,48 +287,45 @@ public class GetDataValuesForDataSetAction
         // Data set completeness info
         // ---------------------------------------------------------------------
 
-        if ( period != null )
+        if ( !multiOrganisationUnit )
         {
-            if ( !multiOrganisationUnit )
-            {
-                CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration( dataSet,
-                    period, organisationUnit );
+            CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration( dataSet,
+                period, organisationUnit );
 
-                if ( registration != null )
-                {
-                    complete = true;
-                    date = registration.getDate();
-                    storedBy = registration.getStoredBy();
-                }
-
-                locked = dataSetService.isLocked( dataSet, period, organisationUnit, null );
-            }
-            else
+            if ( registration != null )
             {
                 complete = true;
+                date = registration.getDate();
+                storedBy = registration.getStoredBy();
+            }
 
-                // -------------------------------------------------------------
-                // If multi-org and one of the children is locked, lock all
-                // -------------------------------------------------------------
+            locked = dataSetService.isLocked( dataSet, period, organisationUnit, null );
+        }
+        else
+        {
+            complete = true;
 
-                for ( OrganisationUnit ou : children )
+            // -----------------------------------------------------------------
+            // If multi-org and one of the children is locked, lock all
+            // -----------------------------------------------------------------
+
+            for ( OrganisationUnit ou : children )
+            {
+                if ( ou.getDataSets().contains( dataSet ) )
                 {
-                    if ( ou.getDataSets().contains( dataSet ) )
+                    locked = dataSetService.isLocked( dataSet, period, organisationUnit, null );
+
+                    if ( locked )
                     {
-                        locked = dataSetService.isLocked( dataSet, period, organisationUnit, null );
+                        break;
+                    }
 
-                        if ( locked )
-                        {
-                            break;
-                        }
+                    CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration(
+                        dataSet, period, ou );
 
-                        CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration(
-                            dataSet, period, ou );
-
-                        if ( complete && registration == null )
-                        {
-                            complete = false;
-                        }
+                    if ( complete && registration == null )
+                    {
+                        complete = false;
                     }
                 }
             }
@@ -320,11 +339,21 @@ public class GetDataValuesForDataSetAction
 
         switch ( dataApprovalState )
         {
+            case READY_FOR_APPROVAL:
+                mayApprove = dataApprovalService.mayApprove( organisationUnit, currentUserService.getCurrentUser(),
+                        actionAccessResolver.hasAccess( "dhis-web-dataentry", "F_APPROVE_DATA_AT_SAME_LEVEL" ),
+                        actionAccessResolver.hasAccess( "dhis-web-dataentry", "F_APPROVE_DATA_AT_LOWER_LEVELS" ));
+                break;
+
             case APPROVED:
                 DataApproval dataApproval = dataApprovalService.getDataApproval( dataSet, period, organisationUnit );
                 approvedDate = dataApproval.getCreated();
                 approvedBy = dataApproval.getCreator().getName();
-                // mayUnapprove = dataApprovalService.mayUnapprove( dataApproval, user  )
+                mayUnapprove = dataApprovalService.mayUnapprove( dataApproval, currentUserService.getCurrentUser(),
+                        actionAccessResolver.hasAccess( "dhis-web-dataentry", "F_APPROVE_DATA_AT_SAME_LEVEL" ),
+                        actionAccessResolver.hasAccess( "dhis-web-dataentry", "F_APPROVE_DATA_AT_LOWER_LEVELS" ));
+                break;
+
         }
         return SUCCESS;
     }

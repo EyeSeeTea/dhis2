@@ -32,8 +32,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.dxf2.timer.SystemNanoTimer;
+import org.hisp.dhis.dxf2.timer.Timer;
 import org.hisp.dhis.period.PeriodStore;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.system.deletion.DeletionManager;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserService;
@@ -41,7 +44,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -69,6 +71,9 @@ public class DefaultObjectBridge
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private DeletionManager deletionManager;
+
     //-------------------------------------------------------------------------------------------------------
     // Internal and Semi-Public maps
     //-------------------------------------------------------------------------------------------------------
@@ -89,6 +94,8 @@ public class DefaultObjectBridge
 
     private boolean writeEnabled = true;
 
+    private boolean preheatCache = true;
+
     //-------------------------------------------------------------------------------------------------------
     // Build maps
     //-------------------------------------------------------------------------------------------------------
@@ -107,7 +114,9 @@ public class DefaultObjectBridge
     @Override
     public void init()
     {
-        log.info( "Started updating lookup maps at " + new Date() );
+        log.info( "Building object-bridge maps (preheatCache: " + preheatCache + ")." );
+        Timer timer = new SystemNanoTimer();
+        timer.start();
 
         masterMap = new HashMap<Class<?>, Set<?>>();
         periodTypeMap = new HashMap<String, PeriodType>();
@@ -127,7 +136,8 @@ public class DefaultObjectBridge
             populateIdentifiableObjectMap( type, IdentifiableObject.IdentifiableProperty.NAME );
         }
 
-        log.info( "Finished updating lookup maps at " + new Date() );
+        timer.stop();
+        log.info( "Building object-bridge maps took " + timer.toString() + "." );
     }
 
     @Override
@@ -140,6 +150,7 @@ public class DefaultObjectBridge
         periodTypeMap = null;
 
         writeEnabled = true;
+        preheatCache = true;
     }
 
     //-------------------------------------------------------------------------------------------------------
@@ -151,7 +162,7 @@ public class DefaultObjectBridge
     {
         Set<IdentifiableObject> map = new HashSet<IdentifiableObject>();
 
-        if ( IdentifiableObject.class.isAssignableFrom( clazz ) )
+        if ( preheatCache && IdentifiableObject.class.isAssignableFrom( clazz ) )
         {
             map = new HashSet<IdentifiableObject>( manager.getAll( (Class<IdentifiableObject>) clazz ) );
         }
@@ -164,12 +175,12 @@ public class DefaultObjectBridge
     {
         Map<String, IdentifiableObject> map = new HashMap<String, IdentifiableObject>();
 
-        if ( IdentifiableObject.class.isAssignableFrom( clazz ) )
+        if ( preheatCache && IdentifiableObject.class.isAssignableFrom( clazz ) )
         {
             map = (Map<String, IdentifiableObject>) manager.getIdMap( (Class<? extends IdentifiableObject>) clazz, property );
         }
 
-        if ( map != null )
+        if ( !preheatCache || map != null )
         {
             if ( property == IdentifiableObject.IdentifiableProperty.UID )
             {
@@ -181,34 +192,41 @@ public class DefaultObjectBridge
             }
             else if ( property == IdentifiableObject.IdentifiableProperty.NAME )
             {
-                try
+                if ( !preheatCache )
                 {
-                    IdentifiableObject identifiableObject = (IdentifiableObject) clazz.newInstance();
-
-                    if ( identifiableObject.haveUniqueNames() )
+                    nameMap.put( (Class<? extends IdentifiableObject>) clazz, map );
+                }
+                else
+                {
+                    try
                     {
-                        nameMap.put( (Class<? extends IdentifiableObject>) clazz, map );
-                    }
-                    else
-                    {
-                        // add an empty map here, since we could still have some auto-generated properties
-                        nameMap.put( (Class<? extends IdentifiableObject>) clazz, new HashMap<String, IdentifiableObject>() );
+                        IdentifiableObject identifiableObject = (IdentifiableObject) clazz.newInstance();
 
-                        // find all auto-generated props and add them
-                        for ( Map.Entry<String, IdentifiableObject> entry : map.entrySet() )
+                        if ( identifiableObject.haveUniqueNames() )
                         {
-                            if ( entry.getValue().isAutoGenerated() )
+                            nameMap.put( (Class<? extends IdentifiableObject>) clazz, map );
+                        }
+                        else
+                        {
+                            // add an empty map here, since we could still have some auto-generated properties
+                            nameMap.put( (Class<? extends IdentifiableObject>) clazz, new HashMap<String, IdentifiableObject>() );
+
+                            // find all auto-generated props and add them
+                            for ( Map.Entry<String, IdentifiableObject> entry : map.entrySet() )
                             {
-                                nameMap.get( clazz ).put( entry.getKey(), entry.getValue() );
+                                if ( entry.getValue().isAutoGenerated() )
+                                {
+                                    nameMap.get( clazz ).put( entry.getKey(), entry.getValue() );
+                                }
                             }
                         }
                     }
-                }
-                catch ( InstantiationException ignored )
-                {
-                }
-                catch ( IllegalAccessException ignored )
-                {
+                    catch ( InstantiationException ignored )
+                    {
+                    }
+                    catch ( IllegalAccessException ignored )
+                    {
+                    }
                 }
             }
         }
@@ -260,7 +278,7 @@ public class DefaultObjectBridge
                 manager.save( (IdentifiableObject) object );
             }
 
-            _updateInternalMaps( object );
+            _updateInternalMaps( object, false );
         }
         else
         {
@@ -278,11 +296,30 @@ public class DefaultObjectBridge
                 manager.update( (IdentifiableObject) object );
             }
 
-            _updateInternalMaps( object );
+            _updateInternalMaps( object, false );
         }
         else
         {
             log.warn( "Trying to update unsupported type + " + object.getClass() + " with object " + object + " object discarded." );
+        }
+    }
+
+    @Override
+    public void deleteObject( Object object )
+    {
+        if ( _typeSupported( object.getClass() ) && IdentifiableObject.class.isInstance( object ) )
+        {
+            if ( writeEnabled )
+            {
+                deletionManager.execute( object );
+                manager.delete( (IdentifiableObject) object );
+            }
+
+            _updateInternalMaps( object, true );
+        }
+        else
+        {
+            log.warn( "Trying to delete unsupported type + " + object.getClass() + " with object " + object + " object discarded." );
         }
     }
 
@@ -347,6 +384,18 @@ public class DefaultObjectBridge
     public boolean isWriteEnabled()
     {
         return writeEnabled;
+    }
+
+    @Override
+    public void setPreheatCache( boolean enabled )
+    {
+        this.preheatCache = enabled;
+    }
+
+    @Override
+    public boolean isPreheatCache()
+    {
+        return preheatCache;
     }
 
     //-------------------------------------------------------------------------------------------------------
@@ -418,7 +467,7 @@ public class DefaultObjectBridge
         return objects;
     }
 
-    private <T> void _updateInternalMaps( T object )
+    private <T> void _updateInternalMaps( T object, boolean delete )
     {
         if ( IdentifiableObject.class.isInstance( object ) )
         {
@@ -434,7 +483,20 @@ public class DefaultObjectBridge
                     map = uidMap.get( identifiableObject.getClass().getSuperclass() );
                 }
 
-                map.put( identifiableObject.getUid(), identifiableObject );
+                if ( !delete )
+                {
+                    map.put( identifiableObject.getUid(), identifiableObject );
+                }
+                else
+                {
+                    try
+                    {
+                        map.remove( identifiableObject.getUid() );
+                    }
+                    catch ( NullPointerException ignored )
+                    {
+                    }
+                }
             }
 
             if ( identifiableObject.getCode() != null )
@@ -447,7 +509,20 @@ public class DefaultObjectBridge
                     map = codeMap.get( identifiableObject.getClass().getSuperclass() );
                 }
 
-                map.put( identifiableObject.getCode(), identifiableObject );
+                if ( !delete )
+                {
+                    map.put( identifiableObject.getCode(), identifiableObject );
+                }
+                else
+                {
+                    try
+                    {
+                        map.remove( identifiableObject.getCode() );
+                    }
+                    catch ( NullPointerException ignored )
+                    {
+                    }
+                }
             }
 
             if ( (identifiableObject.haveUniqueNames() || identifiableObject.isAutoGenerated()) && identifiableObject.getName() != null )
@@ -460,7 +535,21 @@ public class DefaultObjectBridge
                     map = nameMap.get( identifiableObject.getClass().getSuperclass() );
                 }
 
-                map.put( identifiableObject.getName(), identifiableObject );
+                if ( !delete )
+                {
+                    map.put( identifiableObject.getName(), identifiableObject );
+                }
+                else
+                {
+                    try
+                    {
+                        map.remove( identifiableObject.getName() );
+                    }
+                    catch ( NullPointerException ignored )
+                    {
+                    }
+                }
+
             }
         }
     }
@@ -468,37 +557,55 @@ public class DefaultObjectBridge
     private IdentifiableObject getUidMatch( IdentifiableObject identifiableObject )
     {
         Map<String, IdentifiableObject> map = uidMap.get( identifiableObject.getClass() );
+        IdentifiableObject entity = null;
 
         if ( map != null )
         {
-            return map.get( identifiableObject.getUid() );
+            entity = map.get( identifiableObject.getUid() );
         }
 
-        return null;
+        if ( !preheatCache && entity == null )
+        {
+            entity = manager.get( identifiableObject.getClass(), identifiableObject.getUid() );
+        }
+
+        return entity;
     }
 
     private IdentifiableObject getCodeMatch( IdentifiableObject identifiableObject )
     {
         Map<String, IdentifiableObject> map = codeMap.get( identifiableObject.getClass() );
+        IdentifiableObject entity = null;
 
         if ( map != null )
         {
-            return map.get( identifiableObject.getCode() );
+            entity = map.get( identifiableObject.getCode() );
         }
 
-        return null;
+        if ( !preheatCache && entity == null )
+        {
+            entity = manager.getByCode( identifiableObject.getClass(), identifiableObject.getCode() );
+        }
+
+        return entity;
     }
 
     private IdentifiableObject getNameMatch( IdentifiableObject identifiableObject )
     {
         Map<String, IdentifiableObject> map = nameMap.get( identifiableObject.getClass() );
+        IdentifiableObject entity = null;
 
         if ( map != null )
         {
-            return map.get( identifiableObject.getName() );
+            entity = map.get( identifiableObject.getName() );
         }
 
-        return null;
+        if ( !preheatCache && identifiableObject.haveUniqueNames() && entity == null )
+        {
+            entity = manager.getByName( identifiableObject.getClass(), identifiableObject.getName() );
+        }
+
+        return entity;
     }
 
     private boolean _typeSupported( Class<?> clazz )

@@ -400,5 +400,8 @@ public interface UserService
     Collection<User> getUsersByName( String name );  
     
     Collection<String> getUsernames( String query, Integer max );
-    
+
+    int countDataSetUserAuthorityGroups( DataSet dataSet );
+
+    boolean credentialsNonExpired( UserCredentials credentials );
 }

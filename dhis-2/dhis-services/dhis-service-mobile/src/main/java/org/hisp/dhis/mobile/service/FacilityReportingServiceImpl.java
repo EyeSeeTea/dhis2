@@ -93,8 +93,6 @@ public class FacilityReportingServiceImpl
 
     private org.hisp.dhis.i18n.I18nService i18nService;
 
-    private org.hisp.dhis.mobile.service.ModelMapping modelMapping;
-
     private CompleteDataSetRegistrationService registrationService;
 
     private CurrentUserService currentUserService;
@@ -311,7 +309,7 @@ public class FacilityReportingServiceImpl
         {
             dataElement = i18n( i18nService, locale, dataElement );
 
-            DataElement de = modelMapping.getDataElement( dataElement );
+            DataElement de = ModelMapping.getDataElement( dataElement );
 
             // For facility Reporting, no data elements are mandatory
             
@@ -413,16 +411,15 @@ public class FacilityReportingServiceImpl
     {
         String value = dv.getValue().trim();
 
-        DataElementCategoryOptionCombo cateOptCombo = categoryService.getDataElementCategoryOptionCombo( dv
+        DataElementCategoryOptionCombo catOptCombo = categoryService.getDataElementCategoryOptionCombo( dv
             .getCategoryOptComboID() );
 
-        org.hisp.dhis.datavalue.DataValue dataValue = dataValueService.getDataValue( unit, dataElement, period,
-            cateOptCombo );
+        org.hisp.dhis.datavalue.DataValue dataValue = dataValueService.getDataValue( dataElement, period,
+            unit, catOptCombo );
 
         if ( dataValue == null )
         {
-            dataValue = new org.hisp.dhis.datavalue.DataValue( dataElement, period, unit, value, "", new Date(), "",
-                cateOptCombo );
+            dataValue = new org.hisp.dhis.datavalue.DataValue( dataElement, period, unit, catOptCombo, catOptCombo, value, "", new Date(), "" );
             dataValueService.addDataValue( dataValue );
         }
         else
@@ -502,12 +499,6 @@ public class FacilityReportingServiceImpl
     public void setI18nService( org.hisp.dhis.i18n.I18nService i18nService )
     {
         this.i18nService = i18nService;
-    }
-
-    @Required
-    public void setModelMapping( org.hisp.dhis.mobile.service.ModelMapping modelMapping )
-    {
-        this.modelMapping = modelMapping;
     }
 
     @Required

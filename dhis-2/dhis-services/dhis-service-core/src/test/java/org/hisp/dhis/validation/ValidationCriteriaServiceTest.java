@@ -34,10 +34,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
-import java.util.Date;
 
 import org.hisp.dhis.DhisSpringTest;
-import org.hisp.dhis.patient.Patient;
 import org.junit.Test;
 
 /**
@@ -53,9 +51,9 @@ public class ValidationCriteriaServiceTest
 
     private String propertyB;
 
-    private Object valueA;
+    private String valueA;
 
-    private Object valueB;
+    private String valueB;
 
     private ValidationCriteria validationCriteriaA;
 
@@ -71,11 +69,11 @@ public class ValidationCriteriaServiceTest
     {
         validationCriteriaService = (ValidationCriteriaService) getBean( ValidationCriteriaService.ID );
 
-        propertyA = Patient.class.getDeclaredField( "birthDate" ).getName();
-        propertyB = Patient.class.getDeclaredField( "dobType" ).getName();
+        propertyA = "name";
+        propertyB = "name";
 
-        valueA = new Date();
-        valueB = (char)'A';
+        valueA = "A";
+        valueB = "B";
 
         validationCriteriaA = createValidationCriteria( 'A', propertyA, ValidationCriteria.OPERATOR_EQUAL_TO, valueA );
         validationCriteriaB = createValidationCriteria( 'B', propertyB, ValidationCriteria.OPERATOR_EQUAL_TO, valueB );

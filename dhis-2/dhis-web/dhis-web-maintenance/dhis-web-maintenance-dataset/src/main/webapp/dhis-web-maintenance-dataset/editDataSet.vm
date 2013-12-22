@@ -52,9 +52,9 @@
 <form id="editDataSetForm" name="editDataSetForm" action="updateDataSet.action" method="post" class="inputForm">
   <input type="hidden" id="dataSetId" name="dataSetId" value="$dataSet.id"/>
 
-  <table id="detailsList" style="width: 600px;">
-    <col style="width: 400px;"/> ## Labels
-    <col /> ## Input
+  <table style="width: 600px">
+    <col style="width: 400px"/>
+    <col>
     <thead>
       <tr>
         <th colspan="2">$i18n.getString( "dataset_details" )</th>
@@ -94,7 +94,17 @@
             #end
           </select>
         </td>
-      </tr>	   
+      </tr>
+      <tr>
+        <td><label>$i18n.getString( "category_combo" )</label></td>
+        <td>
+          <select id="categoryComboId" name="categoryComboId">
+            #foreach( $categoryCombo in $categoryCombos )
+              <option value="$categoryCombo.id"#if( $dataSet.categoryCombo.id == $categoryCombo.id ) selected="selected"#end>$encoder.htmlEncode( $categoryCombo.displayName )</option>
+            #end
+          </select>
+        </td>
+      </tr>
       <tr>
         <td><label>$i18n.getString( "notification_recipients" )</label></td>
         <td>

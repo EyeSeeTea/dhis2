@@ -455,8 +455,6 @@
 
 	<bean id="org.hisp.dhis.caseentry.action.patient.AddPatientAction"
 		class="org.hisp.dhis.caseentry.action.patient.AddPatientAction" scope="prototype">
-		<property name="selectionManager"
-			ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
 		<property name="patientService" ref="org.hisp.dhis.patient.PatientService" />
 		<property name="patientIdentifierService"
 			ref="org.hisp.dhis.patient.PatientIdentifierService" />
@@ -467,11 +465,12 @@
 		<property name="patientAttributeOptionService"
 			ref="org.hisp.dhis.patient.PatientAttributeOptionService" />
 		<property name="userService" ref="org.hisp.dhis.user.UserService" />
-		<property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
 		<property name="relationshipService"
 			ref="org.hisp.dhis.relationship.RelationshipService" />
 		<property name="relationshipTypeService"
 			ref="org.hisp.dhis.relationship.RelationshipTypeService" />
+		<property name="selectionManager"
+			ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
 	</bean>
 
 	<bean id="org.hisp.dhis.caseentry.action.patient.RemovePatientAction"
@@ -494,12 +493,11 @@
 		</property>
 		<property name="patientIdentifierService"
 			ref="org.hisp.dhis.patient.PatientIdentifierService" />
-		<property name="selectionManager"
-			ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
 		<property name="patientAttributeOptionService"
 			ref="org.hisp.dhis.patient.PatientAttributeOptionService" />
 		<property name="userService" ref="org.hisp.dhis.user.UserService" />
-		<property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
+		<property name="selectionManager"
+			ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
 	</bean>
 
 	<bean id="org.hisp.dhis.caseentry.action.patient.ShowAddPatientFormAction"
@@ -627,8 +625,6 @@
 		<property name="programInstanceService" ref="org.hisp.dhis.program.ProgramInstanceService" />
 		<property name="patientIdentifierService"
 			ref="org.hisp.dhis.patient.PatientIdentifierService" />
-		<property name="patientAttributeValueService"
-			ref="org.hisp.dhis.patientattributevalue.PatientAttributeValueService" />
 		<property name="selectionManager"
 			ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
 	</bean>
@@ -779,8 +775,7 @@
 	</bean>
 
 	<!-- Tabular report -->
-	<bean
-		id="org.hisp.dhis.caseentry.action.caseentry.SearchEventsAction"
+	<bean id="org.hisp.dhis.caseentry.action.caseentry.SearchEventsAction"
 		class="org.hisp.dhis.caseentry.action.caseentry.SearchEventsAction"
 		scope="prototype">
 		<property name="programStageService" ref="org.hisp.dhis.program.ProgramStageService" />

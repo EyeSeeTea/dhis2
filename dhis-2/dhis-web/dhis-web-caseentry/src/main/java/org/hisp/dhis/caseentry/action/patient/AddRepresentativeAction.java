@@ -29,12 +29,12 @@ package org.hisp.dhis.caseentry.action.patient;
  */
 
 import java.util.Collection;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.ServletActionContext;
-import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.patient.Patient;
@@ -55,8 +55,6 @@ public class AddRepresentativeAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private I18nFormat format;
-
     private PatientService patientService;
 
     private PatientIdentifierService patientIdentifierService;
@@ -70,18 +68,6 @@ public class AddRepresentativeAction
     // -------------------------------------------------------------------------
 
     private String fullName;
-
-    private String birthDate;
-
-    private char ageType;
-
-    private Integer age;
-
-    private Character dobType;
-
-    private String gender;
-
-    private String registrationDate;
 
     private Integer relationshipTypeId;
 
@@ -112,28 +98,7 @@ public class AddRepresentativeAction
 
         fullName = fullName.trim();
         patient.setName( fullName );
-
-        // ---------------------------------------------------------------------
-        // Get Other information for patient
-        // ---------------------------------------------------------------------
-
-        patient.setGender( gender );
-        patient.setIsDead( false );
         patient.setOrganisationUnit( organisationUnit );
-
-        if ( dobType == Patient.DOB_TYPE_VERIFIED || dobType == Patient.DOB_TYPE_DECLARED )
-        {
-            birthDate = birthDate.trim();
-            patient.setBirthDate( format.parseDate( birthDate ) );
-        }
-        else
-        {
-            patient.setBirthDateFromAge( age.intValue(), ageType );
-        }
-
-        patient.setDobType( dobType );
-
-        patient.setRegistrationDate( format.parseDate( registrationDate ) );
 
         patientService.savePatient( patient );
 
@@ -143,12 +108,12 @@ public class AddRepresentativeAction
         // PatientIdentifierType will be null
         // --------------------------------------------------------------------------------
 
-        String identifier = PatientIdentifierGenerator.getNewIdentifier( patient.getBirthDate(), patient.getGender() );
+        String identifier = PatientIdentifierGenerator.getNewIdentifier( new Date(), "F" );
 
         PatientIdentifier systemGenerateIdentifier = patientIdentifierService.get( null, identifier );
         while ( systemGenerateIdentifier != null )
         {
-            identifier = PatientIdentifierGenerator.getNewIdentifier( patient.getBirthDate(), patient.getGender() );
+            identifier = PatientIdentifierGenerator.getNewIdentifier( new Date(), "F" );
             systemGenerateIdentifier = patientIdentifierService.get( null, identifier );
         }
 
@@ -204,16 +169,6 @@ public class AddRepresentativeAction
         this.patientIdentifierTypeService = patientIdentifierTypeService;
     }
 
-    public void setBirthDate( String birthDate )
-    {
-        this.birthDate = birthDate;
-    }
-
-    public void setFormat( I18nFormat format )
-    {
-        this.format = format;
-    }
-
     public void setPatientService( PatientService patientService )
     {
         this.patientService = patientService;
@@ -234,21 +189,6 @@ public class AddRepresentativeAction
         this.fullName = fullName;
     }
 
-    public void setRegistrationDate( String registrationDate )
-    {
-        this.registrationDate = registrationDate;
-    }
-
-    public void setAge( Integer age )
-    {
-        this.age = age;
-    }
-
-    public void setGender( String gender )
-    {
-        this.gender = gender;
-    }
-
     public Integer getRelationshipTypeId()
     {
         return relationshipTypeId;
@@ -264,13 +204,4 @@ public class AddRepresentativeAction
         return patient;
     }
 
-    public void setDobType( Character dobType )
-    {
-        this.dobType = dobType;
-    }
-
-    public void setAgeType( char ageType )
-    {
-        this.ageType = ageType;
-    }
 }

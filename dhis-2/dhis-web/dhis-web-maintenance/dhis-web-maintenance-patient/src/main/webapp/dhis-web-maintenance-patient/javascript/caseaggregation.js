@@ -109,12 +109,6 @@ function getParams() {
   clearListById('caseProperty');
   var programId = getFieldValue('programId');
   if( programId == '' ) {
-    var caseProperty = jQuery('#caseProperty');
-    caseProperty.append('<option suggested="" title="' + i18n_total_of_patient_registration + '" value="[PT:count]">' + i18n_total_of_patient_registration + '</option>');
-    caseProperty.append('<option suggested="F, M" title="' + i18n_gender + '" value="[CP:gender]">' + i18n_gender + '</option>');
-    caseProperty.append('<option suggested="" title="' + i18n_dob_type + '" value="[CP:dobType]">' + i18n_dob_type + '</option>');
-    caseProperty.append('<option suggested="" title="' + i18n_age_days + '" value="[CP:age]">' + i18n_age_days + '</option>');
-
     disable('programProperty');
     disable('programStageProperty');
   }
@@ -150,13 +144,6 @@ function getParams() {
       var type = jQuery('#programId option:selected').attr('programType');
       if( type != '3' ) {
         var caseProperty = jQuery('#caseProperty');
-        for( i in json.fixedAttributes ) {
-          var id = json.fixedAttributes[i].id;
-          var name = json.fixedAttributes[i].name;
-
-          caseProperty.append("<option value='" + id + "' title='" + name + "' suggested='" + json.fixedAttributes[i].suggested + "'>" + name + "</option>");
-        }
-
         for( i in json.patientAttributes ) {
           var id = json.patientAttributes[i].id;
           var name = json.patientAttributes[i].name;

@@ -40,6 +40,8 @@ function patientAttributeTypeMap()
 	typeMap['bool'] = i18n_yes_no;
 	typeMap['trueOnly'] = i18n_yes_only;
 	typeMap['date'] = i18n_date;
+	typeMap['phoneNumber'] = i18n_phone_number;
+	typeMap['trackerAssociate'] = i18n_tracker_associate;
 	typeMap['combo'] = i18n_attribute_combo_type;
 	return typeMap;
 }
@@ -73,7 +75,6 @@ ATTRIBUTE_OPTION =
 					function ( json ) {
 						var patientAttributes = jQuery("#availableAttribute");
 						patientAttributes.append( "<option value='[current_date:0]' title='" + i18n_current_date + "'>" + i18n_current_date + "</option>" );
-						patientAttributes.append( "<option value='[CP:0]' title='" + i18n_date_of_birth + "'>" + i18n_date_of_birth + "</option>" );
 						for ( i in json.programs ) 
 						{ 
 							var id = "[PG:" + json.programs[i].id + ".dateOfIncident]";

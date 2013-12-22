@@ -153,9 +153,9 @@ public class DataValueSetServiceTest
         
         assertNotNull( dataValues );
         assertEquals( 3, dataValues.size() );
-        assertTrue( dataValues.contains( new DataValue( deA, peA, ouA, optionComboA ) ) );
-        assertTrue( dataValues.contains( new DataValue( deB, peA, ouA, optionComboA ) ) );
-        assertTrue( dataValues.contains( new DataValue( deC, peA, ouA, optionComboA ) ) );
+        assertTrue( dataValues.contains( new DataValue( deA, peA, ouA, optionComboA, optionComboA ) ) );
+        assertTrue( dataValues.contains( new DataValue( deB, peA, ouA, optionComboA, optionComboA ) ) );
+        assertTrue( dataValues.contains( new DataValue( deC, peA, ouA, optionComboA, optionComboA ) ) );
         
         CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration( dsA, peA, ouA );
         
@@ -179,7 +179,7 @@ public class DataValueSetServiceTest
     public void testImportDataValuesXmlWithCode()
         throws Exception
     {
-        ImportOptions options = new ImportOptions( CODE, CODE, false, NEW_AND_UPDATES, false );
+        ImportOptions options = new ImportOptions( CODE, CODE, false, true, NEW_AND_UPDATES, false );
         ImportSummary summary = dataValueSetService.saveDataValueSet( new ClassPathResource( "datavalueset/dataValueSetBcode.xml" ).getInputStream(), options );
         
         assertImportDataValues( summary );
@@ -204,25 +204,25 @@ public class DataValueSetServiceTest
 
         assertNotNull( dataValues );
         assertEquals( 12, dataValues.size() );
-        assertTrue( dataValues.contains( new DataValue( deA, peA, ouA, optionComboA ) ) );
-        assertTrue( dataValues.contains( new DataValue( deA, peA, ouB, optionComboA ) ) );
-        assertTrue( dataValues.contains( new DataValue( deA, peB, ouA, optionComboA ) ) );
-        assertTrue( dataValues.contains( new DataValue( deA, peB, ouB, optionComboA ) ) );
-        assertTrue( dataValues.contains( new DataValue( deB, peA, ouA, optionComboA ) ) );
-        assertTrue( dataValues.contains( new DataValue( deB, peA, ouB, optionComboA ) ) );
-        assertTrue( dataValues.contains( new DataValue( deB, peB, ouA, optionComboA ) ) );
-        assertTrue( dataValues.contains( new DataValue( deB, peB, ouB, optionComboA ) ) );
-        assertTrue( dataValues.contains( new DataValue( deC, peA, ouA, optionComboA ) ) );
-        assertTrue( dataValues.contains( new DataValue( deC, peA, ouB, optionComboA ) ) );
-        assertTrue( dataValues.contains( new DataValue( deC, peB, ouA, optionComboA ) ) );
-        assertTrue( dataValues.contains( new DataValue( deC, peB, ouB, optionComboA ) ) );        
+        assertTrue( dataValues.contains( new DataValue( deA, peA, ouA, optionComboA, optionComboA ) ) );
+        assertTrue( dataValues.contains( new DataValue( deA, peA, ouB, optionComboA, optionComboA ) ) );
+        assertTrue( dataValues.contains( new DataValue( deA, peB, ouA, optionComboA, optionComboA ) ) );
+        assertTrue( dataValues.contains( new DataValue( deA, peB, ouB, optionComboA, optionComboA ) ) );
+        assertTrue( dataValues.contains( new DataValue( deB, peA, ouA, optionComboA, optionComboA ) ) );
+        assertTrue( dataValues.contains( new DataValue( deB, peA, ouB, optionComboA, optionComboA ) ) );
+        assertTrue( dataValues.contains( new DataValue( deB, peB, ouA, optionComboA, optionComboA ) ) );
+        assertTrue( dataValues.contains( new DataValue( deB, peB, ouB, optionComboA, optionComboA ) ) );
+        assertTrue( dataValues.contains( new DataValue( deC, peA, ouA, optionComboA, optionComboA ) ) );
+        assertTrue( dataValues.contains( new DataValue( deC, peA, ouB, optionComboA, optionComboA ) ) );
+        assertTrue( dataValues.contains( new DataValue( deC, peB, ouA, optionComboA, optionComboA ) ) );
+        assertTrue( dataValues.contains( new DataValue( deC, peB, ouB, optionComboA, optionComboA ) ) );        
     }
     
     @Test
     public void testImportDataValuesXmlDryRun()
         throws Exception
     {
-        ImportOptions options = new ImportOptions( UID, UID, true, NEW_AND_UPDATES, false );
+        ImportOptions options = new ImportOptions( UID, UID, true, true, NEW_AND_UPDATES, false );
         
         dataValueSetService.saveDataValueSet( new ClassPathResource( "datavalueset/dataValueSetB.xml" ).getInputStream(), options );
         
@@ -236,7 +236,7 @@ public class DataValueSetServiceTest
     public void testImportDataValuesXmlUpdatesOnly()
         throws Exception
     {
-        ImportOptions options = new ImportOptions( UID, UID, false, UPDATES, false );
+        ImportOptions options = new ImportOptions( UID, UID, false, true, UPDATES, false );
         
         dataValueSetService.saveDataValueSet( new ClassPathResource( "datavalueset/dataValueSetB.xml" ).getInputStream(), options );
         

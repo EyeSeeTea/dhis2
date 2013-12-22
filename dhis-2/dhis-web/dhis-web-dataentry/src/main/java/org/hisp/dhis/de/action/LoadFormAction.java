@@ -104,16 +104,16 @@ public class LoadFormAction
     // Input
     // -------------------------------------------------------------------------
 
-    private Integer dataSetId;
+    private String dataSetId;
 
-    public void setDataSetId( Integer dataSetId )
+    public void setDataSetId( String dataSetId )
     {
         this.dataSetId = dataSetId;
     }
 
-    private Integer multiOrganisationUnit;
+    private String multiOrganisationUnit;
 
-    public void setMultiOrganisationUnit( Integer multiOrganisationUnit )
+    public void setMultiOrganisationUnit( String multiOrganisationUnit )
     {
         this.multiOrganisationUnit = multiOrganisationUnit;
     }
@@ -318,9 +318,12 @@ public class LoadFormAction
 
         if ( displayMode.equals( DataSet.TYPE_DEFAULT ) )
         {
-            DataSet newDataSet = new DataSet();
-            newDataSet.mergeWith( dataSet );
-            dataSet = newDataSet;
+            DataSet dataSetCopy = new DataSet();
+            dataSetCopy.setName( dataSet.getName() );
+            dataSetCopy.setShortName( dataSet.getShortName() );
+            dataSetCopy.setRenderAsTabs( dataSet.isRenderAsTabs() );
+            dataSetCopy.setRenderHorizontally( dataSet.isRenderHorizontally() );
+            dataSet = dataSetCopy;
 
             for ( int i = 0; i < orderedCategoryCombos.size(); i++ )
             {
@@ -339,10 +342,10 @@ public class LoadFormAction
         }
 
         // ---------------------------------------------------------------------
-        // For multi-org unit we only support custom forms
+        // For multi-org unit we only support section forms
         // ---------------------------------------------------------------------
 
-        if ( multiOrganisationUnit != null && multiOrganisationUnit != 0 )
+        if ( multiOrganisationUnit != null )
         {
             OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( multiOrganisationUnit );
             List<OrganisationUnit> organisationUnitChildren = new ArrayList<OrganisationUnit>();

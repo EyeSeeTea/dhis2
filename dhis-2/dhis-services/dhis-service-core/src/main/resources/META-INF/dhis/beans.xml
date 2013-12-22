@@ -144,27 +144,27 @@
     <property name="cacheable" value="true" />
   </bean>
 
-  <bean id="org.hisp.dhis.dataelement.DataElementCategoryStore" class="org.hisp.dhis.common.hibernate.HibernateDimensionalObjectStore">
+  <bean id="org.hisp.dhis.dataelement.CategoryStore" class="org.hisp.dhis.dataelement.hibernate.HibernateCategoryStore">
     <property name="clazz" value="org.hisp.dhis.dataelement.DataElementCategory" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
   </bean>
 
-  <bean id="org.hisp.dhis.dataelement.DataElementCategoryOptionStore"
+  <bean id="org.hisp.dhis.dataelement.CategoryOptionStore"
     class="org.hisp.dhis.common.hibernate.HibernateDimensionalObjectStore">
     <property name="clazz" value="org.hisp.dhis.dataelement.DataElementCategoryOption" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
   </bean>
 
-  <bean id="org.hisp.dhis.dataelement.DataElementCategoryComboStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
+  <bean id="org.hisp.dhis.dataelement.CategoryComboStore" class="org.hisp.dhis.dataelement.hibernate.HibernateCategoryComboStore">
     <property name="clazz" value="org.hisp.dhis.dataelement.DataElementCategoryCombo" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
   </bean>
 
-  <bean id="org.hisp.dhis.dataelement.DataElementCategoryOptionComboStore"
-    class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
+  <bean id="org.hisp.dhis.dataelement.CategoryOptionComboStore"
+    class="org.hisp.dhis.dataelement.hibernate.HibernateCategoryOptionComboStore">
     <property name="clazz" value="org.hisp.dhis.dataelement.DataElementCategoryOptionCombo" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
@@ -221,6 +221,12 @@
     <property name="cacheable" value="true" />
   </bean>
 
+  <bean id="org.hisp.dhis.user.UserAuthorityGroupStore" class="org.hisp.dhis.user.hibernate.HibernateUserAuthorityGroupStore">
+    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="clazz" value="org.hisp.dhis.user.UserAuthorityGroup" />
+    <property name="cacheable" value="true" />
+  </bean>
+
   <bean id="org.hisp.dhis.user.UserCredentialsStore" class="org.hisp.dhis.user.hibernate.HibernateUserCredentialsStore">
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="userService" ref="org.hisp.dhis.user.UserService" />
@@ -255,12 +261,6 @@
   <bean id="org.hisp.dhis.aggregation.AggregatedOrgUnitDataValueStore"
     class="org.hisp.dhis.aggregation.jdbc.JdbcAggregatedOrgUnitDataValueStore">
     <property name="jdbcTemplate" ref="jdbcTemplate" />
-  </bean>
-
-  <bean id="org.hisp.dhis.user.UserAuthorityGroupStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
-    <property name="clazz" value="org.hisp.dhis.user.UserAuthorityGroup" />
-    <property name="sessionFactory" ref="sessionFactory" />
-    <property name="cacheable" value="true" />
   </bean>
 
   <bean id="org.hisp.dhis.message.MessageConversationStore" class="org.hisp.dhis.message.hibernate.HibernateMessageConversationStore">
@@ -324,7 +324,7 @@
   </bean>
 
   <bean id="org.hisp.dhis.mapping.MapViewStore"
-    class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
+    class="org.hisp.dhis.mapping.hibernate.HibernateMapViewStore">
     <property name="clazz" value="org.hisp.dhis.mapping.MapView" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
@@ -374,6 +374,7 @@
 
   <bean id="org.hisp.dhis.datavalue.DataValueService" class="org.hisp.dhis.datavalue.DefaultDataValueService">
     <property name="dataValueStore" ref="org.hisp.dhis.datavalue.DataValueStore" />
+    <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
   </bean>
 
   <bean id="org.hisp.dhis.datavalue.DataValueAuditService" class="org.hisp.dhis.datavalue.DefaultDataValueAuditService">
@@ -464,10 +465,10 @@
   <bean id="monitoringLastDayTask" class="org.hisp.dhis.validation.scheduling.MonitoringTask" />
 
   <bean id="org.hisp.dhis.dataelement.DataElementCategoryService" class="org.hisp.dhis.dataelement.DefaultDataElementCategoryService">
-    <property name="dataElementCategoryStore" ref="org.hisp.dhis.dataelement.DataElementCategoryStore" />
-    <property name="dataElementCategoryOptionStore" ref="org.hisp.dhis.dataelement.DataElementCategoryOptionStore" />
-    <property name="dataElementCategoryComboStore" ref="org.hisp.dhis.dataelement.DataElementCategoryComboStore" />
-    <property name="dataElementCategoryOptionComboStore" ref="org.hisp.dhis.dataelement.DataElementCategoryOptionComboStore" />
+    <property name="categoryStore" ref="org.hisp.dhis.dataelement.CategoryStore" />
+    <property name="categoryOptionStore" ref="org.hisp.dhis.dataelement.CategoryOptionStore" />
+    <property name="categoryComboStore" ref="org.hisp.dhis.dataelement.CategoryComboStore" />
+    <property name="categoryOptionComboStore" ref="org.hisp.dhis.dataelement.CategoryOptionComboStore" />
     <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
@@ -601,7 +602,6 @@
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
 
-  <!--@author Ovidiu Rosu <rosu.ovi@gmail.com>-->
   <bean id="org.hisp.dhis.filter.MetaDataFilterService" class="org.hisp.dhis.filter.DefaultMetaDataFilterService">
     <property name="metaDataFilterStore" ref="org.hisp.dhis.filter.MetaDataFilterStore" />
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
@@ -905,13 +905,7 @@
     <property name="runlevel" value="7" />
     <property name="skipInTests" value="true" />
   </bean>
-  
-  <!--<bean id="org.hisp.dhis.user.UserDefaultPopulator" class="org.hisp.dhis.user.UserDefaultPopulator">
-    <property name="userService" ref="org.hisp.dhis.user.UserService" />
-    <property name="runlevel" value="5" />
-    <property name="skipInTests" value="true" />
-  </bean>-->
-  
+    
   <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
     <property name="targetObject" ref="org.hisp.dhis.system.startup.StartupRoutineExecutor" />
     <property name="targetMethod" value="addStartupRoutines" />
@@ -928,7 +922,6 @@
           <ref local="org.hisp.dhis.startup.ExpressionUpgrader" />
           <ref local="org.hisp.dhis.startup.ConfigurationPopulator" />
           <ref local="org.hisp.dhis.startup.I18nLocalePopulator" />
-          <!--<ref local="org.hisp.dhis.user.UserDefaultPopulator" />-->
         </list>
       </list>
     </property>
@@ -1087,7 +1080,11 @@
   <bean id="org.hisp.dhis.mapping.MapDeletionHandler" class="org.hisp.dhis.mapping.MapDeletionHandler">
     <property name="mappingService" ref="org.hisp.dhis.mapping.MappingService" />
   </bean>
-  
+
+  <bean id="org.hisp.dhis.sms.SMSCommandDeletionHandler" class="org.hisp.dhis.sms.SMSCommandDeletionHandler" />
+
+  <bean id="org.hisp.dhis.sms.SMSCodesDeletionHandler" class="org.hisp.dhis.sms.SMSCodesDeletionHandler" />
+
   <!-- DeletionManager -->
 
   <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
@@ -1129,6 +1126,8 @@
           <ref local="org.hisp.dhis.attribute.AttributeValueDeletionHandler" />
           <ref local="org.hisp.dhis.mapping.MapLegendSetDeletionHandler" />
           <ref local="org.hisp.dhis.mapping.MapViewDeletionHandler" />
+          <ref local="org.hisp.dhis.sms.SMSCommandDeletionHandler" />
+          <ref local="org.hisp.dhis.sms.SMSCodesDeletionHandler" />
         </list>
       </list>
     </property>

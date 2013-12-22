@@ -540,14 +540,33 @@ div.inputCriteria
   margin-bottom: 15px;
 }
 
-.setting input[type=text],input[type=password],select
+.setting input[type=text], 
+.setting input[type=password], 
+.inputForm input[type=text], 
+.inputForm input[type=password],
+.setting textarea,
+.inputForm textarea
 {
   width: 25em;
+  border: 1px solid #aaa;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  border-radius: 3px;
+  padding: 6px 5px;
+  margin: 2px 0;
+  color: #333;
 }
 
-.setting textarea
+.setting select,
+.inputForm select
 {
-  width: 25em;
+  width: 26em;
+  padding: 2px 3px;
+  margin: 2px 0;
+}
+
+.setting textarea,
+.inputForm textarea
+{
   height: 8em;
 }
 
@@ -659,21 +678,6 @@ ul.pageSizeSelection input
   border: 1px solid #D0D0D0; 
   border-radius: 2px; cursor: pointer;
   max-width: 160px;
-}
-
-/*----------------------------------------------------------------------------*/
-/* Forms                                                                      */
-/*----------------------------------------------------------------------------*/
-
-.inputForm input[type=text],select
-{
-  width: 25em;
-}
-
-.inputForm textarea
-{
-  width: 25em;
-  height: 8em;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -804,7 +808,7 @@ input:-moz-placeholder
     margin-bottom: 8px;
 }
 
-.message-info 
+.message-info
 {
     background-color: #f3f3f3;
 	color: #222;

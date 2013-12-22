@@ -162,7 +162,39 @@ public class DefaultDataSetService
         if ( i18nSections && dataSet.hasSections() )
         {
             i18n( i18nService, dataSet.getSections() );
-            
+
+            for ( Section section : dataSet.getSections() )
+            {
+                i18n( i18nService, section.getDataElements() );
+            }
+        }
+
+        return dataSet;
+    }
+
+    public DataSet getDataSet( String id, boolean i18nDataElements, boolean i18nIndicators, boolean i18nOrgUnits, boolean i18nSections )
+    {
+        DataSet dataSet = getDataSet( id );
+
+        if ( i18nDataElements )
+        {
+            i18n( i18nService, dataSet.getDataElements() );
+        }
+
+        if ( i18nIndicators )
+        {
+            i18n( i18nService, dataSet.getIndicators() );
+        }
+
+        if ( i18nOrgUnits )
+        {
+            i18n( i18nService, dataSet.getSources() );
+        }
+
+        if ( i18nSections && dataSet.hasSections() )
+        {
+            i18n( i18nService, dataSet.getSections() );
+
             for ( Section section : dataSet.getSections() )
             {
                 i18n( i18nService, section.getDataElements() );
@@ -434,6 +466,30 @@ public class DefaultDataSetService
         boolean expired = expiryDays != DataSet.NO_EXPIRY && new DateTime( period.getEndDate() ).plusDays( expiryDays ).isBefore( new DateTime( now ) );
 
         return expired && lockExceptionStore.getCount( dataElement, period, organisationUnit ) == 0l;
+    }
+
+    @Override
+    public boolean isLocked( DataSet dataSet, Period period, OrganisationUnit organisationUnit, Date now, boolean useOrgUnitChildren )
+    {
+        if ( !useOrgUnitChildren )
+        {
+            return isLocked( dataSet, period, organisationUnit, now );
+        }
+        
+        if ( organisationUnit == null || !organisationUnit.hasChild() )
+        {
+            return false;
+        }
+        
+        for ( OrganisationUnit child : organisationUnit.getChildren() )
+        {
+            if ( isLocked( dataSet, period, child, now ) )
+            {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     @Override

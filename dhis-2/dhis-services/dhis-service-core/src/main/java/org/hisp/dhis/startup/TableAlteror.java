@@ -34,6 +34,7 @@ import org.amplecode.quick.StatementHolder;
 import org.amplecode.quick.StatementManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.jdbc.batchhandler.RelativePeriodsBatchHandler;
 import org.hisp.dhis.period.RelativePeriods;
@@ -42,6 +43,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -76,6 +79,8 @@ public class TableAlteror
     @Transactional
     public void execute()
     {
+        int defaultCategoryComboId = getDefaultCategoryCombo();
+        
         // ---------------------------------------------------------------------
         // Drop outdated tables
         // ---------------------------------------------------------------------
@@ -629,7 +634,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE dataelement ALTER COLUMN domaintype SET NOT NULL" );
         executeSql( "update dataelementcategory set datadimension = false where datadimension is null" );
         
-		executeSql( "UPDATE dataset SET dataelementdecoration=false WHERE dataelementdecoration is null" );
+	executeSql( "UPDATE dataset SET dataelementdecoration=false WHERE dataelementdecoration is null" );
 
         executeSql( "alter table validationrulegroup rename column validationgroupid to validationrulegroupid" );
         executeSql( "alter table sqlview rename column viewid to sqlviewid" );
@@ -644,18 +649,49 @@ public class TableAlteror
         executeSql( "ALTER TABLE message ALTER COLUMN messagetext TYPE text" );
         
         executeSql( "delete from usersetting where name = 'dashboardConfig' or name = 'dashboardConfiguration'" );
+        executeSql( "update usersetting set name = 'keyUiLocale' where name = 'currentLocale'" );
+        executeSql( "update usersetting set name = 'keyDbLocale' where name = 'keyLocaleUserSetting'" );
         executeSql( "ALTER TABLE interpretation ALTER COLUMN userid DROP NOT NULL" );
         executeSql( "UPDATE interpretation SET publicaccess='r-------' WHERE publicaccess IS NULL;" );
 
         executeSql( "ALTER TABLE dataset DROP COLUMN symbol" );
-
+	executeSql( "ALTER TABLE users ALTER COLUMN password DROP NOT NULL" );
+	
+	executeSql( "update categorycombo set dimensiontype = '" + DataElementCategoryCombo.DIMENSION_TYPE_DISAGGREGATION + "' where dimensiontype is null" );
+        executeSql( "update dataelementcategory set dimensiontype = '" + DataElementCategoryCombo.DIMENSION_TYPE_DISAGGREGATION + "' where dimensiontype is null" );
+	executeSql( "update dataset set categorycomboid = " + defaultCategoryComboId + " where categorycomboid is null" );
+        
+	upgradeDataValuesWithAttributeOptionCombo();
         upgradeMapViewsToAnalyticalObject();
 
-	executeSql( "ALTER TABLE users ALTER COLUMN password DROP NOT NULL" );
-        
         log.info( "Tables updated" );
     }
 
+    private void upgradeDataValuesWithAttributeOptionCombo()
+    {
+        if ( columnExists( "datavalue", "attributeoptioncomboid" ) )
+        {
+            return;
+        }
+        
+        int optionComboId = getDefaultOptionCombo();
+        
+        executeSql( "alter table datavalue_audit drop constraint fk_datavalueaudit_datavalue;" );
+
+        executeSql( "alter table datavalue drop constraint datavalue_pkey;" );
+
+        executeSql( "alter table datavalue add column attributeoptioncomboid integer;" );
+        executeSql( "update datavalue set attributeoptioncomboid = " + optionComboId + " where attributeoptioncomboid is null;" );
+        executeSql( "alter table datavalue alter column attributeoptioncomboid set not null;" );
+        executeSql( "alter table datavalue add constraint fk_datavalue_attributeoptioncomboid foreign key (attributeoptioncomboid) references categoryoptioncombo (categoryoptioncomboid) match simple;" );
+        executeSql( "alter table datavalue add constraint datavalue_pkey primary key(dataelementid, periodid, sourceid, categoryoptioncomboid, attributeoptioncomboid);" );
+        
+        executeSql( "alter table datavalue_audit add constraint fk_datavalueaudit_datavalue foreign key (dataelementid, periodid, sourceid, categoryoptioncomboid, attributeoptioncomboid) " + 
+            "references datavalue (dataelementid, periodid, sourceid, categoryoptioncomboid, attributeoptioncomboid) match simple;" );
+        
+        log.info( "Data value table upgraded with attributeoptioncomboid column" );
+    }
+    
     private void upgradeMapViewsToAnalyticalObject()
     {
         executeSql( "insert into mapview_dataelements ( mapviewid, sort_order, dataelementid ) select mapviewid, 0, dataelementid from mapview where dataelementid is not null" );
@@ -997,6 +1033,8 @@ public class TableAlteror
     {
         try
         {
+            //TODO use jdbcTemplate
+            
             return statementManager.getHolder().executeUpdate( sql );
         }
         catch ( Exception ex )
@@ -1007,6 +1045,47 @@ public class TableAlteror
         }
     }
 
+    private boolean columnExists( String table, String column )
+    {
+        try
+        {
+            ResultSetMetaData metaData = statementManager.getHolder().getStatement().executeQuery( "select * from datavalue limit 1" ).getMetaData();
+            
+            for ( int i = 1; i <= metaData.getColumnCount(); i++ )
+            {
+                if ( column.equalsIgnoreCase( metaData.getColumnName( i ) ) )
+                {
+                    return true;
+                }
+            }
+        }
+        catch ( SQLException ex )
+        {
+            log.error( "Column detection failed: " + ex.getMessage() );
+            log.error( ex );
+        }
+        
+        return false;
+    }
+    
+    private int getDefaultOptionCombo()
+    {
+        String sql = 
+            "select coc.categoryoptioncomboid from categoryoptioncombo coc " +
+            "inner join categorycombos_optioncombos cco on coc.categoryoptioncomboid=cco.categoryoptioncomboid " +
+            "inner join categorycombo cc on cco.categorycomboid=cc.categorycomboid " +
+            "where cc.name='default';";
+        
+        return statementManager.getHolder().queryForInteger( sql );
+    }
+    
+    private int getDefaultCategoryCombo()
+    {
+        String sql = "select categorycomboid from categorycombo where name = 'default'";
+        
+        return statementManager.getHolder().queryForInteger( sql );
+    }
+    
     private boolean updateDataSetAssociation()
     {
         StatementHolder holder = statementManager.getHolder();
@@ -1044,7 +1123,6 @@ public class TableAlteror
         {
             holder.close();
         }
-
     }
 
     private boolean updateProgramStageAssociation()

@@ -28,7 +28,12 @@ package org.hisp.dhis.caseentry.action.patient;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.struts2.ServletActionContext;
@@ -47,13 +52,9 @@ import org.hisp.dhis.patient.PatientIdentifierTypeService;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
-import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.user.UserService;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -66,8 +67,6 @@ public class UpdatePatientAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private I18nFormat format;
-
     private PatientService patientService;
 
     private PatientAttributeService patientAttributeService;
@@ -78,18 +77,13 @@ public class UpdatePatientAction
 
     private PatientIdentifierTypeService patientIdentifierTypeService;
 
-    private OrganisationUnitSelectionManager selectionManager;
-
     private PatientAttributeOptionService patientAttributeOptionService;
 
     private UserService userService;
 
-    private SystemSettingManager systemSettingManager;
+    private OrganisationUnitSelectionManager selectionManager;
 
-    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
-    {
-        this.systemSettingManager = systemSettingManager;
-    }
+    private I18nFormat format;
 
     // -------------------------------------------------------------------------
     // Input
@@ -98,22 +92,6 @@ public class UpdatePatientAction
     private Integer id;
 
     private String fullName;
-
-    private String birthDate;
-
-    private boolean isDead;
-
-    private String deathDate;
-
-    private Integer age;
-
-    private Boolean verified;
-
-    private String gender;
-
-    private String[] phoneNumber;
-
-    private boolean underAge;
 
     private Integer representativeId;
 
@@ -138,75 +116,21 @@ public class UpdatePatientAction
 
         patient = patientService.getPatient( id );
 
-        verified = (verified == null) ? false : verified;
-
         // ---------------------------------------------------------------------
-        // Set FullName
+        // Set FullName && location
         // ---------------------------------------------------------------------
 
         patient.setName( fullName );
+
+        patient.setOrganisationUnit( organisationUnit );
 
         // ---------------------------------------------------------------------
         // Set Other information for patient
         // ---------------------------------------------------------------------
 
-        String phone = "";
-        if ( phoneNumber != null )
-        {
-            for ( String _phoneNumber : phoneNumber )
-            {
-                _phoneNumber = (_phoneNumber != null && _phoneNumber.isEmpty() && _phoneNumber.trim().equals(
-                    systemSettingManager.getSystemSetting( SystemSettingManager.KEY_PHONE_NUMBER_AREA_CODE ) )) ? null
-                    : _phoneNumber;
-                if ( _phoneNumber != null )
-                {
-                    phone += _phoneNumber + ";";
-                }
-            }
-
-            phone = (phone.isEmpty()) ? null : phone.substring( 0, phone.length() - 1 );
-            patient.setPhoneNumber( phone );
-        }
-        
-        patient.setGender( gender );
-        patient.setIsDead( false );
-        patient.setUnderAge( underAge );
-        patient.setOrganisationUnit( organisationUnit );
-        patient.setIsDead( isDead );
-
-        if ( deathDate != null )
-        {
-            deathDate = deathDate.trim();
-            patient.setDeathDate( format.parseDate( deathDate ) );
-        }
-
         if ( healthWorker != null )
         {
-            patient.setAssociate(  userService.getUser( healthWorker ) );
-        }
-
-        if ( birthDate != null || age != null )
-        {
-            verified = (verified == null) ? false : verified;
-
-            Character dobType = (verified) ? Patient.DOB_TYPE_VERIFIED : Patient.DOB_TYPE_DECLARED;
-
-            if ( !verified && age != null )
-            {
-                dobType = 'A';
-            }
-
-            if ( dobType == Patient.DOB_TYPE_VERIFIED || dobType == Patient.DOB_TYPE_DECLARED )
-            {
-                birthDate = birthDate.trim();
-                patient.setBirthDate( format.parseDate( birthDate ) );
-            }
-            else
-            {
-                patient.setBirthDateFromAge( age.intValue(), Patient.AGE_TYPE_YEAR );
-            }
-
-            patient.setDobType( dobType );
+            patient.setAssociate( userService.getUser( healthWorker ) );
         }
 
         // -------------------------------------------------------------------------------------
@@ -276,6 +200,11 @@ public class UpdatePatientAction
 
                 if ( StringUtils.isNotBlank( value ) )
                 {
+                    if ( attribute.getValueType().equals( PatientAttribute.TYPE_AGE ) )
+                    {
+                        value = format.formatDate( PatientAttribute.getDateFromAge( Integer.parseInt( value ) ) );
+                    }
+
                     attributeValue = patientAttributeValueService.getPatientAttributeValue( patient, attribute );
 
                     if ( attributeValue == null )
@@ -283,23 +212,16 @@ public class UpdatePatientAction
                         attributeValue = new PatientAttributeValue();
                         attributeValue.setPatient( patient );
                         attributeValue.setPatientAttribute( attribute );
+                        attributeValue.setValue( value.trim() );
                         if ( PatientAttribute.TYPE_COMBO.equalsIgnoreCase( attribute.getValueType() ) )
                         {
-                            PatientAttributeOption option = patientAttributeOptionService.get( NumberUtils.toInt(
-                                value, 0 ) );
+                            PatientAttributeOption option = patientAttributeOptionService
+                                .get( Integer.parseInt( value ) );
                             if ( option != null )
                             {
                                 attributeValue.setPatientAttributeOption( option );
+                                attributeValue.setValue( option.getName() );
                             }
-                            else
-                            {
-                                // This option was deleted ???
-                            }
-                            attributeValue.setValue( value );
-                        }
-                        else
-                        {
-                            attributeValue.setValue( value.trim() );
                         }
                         valuesForSave.add( attributeValue );
                     }
@@ -312,13 +234,14 @@ public class UpdatePatientAction
                             if ( option != null )
                             {
                                 attributeValue.setPatientAttributeOption( option );
-                            }
-                            else
-                            {
-                                // This option was deleted ???
+                                attributeValue.setValue( option.getName() );
                             }
                         }
-                        attributeValue.setValue( value.trim() );
+                        else
+                        {
+                            attributeValue.setValue( value.trim() );
+                        }
+
                         valuesForUpdate.add( attributeValue );
                         valuesForDelete.remove( attributeValue );
                     }
@@ -341,6 +264,11 @@ public class UpdatePatientAction
         this.userService = userService;
     }
 
+    public void setFormat( I18nFormat format )
+    {
+        this.format = format;
+    }
+
     public void setHealthWorker( Integer healthWorker )
     {
         this.healthWorker = healthWorker;
@@ -349,11 +277,6 @@ public class UpdatePatientAction
     public void setPatientIdentifierTypeService( PatientIdentifierTypeService patientIdentifierTypeService )
     {
         this.patientIdentifierTypeService = patientIdentifierTypeService;
-    }
-
-    public void setFormat( I18nFormat format )
-    {
-        this.format = format;
     }
 
     public void setPatientService( PatientService patientService )
@@ -386,34 +309,9 @@ public class UpdatePatientAction
         this.id = id;
     }
 
-    public void setIsDead( boolean isDead )
-    {
-        this.isDead = isDead;
-    }
-
-    public void setDeathDate( String deathDate )
-    {
-        this.deathDate = deathDate;
-    }
-
     public void setFullName( String fullName )
     {
         this.fullName = fullName;
-    }
-
-    public void setBirthDate( String birthDate )
-    {
-        this.birthDate = birthDate;
-    }
-
-    public void setGender( String gender )
-    {
-        this.gender = gender;
-    }
-
-    public void setPhoneNumber( String[] phoneNumber )
-    {
-        this.phoneNumber = phoneNumber;
     }
 
     public Patient getPatient()
@@ -421,19 +319,9 @@ public class UpdatePatientAction
         return patient;
     }
 
-    public void setAge( Integer age )
-    {
-        this.age = age;
-    }
-
     public void setPatientAttributeOptionService( PatientAttributeOptionService patientAttributeOptionService )
     {
         this.patientAttributeOptionService = patientAttributeOptionService;
-    }
-
-    public void setUnderAge( boolean underAge )
-    {
-        this.underAge = underAge;
     }
 
     public void setRepresentativeId( Integer representativeId )
@@ -444,11 +332,6 @@ public class UpdatePatientAction
     public void setRelationshipTypeId( Integer relationshipTypeId )
     {
         this.relationshipTypeId = relationshipTypeId;
-    }
-
-    public void setVerified( Boolean verified )
-    {
-        this.verified = verified;
     }
 
 }

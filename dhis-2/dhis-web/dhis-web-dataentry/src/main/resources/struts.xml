@@ -26,6 +26,14 @@
       <result name="success" type="velocity-json">/dhis-web-dataentry/responseMultiOrgForms.vm</result>
     </action>
 
+    <action name="approveDataAtSameLevel" class="org.hisp.dhis.commons.action.NoAction">
+      <param name="requiredAuthorities">F_APPROVE_DATA_AT_SAME_LEVEL</param>
+    </action>
+
+    <action name="approveDataAtLowerLevels" class="org.hisp.dhis.commons.action.NoAction">
+      <param name="requiredAuthorities">F_APPROVE_DATA_AT_LOWER_LEVELS</param>
+    </action>
+
     <action name="getDataValues" class="org.hisp.dhis.de.action.GetDataValuesForDataSetAction">
       <result name="success" type="velocity-json">/dhis-web-dataentry/responseDataValues.vm</result>
     </action>
@@ -34,20 +42,11 @@
       <result name="custom" type="velocity">/dhis-web-dataentry/customForm.vm</result>
       <result name="section" type="velocity">/dhis-web-dataentry/sectionForm.vm</result>
       <result name="multiorg_section" type="velocity">/dhis-web-dataentry/multiOrgSectionForm.vm</result>
-      <result name="default" type="velocity">/dhis-web-dataentry/defaultForm.vm</result>
       <result name="input" type="velocity">/dhis-web-dataentry/responseVoid.vm</result>
     </action>
 
-    <action name="saveValue" class="org.hisp.dhis.de.action.SaveValueAction">
-      <result name="success" type="velocity-json">/dhis-web-dataentry/status.vm</result>
-      <param name="onExceptionReturn">plainTextError</param>
-      <param name="requiredAuthorities">F_DATAVALUE_ADD,F_DATAVALUE_DELETE</param>
-    </action>
-
-    <action name="saveComment" class="org.hisp.dhis.de.action.SaveCommentAction">
-      <result name="success" type="velocity-json">/dhis-web-dataentry/status.vm</result>
-      <param name="onExceptionReturn">plainTextError</param>
-      <param name="requiredAuthorities">F_DATAVALUE_ADD,F_DATAVALUE_DELETE</param>
+    <action name="saveValue" class="org.hisp.dhis.commons.action.NoAction">
+      <param name="requiredAuthorities">F_DATAVALUE_ADD</param>
     </action>
 
     <action name="saveMinMaxLimits" class="org.hisp.dhis.de.action.SaveMinMaxLimitsAction">
@@ -64,7 +63,7 @@
       <param name="requiredAuthorities">F_DATAELEMENT_MINMAX_DELETE</param>
     </action>
 
-    <action name="viewHistory" class="org.hisp.dhis.de.action.HistoryAction">
+    <action name="viewHistory" class="org.hisp.dhis.de.action.GetHistoryAction">
       <result name="success" type="velocity">/dhis-web-dataentry/history.vm</result>
     </action>
 
@@ -76,7 +75,7 @@
 
     <action name="undoCompleteDataSet" class="org.hisp.dhis.de.action.UndoCompleteDataSetAction">
       <result name="success" type="velocity-json">../dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
-      <param name="requiredAuthorities">F_DATAVALUE_DELETE</param>
+      <param name="requiredAuthorities">F_DATAVALUE_ADD</param>
     </action>
 
     <action name="getValidationViolations" class="org.hisp.dhis.de.action.ValidationAction">
@@ -87,10 +86,6 @@
     <action name="validate" class="org.hisp.dhis.de.action.ValidationAction">
       <result name="success" type="outputStreamResult"></result>
       <result name="input" type="velocity">/dhis-web-dataentry/validationResult.vm</result>
-    </action>
-
-    <action name="markValueForFollowup" class="org.hisp.dhis.de.action.MarkForFollowupAction">
-      <result name="success" type="velocity-json">../dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
     </action>
 
     <action name="getHistoryChart" class="org.hisp.dhis.de.action.GetHistoryChartAction">
