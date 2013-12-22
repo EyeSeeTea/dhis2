@@ -28,8 +28,6 @@ package org.hisp.dhis.patient.action.validation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.validation.ValidationCriteria;
 import org.hisp.dhis.validation.ValidationCriteriaService;
 
@@ -57,6 +55,8 @@ public class UpdateValidationCriteriaAction
     // Input
     // -------------------------------------------------------------------------
 
+    private int programId;
+
     private int id;
 
     private String name;
@@ -76,6 +76,16 @@ public class UpdateValidationCriteriaAction
     public void setName( String name )
     {
         this.name = name;
+    }
+
+    public int getProgramId()
+    {
+        return programId;
+    }
+
+    public void setProgramId( int programId )
+    {
+        this.programId = programId;
     }
 
     public void setId( int id )

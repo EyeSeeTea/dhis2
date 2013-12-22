@@ -2,20 +2,10 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
 
-  <bean id="org.hisp.dhis.de.history.HistoryRetriever" class="org.hisp.dhis.de.history.DefaultHistoryRetriever">
-    <property name="minMaxDataElementService" ref="org.hisp.dhis.minmax.MinMaxDataElementService" />
-    <property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
-    <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
-  </bean>
-
   <!-- Actions -->
 
   <bean id="org.hisp.dhis.de.action.PageInitAction" class="org.hisp.dhis.de.action.PageInitAction" scope="prototype">
     <property name="selectionManager" ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
-  </bean>
-
-  <bean id="org.hisp.dhis.de.action.GetMultiOrgSettingAction" class="org.hisp.dhis.de.action.GetMultiOrgSettingAction" scope="prototype">
-    <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
   </bean>
 
   <bean id="org.hisp.dhis.de.action.GetMetaDataAction" class="org.hisp.dhis.de.action.GetMetaDataAction"
@@ -39,6 +29,7 @@
     <property name="dataApprovalService" ref="org.hisp.dhis.dataapproval.DataApprovalService" />
     <property name="actionAccessResolver" ref="org.hisp.dhis.security.ActionAccessResolver" />
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
+    <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
   </bean>
 
   <bean id="org.hisp.dhis.de.action.LoadFormAction" class="org.hisp.dhis.de.action.LoadFormAction" scope="prototype">
@@ -65,7 +56,7 @@
   </bean>
 
   <bean id="org.hisp.dhis.de.action.GetHistoryAction" class="org.hisp.dhis.de.action.GetHistoryAction" scope="prototype">
-    <property name="historyRetriever" ref="org.hisp.dhis.de.history.HistoryRetriever" />
+    <property name="historyRetriever" ref="org.hisp.dhis.dataelementhistory.HistoryRetriever" />
     <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
     <property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
