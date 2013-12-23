@@ -848,6 +848,7 @@ function organisationUnitSelected( orgUnits, orgUnitNames, children )
 
         clearSectionFilters();
         clearPeriod();
+        dhis2.de.clearAttributes();
     }
 }
 
@@ -984,6 +985,7 @@ function dataSetSelected()
     else
     {
         clearEntryForm();
+        dhis2.de.clearAttributes();
     }
 }
 
@@ -1187,7 +1189,7 @@ dhis2.de.getAttributesMarkup = function()
 	$.safeEach( dhis2.de.currentCategories, function( idx, category ) {
 		html += '<div class="selectionBoxRow">';
 		html += '<div class="selectionLabel">' + category.name + '</div>&nbsp;';
-		html += '<select id="category-' + category.id + '" class="selectionBoxSelect">';
+		html += '<select id="category-' + category.id + '" class="selectionBoxSelect" onchange="dhis2.de.attributeSelected(\'' + category.id + '\')">';
 		html += '<option value="-1">[ ' + i18n_select_option + ' ]</option>';
 		
 		$.safeEach( category.options, function( idx, option ) {
@@ -1199,6 +1201,31 @@ dhis2.de.getAttributesMarkup = function()
 	} );
 
 	return html;
+};
+
+/**
+ * Clears the markup for attribute select lists.
+ */
+dhis2.de.clearAttributes = function()
+{
+	$( '#attributeComboDiv' ).html( '' );
+};
+
+/**
+ * Callback for changes in attribute select lists.
+ */
+dhis2.de.attributeSelected = function( categoryId )
+{
+	if ( dhis2.de.inputSelected() ) {    	
+        showLoader();
+
+        if ( dhis2.de.dataEntryFormIsLoaded ) {
+            loadDataValues();
+        }
+        else {
+            loadForm();
+        }
+    }
 };
 
 // -----------------------------------------------------------------------------
