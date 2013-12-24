@@ -1351,20 +1351,14 @@ Ext.onReady( function() {
 					return;
 				}
 
-                svg = Ext.get(svg[0]);
-				svg = svg.parent().dom.innerHTML;
+                svg = Ext.get(svg[0]).parent().dom.innerHTML;
 
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api/svg.' + type,
                     method: 'POST',
-                    headers: {'Content-Type': 'image/svg+xml'},
+                    headers: {'Content-Type': 'application/xml'},
                     params: Ext.encode(svg)
                 });
-                    
-
-                
-
-
                 
 				//var svg = Ext.query('svg'),
 					//form = Ext.query('#exportForm')[0];
