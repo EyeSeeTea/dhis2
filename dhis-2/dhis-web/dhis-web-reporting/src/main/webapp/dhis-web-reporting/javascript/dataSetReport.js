@@ -19,20 +19,20 @@ function getDataSetReport()
         offset: dhis2.dsr.currentPeriodOffset
     };
     
-    var groups = "";
+    var dims = [];
     
-    $( "[name='groupSet']" ).each( function( index, value ) {
+    $( ".dimension" ).each( function( index, value ) {
+    	var dim = $( this ).data( "uid" );
     	var item = $( this ).val();
-    	if ( item )
+    	
+    	if ( dim && item )
     	{
-    		groups += item + ";";
+    		var dimQuery = dim + ":" + item;
+    		dims.push( dimQuery );
     	}
     } );
     
-    if ( groups )
-    {
-    	dataSetReport["groups"] = groups;
-    }
+    dataSetReport.dimension = dims;
     
     return dataSetReport;
 }
@@ -56,6 +56,66 @@ function setDataSetReport( dataSetReport )
 		generateDataSetReport();
 	} );
 }
+
+//------------------------------------------------------------------------------
+// Data set
+//------------------------------------------------------------------------------
+
+/**
+ * Callback for changes to data set selection.
+ */
+dhis2.dsr.dataSetSelected = function()
+{
+	var ds = $( "#dataSetId" ).val();
+	var cc = $( "#dataSetId :selected" ).data( "categorycombo" );
+	
+	if ( cc && cc != dhis2.dsr.metaData.defaultCategoryCombo ) {
+		var categoryCombo = dhis2.dsr.metaData.categoryCombos[cc];
+		var categoryIds = categoryCombo.categories;
+		
+		dhis2.dsr.setAttributesMarkup( categoryIds );		
+	}
+	else {
+		$( "#attributeComboDiv" ).html( "" ).hide();
+	}
+}
+
+/**
+* Sets markup for drop down boxes for the given categories in the selection div.
+*/
+dhis2.dsr.setAttributesMarkup = function( categoryIds )
+{
+	if ( !categoryIds || categoryIds.length == 0 ) {
+		return;
+	}
+	
+	var categoryRx = [];	
+	$.each( categoryIds, function( idx, id ) {
+		categoryRx.push( $.get( "../api/dimensions/" + id + ".json" ) );
+	} );
+
+	$.when.apply( $, categoryRx ).done( function() {
+		var html = '';
+		
+		$.each( arguments, function( idx, cat ) {
+			var category = cat[0];
+			
+			html += '<div class="inputSection">';
+			html += '<label>' + category.name + '</label>';
+			html += '<select class="dimension" data-uid="' + category.id + '" style="width:330px">';
+			html += '<option value="-1">[ ' + i18n_select_option_view_all + ' ]</option>';
+			
+			$.each( category.items, function( idx, option ) {
+				html += '<option value="' + option.id + '">' + option.name + '</option>';
+			} );
+			
+			html += '</select>';
+			html += '</div>';
+		} );
+
+		$( "#attributeComboDiv" ).show().html( html );
+	} );
+};
 
 //------------------------------------------------------------------------------
 // Period
@@ -140,7 +200,15 @@ function displayDataSetReport( dataSetReport )
     delete dataSetReport.periodType;
     delete dataSetReport.offset;
     
-    $.get( 'generateDataSetReport.action', dataSetReport, function( data ) {
+    var url = "generateDataSetReport.action?ds=" + dataSetReport.ds +
+    	"&pe=" + dataSetReport.pe + "&ou=" + dataSetReport.ou +
+    	"&selectedUnitOnly=" + dataSetReport.selectedUnitOnly;
+    
+    $.each( dataSetReport.dimension, function( inx, val ) {
+    	url += "&dimension=" + val;
+    } );
+    
+    $.get( url, function( data ) {
     	$( '#content' ).html( data );
     	hideLoader();
     	showContent();

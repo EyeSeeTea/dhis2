@@ -1,4 +1,4 @@
-package org.hisp.dhis.datasetreport;
+package org.hisp.dhis.dataapproval;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,24 +28,49 @@ package org.hisp.dhis.datasetreport;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Map;
-
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 
 /**
- * @author Lars Helge Overland
+ * Defines the functionality for persisting DataApproval objects.
+ *
+ * @author Jim Grace
  */
-public interface DataSetReportStore
+public interface DataApprovalStore
+//        extends GenericStore<DataApproval>
 {
-    final String SEPARATOR = "-";
-    
-    Map<String, Double> getAggregatedValues( DataSet dataSet, Period period, OrganisationUnit unit, Map<String, String> dimensions, boolean rawData );
+    String ID = DataApprovalStore.class.getName();
 
-    Map<String, Double> getAggregatedSubTotals( DataSet dataSet, Period period, OrganisationUnit unit, Map<String, String> dimensions );
-    
-    Map<String, Double> getAggregatedTotals( DataSet dataSet, Period period, OrganisationUnit unit, Map<String, String> dimensions );
-    
-    Map<String, Double> getAggregatedIndicatorValues( DataSet dataSet, Period period, OrganisationUnit unit, Map<String, String> dimensions );
+    // -------------------------------------------------------------------------
+    // Basic DataApproval
+    // -------------------------------------------------------------------------
+
+    /**
+     * Adds a DataApproval in order to approve data.
+     *
+     * @param dataApproval the DataApproval to add.
+     */
+    void addDataApproval( DataApproval dataApproval );
+
+    /**
+     * Deletes a DataApproval in order to un-approve data.
+     *
+     * @param dataApproval the DataApproval to delete.
+     */
+    void deleteDataApproval( DataApproval dataApproval );
+
+    /**
+     * Returns the DataApproval object (if any) for a given
+     * dataset, period and organisation unit.
+     *
+     * @param dataSet DataSet for approval
+     * @param period Period for approval
+     * @param organisationUnit OrganisationUnit for approval
+     * @param attributeOptionCombo DataElementCategoryOptionCombo for approval.
+     * @return matching DataApproval object, if any
+     */
+    DataApproval getDataApproval( DataSet dataSet, Period period, 
+        OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo );
 }

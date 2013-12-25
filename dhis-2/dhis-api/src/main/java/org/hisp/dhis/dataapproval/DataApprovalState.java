@@ -1,4 +1,4 @@
-package org.hisp.dhis.datasetreport;
+package org.hisp.dhis.dataapproval;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,24 +28,43 @@ package org.hisp.dhis.datasetreport;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Map;
-
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.Period;
-
 /**
- * @author Lars Helge Overland
+ * Current state of data approval for a given combination of data set, period
+ * and organisation unit.
+ *
+ * @author Jim Grace
+ * @version $Id$
  */
-public interface DataSetReportStore
-{
-    final String SEPARATOR = "-";
-    
-    Map<String, Double> getAggregatedValues( DataSet dataSet, Period period, OrganisationUnit unit, Map<String, String> dimensions, boolean rawData );
 
-    Map<String, Double> getAggregatedSubTotals( DataSet dataSet, Period period, OrganisationUnit unit, Map<String, String> dimensions );
-    
-    Map<String, Double> getAggregatedTotals( DataSet dataSet, Period period, OrganisationUnit unit, Map<String, String> dimensions );
-    
-    Map<String, Double> getAggregatedIndicatorValues( DataSet dataSet, Period period, OrganisationUnit unit, Map<String, String> dimensions );
+public enum DataApprovalState
+{
+    /**
+     * Data in this data set is approved for this period and organisation unit.
+     */
+    APPROVED,
+
+    /**
+     * Data in this data set is ready to be approved for this period and
+     * organisation unit.
+     */
+    READY_FOR_APPROVAL,
+
+    /**
+     * Data in this data set is not yet ready to be approved for this period
+     * and organisation unit, because it is waiting for approval at a
+     * lower-level organisation unit under this one.
+     */
+    WAITING_FOR_LOWER_LEVEL_APPROVAL,
+
+    /**
+     * Data in this data set does not need approval for this period and
+     * organisation unit, for one of the following reasons:
+     * <ul>
+     *     <li>Data approval is not enabled globally.</li>
+     *     <li>Data approval is not enabled for this data set.</li>
+     *     <li>No data is collected for this data set for this organisation
+     *         unit or any lower-level organisation units under it.</li>
+     * </ul>
+     */
+    APPROVAL_NOT_NEEDED
 }
