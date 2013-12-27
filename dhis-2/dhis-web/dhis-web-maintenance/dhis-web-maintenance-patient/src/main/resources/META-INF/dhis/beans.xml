@@ -386,6 +386,8 @@
     class="org.hisp.dhis.patient.action.programstage.GetProgramStageSectionAction"
     scope="prototype">
     <property name="programStageService" ref="org.hisp.dhis.program.ProgramStageService" />
+    <property name="programStageSectionService"
+      ref="org.hisp.dhis.program.ProgramStageSectionService" />
   </bean>
 
   <bean
@@ -416,9 +418,7 @@
     id="org.hisp.dhis.patient.action.programstage.GetProgramStageSectionListAction"
     class="org.hisp.dhis.patient.action.programstage.GetProgramStageSectionListAction"
     scope="prototype">
-    <property name="programStageService" ref="org.hisp.dhis.program.ProgramStageService" />
-    <property name="programStageSectionService"
-      ref="org.hisp.dhis.program.ProgramStageSectionService" />
+    <property name="programStageService" ref="org.hisp.dhis.program.ProgramStageService" />    
   </bean>
 
   <!-- Data Entry Form -->

@@ -1,0 +1,590 @@
+{
+    "dataElements": [
+        {
+            "code": "MMD_ALL",
+            "name": "Allergies (drugs and/or severe food allergies)",
+            "created": "2013-12-22T09:44:55.750+0000",
+            "lastUpdated": "2013-12-22T09:49:14.437+0000",
+            "type": "string",
+            "optionSet": {
+                "name": "Allergy",
+                "created": "2013-11-29T18:00:25.641+0000",
+                "lastUpdated": "2013-12-22T10:37:48.048+0000",
+                "options": [
+                    "None",
+                    "Penicillin",
+                    "Other medicine - please specify",
+                    "Other severe allergy - please specify"
+                ],
+                "version": 3,
+                "href": "http://localhost/dhis/api/optionSets/Qdm5fPK5Ra9",
+                "id": "Qdm5fPK5Ra9"
+            },
+            "href": "http://localhost/dhis/api/dataElements/QFX1FLWBwtq",
+            "id": "QFX1FLWBwtq"
+        },
+        {
+            "code": "MMD_BP_DIA",
+            "name": "Blood pressure, diastolic mmHg",
+            "created": "2013-11-29T18:38:33.203+0000",
+            "lastUpdated": "2013-11-29T18:38:33.210+0000",
+            "type": "int",
+            "href": "http://localhost/dhis/api/dataElements/dyYdfamSY2Z",
+            "id": "dyYdfamSY2Z"
+        },
+        {
+            "code": "MMD_BP_SYS",
+            "name": "Blood pressure, systolic mm Hg",
+            "created": "2013-11-29T18:37:38.808+0000",
+            "lastUpdated": "2013-11-29T18:38:48.746+0000",
+            "type": "int",
+            "href": "http://localhost/dhis/api/dataElements/M4HEOoEFTAT",
+            "id": "M4HEOoEFTAT"
+        },
+        {
+            "code": "EA9_TRE_BRE",
+            "name": "Breech presentation (>=37 weeks) confirmed by skilled health personnel",
+            "created": "2013-12-23T09:51:20.802+0000",
+            "lastUpdated": "2013-12-23T09:52:27.721+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/xPTngRLQTnu",
+            "id": "xPTngRLQTnu"
+        },
+        {
+            "code": "EA9_TRE_BRE1",
+            "name": "Breech presentation (>=37 weeks), External Cephalic Version (ECV) performed",
+            "created": "2013-12-23T09:52:05.146+0000",
+            "lastUpdated": "2013-12-23T09:52:05.157+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/QM5d0hfSbKk",
+            "id": "QM5d0hfSbKk"
+        },
+        {
+            "code": "MMD_CON",
+            "name": "Chronic conditions ",
+            "created": "2013-11-29T18:31:04.855+0000",
+            "lastUpdated": "2013-12-22T09:46:49.812+0000",
+            "type": "string",
+            "optionSet": {
+                "name": "Chronic conditions",
+                "created": "2013-11-29T18:03:25.345+0000",
+                "lastUpdated": "2013-12-22T10:38:30.835+0000",
+                "options": [
+                    "None",
+                    "Chronic hypertension",
+                    "Autoimmune disease",
+                    "Diabetes",
+                    "HIV",
+                    "Renal disease",
+                    "Other - please specify"
+                ],
+                "version": 2,
+                "href": "http://localhost/dhis/api/optionSets/ZwC7OYijOn3",
+                "id": "ZwC7OYijOn3"
+            },
+            "href": "http://localhost/dhis/api/dataElements/pDGXOBeiANC",
+            "id": "pDGXOBeiANC"
+        },
+        {
+            "code": "MMD_GES_WK1",
+            "name": "Clinical estimation for gestational age",
+            "created": "2013-12-22T10:04:34.146+0000",
+            "lastUpdated": "2013-12-22T10:04:34.152+0000",
+            "type": "int",
+            "href": "http://localhost/dhis/api/dataElements/BVxtFTS94xK",
+            "id": "BVxtFTS94xK"
+        },
+        {
+            "name": "Conditions in previous pregnancies",
+            "created": "2013-11-29T18:32:38.086+0000",
+            "lastUpdated": "2013-11-29T18:32:38.093+0000",
+            "type": "string",
+            "optionSet": {
+                "name": "Pregnancy conditions",
+                "created": "2013-11-29T18:06:37.273+0000",
+                "lastUpdated": "2013-12-22T10:40:20.518+0000",
+                "options": [
+                    "None",
+                    "Pre eclampsia",
+                    "Eclampsia",
+                    "Previous sibling required phototherapy",
+                    "Other - please specify"
+                ],
+                "version": 2,
+                "href": "http://localhost/dhis/api/optionSets/HNO18uVNoyI",
+                "id": "HNO18uVNoyI"
+            },
+            "href": "http://localhost/dhis/api/dataElements/suhLG4CrzUw",
+            "id": "suhLG4CrzUw"
+        },
+        {
+            "code": "MMD_LMP_DAT",
+            "name": "Date of last menstrual period (LMP)",
+            "created": "2013-12-22T10:01:23.732+0000",
+            "lastUpdated": "2013-12-22T10:01:23.738+0000",
+            "type": "date",
+            "href": "http://localhost/dhis/api/dataElements/w4ky6EkVahL",
+            "id": "w4ky6EkVahL"
+        },
+        {
+            "code": "EA3_STA_TET_DAT",
+            "name": "Date of latest immunization",
+            "created": "2013-10-28T15:12:06.060+0000",
+            "lastUpdated": "2013-11-04T10:17:06.835+0000",
+            "type": "date",
+            "href": "http://localhost/dhis/api/dataElements/r3BqzOPxAjp",
+            "id": "r3BqzOPxAjp"
+        },
+        {
+            "code": "EA8d_CLI_ECL",
+            "name": "Eclampsia generalized seizures",
+            "created": "2013-12-23T09:49:01.213+0000",
+            "lastUpdated": "2013-12-23T09:49:01.221+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/ETZ7vFxodFb",
+            "id": "ETZ7vFxodFb"
+        },
+        {
+            "code": "EA8d_TRE_ECL2",
+            "name": "Eclampsia treatment",
+            "created": "2013-12-23T09:49:46.556+0000",
+            "lastUpdated": "2013-12-23T09:49:46.566+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/Q1x1HIhuwFN",
+            "id": "Q1x1HIhuwFN"
+        },
+        {
+            "code": "MMD_ULS_DAT",
+            "name": "Estimated date of delivery ultrasound",
+            "created": "2013-11-29T18:35:48.231+0000",
+            "lastUpdated": "2013-11-29T18:35:48.238+0000",
+            "type": "date",
+            "href": "http://localhost/dhis/api/dataElements/YR5QjVqKx3l",
+            "id": "YR5QjVqKx3l"
+        },
+        {
+            "code": "EA9_TRE_BRE2",
+            "name": "External Cephalic Version (ECV) >=37 weeks performed conversion remaining after 1 week",
+            "created": "2013-12-23T09:53:34.696+0000",
+            "lastUpdated": "2013-12-23T09:53:34.701+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/DCUDZxqOxUo",
+            "id": "DCUDZxqOxUo"
+        },
+        {
+            "code": "EA2_CLI_PAL",
+            "name": "Extreme pallor (Conjunctival AND palmar)",
+            "created": "2013-10-28T14:29:13.118+0000",
+            "lastUpdated": "2013-11-04T10:06:43.850+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/EyfTU3ibMmJ",
+            "id": "EyfTU3ibMmJ"
+        },
+        {
+            "name": "Fetus presentation",
+            "created": "2013-12-22T10:35:33.037+0000",
+            "lastUpdated": "2013-12-22T10:35:33.046+0000",
+            "type": "string",
+            "optionSet": {
+                "name": "Fetus presentation",
+                "created": "2013-12-22T10:32:17.661+0000",
+                "lastUpdated": "2013-12-22T10:32:17.661+0000",
+                "options": [
+                    "Cephalic",
+                    "Breech",
+                    "Trasverse",
+                    "Others - please specify"
+                ],
+                "version": 1,
+                "href": "http://localhost/dhis/api/optionSets/g80kErVQ9nn",
+                "id": "g80kErVQ9nn"
+            },
+            "href": "http://localhost/dhis/api/dataElements/CubPaKhlZDt",
+            "id": "CubPaKhlZDt"
+        },
+        {
+            "code": "MMD_CM",
+            "name": "Height",
+            "created": "2013-12-22T10:25:30.503+0000",
+            "lastUpdated": "2013-12-22T10:25:30.511+0000",
+            "type": "int",
+            "href": "http://localhost/dhis/api/dataElements/NBkTyZVrzym",
+            "id": "NBkTyZVrzym"
+        },
+        {
+            "code": "EA2_LAB_HCR",
+            "name": "Hematocrit",
+            "created": "2013-10-28T14:28:01.354+0000",
+            "lastUpdated": "2013-11-04T10:06:59.639+0000",
+            "type": "int",
+            "href": "http://localhost/dhis/api/dataElements/X8HbdaoS9LN",
+            "id": "X8HbdaoS9LN"
+        },
+        {
+            "code": "EA2_LAB_HB",
+            "name": "Hemoglobin",
+            "created": "2013-10-28T14:27:17.826+0000",
+            "lastUpdated": "2013-11-04T10:07:34.166+0000",
+            "type": "int",
+            "href": "http://localhost/dhis/api/dataElements/vANAXwtLwcT",
+            "id": "vANAXwtLwcT"
+        },
+        {
+            "code": "EA7_TRE_HIV3",
+            "name": "HIV counseling - when negative",
+            "created": "2013-12-22T14:53:24.464+0000",
+            "lastUpdated": "2013-12-22T14:53:24.473+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/jRo4KlnCKeX",
+            "id": "jRo4KlnCKeX"
+        },
+        {
+            "code": "EA7_TRE_HIV2",
+            "name": "HIV counseling - when positive",
+            "created": "2013-12-22T14:52:59.408+0000",
+            "lastUpdated": "2013-12-22T14:52:59.422+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/yEmfXF9HJ1M",
+            "id": "yEmfXF9HJ1M"
+        },
+        {
+            "code": "EA7_LAB_HIV",
+            "name": "HIV rapid test screening",
+            "created": "2013-11-29T18:43:39.044+0000",
+            "lastUpdated": "2013-11-29T18:43:39.056+0000",
+            "type": "string",
+            "optionSet": {
+                "name": "Negative Positive and Indeterminate",
+                "created": "2013-11-29T17:53:56.980+0000",
+                "lastUpdated": "2013-12-22T10:42:55.766+0000",
+                "options": [
+                    "Negative",
+                    "Positive",
+                    "Indeterminate"
+                ],
+                "version": 2,
+                "href": "http://localhost/dhis/api/optionSets/GbGmTwFp6Ns",
+                "id": "GbGmTwFp6Ns"
+            },
+            "href": "http://localhost/dhis/api/dataElements/Itl05OEupgQ",
+            "id": "Itl05OEupgQ"
+        },
+        {
+            "code": "EA7_TRE_HIV1",
+            "name": "HIV treatment",
+            "created": "2013-12-23T08:07:30.508+0000",
+            "lastUpdated": "2013-12-23T08:08:32.759+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/nhW3SZX9JaN",
+            "id": "nhW3SZX9JaN"
+        },
+        {
+            "code": "EA2_TRE_SUPP",
+            "name": "Iron and folic acid supplementation",
+            "created": "2013-10-28T14:57:54.404+0000",
+            "lastUpdated": "2013-11-04T10:08:45.592+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/Kb6kZzUCJi1",
+            "id": "Kb6kZzUCJi1"
+        },
+        {
+            "code": "EA4a_TRE_MAL",
+            "name": "Malaria treatment",
+            "created": "2013-10-28T15:07:31.209+0000",
+            "lastUpdated": "2013-11-04T10:10:26.901+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/MHW5v2Iljtw",
+            "id": "MHW5v2Iljtw"
+        },
+        {
+            "code": "EA4a_LAB_MAL1",
+            "name": "Microscopy screening for malaria",
+            "created": "2013-10-28T14:44:21.729+0000",
+            "lastUpdated": "2013-11-04T10:11:26.900+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/AdyxQdz7eXY",
+            "id": "AdyxQdz7eXY"
+        },
+        {
+            "name": "Number of fetuses (plurality)",
+            "created": "2013-11-29T18:39:50.186+0000",
+            "lastUpdated": "2013-11-29T18:39:50.193+0000",
+            "type": "int",
+            "href": "http://localhost/dhis/api/dataElements/WpQmKfbYqvt",
+            "id": "WpQmKfbYqvt"
+        },
+        {
+            "code": "EA10a_TRE_PPROM1",
+            "name": "pPROM receiving erythromycin for 10 days",
+            "created": "2013-12-23T10:11:07.712+0000",
+            "lastUpdated": "2013-12-23T10:11:07.718+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/LEW1TORtK3Y",
+            "id": "LEW1TORtK3Y"
+        },
+        {
+            "code": "EA8b_TRE_ASP",
+            "name": "Pre-eclampsia high risk",
+            "created": "2013-12-23T09:46:05.630+0000",
+            "lastUpdated": "2013-12-23T09:46:05.636+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/OSuxnldV4Ug",
+            "id": "OSuxnldV4Ug"
+        },
+        {
+            "code": "EA8a_TRE_CAL",
+            "name": "Prevention of pre-eclampsia",
+            "created": "2013-11-29T18:41:28.287+0000",
+            "lastUpdated": "2013-11-29T18:41:28.293+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/PKZPVfAJfHD",
+            "id": "PKZPVfAJfHD"
+        },
+        {
+            "code": "MMD_OBS_PAR",
+            "name": "Previous deliveries",
+            "created": "2013-12-22T09:52:02.023+0000",
+            "lastUpdated": "2013-12-22T09:52:02.034+0000",
+            "type": "int",
+            "href": "http://localhost/dhis/api/dataElements/hisxuZstYJM",
+            "id": "hisxuZstYJM"
+        },
+        {
+            "code": "MMD_OBS_DEL",
+            "name": "Previous modes of delivery",
+            "created": "2013-12-22T09:59:39.726+0000",
+            "lastUpdated": "2013-12-22T09:59:39.734+0000",
+            "type": "string",
+            "optionSet": {
+                "name": "previous modes of delivery",
+                "created": "2013-12-22T09:58:23.842+0000",
+                "lastUpdated": "2013-12-22T09:58:23.842+0000",
+                "options": [
+                    "Spontaneous vaginal",
+                    "Assisted vaginal",
+                    "CS"
+                ],
+                "version": 1,
+                "href": "http://localhost/dhis/api/optionSets/jAyXdHaxGiH",
+                "id": "jAyXdHaxGiH"
+            },
+            "href": "http://localhost/dhis/api/dataElements/W4zW3aPyS0G",
+            "id": "W4zW3aPyS0G"
+        },
+        {
+            "code": "MMD_OBS_GRA",
+            "name": "previous pregnancies",
+            "created": "2013-12-22T09:51:08.440+0000",
+            "lastUpdated": "2013-12-22T09:51:08.446+0000",
+            "type": "int",
+            "href": "http://localhost/dhis/api/dataElements/PuiTfPfSf86",
+            "id": "PuiTfPfSf86"
+        },
+        {
+            "code": "MMD_OBS_OUT",
+            "name": "Previous pregnancy outcomes",
+            "created": "2013-12-22T09:59:06.806+0000",
+            "lastUpdated": "2013-12-22T09:59:06.814+0000",
+            "type": "string",
+            "optionSet": {
+                "name": "Previous pregnancy outcomes",
+                "created": "2013-12-22T09:56:42.133+0000",
+                "lastUpdated": "2013-12-22T09:56:53.677+0000",
+                "options": [
+                    "Live born",
+                    "Antepartum stillbirth",
+                    "Intrapartum stillbirth",
+                    "Stillbirth of unknown timing",
+                    "Neonatal death",
+                    "Miscarriage",
+                    "Termination of pregnancy"
+                ],
+                "version": 2,
+                "href": "http://localhost/dhis/api/optionSets/VFR0v2vRhlE",
+                "id": "VFR0v2vRhlE"
+            },
+            "href": "http://localhost/dhis/api/dataElements/mrVkW9h2Rdp",
+            "id": "mrVkW9h2Rdp"
+        },
+        {
+            "code": "EA10a_CLI_PROM2",
+            "name": "PROM at term and severe systemic infection or sepsis",
+            "created": "2013-12-23T10:08:11.666+0000",
+            "lastUpdated": "2013-12-23T10:08:11.673+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/q3H6Qr5un26",
+            "id": "q3H6Qr5un26"
+        },
+        {
+            "code": "EA10a_TRE_PROM3",
+            "name": "PROM at term, induction of labour with PGE2 initiated, converted to caesarean section",
+            "created": "2013-12-23T10:07:11.515+0000",
+            "lastUpdated": "2013-12-23T10:07:11.520+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/Of7WcYxbSda",
+            "id": "Of7WcYxbSda"
+        },
+        {
+            "code": "EA10a_TRE_PROM2",
+            "name": "PROM at term, induction of labour with vaginal PGE2  initiated",
+            "created": "2013-12-23T10:01:44.719+0000",
+            "lastUpdated": "2013-12-23T10:04:49.609+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/oQgcj7kV1c3",
+            "id": "oQgcj7kV1c3"
+        },
+        {
+            "code": "EA10a_TRE_PROM1",
+            "name": "PROM at term, woman offered a choice of induction of labour or expectant managment",
+            "created": "2013-12-23T10:00:29.276+0000",
+            "lastUpdated": "2013-12-23T10:00:29.284+0000",
+            "type": "string",
+            "optionSet": {
+                "name": "PROM Management",
+                "created": "2013-12-23T09:57:43.992+0000",
+                "lastUpdated": "2013-12-23T09:57:43.992+0000",
+                "options": [
+                    "Not offered a choice of management",
+                    "Offered a choice of management a chooses induction with vaginal PGE2",
+                    "Offered a choice of management and chooses expectant management"
+                ],
+                "version": 1,
+                "href": "http://localhost/dhis/api/optionSets/iqz8IiJwWPL",
+                "id": "iqz8IiJwWPL"
+            },
+            "href": "http://localhost/dhis/api/dataElements/SeXllT5ypsh",
+            "id": "SeXllT5ypsh"
+        },
+        {
+            "code": "MMD_PRT_US",
+            "name": "Proteinuria, Urine stix",
+            "created": "2013-11-29T18:43:57.718+0000",
+            "lastUpdated": "2013-11-29T18:45:26.426+0000",
+            "type": "int",
+            "href": "http://localhost/dhis/api/dataElements/a7XjFEuZuKE",
+            "id": "a7XjFEuZuKE"
+        },
+        {
+            "code": "EA4a_LAB_MAL2",
+            "name": "RDT screening for malaria",
+            "created": "2013-10-28T14:46:58.570+0000",
+            "lastUpdated": "2013-11-04T10:11:42.294+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/Mh7nK8UKoZP",
+            "id": "Mh7nK8UKoZP"
+        },
+        {
+            "name": "Sample dataelement",
+            "created": "2013-12-22T11:03:35.714+0000",
+            "lastUpdated": "2013-12-22T11:03:35.725+0000",
+            "type": "string",
+            "optionSet": {
+                "name": "Allergy",
+                "created": "2013-11-29T18:00:25.641+0000",
+                "lastUpdated": "2013-12-22T10:37:48.048+0000",
+                "options": [
+                    "None",
+                    "Penicillin",
+                    "Other medicine - please specify",
+                    "Other severe allergy - please specify"
+                ],
+                "version": 3,
+                "href": "http://localhost/dhis/api/optionSets/Qdm5fPK5Ra9",
+                "id": "Qdm5fPK5Ra9"
+            },
+            "href": "http://localhost/dhis/api/dataElements/ZnNGwbmlEnl",
+            "id": "ZnNGwbmlEnl"
+        },
+        {
+            "code": "EA8c_TRE_HYP",
+            "name": "Severe hypertesnion",
+            "created": "2013-12-23T09:46:55.833+0000",
+            "lastUpdated": "2013-12-23T09:46:55.844+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/cKBSkBB3Mt4",
+            "id": "cKBSkBB3Mt4"
+        },
+        {
+            "code": "EA8d_TRE_ECL1",
+            "name": "Severe pre-eclampsia prevention",
+            "created": "2013-12-23T09:48:15.922+0000",
+            "lastUpdated": "2013-12-23T09:48:15.930+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/zHTV0T69Zju",
+            "id": "zHTV0T69Zju"
+        },
+        {
+            "code": "EA4b_PRE_MAL",
+            "name": "Sleeping under mosquito nets",
+            "created": "2013-10-28T14:50:24.570+0000",
+            "lastUpdated": "2013-11-29T17:50:07.311+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/ytV9rX4ADnn",
+            "id": "ytV9rX4ADnn"
+        },
+        {
+            "code": "EA5_CLI_SMO1",
+            "name": "Smoking at first ANC visit?",
+            "created": "2013-10-31T09:09:50.561+0000",
+            "lastUpdated": "2013-12-21T14:00:14.266+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/VFffa31SKjH",
+            "id": "VFffa31SKjH"
+        },
+        {
+            "code": "EA5_TRE_SMO",
+            "name": "Smoking cessation treatment",
+            "created": "2013-10-31T09:12:02.900+0000",
+            "lastUpdated": "2013-12-21T14:00:31.856+0000",
+            "type": "bool",
+            "href": "http://localhost/dhis/api/dataElements/Ok9OQpitjQr",
+            "id": "Ok9OQpitjQr"
+        },
+        {
+            "name": "Specified other allergy",
+            "created": "2013-11-29T18:30:06.427+0000",
+            "lastUpdated": "2013-11-29T18:30:06.433+0000",
+            "type": "string",
+            "href": "http://localhost/dhis/api/dataElements/K778mlaNZHB",
+            "id": "K778mlaNZHB"
+        },
+        {
+            "name": "Specified other chronic condition",
+            "created": "2013-11-29T18:31:44.411+0000",
+            "lastUpdated": "2013-11-29T18:31:44.419+0000",
+            "type": "string",
+            "href": "http://localhost/dhis/api/dataElements/UYgk414pPaJ",
+            "id": "UYgk414pPaJ"
+        },
+        {
+            "name": "Specified other condition in previous pregnancies",
+            "created": "2013-11-29T18:33:58.489+0000",
+            "lastUpdated": "2013-11-29T18:33:58.495+0000",
+            "type": "string",
+            "href": "http://localhost/dhis/api/dataElements/igW9ePhdLGo",
+            "id": "igW9ePhdLGo"
+        },
+        {
+            "code": "EA10a_CLI_PROM1",
+            "name": "Suspected PROM at term_speculum examination test result",
+            "created": "2013-12-23T09:55:45.405+0000",
+            "lastUpdated": "2013-12-23T09:59:42.001+0000",
+            "type": "string",
+            "optionSet": {
+                "name": "Negative, Positive, Not performed",
+                "created": "2013-12-23T09:55:04.213+0000",
+                "lastUpdated": "2013-12-23T10:09:55.700+0000",
+                "options": [
+                    "Negative",
+                    "Positive",
+                    "Not performed"
+                ],
+                "version": 1,
+                "href": "http://localhost/dhis/api/optionSets/J7nRCGjOtRa",
+                "id": "J7nRCGjOtRa"
+            },
+            "href": "http://localhost/dhis/api/dataElements/DwWIh6D3fSr",
+            "id": "DwWIh6D3fSr"
+        }
+    ]
+}

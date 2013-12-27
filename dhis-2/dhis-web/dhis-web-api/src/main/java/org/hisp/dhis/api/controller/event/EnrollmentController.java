@@ -180,7 +180,7 @@ public class EnrollmentController
     @RequestMapping( value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE )
     @PreAuthorize("hasRole('ALL') or hasRole('F_PROGRAM_ENROLLMENT')")
     public void postEnrollmentJson( HttpServletRequest request, HttpServletResponse response ) throws IOException
-    {
+    {    	
         ImportSummaries importSummaries = enrollmentService.saveEnrollmentsJson( request.getInputStream() );
 
         if ( importSummaries.getImportSummaries().size() > 1 )

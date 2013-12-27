@@ -2,22 +2,34 @@
     <div ng-include="'views/personprofile.html'"></div>	
 </div>
 
-<div class="side_bar">
-    <div ng-include="'views/anc/comprem.html'"></div>
-    <div ng-include="'views/anc/notes.html'"></div>	
-</div>
+<!--<div class="side_bar">
+    <div ng-include="'views/anc/interventions.html'"></div>
+    <div ng-include="'views/anc/notes.html'"></div>
+</div> -->
 
 <div class="main_content">
-	<h2>
-		{{'lab' | translate}}
-	</h2>
-	<p>
-		{{lab}}
-	</p>
-	
-	<div class="margin-top">
-		<button ng-click="close()" class="big-button grey">
-			{{'close' | translate}}
-		</button>
-	</div>
+    <hr>
+    <h2>
+        {{'lab_report'| translate}}
+    </h2>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th></th>                    
+                <th ng-repeat="dhis2Event in dhis2Events">{{dhis2Event.eventDate}}</th> 
+            </tr>
+        </thead>
+        <tr ng-repeat="row in rows">
+            <td>{{row}}</td> 
+            <td ng-repeat="val in cells[row]">{{val.value}}</td> 
+        </tr>
+    </table>
+
+    <!--<div ac-chart="line" ac-data="chartData" ac-config="chartConfig" id='chart' class='chart'></div> -->
+
+    <div class="margin-top">
+        <button ng-click="close()" class="big-button grey">
+            {{'close'| translate}}
+        </button>
+    </div>
 </div>

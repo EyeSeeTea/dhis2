@@ -1,0 +1,355 @@
+{
+  "dataElements": [
+    {
+      "code": "MMD_ALL",
+      "name": "Allergies (drugs and/or severe food allergies)",
+      "type": "string",
+      "optionSet": {
+        "id": "Qdm5fPK5Ra9",
+        "options": [
+          "None",
+          "Penicillin",
+          "Other medicine - please specify",
+          "Other severe allergy - please specify"
+        ],
+        "name": "Allergy"
+      },
+      "id": "QFX1FLWBwtq"
+    },
+    {
+      "code": "MMD_BP_DIA",
+      "name": "Blood pressure, diastolic mmHg",
+      "type": "int",
+      "id": "dyYdfamSY2Z"
+    },
+    {
+      "code": "MMD_BP_SYS",
+      "name": "Blood pressure, systolic mm Hg",
+      "type": "int",
+      "id": "M4HEOoEFTAT"
+    },
+    {
+      "code": "MMD_CON",
+      "name": "Chronic conditions ",
+      "created": "2013-11-29T18:31:04.855+0000",
+      "type": "string",
+      "optionSet": {
+        "id": "ZwC7OYijOn3",
+        "options": [
+          "None",
+          "Chronic hypertension",
+          "Autoimmune disease",
+          "Diabetes",
+          "HIV",
+          "Renal disease",
+          "Other - please specify"
+        ],
+        "name": "Chronic conditions"
+      },
+      "id": "pDGXOBeiANC"
+    },
+    {
+      "code": "MMD_GES_WK1",
+      "name": "Clinical estimation for gestational age",
+      "type": "int",
+      "id": "BVxtFTS94xK"
+    },
+    {
+      "name": "Conditions in previous pregnancies",
+      "type": "string",
+      "optionSet": {
+        "id": "HNO18uVNoyI",
+        "options": [
+          "None",
+          "Pre eclampsia",
+          "Eclampsia",
+          "Previous sibling required phototherapy",
+          "Other - please specify"
+        ],
+        "name": "Pregnancy conditions"
+      },
+      "id": "suhLG4CrzUw"
+    },
+    {
+      "code": "MMD_LMP_DAT",
+      "name": "Date of last menstrual period (LMP)",
+      "type": "date",
+      "id": "w4ky6EkVahL"
+    },
+    {
+      "code": "EA3_STA_TET_DAT",
+      "name": "Date of latest immunization",
+      "type": "date",
+      "id": "r3BqzOPxAjp"
+    },
+    {
+      "code": "MMD_ULS_DAT",
+      "name": "Estimated date of delivery ultrasound",
+      "type": "date",
+      "id": "YR5QjVqKx3l"
+    },
+    {
+      "code": "EA2_CLI_PAL",
+      "name": "Extreme pallor (Conjunctival AND palmar)",
+      "type": "bool",
+      "id": "EyfTU3ibMmJ"
+    },
+    {
+      "name": "Fetus presentation",
+      "type": "string",
+      "lastUpdated": "2013-12-22T10:35:33.046+0000",
+      "optionSet": {
+        "id": "g80kErVQ9nn",
+        "options": [
+          "Cephalic",
+          "Breech",
+          "Trasverse",
+          "Others - please specify"
+        ],
+        "name": "Fetus presentation"
+      },
+      "id": "CubPaKhlZDt"
+    },
+    {
+      "code": "MMD_CM",
+      "name": "Height",
+      "type": "int",
+      "id": "NBkTyZVrzym"
+    },
+    {
+      "code": "EA2_LAB_HCR",
+      "name": "Hematocrit",
+      "type": "int",
+      "id": "X8HbdaoS9LN"
+    },
+    {
+      "code": "EA2_LAB_HB",
+      "name": "Hemoglobin",
+      "type": "int",
+      "id": "vANAXwtLwcT"
+    },
+    {
+      "code": "EA7_LAB_HIV",
+      "name": "HIV rapid test screening",
+      "type": "string",
+      "optionSet": {
+        "id": "GbGmTwFp6Ns",
+        "options": [
+          "Negative",
+          "Positive",
+          "Indeterminate"
+        ],
+        "name": "Negative Positive and Indeterminate"
+      },
+      "id": "Itl05OEupgQ"
+    },
+    {
+      "code": "EA2_TRE_SUPP",
+      "name": "Iron and folic acid supplementation",
+      "type": "bool",
+      "id": "Kb6kZzUCJi1"
+    },
+    {
+      "code": "EA4a_TRE_MAL",
+      "name": "Malaria treatment",
+      "type": "bool",
+      "id": "MHW5v2Iljtw"
+    },
+    {
+      "code": "EA4a_LAB_MAL1",
+      "name": "Microscopy screening for malaria",
+      "type": "bool",
+      "id": "AdyxQdz7eXY"
+    },
+    {
+      "name": "Number of fetuses (plurality)",
+      "type": "int",
+      "id": "WpQmKfbYqvt"
+    },
+    {
+      "code": "EA8a_TRE_CAL",
+      "name": "Prevention of pre-eclampsia",
+      "type": "bool",
+      "id": "PKZPVfAJfHD"
+    },
+    {
+      "code": "MMD_OBS_PAR",
+      "name": "Previous deliveries",
+      "type": "int",
+      "id": "hisxuZstYJM"
+    },
+    {
+      "code": "MMD_OBS_DEL",
+      "name": "Previous modes of delivery",
+      "type": "string",
+      "optionSet": {
+        "id": "jAyXdHaxGiH",
+        "options": [
+          "Spontaneous vaginal",
+          "Assisted vaginal",
+          "CS"
+        ],
+        "name": "previous modes of delivery"
+      },
+      "id": "W4zW3aPyS0G"
+    },
+    {
+      "code": "MMD_OBS_GRA",
+      "name": "previous pregnancies",
+      "type": "int",
+      "id": "PuiTfPfSf86"
+    },
+    {
+      "code": "MMD_OBS_OUT",
+      "name": "Previous pregnancy outcomes",
+      "type": "string",
+      "optionSet": {
+        "id": "VFR0v2vRhlE",
+        "options": [
+          "Live born",
+          "Antepartum stillbirth",
+          "Intrapartum stillbirth",
+          "Stillbirth of unknown timing",
+          "Neonatal death",
+          "Miscarriage",
+          "Termination of pregnancy"
+        ],
+        "name": "Previous pregnancy outcomes"
+      },
+      "id": "mrVkW9h2Rdp"
+    },
+    {
+      "code": "MMD_PRT_US",
+      "name": "Proteinuria, Urine stix",
+      "type": "int",
+      "id": "a7XjFEuZuKE"
+    },
+    {
+      "code": "EA4a_LAB_MAL2",
+      "name": "RDT screening for malaria",
+      "type": "bool",
+      "id": "Mh7nK8UKoZP"
+    },
+    {
+      "code": "EA4b_PRE_MAL",
+      "name": "Sleeping under mosquito nets",
+      "type": "bool",
+      "id": "ytV9rX4ADnn"
+    },
+    {
+      "code": "EA5_CLI_SMO1",
+      "name": "Smoking at first ANC visit?",
+      "type": "bool",
+      "id": "VFffa31SKjH"
+    },
+    {
+      "code": "EA5_TRE_SMO",
+      "name": "Smoking cessation treatment",
+      "type": "bool",
+      "id": "Ok9OQpitjQr"
+    },
+    {
+      "name": "Specified other allergy",
+      "type": "string",
+      "id": "K778mlaNZHB"
+    },
+    {
+      "name": "Specified other chronic condition",
+      "type": "string",
+      "id": "UYgk414pPaJ"
+    },
+    {
+      "name": "Specified other condition in previous pregnancies",
+      "type": "string",
+      "id": "igW9ePhdLGo"
+    },
+    {
+      "code": "EA6_TRE_SYP2",
+      "name": "Syphilis counseling",
+      "type": "bool",
+      "id": "Js57E09s9fh"
+    },
+    {
+      "code": "EA6_LAB_SYP",
+      "name": "Syphilis Rapid Plasma Reagin (RPR) serology screening",
+      "type": "string",
+      "optionSet": {
+        "id": "GbGmTwFp6Ns",
+        "options": [
+          "Negative",
+          "Positive",
+          "Indeterminate"
+        ],
+        "name": "Negative Positive and Indeterminate"
+      },
+      "id": "AAaJGnWR5js"
+    },
+    {
+      "code": "EA6_TRE_SYP1",
+      "name": "Syphilis treatment",
+      "type": "bool",
+      "id": "OhcR0fpFcWa"
+    },
+    {
+      "code": "EA3_TRE_TET",
+      "name": "Tetanus immunization",
+      "type": "string",
+      "optionSet": {
+        "version": 1,
+        "id": "mUU7iMXlXbW",
+        "options": [
+          "Dose 1",
+          "Does 2",
+          "Does 3",
+          "Does 4",
+          "Does 5"
+        ],
+        "name": "Tetanus doses"
+      },
+      "id": "rpI2TECYHJc"
+    },
+    {
+      "code": "EA3_STA_TET",
+      "name": "Tetanus Immunization Status",
+      "type": "string",
+      "optionSet": {
+        "version": 4,
+        "id": "RCsz7zzurLe",
+        "options": [
+          "Unknown status or unimmunized",
+          "Sufficiently immunized",
+          ">=28 days since TT1",
+          ">=180 days since TT2",
+          ">1 year since TT3",
+          ">1 year since TT4"
+        ],
+        "name": "Immunization Status"
+      },
+      "id": "sUX4i7QqbXF"
+    },
+    {
+      "code": "EA2_TRE_ANE_MOD",
+      "name": "Treatment for moderate anemia",
+      "type": "bool",
+      "id": "RxVNLSeTjto"
+    },
+    {
+      "code": "EA2_TRE_ANE_SEV",
+      "name": "Treatment for severe anemia",
+      "type": "bool",
+      "id": "nB4Ui3ckmUi"
+    },
+    {
+      "code": "MMD_GES_WK3",
+      "name": "ultrasound gestational age",
+      "type": "int",
+      "id": "EzMB8pjhLz9"
+    },
+    {
+      "code": "MMD_KG",
+      "name": "Weight",
+      "type": "int",
+      "id": "lWx7MYQFO39"
+    }
+  ]
+}

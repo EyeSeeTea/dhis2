@@ -43,7 +43,6 @@ import org.hisp.dhis.patient.PatientIdentifierService;
 import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.patient.PatientIdentifierTypeService;
 import org.hisp.dhis.patient.PatientService;
-import org.hisp.dhis.patient.util.PatientIdentifierGenerator;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
 import org.hisp.dhis.program.Program;
@@ -55,7 +54,6 @@ import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -202,15 +200,7 @@ public abstract class AbstractPersonService
         person.setPerson( patient.getUid() );
         person.setOrgUnit( patient.getOrganisationUnit().getUid() );
 
-        person.setName( patient.getName() );
-
-        Contact contact = new Contact();
-        contact.setPhoneNumber( nullIfEmpty( patient.getPhoneNumber() ) );
-
-        if ( contact.getPhoneNumber() != null )
-        {
-            person.setContact( contact );
-        }
+        person.setName( patient.getName() );       
 
         Collection<Relationship> relationshipsForPatient = relationshipService.getRelationshipsForPatient( patient );
 
@@ -263,11 +253,6 @@ public abstract class AbstractPersonService
         Assert.notNull( organisationUnit );
 
         patient.setOrganisationUnit( organisationUnit );
-
-        if ( person.getContact() != null && person.getContact().getPhoneNumber() != null )
-        {
-            patient.setPhoneNumber( person.getContact().getPhoneNumber() );
-        }
 
         updateIdentifiers( person, patient );
 
@@ -353,16 +338,12 @@ public abstract class AbstractPersonService
         }
 
         patient.setName( person.getName() );
-        String phoneNumber = person.getContact() != null ? person.getContact().getPhoneNumber() : null;
-        patient.setPhoneNumber( phoneNumber );
-
-        updateSystemIdentifier( person );
-        
+     
+        updateSystemIdentifier( person );        
         removeRelationships( patient );
         removeIdentifiers( patient );
-        removeAttributeValues( patient );
-        
-        //patientService.updatePatient( patient );
+        removeAttributeValues( patient );        
+        patientService.updatePatient( patient );
 
         updateRelationships( person, patient );
         updateIdentifiers( person, patient );

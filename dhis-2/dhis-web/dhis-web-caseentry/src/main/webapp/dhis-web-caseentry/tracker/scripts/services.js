@@ -6,72 +6,65 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
 
 /* Factory to fetch programs */
 .factory('ProgramFactory', function($http) {
-
-    var ProgramFactory = {};
-
-    ProgramFactory.getProgram = function(uid) {
-        return $http.get('../../api/programs/' + uid + '.json?viewClass=extended');
-    };
-
-    ProgramFactory.getMyPrograms = function() {
-        return $http.get('../../api/me/programs');
-    };
-
-    return ProgramFactory;
     
-    /*var myPrograms;
-    var selecteProgram;
+    var program, programPromise;
+    var programs, programsPromise;
     
     return {
         
-        getSelectedProgram: function(successCallback){
-            if(!selecteProgram){
-                $http.get('../../api/programs/' + uid + '.json?viewClass=extended').success(function(data){
-                   selecteProgram = data;
-                   successCallback(data);
+        getProgram: function(uid){
+            if( program != uid && !programPromise ){
+                programPromise = $http.get('../../api/programs/' + uid + '.json?viewClass=extended&paging=false').then(function(response){
+                   program = response.data.id;
+                   return response.data;
                 });
             }
-            else{
-                successCallback(selecteProgram);
-            }
-        },
+            return programPromise;
+        },       
         
-        getMyPrograms: function(successCallback){
-            if(!myPrograms){
-                $http.get('../../api/me/profile').success(function(data){
-                   myPrograms = data;
-                   successCallback(data);
+        getMyPrograms: function(){ 
+            if( !programs || !programsPromise ){
+                programsPromise = $http.get('../../api/me/programs').then(function(response){
+                   programs = response.data;
+                   return programs;
                 });
             }
-            else{
-                successCallback(myPrograms);
-            }     
-        }
-        
-    };*/
-
-})
-
-.factory('CurrentUserProfile', function($http) {
-    
-    var profile;
-
-    return {
-        getProfile: function(successCallback) {
-            if( !profile ){
-                $http.get('../../api/me/profile').success(function(data){
-                   profile = data;
-                   successCallback(data);
-                });
-            }
-            else{
-                successCallback(profile);
-            }           
+            return programsPromise;    
         }
     };
-    
 })
 
+/* Factory to fetch programStages */
+.factory('ProgramStageFactory', function($http) {  
+    
+    var programStage, promise;   
+    return {        
+        getProgramStage: function(uid){
+            if( programStage !== uid ){
+                promise = $http.get( '../../api/programStages/' + uid + '.json?viewClass=extended&paging=false').then(function(response){
+                   programStage = response.data.id;
+                   return response.data;
+                });
+            }
+            return promise;
+        }
+    };    
+})
+
+.factory('CurrentUserProfile', function($http) { 
+    var profile, promise;
+    return {
+        getProfile: function() {
+            if( !promise ){
+                promise = $http.get('../../api/me/profile').then(function(response){
+                   profile = response.data;
+                   return profile;
+                });
+            }
+            return promise;           
+        }
+    };    
+})
 
 /* Factory to enroll person in a program */
 .service('EnrollmentFactory', function( $http ) {
@@ -85,24 +78,81 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
     return EnrollmentFactory;
 })
 
-/* Factory to fetch programStages */
-.factory('ProgramStageFactory', function($http) {
-
-    var ProgramStageFactory = {};
-
-    ProgramStageFactory.getProgramStage = function(uid) {
-        return $http.get( '../../api/programStages/' + uid + '.json?viewClass=extended');
-    };
-
-    return ProgramStageFactory;
-})
-
 /* Factory for loading Essential Interventions */
 .factory('EIFactory', function($http) {
-
+    var ei, promise;
     return {
-        getEI: function(data) {
-            $http.get('json/EI.json').success(data);
+        getEI: function() {            
+            if( !ei || !promise ){
+                promise = $http.get('json/EI_All.json').then(function(response){                    
+                    ei = response.data;
+                    return ei;
+                });
+            }
+            return promise;            
+        }
+    };
+})
+
+/* Factory for loading Essential Interventions - new*/
+.factory('EIFormatter', function($http) {    
+    return {
+        getEI: function() {            
+            var ei, promise;
+            if( !ei || !promise ){
+                promise = $http.get('../../api/dataElements.json?viewClass=extended&paging=false').then(function(response){
+                    ei = response.data;                    
+                    return response.data;
+                });
+            }
+            return promise;            
+        },
+        
+        formatEI: function(){
+            var ei, promise;
+            var dataElements = [];
+            if( !ei || !promise ){
+                promise = $http.get('../../api/dataElements.json?viewClass=extended&paging=false').then(function(response){
+                    
+                    angular.forEach(response.data.dataElements, function(de) {
+                        
+                        var dataElement;
+                        
+                        dataElement = {name: de.name,
+                                       code: de.code,
+                                       type: de.type,
+                                       id: de.id,
+                                       pageOfEntry: ['ANC1_GEN', 'ANC1_DEP', 'ANCnn_GEN', 'ANCnn_DEP'],
+                                       sequenceOnPage: '',
+                                       optionSet: '',
+                                       actions: [{
+                                               value: '',
+                                               task: {
+                                                   dependencies: [], 
+                                                   conditionsComplications: [],
+                                                   summary: [],
+                                                   reminders: [],
+                                                   messaging: [],
+                                                   scheduling: []
+                                               }
+                                           }],
+                                       labResults: ''};
+                        
+                        
+                        if(angular.isObject(de.optionSet)){
+                            var options = [];
+                            angular.forEach(de.optionSet.options, function(option){
+                                option = {label: option, value: option};
+                                options.push(option);
+                            });                            
+                            dataElement.optionSet = options;                            
+                        }  
+                        dataElements.push(dataElement);
+                    }); 
+                    return dataElements;
+                });
+            }
+            return promise;            
         }
     };
 })
@@ -138,7 +188,7 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
     };
 
     PersonFactory.getAllPersons = function(orgUnitUid) {
-        return $http.get(baseUrl + '?orgUnit=' + orgUnitUid);
+        return $http.get(baseUrl + '?orgUnit=' + orgUnitUid + '&paging=false');
     };
 
     PersonFactory.registerPerson = function(person) {
@@ -147,56 +197,89 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
 
     PersonFactory.updatePerson = function(person) {
         return $http.put(baseUrl + '/' + person.person , person);
-    };
+    };    
 
     return PersonFactory;
 })
 
-/* Factory for getting person attribute types*/
-.factory('RegistrationAttributesFactory', function($http) { 
+.factory('PersonService', function($http, PersonAttributesFactory){
+    var person, programAttributes, promise; 
+    return {
+        getPerson: function(personUid, programUid){     
 
-    var registrationAttributes;
+            //if(!promise){
+                
+                promise = $http.get('../../api/persons/' + personUid + '.json').then(function(response){              
+                    person = response.data;                
+                    PersonAttributesFactory.getEnrollmentAttributes(programUid).then(function(data) {
+                        var enrollmentAttributes = [];
+                        var registrationAttributes = person.attributes;
+                        programAttributes = data.personAttributeTypes;   
+                        angular.forEach(person.attributes, function(personAttribute) {
+                            angular.forEach(programAttributes, function(programAttribute){                           
+                                if( programAttribute.id == personAttribute.type){                                    
+                                    enrollmentAttributes.push(personAttribute);
+                                }                                
+                            });                   
+                        });
+
+                        angular.forEach(enrollmentAttributes, function(a){
+                            registrationAttributes.splice(registrationAttributes.indexOf(a),1);
+                        });
+                        
+                        person.registrationAttributes = registrationAttributes;
+                        person.enrollmentAttributes = enrollmentAttributes;                    
+                    });                     
+                    return person;
+                });
+            //}      
+            return promise;
+        }
+    };            
+})
+
+/* Factory for getting person attribute types*/
+.factory('PersonAttributesFactory', function($http) { 
+    var rAttributes, rPromise;
+    var eAttributes, ePromise;
     
     return {
-        getRegistrationAttributes: function(successCallback){
-            if(!registrationAttributes){
-                $http.get('../../api/personAttributeTypes/withoutPrograms?viewClass=extended').success(function(data){
-                    
-                    angular.forEach(data, function(registrationAttribute) {
+        getEnrollmentAttributes: function(uid){
+
+            if( !rAttributes || !rPromise ){                
+                rPromise = $http.get('../../api/personAttributeTypes.json?program=' + uid + '&viewClass=extended&paging=false').then(function(response){                    
+                    angular.forEach(response.data.personAttributeTypes, function(registrationAttribute) {
                         if (angular.isObject(registrationAttribute.personAttributeOptions)) {
                             angular.forEach(registrationAttribute.personAttributeOptions, function(attributeOption) {
                                 attributeOption.value = attributeOption.name;
                             });
                         }
-                    });                  
-                    
-                   registrationAttributes = data;
-                   successCallback(data);
+                    });                     
+                   rAttributes = response.data;
+                   return rAttributes;
                 });
             }
-            else{
-                successCallback(registrationAttributes);
+            return rPromise;
+        },
+        
+        getRegistrationAttributes: function(){
+
+            if( !eAttributes || !ePromise ){                
+                ePromise = $http.get('../../api/personAttributeTypes.json?withoutPrograms=true&viewClass=extended&paging=false').then(function(response){                    
+                    angular.forEach(response.data.personAttributeTypes, function(registrationAttribute) {
+                        if (angular.isObject(registrationAttribute.personAttributeOptions)) {
+                            angular.forEach(registrationAttribute.personAttributeOptions, function(attributeOption) {
+                                attributeOption.value = attributeOption.name;
+                            });
+                        }
+                    });                    
+                   eAttributes = response.data;
+                   return eAttributes;
+                });
             }
+            return ePromise;
         }
     };
-})
-
-/* Factory for getting person attribute types*/
-.factory('PersonAttributeTypesFactory', function($http) {
-
-    var baseUrl = '../../api/personAttributeTypes';
-
-    var PersonAttributeTypesFactory = {};
-
-    PersonAttributeTypesFactory.getPersonAttributeTypes = function() {
-        return $http.get(baseUrl + '.json');
-    };
-
-    PersonAttributeTypesFactory.getPersonAttributeType = function(uid) {
-        return $http.get(baseUrl + '/' + uid + '.json');
-    };
-
-    return PersonAttributeTypesFactory;
 })
 
 /* factory for getting data elements */
@@ -226,36 +309,86 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
     return DataElemmentFactory;
 })
 
-.factory('DHIS2EventFactory', function($http) {
+.factory('DHIS2EventFactory', function($http, $filter, storage) {   
     
-    var DHIS2EventFactory = {};
+    return {
+        
+        getDHIS2Events: function(person, orgUnit, program){        
+            
+            var promise = $http.get('../../api/events.json?' + 'person=' + person + '&orgUnit=' + orgUnit + '&program=' + program + '&paging=false').then(function(response){
+                var dhis2Events = response.data.eventList;
+                angular.forEach(dhis2Events, function(dhis2Event){
+                    var programStage = storage.get(dhis2Event.programStage);
+                    dhis2Event.name = programStage.name;
+                    dhis2Event.eventDate = Date.parse(dhis2Event.eventDate);
+                    dhis2Event.eventDate = $filter('date')(dhis2Event.eventDate, 'yyyy-MM-dd');                    
+                });                
+                return dhis2Events;                
+            });            
+            return promise;
+        },
+        
+        getDHIS2Event: function(eventUID){
+            
+            var promise = $http.get('../../api/events/' + eventUID + '.json').then(function(response){               
+                var dhis2Event = response.data;
+                var programStage = storage.get(dhis2Event.programStage);
+                dhis2Event.name = programStage.name;
+                dhis2Event.eventDate = Date.parse(dhis2Event.eventDate);
+                dhis2Event.eventDate = $filter('date')(dhis2Event.eventDate, 'yyyy-MM-dd');               
+                return dhis2Event;
+            });            
+            return promise;
+        },
+        
+        postDHIS2Event: function(dhis2Event){
+            var promise = $http.post('../../api/events.json?', dhis2Event).then(function(response){
+                return response.data;
+            });
+            return promise;            
+        },
+        
+        updateDHIS2Event: function(dhis2Event){            
+            var promise = $http.put('../../api/events/' + dhis2Event.event, dhis2Event).then(function(response){
+                return response.data;
+            });
+            return promise;
+        }
+    };    
+})
 
-    DHIS2EventFactory.getDHIS2Events = function(person, orgUnit, program) {
-        return $http.get('../../api/events.json?' + 'person=' + person + '&orgUnit=' + orgUnit + '&program=' + program );
+.service('DHIS2EventService', function() {
+    var currentEventUid;
+    return {
+        setCurrentEventUid: function(uid) {
+            currentEventUid = uid;
+        },
+        getCurrentEventUid: function() {    
+            return currentEventUid;
+        }
     };
+})
 
-    DHIS2EventFactory.getDHIS2Event = function(eventUID) {
-        return $http.get('../../api/events/' + eventUID + '.json');
+.service('DependencyPageService', function() {
+    var depPage;
+    return {
+        setDepPage: function(page) {
+            depPage = page;
+        },
+        getDepPage: function() {    
+            return depPage;
+        }
     };
-
-    DHIS2EventFactory.getMyDHIS2Event = function(params) {
-        return $http.get(eventBaseUrl + params);
-    };
-
-    DHIS2EventFactory.postDHIS2Event = function(DHIS2event) {
-        return $http.post('../../api/events.json?', DHIS2event);
-    };
-
-    return DHIS2EventFactory;
 })
 
 .factory('TransferHandler', function() {
 
     return {
-        store: function(input, output) {
+        store: function(input, code, value, output) {            
             for (var i = 0; i < input.length; i++) {
                 if (input[i]) {
-                    if (output.indexOf(input[i]) === -1) {
+                    input[i] = input[i].replace(new RegExp('#' + code + '#', 'g'), value);
+                    if (output.indexOf(input[i]) == -1) {
                         output.push(input[i]);
                     }
                 }
@@ -264,15 +397,21 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
     };
 })
 
-.factory('TrackerApp', function($http, storage) {
+.factory('TrackerApp', function($http) {
+    
+    var configuration, configurationPromise;
 
     return {
-        getConfiguration: function(data) {
-            $http.get('manifest.webapp').success(data);
-        },
-        getDHISAPIURL: function() {
-            var DHIS2APIURL = 'http://localhost:8080/api/';
-            return DHIS2APIURL;
+        getConfiguration: function() {
+            
+            if(!configuration || !configurationPromise){
+                configurationPromise = $http.get('manifest.webapp').then(function(response){
+                   configuration = response.data;
+                   return configuration;
+                });
+            }
+            
+            return configurationPromoise; 
         }
     };
 })
@@ -283,47 +422,59 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
         searchById: function(data, k) {
 
             angular.forEach(data, function(d) {
-                if (k.id === d.id) {
+                if (k.id == d.id) {
                     return data.indexOf(d);
                 }
             });
             return -1;
-        }
+        }       
     };
 })
 
-.service('ExpressionService', function(DHIS2EventFactory) {
-
-    var currentEvent = '';
-
+.service('ExpressionService', function(storage) {
+    
     return {
-        getDataElementExpression: function(val, eventUid) {
-
-            DHIS2EventFactory.getDHIS2Event(eventUid)
-                    .success(function(e) {
-                        currentEvent = e;
-                        var regex = /#[^#]*#/g,
-                                match,
-                                m,
-                                mDe,
-                                matches = [];
-
-                        while (match = regex.exec(val)) {
-                            matches.push(match);
-                            m = match.toString();
-                            mDe = m.substring(1, m.length - 1);
-                            var r = new RegExp(match, 'g');
-                            //val = val.replace(r, '@'+mDe+'@');
-                            val = val.replace(r, 100);
+        getDataElementExpression: function(val, dhis2Events) {
+            
+            console.log('Input:  ', val);
+           
+           
+            var regex = /#[^#]*#/g,
+                    match,
+                    m,
+                    mDe,
+                    matches = [];
+            
+            while (match = regex.exec(val)) {					
+                matches.push(match);  
+                m = match.toString();
+                mDe = m.substring(1,m.length-1);
+                
+                var de = storage.get(mDe);
+                
+                var valueIsThere = false;
+                angular.forEach(dhis2Events, function(dhis2Event){
+                    angular.forEach(dhis2Event.dataValue, function(dataValue){
+                        if( de.id == dataValue.dataElement)
+                        {
+                            valueIsThere = true;
+                            console.log( storage.get(mDe), 'needs ',  dataValue );
                         }
-                        return val;
                     });
+                });
+                
+                console.log('finally the value is there:  ', valueIsThere);
+                //var r = new RegExp(match,'g');
+                val = val.replace(new RegExp(match,'g'), 'value of match');
+            }
+            
+            console.log('Output:  ', val);
+            return val;
         }
     };
 })
 
-.service('ModalService', ['$modal',
-    function($modal) {
+.service('ModalService', ['$modal', function($modal) {
 
         var modalDefaults = {
             backdrop: true,
@@ -374,8 +525,7 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
 
     }])
 
-.service('DialogService', ['$modal',
-    function($modal) {
+.service('DialogService', ['$modal', function($modal) {
 
         var dialogDefaults = {
             backdrop: true,
@@ -390,6 +540,58 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
             actionButtonText: 'ok',
             headerText: 'dhis2_tracker',
             bodyText: 'Perform this action?'
+        };
+
+        this.showDialog = function(customDialogDefaults, customDialogOptions) {
+            if (!customDialogDefaults)
+                customDialogDefaults = {};
+            customDialogDefaults.backdropClick = false;
+            return this.show(customDialogDefaults, customDialogOptions);
+        };
+
+        this.show = function(customDialogDefaults, customDialogOptions) {
+            //Create temp objects to work with since we're in a singleton service
+            var tempDialogDefaults = {};
+            var tempDialogOptions = {};
+
+            //Map angular-ui modal custom defaults to modal defaults defined in service
+            angular.extend(tempDialogDefaults, dialogDefaults, customDialogDefaults);
+
+            //Map modal.html $scope custom properties to defaults defined in service
+            angular.extend(tempDialogOptions, dialogOptions, customDialogOptions);
+
+            if (!tempDialogDefaults.controller) {
+                tempDialogDefaults.controller = function($scope, $modalInstance) {
+                    $scope.dialogOptions = tempDialogOptions;
+                    $scope.dialogOptions.ok = function(result) {
+                        $modalInstance.close(result);
+                    };                           
+                };
+            }
+
+            return $modal.open(tempDialogDefaults).result;
+        };
+
+    }])
+
+.service('NotesDialogService', ['$modal', function($modal) {
+
+        var dialogDefaults = {
+            backdrop: true,
+            keyboard: true,
+            backdropClick: true,
+            modalFade: true,
+            templateUrl: '../tracker/views/anc/note.html'
+        };
+
+        var dialogOptions = {
+            closeButtonText: 'close',
+            actionButtonText: 'ok',
+            headerText: 'dhis2_tracker',
+            bodyText: 'Perform this action?',
+            note: 'note',
+            created_by: 'created_by',
+            date: 'date'
         };
 
         this.showDialog = function(customDialogDefaults, customDialogOptions) {

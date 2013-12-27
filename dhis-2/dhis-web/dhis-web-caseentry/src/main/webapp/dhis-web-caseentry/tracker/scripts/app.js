@@ -14,7 +14,8 @@ var ancTracker = angular.module('ancTracker',
 		  'angularTreeview', 
                   'directive.contextMenu',
                   'ui.date',
-		  'ui.bootstrap'])
+		  'ui.bootstrap',
+                  'angularCharts'])
 
 .config(function($routeProvider, $translateProvider) {	
 	
@@ -24,6 +25,9 @@ var ancTracker = angular.module('ancTracker',
 	}).when('/settings', {
 		templateUrl : 'views/settings.html',
 		controller : 'SettingsController'
+	}).when('/dhis2', {
+		templateUrl : 'views/dhis2.html',
+		controller : 'DHIS2Controller'
 	}).when('/anc', {
 		templateUrl : 'views/anc/firstpage.html',
 		controller : 'SearchController'			
@@ -61,5 +65,11 @@ var ancTracker = angular.module('ancTracker',
 	});
 	
 	$translateProvider.preferredLanguage('no');	
+})
+.run(function($rootScope){
+    $rootScope.$on('hanldeEmit', function(event, args){
+       $rootScope.$broadcast('handleBroadcast', args); 
+    });
 });
+
 

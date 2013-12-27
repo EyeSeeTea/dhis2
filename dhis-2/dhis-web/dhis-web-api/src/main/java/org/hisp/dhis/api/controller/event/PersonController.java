@@ -215,6 +215,7 @@ public class PersonController
     @PreAuthorize( "hasRole('ALL') or hasRole('F_PATIENT_ADD')" )
     public void updatePersonJson( @PathVariable String id, HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
+    	System.out.println("The update started here....");
         ImportSummary importSummary = personService.updatePersonJson( id, request.getInputStream() );
         JacksonUtils.toJson( response.getOutputStream(), importSummary );
     }

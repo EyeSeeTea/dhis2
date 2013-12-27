@@ -94,7 +94,7 @@ public class JacksonEnrollmentService extends AbstractEnrollmentService
 
     @Override
     public ImportSummaries saveEnrollmentsJson( InputStream inputStream ) throws IOException
-    {
+    {    	
         ImportSummaries importSummaries = new ImportSummaries();
         String input = StreamUtils.copyToString( inputStream, Charset.forName( "UTF-8" ) );
 

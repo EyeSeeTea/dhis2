@@ -65,7 +65,7 @@ public class Event extends BaseLinkableObject
 
     private List<DataValue> dataValues = new ArrayList<DataValue>();
     
-    private List<String> notes = new ArrayList<String>();
+    private List<Note> notes = new ArrayList<Note>();
 
     public Event()
     {
@@ -196,11 +196,11 @@ public class Event extends BaseLinkableObject
     @JsonProperty
     @JacksonXmlElementWrapper( localName = "notes", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "note", namespace = DxfNamespaces.DXF_2_0 )
-	public List<String> getNotes() {
+	public List<Note> getNotes() {
 		return notes;
 	}
 
-	public void setNotes(List<String> notes) {
+	public void setNotes(List<Note> notes) {
 		this.notes = notes;
 	}
 

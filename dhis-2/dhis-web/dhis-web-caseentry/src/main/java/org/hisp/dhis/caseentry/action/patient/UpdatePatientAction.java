@@ -37,6 +37,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.struts2.ServletActionContext;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.patient.PatientAttributeOption;
@@ -79,12 +81,7 @@ public class UpdatePatientAction
 
     private UserService userService;
 
-    private SystemSettingManager systemSettingManager;
-
-    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
-    {
-        this.systemSettingManager = systemSettingManager;
-    }
+    private OrganisationUnitSelectionManager selectionManager;
 
     // -------------------------------------------------------------------------
     // Input
@@ -93,8 +90,6 @@ public class UpdatePatientAction
     private Integer id;
 
     private String fullName;
-
-    private String[] phoneNumber;
 
     private Integer representativeId;
 
@@ -115,36 +110,21 @@ public class UpdatePatientAction
     public String execute()
         throws Exception
     {
+        OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
         patient = patientService.getPatient( id );
 
         // ---------------------------------------------------------------------
-        // Set FullName
+        // Set FullName && location
         // ---------------------------------------------------------------------
 
         patient.setName( fullName );
 
+        patient.setOrganisationUnit( organisationUnit );
+
         // ---------------------------------------------------------------------
         // Set Other information for patient
         // ---------------------------------------------------------------------
-
-        String phone = "";
-        if ( phoneNumber != null )
-        {
-            for ( String _phoneNumber : phoneNumber )
-            {
-                _phoneNumber = (_phoneNumber != null && _phoneNumber.isEmpty() && _phoneNumber.trim().equals(
-                    systemSettingManager.getSystemSetting( SystemSettingManager.KEY_PHONE_NUMBER_AREA_CODE ) )) ? null
-                    : _phoneNumber;
-                if ( _phoneNumber != null )
-                {
-                    phone += _phoneNumber + ";";
-                }
-            }
-
-            phone = (phone.isEmpty()) ? null : phone.substring( 0, phone.length() - 1 );
-            patient.setPhoneNumber( phone );
-        }
 
         if ( healthWorker != null )
         {
@@ -313,6 +293,11 @@ public class UpdatePatientAction
         this.patientIdentifierService = patientIdentifierService;
     }
 
+    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
+    {
+        this.selectionManager = selectionManager;
+    }
+
     public void setId( Integer id )
     {
         this.id = id;
@@ -321,11 +306,6 @@ public class UpdatePatientAction
     public void setFullName( String fullName )
     {
         this.fullName = fullName;
-    }
-
-    public void setPhoneNumber( String[] phoneNumber )
-    {
-        this.phoneNumber = phoneNumber;
     }
 
     public Patient getPatient()

@@ -72,6 +72,8 @@
 
 							//Collapse or Expand
 							selectedNode.collapsed = !selectedNode.collapsed;
+                                                        
+                                                        alert('clicked is:  ' + scope[treeId].selectNodeHead );
 						};
 
 						//if node label clicks,

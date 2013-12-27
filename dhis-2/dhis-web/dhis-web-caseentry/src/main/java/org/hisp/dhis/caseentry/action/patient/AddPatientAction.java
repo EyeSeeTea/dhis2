@@ -38,6 +38,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.struts2.ServletActionContext;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.patient.PatientAttributeOption;
@@ -54,7 +56,6 @@ import org.hisp.dhis.relationship.Relationship;
 import org.hisp.dhis.relationship.RelationshipService;
 import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.relationship.RelationshipTypeService;
-import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.user.UserService;
 
 import com.opensymphony.xwork2.Action;
@@ -86,19 +87,17 @@ public class AddPatientAction
 
     private UserService userService;
 
-    private SystemSettingManager systemSettingManager;
-
     private RelationshipTypeService relationshipTypeService;
 
     private RelationshipService relationshipService;
+
+    private OrganisationUnitSelectionManager selectionManager;
 
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
     private String fullName;
-
-    private String[] phoneNumber;
 
     private boolean underAge;
 
@@ -120,36 +119,21 @@ public class AddPatientAction
 
     public String execute()
     {
+        OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
+
         Patient patient = new Patient();
 
         // ---------------------------------------------------------------------
-        // Set FullName
+        // Set FullName && location
         // ---------------------------------------------------------------------
 
         patient.setName( fullName );
 
+        patient.setOrganisationUnit( organisationUnit );
+
         // ---------------------------------------------------------------------
         // Set Other information for patient
         // ---------------------------------------------------------------------
-
-        String phone = "";
-
-        if ( phoneNumber != null )
-        {
-            for ( String _phoneNumber : phoneNumber )
-            {
-                _phoneNumber = (_phoneNumber != null && _phoneNumber.isEmpty() && _phoneNumber.trim().equals(
-                    systemSettingManager.getSystemSetting( SystemSettingManager.KEY_PHONE_NUMBER_AREA_CODE ) )) ? null
-                    : _phoneNumber;
-                if ( _phoneNumber != null )
-                {
-                    phone += _phoneNumber + ";";
-                }
-            }
-
-            phone = (phone.isEmpty()) ? null : phone.substring( 0, phone.length() - 1 );
-            patient.setPhoneNumber( phone );
-        }
 
         if ( healthWorker != null )
         {
@@ -294,7 +278,7 @@ public class AddPatientAction
             }
         }
 
-        message = id + "_" + systemGenerateIdentifier.getIdentifier();
+        message = patient.getUid() + "_" + systemGenerateIdentifier.getIdentifier();
 
         return SUCCESS;
     }
@@ -328,9 +312,9 @@ public class AddPatientAction
         this.relationshipService = relationshipService;
     }
 
-    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
+    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
-        this.systemSettingManager = systemSettingManager;
+        this.selectionManager = selectionManager;
     }
 
     public String getMessage()
@@ -366,11 +350,6 @@ public class AddPatientAction
     public void setFullName( String fullName )
     {
         this.fullName = fullName;
-    }
-
-    public void setPhoneNumber( String[] phoneNumber )
-    {
-        this.phoneNumber = phoneNumber;
     }
 
     public void setPatientAttributeOptionService( PatientAttributeOptionService patientAttributeOptionService )

@@ -1,0 +1,12 @@
+<div ng-controller="ANCInterventionsController">
+    <div ng-show="conResult.length > 0">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                {{'conditions_complications'| translate}}
+            </div>  
+            <div class="list-group" ng-repeat="con in conResult">
+                <div class="list-group-item">{{con}}</div>
+            </div>
+        </div>
+    </div>    
+</div>

@@ -2,7 +2,7 @@
     <div class="panel-heading">
         {{'notes'| translate}}
         <span class="btn-group-sm" style="float:right;">
-            <span ng-show="notes.length > 5"><a href ng-click="searchNote()" title="{{'search_note'| translate}}"><i class="fa fa-search fa-lg"></i></a></span> 
+            <span ng-show="currentEvent.notes.length > 5"><a href ng-click="searchNote()" title="{{'search_note'| translate}}"><i class="fa fa-search fa-lg"></i></a></span> 
             &nbsp;&nbsp;
             <a href ng-click="showAddNote()" title="{{'add_note'| translate}}"><i class="fa fa-plus fa-lg"></i></a>   
         </span>
@@ -25,8 +25,8 @@
         </button>
     </div>
 
-    <div class="list-group" ng-repeat="note in notes| filter:noteSearchText">
-        <a href="#" class="list-group-item">{{note}}</a>
+    <div class="list-group" ng-repeat="note in currentEvent.notes | filter:noteSearchText">
+        <a href ng-click="displayNote(note)" title="{{'details'| translate}}" class="list-group-item">{{note.value}}</a> 
     </div>  
 
 </div>

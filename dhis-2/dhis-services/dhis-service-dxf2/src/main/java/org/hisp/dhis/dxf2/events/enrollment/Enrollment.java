@@ -31,9 +31,13 @@ package org.hisp.dhis.dxf2.events.enrollment;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.DxfNamespaces;
 
+import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.dxf2.events.person.Attribute;
+
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -52,6 +56,8 @@ public class Enrollment
     private Date dateOfEnrollment;
 
     private Date dateOfIncident;
+    
+    private List<Attribute> attributes = new ArrayList<Attribute>();
 
     public Enrollment()
     {
@@ -128,6 +134,16 @@ public class Enrollment
     {
         this.dateOfIncident = dateOfIncident;
     }
+    
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+	public List<Attribute> getAttributes() {
+		return attributes;
+	}
+
+	public void setAttributes(List<Attribute> attributes) {
+		this.attributes = attributes;
+	}
 
     @Override
     public boolean equals( Object o )
@@ -143,6 +159,7 @@ public class Enrollment
         if ( person != null ? !person.equals( that.person ) : that.person != null ) return false;
         if ( program != null ? !program.equals( that.program ) : that.program != null ) return false;
         if ( status != that.status ) return false;
+        if ( attributes != null ? !attributes.equals( that.attributes ) : that.attributes != null ) return false;
 
         return true;
     }
@@ -156,6 +173,7 @@ public class Enrollment
         result = 31 * result + (status != null ? status.hashCode() : 0);
         result = 31 * result + (dateOfEnrollment != null ? dateOfEnrollment.hashCode() : 0);
         result = 31 * result + (dateOfIncident != null ? dateOfIncident.hashCode() : 0);
+        result = 31 * result + (attributes != null ? attributes.hashCode() : 0);
         return result;
     }
 
@@ -169,6 +187,7 @@ public class Enrollment
             ", status=" + status +
             ", dateOfEnrollment=" + dateOfEnrollment +
             ", dateOfIncident=" + dateOfIncident +
+            ", attributes=" + attributes +
             '}';
     }
 }

@@ -1,61 +1,53 @@
 <h2> {{'person_registration'| translate}} </h2>
 
-<div class="main-content-left">
+<div class="container-1-2">
+    <div class="list-group">
     <form name="outerRegistrationForm" novalidate>
-        <div class="data-entry-row-1-1">
-            <div class="data-entry-row-1-3">
+        <div class="data-entry-row-1-1 list-group-item">
+            <div class="data-entry-row-1-2">
                 {{'name'| translate}}
                 <span><i class="fa fa-asterisk" style="color:red;font-size:6px"></i></span>
             </div>
-            <div class="data-entry-row-2-3">
+            <div class="data-entry-row-1-2">
                 <input type="text" ng-required="true" ng-minlength="3" ng-model="person.name" name="name"/>	
-                <span ng-show="outerRegistrationForm.submitted && outerRegistrationForm.name.$invalid" style="color:red;font-size:12px">{{'required'| translate}}</span>						
+                <span ng-show="outerRegistrationForm.submitted && outerRegistrationForm.name.$invalid" style="color:red;font-size:12px">{{'required'| translate}}</span>		                
             </div>
-        </div>
-        
-        <div class="data-entry-row-1-1">
-            <div class="data-entry-row-1-3">
-                {{'mobile_phone'| translate}}
-            </div>
-            <div class="data-entry-row-2-3">
-                <input type="text" ng-model="person.contact.phoneNumber"/>
-            </div>
-        </div>
+        </div>       
 
         <div ng-repeat="registrationAttribute in registrationAttributes">
             <ng-form name="innerRegistrationForm">
-                <div class="data-entry-row-1-1">
-                    <div class="data-entry-row-1-3">
+                <div class="data-entry-row-1-1 list-group-item">
+                    <div class="data-entry-row-1-2">
                         {{registrationAttribute.name}}
                         <span ng-show="registrationAttribute.mandatory"><i class="fa fa-asterisk" style="color:red;font-size:6px"></i></span>
                     </div>
                     <div ng-switch="registrationAttribute.valueType">
                         <div ng-switch-when="number">
-                            <div class="data-entry-row-2-3">
+                            <div class="data-entry-row-1-2">
                                 <input type="number" ng-required="registrationAttribute.mandatory" ng-model="registrationAttribute.value" name="foo">
                                 <span ng-show="outerRegistrationForm.submitted && innerRegistrationForm.foo.$invalid" style="color:red;font-size:12px">{{'required'| translate}}</span>														
                             </div>
                         </div>
                         <div ng-switch-when="string">
-                            <div class="data-entry-row-2-3">
+                            <div class="data-entry-row-1-2">
                                 <input type="text" ng-required="registrationAttribute.mandatory" ng-model="registrationAttribute.value" name="foo">
                                 <span ng-show="outerRegistrationForm.submitted && innerRegistrationForm.foo.$invalid" style="color:red;font-size:12px">{{'required'| translate}}</span>	
                             </div>
                         </div>
                         <div ng-switch-when="trueOnly">
-                            <div class="data-entry-row-2-3">
+                            <div class="data-entry-row-1-2">
                                 <input type="checkbox" ng-required="registrationAttribute.mandatory" ng-model="registrationAttribute.value" name="foo">
                                 <span ng-show="outerRegistrationForm.submitted && innerRegistrationForm.foo.$invalid" style="color:red;font-size:12px">{{'required'| translate}}</span>	
                             </div>
                         </div>
                         <div ng-switch-when="date">
-                            <div class="data-entry-row-2-3">                                
-                                <input type="text" data-ng-model="registrationAttribute.value" data-ng-date='' data-ng-required="registrationAttribute.mandatory" name="foo" />
+                            <div class="data-entry-row-1-2">                          
+                                <input type="text" data-ng-model="registrationAttribute.value" data-ng-date='' data-ng-required="registrationAttribute.mandatory" name="foo" readonly="readonly" />
                                 <span ng-show="outerRegistrationForm.submitted && innerRegistrationForm.foo.$invalid" style="color:red;font-size:12px">{{'required'| translate}}</span>		
                             </div>
                         </div>
                         <div ng-switch-when="combo">
-                            <div class="data-entry-row-2-3">
+                            <div class="data-entry-row-1-2">
                                 <select ng-required="registrationAttribute.mandatory" ng-model="registrationAttribute.value" name="foo" ng-options="option.value as option.name for option in registrationAttribute.personAttributeOptions">
                                     <option value="">{{'please_select'| translate}}</option>
                                 </select>
@@ -63,7 +55,7 @@
                             </div>
                         </div>
                         <div ng-switch-when="bool">
-                            <div class="data-entry-row-2-3">
+                            <div class="data-entry-row-1-2">
                                 <select ng-required="registrationAttribute.mandatory" ng-model="registrationAttribute.value" name="foo">
                                     <option value="">{{'please_select'| translate}}</option>
                                     <option value="FALSE">{{'no'| translate}}</option>
@@ -82,4 +74,5 @@
             <button ng-click="cancel()" class="big-button grey">{{'cancel'| translate}}</button>
         </div>
     </form>
+    </div>
 </div>

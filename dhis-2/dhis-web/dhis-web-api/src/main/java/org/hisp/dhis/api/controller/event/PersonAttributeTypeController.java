@@ -28,19 +28,20 @@ package org.hisp.dhis.api.controller.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Map;
-
-import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hisp.dhis.api.controller.AbstractCrudController;
-import org.hisp.dhis.dxf2.utils.JacksonUtils;
+import org.hisp.dhis.api.controller.WebMetaData;
+import org.hisp.dhis.api.controller.WebOptions;
+import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.patient.PatientAttributeService;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -54,7 +55,54 @@ public class PersonAttributeTypeController extends AbstractCrudController<Patien
     @Autowired
     private PatientAttributeService patientAttributeService;
     
-    @RequestMapping( value = "/withoutPrograms", method = RequestMethod.GET, produces = "application/json" )
+    @Autowired
+    private ProgramService programService;
+    
+    
+    @Override
+    protected List<PatientAttribute> getEntityList( WebMetaData metaData, WebOptions options )
+    {
+        List<PatientAttribute> entityList = new ArrayList<PatientAttribute>();      
+
+        boolean withoutPrograms = options.getOptions().containsKey( "withoutPrograms" ) && Boolean.parseBoolean( options.getOptions().get( "withoutPrograms" ) );        
+
+        if ( withoutPrograms )
+        {
+        	entityList = new ArrayList<PatientAttribute>( patientAttributeService.getPatientAttributesWithoutProgram() );
+        }
+        
+        else if ( options.getOptions().containsKey( "program" ) )
+        {
+            String programId = options.getOptions().get( "program" );
+            Program program = programService.getProgram( programId );
+
+            if ( program != null )
+            {
+                entityList = new ArrayList<PatientAttribute>( program.getPatientAttributes() );
+            }
+        }
+        
+        else if ( options.hasPaging() )
+        {
+            int count = manager.getCount( getEntityClass() );
+
+            Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
+            metaData.setPager( pager );
+
+            entityList = new ArrayList<PatientAttribute>( manager.getBetween( getEntityClass(), pager.getOffset(), pager.getPageSize() ) );
+        }
+        
+        else
+        {
+            entityList = new ArrayList<PatientAttribute>( patientAttributeService.getAllPatientAttributes() );
+        }
+
+        return entityList;      
+        
+    }
+
+    
+    /*@RequestMapping( value = "/withoutPrograms", method = RequestMethod.GET, produces = "application/json" )
     public void getAttributes(@RequestParam Map<String, String> parameters, HttpServletResponse response) throws Exception
     {   
     	String viewName = parameters.get( "viewClass" );
@@ -68,5 +116,5 @@ public class PersonAttributeTypeController extends AbstractCrudController<Patien
     	
     	JacksonUtils.toJsonWithView(response.getOutputStream(), patientAttributeService.getPatientAttributesWithoutProgram(), viewClass);  	
     	
-    }
+    }*/
 }

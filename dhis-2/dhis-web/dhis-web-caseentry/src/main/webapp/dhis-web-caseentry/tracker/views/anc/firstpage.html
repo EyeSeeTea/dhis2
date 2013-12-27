@@ -21,27 +21,25 @@
             {{'empty_search_result'| translate}}
         </p>
     </div>
+    <hr>
     <div ng-switch-default>
 
-        <table class="table table-striped">
+        <table class="table table-bordered table-hover">
             <thead>
                 <tr>
                     <th>#</th>
                     <th>{{'full_name'| translate}}</th>
-                    <th>{{'gender'| translate}}</th>
-                    <th>{{'date_of_birth (age)' | translate}}</th>
-                    <th>{{'phone_number'| translate}}</th>
+                    <th ng-repeat="registrationAttribute in registrationAttributes">{{registrationAttribute.name}}</th>                   
                     <th>{{'operations'| translate}}</th>
                 </tr>
             </thead>
             <tr ng-repeat="person in persons">
                 <td>[{{$index + 1}}]</td>
                 <td>{{person.name}}</td>
-                <td ng-switch="person.gender"><span ng-switch-when="MALE"> {{'m'| translate}}</span><span ng-switch-when="FEMALE"> {{'f'| translate}}</span></td>
-                <td>{{ person.dateOfBirth.date | date:'yyyy-MM-dd' }} ({{person.dateOfBirth.age}})</td>
-                <td>{{ person.contact.phoneNumber}}</td>
+                <td ng-repeat="attribute in person.attributes">{{attribute.value}}</td>
+                
                 <td>
-                    <a href="#/personedit?personUid={{person.person}}" title="{{'person_profile'| translate}}">
+                    <a href="#/personedit?personUid={{edit_person.person}}" title="{{'edit_person_profile'| translate}}">
                         <i class="fa fa-pencil-square-o fa-2x" title="{{'person_profile'| translate}}"></i>                        
                     </a>
                     &nbsp;

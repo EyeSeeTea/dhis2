@@ -28,6 +28,8 @@ package org.hisp.dhis.dxf2.events.enrollment;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.dxf2.events.person.Attribute;
 import org.hisp.dhis.dxf2.events.person.Person;
 import org.hisp.dhis.dxf2.events.person.PersonService;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
@@ -37,7 +39,10 @@ import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.i18n.I18nManagerException;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
+import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
@@ -66,6 +71,12 @@ public abstract class AbstractEnrollmentService
 
     @Autowired
     private PatientService patientService;
+    
+    @Autowired
+    private PatientAttributeValueService patientAttributeValueService;
+    
+    @Autowired
+    private IdentifiableObjectManager manager;
 
     @Autowired
     private I18nManager i18nManager;
@@ -272,7 +283,8 @@ public abstract class AbstractEnrollmentService
 
             return importSummary;
         }
-
+        
+        addAttributeValues(enrollment,patient);
         ProgramInstance programInstance = programInstanceService.enrollPatient( patient, program,
             enrollment.getDateOfEnrollment(), enrollment.getDateOfIncident(), patient.getOrganisationUnit(),
             getFormat() );
@@ -421,4 +433,23 @@ public abstract class AbstractEnrollmentService
 
         return program;
     }
+    
+    private void addAttributeValues( Enrollment enrollment, Patient patient )
+    {    	
+        for ( Attribute attribute : enrollment.getAttributes() )
+        {
+            PatientAttribute patientAttribute = manager.get( PatientAttribute.class, attribute.getType() );
+
+            if ( patientAttribute != null )
+            {
+                PatientAttributeValue patientAttributeValue = new PatientAttributeValue();
+                patientAttributeValue.setPatient( patient );
+                patientAttributeValue.setValue( attribute.getValue() );
+                patientAttributeValue.setPatientAttribute( patientAttribute );
+
+                patientAttributeValueService.savePatientAttributeValue( patientAttributeValue );
+            }
+        }
+    }
+
 }
