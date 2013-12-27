@@ -473,8 +473,6 @@ Ext.onReady( function() {
 					xtype: 'menuseparator'
 				});
 
-                var isAdmin = true;
-
 				menuItems.push( Ext.create('Ext.menu.Item', {
 					text: GIS.i18n.relocate,
 					iconCls: 'gis-menu-item-icon-relocate',
@@ -488,7 +486,6 @@ Ext.onReady( function() {
 				}));
 
 				menuItems.push( Ext.create('Ext.menu.Item', {
-					//text: GIS.i18n.swap_coordinates,
                     text: 'Swap lon/lat',
 					iconCls: 'gis-menu-item-icon-relocate',
 					disabled: !gis.init.user.isAdmin,
@@ -496,7 +493,7 @@ Ext.onReady( function() {
                         var id = feature.attributes.id,
                             geo = Ext.clone(feature.geometry).transform('EPSG:900913', 'EPSG:4326');
 
-                        if (Ext.isNumber(geo.x) && Ext.isNumber(geo.y)) {
+                        if (Ext.isNumber(geo.x) && Ext.isNumber(geo.y) && gis.init.user.isAdmin) {
                             Ext.Ajax.request({
                                 url: gis.init.contextPath + '/api/organisationUnits/' + id + '.json?links=false',
                                 success: function(r) {
@@ -525,12 +522,6 @@ Ext.onReady( function() {
                                 }
                             });
                         }
-
-                        //if (Ext.isArray(id)) {
-                            //Ext.Ajax.request({
-                                //url: gis.init.contextPath + '/api/organisationUnits/' + id + '.json?links=false',
-                                //success: function(r) {
-                                    //var
 					}
 				}));
 
