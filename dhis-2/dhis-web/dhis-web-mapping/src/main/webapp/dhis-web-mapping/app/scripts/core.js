@@ -513,10 +513,13 @@ Ext.onReady( function() {
                                             var x = feature.geometry.x,
                                                 y = feature.geometry.y;
 
+                                            delete feature.geometry.bounds;
                                             feature.geometry.x = y;
                                             feature.geometry.y = x;
 
                                             layer.redraw();
+
+                                            console.log(feature.attributes.name + ' relocated to ' + orgUnit.coordinates);
 
                                             //gis.olmap.relocate.active = false;
                                             //gis.olmap.relocate.window.destroy();
