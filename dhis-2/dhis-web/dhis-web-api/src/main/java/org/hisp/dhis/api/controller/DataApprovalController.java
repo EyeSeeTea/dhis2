@@ -169,8 +169,6 @@ public class DataApprovalController
             return;
         }
         
-        User user = currentUserService.getCurrentUser();
-        
         if ( !dataApprovalService.mayApprove( organisationUnit ) )
         {
             ContextUtils.conflictResponse( response, "Current user is not authorized to approve for organisation unit: " + ou );
@@ -179,12 +177,17 @@ public class DataApprovalController
         
         DataApprovalState state = dataApprovalService.getDataApprovalState( dataSet, period, organisationUnit, attributeOptionCombo );
         
-        if ( DataApprovalState.READY_FOR_APPROVAL.equals( state ) )
+        if ( !DataApprovalState.READY_FOR_APPROVAL.equals( state ) )
         {
-            DataApproval approval = new DataApproval( dataSet, period, organisationUnit, attributeOptionCombo, new Date(), user );
-            
-            dataApprovalService.addDataApproval( approval );
+            ContextUtils.conflictResponse( response, "Data is not ready for approval: " + state );
+            return;
         }
+
+        User user = currentUserService.getCurrentUser();
+        
+        DataApproval approval = new DataApproval( dataSet, period, organisationUnit, attributeOptionCombo, new Date(), user );
+        
+        dataApprovalService.addDataApproval( approval );
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_APPROVE_DATA') or hasRole('F_APPROVE_DATA_LOWER_LEVELS')" )
@@ -227,12 +230,21 @@ public class DataApprovalController
         {
             return;
         }
-        
+
         DataApproval approval = dataApprovalService.getDataApproval( dataSet, period, organisationUnit, attributeOptionCombo );
         
-        if ( approval != null )
+        if ( approval == null )
         {
-            dataApprovalService.deleteDataApproval( approval );
+            ContextUtils.conflictResponse( response, "Data is not approved and cannot be unapproved" );
+            return;
         }
+
+        if ( !dataApprovalService.mayUnapprove( approval ) )
+        {
+            ContextUtils.conflictResponse( response, "Current user is not authorized to unapprove for organisation unit: " + ou );
+            return;
+        }
+        
+        dataApprovalService.deleteDataApproval( approval );
     }
 }
