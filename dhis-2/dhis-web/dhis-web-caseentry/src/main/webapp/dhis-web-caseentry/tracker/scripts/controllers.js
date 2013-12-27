@@ -638,6 +638,8 @@ var trackerControllers = angular.module('trackerControllers', [])
             
             $scope.dhis2Events = orderByFilter($scope.dhis2Events, '-eventDate');
             $scope.dhis2Events.reverse();
+            
+            console.log('the events are:  ', $scope.dhis2Events);
         }
     });
 

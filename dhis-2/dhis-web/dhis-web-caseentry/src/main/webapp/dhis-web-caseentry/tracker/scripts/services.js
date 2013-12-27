@@ -314,14 +314,14 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
     return {
         
         getDHIS2Events: function(person, orgUnit, program){        
-            
+
             var promise = $http.get('../../api/events.json?' + 'person=' + person + '&orgUnit=' + orgUnit + '&program=' + program + '&paging=false').then(function(response){
                 var dhis2Events = response.data.eventList;
                 angular.forEach(dhis2Events, function(dhis2Event){
                     var programStage = storage.get(dhis2Event.programStage);
-                    dhis2Event.name = programStage.name;
-                    dhis2Event.eventDate = Date.parse(dhis2Event.eventDate);
-                    dhis2Event.eventDate = $filter('date')(dhis2Event.eventDate, 'yyyy-MM-dd');                    
+                    dhis2Event.name = programStage.name;                    
+                    dhis2Event.eventDate = Date.parse(dhis2Event.eventDate.split(" ")[0]);
+                    dhis2Event.eventDate = $filter('date')(dhis2Event.eventDate, 'yyyy-MM-dd');      
                 });                
                 return dhis2Events;                
             });            
@@ -334,7 +334,7 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
                 var dhis2Event = response.data;
                 var programStage = storage.get(dhis2Event.programStage);
                 dhis2Event.name = programStage.name;
-                dhis2Event.eventDate = Date.parse(dhis2Event.eventDate);
+                dhis2Event.eventDate = Date.parse(dhis2Event.eventDate.split(" ")[0]);
                 dhis2Event.eventDate = $filter('date')(dhis2Event.eventDate, 'yyyy-MM-dd');               
                 return dhis2Event;
             });            
