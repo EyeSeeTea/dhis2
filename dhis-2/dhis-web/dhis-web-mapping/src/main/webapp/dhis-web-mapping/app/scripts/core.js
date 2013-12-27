@@ -473,6 +473,8 @@ Ext.onReady( function() {
 					xtype: 'menuseparator'
 				});
 
+                var isAdmin = true;
+
 				menuItems.push( Ext.create('Ext.menu.Item', {
 					text: GIS.i18n.relocate,
 					iconCls: 'gis-menu-item-icon-relocate',
@@ -482,6 +484,19 @@ Ext.onReady( function() {
 						gis.olmap.relocate.feature = feature;
 						gis.olmap.getViewport().style.cursor = 'crosshair';
 						showRelocate();
+					}
+				}));
+
+				menuItems.push( Ext.create('Ext.menu.Item', {
+					text: GIS.i18n.swap_coordinates,
+					iconCls: 'gis-menu-item-icon-relocate',
+					disabled: !gis.init.user.isAdmin,
+					handler: function(item) {
+                        var id = feature.attributes.id;
+
+                        if (Ext.isArray(id)) {
+                            Ext.Ajax.request({
+                                url: gis.init.contextPath + '/api/organisationUnits/' +
 					}
 				}));
 
