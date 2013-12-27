@@ -488,15 +488,54 @@ Ext.onReady( function() {
 				}));
 
 				menuItems.push( Ext.create('Ext.menu.Item', {
-					text: GIS.i18n.swap_coordinates,
+					//text: GIS.i18n.swap_coordinates,
+                    text: 'Swap lon/lat',
 					iconCls: 'gis-menu-item-icon-relocate',
 					disabled: !gis.init.user.isAdmin,
 					handler: function(item) {
-                        var id = feature.attributes.id;
+                        var id = feature.attributes.id,
+                            geo = Ext.clone(feature.geometry).transform('EPSG:900913', 'EPSG:4326');
 
-                        if (Ext.isArray(id)) {
+                        if (Ext.isNumber(geo.x) && Ext.isNumber(geo.y)) {
                             Ext.Ajax.request({
-                                url: gis.init.contextPath + '/api/organisationUnits/' +
+                                url: gis.init.contextPath + '/api/organisationUnits/' + id + '.json?links=false',
+                                success: function(r) {
+                                    var orgUnit = Ext.decode(r.responseText);
+
+                                    orgUnit.coordinates = '[' + geo.y.toFixed(5) + ',' + geo.x.toFixed(5) + ']';
+
+                                    Ext.Ajax.request({
+                                        url: gis.init.contextPath + '/api/metaData?preheatCache=false',
+                                        method: 'POST',
+                                        headers: {'Content-Type': 'application/json'},
+                                        params: Ext.encode({organisationUnits: [orgUnit]}),
+                                        success: function(r) {
+                                            var x = feature.geometry.x,
+                                                y = feature.geometry.y;
+
+                                            feature.geometry.x = y;
+                                            feature.geometry.y = x;
+
+                                            layer.redraw();
+
+                                            //gis.olmap.relocate.active = false;
+                                            //gis.olmap.relocate.window.destroy();
+
+                                            //gis.olmap.relocate.feature.move({x: parseFloat(e.clientX - center.x), y: parseFloat(e.clientY - 28)});
+                                            //gis.olmap.getViewport().style.cursor = 'auto';
+
+                                            //console.log(gis.olmap.relocate.feature.attributes.name + ' relocated to ' + coordinates);
+                                        }
+                                    });
+                                }
+                            });
+                        }
+
+                        //if (Ext.isArray(id)) {
+                            //Ext.Ajax.request({
+                                //url: gis.init.contextPath + '/api/organisationUnits/' + id + '.json?links=false',
+                                //success: function(r) {
+                                    //var
 					}
 				}));
 
