@@ -2,44 +2,56 @@
 <html lang="en" ng-app="ancTracker">
     <head>
         <meta charset="utf-8">
-        <title>DHIS2 ANC Tracker</title>
-
-        <script type="text/javascript" src="jquery/js/jquery-1.8.3.js"></script>
-        <script type="text/javascript" src="jquery/js/jquery-ui-1.9.2.custom.js"></script>
-        <link rel="stylesheet" type="text/css" href="jquery/css/ui-lightness/jquery-ui-1.9.2.custom.css">
+        <title>DHIS2 ANC Tracker</title>      
         
-        <script type="text/javascript" src="d3/d3.v3.min.js"></script>
 
+        <script type="text/javascript" src="lib/jquery/js/jquery-1.8.3.js"></script>
+        <script type="text/javascript" src="lib/jquery/js/jquery-ui-1.9.2.custom.js"></script>
+        <link rel="stylesheet" type="text/css" href="lib/jquery/css/ui-lightness/jquery-ui-1.9.2.custom.css">        
+        
+        <script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="lib/bootstrap/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" type="text/css" href="lib/bootstrap/css/bootstrap.min.css">
+        
+        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+        
+        <script type="text/javascript" src="lib/html2canvas/html2canvas.min.js"></script>
+        
+        <script type="text/javascript" src="lib/jsPDF/jspdf.min.js"></script>
+        <script type="text/javascript" src="lib/jsPDF/jspdf.plugin.cell.js"></script>
+        <script type="text/javascript" src="lib/jsPDF/libs/Deflate/adler32cs.js"></script>
+        <script type="text/javascript" src="lib/jsPDF/libs/Deflate/deflate.js"></script>
+        
+        <script type="text/javascript" src="lib/d3/d3.v3.min.js"></script>
+        <script type="text/javascript" src="lib/nvd3/nv.d3.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="lib/nvd3/nv.d3.min.css">
 
-        <script type="text/javascript" src="angular/angular.js"></script>
-        <script type="text/javascript" src="angular/angular-resource.js"></script>
-        <script type="text/javascript" src="angular/angular-route.js"></script>
-        <script type="text/javascript" src="angular/angular-cookies.js"></script>
-        <script type="text/javascript" src="angular/angular-animate.js"></script>
-        <script type="text/javascript" src="angular/ui-bootstrap-0.7.0.js"></script>
-        <script type="text/javascript" src="angular/ui-bootstrap-tpls-0.7.0.js"></script>
+        <script type="text/javascript" src="lib/angular/angular.js"></script>
+        <script type="text/javascript" src="lib/angular/angular-resource.js"></script>
+        <script type="text/javascript" src="lib/angular/angular-route.js"></script>
+        <script type="text/javascript" src="lib/angular/angular-cookies.js"></script>
+        <script type="text/javascript" src="lib/angular/angular-animate.js"></script>
+        <script type="text/javascript" src="lib/angular/ui-bootstrap-0.7.0.js"></script>
+        <script type="text/javascript" src="lib/angular/ui-bootstrap-tpls-0.7.0.js"></script>
 
         <script type="text/javascript" src="scripts/angularLocalStorage.js"></script>
         <script type="text/javascript" src="scripts/angular-translate.min.js"></script>
         <script type="text/javascript" src="scripts/angular-translate-loader-static-files.min.js"></script>
         <script type="text/javascript" src="scripts/angular-translate-loader-url.min.js"></script>
         <script type="text/javascript" src="scripts/angular-treeview.js"></script>
-        <script type="text/javascript" src="scripts/date.js"></script>
-        <script type="text/javascript" src="scripts/angular-charts.min.js"></script>
-        <script type="text/javascript" src="scripts/context-menu-directive.js"></script>	
+        <script type="text/javascript" src="scripts/date.js"></script>     
+        <script type="text/javascript" src="scripts/angularjs-nvd3-directives.js"></script> 
 
         <script type="text/javascript" src="scripts/app.js"></script>
         <script type="text/javascript" src="scripts/directives.js"></script>
         <script type="text/javascript" src="scripts/services.js"></script>
         <script type="text/javascript" src="scripts/controllers.js"></script>
+        <script type="text/javascript" src="scripts/pdf-generator.js"></script>
 
-        <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-        <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap-theme.min.css">
-        <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">
-        <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+        
+        
 
-        <link rel="stylesheet" type="text/css" href="styles/style.css">
-
+        <link type="text/css" rel="stylesheet" href="styles/style.css">
         <link type="text/css" rel="stylesheet" href="styles/angular-treeview.css">
 
     </head>

@@ -1,35 +1,57 @@
-<div class="information_bar">
-    <div ng-include="'views/personprofile.html'"></div>	
-</div>
+<div id="anc_lab_report">
 
-<!--<div class="side_bar">
-    <div ng-include="'views/anc/interventions.html'"></div>
-    <div ng-include="'views/anc/notes.html'"></div>
-</div> -->
-
-<div class="main_content">
-    <hr>
-    <h2>
-        {{'lab_report'| translate}}
-    </h2>
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th></th>                    
-                <th ng-repeat="dhis2Event in dhis2Events">{{dhis2Event.eventDate}}</th> 
-            </tr>
-        </thead>
-        <tr ng-repeat="row in rows">
-            <td>{{row}}</td> 
-            <td ng-repeat="val in cells[row]">{{val.value}}</td> 
-        </tr>
-    </table>
-
-    <!--<div ac-chart="line" ac-data="chartData" ac-config="chartConfig" id='chart' class='chart'></div> -->
-
-    <div class="margin-top">
-        <button ng-click="close()" class="big-button grey">
-            {{'close'| translate}}
-        </button>
+    <div class="information_bar">
+        <div ng-include="'views/personprofile.html'"></div>	
     </div>
+
+    <!--<div class="side_bar">
+        <div ng-include="'views/anc/interventions.html'"></div>
+        <div ng-include="'views/anc/notes.html'"></div>
+    </div> -->
+
+    <div class="main_content">
+        <br>
+        <h2>
+            {{'lab_report'| translate}}
+        </h2>
+        <table class="table table-bordered table-striped" id="lab_report_table">
+            <thead>
+                <tr>
+                    <th></th>                    
+                    <th ng-repeat="dhis2Event in dhis2Events">{{dhis2Event.eventDate}}</th> 
+                </tr>
+            </thead>
+            <tr ng-repeat="row in rows">
+                <td>{{row}}</td> 
+                <td ng-repeat="val in cells[row]">{{val.value}}</td> 
+            </tr>
+        </table>
+    </div>
+
 </div>
+
+<div>
+    <nvd3-line-chart
+        data="labData"
+        showLegend="true"
+        id="myChart"
+        xAxisTickFormat="xAxisTickFormatFunction()"
+        yAxisTickFormat="yAxisTickFormatFunction()"
+        width="550"
+        height="350"
+        showXAxis="true"
+        showYAxis="true"
+        interactive="true"
+        tooltips="true"
+        x="xFunction()"
+        y="yFunction()"
+        noData="No Records of Weight to Plot for!">
+        <svg></vg>
+    </nvd3-line-chart>
+</div>
+
+<div>
+    <button ng-click="close()" class="big-button grey">{{'close'| translate}}</button>
+    <button onclick="pdfGenerator()" class="big-button lightblue">{{'save_pdf'| translate}}</button>
+</div>
+

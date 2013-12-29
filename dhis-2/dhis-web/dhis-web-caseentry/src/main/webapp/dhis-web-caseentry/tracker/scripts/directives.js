@@ -29,17 +29,6 @@ var trackerDirectives = angular.module('trackerDirectives', [])
     };
 })
 
-.directive('dhis2Blur', ['$parse', function($parse) {
-  return function(scope, element, attr) {
-    var fn = $parse(attr['dhis2Blur']);
-    element.bind('blur', function(event) {
-      scope.$apply(function() {
-        fn(scope, {$event:event});
-      });
-    });
-  };
-}])
-
 .directive('uiTree', function() {
     return {
         template: '<ul class="uiTree"><ui-tree-node ng-repeat="node in tree"></ui-tree-node></ul>',

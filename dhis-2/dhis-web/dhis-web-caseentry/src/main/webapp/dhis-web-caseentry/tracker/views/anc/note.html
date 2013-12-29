@@ -1,11 +1,22 @@
 <div class="modal-header">
     <h2>{{dialogOptions.headerText | translate}}</h2>
 </div>
-<div class="modal-body">
-    <p>{{note | translate }}:{{dialogOptions.note}}</p>
-    <p>{{created_by | translate }}:{{dialogOptions.created_by}}</p>
-    <p>{{date | translate }}:{{dialogOptions.date}}</p>
+
+<div class="modal-body">    
+    <p><strong>{{dialogOptions.note | translate }}:</strong>  {{dialogOptions.bodyText.value}}</p>
+    <p><strong>{{dialogOptions.created_by | translate }}:</strong> {{dialogOptions.bodyText.storedBy}}</p>
+    <p><strong>{{dialogOptions.date | translate }}:</strong>  {{dialogOptions.bodyText.storedDate}}</p>
 </div>
+
+<!-- 
+
+<div class="modal-body">    
+    <p>{{dialogOptions.comment | translate }}:{{note.value}}</p>
+    <p>{{dialogOptions.created_by | translate }}:{{dialogOptions.bodyText.storedBy}}</p>
+    <p>{{dialogOptions.date | translate }}:{{dialogOptions.bodyText.storedDate}}</p>
+</div>
+
+-->
 
 <div class="modal-footer">
     <button class="big-button grey" 

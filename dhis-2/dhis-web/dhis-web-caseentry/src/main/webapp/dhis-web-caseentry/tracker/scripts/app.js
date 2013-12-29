@@ -11,11 +11,10 @@ var ancTracker = angular.module('ancTracker',
 		  'trackerServices', 
 		  'angularLocalStorage', 
 		  'pascalprecht.translate', 
-		  'angularTreeview', 
-                  'directive.contextMenu',
+		  'angularTreeview',
                   'ui.date',
 		  'ui.bootstrap',
-                  'angularCharts'])
+                  'nvd3ChartDirectives'])
 
 .config(function($routeProvider, $translateProvider) {	
 	
@@ -66,10 +65,9 @@ var ancTracker = angular.module('ancTracker',
 	
 	$translateProvider.preferredLanguage('no');	
 })
-.run(function($rootScope){
-    $rootScope.$on('hanldeEmit', function(event, args){
-       $rootScope.$broadcast('handleBroadcast', args); 
+.run(function ($rootScope, TrackerApp) { // instance-injector
+    
+    TrackerApp.getConfiguration().then(function(appConfiguration){
+        $rootScope.appConfiguration = appConfiguration;       
     });
 });
-
-

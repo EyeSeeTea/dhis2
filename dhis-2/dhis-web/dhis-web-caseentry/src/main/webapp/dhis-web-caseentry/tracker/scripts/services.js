@@ -5,7 +5,11 @@
 var trackerFactory = angular.module('trackerServices', ['ngResource'])
 
 /* Factory to fetch programs */
-.factory('ProgramFactory', function($http) {
+.factory('ProgramFactory', function($http, $rootScope) {
+    
+    var dhis2Url = $rootScope.appConfiguration.activities.dhis.href;   
+    
+    dhis2Url = '../..';
     
     var program, programPromise;
     var programs, programsPromise;
@@ -14,7 +18,7 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
         
         getProgram: function(uid){
             if( program != uid && !programPromise ){
-                programPromise = $http.get('../../api/programs/' + uid + '.json?viewClass=extended&paging=false').then(function(response){
+                programPromise = $http.get(dhis2Url + '/api/programs/' + uid + '.json?viewClass=extended&paging=false').then(function(response){
                    program = response.data.id;
                    return response.data;
                 });
@@ -24,7 +28,7 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
         
         getMyPrograms: function(){ 
             if( !programs || !programsPromise ){
-                programsPromise = $http.get('../../api/me/programs').then(function(response){
+                programsPromise = $http.get(dhis2Url + '/api/me/programs').then(function(response){
                    programs = response.data;
                    return programs;
                 });
@@ -35,13 +39,18 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
 })
 
 /* Factory to fetch programStages */
-.factory('ProgramStageFactory', function($http) {  
+.factory('ProgramStageFactory', function($http, $rootScope) {  
+    
+    var dhis2Url = $rootScope.appConfiguration.activities.dhis.href;    
+    
+    dhis2Url = '../..';
+    
     
     var programStage, promise;   
     return {        
         getProgramStage: function(uid){
             if( programStage !== uid ){
-                promise = $http.get( '../../api/programStages/' + uid + '.json?viewClass=extended&paging=false').then(function(response){
+                promise = $http.get( dhis2Url + 'api/programStages/' + uid + '.json?viewClass=extended&paging=false').then(function(response){
                    programStage = response.data.id;
                    return response.data;
                 });
@@ -51,12 +60,17 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
     };    
 })
 
-.factory('CurrentUserProfile', function($http) { 
+.factory('CurrentUserProfile', function($http, $rootScope) { 
+    
+    var dhis2Url = $rootScope.appConfiguration.activities.dhis.href;    
+    
+    dhis2Url = '../..';
+    
     var profile, promise;
     return {
         getProfile: function() {
             if( !promise ){
-                promise = $http.get('../../api/me/profile').then(function(response){
+                promise = $http.get(dhis2Url + '/api/me/profile').then(function(response){
                    profile = response.data;
                    return profile;
                 });
@@ -67,12 +81,16 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
 })
 
 /* Factory to enroll person in a program */
-.service('EnrollmentFactory', function( $http ) {
+.service('EnrollmentFactory', function($http, $rootScope) {
+    
+    var dhis2Url = $rootScope.appConfiguration.activities.dhis.href;    
+    
+    dhis2Url = '../..';
     
     var EnrollmentFactory = {};
 
     EnrollmentFactory.enrollPerson = function( enrollment ) {
-        return $http.post( '../../api/enrollments', enrollment );
+        return $http.post( dhis2Url + '/api/enrollments', enrollment );
     };
 
     return EnrollmentFactory;
@@ -80,6 +98,7 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
 
 /* Factory for loading Essential Interventions */
 .factory('EIFactory', function($http) {
+    
     var ei, promise;
     return {
         getEI: function() {            
@@ -95,12 +114,17 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
 })
 
 /* Factory for loading Essential Interventions - new*/
-.factory('EIFormatter', function($http) {    
+.factory('EIFormatter', function($http, $rootScope) {  
+    
+    var dhis2Url = $rootScope.appConfiguration.activities.dhis.href;    
+    
+    dhis2Url = '../..';
+    
     return {
         getEI: function() {            
             var ei, promise;
             if( !ei || !promise ){
-                promise = $http.get('../../api/dataElements.json?viewClass=extended&paging=false').then(function(response){
+                promise = $http.get(dhis2Url + '/api/dataElements.json?viewClass=extended&paging=false').then(function(response){
                     ei = response.data;                    
                     return response.data;
                 });
@@ -112,7 +136,7 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
             var ei, promise;
             var dataElements = [];
             if( !ei || !promise ){
-                promise = $http.get('../../api/dataElements.json?viewClass=extended&paging=false').then(function(response){
+                promise = $http.get(dhis2Url + '/api/dataElements.json?viewClass=extended&paging=false').then(function(response){
                     
                     angular.forEach(response.data.dataElements, function(de) {
                         
@@ -158,58 +182,70 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
 })
 
 /* Factory for loading OrgUnit */
-.factory('OrgUnitFactory', function($http) {
+.factory('OrgUnitFactory', function($http, $rootScope) {
+    
+    var dhis2Url = $rootScope.appConfiguration.activities.dhis.href;    
+    
+    dhis2Url = '../..';
 
     var OrgUnitFactory = {};
 
     OrgUnitFactory.getAllOrgUnits = function() {
-        return $http.get('../../api/organisationUnits.json');
+        return $http.get(dhis2Url + '/api/organisationUnits.json');
     };
 
     OrgUnitFactory.getOrgUnit = function(uid) {
-        return $http.get('../../api/organisationUnits/' + uid);
+        return $http.get(dhis2Url + '/api/organisationUnits/' + uid);
     };
 
     OrgUnitFactory.getMyOrgUnits = function() {
-        return $http.get('../../api/me/organisationUnits');
+        return $http.get(dhis2Url + '/api/me/organisationUnits');
     };
 
     return OrgUnitFactory;
 })
 
 /* Factory for getting person */
-.factory('PersonFactory', function($http) {
+.factory('PersonFactory', function($http, $rootScope) {
+    
+    var dhis2Url = $rootScope.appConfiguration.activities.dhis.href;    
+        
+    dhis2Url = '../..';
 
-    var baseUrl = '../../api/persons';
     var PersonFactory = {};
 
     PersonFactory.getPerson = function(uid) {
-        return $http.get(baseUrl + '/' + uid + '.json');
+        return $http.get(dhis2Url + '/api/persons/' + uid + '.json');
     };
 
     PersonFactory.getAllPersons = function(orgUnitUid) {
-        return $http.get(baseUrl + '?orgUnit=' + orgUnitUid + '&paging=false');
+        return $http.get(dhis2Url + '/api/persons?orgUnit=' + orgUnitUid + '&paging=false');
     };
 
     PersonFactory.registerPerson = function(person) {
-        return $http.post(baseUrl, person);
+        return $http.post(dhis2Url + '/api/persons', person);
     };
 
     PersonFactory.updatePerson = function(person) {
-        return $http.put(baseUrl + '/' + person.person , person);
+        return $http.put(dhis2Url + '/api/persons/' + person.person , person);
     };    
 
     return PersonFactory;
 })
 
-.factory('PersonService', function($http, PersonAttributesFactory){
+.factory('PersonService', function($http, $rootScope, PersonAttributesFactory){
+    
+    var dhis2Url = $rootScope.appConfiguration.activities.dhis.href;    
+    
+    dhis2Url = '../..';
+    
     var person, programAttributes, promise; 
     return {
         getPerson: function(personUid, programUid){     
 
             //if(!promise){
                 
-                promise = $http.get('../../api/persons/' + personUid + '.json').then(function(response){              
+                promise = $http.get(dhis2Url + '/api/persons/' + personUid + '.json').then(function(response){              
                     person = response.data;                
                     PersonAttributesFactory.getEnrollmentAttributes(programUid).then(function(data) {
                         var enrollmentAttributes = [];
@@ -239,7 +275,12 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
 })
 
 /* Factory for getting person attribute types*/
-.factory('PersonAttributesFactory', function($http) { 
+.factory('PersonAttributesFactory', function($http, $rootScope) { 
+    
+    var dhis2Url = $rootScope.appConfiguration.activities.dhis.href;    
+    
+    dhis2Url = '../..';
+    
     var rAttributes, rPromise;
     var eAttributes, ePromise;
     
@@ -247,7 +288,7 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
         getEnrollmentAttributes: function(uid){
 
             if( !rAttributes || !rPromise ){                
-                rPromise = $http.get('../../api/personAttributeTypes.json?program=' + uid + '&viewClass=extended&paging=false').then(function(response){                    
+                rPromise = $http.get(dhis2Url + '/api/personAttributeTypes.json?program=' + uid + '&viewClass=extended&paging=false').then(function(response){                    
                     angular.forEach(response.data.personAttributeTypes, function(registrationAttribute) {
                         if (angular.isObject(registrationAttribute.personAttributeOptions)) {
                             angular.forEach(registrationAttribute.personAttributeOptions, function(attributeOption) {
@@ -265,7 +306,7 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
         getRegistrationAttributes: function(){
 
             if( !eAttributes || !ePromise ){                
-                ePromise = $http.get('../../api/personAttributeTypes.json?withoutPrograms=true&viewClass=extended&paging=false').then(function(response){                    
+                ePromise = $http.get(dhis2Url + '/api/personAttributeTypes.json?withoutPrograms=true&viewClass=extended&paging=false').then(function(response){                    
                     angular.forEach(response.data.personAttributeTypes, function(registrationAttribute) {
                         if (angular.isObject(registrationAttribute.personAttributeOptions)) {
                             angular.forEach(registrationAttribute.personAttributeOptions, function(attributeOption) {
@@ -283,39 +324,44 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
 })
 
 /* factory for getting data elements */
-.factory('DataElementFactory', function($http) {
-
-    var dataElementGroupBaseUrl = '../../api/dataElementGroups/';
-    var dataElementBaseUrl = '../../api/dataElements/';
+.factory('DataElementFactory', function($http, $rootScope) {
+    
+    var dhis2Url = $rootScope.appConfiguration.activities.dhis.href;    
+    
+    dhis2Url = '../..';
 
     var DataElemmentFactory = {};
 
     DataElemmentFactory.getDataElement = function(uid) {
-        return $http.get(dataElementBaseUrl + uid + '.json');
+        return $http.get(dhis2Url + '/api/dataElements/' + uid + '.json');
     };
 
     DataElemmentFactory.getAllDataElements = function() {
-        return $http.get(dataElementBaseUrl);
+        return $http.get(dhis2Url + '/api/dataElements');
     };
 
     DataElemmentFactory.getDataElementGroup = function(uid) {
-        return $http.get(dataElementGroupBaseUrl + uid + '.json');
+        return $http.get(dhis2Url + '/api/dataElementGroups/' + uid + '.json');
     };
 
     DataElemmentFactory.getAllDataElementGroups = function() {
-        return $http.get(dataElementGroupBaseUrl);
+        return $http.get(dhis2Url + '/api/dataElementGroups');
     };
 
     return DataElemmentFactory;
 })
 
-.factory('DHIS2EventFactory', function($http, $filter, storage) {   
+.factory('DHIS2EventFactory', function($http, $rootScope, $filter, storage) {   
+    
+    var dhis2Url = $rootScope.appConfiguration.activities.dhis.href;    
+    
+    dhis2Url = '../..';
     
     return {
         
         getDHIS2Events: function(person, orgUnit, program){        
 
-            var promise = $http.get('../../api/events.json?' + 'person=' + person + '&orgUnit=' + orgUnit + '&program=' + program + '&paging=false').then(function(response){
+            var promise = $http.get(dhis2Url + '/api/events.json?' + 'person=' + person + '&orgUnit=' + orgUnit + '&program=' + program + '&paging=false').then(function(response){
                 var dhis2Events = response.data.eventList;
                 angular.forEach(dhis2Events, function(dhis2Event){
                     var programStage = storage.get(dhis2Event.programStage);
@@ -330,7 +376,7 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
         
         getDHIS2Event: function(eventUID){
             
-            var promise = $http.get('../../api/events/' + eventUID + '.json').then(function(response){               
+            var promise = $http.get(dhis2Url + '/api/events/' + eventUID + '.json').then(function(response){               
                 var dhis2Event = response.data;
                 var programStage = storage.get(dhis2Event.programStage);
                 dhis2Event.name = programStage.name;
@@ -342,14 +388,14 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
         },
         
         postDHIS2Event: function(dhis2Event){
-            var promise = $http.post('../../api/events.json?', dhis2Event).then(function(response){
+            var promise = $http.post(dhis2Url + '/api/events.json?', dhis2Event).then(function(response){
                 return response.data;
             });
             return promise;            
         },
         
         updateDHIS2Event: function(dhis2Event){            
-            var promise = $http.put('../../api/events/' + dhis2Event.event, dhis2Event).then(function(response){
+            var promise = $http.put(dhis2Url + '/api/events/' + dhis2Event.event, dhis2Event).then(function(response){
                 return response.data;
             });
             return promise;
@@ -411,23 +457,8 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
                 });
             }
             
-            return configurationPromoise; 
+            return configurationPromise; 
         }
-    };
-})
-
-.service('UtilityService', function() {
-
-    return {
-        searchById: function(data, k) {
-
-            angular.forEach(data, function(d) {
-                if (k.id == d.id) {
-                    return data.indexOf(d);
-                }
-            });
-            return -1;
-        }       
     };
 })
 
@@ -435,40 +466,35 @@ var trackerFactory = angular.module('trackerServices', ['ngResource'])
     
     return {
         getDataElementExpression: function(val, dhis2Events) {
-            
-            console.log('Input:  ', val);
-           
-           
+          
             var regex = /#[^#]*#/g,
                     match,
                     m,
                     mDe,
                     matches = [];
             
-            while (match = regex.exec(val)) {					
-                matches.push(match);  
+            //first collect all variables that need data value from the expression
+            while (match = regex.exec(val)) {               
                 m = match.toString();
                 mDe = m.substring(1,m.length-1);
+                matches.push(mDe);             
                 
-                var de = storage.get(mDe);
-                
-                var valueIsThere = false;
-                angular.forEach(dhis2Events, function(dhis2Event){
-                    angular.forEach(dhis2Event.dataValue, function(dataValue){
-                        if( de.id == dataValue.dataElement)
-                        {
-                            valueIsThere = true;
-                            console.log( storage.get(mDe), 'needs ',  dataValue );
-                        }
-                    });
-                });
-                
-                console.log('finally the value is there:  ', valueIsThere);
-                //var r = new RegExp(match,'g');
-                val = val.replace(new RegExp(match,'g'), 'value of match');
             }
             
-            console.log('Output:  ', val);
+            //replace variables with actuall data values - here I am trusing the order of entry
+            //if the expression requires a value not yet recorded - this will fail! 
+            for(var k=0; k<matches.length; k++){
+                var loopThrough = true;
+                var de = storage.get(matches[k]);
+                for(var i=0; i<dhis2Events.length && loopThrough; i++){
+                    for(var j=0; j<dhis2Events[i].dataValues.length && loopThrough; j++){
+                        if( de.id == dhis2Events[i].dataValues[j].dataElement ){
+                            val = val.replace(new RegExp('#'+de.code+'#','g'), dhis2Events[i].dataValues[j].value);
+                            loopThrough = false;
+                        }                            
+                    }
+                }
+            }            
             return val;
         }
     };

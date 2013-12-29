@@ -23,6 +23,7 @@
         "save": "Save",
 	"save_and_register_pregnancy": "Save and Register Pregnancy",
 	"save_and_close": "Save and Close",
+        "save_pdf": "Save PDF",
 	"cancel": "Cancel",
 	"close": "Close",
         "ok": "OK",
@@ -57,6 +58,7 @@
 	"date_of_birth (age)": "Date of Birth (Age)",
 	"phone_number": "Phone Number",
 	"operations": "Operations",
+        "menu": "Menu",
 	"edit": "Edit",
 	"enrollment": "Enrollment",
         "enroll": "Enroll",
@@ -114,7 +116,9 @@
         "person_edit": "Edit Person Profile",
         "consultation_error": "Consultation - ERROR",
         "consultation_note": "Consultation Note",
-        "settings_error": "Settings - ERROR",
-        "please_select_orgunit_or_program": "Please select OrgUnit/Program from settings page",        
+        "settings_error": "Settings - ERROR",        
+        "please_select_orgunit_or_program": "Please select OrgUnit/Program from settings page",  
+        "intervention_error": "Intervention - ERROR",
+        "intervention_error_text": "The value you just recorded depends on other values not yet recorded",
 	"app_footer": "Folkehelseinstituttet | Health Information Systems Programme | UiO"	
 }
