@@ -28,20 +28,23 @@ package org.hisp.dhis.dxf2.events.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.dxf2.InputValidationService;
 import org.hisp.dhis.dxf2.events.person.Person;
 import org.hisp.dhis.dxf2.importsummary.ImportConflict;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
-import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.i18n.I18nManager;
-import org.hisp.dhis.i18n.I18nManagerException;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -57,17 +60,15 @@ import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.program.ProgramStageService;
+import org.hisp.dhis.system.util.DateUtils;
+import org.hisp.dhis.system.util.ValidationUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -110,53 +111,26 @@ public abstract class AbstractEventService
     private IdentifiableObjectManager manager;
 
     @Autowired
-    private InputValidationService inputValidationService;
-
-    @Autowired
     private EventStore eventStore;
 
     @Autowired
     private I18nManager i18nManager;
 
-    private I18nFormat _format;
-
     private static final ObjectMapper objectMapper = new ObjectMapper();
-
-    @Override
-    public void setFormat( I18nFormat format )
-    {
-        this._format = format;
-    }
-
-    I18nFormat getFormat()
-    {
-        if ( _format != null )
-        {
-            return _format;
-        }
-
-        try
-        {
-            _format = i18nManager.getI18nFormat();
-        }
-        catch ( I18nManagerException ignored )
-        {
-        }
-
-        return _format;
-    }
 
     // -------------------------------------------------------------------------
     // CREATE
     // -------------------------------------------------------------------------
 
     @Override
+    @Transactional
     public ImportSummary saveEvent( Event event )
     {
         return saveEvent( event, null );
     }
 
     @Override
+    @Transactional
     public ImportSummary saveEvent( Event event, ImportOptions importOptions )
     {
         Program program = programService.getProgram( event.getProgram() );
@@ -550,6 +524,7 @@ public abstract class AbstractEventService
         if ( programStageInstance.getProgramStage().getCaptureCoordinates() )
         {
             Coordinate coordinate = null;
+
             if ( programStageInstance.getLongitude() != null && programStageInstance.getLongitude() != null )
             {
                 coordinate = new Coordinate( programStageInstance.getLongitude(), programStageInstance.getLatitude() );
@@ -568,7 +543,7 @@ public abstract class AbstractEventService
                 }
             }
 
-            if ( coordinate.isValid() )
+            if ( coordinate != null && coordinate.isValid() )
             {
                 event.setCoordinate( coordinate );
             }
@@ -620,14 +595,13 @@ public abstract class AbstractEventService
         return !programsByCurrentUser.contains( program );
     }
 
-    private boolean validateDataElement( DataElement dataElement, String value, ImportSummary importSummary )
+    private boolean validateDataValue( DataElement dataElement, String value, ImportSummary importSummary )
     {
-        InputValidationService.Status status = inputValidationService.validateDataElement( dataElement, value,
-            getFormat() );
+        String status = ValidationUtils.dataValueIsValid( value, dataElement );
 
-        if ( !status.isSuccess() )
+        if ( status != null )
         {
-            importSummary.getConflicts().add( new ImportConflict( dataElement.getUid(), status.getMessage() ) );
+            importSummary.getConflicts().add( new ImportConflict( dataElement.getUid(), status ) );
             importSummary.getDataValueCount().incrementIgnored();
             return false;
         }
@@ -731,7 +705,7 @@ public abstract class AbstractEventService
             programStageInstance.setStatus( ProgramStageInstance.COMPLETED_STATUS );
             programStageInstance.setCompletedDate( new Date() );
             programStageInstance.setCompletedUser( storedBy );
-            programStageInstanceService.completeProgramStageInstance( programStageInstance, getFormat() );
+            programStageInstanceService.completeProgramStageInstance( programStageInstance, i18nManager.getI18nFormat() );
         }
     }
 
@@ -747,7 +721,7 @@ public abstract class AbstractEventService
         importSummary.setStatus( ImportStatus.SUCCESS );
         boolean dryRun = importOptions != null && importOptions.isDryRun();
 
-        Date eventDate = getFormat().parseDate( event.getEventDate() );
+        Date eventDate = DateUtils.getMediumDate( event.getEventDate() );
 
         if ( eventDate == null )
         {
@@ -785,7 +759,7 @@ public abstract class AbstractEventService
             }
             else
             {
-                if ( validateDataElement( dataElement, dataValue.getValue(), importSummary ) )
+                if ( validateDataValue( dataElement, dataValue.getValue(), importSummary ) )
                 {
                     String dataValueStoredBy = dataValue.getStoredBy() != null ? dataValue.getStoredBy() : storedBy;
 

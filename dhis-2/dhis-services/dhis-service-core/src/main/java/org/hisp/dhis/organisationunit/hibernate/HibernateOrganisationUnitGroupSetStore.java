@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2;
+package org.hisp.dhis.organisationunit.hibernate;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,44 +28,27 @@ package org.hisp.dhis.dxf2;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.i18n.I18nFormat;
+import org.hibernate.Query;
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupSetStore;
+
+import java.util.Collection;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface InputValidationService
+public class HibernateOrganisationUnitGroupSetStore
+    extends HibernateIdentifiableObjectStore<OrganisationUnitGroupSet>
+    implements OrganisationUnitGroupSetStore
 {
-    public void setFormat( I18nFormat format );
-
-    final class Status
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public Collection<OrganisationUnitGroupSet> getByDataDimension( boolean dataDimension )
     {
-        private boolean success = true;
+        Query query = getQuery( "SELECT d FROM OrganisationUnitGroupSet d WHERE d.dataDimension=:dataDimension" );
+        query.setBoolean( "dataDimension", dataDimension );
 
-        private String message;
-
-        public Status()
-        {
-        }
-
-        public Status( boolean success, String message )
-        {
-            this.success = success;
-            this.message = message;
-        }
-
-        public boolean isSuccess()
-        {
-            return success;
-        }
-
-        public String getMessage()
-        {
-            return message;
-        }
+        return query.list();
     }
-
-    Status validateDataElement( DataElement dataElement, String value );
-
-    Status validateDataElement( DataElement dataElement, String value, I18nFormat format );
 }
