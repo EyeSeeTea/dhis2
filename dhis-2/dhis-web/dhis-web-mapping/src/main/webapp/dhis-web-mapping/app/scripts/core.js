@@ -1792,6 +1792,7 @@ Ext.onReady( function() {
 				paramString += peItems[i].id;
 				paramString += i < peItems.length - 1 ? ';' : '';
 			}
+console.log(GIS, gis);			
 
 			Ext.data.JsonP.request({
 				url: gis.init.contextPath + '/api/analytics.jsonp' + paramString,
