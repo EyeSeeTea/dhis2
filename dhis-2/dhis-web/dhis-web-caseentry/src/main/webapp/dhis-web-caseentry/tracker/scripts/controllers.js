@@ -5,13 +5,17 @@ var trackerControllers = angular.module('trackerControllers', [])
 
 //Controller for DHIS2 page
 .controller('DHIS2Controller',
-        function(CurrentUserProfile,                
+        function($rootScope,
+                CurrentUserProfile,                
                 $translate) {
 
     //Get current locale            
     CurrentUserProfile.getProfile().then(function(profile) {
         $translate.uses(profile.settings.keyUiLocale);
-    });        
+    });
+    
+    window.location = $rootScope.appConfiguration.activities.dhis.href;
+
 })
 
 //Controller for home page
@@ -31,6 +35,7 @@ var trackerControllers = angular.module('trackerControllers', [])
                 CurrentUserProfile,
                 $location,
                 $route,
+                $filter,
                 PersonService,
                 DHIS2EventFactory,
                 orderByFilter,
@@ -54,9 +59,17 @@ var trackerControllers = angular.module('trackerControllers', [])
             
     $scope.xAxis;        
     //Get registered events for the selected person 
-    DHIS2EventFactory.getDHIS2Events($scope.personUid, $scope.selectedOrgUnit.id, $scope.selectedProgram.id).then(function(data) {
+    DHIS2EventFactory.getDHIS2Events($scope.personUid, $scope.selectedOrgUnit.id, $scope.selectedProgram.id).then(function(data) {        
         
-        $scope.dhis2Events = data;           
+        $scope.dhis2Events = data;       
+        
+        angular.forEach($scope.dhis2Events, function(dhis2Event){
+            dhis2Event.eventDate = Date.parse(dhis2Event.eventDate);
+            dhis2Event.eventDate = $filter('date')(dhis2Event.eventDate, 'yyyy-MM-dd');                    
+        });
+        
+        $scope.dhis2Events = orderByFilter($scope.dhis2Events, '-eventDate');
+        //$scope.dhis2Events.reverse();            
          
         if(!angular.isUndefined($scope.dhis2Events)){
             
@@ -100,7 +113,7 @@ var trackerControllers = angular.module('trackerControllers', [])
                     }
                     
                     //Initially assume value is empty for each lab data element                     
-                    var labValue = { value: '', event: dhis2Event.event};     
+                    var labValue = { value: '', event: dhis2Event.event, date: dhis2Event.eventDate};     
                     
                     //if a data element has lab value - pick that value
                     angular.forEach(dhis2Event.dataValues, function(dataValue){
@@ -135,28 +148,73 @@ var trackerControllers = angular.module('trackerControllers', [])
                 var cell = $scope.labValues[de.id];
                 $scope.rows.push(de.name);
                 $scope.cells[de.name] = cell;                              
-            });            
+            });          
             
             //plot weight graph
-            var lab = [];
+            
+            var chartRows = [];
+            var chartCols = [{id: "visit", label: "Visit", type: "string"}, {id: "weight-id", label: "Weight", type: "number"}];            
+            
             for(var i=0; i<$scope.cells['Weight'].length; i++){
                 var val = $scope.cells['Weight'][i].value;
                 if( !angular.isUndefined(val) && val != ""){
-                    lab.push({x: i, y: val});
+                    var x = {v: $scope.cells['Weight'][i].date};
+                    var y = {v: $scope.cells['Weight'][i].value};
+                    var point = [];
+                    point.push(x);
+                    point.push(y);
+                    var chartRow = { c: point };
+                    chartRows.push(chartRow);
+
                 }               
             }
             
-            $scope.xAxis = lab.length;
-            
-            $scope.labData = [{key: 'Weight', values: lab, markers: [250]}];    
+            //Google chart    
+            var chart1 = {};
+
+            chart1.type = "LineChart";
+            chart1.displayed = false;
+            chart1.cssStyle = "height:400px; width:100%;";            
+
+            chart1.data = { "cols": chartCols, "rows": chartRows };
+
+            chart1.options = {
+                "title": "Weight chart",
+                "displayExactValues": true,
+                "vAxis": {
+                    "title": "Kg", 
+                    "gridlines": {"count": 10}
+                },
+                "hAxis": {
+                    "title": "Visit Date"
+                }
+            };
+
+            $scope.chart = chart1;
         }
         
     });    
+    
+    $scope.close = function() {
+        $location.path('/anc');
+        $route.reload();
+    };
    
+    //Graph specifics
     $scope.xFunction = function(){
 	return function(d){
 		return d.x;
 	};
+    };
+    
+    $scope.xForceFunction = function(){
+        return $scope.xAxis;
+    }
+    
+    $scope.xAxisTickFormatFunction = function(){
+        /*return function(d){
+            return d3.time.format('%x')(new Date(d));
+        };*/
     };
 
     $scope.yFunction = function(){
@@ -164,21 +222,28 @@ var trackerControllers = angular.module('trackerControllers', [])
 		return d.y;
 	};
     };
-
-    $scope.close = function() {
-        $location.path('/anc');
-        $route.reload();
-    };
+    
+    $scope.colorFunction = function() {
+        return function(d, i) {
+            return '#E01B5D';
+        };
+    };    
+    
 })
 
 //Controller for summary page
 .controller('ANCSummaryController',
-        function($scope,
+        function($rootScope,
+                $scope,
                 CurrentUserProfile,
                 $location,
                 $route,
                 storage,
                 PersonService,
+                DHIS2EventFactory,
+                orderByFilter,
+                TransferHandler,
+                ExpressionService,
                 $translate) {
 
     //Get current locale            
@@ -211,6 +276,10 @@ var trackerControllers = angular.module('trackerControllers', [])
     DHIS2EventFactory.getDHIS2Events($scope.personUid, $scope.selectedOrgUnit.id, $scope.selectedProgram.id).then(function(data) {
         
         $scope.dhis2Events = data;
+        $scope.dhis2Events = orderByFilter($scope.dhis2Events, '-eventDate');
+        $scope.dhis2Events.reverse();            
+        
+        $rootScope.$broadcast('sharedData', {currentPerson: $scope.personUid, currentEvent: $scope.dhis2Events[0]});
         
         if(!angular.isUndefined($scope.dhis2Events)){
             
@@ -220,69 +289,68 @@ var trackerControllers = angular.module('trackerControllers', [])
             //Fetch available events for the selected person
             angular.forEach($scope.dhis2Events, function(dhis2Event){         
 
-                angular.forEach(dhis2Event.dataValues, function(dataValue){                  
+                angular.forEach(dhis2Event.dataValues, function(dataValue){
+                    
                     var de = storage.get(dataValue.dataElement);
                     var actualValue = dataValue.value;      
+                    
+                    if( angular.isObject(de) ){
+                        
+                        if( angular.isObject(de.optionSet) ){
+                            angular.forEach(de.optionSet, function(option){
+                                if(option.value == dataValue.value){
+                                    actualValue = option.label;
+                                }
+                            });  
+                        }        
+                        angular.forEach(de.actions, function(eiAction) {                           
 
-                    if( angular.isObject(de.optionSet) ){
-                        angular.forEach(de.optionSet, function(option){
-                            if(option.value == dataValue.value){
-                                actualValue = option.label;
+                            var val = eiAction.value.replace(new RegExp('#' + de.code + '#', 'g'), dataValue.value);
+
+                            //check if the expression contains some varibales
+                            if (val.indexOf('#') != -1) {
+                                //format expression, replace varibales with value
+                                val = ExpressionService.getDataElementExpression(val, $scope.dhis2Events);
+                            }                  
+
+                            //make sure the expression has no variables - but values
+                            if (val.indexOf('#') != -1) {
+                                //console.log('the expression is after:  ', val);
+                                //if the expression still contains some varibales - this means 
+                                //the expression requires values which are not yet collected.
+                                var dialogOptions = {
+                                    headerText: 'intervention_error',
+                                    bodyText: 'intervention_error_text'
+                                };
+
+                                DialogService.showDialog({}, dialogOptions);
                             }
-                        });  
-                    }        
-                    angular.forEach(de.actions, function(eiAction) {                           
+                            else{
+                                if ($scope.$eval(val)) {
+                                    TransferHandler.store(eiAction.task.conditionsComplications, de.code, actualValue, con);
+                                    TransferHandler.store(eiAction.task.summary, de.code, actualValue, smr);
+                                    TransferHandler.store(eiAction.task.reminders, de.code, actualValue, rem);
+                                    TransferHandler.store(eiAction.task.messaging, de.code, actualValue, mes);
+                                    TransferHandler.store(eiAction.task.scheduling, de.code, actualValue, sch);
+                                }                        
+                            }
+                        });
 
-                        var val = eiAction.value.replace(new RegExp('#' + de.code + '#', 'g'), dataValue.value);
-
-                        //check if the expression contains some varibales
-                        if (val.indexOf('#') != -1) {
-                            //format expression, replace varibales with value
-                            val = ExpressionService.getDataElementExpression(val, $scope.dhis2Events);
-                        }                  
-
-                        //make sure the expression has no variables - but values
-                        if (val.indexOf('#') != -1) {
-                            //console.log('the expression is after:  ', val);
-                            //if the expression still contains some varibales - this means 
-                            //the expression requires values which are not yet collected.
-                            var dialogOptions = {
-                                headerText: 'intervention_error',
-                                bodyText: 'intervention_error_text'
-                            };
-
-                            DialogService.showDialog({}, dialogOptions);
-                        }
-                        else{
-                            if ($scope.$eval(val)) {
-                                console.log('For Summary:  ', eiAction.task.summary);
-                                TransferHandler.store(eiAction.task.dependencies, de.code, actualValue, dep);
-                                TransferHandler.store(eiAction.task.conditionsComplications, de.code, actualValue, con);
-                                TransferHandler.store(eiAction.task.summary, de.code, actualValue, smr);
-                                TransferHandler.store(eiAction.task.reminders, de.code, actualValue, rem);
-                                TransferHandler.store(eiAction.task.messaging, de.code, actualValue, mes);
-                                TransferHandler.store(eiAction.task.scheduling, de.code, actualValue, sch);
-                            }                        
-                        }
-                    });
-
-                    if (de.labResults) {
-                        if (lab.indexOf(de.labResults) != -1) {
-                            lab.push(de.labResults);
-                        }
-                    }            
-                });       
-
-                // Dep is special need to be shared with data entry controller
-                DependencyPageService.setDepPage(dep);            
-
+                        if (de.labResults) {
+                            if (lab.indexOf(de.labResults) != -1) {
+                                lab.push(de.labResults);
+                            }
+                        }                        
+                    }
+                    
+                });  
+                
                 $scope.conResult = con;
                 $scope.smrResult = smr;
                 $scope.remResult = rem;
                 $scope.mesResult = mes;
                 $scope.schResult = sch;
                 $scope.labResult = lab;
-
             });        
         }        
     }); 
@@ -502,29 +570,20 @@ var trackerControllers = angular.module('trackerControllers', [])
     //Get current locale            
     CurrentUserProfile.getProfile().then(function(profile) {
         $translate.uses(profile.settings.keyUiLocale);
-    });   
+    }); 
 
     //Get orgunits for the logged in user
-    OrgUnitFactory.getMyOrgUnits().success(function(orgUnits) {
+    OrgUnitFactory.getMyOrgUnits().then(function(orgUnits) {
         $scope.orgUnits = orgUnits;
     });
 
     $scope.selectedOrgUnit = storage.get('SELECTED_ORGUNIT');
-    $scope.selecteProgram = storage.get('SELECTED_PROGRAM');
-
-    if (!angular.isObject($scope.selectedOrgUnit)) {
-        $scope.selectedOrgUnit = {name: 'not_selected'};
-    }
-
-    if (!angular.isObject($scope.selecteProgram)) {
-        $scope.selecteProgram = {label: 'not_selected'};
-    }
+    $scope.selecteProgram = storage.get('SELECTED_PROGRAM');   
 
     if (angular.isObject($scope.selectedOrgUnit)) {
 
         $scope.programs = [];
         ProgramFactory.getMyPrograms().then(function(data) {
-
             angular.forEach(data.organisationUnits, function(ou) {
                 if (ou.id == $scope.selectedOrgUnit.id) {
                     angular.forEach(ou.programs, function(p) {
@@ -536,39 +595,11 @@ var trackerControllers = angular.module('trackerControllers', [])
                 }
             });
         });
-    }
-
-    $scope.$watch('orgunit.currentNode', function(newObj, oldObj) {
-
-        if ($scope.orgunit && angular.isObject($scope.orgunit.currentNode)) {
-            $scope.selectedOrgUnit = $scope.orgunit.currentNode;
-
-            $scope.programs = [];
-            var selectedProgramIndex = '';
-
-            ProgramFactory.getMyPrograms().then(function(prs) {
-                angular.forEach(prs.organisationUnits, function(ou) {
-                    if (ou.id == $scope.selectedOrgUnit.id) {
-                        angular.forEach(ou.programs, function(p) {
-                            $scope.programs.push(p);
-
-                            if (p.id == $scope.selecteProgram.id) {
-                                selectedProgramIndex = ou.programs.indexOf(p);
-                                $scope.selecteProgram = ou.programs[selectedProgramIndex];
-                            }
-                        });
-                    }
-                });
-            });
-        }
-    }, false);
+    }   
 
     $scope.saveSettings = function() {
-
-        if (!angular.isObject($scope.selectedOrgUnit) ||
-                $scope.selectedOrgUnit.name == 'not_selected' ||
-                !angular.isObject($scope.selecteProgram) ||
-                $scope.selecteProgram.label == 'not_selected') {
+        
+        if (!angular.isObject($scope.selectedOrgUnit) || !angular.isObject($scope.selecteProgram) ) {
             
             var dialogOptions = {
                     headerText: 'settings_error',
@@ -578,10 +609,7 @@ var trackerControllers = angular.module('trackerControllers', [])
             DialogService.showDialog({}, dialogOptions);
         }
 
-        if (angular.isObject($scope.selectedOrgUnit) &&
-                $scope.selectedOrgUnit.name != 'not_selected' &&
-                angular.isObject($scope.selecteProgram) &&
-                $scope.selecteProgram.label != 'not_selected') {
+        if (angular.isObject($scope.selectedOrgUnit) && angular.isObject($scope.selecteProgram) ) {
 
             storage.set('SELECTED_ORGUNIT', $scope.selectedOrgUnit);
             storage.set('SELECTED_PROGRAM', $scope.selecteProgram);
@@ -616,6 +644,42 @@ var trackerControllers = angular.module('trackerControllers', [])
                     $location.path('/anc');
                 }); 
             });
+        }
+    };    
+
+    $scope.expandCollapse = function(orgUnit) {
+
+        if( !angular.isUndefined( orgUnit.hasChildren ) ){
+
+            //Get children for the selected orgUnit
+            OrgUnitFactory.getOrgUnit(orgUnit.id).then(function(data) {
+                orgUnit.show = !orgUnit.show;  
+                delete orgUnit.hasChildren;
+                orgUnit.children = data.children;                   
+            });           
+        }
+        else
+        {
+            orgUnit.show = !orgUnit.show;   
+        }        
+    };    
+    
+    $scope.loadPrograms = function(orgUnit){    
+        $scope.selectedOrgUnit = orgUnit;
+        $scope.selecteProgram = null;
+        if (angular.isObject($scope.selectedOrgUnit)) {   
+
+            $scope.programs = [];
+            ProgramFactory.getMyPrograms().then(function(data) {
+                angular.forEach(data.organisationUnits, function(ou) {
+                    if (ou.id === $scope.selectedOrgUnit.id) {
+                        angular.forEach(ou.programs, function(p) {
+                            $scope.programs.push(p);                                                   
+                        });
+                    }
+                });
+            });
+            
         }
     };
 })
@@ -752,10 +816,15 @@ var trackerControllers = angular.module('trackerControllers', [])
         else{            
             $scope.isFirstEvent = false;    
             
-            $scope.dhis2Events = orderByFilter($scope.dhis2Events, '-eventDate');
-            $scope.dhis2Events.reverse();
+            angular.forEach($scope.dhis2Events, function(dhis2Event){
+                dhis2Event.eventDate = Date.parse(dhis2Event.eventDate);
+                dhis2Event.eventDate = $filter('date')(dhis2Event.eventDate, 'yyyy-MM-dd');                    
+            });
             
-            $rootScope.$broadcast('sharedData', {currentPerson: $scope.personUid, currentEvent: $scope.dhis2Events[0], eventForNote: $scope.dhis2Events[0].event});
+            $scope.dhis2Events = orderByFilter($scope.dhis2Events, '-eventDate');
+            $scope.dhis2Events.reverse();          
+            
+            $rootScope.$broadcast('sharedData', {currentPerson: $scope.personUid, currentEvent: $scope.dhis2Events[0]});
         }        
     });
 
@@ -801,7 +870,7 @@ var trackerControllers = angular.module('trackerControllers', [])
                 $scope.DHIS2Event.event = data.importSummaries[0].reference;
                 storage.set(data.importSummaries[0].reference, $scope.DHIS2Event);
 
-                $rootScope.$broadcast('sharedData', {currentPerson: $scope.personUid, currentEvent: $scope.DHIS2Event, eventForNote: $scope.DHIS2Event});     
+                $rootScope.$broadcast('sharedData', {currentPerson: $scope.personUid, currentEvent: $scope.DHIS2Event});     
  
                 $location.path('/anc/dataentry').search({personUid: $scope.personUid, eventUid: data.importSummaries[0].reference});
                 $route.reload();
@@ -824,6 +893,7 @@ var trackerControllers = angular.module('trackerControllers', [])
                 $location,
                 PersonService,
                 DHIS2EventFactory,
+                $filter,
                 storage) {
 
     //Get current locale            
@@ -837,7 +907,9 @@ var trackerControllers = angular.module('trackerControllers', [])
     //get the selected event
     $scope.eventUid = ($location.search()).eventUid;    
     DHIS2EventFactory.getDHIS2Event($scope.eventUid).then(function(dhis2Event){
-        $scope.dhis2Event = dhis2Event;      
+        $scope.dhis2Event = dhis2Event;        
+        dhis2Event.eventDate = Date.parse(dhis2Event.eventDate);
+        dhis2Event.eventDate = $filter('date')(dhis2Event.eventDate, 'yyyy-MM-dd');                    
         
         //Pick selected person UID and fetch full person profile from server
         $scope.personUid = $scope.dhis2Event.person;
@@ -872,8 +944,7 @@ var trackerControllers = angular.module('trackerControllers', [])
         });        
 
         //broadcast the selected event for others to pick
-        $rootScope.$broadcast('sharedData', {currentPerson: $scope.dhis2Event.person, eventForNote: $scope.dhis2Event.event, currentEvent: $scope.dhis2Event});
-
+        $rootScope.$broadcast('sharedData', {currentPerson: $scope.dhis2Event.person, currentEvent: $scope.dhis2Event});
     });      
 })
 
@@ -911,7 +982,7 @@ var trackerControllers = angular.module('trackerControllers', [])
     $scope.eventUid = ($location.search()).eventUid;    
     $scope.currentEvent = storage.get($scope.eventUid); 
     
-    $rootScope.$broadcast('sharedData', {currentPerson: $scope.personUid, currentEvent: $scope.currentEvent, eventForNote: $scope.eventUid});
+    $rootScope.$broadcast('sharedData', {currentPerson: $scope.personUid, currentEvent: $scope.currentEvent});
     
     //get program stage for the selected event
     $scope.programStage = storage.get($scope.currentEvent.programStage);   
@@ -933,6 +1004,8 @@ var trackerControllers = angular.module('trackerControllers', [])
         
         if( !angular.isUndefined(dataElement.value) ){           
             
+            console.log('the value is:  ', dataElement.value);
+            
             if( $scope.currentEvent.dataValues.length > 0 ){
 
                 angular.forEach($scope.currentEvent.dataValues, function(dataValue){
@@ -952,7 +1025,7 @@ var trackerControllers = angular.module('trackerControllers', [])
             }
                      
             DHIS2EventFactory.updateDHIS2Event($scope.currentEvent).then(function(data){                
-                $rootScope.$broadcast('sharedData', {currentPerson: $scope.currentEvent.person, currentEvent: $scope.currentEvent, eventForNote: $scope.currentEvent.event});
+                $rootScope.$broadcast('sharedData', {currentPerson: $scope.currentEvent.person, currentEvent: $scope.currentEvent});
             });                   
         }        
     };
@@ -990,11 +1063,14 @@ var trackerControllers = angular.module('trackerControllers', [])
     });    
    
     $scope.$on('sharedData', function(event, args) {
-
-        console.log('I have picked - INTE');
+        
         //pick selected orgUnit and program
         var selectedOrgUnit = storage.get('SELECTED_ORGUNIT');
         var selectedProgram = storage.get('SELECTED_PROGRAM');
+        
+        //get the current event where data is being recorded
+        //(or else the latest event in case of repots)
+        $scope.currentEvent = args.currentEvent;
         
         //Fetch available events for the selected person
         DHIS2EventFactory.getDHIS2Events(args.currentPerson, selectedOrgUnit.id, selectedProgram.id).then(function(data) {
@@ -1002,16 +1078,14 @@ var trackerControllers = angular.module('trackerControllers', [])
             $scope.dhis2Events = data;   
                
             $scope.dhis2Events = orderByFilter($scope.dhis2Events, '-eventDate');
-            $scope.dhis2Events.reverse();
+            $scope.dhis2Events.reverse();            
             
-            $scope.currentEvent = args.currentEvent;
             
             //Execute actions of interventions
             var dep = [], con = [], smr = [], rem = [], mes = [], sch = [], lab = [];
 
             $scope.depResult = '';
             $scope.conResult = '';
-            $scope.smrResult = '';
             $scope.remResult = '';
             $scope.mesResult = '';
             $scope.schResult = '';
@@ -1058,8 +1132,7 @@ var trackerControllers = angular.module('trackerControllers', [])
 
                             if ($scope.$eval(val)) {
                                 TransferHandler.store(eiAction.task.dependencies, de.code, actualValue, dep);
-                                TransferHandler.store(eiAction.task.conditionsComplications, de.code, actualValue, con);
-                                TransferHandler.store(eiAction.task.summary, de.code, actualValue, smr);
+                                TransferHandler.store(eiAction.task.conditionsComplications, de.code, actualValue, con);                                
                                 TransferHandler.store(eiAction.task.reminders, de.code, actualValue, rem);
                                 TransferHandler.store(eiAction.task.messaging, de.code, actualValue, mes);
                                 TransferHandler.store(eiAction.task.scheduling, de.code, actualValue, sch);
@@ -1078,15 +1151,12 @@ var trackerControllers = angular.module('trackerControllers', [])
             // Dep is special need to be shared with data entry controller
             DependencyPageService.setDepPage(dep);            
             
-            $scope.conResult = con;
-            $scope.smrResult = smr;
+            $scope.conResult = con;            
             $scope.remResult = rem;
             $scope.mesResult = mes;
             $scope.schResult = sch;
-            $scope.labResult = lab;
-            
-        });       
-        
+            $scope.labResult = lab;           
+        });        
     });   
 })
 
@@ -1105,11 +1175,9 @@ var trackerControllers = angular.module('trackerControllers', [])
         $translate.uses(profile.settings.keyUiLocale);
     });      
     
-    $scope.$on('sharedData', function(event, args) {  
+    $scope.$on('sharedData', function(event, args) {        
         
-        console.log('picked - NOTE:  ', args.eventForNote);     
-        
-        DHIS2EventFactory.getDHIS2Event(args.eventForNote).then(function(data){    
+        DHIS2EventFactory.getDHIS2Event(args.currentEvent.event).then(function(data){    
             $scope.currentEvent = data;
             $scope.currentEvent.notes = orderByFilter($scope.currentEvent.notes, '-storedDate');
         });               
@@ -1140,7 +1208,7 @@ var trackerControllers = angular.module('trackerControllers', [])
             DHIS2EventFactory.updateDHIS2Event(e).then(function(data){
                 $scope.note = '';
                 $scope.addNoteField = false; //note is added, hence no need to show note field.
-                $rootScope.$broadcast('sharedData', {currentPerson: $scope.currentEvent.person, currentEvent: $scope.currentEvent, eventForNote: $scope.currentEvent.event});
+                $rootScope.$broadcast('sharedData', {currentPerson: $scope.currentEvent.person, currentEvent: $scope.currentEvent});
             });            
         }        
     };
@@ -1160,7 +1228,7 @@ var trackerControllers = angular.module('trackerControllers', [])
     };
     
     $scope.searchNote = function(){        
-        $scope.searchNoteField = $scope.searchNoteField == false? true : false;
+        $scope.searchNoteField = $scope.searchNoteField === false ? true : false;
         $scope.noteSearchText = '';
     };
 });

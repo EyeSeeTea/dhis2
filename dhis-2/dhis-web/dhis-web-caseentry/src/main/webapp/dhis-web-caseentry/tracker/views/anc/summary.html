@@ -3,7 +3,6 @@
 </div>
 
 <div class="side_bar">
-    <div ng-include="'views/anc/interventions.html'"></div>
     <div ng-include="'views/anc/notes.html'"></div>
 </div>
 
@@ -11,9 +10,17 @@
     <h2>
         {{'summary'| translate}}
     </h2>
-    <p>
-        {{summary}}
-    </p>
+    
+    <div ng-show="smrResult.length > 0">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                {{'summary'| translate}}
+            </div>  
+            <div class="list-group" ng-repeat="smr in smrResult">
+                <div class="list-group-item">{{smr}}</div>
+            </div>
+        </div>
+    </div>
 
     <div class="margin-top">
         <button ng-click="close()" class="big-button grey">

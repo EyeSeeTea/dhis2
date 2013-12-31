@@ -14,7 +14,7 @@ var ancTracker = angular.module('ancTracker',
 		  'angularTreeview',
                   'ui.date',
 		  'ui.bootstrap',
-                  'nvd3ChartDirectives'])
+                  'googlechart'])
 
 .config(function($routeProvider, $translateProvider) {	
 	
@@ -68,6 +68,7 @@ var ancTracker = angular.module('ancTracker',
 .run(function ($rootScope, TrackerApp) { // instance-injector
     
     TrackerApp.getConfiguration().then(function(appConfiguration){
-        $rootScope.appConfiguration = appConfiguration;       
+        $rootScope.appConfiguration = appConfiguration;  
+        $rootScope.appConfiguration.activities.dhis.href = 'http://localhost:8080';
     });
 });

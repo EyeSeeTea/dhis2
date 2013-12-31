@@ -26,32 +26,23 @@
                 <td ng-repeat="val in cells[row]">{{val.value}}</td> 
             </tr>
         </table>
+        <br>
+        <div>
+            <div google-chart chart="chart" style="{{chart.cssStyle}}" on-ready="chartReady()"/>
+        </div>
     </div>
 
 </div>
-
-<div>
-    <nvd3-line-chart
-        data="labData"
-        showLegend="true"
-        id="myChart"
-        xAxisTickFormat="xAxisTickFormatFunction()"
-        yAxisTickFormat="yAxisTickFormatFunction()"
-        width="550"
-        height="350"
-        showXAxis="true"
-        showYAxis="true"
-        interactive="true"
-        tooltips="true"
-        x="xFunction()"
-        y="yFunction()"
-        noData="No Records of Weight to Plot for!">
-        <svg></vg>
-    </nvd3-line-chart>
-</div>
-
+<div style="clear:both"></div>
+<br>
 <div>
     <button ng-click="close()" class="big-button grey">{{'close'| translate}}</button>
     <button onclick="pdfGenerator()" class="big-button lightblue">{{'save_pdf'| translate}}</button>
 </div>
+
+
+
+
+
+
 

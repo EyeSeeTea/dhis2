@@ -1,0 +1,20 @@
+<div class="org-unit-tree">
+
+    <script type="text/ng-template" id="orgUnitTree.html">
+
+        <span class="org-unit-tree-button" ng-click="expandCollapse(orgUnit)" ng-show="orgUnit.show && orgUnit.children.length > 0">-</span>
+        <span class="org-unit-tree-button" ng-click="expandCollapse(orgUnit)" ng-show="(!orgUnit.show && orgUnit.children.length > 0) || (!orgUnit.show && orgUnit.hasChildren)">+</span>
+
+        <span class="org-unit-tree-button" ng-click="loadPrograms(orgUnit)" ng-class="{'selected-org-unit' : orgUnit.id === selectedOrgUnit.id}">{{orgUnit.name}}</span>
+
+        <ul class="org-unit-tree-ul" ng-show="orgUnit.show">
+            <li class="org-unit-tree-li" ng-repeat="orgUnit in orgUnit.children" ng-include="'orgUnitTree.html'"></li>
+        </ul>
+
+    </script>
+
+    <ul class="org-unit-tree-ul" >
+        <li class="org-unit-tree-li" ng-repeat="orgUnit in orgUnits" ng-include="'orgUnitTree.html'"></li>
+    </ul>
+    
+</div>
