@@ -282,7 +282,7 @@ function listAllPatient()
 	hideById('editPatientDiv');
 	hideById('migrationPatientDiv');
 	hideById('advanced-search');
-	
+	showById('searchByIdTR');
 	Patient.listAll();
 }
 

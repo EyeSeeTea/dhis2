@@ -28,12 +28,23 @@ package org.hisp.dhis.api.controller.organisationunit;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.hisp.dhis.api.controller.AbstractCrudController;
 import org.hisp.dhis.api.controller.WebOptions;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.api.utils.WebUtils;
 import org.hisp.dhis.api.webdomain.OrganisationUnitList;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -41,24 +52,37 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.Map;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping(value = OrganisationUnitGroupController.RESOURCE_PATH)
+@RequestMapping( value = OrganisationUnitGroupController.RESOURCE_PATH )
 public class OrganisationUnitGroupController
     extends AbstractCrudController<OrganisationUnitGroup>
 {
     public static final String RESOURCE_PATH = "/organisationUnitGroups";
 
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
+    @Autowired
+    private OrganisationUnitGroupService organisationUnitGroupService;
+
+    @Autowired
+    private OrganisationUnitService organisationUnitService;
+
+    // --------------------------------------------------------------------------
+    // Methods
+    // --------------------------------------------------------------------------
+
     @RequestMapping( value = "/{uid}/members", method = RequestMethod.GET )
-    public String getMembers( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
-        Model model, HttpServletRequest request, HttpServletResponse response ) throws Exception
+    public String getMembers( @PathVariable( "uid" )
+    String uid, @RequestParam
+    Map<String, String> parameters, Model model, HttpServletRequest request, HttpServletResponse response )
+        throws Exception
     {
         WebOptions options = new WebOptions( parameters );
         OrganisationUnitGroup organisationUnitGroup = getEntity( uid );
@@ -82,5 +106,39 @@ public class OrganisationUnitGroupController
         model.addAttribute( "viewClass", options.getViewClass( "detailed" ) );
 
         return StringUtils.uncapitalize( getEntitySimpleName() );
+    }
+
+    @RequestMapping( value = "/{uid}/members/{orgUnitUid}", method = RequestMethod.POST )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_ORGANISATIONUNIT_ADD')" )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    public void addMember( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" )
+    String uid, @PathVariable( "orgUnitUid" )
+    String orgUnitUid )
+        throws Exception
+    {
+        OrganisationUnitGroup group = organisationUnitGroupService.getOrganisationUnitGroup( uid );
+        OrganisationUnit unit = organisationUnitService.getOrganisationUnit( orgUnitUid );
+        
+        if ( group.addOrganisationUnit( unit ) )
+        {
+            organisationUnitGroupService.updateOrganisationUnitGroup( group );
+        }
+    }
+
+    @RequestMapping( value = "/{uid}/members/{orgUnitUid}", method = RequestMethod.DELETE )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_ORGANISATIONUNIT_ADD')" )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    public void removeMember( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" )
+    String uid, @PathVariable( "orgUnitUid" )
+    String orgUnitUid )
+        throws Exception
+    {
+        OrganisationUnitGroup group = organisationUnitGroupService.getOrganisationUnitGroup( uid );
+        OrganisationUnit unit = organisationUnitService.getOrganisationUnit( orgUnitUid );
+        
+        if ( group.removeOrganisationUnit( unit ) )
+        {
+            organisationUnitGroupService.updateOrganisationUnitGroup( group );
+        }
     }
 }
