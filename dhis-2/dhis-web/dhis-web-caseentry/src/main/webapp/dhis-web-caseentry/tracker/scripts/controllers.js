@@ -682,6 +682,11 @@ var trackerControllers = angular.module('trackerControllers', [])
             
         }
     };
+    
+    $scope.cancel = function() {
+        $location.path('/anc');
+    };
+    
 })
 
 //Controller for first page

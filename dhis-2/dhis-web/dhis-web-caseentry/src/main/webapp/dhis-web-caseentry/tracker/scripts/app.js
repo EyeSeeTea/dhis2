@@ -11,7 +11,6 @@ var ancTracker = angular.module('ancTracker',
 		  'trackerServices', 
 		  'angularLocalStorage', 
 		  'pascalprecht.translate', 
-		  'angularTreeview',
                   'ui.date',
 		  'ui.bootstrap',
                   'googlechart'])
