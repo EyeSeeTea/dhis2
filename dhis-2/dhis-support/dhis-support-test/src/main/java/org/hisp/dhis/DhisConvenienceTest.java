@@ -31,6 +31,7 @@ package org.hisp.dhis;
 import java.io.File;
 import java.io.StringReader;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -52,6 +53,7 @@ import org.hisp.dhis.aggregation.AggregatedDataValueService;
 import org.hisp.dhis.aggregation.AggregatedOrgUnitDataValueService;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.DimensionalObject;
+import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.constant.ConstantService;
@@ -110,6 +112,7 @@ import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.resourcetable.ResourceTableService;
 import org.hisp.dhis.sqlview.SqlView;
 import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserService;
@@ -120,6 +123,13 @@ import org.hisp.dhis.validation.ValidationRuleGroup;
 import org.hisp.dhis.validation.ValidationRuleService;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.Assert;
 import org.xml.sax.InputSource;
 
 /**
@@ -195,6 +205,8 @@ public abstract class DhisConvenienceTest
     protected UserService userService;
 
     protected MessageService messageService;
+    
+    protected IdentifiableObjectManager identifiableObjectManager;
 
     static
     {
@@ -726,11 +738,13 @@ public abstract class DhisConvenienceTest
     }
 
     /**
+     * Uses the given category option combo also as attribute option combo.
+     * 
      * @param dataElement The data element.
      * @param period The period.
      * @param source The source.
      * @param value The value.
-     * @param categoryOptionCombo The data element category option combo.
+     * @param categoryOptionCombo The category (and attribute) option combo.
      */
     public static DataValue createDataValue( DataElement dataElement, Period period, OrganisationUnit source,
         String value, DataElementCategoryOptionCombo categoryOptionCombo )
@@ -740,11 +754,12 @@ public abstract class DhisConvenienceTest
         dataValue.setDataElement( dataElement );
         dataValue.setPeriod( period );
         dataValue.setSource( source );
+        dataValue.setCategoryOptionCombo( categoryOptionCombo );
+        dataValue.setAttributeOptionCombo( categoryOptionCombo );
         dataValue.setValue( value );
         dataValue.setComment( "Comment" );
         dataValue.setStoredBy( "StoredBy" );
         dataValue.setTimestamp( date );
-        dataValue.setOptionCombo( categoryOptionCombo );
 
         return dataValue;
     }
@@ -754,22 +769,50 @@ public abstract class DhisConvenienceTest
      * @param period The period.
      * @param source The source.
      * @param value The value.
-     * @param lastupdated The date.
-     * @param categoryOptionCombo The data element category option combo.
+     * @param categoryOptionCombo The category option combo.
+     * @param attributeOptionCombo The attribute option combo.
      */
     public static DataValue createDataValue( DataElement dataElement, Period period, OrganisationUnit source,
-        String value, Date lastupdated, DataElementCategoryOptionCombo categoryOptionCombo )
+        String value, DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo )
     {
         DataValue dataValue = new DataValue();
 
         dataValue.setDataElement( dataElement );
         dataValue.setPeriod( period );
         dataValue.setSource( source );
+        dataValue.setCategoryOptionCombo( categoryOptionCombo );
+        dataValue.setAttributeOptionCombo( attributeOptionCombo );
+        dataValue.setValue( value );
+        dataValue.setComment( "Comment" );
+        dataValue.setStoredBy( "StoredBy" );
+        dataValue.setTimestamp( date );
+
+        return dataValue;
+    }
+
+    /**
+     * @param dataElement The data element.
+     * @param period The period.
+     * @param source The source.
+     * @param value The value.
+     * @param lastupdated The date.value.
+     * @param categoryOptionCombo The category option combo.
+     * @param attributeOptionCombo The attribute option combo.
+     */
+    public static DataValue createDataValue( DataElement dataElement, Period period, OrganisationUnit source,
+        String value, Date lastupdated, DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo )
+    {
+        DataValue dataValue = new DataValue();
+
+        dataValue.setDataElement( dataElement );
+        dataValue.setPeriod( period );
+        dataValue.setSource( source );
+        dataValue.setCategoryOptionCombo( categoryOptionCombo );
+        dataValue.setAttributeOptionCombo( attributeOptionCombo );
         dataValue.setValue( value );
         dataValue.setComment( "Comment" );
         dataValue.setStoredBy( "StoredBy" );
         dataValue.setTimestamp( lastupdated );
-        dataValue.setOptionCombo( categoryOptionCombo );
 
         return dataValue;
     }
@@ -1119,7 +1162,7 @@ public abstract class DhisConvenienceTest
      * @return ValidationCriteria
      */
     public static ValidationCriteria createValidationCriteria( char uniqueCharacter, String property, int operator,
-        Object value )
+        String value )
     {
         ValidationCriteria validationCriteria = new ValidationCriteria();
 
@@ -1285,5 +1328,79 @@ public abstract class DhisConvenienceTest
         {
             return null;
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // Allow xpath testing of DXF2
+    // -------------------------------------------------------------------------
+
+    /**
+     * Creates a user and injects into the security context with username 
+     * "username". Requires <code>identifiableObjectManager</code> and 
+     * <code>userService</code> to be injected into the test.
+     * 
+     * @param allAuth whether to grant ALL authority to user.
+     * @param auths authorities to grant to user.
+     * @return the user.
+     */
+    public User createUserAndInjectSecurityContext( boolean allAuth, String... auths )
+    {
+        return createUserAndInjectSecurityContext( null, allAuth, auths );
+    }
+    
+    /**
+     * Creates a user and injects into the security context with username 
+     * "username". Requires <code>identifiableObjectManager</code> and 
+     * <code>userService</code> to be injected into the test.
+     * 
+     * @param organisationUnits the organisation units of the user.
+     * @param allAuth whether to grant the ALL authority to user.
+     * @param auths authorities to grant to user.
+     * @return the user.
+     */
+    public User createUserAndInjectSecurityContext( Set<OrganisationUnit> organisationUnits, boolean allAuth, String... auths )
+    {
+        Assert.notNull( identifiableObjectManager, "IdentifiableObjectManager must be injected in test" );
+        Assert.notNull( userService, "UserService must be injected in test" );
+        
+        UserAuthorityGroup userAuthorityGroup = new UserAuthorityGroup();
+        userAuthorityGroup.setName( "Superuser" );
+        
+        if ( allAuth )
+        {
+            userAuthorityGroup.getAuthorities().add( "ALL" );
+        }
+        
+        if ( auths != null )
+        {
+            for ( String auth : auths )
+            {
+                userAuthorityGroup.getAuthorities().add( auth );
+            }
+        }
+        
+        identifiableObjectManager.save( userAuthorityGroup );
+
+        User user = createUser( 'A' );
+        
+        if ( organisationUnits != null )
+        {
+            user.setOrganisationUnits( organisationUnits );
+        }
+        
+        user.getUserCredentials().getUserAuthorityGroups().add( userAuthorityGroup );
+        userService.addUser( user );
+        user.getUserCredentials().setUser( user );
+        userService.addUserCredentials( user.getUserCredentials() );
+
+        List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+        authorities.add( new SimpleGrantedAuthority( "ALL" ) );
+
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User( "username", "password", authorities );
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken( userDetails, "", authorities );
+        SecurityContextHolder.getContext().setAuthentication( authentication );
+
+        return user;
     }
 }

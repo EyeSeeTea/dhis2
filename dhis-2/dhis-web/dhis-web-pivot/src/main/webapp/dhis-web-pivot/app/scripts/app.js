@@ -1000,17 +1000,20 @@ Ext.onReady( function() {
 			enableKeyEvents: true,
 			currentValue: '',
 			listeners: {
-				keyup: function() {
-					if (this.getValue() !== this.currentValue) {
-						this.currentValue = this.getValue();
+				keyup: {
+					fn: function() {
+						if (this.getValue() !== this.currentValue) {
+							this.currentValue = this.getValue();
 
-						var value = this.getValue(),
-							url = value ? ns.core.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
-							store = ns.app.stores.reportTable;
+							var value = this.getValue(),
+								url = value ? ns.core.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
+								store = ns.app.stores.reportTable;
 
-						store.page = 1;
-						store.loadStore(url);
-					}
+							store.page = 1;
+							store.loadStore(url);
+						}
+					},
+					buffer: 100
 				}
 			}
 		});
@@ -2234,10 +2237,6 @@ Ext.onReady( function() {
 				xLayout = service.layout.getExtendedLayout(layout);
 				paramString = web.analytics.getParamString(xLayout, true);
 
-				if (!web.analytics.validateUrl(init.contextPath + '/api/analytics.json' + paramString)) {
-					return;
-				}
-
 				// show mask
 				web.mask.show(ns.app.centerRegion);
 
@@ -2251,7 +2250,13 @@ Ext.onReady( function() {
 					disableCaching: false,
 					failure: function(r) {
 						web.mask.hide(ns.app.centerRegion);
-						alert(r.responseText);
+
+						if (r.status === 414) {
+							web.analytics.validateUrl(init.contextPath + '/api/analytics.json' + paramString);
+						}
+						else {
+							alert(r.responseText);
+						}
 					},
 					success: function(r) {
 						var response = api.response.Response(Ext.decode(r.responseText));
@@ -2486,7 +2491,7 @@ Ext.onReady( function() {
 		ns.app.stores.indicatorGroup = indicatorGroupStore;
 
 		dataElementAvailableStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'dataElementId', 'optionComboId', 'operandName'],
+			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
 				reader: {
@@ -2505,7 +2510,7 @@ Ext.onReady( function() {
 					path = '/dataElementGroups/' + uid + '.json?domainType=aggregate&links=false&paging=false';
 				}
 				else if (uid === 0) {
-					path = 'dataElements.json?domainType=aggregate&paging=false&links=false';
+					path = '/dataElements.json?domainType=aggregate&paging=false&links=false';
 				}
 
 				if (!path) {
@@ -2533,10 +2538,10 @@ Ext.onReady( function() {
 				if (Ext.isString(uid)) {
 					this.setProxy({
 						type: 'ajax',
-						url: ns.core.init.contextPath + '/dhis-web-commons-ajax-json/getOperands.action?uid=' + uid,
+						url: ns.core.init.contextPath + '/api/dataElementOperands.json?links=false&dataElementGroup=' + uid,
 						reader: {
 							type: 'json',
-							root: 'operands'
+							root: 'dataElementOperands'
 						}
 					});
 
@@ -2544,8 +2549,7 @@ Ext.onReady( function() {
 						scope: this,
 						callback: function() {
 							this.each(function(r) {
-								r.set('id', r.data.dataElementId + '-' + r.data.optionComboId);
-								r.set('name', r.data.operandName);
+								r.set('id', r.data.id.split('.').join('-'));
 							});
 
 							ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
@@ -2553,7 +2557,8 @@ Ext.onReady( function() {
 					});
 				}
 				else {
-					alert('Invalid parameter');
+					this.removeAll();
+                    dataElementGroupComboBox.clearValue();
 				}
 			},
 			listeners: {
@@ -4650,6 +4655,7 @@ Ext.onReady( function() {
 				url += '&tableLayout=true';
 				url += '&columns=' + columnNames.join(';');
 				url += '&rows=' + rowNames.join(';');
+				url += ns.app.layout.hideEmptyRows ? '&hideEmptyRows=true' : '';
 
 				window.open(url, isNewTab ? '_blank' : '_top');
 			}
@@ -5041,9 +5047,7 @@ Ext.onReady( function() {
 						xtype: 'button',
 						text: NS.i18n.home,
 						handler: function() {
-							//window.location.href = ns.core.init.contextPath + '/dhis-web-commons-about/redirect.action';
-
-							ns.core.web.pivot.sort(ns.app.xLayout, ns.app.response, 'Uvn6LCg7dVU');
+							window.location.href = ns.core.init.contextPath + '/dhis-web-commons-about/redirect.action';
 						}
 					}
 				]
@@ -5252,7 +5256,7 @@ Ext.onReady( function() {
 						levels.push(parseInt(ouRecords[i].id.split('-')[1]));
 					}
 					else if (ouRecords[i].id.substr(0,8) === 'OU_GROUP') {
-						groups.push(parseInt(ouRecords[i].id.split('-')[1]));
+						groups.push(ouRecords[i].id.split('-')[1]);
 					}
 					else {
 						orgunits.push(ouRecords[i].id);

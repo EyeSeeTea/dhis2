@@ -28,14 +28,12 @@ package org.hisp.dhis.organisationunit;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
@@ -47,12 +45,13 @@ import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.DimensionalView;
 import org.hisp.dhis.common.view.ExportView;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Kristian Nordal
@@ -75,6 +74,8 @@ public class OrganisationUnitGroupSet
     @Scanned
     private Set<OrganisationUnitGroup> organisationUnitGroups = new HashSet<OrganisationUnitGroup>();
 
+    private boolean dataDimension = true;
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -88,6 +89,12 @@ public class OrganisationUnitGroupSet
         this.name = name;
         this.description = description;
         this.compulsory = compulsory;
+    }
+
+    public OrganisationUnitGroupSet( String name, String description, boolean compulsory, boolean dataDimension )
+    {
+        this( name, description, compulsory );
+        this.dataDimension = dataDimension;
     }
 
     // -------------------------------------------------------------------------
@@ -174,15 +181,15 @@ public class OrganisationUnitGroupSet
 
     @Override
     @JsonProperty
-    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class, DimensionalView.class } )
-    @JacksonXmlElementWrapper( localName = "items", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "item", namespace = DxfNamespaces.DXF_2_0 )
+    @JsonSerialize(contentAs = BaseIdentifiableObject.class)
+    @JsonView({ DetailedView.class, DimensionalView.class })
+    @JacksonXmlElementWrapper(localName = "items", namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty(localName = "item", namespace = DxfNamespaces.DXF_2_0)
     public List<NameableObject> getItems()
     {
         return new ArrayList<NameableObject>( organisationUnitGroups );
     }
-    
+
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
@@ -207,8 +214,8 @@ public class OrganisationUnitGroupSet
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public String getDescription()
     {
         return description;
@@ -247,6 +254,19 @@ public class OrganisationUnitGroupSet
         this.organisationUnitGroups = organisationUnitGroups;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isDataDimension()
+    {
+        return dataDimension;
+    }
+
+    public void setDataDimension( boolean dataDimension )
+    {
+        this.dataDimension = dataDimension;
+    }
+
     @Override
     public void mergeWith( IdentifiableObject other )
     {
@@ -258,6 +278,7 @@ public class OrganisationUnitGroupSet
 
             compulsory = organisationUnitGroupSet.isCompulsory();
             description = organisationUnitGroupSet.getDescription() == null ? description : organisationUnitGroupSet.getDescription();
+            dataDimension = organisationUnitGroupSet.isDataDimension();
 
             removeAllOrganisationUnitGroups();
 

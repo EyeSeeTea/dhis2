@@ -1,65 +1,76 @@
 
-// does current user have any organisation units?
-var emptyOrganisationUnits = false;
+dhis2.util.namespace( 'dhis2.de' );
+
+// whether current user has any organisation units
+dhis2.de.emptyOrganisationUnits = false;
 
 // Identifiers for which zero values are insignificant, also used in entry.js
-var significantZeros = [];
+dhis2.de.significantZeros = [];
 
 // Array with associative arrays for each data element, populated in select.vm
-var dataElements = [];
+dhis2.de.dataElements = [];
 
 // Associative array with [indicator id, expression] for indicators in form,
 // also used in entry.js
-var indicatorFormulas = [];
+dhis2.de.indicatorFormulas = [];
 
 // Array with associative arrays for each data set, populated in select.vm
-var dataSets = [];
+dhis2.de.dataSets = [];
 
 // Maps input field to optionSet
-var optionSets = {};
+dhis2.de.optionSets = {};
 
 // Associative array with identifier and array of assigned data sets
-var dataSetAssociationSets = [];
+dhis2.de.dataSetAssociationSets = [];
 
 // Associate array with mapping between organisation unit identifier and data
 // set association set identifier
-var organisationUnitAssociationSetMap = [];
+dhis2.de.organisationUnitAssociationSetMap = [];
+
+// Default category combo uid
+dhis2.de.defaultCategoryCombo = undefined;
+
+// Category combinations for data value attributes
+dhis2.de.categoryCombos = {};
+
+// Categories for data value attributes
+dhis2.de.categories = {};
 
 // Array with keys on form {dataelementid}-{optioncomboid}-min/max with min/max
 // values
-var currentMinMaxValueMap = [];
+dhis2.de.currentMinMaxValueMap = [];
 
 // Indicates whether any data entry form has been loaded
-var dataEntryFormIsLoaded = false;
+dhis2.de.dataEntryFormIsLoaded = false;
 
 // Indicates whether meta data is loaded
-var metaDataIsLoaded = false;
+dhis2.de.metaDataIsLoaded = false;
 
 // Currently selected organisation unit identifier
-var currentOrganisationUnitId = null;
+dhis2.de.currentOrganisationUnitId = null;
 
 // Currently selected data set identifier
-var currentDataSetId = null;
+dhis2.de.currentDataSetId = null;
 
-// Current offset, next or previous corresponding to increasing or decreasing
-// value with one
-var currentPeriodOffset = 0;
+// Array with category objects, null if default category combo / no categories
+dhis2.de.currentCategories = null;
+
+// Current offset, next or previous corresponding to increasing or decreasing value
+dhis2.de.currentPeriodOffset = 0;
 
 // Username of user who marked the current data set as complete if any
-var currentCompletedByUser = null;
+dhis2.de.currentCompletedByUser = null;
 
 // Period type object
-var periodTypeFactory = new PeriodType();
+dhis2.de.periodTypeFactory = new PeriodType();
 
 // Instance of the StorageManager
-var storageManager = new StorageManager();
+dhis2.de.storageManager = new StorageManager();
 
-// Is this form a multiOrg form?
-var multiOrganisationUnit = false;
+// Indicates whether current form is multi org unit
+dhis2.de.multiOrganisationUnit = false;
 
 // "organisationUnits" object inherited from ouwt.js
-
-// TODO remove all usage of name="entryfield" etc and migrate to class="entryfield" etc
 
 var COLOR_GREEN = '#b9ffb9';
 var COLOR_YELLOW = '#fffe8c';
@@ -87,12 +98,12 @@ var DAO = DAO || {};
 
 function getCurrentOrganisationUnit() 
 {
-    if ( $.isArray( currentOrganisationUnitId ) ) 
+    if ( $.isArray( dhis2.de.currentOrganisationUnitId ) ) 
     {
-        return currentOrganisationUnitId[0];
+        return dhis2.de.currentOrganisationUnitId[0];
     }
 
-    return currentOrganisationUnitId;
+    return dhis2.de.currentOrganisationUnitId;
 }
 
 DAO.store = new dhis2.storage.Store( {
@@ -138,7 +149,7 @@ $( document ).ready( function()
 	{
 	    if ( loggedIn )
 	    {
-	        if ( storageManager.hasLocalData() )
+	        if ( dhis2.de.storageManager.hasLocalData() )
 	        {
 	            var message = i18n_need_to_sync_notification
 	            	+ ' <button id="sync_button" type="button">' + i18n_sync_now + '</button>';
@@ -149,12 +160,13 @@ $( document ).ready( function()
 	        }
 	        else
 	        {
-            if( emptyOrganisationUnits ) {
-              setHeaderMessage(i18n_no_orgunits);
-            } else {
-              setHeaderDelayMessage(i18n_online_notification);
+	            if ( dhis2.de.emptyOrganisationUnits ) {
+	                setHeaderMessage( i18n_no_orgunits );
+	            } 
+	            else {
+	                setHeaderDelayMessage( i18n_online_notification );
+	            }
             }
-          }
 	    }
 	    else
 	    {
@@ -175,10 +187,11 @@ $( document ).ready( function()
 
     $( document ).bind( 'dhis2.offline', function()
     {
-      if( emptyOrganisationUnits ) {
-        setHeaderMessage(i18n_no_orgunits);
-      } else {
-        setHeaderMessage( i18n_offline_notification );
+      if ( dhis2.de.emptyOrganisationUnits ) {
+          setHeaderMessage( i18n_no_orgunits );
+      } 
+      else {
+          setHeaderMessage( i18n_offline_notification );
       }
     } );
 
@@ -222,16 +235,19 @@ function loadMetaData()
 	    {
 	        var metaData = JSON.parse( sessionStorage[KEY_METADATA] );
 
-            emptyOrganisationUnits = metaData.emptyOrganisationUnits;
-	        significantZeros = metaData.significantZeros;
-	        dataElements = metaData.dataElements;
-	        indicatorFormulas = metaData.indicatorFormulas;
-	        dataSets = metaData.dataSets;
-            optionSets = metaData.optionSets;
-	        dataSetAssociationSets = metaData.dataSetAssociationSets;
-	        organisationUnitAssociationSetMap = metaData.organisationUnitAssociationSetMap;
+	        dhis2.de.emptyOrganisationUnits = metaData.emptyOrganisationUnits;
+	        dhis2.de.significantZeros = metaData.significantZeros;
+	        dhis2.de.dataElements = metaData.dataElements;
+	        dhis2.de.indicatorFormulas = metaData.indicatorFormulas;
+	        dhis2.de.dataSets = metaData.dataSets;
+	        dhis2.de.optionSets = metaData.optionSets;
+	        dhis2.de.dataSetAssociationSets = metaData.dataSetAssociationSets;
+	        dhis2.de.organisationUnitAssociationSetMap = metaData.organisationUnitAssociationSetMap;
+	        dhis2.de.defaultCategoryCombo = metaData.defaultCategoryCombo;
+	        dhis2.de.categoryCombos = metaData.categoryCombos;
+	        dhis2.de.categories = metaData.categories;
 
-	        metaDataIsLoaded = true;
+	        dhis2.de.metaDataIsLoaded = true;
 	        selection.responseReceived(); // Notify that meta data is loaded
 	        $( '#loaderSpan' ).hide();
 	        log( 'Meta-data loaded' );
@@ -243,13 +259,13 @@ function loadMetaData()
 
 function uploadLocalData()
 {
-    if ( !storageManager.hasLocalData() )
+    if ( !dhis2.de.storageManager.hasLocalData() )
     {
         return;
     }
 
-    var dataValues = storageManager.getAllDataValues();
-    var completeDataSets = storageManager.getCompleteDataSets();
+    var dataValues = dhis2.de.storageManager.getAllDataValues();
+    var completeDataSets = dhis2.de.storageManager.getCompleteDataSets();
 
     setHeaderWaitMessage( i18n_uploading_data_notification );
 
@@ -282,7 +298,7 @@ function uploadLocalData()
                 else
                 {
                     log( 'Successfully saved complete dataset with value: ' + value );
-                    storageManager.clearCompleteDataSet( value );
+                    dhis2.de.storageManager.clearCompleteDataSet( value );
                     ( array = array.slice( 1 ) ).length && pushCompleteDataSets( array );
 
                     if ( array.length < 1 )
@@ -330,7 +346,7 @@ function uploadLocalData()
             dataType: 'json',
             success: function( data, textStatus, xhr )
             {
-            	storageManager.clearDataValueJSON( value );
+            	dhis2.de.storageManager.clearDataValueJSON( value );
                 log( 'Successfully saved data value with value: ' + value );
                 ( array = array.slice( 1 ) ).length && pushDataValues( array );
 
@@ -349,7 +365,7 @@ function uploadLocalData()
             	{
             		// Ignore value for now TODO needs better handling for locking
             		
-            		storageManager.clearDataValueJSON( value );
+            		dhis2.de.storageManager.clearDataValueJSON( value );
             	}
             	else // Connection lost during upload
             	{
@@ -367,7 +383,7 @@ function uploadLocalData()
 function addEventListeners()
 {
     var dataSetId = $( '#selectedDataSetId' ).val();
-	var formType = dataSets[dataSetId].type;
+	var formType = dhis2.de.dataSets[dataSetId].type;
 
     $( '.entryfield' ).each( function( i )
     {
@@ -376,7 +392,7 @@ function addEventListeners()
         var split = splitFieldId( id );
         var dataElementId = split.dataElementId;
         var optionComboId = split.optionComboId;
-        currentOrganisationUnitId = split.organisationUnitId;
+        dhis2.de.currentOrganisationUnitId = split.organisationUnitId;
 
         var type = getDataElementType( dataElementId );
 
@@ -526,16 +542,14 @@ function addEventListeners()
 
 function resetSectionFilters()
 {
-    $( '#selectionBox' ).css( 'height', '93px' );
-    $( '#filterDataSetSectionTr' ).hide();
+    $( '#filterDataSetSectionDiv' ).hide();
     $( '.formSection' ).show();
 }
 
 function clearSectionFilters()
 {
     $( '#filterDataSetSection' ).children().remove();
-    $( '#selectionBox' ).css( 'height', '93px' );
-    $( '#filterDataSetSectionTr' ).hide();
+    $( '#filterDataSetSectionDiv' ).hide();
     $( '.formSection' ).show();
 }
 
@@ -549,36 +563,33 @@ function clearEntryForm()
 {
     $( '#contentDiv' ).html( '' );
 
-    currentPeriodOffset = 0;
+    dhis2.de.currentPeriodOffset = 0;
 
-    dataEntryFormIsLoaded = false;
+    dhis2.de.dataEntryFormIsLoaded = false;
 
     $( '#completenessDiv' ).hide();
     $( '#infoDiv' ).hide();
 }
 
-function loadForm( dataSetId, multiOrg )
+function loadForm()
 {
-    currentOrganisationUnitId = selection.getSelected()[0];
+	var dataSetId = dhis2.de.currentDataSetId;
+	
+	dhis2.de.currentOrganisationUnitId = selection.getSelected()[0];
 
-    if ( !multiOrg && storageManager.formExists( dataSetId ) )
+    if ( !dhis2.de.multiOrganisationUnit && dhis2.de.storageManager.formExists( dataSetId ) )
     {
         log( 'Loading form locally: ' + dataSetId );
 
-        var html = storageManager.getForm( dataSetId );
+        var html = dhis2.de.storageManager.getForm( dataSetId );
 
         $( '#contentDiv' ).html( html );
 
-        multiOrganisationUnit = !!$('.formSection').data('multiorg');
-
-        if ( !multiOrganisationUnit )
-        {
-            if ( dataSets[dataSetId].renderAsTabs ) {
-                $( "#tabs" ).tabs();
-            }
-
-            enableSectionFilter();
+        if ( dhis2.de.dataSets[dataSetId].renderAsTabs ) {
+            $( "#tabs" ).tabs();
         }
+
+        enableSectionFilter();
 
         loadDataValues();
         insertOptionSets();
@@ -590,15 +601,13 @@ function loadForm( dataSetId, multiOrg )
         $( '#contentDiv' ).load( 'loadForm.action', 
         {
             dataSetId : dataSetId,
-            multiOrganisationUnit: multiOrg ? getCurrentOrganisationUnit() : 0
+            multiOrganisationUnit: dhis2.de.multiOrganisationUnit ? getCurrentOrganisationUnit() : 0
         }, 
         function() 
         {
-            multiOrganisationUnit = !!$('.formSection').data('multiorg');
-
-            if( !multiOrganisationUnit )
+            if ( !dhis2.de.multiOrganisationUnit )
             {
-                if ( dataSets[dataSetId].renderAsTabs ) {
+                if ( dhis2.de.dataSets[dataSetId].renderAsTabs ) {
                     $( "#tabs" ).tabs();
                 }
 
@@ -626,8 +635,6 @@ function enableSectionFilter()
 
     if ( $sectionHeaders.size() > 1)
     {
-        $( '#selectionBox' ).css( 'height', '123px' );
-
         $( '#filterDataSetSection' ).append( "<option value='all'>" + i18n_show_all_sections + "</option>" );
 
         $sectionHeaders.each( function( idx, value ) 
@@ -635,12 +642,11 @@ function enableSectionFilter()
             $( '#filterDataSetSection' ).append( "<option value='" + idx + "'>" + value.innerHTML + "</option>" );
         } );
 
-        $( '#filterDataSetSectionTr' ).show();
+        $( '#filterDataSetSectionDiv' ).show();
     }
     else
     {
-        $( '#selectionBox' ).css( 'height', '93px' );
-        $( '#filterDataSetSectionTr' ).hide();
+        $( '#filterDataSetSectionDiv' ).hide();
     }
 }
 
@@ -696,13 +702,14 @@ function filterInSection( $this )
 // Supportive methods
 //------------------------------------------------------------------------------
 
-// splits a id based on the multiOrgUnit var
-
+/**
+ * Splits an id based on the multi org unit variable.
+ */
 function splitFieldId( id )
 {
     var split = {};
 
-    if ( multiOrganisationUnit )
+    if ( dhis2.de.multiOrganisationUnit )
     {
         split.organisationUnitId = id.split( '-' )[0];
         split.dataElementId = id.split( '-' )[1];
@@ -726,9 +733,9 @@ function refreshZebraStripes( $tbody )
 
 function getDataElementType( dataElementId )
 {
-	if ( dataElements[dataElementId] != null )
+	if ( dhis2.de.dataElements[dataElementId] != null )
 	{
-		return dataElements[dataElementId];
+		return dhis2.de.dataElements[dataElementId];
 	}
 
 	log( 'Data element not present in data set, falling back to default type: ' + dataElementId );
@@ -765,77 +772,14 @@ function getOptionComboName( optionComboId )
 // OrganisationUnit Selection
 // -----------------------------------------------------------------------------
 
-/**
- * Returns an array containing associative array elements with id and name
- * properties. The array is sorted on the element name property.
- */
-function getSortedDataSetList( orgUnit )
-{
-    var associationSet = orgUnit !== undefined ? organisationUnitAssociationSetMap[orgUnit] : organisationUnitAssociationSetMap[getCurrentOrganisationUnit()];
-    var orgUnitDataSets = dataSetAssociationSets[associationSet];
-
-    var dataSetList = [];
-
-    $.safeEach( orgUnitDataSets, function( idx, item ) 
-    {
-        var dataSetId = orgUnitDataSets[idx];
-        var dataSetName = dataSets[dataSetId].name;
-
-        var row = [];
-        row['id'] = dataSetId;
-        row['name'] = dataSetName;
-        dataSetList[idx] = row;
-    } );
-
-    dataSetList.sort( function( a, b )
-    {
-        return a.name > b.name ? 1 : a.name < b.name ? -1 : 0;
-    } );
-
-    return dataSetList;
-}
-
-function getSortedDataSetListForOrgUnits( orgUnits )
-{
-    var dataSetList = [];
-
-    $.safeEach( orgUnits, function( idx, item )
-    {
-        dataSetList.push.apply( dataSetList, getSortedDataSetList(item) )
-    } );
-
-    var filteredDataSetList = [];
-
-    $.safeEach( dataSetList, function( idx, item ) 
-    {
-        var formType = dataSets[item.id].type;
-        var found = false;
-
-        $.safeEach( filteredDataSetList, function( i, el ) 
-        {
-            if( item.name == el.name )
-            {
-                found = true;
-            }
-        } );
-
-        if ( !found && ( formType == FORMTYPE_SECTION || formType == FORMTYPE_DEFAULT ) )
-        {
-            filteredDataSetList.push(item);
-        }
-    });
-
-    return filteredDataSetList;
-}
-
 function organisationUnitSelected( orgUnits, orgUnitNames, children )
 {
-	if ( metaDataIsLoaded == false )
+	if ( dhis2.de.metaDataIsLoaded == false )
 	{
 	    return false;
 	}
 
-    currentOrganisationUnitId = orgUnits[0];
+	dhis2.de.currentOrganisationUnitId = orgUnits[0];
     var organisationUnitName = orgUnitNames[0];
 
     $( '#selectedOrganisationUnit' ).val( organisationUnitName );
@@ -868,80 +812,237 @@ function organisationUnitSelected( orgUnits, orgUnitNames, children )
     {
         var childrenDataSets = getSortedDataSetListForOrgUnits( children );
 
-        if( childrenDataSets && childrenDataSets.length > 0 )
+        if ( childrenDataSets && childrenDataSets.length > 0 )
         {
             $( '#selectedDataSetId' ).append( '<optgroup label="' + i18n_childrens_forms + '">' );
 
             $.safeEach( childrenDataSets, function( idx, item )
             {
-                if ( dataSetId == item.id && multiOrganisationUnit)
+                if ( dataSetId == item.id && dhis2.de.multiOrganisationUnit )
                 {
                     multiDataSetValid = true;
                 }
 
-                $( '<option />' ).attr( 'data-multiorg', true).attr( 'value', item.id).html(item.name).appendTo( '#selectedDataSetId' );
+                $( '<option />' ).attr( 'data-multiorg', true ).attr( 'value', item.id).html(item.name).appendTo( '#selectedDataSetId' );
             } );
 
             $( '#selectDataSetId' ).append( '</optgroup>' );
         }
     }
 
-    if ( !multiOrganisationUnit && dataSetValid && dataSetId != null ) {
-        $( '#selectedDataSetId' ).val( dataSetId );
+    if ( !dhis2.de.multiOrganisationUnit && dataSetValid && dataSetId != null ) {
+        $( '#selectedDataSetId' ).val( dataSetId ); // Restore selected data set
 
-        if ( periodId && periodId != -1 && dataEntryFormIsLoaded ) {
+        if ( dhis2.de.inputSelected() && dhis2.de.dataEntryFormIsLoaded ) {
             resetSectionFilters();
             showLoader();
             loadDataValues();
         }
-    } else if ( multiOrganisationUnit && multiDataSetValid && dataSetId != null ) {
-        $( '#selectedDataSetId' ).val( dataSetId );
+    } 
+    else if ( dhis2.de.multiOrganisationUnit && multiDataSetValid && dataSetId != null ) {
+        $( '#selectedDataSetId' ).val( dataSetId ); // Restore selected data set
         dataSetSelected();
-
-        if ( periodId && periodId != -1 && dataEntryFormIsLoaded ) {
-            resetSectionFilters();
-            showLoader();
-            loadDataValues();
-        }
     }
     else {
-        multiOrganisationUnit = false;
+    	dhis2.de.multiOrganisationUnit = false;
 
         clearSectionFilters();
         clearPeriod();
+        dhis2.de.clearAttributes();
+    }
+}
+
+/**
+ * Returns an array containing associative array elements with id and name
+ * properties. The array is sorted on the element name property.
+ */
+function getSortedDataSetList( orgUnit )
+{
+    var associationSet = orgUnit !== undefined ? dhis2.de.organisationUnitAssociationSetMap[orgUnit] : dhis2.de.organisationUnitAssociationSetMap[getCurrentOrganisationUnit()];
+    var orgUnitDataSets = dhis2.de.dataSetAssociationSets[associationSet];
+
+    var dataSetList = [];
+
+    $.safeEach( orgUnitDataSets, function( idx, item ) 
+    {
+        var dataSetId = orgUnitDataSets[idx];
+        var dataSetName = dhis2.de.dataSets[dataSetId].name;
+
+        var row = [];
+        row['id'] = dataSetId;
+        row['name'] = dataSetName;
+        dataSetList[idx] = row;
+    } );
+
+    dataSetList.sort( function( a, b )
+    {
+        return a.name > b.name ? 1 : a.name < b.name ? -1 : 0;
+    } );
+
+    return dataSetList;
+}
+
+function getSortedDataSetListForOrgUnits( orgUnits )
+{
+    var dataSetList = [];
+
+    $.safeEach( orgUnits, function( idx, item )
+    {
+        dataSetList.push.apply( dataSetList, getSortedDataSetList(item) )
+    } );
+
+    var filteredDataSetList = [];
+
+    $.safeEach( dataSetList, function( idx, item ) 
+    {
+        var formType = dhis2.de.dataSets[item.id].type;
+        var found = false;
+
+        $.safeEach( filteredDataSetList, function( i, el ) 
+        {
+            if( item.name == el.name )
+            {
+                found = true;
+            }
+        } );
+
+        if ( !found && ( formType == FORMTYPE_SECTION || formType == FORMTYPE_DEFAULT ) )
+        {
+            filteredDataSetList.push(item);
+        }
+    } );
+
+    return filteredDataSetList;
+}
+
+// -----------------------------------------------------------------------------
+// DataSet Selection
+// -----------------------------------------------------------------------------
+
+function dataSetSelected()
+{
+    $( '#selectedPeriodId' ).removeAttr( 'disabled' );
+    $( '#prevButton' ).removeAttr( 'disabled' );
+    $( '#nextButton' ).removeAttr( 'disabled' );
+
+    var x = dhis2.de.currentDataSetId;
+    
+    var dataSetId = $( '#selectedDataSetId' ).val();
+    var periodId = $( '#selectedPeriodId' ).val();
+
+    var previousDataSetValid = ( dhis2.de.currentDataSetId && dhis2.de.currentDataSetId != -1 );    
+    var previousPeriodType = previousDataSetValid ? dhis2.de.dataSets[dhis2.de.currentDataSetId].periodType : null;
+
+    dhis2.de.currentDataSetId = dataSetId;
+    
+    if ( dataSetId && dataSetId != -1 )
+    {
+	    var periodType = dhis2.de.dataSets[dataSetId].periodType;
+	    var allowFuturePeriods = dhis2.de.dataSets[dataSetId].allowFuturePeriods;
+	    var periods = dhis2.de.periodTypeFactory.get( periodType ).generatePeriods( dhis2.de.currentPeriodOffset );
+	    periods = dhis2.de.periodTypeFactory.reverse( periods );
+	    
+	    if ( allowFuturePeriods == false )
+	    {
+	    	periods = dhis2.de.periodTypeFactory.filterFuturePeriods( periods );
+	    }
+
+        clearListById( 'selectedPeriodId' );
+        clearSectionFilters();
+
+        dhis2.de.currentCategories = dhis2.de.getCategories( dataSetId );
+        
+        dhis2.de.multiOrganisationUnit = !!$( '#selectedDataSetId :selected' ).data( 'multiorg' );
+
+        var attributeMarkup = dhis2.de.getAttributesMarkup();
+        $( '#attributeComboDiv' ).html( attributeMarkup );
+
+        if ( periods.length > 0 )
+        {
+        	addOptionById( 'selectedPeriodId', '-1', '[ ' + i18n_select_period + ' ]' );
+        }
+        else
+        {
+        	addOptionById( 'selectedPeriodId', '-1', i18n_no_periods_click_prev_year_button );
+        }
+        
+        $.safeEach( periods, function( idx, item )
+        {
+            addOptionById( 'selectedPeriodId', item.iso, item.name );
+        } );
+
+        if ( dhis2.de.inputSelected() && previousPeriodType && previousPeriodType == periodType )
+        {
+            showLoader();            
+            $( '#selectedPeriodId' ).val( periodId );
+            loadForm();
+        }
+        else
+        {
+            clearEntryForm();
+        }
+    }
+    else
+    {
+        clearEntryForm();
+        dhis2.de.clearAttributes();
     }
 }
 
 // -----------------------------------------------------------------------------
-// Next/Previous Periods Selection
+// Period Selection
 // -----------------------------------------------------------------------------
+
+function periodSelected()
+{
+    var periodName = $( '#selectedPeriodId :selected' ).text();
+    var dataSetId = $( '#selectedDataSetId' ).val();
+
+    $( '#currentPeriod' ).html( periodName );
+
+    var periodId = $( '#selectedPeriodId' ).val();
+	
+    if ( dhis2.de.inputSelected() )
+    {    	
+        showLoader();
+
+        if ( dhis2.de.dataEntryFormIsLoaded )
+        {
+            loadDataValues();
+        }
+        else
+        {
+            loadForm();
+        }
+    }
+}
 
 function nextPeriodsSelected()
 {
-    if ( currentPeriodOffset < 0 ) // Cannot display future periods
+    if ( dhis2.de.currentPeriodOffset < 0 ) // Cannot display future periods
     {
-        currentPeriodOffset++;
+    	dhis2.de.currentPeriodOffset++;
         displayPeriodsInternal();
     }
 }
 
 function previousPeriodsSelected()
 {
-    currentPeriodOffset--;
+	dhis2.de.currentPeriodOffset--;
     displayPeriodsInternal();
 }
 
 function displayPeriodsInternal()
 {
     var dataSetId = $( '#selectedDataSetId' ).val();
-    var periodType = dataSets[dataSetId].periodType;
-    var allowFuturePeriods = dataSets[dataSetId].allowFuturePeriods;
-    var periods = periodTypeFactory.get( periodType ).generatePeriods( currentPeriodOffset );
-    periods = periodTypeFactory.reverse( periods );
+    var periodType = dhis2.de.dataSets[dataSetId].periodType;
+    var allowFuturePeriods = dhis2.de.dataSets[dataSetId].allowFuturePeriods;
+    var periods = dhis2.de.periodTypeFactory.get( periodType ).generatePeriods( dhis2.de.currentPeriodOffset );
+    periods = dhis2.de.periodTypeFactory.reverse( periods );
     
     if ( allowFuturePeriods == false )
     {
-    	periods = periodTypeFactory.filterFuturePeriods( periods );
+    	periods = dhis2.de.periodTypeFactory.filterFuturePeriods( periods );
     }
 
     clearListById( 'selectedPeriodId' );
@@ -961,98 +1062,194 @@ function displayPeriodsInternal()
     } );
 }
 
-// -----------------------------------------------------------------------------
-// DataSet Selection
-// -----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// Attributes / Categories Selection
+//------------------------------------------------------------------------------
 
-function dataSetSelected()
+/**
+* Returns an array of category objects for the given data set identifier. Categories 
+* are looked up using the category combo of the data set. Null is returned if 
+* the given data set has the default category combo.
+*/
+dhis2.de.getCategories = function( dataSetId )
 {
-    $( '#selectedPeriodId' ).removeAttr( 'disabled' );
-    $( '#prevButton' ).removeAttr( 'disabled' );
-    $( '#nextButton' ).removeAttr( 'disabled' );
+	var dataSet = dhis2.de.dataSets[dataSetId];
+	
+	if ( !dataSet || !dataSet.categoryCombo || dhis2.de.defaultCategoryCombo === dataSet.categoryCombo ) {
+		return null;
+	}
+	
+	var categoryCombo = dhis2.de.categoryCombos[dataSet.categoryCombo];
+	
+	var categories = [];
+	
+	$.safeEach( categoryCombo.categories, function( idx, cat ) {
+		var category = dhis2.de.categories[cat];
+		categories.push( category );
+	} );
+	
+	return categories;
+};
 
-    var dataSetId = $( '#selectedDataSetId' ).val();
-    var periodId = $( '#selectedPeriodId' ).val();
-    var periodType = dataSets[dataSetId].periodType;
-    var allowFuturePeriods = dataSets[dataSetId].allowFuturePeriods;
-    var periods = periodTypeFactory.get( periodType ).generatePeriods( currentPeriodOffset );
-    periods = periodTypeFactory.reverse( periods );
-    
-    if ( allowFuturePeriods == false )
-    {
-    	periods = periodTypeFactory.filterFuturePeriods( periods );
-    }
+/**
+ * Indicates whether all present categories have been selected. True is returned
+ * if no categories are present. False is returned if less selections have been
+ * made thant here are categories present.
+ */
+dhis2.de.categoriesSelected = function()
+{
+	if ( !dhis2.de.currentCategories || dhis2.de.currentCategories.length == 0 ) {
+		return true; // No categories present which can be selected
+	}
+	
+	var options = dhis2.de.getCurrentCategoryOptions();
+	
+	if ( !options || options.length < dhis2.de.currentCategories.length ) {
+		return false; // Less selected options than categories present
+	}
+	
+	return true;
+};
 
-    if ( dataSetId && dataSetId != -1 )
-    {
-        clearListById( 'selectedPeriodId' );
-        clearSectionFilters();
+/**
+* Returns attribute category combo identifier. Based on the dhis2.de.currentDataSetId 
+* global variable. Returns null if there is no current data set or if current 
+* data set has the default category combo.
+*/
+dhis2.de.getCurrentCategoryCombo = function()
+{
+	var dataSet = dhis2.de.dataSets[dhis2.de.currentDataSetId];
+	
+	if ( !dataSet || !dataSet.categoryCombo || dhis2.de.defaultCategoryCombo === dataSet.categoryCombo ) {
+		return null;
+	}
+	
+	return dataSet.categoryCombo;
+};
 
-        if ( periods.length > 0 )
-        {
-        	addOptionById( 'selectedPeriodId', '-1', '[ ' + i18n_select_period + ' ]' );
-        }
-        else
-        {
-        	addOptionById( 'selectedPeriodId', '-1', i18n_no_periods_click_prev_year_button );
-        }
-        
-        $.safeEach( periods, function( idx, item )
-        {
-            addOptionById( 'selectedPeriodId', item.iso, item.name );
-        } );
+/**
+* Returns an array of the currently selected attribute category option identifiers. 
+* Based on the dhis2.de.currentCategories global variable. Returns null if there 
+* are no current categories.
+*/
+dhis2.de.getCurrentCategoryOptions = function()
+{
+	if ( !dhis2.de.currentCategories || dhis2.de.currentCategories.length == 0 ) {
+		return null;
+	}
+	
+	var options = [];
+	
+	$.safeEach( dhis2.de.currentCategories, function( idx, category ) {
+		var option = $( '#category-' + category.id ).val();
+		
+		if ( option && option != -1 ) {
+			options.push( option );
+		}
+	} );
+	
+	return options;
+};
 
-        var previousPeriodType = currentDataSetId ? dataSets[currentDataSetId].periodType : null;
-
-        if ( periodId && periodId != -1 && previousPeriodType && previousPeriodType == periodType )
-        {
-            showLoader();
-            $( '#selectedPeriodId' ).val( periodId );
-
-            var isMultiOrganisationUnitForm = !!$( '#selectedDataSetId :selected' ).data( 'multiorg' );
-            loadForm( dataSetId, isMultiOrganisationUnitForm );
-        }
-        else
-        {
-            clearEntryForm();
-        }
-
-        currentDataSetId = dataSetId;
-    }
+/**
+ * Returns a query param value for the currently selected category options where
+ * each option is separated by the ; character.
+ */
+dhis2.de.getCurrentCategoryOptionsQueryValue = function()
+{
+	if ( !dhis2.de.getCurrentCategoryOptions() ) {
+		return null;
+	}
+	
+	var value = '';
+	
+	$.safeEach( dhis2.de.getCurrentCategoryOptions(), function( idx, option ) {
+		value += option + ';';
+	} );
+	
+	if ( value ) {
+		value = value.slice( 0, -1 );
+	}
+	
+	return value;
 }
 
-// -----------------------------------------------------------------------------
-// Period Selection
-// -----------------------------------------------------------------------------
-
-function periodSelected()
+/**
+* Returns markup for drop down boxes to be put in the selection box for the
+* given categories. The empty string is returned if no categories are given. 
+*/
+dhis2.de.getAttributesMarkup = function()
 {
-    var periodName = $( '#selectedPeriodId :selected' ).text();
-    var dataSetId = $( '#selectedDataSetId' ).val();
+	var html = '';
+	
+	if ( !dhis2.de.currentCategories || dhis2.de.currentCategories.length == 0 ) {
+		return html;
+	}
+	
+	$.safeEach( dhis2.de.currentCategories, function( idx, category ) {
+		html += '<div class="selectionBoxRow">';
+		html += '<div class="selectionLabel">' + category.name + '</div>&nbsp;';
+		html += '<select id="category-' + category.id + '" class="selectionBoxSelect" onchange="dhis2.de.attributeSelected(\'' + category.id + '\')">';
+		html += '<option value="-1">[ ' + i18n_select_option + ' ]</option>';
+		
+		$.safeEach( category.options, function( idx, option ) {
+			html += '<option value="' + option.id + '">' + option.name + '</option>';
+		} );
+		
+		html += '</select>';
+		html += '</div>';
+	} );
 
-    $( '#currentPeriod' ).html( periodName );
+	return html;
+};
 
-    var periodId = $( '#selectedPeriodId' ).val();
+/**
+ * Clears the markup for attribute select lists.
+ */
+dhis2.de.clearAttributes = function()
+{
+	$( '#attributeComboDiv' ).html( '' );
+};
 
-    if ( periodId && periodId != -1 )
-    {
+/**
+ * Callback for changes in attribute select lists.
+ */
+dhis2.de.attributeSelected = function( categoryId )
+{
+	if ( dhis2.de.inputSelected() ) {    	
         showLoader();
 
-        if ( dataEntryFormIsLoaded )
-        {
+        if ( dhis2.de.dataEntryFormIsLoaded ) {
             loadDataValues();
         }
-        else
-        {
-            var isMultiOrganisationUnitForm = !!$( '#selectedDataSetId :selected' ).data( 'multiorg' );
-            loadForm( dataSetId, isMultiOrganisationUnitForm );
+        else {
+            loadForm();
         }
     }
-}
+};
 
 // -----------------------------------------------------------------------------
 // Form
 // -----------------------------------------------------------------------------
+
+/**
+ * Indicates whether all required inpout selections have been made.
+ */
+dhis2.de.inputSelected = function()
+{
+    var dataSetId = $( '#selectedDataSetId' ).val();
+    var periodId = $( '#selectedPeriodId' ).val();
+
+	if (
+	    dhis2.de.currentOrganisationUnitId &&
+	    dataSetId && dataSetId != -1 &&
+	    periodId && periodId != -1 &&
+	    dhis2.de.categoriesSelected() ) {
+		return true;
+	}
+
+	return false;
+};
 
 function loadDataValues()
 {
@@ -1060,7 +1257,7 @@ function loadDataValues()
     $( '#undoButton' ).attr( 'disabled', 'disabled' );
     $( '#infoDiv' ).css( 'display', 'none' );
 
-    currentOrganisationUnitId = selection.getSelected()[0];
+    dhis2.de.currentOrganisationUnitId = selection.getSelected()[0];
 
     getAndInsertDataValues();
     displayEntryFormCompleted();
@@ -1093,8 +1290,17 @@ function getAndInsertDataValues()
 		periodId : periodId,
         dataSetId : dataSetId,
         organisationUnitId : getCurrentOrganisationUnit(),
-        multiOrganisationUnit: multiOrganisationUnit
+        multiOrganisationUnit: dhis2.de.multiOrganisationUnit
     };
+
+    var cc = dhis2.de.getCurrentCategoryCombo();
+    var cp = dhis2.de.getCurrentCategoryOptionsQueryValue();
+    
+    if ( cc && cp )
+    {
+    	params.cc = cc;
+    	params.cp = cp;
+    }
     
     $.ajax( {
     	url: 'getDataValues.action',
@@ -1122,8 +1328,8 @@ function getAndInsertDataValues()
 
 function getOfflineDataValueJson( params )
 {
-	var dataValues = storageManager.getDataValuesInForm( params );
-	var complete = storageManager.hasCompleteDataSet( params );
+	var dataValues = dhis2.de.storageManager.getDataValuesInForm( params );
+	var complete = dhis2.de.storageManager.hasCompleteDataSet( params );
 	
 	var json = {};
 	json.dataValues = new Array();
@@ -1148,7 +1354,7 @@ function getOfflineDataValueJson( params )
 function insertDataValues( json )
 {
     var dataValueMap = []; // Reset
-    currentMinMaxValueMap = []; // Reset
+    dhis2.de.currentMinMaxValueMap = []; // Reset
     
 	if ( json.locked )
 	{
@@ -1201,7 +1407,7 @@ function insertDataValues( json )
 
     // Set min-max values and colorize violation fields
 
-    if( !json.locked ) 
+    if ( !json.locked ) 
     {
         $.safeEach( json.minMaxDataElements, function( i, value )
         {
@@ -1218,8 +1424,8 @@ function insertDataValues( json )
                 $( valFieldId ).css( 'background-color', COLOR_ORANGE );
             }
 
-            currentMinMaxValueMap[minId] = value.min;
-            currentMinMaxValueMap[maxId] = value.max;
+            dhis2.de.currentMinMaxValueMap[minId] = value.min;
+            dhis2.de.currentMinMaxValueMap[maxId] = value.max;
         } );
     }
 
@@ -1241,7 +1447,7 @@ function insertDataValues( json )
             $( '#completedBy' ).html( json.storedBy );
             $( '#completedDate' ).html( json.date );
 
-            currentCompletedByUser = json.storedBy;
+            dhis2.de.currentCompletedByUser = json.storedBy;
         }
     }
     else
@@ -1265,7 +1471,7 @@ function displayEntryFormCompleted()
     $( '#validationButton' ).removeAttr( 'disabled' );
     $( '#validateButton' ).removeAttr( 'disabled' );
 
-    dataEntryFormIsLoaded = true;
+    dhis2.de.dataEntryFormIsLoaded = true;
     hideLoader();
     
     $( 'body' ).trigger( EVENT_FORM_LOADED );
@@ -1278,7 +1484,7 @@ function valueFocus( e )
     var split = splitFieldId( id );
     var dataElementId = split.dataElementId;
     var optionComboId = split.optionComboId;
-    currentOrganisationUnitId = split.organisationUnitId;
+    dhis2.de.currentOrganisationUnitId = split.organisationUnitId;
 
     var dataElementName = getDataElementName( dataElementId );
     var optionComboName = getOptionComboName( optionComboId );
@@ -1373,11 +1579,11 @@ function registerCompleteDataSet()
 	}
 	
 	validate( true, function() {	
-	    var params = storageManager.getCurrentCompleteDataSetParams();
+	    var params = dhis2.de.storageManager.getCurrentCompleteDataSetParams();
         params['organisationUnitId'] = getCurrentOrganisationUnit();
-        params['multiOrganisationUnit'] = multiOrganisationUnit;
+        params['multiOrganisationUnit'] = dhis2.de.multiOrganisationUnit;
 
-		storageManager.saveCompleteDataSet( params );
+        dhis2.de.storageManager.saveCompleteDataSet( params );
 	
 	    $.ajax( {
 	    	url: 'registerCompleteDataSet.action',
@@ -1394,7 +1600,7 @@ function registerCompleteDataSet()
 	            {
 	                disableCompleteButton();
 	
-	                storageManager.clearCompleteDataSet( params );
+	                dhis2.de.storageManager.clearCompleteDataSet( params );
 	            }
 	        },
 		    error: function()
@@ -1408,9 +1614,9 @@ function registerCompleteDataSet()
 function undoCompleteDataSet()
 {
     var confirmed = confirm( i18n_confirm_undo );
-    var params = storageManager.getCurrentCompleteDataSetParams();
+    var params = dhis2.de.storageManager.getCurrentCompleteDataSetParams();
     params[ 'organisationUnitId' ] = getCurrentOrganisationUnit();
-    params[ 'multiOrganisationUnit' ] = multiOrganisationUnit;
+    params[ 'multiOrganisationUnit' ] = dhis2.de.multiOrganisationUnit;
 
     if ( confirmed )
     {
@@ -1428,13 +1634,13 @@ function undoCompleteDataSet()
                 else
                 {
                     disableUndoButton();
-	                storageManager.clearCompleteDataSet( params );
+                    dhis2.de.storageManager.clearCompleteDataSet( params );
                 }
 
 	        },
 	        error: function()
 	        {
-	            storageManager.clearCompleteDataSet( params );
+	        	dhis2.de.storageManager.clearCompleteDataSet( params );
 	        }
         } );
     }
@@ -1454,11 +1660,11 @@ function disableCompleteButton()
 
 function displayUserDetails()
 {
-	if ( currentCompletedByUser )
+	if ( dhis2.de.currentCompletedByUser )
 	{
 		var url = '../dhis-web-commons-ajax-json/getUser.action';
 
-		$.getJSON( url, { username:currentCompletedByUser }, function( json ) 
+		$.getJSON( url, { username: dhis2.de.currentCompletedByUser }, function( json ) 
 		{
 			$( '#userFullName' ).html( json.user.firstName + ' ' + json.user.surname );
 			$( '#userUsername' ).html( json.user.username );
@@ -1516,11 +1722,11 @@ function validate( ignoreSuccessfulValidation, successCallback )
 	var successHtml = '<h3>' + i18n_validation_result + ' &nbsp;<img src="../images/success_small.png"></h3>' +
 		'<p class="bold">' + i18n_successful_validation + '</p>';
 
-	var validCompleteOnly = dataSets[currentDataSetId].validCompleteOnly;
+	var validCompleteOnly = dhis2.de.dataSets[dhis2.de.currentDataSetId].validCompleteOnly;
 
-    var params = storageManager.getCurrentCompleteDataSetParams();
-	    params['organisationUnitId'] = getCurrentOrganisationUnit();
-        params['multiOrganisationUnit'] = multiOrganisationUnit;
+    var params = dhis2.de.storageManager.getCurrentCompleteDataSetParams();
+	params['organisationUnitId'] = getCurrentOrganisationUnit();
+    params['multiOrganisationUnit'] = dhis2.de.multiOrganisationUnit;
 
     $( '#validationDiv' ).load( 'validate.action', params, function( response, status, xhr ) {
     	var success = null;
@@ -1554,7 +1760,7 @@ function validate( ignoreSuccessfulValidation, successCallback )
 
 function validateCompulsoryCombinations()
 {
-	var fieldCombinationRequired = dataSets[currentDataSetId].fieldCombinationRequired;
+	var fieldCombinationRequired = dhis2.de.dataSets[dhis2.de.currentDataSetId].fieldCombinationRequired;
 	
     if ( fieldCombinationRequired )
     {
@@ -1653,21 +1859,21 @@ function updateForms()
     updateExistingLocalForms();
     downloadRemoteForms();
 
-    DAO.store.open().done(function() {
+    DAO.store.open().done( function() {
         loadOptionSets();
     });
 }
 
 function purgeLocalForms()
 {
-    var formIds = storageManager.getAllForms();
+    var formIds = dhis2.de.storageManager.getAllForms();
 
     $.safeEach( formIds, function( idx, item ) 
     {
-        if ( dataSets[item] == null )
+        if ( dhis2.de.dataSets[item] == null )
         {
-            storageManager.deleteForm( item );
-            storageManager.deleteFormVersion( item );
+        	dhis2.de.storageManager.deleteForm( item );
+        	dhis2.de.storageManager.deleteFormVersion( item );
             log( 'Deleted locally stored form: ' + item );
         }
     } );
@@ -1677,30 +1883,30 @@ function purgeLocalForms()
 
 function updateExistingLocalForms()
 {
-    var formIds = storageManager.getAllForms();
-    var formVersions = storageManager.getAllFormVersions();
+    var formIds = dhis2.de.storageManager.getAllForms();
+    var formVersions = dhis2.de.storageManager.getAllFormVersions();
 
     $.safeEach( formIds, function( idx, item ) 
     {
-        var remoteVersion = dataSets[item].version;
+        var remoteVersion = dhis2.de.dataSets[item].version;
         var localVersion = formVersions[item];
 
         if ( remoteVersion == null || localVersion == null || remoteVersion != localVersion )
         {
-            storageManager.downloadForm( item, remoteVersion );
+        	dhis2.de.storageManager.downloadForm( item, remoteVersion );
         }
     } );
 }
 
 function downloadRemoteForms()
 {
-    $.safeEach( dataSets, function( idx, item ) 
+    $.safeEach( dhis2.de.dataSets, function( idx, item ) 
     {
         var remoteVersion = item.version;
 
-        if ( !storageManager.formExists( idx ) && !item.skipOffline )
+        if ( !dhis2.de.storageManager.formExists( idx ) && !item.skipOffline )
         {
-            storageManager.downloadForm( idx, remoteVersion );
+        	dhis2.de.storageManager.downloadForm( idx, remoteVersion );
         }
     } );
 }
@@ -1901,8 +2107,8 @@ function StorageManager()
             dataType: 'text',
             success: function( data, textStatus, jqXHR )
             {
-                storageManager.saveForm( this.dataSetId, data );
-                storageManager.saveFormVersion( this.dataSetId, this.formVersion );
+            	dhis2.de.storageManager.saveForm( this.dataSetId, data ); //TODO
+            	dhis2.de.storageManager.saveFormVersion( this.dataSetId, this.formVersion );
             }
         } );
     };
@@ -2346,15 +2552,15 @@ function getOptions( uid, query, success ) {
 }
 
 function loadOptionSets() {
-    var options = _.values( optionSets );
+    var options = _.values( dhis2.de.optionSets );
     var uids = [];
 
     var deferred = $.Deferred();
     var promise = deferred.promise();
 
     _.each( options, function ( item, idx ) {
-        if( uids.indexOf( item.uid ) == -1 ) {
-            DAO.store.get('optionSets', item.uid).done( function( obj ) {
+        if ( uids.indexOf( item.uid ) == -1 ) {
+            DAO.store.get( 'optionSets', item.uid ).done( function( obj ) {
                 if( !obj || obj.optionSet.version !== item.v ) {
                     promise = promise.then( function () {
                         return $.ajax( {
@@ -2384,20 +2590,20 @@ function loadOptionSets() {
 }
 
 function insertOptionSets() {
-  $('.entryoptionset').each(function( idx, item ) {
-    var optionSetKey = splitFieldId(item.id);
+    $( '.entryoptionset').each( function( idx, item ) {
+    	var optionSetKey = splitFieldId(item.id);
 
-    if( multiOrganisationUnit ) {
-      item = optionSetKey.organisationUnitId + '-' + optionSetKey.dataElementId + '-' + optionSetKey.optionComboId;
-    } else {
-      item = optionSetKey.dataElementId + '-' + optionSetKey.optionComboId;
-    }
+        if ( dhis2.de.multiOrganisationUnit ) {
+        	item = optionSetKey.organisationUnitId + '-' + optionSetKey.dataElementId + '-' + optionSetKey.optionComboId;
+        } 
+        else {
+        	item = optionSetKey.dataElementId + '-' + optionSetKey.optionComboId;
+        }
 
-    item = item + '-val';
-    optionSetKey = optionSetKey.dataElementId + '-' + optionSetKey.optionComboId;
-
-    autocompleteOptionSetField(item, optionSets[optionSetKey].uid);
-  });
+        item = item + '-val';
+        optionSetKey = optionSetKey.dataElementId + '-' + optionSetKey.optionComboId;
+        autocompleteOptionSetField( item, dhis2.de.optionSets[optionSetKey].uid );
+    } );
 }
 
 function autocompleteOptionSetField( idField, optionSetUid ) {

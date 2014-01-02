@@ -26,31 +26,6 @@ $( document ).ready( function() {
 	});
 } );
 
-function dobTypeOnChange( container ){
-
-	var type = $('#' + container + ' [id=dobType]').val();
-	if(type == 'V' || type == 'D')
-	{
-		$('#' + container + ' [id=age]').rules("remove");
-        $('#' + container + ' [id=age]').css("display","none");
-        $('#' + container + ' [id=age]').val("");
-		
-        $('#' + container + ' [id=birthDate]').rules("add",{required:true});
-		datePickerValid( container + ' [id=birthDate]' );
-        $('#' + container + ' [id=birthDate]').css("display","");
-	}
-	else if(type == 'A')
-	{
-        $('#' + container + ' [id=age]').rules("add",{required:true, number: true});
-        $('#' + container + ' [id=age]').css("display","");
-		
-        $('#' + container + ' [id=birthDate]').val("");
-        $('#' + container + ' [id=birthDate]').rules("remove","required");
-		$('#' + container+ ' [id=birthDate]').datepicker("destroy");
-        $('#' + container + ' [id=birthDate]').css("display","none");
-	}
-}
-
 // -----------------------------------------------------------------------------
 // Advanced search
 // -----------------------------------------------------------------------------
@@ -417,6 +392,7 @@ function enableBtn(){
 	var programIdAddPatient = getFieldValue('programIdAddPatient');
     if( registration == undefined || !registration ) {
 		if( programIdAddPatient!='' ) {
+            enable('statusEvent');
 			enable('listPatientBtn');
 			enable('addPatientBtn');
 			enable('advancedSearchBtn');
@@ -425,6 +401,7 @@ function enableBtn(){
 				enable(this.id);
 			});
 		} else {
+            disable('statusEvent');
 			disable('listPatientBtn');
 			disable('addPatientBtn');
 			disable('advancedSearchBtn');
@@ -999,10 +976,6 @@ function addEventForPatientForm( divname )
     $("#" + divname + " [id=checkDuplicateBtn]").click(function() {
 		checkDuplicate( divname );
 	});
-	
-    $("#" + divname + " [id=dobType]").change(function() {
-		dobTypeOnChange( divname );
-	});
 }
 
 function showRepresentativeInfo( patientId)
@@ -1186,17 +1159,6 @@ function programOnchange( programId )
         $('#identifierAndAttributeDiv').load("getPatientIdentifierAndAttribute.action", {
 			id:program.val()
 		}, function(){
-			if(getFieldValue('useBirthDateAsEnrollmentDate')=='true'){ 
-				setFieldValue("enrollmentDateField", birthDate)
-			}
-			
-			if(getFieldValue('useBirthDateAsIncidentDate')=='true'){ 
-				setFieldValue("dateOfIncidentField", birthDate)
-			}
-			else{
-				setFieldValue("dateOfIncidentField", "");
-			}
-			
             $("#dateOfIncidentField").datepicker("destroy");
             $("#enrollmentDateField").datepicker("destroy");
 
@@ -1260,7 +1222,6 @@ function validateProgramEnrollment()
 		url: 'validatePatientProgramEnrollment.action',
 		data: getParamsForDiv('programEnrollmentSelectDiv'),
 		success: function(json) {
-			hideById('message');
 			var type = json.response;
 
             if( type == 'success' ) {

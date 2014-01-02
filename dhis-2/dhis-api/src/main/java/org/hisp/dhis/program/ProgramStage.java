@@ -39,7 +39,6 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
-import org.hisp.dhis.common.view.ExtendedView;
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.patient.PatientReminder;
 
@@ -58,8 +57,6 @@ public class ProgramStage
     public static final String TYPE_SECTION = "section";
 
     public static final String TYPE_CUSTOM = "custom";
-
-    public static final String REPORT_DATE_TO_USE_REGISTRATION_DATE = "registrationDate";
 
     public static final String REPORT_DATE_TO_USE_INCIDENT_DATE = "dateOfIncident";
 
@@ -194,18 +191,18 @@ public class ProgramStage
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class, ExtendedView.class } )
+    @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getDescription()
     {
         return description;
     }
 
-    @JsonProperty
-    //@JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class, ExportView.class, ExtendedView.class } )
-    @JacksonXmlElementWrapper( localName = "programStageSections", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "programStageSection", namespace = DxfNamespaces.DXF_2_0 )
+    @JsonProperty( value = "validationCriterias" )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlElementWrapper( localName = "validationCriterias", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "validationCriteria", namespace = DxfNamespaces.DXF_2_0 )
     public Set<ProgramStageSection> getProgramStageSections()
     {
         return programStageSections;
@@ -234,8 +231,8 @@ public class ProgramStage
         this.description = description;
     }
 
-    @JsonProperty("repeatable")
-    @JsonView( { DetailedView.class, ExportView.class, ExtendedView.class } )
+    @JsonProperty( "repeatable" )
+    @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( localName = "repeatable", namespace = DxfNamespaces.DXF_2_0 )
     public Boolean getIrregular()
     {
@@ -275,7 +272,7 @@ public class ProgramStage
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class, ExtendedView.class } )
+    @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlElementWrapper( localName = "programStageDataElements", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "programStageDataElement", namespace = DxfNamespaces.DXF_2_0 )
     public Set<ProgramStageDataElement> getProgramStageDataElements()

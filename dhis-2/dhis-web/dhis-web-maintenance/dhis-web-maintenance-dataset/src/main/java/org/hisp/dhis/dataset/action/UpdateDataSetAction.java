@@ -30,6 +30,7 @@ package org.hisp.dhis.dataset.action;
 
 import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
@@ -87,6 +88,13 @@ public class UpdateDataSetAction
     public void setIndicatorService( IndicatorService indicatorService )
     {
         this.indicatorService = indicatorService;
+    }
+
+    private DataElementCategoryService categoryService;
+
+    public void setCategoryService( DataElementCategoryService categoryService )
+    {
+        this.categoryService = categoryService;
     }
 
     private SectionService sectionService;
@@ -168,6 +176,13 @@ public class UpdateDataSetAction
     public void setNotifyCompletingUser( boolean notifyCompletingUser )
     {
         this.notifyCompletingUser = notifyCompletingUser;
+    }
+
+    private boolean approveData;
+
+    public void setApproveData( boolean approveData )
+    {
+        this.approveData = approveData;
     }
 
     private boolean skipAggregation;
@@ -254,6 +269,13 @@ public class UpdateDataSetAction
         this.indicatorsSelectedList = indicatorsSelectedList;
     }
 
+    private Integer categoryComboId;
+    
+    public void setCategoryComboId( Integer categoryComboId )
+    {
+        this.categoryComboId = categoryComboId;
+    }
+
     private Integer selectedLegendSetId;
 
     public void setSelectedLegendSetId( Integer selectedLegendSetId )
@@ -300,7 +322,7 @@ public class UpdateDataSetAction
         dataSet.setTimelyDays( timelyDays );
         dataSet.setSkipAggregation( skipAggregation );
 
-        if ( !(equalsNullSafe( name, dataSet.getName() ) &&
+        if ( !( equalsNullSafe( name, dataSet.getName() ) &&
             periodType.equals( dataSet.getPeriodType() ) &&
             dataElements.equals( dataSet.getDataElements() ) &&
             indicators.equals( dataSet.getIndicators() ) &&
@@ -320,6 +342,7 @@ public class UpdateDataSetAction
         dataSet.setFieldCombinationRequired( fieldCombinationRequired );
         dataSet.setValidCompleteOnly( validCompleteOnly );
         dataSet.setNotifyCompletingUser( notifyCompletingUser );
+        dataSet.setApproveData( approveData );
         dataSet.setSkipOffline( skipOffline );
         dataSet.setDataElementDecoration( dataElementDecoration );
         dataSet.setRenderAsTabs( renderAsTabs );
@@ -327,6 +350,11 @@ public class UpdateDataSetAction
         dataSet.setNotificationRecipients( userGroupService.getUserGroup( notificationRecipients ) );
         dataSet.setLegendSet( legendSet );
 
+        if ( categoryComboId != null )
+        {
+            dataSet.setCategoryCombo( categoryService.getDataElementCategoryCombo( categoryComboId ) );
+        }
+        
         dataSetService.updateDataSet( dataSet );
 
         // ---------------------------------------------------------------------

@@ -136,6 +136,12 @@ public class DataQueryParams
      */
     private boolean ignoreLimit;
     
+    /**
+     * Indicates whether rows with no values should be hidden in the response.
+     * Applies to responses with table layout only. 
+     */
+    private boolean hideEmptyRows;
+    
     // -------------------------------------------------------------------------
     // Transient properties
     // -------------------------------------------------------------------------
@@ -184,6 +190,7 @@ public class DataQueryParams
         params.skipMeta = this.skipMeta;
         params.hierarchyMeta = this.hierarchyMeta;
         params.ignoreLimit = this.ignoreLimit;
+        params.hideEmptyRows = this.hideEmptyRows;
         
         params.partitions = new Partitions( this.partitions );
         params.periodType = this.periodType;
@@ -1098,6 +1105,16 @@ public class DataQueryParams
     public void setIgnoreLimit( boolean ignoreLimit )
     {
         this.ignoreLimit = ignoreLimit;
+    }
+
+    public boolean isHideEmptyRows()
+    {
+        return hideEmptyRows;
+    }
+
+    public void setHideEmptyRows( boolean hideEmptyRows )
+    {
+        this.hideEmptyRows = hideEmptyRows;
     }
 
     // -------------------------------------------------------------------------

@@ -28,8 +28,8 @@ package org.hisp.dhis.patient.action.validation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.validation.ValidationCriteria;
 import org.hisp.dhis.validation.ValidationCriteriaService;
 
@@ -48,9 +48,7 @@ public class AddValidationCriteriaAction
 
     private ValidationCriteriaService validationCriteriaService;
 
-    private PatientService patientService;
-
-    private I18nFormat format;
+    private ProgramService programService;
 
     // -------------------------------------------------------------------------
     // Input
@@ -66,6 +64,8 @@ public class AddValidationCriteriaAction
 
     private String value;
 
+    private int programId;
+
     // -------------------------------------------------------------------------
     // Setters
     // -------------------------------------------------------------------------
@@ -75,14 +75,19 @@ public class AddValidationCriteriaAction
         this.validationCriteriaService = validationCriteriaService;
     }
 
-    public void setPatientService( PatientService patientService )
+    public void setProgramId( int programId )
     {
-        this.patientService = patientService;
+        this.programId = programId;
     }
 
-    public void setFormat( I18nFormat format )
+    public int getProgramId()
     {
-        this.format = format;
+        return programId;
+    }
+
+    public void setProgramService( ProgramService programService )
+    {
+        this.programService = programService;
     }
 
     public void setName( String name )
@@ -124,9 +129,13 @@ public class AddValidationCriteriaAction
         criteria.setDescription( description );
         criteria.setProperty( property );
         criteria.setOperator( operator );
-        criteria.setValue( patientService.getObjectValue( property, value, format ) );
+        criteria.setValue( value );
 
         validationCriteriaService.saveValidationCriteria( criteria );
+
+        Program program = programService.getProgram( programId );
+        program.getPatientValidationCriteria().add( criteria );
+        programService.updateProgram( program );
 
         return SUCCESS;
     }

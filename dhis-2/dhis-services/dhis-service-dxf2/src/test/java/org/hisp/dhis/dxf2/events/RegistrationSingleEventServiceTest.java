@@ -31,11 +31,7 @@ package org.hisp.dhis.dxf2.events;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import java.util.Date;
 import java.util.HashSet;
 
 import org.hamcrest.CoreMatchers;
@@ -52,13 +48,13 @@ import org.hisp.dhis.dxf2.events.person.Person;
 import org.hisp.dhis.dxf2.events.person.PersonService;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
-import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageDataElement;
 import org.hisp.dhis.program.ProgramStageDataElementService;
+import org.hisp.dhis.user.UserService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -80,9 +76,6 @@ public class RegistrationSingleEventServiceTest
     @Autowired
     private EnrollmentService enrollmentService;
 
-    @Autowired
-    private IdentifiableObjectManager manager;
-
     private Patient maleA;
     private Patient maleB;
     private Patient femaleA;
@@ -102,20 +95,23 @@ public class RegistrationSingleEventServiceTest
     @Override
     protected void setUpTest() throws Exception
     {
+        identifiableObjectManager = (IdentifiableObjectManager) getBean( IdentifiableObjectManager.ID );
+        userService = (UserService) getBean( UserService.ID );
+        
         organisationUnitA = createOrganisationUnit( 'A' );
         organisationUnitB = createOrganisationUnit( 'B' );
-        manager.save( organisationUnitA );
-        manager.save( organisationUnitB );
+        identifiableObjectManager.save( organisationUnitA );
+        identifiableObjectManager.save( organisationUnitB );
 
         maleA = createPatient( 'A',  organisationUnitA );
         maleB = createPatient( 'B',  organisationUnitB );
         femaleA = createPatient( 'C',  organisationUnitA );
         femaleB = createPatient( 'D', organisationUnitB );
 
-        manager.save( maleA );
-        manager.save( maleB );
-        manager.save( femaleA );
-        manager.save( femaleB );
+        identifiableObjectManager.save( maleA );
+        identifiableObjectManager.save( maleB );
+        identifiableObjectManager.save( femaleA );
+        identifiableObjectManager.save( femaleB );
 
         personMaleA = personService.getPerson( maleA );
         personMaleB = personService.getPerson( maleB );
@@ -124,14 +120,14 @@ public class RegistrationSingleEventServiceTest
 
         dataElementA = createDataElement( 'A' );
         dataElementA.setType( DataElement.VALUE_TYPE_INT );
-        manager.save( dataElementA );
+        identifiableObjectManager.save( dataElementA );
 
         programStageA = createProgramStage( 'A', 0 );
-        manager.save( programStageA );
+        identifiableObjectManager.save( programStageA );
 
         programA = createProgram( 'A', new HashSet<ProgramStage>(), organisationUnitA );
         programA.setType( Program.SINGLE_EVENT_WITH_REGISTRATION );
-        manager.save( programA );
+        identifiableObjectManager.save( programA );
 
         ProgramStageDataElement programStageDataElement = new ProgramStageDataElement();
         programStageDataElement.setDataElement( dataElementA );
@@ -142,15 +138,10 @@ public class RegistrationSingleEventServiceTest
         programStageA.setProgram( programA );
         programA.getProgramStages().add( programStageA );
 
-        manager.update( programStageA );
-        manager.update( programA );
+        identifiableObjectManager.update( programStageA );
+        identifiableObjectManager.update( programA );
 
-        createSuperuserAndInjectSecurityContext( 'A' );
-
-        // mocked format
-        I18nFormat mockFormat = mock( I18nFormat.class );
-        when( mockFormat.parseDate( anyString() ) ).thenReturn( new Date() );
-        eventService.setFormat( mockFormat );
+        createUserAndInjectSecurityContext( true );
     }
 
     @Override
@@ -247,6 +238,7 @@ public class RegistrationSingleEventServiceTest
         event.setProgram( program );
         event.setOrgUnit( orgUnit );
         event.setPerson( person );
+        event.setEventDate( "2013-01-01" );
 
         event.getDataValues().add( new DataValue( dataElementA.getUid(), "10" ) );
 

@@ -216,7 +216,7 @@ function Patient()
 	
 	this.update = function()
 	{
-		if( !this.validate() ) return;
+		if( !this.validate(getFieldValue('programIdAddPatient')) ) return;
 		
 		var params = 'programId=' + getFieldValue('programIdAddPatient') 
 		+ '&' + getParamsForDiv('editPatientDiv');
@@ -282,7 +282,7 @@ function listAllPatient()
 	hideById('editPatientDiv');
 	hideById('migrationPatientDiv');
 	hideById('advanced-search');
-	
+	showById('searchByIdTR');
 	Patient.listAll();
 }
 

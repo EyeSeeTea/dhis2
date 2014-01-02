@@ -28,7 +28,14 @@ package org.hisp.dhis.patient.action.validation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.i18n.I18nFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.patient.PatientAttribute;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.validation.ValidationCriteria;
 import org.hisp.dhis.validation.ValidationCriteriaService;
 
@@ -52,15 +59,26 @@ public class GetValidationCriteriaAction
         this.validationCriteriaService = validationCriteriaService;
     }
 
+    private ProgramService programService;
+
+    public void setProgramService( ProgramService programService )
+    {
+        this.programService = programService;
+    }
+
     // -------------------------------------------------------------------------
     // Input && Output
     // -------------------------------------------------------------------------
 
     private int id;
 
+    private int programId;
+
+    private List<PatientAttribute> patientAttributes = new ArrayList<PatientAttribute>();
+
     private ValidationCriteria validationCriteria;
 
-    private I18nFormat format;
+    private Program program;
 
     // -------------------------------------------------------------------------
     // Getter && Setter
@@ -71,19 +89,24 @@ public class GetValidationCriteriaAction
         this.id = id;
     }
 
-    public I18nFormat getFormat()
+    public void setProgramId( int programId )
     {
-        return format;
-    }
-
-    public void setFormat( I18nFormat format )
-    {
-        this.format = format;
+        this.programId = programId;
     }
 
     public ValidationCriteria getValidationCriteria()
     {
         return validationCriteria;
+    }
+
+    public List<PatientAttribute> getPatientAttributes()
+    {
+        return patientAttributes;
+    }
+
+    public Program getProgram()
+    {
+        return program;
     }
 
     // -------------------------------------------------------------------------
@@ -95,6 +118,12 @@ public class GetValidationCriteriaAction
         throws Exception
     {
         validationCriteria = validationCriteriaService.getValidationCriteria( id );
+
+        program = programService.getProgram( programId );
+
+        patientAttributes = new ArrayList<PatientAttribute>( program.getPatientAttributes() );
+
+        Collections.sort( patientAttributes, IdentifiableObjectNameComparator.INSTANCE );
 
         return SUCCESS;
     }

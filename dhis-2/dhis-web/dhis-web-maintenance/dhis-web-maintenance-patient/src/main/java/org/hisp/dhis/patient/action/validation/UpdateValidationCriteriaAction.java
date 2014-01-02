@@ -28,8 +28,6 @@ package org.hisp.dhis.patient.action.validation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.validation.ValidationCriteria;
 import org.hisp.dhis.validation.ValidationCriteriaService;
 
@@ -48,13 +46,16 @@ public class UpdateValidationCriteriaAction
 
     private ValidationCriteriaService validationCriteriaService;
 
-    private PatientService patientService;
-
-    private I18nFormat format;
+    public void setValidationCriteriaService( ValidationCriteriaService validationCriteriaService )
+    {
+        this.validationCriteriaService = validationCriteriaService;
+    }
 
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
+
+    private int programId;
 
     private int id;
 
@@ -72,24 +73,19 @@ public class UpdateValidationCriteriaAction
     // Setters
     // -------------------------------------------------------------------------
 
-    public void setValidationCriteriaService( ValidationCriteriaService validationCriteriaService )
-    {
-        this.validationCriteriaService = validationCriteriaService;
-    }
-
-    public void setPatientService( PatientService patientService )
-    {
-        this.patientService = patientService;
-    }
-
-    public void setFormat( I18nFormat format )
-    {
-        this.format = format;
-    }
-
     public void setName( String name )
     {
         this.name = name;
+    }
+
+    public int getProgramId()
+    {
+        return programId;
+    }
+
+    public void setProgramId( int programId )
+    {
+        this.programId = programId;
     }
 
     public void setId( int id )
@@ -131,11 +127,10 @@ public class UpdateValidationCriteriaAction
         criteria.setDescription( description );
         criteria.setProperty( property );
         criteria.setOperator( operator );
-        criteria.setValue( patientService.getObjectValue( property, value, format ) );
+        criteria.setValue( value );
 
         validationCriteriaService.updateValidationCriteria( criteria );
 
         return SUCCESS;
     }
-
 }

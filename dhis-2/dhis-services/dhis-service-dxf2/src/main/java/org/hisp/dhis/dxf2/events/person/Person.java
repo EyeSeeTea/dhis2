@@ -171,8 +171,13 @@ public class Person
     @Override
     public String toString()
     {
-        return "Person{" + "person='" + person + '\'' + ", orgUnit='" + orgUnit + '\'' + ", name='" + name + '\''
-            + ", relationships=" + relationships + ", identifiers=" + identifiers
-            + ", attributes=" + attributes + '}';
+        return "Person{" +
+            "person='" + person + '\'' +
+            ", orgUnit='" + orgUnit + '\'' +
+            ", name='" + name + '\'' +
+            ", relationships=" + relationships +
+            ", identifiers=" + identifiers +
+            ", attributes=" + attributes +
+            '}';
     }
 }

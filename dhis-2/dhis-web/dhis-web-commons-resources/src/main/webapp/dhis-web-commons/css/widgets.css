@@ -342,10 +342,10 @@ span#message
 {
   display: none;
   padding: 1em;
-  margin: 1em;
+  margin: 1em 0;
   background-color: #f8eab0;
   border: 1px solid #dbae56;
-  width: 500px;
+  width: 480px;
   border-radius: 3px;
 }
 
@@ -353,10 +353,10 @@ span#info
 {
   display: block;
   padding: 1em;
-  margin: 1em;
+  margin: 1em 0;
   background-color: #baffbc;
   border: 1px solid #12cd17;
-  width: 500px;
+  width: 480px;
   border-radius: 3px;
 }
 
@@ -553,7 +553,7 @@ div.inputCriteria
   border-radius: 3px;
   padding: 6px 5px;
   margin: 2px 0;
-  color: #555;
+  color: #333;
 }
 
 .setting select,

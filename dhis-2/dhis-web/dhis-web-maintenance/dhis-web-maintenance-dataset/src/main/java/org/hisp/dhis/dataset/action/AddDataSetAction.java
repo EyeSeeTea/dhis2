@@ -29,6 +29,8 @@ package org.hisp.dhis.dataset.action;
  */
 
 import com.opensymphony.xwork2.Action;
+
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
@@ -76,6 +78,13 @@ public class AddDataSetAction
     public void setIndicatorService( IndicatorService indicatorService )
     {
         this.indicatorService = indicatorService;
+    }
+    
+    private DataElementCategoryService categoryService;
+
+    public void setCategoryService( DataElementCategoryService categoryService )
+    {
+        this.categoryService = categoryService;
     }
 
     private UserService userService;
@@ -159,6 +168,13 @@ public class AddDataSetAction
         this.notifyCompletingUser = notifyCompletingUser;
     }
 
+    private boolean approveData;
+
+    public void setApproveData( boolean approveData )
+    {
+        this.approveData = approveData;
+    }
+
     private boolean skipAggregation;
 
     public void setSkipAggregation( boolean skipAggregation )
@@ -236,6 +252,13 @@ public class AddDataSetAction
         this.indicatorsSelectedList = indicatorsSelectedList;
     }
 
+    private Integer categoryComboId;
+    
+    public void setCategoryComboId( Integer categoryComboId )
+    {
+        this.categoryComboId = categoryComboId;
+    }
+
     private Integer selectedLegendSetId;
 
     public void setSelectedLegendSetId( Integer selectedLegendSetId )
@@ -280,6 +303,11 @@ public class AddDataSetAction
             indicators.add( indicatorService.getIndicator( Integer.parseInt( id ) ) );
         }
 
+        if ( categoryComboId != null )
+        {
+            dataSet.setCategoryCombo( categoryService.getDataElementCategoryCombo( categoryComboId ) );
+        }
+        
         dataSet.setDescription( description );
         dataSet.setVersion( 1 );
         dataSet.setMobile( false );
@@ -289,6 +317,7 @@ public class AddDataSetAction
         dataSet.setFieldCombinationRequired( fieldCombinationRequired );
         dataSet.setValidCompleteOnly( validCompleteOnly );
         dataSet.setNotifyCompletingUser( notifyCompletingUser );
+        dataSet.setApproveData( approveData );
         dataSet.setSkipOffline( skipOffline );
         dataSet.setDataElementDecoration( dataElementDecoration );
         dataSet.setRenderAsTabs( renderAsTabs );

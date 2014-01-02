@@ -76,12 +76,13 @@ Ext.onReady( function() {
 		};
 
 		olmap.closeAllLayers = function() {
+			gis.layer.event.core.reset();
+			gis.layer.facility.core.reset();
 			gis.layer.boundary.core.reset();
 			gis.layer.thematic1.core.reset();
 			gis.layer.thematic2.core.reset();
 			gis.layer.thematic3.core.reset();
 			gis.layer.thematic4.core.reset();
-			gis.layer.facility.core.reset();
 		};
 
 		addControl('zoomIn', olmap.zoomIn);
@@ -142,6 +143,12 @@ Ext.onReady( function() {
 		});
 		layers.openStreetMap.id = 'openStreetMap';
 
+		layers.event = GIS.core.VectorLayer(gis, 'event', GIS.i18n.event_layer, {opacity: 0.8});
+		layers.event.core = new mapfish.GeoStat.Event(gis.olmap, {
+			layer: layers.event,
+			gis: gis
+		});
+
 		layers.facility = GIS.core.VectorLayer(gis, 'facility', GIS.i18n.facility_layer, {opacity: 1});
 		layers.facility.core = new mapfish.GeoStat.Facility(gis.olmap, {
 			layer: layers.facility,
@@ -170,19 +177,21 @@ Ext.onReady( function() {
 
 	GIS.core.createSelectHandlers = function(gis, layer) {
 		var isRelocate = !!GIS.app ? (gis.init.user.isAdmin ? true : false) : false,
-
-			window,
+			options = {},
 			infrastructuralPeriod,
-			onHoverSelect,
-			onHoverUnselect,
-			onClickSelect,
-			dimConf = gis.conf.finals.dimension;
+			defaultHoverSelect,
+			defaultHoverUnselect,
+			defaultClickSelect,
+            selectHandlers,
+			dimConf = gis.conf.finals.dimension,
+            defaultHoverWindow,
+            eventWindow;
 
-		onHoverSelect = function fn(feature) {
-			if (window) {
-				window.destroy();
+		defaultHoverSelect = function fn(feature) {
+			if (defaultHoverWindow) {
+				defaultHoverWindow.destroy();
 			}
-			window = Ext.create('Ext.window.Window', {
+			defaultHoverWindow = Ext.create('Ext.window.Window', {
 				cls: 'gis-window-widget-feature gis-plugin',
 				preventHeader: true,
 				shadow: false,
@@ -192,21 +201,21 @@ Ext.onReady( function() {
 				}
 			});
 
-			window.show();
+			defaultHoverWindow.show();
 
 			var eastX = gis.viewport.eastRegion.getPosition()[0],
 				centerX = gis.viewport.centerRegion.getPosition()[0],
 				centerRegionCenterX = centerX + ((eastX - centerX) / 2),
 				centerRegionY = gis.viewport.centerRegion.getPosition()[1] + (GIS.app ? 32 : 0);
 
-			window.setPosition(centerRegionCenterX - (window.getWidth() / 2), centerRegionY);
+			defaultHoverWindow.setPosition(centerRegionCenterX - (defaultHoverWindow.getWidth() / 2), centerRegionY);
 		};
 
-		onHoverUnselect = function fn(feature) {
-			window.destroy();
+		defaultHoverUnselect = function fn(feature) {
+			defaultHoverWindow.destroy();
 		};
 
-		onClickSelect = function fn(feature) {
+		defaultClickSelect = function fn(feature) {
 			var showInfo,
 				showRelocate,
 				drill,
@@ -418,7 +427,7 @@ Ext.onReady( function() {
 				// parent graph map
 				view.parentGraphMap = {};
 				view.parentGraphMap[parentId] = parentGraph;
-console.log(view.parentGraphMap);
+
 				// dimension
 				view.rows = [{
 					dimension: dimConf.organisationUnit.objectName,
@@ -477,6 +486,46 @@ console.log(view.parentGraphMap);
 				}));
 
 				menuItems.push( Ext.create('Ext.menu.Item', {
+                    text: 'Swap lon/lat',
+					iconCls: 'gis-menu-item-icon-relocate',
+					disabled: !gis.init.user.isAdmin,
+					handler: function(item) {
+                        var id = feature.attributes.id,
+                            geo = Ext.clone(feature.geometry).transform('EPSG:900913', 'EPSG:4326');
+
+                        if (Ext.isNumber(geo.x) && Ext.isNumber(geo.y) && gis.init.user.isAdmin) {
+                            Ext.Ajax.request({
+                                url: gis.init.contextPath + '/api/organisationUnits/' + id + '.json?links=false',
+                                success: function(r) {
+                                    var orgUnit = Ext.decode(r.responseText);
+
+                                    orgUnit.coordinates = '[' + geo.y.toFixed(5) + ',' + geo.x.toFixed(5) + ']';
+
+                                    Ext.Ajax.request({
+                                        url: gis.init.contextPath + '/api/metaData?preheatCache=false',
+                                        method: 'POST',
+                                        headers: {'Content-Type': 'application/json'},
+                                        params: Ext.encode({organisationUnits: [orgUnit]}),
+                                        success: function(r) {
+                                            var x = feature.geometry.x,
+                                                y = feature.geometry.y;
+
+                                            delete feature.geometry.bounds;
+                                            feature.geometry.x = y;
+                                            feature.geometry.y = x;
+
+                                            layer.redraw();
+
+                                            console.log(feature.attributes.name + ' relocated to ' + orgUnit.coordinates);
+                                        }
+                                    });
+                                }
+                            });
+                        }
+					}
+				}));
+
+				menuItems.push( Ext.create('Ext.menu.Item', {
 					text: GIS.i18n.show_information_sheet,
 					iconCls: 'gis-menu-item-icon-information',
 					handler: function(item) {
@@ -517,11 +566,67 @@ console.log(view.parentGraphMap);
 			menu.showAt([gis.olmap.mouseMove.x, gis.olmap.mouseMove.y]);
 		};
 
-		selectHandlers = new OpenLayers.Control.newSelectFeature(layer, {
-			onHoverSelect: onHoverSelect,
-			onHoverUnselect: onHoverUnselect,
-			onClickSelect: onClickSelect
-		});
+		options = {
+            onHoverSelect: defaultHoverSelect,
+            onHoverUnselect: defaultHoverUnselect,
+            onClickSelect: defaultClickSelect
+        };
+
+		if (layer.id === 'event') {
+			options.onClickSelect = function fn(feature) {
+                var ignoreKeys = ['label', 'value', 'nameColumnMap', 'psi', 'ps', 'longitude', 'latitude', 'eventdate', 'ou', 'oucode', 'ouname'],
+                    attributes = feature.attributes,
+                    map = attributes.nameColumnMap,
+                    html = '<table class="padding1">',
+                    titleStyle = ' style="font-weight:bold; padding-right:10px; vertical-align:top"',
+                    valueStyle = ' style="max-width:170px"',
+                    windowPosition;
+
+                // default properties
+                html += '<tr><td' + titleStyle + '>' + map['ou'] + '</td><td' + valueStyle + '>' + attributes['ouname'] + '</td></tr>';
+                html += '<tr><td' + titleStyle + '>' + map['eventdate'] + '</td><td' + valueStyle + '>' + attributes['eventdate'] + '</td></tr>';
+                html += '<tr><td' + titleStyle + '>' + map['longitude'] + '</td><td' + valueStyle + '>' + attributes['longitude'] + '</td></tr>';
+                html += '<tr><td' + titleStyle + '>' + map['latitude'] + '</td><td' + valueStyle + '>' + attributes['latitude'] + '</td></tr>';
+
+                for (var key in attributes) {
+                    if (attributes.hasOwnProperty(key) && !Ext.Array.contains(ignoreKeys, key)) {
+                        html += '<tr><td' + titleStyle + '>' + map[key] + '</td><td>' + attributes[key] + '</td></tr>';
+                    }
+                }
+
+                html += '</table>';
+
+                if (Ext.isObject(eventWindow) && eventWindow.destroy) {
+                    windowPosition = eventWindow.getPosition();
+                    eventWindow.destroy();
+                    eventWindow = null;
+                }
+
+                eventWindow = Ext.create('Ext.window.Window', {
+                    title: 'Event',
+                    layout: 'fit',
+                    resizable: false,
+                    bodyStyle: 'background-color:#fff; padding:5px',
+                    html: html,
+                    autoShow: true,
+                    listeners: {
+                        show: function(w) {
+                            if (windowPosition) {
+                                w.setPosition(windowPosition);
+                            }
+                            else {
+                                gis.util.gui.window.setPositionTopRight(w);
+                            }
+                        },
+                        destroy: function() {
+                            eventWindow = null;
+                        }
+                    }
+                });
+            };
+		}
+
+		selectHandlers = new OpenLayers.Control.newSelectFeature(layer, options);
 
 		gis.olmap.addControl(selectHandlers);
 		selectHandlers.activate();
@@ -832,6 +937,448 @@ console.log(view.parentGraphMap);
 					setMap();
 				}
 			}
+		};
+
+		return loader;
+	};
+
+	GIS.core.LayerLoaderEvent = function(gis, layer) {
+		var olmap = layer.map,
+			compareView,
+			loadOrganisationUnits,
+			loadData,
+			loadLegend,
+			afterLoad,
+			loader,
+			dimConf = gis.conf.finals.dimension;
+
+		loadOrganisationUnits = function(view) {
+            loadData(view);
+		};
+
+		loadData = function(view) {
+			view = view || layer.core.view;
+
+            var paramString = '?',
+                features = [];
+
+            // stage
+            paramString += 'stage=' + view.stage.id;
+
+            // dates
+            paramString += '&startDate=' + view.startDate;
+            paramString += '&endDate=' + view.endDate;
+
+            // ou
+            if (Ext.isArray(view.organisationUnits)) {
+				for (var i = 0; i < view.organisationUnits.length; i++) {
+					paramString += '&dimension=ou:' + view.organisationUnits[i].id;
+				}
+			}
+
+            // de
+            for (var i = 0, element; i < view.dataElements.length; i++) {
+                element = view.dataElements[i];
+
+                paramString += '&dimension=' + element.id;
+
+                if (element.value) {
+					if (element.operator) {
+						paramString += ':' + element.operator;
+					}
+
+					paramString += ':' + element.value;
+                }
+            }
+
+			Ext.data.JsonP.request({
+				url: gis.init.contextPath + '/api/analytics/events/query/' + view.program.id + '.jsonp' + paramString,
+				disableCaching: false,
+				scope: this,
+				success: function(r) {
+                    var events = [],
+                        features = [],
+                        rows = [],
+                        lonIndex,
+                        latIndex,
+                        map = Ext.clone(r.metaData.names);
+
+                    // name-column map, lonIndex, latIndex
+                    for (var i = 0; i < r.headers.length; i++) {
+                        map[r.headers[i].name] = r.headers[i].column;
+
+                        if (r.headers[i].name === 'longitude') {
+							lonIndex = i;
+						}
+
+						if (r.headers[i].name === 'latitude') {
+							latIndex = i;
+						}
+                    }
+
+					// get events with coordinates
+                    if (Ext.isArray(r.rows) && r.rows.length) {
+						for (var i = 0, row; i < r.rows.length; i++) {
+							row = r.rows[i];
+
+							if (row[lonIndex] && row[latIndex]) {
+								rows.push(row);
+							}
+						}
+					}
+
+                    if (!rows.length) {
+                        alert('No coordinates found');
+                        olmap.mask.hide();
+                        return;
+                    }
+
+                    // name-column map
+                    map = Ext.clone(r.metaData.names);
+
+                    for (var i = 0; i < r.headers.length; i++) {
+                        map[r.headers[i].name] = r.headers[i].column;
+                    }
+
+                    // events
+                    for (var i = 0, row, obj; i < rows.length; i++) {
+                        row = rows[i];						
+                        obj = {};
+
+                        for (var j = 0; j < row.length; j++) {
+                            obj[r.headers[j].name] = row[j];
+                        }
+
+                        obj[gis.conf.finals.widget.value] = 0;
+                        obj.label = obj.ouname;
+                        obj.nameColumnMap = map;
+
+                        events.push(obj);
+                    }
+
+                    // features
+                    for (var i = 0, event, point; i < events.length; i++) {
+                        event = events[i];
+
+                        point = gis.util.map.getTransformedPointByXY(event.longitude, event.latitude);
+
+                        features.push(new OpenLayers.Feature.Vector(point, event));
+                    }
+
+                    layer.removeFeatures(layer.features);
+                    layer.addFeatures(features);
+
+                    loadLegend(view);
+                }
+            });
+		};
+
+		loadLegend = function(view) {
+			view = view || layer.core.view;
+
+            // classification optionsvar options = {
+            var options = {
+            	indicator: gis.conf.finals.widget.value,
+				method: 2,
+				numClasses: 5,
+				colors: layer.core.getColors('000000', '222222'),
+				minSize: 5,
+				maxSize: 5
+			};
+
+            layer.core.view = view;
+
+            layer.core.applyClassification(options);
+
+            afterLoad(view);
+		};
+
+		afterLoad = function(view) {
+
+			// Layer
+			if (layer.item) {
+				layer.item.setValue(true, view.opacity);
+			}
+			else {
+				layer.setLayerOpacity(view.opacity);
+			}
+
+			// Gui
+			if (loader.updateGui && Ext.isObject(layer.widget)) {
+				layer.widget.setGui(view);
+			}
+
+			// Zoom
+			if (loader.zoomToVisibleExtent) {
+				olmap.zoomToVisibleExtent();
+			}
+
+			// Mask
+			if (loader.hideMask) {
+				olmap.mask.hide();
+			}
+
+			// Map callback
+			if (loader.callBack) {
+				loader.callBack(layer);
+			}
+			else {
+				gis.map = null;
+			}
+
+			// session storage
+			//if (GIS.isSessionStorage) {
+				//gis.util.layout.setSessionStorage('map', gis.util.layout.getAnalytical());
+			//}
+		};
+
+		loader = {
+			compare: false,
+			updateGui: false,
+			zoomToVisibleExtent: false,
+			hideMask: false,
+			callBack: null,
+			load: function(view) {
+				gis.olmap.mask.show();
+
+                loadOrganisationUnits(view);
+			},
+			loadData: loadData,
+			loadLegend: loadLegend
+		};
+
+		return loader;
+	};
+
+	GIS.core.LayerLoaderFacility = function(gis, layer) {
+		var olmap = layer.map,
+			compareView,
+			loadOrganisationUnits,
+			loadData,
+			loadLegend,
+			addCircles,
+			afterLoad,
+			loader;
+
+		compareView = function(view, doExecute) {
+			var src = layer.core.view,
+				viewIds,
+				viewDim,
+				srcIds,
+				srcDim;
+
+			loader.zoomToVisibleExtent = true;
+
+			if (!src) {
+				if (doExecute) {
+					loadOrganisationUnits(view);
+				}
+				return gis.conf.finals.widget.loadtype_organisationunit;
+			}
+
+			// organisation units
+			viewIds = [];
+			viewDim = view.rows[0];
+			srcIds = [];
+			srcDim = src.rows[0];
+
+			if (viewDim.items.length === srcDim.items.length) {
+				for (var i = 0; i < viewDim.items.length; i++) {
+					viewIds.push(viewDim.items[i].id);
+				}
+
+				for (var i = 0; i < srcDim.items.length; i++) {
+					srcIds.push(srcDim.items[i].id);
+				}
+
+				if (Ext.Array.difference(viewIds, srcIds).length !== 0) {
+					if (doExecute) {
+						loadOrganisationUnits(view);
+					}
+					return gis.conf.finals.widget.loadtype_organisationunit;
+				}
+			}
+			else {
+				if (doExecute) {
+					loadOrganisationUnits(view);
+				}
+				return gis.conf.finals.widget.loadtype_organisationunit;
+			}
+
+			// Group set
+			loader.zoomToVisibleExtent = false;
+
+			if (view.organisationUnitGroupSet.id !== src.organisationUnitGroupSet.id) {
+				if (doExecute) {
+					loadOrganisationUnits(view);
+				}
+				return gis.conf.finals.widget.loadtype_organisationunit;
+			}
+
+			//if (view.areaRadius !== src.areaRadius) {
+				//if (doExecute) {
+					//loadLegend(view);
+				//}
+				//return gis.conf.finals.widget.loadtype_legend;
+			//}
+
+			// always reload legend
+			if (doExecute) {
+				loadLegend(view);
+				return gis.conf.finals.widget.loadtype_legend;
+			}
+
+			//gis.olmap.mask.hide();
+		};
+
+		loadOrganisationUnits = function(view) {
+			var items = view.rows[0].items,
+				idParamString = '';
+
+			for (var i = 0; i < items.length; i++) {
+				idParamString += 'ids=' + items[i].id;
+				idParamString += i !== items.length - 1 ? '&' : '';
+			}
+
+			Ext.data.JsonP.request({
+				url: gis.init.contextPath + gis.conf.finals.url.path_module + 'getGeoJsonFacilities.action?' + idParamString,
+				scope: this,
+				disableCaching: false,
+				success: function(r) {
+					var geojson = layer.core.decode(r),
+						format = new OpenLayers.Format.GeoJSON(),
+						features = gis.util.map.getTransformedFeatureArray(format.read(geojson));
+
+					if (!Ext.isArray(features)) {
+						olmap.mask.hide();
+						alert(GIS.i18n.invalid_coordinates);
+						return;
+					}
+
+					if (!features.length) {
+						olmap.mask.hide();
+						alert(GIS.i18n.no_valid_coordinates_found);
+						return;
+					}
+
+					layer.core.featureStore.loadFeatures(features.slice(0));
+
+					loadData(view, features);
+				},
+				failure: function(r) {
+					olmap.mask.hide();
+					alert(GIS.i18n.coordinates_could_not_be_loaded);
+				}
+			});
+		};
+
+		loadData = function(view, features) {
+			view = view || layer.core.view;
+			features = features || layer.core.featureStore.features;
+
+			for (var i = 0; i < features.length; i++) {
+				features[i].attributes.label = features[i].attributes.name;
+			}
+
+			layer.removeFeatures(layer.features);
+			layer.addFeatures(features);
+
+			loadLegend(view);
+		};
+
+		loadLegend = function(view) {
+			view = view || layer.core.view;
+
+			var store = gis.store.groupsByGroupSet;
+
+			store.proxy.url = gis.init.contextPath + gis.conf.finals.url.path_module + 'getOrganisationUnitGroupsByGroupSet.action?id=' + view.organisationUnitGroupSet.id;
+			store.load({
+				scope: this,
+				callback: function() {
+					var options = {
+						indicator: view.organisationUnitGroupSet.id
+					};
+
+					layer.core.view = view;
+
+					layer.core.applyClassification(options);
+
+					addCircles(view);
+
+					afterLoad(view);
+				}
+			});
+		};
+
+		addCircles = function(view) {
+			var radius = view.areaRadius;
+
+			if (layer.circleLayer) {
+				layer.circleLayer.deactivateControls();
+				layer.circleLayer = null;
+			}
+			if (Ext.isDefined(radius) && radius) {
+				layer.circleLayer = GIS.app.CircleLayer(layer.features, radius);
+				nissa = layer.circleLayer;
+			}
+		};
+
+		afterLoad = function(view) {
+
+			// Legend
+			gis.viewport.eastRegion.doLayout();
+			layer.legendPanel.expand();
+
+			// Layer
+			if (layer.item) {
+				layer.item.setValue(true, view.opacity);
+			}
+			else {
+				layer.setLayerOpacity(view.opacity);
+			}
+
+			// Gui
+			if (loader.updateGui && Ext.isObject(layer.widget)) {
+				layer.widget.setGui(view);
+			}
+
+			// Zoom
+			if (loader.zoomToVisibleExtent) {
+				olmap.zoomToVisibleExtent();
+			}
+
+			// Mask
+			if (loader.hideMask) {
+				olmap.mask.hide();
+			}
+
+			// Map callback
+			if (loader.callBack) {
+				loader.callBack(layer);
+			}
+			else {
+				gis.map = null;
+			}
+		};
+
+		loader = {
+			compare: false,
+			updateGui: false,
+			zoomToVisibleExtent: false,
+			hideMask: false,
+			callBack: null,
+			load: function(view) {
+				gis.olmap.mask.show();
+
+				if (this.compare) {
+					compareView(view, true);
+				}
+				else {
+					loadOrganisationUnits(view);
+				}
+			},
+			loadData: loadData,
+			loadLegend: loadLegend
 		};
 
 		return loader;
@@ -1210,6 +1757,8 @@ console.log(view.parentGraphMap);
 		};
 
 		loadData = function(view, features) {
+			var success;
+			
 			view = view || layer.core.view;
 			features = features || layer.core.featureStore.features;
 
@@ -1246,70 +1795,88 @@ console.log(view.parentGraphMap);
 				paramString += i < peItems.length - 1 ? ';' : '';
 			}
 
-			Ext.data.JsonP.request({
-				url: gis.init.contextPath + '/api/analytics.jsonp' + paramString,
-				disableCaching: false,
-				scope: this,
-				success: function(r) {
-					var response = gis.api.response.Response(r),
-						featureMap = {},
-						valueMap = {},
-						ouIndex,
-						dxIndex,
-						valueIndex,
-						newFeatures = [],
-						dimensions,
-						items = [];
+			success = function(json) {
+				var response = gis.api.response.Response(json),
+					featureMap = {},
+					valueMap = {},
+					ouIndex,
+					dxIndex,
+					valueIndex,
+					newFeatures = [],
+					dimensions,
+					items = [];
 
-					if (!response) {
-						olmap.mask.hide();
-						return;
-					}
-
-					// ou index, value index
-					for (var i = 0; i < response.headers.length; i++) {
-						if (response.headers[i].name === dimConf.organisationUnit.dimensionName) {
-							ouIndex = i;
-						}
-						else if (response.headers[i].name === dimConf.value.dimensionName) {
-							valueIndex = i;
-						}
-					}
-
-					// Feature map
-					for (var i = 0, id; i < features.length; i++) {
-						var id = features[i].attributes.id;
-
-						featureMap[id] = true;
-					}
-
-					// Value map
-					for (var i = 0; i < response.rows.length; i++) {
-						var id = response.rows[i][ouIndex],
-							value = parseFloat(response.rows[i][valueIndex]);
-
-						valueMap[id] = value;
-					}
-
-					for (var i = 0; i < features.length; i++) {
-						var feature = features[i],
-							id = feature.attributes.id;
-
-						if (featureMap.hasOwnProperty(id) && valueMap.hasOwnProperty(id)) {
-							feature.attributes.value = valueMap[id];
-							feature.attributes.label = feature.attributes.name + ' (' + feature.attributes.value + ')';
-							newFeatures.push(feature);
-						}
-					}
-
-					layer.removeFeatures(layer.features);
-					layer.addFeatures(newFeatures);
-
-					gis.response = response;
-
-					loadLegend(view);
+				if (!response) {
+					olmap.mask.hide();
+					return;
 				}
-			});
+
+				// ou index, value index
+				for (var i = 0; i < response.headers.length; i++) {
+					if (response.headers[i].name === dimConf.organisationUnit.dimensionName) {
+						ouIndex = i;
+					}
+					else if (response.headers[i].name === dimConf.value.dimensionName) {
+						valueIndex = i;
+					}
+				}
+
+				// Feature map
+				for (var i = 0, id; i < features.length; i++) {
+					var id = features[i].attributes.id;
+
+					featureMap[id] = true;
+				}
+
+				// Value map
+				for (var i = 0; i < response.rows.length; i++) {
+					var id = response.rows[i][ouIndex],
+						value = parseFloat(response.rows[i][valueIndex]);
+
+					valueMap[id] = value;
+				}
+
+				for (var i = 0; i < features.length; i++) {
+					var feature = features[i],
+						id = feature.attributes.id;
+
+					if (featureMap.hasOwnProperty(id) && valueMap.hasOwnProperty(id)) {
+						feature.attributes.value = valueMap[id];
+						feature.attributes.label = feature.attributes.name + ' (' + feature.attributes.value + ')';
+						newFeatures.push(feature);
+					}
+				}
+
+				layer.removeFeatures(layer.features);
+				layer.addFeatures(newFeatures);
+
+				gis.response = response;
+
+				loadLegend(view);
+			};
+
+			if (Ext.isObject(GIS.app)) {
+				Ext.Ajax.request({
+					url: gis.init.contextPath + '/api/analytics.json' + paramString,
+					disableCaching: false,
+					failure: function(r) {
+						alert(r.responseText);
+					},
+					success: function(r) {
+						success(Ext.decode(r.responseText));
+					}
+				});
+			}
+			else if (Ext.isObject(GIS.plugin)) {
+				Ext.data.JsonP.request({
+					url: gis.init.contextPath + '/api/analytics.jsonp' + paramString,
+					disableCaching: false,
+					scope: this,
+					success: function(r) {
+						success(r);
+					}
+				});
+			}
 		};
 
 		loadLegend = function(view) {
@@ -1456,240 +2023,6 @@ console.log(view.parentGraphMap);
 			// session storage
 			if (GIS.isSessionStorage) {
 				gis.util.layout.setSessionStorage('map', gis.util.layout.getAnalytical());
-			}
-		};
-
-		loader = {
-			compare: false,
-			updateGui: false,
-			zoomToVisibleExtent: false,
-			hideMask: false,
-			callBack: null,
-			load: function(view) {
-				gis.olmap.mask.show();
-
-				if (this.compare) {
-					compareView(view, true);
-				}
-				else {
-					loadOrganisationUnits(view);
-				}
-			},
-			loadData: loadData,
-			loadLegend: loadLegend
-		};
-
-		return loader;
-	};
-
-	GIS.core.LayerLoaderFacility = function(gis, layer) {
-		var olmap = layer.map,
-			compareView,
-			loadOrganisationUnits,
-			loadData,
-			loadLegend,
-			addCircles,
-			afterLoad,
-			loader;
-
-		compareView = function(view, doExecute) {
-			var src = layer.core.view,
-				viewIds,
-				viewDim,
-				srcIds,
-				srcDim;
-
-			loader.zoomToVisibleExtent = true;
-
-			if (!src) {
-				if (doExecute) {
-					loadOrganisationUnits(view);
-				}
-				return gis.conf.finals.widget.loadtype_organisationunit;
-			}
-
-			// organisation units
-			viewIds = [];
-			viewDim = view.rows[0];
-			srcIds = [];
-			srcDim = src.rows[0];
-
-			if (viewDim.items.length === srcDim.items.length) {
-				for (var i = 0; i < viewDim.items.length; i++) {
-					viewIds.push(viewDim.items[i].id);
-				}
-
-				for (var i = 0; i < srcDim.items.length; i++) {
-					srcIds.push(srcDim.items[i].id);
-				}
-
-				if (Ext.Array.difference(viewIds, srcIds).length !== 0) {
-					if (doExecute) {
-						loadOrganisationUnits(view);
-					}
-					return gis.conf.finals.widget.loadtype_organisationunit;
-				}
-			}
-			else {
-				if (doExecute) {
-					loadOrganisationUnits(view);
-				}
-				return gis.conf.finals.widget.loadtype_organisationunit;
-			}
-
-			// Group set
-			loader.zoomToVisibleExtent = false;
-
-			if (view.organisationUnitGroupSet.id !== src.organisationUnitGroupSet.id) {
-				if (doExecute) {
-					loadOrganisationUnits(view);
-				}
-				return gis.conf.finals.widget.loadtype_organisationunit;
-			}
-
-			//if (view.areaRadius !== src.areaRadius) {
-				//if (doExecute) {
-					//loadLegend(view);
-				//}
-				//return gis.conf.finals.widget.loadtype_legend;
-			//}
-
-			// always reload legend
-			if (doExecute) {
-				loadLegend(view);
-				return gis.conf.finals.widget.loadtype_legend;
-			}
-
-			//gis.olmap.mask.hide();
-		};
-
-		loadOrganisationUnits = function(view) {
-			var items = view.rows[0].items,
-				idParamString = '';
-
-			for (var i = 0; i < items.length; i++) {
-				idParamString += 'ids=' + items[i].id;
-				idParamString += i !== items.length - 1 ? '&' : '';
-			}
-
-			Ext.data.JsonP.request({
-				url: gis.init.contextPath + gis.conf.finals.url.path_module + 'getGeoJsonFacilities.action?' + idParamString,
-				scope: this,
-				disableCaching: false,
-				success: function(r) {
-					var geojson = layer.core.decode(r),
-						format = new OpenLayers.Format.GeoJSON(),
-						features = gis.util.map.getTransformedFeatureArray(format.read(geojson));
-
-					if (!Ext.isArray(features)) {
-						olmap.mask.hide();
-						alert(GIS.i18n.invalid_coordinates);
-						return;
-					}
-
-					if (!features.length) {
-						olmap.mask.hide();
-						alert(GIS.i18n.no_valid_coordinates_found);
-						return;
-					}
-
-					layer.core.featureStore.loadFeatures(features.slice(0));
-
-					loadData(view, features);
-				},
-				failure: function(r) {
-					olmap.mask.hide();
-					alert(GIS.i18n.coordinates_could_not_be_loaded);
-				}
-			});
-		};
-
-		loadData = function(view, features) {
-			view = view || layer.core.view;
-			features = features || layer.core.featureStore.features;
-
-			for (var i = 0; i < features.length; i++) {
-				features[i].attributes.label = features[i].attributes.name;
-			}
-
-			layer.removeFeatures(layer.features);
-			layer.addFeatures(features);
-
-			loadLegend(view);
-		};
-
-		loadLegend = function(view) {
-			view = view || layer.core.view;
-
-			var store = gis.store.groupsByGroupSet;
-
-			store.proxy.url = gis.init.contextPath + gis.conf.finals.url.path_module + 'getOrganisationUnitGroupsByGroupSet.action?id=' + view.organisationUnitGroupSet.id;
-			store.load({
-				scope: this,
-				callback: function() {
-					var options = {
-						indicator: view.organisationUnitGroupSet.id
-					};
-
-					layer.core.view = view;
-
-					layer.core.applyClassification(options);
-
-					addCircles(view);
-
-					afterLoad(view);
-				}
-			});
-		};
-
-		addCircles = function(view) {
-			var radius = view.areaRadius;
-
-			if (layer.circleLayer) {
-				layer.circleLayer.deactivateControls();
-				layer.circleLayer = null;
-			}
-			if (Ext.isDefined(radius) && radius) {
-				layer.circleLayer = GIS.app.CircleLayer(layer.features, radius);
-				nissa = layer.circleLayer;
-			}
-		};
-
-		afterLoad = function(view) {
-
-			// Legend
-			gis.viewport.eastRegion.doLayout();
-			layer.legendPanel.expand();
-
-			// Layer
-			if (layer.item) {
-				layer.item.setValue(true, view.opacity);
-			}
-			else {
-				layer.setLayerOpacity(view.opacity);
-			}
-
-			// Gui
-			if (loader.updateGui && Ext.isObject(layer.widget)) {
-				layer.widget.setGui(view);
-			}
-
-			// Zoom
-			if (loader.zoomToVisibleExtent) {
-				olmap.zoomToVisibleExtent();
-			}
-
-			// Mask
-			if (loader.hideMask) {
-				olmap.mask.hide();
-			}
-
-			// Map callback
-			if (loader.callBack) {
-				loader.callBack(layer);
-			}
-			else {
-				gis.map = null;
 			}
 		};
 
@@ -2389,12 +2722,14 @@ console.log(view.parentGraphMap);
 			gis.layer.thematic2,
 			gis.layer.thematic1,
 			gis.layer.boundary,
-			gis.layer.facility
+			gis.layer.facility,
+			gis.layer.event
 		);
 
 		gis.olmap.addLayers(layers);
 
 		GIS.core.instances.push(gis);
+e = gis.layer.event;
 
 		return gis;
 	};

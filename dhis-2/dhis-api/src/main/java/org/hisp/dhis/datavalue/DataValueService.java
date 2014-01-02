@@ -102,18 +102,39 @@ public interface DataValueService
     /**
      * Returns a DataValue.
      * 
-     * @param source the Source of the DataValue.
      * @param dataElement the DataElement of the DataValue.
      * @param period the Period of the DataValue.
+     * @param source the Source of the DataValue.
+     * @param categoryOptionCombo the category option combo.
      * @return the DataValue which corresponds to the given parameters, or null
      *         if no match.
      */
-    DataValue getDataValue( OrganisationUnit source, DataElement dataElement, Period period, DataElementCategoryOptionCombo optionCombo );
+    DataValue getDataValue( DataElement dataElement, Period period, OrganisationUnit source, DataElementCategoryOptionCombo optionCombo );
 
     /**
-     * Returns a non-persisted data value.
+     * Returns a DataValue.
+     * 
+     * @param dataElement the DataElement of the DataValue.
+     * @param period the Period of the DataValue.
+     * @param source the Source of the DataValue.
+     * @param categoryOptionCombo the category option combo.
+     * @param attributeOptionCombo the attribute option combo.
+     * @return the DataValue which corresponds to the given parameters, or null
+     *         if no match.
      */
-    DataValue getDataValue( int dataElementId, int categoryOptionComboId, int periodId, int sourceId );
+    DataValue getDataValue( DataElement dataElement, Period period, OrganisationUnit source, 
+        DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo );
+    
+    /**
+     * Returns a non-persisted DataValue.
+     * 
+     * @param dataElementId data element id
+     * @param periodId period id
+     * @param sourceId source id
+     * @param categoryOptionComboId category option combo id
+     * @param attributeOptionComboId attribute option combo id
+     */
+    DataValue getDataValue( int dataElementId, int periodId, int sourceId, int categoryOptionComboId );
     
     // -------------------------------------------------------------------------
     // Collections of DataValues
@@ -184,6 +205,21 @@ public interface DataValueService
      */
     Collection<DataValue> getDataValues( OrganisationUnit source, Period period, Collection<DataElement> dataElements );
 
+    /**
+     * Returns all DataValues for a given Source, Period, collection of
+     * DataElements and DataElementCategoryOptionCombo.
+     * 
+     * @param source the Source of the DataValues.
+     * @param period the Period of the DataValues.
+     * @param dataElements the DataElements of the DataValues.
+     * @param attributeOptionCombo the DataElementCategoryCombo.
+     * @return a collection of all DataValues which match the given Source,
+     *         Period, and any of the DataElements, or an empty collection if no
+     *         values match.
+     */
+    Collection<DataValue> getDataValues( OrganisationUnit source, Period period, 
+        Collection<DataElement> dataElements, DataElementCategoryOptionCombo attributeOptionCombo );
+    
     /**
      * Returns all DataValues for a given DataElement, Period, and collection of 
      * Sources.

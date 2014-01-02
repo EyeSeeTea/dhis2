@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.struts2.ServletActionContext;
+import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.patient.Patient;
@@ -51,7 +52,6 @@ import org.hisp.dhis.patient.PatientIdentifierTypeService;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
-import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.user.UserService;
 
 import com.opensymphony.xwork2.Action;
@@ -82,6 +82,8 @@ public class UpdatePatientAction
     private UserService userService;
 
     private OrganisationUnitSelectionManager selectionManager;
+
+    private I18nFormat format;
 
     // -------------------------------------------------------------------------
     // Input
@@ -198,6 +200,11 @@ public class UpdatePatientAction
 
                 if ( StringUtils.isNotBlank( value ) )
                 {
+                    if ( attribute.getValueType().equals( PatientAttribute.TYPE_AGE ) )
+                    {
+                        value = format.formatDate( PatientAttribute.getDateFromAge( Integer.parseInt( value ) ) );
+                    }
+
                     attributeValue = patientAttributeValueService.getPatientAttributeValue( patient, attribute );
 
                     if ( attributeValue == null )
@@ -205,23 +212,16 @@ public class UpdatePatientAction
                         attributeValue = new PatientAttributeValue();
                         attributeValue.setPatient( patient );
                         attributeValue.setPatientAttribute( attribute );
+                        attributeValue.setValue( value.trim() );
                         if ( PatientAttribute.TYPE_COMBO.equalsIgnoreCase( attribute.getValueType() ) )
                         {
-                            PatientAttributeOption option = patientAttributeOptionService.get( NumberUtils.toInt(
-                                value, 0 ) );
+                            PatientAttributeOption option = patientAttributeOptionService
+                                .get( Integer.parseInt( value ) );
                             if ( option != null )
                             {
                                 attributeValue.setPatientAttributeOption( option );
+                                attributeValue.setValue( option.getName() );
                             }
-                            else
-                            {
-                                // This option was deleted ???
-                            }
-                            attributeValue.setValue( value );
-                        }
-                        else
-                        {
-                            attributeValue.setValue( value.trim() );
                         }
                         valuesForSave.add( attributeValue );
                     }
@@ -234,13 +234,14 @@ public class UpdatePatientAction
                             if ( option != null )
                             {
                                 attributeValue.setPatientAttributeOption( option );
-                            }
-                            else
-                            {
-                                // This option was deleted ???
+                                attributeValue.setValue( option.getName() );
                             }
                         }
-                        attributeValue.setValue( value.trim() );
+                        else
+                        {
+                            attributeValue.setValue( value.trim() );
+                        }
+
                         valuesForUpdate.add( attributeValue );
                         valuesForDelete.remove( attributeValue );
                     }
@@ -261,6 +262,11 @@ public class UpdatePatientAction
     public void setUserService( UserService userService )
     {
         this.userService = userService;
+    }
+
+    public void setFormat( I18nFormat format )
+    {
+        this.format = format;
     }
 
     public void setHealthWorker( Integer healthWorker )

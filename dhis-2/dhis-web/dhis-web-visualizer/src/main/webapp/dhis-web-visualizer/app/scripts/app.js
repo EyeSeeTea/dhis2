@@ -613,17 +613,20 @@ Ext.onReady( function() {
 			enableKeyEvents: true,
 			currentValue: '',
 			listeners: {
-				keyup: function() {
-					if (this.getValue() !== this.currentValue) {
-						this.currentValue = this.getValue();
+				keyup: {
+					fn: function() {
+						if (this.getValue() !== this.currentValue) {
+							this.currentValue = this.getValue();
 
-						var value = this.getValue(),
-							url = value ? ns.core.init.contextPath + '/api/charts/query/' + value + '.json?viewClass=sharing&links=false' : null,
-							store = ns.app.stores.chart;
+							var value = this.getValue(),
+								url = value ? ns.core.init.contextPath + '/api/charts/query/' + value + '.json?viewClass=sharing&links=false' : null,
+								store = ns.app.stores.chart;
 
-						store.page = 1;
-						store.loadStore(url);
-					}
+							store.page = 1;
+							store.loadStore(url);
+						}
+					},
+					buffer: 100
 				}
 			}
 		});
@@ -1353,10 +1356,9 @@ Ext.onReady( function() {
 				svg = svg.parent().dom.innerHTML;
 
 				Ext.query('#svgField')[0].value = svg;
-				Ext.query('#typeField')[0].value = type;
-				Ext.query('#nameField')[0].value = 'test';
+				Ext.query('#filenameField')[0].value = 'test';
 
-				form.action = '../exportImage.action';
+				form.action = ns.core.init.contextPath + '/api/svg.' + type;
 				form.submit();
 			};
 		}());
@@ -1674,10 +1676,6 @@ Ext.onReady( function() {
 				xLayout = service.layout.getExtendedLayout(layout);
 				paramString = web.analytics.getParamString(xLayout, true);
 
-				if (!web.analytics.validateUrl(init.contextPath + '/api/analytics.json' + paramString)) {
-					return;
-				}
-
 				// show mask
 				web.mask.show(ns.app.centerRegion);
 
@@ -1691,7 +1689,13 @@ Ext.onReady( function() {
 					disableCaching: false,
 					failure: function(r) {
 						web.mask.hide(ns.app.centerRegion);
-						alert(r.responseText);
+
+						if (r.status === 414) {
+							web.analytics.validateUrl(init.contextPath + '/api/analytics.json' + paramString);
+						}
+						else {
+							alert(r.responseText);
+						}
 					},
 					success: function(r) {
 						var xResponse,
@@ -2214,7 +2218,7 @@ Ext.onReady( function() {
 		ns.app.stores.indicatorGroup = indicatorGroupStore;
 
 		dataElementAvailableStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'dataElementId', 'optionComboId', 'operandName'],
+			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
 				reader: {
@@ -2233,7 +2237,7 @@ Ext.onReady( function() {
 					path = '/dataElementGroups/' + uid + '.json?domainType=aggregate&links=false&paging=false';
 				}
 				else if (uid === 0) {
-					path = 'dataElements.json?domainType=aggregate&paging=false&links=false';
+					path = '/dataElements.json?domainType=aggregate&paging=false&links=false';
 				}
 
 				if (!path) {
@@ -2261,10 +2265,10 @@ Ext.onReady( function() {
 				if (Ext.isString(uid)) {
 					this.setProxy({
 						type: 'ajax',
-						url: ns.core.init.contextPath + '/dhis-web-commons-ajax-json/getOperands.action?uid=' + uid,
+						url: ns.core.init.contextPath + '/api/dataElementOperands.json?links=false&dataElementGroup=' + uid,
 						reader: {
 							type: 'json',
-							root: 'operands'
+							root: 'dataElementOperands'
 						}
 					});
 
@@ -2272,8 +2276,7 @@ Ext.onReady( function() {
 						scope: this,
 						callback: function() {
 							this.each(function(r) {
-								r.set('id', r.data.dataElementId + '-' + r.data.optionComboId);
-								r.set('name', r.data.operandName);
+								r.set('id', r.data.id.split('.').join('-'));
 							});
 
 							ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
@@ -2281,7 +2284,8 @@ Ext.onReady( function() {
 					});
 				}
 				else {
-					alert('Invalid parameter');
+					this.removeAll();
+                    dataElementGroupComboBox.clearValue();
 				}
 			},
 			listeners: {

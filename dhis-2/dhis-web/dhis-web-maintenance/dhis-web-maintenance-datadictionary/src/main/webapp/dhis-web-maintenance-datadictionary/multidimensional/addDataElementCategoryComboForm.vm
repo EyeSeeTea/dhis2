@@ -1,20 +1,13 @@
+<script src="javascript/categoryOptionCombo.js"></script>
 <script type="text/javascript">
-	jQuery(document).ready(	function(){
-		jQuery("#availableList").dhisAjaxSelect({
-			source: "../dhis-web-commons-ajax-json/getDataElementCategories.action",
-			iterator: 'dataElementCategories',
-			sortSelected: false,
-			connectedTo: 'selectedList',
-			handler: function(item) {
-				var option = jQuery("<option />");
-				option.text( item.name );
-				option.attr( "value", item.id );
+    jQuery(document).ready(	function(){
+        dhis2.coc.clearAndSetAjaxSelect(dhis2.coc.getType(), false);
 
-				return option;
-			}
-		});
+        $('#dimensionType').on('change', function( e ) {
+            dhis2.coc.clearAndSetAjaxSelect(dhis2.coc.getType(), true);
+        });
 
-		validation2( 'addDataElementCategoryComboForm', function( form ){ 
+        validation2( 'addDataElementCategoryComboForm', function( form ){
 			validateSelectedCategories( form );
 		}, {
 			'beforeValidateHandler': function() { listValidator( 'selectedCategories', 'selectedList' ); },
@@ -38,6 +31,15 @@
       <tr>
         <td style="width:120px"><label>$i18n.getString( "name" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
         <td><input type="text" id="name" name="name" /></td>
+      </tr>
+      <tr>
+      	<td><label>$i18n.getString( "dimension_type" )</td>
+      	<td>
+          <select id="dimensionType" name="dimensionType">
+            <option value="disaggregation" selected="selected">$i18n.getString( "disaggregation" )</option>
+            <option value="attribute">$i18n.getString( "attribute" )</option>
+          </select>
+        </td>
       </tr>
       <tr>
       	<td><label for="skipTotal">$i18n.getString( "skip_total_in_reports" )</label></td>

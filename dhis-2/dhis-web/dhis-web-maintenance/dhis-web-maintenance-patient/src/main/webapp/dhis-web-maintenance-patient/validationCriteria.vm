@@ -1,8 +1,8 @@
 <h3>$i18n.getString( "validation_criteria_management" ) #openHelp( "validation_criteria" )</h3>
+<h5>$program.displayName</h5>
 
 <div id="contextMenu" class="contextMenu" style="width: 210px;">
   <ul id="contextMenuItems" class="contextMenuItems">
-    <li><a data-target-fn="showProgramsForValidationCriteriaForm"><i class="fa fa-plus"></i>&nbsp;&nbsp;$i18n.getString( "assign_validation_for_programs" )</a></li>
     <li><a data-target-fn="showUpdateValidationCriteriaForm"><i class="fa fa-edit"></i>&nbsp;&nbsp;$i18n.getString( "edit" )</a></li>
     <li><a data-target-fn="translateWithContext"><i class="fa fa-globe"></i>&nbsp;&nbsp;$i18n.getString( "translation_translate" )</a></li>
     <li><a data-target-fn="removeCriteria"><i class="fa fa-trash-o"></i>&nbsp;&nbsp;$i18n.getString( "remove" )</a></li>
@@ -11,6 +11,7 @@
 </div>
 
 <table class="mainPageTable">
+	<input type='hidden' id='programId' name='programId' value='$program.id' />
 	<tr>
 		<td style="vertical-align:top">
 			<table width="100%">
@@ -20,7 +21,8 @@
 					</td>
 					
 					<td style="text-align:right" >			
-						<input style="text-align:right" type="button" value="$i18n.getString( "add_new" )" onclick="window.location.href='showAddValidationCriteriaForm.action'" style="width:70px">
+						<input type="button" value="$i18n.getString( "add_new" )" onclick="window.location.href='showAddValidationCriteriaForm.action?id=$program.id'" style="width:100px">
+						<br><input type="button" value="$i18n.getString( 'back' )" onclick="window.location.href='program.action'" style="width:100px">
 					</td>
 				</tr>
 			</table>
@@ -31,7 +33,7 @@
 				</tr>
 				</thead>
 				<tbody id="list">
-				#foreach($criteria in $criterias)
+				#foreach($criteria in $program.patientValidationCriteria)
 				<tr id="tr${criteria.id}" data-id="$!criteria.id" data-uid="$!criteria.uid" data-type="ValidationCriteria" data-name="$encoder.htmlEncode( $!criteria.displayName )"
 				    data-can-manage="$security.canManage( $criteria )"
 				    data-can-update="$security.canUpdate( $criteria )"

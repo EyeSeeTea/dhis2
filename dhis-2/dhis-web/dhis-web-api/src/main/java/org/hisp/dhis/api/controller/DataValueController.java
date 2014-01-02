@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.api.utils.ContextUtils;
+import org.hisp.dhis.api.utils.InputUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
@@ -81,96 +82,125 @@ public class DataValueController
     @Autowired
     private DataSetService dataSetService;
     
-    @PreAuthorize("hasRole('ALL') or hasRole('F_DATAVALUE_ADD')")
+    @Autowired
+    private InputUtils inputUtils;
+
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_DATAVALUE_ADD')" )
     @RequestMapping( method = RequestMethod.POST, produces = "text/plain" )
-    public void saveDataValue( @RequestParam String de, @RequestParam(required=false) String co, 
-        @RequestParam String pe, @RequestParam String ou, 
-        @RequestParam(required=false) String value, @RequestParam(required=false) String comment,
-        @RequestParam(required=false) boolean followUp, HttpServletResponse response )
+    public void saveDataValue( 
+        @RequestParam String de, 
+        @RequestParam( required = false ) String co, 
+        @RequestParam( required = false ) String cc, 
+        @RequestParam( required = false ) String cp, 
+        @RequestParam String pe, 
+        @RequestParam String ou, 
+        @RequestParam( required = false ) String value, 
+        @RequestParam( required = false ) String comment, 
+        @RequestParam( required = false ) boolean followUp, HttpServletResponse response )
     {
-        DataElement dataElement = dataElementService.getDataElement( de );
+        // ---------------------------------------------------------------------
+        // Input validation
+        // ---------------------------------------------------------------------
         
+        DataElement dataElement = dataElementService.getDataElement( de );
+
         if ( dataElement == null )
         {
             ContextUtils.conflictResponse( response, "Illegal data element identifier: " + de );
             return;
         }
-        
+
         DataElementCategoryOptionCombo categoryOptionCombo = null;
-        
-        if ( co == null )
-        {
-            categoryOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
-        }
-        else
+
+        if ( co != null )
         {
             categoryOptionCombo = categoryService.getDataElementCategoryOptionCombo( co );
         }
-        
+        else
+        {
+            categoryOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
+        }
+
         if ( categoryOptionCombo == null )
         {
             ContextUtils.conflictResponse( response, "Illegal category option combo identifier: " + co );
             return;
         }
+
+        DataElementCategoryOptionCombo attributeOptionCombo = inputUtils.getAttributeOptionCombo( response, cc, cp );
+        
+        if ( attributeOptionCombo == null )
+        {
+            return;
+        }
         
         Period period = PeriodType.getPeriodFromIsoString( pe );
-        
+
         if ( period == null )
         {
             ContextUtils.conflictResponse( response, "Illegal period identifier: " + pe );
             return;
         }
-        
+
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( ou );
-        
+
         if ( organisationUnit == null )
         {
             ContextUtils.conflictResponse( response, "Illegal organisation unit identifier: " + ou );
             return;
         }
 
-        if ( dataSetService.isLocked( dataElement, period, organisationUnit, null ) )
-        {
-            ContextUtils.conflictResponse( response, "Data set is locked" );
-            return;
-        }
-        
         String valid = ValidationUtils.dataValueIsValid( value, dataElement );
-        
+
         if ( valid != null )
         {
             ContextUtils.conflictResponse( response, "Invalid value: " + value + ", must match data element type: " + dataElement.getType() );
             return;
         }
-        
+
         valid = ValidationUtils.commentIsValid( comment );
-        
+
         if ( valid != null )
         {
             ContextUtils.conflictResponse( response, "Invalid comment: " + comment );
             return;
         }
+
+        // ---------------------------------------------------------------------
+        // Locking validation
+        // ---------------------------------------------------------------------
+
+        if ( dataSetService.isLocked( dataElement, period, organisationUnit, null ) )
+        {
+            ContextUtils.conflictResponse( response, "Data set is locked" );
+            return;
+        }
+
+        // ---------------------------------------------------------------------
+        // Assemble and save data value
+        // ---------------------------------------------------------------------
         
         String storedBy = currentUserService.getCurrentUsername();
 
         Date now = new Date();
 
-        DataValue dataValue = dataValueService.getDataValue( organisationUnit, dataElement, period, categoryOptionCombo );
-        
+        DataValue dataValue = dataValueService.getDataValue( dataElement, period, organisationUnit, categoryOptionCombo, attributeOptionCombo );
+
         if ( dataValue == null )
         {
-            dataValue = new DataValue( dataElement, period, organisationUnit, null, storedBy, now, null, categoryOptionCombo );
-            
+            dataValue = new DataValue( dataElement, period, organisationUnit, categoryOptionCombo, attributeOptionCombo, 
+                null, storedBy, now, null );
+
             if ( value != null )
             {
                 dataValue.setValue( StringUtils.trimToNull( value ) );
             }
-            
+
             if ( comment != null )
             {
                 dataValue.setComment( StringUtils.trimToNull( comment ) );
             }
-            
+
             dataValueService.addDataValue( dataValue );
         }
         else
@@ -179,17 +209,17 @@ public class DataValueController
             {
                 dataValue.setValue( StringUtils.trimToNull( value ) );
             }
-            
+
             if ( comment != null )
             {
                 dataValue.setComment( StringUtils.trimToNull( comment ) );
             }
-            
+
             if ( followUp )
             {
                 dataValue.toggleFollowUp();
             }
-            
+
             dataValue.setTimestamp( now );
             dataValue.setStoredBy( storedBy );
 

@@ -36,7 +36,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 
 import org.hisp.dhis.DhisSpringTest;
-import org.hisp.dhis.patient.Patient;
 import org.junit.Test;
 
 /**
@@ -52,9 +51,9 @@ public class ValidationCriteriaServiceTest
 
     private String propertyB;
 
-    private Object valueA;
+    private String valueA;
 
-    private Object valueB;
+    private String valueB;
 
     private ValidationCriteria validationCriteriaA;
 

@@ -54,7 +54,7 @@ function updateIndicators()
     {
         var indicatorId = $( this ).attr( 'indicatorid' );
 
-        var formula = indicatorFormulas[indicatorId];
+        var formula = dhis2.de.indicatorFormulas[indicatorId];
         
         if ( isDefined( formula ) )
         {        
@@ -118,7 +118,7 @@ function saveVal( dataElementId, optionComboId, fieldId )
 
 	if ( fieldIds.length > 3 )
 	{
-		currentOrganisationUnitId = fieldIds[0];
+		dhis2.de.currentOrganisationUnitId = fieldIds[0];
 	}
 
     fieldId = '#' + fieldId;
@@ -136,6 +136,8 @@ function saveVal( dataElementId, optionComboId, fieldId )
 		value = '';
 	}
 
+	var warning = undefined;
+	
     if ( value != '' )
     {
         if ( type == 'string' || type == 'int' || type == 'number' || type == 'positiveNumber' || type == 'negativeNumber' || type == 'zeroPositiveInt' )
@@ -168,15 +170,15 @@ function saveVal( dataElementId, optionComboId, fieldId )
             {
                 // If value = 0 and zero not significant for data element, skip
 
-                if ( significantZeros.indexOf( dataElementId ) == -1 )
+                if ( dhis2.de.significantZeros.indexOf( dataElementId ) == -1 )
                 {
                     $( fieldId ).css( 'background-color', COLOR_GREEN );
                     return false;
                 }
             }
 
-            var minString = currentMinMaxValueMap[dataElementId + '-' + optionComboId + '-min'];
-            var maxString = currentMinMaxValueMap[dataElementId + '-' + optionComboId + '-max'];
+            var minString = dhis2.de.currentMinMaxValueMap[dataElementId + '-' + optionComboId + '-min'];
+            var maxString = dhis2.de.currentMinMaxValueMap[dataElementId + '-' + optionComboId + '-max'];
 
             if ( minString && maxString ) // TODO if only one exists?
             {
@@ -186,33 +188,29 @@ function saveVal( dataElementId, optionComboId, fieldId )
 
                 if ( valueNo < min )
                 {
-                    var valueSaver = new ValueSaver( dataElementId, optionComboId, getCurrentOrganisationUnit(), periodId,
-                            value, fieldId, COLOR_ORANGE );
-                    valueSaver.save();
-
-                    window.alert( i18n_value_of_data_element_less + ': ' + min + '\n\n' + dataElementName );
-                    return;
+                    warning = i18n_value_of_data_element_less + ': ' + min + '\n\n' + dataElementName;
                 }
 
                 if ( valueNo > max )
                 {
-                    var valueSaver = new ValueSaver( dataElementId, optionComboId, getCurrentOrganisationUnit(), periodId,
-                            value, fieldId, COLOR_ORANGE );
-                    valueSaver.save();
-
-                    window.alert( i18n_value_of_data_element_greater + ': ' + max + '\n\n' + dataElementName );
-                    return;
+                    warning = i18n_value_of_data_element_greater + ': ' + max + '\n\n' + dataElementName;
                 }
             }
         }
     }
-
-    var valueSaver = new ValueSaver( dataElementId, optionComboId, 
-    	getCurrentOrganisationUnit(), periodId, value, fieldId, COLOR_GREEN );
+    
+    var color = warning ? COLOR_ORANGE : COLOR_GREEN;
+    
+    var valueSaver = new ValueSaver( dataElementId,	periodId, optionComboId, value, fieldId, color );
     valueSaver.save();
 
     updateIndicators(); // Update indicators for custom form
     updateDataElementTotals(); // Update data element totals for custom forms
+    
+    if ( warning )
+    {
+    	window.alert( warning );
+    }
 }
 
 function saveBoolean( dataElementId, optionComboId, fieldId )
@@ -225,8 +223,7 @@ function saveBoolean( dataElementId, optionComboId, fieldId )
 
     var periodId = $( '#selectedPeriodId' ).val();
 
-    var valueSaver = new ValueSaver( dataElementId, optionComboId, 
-    	getCurrentOrganisationUnit(), periodId, value, fieldId, COLOR_GREEN );
+    var valueSaver = new ValueSaver( dataElementId, periodId, optionComboId, value, fieldId, COLOR_GREEN );
     valueSaver.save();
 }
 
@@ -242,8 +239,7 @@ function saveTrueOnly( dataElementId, optionComboId, fieldId )
 
     var periodId = $( '#selectedPeriodId' ).val();
 
-    var valueSaver = new ValueSaver( dataElementId, optionComboId,
-        getCurrentOrganisationUnit(), periodId, value, fieldId, COLOR_GREEN );
+    var valueSaver = new ValueSaver( dataElementId, periodId, optionComboId, value, fieldId, COLOR_GREEN );
     valueSaver.save();
 }
 
@@ -272,8 +268,18 @@ function onValueSave( fn )
 // Saver objects
 // -----------------------------------------------------------------------------
 
-function ValueSaver( de, co, ou, pe, value, fieldId, resultColor )
+/**
+ * @param de data element identifier.
+ * @param pe iso period.
+ * @param co category option combo.
+ * @param value value.
+ * @param fieldId identifier of data input field.
+ * @param resultColor the color code to set on input field for success.
+ */
+function ValueSaver( de, pe, co, value, fieldId, resultColor )
 {
+	var ou = getCurrentOrganisationUnit();
+	
     var dataValue = {
         'de' : de,
         'co' : co,
@@ -282,9 +288,18 @@ function ValueSaver( de, co, ou, pe, value, fieldId, resultColor )
         'value' : value
     };
 
+    var cc = dhis2.de.getCurrentCategoryCombo();
+    var cp = dhis2.de.getCurrentCategoryOptionsQueryValue();
+    
+    if ( cc && cp )
+    {
+    	dataValue.cc = cc;
+    	dataValue.cp = cp;
+    }
+    
     this.save = function()
     {
-        storageManager.saveDataValue( dataValue );
+    	dhis2.de.storageManager.saveDataValue( dataValue );
 
         $.ajax( {
             url: '../api/dataValues',
@@ -297,7 +312,7 @@ function ValueSaver( de, co, ou, pe, value, fieldId, resultColor )
 
     function handleSuccess()
     {
-    	storageManager.clearDataValueJSON( dataValue );
+    	dhis2.de.storageManager.clearDataValueJSON( dataValue );
         markValue( fieldId, resultColor );
         $( 'body' ).trigger( EVENT_VALUE_SAVED, dataValue );
     }

@@ -1,5 +1,8 @@
 <!DOCTYPE HTML>
-<html#if( $manifest ) manifest="$manifest"#end>
+<!--[if IE 7]><html #if( $manifest ) manifest="$manifest" #end class="ie7"><![endif]-->
+<!--[if IE 8]><html #if( $manifest ) manifest="$manifest" #end class="ie8"><![endif]-->
+<!--[if IE 9]><html #if( $manifest ) manifest="$manifest" #end class="ie9"><![endif]-->
+<![if !IE]><html #if( $manifest ) manifest="$manifest" #end><![endif]>
   <head>
     <title>$encoder.htmlEncode( $applicationTitle )</title>
     <meta name="description" content="DHIS 2">
@@ -23,6 +26,7 @@
     <script type="text/javascript" src="../dhis-web-commons/javascripts/es5-sham.min.js?_rev=$!{buildRevision}"></script>
 
     <script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/jquery.min.js?_rev=$!{buildRevision}"></script>
+    <!--[if lte IE 8]><script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/placeholders.jquery.min.js?_rev=$!{buildRevision}"></script><![endif]-->
     <script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/jquery.utils.js?_rev=$!{buildRevision}"></script>
     <script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/jquery.ext.js?_rev=$!{buildRevision}"></script>
     <script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/jquery.metadata.js?_rev=$!{buildRevision}"></script>

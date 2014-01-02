@@ -34,20 +34,7 @@ Ext.onReady( function() {
                     dataelement_get: 'dataElementGroups/',
                     dataelement_getall: 'dataElements.json?domainType=aggregate&paging=false&links=false',
                     dataelementgroup_get: 'dataElementGroups.json?paging=false&links=false',
-                    dataset_get: 'dataSets.json?paging=false&links=false',
-                    organisationunit_getbygroup: 'getOrganisationUnitPathsByGroup.action',
-                    organisationunit_getbylevel: 'getOrganisationUnitPathsByLevel.action',
-                    organisationunit_getbyids: 'getOrganisationUnitPaths.action',
-                    organisationunitgroup_getall: 'organisationUnitGroups.json?paging=false&links=false',
-                    organisationunitgroupset_get: 'getOrganisationUnitGroupSetsMinified.action',
-                    organisationunitlevel_getall: 'organisationUnitLevels.json?paging=false&links=false&viewClass=detailed',
-                    organisationunitchildren_get: 'getOrganisationUnitChildren.action',
-                    favorite_addorupdate: 'addOrUpdateChart.action',
-                    favorite_addorupdatesystem: 'addOrUpdateSystemChart.action',
-                    favorite_updatename: 'updateChartName.action',
-                    favorite_get: 'charts/',
-                    favorite_getall: 'getSystemAndCurrentUserCharts.action',
-                    favorite_delete: 'deleteCharts.action'
+                    dataset_get: 'dataSets.json?paging=false&links=false'
                 },
                 dimension: {
                     data: {
@@ -505,9 +492,14 @@ Ext.onReady( function() {
                     config.rows = getValidatedDimensionArray(config.rows);
                     config.filters = getValidatedDimensionArray(config.filters);
 
-					// at least one dimension specified as column or row
-					if (!(config.columns || config.rows)) {
-						alert(NS.i18n.at_least_one_dimension_must_be_specified_as_row_or_column);
+					// at least one dimension specified as column and row
+					if (!config.columns) {
+						alert('No series items selected');
+						return;
+					}
+
+					if (!config.rows) {
+						alert('No category items selected');
 						return;
 					}
 
@@ -1119,7 +1111,7 @@ Ext.onReady( function() {
 							}
 							if (isUserOrgunitGrandChildren) {
 								var userOuOuc = [].concat(init.user.ou, init.user.ouc),
-									responseOu = response.response.metaData[ou];
+									responseOu = response.metaData[ou];
 
 								userOugc = [];
 
@@ -1567,13 +1559,19 @@ Ext.onReady( function() {
             };
 
 			web.analytics.validateUrl = function(url) {
-				if (!Ext.isString(url) || url.length > 2000) {
-					var percent = ((url.length - 2000) / url.length) * 100;
-					alert('Too many parameters selected. Please reduce the number of parameters by at least ' + percent.toFixed(0) + '%.');
-					return;
-				}
+				var msg;
 
-				return true;
+                if (Ext.isIE) {
+                    msg = 'Too many items selected (url has ' + url.length + ' characters). Internet Explorer accepts maximum 2048 characters.';
+                }
+                else {
+					var len = url.length > 8000 ? '8000' : (url.length > 4000 ? '4000' : '2000');
+					msg = 'Too many items selected (url has ' + url.length + ' characters). Please reduce to less than ' + len + ' characters.';
+                }
+
+                msg += '\n\n' + 'Hint: A good way to reduce the number of items is to use relative periods and level/group organisation unit selection modes.';
+
+                alert(msg);
 			};
 
 			// chart

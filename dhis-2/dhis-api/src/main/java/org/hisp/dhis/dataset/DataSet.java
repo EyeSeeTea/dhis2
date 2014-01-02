@@ -46,6 +46,7 @@ import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.common.view.WithoutOrganisationUnitsView;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.indicator.Indicator;
@@ -119,6 +120,11 @@ public class DataSet
      * The Sections associated with the DataSet.
      */
     private Set<Section> sections = new HashSet<Section>();
+    
+    /**
+     * The CategoryCombo used for data attributes.
+     */
+    private DataElementCategoryCombo categoryCombo;
 
     /**
      * Indicating position in the custom sort order.
@@ -167,6 +173,11 @@ public class DataSet
      * notification.
      */
     private boolean notifyCompletingUser;
+
+    /**
+     * Indicating whether to approve data for this data set.
+     */
+    private boolean approveData;
 
     // -------------------------------------------------------------------------
     // Form properties
@@ -578,6 +589,20 @@ public class DataSet
     }
 
     @JsonProperty
+    @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public DataElementCategoryCombo getCategoryCombo()
+    {
+        return categoryCombo;
+    }
+
+    public void setCategoryCombo( DataElementCategoryCombo categoryCombo )
+    {
+        this.categoryCombo = categoryCombo;
+    }
+
+    @JsonProperty
     @JsonView({ DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class })
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public boolean isMobile()
@@ -670,6 +695,19 @@ public class DataSet
 
     @JsonProperty
     @JsonView({ DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class })
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isApproveData()
+    {
+        return approveData;
+    }
+
+    public void setApproveData( boolean approveData )
+    {
+        this.approveData = approveData;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public boolean isAllowFuturePeriods()
     {
