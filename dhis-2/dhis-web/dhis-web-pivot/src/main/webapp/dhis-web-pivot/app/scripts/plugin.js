@@ -2592,7 +2592,7 @@ Ext.onReady( function() {
 	css += '.pivot div.legendColor { \n display: table-cell; \n width: 2px; \n } \n';
 
 	css += '.pointer { \n cursor: pointer; \n } \n';
-	css += '.td-sortable { \n background-image: url("images/arrowupdown.png"); \n background-repeat: no-repeat; \n background-position: right center; \n padding-right: 15px !important; \n } \n';
+	css += '.td-sortable { \n background-image: url("http://dhis2-cdn.org/v214/plugin/images/arrowupdown.png"); \n background-repeat: no-repeat; \n background-position: right center; \n padding-right: 15px !important; \n } \n';
 
 	Ext.util.CSS.createStyleSheet(css);
 
@@ -2619,7 +2619,6 @@ Ext.onReady( function() {
 				isInitComplete = true;
 
 				for (var i = 0; i < configs.length; i++) {
-console.log(configs[i]);
 					execute(configs[i]);
 				}
 
