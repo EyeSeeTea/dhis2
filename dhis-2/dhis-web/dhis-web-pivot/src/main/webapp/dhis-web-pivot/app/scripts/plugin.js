@@ -2571,6 +2571,7 @@ Ext.onReady( function() {
 	css += '.pivot-dim.highlighted { \n	background-color: #c5d8f6; \n } \n';
 	css += '.pivot-dim-subtotal { \n background-color: #cad6e8; \n text-align: center; \n } \n';
 	css += '.pivot-dim-total { \n background-color: #bac6d8; \n text-align: center; \n } \n';
+	css += '.pivot-dim-total.highlighted { \n background-color: #adb8c9; \n } \n';
 	css += '.pivot-dim-empty { \n background-color: #dae6f8; \n text-align: center; \n } \n';
 	css += '.pivot-value { \n background-color: #fff; \n white-space: nowrap; \n text-align: right; \n } \n';
 	css += '.pivot-value-subtotal { \n background-color: #f4f4f4; \n white-space: nowrap; \n text-align: right; \n } \n';
@@ -2589,6 +2590,9 @@ Ext.onReady( function() {
 	css += '.pivot div.arrow { \n width: 0; \n height: 0; \n } \n';
 	css += '.pivot div.number { \n display: table-cell; \n } \n',
 	css += '.pivot div.legendColor { \n display: table-cell; \n width: 2px; \n } \n';
+
+	css += '.pointer { \n cursor: pointer; \n } \n';
+	css += '.td-sortable { \n background-image: url("images/arrowupdown.png"); \n background-repeat: no-repeat; \n background-position: right center; \n padding-right: 15px !important; \n } \n';
 
 	Ext.util.CSS.createStyleSheet(css);
 
@@ -2615,6 +2619,7 @@ Ext.onReady( function() {
 				isInitComplete = true;
 
 				for (var i = 0; i < configs.length; i++) {
+console.log(configs[i]);
 					execute(configs[i]);
 				}
 
@@ -2665,8 +2670,8 @@ Ext.onReady( function() {
 		var validateConfig,
             extendInstance,
 			createViewport,
-			initialize;
-			pt = {
+			initialize,
+			ns = {
 				core: {},
 				app: {}
 			};
@@ -2688,10 +2693,60 @@ Ext.onReady( function() {
 		};
 
         extendInstance = function(pt) {
-            var init = pt.core.init,
-				api = pt.core.api,
-				service = pt.core.service,
-				web = pt.core.web;
+            var init = ns.core.init,
+				api = ns.core.api,
+				support = ns.core.support,
+				service = ns.core.service,
+				web = ns.core.web;
+
+
+			// mouse events
+			web.events = web.events || {};
+
+			web.events.setColumnHeaderMouseHandlers = function(xLayout, response) {
+				if (Ext.isArray(xLayout.sortableIdObjects)) {
+					for (var i = 0, obj, el; i < xLayout.sortableIdObjects.length; i++) {
+						obj = xLayout.sortableIdObjects[i];
+						el = Ext.get(obj.uuid);
+
+						el.dom.xLayout = xLayout;
+						el.dom.response = response;
+						el.dom.metaDataId = obj.id;
+						el.dom.onColumnHeaderMouseClick = web.events.onColumnHeaderMouseClick;
+						el.dom.onColumnHeaderMouseOver = web.events.onColumnHeaderMouseOver;
+						el.dom.onColumnHeaderMouseOut = web.events.onColumnHeaderMouseOut;
+
+						el.dom.setAttribute('onclick', 'this.onColumnHeaderMouseClick(this.xLayout, this.response, this.metaDataId)');
+						el.dom.setAttribute('onmouseover', 'this.onColumnHeaderMouseOver(this)');
+						el.dom.setAttribute('onmouseout', 'this.onColumnHeaderMouseOut(this)');
+					}
+				}
+			};
+
+			web.events.onColumnHeaderMouseClick = function(xLayout, response, id) {
+				if (xLayout.sorting && xLayout.sorting.id === id) {
+					xLayout.sorting.direction = support.prototype.str.toggleDirection(xLayout.sorting.direction);
+				}
+				else {
+					xLayout.sorting = {
+						id: id,
+						direction: 'DESC'
+					};
+				}
+
+				ns.core.web.pivot.sort(xLayout, response, id);
+			};
+
+			web.events.onColumnHeaderMouseOver = function(el) {
+				Ext.get(el).addCls('pointer highlighted');
+			};
+
+			web.events.onColumnHeaderMouseOut = function(el) {
+				Ext.get(el).removeCls('pointer highlighted');
+			};
+
+			// pivot
+			web.pivot = web.pivot || {};
 
             web.pivot.loadTable = function(id) {
 				if (!Ext.isString(id)) {
@@ -2726,7 +2781,7 @@ Ext.onReady( function() {
 				paramString = web.analytics.getParamString(xLayout, true);
 
 				// show mask
-				web.mask.show(pt.app.centerRegion);
+				web.mask.show(ns.app.centerRegion);
 
 				Ext.data.JsonP.request({
 					url: init.contextPath + '/api/analytics.jsonp' + paramString,
@@ -2737,7 +2792,7 @@ Ext.onReady( function() {
 					},
 					disableCaching: false,
 					failure: function(r) {
-						web.mask.hide(pt.app.centerRegion);
+						web.mask.hide(ns.app.centerRegion);
 
 						window.open(init.contextPath + '/api/analytics.json' + paramString, '_blank');
 					},
@@ -2745,7 +2800,7 @@ Ext.onReady( function() {
 						var response = api.response.Response(r);
 
 						if (!response) {
-							web.mask.hide(pt.app.centerRegion);
+							web.mask.hide(ns.app.centerRegion);
 							return;
 						}
 
@@ -2753,11 +2808,11 @@ Ext.onReady( function() {
 						xLayout = service.layout.getSyncronizedXLayout(xLayout, response);
 
 						if (!xLayout) {
-							web.mask.hide(pt.app.centerRegion);
+							web.mask.hide(ns.app.centerRegion);
 							return;
 						}
 
-						pt.app.paramString = paramString;
+						ns.app.paramString = paramString;
 
 						web.pivot.createTable(layout, xLayout, response, isUpdateGui);
 					}
@@ -2783,30 +2838,54 @@ Ext.onReady( function() {
 
 				// update viewport
 				config = web.pivot.getHtml(xLayout, xResponse, xColAxis, xRowAxis);
-				pt.app.centerRegion.update(config.html);
+				ns.app.centerRegion.update(config.html);
 
 				// after render
-				pt.app.layout = layout;
-				pt.app.xLayout = xLayout;
-				pt.app.response = response;
-				pt.app.xResponse = xResponse;
-				pt.app.uuidDimUuidsMap = config.uuidDimUuidsMap;
-				pt.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
+				ns.app.layout = layout;
+				ns.app.xLayout = xLayout;
+				ns.app.response = response;
+				ns.app.xResponse = xResponse;
+				ns.app.uuidDimUuidsMap = config.uuidDimUuidsMap;
+				ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
 
-				//if (NS.isSessionStorage) {
-					//web.events.setValueMouseHandlers(layout, response, pt.app.uuidDimUuidsMap, pt.app.uuidObjectMap);
-					//web.events.setColumnHeaderMouseHandlers(xLayout, response);
-					//web.storage.session.set(layout, 'table');
-				//}
+				// sorting
+				web.events.setColumnHeaderMouseHandlers(xLayout, response);
 
-				//pt.app.viewport.setGui(layout, xLayout, isUpdateGui);
+				web.mask.hide(ns.app.centerRegion);
+			};
 
-				web.mask.hide(pt.app.centerRegion);
+			web.pivot.sort = function(xLayout, response, id) {
+				var xLayout = Ext.clone(xLayout),
+					response = Ext.clone(response),
+					dim = xLayout.rows[0],
+					valueMap = response.idValueMap,
+					direction = xLayout.sorting ? xLayout.sorting.direction : 'DESC',
+					layout;
 
-				//if (NS.isDebug) {
-					//console.log("core", ns.core);
-					//console.log("app", pt.app);
-				//}
+				dim.ids = [];
+
+				// collect values
+				for (var i = 0, item, key, value; i < dim.items.length; i++) {
+					item = dim.items[i];
+					key = id + item.id;
+					value = parseFloat(valueMap[key]);
+
+					item.value = Ext.isNumber(value) ? value : (Number.MAX_VALUE * -1);
+				}
+
+				// sort
+				support.prototype.array.sort(dim.items, direction, 'value');
+
+				// new id order
+				for (var i = 0; i < dim.items.length; i++) {
+					dim.ids.push(dim.items[i].id);
+				}
+
+				// re-layout
+				layout = api.layout.Layout(xLayout);
+
+				// re-create table
+				web.pivot.createTable(layout, null, response, false);
 			};
 		};
 
@@ -2821,23 +2900,23 @@ Ext.onReady( function() {
 				return;
 			}
 
-			pt.core = PT.getCore(Ext.clone(init));
-			extendInstance(pt);
+			ns.core = PT.getCore(Ext.clone(init));
+			extendInstance(ns);
 
-			pt.app.viewport = createViewport();
-			pt.app.centerRegion = pt.app.viewport.centerRegion;
+			ns.app.viewport = createViewport();
+			ns.app.centerRegion = ns.app.viewport.centerRegion;
 
 			if (config.id) {
-				pt.core.web.pivot.loadTable(config.id);
+				ns.core.web.pivot.loadTable(config.id);
 			}
 			else {
-				layout = pt.core.api.layout.Layout(config);
+				layout = ns.core.api.layout.Layout(config);
 
 				if (!layout) {
 					return;
 				}
 
-				pt.core.web.pivot.getData(layout);
+				ns.core.web.pivot.getData(layout);
 			}
 		}();
 	};
