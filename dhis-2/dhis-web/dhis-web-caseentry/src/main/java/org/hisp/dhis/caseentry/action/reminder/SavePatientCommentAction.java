@@ -29,9 +29,11 @@ package org.hisp.dhis.caseentry.action.reminder;
  */
 
 import java.util.Date;
+import java.util.Set;
 
 import org.hisp.dhis.patientcomment.PatientComment;
-import org.hisp.dhis.patientcomment.PatientCommentService;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.user.CurrentUserService;
@@ -56,19 +58,19 @@ public class SavePatientCommentAction
     {
         this.programStageInstanceService = programStageInstanceService;
     }
+    
+    private ProgramInstanceService programInstanceService;
+
+    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
+    {
+        this.programInstanceService = programInstanceService;
+    }
 
     private CurrentUserService currentUserService;
 
     public void setCurrentUserService( CurrentUserService currentUserService )
     {
         this.currentUserService = currentUserService;
-    }
-
-    private PatientCommentService patientCommentService;
-
-    public void setPatientCommentService( PatientCommentService patientCommentService )
-    {
-        this.patientCommentService = patientCommentService;
     }
 
     // -------------------------------------------------------------------------
@@ -96,29 +98,25 @@ public class SavePatientCommentAction
     public String execute()
     {
         ProgramStageInstance programStageInstance = programStageInstanceService
-            .getProgramStageInstance( programStageInstanceId );
-
-        PatientComment patientComment = programStageInstance.getPatientComment();
+            .getProgramStageInstance( programStageInstanceId );  
+        
+        ProgramInstance programInstance = programStageInstance.getProgramInstance();
+                
+        Set<PatientComment> patientComments = programInstance.getPatientComments();
 
         if ( commentText != null && !commentText.isEmpty() )
         {
-            if ( patientComment == null )
-            {
-                patientComment = new PatientComment();
-            }
+            PatientComment patientComment = new PatientComment();       
 
             patientComment.setCommentText( commentText );
             patientComment.setCreator( currentUserService.getCurrentUsername() );
             patientComment.setCreatedDate( new Date() );
-            programStageInstance.setPatientComment( patientComment );
-        }
-        else if ( patientComment != null )
-        {
-            patientCommentService.deletePatientComment( patientComment );
-        }
-
-        programStageInstanceService.updateProgramStageInstance( programStageInstance );
+            patientComments.add(patientComment);
+            
+            programInstanceService.updateProgramInstance( programInstance );           
+            
+        }        
+        
         return SUCCESS;
     }
-
 }
