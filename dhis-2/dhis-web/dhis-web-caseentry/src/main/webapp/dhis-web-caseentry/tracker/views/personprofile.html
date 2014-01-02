@@ -5,7 +5,7 @@
         </div>
         <div class="list-group">            	
             <div class="list-group-item"><strong>{{'full_name'| translate}}:</strong> {{person.name}}</div>
-            <div class="list-group-item" ng-repeat="attribute in person.registrationAttributes"><strong>{{attribute.displayName}}:</strong> {{attribute.value}}</div>            
+            <div class="list-group-item" ng-repeat="attribute in person.attributes"><strong>{{attribute.displayName}}:</strong> {{attribute.value}}</div>            
         </div>
     </div>
 </div>

@@ -62,6 +62,8 @@
 	"edit": "Edit",
 	"enrollment": "Enrollment",
         "enroll": "Enroll",
+        "unenroll": "Remove Enrollment",
+        "are_you_sure_to_unenroll": "Are you sure you want to remove the enrollment?",
 	"consultation": "Consultation",
 	"new_note": "New Note",
         "add_note": "Add Note",
