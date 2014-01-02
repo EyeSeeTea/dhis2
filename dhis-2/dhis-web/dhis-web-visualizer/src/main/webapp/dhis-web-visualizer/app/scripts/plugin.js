@@ -1,5 +1,61 @@
 Ext.onReady(function() {
 
+	// SIMPLE REGRESSION
+	function SimpleRegression()
+	{
+		var sumX = 0; // Sum of x values
+		var sumY = 0; // Sum of y values
+		var sumXX = 0; // Total variation in x
+		var sumXY = 0; // Sum of products
+		var n = 0; // Number of observations
+		var xbar = 0; // Mean of accumulated x values, used in updating formulas
+		var ybar = 0; // Mean of accumulated y values, used in updating formulas
+		
+		this.addData = function( x, y )
+		{
+			if ( n == 0 )
+			{
+				xbar = x;
+				ybar = y;
+			}
+			else
+			{
+				var dx = x - xbar;
+				var dy = y - ybar;
+				sumXX += dx * dx * n / ( n + 1 );
+				sumXY += dx * dy * n / ( n + 1 );
+				xbar += dx / ( n + 1 );
+				ybar += dy / ( n + 1 );
+			}
+			
+			sumX += x;
+			sumY += y;
+			n++;
+		};
+		
+		this.predict = function( x )
+		{
+			var b1 = this.getSlope();
+			
+			return this.getIntercept( b1 ) + b1 * x;
+		};
+		
+		this.getSlope = function()
+		{
+			if ( n < 2 )
+			{
+				return Number.NaN;
+			}
+			
+			return sumXY / sumXX;
+		};
+		
+		this.getIntercept = function( slope )
+		{
+			return ( sumY - slope * sumX ) / n;
+		};
+	}
+
 	// CORE
 
 	// ext config
@@ -2493,12 +2549,12 @@ Ext.onReady(function() {
     };
 
 	// chart tips css
-	var css = '.dv-chart-tips { border-radius: 2px; padding: 0px 3px 1px; border: 2px solid #777; background-color: #f1f1f1; } \n';
-	css += '.dv-chart-tips .x-tip-body { background-color: #f1f1f1; font-size: 13px; font-weight: normal; color: #444; -webkit-text-stroke: 0; } \n';
+	var css = '.dv-chart-tips { border-radius: 2px; padding: 0px 3px 1px; border: 2px solid #000; background-color: #000; } \n';
+	css += '.dv-chart-tips .x-tip-body { background-color: #000; font-size: 13px; font-weight: normal; color: #fff; -webkit-text-stroke: 0; } \n';
 	css += '.dv-chart-tips .x-tip-body div { font-family: arial,sans-serif,ubuntu,consolas !important; } \n';
 
 	// load mask css
-	css += '.x-mask-msg { padding: 0; \n	border: 0 none; background-image: none; background-color: transparent; } \n';
+	css += '.x-mask-msg { padding: 0; \n border: 0 none; background-image: none; background-color: transparent; } \n';
 	css += '.x-mask-msg div { background-position: 11px center; } \n';
 	css += '.x-mask-msg .x-mask-loading { border: 0 none; \n background-color: #000; color: #fff; border-radius: 2px; padding: 12px 14px 12px 30px; opacity: 0.65; } \n';
 
