@@ -4,9 +4,7 @@
 
   <!-- Actions -->
 
-  <bean id="org.hisp.dhis.de.action.PageInitAction" class="org.hisp.dhis.de.action.PageInitAction" scope="prototype">
-    <property name="selectionManager" ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
-  </bean>
+  <bean id="org.hisp.dhis.de.action.PageInitAction" class="org.hisp.dhis.de.action.PageInitAction" scope="prototype" />
 
   <bean id="org.hisp.dhis.de.action.GetMetaDataAction" class="org.hisp.dhis.de.action.GetMetaDataAction"
       scope="prototype">
@@ -84,14 +82,6 @@
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
     <property name="minMaxOutlierAnalysisService" ref="org.hisp.dhis.dataanalysis.MinMaxOutlierAnalysisService" />
     <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
-    <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-  </bean>
-
-  <bean id="org.hisp.dhis.de.action.GetHistoryChartAction" class="org.hisp.dhis.de.action.GetHistoryChartAction"
-      scope="prototype">
-    <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
-    <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
-    <property name="chartService" ref="org.hisp.dhis.chart.ChartService" />
     <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
   </bean>
 
