@@ -3345,7 +3345,7 @@ Ext.onReady( function() {
 			var nbBins = bounds.length - 1;
 
 			for (var j = 0; j < nbBins; j++) {
-				binCount[j] = 0;
+			LON	binCount[j] = 0;
 			}
 
 			for (var k = 0; k < nbBins - 1; k) {
@@ -4070,6 +4070,8 @@ Ext.onReady( function() {
 	mapfish.GeoStat.createThematic('Thematic2');
 	mapfish.GeoStat.createThematic('Thematic3');
 	mapfish.GeoStat.createThematic('Thematic4');
+
+	}());
 
 
 	// GIS PLUGIN (plugin.js)
