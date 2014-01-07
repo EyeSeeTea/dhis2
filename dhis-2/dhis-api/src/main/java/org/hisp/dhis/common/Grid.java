@@ -283,6 +283,15 @@ public interface Grid
     Grid substituteMetaData( Map<Object, Object> metaDataMap );
     
     /**
+     * Substitutes the values in the meta columns with the mapped value in the
+     * meta-data map for the column with the given index.
+     * 
+     * @param columnIndex the index of the column to substitute.
+     * @param metaDataMap meta-data map of keys and substitutions.
+     */
+    Grid substituteMetaData( int columnIndex, Map<Object, Object> metaDataMap );
+    
+    /**
      * Adds a set of headers based on the column names of the given SQL result set.
      * 
      * @param rs the result set.
