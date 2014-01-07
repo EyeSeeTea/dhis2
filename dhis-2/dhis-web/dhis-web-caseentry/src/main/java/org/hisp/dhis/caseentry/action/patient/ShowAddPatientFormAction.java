@@ -47,13 +47,14 @@ import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.patient.PatientIdentifierTypeService;
 import org.hisp.dhis.patient.PatientRegistrationForm;
 import org.hisp.dhis.patient.PatientRegistrationFormService;
-import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.patient.comparator.PatientAttributeGroupSortOrderComparator;
 import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramPatientAttributeService;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.relationship.RelationshipTypeService;
 import org.hisp.dhis.user.User;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
 
@@ -103,13 +104,6 @@ public class ShowAddPatientFormAction
         this.attributeService = attributeService;
     }
 
-    private PatientService patientService;
-
-    public void setPatientService( PatientService patientService )
-    {
-        this.patientService = patientService;
-    }
-
     private PatientAttributeGroupService attributeGroupService;
 
     public void setAttributeGroupService( PatientAttributeGroupService attributeGroupService )
@@ -123,6 +117,9 @@ public class ShowAddPatientFormAction
     {
         this.relationshipTypeService = relationshipTypeService;
     }
+
+    @Autowired
+    private ProgramPatientAttributeService programPatientAttributeService;
 
     private I18n i18n;
 
@@ -310,7 +307,7 @@ public class ShowAddPatientFormAction
                     healthWorkers, null, null, i18n, format );
             }
         }
-        
+
         if ( customRegistrationForm == null )
         {
             attributeGroups = new ArrayList<PatientAttributeGroup>(
@@ -325,13 +322,13 @@ public class ShowAddPatientFormAction
                 for ( Program p : programs )
                 {
                     identifierTypes.removeAll( p.getPatientIdentifierTypes() );
-                    attributes.removeAll( p.getPatientAttributes() );
+                    attributes.removeAll( programPatientAttributeService.getListPatientAttribute( p ) );
                 }
             }
             else
             {
                 identifierTypes = program.getPatientIdentifierTypes();
-                attributes = program.getPatientAttributes();
+                attributes = new ArrayList<PatientAttribute>( programPatientAttributeService.getListPatientAttribute( program ) );
             }
 
             for ( PatientAttribute attribute : attributes )
@@ -353,8 +350,6 @@ public class ShowAddPatientFormAction
 
         }
 
-        orgunitCountIdentifier = generateOrgunitIdentifier( organisationUnit );
-
         if ( relatedProgramId != null )
         {
             relatedProgram = programService.getProgram( relatedProgramId );
@@ -368,28 +363,4 @@ public class ShowAddPatientFormAction
         return SUCCESS;
     }
 
-    private String generateOrgunitIdentifier( OrganisationUnit organisationUnit )
-    {
-        String value = organisationUnit.getCode();
-        value = (value == null) ? "" : value;
-
-        int totalPatient = patientService.countGetPatientsByOrgUnit( organisationUnit );
-        if ( totalPatient < 10 )
-        {
-            value += "000" + totalPatient;
-        }
-        else if ( totalPatient < 100 )
-        {
-            value += "00" + totalPatient;
-        }
-        else if ( totalPatient < 1000 )
-        {
-            value += "0" + totalPatient;
-        }
-        else
-        {
-            value += totalPatient;
-        }
-        return value;
-    }
 }

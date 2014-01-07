@@ -289,7 +289,13 @@ public class TableAlteror
 
         executeSql( "ALTER TABLE program DROP COLUMN useBirthDateAsIncidentDate" );
         executeSql( "ALTER TABLE program DROP COLUMN useBirthDateAsEnrollmentDate" );
-        executeSql( "update patientattribute set displayedInList=false where displayedInList is null" );
+        
+        executeSql( "UPDATE patientattribute set displayedInList=false WHERE displayedInList is null" );
+        executeSql( "INSERT INTO program_programpatientAttributes (programid, programpatientattributeid, displayedInList ) "
+            + "SELECT programid,patientattributeid, displayedInList FROM program_patientattributes pp "
+            + "INNER JOIN patientattribute pa ON pp.patientattributeid=pa.patientattributeid" );
+//        executeSql( "DROP TABLE program_patientattributes" );
+//        executeSql( "ALTER TABLE patientattribute DROP COLUMN displayedInList" );
     }
 
     // -------------------------------------------------------------------------
@@ -463,13 +469,13 @@ public class TableAlteror
         try
         {
             Statement statement = holder.getStatement();
-
+            
             ResultSet resultSet = statement.executeQuery( "SELECT gender FROM patientattribute" );
 
             // Only execute once
             if ( !resultSet.next() )
             {
-                int max = jdbcTemplate.queryForObject( "select max(patientattributeid) from patientattribute",
+                Integer max = jdbcTemplate.queryForObject( "select max(patientattributeid) from patientattribute",
                     Integer.class );
 
                 // ---------------------------------------------------------------------
@@ -487,7 +493,7 @@ public class TableAlteror
                     + "','Gender', 'Gender','"
                     + PatientAttribute.TYPE_COMBO + "', false, false, false)" );
 
-                int maxOpt = jdbcTemplate.queryForObject(
+                Integer maxOpt = jdbcTemplate.queryForObject(
                     "select max(patientattributeoptionid) from patientattributeoption", Integer.class );
                 maxOpt++;
                 executeSql( "INSERT INTO patientattributeoption (patientattributeoptionid, name, patientattributeid ) VALUES ('"
@@ -734,7 +740,9 @@ public class TableAlteror
                     + CaseAggregationCondition.SEPARATOR_OBJECT + max + ".age]";
                 updateFixedAttributeInCaseAggregate( source, target );
 
+                // -------------------------------------------------------------
                 // Patient full name
+                // -------------------------------------------------------------
 
                 uid = CodeGenerator.generateCode();
                 executeSql( "INSERT INTO patientattribute (patientattributeid, uid, lastUpdated, name, description, valueType, mandatory, inherit, displayOnVisitSchedule ) VALUES ("
@@ -752,7 +760,26 @@ public class TableAlteror
                 removeFixedAttributeInCustomRegistrationForm( "fullName", uid );
 
                 // update template messsages
-                updateFixedAttributeInTemplateMessage();
+                updateFixedAttributeInTemplateMessage( uid );
+
+                // -------------------------------------------------------------
+                // User Associate
+                // -------------------------------------------------------------
+
+                uid = CodeGenerator.generateCode();
+                executeSql( "INSERT INTO patientattribute (patientattributeid, uid, lastUpdated, name, description, valueType, mandatory, inherit, displayOnVisitSchedule ) VALUES ("
+                    + max
+                    + ",'"
+                    + uid
+                    + "','"
+                    + DateUtils.getMediumDateString()
+                    + "','Staff', 'Staff','"
+                    + PatientAttribute.TYPE_USERS + "', false, false, false)" );
+                executeSql( "INSERT INTO patientattributevalue (patientid, patientattributeid, value ) SELECT patientid,"
+                    + max + ",healthworkerid from patient inner join userinfo on patient.healthworkerid=userinfo.userinfoid where patient.healthworkerid is not null" );
+
+                // Update custom entry form
+                removeFixedAttributeInCustomRegistrationForm( "associate", uid );
 
                 executeSql( "ALTER TABLE patient DROP COLUMN gender" );
                 executeSql( "ALTER TABLE patient DROP COLUMN deathDate" );
@@ -763,6 +790,7 @@ public class TableAlteror
                 executeSql( "ALTER TABLE patient DROP COLUMN birthdate" );
                 executeSql( "ALTER TABLE patient DROP COLUMN phoneNumber" );
                 executeSql( "ALTER TABLE patient DROP COLUMN name" );
+                executeSql( "ALTER TABLE patient DROP COLUMN healthworkerid" );
             }
 
         }
@@ -802,24 +830,22 @@ public class TableAlteror
         }
     }
 
-    private void updateFixedAttributeInTemplateMessage()
+    private void updateFixedAttributeInTemplateMessage( String uid )
     {
         StatementHolder holder = statementManager.getHolder();
         try
         {
             Statement statement = holder.getStatement();
 
-            ResultSet resultSet = statement.executeQuery( "" );
+            ResultSet resultSet = statement
+                .executeQuery( "SELECT patientreminderid, templatemessage FROM patientreminder where templatemessage like '%{patient-name}%'" );
 
             while ( resultSet.next() )
             {
                 String id = resultSet.getString( "patientreminderid" );
                 String expression = resultSet.getString( "templatemessage" );
 
-                expression = expression
-                    .replaceAll(
-                        "SELECT patientreminderid, templatemessage FROM patientreminder where templatemessage like '%{patient-name}%'",
-                        "Sir/Madam" );
+                expression = expression.replaceAll( "{patient-name}", "{attributeid=" + uid + "}" );
                 executeSql( "UPDATE patientreminder SET templatemessage='" + expression + "'  WHERE patientreminderid="
                     + id );
             }

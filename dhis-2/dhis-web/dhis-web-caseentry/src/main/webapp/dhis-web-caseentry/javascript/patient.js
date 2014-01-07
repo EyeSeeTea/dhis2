@@ -160,12 +160,13 @@ function Patient()
 		  success: function(json) {
 			if(json.response=='success')
 			{
-				var patientId = json.message.split('_')[0];
+				var patientUid = json.message.split('_')[0];
+				var patientId = json.message.split('_')[1];
 				var	dateOfIncident = jQuery('#patientForm [id=dateOfIncident]').val();
 				var enrollmentDate = jQuery('#patientForm [id=enrollmentDate]').val();
 				
 				// Enroll patient into the program
-				if( programId !='' && enrollmentDate != '')
+				if( programId && enrollmentDate )
 				{
 					jQuery.postJSON( "saveProgramEnrollment.action",
 					{
@@ -178,29 +179,34 @@ function Patient()
 					{    
 						if(isContinue){
 							jQuery("#patientForm :input").each( function(){
-								if( $(this).attr('type') != 'button'
-									&& $(this).attr('type') != 'submit' 
-									&& $(this).attr('id') !='enrollmentDate' )
+								var type = $(this).attr('type'),
+									id = $(this).attr('id');
+								
+								if( type != 'button' && type != 'submit' && id != 'enrollmentDate' )
 								{
 									$(this).val("");
 								}
 							});
+							$("#patientForm :input").prop("disabled", false);
+							$("#patientForm").find("select").prop("disabled", false);
 						}
 						else{
-							showPatientDashboardForm( patientId );
+							showPatientDashboardForm( patientUid );
 						}
 					});
 				}
 				else if(isContinue){
 						jQuery("#patientForm :input").each( function(){
-							if( $(this).attr('type') != 'button'
-								&& $(this).attr('type') != 'submit'  )
+							var type = $(this).attr('type'),
+								id = $(this).attr('id');
+						
+							if( type != 'button' && type != 'submit' && id != 'enrollmentDate' )
 							{
 								$(this).val("");
 							}
 						});
-						$("#patientForm :input").attr("disabled", false);
-						$("#patientForm").find("select").attr("disabled", false);
+						$("#patientForm :input").prop("disabled", false);
+						$("#patientForm").find("select").prop("disabled", false);
 				}
 				else
 				{
@@ -295,7 +301,7 @@ function advancedSearch( params )
 // Remove patient
 // -----------------------------------------------------------------------------
 
-function removePatient( patientId, i18n_confirm_delete_patient )
+function removePatient( patientId )
 {
 	var patient = new Patient();
 	patient.patientId = patientId;

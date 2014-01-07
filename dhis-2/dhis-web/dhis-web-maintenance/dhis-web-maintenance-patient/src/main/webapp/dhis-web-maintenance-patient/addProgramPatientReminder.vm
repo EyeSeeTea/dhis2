@@ -5,6 +5,8 @@
 		
 		validation( 'addPatientReminderForm', function( form ){
 			form.submit();
+		}, function(){
+			enable('messageType');
 		});
 		checkValueIsExist( "name", "validateProgramPatientReminder.action" );
 	});
@@ -12,6 +14,7 @@
 </script>
 
 <h3>$i18n.getString( "create_new_template_reminder_message" )</h3>
+<h5>$program.displayName</h5>
 
 <form id="addPatientReminderForm" name="addPatientReminderForm" action="addProgramPatientReminder.action" method="post" onsubmit="selectAllById('selectedPropertyIds');" class="inputForm">
   
@@ -41,7 +44,7 @@
 		<tr>
 			<td><label>$i18n.getString( "date_to_compare")</label></td>
 			<td>
-				<select id='dateToCompare' name='dateToCompare'/>
+				<select id='datesToCompare' name='datesToCompare'/>
 					<option value="enrollmentdate">$i18n.getString( "enrollment_date" )</option>
 					<option value="dateofincident">$i18n.getString( "incident_date" )</option>
 				</select>
@@ -67,7 +70,7 @@
 				<select type="text" id="sendTo" name="sendTo" class="{validate:{required:true,number:true}}" onchange="onchangeUserGroup(  )">
 					<option value="1" >$i18n.getString("patient_sms_only")</option>
 					<option value="3" >$i18n.getString("orgunit_phone_number_sms_only")</option>
-					<option value="2" >$i18n.getString("health_worker_assigned_to_person")</option>
+					<option value="2" >$i18n.getString("attribute_users")</option>
 					<option value="4" >$i18n.getString("all_users_in_orgunit_registered")</option>
 					<option value="5" >$i18n.getString("user_group")</option>
 				</select>
@@ -76,10 +79,11 @@
 		<tr>
 			<td><label>$i18n.getString( "user_group" )</label></td>
 			<td>
-				<select type="text" id="userGroup" name="userGroup" class="userGroup">
-				#foreach($eachGroup in $userGroups)
-					<option value="$eachGroup.id">$i18n.getString($eachGroup.name)</option>
-				#end	
+				<select type="text" id="userGroup" name="userGroup" class="userGroup" disabled>
+					<option value="">[$i18n.getString("please_select")]</option>
+					#foreach($eachGroup in $userGroups)
+						<option value="$eachGroup.id">$i18n.getString($eachGroup.name)</option>
+					#end	
 				</select>
 			</td>
 		</tr>
@@ -106,8 +110,8 @@
 					#foreach($identifierType in $program.patientIdentifierTypes)
 						<option value={identifierid=$identifierType.uid}>$identifierType.displayName</option>
 					#end
-					#foreach($patientAttribute in $program.patientAttributes)
-						<option value={attributeid=$patientAttribute.uid}>$patientAttribute.displayName</option>
+					#foreach($attribute in $attributes)
+						<option value={attributeid=$attribute.uid}>$attribute.displayName</option>
 					#end
 				</select>
 			</td>
@@ -127,7 +131,7 @@
 		<td></td>
       	<td>
 			<input type="submit" value="$i18n.getString( 'add' )">
-			<input type="button" value="$i18n.getString( 'cancel' )" onclick="window.location.href='program.action'">
+			<input type="button" value="$i18n.getString( 'cancel' )" onclick="window.location.href='programPatientReminder.action?id=$program.id'">
 		</td>
       </tr>
   </table>
@@ -149,7 +153,7 @@
 	var i18n_date_to_compare = '$encoder.jsEscape( $i18n.getString( "date_to_compare" ) , "'")'; 
 	var i18n_recipients = '$encoder.jsEscape( $i18n.getString( "recipients" ) , "'")'; 
 	var i18n_patient_sms_only = '$encoder.jsEscape( $i18n.getString( "patient_sms_only" ) , "'")'; 
-	var i18n_health_worker_assigned_to_person = '$encoder.jsEscape( $i18n.getString( "health_worker_assigned_to_person" ) , "'")'; 
+	var i18n_attribute_users = '$encoder.jsEscape( $i18n.getString( "attribute_users" ) , "'")'; 
 	var i18n_orgunit_phone_number_sms_only = '$encoder.jsEscape( $i18n.getString( "orgunit_phone_number_sms_only" ) , "'")'; 
 	var i18n_all_users_at_orgunit = '$encoder.jsEscape( $i18n.getString( "all_users_at_orgunit" ) , "'")'; 
 	var i18n_send_when_to = '$encoder.jsEscape( $i18n.getString( "send_base_on" ) , "'")';

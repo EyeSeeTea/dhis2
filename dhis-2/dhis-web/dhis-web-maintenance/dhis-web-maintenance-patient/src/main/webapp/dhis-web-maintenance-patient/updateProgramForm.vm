@@ -14,15 +14,19 @@
 			compulsaryIdentifier.empty();
 			
 			if( getFieldValue('type') != 3 ){
-				if(  jQuery("#selectedList").find("tr").length > 0){
-					compulsaryIdentifier.append( "<option value='0' selected='true'></option>");
-				}
+				var isDisplayed = false;
 				jQuery("#selectedList").find("tr").each( function( i, item ){
 					selectedPropertyIds.append( "<option value='" + item.id + "' selected='true'>" + item.id + "</option>" );
 					var displayed = jQuery( item ).find( "input[name='displayed']:first");
 					var checked = displayed.attr('checked') ? true : false;
+					if( checked ){
+						isDisplayed = true
+					}
 					personDisplayNames.append( "<option value='" + checked + "' selected='true'>" + checked + "</option>" );
 				});
+				if( jQuery("#selectedList").find("tr").length > 0 && isDisplayed ){
+					compulsaryIdentifier.append( "<option value='0' selected='true'></option>");
+				}
 			}
 			else{
 				compulsaryIdentifier.append( "<option value='0' selected='true'></option>");
@@ -47,19 +51,19 @@
     </thead>
     <tbody>
 		<tr>
-			<td><label>$i18n.getString( "name" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+			<td><label for="name">$i18n.getString( "name" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 			<td><input style="width: 330px;" type="text" id="name" name="name" value="$encoder.htmlEncode( $program.displayName )" class="{validate:{required:true,minlength:4}}"></td>
 			<td></td>
 		</tr>	
 		
 		<tr>
-			<td><label>$i18n.getString( "description" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+			<td><label for="description">$i18n.getString( "description" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 			<td><input style="width: 330px;" type="text" id="description" name="description" value="$encoder.htmlEncode( $program.description )" class="{validate:{required:true,minlength:2}}"></td>
 			<td></td>
 		</tr>
 
 		<tr>
-			<td><label>$i18n.getString( "type" ) </label></td>
+			<td><label for="type">$i18n.getString( "type" ) </label></td>
 			<td>
 				<select style="width: 336px;" id="type" name="type" onchange='programOnChange();' class="{validate:{required:true}}">
 					<option value='1' #if( $program.type=='1' ) selected #end>$i18n.getString('multiple_events_with_registration')</option>
@@ -71,7 +75,7 @@
 		</tr>
 		
 		<tr>
-			<td><label>$i18n.getString( "data_entry_method" ) </label></td>
+			<td><label for="dataEntryMethod">$i18n.getString( "data_entry_method_for_option_sets" ) </label></td>
 			<td>
                 <select id='dataEntryMethod' name='dataEntryMethod' style="width: 335px;">
 					<option value='false' #if( $program.dataEntryMethod=='false' ) selected #end>$i18n.getString('drop_down_lists')</option>
@@ -82,7 +86,7 @@
 		</tr>
 		
 		<tr>
-			<td><label>$i18n.getString( "version" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+			<td><label for="version">$i18n.getString( "version" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 			<td><input type="text" id="version" name="version" style="width: 330px;" value="$program.version" class="{validate:{required:true,integer:true}}"></td>
 			<td></td>
 		</tr>
@@ -92,43 +96,43 @@
 		</tr>
 	
 		<tr name='nonAnonymous'>
-			<td><label>$i18n.getString( "allow_select_enrollment_date_in_future" )</label></td>
+			<td><label for="selectEnrollmentDatesInFuture">$i18n.getString( "allow_select_enrollment_date_in_future" )</label></td>
 			<td><input type="checkbox" id="selectEnrollmentDatesInFuture" name="selectEnrollmentDatesInFuture" value='true' #if($program.selectEnrollmentDatesInFuture=='true') checked #end ></td>
 			<td></td>
 		</tr>
 		
 		<tr name='nonAnonymous'>
-			<td><label>$i18n.getString( "allow_select_incident_date_in_future" )</label></td>
+			<td><label for="selectIncidentDatesInFuture">$i18n.getString( "allow_select_incident_date_in_future" )</label></td>
 			<td><input type="checkbox" id="selectIncidentDatesInFuture" name="selectIncidentDatesInFuture" value='true' #if($program.selectIncidentDatesInFuture=='true') checked #end ></td>
 			<td></td>
 		</tr>
 		
 		<tr name='nonAnonymous'>
-			<td><label>$i18n.getString( "only_enroll_once" )</label></td>
+			<td><label for="onlyEnrollOnce">$i18n.getString( "only_enroll_once" )</label></td>
 			<td><input type="checkbox" id="onlyEnrollOnce" name="onlyEnrollOnce" value='true' onchange='programOnChange();' #if( $program.type!='1' ) disabled #end #if($program.onlyEnrollOnce=='true') checked #end></td>
 			<td></td>
 		</tr>
 
 		<tr name='nonAnonymous'>
-			<td><label>$i18n.getString( "show_incident_date" )</label></td>
+			<td><label for="displayIncidentDate">$i18n.getString( "show_incident_date" )</label></td>
 			<td><input type="checkbox" id="displayIncidentDate" name="displayIncidentDate" value='true' onchange='programOnChange();' #if( $program.type=='3' ) disabled #elseif($program.displayIncidentDate=='true') checked #end></td>
 			<td></td>
 		</tr>
 		
 		<tr name='nonAnonymous'>
-			<td><label>$i18n.getString( "date_of_incident_description" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+			<td><label for="dateOfIncidentDescription">$i18n.getString( "date_of_incident_description" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 			<td><input style="width: 330px;" type="text" id="dateOfIncidentDescription" name="dateOfIncidentDescription" value="$!program.dateOfIncidentDescription" class="{validate:{required:true,minlength:4}}" #if( $program.type=='2' || $program.type=='3') disabled #end ></td>
 			<td></td>
 		</tr name='nonAnonymous'>
 		
 		<tr name='nonAnonymous'>
-			<td><label>$i18n.getString( "date_of_enrollment_description" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+			<td><label for="dateOfEnrollmentDescription">$i18n.getString( "date_of_enrollment_description" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 			<td><input style="width: 330px;" type="text" id="dateOfEnrollmentDescription" name="dateOfEnrollmentDescription"  value="$!program.dateOfEnrollmentDescription" class="{validate:{required:true,minlength:4}}" #if( $program.type=='3' ) disabled #end></td>
 			<td></td>
 		</tr>
 		
         <tr>
-            <td><label>$i18n.getString( "allow_enrollment_at_all_orgunits" )</label></td>
+            <td><label for="displayOnAllOrgunit">$i18n.getString( "allow_enrollment_at_all_orgunits" )</label></td>
             <td><input type="checkbox" id="displayOnAllOrgunit" name="displayOnAllOrgunit" value='true' #if($program.displayOnAllOrgunit) checked #end></td>
             <td></td>
         </tr>
@@ -144,7 +148,7 @@
 		</tr>
 		
 		<tr name='nonAnonymous'>
-			<td>$i18n.getString("relationship")</td>
+			<td><label for="relationshipTypeId">$i18n.getString("relationship_description")</label></td>
 			<td>
 				<select type='text' id='relationshipTypeId' name='relationshipTypeId' onchange='relationshipTypeOnchange()' >
 					<option value=''>[$i18n.getString("please_select")]</option>
@@ -156,7 +160,7 @@
 		</tr>
 		
 		<tr name='nonAnonymous'>
-			<td>$i18n.getString("who_is_the_new_relative_to_the_existing_person")</td>
+			<td><label for="relationshipFromA">$i18n.getString("who_is_the_new_relative_to_the_existing_person")</label></td>
 			<td>
 				<select id='relationshipFromA' name='relationshipFromA'>
 					#if($!program.relationshipType)
@@ -168,7 +172,7 @@
 		</tr>
 		
 		<tr name='nonAnonymous'>
-			<td>$i18n.getString("program_for_new_relative_to_be_enrolled_in")</td>
+			<td><label for="relatedProgramId">$i18n.getString("program_for_new_relative_to_be_enrolled_in")</label></td>
 			<td>
 				<select type='text' id='relatedProgramId' name='relatedProgramId' >
 					<option value=''>[$i18n.getString("please_select")]</option>
@@ -194,7 +198,7 @@
 
       <tbody>
         <tr name='nonAnonymous'>
-            <td><label>$i18n.getString( "skip_to_generate_overdue_events" )</label></td>
+            <td><label for="ignoreOverdueEvents">$i18n.getString( "skip_to_generate_overdue_events" )</label></td>
             <td><input type="checkbox" id="ignoreOverdueEvents" name="ignoreOverdueEvents" value='true' #if($program.ignoreOverdueEvents=='true') checked #end #if( $program.type!='1' ) disabled #end ></td>
             <td></td>
         </tr>
@@ -263,10 +267,10 @@
 									<td align="center"><input type="checkbox" name="displayed" value="iden_$identifier.id" #if($identifier.personDisplayName == true ) checked #end #if($program.type==3) disabled #end /></td>
 								</tr>
 							#end
-							#foreach( $attribute in $program.patientAttributes )
-								<tr ondblclick="unSelectProperties( this )" id="attr_$attribute.id">
+							#foreach( $programPatientAttribute in $program.programPatientAttributes )
+								<tr ondblclick="unSelectProperties( this )" id="attr_$programPatientAttribute.patientAttribute.id">
 									<td onmousedown="select(event, this)">$encoder.htmlEncode( $attribute.name )</td>
-									<td align="center"><input type="checkbox" name="displayed" value="attr_$attribute.id" #if($attribute.displayedInList == true ) checked #end #if($program.type==3) disabled #end  /></td>
+									<td align="center"><input type="checkbox" name="displayed" value="attr_$programPatientAttribute.patientAttribute.id" #if($programPatientAttribute.patientAttribute.displayedInList == true ) checked #end #if($program.type==3) disabled #end  /></td>
 								</tr>
 							#end
 						</tbody>
@@ -306,7 +310,7 @@
 	var i18n_date_to_compare = '$encoder.jsEscape( $i18n.getString( "date_to_compare" ) , "'")'; 
 	var i18n_recipients = '$encoder.jsEscape( $i18n.getString( "recipients" ) , "'")'; 
 	var i18n_patient_sms_only = '$encoder.jsEscape( $i18n.getString( "patient_sms_only" ) , "'")'; 
-	var i18n_health_worker_assigned_to_person = '$encoder.jsEscape( $i18n.getString( "health_worker_assigned_to_person" ) , "'")'; 
+	var i18n_attribute_users = '$encoder.jsEscape( $i18n.getString( "attribute_users" ) , "'")'; 
 	var i18n_orgunit_phone_number_sms_only = '$encoder.jsEscape( $i18n.getString( "orgunit_phone_number_sms_only" ) , "'")'; 
 	var i18n_all_users_at_orgunit = '$encoder.jsEscape( $i18n.getString( "all_users_at_orgunit" ) , "'")'; 
 	var i18n_send_when_to = '$encoder.jsEscape( $i18n.getString( "send_base_on" ) , "'")';

@@ -95,8 +95,6 @@ public class UpdatePatientAction
 
     private Integer relationshipTypeId;
 
-    private Integer healthWorker;
-
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
@@ -115,68 +113,16 @@ public class UpdatePatientAction
         patient = patientService.getPatient( id );
 
         // ---------------------------------------------------------------------
-        // Set FullName && location
+        // Set location
         // ---------------------------------------------------------------------
 
         patient.setOrganisationUnit( organisationUnit );
 
         // ---------------------------------------------------------------------
-        // Set Other information for patient
+        // Save Patient Attributes
         // ---------------------------------------------------------------------
 
-        if ( healthWorker != null )
-        {
-            patient.setAssociate( userService.getUser( healthWorker ) );
-        }
-
-        // -------------------------------------------------------------------------------------
-        // Save PatientIdentifier
-        // -------------------------------------------------------------------------------------
-
         HttpServletRequest request = ServletActionContext.getRequest();
-
-        String value = null;
-
-        Collection<PatientIdentifierType> identifierTypes = patientIdentifierTypeService.getAllPatientIdentifierTypes();
-
-        PatientIdentifier identifier = null;
-
-        if ( identifierTypes != null && identifierTypes.size() > 0 )
-        {
-            for ( PatientIdentifierType identifierType : identifierTypes )
-            {
-                value = request.getParameter( AddPatientAction.PREFIX_IDENTIFIER + identifierType.getId() );
-
-                identifier = patientIdentifierService.getPatientIdentifier( identifierType, patient );
-
-                if ( StringUtils.isNotBlank( value ) )
-                {
-                    value = value.trim();
-
-                    if ( identifier == null )
-                    {
-                        identifier = new PatientIdentifier();
-                        identifier.setIdentifierType( identifierType );
-                        identifier.setPatient( patient );
-                        identifier.setIdentifier( value );
-                        patient.getIdentifiers().add( identifier );
-                    }
-                    else
-                    {
-                        identifier.setIdentifier( value );
-                        patient.getIdentifiers().add( identifier );
-                    }
-                }
-                else if ( identifier != null )
-                {
-                    patient.getIdentifiers().remove( identifier );
-                }
-            }
-        }
-
-        // --------------------------------------------------------------------------------------------------------
-        // Save Patient Attributes
-        // -----------------------------------------------------------------------------------------------------
 
         Collection<PatientAttribute> attributes = patientAttributeService.getAllPatientAttributes();
 
@@ -192,7 +138,7 @@ public class UpdatePatientAction
 
             for ( PatientAttribute attribute : attributes )
             {
-                value = request.getParameter( AddPatientAction.PREFIX_ATTRIBUTE + attribute.getId() );
+                String value = request.getParameter( AddPatientAction.PREFIX_ATTRIBUTE + attribute.getId() );
 
                 if ( StringUtils.isNotBlank( value ) )
                 {
@@ -248,12 +194,62 @@ public class UpdatePatientAction
         patientService.updatePatient( patient, representativeId, relationshipTypeId, valuesForSave, valuesForUpdate,
             valuesForDelete );
 
+        // ---------------------------------------------------------------------
+        // Save PatientIdentifier
+        // ---------------------------------------------------------------------
+
+        String value = null;
+
+        Collection<PatientIdentifierType> identifierTypes = patientIdentifierTypeService.getAllPatientIdentifierTypes();
+
+        PatientIdentifier identifier = null;
+
+        if ( identifierTypes != null && identifierTypes.size() > 0 )
+        {
+            for ( PatientIdentifierType identifierType : identifierTypes )
+            {
+                value = request.getParameter( AddPatientAction.PREFIX_IDENTIFIER + identifierType.getId() );
+
+                identifier = patientIdentifierService.getPatientIdentifier( identifierType, patient );
+
+                if ( StringUtils.isNotBlank( value ) )
+                {
+                    value = value.trim();
+
+                    if ( identifier == null )
+                    {
+                        identifier = new PatientIdentifier();
+                        identifier.setIdentifierType( identifierType );
+                        identifier.setPatient( patient );
+                        identifier.setIdentifier( value );
+                        patientIdentifierService.savePatientIdentifier( identifier );
+
+                        patient.getIdentifiers().add( identifier );
+                    }
+                    else
+                    {
+                        identifier.setIdentifier( value );
+                        patientIdentifierService.updatePatientIdentifier( identifier );
+
+                        patient.getIdentifiers().add( identifier );
+                    }
+                }
+                else if ( identifier != null )
+                {
+                    patient.getIdentifiers().remove( identifier );
+                    patientIdentifierService.deletePatientIdentifier( identifier );
+                }
+            }
+        }
+
+        patientService.updatePatient( patient );
+
         return SUCCESS;
     }
 
-    // -----------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Getter/Setter
-    // -----------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     public void setUserService( UserService userService )
     {
@@ -263,11 +259,6 @@ public class UpdatePatientAction
     public void setFormat( I18nFormat format )
     {
         this.format = format;
-    }
-
-    public void setHealthWorker( Integer healthWorker )
-    {
-        this.healthWorker = healthWorker;
     }
 
     public void setPatientIdentifierTypeService( PatientIdentifierTypeService patientIdentifierTypeService )

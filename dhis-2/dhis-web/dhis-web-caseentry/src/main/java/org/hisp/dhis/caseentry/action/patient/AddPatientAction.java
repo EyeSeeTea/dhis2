@@ -29,7 +29,6 @@ package org.hisp.dhis.caseentry.action.patient;
  */
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -50,7 +49,6 @@ import org.hisp.dhis.patient.PatientIdentifierService;
 import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.patient.PatientIdentifierTypeService;
 import org.hisp.dhis.patient.PatientService;
-import org.hisp.dhis.patient.util.PatientIdentifierGenerator;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
 import org.hisp.dhis.relationship.Relationship;
 import org.hisp.dhis.relationship.RelationshipService;
@@ -122,25 +120,63 @@ public class AddPatientAction
         Patient patient = new Patient();
 
         // ---------------------------------------------------------------------
-        // Set FullName && location
+        // Set location
         // ---------------------------------------------------------------------
 
         patient.setOrganisationUnit( organisationUnit );
 
         // ---------------------------------------------------------------------
-        // Set Other information for patient
+        // Prepare Patient Attributes
         // ---------------------------------------------------------------------
 
-        if ( healthWorker != null )
+        HttpServletRequest request = ServletActionContext.getRequest();
+
+        Collection<PatientAttribute> attributes = patientAttributeService.getAllPatientAttributes();
+
+        Set<PatientAttributeValue> patientAttributeValues = new HashSet<PatientAttributeValue>();
+
+        PatientAttributeValue attributeValue = null;
+
+        if ( attributes != null && attributes.size() > 0 )
         {
-            patient.setAssociate( userService.getUser( healthWorker ) );
+            for ( PatientAttribute attribute : attributes )
+            {
+                String value = request.getParameter( PREFIX_ATTRIBUTE + attribute.getId() );
+                if ( StringUtils.isNotBlank( value ) )
+                {
+                    attributeValue = new PatientAttributeValue();
+                    attributeValue.setPatient( patient );
+                    attributeValue.setPatientAttribute( attribute );
+                    attributeValue.setValue( value.trim() );
+
+                    if ( attribute.getValueType().equals( PatientAttribute.TYPE_AGE ) )
+                    {
+                        value = format.formatDate( PatientAttribute.getDateFromAge( Integer.parseInt( value ) ) );
+                    }
+                    else if ( PatientAttribute.TYPE_COMBO.equalsIgnoreCase( attribute.getValueType() ) )
+                    {
+                        PatientAttributeOption option = patientAttributeOptionService.get( Integer.parseInt( value ) );
+                        if ( option != null )
+                        {
+                            attributeValue.setPatientAttributeOption( option );
+                            attributeValue.setValue( option.getName() );
+                        }
+                    }
+                    patientAttributeValues.add( attributeValue );
+                }
+            }
         }
+
+        // -------------------------------------------------------------------------
+        // Save patient
+        // -------------------------------------------------------------------------
+
+        int patientId = patientService.createPatient( patient, representativeId, relationshipTypeId,
+            patientAttributeValues );
 
         // -----------------------------------------------------------------------------
         // Prepare Patient Identifiers
         // -----------------------------------------------------------------------------
-
-        HttpServletRequest request = ServletActionContext.getRequest();
 
         Collection<PatientIdentifierType> identifierTypes = patientIdentifierTypeService.getAllPatientIdentifierTypes();
 
@@ -160,78 +196,14 @@ public class AddPatientAction
                     pIdentifier.setIdentifierType( identifierType );
                     pIdentifier.setPatient( patient );
                     pIdentifier.setIdentifier( value.trim() );
+                    patientIdentifierService.savePatientIdentifier( pIdentifier );
+
                     patient.getIdentifiers().add( pIdentifier );
                 }
             }
         }
 
-        // --------------------------------------------------------------------------------
-        // Generate system id with this format :
-        // (BirthDate)(Gender)(XXXXXX)(checkdigit)
-        // PatientIdentifierType will be null
-        // --------------------------------------------------------------------------------
-
-        String identifier = PatientIdentifierGenerator.getNewIdentifier( new Date(), "F" );
-
-        PatientIdentifier systemGenerateIdentifier = patientIdentifierService.get( null, identifier );
-        while ( systemGenerateIdentifier != null )
-        {
-            identifier = PatientIdentifierGenerator.getNewIdentifier( new Date(), "F" );
-            systemGenerateIdentifier = patientIdentifierService.get( null, identifier );
-        }
-
-        systemGenerateIdentifier = new PatientIdentifier();
-        systemGenerateIdentifier.setIdentifier( identifier );
-        systemGenerateIdentifier.setPatient( patient );
-
-        patient.getIdentifiers().add( systemGenerateIdentifier );
-
-        // -----------------------------------------------------------------------------
-        // Prepare Patient Attributes
-        // -----------------------------------------------------------------------------
-
-        Collection<PatientAttribute> attributes = patientAttributeService.getAllPatientAttributes();
-
-        Set<PatientAttributeValue> patientAttributeValues = new HashSet<PatientAttributeValue>();
-
-        PatientAttributeValue attributeValue = null;
-
-        if ( attributes != null && attributes.size() > 0 )
-        {
-            for ( PatientAttribute attribute : attributes )
-            {
-                value = request.getParameter( PREFIX_ATTRIBUTE + attribute.getId() );
-                if ( StringUtils.isNotBlank( value ) )
-                {
-                    attributeValue = new PatientAttributeValue();
-                    attributeValue.setPatient( patient );
-                    attributeValue.setPatientAttribute( attribute );
-                    attributeValue.setValue( value.trim() );
-
-                    if ( attribute.getValueType().equals( PatientAttribute.TYPE_AGE ) )
-                    {
-                        value = format.formatDate( PatientAttribute.getDateFromAge( Integer.parseInt( value ) ) );
-                    }
-
-                    if ( PatientAttribute.TYPE_COMBO.equalsIgnoreCase( attribute.getValueType() ) )
-                    {
-                        PatientAttributeOption option = patientAttributeOptionService.get( Integer.parseInt( value ) );
-                        if ( option != null )
-                        {
-                            attributeValue.setPatientAttributeOption( option );
-                            attributeValue.setValue( option.getName() );
-                        }
-                    }
-                    patientAttributeValues.add( attributeValue );
-                }
-            }
-        }
-
-        // -------------------------------------------------------------------------
-        // Save patient
-        // -------------------------------------------------------------------------
-
-        patientService.createPatient( patient, representativeId, relationshipTypeId, patientAttributeValues );
+        patientService.updatePatient( patient );
 
         // -------------------------------------------------------------------------
         // Create relationship
@@ -265,7 +237,7 @@ public class AddPatientAction
             }
         }
 
-        message = patient.getUid() + "_" + systemGenerateIdentifier.getIdentifier();
+        message = patient.getUid() + "_" + patientId;
 
         return SUCCESS;
     }

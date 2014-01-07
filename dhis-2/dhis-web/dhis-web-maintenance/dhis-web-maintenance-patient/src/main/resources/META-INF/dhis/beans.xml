@@ -181,6 +181,8 @@
 			ref="org.hisp.dhis.patient.PatientAttributeService" />
 		<property name="relationshipTypeService"
 			ref="org.hisp.dhis.relationship.RelationshipTypeService" />
+		<property name="programPatientAttributeService"
+			ref="org.hisp.dhis.program.ProgramPatientAttributeService" />
 	</bean>
 
 	<bean id="org.hisp.dhis.patient.action.program.GetProgramListAction"
@@ -1180,8 +1182,9 @@
 		scope="prototype">
 		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
 		<property name="patientReminderService" ref="org.hisp.dhis.patient.PatientReminderService" />
+		<property name="userGroupService" ref="org.hisp.dhis.user.UserGroupService" />
 	</bean>
-	
+
 	<bean
 		id="org.hisp.dhis.patient.action.patientreminder.ValidateProgramPatientReminderAction"
 		class="org.hisp.dhis.patient.action.patientreminder.ValidateProgramPatientReminderAction"
@@ -1189,4 +1192,11 @@
 		<property name="patientReminderService" ref="org.hisp.dhis.patient.PatientReminderService" />
 	</bean>
 
+	<bean
+		id="org.hisp.dhis.patient.action.patientreminder.ShowAddProgramPatientReminderAction"
+		class="org.hisp.dhis.patient.action.patientreminder.ShowAddProgramPatientReminderAction"
+		scope="prototype">
+		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
+		<property name="userGroupService" ref="org.hisp.dhis.user.UserGroupService" />
+	</bean>
 </beans>
