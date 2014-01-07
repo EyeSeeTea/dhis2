@@ -34,6 +34,77 @@ Ext.onReady( function() {
 		};
 	}());
 
+	// extensions
+    (function() {
+
+        Ext.define('Ext.ux.toolbar.PagingToolbar', {
+			extend: 'Ext.toolbar.Toolbar',
+			alias: 'widget.pagingtoolbar',
+			layout: 'column',
+            bodyStyle: 'border:0 none',
+            store: null,
+            setPageCount: function(pageCount) {
+				this.pageCmp.setMaxValue(pageCount);
+				this.pageCountLabelCmp.setPageCount(pageCount);
+			},
+            initComponent: function() {
+                var container = this;
+
+                this.firstCmp = Ext.create('Ext.button.Button', {
+					width: 23,
+					text: '<<',
+					handler: function() {
+						container.pageCmp.setPage(1);
+					}
+				});
+
+				this.pageLabelCmp = Ext.create('Ext.form.Label', {
+					setPageCount: function(value) {
+						this.setText(' of ' + value);
+					}
+				});
+
+				this.pageCmp = Ext.create('Ext.form.field.Number', {
+					width: 60,
+					height: 22,
+					value: 1,
+					minValue: 1,
+					allowBlank: false,
+					setPage: function(value) {
+						this.setValue(value);
+
+						container.store.load();
+					},
+					listeners: {
+						change: function(cmp, value) {
+							cmp.setPage(value);
+						}
+					}
+				});
+
+				this.pageCountLabelCmp = Ext.create('Ext.form.Label', {
+					setPageCount: function(value) {
+						this.setText(' of ' + value);
+					}
+				});
+
+                this.lastCmp = Ext.create('Ext.button.Button', {
+					width: 23,
+					text: '>>'
+				});
+
+				this.items = [
+					this.firstCmp,
+					this.pageCmp,
+					this.pageCountLabelCmp,
+					this.lastCmp
+				];
+
+				this.callParent();
+			}
+		});
+	}());
+
 	// constructors
 	LayoutWindow = function() {
 		var dimension,
@@ -1785,8 +1856,9 @@ Ext.onReady( function() {
 			};
 
 			web.multiSelect.setHeight = function(ms, panel, fill) {
-				for (var i = 0; i < ms.length; i++) {
-					ms[i].setHeight(panel.getHeight() - fill);
+				for (var i = 0, height; i < ms.length; i++) {
+					height = panel.getHeight() - fill - (ms[i].hasToolbar ? 27 : 0);
+					ms[i].setHeight(height);
 				}
 			};
 
@@ -2435,7 +2507,8 @@ Ext.onReady( function() {
 				type: 'ajax',
 				reader: {
 					type: 'json',
-					root: 'indicators'
+					root: 'indicators',
+					totalProperty: 'pager.pageCount'
 				}
 			},
 			storage: {},
@@ -2745,6 +2818,7 @@ Ext.onReady( function() {
 			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
 			valueField: 'id',
 			displayField: 'name',
+			hasToolbar: true,
 			store: indicatorAvailableStore,
 			tbar: [
 				{
@@ -2777,6 +2851,12 @@ Ext.onReady( function() {
 					}, this);
 				}
 			}
+		});
+
+		indicatorAvailableToolbar = Ext.create('Ext.ux.toolbar.PagingToolbar', {
+			height: 27,
+			style: 'border-top:0 none; border-right: 0 none;',
+			store: indicatorAvailableStore
 		});
 
 		indicatorSelected = Ext.create('Ext.ux.form.MultiSelect', {
@@ -2871,13 +2951,23 @@ Ext.onReady( function() {
 								ns.core.web.multiSelect.filterAvailable(indicatorAvailable, indicatorSelected);
 							}
 							else {
+								var options = {
+									params: {
+										page: 1,
+										pageSize: 5
+									},
+									callback: function(rec, operation, isSuccess) {
+										indicatorAvailableToolbar.setPageCount(operation.resultSet.total);
+									}
+								};
+
 								if (id === 0) {
-									store.proxy.url = ns.core.init.contextPath + '/api/indicators.json?paging=false&links=false';
-									store.load();
+									store.proxy.url = ns.core.init.contextPath + '/api/indicators.json?links=false';
+									store.load(options);
 								}
 								else {
 									store.proxy.url = ns.core.init.contextPath + '/api/indicatorGroups/' + id + '.json';
-									store.load();
+									store.load(options);
 								}
 							}
 						}
@@ -2888,7 +2978,13 @@ Ext.onReady( function() {
 					layout: 'column',
 					bodyStyle: 'border-style:none',
 					items: [
-						indicatorAvailable,
+						{
+							bodyStyle: 'border:0 none;',
+							items: [
+								indicatorAvailable,
+								indicatorAvailableToolbar
+							]
+						},
 						indicatorSelected
 					]
 				}

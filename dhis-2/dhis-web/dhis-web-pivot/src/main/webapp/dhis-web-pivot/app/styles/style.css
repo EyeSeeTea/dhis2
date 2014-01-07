@@ -391,6 +391,7 @@ table.pivot {
 
 .ns-toolbar-multiselect-left .x-docked-top {
 	border-top-left-radius: 1px;
+	border-right: 0 none;
 }
 .ns-toolbar-multiselect-right .x-docked-top {
 	border-top-right-radius: 1px;
@@ -427,6 +428,10 @@ table.pivot {
 .ns-toolbar-multiselect-right .x-boundlist-selected {
     background-color: #e5e5e5;
     border-color: #e5e5e5;
+}
+
+.ns-toolbar-multiselect-left .x-panel-body {
+	border-right: 0 none;
 }
 
 
