@@ -42,6 +42,7 @@ Ext.onReady( function() {
 			alias: 'widget.pagingtoolbar',
 			layout: 'column',
             bodyStyle: 'border:0 none',
+            disabled: true,
             store: null,
             setPageCount: function(pageCount) {
 				this.pageCmp.setMaxValue(pageCount);
@@ -51,7 +52,7 @@ Ext.onReady( function() {
                 var container = this;
 
                 this.firstCmp = Ext.create('Ext.button.Button', {
-					width: 23,
+                    height: container.height - 5,
 					text: '<<',
 					handler: function() {
 						container.pageCmp.setPage(1);
@@ -59,6 +60,7 @@ Ext.onReady( function() {
 				});
 
 				this.pageLabelCmp = Ext.create('Ext.form.Label', {
+                    height: container.height - 5,
 					setPageCount: function(value) {
 						this.setText(' of ' + value);
 					}
@@ -66,7 +68,7 @@ Ext.onReady( function() {
 
 				this.pageCmp = Ext.create('Ext.form.field.Number', {
 					width: 60,
-					height: 22,
+                    height: container.height - 5,
 					value: 1,
 					minValue: 1,
 					allowBlank: false,
@@ -83,13 +85,16 @@ Ext.onReady( function() {
 				});
 
 				this.pageCountLabelCmp = Ext.create('Ext.form.Label', {
+                    height: container.height - 5,
+                    text: 'of 1',
+                    style: 'padding-left:3px; padding-right:2px; line-height:20px',
 					setPageCount: function(value) {
 						this.setText(' of ' + value);
 					}
 				});
 
                 this.lastCmp = Ext.create('Ext.button.Button', {
-					width: 23,
+                    height: container.height - 5,
 					text: '>>'
 				});
 
@@ -1857,7 +1862,7 @@ Ext.onReady( function() {
 
 			web.multiSelect.setHeight = function(ms, panel, fill) {
 				for (var i = 0, height; i < ms.length; i++) {
-					height = panel.getHeight() - fill - (ms[i].hasToolbar ? 27 : 0);
+					height = panel.getHeight() - fill - (ms[i].hasToolbar ? 25 : 0);
 					ms[i].setHeight(height);
 				}
 			};
@@ -2813,6 +2818,60 @@ Ext.onReady( function() {
 		ns.app.stores.legendSet = legendSetStore;
 
 		// data
+        onIndicatorLoad = function() {
+            var store = indicatorAvailableStore;
+
+            // storage
+            ns.core.web.storage.internal.add(store);
+
+            // filter available
+            ns.core.web.multiSelect.filterAvailable({store: store}, {store: indicatorSelectedStore});
+
+            
+        
+        indicatorGroup = Ext.create('Ext.form.field.ComboBox', {
+            cls: 'ns-combo',
+            style: 'margin-bottom:2px; margin-top:0px',
+            width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding,
+            valueField: 'id',
+            displayField: 'name',
+            emptyText: NS.i18n.select_indicator_group,
+            editable: false,
+            store: indicatorGroupStore,
+            listeners: {
+                select: function(cb) {
+                    var store = indicatorAvailableStore,
+                        id = cb.getValue();
+
+                    store.parent = id;
+
+                    if (ns.core.support.prototype.object.hasObject(store.storage, 'parent', id)) {
+                        ns.core.web.storage.internal.load(store);
+                        ns.core.web.multiSelect.filterAvailable(indicatorAvailable, indicatorSelected);
+                    }
+                    else {
+                        var options = {
+                            params: {
+                                page: 1
+                            },
+                            callback: function(rec, operation, isSuccess) {
+                                indicatorAvailableToolbar.setPageCount(operation.resultSet.total);
+                            }
+                        };
+
+                        if (id === 0) {
+                            store.proxy.url = ns.core.init.contextPath + '/api/indicators.json?links=false';
+                            store.load(options);
+                        }
+                        else {
+                            store.proxy.url = ns.core.init.contextPath + '/api/indicatorGroups/' + id + '.json';
+                            store.load(options);
+                        }
+                    }
+                }
+            }
+        });
+        
 		indicatorAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-left',
 			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
@@ -2854,7 +2913,7 @@ Ext.onReady( function() {
 		});
 
 		indicatorAvailableToolbar = Ext.create('Ext.ux.toolbar.PagingToolbar', {
-			height: 27,
+			height: 25,
 			style: 'border-top:0 none; border-right: 0 none;',
 			store: indicatorAvailableStore
 		});
@@ -2929,50 +2988,7 @@ Ext.onReady( function() {
 				);
 			},
 			items: [
-				{
-					xtype: 'combobox',
-					cls: 'ns-combo',
-					style: 'margin-bottom:2px; margin-top:0px',
-					width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding,
-					valueField: 'id',
-					displayField: 'name',
-					emptyText: NS.i18n.select_indicator_group,
-					editable: false,
-					store: indicatorGroupStore,
-					listeners: {
-						select: function(cb) {
-							var store = indicatorAvailableStore,
-								id = cb.getValue();
-
-							store.parent = id;
-
-							if (ns.core.support.prototype.object.hasObject(store.storage, 'parent', id)) {
-								ns.core.web.storage.internal.load(store);
-								ns.core.web.multiSelect.filterAvailable(indicatorAvailable, indicatorSelected);
-							}
-							else {
-								var options = {
-									params: {
-										page: 1,
-										pageSize: 5
-									},
-									callback: function(rec, operation, isSuccess) {
-										indicatorAvailableToolbar.setPageCount(operation.resultSet.total);
-									}
-								};
-
-								if (id === 0) {
-									store.proxy.url = ns.core.init.contextPath + '/api/indicators.json?links=false';
-									store.load(options);
-								}
-								else {
-									store.proxy.url = ns.core.init.contextPath + '/api/indicatorGroups/' + id + '.json';
-									store.load(options);
-								}
-							}
-						}
-					}
-				},
+				indicatorGroup,
 				{
 					xtype: 'panel',
 					layout: 'column',
@@ -4735,7 +4751,13 @@ Ext.onReady( function() {
 		});
 
 		getParamString = function() {
-			return ns.core.web.analytics.getParamString(ns.core.service.layout.getExtendedLayout(ns.app.layout));
+			var paramString = ns.core.web.analytics.getParamString(ns.core.service.layout.getExtendedLayout(ns.app.layout));
+			
+			if (ns.app.layout.showHierarchy) {
+				paramString += '&showHierarchy=true';
+			}
+
+			return paramString;
 		};
 
 		openTableLayoutTab = function(type, isNewTab) {

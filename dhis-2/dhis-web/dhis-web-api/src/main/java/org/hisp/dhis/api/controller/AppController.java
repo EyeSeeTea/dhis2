@@ -28,7 +28,6 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import org.hisp.dhis.api.controller.exception.NotFoundException;
 import org.hisp.dhis.api.utils.ContextUtils;
@@ -39,19 +38,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Lars Helge Overland
@@ -76,7 +79,27 @@ public class AppController
         return "apps";
     }
 
+    @RequestMapping( value = RESOURCE_PATH, method = RequestMethod.POST )
+    @ResponseStatus( HttpStatus.NO_CONTENT )
+    @PreAuthorize( "hasRole('ALL') or hasRole('M_dhis-web-maintenance-appmanager')" )
+    public void installApp( @RequestParam( "file" ) MultipartFile file, HttpServletRequest request ) throws IOException
+    {
+        File tempFile = File.createTempFile( "IMPORT_", "_ZIP" );
+        file.transferTo( tempFile );
+
+        appManager.installApp( tempFile, file.getOriginalFilename(), getBaseUrl( request ) );
+    }
+
+    @RequestMapping( value = RESOURCE_PATH, method = RequestMethod.PUT )
+    @ResponseStatus( HttpStatus.NO_CONTENT )
+    @PreAuthorize( "hasRole('ALL') or hasRole('M_dhis-web-maintenance-appmanager')" )
+    public void reloadApps()
+    {
+        appManager.reloadApps();
+    }
+
     @RequestMapping( value = "/apps/{app}/**", method = RequestMethod.GET )
+    @PreAuthorize( "hasRole('ALL') or hasRole('M_dhis-web-maintenance-appmanager')" )
     public void renderApp( @PathVariable( "app" ) String app, HttpServletRequest request, HttpServletResponse response ) throws IOException, NotFoundException
     {
         Iterable<Resource> locations = Lists.newArrayList(
@@ -91,18 +114,25 @@ public class AppController
             throw new NotFoundException();
         }
 
-        Map<String, Object> manifestMap = JacksonUtils.getJsonMapper().readValue( manifest.getInputStream(), new TypeReference<HashMap<String, Object>>()
-        {
-        } );
-
-        String defaultPage = (String) manifestMap.get( "launch_path" );
+        App application = JacksonUtils.getJsonMapper().readValue( manifest.getInputStream(), App.class );
         String pageName = findPage( request.getPathInfo(), app );
+
+        // if request was for manifest.webapp, check for * and replace with host
+        if ( "manifest.webapp".equals( pageName ) )
+        {
+            if ( "*".equals( application.getActivities().getDhis().getHref() ) )
+            {
+                application.getActivities().getDhis().setHref( getBaseUrl( request ) );
+                JacksonUtils.getJsonMapper().writeValue( response.getOutputStream(), application );
+                return;
+            }
+        }
 
         Resource page = findResource( locations, pageName );
 
         if ( page == null )
         {
-            page = findResource( locations, defaultPage );
+            page = findResource( locations, application.getLaunchPath() );
 
             if ( page == null )
             {
@@ -117,6 +147,7 @@ public class AppController
     }
 
     @RequestMapping( value = "/apps/{app}", method = RequestMethod.DELETE )
+    @PreAuthorize( "hasRole('ALL') or hasRole('M_dhis-web-maintenance-appmanager')" )
     public void deleteApp( @PathVariable( "app" ) String app, HttpServletRequest request, HttpServletResponse response ) throws NotFoundException
     {
         if ( !appManager.exists( app ) )
@@ -159,5 +190,11 @@ public class AppController
         }
 
         return path;
+    }
+
+    private String getBaseUrl( HttpServletRequest request )
+    {
+        String baseUrl = org.hisp.dhis.util.ContextUtils.getBaseUrl( request );
+        return baseUrl.substring( 0, baseUrl.length() - 1 );
     }
 }

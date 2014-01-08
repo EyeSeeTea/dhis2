@@ -38,6 +38,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.datavalue.DefaultDataValueService;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StreamUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
@@ -47,6 +49,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 /**
  * @author Saptarshi Purkayastha
@@ -65,8 +68,6 @@ public class DefaultAppManager
     private void init()
     {
         reloadApps();
-
-        log.info( "Detecting apps: " + apps );
     }
 
     @Autowired
@@ -270,5 +271,7 @@ public class DefaultAppManager
         }
 
         this.apps = appList;
+
+        log.info( "Detected apps: " + apps );
     }
 }
