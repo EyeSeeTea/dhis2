@@ -2509,7 +2509,12 @@ console.log("a store length: ", a.store.getRange());
             },
             loadPage: function(uid, filter, append) {
                 uid = (Ext.isString(uid) || Ext.isNumber(uid)) ? uid : dataElementGroupComboBox.getValue();
-                filter = filter || dataElementFilter.getValue();
+                filter = filter || dataElementFilter.getValue() || null;
+
+                if (!append) {
+                    this.lastPage = null;
+                    this.nextPage = 1;
+                }
 
                 if (dataElementDetailLevel.getValue() === dimConf.dataElement.objectName) {
                     this.loadTotalsPage(uid, filter, append);
@@ -2518,7 +2523,7 @@ console.log("a store length: ", a.store.getRange());
                     this.loadDetailsPage(uid, filter, append);
                 }
             },
-            loadTotalsPage: function(uid, filter) {
+            loadTotalsPage: function(uid, filter, append) {
                 var store = this,
                     filterPath = filter ? '/query/' + filter : '',
                     path;
@@ -2557,7 +2562,7 @@ console.log("a store length: ", a.store.getRange());
                             data = response.dataElements,
                             pager = response.pager;
 
-                        store.loadStore(data, pager);
+                        store.loadStore(data, pager, append);
                     }
                 });
             },
@@ -3020,9 +3025,9 @@ console.log("a store length: ", a.store.getRange());
                     fn: function(tf) {
                         var value = dataElementGroupComboBox.getValue(),
                             store = dataElementAvailableStore;
-console.log(store.getRange(), value);
+
                         if (store.getRange().length && (Ext.isString(value) || Ext.isNumber(value))) {
-console.log("store.loadpage");
+console.log("store.loadpage filter: ", tf.getValue());
                             store.loadPage(null, tf.getValue(), false);
                         }
                     },
