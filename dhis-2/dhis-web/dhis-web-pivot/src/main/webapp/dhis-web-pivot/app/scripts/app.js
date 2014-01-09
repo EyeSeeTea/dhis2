@@ -2584,17 +2584,17 @@ console.log("a store length: ", a.store.getRange());
                 this.isPending = false;
                 dataElementSearch.hideFilter();
             },
-            appendPage: function(uid, filter) {
+            loadPage: function(uid, filter, append) {
                 uid = uid || dataElementGroupComboBox.getValue();
 
                 if (dataElementDetailLevel.getValue() === dimConf.dataElement.objectName) {
-                    appendTotalsPage(uid, filter);
+                    this.loadTotalsPage(uid, filter, append);
                 }
                 else if (dataElementDetailLevel.getValue() === dimConf.operand.objectName) {
-                    appendDetailsPage(uid, filter);
+                    this.loadDetailsPage(uid, filter, append);
                 }
             },
-            appendTotalsPage: function(uid, filter) {
+            loadTotalsPage: function(uid, filter) {
                 var store = this,
                     filterPath = filter ? '/query/' + filter : '',
                     path;
@@ -2637,7 +2637,7 @@ console.log("a store length: ", a.store.getRange());
                     }
                 });
             },
-			appendDetailsPage: function(uid) {
+			loadDetailsPage: function(uid, filter, append) {
                 var store = this,
                     filterPath = filter ? '/query/' + filter : '',
                     path;
@@ -2680,12 +2680,12 @@ console.log("a store length: ", a.store.getRange());
                             data[i].id = data[i].id.split('.').join('-');
                         }
 
-                        store.onLoad(data, pager);
+                        store.loadStore(data, pager, append);
                     }
                 });
 			},
-            onLoad: function(data, pager) {
-                this.loadData(data, true);
+            loadStore: function(data, pager, append) {
+                this.loadData(data, append);
                 this.lastPage = this.nextPage;
 
                 if (pager.pageCount > this.nextPage) {
@@ -3108,6 +3108,7 @@ console.log("a store length: ", a.store.getRange());
             emptyText: 'Filter available..',
             height: 22,
             hidden: true,
+            enableKeyEvents: true,
             listeners: {
                 keyup: {
                     fn: function(tf) {
@@ -3115,7 +3116,7 @@ console.log("a store length: ", a.store.getRange());
                             store = dataElementAvailableStore;
 
                         if (store.getRange().length && (Ext.isString(value) || Ext.isNumber(value))) {
-                            store.appendPage(null, tf.getValue());
+                            store.loadPage(null, tf.getValue());
                         }
                     },
                     buffer: 100
@@ -3170,17 +3171,6 @@ console.log("a store length: ", a.store.getRange());
 			}
 		});
 
-		dataElementAvailableToolbar = Ext.create('Ext.ux.toolbar.PagingToolbar', {
-			height: 25,
-			style: 'border-top:0 none; border-right: 0 none;',
-			store: dataElementAvailableStore,
-            listeners: {
-                render: function(cmp) {
-                    cmp.disable();
-                }
-            }
-		});
-
 		dataElementSelected = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-right',
 			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
@@ -3232,14 +3222,14 @@ console.log("a store length: ", a.store.getRange());
 			store: dataElementGroupStore,
 			loadAvailable: function(reset) {
 				var store = dataElementAvailableStore,
-					value = this.getValue();
+					id = this.getValue();
 
-				if (value !== null) {
+				if (id !== null) {
                     if (reset) {
                         store.reset();
                     }
 
-                    store.appendPage(value);
+                    store.loadPage(id, null, true);
 				}
 			},
 			listeners: {
