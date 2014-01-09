@@ -2582,8 +2582,9 @@ console.log("a store length: ", a.store.getRange());
                 this.lastPage = null;
                 this.nextPage = 1;
                 this.isPending = false;
+                dataElementSearch.hideFilter();
             },
-            appendTotalsPage: function(uid) {
+            appendTotalsPage: function(uid, filter) {
                 var store = this,
                     path;
 
@@ -3064,6 +3065,52 @@ console.log("a store length: ", a.store.getRange());
 			}
 		};
 
+        dataElementLabel = Ext.create('Ext.form.Label', {
+            text: NS.i18n.available,
+            cls: 'ns-toolbar-multiselect-left-label',
+            style: 'margin-right:5px'
+        });
+
+        dataElementSearch = Ext.create('Ext.button.Button', {
+            width: 22,
+            height: 22,
+            style: 'background: url(images/search_14.png) 3px 3px no-repeat',
+            showFilter: function() {
+                dataElementLabel.hide();
+                this.hide();
+                dataElementFilter.show();
+                dataElementFilter.reset();
+            },
+            hideFilter: function() {
+                dataElementLabel.show();
+                this.show();
+                dataElementFilter.hide();
+                dataElementFilter.reset();
+            },
+            handler: function() {
+                this.showFilter();
+            }
+        });
+
+        dataElementFilter = Ext.create('Ext.form.field.Text', {
+            emptyText: 'Filter available..',
+            height: 22,
+            hidden: true,
+            listeners: {
+                keyup: {
+                    fn: function(tf) {
+                        var value = dataElementGroupComboBox.getValue(),
+                            store = dataElementAvailableStore;
+
+                        if (store.getRange().length && (Ext.isString(value) || Ext.isNumber(value))) {
+                            // filter on tf.getValue()
+                        }
+                    },
+                    buffer: 100
+                }
+            }
+        });
+
 		dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-left',
 			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
@@ -3073,11 +3120,9 @@ console.log("a store length: ", a.store.getRange());
             page: 1,
 			store: dataElementAvailableStore,
 			tbar: [
-				{
-					xtype: 'label',
-					text: NS.i18n.available,
-					cls: 'ns-toolbar-multiselect-left-label'
-				},
+				dataElementLabel,
+                dataElementSearch,
+                dataElementFilter,
 				'->',
 				{
 					xtype: 'button',
