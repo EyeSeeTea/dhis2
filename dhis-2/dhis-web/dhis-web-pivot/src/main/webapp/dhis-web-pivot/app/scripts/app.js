@@ -96,7 +96,7 @@ Ext.onReady( function() {
 					text: '>>',
                     handler: function() {
 						container.setPage(container.pageCount);
-                    }                        
+                    }
 				});
 
 				this.items = [
@@ -1848,17 +1848,19 @@ Ext.onReady( function() {
 			};
 
 			web.multiSelect.filterAvailable = function(a, s) {
+console.log("a store length: ", a.store.getRange());
 				a.store.filterBy( function(r) {
 					var keep = true;
 					s.store.each( function(r2) {
+//console.log(r.data.id, r2.data.id, r.data.id == r2.data.id);
 						if (r.data.id == r2.data.id) {
 							keep = false;
 						}
-
 					});
+//console.log(keep);
 					return keep;
 				});
-				a.store.sortStore();
+				//a.store.sortStore();
 			};
 
 			web.multiSelect.setHeight = function(ms, panel, fill) {
@@ -2572,15 +2574,6 @@ Ext.onReady( function() {
 
 		dataElementAvailableStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
-			proxy: {
-				type: 'ajax',
-				reader: {
-					type: 'json',
-					root: 'dataElements',
-                    totalProperty: 'pager.pageCount'
-				}
-			},
-			storage: {},
             lastPage: null,
             nextPage: 1,
             isPending: false,
@@ -2615,11 +2608,12 @@ Ext.onReady( function() {
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
                     params: {
+                        viewClass: 'basic',
                         links: 'false',
                         page: store.nextPage,
                         pageSize: 50
                     },
-                    faiure: function() {
+                    failure: function() {
                         store.isPending = false;
                     },
                     success: function(r) {
@@ -2627,52 +2621,69 @@ Ext.onReady( function() {
                             data = response.dataElements,
                             pager = response.pager;
 
-                        store.loadData(data, true);
-                        store.lastPage = store.nextPage;
-
-                        if (pager.pageCount > store.nextPage) {
-                            store.nextPage++;
-                        }
-                        
-                        store.isPending = false;
+                        store.onLoad(data, pager);
                     }
                 });
             },
-			sortStore: function() {
-				this.sort('name', 'ASC');
-			},
-			setDetailsProxy: function(uid) {
+			appendDetailsPage: function(uid) {
+                var store = this,
+                    path;
+
+                if (store.nextPage === store.lastPage) {
+                    return;
+                }
+
 				if (Ext.isString(uid)) {
-					this.setProxy({
-						type: 'ajax',
-						url: ns.core.init.contextPath + '/api/dataElementOperands.json?links=false&dataElementGroup=' + uid,
-						reader: {
-							type: 'json',
-							root: 'dataElementOperands',
-                            totalProperty: 'pager.pageCount'
-						}
-					});
-
-					this.load({
-						scope: this,
-						callback: function() {
-							this.each(function(r) {
-								r.set('id', r.data.id.split('.').join('-'));
-							});
-
-							ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
-						}
-					});
+					path = '/dataElementGroups/' + uid + '/operands.json';
 				}
-				else {
-					this.removeAll();
-                    dataElementGroupComboBox.clearValue();
+				else if (uid === 0) {
+					path = '/dataElementOperands.json';
 				}
+
+				if (!path) {
+					alert('Available data elements: invalid id');
+					return;
+				}
+
+                store.isPending = true;
+
+                Ext.Ajax.request({
+                    url: ns.core.init.contextPath + '/api' + path,
+                    params: {
+                        viewClass: 'basic',
+                        links: 'false',
+                        page: store.nextPage,
+                        pageSize: 50
+                    },
+                    failure: function() {
+                        store.isPending = false;
+                    },
+                    success: function(r) {
+                        var response = Ext.decode(r.responseText),
+                            data = response.dataElementOperands,
+                            pager = response.pager;
+
+                        for (var i = 0; i < data.length; i++) {
+                            data[i].id = data[i].id.split('.').join('-');
+                        }
+
+                        store.onLoad(data, pager);
+                    }
+                });
 			},
-			listeners: {
-				load: function() {
-					onAvailableDataElementStoreLoad();
-				}
+            onLoad: function(data, pager) {
+                this.loadData(data, true);
+                this.lastPage = this.nextPage;
+
+                if (pager.pageCount > this.nextPage) {
+                    this.nextPage++;
+                }
+
+                this.isPending = false;
+                //ns.core.web.multiSelect.filterAvailable({store: this}, {store: dataElementSelectedStore});
+            },
+            sortStore: function() {
+				this.sort('name', 'ASC');
 			}
 		});
 		ns.app.stores.dataElementAvailable = dataElementAvailableStore;
@@ -2695,13 +2706,11 @@ Ext.onReady( function() {
 			},
 			listeners: {
 				load: function(s) {
-					if (dataElementDetailLevel.getValue() === ns.core.conf.finals.dimension.dataElement.objectName) {
-						s.add({
-							id: 0,
-							name: '[ ' + NS.i18n.all_data_element_groups + ' ]',
-							index: -1
-						});
-					}
+                    s.add({
+                        id: 0,
+                        name: '[ ' + NS.i18n.all_data_elements + ' ]',
+                        index: -1
+                    });
 
 					s.sort([
 						{property: 'index', direction: 'ASC'},
@@ -2859,7 +2868,7 @@ Ext.onReady( function() {
             // paging
             indicatorAvailableToolbar.enable();
         };
-        
+
         indicatorGroup = Ext.create('Ext.form.field.ComboBox', {
             cls: 'ns-combo',
             style: 'margin-bottom:2px; margin-top:0px',
@@ -2902,7 +2911,7 @@ Ext.onReady( function() {
                 }
             }
         });
-        
+
 		indicatorAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-left',
 			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
@@ -2997,7 +3006,7 @@ Ext.onReady( function() {
 				}
 			}
 		});
-   
+
 		indicator = {
 			xtype: 'panel',
 			title: '<div class="ns-panel-title-data">' + NS.i18n.indicators + '</div>',
@@ -3055,19 +3064,6 @@ Ext.onReady( function() {
 			}
 		};
 
-        onAvailableDataElementStoreLoad = function() {
-            var store = dataElementAvailableStore;
-
-            // storage
-            ns.core.web.storage.internal.add(store);
-
-            // filter available
-            ns.core.web.multiSelect.filterAvailable({store: store}, {store: dataElementSelectedStore});
-
-            // paging
-            //dataElementAvailableToolbar.enable();
-        };
-        
 		dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-left',
 			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
@@ -3102,16 +3098,14 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				render: function(ms) {
-                    var el = Ext.get(ms.boundList.getEl().id + '-listEl').dom,
-                        store = dataElementAvailableStore;
-                    
+                    var el = Ext.get(ms.boundList.getEl().id + '-listEl').dom;
+
                     el.addEventListener('scroll', function(e) {
-console.log(e.srcElement.scrollTop / e.srcElement.scrollHeight, ms.isPending);
-                        if (e.srcElement.scrollTop / e.srcElement.scrollHeight > 0.7 && !store.isPending) {                            
-                            dataElementAvailableStore.appendTotalsPage(dataElementGroupComboBox.getValue());
+                        if (e.srcElement.scrollTop / e.srcElement.scrollHeight > 0.7 && !dataElementAvailableStore.isPending) {
+                            dataElementGroupComboBox.loadAvailable();
                         }
                     });
-                        
+
 					ms.boundList.on('itemdblclick', function() {
 						ns.core.web.multiSelect.select(ms, dataElementSelected);
 					}, ms);
@@ -3129,7 +3123,7 @@ console.log(e.srcElement.scrollTop / e.srcElement.scrollHeight, ms.isPending);
                 }
             }
 		});
-        
+
 		dataElementSelected = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-right',
 			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
@@ -3179,14 +3173,16 @@ console.log(e.srcElement.scrollTop / e.srcElement.scrollHeight, ms.isPending);
 			emptyText: NS.i18n.select_data_element_group,
 			editable: false,
 			store: dataElementGroupStore,
-			loadAvailable: function() {
+			loadAvailable: function(reset) {
 				var store = dataElementAvailableStore,
 					detailLevel = dataElementDetailLevel.getValue(),
 					value = this.getValue();
 
 				if (value !== null) {
-                    store.reset();
-                    
+                    if (reset) {
+                        store.reset();
+                    }
+
 					if (detailLevel === dimConf.dataElement.objectName) {
 						store.appendTotalsPage(value);
 					}
@@ -3197,7 +3193,7 @@ console.log(e.srcElement.scrollTop / e.srcElement.scrollHeight, ms.isPending);
 			},
 			listeners: {
 				select: function(cb) {
-					cb.loadAvailable();
+					cb.loadAvailable(true);
 				}
 			}
 		});
@@ -3221,21 +3217,7 @@ console.log(e.srcElement.scrollTop / e.srcElement.scrollHeight, ms.isPending);
 			},
 			listeners: {
 				select: function(cb) {
-					var record = dataElementGroupStore.getById(0);
-
-					if (cb.getValue() === ns.core.conf.finals.dimension.operand.objectName && record) {
-						dataElementGroupStore.remove(record);
-					}
-
-					if (cb.getValue() === ns.core.conf.finals.dimension.dataElement.objectName && !record) {
-						dataElementGroupStore.insert(0, {
-							id: 0,
-							name: '[ ' + NS.i18n.all_data_element_groups + ' ]',
-							index: -1
-						});
-					}
-
-					dataElementGroupComboBox.loadAvailable();
+					dataElementGroupComboBox.loadAvailable(true);
 					dataElementSelectedStore.removeAll();
 				}
 			}
@@ -4830,7 +4812,7 @@ console.log(e.srcElement.scrollTop / e.srcElement.scrollHeight, ms.isPending);
 
 		getParamString = function() {
 			var paramString = ns.core.web.analytics.getParamString(ns.core.service.layout.getExtendedLayout(ns.app.layout));
-			
+
 			if (ns.app.layout.showHierarchy) {
 				paramString += '&showHierarchy=true';
 			}
