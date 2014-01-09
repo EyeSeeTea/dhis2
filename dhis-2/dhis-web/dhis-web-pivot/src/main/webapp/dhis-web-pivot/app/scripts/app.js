@@ -42,27 +42,27 @@ Ext.onReady( function() {
 			alias: 'widget.pagingtoolbar',
 			layout: 'column',
             bodyStyle: 'border:0 none',
-            disabled: true,
+            disabledCls: 'disabled-toolbar',
             store: null,
+            setPage: function(page) {
+                this.pageCmp.setValue(page);
+
+                this.store.loadPage(page);
+            },
             setPageCount: function(pageCount) {
 				this.pageCmp.setMaxValue(pageCount);
 				this.pageCountLabelCmp.setPageCount(pageCount);
+                this.pageCount = pageCount;
 			},
             initComponent: function() {
                 var container = this;
 
                 this.firstCmp = Ext.create('Ext.button.Button', {
                     height: container.height - 5,
+                    width: 26,
 					text: '<<',
 					handler: function() {
-						container.pageCmp.setPage(1);
-					}
-				});
-
-				this.pageLabelCmp = Ext.create('Ext.form.Label', {
-                    height: container.height - 5,
-					setPageCount: function(value) {
-						this.setText(' of ' + value);
+						container.setPage(1);
 					}
 				});
 
@@ -72,14 +72,11 @@ Ext.onReady( function() {
 					value: 1,
 					minValue: 1,
 					allowBlank: false,
-					setPage: function(value) {
-						this.setValue(value);
-
-						container.store.load();
-					},
 					listeners: {
-						change: function(cmp, value) {
-							cmp.setPage(value);
+						change: function(cmp, page) {
+                            if (page >= 1 && page <= container.pageCount) {
+                                container.setPage(page);
+                            }
 						}
 					}
 				});
@@ -95,7 +92,11 @@ Ext.onReady( function() {
 
                 this.lastCmp = Ext.create('Ext.button.Button', {
                     height: container.height - 5,
-					text: '>>'
+                    width: 26,
+					text: '>>',
+                    handler: function() {
+						container.setPage(container.pageCount);
+                    }                        
 				});
 
 				this.items = [
@@ -2457,10 +2458,12 @@ Ext.onReady( function() {
 			organisationUnitGroupStore,
 			legendSetStore,
 
-			indicatorAvailable,
+            onAvailableIndicatorLoad,
+            indicatorAvailable,
 			indicatorSelected,
 			indicator,
 			dataElementAvailable,
+            dataElementAvailableToolbar,
 			dataElementSelected,
 			dataElement,
 			dataSetAvailable,
@@ -2522,10 +2525,9 @@ Ext.onReady( function() {
 				this.sort('name', 'ASC');
 			},
 			listeners: {
-				load: function(s) {
-					ns.core.web.storage.internal.add(s);
-					ns.core.web.multiSelect.filterAvailable({store: s}, {store: indicatorSelectedStore});
-				}
+				load: function() {
+                    onAvailableIndicatorStoreLoad();
+                }
 			}
 		});
 		ns.app.stores.indicatorAvailable = indicatorAvailableStore;
@@ -2574,21 +2576,32 @@ Ext.onReady( function() {
 				type: 'ajax',
 				reader: {
 					type: 'json',
-					root: 'dataElements'
+					root: 'dataElements',
+                    totalProperty: 'pager.pageCount'
 				}
 			},
 			storage: {},
-			sortStore: function() {
-				this.sort('name', 'ASC');
-			},
-			setTotalsProxy: function(uid) {
-				var path;
+            lastPage: null,
+            nextPage: 1,
+            url: null,
+            reset: function() {
+                this.removeAll();
+                this.lastPage = null;
+                this.nextPage = 1;
+            },
+            appendTotalsPage: function(uid, fn) {
+                var store = this,
+                    path;
+
+                if (store.nextPage === store.lastPage) {
+                    return;
+                }
 
 				if (Ext.isString(uid)) {
-					path = '/dataElementGroups/' + uid + '.json?domainType=aggregate&links=false&paging=false';
+					path = '/dataElementGroups/' + uid + '/members.json';
 				}
 				else if (uid === 0) {
-					path = '/dataElements.json?domainType=aggregate&paging=false&links=false';
+					path = '/dataElements.json?domainType=aggregate';
 				}
 
 				if (!path) {
@@ -2596,21 +2609,33 @@ Ext.onReady( function() {
 					return;
 				}
 
-				this.setProxy({
-					type: 'ajax',
-					url: ns.core.init.contextPath + '/api' + path,
-					reader: {
-						type: 'json',
-						root: 'dataElements'
-					}
-				});
+                Ext.Ajax.request({
+                    url: ns.core.init.contextPath + '/api' + path,
+                    params: {
+                        links: 'false',
+                        page: store.nextPage,
+                        pageSize: 50
+                    },                        
+                    success: function(r) {
+                        var response = Ext.decode(r.responseText),
+                            data = response.dataElements,
+                            pager = response.pager;
 
-				this.load({
-					scope: this,
-					callback: function() {
-						ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
-					}
-				});
+                        store.loadData(data, true);
+                        store.lastPage = store.nextPage;
+
+                        if (pager.pageCount > store.nextPage) {
+                            store.nextPage++;
+                        }
+
+                        if (fn) {
+                            fn();
+                        }
+                    }
+                });
+            },
+			sortStore: function() {
+				this.sort('name', 'ASC');
 			},
 			setDetailsProxy: function(uid) {
 				if (Ext.isString(uid)) {
@@ -2619,7 +2644,8 @@ Ext.onReady( function() {
 						url: ns.core.init.contextPath + '/api/dataElementOperands.json?links=false&dataElementGroup=' + uid,
 						reader: {
 							type: 'json',
-							root: 'dataElementOperands'
+							root: 'dataElementOperands',
+                            totalProperty: 'pager.pageCount'
 						}
 					});
 
@@ -2640,9 +2666,8 @@ Ext.onReady( function() {
 				}
 			},
 			listeners: {
-				load: function(s) {
-					ns.core.web.storage.internal.add(s);
-					ns.core.web.multiSelect.filterAvailable({store: s}, {store: dataElementSelectedStore});
+				load: function() {
+					onAvailableDataElementStoreLoad();
 				}
 			}
 		});
@@ -2818,7 +2843,7 @@ Ext.onReady( function() {
 		ns.app.stores.legendSet = legendSetStore;
 
 		// data
-        onIndicatorLoad = function() {
+        onAvailableIndicatorStoreLoad = function() {
             var store = indicatorAvailableStore;
 
             // storage
@@ -2827,7 +2852,9 @@ Ext.onReady( function() {
             // filter available
             ns.core.web.multiSelect.filterAvailable({store: store}, {store: indicatorSelectedStore});
 
-            
+            // paging
+            indicatorAvailableToolbar.enable();
+        };
         
         indicatorGroup = Ext.create('Ext.form.field.ComboBox', {
             cls: 'ns-combo',
@@ -2864,7 +2891,7 @@ Ext.onReady( function() {
                             store.load(options);
                         }
                         else {
-                            store.proxy.url = ns.core.init.contextPath + '/api/indicatorGroups/' + id + '.json';
+                            store.proxy.url = ns.core.init.contextPath + '/api/indicatorGroups/' + id + '/members.json?links=false';
                             store.load(options);
                         }
                     }
@@ -2904,10 +2931,14 @@ Ext.onReady( function() {
 				}
 			],
 			listeners: {
-				afterrender: function() {
+				render: function(ms) {
 					this.boundList.on('itemdblclick', function() {
 						ns.core.web.multiSelect.select(this, indicatorSelected);
 					}, this);
+
+                    var el = Ext.get(ms.boundList.getEl().id + '-listEl').dom;
+
+                    el.addEventListener('scroll', function(e) { console.log(e, e.srcElement.scrollTop, e.srcElement.scrollHeight); });
 				}
 			}
 		});
@@ -2915,7 +2946,12 @@ Ext.onReady( function() {
 		indicatorAvailableToolbar = Ext.create('Ext.ux.toolbar.PagingToolbar', {
 			height: 25,
 			style: 'border-top:0 none; border-right: 0 none;',
-			store: indicatorAvailableStore
+			store: indicatorAvailableStore,
+            listeners: {
+                render: function(cmp) {
+                    cmp.disable();
+                }
+            }
 		});
 
 		indicatorSelected = Ext.create('Ext.ux.form.MultiSelect', {
@@ -2957,7 +2993,7 @@ Ext.onReady( function() {
 				}
 			}
 		});
-
+   
 		indicator = {
 			xtype: 'panel',
 			title: '<div class="ns-panel-title-data">' + NS.i18n.indicators + '</div>',
@@ -3015,11 +3051,26 @@ Ext.onReady( function() {
 			}
 		};
 
+        onAvailableDataElementStoreLoad = function() {
+            var store = dataElementAvailableStore;
+
+            // storage
+            ns.core.web.storage.internal.add(store);
+
+            // filter available
+            ns.core.web.multiSelect.filterAvailable({store: store}, {store: dataElementSelectedStore});
+
+            // paging
+            //dataElementAvailableToolbar.enable();
+        };
+        
 		dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-left',
 			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
 			valueField: 'id',
 			displayField: 'name',
+            isPending: false,
+            page: 1,
 			store: dataElementAvailableStore,
 			tbar: [
 				{
@@ -3046,14 +3097,37 @@ Ext.onReady( function() {
 				}
 			],
 			listeners: {
-				afterrender: function() {
-					this.boundList.on('itemdblclick', function() {
-						ns.core.web.multiSelect.select(this, dataElementSelected);
-					}, this);
+				render: function(ms) {
+                    var el = Ext.get(ms.boundList.getEl().id + '-listEl').dom;
+                    
+                    el.addEventListener('scroll', function(e) {
+                        if (e.srcElement.scrollTop / e.srcElement.scrollHeight > 0.7 && !ms.isPending) {
+                            ms.isPending = true;
+                            
+                            dataElementAvailableStore.appendTotalsPage(dataElementGroupComboBox.getValue(), function() {
+                                ms.isPending = false;
+                            });                            
+                        }
+                    });
+                        
+					ms.boundList.on('itemdblclick', function() {
+						ns.core.web.multiSelect.select(ms, dataElementSelected);
+					}, ms);
 				}
 			}
 		});
 
+		dataElementAvailableToolbar = Ext.create('Ext.ux.toolbar.PagingToolbar', {
+			height: 25,
+			style: 'border-top:0 none; border-right: 0 none;',
+			store: dataElementAvailableStore,
+            listeners: {
+                render: function(cmp) {
+                    cmp.disable();
+                }
+            }
+		});
+        
 		dataElementSelected = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-right',
 			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
@@ -3109,11 +3183,13 @@ Ext.onReady( function() {
 					value = this.getValue();
 
 				if (value !== null) {
+                    store.reset();
+                    
 					if (detailLevel === dimConf.dataElement.objectName) {
-						store.setTotalsProxy(value);
+						store.appendTotalsPage(value);
 					}
 					else {
-						store.setDetailsProxy(value);
+						store.appendDetailsPage(value);
 					}
 				}
 			},
@@ -3206,7 +3282,7 @@ Ext.onReady( function() {
 					layout: 'column',
 					bodyStyle: 'border-style:none',
 					items: [
-						dataElementAvailable,
+                        dataElementAvailable,
 						dataElementSelected
 					]
 				}

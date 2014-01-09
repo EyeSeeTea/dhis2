@@ -117,6 +117,12 @@ body.x-windows {
 	cursor: default !important;
 }
 
+.disabled-toolbar {
+	opacity: 1;
+/*
+	cursor: default !important;
+*/
+}
 
 	/* Collapse splitter column */
 .x-splitter {
