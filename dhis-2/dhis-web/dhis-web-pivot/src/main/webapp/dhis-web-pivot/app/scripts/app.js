@@ -2584,8 +2584,19 @@ console.log("a store length: ", a.store.getRange());
                 this.isPending = false;
                 dataElementSearch.hideFilter();
             },
+            appendPage: function(uid, filter) {
+                uid = uid || dataElementGroupComboBox.getValue();
+
+                if (dataElementDetailLevel.getValue() === dimConf.dataElement.objectName) {
+                    appendTotalsPage(uid, filter);
+                }
+                else if (dataElementDetailLevel.getValue() === dimConf.operand.objectName) {
+                    appendDetailsPage(uid, filter);
+                }
+            },
             appendTotalsPage: function(uid, filter) {
                 var store = this,
+                    filterPath = filter ? '/query/' + filter : '',
                     path;
 
                 if (store.nextPage === store.lastPage) {
@@ -2593,10 +2604,10 @@ console.log("a store length: ", a.store.getRange());
                 }
 
 				if (Ext.isString(uid)) {
-					path = '/dataElementGroups/' + uid + '/members.json';
+					path = '/dataElementGroups/' + uid + '/members' + filterPath + '.json';
 				}
 				else if (uid === 0) {
-					path = '/dataElements.json?domainType=aggregate';
+					path = '/dataElements' + filterPath + '.json?domainType=aggregate';
 				}
 
 				if (!path) {
@@ -2628,6 +2639,7 @@ console.log("a store length: ", a.store.getRange());
             },
 			appendDetailsPage: function(uid) {
                 var store = this,
+                    filterPath = filter ? '/query/' + filter : '',
                     path;
 
                 if (store.nextPage === store.lastPage) {
@@ -2635,10 +2647,10 @@ console.log("a store length: ", a.store.getRange());
                 }
 
 				if (Ext.isString(uid)) {
-					path = '/dataElementGroups/' + uid + '/operands.json';
+					path = '/dataElementGroups/' + uid + '/operands' + filterPath + '.json';
 				}
 				else if (uid === 0) {
-					path = '/dataElementOperands.json';
+					path = '/dataElementOperands' + filterPath + '.json';
 				}
 
 				if (!path) {
@@ -3103,7 +3115,7 @@ console.log("a store length: ", a.store.getRange());
                             store = dataElementAvailableStore;
 
                         if (store.getRange().length && (Ext.isString(value) || Ext.isNumber(value))) {
-                            // filter on tf.getValue()
+                            store.appendPage(null, tf.getValue());
                         }
                     },
                     buffer: 100
@@ -3220,7 +3232,6 @@ console.log("a store length: ", a.store.getRange());
 			store: dataElementGroupStore,
 			loadAvailable: function(reset) {
 				var store = dataElementAvailableStore,
-					detailLevel = dataElementDetailLevel.getValue(),
 					value = this.getValue();
 
 				if (value !== null) {
@@ -3228,12 +3239,7 @@ console.log("a store length: ", a.store.getRange());
                         store.reset();
                     }
 
-					if (detailLevel === dimConf.dataElement.objectName) {
-						store.appendTotalsPage(value);
-					}
-					else {
-						store.appendDetailsPage(value);
-					}
+                    store.appendPage(value);
 				}
 			},
 			listeners: {
