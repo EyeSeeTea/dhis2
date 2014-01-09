@@ -301,6 +301,9 @@ public class TableAlteror
             + "INNER JOIN patientidentifiertype pi ON pp.patientidentifiertypeid=pi.patientidentifiertypeid" );
         executeSql( "DROP TABLE program_patientidentifiertypes" );
         executeSql( "ALTER TABLE patientidentifiertype DROP COLUMN personDisplayName" );
+        
+        executeSql( "UPDATE patientattribute SET displayInListNoProgram=false WHERE displayInListNoProgram is null" );
+        executeSql( "UPDATE PatientIdentifierType SET displayInListNoProgram=false WHERE displayInListNoProgram is null" );
     }
 
     // -------------------------------------------------------------------------

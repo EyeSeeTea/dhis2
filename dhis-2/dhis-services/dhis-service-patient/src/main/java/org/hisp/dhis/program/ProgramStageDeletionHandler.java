@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.debug;
+package org.hisp.dhis.program;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,19 +28,36 @@ package org.hisp.dhis.system.debug;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Transactional;
+import java.util.Iterator;
 
-public class DebuggerImpl
-    implements Debugger
+import org.hisp.dhis.system.deletion.DeletionHandler;
+
+public class ProgramStageDeletionHandler
+    extends DeletionHandler
 {
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-    
-    @Transactional
-    public void markDbLog( String key )
+    private ProgramStageService programStageService;
+
+    public void setProgramStageService( ProgramStageService programStageService )
     {
-        jdbcTemplate.queryForObject( "select 1 as \"" + key + "\"", Integer.class );
+        this.programStageService = programStageService;
+    }
+
+    @Override
+    protected String getClassName()
+    {
+        return ProgramStage.class.getSimpleName();
+    }
+    
+    @Override
+    public void deleteProgram( Program program )
+    {
+        Iterator<ProgramStage> iterator = program.getProgramStages().iterator();
+        
+        while ( iterator.hasNext() )
+        {
+            ProgramStage programStage = iterator.next();
+            iterator.remove();
+            programStageService.deleteProgramStage( programStage );
+        }
     }
 }

@@ -2583,13 +2583,14 @@ Ext.onReady( function() {
 			storage: {},
             lastPage: null,
             nextPage: 1,
-            url: null,
+            isPending: false,
             reset: function() {
                 this.removeAll();
                 this.lastPage = null;
                 this.nextPage = 1;
+                this.isPending = false;
             },
-            appendTotalsPage: function(uid, fn) {
+            appendTotalsPage: function(uid) {
                 var store = this,
                     path;
 
@@ -2609,13 +2610,18 @@ Ext.onReady( function() {
 					return;
 				}
 
+                store.isPending = true;
+
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
                     params: {
                         links: 'false',
                         page: store.nextPage,
                         pageSize: 50
-                    },                        
+                    },
+                    faiure: function() {
+                        store.isPending = false;
+                    },
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
                             data = response.dataElements,
@@ -2627,10 +2633,8 @@ Ext.onReady( function() {
                         if (pager.pageCount > store.nextPage) {
                             store.nextPage++;
                         }
-
-                        if (fn) {
-                            fn();
-                        }
+                        
+                        store.isPending = false;
                     }
                 });
             },
@@ -3098,15 +3102,13 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				render: function(ms) {
-                    var el = Ext.get(ms.boundList.getEl().id + '-listEl').dom;
+                    var el = Ext.get(ms.boundList.getEl().id + '-listEl').dom,
+                        store = dataElementAvailableStore;
                     
                     el.addEventListener('scroll', function(e) {
-                        if (e.srcElement.scrollTop / e.srcElement.scrollHeight > 0.7 && !ms.isPending) {
-                            ms.isPending = true;
-                            
-                            dataElementAvailableStore.appendTotalsPage(dataElementGroupComboBox.getValue(), function() {
-                                ms.isPending = false;
-                            });                            
+console.log(e.srcElement.scrollTop / e.srcElement.scrollHeight, ms.isPending);
+                        if (e.srcElement.scrollTop / e.srcElement.scrollHeight > 0.7 && !store.isPending) {                            
+                            dataElementAvailableStore.appendTotalsPage(dataElementGroupComboBox.getValue());
                         }
                     });
                         

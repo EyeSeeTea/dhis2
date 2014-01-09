@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.debug;
+package org.hisp.dhis.webportal.menu.action;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,19 +28,66 @@ package org.hisp.dhis.system.debug;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Transactional;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
-public class DebuggerImpl
-    implements Debugger
+import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
+import org.hisp.dhis.webportal.module.Module;
+import org.hisp.dhis.webportal.module.ModuleManager;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.opensymphony.xwork2.Action;
+
+/**
+ * @author Lars Helge Overland
+ */
+public class GetModulesAction
+    implements Action
 {
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private ModuleManager manager;
+
+    @Autowired
+    private CurrentUserService currentUserService;
     
-    @Transactional
-    public void markDbLog( String key )
+    private List<Module> modules;
+    
+    public List<Module> getModules()
     {
-        jdbcTemplate.queryForObject( "select 1 as \"" + key + "\"", Integer.class );
+        return modules;
+    }
+    
+    @Override
+    public String execute()
+        throws Exception
+    {
+        modules = manager.getAccessibleMenuModulesAndApps();
+        
+        User user = currentUserService.getCurrentUser();
+        
+        final List<String> userApps = user.getApps();        
+        final List<String> allApps = new ArrayList<String>();
+        
+        for ( Module module : modules )
+        {
+            allApps.add( module.getName() );
+        }        
+        
+        Collections.sort( modules, new Comparator<Module>()
+        {
+            @Override
+            public int compare( Module m1, Module m2 )
+            {
+                Integer i1 = userApps.indexOf( m1.getName() );
+                Integer i2 = userApps.indexOf( m2.getName() );
+                
+                return i1 != -1 ? ( i2 != -1 ? i1.compareTo( i2 ) : -1 ) : 1;
+            }
+        } );        
+        
+        return SUCCESS;
     }
 }

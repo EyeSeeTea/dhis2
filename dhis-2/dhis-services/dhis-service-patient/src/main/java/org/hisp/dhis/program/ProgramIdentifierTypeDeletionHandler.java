@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.debug;
+package org.hisp.dhis.program;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,19 +28,36 @@ package org.hisp.dhis.system.debug;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Transactional;
+import java.util.Iterator;
 
-public class DebuggerImpl
-    implements Debugger
+import org.hisp.dhis.system.deletion.DeletionHandler;
+
+public class ProgramIdentifierTypeDeletionHandler
+    extends DeletionHandler
 {
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private ProgramPatientIdentifierTypeService programIdentifierTypeService;
     
-    @Transactional
-    public void markDbLog( String key )
+    public void setProgramIdentifierTypeService( ProgramPatientIdentifierTypeService programIdentifierTypeService )
     {
-        jdbcTemplate.queryForObject( "select 1 as \"" + key + "\"", Integer.class );
+        this.programIdentifierTypeService = programIdentifierTypeService;
+    }
+
+    @Override
+    public String getClassName()
+    {
+        return ProgramPatientIdentifierType.class.getSimpleName();
+    }
+
+    @Override
+    public void deleteProgram( Program program )
+    {
+        Iterator<ProgramPatientIdentifierType> iterator = program.getProgramPatientIdentifierTypes().iterator();
+        
+        while ( iterator.hasNext() )
+        {
+            ProgramPatientIdentifierType identifierType = iterator.next();
+            iterator.remove();
+            programIdentifierTypeService.deleteProgramPatientIdentifierType( identifierType );            
+        }
     }
 }

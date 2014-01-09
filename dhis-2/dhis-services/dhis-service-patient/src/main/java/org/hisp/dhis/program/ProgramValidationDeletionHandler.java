@@ -68,7 +68,7 @@ public class ProgramValidationDeletionHandler
 
         for ( ProgramValidation validation : programValidation )
         {
-            if( program.equals( validation.getProgram() ) )
+            if ( program.equals( validation.getProgram() ) )
             {
                 programValidationService.deleteProgramValidation( validation );
             }

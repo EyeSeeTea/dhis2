@@ -29,11 +29,11 @@ package org.hisp.dhis.api.controller;
  */
 
 import com.google.common.collect.Lists;
-import org.hisp.dhis.api.controller.exception.NotFoundException;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.appmanager.App;
 import org.hisp.dhis.appmanager.AppManager;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
+import org.hisp.dhis.system.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
@@ -48,12 +48,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -100,7 +102,7 @@ public class AppController
 
     @RequestMapping( value = "/apps/{app}/**", method = RequestMethod.GET )
     @PreAuthorize( "hasRole('ALL') or hasRole('M_dhis-web-maintenance-appmanager')" )
-    public void renderApp( @PathVariable( "app" ) String app, HttpServletRequest request, HttpServletResponse response ) throws IOException, NotFoundException
+    public void renderApp( @PathVariable( "app" ) String app, HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         Iterable<Resource> locations = Lists.newArrayList(
             resourceLoader.getResource( "file:" + appManager.getAppFolderPath() + "/" + app + "/" ),
@@ -111,7 +113,8 @@ public class AppController
 
         if ( manifest == null )
         {
-            throw new NotFoundException();
+            response.sendError( HttpServletResponse.SC_NOT_FOUND );
+            return;
         }
 
         App application = JacksonUtils.getJsonMapper().readValue( manifest.getInputStream(), App.class );
@@ -128,22 +131,35 @@ public class AppController
             }
         }
 
-        Resource page = findResource( locations, pageName );
+        Resource resource = findResource( locations, pageName );
 
-        if ( page == null )
+        if ( resource == null )
         {
-            page = findResource( locations, application.getLaunchPath() );
+            resource = findResource( locations, application.getLaunchPath() );
 
-            if ( page == null )
+            if ( resource == null )
             {
-                throw new NotFoundException();
+                response.sendError( HttpServletResponse.SC_NOT_FOUND );
+                return;
             }
         }
 
-        String mimeType = request.getSession().getServletContext().getMimeType( page.getFilename() );
-        response.setContentType( mimeType );
+        if ( new ServletWebRequest( request ).checkNotModified( resource.lastModified() ) )
+        {
+            response.setStatus( HttpServletResponse.SC_NOT_MODIFIED );
+            return;
+        }
 
-        StreamUtils.copy( page.getInputStream(), response.getOutputStream() );
+        String mimeType = request.getSession().getServletContext().getMimeType( resource.getFilename() );
+
+        if ( mimeType != null )
+        {
+            response.setContentType( mimeType );
+        }
+
+        response.setContentLength( (int) resource.contentLength() );
+        response.setHeader( "Last-Modified", DateUtils.getHttpDateString( new Date( resource.lastModified() ) ) );
+        StreamUtils.copy( resource.getInputStream(), response.getOutputStream() );
     }
 
     @RequestMapping( value = "/apps/{app}", method = RequestMethod.DELETE )

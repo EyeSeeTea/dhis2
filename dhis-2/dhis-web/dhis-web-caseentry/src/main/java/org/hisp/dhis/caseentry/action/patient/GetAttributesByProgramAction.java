@@ -25,72 +25,78 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.program;
+package org.hisp.dhis.caseentry.action.patient;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.hisp.dhis.patient.PatientAttribute;
-import org.springframework.transaction.annotation.Transactional;
+import org.hisp.dhis.patient.PatientAttributeService;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramPatientAttributeService;
+import org.hisp.dhis.program.ProgramService;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
+ * 
+ * @version $ GetAttributesByProgramAction.java Jan 8, 2014 4:16:30 PM $
  */
-@Transactional
-public class DefaultProgramPatientAttributeService
-    implements ProgramPatientAttributeService
+public class GetAttributesByProgramAction
+    implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Dependency
     // -------------------------------------------------------------------------
 
-    private ProgramPatientAttributeStore programPatientAttributeStore;
+    @Autowired
+    private ProgramService programService;
 
-    public void setProgramPatientAttributeStore( ProgramPatientAttributeStore programPatientAttributeStore )
+    @Autowired
+    private ProgramPatientAttributeService programPatientAttributeService;
+
+    @Autowired
+    private PatientAttributeService patientAttributeService;
+
+    // -------------------------------------------------------------------------
+    // Getter && Setter
+    // -------------------------------------------------------------------------
+
+    private Integer id;
+
+    public void setId( Integer id )
     {
-        this.programPatientAttributeStore = programPatientAttributeStore;
+        this.id = id;
+    }
+
+    private List<PatientAttribute> attributes = new ArrayList<PatientAttribute>();
+
+    public List<PatientAttribute> getAttributes()
+    {
+        return attributes;
     }
 
     // -------------------------------------------------------------------------
-    // Implementation methods
+    // Implementation Action
     // -------------------------------------------------------------------------
 
-    public void addProgramPatientAttribute( ProgramPatientAttribute programPatientAttribute )
+    @Override
+    public String execute()
+        throws Exception
     {
-        programPatientAttributeStore.save( programPatientAttribute );
-    }
+        if ( id != null )
+        {
+            Program program = programService.getProgram( id );
+            attributes = new ArrayList<PatientAttribute>(
+                programPatientAttributeService.getListPatientAttribute( program ) );
+        }
+        else
+        {
+            attributes = new ArrayList<PatientAttribute>( patientAttributeService.getPatientAttributesDisplayed( true ) );
+        }
 
-    public void deleteProgramPatientAttribute( ProgramPatientAttribute programPatientAttribute )
-    {
-        programPatientAttributeStore.delete( programPatientAttribute );
-    }
-
-    public Collection<ProgramPatientAttribute> getAllProgramPatientAttributes()
-    {
-        return programPatientAttributeStore.getAll();
-    }
-
-    public Collection<ProgramPatientAttribute> get( Program program )
-    {
-        return programPatientAttributeStore.get( program );
-    }
-
-    public ProgramPatientAttribute get( Program program, PatientAttribute patientAttribute )
-    {
-        return programPatientAttributeStore.get( program, patientAttribute );
-    }
-
-    public void updateProgramPatientAttribute( ProgramPatientAttribute programPatientAttribute )
-    {
-        programPatientAttributeStore.update( programPatientAttribute );
-    }
-
-    public Collection<PatientAttribute> getListPatientAttribute( Program program )
-    {
-        return programPatientAttributeStore.getListPatientAttribute( program );
-    }
-
-    public Collection<PatientAttribute> getPatientAttributes()
-    {
-        return programPatientAttributeStore.getPatientAttributes();
+        return SUCCESS;
     }
 }

@@ -36,7 +36,7 @@
 		</td>		
 		<td></td>				
 	</tr>
-		
+	
     <tr>
         <td><label for="valueType">$i18n.getString( "value_type" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
         <td>
