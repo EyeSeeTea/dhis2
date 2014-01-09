@@ -34,83 +34,6 @@ Ext.onReady( function() {
 		};
 	}());
 
-	// extensions
-    (function() {
-
-        Ext.define('Ext.ux.toolbar.PagingToolbar', {
-			extend: 'Ext.toolbar.Toolbar',
-			alias: 'widget.pagingtoolbar',
-			layout: 'column',
-            bodyStyle: 'border:0 none',
-            disabledCls: 'disabled-toolbar',
-            store: null,
-            setPage: function(page) {
-                this.pageCmp.setValue(page);
-
-                this.store.loadPage(page);
-            },
-            setPageCount: function(pageCount) {
-				this.pageCmp.setMaxValue(pageCount);
-				this.pageCountLabelCmp.setPageCount(pageCount);
-                this.pageCount = pageCount;
-			},
-            initComponent: function() {
-                var container = this;
-
-                this.firstCmp = Ext.create('Ext.button.Button', {
-                    height: container.height - 5,
-                    width: 26,
-					text: '<<',
-					handler: function() {
-						container.setPage(1);
-					}
-				});
-
-				this.pageCmp = Ext.create('Ext.form.field.Number', {
-					width: 60,
-                    height: container.height - 5,
-					value: 1,
-					minValue: 1,
-					allowBlank: false,
-					listeners: {
-						change: function(cmp, page) {
-                            if (page >= 1 && page <= container.pageCount) {
-                                container.setPage(page);
-                            }
-						}
-					}
-				});
-
-				this.pageCountLabelCmp = Ext.create('Ext.form.Label', {
-                    height: container.height - 5,
-                    text: 'of 1',
-                    style: 'padding-left:3px; padding-right:2px; line-height:20px',
-					setPageCount: function(value) {
-						this.setText(' of ' + value);
-					}
-				});
-
-                this.lastCmp = Ext.create('Ext.button.Button', {
-                    height: container.height - 5,
-                    width: 26,
-					text: '>>',
-                    handler: function() {
-						container.setPage(container.pageCount);
-                    }
-				});
-
-				this.items = [
-					this.firstCmp,
-					this.pageCmp,
-					this.pageCountLabelCmp,
-					this.lastCmp
-				];
-
-				this.callParent();
-			}
-		});
-	}());
-
 	// constructors
 	LayoutWindow = function() {
 		var dimension,
@@ -2585,7 +2508,8 @@ console.log("a store length: ", a.store.getRange());
                 dataElementSearch.hideFilter();
             },
             loadPage: function(uid, filter, append) {
-                uid = uid || dataElementGroupComboBox.getValue();
+                uid = (Ext.isString(uid) || Ext.isNumber(uid)) ? uid : dataElementGroupComboBox.getValue();
+                filter = filter || dataElementFilter.getValue();
 
                 if (dataElementDetailLevel.getValue() === dimConf.dataElement.objectName) {
                     this.loadTotalsPage(uid, filter, append);
@@ -2633,7 +2557,7 @@ console.log("a store length: ", a.store.getRange());
                             data = response.dataElements,
                             pager = response.pager;
 
-                        store.onLoad(data, pager);
+                        store.loadStore(data, pager);
                     }
                 });
             },
@@ -2930,7 +2854,6 @@ console.log("a store length: ", a.store.getRange());
 			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
 			valueField: 'id',
 			displayField: 'name',
-			hasToolbar: true,
 			store: indicatorAvailableStore,
 			tbar: [
 				{
@@ -2967,17 +2890,6 @@ console.log("a store length: ", a.store.getRange());
                     el.addEventListener('scroll', function(e) { console.log(e, e.srcElement.scrollTop, e.srcElement.scrollHeight); });
 				}
 			}
-		});
-
-		indicatorAvailableToolbar = Ext.create('Ext.ux.toolbar.PagingToolbar', {
-			height: 25,
-			style: 'border-top:0 none; border-right: 0 none;',
-			store: indicatorAvailableStore,
-            listeners: {
-                render: function(cmp) {
-                    cmp.disable();
-                }
-            }
 		});
 
 		indicatorSelected = Ext.create('Ext.ux.form.MultiSelect', {
@@ -3056,13 +2968,7 @@ console.log("a store length: ", a.store.getRange());
 					layout: 'column',
 					bodyStyle: 'border-style:none',
 					items: [
-						{
-							bodyStyle: 'border:0 none;',
-							items: [
-								indicatorAvailable,
-								indicatorAvailableToolbar
-							]
-						},
+                        indicatorAvailable,
 						indicatorSelected
 					]
 				}
@@ -3114,9 +3020,10 @@ console.log("a store length: ", a.store.getRange());
                     fn: function(tf) {
                         var value = dataElementGroupComboBox.getValue(),
                             store = dataElementAvailableStore;
-
+console.log(store.getRange(), value);
                         if (store.getRange().length && (Ext.isString(value) || Ext.isNumber(value))) {
-                            store.loadPage(null, tf.getValue());
+console.log("store.loadpage");
+                            store.loadPage(null, tf.getValue(), false);
                         }
                     },
                     buffer: 100
@@ -3160,7 +3067,7 @@ console.log("a store length: ", a.store.getRange());
 
                     el.addEventListener('scroll', function(e) {
                         if (e.srcElement.scrollTop / e.srcElement.scrollHeight > 0.7 && !dataElementAvailableStore.isPending) {
-                            dataElementGroupComboBox.loadAvailable();
+                            dataElementAvailableStore.loadPage(null, null, true);
                         }
                     });
 
@@ -3229,7 +3136,7 @@ console.log("a store length: ", a.store.getRange());
                         store.reset();
                     }
 
-                    store.loadPage(id, null, true);
+                    store.loadPage(id, null, false);
 				}
 			},
 			listeners: {
