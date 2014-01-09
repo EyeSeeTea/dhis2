@@ -3022,16 +3022,18 @@ console.log("a store length: ", a.store.getRange());
             enableKeyEvents: true,
             listeners: {
                 keyup: {
-                    fn: function(tf) {
+                    fn: function(cmp) {
                         var value = dataElementGroupComboBox.getValue(),
                             store = dataElementAvailableStore;
 
                         if (store.getRange().length && (Ext.isString(value) || Ext.isNumber(value))) {
-console.log("store.loadpage filter: ", tf.getValue());
-                            store.loadPage(null, tf.getValue(), false);
+                            store.loadPage(null, cmp.getValue(), false);
                         }
                     },
                     buffer: 100
+                },
+                show: function(cmp) {
+                    cmp.focus(false, 50);
                 }
             }
         });
