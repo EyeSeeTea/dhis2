@@ -1771,18 +1771,21 @@ Ext.onReady( function() {
 			};
 
 			web.multiSelect.filterAvailable = function(a, s) {
-console.log("a store length: ", a.store.getRange());
-				a.store.filterBy( function(r) {
-					var keep = true;
-					s.store.each( function(r2) {
-//console.log(r.data.id, r2.data.id, r.data.id == r2.data.id);
-						if (r.data.id == r2.data.id) {
-							keep = false;
-						}
+console.log(a.store.getRange().length, s.store.getRange().length);
+				if (a.store.getRange().length && s.store.getRange().length) {
+					a.store.filterBy( function(r) {
+						var keep = true;
+
+						s.store.each( function(r2) {
+console.log("each", r.data.id, r2.data.id, r.data.id == r2.data.id ? 'MATCH on ' + r.data.name : '');
+							if (r.data.id == r2.data.id) {
+								keep = false;
+							}
+						});
+console.log("RETURN", keep);
+						return keep;
 					});
-//console.log(keep);
-					return keep;
-				});
+				}
 				//a.store.sortStore();
 			};
 
@@ -2602,12 +2605,12 @@ console.log("a store length: ", a.store.getRange());
                     },
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
-                            data = response.dataElementOperands,
+							data = response.dataElementOperands || [],
                             pager = response.pager;
 
-                        for (var i = 0; i < data.length; i++) {
-                            data[i].id = data[i].id.split('.').join('-');
-                        }
+						for (var i = 0; i < data.length; i++) {
+							data[i].id = data[i].id.split('.').join('-');
+						}
 
                         store.loadStore(data, pager, append);
                     }
@@ -2629,7 +2632,6 @@ console.log("a store length: ", a.store.getRange());
 			}
 		});
 		ns.app.stores.dataElementAvailable = dataElementAvailableStore;
-nissa = dataElementAvailableStore;
 
 		dataElementSelectedStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
@@ -3074,6 +3076,7 @@ nissa = dataElementAvailableStore;
                     var el = Ext.get(ms.boundList.getEl().id + '-listEl').dom;
 
                     el.addEventListener('scroll', function(e) {
+console.log(e.srcElement.scrollTop / e.srcElement.scrollHeight, dataElementAvailableStore.isPending);
                         if (e.srcElement.scrollTop / e.srcElement.scrollHeight > 0.7 && !dataElementAvailableStore.isPending) {
                             dataElementAvailableStore.loadPage(null, null, true);
                         }
