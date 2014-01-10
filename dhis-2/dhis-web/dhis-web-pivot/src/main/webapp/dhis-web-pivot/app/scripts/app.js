@@ -2622,13 +2622,14 @@ console.log("a store length: ", a.store.getRange());
                 }
 
                 this.isPending = false;
-                //ns.core.web.multiSelect.filterAvailable({store: this}, {store: dataElementSelectedStore});
+                ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
             },
             sortStore: function() {
 				this.sort('name', 'ASC');
 			}
 		});
 		ns.app.stores.dataElementAvailable = dataElementAvailableStore;
+nissa = dataElementAvailableStore;
 
 		dataElementSelectedStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
@@ -3026,7 +3027,7 @@ console.log("a store length: ", a.store.getRange());
                         var value = dataElementGroupComboBox.getValue(),
                             store = dataElementAvailableStore;
 
-                        if (store.getRange().length && (Ext.isString(value) || Ext.isNumber(value))) {
+                        if (Ext.isString(value) || Ext.isNumber(value)) {
                             store.loadPage(null, cmp.getValue(), false);
                         }
                     },
