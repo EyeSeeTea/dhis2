@@ -2901,6 +2901,13 @@ Ext.onReady( function() {
 
 		// data
 
+		isScrolled = function(e) {
+			var el = e.srcElement,
+				scrollBottom = e.scrollTop + ((el.clientHeight / el.scrollHeight) * el.scrollHeight);
+
+			return scrollBottom / e.clientHeight > 0.8;
+		};
+
         indicatorLabel = Ext.create('Ext.form.Label', {
             text: NS.i18n.available,
             cls: 'ns-toolbar-multiselect-left-label',
@@ -3238,7 +3245,8 @@ Ext.onReady( function() {
 
                     el.addEventListener('scroll', function(e) {
 //console.log(e.srcElement.scrollTop / e.srcElement.scrollHeight, dataElementAvailableStore.isPending);
-                        if (e.srcElement.scrollTop / e.srcElement.scrollHeight > 0.7 && !dataElementAvailableStore.isPending) {
+                        //if (e.srcElement.scrollTop / e.srcElement.scrollHeight > 0.7 && !dataElementAvailableStore.isPending) {
+                        if (isScrolled(e) && !dataElementAvailableStore.isPending) {
 console.log("scroll > load page");
                             dataElementAvailableStore.loadPage(null, null, true);
                         }
