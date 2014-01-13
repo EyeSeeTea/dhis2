@@ -1757,37 +1757,72 @@ Ext.onReady( function() {
 			web.multiSelect.unselect = function(a, s) {
 				var selected = s.getValue();
 				if (selected.length) {
-					Ext.Array.each(selected, function(item) {
-						s.store.remove(s.store.getAt(s.store.findExact('id', item)));
+					Ext.Array.each(selected, function(id) {
+						a.store.add(s.store.getAt(s.store.findExact('id', id)));
+						s.store.remove(s.store.getAt(s.store.findExact('id', id)));
 					});
 					this.filterAvailable(a, s);
 				}
 			};
 
 			web.multiSelect.unselectAll = function(a, s) {
+				a.store.add(s.store.getRange());
 				s.store.removeAll();
-				a.store.clearFilter();
 				this.filterAvailable(a, s);
+				//s.store.removeAll();
+				//a.store.clearFilter();
 			};
 
 			web.multiSelect.filterAvailable = function(a, s) {
-console.log(a.store.getRange().length, s.store.getRange().length);
 				if (a.store.getRange().length && s.store.getRange().length) {
-					a.store.filterBy( function(r) {
-						var keep = true;
+					var recordsToRemove = [];
 
-						s.store.each( function(r2) {
-console.log("each", r.data.id, r2.data.id, r.data.id == r2.data.id ? 'MATCH on ' + r.data.name : '');
-							if (r.data.id == r2.data.id) {
-								keep = false;
+					a.store.each( function(ar) {
+						var removeRecord = false;
+
+						s.store.each( function(sr) {
+							if (sr.data.id === ar.data.id) {
+								removeRecord = true;
 							}
 						});
-console.log("RETURN", keep);
-						return keep;
+
+						if (removeRecord) {
+							recordsToRemove.push(ar);
+						}
 					});
+
+					a.store.remove(recordsToRemove);
 				}
-				//a.store.sortStore();
 			};
+
+
+
+
+
+
+
+
+
+
+
+
+				//if (a.store.getRange().length && s.store.getRange().length) {
+					//a.store.filterBy( function(r) {
+						//var keep = true;
+
+						//s.store.each( function(r2) {
+////console.log("each", r.data.id, r2.data.id, r.data.id === r2.data.id ? 'MATCH on ' + r.data.name : '');
+							//if (r.data.id === r2.data.id) {
+//console.log(r.data.id, r2.data.id, "keep = false");
+								//keep = false;
+							//}
+						//});
+//console.log("RETURN", keep);
+						//return keep;
+					//});
+				//}
+				//a.store.sortStore();
+			//};
 
 			web.multiSelect.setHeight = function(ms, panel, fill) {
 				for (var i = 0, height; i < ms.length; i++) {
@@ -2562,7 +2597,7 @@ console.log("RETURN", keep);
                     },
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
-                            data = response.dataElements,
+                            data = response.dataElements || [],
                             pager = response.pager;
 
                         store.loadStore(data, pager, append);
@@ -3076,8 +3111,9 @@ console.log("RETURN", keep);
                     var el = Ext.get(ms.boundList.getEl().id + '-listEl').dom;
 
                     el.addEventListener('scroll', function(e) {
-console.log(e.srcElement.scrollTop / e.srcElement.scrollHeight, dataElementAvailableStore.isPending);
+//console.log(e.srcElement.scrollTop / e.srcElement.scrollHeight, dataElementAvailableStore.isPending);
                         if (e.srcElement.scrollTop / e.srcElement.scrollHeight > 0.7 && !dataElementAvailableStore.isPending) {
+console.log("scroll > load page");
                             dataElementAvailableStore.loadPage(null, null, true);
                         }
                     });
