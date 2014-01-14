@@ -368,7 +368,7 @@ table.pivot {
     /* field default > trigger */
 .ns-trigger-filter .x-form-trigger {
     height: 22px !important;
-    background: url(../images/clear_20.png)0 0 no-repeat;
+    background: url(../images/clear_20.png) 0 0 no-repeat;
     border-top: 1px solid #b5b8c8;
     border-right: 1px solid #b5b8c8;
 }
@@ -379,7 +379,7 @@ table.pivot {
 }
     /* field over > trigger */
 .ns-trigger-filter .x-form-trigger-over {
-    background: url(../images/clear-over_20.png)0 0 no-repeat;
+    background: url(../images/clear-over_20.png) 0 0 no-repeat;
 }
 
 
