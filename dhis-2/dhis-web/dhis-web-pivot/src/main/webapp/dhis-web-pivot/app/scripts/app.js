@@ -3129,6 +3129,7 @@ Ext.onReady( function() {
         dataElementSearch = Ext.create('Ext.button.Button', {
             width: 22,
             height: 22,
+            disabled: true,
             style: 'background: url(images/search_14.png) 3px 3px no-repeat',
             showFilter: function() {
                 dataElementLabel.hide();
@@ -3297,6 +3298,8 @@ Ext.onReady( function() {
 			listeners: {
 				select: function(cb) {
 					cb.loadAvailable(true);
+
+                    dataElementSearch.enable();
 				}
 			}
 		});
