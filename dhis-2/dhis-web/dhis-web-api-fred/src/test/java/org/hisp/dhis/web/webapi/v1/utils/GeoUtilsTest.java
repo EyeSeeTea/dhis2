@@ -28,6 +28,7 @@ package org.hisp.dhis.web.webapi.v1.utils;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.web.fred.webapi.v1.utils.GeoUtils;
 import org.junit.Assert;
 import org.junit.Test;
 

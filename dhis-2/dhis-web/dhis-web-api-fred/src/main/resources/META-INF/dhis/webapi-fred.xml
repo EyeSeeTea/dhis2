@@ -12,7 +12,9 @@
 
   <sec:global-method-security pre-post-annotations="enabled" />
 
-  <context:component-scan base-package="org.hisp.dhis.web.webapi" />
+  <context:component-scan base-package="org.hisp.dhis.web.fred" />
+
+  <context:component-scan base-package="org.hisp.dhis.web.csd" />
 
   <context:annotation-config />
 
@@ -64,6 +66,10 @@
     <property name="objectMapper" ref="objectMapperFactoryBean" />
     <property name="modelKey" value="entity" />
     <property name="extractValueFromSingleKeyModel" value="true" />
+  </bean>
+
+  <bean class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+    <property name="packagesToScan" value="org.hisp.dhis.web.csd.domain" />
   </bean>
 
   <mvc:annotation-driven>

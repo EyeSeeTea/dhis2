@@ -1762,6 +1762,7 @@ Ext.onReady( function() {
 						s.store.remove(s.store.getAt(s.store.findExact('id', id)));
 					});
 					this.filterAvailable(a, s);
+                    a.store.sortStore();
 				}
 			};
 
@@ -1769,8 +1770,7 @@ Ext.onReady( function() {
 				a.store.add(s.store.getRange());
 				s.store.removeAll();
 				this.filterAvailable(a, s);
-				//s.store.removeAll();
-				//a.store.clearFilter();
+                a.store.sortStore();
 			};
 
 			web.multiSelect.filterAvailable = function(a, s) {
@@ -1794,35 +1794,6 @@ Ext.onReady( function() {
 					a.store.remove(recordsToRemove);
 				}
 			};
-
-
-
-
-
-
-
-
-
-
-
-
-				//if (a.store.getRange().length && s.store.getRange().length) {
-					//a.store.filterBy( function(r) {
-						//var keep = true;
-
-						//s.store.each( function(r2) {
-////console.log("each", r.data.id, r2.data.id, r.data.id === r2.data.id ? 'MATCH on ' + r.data.name : '');
-							//if (r.data.id === r2.data.id) {
-//console.log(r.data.id, r2.data.id, "keep = false");
-								//keep = false;
-							//}
-						//});
-//console.log("RETURN", keep);
-						//return keep;
-					//});
-				//}
-				//a.store.sortStore();
-			//};
 
 			web.multiSelect.setHeight = function(ms, panel, fill) {
 				for (var i = 0, height; i < ms.length; i++) {
@@ -2421,12 +2392,10 @@ Ext.onReady( function() {
 			organisationUnitGroupStore,
 			legendSetStore,
 
-            onAvailableIndicatorLoad,
             indicatorAvailable,
 			indicatorSelected,
 			indicator,
 			dataElementAvailable,
-            dataElementAvailableToolbar,
 			dataElementSelected,
 			dataElement,
 			dataSetAvailable,
@@ -2489,7 +2458,7 @@ Ext.onReady( function() {
                     filterPath = filter ? '/query/' + filter : '',
                     path;
 
-                uid = (Ext.isString(uid) || Ext.isNumber(uid)) ? uid : indicatorGroupComboBox.getValue();
+                uid = (Ext.isString(uid) || Ext.isNumber(uid)) ? uid : indicatorGroup.getValue();
                 filter = filter || indicatorFilter.getValue() || null;
 
                 if (!append) {
@@ -2550,11 +2519,6 @@ Ext.onReady( function() {
 			parent: null,
 			sortStore: function() {
 				this.sort('name', 'ASC');
-			},
-			listeners: {
-				load: function() {
-                    onAvailableIndicatorStoreLoad();
-                }
 			}
 		});
 		ns.app.stores.indicatorAvailable = indicatorAvailableStore;
@@ -2610,7 +2574,7 @@ Ext.onReady( function() {
                 dataElementSearch.hideFilter();
             },
             loadPage: function(uid, filter, append) {
-                uid = (Ext.isString(uid) || Ext.isNumber(uid)) ? uid : dataElementGroupComboBox.getValue();
+                uid = (Ext.isString(uid) || Ext.isNumber(uid)) ? uid : dataElementGroup.getValue();
                 filter = filter || dataElementFilter.getValue() || null;
 
                 if (!append) {
@@ -2903,9 +2867,9 @@ Ext.onReady( function() {
 
 		isScrolled = function(e) {
 			var el = e.srcElement,
-				scrollBottom = e.scrollTop + ((el.clientHeight / el.scrollHeight) * el.scrollHeight);
+				scrollBottom = el.scrollTop + ((el.clientHeight / el.scrollHeight) * el.scrollHeight);
 
-			return scrollBottom / e.clientHeight > 0.8;
+			return scrollBottom / el.scrollHeight > 0.9;
 		};
 
         indicatorLabel = Ext.create('Ext.form.Label', {
@@ -3027,11 +2991,9 @@ Ext.onReady( function() {
 			displayField: 'name',
 			store: indicatorAvailableStore,
 			tbar: [
-				{
-					xtype: 'label',
-					text: NS.i18n.available,
-					cls: 'ns-toolbar-multiselect-left-label'
-				},
+				indicatorLabel,
+                indicatorSearch,
+                indicatorFilter,
 				'->',
 				{
 					xtype: 'button',
@@ -3055,8 +3017,7 @@ Ext.onReady( function() {
                     var el = Ext.get(ms.boundList.getEl().id + '-listEl').dom;
 
                     el.addEventListener('scroll', function(e) {
-                        if (e.srcElement.scrollTop / e.srcElement.scrollHeight > 0.7 && !indicatorAvailableStore.isPending) {
-
+                        if (isScrolled(e) && !indicatorAvailableStore.isPending) {
                             indicatorAvailableStore.loadPage(null, null, true);
                         }
                     });
@@ -3194,7 +3155,7 @@ Ext.onReady( function() {
             listeners: {
                 keyup: {
                     fn: function(cmp) {
-                        var value = dataElementGroupComboBox.getValue(),
+                        var value = dataElementGroup.getValue(),
                             store = dataElementAvailableStore;
 
                         if (Ext.isString(value) || Ext.isNumber(value)) {
@@ -3244,10 +3205,7 @@ Ext.onReady( function() {
                     var el = Ext.get(ms.boundList.getEl().id + '-listEl').dom;
 
                     el.addEventListener('scroll', function(e) {
-//console.log(e.srcElement.scrollTop / e.srcElement.scrollHeight, dataElementAvailableStore.isPending);
-                        //if (e.srcElement.scrollTop / e.srcElement.scrollHeight > 0.7 && !dataElementAvailableStore.isPending) {
                         if (isScrolled(e) && !dataElementAvailableStore.isPending) {
-console.log("scroll > load page");
                             dataElementAvailableStore.loadPage(null, null, true);
                         }
                     });
@@ -3299,7 +3257,7 @@ console.log("scroll > load page");
 			}
 		});
 
-		dataElementGroupComboBox = Ext.create('Ext.form.field.ComboBox', {
+		dataElementGroup = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
 			style: 'margin:0 2px 2px 0',
 			width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 90,
@@ -3346,7 +3304,7 @@ console.log("scroll > load page");
 			},
 			listeners: {
 				select: function(cb) {
-					dataElementGroupComboBox.loadAvailable(true);
+					dataElementGroup.loadAvailable(true);
 					dataElementSelectedStore.removeAll();
 				}
 			}
@@ -3386,7 +3344,7 @@ console.log("scroll > load page");
 					xtype: 'container',
 					layout: 'column',
 					items: [
-						dataElementGroupComboBox,
+						dataElementGroup,
 						dataElementDetailLevel
 					]
 				},
