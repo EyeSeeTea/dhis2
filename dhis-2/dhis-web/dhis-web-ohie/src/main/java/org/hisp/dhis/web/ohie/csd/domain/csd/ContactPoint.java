@@ -1,4 +1,4 @@
-package org.hisp.dhis.web.ohie.csd.domain;
+package org.hisp.dhis.web.ohie.csd.domain.csd;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -37,36 +37,62 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @XmlAccessorType( XmlAccessType.FIELD )
-@XmlRootElement( name = "Body", namespace = "http://www.w3.org/2003/05/soap-envelope" )
-public class Body
+@XmlRootElement( name = "contactPoint", namespace = "urn:ihe:iti:csd:2013" )
+public class ContactPoint
 {
-    @XmlElement( name = "getModificationsRequest", namespace = "urn:ihe:iti:csd:2013" )
-    private GetModificationsRequest getModificationsRequest;
+    @XmlElement( name = "codedType", namespace = "urn:ihe:iti:csd:2013" )
+    private CodedType codedType;
 
-    @XmlElement( name = "getModificationsResponse", namespace = "urn:ihe:iti:csd:2013" )
-    private GetModificationsResponse getModificationsResponse;
+    @XmlElement( name = "equipment", namespace = "urn:ihe:iti:csd:2013" )
+    private String equipment;
 
-    public Body()
+    @XmlElement( name = "purpose", namespace = "urn:ihe:iti:csd:2013" )
+    private String purpose;
+
+    @XmlElement( name = "certificate", namespace = "urn:ihe:iti:csd:2013" )
+    private String certificate;
+
+    public ContactPoint()
     {
     }
 
-    public GetModificationsRequest getGetModificationsRequest()
+    public CodedType getCodedType()
     {
-        return getModificationsRequest;
+        return codedType;
     }
 
-    public void setGetModificationsRequest( GetModificationsRequest getModificationsRequest )
+    public void setCodedType( CodedType codedType )
     {
-        this.getModificationsRequest = getModificationsRequest;
+        this.codedType = codedType;
     }
 
-    public GetModificationsResponse getGetModificationsResponse()
+    public String getEquipment()
     {
-        return getModificationsResponse;
+        return equipment;
     }
 
-    public void setGetModificationsResponse( GetModificationsResponse getModificationsResponse )
+    public void setEquipment( String equipment )
     {
-        this.getModificationsResponse = getModificationsResponse;
+        this.equipment = equipment;
+    }
+
+    public String getPurpose()
+    {
+        return purpose;
+    }
+
+    public void setPurpose( String purpose )
+    {
+        this.purpose = purpose;
+    }
+
+    public String getCertificate()
+    {
+        return certificate;
+    }
+
+    public void setCertificate( String certificate )
+    {
+        this.certificate = certificate;
     }
 }
