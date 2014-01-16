@@ -106,7 +106,7 @@ public class TableAlteror
 
     @Autowired
     private StatementBuilder statementBuilder;
-    
+
     // -------------------------------------------------------------------------
     // Action Implementation
     // -------------------------------------------------------------------------
@@ -294,9 +294,12 @@ public class TableAlteror
         executeSql( "ALTER TABLE program DROP COLUMN useBirthDateAsIncidentDate" );
         executeSql( "ALTER TABLE program DROP COLUMN useBirthDateAsEnrollmentDate" );
 
-        executeSql( "UPDATE patientattribute SET displayInListNoProgram=false WHERE displayInListNoProgram is null" );
-        executeSql( "UPDATE patientidentifiertype SET displayInListNoProgram=false WHERE displayInListNoProgram is null" );
-        
+        executeSql( "UPDATE patientattribute SET displayinlistnoprogram=false WHERE displayinlistnoprogram is null" );
+        executeSql( "UPDATE patientidentifiertype SET displayinlistnoprogram=false WHERE displayinlistnoprogram is null" );
+
+        executeSql( "ALTER TABLE patientattribute DROP COLUMN displayedinlist" );
+        executeSql( "ALTER TABLE patientidentifiertype DROP COLUMN persondisplayname" );
+
         updateProgramAttributes();
     }
 
@@ -307,24 +310,25 @@ public class TableAlteror
     private void updateProgramAttributes()
     {
         String autoIncrVal = statementBuilder.getAutoIncrementValue();
-        
+
         String attributeSql = "INSERT INTO program_attributes (programattributeid, attributeid, sort_order, displayinlist, programid) "
-            + "SELECT " + autoIncrVal + ", pp.patientattributeid, pp.sort_order, false, pp.programid "
-            + "FROM program_patientattributes pp";        
+            + "SELECT "
+            + autoIncrVal
+            + ", pp.patientattributeid, pp.sort_order, false, pp.programid "
+            + "FROM program_patientattributes pp";
         executeSql( attributeSql );
 
         String identifierSql = "INSERT INTO program_identifiertypes (programidentifiertypeid, identifiertypeid, sort_order, displayinlist, programid) "
-            + "SELECT " + autoIncrVal + ", pp.patientidentifiertypeid, pp.sort_order, false, pp.programid "
-            + "FROM program_patientidentifiertypes pp";        
+            + "SELECT "
+            + autoIncrVal
+            + ", pp.patientidentifiertypeid, pp.sort_order, false, pp.programid "
+            + "FROM program_patientidentifiertypes pp";
         executeSql( identifierSql );
-        
+
         executeSql( "DROP TABLE program_patientattributes" );
         executeSql( "DROP TABLE program_patientidentifiertypes" );
-
-        executeSql( "ALTER TABLE patientattribute DROP COLUMN displayedInList" );
-        executeSql( "ALTER TABLE patientidentifiertype DROP COLUMN personDisplayName" );
     }
-    
+
     private void updateUid()
     {
         updateUidColumn( "patientattribute" );
@@ -493,10 +497,10 @@ public class TableAlteror
         {
             Statement statement = holder.getStatement();
 
-            ResultSet resultSet = statement.executeQuery( "SELECT gender FROM patientattribute" );
+            ResultSet resultSet = statement.executeQuery( "SELECT gender FROM patient" );
 
             // Only execute once
-            if ( !resultSet.next() )
+            if ( resultSet.next() )
             {
                 Integer max = jdbcTemplate.queryForObject( "select max(patientattributeid) from patientattribute",
                     Integer.class );
@@ -505,8 +509,11 @@ public class TableAlteror
                 // Gender
                 // ---------------------------------------------------------------------
 
+                log.info( "Inserting dynamic atribute called Gender..." );
+
                 max++;
                 String uid = CodeGenerator.generateCode();
+
                 executeSql( "INSERT INTO patientattribute (patientattributeid, uid, lastUpdated, name, description, valueType, mandatory, inherit, displayOnVisitSchedule ) VALUES ("
                     + max
                     + ",'"
@@ -515,6 +522,10 @@ public class TableAlteror
                     + DateUtils.getMediumDateString()
                     + "','Gender', 'Gender','"
                     + PatientAttribute.TYPE_COMBO + "', false, false, false)" );
+
+                log.info( "Inserted Gender attribute successfully." );
+
+                log.info( "Inserting data into Gender attribute..." );
 
                 Integer maxOpt = jdbcTemplate.queryForObject(
                     "select max(patientattributeoptionid) from patientattributeoption", Integer.class );
@@ -536,21 +547,25 @@ public class TableAlteror
                 executeSql( "INSERT INTO patientattributevalue (patientid, patientattributeid, value, patientattributeoptionid ) SELECT patientid,"
                     + max + ",'T'," + maxOpt + " from patient where gender='T'" );
 
+                log.info( "Inserted data into gender attribute." );
+
                 // Update Case Aggregate Query Builder
                 String source = "[CP" + CaseAggregationCondition.SEPARATOR_OBJECT + "gender]";
                 String target = "[" + CaseAggregationCondition.OBJECT_PATIENT_ATTRIBUTE
                     + CaseAggregationCondition.SEPARATOR_OBJECT + max + "]";
                 updateFixedAttributeInCaseAggregate( source, target );
 
+                log.info( "Updated case aggregate query build formulas which have gender criteria" );
+
                 // Update custom entry form && validation criteria
                 removeFixedAttributeInCustomRegistrationForm( "gender", uid );
-                executeSql( "UPDATE validationcriteria SET property='" + resultSet.getInt( "property" )
-                    + "' WHERE validationcriteriaid=" + resultSet.getInt( "validationcriteriaid" )
-                    + " and property='gender' " );
+                executeSql( "UPDATE validationcriteria SET property='gender' WHERE property='gender' " );
 
                 // ---------------------------------------------------------------------
                 // Death date
                 // ---------------------------------------------------------------------
+
+                log.info( "Inserting dynamic atribute called Death date..." );
 
                 max++;
                 uid = CodeGenerator.generateCode();
@@ -562,18 +577,21 @@ public class TableAlteror
                     + DateUtils.getMediumDateString()
                     + "','Death date', 'Death date','"
                     + PatientAttribute.TYPE_DATE + "', false, false, false)" );
+
+                log.info( "Inserting data into Death date attribute..." );
+
                 executeSql( "INSERT INTO patientattributevalue (patientid, patientattributeid, value ) SELECT patientid,"
                     + max + ",deathDate from patient where deathDate is not null" );
 
                 // Update custom entry form && Validation criteria
                 removeFixedAttributeInCustomRegistrationForm( "deathDate", uid );
-                executeSql( "UPDATE validationcriteria SET property='" + resultSet.getInt( "property" )
-                    + "' WHERE validationcriteriaid=" + resultSet.getInt( "validationcriteriaid" )
-                    + " and property='deathDate' " );
+                executeSql( "UPDATE validationcriteria SET property='deathDate' WHERE property='deathDate' " );
 
                 // ---------------------------------------------------------------------
                 // registrationDate
                 // ---------------------------------------------------------------------
+
+                log.info( "Inserting dynamic atribute called registration date..." );
 
                 max++;
                 uid = CodeGenerator.generateCode();
@@ -586,18 +604,21 @@ public class TableAlteror
                     + "','Registration date', 'Registration date','"
                     + PatientAttribute.TYPE_DATE
                     + "', false, false, false)" );
+
+                log.info( "Inserting data into registration date registration date..." );
+
                 executeSql( "INSERT INTO patientattributevalue (patientid, patientattributeid, value ) SELECT patientid,"
                     + max + ",registrationDate from patient where registrationDate is not null" );
 
                 // Update custom entry form && validation criteria
                 removeFixedAttributeInCustomRegistrationForm( "registrationDate", uid );
-                executeSql( "UPDATE validationcriteria SET property='" + resultSet.getInt( "property" )
-                    + "' WHERE validationcriteriaid=" + resultSet.getInt( "validationcriteriaid" )
-                    + " and property='registrationDate' " );
+                executeSql( "UPDATE validationcriteria SET property='registrationDate' WHERE property='registrationDate' " );
 
                 // ---------------------------------------------------------------------
                 // isDead
                 // ---------------------------------------------------------------------
+
+                log.info( "Inserting dynamic atribute called isDead..." );
 
                 max++;
                 uid = CodeGenerator.generateCode();
@@ -609,18 +630,21 @@ public class TableAlteror
                     + DateUtils.getMediumDateString()
                     + "','Is Dead', 'Is Dead','"
                     + PatientAttribute.TYPE_TRACKER_ASSOCIATE + "', false, false, false)" );
+
+                log.info( "Inserting data into isDead..." );
+
                 executeSql( "INSERT INTO patientattributevalue (patientid, patientattributeid, value ) SELECT patientid,"
                     + max + ",isDead from patient where isDead is not null" );
 
                 // Update custom entry form && validation criteria
                 removeFixedAttributeInCustomRegistrationForm( "isDead", uid );
-                executeSql( "UPDATE validationcriteria SET property='" + resultSet.getInt( "property" )
-                    + "' WHERE validationcriteriaid=" + resultSet.getInt( "validationcriteriaid" )
-                    + " and property='isDead' " );
+                executeSql( "UPDATE validationcriteria SET property='isDead' WHERE property='isDead' " );
 
                 // ---------------------------------------------------------------------
                 // underAge
                 // ---------------------------------------------------------------------
+
+                log.info( "Inserting dynamic atribute called underAge..." );
 
                 max++;
                 uid = CodeGenerator.generateCode();
@@ -632,18 +656,21 @@ public class TableAlteror
                     + DateUtils.getMediumDateString()
                     + "','Is under age', 'Is under age','"
                     + PatientAttribute.TYPE_TRACKER_ASSOCIATE + "', false, false, false)" );
+
+                log.info( "Inserting data into underAge..." );
+
                 executeSql( "INSERT INTO patientattributevalue (patientid, patientattributeid, value ) SELECT patientid,"
                     + max + ",isDead from patient where underAge=true" );
 
                 // Update custom entry form && validation criteria
                 removeFixedAttributeInCustomRegistrationForm( "underAge", uid );
-                executeSql( "UPDATE validationcriteria SET property='" + resultSet.getInt( "property" )
-                    + "' WHERE validationcriteriaid=" + resultSet.getInt( "validationcriteriaid" )
-                    + " and property='underAge' " );
+                executeSql( "UPDATE validationcriteria SET property='underAge' WHERE property='underAge' " );
 
                 // ---------------------------------------------------------------------
                 // DobType
                 // ---------------------------------------------------------------------
+
+                log.info( "Inserting dynamic atribute called DobType..." );
 
                 max++;
                 uid = CodeGenerator.generateCode();
@@ -657,6 +684,8 @@ public class TableAlteror
                     + PatientAttribute.TYPE_COMBO + "', false, false, false)" );
                 executeSql( "INSERT INTO patientattributevalue (patientid, patientattributeid, value ) SELECT patientid,"
                     + max + ",dobType from patient where dobType is not null" );
+
+                log.info( "Inserting data into DobType ..." );
 
                 maxOpt++;
                 executeSql( "INSERT INTO patientattributeoption (patientattributeoptionid, name, patientattributeid ) VALUES ('"
@@ -684,13 +713,13 @@ public class TableAlteror
 
                 // Update custom entry form && validation criteria
                 removeFixedAttributeInCustomRegistrationForm( "dobType", uid );
-                executeSql( "UPDATE validationcriteria SET property='" + resultSet.getInt( "property" )
-                    + "' WHERE validationcriteriaid=" + resultSet.getInt( "validationcriteriaid" )
-                    + " and property='dobType' " );
+                executeSql( "UPDATE validationcriteria SET property='dobType' WHERE property='dobType' " );
 
                 // -------------------------------------------------------------
                 // Birthdate
                 // -------------------------------------------------------------
+
+                log.info( "Inserting dynamic atribute called Birthdate..." );
 
                 max++;
                 uid = CodeGenerator.generateCode();
@@ -702,18 +731,21 @@ public class TableAlteror
                     + DateUtils.getMediumDateString()
                     + "','Birth date', 'Birth date','"
                     + PatientAttribute.TYPE_DATE + "', false, false, false)" );
+
+                log.info( "Inserting data into Birthdate ..." );
+
                 executeSql( "INSERT INTO patientattributevalue (patientid, patientattributeid, value ) SELECT patientid,"
                     + max + ",birthdate from patient where birthdate is not null and dobType in ('D','V') " );
 
                 // Update custom entry form && validation criteria
                 removeFixedAttributeInCustomRegistrationForm( "birthDate", uid );
-                executeSql( "UPDATE validationcriteria SET property='" + resultSet.getInt( "property" )
-                    + "' WHERE validationcriteriaid=" + resultSet.getInt( "validationcriteriaid" )
-                    + " and property='birthDate' " );
+                executeSql( "UPDATE validationcriteria SET property='birthDate' WHERE property='birthDate' " );
 
                 // -------------------------------------------------------------
                 // Age
                 // -------------------------------------------------------------
+
+                log.info( "Inserting dynamic atribute called age..." );
 
                 max++;
                 uid = CodeGenerator.generateCode();
@@ -725,18 +757,21 @@ public class TableAlteror
                     + DateUtils.getMediumDateString()
                     + "','Age', 'Age','"
                     + PatientAttribute.TYPE_AGE + "', false, false, false)" );
+
+                log.info( "Inserting data into age ..." );
+
                 executeSql( "INSERT INTO patientattributevalue (patientid, patientattributeid, value ) SELECT patientid,"
                     + max + ",birthdate from patient where birthdate is not null and dobType='A' " );
 
                 // Update custom entry form && validation criteria
                 removeFixedAttributeInCustomRegistrationForm( "age", uid );
-                executeSql( "UPDATE validationcriteria SET property='" + resultSet.getInt( "property" )
-                    + "' WHERE validationcriteriaid=" + resultSet.getInt( "validationcriteriaid" )
-                    + " and property='age' " );
+                executeSql( "UPDATE validationcriteria SET property='age' WHERE property='age' " );
 
                 // -------------------------------------------------------------
                 // Phone number
                 // -------------------------------------------------------------
+
+                log.info( "Inserting dynamic atribute called Phone number ..." );
 
                 max++;
                 uid = CodeGenerator.generateCode();
@@ -748,6 +783,9 @@ public class TableAlteror
                     + DateUtils.getMediumDateString()
                     + "','Phone number', 'Phone number','"
                     + PatientAttribute.TYPE_PHONE_NUMBER + "', false, false, false)" );
+
+                log.info( "Inserting data into Phone number ..." );
+
                 executeSql( "INSERT INTO patientattributevalue (patientid, patientattributeid, value ) SELECT patientid,"
                     + max + ",phoneNumber from patient where phoneNumber is not null" );
 
@@ -767,6 +805,8 @@ public class TableAlteror
                 // Patient full name
                 // -------------------------------------------------------------
 
+                log.info( "Inserting dynamic atribute called Full name ..." );
+
                 uid = CodeGenerator.generateCode();
                 executeSql( "INSERT INTO patientattribute (patientattributeid, uid, lastUpdated, name, description, valueType, mandatory, inherit, displayOnVisitSchedule ) VALUES ("
                     + max
@@ -776,6 +816,9 @@ public class TableAlteror
                     + DateUtils.getMediumDateString()
                     + "','Full name', 'Full name','"
                     + PatientAttribute.TYPE_STRING + "', false, false, false)" );
+
+                log.info( "Inserting data into Full name ..." );
+
                 executeSql( "INSERT INTO patientattributevalue (patientid, patientattributeid, value ) SELECT patientid,"
                     + max + ",name from patient where name is not null" );
 
@@ -789,6 +832,8 @@ public class TableAlteror
                 // User Associate
                 // -------------------------------------------------------------
 
+                log.info( "Inserting dynamic atribute called Staff ..." );
+
                 uid = CodeGenerator.generateCode();
                 executeSql( "INSERT INTO patientattribute (patientattributeid, uid, lastUpdated, name, description, valueType, mandatory, inherit, displayOnVisitSchedule ) VALUES ("
                     + max
@@ -798,12 +843,17 @@ public class TableAlteror
                     + DateUtils.getMediumDateString()
                     + "','Staff', 'Staff','"
                     + PatientAttribute.TYPE_USERS + "', false, false, false)" );
+
+                log.info( "Inserting data into Staff ..." );
+
                 executeSql( "INSERT INTO patientattributevalue (patientid, patientattributeid, value ) SELECT patientid,"
                     + max
                     + ",healthworkerid from patient inner join userinfo on patient.healthworkerid=userinfo.userinfoid where patient.healthworkerid is not null" );
 
                 // Update custom entry form
                 removeFixedAttributeInCustomRegistrationForm( "associate", uid );
+                
+                log.info( "Dropping fixed properties of person ..." );
 
                 executeSql( "ALTER TABLE patient DROP COLUMN gender" );
                 executeSql( "ALTER TABLE patient DROP COLUMN deathDate" );
