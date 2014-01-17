@@ -1,4 +1,4 @@
-package org.hisp.dhis.web.ohie.csd.domain.csd;
+package org.hisp.dhis.web.ohie.csd.domain;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -30,13 +30,49 @@ package org.hisp.dhis.web.ohie.csd.domain.csd;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlValue;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @XmlAccessorType( XmlAccessType.FIELD )
-@XmlRootElement( name = "serviceDirectory", namespace = "urn:ihe:iti:csd:2013" )
-public class ServiceDirectory
+@XmlRootElement( name = "commonName", namespace = "urn:ihe:iti:csd:2013" )
+public class CommonName
 {
+    @XmlAttribute( name = "language" )
+    private String language;
+
+    @XmlValue
+    private String value;
+
+    public CommonName()
+    {
+    }
+
+    public CommonName( String value )
+    {
+        this.value = value;
+    }
+
+    public String getLanguage()
+    {
+        return language;
+    }
+
+    public void setLanguage( String language )
+    {
+        this.language = language;
+    }
+
+    public String getValue()
+    {
+        return value;
+    }
+
+    public void setValue( String value )
+    {
+        this.value = value;
+    }
 }

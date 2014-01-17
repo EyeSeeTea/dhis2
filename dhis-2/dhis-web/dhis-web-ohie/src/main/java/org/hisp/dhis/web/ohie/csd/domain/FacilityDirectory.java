@@ -1,4 +1,4 @@
-package org.hisp.dhis.web.ohie.csd.domain.csd;
+package org.hisp.dhis.web.ohie.csd.domain;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -30,13 +30,31 @@ package org.hisp.dhis.web.ohie.csd.domain.csd;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @XmlAccessorType( XmlAccessType.FIELD )
-@XmlRootElement( name = "providerDirectory", namespace = "urn:ihe:iti:csd:2013" )
-public class ProviderDirectory
+@XmlRootElement( name = "facilityDirectory", namespace = "urn:ihe:iti:csd:2013" )
+public class FacilityDirectory
 {
+    @XmlElement( name = "facility", namespace = "urn:ihe:iti:csd:2013" )
+    private List<Facility> facilities;
+
+    public FacilityDirectory()
+    {
+    }
+
+    public List<Facility> getFacilities()
+    {
+        return facilities;
+    }
+
+    public void setFacilities( List<Facility> facilities )
+    {
+        this.facilities = facilities;
+    }
 }

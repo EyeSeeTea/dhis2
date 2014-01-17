@@ -1,4 +1,4 @@
-package org.hisp.dhis.web.ohie.csd.domain.csd;
+package org.hisp.dhis.web.ohie.csd.domain;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -30,69 +30,64 @@ package org.hisp.dhis.web.ohie.csd.domain.csd;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlValue;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @XmlAccessorType( XmlAccessType.FIELD )
-@XmlRootElement( name = "CSD", namespace = "urn:ihe:iti:csd:2013" )
-public class Csd
+@XmlType( name = "codedType", namespace = "urn:ihe:iti:csd:2013" )
+public class CodedType
 {
-    @XmlElement( name = "organizationDirectory", namespace = "urn:ihe:iti:csd:2013" )
-    private OrganizationDirectory organizationDirectory = new OrganizationDirectory();
+    @XmlAttribute( name = "code", required = true )
+    private String code;
 
-    @XmlElement( name = "serviceDirectory", namespace = "urn:ihe:iti:csd:2013" )
-    private ServiceDirectory serviceDirectory = new ServiceDirectory();
+    @XmlAttribute( name = "codingSchema", required = true )
+    private String codingSchema;
 
-    @XmlElement( name = "facilityDirectory", namespace = "urn:ihe:iti:csd:2013" )
-    private FacilityDirectory facilityDirectory = new FacilityDirectory();
+    @XmlValue
+    private String value;
 
-    @XmlElement( name = "providerDirectory", namespace = "urn:ihe:iti:csd:2013" )
-    private ProviderDirectory providerDirectory = new ProviderDirectory();
-
-    public Csd()
+    public CodedType()
     {
     }
 
-    public OrganizationDirectory getOrganizationDirectory()
+    public CodedType( String code, String codingSchema, String value )
     {
-        return organizationDirectory;
+        this.code = code;
+        this.codingSchema = codingSchema;
+        this.value = value;
     }
 
-    public void setOrganizationDirectory( OrganizationDirectory organizationDirectory )
+    public String getCode()
     {
-        this.organizationDirectory = organizationDirectory;
+        return code;
     }
 
-    public ServiceDirectory getServiceDirectory()
+    public void setCode( String code )
     {
-        return serviceDirectory;
+        this.code = code;
     }
 
-    public void setServiceDirectory( ServiceDirectory serviceDirectory )
+    public String getCodingSchema()
     {
-        this.serviceDirectory = serviceDirectory;
+        return codingSchema;
     }
 
-    public FacilityDirectory getFacilityDirectory()
+    public void setCodingSchema( String codingSchema )
     {
-        return facilityDirectory;
+        this.codingSchema = codingSchema;
     }
 
-    public void setFacilityDirectory( FacilityDirectory facilityDirectory )
+    public String getValue()
     {
-        this.facilityDirectory = facilityDirectory;
+        return value;
     }
 
-    public ProviderDirectory getProviderDirectory()
+    public void setValue( String value )
     {
-        return providerDirectory;
-    }
-
-    public void setProviderDirectory( ProviderDirectory providerDirectory )
-    {
-        this.providerDirectory = providerDirectory;
+        this.value = value;
     }
 }

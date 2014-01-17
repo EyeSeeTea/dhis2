@@ -1,4 +1,4 @@
-package org.hisp.dhis.web.ohie.csd.domain.csd;
+package org.hisp.dhis.web.ohie.csd.domain;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -30,72 +30,30 @@ package org.hisp.dhis.web.ohie.csd.domain.csd;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import java.util.ArrayList;
-import java.util.List;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @XmlAccessorType( XmlAccessType.FIELD )
-@XmlRootElement( name = "service", namespace = "urn:ihe:iti:csd:2013" )
-public class Service
+@XmlType( name = "contact", namespace = "urn:ihe:iti:csd:2013" )
+public class Contact
 {
-    @XmlAttribute( name = "oid" )
-    private String oid;
+    @XmlElement( name = "person", namespace = "urn:ihe:iti:csd:2013" )
+    private Person person;
 
-    @XmlElement( name = "name", namespace = "urn:ihe:iti:csd:2013" )
-    private List<Name> names = new ArrayList<Name>();
-
-    @XmlElement( name = "language", namespace = "urn:ihe:iti:csd:2013" )
-    private Language language;
-
-    @XmlElement( name = "operatingHours", namespace = "urn:ihe:iti:csd:2013" )
-    private List<OperatingHours> operatingHours = new ArrayList<OperatingHours>();
-
-    public Service()
+    public Contact()
     {
     }
 
-    public String getOid()
+    public Person getPerson()
     {
-        return oid;
+        return person;
     }
 
-    public void setOid( String oid )
+    public void setPerson( Person person )
     {
-        this.oid = oid;
-    }
-
-    public List<Name> getNames()
-    {
-        return names;
-    }
-
-    public void setNames( List<Name> names )
-    {
-        this.names = names;
-    }
-
-    public Language getLanguage()
-    {
-        return language;
-    }
-
-    public void setLanguage( Language language )
-    {
-        this.language = language;
-    }
-
-    public List<OperatingHours> getOperatingHours()
-    {
-        return operatingHours;
-    }
-
-    public void setOperatingHours( List<OperatingHours> operatingHours )
-    {
-        this.operatingHours = operatingHours;
+        this.person = person;
     }
 }

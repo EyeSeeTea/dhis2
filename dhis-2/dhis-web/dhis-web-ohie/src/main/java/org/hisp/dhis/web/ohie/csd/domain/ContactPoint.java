@@ -1,4 +1,4 @@
-package org.hisp.dhis.web.ohie.csd.domain.csd;
+package org.hisp.dhis.web.ohie.csd.domain;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -32,43 +32,67 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @XmlAccessorType( XmlAccessType.FIELD )
-@XmlRootElement( name = "address", namespace = "urn:ihe:iti:csd:2013" )
-public class Address
+@XmlRootElement( name = "contactPoint", namespace = "urn:ihe:iti:csd:2013" )
+public class ContactPoint
 {
-    @XmlElement( name = "type", namespace = "urn:ihe:iti:csd:2013" )
-    private String type;
+    @XmlElement( name = "codedType", namespace = "urn:ihe:iti:csd:2013" )
+    private CodedType codedType;
 
-    @XmlElement( name = "addressLine", namespace = "urn:ihe:iti:csd:2013" )
-    private List<AddressLine> addressLines = new ArrayList<AddressLine>();
+    @XmlElement( name = "equipment", namespace = "urn:ihe:iti:csd:2013" )
+    private String equipment;
 
-    public Address()
+    @XmlElement( name = "purpose", namespace = "urn:ihe:iti:csd:2013" )
+    private String purpose;
+
+    @XmlElement( name = "certificate", namespace = "urn:ihe:iti:csd:2013" )
+    private String certificate;
+
+    public ContactPoint()
     {
     }
 
-    public String getType()
+    public CodedType getCodedType()
     {
-        return type;
+        return codedType;
     }
 
-    public void setType( String type )
+    public void setCodedType( CodedType codedType )
     {
-        this.type = type;
+        this.codedType = codedType;
     }
 
-    public List<AddressLine> getAddressLines()
+    public String getEquipment()
     {
-        return addressLines;
+        return equipment;
     }
 
-    public void setAddressLines( List<AddressLine> addressLines )
+    public void setEquipment( String equipment )
     {
-        this.addressLines = addressLines;
+        this.equipment = equipment;
+    }
+
+    public String getPurpose()
+    {
+        return purpose;
+    }
+
+    public void setPurpose( String purpose )
+    {
+        this.purpose = purpose;
+    }
+
+    public String getCertificate()
+    {
+        return certificate;
+    }
+
+    public void setCertificate( String certificate )
+    {
+        this.certificate = certificate;
     }
 }

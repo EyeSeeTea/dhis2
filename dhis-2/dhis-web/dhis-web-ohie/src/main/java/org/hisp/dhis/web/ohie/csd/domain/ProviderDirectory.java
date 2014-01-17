@@ -30,43 +30,13 @@ package org.hisp.dhis.web.ohie.csd.domain;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @XmlAccessorType( XmlAccessType.FIELD )
-@XmlRootElement( name = "Body", namespace = "http://www.w3.org/2003/05/soap-envelope" )
-public class Body
+@XmlType( name = "providerDirectory", namespace = "urn:ihe:iti:csd:2013" )
+public class ProviderDirectory
 {
-    @XmlElement( name = "getModificationsRequest", namespace = "urn:ihe:iti:csd:2013" )
-    private GetModificationsRequest getModificationsRequest;
-
-    @XmlElement( name = "getModificationsResponse", namespace = "urn:ihe:iti:csd:2013" )
-    private GetModificationsResponse getModificationsResponse;
-
-    public Body()
-    {
-    }
-
-    public GetModificationsRequest getGetModificationsRequest()
-    {
-        return getModificationsRequest;
-    }
-
-    public void setGetModificationsRequest( GetModificationsRequest getModificationsRequest )
-    {
-        this.getModificationsRequest = getModificationsRequest;
-    }
-
-    public GetModificationsResponse getGetModificationsResponse()
-    {
-        return getModificationsResponse;
-    }
-
-    public void setGetModificationsResponse( GetModificationsResponse getModificationsResponse )
-    {
-        this.getModificationsResponse = getModificationsResponse;
-    }
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.web.ohie.csd.domain.csd;
+package org.hisp.dhis.web.ohie.csd.domain;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -30,44 +30,45 @@ package org.hisp.dhis.web.ohie.csd.domain.csd;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlValue;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @XmlAccessorType( XmlAccessType.FIELD )
-@XmlRootElement( name = "addressLine", namespace = "urn:ihe:iti:csd:2013" )
-public class AddressLine
+@XmlRootElement( name = "address", namespace = "urn:ihe:iti:csd:2013" )
+public class Address
 {
-    @XmlAttribute( name = "component" )
-    private String component;
+    @XmlElement( name = "type", namespace = "urn:ihe:iti:csd:2013" )
+    private String type;
 
-    @XmlValue
-    private String value;
+    @XmlElement( name = "addressLine", namespace = "urn:ihe:iti:csd:2013" )
+    private List<AddressLine> addressLines = new ArrayList<AddressLine>();
 
-    public AddressLine()
+    public Address()
     {
     }
 
-    public String getComponent()
+    public String getType()
     {
-        return component;
+        return type;
     }
 
-    public void setComponent( String component )
+    public void setType( String type )
     {
-        this.component = component;
+        this.type = type;
     }
 
-    public String getValue()
+    public List<AddressLine> getAddressLines()
     {
-        return value;
+        return addressLines;
     }
 
-    public void setValue( String value )
+    public void setAddressLines( List<AddressLine> addressLines )
     {
-        this.value = value;
+        this.addressLines = addressLines;
     }
 }

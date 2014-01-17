@@ -1,4 +1,4 @@
-package org.hisp.dhis.web.ohie.csd.domain.csd;
+package org.hisp.dhis.web.ohie.common.domain.wsa;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -31,54 +31,34 @@ package org.hisp.dhis.web.ohie.csd.domain.csd;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @XmlAccessorType( XmlAccessType.FIELD )
-@XmlRootElement( name = "codedType", namespace = "urn:ihe:iti:csd:2013" )
-public class CodedType
+@XmlType( name = "To", namespace = "http://www.w3.org/2005/08/addressing" )
+public class To
 {
-    @XmlAttribute( name = "code", required = true )
-    private String code;
-
-    @XmlAttribute( name = "codingSchema", required = true )
-    private String codingSchema;
+    @XmlAttribute( name = "mustUnderstand", namespace = "http://www.w3.org/2003/05/soap-envelope" )
+    private boolean mustUnderstand = true;
 
     @XmlValue
-    private String value;
+    private String value = "http://www.w3.org/2005/08/addressing/anonymous";
 
-    public CodedType()
+    public To()
     {
     }
 
-    public CodedType( String code, String codingSchema, String value )
+    public boolean isMustUnderstand()
     {
-        this.code = code;
-        this.codingSchema = codingSchema;
-        this.value = value;
+        return mustUnderstand;
     }
 
-    public String getCode()
+    public void setMustUnderstand( boolean mustUnderstand )
     {
-        return code;
-    }
-
-    public void setCode( String code )
-    {
-        this.code = code;
-    }
-
-    public String getCodingSchema()
-    {
-        return codingSchema;
-    }
-
-    public void setCodingSchema( String codingSchema )
-    {
-        this.codingSchema = codingSchema;
+        this.mustUnderstand = mustUnderstand;
     }
 
     public String getValue()

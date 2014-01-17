@@ -1,4 +1,4 @@
-package org.hisp.dhis.web.ohie.csd.domain.csd;
+package org.hisp.dhis.web.ohie.csd.domain;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -32,7 +32,8 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,8 +41,8 @@ import java.util.List;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @XmlAccessorType( XmlAccessType.FIELD )
-@XmlRootElement( name = "organization", namespace = "urn:ihe:iti:csd:2013" )
-public class Organization
+@XmlType( name = "facility", namespace = "urn:ihe:iti:csd:2013" )
+public class Facility
 {
     @XmlAttribute( name = "oid" )
     private String oid;
@@ -64,16 +65,24 @@ public class Organization
     @XmlElement( name = "contact", namespace = "urn:ihe:iti:csd:2013" )
     private List<Contact> contacts = new ArrayList<Contact>();
 
-    @XmlElement( name = "service", namespace = "urn:ihe:iti:csd:2013" )
-    private List<Service> services = new ArrayList<Service>();
+    @XmlElement( name = "geocode", namespace = "urn:ihe:iti:csd:2013" )
+    private Geocode geocode;
 
-    public Organization()
-    {
-    }
+    @XmlElement( name = "contactPoint", namespace = "urn:ihe:iti:csd:2013" )
+    private List<ContactPoint> contactPoints = new ArrayList<ContactPoint>();
 
-    public Organization( String oid )
+    @XmlElement( name = "organization", namespace = "urn:ihe:iti:csd:2013" )
+    @XmlElementWrapper( name = "organizations", namespace = "urn:ihe:iti:csd:2013" )
+    private List<Organization> organizations = new ArrayList<Organization>();
+
+    @XmlElement( name = "operatingHours", namespace = "urn:ihe:iti:csd:2013" )
+    private List<OperatingHours> operatingHours = new ArrayList<OperatingHours>();
+
+    @XmlElement( name = "record", namespace = "urn:ihe:iti:csd:2013" )
+    private Record record;
+
+    public Facility()
     {
-        this.oid = oid;
     }
 
     public String getOid()
@@ -146,13 +155,53 @@ public class Organization
         this.contacts = contacts;
     }
 
-    public List<Service> getServices()
+    public Geocode getGeocode()
     {
-        return services;
+        return geocode;
     }
 
-    public void setServices( List<Service> services )
+    public void setGeocode( Geocode geocode )
     {
-        this.services = services;
+        this.geocode = geocode;
+    }
+
+    public List<ContactPoint> getContactPoints()
+    {
+        return contactPoints;
+    }
+
+    public void setContactPoints( List<ContactPoint> contactPoints )
+    {
+        this.contactPoints = contactPoints;
+    }
+
+    public List<Organization> getOrganizations()
+    {
+        return organizations;
+    }
+
+    public void setOrganizations( List<Organization> organizations )
+    {
+        this.organizations = organizations;
+    }
+
+    public List<OperatingHours> getOperatingHours()
+    {
+        return operatingHours;
+    }
+
+    public void setOperatingHours( List<OperatingHours> operatingHours )
+    {
+        this.operatingHours = operatingHours;
+    }
+
+    public Record getRecord()
+    {
+        return record;
+    }
+
+    public void setRecord( Record record )
+    {
+        this.record = record;
     }
 }

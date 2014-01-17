@@ -1,4 +1,4 @@
-package org.hisp.dhis.web.ohie.csd.domain.csd;
+package org.hisp.dhis.web.ohie.common.domain.wsa;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -30,83 +30,30 @@ package org.hisp.dhis.web.ohie.csd.domain.csd;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Date;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlValue;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @XmlAccessorType( XmlAccessType.FIELD )
-@XmlRootElement( name = "operatingHours", namespace = "urn:ihe:iti:csd:2013" )
-public class OperatingHours
+@XmlType( name = "Address", namespace = "http://www.w3.org/2005/08/addressing" )
+public class Address
 {
-    @XmlElement( name = "openFlag", namespace = "urn:ihe:iti:csd:2013" )
-    private String openFlag;
+    @XmlValue
+    private String value;
 
-    @XmlElement( name = "dayOfTheWeek", namespace = "urn:ihe:iti:csd:2013" )
-    private String dayOfTheWeek;
-
-    @XmlElement( name = "beginningHour", namespace = "urn:ihe:iti:csd:2013" )
-    private Date beginningHour;
-
-    @XmlElement( name = "endingHour", namespace = "urn:ihe:iti:csd:2013" )
-    private Date endingHour;
-
-    @XmlElement( name = "beginEffectiveDate", namespace = "urn:ihe:iti:csd:2013" )
-    private Date beginEffectiveDate;
-
-    public OperatingHours()
+    public Address()
     {
     }
 
-    public String getOpenFlag()
+    public String getValue()
     {
-        return openFlag;
+        return value;
     }
 
-    public void setOpenFlag( String openFlag )
+    public void setValue( String value )
     {
-        this.openFlag = openFlag;
-    }
-
-    public String getDayOfTheWeek()
-    {
-        return dayOfTheWeek;
-    }
-
-    public void setDayOfTheWeek( String dayOfTheWeek )
-    {
-        this.dayOfTheWeek = dayOfTheWeek;
-    }
-
-    public Date getBeginningHour()
-    {
-        return beginningHour;
-    }
-
-    public void setBeginningHour( Date beginningHour )
-    {
-        this.beginningHour = beginningHour;
-    }
-
-    public Date getEndingHour()
-    {
-        return endingHour;
-    }
-
-    public void setEndingHour( Date endingHour )
-    {
-        this.endingHour = endingHour;
-    }
-
-    public Date getBeginEffectiveDate()
-    {
-        return beginEffectiveDate;
-    }
-
-    public void setBeginEffectiveDate( Date beginEffectiveDate )
-    {
-        this.beginEffectiveDate = beginEffectiveDate;
+        this.value = value;
     }
 }

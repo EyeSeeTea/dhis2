@@ -1,4 +1,4 @@
-package org.hisp.dhis.web.ohie.csd.domain.csd;
+package org.hisp.dhis.web.ohie.common.domain.wsa;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -30,69 +30,44 @@ package org.hisp.dhis.web.ohie.csd.domain.csd;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlValue;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @XmlAccessorType( XmlAccessType.FIELD )
-@XmlRootElement( name = "geocode", namespace = "urn:ihe:iti:csd:2013" )
-public class Geocode
+@XmlType( name = "Action", namespace = "http://www.w3.org/2005/08/addressing" )
+public class Action
 {
-    @XmlElement( name = "latitude", namespace = "urn:ihe:iti:csd:2013", required = true )
-    private Double latitude;
+    @XmlAttribute( name = "mustUnderstand", namespace = "http://www.w3.org/2003/05/soap-envelope" )
+    private boolean mustUnderstand = true;
 
-    @XmlElement( name = "longitude", namespace = "urn:ihe:iti:csd:2013", required = true )
-    private Double longitude;
+    @XmlValue
+    private String value;
 
-    @XmlElement( name = "altitude", namespace = "urn:ihe:iti:csd:2013" )
-    private Double altitude;
-
-    @XmlElement( name = "coordinateSystem", namespace = "urn:ihe:iti:csd:2013" )
-    private String coordinateSystem;
-
-    public Geocode()
+    public Action()
     {
     }
 
-    public Double getLatitude()
+    public boolean isMustUnderstand()
     {
-        return latitude;
+        return mustUnderstand;
     }
 
-    public void setLatitude( Double latitude )
+    public void setMustUnderstand( boolean mustUnderstand )
     {
-        this.latitude = latitude;
+        this.mustUnderstand = mustUnderstand;
     }
 
-    public Double getLongitude()
+    public String getValue()
     {
-        return longitude;
+        return value;
     }
 
-    public void setLongitude( Double longitude )
+    public void setValue( String value )
     {
-        this.longitude = longitude;
-    }
-
-    public Double getAltitude()
-    {
-        return altitude;
-    }
-
-    public void setAltitude( Double altitude )
-    {
-        this.altitude = altitude;
-    }
-
-    public String getCoordinateSystem()
-    {
-        return coordinateSystem;
-    }
-
-    public void setCoordinateSystem( String coordinateSystem )
-    {
-        this.coordinateSystem = coordinateSystem;
+        this.value = value;
     }
 }

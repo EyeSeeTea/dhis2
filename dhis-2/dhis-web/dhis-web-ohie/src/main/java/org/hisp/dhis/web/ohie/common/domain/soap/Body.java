@@ -1,4 +1,4 @@
-package org.hisp.dhis.web.ohie.csd.domain.csd;
+package org.hisp.dhis.web.ohie.common.domain.soap;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,51 +28,48 @@ package org.hisp.dhis.web.ohie.csd.domain.csd;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.web.ohie.csd.domain.GetModificationsRequest;
+import org.hisp.dhis.web.ohie.csd.domain.GetModificationsResponse;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @XmlAccessorType( XmlAccessType.FIELD )
-@XmlRootElement( name = "otherID", namespace = "urn:ihe:iti:csd:2013" )
-public class OtherID
+@XmlType( name = "Body", namespace = "http://www.w3.org/2003/05/soap-envelope" )
+public class Body
 {
-    @XmlAttribute( name = "code", required = true )
-    private String code;
+    @XmlElement( name = "getModificationsRequest", namespace = "urn:ihe:iti:csd:2013" )
+    private GetModificationsRequest getModificationsRequest;
 
-    @XmlAttribute( name = "assigningAuthorityName", required = true )
-    private String assigningAuthorityName;
+    @XmlElement( name = "getModificationsResponse", namespace = "urn:ihe:iti:csd:2013" )
+    private GetModificationsResponse getModificationsResponse;
 
-    public OtherID()
+    public Body()
     {
     }
 
-    public OtherID( String code, String assigningAuthorityName )
+    public GetModificationsRequest getGetModificationsRequest()
     {
-        this.code = code;
-        this.assigningAuthorityName = assigningAuthorityName;
+        return getModificationsRequest;
     }
 
-    public String getCode()
+    public void setGetModificationsRequest( GetModificationsRequest getModificationsRequest )
     {
-        return code;
+        this.getModificationsRequest = getModificationsRequest;
     }
 
-    public void setCode( String code )
+    public GetModificationsResponse getGetModificationsResponse()
     {
-        this.code = code;
+        return getModificationsResponse;
     }
 
-    public String getAssigningAuthorityName()
+    public void setGetModificationsResponse( GetModificationsResponse getModificationsResponse )
     {
-        return assigningAuthorityName;
-    }
-
-    public void setAssigningAuthorityName( String assigningAuthorityName )
-    {
-        this.assigningAuthorityName = assigningAuthorityName;
+        this.getModificationsResponse = getModificationsResponse;
     }
 }

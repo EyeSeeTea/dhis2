@@ -1,4 +1,4 @@
-package org.hisp.dhis.web.ohie.csd.domain.csd;
+package org.hisp.dhis.web.ohie.csd.domain;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -31,29 +31,68 @@ package org.hisp.dhis.web.ohie.csd.domain.csd;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @XmlAccessorType( XmlAccessType.FIELD )
-@XmlRootElement( name = "contact", namespace = "urn:ihe:iti:csd:2013" )
-public class Contact
+@XmlType( name = "CSD", namespace = "urn:ihe:iti:csd:2013" )
+public class Csd
 {
-    @XmlElement( name = "person", namespace = "urn:ihe:iti:csd:2013" )
-    private Person person;
+    @XmlElement( name = "organizationDirectory", namespace = "urn:ihe:iti:csd:2013" )
+    private OrganizationDirectory organizationDirectory = new OrganizationDirectory();
 
-    public Contact()
+    @XmlElement( name = "serviceDirectory", namespace = "urn:ihe:iti:csd:2013" )
+    private ServiceDirectory serviceDirectory = new ServiceDirectory();
+
+    @XmlElement( name = "facilityDirectory", namespace = "urn:ihe:iti:csd:2013" )
+    private FacilityDirectory facilityDirectory = new FacilityDirectory();
+
+    @XmlElement( name = "providerDirectory", namespace = "urn:ihe:iti:csd:2013" )
+    private ProviderDirectory providerDirectory = new ProviderDirectory();
+
+    public Csd()
     {
     }
 
-    public Person getPerson()
+    public OrganizationDirectory getOrganizationDirectory()
     {
-        return person;
+        return organizationDirectory;
     }
 
-    public void setPerson( Person person )
+    public void setOrganizationDirectory( OrganizationDirectory organizationDirectory )
     {
-        this.person = person;
+        this.organizationDirectory = organizationDirectory;
+    }
+
+    public ServiceDirectory getServiceDirectory()
+    {
+        return serviceDirectory;
+    }
+
+    public void setServiceDirectory( ServiceDirectory serviceDirectory )
+    {
+        this.serviceDirectory = serviceDirectory;
+    }
+
+    public FacilityDirectory getFacilityDirectory()
+    {
+        return facilityDirectory;
+    }
+
+    public void setFacilityDirectory( FacilityDirectory facilityDirectory )
+    {
+        this.facilityDirectory = facilityDirectory;
+    }
+
+    public ProviderDirectory getProviderDirectory()
+    {
+        return providerDirectory;
+    }
+
+    public void setProviderDirectory( ProviderDirectory providerDirectory )
+    {
+        this.providerDirectory = providerDirectory;
     }
 }

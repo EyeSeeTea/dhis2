@@ -1,4 +1,4 @@
-package org.hisp.dhis.web.ohie.csd.domain.csd;
+package org.hisp.dhis.web.ohie.csd.domain;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -30,58 +30,44 @@ package org.hisp.dhis.web.ohie.csd.domain.csd;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import java.util.ArrayList;
-import java.util.List;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlValue;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @XmlAccessorType( XmlAccessType.FIELD )
-@XmlRootElement( name = "person", namespace = "urn:ihe:iti:csd:2013" )
-public class Person
+@XmlType( name = "addressLine", namespace = "urn:ihe:iti:csd:2013" )
+public class AddressLine
 {
-    @XmlElement( name = "name", namespace = "urn:ihe:iti:csd:2013" )
-    private Name name;
+    @XmlAttribute( name = "component" )
+    private String component;
 
-    @XmlElement( name = "address", namespace = "urn:ihe:iti:csd:2013" )
-    private List<Address> addresses = new ArrayList<Address>();
+    @XmlValue
+    private String value;
 
-    @XmlElement( name = "gender", namespace = "urn:ihe:iti:csd:2013" )
-    private String gender;
-
-    public Person()
+    public AddressLine()
     {
     }
 
-    public Name getName()
+    public String getComponent()
     {
-        return name;
+        return component;
     }
 
-    public void setName( Name name )
+    public void setComponent( String component )
     {
-        this.name = name;
+        this.component = component;
     }
 
-    public List<Address> getAddresses()
+    public String getValue()
     {
-        return addresses;
+        return value;
     }
 
-    public void setAddresses( List<Address> addresses )
+    public void setValue( String value )
     {
-        this.addresses = addresses;
-    }
-
-    public String getGender()
-    {
-        return gender;
-    }
-
-    public void setGender( String gender )
-    {
-        this.gender = gender;
+        this.value = value;
     }
 }

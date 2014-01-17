@@ -1,4 +1,4 @@
-package org.hisp.dhis.web.ohie.csd.domain.csd;
+package org.hisp.dhis.web.ohie.common.domain.wsa;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -30,40 +30,29 @@ package org.hisp.dhis.web.ohie.csd.domain.csd;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
+import java.util.UUID;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @XmlAccessorType( XmlAccessType.FIELD )
-@XmlRootElement( name = "commonName", namespace = "urn:ihe:iti:csd:2013" )
-public class CommonName
+@XmlType( name = "MessageID", namespace = "http://www.w3.org/2005/08/addressing" )
+public class MessageID
 {
-    @XmlAttribute( name = "language" )
-    private String language;
-
     @XmlValue
     private String value;
 
-    public CommonName()
+    public MessageID()
     {
+        this.value = "urn:uuid:" + UUID.randomUUID().toString();
     }
 
-    public CommonName( String value )
+    public MessageID( String value )
     {
+        this();
         this.value = value;
-    }
-
-    public String getLanguage()
-    {
-        return language;
-    }
-
-    public void setLanguage( String language )
-    {
-        this.language = language;
     }
 
     public String getValue()

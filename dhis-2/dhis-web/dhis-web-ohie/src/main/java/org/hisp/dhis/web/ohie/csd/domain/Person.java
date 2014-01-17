@@ -31,50 +31,57 @@ package org.hisp.dhis.web.ohie.csd.domain;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = "Envelope", namespace = "http://www.w3.org/2003/05/soap-envelope")
-public class Envelope
+@XmlAccessorType( XmlAccessType.FIELD )
+@XmlType( name = "person", namespace = "urn:ihe:iti:csd:2013" )
+public class Person
 {
-    @XmlElement(name = "Header", required = true, namespace = "http://www.w3.org/2003/05/soap-envelope")
-    private Header header = new Header();
+    @XmlElement( name = "name", namespace = "urn:ihe:iti:csd:2013" )
+    private Name name;
 
-    @XmlElement(name = "Body", required = true, namespace = "http://www.w3.org/2003/05/soap-envelope")
-    private Body body = new Body();
+    @XmlElement( name = "address", namespace = "urn:ihe:iti:csd:2013" )
+    private List<Address> addresses = new ArrayList<Address>();
 
-    public Envelope()
+    @XmlElement( name = "gender", namespace = "urn:ihe:iti:csd:2013" )
+    private String gender;
+
+    public Person()
     {
     }
 
-    public Header getHeader()
+    public Name getName()
     {
-        return header;
+        return name;
     }
 
-    public void setHeader( Header header )
+    public void setName( Name name )
     {
-        this.header = header;
+        this.name = name;
     }
 
-    public Body getBody()
+    public List<Address> getAddresses()
     {
-        return body;
+        return addresses;
     }
 
-    public void setBody( Body body )
+    public void setAddresses( List<Address> addresses )
     {
-        this.body = body;
+        this.addresses = addresses;
     }
 
-    @Override public String toString()
+    public String getGender()
     {
-        return "Envelope{" +
-            "header=" + header +
-            ", body=" + body +
-            '}';
+        return gender;
+    }
+
+    public void setGender( String gender )
+    {
+        this.gender = gender;
     }
 }

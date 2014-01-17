@@ -1,4 +1,4 @@
-package org.hisp.dhis.web.ohie.csd.domain;
+package org.hisp.dhis.web.ohie.common.domain.soap;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -30,16 +30,51 @@ package org.hisp.dhis.web.ohie.csd.domain;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @XmlAccessorType( XmlAccessType.FIELD )
-@XmlRootElement( name = "Header", namespace = "http://www.w3.org/2003/05/soap-envelope" )
-public class Header
+@XmlRootElement( name = "Envelope", namespace = "http://www.w3.org/2003/05/soap-envelope" )
+public class Envelope
 {
-    public Header()
+    @XmlElement( name = "Header", required = true, namespace = "http://www.w3.org/2003/05/soap-envelope" )
+    private Header header = new Header();
+
+    @XmlElement( name = "Body", required = true, namespace = "http://www.w3.org/2003/05/soap-envelope" )
+    private Body body = new Body();
+
+    public Envelope()
     {
+    }
+
+    public Header getHeader()
+    {
+        return header;
+    }
+
+    public void setHeader( Header header )
+    {
+        this.header = header;
+    }
+
+    public Body getBody()
+    {
+        return body;
+    }
+
+    public void setBody( Body body )
+    {
+        this.body = body;
+    }
+
+    @Override public String toString()
+    {
+        return "Envelope{" +
+            "header=" + header +
+            ", body=" + body +
+            '}';
     }
 }

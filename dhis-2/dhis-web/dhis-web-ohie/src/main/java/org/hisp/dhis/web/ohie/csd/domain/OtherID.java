@@ -1,4 +1,4 @@
-package org.hisp.dhis.web.ohie.csd.domain.csd;
+package org.hisp.dhis.web.ohie.csd.domain;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -30,69 +30,49 @@ package org.hisp.dhis.web.ohie.csd.domain.csd;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @XmlAccessorType( XmlAccessType.FIELD )
-@XmlRootElement( name = "contactPoint", namespace = "urn:ihe:iti:csd:2013" )
-public class ContactPoint
+@XmlType( name = "otherID", namespace = "urn:ihe:iti:csd:2013" )
+public class OtherID
 {
-    @XmlElement( name = "codedType", namespace = "urn:ihe:iti:csd:2013" )
-    private CodedType codedType;
+    @XmlAttribute( name = "code", required = true )
+    private String code;
 
-    @XmlElement( name = "equipment", namespace = "urn:ihe:iti:csd:2013" )
-    private String equipment;
+    @XmlAttribute( name = "assigningAuthorityName", required = true )
+    private String assigningAuthorityName;
 
-    @XmlElement( name = "purpose", namespace = "urn:ihe:iti:csd:2013" )
-    private String purpose;
-
-    @XmlElement( name = "certificate", namespace = "urn:ihe:iti:csd:2013" )
-    private String certificate;
-
-    public ContactPoint()
+    public OtherID()
     {
     }
 
-    public CodedType getCodedType()
+    public OtherID( String code, String assigningAuthorityName )
     {
-        return codedType;
+        this.code = code;
+        this.assigningAuthorityName = assigningAuthorityName;
     }
 
-    public void setCodedType( CodedType codedType )
+    public String getCode()
     {
-        this.codedType = codedType;
+        return code;
     }
 
-    public String getEquipment()
+    public void setCode( String code )
     {
-        return equipment;
+        this.code = code;
     }
 
-    public void setEquipment( String equipment )
+    public String getAssigningAuthorityName()
     {
-        this.equipment = equipment;
+        return assigningAuthorityName;
     }
 
-    public String getPurpose()
+    public void setAssigningAuthorityName( String assigningAuthorityName )
     {
-        return purpose;
-    }
-
-    public void setPurpose( String purpose )
-    {
-        this.purpose = purpose;
-    }
-
-    public String getCertificate()
-    {
-        return certificate;
-    }
-
-    public void setCertificate( String certificate )
-    {
-        this.certificate = certificate;
+        this.assigningAuthorityName = assigningAuthorityName;
     }
 }
