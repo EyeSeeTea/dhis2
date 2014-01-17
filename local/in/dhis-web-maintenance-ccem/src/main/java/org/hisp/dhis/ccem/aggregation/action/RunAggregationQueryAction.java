@@ -124,12 +124,6 @@ public class RunAggregationQueryAction
         {
             DataElement dataElement = condition.getAggregationDataElement();
             
-            if ( condition.getOperator().equals( Lookup.CCEI_AGG_TYPE_REF_WORKING_STATUS_BY_MODEL ) || condition.getOperator().equals( Lookup.CCEI_AGG_TYPE_REF_WORKING_STATUS_BY_TYPE ) )
-            {
-                aggregationResultMap.putAll( cceiAggregationService.calculateRefrigeratorWorkingStatus( period, dataElement, orgUnitList, condition.getAggregationExpression() ) );
-            }
-
-            /*
             if ( condition.getOperator().equals( Lookup.CCEI_AGG_TYPE_STORAGE_CAPACITY ) )
             {
                 aggregationResultMap.putAll( cceiAggregationService.calculateStorageCapacityData( period, dataElement, orgUnitList, orgUnitGroups ) );
@@ -142,7 +136,6 @@ public class RunAggregationQueryAction
             {
                 aggregationResultMap.putAll( cceiAggregationService.calculateRefrigeratorUtilization( period, dataElement, orgUnitList, condition.getAggregationExpression() ) );
             }
-            */
 
             dataElements.add( dataElement );
         }
@@ -152,7 +145,7 @@ public class RunAggregationQueryAction
             System.out.println( key + " -- " + aggregationResultMap.get(  key ) );
         }
         
-        //importStatus = cceiAggregationService.importData( aggregationResultMap, period );
+        importStatus = cceiAggregationService.importData( aggregationResultMap, period );
 
         return SUCCESS;
     }

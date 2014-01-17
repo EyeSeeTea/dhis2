@@ -38,7 +38,9 @@ import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.common.PagerUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementGroup;
-import org.hisp.dhis.dxf2.metadata.MetaData;
+import org.hisp.dhis.dataelement.DataElementOperand;
+import org.hisp.dhis.dataelement.DataElementOperandService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -49,7 +51,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -63,8 +64,11 @@ public class DataElementGroupController
 {
     public static final String RESOURCE_PATH = "/dataElementGroups";
 
-    @RequestMapping(value = "/{uid}/members", method = RequestMethod.GET)
-    public String getMembers( @PathVariable("uid") String uid, @RequestParam Map<String, String> parameters,
+    @Autowired
+    private DataElementOperandService dataElementOperandService;
+
+    @RequestMapping( value = "/{uid}/members", method = RequestMethod.GET )
+    public String getMembers( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
         Model model, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         WebOptions options = new WebOptions( parameters );
@@ -94,7 +98,137 @@ public class DataElementGroupController
         }
 
         model.addAttribute( "model", metaData );
-        model.addAttribute( "viewClass", options.getViewClass( "detailed" ) );
+        model.addAttribute( "viewClass", options.getViewClass( "basic" ) );
+
+        return StringUtils.uncapitalize( getEntitySimpleName() );
+    }
+
+    @RequestMapping( value = "/{uid}/members/query/{q}", method = RequestMethod.GET )
+    public String getMembersByQuery( @PathVariable( "uid" ) String uid, @PathVariable( "q" ) String q,
+        @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request,
+        HttpServletResponse response ) throws Exception
+    {
+        WebOptions options = new WebOptions( parameters );
+        DataElementGroup dataElementGroup = getEntity( uid );
+
+        if ( dataElementGroup == null )
+        {
+            ContextUtils.notFoundResponse( response, "DataElementGroup not found for uid: " + uid );
+            return null;
+        }
+
+        WebMetaData metaData = new WebMetaData();
+        List<DataElement> dataElements = Lists.newArrayList();
+
+        for ( DataElement dataElement : dataElementGroup.getMembers() )
+        {
+            if ( dataElement.getDisplayName().toLowerCase().contains( q.toLowerCase() ) )
+            {
+                dataElements.add( dataElement );
+            }
+        }
+
+        if ( options.hasPaging() )
+        {
+            Pager pager = new Pager( options.getPage(), dataElements.size(), options.getPageSize() );
+            metaData.setPager( pager );
+            dataElements = PagerUtils.pageCollection( dataElements, pager );
+        }
+
+        metaData.setDataElements( dataElements );
+
+        if ( options.hasLinks() )
+        {
+            WebUtils.generateLinks( metaData );
+        }
+
+        model.addAttribute( "model", metaData );
+        model.addAttribute( "viewClass", options.getViewClass( "basic" ) );
+
+        return StringUtils.uncapitalize( getEntitySimpleName() );
+    }
+
+    @RequestMapping( value = "/{uid}/operands", method = RequestMethod.GET )
+    public String getOperands( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
+        Model model, HttpServletRequest request, HttpServletResponse response ) throws Exception
+    {
+        WebOptions options = new WebOptions( parameters );
+        DataElementGroup dataElementGroup = getEntity( uid );
+
+        if ( dataElementGroup == null )
+        {
+            ContextUtils.notFoundResponse( response, "DataElementGroup not found for uid: " + uid );
+            return null;
+        }
+
+        WebMetaData metaData = new WebMetaData();
+        List<DataElementOperand> dataElementOperands = Lists.newArrayList( dataElementOperandService.getDataElementOperandByDataElementGroup( dataElementGroup ) );
+
+        metaData.setDataElementOperands( dataElementOperands );
+
+        if ( options.hasPaging() )
+        {
+            Pager pager = new Pager( options.getPage(), dataElementOperands.size(), options.getPageSize() );
+            metaData.setPager( pager );
+            dataElementOperands = PagerUtils.pageCollection( dataElementOperands, pager );
+        }
+
+        metaData.setDataElementOperands( dataElementOperands );
+
+        if ( options.hasLinks() )
+        {
+            WebUtils.generateLinks( metaData );
+        }
+
+        model.addAttribute( "model", metaData );
+        model.addAttribute( "viewClass", options.getViewClass( "basic" ) );
+
+        return StringUtils.uncapitalize( getEntitySimpleName() );
+    }
+
+    @RequestMapping( value = "/{uid}/operands/query/{q}", method = RequestMethod.GET )
+    public String getOperandsByQuery( @PathVariable( "uid" ) String uid, @PathVariable( "q" ) String q,
+        @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request,
+        HttpServletResponse response ) throws Exception
+    {
+        WebOptions options = new WebOptions( parameters );
+        DataElementGroup dataElementGroup = getEntity( uid );
+
+        if ( dataElementGroup == null )
+        {
+            ContextUtils.notFoundResponse( response, "DataElementGroup not found for uid: " + uid );
+            return null;
+        }
+
+        WebMetaData metaData = new WebMetaData();
+        List<DataElementOperand> dataElementOperands = Lists.newArrayList();
+
+        for ( DataElementOperand dataElementOperand : dataElementOperandService.getDataElementOperandByDataElementGroup( dataElementGroup ) )
+        {
+            if ( dataElementOperand.getDisplayName().toLowerCase().contains( q.toLowerCase() ) )
+            {
+                dataElementOperands.add( dataElementOperand );
+            }
+        }
+
+        metaData.setDataElementOperands( dataElementOperands );
+
+        if ( options.hasPaging() )
+        {
+            Pager pager = new Pager( options.getPage(), dataElementOperands.size(), options.getPageSize() );
+            metaData.setPager( pager );
+            dataElementOperands = PagerUtils.pageCollection( dataElementOperands, pager );
+        }
+
+        metaData.setDataElementOperands( dataElementOperands );
+
+        if ( options.hasLinks() )
+        {
+            WebUtils.generateLinks( metaData );
+        }
+
+        model.addAttribute( "model", metaData );
+        model.addAttribute( "viewClass", options.getViewClass( "basic" ) );
 
         return StringUtils.uncapitalize( getEntitySimpleName() );
     }
