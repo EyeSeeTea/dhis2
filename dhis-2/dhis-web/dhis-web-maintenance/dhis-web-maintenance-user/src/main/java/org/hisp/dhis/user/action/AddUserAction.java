@@ -33,11 +33,18 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.struts2.ServletActionContext;
+import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.security.PasswordManager;
+import org.hisp.dhis.security.RestoreType;
+import org.hisp.dhis.security.SecurityService;
 import org.hisp.dhis.system.util.AttributeUtils;
 import org.hisp.dhis.system.util.LocaleUtils;
 import org.hisp.dhis.user.CurrentUserService;
@@ -54,8 +61,14 @@ import com.opensymphony.xwork2.Action;
  * @author Torgeir Lorange Ostby
  */
 public class AddUserAction
-    implements Action
+        implements Action
 {
+    private String ACCOUNT_ACTION_INVITE = "invite";
+
+    private static final int INVITED_USERNAME_TOKEN_LENGTH = 15;
+    private static final int INVITED_USER_PASSWORD_LENGTH = 40;
+
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -79,6 +92,13 @@ public class AddUserAction
     public void setUserService( UserService userService )
     {
         this.userService = userService;
+    }
+
+    private SecurityService securityService;
+
+    public void setSecurityService( SecurityService securityService )
+    {
+        this.securityService = securityService;
     }
 
     private PasswordManager passwordManager;
@@ -105,6 +125,13 @@ public class AddUserAction
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
+
+    private String accountAction;
+
+    public void setAccountAction( String accountAction )
+    {
+        this.accountAction = accountAction;
+    }
 
     private String username;
 
@@ -141,6 +168,13 @@ public class AddUserAction
         this.email = email;
     }
 
+    private String inviteEmail;
+
+    public void setInviteEmail( String inviteEmail )
+    {
+        this.inviteEmail = inviteEmail;
+    }
+
     private String phoneNumber;
 
     public void setPhoneNumber( String phoneNumber )
@@ -161,7 +195,7 @@ public class AddUserAction
     }
 
     private String localeUi;
-    
+
     public void setLocaleUi( String localeUi )
     {
         this.localeUi = localeUi;
@@ -187,16 +221,16 @@ public class AddUserAction
     {
         this.jsonAttributeValues = jsonAttributeValues;
     }
-    
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
-        throws Exception
+            throws Exception
     {
         UserCredentials currentUserCredentials = currentUserService.getCurrentUser() != null ? currentUserService
-            .getCurrentUser().getUserCredentials() : null;
+                .getCurrentUser().getUserCredentials() : null;
 
         // ---------------------------------------------------------------------
         // Prepare values
@@ -208,6 +242,7 @@ public class AddUserAction
         }
 
         username = username.trim();
+        inviteEmail = inviteEmail.trim();
 
         // ---------------------------------------------------------------------
         // Create userCredentials and user
@@ -216,10 +251,23 @@ public class AddUserAction
         Collection<OrganisationUnit> orgUnits = selectionTreeManager.getReloadedSelectedOrganisationUnits();
 
         User user = new User();
-        user.setSurname( surname );
-        user.setFirstName( firstName );
-        user.setEmail( email );
-        user.setPhoneNumber( phoneNumber );
+
+        if ( ACCOUNT_ACTION_INVITE.equals( accountAction ) )
+        {
+            username = "invitedUser" + CodeGenerator.generateCode( INVITED_USERNAME_TOKEN_LENGTH );
+            rawPassword = CodeGenerator.generateCode( INVITED_USER_PASSWORD_LENGTH );
+            user.setEmail( inviteEmail );
+            user.setSurname( "invitedUserSurname" );
+            user.setFirstName( "invitedUserFirstName" );
+        }
+        else
+        {
+            user.setSurname( surname );
+            user.setFirstName( firstName );
+            user.setEmail( email );
+            user.setPhoneNumber( phoneNumber );
+        }
+
         user.updateOrganisationUnits( new HashSet<OrganisationUnit>( orgUnits ) );
 
         UserCredentials userCredentials = new UserCredentials();
@@ -242,7 +290,7 @@ public class AddUserAction
         if ( jsonAttributeValues != null )
         {
             AttributeUtils.updateAttributeValuesFromJson( user.getAttributeValues(), jsonAttributeValues,
-                attributeService );
+                    attributeService );
         }
 
         userService.addUser( user );
@@ -252,10 +300,23 @@ public class AddUserAction
         {
             selectionManager.setSelectedOrganisationUnits( orgUnits );
         }
-        
+
         userService.addUserSetting( new UserSetting( user, UserSettingService.KEY_UI_LOCALE, LocaleUtils.getLocale( localeUi ) ) );
         userService.addUserSetting( new UserSetting( user, UserSettingService.KEY_DB_LOCALE, LocaleUtils.getLocale( localeDb ) ) );
-        
+
+        if ( ACCOUNT_ACTION_INVITE.equals( accountAction ) )
+        {
+            securityService.sendRestoreMessage( userCredentials, getBaseUrl(), RestoreType.INVITE );
+        }
+
         return SUCCESS;
+    }
+
+    private String getBaseUrl()
+    {
+        HttpServletRequest req = ServletActionContext.getRequest();
+        StringBuffer fullUrl = req.getRequestURL();
+        String baseUrl = org.hisp.dhis.util.ContextUtils.getBaseUrl( req );
+        return baseUrl.substring(0, baseUrl.length() - 1 );
     }
 }

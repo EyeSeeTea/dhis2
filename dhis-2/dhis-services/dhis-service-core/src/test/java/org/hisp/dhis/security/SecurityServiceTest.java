@@ -71,7 +71,7 @@ public class SecurityServiceTest
     @Test
     public void testRestore()
     {
-        String[] result = securityService.initRestore( credentials );
+        String[] result = securityService.initRestore( credentials, RestoreType.RECOVER_PASSWORD );
         
         assertNotNull( result[0] );
         assertNotNull( result[1] );
@@ -79,14 +79,14 @@ public class SecurityServiceTest
         assertNotNull( credentials.getRestoreCode() );
         assertNotNull( credentials.getRestoreExpiry() );
         
-        boolean verified = securityService.verifyToken( credentials, result[0] );
+        boolean verified = securityService.verifyToken( credentials, result[0], RestoreType.RECOVER_PASSWORD );
         
         assertTrue( verified );
         
         String password = "NewPassword1";
         
-        boolean restored = securityService.restore( credentials, result[0], result[1], password );
-        
+        boolean restored = securityService.restore( credentials, result[0], result[1], password, RestoreType.RECOVER_PASSWORD );
+
         assertTrue( restored );
         
         String hashedPassword = passwordManager.encodePassword( credentials.getUsername(), password );

@@ -42,10 +42,11 @@ public interface SecurityService
      *
      * @param credentials the credentials for the user to send restore message.
      * @param rootPath the root path of the request.
+     * @param restoreType type of restore operation (e.g. pw recovery, invite).
      * @return false if any of the arguments are null or if the user credentials
      *         identified by the user name does not exist, true otherwise.
      */
-    boolean sendRestoreMessage( UserCredentials credentials, String rootPath );
+    boolean sendRestoreMessage( UserCredentials credentials, String rootPath, RestoreType restoreType );
 
     /**
      * Will populate the restoreToken and restoreCode property of the given
@@ -54,10 +55,11 @@ public interface SecurityService
      * persisted.
      *
      * @param credentials the user credentials.
+     * @param restoreType type of restore operation (e.g. pw recovery, invite).
      * @return an array where index 0 is the clear-text token and index 1 the
      *         clear-text code.
      */
-    String[] initRestore( UserCredentials credentials );
+    String[] initRestore( UserCredentials credentials, RestoreType restoreType );
 
     /**
      * Tests whether the given token and code are valid for the given user name.
@@ -70,9 +72,10 @@ public interface SecurityService
      * @param token the token.
      * @param code the code.
      * @param newPassword the proposed new password.
+     * @param restoreType type of restore operation (e.g. pw recovery, invite).
      * @return true or false.
      */
-    boolean restore( UserCredentials credentials, String token, String code, String newPassword );
+    boolean restore( UserCredentials credentials, String token, String code, String newPassword, RestoreType restoreType );
 
     /**
      * Tests whether the given token in combination with the given user name is
@@ -85,7 +88,7 @@ public interface SecurityService
      *         identified by the user name does not exist, true if the arguments
      *         are valid.
      */
-    boolean verifyToken( UserCredentials credentials, String token );
+    boolean verifyToken( UserCredentials credentials, String token, RestoreType restoreType );
 
     /**
      * Checks whether current user has read access to object.

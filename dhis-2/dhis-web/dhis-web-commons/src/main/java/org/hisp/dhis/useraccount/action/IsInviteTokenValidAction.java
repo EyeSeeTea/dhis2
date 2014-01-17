@@ -37,14 +37,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Lars Helge Overland
+ * @author Jim Grace
  */
-public class IsRestoreTokenValidAction
-    implements Action
+public class IsInviteTokenValidAction
+        implements Action
 {
     @Autowired
     private SecurityService securityService;
-    
+
     @Autowired
     private UserService userService;
 
@@ -77,20 +77,40 @@ public class IsRestoreTokenValidAction
     }
 
     // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
+
+    private UserCredentials userCredentials;
+
+    public UserCredentials getUserCredentials()
+    {
+        return userCredentials;
+    }
+
+    private String email;
+
+    public String getEmail()
+    {
+        return email;
+    }
+
+    // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
     {
-        UserCredentials credentials = userService.getUserCredentialsByUsername( username );
-        
-        if ( credentials == null )
+        userCredentials = userService.getUserCredentialsByUsername( username );
+
+        if ( userCredentials == null )
         {
             return ERROR;
         }
-        
-        boolean verified = securityService.verifyToken( credentials, token, RestoreType.RECOVER_PASSWORD );
-        
+
+        email = userCredentials.getUser().getEmail();
+
+        boolean verified = securityService.verifyToken( userCredentials, token, RestoreType.INVITE );
+
         return verified ? SUCCESS : ERROR;
     }
 }

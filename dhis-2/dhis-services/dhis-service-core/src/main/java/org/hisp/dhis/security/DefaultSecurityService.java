@@ -61,7 +61,7 @@ public class DefaultSecurityService
 {
     private static final Log log = LogFactory.getLog( DefaultSecurityService.class );
 
-    private static final String RESTORE_PATH = "/dhis-web-commons/security/restore.action";
+    private static final String RESTORE_PATH = "/dhis-web-commons/security/";
 
     private static final int TOKEN_LENGTH = 50;
     private static final int CODE_LENGTH = 15;
@@ -105,7 +105,7 @@ public class DefaultSecurityService
     // SecurityService implementation
     // -------------------------------------------------------------------------
 
-    public boolean sendRestoreMessage( UserCredentials credentials, String rootPath )
+    public boolean sendRestoreMessage( UserCredentials credentials, String rootPath, RestoreType restoreType )
     {
         if ( credentials == null || rootPath == null )
         {
@@ -132,40 +132,40 @@ public class DefaultSecurityService
 
         if ( credentials.hasAnyAuthority( Arrays.asList( UserAuthorityGroup.CRITICAL_AUTHS ) ) )
         {
-            log.info( "Not allowed to recover credentials with critical authorities" );
+            log.info( "Not allowed to recover credentials or invite users with critical authorities" );
             return false;
         }
 
-        String[] result = initRestore( credentials );
+        String[] result = initRestore( credentials, restoreType );
 
         Set<User> users = new HashSet<User>();
         users.add( credentials.getUser() );
 
         Map<String, String> vars = new HashMap<String, String>();
         vars.put( "rootPath", rootPath );
-        vars.put( "restorePath", rootPath + RESTORE_PATH );
+        vars.put( "restorePath", rootPath + RESTORE_PATH + restoreType.getAction() );
         vars.put( "token", result[0] );
         vars.put( "code", result[1] );
         vars.put( "username", credentials.getUsername() );
 
-        String text1 = new VelocityManager().render( vars, "restore_message1" );
-        String text2 = new VelocityManager().render( vars, "restore_message2" );
+        String text1 = new VelocityManager().render( vars, restoreType.getEmailTemplate() + "1" );
+        String text2 = new VelocityManager().render( vars, restoreType.getEmailTemplate() + "2" );
 
-        emailMessageSender.sendMessage( "User account restore confirmation (message 1 of 2)", text1, null, users, true );
-        emailMessageSender.sendMessage( "User account restore confirmation (message 2 of 2)", text2, null, users, true );
+        emailMessageSender.sendMessage( restoreType.getEmailSubject() + " (message 1 of 2)", text1, null, users, true );
+        emailMessageSender.sendMessage( restoreType.getEmailSubject() + " (message 2 of 2)", text2, null, users, true );
 
         return true;
     }
 
-    public String[] initRestore( UserCredentials credentials )
+    public String[] initRestore( UserCredentials credentials, RestoreType restoreType )
     {
-        String token = CodeGenerator.generateCode( TOKEN_LENGTH );
+        String token = restoreType.getTokenPrefix() + CodeGenerator.generateCode( TOKEN_LENGTH );
         String code = CodeGenerator.generateCode( CODE_LENGTH );
 
         String hashedToken = passwordManager.encodePassword( credentials.getUsername(), token );
         String hashedCode = passwordManager.encodePassword( credentials.getUsername(), code );
 
-        Date expiry = new Cal().now().add( Calendar.HOUR_OF_DAY, 1 ).time();
+        Date expiry = new Cal().now().add( restoreType.getExpiryIntervalType(), restoreType.getExpiryIntervalCount() ).time();
 
         credentials.setRestoreToken( hashedToken );
         credentials.setRestoreCode( hashedCode );
@@ -177,7 +177,7 @@ public class DefaultSecurityService
         return result;
     }
 
-    public boolean restore( UserCredentials credentials, String token, String code, String newPassword )
+    public boolean restore( UserCredentials credentials, String token, String code, String newPassword, RestoreType restoreType )
     {
         if ( credentials == null || token == null || code == null || newPassword == null )
         {
@@ -209,10 +209,16 @@ public class DefaultSecurityService
         return true;
     }
 
-    public boolean verifyToken( UserCredentials credentials, String token )
+    public boolean verifyToken( UserCredentials credentials, String token, RestoreType restoreType )
     {
         if ( credentials == null || token == null )
         {
+            return false;
+        }
+
+        if ( !token.startsWith( restoreType.getTokenPrefix() ) )
+        {
+            log.info( "Wrong prefix for restore type " + restoreType.name() + " on token: " + token );
             return false;
         }
 

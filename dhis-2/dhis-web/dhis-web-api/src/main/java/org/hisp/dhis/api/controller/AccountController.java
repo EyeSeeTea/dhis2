@@ -36,6 +36,7 @@ import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.configuration.ConfigurationService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.security.PasswordManager;
+import org.hisp.dhis.security.RestoreType;
 import org.hisp.dhis.security.SecurityService;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.util.ValidationUtils;
@@ -131,7 +132,7 @@ public class AccountController
             return "User does not exist: " + username;
         }
         
-        boolean recover = securityService.sendRestoreMessage( credentials, rootPath );
+        boolean recover = securityService.sendRestoreMessage( credentials, rootPath, RestoreType.RECOVER_PASSWORD );
 
         if ( !recover )
         {
@@ -180,7 +181,7 @@ public class AccountController
             return "User does not exist: " + username;
         }
         
-        boolean restore = securityService.restore( credentials, token, code, password );
+        boolean restore = securityService.restore( credentials, token, code, password, RestoreType.RECOVER_PASSWORD );
 
         if ( !restore )
         {
