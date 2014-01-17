@@ -2111,38 +2111,44 @@ Ext.onReady( function() {
 				}
 			};
 
-			web.events.setColumnHeaderMouseHandlers = function(xLayout, response) {
+			//web.events.setColumnHeaderMouseHandlers = function(xLayout, response) {
+			web.events.setColumnHeaderMouseHandlers = function(layout, xLayout, response) {
 				if (Ext.isArray(xLayout.sortableIdObjects)) {
 					for (var i = 0, obj, el; i < xLayout.sortableIdObjects.length; i++) {
 						obj = xLayout.sortableIdObjects[i];
 						el = Ext.get(obj.uuid);
 
-						el.dom.xLayout = xLayout;
+						el.dom.layout = layout;
+						//el.dom.xLayout = xLayout;
 						el.dom.response = response;
 						el.dom.metaDataId = obj.id;
 						el.dom.onColumnHeaderMouseClick = web.events.onColumnHeaderMouseClick;
 						el.dom.onColumnHeaderMouseOver = web.events.onColumnHeaderMouseOver;
 						el.dom.onColumnHeaderMouseOut = web.events.onColumnHeaderMouseOut;
 
-						el.dom.setAttribute('onclick', 'this.onColumnHeaderMouseClick(this.xLayout, this.response, this.metaDataId)');
+						//el.dom.setAttribute('onclick', 'this.onColumnHeaderMouseClick(this.xLayout, this.response, this.metaDataId)');
+						el.dom.setAttribute('onclick', 'this.onColumnHeaderMouseClick(this.layout, this.response, this.metaDataId)');
 						el.dom.setAttribute('onmouseover', 'this.onColumnHeaderMouseOver(this)');
 						el.dom.setAttribute('onmouseout', 'this.onColumnHeaderMouseOut(this)');
 					}
 				}
 			};
 
-			web.events.onColumnHeaderMouseClick = function(xLayout, response, id) {
-				if (xLayout.sorting && xLayout.sorting.id === id) {
-					xLayout.sorting.direction = support.prototype.str.toggleDirection(xLayout.sorting.direction);
+			//web.events.onColumnHeaderMouseClick = function(xLayout, response, id) {
+			web.events.onColumnHeaderMouseClick = function(layout, response, id) {
+				if (layout.sorting && layout.sorting.id === id) {
+					layout.sorting.direction = support.prototype.str.toggleDirection(layout.sorting.direction);
 				}
 				else {
-					xLayout.sorting = {
+					layout.sorting = {
 						id: id,
 						direction: 'DESC'
 					};
 				}
 
-				ns.core.web.pivot.sort(xLayout, response, id);
+				web.pivot.createTable(layout, null, response, false);
+
+				//ns.core.web.pivot.sort(xLayout, response, id);
 			};
 
 			web.events.onColumnHeaderMouseOver = function(el) {
@@ -2230,6 +2236,10 @@ Ext.onReady( function() {
 					success: function(r) {
 						var layoutConfig = Ext.decode(r.responseText),
 							layout = api.layout.Layout(layoutConfig);
+layout.sorting = {
+	id: 'fbfJHSPpUQD',
+	direction: 'DESC'
+};
 
 						if (layout) {
 							web.pivot.getData(layout, true);
@@ -2278,14 +2288,6 @@ Ext.onReady( function() {
 							return;
 						}
 
-						// sync xLayout with response
-						xLayout = service.layout.getSyncronizedXLayout(xLayout, response);
-
-						if (!xLayout) {
-							web.mask.hide(ns.app.centerRegion);
-							return;
-						}
-
 						ns.app.paramString = paramString;
 
 						web.pivot.createTable(layout, xLayout, response, isUpdateGui);
@@ -2299,8 +2301,24 @@ Ext.onReady( function() {
 					xRowAxis,
 					config;
 
-				if (!xLayout) {
+				if (layout.sorting) {
 					xLayout = service.layout.getExtendedLayout(layout);
+					xLayout = service.layout.getSyncronizedXLayout(xLayout, response);
+					web.pivot.sort(xLayout, response);
+					//layout = api.layout.Layout(xLayout);
+					xLayout = service.layout.getExtendedLayout(api.layout.Layout(xLayout));
+				}
+				else {
+					if (!xLayout) {
+						xLayout = service.layout.getExtendedLayout(layout);
+					}
+
+					xLayout = service.layout.getSyncronizedXLayout(xLayout, response);
+				}
+
+				if (!xLayout) {
+					web.mask.hide(ns.app.centerRegion);
+					return;
 				}
 
 				// extend response
@@ -2325,7 +2343,7 @@ Ext.onReady( function() {
 
 				if (NS.isSessionStorage) {
 					web.events.setValueMouseHandlers(layout, response, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
-					web.events.setColumnHeaderMouseHandlers(xLayout, response);
+					web.events.setColumnHeaderMouseHandlers(layout, xLayout, response);
 					web.storage.session.set(layout, 'table');
 				}
 
@@ -2339,14 +2357,14 @@ Ext.onReady( function() {
 				}
 			};
 
-			web.pivot.sort = function(xLayout, response, id) {
-				var xLayout = Ext.clone(xLayout),
-					response = Ext.clone(response),
+			web.pivot.sort = function(xLayout, response) {
+				var response = Ext.clone(response),
+					id = xLayout.sorting.id,
 					dim = xLayout.rows[0],
 					valueMap = response.idValueMap,
 					direction = xLayout.sorting ? xLayout.sorting.direction : 'DESC',
 					layout;
-
+console.log(valueMap);
 				dim.ids = [];
 
 				// collect values
@@ -2366,11 +2384,13 @@ Ext.onReady( function() {
 					dim.ids.push(dim.items[i].id);
 				}
 
+				return xLayout;
+
 				// re-layout
-				layout = api.layout.Layout(xLayout);
+				//layout = api.layout.Layout(xLayout);
 
 				// re-create table
-				web.pivot.createTable(layout, null, response, false);
+				//web.pivot.createTable(layout, null, response, false);
 			};
 		}());
 	};

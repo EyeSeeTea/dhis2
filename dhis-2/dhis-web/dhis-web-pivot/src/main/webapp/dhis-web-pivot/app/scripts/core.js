@@ -1184,6 +1184,23 @@ Ext.onReady( function() {
 						}
 					}
 
+					// Add missing names
+					dimensions = Ext.Array.clean([].concat(xLayout.columns || [], xLayout.rows || [], xLayout.filters || []));
+
+					for (var i = 0, idNameMap = response.metaData.names, dimItems; i < dimensions.length; i++) {
+						dimItems = dimensions[i].items;
+
+						if (Ext.isArray(dimItems) && dimItems.length) {
+							for (var j = 0, item; j < dimItems.length; j++) {
+								item = dimItems[j];
+
+								if (Ext.isObject(item) && Ext.isString(idNameMap[item.id]) && !Ext.isString(item.name)) {
+									item.name = idNameMap[item.id] || '';
+								}
+							}
+						}
+					}
+
 					// Remove dimensions from layout that do not exist in response
 					for (var i = 0, dimensionName; i < xLayout.axisDimensionNames.length; i++) {
 						dimensionName = xLayout.axisDimensionNames[i];
@@ -1196,22 +1213,6 @@ Ext.onReady( function() {
 					layout = api.layout.Layout(xLayout);
 
 					if (layout) {
-						dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || []));
-
-						for (var i = 0, idNameMap = response.metaData.names, dimItems; i < dimensions.length; i++) {
-							dimItems = dimensions[i].items;
-
-							if (Ext.isArray(dimItems) && dimItems.length) {
-								for (var j = 0, item; j < dimItems.length; j++) {
-									item = dimItems[j];
-
-									if (Ext.isObject(item) && Ext.isString(idNameMap[item.id]) && !Ext.isString(item.name)) {
-										item.name = idNameMap[item.id] || '';
-									}
-								}
-							}
-						}
-
 						return service.layout.getExtendedLayout(layout);
 					}
 
