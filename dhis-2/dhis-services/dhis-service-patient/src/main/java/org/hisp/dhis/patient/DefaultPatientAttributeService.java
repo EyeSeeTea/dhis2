@@ -29,6 +29,7 @@ package org.hisp.dhis.patient;
  */
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import org.hisp.dhis.program.Program;
@@ -53,7 +54,7 @@ public class DefaultPatientAttributeService
     {
         this.patientAttributeStore = patientAttributeStore;
     }
-    
+
     private ProgramService programService;
 
     public void setProgramService( ProgramService programService )
@@ -133,27 +134,20 @@ public class DefaultPatientAttributeService
     public Collection<PatientAttribute> getPatientAttributesWithoutProgram()
     {
         Collection<PatientAttribute> patientAttributes = patientAttributeStore.getAll();
-        Iterator<PatientAttribute> iterator = patientAttributes.iterator();
-        
-        Collection<Program> programs = programService.getAllPrograms();
 
+        Collection<PatientAttribute> programAttributes = new HashSet<PatientAttribute>();
+        Collection<Program> programs = programService.getAllPrograms();
         for ( Program program : programs )
         {
-            while ( iterator.hasNext() )
-            {
-                PatientAttribute attribute = iterator.next();
-                
-                if ( program.getAttributes().contains( attribute ) )
-                {
-                    iterator.remove();
-                }
-            }
+            programAttributes.addAll( program.getAttributes() );
         }
+
+        patientAttributes.removeAll( programAttributes );
         
         return patientAttributes;
     }
-    
-    public Collection<PatientAttribute> getPatientAttributesDisplayed(boolean displayInListNoProgram )
+
+    public Collection<PatientAttribute> getPatientAttributesDisplayed( boolean displayInListNoProgram )
     {
         return patientAttributeStore.getPatientAttributesDisplayed( displayInListNoProgram );
     }
