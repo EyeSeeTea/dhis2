@@ -311,6 +311,7 @@ public class SaveValueAction
             if ( value != null )
             {
             	pbfDataValue = new PBFDataValue( );
+            	pbfDataValue.setDataSet(dataSet);
             	pbfDataValue.setDataElement(dataElement);
             	pbfDataValue.setPeriod(period);
             	pbfDataValue.setOrganisationUnit(organisationUnit);

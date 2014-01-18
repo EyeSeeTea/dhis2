@@ -32,32 +32,40 @@ import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.web.ohie.csd.domain.Envelope;
-import org.hisp.dhis.web.ohie.csd.domain.csd.CodedType;
-import org.hisp.dhis.web.ohie.csd.domain.csd.CommonName;
-import org.hisp.dhis.web.ohie.csd.domain.csd.Contact;
-import org.hisp.dhis.web.ohie.csd.domain.csd.Csd;
-import org.hisp.dhis.web.ohie.csd.domain.csd.Facility;
-import org.hisp.dhis.web.ohie.csd.domain.csd.Geocode;
-import org.hisp.dhis.web.ohie.csd.domain.csd.Name;
-import org.hisp.dhis.web.ohie.csd.domain.csd.Organization;
-import org.hisp.dhis.web.ohie.csd.domain.csd.OtherID;
-import org.hisp.dhis.web.ohie.csd.domain.csd.Person;
-import org.hisp.dhis.web.ohie.csd.domain.csd.Record;
-import org.hisp.dhis.web.ohie.csd.domain.csd.Service;
+import org.hisp.dhis.web.ohie.common.domain.soap.Envelope;
+import org.hisp.dhis.web.ohie.common.domain.soap.Fault;
+import org.hisp.dhis.web.ohie.common.domain.wsa.RelatesTo;
+import org.hisp.dhis.web.ohie.common.exception.SoapException;
+import org.hisp.dhis.web.ohie.csd.domain.CodedType;
+import org.hisp.dhis.web.ohie.csd.domain.CommonName;
+import org.hisp.dhis.web.ohie.csd.domain.Contact;
+import org.hisp.dhis.web.ohie.csd.domain.Csd;
+import org.hisp.dhis.web.ohie.csd.domain.Facility;
+import org.hisp.dhis.web.ohie.csd.domain.Geocode;
+import org.hisp.dhis.web.ohie.csd.domain.GetModificationsResponse;
+import org.hisp.dhis.web.ohie.csd.domain.Name;
+import org.hisp.dhis.web.ohie.csd.domain.Organization;
+import org.hisp.dhis.web.ohie.csd.domain.OtherID;
+import org.hisp.dhis.web.ohie.csd.domain.Person;
+import org.hisp.dhis.web.ohie.csd.domain.Record;
+import org.hisp.dhis.web.ohie.csd.domain.Service;
+import org.hisp.dhis.web.ohie.csd.exception.MissingGetDirectoryModificationsRequestException;
+import org.hisp.dhis.web.ohie.csd.exception.MissingGetModificationsRequestException;
+import org.hisp.dhis.web.ohie.csd.exception.MissingLastModifiedException;
 import org.hisp.dhis.web.ohie.fred.webapi.v1.utils.GeoUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.client.HttpClientErrorException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -70,10 +78,18 @@ import java.util.List;
 @RequestMapping( value = "/csd" )
 public class CsdController
 {
+    private static String SOAP_CONTENT_TYPE = "application/soap+xml";
+
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
     @Autowired
     private OrganisationUnitService organisationUnitService;
 
-    private static JAXBContext jaxbContext;
+    private static Marshaller marshaller;
+
+    private static Unmarshaller unmarshaller;
 
     static
     {
@@ -84,39 +100,118 @@ public class CsdController
             };
 
             // TODO: switch Eclipse MOXy?
-            jaxbContext = JAXBContext.newInstance( classes );
+            JAXBContext jaxbContext = JAXBContext.newInstance( classes );
+
+            marshaller = jaxbContext.createMarshaller();
+            unmarshaller = jaxbContext.createUnmarshaller();
         }
-        catch ( JAXBException ignored )
+        catch ( JAXBException ex )
         {
+            ex.printStackTrace();
         }
     }
 
-    @RequestMapping( value = "", method = RequestMethod.POST )
-    public @ResponseBody Csd csdRequest( HttpServletRequest request, HttpServletResponse response ) throws IOException, JAXBException
+    // -------------------------------------------------------------------------
+    // POST
+    // -------------------------------------------------------------------------
+
+    @RequestMapping( value = "", method = RequestMethod.POST, consumes = MediaType.ALL_VALUE, produces = MediaType.ALL_VALUE )
+    public void careServicesRequest( HttpServletRequest request, HttpServletResponse response ) throws IOException, JAXBException
     {
-        Object o = jaxbContext.createUnmarshaller().unmarshal( request.getInputStream() );
-        Envelope envelope = (Envelope) o;
+        Object o = unmarshaller.unmarshal( request.getInputStream() );
+        Envelope env = (Envelope) o;
 
-        Date lastModified = null;
+        validateRequest( env );
 
+        List<OrganisationUnit> organisationUnits = getOrganisationUnits( env );
+
+        Csd csd = createCsd( organisationUnits );
+        Envelope envelope = createResponse( csd, env.getHeader().getMessageID().getValue() );
+
+        response.setContentType( SOAP_CONTENT_TYPE );
+        marshaller.marshal( envelope, response.getOutputStream() );
+    }
+
+    @ExceptionHandler
+    public void soapError( SoapException ex, HttpServletResponse response ) throws JAXBException, IOException
+    {
+        Envelope envelope = new Envelope();
+        envelope.setHeader( null );
+        envelope.getBody().setFault( new Fault() );
+        envelope.getBody().getFault().getCode().getValue().setValue( ex.getFaultCode() );
+        envelope.getBody().getFault().getReason().getText().setValue( ex.getMessage() );
+
+        response.setContentType( SOAP_CONTENT_TYPE );
+        marshaller.marshal( envelope, response.getOutputStream() );
+    }
+
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    private void validateRequest( Envelope envelope )
+    {
         try
         {
-            lastModified = envelope.getBody().getGetModificationsRequest().getLastModified();
+            if ( !"urn:ihe:iti:csd:2013:GetDirectoryModificationsRequest".equals(
+                envelope.getHeader().getAction().getValue() ) )
+            {
+                throw new MissingGetDirectoryModificationsRequestException();
+            }
         }
         catch ( NullPointerException ex )
         {
-            throw new HttpClientErrorException( HttpStatus.BAD_REQUEST );
+            throw new SoapException();
         }
 
-        List<OrganisationUnit> byLastUpdated = new ArrayList<OrganisationUnit>(
-            organisationUnitService.getAllOrganisationUnitsByLastUpdated( lastModified ) );
+        try
+        {
+            if ( envelope.getBody().getGetModificationsRequest() == null )
+            {
+                throw new MissingGetModificationsRequestException();
+            }
+        }
+        catch ( NullPointerException ex )
+        {
+            throw new SoapException();
+        }
 
-        Csd csd = convertToCsd( byLastUpdated );
-
-        return csd;
+        try
+        {
+            if ( envelope.getBody().getGetModificationsRequest().getLastModified() == null )
+            {
+                throw new MissingLastModifiedException();
+            }
+        }
+        catch ( NullPointerException ex )
+        {
+            throw new SoapException();
+        }
     }
 
-    private Csd convertToCsd( Iterable<OrganisationUnit> organisationUnits )
+    private List<OrganisationUnit> getOrganisationUnits( Envelope envelope ) throws MissingGetModificationsRequestException
+    {
+        Date lastModified = envelope.getBody().getGetModificationsRequest().getLastModified();
+
+        return new ArrayList<OrganisationUnit>(
+            organisationUnitService.getAllOrganisationUnitsByLastUpdated( lastModified ) );
+    }
+
+    public Envelope createResponse( Csd csd, String messageID )
+    {
+        Envelope envelope = new Envelope();
+
+        envelope.getHeader().getAction().setValue( "urn:ihe:iti:csd:2013:GetDirectoryModificationsResponse" );
+        envelope.getHeader().setRelatesTo( new RelatesTo( messageID ) );
+
+        GetModificationsResponse response = new GetModificationsResponse( csd );
+        envelope.getBody().setGetModificationsResponse( response );
+
+        return envelope;
+    }
+
+    private Csd createCsd( Iterable<OrganisationUnit> organisationUnits )
     {
         Csd csd = new Csd();
         csd.getFacilityDirectory().setFacilities( new ArrayList<Facility>() );
