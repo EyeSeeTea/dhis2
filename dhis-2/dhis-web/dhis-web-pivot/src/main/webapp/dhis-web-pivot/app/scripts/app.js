@@ -2236,10 +2236,6 @@ Ext.onReady( function() {
 					success: function(r) {
 						var layoutConfig = Ext.decode(r.responseText),
 							layout = api.layout.Layout(layoutConfig);
-layout.sorting = {
-	id: 'fbfJHSPpUQD',
-	direction: 'DESC'
-};
 
 						if (layout) {
 							web.pivot.getData(layout, true);
@@ -2304,8 +2300,9 @@ layout.sorting = {
 				if (layout.sorting) {
 					xLayout = service.layout.getExtendedLayout(layout);
 					xLayout = service.layout.getSyncronizedXLayout(xLayout, response);
-					web.pivot.sort(xLayout, response);
-					//layout = api.layout.Layout(xLayout);
+					xResponse = service.response.getExtendedResponse(xLayout, response);
+					web.pivot.sort(xLayout, xResponse);
+
 					xLayout = service.layout.getExtendedLayout(api.layout.Layout(xLayout));
 				}
 				else {
@@ -2364,13 +2361,12 @@ layout.sorting = {
 					valueMap = response.idValueMap,
 					direction = xLayout.sorting ? xLayout.sorting.direction : 'DESC',
 					layout;
-console.log(valueMap);
+
 				dim.ids = [];
 
 				// collect values
 				for (var i = 0, item, key, value; i < dim.items.length; i++) {
-					item = dim.items[i];
-					key = id + item.id;
+					key = id + dim.items[i];
 					value = parseFloat(valueMap[key]);
 
 					item.value = Ext.isNumber(value) ? value : (Number.MAX_VALUE * -1);
@@ -2665,7 +2661,7 @@ console.log(valueMap);
 					path = '/dataElementGroups/' + uid + '/operands' + filterPath + '.json';
 				}
 				else if (uid === 0) {
-					path = '/dataElementOperands' + filterPath + '.json';
+					path = '/generatedDataElementOperands' + filterPath + '.json';
 				}
 
 				if (!path) {

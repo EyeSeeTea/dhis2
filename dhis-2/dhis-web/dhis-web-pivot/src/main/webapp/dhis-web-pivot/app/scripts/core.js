@@ -1606,6 +1606,8 @@ Ext.onReady( function() {
 			service.response.getExtendedResponse = function(xLayout, response) {
 				var ids = [];
 
+				response = Ext.clone(response);
+
 				response.nameHeaderMap = {};
 				response.idValueMap = {};
 
