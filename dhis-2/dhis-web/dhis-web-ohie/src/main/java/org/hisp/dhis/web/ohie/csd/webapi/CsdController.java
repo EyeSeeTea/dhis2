@@ -28,6 +28,9 @@ package org.hisp.dhis.web.ohie.csd.webapi;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
@@ -36,6 +39,8 @@ import org.hisp.dhis.web.ohie.common.domain.soap.Envelope;
 import org.hisp.dhis.web.ohie.common.domain.soap.Fault;
 import org.hisp.dhis.web.ohie.common.domain.wsa.RelatesTo;
 import org.hisp.dhis.web.ohie.common.exception.SoapException;
+import org.hisp.dhis.web.ohie.csd.domain.Address;
+import org.hisp.dhis.web.ohie.csd.domain.AddressLine;
 import org.hisp.dhis.web.ohie.csd.domain.CodedType;
 import org.hisp.dhis.web.ohie.csd.domain.CommonName;
 import org.hisp.dhis.web.ohie.csd.domain.Contact;
@@ -70,6 +75,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -219,7 +225,16 @@ public class CsdController
         for ( OrganisationUnit organisationUnit : organisationUnits )
         {
             Facility facility = new Facility();
-            facility.setOid( organisationUnit.getCode() ); // TODO skip if code is null??
+            facility.setOid( "No oid, please provide facility_oid attribute value" );
+
+            for ( AttributeValue attributeValue : organisationUnit.getAttributeValues() )
+            {
+                if ( attributeValue.getAttribute().getName().equals( "facility_oid" ) )
+                {
+                    facility.setOid( attributeValue.getValue() );
+                    break;
+                }
+            }
 
             facility.getOtherID().add( new OtherID( organisationUnit.getUid(), "dhis2-uid" ) );
 
@@ -254,7 +269,7 @@ public class CsdController
                 facility.getCodedTypes().add( codedType );
             }
 
-            Organization organization = new Organization( "1.3.6.1.4.1.21367.200.99.1" );
+            Organization organization = new Organization( "No oid, please provide organisation_oid attribute value." );
             facility.getOrganizations().add( organization );
 
             for ( DataSet dataSet : organisationUnit.getDataSets() )
@@ -265,7 +280,17 @@ public class CsdController
                 }
 
                 Service service = new Service();
-                service.setOid( dataSet.getCode() );
+                service.setOid( "No oid, please provide service_oid attribute value." );
+
+                for ( AttributeValue attributeValue : dataSet.getAttributeValues() )
+                {
+                    if ( attributeValue.getAttribute().getName().equals( "service_oid" ) )
+                    {
+                        service.setOid( attributeValue.getValue() );
+                        break;
+                    }
+                }
+
                 service.getNames().add( new Name( new CommonName( dataSet.getDisplayName() ) ) );
 
                 organization.getServices().add( service );
@@ -303,6 +328,44 @@ public class CsdController
             }
 
             facility.setRecord( record );
+
+            Map<String, List<AddressLine>> addressLines = Maps.newHashMap();
+
+            for ( AttributeValue attributeValue : organisationUnit.getAttributeValues() )
+            {
+                if ( attributeValue.getAttribute().getName().startsWith( "Address_" ) )
+                {
+                    String[] attributeSplit = attributeValue.getAttribute().getName().split( "_" );
+
+                    if ( attributeSplit.length > 3 )
+                    {
+                        continue;
+                    }
+
+                    if ( addressLines.get( attributeSplit[1] ) == null )
+                    {
+                        addressLines.put( attributeSplit[1], Lists.<AddressLine>newArrayList() );
+                    }
+
+                    AddressLine addressLine = new AddressLine();
+                    addressLine.setComponent( attributeSplit[2] );
+                    addressLine.setValue( attributeValue.getValue() );
+
+                    addressLines.get( attributeSplit[1] ).add( addressLine );
+                }
+                else if ( attributeValue.getAttribute().getName().equals( "organisation_oid" ) )
+                {
+                    organization.setOid( attributeValue.getValue() );
+                }
+            }
+
+            for ( String key : addressLines.keySet() )
+            {
+                Address address = new Address( key );
+                address.setAddressLines( addressLines.get( key ) );
+
+                facility.getAddresses().add( address );
+            }
 
             csd.getFacilityDirectory().getFacilities().add( facility );
         }

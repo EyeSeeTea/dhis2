@@ -1430,6 +1430,11 @@ Ext.onReady( function() {
 		};
 
 		getBody = function() {
+			if (!ns.core.init.user) {
+				alert('User is not assigned to any organisation units');
+				return;
+			}
+
 			var body = {
 				object: {
 					id: sharing.object.id,
@@ -5756,10 +5761,16 @@ Ext.onReady( function() {
 										if (organisationUnits.length) {
 											var ou = organisationUnits[0];
 
-											init.user = {
-												ou: ou.id,
-												ouc: Ext.Array.pluck(ou.children, 'id')
+											if (ou.id) {
+												init.user = {
+													ou: ou.id
+												};
+
+												init.user.ouc = ou.children ? Ext.Array.pluck(ou.children, 'id') : null;
 											};
+										}
+										else {
+											alert('User is not assigned to any organisation units');
 										}
 
 										fn();

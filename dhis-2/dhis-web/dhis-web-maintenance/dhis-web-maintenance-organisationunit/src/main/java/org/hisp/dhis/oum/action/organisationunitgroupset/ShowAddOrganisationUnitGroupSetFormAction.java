@@ -1,4 +1,4 @@
-package org.hisp.dhis.attribute.comparator;
+package org.hisp.dhis.oum.action.organisationunitgroupset;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,30 +28,49 @@ package org.hisp.dhis.attribute.comparator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.attribute.comparator.AttributeSortOrderComparator;
 
-import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-/**
- * @author mortenoh
- */
-public class AttributeSortOrderComparator
-    implements Comparator<Attribute>
+public class ShowAddOrganisationUnitGroupSetFormAction
+    implements Action
 {
-    public static final Comparator<Attribute> INSTANCE = new AttributeSortOrderComparator();
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-    @Override
-    public int compare( Attribute attribute0, Attribute attribute1 )
+    private AttributeService attributeService;
+
+    public void setAttributeService( AttributeService attributeService )
     {
-        if ( attribute0.getSortOrder() == null || attribute0.getSortOrder() == 0 )
-        {
-            return attribute0.getName().compareTo( attribute1.getName() );
-        }
-        if ( attribute1.getSortOrder() == null || attribute1.getSortOrder() == 0 )
-        {
-            return attribute0.getName().compareTo( attribute1.getName() );
-        }
+        this.attributeService = attributeService;
+    }
 
-        return attribute0.getSortOrder() - attribute1.getSortOrder();
+    // -------------------------------------------------------------------------
+    // Input & Output
+    // -------------------------------------------------------------------------
+
+    private List<Attribute> attributes;
+
+    public List<Attribute> getAttributes()
+    {
+        return attributes;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    public String execute()
+    {
+        attributes = new ArrayList<Attribute>( attributeService.getOrganisationUnitGroupSetAttributes() );
+        Collections.sort( attributes, AttributeSortOrderComparator.INSTANCE );
+
+        return SUCCESS;
     }
 }
