@@ -2278,7 +2278,7 @@ Ext.onReady( function() {
 				if (Ext.isString(uid)) {
 					this.setProxy({
 						type: 'ajax',
-						url: ns.core.init.contextPath + '/api/dataElementOperands.json?links=false&dataElementGroup=' + uid,
+						url: ns.core.init.contextPath + '/api/generatedDataElementOperands.json?links=false&dataElementGroup=' + uid,
 						reader: {
 							type: 'json',
 							root: 'dataElementOperands'
@@ -5085,13 +5085,19 @@ Ext.onReady( function() {
 										if (organisationUnits.length) {
 											var ou = organisationUnits[0];
 
-											init.user = {
-												ou: ou.id,
-												ouc: Ext.Array.pluck(ou.children, 'id')
-											};
+											if (ou.id) {
+												init.user = {
+													ou: ou.id
+												};
 
-											fn();
+												init.user.ouc = ou.children ? Ext.Array.pluck(ou.children, 'id') : null;
+											};
 										}
+										else {
+											alert('User is not assigned to any organisation units');
+										}
+
+										fn();
 									}
 								});
 

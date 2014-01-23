@@ -28,7 +28,6 @@ package org.hisp.dhis.patient.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.patient.Patient.PREFIX_IDENTIFIER_TYPE;
 import static org.hisp.dhis.patient.Patient.PREFIX_PATIENT_ATTRIBUTE;
 import static org.hisp.dhis.patient.Patient.PREFIX_PROGRAM;
 import static org.hisp.dhis.patient.Patient.PREFIX_PROGRAM_EVENT_BY_STATUS;
@@ -58,11 +57,10 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientIdentifier;
-import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.patient.PatientStore;
 import org.hisp.dhis.patient.TrackedEntityQueryParams;
+import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
@@ -215,11 +213,11 @@ public class HibernatePatientStore
     @Override
     // TODO this method must be changed - cannot retrieve one by one
     public Collection<Patient> search( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Collection<PatientAttribute> patientAttributes,
-        Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min, Integer max )
+        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer statusEnrollment, Integer min,
+        Integer max )
     {
-        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, identifierTypes,
-            statusEnrollment, min, max );
+        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, statusEnrollment, min,
+            max );
         Collection<Patient> patients = new HashSet<Patient>();
         try
         {
@@ -241,11 +239,11 @@ public class HibernatePatientStore
 
     @Override
     public List<Integer> getProgramStageInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Collection<PatientAttribute> patientAttributes,
-        Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min, Integer max )
+        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer statusEnrollment, Integer min,
+        Integer max )
     {
-        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, identifierTypes,
-            statusEnrollment, min, max );
+        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, statusEnrollment, min,
+            max );
 
         List<Integer> programStageInstanceIds = new ArrayList<Integer>();
         try
@@ -270,17 +268,17 @@ public class HibernatePatientStore
     public int countSearch( List<String> searchKeys, Collection<OrganisationUnit> orgunits, Boolean followup,
         Integer statusEnrollment )
     {
-        String sql = searchPatientSql( true, searchKeys, orgunits, followup, null, null, statusEnrollment, null, null );
+        String sql = searchPatientSql( true, searchKeys, orgunits, followup, null, statusEnrollment, null, null );
         return jdbcTemplate.queryForObject( sql, Integer.class );
     }
 
     @Override
     public Grid getPatientEventReport( Grid grid, List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Collection<PatientAttribute> patientAttributes,
-        Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min, Integer max )
+        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer statusEnrollment, Integer min,
+        Integer max )
     {
-        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, identifierTypes,
-            statusEnrollment, min, max );
+        String sql = searchPatientSql( false, searchKeys, orgunits, followup, patientAttributes, statusEnrollment, min,
+            max );
 
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet( sql );
 
@@ -322,61 +320,79 @@ public class HibernatePatientStore
 
     public int validate( Patient patient, Program program )
     {
-        if ( patient.getIdentifiers() != null && patient.getIdentifiers().size() > 0 )
+        if ( patient.getAttributeValues() != null && patient.getAttributeValues().size() > 0 )
         {
-            Criteria criteria = getCriteria();
-            criteria.createAlias( "identifiers", "patientIdentifier" );
-            criteria.createAlias( "organisationUnit", "orgunit" );
-            criteria.createAlias( "programInstances", "programInstance" );
-            criteria.createAlias( "programInstance.program", "program" );
+            boolean hasUnique = false;
 
-            Disjunction disjunction = Restrictions.disjunction();
-
-            for ( PatientIdentifier identifier : patient.getIdentifiers() )
+            for ( PatientAttributeValue attributeValue : patient.getAttributeValues() )
             {
-                PatientIdentifierType patientIdentifierType = identifier.getIdentifierType();
+                PatientAttribute attribute = attributeValue.getPatientAttribute();
 
-                Conjunction conjunction = Restrictions.conjunction();
-                conjunction.add( Restrictions.eq( "patientIdentifier.identifier", identifier.getIdentifier() ) );
-                conjunction.add( Restrictions.eq( "patientIdentifier.identifierType", patientIdentifierType ) );
-
-                if ( patient.getId() != 0 )
+                if ( attribute.getUnique() )
                 {
-                    conjunction.add( Restrictions.ne( "id", patient.getId() ) );
+                    hasUnique = true;
+                    break;
                 }
-
-                if ( patientIdentifierType.getType().equals( PatientIdentifierType.VALUE_TYPE_LOCAL_ID )
-                    && patientIdentifierType.getOrgunitScope() )
-                {
-                    conjunction.add( Restrictions.eq( "orgunit.id", patient.getOrganisationUnit().getId() ) );
-                }
-
-                if ( program != null
-                    && patientIdentifierType.getType().equals( PatientIdentifierType.VALUE_TYPE_LOCAL_ID )
-                    && patientIdentifierType.getProgramScope() )
-                {
-                    conjunction.add( Restrictions.eq( "program", program ) );
-                }
-
-                if ( patientIdentifierType.getType().equals( PatientIdentifierType.VALUE_TYPE_LOCAL_ID )
-                    && patientIdentifierType.getPeriodType() != null )
-                {
-                    Date currentDate = new Date();
-                    Period period = patientIdentifierType.getPeriodType().createPeriod( currentDate );
-                    conjunction
-                        .add( Restrictions.between( "enrollmentdate", period.getStartDate(), period.getEndDate() ) );
-                }
-
-                disjunction.add( conjunction );
             }
 
-            criteria.add( disjunction );
-
-            Number rs = (Number) criteria.setProjection( Projections.rowCount() ).uniqueResult();
-
-            if ( rs != null && rs.intValue() > 0 )
+            if ( hasUnique )
             {
-                return PatientService.ERROR_DUPLICATE_IDENTIFIER;
+                Criteria criteria = getCriteria();
+                criteria.createAlias( "attributeValues", "attributeValue" );
+                criteria.createAlias( "organisationUnit", "orgunit" );
+                criteria.createAlias( "programInstances", "programInstance" );
+                criteria.createAlias( "programInstance.program", "program" );
+
+                Disjunction disjunction = Restrictions.disjunction();
+
+                for ( PatientAttributeValue attributeValue : patient.getAttributeValues() )
+                {
+                    PatientAttribute attribute = attributeValue.getPatientAttribute();
+
+                    if ( attribute.getUnique() )
+                    {
+                        Conjunction conjunction = Restrictions.conjunction();
+                        conjunction.add( Restrictions.eq( "attributeValue.value", attributeValue.getValue() ) );
+                        conjunction.add( Restrictions.eq( "attributeValue.patientAttribute", attribute ) );
+
+                        if ( patient.getId() != 0 )
+                        {
+                            conjunction.add( Restrictions.ne( "id", patient.getId() ) );
+                        }
+
+                        if ( attribute.getValueType().equals( PatientAttribute.VALUE_TYPE_LOCAL_ID )
+                            && attribute.getOrgunitScope() )
+                        {
+                            conjunction.add( Restrictions.eq( "orgunit.id", patient.getOrganisationUnit().getId() ) );
+                        }
+
+                        if ( program != null && attribute.getValueType().equals( PatientAttribute.VALUE_TYPE_LOCAL_ID )
+                            && attribute.getProgramScope() )
+                        {
+                            conjunction.add( Restrictions.eq( "programInstance.program", program ) );
+                        }
+
+                        if ( attribute.getValueType().equals( PatientAttribute.VALUE_TYPE_LOCAL_ID )
+                            && attribute.getPeriodType() != null )
+                        {
+                            Date currentDate = new Date();
+                            Period period = attribute.getPeriodType().createPeriod( currentDate );
+                            conjunction.add( Restrictions.between( "programInstance.enrollmentDate", period.getStartDate(),
+                                period.getEndDate() ) );
+                        }
+
+                        disjunction.add( conjunction );
+                    }
+                }
+
+                criteria.add( disjunction );
+
+                Number rs = (Number) criteria.setProjection( Projections.rowCount() ).uniqueResult();
+
+                if ( rs != null && rs.intValue() > 0 )
+                {
+                    return PatientService.ERROR_DUPLICATE_IDENTIFIER;
+                }
             }
         }
 
@@ -398,20 +414,11 @@ public class HibernatePatientStore
     // -------------------------------------------------------------------------
 
     private String searchPatientSql( boolean count, List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Collection<PatientAttribute> patientAttributes,
-        Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min, Integer max )
+        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer statusEnrollment, Integer min,
+        Integer max )
     {
         String selector = count ? "count(*) " : "* ";
         String sql = "select " + selector + " from ( select distinct p.patientid,";
-
-        if ( identifierTypes != null )
-        {
-            for ( PatientIdentifierType identifierType : identifierTypes )
-            {
-                sql += "(select identifier from patientidentifier where patientid=p.patientid and patientidentifiertypeid="
-                    + identifierType.getId() + " ) as " + PREFIX_IDENTIFIER_TYPE + "_" + identifierType.getId() + " ,";
-            }
-        }
 
         if ( patientAttributes != null )
         {
@@ -429,7 +436,6 @@ public class HibernatePatientStore
         String otherWhere = "";
         String operator = " where ";
         String orderBy = "";
-        boolean hasIdentifier = false;
         boolean isSearchEvent = false;
         boolean isPriorityEvent = false;
         Collection<Integer> orgunitChilrenIds = null;
@@ -456,24 +462,7 @@ public class HibernatePatientStore
                 value = keys[2];
             }
 
-            if ( keys[0].equals( PREFIX_IDENTIFIER_TYPE ) )
-            {
-
-                String[] keyValues = id.split( " " );
-                patientWhere += patientOperator + " (";
-                String opt = "";
-                for ( String v : keyValues )
-                {
-                    patientWhere += opt + " ( lower(pi.identifier) like '%" + v
-                        + "%' and pi.patientidentifiertypeid is not null ) ";
-                    opt = "or";
-                }
-
-                patientWhere += ")";
-                patientOperator = " and ";
-                hasIdentifier = true;
-            }
-            else if ( keys[0].equals( PREFIX_PATIENT_ATTRIBUTE ) )
+            if ( keys[0].equals( PREFIX_PATIENT_ATTRIBUTE ) )
             {
                 sql += "(select value from patientattributevalue where patientid=p.patientid and patientattributeid="
                     + id + " ) as " + PREFIX_PATIENT_ATTRIBUTE + "_" + id + ",";
@@ -721,12 +710,6 @@ public class HibernatePatientStore
 
             patientGroupBy += ",psi.programstageinstanceid, pgs.name, psi.duedate ";
 
-            from = " ";
-        }
-
-        if ( hasIdentifier )
-        {
-            sql += from + " left join patientidentifier pi on p.patientid=pi.patientid ";
             from = " ";
         }
 

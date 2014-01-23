@@ -25,36 +25,57 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.comparator;
+package org.hisp.dhis.patient.action.patientattribute;
 
-import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.hisp.dhis.patient.PatientIdentifierType;
+import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodType;
+
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
  * 
- * @version $ PatientIdentifierTypeSortOrderInListNoProgramComparator.java Jan
- *          8, 2014 10:26:50 PM $
+ * @version $ ShowAddPatientAttributeFormAction.java Jan 23, 2014 3:01:44 PM $
  */
-public class PatientIdentifierTypeSortOrderInListNoProgramComparator
-    implements Comparator<PatientIdentifierType>
+public class ShowAddPatientAttributeFormAction
+    implements Action
 {
-    public int compare( PatientIdentifierType patientIdentifierType0, PatientIdentifierType patientIdentifierType1 )
+    // -------------------------------------------------------------------------
+    // Dependency
+    // -------------------------------------------------------------------------
+
+    private PeriodService periodService;
+
+    public void setPeriodService( PeriodService periodService )
     {
-        if ( patientIdentifierType0.getSortOrderInListNoProgram() == null
-            || patientIdentifierType0.getSortOrderInListNoProgram() == 0 )
-        {
-            return patientIdentifierType0.getName().compareTo( patientIdentifierType1.getName() );
-        }
-
-        if ( patientIdentifierType1.getSortOrderInListNoProgram() == null
-            || patientIdentifierType1.getSortOrderInListNoProgram() == 0 )
-        {
-            return patientIdentifierType0.getName().compareTo( patientIdentifierType1.getName() );
-        }
-
-        return patientIdentifierType0.getSortOrderInListNoProgram()
-            - patientIdentifierType1.getSortOrderInListNoProgram();
+        this.periodService = periodService;
     }
+
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
+
+    private List<PeriodType> periodTypes = new ArrayList<PeriodType>();
+
+    public List<PeriodType> getPeriodTypes()
+    {
+        return periodTypes;
+    }
+
+    // -------------------------------------------------------------------------
+    // Getters && Setters
+    // -------------------------------------------------------------------------
+
+    @Override
+    public String execute()
+        throws Exception
+    {
+        periodTypes = periodService.getAllPeriodTypes();
+
+        return SUCCESS;
+    }
+
 }
