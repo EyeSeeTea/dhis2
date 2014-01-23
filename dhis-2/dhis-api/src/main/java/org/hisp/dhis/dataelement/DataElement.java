@@ -88,10 +88,11 @@ public class DataElement
     public static final String VALUE_TYPE_BOOL = "bool";
     public static final String VALUE_TYPE_TRUE_ONLY = "trueOnly";
     public static final String VALUE_TYPE_DATE = "date";
+    public static final String VALUE_TYPE_UNIT_INTERVAL = "unitInterval";
 
     public static final String VALUE_TYPE_ZERO_OR_POSITIVE_INT = "zeroPositiveInt";
-    public static final String VALUE_TYPE_POSITIVE_INT = "positiveNumber";
-    public static final String VALUE_TYPE_NEGATIVE_INT = "negativeNumber";
+    public static final String VALUE_TYPE_POSITIVE_INT = "posInt";
+    public static final String VALUE_TYPE_NEGATIVE_INT = "negInt";
     public static final String VALUE_TYPE_TEXT = "text";
     public static final String VALUE_TYPE_LONG_TEXT = "longText";
 
@@ -187,9 +188,14 @@ public class DataElement
     private Set<AttributeValue> attributeValues = new HashSet<AttributeValue>();
 
     /**
-     * The option set for this data element.
+     * The option set for data values linked to this data element.
      */
     private OptionSet optionSet;
+    
+    /**
+     * The option set for comments linked to this data element.
+     */
+    private OptionSet commentOptionSet;
     
     /**
      * The legend set for this data element.
@@ -638,6 +644,19 @@ public class DataElement
     public void setOptionSet( OptionSet optionSet )
     {
         this.optionSet = optionSet;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public OptionSet getCommentOptionSet()
+    {
+        return commentOptionSet;
+    }
+
+    public void setCommentOptionSet( OptionSet commentOptionSet )
+    {
+        this.commentOptionSet = commentOptionSet;
     }
 
     @JsonProperty

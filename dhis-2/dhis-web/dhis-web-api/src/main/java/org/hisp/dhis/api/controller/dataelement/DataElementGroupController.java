@@ -172,6 +172,8 @@ public class DataElementGroupController
         
         Collections.sort( dataElementOperands, IdentifiableObjectNameComparator.INSTANCE );
 
+		Collections.sort( dataElementOperands, IdentifiableObjectNameComparator.INSTANCE );
+
         metaData.setDataElementOperands( dataElementOperands );
 
         if ( options.hasPaging() )

@@ -1,4 +1,4 @@
-package org.hisp.dhis.api.controller.event;
+package org.hisp.dhis.attribute.comparator;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,17 +28,30 @@ package org.hisp.dhis.api.controller.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.api.controller.AbstractCrudController;
-import org.hisp.dhis.patient.PatientIdentifierType;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.hisp.dhis.attribute.AttributeValue;
+
+import java.util.Comparator;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Controller
-@RequestMapping( value = PersonIdentifierTypeController.RESOURCE_PATH )
-public class PersonIdentifierTypeController extends AbstractCrudController<PatientIdentifierType>
+public class AttributeValueSortOrderComparator
+    implements Comparator<AttributeValue>
 {
-    public static final String RESOURCE_PATH = "/personIdentifierTypes";
+    public static final Comparator<AttributeValue> INSTANCE = new AttributeValueSortOrderComparator();
+
+    @Override
+    public int compare( AttributeValue o1, AttributeValue o2 )
+    {
+        if ( o1.getAttribute().getSortOrder() == null || o2.getAttribute().getSortOrder() == 0 )
+        {
+            return o1.getAttribute().getName().compareTo( o2.getAttribute().getName() );
+        }
+        if ( o2.getAttribute().getSortOrder() == null || o2.getAttribute().getSortOrder() == 0 )
+        {
+            return o1.getAttribute().getName().compareTo( o2.getAttribute().getName() );
+        }
+
+        return o1.getAttribute().getSortOrder() - o2.getAttribute().getSortOrder();
+    }
 }

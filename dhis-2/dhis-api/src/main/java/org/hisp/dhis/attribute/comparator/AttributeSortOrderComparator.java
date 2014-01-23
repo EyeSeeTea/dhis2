@@ -33,7 +33,7 @@ import org.hisp.dhis.attribute.Attribute;
 import java.util.Comparator;
 
 /**
- * @author mortenoh
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public class AttributeSortOrderComparator
     implements Comparator<Attribute>

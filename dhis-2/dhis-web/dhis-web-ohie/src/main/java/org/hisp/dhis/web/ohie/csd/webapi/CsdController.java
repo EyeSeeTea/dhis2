@@ -28,9 +28,22 @@ package org.hisp.dhis.web.ohie.csd.webapi;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+
 import org.hisp.dhis.attribute.AttributeValue;
+import org.hisp.dhis.attribute.comparator.AttributeValueSortOrderComparator;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
@@ -65,17 +78,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -84,7 +88,10 @@ import java.util.Map;
 @RequestMapping( value = "/csd" )
 public class CsdController
 {
-    private static String SOAP_CONTENT_TYPE = "application/soap+xml";
+    private static final String SOAP_CONTENT_TYPE = "application/soap+xml";
+
+    // Name of group
+    private static final String FACILITY_TYPE_DISCRIMINATOR = "Health Facility";
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -101,7 +108,7 @@ public class CsdController
     {
         try
         {
-            Class[] classes = new Class[]{
+            Class<?>[] classes = new Class<?>[]{
                 Envelope.class
             };
 
@@ -224,6 +231,23 @@ public class CsdController
 
         for ( OrganisationUnit organisationUnit : organisationUnits )
         {
+            boolean isFacility = false;
+
+            for ( OrganisationUnitGroup group : organisationUnit.getGroups() )
+            {
+                if ( group.getName().equals( FACILITY_TYPE_DISCRIMINATOR ) )
+                {
+                    isFacility = true;
+                    break;
+                }
+            }
+
+            // skip if orgunit is not a health facility
+            if ( !isFacility )
+            {
+                continue;
+            }
+
             Facility facility = new Facility();
             facility.setOid( "No oid, please provide facility_oid attribute value" );
 
@@ -237,6 +261,11 @@ public class CsdController
             }
 
             facility.getOtherID().add( new OtherID( organisationUnit.getUid(), "dhis2-uid" ) );
+
+            if ( organisationUnit.getCode() != null )
+            {
+                facility.getOtherID().add( new OtherID( organisationUnit.getCode(), "dhis2-code" ) );
+            }
 
             facility.setPrimaryName( organisationUnit.getDisplayName() );
 
@@ -262,8 +291,18 @@ public class CsdController
                 }
 
                 CodedType codedType = new CodedType();
-                codedType.setCode( organisationUnitGroup.getUid() );
-                codedType.setCodingSchema( "dhis2-uid" );
+                codedType.setCode( organisationUnitGroup.getCode() );
+
+                codedType.setCodingSchema( "Unknown" );
+                for ( AttributeValue attributeValue : organisationUnitGroup.getAttributeValues() )
+                {
+                    if ( attributeValue.getAttribute().getName().equals( "code_system" ) )
+                    {
+                        codedType.setCodingSchema( attributeValue.getValue() );
+                        break;
+                    }
+                }
+
                 codedType.setValue( organisationUnitGroup.getDisplayName() );
 
                 facility.getCodedTypes().add( codedType );
@@ -274,23 +313,26 @@ public class CsdController
 
             for ( DataSet dataSet : organisationUnit.getDataSets() )
             {
-                if ( dataSet.getCode() == null )
-                {
-                    continue;
-                }
-
-                Service service = new Service();
-                service.setOid( "No oid, please provide service_oid attribute value." );
-
+                String oid = null;
+                
                 for ( AttributeValue attributeValue : dataSet.getAttributeValues() )
                 {
                     if ( attributeValue.getAttribute().getName().equals( "service_oid" ) )
                     {
-                        service.setOid( attributeValue.getValue() );
+                        oid = attributeValue.getValue() ;
                         break;
                     }
                 }
 
+                // skip if dataset doesn't have a service oid
+                if (oid == null)
+                {
+                    continue;
+                }
+                
+                Service service = new Service();
+                service.setOid( oid );
+    
                 service.getNames().add( new Name( new CommonName( dataSet.getDisplayName() ) ) );
 
                 organization.getServices().add( service );
@@ -331,7 +373,10 @@ public class CsdController
 
             Map<String, List<AddressLine>> addressLines = Maps.newHashMap();
 
-            for ( AttributeValue attributeValue : organisationUnit.getAttributeValues() )
+            List<AttributeValue> attributeValues = new ArrayList<AttributeValue>( organisationUnit.getAttributeValues() );
+            Collections.sort( attributeValues, AttributeValueSortOrderComparator.INSTANCE );
+
+            for ( AttributeValue attributeValue : attributeValues )
             {
                 if ( attributeValue.getAttribute().getName().startsWith( "Address_" ) )
                 {
@@ -372,4 +417,5 @@ public class CsdController
 
         return csd;
     }
+
 }

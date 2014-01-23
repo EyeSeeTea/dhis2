@@ -142,15 +142,13 @@ public interface PatientService
     Collection<Patient> getPatients( OrganisationUnit organisationUnit, Program program );
 
     /**
-     * Retrieve patients base on PatientIdentifierType or Attribute or Patient's
-     * name
+     * Retrieve patients base on Attribute 
      * 
-     * @param identifierTypeId
      * @param attributeId
      * @param value
      * @return
      */
-    Collection<Patient> getPatient( Integer identifierTypeId, Integer attributeId, String value );
+    Collection<Patient> getPatient( Integer attributeId, String value );
 
     /**
      * Search patients base on OrganisationUnit and Program with result limited
@@ -181,7 +179,7 @@ public interface PatientService
      * @return Patient List
      * **/
     Collection<Patient> getRepresentatives( Patient patient );
-    
+
     /**
      * Register a new patient
      * 
@@ -242,7 +240,7 @@ public interface PatientService
     Object getObjectValue( String property, String value, I18nFormat format );
 
     /**
-     * Search patients by attribute values, identifiers and/or a program which
+     * Search patients by attribute values and/or a program which
      * patients enrolled into
      * 
      * @param searchKeys The key for searching patients by attribute values,
@@ -253,7 +251,6 @@ public interface PatientService
      *        its value is false
      * @param patientAttributes The attribute values of these attribute are
      *        displayed into result
-     * @param identifierTypes The identifiers are displayed into the result
      * @param statusEnrollment The status of program of patients. There are
      *        three status, includes Active enrollments only, Completed
      *        enrollments only and Active and completed enrollments
@@ -263,14 +260,14 @@ public interface PatientService
      * @return An object
      */
     Collection<Patient> searchPatients( List<String> searchKeys, Collection<OrganisationUnit> orgunit,
-        Boolean followup, Collection<PatientAttribute> patientAttributes,
-        Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min, Integer max );
+        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer statusEnrollment, Integer min,
+        Integer max );
 
     /**
      * Get the number of patients who meet the criteria for searching
      * 
-     * @param searchKeys The key for searching patients by attribute values,
-     *        identifiers and/or a program
+     * @param searchKeys The key for searching patients by attribute values
+     *        and/or a program
      * @param orgunit Organisation unit where patients registered
      * @param followup Only getting patients with program risked if this
      *        property is true. And getting patients without program risked if
@@ -287,8 +284,8 @@ public interface PatientService
     /**
      * Get phone numbers of persons who meet the criteria for searching *
      * 
-     * @param searchKeys The key for searching patients by attribute values,
-     *        identifiers and/or a program
+     * @param searchKeys The key for searching patients by attribute values
+     *        and/or a program
      * @param orgunit Organisation unit where patients registered
      * @param followup Only getting patients with program risked if this
      *        property is true. And getting patients without program risked if
@@ -307,8 +304,8 @@ public interface PatientService
     /**
      * Get events which meet the criteria for searching
      * 
-     * @param searchKeys The key for searching patients by attribute values,
-     *        identifiers and/or a program
+     * @param searchKeys The key for searching patients by attribute values
+     *        and/or a program
      * @param orgunit Organisation unit where patients registered
      * @param followup Only getting patients with program risked if this
      *        property is true. And getting patients without program risked if
@@ -327,8 +324,8 @@ public interface PatientService
     /**
      * Get visit schedule of person who meet the criteria for searching
      * 
-     * @param searchKeys The key for searching patients by attribute values,
-     *        identifiers and/or a program
+     * @param searchKeys The key for searching patients by attribute values
+     *        and/or a program
      * @param orgunit Organisation unit where patients registered
      * @param followup Only getting patients with program risked if this
      *        property is true. And getting patients without program risked if
@@ -358,10 +355,10 @@ public interface PatientService
     /**
      * Get events of patients who meet the criteria for searching
      * 
-     * @param program Program. It's is used for getting identifier-types of this
-     *        program and put identifiers of patients into the result
-     * @param searchKeys The key for searching patients by attribute values,
-     *        identifiers and/or a program
+     * @param program Program. It's is used for getting attributes of this
+     *        program and put attribute values of patients into the result
+     * @param searchKeys The key for searching patients by attribute values
+     *        and/or a program
      * @param orgunit Organisation unit where patients registered
      * @param followup Only getting patients with program risked if this
      *        property is true. And getting patients without program risked if
@@ -377,14 +374,14 @@ public interface PatientService
         Boolean followup, Integer statusEnrollment, I18n i18n );
 
     /**
-     * Validate patient identifiers and validation criteria by program before
+     * Validate patient attributes and validation criteria by program before
      * registering or updating information
      * 
      * @param patient Patient object
-     * @param program Program which person needs to enroll. If this parameter
-     *        is null, the system check identifiers of the patient
+     * @param program Program which person needs to enroll. If this parameter is
+     *        null, the system check unique attribute values of the patient
      * 
-     * @return Error code 0 : Validation is OK 1 : The identifier is duplicated
+     * @return Error code 0 : Validation is OK 1 : The attribute is duplicated
      *         2 : Violate validation criteria of the program
      */
     int validatePatient( Patient patient, Program program );

@@ -28,10 +28,14 @@ package org.hisp.dhis.patient.action.patientattribute;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.patient.PatientAttributeService;
+import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
 
@@ -39,8 +43,6 @@ import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * 
- * @version $ShowUpdatePatientAttributeAction.java Mar 26, 2012 1:58:26 PM$
  */
 public class ShowUpdatePatientAttributeAction
     implements Action
@@ -61,6 +63,13 @@ public class ShowUpdatePatientAttributeAction
     public void setProgramService( ProgramService programService )
     {
         this.programService = programService;
+    }
+
+    private PeriodService periodService;
+
+    public void setPeriodService( PeriodService periodService )
+    {
+        this.periodService = periodService;
     }
 
     // -------------------------------------------------------------------------
@@ -88,6 +97,13 @@ public class ShowUpdatePatientAttributeAction
         return programs;
     }
 
+    private List<PeriodType> periodTypes = new ArrayList<PeriodType>();
+
+    public List<PeriodType> getPeriodTypes()
+    {
+        return periodTypes;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -96,11 +112,13 @@ public class ShowUpdatePatientAttributeAction
         throws Exception
     {
         patientAttribute = patientAttributeService.getPatientAttribute( id );
-        
+
         programs = programService.getAllPrograms();
-        
+
         programs.removeAll( programService.getPrograms( Program.SINGLE_EVENT_WITHOUT_REGISTRATION ) );
-        
+
+        periodTypes = periodService.getAllPeriodTypes();
+
         return SUCCESS;
     }
 }

@@ -71,13 +71,6 @@ public class DefaultPatientService
         this.patientStore = patientStore;
     }
 
-    private PatientIdentifierService patientIdentifierService;
-
-    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
-    {
-        this.patientIdentifierService = patientIdentifierService;
-    }
-
     private PatientAttributeValueService patientAttributeValueService;
 
     public void setPatientAttributeValueService( PatientAttributeValueService patientAttributeValueService )
@@ -90,13 +83,6 @@ public class DefaultPatientService
     public void setPatientAttributeService( PatientAttributeService patientAttributeService )
     {
         this.patientAttributeService = patientAttributeService;
-    }
-
-    private PatientIdentifierTypeService patientIdentifierTypeService;
-
-    public void setPatientIdentifierTypeService( PatientIdentifierTypeService patientIdentifierTypeService )
-    {
-        this.patientIdentifierTypeService = patientIdentifierTypeService;
     }
 
     private RelationshipService relationshipService;
@@ -201,7 +187,6 @@ public class DefaultPatientService
     public Collection<Patient> getPatientsForMobile( String searchText, int orgUnitId )
     {
         Set<Patient> patients = new HashSet<Patient>();
-        patients.addAll( patientIdentifierService.getPatientsByIdentifier( searchText, 0, Integer.MAX_VALUE ) );
         patients.addAll( getPatientsByPhone( searchText, 0, Integer.MAX_VALUE ) );
 
         // if an org-unit has been selected, filter out every patient that has a
@@ -243,31 +228,12 @@ public class DefaultPatientService
     }
 
     @Override
-    public Collection<Patient> getPatient( Integer identifierTypeId, Integer attributeId, String value )
+    public Collection<Patient> getPatient( Integer attributeId, String value )
     {
-        if ( attributeId != null )
+        PatientAttribute attribute = patientAttributeService.getPatientAttribute( attributeId );
+        if ( attribute != null )
         {
-            PatientAttribute attribute = patientAttributeService.getPatientAttribute( attributeId );
-            if ( attribute != null )
-            {
-                return patientAttributeValueService.getPatient( attribute, value );
-            }
-        }
-        else if ( identifierTypeId != null )
-        {
-            PatientIdentifierType identifierType = patientIdentifierTypeService
-                .getPatientIdentifierType( identifierTypeId );
-
-            if ( identifierType != null )
-            {
-                Patient p = patientIdentifierService.getPatient( identifierType, value );
-                if ( p != null )
-                {
-                    Set<Patient> set = new HashSet<Patient>();
-                    set.add( p );
-                    return set;
-                }
-            }
+            return patientAttributeValueService.getPatient( attribute, value );
         }
 
         return null;
@@ -426,9 +392,9 @@ public class DefaultPatientService
     @Override
     public Collection<Patient> searchPatients( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
         Boolean followup, Collection<PatientAttribute> patientAttributes,
-        Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min, Integer max )
+         Integer statusEnrollment, Integer min, Integer max )
     {
-        return patientStore.search( searchKeys, orgunits, followup, patientAttributes, identifierTypes,
+        return patientStore.search( searchKeys, orgunits, followup, patientAttributes, 
             statusEnrollment, min, max );
     }
 
@@ -443,7 +409,7 @@ public class DefaultPatientService
     public Collection<String> getPatientPhoneNumbers( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
         Boolean followup, Integer statusEnrollment, Integer min, Integer max )
     {
-        Collection<Patient> patients = patientStore.search( searchKeys, orgunits, followup, null, null,
+        Collection<Patient> patients = patientStore.search( searchKeys, orgunits, followup, null,
             statusEnrollment, min, max );
         Set<String> phoneNumbers = new HashSet<String>();
 
@@ -470,7 +436,7 @@ public class DefaultPatientService
     public List<Integer> getProgramStageInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
         Boolean followup, Integer statusEnrollment, Integer min, Integer max )
     {
-        return patientStore.getProgramStageInstances( searchKeys, orgunits, followup, null, null, statusEnrollment,
+        return patientStore.getProgramStageInstances( searchKeys, orgunits, followup, null, statusEnrollment,
             min, max );
     }
 
@@ -521,7 +487,7 @@ public class DefaultPatientService
         grid.addHeader( new GridHeader( i18n.getString( "program_stage" ), false, true ) );
         grid.addHeader( new GridHeader( i18n.getString( "due_date" ), false, true ) );
 
-        return patientStore.getPatientEventReport( grid, searchKeys, orgunits, followup, patientAttributes, null,
+        return patientStore.getPatientEventReport( grid, searchKeys, orgunits, followup, patientAttributes, 
             statusEnrollment, min, max );
     }
 
@@ -555,18 +521,18 @@ public class DefaultPatientService
         grid.addHeader( new GridHeader( i18n.getString( "gender" ), true, true ) );
         grid.addHeader( new GridHeader( i18n.getString( "phone_number" ), false, true ) );
 
-        Collection<PatientIdentifierType> patientIdentifierTypes = program.getIdentifierTypes();
-        
-        for ( PatientIdentifierType patientIdentifierType : patientIdentifierTypes )
+        Collection<PatientAttribute> patientAttributes = program.getAttributes();
+
+        for ( PatientAttribute patientAttribute : patientAttributes )
         {
-            grid.addHeader( new GridHeader( patientIdentifierType.getDisplayName(), false, true ) );
+            grid.addHeader( new GridHeader( patientAttribute.getDisplayName(), false, true ) );
         }
         grid.addHeader( new GridHeader( "programstageinstanceid", true, true ) );
         grid.addHeader( new GridHeader( i18n.getString( "program_stage" ), false, true ) );
         grid.addHeader( new GridHeader( i18n.getString( "due_date" ), false, true ) );
         grid.addHeader( new GridHeader( i18n.getString( "risk" ), false, true ) );
 
-        return patientStore.getPatientEventReport( grid, searchKeys, orgunits, followup, null, patientIdentifierTypes,
+        return patientStore.getPatientEventReport( grid, searchKeys, orgunits, followup, patientAttributes, 
             statusEnrollment, null, null );
     }
 

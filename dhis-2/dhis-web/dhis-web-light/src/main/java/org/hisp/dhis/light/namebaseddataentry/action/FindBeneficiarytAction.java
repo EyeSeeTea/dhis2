@@ -28,27 +28,19 @@ package org.hisp.dhis.light.namebaseddataentry.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientService;
-
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
+
+import com.opensymphony.xwork2.Action;
 
 public class FindBeneficiarytAction
     implements Action
 {
     private static final String REDIRECT = "redirect";
-
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private PatientService patientService;
-
-    public void setPatientService( PatientService patientService )
-    {
-        this.patientService = patientService;
-    }
 
     // -------------------------------------------------------------------------
     // Input & Output
@@ -64,6 +56,30 @@ public class FindBeneficiarytAction
     public void setPatients( Collection<Patient> patients )
     {
         this.patients = patients;
+    }
+
+    private Set<PatientAttributeValue> pavSet;
+
+    public Set<PatientAttributeValue> getPavSet()
+    {
+        return pavSet;
+    }
+
+    public void setPavSet( Set<PatientAttributeValue> pavSet )
+    {
+        this.pavSet = pavSet;
+    }
+
+    private Set<PatientAttributeValue> patientAttributes;
+
+    public Set<PatientAttributeValue> getPatientAttributes()
+    {
+        return patientAttributes;
+    }
+
+    public void setPatientAttributes( Set<PatientAttributeValue> patientAttributes )
+    {
+        this.patientAttributes = patientAttributes;
     }
 
     private String keyword;
@@ -88,6 +104,18 @@ public class FindBeneficiarytAction
     public void setOrganisationUnitId( Integer organisationUnitId )
     {
         this.organisationUnitId = organisationUnitId;
+    }
+
+    private Integer patientAttributeId;
+
+    public Integer getPatientAttributeId()
+    {
+        return patientAttributeId;
+    }
+
+    public void setPatientAttributeId( Integer patientAttributeId )
+    {
+        this.patientAttributeId = patientAttributeId;
     }
 
     private Integer patientId;
@@ -131,13 +159,22 @@ public class FindBeneficiarytAction
     @Override
     public String execute()
         throws Exception
-    {   
-        patients = patientService.getPatientsForMobile( keyword, organisationUnitId );
+    {
+
+        // patients = patientService.searchPatientsForMobile(keyword,
+        // organisationUnitId, patientAttributeId);
+        pavSet = new HashSet<PatientAttributeValue>();
+
+        for ( Patient p : patients )
+        {
+            pavSet.addAll( p.getAttributeValues() );
+        }
 
         if ( patients.size() == 1 )
         {
             Patient patient = patients.iterator().next();
             patientId = patient.getId();
+
             return REDIRECT;
         }
         return SUCCESS;
