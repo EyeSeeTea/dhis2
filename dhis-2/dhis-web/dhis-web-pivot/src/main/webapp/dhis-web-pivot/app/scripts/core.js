@@ -1220,7 +1220,7 @@ Ext.onReady( function() {
 				}();
 			};
 
-			service.layout.getExtendedAxis = function(xLayout, xResponse, type) {
+			service.layout.getExtendedAxis = function(xLayout, type) {
 				var dimensionNames,
 					spanType,
 					aDimensions = [],
@@ -1265,7 +1265,7 @@ Ext.onReady( function() {
 					var a = [];
 
 					for (var i = 0; i < aDimensions.length; i++) {
-						a.push(xResponse.nameHeaderMap[aDimensions[i].dimensionName].ids);
+						a.push(xLayout.dimensionNameIdsMap[aDimensions[i].dimensionName]);
 					}
 
 					return a;
