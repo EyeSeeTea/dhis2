@@ -78,6 +78,20 @@ public interface SecurityService
     boolean restore( UserCredentials credentials, String token, String code, String newPassword, RestoreType restoreType );
 
     /**
+     * Tests whether the given token and code are valid for the given user name.
+     * In order to succeed, the given token and code must match the ones on the
+     * credentials, and the current date must be before the expiry date time of
+     * the credentials.
+     *
+     * @param credentials the user credentials.
+     * @param token the token.
+     * @param code the code.
+     * @param restoreType type of restore operation (e.g. pw recovery, invite).
+     * @return true or false.
+     */
+    boolean canRestoreNow( UserCredentials credentials, String token, String code, RestoreType restoreType );
+
+    /**
      * Tests whether the given token in combination with the given user name is
      * valid, i.e. whether the hashed version of the token matches the one on the
      * user credentials identified by the given user name.

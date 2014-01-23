@@ -254,11 +254,11 @@ public class AddUserAction
 
         if ( ACCOUNT_ACTION_INVITE.equals( accountAction ) )
         {
-            username = "invitedUser" + CodeGenerator.generateCode( INVITED_USERNAME_TOKEN_LENGTH );
+            username = "invitedUser_" + CodeGenerator.generateCode( INVITED_USERNAME_TOKEN_LENGTH );
             rawPassword = CodeGenerator.generateCode( INVITED_USER_PASSWORD_LENGTH );
             user.setEmail( inviteEmail );
-            user.setSurname( "invitedUserSurname" );
-            user.setFirstName( "invitedUserFirstName" );
+            user.setSurname( "(TBD)" );
+            user.setFirstName( "(TBD)" );
         }
         else
         {
@@ -306,17 +306,16 @@ public class AddUserAction
 
         if ( ACCOUNT_ACTION_INVITE.equals( accountAction ) )
         {
-            securityService.sendRestoreMessage( userCredentials, getBaseUrl(), RestoreType.INVITE );
+            securityService.sendRestoreMessage( userCredentials, getRootPath(), RestoreType.INVITE );
         }
 
         return SUCCESS;
     }
 
-    private String getBaseUrl()
+    private String getRootPath()
     {
-        HttpServletRequest req = ServletActionContext.getRequest();
-        StringBuffer fullUrl = req.getRequestURL();
-        String baseUrl = org.hisp.dhis.util.ContextUtils.getBaseUrl( req );
-        return baseUrl.substring(0, baseUrl.length() - 1 );
+        HttpServletRequest request = ServletActionContext.getRequest();
+
+        return ContextUtils.getContextPath( request );
     }
 }

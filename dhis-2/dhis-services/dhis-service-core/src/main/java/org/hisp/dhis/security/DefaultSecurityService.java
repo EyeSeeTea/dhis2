@@ -179,22 +179,13 @@ public class DefaultSecurityService
 
     public boolean restore( UserCredentials credentials, String token, String code, String newPassword, RestoreType restoreType )
     {
-        if ( credentials == null || token == null || code == null || newPassword == null )
+        if ( credentials == null || token == null || code == null || newPassword == null
+                || !canRestoreNow( credentials, token, code, restoreType ) )
         {
             return false;
         }
 
         String username = credentials.getUsername();
-        
-        token = passwordManager.encodePassword( username, token );
-        code = passwordManager.encodePassword( username, code );
-
-        Date date = new Cal().now().time();
-
-        if ( !credentials.canRestore( token, code, date ) )
-        {
-            return false;
-        }
 
         newPassword = passwordManager.encodePassword( username, newPassword );
 
@@ -207,6 +198,23 @@ public class DefaultSecurityService
         userService.updateUserCredentials( credentials );
 
         return true;
+    }
+
+    public boolean canRestoreNow( UserCredentials credentials, String token, String code, RestoreType restoreType )
+    {
+        if ( !verifyToken ( credentials, token, restoreType ) )
+        {
+            return false;
+        }
+
+        String username = credentials.getUsername();
+
+        String encodedToken = passwordManager.encodePassword( username, token );
+        String encodedCode = passwordManager.encodePassword( username, code );
+
+        Date date = new Cal().now().time();
+
+        return credentials.canRestore( encodedToken, encodedCode, date );
     }
 
     public boolean verifyToken( UserCredentials credentials, String token, RestoreType restoreType )

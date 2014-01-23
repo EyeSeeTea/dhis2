@@ -30,6 +30,7 @@ package org.hisp.dhis.useraccount.action;
 
 import org.hisp.dhis.security.RestoreType;
 import org.hisp.dhis.security.SecurityService;
+import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,9 @@ import com.opensymphony.xwork2.Action;
 public class IsInviteTokenValidAction
         implements Action
 {
+    @Autowired
+    private SystemSettingManager systemSettingManager;
+
     @Autowired
     private SecurityService securityService;
 
@@ -87,6 +91,13 @@ public class IsInviteTokenValidAction
         return userCredentials;
     }
 
+    private final String accountAction = "invited";
+
+    public String getAccountAction()
+    {
+        return accountAction;
+    }
+
     private String email;
 
     public String getEmail()
@@ -100,6 +111,11 @@ public class IsInviteTokenValidAction
 
     public String execute()
     {
+        if ( !systemSettingManager.accountInviteEnabled() )
+        {
+            return ERROR;
+        }
+
         userCredentials = userService.getUserCredentialsByUsername( username );
 
         if ( userCredentials == null )

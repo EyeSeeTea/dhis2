@@ -39,61 +39,6 @@
 			}
 		});
 	});
-
-    var saved = {};
-
-    function changeAccountAction()
-    {
-        if( $('#accountAction').val() == 'create' )
-        {
-            $('#username').val( saved["username"] );
-            $('#rawPassword').val( saved["rawPassword"] );
-            $('#retypePassword').val( saved["retypePassword"] );
-            $('#surname').val( saved["surname"] );
-            $('#firstName').val( saved["firstName"] );
-            $('#phoneNumber').val( saved["phoneNumber"] );
-            $('#email').val( $('#inviteEmail').val() );
-            $('#inviteEmail').val( 'validEmail@domain.com' );
-
-            showById('usernameTR');
-            showById('rawPasswordTR');
-            showById('retypePasswordTR');
-            showById('surnameTR');
-            showById('firstNameTR');
-            showById('phoneNumberTR');
-            showById('emailTR');
-
-            hideById('inviteEmailTR');
-        }
-        else
-        {
-            hideById('usernameTR');
-            hideById('rawPasswordTR');
-            hideById('retypePasswordTR');
-            hideById('surnameTR');
-            hideById('firstNameTR');
-            hideById('phoneNumberTR');
-            hideById('emailTR');
-
-            showById('inviteEmailTR');
-
-            saved["username"] = $('#username').val();
-            saved["rawPassword"] = $('#rawPassword').val();
-            saved["retypePassword"] = $('#retypePassword').val();
-            saved["surname"] = $('#surname').val();
-            saved["firstName"] = $('#firstName').val();
-            saved["phoneNumber"] = $('#phoneNumber').val();
-
-            $('#username').val( 'nonExistingUserName_RpuECtIlVoRKTpYmEkYrAHmPtX4m1U' );
-            $('#rawPassword').val( 'validPassword_123' );
-            $('#retypePassword').val( 'validPassword_123' );
-            $('#surname').val( 'validSurname' );
-            $('#firstName').val( 'validFirstName' );
-            $('#phoneNumber').val( '5555555555' );
-            $('#inviteEmail').val( $('#email').val() );
-            $('#email').val( '' );
-        }
-    }
 </script>
 
 <h3>$i18n.getString( "create_new_user" )</h3>
@@ -102,6 +47,7 @@
 <table>
     <col style="width: 120px"/>
 
+    #if ( $keyAccountInvite )
     <tr>
         <td><label>$i18n.getString( "action" )</label></td>
         <td>
@@ -111,6 +57,7 @@
             </select>
         </td>
     </tr>
+    #end
 
 	<tr>
 		<th colspan="4">$i18n.getString( "details" )</th>
@@ -147,7 +94,7 @@
 	</tr>
 
 	<tr id="inviteEmailTR" style="display:none">
-		<td><label for="inviteEmail">$i18n.getString( "email" )</label></td>
+		<td><label for="inviteEmail">$i18n.getString( "email" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
 		<td colspan="3"><input type="text" id="inviteEmail" name="inviteEmail" value="validEmail@domain.com" ></td>
 	</tr>
 
