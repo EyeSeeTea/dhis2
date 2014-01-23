@@ -229,6 +229,7 @@ public class AnalyticsController
 
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_XML, CacheStrategy.RESPECT_SYSTEM_SETTING, "data.jrxml", false );
         Grid grid = analyticsService.getAggregatedDataValues( params );
+        
         GridUtils.toJrxml( substituteMetaData( grid ), null, response.getWriter() );
     }
 

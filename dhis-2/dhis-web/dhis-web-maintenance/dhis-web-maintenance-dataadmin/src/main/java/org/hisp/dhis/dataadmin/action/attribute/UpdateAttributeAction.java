@@ -32,9 +32,10 @@ import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.attribute.AttributeService;
 
 import com.opensymphony.xwork2.Action;
+import org.springframework.util.StringUtils;
 
 /**
- * @author mortenoh
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public class UpdateAttributeAction
     implements Action
@@ -66,6 +67,13 @@ public class UpdateAttributeAction
     public void setName( String name )
     {
         this.name = name;
+    }
+
+    private String code;
+
+    public void setCode( String code )
+    {
+        this.code = code;
     }
 
     private String valueType;
@@ -110,6 +118,13 @@ public class UpdateAttributeAction
         this.indicatorGroupAttribute = indicatorGroupAttribute;
     }
 
+    private Boolean dataSetAttribute = false;
+
+    public void setDataSetAttribute( Boolean dataSetAttribute )
+    {
+        this.dataSetAttribute = dataSetAttribute;
+    }
+
     private Boolean organisationUnitAttribute = false;
 
     public void setOrganisationUnitAttribute( Boolean organisationUnitAttribute )
@@ -122,6 +137,13 @@ public class UpdateAttributeAction
     public void setOrganisationUnitGroupAttribute( Boolean organisationUnitGroupAttribute )
     {
         this.organisationUnitGroupAttribute = organisationUnitGroupAttribute;
+    }
+
+    private Boolean organisationUnitGroupSetAttribute = false;
+
+    public void setOrganisationUnitGroupSetAttribute( Boolean organisationUnitGroupSetAttribute )
+    {
+        this.organisationUnitGroupSetAttribute = organisationUnitGroupSetAttribute;
     }
 
     private Boolean userAttribute = false;
@@ -150,14 +172,17 @@ public class UpdateAttributeAction
         if ( attribute != null )
         {
             attribute.setName( name );
+            attribute.setCode( StringUtils.isEmpty( code.trim() ) ? null : code );
             attribute.setValueType( valueType );
             attribute.setMandatory( mandatory );
             attribute.setDataElementAttribute( dataElementAttribute );
             attribute.setDataElementGroupAttribute( dataElementGroupAttribute );
             attribute.setIndicatorAttribute( indicatorAttribute );
             attribute.setIndicatorGroupAttribute( indicatorGroupAttribute );
+            attribute.setDataSetAttribute( dataSetAttribute );
             attribute.setOrganisationUnitAttribute( organisationUnitAttribute );
             attribute.setOrganisationUnitGroupAttribute( organisationUnitGroupAttribute );
+            attribute.setOrganisationUnitGroupSetAttribute( organisationUnitGroupSetAttribute );
             attribute.setUserAttribute( userAttribute );
             attribute.setUserGroupAttribute( userGroupAttribute );
 

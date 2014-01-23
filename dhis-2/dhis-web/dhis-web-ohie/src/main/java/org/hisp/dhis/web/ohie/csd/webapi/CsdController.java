@@ -28,6 +28,12 @@ package org.hisp.dhis.web.ohie.csd.webapi;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.attribute.AttributeValue;
+import org.hisp.dhis.attribute.comparator.AttributeValueSortOrderComparator;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
@@ -36,6 +42,8 @@ import org.hisp.dhis.web.ohie.common.domain.soap.Envelope;
 import org.hisp.dhis.web.ohie.common.domain.soap.Fault;
 import org.hisp.dhis.web.ohie.common.domain.wsa.RelatesTo;
 import org.hisp.dhis.web.ohie.common.exception.SoapException;
+import org.hisp.dhis.web.ohie.csd.domain.Address;
+import org.hisp.dhis.web.ohie.csd.domain.AddressLine;
 import org.hisp.dhis.web.ohie.csd.domain.CodedType;
 import org.hisp.dhis.web.ohie.csd.domain.CommonName;
 import org.hisp.dhis.web.ohie.csd.domain.Contact;
@@ -68,8 +76,10 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -78,7 +88,12 @@ import java.util.List;
 @RequestMapping( value = "/csd" )
 public class CsdController
 {
-    private static String SOAP_CONTENT_TYPE = "application/soap+xml";
+    private static final Log log = LogFactory.getLog( CsdController.class );
+
+    private static final String SOAP_CONTENT_TYPE = "application/soap+xml";
+
+    // Name of group
+    private static final String FACILITY_TYPE_DISCRIMINATOR = "Health Facility";
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -218,10 +233,41 @@ public class CsdController
 
         for ( OrganisationUnit organisationUnit : organisationUnits )
         {
+            boolean isFacility = false;
+
+            for ( OrganisationUnitGroup group : organisationUnit.getGroups() )
+            {
+                if ( group.getName().equals( FACILITY_TYPE_DISCRIMINATOR ) )
+                {
+                    isFacility = true;
+                    break;
+                }
+            }
+
+            // skip if orgunit is not a health facility
+            if ( !isFacility )
+            {
+                continue;
+            }
+
             Facility facility = new Facility();
-            facility.setOid( organisationUnit.getCode() ); // TODO skip if code is null??
+            facility.setOid( "No oid, please provide facility_oid attribute value" );
+
+            for ( AttributeValue attributeValue : organisationUnit.getAttributeValues() )
+            {
+                if ( attributeValue.getAttribute().getName().equals( "facility_oid" ) )
+                {
+                    facility.setOid( attributeValue.getValue() );
+                    break;
+                }
+            }
 
             facility.getOtherID().add( new OtherID( organisationUnit.getUid(), "dhis2-uid" ) );
+
+            if ( organisationUnit.getCode() != null )
+            {
+                facility.getOtherID().add( new OtherID( organisationUnit.getCode(), "dhis2-code" ) );
+            }
 
             facility.setPrimaryName( organisationUnit.getDisplayName() );
 
@@ -247,25 +293,48 @@ public class CsdController
                 }
 
                 CodedType codedType = new CodedType();
-                codedType.setCode( organisationUnitGroup.getUid() );
-                codedType.setCodingSchema( "dhis2-uid" );
+                codedType.setCode( organisationUnitGroup.getCode() );
+
+                codedType.setCodingSchema( "Unknown" );
+                for ( AttributeValue attributeValue : organisationUnitGroup.getAttributeValues() )
+                {
+                    if ( attributeValue.getAttribute().getName().equals( "code_system" ) )
+                    {
+                        codedType.setCodingSchema( attributeValue.getValue() );
+                        break;
+                    }
+                }
+
                 codedType.setValue( organisationUnitGroup.getDisplayName() );
 
                 facility.getCodedTypes().add( codedType );
             }
 
-            Organization organization = new Organization( "1.3.6.1.4.1.21367.200.99.1" );
+            Organization organization = new Organization( "No oid, please provide organisation_oid attribute value." );
             facility.getOrganizations().add( organization );
 
             for ( DataSet dataSet : organisationUnit.getDataSets() )
             {
-                if ( dataSet.getCode() == null )
+                String oid = null;
+                
+                for ( AttributeValue attributeValue : dataSet.getAttributeValues() )
+                {
+                    if ( attributeValue.getAttribute().getName().equals( "service_oid" ) )
+                    {
+                        oid = attributeValue.getValue() ;
+                        break;
+                    }
+                }
+
+                // skip if dataset doesn't have a service oid
+                if (oid == null)
                 {
                     continue;
                 }
-
+                
                 Service service = new Service();
-                service.setOid( dataSet.getCode() );
+                service.setOid( oid );
+    
                 service.getNames().add( new Name( new CommonName( dataSet.getDisplayName() ) ) );
 
                 organization.getServices().add( service );
@@ -304,9 +373,51 @@ public class CsdController
 
             facility.setRecord( record );
 
+            Map<String, List<AddressLine>> addressLines = Maps.newHashMap();
+
+            List<AttributeValue> attributeValues = new ArrayList<AttributeValue>( organisationUnit.getAttributeValues() );
+            Collections.sort( attributeValues, AttributeValueSortOrderComparator.INSTANCE );
+
+            for ( AttributeValue attributeValue : attributeValues )
+            {
+                if ( attributeValue.getAttribute().getName().startsWith( "Address_" ) )
+                {
+                    String[] attributeSplit = attributeValue.getAttribute().getName().split( "_" );
+
+                    if ( attributeSplit.length > 3 )
+                    {
+                        continue;
+                    }
+
+                    if ( addressLines.get( attributeSplit[1] ) == null )
+                    {
+                        addressLines.put( attributeSplit[1], Lists.<AddressLine>newArrayList() );
+                    }
+
+                    AddressLine addressLine = new AddressLine();
+                    addressLine.setComponent( attributeSplit[2] );
+                    addressLine.setValue( attributeValue.getValue() );
+
+                    addressLines.get( attributeSplit[1] ).add( addressLine );
+                }
+                else if ( attributeValue.getAttribute().getName().equals( "organisation_oid" ) )
+                {
+                    organization.setOid( attributeValue.getValue() );
+                }
+            }
+
+            for ( String key : addressLines.keySet() )
+            {
+                Address address = new Address( key );
+                address.setAddressLines( addressLines.get( key ) );
+
+                facility.getAddresses().add( address );
+            }
+
             csd.getFacilityDirectory().getFacilities().add( facility );
         }
 
         return csd;
     }
+
 }

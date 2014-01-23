@@ -1,4 +1,17 @@
-<h3>$i18n.getString( "patient_identifer_type_attribute_displayed_in_list" )</h3>
+<script>
+	jQuery(document).ready(	function(){
+		validation( 'savePatientAttributeInListNoProgramForm', function(form){
+			form.submit();
+		}, function(){
+			selectAllById('selectedAttributeIds');
+			if(jQuery("#selectedAttributeIds option").length > 0 ){
+				setFieldValue('hasAttributes', 'true');
+			}
+		});
+	});	
+</script>
+
+<h3>$i18n.getString( "patient_attributes_displayed_in_list" )</h3>
 																			
 <form id="savePatientAttributeInListNoProgramForm" name="savePatientAttributeInListNoProgramForm" action="savePatientAttributeInListNoProgram.action" method="post" action='savePatientAttributeVisitSchedule.action' onsubmit="selectAllById('selectedAttributeIds');">
 
@@ -11,15 +24,15 @@
 	<tr>
 		<th>$i18n.getString( "availableAttribute" )</th>
 		<th>$i18n.getString( "filter" )</th>
-		<th>$i18n.getString( "selectedAttribute" )</th>
+		<th>
+			$i18n.getString( "selectedAttribute" )
+			<input type='hidden' id='hasAttributes' name='hasAttributes' class="{validate:{required:true}}">
+		</th>
 	</tr>
 	
 	<tr>
 		<td>
 			<select style='width:322px' multiple="multiple" id="availableAttributes" name="availableAttributes" size="15" ondblclick="moveSelectedById( 'availableAttributes', 'selectedAttributeIds' )" >
-				#foreach($identifierType in $availablePatientIdentifierTypes)
-					<option value='iden_$identifierType.id'>$identifierType.displayName</option>
-				#end
 				#foreach($attribute in $availablePatientAttributes)
 					<option value='attr_$attribute.id'>$attribute.displayName</option>
 				#end
@@ -33,9 +46,6 @@
 		</td>
 		<td>
 			<select style='width:322px' multiple="multiple" id="selectedAttributeIds" name="selectedAttributeIds" size="15" ondblclick="moveSelectedById( 'selectedAttributeIds', 'availableAttributes' )" >
-				#foreach($identifierType in $selectedPatientIdentifierTypes)
-					<option value='iden_$identifierType.id'>$identifierType.displayName</option>
-				#end
 				#foreach($attribute in $selectedPatientAttributes)
 					<option value='attr_$attribute.id'>$attribute.displayName</option>
 				#end
@@ -49,7 +59,7 @@
 	<tr>
 		<td colspan='2'>
 			<input type="submit" value="$i18n.getString( 'save' )" />
-			<input type="button" value="$i18n.getString( 'cancel' )" onclick="window.location.href='patientAttributeGroup.action'"/>
+			<input type="button" value="$i18n.getString( 'cancel' )" onclick="window.location.href='patientAttribute.action'"/>
 		</td>
 	</tr>
 </table>

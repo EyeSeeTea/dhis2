@@ -1,23 +1,8 @@
-<style>
-		.x-column-header-inner .x-column-header-text {
-		white-space: normal;
-		z-index:0;
-	}
-
-	.x-column-header-inner {
-		line-height: normal;
-	}	
-	.x-grid-row .x-grid-cell-inner {
-		white-space: normal;		
-	}
-    .x-grid-row-over .x-grid-cell-inner {
-        font-weight: bold;
-		white-space: normal;		
-    }	
-	
-</style>
 <script >
-
+	var windowWidth = $(window).width();
+	var windowHeight = $(window).height();
+	var tableWidth = (parseInt( windowWidth ) * 72) / 100 ;	
+	var columnWidth = (parseInt( windowWidth ) * 12) / 100 ;
 function organisationUnitSelected( orgUnits, orgUnitNames )
 {
 		setFieldValue("orgUnit", orgUnitNames[0]);

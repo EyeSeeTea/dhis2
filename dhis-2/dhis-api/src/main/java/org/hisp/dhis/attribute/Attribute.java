@@ -42,9 +42,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @author mortenoh
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "attributeType", namespace = DxfNamespaces.DXF_2_0 )
+@JacksonXmlRootElement(localName = "attributeType", namespace = DxfNamespaces.DXF_2_0)
 public class Attribute
     extends BaseIdentifiableObject
 {
@@ -57,19 +57,23 @@ public class Attribute
 
     private boolean dataElementAttribute;
 
-    private Boolean dataElementGroupAttribute = false;
+    private boolean dataElementGroupAttribute;
 
     private boolean indicatorAttribute;
 
-    private Boolean indicatorGroupAttribute = false;
+    private boolean indicatorGroupAttribute;
+
+    private boolean dataSetAttribute;
 
     private boolean organisationUnitAttribute;
 
-    private Boolean organisationUnitGroupAttribute = false;
+    private boolean organisationUnitGroupAttribute;
+
+    private boolean organisationUnitGroupSetAttribute;
 
     private boolean userAttribute;
 
-    private Boolean userGroupAttribute = false;
+    private boolean userGroupAttribute;
 
     private boolean mandatory;
 
@@ -89,8 +93,8 @@ public class Attribute
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public String getValueType()
     {
         return valueType;
@@ -102,8 +106,8 @@ public class Attribute
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public boolean isMandatory()
     {
         return mandatory;
@@ -115,8 +119,8 @@ public class Attribute
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public boolean isDataElementAttribute()
     {
         return dataElementAttribute;
@@ -128,11 +132,11 @@ public class Attribute
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public boolean isDataElementGroupAttribute()
     {
-        return dataElementGroupAttribute == null ? false : dataElementGroupAttribute;
+        return dataElementGroupAttribute;
     }
 
     public void setDataElementGroupAttribute( Boolean dataElementGroupAttribute )
@@ -141,8 +145,8 @@ public class Attribute
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public boolean isIndicatorAttribute()
     {
         return indicatorAttribute;
@@ -154,11 +158,11 @@ public class Attribute
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public boolean isIndicatorGroupAttribute()
     {
-        return indicatorGroupAttribute == null ? false : indicatorGroupAttribute;
+        return indicatorGroupAttribute;
     }
 
     public void setIndicatorGroupAttribute( Boolean indicatorGroupAttribute )
@@ -167,8 +171,21 @@ public class Attribute
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
+    public boolean isDataSetAttribute()
+    {
+        return dataSetAttribute;
+    }
+
+    public void setDataSetAttribute( Boolean dataSetAttribute )
+    {
+        this.dataSetAttribute = dataSetAttribute;
+    }
+
+    @JsonProperty
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public boolean isOrganisationUnitAttribute()
     {
         return organisationUnitAttribute;
@@ -180,11 +197,11 @@ public class Attribute
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public boolean isOrganisationUnitGroupAttribute()
     {
-        return organisationUnitGroupAttribute == null ? false : organisationUnitGroupAttribute;
+        return organisationUnitGroupAttribute;
     }
 
     public void setOrganisationUnitGroupAttribute( Boolean organisationUnitGroupAttribute )
@@ -193,8 +210,21 @@ public class Attribute
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
+    public boolean isOrganisationUnitGroupSetAttribute()
+    {
+        return organisationUnitGroupSetAttribute;
+    }
+
+    public void setOrganisationUnitGroupSetAttribute( Boolean organisationUnitGroupSetAttribute )
+    {
+        this.organisationUnitGroupSetAttribute = organisationUnitGroupSetAttribute;
+    }
+
+    @JsonProperty
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public boolean isUserAttribute()
     {
         return userAttribute;
@@ -206,11 +236,11 @@ public class Attribute
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public boolean isUserGroupAttribute()
     {
-        return userGroupAttribute == null ? false : userGroupAttribute;
+        return userGroupAttribute;
     }
 
     public void setUserGroupAttribute( Boolean userGroupAttribute )
@@ -228,6 +258,9 @@ public class Attribute
         this.attributeValues = attributeValues;
     }
 
+    @JsonProperty
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public Integer getSortOrder()
     {
         return sortOrder;
@@ -249,9 +282,15 @@ public class Attribute
 
             valueType = attribute.getValueType() == null ? valueType : attribute.getValueType();
             dataElementAttribute = attribute.isDataElementAttribute();
+            dataElementGroupAttribute = attribute.isDataElementGroupAttribute();
             indicatorAttribute = attribute.isIndicatorAttribute();
+            indicatorGroupAttribute = attribute.isIndicatorGroupAttribute();
+            dataSetAttribute = attribute.isDataSetAttribute();
             organisationUnitAttribute = attribute.isOrganisationUnitAttribute();
+            organisationUnitGroupAttribute = attribute.isOrganisationUnitGroupAttribute();
+            organisationUnitGroupSetAttribute = attribute.isOrganisationUnitGroupSetAttribute();
             userAttribute = attribute.isUserAttribute();
+            userGroupAttribute = attribute.isUserGroupAttribute();
             mandatory = attribute.isMandatory();
             sortOrder = attribute.getSortOrder() == null ? sortOrder : attribute.getSortOrder();
 

@@ -1,22 +1,8 @@
-<style>
-		.x-column-header-inner .x-column-header-text {
-		white-space: normal;
-		z-index:0;
-	}
-
-	.x-column-header-inner {
-		line-height: normal;
-	}	
-	.x-grid-row .x-grid-cell-inner {
-		white-space: normal;		
-	}
-    .x-grid-row-over .x-grid-cell-inner {
-        font-weight: bold;
-		white-space: normal;		
-    }	
-	
-</style>
 <script >
+	var windowWidth = $(window).width();
+	var windowHeight = $(window).height();
+	var tableWidth = (parseInt( windowWidth ) * 70.2) / 100 ;	
+	var columnWidth = (parseInt( windowWidth ) * 10) / 100 ;
 $(function() {
 	$("#addDataElement").button();
 });
@@ -150,7 +136,7 @@ function loadExtTariff()
 <input type="hidden" name="dataElementName" id="dataElementName" value="">
 <table width="50%">
 	<tr>
-		<td >Orgainsation Unit: &nbsp; <input type="text" id="orgUnit" name="orgUnit" readonly size="40"/></td>
+		<td >Orgainsation Unit: &nbsp;&nbsp;&nbsp; <input type="text" id="orgUnit" name="orgUnit" readonly size="38"/></td>
 		<td >&nbsp;</td>
 	</tr>
 	<tr >
@@ -163,5 +149,5 @@ function loadExtTariff()
 	</tr>
 </table>
 <br/><br/><br/>
-<div id="loadTariffDetails" style="width:90%"></div>
+<div id="loadTariffDetails" style="width:85%"></div>
 	

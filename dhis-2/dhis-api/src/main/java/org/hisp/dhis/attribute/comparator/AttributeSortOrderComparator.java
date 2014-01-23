@@ -28,16 +28,18 @@ package org.hisp.dhis.attribute.comparator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Comparator;
-
 import org.hisp.dhis.attribute.Attribute;
 
+import java.util.Comparator;
+
 /**
- * @author mortenoh
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public class AttributeSortOrderComparator
     implements Comparator<Attribute>
 {
+    public static final Comparator<Attribute> INSTANCE = new AttributeSortOrderComparator();
+
     @Override
     public int compare( Attribute attribute0, Attribute attribute1 )
     {

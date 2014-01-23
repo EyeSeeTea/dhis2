@@ -36,10 +36,11 @@ import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.api.utils.WebUtils;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.common.PagerUtils;
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementOperand;
-import org.hisp.dhis.dataelement.DataElementOperandService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -51,6 +52,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -65,10 +68,10 @@ public class DataElementGroupController
     public static final String RESOURCE_PATH = "/dataElementGroups";
 
     @Autowired
-    private DataElementOperandService dataElementOperandService;
+    private DataElementCategoryService dataElementCategoryService;
 
-    @RequestMapping( value = "/{uid}/members", method = RequestMethod.GET )
-    public String getMembers( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
+    @RequestMapping(value = "/{uid}/members", method = RequestMethod.GET)
+    public String getMembers( @PathVariable("uid") String uid, @RequestParam Map<String, String> parameters,
         Model model, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         WebOptions options = new WebOptions( parameters );
@@ -81,7 +84,8 @@ public class DataElementGroupController
         }
 
         WebMetaData metaData = new WebMetaData();
-        List<DataElement> dataElements = Lists.newArrayList( dataElementGroup.getMembers() );
+        List<DataElement> dataElements = new ArrayList<DataElement>( dataElementGroup.getMembers() );
+        Collections.sort( dataElements, IdentifiableObjectNameComparator.INSTANCE );
 
         if ( options.hasPaging() )
         {
@@ -103,8 +107,8 @@ public class DataElementGroupController
         return StringUtils.uncapitalize( getEntitySimpleName() );
     }
 
-    @RequestMapping( value = "/{uid}/members/query/{q}", method = RequestMethod.GET )
-    public String getMembersByQuery( @PathVariable( "uid" ) String uid, @PathVariable( "q" ) String q,
+    @RequestMapping(value = "/{uid}/members/query/{q}", method = RequestMethod.GET)
+    public String getMembersByQuery( @PathVariable("uid") String uid, @PathVariable("q") String q,
         @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request,
         HttpServletResponse response ) throws Exception
     {
@@ -118,9 +122,11 @@ public class DataElementGroupController
         }
 
         WebMetaData metaData = new WebMetaData();
-        List<DataElement> dataElements = Lists.newArrayList();
+        List<DataElement> dataElements = new ArrayList<DataElement>();
+        List<DataElement> members = new ArrayList<DataElement>( dataElementGroup.getMembers() );
+        Collections.sort( members, IdentifiableObjectNameComparator.INSTANCE );
 
-        for ( DataElement dataElement : dataElementGroup.getMembers() )
+        for ( DataElement dataElement : members )
         {
             if ( dataElement.getDisplayName().toLowerCase().contains( q.toLowerCase() ) )
             {
@@ -148,8 +154,8 @@ public class DataElementGroupController
         return StringUtils.uncapitalize( getEntitySimpleName() );
     }
 
-    @RequestMapping( value = "/{uid}/operands", method = RequestMethod.GET )
-    public String getOperands( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
+    @RequestMapping(value = "/{uid}/operands", method = RequestMethod.GET)
+    public String getOperands( @PathVariable("uid") String uid, @RequestParam Map<String, String> parameters,
         Model model, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         WebOptions options = new WebOptions( parameters );
@@ -162,7 +168,9 @@ public class DataElementGroupController
         }
 
         WebMetaData metaData = new WebMetaData();
-        List<DataElementOperand> dataElementOperands = Lists.newArrayList( dataElementOperandService.getDataElementOperandByDataElementGroup( dataElementGroup ) );
+        List<DataElementOperand> dataElementOperands = Lists.newArrayList( dataElementCategoryService.getOperands( dataElementGroup.getMembers() ) );
+
+		Collections.sort( dataElementOperands, IdentifiableObjectNameComparator.INSTANCE );
 
         metaData.setDataElementOperands( dataElementOperands );
 
@@ -186,8 +194,8 @@ public class DataElementGroupController
         return StringUtils.uncapitalize( getEntitySimpleName() );
     }
 
-    @RequestMapping( value = "/{uid}/operands/query/{q}", method = RequestMethod.GET )
-    public String getOperandsByQuery( @PathVariable( "uid" ) String uid, @PathVariable( "q" ) String q,
+    @RequestMapping(value = "/{uid}/operands/query/{q}", method = RequestMethod.GET)
+    public String getOperandsByQuery( @PathVariable("uid") String uid, @PathVariable("q") String q,
         @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request,
         HttpServletResponse response ) throws Exception
     {
@@ -203,7 +211,7 @@ public class DataElementGroupController
         WebMetaData metaData = new WebMetaData();
         List<DataElementOperand> dataElementOperands = Lists.newArrayList();
 
-        for ( DataElementOperand dataElementOperand : dataElementOperandService.getDataElementOperandByDataElementGroup( dataElementGroup ) )
+        for ( DataElementOperand dataElementOperand : dataElementCategoryService.getOperands( dataElementGroup.getMembers() ) )
         {
             if ( dataElementOperand.getDisplayName().toLowerCase().contains( q.toLowerCase() ) )
             {

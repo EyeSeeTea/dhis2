@@ -63,8 +63,8 @@ public interface PatientStore
      * into a program with active status
      * 
      * @param organisationUnit Organisation unit where patients registered
-     * @param program Program. It's is used for getting identifier-types of this
-     *        program and put identifiers of patients into the result
+     * @param program Program. It's is used for getting attributes of this
+     *        program and put attribute values of patients into the result
      * @param min
      * @param max
      * 
@@ -107,8 +107,8 @@ public interface PatientStore
      * unit and enrolled into a program with active status
      * 
      * @param organisationUnit Organisation unit where patients registered
-     * @param program Program. It's is used for getting identifier-types of this
-     *        program and put identifiers of patients into the result
+     * @param program Program. It's is used for getting attributes of this
+     *        program and put attribute values of patients into the result
      * 
      * @return The number of patients
      */
@@ -117,8 +117,8 @@ public interface PatientStore
     /**
      * Get number of patients who meet the criteria for searching
      * 
-     * @param searchKeys The key for searching patients by attribute values,
-     *        identifiers and/or a program
+     * @param searchKeys The key for searching patients by attribute values
+     *        and/or a program
      * @param orgunit Organisation unit where patients registered
      * @param followup Only getting patients with program risked if this
      *        property is true. And getting patients without program risked if
@@ -146,15 +146,14 @@ public interface PatientStore
     /**
      * Search events of patients who meet the criteria for searching
      * 
-     * @param searchKeys The key for searching patients by attribute values,
-     *        identifiers and/or a program
+     * @param searchKeys The key for searching patients by attribute values
+     *        and/or a program
      * @param orgunit Organisation unit where patients registered
      * @param followup Only getting patients with program risked if this
      *        property is true. And getting patients without program risked if
      *        its value is false
      * @param patientAttributes The attribute values of these attribute are
      *        displayed into result
-     * @param identifierTypes The identifiers are displayed into the result
      * @param statusEnrollment The status of program of patients. There are
      *        three status, includes Active enrollments only, Completed
      *        enrollments only and Active and completed enrollments
@@ -164,21 +163,19 @@ public interface PatientStore
      * @return List of patients
      */
     Collection<Patient> search( List<String> searchKeys, Collection<OrganisationUnit> orgunit, Boolean followup,
-        Collection<PatientAttribute> patientAttributes, Collection<PatientIdentifierType> identifierTypes,
-        Integer statusEnrollment, Integer min, Integer max );
+        Collection<PatientAttribute> patientAttributes, Integer statusEnrollment, Integer min, Integer max );
 
     /**
      * Search events which meet the criteria for searching
      * 
-     * @param searchKeys The key for searching patients by attribute values,
-     *        identifiers and/or a program
+     * @param searchKeys The key for searching patients by attribute values
+     *        and/or a program
      * @param orgunit Organisation unit where patients registered
      * @param followup Only getting patients with program risked if this
      *        property is true. And getting patients without program risked if
      *        its value is false
      * @param patientAttributes The attribute values of these attribute are
      *        displayed into result
-     * @param identifierTypes The identifiers are displayed into the result
      * @param statusEnrollment The status of program of patients. There are
      *        three status, includes Active enrollments only, Completed
      *        enrollments only and Active and completed enrollments
@@ -188,8 +185,8 @@ public interface PatientStore
      * @return List of patients
      */
     List<Integer> getProgramStageInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Collection<PatientAttribute> patientAttributes,
-        Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min, Integer max );
+        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer statusEnrollment, Integer min,
+        Integer max );
 
     /**
      * Search patients who enrolled into a program with active status
@@ -206,15 +203,14 @@ public interface PatientStore
      * Search events of patients who meet the criteria for searching
      * 
      * @param grid Grid with headers
-     * @param searchKeys The key for searching patients by attribute values,
-     *        identifiers and/or a program
+     * @param searchKeys The key for searching patients by attribute values
+     *        and/or a program
      * @param orgunit Organisation unit where patients registered
      * @param followup Only getting patients with program risked if this
      *        property is true. And getting patients without program risked if
      *        its value is false
      * @param patientAttributes The attribute values of these attribute are
      *        displayed into result
-     * @param identifierTypes The identifiers are displayed into the result
      * @param statusEnrollment The status of program of patients. There are
      *        three status, includes Active enrollments only, Completed
      *        enrollments only and Active and completed enrollments
@@ -224,18 +220,18 @@ public interface PatientStore
      * @return Grid
      */
     Grid getPatientEventReport( Grid grid, List<String> searchKeys, Collection<OrganisationUnit> orgunit,
-        Boolean followup, Collection<PatientAttribute> patientAttributes,
-        Collection<PatientIdentifierType> identifierTypes, Integer statusEnrollment, Integer min, Integer max );
+        Boolean followup, Collection<PatientAttribute> patientAttributes, Integer statusEnrollment, Integer min,
+        Integer max );
 
     /**
-     * Validate patient identifiers and validation criteria by program before
+     * Validate patient attribute values and validation criteria by program before
      * registering / updating information
      * 
      * @param patient Patient object
-     * @param program Program which person needs to enroll. If this parameter
-     *        is null, the system check identifiers of the patient
+     * @param program Program which person needs to enroll. If this parameter is
+     *        null, the system check attribute values of the patient
      * 
-     * @return Error code 0 : Validation is OK 1 : The identifier is duplicated
+     * @return Error code 0 : Validation is OK 1 : The attribute value is duplicated
      *         2 : Violate validation criteria of the program
      */
     int validate( Patient patient, Program program );

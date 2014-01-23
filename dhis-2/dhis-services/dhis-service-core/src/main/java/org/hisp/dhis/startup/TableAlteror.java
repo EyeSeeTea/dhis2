@@ -264,6 +264,8 @@ public class TableAlteror
         executeSql( "ALTER TABLE section DROP CONSTRAINT section_name_key" );
         executeSql( "UPDATE patientattribute set inheritable=false where inheritable is null" );
         executeSql( "UPDATE dataelement SET numbertype='number' where numbertype is null and valuetype='int'" );
+        executeSql( "UPDATE dataelement SET valuetype='posInt' where valuetype='positiveNumber'" );
+        executeSql( "UPDATE dataelement SET valuetype='negInt' where valuetype='negativeNumber'" );
 
         // revert prepare aggregate*Value tables for offline diffs
 
@@ -519,6 +521,7 @@ public class TableAlteror
         executeSql( "UPDATE dataset SET skipoffline = false WHERE skipoffline IS NULL" );
         executeSql( "UPDATE dataset SET renderastabs = false WHERE renderastabs IS NULL" );
         executeSql( "UPDATE dataset SET renderhorizontally = false WHERE renderhorizontally IS NULL" );
+        executeSql( "UPDATE dataset SET novaluerequirescomment = false WHERE novaluerequirescomment IS NULL" );
 
         executeSql( "UPDATE categorycombo SET skiptotal = false WHERE skiptotal IS NULL" );
 
@@ -667,6 +670,21 @@ public class TableAlteror
         executeSql( "ALTER TABLE dataelementgroupset ALTER COLUMN datadimension SET NOT NULL" );
         executeSql( "UPDATE orgunitgroupset SET datadimension=true WHERE datadimension IS NULL" );
         executeSql( "ALTER TABLE orgunitgroupset ALTER COLUMN datadimension SET NOT NULL" );
+
+        // set attribute defaults
+        executeSql( "UPDATE attribute SET dataelementattribute=false WHERE dataelementattribute IS NULL" );
+        executeSql( "UPDATE attribute SET dataelementgroupattribute=false WHERE dataelementgroupattribute IS NULL" );
+        executeSql( "UPDATE attribute SET indicatorattribute=false WHERE indicatorattribute IS NULL" );
+        executeSql( "UPDATE attribute SET indicatorgroupattribute=false WHERE indicatorgroupattribute IS NULL" );
+        executeSql( "UPDATE attribute SET organisationunitattribute=false WHERE organisationunitattribute IS NULL" );
+        executeSql( "UPDATE attribute SET organisationunitgroupattribute=false WHERE organisationunitgroupattribute IS NULL" );
+        executeSql( "UPDATE attribute SET organisationunitgroupsetattribute=false WHERE organisationunitgroupsetattribute IS NULL" );
+        executeSql( "UPDATE attribute SET userattribute=false WHERE userattribute IS NULL" );
+        executeSql( "UPDATE attribute SET usergroupattribute=false WHERE usergroupattribute IS NULL" );
+        executeSql( "UPDATE attribute SET datasetattribute=false WHERE datasetattribute IS NULL" );
+
+        // update attribute.code, set to null if code=''
+        executeSql( "UPDATE attribute SET code=NULL WHERE code=''" );
 
         upgradeDataValuesWithAttributeOptionCombo();
         upgradeMapViewsToAnalyticalObject();

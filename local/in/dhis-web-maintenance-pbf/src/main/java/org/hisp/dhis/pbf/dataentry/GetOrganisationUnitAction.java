@@ -77,6 +77,7 @@ public class GetOrganisationUnitAction implements Action
     public String execute() throws Exception
     {
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( orgUnitId );
+        //organisationUnit.get
         
         dataSets = new ArrayList<DataSet>( organisationUnit.getDataSets() );
         
@@ -105,7 +106,7 @@ public class GetOrganisationUnitAction implements Action
             System.out.println(" dataSet ---" + dataSet.getId() +" -- " + dataSet.getName() );
         }
         */
-        
+        System.out.println( dataSets.size() );
         if ( dataSets.size() > 0 )
         {
             message = organisationUnit.getName();
