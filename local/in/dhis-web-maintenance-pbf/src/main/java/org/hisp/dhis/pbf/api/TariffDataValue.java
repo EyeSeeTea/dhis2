@@ -28,6 +28,10 @@ public class TariffDataValue implements Serializable
     private Date timestamp;
 
     private String comment;
+    
+    private Integer target;
+    
+    private Double targetPercentage;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -37,7 +41,7 @@ public class TariffDataValue implements Serializable
         
     }
     
-    public TariffDataValue( OrganisationUnit organisationUnit, DataElement dataElement, DataSet dataSet, Date startDate, Date endDate, Double value )
+    public TariffDataValue( OrganisationUnit organisationUnit, DataElement dataElement, DataSet dataSet, Date startDate, Date endDate, Double value ,Integer target,Double targetPercentage)
     {
         this.organisationUnit = organisationUnit;
         this.dataElement = dataElement;
@@ -45,6 +49,8 @@ public class TariffDataValue implements Serializable
         this.startDate = startDate;
         this.endDate = endDate;
         this.value = value;
+        this.target = target;
+        this.targetPercentage = targetPercentage;
     }
     
     // -------------------------------------------------------------------------
@@ -180,5 +186,22 @@ public class TariffDataValue implements Serializable
     {
         this.dataSet = dataSet;
     }
+
+	public Integer getTarget() {
+		return target;
+	}
+
+	public void setTarget(Integer target) {
+		this.target = target;
+	}
+
+	public Double getTargetPercentage() {
+		return targetPercentage;
+	}
+
+	public void setTargetPercentage(Double targetPercentage) {
+		this.targetPercentage = targetPercentage;
+	}
+    
 
 }

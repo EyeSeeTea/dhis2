@@ -49,7 +49,7 @@
 	<tr>
 		<td><label for="selectedPeriodId">$i18n.getString( "period" )</label></td>
 		<td><select id="selectedPeriodId" name="selectedPeriodId" style="width:200px" disabled="disabled" onchange="loadDataEntryForm()">
-				<option value="-1">[$i18n.getString( "select" )]</option>
+				 <option value="-1">[$i18n.getString( "select" )]</option> 
 				#foreach( $period in $periods )
 					<option value="$period.iso">$encoder.htmlEncode( $period.name )</option>
     			#end
@@ -65,7 +65,7 @@
 
 
 #parse( "/dhis-web-commons/loader/loader.vm" )
-<div id='dataEntryFormDiv'></div> <!-- DataEntry Form -->  	
+<div id='dataEntryFormDiv' style="width:70%"></div> <!-- DataEntry Form -->  	
 <!--
 
 <p>

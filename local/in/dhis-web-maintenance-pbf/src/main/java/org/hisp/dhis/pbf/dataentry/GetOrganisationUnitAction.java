@@ -105,7 +105,7 @@ public class GetOrganisationUnitAction implements Action
             System.out.println(" dataSet ---" + dataSet.getId() +" -- " + dataSet.getName() );
         }
         */
-        
+        System.out.println( dataSets.size() );
         if ( dataSets.size() > 0 )
         {
             message = organisationUnit.getName();
