@@ -2240,10 +2240,7 @@ Ext.onReady( function() {
 					success: function(r) {
 						var layoutConfig = Ext.decode(r.responseText),
 							layout = api.layout.Layout(layoutConfig);
-layout.sorting = {
-	id: 'cYeuwXTCPkU',
-	direction: 'DESC'
-};
+
 						if (layout) {
 							web.pivot.getData(layout, true);
 						}
@@ -2388,12 +2385,6 @@ layout.sorting = {
 				}
 
 				return xLayout;
-
-				// re-layout
-				//layout = api.layout.Layout(xLayout);
-
-				// re-create table
-				//web.pivot.createTable(layout, null, response, false);
 			};
 		}());
 	};
