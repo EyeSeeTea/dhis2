@@ -97,7 +97,7 @@ public class Module
     
     public String getIconFallback()
     {
-        return icon != null ? icon : name + ".png";
+        return icon != null ? icon : ".." + File.separator + "icons" + File.separator + name + ".png";
     }
     
     // -------------------------------------------------------------------------
