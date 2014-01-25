@@ -443,7 +443,7 @@ Ext.onReady( function() {
 
 					layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
 
-					layout.sorting = Ext.isObject(config.sorting) && Ext.isString(config.sorting.id) && Ext.isString(config.sorting.direction) ? config.sorting : null;
+					layout.sorting = Ext.isObject(config.sorting) && Ext.isDefined(config.sorting.id) && Ext.isString(config.sorting.direction) ? config.sorting : null;
 
 					layout.reportingPeriod = Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramReportingPeriod) ? config.reportParams.paramReportingPeriod : (Ext.isBoolean(config.reportingPeriod) ? config.reportingPeriod : false);
 					layout.organisationUnit =  Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramOrganisationUnit) ? config.reportParams.paramOrganisationUnit : (Ext.isBoolean(config.organisationUnit) ? config.organisationUnit : false);
@@ -856,10 +856,10 @@ Ext.onReady( function() {
 					dimensionNameIdsMap: {},
 
 						// for param string
-					dimensionNameSortedIdsMap: {},
+					dimensionNameSortedIdsMap: {}
 
 					// sort table by column
-					sortableIdObjects: []
+					//sortableIdObjects: []
 				};
 
 				Ext.applyIf(xLayout, layout);
@@ -1184,6 +1184,23 @@ Ext.onReady( function() {
 						}
 					}
 
+					// Add missing names
+					dimensions = Ext.Array.clean([].concat(xLayout.columns || [], xLayout.rows || [], xLayout.filters || []));
+
+					for (var i = 0, idNameMap = response.metaData.names, dimItems; i < dimensions.length; i++) {
+						dimItems = dimensions[i].items;
+
+						if (Ext.isArray(dimItems) && dimItems.length) {
+							for (var j = 0, item; j < dimItems.length; j++) {
+								item = dimItems[j];
+
+								if (Ext.isObject(item) && Ext.isString(idNameMap[item.id]) && !Ext.isString(item.name)) {
+									item.name = idNameMap[item.id] || '';
+								}
+							}
+						}
+					}
+
 					// Remove dimensions from layout that do not exist in response
 					for (var i = 0, dimensionName; i < xLayout.axisDimensionNames.length; i++) {
 						dimensionName = xLayout.axisDimensionNames[i];
@@ -1196,22 +1213,6 @@ Ext.onReady( function() {
 					layout = api.layout.Layout(xLayout);
 
 					if (layout) {
-						dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || []));
-
-						for (var i = 0, idNameMap = response.metaData.names, dimItems; i < dimensions.length; i++) {
-							dimItems = dimensions[i].items;
-
-							if (Ext.isArray(dimItems) && dimItems.length) {
-								for (var j = 0, item; j < dimItems.length; j++) {
-									item = dimItems[j];
-
-									if (Ext.isObject(item) && Ext.isString(idNameMap[item.id]) && !Ext.isString(item.name)) {
-										item.name = idNameMap[item.id] || '';
-									}
-								}
-							}
-						}
-
 						return service.layout.getExtendedLayout(layout);
 					}
 
@@ -1219,7 +1220,7 @@ Ext.onReady( function() {
 				}();
 			};
 
-			service.layout.getExtendedAxis = function(xLayout, xResponse, type) {
+			service.layout.getExtendedAxis = function(xLayout, type) {
 				var dimensionNames,
 					spanType,
 					aDimensions = [],
@@ -1264,7 +1265,7 @@ Ext.onReady( function() {
 					var a = [];
 
 					for (var i = 0; i < aDimensions.length; i++) {
-						a.push(xResponse.nameHeaderMap[aDimensions[i].dimensionName].ids);
+						a.push(xLayout.dimensionNameIdsMap[aDimensions[i].dimensionName]);
 					}
 
 					return a;
@@ -1605,6 +1606,8 @@ Ext.onReady( function() {
 			service.response.getExtendedResponse = function(xLayout, response) {
 				var ids = [];
 
+				response = Ext.clone(response);
+
 				response.nameHeaderMap = {};
 				response.idValueMap = {};
 
@@ -1815,6 +1818,53 @@ Ext.onReady( function() {
 			// pivot
 			web.pivot = {};
 
+			web.pivot.sort = function(xLayout, xResponse, xColAxis) {
+				var xResponse = Ext.clone(xResponse),
+					id = xLayout.sorting.id,
+					dim = xLayout.rows[0],
+					valueMap = xResponse.idValueMap,
+					direction = xLayout.sorting ? xLayout.sorting.direction : 'DESC',
+					layout;
+
+				dim.ids = [];
+
+				// relative id?
+				if ((Ext.isString(id) && id.toLowerCase() === 'total') || id === 0) {
+					id = 'total_';
+				}
+				else if (Ext.isNumber(parseInt(id))) {
+					id = xColAxis.ids[parseInt(id) - 1];
+
+					if (!id) {
+						return xLayout;
+					}
+				}
+
+				// collect values
+				for (var i = 0, item, key, value; i < dim.items.length; i++) {
+					item = dim.items[i];
+					key = id + item.id;
+					value = parseFloat(valueMap[key]);
+
+					item.value = Ext.isNumber(value) ? value : (Number.MAX_VALUE * -1);
+				}
+
+				// sort
+				support.prototype.array.sort(dim.items, direction, 'value');
+
+				// new id order
+				for (var i = 0; i < dim.items.length; i++) {
+					dim.ids.push(dim.items[i].id);
+				}
+
+				// update id
+				if (id !== xLayout.sorting.id) {
+					xLayout.sorting.id = id;
+				}
+
+				return xLayout;
+			};
+
 			web.pivot.getHtml = function(xLayout, xResponse, xColAxis, xRowAxis) {
 				var getRoundedHtmlValue,
 					getTdHtml,
@@ -1848,6 +1898,8 @@ Ext.onReady( function() {
 					uuidDimUuidsMap = {},
 					isLegendSet = Ext.isObject(xLayout.legendSet) && Ext.isArray(xLayout.legendSet.mapLegends) && xLayout.legendSet.mapLegends.length,
 					htmlArray;
+
+				xResponse.sortableIdObjects = [];
 
 				getRoundedHtmlValue = function(value, dec) {
 					dec = dec || 2;
@@ -1899,7 +1951,7 @@ Ext.onReady( function() {
 					if (Ext.isString(metaDataId)) {
 						cls += ' td-sortable';
 
-						xLayout.sortableIdObjects.push({
+						xResponse.sortableIdObjects.push({
 							id: metaDataId,
 							uuid: config.uuid
 						});
@@ -1993,6 +2045,8 @@ Ext.onReady( function() {
 
 						for (var j = 0, obj, spanCount = 0, condoId, totalId; j < xColAxis.size; j++) {
 							spanCount++;
+							condoId = null;
+							totalId = null;
 
 							obj = xColAxis.objects.all[i][j];
 							obj.type = 'dimension';
