@@ -46,7 +46,6 @@ import org.hisp.dhis.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,8 +62,11 @@ public class DefaultSecurityService
 
     private static final String RESTORE_PATH = "/dhis-web-commons/security/";
 
-    private static final int TOKEN_LENGTH = 50;
-    private static final int CODE_LENGTH = 15;
+    private static final int INVITED_USERNAME_UNIQUE_LENGTH = 15;
+    private static final int INVITED_USER_PASSWORD_LENGTH = 40;
+
+    private static final int RESTORE_TOKEN_LENGTH = 50;
+    private static final int RESTORE_CODE_LENGTH = 15;
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -105,6 +107,24 @@ public class DefaultSecurityService
     // SecurityService implementation
     // -------------------------------------------------------------------------
 
+    public boolean prepareUserForInvite( UserCredentials credentials )
+    {
+        if ( credentials == null || credentials.getUser() == null )
+        {
+            return false;
+        }
+
+        String username = "invitedUser_" + CodeGenerator.generateCode( INVITED_USERNAME_UNIQUE_LENGTH );
+        String rawPassword = CodeGenerator.generateCode( INVITED_USER_PASSWORD_LENGTH );
+
+        credentials.getUser().setSurname( "(TBD)" );
+        credentials.getUser().setFirstName( "(TBD)" );
+        credentials.setUsername( username );
+        credentials.setPassword( passwordManager.encodePassword( username, rawPassword ) );
+
+        return true;
+    }
+
     public boolean sendRestoreMessage( UserCredentials credentials, String rootPath, RestoreType restoreType )
     {
         if ( credentials == null || rootPath == null )
@@ -114,25 +134,25 @@ public class DefaultSecurityService
 
         if ( credentials.getUser() == null || credentials.getUser().getEmail() == null )
         {
-            log.info( "Could not send message as user does not exist or has no email: " + credentials );
+            log.info( "Could not send " + restoreType.name() + " message as user does not exist or has no email: " + credentials );
             return false;
         }
 
         if ( !ValidationUtils.emailIsValid( credentials.getUser().getEmail() ) )
         {
-            log.info( "Could not send message as email is invalid" );
+            log.info( "Could not send " + restoreType.name() + " message as email is invalid" );
             return false;
         }
 
         if ( !systemSettingManager.emailEnabled() )
         {
-            log.info( "Could not send message as email is not configured" );
+            log.info( "Could not send " + restoreType.name() + " message as email is not configured" );
             return false;
         }
 
         if ( credentials.hasAnyAuthority( Arrays.asList( UserAuthorityGroup.CRITICAL_AUTHS ) ) )
         {
-            log.info( "Not allowed to recover credentials or invite users with critical authorities" );
+            log.info( "Not allowed to  " + restoreType.name() + " users with critical authorities" );
             return false;
         }
 
@@ -159,8 +179,8 @@ public class DefaultSecurityService
 
     public String[] initRestore( UserCredentials credentials, RestoreType restoreType )
     {
-        String token = restoreType.getTokenPrefix() + CodeGenerator.generateCode( TOKEN_LENGTH );
-        String code = CodeGenerator.generateCode( CODE_LENGTH );
+        String token = restoreType.getTokenPrefix() + CodeGenerator.generateCode( RESTORE_TOKEN_LENGTH );
+        String code = CodeGenerator.generateCode( RESTORE_CODE_LENGTH );
 
         String hashedToken = passwordManager.encodePassword( credentials.getUsername(), token );
         String hashedCode = passwordManager.encodePassword( credentials.getUsername(), code );

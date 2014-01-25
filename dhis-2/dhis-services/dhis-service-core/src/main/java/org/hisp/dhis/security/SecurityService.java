@@ -37,8 +37,21 @@ import org.hisp.dhis.user.UserCredentials;
 public interface SecurityService
 {
     /**
-     * Will invoke the initiateRestore method and dispatch email messages with
+     * Sets information for a user who will be invited by email to finish
+     * setting up their user account.
+     *
+     * @param credentials the credentials of the user to invite.
+     * @return true if the invitation was sent, otherwise false.
+     */
+    boolean prepareUserForInvite( UserCredentials credentials );
+
+    /**
+     * Invokes the initRestore method and dispatches email messages with
      * restore information to the user.
+     * <p>
+     * In the case of inviting a user to finish setting up an account,
+     * the user account must already be configured with the profile desired
+     * for the user (e.g., locale, organisation unit(s), role(s), etc.)
      *
      * @param credentials the credentials for the user to send restore message.
      * @param rootPath the root path of the request.
@@ -49,10 +62,10 @@ public interface SecurityService
     boolean sendRestoreMessage( UserCredentials credentials, String rootPath, RestoreType restoreType );
 
     /**
-     * Will populate the restoreToken and restoreCode property of the given
-     * credentials with a hashed version of auto-generated values. Will set the
-     * restoreExpiry property with a date time one hour from now. Changes will be
-     * persisted.
+     * Populates the restoreToken and restoreCode property of the given
+     * credentials with a hashed version of auto-generated values. Sets the
+     * restoreExpiry property with a date time some interval from now depending
+     * on the restore type. Changes are persisted.
      *
      * @param credentials the user credentials.
      * @param restoreType type of restore operation (e.g. pw recovery, invite).

@@ -38,7 +38,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.attribute.AttributeService;
-import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
@@ -64,10 +63,6 @@ public class AddUserAction
         implements Action
 {
     private String ACCOUNT_ACTION_INVITE = "invite";
-
-    private static final int INVITED_USERNAME_TOKEN_LENGTH = 15;
-    private static final int INVITED_USER_PASSWORD_LENGTH = 40;
-
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -250,15 +245,17 @@ public class AddUserAction
 
         Collection<OrganisationUnit> orgUnits = selectionTreeManager.getReloadedSelectedOrganisationUnits();
 
+        UserCredentials userCredentials = new UserCredentials();
         User user = new User();
+
+        userCredentials.setUser( user );
+        user.setUserCredentials( userCredentials );
 
         if ( ACCOUNT_ACTION_INVITE.equals( accountAction ) )
         {
-            username = "invitedUser_" + CodeGenerator.generateCode( INVITED_USERNAME_TOKEN_LENGTH );
-            rawPassword = CodeGenerator.generateCode( INVITED_USER_PASSWORD_LENGTH );
             user.setEmail( inviteEmail );
-            user.setSurname( "(TBD)" );
-            user.setFirstName( "(TBD)" );
+
+            securityService.prepareUserForInvite ( userCredentials );
         }
         else
         {
@@ -266,14 +263,12 @@ public class AddUserAction
             user.setFirstName( firstName );
             user.setEmail( email );
             user.setPhoneNumber( phoneNumber );
+
+            userCredentials.setUsername( username );
+            userCredentials.setPassword( passwordManager.encodePassword( username, rawPassword ) );
         }
 
         user.updateOrganisationUnits( new HashSet<OrganisationUnit>( orgUnits ) );
-
-        UserCredentials userCredentials = new UserCredentials();
-        userCredentials.setUser( user );
-        userCredentials.setUsername( username );
-        userCredentials.setPassword( passwordManager.encodePassword( username, rawPassword ) );
 
         for ( String id : selectedList )
         {
@@ -284,8 +279,6 @@ public class AddUserAction
                 userCredentials.getUserAuthorityGroups().add( group );
             }
         }
-
-        user.setUserCredentials( userCredentials );
 
         if ( jsonAttributeValues != null )
         {
