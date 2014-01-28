@@ -85,7 +85,14 @@ public class Module
         boolean hasIcon = app.getIcons() != null && app.getIcons().getIcon48() != null;
         
         String defaultAction = app.getLaunchUrl();
-        String icon = hasIcon ? app.getFolderName() + File.separator + app.getIcons().getIcon48() : null;
+
+        String icon = null;
+        if (hasIcon)
+        {
+            icon = app.getBaseUrl() + File.separator + app.getFolderName() +
+                   File.separator + app.getIcons().getIcon48();
+        }
+
         String description = TextUtils.subString( app.getDescription(), 0, 80 );
         
         Module module = new Module( app.getName(), app.getName(), defaultAction );
