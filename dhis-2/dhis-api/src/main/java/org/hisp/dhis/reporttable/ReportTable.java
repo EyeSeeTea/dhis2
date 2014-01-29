@@ -1074,6 +1074,7 @@ public class ReportTable
             totals = reportTable.isTotals();
             subtotals = reportTable.isSubtotals();
             hideEmptyRows = reportTable.isHideEmptyRows();
+            aggregationType = reportTable.getAggregationType();
             digitGroupSeparator = reportTable.getDigitGroupSeparator();
             displayDensity = reportTable.getDisplayDensity();
             fontSize = reportTable.getFontSize();

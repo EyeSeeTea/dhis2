@@ -851,6 +851,8 @@ Ext.onReady( function() {
 
 				delete favorite.parentGraphMap;
 
+                delete favorite.id;
+
 				// Replace operand id characters
 				for (var i = 0; i < dimensions.length; i++) {
 					if (dimensions[i].dimension === ns.core.conf.finals.dimension.operand.objectName) {
@@ -1138,7 +1140,7 @@ Ext.onReady( function() {
 
 									if (favorite) {
 										favorite.name = record.data.name;
-
+console.log(favorite);
 										if (confirm(message)) {
 											Ext.Ajax.request({
 												url: ns.core.init.contextPath + '/api/reportTables/' + record.data.id,
