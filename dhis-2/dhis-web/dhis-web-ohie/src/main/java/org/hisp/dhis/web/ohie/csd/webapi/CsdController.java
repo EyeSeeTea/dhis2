@@ -28,20 +28,8 @@ package org.hisp.dhis.web.ohie.csd.webapi;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.attribute.comparator.AttributeValueSortOrderComparator;
 import org.hisp.dhis.dataset.DataSet;
@@ -78,20 +66,37 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping( value = "/csd" )
+@RequestMapping(value = "/csd")
 public class CsdController
 {
     private static final String SOAP_CONTENT_TYPE = "application/soap+xml";
 
-    // Name of group
-    private static final String FACILITY_TYPE_DISCRIMINATOR = "Health Facility";
+    // Name of group all facilities belong to
+    private static final String FACILITY_DISCRIMINATOR_GROUP = "Health Facility";
+    
+    // groupset for status codelist - open, closed, etc
+    private static final String FACILITY_STATUS_GROUPSET = "Status";
+    
+    // groupset for facility type codelist
+    private static final String FACILITY_TYPE_GROUPSET = "Type";
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -128,7 +133,7 @@ public class CsdController
     // POST
     // -------------------------------------------------------------------------
 
-    @RequestMapping( value = "", method = RequestMethod.POST, consumes = MediaType.ALL_VALUE, produces = MediaType.ALL_VALUE )
+    @RequestMapping(value = "", method = RequestMethod.POST, consumes = MediaType.ALL_VALUE, produces = MediaType.ALL_VALUE)
     public void careServicesRequest( HttpServletRequest request, HttpServletResponse response ) throws IOException, JAXBException
     {
         Object o = unmarshaller.unmarshal( request.getInputStream() );
@@ -235,7 +240,7 @@ public class CsdController
 
             for ( OrganisationUnitGroup group : organisationUnit.getGroups() )
             {
-                if ( group.getName().equals( FACILITY_TYPE_DISCRIMINATOR ) )
+                if ( group.getName().equals( FACILITY_DISCRIMINATOR_GROUP ) )
                 {
                     isFacility = true;
                     break;
@@ -283,29 +288,49 @@ public class CsdController
                 facility.getContacts().add( contact );
             }
 
+            String facilityStatus = "Open";
+
             for ( OrganisationUnitGroup organisationUnitGroup : organisationUnit.getGroups() )
             {
-                if ( organisationUnitGroup.getCode() == null )
+                if ( organisationUnitGroup == null )
                 {
                     continue;
                 }
 
-                CodedType codedType = new CodedType();
-                codedType.setCode( organisationUnitGroup.getCode() );
-
-                codedType.setCodingSchema( "Unknown" );
-                for ( AttributeValue attributeValue : organisationUnitGroup.getAttributeValues() )
+                if ( organisationUnitGroup.getGroupSet() != null &&
+                    FACILITY_STATUS_GROUPSET.equals( organisationUnitGroup.getGroupSet().getName() ) )
                 {
-                    if ( attributeValue.getAttribute().getName().equals( "code_system" ) )
-                    {
-                        codedType.setCodingSchema( attributeValue.getValue() );
-                        break;
-                    }
+                    facilityStatus = organisationUnitGroup.getCode();
+                    continue;
                 }
 
-                codedType.setValue( organisationUnitGroup.getDisplayName() );
+                
+                if ( organisationUnitGroup.getGroupSet() != null &&
+                    FACILITY_TYPE_GROUPSET.equals( organisationUnitGroup.getGroupSet().getName() ) )
+                {
+                    if ( organisationUnitGroup.getCode() == null )
+                    {
+                        continue;
+                    }
 
-                facility.getCodedTypes().add( codedType );
+                    CodedType codedType = new CodedType();
+                    codedType.setCode( organisationUnitGroup.getCode() );
+
+                    codedType.setCodingSchema( "Unknown" );
+
+                    for ( AttributeValue attributeValue : organisationUnitGroup.getAttributeValues() )
+                    {
+                        if ( attributeValue.getAttribute().getName().equals( "code_system" ) )
+                        {
+                            codedType.setCodingSchema( attributeValue.getValue() );
+                            break;
+                        }
+                    }
+
+                    codedType.setValue( organisationUnitGroup.getDisplayName() );
+
+                    facility.getCodedTypes().add( codedType );
+                }
             }
 
             Organization organization = new Organization( "No oid, please provide organisation_oid attribute value." );
@@ -314,25 +339,25 @@ public class CsdController
             for ( DataSet dataSet : organisationUnit.getDataSets() )
             {
                 String oid = null;
-                
+
                 for ( AttributeValue attributeValue : dataSet.getAttributeValues() )
                 {
                     if ( attributeValue.getAttribute().getName().equals( "service_oid" ) )
                     {
-                        oid = attributeValue.getValue() ;
+                        oid = attributeValue.getValue();
                         break;
                     }
                 }
 
                 // skip if dataset doesn't have a service oid
-                if (oid == null)
+                if ( oid == null )
                 {
                     continue;
                 }
-                
+
                 Service service = new Service();
                 service.setOid( oid );
-    
+
                 service.getNames().add( new Name( new CommonName( dataSet.getDisplayName() ) ) );
 
                 organization.getServices().add( service );
@@ -348,26 +373,18 @@ public class CsdController
 
                     geocode.setLongitude( coordinates.lng );
                     geocode.setLatitude( coordinates.lat );
+
+                    facility.setGeocode( geocode );
                 }
                 catch ( NumberFormatException ignored )
                 {
                 }
-
-                facility.setGeocode( geocode );
             }
 
             Record record = new Record();
             record.setCreated( organisationUnit.getCreated() );
             record.setUpdated( organisationUnit.getLastUpdated() );
-
-            if ( organisationUnit.isActive() )
-            {
-                record.setStatus( "Active" );
-            }
-            else
-            {
-                record.setStatus( "Inactive" );
-            }
+            record.setStatus( facilityStatus );
 
             facility.setRecord( record );
 

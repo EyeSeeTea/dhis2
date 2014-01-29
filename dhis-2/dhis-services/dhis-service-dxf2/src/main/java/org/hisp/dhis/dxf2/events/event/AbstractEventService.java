@@ -31,7 +31,6 @@ package org.hisp.dhis.dxf2.events.event;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dxf2.events.person.Person;
@@ -111,9 +110,6 @@ public abstract class AbstractEventService
 
     @Autowired
     private PatientCommentService patientCommentService;
-
-    @Autowired
-    private IdentifiableObjectManager manager;
 
     @Autowired
     private EventStore eventStore;
@@ -259,7 +255,16 @@ public abstract class AbstractEventService
             }
 
             programInstance = programInstances.get( 0 );
-            programStageInstance = programInstance.getProgramStageInstanceByStage( 1 );
+
+            if ( event.getEvent() != null )
+            {
+                programStageInstance = programStageInstanceService.getProgramStageInstance( event.getEvent() );
+
+                if ( programStageInstance == null )
+                {
+                    return new ImportSummary( ImportStatus.ERROR, "Event.event did not point to a valid event" );
+                }
+            }
         }
 
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( event.getOrgUnit() );
@@ -457,10 +462,28 @@ public abstract class AbstractEventService
 
         String storedBy = getStoredBy( event, null );
 
+        if ( event.getStatus() == EventStatus.ACTIVE )
+        {
+            programStageInstance.setCompleted( false );
+            programStageInstance.setStatus( ProgramStageInstance.ACTIVE_STATUS );
+            programStageInstance.setCompletedDate( null );
+            programStageInstance.setCompletedUser( null );
+        }
+        else if ( event.getStatus() == EventStatus.COMPLETED )
+        {
+            programStageInstance.setStatus( ProgramStageInstance.COMPLETED_STATUS );
+            programStageInstance.setCompletedDate( date );
+            programStageInstance.setCompletedUser( storedBy );
+
+            if ( !programStageInstance.isCompleted() )
+            {
+                programStageInstanceService.completeProgramStageInstance( programStageInstance, i18nManager.getI18nFormat() );
+            }
+        }
+
         programStageInstance.setDueDate( date );
         programStageInstance.setExecutionDate( date );
         programStageInstance.setOrganisationUnit( organisationUnit );
-        programStageInstance.setCompletedUser( storedBy );
 
         programStageInstanceService.updateProgramStageInstance( programStageInstance );
 
@@ -713,7 +736,6 @@ public abstract class AbstractEventService
         ProgramStageInstance programStageInstance = new ProgramStageInstance();
         updateProgramStageInstance( programStage, programInstance, organisationUnit, date, completed, coordinate,
             storedBy, programStageInstance );
-        programStageInstanceService.addProgramStageInstance( programStageInstance );
 
         return programStageInstance;
     }
@@ -738,6 +760,11 @@ public abstract class AbstractEventService
         }
 
         programStageInstance.setCompleted( completed );
+
+        if ( programStageInstance.getId() == 0 )
+        {
+            programStageInstanceService.addProgramStageInstance( programStageInstance );
+        }
 
         if ( programStageInstance.isCompleted() )
         {
@@ -774,12 +801,12 @@ public abstract class AbstractEventService
             if ( programStageInstance == null )
             {
                 programStageInstance = createProgramStageInstance( programStage, programInstance, organisationUnit,
-                    eventDate, EventStatus.COMPLETED.equals( event.getStatus() ), event.getCoordinate(), storedBy );
+                    eventDate, EventStatus.COMPLETED == event.getStatus(), event.getCoordinate(), storedBy );
             }
             else
             {
                 updateProgramStageInstance( programStage, programInstance, organisationUnit, eventDate,
-                    EventStatus.COMPLETED.equals( event.getStatus() ), event.getCoordinate(), storedBy,
+                    EventStatus.COMPLETED == event.getStatus(), event.getCoordinate(), storedBy,
                     programStageInstance );
             }
 
