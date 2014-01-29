@@ -13,6 +13,7 @@
     <link type="text/css" rel="stylesheet" media="screen,print" href="../dhis-web-commons/css/${stylesheet}?_rev=$!{buildRevision}" />
     <link type="text/css" rel="stylesheet" media="screen,print" href="../dhis-web-commons/css/widgets.css?_rev=$!{buildRevision}" />
     <link type="text/css" rel="stylesheet" media="print" href="../dhis-web-commons/css/print.css?_rev=$!{buildRevision}" />
+    <link type="text/css" rel="stylesheet" media="screen" href="../dhis-web-commons/css/menu.css?_rev=$!{buildRevision}" />
     #foreach ( $style in $stylesheets )
     <link type="text/css" rel="stylesheet" href="${style}?_rev=$!{buildRevision}">
     #end

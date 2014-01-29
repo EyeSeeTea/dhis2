@@ -31,12 +31,14 @@
  * Menu service
  */
 (function (dhis2, undefined) {
-    /**
-     * Simple service object that calls callbacks when the object is updated
-     */
-    dhis2.service = function (serviceFor) {
+    var MAX_FAVORITES = 9;
+
+    dhis2.util.namespace( 'dhis2.menu' );
+
+    dhis2.menu = function () {
         var that = {},
-            serviced = serviceFor || undefined,
+            menuReady = false,
+            menuItems = undefined,
             callBacks = [], //Array of callbacks to call when serviced is updated
             onceCallBacks = [];
 
@@ -44,44 +46,82 @@
          * Private methods
          **********************************************************************/
 
+        function processTranslations(translations) {
+            var itemIndex,
+                items = dhis2.menu.getItems();
+
+            for (itemIndex in items) {
+                if (translations[items[itemIndex].id]) {
+                    items[itemIndex].name = translations.get(items[itemIndex].id);
+                }
+                if (items[itemIndex].description === '' && translations.get('intro_' + items[itemIndex].id) !== items[itemIndex].id) {
+                    items[itemIndex].description = translations['intro_' + items[itemIndex].id];
+                }
+            }
+            setReady();
+        }
+
+        function setReady() {
+            menuReady = true;
+            executeCallBacks();
+        }
+
+        function isReady() {
+            return menuReady;
+        }
+
         /**
          * Execute any callbacks that are set onto the callbacks array
          */
         function executeCallBacks() {
             var onceCallBack, callBackIndex;
 
-            //If there is nothing to service we don't do anything
-            if (serviced === undefined)
+            //If not ready or no menu items
+            if ( ! isReady() || menuItems === undefined)
                 return false;
 
             //Execute the single time callbacks
             while (onceCallBacks.length !== 0) {
                 onceCallBack = onceCallBacks.pop();
-                onceCallBack(serviced);
+                onceCallBack(menuItems);
             }
 
             for (callBackIndex in callBacks) {
-                callBacks[callBackIndex](serviced);
+                callBacks[callBackIndex](menuItems);
             }
-        };
+        }
 
         /***********************************************************************
          * Public methods
          **********************************************************************/
 
         /**
-         * Set a new serviced object
          *
-         * @param array sets new modules array
          */
-        that.setServiced = function (newServiced) {
-            serviced = newServiced;
-            executeCallBacks();
-        };
-
-        that.getServiced = function () {
-            return serviced;
+        that.getItems = function () {
+            return menuItems;
         }
+        /**
+         * Adds the menu items given to the menu
+         */
+        that.addMenuItems = function (items) {
+            var itemIndex,
+                currentItem,
+                keysToTranslate = [];
+
+            for (itemIndex in items) {
+                currentItem = items[itemIndex];
+                currentItem.id = currentItem.name;
+                keysToTranslate.push(currentItem.name);
+                if (currentItem.description === "") {
+                    keysToTranslate.push( "intro_" + currentItem.name );
+                }
+            }
+
+            menuItems = items;
+
+            dhis2.translate.get(keysToTranslate, processTranslations);
+        };
 
         /**
          * Subscribe to the service
@@ -95,8 +135,8 @@
             if (typeof callback !== 'function')
                 return false;
 
-            if (serviced !== undefined) {
-                callback(serviced);
+            if (menuItems !== undefined) {
+                callback(menuItems);
             }
 
             if (true === once) {
@@ -107,59 +147,74 @@
             return true;
         };
 
+        that.getFavorites = function () {
+            return menuItems.slice(0, MAX_FAVORITES);
+        }
+        that.getApps = function () {
+            return menuItems.slice(MAX_FAVORITES);
+        }
+
         return that;
-    };
+    }();
 })(dhis2);
 
 /**
  * jQuery template
  */
-(function ($, dhis2) {
-    var menu = dhis2.menu = dhis2.menu || {},
-        markup = '';
+(function ($, menu, undefined) {
+    var markup = '';
 
-    markup += '<li data-app-name="${name}" data-app-action="${defaultAction}">';
-    markup += '<img src="${icon}">';
-    markup += '<span>${name}</span>';
-    markup += '<p>${description}</p>';
+    markup += '<li data-id="${id}" data-app-name="${name}" data-app-action="${defaultAction}">';
+    markup += '  <a href="${defaultAction}" class="app-menu-item">';
+    markup += '    <img src="${icon}">';
+    markup += '    <span>${name}</span>';
+    markup += '    <div class="app-menu-item-description">${description}</div>';
+    markup += '  </a>';
     markup += '</li>';
 
     $.template('appMenuItemTemplate', markup);
 
-    menu.service = menu.service || dhis2.service([]);
-    menu.selector = '#appsMenu';
-
-    menu.getFavorites = function () {
-        return menu.service.getServiced().slice(0,9);
-    }
-    menu.getApps = function () {
-        return menu.service.getServiced().slice(9);
+    function renderFavorites(selector) {
+        var favorites = dhis2.menu.getFavorites();
+        $('#' + selector).before($('<div id="' + selector + '_favorites"><ul></ul></div>'));
+        $('#' + selector + '_favorites').addClass('app-menu');
+        return $.tmpl( "appMenuItemTemplate", favorites).appendTo('#' + selector + '_favorites ul');
     }
 
-    function renderFavorites(appList) {
-        var favorites = [];
-        favorites = dhis2.menu.getFavorites();
-
-        return $.tmpl( "appMenuItemTemplate", favorites).appendTo(dhis2.menu.selector + '_favorites');
+    function renderNotFavorites(selector) {
+        var apps = dhis2.menu.getApps();
+        $('#' +  selector).append($('<ul></ul>'));
+        $('#' + selector).addClass('app-menu');
+        return $.tmpl( "appMenuItemTemplate", apps).appendTo('#' + selector + ' ul');
     }
 
-    function renderNotFavorites(appList) {
-        var apps = [];
-        apps = dhis2.menu.getApps();
-        return $.tmpl( "appMenuItemTemplate", apps).appendTo(dhis2.menu.selector);
+    function renderMenu() {
+        var selector = 'appsMenu',
+            options = {
+                placeholder: 'app-menu-placeholder', //Classes for the placeholder when dragging
+                connectWith: '#' + selector + '_favorites',
+                update: function (event, ui) {
+                    service.save(getApps());
+                }
+            },
+            favoriteOptions = _.extend(options, { connectWith: '#' + selector } );
+
+        renderFavorites(selector);
+        renderNotFavorites(selector);
+
+        $('#' + selector + ' ul').sortable(options);
+        $('#' + selector + '_favorites ul').sortable(favoriteOptions);
     }
 
     //Subscribe to the list and run the callbacks only once on the first update
-    menu.service.subscribe(renderFavorites, true);
-    menu.service.subscribe(renderNotFavorites, true);
+    menu.subscribe(renderMenu, true);
 
-})(jQuery, dhis2);
+})(jQuery, dhis2.menu);
 
 /**
  * jQuery event hookups
  */
-(function ($, dhis2, undefined) {
-    var service = dhis2.menu.service ? dhis2.menu.service : dhis2.menu.service = dhis2.service([]);
+(function ($, menu, undefined) {
     /**
      * jQuery events that communicate with the web api
      * TODO: Check the urls (they seem to be specific to the dev location atm)
@@ -167,11 +222,10 @@
     $(function () {
         $.ajax('../dhis-web-commons/menu/getModules.action').success(function (data) {
             if (typeof data.modules === 'object') {
-                dhis2.translate
-                service.setServiced(data.modules);
+                menu.addMenuItems(data.modules);
             }
         }).error(function () {
                 alert('Can not load apps from server.');
             });
     });
-})(jQuery, dhis2);
+})(jQuery, dhis2.menu);

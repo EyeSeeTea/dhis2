@@ -1,0 +1,66 @@
+.app-menu:after {
+    clear: both;
+    content: "";
+}
+
+.app-menu ul,
+.app-menu li {
+    list-style: none;
+}
+
+.app-menu li {
+    float: left;
+    position: relative;
+}
+
+.app-menu-item,
+.app-menu-placeholder {
+    margin: 10px;
+    display: block;
+    border: 2px solid transparent;
+    background: rgba(245, 245, 245, .9);
+    width: 225px;
+    height: 56px;
+    border-radius: 8px;
+    padding: 10px
+}
+.app-menu-item img {
+    max-height: 36px;
+    max-width: 36px;
+    display: block;
+    left: 20px;
+    top: 25%;
+    position: absolute;
+}
+.app-menu-item span {
+    font-size: 1.3em;
+    padding-left: 48px;
+    display: block;
+    padding-left: 50px;
+    padding-top: 15px;
+}
+
+.app-menu-placeholder,
+.app-menu-item:hover {
+    border: 2px dotted rgba(0, 0, 0, .2);
+}
+
+.app-menu-item-description {
+    display: none;
+}
+
+.app-menu li:hover a .app-menu-item-description {
+    position: absolute;
+    top: 15%;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(0, 31, 128, 0.75);
+    display: block;
+    margin: 10px;
+    padding: 5px 10px;
+    font-size: 1.1em;
+    color: #fff;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}

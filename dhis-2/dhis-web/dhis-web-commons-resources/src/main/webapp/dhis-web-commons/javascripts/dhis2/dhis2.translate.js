@@ -29,11 +29,17 @@
 /**
  * Created by mark on 28/01/14.
  */
-(function ($, dhis2) {
-    var translationCache = {};
 
-    dhis2.translate = dhis2.translate || {};
-    //Get list of all apps
+dhis2.util.namespace( 'dhis2.translate' );
+
+(function ($, translate) {
+    var translationCache = {
+        get: function (key) {
+            if (this.hasOwnProperty(key))
+                return this[key];
+            return key;
+        }
+    };
 
     /**
      * Adds translations to the translation cache (overrides already existing ones)
@@ -42,7 +48,6 @@
      */
     function  addToCache(translations) {
         translationCache = _.extend(translationCache, translations);
-        console.log(translationCache);
     }
 
     /**
@@ -53,7 +58,6 @@
      * @param callback {function}
      */
     function getTranslationsFromServer(translateKeys, callback) {
-        console.log(translateKeys);
         $.ajax({
             url:'../api/i18n',
             type:"POST",
@@ -75,13 +79,12 @@
      * @param translate {Array}
      * @param callback {function}
      */
-    dhis2.translate.get = function (translate, callback) {
+    translate.get = function (translate, callback) {
         var translateKeys = [],
             key;
 
         //Only ask for the translations that we do not already have
         for (key in translate) {
-            //console.log( translationCache.hasOwnProperty(translate[key]));
             if ( ! (translate[key] in translationCache)) {
                 translateKeys.push(translate[key]);
             }
@@ -96,4 +99,4 @@
 
     };
 
-})(jQuery, dhis2);
+})(jQuery, dhis2.translate);
