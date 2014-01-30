@@ -13,8 +13,8 @@
     position: relative;
 }
 
-.app-menu-item,
-.app-menu-placeholder {
+.app-menu .app-menu-item,
+.app-menu .app-menu-placeholder {
     margin: 10px;
     display: block;
     border: 2px solid transparent;
@@ -24,7 +24,7 @@
     border-radius: 8px;
     padding: 10px
 }
-.app-menu-item img {
+.app-menu .app-menu-item img {
     max-height: 36px;
     max-width: 36px;
     display: block;
@@ -32,7 +32,7 @@
     top: 25%;
     position: absolute;
 }
-.app-menu-item span {
+.app-menu .app-menu-item span {
     font-size: 1.3em;
     padding-left: 48px;
     display: block;
@@ -40,8 +40,8 @@
     padding-top: 15px;
 }
 
-.app-menu-placeholder,
-.app-menu-item:hover {
+.app-menu .app-menu-placeholder,
+.app-menu .app-menu-item:hover {
     border: 2px dotted rgba(0, 0, 0, .2);
 }
 
@@ -51,11 +51,11 @@
 
 .app-menu li:hover a .app-menu-item-description {
     position: absolute;
-    top: 15%;
+    top: 0;
     right: 0;
     bottom: 0;
     left: 0;
-    background: rgba(0, 31, 128, 0.75);
+    background: #4A89BA;
     display: block;
     margin: 10px;
     padding: 5px 10px;
@@ -63,4 +63,126 @@
     color: #fff;
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+/**
+ * App menu item
+ */
+#menuLink1 i.fa-th {
+    font-size: 2em;
+    padding-right: 10px;
+    position: relative;
+    top: 5px;
+}
+
+/**
+ * App menu dropdown box
+ */
+.app-menu-dropdown {
+    background-color: #fff;
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 1px solid #bbb;
+    border-radius: 2px;
+    box-shadow: 0px 0px 3px #bbb;
+    color: #000;
+    overflow-y: inherit;
+    padding: 10px;
+    width: 360px;
+}
+
+.app-menu-dropdown ul {
+    margin: 0;
+}
+
+.app-menu-dropdown li {
+    float: left;
+}
+
+.app-menu-dropdown img {
+    padding-left: 36px;
+    padding-right: 36px;
+    padding-top: 15px;
+    padding-bottom: 5px;
+}
+
+.app-menu-dropdown span {
+    display: block;
+    height: 30px;
+    opacity: 1;
+    padding-left: 10px;
+    padding-right: 10px;
+    text-align: center;
+    width: 100px;
+}
+
+.app-menu-dropdown .caret-up-background,
+.app-menu-dropdown .caret-up-border {
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.app-menu-dropdown .caret-up-background {
+    border-bottom: 10px solid #fff;
+    top: -9px;
+}
+
+.app-menu-dropdown .caret-up-border {
+    border-bottom: 10px solid #bbb;
+    top: -10px;
+}
+
+.app-menu-dropdown a.app-menu-item {
+    color: #000;
+    display: block;
+    height: 110px;
+    padding: 0;
+    width: 120px;
+}
+
+.app-menu-dropdown a.app-menu-item:hover span {
+    color: #fff;
+    padding-left: 10px;
+    padding-right: 10px;
+    text-align: center;
+    width:100px;
+}
+
+.apps-menu-more {
+    display: table;
+    height: 30px;
+    padding-top: 10px;
+    text-align: center;
+    width: 100%;
+}
+
+.apps-menu-more a {
+    color: #4A89BA;
+    border: 1px solid #4A89BA;
+    border-radius: 5px;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.apps-menu-more a:hover {
+    color: #fff;
+    background-color: #4A89BA;
+}
+
+/**
+ * Overrides
+ * TODO: Merge these with the main stylesheet
+ */
+#menuDropDown1 {
+    top: 55px;
+    left: 575px;
+}
+
+#menuDropDown1 .caret-up-background,
+#menuDropDown1 .caret-up-border {
+    left: 121px;
 }

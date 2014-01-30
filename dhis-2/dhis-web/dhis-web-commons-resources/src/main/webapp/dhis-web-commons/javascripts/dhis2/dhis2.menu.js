@@ -174,6 +174,14 @@
 
     $.template('appMenuItemTemplate', markup);
 
+    function renderDropDownFavorites() {
+        var selector = '#menuDropDown1 .menuDropDownBox',
+            favorites = dhis2.menu.getFavorites();
+
+        $(selector).parent().addClass('app-menu-dropdown ui-helper-clearfix');
+        return $.tmpl( "appMenuItemTemplate", favorites).appendTo(selector);
+    }
+
     function renderFavorites(selector) {
         var favorites = dhis2.menu.getFavorites();
         $('#' + selector).before($('<div id="' + selector + '_favorites"><ul></ul></div>'));
@@ -201,6 +209,7 @@
 
         renderFavorites(selector);
         renderNotFavorites(selector);
+        renderDropDownFavorites();
 
         $('#' + selector + ' ul').sortable(options);
         $('#' + selector + '_favorites ul').sortable(favoriteOptions);
