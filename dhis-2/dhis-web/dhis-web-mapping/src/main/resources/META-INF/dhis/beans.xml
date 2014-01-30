@@ -14,9 +14,6 @@
         class="org.hisp.dhis.mapping.action.InitializeAction"
         scope="prototype">
         <property name="configurationService" ref="org.hisp.dhis.configuration.ConfigurationService" />
-        <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-        <property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
-        <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
     </bean>
 
 	<!-- OrganisationUnit -->
