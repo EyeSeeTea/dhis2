@@ -59,13 +59,6 @@
 
     <!-- Period -->
 
-    <action name="getAllPeriodTypes"
-      class="org.hisp.dhis.mapping.action.GetAllPeriodTypesAction">
-      <result name="success" type="velocity-json">
-        /dhis-web-mapping/jsonPeriodTypes.vm
-      </result>
-    </action>
-
     <action name="getPeriodsByPeriodType"
       class="org.hisp.dhis.mapping.action.GetPeriodsByPeriodTypeAction">
       <result name="success" type="velocity-json">/dhis-web-mapping/jsonPeriods.vm
