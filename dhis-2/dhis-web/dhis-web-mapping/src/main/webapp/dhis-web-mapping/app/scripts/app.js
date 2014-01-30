@@ -3,6 +3,24 @@ Ext.onReady( function() {
 		initialize;
 		//gis;
 
+	// set app config
+	(function() {
+
+		// ext configuration
+		Ext.QuickTips.init();
+
+		Ext.override(Ext.LoadMask, {
+			onHide: function() {
+				this.callParent();
+			}
+		});
+
+		// right click handler
+		document.body.oncontextmenu = function() {
+			return false;
+		};
+	}());
+
 	GIS.app = {};
 
 	GIS.app.extendInstance = function(gis) {
@@ -8599,20 +8617,34 @@ Ext.onReady( function() {
 	};
 
 	initialize = function() {
+		var requests = [],
+			callbacks = 0,
+			init = {},
+			fn;
 
-		// ext configuration
-		Ext.QuickTips.init();
+		fn = function() {
+			if (++callbacks === requests.length) {
 
-		Ext.override(Ext.LoadMask, {
-			onHide: function() {
-				this.callParent();
+				NS.instances.push(ns);
+
+				ns.core = NS.getCore(init);
+				extendCore(ns.core);
+
+				dimConf = ns.core.conf.finals.dimension;
+				ns.app.viewport = createViewport();
 			}
-		});
-
-		// right click handler
-		document.body.oncontextmenu = function() {
-			return false;
 		};
+
+        Ext.Ajax.request({
+            url: 'manifest.webapp',
+			success: function(r) {
+				init.contextPath = Ext.decode(r.responseText).activities.dhis.href;
+
+				Ext.Ajax.request({
+					url: 'i18n.json',
+					success: function(r) {
+						var i18nArray = Ext.decode(r.responseText);
+
 
 		Ext.Ajax.request({
 			url: '../initialize.action',
