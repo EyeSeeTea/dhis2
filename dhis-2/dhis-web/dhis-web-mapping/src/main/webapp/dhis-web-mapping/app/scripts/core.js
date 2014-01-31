@@ -361,7 +361,26 @@ Ext.onReady( function() {
 											forceSelection: true,
 											width: 258, //todo
 											labelWidth: 70,
-											store: gis.store.infrastructuralPeriodsByType,
+											store: {
+												fields: ['id', 'name'],
+												data: function() {													
+													var pt = new PeriodType(),
+														pType = gis.init.systemSettings.infrastructuralPeriodType,
+														data;
+														
+													data = pt.get(pType).generatePeriods({
+														offset: 0,
+														filterFuturePeriods: true,
+														reversePeriods: true
+													});
+
+													if (Ext.isArray(data) && data.length) {
+														data = data.slice(0,5);
+													}
+
+													return data;
+												}()
+											},												
 											lockPosition: false,
 											listeners: {
 												select: function() {
@@ -479,8 +498,9 @@ Ext.onReady( function() {
 					}
 				}));
 			}
-
-			if (isRelocate && isPoint) {
+			
+			//if (isRelocate && isPoint) {
+			if (true) {
 
                 if (layer.id !== 'facility') {
                     menuItems.push({

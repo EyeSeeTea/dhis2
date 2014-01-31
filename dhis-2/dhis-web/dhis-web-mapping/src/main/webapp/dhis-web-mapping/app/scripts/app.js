@@ -8741,7 +8741,7 @@ Ext.onReady( function() {
 
                                 // infrastructural period type
 								requests.push({
-									url: init.contextPath + '/api/configuration/infrastructuralDataElements.json',
+									url: init.contextPath + '/api/configuration/infrastructuralPeriodType.json',
 									success: function(r) {
 										var obj = Ext.decode(r.responseText);
 

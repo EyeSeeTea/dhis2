@@ -30,6 +30,7 @@ package org.hisp.dhis.api.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.configuration.ConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -50,55 +51,52 @@ public class ConfigurationController
     @RequestMapping( value = "/systemId", method = RequestMethod.GET )
     private String getSystemId( Model model, HttpServletRequest request )
     {
-        setModel( model, configurationService.getConfiguration().getSystemId() );
-        return "config";
+        return setModel( model, configurationService.getConfiguration().getSystemId() );
     }
 
     @RequestMapping( value = "/feedbackRecipients", method = RequestMethod.GET )
     private String getFeedbackRecipients(  Model model, HttpServletRequest request )
     {
-        setModel( model, configurationService.getConfiguration().getFeedbackRecipients() );
-        return "config";
+        return setModel( model, configurationService.getConfiguration().getFeedbackRecipients() );
     }
     
     @RequestMapping( value = "/offlineOrganisationUnitLevel", method = RequestMethod.GET )
     private String getOfflineOrganisationUnitLevel(  Model model, HttpServletRequest request )
     {
-        setModel( model, configurationService.getConfiguration().getOfflineOrganisationUnitLevel() );
-        return "config";
+        return setModel( model, configurationService.getConfiguration().getOfflineOrganisationUnitLevel() );
     }
 
     @RequestMapping( value = "/infrastructuralDataElements", method = RequestMethod.GET )
     private String getInfrastructuralDataElements( Model model, HttpServletRequest request )
     {
-        setModel( model, configurationService.getConfiguration().getInfrastructuralDataElements() );
-        return "config";
+        return setModel( model, configurationService.getConfiguration().getInfrastructuralDataElements() );
     }
 
     @RequestMapping( value = "/infrastructuralPeriodType", method = RequestMethod.GET )
     private String getInfrastructuralPeriodType( Model model, HttpServletRequest request )
     {
-        setModel( model, configurationService.getConfiguration().getInfrastructuralPeriodType() );
-        return "config";
+        String name = configurationService.getConfiguration().getInfrastructuralPeriodTypeDefaultIfNull().getName();
+        BaseIdentifiableObject entity = new BaseIdentifiableObject( name, name, name );
+        
+        return setModel( model, entity );
     }
 
     @RequestMapping( value = "/selfRegistrationRole", method = RequestMethod.GET )
     private String getSelfRegistrationRole( Model model, HttpServletRequest request )
     {
-        setModel( model, configurationService.getConfiguration().getSelfRegistrationRole() );
-        return "config";
+        return setModel( model, configurationService.getConfiguration().getSelfRegistrationRole() );
     }
 
     @RequestMapping( value = "/selfRegistrationOrgUnit", method = RequestMethod.GET )
     private String getSelfRegistrationOrgUnit( Model model, HttpServletRequest request )
     {
-        setModel( model, configurationService.getConfiguration().getSelfRegistrationOrgUnit() );
-        return "config";
+        return setModel( model, configurationService.getConfiguration().getSelfRegistrationOrgUnit() );
     }
 
-    private void setModel( Model model, Object entity )
+    private String setModel( Model model, Object entity )
     {
         model.addAttribute( "model", entity );
         model.addAttribute( "viewClass", "detailed" );
+        return "config";
     }
 }
