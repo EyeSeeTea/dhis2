@@ -8619,7 +8619,9 @@ Ext.onReady( function() {
 	initialize = function() {
 		var requests = [],
 			callbacks = 0,
-			init = {},
+			init = {
+				systemSettings: {}
+			},
 			fn;
 
 		fn = function() {
@@ -8726,11 +8728,24 @@ Ext.onReady( function() {
 									}
 								});
 
-                                // infrastructural
+                                // infrastructural data element group
 								requests.push({
-									url: init.contextPath + '/dhis-web-mapping/initialize.action',
+									url: init.contextPath + '/api/configuration/infrastructuralDataElements.json',
 									success: function(r) {
-										init.systemSettings = Ext.decode(r.responseText).systemSettings || {};
+										var obj = Ext.decode(r.responseText);
+
+										init.systemSettings.infrastructuralDataElementGroup = Ext.isString(obj.id) ? obj.id : null;
+										fn();
+									}
+								});
+
+                                // infrastructural period type
+								requests.push({
+									url: init.contextPath + '/api/configuration/infrastructuralDataElements.json',
+									success: function(r) {
+										var obj = Ext.decode(r.responseText);
+
+										init.systemSettings.infrastructuralPeriodType = Ext.isString(obj.id) ? obj.id : null;
 										fn();
 									}
 								});
@@ -8744,25 +8759,5 @@ Ext.onReady( function() {
                 });
             }
         });
-
-
-
-
-		//Ext.Ajax.request({
-			//url: '../initialize.action',
-			//success: function(r) {
-				//var init = Ext.decode(r.responseText);
-
-				//GIS.i18n = init.i18n;
-
-				//gis = GIS.core.getInstance(init);
-
-				//GIS.app.createExtensions();
-
-				//GIS.app.extendInstance(gis);
-
-				//gis.viewport = createViewport();
-			//}
-		//});
 	}();
 });
