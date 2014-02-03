@@ -103,12 +103,17 @@ public class User
     private Set<UserGroup> groups = new HashSet<UserGroup>();
 
     /**
-     * All OrgUnits where the user could belong <p/> TODO This should have been
-     * put in UserCredentials
+     * Organisation unit roots where the user could belong and capture data.
+     * TODO Move to UserCredentials.
      */
     @Scanned
     private Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
 
+    /**
+     * Organisation units roots for which the user can view data.
+     */
+    private Set<OrganisationUnit> dataViewOrganisationUnits = new HashSet<OrganisationUnit>();
+    
     /**
      * Set of the dynamic attributes values that belong to this User.
      */
@@ -437,6 +442,21 @@ public class User
     public void setOrganisationUnits( Set<OrganisationUnit> organisationUnits )
     {
         this.organisationUnits = organisationUnits;
+    }
+
+    @JsonProperty
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlElementWrapper( localName = "dataViewOrganisationUnits", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "organisationUnit", namespace = DxfNamespaces.DXF_2_0 )
+    public Set<OrganisationUnit> getDataViewOrganisationUnits()
+    {
+        return dataViewOrganisationUnits;
+    }
+
+    public void setDataViewOrganisationUnits( Set<OrganisationUnit> dataViewOrganisationUnits )
+    {
+        this.dataViewOrganisationUnits = dataViewOrganisationUnits;
     }
 
     @JsonProperty( value = "attributes" )
