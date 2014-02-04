@@ -3530,6 +3530,7 @@ console.log(favorite);
 		};
 
 		// period
+
 		rewind = Ext.create('Ext.form.field.Checkbox', {
 			relativePeriodId: 'rewind',
 			boxLabel: 'Rewind one period',
@@ -4085,6 +4086,7 @@ console.log(favorite);
 		};
 
 		// organisation unit
+
 		treePanel = Ext.create('Ext.tree.Panel', {
 			cls: 'ns-tree',
 			style: 'border-top: 1px solid #ddd; padding-top: 1px',
@@ -4548,6 +4550,7 @@ console.log(favorite);
         };
 
 		// dimensions
+
 		getDimensionPanels = function(dimensions, iconCls) {
 			var	getAvailableStore,
 				getSelectedStore,
@@ -4773,6 +4776,7 @@ console.log(favorite);
 		};
 
 		// viewport
+
 		update = function() {
 			var config = ns.core.web.pivot.getLayoutConfig(),
 				layout = ns.core.api.layout.Layout(config);
