@@ -156,14 +156,14 @@ public class DefaultExpressionService
     // -------------------------------------------------------------------------
     
     public Double getIndicatorValue( Indicator indicator, Period period, Map<DataElementOperand, Double> valueMap, 
-        Map<String, Double> constantMap, Integer orgUnitCount, Integer days )
+        Map<String, Double> constantMap, Map<String, Integer> orgUnitCountMap, Integer days )
     {
         if ( indicator == null || indicator.getExplodedNumeratorFallback() == null || indicator.getExplodedDenominatorFallback() == null )
         {
             return null;
         }
         
-        final String denominatorExpression = generateExpression( indicator.getExplodedDenominatorFallback(), valueMap, constantMap, orgUnitCount, days, false );
+        final String denominatorExpression = generateExpression( indicator.getExplodedDenominatorFallback(), valueMap, constantMap, orgUnitCountMap, days, false );
         
         if ( denominatorExpression == null )
         {
@@ -174,7 +174,7 @@ public class DefaultExpressionService
         
         if ( !isEqual( denominatorValue, 0d ) )
         {
-            final String numeratorExpression = generateExpression( indicator.getExplodedNumeratorFallback(), valueMap, constantMap, orgUnitCount, days, false );
+            final String numeratorExpression = generateExpression( indicator.getExplodedNumeratorFallback(), valueMap, constantMap, orgUnitCountMap, days, false );
             
             if ( numeratorExpression == null )
             {
@@ -194,18 +194,18 @@ public class DefaultExpressionService
     }
 
     public Double getExpressionValue( Expression expression, Map<DataElementOperand, Double> valueMap,
-        Map<String, Double> constantMap, Integer orgUnitCount, Integer days )
+        Map<String, Double> constantMap, Map<String, Integer> orgUnitCountMap, Integer days )
     {
         final String expressionString = generateExpression( expression.getExpression(), valueMap, constantMap, 
-            orgUnitCount, days, expression.isNullIfBlank() );
+            orgUnitCountMap, days, expression.isNullIfBlank() );
 
         return expressionString != null ? calculateExpression( expressionString ) : null;
     }
 
     public Double getExpressionValue( Expression expression, Map<DataElementOperand, Double> valueMap,
-        Map<String, Double> constantMap, Integer orgUnitCount, Integer days, Set<DataElementOperand> incompleteValues )
+        Map<String, Double> constantMap, Map<String, Integer> orgUnitCountMap, Integer days, Set<DataElementOperand> incompleteValues )
     {
-        final String expressionString = generateExpression( expression.getExpression(), valueMap, constantMap, orgUnitCount, days,
+        final String expressionString = generateExpression( expression.getExpression(), valueMap, constantMap, orgUnitCountMap, days,
             expression.isNullIfBlank(), incompleteValues );
 
         return expressionString != null ? calculateExpression( expressionString ) : null;
@@ -236,7 +236,25 @@ public class DefaultExpressionService
         return dataElementsInExpression;
     }
     
-    public Set<OrganisationUnitGroup> getOrganisationUnitGroupsInExpresion( String expression )
+    public Set<OrganisationUnitGroup> getOrganisationUnitGroupsInIndicators( Collection<Indicator> indicators )
+    {
+        Set<OrganisationUnitGroup> groups = null;
+        
+        if ( indicators != null )
+        {
+            groups = new HashSet<OrganisationUnitGroup>();
+            
+            for ( Indicator indicator : indicators )
+            {
+                groups.addAll( getOrganisationUnitGroupsInExpression( indicator.getNumerator() ) );
+                groups.addAll( getOrganisationUnitGroupsInExpression( indicator.getDenominator() ) );
+            }
+        }
+        
+        return groups;
+    }
+    
+    public Set<OrganisationUnitGroup> getOrganisationUnitGroupsInExpression( String expression )
     {
         Set<OrganisationUnitGroup> groupsInExpression = null;
         
@@ -753,13 +771,13 @@ public class DefaultExpressionService
 
     @Transactional
     public String generateExpression( String expression, Map<DataElementOperand, Double> valueMap, 
-        Map<String, Double> constantMap, Integer orgUnitCount, Integer days, boolean nullIfNoValues )
+        Map<String, Double> constantMap, Map<String, Integer> orgUnitCountMap, Integer days, boolean nullIfNoValues )
     {
-    	return generateExpression( expression, valueMap, constantMap, orgUnitCount, days, nullIfNoValues, null );
+    	return generateExpression( expression, valueMap, constantMap, orgUnitCountMap, days, nullIfNoValues, null );
     }
 
     private String generateExpression( String expression, Map<DataElementOperand, Double> valueMap, 
-        Map<String, Double> constantMap, Integer orgUnitCount, Integer days, boolean nullIfNoValues, Set<DataElementOperand> incompleteValues )
+        Map<String, Double> constantMap, Map<String, Integer> orgUnitCountMap, Integer days, boolean nullIfNoValues, Set<DataElementOperand> incompleteValues )
     {
         if ( expression == null || expression.isEmpty() )
         {
@@ -800,7 +818,7 @@ public class DefaultExpressionService
         
         while ( matcher.find() )
         {
-            final Double constant = constantMap.get( matcher.group( 1 ) );
+            final Double constant = constantMap != null ? constantMap.get( matcher.group( 1 ) ) : null;
             
             String replacement = constant != null ? String.valueOf( constant ) : NULL_REPLACEMENT;
             
@@ -818,7 +836,9 @@ public class DefaultExpressionService
         
         while ( matcher.find() )
         {
-            String replacement = orgUnitCount != null ? String.valueOf( orgUnitCount ) : NULL_REPLACEMENT;
+            final Integer count = orgUnitCountMap != null ? orgUnitCountMap.get( matcher.group( 1 ) ) : null;
+            
+            String replacement = count != null ? String.valueOf( count ) : NULL_REPLACEMENT;
             
             matcher.appendReplacement( sb, replacement );
         }
