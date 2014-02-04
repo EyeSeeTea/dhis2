@@ -81,12 +81,12 @@ public class DefaultDataValueService
             {
                 dataValue.setCategoryOptionCombo( categoryService.getDefaultDataElementCategoryOptionCombo() );
             }
-            
+
             if ( dataValue.getAttributeOptionCombo() == null )
             {
                 dataValue.setAttributeOptionCombo( categoryService.getDefaultDataElementCategoryOptionCombo() );
             }
-            
+
             dataValueStore.addDataValue( dataValue );
         }
     }
@@ -121,26 +121,28 @@ public class DefaultDataValueService
         return dataValueStore.deleteDataValuesByDataElement( dataElement );
     }
 
-    public DataValue getDataValue( DataElement dataElement, Period period, OrganisationUnit source, DataElementCategoryOptionCombo categoryOptionCombo )
+    public DataValue getDataValue( DataElement dataElement, Period period, OrganisationUnit source,
+        DataElementCategoryOptionCombo categoryOptionCombo )
     {
         DataElementCategoryOptionCombo defaultOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
-        
+
         return dataValueStore.getDataValue( dataElement, period, source, categoryOptionCombo, defaultOptionCombo );
     }
 
-    public DataValue getDataValue( DataElement dataElement, Period period, OrganisationUnit source, 
+    public DataValue getDataValue( DataElement dataElement, Period period, OrganisationUnit source,
         DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo )
     {
         return dataValueStore.getDataValue( dataElement, period, source, categoryOptionCombo, attributeOptionCombo );
     }
-    
+
     public DataValue getDataValue( int dataElementId, int periodId, int sourceId, int categoryOptionComboId )
     {
         DataElementCategoryOptionCombo defaultOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
-        
-        return dataValueStore.getDataValue( dataElementId, periodId, sourceId, categoryOptionComboId, defaultOptionCombo.getId() );
+
+        return dataValueStore.getDataValue( dataElementId, periodId, sourceId, categoryOptionComboId,
+            defaultOptionCombo.getId() );
     }
-    
+
     // -------------------------------------------------------------------------
     // Collections of DataValues
     // -------------------------------------------------------------------------
@@ -165,19 +167,20 @@ public class DefaultDataValueService
         return dataValueStore.getDataValues( sources, dataElement );
     }
 
-    public Collection<DataValue> getDataValues( OrganisationUnit source, Period period, Collection<DataElement> dataElements )
+    public Collection<DataValue> getDataValues( OrganisationUnit source, Period period,
+        Collection<DataElement> dataElements )
     {
         return dataValueStore.getDataValues( source, period, dataElements );
     }
 
-    public Collection<DataValue> getDataValues( OrganisationUnit source, Period period, 
+    public Collection<DataValue> getDataValues( OrganisationUnit source, Period period,
         Collection<DataElement> dataElements, DataElementCategoryOptionCombo attributeOptionCombo )
     {
         return dataValueStore.getDataValues( source, period, dataElements, attributeOptionCombo );
     }
 
-    public Collection<DataValue> getDataValues( OrganisationUnit source, Period period, Collection<DataElement> dataElements,
-        Collection<DataElementCategoryOptionCombo> optionCombos )
+    public Collection<DataValue> getDataValues( OrganisationUnit source, Period period,
+        Collection<DataElement> dataElements, Collection<DataElementCategoryOptionCombo> optionCombos )
     {
         return dataValueStore.getDataValues( source, period, dataElements, optionCombos );
     }
@@ -223,20 +226,29 @@ public class DefaultDataValueService
 
         return dataValueStore.getDataValueCount( cal.getTime() );
     }
-    
-    public Map<DataElementOperand, Double> getDataValueMap( Collection<DataElement> dataElements, Period period, OrganisationUnit source )
+
+    public Map<DataElementOperand, Double> getDataValueMap( Collection<DataElement> dataElements, Period period,
+        OrganisationUnit source )
     {
         return dataValueStore.getDataValueMap( dataElements, period, source );
     }
-    
-    public Map<DataElementOperand, Double> getDataValueMap( Collection<DataElement> dataElements, Date date, OrganisationUnit source,
-    		Collection<PeriodType> periodTypes, Map<DataElementOperand, Date> lastUpdatedMap )
+
+    public Map<DataElementOperand, Double> getDataValueMap( Collection<DataElement> dataElements, Date date,
+        OrganisationUnit source, Collection<PeriodType> periodTypes, Map<DataElementOperand, Date> lastUpdatedMap )
     {
-    	return dataValueStore.getDataValueMap( dataElements, date, source, periodTypes, lastUpdatedMap );
+        return dataValueStore.getDataValueMap( dataElements, date, source, periodTypes, lastUpdatedMap );
     }
-    
-    public Collection<DeflatedDataValue> getDeflatedDataValues( int dataElementId, int periodId, Collection<Integer> sourceIds )
+
+    public Collection<DeflatedDataValue> getDeflatedDataValues( int dataElementId, int periodId,
+        Collection<Integer> sourceIds )
     {
         return dataValueStore.getDeflatedDataValues( dataElementId, periodId, sourceIds );
+    }
+
+    @Override
+    public Collection<DeflatedDataValueDaily> getDeflatedDataValuesDaily( int dataElementId, int periodId,
+        Collection<Integer> sourceIds )
+    {
+        return dataValueStore.getDeflatedDataValuesDaily( dataElementId, periodId, sourceIds );
     }
 }

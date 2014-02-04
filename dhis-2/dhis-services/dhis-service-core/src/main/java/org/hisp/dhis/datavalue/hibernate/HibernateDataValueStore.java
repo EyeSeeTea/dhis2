@@ -52,11 +52,13 @@ import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueStore;
 import org.hisp.dhis.datavalue.DeflatedDataValue;
+import org.hisp.dhis.datavalue.DeflatedDataValueDaily;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodStore;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.objectmapper.DataValueRowMapper;
+import org.hisp.dhis.system.objectmapper.DeflatedDataValueDailyRowMapper;
 import org.hisp.dhis.system.objectmapper.DeflatedDataValueRowMapper;
 import org.hisp.dhis.system.util.ConversionUtils;
 import org.hisp.dhis.system.util.DateUtils;
@@ -567,5 +569,18 @@ public class HibernateDataValueStore
             "AND sourceid IN ( " + getCommaDelimitedString( sourceIds ) + " )";
         
         return jdbcTemplate.query( sql, new DeflatedDataValueRowMapper() );
+    }
+
+    @Override
+    public Collection<DeflatedDataValueDaily> getDeflatedDataValuesDaily( int dataElementId, int periodId,
+        Collection<Integer> sourceIds )
+    {
+        final String sql =
+            "SELECT * FROM datavalue " +
+            "WHERE dataelementid = " + dataElementId + " " +
+            "AND periodid = " + periodId + " " +
+            "AND sourceid IN ( " + getCommaDelimitedString( sourceIds ) + " )";
+        
+        return jdbcTemplate.query( sql, new DeflatedDataValueDailyRowMapper() );
     }
 }

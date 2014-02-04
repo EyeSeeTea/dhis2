@@ -55,8 +55,8 @@ extends AbstractXSDConverter
 
     public void write( XMLWriter writer, ExportParams params )
     {
-        if ( params.getOrganisationUnits() != null && params.getOrganisationUnits().size() > 0 )
-        {
+        //if ( params.getOrganisationUnits() != null && params.getOrganisationUnits().size() > 0 )
+        //{
             writer.openElement( "xsd:element", "name", "OrgHierarchy" );
 
             writeAnnotation( writer );
@@ -84,7 +84,7 @@ extends AbstractXSDConverter
             writer.closeElement();
 
             writer.closeElement();
-        }
+        //}
     }
 
     public void read( XMLReader reader, ImportParams params )

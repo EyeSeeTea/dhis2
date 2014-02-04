@@ -46,8 +46,8 @@ extends AbstractXSDConverter
     }
       public void write( XMLWriter writer, ExportParams params )
     {
-        if ( params.getOrganisationUnits() != null && params.getOrganisationUnits().size() > 0 )
-        {
+        //if ( params.getOrganisationUnits() != null && params.getOrganisationUnits().size() > 0 )
+        //{
             writer.openElement( "xsd:element", "name", "OrgUnit" );
 
             writeAnnotation( writer );
@@ -57,6 +57,8 @@ extends AbstractXSDConverter
             writer.openElement( "xsd:sequence" );
 
             writeInteger( writer, "OrgUnitID", 1, true );
+            
+            writeText( writer, "UID", 0, false, 11 );
 
             writeText( writer, "OrgUnitCode", 0, false, 15 );
 
@@ -73,6 +75,10 @@ extends AbstractXSDConverter
             writeInteger ( writer, "Active", 1, true);
 
             writeMemo( writer, "Comment", 0, false, 536870910 );
+            
+            writeDouble( writer, "Latitude", 1, true );
+            
+            writeDouble( writer, "Longitude", 1, true );
 
             writeInteger( writer, "Selected", 1, true );
 
@@ -83,14 +89,26 @@ extends AbstractXSDConverter
             writeText( writer, "OrgUnitNameOld", 0, false, 230 );
 
             writeText( writer, "OrgUnitShortOld", 0, false, 25 );
+            
+            writeText( writer, "OrgUnitGUIDAlt1", 0, false, 50 );
+            
+            writeText( writer, "OrgUnitCodeAlt1", 0, false, 18 );
 
             writeText( writer, "OrgUnitNameAlt1", 0, false, 230 );
 
             writeText( writer, "OrgUnitShortAlt1", 0, false, 25 );
+            
+            writeText( writer, "OrgUnitGUIDAlt2", 0, false, 50 );
+            
+            writeText( writer, "OrgUnitCodeAlt2", 0, false, 18 );
 
             writeText( writer, "OrgUnitNameAlt2", 0, false, 230 );
 
             writeText( writer, "OrgUnitShortAlt2", 0, false, 25 );
+            
+            writeText( writer, "OrgUnitGUIDAlt3", 0, false, 50 );
+            
+            writeText( writer, "OrgUnitCodeAlt3", 0, false, 18 );
 
             writeText( writer, "OrgUnitNameAlt3", 0, false, 230 );
 
@@ -101,7 +119,7 @@ extends AbstractXSDConverter
             writer.closeElement();
 
             writer.closeElement();
-        }
+        //}
     }
 
     public void read( XMLReader reader, ImportParams params )

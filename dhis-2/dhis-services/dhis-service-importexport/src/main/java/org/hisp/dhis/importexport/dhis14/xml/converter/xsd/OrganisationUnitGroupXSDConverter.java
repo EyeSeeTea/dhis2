@@ -47,7 +47,30 @@ public class OrganisationUnitGroupXSDConverter
 
         public void write( XMLWriter writer, ExportParams params )
     {
-      // Not implemented
+        	writer.openElement( "xsd:element", "name", "OrgUnitGroup" );
+
+            writeAnnotation( writer );
+            
+            writer.openElement( "xsd:complexType" );
+            
+            writer.openElement( "xsd:sequence" );
+            
+            writeInteger( writer, "OrgUnitGroupID", 1, true );
+            
+            writeText( writer, "OrgUnitGroupName", 1, true, 230 );
+            
+            writeMemo( writer, "OrgUnitGroupDescription", 0, false, 536870910 );
+            
+            writeText( writer, "UID", 1, true, 11 );
+            //added
+            writeInteger( writer, "LastUserID", 1, true );
+            writeDateTime( writer, "LastUpdated", 1, true );
+            
+            writer.closeElement();
+            
+            writer.closeElement();
+            
+            writer.closeElement();
      }
 
             public void read( XMLReader reader, ImportParams params )

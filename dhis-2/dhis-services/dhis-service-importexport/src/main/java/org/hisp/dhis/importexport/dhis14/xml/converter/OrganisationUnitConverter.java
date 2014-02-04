@@ -57,6 +57,7 @@ public class OrganisationUnitConverter
     public static final String ELEMENT_NAME = "OrgUnit";
     
     private static final String FIELD_ID = "OrgUnitID";
+    private static final String FIELD_UID = "UID";
     private static final String FIELD_CODE = "OrgUnitCode";
     private static final String FIELD_LEVEL = "OrgUnitLevel";
     private static final String FIELD_NAME = "OrgUnitName";
@@ -65,9 +66,26 @@ public class OrganisationUnitConverter
     private static final String FIELD_VALID_TO = "ValidTo";
     private static final String FIELD_ACTIVE = "Active";
     private static final String FIELD_COMMENT = "Comment";
+    private static final String FIELD_LATITUDE = "Latitude";
+    private static final String FIELD_LONGITUDE = "Longitude";
     private static final String FIELD_SELECTED = "Selected";
     private static final String FIELD_LAST_USER = "LastUserID";
     private static final String FIELD_LAST_UPDATED = "LastUpdated";
+    
+    private static final String FIELD_ORGUNITNAMEOLD = "OrgUnitNameOld";
+    private static final String FIELD_ORGUNITSHORTOLD = "OrgUnitShortOld";
+    private static final String FIELD_ORGUNITGUIDALT1 = "OrgUnitGUIDAlt1";
+    private static final String FIELD_ORGUNITCODEALT1 = "OrgUnitCodeAlt1";
+    private static final String FIELD_ORGUNITNAMEALT1 = "OrgUnitNameAlt1";
+    private static final String FIELD_ORGUNITSHORTALT1 = "OrgUnitShortAlt1";
+    private static final String FIELD_ORGUNITGUIDALT2 = "OrgUnitGUIDAlt2";
+    private static final String FIELD_ORGUNITCODEALT2 = "OrgUnitCodeAlt2";
+    private static final String FIELD_ORGUNITNAMEALT2 = "OrgUnitNameAlt2";
+    private static final String FIELD_ORGUNITSHORTALT2 = "OrgUnitShortAlt2";
+    private static final String FIELD_ORGUNITGUIDALT3 = "OrgUnitGUIDAlt3";
+    private static final String FIELD_ORGUNITCODEALT3 = "OrgUnitCodeAlt3";
+    private static final String FIELD_ORGUNITNAMEALT3 = "OrgUnitNameAlt3";
+    private static final String FIELD_ORGUNITSHORTALT3 = "OrgUnitShortAlt3";
 
     private static final int VALID_FROM = 34335;
     private static final int VALID_TO = 2958465;
@@ -116,6 +134,7 @@ public class OrganisationUnitConverter
                 writer.openElement( ELEMENT_NAME );
                 
                 writer.writeElement( FIELD_ID, String.valueOf( unit.getId() ) );
+                writer.writeElement( FIELD_UID, unit.getUid() );
                 writer.writeElement( FIELD_CODE, unit.getCode() );
                 writer.writeElement( FIELD_LEVEL, String.valueOf( level ) );
                 writer.writeElement( FIELD_NAME, unit.getName() );
@@ -124,9 +143,27 @@ public class OrganisationUnitConverter
                 writer.writeElement( FIELD_VALID_TO, String.valueOf( VALID_TO ) );
                 writer.writeElement( FIELD_ACTIVE, convertBooleanToDhis14( unit.isActive() ) );
                 writer.writeElement (FIELD_COMMENT, unit.getComment() );
+                writer.writeElement (FIELD_LATITUDE, String.valueOf( 0 ) );
+                writer.writeElement (FIELD_LONGITUDE, String.valueOf( 0 ) );
                 writer.writeElement( FIELD_SELECTED, String.valueOf( 0 ) );
                 writer.writeElement( FIELD_LAST_USER, String.valueOf( 1 ) );
                 writer.writeElement( FIELD_LAST_UPDATED, Dhis14DateUtil.getDateString( unit.getLastUpdated() ) );
+                
+                writer.writeElement( FIELD_ORGUNITNAMEOLD, "" );
+                writer.writeElement( FIELD_ORGUNITSHORTOLD, "" );
+                writer.writeElement( FIELD_ORGUNITGUIDALT1, "" );
+                writer.writeElement( FIELD_ORGUNITCODEALT1, "" );
+                writer.writeElement( FIELD_ORGUNITNAMEALT1, "" );
+                writer.writeElement( FIELD_ORGUNITSHORTALT1, "" );
+                writer.writeElement( FIELD_ORGUNITGUIDALT2, "" );
+                writer.writeElement( FIELD_ORGUNITCODEALT2, "" );
+                writer.writeElement( FIELD_ORGUNITNAMEALT2, "" );
+                writer.writeElement( FIELD_ORGUNITSHORTALT2, "" );
+                writer.writeElement( FIELD_ORGUNITGUIDALT3, "" );
+                writer.writeElement( FIELD_ORGUNITCODEALT3, "" );
+                writer.writeElement( FIELD_ORGUNITNAMEALT3, "" );
+                writer.writeElement( FIELD_ORGUNITSHORTALT3, "" );
+
                 
                 writer.closeElement();
             }

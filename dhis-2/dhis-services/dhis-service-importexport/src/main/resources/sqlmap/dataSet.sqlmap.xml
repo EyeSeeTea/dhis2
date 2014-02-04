@@ -17,6 +17,7 @@
 		<result property="name" column="DataSetName"/>
 		<result property="periodType" column="DataPeriodTypeID" typeHandler="periodTypeTypeHandler"/>
         <result property="sortOrder" column="SortOrder"/>
+        <result property="useDailyCaptureForm" column="UseDailyCaptureForm"/>
 	</resultMap>
 
 	<!-- Statement -->

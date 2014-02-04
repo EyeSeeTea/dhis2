@@ -36,6 +36,7 @@ import static org.hisp.dhis.system.util.CsvUtils.getCsvValue;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -58,8 +59,11 @@ import org.hisp.dhis.importexport.analysis.ImportAnalyser;
 import org.hisp.dhis.importexport.dhis14.util.Dhis14TypeHandler;
 import org.hisp.dhis.importexport.importer.DataValueImporter;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.period.DailyPeriodType;
+import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.MimicingHashMap;
 import org.hisp.dhis.system.util.StreamUtils;
@@ -91,6 +95,10 @@ public class DataValueConverter
     private Map<Object, Integer> periodMapping;
 
     private Map<Object, Integer> sourceMapping;
+    
+    
+    //private BigDecimal price = new BigDecimal("0");
+    //private BigDecimal  totalEntry;
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -150,6 +158,7 @@ public class DataValueConverter
 
             out.write( NEWLINE );
 
+            int i = 1;
             if ( params.isIncludeDataValues() )
             {
                 if ( params.getStartDate() != null && params.getEndDate() != null )
@@ -158,17 +167,24 @@ public class DataValueConverter
 
                     Collection<Period> periods = periodService.getIntersectingPeriods( params.getStartDate(),
                         params.getEndDate() );
-
+                    
+                   /*Period period = periodService.getPeriodFromDates( params.getStartDate(),
+                            params.getEndDate(), PeriodType.getPeriodTypeByName(MonthlyPeriodType.NAME) );*/
+                    
+                    //outerloop:
                     for ( final Integer element : params.getDataElements() )
                     {
+
                         for ( final Period period : periods )
                         {
+                        	if(period.getPeriodType().getName().equals(MonthlyPeriodType.NAME))
+                        	{
                             values = dataValueService.getDeflatedDataValues( element, period.getId(),
                                 params.getOrganisationUnits() );
 
                             for ( final DeflatedDataValue value : values )
                             {
-                                out.write( getCsvValue( 0 ) );
+                                out.write( getCsvValue( i ) );
                                 out.write( getCsvValue( value.getSourceId() ) );
                                 out.write( getCsvValue( value.getDataElementId() ) );
                                 out.write( getCsvValue( value.getPeriodId() ) );
@@ -177,16 +193,31 @@ public class DataValueConverter
                                 out.write( getCsvValue( 0 ) );
                                 out.write( getCsvValue( 0 ) );
                                 out.write( getCsvValue( csvEncode( value.getComment() ) ) );
-                                out.write( getCsvValue( 1 ) );
-                                out.write( getCsvEndValue( DateUtils.getAccessDateString( value.getTimestamp() ) ) );
+                                //out.write( getCsvValue( 1 ) );
+                                out.write( getCsvValue( 1594 ) );
+                                //out.write( getCsvEndValue( DateUtils.getAccessDateString( value.getTimestamp() ) ) );
+                                if(value.getTimestamp() != null ){
+                                	out.write( getCsvEndValue( DateUtils.getAccessDateString( value.getTimestamp() ) ) );
+                                }else{
+                                	out.write( getCsvEndValue( DateUtils.getAccessDateString( params.getStartDate() ) ) );
+                                }
+                                
 
                                 out.write( NEWLINE );
-                            }
+                                
+                                /*if(i == 5){
+                                	break outerloop;
+                                }*/
+                                i++;
+                            }   
+                            
+                        }
+                                
                         }
                     }
                 }
             }
-
+            //System.out.println("totalEntryNumber: "+totalEntry);
             StreamUtils.closeZipEntry( out );
         }
         catch ( IOException ex )
@@ -335,6 +366,13 @@ public class DataValueConverter
                 out.write( SEPARATOR_B );
                 out.write( SEPARATOR_B );
                 out.write( SEPARATOR_B );
+                
+                /*if(value.getValue() != null){
+                	BigDecimal anotherPrice = new BigDecimal(value.getValue());
+                	totalEntry = price.add(anotherPrice);
+                	//totalEntry =+ Double.parseDouble(value.getValue());
+                }*/
+                
             }
 
             else if ( dataElementType.equals( DataElement.VALUE_TYPE_DATE ) )

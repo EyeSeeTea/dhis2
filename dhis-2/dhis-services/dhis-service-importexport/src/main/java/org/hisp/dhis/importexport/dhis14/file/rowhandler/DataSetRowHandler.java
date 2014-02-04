@@ -36,6 +36,7 @@ import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.analysis.ImportAnalyser;
+import org.hisp.dhis.period.DailyPeriodType;
 import org.hisp.dhis.importexport.importer.DataSetImporter;
 import org.hisp.dhis.period.YearlyPeriodType;
 
@@ -82,8 +83,17 @@ public class DataSetRowHandler
         Integer periodTypeId = periodTypeMapping.get( dataSet.getPeriodType().getName() );
         Integer defaultId = periodTypeMapping.get( YearlyPeriodType.NAME );
         
-        dataSet.getPeriodType().setId( periodTypeId != null ? periodTypeId : defaultId );
+        //Daily DataSet
+        Integer dailyPeriodTypeId = periodTypeMapping.get( DailyPeriodType.NAME );
         
+        //dataSet.setShortName(dataSet.getName().substring(0, 49));
+        
+        if(dataSet.getUseDailyCaptureForm() == 1){
+            dataSet.getPeriodType().setId( dailyPeriodTypeId );
+        }else{
+            dataSet.getPeriodType().setId( periodTypeId != null ? periodTypeId : defaultId );
+        }
+
         importObject( dataSet, params );
     }
 }

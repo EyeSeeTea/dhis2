@@ -329,4 +329,13 @@ public interface DataValueService
      * @param sourceIds the Collection of Source identifiers.
      */
     Collection<DeflatedDataValue> getDeflatedDataValues( int dataElementId, int periodId, Collection<Integer> sourceIds );
+    
+    /**
+     * Gets a Collection of DeflatedDataValuesDaily.
+     * 
+     * @param dataElementId the DataElement identifier.
+     * @param periodId the Period identifier.
+     * @param sourceIds the Collection of Source identifiers.
+     */
+    Collection<DeflatedDataValueDaily> getDeflatedDataValuesDaily( int dataElementId, int periodId, Collection<Integer> sourceIds );
 }
