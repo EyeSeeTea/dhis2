@@ -1396,36 +1396,48 @@ Ext.onReady( function() {
 			web.multiSelect.unselect = function(a, s) {
 				var selected = s.getValue();
 				if (selected.length) {
-					Ext.Array.each(selected, function(item) {
-						s.store.remove(s.store.getAt(s.store.findExact('id', item)));
+					Ext.Array.each(selected, function(id) {
+						a.store.add(s.store.getAt(s.store.findExact('id', id)));
+						s.store.remove(s.store.getAt(s.store.findExact('id', id)));
 					});
 					this.filterAvailable(a, s);
+                    a.store.sortStore();
 				}
 			};
 
 			web.multiSelect.unselectAll = function(a, s) {
+				a.store.add(s.store.getRange());
 				s.store.removeAll();
-				a.store.clearFilter();
 				this.filterAvailable(a, s);
+                a.store.sortStore();
 			};
 
 			web.multiSelect.filterAvailable = function(a, s) {
-				a.store.filterBy( function(r) {
-					var keep = true;
-					s.store.each( function(r2) {
-						if (r.data.id == r2.data.id) {
-							keep = false;
-						}
+				if (a.store.getRange().length && s.store.getRange().length) {
+					var recordsToRemove = [];
 
+					a.store.each( function(ar) {
+						var removeRecord = false;
+
+						s.store.each( function(sr) {
+							if (sr.data.id === ar.data.id) {
+								removeRecord = true;
+							}
+						});
+
+						if (removeRecord) {
+							recordsToRemove.push(ar);
+						}
 					});
-					return keep;
-				});
-				a.store.sortStore();
+
+					a.store.remove(recordsToRemove);
+				}
 			};
 
 			web.multiSelect.setHeight = function(ms, panel, fill) {
-				for (var i = 0; i < ms.length; i++) {
-					ms[i].setHeight(panel.getHeight() - fill);
+				for (var i = 0, height; i < ms.length; i++) {
+					height = panel.getHeight() - fill - (ms[i].hasToolbar ? 25 : 0);
+					ms[i].setHeight(height);
 				}
 			};
 
@@ -2595,7 +2607,7 @@ Ext.onReady( function() {
 		isScrolled = function(e) {
 			var el = e.srcElement,
 				scrollBottom = el.scrollTop + ((el.clientHeight / el.scrollHeight) * el.scrollHeight);
-
+                
 			return scrollBottom / el.scrollHeight > 0.9;
 		};
 
