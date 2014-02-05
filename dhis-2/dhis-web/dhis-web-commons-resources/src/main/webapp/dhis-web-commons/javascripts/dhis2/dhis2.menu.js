@@ -96,11 +96,36 @@
          **********************************************************************/
 
         /**
-         *
+         * Get the current menuItems
          */
         that.getItems = function () {
             return menuItems;
-        }
+        };
+
+        /**
+         * Order the menuItems by a given list
+         *
+         * @param orderedIdList
+         * @returns {{}}
+         */
+        that.orderMenuItemsByList = function (orderedIdList) {
+            var apps = dhis2.menu.getApps(),
+                reorderedApps = [],
+                appIndex, orderIndex;
+
+            for (orderIndex in orderedIdList) {
+                for (appIndex in apps) {
+                    if (orderedIdList[orderIndex] === apps[appIndex].id) {
+                        reorderedApps.push(apps[appIndex]);
+                    }
+                }
+            }
+
+            menuItems = reorderedApps;
+
+            return that;
+        };
+
         /**
          * Adds the menu items given to the menu
          */
@@ -151,7 +176,7 @@
             return menuItems.slice(0, MAX_FAVORITES);
         }
         that.getApps = function () {
-            return menuItems.slice(MAX_FAVORITES);
+            return menuItems;
         }
 
         return that;
@@ -165,7 +190,7 @@
     var markup = '';
 
     markup += '<li data-id="${id}" data-app-name="${name}" data-app-action="${defaultAction}">';
-    markup += '  <a href="${defaultAction}" class="app-menu-item">';
+    markup += '  <a href="${defaultAction}" class="app-menu-item" title="${name}">';
     markup += '    <img src="${icon}">';
     markup += '    <span>${name}</span>';
     markup += '    <div class="app-menu-item-description">${description}</div>';
@@ -179,19 +204,13 @@
             favorites = dhis2.menu.getFavorites();
 
         $(selector).parent().addClass('app-menu-dropdown ui-helper-clearfix');
+        $(selector).html('');
         return $.tmpl( "appMenuItemTemplate", favorites).appendTo(selector);
     }
 
-    function renderFavorites(selector) {
-        var favorites = dhis2.menu.getFavorites();
-        $('#' + selector).before($('<div id="' + selector + '_favorites"><ul></ul></div>'));
-        $('#' + selector + '_favorites').addClass('app-menu');
-        return $.tmpl( "appMenuItemTemplate", favorites).appendTo('#' + selector + '_favorites ul');
-    }
-
-    function renderNotFavorites(selector) {
+    function renderAppManager(selector) {
         var apps = dhis2.menu.getApps();
-        $('#' +  selector).append($('<ul></ul>'));
+        $('#' +  selector).append($('<ul></ul>').addClass('ui-helper-clearfix'));
         $('#' + selector).addClass('app-menu');
         return $.tmpl( "appMenuItemTemplate", apps).appendTo('#' + selector + ' ul');
     }
@@ -199,20 +218,22 @@
     function renderMenu() {
         var selector = 'appsMenu',
             options = {
-                placeholder: 'app-menu-placeholder', //Classes for the placeholder when dragging
-                connectWith: '#' + selector + '_favorites',
+                placeholder: 'app-menu-placeholder',
+                connectWith: '.app-menu ul',
                 update: function (event, ui) {
-                    service.save(getApps());
-                }
-            },
-            favoriteOptions = _.extend(options, { connectWith: '#' + selector } );
+                    var reorderedApps = $("#" + selector + " ul"). sortable('toArray', {attribute: "data-id"});
+                    dhis2.menu.orderMenuItemsByList(reorderedApps);
 
-        renderFavorites(selector);
-        renderNotFavorites(selector);
+                    renderDropDownFavorites();
+                },
+                revert: true,
+                scroll: false
+            };
+
+        renderAppManager(selector);
         renderDropDownFavorites();
 
-        $('#' + selector + ' ul').sortable(options);
-        $('#' + selector + '_favorites ul').sortable(favoriteOptions);
+        $('.app-menu ul').sortable(options).disableSelection();
     }
 
     //Subscribe to the list and run the callbacks only once on the first update
