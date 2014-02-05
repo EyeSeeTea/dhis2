@@ -96,6 +96,13 @@
          **********************************************************************/
 
         /**
+         * Get the max number of favorites
+         */
+        that.getMaxFavorites = function () {
+            return MAX_FAVORITES;
+        }
+
+        /**
          * Get the current menuItems
          */
         that.getItems = function () {
@@ -193,7 +200,7 @@
     markup += '  <a href="${defaultAction}" class="app-menu-item" title="${name}">';
     markup += '    <img src="${icon}">';
     markup += '    <span>${name}</span>';
-    markup += '    <div class="app-menu-item-description">${description}</div>';
+    markup += '    <div class="app-menu-item-description"><span>${name}</span><i class="fa fa-arrows"></i>${description}</div>';
     markup += '  </a>';
     markup += '</li>';
 
@@ -212,7 +219,12 @@
         var apps = dhis2.menu.getApps();
         $('#' +  selector).append($('<ul></ul>').addClass('ui-helper-clearfix'));
         $('#' + selector).addClass('app-menu');
-        return $.tmpl( "appMenuItemTemplate", apps).appendTo('#' + selector + ' ul');
+        $.tmpl( "appMenuItemTemplate", apps).appendTo('#' + selector + ' ul');
+
+        //Add favorites icon to all the menu items in the manager
+        $('#' + selector + ' ul li').each(function (index, item) {
+            $(item).children('a').append($('<i class="fa fa-bookmark"></i>'));
+        });
     }
 
     function renderMenu() {
@@ -226,8 +238,7 @@
 
                     renderDropDownFavorites();
                 },
-                revert: true,
-                scroll: false
+                containment: 'parent'
             };
 
         renderAppManager(selector);
@@ -258,4 +269,5 @@
                 alert('Can not load apps from server.');
             });
     });
+
 })(jQuery, dhis2.menu);

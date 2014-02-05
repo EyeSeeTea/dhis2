@@ -8,6 +8,11 @@
     list-style: none;
 }
 
+.app-menu {
+    width: 808px;
+    margin: 0 auto;
+}
+
 .app-menu li {
     float: left;
     position: relative;
@@ -21,7 +26,7 @@
     background: rgba(245, 245, 245, .9);
     width: 225px;
     height: 56px;
-    border-radius: 8px;
+    border-radius: 5px;
     padding: 10px
 }
 .app-menu .app-menu-item img {
@@ -49,22 +54,57 @@
     display: none;
 }
 
+.app-menu-item-description .fa.fa-arrows {
+    font-size: 1.3em;
+    position: absolute;
+    right: 5px;
+    top: 5px;
+}
+
+/**
+ * When hovered display the description and hide the favorites icon
+ */
 .app-menu li:hover a .app-menu-item-description {
     position: absolute;
     top: 0;
     right: 0;
     bottom: 0;
     left: 0;
-    background: #4A89BA;
+    background: #276696;
     display: block;
     margin: 10px;
     padding: 5px 10px;
-    font-size: 1.1em;
+    font-size: 1em;
     color: #fff;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
+    border-radius: 5px;
+}
+
+.app-menu-item .app-menu-item-description span {
+    color: #7fc9fd;
+    display: block;
+    font-size: 1em;
+    font-weight: bold;
+    padding: 0;
+    padding-bottom: 5px;
+    margin: 0;
+}
+
+.app-menu li:hover a .fa.fa-bookmark {
+    display: none;
+}
+
+.app-menu a.app-menu-item .fa.fa-bookmark {
+    font-size: 2em;
+    position: absolute;
+    right: 15px;
+    top: 10px;
+}
+
+/**
+ * IE8 hack to display all items after the 9th item differently
+ */
+.app-menu li + li + li + li + li + li + li + li + li + li a.app-menu-item .fa.fa-bookmark {
+    display: none;
 }
 
 /**
