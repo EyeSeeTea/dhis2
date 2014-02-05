@@ -8,6 +8,7 @@
     list-style: none;
 }
 
+.app-manager-header,
 .app-menu {
     width: 808px;
     margin: 0 auto;
@@ -110,11 +111,19 @@
 /**
  * App menu item
  */
-#menuLink1 i.fa-th {
+.menuLink {
+    width: 105px;
+}
+
+.menuLink i.fa {
     font-size: 2em;
     padding-right: 10px;
     position: relative;
     top: 5px;
+}
+
+#menuLink1 {
+    left: 762px;
 }
 
 /**
@@ -224,5 +233,5 @@
 
 #menuDropDown1 .caret-up-background,
 #menuDropDown1 .caret-up-border {
-    left: 121px;
+    left: 190px;
 }

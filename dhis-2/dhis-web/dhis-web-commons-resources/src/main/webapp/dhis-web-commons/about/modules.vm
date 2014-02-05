@@ -1,2 +1,13 @@
 
+<div class="app-manager-header">
+    <h3>$i18n.getString( "app_manager")</h3>
+    <p>
+      $i18n.getString( "app_manager_description" )
+    </p>
+    <p>
+      <i class="fa fa-bookmark"></i> $i18n.getString( "app_favorite_description" )<br>
+      <i class="fa fa-arrows"></i> $i18n.getString( "app_draggable_description" )
+    </p>
+</div>
+
 <div id="appsMenu"></div>
