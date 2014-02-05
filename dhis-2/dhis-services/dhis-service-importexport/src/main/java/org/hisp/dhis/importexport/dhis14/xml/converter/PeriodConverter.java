@@ -28,27 +28,16 @@ package org.hisp.dhis.importexport.dhis14.xml.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
-import java.util.Vector;
 
 import org.amplecode.staxwax.reader.XMLReader;
 import org.amplecode.staxwax.writer.XMLWriter;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.hisp.dhis.importexport.ExportParams;
 import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
@@ -130,7 +119,6 @@ public class PeriodConverter
     {
         Collection<Period> periods = periodService.getPeriods( params.getPeriods() );
 
-
         if ( periods != null && periods.size() > 0 )
         {
             for ( Period period : periods )
@@ -149,24 +137,23 @@ public class PeriodConverter
                     String dataPeriodName = null;
                     String validFrom = null;
                     String validTo = null;
-                    
+
                     Calendar msAccessCalendarDate = getCalendarDate( "1899-12-29" );
 
                     Calendar startCalendarDate = getCalendarDate( startDate );
                     Calendar endCalendarDate = getCalendarDate( endDate );
-                    
+
                     dataPeriodNameEng = getDateName( startDate );
                     dataPeriodName = getDateName( startDate );
-                    
-                    validFrom = Days.daysBetween(new DateTime(msAccessCalendarDate), new DateTime(startCalendarDate)).getDays() + "";
-                    validTo = Days.daysBetween(new DateTime(msAccessCalendarDate), new DateTime(endCalendarDate)).getDays() + "";
 
-                   
+                    validFrom = Days.daysBetween( new DateTime( msAccessCalendarDate ),
+                        new DateTime( startCalendarDate ) ).getDays()
+                        + "";
+                    validTo = Days.daysBetween( new DateTime( msAccessCalendarDate ), new DateTime( endCalendarDate ) )
+                        .getDays() + "";
 
                     writer.writeElement( FIELD_DATA_PERIODNAMEENG, dataPeriodNameEng );
                     writer.writeElement( FIELD_DATA_PERIODNAME, dataPeriodName );
-                    // writer.writeElement( FIELD_PERIOD_TYPE, String.valueOf(
-                    // period.getPeriodType().getId() ) );
                     writer.writeElement( FIELD_PERIOD_TYPE, String.valueOf( 1 ) );
                     writer.writeElement( FIELD_START_DATE, validFrom );
                     writer.writeElement( FIELD_END_DATE, validTo );
@@ -199,32 +186,33 @@ public class PeriodConverter
 
         importObject( period, params );
     }
-    
-    
-    public Calendar getCalendarDate(String date){
+
+    public Calendar getCalendarDate( String date )
+    {
         Calendar cal = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat( "yyyy-MM-dd" );
         try
         {
-            cal.setTime(sdf.parse(date));
+            cal.setTime( sdf.parse( date ) );
         }
         catch ( ParseException e )
         {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
+
         return cal;
     }
-    
-    public String getDateName(String date){
-        DateFormat dateFormat = new SimpleDateFormat("MMM-yy");             
+
+    public String getDateName( String date )
+    {
+        DateFormat dateFormat = new SimpleDateFormat( "MMM-yy" );
         Date predefined;
         String name = "";
         try
         {
-            predefined = new SimpleDateFormat("yyyy-MM-dd").parse(date);
-            name = dateFormat.format(predefined);
+            predefined = new SimpleDateFormat( "yyyy-MM-dd" ).parse( date );
+            name = dateFormat.format( predefined );
         }
         catch ( ParseException e )
         {
@@ -235,5 +223,4 @@ public class PeriodConverter
         return name;
     }
 
-    
 }

@@ -245,10 +245,4 @@ public class DefaultDataValueService
         return dataValueStore.getDeflatedDataValues( dataElementId, periodId, sourceIds );
     }
 
-    @Override
-    public Collection<DeflatedDataValueDaily> getDeflatedDataValuesDaily( int dataElementId, int periodId,
-        Collection<Integer> sourceIds )
-    {
-        return dataValueStore.getDeflatedDataValuesDaily( dataElementId, periodId, sourceIds );
-    }
 }

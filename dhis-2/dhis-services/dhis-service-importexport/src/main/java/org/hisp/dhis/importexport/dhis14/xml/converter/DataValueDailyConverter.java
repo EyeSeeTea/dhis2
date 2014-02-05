@@ -39,9 +39,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -53,8 +51,8 @@ import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.datavalue.DeflatedDataValue;
-import org.hisp.dhis.datavalue.DeflatedDataValueDaily;
 import org.hisp.dhis.importexport.CSVConverter;
+import org.hisp.dhis.importexport.DeflatedDataValueDaily;
 import org.hisp.dhis.importexport.ExportParams;
 import org.hisp.dhis.importexport.ImportDataValue;
 import org.hisp.dhis.importexport.ImportObjectService;
@@ -67,7 +65,6 @@ import org.hisp.dhis.period.DailyPeriodType;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
-import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.MimicingHashMap;
 import org.hisp.dhis.system.util.StreamUtils;
@@ -99,18 +96,17 @@ public class DataValueDailyConverter
     private Map<Object, Integer> periodMapping;
 
     private Map<Object, Integer> sourceMapping;
-    
-    private BigDecimal price = new BigDecimal("0");
-    
-    private BigDecimal  totalEntry;// =new BigDecimal("0");
+
+    private BigDecimal totalEntry;
 
     private int periodId = 0;
+
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
 
     public DataValueDailyConverter( PeriodService periodService, DataValueService dataValueService,
-         DataElementService dataElementService )
+        DataElementService dataElementService )
     {
         this.periodService = periodService;
         this.dataValueService = dataValueService;
@@ -194,100 +190,88 @@ public class DataValueDailyConverter
             {
                 if ( params.getStartDate() != null && params.getEndDate() != null )
                 {
-                    Collection<DeflatedDataValueDaily> values = null;
+                    Collection<DeflatedDataValue> values = null;
 
                     Collection<Period> periods = periodService.getIntersectingPeriods( params.getStartDate(),
                         params.getEndDate() );
-                    
-                   /*Period period = periodService.getPeriodFromDates( params.getStartDate(),
-                            params.getEndDate(), PeriodType.getPeriodTypeByName(MonthlyPeriodType.NAME) );*/
-                    
-                    ////
+
                     for ( final Period period : periods )
                     {
-                    	if(period.getPeriodType().getName().equals( MonthlyPeriodType.NAME  )){
-                    		if(period.getStartDate().equals(params.getStartDate())){
-                    			periodId = period.getId();
-                    			break;
-                    		}
-                    	}
+                        if ( period.getPeriodType().getName().equals( MonthlyPeriodType.NAME ) )
+                        {
+                            if ( period.getStartDate().equals( params.getStartDate() ) )
+                            {
+                                periodId = period.getId();
+                                break;
+                            }
+                        }
                     }
-                    
-                    /////
-                    
+
                     HashMap<String, DeflatedDataValueDaily> dailyDataCache = new HashMap<String, DeflatedDataValueDaily>();
-                    
-                    //outerloop:
+
                     for ( final Integer element : params.getDataElements() )
                     {
 
                         for ( final Period period : periods )
                         {
-                        	if(period.getPeriodType().getName().equals( DailyPeriodType.NAME  )){
-                        		values = dataValueService.getDeflatedDataValuesDaily( element, period.getId(),
-                                        params.getOrganisationUnits() );
-                        		
-                        		for ( final DeflatedDataValueDaily value : values )
+                            if ( period.getPeriodType().getName().equals( DailyPeriodType.NAME ) )
+                            {
+                                values = dataValueService.getDeflatedDataValues( element, period.getId(),
+                                    params.getOrganisationUnits() );
+
+                                for ( final DeflatedDataValue value : values )
                                 {
-                        			//String dailyDatakey = period.getStartDateString().substring(0, 7);
-                        			String dailyDatakey = period.getStartDateString().substring(0, 7) + value.getDataElementId() + value.getSourceId();
-                        			if(dailyDataCache.containsKey(dailyDatakey)){
-                        				
-                        				//DeflatedDataValueDaily cachedValue = dailyDataCache.get(dailyDatakey);
-                        				
-                        				
-                        				setCachedDailyDataCapture(dailyDataCache, dailyDatakey, value, period.getStartDateString());
-                        				
-                        			}else{
-                        				
-                        				DeflatedDataValueDaily newValue = setDailyDataCapture( value, period.getStartDateString());
-                        				dailyDataCache.put(dailyDatakey, newValue);
-                        			}
-                                    
-                                    /*if(j == 100){
-                                    	break outerloop;
+                                    String dailyDatakey = period.getStartDateString().substring( 0, 7 )
+                                        + value.getDataElementId() + value.getSourceId();
+                                    if ( dailyDataCache.containsKey( dailyDatakey ) )
+                                    {
+
+                                        setCachedDailyDataCapture( dailyDataCache, dailyDatakey, value,
+                                            period.getStartDateString() );
+
                                     }
-                                    j++;*/
+                                    else
+                                    {
+                                        
+                                        DeflatedDataValueDaily newValue = setDailyDataCapture( value,
+                                            period.getStartDateString() );
+                                        dailyDataCache.put( dailyDatakey, newValue );
+                                    }
+
                                 }
-                        		
-                        	}
-                                
+
+                            }
+
                         }
                     }
-                    
-       
-                              
-                    for (String key : dailyDataCache.keySet()) {
-                    	DeflatedDataValueDaily value = dailyDataCache.get(key);
+
+                    for ( String key : dailyDataCache.keySet() )
+                    {
+                        DeflatedDataValueDaily value = dailyDataCache.get( key );
                         out.write( getCsvValue( j ) );
                         out.write( getCsvValue( value.getSourceId() ) );
                         out.write( getCsvValue( value.getDataElementId() ) );
-                        //out.write( getCsvValue( value.getPeriodId() ) );
                         out.write( getCsvValue( periodId ) );
                         out = getCSVDataExportField( out, value );
                         out.write( getCsvValue( 0 ) );
                         out.write( getCsvValue( 0 ) );
                         out.write( getCsvValue( 0 ) );
                         out.write( getCsvValue( csvEncode( value.getComment() ) ) );
-                        //out.write( getCsvValue( value.getStoredBy() ) );
                         out.write( getCsvValue( 1594 ) );
-                        //out.write( getCsvEndValue( DateUtils.getAccessDateString( value.getTimestamp() ) ) );
-                        if(value.getTimestamp() != null ){
-                        	out.write( getCsvEndValue( DateUtils.getAccessDateString( value.getTimestamp() ) ) );
-                        }else{
-                        	out.write( getCsvEndValue( DateUtils.getAccessDateString( params.getStartDate() ) ) );
+                        if ( value.getTimestamp() != null )
+                        {
+                            out.write( getCsvEndValue( DateUtils.getAccessDateString( value.getTimestamp() ) ) );
+                        }
+                        else
+                        {
+                            out.write( getCsvEndValue( DateUtils.getAccessDateString( params.getStartDate() ) ) );
                         }
 
                         out.write( NEWLINE );
-                        
-                        /*if(j == 5){
-                        	break;
-                        }*/
+
                         j++;
                     }
-                    
-                    //System.out.println("totalEntryNumber: "+totalEntry);
-                    
+
                 }
             }
 
@@ -298,146 +282,285 @@ public class DataValueDailyConverter
             throw new RuntimeException( "Failed to write data", ex );
         }
     }
-    
-    public void setCachedDailyDataCapture( HashMap<String, DeflatedDataValueDaily> cachedValue, String key, DeflatedDataValueDaily value, String period){
-    	
-    	
-    	if(period.endsWith("-01")){
-			cachedValue.get(key).setDay1(value.getValue());
-		}else if(period.endsWith("-02")){
-			cachedValue.get(key).setDay2(value.getValue());
-		}else if(period.endsWith("-03")){
-			cachedValue.get(key).setDay3(value.getValue());
-		}else if(period.endsWith("-04")){
-			cachedValue.get(key).setDay4(value.getValue());
-		}else if(period.endsWith("-05")){
-			cachedValue.get(key).setDay5(value.getValue());
-		}else if(period.endsWith("-06")){
-			cachedValue.get(key).setDay6(value.getValue());
-		}else if(period.endsWith("-07")){
-			cachedValue.get(key).setDay7(value.getValue());
-		}else if(period.endsWith("-08")){
-			cachedValue.get(key).setDay8(value.getValue());
-		}else if(period.endsWith("-09")){
-			cachedValue.get(key).setDay9(value.getValue());
-		}else if(period.endsWith("-10")){
-			cachedValue.get(key).setDay10(value.getValue());
-		}else if(period.endsWith("-11")){
-			cachedValue.get(key).setDay11(value.getValue());
-		}else if(period.endsWith("-12")){
-			cachedValue.get(key).setDay12(value.getValue());
-		}else if(period.endsWith("-13")){
-			cachedValue.get(key).setDay13(value.getValue());
-		}else if(period.endsWith("-14")){
-			cachedValue.get(key).setDay14(value.getValue());
-		}else if(period.endsWith("-15")){
-			cachedValue.get(key).setDay15(value.getValue());
-		}else if(period.endsWith("-16")){
-			cachedValue.get(key).setDay16(value.getValue());
-		}else if(period.endsWith("-17")){
-			cachedValue.get(key).setDay17(value.getValue());
-		}else if(period.endsWith("-18")){
-			cachedValue.get(key).setDay18(value.getValue());
-		}else if(period.endsWith("-19")){
-			cachedValue.get(key).setDay19(value.getValue());
-		}else if(period.endsWith("-20")){
-			cachedValue.get(key).setDay20(value.getValue());
-		}else if(period.endsWith("-21")){
-			cachedValue.get(key).setDay21(value.getValue());
-		}else if(period.endsWith("-22")){
-			cachedValue.get(key).setDay22(value.getValue());
-		}else if(period.endsWith("-23")){
-			cachedValue.get(key).setDay23(value.getValue());
-		}else if(period.endsWith("-24")){
-			cachedValue.get(key).setDay24(value.getValue());
-		}else if(period.endsWith("-25")){
-			cachedValue.get(key).setDay25(value.getValue());
-		}else if(period.endsWith("-26")){
-			cachedValue.get(key).setDay26(value.getValue());
-		}else if(period.endsWith("-27")){
-			cachedValue.get(key).setDay27(value.getValue());
-		}else if(period.endsWith("-28")){
-			cachedValue.get(key).setDay28(value.getValue());
-		}else if(period.endsWith("-29")){
-			cachedValue.get(key).setDay29(value.getValue());
-		}else if(period.endsWith("-30")){
-			cachedValue.get(key).setDay30(value.getValue());
-		}else if(period.endsWith("-31")){
-			cachedValue.get(key).setDay31(value.getValue());
-		}
-    	
-    	//return cachedValue;
+
+    public void setCachedDailyDataCapture( HashMap<String, DeflatedDataValueDaily> cachedValue, String key,
+        DeflatedDataValue value, String period )
+    {
+
+        if ( period.endsWith( "-01" ) )
+        {
+            cachedValue.get( key ).setDay1( value.getValue() );
+        }
+        else if ( period.endsWith( "-02" ) )
+        {
+            cachedValue.get( key ).setDay2( value.getValue() );
+        }
+        else if ( period.endsWith( "-03" ) )
+        {
+            cachedValue.get( key ).setDay3( value.getValue() );
+        }
+        else if ( period.endsWith( "-04" ) )
+        {
+            cachedValue.get( key ).setDay4( value.getValue() );
+        }
+        else if ( period.endsWith( "-05" ) )
+        {
+            cachedValue.get( key ).setDay5( value.getValue() );
+        }
+        else if ( period.endsWith( "-06" ) )
+        {
+            cachedValue.get( key ).setDay6( value.getValue() );
+        }
+        else if ( period.endsWith( "-07" ) )
+        {
+            cachedValue.get( key ).setDay7( value.getValue() );
+        }
+        else if ( period.endsWith( "-08" ) )
+        {
+            cachedValue.get( key ).setDay8( value.getValue() );
+        }
+        else if ( period.endsWith( "-09" ) )
+        {
+            cachedValue.get( key ).setDay9( value.getValue() );
+        }
+        else if ( period.endsWith( "-10" ) )
+        {
+            cachedValue.get( key ).setDay10( value.getValue() );
+        }
+        else if ( period.endsWith( "-11" ) )
+        {
+            cachedValue.get( key ).setDay11( value.getValue() );
+        }
+        else if ( period.endsWith( "-12" ) )
+        {
+            cachedValue.get( key ).setDay12( value.getValue() );
+        }
+        else if ( period.endsWith( "-13" ) )
+        {
+            cachedValue.get( key ).setDay13( value.getValue() );
+        }
+        else if ( period.endsWith( "-14" ) )
+        {
+            cachedValue.get( key ).setDay14( value.getValue() );
+        }
+        else if ( period.endsWith( "-15" ) )
+        {
+            cachedValue.get( key ).setDay15( value.getValue() );
+        }
+        else if ( period.endsWith( "-16" ) )
+        {
+            cachedValue.get( key ).setDay16( value.getValue() );
+        }
+        else if ( period.endsWith( "-17" ) )
+        {
+            cachedValue.get( key ).setDay17( value.getValue() );
+        }
+        else if ( period.endsWith( "-18" ) )
+        {
+            cachedValue.get( key ).setDay18( value.getValue() );
+        }
+        else if ( period.endsWith( "-19" ) )
+        {
+            cachedValue.get( key ).setDay19( value.getValue() );
+        }
+        else if ( period.endsWith( "-20" ) )
+        {
+            cachedValue.get( key ).setDay20( value.getValue() );
+        }
+        else if ( period.endsWith( "-21" ) )
+        {
+            cachedValue.get( key ).setDay21( value.getValue() );
+        }
+        else if ( period.endsWith( "-22" ) )
+        {
+            cachedValue.get( key ).setDay22( value.getValue() );
+        }
+        else if ( period.endsWith( "-23" ) )
+        {
+            cachedValue.get( key ).setDay23( value.getValue() );
+        }
+        else if ( period.endsWith( "-24" ) )
+        {
+            cachedValue.get( key ).setDay24( value.getValue() );
+        }
+        else if ( period.endsWith( "-25" ) )
+        {
+            cachedValue.get( key ).setDay25( value.getValue() );
+        }
+        else if ( period.endsWith( "-26" ) )
+        {
+            cachedValue.get( key ).setDay26( value.getValue() );
+        }
+        else if ( period.endsWith( "-27" ) )
+        {
+            cachedValue.get( key ).setDay27( value.getValue() );
+        }
+        else if ( period.endsWith( "-28" ) )
+        {
+            cachedValue.get( key ).setDay28( value.getValue() );
+        }
+        else if ( period.endsWith( "-29" ) )
+        {
+            cachedValue.get( key ).setDay29( value.getValue() );
+        }
+        else if ( period.endsWith( "-30" ) )
+        {
+            cachedValue.get( key ).setDay30( value.getValue() );
+        }
+        else if ( period.endsWith( "-31" ) )
+        {
+            cachedValue.get( key ).setDay31( value.getValue() );
+        }
+
+        // return cachedValue;
     }
-    
-    
-public DeflatedDataValueDaily setDailyDataCapture( DeflatedDataValueDaily value, String period){
-    	
-    	
-    	if(period.endsWith("-01")){
-			value.setDay1(value.getValue());
-		}else if(period.endsWith("-02")){
-			value.setDay2(value.getValue());
-		}else if(period.endsWith("-03")){
-			value.setDay3(value.getValue());
-		}else if(period.endsWith("-04")){
-			value.setDay4(value.getValue());
-		}else if(period.endsWith("-05")){
-			value.setDay5(value.getValue());
-		}else if(period.endsWith("-06")){
-			value.setDay6(value.getValue());
-		}else if(period.endsWith("-07")){
-			value.setDay7(value.getValue());
-		}else if(period.endsWith("-08")){
-			value.setDay8(value.getValue());
-		}else if(period.endsWith("-09")){
-			value.setDay9(value.getValue());
-		}else if(period.endsWith("-10")){
-			value.setDay10(value.getValue());
-		}else if(period.endsWith("-11")){
-			value.setDay11(value.getValue());
-		}else if(period.endsWith("-12")){
-			value.setDay12(value.getValue());
-		}else if(period.endsWith("-13")){
-			value.setDay13(value.getValue());
-		}else if(period.endsWith("-14")){
-			value.setDay14(value.getValue());
-		}else if(period.endsWith("-15")){
-			value.setDay15(value.getValue());
-		}else if(period.endsWith("-16")){
-			value.setDay16(value.getValue());
-		}else if(period.endsWith("-17")){
-			value.setDay17(value.getValue());
-		}else if(period.endsWith("-18")){
-			value.setDay18(value.getValue());
-		}else if(period.endsWith("-19")){
-			value.setDay19(value.getValue());
-		}else if(period.endsWith("-20")){
-			value.setDay20(value.getValue());
-		}else if(period.endsWith("-21")){
-			value.setDay21(value.getValue());
-		}else if(period.endsWith("-22")){
-			value.setDay22(value.getValue());
-		}else if(period.endsWith("-23")){
-			value.setDay23(value.getValue());
-		}else if(period.endsWith("-24")){
-			value.setDay24(value.getValue());
-		}else if(period.endsWith("-25")){
-			value.setDay25(value.getValue());
-		}else if(period.endsWith("-26")){
-			value.setDay26(value.getValue());
-		}else if(period.endsWith("-27")){
-			value.setDay27(value.getValue());
-		}else if(period.endsWith("-28")){
-			value.setDay28(value.getValue());
-		}else if(period.endsWith("-29")){
-			value.setDay29(value.getValue());
-		}else if(period.endsWith("-30")){
-			value.setDay30(value.getValue());
-		}else if(period.endsWith("-31")){
-			value.setDay31(value.getValue());
-		}
-    	
-    	return value;
+
+    public DeflatedDataValueDaily setDailyDataCapture( DeflatedDataValue newDataValue, String period )
+    {
+
+        DeflatedDataValueDaily value = new DeflatedDataValueDaily();
+        
+        value.setCategoryOptionComboId( newDataValue.getCategoryOptionComboId() );
+        value.setCategoryOptionComboName( newDataValue.getCategoryOptionComboName() );
+        value.setComment( newDataValue.getComment() );
+        value.setDataElementId( newDataValue.getDataElementId() );
+        value.setDataElementName( newDataValue.getDataElementName() );
+        value.setMax( newDataValue.getMax() );
+        value.setMin( newDataValue.getMin() );
+        value.setPeriod( newDataValue.getPeriod() );
+        value.setPeriodId( newDataValue.getPeriodId() );
+        value.setSourceId( newDataValue.getSourceId() );
+        value.setSourceName( newDataValue.getSourceName() );
+        value.setStoredBy( newDataValue.getStoredBy() );
+        value.setTimestamp( newDataValue.getTimestamp() );
+        value.setValue( newDataValue.getValue() );
+        
+        if ( period.endsWith( "-01" ) )
+        {
+            value.setDay1( value.getValue() );
+        }
+        else if ( period.endsWith( "-02" ) )
+        {
+            value.setDay2( value.getValue() );
+        }
+        else if ( period.endsWith( "-03" ) )
+        {
+            value.setDay3( value.getValue() );
+        }
+        else if ( period.endsWith( "-04" ) )
+        {
+            value.setDay4( value.getValue() );
+        }
+        else if ( period.endsWith( "-05" ) )
+        {
+            value.setDay5( value.getValue() );
+        }
+        else if ( period.endsWith( "-06" ) )
+        {
+            value.setDay6( value.getValue() );
+        }
+        else if ( period.endsWith( "-07" ) )
+        {
+            value.setDay7( value.getValue() );
+        }
+        else if ( period.endsWith( "-08" ) )
+        {
+            value.setDay8( value.getValue() );
+        }
+        else if ( period.endsWith( "-09" ) )
+        {
+            value.setDay9( value.getValue() );
+        }
+        else if ( period.endsWith( "-10" ) )
+        {
+            value.setDay10( value.getValue() );
+        }
+        else if ( period.endsWith( "-11" ) )
+        {
+            value.setDay11( value.getValue() );
+        }
+        else if ( period.endsWith( "-12" ) )
+        {
+            value.setDay12( value.getValue() );
+        }
+        else if ( period.endsWith( "-13" ) )
+        {
+            value.setDay13( value.getValue() );
+        }
+        else if ( period.endsWith( "-14" ) )
+        {
+            value.setDay14( value.getValue() );
+        }
+        else if ( period.endsWith( "-15" ) )
+        {
+            value.setDay15( value.getValue() );
+        }
+        else if ( period.endsWith( "-16" ) )
+        {
+            value.setDay16( value.getValue() );
+        }
+        else if ( period.endsWith( "-17" ) )
+        {
+            value.setDay17( value.getValue() );
+        }
+        else if ( period.endsWith( "-18" ) )
+        {
+            value.setDay18( value.getValue() );
+        }
+        else if ( period.endsWith( "-19" ) )
+        {
+            value.setDay19( value.getValue() );
+        }
+        else if ( period.endsWith( "-20" ) )
+        {
+            value.setDay20( value.getValue() );
+        }
+        else if ( period.endsWith( "-21" ) )
+        {
+            value.setDay21( value.getValue() );
+        }
+        else if ( period.endsWith( "-22" ) )
+        {
+            value.setDay22( value.getValue() );
+        }
+        else if ( period.endsWith( "-23" ) )
+        {
+            value.setDay23( value.getValue() );
+        }
+        else if ( period.endsWith( "-24" ) )
+        {
+            value.setDay24( value.getValue() );
+        }
+        else if ( period.endsWith( "-25" ) )
+        {
+            value.setDay25( value.getValue() );
+        }
+        else if ( period.endsWith( "-26" ) )
+        {
+            value.setDay26( value.getValue() );
+        }
+        else if ( period.endsWith( "-27" ) )
+        {
+            value.setDay27( value.getValue() );
+        }
+        else if ( period.endsWith( "-28" ) )
+        {
+            value.setDay28( value.getValue() );
+        }
+        else if ( period.endsWith( "-29" ) )
+        {
+            value.setDay29( value.getValue() );
+        }
+        else if ( period.endsWith( "-30" ) )
+        {
+            value.setDay30( value.getValue() );
+        }
+        else if ( period.endsWith( "-31" ) )
+        {
+            value.setDay31( value.getValue() );
+        }
+
+        return value;
     }
 
     public void read( BufferedReader reader, ImportParams params )
@@ -482,7 +605,7 @@ public DeflatedDataValueDaily setDailyDataCapture( DeflatedDataValueDaily value,
                 }
                 else if ( !values[5].isEmpty() ) // Boolean
                 {
-                    value.setValue(Dhis14TypeHandler.convertYesNoFromDhis14( Integer.parseInt(values[5]) ) );
+                    value.setValue( Dhis14TypeHandler.convertYesNoFromDhis14( Integer.parseInt( values[5] ) ) );
 
                 }
                 else if ( !values[7].isEmpty() ) // Date
@@ -561,7 +684,7 @@ public DeflatedDataValueDaily setDailyDataCapture( DeflatedDataValueDaily value,
             else if ( dataElementType.equals( DataElement.VALUE_TYPE_BOOL ) )
             {
                 out.write( SEPARATOR_B );
-                out.write( getCsvValue( csvEncode( Dhis14TypeHandler.convertBooleanToDhis14( value.getValue()) ) ) );
+                out.write( getCsvValue( csvEncode( Dhis14TypeHandler.convertBooleanToDhis14( value.getValue() ) ) ) );
                 out.write( SEPARATOR_B );
                 out.write( SEPARATOR_B );
                 out.write( SEPARATOR_B );
@@ -571,46 +694,15 @@ public DeflatedDataValueDaily setDailyDataCapture( DeflatedDataValueDaily value,
             else if ( dataElementType.equals( DataElement.VALUE_TYPE_NUMBER )
                 || dataElementType.equals( DataElement.VALUE_TYPE_INT )
                 || dataElementType.equals( DataElement.VALUE_TYPE_NEGATIVE_INT )
-                || dataElementType.equals( DataElement.VALUE_TYPE_POSITIVE_INT ) 
-                || dataElementType.equals( DataElement.VALUE_TYPE_ZERO_OR_POSITIVE_INT) )
+                || dataElementType.equals( DataElement.VALUE_TYPE_POSITIVE_INT )
+                || dataElementType.equals( DataElement.VALUE_TYPE_ZERO_OR_POSITIVE_INT ) )
             {
-            	/*out.write( getCsvValue( csvEncode( value.getDay1() ) ) );
-            	out.write( getCsvValue( csvEncode( value.getDay2() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay3() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay4() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay5() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay6() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay7() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay8() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay9() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay10() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay11() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay12() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay13() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay14() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay15() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay16() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay17() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay18() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay19() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay20() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay21() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay22() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay23() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay24() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay25() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay26() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay27() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay28() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay29() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay30() ) ) );
-                out.write( getCsvValue( csvEncode( value.getDay31() ) ) );*/
-            	
-            	totalEntry =new BigDecimal("0");
-            	out.write( getCsvValue( value.getDay1()  ) );
-            	addTotalEntry( value.getDay1() );
-            	out.write( getCsvValue( value.getDay2() ) );
-            	addTotalEntry( value.getDay2() );
+
+                totalEntry = new BigDecimal( "0" );
+                out.write( getCsvValue( value.getDay1() ) );
+                addTotalEntry( value.getDay1() );
+                out.write( getCsvValue( value.getDay2() ) );
+                addTotalEntry( value.getDay2() );
                 out.write( getCsvValue( value.getDay3() ) );
                 addTotalEntry( value.getDay3() );
                 out.write( getCsvValue( value.getDay4() ) );
@@ -669,12 +761,10 @@ public DeflatedDataValueDaily setDailyDataCapture( DeflatedDataValueDaily value,
                 addTotalEntry( value.getDay30() );
                 out.write( getCsvValue( value.getDay31() ) );
                 addTotalEntry( value.getDay31() );
-                //out.write( SEPARATOR_B );
-                //added
+                // out.write( SEPARATOR_B );
+                // added
                 out.write( getCsvValue( totalEntry + "" ) );
-                
-                
-                
+
             }
 
             else if ( dataElementType.equals( DataElement.VALUE_TYPE_DATE ) )
@@ -695,12 +785,13 @@ public DeflatedDataValueDaily setDailyDataCapture( DeflatedDataValueDaily value,
 
         return out;
     }
-    
-    public void addTotalEntry(String value){
-    	if(value != null){
-        	BigDecimal anotherPrice = new BigDecimal(value);
-        	totalEntry = totalEntry.add(anotherPrice);
-        	//totalEntry =+ Double.parseDouble(value.getValue());
+
+    public void addTotalEntry( String value )
+    {
+        if ( value != null )
+        {
+            BigDecimal anotherPrice = new BigDecimal( value );
+            totalEntry = totalEntry.add( anotherPrice );
         }
     }
 }

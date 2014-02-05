@@ -10,26 +10,24 @@ import org.hisp.dhis.validation.ValidationRuleService;
 import com.ibatis.sqlmap.client.event.RowHandler;
 
 public class ValidationRuleRowHandler
-extends ValidationRuleImporter implements RowHandler
+    extends ValidationRuleImporter
+    implements RowHandler
 {
     private ImportParams params;
-    
-    
+
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
 
     public ValidationRuleRowHandler( BatchHandler<ValidationRule> batchHandler,
-        ImportObjectService importObjectService,
-        ValidationRuleService validationRuleService, 
-        ImportParams params)
+        ImportObjectService importObjectService, ValidationRuleService validationRuleService, ImportParams params )
     {
         this.batchHandler = batchHandler;
         this.importObjectService = importObjectService;
         this.validationRuleService = validationRuleService;
         this.params = params;
     }
-    
+
     // -------------------------------------------------------------------------
     // RowHandler implementation
     // -------------------------------------------------------------------------
@@ -37,13 +35,13 @@ extends ValidationRuleImporter implements RowHandler
     public void handleRow( Object object )
     {
         final ValidationRule validationRule = (ValidationRule) object;
-                    
+
         if ( validationRule.getCode() != null && validationRule.getCode().trim().length() == 0 )
         {
             validationRule.setCode( null );
         }
-        
-        //validationRule.setType( ValidationRule.TYPE_ABSOLUTE );
+
+        // validationRule.setType( ValidationRule.TYPE_ABSOLUTE );
 
         importObject( validationRule, params );
     }

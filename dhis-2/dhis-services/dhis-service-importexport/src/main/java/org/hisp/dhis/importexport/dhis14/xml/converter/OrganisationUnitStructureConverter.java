@@ -28,49 +28,32 @@ package org.hisp.dhis.importexport.dhis14.xml.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.Map;
-
 import org.amplecode.staxwax.reader.XMLReader;
 import org.amplecode.staxwax.writer.XMLWriter;
-import org.hisp.dhis.importexport.AssociationType;
 import org.hisp.dhis.importexport.ExportParams;
-import org.hisp.dhis.importexport.GroupMemberAssociation;
-import org.hisp.dhis.importexport.GroupMemberType;
-import org.hisp.dhis.importexport.ImportObjectService;
 import org.hisp.dhis.importexport.ImportParams;
 import org.hisp.dhis.importexport.XMLConverter;
 import org.hisp.dhis.importexport.importer.OrganisationUnitRelationshipImporter;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.importexport.dhis14.util.Dhis14DateUtil;
-import org.hisp.dhis.system.util.MimicingHashMap;
 
 /**
  * @author Lars Helge Overland
- * @version $Id: OrganisationUnitHierarchyConverter.java 6455 2008-11-24 08:59:37Z larshelg $
+ * @version $Id: OrganisationUnitHierarchyConverter.java 6455 2008-11-24
+ *          08:59:37Z larshelg $
  */
 public class OrganisationUnitStructureConverter
-    extends OrganisationUnitRelationshipImporter implements XMLConverter
+    extends OrganisationUnitRelationshipImporter
+    implements XMLConverter
 {
-    public static final String ELEMENT_NAME = "OrgHierarchy";
-    
-    private static final String FIELD_ID = "OrgHierarchyID";
-    private static final String FIELD_LEVEL = "OrgUnitLevel";
-    private static final String FIELD_STRUCTURE = "OrgUnitStructureID";
-    private static final String FIELD_CHILD = "OrgUnitChildID";
-    private static final String FIELD_PARENT = "OrgUnitParentID";
-    private static final String FIELD_LAST_USER = "LastUserID";
-    private static final String FIELD_LAST_UPDATED = "LastUpdated";
+    public static final String ELEMENT_NAME = "OrgUnitStructure";
 
-    // -------------------------------------------------------------------------
-    // Properties
-    // -------------------------------------------------------------------------
+    private static final String FIELD_STRUCTUREID = "OrgUnitStructureID";
 
-    private static final int STRUCTURE_ID = 1;
+    private static final String FIELD_STRUCTURENAME = "OrgUnitStructureName";
 
-    private Map<Object, Integer> organisationUnitMapping;
-    
+    private static final String FIELD_STRUCTUREDESCRIPTION = "OrgUnitStructureDescription";
+
+    private static final String FIELD_LEVELCOUNT = "OrgUnitLevelCount";
+
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
@@ -78,37 +61,27 @@ public class OrganisationUnitStructureConverter
     /**
      * Constructor for write operations.
      */
-    public OrganisationUnitStructureConverter( OrganisationUnitService organisationUnitService )
+    public OrganisationUnitStructureConverter()
     {
-        this.organisationUnitService = organisationUnitService;
     }
 
-    /**
-     * Constructor for read operations.
-     * 
-     * @param importObjectService the importObjectService to use.
-     * @param organisationUnitService the organisationUnitService to use.
-     * @param organisationUnitMapping the organisationUnitMapping to use.
-     */
-    public OrganisationUnitStructureConverter( ImportObjectService importObjectService,
-        OrganisationUnitService organisationUnitService )
-    {
-        this.importObjectService = importObjectService;
-        this.organisationUnitService = organisationUnitService;
-        this.organisationUnitMapping = new MimicingHashMap<Object, Integer>();
-    }
-    
     // -------------------------------------------------------------------------
     // XMLConverter implementation
     // -------------------------------------------------------------------------
-    
+
     public void write( XMLWriter writer, ExportParams params )
     {
-    	// Not implemented
+        writer.openElement( ELEMENT_NAME );
+
+        writer.writeElement( FIELD_STRUCTUREID, String.valueOf( 1 ) );
+        writer.writeElement( FIELD_STRUCTURENAME, "Municipality Structure (2011)" );
+        writer.writeElement( FIELD_STRUCTUREDESCRIPTION, "Municipality Structure(2011)" );
+        writer.writeElement( FIELD_LEVELCOUNT, String.valueOf( 6 ) );
+        writer.closeElement();
     }
-    
+
     public void read( XMLReader reader, ImportParams params )
     {
-    	// Not implemented       
-    }      
+        // Not implemented
+    }
 }

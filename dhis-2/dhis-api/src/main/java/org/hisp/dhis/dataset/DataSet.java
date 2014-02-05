@@ -244,11 +244,6 @@ public class DataSet
      */
     private MapLegendSet legendSet;
 
-    /**
-     * Defines the use daily capture form field.
-     */
-    private Integer useDailyCaptureForm;
-
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -919,16 +914,6 @@ public class DataSet
             attributeValues.clear();
             attributeValues.addAll( dataSet.getAttributeValues() );
         }
-    }
-
-    public Integer getUseDailyCaptureForm()
-    {
-        return useDailyCaptureForm;
-    }
-
-    public void setUseDailyCaptureForm( Integer useDailyCaptureForm )
-    {
-        this.useDailyCaptureForm = useDailyCaptureForm;
     }
 
 }

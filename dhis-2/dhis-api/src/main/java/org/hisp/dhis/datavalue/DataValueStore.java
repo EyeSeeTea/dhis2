@@ -73,7 +73,7 @@ public interface DataValueStore
      * @param dataValue the DataValue to delete.
      */
     void deleteDataValue( DataValue dataValue );
-    
+
     /**
      * Deletes all DataValues registered for the given Source.
      * 
@@ -81,15 +81,16 @@ public interface DataValueStore
      * @return the number of deleted DataValues.
      */
     int deleteDataValuesBySource( OrganisationUnit source );
-    
+
     /**
      * Deletes all DataValues registered for the given DataElement.
      * 
-     * @param dataElement the DataElement for which the DataValues should be deleted.
+     * @param dataElement the DataElement for which the DataValues should be
+     *        deleted.
      * @return the number of deleted DataValues.
      */
     int deleteDataValuesByDataElement( DataElement dataElement );
-    
+
     /**
      * Returns a DataValue.
      * 
@@ -101,7 +102,7 @@ public interface DataValueStore
      * @return the DataValue which corresponds to the given parameters, or null
      *         if no match.
      */
-    DataValue getDataValue( DataElement dataElement, Period period, OrganisationUnit source, 
+    DataValue getDataValue( DataElement dataElement, Period period, OrganisationUnit source,
         DataElementCategoryOptionCombo categoryOptionCombo, DataElementCategoryOptionCombo attributeOptionCombo );
 
     /**
@@ -113,8 +114,9 @@ public interface DataValueStore
      * @param categoryOptionComboId category option combo id
      * @param attributeOptionComboId attribute option combo id
      */
-    DataValue getDataValue( int dataElementId, int periodId, int sourceId, int categoryOptionComboId, int attributeOptionComboId );
-    
+    DataValue getDataValue( int dataElementId, int periodId, int sourceId, int categoryOptionComboId,
+        int attributeOptionComboId );
+
     // -------------------------------------------------------------------------
     // Collections of DataValues
     // -------------------------------------------------------------------------
@@ -125,7 +127,7 @@ public interface DataValueStore
      * @return a collection of all DataValues.
      */
     Collection<DataValue> getAllDataValues();
-    
+
     /**
      * Returns all DataValues for a given Source and Period.
      * 
@@ -135,7 +137,7 @@ public interface DataValueStore
      *         Period, or an empty collection if no values match.
      */
     Collection<DataValue> getDataValues( OrganisationUnit source, Period period );
-    
+
     /**
      * Returns all DataValues for a given Source and DataElement.
      * 
@@ -183,9 +185,9 @@ public interface DataValueStore
      *         Period, and any of the DataElements, or an empty collection if no
      *         values match.
      */
-    Collection<DataValue> getDataValues( OrganisationUnit source, Period period, 
-        Collection<DataElement> dataElements, DataElementCategoryOptionCombo attributeOptionCombo );
-    
+    Collection<DataValue> getDataValues( OrganisationUnit source, Period period, Collection<DataElement> dataElements,
+        DataElementCategoryOptionCombo attributeOptionCombo );
+
     /**
      * Returns all DataValues for a given Source, Period, collection of
      * DataElements and collection of optioncombos.
@@ -197,10 +199,11 @@ public interface DataValueStore
      *         Period, and any of the DataElements, or an empty collection if no
      *         values match.
      */
-    Collection<DataValue> getDataValues( OrganisationUnit source, Period period, Collection<DataElement> dataElements, Collection<DataElementCategoryOptionCombo> categoryOptionCombos );
-    
+    Collection<DataValue> getDataValues( OrganisationUnit source, Period period, Collection<DataElement> dataElements,
+        Collection<DataElementCategoryOptionCombo> categoryOptionCombos );
+
     /**
-     * Returns all DataValues for a given DataElement, Period, and collection of 
+     * Returns all DataValues for a given DataElement, Period, and collection of
      * Sources.
      * 
      * @param dataElement the DataElements of the DataValues.
@@ -210,10 +213,10 @@ public interface DataValueStore
      *         Period, and Sources.
      */
     Collection<DataValue> getDataValues( DataElement dataElement, Period period, Collection<OrganisationUnit> sources );
-    
+
     /**
-     * Returns all DataValues for a given DataElement, collection of Periods, and 
-     * collection of Sources.
+     * Returns all DataValues for a given DataElement, collection of Periods,
+     * and collection of Sources.
      * 
      * @param dataElement the DataElements of the DataValues.
      * @param periods the Periods of the DataValues.
@@ -221,12 +224,13 @@ public interface DataValueStore
      * @return a collection of all DataValues which match the given DataElement,
      *         Periods, and Sources.
      */
-    Collection<DataValue> getDataValues( DataElement dataElement, Collection<Period> periods, 
+    Collection<DataValue> getDataValues( DataElement dataElement, Collection<Period> periods,
         Collection<OrganisationUnit> sources );
-    
+
     /**
-     * Returns all DataValues for a given DataElement, DataElementCategoryOptionCombo,
-     * collection of Periods, and collection of Sources.
+     * Returns all DataValues for a given DataElement,
+     * DataElementCategoryOptionCombo, collection of Periods, and collection of
+     * Sources.
      * 
      * @param dataElement the DataElements of the DataValues.
      * @param optionCombo the DataElementCategoryOptionCombo of the DataValues.
@@ -235,37 +239,40 @@ public interface DataValueStore
      * @return a collection of all DataValues which match the given DataElement,
      *         Periods, and Sources.
      */
-    Collection<DataValue> getDataValues( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombos, 
+    Collection<DataValue> getDataValues( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombos,
         Collection<Period> periods, Collection<OrganisationUnit> sources );
-    
+
     /**
-     * Returns all DataValues for a given collection of DataElementCategoryOptionCombos.
+     * Returns all DataValues for a given collection of
+     * DataElementCategoryOptionCombos.
      * 
      * @param optionCombos the DataElementCategoryOptionCombos of the DataValue.
-     * @return a collection of all DataValues which match the given collection of
-     *         DataElementCategoryOptionCombos.
+     * @return a collection of all DataValues which match the given collection
+     *         of DataElementCategoryOptionCombos.
      */
     Collection<DataValue> getDataValues( Collection<DataElementCategoryOptionCombo> categoryOptionCombos );
-    
+
     /**
      * Returns all DataValues for a given collection of DataElements.
      * 
      * @param dataElement the DataElements of the DataValue.
-     * @return a collection of all DataValues which mach the given collection of DataElements.
+     * @return a collection of all DataValues which mach the given collection of
+     *         DataElements.
      */
-    Collection<DataValue> getDataValues( DataElement dataElement );  
-    
+    Collection<DataValue> getDataValues( DataElement dataElement );
+
     /**
-     * Returns Latest DataValues for a given DataElement, PeriodType and OrganisationUnit
+     * Returns Latest DataValues for a given DataElement, PeriodType and
+     * OrganisationUnit
      * 
      * @param dataElement the DataElements of the DataValue.
      * @param periodType the Period Type of period of the DataValue
      * @param organisationUnit the Organisation Unit of the DataValue
-     * @return a Latest DataValue 
-     */   
-    
+     * @return a Latest DataValue
+     */
+
     DataValue getLatestDataValues( DataElement dataElement, PeriodType periodType, OrganisationUnit organisationUnit );
-    
+
     /**
      * Gets the number of DataValues persisted since the given data.
      * 
@@ -273,35 +280,38 @@ public interface DataValueStore
      * @return the number of DataValues.
      */
     int getDataValueCount( Date date );
-    
+
     /**
      * Returns a map of values indexed by DataElementOperand.
      * 
      * @param dataElements collection of DataElements to fetch for
      * @param period period for which to fetch the values
      * @param unit OrganisationUnit for which to fetch the values
-     * @param lastUpdatedMap optional map in which to return the lastUpdated date for each value
+     * @param lastUpdatedMap optional map in which to return the lastUpdated
+     *        date for each value
      * @return
      */
-    Map<DataElementOperand, Double> getDataValueMap( Collection<DataElement> dataElements, Period period, OrganisationUnit source );
+    Map<DataElementOperand, Double> getDataValueMap( Collection<DataElement> dataElements, Period period,
+        OrganisationUnit source );
 
     /**
      * Returns a map of values indexed by DataElementOperand.
      * 
      * In the (unlikely) event that the same dataElement/optionCombo is found in
-     * more than one period for the same organisationUnit and date, the value
-     * is returned from the period with the shortest duration.
+     * more than one period for the same organisationUnit and date, the value is
+     * returned from the period with the shortest duration.
      * 
      * @param dataElements collection of DataElements to fetch for
      * @param date date which must be present in the period
      * @param unit OrganisationUnit for which to fetch the values
      * @param periodTypes allowable period types in which to find the data
-     * @param lastUpdatedMap map in which to return the lastUpdated date for each value
+     * @param lastUpdatedMap map in which to return the lastUpdated date for
+     *        each value
      * @return
      */
-    Map<DataElementOperand, Double> getDataValueMap( Collection<DataElement> dataElements, Date date, OrganisationUnit source,
-    		Collection<PeriodType> periodTypes, Map<DataElementOperand, Date> lastUpdatedMap );
-    
+    Map<DataElementOperand, Double> getDataValueMap( Collection<DataElement> dataElements, Date date,
+        OrganisationUnit source, Collection<PeriodType> periodTypes, Map<DataElementOperand, Date> lastUpdatedMap );
+
     /**
      * Gets a Collection of DeflatedDataValues.
      * 
@@ -310,13 +320,5 @@ public interface DataValueStore
      * @param sourceIds the Collection of Source identifiers.
      */
     Collection<DeflatedDataValue> getDeflatedDataValues( int dataElementId, int periodId, Collection<Integer> sourceIds );
-    
-    /**
-     * Gets a Collection of DeflatedDataValuesDaily.
-     * 
-     * @param dataElementId the DataElement identifier.
-     * @param periodId the Period identifier.
-     * @param sourceIds the Collection of Source identifiers.
-     */
-    Collection<DeflatedDataValueDaily> getDeflatedDataValuesDaily( int dataElementId, int periodId, Collection<Integer> sourceIds );
+
 }

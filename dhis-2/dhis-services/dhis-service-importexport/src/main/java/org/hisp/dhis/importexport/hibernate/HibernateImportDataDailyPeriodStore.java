@@ -28,18 +28,7 @@ package org.hisp.dhis.importexport.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-
-import org.hibernate.Criteria;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.importexport.ImportDataDailyPeriod;
 import org.hisp.dhis.importexport.ImportDataDailyPeriodStore;
-import org.hisp.dhis.importexport.ImportDataValue;
-import org.hisp.dhis.importexport.ImportDataValueStore;
-import org.hisp.dhis.importexport.ImportObjectStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
@@ -52,13 +41,6 @@ public class HibernateImportDataDailyPeriodStore
     // ----------------------------------------------------------------------
     // Dependencies
     // ----------------------------------------------------------------------
-
-    private SessionFactory sessionFactory;
-
-    public void setSessionFactory( SessionFactory sessionFactory )
-    {
-        this.sessionFactory = sessionFactory;
-    }
 
     private JdbcTemplate jdbcTemplate;
 

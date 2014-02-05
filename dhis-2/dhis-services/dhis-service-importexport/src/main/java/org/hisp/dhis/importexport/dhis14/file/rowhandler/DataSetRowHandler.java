@@ -47,21 +47,19 @@ import com.ibatis.sqlmap.client.event.RowHandler;
  * @version $Id: DataSetRowHandler.java 6298 2008-11-17 17:31:14Z larshelg $
  */
 public class DataSetRowHandler
-    extends DataSetImporter implements RowHandler
+    extends DataSetImporter
+    implements RowHandler
 {
     private ImportParams params;
 
     private Map<String, Integer> periodTypeMapping;
-    
+
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
 
-    public DataSetRowHandler( BatchHandler<DataSet> batchHandler,
-        ImportObjectService importObjectService,
-        DataSetService dataSetService,
-        Map<String, Integer> periodTypeMapping,
-        ImportParams params,
+    public DataSetRowHandler( BatchHandler<DataSet> batchHandler, ImportObjectService importObjectService,
+        DataSetService dataSetService, Map<String, Integer> periodTypeMapping, ImportParams params,
         ImportAnalyser importAnalyser )
     {
         this.batchHandler = batchHandler;
@@ -71,7 +69,7 @@ public class DataSetRowHandler
         this.params = params;
         this.importAnalyser = importAnalyser;
     }
-    
+
     // -------------------------------------------------------------------------
     // RowHandler implementation
     // -------------------------------------------------------------------------
@@ -79,20 +77,11 @@ public class DataSetRowHandler
     public void handleRow( Object object )
     {
         final DataSet dataSet = (DataSet) object;
-        
+
         Integer periodTypeId = periodTypeMapping.get( dataSet.getPeriodType().getName() );
         Integer defaultId = periodTypeMapping.get( YearlyPeriodType.NAME );
-        
-        //Daily DataSet
-        Integer dailyPeriodTypeId = periodTypeMapping.get( DailyPeriodType.NAME );
-        
-        //dataSet.setShortName(dataSet.getName().substring(0, 49));
-        
-        if(dataSet.getUseDailyCaptureForm() == 1){
-            dataSet.getPeriodType().setId( dailyPeriodTypeId );
-        }else{
-            dataSet.getPeriodType().setId( periodTypeId != null ? periodTypeId : defaultId );
-        }
+
+        dataSet.getPeriodType().setId( periodTypeId != null ? periodTypeId : defaultId );
 
         importObject( dataSet, params );
     }

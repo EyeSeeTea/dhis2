@@ -36,7 +36,6 @@ import static org.hisp.dhis.system.util.CsvUtils.getCsvValue;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -59,11 +58,9 @@ import org.hisp.dhis.importexport.analysis.ImportAnalyser;
 import org.hisp.dhis.importexport.dhis14.util.Dhis14TypeHandler;
 import org.hisp.dhis.importexport.importer.DataValueImporter;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.DailyPeriodType;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
-import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.MimicingHashMap;
 import org.hisp.dhis.system.util.StreamUtils;
@@ -95,17 +92,16 @@ public class DataValueConverter
     private Map<Object, Integer> periodMapping;
 
     private Map<Object, Integer> sourceMapping;
-    
-    
-    //private BigDecimal price = new BigDecimal("0");
-    //private BigDecimal  totalEntry;
+
+    // private BigDecimal price = new BigDecimal("0");
+    // private BigDecimal totalEntry;
 
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
 
     public DataValueConverter( PeriodService periodService, DataValueService dataValueService,
-         DataElementService dataElementService )
+        DataElementService dataElementService )
     {
         this.periodService = periodService;
         this.dataValueService = dataValueService;
@@ -167,57 +163,49 @@ public class DataValueConverter
 
                     Collection<Period> periods = periodService.getIntersectingPeriods( params.getStartDate(),
                         params.getEndDate() );
-                    
-                   /*Period period = periodService.getPeriodFromDates( params.getStartDate(),
-                            params.getEndDate(), PeriodType.getPeriodTypeByName(MonthlyPeriodType.NAME) );*/
-                    
-                    //outerloop:
+
                     for ( final Integer element : params.getDataElements() )
                     {
 
                         for ( final Period period : periods )
                         {
-                        	if(period.getPeriodType().getName().equals(MonthlyPeriodType.NAME))
-                        	{
-                            values = dataValueService.getDeflatedDataValues( element, period.getId(),
-                                params.getOrganisationUnits() );
-
-                            for ( final DeflatedDataValue value : values )
+                            if ( period.getPeriodType().getName().equals( MonthlyPeriodType.NAME ) )
                             {
-                                out.write( getCsvValue( i ) );
-                                out.write( getCsvValue( value.getSourceId() ) );
-                                out.write( getCsvValue( value.getDataElementId() ) );
-                                out.write( getCsvValue( value.getPeriodId() ) );
-                                out = getCSVDataExportField( out, value );
-                                out.write( getCsvValue( 0 ) );
-                                out.write( getCsvValue( 0 ) );
-                                out.write( getCsvValue( 0 ) );
-                                out.write( getCsvValue( csvEncode( value.getComment() ) ) );
-                                //out.write( getCsvValue( 1 ) );
-                                out.write( getCsvValue( 1594 ) );
-                                //out.write( getCsvEndValue( DateUtils.getAccessDateString( value.getTimestamp() ) ) );
-                                if(value.getTimestamp() != null ){
-                                	out.write( getCsvEndValue( DateUtils.getAccessDateString( value.getTimestamp() ) ) );
-                                }else{
-                                	out.write( getCsvEndValue( DateUtils.getAccessDateString( params.getStartDate() ) ) );
-                                }
-                                
+                                values = dataValueService.getDeflatedDataValues( element, period.getId(),
+                                    params.getOrganisationUnits() );
 
-                                out.write( NEWLINE );
-                                
-                                /*if(i == 5){
-                                	break outerloop;
-                                }*/
-                                i++;
-                            }   
-                            
-                        }
-                                
+                                for ( final DeflatedDataValue value : values )
+                                {
+                                    out.write( getCsvValue( i ) );
+                                    out.write( getCsvValue( value.getSourceId() ) );
+                                    out.write( getCsvValue( value.getDataElementId() ) );
+                                    out.write( getCsvValue( value.getPeriodId() ) );
+                                    out = getCSVDataExportField( out, value );
+                                    out.write( getCsvValue( 0 ) );
+                                    out.write( getCsvValue( 0 ) );
+                                    out.write( getCsvValue( 0 ) );
+                                    out.write( getCsvValue( csvEncode( value.getComment() ) ) );
+                                    out.write( getCsvValue( 1594 ) );
+                                    if ( value.getTimestamp() != null )
+                                    {
+                                        out.write( getCsvEndValue( DateUtils.getAccessDateString( value.getTimestamp() ) ) );
+                                    }
+                                    else
+                                    {
+                                        out.write( getCsvEndValue( DateUtils.getAccessDateString( params.getStartDate() ) ) );
+                                    }
+
+                                    out.write( NEWLINE );
+
+                                    i++;
+                                }
+
+                            }
+
                         }
                     }
                 }
             }
-            //System.out.println("totalEntryNumber: "+totalEntry);
             StreamUtils.closeZipEntry( out );
         }
         catch ( IOException ex )
@@ -268,7 +256,7 @@ public class DataValueConverter
                 }
                 else if ( !values[5].isEmpty() ) // Boolean
                 {
-                    value.setValue(Dhis14TypeHandler.convertYesNoFromDhis14( Integer.parseInt(values[5]) ) );
+                    value.setValue( Dhis14TypeHandler.convertYesNoFromDhis14( Integer.parseInt( values[5] ) ) );
 
                 }
                 else if ( !values[7].isEmpty() ) // Date
@@ -347,7 +335,7 @@ public class DataValueConverter
             else if ( dataElementType.equals( DataElement.VALUE_TYPE_BOOL ) )
             {
                 out.write( SEPARATOR_B );
-                out.write( getCsvValue( csvEncode( Dhis14TypeHandler.convertBooleanToDhis14( value.getValue()) ) ) );
+                out.write( getCsvValue( csvEncode( Dhis14TypeHandler.convertBooleanToDhis14( value.getValue() ) ) ) );
                 out.write( SEPARATOR_B );
                 out.write( SEPARATOR_B );
                 out.write( SEPARATOR_B );
@@ -357,8 +345,8 @@ public class DataValueConverter
             else if ( dataElementType.equals( DataElement.VALUE_TYPE_NUMBER )
                 || dataElementType.equals( DataElement.VALUE_TYPE_INT )
                 || dataElementType.equals( DataElement.VALUE_TYPE_NEGATIVE_INT )
-                || dataElementType.equals( DataElement.VALUE_TYPE_POSITIVE_INT ) 
-                || dataElementType.equals( DataElement.VALUE_TYPE_ZERO_OR_POSITIVE_INT) )
+                || dataElementType.equals( DataElement.VALUE_TYPE_POSITIVE_INT )
+                || dataElementType.equals( DataElement.VALUE_TYPE_ZERO_OR_POSITIVE_INT ) )
             {
                 out.write( SEPARATOR_B );
                 out.write( SEPARATOR_B );
@@ -366,13 +354,6 @@ public class DataValueConverter
                 out.write( SEPARATOR_B );
                 out.write( SEPARATOR_B );
                 out.write( SEPARATOR_B );
-                
-                /*if(value.getValue() != null){
-                	BigDecimal anotherPrice = new BigDecimal(value.getValue());
-                	totalEntry = price.add(anotherPrice);
-                	//totalEntry =+ Double.parseDouble(value.getValue());
-                }*/
-                
             }
 
             else if ( dataElementType.equals( DataElement.VALUE_TYPE_DATE ) )

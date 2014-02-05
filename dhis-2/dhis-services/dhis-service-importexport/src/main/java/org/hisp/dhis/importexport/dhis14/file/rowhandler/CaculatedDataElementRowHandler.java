@@ -13,7 +13,6 @@ import org.hisp.dhis.importexport.dhis14.object.Dhis14CalculatedDataElement;
 import org.hisp.dhis.importexport.importer.IndicatorImporter;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.period.YearlyPeriodType;
 
 import com.ibatis.sqlmap.client.event.RowHandler;
 

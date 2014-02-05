@@ -35,7 +35,8 @@ import org.hisp.dhis.importexport.ImportParams;
 
 /**
  * @author Jason P. Pickering
- * @version $Id: OrganisationUnitXSDConverter.java 6455 2011-02-17 09:04:37Z jasonp $
+ * @version $Id: OrganisationUnitXSDConverter.java 6455 2011-02-17 09:04:37Z
+ *          jasonp $
  */
 public class OrganisationUnitGroupMemberXSDConverter
     extends AbstractXSDConverter
@@ -45,33 +46,32 @@ public class OrganisationUnitGroupMemberXSDConverter
         // Not implemented
     }
 
-        public void write( XMLWriter writer, ExportParams params )
+    public void write( XMLWriter writer, ExportParams params )
     {
-        	writer.openElement( "xsd:element", "name", "OrgUnitGroupMember" );
+        writer.openElement( "xsd:element", "name", "OrgUnitGroupMember" );
 
-            writeAnnotation( writer );
-            
-            writer.openElement( "xsd:complexType" );
-            
-            writer.openElement( "xsd:sequence" );
-            
-            writeInteger( writer, "OrgUnitGroupID", 1, true );
-            
-            writeInteger( writer, "OrgUnitID", 1, true );
-            
-            //added
-            writeInteger( writer, "Active", 1, true );
-            writeInteger( writer, "LastUserID", 1, true );
-            writeDateTime( writer, "LastUpdated", 1, true );
-            
-            writer.closeElement();
-            
-            writer.closeElement();
-            
-            writer.closeElement();
-     }
+        writeAnnotation( writer );
 
-            public void read( XMLReader reader, ImportParams params )
+        writer.openElement( "xsd:complexType" );
+
+        writer.openElement( "xsd:sequence" );
+
+        writeInteger( writer, "OrgUnitGroupID", 1, true );
+
+        writeInteger( writer, "OrgUnitID", 1, true );
+
+        writeInteger( writer, "Active", 1, true );
+        writeInteger( writer, "LastUserID", 1, true );
+        writeDateTime( writer, "LastUpdated", 1, true );
+
+        writer.closeElement();
+
+        writer.closeElement();
+
+        writer.closeElement();
+    }
+
+    public void read( XMLReader reader, ImportParams params )
     {
         // Not implemented
     }

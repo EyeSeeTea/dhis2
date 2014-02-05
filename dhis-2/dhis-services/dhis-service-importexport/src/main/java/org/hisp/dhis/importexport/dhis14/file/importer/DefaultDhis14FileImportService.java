@@ -64,6 +64,7 @@ import org.hisp.dhis.importexport.dhis14.file.rowhandler.CaculatedDataElementRow
 import org.hisp.dhis.importexport.dhis14.file.rowhandler.DataElementGroupMemberRowHandler;
 import org.hisp.dhis.importexport.dhis14.file.rowhandler.DataElementGroupRowHandler;
 import org.hisp.dhis.importexport.dhis14.file.rowhandler.DataElementRowHandler;
+import org.hisp.dhis.importexport.dhis14.file.rowhandler.DataSetDailyCaptureRowHandler;
 import org.hisp.dhis.importexport.dhis14.file.rowhandler.DataSetMemberRowHandler;
 import org.hisp.dhis.importexport.dhis14.file.rowhandler.DataSetOrganisationUnitAssociationRowHandler;
 import org.hisp.dhis.importexport.dhis14.file.rowhandler.DataSetRowHandler;
@@ -117,8 +118,9 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
-import org.hisp.dhis.validation.ValidationRuleService;
 import org.hisp.dhis.validation.ValidationRule;
+import org.hisp.dhis.validation.ValidationRuleService;
+
 import com.ibatis.sqlmap.client.event.RowHandler;
 
 /**
@@ -298,6 +300,7 @@ public class DefaultDhis14FileImportService
         importIndicatorGroupMembers( params, state );
 
         importDataSets( params, state );
+        importDataSetsDailyCapture( params, state );
         importDataSetMembers( params, state );
 
         importOrganisationUnits( params, state );
@@ -513,6 +516,22 @@ public class DefaultDhis14FileImportService
         batchHandler.flush();
 
         log.info( "Imported DataSets" );
+    }
+    
+    private void importDataSetsDailyCapture( ImportParams params, ProcessState state )
+    {
+        state.setMessage( "importing_data_sets_daily_capture" );
+
+        BatchHandler<DataSet> batchHandler = batchHandlerFactory.createBatchHandler( DataSetBatchHandler.class ).init();
+
+        RowHandler rowHandler = new DataSetDailyCaptureRowHandler( batchHandler, importObjectService, dataSetService,
+            objectMappingGenerator.getPeriodTypeMapping(), params, importAnalyser );
+
+        queryManager.queryWithRowhandler( "getDataSetsDailyCapture", rowHandler );
+
+        batchHandler.flush();
+
+        log.info( "Imported DataSets Daily Capture" );
     }
 
     private void importDataSetMembers( ImportParams params, ProcessState state )

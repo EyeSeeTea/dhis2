@@ -1,4 +1,5 @@
 package org.hisp.dhis.importexport.dhis14.xml.converter.xsd;
+
 /*
  * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
@@ -27,8 +28,6 @@ package org.hisp.dhis.importexport.dhis14.xml.converter.xsd;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
 import org.amplecode.staxwax.reader.XMLReader;
 import org.amplecode.staxwax.writer.XMLWriter;
 import org.hisp.dhis.importexport.ExportParams;
@@ -36,14 +35,13 @@ import org.hisp.dhis.importexport.ImportParams;
 
 /**
  * @author Jason P. Pickering
- * @version $Id: OrganisationUnitXSDConverter.java 6455 2011-02-17 09:04:37Z jasonp $
-  */
-
+ * @version $Id: OrganisationUnitXSDConverter.java 6455 2011-02-17 09:04:37Z
+ *          jasonp $
+ */
 
 public class OrganisationUnitStructureXSDConverter
-extends AbstractXSDConverter
+    extends AbstractXSDConverter
 {
-
 
     public OrganisationUnitStructureXSDConverter()
     {
@@ -55,30 +53,29 @@ extends AbstractXSDConverter
 
     public void write( XMLWriter writer, ExportParams params )
     {
-        //if ( params.getOrganisationUnits() != null && params.getOrganisationUnits().size() > 0 )
-        //{
-            writer.openElement( "xsd:element", "name", "OrgUnitStructure" );
 
-            writeAnnotation( writer );
+        writer.openElement( "xsd:element", "name", "OrgUnitStructure" );
 
-            writer.openElement( "xsd:complexType" );
+        writeAnnotation( writer );
 
-            writer.openElement( "xsd:sequence" );
+        writer.openElement( "xsd:complexType" );
 
-            writeLongInteger( writer, "OrgUnitStructureID", 1, true );
+        writer.openElement( "xsd:sequence" );
 
-            writeText( writer, "OrgUnitStructureName", 1, true, 230 );
-            
-            writeMemo( writer, "OrgUnitStructureDescription", 0, false, 536870910 );
+        writeLongInteger( writer, "OrgUnitStructureID", 1, true );
 
-            writeInteger( writer, "OrgUnitLevelCount", 0, false );
+        writeText( writer, "OrgUnitStructureName", 1, true, 230 );
 
-            writer.closeElement();
+        writeMemo( writer, "OrgUnitStructureDescription", 0, false, 536870910 );
 
-            writer.closeElement();
+        writeInteger( writer, "OrgUnitLevelCount", 0, false );
 
-            writer.closeElement();
-        //}
+        writer.closeElement();
+
+        writer.closeElement();
+
+        writer.closeElement();
+
     }
 
     public void read( XMLReader reader, ImportParams params )

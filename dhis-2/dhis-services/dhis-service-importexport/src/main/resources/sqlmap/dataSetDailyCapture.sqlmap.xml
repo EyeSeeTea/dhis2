@@ -4,16 +4,16 @@
 	PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
 	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
 
-<sqlMap namespace="dataSet">
+<sqlMap namespace="dataSetUseDailyCapture">
 	
 	<!-- TypeAlias -->
 
-	<typeAlias alias="dataSet" type="org.hisp.dhis.dataset.DataSet"/>
+	<typeAlias alias="dataSetDailyCapture" type="org.hisp.dhis.dataset.DataSet"/>
 	<typeAlias alias="periodTypeTypeHandler" type="org.hisp.dhis.importexport.dhis14.file.typehandler.PeriodTypeTypeHandler"/>
 	
 	<!-- ResultMap -->
 	
-	<resultMap class="dataSet" id="dataSetResultMap">
+	<resultMap class="dataSetDailyCapture" id="dataSetDailyCaptureResultMap">
 		<result property="id" column="DataSetID"/>
 		<result property="name" column="DataSetName"/>
 		<result property="periodType" column="DataPeriodTypeID" typeHandler="periodTypeTypeHandler"/>
@@ -22,7 +22,7 @@
 
 	<!-- Statement -->
 		
-	<select id="getDataSets" resultMap="dataSetResultMap">
+	<select id="getDataSetsDailyCapture" resultMap="dataSetDailyCaptureResultMap">
 		SELECT * FROM DataSet WHERE UseDailyCaptureForm = 0
 	</select>
 	
