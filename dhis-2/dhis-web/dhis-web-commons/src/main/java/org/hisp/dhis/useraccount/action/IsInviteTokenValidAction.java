@@ -1,4 +1,4 @@
-package org.hisp.dhis.mapping.action;
+package org.hisp.dhis.useraccount.action;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,79 +28,105 @@ package org.hisp.dhis.mapping.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.security.RestoreType;
+import org.hisp.dhis.security.SecurityService;
+import org.hisp.dhis.setting.SystemSettingManager;
+import org.hisp.dhis.user.UserCredentials;
+import org.hisp.dhis.user.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Lars Helge Overland
+ * @author Jim Grace
  */
-public class GetOrganisationUnitChildrenAction
-    implements Action
+public class IsInviteTokenValidAction
+        implements Action
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
+    @Autowired
+    private SystemSettingManager systemSettingManager;
 
-    private OrganisationUnitService organisationUnitService;
+    @Autowired
+    private SecurityService securityService;
 
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
-    }
+    @Autowired
+    private UserService userService;
 
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private String node;
-    
-    public void setNode( String node )
+    private String username;
+
+    public String getUsername()
     {
-        this.node = node;
+        return username;
+    }
+
+    public void setUsername( String username )
+    {
+        this.username = username;
+    }
+
+    private String token;
+
+    public String getToken()
+    {
+        return token;
+    }
+
+    public void setToken( String token )
+    {
+        this.token = token;
     }
 
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
 
-    private List<OrganisationUnit> units = new ArrayList<OrganisationUnit>();
-    
-    public List<OrganisationUnit> getUnits()
+    private UserCredentials userCredentials;
+
+    public UserCredentials getUserCredentials()
     {
-        return units;
+        return userCredentials;
+    }
+
+    private final String accountAction = "invited";
+
+    public String getAccountAction()
+    {
+        return accountAction;
+    }
+
+    private String email;
+
+    public String getEmail()
+    {
+        return email;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
-    @Override
     public String execute()
-        throws Exception
     {
-        OrganisationUnit unit = organisationUnitService.getOrganisationUnit( node );
-
-        if ( unit != null )
+        if ( !systemSettingManager.accountInviteEnabled() )
         {
-            int level = organisationUnitService.getLevelOfOrganisationUnit( unit.getId() ) + 1;
-        
-            units = new ArrayList<OrganisationUnit>( unit.getChildren() );
-            
-            for ( OrganisationUnit organisationUnit : units )
-            {
-                organisationUnit.setLevel( level );
-            }
-
-            Collections.sort( units, new IdentifiableObjectNameComparator() );
+            return ERROR;
         }
-        
-        return SUCCESS;
+
+        userCredentials = userService.getUserCredentialsByUsername( username );
+
+        if ( userCredentials == null )
+        {
+            return ERROR;
+        }
+
+        email = userCredentials.getUser().getEmail();
+
+        boolean verified = securityService.verifyToken( userCredentials, token, RestoreType.INVITE );
+
+        return verified ? SUCCESS : ERROR;
     }
 }

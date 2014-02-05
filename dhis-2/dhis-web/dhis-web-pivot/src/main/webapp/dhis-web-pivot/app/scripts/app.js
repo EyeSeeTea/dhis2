@@ -382,6 +382,7 @@ Ext.onReady( function() {
 		var showTotals,
 			showSubTotals,
 			hideEmptyRows,
+            aggregationType,
 			showHierarchy,
 			digitGroupSeparator,
 			displayDensity,
@@ -412,6 +413,27 @@ Ext.onReady( function() {
 		hideEmptyRows = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.hide_empty_rows,
 			style: 'margin-bottom:4px'
+		});
+
+		aggregationType = Ext.create('Ext.form.field.ComboBox', {
+			cls: 'ns-combo',
+			style: 'margin-bottom:3px',
+			width: comboboxWidth,
+			labelWidth: 130,
+			fieldLabel: NS.i18n.aggregation_type,
+			labelStyle: 'color:#333',
+			queryMode: 'local',
+			valueField: 'id',
+			editable: false,
+			value: 'default',
+			store: Ext.create('Ext.data.Store', {
+				fields: ['id', 'text'],
+				data: [
+					{id: 'default', text: NS.i18n.by_data_element},
+					{id: 'count', text: NS.i18n.count},
+					{id: 'sum', text: NS.i18n.sum}
+				]
+			})
 		});
 
 		showHierarchy = Ext.create('Ext.form.field.Checkbox', {
@@ -571,7 +593,8 @@ Ext.onReady( function() {
 			items: [
 				showTotals,
 				showSubTotals,
-				hideEmptyRows
+				hideEmptyRows,
+                aggregationType
 			]
 		};
 
@@ -621,6 +644,7 @@ Ext.onReady( function() {
 					showTotals: showTotals.getValue(),
 					showSubTotals: showSubTotals.getValue(),
 					hideEmptyRows: hideEmptyRows.getValue(),
+                    aggregationType: aggregationType.getValue(),
 					showHierarchy: showHierarchy.getValue(),
 					displayDensity: displayDensity.getValue(),
 					fontSize: fontSize.getValue(),
@@ -639,6 +663,7 @@ Ext.onReady( function() {
 				showTotals.setValue(Ext.isBoolean(layout.showTotals) ? layout.showTotals : true);
 				showSubTotals.setValue(Ext.isBoolean(layout.showSubTotals) ? layout.showSubTotals : true);
 				hideEmptyRows.setValue(Ext.isBoolean(layout.hideEmptyRows) ? layout.hideEmptyRows : false);
+                aggregationType.setValue(Ext.isString(layout.aggregationType) ? layout.aggregationType : 'default');
 				showHierarchy.setValue(Ext.isBoolean(layout.showHierarchy) ? layout.showHierarchy : false);
 				displayDensity.setValue(Ext.isString(layout.displayDensity) ? layout.displayDensity : 'normal');
 				fontSize.setValue(Ext.isString(layout.fontSize) ? layout.fontSize : 'normal');
@@ -733,6 +758,7 @@ Ext.onReady( function() {
 					w.showTotals = showTotals;
 					w.showSubTotals = showSubTotals;
 					w.hideEmptyRows = hideEmptyRows;
+                    w.aggregationType = aggregationType;
 					w.showHierarchy = showHierarchy;
 					w.displayDensity = displayDensity;
 					w.fontSize = fontSize;
@@ -824,6 +850,8 @@ Ext.onReady( function() {
 				delete favorite.parentOrganisationUnit;
 
 				delete favorite.parentGraphMap;
+
+                delete favorite.id;
 
 				// Replace operand id characters
 				for (var i = 0; i < dimensions.length; i++) {
@@ -1112,7 +1140,7 @@ Ext.onReady( function() {
 
 									if (favorite) {
 										favorite.name = record.data.name;
-
+console.log(favorite);
 										if (confirm(message)) {
 											Ext.Ajax.request({
 												url: ns.core.init.contextPath + '/api/reportTables/' + record.data.id,
@@ -2269,7 +2297,7 @@ Ext.onReady( function() {
 					failure: function(r) {
 						web.mask.hide(ns.app.centerRegion);
 
-						if (r.status === 413 || r.status === 414) {
+						if (Ext.Array.contains([413, 414], parseInt(r.status))) {
 							web.analytics.validateUrl(init.contextPath + '/api/analytics.json' + paramString);
 						}
 						else {
@@ -2340,7 +2368,7 @@ Ext.onReady( function() {
 				ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
 
 				if (NS.isSessionStorage) {
-					web.events.setValueMouseHandlers(layout, response, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
+					web.events.setValueMouseHandlers(layout, response || xResponse, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
 					web.events.setColumnHeaderMouseHandlers(layout, xLayout, xResponse);
 					web.storage.session.set(layout, 'table');
 				}
@@ -2361,6 +2389,7 @@ Ext.onReady( function() {
 	createViewport = function() {
         var indicatorAvailableStore,
 			indicatorSelectedStore,
+            indicatorGroupStore,
 			dataElementAvailableStore,
 			dataElementSelectedStore,
 			dataElementGroupStore,
@@ -2374,50 +2403,61 @@ Ext.onReady( function() {
 			organisationUnitGroupStore,
 			legendSetStore,
 
+            isScrolled,
+            indicatorLabel,
+            indicatorSearch,
+            indicatorFilter,
+            indicatorGroup,
             indicatorAvailable,
-			indicatorSelected,
-			indicator,
-			dataElementAvailable,
-			dataElementSelected,
-			dataElement,
-			dataSetAvailable,
-			dataSetSelected,
-			dataSet,
+            indicatorSelected,
+            indicator,
+			dataElementLabel,
+            dataElementSearch,
+            dataElementFilter,
+            dataElementAvailable,
+            dataElementSelected,
+            dataElementGroup,
+            dataElementDetailLevel,
+            dataElement,
+            dataSetAvailable,
+            dataSetSelected,
+            dataSet,
 			rewind,
-			relativePeriod,
-			fixedPeriodAvailable,
-			fixedPeriodSelected,
-			period,
-			treePanel,
-			userOrganisationUnit,
-			userOrganisationUnitChildren,
-			userOrganisationUnitGrandChildren,
-			userOrganisationUnitPanel,
-			organisationUnitLevel,
-			tool,
-			toolPanel,
-			organisationUnit,
+            relativePeriod,
+            fixedPeriodAvailable,
+            fixedPeriodSelected,
+            period,
+            treePanel,
+            userOrganisationUnit,
+            userOrganisationUnitChildren,
+            userOrganisationUnitGrandChildren,
+            organisationUnitLevel,
+            organisationUnitGroup,
+            toolMenu,
+            tool,
+            toolPanel,
+            organisationUnit,
 			dimensionIdAvailableStoreMap = {},
 			dimensionIdSelectedStoreMap = {},
 			getGroupSetPanels,
 			update,
 
-			layoutButton,
-			optionsButton,
-			favoriteButton,
-			openTableLayoutTab,
-			downloadButton,
-			interpretationItem,
-			pluginItem,
-			shareButton,
-
 			accordionBody,
-			accordion,
-			westRegion,
-			centerRegion,
-
-			setGui,
-			viewport,
+            accordion,
+            westRegion,
+            layoutButton,
+            optionsButton,
+            favoriteButton,
+            getParamString,
+            openTableLayoutTab,
+            downloadButton,
+            interpretationItem,
+            pluginItem,
+            shareButton,
+            defaultButton,
+            centerRegion,
+            setGui,
+            viewport,
 
 			accordionPanels = [];
 
@@ -3490,6 +3530,7 @@ Ext.onReady( function() {
 		};
 
 		// period
+
 		rewind = Ext.create('Ext.form.field.Checkbox', {
 			relativePeriodId: 'rewind',
 			boxLabel: 'Rewind one period',
@@ -4045,6 +4086,7 @@ Ext.onReady( function() {
 		};
 
 		// organisation unit
+
 		treePanel = Ext.create('Ext.tree.Panel', {
 			cls: 'ns-tree',
 			style: 'border-top: 1px solid #ddd; padding-top: 1px',
@@ -4508,6 +4550,7 @@ Ext.onReady( function() {
         };
 
 		// dimensions
+
 		getDimensionPanels = function(dimensions, iconCls) {
 			var	getAvailableStore,
 				getSelectedStore,
@@ -4733,6 +4776,7 @@ Ext.onReady( function() {
 		};
 
 		// viewport
+
 		update = function() {
 			var config = ns.core.web.pivot.getLayoutConfig(),
 				layout = ns.core.api.layout.Layout(config);

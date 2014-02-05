@@ -28,6 +28,7 @@ package org.hisp.dhis.useraccount.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.security.RestoreType;
 import org.hisp.dhis.security.SecurityService;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserService;
@@ -88,7 +89,7 @@ public class IsRestoreTokenValidAction
             return ERROR;
         }
         
-        boolean verified = securityService.verifyToken( credentials, token );
+        boolean verified = securityService.verifyToken( credentials, token, RestoreType.RECOVER_PASSWORD );
         
         return verified ? SUCCESS : ERROR;
     }

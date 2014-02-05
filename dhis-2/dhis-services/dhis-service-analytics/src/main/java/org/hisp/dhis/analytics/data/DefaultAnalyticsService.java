@@ -31,6 +31,7 @@ package org.hisp.dhis.analytics.data;
 import static org.hisp.dhis.analytics.AnalyticsTableManager.ANALYTICS_TABLE_NAME;
 import static org.hisp.dhis.analytics.AnalyticsTableManager.COMPLETENESS_TABLE_NAME;
 import static org.hisp.dhis.analytics.AnalyticsTableManager.COMPLETENESS_TARGET_TABLE_NAME;
+import static org.hisp.dhis.analytics.AnalyticsTableManager.ORGUNIT_TARGET_TABLE_NAME;
 import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_CATEGORYOPTIONCOMBO;
 import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_DATA_X;
 import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_ORGUNIT;
@@ -225,7 +226,11 @@ public class DefaultAnalyticsService
             List<Indicator> indicators = asTypedList( params.getIndicators() );
             
             expressionService.explodeExpressions( indicators );
-            
+
+            // -----------------------------------------------------------------
+            // Get indicator values
+            // -----------------------------------------------------------------
+
             DataQueryParams dataSourceParams = params.instance();
             dataSourceParams.removeDimension( DATAELEMENT_DIM_ID );
             dataSourceParams.removeDimension( DATASET_DIM_ID );
@@ -241,6 +246,8 @@ public class DefaultAnalyticsService
             Map<String, Double> constantMap = constantService.getConstantMap();
 
             Period filterPeriod = dataSourceParams.getFilterPeriod();
+
+            Map<String, Map<String, Integer>> permutationOrgUnitTargetMap = getOrgUnitTargetMap( dataSourceParams, indicators );
             
             for ( Indicator indicator : indicators )
             {
@@ -256,10 +263,16 @@ public class DefaultAnalyticsService
                     }
                     
                     Period period = filterPeriod != null ? filterPeriod : (Period) DimensionItem.getPeriodItem( options );
-
+                    
                     int days = daysBetween( period.getStartDate(), period.getEndDate() );
                     
-                    Double value = expressionService.getIndicatorValue( indicator, period, valueMap, constantMap, days );
+                    OrganisationUnit unit = (OrganisationUnit) DimensionItem.getOrganisationUnitItem( options );
+                    
+                    String ou = unit != null ? unit.getUid() : null;
+                    
+                    Map<String, Integer> orgUnitCountMap = permutationOrgUnitTargetMap != null ? permutationOrgUnitTargetMap.get( ou ) : null;
+                    
+                    Double value = expressionService.getIndicatorValue( indicator, period, valueMap, constantMap, orgUnitCountMap, days );
 
                     if ( value != null )
                     {
@@ -476,6 +489,24 @@ public class DefaultAnalyticsService
         return getAggregatedDataValueMapping( grid );
     }
     
+    private Map<String, Map<String, Integer>> getOrgUnitTargetMap( DataQueryParams params, Collection<Indicator> indicators )
+    {
+        Set<OrganisationUnitGroup> orgUnitGroups = expressionService.getOrganisationUnitGroupsInIndicators( indicators );
+        
+        if ( orgUnitGroups == null || orgUnitGroups.isEmpty() )
+        {
+            return null;
+        }
+        
+        DataQueryParams orgUnitTargetParams = params.instance().pruneToDimensionType( DimensionType.ORGANISATIONUNIT );
+        orgUnitTargetParams.getDimensions().add( new BaseDimensionalObject( DimensionalObject.ORGUNIT_GROUP_DIM_ID, null, new ArrayList<NameableObject>( orgUnitGroups ) ) );
+        orgUnitTargetParams.setSkipPartitioning( true );
+        
+        Map<String, Double> orgUnitCountMap = getAggregatedOrganisationUnitTargetMap( orgUnitTargetParams );
+        
+        return orgUnitTargetParams.getPermutationOrgUnitGroupCountMap( orgUnitCountMap );
+    }
+    
     /**
      * Generates a mapping where the key represents the dimensional item identifiers
      * concatenated by "-" and the value is the corresponding aggregated data value
@@ -545,13 +576,30 @@ public class DefaultAnalyticsService
     }
 
     /**
+     * Generates a mapping between the the data set dimension key and the count
+     * of expected data sets to report.
      * 
-     * @param params
-     * @return
+     * @param params the data query parameters.
+     * @return a mapping between the the data set dimension key and the count of
+     *         expected data sets to report.
      */
     private Map<String, Double> getAggregatedCompletenessTargetMap( DataQueryParams params )
     {
         return getAggregatedValueMap( params, COMPLETENESS_TARGET_TABLE_NAME );
+    }
+
+    /**
+     * Generates a mapping between the the org unit dimension key and the count
+     * of org units inside the subtree of the given organisation units and
+     * members of the given organisation unit groups.
+     * 
+     * @param params the data query parameters.
+     * @return a mapping between the the data set dimension key and the count of
+     *         expected data sets to report.
+     */
+    private Map<String, Double> getAggregatedOrganisationUnitTargetMap( DataQueryParams params )
+    {
+        return getAggregatedValueMap( params, ORGUNIT_TARGET_TABLE_NAME );
     }
     
     /**

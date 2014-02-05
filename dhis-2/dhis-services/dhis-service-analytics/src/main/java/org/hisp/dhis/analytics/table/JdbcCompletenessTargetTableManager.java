@@ -63,7 +63,7 @@ public class JdbcCompletenessTargetTableManager
     
     public String getTableName()
     {
-        return "completenesstarget";
+        return COMPLETENESS_TARGET_TABLE_NAME;
     }
 
     public void createTable( AnalyticsTable table )

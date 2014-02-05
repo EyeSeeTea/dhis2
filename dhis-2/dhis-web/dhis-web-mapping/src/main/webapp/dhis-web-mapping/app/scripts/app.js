@@ -3,6 +3,24 @@ Ext.onReady( function() {
 		initialize;
 		//gis;
 
+	// set app config
+	(function() {
+
+		// ext configuration
+		Ext.QuickTips.init();
+
+		Ext.override(Ext.LoadMask, {
+			onHide: function() {
+				this.callParent();
+			}
+		});
+
+		// right click handler
+		document.body.oncontextmenu = function() {
+			return false;
+		};
+	}());
+
 	GIS.app = {};
 
 	GIS.app.extendInstance = function(gis) {
@@ -90,7 +108,7 @@ Ext.onReady( function() {
 
 			util.map.map2plugin = function(map) {
 				map.url = init.contextPath;
-				
+
 				if (map.id) {
 					return {id: map.id};
 				}
@@ -475,11 +493,14 @@ Ext.onReady( function() {
 				init.rootNodes[i].path = '/root/' + init.rootNodes[i].id;
 			}
 
+			// sort organisation unit levels
+			gis.util.array.sort(init.organisationUnitLevels, 'ASC', 'level');
+
 			// sort indicator groups
-			gis.util.object.sortObjectsByString(init.indicatorGroups);
+			gis.util.array.sort(init.indicatorGroups);
 
 			// sort data element groups
-			gis.util.object.sortObjectsByString(init.dataElementGroups);
+			gis.util.array.sort(init.dataElementGroups);
 		}());
 
 		// store
@@ -487,30 +508,6 @@ Ext.onReady( function() {
 			store.periodTypes = Ext.create('Ext.data.Store', {
 				fields: ['id', 'name'],
 				data: gis.conf.period.periodTypes
-			});
-
-			store.infrastructuralPeriodsByType = Ext.create('Ext.data.Store', {
-				fields: ['id', 'name'],
-				proxy: {
-					type: 'ajax',
-					url: gis.init.contextPath + gis.conf.finals.url.path_module + 'getPeriodsByPeriodType.action',
-					reader: {
-						type: 'json',
-						root: 'periods'
-					},
-					extraParams: {
-						name: gis.init.systemSettings.infrastructuralPeriodType
-					}
-				},
-				autoLoad: false,
-				isLoaded: false,
-				listeners: {
-					load: function() {
-						if (!this.isLoaded) {
-							this.isLoaded = true;
-						}
-					}
-				}
 			});
 
 			store.groupSets = Ext.create('Ext.data.Store', {
@@ -544,39 +541,13 @@ Ext.onReady( function() {
 
 			store.groupsByGroupSet = Ext.create('Ext.data.Store', {
 				fields: ['id', 'name', 'symbol'],
-				proxy: {
-					type: 'ajax',
-					url: '',
-					noCache: false,
-					reader: {
-						type: 'json',
-						root: 'organisationUnitGroups'
-					}
-				},
-				isLoaded: false,
-				loadFn: function(fn) {
-					if (this.isLoaded) {
-						fn.call();
-					}
-					else {
-						this.load(fn);
-					}
-				},
-				listeners: {
-					load: function() {
-						if (!this.isLoaded) {
-							this.isLoaded = true;
-						}
-						this.sort('name', 'ASC');
-					}
-				}
 			});
 
 			store.organisationUnitGroup = Ext.create('Ext.data.Store', {
 				fields: ['id', 'name'],
 				proxy: {
 					type: 'ajax',
-					url: init.contextPath + conf.finals.url.path_api + conf.finals.url.organisationunitgroup_getall,
+					url: init.contextPath + '/api/organisationUnitGroups.json?paging=false&links=false',
 					reader: {
 						type: 'json',
 						root: 'organisationUnitGroups'
@@ -661,7 +632,7 @@ Ext.onReady( function() {
 			layer = gis.layer.event;
 			layer.menu = GIS.app.LayerMenu(layer, 'gis-toolbar-btn-menu-first');
 			layer.widget = GIS.app.LayerWidgetEvent(layer);
-			layer.window = GIS.app.WidgetWindow(layer, gis.conf.layout.widget.window_width + 150, 3);
+			layer.window = GIS.app.WidgetWindow(layer, gis.conf.layout.widget.window_width + 150, 1);
 			layer.window.widget = layer.widget;
 			GIS.core.createSelectHandlers(gis, layer);
 
@@ -943,6 +914,11 @@ Ext.onReady( function() {
 			}
 		});
 
+        var operatorCmpWidth = 70,
+            valueCmpWidth = 304,
+            buttonCmpWidth = 20,
+            nameCmpWidth = 400;
+
         Ext.define('Ext.ux.panel.DataElementIntegerContainer', {
 			extend: 'Ext.container.Container',
 			alias: 'widget.dataelementintegerpanel',
@@ -964,7 +940,7 @@ Ext.onReady( function() {
                     displayField: 'name',
                     queryMode: 'local',
                     editable: false,
-                    width: 70,
+                    width: operatorCmpWidth,
                     value: 'EQ',
                     store: {
                         fields: ['id', 'name'],
@@ -980,13 +956,13 @@ Ext.onReady( function() {
                 });
 
                 this.valueCmp = Ext.create('Ext.form.field.Number', {
-                    width: 300,
+                    width: valueCmpWidth,
                     value: 0
                 });
 
                 this.addCmp = Ext.create('Ext.button.Button', {
                     text: '+',
-                    width: 20,
+                    width: buttonCmpWidth,
                     handler: function() {
 						container.duplicateDataElement();
 					}
@@ -994,7 +970,7 @@ Ext.onReady( function() {
 
                 this.removeCmp = Ext.create('Ext.button.Button', {
                     text: 'x',
-                    width: 20,
+                    width: buttonCmpWidth,
                     handler: function() {
                         container.removeDataElement();
                     }
@@ -1002,7 +978,7 @@ Ext.onReady( function() {
 
                 this.nameCmp = Ext.create('Ext.form.Label', {
                     text: this.dataElement.name,
-                    width: 360,
+                    width: nameCmpWidth,
                     style: 'padding:2px'
                 });
 
@@ -1039,7 +1015,7 @@ Ext.onReady( function() {
                     displayField: 'name',
                     queryMode: 'local',
                     editable: false,
-                    width: 70,
+                    width: operatorCmpWidth,
                     value: 'LIKE',
                     store: {
                         fields: ['id', 'name'],
@@ -1051,17 +1027,17 @@ Ext.onReady( function() {
                 });
 
                 this.valueCmp = Ext.create('Ext.form.field.Text', {
-                    width: 300
+                    width: valueCmpWidth
                 });
 
                 this.addCmp = Ext.create('Ext.button.Button', {
                     text: '+',
-                    width: 20
+                    width: buttonCmpWidth
                 });
 
                 this.removeCmp = Ext.create('Ext.button.Button', {
                     text: 'x',
-                    width: 20,
+                    width: buttonCmpWidth,
                     handler: function() {
                         container.removeDataElement();
                     }
@@ -1069,7 +1045,7 @@ Ext.onReady( function() {
 
                 this.nameCmp = Ext.create('Ext.form.Label', {
                     text: this.dataElement.name,
-                    width: 360,
+                    width: nameCmpWidth,
                     style: 'padding:2px'
                 });
 
@@ -1106,7 +1082,7 @@ Ext.onReady( function() {
                     displayField: 'name',
                     queryMode: 'local',
                     editable: false,
-                    width: 70,
+                    width: operatorCmpWidth,
                     value: 'EQ',
                     store: {
                         fields: ['id', 'name'],
@@ -1122,18 +1098,18 @@ Ext.onReady( function() {
                 });
 
                 this.valueCmp = Ext.create('Ext.form.field.Date', {
-					width: 300,
+					width: valueCmpWidth,
 					format: 'Y-m-d'
 				});
 
                 this.addCmp = Ext.create('Ext.button.Button', {
                     text: '+',
-                    width: 20
+                    width: buttonCmpWidth
                 });
 
                 this.removeCmp = Ext.create('Ext.button.Button', {
                     text: 'x',
-                    width: 20,
+                    width: buttonCmpWidth,
                     handler: function() {
                         container.removeDataElement();
                     }
@@ -1141,7 +1117,7 @@ Ext.onReady( function() {
 
                 this.nameCmp = Ext.create('Ext.form.Label', {
                     text: this.dataElement.name,
-                    width: 360,
+                    width: nameCmpWidth,
                     style: 'padding:2px'
                 });
 
@@ -1177,7 +1153,7 @@ Ext.onReady( function() {
                     displayField: 'name',
                     queryMode: 'local',
                     editable: false,
-                    width: 70,
+                    width: operatorCmpWidth + valueCmpWidth,
                     value: 'false',
                     store: {
                         fields: ['id', 'name'],
@@ -1190,12 +1166,12 @@ Ext.onReady( function() {
 
                 this.addCmp = Ext.create('Ext.button.Button', {
                     text: '+',
-                    width: 20
+                    width: buttonCmpWidth
                 });
 
                 this.removeCmp = Ext.create('Ext.button.Button', {
                     text: 'x',
-                    width: 20,
+                    width: buttonCmpWidth,
                     handler: function() {
                         container.removeDataElement();
                     }
@@ -1203,7 +1179,7 @@ Ext.onReady( function() {
 
                 this.nameCmp = Ext.create('Ext.form.Label', {
                     text: this.dataElement.name,
-                    width: 360,
+                    width: nameCmpWidth,
                     style: 'padding:2px'
                 });
 
@@ -1242,7 +1218,7 @@ Ext.onReady( function() {
 
                 this.nameCmp = Ext.create('Ext.form.Label', {
                     text: this.dataElement.name,
-                    width: 360,
+                    width: nameCmpWidth,
                     style: 'padding:2px 2px 2px 1px'
                 });
 
@@ -1251,7 +1227,7 @@ Ext.onReady( function() {
                     displayField: 'name',
                     queryMode: 'local',
                     editable: false,
-                    width: 70,
+                    width: operatorCmpWidth,
                     value: 'IN',
                     store: {
                         fields: ['id', 'name'],
@@ -1383,7 +1359,7 @@ Ext.onReady( function() {
                 });
 
                 this.valueCmp = Ext.create('Ext.form.field.Text', {
-					width: 220,
+					width: 224,
 					addOptionValue: function(option) {
 						var value = this.getValue();
 
@@ -1406,13 +1382,13 @@ Ext.onReady( function() {
 
                 this.addCmp = Ext.create('Ext.button.Button', {
                     text: '+',
-                    width: 20,
+                    width: buttonCmpWidth,
                     style: 'font-weight:bold'
                 });
 
                 this.removeCmp = Ext.create('Ext.button.Button', {
                     text: 'x',
-                    width: 20,
+                    width: buttonCmpWidth,
                     handler: function() {
                         container.removeDataElement();
                     }
@@ -3796,7 +3772,7 @@ Ext.onReady( function() {
 			cls: 'gis-textarea',
 			height: 130,
 			fieldStyle: 'padding-left: 4px; padding-top: 3px',
-			emptyText: GIS.i18n.write_your_interpretation
+			emptyText: GIS.i18n.write_your_interpretation + '..'
 		});
 
 		panel = Ext.create('Ext.panel.Panel', {
@@ -3955,7 +3931,7 @@ Ext.onReady( function() {
             baseWidth = 442,
             toolWidth = 36,
 
-            accBaseWidth = baseWidth - 6;
+            accBaseWidth = baseWidth - 2;
 
 		// stores
 
@@ -4058,7 +4034,7 @@ Ext.onReady( function() {
 			stage.clearValue();
 
 			dataElementsByStageStore.removeAll();
-			dataElementSelected.removeAll();			
+			dataElementSelected.removeAll();
 
 			stagesByProgramStore.proxy.url = gis.init.contextPath + '/api/programs/' + programId + '.json?viewClass=withoutOrganisationUnits&links=false&paging=false';
 			stagesByProgramStore.load({
@@ -4127,7 +4103,7 @@ Ext.onReady( function() {
 
 			fn = function(attributes) {
 
-				// data elements			
+				// data elements
 				if (Ext.isString(item)) {
 					Ext.Ajax.request({
 						url: gis.init.contextPath + '/api/programStages/' + item + '.json?links=false&paging=false',
@@ -4157,7 +4133,7 @@ Ext.onReady( function() {
 								for (var i = 0; i < attributes.length; i++) {
 									attributes[i].type = attributes[i].valueType;
 								}
-								
+
 								program.storage[programId] = attributes;
 							}
 
@@ -4220,7 +4196,7 @@ Ext.onReady( function() {
         dataElementSelected = Ext.create('Ext.panel.Panel', {
 			width: accBaseWidth,
             height: 204,
-            bodyStyle: 'padding:2px 5px 5px; overflow-y: scroll',
+            bodyStyle: 'padding:2px 0 5px 3px; overflow-y: scroll',
             tbar: {
                 height: 27,
                 items: {
@@ -5061,25 +5037,7 @@ Ext.onReady( function() {
 		// Stores
 
 		infrastructuralDataElementValuesStore = Ext.create('Ext.data.Store', {
-			fields: ['dataElementName', 'value'],
-			proxy: {
-				type: 'ajax',
-				url: '../getInfrastructuralDataElementMapValues.action',
-				reader: {
-					type: 'json',
-					root: 'mapValues'
-				}
-			},
-			sortInfo: {field: 'dataElementName', direction: 'ASC'},
-			autoLoad: false,
-			isLoaded: false,
-			listeners: {
-				load: function() {
-					if (!this.isLoaded) {
-						this.isLoaded = true;
-					}
-				}
-			}
+			fields: ['name', 'value']
 		});
 
 		// Components
@@ -5793,25 +5751,7 @@ Ext.onReady( function() {
 		// Stores
 
 		infrastructuralDataElementValuesStore = Ext.create('Ext.data.Store', {
-			fields: ['dataElementName', 'value'],
-			proxy: {
-				type: 'ajax',
-				url: '../getInfrastructuralDataElementMapValues.action',
-				reader: {
-					type: 'json',
-					root: 'mapValues'
-				}
-			},
-			sortInfo: {field: 'dataElementName', direction: 'ASC'},
-			autoLoad: false,
-			isLoaded: false,
-			listeners: {
-				load: function() {
-					if (!this.isLoaded) {
-						this.isLoaded = true;
-					}
-				}
-			}
+			fields: ['name', 'value']
 		});
 
 		// Components
@@ -6628,7 +6568,7 @@ Ext.onReady( function() {
             fields: ['id', 'name'],
             proxy: {
                 type: 'ajax',
-                url: gis.init.contextPath + gis.conf.finals.url.path_api + gis.conf.finals.url.dataset_get,
+                url: gis.init.contextPath + '/api/dataSets.json?paging=false&links=false',
                 reader: {
                     type: 'json',
                     root: 'dataSets'
@@ -6659,25 +6599,7 @@ Ext.onReady( function() {
 		});
 
 		infrastructuralDataElementValuesStore = Ext.create('Ext.data.Store', {
-			fields: ['dataElementName', 'value'],
-			proxy: {
-				type: 'ajax',
-				url: '../getInfrastructuralDataElementMapValues.action',
-				reader: {
-					type: 'json',
-					root: 'mapValues'
-				}
-			},
-			sortInfo: {field: 'dataElementName', direction: 'ASC'},
-			autoLoad: false,
-			isLoaded: false,
-			listeners: {
-				load: function() {
-					if (!this.isLoaded) {
-						this.isLoaded = true;
-					}
-				}
-			}
+			fields: ['name', 'value']
 		});
 
 		legendsByLegendSetStore = Ext.create('Ext.data.Store', {
@@ -7831,26 +7753,34 @@ Ext.onReady( function() {
 				objectNameCmpMap = {},
 				view = {};
 
+            view.layer = layer.id;
+
 			objectNameCmpMap[dimConf.indicator.objectName] = indicator;
 			objectNameCmpMap[dimConf.dataElement.objectName] = dataElement;
 			objectNameCmpMap[dimConf.operand.objectName] = dataElement;
 			objectNameCmpMap[dimConf.dataSet.objectName] = dataSet;
 
-			view.columns = [{
-				dimension: vType,
-				items: [{
-					id: objectNameCmpMap[vType].getValue()
-				}]
-			}];
+            if (objectNameCmpMap[vType].getValue()) {
+                view.columns = [{
+                    dimension: vType,
+                    items: [{
+                        id: objectNameCmpMap[vType].getValue()
+                    }]
+                }];
+            }
 
-			view.rows = [treePanel.getDimension()];
+            if (treePanel.getDimension()) {
+                view.rows = [treePanel.getDimension()];
+            }
 
-			view.filters = [{
-				dimension: dimConf.period.objectName,
-				items: [{
-					id: period.getValue()
-				}]
-			}];
+            if (period.getValue()) {
+                view.filters = [{
+                    dimension: dimConf.period.objectName,
+                    items: [{
+                        id: period.getValue()
+                    }]
+                }];
+            }
 
 			view.classes = parseInt(classes.getValue());
 			view.method = parseInt(method.getValue());
@@ -8020,16 +7950,32 @@ Ext.onReady( function() {
 			handler: function() {
 				var textArea,
 					window,
-					text = '';
+					text = '',
+                    el = 'table1',
+                    layout = gis.util.map.map2plugin(gis.util.layout.getPluginConfig());
+
+                layout.el = el;
+
+                if (layout.mapViews) {
+                    for (var i = 0, view; i < layout.mapViews.length; i++) {
+                        view = layout.mapViews[i];
+
+                        if (view.legendSet) {
+                            delete view.legendSet.bounds;
+                            delete view.legendSet.colors;
+                            delete view.legendSet.names;
+                        }
+                    }
+                }
 
 				text += '<html>\n<head>\n';
 				text += '<link rel="stylesheet" href="http://dhis2-cdn.org/v214/ext/resources/css/ext-plugin-gray.css" />\n';
 				text += '<script src="http://dhis2-cdn.org/v214/ext/ext-all.js"></script>\n';
 				text += '<script src="http://dhis2-cdn.org/v214/plugin/table.js"></script>\n';
 				text += '</head>\n\n<body>\n';
-				text += '<div id="table1"></div>\n\n';
+				text += '<div id="' + el + '"></div>\n\n';
 				text += '<script>\n\n';
-				text += 'DHIS.getMap(' + JSON.stringify(gis.util.map.map2plugin(gis.util.layout.getPluginConfig()), null, 2) + ');\n\n';
+				text += 'DHIS.getMap(' + JSON.stringify(layout, null, 2) + ');\n\n';
 				text += '</script>\n\n';
 				text += '</body>\n</html>';
 
@@ -8066,57 +8012,11 @@ Ext.onReady( function() {
 
 				window.show();
 			}
-
-
-			
-				//var textArea,
-					//window,
-					//text = 'DHIS.getMap(' + JSON.stringify(gis.util.map.map2plugin(gis.util.layout.getPluginConfig())) + ');';
-
-				//textArea = Ext.create('Ext.form.field.TextArea', {
-					//width: 400,
-					//height: 200,
-					//readOnly: true,
-					//cls: 'gis-textarea monospaced',
-					//value: text
-				//});
-
-				//window = Ext.create('Ext.window.Window', {
-					//title: 'Plugin configuration',
-					//layout: 'fit',
-					//modal: true,
-					//resizable: false,
-					//items: textArea,
-					//destroyOnBlur: true,
-					//bbar: [
-						//'->',
-						//{
-							//text: 'Format',
-							//handler: function() {
-								//textArea.setValue('DHIS.getMap(' + JSON.stringify(gis.util.map.map2plugin(gis.util.layout.getPluginConfig()), null, 2) + ');');
-
-							//}
-						//},
-						//{
-							//text: 'Select',
-							//handler: function() {
-								//textArea.selectText();
-							//}
-						//}
-					//],
-					//listeners: {
-						//show: function(w) {
-							//this.setPosition(215, 33);
-						//}
-					//}
-				//});
-
-				//window.show();
-			//}
 		});
 
 		shareButton = Ext.create('Ext.button.Button', {
 			text: GIS.i18n.share,
+            disabled: true,
 			xableItems: function() {
 				interpretationItem.xable();
 				pluginItem.xable();
@@ -8616,27 +8516,16 @@ Ext.onReady( function() {
 	};
 
 	initialize = function() {
+		var requests = [],
+			callbacks = 0,
+			init = {
+				user: {},
+				systemSettings: {}
+			},
+			fn;
 
-		// ext configuration
-		Ext.QuickTips.init();
-
-		Ext.override(Ext.LoadMask, {
-			onHide: function() {
-				this.callParent();
-			}
-		});
-
-		// right click handler
-		document.body.oncontextmenu = function() {
-			return false;
-		};
-
-		Ext.Ajax.request({
-			url: '../initialize.action',
-			success: function(r) {
-				var init = Ext.decode(r.responseText);
-
-				GIS.i18n = init.i18n;
+		fn = function() {
+			if (++callbacks === requests.length) {
 
 				gis = GIS.core.getInstance(init);
 
@@ -8646,6 +8535,135 @@ Ext.onReady( function() {
 
 				gis.viewport = createViewport();
 			}
-		});
+		};
+
+        Ext.Ajax.request({
+            url: 'manifest.webapp',
+			success: function(r) {
+				init.contextPath = Ext.decode(r.responseText).activities.dhis.href;
+
+				Ext.Ajax.request({
+					url: 'i18n.json',
+					success: function(r) {
+						var i18nArray = Ext.decode(r.responseText);
+
+						Ext.Ajax.request({
+							url: init.contextPath + '/api/system/context.json',
+							success: function(r) {
+								init.contextPath = Ext.decode(r.responseText).contextPath || init.contextPath;
+
+								// i18n
+								requests.push({
+									url: init.contextPath + '/api/i18n?package=org.hisp.dhis.mapping',
+									method: 'POST',
+									headers: {
+										'Content-Type': 'application/json',
+										'Accepts': 'application/json'
+									},
+									params: Ext.encode(i18nArray),
+									success: function(r) {
+										GIS.i18n = Ext.decode(r.responseText);
+										fn();
+									}
+								});
+
+								// root nodes
+								requests.push({
+									url: init.contextPath + '/api/organisationUnits.json?level=1&paging=false&links=false&viewClass=detailed',
+									success: function(r) {
+										init.rootNodes = Ext.decode(r.responseText).organisationUnits || [];
+										fn();
+									}
+								});
+
+								// user orgunits and children
+								requests.push({
+									url: init.contextPath + '/api/organisationUnits.json?userOnly=true&viewClass=detailed&links=false',
+									success: function(r) {
+										var organisationUnits = Ext.decode(r.responseText).organisationUnits || [];
+
+										if (organisationUnits.length) {
+											var ou = organisationUnits[0];
+
+											if (ou.id) {
+												init.user.ou = ou.id;
+												init.user.ouc = ou.children ? Ext.Array.pluck(ou.children, 'id') : null;
+											};
+										}
+										else {
+											alert('User is not assigned to any organisation units');
+										}
+
+										fn();
+									}
+								});
+
+								// admin
+								requests.push({
+									url: init.contextPath + '/api/me/authorization/F_GIS_ADMIN',
+									success: function(r) {
+										init.user.isAdmin = Ext.decode(r.responseText);
+										fn();
+									}
+								});
+
+								// organisation unit levels
+								requests.push({
+									url: init.contextPath + '/api/organisationUnitLevels.json?paging=false&links=false',
+									success: function(r) {
+										init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
+										fn();
+									}
+								});
+
+								// indicator groups
+								requests.push({
+									url: init.contextPath + '/api/indicatorGroups.json?links=false&paging=false',
+									success: function(r) {
+										init.indicatorGroups = Ext.decode(r.responseText).indicatorGroups || [];
+										fn();
+									}
+								});
+
+								// data element groups
+								requests.push({
+									url: init.contextPath + '/api/dataElementGroups.json?links=false&paging=false',
+									success: function(r) {
+										init.dataElementGroups = Ext.decode(r.responseText).dataElementGroups || [];
+										fn();
+									}
+								});
+
+                                // infrastructural data element group
+								requests.push({
+									url: init.contextPath + '/api/configuration/infrastructuralDataElements.json',
+									success: function(r) {
+										var obj = Ext.decode(r.responseText);
+
+										init.systemSettings.infrastructuralDataElementGroup = Ext.isObject(obj) ? obj : null;
+										fn();
+									}
+								});
+
+                                // infrastructural period type
+								requests.push({
+									url: init.contextPath + '/api/configuration/infrastructuralPeriodType.json',
+									success: function(r) {
+										var obj = Ext.decode(r.responseText);
+
+										init.systemSettings.infrastructuralPeriodType = Ext.isObject(obj) ? obj : null;
+										fn();
+									}
+								});
+
+								for (var i = 0; i < requests.length; i++) {
+									Ext.Ajax.request(requests[i]);
+								}
+                            }
+                        });
+                    }
+                });
+            }
+        });
 	}();
 });

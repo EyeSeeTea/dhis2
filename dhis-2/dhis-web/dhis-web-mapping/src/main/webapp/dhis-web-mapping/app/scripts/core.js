@@ -272,10 +272,7 @@ Ext.onReady( function() {
 			// Infrastructural data
 			showInfo = function() {
 				Ext.Ajax.request({
-					url: gis.init.contextPath + gis.conf.finals.url.path_module + 'getFacilityInfo.action',
-					params: {
-						id: att.id
-					},
+					url: gis.init.contextPath + '/api/organisationUnits/' + att.id + '.json?links=false',
 					success: function(r) {
 						var ou = Ext.decode(r.responseText);
 
@@ -303,29 +300,41 @@ Ext.onReady( function() {
 											a.push({html: GIS.i18n.name, cls: 'gis-panel-html-title'}, {html: att.name, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
 										}
 
-										if (ou.pa) {
-											a.push({html: GIS.i18n.parent_unit, cls: 'gis-panel-html-title'}, {html: ou.pa, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
+										if (ou.parent) {
+											a.push({html: GIS.i18n.parent_unit, cls: 'gis-panel-html-title'}, {html: ou.parent.name, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
 										}
 
-										if (ou.ty) {
-											a.push({html: GIS.i18n.type, cls: 'gis-panel-html-title'}, {html: ou.ty, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
+										if (ou.code) {
+											a.push({html: GIS.i18n.code, cls: 'gis-panel-html-title'}, {html: ou.code, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
 										}
 
-										if (ou.co) {
-											a.push({html: GIS.i18n.code, cls: 'gis-panel-html-title'}, {html: ou.co, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
+										if (ou.address) {
+											a.push({html: GIS.i18n.address, cls: 'gis-panel-html-title'}, {html: ou.address, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
 										}
 
-										if (ou.ad) {
-											a.push({html: GIS.i18n.address, cls: 'gis-panel-html-title'}, {html: ou.ad, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
+										if (ou.email) {
+											a.push({html: GIS.i18n.email, cls: 'gis-panel-html-title'}, {html: ou.email, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
 										}
 
-										if (ou.em) {
-											a.push({html: GIS.i18n.email, cls: 'gis-panel-html-title'}, {html: ou.em, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
+										if (ou.phoneNumber) {
+											a.push({html: GIS.i18n.phone_number, cls: 'gis-panel-html-title'}, {html: ou.phoneNumber, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
 										}
 
-										if (ou.pn) {
-											a.push({html: GIS.i18n.phone_number, cls: 'gis-panel-html-title'}, {html: ou.pn, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
-										}
+                                        if (Ext.isString(ou.coordinates)) {
+                                            var co = ou.coordinates.replace("[","").replace("]","").replace(",",", ");
+											a.push({html: GIS.i18n.coordinate, cls: 'gis-panel-html-title'}, {html: co, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
+                                        }
+
+                                        if (Ext.isArray(ou.organisationUnitGroups) && ou.organisationUnitGroups.length) {
+                                            var html = '';
+
+                                            for (var i = 0; i < ou.organisationUnitGroups.length; i++) {
+                                                html += ou.organisationUnitGroups[i].name;
+                                                html += i < ou.organisationUnitGroups.length - 1 ? '<br/>' : '';
+                                            }
+
+											a.push({html: GIS.i18n.groups, cls: 'gis-panel-html-title'}, {html: html, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
+                                        }
 
 										return a;
 									}()
@@ -349,38 +358,88 @@ Ext.onReady( function() {
 											editable: false,
 											valueField: 'id',
 											displayField: 'name',
+											emptyText: 'Select period',
 											forceSelection: true,
-											width: 255, //todo
+											width: 258, //todo
 											labelWidth: 70,
-											store: gis.store.infrastructuralPeriodsByType,
+											store: {
+												fields: ['id', 'name'],
+												data: function() {
+													var pt = new PeriodType(),
+														periodType = gis.init.systemSettings.infrastructuralPeriodType.id,
+														data;
+
+													data = pt.get(periodType).generatePeriods({
+														offset: 0,
+														filterFuturePeriods: true,
+														reversePeriods: true
+													});
+
+													if (Ext.isArray(data) && data.length) {
+														data = data.slice(0,5);
+													}
+
+													return data;
+												}()
+											},
 											lockPosition: false,
 											listeners: {
-												select: function() {
-													infrastructuralPeriod = this.getValue();
+												select: function(cmp) {
+													var period = cmp.getValue(),
+														url = gis.init.contextPath + '/api/analytics.json?',
+														group = gis.init.systemSettings.infrastructuralDataElementGroup;
 
-													layer.widget.infrastructuralDataElementValuesStore.load({
-														params: {
-															periodId: infrastructuralPeriod,
-															organisationUnitId: att.internalId
+													if (group && group.dataElements) {
+														url += 'dimension=dx:';
+
+														for (var i = 0; i < group.dataElements.length; i++) {
+															url += group.dataElements[i].id;
+															url += i < group.dataElements.length - 1 ? ';' : '';
+														}
+													}
+
+													url += '&filter=pe:' + period;
+													url += '&filter=ou:' + att.id;
+
+													Ext.Ajax.request({
+														url: url,
+														success: function(r) {
+															var response = Ext.decode(r.responseText),
+																data = [];
+
+															if (Ext.isArray(response.rows)) {
+																for (var i = 0; i < response.rows.length; i++) {
+																	data.push({
+																		name: response.metaData.names[response.rows[i][0]],
+																		value: response.rows[i][1]
+																	});
+																}
+															}
+
+															layer.widget.infrastructuralDataElementValuesStore.loadData(data);
 														}
 													});
+
+													//layer.widget.infrastructuralDataElementValuesStore.load({
+														//params: {
+															//periodId: infrastructuralPeriod,
+															//organisationUnitId: att.internalId
+														//}
+													//});
 												}
 											}
-										},
-										{
-											cls: 'gis-panel-html-separator'
 										},
 										{
 											xtype: 'grid',
 											cls: 'gis-grid',
 											height: 300, //todo
-											width: 255,
+											width: 258,
 											scroll: 'vertical',
 											columns: [
 												{
-													id: 'dataElementName',
+													id: 'name',
 													text: 'Data element',
-													dataIndex: 'dataElementName',
+													dataIndex: 'name',
 													sortable: true,
 													width: 195
 												},
@@ -389,7 +448,7 @@ Ext.onReady( function() {
 													header: 'Value',
 													dataIndex: 'value',
 													sortable: true,
-													width: 60
+													width: 63
 												}
 											],
 											disableSelection: true,
@@ -447,8 +506,10 @@ Ext.onReady( function() {
 			};
 
 			// Menu
-			var menuItems = [
-				Ext.create('Ext.menu.Item', {
+			var menuItems = [];
+
+            if (layer.id !== 'facility') {
+				menuItems.push(Ext.create('Ext.menu.Item', {
 					text: 'Float up',
 					iconCls: 'gis-menu-item-icon-float',
 					cls: 'gis-plugin',
@@ -456,8 +517,9 @@ Ext.onReady( function() {
 					handler: function() {
 						drill(att.grandParentId, att.grandParentParentGraph, parseInt(att.level) - 1);
 					}
-				}),
-				Ext.create('Ext.menu.Item', {
+				}));
+
+                menuItems.push(Ext.create('Ext.menu.Item', {
 					text: 'Drill down',
 					iconCls: 'gis-menu-item-icon-drill',
 					cls: 'gis-menu-item-first gis-plugin',
@@ -465,13 +527,16 @@ Ext.onReady( function() {
 					handler: function() {
 						drill(att.id, att.parentGraph, parseInt(att.level) + 1);
 					}
-				})
-			];
+				}));
+			}
 
 			if (isRelocate && isPoint) {
-				menuItems.push({
-					xtype: 'menuseparator'
-				});
+
+                if (layer.id !== 'facility') {
+                    menuItems.push({
+                        xtype: 'menuseparator'
+                    });
+                }
 
 				menuItems.push( Ext.create('Ext.menu.Item', {
 					text: GIS.i18n.relocate,
@@ -529,21 +594,9 @@ Ext.onReady( function() {
 					text: GIS.i18n.show_information_sheet,
 					iconCls: 'gis-menu-item-icon-information',
 					handler: function(item) {
-						if (gis.store.infrastructuralPeriodsByType.isLoaded) {
-							showInfo();
-						}
-						else {
-							gis.store.infrastructuralPeriodsByType.load({
-								params: {
-									name: gis.init.systemSettings.infrastructuralPeriodType
-								},
-								callback: function() {
-									showInfo();
-								}
-							});
-						}
-					}
-				}));
+                        showInfo();
+                    }
+                }));
 			}
 
 			menuItems[menuItems.length - 1].addCls('gis-menu-item-last');
@@ -1042,7 +1095,7 @@ Ext.onReady( function() {
 
                     // events
                     for (var i = 0, row, obj; i < rows.length; i++) {
-                        row = rows[i];						
+                        row = rows[i];
                         obj = {};
 
                         for (var j = 0; j < row.length; j++) {
@@ -1289,15 +1342,15 @@ Ext.onReady( function() {
 		loadLegend = function(view) {
 			view = view || layer.core.view;
 
-			var store = gis.store.groupsByGroupSet;
+            Ext.data.JsonP.request({
+                url: gis.init.contextPath + '/api/organisationUnitGroupSets/' + view.organisationUnitGroupSet.id + '.jsonp?links=false',
+                success: function(r) {
+                    var data = r.organisationUnitGroups,
+                        options = {
+                            indicator: view.organisationUnitGroupSet.id
+                        };
 
-			store.proxy.url = gis.init.contextPath + gis.conf.finals.url.path_module + 'getOrganisationUnitGroupsByGroupSet.action?id=' + view.organisationUnitGroupSet.id;
-			store.load({
-				scope: this,
-				callback: function() {
-					var options = {
-						indicator: view.organisationUnitGroupSet.id
-					};
+                    gis.store.groupsByGroupSet.loadData(data);
 
 					layer.core.view = view;
 
@@ -1358,6 +1411,10 @@ Ext.onReady( function() {
 			}
 			else {
 				gis.map = null;
+
+				if (gis.viewport.shareButton) {
+                    gis.viewport.shareButton.enable();
+				}
 			}
 		};
 
@@ -1545,6 +1602,10 @@ Ext.onReady( function() {
 			}
 			else {
 				gis.map = null;
+
+				if (gis.viewport.shareButton) {
+                    gis.viewport.shareButton.enable();
+				}
 			}
 		};
 
@@ -1758,7 +1819,7 @@ Ext.onReady( function() {
 
 		loadData = function(view, features) {
 			var success;
-			
+
 			view = view || layer.core.view;
 			features = features || layer.core.featureStore.features;
 
@@ -2017,6 +2078,7 @@ Ext.onReady( function() {
 			else {
 				gis.map = null;
 				if (gis.viewport.shareButton) {
+                    gis.viewport.shareButton.enable();
 				}
 			}
 
@@ -2063,10 +2125,7 @@ Ext.onReady( function() {
 				url: {
 					path_api: '/api/',
 					path_module: '/dhis-web-mapping/',
-					path_commons: '/dhis-web-commons-ajax-json/',
-					organisationunitchildren_get: 'getOrganisationUnitChildren.action',
-					organisationunitgroup_getall: 'organisationUnitGroups.json?paging=false&links=false',
-					dataset_get: 'dataSets.json?paging=false&links=false'
+					path_commons: '/dhis-web-commons-ajax-json/'
 				},
 				layer: {
 					type_base: 'base',
@@ -2320,26 +2379,9 @@ Ext.onReady( function() {
 					cmpArray[i].queryMode = mode;
 				}
 			};
-
+			
 			util.object = {};
-
-			util.object.sortObjectsByString = function(array, key) {
-				key = key || 'name';
-				array.sort( function(a, b) {
-					var nameA = a[key].toLowerCase(),
-						nameB = b[key].toLowerCase();
-
-					if (nameA < nameB) {
-						return -1;
-					}
-					if (nameA > nameB) {
-						return 1;
-					}
-					return 0;
-				});
-				return array;
-			};
-
+			
 			util.object.getLength = function(object) {
 				var size = 0;
 
@@ -2350,6 +2392,49 @@ Ext.onReady( function() {
 				}
 
 				return size;
+			};
+
+			util.array = {};
+
+			util.array.sort = function(array, direction, key) {
+				// accepts [number], [string], [{prop: number}], [{prop: string}]
+
+				if (!util.object.getLength(array)) {
+					return;
+				}
+
+				key = key || 'name';
+
+				array.sort( function(a, b) {
+
+					// if object, get the property values
+					if (Ext.isObject(a) && Ext.isObject(b) && key) {
+						a = a[key];
+						b = b[key];
+					}
+
+					// string
+					if (Ext.isString(a) && Ext.isString(b)) {
+						a = a.toLowerCase();
+						b = b.toLowerCase();
+
+						if (direction === 'DESC') {
+							return a < b ? 1 : (a > b ? -1 : 0);
+						}
+						else {
+							return a < b ? -1 : (a > b ? 1 : 0);
+						}
+					}
+
+					// number
+					else if (Ext.isNumber(a) && Ext.isNumber(b)) {
+						return direction === 'DESC' ? b - a : a - b;
+					}
+
+					return 0;
+				});
+
+				return array;
 			};
 		}());
 
@@ -2371,12 +2456,12 @@ Ext.onReady( function() {
 
 				return function() {
 					if (!Ext.isObject(config)) {
-						console.log('Record config is not an object: ' + config);
+						console.log('Record config is not an object', config);
 						return;
 					}
 
 					if (!Ext.isString(config.id)) {
-						alert('Record id is not text: ' + config);
+						console.log('Record id is not text', config);
 						return;
 					}
 
@@ -2404,7 +2489,7 @@ Ext.onReady( function() {
 					}
 
 					if (!Ext.isString(config.dimension)) {
-						console.log('Dimension name is not text: ' + config);
+						console.log('Dimension name is not text', config);
 						return;
 					}
 
@@ -2412,7 +2497,7 @@ Ext.onReady( function() {
 						var records = [];
 
 						if (!Ext.isArray(config.items)) {
-							console.log('Dimension items is not an array: ' + config);
+							console.log('Dimension items is not an array', config);
 							return;
 						}
 
@@ -2427,7 +2512,7 @@ Ext.onReady( function() {
 						config.items = records;
 
 						if (!config.items.length) {
-							console.log('Dimension has no valid items: ' + config);
+							console.log('Dimension has no valid items', config);
 							return;
 						}
 					}
@@ -2538,6 +2623,7 @@ Ext.onReady( function() {
 					var a = [],
 						objectNames = [],
 						dimConf = conf.finals.dimension,
+                        layerConf =
 						isOu = false,
 						isOuc = false,
 						isOugc = false;
@@ -2553,9 +2639,16 @@ Ext.onReady( function() {
 					config.filters = getValidatedDimensionArray(config.filters);
 
 					if (!config.rows) {
-						console.log('Organisation unit dimension is invalid');
+						console.log('Organisation unit dimension is invalid', config.rows);
 						return;
 					}
+
+                    if (Ext.Array.contains([gis.layer.thematic1.id, gis.layer.thematic2.id, gis.layer.thematic3.id, gis.layer.thematic4.id], config.layer)) {
+                        if (!config.columns) {
+                            console.log('Data dimension is invalid', config.columns);
+                            return;
+                        }
+                    }
 
 					// Collect object names and user orgunits
 					for (var i = 0, dim, dims = Ext.Array.clean([].concat(config.columns, config.rows, config.filters)); i < dims.length; i++) {
@@ -2624,17 +2717,17 @@ Ext.onReady( function() {
 
 				return function() {
 					if (!Ext.isObject(config)) {
-						console.log('Header is not an object: ' + config);
+						console.log('Header is not an object', config);
 						return;
 					}
 
 					if (!Ext.isString(config.name)) {
-						console.log('Header name is not text: ' + config);
+						console.log('Header name is not text', config);
 						return;
 					}
 
 					if (!Ext.isBoolean(config.meta)) {
-						console.log('Header meta is not boolean: ' + config);
+						console.log('Header meta is not boolean', config);
 						return;
 					}
 
@@ -2654,12 +2747,12 @@ Ext.onReady( function() {
 					var headers = [];
 
 					if (!(config && Ext.isObject(config))) {
-						alert('Data response invalid');
+						alert('Data response invalid', config);
 						return false;
 					}
 
 					if (!(config.headers && Ext.isArray(config.headers))) {
-						alert('Data response invalid');
+						alert('Data response invalid', config);
 						return false;
 					}
 
@@ -2674,17 +2767,17 @@ Ext.onReady( function() {
 					config.headers = headers;
 
 					if (!config.headers.length) {
-						alert('No valid response headers');
+						alert('No valid response headers', config);
 						return;
 					}
 
 					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
-						alert('No values found');
+						alert('No values found', config);
 						return false;
 					}
 
 					if (config.headers.length !== config.rows[0].length) {
-						alert('Data invalid');
+						alert('Data invalid', config);
 						return false;
 					}
 
@@ -2729,7 +2822,6 @@ Ext.onReady( function() {
 		gis.olmap.addLayers(layers);
 
 		GIS.core.instances.push(gis);
-e = gis.layer.event;
 
 		return gis;
 	};

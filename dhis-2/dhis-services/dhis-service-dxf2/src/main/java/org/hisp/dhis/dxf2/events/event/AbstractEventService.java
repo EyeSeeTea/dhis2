@@ -29,14 +29,8 @@ package org.hisp.dhis.dxf2.events.event;
  */
 
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dxf2.events.person.Person;
@@ -69,8 +63,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -463,10 +462,28 @@ public abstract class AbstractEventService
 
         String storedBy = getStoredBy( event, null );
 
+        if ( event.getStatus() == EventStatus.ACTIVE )
+        {
+            programStageInstance.setCompleted( false );
+            programStageInstance.setStatus( ProgramStageInstance.ACTIVE_STATUS );
+            programStageInstance.setCompletedDate( null );
+            programStageInstance.setCompletedUser( null );
+        }
+        else if ( event.getStatus() == EventStatus.COMPLETED )
+        {
+            programStageInstance.setStatus( ProgramStageInstance.COMPLETED_STATUS );
+            programStageInstance.setCompletedDate( date );
+            programStageInstance.setCompletedUser( storedBy );
+
+            if ( !programStageInstance.isCompleted() )
+            {
+                programStageInstanceService.completeProgramStageInstance( programStageInstance, i18nManager.getI18nFormat() );
+            }
+        }
+
         programStageInstance.setDueDate( date );
         programStageInstance.setExecutionDate( date );
         programStageInstance.setOrganisationUnit( organisationUnit );
-        programStageInstance.setCompletedUser( storedBy );
 
         programStageInstanceService.updateProgramStageInstance( programStageInstance );
 
@@ -719,7 +736,6 @@ public abstract class AbstractEventService
         ProgramStageInstance programStageInstance = new ProgramStageInstance();
         updateProgramStageInstance( programStage, programInstance, organisationUnit, date, completed, coordinate,
             storedBy, programStageInstance );
-        programStageInstanceService.addProgramStageInstance( programStageInstance );
 
         return programStageInstance;
     }
@@ -744,6 +760,11 @@ public abstract class AbstractEventService
         }
 
         programStageInstance.setCompleted( completed );
+
+        if ( programStageInstance.getId() == 0 )
+        {
+            programStageInstanceService.addProgramStageInstance( programStageInstance );
+        }
 
         if ( programStageInstance.isCompleted() )
         {
@@ -780,12 +801,12 @@ public abstract class AbstractEventService
             if ( programStageInstance == null )
             {
                 programStageInstance = createProgramStageInstance( programStage, programInstance, organisationUnit,
-                    eventDate, EventStatus.COMPLETED.equals( event.getStatus() ), event.getCoordinate(), storedBy );
+                    eventDate, EventStatus.COMPLETED == event.getStatus(), event.getCoordinate(), storedBy );
             }
             else
             {
                 updateProgramStageInstance( programStage, programInstance, organisationUnit, eventDate,
-                    EventStatus.COMPLETED.equals( event.getStatus() ), event.getCoordinate(), storedBy,
+                    EventStatus.COMPLETED == event.getStatus(), event.getCoordinate(), storedBy,
                     programStageInstance );
             }
 
