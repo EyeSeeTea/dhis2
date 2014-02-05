@@ -6369,18 +6369,16 @@ Ext.onReady( function() {
 
 	GIS.app.LayerWidgetThematic = function(layer) {
 
-		// Stores
 		var indicatorsByGroupStore,
 			dataElementsByGroupStore,
 			periodsByTypeStore,
 			infrastructuralDataElementValuesStore,
 			legendsByLegendSetStore,
 
-		// Togglers
 			valueTypeToggler,
 			legendTypeToggler,
 
-		// Components
+			isScrolled,
 			valueType,
 			indicatorGroup,
 			indicator,
@@ -6417,18 +6415,14 @@ Ext.onReady( function() {
 			lowPanel,
 			highPanel,
 
-		// Functions
-			//createSelectHandlers,
 			reset,
 			setGui,
 			getView,
 
-		// Convenience
 			dimConf = gis.conf.finals.dimension,
-
 			panel;
 
-		// Stores
+		// stores
 
 		indicatorsByGroupStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name', 'legendSet'],
@@ -6465,23 +6459,75 @@ Ext.onReady( function() {
 
 		dataElementsByGroupStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
-			proxy: {
-				type: 'ajax',
-				url: '',
-				reader: {
-					type: 'json',
-					root: 'dataElements'
+            lastPage: null,
+            nextPage: 1,
+			isPending: false,
+            reset: function() {
+                this.removeAll();
+                this.lastPage = null;
+                this.nextPage = 1;
+                this.isPending = false;
+                dataElementSearch.hideFilter();
+            },
+            loadPage: function(uid, filter, append) {
+                uid = (Ext.isString(uid) || Ext.isNumber(uid)) ? uid : dataElementGroup.getValue();
+                filter = filter || dataElementFilter.getValue() || null;
+
+                if (!append) {
+                    this.lastPage = null;
+                    this.nextPage = 1;
+                }
+
+                if (dataElementDetailLevel.getValue() === dimConf.dataElement.objectName) {
+                    this.loadTotalsPage(uid, filter, append);
+                }
+                else if (dataElementDetailLevel.getValue() === dimConf.operand.objectName) {
+                    this.loadDetailsPage(uid, filter, append);
+                }
+            },
+            loadTotalsPage: function(uid, filter, append) {
+                var store = this,
+                    filterPath = filter ? '/query/' + filter : '',
+                    path;
+
+                if (store.nextPage === store.lastPage) {
+                    return;
+                }
+
+				if (Ext.isString(uid)) {
+					path = '/dataElementGroups/' + uid + '/members' + filterPath + '.json';
 				}
-			},
-			isLoaded: false,
-			loadFn: function(fn) {
-				if (this.isLoaded) {
-					fn.call();
+				else if (uid === 0) {
+					path = '/dataElements' + filterPath + '.json?domainType=aggregate';
 				}
-				else {
-					this.load(fn);
+
+				if (!path) {
+					alert('Available data elements: invalid id');
+					return;
 				}
-			},
+
+                store.isPending = true;
+
+                Ext.Ajax.request({
+                    url: ns.core.init.contextPath + '/api' + path,
+                    params: {
+                        viewClass: 'basic',
+                        links: 'false',
+                        page: store.nextPage,
+                        pageSize: 50
+                    },
+                    failure: function() {
+                        store.isPending = false;
+                    },
+                    success: function(r) {
+                        var response = Ext.decode(r.responseText),
+                            data = response.dataElements || [],
+                            pager = response.pager;
+
+                        store.loadStore(data, pager, append);
+                    }
+                });
+            },
 			sortStore: function() {
 				this.sort('name', 'ASC');
 			},
@@ -6631,7 +6677,7 @@ Ext.onReady( function() {
 			}
 		});
 
-		// Togglers
+		// togglers
 
 		valueTypeToggler = function(valueType) {
 			if (valueType === dimConf.indicator.objectName) {
@@ -6672,7 +6718,14 @@ Ext.onReady( function() {
 			}
 		};
 
-		// Components
+		// form
+
+		isScrolled = function(e) {
+			var el = e.srcElement,
+				scrollBottom = el.scrollTop + ((el.clientHeight / el.scrollHeight) * el.scrollHeight);
+
+			return scrollBottom / el.scrollHeight > 0.9;
+		};
 
 		valueType = Ext.create('Ext.form.field.ComboBox', {
 			fieldLabel: GIS.i18n.value_type,
@@ -6844,6 +6897,17 @@ Ext.onReady( function() {
 							}
 						}
 					});
+				},
+				expand: function(cmp) {
+					Ext.defer( function() {
+						var el = Ext.get(cmp.listKeyNav.boundList.getEl().id + '-listEl').dom;
+
+						el.addEventListener('scroll', function(e) {
+							if (isScrolled(e) && !indicatorAvailableStore.isPending) {
+								indicatorAvailableStore.loadPage(null, null, true);
+							}
+						});						
+					}, 100);
 				}
 			}
 		});
