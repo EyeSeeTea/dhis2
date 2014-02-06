@@ -9,7 +9,6 @@
 	<!-- TypeAlias -->
 
 	<typeAlias alias="dataSet" type="org.hisp.dhis.dataset.DataSet"/>
-	<typeAlias alias="periodTypeTypeHandler" type="org.hisp.dhis.importexport.dhis14.file.typehandler.PeriodTypeTypeHandler"/>
 	
 	<!-- ResultMap -->
 	

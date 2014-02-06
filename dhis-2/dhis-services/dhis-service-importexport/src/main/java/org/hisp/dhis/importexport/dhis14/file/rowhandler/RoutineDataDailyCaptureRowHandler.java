@@ -104,6 +104,7 @@ public class RoutineDataDailyCaptureRowHandler
 
         value.setDataElement( element );
         value.setCategoryOptionCombo( categoryOptionCombo );
+        value.setAttributeOptionCombo( categoryOptionCombo );
         value.setSource( source );
         value.setStoredBy( dhis14Value.getStoredBy() );
         value.setComment( dhis14Value.getComment() );

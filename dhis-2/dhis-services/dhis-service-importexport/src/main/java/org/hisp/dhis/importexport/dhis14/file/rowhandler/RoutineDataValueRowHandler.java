@@ -129,6 +129,7 @@ public class RoutineDataValueRowHandler
 
         value.setDataElement( element );
         value.setCategoryOptionCombo( categoryOptionCombo );
+        value.setAttributeOptionCombo( categoryOptionCombo );
         value.setPeriod( period );
         value.setSource( source );
         value.setStoredBy( dhis14Value.getStoredBy() );

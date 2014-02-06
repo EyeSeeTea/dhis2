@@ -9,7 +9,6 @@
 	<!-- TypeAlias -->
 
 	<typeAlias alias="dataSetDailyCapture" type="org.hisp.dhis.dataset.DataSet"/>
-	<typeAlias alias="periodTypeTypeHandler" type="org.hisp.dhis.importexport.dhis14.file.typehandler.PeriodTypeTypeHandler"/>
 	
 	<!-- ResultMap -->
 	
@@ -23,7 +22,7 @@
 	<!-- Statement -->
 		
 	<select id="getDataSetsDailyCapture" resultMap="dataSetDailyCaptureResultMap">
-		SELECT * FROM DataSet WHERE UseDailyCaptureForm = 0
+		SELECT * FROM DataSet WHERE UseDailyCaptureForm = 1
 	</select>
 	
 </sqlMap>
