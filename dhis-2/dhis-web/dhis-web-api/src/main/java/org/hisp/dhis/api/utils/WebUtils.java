@@ -28,6 +28,8 @@ package org.hisp.dhis.api.utils;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.api.controller.WebMetaData;
@@ -38,9 +40,11 @@ import org.hisp.dhis.system.util.ReflectionUtils;
 import org.hisp.dhis.user.UserCredentials;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import static org.hisp.dhis.system.util.PredicateUtils.alwaysTrue;
 
@@ -179,5 +183,98 @@ public class WebUtils
                 }
             }
         }
+    }
+
+    public static <T extends IdentifiableObject> List<Object> filterFields( List<T> entityList, String fields )
+    {
+        List<Object> objects = Lists.newArrayList();
+
+        if ( entityList.isEmpty() || fields == null )
+        {
+            return objects;
+        }
+
+        Map<String, Method> classMap = ReflectionUtils.getJacksonClassMap( entityList.get( 0 ).getClass() );
+        String[] split = fields.split( "," );
+
+        for ( T object : entityList )
+        {
+            Map<String, Object> objMap = Maps.newLinkedHashMap();
+
+            for ( String field : split )
+            {
+                if ( classMap.containsKey( field ) )
+                {
+                    Object o = ReflectionUtils.invokeMethod( object, classMap.get( field ) );
+
+                    if ( o == null )
+                    {
+                        continue;
+                    }
+
+                    if ( !ReflectionUtils.isCollection( o ) )
+                    {
+                        if ( IdentifiableObject.class.isInstance( o ) )
+                        {
+                            objMap.put( field, getIdentifiableObjectProperties( (IdentifiableObject) o ) );
+                        }
+                        else
+                        {
+                            objMap.put( field, o );
+                        }
+                    }
+                    else
+                    {
+                        objMap.put( field, getIdentifiableObjectCollectionProperties( o ) );
+                    }
+                }
+            }
+
+            objects.add( objMap );
+        }
+
+        return objects;
+    }
+
+    @SuppressWarnings( "unchecked" )
+    private static Object getIdentifiableObjectCollectionProperties( Object o )
+    {
+        List<Map<String, Object>> idPropertiesList = Lists.newArrayList();
+        Collection<IdentifiableObject> identifiableObjects;
+
+        try
+        {
+            identifiableObjects = (Collection<IdentifiableObject>) o;
+        }
+        catch ( ClassCastException ex )
+        {
+            return o;
+        }
+
+        for ( IdentifiableObject identifiableObject : identifiableObjects )
+        {
+            Map<String, Object> idProps = getIdentifiableObjectProperties( identifiableObject );
+            idPropertiesList.add( idProps );
+        }
+
+        return idPropertiesList;
+    }
+
+    private static Map<String, Object> getIdentifiableObjectProperties( IdentifiableObject identifiableObject )
+    {
+        Map<String, Object> idProps = Maps.newLinkedHashMap();
+
+        idProps.put( "id", identifiableObject.getUid() );
+        idProps.put( "name", identifiableObject.getDisplayName() );
+
+        if ( identifiableObject.getCode() != null )
+        {
+            idProps.put( "code", identifiableObject.getCode() );
+        }
+
+        idProps.put( "created", identifiableObject.getCreated() );
+        idProps.put( "lastUpdated", identifiableObject.getLastUpdated() );
+
+        return idProps;
     }
 }

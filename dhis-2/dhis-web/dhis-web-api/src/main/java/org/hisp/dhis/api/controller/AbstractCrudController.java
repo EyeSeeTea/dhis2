@@ -28,6 +28,7 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Maps;
 import org.hisp.dhis.api.controller.exception.NotFoundException;
 import org.hisp.dhis.api.controller.exception.NotFoundForQueryException;
 import org.hisp.dhis.api.utils.WebUtils;
@@ -57,7 +58,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -84,10 +84,36 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     // GET
     //--------------------------------------------------------------------------
 
-    @RequestMapping( value = "/map", method = RequestMethod.GET )
-    public void getJacksonClassMap( OutputStream outputStream ) throws IOException
+    @RequestMapping( value = "/filtered", method = RequestMethod.GET )
+    public void getJacksonClassMap( @RequestParam( required = false ) String fields,
+        @RequestParam Map<String, String> parameters, HttpServletResponse response ) throws IOException
     {
-        JacksonUtils.toJson( outputStream, ReflectionUtils.getJacksonClassMap( getEntityClass() ).keySet() );
+        if ( fields == null )
+        {
+            JacksonUtils.toJson( response.getOutputStream(), ReflectionUtils.getJacksonClassMap( getEntityClass() ).keySet() );
+            return;
+        }
+
+        WebOptions options = new WebOptions( parameters );
+        WebMetaData metaData = new WebMetaData();
+        List<T> entityList = getEntityList( metaData, options );
+
+        handleLinksAndAccess( options, metaData, entityList, true );
+
+        postProcessEntities( entityList );
+        postProcessEntities( entityList, options, parameters );
+
+        List<Object> objects = WebUtils.filterFields( entityList, fields );
+        Map<String, Object> output = Maps.newLinkedHashMap();
+
+        if ( options.hasPaging() )
+        {
+            output.put( "pager", metaData.getPager() );
+        }
+
+        output.put( "objects", objects );
+
+        JacksonUtils.toJson( response.getOutputStream(), output );
     }
 
     @RequestMapping( method = RequestMethod.GET )
