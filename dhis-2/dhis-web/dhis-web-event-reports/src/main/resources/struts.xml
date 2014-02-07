@@ -6,7 +6,7 @@
 
 	<include file="dhis-web-commons.xml" />
 
-	<package name="dhis-web-event" extends="dhis-web-commons" namespace="/dhis-web-event">
+	<package name="dhis-web-event-reports" extends="dhis-web-commons" namespace="/dhis-web-event-reports">
 
 		<action name="index" class="org.hisp.dhis.commons.action.NoAction">
 			<result name="success" type="redirect">app/index.html</result>
