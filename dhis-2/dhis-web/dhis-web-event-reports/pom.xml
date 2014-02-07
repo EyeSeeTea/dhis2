@@ -9,12 +9,12 @@
     <version>2.15-SNAPSHOT</version>
   </parent>
 
-  <artifactId>dhis-web-event</artifactId>
+  <artifactId>dhis-web-event-reports</artifactId>
   <packaging>war</packaging>
   <name>DHIS Event</name>
 
   <build>
-    <finalName>dhis-web-event</finalName>
+    <finalName>dhis-web-event-reports</finalName>
   </build>
 
   <dependencies>
