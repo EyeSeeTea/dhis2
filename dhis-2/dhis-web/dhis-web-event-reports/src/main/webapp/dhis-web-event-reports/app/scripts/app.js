@@ -1733,6 +1733,1128 @@ console.log(favorite);
 		return;
 	};
 
+	LayerWidgetEvent = function(layer) {
+
+		// stores
+		var programStore,
+			stagesByProgramStore,
+            dataElementsByStageStore,
+
+		// components
+			program,
+            onProgramSelect,
+			stage,
+            onStageSelect,
+            loadDataElements,
+            dataElementAvailable,
+            dataElementSelected,
+            addUxFromDataElement,
+            selectDataElements,
+            dataElement,
+
+			startDate,
+			endDate,
+			period,
+
+			treePanel,
+			userOrganisationUnit,
+			userOrganisationUnitChildren,
+			userOrganisationUnitGrandChildren,
+			organisationUnitLevel,
+			organisationUnitGroup,
+			toolMenu,
+			tool,
+			toolPanel,
+            organisationUnit,
+
+			panel,
+
+		// functions
+			reset,
+			setGui,
+			getView,
+			validateView,
+
+        // constants
+            baseWidth = 442,
+            toolWidth = 36,
+
+            accBaseWidth = baseWidth - 2;
+
+		// stores
+
+		programStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			proxy: {
+				type: 'ajax',
+				url: gis.init.contextPath + '/api/programs.json?links=false',
+				reader: {
+					type: 'json',
+					root: 'programs'
+				}
+			},
+			sortInfo: {field: 'name', direction: 'ASC'},
+			isLoaded: false,
+			listeners: {
+				load: function() {
+					if (!this.isLoaded) {
+						this.isLoaded = true;
+					}
+				}
+			}
+		});
+
+		stagesByProgramStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			proxy: {
+				type: 'ajax',
+				url: '',
+				reader: {
+					type: 'json',
+					root: 'programStages'
+				}
+			},
+			isLoaded: false,
+			loadFn: function(fn) {
+				if (Ext.isFunction(fn)) {
+					if (this.isLoaded) {
+						fn.call();
+					}
+					else {
+						this.load({
+							callback: fn
+						});
+					}
+				}
+			},
+			listeners: {
+				load: function() {
+					if (!this.isLoaded) {
+						this.isLoaded = true;
+					}
+					this.sort('name', 'ASC');
+				}
+			}
+		});
+
+		dataElementsByStageStore = Ext.create('Ext.data.Store', {
+			fields: [''],
+			data: [],
+			sorters: [{
+				property: 'name',
+				direction: 'ASC'
+			}]
+		});
+
+		// components
+
+            // data element
+		program = Ext.create('Ext.form.field.ComboBox', {
+			fieldLabel: GIS.i18n.programs,
+			editable: false,
+			valueField: 'id',
+			displayField: 'name',
+			fieldLabel: 'Program',
+			labelAlign: 'top',
+			labelCls: 'gis-form-item-label-top',
+			labelSeparator: '',
+			emptyText: 'Select program',
+			forceSelection: true,
+			queryMode: 'remote',
+			columnWidth: 0.5,
+			style: 'margin:1px 1px 2px 0',
+			storage: {},
+			store: programStore,
+            getRecord: function() {
+                return {
+                    id: this.getValue(),
+                    name: this.getRawValue()
+                };
+            },
+			listeners: {
+				select: function(cb) {
+					onProgramSelect(cb.getValue());
+				}
+			}
+		});
+
+		onProgramSelect = function(programId) {
+			stage.clearValue();
+
+			dataElementsByStageStore.removeAll();
+			dataElementSelected.removeAll();
+
+			stagesByProgramStore.proxy.url = gis.init.contextPath + '/api/programs/' + programId + '.json?viewClass=withoutOrganisationUnits&links=false&paging=false';
+			stagesByProgramStore.load({
+				callback: function(records) {
+					stage.enable();
+					stage.clearValue();
+					stage.queryMode = 'local';
+
+					if (records.length === 1) {
+						stage.setValue(records[0].data.id);
+
+						onStageSelect(records[0].data.id);
+					}
+				}
+			});
+
+		};
+
+		stage = Ext.create('Ext.form.field.ComboBox', {
+			fieldLabel: GIS.i18n.indicator,
+			editable: false,
+			valueField: 'id',
+			displayField: 'name',
+			fieldLabel: 'Stage',
+			labelAlign: 'top',
+			labelCls: 'gis-form-item-label-top',
+			labelSeparator: '',
+			emptyText: 'Select stage',
+			queryMode: 'remote',
+			forceSelection: true,
+			columnWidth: 0.5,
+			style: 'margin:1px 0 2px 1px',
+			disabled: true,
+			listConfig: {loadMask: false},
+			store: stagesByProgramStore,
+            getRecord: function() {
+                return {
+                    id: this.getValue(),
+                    name: this.getRawValue()
+                };
+            },
+			listeners: {
+				select: function(cb) {
+					onStageSelect(cb.getValue());
+				}
+			}
+		});
+
+		onStageSelect = function(stageId) {
+			dataElementSelected.removeAll();
+
+			loadDataElements(stageId);
+		};
+
+		loadDataElements = function(item, programId) {
+			var dataElements,
+				load,
+				fn;
+
+			programId = programId || program.getValue() || null;
+
+			load = function(attributes, dataElements) {
+				var data = Ext.Array.clean([].concat(attributes || [], dataElements || []));
+				dataElementsByStageStore.loadData(data);
+			};
+
+			fn = function(attributes) {
+
+				// data elements
+				if (Ext.isString(item)) {
+					Ext.Ajax.request({
+						url: gis.init.contextPath + '/api/programStages/' + item + '.json?links=false&paging=false',
+						success: function(r) {
+							var dataElements = Ext.Array.pluck(Ext.decode(r.responseText).programStageDataElements, 'dataElement');
+							load(attributes, dataElements);
+						}
+					});
+				}
+				else if (Ext.isArray(item)) {
+					load(attributes, item);
+				}
+			};
+
+			// attributes
+			if (programId) {
+				if (program.storage[programId]) {
+					fn(program.storage[programId]);
+				}
+				else {
+					Ext.Ajax.request({
+						url: gis.init.contextPath + '/api/programs/' + programId + '.json?viewClass=withoutOrganisationUnits&links=false',
+						success: function(r) {
+							var attributes = Ext.decode(r.responseText).attributes;
+
+							if (attributes) {
+								for (var i = 0; i < attributes.length; i++) {
+									attributes[i].type = attributes[i].valueType;
+								}
+
+								program.storage[programId] = attributes;
+							}
+
+							fn(attributes);
+						}
+					});
+				}
+			}
+		};
+
+		dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
+			cls: 'ns-toolbar-multiselect-left',
+			width: accBaseWidth,
+            height: 112,
+			valueField: 'id',
+			displayField: 'name',
+            style: 'margin-bottom:2px',
+			store: dataElementsByStageStore,
+			tbar: [
+				{
+					xtype: 'label',
+                    text: 'Available data items',
+					cls: 'ns-toolbar-multiselect-left-label'
+				},
+				'->',
+				{
+					xtype: 'button',
+					icon: 'images/arrowdown.png',
+					width: 22,
+					height: 22,
+					handler: function() {
+                        if (dataElementAvailable.getValue().length) {
+                            selectDataElements(dataElementAvailable.getValue());
+                        }
+					}
+				},
+				{
+					xtype: 'button',
+					icon: 'images/arrowdowndouble.png',
+					width: 22,
+					height: 22,
+					handler: function() {
+                        if (dataElementsByStageStore.getRange().length) {
+                            selectDataElements(dataElementsByStageStore.getRange());
+                        }
+					}
+				}
+			],
+			listeners: {
+				afterrender: function(ms) {
+					this.boundList.on('itemdblclick', function() {
+                        if (ms.getValue().length) {
+                            selectDataElements(ms.getValue());
+                        }
+					});
+				}
+			}
+		});
+
+        dataElementSelected = Ext.create('Ext.panel.Panel', {
+			width: accBaseWidth,
+            height: 204,
+            bodyStyle: 'padding:2px 0 5px 3px; overflow-y: scroll',
+            tbar: {
+                height: 27,
+                items: {
+					xtype: 'label',
+                    text: 'Selected data items',
+                    style: 'padding-left:6px; color:#222',
+					cls: 'ns-toolbar-multiselect-left-label'
+				}
+            },
+            getChildIndex: function(child) {
+				this.items.each(function(item, index) {
+					if (item.id === child.id) {
+						return index;
+					}
+				});
+			},
+			hasDataElement: function(dataElementId) {
+				var hasDataElement = false;
+
+				this.items.each(function(item) {
+					if (item.dataElement.id === dataElementId) {
+						hasDataElement = true;
+					}
+				});
+
+				return hasDataElement;
+			}
+        });
+
+        addUxFromDataElement = function(element, index) {
+			var getUxType,
+				ux;
+
+			index = index || dataElementSelected.items.items.length;
+
+			getUxType = function(element) {
+				if (Ext.isObject(element.optionSet) && Ext.isString(element.optionSet.id)) {
+					return 'Ext.ux.panel.DataElementOptionContainer';
+				}
+
+				if (element.type === 'int') {
+					return 'Ext.ux.panel.DataElementIntegerContainer';
+				}
+
+				if (element.type === 'string') {
+					return 'Ext.ux.panel.DataElementStringContainer';
+				}
+
+				if (element.type === 'date') {
+					return 'Ext.ux.panel.DataElementDateContainer';
+				}
+
+				return 'Ext.ux.panel.DataElementIntegerContainer';
+			};
+
+			// add
+			ux = dataElementSelected.insert(index, Ext.create(getUxType(element), {
+				dataElement: element
+			}));
+
+			ux.removeDataElement = function() {
+				dataElementSelected.remove(ux);
+
+				if (!dataElementSelected.hasDataElement(element.id)) {
+					dataElementsByStageStore.add(element);
+					dataElementsByStageStore.sort();
+				}
+			};
+
+			ux.duplicateDataElement = function() {
+				var index = dataElementSelected.getChildIndex(ux) + 1;
+
+				addUxFromDataElement(element, index);
+			};
+
+			dataElementsByStageStore.removeAt(dataElementsByStageStore.findExact('id', element.id));
+		};
+
+        selectDataElements = function(items) {
+            var dataElements = [];
+
+			// data element objects
+            for (var i = 0, item; i < items.length; i++) {
+				item = items[i];
+
+                if (Ext.isString(item)) {
+                    dataElements.push(dataElementsByStageStore.getAt(dataElementsByStageStore.findExact('id', item)).data);
+                }
+                else if (Ext.isObject(item)) {
+                    if (item.data) {
+                        dataElements.push(item.data);
+                    }
+                    else {
+                        dataElements.push(item);
+                    }
+                }
+            }
+
+			// panel, store
+            for (var i = 0, element, ux; i < dataElements.length; i++) {
+				element = dataElements[i];
+
+				addUxFromDataElement(element);
+			}
+        };
+
+        dataElement = Ext.create('Ext.panel.Panel', {
+            title: '<div class="gis-panel-title-data">Data</div>',
+            bodyStyle: 'padding:2px',
+            hideCollapseTool: true,
+            items: [
+                {
+					layout: 'column',
+                    bodyStyle: 'border:0 none',
+					style: 'margin-top:2px',
+					items: [
+						program,
+						stage
+					]
+				},
+                dataElementAvailable,
+                dataElementSelected
+            ]
+        });
+
+            // date
+		startDate = Ext.create('Ext.form.field.Date', {
+			fieldLabel: 'Start date',
+			labelAlign: 'top',
+			labelCls: 'gis-form-item-label-top',
+            //labelStyle: 'font-weight: bold',
+			labelSeparator: '',
+			columnWidth: 0.5,
+			style: 'margin-right: 1px',
+			format: 'Y-m-d',
+			value: new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))
+		});
+
+		endDate = Ext.create('Ext.form.field.Date', {
+			fieldLabel: 'End date',
+			labelAlign: 'top',
+			labelCls: 'gis-form-item-label-top',
+            //labelStyle: 'font-weight: bold',
+			labelSeparator: '',
+			columnWidth: 0.5,
+			style: 'margin-left: 1px',
+			format: 'Y-m-d',
+			value: new Date()
+		});
+
+        period = Ext.create('Ext.panel.Panel', {
+            title: '<div class="gis-panel-title-period">Periods</div>',
+            bodyStyle: 'padding:4px 2px 2px',
+            hideCollapseTool: true,
+            layout: 'column',
+            width: accBaseWidth,
+            items: [
+                startDate,
+                endDate
+            ]
+        });
+
+            // organisation unit
+		treePanel = Ext.create('Ext.tree.Panel', {
+			cls: 'gis-tree',
+			height: 333,
+            bodyStyle: 'border:0 none',
+			style: 'border-top: 1px solid #ddd; padding-top: 1px',
+			displayField: 'name',
+			rootVisible: false,
+			autoScroll: true,
+			multiSelect: true,
+			rendered: false,
+			reset: function() {
+				var rootNode = this.getRootNode().findChild('id', gis.init.rootNodes[0].id);
+				this.collapseAll();
+				this.expandPath(rootNode.getPath());
+				this.getSelectionModel().select(rootNode);
+			},
+			selectRootIf: function() {
+				if (this.getSelectionModel().getSelection().length < 1) {
+					var node = this.getRootNode().findChild('id', gis.init.rootNodes[0].id);
+					if (this.rendered) {
+						this.getSelectionModel().select(node);
+					}
+					return node;
+				}
+			},
+			isPending: false,
+			recordsToSelect: [],
+			recordsToRestore: [],
+			multipleSelectIf: function(map, doUpdate) {
+				if (this.recordsToSelect.length === gis.util.object.getLength(map)) {
+					this.getSelectionModel().select(this.recordsToSelect);
+					this.recordsToSelect = [];
+					this.isPending = false;
+
+					if (doUpdate) {
+						update();
+					}
+				}
+			},
+			multipleExpand: function(id, map, doUpdate) {
+				var that = this,
+					rootId = gis.conf.finals.root.id,
+					path = map[id];
+
+				if (path.substr(0, rootId.length + 1) !== ('/' + rootId)) {
+					path = '/' + rootId + path;
+				}
+
+				that.expandPath(path, 'id', '/', function() {
+					record = Ext.clone(that.getRootNode().findChild('id', id, true));
+					that.recordsToSelect.push(record);
+					that.multipleSelectIf(map, doUpdate);
+				});
+			},
+            select: function(url, params) {
+                if (!params) {
+                    params = {};
+                }
+                Ext.Ajax.request({
+                    url: url,
+                    method: 'GET',
+                    params: params,
+                    scope: this,
+                    success: function(r) {
+                        var a = Ext.decode(r.responseText).organisationUnits;
+                        this.numberOfRecords = a.length;
+                        for (var i = 0; i < a.length; i++) {
+                            this.multipleExpand(a[i].id, a[i].path);
+                        }
+                    }
+                });
+            },
+			getParentGraphMap: function() {
+				var selection = this.getSelectionModel().getSelection(),
+					map = {};
+
+				if (Ext.isArray(selection) && selection.length) {
+					for (var i = 0, pathArray, key; i < selection.length; i++) {
+						pathArray = selection[i].getPath().split('/');
+						map[pathArray.pop()] = pathArray.join('/');
+					}
+				}
+
+				return map;
+			},
+			selectGraphMap: function(map, update) {
+				if (!gis.util.object.getLength(map)) {
+					return;
+				}
+
+				this.isPending = true;
+
+				for (var key in map) {
+					if (map.hasOwnProperty(key)) {
+						treePanel.multipleExpand(key, map, update);
+					}
+				}
+			},
+			store: Ext.create('Ext.data.TreeStore', {
+				fields: ['id', 'name'],
+				proxy: {
+					type: 'rest',
+					format: 'json',
+					noCache: false,
+					extraParams: {
+						links: 'false'
+					},
+					url: gis.init.contextPath + '/api/organisationUnits',
+					reader: {
+						type: 'json',
+						root: 'children'
+					}
+				},
+				sorters: [{
+					property: 'name',
+					direction: 'ASC'
+				}],
+				root: {
+					id: gis.conf.finals.root.id,
+					expanded: true,
+					children: gis.init.rootNodes
+				},
+				listeners: {
+					load: function(store, node, records) {
+						Ext.Array.each(records, function(record) {
+							record.set('leaf', !record.raw.hasChildren);
+						});
+					}
+				}
+			}),
+			xable: function(values) {
+				for (var i = 0; i < values.length; i++) {
+					if (!!values[i]) {
+						this.disable();
+						return;
+					}
+				}
+
+				this.enable();
+			},
+			getDimension: function() {
+				var r = treePanel.getSelectionModel().getSelection(),
+					config = {
+						dimension: gis.conf.finals.dimension.organisationUnit.objectName,
+						items: []
+					};
+
+				if (toolMenu.menuValue === 'orgunit') {
+					if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue() || userOrganisationUnitGrandChildren.getValue()) {
+						if (userOrganisationUnit.getValue()) {
+							config.items.push({
+								id: 'USER_ORGUNIT',
+								name: ''
+							});
+						}
+						if (userOrganisationUnitChildren.getValue()) {
+							config.items.push({
+								id: 'USER_ORGUNIT_CHILDREN',
+								name: ''
+							});
+						}
+						if (userOrganisationUnitGrandChildren.getValue()) {
+							config.items.push({
+								id: 'USER_ORGUNIT_GRANDCHILDREN',
+								name: ''
+							});
+						}
+					}
+					else {
+						for (var i = 0; i < r.length; i++) {
+							config.items.push({id: r[i].data.id});
+						}
+					}
+				}
+				else if (toolMenu.menuValue === 'level') {
+					var levels = organisationUnitLevel.getValue();
+
+					for (var i = 0; i < levels.length; i++) {
+						config.items.push({
+							id: 'LEVEL-' + levels[i],
+							name: ''
+						});
+					}
+
+					for (var i = 0; i < r.length; i++) {
+						config.items.push({
+							id: r[i].data.id,
+							name: ''
+						});
+					}
+				}
+				else if (toolMenu.menuValue === 'group') {
+					var groupIds = organisationUnitGroup.getValue();
+
+					for (var i = 0; i < groupIds.length; i++) {
+						config.items.push({
+							id: 'OU_GROUP-' + groupIds[i],
+							name: ''
+						});
+					}
+
+					for (var i = 0; i < r.length; i++) {
+						config.items.push({
+							id: r[i].data.id,
+							name: ''
+						});
+					}
+				}
+
+				return config.items.length ? config : null;
+			},
+			listeners: {
+				beforeitemexpand: function() {
+					var rts = treePanel.recordsToSelect;
+
+					if (!treePanel.isPending) {
+						treePanel.recordsToRestore = treePanel.getSelectionModel().getSelection();
+					}
+				},
+				itemexpand: function() {
+					if (!treePanel.isPending && treePanel.recordsToRestore.length) {
+						treePanel.getSelectionModel().select(treePanel.recordsToRestore);
+						treePanel.recordsToRestore = [];
+					}
+				},
+				render: function() {
+					this.rendered = true;
+				},
+				afterrender: function() {
+					this.getSelectionModel().select(0);
+				},
+				itemcontextmenu: function(v, r, h, i, e) {
+					v.getSelectionModel().select(r, false);
+
+					if (v.menu) {
+						v.menu.destroy();
+					}
+					v.menu = Ext.create('Ext.menu.Menu', {
+						id: 'treepanel-contextmenu',
+						showSeparator: false,
+						shadow: false
+					});
+					if (!r.data.leaf) {
+						v.menu.add({
+							id: 'treepanel-contextmenu-item',
+							text: gis.i18n.select_all_children,
+							icon: 'images/node-select-child.png',
+							handler: function() {
+								r.expand(false, function() {
+									v.getSelectionModel().select(r.childNodes, true);
+									v.getSelectionModel().deselect(r);
+								});
+							}
+						});
+					}
+					else {
+						return;
+					}
+
+					v.menu.showAt(e.xy);
+				}
+			}
+		});
+
+		userOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
+			columnWidth: 0.28,
+			style: 'padding-top:2px; padding-left:3px; margin-bottom:0',
+			boxLabelCls: 'x-form-cb-label-alt1',
+			boxLabel: 'User org unit',
+			labelWidth: gis.conf.layout.form_label_width,
+			handler: function(chb, checked) {
+				treePanel.xable([checked, userOrganisationUnitChildren.getValue(), userOrganisationUnitGrandChildren.getValue()]);
+			}
+		});
+
+		userOrganisationUnitChildren = Ext.create('Ext.form.field.Checkbox', {
+			columnWidth: 0.34,
+			style: 'padding-top:2px; margin-bottom:0',
+			boxLabelCls: 'x-form-cb-label-alt1',
+			boxLabel: 'User OU children',
+			labelWidth: gis.conf.layout.form_label_width,
+			handler: function(chb, checked) {
+				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitGrandChildren.getValue()]);
+			}
+		});
+
+		userOrganisationUnitGrandChildren = Ext.create('Ext.form.field.Checkbox', {
+			columnWidth: 0.38,
+			style: 'padding-top:2px; margin-bottom:0',
+			boxLabelCls: 'x-form-cb-label-alt1',
+			boxLabel: 'User OU grand children',
+			labelWidth: gis.conf.layout.form_label_width,
+			handler: function(chb, checked) {
+				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitChildren.getValue()]);
+			}
+		});
+
+		organisationUnitLevel = Ext.create('Ext.form.field.ComboBox', {
+			cls: 'gis-combo',
+			multiSelect: true,
+			style: 'margin-bottom:0',
+			width: accBaseWidth - toolWidth - 2,
+			valueField: 'level',
+			displayField: 'name',
+			emptyText: GIS.i18n.select_organisation_unit_levels,
+			editable: false,
+			hidden: true,
+			store: {
+				fields: ['id', 'name', 'level'],
+				data: gis.init.organisationUnitLevels
+			}
+		});
+
+		organisationUnitGroup = Ext.create('Ext.form.field.ComboBox', {
+			cls: 'gis-combo',
+			multiSelect: true,
+			style: 'margin-bottom:0',
+			width: accBaseWidth - toolWidth - 2,
+			valueField: 'id',
+			displayField: 'name',
+			emptyText: GIS.i18n.select_organisation_unit_groups,
+			editable: false,
+			hidden: true,
+			store: gis.store.organisationUnitGroup
+		});
+
+        organisationUnitPanel = Ext.create('Ext.panel.Panel', {
+			width: accBaseWidth - toolWidth - 2,
+            layout: 'column',
+            bodyStyle: 'border:0 none',
+            items: [
+                userOrganisationUnit,
+                userOrganisationUnitChildren,
+                userOrganisationUnitGrandChildren,
+                organisationUnitLevel,
+                organisationUnitGroup
+            ]
+        });
+
+		toolMenu = Ext.create('Ext.menu.Menu', {
+			shadow: false,
+			showSeparator: false,
+			menuValue: 'orgunit',
+			clickHandler: function(param) {
+				if (!param) {
+					return;
+				}
+
+				var items = this.items.items;
+				this.menuValue = param;
+
+				// Menu item icon cls
+				for (var i = 0; i < items.length; i++) {
+					if (items[i].setIconCls) {
+						if (items[i].param === param) {
+							items[i].setIconCls('gis-menu-item-selected');
+						}
+						else {
+							items[i].setIconCls('gis-menu-item-unselected');
+						}
+					}
+				}
+
+				// Gui
+				if (param === 'orgunit') {
+					userOrganisationUnit.show();
+					userOrganisationUnitChildren.show();
+					userOrganisationUnitGrandChildren.show();
+					organisationUnitLevel.hide();
+					organisationUnitGroup.hide();
+
+					if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue()) {
+						treePanel.disable();
+					}
+				}
+				else if (param === 'level') {
+					userOrganisationUnit.hide();
+					userOrganisationUnitChildren.hide();
+					userOrganisationUnitGrandChildren.hide();
+					organisationUnitLevel.show();
+					organisationUnitGroup.hide();
+					treePanel.enable();
+				}
+				else if (param === 'group') {
+					userOrganisationUnit.hide();
+					userOrganisationUnitChildren.hide();
+					userOrganisationUnitGrandChildren.hide();
+					organisationUnitLevel.hide();
+					organisationUnitGroup.show();
+					treePanel.enable();
+				}
+			},
+			items: [
+				{
+					xtype: 'label',
+					text: 'Selection mode',
+					style: 'padding:7px 5px 5px 7px; font-weight:bold; border:0 none'
+				},
+				{
+					text: GIS.i18n.select_organisation_units + '&nbsp;&nbsp;',
+					param: 'orgunit',
+					iconCls: 'gis-menu-item-selected'
+				},
+				{
+					text: 'Select levels' + '&nbsp;&nbsp;',
+					param: 'level',
+					iconCls: 'gis-menu-item-unselected'
+				},
+				{
+					text: 'Select groups' + '&nbsp;&nbsp;',
+					param: 'group',
+					iconCls: 'gis-menu-item-unselected'
+				}
+			],
+			listeners: {
+				afterrender: function() {
+					this.getEl().addCls('gis-btn-menu');
+				},
+				click: function(menu, item) {
+					this.clickHandler(item.param);
+				}
+			}
+		});
+
+		tool = Ext.create('Ext.button.Button', {
+			cls: 'gis-button-organisationunitselection',
+			iconCls: 'gis-button-icon-gear',
+			width: toolWidth,
+			height: 24,
+			menu: toolMenu
+		});
+
+		toolPanel = Ext.create('Ext.panel.Panel', {
+			width: toolWidth,
+			bodyStyle: 'border:0 none; text-align:right',
+			style: 'margin-right:2px',
+			items: tool
+		});
+
+        organisationUnit = Ext.create('Ext.panel.Panel', {
+            title: '<div class="gis-panel-title-organisationunit">' + GIS.i18n.organisation_units + '</div>',
+            cls: 'gis-accordion-last',
+            bodyStyle: 'padding:2px',
+            hideCollapseTool: true,
+            items: [
+                {
+                    layout: 'column',
+                    width: accBaseWidth,
+                    bodyStyle: 'border:0 none',
+                    style: 'padding-bottom:2px',
+                    items: [
+                        toolPanel,
+                        organisationUnitPanel
+                    ]
+                },
+                treePanel
+            ]
+        });
+
+            // accordion
+        accordionBody = Ext.create('Ext.panel.Panel', {
+			layout: 'accordion',
+			activeOnTop: true,
+			cls: 'gis-accordion',
+			bodyStyle: 'border:0 none',
+			height: 450,
+			items: [
+                dataElement,
+                period,
+                organisationUnit
+            ],
+            listeners: {
+                afterrender: function() { // nasty workaround
+                    organisationUnit.expand();
+                    period.expand();
+                    dataElement.expand();
+                }
+            }
+		});
+
+		// functions
+
+		reset = function(skipTree) {
+
+			// item
+			if (layer) {
+				layer.item.setValue(false);
+
+				if (!layer.window.isRendered) {
+					layer.core.view = null;
+					return;
+				}
+			}
+
+			// components
+            program.clearValue();
+            stage.clearValue();
+
+            dataElementsByStageStore.removeAll();
+            dataElementSelected.removeAll();
+
+            startDate.reset();
+            endDate.reset();
+
+			toolMenu.clickHandler(toolMenu.menuValue);
+
+			if (!skipTree) {
+				treePanel.reset();
+			}
+
+			userOrganisationUnit.setValue(false);
+			userOrganisationUnitChildren.setValue(false);
+			userOrganisationUnitGrandChildren.setValue(false);
+
+			organisationUnitLevel.clearValue();
+			organisationUnitGroup.clearValue();
+
+			// layer options
+			//if (layer.labelWindow) {
+				//layer.labelWindow.destroy();
+				//layer.labelWindow = null;
+			//}
+		};
+
+		setGui = function(view) { //todo
+			var ouDim = view.rows[0],
+				isOu = false,
+				isOuc = false,
+				isOugc = false,
+				levels = [],
+				groups = [];
+
+			// widget gui
+			(function() {
+
+				// components
+				if (layer && !layer.window.isRendered) {
+					return;
+				}
+
+				reset(true);
+
+				// organisation units
+				for (var i = 0, item; i < ouDim.items.length; i++) {
+					item = ouDim.items[i];
+
+					if (item.id === 'USER_ORGUNIT') {
+						isOu = true;
+					}
+					else if (item.id === 'USER_ORGUNIT_CHILDREN') {
+						isOuc = true;
+					}
+					else if (item.id === 'USER_ORGUNIT_GRANDCHILDREN') {
+						isOugc = true;
+					}
+					else if (item.id.substr(0,5) === 'LEVEL') {
+						levels.push(parseInt(item.id.split('-')[1]));
+					}
+					else if (item.id.substr(0,8) === 'OU_GROUP') {
+						groups.push(parseInt(item.id.split('-')[1]));
+					}
+				}
+
+				if (levels.length) {
+					toolMenu.clickHandler('level');
+					organisationUnitLevel.setValue(levels);
+				}
+				else if (groups.length) {
+					toolMenu.clickHandler('group');
+					organisationUnitGroup.setValue(groups);
+				}
+				else {
+					toolMenu.clickHandler('orgunit');
+					userOrganisationUnit.setValue(isOu);
+					userOrganisationUnitChildren.setValue(isOuc);
+					userOrganisationUnitGrandChildren.setValue(isOugc);
+				}
+
+				treePanel.selectGraphMap(view.parentGraphMap);
+			}());
+
+			// layer gui
+			if (layer) {			
+
+				// layer item
+				layer.item.setValue(true, view.opacity);
+
+				// layer menu
+				layer.menu.enableItems();
+			}
+		};
+
+		getView = function(config) {
+			var view = {};
+
+            view.program = program.getRecord();
+            view.stage = stage.getRecord();
+
+            view.startDate = startDate.getSubmitValue();
+            view.endDate = endDate.getSubmitValue();
+
+            view.dataElements = [];
+
+            for (var i = 0, panel; i < dataElementSelected.items.items.length; i++) {
+                panel = dataElementSelected.items.items[i];
+
+                view.dataElements.push(panel.getRecord());
+            }
+
+            view.organisationUnits = treePanel.getDimension().items;
+
+			return view;
+		};
+
+		validateView = function(view) {
+			if (!(Ext.isArray(view.rows) && view.rows.length && Ext.isString(view.rows[0].dimension) && Ext.isArray(view.rows[0].items) && view.rows[0].items.length)) {
+				GIS.logg.push([view.rows, layer.id + '.rows: dimension array']);
+				alert('No organisation units selected');
+				return false;
+			}
+
+			return view;
+		};
+
+		panel = Ext.create('Ext.panel.Panel', {
+			map: layer ? layer.map : null,
+			layer: layer ? layer : null,
+			menu: layer ? layer.menu : null,
+
+			reset: reset,
+			setGui: setGui,
+			getView: getView,
+			getParentGraphMap: function() {
+				return treePanel.getParentGraphMap();
+			},
+
+			cls: 'gis-form-widget',
+			border: false,
+			items: [
+                accordionBody
+			]
+		});
+
+		return panel;
+	};
+
+
 	// core
 	extendCore = function(core) {
         var conf = core.conf,
@@ -2387,64 +3509,8 @@ console.log(favorite);
 
 	// viewport
 	createViewport = function() {
-        var indicatorAvailableStore,
-			indicatorSelectedStore,
-            indicatorGroupStore,
-			dataElementAvailableStore,
-			dataElementSelectedStore,
-			dataElementGroupStore,
-			dataSetAvailableStore,
-			dataSetSelectedStore,
-			periodTypeStore,
-			fixedPeriodAvailableStore,
-			fixedPeriodSelectedStore,
-			reportTableStore,
-			organisationUnitLevelStore,
-			organisationUnitGroupStore,
-			legendSetStore,
-
-            isScrolled,
-            indicatorLabel,
-            indicatorSearch,
-            indicatorFilter,
-            indicatorGroup,
-            indicatorAvailable,
-            indicatorSelected,
-            indicator,
-			dataElementLabel,
-            dataElementSearch,
-            dataElementFilter,
-            dataElementAvailable,
-            dataElementSelected,
-            dataElementGroup,
-            dataElementDetailLevel,
-            dataElement,
-            dataSetAvailable,
-            dataSetSelected,
-            dataSet,
-			rewind,
-            relativePeriod,
-            fixedPeriodAvailable,
-            fixedPeriodSelected,
-            period,
-            treePanel,
-            userOrganisationUnit,
-            userOrganisationUnitChildren,
-            userOrganisationUnitGrandChildren,
-            organisationUnitLevel,
-            organisationUnitGroup,
-            toolMenu,
-            tool,
-            toolPanel,
-            organisationUnit,
-			dimensionIdAvailableStoreMap = {},
-			dimensionIdSelectedStoreMap = {},
-			getGroupSetPanels,
-			update,
-
-			accordionBody,
-            accordion,
-            westRegion,
+        var accordion,
+			westRegion,
             layoutButton,
             optionsButton,
             favoriteButton,
@@ -2457,357 +3523,9 @@ console.log(favorite);
             defaultButton,
             centerRegion,
             setGui,
-            viewport,
-
-			accordionPanels = [];
+            viewport;
 
 		ns.app.stores = ns.app.stores || {};
-
-		indicatorAvailableStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-            lastPage: null,
-            nextPage: 1,
-            isPending: false,
-            reset: function() {
-                this.removeAll();
-                this.lastPage = null;
-                this.nextPage = 1;
-                this.isPending = false;
-                indicatorSearch.hideFilter();
-            },
-            loadPage: function(uid, filter, append) {
-                var store = this,
-                    filterPath = filter ? '/query/' + filter : '',
-                    path;
-
-                uid = (Ext.isString(uid) || Ext.isNumber(uid)) ? uid : indicatorGroup.getValue();
-                filter = filter || indicatorFilter.getValue() || null;
-
-                if (!append) {
-                    this.lastPage = null;
-                    this.nextPage = 1;
-                }
-
-                if (store.nextPage === store.lastPage) {
-                    return;
-                }
-
-				if (Ext.isString(uid)) {
-					path = '/indicatorGroups/' + uid + '/members' + filterPath + '.json';
-				}
-				else if (uid === 0) {
-					path = '/indicators' + filterPath + '.json';
-				}
-
-				if (!path) {
-					console.log('Available indicators: invalid id');
-					return;
-				}
-
-                store.isPending = true;
-
-                Ext.Ajax.request({
-                    url: ns.core.init.contextPath + '/api' + path,
-                    params: {
-                        viewClass: 'basic',
-                        links: 'false',
-                        page: store.nextPage,
-                        pageSize: 50
-                    },
-                    failure: function() {
-                        store.isPending = false;
-                    },
-                    success: function(r) {
-                        var response = Ext.decode(r.responseText),
-                            data = response.indicators || [],
-                            pager = response.pager;
-
-                        store.loadStore(data, pager, append);
-                    }
-                });
-            },
-            loadStore: function(data, pager, append) {
-                this.loadData(data, append);
-                this.lastPage = this.nextPage;
-
-                if (pager.pageCount > this.nextPage) {
-                    this.nextPage++;
-                }
-
-                this.isPending = false;
-                ns.core.web.multiSelect.filterAvailable({store: indicatorAvailableStore}, {store: indicatorSelectedStore});
-            },
-			storage: {},
-			parent: null,
-			sortStore: function() {
-				this.sort('name', 'ASC');
-			}
-		});
-		ns.app.stores.indicatorAvailable = indicatorAvailableStore;
-
-		indicatorSelectedStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			data: []
-		});
-		ns.app.stores.indicatorSelected = indicatorSelectedStore;
-
-		indicatorGroupStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'index'],
-			proxy: {
-				type: 'ajax',
-				url: ns.core.init.contextPath + '/api/indicatorGroups.json?paging=false&links=false',
-				reader: {
-					type: 'json',
-					root: 'indicatorGroups'
-				}
-			},
-			listeners: {
-				load: function(s) {
-					s.add({
-						id: 0,
-						name: '[ ' + NS.i18n.all_indicators + ' ]',
-						index: -1
-					});
-					s.sort([
-						{
-							property: 'index',
-							direction: 'ASC'
-						},
-						{
-							property: 'name',
-							direction: 'ASC'
-						}
-					]);
-				}
-			}
-		});
-		ns.app.stores.indicatorGroup = indicatorGroupStore;
-
-		dataElementAvailableStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-            lastPage: null,
-            nextPage: 1,
-            isPending: false,
-            reset: function() {
-                this.removeAll();
-                this.lastPage = null;
-                this.nextPage = 1;
-                this.isPending = false;
-                dataElementSearch.hideFilter();
-            },
-            loadPage: function(uid, filter, append) {
-                uid = (Ext.isString(uid) || Ext.isNumber(uid)) ? uid : dataElementGroup.getValue();
-                filter = filter || dataElementFilter.getValue() || null;
-
-                if (!append) {
-                    this.lastPage = null;
-                    this.nextPage = 1;
-                }
-
-                if (dataElementDetailLevel.getValue() === dimConf.dataElement.objectName) {
-                    this.loadTotalsPage(uid, filter, append);
-                }
-                else if (dataElementDetailLevel.getValue() === dimConf.operand.objectName) {
-                    this.loadDetailsPage(uid, filter, append);
-                }
-            },
-            loadTotalsPage: function(uid, filter, append) {
-                var store = this,
-                    filterPath = filter ? '/query/' + filter : '',
-                    path;
-
-                if (store.nextPage === store.lastPage) {
-                    return;
-                }
-
-				if (Ext.isString(uid)) {
-					path = '/dataElementGroups/' + uid + '/members' + filterPath + '.json';
-				}
-				else if (uid === 0) {
-					path = '/dataElements' + filterPath + '.json?domainType=aggregate';
-				}
-
-				if (!path) {
-					alert('Available data elements: invalid id');
-					return;
-				}
-
-                store.isPending = true;
-
-                Ext.Ajax.request({
-                    url: ns.core.init.contextPath + '/api' + path,
-                    params: {
-                        viewClass: 'basic',
-                        links: 'false',
-                        page: store.nextPage,
-                        pageSize: 50
-                    },
-                    failure: function() {
-                        store.isPending = false;
-                    },
-                    success: function(r) {
-                        var response = Ext.decode(r.responseText),
-                            data = response.dataElements || [],
-                            pager = response.pager;
-
-                        store.loadStore(data, pager, append);
-                    }
-                });
-            },
-			loadDetailsPage: function(uid, filter, append) {
-                var store = this,
-                    filterPath = filter ? '/query/' + filter : '',
-                    path;
-
-                if (store.nextPage === store.lastPage) {
-                    return;
-                }
-
-				if (Ext.isString(uid)) {
-					path = '/dataElementGroups/' + uid + '/operands' + filterPath + '.json';
-				}
-				else if (uid === 0) {
-					path = '/generatedDataElementOperands' + filterPath + '.json';
-				}
-
-				if (!path) {
-					alert('Available data elements: invalid id');
-					return;
-				}
-
-                store.isPending = true;
-
-                Ext.Ajax.request({
-                    url: ns.core.init.contextPath + '/api' + path,
-                    params: {
-                        viewClass: 'basic',
-                        links: 'false',
-                        page: store.nextPage,
-                        pageSize: 50
-                    },
-                    failure: function() {
-                        store.isPending = false;
-                    },
-                    success: function(r) {
-                        var response = Ext.decode(r.responseText),
-							data = response.dataElementOperands || [],
-                            pager = response.pager;
-
-						for (var i = 0; i < data.length; i++) {
-							data[i].id = data[i].id.split('.').join('-');
-						}
-
-                        store.loadStore(data, pager, append);
-                    }
-                });
-			},
-            loadStore: function(data, pager, append) {
-                this.loadData(data, append);
-                this.lastPage = this.nextPage;
-
-                if (pager.pageCount > this.nextPage) {
-                    this.nextPage++;
-                }
-
-                this.isPending = false;
-                ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
-            },
-            sortStore: function() {
-				this.sort('name', 'ASC');
-			}
-		});
-		ns.app.stores.dataElementAvailable = dataElementAvailableStore;
-
-		dataElementSelectedStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			data: []
-		});
-		ns.app.stores.dataElementSelected = dataElementSelectedStore;
-
-		dataElementGroupStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'index'],
-			proxy: {
-				type: 'ajax',
-				url: ns.core.init.contextPath + '/api/dataElementGroups.json?paging=false&links=false',
-				reader: {
-					type: 'json',
-					root: 'dataElementGroups'
-				}
-			},
-			listeners: {
-				load: function(s) {
-                    s.add({
-                        id: 0,
-                        name: '[ ' + NS.i18n.all_data_elements + ' ]',
-                        index: -1
-                    });
-
-					s.sort([
-						{property: 'index', direction: 'ASC'},
-						{property: 'name', direction: 'ASC'}
-					]);
-				}
-			}
-		});
-		ns.app.stores.dataElementGroup = dataElementGroupStore;
-
-		dataSetAvailableStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			proxy: {
-				type: 'ajax',
-				url: ns.core.init.contextPath + '/api/dataSets.json?paging=false&links=false',
-				reader: {
-					type: 'json',
-					root: 'dataSets'
-				}
-			},
-			storage: {},
-			sortStore: function() {
-				this.sort('name', 'ASC');
-			},
-			isLoaded: false,
-			listeners: {
-				load: function(s) {
-					this.isLoaded = true;
-
-					ns.core.web.storage.internal.add(s);
-					ns.core.web.multiSelect.filterAvailable({store: s}, {store: dataSetSelectedStore});
-				}
-			}
-		});
-		ns.app.stores.dataSetAvailable = dataSetAvailableStore;
-
-		dataSetSelectedStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			data: []
-		});
-		ns.app.stores.dataSetSelected = dataSetSelectedStore;
-
-		periodTypeStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			data: ns.core.conf.period.periodTypes
-		});
-		ns.app.stores.periodType = periodTypeStore;
-
-		fixedPeriodAvailableStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'index'],
-			data: [],
-			setIndex: function(periods) {
-				for (var i = 0; i < periods.length; i++) {
-					periods[i].index = i;
-				}
-			},
-			sortStore: function() {
-				this.sort('index', 'ASC');
-			}
-		});
-		ns.app.stores.fixedPeriodAvailable = fixedPeriodAvailableStore;
-
-		fixedPeriodSelectedStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			data: []
-		});
-		ns.app.stores.fixedPeriodSelected = fixedPeriodSelectedStore;
 
 		reportTableStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name', 'lastUpdated', 'access'],
@@ -2852,12 +3570,6 @@ console.log(favorite);
 		});
 		ns.app.stores.reportTable = reportTableStore;
 
-		organisationUnitLevelStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'level'],
-			data: ns.core.init.organisationUnitLevels
-		});
-		ns.app.stores.organisationUnitLevel = organisationUnitLevelStore;
-
 		organisationUnitGroupStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
 			proxy: {
@@ -2871,1911 +3583,9 @@ console.log(favorite);
 		});
 		ns.app.stores.organisationUnitGroup = organisationUnitGroupStore;
 
-		legendSetStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'index'],
-			data: function() {
-				var data = ns.core.init.legendSets;
-				data.unshift({id: 0, name: NS.i18n.none, index: -1});
-				return data;
-			}(),
-			sorters: [
-				{property: 'index', direction: 'ASC'},
-				{property: 'name', direction: 'ASC'}
-			]
-		});
-		ns.app.stores.legendSet = legendSetStore;
-
-		// data
-
-		isScrolled = function(e) {
-			var el = e.srcElement,
-				scrollBottom = el.scrollTop + ((el.clientHeight / el.scrollHeight) * el.scrollHeight);
-
-			return scrollBottom / el.scrollHeight > 0.9;
-		};
-
-        indicatorLabel = Ext.create('Ext.form.Label', {
-            text: NS.i18n.available,
-            cls: 'ns-toolbar-multiselect-left-label',
-            style: 'margin-right:5px'
-        });
-
-        indicatorSearch = Ext.create('Ext.button.Button', {
-            width: 22,
-            height: 22,
-            cls: 'ns-button-icon',
-            disabled: true,
-            style: 'background: url(images/search_14.png) 3px 3px no-repeat',
-            showFilter: function() {
-                indicatorLabel.hide();
-                this.hide();
-                indicatorFilter.show();
-                indicatorFilter.reset();
-            },
-            hideFilter: function() {
-                indicatorLabel.show();
-                this.show();
-                indicatorFilter.hide();
-                indicatorFilter.reset();
-            },
-            handler: function() {
-                this.showFilter();
-            }
-        });
-
-        indicatorFilter = Ext.create('Ext.form.field.Trigger', {
-            cls: 'ns-trigger-filter',
-            emptyText: 'Filter available..',
-            height: 22,
-            hidden: true,
-            enableKeyEvents: true,
-            fieldStyle: 'height:22px; border-right:0 none',
-            style: 'height:22px',
-            onTriggerClick: function() {
-                this.reset();
-                this.onKeyUp();
-            },
-            onKeyUp: function() {
-                var value = indicatorGroup.getValue(),
-                    store = indicatorAvailableStore;
-
-                if (Ext.isString(value) || Ext.isNumber(value)) {
-                    store.loadPage(null, this.getValue(), false);
-                }
-            },
-            listeners: {
-                keyup: {
-                    fn: function(cmp) {
-                        cmp.onKeyUp();
-                    },
-                    buffer: 100
-                },
-                show: function(cmp) {
-                    cmp.focus(false, 50);
-                },
-                focus: function(cmp) {
-                    cmp.addCls('ns-trigger-filter-focused');
-                },
-                blur: function(cmp) {
-                    cmp.removeCls('ns-trigger-filter-focused');
-                }
-            }
-        });
-
-        indicatorGroup = Ext.create('Ext.form.field.ComboBox', {
-            cls: 'ns-combo',
-            style: 'margin-bottom:2px; margin-top:0px',
-            width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding,
-            valueField: 'id',
-            displayField: 'name',
-            emptyText: NS.i18n.select_indicator_group,
-            editable: false,
-            store: indicatorGroupStore,
-			loadAvailable: function(reset) {
-				var store = indicatorAvailableStore,
-					id = this.getValue();
-
-				if (id !== null) {
-                    if (reset) {
-                        store.reset();
-                    }
-
-                    store.loadPage(id, null, false);
-				}
-			},
-			listeners: {
-				select: function(cb) {
-					cb.loadAvailable(true);
-
-                    indicatorSearch.enable();
-				}
-			}
-        });
-
-		indicatorAvailable = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'ns-toolbar-multiselect-left',
-			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
-			valueField: 'id',
-			displayField: 'name',
-			store: indicatorAvailableStore,
-			tbar: [
-				indicatorLabel,
-                indicatorSearch,
-                indicatorFilter,
-				'->',
-				{
-					xtype: 'button',
-					icon: 'images/arrowright.png',
-					width: 22,
-					handler: function() {
-						ns.core.web.multiSelect.select(indicatorAvailable, indicatorSelected);
-					}
-				},
-				{
-					xtype: 'button',
-					icon: 'images/arrowrightdouble.png',
-					width: 22,
-					handler: function() {
-						ns.core.web.multiSelect.selectAll(indicatorAvailable, indicatorSelected);
-					}
-				}
-			],
-			listeners: {
-				render: function(ms) {
-                    var el = Ext.get(ms.boundList.getEl().id + '-listEl').dom;
-
-                    el.addEventListener('scroll', function(e) {
-                        if (isScrolled(e) && !indicatorAvailableStore.isPending) {
-                            indicatorAvailableStore.loadPage(null, null, true);
-                        }
-                    });
-
-					ms.boundList.on('itemdblclick', function() {
-						ns.core.web.multiSelect.select(ms, indicatorSelected);
-					}, ms);
-				}
-			}
-		});
-
-		indicatorSelected = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'ns-toolbar-multiselect-right',
-			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
-			valueField: 'id',
-			displayField: 'name',
-			ddReorder: true,
-			store: indicatorSelectedStore,
-			tbar: [
-				{
-					xtype: 'button',
-					icon: 'images/arrowleftdouble.png',
-					width: 22,
-					handler: function() {
-						ns.core.web.multiSelect.unselectAll(indicatorAvailable, indicatorSelected);
-					}
-				},
-				{
-					xtype: 'button',
-					icon: 'images/arrowleft.png',
-					width: 22,
-					handler: function() {
-						ns.core.web.multiSelect.unselect(indicatorAvailable, indicatorSelected);
-					}
-				},
-				'->',
-				{
-					xtype: 'label',
-					text: NS.i18n.selected,
-					cls: 'ns-toolbar-multiselect-right-label'
-				}
-			],
-			listeners: {
-				afterrender: function() {
-					this.boundList.on('itemdblclick', function() {
-						ns.core.web.multiSelect.unselect(indicatorAvailable, this);
-					}, this);
-				}
-			}
-		});
-
-		indicator = {
-			xtype: 'panel',
-			title: '<div class="ns-panel-title-data">' + NS.i18n.indicators + '</div>',
-			hideCollapseTool: true,
-			getDimension: function() {
-				var config = {
-					dimension: dimConf.indicator.objectName,
-					items: []
-				};
-
-				indicatorSelectedStore.each( function(r) {
-					config.items.push({
-						id: r.data.id,
-						name: r.data.name
-					});
-				});
-
-				return config.items.length ? config : null;
-			},
-			onExpand: function() {
-				var h = westRegion.hasScrollbar ?
-					ns.core.conf.layout.west_scrollbarheight_accordion_indicator : ns.core.conf.layout.west_maxheight_accordion_indicator;
-				accordion.setThisHeight(h);
-				ns.core.web.multiSelect.setHeight(
-					[indicatorAvailable, indicatorSelected],
-					this,
-					ns.core.conf.layout.west_fill_accordion_indicator
-				);
-			},
-			items: [
-				indicatorGroup,
-				{
-					xtype: 'panel',
-					layout: 'column',
-					bodyStyle: 'border-style:none',
-					items: [
-                        indicatorAvailable,
-						indicatorSelected
-					]
-				}
-			],
-			listeners: {
-				added: function() {
-					accordionPanels.push(this);
-				},
-				expand: function(p) {
-					p.onExpand();
-				}
-			}
-		};
-
-        dataElementLabel = Ext.create('Ext.form.Label', {
-            text: NS.i18n.available,
-            cls: 'ns-toolbar-multiselect-left-label',
-            style: 'margin-right:5px'
-        });
-
-        dataElementSearch = Ext.create('Ext.button.Button', {
-            width: 22,
-            height: 22,
-            cls: 'ns-button-icon',
-            disabled: true,
-            style: 'background: url(images/search_14.png) 3px 3px no-repeat',
-            showFilter: function() {
-                dataElementLabel.hide();
-                this.hide();
-                dataElementFilter.show();
-                dataElementFilter.reset();
-            },
-            hideFilter: function() {
-                dataElementLabel.show();
-                this.show();
-                dataElementFilter.hide();
-                dataElementFilter.reset();
-            },
-            handler: function() {
-                this.showFilter();
-            }
-        });
-
-        dataElementFilter = Ext.create('Ext.form.field.Trigger', {
-            cls: 'ns-trigger-filter',
-            emptyText: 'Filter available..',
-            height: 22,
-            hidden: true,
-            enableKeyEvents: true,
-            fieldStyle: 'height:22px; border-right:0 none',
-            style: 'height:22px',
-            onTriggerClick: function() {
-                this.reset();
-                this.onKeyUp();
-            },
-            onKeyUp: function() {
-                var value = dataElementGroup.getValue(),
-                    store = dataElementAvailableStore;
-
-                if (Ext.isString(value) || Ext.isNumber(value)) {
-                    store.loadPage(null, this.getValue(), false);
-                }
-            },
-            listeners: {
-                keyup: {
-                    fn: function(cmp) {
-                        cmp.onKeyUp();
-                    },
-                    buffer: 100
-                },
-                show: function(cmp) {
-                    cmp.focus(false, 50);
-                },
-                focus: function(cmp) {
-                    cmp.addCls('ns-trigger-filter-focused');
-                },
-                blur: function(cmp) {
-                    cmp.removeCls('ns-trigger-filter-focused');
-                }
-            }
-        });
-
-		dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'ns-toolbar-multiselect-left',
-			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
-			valueField: 'id',
-			displayField: 'name',
-            isPending: false,
-            page: 1,
-			store: dataElementAvailableStore,
-			tbar: [
-				dataElementLabel,
-                dataElementSearch,
-                dataElementFilter,
-				'->',
-				{
-					xtype: 'button',
-					icon: 'images/arrowright.png',
-					width: 22,
-					handler: function() {
-						ns.core.web.multiSelect.select(dataElementAvailable, dataElementSelected);
-					}
-				},
-				{
-					xtype: 'button',
-					icon: 'images/arrowrightdouble.png',
-					width: 22,
-					handler: function() {
-						ns.core.web.multiSelect.selectAll(dataElementAvailable, dataElementSelected);
-					}
-				}
-			],
-			listeners: {
-				render: function(ms) {
-                    var el = Ext.get(ms.boundList.getEl().id + '-listEl').dom;
-
-                    el.addEventListener('scroll', function(e) {
-                        if (isScrolled(e) && !dataElementAvailableStore.isPending) {
-                            dataElementAvailableStore.loadPage(null, null, true);
-                        }
-                    });
-
-					ms.boundList.on('itemdblclick', function() {
-						ns.core.web.multiSelect.select(ms, dataElementSelected);
-					}, ms);
-				}
-			}
-		});
-
-		dataElementSelected = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'ns-toolbar-multiselect-right',
-			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
-			valueField: 'id',
-			displayField: 'name',
-			ddReorder: true,
-			store: dataElementSelectedStore,
-			tbar: [
-				{
-					xtype: 'button',
-					icon: 'images/arrowleftdouble.png',
-					width: 22,
-					handler: function() {
-						ns.core.web.multiSelect.unselectAll(dataElementAvailable, dataElementSelected);
-					}
-				},
-				{
-					xtype: 'button',
-					icon: 'images/arrowleft.png',
-					width: 22,
-					handler: function() {
-						ns.core.web.multiSelect.unselect(dataElementAvailable, dataElementSelected);
-					}
-				},
-				'->',
-				{
-					xtype: 'label',
-					text: NS.i18n.selected,
-					cls: 'ns-toolbar-multiselect-right-label'
-				}
-			],
-			listeners: {
-				afterrender: function() {
-					this.boundList.on('itemdblclick', function() {
-						ns.core.web.multiSelect.unselect(dataElementAvailable, this);
-					}, this);
-				}
-			}
-		});
-
-		dataElementGroup = Ext.create('Ext.form.field.ComboBox', {
-			cls: 'ns-combo',
-			style: 'margin:0 2px 2px 0',
-			width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 90,
-			valueField: 'id',
-			displayField: 'name',
-			emptyText: NS.i18n.select_data_element_group,
-			editable: false,
-			store: dataElementGroupStore,
-			loadAvailable: function(reset) {
-				var store = dataElementAvailableStore,
-					id = this.getValue();
-
-				if (id !== null) {
-                    if (reset) {
-                        store.reset();
-                    }
-
-                    store.loadPage(id, null, false);
-				}
-			},
-			listeners: {
-				select: function(cb) {
-					cb.loadAvailable(true);
-
-                    dataElementSearch.enable();
-				}
-			}
-		});
-
-		dataElementDetailLevel = Ext.create('Ext.form.field.ComboBox', {
-			cls: 'ns-combo',
-			style: 'margin-bottom:2px',
-			baseBodyCls: 'small',
-			queryMode: 'local',
-			editable: false,
-			valueField: 'id',
-			displayField: 'text',
-			width: 90 - 2,
-			value: dimConf.dataElement.objectName,
-			store: {
-				fields: ['id', 'text'],
-				data: [
-					{id: ns.core.conf.finals.dimension.dataElement.objectName, text: NS.i18n.totals},
-					{id: ns.core.conf.finals.dimension.operand.objectName, text: NS.i18n.details}
-				]
-			},
-			listeners: {
-				select: function(cb) {
-					dataElementGroup.loadAvailable(true);
-					dataElementSelectedStore.removeAll();
-				}
-			}
-		});
-
-		dataElement = {
-			xtype: 'panel',
-			title: '<div class="ns-panel-title-data">' + NS.i18n.data_elements + '</div>',
-			hideCollapseTool: true,
-			getDimension: function() {
-				var config = {
-					dimension: dataElementDetailLevel.getValue(),
-					items: []
-				};
-
-				dataElementSelectedStore.each( function(r) {
-					config.items.push({
-						id: r.data.id,
-						name: r.data.name
-					});
-				});
-
-				return config.items.length ? config : null;
-			},
-			onExpand: function() {
-				var h = ns.app.westRegion.hasScrollbar ?
-					ns.core.conf.layout.west_scrollbarheight_accordion_dataelement : ns.core.conf.layout.west_maxheight_accordion_dataelement;
-				accordion.setThisHeight(h);
-				ns.core.web.multiSelect.setHeight(
-					[dataElementAvailable, dataElementSelected],
-					this,
-					ns.core.conf.layout.west_fill_accordion_indicator
-				);
-			},
-			items: [
-				{
-					xtype: 'container',
-					layout: 'column',
-					items: [
-						dataElementGroup,
-						dataElementDetailLevel
-					]
-				},
-				{
-					xtype: 'panel',
-					layout: 'column',
-					bodyStyle: 'border-style:none',
-					items: [
-                        dataElementAvailable,
-						dataElementSelected
-					]
-				}
-			],
-			listeners: {
-				added: function() {
-					accordionPanels.push(this);
-				},
-				expand: function(p) {
-					p.onExpand();
-				}
-			}
-		};
-
-		dataSetAvailable = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'ns-toolbar-multiselect-left',
-			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
-			valueField: 'id',
-			displayField: 'name',
-			store: dataSetAvailableStore,
-			tbar: [
-				{
-					xtype: 'label',
-					text: NS.i18n.available,
-					cls: 'ns-toolbar-multiselect-left-label'
-				},
-				'->',
-				{
-					xtype: 'button',
-					icon: 'images/arrowright.png',
-					width: 22,
-					handler: function() {
-						ns.core.web.multiSelect.select(dataSetAvailable, dataSetSelected);
-					}
-				},
-				{
-					xtype: 'button',
-					icon: 'images/arrowrightdouble.png',
-					width: 22,
-					handler: function() {
-						ns.core.web.multiSelect.selectAll(dataSetAvailable, dataSetSelected);
-					}
-				}
-			],
-			listeners: {
-				afterrender: function() {
-					this.boundList.on('itemdblclick', function() {
-						ns.core.web.multiSelect.select(this, dataSetSelected);
-					}, this);
-				}
-			}
-		});
-
-		dataSetSelected = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'ns-toolbar-multiselect-right',
-			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
-			valueField: 'id',
-			displayField: 'name',
-			ddReorder: true,
-			store: dataSetSelectedStore,
-			tbar: [
-				{
-					xtype: 'button',
-					icon: 'images/arrowleftdouble.png',
-					width: 22,
-					handler: function() {
-						ns.core.web.multiSelect.unselectAll(dataSetAvailable, dataSetSelected);
-					}
-				},
-				{
-					xtype: 'button',
-					icon: 'images/arrowleft.png',
-					width: 22,
-					handler: function() {
-						ns.core.web.multiSelect.unselect(dataSetAvailable, dataSetSelected);
-					}
-				},
-				'->',
-				{
-					xtype: 'label',
-					text: NS.i18n.selected,
-					cls: 'ns-toolbar-multiselect-right-label'
-				}
-			],
-			listeners: {
-				afterrender: function() {
-					this.boundList.on('itemdblclick', function() {
-						ns.core.web.multiSelect.unselect(dataSetAvailable, this);
-					}, this);
-				}
-			}
-		});
-
-		dataSet = {
-			xtype: 'panel',
-			title: '<div class="ns-panel-title-data">' + NS.i18n.reporting_rates + '</div>',
-			hideCollapseTool: true,
-			getDimension: function() {
-				var config = {
-					dimension: dimConf.dataSet.objectName,
-					items: []
-				};
-
-				dataSetSelectedStore.each( function(r) {
-					config.items.push({
-						id: r.data.id,
-						name: r.data.name
-					});
-				});
-
-				return config.items.length ? config : null;
-			},
-			onExpand: function() {
-				var h = ns.app.westRegion.hasScrollbar ?
-					ns.core.conf.layout.west_scrollbarheight_accordion_dataset : ns.core.conf.layout.west_maxheight_accordion_dataset;
-				accordion.setThisHeight(h);
-				ns.core.web.multiSelect.setHeight(
-					[dataSetAvailable, dataSetSelected],
-					this,
-					ns.core.conf.layout.west_fill_accordion_dataset
-				);
-
-				if (!dataSetAvailableStore.isLoaded) {
-					dataSetAvailableStore.load();
-				}
-			},
-			items: [
-				{
-					xtype: 'panel',
-					layout: 'column',
-					bodyStyle: 'border-style:none',
-					items: [
-						dataSetAvailable,
-						dataSetSelected
-					]
-				}
-			],
-			listeners: {
-				added: function() {
-					accordionPanels.push(this);
-				},
-				expand: function(p) {
-					p.onExpand();
-				}
-			}
-		};
-
-		// period
-
-		rewind = Ext.create('Ext.form.field.Checkbox', {
-			relativePeriodId: 'rewind',
-			boxLabel: 'Rewind one period',
-			xable: function() {
-				this.setDisabled(period.isNoRelativePeriods());
-			}
-		});
-
-		relativePeriod = {
-			xtype: 'panel',
-			hideCollapseTool: true,
-			autoScroll: true,
-			bodyStyle: 'border:0 none',
-			valueComponentMap: {},
-			items: [
-				{
-					xtype: 'container',
-					layout: 'column',
-					bodyStyle: 'border-style:none',
-					items: [
-						{
-							xtype: 'panel',
-							columnWidth: 0.34,
-							bodyStyle: 'border-style:none; padding:0 0 0 8px',
-							defaults: {
-								labelSeparator: '',
-								style: 'margin-bottom:2px',
-								listeners: {
-									added: function(chb) {
-										if (chb.xtype === 'checkbox') {
-											period.checkboxes.push(chb);
-											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-										}
-									},
-									change: function() {
-										//rewind.xable();
-									}
-								}
-							},
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.weeks,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_WEEK',
-									boxLabel: NS.i18n.last_week
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_4_WEEKS',
-									boxLabel: NS.i18n.last_4_weeks
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_12_WEEKS',
-									boxLabel: NS.i18n.last_12_weeks
-								}
-							]
-						},
-						{
-							xtype: 'panel',
-							columnWidth: 0.33,
-							bodyStyle: 'border-style:none',
-							defaults: {
-								labelSeparator: '',
-								style: 'margin-bottom:2px',
-								listeners: {
-									added: function(chb) {
-										if (chb.xtype === 'checkbox') {
-											period.checkboxes.push(chb);
-											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-										}
-									},
-									change: function() {
-										//rewind.xable();
-									}
-								}
-							},
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.months,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_MONTH',
-									boxLabel: NS.i18n.last_month
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_3_MONTHS',
-									boxLabel: NS.i18n.last_3_months
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_12_MONTHS',
-									boxLabel: NS.i18n.last_12_months,
-									checked: true
-								}
-							]
-						},
-						{
-							xtype: 'panel',
-							columnWidth: 0.33,
-							bodyStyle: 'border-style:none',
-							defaults: {
-								labelSeparator: '',
-								style: 'margin-bottom:2px',
-								listeners: {
-									added: function(chb) {
-										if (chb.xtype === 'checkbox') {
-											period.checkboxes.push(chb);
-											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-										}
-									},
-									change: function() {
-										//rewind.xable();
-									}
-								}
-							},
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.bimonths,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_BIMONTH',
-									boxLabel: NS.i18n.last_bimonth
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_6_BIMONTHS',
-									boxLabel: NS.i18n.last_6_bimonths
-								}
-							]
-						}
-					]
-				},
-				{
-					xtype: 'container',
-					layout: 'column',
-					bodyStyle: 'border-style:none',
-					items: [
-						{
-							xtype: 'panel',
-							columnWidth: 0.34,
-							bodyStyle: 'border-style:none; padding:5px 0 0 8px',
-							defaults: {
-								labelSeparator: '',
-								style: 'margin-bottom:2px',
-								listeners: {
-									added: function(chb) {
-										if (chb.xtype === 'checkbox') {
-											period.checkboxes.push(chb);
-											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-										}
-									},
-									change: function() {
-										//rewind.xable();
-									}
-								}
-							},
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.quarters,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_QUARTER',
-									boxLabel: NS.i18n.last_quarter
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_4_QUARTERS',
-									boxLabel: NS.i18n.last_4_quarters
-								}
-							]
-						},
-						{
-							xtype: 'panel',
-							columnWidth: 0.33,
-							bodyStyle: 'border-style:none; padding:5px 0 0',
-							defaults: {
-								labelSeparator: '',
-								style: 'margin-bottom:2px',
-								listeners: {
-									added: function(chb) {
-										if (chb.xtype === 'checkbox') {
-											period.checkboxes.push(chb);
-											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-										}
-									},
-									change: function() {
-										//rewind.xable();
-									}
-								}
-							},
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.sixmonths,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_SIX_MONTH',
-									boxLabel: NS.i18n.last_sixmonth
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_2_SIXMONTHS',
-									boxLabel: NS.i18n.last_2_sixmonths
-								}
-							]
-						},
-						{
-							xtype: 'panel',
-							columnWidth: 0.33,
-							bodyStyle: 'border-style:none; padding:5px 0 0',
-							defaults: {
-								labelSeparator: '',
-								style: 'margin-bottom:2px',
-								listeners: {
-									added: function(chb) {
-										if (chb.xtype === 'checkbox') {
-											period.checkboxes.push(chb);
-											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-										}
-									},
-									change: function() {
-										//rewind.xable();
-									}
-								}
-							},
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.financial_years,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_FINANCIAL_YEAR',
-									boxLabel: NS.i18n.last_financial_year
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_5_FINANCIAL_YEARS',
-									boxLabel: NS.i18n.last_5_financial_years
-								}
-							]
-						}
-
-						//{
-							//xtype: 'panel',
-							//layout: 'anchor',
-							//bodyStyle: 'border-style:none; padding:5px 0 0 46px',
-							//defaults: {
-								//labelSeparator: '',
-								//style: 'margin-bottom:2px',
-							//},
-							//items: [
-								//{
-									//xtype: 'label',
-									//text: 'Options',
-									//cls: 'ns-label-period-heading-options'
-								//},
-								//rewind
-							//]
-						//}
-					]
-				},
-				{
-					xtype: 'container',
-					layout: 'column',
-					bodyStyle: 'border-style:none',
-					items: [
-						{
-							xtype: 'panel',
-							columnWidth: 0.35,
-							bodyStyle: 'border-style:none; padding:5px 0 0 8px',
-							defaults: {
-								labelSeparator: '',
-								style: 'margin-bottom:2px',
-								listeners: {
-									added: function(chb) {
-										if (chb.xtype === 'checkbox') {
-											period.checkboxes.push(chb);
-											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-										}
-									},
-									change: function() {
-										//rewind.xable();
-									}
-								}
-							},
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.years,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'THIS_YEAR',
-									boxLabel: NS.i18n.this_year
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_YEAR',
-									boxLabel: NS.i18n.last_year
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_5_YEARS',
-									boxLabel: NS.i18n.last_5_years
-								}
-							]
-						}
-					]
-				}
-			]
-		};
-
-		fixedPeriodAvailable = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'ns-toolbar-multiselect-left',
-			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
-			height: 180,
-			valueField: 'id',
-			displayField: 'name',
-			store: fixedPeriodAvailableStore,
-			tbar: [
-				{
-					xtype: 'label',
-					text: NS.i18n.available,
-					cls: 'ns-toolbar-multiselect-left-label'
-				},
-				'->',
-				{
-					xtype: 'button',
-					icon: 'images/arrowright.png',
-					width: 22,
-					handler: function() {
-						ns.core.web.multiSelect.select(fixedPeriodAvailable, fixedPeriodSelected);
-					}
-				},
-				{
-					xtype: 'button',
-					icon: 'images/arrowrightdouble.png',
-					width: 22,
-					handler: function() {
-						ns.core.web.multiSelect.selectAll(fixedPeriodAvailable, fixedPeriodSelected, true);
-					}
-				},
-				' '
-			],
-			listeners: {
-				afterrender: function() {
-					this.boundList.on('itemdblclick', function() {
-						ns.core.web.multiSelect.select(fixedPeriodAvailable, fixedPeriodSelected);
-					}, this);
-				}
-			}
-		});
-
-		fixedPeriodSelected = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'ns-toolbar-multiselect-right',
-			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
-			height: 180,
-			valueField: 'id',
-			displayField: 'name',
-			ddReorder: false,
-			store: fixedPeriodSelectedStore,
-			tbar: [
-				' ',
-				{
-					xtype: 'button',
-					icon: 'images/arrowleftdouble.png',
-					width: 22,
-					handler: function() {
-						ns.core.web.multiSelect.unselectAll(fixedPeriodAvailable, fixedPeriodSelected);
-					}
-				},
-				{
-					xtype: 'button',
-					icon: 'images/arrowleft.png',
-					width: 22,
-					handler: function() {
-						ns.core.web.multiSelect.unselect(fixedPeriodAvailable, fixedPeriodSelected);
-					}
-				},
-				'->',
-				{
-					xtype: 'label',
-					text: NS.i18n.selected,
-					cls: 'ns-toolbar-multiselect-right-label'
-				}
-			],
-			listeners: {
-				afterrender: function() {
-					this.boundList.on('itemdblclick', function() {
-						ns.core.web.multiSelect.unselect(fixedPeriodAvailable, fixedPeriodSelected);
-					}, this);
-				}
-			}
-		});
-
-		period = {
-			xtype: 'panel',
-			title: '<div class="ns-panel-title-period">Periods</div>',
-			hideCollapseTool: true,
-			checkboxes: [],
-			getDimension: function() {
-				var config = {
-						dimension: dimConf.period.objectName,
-						items: []
-					};
-
-				fixedPeriodSelectedStore.each( function(r) {
-					config.items.push({
-						id: r.data.id,
-						name: r.data.name
-					});
-				});
-
-				for (var i = 0; i < this.checkboxes.length; i++) {
-					if (this.checkboxes[i].getValue()) {
-						config.items.push({
-							id: this.checkboxes[i].relativePeriodId,
-							name: ''
-						});
-					}
-				}
-
-				return config.items.length ? config : null;
-			},
-			onExpand: function() {
-				var h = ns.app.westRegion.hasScrollbar ?
-					ns.core.conf.layout.west_scrollbarheight_accordion_period : ns.core.conf.layout.west_maxheight_accordion_period;
-				accordion.setThisHeight(h);
-				ns.core.web.multiSelect.setHeight(
-					[fixedPeriodAvailable, fixedPeriodSelected],
-					this,
-					ns.core.conf.layout.west_fill_accordion_period
-				);
-			},
-			resetRelativePeriods: function() {
-				var a = this.checkboxes;
-				for (var i = 0; i < a.length; i++) {
-					a[i].setValue(false);
-				}
-			},
-			isNoRelativePeriods: function() {
-				var a = this.checkboxes;
-				for (var i = 0; i < a.length; i++) {
-					if (a[i].getValue()) {
-						return false;
-					}
-				}
-				return true;
-			},
-			items: [
-				{
-					xtype: 'panel',
-					layout: 'column',
-					bodyStyle: 'border-style:none',
-					style: 'margin-top:0px',
-					items: [
-						{
-							xtype: 'combobox',
-							cls: 'ns-combo',
-							style: 'margin-bottom:2px',
-							width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 62 - 62 - 4,
-							valueField: 'id',
-							displayField: 'name',
-							emptyText: NS.i18n.select_period_type,
-							editable: false,
-							queryMode: 'remote',
-							store: periodTypeStore,
-							periodOffset: 0,
-							listeners: {
-								select: function() {
-									var nsype = new PeriodType(),
-										periodType = this.getValue();
-
-									var periods = nsype.get(periodType).generatePeriods({
-										offset: this.periodOffset,
-										filterFuturePeriods: true,
-										reversePeriods: true
-									});
-
-									fixedPeriodAvailableStore.setIndex(periods);
-									fixedPeriodAvailableStore.loadData(periods);
-									ns.core.web.multiSelect.filterAvailable(fixedPeriodAvailable, fixedPeriodSelected);
-								}
-							}
-						},
-						{
-							xtype: 'button',
-							text: NS.i18n.prev_year,
-							style: 'margin-left:2px; border-radius:2px',
-							height: 24,
-							handler: function() {
-								var cb = this.up('panel').down('combobox');
-								if (cb.getValue()) {
-									cb.periodOffset--;
-									cb.fireEvent('select');
-								}
-							}
-						},
-						{
-							xtype: 'button',
-							text: NS.i18n.next_year,
-							style: 'margin-left:2px; border-radius:2px',
-							height: 24,
-							handler: function() {
-								var cb = this.up('panel').down('combobox');
-								if (cb.getValue() && cb.periodOffset < 0) {
-									cb.periodOffset++;
-									cb.fireEvent('select');
-								}
-							}
-						}
-					]
-				},
-				{
-					xtype: 'panel',
-					layout: 'column',
-					bodyStyle: 'border-style:none; padding-bottom:2px',
-					items: [
-						fixedPeriodAvailable,
-						fixedPeriodSelected
-					]
-				},
-				relativePeriod
-			],
-			listeners: {
-				added: function() {
-					accordionPanels.push(this);
-				},
-				expand: function(p) {
-					p.onExpand();
-				}
-			}
-		};
-
-		// organisation unit
-
-		treePanel = Ext.create('Ext.tree.Panel', {
-			cls: 'ns-tree',
-			style: 'border-top: 1px solid #ddd; padding-top: 1px',
-			width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding,
-			displayField: 'name',
-			rootVisible: false,
-			autoScroll: true,
-			multiSelect: true,
-			rendered: false,
-			reset: function() {
-				var rootNode = this.getRootNode().findChild('id', ns.core.init.rootNodes[0].id);
-				this.collapseAll();
-				this.expandPath(rootNode.getPath());
-				this.getSelectionModel().select(rootNode);
-			},
-			selectRootIf: function() {
-				if (this.getSelectionModel().getSelection().length < 1) {
-					var node = this.getRootNode().findChild('id', ns.core.init.rootNodes[0].id);
-					if (this.rendered) {
-						this.getSelectionModel().select(node);
-					}
-					return node;
-				}
-			},
-			isPending: false,
-			recordsToSelect: [],
-			recordsToRestore: [],
-			multipleSelectIf: function(map, doUpdate) {
-				if (this.recordsToSelect.length === ns.core.support.prototype.object.getLength(map)) {
-					this.getSelectionModel().select(this.recordsToSelect);
-					this.recordsToSelect = [];
-					this.isPending = false;
-
-					if (doUpdate) {
-						update();
-					}
-				}
-			},
-			multipleExpand: function(id, map, doUpdate) {
-				var that = this,
-					rootId = ns.core.conf.finals.root.id,
-					path = map[id];
-
-				if (path.substr(0, rootId.length + 1) !== ('/' + rootId)) {
-					path = '/' + rootId + path;
-				}
-
-				that.expandPath(path, 'id', '/', function() {
-					record = Ext.clone(that.getRootNode().findChild('id', id, true));
-					that.recordsToSelect.push(record);
-					that.multipleSelectIf(map, doUpdate);
-				});
-			},
-            select: function(url, params) {
-                if (!params) {
-                    params = {};
-                }
-                Ext.Ajax.request({
-                    url: url,
-                    method: 'GET',
-                    params: params,
-                    scope: this,
-                    success: function(r) {
-                        var a = Ext.decode(r.responseText).organisationUnits;
-                        this.numberOfRecords = a.length;
-                        for (var i = 0; i < a.length; i++) {
-                            this.multipleExpand(a[i].id, a[i].path);
-                        }
-                    }
-                });
-            },
-			getParentGraphMap: function() {
-				var selection = this.getSelectionModel().getSelection(),
-					map = {};
-
-				if (Ext.isArray(selection) && selection.length) {
-					for (var i = 0, pathArray, key; i < selection.length; i++) {
-						pathArray = selection[i].getPath().split('/');
-						map[pathArray.pop()] = pathArray.join('/');
-					}
-				}
-
-				return map;
-			},
-			selectGraphMap: function(map, update) {
-				if (!ns.core.support.prototype.object.getLength(map)) {
-					return;
-				}
-
-				this.isPending = true;
-
-				for (var key in map) {
-					if (map.hasOwnProperty(key)) {
-						treePanel.multipleExpand(key, map, update);
-					}
-				}
-			},
-			store: Ext.create('Ext.data.TreeStore', {
-				fields: ['id', 'name'],
-				proxy: {
-					type: 'rest',
-					format: 'json',
-					noCache: false,
-					extraParams: {
-						links: 'false'
-					},
-					url: ns.core.init.contextPath + '/api/organisationUnits',
-					reader: {
-						type: 'json',
-						root: 'children'
-					}
-				},
-				sorters: [{
-					property: 'name',
-					direction: 'ASC'
-				}],
-				root: {
-					id: ns.core.conf.finals.root.id,
-					expanded: true,
-					children: ns.core.init.rootNodes
-				},
-				listeners: {
-					load: function(store, node, records) {
-						Ext.Array.each(records, function(record) {
-							record.set('leaf', !record.raw.hasChildren);
-						});
-					}
-				}
-			}),
-			xable: function(values) {
-				for (var i = 0; i < values.length; i++) {
-					if (!!values[i]) {
-						this.disable();
-						return;
-					}
-				}
-
-				this.enable();
-			},
-			listeners: {
-				beforeitemexpand: function() {
-					if (!treePanel.isPending) {
-						treePanel.recordsToRestore = treePanel.getSelectionModel().getSelection();
-					}
-				},
-				itemexpand: function() {
-					if (!treePanel.isPending && treePanel.recordsToRestore.length) {
-						treePanel.getSelectionModel().select(treePanel.recordsToRestore);
-						treePanel.recordsToRestore = [];
-					}
-				},
-				render: function() {
-					this.rendered = true;
-				},
-				afterrender: function() {
-					this.getSelectionModel().select(0);
-				},
-				itemcontextmenu: function(v, r, h, i, e) {
-					v.getSelectionModel().select(r, false);
-
-					if (v.menu) {
-						v.menu.destroy();
-					}
-					v.menu = Ext.create('Ext.menu.Menu', {
-						id: 'treepanel-contextmenu',
-						showSeparator: false,
-						shadow: false
-					});
-					if (!r.data.leaf) {
-						v.menu.add({
-							id: 'treepanel-contextmenu-item',
-							text: NS.i18n.select_all_children,
-							icon: 'images/node-select-child.png',
-							handler: function() {
-								r.expand(false, function() {
-									v.getSelectionModel().select(r.childNodes, true);
-									v.getSelectionModel().deselect(r);
-								});
-							}
-						});
-					}
-					else {
-						return;
-					}
-
-					v.menu.showAt(e.xy);
-				}
-			}
-		});
-
-		userOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
-			columnWidth: 0.28,
-			style: 'padding-top:2px; padding-left:3px; margin-bottom:0',
-			boxLabel: NS.i18n.user_organisation_unit,
-			labelWidth: ns.core.conf.layout.form_label_width,
-			handler: function(chb, checked) {
-				treePanel.xable([checked, userOrganisationUnitChildren.getValue(), userOrganisationUnitGrandChildren.getValue()]);
-			}
-		});
-
-		userOrganisationUnitChildren = Ext.create('Ext.form.field.Checkbox', {
-			columnWidth: 0.31,
-			style: 'padding-top:2px; margin-bottom:0',
-			boxLabel: NS.i18n.user_organisation_unit_children,
-			labelWidth: ns.core.conf.layout.form_label_width,
-			handler: function(chb, checked) {
-				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitGrandChildren.getValue()]);
-			}
-		});
-
-		userOrganisationUnitGrandChildren = Ext.create('Ext.form.field.Checkbox', {
-			columnWidth: 0.41,
-			style: 'padding-top:2px; margin-bottom:0',
-			boxLabel: NS.i18n.user_organisation_unit_grandchildren,
-			labelWidth: ns.core.conf.layout.form_label_width,
-			handler: function(chb, checked) {
-				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitChildren.getValue()]);
-			}
-		});
-
-		organisationUnitLevel = Ext.create('Ext.form.field.ComboBox', {
-			cls: 'ns-combo',
-			multiSelect: true,
-			style: 'margin-bottom:0',
-			width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 38,
-			valueField: 'level',
-			displayField: 'name',
-			emptyText: NS.i18n.select_organisation_unit_levels,
-			editable: false,
-			hidden: true,
-			store: organisationUnitLevelStore
-		});
-
-		organisationUnitGroup = Ext.create('Ext.form.field.ComboBox', {
-			cls: 'ns-combo',
-			multiSelect: true,
-			style: 'margin-bottom:0',
-			width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 38,
-			valueField: 'id',
-			displayField: 'name',
-			emptyText: NS.i18n.select_organisation_unit_groups,
-			editable: false,
-			hidden: true,
-			store: organisationUnitGroupStore
-		});
-
-		toolMenu = Ext.create('Ext.menu.Menu', {
-			shadow: false,
-			showSeparator: false,
-			menuValue: 'orgunit',
-			clickHandler: function(param) {
-				if (!param) {
-					return;
-				}
-
-				var items = this.items.items;
-				this.menuValue = param;
-
-				// Menu item icon cls
-				for (var i = 0; i < items.length; i++) {
-					if (items[i].setIconCls) {
-						if (items[i].param === param) {
-							items[i].setIconCls('ns-menu-item-selected');
-						}
-						else {
-							items[i].setIconCls('ns-menu-item-unselected');
-						}
-					}
-				}
-
-				// Gui
-				if (param === 'orgunit') {
-					userOrganisationUnit.show();
-					userOrganisationUnitChildren.show();
-					userOrganisationUnitGrandChildren.show();
-					organisationUnitLevel.hide();
-					organisationUnitGroup.hide();
-
-					if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue()) {
-						treePanel.disable();
-					}
-				}
-				else if (param === 'level') {
-					userOrganisationUnit.hide();
-					userOrganisationUnitChildren.hide();
-					userOrganisationUnitGrandChildren.hide();
-					organisationUnitLevel.show();
-					organisationUnitGroup.hide();
-					treePanel.enable();
-				}
-				else if (param === 'group') {
-					userOrganisationUnit.hide();
-					userOrganisationUnitChildren.hide();
-					userOrganisationUnitGrandChildren.hide();
-					organisationUnitLevel.hide();
-					organisationUnitGroup.show();
-					treePanel.enable();
-				}
-			},
-			items: [
-				{
-					xtype: 'label',
-					text: 'Selection mode',
-					style: 'padding:7px 5px 5px 7px; font-weight:bold; border:0 none'
-				},
-				{
-					text: NS.i18n.select_organisation_units + '&nbsp;&nbsp;',
-					param: 'orgunit',
-					iconCls: 'ns-menu-item-selected'
-				},
-				{
-					text: 'Select levels' + '&nbsp;&nbsp;',
-					param: 'level',
-					iconCls: 'ns-menu-item-unselected'
-				},
-				{
-					text: 'Select groups' + '&nbsp;&nbsp;',
-					param: 'group',
-					iconCls: 'ns-menu-item-unselected'
-				}
-			],
-			listeners: {
-				afterrender: function() {
-					this.getEl().addCls('ns-btn-menu');
-				},
-				click: function(menu, item) {
-					this.clickHandler(item.param);
-				}
-			}
-		});
-
-		tool = Ext.create('Ext.button.Button', {
-			cls: 'ns-button-organisationunitselection',
-			iconCls: 'ns-button-icon-gear',
-			width: 36,
-			height: 24,
-			menu: toolMenu
-		});
-
-		toolPanel = Ext.create('Ext.panel.Panel', {
-			width: 36,
-			bodyStyle: 'border:0 none; text-align:right',
-			style: 'margin-right:2px',
-			items: tool
-		});
-
-		organisationUnit = {
-			xtype: 'panel',
-			title: '<div class="ns-panel-title-organisationunit">' + NS.i18n.organisation_units + '</div>',
-			bodyStyle: 'padding:2px',
-			hideCollapseTool: true,
-			collapsed: false,
-			getDimension: function() {
-				var r = treePanel.getSelectionModel().getSelection(),
-					config = {
-						dimension: ns.core.conf.finals.dimension.organisationUnit.objectName,
-						items: []
-					};
-
-				if (toolMenu.menuValue === 'orgunit') {
-					if (userOrganisationUnit.getValue() || userOrganisationUnitChildren.getValue() || userOrganisationUnitGrandChildren.getValue()) {
-						if (userOrganisationUnit.getValue()) {
-							config.items.push({
-								id: 'USER_ORGUNIT',
-								name: ''
-							});
-						}
-						if (userOrganisationUnitChildren.getValue()) {
-							config.items.push({
-								id: 'USER_ORGUNIT_CHILDREN',
-								name: ''
-							});
-						}
-						if (userOrganisationUnitGrandChildren.getValue()) {
-							config.items.push({
-								id: 'USER_ORGUNIT_GRANDCHILDREN',
-								name: ''
-							});
-						}
-					}
-					else {
-						for (var i = 0; i < r.length; i++) {
-							config.items.push({id: r[i].data.id});
-						}
-					}
-				}
-				else if (toolMenu.menuValue === 'level') {
-					var levels = organisationUnitLevel.getValue();
-
-					for (var i = 0; i < levels.length; i++) {
-						config.items.push({
-							id: 'LEVEL-' + levels[i],
-							name: ''
-						});
-					}
-
-					for (var i = 0; i < r.length; i++) {
-						config.items.push({
-							id: r[i].data.id,
-							name: ''
-						});
-					}
-				}
-				else if (toolMenu.menuValue === 'group') {
-					var groupIds = organisationUnitGroup.getValue();
-
-					for (var i = 0; i < groupIds.length; i++) {
-						config.items.push({
-							id: 'OU_GROUP-' + groupIds[i],
-							name: ''
-						});
-					}
-
-					for (var i = 0; i < r.length; i++) {
-						config.items.push({
-							id: r[i].data.id,
-							name: ''
-						});
-					}
-				}
-
-				return config.items.length ? config : null;
-			},
-            onExpand: function() {
-                var h = ns.app.westRegion.hasScrollbar ?
-                    ns.core.conf.layout.west_scrollbarheight_accordion_organisationunit : ns.core.conf.layout.west_maxheight_accordion_organisationunit;
-                accordion.setThisHeight(h);
-                treePanel.setHeight(this.getHeight() - ns.core.conf.layout.west_fill_accordion_organisationunit);
-            },
-            items: [
-                {
-                    layout: 'column',
-                    bodyStyle: 'border:0 none',
-                    style: 'padding-bottom:2px',
-                    items: [
-                        toolPanel,
-                        {
-                            width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 38,
-                            layout: 'column',
-                            bodyStyle: 'border:0 none',
-                            items: [
-                                userOrganisationUnit,
-                                userOrganisationUnitChildren,
-                                userOrganisationUnitGrandChildren,
-                                organisationUnitLevel,
-                                organisationUnitGroup
-                            ]
-                        }
-                    ]
-                },
-                treePanel
-            ],
-            listeners: {
-                added: function() {
-                    accordionPanels.push(this);
-                },
-                expand: function(p) {
-                    p.onExpand();
-                }
-            }
-        };
-
-		// dimensions
-
-		getDimensionPanels = function(dimensions, iconCls) {
-			var	getAvailableStore,
-				getSelectedStore,
-
-				createPanel,
-				getPanels;
-
-			getAvailableStore = function(dimension) {
-				return Ext.create('Ext.data.Store', {
-					fields: ['id', 'name'],
-					proxy: {
-						type: 'ajax',
-						url: ns.core.init.contextPath + '/api/dimensions/' + dimension.id + '.json',
-						reader: {
-							type: 'json',
-							root: 'items'
-						}
-					},
-					isLoaded: false,
-					storage: {},
-					sortStore: function() {
-						this.sort('name', 'ASC');
-					},
-					reset: function() {
-						if (this.isLoaded) {
-							this.removeAll();
-							ns.core.web.storage.internal.load(this);
-							this.sortStore();
-						}
-					},
-					listeners: {
-						load: function(s) {
-							s.isLoaded = true;
-							ns.core.web.storage.internal.add(s);
-						}
-					}
-				});
-			};
-
-			getSelectedStore = function() {
-				return Ext.create('Ext.data.Store', {
-					fields: ['id', 'name'],
-					data: []
-				});
-			};
-
-			createPanel = function(dimension) {
-				var getAvailable,
-					getSelected,
-
-					availableStore,
-					selectedStore,
-					available,
-					selected,
-
-					panel;
-
-				getAvailable = function(availableStore) {
-					return Ext.create('Ext.ux.form.MultiSelect', {
-						cls: 'ns-toolbar-multiselect-left',
-						width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
-						valueField: 'id',
-						displayField: 'name',
-						store: availableStore,
-						tbar: [
-							{
-								xtype: 'label',
-								text: NS.i18n.available,
-								cls: 'ns-toolbar-multiselect-left-label'
-							},
-							'->',
-							{
-								xtype: 'button',
-								icon: 'images/arrowright.png',
-								width: 22,
-								handler: function() {
-									ns.core.web.multiSelect.select(available, selected);
-								}
-							},
-							{
-								xtype: 'button',
-								icon: 'images/arrowrightdouble.png',
-								width: 22,
-								handler: function() {
-									ns.core.web.multiSelect.selectAll(available, selected);
-								}
-							}
-						],
-						listeners: {
-							afterrender: function() {
-								this.boundList.on('itemdblclick', function() {
-									ns.core.web.multiSelect.select(available, selected);
-								}, this);
-							}
-						}
-					});
-				};
-
-				getSelected = function(selectedStore) {
-					return Ext.create('Ext.ux.form.MultiSelect', {
-						cls: 'ns-toolbar-multiselect-right',
-						width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
-						valueField: 'id',
-						displayField: 'name',
-						ddReorder: true,
-						store: selectedStore,
-						tbar: [
-							{
-								xtype: 'button',
-								icon: 'images/arrowleftdouble.png',
-								width: 22,
-								handler: function() {
-									ns.core.web.multiSelect.unselectAll(available, selected);
-								}
-							},
-							{
-								xtype: 'button',
-								icon: 'images/arrowleft.png',
-								width: 22,
-								handler: function() {
-									ns.core.web.multiSelect.unselect(available, selected);
-								}
-							},
-							'->',
-							{
-								xtype: 'label',
-								text: NS.i18n.selected,
-								cls: 'ns-toolbar-multiselect-right-label'
-							}
-						],
-						listeners: {
-							afterrender: function() {
-								this.boundList.on('itemdblclick', function() {
-									ns.core.web.multiSelect.unselect(available, selected);
-								}, this);
-							}
-						}
-					});
-				};
-
-				availableStore = getAvailableStore(dimension);
-				selectedStore = getSelectedStore();
-
-				dimensionIdAvailableStoreMap[dimension.id] = availableStore;
-				dimensionIdSelectedStoreMap[dimension.id] = selectedStore;
-
-				available = getAvailable(availableStore);
-				selected = getSelected(selectedStore);
-
-				availableStore.on('load', function() {
-					ns.core.web.multiSelect.filterAvailable(available, selected);
-				});
-
-				panel = {
-					xtype: 'panel',
-					title: '<div class="' + iconCls + '">' + dimension.name + '</div>',
-					hideCollapseTool: true,
-					availableStore: availableStore,
-					selectedStore: selectedStore,
-					getDimension: function() {
-						var config = {
-							dimension: dimension.id,
-							items: []
-						};
-
-						selectedStore.each( function(r) {
-							config.items.push({id: r.data.id});
-						});
-
-						return config.items.length ? config : null;
-					},
-					onExpand: function() {
-						if (!availableStore.isLoaded) {
-							availableStore.load();
-						}
-
-						var h = ns.app.westRegion.hasScrollbar ?
-							ns.core.conf.layout.west_scrollbarheight_accordion_group : ns.core.conf.layout.west_maxheight_accordion_group;
-						accordion.setThisHeight(h);
-						ns.core.web.multiSelect.setHeight(
-							[available, selected],
-							this,
-							ns.core.conf.layout.west_fill_accordion_dataset
-						);
-					},
-					items: [
-						{
-							xtype: 'panel',
-							layout: 'column',
-							bodyStyle: 'border-style:none',
-							items: [
-								available,
-								selected
-							]
-						}
-					],
-					listeners: {
-						added: function() {
-							accordionPanels.push(this);
-						},
-						expand: function(p) {
-							p.onExpand();
-						}
-					}
-				};
-
-				return panel;
-			};
-
-			getPanels = function() {
-				var panels = [];
-
-				for (var i = 0, panel; i < dimensions.length; i++) {
-					panel = createPanel(dimensions[i]);
-
-					panels.push(panel);
-				}
-
-				return panels;
-			};
-
-			return getPanels();
-		};
-
 		// viewport
+
+		accordion = LayerWidgetEvent();
 
 		update = function() {
 			var config = ns.core.web.pivot.getLayoutConfig(),
@@ -4787,70 +3597,6 @@ console.log(favorite);
 
 			ns.core.web.pivot.getData(layout, false);
 		};
-
-		accordionBody = Ext.create('Ext.panel.Panel', {
-			layout: 'accordion',
-			activeOnTop: true,
-			cls: 'ns-accordion',
-			bodyStyle: 'border:0 none; margin-bottom:2px',
-			height: 700,
-			items: function() {
-				var panels = [
-					indicator,
-					dataElement,
-					dataSet,
-					period,
-					organisationUnit
-				],
-				dims = Ext.clone(ns.core.init.dimensions);
-
-				panels = panels.concat(getDimensionPanels(dims, 'ns-panel-title-dimension'));
-
-				last = panels[panels.length - 1];
-				last.cls = 'ns-accordion-last';
-
-				return panels;
-			}()
-		});
-
-		accordion = Ext.create('Ext.panel.Panel', {
-			bodyStyle: 'border-style:none; padding:2px; padding-bottom:0; overflow-y:scroll;',
-			items: accordionBody,
-			panels: accordionPanels,
-			setThisHeight: function(mx) {
-				var panelHeight = this.panels.length * 28,
-					height;
-
-				if (westRegion.hasScrollbar) {
-					height = panelHeight + mx;
-					this.setHeight(viewport.getHeight() - 2);
-					accordionBody.setHeight(height - 2);
-				}
-				else {
-					height = westRegion.getHeight() - ns.core.conf.layout.west_fill;
-					mx += panelHeight;
-					accordion.setHeight((height > mx ? mx : height) - 2);
-					accordionBody.setHeight((height > mx ? mx : height) - 2);
-				}
-			},
-			getExpandedPanel: function() {
-				for (var i = 0, panel; i < this.panels.length; i++) {
-					if (!this.panels[i].collapsed) {
-						return this.panels[i];
-					}
-				}
-
-				return null;
-			},
-			getFirstPanel: function() {
-				return this.panels[0];
-			},
-			listeners: {
-				added: function() {
-					ns.app.accordion = this;
-				}
-			}
-		});
 
 		westRegion = Ext.create('Ext.panel.Panel', {
 			region: 'west',
