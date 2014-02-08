@@ -126,7 +126,7 @@ Ext.onReady( function() {
 			};
 
 			conf.layout = {
-				west_width: 424,
+				west_width: 452,
 				west_fieldset_width: 416,
 				west_width_padding: 4,
 				west_fill: 2,

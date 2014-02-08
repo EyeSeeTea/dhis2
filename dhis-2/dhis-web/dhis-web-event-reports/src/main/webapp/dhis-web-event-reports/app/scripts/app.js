@@ -17,6 +17,7 @@ Ext.onReady( function() {
 		};
 
 	// set app config
+	
 	(function() {
 
 		// ext configuration
@@ -34,7 +35,506 @@ Ext.onReady( function() {
 		};
 	}());
 
+	// extensions
+	
+	(function() {
+        var operatorCmpWidth = 70,
+            valueCmpWidth = 304,
+            buttonCmpWidth = 20,
+            nameCmpWidth = 400;
+
+        Ext.define('Ext.ux.panel.DataElementIntegerContainer', {
+			extend: 'Ext.container.Container',
+			alias: 'widget.dataelementintegerpanel',
+			layout: 'column',
+            bodyStyle: 'border:0 none',
+            getRecord: function() {
+                return {
+                    id: this.dataElement.id,
+                    name: this.dataElement.name,
+                    operator: this.operatorCmp.getValue(),
+                    value: this.valueCmp.getValue()
+                };
+            },
+            initComponent: function() {
+                var container = this;
+
+                this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
+                    valueField: 'id',
+                    displayField: 'name',
+                    queryMode: 'local',
+                    editable: false,
+                    width: operatorCmpWidth,
+                    value: 'EQ',
+                    store: {
+                        fields: ['id', 'name'],
+                        data: [
+                            {id: 'EQ', name: '='},
+                            {id: 'GT', name: '>'},
+                            {id: 'GE', name: '>='},
+                            {id: 'LT', name: '<'},
+                            {id: 'LE', name: '<='},
+                            {id: 'NE', name: '!='}
+                        ]
+                    }
+                });
+
+                this.valueCmp = Ext.create('Ext.form.field.Number', {
+                    width: valueCmpWidth,
+                    value: 0
+                });
+
+                this.addCmp = Ext.create('Ext.button.Button', {
+                    text: '+',
+                    width: buttonCmpWidth,
+                    handler: function() {
+						container.duplicateDataElement();
+					}
+                });
+
+                this.removeCmp = Ext.create('Ext.button.Button', {
+                    text: 'x',
+                    width: buttonCmpWidth,
+                    handler: function() {
+                        container.removeDataElement();
+                    }
+                });
+
+                this.nameCmp = Ext.create('Ext.form.Label', {
+                    text: this.dataElement.name,
+                    width: nameCmpWidth,
+                    style: 'padding:2px'
+                });
+
+                this.items = [
+                    this.nameCmp,
+                    this.operatorCmp,
+                    this.valueCmp,
+                    this.addCmp,
+                    this.removeCmp
+                ];
+
+                this.callParent();
+            }
+        });
+
+        Ext.define('Ext.ux.panel.DataElementStringContainer', {
+			extend: 'Ext.container.Container',
+			alias: 'widget.dataelementintegerpanel',
+			layout: 'column',
+            bodyStyle: 'border:0 none',
+            getRecord: function() {
+                return {
+                    id: this.dataElement.id,
+                    name: this.dataElement.name,
+                    operator: this.operatorCmp.getValue(),
+                    value: this.valueCmp.getValue()
+                };
+            },
+            initComponent: function() {
+                var container = this;
+
+                this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
+                    valueField: 'id',
+                    displayField: 'name',
+                    queryMode: 'local',
+                    editable: false,
+                    width: operatorCmpWidth,
+                    value: 'LIKE',
+                    store: {
+                        fields: ['id', 'name'],
+                        data: [
+                            {id: 'LIKE', name: 'Contains'},
+                            {id: 'EQ', name: 'Is exact'}
+                        ]
+                    }
+                });
+
+                this.valueCmp = Ext.create('Ext.form.field.Text', {
+                    width: valueCmpWidth
+                });
+
+                this.addCmp = Ext.create('Ext.button.Button', {
+                    text: '+',
+                    width: buttonCmpWidth
+                });
+
+                this.removeCmp = Ext.create('Ext.button.Button', {
+                    text: 'x',
+                    width: buttonCmpWidth,
+                    handler: function() {
+                        container.removeDataElement();
+                    }
+                });
+
+                this.nameCmp = Ext.create('Ext.form.Label', {
+                    text: this.dataElement.name,
+                    width: nameCmpWidth,
+                    style: 'padding:2px'
+                });
+
+                this.items = [
+                    this.nameCmp,
+                    this.operatorCmp,
+                    this.valueCmp,
+                    this.addCmp,
+                    this.removeCmp
+                ];
+
+                this.callParent();
+            }
+        });
+
+        Ext.define('Ext.ux.panel.DataElementDateContainer', {
+			extend: 'Ext.container.Container',
+			alias: 'widget.dataelementdatepanel',
+			layout: 'column',
+            bodyStyle: 'border:0 none',
+            getRecord: function() {
+                return {
+                    id: this.dataElement.id,
+                    name: this.dataElement.name,
+                    operator: this.operatorCmp.getValue(),
+                    value: this.valueCmp.getSubmitValue()
+                };
+            },
+            initComponent: function() {
+                var container = this;
+
+                this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
+                    valueField: 'id',
+                    displayField: 'name',
+                    queryMode: 'local',
+                    editable: false,
+                    width: operatorCmpWidth,
+                    value: 'EQ',
+                    store: {
+                        fields: ['id', 'name'],
+                        data: [
+                            {id: 'EQ', name: '='},
+                            {id: 'GT', name: '>'},
+                            {id: 'GE', name: '>='},
+                            {id: 'LT', name: '<'},
+                            {id: 'LE', name: '<='},
+                            {id: 'NE', name: '!='}
+                        ]
+                    }
+                });
+
+                this.valueCmp = Ext.create('Ext.form.field.Date', {
+					width: valueCmpWidth,
+					format: 'Y-m-d'
+				});
+
+                this.addCmp = Ext.create('Ext.button.Button', {
+                    text: '+',
+                    width: buttonCmpWidth
+                });
+
+                this.removeCmp = Ext.create('Ext.button.Button', {
+                    text: 'x',
+                    width: buttonCmpWidth,
+                    handler: function() {
+                        container.removeDataElement();
+                    }
+                });
+
+                this.nameCmp = Ext.create('Ext.form.Label', {
+                    text: this.dataElement.name,
+                    width: nameCmpWidth,
+                    style: 'padding:2px'
+                });
+
+                this.items = [
+                    this.nameCmp,
+                    this.operatorCmp,
+                    this.valueCmp,
+                    this.addCmp,
+                    this.removeCmp
+                ];
+
+                this.callParent();
+            }
+        });
+
+        Ext.define('Ext.ux.panel.DataElementBooleanContainer', {
+			extend: 'Ext.container.Container',
+			alias: 'widget.dataelementbooleanpanel',
+			layout: 'column',
+            bodyStyle: 'border:0 none',
+            getRecord: function() {
+                return {
+                    id: this.dataElement.id,
+                    name: this.dataElement.name,
+                    value: this.valueCmp.getValue()
+                };
+            },
+            initComponent: function() {
+                var container = this;
+
+                this.valueCmp = Ext.create('Ext.form.field.ComboBox', {
+                    valueField: 'id',
+                    displayField: 'name',
+                    queryMode: 'local',
+                    editable: false,
+                    width: operatorCmpWidth + valueCmpWidth,
+                    value: 'false',
+                    store: {
+                        fields: ['id', 'name'],
+                        data: [
+                            {id: 'true', name: 'Yes'},
+                            {id: 'false', name: 'No'}
+                        ]
+                    }
+                });
+
+                this.addCmp = Ext.create('Ext.button.Button', {
+                    text: '+',
+                    width: buttonCmpWidth
+                });
+
+                this.removeCmp = Ext.create('Ext.button.Button', {
+                    text: 'x',
+                    width: buttonCmpWidth,
+                    handler: function() {
+                        container.removeDataElement();
+                    }
+                });
+
+                this.nameCmp = Ext.create('Ext.form.Label', {
+                    text: this.dataElement.name,
+                    width: nameCmpWidth,
+                    style: 'padding:2px'
+                });
+
+                this.items = [
+                    this.nameCmp,
+                    this.valueCmp,
+                    this.addCmp,
+                    this.removeCmp
+                ];
+
+                this.callParent();
+            }
+        });
+
+		Ext.define('Ext.ux.panel.DataElementOptionContainer', {
+			extend: 'Ext.container.Container',
+			alias: 'widget.dataelementoptionpanel',
+			layout: 'column',
+            bodyStyle: 'border:0 none',
+            getRecord: function() {
+				var valueArray = this.valueCmp.getValue().split(';');
+
+				for (var i = 0; i < valueArray.length; i++) {
+					valueArray[i] = Ext.String.trim(valueArray[i]);
+				}
+
+                return {
+                    id: this.dataElement.id,
+                    name: this.dataElement.name,
+                    operator: this.operatorCmp.getValue(),
+                    value: valueArray.join(';')
+                };
+            },
+            initComponent: function() {
+                var container = this;
+
+                this.nameCmp = Ext.create('Ext.form.Label', {
+                    text: this.dataElement.name,
+                    width: nameCmpWidth,
+                    style: 'padding:2px 2px 2px 1px'
+                });
+
+                this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
+                    valueField: 'id',
+                    displayField: 'name',
+                    queryMode: 'local',
+                    editable: false,
+                    width: operatorCmpWidth,
+                    value: 'IN',
+                    store: {
+                        fields: ['id', 'name'],
+                        data: [
+                            {id: 'IN', name: 'One of'}
+                        ]
+                    }
+                });
+
+                this.valueStore = Ext.create('Ext.data.Store', {
+					fields: ['id', 'name'],
+					data: [],
+					loadOptionSet: function(optionSetId, key, pageSize) {
+						var store = this,
+							params = {};
+
+						params['max'] = pageSize || 15;
+
+						if (key) {
+							params['key'] = key;
+						}
+
+						Ext.Ajax.request({
+							url: gis.init.contextPath + '/api/optionSets/' + optionSetId + '/options.json',
+							params: params,
+							disableCaching: false,
+							success: function(r) {
+								var options = Ext.decode(r.responseText),
+									data = [];
+
+								Ext.each(options, function(option) {
+									data.push({
+										id: option,
+										name: option
+									});
+								});
+
+								store.removeAll();
+								store.add(data);
+							}
+						});
+					},
+                    listeners: {
+						datachanged: function(s) {
+							if (container.searchCmp && s.getRange().length) {
+								container.searchCmp.expand();
+							}
+						}
+					}
+				});
+
+                this.searchCmp = Ext.create('Ext.form.field.ComboBox', {
+                    width: 62,
+                    emptyText: 'Search..',
+                    valueField: 'id',
+                    displayField: 'name',
+                    hideTrigger: true,
+                    delimiter: '; ',
+                    enableKeyEvents: true,
+                    queryMode: 'local',
+                    listConfig: {
+                        minWidth: 300
+                    },
+                    store: this.valueStore,
+                    listeners: {
+						keyup: {
+							fn: function(cb) {
+								var value = cb.getValue(),
+									optionSetId = container.dataElement.optionSet.id;
+
+								// search
+								container.valueStore.loadOptionSet(optionSetId, value);
+
+                                // trigger
+                                if (!value || (Ext.isString(value) && value.length === 1)) {
+									container.triggerCmp.setDisabled(!!value);
+								}
+							}
+						},
+						select: function(cb) {
+
+                            // value
+							container.valueCmp.addOptionValue(cb.getValue());
+
+                            // search
+							cb.clearValue();
+
+                            // trigger
+                            container.triggerCmp.enable();
+						}
+					}
+                });
+
+                this.triggerCmp = Ext.create('Ext.button.Button', {
+                    cls: 'gis-button-combotrigger',
+                    disabledCls: 'gis-button-combotrigger-disabled',
+                    width: 18,
+                    height: 22,
+                    storage: [],
+                    handler: function(b) {
+                        if (b.storage.length) {
+							container.valueStore.removeAll();
+                            container.valueStore.add(Ext.clone(b.storage));
+                        }
+                        else {
+                            Ext.Ajax.request({
+                                url: gis.init.contextPath + '/api/optionSets/' + container.dataElement.optionSet.id + '/options.json',
+                                params: {
+                                    'max': 15
+                                },
+                                success: function(r) {
+                                    var options = Ext.decode(r.responseText),
+                                        data = [];
+
+                                    Ext.each(options, function(option) {
+                                        data.push({
+                                            id: option,
+                                            name: option
+                                        });
+                                    });
+
+                                    b.storage = Ext.clone(data);
+									container.valueStore.removeAll();
+                                    container.valueStore.add(data);
+                                }
+                            });
+                        }
+                    }
+                });
+
+                this.valueCmp = Ext.create('Ext.form.field.Text', {
+					width: 224,
+					addOptionValue: function(option) {
+						var value = this.getValue();
+
+						if (value) {
+							var a = value.split(';');
+
+							for (var i = 0; i < a.length; i++) {
+								a[i] = Ext.String.trim(a[i]);
+							};
+
+							a = Ext.Array.clean(a);
+
+							value = a.join('; ');
+							value += '; ';
+						}
+
+						this.setValue(value += option);
+					}
+				});
+
+                this.addCmp = Ext.create('Ext.button.Button', {
+                    text: '+',
+                    width: buttonCmpWidth,
+                    style: 'font-weight:bold'
+                });
+
+                this.removeCmp = Ext.create('Ext.button.Button', {
+                    text: 'x',
+                    width: buttonCmpWidth,
+                    handler: function() {
+                        container.removeDataElement();
+                    }
+                });
+
+                this.items = [
+                    this.nameCmp,
+                    this.operatorCmp,
+                    this.searchCmp,
+                    this.triggerCmp,
+                    this.valueCmp,
+                    this.addCmp,
+                    this.removeCmp
+                ];
+
+                this.callParent();
+            }
+        });
+	}());
+
 	// constructors
+	
 	LayoutWindow = function() {
 		var dimension,
 			dimensionStore,
@@ -1140,7 +1640,7 @@ Ext.onReady( function() {
 
 									if (favorite) {
 										favorite.name = record.data.name;
-console.log(favorite);
+										
 										if (confirm(message)) {
 											Ext.Ajax.request({
 												url: ns.core.init.contextPath + '/api/reportTables/' + record.data.id,
@@ -2007,7 +2507,6 @@ console.log(favorite);
 		};
 
 		dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'ns-toolbar-multiselect-left',
 			width: accBaseWidth,
             height: 112,
 			valueField: 'id',
@@ -2885,7 +3384,6 @@ console.log(favorite);
 
 		return panel;
 	};
-
 
 	// core
 	extendCore = function(core) {

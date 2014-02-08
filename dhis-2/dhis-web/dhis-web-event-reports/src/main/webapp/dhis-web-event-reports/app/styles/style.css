@@ -49,9 +49,6 @@ body,
 	font: normal 11px arial,sans-serif,ubuntu,consolas;
 }
 
-body {
-}
-
 body.x-windows {
 	-webkit-text-stroke: 0.2px #888;
 }
