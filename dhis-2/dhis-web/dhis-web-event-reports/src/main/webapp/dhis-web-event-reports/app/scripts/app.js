@@ -1768,6 +1768,7 @@ console.log(favorite);
 			toolPanel,
             organisationUnit,
 
+			accordionPanels = [],
 			panel,
 
 		// functions
@@ -1869,7 +1870,7 @@ console.log(favorite);
 			displayField: 'name',
 			fieldLabel: 'Program',
 			labelAlign: 'top',
-			labelCls: 'gis-form-item-label-top',
+			labelCls: 'ns-form-item-label-top',
 			labelSeparator: '',
 			emptyText: 'Select program',
 			forceSelection: true,
@@ -1921,7 +1922,7 @@ console.log(favorite);
 			displayField: 'name',
 			fieldLabel: 'Stage',
 			labelAlign: 'top',
-			labelCls: 'gis-form-item-label-top',
+			labelCls: 'ns-form-item-label-top',
 			labelSeparator: '',
 			emptyText: 'Select stage',
 			queryMode: 'remote',
@@ -2165,7 +2166,7 @@ console.log(favorite);
         };
 
         dataElement = Ext.create('Ext.panel.Panel', {
-            title: '<div class="gis-panel-title-data">Data</div>',
+            title: '<div class="ns-panel-title-data">Data</div>',
             bodyStyle: 'padding:2px',
             hideCollapseTool: true,
             items: [
@@ -2180,14 +2181,19 @@ console.log(favorite);
 				},
                 dataElementAvailable,
                 dataElementSelected
-            ]
+            ],
+            listeners: {
+				added: function(cmp) {
+					accordionPanels.push(cmp);
+				}
+			}
         });
 
             // date
 		startDate = Ext.create('Ext.form.field.Date', {
 			fieldLabel: 'Start date',
 			labelAlign: 'top',
-			labelCls: 'gis-form-item-label-top',
+			labelCls: 'ns-form-item-label-top',
             //labelStyle: 'font-weight: bold',
 			labelSeparator: '',
 			columnWidth: 0.5,
@@ -2199,7 +2205,7 @@ console.log(favorite);
 		endDate = Ext.create('Ext.form.field.Date', {
 			fieldLabel: 'End date',
 			labelAlign: 'top',
-			labelCls: 'gis-form-item-label-top',
+			labelCls: 'ns-form-item-label-top',
             //labelStyle: 'font-weight: bold',
 			labelSeparator: '',
 			columnWidth: 0.5,
@@ -2209,7 +2215,7 @@ console.log(favorite);
 		});
 
         period = Ext.create('Ext.panel.Panel', {
-            title: '<div class="gis-panel-title-period">Periods</div>',
+            title: '<div class="ns-panel-title-period">Periods</div>',
             bodyStyle: 'padding:4px 2px 2px',
             hideCollapseTool: true,
             layout: 'column',
@@ -2217,12 +2223,17 @@ console.log(favorite);
             items: [
                 startDate,
                 endDate
-            ]
+            ],
+            listeners: {
+				added: function(cmp) {
+					accordionPanels.push(cmp);
+				}
+			}
         });
 
             // organisation unit
 		treePanel = Ext.create('Ext.tree.Panel', {
-			cls: 'gis-tree',
+			cls: 'ns-tree',
 			height: 333,
             bodyStyle: 'border:0 none',
 			style: 'border-top: 1px solid #ddd; padding-top: 1px',
@@ -2519,7 +2530,7 @@ console.log(favorite);
 		});
 
 		organisationUnitLevel = Ext.create('Ext.form.field.ComboBox', {
-			cls: 'gis-combo',
+			cls: 'ns-combo',
 			multiSelect: true,
 			style: 'margin-bottom:0',
 			width: accBaseWidth - toolWidth - 2,
@@ -2535,7 +2546,7 @@ console.log(favorite);
 		});
 
 		organisationUnitGroup = Ext.create('Ext.form.field.ComboBox', {
-			cls: 'gis-combo',
+			cls: 'ns-combo',
 			multiSelect: true,
 			style: 'margin-bottom:0',
 			width: accBaseWidth - toolWidth - 2,
@@ -2576,10 +2587,10 @@ console.log(favorite);
 				for (var i = 0; i < items.length; i++) {
 					if (items[i].setIconCls) {
 						if (items[i].param === param) {
-							items[i].setIconCls('gis-menu-item-selected');
+							items[i].setIconCls('ns-menu-item-selected');
 						}
 						else {
-							items[i].setIconCls('gis-menu-item-unselected');
+							items[i].setIconCls('ns-menu-item-unselected');
 						}
 					}
 				}
@@ -2622,22 +2633,22 @@ console.log(favorite);
 				{
 					text: NS.i18n.select_organisation_units + '&nbsp;&nbsp;',
 					param: 'orgunit',
-					iconCls: 'gis-menu-item-selected'
+					iconCls: 'ns-menu-item-selected'
 				},
 				{
 					text: 'Select levels' + '&nbsp;&nbsp;',
 					param: 'level',
-					iconCls: 'gis-menu-item-unselected'
+					iconCls: 'ns-menu-item-unselected'
 				},
 				{
 					text: 'Select groups' + '&nbsp;&nbsp;',
 					param: 'group',
-					iconCls: 'gis-menu-item-unselected'
+					iconCls: 'ns-menu-item-unselected'
 				}
 			],
 			listeners: {
 				afterrender: function() {
-					this.getEl().addCls('gis-btn-menu');
+					this.getEl().addCls('ns-btn-menu');
 				},
 				click: function(menu, item) {
 					this.clickHandler(item.param);
@@ -2646,8 +2657,8 @@ console.log(favorite);
 		});
 
 		tool = Ext.create('Ext.button.Button', {
-			cls: 'gis-button-organisationunitselection',
-			iconCls: 'gis-button-icon-gear',
+			cls: 'ns-button-organisationunitselection',
+			iconCls: 'ns-button-icon-gear',
 			width: toolWidth,
 			height: 24,
 			menu: toolMenu
@@ -2661,8 +2672,8 @@ console.log(favorite);
 		});
 
         organisationUnit = Ext.create('Ext.panel.Panel', {
-            title: '<div class="gis-panel-title-organisationunit">' + NS.i18n.organisation_units + '</div>',
-            cls: 'gis-accordion-last',
+            title: '<div class="ns-panel-title-organisationunit">' + NS.i18n.organisation_units + '</div>',
+            cls: 'ns-accordion-last',
             bodyStyle: 'padding:2px',
             hideCollapseTool: true,
             items: [
@@ -2677,14 +2688,19 @@ console.log(favorite);
                     ]
                 },
                 treePanel
-            ]
+            ],
+            listeners: {
+				added: function(cmp) {
+					accordionPanels.push(cmp);
+				}
+			}
         });
 
             // accordion
         accordionBody = Ext.create('Ext.panel.Panel', {
 			layout: 'accordion',
 			activeOnTop: true,
-			cls: 'gis-accordion',
+			cls: 'ns-accordion',
 			bodyStyle: 'border:0 none',
 			height: 450,
 			items: [
@@ -2850,6 +2866,9 @@ console.log(favorite);
 			layer: layer ? layer : null,
 			menu: layer ? layer.menu : null,
 
+			accordionBody: accordionBody,
+			accordionPanels: accordionPanels,
+
 			reset: reset,
 			setGui: setGui,
 			getView: getView,
@@ -2857,7 +2876,7 @@ console.log(favorite);
 				return treePanel.getParentGraphMap();
 			},
 
-			cls: 'gis-form-widget',
+			cls: 'ns-form-widget',
 			border: false,
 			items: [
                 accordionBody
@@ -3523,6 +3542,7 @@ console.log(favorite);
 	// viewport
 	createViewport = function() {
         var accordion,
+			accordionBody,
 			westRegion,
             layoutButton,
             optionsButton,
@@ -3585,7 +3605,46 @@ console.log(favorite);
 
 		// viewport
 
-		accordion = LayerWidgetEvent();
+		accordionBody = LayerWidgetEvent();
+
+		accordion = Ext.create('Ext.panel.Panel', {
+			bodyStyle: 'border-style:none; padding:2px; padding-bottom:0; overflow-y:scroll;',
+			items: accordionBody,
+			panels: accordionBody.accordionPanels,
+			setThisHeight: function(mx) {
+				var panelHeight = this.panels.length * 28,
+					height;
+
+				if (westRegion.hasScrollbar) {
+					height = panelHeight + mx;
+					this.setHeight(viewport.getHeight() - 2);
+					accordionBody.setHeight(height - 2);
+				}
+				else {
+					height = westRegion.getHeight() - ns.core.conf.layout.west_fill;
+					mx += panelHeight;
+					accordion.setHeight((height > mx ? mx : height) - 2);
+					accordionBody.setHeight((height > mx ? mx : height) - 2);
+				}
+			},
+			getExpandedPanel: function() {
+				for (var i = 0, panel; i < this.panels.length; i++) {
+					if (!this.panels[i].collapsed) {
+						return this.panels[i];
+					}
+				}
+
+				return null;
+			},
+			getFirstPanel: function() {
+				return this.panels[0];
+			},
+			listeners: {
+				added: function() {
+					ns.app.accordion = this;
+				}
+			}
+		});
 
 		update = function() {
 			var config = ns.core.web.pivot.getLayoutConfig(),
@@ -4342,8 +4401,6 @@ console.log(favorite);
 
 		viewport = Ext.create('Ext.container.Viewport', {
 			layout: 'border',
-			period: period,
-			treePanel: treePanel,
 			setGui: setGui,
 			items: [
 				westRegion,
@@ -4365,7 +4422,7 @@ console.log(favorite);
 						var panel = accordion.getExpandedPanel();
 
 						if (panel) {
-							panel.onExpand();
+							//panel.onExpand(); //todo
 						}
 					});
 
@@ -4387,7 +4444,7 @@ console.log(favorite);
 					}
 
 					// expand first panel
-					accordion.getFirstPanel().expand();
+					//accordion.getFirstPanel().expand(); //todo
 
 					// look for url params
 					var id = ns.core.web.url.getParam('id'),
@@ -4414,22 +4471,6 @@ console.log(favorite);
 				}
 			}
 		});
-
-		// add listeners
-		(function() {
-			ns.app.stores.indicatorAvailable.on('load', function() {
-				ns.core.web.multiSelect.filterAvailable(indicatorAvailable, indicatorSelected);
-			});
-
-			ns.app.stores.dataElementAvailable.on('load', function() {
-				ns.core.web.multiSelect.filterAvailable(dataElementAvailable, dataElementSelected);
-			});
-
-			ns.app.stores.dataSetAvailable.on('load', function(s) {
-				ns.core.web.multiSelect.filterAvailable(dataSetAvailable, dataSetSelected);
-				s.sort('name', 'ASC');
-			});
-		}());
 
 		return viewport;
 	};

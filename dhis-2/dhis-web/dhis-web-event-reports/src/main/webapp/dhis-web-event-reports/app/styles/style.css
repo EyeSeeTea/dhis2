@@ -38,12 +38,6 @@
  * General
  *--------------------------------------------------------------------------*/
 
-body {
-	background-color: #e1e1e1;
-	opacity: 0;
-	filter:Alpha(opacity=0)
-}
-
 body,
 .x-body,
 .x-btn-default-toolbar-small .x-btn-inner,
@@ -52,17 +46,10 @@ body,
 .x-grid-cell-inner,
 .x-form-item-label,
 .x-window-header-text-default {
-	font-family: arial,sans-serif,ubuntu,consolas;
+	font: normal 11px arial,sans-serif,ubuntu,consolas;
 }
 
 body {
-    font-size: 10px;
-	-webkit-touch-callout: none;
-	-webkit-user-select: none;
-	-khtml-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
 }
 
 body.x-windows {
@@ -172,6 +159,14 @@ body.x-windows {
 
 .align-left {
 	text-align: left !important;
+}
+
+.ns-form-item-label-top {
+	padding-left: 2px;
+	float: none;
+	clear: none;
+	display: block;
+	margin-bottom: 2px !important;
 }
 
 /*----------------------------------------------------------------------------
@@ -319,6 +314,30 @@ table.pivot {
 }
 .ns-panel-title-dimension {
 	background-image: url(../images/dataelementgroupset.png);
+}
+
+
+/*----------------------------------------------------------------------------
+ * NS form
+ *--------------------------------------------------------------------------*/
+
+.ns-form-widget .x-form-item-label-left { /* (Combo) label */
+	padding-left: 4px;
+	color: #444;
+}
+.ns-form-widget .x-form-text { /* Combo text */
+	font-size: 10px !important;
+	padding: 3px 1px 1px 4px;
+	border-top-left-radius: 1px;
+	border-bottom-left-radius: 1px;
+}
+
+.ns-form-widget .x-form-item { /* (Combo) spacing */
+	margin-bottom: 3px;
+}
+
+.ns-form-widget .x-btn-default-small { /* Button */
+	border-radius: 1px;
 }
 
 
