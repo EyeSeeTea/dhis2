@@ -1,5 +1,5 @@
 Ext.onReady( function() {
-	var NS = PT,
+	var NS = ER,
 
 		LayoutWindow,
 		OptionsWindow,
@@ -1739,6 +1739,7 @@ console.log(favorite);
 		var programStore,
 			stagesByProgramStore,
             dataElementsByStageStore,
+            organisationUnitGroupStore,
 
 		// components
 			program,
@@ -1787,7 +1788,7 @@ console.log(favorite);
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: gis.init.contextPath + '/api/programs.json?links=false',
+				url: ns.core.init.contextPath + '/api/programs.json?links=false',
 				reader: {
 					type: 'json',
 					root: 'programs'
@@ -1846,11 +1847,23 @@ console.log(favorite);
 			}]
 		});
 
+		organisationUnitGroupStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			proxy: {
+				type: 'ajax',
+				url: ns.core.init.contextPath + '/api/organisationUnitGroups.json?paging=false&links=false',
+				reader: {
+					type: 'json',
+					root: 'organisationUnitGroups'
+				}
+			}
+		});
+
 		// components
 
             // data element
 		program = Ext.create('Ext.form.field.ComboBox', {
-			fieldLabel: GIS.i18n.programs,
+			fieldLabel: NS.i18n.programs,
 			editable: false,
 			valueField: 'id',
 			displayField: 'name',
@@ -1884,7 +1897,7 @@ console.log(favorite);
 			dataElementsByStageStore.removeAll();
 			dataElementSelected.removeAll();
 
-			stagesByProgramStore.proxy.url = gis.init.contextPath + '/api/programs/' + programId + '.json?viewClass=withoutOrganisationUnits&links=false&paging=false';
+			stagesByProgramStore.proxy.url = ns.core.init.contextPath + '/api/programs/' + programId + '.json?viewClass=withoutOrganisationUnits&links=false&paging=false';
 			stagesByProgramStore.load({
 				callback: function(records) {
 					stage.enable();
@@ -1902,7 +1915,7 @@ console.log(favorite);
 		};
 
 		stage = Ext.create('Ext.form.field.ComboBox', {
-			fieldLabel: GIS.i18n.indicator,
+			fieldLabel: NS.i18n.indicator,
 			editable: false,
 			valueField: 'id',
 			displayField: 'name',
@@ -1954,7 +1967,7 @@ console.log(favorite);
 				// data elements
 				if (Ext.isString(item)) {
 					Ext.Ajax.request({
-						url: gis.init.contextPath + '/api/programStages/' + item + '.json?links=false&paging=false',
+						url: ns.core.init.contextPath + '/api/programStages/' + item + '.json?links=false&paging=false',
 						success: function(r) {
 							var dataElements = Ext.Array.pluck(Ext.decode(r.responseText).programStageDataElements, 'dataElement');
 							load(attributes, dataElements);
@@ -1973,7 +1986,7 @@ console.log(favorite);
 				}
 				else {
 					Ext.Ajax.request({
-						url: gis.init.contextPath + '/api/programs/' + programId + '.json?viewClass=withoutOrganisationUnits&links=false',
+						url: ns.core.init.contextPath + '/api/programs/' + programId + '.json?viewClass=withoutOrganisationUnits&links=false',
 						success: function(r) {
 							var attributes = Ext.decode(r.responseText).attributes;
 
@@ -2219,14 +2232,14 @@ console.log(favorite);
 			multiSelect: true,
 			rendered: false,
 			reset: function() {
-				var rootNode = this.getRootNode().findChild('id', gis.init.rootNodes[0].id);
+				var rootNode = this.getRootNode().findChild('id', ns.core.init.rootNodes[0].id);
 				this.collapseAll();
 				this.expandPath(rootNode.getPath());
 				this.getSelectionModel().select(rootNode);
 			},
 			selectRootIf: function() {
 				if (this.getSelectionModel().getSelection().length < 1) {
-					var node = this.getRootNode().findChild('id', gis.init.rootNodes[0].id);
+					var node = this.getRootNode().findChild('id', ns.core.init.rootNodes[0].id);
 					if (this.rendered) {
 						this.getSelectionModel().select(node);
 					}
@@ -2237,7 +2250,7 @@ console.log(favorite);
 			recordsToSelect: [],
 			recordsToRestore: [],
 			multipleSelectIf: function(map, doUpdate) {
-				if (this.recordsToSelect.length === gis.util.object.getLength(map)) {
+				if (this.recordsToSelect.length === ns.core.support.prototype.object.getLength(map)) {
 					this.getSelectionModel().select(this.recordsToSelect);
 					this.recordsToSelect = [];
 					this.isPending = false;
@@ -2249,7 +2262,7 @@ console.log(favorite);
 			},
 			multipleExpand: function(id, map, doUpdate) {
 				var that = this,
-					rootId = gis.conf.finals.root.id,
+					rootId = ns.core.conf.finals.root.id,
 					path = map[id];
 
 				if (path.substr(0, rootId.length + 1) !== ('/' + rootId)) {
@@ -2294,7 +2307,7 @@ console.log(favorite);
 				return map;
 			},
 			selectGraphMap: function(map, update) {
-				if (!gis.util.object.getLength(map)) {
+				if (!ns.core.support.prototype.object.getLength(map)) {
 					return;
 				}
 
@@ -2315,7 +2328,7 @@ console.log(favorite);
 					extraParams: {
 						links: 'false'
 					},
-					url: gis.init.contextPath + '/api/organisationUnits',
+					url: ns.core.init.contextPath + '/api/organisationUnits',
 					reader: {
 						type: 'json',
 						root: 'children'
@@ -2326,9 +2339,9 @@ console.log(favorite);
 					direction: 'ASC'
 				}],
 				root: {
-					id: gis.conf.finals.root.id,
+					id: ns.core.conf.finals.root.id,
 					expanded: true,
-					children: gis.init.rootNodes
+					children: ns.core.init.rootNodes
 				},
 				listeners: {
 					load: function(store, node, records) {
@@ -2351,7 +2364,7 @@ console.log(favorite);
 			getDimension: function() {
 				var r = treePanel.getSelectionModel().getSelection(),
 					config = {
-						dimension: gis.conf.finals.dimension.organisationUnit.objectName,
+						dimension: ns.core.conf.finals.dimension.organisationUnit.objectName,
 						items: []
 					};
 
@@ -2453,7 +2466,7 @@ console.log(favorite);
 					if (!r.data.leaf) {
 						v.menu.add({
 							id: 'treepanel-contextmenu-item',
-							text: gis.i18n.select_all_children,
+							text: NS.i18n.select_all_children,
 							icon: 'images/node-select-child.png',
 							handler: function() {
 								r.expand(false, function() {
@@ -2477,7 +2490,7 @@ console.log(favorite);
 			style: 'padding-top:2px; padding-left:3px; margin-bottom:0',
 			boxLabelCls: 'x-form-cb-label-alt1',
 			boxLabel: 'User org unit',
-			labelWidth: gis.conf.layout.form_label_width,
+			labelWidth: ns.core.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnitChildren.getValue(), userOrganisationUnitGrandChildren.getValue()]);
 			}
@@ -2488,7 +2501,7 @@ console.log(favorite);
 			style: 'padding-top:2px; margin-bottom:0',
 			boxLabelCls: 'x-form-cb-label-alt1',
 			boxLabel: 'User OU children',
-			labelWidth: gis.conf.layout.form_label_width,
+			labelWidth: ns.core.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitGrandChildren.getValue()]);
 			}
@@ -2499,7 +2512,7 @@ console.log(favorite);
 			style: 'padding-top:2px; margin-bottom:0',
 			boxLabelCls: 'x-form-cb-label-alt1',
 			boxLabel: 'User OU grand children',
-			labelWidth: gis.conf.layout.form_label_width,
+			labelWidth: ns.core.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitChildren.getValue()]);
 			}
@@ -2512,12 +2525,12 @@ console.log(favorite);
 			width: accBaseWidth - toolWidth - 2,
 			valueField: 'level',
 			displayField: 'name',
-			emptyText: GIS.i18n.select_organisation_unit_levels,
+			emptyText: NS.i18n.select_organisation_unit_levels,
 			editable: false,
 			hidden: true,
 			store: {
 				fields: ['id', 'name', 'level'],
-				data: gis.init.organisationUnitLevels
+				data: ns.core.init.organisationUnitLevels
 			}
 		});
 
@@ -2528,10 +2541,10 @@ console.log(favorite);
 			width: accBaseWidth - toolWidth - 2,
 			valueField: 'id',
 			displayField: 'name',
-			emptyText: GIS.i18n.select_organisation_unit_groups,
+			emptyText: NS.i18n.select_organisation_unit_groups,
 			editable: false,
 			hidden: true,
-			store: gis.store.organisationUnitGroup
+			store: organisationUnitGroupStore
 		});
 
         organisationUnitPanel = Ext.create('Ext.panel.Panel', {
@@ -2607,7 +2620,7 @@ console.log(favorite);
 					style: 'padding:7px 5px 5px 7px; font-weight:bold; border:0 none'
 				},
 				{
-					text: GIS.i18n.select_organisation_units + '&nbsp;&nbsp;',
+					text: NS.i18n.select_organisation_units + '&nbsp;&nbsp;',
 					param: 'orgunit',
 					iconCls: 'gis-menu-item-selected'
 				},
@@ -2648,7 +2661,7 @@ console.log(favorite);
 		});
 
         organisationUnit = Ext.create('Ext.panel.Panel', {
-            title: '<div class="gis-panel-title-organisationunit">' + GIS.i18n.organisation_units + '</div>',
+            title: '<div class="gis-panel-title-organisationunit">' + NS.i18n.organisation_units + '</div>',
             cls: 'gis-accordion-last',
             bodyStyle: 'padding:2px',
             hideCollapseTool: true,
@@ -2824,7 +2837,7 @@ console.log(favorite);
 
 		validateView = function(view) {
 			if (!(Ext.isArray(view.rows) && view.rows.length && Ext.isString(view.rows[0].dimension) && Ext.isArray(view.rows[0].items) && view.rows[0].items.length)) {
-				GIS.logg.push([view.rows, layer.id + '.rows: dimension array']);
+				NS.logg.push([view.rows, layer.id + '.rows: dimension array']);
 				alert('No organisation units selected');
 				return false;
 			}
@@ -3569,19 +3582,6 @@ console.log(favorite);
 			}
 		});
 		ns.app.stores.reportTable = reportTableStore;
-
-		organisationUnitGroupStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			proxy: {
-				type: 'ajax',
-				url: ns.core.init.contextPath + '/api/organisationUnitGroups.json?paging=false&links=false',
-				reader: {
-					type: 'json',
-					root: 'organisationUnitGroups'
-				}
-			}
-		});
-		ns.app.stores.organisationUnitGroup = organisationUnitGroupStore;
 
 		// viewport
 

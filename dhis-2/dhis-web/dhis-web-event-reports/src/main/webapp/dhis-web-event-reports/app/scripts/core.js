@@ -4,8 +4,8 @@ Ext.onReady( function() {
 	Ext.Ajax.method = 'GET';
 
 	// namespace
-	PT = {};
-	var NS = PT;
+	ER = {};
+	var NS = ER;
 
 	NS.instances = [];
 	NS.i18n = {};
