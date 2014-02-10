@@ -3855,8 +3855,30 @@ Ext.onReady( function() {
 				config.rows = [];
 				config.filters = [];
 
-				//todo
-				
+				for (var i = 0, dimNameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], dimNameArray; i < dimNameArrays.length; i++) {
+					dimNameArray = dimNameArrays[i];
+
+					for (var j = 0, dimName; j < dimNameArray.length; i++) {
+						dimName = dimNameArray[j];
+						
+						if (dimName === 'pe') {
+							axes[i].push({
+								dimension: 'pe'
+							});
+						}
+
+						if (dimName === 'ou') {
+							axes[i].push({
+								dimension: 'ou'
+							});
+						}
+
+						//todo
+
+					
+
+				console.log(view, columnDimNames, rowDimNames, filterDimNames);
+			};
 
 
 
