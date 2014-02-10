@@ -41,7 +41,8 @@ Ext.onReady( function() {
         var operatorCmpWidth = 70,
             valueCmpWidth = 304,
             buttonCmpWidth = 20,
-            nameCmpWidth = 400;
+            nameCmpWidth = 400,
+            namePadding = '2px 5px';
 
         Ext.define('Ext.ux.panel.DataElementIntegerContainer', {
 			extend: 'Ext.container.Container',
@@ -58,6 +59,12 @@ Ext.onReady( function() {
             },
             initComponent: function() {
                 var container = this;
+
+                this.nameCmp = Ext.create('Ext.form.Label', {
+                    text: this.dataElement.name,
+                    width: nameCmpWidth,
+                    style: 'padding:' + namePadding
+                });
 
                 this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
                     valueField: 'id',
@@ -100,12 +107,6 @@ Ext.onReady( function() {
                     }
                 });
 
-                this.nameCmp = Ext.create('Ext.form.Label', {
-                    text: this.dataElement.name,
-                    width: nameCmpWidth,
-                    style: 'padding:2px'
-                });
-
                 this.items = [
                     this.nameCmp,
                     this.operatorCmp,
@@ -133,6 +134,12 @@ Ext.onReady( function() {
             },
             initComponent: function() {
                 var container = this;
+
+                this.nameCmp = Ext.create('Ext.form.Label', {
+                    text: this.dataElement.name,
+                    width: nameCmpWidth,
+                    style: 'padding:' + namePadding
+                });
 
                 this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
                     valueField: 'id',
@@ -167,12 +174,6 @@ Ext.onReady( function() {
                     }
                 });
 
-                this.nameCmp = Ext.create('Ext.form.Label', {
-                    text: this.dataElement.name,
-                    width: nameCmpWidth,
-                    style: 'padding:2px'
-                });
-
                 this.items = [
                     this.nameCmp,
                     this.operatorCmp,
@@ -200,6 +201,12 @@ Ext.onReady( function() {
             },
             initComponent: function() {
                 var container = this;
+
+                this.nameCmp = Ext.create('Ext.form.Label', {
+                    text: this.dataElement.name,
+                    width: nameCmpWidth,
+                    style: 'padding:' + namePadding
+                });
 
                 this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
                     valueField: 'id',
@@ -239,12 +246,6 @@ Ext.onReady( function() {
                     }
                 });
 
-                this.nameCmp = Ext.create('Ext.form.Label', {
-                    text: this.dataElement.name,
-                    width: nameCmpWidth,
-                    style: 'padding:2px'
-                });
-
                 this.items = [
                     this.nameCmp,
                     this.operatorCmp,
@@ -271,6 +272,12 @@ Ext.onReady( function() {
             },
             initComponent: function() {
                 var container = this;
+
+                this.nameCmp = Ext.create('Ext.form.Label', {
+                    text: this.dataElement.name,
+                    width: nameCmpWidth,
+                    style: 'padding:' + namePadding
+                });
 
                 this.valueCmp = Ext.create('Ext.form.field.ComboBox', {
                     valueField: 'id',
@@ -299,12 +306,6 @@ Ext.onReady( function() {
                     handler: function() {
                         container.removeDataElement();
                     }
-                });
-
-                this.nameCmp = Ext.create('Ext.form.Label', {
-                    text: this.dataElement.name,
-                    width: nameCmpWidth,
-                    style: 'padding:2px'
                 });
 
                 this.items = [
@@ -343,7 +344,7 @@ Ext.onReady( function() {
                 this.nameCmp = Ext.create('Ext.form.Label', {
                     text: this.dataElement.name,
                     width: nameCmpWidth,
-                    style: 'padding:2px 2px 2px 1px'
+                    style: 'padding:' + namePadding
                 });
 
                 this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
@@ -375,7 +376,7 @@ Ext.onReady( function() {
 						}
 
 						Ext.Ajax.request({
-							url: gis.init.contextPath + '/api/optionSets/' + optionSetId + '/options.json',
+							url: ns.core.init.contextPath + '/api/optionSets/' + optionSetId + '/options.json',
 							params: params,
 							disableCaching: false,
 							success: function(r) {
@@ -446,8 +447,8 @@ Ext.onReady( function() {
                 });
 
                 this.triggerCmp = Ext.create('Ext.button.Button', {
-                    cls: 'gis-button-combotrigger',
-                    disabledCls: 'gis-button-combotrigger-disabled',
+                    cls: 'ns-button-combotrigger',
+                    disabledCls: 'ns-button-combotrigger-disabled',
                     width: 18,
                     height: 22,
                     storage: [],
@@ -458,7 +459,7 @@ Ext.onReady( function() {
                         }
                         else {
                             Ext.Ajax.request({
-                                url: gis.init.contextPath + '/api/optionSets/' + container.dataElement.optionSet.id + '/options.json',
+                                url: ns.core.init.contextPath + '/api/optionSets/' + container.dataElement.optionSet.id + '/options.json',
                                 params: {
                                     'max': 15
                                 },
@@ -847,10 +848,9 @@ Ext.onReady( function() {
 					listeners: {
 						added: function(b) {
 							b.on('click', function() {
-								var config = ns.core.web.pivot.getLayoutConfig(),
-									layout = ns.core.api.layout.Layout(config);
+								var config = ns.core.web.pivot.getLayoutConfig();
 
-								if (!layout) {
+								if (!config) {
 									return;
 								}
 
@@ -2380,10 +2380,10 @@ Ext.onReady( function() {
 			storage: {},
 			store: programStore,
             getRecord: function() {
-                return {
+                return this.getValue ? {
                     id: this.getValue(),
                     name: this.getRawValue()
-                };
+                } : null;
             },
 			listeners: {
 				select: function(cb) {
@@ -2433,10 +2433,10 @@ Ext.onReady( function() {
 			listConfig: {loadMask: false},
 			store: stagesByProgramStore,
             getRecord: function() {
-                return {
+                return this.getValue() ? {
                     id: this.getValue(),
                     name: this.getRawValue()
-                };
+                } : null;
             },
 			listeners: {
 				select: function(cb) {
@@ -2508,7 +2508,7 @@ Ext.onReady( function() {
 
 		dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 			width: accBaseWidth,
-            height: 112,
+            height: 162,
 			valueField: 'id',
 			displayField: 'name',
             style: 'margin-bottom:2px',
@@ -3199,14 +3199,14 @@ Ext.onReady( function() {
 			activeOnTop: true,
 			cls: 'ns-accordion',
 			bodyStyle: 'border:0 none',
-			height: 450,
+			height: 500,
 			items: [
                 dataElement,
                 period,
                 organisationUnit
             ],
             listeners: {
-                afterrender: function() { // nasty workaround
+                afterrender: function() { // nasty workaround, should be fixed
                     organisationUnit.expand();
                     period.expand();
                     dataElement.expand();
@@ -3344,6 +3344,10 @@ Ext.onReady( function() {
             }
 
             view.organisationUnits = treePanel.getDimension().items;
+
+            if (!(view.program && view.stage && view.startDate && view.endDate)) {
+				return;
+			}
 
 			return view;
 		};
@@ -3837,87 +3841,151 @@ Ext.onReady( function() {
 				Ext.get(el).removeCls('pointer highlighted');
 			};
 
-			// pivot
-			web.pivot = web.pivot || {};
+			// report
+			web.report = web.pivot || {};
 
-			web.pivot.getLayoutConfig = function() {
-				var panels = ns.app.accordion.panels,
+			web.report.getLayoutConfig = function() {
+				var view = ns.app.viewport.accordionBody.getView(),					
 					columnDimNames = ns.app.stores.col.getDimensionNames(),
 					rowDimNames = ns.app.stores.row.getDimensionNames(),
 					filterDimNames = ns.app.stores.filter.getDimensionNames(),
-					config = ns.app.optionsWindow.getOptions(),
-					dx = dimConf.data.dimensionName,
-					co = dimConf.category.dimensionName,
-					nameDimArrayMap = {};
+					config = {};
 
 				config.columns = [];
 				config.rows = [];
 				config.filters = [];
 
-				// panel data
-				for (var i = 0, dim, dimName; i < panels.length; i++) {
-					dim = panels[i].getDimension();
+				//todo
+				
 
-					if (dim) {
-						nameDimArrayMap[dim.dimension] = [dim];
-					}
-				}
 
-				nameDimArrayMap[dx] = Ext.Array.clean([].concat(
-					nameDimArrayMap[dimConf.indicator.objectName] || [],
-					nameDimArrayMap[dimConf.dataElement.objectName] || [],
-					nameDimArrayMap[dimConf.operand.objectName] || [],
-					nameDimArrayMap[dimConf.dataSet.objectName] || []
-				));
 
-				// columns, rows, filters
-				for (var i = 0, nameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], dimNames; i < nameArrays.length; i++) {
-					dimNames = nameArrays[i];
+				
 
-					for (var j = 0, dimName, dim; j < dimNames.length; j++) {
-						dimName = dimNames[j];
-
-						if (dimName === co) {
-							axes[i].push({
-								dimension: co,
-								items: []
-							});
-						}
-						else if (dimName === dx && nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
-							for (var k = 0; k < nameDimArrayMap[dx].length; k++) {
-								axes[i].push(Ext.clone(nameDimArrayMap[dx][k]));
-							}
-						}
-						else if (nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
-							for (var k = 0; k < nameDimArrayMap[dimName].length; k++) {
-								axes[i].push(Ext.clone(nameDimArrayMap[dimName][k]));
-							}
-						}
-					}
-				}
-
-				return config;
-			};
-
-			web.pivot.loadTable = function(id) {
+			web.report.loadReport = function(id) {
 				if (!Ext.isString(id)) {
-					alert('Invalid report table id');
+					alert('Invalid report id');
 					return;
 				}
 
 				Ext.Ajax.request({
-					url: init.contextPath + '/api/reportTables/' + id + '.json?viewClass=dimensional&links=false',
+					url: init.contextPath + '/api/eventReports/' + id + '.json?viewClass=dimensional&links=false',
 					failure: function(r) {
 						web.mask.hide(ns.app.centerRegion);
 						alert(r.responseText);
 					},
 					success: function(r) {
-						var layoutConfig = Ext.decode(r.responseText),
-							layout = api.layout.Layout(layoutConfig);
+						var config = Ext.decode(r.responseText);
 
-						if (layout) {
-							web.pivot.getData(layout, true);
+						web.report.getData(config, true);
+					}
+				});
+			};
+
+			web.report.loadData = function(view, isUpdateGui) {
+				var paramString = '?',
+					features = [];
+
+				// stage
+				paramString += 'stage=' + view.stage.id;
+
+				// dates
+				paramString += '&startDate=' + view.startDate;
+				paramString += '&endDate=' + view.endDate;
+
+				// ou
+				if (Ext.isArray(view.organisationUnits)) {
+					for (var i = 0; i < view.organisationUnits.length; i++) {
+						paramString += '&dimension=ou:' + view.organisationUnits[i].id;
+					}
+				}
+
+				// de
+				for (var i = 0, element; i < view.dataElements.length; i++) {
+					element = view.dataElements[i];
+
+					paramString += '&dimension=' + element.id;
+
+					if (element.value) {
+						if (element.operator) {
+							paramString += ':' + element.operator;
 						}
+
+						paramString += ':' + element.value;
+					}
+				}
+
+				Ext.data.JsonP.request({
+					url: gis.init.contextPath + '/api/analytics/events/aggregate/' + view.program.id + '.jsonp' + paramString,
+					disableCaching: false,
+					scope: this,
+					success: function(r) {
+						var events = [],
+							features = [],
+							rows = r.rows,
+							//lonIndex,
+							//latIndex,
+							map = Ext.clone(r.metaData.names);
+
+						// name-column map, lonIndex, latIndex
+						for (var i = 0; i < r.headers.length; i++) {
+							map[r.headers[i].name] = r.headers[i].column;
+
+							//if (r.headers[i].name === 'longitude') {
+								//lonIndex = i;
+							//}
+
+							//if (r.headers[i].name === 'latitude') {
+								//latIndex = i;
+							//}
+						}
+
+						// get events with coordinates
+						//if (Ext.isArray(r.rows) && r.rows.length) {
+							//for (var i = 0, row; i < r.rows.length; i++) {
+								//row = r.rows[i];
+
+								//if (row[lonIndex] && row[latIndex]) {
+									//rows.push(row);
+								//}
+							//}
+						//}
+
+						//if (!rows.length) {
+							//alert('No coordinates found');
+							//olmap.mask.hide();
+							//return;
+						//}
+
+						// events
+						for (var i = 0, row, obj; i < rows.length; i++) {
+							row = rows[i];
+							obj = {};
+
+							for (var j = 0; j < row.length; j++) {
+								obj[r.headers[j].name] = row[j];
+							}
+
+							obj[gis.conf.finals.widget.value] = 0;
+							obj.label = obj.ouname;
+							obj.nameColumnMap = map;
+
+							events.push(obj);
+						}
+
+						// features
+						for (var i = 0, event, point; i < events.length; i++) {
+							event = events[i];
+
+							point = gis.util.map.getTransformedPointByXY(event.longitude, event.latitude);
+
+							features.push(new OpenLayers.Feature.Vector(point, event));
+						}
+
+						layer.removeFeatures(layer.features);
+						layer.addFeatures(features);
+
+						loadLegend(view);
 					}
 				});
 			};
@@ -4946,6 +5014,7 @@ Ext.onReady( function() {
 		viewport = Ext.create('Ext.container.Viewport', {
 			layout: 'border',
 			setGui: setGui,
+			accordionBody: accordionBody,
 			items: [
 				westRegion,
 				centerRegion
@@ -4972,11 +5041,12 @@ Ext.onReady( function() {
 
 					// left gui
 					var viewportHeight = westRegion.getHeight(),
-						numberOfTabs = ns.core.init.dimensions.length + 5,
+						numberOfTabs = 3,
 						tabHeight = 28,
-						minPeriodHeight = 380;
+						minPeriodHeight = 380,
+						settingsHeight = 91;
 
-					if (viewportHeight > numberOfTabs * tabHeight + minPeriodHeight) {
+					if (viewportHeight > numberOfTabs * tabHeight + minPeriodHeight + settingsHeight) {
 						if (!Ext.isIE) {
 							accordion.setAutoScroll(false);
 							westRegion.setWidth(ns.core.conf.layout.west_width);

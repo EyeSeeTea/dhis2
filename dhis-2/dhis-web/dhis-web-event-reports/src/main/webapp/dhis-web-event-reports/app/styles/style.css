@@ -703,6 +703,17 @@ table.pivot {
     opacity: 0.25;
 }
 
+.ns-button-combotrigger {
+    background-image: url('../images/trigger.gif');
+    background-position: 0 0;
+    width: 17px;
+}
+.ns-button-combotrigger-disabled,
+.ns-button-combotrigger-disabled * {
+    opacity: 0.8;
+    cursor: default !important;
+}
+
 
 /*----------------------------------------------------------------------------
  * Tooltip
