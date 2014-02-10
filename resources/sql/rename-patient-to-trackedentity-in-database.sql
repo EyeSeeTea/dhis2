@@ -142,9 +142,8 @@ ALTER TABLE dashboarditem_trackedentitytabularreports RENAME CONSTRAINT fk_dashb
 ALTER TABLE dashboarditem_trackedentitytabularreports RENAME CONSTRAINT fk_dashboarditem_patienttabularreports_dashboardid TO fk_dashboarditem_tabularreports_dashboardid;
 
 
-
+ALTER TABLE program_attributes RENAME COLUMN programattributeid TO programtrackedentityattributeid;
 ALTER TABLE program_attributes RENAME COLUMN attributeid TO trackedentityattributeid; 
-ALTER TABLE program_attributes RENAME COLUMN patientattributeid TO trackedentityattributeid;
 
 
 ALTER TABLE programinstance RENAME COLUMN patientcommentid TO trackedentitycommentid;
@@ -153,16 +152,18 @@ ALTER TABLE programinstance RENAME COLUMN patientid TO trackedentityinstanceid;
 
 ALTER TABLE programstage_dataelements RENAME COLUMN patienttabularreportid TO trackedentitytabularreportid;
 
-
 ALTER TABLE programstageinstance RENAME COLUMN patientcommentid TO trackedentitycommentid;
 ALTER TABLE trackedentityattribute RENAME COLUMN patientmobilesettingid TO trackedentitymobilesettingid;
 ALTER TABLE trackedentityattribute RENAME COLUMN sort_order_patientattributename TO sort_order_trackedentityattributename;
 
-
-ALTER TABLE patientaggregatereportmembers RENAME COLUMN patientaggregatereportid TO trackedentityaggregatereportid;
+ALTER TABLE patientaggregatereportmembers RENAME TO trackedentityaggregatereportmembers;
+ALTER TABLE trackedentityaggregatereportmembers RENAME COLUMN patientaggregatereportid TO trackedentityaggregatereportid;
 ALTER TABLE trackedentityaudit RENAME COLUMN patientid TO trackedentityinstanceid;
-ALTER TABLE patienttabularreportmembers RENAME COLUMN patienttabularreportid TO trackedentitytabularreportid;
-ALTER TABLE programstageinstance_patients RENAME COLUMN patientid TO trackedentityinstanceid;
-ALTER TABLE programinstance RENAME COLUMN patientid TO trackedentityinstanceid;
-ALTER TABLE programinstance RENAME COLUMN patientcommentid TO trackedentitycommentid;
+ALTER TABLE patienttabularreportmembers RENAME TO trackedentitytabularreportmembers;
+ALTER TABLE trackedentitytabularreportmembers RENAME COLUMN patienttabularreportid TO trackedentitytabularreportid;
+
+
+ALTER TABLE programstageinstance_patients RENAME TO programstageinstance_trackedentityinstances;
+ALTER TABLE programstageinstance_trackedentityinstances RENAME COLUMN patientid TO trackedentityinstanceid;
+
 

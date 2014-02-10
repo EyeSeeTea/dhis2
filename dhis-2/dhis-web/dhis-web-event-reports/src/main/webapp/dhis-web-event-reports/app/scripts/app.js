@@ -2998,7 +2998,6 @@ Ext.onReady( function() {
 		userOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
 			columnWidth: 0.28,
 			style: 'padding-top:2px; padding-left:3px; margin-bottom:0',
-			boxLabelCls: 'x-form-cb-label-alt1',
 			boxLabel: 'User org unit',
 			labelWidth: ns.core.conf.layout.form_label_width,
 			handler: function(chb, checked) {
@@ -3009,7 +3008,6 @@ Ext.onReady( function() {
 		userOrganisationUnitChildren = Ext.create('Ext.form.field.Checkbox', {
 			columnWidth: 0.34,
 			style: 'padding-top:2px; margin-bottom:0',
-			boxLabelCls: 'x-form-cb-label-alt1',
 			boxLabel: 'User OU children',
 			labelWidth: ns.core.conf.layout.form_label_width,
 			handler: function(chb, checked) {
@@ -3020,7 +3018,6 @@ Ext.onReady( function() {
 		userOrganisationUnitGrandChildren = Ext.create('Ext.form.field.Checkbox', {
 			columnWidth: 0.38,
 			style: 'padding-top:2px; margin-bottom:0',
-			boxLabelCls: 'x-form-cb-label-alt1',
 			boxLabel: 'User OU grand children',
 			labelWidth: ns.core.conf.layout.form_label_width,
 			handler: function(chb, checked) {
