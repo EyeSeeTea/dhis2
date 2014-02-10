@@ -2517,6 +2517,7 @@ Ext.onReady( function() {
 				{
 					xtype: 'label',
                     text: 'Available data items',
+                    style: 'padding-left:6px; color:#222',
 					cls: 'ns-toolbar-multiselect-left-label'
 				},
 				'->',
@@ -4036,8 +4037,11 @@ Ext.onReady( function() {
 
 	// viewport
 	createViewport = function() {
-        var accordion,
+        var caseButton,
+			aggregateButton,
+			modeToolbar,
 			accordionBody,
+			accordion,
 			westRegion,
             layoutButton,
             optionsButton,
@@ -4100,11 +4104,50 @@ Ext.onReady( function() {
 
 		// viewport
 
+		caseButton = Ext.create('Ext.button.Button', {
+			flex: 1,
+            text: '<b>Case based</b><br/>Case based event report',
+            pressed: true,
+			listeners: {
+				mouseout: function(cmp) {
+					cmp.addCls('x-btn-default-toolbar-small-over');
+				}
+			}
+        });
+
+        aggregateButton = Ext.create('Ext.button.Button', {
+			flex: 1,
+            text: '<b>Aggregated</b><br/>Aggregated event report',
+            listeners: {
+				mouseout: function(cmp) {
+					cmp.addCls('x-btn-default-toolbar-small-over');
+				}
+			}
+        });
+
+        modeToolbar = Ext.create('Ext.toolbar.Toolbar', {
+			style: 'padding-top:1px; background:#f5f5f5; border:0 none',
+            height: 41,
+            defaults: {
+                height: 40,
+                toggleGroup: 'mode',
+				cls: 'x-btn-default-toolbar-small-over',                
+                handler: function(b) {
+					if (!b.pressed) {
+						b.toggle();
+					}
+				}
+			},                
+			items: [
+				caseButton,
+				aggregateButton
+			]
+		});
+
 		accordionBody = LayerWidgetEvent();
 
 		accordion = Ext.create('Ext.panel.Panel', {
 			bodyStyle: 'border-style:none; padding:2px; padding-bottom:0; overflow-y:scroll;',
-			items: accordionBody,
 			panels: accordionBody.accordionPanels,
 			setThisHeight: function(mx) {
 				var panelHeight = this.panels.length * 28,
@@ -4134,6 +4177,9 @@ Ext.onReady( function() {
 			getFirstPanel: function() {
 				return this.panels[0];
 			},
+			items: [
+				accordionBody
+			],
 			listeners: {
 				added: function() {
 					ns.app.accordion = this;
@@ -4168,7 +4214,10 @@ Ext.onReady( function() {
 					return ns.core.conf.layout.west_width + 17;
 				}
 			}(),
-			items: accordion,
+			items: [
+				modeToolbar,
+				accordion
+			],
 			listeners: {
 				added: function() {
 					ns.app.westRegion = this;
