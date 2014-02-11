@@ -19,6 +19,10 @@
     position: relative;
 }
 
+#menuOrderBy {
+    float: right;
+}
+
 .app-menu .app-menu-item,
 .app-menu .app-menu-placeholder {
     margin: 10px;

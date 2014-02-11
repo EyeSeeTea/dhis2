@@ -48,7 +48,7 @@
 
         function processTranslations(translations) {
             var itemIndex,
-                items = dhis2.menu.getItems();
+                items = dhis2.menu.getApps();
 
             for (itemIndex in items) {
                 if (translations[items[itemIndex].id]) {
@@ -103,13 +103,6 @@
         }
 
         /**
-         * Get the current menuItems
-         */
-        that.getItems = function () {
-            return menuItems;
-        };
-
-        /**
          * Order the menuItems by a given list
          *
          * @param orderedIdList
@@ -132,6 +125,25 @@
 
             return that;
         };
+
+        that.updateFavoritesFromList = function (orderedIdList) {
+            var favApps = that.getFavorites(),
+                apps = that.getApps(),
+                newFavsIds = orderedIdList.splice(0, MAX_FAVORITES),
+                addToTopIds = [],
+                favAppsIndex, appIndex;
+
+            for (favAppsIndex in favApps) {
+                if (newFavsIds.indexOf(favApps[favAppsIndex].id) === -1) {
+                    addToTopIds.push(favApps[favAppsIndex]);
+                }
+            }
+
+            for (appIndex in apps) {
+                //if
+            }
+            console.log(addToTopIds);
+        }
 
         /**
          * Adds the menu items given to the menu
@@ -179,12 +191,28 @@
             return true;
         };
 
+        /**
+         * Get the favorite apps
+         *
+         * @returns {Array}
+         */
         that.getFavorites = function () {
             return menuItems.slice(0, MAX_FAVORITES);
-        }
+        };
+
+        /**
+         * Get the current menuItems
+         */
         that.getApps = function () {
             return menuItems;
-        }
+        };
+
+        /**
+         * Get non favorite apps
+         */
+        that.getNonFavoriteApps = function () {
+            return menuItems.slice(MAX_FAVORITES);
+        };
 
         return that;
     }();
@@ -194,7 +222,9 @@
  * jQuery template
  */
 (function ($, menu, undefined) {
-    var markup = '';
+    var displayOrder = 'custom',
+        markup = '',
+        selector = 'appsMenu';
 
     markup += '<li data-id="${id}" data-app-name="${name}" data-app-action="${defaultAction}">';
     markup += '  <a href="${defaultAction}" class="app-menu-item" title="${name}">';
@@ -216,7 +246,8 @@
     }
 
     function renderAppManager(selector) {
-        var apps = dhis2.menu.getApps();
+        var apps = getOrderedAppList();
+        $('#' +  selector).html('');
         $('#' +  selector).append($('<ul></ul>').addClass('ui-helper-clearfix'));
         $('#' + selector).addClass('app-menu');
         $.tmpl( "appMenuItemTemplate", apps).appendTo('#' + selector + ' ul');
@@ -228,14 +259,23 @@
     }
 
     function renderMenu() {
-        var selector = 'appsMenu',
-            options = {
+        var options = {
                 placeholder: 'app-menu-placeholder',
                 connectWith: '.app-menu ul',
                 update: function (event, ui) {
                     var reorderedApps = $("#" + selector + " ul"). sortable('toArray', {attribute: "data-id"});
-                    dhis2.menu.orderMenuItemsByList(reorderedApps);
+                    console.log(displayOrder);
+                    switch (displayOrder) {
+                        case 'name-asc':
+                        case 'name-desc':
+                            dhis2.menu.updateFavoritesFromList(reorderedApps);
+                            break;
 
+                        default:
+                            //Update the menu object with the changed order
+                            dhis2.menu.orderMenuItemsByList(reorderedApps);
+                            break;
+                    }
                     renderDropDownFavorites();
                 },
                 containment: 'parent'
@@ -247,15 +287,61 @@
         $('.app-menu ul').sortable(options).disableSelection();
     }
 
+    /**
+     * Gets the applist based on the current display order
+     *
+     * @returns {Array} Array of app objects
+     */
+    function getOrderedAppList() {
+        var favApps = dhis2.menu.getFavorites(),
+            nonFavApps = dhis2.menu.getNonFavoriteApps();
+
+        switch (displayOrder) {
+            case 'name-asc':
+                nonFavApps = sortAppsByName(nonFavApps);
+                break;
+            case 'name-desc':
+                nonFavApps = sortAppsByName(nonFavApps, true);
+                break;
+        }
+
+        return favApps.concat(nonFavApps);;
+    }
+
+    //TODO: Function seems complicated and can be improved perhaps
+    function sortAppsByName(apps, inverse) {
+        var smaller = [],
+            bigger = [],
+            center = Math.floor(apps.length / 2),
+            appIndex,
+            comparisonResult,
+            result;
+
+        //If nothing left to sort return the app list
+        if (apps.length <= 1)
+            return apps;
+
+        center = apps[center];
+        for (appIndex in apps) {
+            comparisonResult = center.name.localeCompare(apps[appIndex].name);
+            if (comparisonResult === -1) {
+                bigger.push(apps[appIndex]);
+            }
+            if (comparisonResult === 1) {
+                smaller.push(apps[appIndex]);
+            }
+        }
+
+        smaller = sortAppsByName(smaller);
+        bigger = sortAppsByName(bigger);
+
+        result = smaller.concat([center]).concat(bigger);
+        return inverse ? result.reverse() : result;
+    }
+
     //Subscribe to the list and run the callbacks only once on the first update
-    menu.subscribe(renderMenu, true);
+    menu.subscribe(renderMenu);
 
-})(jQuery, dhis2.menu);
-
-/**
- * jQuery event hookups
- */
-(function ($, menu, undefined) {
     /**
      * jQuery events that communicate with the web api
      * TODO: Check the urls (they seem to be specific to the dev location atm)
@@ -267,7 +353,15 @@
             }
         }).error(function () {
                 alert('Can not load apps from server.');
-            });
+        });
+
+        $('#menuOrderBy').change(function (event) {
+            var orderBy = $(event.target).val();
+
+            displayOrder = orderBy;
+
+            renderMenu(selector);
+        });
     });
 
 })(jQuery, dhis2.menu);
