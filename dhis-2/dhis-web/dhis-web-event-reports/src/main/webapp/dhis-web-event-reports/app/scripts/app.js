@@ -3848,42 +3848,41 @@ Ext.onReady( function() {
 				var view = ns.app.viewport.accordionBody.getView(),					
 					columnDimNames = ns.app.stores.col.getDimensionNames(),
 					rowDimNames = ns.app.stores.row.getDimensionNames(),
-					filterDimNames = ns.app.stores.filter.getDimensionNames(),
-					config = {};
+					filterDimNames = ns.app.stores.filter.getDimensionNames();
 
-				config.columns = [];
-				config.rows = [];
-				config.filters = [];
+				view.columns = [];
+				view.rows = [];
+				view.filters = [];
 
-				for (var i = 0, dimNameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], dimNameArray; i < dimNameArrays.length; i++) {
+				for (var i = 0, dimNameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [view.columns, view.rows, view.filters], dimNameArray; i < dimNameArrays.length; i++) {
 					dimNameArray = dimNameArrays[i];
 
-					for (var j = 0, dimName; j < dimNameArray.length; i++) {
+					for (var j = 0, dimName; j < dimNameArray.length; j++) {
 						dimName = dimNameArray[j];
 						
-						if (dimName === 'pe') {
-							axes[i].push({
-								dimension: 'pe'
-							});
-						}
+						//if (dimName === 'pe') {
+							//axes[i].push({
+								//dimension: 'pe'
+							//});
+						//}
 
-						if (dimName === 'ou') {
-							axes[i].push({
-								dimension: 'ou'
-							});
-						}
+						//if (dimName === 'ou') {
+							//axes[i].push({
+								//dimension: 'ou'
+							//});
+						//}
 
-						//todo
+						axes[i].push({
+							dimension: dimName
+						});
+					}
+				}
 
-					
+				console.log(view);
 
-				console.log(view, columnDimNames, rowDimNames, filterDimNames);
+				return view;
 			};
-
-
-
-				
-
+			
 			web.report.loadReport = function(id) {
 				if (!Ext.isString(id)) {
 					alert('Invalid report id');

@@ -90,12 +90,6 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         @RequestParam( required = false ) String exclude,
         @RequestParam Map<String, String> parameters, HttpServletResponse response ) throws IOException
     {
-        if ( include == null && exclude == null )
-        {
-            JacksonUtils.toJson( response.getOutputStream(), ReflectionUtils.getJacksonClassMap( getEntityClass() ) );
-            return;
-        }
-
         WebOptions options = new WebOptions( parameters );
         WebMetaData metaData = new WebMetaData();
         List<T> entityList = getEntityList( metaData, options );
@@ -105,7 +99,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         postProcessEntities( entityList );
         postProcessEntities( entityList, options, parameters );
 
-        List<Object> objects = WebUtils.filterFields( entityList, include );
+        List<Object> objects = WebUtils.filterFields( entityList, include, exclude );
         Map<String, Object> output = Maps.newLinkedHashMap();
 
         if ( options.hasPaging() )
