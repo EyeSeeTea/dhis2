@@ -2252,6 +2252,7 @@ Ext.onReady( function() {
             selectDataElements,
             dataElement,
 
+            getDateLink,
 			startDate,
 			endDate,
 			period,
