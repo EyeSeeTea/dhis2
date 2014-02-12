@@ -87,8 +87,7 @@ Ext.onReady( function() {
                 });
 
                 this.valueCmp = Ext.create('Ext.form.field.Number', {
-                    width: valueCmpWidth,
-                    value: 0
+                    width: valueCmpWidth
                 });
 
                 this.addCmp = Ext.create('Ext.button.Button', {
@@ -848,13 +847,13 @@ Ext.onReady( function() {
 					listeners: {
 						added: function(b) {
 							b.on('click', function() {
-								var config = ns.core.web.pivot.getLayoutConfig();
+								var config = ns.core.web.report.getLayoutConfig();
 
 								if (!config) {
 									return;
 								}
 
-								ns.core.web.pivot.getData(layout, false);
+								ns.core.web.report.getData(config, false);
 
 								window.hide();
 							});
@@ -1227,14 +1226,14 @@ Ext.onReady( function() {
 				{
 					text: '<b>' + NS.i18n.update + '</b>',
 					handler: function() {
-						var config = ns.core.web.pivot.getLayoutConfig(),
-							layout = ns.core.api.layout.Layout(config);
+						var config = ns.core.web.pivot.getLayoutConfig();
+							//layout = ns.core.api.layout.Layout(config);
 
-						if (!layout) {
+						if (!config) {
 							return;
 						}
 
-						ns.core.web.pivot.getData(layout, false);
+						ns.core.web.report.getData(config, false);
 
 						window.hide();
 					}
@@ -2690,14 +2689,29 @@ Ext.onReady( function() {
         });
 
             // date
-		startDate = Ext.create('Ext.form.field.Date', {
+        getDateLink = function(text, fn) {            
+            return Ext.create('Ext.form.Label', {
+                text: text,
+                style: 'margin-left: 5px; width: 100%',
+                cls: 'ns-label-date',
+                updateValue: fn,
+                listeners: {
+                    render: function(cmp) {                        
+                        cmp.getEl().on('click', function() {
+                            cmp.updateValue();
+                        });
+                    }
+                }
+            });
+        };
+
+        startDate = Ext.create('Ext.form.field.Date', {
 			fieldLabel: 'Start date',
 			labelAlign: 'top',
 			labelCls: 'ns-form-item-label-top',
-            //labelStyle: 'font-weight: bold',
 			labelSeparator: '',
-			columnWidth: 0.5,
-			style: 'margin-right: 1px',
+            width: (accBaseWidth / 2) - 1,
+			style: 'margin-right: 1px; margin-bottom: 5px',
 			format: 'Y-m-d',
 			value: new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))
 		});
@@ -2706,10 +2720,9 @@ Ext.onReady( function() {
 			fieldLabel: 'End date',
 			labelAlign: 'top',
 			labelCls: 'ns-form-item-label-top',
-            //labelStyle: 'font-weight: bold',
 			labelSeparator: '',
-			columnWidth: 0.5,
-			style: 'margin-left: 1px',
+            width: (accBaseWidth / 2) - 1,
+			style: 'margin-left: 1px; margin-bottom: 5px',
 			format: 'Y-m-d',
 			value: new Date()
 		});
@@ -2721,8 +2734,150 @@ Ext.onReady( function() {
             layout: 'column',
             width: accBaseWidth,
             items: [
-                startDate,
-                endDate
+                {
+                    xtype: 'container',
+                    cls: 'ns-container-default',
+                    items: [
+                        startDate,
+                        {
+                            xtype: 'container',
+                            cls: 'ns-container-default',
+                            layout: 'column',
+                            items: [
+                                {
+                                    xtype: 'container',
+                                    cls: 'ns-container-default',
+                                    columnWidth: 0.3,
+                                    layout: 'anchor',
+                                    items: [
+                                        getDateLink('+1 year', function() {
+                                            var a = startDate.getRawValue().split('-'),
+                                                year = (parseInt(a[0]) + 1).toString();
+                                                
+                                            startDate.setValue((year.length === 1 ? '0' + year : year) + '-' + a[1] + '-' + a[2]);
+                                        }),
+                                        getDateLink('-1 year', function() {
+                                            var a = startDate.getRawValue().split('-'),
+                                                year = (parseInt(a[0]) - 1).toString();
+                                                
+                                            startDate.setValue((year.length === 1 ? '0' + year : year) + '-' + a[1] + '-' + a[2]);
+                                        }),
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    cls: 'ns-container-default',
+                                    columnWidth: 0.3,
+                                    items: [
+                                        getDateLink('+1 month', function() {
+                                            var a = startDate.getRawValue().split('-'),
+                                                month = (parseInt(a[1]) + 1).toString();
+                                                
+                                            startDate.setValue(a[0] + '-' + (month.length === 1 ? '0' + month : month) + '-' + a[2]);
+                                        }),
+                                        getDateLink('-1 month', function() {
+                                            var a = startDate.getRawValue().split('-'),
+                                                month = (parseInt(a[1]) - 1).toString();
+                                                
+                                            startDate.setValue(a[0] + '-' + (month.length === 1 ? '0' + month : month) + '-' + a[2]);
+                                        })
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    cls: 'ns-container-default',
+                                    columnWidth: 0.3,
+                                    items: [
+                                        getDateLink('+1 day', function() {
+                                            var a = startDate.getRawValue().split('-'),
+                                                day = (parseInt(a[2]) + 1).toString();
+                                                
+                                            startDate.setValue(a[0] + '-' + a[1] + '-' + (day.length === 1 ? '0' + day : day));
+                                        }),
+                                        getDateLink('-1 day', function() {
+                                            var a = startDate.getRawValue().split('-'),
+                                                day = (parseInt(a[2]) - 1).toString();
+                                                
+                                            startDate.setValue(a[0] + '-' + a[1] + '-' + (day.length === 1 ? '0' + day : day));
+                                        })
+                                    ]
+                                }
+                            ]
+                        }                                        
+                    ]
+                },
+                {
+                    xtype: 'container',
+                    cls: 'ns-container-default',
+                    items: [
+                        endDate,
+                        {
+                            xtype: 'container',
+                            cls: 'ns-container-default',
+                            layout: 'column',
+                            items: [
+                                {
+                                    xtype: 'container',
+                                    cls: 'ns-container-default',
+                                    columnWidth: 0.3,
+                                    layout: 'anchor',
+                                    items: [
+                                        getDateLink('+1 year', function() {
+                                            var a = endDate.getRawValue().split('-'),
+                                                year = (parseInt(a[0]) + 1).toString();
+                                                
+                                            endDate.setValue((year.length === 1 ? '0' + year : year) + '-' + a[1] + '-' + a[2]);
+                                        }),
+                                        getDateLink('-1 year', function() {
+                                            var a = endDate.getRawValue().split('-'),
+                                                year = (parseInt(a[0]) - 1).toString();
+                                                
+                                            endDate.setValue((year.length === 1 ? '0' + year : year) + '-' + a[1] + '-' + a[2]);
+                                        }),
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    cls: 'ns-container-default',
+                                    columnWidth: 0.3,
+                                    items: [
+                                        getDateLink('+1 month', function() {
+                                            var a = endDate.getRawValue().split('-'),
+                                                month = (parseInt(a[1]) + 1).toString();
+                                                
+                                            endDate.setValue(a[0] + '-' + (month.length === 1 ? '0' + month : month) + '-' + a[2]);
+                                        }),
+                                        getDateLink('-1 month', function() {
+                                            var a = endDate.getRawValue().split('-'),
+                                                month = (parseInt(a[1]) - 1).toString();
+                                                
+                                            endDate.setValue(a[0] + '-' + (month.length === 1 ? '0' + month : month) + '-' + a[2]);
+                                        })
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    cls: 'ns-container-default',
+                                    columnWidth: 0.3,
+                                    items: [
+                                        getDateLink('+1 day', function() {
+                                            var a = endDate.getRawValue().split('-'),
+                                                day = (parseInt(a[2]) + 1).toString();
+                                                
+                                            endDate.setValue(a[0] + '-' + a[1] + '-' + (day.length === 1 ? '0' + day : day));
+                                        }),
+                                        getDateLink('-1 day', function() {
+                                            var a = endDate.getRawValue().split('-'),
+                                                day = (parseInt(a[2]) - 1).toString();
+                                                
+                                            endDate.setValue(a[0] + '-' + a[1] + '-' + (day.length === 1 ? '0' + day : day));
+                                        })
+                                    ]
+                                }
+                            ]
+                        }                                        
+                    ]
+                }
             ],
             listeners: {
 				added: function(cmp) {
@@ -3903,7 +4058,7 @@ Ext.onReady( function() {
 				});
 			};
 
-			web.report.loadData = function(view, isUpdateGui) {
+			web.report.getData = function(view, isUpdateGui) {
 				var paramString = '?',
 					features = [];
 
@@ -3936,82 +4091,18 @@ Ext.onReady( function() {
 					}
 				}
 
-				Ext.data.JsonP.request({
-					url: gis.init.contextPath + '/api/analytics/events/aggregate/' + view.program.id + '.jsonp' + paramString,
+				Ext.Ajax.request({
+					url: ns.core.init.contextPath + '/api/analytics/events/aggregate/' + view.program.id + '.json' + paramString,
 					disableCaching: false,
 					scope: this,
-					success: function(r) {
-						var events = [],
-							features = [],
-							rows = r.rows,
-							//lonIndex,
-							//latIndex,
-							map = Ext.clone(r.metaData.names);
-
-						// name-column map, lonIndex, latIndex
-						for (var i = 0; i < r.headers.length; i++) {
-							map[r.headers[i].name] = r.headers[i].column;
-
-							//if (r.headers[i].name === 'longitude') {
-								//lonIndex = i;
-							//}
-
-							//if (r.headers[i].name === 'latitude') {
-								//latIndex = i;
-							//}
-						}
-
-						// get events with coordinates
-						//if (Ext.isArray(r.rows) && r.rows.length) {
-							//for (var i = 0, row; i < r.rows.length; i++) {
-								//row = r.rows[i];
-
-								//if (row[lonIndex] && row[latIndex]) {
-									//rows.push(row);
-								//}
-							//}
-						//}
-
-						//if (!rows.length) {
-							//alert('No coordinates found');
-							//olmap.mask.hide();
-							//return;
-						//}
-
-						// events
-						for (var i = 0, row, obj; i < rows.length; i++) {
-							row = rows[i];
-							obj = {};
-
-							for (var j = 0; j < row.length; j++) {
-								obj[r.headers[j].name] = row[j];
-							}
-
-							obj[gis.conf.finals.widget.value] = 0;
-							obj.label = obj.ouname;
-							obj.nameColumnMap = map;
-
-							events.push(obj);
-						}
-
-						// features
-						for (var i = 0, event, point; i < events.length; i++) {
-							event = events[i];
-
-							point = gis.util.map.getTransformedPointByXY(event.longitude, event.latitude);
-
-							features.push(new OpenLayers.Feature.Vector(point, event));
-						}
-
-						layer.removeFeatures(layer.features);
-						layer.addFeatures(features);
-
-						loadLegend(view);
+					success: function(r) {                        
+                        var response = api.response.Response(Ext.decode(r.responseText));
+                        console.log("response", response);
 					}
 				});
 			};
 
-			web.pivot.getData = function(layout, isUpdateGui) {
+			web.report.sdfsdfsdfd = function(layout, isUpdateGui) {
 				var xLayout,
 					paramString;
 
@@ -4058,7 +4149,7 @@ Ext.onReady( function() {
 				});
 			};
 
-			web.pivot.createTable = function(layout, response, xResponse, isUpdateGui) {
+			web.report.createTable = function(layout, response, xResponse, isUpdateGui) {
 				var xLayout,
 					xColAxis,
 					xRowAxis,
@@ -4277,14 +4368,14 @@ Ext.onReady( function() {
 		});
 
 		update = function() {
-			var config = ns.core.web.pivot.getLayoutConfig(),
-				layout = ns.core.api.layout.Layout(config);
+			var config = ns.core.web.pivot.getLayoutConfig();
+				//layout = ns.core.api.layout.Layout(config);
 
-			if (!layout) {
+			if (!config) {
 				return;
 			}
 
-			ns.core.web.pivot.getData(layout, false);
+			ns.core.web.report.getData(config, false);
 		};
 
 		westRegion = Ext.create('Ext.panel.Panel', {
