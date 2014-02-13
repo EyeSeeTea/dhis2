@@ -2690,10 +2690,10 @@ Ext.onReady( function() {
         });
 
             // date
-        getDateLink = function(text, fn) {            
+        getDateLink = function(text, fn, style) {            
             return Ext.create('Ext.form.Label', {
                 text: text,
-                style: 'margin-left: 5px; width: 100%',
+                style: 'padding-left: 5px; width: 100%; ' + style || '',
                 cls: 'ns-label-date',
                 updateValue: fn,
                 listeners: {
@@ -2712,7 +2712,7 @@ Ext.onReady( function() {
 			labelCls: 'ns-form-item-label-top',
 			labelSeparator: '',
             width: (accBaseWidth / 2) - 1,
-			style: 'margin-right: 1px; margin-bottom: 5px',
+			style: 'margin-right: 1px; margin-bottom: 7px',
 			format: 'Y-m-d',
 			value: new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))
 		});
@@ -2723,7 +2723,7 @@ Ext.onReady( function() {
 			labelCls: 'ns-form-item-label-top',
 			labelSeparator: '',
             width: (accBaseWidth / 2) - 1,
-			style: 'margin-left: 1px; margin-bottom: 5px',
+			style: 'margin-left: 1px; margin-bottom: 7px',
 			format: 'Y-m-d',
 			value: new Date()
 		});
@@ -2752,17 +2752,24 @@ Ext.onReady( function() {
                                     layout: 'anchor',
                                     items: [
                                         getDateLink('+1 year', function() {
-                                            var a = startDate.getRawValue().split('-'),
-                                                year = (parseInt(a[0]) + 1).toString();
-                                                
-                                            startDate.setValue((year.length === 1 ? '0' + year : year) + '-' + a[1] + '-' + a[2]);
+                                            var date = startDate.getValue();
+                                            date.setFullYear(date.getFullYear() + 1);
+                                            startDate.setValue(date);
                                         }),
                                         getDateLink('-1 year', function() {
-                                            var a = startDate.getRawValue().split('-'),
-                                                year = (parseInt(a[0]) - 1).toString();
-                                                
-                                            startDate.setValue((year.length === 1 ? '0' + year : year) + '-' + a[1] + '-' + a[2]);
+                                            var date = startDate.getValue();
+                                            date.setFullYear(date.getFullYear() - 1);
+                                            startDate.setValue(date);
                                         }),
+                                        getDateLink((new Date()).getFullYear() + '-01-01', function() {
+                                            startDate.setValue((new Date()).getFullYear() + '-01-01');
+                                        }, 'margin-top: 7px'),
+                                        getDateLink(((new Date()).getFullYear() - 1) + '-01-01', function() {
+                                            startDate.setValue(((new Date()).getFullYear() - 1) + '-01-01');
+                                        }),
+                                        getDateLink(((new Date()).getFullYear() - 2) + '-01-01', function() {
+                                            startDate.setValue(((new Date()).getFullYear() - 2) + '-01-01');
+                                        })
                                     ]
                                 },
                                 {
@@ -2771,16 +2778,23 @@ Ext.onReady( function() {
                                     columnWidth: 0.3,
                                     items: [
                                         getDateLink('+1 month', function() {
-                                            var a = startDate.getRawValue().split('-'),
-                                                month = (parseInt(a[1]) + 1).toString();
-                                                
-                                            startDate.setValue(a[0] + '-' + (month.length === 1 ? '0' + month : month) + '-' + a[2]);
+                                            var date = startDate.getValue();
+                                            date.setMonth(date.getMonth() + 1);
+                                            startDate.setValue(date);
                                         }),
                                         getDateLink('-1 month', function() {
-                                            var a = startDate.getRawValue().split('-'),
-                                                month = (parseInt(a[1]) - 1).toString();
-                                                
-                                            startDate.setValue(a[0] + '-' + (month.length === 1 ? '0' + month : month) + '-' + a[2]);
+                                            var date = startDate.getValue();
+                                            date.setMonth(date.getMonth() - 1);
+                                            startDate.setValue(date);
+                                        }),
+                                        getDateLink((new Date()).getFullYear() + '-07-01', function() {
+                                            startDate.setValue((new Date()).getFullYear() + '-07-01');
+                                        }, 'margin-top: 7px'),
+                                        getDateLink(((new Date()).getFullYear() - 1) + '-07-01', function() {
+                                            startDate.setValue(((new Date()).getFullYear() - 1) + '-07-01');
+                                        }),
+                                        getDateLink(((new Date()).getFullYear() - 2) + '-07-01', function() {
+                                            startDate.setValue(((new Date()).getFullYear() - 2) + '-07-01');
                                         })
                                     ]
                                 },
@@ -2790,16 +2804,14 @@ Ext.onReady( function() {
                                     columnWidth: 0.3,
                                     items: [
                                         getDateLink('+1 day', function() {
-                                            var a = startDate.getRawValue().split('-'),
-                                                day = (parseInt(a[2]) + 1).toString();
-                                                
-                                            startDate.setValue(a[0] + '-' + a[1] + '-' + (day.length === 1 ? '0' + day : day));
+                                            var date = startDate.getValue();
+                                            date.setDate(date.getDate() + 1);
+                                            startDate.setValue(date);
                                         }),
                                         getDateLink('-1 day', function() {
-                                            var a = startDate.getRawValue().split('-'),
-                                                day = (parseInt(a[2]) - 1).toString();
-                                                
-                                            startDate.setValue(a[0] + '-' + a[1] + '-' + (day.length === 1 ? '0' + day : day));
+                                            var date = startDate.getValue();
+                                            date.setDate(date.getDate() - 1);
+                                            startDate.setValue(date);
                                         })
                                     ]
                                 }
@@ -2835,6 +2847,15 @@ Ext.onReady( function() {
                                                 
                                             endDate.setValue((year.length === 1 ? '0' + year : year) + '-' + a[1] + '-' + a[2]);
                                         }),
+                                        getDateLink((new Date()).getFullYear() + '-06-30', function() {
+                                            endDate.setValue((new Date()).getFullYear() + '-06-30');
+                                        }, 'margin-top: 7px'),
+                                        getDateLink(((new Date()).getFullYear() - 1) + '-06-30', function() {
+                                            endDate.setValue(((new Date()).getFullYear() - 1) + '-06-30');
+                                        }),
+                                        getDateLink(((new Date()).getFullYear() - 2) + '-06-30', function() {
+                                            endDate.setValue(((new Date()).getFullYear() - 2) + '-06-30');
+                                        })
                                     ]
                                 },
                                 {
@@ -2853,6 +2874,15 @@ Ext.onReady( function() {
                                                 month = (parseInt(a[1]) - 1).toString();
                                                 
                                             endDate.setValue(a[0] + '-' + (month.length === 1 ? '0' + month : month) + '-' + a[2]);
+                                        }),
+                                        getDateLink((new Date()).getFullYear() + '-12-31', function() {
+                                            endDate.setValue((new Date()).getFullYear() + '-12-31');
+                                        }, 'margin-top: 7px'),
+                                        getDateLink(((new Date()).getFullYear() - 1) + '-12-31', function() {
+                                            endDate.setValue(((new Date()).getFullYear() - 1) + '-12-31');
+                                        }),
+                                        getDateLink(((new Date()).getFullYear() - 2) + '-12-31', function() {
+                                            endDate.setValue(((new Date()).getFullYear() - 2) + '-12-31');
                                         })
                                     ]
                                 },
@@ -2862,16 +2892,14 @@ Ext.onReady( function() {
                                     columnWidth: 0.3,
                                     items: [
                                         getDateLink('+1 day', function() {
-                                            var a = endDate.getRawValue().split('-'),
-                                                day = (parseInt(a[2]) + 1).toString();
-                                                
-                                            endDate.setValue(a[0] + '-' + a[1] + '-' + (day.length === 1 ? '0' + day : day));
+                                            var date = endDate.getValue();
+                                            date.setDate(date.getDate() + 1);
+                                            endDate.setValue(date);
                                         }),
                                         getDateLink('-1 day', function() {
-                                            var a = endDate.getRawValue().split('-'),
-                                                day = (parseInt(a[2]) - 1).toString();
-                                                
-                                            endDate.setValue(a[0] + '-' + a[1] + '-' + (day.length === 1 ? '0' + day : day));
+                                            var date = endDate.getValue();
+                                            date.setDate(date.getDate() - 1);
+                                            endDate.setValue(date);
                                         })
                                     ]
                                 }
