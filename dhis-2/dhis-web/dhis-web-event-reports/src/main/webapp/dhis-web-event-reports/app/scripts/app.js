@@ -17,7 +17,7 @@ Ext.onReady( function() {
 		};
 
 	// set app config
-	
+
 	(function() {
 
 		// ext configuration
@@ -36,7 +36,7 @@ Ext.onReady( function() {
 	}());
 
 	// extensions
-	
+
 	(function() {
         var operatorCmpWidth = 70,
             valueCmpWidth = 304,
@@ -534,7 +534,7 @@ Ext.onReady( function() {
 	}());
 
 	// constructors
-	
+
 	LayoutWindow = function() {
 		var dimension,
 			dimensionStore,
@@ -1639,7 +1639,7 @@ Ext.onReady( function() {
 
 									if (favorite) {
 										favorite.name = record.data.name;
-										
+
 										if (confirm(message)) {
 											Ext.Ajax.request({
 												url: ns.core.init.contextPath + '/api/reportTables/' + record.data.id,
@@ -2255,6 +2255,9 @@ Ext.onReady( function() {
             getDateLink,
 			startDate,
 			endDate,
+            startEndDate,
+            relativePeriod,
+            checkboxes = [],
 			period,
 
 			treePanel,
@@ -2690,14 +2693,15 @@ Ext.onReady( function() {
         });
 
             // date
-        getDateLink = function(text, fn, style) {            
+
+        getDateLink = function(text, fn, style) {
             return Ext.create('Ext.form.Label', {
                 text: text,
                 style: 'padding-left: 5px; width: 100%; ' + style || '',
                 cls: 'ns-label-date',
                 updateValue: fn,
                 listeners: {
-                    render: function(cmp) {                        
+                    render: function(cmp) {
                         cmp.getEl().on('click', function() {
                             cmp.updateValue();
                         });
@@ -2712,7 +2716,7 @@ Ext.onReady( function() {
 			labelCls: 'ns-form-item-label-top',
 			labelSeparator: '',
             width: (accBaseWidth / 2) - 1,
-			style: 'margin-right: 1px; margin-bottom: 7px',
+			style: 'margin-right: 1px; margin-bottom: 7px; font-weight: bold; color: #333;',
 			format: 'Y-m-d',
 			value: new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))
 		});
@@ -2723,17 +2727,22 @@ Ext.onReady( function() {
 			labelCls: 'ns-form-item-label-top',
 			labelSeparator: '',
             width: (accBaseWidth / 2) - 1,
-			style: 'margin-left: 1px; margin-bottom: 7px',
+			style: 'margin-left: 1px; margin-bottom: 7px; font-weight: bold; color: #333;',
 			format: 'Y-m-d',
 			value: new Date()
 		});
 
-        period = Ext.create('Ext.panel.Panel', {
-            title: '<div class="ns-panel-title-period">Periods</div>',
-            bodyStyle: 'padding:4px 2px 2px',
-            hideCollapseTool: true,
+        startEndDate = Ext.create('Ext.container.Container', {
+            cls: 'ns-container-default',
             layout: 'column',
-            width: accBaseWidth,
+            xable: function() {
+                if (period.isNoRelativePeriods()) {
+                    this.enable();
+                }
+                else if (!this.isDisabled()) {
+                    this.disable();
+                }
+            },
             items: [
                 {
                     xtype: 'container',
@@ -2816,7 +2825,7 @@ Ext.onReady( function() {
                                     ]
                                 }
                             ]
-                        }                                        
+                        }
                     ]
                 },
                 {
@@ -2838,13 +2847,13 @@ Ext.onReady( function() {
                                         getDateLink('+1 year', function() {
                                             var a = endDate.getRawValue().split('-'),
                                                 year = (parseInt(a[0]) + 1).toString();
-                                                
+
                                             endDate.setValue((year.length === 1 ? '0' + year : year) + '-' + a[1] + '-' + a[2]);
                                         }),
                                         getDateLink('-1 year', function() {
                                             var a = endDate.getRawValue().split('-'),
                                                 year = (parseInt(a[0]) - 1).toString();
-                                                
+
                                             endDate.setValue((year.length === 1 ? '0' + year : year) + '-' + a[1] + '-' + a[2]);
                                         }),
                                         getDateLink((new Date()).getFullYear() + '-06-30', function() {
@@ -2866,13 +2875,13 @@ Ext.onReady( function() {
                                         getDateLink('+1 month', function() {
                                             var a = endDate.getRawValue().split('-'),
                                                 month = (parseInt(a[1]) + 1).toString();
-                                                
+
                                             endDate.setValue(a[0] + '-' + (month.length === 1 ? '0' + month : month) + '-' + a[2]);
                                         }),
                                         getDateLink('-1 month', function() {
                                             var a = endDate.getRawValue().split('-'),
                                                 month = (parseInt(a[1]) - 1).toString();
-                                                
+
                                             endDate.setValue(a[0] + '-' + (month.length === 1 ? '0' + month : month) + '-' + a[2]);
                                         }),
                                         getDateLink((new Date()).getFullYear() + '-12-31', function() {
@@ -2904,9 +2913,360 @@ Ext.onReady( function() {
                                     ]
                                 }
                             ]
-                        }                                        
+                        }
                     ]
                 }
+            ]
+        });
+
+        relativePeriod = {
+			xtype: 'container',
+            cls: 'ns-container-default',
+            style: 'margin-top: 13px; padding-top: 6px; border-top: 1px dashed #ccc',
+            width: accBaseWidth,
+			hideCollapseTool: true,
+			autoScroll: true,
+			valueComponentMap: {},
+			items: [
+				{
+					xtype: 'container',
+                    cls: 'ns-container-default',
+					layout: 'column',
+					items: [
+						{
+							xtype: 'container',
+                            cls: 'ns-container-default',
+							columnWidth: 0.34,
+							style: 'padding: 0 0 0 6px',
+							defaults: {
+								labelSeparator: '',
+								style: 'margin-bottom: 2px',
+								listeners: {
+									added: function(chb) {
+										if (chb.xtype === 'checkbox') {
+											checkboxes.push(chb);
+											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
+										}
+									},
+									change: function() {
+										startEndDate.xable();
+									}
+								}
+							},
+							items: [
+								{
+									xtype: 'label',
+									text: NS.i18n.weeks,
+									cls: 'ns-label-period-heading'
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'LAST_WEEK',
+									boxLabel: NS.i18n.last_week
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'LAST_4_WEEKS',
+									boxLabel: NS.i18n.last_4_weeks
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'LAST_12_WEEKS',
+									boxLabel: NS.i18n.last_12_weeks
+								}
+							]
+						},
+						{
+							xtype: 'container',
+                            cls: 'ns-container-default',
+							columnWidth: 0.33,
+							defaults: {
+								labelSeparator: '',
+								style: 'margin-bottom:2px',
+								listeners: {
+									added: function(chb) {
+										if (chb.xtype === 'checkbox') {
+											checkboxes.push(chb);
+											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
+										}
+									},
+									change: function() {
+										startEndDate.xable();
+									}
+								}
+							},
+							items: [
+								{
+									xtype: 'label',
+									text: NS.i18n.months,
+									cls: 'ns-label-period-heading'
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'LAST_MONTH',
+									boxLabel: NS.i18n.last_month
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'LAST_3_MONTHS',
+									boxLabel: NS.i18n.last_3_months
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'LAST_12_MONTHS',
+									boxLabel: NS.i18n.last_12_months
+								}
+							]
+						},
+						{
+							xtype: 'container',
+                            cls: 'ns-container-default',
+							columnWidth: 0.33,
+							defaults: {
+								labelSeparator: '',
+								style: 'margin-bottom:2px',
+								listeners: {
+									added: function(chb) {
+										if (chb.xtype === 'checkbox') {
+											checkboxes.push(chb);
+											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
+										}
+									},
+									change: function() {
+										startEndDate.xable();
+									}
+								}
+							},
+							items: [
+								{
+									xtype: 'label',
+									text: NS.i18n.bimonths,
+									cls: 'ns-label-period-heading'
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'LAST_BIMONTH',
+									boxLabel: NS.i18n.last_bimonth
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'LAST_6_BIMONTHS',
+									boxLabel: NS.i18n.last_6_bimonths
+								}
+							]
+						}
+					]
+				},
+				{
+                    xtype: 'container',
+                    cls: 'ns-container-default',
+                    layout: 'column',
+					items: [
+						{
+							xtype: 'container',
+                            cls: 'ns-container-default',
+							columnWidth: 0.34,
+							style: 'padding: 5px 0 0 6px',
+							defaults: {
+								labelSeparator: '',
+								style: 'margin-bottom:2px',
+								listeners: {
+									added: function(chb) {
+										if (chb.xtype === 'checkbox') {
+											checkboxes.push(chb);
+											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
+										}
+									},
+									change: function() {
+										startEndDate.xable();
+									}
+								}
+							},
+							items: [
+								{
+									xtype: 'label',
+									text: NS.i18n.quarters,
+									cls: 'ns-label-period-heading'
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'LAST_QUARTER',
+									boxLabel: NS.i18n.last_quarter
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'LAST_4_QUARTERS',
+									boxLabel: NS.i18n.last_4_quarters
+								}
+							]
+						},
+						{
+							xtype: 'container',
+                            cls: 'ns-container-default',
+							columnWidth: 0.33,
+							style: 'padding: 5px 0 0',
+							defaults: {
+								labelSeparator: '',
+								style: 'margin-bottom:2px',
+								listeners: {
+									added: function(chb) {
+										if (chb.xtype === 'checkbox') {
+											checkboxes.push(chb);
+											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
+										}
+									},
+									change: function() {
+										startEndDate.xable();
+									}
+								}
+							},
+							items: [
+								{
+									xtype: 'label',
+									text: NS.i18n.sixmonths,
+									cls: 'ns-label-period-heading'
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'LAST_SIX_MONTH',
+									boxLabel: NS.i18n.last_sixmonth
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'LAST_2_SIXMONTHS',
+									boxLabel: NS.i18n.last_2_sixmonths
+								}
+							]
+						},
+						{
+							xtype: 'container',
+                            cls: 'ns-container-default',
+							columnWidth: 0.33,
+							style: 'padding: 5px 0 0',
+							defaults: {
+								labelSeparator: '',
+								style: 'margin-bottom:2px',
+								listeners: {
+									added: function(chb) {
+										if (chb.xtype === 'checkbox') {
+											checkboxes.push(chb);
+											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
+										}
+									},
+									change: function() {
+										startEndDate.xable();
+									}
+								}
+							},
+							items: [
+								{
+									xtype: 'label',
+									text: NS.i18n.financial_years,
+									cls: 'ns-label-period-heading'
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'LAST_FINANCIAL_YEAR',
+									boxLabel: NS.i18n.last_financial_year
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'LAST_5_FINANCIAL_YEARS',
+									boxLabel: NS.i18n.last_5_financial_years
+								}
+							]
+						}
+
+						//{
+							//xtype: 'panel',
+							//layout: 'anchor',
+							//bodyStyle: 'border-style:none; padding:5px 0 0 46px',
+							//defaults: {
+								//labelSeparator: '',
+								//style: 'margin-bottom:2px',
+							//},
+							//items: [
+								//{
+									//xtype: 'label',
+									//text: 'Options',
+									//cls: 'ns-label-period-heading-options'
+								//},
+								//rewind
+							//]
+						//}
+					]
+				},
+				{
+                    xtype: 'container',
+                    cls: 'ns-container-default',
+                    layout: 'column',
+					items: [
+                        {
+							xtype: 'container',
+                            cls: 'ns-container-default',
+							columnWidth: 0.35,
+							style: 'padding: 5px 0 0 6px',
+							defaults: {
+								labelSeparator: '',
+								style: 'margin-bottom:2px',
+								listeners: {
+									added: function(chb) {
+										if (chb.xtype === 'checkbox') {
+											checkboxes.push(chb);
+											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
+										}
+									},
+									change: function() {
+										startEndDate.xable();
+									}
+								}
+							},
+							items: [
+								{
+									xtype: 'label',
+									text: NS.i18n.years,
+									cls: 'ns-label-period-heading'
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'THIS_YEAR',
+									boxLabel: NS.i18n.this_year
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'LAST_YEAR',
+									boxLabel: NS.i18n.last_year
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'LAST_5_YEARS',
+									boxLabel: NS.i18n.last_5_years
+								}
+							]
+						}
+					]
+				}
+			]
+		};
+
+        period = Ext.create('Ext.panel.Panel', {
+            title: '<div class="ns-panel-title-period">Periods</div>',
+            bodyStyle: 'padding:5px 2px 2px',
+            hideCollapseTool: true,
+            width: accBaseWidth,
+            checkboxes: checkboxes,
+            isNoRelativePeriods: function() {
+				var a = this.checkboxes;
+				for (var i = 0; i < a.length; i++) {
+					if (a[i].getValue()) {
+						return false;
+					}
+				}
+				return true;
+			},
+            items: [
+                startEndDate,
+                relativePeriod
             ],
             listeners: {
 				added: function(cmp) {
@@ -3500,7 +3860,7 @@ Ext.onReady( function() {
 			}());
 
 			// layer gui
-			if (layer) {			
+			if (layer) {
 
 				// layer item
 				layer.item.setValue(true, view.opacity);
@@ -4029,7 +4389,7 @@ Ext.onReady( function() {
 			web.report = web.pivot || {};
 
 			web.report.getLayoutConfig = function() {
-				var view = ns.app.viewport.accordionBody.getView(),					
+				var view = ns.app.viewport.accordionBody.getView(),
 					columnDimNames = ns.app.stores.col.getDimensionNames(),
 					rowDimNames = ns.app.stores.row.getDimensionNames(),
 					filterDimNames = ns.app.stores.filter.getDimensionNames();
@@ -4043,7 +4403,7 @@ Ext.onReady( function() {
 
 					for (var j = 0, dimName; j < dimNameArray.length; j++) {
 						dimName = dimNameArray[j];
-						
+
 						//if (dimName === 'pe') {
 							//axes[i].push({
 								//dimension: 'pe'
@@ -4066,7 +4426,7 @@ Ext.onReady( function() {
 
 				return view;
 			};
-			
+
 			web.report.loadReport = function(id) {
 				if (!Ext.isString(id)) {
 					alert('Invalid report id');
@@ -4124,9 +4484,19 @@ Ext.onReady( function() {
 					url: ns.core.init.contextPath + '/api/analytics/events/aggregate/' + view.program.id + '.json' + paramString,
 					disableCaching: false,
 					scope: this,
-					success: function(r) {                        
+					success: function(r) {
                         var response = api.response.Response(Ext.decode(r.responseText));
                         console.log("response", response);
+
+                        if (!response) {
+							//ns.app.viewport.setGui(layout, xLayout, isUpdateGui);
+							web.mask.hide(ns.app.centerRegion);
+							return;
+						}
+
+                        ns.app.paramString = paramString;
+
+                        web.report.createTable(view, response, null, isUpdateGui);
 					}
 				});
 			};
@@ -4195,7 +4565,7 @@ Ext.onReady( function() {
 
 					return web.pivot.getHtml(xLayout, xResponse, xColAxis, xRowAxis);
 				};
-
+console.log(layout);
 				xLayout = getSXLayout(getXLayout(layout), xResponse || response);
 
 				if (layout.sorting) {
@@ -4340,13 +4710,13 @@ Ext.onReady( function() {
             defaults: {
                 height: 40,
                 toggleGroup: 'mode',
-				cls: 'x-btn-default-toolbar-small-over',                
+				cls: 'x-btn-default-toolbar-small-over',
                 handler: function(b) {
 					if (!b.pressed) {
 						b.toggle();
 					}
 				}
-			},                
+			},
 			items: [
 				caseButton,
 				aggregateButton

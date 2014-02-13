@@ -168,14 +168,14 @@ body.x-windows {
 }
 
 .ns-form-item-label-top {
-	padding-left: 2px;
+	padding-left: 4px;
 	float: none;
 	clear: none;
 	display: block;
 	margin-bottom: 2px !important;
 }
 
-ns-container-default {
+.ns-container-default {
     border: 0 none;
     background: #fff;
 }
