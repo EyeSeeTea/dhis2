@@ -25,13 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.dd.action.categoryoptiongroup;
+package org.hisp.dhis.dd.action.categoryoptiongroupset;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
+import org.hisp.dhis.dataelement.CategoryOptionGroupService;
+import org.hisp.dhis.i18n.I18n;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
@@ -39,9 +37,10 @@ import com.opensymphony.xwork2.Action;
 /**
  * @author Chau Thu Tran
  * 
- * @version $ ShowAddCategoryOptionGroupAction.java Feb 12, 2014 11:20:01 PM $
+ * @version $ ValidateCategoryOptionGroupSetAction.java Feb 12, 2014 11:20:01 PM
+ *          $
  */
-public class ShowAddCategoryOptionGroupAction
+public class ValidateCategoryOptionGroupSetAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -49,17 +48,38 @@ public class ShowAddCategoryOptionGroupAction
     // -------------------------------------------------------------------------
 
     @Autowired
-    private DataElementCategoryService dataElementCategoryService;
+    private CategoryOptionGroupService categoryOptionGroupService;
+
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
+    }
 
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private List<DataElementCategoryOption> categoryOptions;
+    private Integer id;
 
-    public List<DataElementCategoryOption> getCategoryOptions()
+    public void setId( Integer id )
     {
-        return categoryOptions;
+        this.id = id;
+    }
+
+    private String name;
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+    private String message;
+
+    public String getMessage()
+    {
+        return message;
     }
 
     // -------------------------------------------------------------------------
@@ -70,8 +90,16 @@ public class ShowAddCategoryOptionGroupAction
     public String execute()
         throws Exception
     {
-        categoryOptions = new ArrayList<DataElementCategoryOption>(
-            dataElementCategoryService.getAllDataElementCategoryOptions() );
+        CategoryOptionGroup match = categoryOptionGroupService.getCategoryOptionGroupByName( name );
+
+        if ( match != null && (id == null || match.getId() != id.intValue()) )
+        {
+            message = i18n.getString( "name_in_use" );
+
+            return INPUT;
+        }
+
+        message = i18n.getString( "everything_is_ok" );
 
         return SUCCESS;
     }

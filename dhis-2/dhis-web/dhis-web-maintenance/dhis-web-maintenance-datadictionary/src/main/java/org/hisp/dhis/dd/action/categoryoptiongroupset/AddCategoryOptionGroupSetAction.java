@@ -25,13 +25,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.dd.action.categoryoptiongroup;
+package org.hisp.dhis.dd.action.categoryoptiongroupset;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.dataelement.CategoryOptionGroupService;
+import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
+import org.hisp.dhis.dataelement.CategoryOptionGroupSetService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
@@ -39,9 +40,9 @@ import com.opensymphony.xwork2.Action;
 /**
  * @author Chau Thu Tran
  * 
- * @version $ ShowAddCategoryOptionGroupAction.java Feb 12, 2014 11:20:01 PM $
+ * @version $ AddCategoryOptionGroupSetAction.java Feb 12, 2014 11:20:01 PM $
  */
-public class ShowAddCategoryOptionGroupAction
+public class AddCategoryOptionGroupSetAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -49,17 +50,41 @@ public class ShowAddCategoryOptionGroupAction
     // -------------------------------------------------------------------------
 
     @Autowired
-    private DataElementCategoryService dataElementCategoryService;
+    private CategoryOptionGroupSetService categoryOptionGroupSetService;
+
+    @Autowired
+    private CategoryOptionGroupService categoryOptionGroupService;
 
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private List<DataElementCategoryOption> categoryOptions;
+    private String name;
 
-    public List<DataElementCategoryOption> getCategoryOptions()
+    public void setName( String name )
     {
-        return categoryOptions;
+        this.name = name;
+    }
+
+    private String description;
+
+    public void setDescription( String description )
+    {
+        this.description = description;
+    }
+
+    private Boolean dataDimension;
+
+    public void setDataDimension( Boolean dataDimension )
+    {
+        this.dataDimension = dataDimension;
+    }
+
+    private List<String> groupMembers = new ArrayList<String>();
+
+    public void setGroupMembers( List<String> groupMembers )
+    {
+        this.groupMembers = groupMembers;
     }
 
     // -------------------------------------------------------------------------
@@ -70,8 +95,17 @@ public class ShowAddCategoryOptionGroupAction
     public String execute()
         throws Exception
     {
-        categoryOptions = new ArrayList<DataElementCategoryOption>(
-            dataElementCategoryService.getAllDataElementCategoryOptions() );
+        CategoryOptionGroupSet categoryOptionGroupSet = new CategoryOptionGroupSet( name );
+        categoryOptionGroupSet.setDescription( description );
+        categoryOptionGroupSet.setDataDimension( dataDimension );
+
+        for ( String id : groupMembers )
+        {
+            categoryOptionGroupSet.addCategoryOptionGroup( categoryOptionGroupService.getCategoryOptionGroup( Integer
+                .parseInt( id ) ) );
+        }
+
+        categoryOptionGroupSetService.addCategoryOptionGroupSet( categoryOptionGroupSet );
 
         return SUCCESS;
     }

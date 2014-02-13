@@ -25,13 +25,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.dd.action.categoryoptiongroup;
+package org.hisp.dhis.dd.action.categoryoptiongroupset;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
+import org.hisp.dhis.dataelement.CategoryOptionGroupService;
+import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
+import org.hisp.dhis.dataelement.CategoryOptionGroupSetService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
@@ -39,39 +41,69 @@ import com.opensymphony.xwork2.Action;
 /**
  * @author Chau Thu Tran
  * 
- * @version $ ShowAddCategoryOptionGroupAction.java Feb 12, 2014 11:20:01 PM $
+ * @version $ ShowUpdateCategoryOptionGroupSetAction.java Feb 12, 2014 11:20:01
+ *          PM $
  */
-public class ShowAddCategoryOptionGroupAction
+public class ShowUpdateCategoryOptionGroupSetAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
+   
+    @Autowired
+    private CategoryOptionGroupSetService categoryOptionGroupSetService;
 
     @Autowired
-    private DataElementCategoryService dataElementCategoryService;
+    private CategoryOptionGroupService categoryOptionGroupService;
 
     // -------------------------------------------------------------------------
-    // Input
+    // Input && Output
     // -------------------------------------------------------------------------
 
-    private List<DataElementCategoryOption> categoryOptions;
+    private int id;
 
-    public List<DataElementCategoryOption> getCategoryOptions()
+    public void setId( int id )
     {
-        return categoryOptions;
+        this.id = id;
+    }
+
+    private CategoryOptionGroupSet categoryOptionGroupSet;
+
+    public CategoryOptionGroupSet getCategoryOptionGroupSet()
+    {
+        return categoryOptionGroupSet;
+    }
+
+    private List<CategoryOptionGroup> categoryOptionGroups;
+
+    public List<CategoryOptionGroup> getCategoryOptions()
+    {
+        return categoryOptionGroups;
+    }
+
+    private List<CategoryOptionGroup> groupMembers;
+
+    public List<CategoryOptionGroup> getGroupMembers()
+    {
+        return groupMembers;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
+
     @Override
     public String execute()
         throws Exception
     {
-        categoryOptions = new ArrayList<DataElementCategoryOption>(
-            dataElementCategoryService.getAllDataElementCategoryOptions() );
+        categoryOptionGroupSet = categoryOptionGroupSetService.getCategoryOptionGroupSet( id );
+
+        groupMembers = new ArrayList<CategoryOptionGroup>( categoryOptionGroupSet.getMembers() );
+
+        categoryOptionGroups = new ArrayList<CategoryOptionGroup>(
+            categoryOptionGroupService.getAllCategoryOptionGroups());
 
         return SUCCESS;
     }

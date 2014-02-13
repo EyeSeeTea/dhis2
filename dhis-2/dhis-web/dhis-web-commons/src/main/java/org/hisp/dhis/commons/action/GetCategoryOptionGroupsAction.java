@@ -25,13 +25,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.dd.action.categoryoptiongroup;
+package org.hisp.dhis.commons.action;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
+import org.hisp.dhis.dataelement.CategoryOptionGroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
@@ -39,41 +41,36 @@ import com.opensymphony.xwork2.Action;
 /**
  * @author Chau Thu Tran
  * 
- * @version $ ShowAddCategoryOptionGroupAction.java Feb 12, 2014 11:20:01 PM $
+ * @version $ GetCategoryOptionGroupsAction.java Feb 13, 2014 6:17:33 PM $
  */
-public class ShowAddCategoryOptionGroupAction
+public class GetCategoryOptionGroupsAction
     implements Action
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
     @Autowired
-    private DataElementCategoryService dataElementCategoryService;
+    private CategoryOptionGroupService categoryOptionGroupService;
 
     // -------------------------------------------------------------------------
-    // Input
+    // Output
     // -------------------------------------------------------------------------
 
-    private List<DataElementCategoryOption> categoryOptions;
+    private List<CategoryOptionGroup> categoryOptionGroups;
 
-    public List<DataElementCategoryOption> getCategoryOptions()
+    public List<CategoryOptionGroup> getCategoryOptionGroups()
     {
-        return categoryOptions;
+        return categoryOptionGroups;
     }
 
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Action
     // -------------------------------------------------------------------------
 
-    @Override
     public String execute()
-        throws Exception
     {
-        categoryOptions = new ArrayList<DataElementCategoryOption>(
-            dataElementCategoryService.getAllDataElementCategoryOptions() );
+        categoryOptionGroups = new ArrayList<CategoryOptionGroup>(
+            categoryOptionGroupService.getAllCategoryOptionGroups() );
+
+        Collections.sort( categoryOptionGroups, IdentifiableObjectNameComparator.INSTANCE );
 
         return SUCCESS;
     }
-
 }

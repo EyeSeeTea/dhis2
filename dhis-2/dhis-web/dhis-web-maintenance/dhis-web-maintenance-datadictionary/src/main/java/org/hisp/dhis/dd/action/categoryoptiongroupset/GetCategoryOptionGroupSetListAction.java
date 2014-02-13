@@ -25,41 +25,56 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.dd.action.categoryoptiongroup;
+package org.hisp.dhis.dd.action.categoryoptiongroupset;
+
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
+import org.hisp.dhis.dataelement.CategoryOptionGroupSetService;
+import org.hisp.dhis.paging.ActionPagingSupport;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
  * 
- * @version $ ShowAddCategoryOptionGroupAction.java Feb 12, 2014 11:20:01 PM $
+ * @version $ GetCategoryOptionGroupSetListAction.java Feb 12, 2014 11:27:01 PM $
  */
-public class ShowAddCategoryOptionGroupAction
-    implements Action
+public class GetCategoryOptionGroupSetListAction
+    extends ActionPagingSupport<CategoryOptionGroupSet>
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
     @Autowired
-    private DataElementCategoryService dataElementCategoryService;
+    private CategoryOptionGroupSetService categoryOptionGroupSetService;
 
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private List<DataElementCategoryOption> categoryOptions;
+    private String key;
 
-    public List<DataElementCategoryOption> getCategoryOptions()
+    public String getKey()
     {
-        return categoryOptions;
+        return key;
+    }
+
+    public void setKey( String key )
+    {
+        this.key = key;
+    }
+
+    private List<CategoryOptionGroupSet> categoryOptionGroupSets = new ArrayList<CategoryOptionGroupSet>();
+
+    public List<CategoryOptionGroupSet> getCategoryOptionGroupSets()
+    {
+        return categoryOptionGroupSets;
     }
 
     // -------------------------------------------------------------------------
@@ -70,8 +85,23 @@ public class ShowAddCategoryOptionGroupAction
     public String execute()
         throws Exception
     {
-        categoryOptions = new ArrayList<DataElementCategoryOption>(
-            dataElementCategoryService.getAllDataElementCategoryOptions() );
+        if ( isNotBlank( key ) ) // Filter on key only if set
+        {
+            this.paging = createPaging( categoryOptionGroupSetService.getCategoryOptionGroupSetCountByName( key ) );
+
+            categoryOptionGroupSets = new ArrayList<CategoryOptionGroupSet>(
+                categoryOptionGroupSetService.getCategoryOptionGroupSetsBetweenByName( key, paging.getStartPos(),
+                    paging.getPageSize() ) );
+        }
+        else
+        {
+            this.paging = createPaging( categoryOptionGroupSetService.getCategoryOptionGroupSetCount() );
+
+            categoryOptionGroupSets = new ArrayList<CategoryOptionGroupSet>( categoryOptionGroupSetService.getCategoryOptionGroupSetsBetween(
+                paging.getStartPos(), paging.getPageSize() ) );
+        }
+
+        Collections.sort( categoryOptionGroupSets, IdentifiableObjectNameComparator.INSTANCE );
 
         return SUCCESS;
     }

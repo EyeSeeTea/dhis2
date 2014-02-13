@@ -114,7 +114,7 @@ public class UpdateCategoryOptionGroupAction
                 .parseInt( id ) ) );
         }
 
-        categoryOptionGroupService.addCategoryOptionGroup( categoryOptionGroup );
+        categoryOptionGroupService.updateCategoryOptionGroup( categoryOptionGroup );
 
         return SUCCESS;
     }
