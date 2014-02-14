@@ -4554,8 +4554,11 @@ Ext.onReady( function() {
 
 					return web.pivot.getHtml(xLayout, xResponse, xColAxis, xRowAxis);
 				};
-console.log("layout", layout);
-				xLayout = getSXLayout(getXLayout(layout), xResponse || response);
+console.log("laayout", layout);
+
+				xLayout = getXLayout(layout);
+
+				xLayout = getSXLayout(xLayout, xResponse || response);
 
 				if (layout.sorting) {
 					if (!xResponse) {
