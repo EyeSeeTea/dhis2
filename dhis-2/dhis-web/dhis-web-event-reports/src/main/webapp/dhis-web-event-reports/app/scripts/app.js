@@ -566,16 +566,12 @@ Ext.onReady( function() {
 
 			if (all) {
 				data.push({id: dimConf.data.dimensionName, name: dimConf.data.name});
-			}
-
-			data.push({id: dimConf.category.dimensionName, name: dimConf.category.name});
-
-			if (all) {
-				data.push({id: dimConf.period.dimensionName, name: dimConf.period.name});
+				data.push({id: dimConf.period.dimensionName, name: dimConf.relativePeriod.name});
 				data.push({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
 			}
 
-			return data.concat(Ext.clone(ns.core.init.dimensions));
+			//return data.concat(Ext.clone(ns.core.init.dimensions));
+			return data;
 		};
 
 		getStore = function(data) {
@@ -613,24 +609,27 @@ Ext.onReady( function() {
 			return keys;
 		};
 
-		dimensionStore = getStore(getData());
+		//dimensionStore = getStore(getData());
+		dimensionStore = getStore();
 		dimensionStore.reset = function(all) {
 			dimensionStore.removeAll();
 			dimensionStore.add(getData(all));
 		};
 		ns.app.stores.dimension = dimensionStore;
-
-		rowStore = getStore();
-		ns.app.stores.row = rowStore;
-		rowStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
+		dimensionStore.add({id: dimConf.period.dimensionName, name: dimConf.relativePeriod.name});
 
 		colStore = getStore();
 		ns.app.stores.col = colStore;
-		colStore.add({id: dimConf.data.dimensionName, name: dimConf.data.name});
+		//colStore.add({id: dimConf.data.dimensionName, name: dimConf.data.name});
+
+		rowStore = getStore();
+		ns.app.stores.row = rowStore;
+		//rowStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
+		rowStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
 
 		filterStore = getStore();
 		ns.app.stores.filter = filterStore;
-		filterStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
+		//filterStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
 
 		getCmpHeight = function() {
 			var size = dimensionStore.totalCount,
@@ -678,21 +677,21 @@ Ext.onReady( function() {
 			}
 		});
 
-		row = Ext.create('Ext.ux.form.MultiSelect', {
+		col = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-leftright',
 			width: defaultWidth,
 			height: getCmpHeight(),
-			style: 'margin-bottom:0px',
+			style: 'margin-bottom:' + margin + 'px',
 			valueField: 'id',
 			displayField: 'name',
 			dragGroup: 'layoutDD',
 			dropGroup: 'layoutDD',
-			store: rowStore,
+			store: colStore,
 			tbar: {
 				height: 25,
 				items: {
 					xtype: 'label',
-					text: NS.i18n.row,
+					text: NS.i18n.column,
 					cls: 'ns-toolbar-multiselect-leftright-label'
 				}
 			},
@@ -712,21 +711,21 @@ Ext.onReady( function() {
 			}
 		});
 
-		col = Ext.create('Ext.ux.form.MultiSelect', {
+		row = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-leftright',
 			width: defaultWidth,
 			height: getCmpHeight(),
-			style: 'margin-bottom:' + margin + 'px',
+			style: 'margin-bottom:0px',
 			valueField: 'id',
 			displayField: 'name',
 			dragGroup: 'layoutDD',
 			dropGroup: 'layoutDD',
-			store: colStore,
+			store: rowStore,
 			tbar: {
 				height: 25,
 				items: {
 					xtype: 'label',
-					text: NS.i18n.column,
+					text: NS.i18n.row,
 					cls: 'ns-toolbar-multiselect-leftright-label'
 				}
 			},
@@ -818,8 +817,8 @@ Ext.onReady( function() {
 			resizable: false,
 			getSetup: getSetup,
 			dimensionStore: dimensionStore,
-			rowStore: rowStore,
 			colStore: colStore,
+			rowStore: rowStore,
 			filterStore: filterStore,
 			hideOnBlur: true,
 			items: {
@@ -2658,6 +2657,8 @@ Ext.onReady( function() {
                         dataElements.push(item);
                     }
                 }
+
+                ns.app.layoutWindow.colStore.add(dataElements[dataElements.length - 1]);
             }
 
 			// panel, store
@@ -4404,18 +4405,6 @@ Ext.onReady( function() {
 					for (var j = 0, dimName; j < dimNameArray.length; j++) {
 						dimName = dimNameArray[j];
 
-						//if (dimName === 'pe') {
-							//axes[i].push({
-								//dimension: 'pe'
-							//});
-						//}
-
-						//if (dimName === 'ou') {
-							//axes[i].push({
-								//dimension: 'ou'
-							//});
-						//}
-
 						axes[i].push({
 							dimension: dimName
 						});
@@ -4565,7 +4554,7 @@ Ext.onReady( function() {
 
 					return web.pivot.getHtml(xLayout, xResponse, xColAxis, xRowAxis);
 				};
-console.log(layout);
+console.log("layout", layout);
 				xLayout = getSXLayout(getXLayout(layout), xResponse || response);
 
 				if (layout.sorting) {

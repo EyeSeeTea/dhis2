@@ -36,6 +36,7 @@ import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.dashboard.DashboardItem;
 import org.hisp.dhis.datadictionary.DataDictionary;
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -81,11 +82,11 @@ import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.sqlview.SqlView;
-import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeGroup;
 import org.hisp.dhis.trackedentity.TrackedEntityAudit;
 import org.hisp.dhis.trackedentity.TrackedEntityForm;
+import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValue;
 import org.hisp.dhis.user.User;
@@ -721,6 +722,15 @@ public abstract class DeletionHandler
     }
 
     public String allowDeleteDashboardItem( DashboardItem dashboardItem )
+    {
+        return null;
+    }
+    
+    public void deleteCategoryOptionGroup( CategoryOptionGroup categoryOptionGroup )
+    {
+    }
+
+    public String allowCategoryOptionGroup( CategoryOptionGroup categoryOptionGroup )
     {
         return null;
     }
