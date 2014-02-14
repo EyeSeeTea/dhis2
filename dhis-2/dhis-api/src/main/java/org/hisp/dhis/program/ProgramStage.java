@@ -40,7 +40,7 @@ import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataentryform.DataEntryForm;
-import org.hisp.dhis.patient.PatientReminder;
+import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminder;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -57,8 +57,6 @@ public class ProgramStage
     public static final String TYPE_SECTION = "section";
 
     public static final String TYPE_CUSTOM = "custom";
-
-    public static final String REPORT_DATE_TO_USE_REGISTRATION_DATE = "registrationDate";
 
     public static final String REPORT_DATE_TO_USE_INCIDENT_DATE = "dateOfIncident";
 
@@ -87,7 +85,7 @@ public class ProgramStage
 
     private String reportDateDescription;
 
-    private Set<PatientReminder> patientReminders = new HashSet<PatientReminder>();
+    private Set<TrackedEntityInstanceReminder> reminders = new HashSet<TrackedEntityInstanceReminder>();
 
     private Boolean autoGenerateEvent = true;
 
@@ -101,7 +99,7 @@ public class ProgramStage
 
     /**
      * Enabled this property to show a pop-up for confirming Complete a program
-     * after to complete a progam-stage
+     * after to complete a program-stage
      */
     private Boolean remindCompleted = false;
 
@@ -172,14 +170,14 @@ public class ProgramStage
         this.remindCompleted = remindCompleted;
     }
 
-    public Set<PatientReminder> getPatientReminders()
+    public Set<TrackedEntityInstanceReminder> getReminders()
     {
-        return patientReminders;
+        return reminders;
     }
 
-    public void setPatientReminders( Set<PatientReminder> patientReminders )
+    public void setReminders( Set<TrackedEntityInstanceReminder> reminders )
     {
-        this.patientReminders = patientReminders;
+        this.reminders = reminders;
     }
 
     public DataEntryForm getDataEntryForm()
@@ -200,11 +198,10 @@ public class ProgramStage
         return description;
     }
 
-    @JsonProperty( value = "validationCriterias" )
-    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonProperty( value = "programStageSections" )
     @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlElementWrapper( localName = "validationCriterias", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "validationCriteria", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlElementWrapper( localName = "programStageSections", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "programStageSection", namespace = DxfNamespaces.DXF_2_0 )
     public Set<ProgramStageSection> getProgramStageSections()
     {
         return programStageSections;
@@ -233,7 +230,7 @@ public class ProgramStage
         this.description = description;
     }
 
-    @JsonProperty("repeatable")
+    @JsonProperty( "repeatable" )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( localName = "repeatable", namespace = DxfNamespaces.DXF_2_0 )
     public Boolean getIrregular()

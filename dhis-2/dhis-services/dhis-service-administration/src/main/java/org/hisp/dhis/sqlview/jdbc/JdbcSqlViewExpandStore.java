@@ -124,7 +124,7 @@ public class JdbcSqlViewExpandStore
 
             for ( String filter : criteria.keySet() )
             {
-                sql += " " + helper.whereAnd() + " " + filter + "='" + criteria.get( filter ) + "'";
+                sql += " " + helper.whereAnd() + " " + statementBuilder.columnQuote( filter ) + "='" + criteria.get( filter ) + "'";
             }
         }
 
@@ -164,11 +164,15 @@ public class JdbcSqlViewExpandStore
     {
         try
         {
-            jdbcTemplate.update( "DROP VIEW IF EXISTS " + statementBuilder.columnQuote( viewName ) );
+            final String sql = "DROP VIEW IF EXISTS " + statementBuilder.columnQuote( viewName );
+            
+            log.info( "Drop view SQL: " + sql );
+            
+            jdbcTemplate.update( sql );
         }
         catch ( BadSqlGrammarException ex )
         {
-            throw new RuntimeException( "Failed to drop view: " + viewName, ex );
+            log.warn( "Could not drop view: " + viewName, ex );
         }
     }
 }

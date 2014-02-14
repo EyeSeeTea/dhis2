@@ -32,13 +32,13 @@ import static org.hisp.dhis.analytics.AggregationType.AVERAGE_BOOL;
 import static org.hisp.dhis.analytics.AggregationType.AVERAGE_INT;
 import static org.hisp.dhis.analytics.AggregationType.AVERAGE_INT_DISAGGREGATION;
 import static org.hisp.dhis.analytics.AggregationType.COUNT;
-import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
 import static org.hisp.dhis.analytics.DataQueryParams.VALUE_ID;
 import static org.hisp.dhis.analytics.MeasureFilter.EQ;
 import static org.hisp.dhis.analytics.MeasureFilter.GE;
 import static org.hisp.dhis.analytics.MeasureFilter.GT;
 import static org.hisp.dhis.analytics.MeasureFilter.LE;
 import static org.hisp.dhis.analytics.MeasureFilter.LT;
+import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 import static org.hisp.dhis.system.util.TextUtils.getQuotedCommaDelimitedString;
 import static org.hisp.dhis.system.util.TextUtils.trimEnd;
@@ -155,7 +155,7 @@ public class JdbcAnalyticsManager
             {
                 String[] keyArray = key.split( DIMENSION_SEP );
                 
-                Assert.notNull( keyArray[periodIndex], keyArray.toString() );
+                Assert.notNull( keyArray[periodIndex] );
                 
                 List<NameableObject> periods = dataPeriodAggregationPeriodMap.get( PeriodType.getPeriodFromIsoString( keyArray[periodIndex] ) );
                 

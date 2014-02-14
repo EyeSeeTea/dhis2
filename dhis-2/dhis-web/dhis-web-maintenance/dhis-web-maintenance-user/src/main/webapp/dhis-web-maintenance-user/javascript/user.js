@@ -76,6 +76,52 @@ function showUserDetails( context ) {
 }
 
 // -----------------------------------------------------------------------------
+// Add user
+// -----------------------------------------------------------------------------
+
+var saved = {};
+
+function changeAccountAction()
+{
+    if( $('#accountAction').val() == 'create' )
+    {
+        $('#username').val( $('#inviteUsername').val() );
+        $('#inviteUsername').val( 'nonExistingUserName_RpuECtIlVoRKTpYmEkYrAHmPtX4m1U' );
+        $('#rawPassword').val( saved["rawPassword"] );
+        $('#retypePassword').val( saved["retypePassword"] );
+        $('#surname').val( saved["surname"] );
+        $('#firstName').val( saved["firstName"] );
+        $('#phoneNumber').val( saved["phoneNumber"] );
+        $('#email').val( $('#inviteEmail').val() );
+        $('#inviteEmail').val( 'validEmail@domain.com' );
+
+        $('.account').show();
+        $('.invite').hide();
+    }
+    else
+    {
+        $('.account').hide();
+        $('.invite').show();
+
+        saved["rawPassword"] = $('#rawPassword').val();
+        saved["retypePassword"] = $('#retypePassword').val();
+        saved["surname"] = $('#surname').val();
+        saved["firstName"] = $('#firstName').val();
+        saved["phoneNumber"] = $('#phoneNumber').val();
+
+        $('#inviteUsername').val( $('#username').val() );
+        $('#username').val( 'nonExistingUserName_RpuECtIlVoRKTpYmEkYrAHmPtX4m1U' );
+        $('#rawPassword').val( 'validPassword_123' );
+        $('#retypePassword').val( 'validPassword_123' );
+        $('#surname').val( 'validSurname' );
+        $('#firstName').val( 'validFirstName' );
+        $('#phoneNumber').val( '5555555555' );
+        $('#inviteEmail').val( $('#email').val() );
+        $('#email').val( '' );
+    }
+}
+
+// -----------------------------------------------------------------------------
 // Remove user
 // -----------------------------------------------------------------------------
 

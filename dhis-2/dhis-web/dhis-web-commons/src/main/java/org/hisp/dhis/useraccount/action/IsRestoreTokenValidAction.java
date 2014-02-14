@@ -28,7 +28,10 @@ package org.hisp.dhis.useraccount.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.security.RestoreType;
 import org.hisp.dhis.security.SecurityService;
+import org.hisp.dhis.user.UserCredentials;
+import org.hisp.dhis.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
@@ -41,6 +44,9 @@ public class IsRestoreTokenValidAction
 {
     @Autowired
     private SecurityService securityService;
+    
+    @Autowired
+    private UserService userService;
 
     // -------------------------------------------------------------------------
     // Input
@@ -76,7 +82,14 @@ public class IsRestoreTokenValidAction
 
     public String execute()
     {
-        boolean verified = securityService.verifyToken( username, token );
+        UserCredentials credentials = userService.getUserCredentialsByUsername( username );
+        
+        if ( credentials == null )
+        {
+            return ERROR;
+        }
+        
+        boolean verified = securityService.verifyToken( credentials, token, RestoreType.RECOVER_PASSWORD );
         
         return verified ? SUCCESS : ERROR;
     }

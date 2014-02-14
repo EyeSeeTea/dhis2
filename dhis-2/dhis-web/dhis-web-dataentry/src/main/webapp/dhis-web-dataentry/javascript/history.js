@@ -1,9 +1,8 @@
-// -----------------------------------------------------------------------------
-// Comments
-// -----------------------------------------------------------------------------
 
 function saveComment()
 {
+	$( '#commentOptionSet' ).val( '' );
+	
     var commentValue = $( '#commentTextArea' ).val();
     var periodId = $( '#selectedPeriodId' ).val();
 
@@ -92,7 +91,7 @@ function saveMinMaxLimit()
     {
         return;
     }
-    else if ( !isInt( minValue ) )
+    else if ( !dhis2.validation.isInt( minValue ) )
     {
         $( '#minSpan' ).html( i18n_enter_digits );
         return;
@@ -106,7 +105,7 @@ function saveMinMaxLimit()
     {
         return;
     }
-    else if ( !isInt( maxValue ) )
+    else if ( !dhis2.validation.isInt( maxValue ) )
     {
         $( '#maxSpan' ).html( i18n_enter_digits );
         return;
@@ -160,9 +159,9 @@ function refreshChart()
 {	
     var periodId = $( '#selectedPeriodId' ).val();
     
-    var source = 'getHistoryChart.action?dataElementId=' + currentDataElementId + '&categoryOptionComboId='
-    	+ currentOptionComboId + '&periodId=' + periodId + 
-    	'&organisationUnitId=' + dhis2.de.currentOrganisationUnitId + '&r=' + Math.random();
+    var source = '../api/charts/history/data.png?de=' + currentDataElementId + '&co='
+    	+ currentOptionComboId + '&pe=' + periodId + 
+    	'&ou=' + dhis2.de.currentOrganisationUnitId + '&r=' + Math.random();
 
     $( '#historyChart' ).attr( 'src', source );
 }
@@ -197,3 +196,17 @@ function markValueForFollowup()
 	    }
 	} );
 }
+
+dhis2.de.insertCommentOptionSet = function( optionSetId )
+{
+	$optSet = $( '#commentOptionSet' );
+
+	if ( optionSetId ) {
+		$optSet.change( function() {
+			$( '#commentTextArea' ).val( $optSet.val() );
+		} );
+	
+		$( '#commentOptionDiv' ).show();
+		dhis2.de.autocompleteOptionSetField( 'commentOptionSet', optionSetId );
+	}
+};

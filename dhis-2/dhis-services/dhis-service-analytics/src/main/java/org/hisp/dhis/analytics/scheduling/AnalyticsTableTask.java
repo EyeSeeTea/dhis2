@@ -54,6 +54,9 @@ public class AnalyticsTableTask
     @Resource(name="org.hisp.dhis.analytics.CompletenessTargetTableService")
     private AnalyticsTableService completenessTargetTableService;
     
+    @Resource(name="org.hisp.dhis.analytics.OrgUnitTargetTableService")
+    private AnalyticsTableService orgUnitTargetTableService;
+    
     @Resource(name="org.hisp.dhis.analytics.EventAnalyticsTableService")
     private AnalyticsTableService eventAnalyticsTableService;
     
@@ -63,11 +66,32 @@ public class AnalyticsTableTask
     @Autowired
     private MessageService messageService;
 
-    private boolean last3Years;
+    private boolean last3Years = false;
 
     public void setLast3Years( boolean last3Years )
     {
         this.last3Years = last3Years;
+    }
+    
+    private boolean skipResourceTables = false;
+
+    public void setSkipResourceTables( boolean skipResourceTables )
+    {
+        this.skipResourceTables = skipResourceTables;
+    }
+    
+    private boolean skipAggregate = false;
+    
+    public void setSkipAggregate( boolean skipAggregate )
+    {
+        this.skipAggregate = skipAggregate;
+    }
+
+    private boolean skipEvents = false;
+
+    public void setSkipEvents( boolean skipEvents )
+    {
+        this.skipEvents = skipEvents;
     }
 
     private TaskId taskId;
@@ -84,27 +108,36 @@ public class AnalyticsTableTask
     @Override
     public void run()
     {
-        notifier.clear( taskId ).notify( taskId, "Updating resource tables" );
+        notifier.clear( taskId ).notify( taskId, "Analytics table update process started" );
 
         try
         {
-            analyticsTableService.generateResourceTables();
-    
-            notifier.notify( taskId, "Updating analytics tables" );
+            if ( !skipResourceTables )
+            {
+                notifier.notify( taskId, "Updating resource tables" );
+                analyticsTableService.generateResourceTables();    
+            }
             
-            analyticsTableService.update( last3Years, taskId );
+            if ( !skipAggregate )
+            {
+                notifier.notify( taskId, "Updating analytics tables" );
+                analyticsTableService.update( last3Years, taskId );
+
+                notifier.notify( taskId, "Updating completeness table" );
+                completenessTableService.update( last3Years, taskId );    
+
+                notifier.notify( taskId, "Updating completeness target table" );
+                completenessTargetTableService.update( last3Years, taskId );      
+
+                notifier.notify( taskId, "Updating organisation unit target table" );                
+                orgUnitTargetTableService.update( last3Years, taskId );        
+            }
             
-            notifier.notify( taskId, "Updating completeness tables" );
-            
-            completenessTableService.update( last3Years, taskId );
-    
-            notifier.notify( taskId, "Updating compeleteness target table" );
-            
-            completenessTargetTableService.update( last3Years, taskId );
-            
-            notifier.notify( taskId, "Updating event analytics tables" );
-            
-            eventAnalyticsTableService.update( last3Years, taskId );
+            if ( !skipEvents )
+            {
+                notifier.notify( taskId, "Updating event analytics table" );  
+                eventAnalyticsTableService.update( last3Years, taskId );
+            }
             
             notifier.notify( taskId, INFO, "Analytics tables updated", true );
         }

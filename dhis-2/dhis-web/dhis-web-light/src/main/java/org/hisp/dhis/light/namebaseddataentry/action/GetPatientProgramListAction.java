@@ -37,10 +37,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.hisp.dhis.light.utils.NamebasedUtils;
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientIdentifier;
-import org.hisp.dhis.patient.PatientIdentifierService;
-import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
@@ -49,6 +45,10 @@ import org.hisp.dhis.relationship.Relationship;
 import org.hisp.dhis.relationship.RelationshipService;
 import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.relationship.RelationshipTypeService;
+import org.hisp.dhis.trackedentity.TrackedEntityInstance;
+import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
+import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
+import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 
@@ -68,11 +68,11 @@ public class GetPatientProgramListAction
         this.programInstanceService = programInstanceService;
     }
 
-    private PatientIdentifierService patientIdentifierService;
+    private TrackedEntityAttributeValueService patientAttributeValueService;
 
-    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
+    public void setPatientAttributeValueService( TrackedEntityAttributeValueService patientAttributeValueService )
     {
-        this.patientIdentifierService = patientIdentifierService;
+        this.patientAttributeValueService = patientAttributeValueService;
     }
 
     private ProgramService programService;
@@ -82,9 +82,9 @@ public class GetPatientProgramListAction
         this.programService = programService;
     }
 
-    private PatientService patientService;
+    private TrackedEntityInstanceService patientService;
 
-    public void setPatientService( PatientService patientService )
+    public void setPatientService( TrackedEntityInstanceService patientService )
     {
         this.patientService = patientService;
     }
@@ -150,14 +150,14 @@ public class GetPatientProgramListAction
         this.programInstances = programInstances;
     }
 
-    private Patient patient;
+    private TrackedEntityInstance patient;
 
-    public Patient getPatient()
+    public TrackedEntityInstance getPatient()
     {
         return patient;
     }
 
-    public void setPatient( Patient patient )
+    public void setPatient( TrackedEntityInstance patient )
     {
         this.patient = patient;
     }
@@ -174,14 +174,14 @@ public class GetPatientProgramListAction
         this.enrollmentProgramList = enrollmentProgramList;
     }
 
-    private Map<Relationship, Patient> relatedPeople;
+    private Map<Relationship, TrackedEntityInstance> relatedPeople;
 
-    public Map<Relationship, Patient> getRelatedPeople()
+    public Map<Relationship, TrackedEntityInstance> getRelatedPeople()
     {
         return relatedPeople;
     }
 
-    public void setRelatedPeople( Map<Relationship, Patient> relatedPeople )
+    public void setRelatedPeople( Map<Relationship, TrackedEntityInstance> relatedPeople )
     {
         this.relatedPeople = relatedPeople;
     }
@@ -210,16 +210,16 @@ public class GetPatientProgramListAction
         this.validated = validated;
     }
 
-    private Collection<PatientIdentifier> patientIdentifiers;
+    private Collection<TrackedEntityAttributeValue> patientAttributeValues;
 
-    public Collection<PatientIdentifier> getPatientIdentifiers()
+    public void setPatientAttributeValues( Collection<TrackedEntityAttributeValue> patientAttributeValues )
     {
-        return patientIdentifiers;
+        this.patientAttributeValues = patientAttributeValues;
     }
 
-    public void setPatientIdentifiers( Collection<PatientIdentifier> patientIdentifiers )
+    public Collection<TrackedEntityAttributeValue> getPatientAttributeValues()
     {
-        this.patientIdentifiers = patientIdentifiers;
+        return patientAttributeValues;
     }
 
     private List<ProgramInstance> listOfCompletedProgram;
@@ -247,9 +247,9 @@ public class GetPatientProgramListAction
     {
         user = currentUserService.getCurrentUser();
         programInstances.clear();
-        relatedPeople = new HashMap<Relationship, Patient>();
+        relatedPeople = new HashMap<Relationship, TrackedEntityInstance>();
 
-        patient = patientService.getPatient( patientId );
+        patient = patientService.getTrackedEntityInstance( patientId );
         Collection<Program> programByCurrentUser = programService.getProgramsByCurrentUser();
         for ( ProgramInstance programInstance : patient.getProgramInstances() )
         {
@@ -261,24 +261,24 @@ public class GetPatientProgramListAction
         }
 
         enrollmentProgramList = this.generateEnrollmentProgramList();
-        Collection<Relationship> relationships = relationshipService.getRelationshipsForPatient( patient );
+        Collection<Relationship> relationships = relationshipService.getRelationshipsForTrackedEntityInstance( patient );
 
         for ( Relationship relationship : relationships )
         {
-            if ( relationship.getPatientA().getId() != patient.getId() )
+            if ( relationship.getEntityInstanceA().getId() != patient.getId() )
             {
-                relatedPeople.put( relationship, relationship.getPatientA() );
+                relatedPeople.put( relationship, relationship.getEntityInstanceA() );
             }
 
-            if ( relationship.getPatientB().getId() != patient.getId() )
+            if ( relationship.getEntityInstanceB().getId() != patient.getId() )
             {
-                relatedPeople.put( relationship, relationship.getPatientB() );
+                relatedPeople.put( relationship, relationship.getEntityInstanceB() );
             }
         }
 
         relationshipTypes = relationshipTypeService.getAllRelationshipTypes();
 
-        patientIdentifiers = patientIdentifierService.getPatientIdentifiers( patient );
+        patientAttributeValues = patientAttributeValueService.getTrackedEntityAttributeValues( patient );
 
         Collection<ProgramInstance> listOfProgramInstance = patient.getProgramInstances();
 

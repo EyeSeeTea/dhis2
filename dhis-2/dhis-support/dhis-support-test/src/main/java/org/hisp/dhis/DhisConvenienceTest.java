@@ -31,6 +31,7 @@ package org.hisp.dhis;
 import java.io.File;
 import java.io.StringReader;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -52,6 +53,7 @@ import org.hisp.dhis.aggregation.AggregatedDataValueService;
 import org.hisp.dhis.aggregation.AggregatedOrgUnitDataValueService;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.DimensionalObject;
+import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.constant.ConstantService;
@@ -92,13 +94,6 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeGroup;
-import org.hisp.dhis.patient.PatientAttributeOption;
-import org.hisp.dhis.patient.PatientIdentifier;
-import org.hisp.dhis.patient.PatientIdentifierType;
-import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
@@ -109,7 +104,13 @@ import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.resourcetable.ResourceTableService;
 import org.hisp.dhis.sqlview.SqlView;
+import org.hisp.dhis.trackedentity.TrackedEntityInstance;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.hisp.dhis.trackedentity.TrackedEntityAttributeGroup;
+import org.hisp.dhis.trackedentity.TrackedEntityAttributeOption;
+import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserService;
@@ -120,6 +121,13 @@ import org.hisp.dhis.validation.ValidationRuleGroup;
 import org.hisp.dhis.validation.ValidationRuleService;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.Assert;
 import org.xml.sax.InputSource;
 
 /**
@@ -195,6 +203,8 @@ public abstract class DhisConvenienceTest
     protected UserService userService;
 
     protected MessageService messageService;
+    
+    protected IdentifiableObjectManager identifiableObjectManager;
 
     static
     {
@@ -732,8 +742,7 @@ public abstract class DhisConvenienceTest
      * @param period The period.
      * @param source The source.
      * @param value The value.
-     * @param categoryOptionCombo The category option combo.
-     * @param attributeOptionCombo The attribute option combo.
+     * @param categoryOptionCombo The category (and attribute) option combo.
      */
     public static DataValue createDataValue( DataElement dataElement, Period period, OrganisationUnit source,
         String value, DataElementCategoryOptionCombo categoryOptionCombo )
@@ -1031,41 +1040,37 @@ public abstract class DhisConvenienceTest
         return programStage;
     }
 
-    public static Patient createPatient( char uniqueChar, OrganisationUnit organisationUnit )
+    public static TrackedEntityInstance createTrackedEntityInstance( char uniqueChar, OrganisationUnit organisationUnit )
     {
-        Patient patient = new Patient();
-        patient.setAutoFields();
+        TrackedEntityInstance entityInstance = new TrackedEntityInstance();
+        entityInstance.setAutoFields();
+        entityInstance.setOrganisationUnit( organisationUnit );
 
-        patient.setName( "Name" + uniqueChar );
-        patient.setOrganisationUnit( organisationUnit );
-
-        return patient;
+        return entityInstance;
     }
 
-    public static Patient createPatient( char uniqueChar, OrganisationUnit organisationUnit,
-        PatientIdentifierType patientIdentifierType )
+    public static TrackedEntityInstance createTrackedEntityInstance( char uniqueChar, OrganisationUnit organisationUnit,
+        TrackedEntityAttribute attribute )
     {
-        Patient patient = new Patient();
-        patient.setAutoFields();
+        TrackedEntityInstance entityInstance = new TrackedEntityInstance();
+        entityInstance.setAutoFields();
+        entityInstance.setOrganisationUnit( organisationUnit );
 
-        patient.setName( "Name" + uniqueChar );
-        patient.setOrganisationUnit( organisationUnit );
+        TrackedEntityAttributeValue attributeValue = new TrackedEntityAttributeValue();
+        attributeValue.setAttribute( attribute );
+        attributeValue.setEntityInstance( entityInstance );
+        attributeValue.setValue(  "Attribute" + uniqueChar );
+        entityInstance.getAttributeValues().add( attributeValue );
 
-        PatientIdentifier pIdentifier = new PatientIdentifier();
-        pIdentifier.setIdentifierType( patientIdentifierType );
-        pIdentifier.setPatient( patient );
-        pIdentifier.setIdentifier( "Identifier" + uniqueChar );
-        patient.getIdentifiers().add( pIdentifier );
-
-        return patient;
+        return entityInstance;
     }
 
-    public static PatientAttributeValue createPatientAttributeValue( char uniqueChar, Patient patient,
-        PatientAttribute patientAttribute )
+    public static TrackedEntityAttributeValue createTrackedEntityAttributeValue( char uniqueChar, TrackedEntityInstance entityInstance,
+        TrackedEntityAttribute attribute )
     {
-        PatientAttributeValue attributeValue = new PatientAttributeValue();
-        attributeValue.setPatient( patient );
-        attributeValue.setPatientAttribute( patientAttribute );
+        TrackedEntityAttributeValue attributeValue = new TrackedEntityAttributeValue();
+        attributeValue.setEntityInstance( entityInstance );
+        attributeValue.setAttribute( attribute );
         attributeValue.setValue( "Attribute" + uniqueChar );
 
         return attributeValue;
@@ -1073,77 +1078,62 @@ public abstract class DhisConvenienceTest
 
     /**
      * @param uniqueCharacter A unique character to identify the object.
-     * @return PatientAttribute
+     * @return TrackedEntityAttribute
      */
-    public static PatientAttribute createPatientAttribute( char uniqueChar )
+    public static TrackedEntityAttribute createTrackedEntityAttribute( char uniqueChar )
     {
-        PatientAttribute patientAttribute = new PatientAttribute();
+        TrackedEntityAttribute attribute = new TrackedEntityAttribute();
 
-        patientAttribute.setName( "Attribute" + uniqueChar );
-        patientAttribute.setDescription( "Attribute" + uniqueChar );
-        patientAttribute.setValueType( PatientAttribute.TYPE_STRING );
+        attribute.setName( "Attribute" + uniqueChar );
+        attribute.setDescription( "Attribute" + uniqueChar );
+        attribute.setValueType( TrackedEntityAttribute.TYPE_STRING );
 
-        return patientAttribute;
+        return attribute;
     }
 
     /**
      * @param uniqueCharacter A unique character to identify the object.
-     * @return PatientAttribute
+     * @return TrackedEntityAttribute
      */
-    public static PatientAttribute createPatientAttribute( char uniqueChar, String type )
+    public static TrackedEntityAttribute createTrackedEntityAttribute( char uniqueChar, String type )
     {
-        PatientAttribute patientAttribute = new PatientAttribute();
+        TrackedEntityAttribute attribute = new TrackedEntityAttribute();
 
-        patientAttribute.setName( "Attribute" + uniqueChar );
-        patientAttribute.setDescription( "Attribute" + uniqueChar );
-        patientAttribute.setValueType( type );
+        attribute.setName( "Attribute" + uniqueChar );
+        attribute.setDescription( "Attribute" + uniqueChar );
+        attribute.setValueType( type );
 
-        return patientAttribute;
+        return attribute;
     }
 
     /**
      * @param uniqueCharacter A unique character to identify the object.
-     * @return PatientAttributeOption
+     * @return TrackedEntityAttributeOption
      */
-    public static PatientAttributeOption createPatientAttributeOption( char uniqueChar,
-        PatientAttribute patientAttribute )
+    public static TrackedEntityAttributeOption createTrackedEntityAttributeOption( char uniqueChar,
+        TrackedEntityAttribute attribute )
     {
-        PatientAttributeOption patientAttributeOption = new PatientAttributeOption();
+        TrackedEntityAttributeOption attributeOption = new TrackedEntityAttributeOption();
 
-        patientAttributeOption.setName( "AttributeOption" + uniqueChar );
-        patientAttributeOption.setPatientAttribute( patientAttribute );
+        attributeOption.setName( "AttributeOption" + uniqueChar );
+        attributeOption.setAttribute( attribute );
 
-        return patientAttributeOption;
+        return attributeOption;
     }
 
     /**
      * @param uniqueCharacter A unique character to identify the object.
-     * @return PatientAttributeGroup
+     * @return TrackedEntityAttributeGroup
      */
-    public static PatientAttributeGroup createPatientAttributeGroup( char uniqueChar, List<PatientAttribute> attributes )
+    public static TrackedEntityAttributeGroup createTrackedEntityAttributeGroup( char uniqueChar, List<TrackedEntityAttribute> attributes )
     {
-        PatientAttributeGroup patientAttributeGroup = new PatientAttributeGroup();
+        TrackedEntityAttributeGroup attributeGroup = new TrackedEntityAttributeGroup();
 
-        patientAttributeGroup.setName( "PatientAttributeGroup" + uniqueChar );
-        patientAttributeGroup.setDescription( "PatientAttributeGroup" + uniqueChar );
-        patientAttributeGroup.setAttributes( attributes );
+        attributeGroup.setName( "TrackedEntityAttributeGroup" + uniqueChar );
+        attributeGroup.setDescription( "TrackedEntityAttributeGroup" + uniqueChar );
+        attributeGroup.setAttributes( attributes );
 
-        return patientAttributeGroup;
-    }
-
-    /**
-     * @param uniqueCharacter A unique character to identify the object.
-     * @return PatientIdentifierType
-     */
-    public static PatientIdentifierType createPatientIdentifierType( char uniqueChar )
-    {
-        PatientIdentifierType identifierType = new PatientIdentifierType();
-
-        identifierType.setName( "IdentifierType" + uniqueChar );
-        identifierType.setDescription( "IdentifierType" + uniqueChar );
-        identifierType.setType( PatientIdentifierType.VALUE_TYPE_TEXT );
-
-        return identifierType;
+        return attributeGroup;
     }
 
     /**
@@ -1317,5 +1307,79 @@ public abstract class DhisConvenienceTest
         {
             return null;
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // Allow xpath testing of DXF2
+    // -------------------------------------------------------------------------
+
+    /**
+     * Creates a user and injects into the security context with username 
+     * "username". Requires <code>identifiableObjectManager</code> and 
+     * <code>userService</code> to be injected into the test.
+     * 
+     * @param allAuth whether to grant ALL authority to user.
+     * @param auths authorities to grant to user.
+     * @return the user.
+     */
+    public User createUserAndInjectSecurityContext( boolean allAuth, String... auths )
+    {
+        return createUserAndInjectSecurityContext( null, allAuth, auths );
+    }
+    
+    /**
+     * Creates a user and injects into the security context with username 
+     * "username". Requires <code>identifiableObjectManager</code> and 
+     * <code>userService</code> to be injected into the test.
+     * 
+     * @param organisationUnits the organisation units of the user.
+     * @param allAuth whether to grant the ALL authority to user.
+     * @param auths authorities to grant to user.
+     * @return the user.
+     */
+    public User createUserAndInjectSecurityContext( Set<OrganisationUnit> organisationUnits, boolean allAuth, String... auths )
+    {
+        Assert.notNull( identifiableObjectManager, "IdentifiableObjectManager must be injected in test" );
+        Assert.notNull( userService, "UserService must be injected in test" );
+        
+        UserAuthorityGroup userAuthorityGroup = new UserAuthorityGroup();
+        userAuthorityGroup.setName( "Superuser" );
+        
+        if ( allAuth )
+        {
+            userAuthorityGroup.getAuthorities().add( "ALL" );
+        }
+        
+        if ( auths != null )
+        {
+            for ( String auth : auths )
+            {
+                userAuthorityGroup.getAuthorities().add( auth );
+            }
+        }
+        
+        identifiableObjectManager.save( userAuthorityGroup );
+
+        User user = createUser( 'A' );
+        
+        if ( organisationUnits != null )
+        {
+            user.setOrganisationUnits( organisationUnits );
+        }
+        
+        user.getUserCredentials().getUserAuthorityGroups().add( userAuthorityGroup );
+        userService.addUser( user );
+        user.getUserCredentials().setUser( user );
+        userService.addUserCredentials( user.getUserCredentials() );
+
+        List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+        authorities.add( new SimpleGrantedAuthority( "ALL" ) );
+
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User( "username", "password", authorities );
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken( userDetails, "", authorities );
+        SecurityContextHolder.getContext().setAuthentication( authentication );
+
+        return user;
     }
 }

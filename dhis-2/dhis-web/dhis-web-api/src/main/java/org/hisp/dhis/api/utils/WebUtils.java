@@ -28,6 +28,9 @@ package org.hisp.dhis.api.utils;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.api.controller.WebMetaData;
@@ -41,6 +44,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import static org.hisp.dhis.system.util.PredicateUtils.alwaysTrue;
 
@@ -179,5 +183,255 @@ public class WebUtils
                 }
             }
         }
+    }
+
+    @SuppressWarnings( "unchecked" )
+    private static void putInMap( Map<String, Map> map, String path )
+    {
+        for ( String p : path.split( "\\." ) )
+        {
+            if ( map.get( p ) == null )
+            {
+                map.put( p, Maps.newHashMap() );
+            }
+
+            map = (Map<String, Map>) map.get( p );
+        }
+    }
+
+    public static Map<String, Map> parseFieldExpression( String fields )
+    {
+        List<String> prefixList = Lists.newArrayList();
+        Map<String, Map> parsed = Maps.newHashMap();
+
+        StringBuilder builder = new StringBuilder();
+
+        for ( String c : fields.split( "" ) )
+        {
+            if ( c.equals( "," ) )
+            {
+                putInMap( parsed, joinedWithPrefix( builder, prefixList ) );
+                builder = new StringBuilder();
+                continue;
+            }
+
+            if ( c.equals( "[" ) )
+            {
+                prefixList.add( builder.toString() );
+                builder = new StringBuilder();
+                continue;
+            }
+
+            if ( c.equals( "]" ) )
+            {
+                if ( !builder.toString().isEmpty() )
+                {
+                    putInMap( parsed, joinedWithPrefix( builder, prefixList ) );
+                }
+
+                prefixList.remove( prefixList.size() - 1 );
+                builder = new StringBuilder();
+                continue;
+            }
+
+            if ( StringUtils.isAlpha( c ) )
+            {
+                builder.append( c );
+            }
+        }
+
+        if ( !builder.toString().isEmpty() )
+        {
+            putInMap( parsed, joinedWithPrefix( builder, prefixList ) );
+        }
+
+        return parsed;
+    }
+
+    private static String joinedWithPrefix( StringBuilder builder, List<String> prefixList )
+    {
+        String prefixes = StringUtils.join( prefixList, "." );
+        prefixes = prefixes.isEmpty() ? builder.toString() : (prefixes + "." + builder.toString());
+        return prefixes;
+    }
+
+    public static <T extends IdentifiableObject> List<Object> filterFields( List<T> objects, String include, String exclude )
+    {
+        List<Object> output = Lists.newArrayList();
+
+        if ( objects.isEmpty() )
+        {
+            return output;
+        }
+
+        Map<String, Map> fieldMap = Maps.newHashMap();
+
+        if ( include == null && exclude == null )
+        {
+            Map<String, ReflectionUtils.PropertyDescriptor> classMap = ReflectionUtils.getJacksonClassMap( objects.get( 0 ).getClass() );
+
+            for ( String key : classMap.keySet() )
+            {
+                fieldMap.put( key, Maps.newHashMap() );
+            }
+        }
+        else if ( include == null )
+        {
+            Map<String, ReflectionUtils.PropertyDescriptor> classMap = ReflectionUtils.getJacksonClassMap( objects.get( 0 ).getClass() );
+            Map<String, Map> excludeMap = parseFieldExpression( exclude );
+
+            for ( String key : classMap.keySet() )
+            {
+                if ( !excludeMap.containsKey( key ) )
+                {
+                    fieldMap.put( key, Maps.newHashMap() );
+                }
+            }
+        }
+        else
+        {
+            fieldMap = parseFieldExpression( include );
+        }
+
+        for ( Object object : objects )
+        {
+            output.add( buildObjectOutput( object, fieldMap ) );
+        }
+
+        return output;
+    }
+
+    @SuppressWarnings( "unchecked" )
+    private static Map<String, Object> buildObjectOutput( Object object, Map<String, Map> fieldMap )
+    {
+        if ( object == null )
+        {
+            return null;
+        }
+
+        Map<String, Object> output = Maps.newHashMap();
+        Map<String, ReflectionUtils.PropertyDescriptor> classMap = ReflectionUtils.getJacksonClassMap( object.getClass() );
+
+        for ( String key : fieldMap.keySet() )
+        {
+            if ( !classMap.containsKey( key ) )
+            {
+                continue;
+            }
+
+            Map value = fieldMap.get( key );
+            ReflectionUtils.PropertyDescriptor descriptor = classMap.get( key );
+            Object returned = ReflectionUtils.invokeMethod( object, descriptor.getMethod() );
+
+            if ( returned == null )
+            {
+                continue;
+            }
+
+            if ( value.isEmpty() )
+            {
+                if ( !descriptor.isCollection() && !descriptor.isIdentifiableObject() )
+                {
+                    output.put( key, returned );
+                }
+                else if ( descriptor.isIdentifiableObject() )
+                {
+                    if ( descriptor.isCollection() )
+                    {
+                        List<Map<String, Object>> properties = getIdentifiableObjectCollectionProperties( returned );
+                        output.put( key, properties );
+                    }
+                    else
+                    {
+                        Map<String, Object> properties = getIdentifiableObjectProperties( returned );
+                        output.put( key, properties );
+                    }
+                }
+            }
+            else
+            {
+                if ( descriptor.isCollection() )
+                {
+                    Collection<IdentifiableObject> objects = (Collection<IdentifiableObject>) returned;
+                    ArrayList<Object> arrayList = Lists.newArrayList();
+                    output.put( key, arrayList );
+
+                    for ( IdentifiableObject identifiableObject : objects )
+                    {
+                        Map<String, Object> properties = buildObjectOutput( identifiableObject, value );
+                        arrayList.add( properties );
+                    }
+                }
+                else
+                {
+                    Map<String, Object> properties = buildObjectOutput( returned, value );
+                    output.put( key, properties );
+                }
+            }
+        }
+
+        return output;
+    }
+
+    private static List<Map<String, Object>> getIdentifiableObjectCollectionProperties( Object object )
+    {
+        List<String> fields = Lists.newArrayList( "id", "name", "code", "created", "lastUpdated" );
+        return getIdentifiableObjectCollectionProperties( object, fields );
+    }
+
+    @SuppressWarnings( "unchecked" )
+    private static List<Map<String, Object>> getIdentifiableObjectCollectionProperties( Object object, List<String> fields )
+    {
+        List<Map<String, Object>> output = Lists.newArrayList();
+        Collection<IdentifiableObject> identifiableObjects;
+
+        try
+        {
+            identifiableObjects = (Collection<IdentifiableObject>) object;
+        }
+        catch ( ClassCastException ex )
+        {
+            ex.printStackTrace();
+            return output;
+        }
+
+        for ( IdentifiableObject identifiableObject : identifiableObjects )
+        {
+            Map<String, Object> properties = getIdentifiableObjectProperties( identifiableObject, fields );
+            output.add( properties );
+        }
+
+        return output;
+    }
+
+    private static Map<String, Object> getIdentifiableObjectProperties( Object object )
+    {
+        List<String> fields = Lists.newArrayList( "id", "name", "code", "created", "lastUpdated" );
+        return getIdentifiableObjectProperties( object, fields );
+    }
+
+    private static Map<String, Object> getIdentifiableObjectProperties( Object object, List<String> fields )
+    {
+        Map<String, Object> idProps = Maps.newLinkedHashMap();
+        Map<String, ReflectionUtils.PropertyDescriptor> classMap = ReflectionUtils.getJacksonClassMap( object.getClass() );
+
+        for ( String field : fields )
+        {
+            ReflectionUtils.PropertyDescriptor descriptor = classMap.get( field );
+
+            if ( descriptor == null )
+            {
+                continue;
+            }
+
+            Object o = ReflectionUtils.invokeMethod( object, descriptor.getMethod() );
+
+            if ( o != null )
+            {
+                idProps.put( field, o );
+            }
+        }
+
+        return idProps;
     }
 }

@@ -36,6 +36,7 @@ import static org.hisp.dhis.common.DimensionType.DATASET;
 import static org.hisp.dhis.common.DimensionType.INDICATOR;
 import static org.hisp.dhis.common.DimensionType.ORGANISATIONUNIT;
 import static org.hisp.dhis.common.DimensionType.ORGANISATIONUNIT_GROUPSET;
+import static org.hisp.dhis.common.DimensionType.CATEGORYOPTION_GROUPSET;
 import static org.hisp.dhis.common.DimensionType.PERIOD;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_LEVEL;
@@ -50,6 +51,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
+import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryDimension;
@@ -57,10 +60,12 @@ import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataelement.DataElementOperandService;
+import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
@@ -89,7 +94,13 @@ public class DefaultDimensionService
 
     @Autowired
     private PeriodService periodService;
-    
+
+    @Autowired
+    private OrganisationUnitGroupService organisationUnitGroupService;
+
+    @Autowired
+    private DataElementService dataElementService;
+
     @Autowired
     private CurrentUserService currentUserService;
     
@@ -120,6 +131,13 @@ public class DefaultDimensionService
         {
             return ougs;
         }
+
+        CategoryOptionGroupSet cogs = identifiableObjectManager.get( CategoryOptionGroupSet.class, uid );
+        
+        if ( cogs != null )
+        {
+            return cogs;
+        }
         
         return null;
     }
@@ -131,7 +149,7 @@ public class DefaultDimensionService
         if ( cat != null )
         {
             return DimensionType.CATEGORY;
-        }
+        }        
 
         DataElementGroupSet degs = identifiableObjectManager.get( DataElementGroupSet.class, uid );
         
@@ -145,6 +163,13 @@ public class DefaultDimensionService
         if ( ougs != null )
         {
             return DimensionType.ORGANISATIONUNIT_GROUPSET;
+        }
+
+        CategoryOptionGroupSet cogs = identifiableObjectManager.get( CategoryOptionGroupSet.class, uid );
+        
+        if ( cogs != null )
+        {
+            return DimensionType.CATEGORYOPTION_GROUPSET;
         }
         
         final Map<String, DimensionType> dimObjectTypeMap = new HashMap<String, DimensionType>();
@@ -164,12 +189,14 @@ public class DefaultDimensionService
     public List<DimensionalObject> getAllDimensions()
     {
         Collection<DataElementCategory> dcs = categoryService.getDataDimensionDataElementCategories();
-        Collection<DataElementGroupSet> degs = identifiableObjectManager.getAll( DataElementGroupSet.class );
-        Collection<OrganisationUnitGroupSet> ougs = identifiableObjectManager.getAll( OrganisationUnitGroupSet.class );
+        Collection<CategoryOptionGroupSet> cogs = categoryService.getDataDimensionCategoryOptionGroupSets();
+        Collection<DataElementGroupSet> degs = dataElementService.getDataDimensionDataElementGroupSets();
+        Collection<OrganisationUnitGroupSet> ougs = organisationUnitGroupService.getDataDimensionOrganisationUnitGroupSets();
 
         final List<DimensionalObject> dimensions = new ArrayList<DimensionalObject>();
 
         dimensions.addAll( dcs );
+        dimensions.addAll( cogs );
         dimensions.addAll( degs );
         dimensions.addAll( ougs );
         
@@ -336,6 +363,10 @@ public class DefaultDimensionService
                 else if ( ORGANISATIONUNIT_GROUPSET.equals( type ) )
                 {
                     object.getOrganisationUnitGroups().addAll( identifiableObjectManager.getByUid( OrganisationUnitGroup.class, uids ) );
+                }
+                else if ( CATEGORYOPTION_GROUPSET.equals( type ) )
+                {
+                    object.getCategoryOptionGroups().addAll( identifiableObjectManager.getByUid( CategoryOptionGroup.class, uids ) );
                 }
             }
         }

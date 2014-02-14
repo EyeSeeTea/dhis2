@@ -115,7 +115,7 @@ public class DataQueryParams
     /**
      * Indicates if the meta data part of the query response should be omitted.
      */
-    private boolean skipMeta;
+    protected boolean skipMeta;
 
     /**
      * Indicates that full precision should be provided for values.
@@ -135,6 +135,18 @@ public class DataQueryParams
      * should be ignored.
      */
     private boolean ignoreLimit;
+    
+    /**
+     * Indicates whether rows with no values should be hidden in the response.
+     * Applies to responses with table layout only. 
+     */
+    private boolean hideEmptyRows;
+    
+    /**
+     * Indicates whether the org unit hierarchy path should be displayed with the
+     * org unit names on rows.
+     */
+    private boolean showHierarchy;
     
     // -------------------------------------------------------------------------
     // Transient properties
@@ -184,6 +196,7 @@ public class DataQueryParams
         params.skipMeta = this.skipMeta;
         params.hierarchyMeta = this.hierarchyMeta;
         params.ignoreLimit = this.ignoreLimit;
+        params.hideEmptyRows = this.hideEmptyRows;
         
         params.partitions = new Partitions( this.partitions );
         params.periodType = this.periodType;
@@ -329,6 +342,35 @@ public class DataQueryParams
         }
         
         return indexes;
+    }
+    
+    /**
+     * Removes all dimensions which are not of the given type from dimensions
+     * and filters.
+     */
+    public DataQueryParams pruneToDimensionType( DimensionType type )
+    {
+        Iterator<DimensionalObject> dimensionIter = dimensions.iterator();
+        
+        while ( dimensionIter.hasNext() )
+        {
+            if ( !dimensionIter.next().getType().equals( type ) )
+            {
+                dimensionIter.remove();
+            }
+        }
+        
+        Iterator<DimensionalObject> filterIter = filters.iterator();
+        
+        while ( filterIter.hasNext() )
+        {
+            if ( !filterIter.next().getType().equals( type ) )
+            {
+                filterIter.remove();
+            }
+        }
+        
+        return this;
     }
 
     /**
@@ -666,6 +708,37 @@ public class DataQueryParams
         return valueMap;
     }
 
+    /**
+     * Returns a mapping of permutations keys (org unit id or null) and mappings
+     * of org unit group and counts, based on the given mapping of dimension option
+     * keys and counts.
+     */
+    public Map<String, Map<String, Integer>> getPermutationOrgUnitGroupCountMap( Map<String, Double> orgUnitCountMap )
+    {
+        MapMap<String, String, Integer> countMap = new MapMap<String, String, Integer>();
+        
+        for ( String key : orgUnitCountMap.keySet() )
+        {
+            List<String> keys = new ArrayList<String>( Arrays.asList( key.split( DIMENSION_SEP ) ) );
+            
+            // Org unit group always at last index, org unit potentially at first
+            
+            int ougInx = keys.size() - 1;
+            
+            String oug = keys.get( ougInx );
+            
+            ListUtils.removeAll( keys, ougInx );
+
+            String permKey = StringUtils.trimToNull( StringUtils.join( keys, DIMENSION_SEP ) );
+            
+            Integer count = orgUnitCountMap.get( key ).intValue();
+            
+            countMap.putEntry( permKey, oug, count );
+        }
+        
+        return countMap;
+    }
+    
     /**
      * Retrieves the options for the given dimension identifier. Returns null if
      * the dimension is not present.
@@ -1098,6 +1171,26 @@ public class DataQueryParams
     public void setIgnoreLimit( boolean ignoreLimit )
     {
         this.ignoreLimit = ignoreLimit;
+    }
+
+    public boolean isHideEmptyRows()
+    {
+        return hideEmptyRows;
+    }
+
+    public void setHideEmptyRows( boolean hideEmptyRows )
+    {
+        this.hideEmptyRows = hideEmptyRows;
+    }
+
+    public boolean isShowHierarchy()
+    {
+        return showHierarchy;
+    }
+
+    public void setShowHierarchy( boolean showHierarchy )
+    {
+        this.showHierarchy = showHierarchy;
     }
 
     // -------------------------------------------------------------------------

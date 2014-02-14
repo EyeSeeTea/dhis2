@@ -36,6 +36,8 @@ import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.configuration.ConfigurationService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.security.PasswordManager;
+import org.hisp.dhis.security.RestoreOptions;
+import org.hisp.dhis.security.RestoreType;
 import org.hisp.dhis.security.SecurityService;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.util.ValidationUtils;
@@ -106,7 +108,7 @@ public class AccountController
 
     @Autowired
     private SystemSettingManager systemSettingManager;
-
+    
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @RequestMapping( value = "/recovery", method = RequestMethod.POST, produces = ContextUtils.CONTENT_TYPE_TEXT )
@@ -123,7 +125,15 @@ public class AccountController
             return "Account recovery is not enabled";
         }
 
-        boolean recover = securityService.sendRestoreMessage( username, rootPath );
+        UserCredentials credentials = userService.getUserCredentialsByUsername( username );
+
+        if ( credentials == null )
+        {
+            response.setStatus( HttpServletResponse.SC_CONFLICT );
+            return "User does not exist: " + username;
+        }
+        
+        boolean recover = securityService.sendRestoreMessage( credentials, rootPath, RestoreOptions.RECOVER_PASSWORD_OPTION );
 
         if ( !recover )
         {
@@ -164,7 +174,15 @@ public class AccountController
             return "Password cannot be equal to username";
         }
 
-        boolean restore = securityService.restore( username, token, code, password );
+        UserCredentials credentials = userService.getUserCredentialsByUsername( username );
+
+        if ( credentials == null )
+        {
+            response.setStatus( HttpServletResponse.SC_CONFLICT );
+            return "User does not exist: " + username;
+        }
+        
+        boolean restore = securityService.restore( credentials, token, code, password, RestoreType.RECOVER_PASSWORD );
 
         if ( !restore )
         {
@@ -187,17 +205,59 @@ public class AccountController
         @RequestParam String email,
         @RequestParam String phoneNumber,
         @RequestParam String employer,
+        @RequestParam( required = false ) String inviteUsername,
+        @RequestParam( required = false ) String inviteToken,
+        @RequestParam( required = false ) String inviteCode,
         @RequestParam( value = "recaptcha_challenge_field", required = false ) String recapChallenge,
         @RequestParam( value = "recaptcha_response_field", required = false ) String recapResponse,
         HttpServletRequest request,
         HttpServletResponse response )
     {
-        boolean allowed = configurationService.getConfiguration().selfRegistrationAllowed();
+        UserCredentials credentials = null;
 
-        if ( !allowed )
+        boolean invitedByEmail = ( inviteUsername != null && !inviteUsername.isEmpty() );
+
+        log.info( "AccountController: inviteUsername = " + inviteUsername );
+
+        boolean canChooseUsername = true;
+
+        if ( invitedByEmail )
         {
-            response.setStatus( HttpServletResponse.SC_BAD_REQUEST );
-            return "User self registration is not allowed";
+            if ( !systemSettingManager.accountInviteEnabled() )
+            {
+                response.setStatus( HttpServletResponse.SC_CONFLICT );
+                return "Account invite is not enabled";
+            }
+
+            credentials = userService.getUserCredentialsByUsername( inviteUsername );
+
+            if ( credentials == null )
+            {
+                response.setStatus( HttpServletResponse.SC_BAD_REQUEST );
+                return "Invitation link not valid";
+            }
+
+            boolean canRestore = securityService.canRestoreNow( credentials, inviteToken, inviteCode, RestoreType.INVITE );
+
+            if ( !canRestore )
+            {
+                response.setStatus( HttpServletResponse.SC_BAD_REQUEST );
+                return "Invitation code not valid";
+            }
+
+            RestoreOptions restoreOptions = securityService.getRestoreOptions( inviteToken );
+
+            canChooseUsername = restoreOptions.isUsernameChoice();
+        }
+        else
+        {
+            boolean allowed = configurationService.getConfiguration().selfRegistrationAllowed();
+
+            if ( !allowed )
+            {
+                response.setStatus( HttpServletResponse.SC_BAD_REQUEST );
+                return "User self registration is not allowed";
+            }
         }
 
         // ---------------------------------------------------------------------
@@ -224,12 +284,12 @@ public class AccountController
             return "User name is not specified or invalid";
         }
 
-        UserCredentials credentials = userService.getUserCredentialsByUsername( username );
+        UserCredentials usernameAlreadyTakenCredentials = userService.getUserCredentialsByUsername( username );
 
-        if ( credentials != null )
+        if ( canChooseUsername && usernameAlreadyTakenCredentials != null )
         {
             response.setStatus( HttpServletResponse.SC_BAD_REQUEST );
-            return "User name is alread taken";
+            return "User name is already taken";
         }
 
         if ( firstName == null || firstName.trim().length() > MAX_LENGTH )
@@ -317,32 +377,72 @@ public class AccountController
         // Create and save user, return 201
         // ---------------------------------------------------------------------
 
-        UserAuthorityGroup userRole = configurationService.getConfiguration().getSelfRegistrationRole();
-        OrganisationUnit orgUnit = configurationService.getConfiguration().getSelfRegistrationOrgUnit();
+        if ( invitedByEmail )
+        {
+            boolean restored = securityService.restore( credentials, inviteToken, inviteCode, password, RestoreType.INVITE );
 
-        User user = new User();
-        user.setFirstName( firstName );
-        user.setSurname( surname );
-        user.setEmail( email );
-        user.setPhoneNumber( phoneNumber );
-        user.setEmployer( employer );
-        user.getOrganisationUnits().add( orgUnit );
+            if ( !restored )
+            {
+                log.info( "Invite restore failed for: " + inviteUsername );
 
-        credentials = new UserCredentials();
-        credentials.setUsername( username );
-        credentials.setPassword( passwordManager.encodePassword( username, password ) );
-        credentials.setSelfRegistered( true );
-        credentials.setUser( user );
-        credentials.getUserAuthorityGroups().add( userRole );
+                response.setStatus( HttpServletResponse.SC_BAD_REQUEST );
+                return "Unable to create invited user account";
+            }
 
-        user.setUserCredentials( credentials );
+            User user = credentials.getUser();
+            user.setFirstName( firstName );
+            user.setSurname( surname );
+            user.setEmail( email );
+            user.setPhoneNumber( phoneNumber );
+            user.setEmployer( employer );
 
-        userService.addUser( user );
-        userService.addUserCredentials( credentials );
+            if ( canChooseUsername )
+            {
+                credentials.setUsername( username );
+            }
+            else
+            {
+                username = credentials.getUsername();
+            }
 
-        authenticate( username, password, userRole, request );
+            credentials.setPassword( passwordManager.encodePassword( username, password ) );
 
-        log.info( "Created user with username: " + username );
+            userService.updateUser( user );
+            userService.updateUserCredentials( credentials );
+
+            log.info( "User " + username + " accepted invitation for " + inviteUsername );
+        }
+        else
+        {
+            UserAuthorityGroup userRole = configurationService.getConfiguration().getSelfRegistrationRole();
+            OrganisationUnit orgUnit = configurationService.getConfiguration().getSelfRegistrationOrgUnit();
+
+            User user = new User();
+            user.setFirstName( firstName );
+            user.setSurname( surname );
+            user.setEmail( email );
+            user.setPhoneNumber( phoneNumber );
+            user.setEmployer( employer );
+            user.getOrganisationUnits().add( orgUnit );
+
+            credentials = new UserCredentials();
+            credentials.setUsername( username );
+            credentials.setPassword( passwordManager.encodePassword( username, password ) );
+            credentials.setSelfRegistered( true );
+            credentials.setUser( user );
+            credentials.getUserAuthorityGroups().add( userRole );
+
+            user.setUserCredentials( credentials );
+
+            userService.addUser( user );
+            userService.addUserCredentials( credentials );
+
+            log.info( "Created user with username: " + username );
+        }
+
+        Set<GrantedAuthority> authorities = getAuthorities( credentials.getUserAuthorityGroups() );
+
+        authenticate( username, password, authorities, request );
 
         response.setStatus( HttpServletResponse.SC_CREATED );
         return "Account created";
@@ -457,23 +557,9 @@ public class AccountController
         session.setAttribute( "SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext() );
     }
 
-    private void authenticate( String username, String rawPassword, UserAuthorityGroup userRole, HttpServletRequest request )
+    private Set<GrantedAuthority> getAuthorities( Set<UserAuthorityGroup> userRoles )
     {
-        UsernamePasswordAuthenticationToken token =
-            new UsernamePasswordAuthenticationToken( username, rawPassword, getAuthorities( userRole ) );
-
-        Authentication auth = authenticationManager.authenticate( token );
-
-        SecurityContextHolder.getContext().setAuthentication( auth );
-
-        HttpSession session = request.getSession();
-
-        session.setAttribute( "SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext() );
-    }
-
-    private Collection<GrantedAuthority> getAuthorities( Set<UserAuthorityGroup> userRoles )
-    {
-        Collection<GrantedAuthority> auths = new HashSet<GrantedAuthority>();
+        Set<GrantedAuthority> auths = new HashSet<GrantedAuthority>();
 
         for ( UserAuthorityGroup userRole : userRoles )
         {
@@ -483,9 +569,9 @@ public class AccountController
         return auths;
     }
 
-    private Collection<GrantedAuthority> getAuthorities( UserAuthorityGroup userRole )
+    private Set<GrantedAuthority> getAuthorities( UserAuthorityGroup userRole )
     {
-        Collection<GrantedAuthority> auths = new HashSet<GrantedAuthority>();
+        Set<GrantedAuthority> auths = new HashSet<GrantedAuthority>();
 
         for ( String auth : userRole.getAuthorities() )
         {

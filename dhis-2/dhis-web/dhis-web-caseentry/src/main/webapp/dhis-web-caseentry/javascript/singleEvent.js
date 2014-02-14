@@ -3,36 +3,40 @@ var _continue = false;
 
 function orgunitSelected( orgUnits, orgUnitNames )
 {	
-	var width = jQuery('#programIdAddPatient').width();
-	jQuery('#programIdAddPatient').width(width-30);
+	var width = jQuery('#programIdAddEntityInstance').width();
+	jQuery('#programIdAddEntityInstance').width(width-30);
 	showById( "programLoader" );
-	disable('programIdAddPatient');
+	disable('programIdAddEntityInstance');
 	hideById('addNewDiv');
 	organisationUnitSelected( orgUnits, orgUnitNames );
-	clearListById('programIdAddPatient');
+	clearListById('programIdAddEntityInstance');
 	$.postJSON( 'singleEventPrograms.action', {}, function( json )
 		{
 			var count = 0;
 			for ( i in json.programs ) {
-				jQuery( '#programIdAddPatient').append( '<option value="' + json.programs[i].id +'" programStageId="' + json.programs[i].programStageId + '" type="' + json.programs[i].type + '">' + json.programs[i].name + '</option>' );
+				if( json.programs[i].type==2){
+					jQuery( '#programIdAddEntityInstance').append( '<option value="' + json.programs[i].id +'" programStageId="' + json.programs[i].programStageId + '" type="' + json.programs[i].type + '">' + json.programs[i].name + '</option>' );
+					count++;
+				}
 			}
 			
-			if(json.programs.length==0){
-				jQuery( '#programIdAddPatient').prepend( '<option value="" >' + i18n_none_program + '</option>' );
+			if(count==0){
+				jQuery( '#programIdAddEntityInstance').prepend( '<option value="" >' + i18n_none_program + '</option>' );
 			}
-			else if(json.programs.length>1){
-				jQuery( '#programIdAddPatient').prepend( '<option value="" selected>' + i18n_please_select + '</option>' );
+			else if(count>1){
+				jQuery( '#programIdAddEntityInstance').prepend( '<option value="" selected>' + i18n_please_select + '</option>' );
+				enable('addEntityInstanceBtn');
 			}
 			
 			enableBtn();
 			hideById('programLoader');
-			jQuery('#programIdAddPatient').width(width);
-			enable('programIdAddPatient');
+			jQuery('#programIdAddEntityInstance').width(width);
+			enable('programIdAddEntityInstance');
 		});
 }
 selection.setListenerFunction( orgunitSelected );
 
-function showAddPatientForm()
+function showAddTrackedEntityInstanceForm()
 {
 	hideById('dataEntryMenu');
 	showById('eventActionMenu');
@@ -45,29 +49,29 @@ function showAddPatientForm()
 	jQuery('#loaderDiv').show();
 	jQuery('#addNewDiv').load('showEventWithRegistrationForm.action',
 		{
-			programId: getFieldValue('programIdAddPatient')
+			programId: getFieldValue('programIdAddEntityInstance')
 		}, function()
 		{
-			setInnerHTML('singleProgramName',jQuery('#programIdAddPatient option:selected').text());	unSave = true;
+			setInnerHTML('singleProgramName',jQuery('#programIdAddEntityInstance option:selected').text());	unSave = true;
 			showById('singleProgramName');
 			showById('addNewDiv');
 			jQuery('#loaderDiv').hide();
 		});
 }
 
-function showUpdatePatientForm( patientId )
+function showUpdateTrackedEntityInstanceForm( entityInstanceId )
 {
 	hideById('dataEntryMenu');
 	showById('eventActionMenu');
 	hideById('nextEventLink');
-	setInnerHTML('singleProgramName',jQuery('#programIdAddPatient option:selected').text());	
+	setInnerHTML('singleProgramName',jQuery('#programIdAddEntityInstance option:selected').text());	
 	showById('singleProgramName');
 	setInnerHTML('addNewDiv','');
 	unSave = false;
-	showSelectedDataRecoding(patientId, getFieldValue('programIdAddPatient'));
+	showSelectedDataRecoding(entityInstanceId, getFieldValue('programIdAddEntityInstance'));
 }
 
-function addEventForPatientForm( divname )
+function addEventForEntityInstanceForm( divname )
 {
 	jQuery("#" + divname + " [id=checkDuplicateBtn]").click(function() {
 		checkDuplicate( divname );
@@ -76,36 +80,33 @@ function addEventForPatientForm( divname )
 
 function validateData()
 {
-	var params = "programId=" + getFieldValue('programIdAddPatient') + "&" + getParamsForDiv('patientForm');
-	$("#patientForm :input").attr("disabled", true);
+	var params = "programId=" + getFieldValue('programIdAddEntityInstance') + "&" + getParamsForDiv('entityInstanceForm');
+	$("#entityInstanceForm :input").attr("disabled", true);
 	$("#entryForm :input").attr("disabled", true);
 	$.ajax({
 		type: "POST",
-		url: 'validatePatient.action',
+		url: 'validateTrackedEntityInstance.action',
 		data: params,
-		success: function( data ){
-			var type = jQuery(data).find('message').attr('type');
-			var message = jQuery(data).find('message').text();
+		success: function( json ){
+			var type = json.response;
+			var message = json.message;
 			
-			if ( type == 'success' )
-			{
+			if ( type == 'success' ){
 				if( message == 0 ){
-					removeDisabledIdentifier( );
-					addPatient();
+					addTrackedEntityInstance();
 				}
 				else if( message == 1 ){
-					showErrorMessage( i18n_adding_patient_failed + ':' + '\n' + i18n_duplicate_identifier );
+					showErrorMessage( i18n_adding_tracked_entity_instance_failed + ':' + '\n' + i18n_duplicate_identifier );
 				}
 				else if( message == 2 ){
-					showErrorMessage( i18n_adding_patient_failed + ':' + '\n' + i18n_this_patient_could_not_be_enrolled_please_check_validation_criteria );
+					showErrorMessage( i18n_adding_tracked_entity_instance_failed + ':' + '\n' + i18n_this_tracked_entity_instance_could_not_be_enrolled_please_check_validation_criteria );
 				}
 			}
-			else
-			{
-				$("#patientForm :input").attr("disabled", true);
+			else{
+				$("#entityInstanceForm :input").attr("disabled", true);
 				if ( type == 'error' )
 				{
-					showErrorMessage( i18n_adding_patient_failed + ':' + '\n' + message );
+					showErrorMessage( i18n_adding_tracked_entity_instance_failed + ':' + '\n' + message );
 				}
 				else if ( type == 'input' )
 				{
@@ -113,32 +114,32 @@ function validateData()
 				}
 				else if( type == 'duplicate' )
 				{
-					showListPatientDuplicate(data, false);
+					showListTrackedEntityInstanceDuplicate(data, false);
 				}
 					
-				$("#patientForm :input").attr("disabled", false);
+				$("#entityInstanceForm :input").attr("disabled", false);
 			}
 		}
     });	
 }
 
-function addPatient()
+function addTrackedEntityInstance()
 {
 	$.ajax({
 		type: "POST",
-		url: 'addPatient.action',
-		data: getParamsForDiv('patientForm'),
+		url: 'addTrackedEntityInstance.action',
+		data: getParamsForDiv('entityInstanceForm'),
 		success: function(json) {
-			var patientId = json.message.split('_')[0];
-			addData( getFieldValue('programIdAddPatient'), patientId );
+			var entityInstanceId = json.message.split('_')[1];
+			addData( getFieldValue('programIdAddEntityInstance'), entityInstanceId );
 		}
      });
 }
 
-function addData( programId, patientId )
+function addData( programId, entityInstanceId )
 {		
-	var params = "programId=" + getFieldValue('programIdAddPatient');
-		params += "&patientId=" + patientId;
+	var params = "programId=" + getFieldValue('programIdAddEntityInstance');
+		params += "&entityInstanceId=" + entityInstanceId;
 		params += "&" + getParamsForDiv('entryForm');
 		
 	$.ajax({
@@ -148,9 +149,9 @@ function addData( programId, patientId )
 		success: function(json) {
 			if( _continue==true )
 			{
-				$("#patientForm :input").attr("disabled", false);
+				$("#entityInstanceForm :input").attr("disabled", false);
 				$("#entryForm :input").attr("disabled", false);
-				jQuery('#patientForm :input').each(function()
+				jQuery('#entityInstanceForm :input').each(function()
 				{
 					var type=$( this ).attr('type');
 					if(type=='checkbox'){
@@ -177,94 +178,24 @@ function addData( programId, patientId )
 				setInnerHTML('singleProgramName','');
 				hideById('addNewDiv');
 				if( getFieldValue('listAll')=='true'){
-					listAllPatient();
+					listAllTrackedEntityInstance();
 				}
 				else{
 					showById('searchDiv');
 					showById('contentDiv');
 				}
 			}
+			backEventList();
 			showSuccessMessage( i18n_save_success );
 		}
      });
     return false;
 }
 
-function showListPatientDuplicate( rootElement, validate )
-{
-	var message = jQuery(rootElement).find('message').text();
-	var patients = jQuery(rootElement).find('patient');
-	
-	var sPatient = "";
-	jQuery( patients ).each( function( i, patient )
-        {
-			sPatient += "<hr style='margin:5px 0px;'><table>";
-			sPatient += "<tr><td class='bold'>" + i18n_patient_system_id + "</td><td>" + jQuery(patient).find('systemIdentifier').text() + "</td></tr>" ;
-			sPatient += "<tr><td class='bold'>" + i18n_patient_full_name + "</td><td>" + jQuery(patient).find('fullName').text() + "</td></tr>" ;
-        	
-			var identifiers = jQuery(patient).find('identifier');
-        	if( identifiers.length > 0 )
-        	{
-        		sPatient += "<tr><td colspan='2' class='bold'>" + i18n_patient_identifiers + "</td></tr>";
-
-        		jQuery( identifiers ).each( function( i, identifier )
-				{
-        			sPatient +="<tr class='identifierRow'>"
-        				+"<td class='bold'>" + jQuery(identifier).find('name').text() + "</td>"
-        				+"<td>" + jQuery(identifier).find('value').text() + "</td>	"	
-        				+"</tr>";
-        		});
-        	}
-			
-        	var attributes = jQuery(patient).find('attribute');
-        	if( attributes.length > 0 )
-        	{
-        		sPatient += "<tr><td colspan='2' class='bold'>" + i18n_patient_attributes + "</td></tr>";
-
-        		jQuery( attributes ).each( function( i, attribute )
-				{
-        			sPatient +="<tr class='attributeRow'>"
-        				+"<td class='bold'>" + jQuery(attribute).find('name').text() + "</td>"
-        				+"<td>" + jQuery(attribute).find('value').text() + "</td>	"	
-        				+"</tr>";
-        		});
-        	}
-        	sPatient += "<tr><td colspan='2'><input type='button' id='"+ jQuery(patient).find('id').first().text() + "' value='" + i18n_show_data_entry + "' onclick='showSelectedDataRecoding(" + jQuery(patient).find('id').first().text() + ");showEntryFormDiv(); '/></td></tr>";
-        	sPatient += "</table>";
-		});
-		
-		var result = i18n_duplicate_warning;
-		if( !validate )
-		{
-			result += "<input type='button' value='" + i18n_create_new_patient + "' onClick='removeDisabledIdentifier( );addPatient();'/>";
-			result += "<br><hr style='margin:5px 0px;'>";
-		}
-		
-		result += "<br>" + sPatient;
-		jQuery('#resultSearchDiv' ).html( result );
-		jQuery('#resultSearchDiv' ).dialog({
-			title: i18n_duplicated_patient_list,
-			maximize: true, 
-			closable: true,
-			modal:true,
-			overlay:{background:'#000000', opacity:0.1},
-			width: 800,
-			height: 400
-		});
-}
-
 function showEntryFormDiv()
 {
 	hideById('singleEventForm');
 	jQuery("#resultSearchDiv").dialog("close");
-}
-
-function removeDisabledIdentifier()
-{
-	jQuery("input.idfield").each(function(){
-		if( jQuery(this).is(":disabled"))
-			jQuery(this).val("");
-	});
 }
 
 function backEventList()
@@ -274,7 +205,7 @@ function backEventList()
 	hideById('singleProgramName');
 	showSearchForm();
 	if( getFieldValue('listAll')=='true'){
-		listAllPatient();
+		listAllTrackedEntityInstance();
 	}
 	hideById('backBtnFromEntry');
 }
@@ -283,11 +214,11 @@ function backEventList()
 // Check an available person allowed to enroll a program
 // --------------------------------------------------------
 
-function validateAllowEnrollment( patientId, programId  )
+function validateAllowEnrollment( entityInstanceId, programId  )
 {	
-	jQuery.getJSON( "validatePatientProgramEnrollment.action",
+	jQuery.getJSON( "validateProgramEnrollment.action",
 		{
-			patientId: patientId,
+			entityInstanceId: entityInstanceId,
 			programId: programId
 		}, 
 		function( json ) 
@@ -296,7 +227,7 @@ function validateAllowEnrollment( patientId, programId  )
 			hideById('message');
 			var type = json.response;
 			if ( type == 'success' ){
-				showSelectedDataRecoding(patientId, programId );
+				showSelectedDataRecoding(entityInstanceId, programId );
 			}
 			else if ( type == 'input' ){
 				showWarningMessage( json.message );

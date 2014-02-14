@@ -30,7 +30,6 @@ package org.hisp.dhis.api.controller;
 
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.api.utils.ContextUtils.CacheStrategy;
-import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dxf2.metadata.ExportService;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.ImportService;
@@ -38,11 +37,13 @@ import org.hisp.dhis.dxf2.metadata.ImportSummary;
 import org.hisp.dhis.dxf2.metadata.MetaData;
 import org.hisp.dhis.dxf2.metadata.tasks.ImportMetaDataTask;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
+import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.scheduling.TaskCategory;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.scheduling.Scheduler;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -67,7 +68,7 @@ import java.util.zip.ZipOutputStream;
 @RequestMapping( method = RequestMethod.GET )
 public class MetaDataController
 {
-    public static final String RESOURCE_PATH = "/metaData";
+    public static final String RESOURCE_PATH = "/meta{xyz:[Dd]}ata";
 
     @Autowired
     private ExportService exportService;
@@ -96,7 +97,7 @@ public class MetaDataController
         MetaData metaData = exportService.getMetaData( options );
 
         model.addAttribute( "model", metaData );
-        model.addAttribute( "viewClass", "export" );
+        model.addAttribute( "viewClass", options.getViewClass( "export" ) );
 
         return "export";
     }
@@ -110,7 +111,8 @@ public class MetaDataController
 
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_XML, CacheStrategy.NO_CACHE, "metaData.xml", true );
 
-        JacksonUtils.toXmlWithView( response.getOutputStream(), metaData, ExportView.class );
+        Class<?> viewClass = JacksonUtils.getViewClass( options.getViewClass( "export" ) );
+        JacksonUtils.toXmlWithView( response.getOutputStream(), metaData, viewClass );
     }
 
     @RequestMapping( value = MetaDataController.RESOURCE_PATH + ".json", produces = "*/*" )
@@ -122,7 +124,8 @@ public class MetaDataController
 
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_JSON, CacheStrategy.NO_CACHE, "metaData.json", true );
 
-        JacksonUtils.toJsonWithView( response.getOutputStream(), metaData, ExportView.class );
+        Class<?> viewClass = JacksonUtils.getViewClass( options.getViewClass( "export" ) );
+        JacksonUtils.toJsonWithView( response.getOutputStream(), metaData, viewClass );
     }
 
     @RequestMapping( value = { MetaDataController.RESOURCE_PATH + ".zip" }, produces = "*/*" )
@@ -131,7 +134,7 @@ public class MetaDataController
     {
         String accept = request.getHeader( "Accept" );
 
-        if ( accept != null && accept.equalsIgnoreCase( "application/json" ) )
+        if ( isJson( accept ) )
         {
             exportZippedJSON( parameters, response );
         }
@@ -154,7 +157,8 @@ public class MetaDataController
         ZipOutputStream zip = new ZipOutputStream( response.getOutputStream() );
         zip.putNextEntry( new ZipEntry( "metaData.xml" ) );
 
-        JacksonUtils.toXmlWithView( zip, metaData, ExportView.class );
+        Class<?> viewClass = JacksonUtils.getViewClass( options.getViewClass( "export" ) );
+        JacksonUtils.toXmlWithView( zip, metaData, viewClass );
     }
 
     @RequestMapping( value = { MetaDataController.RESOURCE_PATH + ".json.zip" }, produces = "*/*" )
@@ -170,7 +174,8 @@ public class MetaDataController
         ZipOutputStream zip = new ZipOutputStream( response.getOutputStream() );
         zip.putNextEntry( new ZipEntry( "metaData.json" ) );
 
-        JacksonUtils.toJsonWithView( zip, metaData, ExportView.class );
+        Class<?> viewClass = JacksonUtils.getViewClass( options.getViewClass( "export" ) );
+        JacksonUtils.toJsonWithView( zip, metaData, viewClass );
     }
 
     @RequestMapping( value = { MetaDataController.RESOURCE_PATH + ".gz" }, produces = "*/*" )
@@ -179,7 +184,7 @@ public class MetaDataController
     {
         String accept = request.getHeader( "Accept" );
 
-        if ( accept != null && accept.equalsIgnoreCase( "application/json" ) )
+        if ( isJson( accept ) )
         {
             exportGZippedJSON( parameters, response );
         }
@@ -200,7 +205,9 @@ public class MetaDataController
         response.addHeader( ContextUtils.HEADER_CONTENT_TRANSFER_ENCODING, "binary" );
 
         GZIPOutputStream gzip = new GZIPOutputStream( response.getOutputStream() );
-        JacksonUtils.toXmlWithView( gzip, metaData, ExportView.class );
+
+        Class<?> viewClass = JacksonUtils.getViewClass( options.getViewClass( "export" ) );
+        JacksonUtils.toXmlWithView( gzip, metaData, viewClass );
     }
 
     @RequestMapping( value = { MetaDataController.RESOURCE_PATH + ".json.gz" }, produces = "*/*" )
@@ -214,7 +221,9 @@ public class MetaDataController
         response.addHeader( ContextUtils.HEADER_CONTENT_TRANSFER_ENCODING, "binary" );
 
         GZIPOutputStream gzip = new GZIPOutputStream( response.getOutputStream() );
-        JacksonUtils.toJsonWithView( gzip, metaData, ExportView.class );
+
+        Class<?> viewClass = JacksonUtils.getViewClass( options.getViewClass( "export" ) );
+        JacksonUtils.toJsonWithView( gzip, metaData, viewClass );
     }
 
     //--------------------------------------------------------------------------
@@ -237,6 +246,14 @@ public class MetaDataController
         }
     }
 
+    @RequestMapping( value = MetaDataController.RESOURCE_PATH, method = RequestMethod.DELETE, consumes = { "application/xml", "text/*" } )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_IMPORT')" )
+    public void deleteXml( ImportOptions importOptions, HttpServletResponse response, HttpServletRequest request ) throws IOException
+    {
+        importOptions.setImportStrategy( ImportStrategy.DELETE.name() );
+        importXml( importOptions, response, request );
+    }
+
     @RequestMapping( value = MetaDataController.RESOURCE_PATH, method = RequestMethod.POST, consumes = "application/json" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_IMPORT')" )
     public void importJson( ImportOptions importOptions, HttpServletResponse response, HttpServletRequest request ) throws IOException
@@ -251,6 +268,14 @@ public class MetaDataController
         {
             startSyncImportJson( importOptions, response, metaData );
         }
+    }
+
+    @RequestMapping( value = MetaDataController.RESOURCE_PATH, method = RequestMethod.DELETE, consumes = "application/json" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_IMPORT')" )
+    public void deleteJson( ImportOptions importOptions, HttpServletResponse response, HttpServletRequest request ) throws IOException
+    {
+        importOptions.setImportStrategy( ImportStrategy.DELETE.name() );
+        importJson( importOptions, response, request );
     }
 
     @RequestMapping( value = { MetaDataController.RESOURCE_PATH + ".zip", MetaDataController.RESOURCE_PATH + ".xml.zip" }, method = RequestMethod.POST, consumes = { "application/xml", "text/*" } )
@@ -272,6 +297,14 @@ public class MetaDataController
         }
     }
 
+    @RequestMapping( value = { MetaDataController.RESOURCE_PATH + ".zip", MetaDataController.RESOURCE_PATH + ".xml.zip" }, method = RequestMethod.DELETE, consumes = { "application/xml", "text/*" } )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_IMPORT')" )
+    public void deleteZippedXml( ImportOptions importOptions, HttpServletResponse response, HttpServletRequest request ) throws IOException
+    {
+        importOptions.setImportStrategy( ImportStrategy.DELETE.name() );
+        importZippedXml( importOptions, response, request );
+    }
+
     @RequestMapping( value = { MetaDataController.RESOURCE_PATH + ".zip", MetaDataController.RESOURCE_PATH + ".json.zip" }, method = RequestMethod.POST, consumes = "application/json" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_IMPORT')" )
     public void importZippedJson( ImportOptions importOptions, HttpServletResponse response, HttpServletRequest request ) throws IOException
@@ -291,6 +324,14 @@ public class MetaDataController
         }
     }
 
+    @RequestMapping( value = { MetaDataController.RESOURCE_PATH + ".zip", MetaDataController.RESOURCE_PATH + ".json.zip" }, method = RequestMethod.DELETE, consumes = "application/json" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_IMPORT')" )
+    public void deleteZippedJson( ImportOptions importOptions, HttpServletResponse response, HttpServletRequest request ) throws IOException
+    {
+        importOptions.setImportStrategy( ImportStrategy.DELETE.name() );
+        importZippedJson( importOptions, response, request );
+    }
+
     @RequestMapping( value = { MetaDataController.RESOURCE_PATH + ".gz", MetaDataController.RESOURCE_PATH + ".xml.gz" }, method = RequestMethod.POST, consumes = { "application/xml", "text/*" } )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_IMPORT')" )
     public void importGZippedXml( ImportOptions importOptions, HttpServletResponse response, HttpServletRequest request ) throws IOException
@@ -308,6 +349,14 @@ public class MetaDataController
         }
     }
 
+    @RequestMapping( value = { MetaDataController.RESOURCE_PATH + ".gz", MetaDataController.RESOURCE_PATH + ".xml.gz" }, method = RequestMethod.DELETE, consumes = { "application/xml", "text/*" } )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_IMPORT')" )
+    public void deleteGZippedXml( ImportOptions importOptions, HttpServletResponse response, HttpServletRequest request ) throws IOException
+    {
+        importOptions.setImportStrategy( ImportStrategy.DELETE.name() );
+        importGZippedXml( importOptions, response, request );
+    }
+
     @RequestMapping( value = { MetaDataController.RESOURCE_PATH + ".gz", MetaDataController.RESOURCE_PATH + ".json.gz" }, method = RequestMethod.POST, consumes = "application/json" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_IMPORT')" )
     public void importGZippedJson( ImportOptions importOptions, HttpServletResponse response, HttpServletRequest request ) throws IOException
@@ -323,6 +372,14 @@ public class MetaDataController
         {
             startSyncImportJson( importOptions, response, metaData );
         }
+    }
+
+    @RequestMapping( value = { MetaDataController.RESOURCE_PATH + ".gz", MetaDataController.RESOURCE_PATH + ".json.gz" }, method = RequestMethod.DELETE, consumes = "application/json" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_IMPORT')" )
+    public void deleteGZippedJson( ImportOptions importOptions, HttpServletResponse response, HttpServletRequest request ) throws IOException
+    {
+        importOptions.setImportStrategy( ImportStrategy.DELETE.name() );
+        importGZippedJson( importOptions, response, request );
     }
 
     //--------------------------------------------------------------------------
@@ -359,5 +416,19 @@ public class MetaDataController
 
         response.setHeader( "Location", ContextUtils.getRootPath( request ) + "/system/tasks/" + TaskCategory.METADATA_IMPORT );
         response.setStatus( HttpServletResponse.SC_NO_CONTENT );
+    }
+
+    //--------------------------------------------------------------------------
+    // Supportive Methods
+    //--------------------------------------------------------------------------
+
+    public boolean isJson( String accept )
+    {
+        return accept != null && MediaType.parseMediaType( accept ).isCompatibleWith( MediaType.APPLICATION_JSON );
+    }
+
+    public boolean isXml( String accept )
+    {
+        return accept != null && MediaType.parseMediaType( accept ).isCompatibleWith( MediaType.APPLICATION_XML );
     }
 }

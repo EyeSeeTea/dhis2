@@ -28,17 +28,6 @@ package org.hisp.dhis.sms.outcoming;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.paging.ActionPagingSupport;
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientIdentifierType;
-import org.hisp.dhis.patient.PatientService;
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramInstance;
-import org.hisp.dhis.program.ProgramService;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,8 +35,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.hisp.dhis.paging.ActionPagingSupport;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.trackedentity.TrackedEntityInstance;
+import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
+import org.springframework.beans.factory.annotation.Autowired;
+
 public class SearchPatientAction
-    extends ActionPagingSupport<Patient>
+    extends ActionPagingSupport<TrackedEntityInstance>
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -57,7 +55,7 @@ public class SearchPatientAction
     private OrganisationUnitSelectionManager selectionManager;
 
     @Autowired
-    private PatientService patientService;
+    private TrackedEntityInstanceService patientService;
 
     @Autowired
     private ProgramService programService;
@@ -72,7 +70,7 @@ public class SearchPatientAction
 
     private boolean listAll;
 
-    private Collection<Patient> patients = new ArrayList<Patient>();
+    private Collection<TrackedEntityInstance> patients = new ArrayList<TrackedEntityInstance>();
 
     // -------------------------------------------------------------------------
     // Getters && Setters
@@ -93,14 +91,7 @@ public class SearchPatientAction
         this.listAll = listAll;
     }
 
-    private List<Integer> programIds;
-
-    public void setProgramIds( List<Integer> programIds )
-    {
-        this.programIds = programIds;
-    }
-
-    public Collection<Patient> getPatients()
+    public Collection<TrackedEntityInstance> getPatients()
     {
         return patients;
     }
@@ -119,13 +110,6 @@ public class SearchPatientAction
         return mapPatientOrgunit;
     }
 
-    private List<PatientIdentifierType> identifierTypes = new ArrayList<PatientIdentifierType>();
-
-    public List<PatientIdentifierType> getIdentifierTypes()
-    {
-        return identifierTypes;
-    }
-
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -135,14 +119,14 @@ public class SearchPatientAction
     {
         OrganisationUnit organisationUnit = selectionManager.getSelectedOrganisationUnit();
         Collection<OrganisationUnit> orgunits = new HashSet<OrganisationUnit>();
-        
+
         // List all patients
         if ( listAll )
         {
-            total = patientService.countGetPatientsByOrgUnit( organisationUnit );
+            total = patientService.countGetTrackedEntityInstancesByOrgUnit( organisationUnit );
             this.paging = createPaging( total );
 
-            patients = new ArrayList<Patient>( patientService.getPatients( organisationUnit, paging.getStartPos(),
+            patients = new ArrayList<TrackedEntityInstance>( patientService.getTrackedEntityInstances( organisationUnit, paging.getStartPos(),
                 paging.getPageSize() ) );
 
         }
@@ -150,30 +134,21 @@ public class SearchPatientAction
         else if ( searchTexts.size() > 0 )
         {
             organisationUnit = (searchBySelectedOrgunit) ? organisationUnit : null;
-            if( organisationUnit != null )
+            if ( organisationUnit != null )
             {
                 orgunits.add( organisationUnit );
             }
 
-            total = patientService.countSearchPatients( searchTexts, orgunits, null, ProgramInstance.STATUS_ACTIVE );
+            total = patientService.countSearchTrackedEntityInstances( searchTexts, orgunits, null, ProgramInstance.STATUS_ACTIVE );
             this.paging = createPaging( total );
-            patients = patientService.searchPatients( searchTexts, orgunits, null, null, null, ProgramInstance.STATUS_ACTIVE, paging.getStartPos(), paging
-                .getPageSize() );
+            patients = patientService.searchTrackedEntityInstances( searchTexts, orgunits, null, null, ProgramInstance.STATUS_ACTIVE,
+                paging.getStartPos(), paging.getPageSize() );
 
             if ( !searchBySelectedOrgunit )
             {
-                for ( Patient patient : patients )
+                for ( TrackedEntityInstance patient : patients )
                 {
                     mapPatientOrgunit.put( patient.getId(), getHierarchyOrgunit( patient.getOrganisationUnit() ) );
-                }
-            }
-
-            if ( programIds != null )
-            {
-                for ( Integer programId : programIds )
-                {
-                    Program program = programService.getProgram( programId );
-                    identifierTypes.addAll( program.getPatientIdentifierTypes() );
                 }
             }
         }

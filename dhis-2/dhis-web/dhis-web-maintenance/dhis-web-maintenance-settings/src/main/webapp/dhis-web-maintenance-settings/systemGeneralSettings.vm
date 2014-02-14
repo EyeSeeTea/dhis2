@@ -11,7 +11,6 @@
         factorDeviation: getFieldValue('factorDeviation'),
         phoneNumberAreaCode: getFieldValue('phoneNumberAreaCode'),
         googleAnalyticsUA: getFieldValue('googleAnalyticsUA'),
-        enableDataApproval: jQuery('#enableDataApproval').is(':checked')
         multiOrganisationUnitForms: jQuery('#multiOrganisationUnitForms').is(':checked')
       }, function( json ) {
         if( json.response == "success" ) {
@@ -98,11 +97,6 @@
 <div class="setting">
     <input type="checkbox" id="multiOrganisationUnitForms" name="multiOrganisationUnitForms" #if( $multiOrganisationUnitForms )checked="checked"#end>
     <label for="multiOrganisationUnitForms">$i18n.getString( "multi_organisation_unit_forms" )</label>
-</div>
-
-<div class="setting">
-    <input type="checkbox" id="enableDataApproval" name="enableDataApproval" #if( $enableDataApproval )checked="checked"#end>
-    <label for="enableDataApproval">$i18n.getString( "enable_data_approval" )</label>
 </div>
 
 <div class="setting">

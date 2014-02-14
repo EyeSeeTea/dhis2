@@ -31,15 +31,20 @@ package org.hisp.dhis.program;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.message.MessageConversation;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.patientcomment.PatientComment;
 import org.hisp.dhis.sms.outbound.OutboundSms;
+import org.hisp.dhis.trackedentitycomment.TrackedEntityComment;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 /**
  * @author Abyot Asalefew
+ */
+/**
+ * @author abyot
+ * 
  */
 public class ProgramStageInstance
     extends BaseIdentifiableObject
@@ -73,11 +78,11 @@ public class ProgramStageInstance
 
     private boolean completed;
 
-    private List<OutboundSms> outboundSms;
+    private List<OutboundSms> outboundSms = new ArrayList<OutboundSms>();
 
-    private List<MessageConversation> messageConversations;
+    private List<MessageConversation> messageConversations = new ArrayList<MessageConversation>();
 
-    private PatientComment patientComment;
+    private TrackedEntityComment comment;
 
     private Integer status = ACTIVE_STATUS;
 
@@ -100,7 +105,6 @@ public class ProgramStageInstance
 
     public ProgramStageInstance( ProgramInstance programInstance, ProgramStage programStage )
     {
-        this();
         this.programInstance = programInstance;
         this.programStage = programStage;
     }
@@ -127,13 +131,9 @@ public class ProgramStageInstance
             return false;
         }
 
-        // TODO include due date and execution date to make consistent with
-        // hashcode
-
         final ProgramStageInstance other = (ProgramStageInstance) object;
 
         return programInstance.equals( other.getProgramInstance() ) && programStage.equals( other.getProgramStage() );
-
     }
 
     @Override
@@ -144,8 +144,6 @@ public class ProgramStageInstance
 
         result = result * prime + programInstance.hashCode();
         result = result * prime + programStage.hashCode();
-        result = result * prime + dueDate.hashCode();
-        result = result * prime + ((executionDate == null) ? 0 : executionDate.hashCode());
 
         return result;
     }
@@ -264,16 +262,6 @@ public class ProgramStageInstance
         this.outboundSms = outboundSms;
     }
 
-    public PatientComment getPatientComment()
-    {
-        return patientComment;
-    }
-
-    public void setPatientComment( PatientComment patientComment )
-    {
-        this.patientComment = patientComment;
-    }
-
     public Date getCompletedDate()
     {
         return completedDate;
@@ -322,6 +310,16 @@ public class ProgramStageInstance
     public void setLatitude( Double latitude )
     {
         this.latitude = latitude;
+    }
+
+    public TrackedEntityComment getComment()
+    {
+        return comment;
+    }
+
+    public void setComment( TrackedEntityComment comment )
+    {
+        this.comment = comment;
     }
 
     public Integer getEventStatus()

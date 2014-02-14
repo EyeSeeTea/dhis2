@@ -28,7 +28,6 @@ package org.hisp.dhis.organisationunit;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
@@ -64,10 +63,9 @@ public class DefaultOrganisationUnitGroupService
         this.organisationUnitGroupStore = organisationUnitGroupStore;
     }
 
-    private GenericIdentifiableObjectStore<OrganisationUnitGroupSet> organisationUnitGroupSetStore;
+    private OrganisationUnitGroupSetStore organisationUnitGroupSetStore;
 
-    public void setOrganisationUnitGroupSetStore(
-        GenericIdentifiableObjectStore<OrganisationUnitGroupSet> organisationUnitGroupSetStore )
+    public void setOrganisationUnitGroupSetStore( OrganisationUnitGroupSetStore organisationUnitGroupSetStore )
     {
         this.organisationUnitGroupSetStore = organisationUnitGroupSetStore;
     }
@@ -264,6 +262,12 @@ public class DefaultOrganisationUnitGroupService
     public Collection<OrganisationUnitGroupSet> getAllOrganisationUnitGroupSets()
     {
         return i18n( i18nService, organisationUnitGroupSetStore.getAll() );
+    }
+
+    @Override
+    public Collection<OrganisationUnitGroupSet> getDataDimensionOrganisationUnitGroupSets()
+    {
+        return i18n( i18nService, organisationUnitGroupSetStore.getByDataDimension( true ) );
     }
 
     public Collection<OrganisationUnitGroupSet> getCompulsoryOrganisationUnitGroupSets()

@@ -30,38 +30,32 @@ package org.hisp.dhis.caseentry.action.caseentry;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import org.hisp.dhis.common.Grid;
-import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.paging.ActionPagingSupport;
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeService;
-import org.hisp.dhis.patient.PatientIdentifierType;
-import org.hisp.dhis.patient.PatientService;
-import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
-import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
+import org.hisp.dhis.trackedentity.TrackedEntityInstance;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
 
 public class GetDataRecordsAction
-    extends ActionPagingSupport<Patient>
+    extends ActionPagingSupport<TrackedEntityInstance>
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-    
+
     private OrganisationUnitSelectionManager selectionManager;
 
     public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
@@ -69,11 +63,11 @@ public class GetDataRecordsAction
         this.selectionManager = selectionManager;
     }
 
-    private PatientService patientService;
+    private TrackedEntityInstanceService entityInstanceService;
 
-    public void setPatientService( PatientService patientService )
+    public void setEntityInstanceService( TrackedEntityInstanceService entityInstanceService )
     {
-        this.patientService = patientService;
+        this.entityInstanceService = entityInstanceService;
     }
 
     private ProgramService programService;
@@ -88,20 +82,6 @@ public class GetDataRecordsAction
     public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
     {
         this.programStageInstanceService = programStageInstanceService;
-    }
-
-    private PatientAttributeService patientAttributeService;
-
-    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
-    {
-        this.patientAttributeService = patientAttributeService;
-    }
-
-    private PatientAttributeValueService patientAttributeValueService;
-
-    public void setPatientAttributeValueService( PatientAttributeValueService patientAttributeValueService )
-    {
-        this.patientAttributeValueService = patientAttributeValueService;
     }
 
     private I18n i18n;
@@ -136,18 +116,18 @@ public class GetDataRecordsAction
         return total;
     }
 
-    private Map<Patient, ProgramInstance> programInstanceMap = new HashMap<Patient, ProgramInstance>();
+    private Map<TrackedEntityInstance, ProgramInstance> programInstanceMap = new HashMap<TrackedEntityInstance, ProgramInstance>();
 
-    public Map<Patient, ProgramInstance> getProgramInstanceMap()
+    public Map<TrackedEntityInstance, ProgramInstance> getProgramInstanceMap()
     {
         return programInstanceMap;
     }
 
-    private Collection<Patient> patients;
+    private Collection<TrackedEntityInstance> entityInstances;
 
-    public Collection<Patient> getPatients()
+    public Collection<TrackedEntityInstance> getEntityInstances()
     {
-        return patients;
+        return entityInstances;
     }
 
     private List<ProgramStageInstance> programStageInstances = new ArrayList<ProgramStageInstance>();
@@ -157,11 +137,11 @@ public class GetDataRecordsAction
         return programStageInstances;
     }
 
-    private List<PatientIdentifierType> identifierTypes;
+    private List<TrackedEntityAttribute> attributes = new ArrayList<TrackedEntityAttribute>();
 
-    public List<PatientIdentifierType> getIdentifierTypes()
+    public List<TrackedEntityAttribute> getAttributes()
     {
-        return identifierTypes;
+        return attributes;
     }
 
     private Program program;
@@ -183,20 +163,6 @@ public class GetDataRecordsAction
     public Grid getGrid()
     {
         return grid;
-    }
-
-    private List<PatientAttribute> patientAttributes;
-
-    public List<PatientAttribute> getPatientAttributes()
-    {
-        return patientAttributes;
-    }
-
-    private Map<Integer, List<String>> patientAttributeValueMap = new HashMap<Integer, List<String>>();
-
-    public Map<Integer, List<String>> getPatientAttributeValueMap()
-    {
-        return patientAttributeValueMap;
     }
 
     private Boolean followup;
@@ -228,59 +194,34 @@ public class GetDataRecordsAction
         if ( programId != null )
         {
             program = programService.getProgram( programId );
-
-            identifierTypes = program.getPatientIdentifierTypes();
         }
 
         if ( searchTexts.size() > 0 )
         {
             if ( type == null )
             {
-                patientAttributes = new ArrayList<PatientAttribute>(
-                    patientAttributeService.getPatientAttributesByDisplayOnVisitSchedule( true ) );
-
-                Collections.sort( patientAttributes, IdentifiableObjectNameComparator.INSTANCE );
-
-                total = patientService.countSearchPatients( searchTexts, orgunits, followup,
+                total = entityInstanceService.countSearchTrackedEntityInstances( searchTexts, orgunits, followup,
                     ProgramInstance.STATUS_ACTIVE );
                 this.paging = createPaging( total );
 
-                List<Integer> stageInstanceIds = patientService.getProgramStageInstances( searchTexts, orgunits,
+                List<Integer> stageInstanceIds = entityInstanceService.getProgramStageInstances( searchTexts, orgunits,
                     followup, ProgramInstance.STATUS_ACTIVE, paging.getStartPos(), paging.getPageSize() );
 
                 for ( Integer stageInstanceId : stageInstanceIds )
                 {
-                    // Get programStageInstance
-
                     ProgramStageInstance programStageInstance = programStageInstanceService
                         .getProgramStageInstance( stageInstanceId );
                     programStageInstances.add( programStageInstance );
-
-                    // Get Patient-attributes
-
-                    Patient patient = programStageInstance.getProgramInstance().getPatient();
-                    if ( patientAttributeValueMap.get( patient.getId() ) == null )
-                    {
-                        List<String> values = new ArrayList<String>();
-                        for ( PatientAttribute patientAttribute : patientAttributes )
-                        {
-                            PatientAttributeValue patientAttributeValue = patientAttributeValueService
-                                .getPatientAttributeValue( patient, patientAttribute );
-                            String value = (patientAttributeValue == null) ? "" : patientAttributeValue.getValue();
-                            values.add( value );
-                        }
-                        patientAttributeValueMap.put( patient.getId(), values );
-                    }
                 }
             }
             else if ( trackingReport != null && trackingReport )
             {
-                grid = patientService.getTrackingEventsReport( program, searchTexts, orgunits, followup,
+                grid = entityInstanceService.getTrackingEventsReport( program, searchTexts, orgunits, followup,
                     ProgramInstance.STATUS_ACTIVE, i18n );
             }
             else
             {
-                grid = patientService.getScheduledEventsReport( searchTexts, orgunits, followup,
+                grid = entityInstanceService.getScheduledEventsReport( searchTexts, orgunits, followup,
                     ProgramInstance.STATUS_ACTIVE, null, null, i18n );
             }
         }

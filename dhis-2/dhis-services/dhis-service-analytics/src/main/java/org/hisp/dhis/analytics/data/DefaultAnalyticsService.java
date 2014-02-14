@@ -31,6 +31,7 @@ package org.hisp.dhis.analytics.data;
 import static org.hisp.dhis.analytics.AnalyticsTableManager.ANALYTICS_TABLE_NAME;
 import static org.hisp.dhis.analytics.AnalyticsTableManager.COMPLETENESS_TABLE_NAME;
 import static org.hisp.dhis.analytics.AnalyticsTableManager.COMPLETENESS_TARGET_TABLE_NAME;
+import static org.hisp.dhis.analytics.AnalyticsTableManager.ORGUNIT_TARGET_TABLE_NAME;
 import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_CATEGORYOPTIONCOMBO;
 import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_DATA_X;
 import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_ORGUNIT;
@@ -56,6 +57,7 @@ import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_CHILDREN;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_GRANDCHILDREN;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.getParentGraphMap;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.getParentNameGraphMap;
 import static org.hisp.dhis.period.PeriodType.getPeriodTypeFromIsoString;
 import static org.hisp.dhis.reporttable.ReportTable.IRT2D;
 import static org.hisp.dhis.reporttable.ReportTable.addIfEmpty;
@@ -224,7 +226,11 @@ public class DefaultAnalyticsService
             List<Indicator> indicators = asTypedList( params.getIndicators() );
             
             expressionService.explodeExpressions( indicators );
-            
+
+            // -----------------------------------------------------------------
+            // Get indicator values
+            // -----------------------------------------------------------------
+
             DataQueryParams dataSourceParams = params.instance();
             dataSourceParams.removeDimension( DATAELEMENT_DIM_ID );
             dataSourceParams.removeDimension( DATASET_DIM_ID );
@@ -240,6 +246,8 @@ public class DefaultAnalyticsService
             Map<String, Double> constantMap = constantService.getConstantMap();
 
             Period filterPeriod = dataSourceParams.getFilterPeriod();
+
+            Map<String, Map<String, Integer>> permutationOrgUnitTargetMap = getOrgUnitTargetMap( dataSourceParams, indicators );
             
             for ( Indicator indicator : indicators )
             {
@@ -255,10 +263,16 @@ public class DefaultAnalyticsService
                     }
                     
                     Period period = filterPeriod != null ? filterPeriod : (Period) DimensionItem.getPeriodItem( options );
-
+                    
                     int days = daysBetween( period.getStartDate(), period.getEndDate() );
                     
-                    Double value = expressionService.getIndicatorValue( indicator, period, valueMap, constantMap, days );
+                    OrganisationUnit unit = (OrganisationUnit) DimensionItem.getOrganisationUnitItem( options );
+                    
+                    String ou = unit != null ? unit.getUid() : null;
+                    
+                    Map<String, Integer> orgUnitCountMap = permutationOrgUnitTargetMap != null ? permutationOrgUnitTargetMap.get( ou ) : null;
+                    
+                    Double value = expressionService.getIndicatorValue( indicator, period, valueMap, constantMap, orgUnitCountMap, days );
 
                     if ( value != null )
                     {
@@ -401,6 +415,11 @@ public class DefaultAnalyticsService
                 metaData.put( OU_HIERARCHY_KEY, getParentGraphMap( asTypedList( params.getDimensionOrFilter( ORGUNIT_DIM_ID ), OrganisationUnit.class ) ) );
             }
             
+            if ( params.isShowHierarchy() )
+            {
+                metaData.put( OU_NAME_HIERARCHY_KEY, getParentNameGraphMap( asTypedList( params.getDimensionOrFilter( ORGUNIT_DIM_ID ), OrganisationUnit.class ), true ) );
+            }
+            
             grid.setMetaData( metaData );
         }
         
@@ -420,8 +439,6 @@ public class DefaultAnalyticsService
         
         queryPlanner.validateTableLayout( params, columns, rows );
         
-        Map<String, Double> valueMap = getAggregatedDataValueMapping( params );
-
         ReportTable reportTable = new ReportTable();
         
         List<NameableObject[]> tableColumns = new ArrayList<NameableObject[]>();
@@ -454,8 +471,14 @@ public class DefaultAnalyticsService
         addIfEmpty( reportTable.getGridRows() );
         
         reportTable.setTitle( IdentifiableObjectUtils.join( params.getFilterItems() ) );
+        reportTable.setHideEmptyRows( params.isHideEmptyRows() );
+        reportTable.setShowHierarchy( params.isShowHierarchy() );
 
-        return reportTable.getGrid( new ListGrid(), valueMap, false );
+        Grid grid = getAggregatedDataValues( params );
+        
+        Map<String, Double> valueMap = getAggregatedDataValueMapping( grid );
+
+        return reportTable.getGrid( new ListGrid( grid.getMetaData() ), valueMap, false );
     }
     
     @Override
@@ -463,6 +486,37 @@ public class DefaultAnalyticsService
     {
         Grid grid = getAggregatedDataValues( params );
         
+        return getAggregatedDataValueMapping( grid );
+    }
+    
+    private Map<String, Map<String, Integer>> getOrgUnitTargetMap( DataQueryParams params, Collection<Indicator> indicators )
+    {
+        Set<OrganisationUnitGroup> orgUnitGroups = expressionService.getOrganisationUnitGroupsInIndicators( indicators );
+        
+        if ( orgUnitGroups == null || orgUnitGroups.isEmpty() )
+        {
+            return null;
+        }
+        
+        DataQueryParams orgUnitTargetParams = params.instance().pruneToDimensionType( DimensionType.ORGANISATIONUNIT );
+        orgUnitTargetParams.getDimensions().add( new BaseDimensionalObject( DimensionalObject.ORGUNIT_GROUP_DIM_ID, null, new ArrayList<NameableObject>( orgUnitGroups ) ) );
+        orgUnitTargetParams.setSkipPartitioning( true );
+        
+        Map<String, Double> orgUnitCountMap = getAggregatedOrganisationUnitTargetMap( orgUnitTargetParams );
+        
+        return orgUnitTargetParams.getPermutationOrgUnitGroupCountMap( orgUnitCountMap );
+    }
+    
+    /**
+     * Generates a mapping where the key represents the dimensional item identifiers
+     * concatenated by "-" and the value is the corresponding aggregated data value
+     * based on the given grid.
+     * 
+     * @param grid the grid.
+     * @return a mapping between item identifiers and aggregated values.
+     */
+    private Map<String, Double> getAggregatedDataValueMapping( Grid grid )
+    {
         Map<String, Double> map = new HashMap<String, Double>();
         
         int metaCols = grid.getWidth() - 1;
@@ -522,13 +576,30 @@ public class DefaultAnalyticsService
     }
 
     /**
+     * Generates a mapping between the the data set dimension key and the count
+     * of expected data sets to report.
      * 
-     * @param params
-     * @return
+     * @param params the data query parameters.
+     * @return a mapping between the the data set dimension key and the count of
+     *         expected data sets to report.
      */
     private Map<String, Double> getAggregatedCompletenessTargetMap( DataQueryParams params )
     {
         return getAggregatedValueMap( params, COMPLETENESS_TARGET_TABLE_NAME );
+    }
+
+    /**
+     * Generates a mapping between the the org unit dimension key and the count
+     * of org units inside the subtree of the given organisation units and
+     * members of the given organisation unit groups.
+     * 
+     * @param params the data query parameters.
+     * @return a mapping between the the data set dimension key and the count of
+     *         expected data sets to report.
+     */
+    private Map<String, Double> getAggregatedOrganisationUnitTargetMap( DataQueryParams params )
+    {
+        return getAggregatedValueMap( params, ORGUNIT_TARGET_TABLE_NAME );
     }
     
     /**
@@ -586,8 +657,8 @@ public class DefaultAnalyticsService
     }
     
     @Override
-    public DataQueryParams getFromUrl( Set<String> dimensionParams, Set<String> filterParams, 
-        AggregationType aggregationType, String measureCriteria, boolean skipMeta, boolean skipRounding, boolean hierarchyMeta, boolean ignoreLimit, I18nFormat format )
+    public DataQueryParams getFromUrl( Set<String> dimensionParams, Set<String> filterParams, AggregationType aggregationType, 
+        String measureCriteria, boolean skipMeta, boolean skipRounding, boolean hierarchyMeta, boolean ignoreLimit, boolean hideEmptyRows, boolean showHierarchy, I18nFormat format )
     {
         DataQueryParams params = new DataQueryParams();
 
@@ -630,6 +701,8 @@ public class DefaultAnalyticsService
         params.setSkipMeta( skipMeta );
         params.setSkipRounding( skipRounding );
         params.setHierarchyMeta( hierarchyMeta );
+        params.setHideEmptyRows( hideEmptyRows );
+        params.setShowHierarchy( showHierarchy );
 
         return params;
     }

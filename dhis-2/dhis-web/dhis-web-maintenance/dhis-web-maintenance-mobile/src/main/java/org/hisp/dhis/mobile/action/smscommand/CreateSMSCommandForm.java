@@ -66,6 +66,13 @@ public class CreateSMSCommandForm
         this.userGroupService = userGroupService;
     }
 
+    // private ProgramService programService;
+    //
+    // public void setProgramService( ProgramService programService )
+    // {
+    // this.programService = programService;
+    // }
+
     // -------------------------------------------------------------------------
     // Input && Output
     // -------------------------------------------------------------------------
@@ -121,7 +128,11 @@ public class CreateSMSCommandForm
             userGroup = userGroupService.getUserGroup( userGroupID );
             command.setUserGroup( userGroup );
         }
-        
+        else if ( parserType.equals( ParserType.ANONYMOUS_PROGRAM_PARSER ) )
+        {
+
+        }
+
         smsCommandService.save( command );
         return SUCCESS;
     }

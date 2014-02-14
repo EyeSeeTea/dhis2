@@ -28,42 +28,53 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.hisp.dhis.DhisSpringTest;
-import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodStore;
+import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
 import org.junit.Test;
-
-import java.util.Date;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Jim Grace
  * @version $Id$
  */
 public class DataApprovalServiceTest
-        extends DhisSpringTest
+    extends DhisSpringTest
 {
+    @Autowired
     private DataApprovalService dataApprovalService;
 
-    private PeriodStore periodStore;
+    @Autowired
+    private PeriodService periodService;
 
-    private SystemSettingManager systemSettingManager;
+    @Autowired
+    private DataElementCategoryService categoryService;
 
+    @Autowired
+    private DataSetService dataSetService;
+    
+    @Autowired
+    private OrganisationUnitService organisationUnitService;
+    
     // -------------------------------------------------------------------------
     // Supporting data
     // -------------------------------------------------------------------------
@@ -76,18 +87,26 @@ public class DataApprovalServiceTest
 
     private Period periodB;
 
-    private OrganisationUnit sourceA;
+    private Period periodC;
 
-    private OrganisationUnit sourceB;
+    private OrganisationUnit organisationUnitA;
 
-    private OrganisationUnit sourceC;
+    private OrganisationUnit organisationUnitB;
 
-    private OrganisationUnit sourceD;
+    private OrganisationUnit organisationUnitC;
+
+    private OrganisationUnit organisationUnitD;
+
+    private OrganisationUnit organisationUnitE;
+
+    private OrganisationUnit organisationUnitF;
 
     private User userA;
 
     private User userB;
 
+    private DataElementCategoryOptionCombo attributeOptionCombo;
+    
     // -------------------------------------------------------------------------
     // Set up/tear down
     // -------------------------------------------------------------------------
@@ -95,20 +114,9 @@ public class DataApprovalServiceTest
     @Override
     public void setUpTest() throws Exception
     {
-        dataApprovalService = (DataApprovalService) getBean( DataApprovalService.ID );
-
-        dataSetService = (DataSetService) getBean( DataSetService.ID );
-
-        categoryService = (DataElementCategoryService) getBean( DataElementCategoryService.ID );
-
-        periodStore = (PeriodStore) getBean( PeriodStore.ID );
-
-        organisationUnitService = (OrganisationUnitService) getBean( OrganisationUnitService.ID );
-
+        identifiableObjectManager = (IdentifiableObjectManager) getBean( IdentifiableObjectManager.ID );
         userService = (UserService) getBean( UserService.ID );
-
-        systemSettingManager = (SystemSettingManager) getBean( SystemSettingManager.ID );
-
+        
         // ---------------------------------------------------------------------
         // Add supporting data
         // ---------------------------------------------------------------------
@@ -123,26 +131,44 @@ public class DataApprovalServiceTest
 
         periodA = createPeriod( getDay( 5 ), getDay( 6 ) );
         periodB = createPeriod( getDay( 6 ), getDay( 7 ) );
+        periodC = createPeriod( PeriodType.getPeriodTypeByName( "Yearly" ), getDay( 1 ), getDay( 365 ) );
 
-        periodStore.addPeriod( periodA );
-        periodStore.addPeriod( periodB );
+        periodService.addPeriod( periodA );
+        periodService.addPeriod( periodB );
 
-        sourceA = createOrganisationUnit( 'A' );
-        sourceB = createOrganisationUnit( 'B', sourceA );
-        sourceC = createOrganisationUnit( 'C', sourceB );
-        sourceD = createOrganisationUnit( 'D', sourceC );
+        //
+        // Organisation unit hierarchy:
+        //
+        //      A
+        //      |
+        //      B
+        //     / \
+        //    C   E
+        //    |   |
+        //    D   F
+        //
+        
+        organisationUnitA = createOrganisationUnit( 'A' );
+        organisationUnitB = createOrganisationUnit( 'B', organisationUnitA );
+        organisationUnitC = createOrganisationUnit( 'C', organisationUnitB );
+        organisationUnitD = createOrganisationUnit( 'D', organisationUnitC );
+        organisationUnitE = createOrganisationUnit( 'E', organisationUnitB );
+        organisationUnitF = createOrganisationUnit( 'F', organisationUnitE );
 
-        organisationUnitService.addOrganisationUnit( sourceA );
-        organisationUnitService.addOrganisationUnit( sourceB );
-        organisationUnitService.addOrganisationUnit( sourceC );
-        organisationUnitService.addOrganisationUnit( sourceD );
+        organisationUnitService.addOrganisationUnit( organisationUnitA );
+        organisationUnitService.addOrganisationUnit( organisationUnitB );
+        organisationUnitService.addOrganisationUnit( organisationUnitC );
+        organisationUnitService.addOrganisationUnit( organisationUnitD );
+        organisationUnitService.addOrganisationUnit( organisationUnitE );
+        organisationUnitService.addOrganisationUnit( organisationUnitF );
 
         userA = createUser( 'A' );
         userB = createUser( 'B' );
 
         userService.addUser( userA );
         userService.addUser( userB );
-
+        
+        attributeOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
     }
 
     // -------------------------------------------------------------------------
@@ -153,10 +179,10 @@ public class DataApprovalServiceTest
     public void testAddAndGetDataApproval() throws Exception
     {
         Date date = new Date();
-        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, sourceA, date, userA );
-        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, sourceB, date, userA );
-        DataApproval dataApprovalC = new DataApproval( dataSetA, periodB, sourceA, date, userA );
-        DataApproval dataApprovalD = new DataApproval( dataSetB, periodA, sourceA, date, userA );
+        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, organisationUnitA, attributeOptionCombo, date, userA );
+        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, organisationUnitB, attributeOptionCombo, date, userA );
+        DataApproval dataApprovalC = new DataApproval( dataSetA, periodB, organisationUnitA, attributeOptionCombo, date, userA );
+        DataApproval dataApprovalD = new DataApproval( dataSetB, periodA, organisationUnitA, attributeOptionCombo, date, userA );
         DataApproval dataApprovalE;
 
         dataApprovalService.addDataApproval( dataApprovalA );
@@ -164,39 +190,39 @@ public class DataApprovalServiceTest
         dataApprovalService.addDataApproval( dataApprovalC );
         dataApprovalService.addDataApproval( dataApprovalD );
 
-        dataApprovalA = dataApprovalService.getDataApproval( dataSetA, periodA, sourceA );
+        dataApprovalA = dataApprovalService.getDataApproval( dataSetA, periodA, organisationUnitA, attributeOptionCombo );
         assertNotNull( dataApprovalA );
         assertEquals( dataSetA.getId(), dataApprovalA.getDataSet().getId() );
         assertEquals( periodA, dataApprovalA.getPeriod() );
-        assertEquals( sourceA.getId(), dataApprovalA.getSource().getId() );
+        assertEquals( organisationUnitA.getId(), dataApprovalA.getOrganisationUnit().getId() );
         assertEquals( date, dataApprovalA.getCreated() );
         assertEquals( userA.getId(), dataApprovalA.getCreator().getId() );
 
-        dataApprovalB = dataApprovalService.getDataApproval( dataSetA, periodA, sourceB );
+        dataApprovalB = dataApprovalService.getDataApproval( dataSetA, periodA, organisationUnitB, attributeOptionCombo );
         assertNotNull( dataApprovalB );
         assertEquals( dataSetA.getId(), dataApprovalB.getDataSet().getId() );
         assertEquals( periodA, dataApprovalB.getPeriod() );
-        assertEquals( sourceB.getId(), dataApprovalB.getSource().getId() );
+        assertEquals( organisationUnitB.getId(), dataApprovalB.getOrganisationUnit().getId() );
         assertEquals( date, dataApprovalB.getCreated() );
         assertEquals( userA.getId(), dataApprovalB.getCreator().getId() );
 
-        dataApprovalC = dataApprovalService.getDataApproval( dataSetA, periodB, sourceA );
+        dataApprovalC = dataApprovalService.getDataApproval( dataSetA, periodB, organisationUnitA, attributeOptionCombo );
         assertNotNull( dataApprovalC );
         assertEquals( dataSetA.getId(), dataApprovalC.getDataSet().getId() );
         assertEquals( periodB, dataApprovalC.getPeriod() );
-        assertEquals( sourceA.getId(), dataApprovalC.getSource().getId() );
+        assertEquals( organisationUnitA.getId(), dataApprovalC.getOrganisationUnit().getId() );
         assertEquals( date, dataApprovalC.getCreated() );
         assertEquals( userA.getId(), dataApprovalC.getCreator().getId() );
 
-        dataApprovalD = dataApprovalService.getDataApproval( dataSetB, periodA, sourceA );
+        dataApprovalD = dataApprovalService.getDataApproval( dataSetB, periodA, organisationUnitA, attributeOptionCombo );
         assertNotNull( dataApprovalD );
         assertEquals( dataSetB.getId(), dataApprovalD.getDataSet().getId() );
         assertEquals( periodA, dataApprovalD.getPeriod() );
-        assertEquals( sourceA.getId(), dataApprovalD.getSource().getId() );
+        assertEquals( organisationUnitA.getId(), dataApprovalD.getOrganisationUnit().getId() );
         assertEquals( date, dataApprovalD.getCreated() );
         assertEquals( userA.getId(), dataApprovalD.getCreator().getId() );
 
-        dataApprovalE = dataApprovalService.getDataApproval( dataSetB, periodB, sourceB );
+        dataApprovalE = dataApprovalService.getDataApproval( dataSetB, periodB, organisationUnitB, attributeOptionCombo );
         assertNull( dataApprovalE );
     }
 
@@ -204,8 +230,8 @@ public class DataApprovalServiceTest
     public void testAddDuplicateDataApproval() throws Exception
     {
         Date date = new Date();
-        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, sourceA, date, userA );
-        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, sourceA, date, userA );
+        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, organisationUnitA, attributeOptionCombo, date, userA );
+        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, organisationUnitA, attributeOptionCombo, date, userA );
 
         dataApprovalService.addDataApproval( dataApprovalA );
 
@@ -224,35 +250,35 @@ public class DataApprovalServiceTest
     public void testDeleteDataApproval() throws Exception
     {
         Date date = new Date();
-        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, sourceA, date, userA );
-        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, sourceB, date, userB );
+        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, organisationUnitA, attributeOptionCombo, date, userA );
+        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, organisationUnitB, attributeOptionCombo, date, userB );
         DataApproval testA;
         DataApproval testB;
 
         dataApprovalService.addDataApproval( dataApprovalA );
         dataApprovalService.addDataApproval( dataApprovalB );
 
-        testA = dataApprovalService.getDataApproval( dataSetA, periodA, sourceA );
+        testA = dataApprovalService.getDataApproval( dataSetA, periodA, organisationUnitA, attributeOptionCombo );
         assertNotNull( testA );
 
-        testB = dataApprovalService.getDataApproval( dataSetA, periodA, sourceB );
+        testB = dataApprovalService.getDataApproval( dataSetA, periodA, organisationUnitB, attributeOptionCombo );
         assertNotNull( testB );
 
         dataApprovalService.deleteDataApproval( dataApprovalA ); // Only A should be deleted.
 
-        testA = dataApprovalService.getDataApproval( dataSetA, periodA, sourceA );
+        testA = dataApprovalService.getDataApproval( dataSetA, periodA, organisationUnitA, attributeOptionCombo );
         assertNull( testA );
 
-        testB = dataApprovalService.getDataApproval( dataSetA, periodA, sourceB );
+        testB = dataApprovalService.getDataApproval( dataSetA, periodA, organisationUnitB, attributeOptionCombo );
         assertNotNull( testB );
 
         dataApprovalService.addDataApproval( dataApprovalA );
         dataApprovalService.deleteDataApproval( dataApprovalB ); // A and B should both be deleted.
 
-        testA = dataApprovalService.getDataApproval( dataSetA, periodA, sourceA );
+        testA = dataApprovalService.getDataApproval( dataSetA, periodA, organisationUnitA, attributeOptionCombo );
         assertNull( testA );
 
-        testB = dataApprovalService.getDataApproval( dataSetA, periodA, sourceB );
+        testB = dataApprovalService.getDataApproval( dataSetA, periodA, organisationUnitB, attributeOptionCombo );
         assertNull( testB );
     }
 
@@ -260,135 +286,281 @@ public class DataApprovalServiceTest
     public void testGetDataApprovalState() throws Exception
     {
         // Not enabled.
-        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceA ) );
-        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceB ) );
-        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceC ) );
-        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceD ) );
-
-        // Enabled globally, but not for data set.
-        systemSettingManager.saveSystemSetting( SystemSettingManager.KEY_ENABLE_DATA_APPROVAL, true );
-        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceA ) );
-        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceB ) );
-        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceC ) );
-        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceD ) );
+        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitA, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitB, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitC, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitD, attributeOptionCombo ) );
 
         // Enabled for data set, but data set not associated with organisation unit.
         dataSetA.setApproveData( true );
-        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceA ) );
-        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceB ) );
-        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceC ) );
-        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceD ) );
+        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitA, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitB, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitC, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitD, attributeOptionCombo ) );
 
         // Enabled for data set, and associated with organisation unit C.
-        sourceC.addDataSet( dataSetA );
-        assertEquals( DataApprovalState.WAITING_FOR_LOWER_LEVEL_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceA ) );
-        assertEquals( DataApprovalState.WAITING_FOR_LOWER_LEVEL_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceB ) );
-        assertEquals( DataApprovalState.READY_FOR_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceC ) );
-        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceD ) );
+        organisationUnitC.addDataSet( dataSetA );
+        assertEquals( DataApprovalState.WAITING_FOR_LOWER_LEVEL_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitA, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.WAITING_FOR_LOWER_LEVEL_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitB, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.READY_FOR_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitC, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitD, attributeOptionCombo ) );
 
         // Approved for sourceC
         Date date = new Date();
-        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, sourceC, date, userA );
+        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, organisationUnitC, attributeOptionCombo, date, userA );
         dataApprovalService.addDataApproval( dataApprovalA );
-        assertEquals( DataApprovalState.WAITING_FOR_LOWER_LEVEL_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceA ) );
-        assertEquals( DataApprovalState.READY_FOR_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceB ) );
-        assertEquals( DataApprovalState.APPROVED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceC ) );
-        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceD ) );
+        assertEquals( DataApprovalState.WAITING_FOR_LOWER_LEVEL_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitA, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.READY_FOR_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitB, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitC, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitD, attributeOptionCombo ) );
 
         // Disable approval for dataset.
         dataSetA.setApproveData( false );
-        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceA ) );
-        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceB ) );
-        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceC ) );
-        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceD ) );
+        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitA, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitB, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitC, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitD, attributeOptionCombo ) );
+    }
 
-        // Enable for dataset but disable for system.
+    @Test
+    public void testGetDataApprovalStateWithMultipleChildren() throws Exception
+    {
         dataSetA.setApproveData( true );
-        systemSettingManager.saveSystemSetting( SystemSettingManager.KEY_ENABLE_DATA_APPROVAL, false );
-        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceA ) );
-        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceB ) );
-        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceC ) );
-        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodA, sourceD ) );
+
+        organisationUnitD.addDataSet( dataSetA );
+        organisationUnitF.addDataSet( dataSetA );
+
+        Date date = new Date();
+
+        assertEquals( DataApprovalState.WAITING_FOR_LOWER_LEVEL_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitB, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.WAITING_FOR_LOWER_LEVEL_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitC, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.READY_FOR_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitD, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.WAITING_FOR_LOWER_LEVEL_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitE, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.READY_FOR_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitF, attributeOptionCombo ) );
+
+        dataApprovalService.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitF, attributeOptionCombo, date, userA ) );
+
+        assertEquals( DataApprovalState.WAITING_FOR_LOWER_LEVEL_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitB, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.WAITING_FOR_LOWER_LEVEL_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitC, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.READY_FOR_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitD, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.READY_FOR_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitE, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitF, attributeOptionCombo ) );
+
+        dataApprovalService.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitD, attributeOptionCombo, date, userA ) );
+
+        assertEquals( DataApprovalState.WAITING_FOR_LOWER_LEVEL_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitB, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.READY_FOR_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitC, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitD, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.READY_FOR_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitE, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitF, attributeOptionCombo ) );
+
+        dataApprovalService.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitE, attributeOptionCombo, date, userA ) );
+
+        assertEquals( DataApprovalState.WAITING_FOR_LOWER_LEVEL_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitB, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.READY_FOR_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitC, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitD, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitE, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitF, attributeOptionCombo ) );
+
+        dataApprovalService.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitC, attributeOptionCombo, date, userA ) );
+
+        assertEquals( DataApprovalState.READY_FOR_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitB, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitC, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitD, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitE, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVED, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitF, attributeOptionCombo ) );
+    }
+
+    @Test
+    public void testGetDataApprovalStateWrongPeriod() throws Exception
+    {
+        dataSetA.setApproveData( true );
+
+        organisationUnitA.addDataSet( dataSetA );
+
+        assertEquals( DataApprovalState.READY_FOR_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodA, organisationUnitA, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.READY_FOR_APPROVAL, dataApprovalService.getDataApprovalState( dataSetA, periodB, organisationUnitA, attributeOptionCombo ) );
+        assertEquals( DataApprovalState.APPROVAL_NOT_NEEDED, dataApprovalService.getDataApprovalState( dataSetA, periodC, organisationUnitA, attributeOptionCombo ) );
     }
 
     @Test
     public void testMayApprove() throws Exception
     {
-        userB.addOrganisationUnit( sourceB );
+        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        units.add( organisationUnitC );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE );
 
-        assertEquals( false, dataApprovalService.mayApprove( sourceA, userB, false, false ) );
-        assertEquals( false, dataApprovalService.mayApprove( sourceB, userB, false, false ) );
-        assertEquals( false, dataApprovalService.mayApprove( sourceC, userB, false, false ) );
-        assertEquals( false, dataApprovalService.mayApprove( sourceD, userB, false, false ) );
+        assertEquals( false, dataApprovalService.mayApprove( organisationUnitA ) );
+        assertEquals( false, dataApprovalService.mayApprove( organisationUnitB ) );
+        assertEquals( true, dataApprovalService.mayApprove( organisationUnitC ) );
+        assertEquals( false, dataApprovalService.mayApprove( organisationUnitD ) );
+    }
 
-        assertEquals( false, dataApprovalService.mayApprove( sourceA, userB, false, true ) );
-        assertEquals( false, dataApprovalService.mayApprove( sourceB, userB, false, true ) );
-        assertEquals( true, dataApprovalService.mayApprove( sourceC, userB, false, true ) );
-        assertEquals( true, dataApprovalService.mayApprove( sourceD, userB, false, true ) );
+    @Test
+    public void testMayApproveLowerLevels() throws Exception
+    {
+        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        units.add( organisationUnitB );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
 
-        assertEquals( false, dataApprovalService.mayApprove( sourceA, userB, true, false ) );
-        assertEquals( true, dataApprovalService.mayApprove( sourceB, userB, true, false ) );
-        assertEquals( false, dataApprovalService.mayApprove( sourceC, userB, true, false ) );
-        assertEquals( false, dataApprovalService.mayApprove( sourceD, userB, true, false ) );
+        assertEquals( false, dataApprovalService.mayApprove( organisationUnitA ) );
+        assertEquals( false, dataApprovalService.mayApprove( organisationUnitB ) );
+        assertEquals( true, dataApprovalService.mayApprove( organisationUnitC ) );
+        assertEquals( true, dataApprovalService.mayApprove( organisationUnitD ) );
+    }
 
-        assertEquals( false, dataApprovalService.mayApprove( sourceA, userB, true, true ) );
-        assertEquals( true, dataApprovalService.mayApprove( sourceB, userB, true, true ) );
-        assertEquals( true, dataApprovalService.mayApprove( sourceC, userB, true, true ) );
-        assertEquals( true, dataApprovalService.mayApprove( sourceD, userB, true, true ) );
+    @Test
+    public void testMayApproveSameAndLowerLevels() throws Exception
+    {
+        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        units.add( organisationUnitB );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
+
+        assertEquals( false, dataApprovalService.mayApprove( organisationUnitA ) );
+        assertEquals( true, dataApprovalService.mayApprove( organisationUnitB ) );
+        assertEquals( true, dataApprovalService.mayApprove( organisationUnitC ) );
+        assertEquals( true, dataApprovalService.mayApprove( organisationUnitD ) );
+    }
+
+    @Test
+    public void testMayApproveNoAuthority() throws Exception
+    {
+        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        units.add( organisationUnitC );
+        createUserAndInjectSecurityContext( units, false );
+
+        assertEquals( false, dataApprovalService.mayApprove( organisationUnitA ) );
+        assertEquals( false, dataApprovalService.mayApprove( organisationUnitB ) );
+        assertEquals( false, dataApprovalService.mayApprove( organisationUnitC ) );
+        assertEquals( false, dataApprovalService.mayApprove( organisationUnitD ) );
     }
 
     @Test
     public void testMayUnapprove() throws Exception
     {
-        userA.addOrganisationUnit( sourceA );
-        userB.addOrganisationUnit( sourceB );
+        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        units.add( organisationUnitB );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE );
 
         Date date = new Date();
-        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, sourceA, date, userA );
-        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, sourceB, date, userA );
-        DataApproval dataApprovalC = new DataApproval( dataSetA, periodA, sourceC, date, userA );
-        DataApproval dataApprovalD = new DataApproval( dataSetA, periodA, sourceD, date, userA );
+        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, organisationUnitA, attributeOptionCombo, date, userA );
+        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, organisationUnitB, attributeOptionCombo, date, userA );
+        DataApproval dataApprovalC = new DataApproval( dataSetA, periodA, organisationUnitC, attributeOptionCombo, date, userA );
+        DataApproval dataApprovalD = new DataApproval( dataSetA, periodA, organisationUnitD, attributeOptionCombo, date, userA );
 
-        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalA, userB, false, false ) );
-        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalB, userB, false, false ) );
-        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalC, userB, false, false ) );
-        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalD, userB, false, false ) );
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalA ) );
+        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalB ) );
+        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalC ) );
+        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalD ) );
 
-        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalA, userB, false, true ) );
-        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalB, userB, false, true ) );
-        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalC, userB, false, true ) );
-        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalD, userB, false, true ) );
-
-        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalA, userB, true, false ) );
-        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalB, userB, true, false ) );
-        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalC, userB, true, false ) );
-        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalD, userB, true, false ) );
-
-        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalA, userB, true, true ) );
-        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalB, userB, true, true ) );
-        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalC, userB, true, true ) );
-        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalD, userB, true, true ) );
-
-        // If the organisation unit has no parent:
-        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalA, userA, false, false ) );
-        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalA, userA, false, true ) );
-        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalA, userA, true, false ) );
-        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalA, userA, true, true ) );
-
+        // These approvals will not block un-approving
         dataApprovalService.addDataApproval( dataApprovalB );
         dataApprovalService.addDataApproval( dataApprovalC );
         dataApprovalService.addDataApproval( dataApprovalD );
 
-        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalA, userB, true, true ) );
-        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalB, userB, true, true ) );
-        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalC, userB, true, true ) );
-        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalD, userB, true, true ) );
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalA ) );
+        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalB ) );
+        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalC ) );
+        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalD ) );
 
+        // Approval at A will block them all
         dataApprovalService.addDataApproval( dataApprovalA );
 
-        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalA, userB, true, true ) );
-        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalB, userB, true, true ) );
-        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalC, userB, true, true ) );
-        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalD, userB, true, true ) );
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalA ) );
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalB ) );
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalC ) );
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalD ) );
+    }
+
+    @Test
+    public void testMayUnapproveLowerLevels() throws Exception
+    {
+        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        units.add( organisationUnitB );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
+
+        Date date = new Date();
+        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, organisationUnitA, attributeOptionCombo, date, userA );
+        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, organisationUnitB, attributeOptionCombo, date, userA );
+        DataApproval dataApprovalC = new DataApproval( dataSetA, periodA, organisationUnitC, attributeOptionCombo, date, userA );
+        DataApproval dataApprovalD = new DataApproval( dataSetA, periodA, organisationUnitD, attributeOptionCombo, date, userA );
+
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalA ) );
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalB ) );
+        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalC ) );
+        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalD ) );
+
+        // These approvals will not block un-approving
+        dataApprovalService.addDataApproval( dataApprovalC );
+        dataApprovalService.addDataApproval( dataApprovalD );
+
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalA ) );
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalB ) );
+        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalC ) );
+        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalD ) );
+
+        // Approval at B will block them all
+        dataApprovalService.addDataApproval( dataApprovalB );
+
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalA ) );
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalB ) );
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalC ) );
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalD ) );
+    }
+
+    @Test
+    public void testMayUnapproveSameAndLowerLevels() throws Exception
+    {
+        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        units.add( organisationUnitB );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE );
+
+        Date date = new Date();
+        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, organisationUnitA, attributeOptionCombo, date, userA );
+        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, organisationUnitB, attributeOptionCombo, date, userA );
+        DataApproval dataApprovalC = new DataApproval( dataSetA, periodA, organisationUnitC, attributeOptionCombo, date, userA );
+        DataApproval dataApprovalD = new DataApproval( dataSetA, periodA, organisationUnitD, attributeOptionCombo, date, userA );
+
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalA ) );
+        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalB ) );
+        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalC ) );
+        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalD ) );
+
+        // These approvals will not block un-approving
+        dataApprovalService.addDataApproval( dataApprovalB );
+        dataApprovalService.addDataApproval( dataApprovalC );
+        dataApprovalService.addDataApproval( dataApprovalD );
+
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalA ) );
+        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalB ) );
+        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalC ) );
+        assertEquals( true, dataApprovalService.mayUnapprove( dataApprovalD ) );
+
+        // Approval at A will block them all
+        dataApprovalService.addDataApproval( dataApprovalA );
+
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalA ) );
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalB ) );
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalC ) );
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalD ) );
+    }
+
+    @Test
+    public void testMayUnapproveNoAuthority() throws Exception
+    {
+        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        units.add( organisationUnitB );
+        createUserAndInjectSecurityContext( units, false );
+
+        Date date = new Date();
+        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, organisationUnitA, attributeOptionCombo, date, userA );
+        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, organisationUnitB, attributeOptionCombo, date, userA );
+        DataApproval dataApprovalC = new DataApproval( dataSetA, periodA, organisationUnitC, attributeOptionCombo, date, userA );
+        DataApproval dataApprovalD = new DataApproval( dataSetA, periodA, organisationUnitD, attributeOptionCombo, date, userA );
+
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalA ) );
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalB ) );
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalC ) );
+        assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalD ) );
     }
 }

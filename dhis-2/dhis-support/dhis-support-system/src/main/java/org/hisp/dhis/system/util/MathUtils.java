@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.regex.Pattern;
 
+import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.expression.Operator;
 import org.nfunk.jep.JEP;
 
@@ -305,6 +306,26 @@ public class MathUtils
     {
         return value != null && NUMERIC_LENIENT_PATTERN.matcher( value ).matches();
     }
+    
+    /**
+     * Returns true if the provided string argument is to be considered a unit
+     * interval, which implies that the value is numeric and inclusive between 0 
+     * and 1.
+     * 
+     * @param value the value.
+     * @return true if the provided string argument is to be considered a unit interval.
+     */
+    public static boolean isUnitInterval( String value )
+    {
+        if ( !isNumeric( value ) )
+        {
+            return false;
+        }
+        
+        Double dbl = Double.parseDouble( value );
+        
+        return dbl >= 0d && dbl <= 1d;
+    }
 
     /**
      * Returns true if the provided string argument is to be considered an integer. 
@@ -328,8 +349,7 @@ public class MathUtils
     public static boolean isPositiveInteger( String value )
     {
         return value != null && POSITIVE_INT_PATTERN.matcher( value ).matches();
-    }
-    
+    }    
     
     /**
      * Returns true if the provided string argument is to be considered a positive
@@ -343,7 +363,6 @@ public class MathUtils
     {
         return value != null && POSITIVE_OR_ZERO_INT_PATTERN.matcher( value ).matches();
     }
-
 
     /**
      * Returns true if the provided string argument is to be considered a negative
@@ -367,6 +386,18 @@ public class MathUtils
     public static boolean isZero( String value )
     {
         return value != null && ZERO_PATTERN.matcher( value ).matches();
+    }
+    
+    /**
+     * Indicates if the provided string argument is to be considered as a boolean,
+     * more specifically if it equals "true" or "false".
+     * 
+     * @param value the value.
+     * @return if the provided string argument is to be considered as a boolean.
+     */
+    public static boolean isBool( String value )
+    {
+        return value != null && ( value.equals( DataValue.TRUE ) || value.equals( DataValue.FALSE ) );
     }
     
     /**

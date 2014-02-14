@@ -28,26 +28,23 @@ package org.hisp.dhis.dxf2.events.enrollment;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dxf2.events.person.Person;
-import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
-import org.hisp.dhis.dxf2.importsummary.ImportSummary;
-import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramInstance;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+
+import org.hisp.dhis.dxf2.events.person.Person;
+import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
+import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public interface EnrollmentService
 {
-    public void setFormat(I18nFormat format);
-
     // -------------------------------------------------------------------------
     // READ
     // -------------------------------------------------------------------------
@@ -60,9 +57,9 @@ public interface EnrollmentService
 
     Enrollments getEnrollments( Person person, EnrollmentStatus status );
 
-    Enrollments getEnrollments( Patient patient );
+    Enrollments getEnrollments( TrackedEntityInstance entityInstance );
 
-    Enrollments getEnrollments( Patient patient, EnrollmentStatus status );
+    Enrollments getEnrollments( TrackedEntityInstance entityInstance, EnrollmentStatus status );
 
     Enrollments getEnrollments( Program program );
 

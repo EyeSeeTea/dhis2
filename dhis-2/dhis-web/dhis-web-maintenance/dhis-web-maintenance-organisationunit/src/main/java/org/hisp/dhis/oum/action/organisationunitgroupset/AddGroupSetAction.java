@@ -30,13 +30,16 @@ package org.hisp.dhis.oum.action.organisationunitgroupset;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 
 import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.system.util.AttributeUtils;
 
 /**
  * @author Lars Helge Overland
@@ -54,6 +57,13 @@ public class AddGroupSetAction
     public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
     {
         this.organisationUnitGroupService = organisationUnitGroupService;
+    }
+
+    private AttributeService attributeService;
+
+    public void setAttributeService( AttributeService attributeService )
+    {
+        this.attributeService = attributeService;
     }
 
     // -------------------------------------------------------------------------
@@ -81,11 +91,25 @@ public class AddGroupSetAction
         this.compulsory = compulsory;
     }
 
+    private boolean dataDimension;
+
+    public void setDataDimension( boolean dataDimension )
+    {
+        this.dataDimension = dataDimension;
+    }
+
     private Collection<String> selectedGroups;
 
     public void setSelectedGroups( Collection<String> selectedGroups )
     {
         this.selectedGroups = selectedGroups;
+    }
+
+    private List<String> jsonAttributeValues;
+
+    public void setJsonAttributeValues( List<String> jsonAttributeValues )
+    {
+        this.jsonAttributeValues = jsonAttributeValues;
     }
 
     // -------------------------------------------------------------------------
@@ -95,7 +119,7 @@ public class AddGroupSetAction
     public String execute()
         throws Exception
     {
-        OrganisationUnitGroupSet groupSet = new OrganisationUnitGroupSet( name, description, compulsory );
+        OrganisationUnitGroupSet groupSet = new OrganisationUnitGroupSet( name, description, compulsory, dataDimension );
 
         Set<OrganisationUnitGroup> selectedMembers = new HashSet<OrganisationUnitGroup>();
 
@@ -105,6 +129,12 @@ public class AddGroupSetAction
             {
                 selectedMembers.add( organisationUnitGroupService.getOrganisationUnitGroup( Integer.parseInt( groupId ) ) );
             }
+        }
+
+        if ( jsonAttributeValues != null )
+        {
+            AttributeUtils.updateAttributeValuesFromJson( groupSet.getAttributeValues(),
+                jsonAttributeValues, attributeService );
         }
 
         groupSet.setOrganisationUnitGroups( selectedMembers );

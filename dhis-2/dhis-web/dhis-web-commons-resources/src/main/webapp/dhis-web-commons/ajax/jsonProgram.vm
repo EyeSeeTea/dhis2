@@ -10,12 +10,9 @@
 	"dateOfEnrollmentDescription": "$!encoder.jsEncode( ${program.dateOfEnrollmentDescription} )",
 	"dateOfIncidentDescription": "$!encoder.jsEncode( ${program.dateOfIncidentDescription} )",
 	"programStageCount": "${program.programStages.size()}",
-	"noAttributes": "$!program.patientAttributes.size()",
-	"noIdentifierTypes": "$!program.patientIdentifierTypes.size()",
+	"noAttributes": "$!program.attributes.size()",
 	"onlyEnrollOnce": "$!program.onlyEnrollOnce",
 	"displayOnAllOrgunit": "$!program.displayOnAllOrgunit",
-	"useBirthDateAsIncidentDate": "$!program.useBirthDateAsIncidentDate",
-	"useBirthDateAsEnrollmentDate": "$!program.useBirthDateAsEnrollmentDate",
 	"selectEnrollmentDatesInFuture": "$!program.selectEnrollmentDatesInFuture",
 	"selectIncidentDatesInFuture": "$!program.selectIncidentDatesInFuture"
   }

@@ -36,6 +36,7 @@ import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.dashboard.DashboardItem;
 import org.hisp.dhis.datadictionary.DataDictionary;
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -67,15 +68,6 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeGroup;
-import org.hisp.dhis.patient.PatientAudit;
-import org.hisp.dhis.patient.PatientIdentifier;
-import org.hisp.dhis.patient.PatientIdentifierType;
-import org.hisp.dhis.patient.PatientRegistrationForm;
-import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
-import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.program.Program;
@@ -90,6 +82,13 @@ import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.sqlview.SqlView;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.hisp.dhis.trackedentity.TrackedEntityAttributeGroup;
+import org.hisp.dhis.trackedentity.TrackedEntityAudit;
+import org.hisp.dhis.trackedentity.TrackedEntityForm;
+import org.hisp.dhis.trackedentity.TrackedEntityInstance;
+import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
+import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValue;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserGroup;
@@ -339,7 +338,7 @@ public abstract class DeletionHandler
     {
         return null;
     }
-
+    
     public void deleteValidationRuleGroup( ValidationRuleGroup validationRuleGroup )
     {
     }
@@ -502,57 +501,39 @@ public abstract class DeletionHandler
         return null;
     }
 
-    public void deletePatient( Patient patient )
+    public void deleteTrackedEntityInstance( TrackedEntityInstance entityInstance )
     {
     }
 
-    public String allowDeletePatient( Patient patient )
-    {
-        return null;
-    }
-
-    public String allowDeletePatientAttribute( PatientAttribute patientAttribute )
+    public String allowDeleteTrackedEntityInstance( TrackedEntityInstance entityInstance )
     {
         return null;
     }
 
-    public void deletePatientAttribute( PatientAttribute patientAttribute )
-    {
-    }
-
-    public String allowDeletePatientAttributeValue( PatientAttributeValue patientAttributeValue )
+    public String allowDeleteTrackedEntityAttribute( TrackedEntityAttribute attribute )
     {
         return null;
     }
 
-    public void deletePatientAttributeValue( PatientAttributeValue patientAttributeValue )
+    public void deleteTrackedEntityAttribute( TrackedEntityAttribute attribute )
     {
     }
 
-    public String allowDeletePatientAttributeGroup( PatientAttributeGroup patientAttributeGroup )
-    {
-        return null;
-    }
-
-    public void deletePatientAttributeGroup( PatientAttributeGroup patientAttributeGroup )
-    {
-    }
-
-    public String allowDeletePatientIdentifier( PatientIdentifier patientIdentifier )
+    public String allowDeleteTrackedEntityAttributeValue( TrackedEntityAttributeValue attributeValue )
     {
         return null;
     }
 
-    public void deletePatientIdentifier( PatientIdentifier patientIdentifier )
+    public void deleteTrackedEntityAttributeValue( TrackedEntityAttributeValue attributeValue )
     {
     }
 
-    public String allowDeletePatientIdentifierType( PatientIdentifierType patientIdentifierType )
+    public String allowDeleteTrackedEntityAttributeGroup( TrackedEntityAttributeGroup attributeGroup )
     {
         return null;
     }
 
-    public void deletePatientIdentifierType( PatientIdentifierType patientIdentifierType )
+    public void deleteTrackedEntityAttributeGroup( TrackedEntityAttributeGroup attributeGroup )
     {
     }
 
@@ -628,12 +609,12 @@ public abstract class DeletionHandler
     {
     }
 
-    public String allowDeletePatientDataValue( PatientDataValue patientDataValue )
+    public String allowDeleteTrackedEntityDataValue( TrackedEntityDataValue dataValue )
     {
         return null;
     }
 
-    public void deletePatientDataValue( PatientDataValue patientDataValue )
+    public void deleteTrackedEntityDataValue( TrackedEntityDataValue dataValue )
     {
     }
 
@@ -655,12 +636,12 @@ public abstract class DeletionHandler
     {
     }
 
-    public String allowDeletePatientRegistrationForm( PatientRegistrationForm patientRegistrationForm )
+    public String allowDeleteTrackedEntityForm( TrackedEntityForm entityForm )
     {
         return null;
     }
 
-    public void deletePatientRegistrationForm( PatientRegistrationForm patientRegistrationForm )
+    public void deleteTrackedEntityForm( TrackedEntityForm entityForm )
     {
     }
 
@@ -700,11 +681,11 @@ public abstract class DeletionHandler
     {
     }
 
-    public void deletePatientAudit( PatientAudit patientAudit )
+    public void deleteTrackedEntityAudit( TrackedEntityAudit audit )
     {
     }
 
-    public String allowDeletePatientAudit( PatientAudit patientAudit )
+    public String allowDeleteTrackedEntityAudit( TrackedEntityAudit audit )
     {
         return null;
     }
@@ -741,6 +722,15 @@ public abstract class DeletionHandler
     }
 
     public String allowDeleteDashboardItem( DashboardItem dashboardItem )
+    {
+        return null;
+    }
+    
+    public void deleteCategoryOptionGroup( CategoryOptionGroup categoryOptionGroup )
+    {
+    }
+
+    public String allowCategoryOptionGroup( CategoryOptionGroup categoryOptionGroup )
     {
         return null;
     }

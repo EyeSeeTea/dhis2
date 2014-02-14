@@ -72,8 +72,20 @@ public class AddTariffDataAction
     private String dataElementId;
 
     private String orgUnitUid;
+    
+    private String target;
+    
+    private String targetPercentage;     
+    
+    public void setTarget(String target) {
+		this.target = target;
+	}
 
-    public void setDataElementId( String dataElementId )
+	public void setTargetPercentage(String targetPercentage) {
+		this.targetPercentage = targetPercentage;
+	}
+
+	public void setDataElementId( String dataElementId )
     {
         this.dataElementId = dataElementId;
     }
@@ -111,6 +123,7 @@ public class AddTariffDataAction
         throws Exception
     {
         SimpleDateFormat dateFormat = new SimpleDateFormat( "yyyy-MM-dd" );
+        
         Date sDate = dateFormat.parse( startDate );
         Date eDate = dateFormat.parse( endDate );
 
@@ -127,6 +140,14 @@ public class AddTariffDataAction
             tariffDataValue = new TariffDataValue();
             
             tariffDataValue.setValue( Double.parseDouble( tariff ) );
+            if(!target.equals(""))
+            {
+            	tariffDataValue.setTarget(Integer.parseInt(target));
+            }
+            if(!targetPercentage.equals(""))
+            {
+            	tariffDataValue.setTargetPercentage(Double.parseDouble(targetPercentage));
+            }            
             tariffDataValue.setStartDate( sDate );
             tariffDataValue.setEndDate( eDate );
             tariffDataValue.setTimestamp( new Date() );
@@ -136,14 +157,24 @@ public class AddTariffDataAction
             tariffDataValue.setOrganisationUnit( organisationUnit );
             
             tariffDataValueService.addTariffDataValue( tariffDataValue );
+            System.out.println("Tariff Data Added");
         }
         else
         {
             tariffDataValue.setValue( Double.parseDouble( tariff ) );
+            if(!target.equals(""))
+            {
+            	tariffDataValue.setTarget(Integer.parseInt(target));
+            }
+            if(!targetPercentage.equals(""))
+            {
+            	tariffDataValue.setTargetPercentage(Double.parseDouble(targetPercentage));
+            }   
             tariffDataValue.setTimestamp( new Date() );
             tariffDataValue.setStoredBy( currentUserService.getCurrentUsername() );
             
             tariffDataValueService.updateTariffDataValue( tariffDataValue );
+            System.out.println("Tariff Data Updated");
         }
 
         return SUCCESS;

@@ -28,6 +28,12 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.BaseDimensionalObject;
@@ -36,6 +42,8 @@ import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.dashboard.Dashboard;
 import org.hisp.dhis.datadictionary.DataDictionary;
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
+import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -63,26 +71,19 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeGroup;
-import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.sqlview.SqlView;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.hisp.dhis.trackedentity.TrackedEntityAttributeGroup;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleGroup;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -122,6 +123,8 @@ final public class ExchangeClasses
         allExportClasses.put( OrganisationUnitGroupSet.class, "organisationUnitGroupSets" );
 
         allExportClasses.put( DataElementCategoryOption.class, "categoryOptions" );
+        allExportClasses.put( CategoryOptionGroup.class, "categoryOptionGroups" );
+        allExportClasses.put( CategoryOptionGroupSet.class, "categoryOptionGroupSets" );
         allExportClasses.put( DataElementCategory.class, "categories" );
         allExportClasses.put( DataElementCategoryCombo.class, "categoryCombos" );
         allExportClasses.put( DataElementCategoryOptionCombo.class, "categoryOptionCombos" );
@@ -165,9 +168,8 @@ final public class ExchangeClasses
         allExportClasses.put( Program.class, "programs" );
         allExportClasses.put( ProgramStage.class, "programStages" );
         allExportClasses.put( RelationshipType.class, "relationshipTypes" );
-        allExportClasses.put( PatientIdentifierType.class, "personIdentifierTypes" );
-        allExportClasses.put( PatientAttribute.class, "personAttributeTypes" );
-        allExportClasses.put( PatientAttributeGroup.class, "personAttributeGroups" );
+        allExportClasses.put( TrackedEntityAttribute.class, "personAttributeTypes" );
+        allExportClasses.put( TrackedEntityAttributeGroup.class, "personAttributeGroups" );
 
         allExportClasses.put( BaseDimensionalObject.class, "dimensions" );
 
@@ -188,19 +190,21 @@ final public class ExchangeClasses
         exportClasses.remove( Program.class );
         exportClasses.remove( ProgramStage.class );
         exportClasses.remove( RelationshipType.class );
-        exportClasses.remove( PatientIdentifierType.class );
-        exportClasses.remove( PatientAttribute.class );
-        exportClasses.remove( PatientAttributeGroup.class );
+        exportClasses.remove( TrackedEntityAttribute.class );
+        exportClasses.remove( TrackedEntityAttributeGroup.class );
         importClasses.remove( Program.class );
         importClasses.remove( ProgramStage.class );
         importClasses.remove( RelationshipType.class );
-        importClasses.remove( PatientIdentifierType.class );
-        importClasses.remove( PatientAttribute.class );
-        importClasses.remove( PatientAttributeGroup.class );
+        importClasses.remove( TrackedEntityAttribute.class );
+        importClasses.remove( TrackedEntityAttributeGroup.class );
 
         // special class which is created on demand in association with other objects
         exportClasses.remove( DataElementOperand.class );
         importClasses.remove( DataElementOperand.class );
+        exportClasses.remove( CategoryOptionGroup.class );
+        importClasses.remove( CategoryOptionGroup.class );
+        exportClasses.remove( CategoryOptionGroupSet.class );
+        importClasses.remove( CategoryOptionGroupSet.class );
 
         allExportClasses.put( MetaDataFilter.class, "metaDataFilters" );
         exportClasses.remove( MetaDataFilter.class );

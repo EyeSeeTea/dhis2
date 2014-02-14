@@ -48,6 +48,11 @@ public interface ResourceTableService
     void generateCategoryOptionComboNames();
     
     /**
+     * Generates a resource table for all category options.
+     */
+    void generateCategoryOptionGroupSetTable();
+    
+    /**
      * Generates a resource table for all data elements.
      */
     void generateDataElementGroupSetTable();
@@ -87,4 +92,14 @@ public interface ResourceTableService
      * option combinations.
      */
     void generateDataElementCategoryOptionComboTable();
+    
+    /**
+     * Create all sql views in the database.
+     */
+    void createAllSqlViews();
+    
+    /**
+     * Drop all sql views in the database.
+     */
+    void dropAllSqlViews();
 }

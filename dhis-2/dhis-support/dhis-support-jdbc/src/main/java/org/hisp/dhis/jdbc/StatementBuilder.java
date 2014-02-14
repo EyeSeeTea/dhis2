@@ -85,6 +85,12 @@ public interface StatementBuilder
     String limitRecord( int offset, int limit );
     
     /**
+     * Returns the value to use in insert statements for auto-increment columns.
+     * @return value to use in insert statements for auto-increment columns.
+     */
+    String getAutoIncrementValue();
+    
+    /**
      * Returns statement for vacuum and analyze operations for a table. Returns
      * null if such statement is not relevant.
      * 
@@ -155,6 +161,11 @@ public interface StatementBuilder
      * group datasetcompleteness table.
      */
     String getCreateOrgUnitDataSetCompletenessTable();
+    
+    /**
+     * Returns the number of columns part of the primary key for the given table.
+     */
+    String getNumberOfColumnsInPrimaryKey( String table );
     
     /**
      * Creates a delete datavalue statement.

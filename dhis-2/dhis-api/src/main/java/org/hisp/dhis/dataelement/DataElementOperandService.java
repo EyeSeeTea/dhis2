@@ -33,27 +33,30 @@ import java.util.List;
 
 /**
  * @author Abyot Asalefew
- * @version $Id$
  */
 public interface DataElementOperandService
 {
     String ID = DataElementOperandService.class.getName();
 
-    int addDataElementOperand( DataElementOperand dataElementOperand );    
+    int addDataElementOperand( DataElementOperand dataElementOperand );
 
     void deleteDataElementOperand( DataElementOperand dataElementOperand );
 
     DataElementOperand getDataElementOperand( int id );
-    
+
     DataElementOperand getDataElementOperandByUid( String uid );
-    
+
     List<DataElementOperand> getDataElementOperandsByUid( Collection<String> uids );
 
     DataElementOperand getDataElementOperand( DataElementOperand dataElementOperand );
 
     Collection<DataElementOperand> getAllDataElementOperands();
 
+    Collection<DataElementOperand> getAllDataElementOperands(int first, int max);
+
     Collection<DataElementOperand> getDataElementOperandByDataElements( Collection<DataElement> dataElements );
 
     Collection<DataElementOperand> getDataElementOperandByOptionCombos( Collection<DataElementCategoryOptionCombo> optionCombos );
+
+    Collection<DataElementOperand> getDataElementOperandByDataElementGroup( DataElementGroup dataElementGroup );
 }

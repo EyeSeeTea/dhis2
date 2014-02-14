@@ -30,11 +30,7 @@ package org.hisp.dhis.dxf2.events;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import java.util.Date;
 import java.util.HashSet;
 
 import org.hamcrest.CoreMatchers;
@@ -50,13 +46,13 @@ import org.hisp.dhis.dxf2.events.person.Person;
 import org.hisp.dhis.dxf2.events.person.PersonService;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
-import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageDataElement;
 import org.hisp.dhis.program.ProgramStageDataElementService;
+import org.hisp.dhis.trackedentity.TrackedEntityInstance;
+import org.hisp.dhis.user.UserService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -78,24 +74,15 @@ public class RegistrationMultiEventsServiceTest
     @Autowired
     private EnrollmentService enrollmentService;
 
-    @Autowired
-    private IdentifiableObjectManager manager;
+    private TrackedEntityInstance maleA;
 
-    private Patient maleA;
+    private TrackedEntityInstance maleB;
 
-    private Patient maleB;
+    private TrackedEntityInstance femaleA;
 
-    private Patient femaleA;
-
-    private Patient femaleB;
+    private TrackedEntityInstance femaleB;
 
     private Person personMaleA;
-
-    private Person personMaleB;
-
-    private Person personFemaleA;
-
-    private Person personFemaleB;
 
     private OrganisationUnit organisationUnitA;
 
@@ -115,44 +102,44 @@ public class RegistrationMultiEventsServiceTest
     protected void setUpTest()
         throws Exception
     {
+        identifiableObjectManager = (IdentifiableObjectManager) getBean( IdentifiableObjectManager.ID );
+        userService = (UserService) getBean( UserService.ID );
+        
         organisationUnitA = createOrganisationUnit( 'A' );
         organisationUnitB = createOrganisationUnit( 'B' );
-        manager.save( organisationUnitA );
-        manager.save( organisationUnitB );
+        identifiableObjectManager.save( organisationUnitA );
+        identifiableObjectManager.save( organisationUnitB );
 
-        maleA = createPatient( 'A', organisationUnitA );
-        maleB = createPatient( 'B', organisationUnitB );
-        femaleA = createPatient( 'C', organisationUnitA );
-        femaleB = createPatient( 'D', organisationUnitB );
+        maleA = createTrackedEntityInstance( 'A', organisationUnitA );
+        maleB = createTrackedEntityInstance( 'B', organisationUnitB );
+        femaleA = createTrackedEntityInstance( 'C', organisationUnitA );
+        femaleB = createTrackedEntityInstance( 'D', organisationUnitB );
 
-        manager.save( maleA );
-        manager.save( maleB );
-        manager.save( femaleA );
-        manager.save( femaleB );
+        identifiableObjectManager.save( maleA );
+        identifiableObjectManager.save( maleB );
+        identifiableObjectManager.save( femaleA );
+        identifiableObjectManager.save( femaleB );
 
         personMaleA = personService.getPerson( maleA );
-        personMaleB = personService.getPerson( maleB );
-        personFemaleA = personService.getPerson( femaleA );
-        personFemaleB = personService.getPerson( femaleB );
 
         dataElementA = createDataElement( 'A' );
         dataElementB = createDataElement( 'B' );
         dataElementA.setType( DataElement.VALUE_TYPE_INT );
         dataElementB.setType( DataElement.VALUE_TYPE_INT );
 
-        manager.save( dataElementA );
-        manager.save( dataElementB );
+        identifiableObjectManager.save( dataElementA );
+        identifiableObjectManager.save( dataElementB );
 
         programStageA = createProgramStage( 'A', 0 );
         programStageB = createProgramStage( 'B', 0 );
         programStageB.setIrregular( true );
 
-        manager.save( programStageA );
-        manager.save( programStageB );
+        identifiableObjectManager.save( programStageA );
+        identifiableObjectManager.save( programStageB );
 
         programA = createProgram( 'A', new HashSet<ProgramStage>(), organisationUnitA );
         programA.setType( Program.MULTIPLE_EVENTS_WITH_REGISTRATION );
-        manager.save( programA );
+        identifiableObjectManager.save( programA );
 
         ProgramStageDataElement programStageDataElement = new ProgramStageDataElement();
         programStageDataElement.setDataElement( dataElementA );
@@ -174,16 +161,11 @@ public class RegistrationMultiEventsServiceTest
         programA.getProgramStages().add( programStageA );
         programA.getProgramStages().add( programStageB );
 
-        manager.update( programStageA );
-        manager.update( programStageB );
-        manager.update( programA );
+        identifiableObjectManager.update( programStageA );
+        identifiableObjectManager.update( programStageB );
+        identifiableObjectManager.update( programA );
 
-        createSuperuserAndInjectSecurityContext( 'A' );
-
-        // mocked format
-        I18nFormat mockFormat = mock( I18nFormat.class );
-        when( mockFormat.parseDate( anyString() ) ).thenReturn( new Date() );
-        eventService.setFormat( mockFormat );
+        createUserAndInjectSecurityContext( true );
     }
 
     @Override
@@ -316,6 +298,7 @@ public class RegistrationMultiEventsServiceTest
         event.setProgramStage( programStage );
         event.setOrgUnit( orgUnit );
         event.setPerson( person );
+        event.setEventDate( "2013-01-01" );
 
         event.getDataValues().add( new DataValue( dataElement, "10" ) );
 

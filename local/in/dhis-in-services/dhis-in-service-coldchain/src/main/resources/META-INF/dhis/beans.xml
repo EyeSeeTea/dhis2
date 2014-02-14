@@ -97,6 +97,17 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     </bean>		
 
 	<!-- Service definitions -->
+	<bean id="org.hisp.dhis.coldchain.aggregation.CCEIAggregationService"
+        class="org.hisp.dhis.coldchain.aggregation.DefaultCCEIAggregationService">
+		<property name="ccemReportManager" ref="org.hisp.dhis.coldchain.reports.CCEMReportManager" />
+		<property name="constantService" ref="org.hisp.dhis.constant.ConstantService" />
+		<property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService"/>
+		<property name="periodService" ref="org.hisp.dhis.period.PeriodService"/>
+		<property name="dataElementCategoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
+		<property name="jdbcTemplate" ref="jdbcTemplate"/>
+    </bean>
+	
+	
 	<bean id="org.hisp.dhis.coldchain.model.ModelTypeAttributeOptionService"
         class="org.hisp.dhis.coldchain.model.DefaultModelTypeAttributeOptionService">
         <property name="modelTypeAttributeOptionStore" ref="org.hisp.dhis.coldchain.model.ModelTypeAttributeOptionStore"/>
@@ -221,7 +232,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <property name="jdbcTemplate" ref="jdbcTemplate"/>
         <property name="databaseInfoProvider" ref="databaseInfoProvider" />
     </bean>	
-	
 	
 	
 	<!-- ModelTypeAttributeGroup -->

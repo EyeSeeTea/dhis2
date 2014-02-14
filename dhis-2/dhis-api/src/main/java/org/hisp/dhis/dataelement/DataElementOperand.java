@@ -175,6 +175,11 @@ public class DataElementOperand
     @Override
     public String getName()
     {
+        if ( name != null )
+        {
+            return name;
+        }
+        
         String name = null;
         
         if ( dataElement != null )
@@ -244,7 +249,7 @@ public class DataElementOperand
      * organisation unit level. If no aggregation levels lower than the
      * organisation unit level exist, null is returned.
      *
-     * @param organisationUnitLevel the hiearchy level of the relevant
+     * @param organisationUnitLevel the hierarchy level of the relevant
      *                              OrganisationUnit.
      */
     public Integer getRelevantAggregationLevel( int organisationUnitLevel )
@@ -368,6 +373,9 @@ public class DataElementOperand
         this.frequencyOrder = dataElement.getFrequencyOrder();
         this.aggregationLevels = new ArrayList<Integer>( dataElement.getAggregationLevels() );
         this.valueType = dataElement.getType();
+
+        this.uid = dataElementId + SEPARATOR + optionComboId;
+        this.name = getPrettyName( dataElement, categoryOptionCombo );
     }
 
     /**
@@ -379,11 +387,14 @@ public class DataElementOperand
     {
         this.dataElementId = dataElement.getUid();
         this.operandId = String.valueOf( dataElementId );
-        this.operandName = dataElement.getDisplayName() + SPACE + NAME_TOTAL;
+        this.operandName = getPrettyName( dataElement, null );
         this.aggregationOperator = dataElement.getAggregationOperator();
         this.frequencyOrder = dataElement.getFrequencyOrder();
         this.aggregationLevels = new ArrayList<Integer>( dataElement.getAggregationLevels() );
         this.valueType = dataElement.getType();
+
+        this.uid = dataElementId;
+        this.name = getPrettyName( dataElement, null );
     }
 
     /**

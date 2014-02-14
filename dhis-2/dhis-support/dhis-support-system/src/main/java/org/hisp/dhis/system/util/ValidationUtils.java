@@ -32,6 +32,7 @@ import org.apache.commons.validator.routines.DateValidator;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.datavalue.DataValue;
 
 import java.awt.geom.Point2D;
 import java.util.Arrays;
@@ -245,10 +246,14 @@ public class ValidationUtils
      * <li>data_element_or_type_null_or_empty</li>
      * <li>value_length_greater_than_max_length</li>
      * <li>value_not_numeric</li>
+     * <li>value_not_unit_interval</li>
      * <li>value_not_integer</li>
      * <li>value_not_positive_integer</li>
      * <li>value_not_negative_integer</li>
      * <li>value_is_zero_and_not_zero_significant</li>
+     * <li>value_not_bool</li>
+     * <li>value_not_true_only</li>
+     * <li>value_not_valid_date</li>
      * </ul>
      *
      * @param value       the data value.
@@ -268,7 +273,7 @@ public class ValidationUtils
         }
 
         List<String> types = Arrays.asList( VALUE_TYPE_STRING, VALUE_TYPE_INT, VALUE_TYPE_NUMBER, 
-            VALUE_TYPE_POSITIVE_INT, VALUE_TYPE_NEGATIVE_INT, VALUE_TYPE_ZERO_OR_POSITIVE_INT);
+            VALUE_TYPE_POSITIVE_INT, VALUE_TYPE_NEGATIVE_INT, VALUE_TYPE_ZERO_OR_POSITIVE_INT );
 
         String type = dataElement.getDetailedNumberType();
 
@@ -280,6 +285,11 @@ public class ValidationUtils
         if ( VALUE_TYPE_NUMBER.equals( type ) && !MathUtils.isNumeric( value ) )
         {
             return "value_not_numeric";
+        }
+        
+        if ( VALUE_TYPE_UNIT_INTERVAL.equals( type ) && !MathUtils.isUnitInterval( value ) )
+        {
+            return "value_not_unit_interval";
         }
 
         if ( VALUE_TYPE_INT.equals( type ) && !MathUtils.isInteger( value ) )
@@ -301,7 +311,22 @@ public class ValidationUtils
         {
             return "value_not_zero_or_positive_integer";
         }
+        
+        if ( VALUE_TYPE_BOOL.equals( type ) && !MathUtils.isBool( value ) )
+        {
+            return "value_not_bool";
+        }
 
+        if ( VALUE_TYPE_TRUE_ONLY.equals( type ) && !DataValue.TRUE.equals( value ) )
+        {
+            return "value_not_true_only";
+        }
+        
+        if ( VALUE_TYPE_DATE.equals( type ) && !DateUtils.dateIsValid( value ) )
+        {
+            return "value_not_valid_date";
+        }
+        
         if ( VALUE_TYPE_INT.equals( dataElement.getType() ) && MathUtils.isZero( value ) &&
             !dataElement.isZeroIsSignificant() && !AGGREGATION_OPERATOR_AVERAGE.equals( dataElement.getAggregationOperator() ) )
         {

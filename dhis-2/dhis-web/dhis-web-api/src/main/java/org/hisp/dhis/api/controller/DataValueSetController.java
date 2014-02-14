@@ -115,7 +115,7 @@ public class DataValueSetController
     {
         response.setContentType( CONTENT_TYPE_XML );
 
-        boolean isSingleDataValueSet = dataSet.size() == 1 && orgUnit.size() == 1;
+        boolean isSingleDataValueSet = dataSet.size() == 1 && period != null && orgUnit.size() == 1;
         
         if ( isSingleDataValueSet )
         {
@@ -136,7 +136,7 @@ public class DataValueSetController
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = CONTENT_TYPE_CSV)
-    public void getDataValuesCsv( 
+    public void getDataValueSetCsv( 
         @RequestParam Set<String> dataSet, 
         @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate, 
         @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
@@ -213,8 +213,7 @@ public class DataValueSetController
         StringWriter dxf2 = new StringWriter();
         transformer.transform( new StreamSource( in ), new StreamResult( dxf2 ) );
         
-        // override id scheme 
-        importOptions.setOrgUnitIdScheme( "CODE");
+        importOptions.setOrgUnitIdScheme( "CODE"); // Override id scheme
         importOptions.setDataElementIdScheme( "CODE");
         
         dataValueSetService.saveDataValueSetJson( 

@@ -28,13 +28,26 @@ package org.hisp.dhis.de.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
+import static org.hisp.dhis.system.util.ListUtils.getCollection;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.dataanalysis.DataAnalysisService;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.datavalue.DataValue;
+import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.datavalue.DeflatedDataValue;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -46,14 +59,7 @@ import org.hisp.dhis.validation.ValidationResult;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleService;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
-import static org.hisp.dhis.system.util.ListUtils.getCollection;
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Margrethe Store
@@ -109,42 +115,49 @@ public class ValidationAction
     {
         this.organisationUnitService = organisationUnitService;
     }
+    
+    private DataValueService dataValueService;
+
+    public void setDataValueService( DataValueService dataValueService )
+    {
+        this.dataValueService = dataValueService;
+    }
 
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private String periodId;
+    private String ds;
 
-    public void setPeriodId( String periodId )
+    public void setDs( String ds )
     {
-        this.periodId = periodId;
+        this.ds = ds;
     }
 
-    private String dataSetId;
+    private String pe;
 
-    public void setDataSetId( String dataSetId )
+    public void setPe( String pe )
     {
-        this.dataSetId = dataSetId;
+        this.pe = pe;
     }
 
-    private String organisationUnitId;
+    private String ou;
 
-    public void setOrganisationUnitId( String organisationUnitId )
+    public void setOu( String ou )
     {
-        this.organisationUnitId = organisationUnitId;
+        this.ou = ou;
     }
 
-    private boolean multiOrganisationUnit;
+    private boolean multiOu;
 
-    public void setMultiOrganisationUnit( boolean multiOrganisationUnit )
+    public boolean isMultiOu()
     {
-        this.multiOrganisationUnit = multiOrganisationUnit;
+        return multiOu;
     }
 
-    public boolean isMultiOrganisationUnit()
+    public void setMultiOu( boolean multiOu )
     {
-        return multiOrganisationUnit;
+        this.multiOu = multiOu;
     }
 
     // -------------------------------------------------------------------------
@@ -178,6 +191,13 @@ public class ValidationAction
     {
         return dataValues;
     }
+    
+    private Map<OrganisationUnit, List<DataElementOperand>> commentViolations = new TreeMap<OrganisationUnit, List<DataElementOperand>>();
+
+    public Map<OrganisationUnit, List<DataElementOperand>> getCommentViolations()
+    {
+        return commentViolations;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -186,13 +206,13 @@ public class ValidationAction
     public String execute()
         throws Exception
     {
-        OrganisationUnit orgUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
+        OrganisationUnit orgUnit = organisationUnitService.getOrganisationUnit( ou );
 
-        DataSet dataSet = dataSetService.getDataSet( dataSetId );
+        DataSet dataSet = dataSetService.getDataSet( ds );
 
-        Period selectedPeriod = PeriodType.getPeriodFromIsoString( periodId );
+        Period selectedPeriod = PeriodType.getPeriodFromIsoString( pe );
 
-        if ( selectedPeriod == null || orgUnit == null || ( multiOrganisationUnit && !orgUnit.hasChild() ) )
+        if ( selectedPeriod == null || orgUnit == null || ( multiOu && !orgUnit.hasChild() ) )
         {
             return SUCCESS;
         }
@@ -202,7 +222,7 @@ public class ValidationAction
 
         List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>();
 
-        if ( !multiOrganisationUnit )
+        if ( !multiOu )
         {
             organisationUnits.add( orgUnit );
         }
@@ -228,9 +248,16 @@ public class ValidationAction
             {
                 validationResults.put( organisationUnit, results );
             }
+            
+            List<DataElementOperand> violations = noValueRequiresCommentAnalysis( organisationUnit, dataSet, period );
+            
+            if ( !violations.isEmpty() )
+            {
+                commentViolations.put( organisationUnit, violations );
+            }
         }
 
-        return dataValues.size() == 0 && validationResults.size() == 0 ? SUCCESS : INPUT;
+        return dataValues.isEmpty() && validationResults.isEmpty() & commentViolations.isEmpty() ? SUCCESS : INPUT;
     }
 
     // -------------------------------------------------------------------------
@@ -278,5 +305,36 @@ public class ValidationAction
         }
 
         return validationResults;
+    }
+
+    // -------------------------------------------------------------------------
+    // No value requires comment analysis
+    // -------------------------------------------------------------------------
+    
+    private List<DataElementOperand> noValueRequiresCommentAnalysis( OrganisationUnit organisationUnit, DataSet dataSet, Period period )
+    {
+        List<DataElementOperand> violations = new ArrayList<DataElementOperand>();
+     
+        if ( !dataSet.isNoValueRequiresComment() )
+        {
+            return violations;
+        }
+        
+        for ( DataElement de : dataSet.getDataElements() )
+        {
+            for ( DataElementCategoryOptionCombo co : de.getCategoryCombo().getOptionCombos() )
+            {
+                DataValue dv = dataValueService.getDataValue( de, period, organisationUnit, co );
+                
+                if ( dv == null || DataValue.FALSE.equals( dv.getValue() ) )
+                {
+                    violations.add( new DataElementOperand( de, co ) );
+                }
+            }
+        }
+        
+        log.info( "Number of missing comments: " + violations.size() );
+        
+        return violations;
     }
 }

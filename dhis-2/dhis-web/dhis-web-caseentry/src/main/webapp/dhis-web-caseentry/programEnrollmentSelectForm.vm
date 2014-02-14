@@ -15,8 +15,8 @@
 </script>
 
 <form id='programEnrollmentSelectDiv' name='programEnrollmentSelectDiv' method='POST' action='saveProgramEnrollment.action'>
-	<input type="hidden" id="patientId" name="patientId" value="$patient.id">
-	<input type="hidden" id="patientUid" name="patientUid" value="$patient.uid">
+	<input type="hidden" id="entityInstanceId" name="entityInstanceId" value="$entityInstance.id">
+	<input type="hidden" id="entityInstanceUid" name="entityInstanceUid" value="$entityInstance.uid">
 	<table>
 		<tr>
 			<td class='text-column'><label for="programId">$i18n.getString( "program" )</label></td>
@@ -24,7 +24,7 @@
 				<select id="programId" name="programId" onchange='programOnchange(this.value);'>
 					#if($programs.size()==0)
 					<option value="">[$i18n.getString( "none_program" )]</option>
-					#elseif($programs.size()>1)
+					#else
 					<option value="">[$i18n.getString( "please_select" )]</option>
 					#end
 					#foreach( $program in $programs )
@@ -79,5 +79,4 @@
 <script>
 	var i18n_enroll = '$encoder.jsEscape( $i18n.getString( "enroll" ) , "'")';
 	var i18n_program_stage = '$encoder.jsEscape( $i18n.getString( "program_stage" ) , "'")';
-	var birthDate = '$!format.formatDate($!patient.birthDate)';
 </script>

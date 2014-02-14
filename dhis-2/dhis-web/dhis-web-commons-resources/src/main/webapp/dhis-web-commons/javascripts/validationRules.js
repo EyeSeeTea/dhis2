@@ -4,6 +4,9 @@ var validationRules = {
             "required" : true,
             "rangelength" : [ 2, 140 ]
         },
+        "inviteUsername" : {
+            "rangelength" : [ 2, 140 ]
+        },
         "firstName" : {
             "required" : true,
             "rangelength" : [ 2, 140 ]
@@ -30,6 +33,11 @@ var validationRules = {
         "email" : {
             "email" : true,
             "rangelength" : [ 0, 160 ]
+        },
+        "inviteEmail" : {
+            "required" : true,
+            "email" : true,
+            "rangelength" : [ 4, 160 ]
         },
         "phoneNumber" : {
             "rangelength" : [ 0, 80 ]
@@ -73,7 +81,7 @@ var validationRules = {
             "rangelength" : [ 2, 50 ]
         },
         "code" : {
-            "rangelength" : [ 0, 25 ],
+            "rangelength" : [ 0, 50 ],
             "alphanumericwithbasicpuncspaces" : true,
             "notOnlyDigits" : false
         },
@@ -121,7 +129,7 @@ var validationRules = {
         "code" : {
             "alphanumericwithbasicpuncspaces" : true,
             "notOnlyDigits" : false,
-            "rangelength" : [ 0, 25 ]
+            "rangelength" : [ 0, 50 ]
         }
     },
     "organisationUnitGroupSet" : {
@@ -163,7 +171,7 @@ var validationRules = {
         "code" : {
             "alphanumericwithbasicpuncspaces" : true,
             "notOnlyDigits" : false,
-            "rangelength" : [ 0, 25 ]
+            "rangelength" : [ 0, 50 ]
         },
         "expiryDays": {
             "digits" : true
@@ -227,7 +235,7 @@ var validationRules = {
             "notOnlyDigits" : true
         },
         "code" : {
-            "rangelength" : [ 0, 25 ],
+            "rangelength" : [ 0, 50 ],
             "alphanumericwithbasicpuncspaces" : true,
             "notOnlyDigits" : false
         },
@@ -278,7 +286,7 @@ var validationRules = {
         "code" : {
             "alphanumericwithbasicpuncspaces" : true,
             "notOnlyDigits" : false,
-            "rangelength" : [ 0, 25 ]
+            "rangelength" : [ 0, 50 ]
         }
     },
     "dataElementGroupSet" : {
@@ -320,7 +328,7 @@ var validationRules = {
             "alphanumericwithbasicpuncspaces" : true
         },
         "code" : {
-            "rangelength" : [ 0, 25 ],
+            "rangelength" : [ 0, 50 ],
             "alphanumericwithbasicpuncspaces" : true,
             "notOnlyDigits" : false
         },

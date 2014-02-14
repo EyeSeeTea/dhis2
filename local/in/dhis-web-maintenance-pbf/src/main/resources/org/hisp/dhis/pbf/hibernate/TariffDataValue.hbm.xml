@@ -15,6 +15,10 @@
     </composite-id>
 
     <property name="value" />
+    
+    <property name="target" />
+    
+    <property name="targetPercentage" />
 
     <property name="storedBy" column="storedby" length="100" />
 

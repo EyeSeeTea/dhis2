@@ -168,13 +168,6 @@ public class SetGeneralSettingsAction
         this.multiOrganisationUnitForms = multiOrganisationUnitForms;
     }
 
-    private boolean enableDataApproval;
-
-    public void setEnableDataApproval( boolean enableDataApproval )
-    {
-        this.enableDataApproval = enableDataApproval;
-    }
-
     private String message;
 
     public String getMessage()
@@ -200,7 +193,6 @@ public class SetGeneralSettingsAction
         systemSettingManager.saveSystemSetting( KEY_FACTOR_OF_DEVIATION, factorDeviation );
         systemSettingManager.saveSystemSetting( KEY_PHONE_NUMBER_AREA_CODE, phoneNumberAreaCode );
         systemSettingManager.saveSystemSetting( KEY_MULTI_ORGANISATION_UNIT_FORMS, multiOrganisationUnitForms );
-        systemSettingManager.saveSystemSetting( KEY_ENABLE_DATA_APPROVAL, enableDataApproval );
         systemSettingManager.saveSystemSetting( KEY_GOOGLE_ANALYTICS_UA, googleAnalyticsUA );
 
         Configuration configuration = configurationService.getConfiguration();

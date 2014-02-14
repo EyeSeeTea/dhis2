@@ -40,6 +40,7 @@ import java.util.concurrent.Future;
 
 import org.hisp.dhis.analytics.AnalyticsTable;
 import org.hisp.dhis.analytics.DataQueryParams;
+import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
@@ -80,7 +81,7 @@ public class JdbcAnalyticsTableManager
     
     public String getTableName()
     {
-        return "analytics";
+        return ANALYTICS_TABLE_NAME;
     }
     
     public void createTable( AnalyticsTable table )
@@ -165,7 +166,9 @@ public class JdbcAnalyticsTableManager
             "from datavalue dv " +
             "left join _dataelementgroupsetstructure degs on dv.dataelementid=degs.dataelementid " +
             "left join _organisationunitgroupsetstructure ougs on dv.sourceid=ougs.organisationunitid " +
-            "left join _categorystructure cs on dv.categoryoptioncomboid=cs.categoryoptioncomboid " +
+            "left join _categoryoptiongroupsetstructure cogs on dv.categoryoptioncomboid=cogs.categoryoptioncomboid " +
+            "left join _categorystructure dcs on dv.categoryoptioncomboid=dcs.categoryoptioncomboid " +
+            "left join _categorystructure acs on dv.attributeoptioncomboid=acs.categoryoptioncomboid " +
             "left join _orgunitstructure ous on dv.sourceid=ous.organisationunitid " +
             "left join _periodstructure ps on dv.periodid=ps.periodid " +
             "left join dataelement de on dv.dataelementid=de.dataelementid " +
@@ -188,13 +191,19 @@ public class JdbcAnalyticsTableManager
         List<String[]> columns = new ArrayList<String[]>();
 
         Collection<DataElementGroupSet> dataElementGroupSets =
-            dataElementService.getAllDataElementGroupSets();
+            dataElementService.getDataDimensionDataElementGroupSets();
         
         Collection<OrganisationUnitGroupSet> orgUnitGroupSets = 
-            organisationUnitGroupService.getAllOrganisationUnitGroupSets();
+            organisationUnitGroupService.getDataDimensionOrganisationUnitGroupSets();
 
-        Collection<DataElementCategory> categories =
-            categoryService.getDataDimensionDataElementCategories();
+        Collection<CategoryOptionGroupSet> categoryOptionGroupSets =
+            categoryService.getDataDimensionCategoryOptionGroupSets();
+        
+        Collection<DataElementCategory> disaggregationCategories =
+            categoryService.getDisaggregationDataDimensionCategories();
+        
+        Collection<DataElementCategory> attributeCategories =
+            categoryService.getAttributeDataDimensionCategories();
 
         Collection<OrganisationUnitLevel> levels =
             organisationUnitService.getOrganisationUnitLevels();
@@ -210,10 +219,22 @@ public class JdbcAnalyticsTableManager
             String[] col = { quote( groupSet.getUid() ), "character(11)", "ougs." + quote( groupSet.getUid() ) };
             columns.add( col );
         }
-        
-        for ( DataElementCategory category : categories )
+
+        for ( CategoryOptionGroupSet groupSet : categoryOptionGroupSets )
         {
-            String[] col = { quote( category.getUid() ), "character(11)", "cs." + quote( category.getUid() ) };
+            String[] col = { quote( groupSet.getUid() ), "character(11)", "cogs." + quote( groupSet.getUid() ) };
+            columns.add( col );
+        }
+        
+        for ( DataElementCategory category : disaggregationCategories )
+        {
+            String[] col = { quote( category.getUid() ), "character(11)", "dcs." + quote( category.getUid() ) };
+            columns.add( col );
+        }
+        
+        for ( DataElementCategory category : attributeCategories )
+        {
+            String[] col = { quote( category.getUid() ), "character(11)", "acs." + quote( category.getUid() ) };
             columns.add( col );
         }
         
@@ -229,7 +250,7 @@ public class JdbcAnalyticsTableManager
         for ( PeriodType periodType : periodTypes )
         {
             String column = quote( periodType.getName().toLowerCase() );
-            String[] col = { column, "character varying(10)", "ps." + column };
+            String[] col = { column, "character varying(15)", "ps." + column };
             columns.add( col );
         }
         
@@ -278,7 +299,7 @@ public class JdbcAnalyticsTableManager
             {
                 int level = i + 1;
                 
-                String column = DataQueryParams.LEVEL_PREFIX + level;
+                String column = quote( DataQueryParams.LEVEL_PREFIX + level );
                 
                 sql.append( column + " = null," );
             }

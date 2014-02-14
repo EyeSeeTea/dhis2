@@ -55,7 +55,7 @@ public class JdbcCompletenessTableManager
     
     public String getTableName()
     {
-        return "completeness";
+        return COMPLETENESS_TABLE_NAME;
     }
     
     public void createTable( AnalyticsTable table )
@@ -142,7 +142,7 @@ public class JdbcCompletenessTableManager
         List<String[]> columns = new ArrayList<String[]>();
 
         Collection<OrganisationUnitGroupSet> orgUnitGroupSets = 
-            organisationUnitGroupService.getAllOrganisationUnitGroupSets();
+            organisationUnitGroupService.getDataDimensionOrganisationUnitGroupSets();
         
         Collection<OrganisationUnitLevel> levels =
             organisationUnitService.getOrganisationUnitLevels();
@@ -163,7 +163,7 @@ public class JdbcCompletenessTableManager
         for ( PeriodType periodType : PeriodType.getAvailablePeriodTypes().subList( 0, 7 ) )
         {
             String column = quote( periodType.getName().toLowerCase() );
-            String[] col = { column, "character varying(10)", "ps." + column };
+            String[] col = { column, "character varying(15)", "ps." + column };
             columns.add( col );
         }
         

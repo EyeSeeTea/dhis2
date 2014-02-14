@@ -70,6 +70,8 @@
 
   <cache name="org.hisp.dhis.organisationunit.OrganisationUnitGroupSet" maxElementsInMemory="50" />
 
+  <cache name="org.hisp.dhis.organisationunit.OrganisationUnitGroupSet.attributeValues" maxElementsInMemory="1000" />
+
   <cache name="org.hisp.dhis.user.User" maxElementsInMemory="200" />
 
   <cache name="org.hisp.dhis.user.UserSetting" maxElementsInMemory="200" />
@@ -117,6 +119,10 @@
   <cache name="org.hisp.dhis.dataset.LockException" maxElementsInMemory="1000" />
 
   <cache name="org.hisp.dhis.filter.MetaDataFilter" maxElementsInMemory="100" />
+  
+  <cache name="org.hisp.dhis.program.Program" maxElementsInMemory="100" />
+  
+  <cache name="org.hisp.dhis.program.ProgramStage" maxElementsInMemory="500" />
 
   <!-- Hibernate Associations -->
 
@@ -141,6 +147,8 @@
   <cache name="org.hisp.dhis.dataset.DataSet.sections" maxElementsInMemory="3000" />
 
   <cache name="org.hisp.dhis.dataset.DataSet.userGroupAccesses" maxElementsInMemory="200" />
+
+  <cache name="org.hisp.dhis.dataset.DataSet.attributeValues" maxElementsInMemory="1000" />
 
   <cache name="org.hisp.dhis.dashboard.Dashboard.userGroupAccesses" maxElementsInMemory="500" />
 

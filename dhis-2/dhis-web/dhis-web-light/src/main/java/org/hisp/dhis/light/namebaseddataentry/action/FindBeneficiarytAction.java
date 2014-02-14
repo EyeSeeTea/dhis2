@@ -28,119 +28,145 @@ package org.hisp.dhis.light.namebaseddataentry.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientService;
-
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
-public class FindBeneficiarytAction
-    implements Action
-{
-    private static final String REDIRECT = "redirect";
+import org.hisp.dhis.trackedentity.TrackedEntityInstance;
+import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
+import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
+import com.opensymphony.xwork2.Action;
 
-    private PatientService patientService;
+public class FindBeneficiarytAction implements Action {
+	private static final String REDIRECT = "redirect";
 
-    public void setPatientService( PatientService patientService )
-    {
-        this.patientService = patientService;
-    }
+	// -------------------------------------------------------------------------
+	// Dependencies
+	// -------------------------------------------------------------------------
 
-    // -------------------------------------------------------------------------
-    // Input & Output
-    // -------------------------------------------------------------------------
+	private TrackedEntityInstanceService patientService;
 
-    private Collection<Patient> patients;
+	public void setPatientService(TrackedEntityInstanceService patientService) {
+		this.patientService = patientService;
+	}
 
-    public Collection<Patient> getPatients()
-    {
-        return patients;
-    }
+	// -------------------------------------------------------------------------
+	// Input & Output
+	// -------------------------------------------------------------------------
 
-    public void setPatients( Collection<Patient> patients )
-    {
-        this.patients = patients;
-    }
+	private Collection<TrackedEntityInstance> patients;
 
-    private String keyword;
+	public Collection<TrackedEntityInstance> getPatients() {
+		return patients;
+	}
 
-    public String getKeyword()
-    {
-        return keyword;
-    }
+	public void setPatients(Collection<TrackedEntityInstance> patients) {
+		this.patients = patients;
+	}
 
-    public void setKeyword( String keyword )
-    {
-        this.keyword = keyword;
-    }
+	private Set<TrackedEntityAttributeValue> pavSet;
 
-    private Integer organisationUnitId;
+	public Set<TrackedEntityAttributeValue> getPavSet() {
+		return pavSet;
+	}
 
-    public Integer getOrganisationUnitId()
-    {
-        return organisationUnitId;
-    }
+	public void setPavSet(Set<TrackedEntityAttributeValue> pavSet) {
+		this.pavSet = pavSet;
+	}
 
-    public void setOrganisationUnitId( Integer organisationUnitId )
-    {
-        this.organisationUnitId = organisationUnitId;
-    }
+	private Set<TrackedEntityAttributeValue> patientAttributes;
 
-    private Integer patientId;
+	public Set<TrackedEntityAttributeValue> getPatientAttributes() {
+		return patientAttributes;
+	}
 
-    public Integer getPatientId()
-    {
-        return patientId;
-    }
+	public void setPatientAttributes(
+			Set<TrackedEntityAttributeValue> patientAttributes) {
+		this.patientAttributes = patientAttributes;
+	}
 
-    public void setPatientId( Integer patientId )
-    {
-        this.patientId = patientId;
-    }
+	private String keyword;
 
-    // Use in search related patient
+	public String getKeyword() {
+		return keyword;
+	}
 
-    private Integer originalPatientId;
+	public void setKeyword(String keyword) {
+		this.keyword = keyword;
+	}
 
-    public void setOriginalPatientId( Integer originalPatientId )
-    {
-        this.originalPatientId = originalPatientId;
-    }
+	private Integer organisationUnitId;
 
-    public Integer getOriginalPatientId()
-    {
-        return originalPatientId;
-    }
+	public Integer getOrganisationUnitId() {
+		return organisationUnitId;
+	}
 
-    private Integer relationshipTypeId;
+	public void setOrganisationUnitId(Integer organisationUnitId) {
+		this.organisationUnitId = organisationUnitId;
+	}
 
-    public Integer getRelationshipTypeId()
-    {
-        return relationshipTypeId;
-    }
+	private Integer patientAttributeId;
 
-    public void setRelationshipTypeId( Integer relationshipTypeId )
-    {
-        this.relationshipTypeId = relationshipTypeId;
-    }
+	public Integer getPatientAttributeId() {
+		return patientAttributeId;
+	}
 
-    @Override
-    public String execute()
-        throws Exception
-    {   
-        patients = patientService.getPatientsForMobile( keyword, organisationUnitId );
+	public void setPatientAttributeId(Integer patientAttributeId) {
+		this.patientAttributeId = patientAttributeId;
+	}
 
-        if ( patients.size() == 1 )
-        {
-            Patient patient = patients.iterator().next();
-            patientId = patient.getId();
-            return REDIRECT;
-        }
-        return SUCCESS;
-    }
+	private Integer patientId;
+
+	public Integer getPatientId() {
+		return patientId;
+	}
+
+	public void setPatientId(Integer patientId) {
+		this.patientId = patientId;
+	}
+
+	// Use in search related patient
+
+	private Integer originalPatientId;
+
+	public void setOriginalPatientId(Integer originalPatientId) {
+		this.originalPatientId = originalPatientId;
+	}
+
+	public Integer getOriginalPatientId() {
+		return originalPatientId;
+	}
+
+	private Integer relationshipTypeId;
+
+	public Integer getRelationshipTypeId() {
+		return relationshipTypeId;
+	}
+
+	public void setRelationshipTypeId(Integer relationshipTypeId) {
+		this.relationshipTypeId = relationshipTypeId;
+	}
+
+	@Override
+	public String execute() throws Exception {
+
+		patients = patientService.searchTrackedEntityInstancesForMobile( keyword,
+				organisationUnitId, patientAttributeId);
+
+		pavSet = new HashSet<TrackedEntityAttributeValue>();
+
+		for (TrackedEntityInstance p : patients) {
+			pavSet.addAll(p.getAttributeValues());
+		}
+
+		if (patients.size() == 1) {
+			TrackedEntityInstance patient = patients.iterator().next();
+			patientId = patient.getId();
+
+			return REDIRECT;
+		}
+		return SUCCESS;
+	}
 
 }

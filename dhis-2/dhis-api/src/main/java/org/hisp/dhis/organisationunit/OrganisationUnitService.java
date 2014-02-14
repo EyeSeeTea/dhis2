@@ -220,7 +220,7 @@ public interface OrganisationUnitService
 
     /**
      * Returns all OrganisationUnits which are part of the subtree of the
-     * OrganisationUnit with the given identifer and have no children.
+     * OrganisationUnit with the given identifier and have no children.
      *
      * @param id the identifier of the parent OrganisationUnit.
      * @return a collection of OrganisationUnits.
@@ -391,6 +391,8 @@ public interface OrganisationUnitService
      * @return collection of objects.
      */
     Collection<OrganisationUnit> getWithinCoordinateArea( double longitude, double latitude, double distance );
+    
+    boolean isInUserHierarchy( OrganisationUnit organisationUnit );
     
     // -------------------------------------------------------------------------
     // OrganisationUnitHierarchy

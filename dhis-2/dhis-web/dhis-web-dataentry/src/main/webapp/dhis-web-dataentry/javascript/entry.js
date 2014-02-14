@@ -140,33 +140,37 @@ function saveVal( dataElementId, optionComboId, fieldId )
 	
     if ( value != '' )
     {
-        if ( type == 'string' || type == 'int' || type == 'number' || type == 'positiveNumber' || type == 'negativeNumber' || type == 'zeroPositiveInt' )
+        if ( type == 'string' || type == 'int' || type == 'number' || type == 'unitInterval' || type == 'posInt' || type == 'negInt' || type == 'zeroPositiveInt' )
         {
             if ( value.length > 255 )
             {
-                return alertField( fieldId, i18n_value_too_long + ': ' + dataElementName );
+                return alertField( fieldId, i18n_value_too_long + '\n\n' + dataElementName );
             }
-            if ( type == 'int' && !isInt( value ) )
+            if ( type == 'int' && !dhis2.validation.isInt( value ) )
             {
-                return alertField( fieldId, i18n_value_must_integer + ': ' + dataElementName );
+                return alertField( fieldId, i18n_value_must_integer + '\n\n' + dataElementName );
             }
-            if ( type == 'number' && !isNumber( value ) )
+            if ( type == 'number' && !dhis2.validation.isNumber( value ) )
             {
-                return alertField( fieldId, i18n_value_must_number + ': ' + dataElementName );
+                return alertField( fieldId, i18n_value_must_number + '\n\n' + dataElementName );
             }
-            if ( type == 'positiveNumber' && !isPositiveInt( value ) )
+            if ( type == 'unitInterval' && !dhis2.validation.isUnitInterval( value ) )
             {
-                return alertField( fieldId, i18n_value_must_positive_integer + ': ' + dataElementName );
+            	return alertField( fieldId, i18n_value_must_unit_interval + '\n\n' + dataElementName );
             }
-            if ( type == 'negativeNumber' && !isNegativeInt( value ) )
+            if ( type == 'posInt' && !dhis2.validation.isPositiveInt( value ) )
             {
-                return alertField( fieldId, i18n_value_must_negative_integer + ': ' + dataElementName );
+                return alertField( fieldId, i18n_value_must_positive_integer + '\n\n' + dataElementName );
             }
-            if ( type == 'zeroPositiveInt' && !isZeroOrPositiveInt( value ) )
+            if ( type == 'negInt' && !dhis2.validation.isNegativeInt( value ) )
             {
-                return alertField( fieldId, i18n_value_must_zero_or_positive_integer + ': ' + dataElementName );
+                return alertField( fieldId, i18n_value_must_negative_integer + '\n\n' + dataElementName );
             }
-            if ( isValidZeroNumber( value ) )
+            if ( type == 'zeroPositiveInt' && !dhis2.validation.isZeroOrPositiveInt( value ) )
+            {
+                return alertField( fieldId, i18n_value_must_zero_or_positive_integer + '\n\n' + dataElementName );
+            }
+            if ( dhis2.validation.isValidZeroNumber( value ) )
             {
                 // If value = 0 and zero not significant for data element, skip
 
@@ -305,11 +309,12 @@ function ValueSaver( de, pe, co, value, fieldId, resultColor )
             url: '../api/dataValues',
             data: dataValue,
             dataType: 'json',
+            type: 'post',
             success: handleSuccess,
             error: handleError
         } );
     };
-
+    
     function handleSuccess()
     {
     	dhis2.de.storageManager.clearDataValueJSON( dataValue );
@@ -324,10 +329,10 @@ function ValueSaver( de, pe, co, value, fieldId, resultColor )
     		markValue( fieldId, COLOR_RED );
     		setHeaderMessage( xhr.responseText );
     	}
-    	else // No connection
+    	else // Offline, keep local value
     	{
-    		setHeaderMessage( i18n_offline_notification );
     		markValue( fieldId, resultColor );
+    		setHeaderMessage( i18n_offline_notification );
     	}
     }
 

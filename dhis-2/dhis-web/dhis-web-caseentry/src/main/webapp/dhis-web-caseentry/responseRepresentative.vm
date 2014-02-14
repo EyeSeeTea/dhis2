@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<patient>
-  <id>$patient.id</id>  
+<entityInstance>
+  <id>$entityInstance.id</id>  
   <relationshipTypeId>$relationshipTypeId</relationshipTypeId>
-  #foreach( $patientIdentifier in $patient.identifiers )
-  	#if( $patientIdentifier.identifierType && $patientIdentifier.identifierType.related )
+  #foreach( $attributeValue in $entityInstance.attributeValues )
+  	#if( $attributeValue.attribute )
 	     <identifier>    
-	     	<identifierTypeId>$patientIdentifier.identifierType.id</identifierTypeId>    
-	        <identifierText>$encoder.xmlEncode( $patientIdentifier.identifier )</identifierText>
+	     	<identifierTypeId>$attributeValue.attribute.id</identifierTypeId>    
+	        <identifierText>$encoder.xmlEncode( $attributeValue.value )</identifierText>
 	     </identifier>
      #end
   #end
-</patient>
-
+</entityInstance>

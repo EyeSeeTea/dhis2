@@ -49,16 +49,6 @@ public class TranslationServiceTest
     private TranslationService translationService;
 
     // -------------------------------------------------------------------------
-    // Set up/tear down
-    // -------------------------------------------------------------------------
-
-    @Override
-    public void setUpTest()
-    {
-        translationService = (TranslationService) getBean( TranslationService.ID );
-    }
-    
-    // -------------------------------------------------------------------------
     // Testdata
     // -------------------------------------------------------------------------
 
@@ -78,6 +68,16 @@ public class TranslationServiceTest
     private Translation translation2b = new Translation( className2, id1, locale2, "name", "hey" );
     private Translation translation2c = new Translation( className2, id2, locale3, "name", "bonjour" );
 
+    // -------------------------------------------------------------------------
+    // Set up/tear down
+    // -------------------------------------------------------------------------
+
+    @Override
+    public void setUpTest()
+    {
+        translationService = (TranslationService) getBean( TranslationService.ID );
+    }
+    
     // -------------------------------------------------------------------------
     // Tests
     // -------------------------------------------------------------------------
@@ -127,21 +127,7 @@ public class TranslationServiceTest
     }
 
     @Test
-    public void testGetTranslations1()
-    {
-        translationService.addTranslation( translation1a );
-        translationService.addTranslation( translation1b );
-        translationService.addTranslation( translation2a );
-        translationService.addTranslation( translation2b );
-        translationService.addTranslation( translation2c );
-        
-        assertEquals( 2, translationService.getTranslations( className1, id1, Locale.UK ).size() );
-        assertTrue( translationService.getTranslations( className1, id1, Locale.UK ).contains( translation1a ) );
-        assertTrue( translationService.getTranslations( className1, id1, Locale.UK ).contains( translation1b ) );
-    }
-
-    @Test
-    public void testGetTranslations2()
+    public void testGetTranslations()
     {
         translationService.addTranslation( translation1a );
         translationService.addTranslation( translation1b );

@@ -28,53 +28,48 @@ package org.hisp.dhis.dxf2.events.person;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
-import org.hisp.dhis.dxf2.importsummary.ImportSummary;
-import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.program.Program;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+
+import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
+import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public interface PersonService
 {
-    public void setFormat( I18nFormat format );
-
     // -------------------------------------------------------------------------
     // READ
     // -------------------------------------------------------------------------
 
     Persons getPersons();
 
-    Person getPerson( Identifier identifier );
-
     Persons getPersons( OrganisationUnit organisationUnit );
-
-    Persons getPersons( OrganisationUnit organisationUnit, String nameLike );
 
     Persons getPersons( Program program );
 
     Persons getPersons( OrganisationUnit organisationUnit, Program program );
 
-    Persons getPersons( Collection<Patient> patients );
+    Persons getPersons( Collection<TrackedEntityInstance> entityInstances );
 
     Person getPerson( String uid );
 
-    Person getPerson( Patient patient );
+    Person getPerson( TrackedEntityInstance entityInstance );
 
     // -------------------------------------------------------------------------
     // CREATE
     // -------------------------------------------------------------------------
 
-    ImportSummaries savePersonXml( InputStream inputStream ) throws IOException;
+    ImportSummaries savePersonXml( InputStream inputStream )
+        throws IOException;
 
-    ImportSummaries savePersonJson( InputStream inputStream ) throws IOException;
+    ImportSummaries savePersonJson( InputStream inputStream )
+        throws IOException;
 
     ImportSummary savePerson( Person person );
 
@@ -82,9 +77,11 @@ public interface PersonService
     // UPDATE
     // -------------------------------------------------------------------------
 
-    ImportSummary updatePersonXml( String id, InputStream inputStream ) throws IOException;
+    ImportSummary updatePersonXml( String id, InputStream inputStream )
+        throws IOException;
 
-    ImportSummary updatePersonJson( String id, InputStream inputStream ) throws IOException;
+    ImportSummary updatePersonJson( String id, InputStream inputStream )
+        throws IOException;
 
     ImportSummary updatePerson( Person person );
 

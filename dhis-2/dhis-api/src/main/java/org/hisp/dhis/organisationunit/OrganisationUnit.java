@@ -631,6 +631,25 @@ public class OrganisationUnit
         return builder.toString();
     }
 
+    public String getParentNameGraph( boolean includeThis )
+    {
+        StringBuilder builder = new StringBuilder();
+
+        List<OrganisationUnit> ancestors = getAncestors();
+
+        for ( OrganisationUnit unit : ancestors )
+        {
+            builder.append( "/" ).append( unit.getName() );
+        }
+
+        if ( includeThis )
+        {
+            builder.append( "/" ).append( name );
+        }
+        
+        return builder.toString();
+    }
+
     public Set<DataSet> getAllDataSets()
     {
         Set<DataSet> allDataSets = new HashSet<DataSet>( dataSets );
@@ -656,6 +675,25 @@ public class OrganisationUnit
             for ( OrganisationUnit unit : organisationUnits )
             {
                 map.put( unit.getUid(), unit.getParentGraph() );
+            }
+        }
+        
+        return map;
+    }
+
+    /**
+     * Returns a mapping between the uid and the uid parent graph of the given
+     * organisation units.
+     */
+    public static Map<String, String> getParentNameGraphMap( List<OrganisationUnit> organisationUnits, boolean includeThis )
+    {
+        Map<String, String> map = new HashMap<String, String>();
+        
+        if ( organisationUnits != null )
+        {
+            for ( OrganisationUnit unit : organisationUnits )
+            {
+                map.put( unit.getName(), unit.getParentNameGraph( includeThis ) );
             }
         }
         
@@ -938,10 +976,10 @@ public class OrganisationUnit
         this.users = users;
     }
 
-    @JsonProperty( value = "attributes" )
+    @JsonProperty( value = "attributeValues" )
     @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlElementWrapper( localName = "attributes", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "attribute", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlElementWrapper( localName = "attributeValues", namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty( localName = "attributeValue", namespace = DxfNamespaces.DXF_2_0)
     public Set<AttributeValue> getAttributeValues()
     {
         return attributeValues;

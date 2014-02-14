@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.AnalyticsIndex;
@@ -154,13 +155,15 @@ public abstract class AbstractJdbcTableManager
                 break taskLoop;
             }
             
-            final String index = PREFIX_INDEX + inx.getColumn() + "_" + inx.getTable() + "_" + CodeGenerator.generateCode();
+            final String indexName = getIndexName( inx );
             
-            final String sql = "create index " + index + " on " + inx.getTable() + " (" + inx.getColumn() + ")";
-                
-            executeSilently( sql );
+            final String sql = "create index " + indexName + " on " + inx.getTable() + " (" + inx.getColumn() + ")";
             
-            log.info( "Created index: " + index );
+            log.debug( "Create index SQL: " + sql );
+            
+            jdbcTemplate.execute( sql );
+            
+            log.info( "Created index: " + indexName );
         }
         
         return null;
@@ -238,6 +241,31 @@ public abstract class AbstractJdbcTableManager
     protected String quote( String column )
     {
         return statementBuilder.columnQuote( column );
+    }
+    
+    /**
+     * Remove quotes from the given column name.
+     */
+    protected String removeQuote( String column )
+    {
+        return column != null ? column.replaceAll( statementBuilder.getColumnQuote(), StringUtils.EMPTY ) : null;
+    }
+    
+    /**
+     * Remove temp part of name from the given column name.
+     */
+    protected String removeTemp( String column )
+    {
+        return column != null ? column.replaceAll( TABLE_TEMP_SUFFIX, StringUtils.EMPTY ) : null;
+    }
+    
+    /**
+     * Returns index name for column. Purpose of code suffix is to avoid uniqueness
+     * collision between indexes for temp and real tables.
+     */
+    protected String getIndexName( AnalyticsIndex inx )
+    {
+        return quote( PREFIX_INDEX + removeQuote( removeTemp( inx.getColumn() ) ) + "_" + inx.getTable() + "_" + CodeGenerator.generateCode( 5 ) );        
     }
     
     /**

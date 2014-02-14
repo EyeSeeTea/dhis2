@@ -66,12 +66,12 @@ public class DataElementGroupSet
      */
     private static final long serialVersionUID = -2118690320625221749L;
 
-    private String description;
-
     private Boolean compulsory = false;
 
     @Scanned
     private List<DataElementGroup> members = new ArrayList<DataElementGroup>();
+
+    private boolean dataDimension = true;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -98,6 +98,12 @@ public class DataElementGroupSet
         this.name = name;
         this.description = description;
         this.compulsory = compulsory;
+    }
+
+    public DataElementGroupSet( String name, String description, boolean compulsory, boolean dataDimension )
+    {
+        this( name, description, compulsory );
+        this.dataDimension = dataDimension;
     }
 
     // -------------------------------------------------------------------------
@@ -209,19 +215,6 @@ public class DataElementGroupSet
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getDescription()
-    {
-        return description;
-    }
-
-    public void setDescription( String description )
-    {
-        this.description = description;
-    }
-
-    @JsonProperty
     @JsonView({ DetailedView.class, ExportView.class })
     @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public Boolean isCompulsory()
@@ -254,6 +247,19 @@ public class DataElementGroupSet
         this.members = members;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isDataDimension()
+    {
+        return dataDimension;
+    }
+
+    public void setDataDimension( boolean dataDimension )
+    {
+        this.dataDimension = dataDimension;
+    }
+
     @Override
     public void mergeWith( IdentifiableObject other )
     {
@@ -265,6 +271,7 @@ public class DataElementGroupSet
 
             description = dataElementGroupSet.getDescription() == null ? description : dataElementGroupSet.getDescription();
             compulsory = dataElementGroupSet.isCompulsory() == null ? compulsory : dataElementGroupSet.isCompulsory();
+            dataDimension = dataElementGroupSet.isDataDimension();
 
             removeAllDataElementGroups();
 

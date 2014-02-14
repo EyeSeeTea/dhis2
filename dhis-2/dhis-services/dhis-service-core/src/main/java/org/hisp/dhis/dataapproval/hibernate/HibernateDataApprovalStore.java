@@ -32,6 +32,7 @@ import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.dataapproval.DataApproval;
 import org.hisp.dhis.dataapproval.DataApprovalStore;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -73,14 +74,16 @@ public class HibernateDataApprovalStore
         delete( dataApproval );
     }
 
-    public DataApproval getDataApproval( DataSet dataSet, Period period, OrganisationUnit source )
+    public DataApproval getDataApproval( DataSet dataSet, Period period, 
+        OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
     {
         Period storedPeriod = periodService.reloadPeriod( period );
 
         Criteria criteria = getCriteria();
         criteria.add( Restrictions.eq( "dataSet", dataSet ) );
         criteria.add( Restrictions.eq( "period", storedPeriod ) );
-        criteria.add( Restrictions.eq( "source", source ) );
+        criteria.add( Restrictions.eq( "organisationUnit", organisationUnit ) );
+        criteria.add( Restrictions.eq( "attributeOptionCombo", attributeOptionCombo ) );
 
         return (DataApproval) criteria.uniqueResult();
     }

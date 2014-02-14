@@ -2,7 +2,7 @@
 	"id": "${tabularReport.id}",
 	"name": "$!encoder.jsonEncode( ${tabularReport.name} )",
 	"lastUpdated": "$!format.formatDate( ${tabularReport.lastUpdated} )",
-	"programId": "${programStage.program.uid}",
+	"programId": "${tabularReport.program.uid}",
 	"singleEvent": 
 		#if($tabularReport.program.programStages.size() == 1 )
 			"true",
@@ -13,7 +13,7 @@
 		#set($programStage = $tabularReport.programStage)
 	#end
 	
-	"type": "${programStage.program.type}",
+	"type": "$!{programStage.program.type}",
 	"programStageId": "$!{tabularReport.programStage.uid}",
 	"programStages": [
 		#set( $programStages = $tabularReport.program.programStages )
@@ -43,21 +43,6 @@
 		#end
 	],
 	"items": [
-		#foreach( $item in $dimensionIdentifierTypes )
-			{
-				"id": "$item.uid",
-				"name": "",
-				"compulsory": "",
-				"valueType": #if( $iden.optionSet )
-								"list"
-							 #else
-								"${iden.type}"
-							 #end,
-				"dimension": "true"
-			},
-		#end
-		
-		
 		#foreach( $attr in $dimensionAttributes )
 		{
 			"id": "$attr.uid",
@@ -82,20 +67,6 @@
 						 #end,
 			"dimension": "true"
 		},
-		#end
-		
-		#foreach( $item in $filterIdentifierTypes )
-			{
-				"id": "$item.uid",
-				"name": "",
-				"compulsory": "",
-				"valueType": #if( $iden.optionSet )
-								"list"
-							 #else
-								"${iden.type}"
-							 #end,
-			"dimension": "false"
-			},
 		#end
 		
 		#foreach( $attr in $filterAttributes )

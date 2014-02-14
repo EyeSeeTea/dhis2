@@ -37,7 +37,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.hamcrest.CoreMatchers;
-import org.hisp.dhis.DhisTest;
+import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
 import org.hisp.dhis.dxf2.events.enrollment.EnrollmentService;
@@ -48,12 +48,13 @@ import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.period.Cal;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.trackedentity.TrackedEntityInstance;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -61,7 +62,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public class EnrollmentServiceTest
-    extends DhisTest
+    extends DhisSpringTest
 {
     @Autowired
     private PersonService personService;
@@ -75,10 +76,10 @@ public class EnrollmentServiceTest
     @Autowired
     private ProgramInstanceService programInstanceService;
 
-    private Patient maleA;
-    private Patient maleB;
-    private Patient femaleA;
-    private Patient femaleB;
+    private TrackedEntityInstance maleA;
+    private TrackedEntityInstance maleB;
+    private TrackedEntityInstance femaleA;
+    private TrackedEntityInstance femaleB;
 
     private OrganisationUnit organisationUnitA;
     private OrganisationUnit organisationUnitB;
@@ -96,10 +97,10 @@ public class EnrollmentServiceTest
         manager.save( organisationUnitA );
         manager.save( organisationUnitB );
 
-        maleA = createPatient( 'A', organisationUnitA );
-        maleB = createPatient( 'B',  organisationUnitB );
-        femaleA = createPatient( 'C', organisationUnitA );
-        femaleB = createPatient( 'D',  organisationUnitB );
+        maleA = createTrackedEntityInstance( 'A', organisationUnitA );
+        maleB = createTrackedEntityInstance( 'B', organisationUnitB );
+        femaleA = createTrackedEntityInstance( 'C', organisationUnitA );
+        femaleB = createTrackedEntityInstance( 'D', organisationUnitB );
 
         manager.save( maleA );
         manager.save( maleB );
@@ -118,23 +119,13 @@ public class EnrollmentServiceTest
         programStage.setProgram( programA );
 
         manager.save( programA );
-
-        // mocked format
-        I18nFormat mockFormat = mock( I18nFormat.class );
-        enrollmentService.setFormat( mockFormat );
-    }
-
-    @Override
-    public boolean emptyDatabaseAfterTest()
-    {
-        return true;
     }
 
     @Test
     public void testGetEnrollments()
     {
-        programInstanceService.enrollPatient( maleA, programA, null, null, organisationUnitA, mock( I18nFormat.class ) );
-        programInstanceService.enrollPatient( femaleA, programA, null, null, organisationUnitA, mock( I18nFormat.class ) );
+        programInstanceService.enrollTrackedEntityInstance( maleA, programA, null, null, organisationUnitA, mock( I18nFormat.class ) );
+        programInstanceService.enrollTrackedEntityInstance( femaleA, programA, null, null, organisationUnitA, mock( I18nFormat.class ) );
 
         assertEquals( 2, enrollmentService.getEnrollments().getEnrollments().size() );
     }
@@ -142,8 +133,8 @@ public class EnrollmentServiceTest
     @Test
     public void testGetEnrollmentsByPatient()
     {
-        programInstanceService.enrollPatient( maleA, programA, null, null, organisationUnitA, mock( I18nFormat.class ) );
-        programInstanceService.enrollPatient( femaleA, programA, null, null, organisationUnitA, mock( I18nFormat.class ) );
+        programInstanceService.enrollTrackedEntityInstance( maleA, programA, null, null, organisationUnitA, mock( I18nFormat.class ) );
+        programInstanceService.enrollTrackedEntityInstance( femaleA, programA, null, null, organisationUnitA, mock( I18nFormat.class ) );
 
         assertEquals( 1, enrollmentService.getEnrollments( maleA ).getEnrollments().size() );
         assertEquals( 1, enrollmentService.getEnrollments( femaleA ).getEnrollments().size() );
@@ -153,8 +144,8 @@ public class EnrollmentServiceTest
     public void testGetEnrollmentsByPerson()
     {
 
-        programInstanceService.enrollPatient( maleA, programA, null, null, organisationUnitA, mock( I18nFormat.class ) );
-        programInstanceService.enrollPatient( femaleA, programA, null, null, organisationUnitA, mock( I18nFormat.class ) );
+        programInstanceService.enrollTrackedEntityInstance( maleA, programA, null, null, organisationUnitA, mock( I18nFormat.class ) );
+        programInstanceService.enrollTrackedEntityInstance( femaleA, programA, null, null, organisationUnitA, mock( I18nFormat.class ) );
 
         Person male = personService.getPerson( maleA );
         Person female = personService.getPerson( femaleA );
@@ -166,8 +157,8 @@ public class EnrollmentServiceTest
     @Test
     public void testGetEnrollmentsByStatus()
     {
-        ProgramInstance piMale = programInstanceService.enrollPatient( maleA, programA, null, null, organisationUnitA, mock( I18nFormat.class ) );
-        ProgramInstance piFemale = programInstanceService.enrollPatient( femaleA, programA, null, null, organisationUnitA, mock( I18nFormat.class ) );
+        ProgramInstance piMale = programInstanceService.enrollTrackedEntityInstance( maleA, programA, null, null, organisationUnitA, mock( I18nFormat.class ) );
+        ProgramInstance piFemale = programInstanceService.enrollTrackedEntityInstance( femaleA, programA, null, null, organisationUnitA, mock( I18nFormat.class ) );
 
         assertEquals( 2, enrollmentService.getEnrollments( EnrollmentStatus.ACTIVE ).getEnrollments().size() );
         assertEquals( 0, enrollmentService.getEnrollments( EnrollmentStatus.CANCELLED ).getEnrollments().size() );
@@ -244,10 +235,13 @@ public class EnrollmentServiceTest
         enrollment.setDateOfIncident( new Date() );
         enrollment.setDateOfEnrollment( new Date() );
 
+        List<Enrollment> enrollments = enrollmentService.getEnrollments( maleA ).getEnrollments();
+        assertEquals( 0, enrollments.size() );
+        
         ImportSummary importSummary = enrollmentService.saveEnrollment( enrollment );
         assertEquals( ImportStatus.SUCCESS, importSummary.getStatus() );
 
-        List<Enrollment> enrollments = enrollmentService.getEnrollments( maleA ).getEnrollments();
+        enrollments = enrollmentService.getEnrollments( maleA ).getEnrollments();
 
         assertEquals( 1, enrollments.size() );
         enrollment = enrollments.get( 0 );
@@ -327,5 +321,29 @@ public class EnrollmentServiceTest
         importSummary = enrollmentService.saveEnrollment( enrollment );
         assertEquals( ImportStatus.ERROR, importSummary.getStatus() );
         assertThat( importSummary.getDescription(), CoreMatchers.containsString( "already have an active enrollment in program" ) );
+    }
+
+    @Test
+    @Ignore
+    public void testUpdatePersonShouldKeepEnrollments()
+    {
+        Enrollment enrollment = new Enrollment();
+        enrollment.setPerson( maleA.getUid() );
+        enrollment.setProgram( programA.getUid() );
+        enrollment.setDateOfIncident( new Date() );
+        enrollment.setDateOfEnrollment( new Date() );
+
+        ImportSummary importSummary = enrollmentService.saveEnrollment( enrollment );
+        assertEquals( ImportStatus.SUCCESS, importSummary.getStatus() );
+
+        Person person = personService.getPerson( maleA );
+        // person.setName( "Changed Name" );
+        personService.updatePerson( person );
+
+        List<Enrollment> enrollments = enrollmentService.getEnrollments( person ).getEnrollments();
+
+        assertEquals( 1, enrollments.size() );
+        assertEquals( maleA.getUid(), enrollments.get( 0 ).getPerson() );
+        assertEquals( programA.getUid(), enrollments.get( 0 ).getProgram() );
     }
 }

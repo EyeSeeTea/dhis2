@@ -45,6 +45,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
+import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -68,10 +70,13 @@ import org.hisp.dhis.period.DailyPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.resourcetable.statement.CreateCategoryOptionGroupSetTableStatement;
 import org.hisp.dhis.resourcetable.statement.CreateCategoryTableStatement;
 import org.hisp.dhis.resourcetable.statement.CreateDataElementGroupSetTableStatement;
 import org.hisp.dhis.resourcetable.statement.CreateIndicatorGroupSetTableStatement;
 import org.hisp.dhis.resourcetable.statement.CreateOrganisationUnitGroupSetTableStatement;
+import org.hisp.dhis.sqlview.SqlView;
+import org.hisp.dhis.sqlview.SqlViewService;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
@@ -134,6 +139,13 @@ public class DefaultResourceTableService
     public void setPeriodService( PeriodService periodService )
     {
         this.periodService = periodService;
+    }
+    
+    private SqlViewService sqlViewService;
+
+    public void setSqlViewService( SqlViewService sqlViewService )
+    {
+        this.sqlViewService = sqlViewService;
     }
 
     // -------------------------------------------------------------------------
@@ -219,6 +231,50 @@ public class DefaultResourceTableService
         log.info( "Category option combo name table generated" );
     }
 
+    @Transactional
+    public void generateCategoryOptionGroupSetTable()
+    {
+        // ---------------------------------------------------------------------
+        // Create table
+        // ---------------------------------------------------------------------
+
+        List<CategoryOptionGroupSet> groupSets = new ArrayList<CategoryOptionGroupSet>();
+        
+        Collections.sort( groupSets, IdentifiableObjectNameComparator.INSTANCE );
+
+        List<DataElementCategoryOptionCombo> categoryOptionCombos = 
+            new ArrayList<DataElementCategoryOptionCombo>( categoryService.getAllDataElementCategoryOptionCombos() );
+        
+        resourceTableStore.createCategoryOptionGroupSetStructure( groupSets );
+
+        // ---------------------------------------------------------------------
+        // Populate table
+        // ---------------------------------------------------------------------
+
+        List<Object[]> batchArgs = new ArrayList<Object[]>();
+        
+        for ( DataElementCategoryOptionCombo categoryOptionCombo : categoryOptionCombos )
+        {
+            List<Object> values = new ArrayList<Object>();
+
+            values.add( categoryOptionCombo.getId() );
+            
+            for ( CategoryOptionGroupSet groupSet : groupSets )
+            {
+                CategoryOptionGroup group = groupSet.getGroup( categoryOptionCombo );
+                
+                values.add( group != null ? group.getName() : null );
+                values.add( group != null ? group.getUid() : null );
+            }
+            
+            batchArgs.add( values.toArray() );
+        }
+        
+        resourceTableStore.batchUpdate( ( groupSets.size() * 2 ) + 1, CreateCategoryOptionGroupSetTableStatement.TABLE_NAME, batchArgs );
+        
+        log.info( "Category option group set table generated" );
+    }
+    
     // -------------------------------------------------------------------------
     // DataElementGroupSetTable
     // -------------------------------------------------------------------------
@@ -567,5 +623,35 @@ public class DefaultResourceTableService
         resourceTableStore.createAndGenerateDataElementCategoryOptionCombo();
         
         log.info( "Data element category option combo table generated" );
+    }
+
+    // -------------------------------------------------------------------------
+    // SQL views
+    // -------------------------------------------------------------------------
+
+    @Override
+    public void createAllSqlViews()
+    {
+        List<SqlView> sqlViews = new ArrayList<SqlView>( sqlViewService.getAllSqlViews() );
+        Collections.sort( sqlViews, IdentifiableObjectNameComparator.INSTANCE );
+
+        for ( SqlView sqlView : sqlViews )
+        {
+            sqlViewService.createViewTable( sqlView );
+        }
+    }
+
+
+    @Override
+    public void dropAllSqlViews()
+    {
+        List<SqlView> views = new ArrayList<SqlView>( sqlViewService.getAllSqlViews() );
+        Collections.sort( views, IdentifiableObjectNameComparator.INSTANCE );
+        Collections.reverse( views );
+
+        for ( SqlView view : views )
+        {
+            sqlViewService.dropViewTable( view.getViewName() );
+        }
     }
 }

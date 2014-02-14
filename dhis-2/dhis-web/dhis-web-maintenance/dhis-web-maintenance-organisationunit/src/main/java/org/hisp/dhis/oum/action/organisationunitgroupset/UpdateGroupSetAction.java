@@ -30,17 +30,19 @@ package org.hisp.dhis.oum.action.organisationunitgroupset;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 
 import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.system.util.AttributeUtils;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
  */
 public class UpdateGroupSetAction
     implements Action
@@ -54,6 +56,13 @@ public class UpdateGroupSetAction
     public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
     {
         this.organisationUnitGroupService = organisationUnitGroupService;
+    }
+
+    private AttributeService attributeService;
+
+    public void setAttributeService( AttributeService attributeService )
+    {
+        this.attributeService = attributeService;
     }
 
     // -------------------------------------------------------------------------
@@ -88,11 +97,25 @@ public class UpdateGroupSetAction
         this.compulsory = compulsory;
     }
 
+    private boolean dataDimension;
+
+    public void setDataDimension( boolean dataDimension )
+    {
+        this.dataDimension = dataDimension;
+    }
+
     private Collection<String> selectedGroups;
 
     public void setSelectedGroups( Collection<String> selectedGroups )
     {
         this.selectedGroups = selectedGroups;
+    }
+
+    private List<String> jsonAttributeValues;
+
+    public void setJsonAttributeValues( List<String> jsonAttributeValues )
+    {
+        this.jsonAttributeValues = jsonAttributeValues;
     }
 
     // -------------------------------------------------------------------------
@@ -102,11 +125,12 @@ public class UpdateGroupSetAction
     public String execute()
         throws Exception
     {
-        OrganisationUnitGroupSet groupSet = organisationUnitGroupService.getOrganisationUnitGroupSet( id );
+        OrganisationUnitGroupSet organisationUnitGroupSet = organisationUnitGroupService.getOrganisationUnitGroupSet( id );
 
-        groupSet.setName( name );
-        groupSet.setDescription( description );
-        groupSet.setCompulsory( compulsory );
+        organisationUnitGroupSet.setName( name );
+        organisationUnitGroupSet.setDescription( description );
+        organisationUnitGroupSet.setCompulsory( compulsory );
+        organisationUnitGroupSet.setDataDimension( dataDimension );
 
         Set<OrganisationUnitGroup> selectedMembers = new HashSet<OrganisationUnitGroup>();
 
@@ -118,9 +142,15 @@ public class UpdateGroupSetAction
             }
         }
 
-        groupSet.setOrganisationUnitGroups( selectedMembers );
+        organisationUnitGroupSet.setOrganisationUnitGroups( selectedMembers );
 
-        organisationUnitGroupService.updateOrganisationUnitGroupSet( groupSet );
+        if ( jsonAttributeValues != null )
+        {
+            AttributeUtils.updateAttributeValuesFromJson( organisationUnitGroupSet.getAttributeValues(),
+                jsonAttributeValues, attributeService );
+        }
+
+        organisationUnitGroupService.updateOrganisationUnitGroupSet( organisationUnitGroupSet );
 
         return SUCCESS;
     }

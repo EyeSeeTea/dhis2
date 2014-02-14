@@ -93,16 +93,16 @@ public class OrganisationUnitGroup
     // Logic
     // -------------------------------------------------------------------------
 
-    public void addOrganisationUnit( OrganisationUnit organisationUnit )
+    public boolean addOrganisationUnit( OrganisationUnit organisationUnit )
     {
         members.add( organisationUnit );
-        organisationUnit.getGroups().add( this );
+        return organisationUnit.getGroups().add( this );
     }
 
-    public void removeOrganisationUnit( OrganisationUnit organisationUnit )
+    public boolean removeOrganisationUnit( OrganisationUnit organisationUnit )
     {
         members.remove( organisationUnit );
-        organisationUnit.getGroups().remove( this );
+        return organisationUnit.getGroups().remove( this );
     }
 
     public void removeAllOrganisationUnits()
@@ -220,10 +220,10 @@ public class OrganisationUnitGroup
         this.groupSet = groupSet;
     }
 
-    @JsonProperty( value = "attributes" )
+    @JsonProperty( value = "attributeValues" )
     @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlElementWrapper( localName = "attributes", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "attribute", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlElementWrapper( localName = "attributeValues", namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty( localName = "attributeValue", namespace = DxfNamespaces.DXF_2_0)
     public Set<AttributeValue> getAttributeValues()
     {
         return attributeValues;

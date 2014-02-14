@@ -30,13 +30,11 @@ package org.hisp.dhis.light.beneficiaryregistration.action;
 
 import java.util.Collection;
 
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeService;
-import org.hisp.dhis.patient.PatientIdentifierType;
-import org.hisp.dhis.patient.PatientIdentifierTypeService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.setting.SystemSettingManager;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -47,16 +45,9 @@ public class RegisterBeneficiaryAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private PatientIdentifierTypeService patientIdentifierTypeService;
+    private TrackedEntityAttributeService patientAttributeService;
 
-    public void setPatientIdentifierTypeService( PatientIdentifierTypeService patientIdentifierTypeService )
-    {
-        this.patientIdentifierTypeService = patientIdentifierTypeService;
-    }
-
-    private PatientAttributeService patientAttributeService;
-
-    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
+    public void setPatientAttributeService( TrackedEntityAttributeService patientAttributeService )
     {
         this.patientAttributeService = patientAttributeService;
     }
@@ -101,26 +92,14 @@ public class RegisterBeneficiaryAction
         this.orgUnitId = orgUnitId;
     }
 
-    private Collection<PatientIdentifierType> patientIdentifierTypes;
+    private Collection<TrackedEntityAttribute> patientAttributes;
 
-    public Collection<PatientIdentifierType> getPatientIdentifierTypes()
-    {
-        return patientIdentifierTypes;
-    }
-
-    public void setPatientIdentifierTypes( Collection<PatientIdentifierType> patientIdentifierTypes )
-    {
-        this.patientIdentifierTypes = patientIdentifierTypes;
-    }
-
-    private Collection<PatientAttribute> patientAttributes;
-
-    public Collection<PatientAttribute> getPatientAttributes()
+    public Collection<TrackedEntityAttribute> getPatientAttributes()
     {
         return patientAttributes;
     }
 
-    public void setPatientAttributes( Collection<PatientAttribute> patientAttributes )
+    public void setPatientAttributes( Collection<TrackedEntityAttribute> patientAttributes )
     {
         this.patientAttributes = patientAttributes;
     }
@@ -171,8 +150,7 @@ public class RegisterBeneficiaryAction
     public String execute()
         throws Exception
     {
-        patientIdentifierTypes = patientIdentifierTypeService.getAllPatientIdentifierTypes();
-        patientAttributes = patientAttributeService.getAllPatientAttributes();
+        patientAttributes = patientAttributeService.getAllTrackedEntityAttributes();
         phoneNumberAreaCode = (String) systemSettingManager
             .getSystemSetting( SystemSettingManager.KEY_PHONE_NUMBER_AREA_CODE );
         if ( phoneNumberAreaCode == null )
@@ -181,8 +159,7 @@ public class RegisterBeneficiaryAction
 
         for ( Program program : programs )
         {
-            patientIdentifierTypes.removeAll( program.getPatientIdentifierTypes() );
-            patientAttributes.removeAll( program.getPatientAttributes() );
+            patientAttributes.removeAll( program.getAttributes() );
         }
         return SUCCESS;
     }

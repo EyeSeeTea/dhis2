@@ -1,15 +1,7 @@
 #set( $size = $identifierTypes.size() )
 { 
-"identifierTypes": [
-	#foreach( $identifierType in $identifierTypes )
-	  {
-		"id":  ${identifierType.id} ,
-		"name": "$!encoder.jsonEncode( ${identifierType.displayName} )"
-	  }#if( $velocityCount < $size ),#end
-	#end],
-	
 #set( $size = $attributes.size() )
-"patientAttributes": [
+"attributes": [
 	#foreach( $attribute in $attributes )
 	  {
 		"id":  ${attribute.id} ,

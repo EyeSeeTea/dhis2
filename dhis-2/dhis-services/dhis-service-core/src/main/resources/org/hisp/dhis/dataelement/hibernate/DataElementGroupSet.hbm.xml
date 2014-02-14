@@ -17,9 +17,11 @@
 
     <property name="name" column="name" not-null="true" unique="true" length="230" />
 
-    <property name="description" />
+    <property name="description" type="text" />
 
     <property name="compulsory" />
+
+    <property name="dataDimension" />
 
     <list name="members" table="dataelementgroupsetmembers">
       <cache usage="read-write" />

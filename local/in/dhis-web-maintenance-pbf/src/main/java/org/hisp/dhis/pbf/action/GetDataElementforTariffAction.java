@@ -88,8 +88,8 @@ public class GetDataElementforTariffAction
         Constant tariffDataElement = constantService.getConstantByName( TARIFF_DATAELEMENT );
         if ( tariff_authority == null )
         {
-            tariff_setting_authority = "Level 3";
-            List<OrganisationUnit> allLevelOrg = new ArrayList<OrganisationUnit>( organisationUnitService.getOrganisationUnitsAtLevel( 3 ) );
+            tariff_setting_authority = "Level 1";
+            List<OrganisationUnit> allLevelOrg = new ArrayList<OrganisationUnit>( organisationUnitService.getOrganisationUnitsAtLevel( 1 ) );
             for ( OrganisationUnit org : allLevelOrg )
             {
                 levelOrgUnitIds.add( "\"" + org.getUid() + "\"" );
@@ -112,10 +112,10 @@ public class GetDataElementforTariffAction
             Set<AttributeValue> attrValueSet = new HashSet<AttributeValue>( de.getAttributeValues() );
             for ( AttributeValue attValue : attrValueSet )
             {
-                if ( dataElementList != null && !( dataElementList.contains( "\"" + de.getName() + "\"" ) )
+                if ( dataElementList != null && !( dataElementList.contains( "{\"name\" : \"" + de.getName() + "\"}" ) )
                     && attValue.getAttribute().getId() == tariffDataElement.getValue() )
                 {
-                    dataElementList.add( "\"" + de.getName() + "\"" );
+                    dataElementList.add( "{\"name\" : \"" + de.getName() + "\"}" );
                 }
             }
         }

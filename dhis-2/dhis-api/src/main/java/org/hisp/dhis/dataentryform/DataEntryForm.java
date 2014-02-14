@@ -91,7 +91,7 @@ public class DataEntryForm
     private int format;
 
     // -------------------------------------------------------------------------
-    // Contructors
+    // Constructors
     // -------------------------------------------------------------------------
 
     public DataEntryForm()
@@ -199,6 +199,12 @@ public class DataEntryForm
         final DataEntryForm other = (DataEntryForm) o;
 
         return name.equals( other.getName() );
+    }
+    
+    @Override
+    public String toString()
+    {
+        return "[" + name + "]";
     }
 
     // -------------------------------------------------------------------------

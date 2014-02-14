@@ -28,30 +28,27 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.DhisSpringTest;
-import org.hisp.dhis.dataapproval.DataApproval;
-import org.hisp.dhis.dataapproval.DataApprovalStore;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetService;
-import org.hisp.dhis.datavalue.DataValueStore;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodStore;
-import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserService;
-import org.junit.Test;
-
-import java.util.Date;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+
+import java.util.Date;
+
+import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserService;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Jim Grace
@@ -60,10 +57,24 @@ import static org.junit.Assert.fail;
 public class DataApprovalStoreTest
     extends DhisSpringTest
 {
+    @Autowired
     private DataApprovalStore dataApprovalStore;
 
-    private PeriodStore periodStore;
+    @Autowired
+    private PeriodService periodService;
 
+    @Autowired
+    private DataElementCategoryService categoryService;
+
+    @Autowired
+    private DataSetService dataSetService;
+    
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private OrganisationUnitService organisationUnitService;
+    
     // -------------------------------------------------------------------------
     // Supporting data
     // -------------------------------------------------------------------------
@@ -88,6 +99,8 @@ public class DataApprovalStoreTest
 
     private User userB;
 
+    private DataElementCategoryOptionCombo attributeOptionCombo;
+    
     // -------------------------------------------------------------------------
     // Set up/tear down
     // -------------------------------------------------------------------------
@@ -95,18 +108,6 @@ public class DataApprovalStoreTest
     @Override
     public void setUpTest() throws Exception
     {
-        dataApprovalStore = (DataApprovalStore) getBean( DataApprovalStore.ID );
-
-        dataSetService = (DataSetService) getBean( DataSetService.ID );
-
-        categoryService = (DataElementCategoryService) getBean( DataElementCategoryService.ID );
-
-        periodStore = (PeriodStore) getBean( PeriodStore.ID );
-
-        organisationUnitService = (OrganisationUnitService) getBean( OrganisationUnitService.ID );
-
-        userService = (UserService) getBean( UserService.ID );
-
         // ---------------------------------------------------------------------
         // Add supporting data
         // ---------------------------------------------------------------------
@@ -122,8 +123,8 @@ public class DataApprovalStoreTest
         periodA = createPeriod( getDay( 5 ), getDay( 6 ) );
         periodB = createPeriod( getDay( 6 ), getDay( 7 ) );
 
-        periodStore.addPeriod( periodA );
-        periodStore.addPeriod( periodB );
+        periodService.addPeriod( periodA );
+        periodService.addPeriod( periodB );
 
         sourceA = createOrganisationUnit( 'A' );
         sourceB = createOrganisationUnit( 'B', sourceA );
@@ -140,6 +141,8 @@ public class DataApprovalStoreTest
 
         userService.addUser( userA );
         userService.addUser( userB );
+
+        attributeOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
     }
 
     // -------------------------------------------------------------------------
@@ -150,10 +153,10 @@ public class DataApprovalStoreTest
     public void testAddAndGetDataApproval() throws Exception
     {
         Date date = new Date();
-        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, sourceA, date, userA );
-        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, sourceB, date, userA );
-        DataApproval dataApprovalC = new DataApproval( dataSetA, periodB, sourceA, date, userA );
-        DataApproval dataApprovalD = new DataApproval( dataSetB, periodA, sourceA, date, userA );
+        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, sourceA, attributeOptionCombo, date, userA );
+        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, sourceB, attributeOptionCombo, date, userA );
+        DataApproval dataApprovalC = new DataApproval( dataSetA, periodB, sourceA, attributeOptionCombo, date, userA );
+        DataApproval dataApprovalD = new DataApproval( dataSetB, periodA, sourceA, attributeOptionCombo, date, userA );
         DataApproval dataApprovalE;
 
         dataApprovalStore.addDataApproval( dataApprovalA );
@@ -161,39 +164,39 @@ public class DataApprovalStoreTest
         dataApprovalStore.addDataApproval( dataApprovalC );
         dataApprovalStore.addDataApproval( dataApprovalD );
 
-        dataApprovalA = dataApprovalStore.getDataApproval( dataSetA, periodA, sourceA );
+        dataApprovalA = dataApprovalStore.getDataApproval( dataSetA, periodA, sourceA, attributeOptionCombo );
         assertNotNull( dataApprovalA );
         assertEquals( dataSetA.getId(), dataApprovalA.getDataSet().getId() );
         assertEquals( periodA, dataApprovalA.getPeriod() );
-        assertEquals( sourceA.getId(), dataApprovalA.getSource().getId() );
+        assertEquals( sourceA.getId(), dataApprovalA.getOrganisationUnit().getId() );
         assertEquals( date, dataApprovalA.getCreated() );
         assertEquals( userA.getId(), dataApprovalA.getCreator().getId() );
 
-        dataApprovalB = dataApprovalStore.getDataApproval( dataSetA, periodA, sourceB );
+        dataApprovalB = dataApprovalStore.getDataApproval( dataSetA, periodA, sourceB, attributeOptionCombo );
         assertNotNull( dataApprovalB );
         assertEquals( dataSetA.getId(), dataApprovalB.getDataSet().getId() );
         assertEquals( periodA, dataApprovalB.getPeriod() );
-        assertEquals( sourceB.getId(), dataApprovalB.getSource().getId() );
+        assertEquals( sourceB.getId(), dataApprovalB.getOrganisationUnit().getId() );
         assertEquals( date, dataApprovalB.getCreated() );
         assertEquals( userA.getId(), dataApprovalB.getCreator().getId() );
 
-        dataApprovalC = dataApprovalStore.getDataApproval( dataSetA, periodB, sourceA );
+        dataApprovalC = dataApprovalStore.getDataApproval( dataSetA, periodB, sourceA, attributeOptionCombo );
         assertNotNull( dataApprovalC );
         assertEquals( dataSetA.getId(), dataApprovalC.getDataSet().getId() );
         assertEquals( periodB, dataApprovalC.getPeriod() );
-        assertEquals( sourceA.getId(), dataApprovalC.getSource().getId() );
+        assertEquals( sourceA.getId(), dataApprovalC.getOrganisationUnit().getId() );
         assertEquals( date, dataApprovalC.getCreated() );
         assertEquals( userA.getId(), dataApprovalC.getCreator().getId() );
 
-        dataApprovalD = dataApprovalStore.getDataApproval( dataSetB, periodA, sourceA );
+        dataApprovalD = dataApprovalStore.getDataApproval( dataSetB, periodA, sourceA, attributeOptionCombo );
         assertNotNull( dataApprovalD );
         assertEquals( dataSetB.getId(), dataApprovalD.getDataSet().getId() );
         assertEquals( periodA, dataApprovalD.getPeriod() );
-        assertEquals( sourceA.getId(), dataApprovalD.getSource().getId() );
+        assertEquals( sourceA.getId(), dataApprovalD.getOrganisationUnit().getId() );
         assertEquals( date, dataApprovalD.getCreated() );
         assertEquals( userA.getId(), dataApprovalD.getCreator().getId() );
 
-        dataApprovalE = dataApprovalStore.getDataApproval( dataSetB, periodB, sourceB );
+        dataApprovalE = dataApprovalStore.getDataApproval( dataSetB, periodB, sourceB, attributeOptionCombo );
         assertNull( dataApprovalE );
     }
 
@@ -201,8 +204,8 @@ public class DataApprovalStoreTest
     public void testAddDuplicateDataApproval() throws Exception
     {
         Date date = new Date();
-        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, sourceA, date, userA );
-        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, sourceA, date, userA );
+        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, sourceA, attributeOptionCombo, date, userA );
+        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, sourceA, attributeOptionCombo, date, userA );
 
         dataApprovalStore.addDataApproval( dataApprovalA );
 
@@ -221,32 +224,32 @@ public class DataApprovalStoreTest
     public void testDeleteDataApproval() throws Exception
     {
         Date date = new Date();
-        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, sourceA, date, userA );
-        DataApproval dataApprovalB = new DataApproval( dataSetB, periodB, sourceB, date, userB );
+        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, sourceA, attributeOptionCombo, date, userA );
+        DataApproval dataApprovalB = new DataApproval( dataSetB, periodB, sourceB, attributeOptionCombo, date, userB );
 
         dataApprovalStore.addDataApproval( dataApprovalA );
         dataApprovalStore.addDataApproval( dataApprovalB );
 
-        dataApprovalA = dataApprovalStore.getDataApproval( dataSetA, periodA, sourceA );
+        dataApprovalA = dataApprovalStore.getDataApproval( dataSetA, periodA, sourceA, attributeOptionCombo );
         assertNotNull( dataApprovalA );
 
-        dataApprovalB = dataApprovalStore.getDataApproval( dataSetB, periodB, sourceB );
+        dataApprovalB = dataApprovalStore.getDataApproval( dataSetB, periodB, sourceB, attributeOptionCombo );
         assertNotNull( dataApprovalB );
 
         dataApprovalStore.deleteDataApproval( dataApprovalA );
 
-        dataApprovalA = dataApprovalStore.getDataApproval( dataSetA, periodA, sourceA );
+        dataApprovalA = dataApprovalStore.getDataApproval( dataSetA, periodA, sourceA, attributeOptionCombo );
         assertNull( dataApprovalA );
 
-        dataApprovalB = dataApprovalStore.getDataApproval( dataSetB, periodB, sourceB );
+        dataApprovalB = dataApprovalStore.getDataApproval( dataSetB, periodB, sourceB, attributeOptionCombo );
         assertNotNull( dataApprovalB );
 
         dataApprovalStore.deleteDataApproval( dataApprovalB );
 
-        dataApprovalA = dataApprovalStore.getDataApproval( dataSetA, periodA, sourceA );
+        dataApprovalA = dataApprovalStore.getDataApproval( dataSetA, periodA, sourceA, attributeOptionCombo );
         assertNull( dataApprovalA );
 
-        dataApprovalB = dataApprovalStore.getDataApproval( dataSetB, periodB, sourceB );
+        dataApprovalB = dataApprovalStore.getDataApproval( dataSetB, periodB, sourceB, attributeOptionCombo );
         assertNull( dataApprovalB );
     }
 }

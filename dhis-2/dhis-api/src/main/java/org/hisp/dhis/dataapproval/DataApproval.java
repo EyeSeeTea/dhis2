@@ -31,6 +31,7 @@ package org.hisp.dhis.dataapproval;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
@@ -42,10 +43,12 @@ import org.hisp.dhis.user.User;
  * 
  * @author Jim Grace
  */
-
 public class DataApproval
     implements Serializable
 {
+    public static final String AUTH_APPROVE = "F_APPROVE_DATA";
+    public static final String AUTH_APPROVE_LOWER_LEVELS = "F_APPROVE_DATA_LOWER_LEVELS";
+    
     private static final long serialVersionUID = -4034531921928532366L;
 
     /**
@@ -66,7 +69,12 @@ public class DataApproval
     /**
      * The OrganisationUnit of the DataSet values being approved.
      */
-    private OrganisationUnit source;
+    private OrganisationUnit organisationUnit;
+    
+    /**
+     * The attribute DataElementCategoryOptionCombo being approved.
+     */
+    private DataElementCategoryOptionCombo attributeOptionCombo;
 
     /**
      * The Date (including time) when the DataSet values were approved.
@@ -86,11 +94,13 @@ public class DataApproval
     {
     }
 
-    public DataApproval( DataSet dataSet, Period period, OrganisationUnit source, Date created, User creator )
+    public DataApproval( DataSet dataSet, Period period, OrganisationUnit organisationUnit, 
+        DataElementCategoryOptionCombo attributeOptionCombo, Date created, User creator )
     {
         this.dataSet = dataSet;
         this.period = period;
-        this.source = source;
+        this.organisationUnit = organisationUnit;
+        this.attributeOptionCombo = attributeOptionCombo;
         this.created = created;
         this.creator = creator;
     }
@@ -129,14 +139,24 @@ public class DataApproval
         this.period = period;
     }
 
-    public OrganisationUnit getSource()
+    public OrganisationUnit getOrganisationUnit()
     {
-        return source;
+        return organisationUnit;
     }
 
-    public void setSource( OrganisationUnit source )
+    public void setOrganisationUnit( OrganisationUnit organisationUnit )
     {
-        this.source = source;
+        this.organisationUnit = organisationUnit;
+    }
+
+    public DataElementCategoryOptionCombo getAttributeOptionCombo()
+    {
+        return attributeOptionCombo;
+    }
+
+    public void setAttributeOptionCombo( DataElementCategoryOptionCombo attributeOptionCombo )
+    {
+        this.attributeOptionCombo = attributeOptionCombo;
     }
 
     public Date getCreated()

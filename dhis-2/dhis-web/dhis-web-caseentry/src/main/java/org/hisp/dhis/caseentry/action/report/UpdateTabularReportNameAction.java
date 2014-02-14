@@ -28,8 +28,8 @@ package org.hisp.dhis.caseentry.action.report;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.patientreport.PatientTabularReport;
-import org.hisp.dhis.patientreport.PatientTabularReportService;
+import org.hisp.dhis.trackedentityreport.TrackedEntityTabularReport;
+import org.hisp.dhis.trackedentityreport.TrackedEntityTabularReportService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -45,9 +45,9 @@ public class UpdateTabularReportNameAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private PatientTabularReportService tabularReportService;
+    private TrackedEntityTabularReportService tabularReportService;
 
-    public void setTabularReportService( PatientTabularReportService tabularReportService )
+    public void setTabularReportService( TrackedEntityTabularReportService tabularReportService )
     {
         this.tabularReportService = tabularReportService;
     }
@@ -56,9 +56,9 @@ public class UpdateTabularReportNameAction
     // Input
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private String id;
 
-    public void setId( Integer id )
+    public void setId( String id )
     {
         this.id = id;
     }
@@ -78,7 +78,7 @@ public class UpdateTabularReportNameAction
     public String execute()
         throws Exception
     {
-        PatientTabularReport tabularReport = tabularReportService.getPatientTabularReport( id );
+        TrackedEntityTabularReport tabularReport = tabularReportService.getTrackedEntityTabularReportByUid(  id );
 
         tabularReport.setName( name );
         

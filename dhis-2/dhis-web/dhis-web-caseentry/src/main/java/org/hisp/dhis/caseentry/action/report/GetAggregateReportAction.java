@@ -43,14 +43,12 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeService;
-import org.hisp.dhis.patient.PatientIdentifierType;
-import org.hisp.dhis.patient.PatientIdentifierTypeService;
-import org.hisp.dhis.patientreport.PatientAggregateReport;
-import org.hisp.dhis.patientreport.PatientAggregateReportService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
+import org.hisp.dhis.trackedentityreport.TrackedEntityAggregateReport;
+import org.hisp.dhis.trackedentityreport.TrackedEntityAggregateReportService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -66,27 +64,20 @@ public class GetAggregateReportAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private PatientAggregateReportService aggregateReportService;
+    private TrackedEntityAggregateReportService aggregateReportService;
 
-    public void setAggregateReportService( PatientAggregateReportService aggregateReportService )
+    public void setAggregateReportService( TrackedEntityAggregateReportService aggregateReportService )
     {
         this.aggregateReportService = aggregateReportService;
     }
 
-    private PatientAttributeService patientAttributeService;
+    private TrackedEntityAttributeService attributeService;
 
-    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
+    public void setAttributeService( TrackedEntityAttributeService attributeService )
     {
-        this.patientAttributeService = patientAttributeService;
+        this.attributeService = attributeService;
     }
-
-    private PatientIdentifierTypeService patientIdentifierTypeService;
-
-    public void setPatientIdentifierTypeService( PatientIdentifierTypeService patientIdentifierTypeService )
-    {
-        this.patientIdentifierTypeService = patientIdentifierTypeService;
-    }
-
+    
     private DataElementService dataElementService;
 
     public void setDataElementService( DataElementService dataElementService )
@@ -112,9 +103,9 @@ public class GetAggregateReportAction
         this.id = id;
     }
 
-    private PatientAggregateReport aggregateReport;
+    private TrackedEntityAggregateReport aggregateReport;
 
-    public PatientAggregateReport getAggregateReport()
+    public TrackedEntityAggregateReport getAggregateReport()
     {
         return aggregateReport;
     }
@@ -126,30 +117,16 @@ public class GetAggregateReportAction
         return programStage;
     }
 
-    private List<PatientIdentifierType> dimensionIdentifierTypes = new ArrayList<PatientIdentifierType>();
+    private List<TrackedEntityAttribute> dimensionAttributes = new ArrayList<TrackedEntityAttribute>();
 
-    public List<PatientIdentifierType> getDimensionIdentifierTypes()
-    {
-        return dimensionIdentifierTypes;
-    }
-
-    private List<PatientIdentifierType> filterIdentifierTypes = new ArrayList<PatientIdentifierType>();
-
-    public List<PatientIdentifierType> getFilterIdentifierTypes()
-    {
-        return filterIdentifierTypes;
-    }
-
-    private List<PatientAttribute> dimensionAttributes = new ArrayList<PatientAttribute>();
-
-    public List<PatientAttribute> getDimensionAttributes()
+    public List<TrackedEntityAttribute> getDimensionAttributes()
     {
         return dimensionAttributes;
     }
 
-    private List<PatientAttribute> filterAttributes = new ArrayList<PatientAttribute>();
+    private List<TrackedEntityAttribute> filterAttributes = new ArrayList<TrackedEntityAttribute>();
 
-    public List<PatientAttribute> getFilterAttributes()
+    public List<TrackedEntityAttribute> getFilterAttributes()
     {
         return filterAttributes;
     }
@@ -204,7 +181,7 @@ public class GetAggregateReportAction
     public String execute()
         throws Exception
     {
-        aggregateReport = aggregateReportService.getPatientAggregateReportByUid( id );
+        aggregateReport = aggregateReportService.getTrackedEntityAggregateReportByUid( id );
 
         Program program = aggregateReport.getProgram();
 
@@ -258,16 +235,9 @@ public class GetAggregateReportAction
             }
             else
             {
-                PatientIdentifierType it = patientIdentifierTypeService.getPatientIdentifierType( dimensionId );
+                TrackedEntityAttribute at = attributeService.getTrackedEntityAttribute( dimensionId );
 
-                if ( it != null && program.getPatientIdentifierTypes().contains( it ) )
-                {
-                    dimensionIdentifierTypes.add( it );
-                }
-
-                PatientAttribute at = patientAttributeService.getPatientAttribute( dimensionId );
-
-                if ( at != null && program.getPatientAttributes().contains( at ) )
+                if ( at != null && program.getAttributes().contains( at ) )
                 {
                     dimensionAttributes.add( at );
                 }
@@ -295,16 +265,9 @@ public class GetAggregateReportAction
                 mapFilters.put( filterId, filter.substring( filterId.length() + 1, filter.length() ) );
             }
 
-            PatientIdentifierType it = patientIdentifierTypeService.getPatientIdentifierType( filterId );
+            TrackedEntityAttribute at = attributeService.getTrackedEntityAttribute( filterId );
 
-            if ( it != null && program.getPatientIdentifierTypes().contains( it ) )
-            {
-                filterIdentifierTypes.add( it );
-            }
-
-            PatientAttribute at = patientAttributeService.getPatientAttribute( filterId );
-
-            if ( at != null && program.getPatientAttributes().contains( at ) )
+            if ( at != null && program.getAttributes().contains( at ) )
             {
                 filterAttributes.add( at );
             }

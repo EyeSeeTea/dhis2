@@ -27,25 +27,9 @@
 
 package org.hisp.dhis.caseentry.action.caseentry;
 
-import org.hibernate.exception.SQLGrammarException;
-import org.hisp.dhis.common.Grid;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.paging.ActionPagingSupport;
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientIdentifierType;
-import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.program.ProgramStageInstance;
-import org.hisp.dhis.program.ProgramStageInstanceService;
-import org.hisp.dhis.program.ProgramStageService;
-import org.hisp.dhis.program.TabularEventColumn;
-import org.hisp.dhis.system.util.ConversionUtils;
-import org.hisp.dhis.system.util.TextUtils;
-import org.hisp.dhis.user.CurrentUserService;
+import static org.hisp.dhis.trackedentityreport.TrackedEntityTabularReport.PREFIX_DATA_ELEMENT;
+import static org.hisp.dhis.trackedentityreport.TrackedEntityTabularReport.PREFIX_NUMBER_DATA_ELEMENT;
+import static org.hisp.dhis.trackedentityreport.TrackedEntityTabularReport.VALUE_TYPE_OPTION_SET;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,7 +40,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.hisp.dhis.patientreport.PatientTabularReport.*;
+import org.hibernate.exception.SQLGrammarException;
+import org.hisp.dhis.common.Grid;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.paging.ActionPagingSupport;
+import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageInstance;
+import org.hisp.dhis.program.ProgramStageInstanceService;
+import org.hisp.dhis.program.ProgramStageService;
+import org.hisp.dhis.program.TabularEventColumn;
+import org.hisp.dhis.system.util.ConversionUtils;
+import org.hisp.dhis.system.util.TextUtils;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.hisp.dhis.user.CurrentUserService;
 
 /**
  * @author Chau Thu Tran
@@ -108,18 +109,11 @@ public class SearchEventsAction
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private List<PatientIdentifierType> identifierTypes = new ArrayList<PatientIdentifierType>();
+    private List<TrackedEntityAttribute> attributes = new ArrayList<TrackedEntityAttribute>();
 
-    public List<PatientIdentifierType> getIdentifierTypes()
+    public List<TrackedEntityAttribute> getAttributes()
     {
-        return identifierTypes;
-    }
-
-    private List<PatientAttribute> patientAttributes = new ArrayList<PatientAttribute>();
-
-    public List<PatientAttribute> getPatientAttributes()
-    {
-        return patientAttributes;
+        return attributes;
     }
 
     private Collection<String> orgunitIds = new HashSet<String>();

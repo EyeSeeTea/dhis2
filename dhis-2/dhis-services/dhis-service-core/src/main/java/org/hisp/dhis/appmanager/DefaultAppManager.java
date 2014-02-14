@@ -66,11 +66,9 @@ public class DefaultAppManager
     @PostConstruct
     private void init()
     {
-        reloadAppsInternal();
-        
-        log.info( "Detecting apps: " + apps );
+        reloadApps();
     }
-    
+
     @Autowired
     private SystemSettingManager appSettingManager;
 
@@ -94,15 +92,15 @@ public class DefaultAppManager
     public List<App> getApps()
     {
         String baseUrl = getAppBaseUrl();
-        
+
         for ( App app : apps )
         {
             app.setBaseUrl( baseUrl );
         }
-        
+
         return apps;
     }
-    
+
     @Override
     public void installApp( File file, String fileName, String rootPath )
         throws IOException
@@ -116,7 +114,7 @@ public class DefaultAppManager
         App app = mapper.readValue( inputStream, App.class );
 
         // Delete if app is already installed
-        
+
         if ( getApps().contains( app ) )
         {
             String folderPath = getAppFolderPath() + File.separator + app.getFolderName();
@@ -130,7 +128,7 @@ public class DefaultAppManager
         unzip.execute();
 
         // Updating dhis server location
-        
+
         File updateManifest = new File( dest + File.separator + "manifest.webapp" );
         App installedApp = mapper.readValue( updateManifest, App.class );
 
@@ -141,8 +139,22 @@ public class DefaultAppManager
         }
 
         zip.close();
-                
-        reloadAppsInternal(); // Reload app state
+
+        reloadApps(); // Reload app state
+    }
+
+    @Override
+    public boolean exists( String appName )
+    {
+        for ( App app : getApps() )
+        {
+            if ( app.getName().equals( appName ) || app.getFolderName().equals( appName ) )
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
@@ -150,11 +162,11 @@ public class DefaultAppManager
     {
         for ( App app : getApps() )
         {
-            if ( app.getName().equals( name ) )
+            if ( app.getName().equals( name ) || app.getFolderName().equals( name ) )
             {
                 try
                 {
-                    String folderPath = getAppFolderPath() + File.separator + app.getFolderName();                
+                    String folderPath = getAppFolderPath() + File.separator + app.getFolderName();
                     FileUtils.forceDelete( new File( folderPath ) );
 
                     return true;
@@ -166,7 +178,7 @@ public class DefaultAppManager
                 }
                 finally
                 {
-                    reloadAppsInternal(); // Reload app state
+                    reloadApps(); // Reload app state
                 }
             }
         }
@@ -221,7 +233,8 @@ public class DefaultAppManager
     /**
      * Sets the list of apps with detected apps from the file system.
      */
-    private void reloadAppsInternal()
+    @Override
+    public void reloadApps()
     {
         List<App> appList = new ArrayList<App>();
         ObjectMapper mapper = new ObjectMapper();
@@ -257,5 +270,7 @@ public class DefaultAppManager
         }
 
         this.apps = appList;
+
+        log.info( "Detected apps: " + apps );
     }
 }

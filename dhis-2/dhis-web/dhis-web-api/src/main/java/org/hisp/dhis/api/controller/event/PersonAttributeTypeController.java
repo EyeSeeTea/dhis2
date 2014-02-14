@@ -28,8 +28,18 @@ package org.hisp.dhis.api.controller.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.hisp.dhis.api.controller.AbstractCrudController;
-import org.hisp.dhis.patient.PatientAttribute;
+import org.hisp.dhis.api.controller.WebMetaData;
+import org.hisp.dhis.api.controller.WebOptions;
+import org.hisp.dhis.common.Pager;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -38,7 +48,57 @@ import org.springframework.web.bind.annotation.RequestMapping;
  */
 @Controller
 @RequestMapping( value = PersonAttributeTypeController.RESOURCE_PATH )
-public class PersonAttributeTypeController extends AbstractCrudController<PatientAttribute>
+public class PersonAttributeTypeController
+    extends AbstractCrudController<TrackedEntityAttribute>
 {
     public static final String RESOURCE_PATH = "/personAttributeTypes";
+
+    @Autowired
+    private TrackedEntityAttributeService attributeService;
+
+    @Autowired
+    private ProgramService programService;
+
+    @Override
+    protected List<TrackedEntityAttribute> getEntityList( WebMetaData metaData, WebOptions options )
+    {
+        List<TrackedEntityAttribute> entityList = new ArrayList<TrackedEntityAttribute>();
+
+        boolean withoutPrograms = options.getOptions().containsKey( "withoutPrograms" )
+            && Boolean.parseBoolean( options.getOptions().get( "withoutPrograms" ) );
+
+        if ( withoutPrograms )
+        {
+            entityList = new ArrayList<TrackedEntityAttribute>(
+                attributeService.getTrackedEntityAttributesWithoutProgram() );
+        }
+
+        else if ( options.getOptions().containsKey( "program" ) )
+        {
+            String programId = options.getOptions().get( "program" );
+            Program program = programService.getProgram( programId );
+
+            if ( program != null )
+            {
+                entityList = new ArrayList<TrackedEntityAttribute>( program.getEntityAttributes() );
+            }
+        }
+
+        else if ( options.hasPaging() )
+        {
+            int count = manager.getCount( getEntityClass() );
+
+            Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
+            metaData.setPager( pager );
+
+            entityList = new ArrayList<TrackedEntityAttribute>( manager.getBetween( getEntityClass(),
+                pager.getOffset(), pager.getPageSize() ) );
+        }
+        else
+        {
+            entityList = new ArrayList<TrackedEntityAttribute>( attributeService.getAllTrackedEntityAttributes() );
+        }
+
+        return entityList;
+    }
 }

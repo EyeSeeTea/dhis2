@@ -28,13 +28,9 @@ package org.hisp.dhis.dd.action.category;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.concept.Concept;
-import org.hisp.dhis.concept.ConceptService;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.paging.ActionPagingSupport;
@@ -56,13 +52,6 @@ public class GetDataElementCategoryOptionAction
     public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
     {
         this.dataElementCategoryService = dataElementCategoryService;
-    }
-
-    private ConceptService conceptService;
-
-    public void setConceptService( ConceptService conceptService )
-    {
-        this.conceptService = conceptService;
     }
 
     // -------------------------------------------------------------------------
@@ -98,11 +87,6 @@ public class GetDataElementCategoryOptionAction
     {
         dataElementCategoryOption = dataElementCategoryService.getDataElementCategoryOption( id );
 
-        concepts = new ArrayList<Concept>( conceptService.getAllConcepts() );
-
-        Collections.sort( concepts, IdentifiableObjectNameComparator.INSTANCE );
-        
         return SUCCESS;
     }
-
 }

@@ -1,8 +1,11 @@
 package org.hisp.dhis.pbf.action;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
@@ -114,11 +117,17 @@ public class LoadTariffDetailsAction
         return dataSets;
     }
     
+    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat( "yyyy-MM-dd" );;
+    
+    public SimpleDateFormat getSimpleDateFormat() {
+		return simpleDateFormat;
+	}
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
-    public String execute()
+	public String execute()
     {
         User curUser = currentUserService.getCurrentUser();
         
@@ -140,7 +149,9 @@ public class LoadTariffDetailsAction
         selecteddataElement = dataElementService.getDataElementByName( dataElementName );
 
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( orgUnitUid );
-
+        
+        //organisationUnit.getParent()
+        
         tariffList = new ArrayList<TariffDataValue>( tariffDataValueService.getTariffDataValues( organisationUnit, selecteddataElement ) );
 
         List<Lookup> lookups = new ArrayList<Lookup>( lookupService.getAllLookupsByType( Lookup.DS_PBF_TYPE ) );

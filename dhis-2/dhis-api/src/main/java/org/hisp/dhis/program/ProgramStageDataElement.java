@@ -30,10 +30,8 @@ package org.hisp.dhis.program;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
@@ -64,7 +62,7 @@ public class ProgramStageDataElement
      */
     private DataElement dataElement;
 
-    /*
+    /**
      * True if this dataElement is mandatory in the dataEntryForm for this
      * programStage
      */
@@ -102,10 +100,6 @@ public class ProgramStageDataElement
     {
     }
 
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public ProgramStage getProgramStage()
     {
         return programStage;

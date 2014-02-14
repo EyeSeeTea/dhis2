@@ -28,27 +28,25 @@ package org.hisp.dhis.dxf2.events.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hisp.dhis.common.IdentifiableObjectManager;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.dxf2.InputValidationService;
 import org.hisp.dhis.dxf2.events.person.Person;
 import org.hisp.dhis.dxf2.importsummary.ImportConflict;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
-import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.i18n.I18nManager;
-import org.hisp.dhis.i18n.I18nManagerException;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientService;
-import org.hisp.dhis.patientdatavalue.PatientDataValue;
-import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
@@ -57,17 +55,21 @@ import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.program.ProgramStageService;
+import org.hisp.dhis.system.util.DateUtils;
+import org.hisp.dhis.system.util.ValidationUtils;
+import org.hisp.dhis.trackedentity.TrackedEntityInstance;
+import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
+import org.hisp.dhis.trackedentitycomment.TrackedEntityComment;
+import org.hisp.dhis.trackedentitycomment.TrackedEntityCommentService;
+import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValue;
+import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValueService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -101,16 +103,13 @@ public abstract class AbstractEventService
     protected CurrentUserService currentUserService;
 
     @Autowired
-    private PatientDataValueService patientDataValueService;
+    private TrackedEntityDataValueService dataValueService;
 
     @Autowired
-    private PatientService patientService;
+    private TrackedEntityInstanceService entityInstanceService;
 
     @Autowired
-    private IdentifiableObjectManager manager;
-
-    @Autowired
-    private InputValidationService inputValidationService;
+    private TrackedEntityCommentService commentService;
 
     @Autowired
     private EventStore eventStore;
@@ -118,45 +117,21 @@ public abstract class AbstractEventService
     @Autowired
     private I18nManager i18nManager;
 
-    private I18nFormat _format;
-
     private static final ObjectMapper objectMapper = new ObjectMapper();
-
-    @Override
-    public void setFormat( I18nFormat format )
-    {
-        this._format = format;
-    }
-
-    I18nFormat getFormat()
-    {
-        if ( _format != null )
-        {
-            return _format;
-        }
-
-        try
-        {
-            _format = i18nManager.getI18nFormat();
-        }
-        catch ( I18nManagerException ignored )
-        {
-        }
-
-        return _format;
-    }
 
     // -------------------------------------------------------------------------
     // CREATE
     // -------------------------------------------------------------------------
 
     @Override
+    @Transactional
     public ImportSummary saveEvent( Event event )
     {
         return saveEvent( event, null );
     }
 
     @Override
+    @Transactional
     public ImportSummary saveEvent( Event event, ImportOptions importOptions )
     {
         Program program = programService.getProgram( event.getProgram() );
@@ -196,24 +171,24 @@ public abstract class AbstractEventService
                     "No Event.person was provided for registration based program." );
             }
 
-            Patient patient = patientService.getPatient( event.getPerson() );
+            TrackedEntityInstance entityInstance = entityInstanceService.getTrackedEntityInstance( event.getPerson() );
 
-            if ( patient == null )
+            if ( entityInstance == null )
             {
                 return new ImportSummary( ImportStatus.ERROR, "Event.person does not point to a valid person." );
             }
 
             List<ProgramInstance> programInstances = new ArrayList<ProgramInstance>(
-                programInstanceService.getProgramInstances( patient, program, ProgramInstance.STATUS_ACTIVE ) );
+                programInstanceService.getProgramInstances( entityInstance, program, ProgramInstance.STATUS_ACTIVE ) );
 
             if ( programInstances.isEmpty() )
             {
-                return new ImportSummary( ImportStatus.ERROR, "Person " + patient.getUid()
+                return new ImportSummary( ImportStatus.ERROR, "Person " + entityInstance.getUid()
                     + " is not enrolled in program " + program.getUid() );
             }
             else if ( programInstances.size() > 1 )
             {
-                return new ImportSummary( ImportStatus.ERROR, "Person " + patient.getUid()
+                return new ImportSummary( ImportStatus.ERROR, "Person " + entityInstance.getUid()
                     + " have multiple active enrollments into program " + program.getUid()
                     + " please check and correct your database." );
             }
@@ -227,12 +202,12 @@ public abstract class AbstractEventService
 
                 if ( programStageInstances.isEmpty() )
                 {
-                    return new ImportSummary( ImportStatus.ERROR, "Person " + patient.getUid()
+                    return new ImportSummary( ImportStatus.ERROR, "Person " + entityInstance.getUid()
                         + " is not enrolled in programStage " + programStage.getUid() );
                 }
                 else if ( programStageInstances.size() > 1 )
                 {
-                    return new ImportSummary( ImportStatus.ERROR, "Person " + patient.getUid()
+                    return new ImportSummary( ImportStatus.ERROR, "Person " + entityInstance.getUid()
                         + " have multiple active enrollments into programStage " + programStage.getUid()
                         + " please check and correct your database for multiple active stages." );
                 }
@@ -280,7 +255,16 @@ public abstract class AbstractEventService
             }
 
             programInstance = programInstances.get( 0 );
-            programStageInstance = programInstance.getProgramStageInstanceByStage( 1 );
+
+            if ( event.getEvent() != null )
+            {
+                programStageInstance = programStageInstanceService.getProgramStageInstance( event.getEvent() );
+
+                if ( programStageInstance == null )
+                {
+                    return new ImportSummary( ImportStatus.ERROR, "Event.event did not point to a valid event" );
+                }
+            }
         }
 
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( event.getOrgUnit() );
@@ -420,9 +404,11 @@ public abstract class AbstractEventService
     }
 
     @Override
-    public Events getEvents( List<Program> programs, List<ProgramStage> programStages, List<OrganisationUnit> organisationUnits, Person person, Date startDate, Date endDate )
+    public Events getEvents( List<Program> programs, List<ProgramStage> programStages,
+        List<OrganisationUnit> organisationUnits, Person person, Date startDate, Date endDate )
     {
-        List<Event> eventList = eventStore.getAll( programs, programStages, organisationUnits, person, startDate, endDate );
+        List<Event> eventList = eventStore.getAll( programs, programStages, organisationUnits, person, startDate,
+            endDate );
         Events events = new Events();
         events.setEvents( eventList );
 
@@ -432,8 +418,9 @@ public abstract class AbstractEventService
     @Override
     public Event getEvent( String uid )
     {
-        ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance( uid );
-        return convertProgramStageInstance( programStageInstance );
+        ProgramStageInstance psi = programStageInstanceService.getProgramStageInstance( uid );
+
+        return psi != null ? convertProgramStageInstance( psi ) : null;
     }
 
     @Override
@@ -470,32 +457,60 @@ public abstract class AbstractEventService
 
         Date date = new Date();
 
+        if ( event.getEventDate() != null )
+        {
+            date = DateUtils.getMediumDate( event.getEventDate() );
+        }
+
         String storedBy = getStoredBy( event, null );
+
+        if ( event.getStatus() == EventStatus.ACTIVE )
+        {
+            programStageInstance.setCompleted( false );
+            programStageInstance.setStatus( ProgramStageInstance.ACTIVE_STATUS );
+            programStageInstance.setCompletedDate( null );
+            programStageInstance.setCompletedUser( null );
+        }
+        else if ( event.getStatus() == EventStatus.COMPLETED )
+        {
+            programStageInstance.setStatus( ProgramStageInstance.COMPLETED_STATUS );
+            programStageInstance.setCompletedDate( date );
+            programStageInstance.setCompletedUser( storedBy );
+
+            if ( !programStageInstance.isCompleted() )
+            {
+                programStageInstanceService.completeProgramStageInstance( programStageInstance,
+                    i18nManager.getI18nFormat() );
+            }
+        }
 
         programStageInstance.setDueDate( date );
         programStageInstance.setExecutionDate( date );
         programStageInstance.setOrganisationUnit( organisationUnit );
-        programStageInstance.setCompletedUser( storedBy );
 
         programStageInstanceService.updateProgramStageInstance( programStageInstance );
 
-        Set<PatientDataValue> patientDataValues = new HashSet<PatientDataValue>(
-            patientDataValueService.getPatientDataValues( programStageInstance ) );
+        ProgramInstance programInstance = programStageInstance.getProgramInstance();
+
+        saveTrackedEntityCommentFromEvent( programInstance, event, storedBy );
+
+        Set<TrackedEntityDataValue> dataValues = new HashSet<TrackedEntityDataValue>(
+            dataValueService.getTrackedEntityDataValues( programStageInstance ) );
 
         for ( DataValue value : event.getDataValues() )
         {
             DataElement dataElement = dataElementService.getDataElement( value.getDataElement() );
 
-            PatientDataValue patientDataValue = patientDataValueService.getPatientDataValue( programStageInstance,
+            TrackedEntityDataValue dataValue = dataValueService.getTrackedEntityDataValue( programStageInstance,
                 dataElement );
 
-            if ( patientDataValue != null )
+            if ( dataValue != null )
             {
-                patientDataValue.setValue( value.getValue() );
-                patientDataValue.setProvidedElsewhere( value.getProvidedElsewhere() );
-                patientDataValueService.updatePatientDataValue( patientDataValue );
+                dataValue.setValue( value.getValue() );
+                dataValue.setProvidedElsewhere( value.getProvidedElsewhere() );
+                dataValueService.updateTrackedEntityDataValue( dataValue );
 
-                patientDataValues.remove( patientDataValue );
+                dataValues.remove( dataValue );
             }
             else
             {
@@ -504,9 +519,9 @@ public abstract class AbstractEventService
             }
         }
 
-        for ( PatientDataValue value : patientDataValues )
+        for ( TrackedEntityDataValue value : dataValues )
         {
-            patientDataValueService.deletePatientDataValue( value );
+            dataValueService.deleteTrackedEntityDataValue( value );
         }
     }
 
@@ -540,25 +555,38 @@ public abstract class AbstractEventService
         Event event = new Event();
 
         event.setEvent( programStageInstance.getUid() );
+
+        if ( programStageInstance.getProgramInstance().getEntityInstance() != null )
+        {
+            event.setPerson( programStageInstance.getProgramInstance().getEntityInstance().getUid() );
+        }
+
         event.setStatus( EventStatus.fromInt( programStageInstance.getStatus() ) );
-        event.setEventDate( programStageInstance.getExecutionDate().toString() );
+        event.setEventDate( DateUtils.getLongDateString( programStageInstance.getExecutionDate() ) );
         event.setStoredBy( programStageInstance.getCompletedUser() );
         event.setOrgUnit( programStageInstance.getOrganisationUnit().getUid() );
         event.setProgram( programStageInstance.getProgramInstance().getProgram().getUid() );
         event.setProgramStage( programStageInstance.getProgramStage().getUid() );
 
+        if ( programStageInstance.getProgramInstance().getEntityInstance() != null )
+        {
+            event.setPerson( programStageInstance.getProgramInstance().getEntityInstance().getUid() );
+        }
+
         if ( programStageInstance.getProgramStage().getCaptureCoordinates() )
         {
             Coordinate coordinate = null;
+
             if ( programStageInstance.getLongitude() != null && programStageInstance.getLongitude() != null )
             {
                 coordinate = new Coordinate( programStageInstance.getLongitude(), programStageInstance.getLatitude() );
 
                 try
                 {
-                    List<Double> list = objectMapper.readValue( coordinate.getCoordinateString(), new TypeReference<List<Double>>()
-                    {
-                    } );
+                    List<Double> list = objectMapper.readValue( coordinate.getCoordinateString(),
+                        new TypeReference<List<Double>>()
+                        {
+                        } );
 
                     coordinate.setLongitude( list.get( 0 ) );
                     coordinate.setLatitude( list.get( 1 ) );
@@ -568,24 +596,40 @@ public abstract class AbstractEventService
                 }
             }
 
-            if ( coordinate.isValid() )
+            if ( coordinate != null && coordinate.isValid() )
             {
                 event.setCoordinate( coordinate );
             }
         }
 
-        Collection<PatientDataValue> patientDataValues = patientDataValueService
-            .getPatientDataValues( programStageInstance );
+        Collection<TrackedEntityDataValue> dataValues = dataValueService
+            .getTrackedEntityDataValues( programStageInstance );
 
-        for ( PatientDataValue patientDataValue : patientDataValues )
+        for ( TrackedEntityDataValue dataValue : dataValues )
         {
             DataValue value = new DataValue();
-            value.setDataElement( patientDataValue.getDataElement().getUid() );
-            value.setValue( patientDataValue.getValue() );
-            value.setProvidedElsewhere( patientDataValue.getProvidedElsewhere() );
-            value.setStoredBy( patientDataValue.getStoredBy() );
+            value.setDataElement( dataValue.getDataElement().getUid() );
+            value.setValue( dataValue.getValue() );
+            value.setProvidedElsewhere( dataValue.getProvidedElsewhere() );
+            value.setStoredBy( dataValue.getStoredBy() );
 
             event.getDataValues().add( value );
+        }
+
+        ProgramInstance programInstance = programStageInstance.getProgramInstance();
+
+        TrackedEntityComment comment = programInstance.getComment();
+
+        if ( comment != null )
+        {
+            Note note = new Note();
+            note.setValue( comment.getCommentText() );
+            note.setStoredBy( comment.getCreator() );
+            if ( comment.getCreatedDate() != null )
+            {
+                note.setStoredDate( comment.getCreatedDate().toString() );
+            }
+            event.getNotes().add( note );
         }
 
         return event;
@@ -620,14 +664,13 @@ public abstract class AbstractEventService
         return !programsByCurrentUser.contains( program );
     }
 
-    private boolean validateDataElement( DataElement dataElement, String value, ImportSummary importSummary )
+    private boolean validateDataValue( DataElement dataElement, String value, ImportSummary importSummary )
     {
-        InputValidationService.Status status = inputValidationService.validateDataElement( dataElement, value,
-            getFormat() );
+        String status = ValidationUtils.dataValueIsValid( value, dataElement );
 
-        if ( !status.isSuccess() )
+        if ( status != null )
         {
-            importSummary.getConflicts().add( new ImportConflict( dataElement.getUid(), status.getMessage() ) );
+            importSummary.getConflicts().add( new ImportConflict( dataElement.getUid(), status ) );
             importSummary.getDataValueCount().incrementIgnored();
             return false;
         }
@@ -664,32 +707,32 @@ public abstract class AbstractEventService
             value = null;
         }
 
-        PatientDataValue patientDataValue = patientDataValueService.getPatientDataValue( programStageInstance,
+        TrackedEntityDataValue dataValue = dataValueService.getTrackedEntityDataValue( programStageInstance,
             dataElement );
 
         if ( value != null )
         {
-            if ( patientDataValue == null )
+            if ( dataValue == null )
             {
-                patientDataValue = new PatientDataValue( programStageInstance, dataElement, new Date(), value );
-                patientDataValue.setStoredBy( storedBy );
-                patientDataValue.setProvidedElsewhere( providedElsewhere );
+                dataValue = new TrackedEntityDataValue( programStageInstance, dataElement, new Date(), value );
+                dataValue.setStoredBy( storedBy );
+                dataValue.setProvidedElsewhere( providedElsewhere );
 
-                patientDataValueService.savePatientDataValue( patientDataValue );
+                dataValueService.saveTrackedEntityDataValue( dataValue );
             }
             else
             {
-                patientDataValue.setValue( value );
-                patientDataValue.setTimestamp( new Date() );
-                patientDataValue.setProvidedElsewhere( providedElsewhere );
-                patientDataValue.setStoredBy( storedBy );
+                dataValue.setValue( value );
+                dataValue.setTimestamp( new Date() );
+                dataValue.setProvidedElsewhere( providedElsewhere );
+                dataValue.setStoredBy( storedBy );
 
-                patientDataValueService.updatePatientDataValue( patientDataValue );
+                dataValueService.updateTrackedEntityDataValue( dataValue );
             }
         }
-        else if ( patientDataValue != null )
+        else if ( dataValue != null )
         {
-            patientDataValueService.deletePatientDataValue( patientDataValue );
+            dataValueService.deleteTrackedEntityDataValue( dataValue );
         }
     }
 
@@ -700,7 +743,6 @@ public abstract class AbstractEventService
         ProgramStageInstance programStageInstance = new ProgramStageInstance();
         updateProgramStageInstance( programStage, programInstance, organisationUnit, date, completed, coordinate,
             storedBy, programStageInstance );
-        programStageInstanceService.addProgramStageInstance( programStageInstance );
 
         return programStageInstance;
     }
@@ -726,12 +768,18 @@ public abstract class AbstractEventService
 
         programStageInstance.setCompleted( completed );
 
+        if ( programStageInstance.getId() == 0 )
+        {
+            programStageInstanceService.addProgramStageInstance( programStageInstance );
+        }
+
         if ( programStageInstance.isCompleted() )
         {
             programStageInstance.setStatus( ProgramStageInstance.COMPLETED_STATUS );
             programStageInstance.setCompletedDate( new Date() );
             programStageInstance.setCompletedUser( storedBy );
-            programStageInstanceService.completeProgramStageInstance( programStageInstance, getFormat() );
+            programStageInstanceService
+                .completeProgramStageInstance( programStageInstance, i18nManager.getI18nFormat() );
         }
     }
 
@@ -747,7 +795,7 @@ public abstract class AbstractEventService
         importSummary.setStatus( ImportStatus.SUCCESS );
         boolean dryRun = importOptions != null && importOptions.isDryRun();
 
-        Date eventDate = getFormat().parseDate( event.getEventDate() );
+        Date eventDate = DateUtils.getMediumDate( event.getEventDate() );
 
         if ( eventDate == null )
         {
@@ -761,14 +809,15 @@ public abstract class AbstractEventService
             if ( programStageInstance == null )
             {
                 programStageInstance = createProgramStageInstance( programStage, programInstance, organisationUnit,
-                    eventDate, EventStatus.COMPLETED.equals( event.getStatus() ), event.getCoordinate(), storedBy );
+                    eventDate, EventStatus.COMPLETED == event.getStatus(), event.getCoordinate(), storedBy );
             }
             else
             {
                 updateProgramStageInstance( programStage, programInstance, organisationUnit, eventDate,
-                    EventStatus.COMPLETED.equals( event.getStatus() ), event.getCoordinate(), storedBy,
-                    programStageInstance );
+                    EventStatus.COMPLETED == event.getStatus(), event.getCoordinate(), storedBy, programStageInstance );
             }
+
+            saveTrackedEntityCommentFromEvent( programInstance, event, storedBy );
 
             importSummary.setReference( programStageInstance.getUid() );
         }
@@ -785,7 +834,7 @@ public abstract class AbstractEventService
             }
             else
             {
-                if ( validateDataElement( dataElement, dataValue.getValue(), importSummary ) )
+                if ( validateDataValue( dataElement, dataValue.getValue(), importSummary ) )
                 {
                     String dataValueStoredBy = dataValue.getStoredBy() != null ? dataValue.getStoredBy() : storedBy;
 
@@ -801,5 +850,22 @@ public abstract class AbstractEventService
         }
 
         return importSummary;
+    }
+
+    private void saveTrackedEntityCommentFromEvent( ProgramInstance programInstance, Event event, String storedBy )
+    {
+        for ( Note note : event.getNotes() )
+        {
+            TrackedEntityComment comment = new TrackedEntityComment();
+            comment.setCreator( storedBy );
+            comment.setCreatedDate( new Date() );
+            comment.setCommentText( note.getValue() );
+
+            commentService.addTrackedEntityComment( comment );
+
+            programInstance.setComment( comment );
+
+            programInstanceService.updateProgramInstance( programInstance );
+        }
     }
 }

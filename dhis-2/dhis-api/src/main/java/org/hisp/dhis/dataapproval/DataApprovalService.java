@@ -28,12 +28,10 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.user.User;
-
-import java.util.Date;
 
 /**
  * @author Jim Grace
@@ -61,41 +59,39 @@ public interface DataApprovalService
 
     /**
      * Returns the DataApproval object (if any) for a given
-     * dataset, period and organisation unit.
+     * dataset, period and organisation unit. If attributeOptionCombo is null,
+     * the default option combo will be used.
      *
      * @param dataSet DataSet for approval
      * @param period Period for approval
-     * @param source OrganisationUnit for approval
+     * @param organisationUnit OrganisationUnit for approval
+     * @param attributeOptionCombo DataElementCategoryOptionCombo for approval.
      * @return matching DataApproval object, if any
      */
-    DataApproval getDataApproval( DataSet dataSet, Period period, OrganisationUnit source );
-
+    DataApproval getDataApproval( DataSet dataSet, Period period, 
+        OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo );
+    
     /**
      * Returns the DataApprovalState for a given data set, period and
-     * OrganisationUnit.
+     * OrganisationUnit. If attributeOptionCombo is null, the default option 
+     * combo will be used.
      *
      * @param dataSet DataSet to check for approval.
      * @param period Period to check for approval.
-     * @param source OrganisationUnit to check for approval.
+     * @param organisationUnit OrganisationUnit to check for approval.
      * @return the data approval state.
      */
-    DataApprovalState getDataApprovalState( DataSet dataSet, Period period, OrganisationUnit source );
+    DataApprovalState getDataApprovalState( DataSet dataSet, Period period, 
+        OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo );
 
     /**
      * Checks to see whether a user may approve data for a given
      * organisation unit.
      *
-     * @param source OrganisationUnit to check for approval.
-     * @param user The current user.
-     * @param mayApproveAtSameLevel Tells whether the user has the authority
-     *        to approve data for the user's assigned organisation unit(s).
-     * @param mayApproveAtLowerLevels Tells whether the user has the authority
-     *        to approve data below the user's assigned organisation unit(s).
+     * @param organisationUnit OrganisationUnit to check for approval.
      * @return true if the user may approve, otherwise false
      */
-    boolean mayApprove( OrganisationUnit source, User user,
-                        boolean mayApproveAtSameLevel,
-                        boolean mayApproveAtLowerLevels );
+    boolean mayApprove( OrganisationUnit organisationUnit );
 
     /**
      * Checks to see whether a user may unapprove a given data approval.
@@ -113,14 +109,6 @@ public interface DataApprovalService
      * data set, and the user is not authorized to remove that approval as well.
      *
      * @param dataApproval The data approval to check for access.
-     * @param user The current user.
-     * @param mayApproveAtSameLevel Tells whether the user has the authority
-     *        to approve data for the user's assigned organisation unit(s).
-     * @param mayApproveAtLowerLevels Tells whether the user has the authority
-     *        to approve data below the user's assigned organisation unit(s).
-     * @return true if the user may unapprove, otherwise false
      */
-    boolean mayUnapprove( DataApproval dataApproval, User user,
-                          boolean mayApproveAtSameLevel,
-                          boolean mayApproveAtLowerLevels );
+    boolean mayUnapprove( DataApproval dataApproval );
 }

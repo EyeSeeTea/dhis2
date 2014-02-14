@@ -14,12 +14,6 @@
     <property name="sessionFactory" ref="sessionFactory" />
   </bean>
 
-  <bean id="org.hisp.dhis.dataelement.DataElementOperandStore" class="org.hisp.dhis.hibernate.HibernateGenericStore">
-    <property name="clazz" value="org.hisp.dhis.dataelement.DataElementOperand" />
-    <property name="sessionFactory" ref="sessionFactory" />
-    <property name="cacheable" value="true" />
-  </bean>
-
   <bean id="org.hisp.dhis.dataentryform.DataEntryFormStore" class="org.hisp.dhis.dataentryform.hibernate.HibernateDataEntryFormStore">
     <property name="sessionFactory" ref="sessionFactory" />
   </bean>
@@ -31,13 +25,20 @@
     <property name="cacheable" value="true" />
   </bean>
 
+  <bean id="org.hisp.dhis.dataelement.DataElementOperandStore" class="org.hisp.dhis.dataelement.hibernate.HibernateDataElementOperandStore">
+    <property name="clazz" value="org.hisp.dhis.dataelement.DataElementOperand" />
+    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="jdbcTemplate" ref="jdbcTemplate" />
+    <property name="cacheable" value="true" />
+  </bean>
+
   <bean id="org.hisp.dhis.dataelement.DataElementGroupStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
     <property name="clazz" value="org.hisp.dhis.dataelement.DataElementGroup" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
   </bean>
 
-  <bean id="org.hisp.dhis.dataelement.DataElementGroupSetStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
+  <bean id="org.hisp.dhis.dataelement.DataElementGroupSetStore" class="org.hisp.dhis.dataelement.hibernate.HibernateDataElementGroupSetStore">
     <property name="clazz" value="org.hisp.dhis.dataelement.DataElementGroupSet" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
@@ -61,7 +62,6 @@
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
   </bean>
 
-    <!--@author Ovidiu Rosu <rosu.ovi@gmail.com>-->
   <bean id="org.hisp.dhis.filter.MetaDataFilterStore" class="org.hisp.dhis.metadatafilter.hibernate.HibernateMetaDataFilterStore">
     <property name="clazz" value="org.hisp.dhis.filter.MetaDataFilter" />
     <property name="sessionFactory" ref="sessionFactory" />
@@ -170,6 +170,18 @@
     <property name="cacheable" value="true" />
   </bean>
 
+  <bean id="org.hisp.dhis.dataelement.CategoryOptionGroupStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
+    <property name="clazz" value="org.hisp.dhis.dataelement.CategoryOptionGroup" />
+    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="cacheable" value="true" />
+  </bean>
+
+  <bean id="org.hisp.dhis.dataelement.CategoryOptionGroupSetStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
+    <property name="clazz" value="org.hisp.dhis.dataelement.CategoryOptionGroupSet" />
+    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="cacheable" value="true" />
+  </bean>
+
   <bean id="org.hisp.dhis.dataset.SectionStore" class="org.hisp.dhis.dataset.hibernate.HibernateSectionStore">
     <property name="clazz" value="org.hisp.dhis.dataset.Section" />
     <property name="sessionFactory" ref="sessionFactory" />
@@ -200,7 +212,7 @@
   </bean>
 
   <bean id="org.hisp.dhis.organisationunit.OrganisationUnitGroupSetStore"
-    class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
+    class="org.hisp.dhis.organisationunit.hibernate.HibernateOrganisationUnitGroupSetStore">
     <property name="clazz" value="org.hisp.dhis.organisationunit.OrganisationUnitGroupSet" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
@@ -337,13 +349,13 @@
   </bean>
 
   <bean id="org.hisp.dhis.mapping.MapLegendStore"
-    class="org.hisp.dhis.mapping.hibernate.HibernateMapLegendStore">
+    class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
     <property name="clazz" value="org.hisp.dhis.mapping.MapLegend" />
     <property name="sessionFactory" ref="sessionFactory" />
   </bean>
 
   <bean id="org.hisp.dhis.mapping.MapLegendSetStore"
-    class="org.hisp.dhis.mapping.hibernate.HibernateMapLegendSetStore">
+    class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
     <property name="clazz" value="org.hisp.dhis.mapping.MapLegendSet" />
     <property name="sessionFactory" ref="sessionFactory" />
   </bean>
@@ -382,8 +394,9 @@
   </bean>
 
   <bean id="org.hisp.dhis.dataapproval.DataApprovalService" class="org.hisp.dhis.dataapproval.DefaultDataApprovalService">
-      <property name="dataApprovalStore" ref="org.hisp.dhis.dataapproval.DataApprovalStore" />
-      <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
+    <property name="dataApprovalStore" ref="org.hisp.dhis.dataapproval.DataApprovalStore" />
+    <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
+    <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
   </bean>
 
   <bean id="org.hisp.dhis.dataelement.DataElementService" class="org.hisp.dhis.dataelement.DefaultDataElementService">
@@ -418,6 +431,9 @@
     <property name="dataSetStore" ref="org.hisp.dhis.dataset.DataSetStore" />
     <property name="lockExceptionStore" ref="org.hisp.dhis.dataset.LockExceptionStore" />
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
+    <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+    <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
+    <property name="dataApprovalService" ref="org.hisp.dhis.dataapproval.DataApprovalService" />
   </bean>
 
   <bean id="org.hisp.dhis.dataset.CompleteDataSetRegistrationService"
@@ -444,6 +460,7 @@
     <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
     <property name="constantService" ref="org.hisp.dhis.constant.ConstantService" />
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
+    <property name="organisationUnitGroupService" ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
   </bean>
 
   <bean id="org.hisp.dhis.validation.ValidationRuleService" class="org.hisp.dhis.validation.DefaultValidationRuleService">
@@ -460,15 +477,13 @@
     <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
   </bean>
   
-  <!-- Scheduled task for data monitoring -->
-  
-  <bean id="monitoringLastDayTask" class="org.hisp.dhis.validation.scheduling.MonitoringTask" />
-
   <bean id="org.hisp.dhis.dataelement.DataElementCategoryService" class="org.hisp.dhis.dataelement.DefaultDataElementCategoryService">
     <property name="categoryStore" ref="org.hisp.dhis.dataelement.CategoryStore" />
     <property name="categoryOptionStore" ref="org.hisp.dhis.dataelement.CategoryOptionStore" />
     <property name="categoryComboStore" ref="org.hisp.dhis.dataelement.CategoryComboStore" />
     <property name="categoryOptionComboStore" ref="org.hisp.dhis.dataelement.CategoryOptionComboStore" />
+    <property name="categoryOptionGroupStore" ref="org.hisp.dhis.dataelement.CategoryOptionGroupStore" />
+    <property name="categoryOptionGroupSetStore" ref="org.hisp.dhis.dataelement.CategoryOptionGroupSetStore" />
     <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
@@ -611,7 +626,7 @@
     <property name="optionStore" ref="org.hisp.dhis.option.OptionStore" />
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
-
+  
   <bean id="org.hisp.dhis.mapping.MappingService" class="org.hisp.dhis.mapping.DefaultMappingService">
     <property name="mapStore" ref="org.hisp.dhis.mapping.MapStore" />
     <property name="mapViewStore" ref="org.hisp.dhis.mapping.MapViewStore" />
@@ -843,32 +858,20 @@
     <property name="localeStore" ref="org.hisp.dhis.i18n.I18nLocaleStore" />
   </bean>
 
+  <!-- 
+  <bean id="hibernateEntityInterceptorWiring" class="org.hisp.dhis.hibernate.HibernateEventListenerWiring" /> 
+  -->
+
+  <!-- Scheduled task for data monitoring -->
+  
+  <bean id="monitoringLastDayTask" class="org.hisp.dhis.validation.scheduling.MonitoringTask" />
+
   <!-- Startup routine definitions -->
-
-  <bean id="org.hisp.dhis.startup.TableAlteror" class="org.hisp.dhis.startup.TableAlteror">
-    <property name="name" value="TableAlteror" />
-    <property name="runlevel" value="1" />
-    <property name="skipInTests" value="true" />
-  </bean>
-
-  <bean id="org.hisp.dhis.startup.MapViewUpgrader" class="org.hisp.dhis.startup.MapViewUpgrader">
-    <property name="statementManager" ref="statementManager" />
-    <property name="batchHandlerFactory" ref="batchHandlerFactory" />
-    <property name="name" value="MapViewUpgrader" />
-    <property name="runlevel" value="1" />
-    <property name="skipInTests" value="true" />
-  </bean>
-
-  <bean id="org.hisp.dhis.common.IdentityPopulator" class="org.hisp.dhis.common.IdentityPopulator">
-    <property name="name" value="IdentityPopulator" />
-    <property name="runlevel" value="2" />
-    <property name="skipInTests" value="true" />
-  </bean>
 
   <bean id="org.hisp.dhis.period.PeriodTypePopulator" class="org.hisp.dhis.period.PeriodTypePopulator">
     <property name="periodStore" ref="org.hisp.dhis.period.PeriodStore" />
     <property name="name" value="PeriodTypePopulator" />
-    <property name="runlevel" value="2" />
+    <property name="runlevel" value="1" />
   </bean>
 
   <bean id="org.hisp.dhis.dataelement.DataElementDefaultDimensionPopulator"
@@ -877,12 +880,64 @@
     <property name="conceptService" ref="org.hisp.dhis.concept.ConceptService" />
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
     <property name="name" value="DataElementDefaultDimensionPopulator" />
+    <property name="runlevel" value="1" />
+  </bean>
+
+  <bean id="org.hisp.dhis.startup.TableAlteror" class="org.hisp.dhis.startup.TableAlteror">
+    <property name="name" value="TableAlteror" />
+    <property name="runlevel" value="2" />
+    <property name="skipInTests" value="true" />
+  </bean>
+
+  <bean id="org.hisp.dhis.common.IdentityPopulator" class="org.hisp.dhis.common.IdentityPopulator">
+    <property name="name" value="IdentityPopulator" />
     <property name="runlevel" value="3" />
+    <property name="skipInTests" value="true" />
+    <property name="tables">
+      <list>
+        <value>constant</value>
+        <value>concept</value>
+        <value>attribute</value>
+        <value>indicatortype</value>
+        <value>indicator</value>
+        <value>indicatorgroup</value>
+        <value>indicatorgroupset</value>
+        <value>datadictionary</value>
+        <value>validationrule</value>
+        <value>validationrulegroup</value>
+        <value>dataset</value>
+        <value>section</value>
+        <value>orgunitlevel</value>
+        <value>organisationunit</value>
+        <value>orgunitgroup</value>
+        <value>orgunitgroupset</value>
+        <value>dataelement</value>
+        <value>dataelementgroup</value>
+        <value>dataelementgroupset</value>
+        <value>sqlview</value>
+        <value>dataelementcategory</value>
+        <value>dataelementcategoryoption</value>
+        <value>categorycombo</value>
+        <value>categoryoptioncombo</value>
+        <value>userinfo</value>
+        <value>usergroup</value>
+        <value>userrole</value>
+        <value>optionset</value>
+      </list>
+    </property>
   </bean>
 
   <bean id="org.hisp.dhis.startup.TableCreator" class="org.hisp.dhis.startup.TableCreator">
     <property name="name" value="TableCreator" />
     <property name="runlevel" value="3" />
+  </bean>
+
+  <bean id="org.hisp.dhis.startup.MapViewUpgrader" class="org.hisp.dhis.startup.MapViewUpgrader">
+    <property name="statementManager" ref="statementManager" />
+    <property name="batchHandlerFactory" ref="batchHandlerFactory" />
+    <property name="name" value="MapViewUpgrader" />
+    <property name="runlevel" value="4" />
+    <property name="skipInTests" value="true" />
   </bean>
 
   <bean id="org.hisp.dhis.dataentryform.DataEntryFormUpgrader" class="org.hisp.dhis.dataentryform.DataEntryFormUpgrader">
@@ -1043,7 +1098,6 @@
   <bean id="org.hisp.dhis.dataelement.DataElementCategoryDeletionHandler"
     class="org.hisp.dhis.dataelement.DataElementCategoryDeletionHandler">
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
-    <property name="conceptService" ref="org.hisp.dhis.concept.ConceptService" />
   </bean>
 
   <bean id="org.hisp.dhis.dataelement.DataElementGroupSetDeletionHandler"
@@ -1085,6 +1139,9 @@
 
   <bean id="org.hisp.dhis.sms.SMSCodesDeletionHandler" class="org.hisp.dhis.sms.SMSCodesDeletionHandler" />
 
+  <bean id="org.hisp.dhis.dataelement.CategoryOptionGroupSetDeletionHandler" class="org.hisp.dhis.dataelement.CategoryOptionGroupSetDeletionHandler">
+  </bean>
+  
   <!-- DeletionManager -->
 
   <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
@@ -1120,6 +1177,7 @@
           <ref local="org.hisp.dhis.user.UserSettingDeletionHandler" />
           <ref local="org.hisp.dhis.dataelement.DataElementCategoryDeletionHandler" />
           <ref local="org.hisp.dhis.dataelement.DataElementGroupSetDeletionHandler" />
+          <ref local="org.hisp.dhis.dataelement.CategoryOptionGroupSetDeletionHandler" />
           <ref local="org.hisp.dhis.configuration.ConfigurationDeletionHandler" />
           <ref local="org.hisp.dhis.message.MessageConversationDeletionHandler" />
           <ref local="org.hisp.dhis.translation.TranslationDeletionHandler" />

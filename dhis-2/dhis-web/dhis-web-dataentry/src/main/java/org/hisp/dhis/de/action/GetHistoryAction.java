@@ -29,7 +29,6 @@ package org.hisp.dhis.de.action;
  */
 
 import java.util.Collection;
-import java.util.List;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
@@ -41,6 +40,7 @@ import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueAudit;
 import org.hisp.dhis.datavalue.DataValueAuditService;
 import org.hisp.dhis.datavalue.DataValueService;
+import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
@@ -190,13 +190,6 @@ public class GetHistoryAction
         return dataValue;
     }
 
-    private List<String> standardComments;
-
-    public List<String> getStandardComments()
-    {
-        return standardComments;
-    }
-
     private Collection<DataValueAudit> dataValueAudits;
 
     public Collection<DataValueAudit> getDataValueAudits()
@@ -209,6 +202,13 @@ public class GetHistoryAction
     public String getStoredBy()
     {
         return storedBy;
+    }
+    
+    private OptionSet commentOptionSet;
+
+    public OptionSet getCommentOptionSet()
+    {
+        return commentOptionSet;
     }
 
     // -------------------------------------------------------------------------
@@ -250,12 +250,10 @@ public class GetHistoryAction
 
         minMaxInvalid = !DataElement.VALUE_TYPE_INT.equals( dataElement.getType() );
 
-        // ---------------------------------------------------------------------
-        // Data Value Audit
-        // ---------------------------------------------------------------------
-
         dataValueAudits = dataValueAuditService.getDataValueAuditByDataValue( dataValue );
 
+        commentOptionSet = dataElement.getCommentOptionSet();
+        
         return SUCCESS;
     }
 }

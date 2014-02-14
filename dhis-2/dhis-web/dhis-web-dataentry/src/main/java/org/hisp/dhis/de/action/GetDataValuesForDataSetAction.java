@@ -28,17 +28,16 @@ package org.hisp.dhis.de.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.api.utils.ContextUtils;
-import org.hisp.dhis.dataapproval.DataApproval;
-import org.hisp.dhis.dataapproval.DataApprovalService;
-import org.hisp.dhis.dataapproval.DataApprovalState;
-import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
+import org.apache.struts2.ServletActionContext;
+import org.hisp.dhis.api.utils.InputUtils;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataset.CompleteDataSetRegistration;
 import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
 import org.hisp.dhis.dataset.DataSet;
@@ -51,15 +50,9 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.security.ActionAccessResolver;
-import org.hisp.dhis.user.CurrentUserService;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Lars Helge Overland
@@ -108,34 +101,8 @@ public class GetDataValuesForDataSetAction
         this.organisationUnitService = organisationUnitService;
     }
     
-    private DataElementCategoryService categoryService;
-
-    public void setCategoryService( DataElementCategoryService categoryService )
-    {
-        this.categoryService = categoryService;
-    }
-
-    private DataApprovalService dataApprovalService;
-
-    public void setDataApprovalService( DataApprovalService dataApprovalService )
-    {
-        this.dataApprovalService = dataApprovalService;
-    }
-
-    private ActionAccessResolver actionAccessResolver;
-
-    public void setActionAccessResolver( ActionAccessResolver actionAccessResolver )
-    {
-        this.actionAccessResolver = actionAccessResolver;
-    }
-
-    private CurrentUserService currentUserService;
-
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
-    }
-
+    @Autowired
+    private InputUtils inputUtils;
 
     // -------------------------------------------------------------------------
     // Input
@@ -234,49 +201,12 @@ public class GetDataValuesForDataSetAction
         return storedBy;
     }
 
-    private DataApprovalState dataApprovalState;
-
-    public DataApprovalState getDataApprovalState()
-    {
-        return dataApprovalState;
-    }
-
-    private Date approvedDate;
-
-    public Date getApprovedDate()
-    {
-        return approvedDate;
-    }
-
-    private String approvedBy;
-
-    public String getApprovedBy()
-    {
-        return approvedBy;
-    }
-
-    private boolean mayApprove;
-
-    public boolean isMayApprove()
-    {
-        return mayApprove;
-    }
-
-    private boolean mayUnapprove;
-
-    public boolean isMayUnapprove()
-    {
-        return mayUnapprove;
-    }
-
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
     {
-        List<String> opts = ContextUtils.getQueryParamValues( cp );
-        
         // ---------------------------------------------------------------------
         // Validation
         // ---------------------------------------------------------------------
@@ -299,32 +229,7 @@ public class GetDataValuesForDataSetAction
         // Attributes
         // ---------------------------------------------------------------------
 
-        DataElementCategoryOptionCombo attributeOptionCombo = null;
-        
-        if ( cc != null && opts != null )
-        {
-            DataElementCategoryCombo categoryCombo = categoryService.getDataElementCategoryCombo( cc );
-
-            Set<DataElementCategoryOption> categoryOptions = new HashSet<DataElementCategoryOption>();
-
-            for ( String id : opts )
-            {
-                categoryOptions.add( categoryService.getDataElementCategoryOption( id ) );
-            }
-            
-            attributeOptionCombo = categoryService.getDataElementCategoryOptionCombo( categoryCombo, categoryOptions );
-            
-            if ( attributeOptionCombo == null )
-            {
-                log.warn( "Illegal input, attribute option combo does not exist" );
-                return SUCCESS;
-            }            
-        }
-
-        if ( attributeOptionCombo == null )
-        {
-            attributeOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
-        }
+        DataElementCategoryOptionCombo attributeOptionCombo = inputUtils.getAttributeOptionCombo( ServletActionContext.getResponse(), cc, cp );
         
         // ---------------------------------------------------------------------
         // Data values & Min-max data elements
@@ -365,7 +270,7 @@ public class GetDataValuesForDataSetAction
                 storedBy = registration.getStoredBy();
             }
 
-            locked = dataSetService.isLocked( dataSet, period, organisationUnit, null );
+            locked = dataSetService.isLocked( dataSet, period, organisationUnit, attributeOptionCombo, null );
         }
         else
         {
@@ -379,7 +284,7 @@ public class GetDataValuesForDataSetAction
             {
                 if ( ou.getDataSets().contains( dataSet ) )
                 {
-                    locked = dataSetService.isLocked( dataSet, period, organisationUnit, null );
+                    locked = dataSetService.isLocked( dataSet, period, organisationUnit, attributeOptionCombo, null );
 
                     if ( locked )
                     {
@@ -397,30 +302,6 @@ public class GetDataValuesForDataSetAction
             }
         }
 
-        // ---------------------------------------------------------------------
-        // Data approval info
-        // ---------------------------------------------------------------------
-
-        dataApprovalState = dataApprovalService.getDataApprovalState( dataSet, period, organisationUnit );
-
-        switch ( dataApprovalState )
-        {
-            case READY_FOR_APPROVAL:
-                mayApprove = dataApprovalService.mayApprove( organisationUnit, currentUserService.getCurrentUser(),
-                        actionAccessResolver.hasAccess( "dhis-web-dataentry", "F_APPROVE_DATA_AT_SAME_LEVEL" ),
-                        actionAccessResolver.hasAccess( "dhis-web-dataentry", "F_APPROVE_DATA_AT_LOWER_LEVELS" ));
-                break;
-
-            case APPROVED:
-                DataApproval dataApproval = dataApprovalService.getDataApproval( dataSet, period, organisationUnit );
-                approvedDate = dataApproval.getCreated();
-                approvedBy = dataApproval.getCreator().getName();
-                mayUnapprove = dataApprovalService.mayUnapprove( dataApproval, currentUserService.getCurrentUser(),
-                        actionAccessResolver.hasAccess( "dhis-web-dataentry", "F_APPROVE_DATA_AT_SAME_LEVEL" ),
-                        actionAccessResolver.hasAccess( "dhis-web-dataentry", "F_APPROVE_DATA_AT_LOWER_LEVELS" ));
-                break;
-
-        }
         return SUCCESS;
     }
 }

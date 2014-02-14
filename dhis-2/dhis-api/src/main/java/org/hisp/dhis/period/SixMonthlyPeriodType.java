@@ -28,10 +28,7 @@ package org.hisp.dhis.period;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 
 /**
  * PeriodType for six-monthly Periods. A valid six-monthly Period has startDate
@@ -42,7 +39,7 @@ import java.util.List;
  * @version $Id: SixMonthlyPeriodType.java 2971 2007-03-03 18:54:56Z torgeilo $
  */
 public class SixMonthlyPeriodType
-    extends CalendarPeriodType
+    extends SixMonthlyAbstractPeriodType
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -51,12 +48,12 @@ public class SixMonthlyPeriodType
 
     private static final String ISO_FORMAT = "yyyySn";
 
+    private static final int BASE_MONTH = Calendar.JANUARY;
+
     /**
      * The name of the SixMonthlyPeriodType, which is "SixMonthly".
      */
     public static final String NAME = "SixMonthly";
-
-    public static final int FREQUENCY_ORDER = 182;
 
     // -------------------------------------------------------------------------
     // PeriodType functionality
@@ -69,101 +66,15 @@ public class SixMonthlyPeriodType
     }
 
     @Override
-    public Period createPeriod()
+    public int getBaseMonth()
     {
-        return createPeriod( createCalendarInstance() );
-    }
-
-    @Override
-    public Period createPeriod( Date date )
-    {
-        return createPeriod( createCalendarInstance( date ) );
-    }
-
-    @Override
-    public Period createPeriod( Calendar cal )
-    {
-        cal.set( Calendar.MONTH, cal.get( Calendar.MONTH ) - cal.get( Calendar.MONTH ) % 6 );
-        cal.set( Calendar.DAY_OF_MONTH, 1 );
-
-        Date startDate = cal.getTime();
-
-        cal.add( Calendar.MONTH, 5 );
-        cal.set( Calendar.DAY_OF_MONTH, cal.getActualMaximum( Calendar.DAY_OF_MONTH ) );
-
-        return new Period( this, startDate, cal.getTime() );
-    }
-
-    @Override
-    public int getFrequencyOrder()
-    {
-        return FREQUENCY_ORDER;
+        return BASE_MONTH;
     }
 
     // -------------------------------------------------------------------------
     // CalendarPeriodType functionality
     // -------------------------------------------------------------------------
 
-    @Override
-    public Period getNextPeriod( Period period )
-    {
-        Calendar cal = createCalendarInstance( period.getStartDate() );
-        cal.add( Calendar.MONTH, 6 );
-        return createPeriod( cal );
-    }
-
-    @Override
-    public Period getPreviousPeriod( Period period )
-    {
-        Calendar cal = createCalendarInstance( period.getStartDate() );
-        cal.add( Calendar.MONTH, -6 );
-        return createPeriod( cal );
-    }
-
-    /**
-     * Generates six-monthly Periods for the whole year in which the given
-     * Period's startDate exists.
-     */
-    @Override
-    public List<Period> generatePeriods( Date date )
-    {
-        Calendar cal = createCalendarInstance( date );
-        cal.set( Calendar.DAY_OF_YEAR, 1 );
-
-        int year = cal.get( Calendar.YEAR );
-        ArrayList<Period> periods = new ArrayList<Period>();
-
-        while ( cal.get( Calendar.YEAR ) == year )
-        {
-            periods.add( createPeriod( cal ) );
-            cal.add( Calendar.MONTH, 6 );
-        }
-
-        return periods;
-    }
-
-    /**
-     * Generates the last 2 six-months where the last one is the six-month
-     * which the given date is inside.
-     */
-    @Override
-    public List<Period> generateRollingPeriods( Date date )
-    {
-        Calendar cal = createCalendarInstance( date );
-        cal.set( Calendar.DAY_OF_MONTH, 1 );
-        cal.add( Calendar.MONTH, ( ( cal.get( Calendar.MONTH ) % 6 ) * -1 ) - 6 );
-
-        ArrayList<Period> periods = new ArrayList<Period>();
-        
-        for ( int i = 0; i < 2; i++ )
-        {
-            periods.add( createPeriod( cal ) );
-            cal.add( Calendar.MONTH, 6 );
-        }
-        
-        return periods;
-    }
-    
     @Override
     public String getIsoDate( Period period )
     {
@@ -222,17 +133,5 @@ public class SixMonthlyPeriodType
                 throw new IllegalArgumentException( "Not a valid six-monthly starting month" );
             }
         }
-    }
-    
-    @Override
-    public Date getRewindedDate( Date date, Integer rewindedPeriods )
-    {
-        date = date != null ? date : new Date();        
-        rewindedPeriods = rewindedPeriods != null ? rewindedPeriods : 1;
-
-        Calendar cal = createCalendarInstance( date );        
-        cal.add( Calendar.MONTH, (rewindedPeriods * -6) );
-
-        return cal.getTime();
     }
 }

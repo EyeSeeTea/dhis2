@@ -342,10 +342,10 @@ span#message
 {
   display: none;
   padding: 1em;
-  margin: 1em;
+  margin: 1em 0;
   background-color: #f8eab0;
   border: 1px solid #dbae56;
-  width: 500px;
+  width: 480px;
   border-radius: 3px;
 }
 
@@ -353,10 +353,10 @@ span#info
 {
   display: block;
   padding: 1em;
-  margin: 1em;
+  margin: 1em 0;
   background-color: #baffbc;
   border: 1px solid #12cd17;
-  width: 500px;
+  width: 480px;
   border-radius: 3px;
 }
 
@@ -522,7 +522,7 @@ div.inputCriteria
 
 .settingHeader
 {
-  padding: 6px 0;
+  padding: 9px 0 6px 0;
   font-size: 12pt;
   color: #373737;
 }
@@ -568,6 +568,11 @@ div.inputCriteria
 .inputForm textarea
 {
   height: 8em;
+}
+
+.settingIndent
+{
+  margin-left: 12px;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -839,3 +844,7 @@ input:-moz-placeholder
 	color: #777;
 }
 
+.fa-question-circle
+{
+  color: #276696;
+}

@@ -76,17 +76,11 @@ function showDataSqlViewForm( context ) {
     },
     function( json ) {
       if( json.response == "success" ) {
-        window.location.href = "exportSqlView.action?id=" + viewId;
+        window.location.href = "exportSqlView.action?id=" + context.id;
       }
       else if( json.response == "error" ) {
         setHeaderDelayMessage(json.message);
       }
     }
   );
-}
-
-function exportSqlView( id, type ) {
-  var url = "exportSqlView.action?id=" + id + "&type=" + type;
-
-  window.location.href = url;
 }
