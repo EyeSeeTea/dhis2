@@ -52,7 +52,7 @@ public class DataApproval
     private static final long serialVersionUID = -4034531921928532366L;
 
     /**
-     * The DataSet for the values being approved.
+     * Identifies the data approval instance.
      */
     private int id;
 

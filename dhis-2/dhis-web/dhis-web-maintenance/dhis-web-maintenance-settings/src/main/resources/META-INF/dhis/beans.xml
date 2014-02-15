@@ -59,6 +59,14 @@
     <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
   </bean>
 
+  <bean id="org.hisp.dhis.settings.action.system.GetApprovalSettingsAction"
+      class="org.hisp.dhis.settings.action.system.GetApprovalSettingsAction"
+      scope="prototype"/>
+
+  <bean id="org.hisp.dhis.settings.action.system.SetApprovalSettingsAction"
+      class="org.hisp.dhis.settings.action.system.SetApprovalSettingsAction"
+      scope="prototype"/>
+
   <bean id="org.hisp.dhis.settings.action.system.GetAccessSettingsAction"
       class="org.hisp.dhis.settings.action.system.GetAccessSettingsAction"
       scope="prototype"/>
