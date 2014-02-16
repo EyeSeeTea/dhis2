@@ -880,9 +880,11 @@ Ext.onReady( function() {
 						xDim.objectName = dim.dimension;
 						xDim.dimensionName = dimConf.objectNameMap.hasOwnProperty(dim.dimension) ? dimConf.objectNameMap[dim.dimension].dimensionName || dim.dimension : dim.dimension;
 
+						xDim.items = [];
+						xDim.ids = [];
+
 						if (items) {
 							xDim.items = items;
-							xDim.ids = [];
 
 							for (var j = 0; j < items.length; j++) {
 								xDim.ids.push(items[j].id);
@@ -914,9 +916,11 @@ Ext.onReady( function() {
 						xDim.objectName = dim.dimension;
 						xDim.dimensionName = dimConf.objectNameMap.hasOwnProperty(dim.dimension) ? dimConf.objectNameMap[dim.dimension].dimensionName || dim.dimension : dim.dimension;
 
+						xDim.items = [];
+						xDim.ids = [];
+
 						if (items) {
 							xDim.items = items;
-							xDim.ids = [];
 
 							for (var j = 0; j < items.length; j++) {
 								xDim.ids.push(items[j].id);
@@ -948,9 +952,11 @@ Ext.onReady( function() {
 						xDim.objectName = dim.dimension;
 						xDim.dimensionName = dimConf.objectNameMap.hasOwnProperty(dim.dimension) ? dimConf.objectNameMap[dim.dimension].dimensionName || dim.dimension : dim.dimension;
 
+						xDim.items = [];
+						xDim.ids = [];
+
 						if (items) {
 							xDim.items = items;
-							xDim.ids = [];
 
 							for (var j = 0; j < items.length; j++) {
 								xDim.ids.push(items[j].id);
@@ -1071,12 +1077,43 @@ Ext.onReady( function() {
 				};
 
 				return function() {
-					var headerNames = getHeaderNames(),
-						xOuDimension = xLayout.objectNameDimensionsMap[dimConf.organisationUnit.objectName],
-						isUserOrgunit = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT'),
-						isUserOrgunitChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_CHILDREN'),
-						isUserOrgunitGrandChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_GRANDCHILDREN'),
-						isLevel = function() {
+					//var headerNames = getHeaderNames(),
+						//xOuDimension = xLayout.objectNameDimensionsMap[dimConf.organisationUnit.objectName],
+						//isUserOrgunit = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT'),
+						//isUserOrgunitChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_CHILDREN'),
+						//isUserOrgunitGrandChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_GRANDCHILDREN'),
+						//isLevel = function() {
+							//if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
+								//for (var i = 0; i < xOuDimension.ids.length; i++) {
+									//if (xOuDimension.ids[i].substr(0,5) === 'LEVEL') {
+										//return true;
+									//}
+								//}
+							//}
+
+							//return false;
+						//}(),
+						//isGroup = function() {
+							//if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
+								//for (var i = 0; i < xOuDimension.ids.length; i++) {
+									//if (xOuDimension.ids[i].substr(0,8) === 'OU_GROUP') {
+										//return true;
+									//}
+								//}
+							//}
+
+							//return false;
+						//}(),
+						//co = dimConf.category.objectName,
+						//ou = dimConf.organisationUnit.objectName,
+						//layout;
+						
+					var headerNames = getHeaderNames();
+					var xOuDimension = xLayout.objectNameDimensionsMap[dimConf.organisationUnit.objectName];
+						var isUserOrgunit = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT');
+						var isUserOrgunitChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_CHILDREN');
+						var isUserOrgunitGrandChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_GRANDCHILDREN');
+						var isLevel = function() {
 							if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
 								for (var i = 0; i < xOuDimension.ids.length; i++) {
 									if (xOuDimension.ids[i].substr(0,5) === 'LEVEL') {
@@ -1086,8 +1123,8 @@ Ext.onReady( function() {
 							}
 
 							return false;
-						}(),
-						isGroup = function() {
+						}();
+						var isGroup = function() {
 							if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
 								for (var i = 0; i < xOuDimension.ids.length; i++) {
 									if (xOuDimension.ids[i].substr(0,8) === 'OU_GROUP') {
@@ -1097,10 +1134,10 @@ Ext.onReady( function() {
 							}
 
 							return false;
-						}(),
-						co = dimConf.category.objectName,
-						ou = dimConf.organisationUnit.objectName,
-						layout;
+						}();
+						var co = dimConf.category.objectName;
+						var ou = dimConf.organisationUnit.objectName;
+						var layout;
 
 					// Set items from init/metaData/xLayout
 					for (var i = 0, dim, metaDataDim, items; i < dimensions.length; i++) {

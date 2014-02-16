@@ -31,16 +31,13 @@ package org.hisp.dhis.trackedentity.hibernate;
 import java.util.Collection;
 
 import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeOption;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeOptionStore;
 
-/**
- * @author Viet
- */
 public class HibernateTrackedEntityAttributeOptionStore
-    extends HibernateGenericStore<TrackedEntityAttributeOption>
+    extends HibernateIdentifiableObjectStore<TrackedEntityAttributeOption>
     implements TrackedEntityAttributeOptionStore
 {
     public TrackedEntityAttributeOption get( TrackedEntityAttribute attribute, String name )
@@ -54,5 +51,4 @@ public class HibernateTrackedEntityAttributeOptionStore
     {
         return getCriteria( Restrictions.eq( "attribute", attribute ) ).list();
     }
-    
 }

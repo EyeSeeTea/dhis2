@@ -28,12 +28,12 @@ package org.hisp.dhis.trackedentity.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
+
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeStore;
-
-import java.util.Collection;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -54,22 +54,22 @@ public class HibernateTrackedEntityAttributeStore
     }
 
     @Override
-     @SuppressWarnings( "unchecked" )
+    @SuppressWarnings( "unchecked" )
     public Collection<TrackedEntityAttribute> getByMandatory( boolean mandatory )
     {
         return getCriteria( Restrictions.eq( "mandatory", mandatory ) ).list();
     }
 
     @Override
-     @SuppressWarnings( "unchecked" )
+    @SuppressWarnings( "unchecked" )
     public Collection<TrackedEntityAttribute> getOptionalAttributesWithoutGroup()
     {
-        return getCriteria( Restrictions.isNull( "attributeGroup" ) )
-            .add( Restrictions.eq( "mandatory", false ) ).list();
+        return getCriteria( Restrictions.isNull( "attributeGroup" ) ).add( Restrictions.eq( "mandatory", false ) )
+            .list();
     }
 
     @Override
-     public TrackedEntityAttribute getByGroupBy()
+    public TrackedEntityAttribute getByGroupBy()
     {
         return (TrackedEntityAttribute) getCriteria( Restrictions.eq( "groupBy", true ) ).uniqueResult();
     }
@@ -89,10 +89,9 @@ public class HibernateTrackedEntityAttributeStore
     }
 
     @Override
-     @SuppressWarnings( "unchecked" )
+    @SuppressWarnings( "unchecked" )
     public Collection<TrackedEntityAttribute> getDisplayedInList( boolean displayInListNoProgram )
     {
         return getCriteria( Restrictions.eq( "displayInListNoProgram", displayInListNoProgram ) ).list();
     }
-
 }

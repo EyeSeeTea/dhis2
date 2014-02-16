@@ -30,33 +30,31 @@ package org.hisp.dhis.trackedentity;
 
 import java.util.Collection;
 
-import org.hisp.dhis.common.GenericStore;
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 
-/**
- * @author Viet
- */
 public interface TrackedEntityAttributeOptionStore
-    extends GenericStore<TrackedEntityAttributeOption>
+    extends GenericIdentifiableObjectStore<TrackedEntityAttributeOption>
 {
-    String ID = TrackedEntityAttributeOption.class.getName();
-
     /**
      * Returns a {@link TrackedEntityAttributeOption} with a given name.
      * 
      * @param attribute {@link TrackedEntityAttribute}
+     * 
      * @param name the name of the TrackedEntityAttributeOption to return.
      * 
-     * @return the TrackedEntityAttributeOption with the given name, or null if no
-     *         match.
+     * @return the TrackedEntityAttributeOption with the given name, or null if
+     * no match.
      */
     TrackedEntityAttributeOption get( TrackedEntityAttribute attribute, String name );
 
     /**
-     * Get all {@link TrackedEntityAttributeOption} of a {@link TrackedEntityAttribute}
+     * Get all {@link TrackedEntityAttributeOption} of a
+     * {@link TrackedEntityAttribute}
      * 
      * @param attribute {@link TrackedEntityAttribute}
      * 
      * @return {@link TrackedEntityAttributeOption}
      */
     Collection<TrackedEntityAttributeOption> get( TrackedEntityAttribute attribute );
+
 }

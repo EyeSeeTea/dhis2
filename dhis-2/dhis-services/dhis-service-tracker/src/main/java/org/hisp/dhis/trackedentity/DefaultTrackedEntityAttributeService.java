@@ -32,14 +32,10 @@ import java.util.Collection;
 
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
-import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
-import org.hisp.dhis.trackedentity.TrackedEntityAttributeStore;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Abyot Asalefew
- * @version $Id$
  */
 @Transactional
 public class DefaultTrackedEntityAttributeService
@@ -54,6 +50,13 @@ public class DefaultTrackedEntityAttributeService
     public void setAttributeStore( TrackedEntityAttributeStore attributeStore )
     {
         this.attributeStore = attributeStore;
+    }
+
+    private TrackedEntityAttributeOptionStore attributeOptionStore;
+
+    public void setAttributeOptionStore( TrackedEntityAttributeOptionStore attributeOptionStore )
+    {
+        this.attributeOptionStore = attributeOptionStore;
     }
 
     private ProgramService programService;
@@ -171,4 +174,37 @@ public class DefaultTrackedEntityAttributeService
         return attributeStore.getCountEqNameNoAcl( name );
     }
 
+    // -------------------------------------------------------------------------
+    // TrackedEntityAttributeOption
+    // -------------------------------------------------------------------------
+
+    public int addTrackedEntityAttributeOption( TrackedEntityAttributeOption option )
+    {
+        return attributeOptionStore.save( option );
+    }
+
+    public void deleteTrackedEntityAttributeOption( TrackedEntityAttributeOption option )
+    {
+        attributeOptionStore.delete( option );
+    }
+
+    public void updateTrackedEntityAttributeOption( TrackedEntityAttributeOption option )
+    {
+        attributeOptionStore.update( option );
+    }
+
+    public TrackedEntityAttributeOption getTrackedEntityAttributeOption( TrackedEntityAttribute attribute, String name )
+    {
+        return attributeOptionStore.get( attribute, name );
+    }
+
+    public TrackedEntityAttributeOption getTrackedEntityAttributeOption( int id )
+    {
+        return attributeOptionStore.get( id );
+    }
+
+    public Collection<TrackedEntityAttributeOption> getTrackedEntityAttributeOption( TrackedEntityAttribute attribute )
+    {
+        return attributeOptionStore.get( attribute );
+    }
 }

@@ -33,6 +33,7 @@ import static org.hisp.dhis.analytics.AnalyticsService.OU_HIERARCHY_KEY;
 import static org.hisp.dhis.analytics.DataQueryParams.DIMENSION_NAME_SEP;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
+import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 import static org.hisp.dhis.common.NameableObjectUtils.asTypedList;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.getParentGraphMap;
 
@@ -133,7 +134,7 @@ public class DefaultEventAnalyticsService
     // -------------------------------------------------------------------------
 
     // TODO order event analytics tables on execution date to avoid default
-    // sorting in queries
+    // TODO sorting in queries
     // TODO parallel processing of queries
 
     public Grid getAggregatedEventData( EventQueryParams params )
@@ -174,20 +175,25 @@ public class DefaultEventAnalyticsService
         // ---------------------------------------------------------------------
         // Meta-data
         // ---------------------------------------------------------------------
-
-        Map<Object, Object> metaData = new HashMap<Object, Object>();
-
-        Map<String, String> uidNameMap = getUidNameMap( params );
-
-        metaData.put( NAMES_META_KEY, uidNameMap );
-
-        if ( params.isHierarchyMeta() )
+        
+        if ( !params.isSkipMeta() )
         {
-            metaData.put( OU_HIERARCHY_KEY, getParentGraphMap( asTypedList( 
-                params.getDimensionOrFilter( ORGUNIT_DIM_ID ), OrganisationUnit.class ) ) );
-        }
+            Map<Object, Object> metaData = new HashMap<Object, Object>();
+    
+            Map<String, String> uidNameMap = getUidNameMap( params );
+    
+            metaData.put( NAMES_META_KEY, uidNameMap );
+            metaData.put( PERIOD_DIM_ID, getUids( params.getDimensionOrFilter( PERIOD_DIM_ID ) ) );
+            metaData.put( ORGUNIT_DIM_ID, getUids( params.getDimensionOrFilter( ORGUNIT_DIM_ID ) ) );
+    
+            if ( params.isHierarchyMeta() )
+            {
+                metaData.put( OU_HIERARCHY_KEY, getParentGraphMap( asTypedList( 
+                    params.getDimensionOrFilter( ORGUNIT_DIM_ID ), OrganisationUnit.class ) ) );
+            }
 
-        grid.setMetaData( metaData );
+            grid.setMetaData( metaData );
+        }
 
         return grid;
     }
@@ -270,11 +276,12 @@ public class DefaultEventAnalyticsService
     }
 
     public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate,
-        Set<String> dimension, Set<String> filter, boolean hierarchyMeta, SortOrder sortOrder, Integer limit,
+        Set<String> dimension, Set<String> filter, boolean skipMeta, boolean hierarchyMeta, SortOrder sortOrder, Integer limit,
         I18nFormat format )
     {
         EventQueryParams params = getFromUrl( program, stage, startDate, endDate, dimension, filter, null, null, null,
-            hierarchyMeta, false, null, null, format );
+            skipMeta, hierarchyMeta, false, null, null, format );
+        
         params.setSortOrder( sortOrder );
         params.setLimit( limit );
         params.setAggregate( true );
@@ -284,7 +291,7 @@ public class DefaultEventAnalyticsService
 
     public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate,
         Set<String> dimension, Set<String> filter, String ouMode, Set<String> asc, Set<String> desc,
-        boolean hierarchyMeta, boolean coordinatesOnly, Integer page, Integer pageSize, I18nFormat format )
+        boolean skipMeta, boolean hierarchyMeta, boolean coordinatesOnly, Integer page, Integer pageSize, I18nFormat format )
     {
         EventQueryParams params = new EventQueryParams();
 
@@ -383,6 +390,7 @@ public class DefaultEventAnalyticsService
         params.setStartDate( start );
         params.setEndDate( end );
         params.setOrganisationUnitMode( ouMode );
+        params.setSkipMeta( skipMeta );
         params.setHierarchyMeta( hierarchyMeta );
         params.setCoordinatesOnly( coordinatesOnly );
         params.setPage( page );

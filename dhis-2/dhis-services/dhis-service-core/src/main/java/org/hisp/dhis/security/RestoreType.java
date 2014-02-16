@@ -37,14 +37,8 @@ import java.util.Calendar;
 
 public enum RestoreType
 {
-    RECOVER_PASSWORD ("R", Calendar.HOUR_OF_DAY, 1, "restore_message", "User account restore confirmation", "restore.action" ),
-    INVITE ("I", Calendar.MONTH, 3, "invite_message", "Create DHIS 2 user account invitation", "invite.action" );
-
-    /**
-     * Prefix to be used on restore token. This prevents one type of restore
-     * URL from being hacked and used for a different type of restore.
-     */
-    private final String tokenPrefix;
+    RECOVER_PASSWORD( Calendar.HOUR_OF_DAY, 1, "restore_message", "User account restore confirmation", "restore.action" ),
+    INVITE( Calendar.MONTH, 3, "invite_message", "Create DHIS 2 user account invitation", "invite.action" );
 
     /**
      * Type of Calendar interval before the restore expires.
@@ -75,10 +69,9 @@ public enum RestoreType
     // Constructor
     // -------------------------------------------------------------------------
 
-    RestoreType( String tokenPrefix, int expiryIntervalType, int expiryIntervalCount,
+    RestoreType( int expiryIntervalType, int expiryIntervalCount,
                  String emailTemplate, String emailSubject, String action )
     {
-        this.tokenPrefix = tokenPrefix;
         this.expiryIntervalType = expiryIntervalType;
         this.expiryIntervalCount = expiryIntervalCount;
         this.emailTemplate = emailTemplate;
@@ -89,11 +82,6 @@ public enum RestoreType
     // -------------------------------------------------------------------------
     // Getters
     // -------------------------------------------------------------------------
-
-    public String getTokenPrefix()
-    {
-        return tokenPrefix;
-    }
 
     public int getExpiryIntervalType()
     {
