@@ -4490,53 +4490,6 @@ Ext.onReady( function() {
 				});
 			};
 
-			web.report.sdfsdfsdfd = function(layout, isUpdateGui) {
-				var xLayout,
-					paramString;
-
-				if (!layout) {
-					return;
-				}
-
-				xLayout = service.layout.getExtendedLayout(layout);
-				paramString = web.analytics.getParamString(xLayout, true);
-
-				// show mask
-				web.mask.show(ns.app.centerRegion);
-
-				Ext.Ajax.request({
-					url: init.contextPath + '/api/analytics.json' + paramString,
-					timeout: 60000,
-					headers: {
-						'Content-Type': 'application/json',
-						'Accepts': 'application/json'
-					},
-					disableCaching: false,
-					failure: function(r) {
-						web.mask.hide(ns.app.centerRegion);
-
-						if (Ext.Array.contains([413, 414], parseInt(r.status))) {
-							web.analytics.validateUrl(init.contextPath + '/api/analytics.json' + paramString);
-						}
-						else {
-							alert(r.responseText);
-						}
-					},
-					success: function(r) {
-						var response = api.response.Response(Ext.decode(r.responseText));
-
-						if (!response) {
-							web.mask.hide(ns.app.centerRegion);
-							return;
-						}
-
-						ns.app.paramString = paramString;
-
-						web.pivot.createTable(layout, response, null, isUpdateGui);
-					}
-				});
-			};
-
 			web.report.createTable = function(layout, response, xResponse, isUpdateGui) {
 				var xLayout,
 					xColAxis,
@@ -4554,11 +4507,11 @@ Ext.onReady( function() {
 
 					return web.pivot.getHtml(xLayout, xResponse, xColAxis, xRowAxis);
 				};
-console.log("laayout", layout);
+console.log("layout", layout);
 
 				xLayout = getXLayout(layout);
-
-				xLayout = getSXLayout(xLayout, xResponse || response);
+				xResponse = service.response.getExtendedResponse(xLayout, response);
+				xLayout = getSXLayout(xLayout, xResponse);
 
 				if (layout.sorting) {
 					if (!xResponse) {
@@ -4569,9 +4522,9 @@ console.log("laayout", layout);
 					web.pivot.sort(xLayout, xResponse, xColAxis || ns.app.xColAxis);
 					xLayout = getXLayout(api.layout.Layout(xLayout));
 				}
-				else {
-					xResponse = service.response.getExtendedResponse(xLayout, response);
-				}
+				//else {
+					//xResponse = service.response.getExtendedResponse(xLayout, response);
+				//}
 
 				table = getHtml(xLayout, xResponse);
 

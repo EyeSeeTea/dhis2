@@ -1107,37 +1107,46 @@ Ext.onReady( function() {
 						//co = dimConf.category.objectName,
 						//ou = dimConf.organisationUnit.objectName,
 						//layout;
-						
+
 					var headerNames = getHeaderNames();
 					var xOuDimension = xLayout.objectNameDimensionsMap[dimConf.organisationUnit.objectName];
-						var isUserOrgunit = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT');
-						var isUserOrgunitChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_CHILDREN');
-						var isUserOrgunitGrandChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_GRANDCHILDREN');
-						var isLevel = function() {
-							if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
-								for (var i = 0; i < xOuDimension.ids.length; i++) {
-									if (xOuDimension.ids[i].substr(0,5) === 'LEVEL') {
-										return true;
-									}
+					var isUserOrgunit = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT');
+					var isUserOrgunitChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_CHILDREN');
+					var isUserOrgunitGrandChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_GRANDCHILDREN');
+					var isLevel = function() {
+						if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
+							for (var i = 0; i < xOuDimension.ids.length; i++) {
+								if (xOuDimension.ids[i].substr(0,5) === 'LEVEL') {
+									return true;
 								}
 							}
+						}
 
-							return false;
-						}();
-						var isGroup = function() {
-							if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
-								for (var i = 0; i < xOuDimension.ids.length; i++) {
-									if (xOuDimension.ids[i].substr(0,8) === 'OU_GROUP') {
-										return true;
-									}
+						return false;
+					}();
+					var isGroup = function() {
+						if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
+							for (var i = 0; i < xOuDimension.ids.length; i++) {
+								if (xOuDimension.ids[i].substr(0,8) === 'OU_GROUP') {
+									return true;
 								}
 							}
+						}
 
-							return false;
-						}();
-						var co = dimConf.category.objectName;
-						var ou = dimConf.organisationUnit.objectName;
-						var layout;
+						return false;
+					}();
+					//var co = dimConf.category.objectName;
+					var ou = dimConf.organisationUnit.objectName;
+					var layout;
+
+
+
+
+
+
+
+
+
 
 					// Set items from init/metaData/xLayout
 					for (var i = 0, dim, metaDataDim, items; i < dimensions.length; i++) {
@@ -1220,9 +1229,12 @@ Ext.onReady( function() {
 								}
 							}
 							// Items: get items from xLayout
-							else {
+							else if (xLayout.objectNameItemsMap[dim.objectName]) {
 								dim.items = Ext.clone(xLayout.objectNameItemsMap[dim.objectName]);
 							}
+							// Items: get from extended header
+							else {
+								dim.items =
 						}
 					}
 
@@ -1646,57 +1658,47 @@ Ext.onReady( function() {
 			service.response = {};
 
 			service.response.getExtendedResponse = function(xLayout, response) {
-				var ids = [];
+				var allIds = [],
+					headers;
 
 				response = Ext.clone(response);
+				headers = response.headers;
 
 				response.nameHeaderMap = {};
 				response.idValueMap = {};
 
-				// extend headers
-				(function() {
+				// add to headers: size, index, response ids
+				for (var i = 0, header, ids; i < headers.length; i++) {
+					header = headers[i];
+					ids = [];
 
-					// extend headers: index, ids, size
-					for (var i = 0, header; i < response.headers.length; i++) {
-						header = response.headers[i];
-
-						// index
-						header.index = i;
-
-						if (header.meta) {
-
-							// ids
-							header.ids = Ext.clone(xLayout.dimensionNameIdsMap[header.name]) || [];
-
-							// size
-							header.size = header.ids.length;
-
-							// collect ids, used by extendMetaData
-							ids = ids.concat(header.ids);
-						}
+					// collect ids from response
+					for (var j = 0; j < response.height; j++) {
+						ids.push(response.rows[j][i]);
 					}
 
-					// nameHeaderMap (headerName: header)
-					for (var i = 0, header; i < response.headers.length; i++) {
-						header = response.headers[i];
+					header.ids = support.prototype.array.sort(Ext.Array.unique(ids), 'ASC');
+					header.size = header.ids.length;
+					header.index = i;
 
-						response.nameHeaderMap[header.name] = header;
+					// all ids, used later
+					allIds = allIds.concat(header.ids);
+
+					// name header map
+					response.nameHeaderMap[header.name] = header;
+				}
+
+				// fix co ids and names
+				for (var i = 0, id, splitId; i < allIds.length; i++) {
+					id = allIds[i];
+
+					if (id.indexOf('-') !== -1) {
+						splitId = id.split('-');
+						response.metaData.names[id] = response.metaData.names[splitId[0]] + ' ' + response.metaData.names[splitId[1]];
 					}
-				}());
+				}
 
-				// extend metadata
-				(function() {
-					for (var i = 0, id, splitId ; i < ids.length; i++) {
-						id = ids[i];
-
-						if (id.indexOf('-') !== -1) {
-							splitId = id.split('-');
-							response.metaData.names[id] = response.metaData.names[splitId[0]] + ' ' + response.metaData.names[splitId[1]];
-						}
-					}
-				}());
-
-				// create value id map
+				// value id map
 				(function() {
 					var valueHeaderIndex = response.nameHeaderMap[conf.finals.dimension.value.value].index,
 						coHeader = response.nameHeaderMap[conf.finals.dimension.category.dimensionName],

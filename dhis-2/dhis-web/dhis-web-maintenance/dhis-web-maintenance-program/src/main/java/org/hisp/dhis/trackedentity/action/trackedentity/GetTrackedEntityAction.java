@@ -1,5 +1,3 @@
-package org.hisp.dhis.importexport.action.dxf2;
-
 /*
  * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
@@ -27,107 +25,58 @@ package org.hisp.dhis.importexport.action.dxf2;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.hisp.dhis.trackedentity.action.trackedentity;
+
+import org.hisp.dhis.trackedentity.TrackedEntity;
+import org.hisp.dhis.trackedentity.TrackedEntityService;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.opensymphony.xwork2.Action;
-import org.hisp.dhis.filter.MetaDataFilter;
 
 /**
- * @author Ovidiu Rosu <rosu.ovi@gmail.com>
+ * @author Chau Thu Tran
+ * 
+ * @version $ GetTrackedEntityAction.java Feb 15, 2014 7:20:44 PM $
  */
-public class FilterExportFormAction
+public class GetTrackedEntityAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Input
+    // Dependency
     // -------------------------------------------------------------------------
 
-    private String name;
+    @Autowired
+    private TrackedEntityService trackedEntityService;
 
-    public String getName()
+    // -------------------------------------------------------------------------
+    // Input/Output
+    // -------------------------------------------------------------------------
+
+    private Integer id;
+
+    public void setId( Integer id )
     {
-        return name;
+        this.id = id;
     }
 
-    public void setName( String name )
+    private TrackedEntity trackedEntity;
+
+    public TrackedEntity getTrackedEntity()
     {
-        this.name = name;
-    }
-
-    private String uid;
-
-    public String getUid()
-    {
-        return uid;
-    }
-
-    public void setUid( String uid )
-    {
-        this.uid = uid;
-    }
-
-    private String description;
-
-    public String getDescription()
-    {
-        return description;
-    }
-
-    public void setDescription( String description )
-    {
-        this.description = description;
-    }
-
-    private String jsonFilter;
-
-    public String getJsonFilter()
-    {
-        return jsonFilter;
-    }
-
-    public void setJsonFilter( String jsonFilter )
-    {
-        this.jsonFilter = jsonFilter;
-    }
-
-    public String command;
-
-    public String getCommand()
-    {
-        return command;
-    }
-
-    public void setCommand( String command )
-    {
-        this.command = command;
+        return trackedEntity;
     }
 
     // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private MetaDataFilter filter = new MetaDataFilter();
-
-    public MetaDataFilter getFilter()
-    {
-        return filter;
-    }
-
-    public void setFilter( MetaDataFilter metaDataFilter )
-    {
-        this.filter = metaDataFilter;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action Implementation
+    // Action implementation
     // -------------------------------------------------------------------------
 
     @Override
-    public String execute() throws Exception
+    public String execute()
+        throws Exception
     {
-        filter.setName( name );
-        filter.setUid( uid );
-        filter.setDescription( description );
-        filter.setJsonFilter( jsonFilter );
+        trackedEntity = trackedEntityService.getTrackedEntity( id );
 
         return SUCCESS;
     }
+
 }

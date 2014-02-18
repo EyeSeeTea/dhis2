@@ -63,7 +63,7 @@
 		</tr>
 
 		<tr>
-			<td><label for="type">$i18n.getString( "type" ) </label></td>
+			<td><label for="type">$i18n.getString( "type" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 			<td>
 				<select style="width: 336px;" id="type" name="type" onchange='programOnChange();' class="{validate:{required:true}}">
 					<option value='1' #if( $program.type=='1' ) selected #end>$i18n.getString('multiple_events_with_registration')</option>
@@ -80,6 +80,19 @@
                 <select id='dataEntryMethod' name='dataEntryMethod' style="width: 335px;">
 					<option value='false' #if( $program.dataEntryMethod=='false' ) selected #end>$i18n.getString('drop_down_lists')</option>
 					<option value='true' #if( $program.dataEntryMethod=='true' ) selected #end>$i18n.getString('radio_buttons')</option>
+				</select>
+			</td>
+			<td></td>
+		</tr>
+		
+		<tr>
+			<td><label for="dataEntryMethod">$i18n.getString( "tracked_entity" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
+			<td>
+				<select id='trackedEntityId' name='trackedEntityId' style="width: 335px;" class="{validate:{required:true}}">
+					<option value=''>[$i18n.getString('please_select')]</option>
+					#foreach($trackedEntity in $trackedEntities)
+					<option value='$trackedEntity.id' #if($trackedEntity.id==$program.trackedEntity.id) selected #end >$trackedEntity.displayName</option>
+					#end
 				</select>
 			</td>
 			<td></td>
@@ -160,7 +173,7 @@
 		</tr>
 		
 		<tr name='nonAnonymous'>
-			<td><label for="relationshipFromA">$i18n.getString("who_is_the_new_relative_to_the_existing_person")</label></td>
+			<td><label for="relationshipFromA">$i18n.getString("who_is_the_new_relative_to_the_existing_tracked_entity_instance")</label></td>
 			<td>
 				<select id='relationshipFromA' name='relationshipFromA'>
 					#if($!program.relationshipType)
