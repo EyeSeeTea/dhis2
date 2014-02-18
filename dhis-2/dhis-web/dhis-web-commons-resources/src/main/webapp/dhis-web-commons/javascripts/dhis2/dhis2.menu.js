@@ -38,7 +38,7 @@
     dhis2.menu = function () {
         var that = {},
             menuReady = false,
-            menuItems = undefined,
+            menuItems = undefined, //TODO: If this is change to an object with properties we can eliminate some for loops
             callBacks = [], //Array of callbacks to call when serviced is updated
             onceCallBacks = [];
 
@@ -127,22 +127,57 @@
         };
 
         that.updateFavoritesFromList = function (orderedIdList) {
-            var favApps = that.getFavorites(),
-                apps = that.getApps(),
-                newFavsIds = orderedIdList.splice(0, MAX_FAVORITES),
-                addToTopIds = [],
-                favAppsIndex, appIndex;
+            var apps = that.getApps(),
+                newFavsIds = orderedIdList.slice(0, MAX_FAVORITES),
+                favorites = [],
+                appsOnTop = [],
+                appIndex = 0;
 
-            for (favAppsIndex in favApps) {
-                if (newFavsIds.indexOf(favApps[favAppsIndex].id) === -1) {
-                    addToTopIds.push(favApps[favAppsIndex]);
+            console.log(orderedIdList);
+
+            for (appIndex in apps) {
+                if (appIndex < MAX_FAVORITES) {
+                    console.log(apps[appIndex].name);
                 }
             }
 
-            for (appIndex in apps) {
-                //if
+            /*
+            var apps = that.getApps(),
+                newFavsIds = orderedIdList.slice(0, MAX_FAVORITES),
+                favorites = [],
+                appsOnTop = [],
+                nonFavorites = apps.slice(MAX_FAVORITES),
+                orderIndex, appIndex, nonFavoriteIndex;
+
+            //Use the new ordered list for for the new favorites
+            for (orderIndex in newFavsIds) {
+                for (appIndex in apps) {
+                    //If it's a favorite add to the list of favorites else to nonFavorites
+                    if (orderIndex < MAX_FAVORITES && orderedIdList[orderIndex] === apps[appIndex].id) {
+                        favorites.push(apps[appIndex]);
+                    }
+                }
             }
-            console.log(addToTopIds);
+
+            //Remove the item that got added to list of favorites from the non favorites
+            for (nonFavoriteIndex in apps) {
+                if (orderedIdList[9] === apps[nonFavoriteIndex].id) {
+                    console.log(nonFavoriteIndex);
+                    console.log(apps.slice(nonFavoriteIndex, nonFavoriteIndex+1));
+                    appsOnTop = apps.slice(nonFavoriteIndex, nonFavoriteIndex+1);
+                    console.log(appsOnTop);
+                }
+            }
+
+            //Create a new list of menuItems with the new favorites, the old favorite on top
+            // and the rest of the custom items
+            menuItems = favorites.concat(appsOnTop).concat(nonFavorites);
+
+            //console.log(favorites);
+            //console.log(appsOnTop);
+            //console.log(nonFavorites);
+            */
+            return that;
         }
 
         /**
@@ -258,13 +293,17 @@
         });
     }
 
+    /**
+     * Render the menumanager and the dropdown meny and attach the update handler
+     */
+    //TODO: Rename this as the name is not very clear to what it does
     function renderMenu() {
         var options = {
                 placeholder: 'app-menu-placeholder',
                 connectWith: '.app-menu ul',
                 update: function (event, ui) {
                     var reorderedApps = $("#" + selector + " ul"). sortable('toArray', {attribute: "data-id"});
-                    console.log(displayOrder);
+
                     switch (displayOrder) {
                         case 'name-asc':
                         case 'name-desc':
@@ -276,8 +315,11 @@
                             dhis2.menu.orderMenuItemsByList(reorderedApps);
                             break;
                     }
+
+                    //Render the dropdown menu
                     renderDropDownFavorites();
                 },
+                //Constrict the draggable elements to the parent element
                 containment: 'parent'
             };
 
@@ -309,6 +351,13 @@
     }
 
     //TODO: Function seems complicated and can be improved perhaps
+    /**
+     * Sort apps (objects with a name property) by name
+     *
+     * @param apps
+     * @param inverse Return the elements in an inverted order (DESC sort)
+     * @returns {Array}
+     */
     function sortAppsByName(apps, inverse) {
         var smaller = [],
             bigger = [],
@@ -339,7 +388,6 @@
         return inverse ? result.reverse() : result;
     }
 
-    //Subscribe to the list and run the callbacks only once on the first update
     menu.subscribe(renderMenu);
 
     /**
