@@ -1030,7 +1030,7 @@ Ext.onReady( function() {
 				return xLayout;
 			};
 
-			service.layout.getSyncronizedXLayout = function(xLayout, response) {
+			service.layout.getSyncronizedXLayout = function(xLayout, xResponse) {
 				var removeDimensionFromXLayout,
 					getHeaderNames,
 					dimensions = Ext.Array.clean([].concat(xLayout.columns || [], xLayout.rows || [], xLayout.filters || []));
@@ -1069,8 +1069,8 @@ Ext.onReady( function() {
 				getHeaderNames = function() {
 					var headerNames = [];
 
-					for (var i = 0; i < response.headers.length; i++) {
-						headerNames.push(response.headers[i].name);
+					for (var i = 0; i < xResponse.headers.length; i++) {
+						headerNames.push(xResponse.headers[i].name);
 					}
 
 					return headerNames;
@@ -1108,152 +1108,167 @@ Ext.onReady( function() {
 						//ou = dimConf.organisationUnit.objectName,
 						//layout;
 
-					var headerNames = getHeaderNames();
-					var xOuDimension = xLayout.objectNameDimensionsMap[dimConf.organisationUnit.objectName];
-					var isUserOrgunit = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT');
-					var isUserOrgunitChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_CHILDREN');
-					var isUserOrgunitGrandChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_GRANDCHILDREN');
-					var isLevel = function() {
-						if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
-							for (var i = 0; i < xOuDimension.ids.length; i++) {
-								if (xOuDimension.ids[i].substr(0,5) === 'LEVEL') {
-									return true;
-								}
-							}
-						}
+					//var headerNames = getHeaderNames();
+					//var xOuDimension = xLayout.objectNameDimensionsMap[dimConf.organisationUnit.objectName];
+					//var isUserOrgunit = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT');
+					//var isUserOrgunitChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_CHILDREN');
+					//var isUserOrgunitGrandChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_GRANDCHILDREN');
+					//var isLevel = function() {
+						//if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
+							//for (var i = 0; i < xOuDimension.ids.length; i++) {
+								//if (xOuDimension.ids[i].substr(0,5) === 'LEVEL') {
+									//return true;
+								//}
+							//}
+						//}
 
-						return false;
-					}();
-					var isGroup = function() {
-						if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
-							for (var i = 0; i < xOuDimension.ids.length; i++) {
-								if (xOuDimension.ids[i].substr(0,8) === 'OU_GROUP') {
-									return true;
-								}
-							}
-						}
+						//return false;
+					//}();
+					//var isGroup = function() {
+						//if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
+							//for (var i = 0; i < xOuDimension.ids.length; i++) {
+								//if (xOuDimension.ids[i].substr(0,8) === 'OU_GROUP') {
+									//return true;
+								//}
+							//}
+						//}
 
-						return false;
-					}();
-					//var co = dimConf.category.objectName;
-					var ou = dimConf.organisationUnit.objectName;
-					var layout;
-
-
+						//return false;
+					//}();
+					////var co = dimConf.category.objectName;
+					//var ou = dimConf.organisationUnit.objectName;
+					//var layout;
 
 
 
 
+					// items
 
-
-
-
-					// Set items from init/metaData/xLayout
-					for (var i = 0, dim, metaDataDim, items; i < dimensions.length; i++) {
+					for (var i = 0, dim, ids; i < dimensions.length; i++) {
 						dim = dimensions[i];
 						dim.items = [];
-						metaDataDim = response.metaData[dim.objectName];
+						ids = xResponse.nameHeaderMap[dim.dimension].ids;
 
-						// If ou and children
-						if (dim.dimensionName === ou) {
-							if (isUserOrgunit || isUserOrgunitChildren || isUserOrgunitGrandChildren) {
-								var userOu,
-									userOuc,
-									userOugc;
+						for (var j = 0, id; j < ids.length; j++) {
+							id = ids[j];
 
-								if (init.user && isUserOrgunit) {
-									userOu = [{
-										id: init.user.ou,
-										name: service.layout.getItemName(xLayout, response, init.user.ou, false)
-									}];
-								}
-								if (init.user && init.user.ouc && isUserOrgunitChildren) {
-									userOuc = [];
-
-									for (var j = 0; j < init.user.ouc.length; j++) {
-										userOuc.push({
-											id: init.user.ouc[j],
-											name: service.layout.getItemName(xLayout, response, init.user.ouc[j], false)
-										});
-									}
-
-									support.prototype.array.sort(userOuc);
-								}
-								if (init.user && init.user.ouc && isUserOrgunitGrandChildren) {
-									var userOuOuc = [].concat(init.user.ou, init.user.ouc),
-										responseOu = response.metaData[ou];
-
-									userOugc = [];
-
-									for (var j = 0, id; j < responseOu.length; j++) {
-										id = responseOu[j];
-
-										if (!Ext.Array.contains(userOuOuc, id)) {
-											userOugc.push({
-												id: id,
-												name: service.layout.getItemName(xLayout, response, id, false)
-											});
-										}
-									}
-
-									support.prototype.array.sort(userOugc);
-								}
-
-								dim.items = [].concat(userOu || [], userOuc || [], userOugc || []);
-							}
-							else if (isLevel || isGroup) {
-								for (var j = 0, responseOu = response.metaData[ou], id; j < responseOu.length; j++) {
-									id = responseOu[j];
-
-									dim.items.push({
-										id: id,
-										name: service.layout.getItemName(xLayout, response, id, false)
-									});
-								}
-
-								support.prototype.array.sort(dim.items);
-							}
-							else {
-								dim.items = Ext.clone(xLayout.dimensionNameItemsMap[dim.dimensionName]);
-							}
-						}
-						else {
-							// Items: get ids from metadata -> items
-							if (Ext.isArray(metaDataDim) && metaDataDim.length) {
-								var ids = Ext.clone(response.metaData[dim.dimensionName]);
-								for (var j = 0; j < ids.length; j++) {
-									dim.items.push({
-										id: ids[j],
-										name: response.metaData.names[ids[j]]
-									});
-								}
-							}
-							// Items: get items from xLayout
-							else if (xLayout.objectNameItemsMap[dim.objectName]) {
-								dim.items = Ext.clone(xLayout.objectNameItemsMap[dim.objectName]);
-							}
-							// Items: get from extended header
-							else {
-								dim.items =
+							dim.items.push({
+								id: id,
+								name: xResponse.metaData.names[id]
+							});
 						}
 					}
+
+
+
+
+
+					//// Set items from init/metaData/xLayout
+					//for (var i = 0, dim, metaDataDim, items; i < dimensions.length; i++) {
+						//dim = dimensions[i];
+						//dim.items = [];
+						//metaDataDim = response.metaData[dim.objectName];
+
+						//// If ou and children
+						//if (dim.dimensionName === ou) {
+							//if (isUserOrgunit || isUserOrgunitChildren || isUserOrgunitGrandChildren) {
+								//var userOu,
+									//userOuc,
+									//userOugc;
+
+								//if (init.user && isUserOrgunit) {
+									//userOu = [{
+										//id: init.user.ou,
+										//name: service.layout.getItemName(xLayout, response, init.user.ou, false)
+									//}];
+								//}
+								//if (init.user && init.user.ouc && isUserOrgunitChildren) {
+									//userOuc = [];
+
+									//for (var j = 0; j < init.user.ouc.length; j++) {
+										//userOuc.push({
+											//id: init.user.ouc[j],
+											//name: service.layout.getItemName(xLayout, response, init.user.ouc[j], false)
+										//});
+									//}
+
+									//support.prototype.array.sort(userOuc);
+								//}
+								//if (init.user && init.user.ouc && isUserOrgunitGrandChildren) {
+									//var userOuOuc = [].concat(init.user.ou, init.user.ouc),
+										//responseOu = response.metaData[ou];
+
+									//userOugc = [];
+
+									//for (var j = 0, id; j < responseOu.length; j++) {
+										//id = responseOu[j];
+
+										//if (!Ext.Array.contains(userOuOuc, id)) {
+											//userOugc.push({
+												//id: id,
+												//name: service.layout.getItemName(xLayout, response, id, false)
+											//});
+										//}
+									//}
+
+									//support.prototype.array.sort(userOugc);
+								//}
+
+								//dim.items = [].concat(userOu || [], userOuc || [], userOugc || []);
+							//}
+							//else if (isLevel || isGroup) {
+								//for (var j = 0, responseOu = response.metaData[ou], id; j < responseOu.length; j++) {
+									//id = responseOu[j];
+
+									//dim.items.push({
+										//id: id,
+										//name: service.layout.getItemName(xLayout, response, id, false)
+									//});
+								//}
+
+								//support.prototype.array.sort(dim.items);
+							//}
+							//else {
+								//dim.items = Ext.clone(xLayout.dimensionNameItemsMap[dim.dimensionName]);
+							//}
+						//}
+						//else {
+							//// Items: get ids from metadata -> items
+							//if (Ext.isArray(metaDataDim) && metaDataDim.length) {
+								//var ids = Ext.clone(response.metaData[dim.dimensionName]);
+								//for (var j = 0; j < ids.length; j++) {
+									//dim.items.push({
+										//id: ids[j],
+										//name: response.metaData.names[ids[j]]
+									//});
+								//}
+							//}
+							//// Items: get items from xLayout
+							//else if (xLayout.objectNameItemsMap[dim.objectName]) {
+								//dim.items = Ext.clone(xLayout.objectNameItemsMap[dim.objectName]);
+							//}
+							//// Items: get from extended header
+							//else {
+								//dim.items =
+						//}
+					//}
 
 					// Add missing names
-					dimensions = Ext.Array.clean([].concat(xLayout.columns || [], xLayout.rows || [], xLayout.filters || []));
+					//dimensions = Ext.Array.clean([].concat(xLayout.columns || [], xLayout.rows || [], xLayout.filters || []));
 
-					for (var i = 0, idNameMap = response.metaData.names, dimItems; i < dimensions.length; i++) {
-						dimItems = dimensions[i].items;
+					//for (var i = 0, idNameMap = response.metaData.names, dimItems; i < dimensions.length; i++) {
+						//dimItems = dimensions[i].items;
 
-						if (Ext.isArray(dimItems) && dimItems.length) {
-							for (var j = 0, item; j < dimItems.length; j++) {
-								item = dimItems[j];
+						//if (Ext.isArray(dimItems) && dimItems.length) {
+							//for (var j = 0, item; j < dimItems.length; j++) {
+								//item = dimItems[j];
 
-								if (Ext.isObject(item) && Ext.isString(idNameMap[item.id]) && !Ext.isString(item.name)) {
-									item.name = idNameMap[item.id] || '';
-								}
-							}
-						}
-					}
+								//if (Ext.isObject(item) && Ext.isString(idNameMap[item.id]) && !Ext.isString(item.name)) {
+									//item.name = idNameMap[item.id] || '';
+								//}
+							//}
+						//}
+					//}
 
 					// Remove dimensions from layout that do not exist in response
 					for (var i = 0, dimensionName; i < xLayout.axisDimensionNames.length; i++) {
