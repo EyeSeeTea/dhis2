@@ -31,14 +31,43 @@
  * Menu service
  */
 (function (dhis2, undefined) {
-    var MAX_FAVORITES = 9;
+    var MAX_FAVORITES = 9,
+        menuItemsList = (function () {
+            var menuOrder = [],
+                menuItems = {},
+                orderIndex;
+            return {
+                getItem: function (key) {
+                    return menuItems[key];
+                },
+                setItem: function (key, item) {
+                    menuOrder.push(key);
+                    menuItems[key] = item;
+                },
+                list: function () {
+                    var result = [];
+
+                    for (orderIndex in menuOrder) {
+                        result.push(menuItems[menuOrder[orderIndex]]);
+                    }
+                    return result;
+                },
+                setOrder: function (order) {
+                    menuOrder = order;
+                },
+                getOrder: function () {
+                    return menuOrder;
+                }
+            }
+        })();
+
 
     dhis2.util.namespace( 'dhis2.menu' );
 
     dhis2.menu = function () {
         var that = {},
             menuReady = false,
-            menuItems = undefined, //TODO: If this is change to an object with properties we can eliminate some for loops
+            menuItems = menuItemsList,
             callBacks = [], //Array of callbacks to call when serviced is updated
             onceCallBacks = [];
 
@@ -77,7 +106,7 @@
             var onceCallBack, callBackIndex;
 
             //If not ready or no menu items
-            if ( ! isReady() || menuItems === undefined)
+            if ( ! isReady() || menuItems === {})
                 return false;
 
             //Execute the single time callbacks
@@ -109,74 +138,39 @@
          * @returns {{}}
          */
         that.orderMenuItemsByList = function (orderedIdList) {
-            var apps = dhis2.menu.getApps(),
-                reorderedApps = [],
-                appIndex, orderIndex;
-
-            for (orderIndex in orderedIdList) {
-                for (appIndex in apps) {
-                    if (orderedIdList[orderIndex] === apps[appIndex].id) {
-                        reorderedApps.push(apps[appIndex]);
-                    }
-                }
-            }
-
-            menuItems = reorderedApps;
-
+            menuItems.setOrder(orderedIdList);
             return that;
         };
 
         that.updateFavoritesFromList = function (orderedIdList) {
-            var apps = that.getApps(),
-                newFavsIds = orderedIdList.slice(0, MAX_FAVORITES),
-                favorites = [],
-                appsOnTop = [],
-                appIndex = 0;
+            var newFavsIds = orderedIdList.slice(0, MAX_FAVORITES),
+                oldFavsIds = menuItems.getOrder().slice(0, MAX_FAVORITES),
+                oldFavId,
+                currentOrder = menuItems.getOrder(),
+                currentOrderId,
+                i,
+                newOrder;
 
-            console.log(orderedIdList);
+            //Take the new favorites as the new order
+            newOrder = newFavsIds;
 
-            for (appIndex in apps) {
-                if (appIndex < MAX_FAVORITES) {
-                    console.log(apps[appIndex].name);
+            //Find the favorites that were pushed out and add  them to the list on the top of the order
+            for (oldFavId  in oldFavsIds) {
+                if (-1 === newFavsIds.indexOf(oldFavsIds[oldFavId])) {
+                    newOrder.push(oldFavsIds[oldFavId]);
                 }
             }
 
-            /*
-            var apps = that.getApps(),
-                newFavsIds = orderedIdList.slice(0, MAX_FAVORITES),
-                favorites = [],
-                appsOnTop = [],
-                nonFavorites = apps.slice(MAX_FAVORITES),
-                orderIndex, appIndex, nonFavoriteIndex;
-
-            //Use the new ordered list for for the new favorites
-            for (orderIndex in newFavsIds) {
-                for (appIndex in apps) {
-                    //If it's a favorite add to the list of favorites else to nonFavorites
-                    if (orderIndex < MAX_FAVORITES && orderedIdList[orderIndex] === apps[appIndex].id) {
-                        favorites.push(apps[appIndex]);
-                    }
+            //Loop through the remaining current order to add the remaining apps to the new order
+            for (currentOrderId in currentOrder) {
+                //Add id to the order when it's not already in there
+                if (-1 === newOrder.indexOf(currentOrder[currentOrderId])) {
+                    newOrder.push(currentOrder[currentOrderId]);
                 }
             }
 
-            //Remove the item that got added to list of favorites from the non favorites
-            for (nonFavoriteIndex in apps) {
-                if (orderedIdList[9] === apps[nonFavoriteIndex].id) {
-                    console.log(nonFavoriteIndex);
-                    console.log(apps.slice(nonFavoriteIndex, nonFavoriteIndex+1));
-                    appsOnTop = apps.slice(nonFavoriteIndex, nonFavoriteIndex+1);
-                    console.log(appsOnTop);
-                }
-            }
+            menuItems.setOrder(newOrder);
 
-            //Create a new list of menuItems with the new favorites, the old favorite on top
-            // and the rest of the custom items
-            menuItems = favorites.concat(appsOnTop).concat(nonFavorites);
-
-            //console.log(favorites);
-            //console.log(appsOnTop);
-            //console.log(nonFavorites);
-            */
             return that;
         }
 
@@ -195,9 +189,8 @@
                 if (currentItem.description === "") {
                     keysToTranslate.push( "intro_" + currentItem.name );
                 }
+                menuItems.setItem(currentItem.id, currentItem);
             }
-
-            menuItems = items;
 
             dhis2.translate.get(keysToTranslate, processTranslations);
         };
@@ -232,21 +225,22 @@
          * @returns {Array}
          */
         that.getFavorites = function () {
-            return menuItems.slice(0, MAX_FAVORITES);
+            return menuItems.list().slice(0, MAX_FAVORITES);
         };
 
         /**
          * Get the current menuItems
          */
         that.getApps = function () {
-            return menuItems;
+            console.log(menuItems.list());
+            return menuItems.list();
         };
 
         /**
          * Get non favorite apps
          */
         that.getNonFavoriteApps = function () {
-            return menuItems.slice(MAX_FAVORITES);
+            return menuItems.list().slice(MAX_FAVORITES);
         };
 
         return that;
@@ -282,8 +276,8 @@
 
     function renderAppManager(selector) {
         var apps = getOrderedAppList();
-        $('#' +  selector).html('');
-        $('#' +  selector).append($('<ul></ul>').addClass('ui-helper-clearfix'));
+        $('#' + selector).html('');
+        $('#' + selector).append($('<ul></ul><hr class="app-separator">').addClass('ui-helper-clearfix'));
         $('#' + selector).addClass('app-menu');
         $.tmpl( "appMenuItemTemplate", apps).appendTo('#' + selector + ' ul');
 

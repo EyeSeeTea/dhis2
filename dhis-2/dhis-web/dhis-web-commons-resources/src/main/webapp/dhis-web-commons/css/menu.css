@@ -10,8 +10,9 @@
 
 .app-manager-header,
 .app-menu {
-    width: 808px;
     margin: 0 auto;
+    position: relative;
+    width: 808px;
 }
 
 .app-menu li {
@@ -233,6 +234,14 @@
 #menuDropDown1 {
     top: 55px;
     left: 575px;
+}
+
+hr.app-separator {
+    border-top: 1px dotted #4A89BA;
+    height: 1px;
+    position: absolute;
+    top: 293px;
+    width: 100%;
 }
 
 #menuDropDown1 .caret-up-background,
