@@ -1,46 +1,56 @@
-<form role="form" ng-show="eventRegistration">    
-    <div class="form-group" ng-repeat="newEventDataValue in newDhis2Event.dataValues">
-        <label>{{newEventDataValue.name}}</label>
-        <div ng-switch="newEventDataValue.dataElement.type">
-            <div ng-switch-when="int">
-                <input type="number" class="form-control" ng-model="newEventDataValue.value"/>
-            </div>
-            <div ng-switch-when="string">
-                <select class="form-control" ng-model='newEventDataValue.value' ng-options='option for option in newEventDataValue.dataElement.optionSet.options | limitTo:20'>
-                    <option value="">{{'please_select'| translate}}</option>
-                </select>
-            </div>
-            <div ng-switch-when="bool">
-                <select class="form-control" ng-model='newEventDataValue.value'>
-                    <option value="">{{'please_select'| translate}}</option>                        
-                    <option value="0">{{'no'| translate}}</option>
-                    <option value="1">{{'yes'| translate}}</option>
-                </select>
-            </div>
-            <div ng-switch-when="date">
-                <input type="text" placeholder="yyyy-mm-dd" class="form-control" ng-date ng-model="newEventDataValue.value"/>
-            </div>
-        </div>
-    </div>                                            
-    <span>
-        <button ng-click="saveEvent(newDhis2Event)" class="button">{{'add' | translate}}</button>
-        <button ng-click="cancelAdding(newDhis2Event)" class="button">{{'cancel' | translate}}</button>      
-    </span>
-</form>
-<!--<form role="form">
-    <div class="form-group">
-        <label>{{'registering_unit'| translate}}</label>
-        <input type="text" class="form-control" value="{{selectedOrgUnit.name| translate}}" disabled>
-    </div>
-    <div class="form-group">
-        <label>{{'program'| translate}}</label>
-        <span class="inline">
-
-            <select class="form-control" ng-model="pr" ng-options="program as program.label for program in programs | orderBy: 'label'" ng-change="loadEvents(pr)">
-                <option value="">{{'please_select'| translate}}</option>
-            </select>
-
-            <button ng-show="selectedProgramStage" ng-click="registerEvent()" class="button">{{'register_new_event'| translate}}</button>
-        </span>
-    </div>                       
-</form>-->
+<div ng-show="eventRegistration" style="width:50%;">
+    <table class="dhis2-list-table-striped">                    
+        <thead>                        
+            <tr>
+                <th>
+                    {{'data_element' | translate}}                    
+                </th>
+                <th>
+                    {{'value' | translate}}                    
+                </th>         
+            </tr>                        
+        </thead>
+        <tbody id="list">
+            <tr ng-repeat="eventDataValue in currentEvent.dataValues">                
+                <td class="max-column-width">
+                    {{eventDataValue.name}}                                              
+                </td>
+                <td class="max-column-width">
+                    <div ng-switch="eventDataValue.dataElement.type">
+                        <div ng-switch-when="int">
+                            <input type="number" style="width:98%;" ng-model="eventDataValue.value"/>
+                        </div>
+                        <div ng-switch-when="string">                                        
+                            <div ng-switch="eventDataValue.dataElement.optionSet.options.length > 20">
+                                <div ng-switch-when="true">
+                                    <div class="container-fluid">
+                                        <input type="text" style="width:98%;" ng-model="eventDataValue.value" typeahead="option for option in eventDataValue.dataElement.optionSet.options | filter:$viewValue | limitTo:20" >                                            
+                                    </div>
+                                </div>
+                                <div ng-switch-default>
+                                    <select style="width:98%;" ng-model="eventDataValue.value" ng-options='option for option in eventDataValue.dataElement.optionSet.options'>
+                                        <option value="">{{'please_select'| translate}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div ng-switch-when="bool">
+                            <select style="width:98%;" ng-model="eventDataValue.value">
+                                <option value="">{{'please_select'| translate}}</option>                        
+                                <option value="0">{{'no'| translate}}</option>
+                                <option value="1">{{'yes'| translate}}</option>
+                            </select>
+                        </div>
+                        <div ng-switch-when="date">
+                            <input type="text" style="width:98%;" placeholder="yyyy-mm-dd" ng-date ng-model="eventDataValue.value">
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>        
+    </table>
+    
+    <button ng-show="selectedProgramStage" ng-click="addEvent()" class="button">{{'save'| translate}}</button>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <button ng-show="selectedProgramStage" ng-click="showEventList(null)" class="button">{{'back'| translate}}</button>  
+</div>

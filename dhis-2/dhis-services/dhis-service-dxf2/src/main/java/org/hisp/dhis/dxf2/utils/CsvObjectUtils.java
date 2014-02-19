@@ -35,11 +35,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.CodeGenerator;
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dxf2.metadata.MetaData;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 import com.csvreader.CsvReader;
+
+import static org.hisp.dhis.system.util.DateUtils.getMediumDate;
 
 /**
  * @author Lars Helge Overland
@@ -49,54 +55,171 @@ public class CsvObjectUtils
     public static MetaData fromCsv( InputStream input, Class<?> clazz )
         throws IOException
     {
-        CsvReader reader = new CsvReader( input, Charset.forName( "UTF-8" ) );
-        
+        CsvReader reader = new CsvReader( input, Charset.forName( "UTF-8" ) );        
         reader.readRecord(); // Ignore first row
         
-        List<DataElement> dataElements = new ArrayList<DataElement>();
+        MetaData metaData = new MetaData();
+        
+        if ( DataElement.class.equals( clazz ) )
+        {
+            metaData.setDataElements( dataElementsFromCsv( reader, input ) );
+        }
+        else if ( DataElementCategoryOption.class.equals( clazz ) )
+        {
+            metaData.setCategoryOptions( categoryOptionsFromCsv( reader, input ) );
+        }
+        else if ( CategoryOptionGroup.class.equals( clazz ) )
+        {
+            metaData.setCategoryOptionGroups( categoryOptionGroupsFromCsv( reader, input ) );
+        }
+        else if ( OrganisationUnit.class.equals( clazz ) )
+        {
+            metaData.setOrganisationUnits( organisationUnitsFromCsv( reader, input ) );
+        }
+        
+        return metaData;
+    }
+    
+    private static List<DataElementCategoryOption> categoryOptionsFromCsv( CsvReader reader, InputStream input )
+        throws IOException
+    {
+        List<DataElementCategoryOption> list = new ArrayList<DataElementCategoryOption>();
         
         while ( reader.readRecord() )
         {
             String[] values = reader.getValues();
 
-            if ( values == null || values.length == 0 )
+            if ( values != null && values.length > 0 )
             {
-                continue;
+                DataElementCategoryOption object = new DataElementCategoryOption();
+                setIdentifiableObject( object, values );
+                list.add( object );
             }
-            
-            DataElement element = new DataElement();
-            element.setName( getSafe( values, 0, null ) );
-            element.setUid( getSafe( values, 1, CodeGenerator.generateCode() ) );
-            element.setCode( getSafe( values, 2, null ) );
-            element.setShortName( getSafe( values, 3, StringUtils.substring( element.getName(), 0, 50 ) ) );
-            element.setDescription( getSafe( values, 4, null ) );
-            element.setFormName( getSafe( values, 5, null ) );
-            element.setActive( Boolean.valueOf( getSafe( values, 6, "false" ) ) );
-            element.setDomainType( getSafe( values, 7, DataElement.DOMAIN_TYPE_AGGREGATE ) );
-            element.setType( getSafe( values, 8, DataElement.VALUE_TYPE_INT ) );
-            element.setNumberType( getSafe( values, 9, DataElement.VALUE_TYPE_NUMBER ) );
-            element.setTextType( getSafe( values, 10, null ) );
-            element.setAggregationOperator( getSafe( values, 11, DataElement.AGGREGATION_OPERATOR_SUM ) );
-            element.setUrl( getSafe( values, 12, null ) );
-            element.setZeroIsSignificant( Boolean.valueOf( getSafe( values, 13, "false" ) ) );
-            
-            dataElements.add( element );
         }
         
-        MetaData metaData = new MetaData();
-        metaData.setDataElements( dataElements );
-        return metaData;
+        return list;
+    }    
+
+    private static List<CategoryOptionGroup> categoryOptionGroupsFromCsv( CsvReader reader, InputStream input )
+        throws IOException
+    {
+        List<CategoryOptionGroup> list = new ArrayList<CategoryOptionGroup>();
+        
+        while ( reader.readRecord() )
+        {
+            String[] values = reader.getValues();
+
+            if ( values != null && values.length > 0 )
+            {
+                CategoryOptionGroup object = new CategoryOptionGroup();
+                setIdentifiableObject( object, values );
+                list.add( object );
+            }
+        }
+        
+        return list;
+    }    
+    
+    private static List<DataElement> dataElementsFromCsv( CsvReader reader, InputStream input )
+        throws IOException
+    {
+        List<DataElement> list = new ArrayList<DataElement>();
+        
+        while ( reader.readRecord() )
+        {
+            String[] values = reader.getValues();
+
+            if ( values != null && values.length > 0 )
+            {
+                DataElement object = new DataElement();
+                setIdentifiableObject( object, values );
+                object.setShortName( getSafe( values, 3, object.getName(), 50 ) );
+                object.setDescription( getSafe( values, 4, null, null ) );
+                object.setFormName( getSafe( values, 5, null, 230 ) );
+                object.setActive( true );
+                object.setDomainType( getSafe( values, 6, DataElement.DOMAIN_TYPE_AGGREGATE, 16 ) );
+                object.setType( getSafe( values, 7, DataElement.VALUE_TYPE_INT, 16 ) );
+                object.setNumberType( getSafe( values, 8, DataElement.VALUE_TYPE_NUMBER, 16 ) );
+                object.setTextType( getSafe( values, 9, null, 16 ) );
+                object.setAggregationOperator( getSafe( values, 10, DataElement.AGGREGATION_OPERATOR_SUM, 16 ) );
+                object.setUrl( getSafe( values, 11, null, 255 ) );
+                object.setZeroIsSignificant( Boolean.valueOf( getSafe( values, 12, "false", null ) ) );
+                
+                list.add( object );
+            }
+        }
+        
+        return list;
     }
     
-    private static final String getSafe( String[] values, int index, String defaultValue )
+    public static List<OrganisationUnit> organisationUnitsFromCsv( CsvReader reader, InputStream input )
+        throws IOException
     {
-        if ( values == null || index < 0 || index >= values.length )
+        List<OrganisationUnit> list = new ArrayList<OrganisationUnit>();
+        
+        while ( reader.readRecord() )
         {
-            return defaultValue;
+            String[] values = reader.getValues();
+
+            if ( values != null && values.length > 0 )
+            {
+                OrganisationUnit object = new OrganisationUnit();
+                setIdentifiableObject( object, values );
+                object.setShortName( getSafe( values, 3, object.getName(), 50 ) );
+                object.setDescription( getSafe( values, 4, null, null ) );
+                object.setUuid( getSafe( values, 5, null, 36 ) );
+                object.setOpeningDate( getMediumDate( getSafe( values, 6, "1970-01-01", null ) ) );
+                object.setClosedDate( getMediumDate( getSafe( values, 7, "1970-01-01", null ) ) );
+                object.setActive( true );
+                object.setComment( getSafe( values, 8, null, null ) );
+                object.setFeatureType( getSafe( values, 9, null, 50 ) );
+                object.setCoordinates( getSafe( values, 10, null, null ) );
+                object.setUrl( getSafe( values, 11, null, 255 ) );
+                object.setContactPerson( getSafe( values, 12, null, 255 ) );
+                object.setAddress( getSafe( values, 13, null, 255 ) );
+                object.setEmail( getSafe( values, 14, null, 150 ) );
+                object.setPhoneNumber( getSafe( values, 15, null, 150 ) );
+
+                list.add( object );
+            }
         }
         
-        String value = values[index];
+        return list;
+    }
+
+    private static void setIdentifiableObject( BaseIdentifiableObject object, String[] values )
+    {
+        object.setName( getSafe( values, 0, null, 230 ) );
+        object.setUid( getSafe( values, 1, CodeGenerator.generateCode(), 11 ) );
+        object.setCode( getSafe( values, 2, null, 50 ) );
+    }
+    
+    /**
+     * Returns a string from the given array avoiding exceptions.
+     * 
+     * @param values the string array.
+     * @param index the array index of the string to get.
+     * @param defaultValue the default value in case index is out of bounds.
+     * @param max the max number of characters to return for the string.
+     */
+    private static String getSafe( String[] values, int index, String defaultValue, Integer max )
+    {
+        String string = null;
         
-        return value != null ? value : defaultValue;
+        if ( values == null || index < 0 || index >= values.length )
+        {
+            string = defaultValue;
+        }
+        else
+        {        
+            string = values[index];
+        }
+        
+        if ( string != null )
+        {
+            return max != null ? StringUtils.substring( string, 0, max ) : string;
+        }
+        
+        return null;
     }
 }

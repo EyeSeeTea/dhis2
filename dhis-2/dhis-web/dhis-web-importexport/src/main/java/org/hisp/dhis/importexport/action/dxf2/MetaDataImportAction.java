@@ -29,11 +29,16 @@ package org.hisp.dhis.importexport.action.dxf2;
  */
 
 import com.opensymphony.xwork2.Action;
+
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.ImportService;
 import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.importexport.action.util.ImportMetaDataCsvTask;
 import org.hisp.dhis.importexport.action.util.ImportMetaDataTask;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.scheduling.TaskCategory;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.notification.Notifier;
@@ -46,6 +51,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -53,6 +60,13 @@ import java.io.InputStream;
 public class MetaDataImportAction
     implements Action
 {
+    private static final Map<String, Class<?>> KEY_CLASS_MAP = new HashMap<String, Class<?>>() {{
+       put( "dataelement", DataElement.class );
+       put( "categoryoption", DataElementCategoryOption.class );
+       put( "categoryoptiongroup", CategoryOptionGroup.class );
+       put( "organisationunit", OrganisationUnit.class );
+    }};
+    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -105,6 +119,13 @@ public class MetaDataImportAction
     {
         this.importFormat = importFormat;
     }
+    
+    private String classKey;
+
+    public void setClassKey( String classKey )
+    {
+        this.classKey = classKey;
+    }
 
     // -------------------------------------------------------------------------
     // Action Implementation
@@ -130,9 +151,9 @@ public class MetaDataImportAction
 
         String userId = user != null ? user.getUid() : null;
         
-        if ( "csv".equals( importFormat ) )
+        if ( "csv".equals( importFormat ) && classKey != null && KEY_CLASS_MAP.get( classKey ) != null )
         {
-            scheduler.executeTask( new ImportMetaDataCsvTask( userId, importService, importOptions, in, taskId ) );
+            scheduler.executeTask( new ImportMetaDataCsvTask( userId, importService, importOptions, in, taskId, KEY_CLASS_MAP.get( classKey ) ) );
         }
         else
         {
