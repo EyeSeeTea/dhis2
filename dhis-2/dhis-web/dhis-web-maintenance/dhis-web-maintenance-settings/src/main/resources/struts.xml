@@ -94,7 +94,6 @@
 
     <action name="moveApprovalLevelDown" class="org.hisp.dhis.settings.action.system.MoveApprovalLevelDownAction">
       <result name="success" type="redirect">systemApprovalSettings.action</result>
-      <!-- <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result> -->
       <param name="page">/dhis-web-maintenance-settings/systemApprovalSettings.vm</param>
       <param name="requiredAuthorities">F_SYSTEM_SETTING</param>
       <param name="onExceptionReturn">plainTextError</param>
@@ -102,7 +101,6 @@
 
     <action name="moveApprovalLevelUp" class="org.hisp.dhis.settings.action.system.MoveApprovalLevelUpAction">
       <result name="success" type="redirect">systemApprovalSettings.action</result>
-      <!-- <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result> -->
       <param name="page">/dhis-web-maintenance-settings/systemApprovalSettings.vm</param>
       <param name="requiredAuthorities">F_SYSTEM_SETTING</param>
       <param name="onExceptionReturn">plainTextError</param>
@@ -110,19 +108,10 @@
 
     <action name="removeApprovalLevel" class="org.hisp.dhis.settings.action.system.RemoveApprovalLevelAction">
       <result name="success" type="redirect">systemApprovalSettings.action</result>
-      <!-- <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result> -->
       <param name="page">/dhis-web-maintenance-settings/systemApprovalSettings.vm</param>
       <param name="requiredAuthorities">F_SYSTEM_SETTING</param>
       <param name="onExceptionReturn">plainTextError</param>
     </action>
-
-    <!--
-    <action name="validateApprovalLevel" class="org.hisp.dhis.settings.action.system.ValidateApprovalLevelAction">
-      <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
-      <param name="requiredAuthorities">F_SYSTEM_SETTING</param>
-      <param name="onExceptionReturn">plainTextError</param>
-    </action>
-    -->
 
     <!-- Access settings -->
 

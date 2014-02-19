@@ -55,11 +55,11 @@ public class RemoveApprovalLevelAction
     // Input
     // -------------------------------------------------------------------------
 
-    private int level;
+    private int id;
 
-    public void setLevel( int level )
+    public void setId( int id )
     {
-        this.level = level;
+        this.id = id;
     }
 
     // -------------------------------------------------------------------------
@@ -68,7 +68,7 @@ public class RemoveApprovalLevelAction
 
     public String execute()
     {
-        dataApprovalLevelService.remove( level );
+        dataApprovalLevelService.remove( id );
 
         return SUCCESS;
     }

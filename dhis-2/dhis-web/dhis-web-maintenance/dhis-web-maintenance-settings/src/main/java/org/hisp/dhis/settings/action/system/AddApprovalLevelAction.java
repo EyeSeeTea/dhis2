@@ -126,9 +126,6 @@ public class AddApprovalLevelAction
 
         boolean added = dataApprovalLevelService.add( dataApprovalLevel );
 
-        System.out.println( "orgLevel=" + organisationUnitLevel + ", catOptGroupSet=" + categoryOptionGroupSet
-                            + ", added=" + added);
-
         if ( !added )
         {
             message = i18n.getString( "approval_level_is_already_defined" );
