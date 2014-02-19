@@ -13,8 +13,8 @@
 
 <div id="contextMenu" class="contextMenu">
     <ul id="contextMenuItems" class="contextMenuItems">
-        <li data-enabled="canMmoveUp"><a data-target-fn="moveApprovalLevelUp"><i class="fa fa-arrow-up"></i>&nbsp;&nbsp;$i18n.getString( "move_up" )</a></li>
-        <li data-enabled="canMmoveDown"><a data-target-fn="moveApprovalLevelDown"><i class="fa fa-arrow-down"></i>&nbsp;&nbsp;$i18n.getString( "move_down" )</a></li>
+        <li data-enabled="canMoveUp"><a data-target-fn="moveApprovalLevelUp"><i class="fa fa-arrow-up"></i>&nbsp;&nbsp;$i18n.getString( "move_up" )</a></li>
+        <li data-enabled="canMoveDown"><a data-target-fn="moveApprovalLevelDown"><i class="fa fa-arrow-down"></i>&nbsp;&nbsp;$i18n.getString( "move_down" )</a></li>
         <li><a data-target-fn="removeApprovalLevel"><i class="fa fa-trash-o"></i>&nbsp;&nbsp;$i18n.getString( "remove" )</a></li>
     </ul>
 </div>

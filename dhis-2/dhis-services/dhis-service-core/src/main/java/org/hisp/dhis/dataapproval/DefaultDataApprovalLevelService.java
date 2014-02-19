@@ -39,6 +39,7 @@ import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -231,20 +232,29 @@ public class DefaultDataApprovalLevelService
 
     /**
      * Tag each data approval level with the current timestamp,
-     * re-number the levels, and save all of them.
+     * re-number the levels, and save all of them. Also copy them
+     * to another List, so Hibernate doesn't get upset about changing
+     * the level numbers.
      *
      * @param dataApprovalLevels The list of data approval levels to save.
      */
     private void save( List<DataApprovalLevel> dataApprovalLevels )
     {
+        List<DataApprovalLevel> copy = new ArrayList<DataApprovalLevel>();
+
         Date now = new Date();
 
-        for ( int i = 0; i <= dataApprovalLevels.size(); i++ )
+        int level = 1;
+
+        for ( DataApprovalLevel old : dataApprovalLevels )
         {
-            dataApprovalLevels.get( i ).setLevel( i + 1 );
-            dataApprovalLevels.get( i ).setCreated( now );
+            DataApprovalLevel d = new DataApprovalLevel( level++,
+                    old.getOrganisationUnitLevel(),
+                    old.getCategoryOptionGroupSet(), now );
+
+            copy.add( d );
         }
 
-        dataApprovalLevelStore.updateAllDataApprovalLevels( dataApprovalLevels );
+        dataApprovalLevelStore.updateAllDataApprovalLevels( copy );
     }
 }

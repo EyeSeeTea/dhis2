@@ -68,9 +68,11 @@ public class HibernateDataApprovalLevelStore
 
     public void updateAllDataApprovalLevels( List<DataApprovalLevel> dataApprovalLevels )
     {
-        String hql = "delete from OrganisationUnitLevel";
+        String hql = "delete from DataApprovalLevel";
 
         getQuery( hql ).executeUpdate();
+
+        getSession().clear();
 
         for ( DataApprovalLevel dataApprovalLevel : dataApprovalLevels )
         {
