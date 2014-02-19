@@ -28,6 +28,10 @@ package org.hisp.dhis.settings.action.system;
  */
 
 import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.dataapproval.DataApprovalLevel;
+import org.hisp.dhis.dataapproval.DataApprovalLevelService;
+
+import java.util.List;
 
 /**
  * @author Jim Grace
@@ -36,11 +40,34 @@ import com.opensymphony.xwork2.Action;
 public class GetApprovalSettingsAction
         implements Action
 {
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
+    private DataApprovalLevelService dataApprovalLevelService;
+
+    public void setDataApprovalLevelService( DataApprovalLevelService dataApprovalLevelService )
+    {
+        this.dataApprovalLevelService = dataApprovalLevelService;
+    }
 
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
 
+    private List<DataApprovalLevel> dataApprovalLevels;
+
+    public List<DataApprovalLevel> getDataApprovalLevels()
+    {
+        return dataApprovalLevels;
+    }
+
+    private DataApprovalLevelService approvalLevelService;
+
+    public DataApprovalLevelService getApprovalLevelService()
+    {
+        return approvalLevelService;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -48,6 +75,10 @@ public class GetApprovalSettingsAction
 
     public String execute()
     {
+        dataApprovalLevels = dataApprovalLevelService.getAllDataApprovalLevels();
+
+        approvalLevelService = dataApprovalLevelService;
+
         return SUCCESS;
     }
 }

@@ -31,7 +31,7 @@ package org.hisp.dhis.dataapproval;
 import java.io.Serializable;
 import java.util.Date;
 
-import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
@@ -52,37 +52,38 @@ public class DataApproval
     private static final long serialVersionUID = -4034531921928532366L;
 
     /**
-     * Identifies the data approval instance.
+     * Identifies the data approval instance (required).
      */
     private int id;
 
     /**
-     * The DataSet for the values being approved.
+     * The DataSet for the values being approved (required).
      */
     private DataSet dataSet;
 
     /**
-     * The Period of the DataSet values being approved.
+     * The Period of the DataSet values being approved (required).
      */
     private Period period;
 
     /**
-     * The OrganisationUnit of the DataSet values being approved.
+     * The OrganisationUnit of the DataSet values being approved (required).
      */
     private OrganisationUnit organisationUnit;
     
     /**
-     * The attribute DataElementCategoryOptionCombo being approved.
+     * The attribute CategoryOptionGroup being approved (optional).
      */
-    private DataElementCategoryOptionCombo attributeOptionCombo;
+    private CategoryOptionGroup categoryOptionGroup;
 
     /**
-     * The Date (including time) when the DataSet values were approved.
+     * The Date (including time) when the DataSet values were approved
+     * (required).
      */
     private Date created;
 
     /**
-     * The User who approved the DataSet values.
+     * The User who approved the DataSet values (required).
      */
     private User creator;
 
@@ -94,13 +95,13 @@ public class DataApproval
     {
     }
 
-    public DataApproval( DataSet dataSet, Period period, OrganisationUnit organisationUnit, 
-        DataElementCategoryOptionCombo attributeOptionCombo, Date created, User creator )
+    public DataApproval( DataSet dataSet, Period period, OrganisationUnit organisationUnit,
+                         CategoryOptionGroup categoryOptionGroup, Date created, User creator )
     {
         this.dataSet = dataSet;
         this.period = period;
         this.organisationUnit = organisationUnit;
-        this.attributeOptionCombo = attributeOptionCombo;
+        this.categoryOptionGroup = categoryOptionGroup;
         this.created = created;
         this.creator = creator;
     }
@@ -149,14 +150,14 @@ public class DataApproval
         this.organisationUnit = organisationUnit;
     }
 
-    public DataElementCategoryOptionCombo getAttributeOptionCombo()
+    public CategoryOptionGroup getCategoryOptionGroup()
     {
-        return attributeOptionCombo;
+        return categoryOptionGroup;
     }
 
-    public void setAttributeOptionCombo( DataElementCategoryOptionCombo attributeOptionCombo )
+    public void setCategoryOptionGroup( CategoryOptionGroup categoryOptionGroup )
     {
-        this.attributeOptionCombo = attributeOptionCombo;
+        this.categoryOptionGroup = categoryOptionGroup;
     }
 
     public Date getCreated()

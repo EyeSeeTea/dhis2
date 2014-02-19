@@ -29,6 +29,7 @@ package org.hisp.dhis.dataapproval;
  */
 
 import org.apache.commons.collections.CollectionUtils;
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataset.DataSet;
@@ -55,7 +56,14 @@ public class DefaultDataApprovalService
     {
         this.dataApprovalStore = dataApprovalStore;
     }
-    
+
+    private DataApprovalLevelService dataApprovalLevelService;
+
+    public void setDataApprovalLevelService( DataApprovalLevelService dataApprovalLevelService )
+    {
+        this.dataApprovalLevelService = dataApprovalLevelService;
+    }
+
     private CurrentUserService currentUserService;
 
     public void setCurrentUserService( CurrentUserService currentUserService )
@@ -86,7 +94,7 @@ public class DefaultDataApprovalService
         for ( OrganisationUnit ancestor : dataApproval.getOrganisationUnit().getAncestors() )
         {
             DataApproval ancestorApproval = dataApprovalStore.getDataApproval(
-                    dataApproval.getDataSet(), dataApproval.getPeriod(), ancestor, dataApproval.getAttributeOptionCombo() );
+                    dataApproval.getDataSet(), dataApproval.getPeriod(), ancestor, dataApproval.getCategoryOptionGroup() );
 
             if ( ancestorApproval != null ) {
                 dataApprovalStore.deleteDataApproval ( ancestorApproval );
@@ -94,29 +102,19 @@ public class DefaultDataApprovalService
         }
     }
 
-    public DataApproval getDataApproval( DataSet dataSet, Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
+    public DataApproval getDataApproval( DataSet dataSet, Period period, OrganisationUnit organisationUnit, CategoryOptionGroup categoryOptionGroup )
     {
-        if ( attributeOptionCombo == null )
-        {
-            attributeOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
-        }
-        
-        return dataApprovalStore.getDataApproval( dataSet, period, organisationUnit, attributeOptionCombo );
+        return dataApprovalStore.getDataApproval( dataSet, period, organisationUnit, categoryOptionGroup );
     }
 
-    public DataApprovalState getDataApprovalState( DataSet dataSet, Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
+    public DataApprovalState getDataApprovalState( DataSet dataSet, Period period, OrganisationUnit organisationUnit, CategoryOptionGroup categoryOptionGroup )
     {
         if ( !dataSet.isApproveData() || !period.getPeriodType().equals( dataSet.getPeriodType() ) )
         {
             return DataApprovalState.APPROVAL_NOT_NEEDED;
         }
 
-        if ( attributeOptionCombo == null )
-        {
-            attributeOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
-        }
-        
-        if ( null != dataApprovalStore.getDataApproval( dataSet, period, organisationUnit, attributeOptionCombo ) )
+        if ( null != dataApprovalStore.getDataApproval( dataSet, period, organisationUnit, categoryOptionGroup ) )
         {
             return DataApprovalState.APPROVED;
         }
@@ -125,7 +123,7 @@ public class DefaultDataApprovalService
 
         for ( OrganisationUnit child : organisationUnit.getChildren() )
         {
-            switch ( getDataApprovalState( dataSet, period, child, attributeOptionCombo ) )
+            switch ( getDataApprovalState( dataSet, period, child, categoryOptionGroup ) )
             {
                 // -------------------------------------------------------------
                 // If ready or waiting at a lower level, return
@@ -168,7 +166,12 @@ public class DefaultDataApprovalService
         return DataApprovalState.APPROVAL_NOT_NEEDED;
     }
 
-    public boolean mayApprove( OrganisationUnit organisationUnit )
+    public DataApprovalState getDataApprovalState( DataSet dataSet, Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
+    {
+        return null; //TODO: write logic.
+    }
+
+        public boolean mayApprove( OrganisationUnit organisationUnit )
     {
         User user = currentUserService.getCurrentUser();
         
@@ -198,7 +201,7 @@ public class DefaultDataApprovalService
             for ( OrganisationUnit ancestor : dataApproval.getOrganisationUnit().getAncestors() )
             {
                 DataApproval ancestorDataApproval = dataApprovalStore.getDataApproval(
-                        dataApproval.getDataSet(), dataApproval.getPeriod(), ancestor, dataApproval.getAttributeOptionCombo() );
+                        dataApproval.getDataSet(), dataApproval.getPeriod(), ancestor, dataApproval.getCategoryOptionGroup() );
                 
                 if ( ancestorDataApproval != null && !isAuthorizedToUnapprove( ancestor ) )
                 {

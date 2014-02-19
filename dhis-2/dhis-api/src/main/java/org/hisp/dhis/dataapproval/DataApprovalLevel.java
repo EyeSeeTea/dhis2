@@ -29,6 +29,7 @@ package org.hisp.dhis.dataapproval;
  */
 
 import java.io.Serializable;
+import java.util.Date;
 
 import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
@@ -45,7 +46,7 @@ public class DataApprovalLevel
     private static final long serialVersionUID = -8424400562969386167L;
 
     /**
-     * The data approval level.
+     * The data approval level, 1=highest level, max=lowest level.
      */
     private int level;
 
@@ -59,6 +60,11 @@ public class DataApprovalLevel
      */
     private CategoryOptionGroupSet categoryOptionGroupSet;
 
+    /**
+     * The Date (including time) when the data approval level was created.
+     */
+    private Date created;
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -67,15 +73,48 @@ public class DataApprovalLevel
     {
     }
 
-    public DataApprovalLevel( int level, OrganisationUnitLevel organisationUnitLevel, CategoryOptionGroupSet categoryOptionGroupSet )
+    public DataApprovalLevel( int level, OrganisationUnitLevel organisationUnitLevel,
+                              CategoryOptionGroupSet categoryOptionGroupSet, Date created )
     {
         this.level = level;
         this.organisationUnitLevel = organisationUnitLevel;
         this.categoryOptionGroupSet = categoryOptionGroupSet;
+        this.created = created;
     }
 
     // -------------------------------------------------------------------------
-    // Getters
+    // Logic
+    // -------------------------------------------------------------------------
+
+    /**
+     * Constructs a name that can refer to this data approval level.
+     *
+     * @return name of this data approval level.
+     */
+    public String getName()
+    {
+        String name = organisationUnitLevel.getName()
+                + ( categoryOptionGroupSet == null ? "" : ( " - " + categoryOptionGroupSet.getName() ) );
+
+        return name;
+    }
+
+    /**
+     * Returns the name of the category option group set for this data approval
+     * level, or an empty string if there is no category option group set.
+     *
+     * @return name of this approval level's category option group set.
+     */
+    public String getCategoryOptionGroupSetName()
+    {
+        String categoryOptionGroupSetName = ( categoryOptionGroupSet == null ? "" : categoryOptionGroupSet.getName() );
+
+        return categoryOptionGroupSetName;
+    }
+
+
+    // -------------------------------------------------------------------------
+    // Getters and Setters
     // -------------------------------------------------------------------------
 
     public int getLevel()
@@ -83,13 +122,38 @@ public class DataApprovalLevel
         return level;
     }
 
+    public void setLevel( int level )
+    {
+        this.level = level;
+    }
+
     public OrganisationUnitLevel getOrganisationUnitLevel()
     {
         return organisationUnitLevel;
     }
 
+    public void setOrganisationUnitLevel( OrganisationUnitLevel organisationUnitLevel )
+    {
+        this.organisationUnitLevel = organisationUnitLevel;
+    }
+
     public CategoryOptionGroupSet getCategoryOptionGroupSet()
     {
         return categoryOptionGroupSet;
+    }
+
+    public void setCategoryOptionGroupSet( CategoryOptionGroupSet categoryOptionGroupSet )
+    {
+        this.categoryOptionGroupSet = categoryOptionGroupSet;
+    }
+
+    public Date getCreated()
+    {
+        return created;
+    }
+
+    public void setCreated( Date created )
+    {
+        this.created = created;
     }
 }

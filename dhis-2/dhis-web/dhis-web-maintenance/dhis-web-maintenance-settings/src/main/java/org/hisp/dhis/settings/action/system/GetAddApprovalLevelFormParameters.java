@@ -28,23 +28,56 @@ package org.hisp.dhis.settings.action.system;
  */
 
 import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Jim Grace
  * @version $Id$
  */
-public class SetApprovalSettingsAction
+public class GetAddApprovalLevelFormParameters
         implements Action
 {
     // -------------------------------------------------------------------------
-    // Input
+    // Dependencies
     // -------------------------------------------------------------------------
 
+    private OrganisationUnitService organisationUnitService;
+
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitService = organisationUnitService;
+    }
+
+    private DataElementCategoryService dataElementCategoryService;
+
+    public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
+    {
+        this.dataElementCategoryService = dataElementCategoryService;
+    }
 
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
 
+    private List<OrganisationUnitLevel> organisationUnitLevels;
+
+    public List<OrganisationUnitLevel> getOrganisationUnitLevels()
+    {
+        return organisationUnitLevels;
+    }
+
+    private Collection<CategoryOptionGroupSet> categoryOptionGroupSets;
+
+    public Collection<CategoryOptionGroupSet> getCategoryOptionGroupSets()
+    {
+        return categoryOptionGroupSets;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -52,6 +85,9 @@ public class SetApprovalSettingsAction
 
     public String execute()
     {
+        organisationUnitLevels = organisationUnitService.getOrganisationUnitLevels();
+        categoryOptionGroupSets = dataElementCategoryService.getAllCategoryOptionGroupSets();
+
         return SUCCESS;
     }
 }

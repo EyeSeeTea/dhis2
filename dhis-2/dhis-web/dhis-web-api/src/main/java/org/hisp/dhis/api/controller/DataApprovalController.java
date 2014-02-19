@@ -137,9 +137,9 @@ public class DataApprovalController
         
         if ( DataApprovalState.APPROVED.equals( state ) )
         {
-            DataApproval approval = dataApprovalService.getDataApproval( dataSet, period, organisationUnit, attributeOptionCombo );
-            
-            mayUnapprove = dataApprovalService.mayUnapprove( approval );
+            //TODO: Fix DataApproval approval = dataApprovalService.getDataApproval( dataSet, period, organisationUnit, attributeOptionCombo );
+
+            //TODO: Fix mayUnapprove = dataApprovalService.mayUnapprove( approval );
         }
         
         Map<String, Object> approvalState = new HashMap<String, Object>();
@@ -206,9 +206,9 @@ public class DataApprovalController
 
         User user = currentUserService.getCurrentUser();
         
-        DataApproval approval = new DataApproval( dataSet, period, organisationUnit, attributeOptionCombo, new Date(), user );
-        
-        dataApprovalService.addDataApproval( approval );
+        //TODO: FIX. DataApproval approval = new DataApproval( dataSet, period, organisationUnit, attributeOptionCombo, new Date(), user );
+
+        //TODO: FIX. dataApprovalService.addDataApproval( approval );
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_APPROVE_DATA') or hasRole('F_APPROVE_DATA_LOWER_LEVELS')" )
@@ -252,7 +252,7 @@ public class DataApprovalController
             return;
         }
 
-        DataApproval approval = dataApprovalService.getDataApproval( dataSet, period, organisationUnit, attributeOptionCombo );
+        DataApproval approval = null; //TODO: Fix DataApproval approval = dataApprovalService.getDataApproval( dataSet, period, organisationUnit, attributeOptionCombo );
         
         if ( approval == null )
         {
