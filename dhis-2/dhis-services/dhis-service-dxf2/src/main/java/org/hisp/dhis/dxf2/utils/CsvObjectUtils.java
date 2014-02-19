@@ -41,8 +41,11 @@ import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dxf2.metadata.MetaData;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 import com.csvreader.CsvReader;
+
+import static org.hisp.dhis.system.util.DateUtils.getMediumDate;
 
 /**
  * @author Lars Helge Overland
@@ -68,6 +71,10 @@ public class CsvObjectUtils
         else if ( CategoryOptionGroup.class.equals( clazz ) )
         {
             metaData.setCategoryOptionGroups( categoryOptionGroupsFromCsv( reader, input ) );
+        }
+        else if ( OrganisationUnit.class.equals( clazz ) )
+        {
+            metaData.setOrganisationUnits( organisationUnitsFromCsv( reader, input ) );
         }
         
         return metaData;
@@ -126,18 +133,53 @@ public class CsvObjectUtils
             {
                 DataElement object = new DataElement();
                 setIdentifiableObject( object, values );
-                object.setShortName( getSafe( values, 3, StringUtils.substring( object.getName(), 0, 50 ) ) );
-                object.setDescription( getSafe( values, 4, null ) );
-                object.setFormName( getSafe( values, 5, null ) );
+                object.setShortName( getSafe( values, 3, object.getName(), 50 ) );
+                object.setDescription( getSafe( values, 4, null, null ) );
+                object.setFormName( getSafe( values, 5, null, 230 ) );
                 object.setActive( true );
-                object.setDomainType( getSafe( values, 6, DataElement.DOMAIN_TYPE_AGGREGATE ) );
-                object.setType( getSafe( values, 7, DataElement.VALUE_TYPE_INT ) );
-                object.setNumberType( getSafe( values, 8, DataElement.VALUE_TYPE_NUMBER ) );
-                object.setTextType( getSafe( values, 9, null ) );
-                object.setAggregationOperator( getSafe( values, 10, DataElement.AGGREGATION_OPERATOR_SUM ) );
-                object.setUrl( getSafe( values, 11, null ) );
-                object.setZeroIsSignificant( Boolean.valueOf( getSafe( values, 12, "false" ) ) );
+                object.setDomainType( getSafe( values, 6, DataElement.DOMAIN_TYPE_AGGREGATE, 16 ) );
+                object.setType( getSafe( values, 7, DataElement.VALUE_TYPE_INT, 16 ) );
+                object.setNumberType( getSafe( values, 8, DataElement.VALUE_TYPE_NUMBER, 16 ) );
+                object.setTextType( getSafe( values, 9, null, 16 ) );
+                object.setAggregationOperator( getSafe( values, 10, DataElement.AGGREGATION_OPERATOR_SUM, 16 ) );
+                object.setUrl( getSafe( values, 11, null, 255 ) );
+                object.setZeroIsSignificant( Boolean.valueOf( getSafe( values, 12, "false", null ) ) );
                 
+                list.add( object );
+            }
+        }
+        
+        return list;
+    }
+    
+    public static List<OrganisationUnit> organisationUnitsFromCsv( CsvReader reader, InputStream input )
+        throws IOException
+    {
+        List<OrganisationUnit> list = new ArrayList<OrganisationUnit>();
+        
+        while ( reader.readRecord() )
+        {
+            String[] values = reader.getValues();
+
+            if ( values != null && values.length > 0 )
+            {
+                OrganisationUnit object = new OrganisationUnit();
+                setIdentifiableObject( object, values );
+                object.setShortName( getSafe( values, 3, object.getName(), 50 ) );
+                object.setDescription( getSafe( values, 4, null, null ) );
+                object.setUuid( getSafe( values, 5, null, 36 ) );
+                object.setOpeningDate( getMediumDate( getSafe( values, 6, "1970-01-01", null ) ) );
+                object.setClosedDate( getMediumDate( getSafe( values, 7, "1970-01-01", null ) ) );
+                object.setActive( true );
+                object.setComment( getSafe( values, 8, null, null ) );
+                object.setFeatureType( getSafe( values, 9, null, 50 ) );
+                object.setCoordinates( getSafe( values, 10, null, null ) );
+                object.setUrl( getSafe( values, 11, null, 255 ) );
+                object.setContactPerson( getSafe( values, 12, null, 255 ) );
+                object.setAddress( getSafe( values, 13, null, 255 ) );
+                object.setEmail( getSafe( values, 14, null, 150 ) );
+                object.setPhoneNumber( getSafe( values, 15, null, 150 ) );
+
                 list.add( object );
             }
         }
@@ -147,20 +189,37 @@ public class CsvObjectUtils
 
     private static void setIdentifiableObject( BaseIdentifiableObject object, String[] values )
     {
-        object.setName( getSafe( values, 0, null ) );
-        object.setUid( getSafe( values, 1, CodeGenerator.generateCode() ) );
-        object.setCode( getSafe( values, 2, null ) );
+        object.setName( getSafe( values, 0, null, 230 ) );
+        object.setUid( getSafe( values, 1, CodeGenerator.generateCode(), 11 ) );
+        object.setCode( getSafe( values, 2, null, 50 ) );
     }
     
-    private static final String getSafe( String[] values, int index, String defaultValue )
+    /**
+     * Returns a string from the given array avoiding exceptions.
+     * 
+     * @param values the string array.
+     * @param index the array index of the string to get.
+     * @param defaultValue the default value in case index is out of bounds.
+     * @param max the max number of characters to return for the string.
+     */
+    private static String getSafe( String[] values, int index, String defaultValue, Integer max )
     {
+        String string = null;
+        
         if ( values == null || index < 0 || index >= values.length )
         {
-            return defaultValue;
+            string = defaultValue;
+        }
+        else
+        {        
+            string = values[index];
         }
         
-        String value = values[index];
+        if ( string != null )
+        {
+            return max != null ? StringUtils.substring( string, 0, max ) : string;
+        }
         
-        return value != null ? value : defaultValue;
+        return null;
     }
 }
