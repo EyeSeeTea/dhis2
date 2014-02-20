@@ -551,7 +551,9 @@ Ext.onReady( function() {
 			getStoreKeys,
 			getCmpHeight,
 			getSetup,
+            addDimension,
             removeDimension,
+            dimensionStoreMap = {},
 
 			dimensionPanel,
 			selectPanel,
@@ -616,7 +618,7 @@ Ext.onReady( function() {
 			dimensionStore.add(getData(all));
 		};
 		ns.app.stores.dimension = dimensionStore;
-		dimensionStore.add({id: dimConf.period.dimensionName, name: dimConf.relativePeriod.name});
+		//dimensionStore.add({id: dimConf.period.dimensionName, name: dimConf.relativePeriod.name});
 
 		colStore = getStore();
 		ns.app.stores.col = colStore;
@@ -805,6 +807,11 @@ Ext.onReady( function() {
 			};
 		};
 
+        addDimenson = function(record) {
+            var store = dimensionStoreMap[record.id] || dimensionStore;
+            store.add(record);
+        };
+
         removeDimension = function(dataElementId) {
             var stores = [dimensionStore, colStore, rowStore, filterStore];
 
@@ -814,6 +821,7 @@ Ext.onReady( function() {
 
                 if (index != -1) {
                     store.remove(store.getAt(index));
+                    dimensionStoreMap[dataElementId] = store;
                 }
             }
         };
@@ -830,6 +838,7 @@ Ext.onReady( function() {
 			colStore: colStore,
 			rowStore: rowStore,
 			filterStore: filterStore,
+            addDimenson: addDimenson,
             removeDimension: removeDimension,
 			hideOnBlur: true,
 			items: {
@@ -2266,6 +2275,7 @@ Ext.onReady( function() {
 			startDate,
 			endDate,
             startEndDate,
+            onRelativePeriodChange,
             relativePeriod,
             checkboxes = [],
 			period,
@@ -2749,14 +2759,6 @@ Ext.onReady( function() {
         startEndDate = Ext.create('Ext.container.Container', {
             cls: 'ns-container-default',
             layout: 'column',
-            xable: function() {
-                if (period.isNoRelativePeriods()) {
-                    this.enable();
-                }
-                else if (!this.isDisabled()) {
-                    this.disable();
-                }
-            },
             items: [
                 {
                     xtype: 'container',
@@ -2933,6 +2935,19 @@ Ext.onReady( function() {
             ]
         });
 
+        onRelativePeriodChange = function() {
+            if (period.isNoRelativePeriods()) {
+                startEndDate.enable();
+
+                ns.app.layoutWindow.removeDimension(dimConf.period.dimensionName);
+            }
+            else if (!startEndDate.isDisabled()) {
+                startEndDate.disable();
+
+                ns.app.layoutWindow.addDimension({id: dimConf.period.dimensionName, name: dimConf.relativePeriod.name});
+            }
+        };
+
         relativePeriod = {
 			xtype: 'container',
             cls: 'ns-container-default',
@@ -2963,7 +2978,7 @@ Ext.onReady( function() {
 										}
 									},
 									change: function() {
-										startEndDate.xable();
+										onRelativePeriodChange();
 									}
 								}
 							},
@@ -3005,7 +3020,7 @@ Ext.onReady( function() {
 										}
 									},
 									change: function() {
-										startEndDate.xable();
+										onRelativePeriodChange();
 									}
 								}
 							},
@@ -3047,7 +3062,7 @@ Ext.onReady( function() {
 										}
 									},
 									change: function() {
-										startEndDate.xable();
+										onRelativePeriodChange();
 									}
 								}
 							},
@@ -3092,7 +3107,7 @@ Ext.onReady( function() {
 										}
 									},
 									change: function() {
-										startEndDate.xable();
+										onRelativePeriodChange();
 									}
 								}
 							},
@@ -3130,7 +3145,7 @@ Ext.onReady( function() {
 										}
 									},
 									change: function() {
-										startEndDate.xable();
+										onRelativePeriodChange();
 									}
 								}
 							},
@@ -3168,7 +3183,7 @@ Ext.onReady( function() {
 										}
 									},
 									change: function() {
-										startEndDate.xable();
+										onRelativePeriodChange();
 									}
 								}
 							},
@@ -3231,7 +3246,7 @@ Ext.onReady( function() {
 										}
 									},
 									change: function() {
-										startEndDate.xable();
+										onRelativePeriodChange();
 									}
 								}
 							},

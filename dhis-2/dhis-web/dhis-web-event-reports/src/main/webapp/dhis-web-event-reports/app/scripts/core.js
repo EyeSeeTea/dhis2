@@ -77,8 +77,7 @@ Ext.onReady( function() {
 					},
 					relativePeriod: {
 						value: 'relativePeriods',
-						name: NS.i18n.relative_periods,
-						name: 'Relative periods'
+						name: NS.i18n.relative_periods
 					},
 					organisationUnit: {
 						value: 'organisationUnits',
