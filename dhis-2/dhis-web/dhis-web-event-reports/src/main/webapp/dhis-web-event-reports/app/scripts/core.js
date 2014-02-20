@@ -1680,6 +1680,7 @@ console.log("getItemName", arguments);
 
 			service.response.getExtendedResponse = function(xLayout, response) {
 				var allIds = [],
+                    emptyId = 'N/A',
                     names,
 					headers;
 
@@ -1698,20 +1699,21 @@ console.log("getItemName", arguments);
 
 					// collect ids from response
 					for (var j = 0; j < response.height; j++) {
-						ids.push(response.rows[j][i]);
+						ids.push(response.rows[j][i] || emptyId);
 					}
 
                     ids = support.prototype.array.sort(Ext.Array.unique(ids), 'ASC');
 
                     // header ids
-                    for (var j = 0, id; j < ids.length; j++) {
+                    for (var j = 0, id, fullId; j < ids.length; j++) {
                         id = ids[j];
+                        fullId = header.name + id;
 
-                        // add header name to id
-                        header.ids.push(header.name + id);
+                        // add full ids to header id array
+                        header.ids.push(fullId);
 
-                        // add name+id to names
-                        names[header.name + id] = names.hasOwnProperty(id) ? names[id] : names[header.name] + ' ' + id;
+                        // add full names to metadata names
+                        names[fullId] = names.hasOwnProperty(id) ? names[id] : names[header.name] + ' ' + id;
                     }
 
 					header.size = header.ids.length;
@@ -1726,20 +1728,20 @@ console.log("getItemName", arguments);
                     // update row ids
                     if (header.name !== 'value') {
                         for (var j = 0; j < response.height; j++) {
-                            response.rows[j][i] = header.name + response.rows[j][i];
+                            response.rows[j][i] = header.name + (response.rows[j][i] || emptyId);
                         }
                     }
 				}
 
 				// fix co ids and names
-				for (var i = 0, id, splitId; i < allIds.length; i++) {
-					id = allIds[i];
+				//for (var i = 0, id, splitId; i < allIds.length; i++) {
+					//id = allIds[i];
 
-					if (id.indexOf('-') !== -1) {
-						splitId = id.split('-');
-						response.metaData.names[id] = response.metaData.names[splitId[0]] + ' ' + response.metaData.names[splitId[1]];
-					}
-				}
+					//if (id.indexOf('-') !== -1) {
+						//splitId = id.split('-');
+						//response.metaData.names[id] = response.metaData.names[splitId[0]] + ' ' + response.metaData.names[splitId[1]];
+					//}
+				//}
 
 				// value id map
 				(function() {
