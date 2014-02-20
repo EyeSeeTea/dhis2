@@ -798,6 +798,7 @@ Ext.onReady( function() {
 			};
 
 			service.layout.getItemName = function(layout, response, id, isHtml) {
+console.log("getItemName", arguments);
 				var metaData = response.metaData,
 					name = '';
 
@@ -1708,6 +1709,15 @@ Ext.onReady( function() {
 					response.nameHeaderMap[header.name] = header;
 				}
 
+                // metaData, id as name
+                for (var i = 0, id; i < allIds.length; i++) {
+                    id = allIds[i];
+
+                    if (!response.metaData.names.hasOwnProperty(id)) {
+                        response.metaData.names[id] = id;
+                    }
+                }
+
 				// fix co ids and names
 				for (var i = 0, id, splitId; i < allIds.length; i++) {
 					id = allIds[i];
@@ -1979,6 +1989,7 @@ Ext.onReady( function() {
 				};
 
 				getTdHtml = function(config, metaDataId) {
+console.log("config", config, "metaDataId", metaDataId);
 					var bgColor,
 						mapLegends,
 						colSpan,

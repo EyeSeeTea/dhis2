@@ -4411,8 +4411,6 @@ Ext.onReady( function() {
 					}
 				}
 
-				console.log(view);
-
 				return view;
 			};
 
@@ -4475,7 +4473,6 @@ Ext.onReady( function() {
 					scope: this,
 					success: function(r) {
                         var response = api.response.Response(Ext.decode(r.responseText));
-                        console.log("response", response);
 
                         if (!response) {
 							//ns.app.viewport.setGui(layout, xLayout, isUpdateGui);
@@ -4507,11 +4504,13 @@ Ext.onReady( function() {
 
 					return web.pivot.getHtml(xLayout, xResponse, xColAxis, xRowAxis);
 				};
-console.log("layout", layout);
 
 				xLayout = getXLayout(layout);
 				xResponse = service.response.getExtendedResponse(xLayout, response);
 				xLayout = getSXLayout(xLayout, xResponse);
+console.log("layout", layout);
+console.log("xResponse", xResponse);
+console.log("xLayout", xLayout);
 
 				if (layout.sorting) {
 					if (!xResponse) {
@@ -5583,7 +5582,7 @@ console.log("layout", layout);
 
 								// i18n
 								requests.push({
-									url: init.contextPath + '/api/i18n?package=org.hisp.dhis.pivot',
+									url: init.contextPath + '/api/i18n?package=org.hisp.dhis.eventreport',
 									method: 'POST',
 									headers: {
 										'Content-Type': 'application/json',
