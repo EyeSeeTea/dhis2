@@ -551,6 +551,7 @@ Ext.onReady( function() {
 			getStoreKeys,
 			getCmpHeight,
 			getSetup,
+            removeDimension,
 
 			dimensionPanel,
 			selectPanel,
@@ -609,7 +610,6 @@ Ext.onReady( function() {
 			return keys;
 		};
 
-		//dimensionStore = getStore(getData());
 		dimensionStore = getStore();
 		dimensionStore.reset = function(all) {
 			dimensionStore.removeAll();
@@ -620,16 +620,13 @@ Ext.onReady( function() {
 
 		colStore = getStore();
 		ns.app.stores.col = colStore;
-		//colStore.add({id: dimConf.data.dimensionName, name: dimConf.data.name});
 
 		rowStore = getStore();
 		ns.app.stores.row = rowStore;
-		//rowStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
 		rowStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
 
 		filterStore = getStore();
 		ns.app.stores.filter = filterStore;
-		//filterStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
 
 		getCmpHeight = function() {
 			var size = dimensionStore.totalCount,
@@ -808,6 +805,19 @@ Ext.onReady( function() {
 			};
 		};
 
+        removeDimension = function(dataElementId) {
+            var stores = [dimensionStore, colStore, rowStore, filterStore];
+
+            for (var i = 0, store, index; i < stores.length; i++) {
+                store = stores[i];
+                index = store.findExact('id', dataElementId);
+
+                if (index != -1) {
+                    store.remove(store.getAt(index));
+                }
+            }
+        };
+
 		window = Ext.create('Ext.window.Window', {
 			title: NS.i18n.table_layout,
 			bodyStyle: 'background-color:#fff; padding:2px',
@@ -820,6 +830,7 @@ Ext.onReady( function() {
 			colStore: colStore,
 			rowStore: rowStore,
 			filterStore: filterStore,
+            removeDimension: removeDimension,
 			hideOnBlur: true,
 			items: {
 				layout: 'column',
@@ -2627,6 +2638,8 @@ Ext.onReady( function() {
 				if (!dataElementSelected.hasDataElement(element.id)) {
 					dataElementsByStageStore.add(element);
 					dataElementsByStageStore.sort();
+
+                    ns.app.layoutWindow.removeDimension(element.id);
 				}
 			};
 
