@@ -207,7 +207,7 @@ Ext.onReady( function() {
 						return;
 					}
 
-					config.id = config.id.replace('.', '-');
+					//config.id = config.id.replace('.', '-');
 
 					return config;
 				}();
@@ -1680,9 +1680,11 @@ console.log("getItemName", arguments);
 
 			service.response.getExtendedResponse = function(xLayout, response) {
 				var allIds = [],
+                    names,
 					headers;
 
 				response = Ext.clone(response);
+                names = response.metaData.names;
 				headers = response.headers;
 
 				response.nameHeaderMap = {};
@@ -1691,6 +1693,7 @@ console.log("getItemName", arguments);
 				// add to headers: size, index, response ids
 				for (var i = 0, header, ids; i < headers.length; i++) {
 					header = headers[i];
+                    header.ids = [];
 					ids = [];
 
 					// collect ids from response
@@ -1698,7 +1701,19 @@ console.log("getItemName", arguments);
 						ids.push(response.rows[j][i]);
 					}
 
-					header.ids = support.prototype.array.sort(Ext.Array.unique(ids), 'ASC');
+                    ids = support.prototype.array.sort(Ext.Array.unique(ids), 'ASC');
+
+                    // header ids
+                    for (var j = 0, id; j < ids.length; j++) {
+                        id = ids[j];
+
+                        // add header name to id
+                        header.ids.push(header.name + id);
+
+                        // add name+id to names
+                        names[header.name + id] = names.hasOwnProperty(id) ? names[id] : names[header.name] + ' ' + id;
+                    }
+
 					header.size = header.ids.length;
 					header.index = i;
 
@@ -1707,16 +1722,14 @@ console.log("getItemName", arguments);
 
 					// name header map
 					response.nameHeaderMap[header.name] = header;
-				}
 
-                // metaData, id as name
-                for (var i = 0, id; i < allIds.length; i++) {
-                    id = allIds[i];
-
-                    if (!response.metaData.names.hasOwnProperty(id)) {
-                        response.metaData.names[id] = id;
+                    // update row ids
+                    if (header.name !== 'value') {
+                        for (var j = 0; j < response.height; j++) {
+                            response.rows[j][i] = header.name + response.rows[j][i];
+                        }
                     }
-                }
+				}
 
 				// fix co ids and names
 				for (var i = 0, id, splitId; i < allIds.length; i++) {
@@ -1736,7 +1749,7 @@ console.log("getItemName", arguments);
 						co = dimConf.category.dimensionName,
 						axisDimensionNames = xLayout.axisDimensionNames,
 						idIndexOrder = [];
-
+console.log("axisDimensionNames", axisDimensionNames);
 					// idIndexOrder
 					for (var i = 0; i < axisDimensionNames.length; i++) {
 						idIndexOrder.push(response.nameHeaderMap[axisDimensionNames[i]].index);
