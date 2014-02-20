@@ -32,9 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Chau Thu Tran
- * 
- * @version $ CategoryOptionGroupSetDeletionHandler.java Feb 13, 2014 7:53:06 PM
- *          $
  */
 public class CategoryOptionGroupSetDeletionHandler
     extends DeletionHandler
