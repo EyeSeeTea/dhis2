@@ -29,8 +29,8 @@ package org.hisp.dhis.dataapproval;
  */
 
 /**
- * Current state of data approval for a given combination of data set, period
- * and organisation unit.
+ * Current status of data approval for a selected combination of data set, period,
+ * organisation unit, and category options or category group options.
  *
  * @author Jim Grace
  * @version $Id$
@@ -39,31 +39,94 @@ package org.hisp.dhis.dataapproval;
 public enum DataApprovalState
 {
     /**
-     * Data in this data set is approved for this period and organisation unit.
+     * Data approval does not apply to this selection. (Data is neither
+     * "approved" nor "unapproved".)
      */
-    APPROVED,
+    UNAPPROVABLE ( false, false, false, false ),
 
     /**
-     * Data in this data set is ready to be approved for this period and
-     * organisation unit.
+     * Data is unapproved, and is ready to be approved for this selection.
      */
-    READY_FOR_APPROVAL,
+    UNAPPROVED_READY ( false, true, true, true ),
 
     /**
-     * Data in this data set is not yet ready to be approved for this period
-     * and organisation unit, because it is waiting for approval at a
-     * lower-level organisation unit under this one.
+     * Data is unapproved, and is waiting for some lower-level approval.
      */
-    WAITING_FOR_LOWER_LEVEL_APPROVAL,
+    UNAPPROVED_WAITING ( false, true, true, false ),
 
     /**
-     * Data in this data set does not need approval for this period and
-     * organisation unit, for one of the following reasons:
-     * <ul>
-     *     <li>Data approval is not enabled for this data set.</li>
-     *     <li>No data is collected for this data set for this organisation
-     *         unit or any lower-level organisation units under it.</li>
-     * </ul>
+     * Data is unapproved, and is waiting for approval somewhere else
+     * (not approvable here.)
      */
-    APPROVAL_NOT_NEEDED
+    UNAPPROVED_ELSEWHERE ( false, true, false, false ),
+
+    /**
+     * Data is approved, and was approved here (so could be unapproved here.)
+     */
+    APPROVED_HERE ( true, false, true, false ),
+
+    /**
+     * Data is approved, but was not approved here (so cannot be unapproved here.)
+     * This covers the case where data was approved at a higher level. It also
+     * covers the case where the data is selected for a period type that is
+     * longer than the data set period type, and the data was approved for
+     * every constituent data set period.
+     */
+    APPROVED_ELSEWHERE( true, false, false, false );
+
+    /**
+     * Is this data approved (and therefore locked)?
+     */
+    private boolean approved;
+
+    /**
+     * Is this data unapproved (could be approved but is not)?
+     */
+    private boolean unapproved;
+
+    /**
+     * Is this data approvable for this selection?
+     */
+    private boolean approvable;
+
+    /**
+     * Is this data ready to be approved in this combination of data set, etc.?
+     */
+    private boolean ready;
+
+    // -------------------------------------------------------------------------
+    // Constructor
+    // -------------------------------------------------------------------------
+
+    DataApprovalState( boolean approved, boolean unapproved, boolean approvable, boolean ready )
+    {
+        this.approved = approved;
+        this.unapproved = unapproved;
+        this.approvable = approvable;
+        this.ready = ready;
+    }
+
+    // -------------------------------------------------------------------------
+    // Getters
+    // -------------------------------------------------------------------------
+
+    public boolean isApproved()
+    {
+        return approved;
+    }
+
+    public boolean isUnapproved()
+    {
+        return unapproved;
+    }
+
+    public boolean isApprovable()
+    {
+        return approvable;
+    }
+
+    public boolean isReady()
+    {
+        return ready;
+    }
 }

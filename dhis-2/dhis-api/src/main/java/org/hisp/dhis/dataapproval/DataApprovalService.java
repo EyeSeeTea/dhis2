@@ -29,10 +29,13 @@ package org.hisp.dhis.dataapproval;
  */
 
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
+
+import java.util.Set;
 
 /**
  * @author Jim Grace
@@ -69,24 +72,24 @@ public interface DataApprovalService
      * @param categoryOptionGroup CategoryOptionGroup (if any) for approval.
      * @return matching DataApproval object, if any
      */
-    DataApproval getDataApproval( DataSet dataSet, Period period, 
-        OrganisationUnit organisationUnit, CategoryOptionGroup categoryOptionGroup );
+//    DataApproval getDataApproval( DataSet dataSet, Period period,
+//        OrganisationUnit organisationUnit, CategoryOptionGroup categoryOptionGroup );
 
     /**
-     * Returns the DataApprovalState for a given data set, period,
-     * organisation unit and, optionally category option group.
+     * Returns the data approval status for a given data set, period,
+     * organisation unit and, optionally, category option group.
      *
      * @param dataSet DataSet to check for approval.
      * @param period Period to check for approval.
      * @param organisationUnit OrganisationUnit to check for approval.
      * @param categoryOptionGroup CategoryOptionGroup (if any) for approval.
-     * @return the data approval state.
+     * @return the data approval status.
      */
-    DataApprovalState getDataApprovalState( DataSet dataSet, Period period,
+    DataApprovalStatus getDataApprovalStatus( DataSet dataSet, Period period,
                                             OrganisationUnit organisationUnit, CategoryOptionGroup categoryOptionGroup );
 
     /**
-     * Returns the DataApprovalState for a given data set, period,
+     * Returns the data approval status for a given data set, period,
      * organisation unit and attribute category combination.
      * If attributeOptionCombo is null, the default option combo will be used.
      *
@@ -94,10 +97,27 @@ public interface DataApprovalService
      * @param period Period to check for approval.
      * @param organisationUnit OrganisationUnit to check for approval.
      * @param attributeOptionCombo CategoryOptionCombo (if any) for approval.
-     * @return the data approval state.
+     * @return the data approval status.
      */
-    DataApprovalState getDataApprovalState( DataSet dataSet, Period period,
-                                            OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo );
+    DataApprovalStatus getDataApprovalStatus( DataSet dataSet, Period period,
+                                              OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo );
+
+    /**
+     * Returns the data approval status for a given data set, period,
+     * organisation unit and attribute category combination.
+     * If attributeOptionCombo is null, the default option combo will be used.
+     *
+     * @param dataSet DataSet to check for approval.
+     * @param period Period to check for approval.
+     * @param organisationUnit OrganisationUnit to check for approval.
+     * @param categoryOptionGroup CategoryOptionGroup (if any) for approval.
+     * @param dataElementCategoryOptions Selected category options (if any).
+     * @return the data approval status.
+     */
+    public DataApprovalStatus getDataApprovalStatus( DataSet dataSet, Period period,
+                                                     OrganisationUnit organisationUnit,
+                                                     CategoryOptionGroup categoryOptionGroup,
+                                                     Set<DataElementCategoryOption> dataElementCategoryOptions );
 
     /**
      * Checks to see whether a user may approve data for a given

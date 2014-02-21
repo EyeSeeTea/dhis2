@@ -28,18 +28,8 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.collections.CollectionUtils;
-import org.hisp.dhis.dataelement.CategoryOptionGroup;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.user.CurrentUserService;
-import org.hisp.dhis.user.User;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -124,15 +114,7 @@ public class DefaultDataApprovalLevelService
     {
         if ( canMoveDown( level ) )
         {
-            List<DataApprovalLevel> dataApprovalLevels = getAllDataApprovalLevels();
-
-            int index = level - 1;
-
-            DataApprovalLevel next = dataApprovalLevels.get( index + 1 );
-            dataApprovalLevels.set( index + 1, dataApprovalLevels.get( index ) );
-            dataApprovalLevels.set( index, next );
-
-            save( dataApprovalLevels );
+            swapWithNextLevel( level );
         }
     }
 
@@ -140,19 +122,11 @@ public class DefaultDataApprovalLevelService
     {
         if ( canMoveUp( level ) )
         {
-            List<DataApprovalLevel> dataApprovalLevels = getAllDataApprovalLevels();
-
-            int index = level - 1;
-
-            DataApprovalLevel previous = dataApprovalLevels.get( index - 1 );
-            dataApprovalLevels.set( index - 1, dataApprovalLevels.get( index ) );
-            dataApprovalLevels.set( index, previous );
-
-            save( dataApprovalLevels );
+            swapWithNextLevel( level - 1 );
         }
     }
 
-    public boolean exists ( DataApprovalLevel testLevel )
+    public boolean exists( DataApprovalLevel testLevel )
     {
         List<DataApprovalLevel> dataApprovalLevels = getAllDataApprovalLevels();
 
@@ -177,6 +151,109 @@ public class DefaultDataApprovalLevelService
             return false;
         }
 
+        int index = getInsertIndex( dataApprovalLevels, newLevel );
+
+        if ( index < 0 )
+        {
+            return false;
+        }
+
+        dataApprovalLevels.add( index, newLevel );
+
+        newLevel.setLevel( index + 1 );
+        newLevel.setCreated( new Date() );
+
+        dataApprovalLevelStore.addDataApproval( newLevel );
+
+        updateFromIndexToEnd( dataApprovalLevels, index + 1 );
+
+        return true;
+    }
+
+    public void remove( int level )
+    {
+        List<DataApprovalLevel> dataApprovalLevels = getAllDataApprovalLevels();
+
+        int index = level - 1;
+
+        if ( index >= 0 & index < dataApprovalLevels.size() )
+        {
+            dataApprovalLevels.remove( index );
+
+            dataApprovalLevelStore.deleteDataApprovalLevel( dataApprovalLevels.get( index ) );
+
+            updateFromIndexToEnd( dataApprovalLevels, index );
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    /**
+     * Swaps a data approval level with the next higher level.
+     *
+     * @param level lower level to swap.
+     */
+    private void swapWithNextLevel( int level )
+    {
+        List<DataApprovalLevel> dataApprovalLevels = getAllDataApprovalLevels();
+
+        int index = level - 1;
+
+        DataApprovalLevel d2 = dataApprovalLevels.get( index );
+        DataApprovalLevel d1  = dataApprovalLevels.get( index + 1 );
+
+        dataApprovalLevels.set( index, d1 );
+        dataApprovalLevels.set( index + 1, d2 );
+
+        update( d1, index );
+        update( d2, index + 1 );
+    }
+
+    /**
+     * Updates a data approval level object by setting the level to
+     * correspond with the list index, setting the updated date to now,
+     * and updating the object on disk.
+     *
+     * @param dataApprovalLevel data approval level to update
+     * @param index index of the object (used to set the level.)
+     */
+    private void update( DataApprovalLevel dataApprovalLevel, int index )
+    {
+        dataApprovalLevel.setLevel( index + 1 );
+
+        dataApprovalLevel.setCreated( new Date() );
+
+        dataApprovalLevelStore.updateDataApprovalLevel( dataApprovalLevel );
+    }
+
+    /**
+     * Updates all the approvals in the list, starting with a given index
+     * and ending at the end of the list.
+     *
+     * @param dataApprovalLevels list of all data approvals.
+     * @param index index from which to start updating.
+     */
+    private void updateFromIndexToEnd( List<DataApprovalLevel> dataApprovalLevels, int index )
+    {
+        for (int i = index; i < dataApprovalLevels.size(); i++ )
+        {
+            update( dataApprovalLevels.get( i ), i );
+        }
+    }
+
+    /**
+     * Finds the right index at which to insert a new data approval level.
+     * Returns -1 if the new data approval level is a duplicate.
+     *
+     * @param dataApprovalLevels list of all levels.
+     * @param newLevel new level to find the insertion point for.
+     * @return index where the new approval level should be inserted,
+     * or -1 if the new level is a duplicate.
+     */
+    private int getInsertIndex( List<DataApprovalLevel> dataApprovalLevels, DataApprovalLevel newLevel )
+    {
         int i = dataApprovalLevels.size() - 1;
 
         while ( i >= 0 )
@@ -194,67 +271,17 @@ public class DefaultDataApprovalLevelService
             {
                 if ( newLevel.getCategoryOptionGroupSet() == test.getCategoryOptionGroupSet() )
                 {
-                    return false; // Attempt to insert a duplicate approval level.
+                    return -1;
                 }
 
                 if ( test.getCategoryOptionGroupSet() == null )
                 {
                     break;
                 }
-
             }
 
             i--;
         }
-
-        dataApprovalLevels.add( i  + 1, newLevel );
-
-        return true;
-    }
-
-    public void remove( int level )
-    {
-        List<DataApprovalLevel> dataApprovalLevels = getAllDataApprovalLevels();
-
-        int index = level - 1;
-
-        if ( index >= 0 & index < dataApprovalLevels.size() )
-        {
-            dataApprovalLevels.remove( index );
-
-            save( dataApprovalLevels );
-        }
-    }
-
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-
-    /**
-     * Tag each data approval level with the current timestamp,
-     * re-number the levels, and save all of them. Also copy them
-     * to another List, so Hibernate doesn't get upset about changing
-     * the level numbers.
-     *
-     * @param dataApprovalLevels The list of data approval levels to save.
-     */
-    private void save( List<DataApprovalLevel> dataApprovalLevels )
-    {
-        List<DataApprovalLevel> copy = new ArrayList<DataApprovalLevel>();
-
-        Date now = new Date();
-
-        int level = 1;
-
-        for ( DataApprovalLevel old : dataApprovalLevels )
-        {
-            DataApprovalLevel d = new DataApprovalLevel( level++,
-                    old.getOrganisationUnitLevel(),
-                    old.getCategoryOptionGroupSet(), now );
-
-            copy.add( d );
-        }
-
-        dataApprovalLevelStore.updateAllDataApprovalLevels( copy );
+        return i + 1;
     }
 }

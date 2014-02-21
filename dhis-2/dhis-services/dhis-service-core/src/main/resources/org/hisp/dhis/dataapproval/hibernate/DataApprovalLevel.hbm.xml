@@ -7,7 +7,9 @@
 <hibernate-mapping>
   <class name="org.hisp.dhis.dataapproval.DataApprovalLevel" table="dataapprovallevel">
 
-    <id name="level" column="level" />
+    <id name="id" column="dataapprovallevelid" />
+
+    <property name="level" column="level" not-null="true" unique="true" />
 
     <properties name="dataapprovallevel_orgunitlevel_categoryoptiongroupset_unique_key" unique="true">
       <many-to-one name="organisationUnitLevel" class="org.hisp.dhis.organisationunit.OrganisationUnitLevel" not-null="true" column="organisationunitlevelid" foreign-key="fk_dataapprovallevel_organisationunitlevelid" />
@@ -15,6 +17,8 @@
     </properties>
 
     <property name="created" column="created" not-null="true" type="timestamp" />
+
+    <property name="updated" column="updated" type="timestamp" />
 
     </class>
 </hibernate-mapping>

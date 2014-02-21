@@ -44,6 +44,10 @@ public interface DataApprovalLevelStore
 {
     String ID = DataApprovalLevelStore.class.getName();
 
+    // -------------------------------------------------------------------------
+    // Basic DataApprovalLevel
+    // -------------------------------------------------------------------------
+
     /**
      * Gets a list of all data approval levels.
      *
@@ -52,9 +56,23 @@ public interface DataApprovalLevelStore
     List<DataApprovalLevel> getAllDataApprovalLevels();
 
     /**
-     * Updates the list of data approval levels.
+     * Adds a data approval level.
      *
-     * @param dataApprovalLevels All data approval levels as they should be.
+     * @param dataApprovalLevel the DataApprovalLevel to add.
      */
-    void updateAllDataApprovalLevels( List<DataApprovalLevel> dataApprovalLevels );
+    void addDataApproval( DataApprovalLevel dataApprovalLevel );
+
+    /**
+     * Updates a data approval level.
+     *
+     * @param dataApprovalLevel The DataApprovalLevel to update.
+     */
+    void updateDataApprovalLevel( DataApprovalLevel dataApprovalLevel );
+
+    /**
+     * Deletes a data approval level.
+     *
+     * @param dataApprovalLevel the DataApprovalLevel to delete.
+     */
+    void deleteDataApprovalLevel( DataApprovalLevel dataApprovalLevel );
 }

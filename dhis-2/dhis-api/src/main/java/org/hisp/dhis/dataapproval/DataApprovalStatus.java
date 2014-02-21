@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataapproval.hibernate;
+package org.hisp.dhis.dataapproval;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,56 +28,63 @@ package org.hisp.dhis.dataapproval.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hibernate.criterion.Order;
-import org.hisp.dhis.dataapproval.DataApprovalLevel;
-import org.hisp.dhis.dataapproval.DataApprovalLevelStore;
-import org.hisp.dhis.hibernate.HibernateGenericStore;
-import org.hisp.dhis.period.PeriodService;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-
 /**
+ * Current status of data approval for a given selection of data from a
+ * data set. Returns the approval state and, if approved for this particular
+ * selection, the approval object.
+ *
  * @author Jim Grace
  * @version $Id$
  */
-@Transactional
-public class HibernateDataApprovalLevelStore
-        extends HibernateGenericStore<DataApprovalLevel>
-        implements DataApprovalLevelStore
+
+public class DataApprovalStatus
 {
+    /**
+     * State of data approval for a given selection of data from a data set.
+     */
+    private DataApprovalState dataApprovalState;
+
+    /**
+     * Data approval object (if any) for a given selection of data from a
+     * data set.
+     */
+    private DataApproval dataApproval;
+
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Constructors
     // -------------------------------------------------------------------------
 
-    private DataApprovalLevelStore dataApprovalLevelStore;
-
-    public void setDataApprovalLevelStore( DataApprovalLevelStore dataApprovalLevelStore )
+    public DataApprovalStatus()
     {
-        this.dataApprovalLevelStore = dataApprovalLevelStore;
+    }
+
+    public DataApprovalStatus( DataApprovalState dataApprovalState, DataApproval dataApproval )
+    {
+        this.dataApprovalState = dataApprovalState;
+        this.dataApproval = dataApproval;
     }
 
     // -------------------------------------------------------------------------
-    // DataApprovalLevel
+    // Getters and setters
     // -------------------------------------------------------------------------
 
-    public List<DataApprovalLevel> getAllDataApprovalLevels()
+    public DataApprovalState getDataApprovalState()
     {
-        return getCriteria().addOrder( Order.asc( "level" ) ).list();
+        return dataApprovalState;
     }
 
-    public void addDataApproval( DataApprovalLevel dataApprovalLevel )
+    public void setDataApprovalState( DataApprovalState dataApprovalState )
     {
-        save( dataApprovalLevel );
+        this.dataApprovalState = dataApprovalState;
     }
 
-    public void updateDataApprovalLevel( DataApprovalLevel dataApprovalLevel )
+    public DataApproval getDataApproval()
     {
-        update( dataApprovalLevel );
+        return dataApproval;
     }
 
-    public void deleteDataApprovalLevel( DataApprovalLevel dataApprovalLevel )
+    public void setDataApproval( DataApproval dataApproval )
     {
-        delete( dataApprovalLevel );
+        this.dataApproval = dataApproval;
     }
 }

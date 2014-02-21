@@ -29,15 +29,16 @@ package org.hisp.dhis.dataapproval;
  */
 
 import org.apache.commons.collections.CollectionUtils;
-import org.hisp.dhis.dataelement.CategoryOptionGroup;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.dataelement.*;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
 
 /**
  * @author Jim Grace
@@ -70,12 +71,19 @@ public class DefaultDataApprovalService
     {
         this.currentUserService = currentUserService;
     }
-    
+
     private DataElementCategoryService categoryService;
 
     public void setCategoryService( DataElementCategoryService categoryService )
     {
         this.categoryService = categoryService;
+    }
+
+    private PeriodService periodService;
+
+    public void setPeriodService( PeriodService periodService )
+    {
+        this.periodService = periodService;
     }
 
     // -------------------------------------------------------------------------
@@ -102,76 +110,30 @@ public class DefaultDataApprovalService
         }
     }
 
-    public DataApproval getDataApproval( DataSet dataSet, Period period, OrganisationUnit organisationUnit, CategoryOptionGroup categoryOptionGroup )
+    public DataApprovalStatus getDataApprovalStatus( DataSet dataSet, Period period, OrganisationUnit organisationUnit, CategoryOptionGroup categoryOptionGroup )
     {
-        return dataApprovalStore.getDataApproval( dataSet, period, organisationUnit, categoryOptionGroup );
+        return getDataApprovalStatus( dataSet, period, organisationUnit, categoryOptionGroup, null );
     }
 
-    public DataApprovalState getDataApprovalState( DataSet dataSet, Period period, OrganisationUnit organisationUnit, CategoryOptionGroup categoryOptionGroup )
+    public DataApprovalStatus getDataApprovalStatus( DataSet dataSet, Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
     {
-        if ( !dataSet.isApproveData() || !period.getPeriodType().equals( dataSet.getPeriodType() ) )
-        {
-            return DataApprovalState.APPROVAL_NOT_NEEDED;
-        }
-
-        if ( null != dataApprovalStore.getDataApproval( dataSet, period, organisationUnit, categoryOptionGroup ) )
-        {
-            return DataApprovalState.APPROVED;
-        }
-
-        boolean approvedAtLowerLevels = false; // Until proven otherwise
-
-        for ( OrganisationUnit child : organisationUnit.getChildren() )
-        {
-            switch ( getDataApprovalState( dataSet, period, child, categoryOptionGroup ) )
-            {
-                // -------------------------------------------------------------
-                // If ready or waiting at a lower level, return
-                // WAITING_FOR_LOWER_LEVEL_APPROVAL at this level.
-                // -------------------------------------------------------------
-            
-                case READY_FOR_APPROVAL:
-                case WAITING_FOR_LOWER_LEVEL_APPROVAL:
-                    return DataApprovalState.WAITING_FOR_LOWER_LEVEL_APPROVAL;
-
-                case APPROVED:
-                    approvedAtLowerLevels = true;
-                    break;
-
-                case APPROVAL_NOT_NEEDED:
-                    break; // Do nothing.
-                    
-                default:
-                    break; // Do nothing.
-            }
-        }
-
-        // ---------------------------------------------------------------------
-        // If approved at lower levels (and not ready or waiting at any),
-        // and/or if data is configured for entry at this level (whether or
-        // not it has been entered), return READY_FOR_APPROVAL.
-        // ---------------------------------------------------------------------
-        
-        if ( approvedAtLowerLevels || organisationUnit.getAllDataSets().contains ( dataSet ) )
-        {
-            return DataApprovalState.READY_FOR_APPROVAL;
-        }
-
-        // ---------------------------------------------------------------------
-        // Finally, if we haven't seen any approval action at lower levels,
-        // and this level is not configured for data entry from this data set,
-        // then return APPROVAL_NOT_NEEDED.
-        // ---------------------------------------------------------------------
-        
-        return DataApprovalState.APPROVAL_NOT_NEEDED;
+        return getDataApprovalStatus( dataSet, period, organisationUnit, null, attributeOptionCombo.getCategoryOptions() );
     }
 
-    public DataApprovalState getDataApprovalState( DataSet dataSet, Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
+    public DataApprovalStatus getDataApprovalStatus( DataSet dataSet, Period period,
+                                                     OrganisationUnit organisationUnit,
+                                                     CategoryOptionGroup categoryOptionGroup,
+                                                     Set<DataElementCategoryOption> dataElementCategoryOptions )
     {
-        return null; //TODO: write logic.
+        DataApprovalSelection dataApprovalSelection = new DataApprovalSelection( dataSet, period, organisationUnit,
+                categoryOptionGroup, dataElementCategoryOptions,
+                dataApprovalStore, dataApprovalLevelService,
+                categoryService, periodService);
+
+        return dataApprovalSelection.getDataApprovalStatus();
     }
 
-        public boolean mayApprove( OrganisationUnit organisationUnit )
+    public boolean mayApprove( OrganisationUnit organisationUnit )
     {
         User user = currentUserService.getCurrentUser();
         

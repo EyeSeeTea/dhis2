@@ -46,6 +46,11 @@ public class DataApprovalLevel
     private static final long serialVersionUID = -8424400562969386167L;
 
     /**
+     * Identifies the data approval level instance.
+     */
+    private int id;
+
+    /**
      * The data approval level, 1=highest level, max=lowest level.
      */
     private int level;
@@ -65,6 +70,11 @@ public class DataApprovalLevel
      */
     private Date created;
 
+    /**
+     * The Date (including time) when the data approval level was last updated.
+     */
+    private Date updated;
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -74,12 +84,14 @@ public class DataApprovalLevel
     }
 
     public DataApprovalLevel( int level, OrganisationUnitLevel organisationUnitLevel,
-                              CategoryOptionGroupSet categoryOptionGroupSet, Date created )
+                              CategoryOptionGroupSet categoryOptionGroupSet,
+                              Date created, Date updated )
     {
         this.level = level;
         this.organisationUnitLevel = organisationUnitLevel;
         this.categoryOptionGroupSet = categoryOptionGroupSet;
         this.created = created;
+        this.updated = updated;
     }
 
     // -------------------------------------------------------------------------
@@ -112,10 +124,19 @@ public class DataApprovalLevel
         return categoryOptionGroupSetName;
     }
 
-
     // -------------------------------------------------------------------------
     // Getters and Setters
     // -------------------------------------------------------------------------
+
+    public int getId()
+    {
+        return id;
+    }
+
+    public void setId( int id )
+    {
+        this.id = id;
+    }
 
     public int getLevel()
     {
@@ -155,5 +176,15 @@ public class DataApprovalLevel
     public void setCreated( Date created )
     {
         this.created = created;
+    }
+
+    public Date getUpdated()
+    {
+        return updated;
+    }
+
+    public void setUpdated( Date updated )
+    {
+        this.updated = updated;
     }
 }

@@ -469,10 +469,10 @@ public class DefaultDataSetService
         {
             return true;
         }
+
+        DataApprovalState dataApprovalState = dataApprovalService.getDataApprovalStatus( dataSet, period, organisationUnit, attributeOptionCombo );
         
-        boolean approved = DataApprovalState.APPROVED == dataApprovalService.getDataApprovalState( dataSet, period, organisationUnit, attributeOptionCombo );
-        
-        return approved;
+        return dataApprovalState.isApproved();
     }
 
     @Override
