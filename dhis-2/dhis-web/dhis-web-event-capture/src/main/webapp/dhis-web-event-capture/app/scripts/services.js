@@ -33,6 +33,15 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
                 });
             }
             return programsPromise;    
+        },
+        
+        getEventProgramsByOrgUnit: function(orgUnit, type){
+                       
+            var promise = $http.get( dhis2Url + '/api/programs.json?orgUnit=' + orgUnit + '&type=' + type ).then(function(response){
+                programs = response.data;
+                return programs;
+            });            
+            return promise;
         }
     };
 })
@@ -63,7 +72,7 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
 })
 
 /* factory for loading logged in user profiles from DHIS2 */
-.factory('CurrentUserProfile', function($http, storage) { 
+.factory('CurrentUserProfile', function($http, storage, TrackerApp) { 
     
     var dhis2Url = storage.get('CONFIG').activities.dhis.href;      
            
@@ -580,9 +589,23 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
             });
             return promise;            
         },
+        
+        delete: function(dhis2Event){
+           var promise = $http.delete(dhis2Url + '/api/events/' + dhis2Event.event).then(function(response){
+                return response.data;
+            });
+            return promise;           
+        },
     
         update: function(dhis2Event){            
             var promise = $http.put(dhis2Url + '/api/events/' + dhis2Event.event, dhis2Event).then(function(response){
+                return response.data;
+            });
+            return promise;
+        },
+        
+        updateSingleValue: function(dhis2Event){            
+            var promise = $http.put(dhis2Url + '/api/events/' + dhis2Event.event + '/' + dhis2Event.dataValues[0].dataElement, dhis2Event ).then(function(response){
                 return response.data;
             });
             return promise;
@@ -621,6 +644,12 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
             
             return configurationPromise; 
         }
+        
+        /*getConfiguration: function(){
+            return this.loadConfiguration().then(function(appConfiguration){
+                return appConfiguration;
+            });
+        }*/
     };
 })
 

@@ -7,14 +7,15 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
 .controller('MainController',
         function($scope,
                 CurrentUserProfile,
-                OrgUnitFactory,
                 ProgramFactory,
                 ProgramStageFactory,
                 DHIS2EventFactory,
                 Paginator,
                 ContextMenuSelectedItem,
                 ModalService,
+                DialogService,                
                 orderByFilter,
+                $filter,
                 $translate) {   
     
     //Get current locale            
@@ -22,81 +23,66 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         $translate.uses(profile.settings.keyUiLocale);
     });    
     
+    //Paging
     $scope.rowsPerPage = 50;
     $scope.currentPage = Paginator.getPage() + 1;
     
-    //selections
-    $scope.selectedOrgUnit = {name: 'please_select'};
-    $scope.selectedProgram = '';
-    $scope.selectedProgramStage = '';
-    $scope.programStageDataElements = [];
-    $scope.dhis2Events = [];
+    //Filtering
+    $scope.reverse = false;
+    $scope.filterText = {}; 
+    
+    //Editing
     $scope.eventRegistration = false;
     $scope.editGridColumns = false;
+    $scope.editingEventInFull = false;
+    $scope.editingEventInGrid = false;   
+    
+    $scope.programStageDataElements = [];
+    $scope.dhis2Events = [];    
+    
     $scope.eventGridColumns = [];
+    $scope.hiddenGridColumns = 0;
     $scope.newDhis2Event = {dataValues: []};
     $scope.currentEvent = {dataValues: []};
-    $scope.currentEventOrginialValue = '';
-    
-    $scope.editingEventInFull = false;
-    $scope.editingEventInGrid = false;
-    
-    $scope.sortHeader = '';
-    $scope.reverse = false;
-    $scope.gridFilter = '';
-    
-   
-    //Get orgunits for the logged in user
-    OrgUnitFactory.getMine().then(function(orgUnits) {
-        $scope.orgUnits = orgUnits;
+    $scope.currentEventOrginialValue = '';     
+  
+       
+    $scope.$watch('selectedOrgUnit', function(newObj, oldObj) {
         
-        //expand root orgunit (the expansion is only if we have one root)
-        if($scope.orgUnits.length === 1 ){
-            $scope.orgUnits[0].show = true;
-        }
+        if( angular.isObject($scope.selectedOrgUnit)){            
+            $scope.loadPrograms($scope.selectedOrgUnit);            
+        }        
     });
     
-    //controll expand/collapse of orgunit tree
-    $scope.expandCollapse = function(orgUnit) {
-
-        if( !angular.isUndefined( orgUnit.hasChildren ) ){
-            
-            //Get children for the selected orgUnit
-            OrgUnitFactory.get(orgUnit.id).then(function(data) {
-                orgUnit.show = !orgUnit.show;  
-                delete orgUnit.hasChildren;
-                orgUnit.children = data.children;                   
-            });           
-        }
-        else{
-            orgUnit.show = !orgUnit.show;   
-        }        
-    };
-    
     //load programs of type=3 for the selected orgunit
-    $scope.loadPrograms = function(orgUnit){            
+    $scope.loadPrograms = function(orgUnit){     
+        
         $scope.selectedOrgUnit = orgUnit;
         $scope.selectedProgram = null;
         $scope.selectedProgramStage = null;
+        $scope.eventGridColumns = [];
         $scope.dhis2Events = [];
         $scope.newDhis2Event = {dataValues: []};
         if (angular.isObject($scope.selectedOrgUnit)) {   
 
             $scope.programs = [];
-            ProgramFactory.getMine(3).then(function(data) {
-                angular.forEach(data.organisationUnits, function(ou) {
-                    if (ou.id === $scope.selectedOrgUnit.id) {
-                        angular.forEach(ou.programs, function(p) {
-                            $scope.programs.push(p);                                                   
-                        });                        
-                    }
-                });
-            });            
+            
+            ProgramFactory.getEventProgramsByOrgUnit($scope.selectedOrgUnit.id,3).then(function(data) {
+                $scope.programs = data.programs;               
+                
+                if( !angular.isUndefined($scope.programs)){                    
+                    if($scope.programs.length === 1){
+                        $scope.pr = $scope.programs[0];
+                        $scope.loadEvents($scope.pr);
+                    }                    
+                }                               
+            });
         }
     };    
     
     //fetch contents of selected program from server - with full details
     $scope.loadEvents = function(program){
+
         ProgramFactory.get(program.id).then(function(data){
             $scope.selectedProgram = data;
             
@@ -128,13 +114,15 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                                    }
                                    $scope.dhis2Events[i][dataValue.dataElement] = dataValue.value; 
                                }                                
-                            });                           
+                            });  
+                            
+                            delete $scope.dhis2Events[i].dataValues;
                        }
                        else{//event is empty, remove from display list
                            var index = $scope.dhis2Events.indexOf($scope.dhis2Events[i]);                           
                            $scope.dhis2Events.splice(index,1);
                            i--;                           
-                       }                                              
+                       }
                    }
                    
                    //generate grid headers using program stage data elements
@@ -156,24 +144,34 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     };
     
     $scope.sortEventGrid = function(gridHeader){
+        
         if ($scope.sortHeader === gridHeader.id){
             $scope.reverse = !$scope.reverse;
             return;
-        }
-        
+        }        
         $scope.sortHeader = gridHeader.id;
         $scope.reverse = false;    
     };
     
-    $scope.showHideColumns = function(showAllColumns){
+    $scope.showHideColumns = function(gridColumn, showAllColumns){
         if(showAllColumns){
             angular.forEach($scope.eventGridColumns, function(gridHeader){
-                gridHeader.hide = false;
+                gridHeader.hide = false;                
             });
+            $scope.hiddenGridColumns = 0;
         }
-        else{
-            $scope.editGridColumns = !$scope.editGridColumns;
-        }        
+        if(!showAllColumns){            
+            if(gridColumn.hide){
+                $scope.hiddenGridColumns++;
+            }
+            else{
+                $scope.hiddenGridColumns--;
+            }
+        }      
+    };
+    
+    $scope.searchInGrid = function(gridColumn){        
+        $scope.filteringGrid = gridColumn;    
     };
     
     $scope.showEventList = function(){
@@ -183,13 +181,15 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         
         $scope.outerForm.$valid = true;
         
-        $scope.currentEvent = '';
+        $scope.currentEvent = {};
     };
     
     $scope.showEventRegistration = function(){
         $scope.eventRegistration = !$scope.eventRegistration;  
-        $scope.currentEvent = $scope.newDhis2Event;
-        $scope.outerForm.$valid = true;
+        $scope.currentEvent = $scope.newDhis2Event;        
+        $scope.outerForm.submitted = false;
+        
+        $scope.currentEvent = {};
     };    
     
     $scope.showEditEventInGrid = function(){
@@ -200,56 +200,99 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     };
     
     $scope.showEditEventInFull = function(){      
-        $scope.currentEvent = ContextMenuSelectedItem.getSelectedItem();        
+        $scope.currentEvent = ContextMenuSelectedItem.getSelectedItem();  
+        $scope.currentEventOrginialValue = angular.copy($scope.currentEvent);
         $scope.editingEventInFull = !$scope.editingEventInFull;   
         $scope.eventRegistration = false;
-        $scope.outerForm.$valid = true;
         
-        if($scope.currentEvent.dataValues.length !== $scope.selectedProgramStage.programStageDataElements.length){
-            angular.forEach($scope.selectedProgramStage.programStageDataElements, function(prStDe){
-                if(!$scope.currentEvent.hasOwnProperty(prStDe.dataElement.id)){
-                    $scope.currentEvent[prStDe.dataElement.id] = '';
+        angular.forEach($scope.selectedProgramStage.programStageDataElements, function(prStDe){
+            if(!$scope.currentEvent.hasOwnProperty(prStDe.dataElement.id)){
+                $scope.currentEvent[prStDe.dataElement.id] = '';
+            }
+        });
+    };
+    
+    $scope.addEvent = function(addingAnotherEvent){                
+        
+        //check for form validity
+        $scope.outerForm.submitted = true;        
+        if( $scope.outerForm.$invalid ){
+            console.log('the form is invalid');
+            return false;
+        }
+        
+        //the form is valid, get the values
+        var dataValues = [];        
+        for(var dataElement in $scope.programStageDataElements){
+            dataValues.push({dataElement: dataElement, value: $scope.currentEvent[dataElement]});
+        }
+        
+        var newEvent = angular.copy($scope.currentEvent);
+        
+        //prepare the event to be created
+        var dhis2Event = {program: $scope.selectedProgram.id,
+            programStage: $scope.selectedProgramStage.id,
+            orgUnit: $scope.selectedOrgUnit.id,
+            status: 'ACTIVE',            
+            eventDate: $filter('date')(new Date(), 'yyyy-MM-dd'),
+            dataValues: dataValues
+        };      
+        
+        //send the new event to server
+        DHIS2EventFactory.create(dhis2Event).then(function(data) {
+            if (data.importSummaries[0].status == 'ERROR') {
+                var dialogOptions = {
+                    headerText: 'event_registration_error',
+                    bodyText: data.importSummaries[0].description
+                };
+
+                DialogService.showDialog({}, dialogOptions);
+            }
+            else {
+                
+                //add the new event to the grid                
+                newEvent.event = data.importSummaries[0].reference;
+                $scope.dhis2Events.splice(0,0,newEvent);
+                
+                //decide whether to stay in the current screen or not.
+                if(!addingAnotherEvent){
+                    $scope.eventRegistration = false;
+                    $scope.editingEventInFull = false;
+                    $scope.editingEventInGrid = false;                    
                 }
-            });
+                $scope.currentEvent = {};
+            }
+        });        
+    }; 
+   
+    
+    $scope.updateEventDataValue = function(currentEvent, dataElement){       
+       
+        var newValue = currentEvent[dataElement];
+        var oldValue = $scope.currentEventOrginialValue[dataElement];
+        
+        if( newValue !== oldValue ){                     
+            
+            var dhis2Event = {event: currentEvent.event, dataValues: [{value: newValue, dataElement: dataElement}]};
+            
+            DHIS2EventFactory.updateSingleValue(dhis2Event).then(function(data){
+                
+                var continueLoop = true;
+                for(var i=0; i< $scope.dhis2Events.length && continueLoop; i++){
+                    if($scope.dhis2Events[i].event === currentEvent.event ){
+                        $scope.dhis2Events[i] = currentEvent;
+                        continueLoop = false;
+                    }
+                }
+                
+                //update original value
+                $scope.currentEventOrginialValue = angular.copy(currentEvent);                
+            });            
         }
     };
     
-    $scope.addEvent = function(){        
-        $scope.eventRegistration = false;
-        $scope.editingEventInFull = false;
-        $scope.editingEventInGrid = false;
-        
-        $scope.outerForm.submitted = true;
-        
-        if($scope.outerForm.$invalid ){
-            console.log('the form is invalid');
-            return false;
-        }
-        
-        console.log('the event to be added is:  ', $scope.currentEvent);
-        $scope.currentEvent = '';
-    };       
-    
-    $scope.updateEvent = function(){
-        
-        console.log('the form is:  ', $scope.outerForm);
-        //validate form        
-        $scope.outerForm.submitted = true;
-        
-        if($scope.outerForm.$invalid ){
-            console.log('the form is invalid');
-            return false;
-        }
-        
-        $scope.eventRegistration = false;
-        $scope.editingEventInFull = false;
-        $scope.editingEventInGrid = false;                
-        
-        console.log('the event to be updated is:  ', $scope.currentEvent);
-        $scope.currentEvent = '';
-    };    
-    
     $scope.removeEvent = function(){
+        
         var dhis2Event = ContextMenuSelectedItem.getSelectedItem();
         
         var modalOptions = {
@@ -260,7 +303,20 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         };
 
         ModalService.showModal({}, modalOptions).then(function(result){
-            console.log('The event to be deleted is:  ', dhis2Event);
+            
+            DHIS2EventFactory.delete(dhis2Event).then(function(data){
+                
+                var continueLoop = true, index = -1;
+                for(var i=0; i< $scope.dhis2Events.length && continueLoop; i++){
+                    if($scope.dhis2Events[i].event === dhis2Event.event ){
+                        $scope.dhis2Events[i] = dhis2Event;
+                        continueLoop = false;
+                        index = i;
+                    }
+                }
+                $scope.dhis2Events.splice(index,1);                
+                $scope.currentEvent = {};             
+            });
         });        
     };
     
@@ -274,7 +330,8 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     
     $scope.generateReport = function(){
         console.log('I need to generate the report....');  
-    };     
+    };   
+    
 })
 
 //Controller for the main page
