@@ -189,16 +189,11 @@ public class DataApprovalServiceTest
 
         categoryOptionGroup = null;
 
-        System.out.println( "\n***** OrganisationUnitLevels: " + organisationUnitService.getOrganisationUnitLevels().size() );
-
         List<DataApprovalLevel> ds = new ArrayList<DataApprovalLevel>();
 
         for ( OrganisationUnitLevel level : organisationUnitService.getOrganisationUnitLevels() )
         {
-            System.out.println( "+++ Adding level " + level.getLevel() );
-            DataApprovalLevel d = new DataApprovalLevel( 0, level, null, new Date(), null );
-            ds.add( d );
-            dataApprovalLevelService.add( d );
+            dataApprovalLevelService.add( new DataApprovalLevel( 0, level, null, new Date(), null ) );
         }
     }
 
@@ -209,8 +204,6 @@ public class DataApprovalServiceTest
     @Test
     public void testAddAndGetDataApproval() throws Exception
     {
-        System.out.println( "\n----------------------- Starting testAddAndGetDataApproval()");
-
         Date date = new Date();
         DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, organisationUnitA, categoryOptionGroup, date, userA );
         DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, organisationUnitB, categoryOptionGroup, date, userA );
@@ -277,8 +270,6 @@ public class DataApprovalServiceTest
     @Test
     public void testAddDuplicateDataApproval() throws Exception
     {
-        System.out.println( "\n----------------------- Starting testAddDuplicateDataApproval()");
-
         Date date = new Date();
         DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, organisationUnitA, categoryOptionGroup, date, userA );
         DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, organisationUnitA, categoryOptionGroup, date, userA );
@@ -299,8 +290,6 @@ public class DataApprovalServiceTest
     @Test
     public void testDeleteDataApproval() throws Exception
     {
-        System.out.println( "\n----------------------- Starting testDeleteDataApproval()");
-
         Date date = new Date();
         DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, organisationUnitA, categoryOptionGroup, date, userA );
         DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, organisationUnitB, categoryOptionGroup, date, userB );
@@ -339,8 +328,6 @@ public class DataApprovalServiceTest
     @Test
     public void testGetDataApprovalState() throws Exception
     {
-        System.out.println( "\n----------------------- Starting testGetDataApprovalState()");
-
         // Not enabled.
         assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitA, categoryOptionGroup ).getDataApprovalState() );
         assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, categoryOptionGroup ).getDataApprovalState() );
@@ -422,8 +409,6 @@ public class DataApprovalServiceTest
     @Test
     public void testGetDataApprovalStateWithMultipleChildren() throws Exception
     {
-        System.out.println( "\n----------------------- Starting testGetDataApprovalStateWithMultipleChildren()");
-
         dataSetA.setApproveData( true );
 
         organisationUnitD.addDataSet( dataSetA );
@@ -473,8 +458,6 @@ public class DataApprovalServiceTest
     @Test
     public void testGetDataApprovalStateOtherPeriodTypes() throws Exception
     {
-        System.out.println( "\n----------------------- Starting testGetDataApprovalStateOtherPeriodTypes()");
-
         dataSetA.setApproveData( true );
 
         organisationUnitA.addDataSet( dataSetA );
@@ -491,8 +474,6 @@ public class DataApprovalServiceTest
     @Test
     public void testMayApprove() throws Exception
     {
-        System.out.println( "\n----------------------- Starting testMayApprove()");
-
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitC );
         createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE );
@@ -506,8 +487,6 @@ public class DataApprovalServiceTest
     @Test
     public void testMayApproveLowerLevels() throws Exception
     {
-        System.out.println( "\n----------------------- Starting testMayApproveLowerLevels()");
-
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitB );
         createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
@@ -521,8 +500,6 @@ public class DataApprovalServiceTest
     @Test
     public void testMayApproveSameAndLowerLevels() throws Exception
     {
-        System.out.println( "\n----------------------- Starting testMayApproveSameAndLowerLevels()");
-
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitB );
         createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
@@ -536,8 +513,6 @@ public class DataApprovalServiceTest
     @Test
     public void testMayApproveNoAuthority() throws Exception
     {
-        System.out.println( "\n----------------------- Starting testMayApproveNoAuthority()");
-
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitC );
         createUserAndInjectSecurityContext( units, false );
@@ -551,8 +526,6 @@ public class DataApprovalServiceTest
     @Test
     public void testMayUnapprove() throws Exception
     {
-        System.out.println( "\n----------------------- Starting testMayUnapprove()");
-
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitB );
         createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE );
@@ -590,8 +563,6 @@ public class DataApprovalServiceTest
     @Test
     public void testMayUnapproveLowerLevels() throws Exception
     {
-        System.out.println( "\n----------------------- Starting testMayUnapproveLowerLevels()");
-
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitB );
         createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
@@ -628,8 +599,6 @@ public class DataApprovalServiceTest
     @Test
     public void testMayUnapproveSameAndLowerLevels() throws Exception
     {
-        System.out.println( "\n----------------------- Starting testMayUnapproveSameAndLowerLevels()");
-
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitB );
         createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE );
@@ -667,8 +636,6 @@ public class DataApprovalServiceTest
     @Test
     public void testMayUnapproveNoAuthority() throws Exception
     {
-        System.out.println( "\n----------------------- Starting testMayUnapproveNoAuthority()");
-
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitB );
         createUserAndInjectSecurityContext( units, false );

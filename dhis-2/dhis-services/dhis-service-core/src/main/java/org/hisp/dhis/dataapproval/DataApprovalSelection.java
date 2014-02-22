@@ -101,6 +101,8 @@ class DataApprovalSelection
 
     private DataApproval dataApproval = null;
 
+    private static final boolean LOG = false;
+    
     // -------------------------------------------------------------------------
     // Preconstructed Status object
     // -------------------------------------------------------------------------
@@ -132,21 +134,13 @@ class DataApprovalSelection
         this.periodService = periodService;
     }
 
-    private String getInput()
-    {
-        return "getDataApprovalStatus( " + dataSet.getName() + ", " + period.getPeriodType().getName() + ":" + period.getShortName()
-                + ", " + organisationUnit.getName() + " (level " + organisationUnit.getLevel() + "), "
-                + ( categoryOptionGroup == null ? "null" : categoryOptionGroup.getName() ) + ", "
-                + ( dataElementCategoryOptions == null ? "null" : ( "[" + dataElementCategoryOptions.size() + "]" ) ) + " )";
-    }
-
     DataApprovalStatus getDataApprovalStatus()
     {
-        System.out.println( getInput() + " starting." );
+        if (LOG) log( logSelection() + " starting." );
 
         if ( !dataSet.isApproveData() )
         {
-            System.out.println( "\n" + getInput() + " returning UNAPPROVABLE (dataSet not marked for approval)" );
+            if (LOG) log( "\n" + logSelection() + " returning UNAPPROVABLE (dataSet not marked for approval)" );
             return STATUS_UNAPPROVABLE;
         }
 
@@ -154,7 +148,7 @@ class DataApprovalSelection
 
         if ( matchingApprovalLevels.size() == 0 )
         {
-            System.out.println( getInput() + " returning UNAPPROVABLE (no matching approval levels)" );
+            if (LOG) log( logSelection() + " returning UNAPPROVABLE (no matching approval levels)" );
             return STATUS_UNAPPROVABLE;
         }
 
@@ -168,7 +162,7 @@ class DataApprovalSelection
             }
             else
             {
-                System.out.println( getInput() + " returning UNAPPROVABLE (period type too short)" );
+                if (LOG) log( logSelection() + " returning UNAPPROVABLE (period type too short)" );
                 return STATUS_UNAPPROVABLE;
             }
         }
@@ -183,7 +177,7 @@ class DataApprovalSelection
 
         status.setDataApproval( dataApproval );
 
-        System.out.println( getInput() + " returning " + state.name() );
+        if (LOG) log( logSelection() + " returning " + state.name() );
 
         return status;
     }
@@ -191,6 +185,19 @@ class DataApprovalSelection
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
+
+    private String logSelection()
+    {
+        return "getDataApprovalStatus( " + dataSet.getName() + ", " + period.getPeriodType().getName() + ":" + period.getShortName()
+                + ", " + organisationUnit.getName() + " (level " + organisationUnit.getLevel() + "), "
+                + ( categoryOptionGroup == null ? "null" : categoryOptionGroup.getName() ) + ", "
+                + ( dataElementCategoryOptions == null ? "null" : ( "[" + dataElementCategoryOptions.size() + "]" ) ) + " )";
+    }
+
+    private void log(String s)
+    {
+        System.out.println( s );
+    }
 
     /**
      * Handles the case where the selected period type is longer than the
@@ -256,18 +263,21 @@ class DataApprovalSelection
             {
                 if ( dataElementCategoryOptions == null || dataElementCategoryOptions.size() == 0 )
                 {
-                    System.out.println( "getState() - approved here." );
+                    if (LOG) log( "getState() - approved here." );
+
                     return DataApprovalState.APPROVED_HERE;
                 }
 
-                System.out.println( "getState() - approved for a wider selection of category options." );
+                if (LOG) log( "getState() - approved for a wider selection of category options." );
+
                 return DataApprovalState.APPROVED_ELSEWHERE;
             }
         }
 
         if ( isApprovedAtHigherLevel() )
         {
-            System.out.println( "getState() - isApprovedAtHigherLevel() true." );
+            if (LOG) log( "getState() - isApprovedAtHigherLevel() true." );
+
             return DataApprovalState.APPROVED_ELSEWHERE;
         }
 
@@ -277,22 +287,26 @@ class DataApprovalSelection
         {
             if ( !unapprovedBelow )
             {
-                System.out.println( "getState() - not unapproved below." );
+                if (LOG) log( "getState() - not unapproved below." );
+
                 return DataApprovalState.UNAPPROVED_READY;
             }
 
-            System.out.println( "getState() - waiting." );
+            if (LOG) log( "getState() - waiting." );
+
             return DataApprovalState.UNAPPROVED_WAITING;
         }
 
         if ( dataSetAssignedAtOrBelowLevel )
         {
-            System.out.println( "getState() - waiting for higher-level approval at a higher level for data at or below this level." );
+            if (LOG) log( "getState() - waiting for higher-level approval at a higher level for data at or below this level." );
+
             return DataApprovalState.UNAPPROVED_ELSEWHERE;
         }
 
-        System.out.println( "getState() - unapprovable because not approvable at level or below, and no dataset assignment." );
-            return DataApprovalState.UNAPPROVABLE;
+        if (LOG) log( "getState() - unapprovable because not approvable at level or below, and no dataset assignment." );
+
+        return DataApprovalState.UNAPPROVABLE;
     }
 
     /**
@@ -339,7 +353,8 @@ class DataApprovalSelection
                 }
             }
         }
-        System.out.println( "findMatchingApprovalLevels() " + allDataApprovalLevels.size() + " -> " +  matchingApprovalLevels.size() );
+
+        if (LOG) log( "findMatchingApprovalLevels() " + allDataApprovalLevels.size() + " -> " +  matchingApprovalLevels.size() );
     }
 
     /**
@@ -397,10 +412,11 @@ class DataApprovalSelection
 
     private void findThisLevel()
     {
-        System.out.println( "findThisLevel() - matchingApprovalLevels.size() = " + matchingApprovalLevels.size() );
+        if (LOG) log( "findThisLevel() - matchingApprovalLevels.size() = " + matchingApprovalLevels.size() );
+
         for ( int i = matchingApprovalLevels.size() - 1; i >= 0; i-- )
         {
-            System.out.println( "findThisLevel() - testing index " + i
+            if (LOG) log( "findThisLevel() - testing index " + i
                     + " level org level " + matchingApprovalLevels.get( i ).getOrganisationUnitLevel().getLevel()
                     + " selected org level " + organisationUnit.getLevel() );
 
@@ -412,7 +428,8 @@ class DataApprovalSelection
                 higherIndex = i - 1;
                 lowerIndex = i + 1;
 
-                System.out.println( "findThisLevel() - approvable at " + thisIndex );
+                if (LOG) log( "findThisLevel() - approvable at " + thisIndex );
+
                 return;
             }
             else if ( matchingApprovalLevels.get( i ).getOrganisationUnitLevel().getLevel() < organisationUnit.getLevel() )
@@ -423,7 +440,8 @@ class DataApprovalSelection
                 higherIndex = i;
                 lowerIndex = i + 1;
 
-                System.out.println( "findThisLevel() - level too high at " + thisIndex );
+                if (LOG) log( "findThisLevel() - level too high at " + thisIndex );
+
                 return;
             }
         }
@@ -434,7 +452,7 @@ class DataApprovalSelection
         higherIndex = -1;
         lowerIndex = matchingApprovalLevels.size();
 
-        System.out.println( "findThisLevel() - did not find level " );
+        if (LOG) log( "findThisLevel() - did not find level " );
     }
 
     private boolean isApprovedAtHigherLevel()
@@ -443,7 +461,7 @@ class DataApprovalSelection
 
         for (int i = higherIndex; i >= 0; i-- )
         {
-            System.out.println( "isApprovedAtHigherLevel() i = " + i );
+            if (LOG) log( "isApprovedAtHigherLevel() i = " + i );
 
             int orgLevel = orgUnit.getLevel();
 
@@ -504,7 +522,7 @@ class DataApprovalSelection
      */
     private boolean isUnapprovedBelow ( OrganisationUnit orgUnit )
     {
-        System.out.println( "isUnapprovedBelow( " + orgUnit.getName() + " )" );
+        if (LOG) log( "isUnapprovedBelow( " + orgUnit.getName() + " )" );
 
         if ( dataSetAssignedAtOrBelowLevel == false && orgUnit.getAllDataSets().contains( dataSet ) )
         {
@@ -515,42 +533,42 @@ class DataApprovalSelection
         {
             if ( orgUnit.getLevel() == matchingApprovalLevels.get( lowerIndex ).getLevel() )
             {
-                System.out.println( "isUnapprovedBelow() orgUnit level " + orgUnit.getLevel() + " matches approval level." );
+                if (LOG) log( "isUnapprovedBelow() orgUnit level " + orgUnit.getLevel() + " matches approval level." );
 
                 DataApproval d = getDataApproval( lowerIndex, orgUnit );
 
-                System.out.println( "isUnapprovedBelow() returns " + ( d == null ) + " after looking for approval for this orgUnit." );
+                if (LOG) log( "isUnapprovedBelow() returns " + ( d == null ) + " after looking for approval for this orgUnit." );
 
                 return ( d == null );
             }
         }
         else if ( dataSetAssignedAtOrBelowLevel )
         {
-            System.out.println( "isUnapprovedBelow() returns false." );
+            if (LOG) log( "isUnapprovedBelow() returns false." );
 
             return false;
         }
 
         if ( orgUnit.getChildren() == null || orgUnit.getChildren().size() == 0 )
         {
-            System.out.println( "isUnapprovedBelow() returns false." );
+            if (LOG) log( "isUnapprovedBelow() returns false." );
 
             return false;
         }
 
-        System.out.println( "+++ isUnapprovedBelow( " + orgUnit.getName() + " ) is recursing..." );
+        if (LOG) log( "+++ isUnapprovedBelow( " + orgUnit.getName() + " ) is recursing..." );
 
         for ( OrganisationUnit child : orgUnit.getChildren() )
         {
             if ( isUnapprovedBelow( child ) )
             {
-                System.out.println( "--- isUnapprovedBelow( " + orgUnit.getName() + " ) returns true because unapproved from below." );
+                if (LOG) log( "--- isUnapprovedBelow( " + orgUnit.getName() + " ) returns true because unapproved from below." );
 
                 return true;
             }
         }
 
-        System.out.println( "--- isUnapprovedBelow( " + orgUnit.getName() + " ) returns false after recursing" );
+        if (LOG) log( "--- isUnapprovedBelow( " + orgUnit.getName() + " ) returns false after recursing" );
 
         return false;
     }
