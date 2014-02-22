@@ -40,6 +40,7 @@ import org.hisp.dhis.api.utils.InputUtils;
 import org.hisp.dhis.dataapproval.DataApproval;
 import org.hisp.dhis.dataapproval.DataApprovalService;
 import org.hisp.dhis.dataapproval.DataApprovalState;
+import org.hisp.dhis.dataapproval.DataApprovalStatus;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataset.DataSet;
@@ -130,20 +131,18 @@ public class DataApprovalController
             return;
         }
         
-        DataApprovalState state = dataApprovalService.getDataApprovalState( dataSet, period, organisationUnit, attributeOptionCombo );
+        DataApprovalStatus status = dataApprovalService.getDataApprovalStatus( dataSet, period, organisationUnit, attributeOptionCombo );
 
         boolean mayApprove = dataApprovalService.mayApprove( organisationUnit );
         boolean mayUnapprove = false;
         
-        if ( DataApprovalState.APPROVED.equals( state ) )
+        if ( status.getDataApprovalState() == DataApprovalState.APPROVED_HERE );
         {
-            //TODO: Fix DataApproval approval = dataApprovalService.getDataApproval( dataSet, period, organisationUnit, attributeOptionCombo );
-
-            //TODO: Fix mayUnapprove = dataApprovalService.mayUnapprove( approval );
+            mayUnapprove = dataApprovalService.mayUnapprove( status.getDataApproval() );
         }
         
         Map<String, Object> approvalState = new HashMap<String, Object>();
-        approvalState.put( APPROVAL_STATE, state.toString() );
+        approvalState.put( APPROVAL_STATE, status.getDataApprovalState().toString() );
         approvalState.put( APPROVAL_MAY_APPROVE, mayApprove );
         approvalState.put( APPROVAL_MAY_UNAPPROVE, mayUnapprove );
         
@@ -196,17 +195,19 @@ public class DataApprovalController
             return;
         }
         
-        DataApprovalState state = dataApprovalService.getDataApprovalState( dataSet, period, organisationUnit, attributeOptionCombo );
+        DataApprovalState state = dataApprovalService.getDataApprovalStatus( dataSet, period, organisationUnit, attributeOptionCombo ).getDataApprovalState();
         
-        if ( !DataApprovalState.READY_FOR_APPROVAL.equals( state ) )
+        if ( !DataApprovalState.UNAPPROVED_READY.equals( state ) )
         {
             ContextUtils.conflictResponse( response, "Data is not ready for approval, current state is: " + state );
             return;
         }
 
         User user = currentUserService.getCurrentUser();
-        
-        //TODO: FIX. DataApproval approval = new DataApproval( dataSet, period, organisationUnit, attributeOptionCombo, new Date(), user );
+
+        //TODO: FIX. We need to know what CategoryOptionGroup if any was selected, to use when constructing the data approval object.
+
+        //TODO: FIX. DataApproval approval = new DataApproval( dataSet, period, organisationUnit, attributeOptionGroup, new Date(), user );
 
         //TODO: FIX. dataApprovalService.addDataApproval( approval );
     }

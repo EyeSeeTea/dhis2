@@ -158,14 +158,22 @@ public class DefaultDataApprovalLevelService
             return false;
         }
 
+        System.out.println( "Addding new dataApproval at index " + index );
+
         dataApprovalLevels.add( index, newLevel );
+
+        //
+        // Move down from end to here, to avoid duplicate level in database.
+        //
+        for (int i = dataApprovalLevels.size() - 1; i > index; i-- )
+        {
+            update( dataApprovalLevels.get( i ), i );
+        }
 
         newLevel.setLevel( index + 1 );
         newLevel.setCreated( new Date() );
 
         dataApprovalLevelStore.addDataApproval( newLevel );
-
-        updateFromIndexToEnd( dataApprovalLevels, index + 1 );
 
         return true;
     }
@@ -178,11 +186,17 @@ public class DefaultDataApprovalLevelService
 
         if ( index >= 0 & index < dataApprovalLevels.size() )
         {
-            dataApprovalLevels.remove( index );
-
             dataApprovalLevelStore.deleteDataApprovalLevel( dataApprovalLevels.get( index ) );
 
-            updateFromIndexToEnd( dataApprovalLevels, index );
+            dataApprovalLevels.remove( index );
+
+            //
+            // Move up from here to end, to avoid duplicate level in database.
+            //
+            for (int i = index; i < dataApprovalLevels.size(); i++ )
+            {
+                update( dataApprovalLevels.get( i ), i );
+            }
         }
     }
 
@@ -226,21 +240,6 @@ public class DefaultDataApprovalLevelService
         dataApprovalLevel.setCreated( new Date() );
 
         dataApprovalLevelStore.updateDataApprovalLevel( dataApprovalLevel );
-    }
-
-    /**
-     * Updates all the approvals in the list, starting with a given index
-     * and ending at the end of the list.
-     *
-     * @param dataApprovalLevels list of all data approvals.
-     * @param index index from which to start updating.
-     */
-    private void updateFromIndexToEnd( List<DataApprovalLevel> dataApprovalLevels, int index )
-    {
-        for (int i = index; i < dataApprovalLevels.size(); i++ )
-        {
-            update( dataApprovalLevels.get( i ), i );
-        }
     }
 
     /**

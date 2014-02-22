@@ -400,6 +400,7 @@
 
   <bean id="org.hisp.dhis.dataapproval.DataApprovalService" class="org.hisp.dhis.dataapproval.DefaultDataApprovalService">
     <property name="dataApprovalStore" ref="org.hisp.dhis.dataapproval.DataApprovalStore" />
+    <property name="dataApprovalLevelService" ref="org.hisp.dhis.dataapproval.DataApprovalLevelService" />
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />

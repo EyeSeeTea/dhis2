@@ -67,10 +67,14 @@ public enum DataApprovalState
 
     /**
      * Data is approved, but was not approved here (so cannot be unapproved here.)
-     * This covers the case where data was approved at a higher level. It also
-     * covers the case where the data is selected for a period type that is
-     * longer than the data set period type, and the data was approved for
-     * every constituent data set period.
+     * This covers the following cases:
+     * <ul>
+     * <li>Data is approved at a higher level.</li>
+     * <li>Data is approved for wider scope of category options.</li>
+     * <li>Data is approved for all sub-periods in selected period.</li>
+     * </ul>
+     * In the first two cases, there is a single data approval object
+     * that covers the selection. In the third case there is not.
      */
     APPROVED_ELSEWHERE( true, false, false, false );
 

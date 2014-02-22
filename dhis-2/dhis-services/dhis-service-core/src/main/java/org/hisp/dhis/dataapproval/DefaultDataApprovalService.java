@@ -117,7 +117,8 @@ public class DefaultDataApprovalService
 
     public DataApprovalStatus getDataApprovalStatus( DataSet dataSet, Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
     {
-        return getDataApprovalStatus( dataSet, period, organisationUnit, null, attributeOptionCombo.getCategoryOptions() );
+        return getDataApprovalStatus( dataSet, period, organisationUnit, null,
+                attributeOptionCombo == null ? null : attributeOptionCombo.getCategoryOptions() );
     }
 
     public DataApprovalStatus getDataApprovalStatus( DataSet dataSet, Period period,

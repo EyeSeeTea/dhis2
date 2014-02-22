@@ -43,6 +43,7 @@ import java.util.Set;
 
 import org.hisp.dhis.dataapproval.DataApprovalService;
 import org.hisp.dhis.dataapproval.DataApprovalState;
+import org.hisp.dhis.dataapproval.DataApprovalStatus;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataentryform.DataEntryForm;
@@ -470,9 +471,9 @@ public class DefaultDataSetService
             return true;
         }
 
-        DataApprovalState dataApprovalState = dataApprovalService.getDataApprovalStatus( dataSet, period, organisationUnit, attributeOptionCombo );
+        DataApprovalStatus dataApprovalStatus = dataApprovalService.getDataApprovalStatus( dataSet, period, organisationUnit, attributeOptionCombo );
         
-        return dataApprovalState.isApproved();
+        return dataApprovalStatus.getDataApprovalState().isApproved();
     }
 
     @Override

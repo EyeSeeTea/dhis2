@@ -68,8 +68,9 @@ public class HibernateDataApprovalStore
     {
         dataApproval.setPeriod( periodService.reloadPeriod( dataApproval.getPeriod() ) );
 
-        // In general null values to violate a unique constraint,
-        // so we check by hand if categoryOptionGroup has a null value.
+        // In general null values do not violate a unique constraint,
+        // so we check by hand if categoryOptionGroup has a null value,
+        // that no identical record exists with a null value.
 
         if ( dataApproval.getCategoryOptionGroup() == null )
         {
