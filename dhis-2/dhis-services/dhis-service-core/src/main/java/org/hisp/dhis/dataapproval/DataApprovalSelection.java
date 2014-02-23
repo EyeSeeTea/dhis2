@@ -165,7 +165,7 @@ class DataApprovalSelection
             else
             {
                 if (LOG) log( logSelection() + " returning UNAPPROVABLE (period type too short)" );
-                
+
                 return STATUS_UNAPPROVABLE;
             }
         }
@@ -189,6 +189,11 @@ class DataApprovalSelection
     // Supportive methods
     // -------------------------------------------------------------------------
 
+    /**
+     * Formats data selection parameters for getDataApprovalStatus() tracing.
+     *
+     * @return data selection parameters as a string.
+     */
     private String logSelection()
     {
         return "getDataApprovalStatus( " + dataSet.getName() + ", " + period.getPeriodType().getName() + ":" + period.getShortName()
@@ -197,6 +202,11 @@ class DataApprovalSelection
                 + ( dataElementCategoryOptions == null ? "null" : ( "[" + dataElementCategoryOptions.size() + "]" ) ) + " )";
     }
 
+    /**
+     * Logs for debug tracing.
+     *
+     * @param s String to log.
+     */
     private void log(String s)
     {
         System.out.println( s );
@@ -379,12 +389,15 @@ class DataApprovalSelection
 
             if ( dataElementCategoryOptions != null )
             {
-                addDataGroups( dataElementCategoryOptions );
+                addDataGroups();
             }
         }
     }
 
-    private void addDataGroups( Set<DataElementCategoryOption> dataElementCategoryOptions )
+    /**
+     * Finds the category option groups referenced by the category options.
+     */
+    private void addDataGroups()
     {
         //TODO: Should we replace this exhaustive search with a Hibernate query?
 
@@ -399,6 +412,13 @@ class DataApprovalSelection
         }
     }
 
+    /**
+     * Adds a category option group set and associated category option group
+     * to the set of these pairs referenced by the selected data.
+     *
+     * @param groupSet category option group set to add
+     * @param group category option group to add
+     */
     private void addDataGroup( CategoryOptionGroupSet groupSet, CategoryOptionGroup group )
     {
         Set<CategoryOptionGroup> groups = dataGroups.get( groupSet );
@@ -413,6 +433,11 @@ class DataApprovalSelection
         groups.add( group );
     }
 
+    /**
+     * Finds the data approval level (if any) at which this data selection would
+     * be approved. Also determines the levels just above and just below where
+     * this selection would be approved.
+     */
     private void findThisLevel()
     {
         if (LOG) log( "findThisLevel() - matchingApprovalLevels.size() = " + matchingApprovalLevels.size() );
@@ -458,6 +483,11 @@ class DataApprovalSelection
         if (LOG) log( "findThisLevel() - did not find level " );
     }
 
+    /**
+     * Is this data selection approved at a higher approval level?
+     *
+     * @return true if approved at higher level, otherwise false
+     */
     private boolean isApprovedAtHigherLevel()
     {
         OrganisationUnit orgUnit = organisationUnit;
@@ -486,6 +516,14 @@ class DataApprovalSelection
         return false;
     }
 
+    /**
+     * Is this data selection approved at the given level index, for the
+     * given organisation unit?
+     *
+     * @param index (matching) approval level index at which to test
+     * @param orgUnit organisation unit to tes.
+     * @return true if approved, otherwise false.
+     */
     private DataApproval getDataApproval( int index, OrganisationUnit orgUnit )
     {
         Set<CategoryOptionGroup> groups = categoryOptionGroupsByLevel.get( index );
