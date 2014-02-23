@@ -141,6 +141,7 @@ class DataApprovalSelection
         if ( !dataSet.isApproveData() )
         {
             if (LOG) log( "\n" + logSelection() + " returning UNAPPROVABLE (dataSet not marked for approval)" );
+
             return STATUS_UNAPPROVABLE;
         }
 
@@ -149,6 +150,7 @@ class DataApprovalSelection
         if ( matchingApprovalLevels.size() == 0 )
         {
             if (LOG) log( logSelection() + " returning UNAPPROVABLE (no matching approval levels)" );
+
             return STATUS_UNAPPROVABLE;
         }
 
@@ -163,6 +165,7 @@ class DataApprovalSelection
             else
             {
                 if (LOG) log( logSelection() + " returning UNAPPROVABLE (period type too short)" );
+                
                 return STATUS_UNAPPROVABLE;
             }
         }

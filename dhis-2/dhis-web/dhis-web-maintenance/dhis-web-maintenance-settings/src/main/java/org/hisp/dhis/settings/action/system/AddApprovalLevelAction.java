@@ -124,7 +124,7 @@ public class AddApprovalLevelAction
 
         DataApprovalLevel dataApprovalLevel = new DataApprovalLevel(0, orgUnitLevel, catOptGroupSet, null, null );
 
-        boolean added = dataApprovalLevelService.add( dataApprovalLevel );
+        boolean added = dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel );
 
         if ( !added )
         {

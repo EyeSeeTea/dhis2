@@ -68,7 +68,7 @@ public class MoveApprovalLevelUpAction
 
     public String execute()
     {
-        dataApprovalLevelService.moveUp( level );
+        dataApprovalLevelService.moveDataApprovalLevelUp( level );
 
         return SUCCESS;
     }

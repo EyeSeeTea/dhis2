@@ -68,7 +68,7 @@ public class RemoveApprovalLevelAction
 
     public String execute()
     {
-        dataApprovalLevelService.remove( id );
+        dataApprovalLevelService.deleteDataApprovalLevel( id );
 
         return SUCCESS;
     }

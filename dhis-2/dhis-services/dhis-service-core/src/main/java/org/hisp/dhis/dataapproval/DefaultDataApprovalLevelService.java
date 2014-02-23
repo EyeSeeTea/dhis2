@@ -60,7 +60,7 @@ public class DefaultDataApprovalLevelService
         return dataApprovalLevelStore.getAllDataApprovalLevels();
     }
 
-    public boolean canMoveDown( int level )
+    public boolean canDataApprovalLevelMoveDown( int level )
     {
         List<DataApprovalLevel> dataApprovalLevels = getAllDataApprovalLevels();
 
@@ -85,7 +85,7 @@ public class DefaultDataApprovalLevelService
         }
     }
 
-    public boolean canMoveUp( int level )
+    public boolean canDataApprovalLevelMoveUp( int level )
     {
         List<DataApprovalLevel> dataApprovalLevels = getAllDataApprovalLevels();
 
@@ -110,23 +110,23 @@ public class DefaultDataApprovalLevelService
         }
     }
 
-    public void moveDown( int level )
+    public void moveDataApprovalLevelDown( int level )
     {
-        if ( canMoveDown( level ) )
+        if ( canDataApprovalLevelMoveDown( level ) )
         {
             swapWithNextLevel( level );
         }
     }
 
-    public void moveUp( int level )
+    public void moveDataApprovalLevelUp( int level )
     {
-        if ( canMoveUp( level ) )
+        if ( canDataApprovalLevelMoveUp( level ) )
         {
             swapWithNextLevel( level - 1 );
         }
     }
 
-    public boolean exists( DataApprovalLevel testLevel )
+    public boolean dataApprovalLevelExists( DataApprovalLevel testLevel )
     {
         List<DataApprovalLevel> dataApprovalLevels = getAllDataApprovalLevels();
 
@@ -142,7 +142,7 @@ public class DefaultDataApprovalLevelService
         return false;
     }
 
-    public boolean add( DataApprovalLevel newLevel )
+    public boolean addDataApprovalLevel( DataApprovalLevel newLevel )
     {
         List<DataApprovalLevel> dataApprovalLevels = getAllDataApprovalLevels();
 
@@ -178,7 +178,7 @@ public class DefaultDataApprovalLevelService
         return true;
     }
 
-    public void remove( int level )
+    public void deleteDataApprovalLevel( int level )
     {
         List<DataApprovalLevel> dataApprovalLevels = getAllDataApprovalLevels();
 

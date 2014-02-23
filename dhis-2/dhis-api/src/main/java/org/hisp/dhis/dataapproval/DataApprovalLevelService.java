@@ -58,7 +58,7 @@ public interface DataApprovalLevelService
      * @param level the level to test.
      * @return true if the level can move down, otherwise false.
      */
-    boolean canMoveDown( int level );
+    boolean canDataApprovalLevelMoveDown( int level );
 
     /**
      * Tells whether a level can move up in the list (can switch places with
@@ -67,7 +67,7 @@ public interface DataApprovalLevelService
      * @param level the level to test.
      * @return true if the level can move up, otherwise false.
      */
-    boolean canMoveUp( int level );
+    boolean canDataApprovalLevelMoveUp( int level );
 
     /**
      * Moves a data approval level down in the list (switches places with the
@@ -75,7 +75,7 @@ public interface DataApprovalLevelService
      *
      * @param level the level to move down.
      */
-    void moveDown( int level );
+    void moveDataApprovalLevelDown( int level );
 
     /**
      * Moves a data approval level up in the list (switches places with the
@@ -83,7 +83,7 @@ public interface DataApprovalLevelService
      *
      * @param level the level to move up.
      */
-    void moveUp( int level );
+    void moveDataApprovalLevelUp( int level );
 
     /**
      * Determines whether level already exists with the same organisation
@@ -93,7 +93,7 @@ public interface DataApprovalLevelService
      * @param testLevel Data approval level to test for existence.
      * @return true if it exists, otherwise false.
      */
-    public boolean exists ( DataApprovalLevel testLevel );
+    public boolean dataApprovalLevelExists ( DataApprovalLevel testLevel );
 
     /**
      * Adds a new data approval level. Adds the new level at the highest
@@ -103,12 +103,12 @@ public interface DataApprovalLevelService
      * @param newLevel the new level to add.
      * @return true if level was added, false if not well formed or duplicate.
      */
-    boolean add( DataApprovalLevel newLevel );
+    boolean addDataApprovalLevel( DataApprovalLevel newLevel );
 
     /**
      * Removes a data approval level.
      *
      * @param index index of the level to move up.
      */
-    void remove( int index );
+    void deleteDataApprovalLevel( int index );
 }

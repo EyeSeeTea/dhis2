@@ -83,6 +83,13 @@ public class DataApprovalLevel
     {
     }
 
+    public DataApprovalLevel( OrganisationUnitLevel organisationUnitLevel,
+                              CategoryOptionGroupSet categoryOptionGroupSet )
+    {
+        this.organisationUnitLevel = organisationUnitLevel;
+        this.categoryOptionGroupSet = categoryOptionGroupSet;
+    }
+
     public DataApprovalLevel( int level, OrganisationUnitLevel organisationUnitLevel,
                               CategoryOptionGroupSet categoryOptionGroupSet,
                               Date created, Date updated )
