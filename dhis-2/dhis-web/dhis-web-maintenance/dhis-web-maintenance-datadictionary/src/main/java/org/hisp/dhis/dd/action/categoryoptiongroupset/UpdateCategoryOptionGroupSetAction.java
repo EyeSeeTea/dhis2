@@ -102,12 +102,12 @@ public class UpdateCategoryOptionGroupSetAction
         categoryOptionGroupSet.setName( name );
         categoryOptionGroupSet.setDescription( description );
         categoryOptionGroupSet.setDataDimension( dataDimension );
-
         categoryOptionGroupSet.getMembers().clear();
+        
         for ( String id : groupMembers )
         {
-            categoryOptionGroupSet.addCategoryOptionGroup( dataElementCategoryService.getCategoryOptionGroup( Integer
-                .parseInt( id ) ) );
+            categoryOptionGroupSet.addCategoryOptionGroup( dataElementCategoryService.getCategoryOptionGroup( 
+                Integer.parseInt( id ) ) );
         }
 
         dataElementCategoryService.updateCategoryOptionGroupSet( categoryOptionGroupSet );
