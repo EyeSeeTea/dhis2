@@ -158,8 +158,6 @@ public class DefaultDataApprovalLevelService
             return false;
         }
 
-        System.out.println( "Addding new dataApproval at index " + index );
-
         dataApprovalLevels.add( index, newLevel );
 
         //
