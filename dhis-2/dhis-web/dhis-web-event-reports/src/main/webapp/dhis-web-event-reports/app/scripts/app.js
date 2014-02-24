@@ -807,7 +807,7 @@ Ext.onReady( function() {
 			};
 		};
 
-        addDimenson = function(record) {
+        addDimension = function(record) {
             var store = dimensionStoreMap[record.id] || dimensionStore;
             store.add(record);
         };
@@ -838,7 +838,7 @@ Ext.onReady( function() {
 			colStore: colStore,
 			rowStore: rowStore,
 			filterStore: filterStore,
-            addDimenson: addDimenson,
+            addDimension: addDimension,
             removeDimension: removeDimension,
 			hideOnBlur: true,
 			items: {
@@ -2592,11 +2592,15 @@ Ext.onReady( function() {
 				}
             },
             getChildIndex: function(child) {
-				this.items.each(function(item, index) {
-					if (item.id === child.id) {
-						return index;
+				var items = this.items.items;
+
+				for (var i = 0; i < items.length; i++) {
+					if (items[i].id === child.id) {
+						return i;
 					}
-				});
+				}
+
+				return items.length;
 			},
 			hasDataElement: function(dataElementId) {
 				var hasDataElement = false;
@@ -2655,7 +2659,6 @@ Ext.onReady( function() {
 
 			ux.duplicateDataElement = function() {
 				var index = dataElementSelected.getChildIndex(ux) + 1;
-
 				addUxFromDataElement(element, index);
 			};
 
@@ -2944,7 +2947,7 @@ Ext.onReady( function() {
             else if (!startEndDate.isDisabled()) {
                 startEndDate.disable();
 
-                ns.app.layoutWindow.addDimension({id: dimConf.period.dimensionName, name: dimConf.relativePeriod.name});
+                ns.app.layoutWindow.rowStore.add({id: dimConf.period.dimensionName, name: dimConf.relativePeriod.name});
             }
         };
 
@@ -2956,6 +2959,18 @@ Ext.onReady( function() {
 			hideCollapseTool: true,
 			autoScroll: true,
 			valueComponentMap: {},
+			getRecords: function() {
+				var map = this.valueComponentMap,
+					records = [];
+
+				for (var rp in map) {
+					if (map.hasOwnProperty(rp) && map[rp].getValue()) {
+						records.push({id: map[rp].relativePeriodId});
+					}
+				}
+
+				return records.length ? records : null;
+			},
 			items: [
 				{
 					xtype: 'container',
@@ -3908,6 +3923,8 @@ Ext.onReady( function() {
             view.startDate = startDate.getSubmitValue();
             view.endDate = endDate.getSubmitValue();
 
+            view.relativePeriods = relativePeriod.getRecords();
+
             view.dataElements = [];
 
             for (var i = 0, panel; i < dataElementSelected.items.items.length; i++) {
@@ -4419,9 +4436,14 @@ Ext.onReady( function() {
 
 			web.report.getLayoutConfig = function() {
 				var view = ns.app.viewport.accordionBody.getView(),
+					options = ns.app.optionsWindow.getOptions(),
 					columnDimNames = ns.app.stores.col.getDimensionNames(),
 					rowDimNames = ns.app.stores.row.getDimensionNames(),
 					filterDimNames = ns.app.stores.filter.getDimensionNames();
+
+				Ext.applyIf(view, options);
+
+console.log(view);
 
 				view.columns = [];
 				view.rows = [];
@@ -4469,10 +4491,6 @@ Ext.onReady( function() {
 				// stage
 				paramString += 'stage=' + view.stage.id;
 
-				// dates
-				paramString += '&startDate=' + view.startDate;
-				paramString += '&endDate=' + view.endDate;
-
 				// ou
 				if (Ext.isArray(view.organisationUnits)) {
 					for (var i = 0; i < view.organisationUnits.length; i++) {
@@ -4493,6 +4511,19 @@ Ext.onReady( function() {
 
 						paramString += ':' + element.value;
 					}
+				}
+
+				// pe
+				if (Ext.isArray(view.relativePeriods)) {
+					paramString += '&dimension=pe:';
+
+					for (var i = 0; i < view.relativePeriods.length; i++) {
+						paramString += view.relativePeriods[i].id + (i < view.relativePeriods.length - 1 ?  ';' : '');
+					}
+				}
+				else {
+					paramString += '&startDate=' + view.startDate;
+					paramString += '&endDate=' + view.endDate;
 				}
 
 				Ext.Ajax.request({

@@ -978,7 +978,7 @@ console.log("getItemName", arguments);
 				// legend set
 				xLayout.legendSet = layout.legendSet ? init.idLegendSetMap[layout.legendSet.id] : null;
 
-				if (layout.legendSet) {
+				if (layout.legendSet && layout.legendSet.mapLegends) {
 					xLayout.legendSet = init.idLegendSetMap[layout.legendSet.id];
 					support.prototype.array.sort(xLayout.legendSet.mapLegends, 'ASC', 'startValue');
 				}
