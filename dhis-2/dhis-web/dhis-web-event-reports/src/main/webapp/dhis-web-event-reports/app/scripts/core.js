@@ -1743,47 +1743,35 @@ Ext.onReady( function() {
                     }
 				}
 
-				// fix co ids and names
-				//for (var i = 0, id, splitId; i < allIds.length; i++) {
-					//id = allIds[i];
+				// idValueMap: vars
+				var valueHeaderIndex = response.nameHeaderMap[conf.finals.dimension.value.value].index,
+					coHeader = response.nameHeaderMap[conf.finals.dimension.category.dimensionName],
+					dx = dimConf.data.dimensionName,
+					co = dimConf.category.dimensionName,
+					axisDimensionNames = xLayout.axisDimensionNames,
+					idIndexOrder = [];
 
-					//if (id.indexOf('-') !== -1) {
-						//splitId = id.split('-');
-						//response.metaData.names[id] = response.metaData.names[splitId[0]] + ' ' + response.metaData.names[splitId[1]];
-					//}
-				//}
+				// idValueMap: idIndexOrder
+				for (var i = 0; i < axisDimensionNames.length; i++) {
+					idIndexOrder.push(response.nameHeaderMap[axisDimensionNames[i]].index);
 
-				// value id map
-				(function() {
-					var valueHeaderIndex = response.nameHeaderMap[conf.finals.dimension.value.value].index,
-						coHeader = response.nameHeaderMap[conf.finals.dimension.category.dimensionName],
-						dx = dimConf.data.dimensionName,
-						co = dimConf.category.dimensionName,
-						axisDimensionNames = xLayout.axisDimensionNames,
-						idIndexOrder = [];
+					// If co exists in response and is not added in layout, add co after dx
+					if (coHeader && !Ext.Array.contains(axisDimensionNames, co) && axisDimensionNames[i] === dx) {
+						idIndexOrder.push(coHeader.index);
+					}
+				}
 
-					// idIndexOrder
-					for (var i = 0; i < axisDimensionNames.length; i++) {
-						idIndexOrder.push(response.nameHeaderMap[axisDimensionNames[i]].index);
+				// idValueMap
+				for (var i = 0, row, id; i < response.rows.length; i++) {
+					row = response.rows[i];
+					id = '';
 
-						// If co exists in response and is not added in layout, add co after dx
-						if (coHeader && !Ext.Array.contains(axisDimensionNames, co) && axisDimensionNames[i] === dx) {
-							idIndexOrder.push(coHeader.index);
-						}
+					for (var j = 0; j < idIndexOrder.length; j++) {
+						id += row[idIndexOrder[j]];
 					}
 
-					// idValueMap
-					for (var i = 0, row, id; i < response.rows.length; i++) {
-						row = response.rows[i];
-						id = '';
-
-						for (var j = 0; j < idIndexOrder.length; j++) {
-							id += row[idIndexOrder[j]];
-						}
-
-						response.idValueMap[id] = row[valueHeaderIndex];
-					}
-				}());
+					response.idValueMap[id] = row[valueHeaderIndex];
+				}
 
 				return response;
 			};
