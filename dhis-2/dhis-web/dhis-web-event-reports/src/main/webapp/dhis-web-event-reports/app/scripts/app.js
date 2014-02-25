@@ -3935,7 +3935,7 @@ Ext.onReady( function() {
 
             view.organisationUnits = treePanel.getDimension().items;
 
-            if (!(view.program && view.stage && view.startDate && view.endDate)) {
+            if (!(view.program && view.stage && ((view.startDate && view.endDate) || view.relativePeriods.length))) {
 				return;
 			}
 
@@ -4441,6 +4441,10 @@ Ext.onReady( function() {
 					rowDimNames = ns.app.stores.row.getDimensionNames(),
 					filterDimNames = ns.app.stores.filter.getDimensionNames();
 
+				if (!view) {
+					return;
+				}
+
 				Ext.applyIf(view, options);
 
 				view.columns = [];
@@ -4523,6 +4527,9 @@ Ext.onReady( function() {
 					paramString += '&startDate=' + view.startDate;
 					paramString += '&endDate=' + view.endDate;
 				}
+
+				// hierarchy
+				paramString += view.showHierarchy ? '&hierarchyMeta=true' : '';
 
 				Ext.Ajax.request({
 					url: ns.core.init.contextPath + '/api/analytics/events/aggregate/' + view.program.id + '.json' + paramString,
@@ -4703,7 +4710,7 @@ console.log("table", table);
 
 		caseButton = Ext.create('Ext.button.Button', {
 			flex: 1,
-            text: '<b>Case based</b><br/>Case based event report',
+            text: '<b>Case-based</b><br/>Case-based event report',
 			listeners: {
 				mouseout: function(cmp) {
 					cmp.addCls('x-btn-default-toolbar-small-over');
@@ -4848,6 +4855,7 @@ console.log("table", table);
 		favoriteButton = Ext.create('Ext.button.Button', {
 			text: NS.i18n.favorites,
 			menu: {},
+			disabled: true,
 			handler: function() {
 				if (ns.app.favoriteWindow) {
 					ns.app.favoriteWindow.destroy();
@@ -5089,6 +5097,7 @@ console.log("table", table);
 
 		shareButton = Ext.create('Ext.button.Button', {
 			text: NS.i18n.share,
+			disabled: true,
 			xableItems: function() {
 				interpretationItem.xable();
 				pluginItem.xable();
@@ -5203,10 +5212,10 @@ console.log("table", table);
 				orgunits = [];
 
 			// State
-			downloadButton.enable();
+			//downloadButton.enable();
 
 			if (layout.id) {
-				shareButton.enable();
+				//shareButton.enable();
 			}
 
 			// Set gui
