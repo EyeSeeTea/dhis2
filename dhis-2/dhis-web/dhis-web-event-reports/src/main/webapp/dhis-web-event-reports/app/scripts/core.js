@@ -1883,7 +1883,7 @@ Ext.onReady( function() {
 
 					cls += config.hidden ? ' td-hidden' : '';
 					cls += config.collapsed ? ' td-collapsed' : '';
-					cls += isValue ? ' pointer' : '';
+					//cls += isValue ? ' pointer' : '';
 					cls += bgColor ? ' legend' : (config.cls ? ' ' + config.cls : '');
 
 					// sorting

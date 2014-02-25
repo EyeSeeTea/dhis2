@@ -4614,7 +4614,7 @@ console.log("table", table);
 				ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
 
 				if (NS.isSessionStorage) {
-					web.events.setValueMouseHandlers(layout, response || xResponse, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
+					//web.events.setValueMouseHandlers(layout, response || xResponse, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
 					web.events.setColumnHeaderMouseHandlers(layout, xLayout, xResponse);
 					web.storage.session.set(layout, 'table');
 				}
