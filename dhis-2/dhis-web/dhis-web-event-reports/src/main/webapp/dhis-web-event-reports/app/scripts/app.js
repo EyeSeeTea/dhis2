@@ -4639,7 +4639,6 @@ console.log("table", table);
             interpretationItem,
             pluginItem,
             shareButton,
-            defaultButton,
             centerRegion,
             setGui,
             viewport;
@@ -4691,21 +4690,21 @@ console.log("table", table);
 
 		// viewport
 
-		caseButton = Ext.create('Ext.button.Button', {
+        aggregateButton = Ext.create('Ext.button.Button', {
 			flex: 1,
-            text: '<b>Case based</b><br/>Case based event report',
+            text: '<b>Aggregated</b><br/>Aggregated event report',
             pressed: true,
-			listeners: {
+            listeners: {
 				mouseout: function(cmp) {
 					cmp.addCls('x-btn-default-toolbar-small-over');
 				}
 			}
         });
 
-        aggregateButton = Ext.create('Ext.button.Button', {
+		caseButton = Ext.create('Ext.button.Button', {
 			flex: 1,
-            text: '<b>Aggregated</b><br/>Aggregated event report',
-            listeners: {
+            text: '<b>Case based</b><br/>Case based event report',
+			listeners: {
 				mouseout: function(cmp) {
 					cmp.addCls('x-btn-default-toolbar-small-over');
 				}
@@ -4726,8 +4725,8 @@ console.log("table", table);
 				}
 			},
 			items: [
-				caseButton,
-				aggregateButton
+				aggregateButton,
+				caseButton
 			]
 		});
 
@@ -5118,18 +5117,6 @@ console.log("table", table);
 			}
 		});
 
-		defaultButton = Ext.create('Ext.button.Button', {
-			text: NS.i18n.table,
-			iconCls: 'ns-button-icon-table',
-			toggleGroup: 'module',
-			pressed: true,
-			handler: function() {
-				if (!this.pressed) {
-					this.toggle();
-				}
-			}
-		});
-
 		centerRegion = Ext.create('Ext.panel.Panel', {
 			region: 'center',
 			bodyStyle: 'padding:1px',
@@ -5166,124 +5153,6 @@ console.log("table", table);
 					downloadButton,
 					shareButton,
 					'->',
-					defaultButton,
-					{
-						text: NS.i18n.chart,
-						iconCls: 'ns-button-icon-chart',
-						toggleGroup: 'module',
-						menu: {},
-						handler: function(b) {
-							b.menu = Ext.create('Ext.menu.Menu', {
-								closeAction: 'destroy',
-								shadow: false,
-								showSeparator: false,
-								items: [
-									{
-										text: 'Go to charts' + '&nbsp;&nbsp;', //i18n
-										cls: 'ns-menu-item-noicon',
-										handler: function() {
-											window.location.href = ns.core.init.contextPath + '/dhis-web-visualizer/app/index.html';
-										}
-									},
-									'-',
-									{
-										text: 'Open this table as chart' + '&nbsp;&nbsp;', //i18n
-										cls: 'ns-menu-item-noicon',
-										disabled: !(NS.isSessionStorage && ns.app.layout),
-										handler: function() {
-											if (NS.isSessionStorage) {
-												ns.app.layout.parentGraphMap = treePanel.getParentGraphMap();
-												ns.core.web.storage.session.set(ns.app.layout, 'analytical', ns.core.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
-											}
-										}
-									},
-									{
-										text: 'Open last chart' + '&nbsp;&nbsp;', //i18n
-										cls: 'ns-menu-item-noicon',
-										disabled: !(NS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['chart']),
-										handler: function() {
-											window.location.href = ns.core.init.contextPath + '/dhis-web-visualizer/app/index.html?s=chart';
-										}
-									}
-								],
-								listeners: {
-									show: function() {
-										ns.core.web.window.setAnchorPosition(b.menu, b);
-									},
-									hide: function() {
-										b.menu.destroy();
-										defaultButton.toggle();
-									},
-									destroy: function(m) {
-										b.menu = null;
-									}
-								}
-							});
-
-							b.menu.show();
-						}
-					},
-					{
-						text: NS.i18n.map,
-						iconCls: 'ns-button-icon-map',
-						toggleGroup: 'module',
-						menu: {},
-						handler: function(b) {
-							b.menu = Ext.create('Ext.menu.Menu', {
-								closeAction: 'destroy',
-								shadow: false,
-								showSeparator: false,
-								items: [
-									{
-										text: 'Go to maps' + '&nbsp;&nbsp;', //i18n
-										cls: 'ns-menu-item-noicon',
-										handler: function() {
-											window.location.href = ns.core.init.contextPath + '/dhis-web-mapping/app/index.html';
-										}
-									},
-									'-',
-									{
-										text: 'Open this table as map' + '&nbsp;&nbsp;', //i18n
-										cls: 'ns-menu-item-noicon',
-										disabled: !(NS.isSessionStorage && ns.app.layout),
-										handler: function() {
-											if (NS.isSessionStorage) {
-												ns.app.layout.parentGraphMap = treePanel.getParentGraphMap();
-												ns.core.web.storage.session.set(ns.app.layout, 'analytical', ns.core.init.contextPath + '/dhis-web-mapping/app/index.html?s=analytical');
-											}
-										}
-									},
-									{
-										text: 'Open last map' + '&nbsp;&nbsp;', //i18n
-										cls: 'ns-menu-item-noicon',
-										disabled: !(NS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['map']),
-										handler: function() {
-											window.location.href = ns.core.init.contextPath + '/dhis-web-mapping/app/index.html?s=map';
-										}
-									}
-								],
-								listeners: {
-									show: function() {
-										ns.core.web.window.setAnchorPosition(b.menu, b);
-									},
-									hide: function() {
-										b.menu.destroy();
-										defaultButton.toggle();
-									},
-									destroy: function(m) {
-										b.menu = null;
-									}
-								}
-							});
-
-							b.menu.show();
-						}
-					},
-					{
-						xtype: 'tbseparator',
-						height: 18,
-						style: 'border-color:transparent; border-right-color:#d1d1d1; margin-right:4px',
-					},
 					{
 						xtype: 'button',
 						text: NS.i18n.home,
