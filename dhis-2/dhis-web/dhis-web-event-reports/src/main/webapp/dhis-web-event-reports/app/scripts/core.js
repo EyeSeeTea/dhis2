@@ -1691,17 +1691,33 @@ console.log("getItemName", arguments);
 				response.idValueMap = {};
 
 				// add to headers: size, index, response ids
-				for (var i = 0, header, ids; i < headers.length; i++) {
+				for (var i = 0, header, ids, objects; i < headers.length; i++) {
 					header = headers[i];
                     header.ids = [];
 					ids = [];
+					objects = [];
 
 					// collect ids from response
-					for (var j = 0; j < response.height; j++) {
+					for (var j = 0, id; j < response.rows.length; j++) {
+						//id = response.rows[j][i] || emptyId;
 						ids.push(response.rows[j][i] || emptyId);
 					}
 
-                    ids = support.prototype.array.sort(Ext.Array.unique(ids), 'ASC');
+					ids = Ext.Array.unique(ids);
+
+					// sorting objects
+					for (var j = 0, id; j < ids.length; j++) {
+						id = ids[j];
+
+						objects.push({
+							id: id,
+							sortingId: Ext.isNumber(parseFloat(id)) ? parseFloat(id) : id
+						});
+					}
+
+					objects = support.prototype.array.sort(objects, 'ASC', 'sortingId');
+
+					ids = Ext.Array.pluck(objects, 'id');
 
                     // header ids
                     for (var j = 0, id, fullId; j < ids.length; j++) {
@@ -1712,7 +1728,7 @@ console.log("getItemName", arguments);
                         header.ids.push(fullId);
 
                         // add full names to metadata names
-                        names[fullId] = names.hasOwnProperty(id) ? names[id] : names[header.name] + ' ' + id;
+                        names[fullId] = names.hasOwnProperty(id) ? names[id] : names[header.name] + ' ' + (Ext.isNumber(parseFloat(id)) ? parseFloat(id) : id);
                     }
 
 					header.size = header.ids.length;
@@ -1750,7 +1766,7 @@ console.log("getItemName", arguments);
 						co = dimConf.category.dimensionName,
 						axisDimensionNames = xLayout.axisDimensionNames,
 						idIndexOrder = [];
-console.log("axisDimensionNames", axisDimensionNames);
+
 					// idIndexOrder
 					for (var i = 0; i < axisDimensionNames.length; i++) {
 						idIndexOrder.push(response.nameHeaderMap[axisDimensionNames[i]].index);

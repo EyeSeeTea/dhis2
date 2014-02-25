@@ -4443,8 +4443,6 @@ Ext.onReady( function() {
 
 				Ext.applyIf(view, options);
 
-console.log(view);
-
 				view.columns = [];
 				view.rows = [];
 				view.filters = [];
