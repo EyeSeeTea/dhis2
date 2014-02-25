@@ -4447,6 +4447,8 @@ Ext.onReady( function() {
 
 				Ext.applyIf(view, options);
 
+				view.type = ns.app.typeToolbar.getType();
+
 				view.columns = [];
 				view.rows = [];
 				view.filters = [];
@@ -4532,7 +4534,7 @@ Ext.onReady( function() {
 				paramString += view.showHierarchy ? '&hierarchyMeta=true' : '';
 
 				Ext.Ajax.request({
-					url: ns.core.init.contextPath + '/api/analytics/events/aggregate/' + view.program.id + '.json' + paramString,
+					url: ns.core.init.contextPath + '/api/analytics/events/' + view.type + '/' + view.program.id + '.json' + paramString,
 					disableCaching: false,
 					scope: this,
 					success: function(r) {
@@ -4633,7 +4635,7 @@ console.log("table", table);
 	createViewport = function() {
         var caseButton,
 			aggregateButton,
-			modeToolbar,
+			typeToolbar,
 			accordionBody,
 			accordion,
 			westRegion,
@@ -4718,9 +4720,12 @@ console.log("table", table);
 			}
         });
 
-        modeToolbar = Ext.create('Ext.toolbar.Toolbar', {
+        typeToolbar = Ext.create('Ext.toolbar.Toolbar', {
 			style: 'padding-top:1px; background:#f5f5f5; border:0 none',
             height: 41,
+            getType: function() {
+				return aggregateButton.pressed ? 'aggregate' : 'query';
+			},
             defaults: {
                 height: 40,
                 toggleGroup: 'mode',
@@ -4734,7 +4739,12 @@ console.log("table", table);
 			items: [
 				aggregateButton,
 				caseButton
-			]
+			],
+			listeners: {
+				added: function() {
+					ns.app.typeToolbar = this;
+				}
+			}
 		});
 
 		accordionBody = LayerWidgetEvent();
@@ -4808,7 +4818,7 @@ console.log("table", table);
 				}
 			}(),
 			items: [
-				modeToolbar,
+				typeToolbar,
 				accordion
 			],
 			listeners: {
