@@ -793,7 +793,6 @@ Ext.onReady( function() {
 			};
 
 			service.layout.getItemName = function(layout, response, id, isHtml) {
-console.log("getItemName", arguments);
 				var metaData = response.metaData,
 					name = '';
 
@@ -1928,49 +1927,82 @@ console.log("getItemName", arguments);
 
 			web.report.sort = function(xLayout, xResponse, xColAxis) {
 				var xResponse = Ext.clone(xResponse),
-					id = xLayout.sorting.id,
-					dim = xLayout.rows[0],
+					condoId = xLayout.sorting.id,
+					name = xLayout.rows[0].dimension,
+					ids = xResponse.nameHeaderMap[name].ids,
 					valueMap = xResponse.idValueMap,
 					direction = xLayout.sorting ? xLayout.sorting.direction : 'DESC',
+					objects = [],
 					layout;
 
-				dim.ids = [];
+				//dim.ids = [];
 
 				// relative id?
-				if ((Ext.isString(id) && id.toLowerCase() === 'total') || id === 0) {
-					id = 'total_';
+				if ((Ext.isString(condoId) && condoId.toLowerCase() === 'total') || condoId === 0) {
+					condoId = 'total_';
 				}
-				else if (Ext.isNumber(parseInt(id))) {
-					id = xColAxis.ids[parseInt(id) - 1];
+				else if (Ext.isNumber(parseInt(condoId))) {
+					condoId = xColAxis.ids[parseInt(condoId) - 1];
 
-					if (!id) {
-						return xLayout;
+					if (!condoId) {
+						return xResponse;
 					}
 				}
+// condoId === abccbc13432452
 
 				// collect values
-				for (var i = 0, item, key, value; i < dim.items.length; i++) {
-					item = dim.items[i];
-					key = id + item.id;
+				for (var i = 0, key, value; i < ids.length; i++) {
+					key = condoId + ids[i];
 					value = parseFloat(valueMap[key]);
 
-					item.value = Ext.isNumber(value) ? value : (Number.MAX_VALUE * -1);
+					objects.push({
+						id: ids[i],
+						value: Ext.isNumber(value) ? value : (Number.MAX_VALUE * -1)
+					});
 				}
 
-				// sort
-				support.prototype.array.sort(dim.items, direction, 'value');
+				support.prototype.array.sort(objects, direction, 'value');
 
 				// new id order
-				for (var i = 0; i < dim.items.length; i++) {
-					dim.ids.push(dim.items[i].id);
-				}
+				xResponse.nameHeaderMap[name].ids = Ext.Array.pluck(objects, 'id');
+
+
+				//for (var i = 0; i < dim.items.length; i++) {
+					//dim.ids.push(dim.items[i].id);
+				//}
 
 				// update id
-				if (id !== xLayout.sorting.id) {
-					xLayout.sorting.id = id;
-				}
+				//if (id !== xLayout.sorting.id) {
+					//xLayout.sorting.id = id;
+				//}
 
-				return xLayout;
+
+
+					//item = dim.items[i];
+					//key = id + item.id;
+					//value = parseFloat(valueMap[key]);
+
+					//item.value = Ext.isNumber(value) ? value : (Number.MAX_VALUE * -1);
+				//}
+
+				// collect values
+				//for (var i = 0, item, key, value; i < dim.items.length; i++) {
+					//item = dim.items[i];
+					//key = id + item.id;
+					//value = parseFloat(valueMap[key]);
+
+					//item.value = Ext.isNumber(value) ? value : (Number.MAX_VALUE * -1);
+				//}
+
+				//// sort
+				//support.prototype.array.sort(dim.items, direction, 'value');
+
+				//// new id order
+				//for (var i = 0; i < dim.items.length; i++) {
+					//dim.ids.push(dim.items[i].id);
+				//}
+
+				return xResponse;
 			};
 
 			web.report.getHtml = function(xLayout, xResponse, xColAxis, xRowAxis) {
@@ -2015,7 +2047,6 @@ console.log("getItemName", arguments);
 				};
 
 				getTdHtml = function(config, metaDataId) {
-console.log("config", config, "metaDataId", metaDataId);
 					var bgColor,
 						mapLegends,
 						colSpan,
@@ -2682,7 +2713,9 @@ console.log("config", config, "metaDataId", metaDataId);
 
 					return {
 						html: getHtml(htmlArray),
-						uuidDimUuidsMap: uuidDimUuidsMap
+						uuidDimUuidsMap: uuidDimUuidsMap,
+						xColAxis: xColAxis,
+						xRowAxis: xRowAxis
 					};
 				}();
 			};

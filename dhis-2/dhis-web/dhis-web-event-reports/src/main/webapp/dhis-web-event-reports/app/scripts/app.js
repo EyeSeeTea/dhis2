@@ -4420,7 +4420,7 @@ Ext.onReady( function() {
 					};
 				}
 
-				web.report.createReport(layout, null, xResponse, false);
+				web.report.createReport(layout);
 			};
 
 			web.events.onColumnHeaderMouseOver = function(el) {
@@ -4539,12 +4539,12 @@ Ext.onReady( function() {
 
                         ns.app.paramString = paramString;
 
-                        web.report.createReport(view, response, null, isUpdateGui);
+                        web.report.createReport(view, response, isUpdateGui);
 					}
 				});
 			};
 
-			web.report.createReport = function(layout, response, xResponse, isUpdateGui) {
+			web.report.createReport = function(layout, response, isUpdateGui) {
 				var xLayout,
 					xColAxis,
 					xRowAxis,
@@ -4554,6 +4554,8 @@ Ext.onReady( function() {
 					getSXLayout = service.layout.getSyncronizedXLayout,
 					getXResponse = service.response.getExtendedResponse,
 					getXAxis = service.layout.getExtendedAxis;
+
+				response = response || ns.app.response;
 
 				getHtml = function(xLayout, xResponse) {
 					xColAxis = getXAxis(xLayout, 'col');
@@ -4566,24 +4568,28 @@ Ext.onReady( function() {
 				xResponse = service.response.getExtendedResponse(xLayout, response);
 				xLayout = getSXLayout(xLayout, xResponse);
 
+				table = getHtml(xLayout, xResponse);
+
 console.log("layout", layout);
 console.log("xResponse", xResponse);
 console.log("xLayout", xLayout);
+console.log("table", table);
 
 				if (layout.sorting) {
-					if (!xResponse) {
-						xResponse = getXResponse(xLayout, response);
-						getHtml(xLayout, xResponse);
-					}
+					//if (!xResponse) {
+						//xResponse = getXResponse(xLayout, response);
+						//getHtml(xLayout, xResponse);
+					//}
 
-					web.report.sort(xLayout, xResponse, xColAxis || ns.app.xColAxis);
-					xLayout = getXLayout(api.layout.Layout(xLayout));
+					xResponse = web.report.sort(xLayout, xResponse, xColAxis);
+					xLayout = getSXLayout(xLayout, xResponse);
+					table = getHtml(xLayout, xResponse);
 				}
 				//else {
 					//xResponse = service.response.getExtendedResponse(xLayout, response);
 				//}
 
-				table = getHtml(xLayout, xResponse);
+
 
 				ns.app.centerRegion.removeAll(true);
 				ns.app.centerRegion.update(table.html);
