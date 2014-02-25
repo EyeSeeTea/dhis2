@@ -1245,7 +1245,7 @@ Ext.onReady( function() {
 				{
 					text: '<b>' + NS.i18n.update + '</b>',
 					handler: function() {
-						var config = ns.core.web.pivot.getLayoutConfig();
+						var config = ns.core.web.report.getLayoutConfig();
 							//layout = ns.core.api.layout.Layout(config);
 
 						if (!config) {
@@ -1612,7 +1612,7 @@ Ext.onReady( function() {
 								element.addClsOnOver('link');
 								element.load = function() {
 									favoriteWindow.hide();
-									ns.core.web.pivot.loadTable(record.data.id);
+									ns.core.web.report.loadReport(record.data.id);
 								};
 								element.dom.setAttribute('onclick', 'Ext.get(this).load();');
 							}
@@ -2169,7 +2169,7 @@ Ext.onReady( function() {
 
 			linkPanel = Ext.create('Ext.panel.Panel', {
 				html: function() {
-					var reportTableUrl = ns.core.init.contextPath + '/dhis-web-pivot/app/index.html?id=' + ns.app.layout.id,
+					var reportTableUrl = ns.core.init.contextPath + '/dhis-web-event-report/app/index.html?id=' + ns.app.layout.id,
 						apiUrl = ns.core.init.contextPath + '/api/reportTables/' + ns.app.layout.id + '/data.html',
 						html = '';
 
@@ -4420,7 +4420,7 @@ Ext.onReady( function() {
 					};
 				}
 
-				web.pivot.createTable(layout, null, xResponse, false);
+				web.report.createReport(layout, null, xResponse, false);
 			};
 
 			web.events.onColumnHeaderMouseOver = function(el) {
@@ -4432,7 +4432,7 @@ Ext.onReady( function() {
 			};
 
 			// report
-			web.report = web.pivot || {};
+			web.report = web.report || {};
 
 			web.report.getLayoutConfig = function() {
 				var view = ns.app.viewport.accordionBody.getView(),
@@ -4539,12 +4539,12 @@ Ext.onReady( function() {
 
                         ns.app.paramString = paramString;
 
-                        web.report.createTable(view, response, null, isUpdateGui);
+                        web.report.createReport(view, response, null, isUpdateGui);
 					}
 				});
 			};
 
-			web.report.createTable = function(layout, response, xResponse, isUpdateGui) {
+			web.report.createReport = function(layout, response, xResponse, isUpdateGui) {
 				var xLayout,
 					xColAxis,
 					xRowAxis,
@@ -4559,12 +4559,13 @@ Ext.onReady( function() {
 					xColAxis = getXAxis(xLayout, 'col');
 					xRowAxis = getXAxis(xLayout, 'row');
 
-					return web.pivot.getHtml(xLayout, xResponse, xColAxis, xRowAxis);
+					return web.report.getHtml(xLayout, xResponse, xColAxis, xRowAxis);
 				};
 
 				xLayout = getXLayout(layout);
 				xResponse = service.response.getExtendedResponse(xLayout, response);
 				xLayout = getSXLayout(xLayout, xResponse);
+
 console.log("layout", layout);
 console.log("xResponse", xResponse);
 console.log("xLayout", xLayout);
@@ -4575,7 +4576,7 @@ console.log("xLayout", xLayout);
 						getHtml(xLayout, xResponse);
 					}
 
-					web.pivot.sort(xLayout, xResponse, xColAxis || ns.app.xColAxis);
+					web.report.sort(xLayout, xResponse, xColAxis || ns.app.xColAxis);
 					xLayout = getXLayout(api.layout.Layout(xLayout));
 				}
 				//else {
@@ -4768,7 +4769,7 @@ console.log("xLayout", xLayout);
 		});
 
 		update = function() {
-			var config = ns.core.web.pivot.getLayoutConfig();
+			var config = ns.core.web.report.getLayoutConfig();
 				//layout = ns.core.api.layout.Layout(config);
 
 			if (!config) {
@@ -5578,13 +5579,13 @@ console.log("xLayout", xLayout);
 						layout;
 
 					if (id) {
-						ns.core.web.pivot.loadTable(id);
+						ns.core.web.report.loadReport(id);
 					}
 					else if (Ext.isString(session) && NS.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
 						layout = ns.core.api.layout.Layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]);
 
 						if (layout) {
-							ns.core.web.pivot.getData(layout, true);
+							ns.core.web.report.getData(layout, true);
 						}
 					}
 

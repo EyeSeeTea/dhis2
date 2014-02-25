@@ -23,10 +23,6 @@ Ext.onReady( function() {
 		// conf
 		(function() {
 			conf.finals = {
-				url: {
-					path_module: '/dhis-web-pivot/',
-					organisationunitchildren_get: 'getOrganisationUnitChildren.action'
-				},
 				dimension: {
 					data: {
 						value: 'data',
@@ -168,7 +164,7 @@ Ext.onReady( function() {
 				multiselect_fill_reportingrates: 315
 			};
 
-			conf.pivot = {
+			conf.report = {
 				digitGroupSeparator: {
 					'comma': ',',
 					'space': ' '
@@ -675,7 +671,7 @@ Ext.onReady( function() {
 					return number;
 				}
 
-				return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.pivot.digitGroupSeparator[separator]);
+				return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.report.digitGroupSeparator[separator]);
 			};
 
 			// color
@@ -1927,10 +1923,10 @@ console.log("getItemName", arguments);
                 alert(msg);
 			};
 
-			// pivot
-			web.pivot = {};
+			// report
+			web.report = {};
 
-			web.pivot.sort = function(xLayout, xResponse, xColAxis) {
+			web.report.sort = function(xLayout, xResponse, xColAxis) {
 				var xResponse = Ext.clone(xResponse),
 					id = xLayout.sorting.id,
 					dim = xLayout.rows[0],
@@ -1977,7 +1973,7 @@ console.log("getItemName", arguments);
 				return xLayout;
 			};
 
-			web.pivot.getHtml = function(xLayout, xResponse, xColAxis, xRowAxis) {
+			web.report.getHtml = function(xLayout, xResponse, xColAxis, xRowAxis) {
 				var getRoundedHtmlValue,
 					getTdHtml,
 					doSubTotals,
@@ -2052,8 +2048,8 @@ console.log("config", config, "metaDataId", metaDataId);
 					rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '" ' : '';
 					htmlValue = config.collapsed ? '' : config.htmlValue || config.value || '';
 					htmlValue = config.type !== 'dimension' ? support.prototype.number.prettyPrint(htmlValue, xLayout.digitGroupSeparator) : htmlValue;
-					displayDensity = conf.pivot.displayDensity[config.displayDensity] || conf.pivot.displayDensity[xLayout.displayDensity];
-					fontSize = conf.pivot.fontSize[config.fontSize] || conf.pivot.fontSize[xLayout.fontSize];
+					displayDensity = conf.report.displayDensity[config.displayDensity] || conf.report.displayDensity[xLayout.displayDensity];
+					fontSize = conf.report.fontSize[config.fontSize] || conf.report.fontSize[xLayout.fontSize];
 
 					cls += config.hidden ? ' td-hidden' : '';
 					cls += config.collapsed ? ' td-collapsed' : '';
