@@ -229,21 +229,21 @@ Ext.onReady( function() {
 					if (config.dimension !== conf.finals.dimension.category.objectName) {
 						var records = [];
 
-						if (!Ext.isArray(config.items)) {
-							console.log('Dimension: items is not an array: ' + config);
-							return;
-						}
+						//if (!Ext.isArray(config.items)) {
+							//console.log('Dimension: items is not an array: ' + config);
+							//return;
+						//}
 
-						for (var i = 0; i < config.items.length; i++) {
-							records.push(api.layout.Record(config.items[i]));
-						}
+						//for (var i = 0; i < config.items.length; i++) {
+							//records.push(api.layout.Record(config.items[i]));
+						//}
 
-						config.items = Ext.Array.clean(records);
+						//config.items = Ext.Array.clean(records);
 
-						if (!config.items.length) {
-							console.log('Dimension: has no valid items: ' + config);
-							return;
-						}
+						//if (!config.items.length) {
+							//console.log('Dimension: has no valid items: ' + config);
+							//return;
+						//}
 					}
 
 					return config;
@@ -1724,7 +1724,10 @@ Ext.onReady( function() {
 			// report
 			web.report = {};
 
-			web.report.sort = function(xLayout, xResponse, xColAxis) {
+				// aggregate
+			web.report.aggregate = {};
+
+			web.report.aggregate.sort = function(xLayout, xResponse, xColAxis) {
 				var xResponse = Ext.clone(xResponse),
 					condoId = xLayout.sorting.id,
 					name = xLayout.rows[0].dimension,
@@ -1804,7 +1807,7 @@ Ext.onReady( function() {
 				return xResponse;
 			};
 
-			web.report.getHtml = function(xLayout, xResponse, xColAxis, xRowAxis) {
+			web.report.aggregate.getHtml = function(xLayout, xResponse, xColAxis, xRowAxis) {
 				var getRoundedHtmlValue,
 					getTdHtml,
 					doSubTotals,
@@ -2517,6 +2520,17 @@ Ext.onReady( function() {
 						xRowAxis: xRowAxis
 					};
 				}();
+			};
+
+				// query
+			web.report.query = {};
+
+			web.report.query.sort = function() {
+
+			};
+
+			web.report.query.getHtml = function(response) {
+
 			};
 
 		}());

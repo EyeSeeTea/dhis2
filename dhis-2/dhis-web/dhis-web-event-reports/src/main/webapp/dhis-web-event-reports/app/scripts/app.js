@@ -4623,7 +4623,8 @@ Ext.onReady( function() {
 				};
 
 				generator.query = function() {
-					var ignoreKeys = ['label', 'value', 'nameColumnMap', 'psi', 'ps', 'longitude', 'latitude', 'eventdate', 'ou', 'oucode', 'ouname'];
+					var ignoreKeys = ['psi', 'ps', 'ou', 'oucode'];
+
 
 				};
 
