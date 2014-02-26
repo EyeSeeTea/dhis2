@@ -622,10 +622,10 @@ Ext.onReady( function() {
 
 		colStore = getStore();
 		ns.app.stores.col = colStore;
+		colStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
 
 		rowStore = getStore();
 		ns.app.stores.row = rowStore;
-		rowStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
 
 		filterStore = getStore();
 		ns.app.stores.filter = filterStore;
@@ -2684,7 +2684,7 @@ Ext.onReady( function() {
                     }
                 }
 
-                ns.app.layoutWindow.colStore.add(dataElements[dataElements.length - 1]);
+                ns.app.layoutWindow.rowStore.add(dataElements[dataElements.length - 1]);
             }
 
 			// panel, store
@@ -4624,7 +4624,7 @@ Ext.onReady( function() {
 
 				generator.query = function() {
 					var ignoreKeys = ['psi', 'ps', 'ou', 'oucode'],
-						table = web.report.query.getHtml(response, ignoreKeys);
+						table = web.report.query.getHtml(layout, response, ignoreKeys);
 
 					ns.app.centerRegion.removeAll(true);
 					ns.app.centerRegion.update(table.html);

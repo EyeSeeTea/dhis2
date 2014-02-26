@@ -2529,13 +2529,33 @@ Ext.onReady( function() {
 
 			};
 
-			web.report.query.getHtml = function(response, ignoreKeys) {
+			web.report.query.format = function(str) {
+				var value = new Date(str);
+
+				if (value.toString() !== 'Invalid Date') {
+					return value;
+				}
+
+				value = parseFloat(str);
+
+				if (Ext.isNumber(value)) {
+					return value;
+				}
+
+				return str;
+			};
+
+			web.report.query.getHtml = function(layout, response, ignoreKeys) {
 				var headerIndexes = [],
 					headers = response.headers,
 					rows = response.rows,
-					html = '<table class="pivot">';
+					tableCls = 'pivot',
+					html = '';
 
-				html += '<tr>';
+				tableCls += layout.displayDensity ? ' ' + layout.displayDensity : '';
+				tableCls += layout.fontSize ? ' ' + layout.fontSize : '';
+
+				html += '<table class="' + tableCls + '"><tr>';
 
 				// get header indexes
 				for (var i = 0, header; i < headers.length; i++) {
@@ -2555,12 +2575,10 @@ Ext.onReady( function() {
 					row = rows[i];
 					html += '<tr>';
 
-					for (var j = 0, value; j < headerIndexes.length; j++) {
-						value = row[headerIndexes[j]];
+					for (var j = 0, str, value; j < headerIndexes.length; j++) {
+						str = row[headerIndexes[j]];
 
-						if (Ext.isNumber(parseFloat(value))) {
-							value = parseFloat(value);
-						}
+						value = web.report.query.format(str);
 
 						html += '<td class="pivot-value align-left">' + value + '</td>';
 					}
