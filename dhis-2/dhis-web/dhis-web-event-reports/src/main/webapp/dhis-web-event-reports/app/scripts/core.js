@@ -2529,8 +2529,50 @@ Ext.onReady( function() {
 
 			};
 
-			web.report.query.getHtml = function(response) {
+			web.report.query.getHtml = function(response, ignoreKeys) {
+				var headerIndexes = [],
+					headers = response.headers,
+					rows = response.rows,
+					html = '<table class="pivot">';
 
+				html += '<tr>';
+
+				// get header indexes
+				for (var i = 0, header; i < headers.length; i++) {
+					header = headers[i];
+
+					if (!Ext.Array.contains(ignoreKeys, header.name)) {
+						headerIndexes.push(i);
+
+						html += '<td class="pivot-dim td-sortable">' + header.column + '</td>';
+					}
+				}
+
+				html += '</tr>';
+
+				// rows
+				for (var i = 0, row; i < rows.length; i++) {
+					row = rows[i];
+					html += '<tr>';
+
+					for (var j = 0, value; j < headerIndexes.length; j++) {
+						value = row[headerIndexes[j]];
+
+						if (Ext.isNumber(parseFloat(value))) {
+							value = parseFloat(value);
+						}
+
+						html += '<td class="pivot-value align-left">' + value + '</td>';
+					}
+
+					html += '</tr>';
+				}
+
+				html += '</table>';
+
+				return {
+					html: html
+				};
 			};
 
 		}());

@@ -4573,7 +4573,7 @@ Ext.onReady( function() {
 						xColAxis = getXAxis(xLayout, 'col');
 						xRowAxis = getXAxis(xLayout, 'row');
 
-						return web.report.getHtml(xLayout, xResponse, xColAxis, xRowAxis);
+						return web.report.aggregate.getHtml(xLayout, xResponse, xColAxis, xRowAxis);
 					};
 
 					xLayout = getXLayout(layout);
@@ -4588,7 +4588,7 @@ Ext.onReady( function() {
 					console.log("table", table);
 
 					if (layout.sorting) {
-						xResponse = web.report.sort(xLayout, xResponse, xColAxis);
+						xResponse = web.report.aggregate.sort(xLayout, xResponse, xColAxis);
 						xLayout = getSXLayout(xLayout, xResponse);
 						table = getHtml(xLayout, xResponse);
 					}
@@ -4623,9 +4623,13 @@ Ext.onReady( function() {
 				};
 
 				generator.query = function() {
-					var ignoreKeys = ['psi', 'ps', 'ou', 'oucode'];
+					var ignoreKeys = ['psi', 'ps', 'ou', 'oucode'],
+						table = web.report.query.getHtml(response, ignoreKeys);
 
+					ns.app.centerRegion.removeAll(true);
+					ns.app.centerRegion.update(table.html);
 
+					web.mask.hide(ns.app.centerRegion);
 				};
 
 				generator[layout.type]();
@@ -4637,6 +4641,7 @@ Ext.onReady( function() {
 	createViewport = function() {
         var caseButton,
 			aggregateButton,
+			paramButtonMap = {},
 			typeToolbar,
 			accordionBody,
 			accordion,
@@ -4703,6 +4708,7 @@ Ext.onReady( function() {
 
         aggregateButton = Ext.create('Ext.button.Button', {
 			flex: 1,
+			param: 'aggregate',
             text: '<b>Aggregated</b><br/>Aggregated event report',
             pressed: true,
             listeners: {
@@ -4711,9 +4717,11 @@ Ext.onReady( function() {
 				}
 			}
         });
+        paramButtonMap[aggregateButton.param] = aggregateButton;
 
 		caseButton = Ext.create('Ext.button.Button', {
 			flex: 1,
+			param: 'query',
             text: '<b>Case-based</b><br/>Case-based event report',
 			listeners: {
 				mouseout: function(cmp) {
@@ -4721,8 +4729,27 @@ Ext.onReady( function() {
 				}
 			}
         });
+        paramButtonMap[caseButton.param] = caseButton;
 
-        typeToolbar = Ext.create('Ext.toolbar.Toolbar', {
+		typeHandler = function(param) {
+			var button = paramButtonMap[param];
+
+			if (!button.pressed) {
+				button.toggle();
+			}
+
+			if (param === 'aggregate') {
+				layoutButton.enable();
+			}
+
+			if (param === 'query') {
+				layoutButton.disable();
+			}
+
+			update();
+		};
+
+		typeToolbar = Ext.create('Ext.toolbar.Toolbar', {
 			style: 'padding-top:1px; background:#f5f5f5; border:0 none',
             height: 41,
             getType: function() {
@@ -4733,9 +4760,7 @@ Ext.onReady( function() {
                 toggleGroup: 'mode',
 				cls: 'x-btn-default-toolbar-small-over',
                 handler: function(b) {
-					if (!b.pressed) {
-						b.toggle();
-					}
+					typeHandler(b.param);
 				}
 			},
 			items: [
