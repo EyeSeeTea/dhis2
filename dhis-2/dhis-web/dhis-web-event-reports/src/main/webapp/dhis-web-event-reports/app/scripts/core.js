@@ -1505,7 +1505,6 @@ Ext.onReady( function() {
 
 					// collect ids from response
 					for (var j = 0, id; j < response.rows.length; j++) {
-						//id = response.rows[j][i] || emptyId;
 						ids.push(response.rows[j][i] || emptyId);
 					}
 
