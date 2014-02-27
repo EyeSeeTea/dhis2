@@ -4388,29 +4388,28 @@ Ext.onReady( function() {
 				}
 			};
 
-			web.events.setColumnHeaderMouseHandlers = function(layout, xLayout, xResponse) {
+			web.events.setColumnHeaderMouseHandlers = function(layout, xResponse) {
 				if (Ext.isArray(xResponse.sortableIdObjects)) {
 					for (var i = 0, obj, el; i < xResponse.sortableIdObjects.length; i++) {
 						obj = xResponse.sortableIdObjects[i];
 						el = Ext.get(obj.uuid);
 
 						el.dom.layout = layout;
-						el.dom.xLayout = xLayout;
 						el.dom.xResponse = xResponse;
 						el.dom.metaDataId = obj.id;
 						el.dom.onColumnHeaderMouseClick = web.events.onColumnHeaderMouseClick;
 						el.dom.onColumnHeaderMouseOver = web.events.onColumnHeaderMouseOver;
 						el.dom.onColumnHeaderMouseOut = web.events.onColumnHeaderMouseOut;
 
-						el.dom.setAttribute('onclick', 'this.onColumnHeaderMouseClick(this.layout, this.xLayout, this.xResponse, this.metaDataId)');
+						el.dom.setAttribute('onclick', 'this.onColumnHeaderMouseClick(this.layout, this.xResponse, this.metaDataId)');
 						el.dom.setAttribute('onmouseover', 'this.onColumnHeaderMouseOver(this)');
 						el.dom.setAttribute('onmouseout', 'this.onColumnHeaderMouseOut(this)');
 					}
 				}
 			};
 
-			web.events.onColumnHeaderMouseClick = function(layout, xLayout, xResponse, id) {
-				if (xLayout.sorting && xLayout.sorting.id === id) {
+			web.events.onColumnHeaderMouseClick = function(layout, xResponse, id) {
+				if (layout.sorting && layout.sorting.id === id) {
 					layout.sorting.direction = support.prototype.str.toggleDirection(layout.sorting.direction);
 				}
 				else {
@@ -4564,7 +4563,7 @@ Ext.onReady( function() {
 						getHtml,
 						getXLayout = service.layout.getExtendedLayout,
 						getSXLayout = service.layout.getSyncronizedXLayout,
-						getXResponse = service.response.getExtendedResponse,
+						getXResponse = service.response.aggregate.getExtendedResponse,
 						getXAxis = service.layout.getExtendedAxis;
 
 					response = response || ns.app.response;
@@ -4577,7 +4576,7 @@ Ext.onReady( function() {
 					};
 
 					xLayout = getXLayout(layout);
-					xResponse = service.response.getExtendedResponse(xLayout, response);
+					xResponse = service.response.aggregate.getExtendedResponse(xLayout, response);
 					xLayout = getSXLayout(xLayout, xResponse);
 
 					table = getHtml(xLayout, xResponse);
@@ -4608,7 +4607,7 @@ Ext.onReady( function() {
 
 					if (NS.isSessionStorage) {
 						//web.events.setValueMouseHandlers(layout, response || xResponse, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
-						web.events.setColumnHeaderMouseHandlers(layout, xLayout, xResponse);
+						web.events.setColumnHeaderMouseHandlers(layout, xResponse);
 						web.storage.session.set(layout, 'table');
 					}
 
@@ -4624,13 +4623,19 @@ Ext.onReady( function() {
 
 				generator.query = function() {
 					var ignoreKeys = ['psi', 'ps', 'ou', 'oucode'],
-						table = web.report.query.getHtml(layout, response, ignoreKeys);
+						xResponse = service.response.query.getExtendedResponse(response, ignoreKeys),
+						table = web.report.query.getHtml(layout, xResponse);
+
+					if (layout.sorting) {
+						xResponse = web.report.query.sort(layout, xResponse);
+						table = web.report.query.getHtml(layout, xResponse);
+					}
 
 					ns.app.centerRegion.removeAll(true);
 					ns.app.centerRegion.update(table.html);
 
 					if (NS.isSessionStorage) {
-						web.events.setColumnHeaderMouseHandlers(layout, xLayout, response);
+						web.events.setColumnHeaderMouseHandlers(layout, response);
 					}
 
 					web.mask.hide(ns.app.centerRegion);

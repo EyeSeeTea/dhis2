@@ -554,18 +554,24 @@ Ext.onReady( function() {
 			};
 
 			support.prototype.array.sort = function(array, direction, key) {
-				// accepts [number], [string], [{key: number}], [{key: string}]
+				// supports [number], [string], [{key: number}], [{key: string}], [[string]], [[number]]
 
 				if (!support.prototype.array.getLength(array)) {
 					return;
 				}
 
-				key = key || 'name';
+				key = !!key || Ext.isNumber(key) ? key : 'name';
 
 				array.sort( function(a, b) {
 
 					// if object, get the property values
-					if (Ext.isObject(a) && Ext.isObject(b) && key) {
+					if (Ext.isObject(a) && Ext.isObject(b)) {
+						a = a[key];
+						b = b[key];
+					}
+
+					// if array, get from the right index
+					if (Ext.isArray(a) && Ext.isArray(b)) {
 						a = a[key];
 						b = b[key];
 					}
@@ -1483,7 +1489,10 @@ Ext.onReady( function() {
 			// response
 			service.response = {};
 
-			service.response.getExtendedResponse = function(xLayout, response) {
+				// aggregate
+			service.response.aggregate = {};
+
+			service.response.aggregate.getExtendedResponse = function(xLayout, response) {
 				var allIds = [],
                     emptyId = 'N/A',
                     names,
@@ -1584,6 +1593,30 @@ Ext.onReady( function() {
 				}
 
 				return response;
+			};
+
+				// query
+			service.response.query = {};
+
+			service.response.query.getExtendedResponse = function(response, ignoreKeys) {
+				var xResponse = Ext.clone(response),
+					headers = xResponse.headers,
+					dimensionHeaders = [];
+
+				for (var i = 0, header; i < headers.length; i++) {
+					header = headers[i];
+
+					header.index = i;
+
+					if (!Ext.Array.contains(ignoreKeys, header.name)) {
+						dimensionHeaders.push(header);
+					}
+				}
+
+				xResponse.dimensionHeaders = dimensionHeaders;
+				xResponse.ignoreKeys = ignoreKeys;
+
+				return xResponse;
 			};
 		}());
 
@@ -1736,18 +1769,20 @@ Ext.onReady( function() {
 					objects = [],
 					layout;
 
-				//dim.ids = [];
-
 				// relative id?
-				if ((Ext.isString(condoId) && condoId.toLowerCase() === 'total') || condoId === 0) {
-					condoId = 'total_';
+				if (Ext.isString(condoId)) {
+					condoId = condoId.toLowerCase() === 'total' ? 'total_' : condoId;
 				}
-				else if (Ext.isNumber(parseInt(condoId))) {
-					condoId = xColAxis.ids[parseInt(condoId) - 1];
-
-					if (!condoId) {
-						return xResponse;
+				else if (Ext.isNumber(condoId)) {
+					if (condoId === 0) {
+						condoId = 'total_';
 					}
+					else {
+						condoId = xColAxis.ids[parseInt(condoId) - 1];
+					}
+				}
+				else {
+					return xResponse;
 				}
 // condoId === abccbc13432452
 
@@ -2524,7 +2559,16 @@ Ext.onReady( function() {
 				// query
 			web.report.query = {};
 
-			web.report.query.sort = function() {
+			web.report.query.sort = function(layout, xResponse) {
+				var id = layout.sorting.id,
+					headers = response.headers,
+					index;
+console.log("sorting id", id);
+				//for (var i = 0; i < headers.length; i++) {
+					//if (headers[i].
+
+
+
 
 
 			};
@@ -2543,12 +2587,13 @@ Ext.onReady( function() {
 				return str;
 			};
 
-			web.report.query.getHtml = function(layout, response, ignoreKeys) {
-				var headerIndexes = [],
-					headers = response.headers,
-					rows = response.rows,
+			web.report.query.getHtml = function(layout, xResponse) {
+				var dimensionHeaders = xResponse.dimensionHeaders,
+					rows = xResponse.rows,
 					tableCls = 'pivot',
 					html = '';
+
+				xResponse.sortableIdObjects = [];
 
 				tableCls += layout.displayDensity ? ' ' + layout.displayDensity : '';
 				tableCls += layout.fontSize ? ' ' + layout.fontSize : '';
@@ -2556,14 +2601,16 @@ Ext.onReady( function() {
 				html += '<table class="' + tableCls + '"><tr>';
 
 				// get header indexes
-				for (var i = 0, header; i < headers.length; i++) {
-					header = headers[i];
+				for (var i = 0, header, uuid; i < dimensionHeaders.length; i++) {
+					header = dimensionHeaders[i];
+					uuid = Ext.data.IdGenerator.get('uuid').generate();
 
-					if (!Ext.Array.contains(ignoreKeys, header.name)) {
-						headerIndexes.push(i);
+					html += '<td id="' + uuid + '" class="pivot-dim td-sortable">' + header.column + '</td>';
 
-						html += '<td class="pivot-dim td-sortable">' + header.column + '</td>';
-					}
+					xResponse.sortableIdObjects.push({
+						id: header.name,
+						uuid: uuid
+					});
 				}
 
 				html += '</tr>';
@@ -2573,11 +2620,9 @@ Ext.onReady( function() {
 					row = rows[i];
 					html += '<tr>';
 
-					for (var j = 0, str, value; j < headerIndexes.length; j++) {
-						str = row[headerIndexes[j]];
-
+					for (var j = 0, str, value; j < dimensionHeaders.length; j++) {
+						str = row[dimensionHeaders[j].index];
 						value = web.report.query.format(str);
-
 						html += '<td class="pivot-value align-left">' + value + '</td>';
 					}
 
