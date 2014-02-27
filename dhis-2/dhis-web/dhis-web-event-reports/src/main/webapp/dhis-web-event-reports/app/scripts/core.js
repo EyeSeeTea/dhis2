@@ -2529,16 +2529,14 @@ Ext.onReady( function() {
 			};
 
 			web.report.query.format = function(str) {
-				var value = new Date(str);
+				var n = parseFloat(str);
 
-				if (value.toString() !== 'Invalid Date') {
-					return value;
+				if (!Ext.isNumber(n)) {
+					return str;
 				}
 
-				value = parseFloat(str);
-
-				if (Ext.isNumber(value)) {
-					return value;
+				if (new Date(str).toString() === 'Invalid Date') {
+					return n;
 				}
 
 				return str;
