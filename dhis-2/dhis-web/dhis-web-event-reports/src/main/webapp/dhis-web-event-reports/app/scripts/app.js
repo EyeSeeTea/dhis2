@@ -4388,27 +4388,28 @@ Ext.onReady( function() {
 				}
 			};
 
-			web.events.setColumnHeaderMouseHandlers = function(layout, xResponse) {
+			web.events.setColumnHeaderMouseHandlers = function(layout, response, xResponse) {
 				if (Ext.isArray(xResponse.sortableIdObjects)) {
 					for (var i = 0, obj, el; i < xResponse.sortableIdObjects.length; i++) {
 						obj = xResponse.sortableIdObjects[i];
 						el = Ext.get(obj.uuid);
 
 						el.dom.layout = layout;
+						el.dom.response = response;
 						el.dom.xResponse = xResponse;
 						el.dom.metaDataId = obj.id;
 						el.dom.onColumnHeaderMouseClick = web.events.onColumnHeaderMouseClick;
 						el.dom.onColumnHeaderMouseOver = web.events.onColumnHeaderMouseOver;
 						el.dom.onColumnHeaderMouseOut = web.events.onColumnHeaderMouseOut;
 
-						el.dom.setAttribute('onclick', 'this.onColumnHeaderMouseClick(this.layout, this.xResponse, this.metaDataId)');
+						el.dom.setAttribute('onclick', 'this.onColumnHeaderMouseClick(this.layout, this.response, this.metaDataId)');
 						el.dom.setAttribute('onmouseover', 'this.onColumnHeaderMouseOver(this)');
 						el.dom.setAttribute('onmouseout', 'this.onColumnHeaderMouseOut(this)');
 					}
 				}
 			};
 
-			web.events.onColumnHeaderMouseClick = function(layout, xResponse, id) {
+			web.events.onColumnHeaderMouseClick = function(layout, response, id) {
 				if (layout.sorting && layout.sorting.id === id) {
 					layout.sorting.direction = support.prototype.str.toggleDirection(layout.sorting.direction);
 				}
@@ -4419,7 +4420,7 @@ Ext.onReady( function() {
 					};
 				}
 
-				web.report.createReport(layout, xResponse);
+				web.report.createReport(layout, response);
 			};
 
 			web.events.onColumnHeaderMouseOver = function(el) {
@@ -4582,6 +4583,7 @@ Ext.onReady( function() {
 					table = getHtml(xLayout, xResponse);
 
 					console.log("layout", layout);
+					console.log("response", response);
 					console.log("xResponse", xResponse);
 					console.log("xLayout", xLayout);
 					console.log("table", table);
@@ -4607,7 +4609,7 @@ Ext.onReady( function() {
 
 					if (NS.isSessionStorage) {
 						//web.events.setValueMouseHandlers(layout, response || xResponse, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
-						web.events.setColumnHeaderMouseHandlers(layout, xResponse);
+						web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
 						web.storage.session.set(layout, 'table');
 					}
 
@@ -4637,7 +4639,7 @@ Ext.onReady( function() {
 					ns.app.centerRegion.update(table.html);
 
 					if (NS.isSessionStorage) {
-						web.events.setColumnHeaderMouseHandlers(layout, xResponse);
+						web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
 					}
 
 					web.mask.hide(ns.app.centerRegion);

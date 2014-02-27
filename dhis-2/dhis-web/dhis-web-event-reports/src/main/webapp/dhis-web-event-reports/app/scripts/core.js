@@ -1764,8 +1764,7 @@ Ext.onReady( function() {
 			web.report.aggregate = {};
 
 			web.report.aggregate.sort = function(xLayout, xResponse, xColAxis) {
-				var xResponse = Ext.clone(xResponse),
-					condoId = xLayout.sorting.id,
+				var condoId = xLayout.sorting.id,
 					name = xLayout.rows[0].dimension,
 					ids = xResponse.nameHeaderMap[name].ids,
 					valueMap = xResponse.idValueMap,
@@ -1789,6 +1788,7 @@ Ext.onReady( function() {
 					return xResponse;
 				}
 // condoId === abccbc13432452
+console.log("condoId", condoId);
 
 				// collect values
 				for (var i = 0, key, value; i < ids.length; i++) {
@@ -1805,42 +1805,6 @@ Ext.onReady( function() {
 
 				// new id order
 				xResponse.nameHeaderMap[name].ids = Ext.Array.pluck(objects, 'id');
-
-
-				//for (var i = 0; i < dim.items.length; i++) {
-					//dim.ids.push(dim.items[i].id);
-				//}
-
-				// update id
-				//if (id !== xLayout.sorting.id) {
-					//xLayout.sorting.id = id;
-				//}
-
-
-
-					//item = dim.items[i];
-					//key = id + item.id;
-					//value = parseFloat(valueMap[key]);
-
-					//item.value = Ext.isNumber(value) ? value : (Number.MAX_VALUE * -1);
-				//}
-
-				// collect values
-				//for (var i = 0, item, key, value; i < dim.items.length; i++) {
-					//item = dim.items[i];
-					//key = id + item.id;
-					//value = parseFloat(valueMap[key]);
-
-					//item.value = Ext.isNumber(value) ? value : (Number.MAX_VALUE * -1);
-				//}
-
-				//// sort
-				//support.prototype.array.sort(dim.items, direction, 'value');
-
-				//// new id order
-				//for (var i = 0; i < dim.items.length; i++) {
-					//dim.ids.push(dim.items[i].id);
-				//}
 
 				return xResponse;
 			};
