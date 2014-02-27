@@ -2526,6 +2526,7 @@ Ext.onReady( function() {
 
 			web.report.query.sort = function() {
 
+
 			};
 
 			web.report.query.format = function(str) {

@@ -4629,6 +4629,10 @@ Ext.onReady( function() {
 					ns.app.centerRegion.removeAll(true);
 					ns.app.centerRegion.update(table.html);
 
+					if (NS.isSessionStorage) {
+						web.events.setColumnHeaderMouseHandlers(layout, xLayout, response);
+					}
+
 					web.mask.hide(ns.app.centerRegion);
 				};
 
