@@ -1787,8 +1787,6 @@ Ext.onReady( function() {
 				else {
 					return xResponse;
 				}
-// condoId === abccbc13432452
-console.log("condoId", condoId);
 
 				// collect values
 				for (var i = 0, key, value; i < ids.length; i++) {
