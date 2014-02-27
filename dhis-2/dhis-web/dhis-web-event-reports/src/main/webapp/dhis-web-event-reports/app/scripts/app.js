@@ -4419,7 +4419,7 @@ Ext.onReady( function() {
 					};
 				}
 
-				web.report.createReport(layout);
+				web.report.createReport(layout, xResponse);
 			};
 
 			web.events.onColumnHeaderMouseOver = function(el) {
@@ -4622,9 +4622,11 @@ Ext.onReady( function() {
 				};
 
 				generator.query = function() {
-					var ignoreKeys = ['psi', 'ps', 'ou', 'oucode'],
-						xResponse = service.response.query.getExtendedResponse(response, ignoreKeys),
-						table = web.report.query.getHtml(layout, xResponse);
+					var ignoreKeys = ['psi', 'ps', 'ou', 'oucode'];
+
+					var xResponse = service.response.query.getExtendedResponse(response, ignoreKeys);
+
+					var	table = web.report.query.getHtml(layout, xResponse);
 
 					if (layout.sorting) {
 						xResponse = web.report.query.sort(layout, xResponse);
@@ -4635,7 +4637,7 @@ Ext.onReady( function() {
 					ns.app.centerRegion.update(table.html);
 
 					if (NS.isSessionStorage) {
-						web.events.setColumnHeaderMouseHandlers(layout, response);
+						web.events.setColumnHeaderMouseHandlers(layout, xResponse);
 					}
 
 					web.mask.hide(ns.app.centerRegion);

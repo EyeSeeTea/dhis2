@@ -1601,7 +1601,8 @@ Ext.onReady( function() {
 			service.response.query.getExtendedResponse = function(response, ignoreKeys) {
 				var xResponse = Ext.clone(response),
 					headers = xResponse.headers,
-					dimensionHeaders = [];
+					dimensionHeaders = [],
+					nameHeaderMap = {};
 
 				for (var i = 0, header; i < headers.length; i++) {
 					header = headers[i];
@@ -1611,9 +1612,12 @@ Ext.onReady( function() {
 					if (!Ext.Array.contains(ignoreKeys, header.name)) {
 						dimensionHeaders.push(header);
 					}
+
+					nameHeaderMap[header.name] = header;
 				}
 
 				xResponse.dimensionHeaders = dimensionHeaders;
+				xResponse.nameHeaderMap = nameHeaderMap;
 				xResponse.ignoreKeys = ignoreKeys;
 
 				return xResponse;
@@ -2561,16 +2565,13 @@ Ext.onReady( function() {
 
 			web.report.query.sort = function(layout, xResponse) {
 				var id = layout.sorting.id,
-					headers = response.headers,
-					index;
-console.log("sorting id", id);
-				//for (var i = 0; i < headers.length; i++) {
-					//if (headers[i].
+					direction = layout.sorting ? layout.sorting.direction : 'DESC',
+					index = xResponse.nameHeaderMap[id].index,
+					rows = xResponse.rows;
 
+				support.prototype.array.sort(rows, direction, index);
 
-
-
-
+				return xResponse;
 			};
 
 			web.report.query.format = function(str) {
