@@ -11,7 +11,7 @@
     <table class="listTable" width="100%">
         <tr>
             <th>$i18n.getString( "validation_rule" )</th>                
-            <th>$i18n.getString( "expression" )</th>
+            <th>$i18n.getString( "instruction" )</th>
             <th style="width:65px">$i18n.getString( "left_side" )</th>
             <th style="width:65px">$i18n.getString( "operator" )</th>
             <th style="width:65px">$i18n.getString( "right_side" )</th>
