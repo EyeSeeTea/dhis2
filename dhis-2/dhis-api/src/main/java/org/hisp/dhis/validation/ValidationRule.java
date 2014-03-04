@@ -268,15 +268,24 @@ public class ValidationRule
         return false;
     }
     
+    /**
+     * Returns the instruction if it is not null or empty, if not returns the
+     * left side description, operator and right side description if not null or
+     * empty, if not returns null.
+     */
     public String getInstructionFallback()
     {
         if ( instruction != null && !instruction.isEmpty() )
         {
             return instruction;
         }
+        else if ( leftSide != null && rightSide != null )
+        {
+            return leftSide.getDescription() + " " + operator.getMathematicalOperator() + " " + rightSide.getDescription();
+        }
         else
         {
-            reutrn 
+            return null;
         }
     }
 
