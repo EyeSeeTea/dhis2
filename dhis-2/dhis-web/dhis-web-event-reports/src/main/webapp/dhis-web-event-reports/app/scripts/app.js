@@ -4897,8 +4897,7 @@ Ext.onReady( function() {
 				};
 
 				map.query = function() {
-					var ignoreKeys = ['psi', 'ps', 'ou', 'oucode'],
-                        xResponse = service.response.query.getExtendedResponse(response, ignoreKeys),
+					var xResponse = service.response.query.getExtendedResponse(layout, response),
                         table = web.report.query.getHtml(layout, xResponse);
 
 					if (layout.sorting) {
