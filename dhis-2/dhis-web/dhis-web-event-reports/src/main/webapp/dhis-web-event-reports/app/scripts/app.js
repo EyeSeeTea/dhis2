@@ -1056,9 +1056,7 @@ Ext.onReady( function() {
 
 		getSetup = function() {
 			return {
-				col: getStoreKeys(colStore),
-				row: getStoreKeys(rowStore),
-				filter: getStoreKeys(filterStore)
+				col: getStoreKeys(colStore)
 			};
 		};
 
@@ -1068,7 +1066,7 @@ Ext.onReady( function() {
         };
 
         removeDimension = function(dataElementId) {
-            var stores = [dimensionStore, colStore, rowStore, filterStore];
+            var stores = [dimensionStore, colStore];
 
             for (var i = 0, store, index; i < stores.length; i++) {
                 store = stores[i];
@@ -2755,7 +2753,6 @@ Ext.onReady( function() {
 					load(attributes, item);
 				}
 			};
-console.log("program.storage", program.storage);
 
 			// attributes
 			if (programId) {
@@ -2908,6 +2905,7 @@ console.log("program.storage", program.storage);
 					dataElementsByStageStore.sort();
 
                     ns.app.aggregateLayoutWindow.removeDimension(element.id);
+                    ns.app.queryLayoutWindow.removeDimension(element.id);
 				}
 			};
 
@@ -2937,8 +2935,6 @@ console.log("program.storage", program.storage);
                         dataElements.push(item);
                     }
                 }
-
-                ns.app.aggregateLayoutWindow.rowStore.add(dataElements[dataElements.length - 1]);
             }
 
 			// panel, store
@@ -2946,6 +2942,9 @@ console.log("program.storage", program.storage);
 				element = dataElements[i];
 
 				addUxFromDataElement(element);
+
+                ns.app.aggregateLayoutWindow.rowStore.add(element);
+                ns.app.queryLayoutWindow.colStore.add(element);
 			}
         };
 
@@ -4689,38 +4688,58 @@ console.log("program.storage", program.storage);
 			web.report = web.report || {};
 
 			web.report.getLayoutConfig = function() {
-				var view = ns.app.viewport.accordionBody.getView(),
-					options = ns.app.optionsWindow.getOptions(),
-					columnDimNames = ns.app.aggregateLayoutWindow.colStore.getDimensionNames(),
-					rowDimNames = ns.app.aggregateLayoutWindow.rowStore.getDimensionNames(),
-					filterDimNames = ns.app.aggregateLayoutWindow.filterStore.getDimensionNames();
+                var map = {},
+                    type = ns.app.typeToolbar.getType(),
+                    view = ns.app.viewport.accordionBody.getView(),
+                    options = ns.app.optionsWindow.getOptions();
 
-				if (!view) {
-					return;
-				}
+                map.aggregate = function() {
+                    var columnDimNames = ns.app.aggregateLayoutWindow.colStore.getDimensionNames(),
+                        rowDimNames = ns.app.aggregateLayoutWindow.rowStore.getDimensionNames(),
+                        filterDimNames = ns.app.aggregateLayoutWindow.filterStore.getDimensionNames();
 
-				Ext.applyIf(view, options);
+                    view.columns = [];
+                    view.rows = [];
+                    view.filters = [];
 
-				view.type = ns.app.typeToolbar.getType();
+                    for (var i = 0, dimNameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [view.columns, view.rows, view.filters], dimNameArray; i < dimNameArrays.length; i++) {
+                        dimNameArray = dimNameArrays[i];
 
-				view.columns = [];
-				view.rows = [];
-				view.filters = [];
+                        for (var j = 0, dimName; j < dimNameArray.length; j++) {
+                            dimName = dimNameArray[j];
 
-				for (var i = 0, dimNameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [view.columns, view.rows, view.filters], dimNameArray; i < dimNameArrays.length; i++) {
-					dimNameArray = dimNameArrays[i];
+                            axes[i].push({
+                                dimension: dimName
+                            });
+                        }
+                    }
 
-					for (var j = 0, dimName; j < dimNameArray.length; j++) {
-						dimName = dimNameArray[j];
+                    return view;
+                };
 
-						axes[i].push({
-							dimension: dimName
-						});
-					}
-				}
+                map.query = function() {
+                    var columnDimNames = ns.app.queryLayoutWindow.colStore.getDimensionNames();
 
-				return view;
-			};
+                    view.columns = [];
+
+                    for (var i = 0; i < columnDimNames.length; i++) {
+                        view.columns.push({
+                            dimension: columnDimNames[i]
+                        });
+                    }
+
+                    return view;
+                };
+
+                if (!view) {
+                    return;
+                }
+
+                Ext.applyIf(view, options);
+                view.type = type;
+
+                return map[type]();
+            };
 
 			web.report.loadReport = function(id) {
 				if (!Ext.isString(id)) {
@@ -4808,9 +4827,9 @@ console.log("program.storage", program.storage);
 			};
 
 			web.report.createReport = function(layout, response, isUpdateGui) {
-				var generator = {};
+				var map = {};
 
-				generator.aggregate = function() {
+				map.aggregate = function() {
 					var xLayout,
 						xColAxis,
 						xRowAxis,
@@ -4877,12 +4896,10 @@ console.log("program.storage", program.storage);
 					}
 				};
 
-				generator.query = function() {
-					var ignoreKeys = ['psi', 'ps', 'ou', 'oucode'];
-
-					var xResponse = service.response.query.getExtendedResponse(response, ignoreKeys);
-
-					var	table = web.report.query.getHtml(layout, xResponse);
+				map.query = function() {
+					var ignoreKeys = ['psi', 'ps', 'ou', 'oucode'],
+                        xResponse = service.response.query.getExtendedResponse(response, ignoreKeys),
+                        table = web.report.query.getHtml(layout, xResponse);
 
 					if (layout.sorting) {
 						xResponse = web.report.query.sort(layout, xResponse);
@@ -4899,7 +4916,7 @@ console.log("program.storage", program.storage);
 					web.mask.hide(ns.app.centerRegion);
 				};
 
-				generator[layout.type]();
+				map[layout.type]();
 			};
 		}());
 	};
@@ -4910,6 +4927,7 @@ console.log("program.storage", program.storage);
 			aggregateButton,
 			paramButtonMap = {},
 			typeToolbar,
+            onTypeClick,
 			accordionBody,
 			accordion,
 			westRegion,
@@ -4998,7 +5016,32 @@ console.log("program.storage", program.storage);
         });
         paramButtonMap[caseButton.param] = caseButton;
 
-		typeHandler = function(param) {
+		typeToolbar = Ext.create('Ext.toolbar.Toolbar', {
+			style: 'padding-top:1px; background:#f5f5f5; border:0 none',
+            height: 41,
+            getType: function() {
+				return aggregateButton.pressed ? 'aggregate' : 'query';
+			},
+            defaults: {
+                height: 40,
+                toggleGroup: 'mode',
+				cls: 'x-btn-default-toolbar-small-over',
+                handler: function(b) {
+					onTypeClick(b.param);
+				}
+			},
+			items: [
+				aggregateButton,
+				caseButton
+			],
+			listeners: {
+				added: function() {
+					ns.app.typeToolbar = this;
+				}
+			}
+		});
+
+		onTypeClick = function(param) {
 			var button = paramButtonMap[param];
 
 			if (!button.pressed) {
@@ -5015,31 +5058,6 @@ console.log("program.storage", program.storage);
 
 			update();
 		};
-
-		typeToolbar = Ext.create('Ext.toolbar.Toolbar', {
-			style: 'padding-top:1px; background:#f5f5f5; border:0 none',
-            height: 41,
-            getType: function() {
-				return aggregateButton.pressed ? 'aggregate' : 'query';
-			},
-            defaults: {
-                height: 40,
-                toggleGroup: 'mode',
-				cls: 'x-btn-default-toolbar-small-over',
-                handler: function(b) {
-					typeHandler(b.param);
-				}
-			},
-			items: [
-				aggregateButton,
-				caseButton
-			],
-			listeners: {
-				added: function() {
-					ns.app.typeToolbar = this;
-				}
-			}
-		});
 
 		accordionBody = LayerWidgetEvent();
 
