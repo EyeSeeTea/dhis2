@@ -38,15 +38,18 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.ServletActionContext;
+import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.trackedentity.TrackedEntityAttributeOption;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
 
@@ -69,6 +72,16 @@ public class ValidateTrackedEntityInstanceAction
     private TrackedEntityAttributeService attributeService;
 
     private OrganisationUnitSelectionManager selectionManager;
+
+    @Autowired
+    private TrackedEntityAttributeService patientAttributeService;
+
+    private I18nFormat format;
+
+    public void setFormat( I18nFormat format )
+    {
+        this.format = format;
+    }
 
     // -------------------------------------------------------------------------
     // Input
@@ -131,6 +144,21 @@ public class ValidateTrackedEntityInstanceAction
                     TrackedEntityAttributeValue attributeValue = new TrackedEntityAttributeValue();
                     attributeValue.setEntityInstance( entityInstance );
                     attributeValue.setAttribute( attribute );
+
+                    if ( attribute.getValueType().equals( TrackedEntityAttribute.TYPE_AGE ) )
+                    {
+                        value = format.formatDate( TrackedEntityAttribute.getDateFromAge( Integer.parseInt( value ) ) );
+                    }
+                    else if ( TrackedEntityAttribute.TYPE_COMBO.equalsIgnoreCase( attribute.getValueType() ) )
+                    {
+                        TrackedEntityAttributeOption option = attributeService.getTrackedEntityAttributeOption( Integer
+                            .parseInt( value ) );
+                        if ( option != null )
+                        {
+                            attributeValue.setValue( option.getName() );
+                        }
+                    }
+
                     attributeValue.setValue( value );
 
                     attributeValues.add( attributeValue );
@@ -144,7 +172,7 @@ public class ValidateTrackedEntityInstanceAction
         // Validate entityInstance
         // ---------------------------------------------------------------------
 
-        int errorCode = entityInstanceService.validateTrackedEntityInstance( entityInstance, program );
+        int errorCode = entityInstanceService.validateTrackedEntityInstance( entityInstance, program, format );
 
         message = errorCode + "";
 

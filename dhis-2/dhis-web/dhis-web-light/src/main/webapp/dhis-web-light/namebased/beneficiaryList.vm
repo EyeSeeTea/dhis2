@@ -3,8 +3,8 @@
 <p>
 <ul>
 #foreach( $pav in $pavSet )
-	#if($pav.getPatientAttribute().getDisplayInListNoProgram()== true)
-<li><a href="showPatientProgramList.action?patientId=$pav.getPatient().getId()">$!encoder.htmlEncode( ${pav.value} )</a></li>
+	#if($pav.getAttribute().getDisplayInListNoProgram()== true)
+<li><a href="showPatientProgramList.action?patientId=$pav.getEntityInstance().getId()">$!encoder.htmlEncode( ${pav.value} )</a></li>
 #end	
 #end
 </ul>

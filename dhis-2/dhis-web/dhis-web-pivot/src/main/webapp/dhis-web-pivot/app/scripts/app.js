@@ -854,13 +854,13 @@ Ext.onReady( function() {
                 delete favorite.id;
 
 				// Replace operand id characters
-				for (var i = 0; i < dimensions.length; i++) {
-					if (dimensions[i].dimension === ns.core.conf.finals.dimension.operand.objectName) {
-						for (var j = 0; j < dimensions[i].items.length; j++) {
-							dimensions[i].items[j].id = dimensions[i].items[j].id.replace('-', '.');
-						}
-					}
-				}
+				//for (var i = 0; i < dimensions.length; i++) {
+					//if (dimensions[i].dimension === ns.core.conf.finals.dimension.operand.objectName) {
+						//for (var j = 0; j < dimensions[i].items.length; j++) {
+							//dimensions[i].items[j].id = dimensions[i].items[j].id.replace('-', '.');
+						//}
+					//}
+				//}
 			}
 
 			return favorite;
@@ -2144,29 +2144,28 @@ Ext.onReady( function() {
 				}
 			};
 
-			web.events.setColumnHeaderMouseHandlers = function(layout, xLayout, xResponse) {
+			web.events.setColumnHeaderMouseHandlers = function(layout, xResponse) {
 				if (Ext.isArray(xResponse.sortableIdObjects)) {
 					for (var i = 0, obj, el; i < xResponse.sortableIdObjects.length; i++) {
 						obj = xResponse.sortableIdObjects[i];
 						el = Ext.get(obj.uuid);
 
 						el.dom.layout = layout;
-						el.dom.xLayout = xLayout;
 						el.dom.xResponse = xResponse;
 						el.dom.metaDataId = obj.id;
 						el.dom.onColumnHeaderMouseClick = web.events.onColumnHeaderMouseClick;
 						el.dom.onColumnHeaderMouseOver = web.events.onColumnHeaderMouseOver;
 						el.dom.onColumnHeaderMouseOut = web.events.onColumnHeaderMouseOut;
 
-						el.dom.setAttribute('onclick', 'this.onColumnHeaderMouseClick(this.layout, this.xLayout, this.xResponse, this.metaDataId)');
+						el.dom.setAttribute('onclick', 'this.onColumnHeaderMouseClick(this.layout, this.xResponse, this.metaDataId)');
 						el.dom.setAttribute('onmouseover', 'this.onColumnHeaderMouseOver(this)');
 						el.dom.setAttribute('onmouseout', 'this.onColumnHeaderMouseOut(this)');
 					}
 				}
 			};
 
-			web.events.onColumnHeaderMouseClick = function(layout, xLayout, xResponse, id) {
-				if (xLayout.sorting && xLayout.sorting.id === id) {
+			web.events.onColumnHeaderMouseClick = function(layout, xResponse, id) {
+				if (layout.sorting && layout.sorting.id === id) {
 					layout.sorting.direction = support.prototype.str.toggleDirection(layout.sorting.direction);
 				}
 				else {
@@ -2372,7 +2371,7 @@ Ext.onReady( function() {
 
 				if (NS.isSessionStorage) {
 					web.events.setValueMouseHandlers(layout, response || xResponse, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
-					web.events.setColumnHeaderMouseHandlers(layout, xLayout, xResponse);
+					web.events.setColumnHeaderMouseHandlers(layout, xResponse);
 					web.storage.session.set(layout, 'table');
 				}
 
@@ -2442,7 +2441,8 @@ Ext.onReady( function() {
             organisationUnit,
 			dimensionIdAvailableStoreMap = {},
 			dimensionIdSelectedStoreMap = {},
-			getGroupSetPanels,
+			getDimensionPanel,
+			getDimensionPanels,
 			update,
 
 			accordionBody,
@@ -2696,9 +2696,9 @@ Ext.onReady( function() {
 							data = response.dataElementOperands || [],
                             pager = response.pager;
 
-						for (var i = 0; i < data.length; i++) {
-							data[i].id = data[i].id.split('.').join('-');
-						}
+						//for (var i = 0; i < data.length; i++) {
+							//data[i].id = data[i].id.split('.').join('-');
+						//}
 
                         store.loadStore(data, pager, append);
                     }
@@ -4554,228 +4554,246 @@ Ext.onReady( function() {
 
 		// dimensions
 
-		getDimensionPanels = function(dimensions, iconCls) {
-			var	getAvailableStore,
-				getSelectedStore,
+		getDimensionPanel = function(dimension, iconCls) {
+			var	availableStore,
+				selectedStore,
+				available,
+				selected,
+				panel,
 
 				createPanel,
 				getPanels;
 
-			getAvailableStore = function(dimension) {
-				return Ext.create('Ext.data.Store', {
-					fields: ['id', 'name'],
-					proxy: {
-						type: 'ajax',
-						url: ns.core.init.contextPath + '/api/dimensions/' + dimension.id + '/items.json',
-						reader: {
-							type: 'json',
-							root: 'items'
+			availableStore = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name'],
+				lastPage: null,
+				nextPage: 1,
+				isPending: false,
+				isLoaded: false,
+				reset: function() {
+					this.removeAll();
+					this.lastPage = null;
+					this.nextPage = 1;
+					this.isPending = false;
+					//indicatorSearch.hideFilter();
+				},
+				loadPage: function(filter, append) {
+					var store = this,
+						filterPath = filter ? '/query/' + filter : '',
+						path;
+
+					filter = filter || indicatorFilter.getValue() || null;
+
+					if (!append) {
+						this.lastPage = null;
+						this.nextPage = 1;
+					}
+
+					if (store.nextPage === store.lastPage) {
+						return;
+					}
+
+					path = '/dimensions/' + dimension.id + '/items' + filterPath + '.json';
+
+					store.isPending = true;
+
+					Ext.Ajax.request({
+						url: ns.core.init.contextPath + '/api' + path,
+						params: {
+							page: store.nextPage,
+							pageSize: 50
+						},
+						failure: function() {
+							store.isPending = false;
+						},
+						success: function(r) {
+							var response = Ext.decode(r.responseText),
+								data = response.items || [],
+								pager = response.pager;
+
+							store.loadStore(data, pager, append);
+						}
+					});
+				},
+				loadStore: function(data, pager, append) {
+					this.loadData(data, append);
+					this.lastPage = this.nextPage;
+
+					if (pager.pageCount > this.nextPage) {
+						this.nextPage++;
+					}
+
+					this.isPending = false;
+					ns.core.web.multiSelect.filterAvailable({store: availableStore}, {store: selectedStore});
+				},
+				sortStore: function() {
+					this.sort('name', 'ASC');
+				}
+			});
+
+			selectedStore = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name'],
+				data: []
+			});
+
+			available = Ext.create('Ext.ux.form.MultiSelect', {
+				cls: 'ns-toolbar-multiselect-left',
+				width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
+				valueField: 'id',
+				displayField: 'name',
+				store: availableStore,
+				tbar: [
+					{
+						xtype: 'label',
+						text: NS.i18n.available,
+						cls: 'ns-toolbar-multiselect-left-label'
+					},
+					'->',
+					{
+						xtype: 'button',
+						icon: 'images/arrowright.png',
+						width: 22,
+						handler: function() {
+							ns.core.web.multiSelect.select(available, selected);
 						}
 					},
-					isLoaded: false,
-					storage: {},
-					sortStore: function() {
-						this.sort('name', 'ASC');
-					},
-					reset: function() {
-						if (this.isLoaded) {
-							this.removeAll();
-							ns.core.web.storage.internal.load(this);
-							this.sortStore();
-						}
-					},
-					listeners: {
-						load: function(s) {
-							s.isLoaded = true;
-							ns.core.web.storage.internal.add(s);
+					{
+						xtype: 'button',
+						icon: 'images/arrowrightdouble.png',
+						width: 22,
+						handler: function() {
+							ns.core.web.multiSelect.selectAll(available, selected);
 						}
 					}
-				});
-			};
+				],
+				listeners: {
+					render: function(ms) {
+						var el = Ext.get(ms.boundList.getEl().id + '-listEl').dom;
 
-			getSelectedStore = function() {
-				return Ext.create('Ext.data.Store', {
-					fields: ['id', 'name'],
-					data: []
-				});
-			};
-
-			createPanel = function(dimension) {
-				var getAvailable,
-					getSelected,
-
-					availableStore,
-					selectedStore,
-					available,
-					selected,
-
-					panel;
-
-				getAvailable = function(availableStore) {
-					return Ext.create('Ext.ux.form.MultiSelect', {
-						cls: 'ns-toolbar-multiselect-left',
-						width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
-						valueField: 'id',
-						displayField: 'name',
-						store: availableStore,
-						tbar: [
-							{
-								xtype: 'label',
-								text: NS.i18n.available,
-								cls: 'ns-toolbar-multiselect-left-label'
-							},
-							'->',
-							{
-								xtype: 'button',
-								icon: 'images/arrowright.png',
-								width: 22,
-								handler: function() {
-									ns.core.web.multiSelect.select(available, selected);
-								}
-							},
-							{
-								xtype: 'button',
-								icon: 'images/arrowrightdouble.png',
-								width: 22,
-								handler: function() {
-									ns.core.web.multiSelect.selectAll(available, selected);
-								}
+						el.addEventListener('scroll', function(e) {
+							if (isScrolled(e) && !availableStore.isPending) {
+								availableStore.loadPage(null, true);
 							}
-						],
-						listeners: {
-							afterrender: function() {
-								this.boundList.on('itemdblclick', function() {
-									ns.core.web.multiSelect.select(available, selected);
-								}, this);
-							}
-						}
-					});
-				};
-
-				getSelected = function(selectedStore) {
-					return Ext.create('Ext.ux.form.MultiSelect', {
-						cls: 'ns-toolbar-multiselect-right',
-						width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
-						valueField: 'id',
-						displayField: 'name',
-						ddReorder: true,
-						store: selectedStore,
-						tbar: [
-							{
-								xtype: 'button',
-								icon: 'images/arrowleftdouble.png',
-								width: 22,
-								handler: function() {
-									ns.core.web.multiSelect.unselectAll(available, selected);
-								}
-							},
-							{
-								xtype: 'button',
-								icon: 'images/arrowleft.png',
-								width: 22,
-								handler: function() {
-									ns.core.web.multiSelect.unselect(available, selected);
-								}
-							},
-							'->',
-							{
-								xtype: 'label',
-								text: NS.i18n.selected,
-								cls: 'ns-toolbar-multiselect-right-label'
-							}
-						],
-						listeners: {
-							afterrender: function() {
-								this.boundList.on('itemdblclick', function() {
-									ns.core.web.multiSelect.unselect(available, selected);
-								}, this);
-							}
-						}
-					});
-				};
-
-				availableStore = getAvailableStore(dimension);
-				selectedStore = getSelectedStore();
-
-				dimensionIdAvailableStoreMap[dimension.id] = availableStore;
-				dimensionIdSelectedStoreMap[dimension.id] = selectedStore;
-
-				available = getAvailable(availableStore);
-				selected = getSelected(selectedStore);
-
-				availableStore.on('load', function() {
-					ns.core.web.multiSelect.filterAvailable(available, selected);
-				});
-
-				panel = {
-					xtype: 'panel',
-					title: '<div class="' + iconCls + '">' + dimension.name + '</div>',
-					hideCollapseTool: true,
-					availableStore: availableStore,
-					selectedStore: selectedStore,
-					getDimension: function() {
-						var config = {
-							dimension: dimension.id,
-							items: []
-						};
-
-						selectedStore.each( function(r) {
-							config.items.push({id: r.data.id});
 						});
 
-						return config.items.length ? config : null;
-					},
-					onExpand: function() {
-						if (!availableStore.isLoaded) {
-							availableStore.load();
-						}
-
-						var h = ns.app.westRegion.hasScrollbar ?
-							ns.core.conf.layout.west_scrollbarheight_accordion_group : ns.core.conf.layout.west_maxheight_accordion_group;
-						accordion.setThisHeight(h);
-						ns.core.web.multiSelect.setHeight(
-							[available, selected],
-							this,
-							ns.core.conf.layout.west_fill_accordion_dataset
-						);
-					},
-					items: [
-						{
-							xtype: 'panel',
-							layout: 'column',
-							bodyStyle: 'border-style:none',
-							items: [
-								available,
-								selected
-							]
-						}
-					],
-					listeners: {
-						added: function() {
-							accordionPanels.push(this);
-						},
-						expand: function(p) {
-							p.onExpand();
-						}
+						ms.boundList.on('itemdblclick', function() {
+							ns.core.web.multiSelect.select(available, selected);
+						}, ms);
 					}
-				};
-
-				return panel;
-			};
-
-			getPanels = function() {
-				var panels = [];
-
-				for (var i = 0, panel; i < dimensions.length; i++) {
-					panel = createPanel(dimensions[i]);
-
-					panels.push(panel);
 				}
+			});
 
-				return panels;
+			selected = Ext.create('Ext.ux.form.MultiSelect', {
+				cls: 'ns-toolbar-multiselect-right',
+				width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
+				valueField: 'id',
+				displayField: 'name',
+				ddReorder: true,
+				store: selectedStore,
+				tbar: [
+					{
+						xtype: 'button',
+						icon: 'images/arrowleftdouble.png',
+						width: 22,
+						handler: function() {
+							ns.core.web.multiSelect.unselectAll(available, selected);
+						}
+					},
+					{
+						xtype: 'button',
+						icon: 'images/arrowleft.png',
+						width: 22,
+						handler: function() {
+							ns.core.web.multiSelect.unselect(available, selected);
+						}
+					},
+					'->',
+					{
+						xtype: 'label',
+						text: NS.i18n.selected,
+						cls: 'ns-toolbar-multiselect-right-label'
+					}
+				],
+				listeners: {
+					afterrender: function() {
+						this.boundList.on('itemdblclick', function() {
+							ns.core.web.multiSelect.unselect(available, selected);
+						}, this);
+					}
+				}
+			});
+
+			dimensionIdAvailableStoreMap[dimension.id] = availableStore;
+			dimensionIdSelectedStoreMap[dimension.id] = selectedStore;
+
+			//availableStore.on('load', function() {
+				//ns.core.web.multiSelect.filterAvailable(available, selected);
+			//});
+
+			panel = {
+				xtype: 'panel',
+				title: '<div class="' + iconCls + '">' + dimension.name + '</div>',
+				hideCollapseTool: true,
+				availableStore: availableStore,
+				selectedStore: selectedStore,
+				getDimension: function() {
+					var config = {
+						dimension: dimension.id,
+						items: []
+					};
+
+					selectedStore.each( function(r) {
+						config.items.push({id: r.data.id});
+					});
+
+					return config.items.length ? config : null;
+				},
+				onExpand: function() {
+					if (!availableStore.isLoaded) {
+						availableStore.loadPage();
+					}
+
+					var h = ns.app.westRegion.hasScrollbar ?
+						ns.core.conf.layout.west_scrollbarheight_accordion_group : ns.core.conf.layout.west_maxheight_accordion_group;
+					accordion.setThisHeight(h);
+					ns.core.web.multiSelect.setHeight(
+						[available, selected],
+						this,
+						ns.core.conf.layout.west_fill_accordion_dataset
+					);
+				},
+				items: [
+					{
+						xtype: 'panel',
+						layout: 'column',
+						bodyStyle: 'border-style:none',
+						items: [
+							available,
+							selected
+						]
+					}
+				],
+				listeners: {
+					added: function() {
+						accordionPanels.push(this);
+					},
+					expand: function(p) {
+						p.onExpand();
+					}
+				}
 			};
 
-			return getPanels();
+			return panel;
+		};
+
+		getDimensionPanels = function(dimensions, iconCls) {
+			var panels = [];
+
+			for (var i = 0, panel; i < dimensions.length; i++) {
+				panels.push(getDimensionPanel(dimensions[i], iconCls));
+			}
+
+			return panels;
 		};
 
 		// viewport

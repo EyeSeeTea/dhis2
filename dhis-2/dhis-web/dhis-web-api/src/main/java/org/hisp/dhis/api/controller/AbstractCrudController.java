@@ -88,10 +88,25 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     public void getJacksonClassMap(
         @RequestParam( required = false ) String include,
         @RequestParam( required = false ) String exclude,
+        @RequestParam( value = "filter", required = false ) List<String> filters,
         @RequestParam Map<String, String> parameters, HttpServletResponse response ) throws IOException
     {
         WebOptions options = new WebOptions( parameters );
         WebMetaData metaData = new WebMetaData();
+        options.getOptions().put( "links", "false" );
+
+        boolean hasPaging = false;
+
+        // get full list if we are using filters
+        if ( filters != null && !filters.isEmpty() )
+        {
+            if ( options.hasPaging() )
+            {
+                hasPaging = true;
+                options.getOptions().put( "paging", "false" );
+            }
+        }
+
         List<T> entityList = getEntityList( metaData, options );
 
         handleLinksAndAccess( options, metaData, entityList, true );
@@ -99,10 +114,22 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         postProcessEntities( entityList );
         postProcessEntities( entityList, options, parameters );
 
+        if ( filters != null && !filters.isEmpty() )
+        {
+            entityList = WebUtils.filterObjects( entityList, filters );
+
+            if ( hasPaging )
+            {
+                Pager pager = new Pager( options.getPage(), entityList.size(), options.getPageSize() );
+                metaData.setPager( pager );
+                entityList = PagerUtils.pageCollection( entityList, pager );
+            }
+        }
+
         List<Object> objects = WebUtils.filterFields( entityList, include, exclude );
         Map<String, Object> output = Maps.newLinkedHashMap();
 
-        if ( options.hasPaging() )
+        if ( hasPaging )
         {
             output.put( "pager", metaData.getPager() );
         }

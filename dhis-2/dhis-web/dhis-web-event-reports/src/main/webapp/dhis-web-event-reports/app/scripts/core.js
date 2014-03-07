@@ -23,10 +23,6 @@ Ext.onReady( function() {
 		// conf
 		(function() {
 			conf.finals = {
-				url: {
-					path_module: '/dhis-web-pivot/',
-					organisationunitchildren_get: 'getOrganisationUnitChildren.action'
-				},
 				dimension: {
 					data: {
 						value: 'data',
@@ -76,7 +72,8 @@ Ext.onReady( function() {
 						value: 'periods'
 					},
 					relativePeriod: {
-						value: 'relativePeriods'
+						value: 'relativePeriods',
+						name: NS.i18n.relative_periods
 					},
 					organisationUnit: {
 						value: 'organisationUnits',
@@ -167,7 +164,7 @@ Ext.onReady( function() {
 				multiselect_fill_reportingrates: 315
 			};
 
-			conf.pivot = {
+			conf.report = {
 				digitGroupSeparator: {
 					'comma': ',',
 					'space': ' '
@@ -205,7 +202,7 @@ Ext.onReady( function() {
 						return;
 					}
 
-					config.id = config.id.replace('.', '-');
+					//config.id = config.id.replace('.', '-');
 
 					return config;
 				}();
@@ -232,21 +229,21 @@ Ext.onReady( function() {
 					if (config.dimension !== conf.finals.dimension.category.objectName) {
 						var records = [];
 
-						if (!Ext.isArray(config.items)) {
-							console.log('Dimension: items is not an array: ' + config);
-							return;
-						}
+						//if (!Ext.isArray(config.items)) {
+							//console.log('Dimension: items is not an array: ' + config);
+							//return;
+						//}
 
-						for (var i = 0; i < config.items.length; i++) {
-							records.push(api.layout.Record(config.items[i]));
-						}
+						//for (var i = 0; i < config.items.length; i++) {
+							//records.push(api.layout.Record(config.items[i]));
+						//}
 
-						config.items = Ext.Array.clean(records);
+						//config.items = Ext.Array.clean(records);
 
-						if (!config.items.length) {
-							console.log('Dimension: has no valid items: ' + config);
-							return;
-						}
+						//if (!config.items.length) {
+							//console.log('Dimension: has no valid items: ' + config);
+							//return;
+						//}
 					}
 
 					return config;
@@ -413,8 +410,8 @@ Ext.onReady( function() {
 
 					// at least one period
 					if (!Ext.Array.contains(objectNames, dimConf.period.objectName)) {
-						alert(NS.i18n.at_least_one_period_must_be_specified_as_column_row_or_filter);
-						return;
+						//alert(NS.i18n.at_least_one_period_must_be_specified_as_column_row_or_filter);
+						//return;
 					}
 
 					// favorite
@@ -557,18 +554,24 @@ Ext.onReady( function() {
 			};
 
 			support.prototype.array.sort = function(array, direction, key) {
-				// accepts [number], [string], [{key: number}], [{key: string}]
+				// supports [number], [string], [{key: number}], [{key: string}], [[string]], [[number]]
 
 				if (!support.prototype.array.getLength(array)) {
 					return;
 				}
 
-				key = key || 'name';
+				key = !!key || Ext.isNumber(key) ? key : 'name';
 
 				array.sort( function(a, b) {
 
 					// if object, get the property values
-					if (Ext.isObject(a) && Ext.isObject(b) && key) {
+					if (Ext.isObject(a) && Ext.isObject(b)) {
+						a = a[key];
+						b = b[key];
+					}
+
+					// if array, get from the right index
+					if (Ext.isArray(a) && Ext.isArray(b)) {
 						a = a[key];
 						b = b[key];
 					}
@@ -674,7 +677,7 @@ Ext.onReady( function() {
 					return number;
 				}
 
-				return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.pivot.digitGroupSeparator[separator]);
+				return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.report.digitGroupSeparator[separator]);
 			};
 
 			// color
@@ -876,11 +879,13 @@ Ext.onReady( function() {
 
 						xDim.dimension = dim.dimension;
 						xDim.objectName = dim.dimension;
-						xDim.dimensionName = dimConf.objectNameMap[dim.dimension].dimensionName;
+						xDim.dimensionName = dimConf.objectNameMap.hasOwnProperty(dim.dimension) ? dimConf.objectNameMap[dim.dimension].dimensionName || dim.dimension : dim.dimension;
+
+						xDim.items = [];
+						xDim.ids = [];
 
 						if (items) {
 							xDim.items = items;
-							xDim.ids = [];
 
 							for (var j = 0; j < items.length; j++) {
 								xDim.ids.push(items[j].id);
@@ -894,7 +899,7 @@ Ext.onReady( function() {
 
 						xLayout.axisDimensions.push(xDim);
 						xLayout.axisObjectNames.push(xDim.objectName);
-						xLayout.axisDimensionNames.push(dimConf.objectNameMap[xDim.objectName].dimensionName);
+						xLayout.axisDimensionNames.push(dimConf.objectNameMap.hasOwnProperty(xDim.objectName) ? dimConf.objectNameMap[xDim.objectName].dimensionName || xDim.objectName : xDim.objectName);
 
 						xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
 						xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
@@ -910,11 +915,13 @@ Ext.onReady( function() {
 
 						xDim.dimension = dim.dimension;
 						xDim.objectName = dim.dimension;
-						xDim.dimensionName = dimConf.objectNameMap[dim.dimension].dimensionName;
+						xDim.dimensionName = dimConf.objectNameMap.hasOwnProperty(dim.dimension) ? dimConf.objectNameMap[dim.dimension].dimensionName || dim.dimension : dim.dimension;
+
+						xDim.items = [];
+						xDim.ids = [];
 
 						if (items) {
 							xDim.items = items;
-							xDim.ids = [];
 
 							for (var j = 0; j < items.length; j++) {
 								xDim.ids.push(items[j].id);
@@ -928,7 +935,7 @@ Ext.onReady( function() {
 
 						xLayout.axisDimensions.push(xDim);
 						xLayout.axisObjectNames.push(xDim.objectName);
-						xLayout.axisDimensionNames.push(dimConf.objectNameMap[xDim.objectName].dimensionName);
+						xLayout.axisDimensionNames.push(dimConf.objectNameMap.hasOwnProperty(xDim.objectName) ? dimConf.objectNameMap[xDim.objectName].dimensionName || xDim.objectName : xDim.objectName);
 
 						xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
 						xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
@@ -944,11 +951,13 @@ Ext.onReady( function() {
 
 						xDim.dimension = dim.dimension;
 						xDim.objectName = dim.dimension;
-						xDim.dimensionName = dimConf.objectNameMap[dim.dimension].dimensionName;
+						xDim.dimensionName = dimConf.objectNameMap.hasOwnProperty(dim.dimension) ? dimConf.objectNameMap[dim.dimension].dimensionName || dim.dimension : dim.dimension;
+
+						xDim.items = [];
+						xDim.ids = [];
 
 						if (items) {
 							xDim.items = items;
-							xDim.ids = [];
 
 							for (var j = 0; j < items.length; j++) {
 								xDim.ids.push(items[j].id);
@@ -959,7 +968,7 @@ Ext.onReady( function() {
 
 						xLayout.filterDimensions.push(xDim);
 						xLayout.filterObjectNames.push(xDim.objectName);
-						xLayout.filterDimensionNames.push(dimConf.objectNameMap[xDim.objectName].dimensionName);
+						xLayout.filterDimensionNames.push(dimConf.objectNameMap.hasOwnProperty(xDim.objectName) ? dimConf.objectNameMap[xDim.objectName].dimensionName || xDim.objectName : xDim.objectName);
 
 						xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
 						xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
@@ -970,7 +979,7 @@ Ext.onReady( function() {
 				// legend set
 				xLayout.legendSet = layout.legendSet ? init.idLegendSetMap[layout.legendSet.id] : null;
 
-				if (layout.legendSet) {
+				if (layout.legendSet && layout.legendSet.mapLegends) {
 					xLayout.legendSet = init.idLegendSetMap[layout.legendSet.id];
 					support.prototype.array.sort(xLayout.legendSet.mapLegends, 'ASC', 'startValue');
 				}
@@ -1022,7 +1031,7 @@ Ext.onReady( function() {
 				return xLayout;
 			};
 
-			service.layout.getSyncronizedXLayout = function(xLayout, response) {
+			service.layout.getSyncronizedXLayout = function(xLayout, xResponse) {
 				var removeDimensionFromXLayout,
 					getHeaderNames,
 					dimensions = Ext.Array.clean([].concat(xLayout.columns || [], xLayout.rows || [], xLayout.filters || []));
@@ -1061,154 +1070,28 @@ Ext.onReady( function() {
 				getHeaderNames = function() {
 					var headerNames = [];
 
-					for (var i = 0; i < response.headers.length; i++) {
-						headerNames.push(response.headers[i].name);
+					for (var i = 0; i < xResponse.headers.length; i++) {
+						headerNames.push(xResponse.headers[i].name);
 					}
 
 					return headerNames;
 				};
 
 				return function() {
-					var headerNames = getHeaderNames(),
-						xOuDimension = xLayout.objectNameDimensionsMap[dimConf.organisationUnit.objectName],
-						isUserOrgunit = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT'),
-						isUserOrgunitChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_CHILDREN'),
-						isUserOrgunitGrandChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_GRANDCHILDREN'),
-						isLevel = function() {
-							if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
-								for (var i = 0; i < xOuDimension.ids.length; i++) {
-									if (xOuDimension.ids[i].substr(0,5) === 'LEVEL') {
-										return true;
-									}
-								}
-							}
 
-							return false;
-						}(),
-						isGroup = function() {
-							if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
-								for (var i = 0; i < xOuDimension.ids.length; i++) {
-									if (xOuDimension.ids[i].substr(0,8) === 'OU_GROUP') {
-										return true;
-									}
-								}
-							}
-
-							return false;
-						}(),
-						co = dimConf.category.objectName,
-						ou = dimConf.organisationUnit.objectName,
-						layout;
-
-					// Set items from init/metaData/xLayout
-					for (var i = 0, dim, metaDataDim, items; i < dimensions.length; i++) {
+					// items
+					for (var i = 0, dim, ids; i < dimensions.length; i++) {
 						dim = dimensions[i];
 						dim.items = [];
-						metaDataDim = response.metaData[dim.objectName];
+						ids = xResponse.nameHeaderMap[dim.dimension].ids;
 
-						// If ou and children
-						if (dim.dimensionName === ou) {
-							if (isUserOrgunit || isUserOrgunitChildren || isUserOrgunitGrandChildren) {
-								var userOu,
-									userOuc,
-									userOugc;
+						for (var j = 0, id; j < ids.length; j++) {
+							id = ids[j];
 
-								if (init.user && isUserOrgunit) {
-									userOu = [{
-										id: init.user.ou,
-										name: service.layout.getItemName(xLayout, response, init.user.ou, false)
-									}];
-								}
-								if (init.user && init.user.ouc && isUserOrgunitChildren) {
-									userOuc = [];
-
-									for (var j = 0; j < init.user.ouc.length; j++) {
-										userOuc.push({
-											id: init.user.ouc[j],
-											name: service.layout.getItemName(xLayout, response, init.user.ouc[j], false)
-										});
-									}
-
-									support.prototype.array.sort(userOuc);
-								}
-								if (init.user && init.user.ouc && isUserOrgunitGrandChildren) {
-									var userOuOuc = [].concat(init.user.ou, init.user.ouc),
-										responseOu = response.metaData[ou];
-
-									userOugc = [];
-
-									for (var j = 0, id; j < responseOu.length; j++) {
-										id = responseOu[j];
-
-										if (!Ext.Array.contains(userOuOuc, id)) {
-											userOugc.push({
-												id: id,
-												name: service.layout.getItemName(xLayout, response, id, false)
-											});
-										}
-									}
-
-									support.prototype.array.sort(userOugc);
-								}
-
-								dim.items = [].concat(userOu || [], userOuc || [], userOugc || []);
-							}
-							else if (isLevel || isGroup) {
-								for (var j = 0, responseOu = response.metaData[ou], id; j < responseOu.length; j++) {
-									id = responseOu[j];
-
-									dim.items.push({
-										id: id,
-										name: service.layout.getItemName(xLayout, response, id, false)
-									});
-								}
-
-								support.prototype.array.sort(dim.items);
-							}
-							else {
-								dim.items = Ext.clone(xLayout.dimensionNameItemsMap[dim.dimensionName]);
-							}
-						}
-						else {
-							// Items: get ids from metadata -> items
-							if (Ext.isArray(metaDataDim) && metaDataDim.length) {
-								var ids = Ext.clone(response.metaData[dim.dimensionName]);
-								for (var j = 0; j < ids.length; j++) {
-									dim.items.push({
-										id: ids[j],
-										name: response.metaData.names[ids[j]]
-									});
-								}
-							}
-							// Items: get items from xLayout
-							else {
-								dim.items = Ext.clone(xLayout.objectNameItemsMap[dim.objectName]);
-							}
-						}
-					}
-
-					// Add missing names
-					dimensions = Ext.Array.clean([].concat(xLayout.columns || [], xLayout.rows || [], xLayout.filters || []));
-
-					for (var i = 0, idNameMap = response.metaData.names, dimItems; i < dimensions.length; i++) {
-						dimItems = dimensions[i].items;
-
-						if (Ext.isArray(dimItems) && dimItems.length) {
-							for (var j = 0, item; j < dimItems.length; j++) {
-								item = dimItems[j];
-
-								if (Ext.isObject(item) && Ext.isString(idNameMap[item.id]) && !Ext.isString(item.name)) {
-									item.name = idNameMap[item.id] || '';
-								}
-							}
-						}
-					}
-
-					// Remove dimensions from layout that do not exist in response
-					for (var i = 0, dimensionName; i < xLayout.axisDimensionNames.length; i++) {
-						dimensionName = xLayout.axisDimensionNames[i];
-						if (!Ext.Array.contains(headerNames, dimensionName)) {
-							removeDimensionFromXLayout(dimensionName);
+							dim.items.push({
+								id: id,
+								name: xResponse.metaData.names[id] || id
+							});
 						}
 					}
 
@@ -1606,90 +1489,139 @@ Ext.onReady( function() {
 			// response
 			service.response = {};
 
-			service.response.getExtendedResponse = function(xLayout, response) {
-				var ids = [];
+				// aggregate
+			service.response.aggregate = {};
+
+			service.response.aggregate.getExtendedResponse = function(xLayout, response) {
+				var allIds = [],
+                    emptyId = 'N/A',
+                    names,
+					headers;
 
 				response = Ext.clone(response);
+                names = response.metaData.names;
+				headers = response.headers;
 
 				response.nameHeaderMap = {};
 				response.idValueMap = {};
 
-				// extend headers
-				(function() {
+				// add to headers: size, index, response ids
+				for (var i = 0, header, ids, objects; i < headers.length; i++) {
+					header = headers[i];
+                    header.ids = [];
+					ids = [];
+					objects = [];
 
-					// extend headers: index, ids, size
-					for (var i = 0, header; i < response.headers.length; i++) {
-						header = response.headers[i];
-
-						// index
-						header.index = i;
-
-						if (header.meta) {
-
-							// ids
-							header.ids = Ext.clone(xLayout.dimensionNameIdsMap[header.name]) || [];
-
-							// size
-							header.size = header.ids.length;
-
-							// collect ids, used by extendMetaData
-							ids = ids.concat(header.ids);
-						}
+					// collect ids from response
+					for (var j = 0, id; j < response.rows.length; j++) {
+						ids.push(response.rows[j][i] || emptyId);
 					}
 
-					// nameHeaderMap (headerName: header)
-					for (var i = 0, header; i < response.headers.length; i++) {
-						header = response.headers[i];
+					ids = Ext.Array.unique(ids);
 
-						response.nameHeaderMap[header.name] = header;
-					}
-				}());
+					// sorting objects
+					for (var j = 0, id; j < ids.length; j++) {
+						id = ids[j];
 
-				// extend metadata
-				(function() {
-					for (var i = 0, id, splitId ; i < ids.length; i++) {
-						id = ids[i];
-
-						if (id.indexOf('-') !== -1) {
-							splitId = id.split('-');
-							response.metaData.names[id] = response.metaData.names[splitId[0]] + ' ' + response.metaData.names[splitId[1]];
-						}
-					}
-				}());
-
-				// create value id map
-				(function() {
-					var valueHeaderIndex = response.nameHeaderMap[conf.finals.dimension.value.value].index,
-						coHeader = response.nameHeaderMap[conf.finals.dimension.category.dimensionName],
-						dx = dimConf.data.dimensionName,
-						co = dimConf.category.dimensionName,
-						axisDimensionNames = xLayout.axisDimensionNames,
-						idIndexOrder = [];
-
-					// idIndexOrder
-					for (var i = 0; i < axisDimensionNames.length; i++) {
-						idIndexOrder.push(response.nameHeaderMap[axisDimensionNames[i]].index);
-
-						// If co exists in response and is not added in layout, add co after dx
-						if (coHeader && !Ext.Array.contains(axisDimensionNames, co) && axisDimensionNames[i] === dx) {
-							idIndexOrder.push(coHeader.index);
-						}
+						objects.push({
+							id: id,
+							sortingId: Ext.isNumber(parseFloat(id)) ? parseFloat(id) : id
+						});
 					}
 
-					// idValueMap
-					for (var i = 0, row, id; i < response.rows.length; i++) {
-						row = response.rows[i];
-						id = '';
+					objects = support.prototype.array.sort(objects, 'ASC', 'sortingId');
 
-						for (var j = 0; j < idIndexOrder.length; j++) {
-							id += row[idIndexOrder[j]];
-						}
+					ids = Ext.Array.pluck(objects, 'id');
 
-						response.idValueMap[id] = row[valueHeaderIndex];
+                    // header ids
+                    for (var j = 0, id, fullId; j < ids.length; j++) {
+                        id = ids[j];
+                        fullId = header.name + id;
+
+                        // add full ids to header id array
+                        header.ids.push(fullId);
+
+                        // add full names to metadata names
+                        names[fullId] = names.hasOwnProperty(id) ? names[id] : names[header.name] + ' ' + (Ext.isNumber(parseFloat(id)) ? parseFloat(id) : id);
+                    }
+
+					header.size = header.ids.length;
+					header.index = i;
+
+					// all ids, used later
+					allIds = allIds.concat(header.ids);
+
+					// name header map
+					response.nameHeaderMap[header.name] = header;
+
+                    // update row ids
+                    if (header.name !== 'value') {
+                        for (var j = 0; j < response.height; j++) {
+                            response.rows[j][i] = header.name + (response.rows[j][i] || emptyId);
+                        }
+                    }
+				}
+
+				// idValueMap: vars
+				var valueHeaderIndex = response.nameHeaderMap[conf.finals.dimension.value.value].index,
+					coHeader = response.nameHeaderMap[conf.finals.dimension.category.dimensionName],
+					dx = dimConf.data.dimensionName,
+					co = dimConf.category.dimensionName,
+					axisDimensionNames = xLayout.axisDimensionNames,
+					idIndexOrder = [];
+
+				// idValueMap: idIndexOrder
+				for (var i = 0; i < axisDimensionNames.length; i++) {
+					idIndexOrder.push(response.nameHeaderMap[axisDimensionNames[i]].index);
+
+					// If co exists in response and is not added in layout, add co after dx
+					if (coHeader && !Ext.Array.contains(axisDimensionNames, co) && axisDimensionNames[i] === dx) {
+						idIndexOrder.push(coHeader.index);
 					}
-				}());
+				}
+
+				// idValueMap
+				for (var i = 0, row, id; i < response.rows.length; i++) {
+					row = response.rows[i];
+					id = '';
+
+					for (var j = 0; j < idIndexOrder.length; j++) {
+						id += row[idIndexOrder[j]];
+					}
+
+					response.idValueMap[id] = row[valueHeaderIndex];
+				}
 
 				return response;
+			};
+
+				// query
+			service.response.query = {};
+
+			service.response.query.getExtendedResponse = function(layout, response) {
+				var xResponse = Ext.clone(response),
+                    dimensionNames = Ext.Array.pluck(layout.columns, 'dimension'),
+                    dimensionHeaders = [],
+					headers = xResponse.headers,
+					nameHeaderMap = {};
+
+				for (var i = 0, header; i < headers.length; i++) {
+					header = headers[i];
+					header.index = i;
+
+					nameHeaderMap[header.name] = header;
+				}
+
+                for (var i = 0, name; i < dimensionNames.length; i++) {
+                    name = dimensionNames[i];
+
+                    dimensionHeaders.push(nameHeaderMap[name]);
+                }
+
+				xResponse.dimensionHeaders = dimensionHeaders;
+				xResponse.nameHeaderMap = nameHeaderMap;
+
+				return xResponse;
 			};
 		}());
 
@@ -1826,57 +1758,57 @@ Ext.onReady( function() {
                 alert(msg);
 			};
 
-			// pivot
-			web.pivot = {};
+			// report
+			web.report = {};
 
-			web.pivot.sort = function(xLayout, xResponse, xColAxis) {
-				var xResponse = Ext.clone(xResponse),
-					id = xLayout.sorting.id,
-					dim = xLayout.rows[0],
+				// aggregate
+			web.report.aggregate = {};
+
+			web.report.aggregate.sort = function(xLayout, xResponse, xColAxis) {
+				var condoId = xLayout.sorting.id,
+					name = xLayout.rows[0].dimension,
+					ids = xResponse.nameHeaderMap[name].ids,
 					valueMap = xResponse.idValueMap,
 					direction = xLayout.sorting ? xLayout.sorting.direction : 'DESC',
+					objects = [],
 					layout;
 
-				dim.ids = [];
-
 				// relative id?
-				if ((Ext.isString(id) && id.toLowerCase() === 'total') || id === 0) {
-					id = 'total_';
+				if (Ext.isString(condoId)) {
+					condoId = condoId.toLowerCase() === 'total' ? 'total_' : condoId;
 				}
-				else if (Ext.isNumber(parseInt(id))) {
-					id = xColAxis.ids[parseInt(id) - 1];
-
-					if (!id) {
-						return xLayout;
+				else if (Ext.isNumber(condoId)) {
+					if (condoId === 0) {
+						condoId = 'total_';
 					}
+					else {
+						condoId = xColAxis.ids[parseInt(condoId) - 1];
+					}
+				}
+				else {
+					return xResponse;
 				}
 
 				// collect values
-				for (var i = 0, item, key, value; i < dim.items.length; i++) {
-					item = dim.items[i];
-					key = id + item.id;
+				for (var i = 0, key, value; i < ids.length; i++) {
+					key = condoId + ids[i];
 					value = parseFloat(valueMap[key]);
 
-					item.value = Ext.isNumber(value) ? value : (Number.MAX_VALUE * -1);
+					objects.push({
+						id: ids[i],
+						value: Ext.isNumber(value) ? value : (Number.MAX_VALUE * -1)
+					});
 				}
 
-				// sort
-				support.prototype.array.sort(dim.items, direction, 'value');
+				support.prototype.array.sort(objects, direction, 'value');
 
 				// new id order
-				for (var i = 0; i < dim.items.length; i++) {
-					dim.ids.push(dim.items[i].id);
-				}
+				xResponse.nameHeaderMap[name].ids = Ext.Array.pluck(objects, 'id');
 
-				// update id
-				if (id !== xLayout.sorting.id) {
-					xLayout.sorting.id = id;
-				}
-
-				return xLayout;
+				return xResponse;
 			};
 
-			web.pivot.getHtml = function(xLayout, xResponse, xColAxis, xRowAxis) {
+			web.report.aggregate.getHtml = function(xLayout, xResponse, xColAxis, xRowAxis) {
 				var getRoundedHtmlValue,
 					getTdHtml,
 					doSubTotals,
@@ -1950,12 +1882,12 @@ Ext.onReady( function() {
 					rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '" ' : '';
 					htmlValue = config.collapsed ? '' : config.htmlValue || config.value || '';
 					htmlValue = config.type !== 'dimension' ? support.prototype.number.prettyPrint(htmlValue, xLayout.digitGroupSeparator) : htmlValue;
-					displayDensity = conf.pivot.displayDensity[config.displayDensity] || conf.pivot.displayDensity[xLayout.displayDensity];
-					fontSize = conf.pivot.fontSize[config.fontSize] || conf.pivot.fontSize[xLayout.fontSize];
+					displayDensity = conf.report.displayDensity[config.displayDensity] || conf.report.displayDensity[xLayout.displayDensity];
+					fontSize = conf.report.fontSize[config.fontSize] || conf.report.fontSize[xLayout.fontSize];
 
 					cls += config.hidden ? ' td-hidden' : '';
 					cls += config.collapsed ? ' td-collapsed' : '';
-					cls += isValue ? ' pointer' : '';
+					//cls += isValue ? ' pointer' : '';
 					cls += bgColor ? ' legend' : (config.cls ? ' ' + config.cls : '');
 
 					// sorting
@@ -2584,9 +2516,88 @@ Ext.onReady( function() {
 
 					return {
 						html: getHtml(htmlArray),
-						uuidDimUuidsMap: uuidDimUuidsMap
+						uuidDimUuidsMap: uuidDimUuidsMap,
+						xColAxis: xColAxis,
+						xRowAxis: xRowAxis
 					};
 				}();
+			};
+
+				// query
+			web.report.query = {};
+
+			web.report.query.sort = function(layout, xResponse) {
+				var id = layout.sorting.id,
+					direction = layout.sorting ? layout.sorting.direction : 'DESC',
+					index = xResponse.nameHeaderMap[id].index,
+					rows = xResponse.rows;
+
+				support.prototype.array.sort(rows, direction, index);
+
+				return xResponse;
+			};
+
+			web.report.query.format = function(str) {
+				var n = parseFloat(str);
+
+				if (!Ext.isNumber(n)) {
+					return str;
+				}
+
+				if (new Date(str).toString() === 'Invalid Date') {
+					return n;
+				}
+
+				return str;
+			};
+
+			web.report.query.getHtml = function(layout, xResponse) {
+				var dimensionHeaders = xResponse.dimensionHeaders,
+					rows = xResponse.rows,
+					tableCls = 'pivot',
+					html = '';
+
+				xResponse.sortableIdObjects = [];
+
+				tableCls += layout.displayDensity ? ' ' + layout.displayDensity : '';
+				tableCls += layout.fontSize ? ' ' + layout.fontSize : '';
+
+				html += '<table class="' + tableCls + '"><tr>';
+
+				// get header indexes
+				for (var i = 0, header, uuid; i < dimensionHeaders.length; i++) {
+					header = dimensionHeaders[i];
+					uuid = Ext.data.IdGenerator.get('uuid').generate();
+
+					html += '<td id="' + uuid + '" class="pivot-dim td-sortable">' + header.column + '</td>';
+
+					xResponse.sortableIdObjects.push({
+						id: header.name,
+						uuid: uuid
+					});
+				}
+
+				html += '</tr>';
+
+				// rows
+				for (var i = 0, row; i < rows.length; i++) {
+					row = rows[i];
+					html += '<tr>';
+
+					for (var j = 0, str, value; j < dimensionHeaders.length; j++) {
+						str = row[dimensionHeaders[j].index];
+						value = web.report.query.format(str);
+						html += '<td class="pivot-value align-left">' + value + '</td>';
+					}
+
+					html += '</tr>';
+				}
+
+				html += '</table>';
+
+				return {
+					html: html
+				};
 			};
 
 		}());

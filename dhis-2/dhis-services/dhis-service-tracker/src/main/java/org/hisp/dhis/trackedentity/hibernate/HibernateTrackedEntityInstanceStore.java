@@ -53,6 +53,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
@@ -301,7 +302,7 @@ public class HibernateTrackedEntityInstanceStore
         return criteria.list();
     }
 
-    public int validate( TrackedEntityInstance instance, Program program )
+    public int validate( TrackedEntityInstance instance, Program program, I18nFormat format )
     {
         if ( instance.getAttributeValues() != null && instance.getAttributeValues().size() > 0 )
         {
@@ -324,7 +325,6 @@ public class HibernateTrackedEntityInstanceStore
                 criteria.createAlias( "attributeValues", "attributeValue" );
                 criteria.createAlias( "organisationUnit", "orgunit" );
                 criteria.createAlias( "programInstances", "programInstance" );
-                criteria.createAlias( "programInstance.program", "program" );
 
                 Disjunction disjunction = Restrictions.disjunction();
 
@@ -382,7 +382,7 @@ public class HibernateTrackedEntityInstanceStore
 
         if ( program != null )
         {
-            ValidationCriteria validationCriteria = program.isValid( instance );
+            ValidationCriteria validationCriteria = validateEnrollment( instance, program, format );
 
             if ( validationCriteria != null )
             {
@@ -391,6 +391,79 @@ public class HibernateTrackedEntityInstanceStore
         }
 
         return TrackedEntityInstanceService.ERROR_NONE;
+    }
+
+    public ValidationCriteria validateEnrollment( TrackedEntityInstance instance, Program program, I18nFormat format )
+    {
+        try
+        {
+            for ( ValidationCriteria criteria : program.getValidationCriteria() )
+            {
+                String value = "";
+                for ( TrackedEntityAttributeValue attributeValue : instance.getAttributeValues() )
+                {
+                    if ( attributeValue.getAttribute().getUid().equals( criteria.getProperty() ) )
+                    {
+                        value = attributeValue.getValue();
+
+                        if ( attributeValue.getAttribute().getValueType().equals( TrackedEntityAttribute.TYPE_AGE ) )
+                        {
+                            value = TrackedEntityAttribute.getAgeFromDate( format.parseDate( value ) ) + "";
+                        }
+
+                        if ( !value.isEmpty() )
+                        {
+                            String type = attributeValue.getAttribute().getValueType();
+                            // For integer type
+                            if ( type.equals( TrackedEntityAttribute.TYPE_AGE )
+                                || type.equals( TrackedEntityAttribute.TYPE_INT ) )
+                            {
+                                int value1 = Integer.parseInt( value );
+                                int value2 = Integer.parseInt( criteria.getValue() );
+
+                                if ( (criteria.getOperator() == ValidationCriteria.OPERATOR_LESS_THAN && value1 >= value2)
+                                    || (criteria.getOperator() == ValidationCriteria.OPERATOR_EQUAL_TO && value1 != value2)
+                                    || (criteria.getOperator() == ValidationCriteria.OPERATOR_GREATER_THAN && value1 <= value2) )
+                                {
+                                    return criteria;
+                                }
+                            }
+                            // For Date type
+                            else if ( type.equals( TrackedEntityAttribute.TYPE_DATE ) )
+                            {
+                                Date value1 = format.parseDate( value );
+                                Date value2 = format.parseDate( criteria.getValue() );
+                                int i = value1.compareTo( value2 );
+                                if ( i != criteria.getOperator() )
+                                {
+                                    return criteria;
+                                }
+                            }
+                            // For other types
+                            else
+                            {
+                                if ( criteria.getOperator() == ValidationCriteria.OPERATOR_EQUAL_TO
+                                    && !value.equals( criteria.getValue() ) )
+                                {
+                                    return criteria;
+                                }
+
+                            }
+                        }
+
+                    }
+                }
+
+            }
+
+            // Return null if all criteria are met
+
+            return null;
+        }
+        catch ( Exception ex )
+        {
+            throw new RuntimeException( ex );
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -784,9 +857,9 @@ public class HibernateTrackedEntityInstanceStore
     public Collection<TrackedEntityInstance> getByAttributeValue( String searchText, int attributeId, Integer min,
         Integer max )
     {
-
+        
         String hql = "FROM TrackedEntityAttributeValue pav WHERE lower (pav.value) LIKE lower ('%" + searchText
-            + "%') AND pav.attribute.id =:attributeId order by pav.instance";
+            + "%') AND pav.attribute.id =:attributeId order by pav.entityInstance";
 
         Query query = getQuery( hql );
 
