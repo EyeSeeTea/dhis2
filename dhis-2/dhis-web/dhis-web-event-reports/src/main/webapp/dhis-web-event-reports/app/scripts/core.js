@@ -1493,14 +1493,14 @@ Ext.onReady( function() {
 			service.response.aggregate = {};
 
 			service.response.aggregate.getExtendedResponse = function(xLayout, response) {
-				var allIds = [],
-                    emptyId = 'N/A',
+				var emptyId = 'N/A',
                     names,
 					headers;
 
 				response = Ext.clone(response);
-                names = response.metaData.names;
 				headers = response.headers;
+                names = response.metaData.names;
+                names[emptyId] = emptyId;
 
 				response.nameHeaderMap = {};
 				response.idValueMap = {};
@@ -1512,44 +1512,61 @@ Ext.onReady( function() {
 					ids = [];
 					objects = [];
 
-					// collect ids from response
-					for (var j = 0, id; j < response.rows.length; j++) {
-						ids.push(response.rows[j][i] || emptyId);
-					}
+                    if (header.type === 'java.lang.Double') {
+                        for (var j = 0, id, fullId, parsedId; j < response.rows.length; j++) {
+                            id = response.rows[j][i] || emptyId;
+                            fullId = header.name + id;
+                            parsedId = parseFloat(id);
 
-					ids = Ext.Array.unique(ids);
-
-					// sorting objects
-					for (var j = 0, id; j < ids.length; j++) {
-						id = ids[j];
-
-						objects.push({
-							id: id,
-							sortingId: Ext.isNumber(parseFloat(id)) ? parseFloat(id) : id
-						});
-					}
-
-					objects = support.prototype.array.sort(objects, 'ASC', 'sortingId');
-
-					ids = Ext.Array.pluck(objects, 'id');
-
-                    // header ids
-                    for (var j = 0, id, fullId; j < ids.length; j++) {
-                        id = ids[j];
-                        fullId = header.name + id;
-
-                        // add full ids to header id array
-                        header.ids.push(fullId);
-
-                        // add full names to metadata names
-                        names[fullId] = names.hasOwnProperty(id) ? names[id] : names[header.name] + ' ' + (Ext.isNumber(parseFloat(id)) ? parseFloat(id) : id);
+                            names[fullId] = header.column + (parsedId || names[id] || id);
+                            response.rows[j][i] = fullId;
+                            header.ids.push(fullId);
                     }
+                    else {
+                        for (var j = 0, id, fullId; j < response.rows.length; j++) {
+                            id = response.rows[j][i] || emptyId;
+                            fullId = header.name + id;
+
+                            names[fullId] = header.column + (names[id] || id);
+                            response.rows[j][i] = fullId;
+                            header.ids.push(fullId);
+                    }
+
+					header.ids = Ext.Array.unique(header.ids);
+                    header.ids.sort();
 
 					header.size = header.ids.length;
 					header.index = i;
 
+					// sorting objects
+					//for (var j = 0, id; j < ids.length; j++) {
+						//id = ids[j];
+
+						//objects.push({
+							//id: id,
+							//sortingId:  Ext.isNumber(parseFloat(id)) ? parseFloat(id) : id
+						//});
+					//}
+
+					//objects = support.prototype.array.sort(objects, 'ASC', 'sortingId');
+                    //ids.sort();
+
+					//ids = Ext.Array.pluck(objects, 'id');
+
+                    // header ids
+                    //for (var j = 0, id, fullId; j < ids.length; j++) {
+                        //id = ids[j];
+                        //fullId = header.name + id;
+
+                        //// add full ids to header id array
+                        //header.ids.push(fullId);
+
+                        //// add full names to metadata names
+                        //names[fullId] = names.hasOwnProperty(id) ? names[id] : names[header.name] + ' ' + id;
+                    //}
+
 					// all ids, used later
-					allIds = allIds.concat(header.ids);
+					//allIds = allIds.concat(header.ids);
 
 					// name header map
 					response.nameHeaderMap[header.name] = header;
@@ -1573,11 +1590,6 @@ Ext.onReady( function() {
 				// idValueMap: idIndexOrder
 				for (var i = 0; i < axisDimensionNames.length; i++) {
 					idIndexOrder.push(response.nameHeaderMap[axisDimensionNames[i]].index);
-
-					// If co exists in response and is not added in layout, add co after dx
-					if (coHeader && !Ext.Array.contains(axisDimensionNames, co) && axisDimensionNames[i] === dx) {
-						idIndexOrder.push(coHeader.index);
-					}
 				}
 
 				// idValueMap
