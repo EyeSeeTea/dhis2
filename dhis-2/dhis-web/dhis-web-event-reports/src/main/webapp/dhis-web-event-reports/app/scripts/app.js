@@ -973,6 +973,7 @@ Ext.onReady( function() {
 		colStore.add({id: 'eventdate', name: 'Event date'});
         colStore.add({id: 'longitude', name: 'Longitude'});
         colStore.add({id: 'latitude', name: 'Latitude'});
+        colStore.add({id: 'ouname', name: 'Organisation unit'});
 
 		getCmpHeight = function() {
 			var size = dimensionStore.totalCount,
