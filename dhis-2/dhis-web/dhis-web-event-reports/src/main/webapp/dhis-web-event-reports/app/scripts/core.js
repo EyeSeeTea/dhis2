@@ -1513,12 +1513,13 @@ Ext.onReady( function() {
 					objects = [];
 
                     if (header.type === 'java.lang.Double') {
-                        for (var j = 0, id, fullId, parsedId; j < response.rows.length; j++) {
+                        for (var j = 0, id, fullId, parsedId, displayId; j < response.rows.length; j++) {
                             id = response.rows[j][i] || emptyId;
                             fullId = header.name + id;
                             parsedId = parseFloat(id);
+                            displayId = Ext.isNumber(parsedId) ? parsedId : (names[id] || id);
 
-                            names[fullId] = header.column + (parsedId || names[id] || id);
+                            names[fullId] = header.column + (header.meta ? ' ' + displayId : '');
                             response.rows[j][i] = fullId;
                             header.ids.push(fullId);
                         }
@@ -1528,7 +1529,7 @@ Ext.onReady( function() {
                             id = response.rows[j][i] || emptyId;
                             fullId = header.name + id;
 
-                            names[fullId] = header.column + '' + (names[id] || id);
+                            names[fullId] = header.column + ' ' + (names[id] || id);
                             response.rows[j][i] = fullId;
                             header.ids.push(fullId);
                         }

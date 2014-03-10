@@ -292,9 +292,9 @@ public class InternalMapLayer
     {
         if ( DistributionStrategy.STRATEGY_EQUAL_RANGE == strategy )
         {
-            setEqualRangeIntervalSetToMapLayer( length );
+            setEqualRangeIntervalSet( length );
         }
-        else if ( DistributionStrategy.STRATEGY_EQUAL_SIZE == strategy )
+        else if ( DistributionStrategy.STRATEGY_EQUAL_COUNT == strategy )
         {
             throw new RuntimeException( "This distribution strategy is not implemented yet!" );
         }
@@ -312,35 +312,20 @@ public class InternalMapLayer
      * @param length the number of equal sized intervals
      * @return the created interval set that was applied to this map layer
      */
-    public void setEqualRangeIntervalSetToMapLayer( int length )
+    public void setEqualRangeIntervalSet( int length )
     {
         Assert.isTrue( length > 0 );
         Assert.isTrue( mapObjects != null );
         Assert.isTrue( mapObjects.size() > 0 );
 
-        IntervalSet intervalSet = new IntervalSet();
+        IntervalSet intervalSet = new IntervalSet().setLowHigh( mapObjects );
 
-        // Determine the objects with the min and max values
-        for ( InternalMapObject mapObject : mapObjects )
-        {
-            if ( intervalSet.getObjectLow() == null || mapObject.getValue() < intervalSet.getObjectLow().getValue() )
-            {
-                intervalSet.setObjectLow( mapObject );
-            }
-            
-            if ( intervalSet.getObjectHigh() == null || mapObject.getValue() > intervalSet.getObjectHigh().getValue() )
-            {
-                intervalSet.setObjectHigh( mapObject );
-            }
-        }
-
-        // Determine and set the color for each of the intervals according to
-        // the highest and lowest values
+        // Set the color for each of the intervals according to highest/lowest values
         for ( int i = 0; i < length; i++ )
         {
             // Determine the boundaries the interval covers
-            double low = MapUtils.lerp( intervalSet.getObjectLow().getValue(), intervalSet.getObjectHigh().getValue(), (i + 0.0) / length );
-            double high = MapUtils.lerp( intervalSet.getObjectLow().getValue(), intervalSet.getObjectHigh().getValue(), (i + 1.0) / length );
+            double low = MapUtils.lerp( intervalSet.getObjectLow().getValue(), intervalSet.getObjectHigh().getValue(), ((i + 0d) / length) );
+            double high = MapUtils.lerp( intervalSet.getObjectLow().getValue(), intervalSet.getObjectHigh().getValue(), ((i + 1d) / length) );
 
             // Determine the color of the interval
             Color color = MapUtils.lerp( colorLow, colorHigh, (i + 0.5) / length );
