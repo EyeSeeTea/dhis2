@@ -34,6 +34,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.api.controller.WebMetaData;
+import org.hisp.dhis.api.utils.ops.FilterOps;
+import org.hisp.dhis.api.utils.ops.Filters;
+import org.hisp.dhis.api.utils.ops.Op;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.Pager;
@@ -49,6 +52,8 @@ import java.util.Map;
 import static org.hisp.dhis.system.util.PredicateUtils.alwaysTrue;
 
 /**
+ * TODO too many inner classes, need to be split up
+ *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public class WebUtils
@@ -131,7 +136,7 @@ public class WebUtils
         generateLinks( object, true );
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public static void generateLinks( Object object, boolean deep )
     {
         if ( object == null )
@@ -185,7 +190,7 @@ public class WebUtils
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     private static void putInMap( Map<String, Map> map, String path )
     {
         for ( String p : path.split( "\\." ) )
@@ -301,7 +306,7 @@ public class WebUtils
         return output;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     private static Map<String, Object> buildObjectOutput( Object object, Map<String, Map> fieldMap )
     {
         if ( object == null )
@@ -379,7 +384,7 @@ public class WebUtils
         return getIdentifiableObjectCollectionProperties( object, fields );
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     private static List<Map<String, Object>> getIdentifiableObjectCollectionProperties( Object object, List<String> fields )
     {
         List<Map<String, Object>> output = Lists.newArrayList();
@@ -442,7 +447,7 @@ public class WebUtils
             return Lists.newArrayList();
         }
 
-        Map<String, Op> parsed = parseFilters( filters );
+        Filters parsed = parseFilters( filters );
 
         List<T> list = Lists.newArrayList();
 
@@ -457,32 +462,71 @@ public class WebUtils
         return list;
     }
 
-    private static <T extends IdentifiableObject> boolean evaluateWithFilters( T object, Map<String, Op> filters )
+    @SuppressWarnings( "unchecked" )
+    private static <T extends IdentifiableObject> boolean evaluateWithFilters( T object, Filters filters )
     {
         Map<String, ReflectionUtils.PropertyDescriptor> classMap = ReflectionUtils.getJacksonClassMap( object.getClass() );
 
-        for ( String field : filters.keySet() )
+        for ( String field : filters.getFilters().keySet() )
         {
             if ( !classMap.containsKey( field ) )
             {
+                System.err.println( "Skipping non-existent field: " + field );
                 continue;
             }
 
             ReflectionUtils.PropertyDescriptor descriptor = classMap.get( field );
 
-            if ( descriptor.isCollection() || descriptor.isIdentifiableObject() )
-            {
-                continue;
-            }
+            Object value = ReflectionUtils.invokeMethod( object, descriptor.getMethod() );
 
-            Object o = ReflectionUtils.invokeMethod( object, descriptor.getMethod() );
-            Op op = filters.get( field );
+            Object filter = filters.getFilters().get( field );
 
-            switch ( op.evaluate( o ) )
+            if ( FilterOps.class.isInstance( filter ) )
             {
-                case EXCLUDE:
+                if ( evaluateFilterOps( value, (FilterOps) filter ) )
                 {
                     return false;
+                }
+            }
+            else
+            {
+                Map<String, Object> map = (Map<String, Object>) filters.getFilters().get( field );
+                Filters f = new Filters();
+                f.setFilters( map );
+
+                if ( map.containsKey( "__self__" ) )
+                {
+                    if ( evaluateFilterOps( value, (FilterOps) map.get( "__self__" ) ) )
+                    {
+                        return false;
+                    }
+
+                    map.remove( "__self__" );
+                }
+
+                if ( descriptor.isIdentifiableObject() && !descriptor.isCollection() )
+                {
+                    if ( !evaluateWithFilters( (IdentifiableObject) value, f ) )
+                    {
+                        return false;
+                    }
+                }
+                else if ( descriptor.isIdentifiableObject() && descriptor.isCollection() )
+                {
+                    Collection<?> idObjectCollection = (Collection<?>) value;
+
+                    if ( idObjectCollection.isEmpty() )
+                    {
+                        return false;
+                    }
+
+                    for ( Object idObject : idObjectCollection )
+                    {
+                        if ( !evaluateWithFilters( (IdentifiableObject) idObject, f ) )
+                        {
+                            return false;
+                        }
+                    }
                 }
             }
         }
@@ -490,10 +534,38 @@ public class WebUtils
         return true;
     }
 
-    @SuppressWarnings( "unchecked" )
-    private static Map<String, Op> parseFilters( List<String> filters )
+    private static boolean evaluateFilterOps( Object value, FilterOps filterOps )
     {
-        Map<String, Op> output = Maps.newHashMap();
+        // filter through every operator treating multiple of same operator as OR
+        for ( String operator : filterOps.getFilters().keySet() )
+        {
+            boolean include = false;
+
+            List<Op> ops = filterOps.getFilters().get( operator );
+
+            for ( Op op : ops )
+            {
+                switch ( op.evaluate( value ) )
+                {
+                    case INCLUDE:
+                    {
+                        include = true;
+                    }
+                }
+            }
+
+            if ( !include )
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @SuppressWarnings( "unchecked" )
+    private static Filters parseFilters( List<String> filters )
+    {
+        Filters parsed = new Filters();
 
         for ( String filter : filters )
         {
@@ -504,185 +576,16 @@ public class WebUtils
                 continue;
             }
 
-            if ( OpFactory.canCreate( split[1] ) )
+            if ( split.length >= 3 )
             {
-                Op op = OpFactory.create( split[1] );
-
-                if ( op.wantLeft() )
-                {
-                    if ( split.length < 3 )
-                    {
-                        System.err.println( "Op wanted left side, but none was giving. Skipping Op: " + split[1] );
-                        continue;
-                    }
-
-                    op.setLeft( split[2] );
-                }
-
-                output.put( split[0], op );
+                parsed.addFilter( split[0], split[1], split[2] );
             }
             else
             {
-                System.err.println( "Skipping invalid op: " + split[1] );
+                parsed.addFilter( split[0], split[1], null );
             }
         }
 
-        return output;
-    }
-
-    private static enum OpStatus
-    {
-        INCLUDE, EXCLUDE, IGNORE
-    }
-
-    private static class OpFactory
-    {
-        protected static Map<String, Class<? extends Op>> register = Maps.newHashMap();
-
-        static
-        {
-            register( "eq", EqOp.class );
-            register( "like", LikeOp.class );
-        }
-
-        public static void register( String type, Class<? extends Op> opClass )
-        {
-            register.put( type.toLowerCase(), opClass );
-        }
-
-        public static boolean canCreate( String type )
-        {
-            return register.containsKey( type.toLowerCase() );
-        }
-
-        public static Op create( String type )
-        {
-            Class<? extends Op> opClass = register.get( type.toLowerCase() );
-
-            try
-            {
-                return opClass.newInstance();
-            }
-            catch ( InstantiationException ignored )
-            {
-            }
-            catch ( IllegalAccessException ignored )
-            {
-            }
-
-            return null;
-        }
-    }
-
-    private abstract static class Op
-    {
-        private String left;
-
-        public boolean wantLeft()
-        {
-            return true;
-        }
-
-        public void setLeft( String left )
-        {
-            this.left = left;
-        }
-
-        public Object getLeft()
-        {
-            return left;
-        }
-
-        @SuppressWarnings( "unchecked" )
-        public <T> T getLeft( Class<?> klass )
-        {
-            if ( left.getClass().isAssignableFrom( klass ) )
-            {
-                return (T) left;
-            }
-
-            if ( klass.isAssignableFrom( Boolean.class ) )
-            {
-                try
-                {
-                    return (T) Boolean.valueOf( left );
-                }
-                catch ( Exception ignored )
-                {
-                }
-            }
-            else if ( klass.isAssignableFrom( Integer.class ) )
-            {
-                try
-                {
-                    return (T) Integer.valueOf( left );
-                }
-                catch ( Exception ignored )
-                {
-                }
-            }
-
-            return null;
-        }
-
-        public abstract OpStatus evaluate( Object right );
-    }
-
-    public static class EqOp extends Op
-    {
-        @Override
-        public OpStatus evaluate( Object right )
-        {
-            if ( getLeft() == null || right == null )
-            {
-                return OpStatus.IGNORE;
-            }
-
-            if ( right.getClass().isAssignableFrom( String.class ) )
-            {
-                String s1 = getLeft( String.class );
-                String s2 = (String) right;
-
-                return (s1 != null && s1.equals( s2 )) ? OpStatus.INCLUDE : OpStatus.EXCLUDE;
-            }
-            else if ( right.getClass().isAssignableFrom( Boolean.class ) )
-            {
-                Boolean s1 = getLeft( Boolean.class );
-                Boolean s2 = (Boolean) right;
-
-                return (s1 != null && s2.equals( s1 )) ? OpStatus.INCLUDE : OpStatus.EXCLUDE;
-            }
-            else if ( right.getClass().isAssignableFrom( Integer.class ) )
-            {
-                Integer s1 = getLeft( Integer.class );
-                Integer s2 = (Integer) right;
-
-                return (s1 != null && s2.equals( s1 )) ? OpStatus.INCLUDE : OpStatus.EXCLUDE;
-            }
-
-            return OpStatus.IGNORE;
-        }
-    }
-
-    public static class LikeOp extends Op
-    {
-        @Override
-        public OpStatus evaluate( Object right )
-        {
-            if ( getLeft() == null || right == null )
-            {
-                return OpStatus.IGNORE;
-            }
-
-            if ( right.getClass().isAssignableFrom( String.class ) )
-            {
-                String s1 = getLeft( String.class );
-                String s2 = (String) right;
-
-                return (s1 != null && s2.toLowerCase().contains( s1.toLowerCase() )) ? OpStatus.INCLUDE : OpStatus.EXCLUDE;
-            }
-
-            return OpStatus.IGNORE;
-        }
+        return parsed;
     }
 }

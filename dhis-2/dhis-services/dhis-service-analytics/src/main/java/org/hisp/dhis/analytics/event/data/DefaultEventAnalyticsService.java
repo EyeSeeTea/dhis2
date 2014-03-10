@@ -85,21 +85,12 @@ public class DefaultEventAnalyticsService
     implements EventAnalyticsService
 {
     private static final String ITEM_EVENT = "psi";
-
     private static final String ITEM_PROGRAM_STAGE = "ps";
-
     private static final String ITEM_EXECUTION_DATE = "eventdate";
-
     private static final String ITEM_LONGITUDE = "longitude";
-
     private static final String ITEM_LATITUDE = "latitude";
-
-    private static final String ITEM_ORG_UNIT = "ou";
-
     private static final String ITEM_ORG_UNIT_NAME = "ouname";
-
     private static final String ITEM_ORG_UNIT_CODE = "oucode";
-
     private static final String COL_NAME_EVENTDATE = "executiondate";
 
     private static final List<String> SORTABLE_ITEMS = Arrays.asList( ITEM_EXECUTION_DATE, ITEM_ORG_UNIT_NAME,
@@ -154,9 +145,9 @@ public class DefaultEventAnalyticsService
             grid.addHeader( new GridHeader( dimension.getDimension(), dimension.getDisplayName() ) );
         }
 
-        for ( QueryItem item : params.getItems() )
+        for ( QueryItem item : params.getUniqueItems() )
         {
-            grid.addHeader( new GridHeader( item.getItem().getUid(), item.getItem().getName() ) );
+            grid.addHeader( new GridHeader( item.getItem().getUid(), item.getItem().getName(), item.getTypeAsString() ) );
         }
 
         grid.addHeader( new GridHeader( "value", "Value" ) );
@@ -215,13 +206,15 @@ public class DefaultEventAnalyticsService
         grid.addHeader( new GridHeader( ITEM_LATITUDE, "Latitude" ) );
         grid.addHeader( new GridHeader( ITEM_ORG_UNIT_NAME, "Organisation unit name" ) );
         grid.addHeader( new GridHeader( ITEM_ORG_UNIT_CODE, "Organisation unit code" ) );
-        grid.addHeader( new GridHeader( ITEM_ORG_UNIT, "Organisation unit", String.class.getName(), true, false ) );
 
-        for ( QueryItem queryItem : params.getItems() )
+        for ( DimensionalObject dimension : params.getDimensions() )
         {
-            IdentifiableObject item = queryItem.getItem();
+            grid.addHeader( new GridHeader( dimension.getDimension(), dimension.getDisplayName() ) );
+        }
 
-            grid.addHeader( new GridHeader( item.getUid(), item.getName() ) );
+        for ( QueryItem item : params.getUniqueItems() )
+        {
+            grid.addHeader( new GridHeader( item.getItem().getUid(), item.getItem().getName(), item.getTypeAsString() ) );
         }
 
         // ---------------------------------------------------------------------
