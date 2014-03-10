@@ -97,46 +97,71 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
         },
         
         getByStage: function(orgUnit, programStage){
-            var promise = $http.get(DHIS2URL + '/api/events.json?' + 'orgUnit=' + orgUnit + '&programStage=' + programStage + '&paging=false').then(function(response){
-                //var dhis2Events = response.data.eventList;                
-                
+            var promise = $http.get(DHIS2URL + '/api/events.json?' + 'orgUnit=' + orgUnit + '&programStage=' + programStage + '&paging=false')
+                    .then(function(response){
+                        
                 return response.data.eventList;             
+        
+            }, function(){
+                
+                return dhis2.ec.storageManager.getEvents(orgUnit, programStage);
+                
             });            
+            
             return promise;
         },
         
-        get: function(eventUID){
+        get: function(eventUid){
             
-            var promise = $http.get(DHIS2URL + '/api/events/' + eventUID + '.json').then(function(response){               
+            var promise = $http.get(DHIS2URL + '/api/events/' + eventUid + '.json').then(function(response){               
                 return response.data;
+                
+            }, function(){
+                return dhis2.ec.storageManager.getEvent(eventUid);
             });            
             return promise;
         },
         
         create: function(dhis2Event){
-            var promise = $http.post(DHIS2URL + '/api/events.json?', dhis2Event).then(function(response){
+            
+            var e = angular.copy(dhis2Event);            
+            dhis2.ec.storageManager.saveEvent(e);            
+        
+            var promise = $http.post(DHIS2URL + '/api/events.json', dhis2Event).then(function(response){
+                dhis2.ec.storageManager.clearEvent(e);
                 return response.data;
+            }, function(){
+                return {importSummaries: [{status: 'SUCCESS', reference: e.event}]};
             });
             return promise;            
         },
         
         delete: function(dhis2Event){
-           var promise = $http.delete(DHIS2URL + '/api/events/' + dhis2Event.event).then(function(response){
+            dhis2.ec.storageManager.clearEvent(dhis2Event);
+            var promise = $http.delete(DHIS2URL + '/api/events/' + dhis2Event.event).then(function(response){
                 return response.data;
+            }, function(){                
             });
             return promise;           
         },
     
-        update: function(dhis2Event){            
+        update: function(dhis2Event){   
+            dhis2.ec.storageManager.saveEvent(dhis2Event);
             var promise = $http.put(DHIS2URL + '/api/events/' + dhis2Event.event, dhis2Event).then(function(response){
+                dhis2.ec.storageManager.clearEvent(dhis2Event);
                 return response.data;
             });
             return promise;
         },
         
-        updateSingleValue: function(dhis2Event){            
-            var promise = $http.put(DHIS2URL + '/api/events/' + dhis2Event.event + '/' + dhis2Event.dataValues[0].dataElement, dhis2Event ).then(function(response){
+        updateForSingleValue: function(singleValue, fullValue){                
+            
+            dhis2.ec.storageManager.saveEvent(fullValue);            
+            
+            var promise = $http.put(DHIS2URL + '/api/events/' + singleValue.event + '/' + singleValue.dataValues[0].dataElement, singleValue ).then(function(response){
+                dhis2.ec.storageManager.clearEvent(fullValue);
                 return response.data;
+            }, function(){                
             });
             return promise;
         }
@@ -245,6 +270,7 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
 
     }])
 
+/* Context menu for grid*/
 .service('ContextMenuSelectedItem', function(){
     this.selectedItem = '';
     
@@ -257,11 +283,13 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
     };
 })
 
+/* Translation service - gets logged in user profile for the server, 
+ * and apply user's locale to translation
+ */
 .service('TranslationService', function($translate, storage){
     
     this.translate = function(){
-        var profile = storage.get('USER_PROFILE');
-        profile = JSON.parse( profile );
+        var profile = storage.get('USER_PROFILE');        
         if( profile ){        
             $translate.uses(profile.settings.keyUiLocale);
         }
