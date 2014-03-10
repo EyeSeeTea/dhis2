@@ -1494,6 +1494,7 @@ Ext.onReady( function() {
 
 			service.response.aggregate.getExtendedResponse = function(xLayout, response) {
 				var emptyId = 'N/A',
+                    meta = ['ou', 'pe'],
                     names,
 					headers;
 
@@ -1506,11 +1507,10 @@ Ext.onReady( function() {
 				response.idValueMap = {};
 
 				// add to headers: size, index, response ids
-				for (var i = 0, header, ids, objects; i < headers.length; i++) {
+				for (var i = 0, header, isMeta; i < headers.length; i++) {
 					header = headers[i];
                     header.ids = [];
-					ids = [];
-					objects = [];
+                    isMeta = Ext.Array.contains(meta, header.name);
 
                     if (header.type === 'java.lang.Double') {
                         for (var j = 0, id, fullId, parsedId, displayId; j < response.rows.length; j++) {
@@ -1519,7 +1519,8 @@ Ext.onReady( function() {
                             parsedId = parseFloat(id);
                             displayId = Ext.isNumber(parsedId) ? parsedId : (names[id] || id);
 
-                            names[fullId] = header.column + (header.meta ? ' ' + displayId : '');
+                            //names[fullId] = header.column + (isMeta ? '' : ' ' + displayId);
+                            names[fullId] = (isMeta ? '' : header.column + ' ') + displayId;
                             response.rows[j][i] = fullId;
                             header.ids.push(fullId);
                         }
@@ -1529,7 +1530,7 @@ Ext.onReady( function() {
                             id = response.rows[j][i] || emptyId;
                             fullId = header.name + id;
 
-                            names[fullId] = header.column + ' ' + (names[id] || id);
+                            names[fullId] = (isMeta ? '' : header.column + ' ') + (names[id] || id);
                             response.rows[j][i] = fullId;
                             header.ids.push(fullId);
                         }
