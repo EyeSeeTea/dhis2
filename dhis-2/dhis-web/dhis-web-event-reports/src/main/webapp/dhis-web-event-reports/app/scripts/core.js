@@ -1515,6 +1515,8 @@ Ext.onReady( function() {
                     // overwrite row ids, update metadata, set unique header ids
                     if (header.meta) {
                         if (header.type === 'java.lang.Double') {
+                            var objects = [];
+
                             for (var j = 0, id, fullId, parsedId, displayId; j < response.rows.length; j++) {
                                 id = response.rows[j][i] || emptyId;
                                 fullId = header.name + id;
@@ -1523,8 +1525,15 @@ Ext.onReady( function() {
 
                                 names[fullId] = (isMeta ? '' : header.column + ' ') + displayId;
                                 response.rows[j][i] = fullId;
-                                header.ids.push(fullId);
+
+                                objects.push({
+                                    id: fullId,
+                                    sortingId: parsedId
+                                });
                             }
+
+                            support.prototype.array.sort(objects, 'ASC', 'sortingId');
+                            header.ids = Ext.Array.pluck(objects, 'id');
                         }
                         else {
                             for (var j = 0, id, fullId; j < response.rows.length; j++) {
@@ -1535,11 +1544,12 @@ Ext.onReady( function() {
                                 response.rows[j][i] = fullId;
                                 header.ids.push(fullId);
                             }
+
+                            header.ids.sort();
                         }
                     }
 
 					header.ids = Ext.Array.unique(header.ids);
-                    header.ids.sort();
 
 					header.size = header.ids.length;
 					header.index = i;
