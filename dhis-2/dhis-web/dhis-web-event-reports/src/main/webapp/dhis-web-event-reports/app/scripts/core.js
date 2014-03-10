@@ -1521,15 +1521,17 @@ Ext.onReady( function() {
                             names[fullId] = header.column + (parsedId || names[id] || id);
                             response.rows[j][i] = fullId;
                             header.ids.push(fullId);
+                        }
                     }
                     else {
                         for (var j = 0, id, fullId; j < response.rows.length; j++) {
                             id = response.rows[j][i] || emptyId;
                             fullId = header.name + id;
 
-                            names[fullId] = header.column + (names[id] || id);
+                            names[fullId] = header.column + '' + (names[id] || id);
                             response.rows[j][i] = fullId;
                             header.ids.push(fullId);
+                        }
                     }
 
 					header.ids = Ext.Array.unique(header.ids);
@@ -1572,18 +1574,17 @@ Ext.onReady( function() {
 					response.nameHeaderMap[header.name] = header;
 
                     // update row ids
-                    if (header.name !== 'value') {
-                        for (var j = 0; j < response.height; j++) {
-                            response.rows[j][i] = header.name + (response.rows[j][i] || emptyId);
-                        }
-                    }
+                    //if (header.name !== 'value') {
+                        //for (var j = 0; j < response.height; j++) {
+                            //response.rows[j][i] = header.name + (response.rows[j][i] || emptyId);
+                        //}
+                    //}
 				}
 
 				// idValueMap: vars
 				var valueHeaderIndex = response.nameHeaderMap[conf.finals.dimension.value.value].index,
 					coHeader = response.nameHeaderMap[conf.finals.dimension.category.dimensionName],
 					dx = dimConf.data.dimensionName,
-					co = dimConf.category.dimensionName,
 					axisDimensionNames = xLayout.axisDimensionNames,
 					idIndexOrder = [];
 
