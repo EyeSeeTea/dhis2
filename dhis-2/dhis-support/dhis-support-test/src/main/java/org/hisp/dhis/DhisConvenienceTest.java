@@ -524,6 +524,8 @@ public abstract class DhisConvenienceTest
         for ( DataElementCategoryOption categoryOption : categoryOptions )
         {
             categoryOptionCombo.getCategoryOptions().add( categoryOption );
+
+            categoryOption.getCategoryOptionCombos().add( categoryOptionCombo );
         }
 
         return categoryOptionCombo;
@@ -544,6 +546,8 @@ public abstract class DhisConvenienceTest
         for ( DataElementCategoryOption categoryOption : categoryOptions )
         {
             categoryOptionCombo.getCategoryOptions().add( categoryOption );
+
+            categoryOption.getCategoryOptionCombos().add( categoryOptionCombo );
         }
 
         return categoryOptionCombo;
@@ -563,7 +567,7 @@ public abstract class DhisConvenienceTest
 
         for ( DataElementCategoryOption categoryOption : categoryOptions )
         {
-            dataElementCategory.getCategoryOptions().add( categoryOption );
+            dataElementCategory.addDataElementCategoryOption( categoryOption );
         }
 
         return dataElementCategory;
@@ -580,14 +584,12 @@ public abstract class DhisConvenienceTest
     {
         CategoryOptionGroup categoryOptionGroup = new CategoryOptionGroup( "CategoryOptionGroup" + categoryGroupUniqueIdentifier );
 
-        Set<DataElementCategoryOption> members = new HashSet<DataElementCategoryOption>();
+        categoryOptionGroup.setMembers( new HashSet<DataElementCategoryOption>() );
 
         for ( DataElementCategoryOption categoryOption : categoryOptions )
         {
-            members.add( categoryOption );
+            categoryOptionGroup.addCategoryOption( categoryOption );
         }
-
-        categoryOptionGroup.setMembers( members );
 
         return categoryOptionGroup;
     }
@@ -603,16 +605,14 @@ public abstract class DhisConvenienceTest
     {
         CategoryOptionGroupSet categoryOptionGroupSet = new CategoryOptionGroupSet( "CategoryOptionGroupSet" + categoryGroupSetUniqueIdentifier );
 
-        List<CategoryOptionGroup> members = new ArrayList<CategoryOptionGroup>();
+        // categoryOptionGroupSet.setMembers( new ArrayList<CategoryOptionGroup>() );
 
         for ( CategoryOptionGroup categoryOptionGroup : categoryOptionGroups )
         {
-            members.add( categoryOptionGroup );
+            categoryOptionGroupSet.addCategoryOptionGroup( categoryOptionGroup );
 
             categoryOptionGroup.setGroupSet( categoryOptionGroupSet );
         }
-
-        categoryOptionGroupSet.setMembers( members );
 
         return categoryOptionGroupSet;
     }
