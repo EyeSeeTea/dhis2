@@ -1512,6 +1512,7 @@ Ext.onReady( function() {
                     header.ids = [];
                     isMeta = Ext.Array.contains(meta, header.name);
 
+                    // overwrite row ids, update metadata, set unique header ids
                     if (header.type === 'java.lang.Double') {
                         for (var j = 0, id, fullId, parsedId, displayId; j < response.rows.length; j++) {
                             id = response.rows[j][i] || emptyId;
@@ -1519,7 +1520,6 @@ Ext.onReady( function() {
                             parsedId = parseFloat(id);
                             displayId = Ext.isNumber(parsedId) ? parsedId : (names[id] || id);
 
-                            //names[fullId] = header.column + (isMeta ? '' : ' ' + displayId);
                             names[fullId] = (isMeta ? '' : header.column + ' ') + displayId;
                             response.rows[j][i] = fullId;
                             header.ids.push(fullId);
