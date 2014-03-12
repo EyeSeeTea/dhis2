@@ -169,9 +169,7 @@ public class DataElementCategoryServiceTest
         int idA = categoryService.saveCategoryOptionGroup( groupA );
         int idB = categoryService.saveCategoryOptionGroup( groupB );
         int idC = categoryService.saveCategoryOptionGroup( groupC );
-
-        categoryService.getAllCategoryOptionGroups();
-
+        
         assertEquals( groupA, categoryService.getCategoryOptionGroup( idA ) );
         assertEquals( groupB, categoryService.getCategoryOptionGroup( idB ) );
         assertEquals( groupC, categoryService.getCategoryOptionGroup( idC ) );
@@ -211,17 +209,7 @@ public class DataElementCategoryServiceTest
         int idA = categoryService.saveCategoryOptionGroupSet( groupSetA );
         int idB = categoryService.saveCategoryOptionGroupSet( groupSetB );
         int idC = categoryService.saveCategoryOptionGroupSet( groupSetC );
-
-        groupA.setGroupSet( groupSetA );
-        groupB.setGroupSet( groupSetA );
-        groupC.setGroupSet( groupSetB );
-
-        categoryService.updateCategoryOptionGroup( groupA );
-        categoryService.updateCategoryOptionGroup( groupB );
-        categoryService.updateCategoryOptionGroup( groupC );
-
-        categoryService.getAllCategoryOptionGroups();
-
+        
         assertEquals( groupSetA, categoryService.getCategoryOptionGroupSet( idA ) );
         assertEquals( groupSetB, categoryService.getCategoryOptionGroupSet( idB ) );
         assertEquals( groupSetC, categoryService.getCategoryOptionGroupSet( idC ) );

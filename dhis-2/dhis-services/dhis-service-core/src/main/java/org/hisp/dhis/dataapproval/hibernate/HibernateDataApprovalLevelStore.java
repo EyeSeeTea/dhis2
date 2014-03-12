@@ -46,7 +46,6 @@ public class HibernateDataApprovalLevelStore
         extends HibernateGenericStore<DataApprovalLevel>
         implements DataApprovalLevelStore
 {
-    private static final boolean LOG = false;
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -65,37 +64,21 @@ public class HibernateDataApprovalLevelStore
 
     public List<DataApprovalLevel> getAllDataApprovalLevels()
     {
-        if (LOG) log( "get all data approval levels" );
-
         return getCriteria().addOrder( Order.asc( "level" ) ).list();
     }
 
     public void addDataApproval( DataApprovalLevel dataApprovalLevel )
     {
-        if (LOG) log( "save " + dataApprovalLevel.getLevel() + " " + dataApprovalLevel.getName() );
-
         save( dataApprovalLevel );
     }
 
     public void updateDataApprovalLevel( DataApprovalLevel dataApprovalLevel )
     {
-        if (LOG) log( "update " + dataApprovalLevel.getLevel() + " " + dataApprovalLevel.getName() );
-
         update( dataApprovalLevel );
     }
 
     public void deleteDataApprovalLevel( DataApprovalLevel dataApprovalLevel )
     {
-        if (LOG) log( "delete " + dataApprovalLevel.getLevel() + " " + dataApprovalLevel.getName() );
-
         delete( dataApprovalLevel );
-    }
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-
-    private void log(String s)
-    {
-        System.out.println( s );
     }
 }

@@ -28,6 +28,8 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dataelement.*;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -101,8 +103,8 @@ class DataApprovalSelection
 
     private DataApproval dataApproval = null;
 
-    private static final boolean LOG = true;
-    
+    private final static Log log = LogFactory.getLog( DataApprovalSelection.class );
+
     // -------------------------------------------------------------------------
     // Preconstructed Status object
     // -------------------------------------------------------------------------
@@ -136,11 +138,11 @@ class DataApprovalSelection
 
     DataApprovalStatus getDataApprovalStatus()
     {
-        if (LOG) log( "\n" + logSelection() + " starting." );
+        log.info( "\n" + logSelection() + " starting." );
 
         if ( !dataSet.isApproveData() )
         {
-            if (LOG) log( logSelection() + " returning UNAPPROVABLE (dataSet not marked for approval)" );
+            log.info( logSelection() + " returning UNAPPROVABLE (dataSet not marked for approval)" );
 
             return STATUS_UNAPPROVABLE;
         }
@@ -149,7 +151,7 @@ class DataApprovalSelection
 
         if ( matchingApprovalLevels.size() == 0 )
         {
-            if (LOG) log( logSelection() + " returning UNAPPROVABLE (no matching approval levels)" );
+            log.info( logSelection() + " returning UNAPPROVABLE (no matching approval levels)" );
 
             return STATUS_UNAPPROVABLE;
         }
@@ -158,7 +160,7 @@ class DataApprovalSelection
 
         if ( lowerIndex == 0 )
         {
-            if (LOG) log( logSelection() + " returning UNAPPROVABLE because org unit is above all approval levels" );
+            log.info( logSelection() + " returning UNAPPROVABLE because org unit is above all approval levels" );
 
             return STATUS_UNAPPROVABLE;
         }
@@ -171,7 +173,7 @@ class DataApprovalSelection
             }
             else
             {
-                if (LOG) log( logSelection() + " returning UNAPPROVABLE (period type too short)" );
+                log.info( logSelection() + " returning UNAPPROVABLE (period type too short)" );
 
                 return STATUS_UNAPPROVABLE;
             }
@@ -187,7 +189,7 @@ class DataApprovalSelection
 
         status.setDataApproval( dataApproval );
 
-        if (LOG) log( logSelection() + " returning " + state.name() );
+        log.info( logSelection() + " returning " + state.name() );
 
         return status;
     }
@@ -203,20 +205,20 @@ class DataApprovalSelection
      */
     private String logSelection()
     {
+        String categoryOptionsString = "";
+
+        if ( dataElementCategoryOptions != null )
+        {
+            for ( DataElementCategoryOption option : dataElementCategoryOptions )
+            {
+                categoryOptionsString += ( categoryOptionsString.isEmpty() ? "" : ", " ) + option.getName();
+            }
+        }
+
         return "getDataApprovalStatus( " + dataSet.getName() + ", " + period.getPeriodType().getName() + ":" + period.getShortName()
                 + ", " + organisationUnit.getName() + " (level " + organisationUnit.getLevel() + "), "
                 + ( categoryOptionGroup == null ? "null" : categoryOptionGroup.getName() ) + ", "
-                + ( dataElementCategoryOptions == null ? "null" : ( "[" + dataElementCategoryOptions.size() + "]" ) ) + " )";
-    }
-
-    /**
-     * Logs for debug tracing.
-     *
-     * @param s String to log.
-     */
-    private void log(String s)
-    {
-        System.out.println( s );
+                + ( categoryOptionsString.isEmpty() ? "null" : ( "[" + categoryOptionsString + "]" ) ) + " )";
     }
 
     /**
@@ -283,12 +285,12 @@ class DataApprovalSelection
             {
                 if ( dataElementCategoryOptions == null || dataElementCategoryOptions.size() == 0 )
                 {
-                    if (LOG) log( "getState() - approved here." );
+                    log.info( "getState() - approved here." );
 
                     return DataApprovalState.APPROVED_HERE;
                 }
 
-                if (LOG) log( "getState() - approved for a wider selection of category options." );
+                log.info( "getState() - approved for a wider selection of category options." );
 
                 return DataApprovalState.APPROVED_ELSEWHERE;
             }
@@ -296,7 +298,7 @@ class DataApprovalSelection
 
         if ( isApprovedAtHigherLevel() )
         {
-            if (LOG) log( "getState() - isApprovedAtHigherLevel() true." );
+            log.info( "getState() - isApprovedAtHigherLevel() true." );
 
             return DataApprovalState.APPROVED_ELSEWHERE;
         }
@@ -307,24 +309,24 @@ class DataApprovalSelection
         {
             if ( !unapprovedBelow )
             {
-                if (LOG) log( "getState() - not unapproved below." );
+                log.info( "getState() - not unapproved below." );
 
                 return DataApprovalState.UNAPPROVED_READY;
             }
 
-            if (LOG) log( "getState() - waiting." );
+            log.info( "getState() - waiting." );
 
             return DataApprovalState.UNAPPROVED_WAITING;
         }
 
         if ( dataSetAssignedAtOrBelowLevel )
         {
-            if (LOG) log( "getState() - waiting for higher-level approval at a higher level for data at or below this level." );
+            log.info( "getState() - waiting for higher-level approval at a higher level for data at or below this level." );
 
             return DataApprovalState.UNAPPROVED_ELSEWHERE;
         }
 
-        if (LOG) log( "getState() - unapprovable because not approvable at level or below, and no dataset assignment." );
+        log.info( "getState() - unapprovable because not approvable at level or below, and no dataset assignment." );
 
         return DataApprovalState.UNAPPROVABLE;
     }
@@ -354,7 +356,7 @@ class DataApprovalSelection
             {
                 if ( level.getCategoryOptionGroupSet() == null )
                 {
-                    if (LOG) log( "findMatchingApprovalLevels() adding org unit level "
+                    log.info( "findMatchingApprovalLevels() adding org unit level "
                             + level.getOrganisationUnitLevel().getLevel()
                             + " with no category option groups." );
 
@@ -378,7 +380,7 @@ class DataApprovalSelection
             }
         }
 
-        if (LOG) log( "findMatchingApprovalLevels() " + allDataApprovalLevels.size() + " -> " +  matchingApprovalLevels.size() );
+        log.info( "findMatchingApprovalLevels() " + allDataApprovalLevels.size() + " -> " +  matchingApprovalLevels.size() );
     }
 
     /**
@@ -396,12 +398,12 @@ class DataApprovalSelection
             {
                 addDataGroup( categoryOptionGroup.getGroupSet(), categoryOptionGroup );
 
-                if (LOG) log( "initDataGroups() adding categoryOptionGroupSet "
+                log.info( "initDataGroups() adding categoryOptionGroupSet "
                         + categoryOptionGroup.getGroupSet().getName()
                         + ", group " + categoryOptionGroup.getName() );
             }
 
-            else if (LOG) log( "initDataGroups() - not adding categoryOptionGroup "
+            else log.info( "initDataGroups() - not adding categoryOptionGroup "
                     + ( categoryOptionGroup == null ? "null" : categoryOptionGroup.getName() ) );
 
             if ( dataElementCategoryOptions != null )
@@ -409,9 +411,9 @@ class DataApprovalSelection
                 addDataGroups();
             }
 
-            if (LOG)
+            if ( log.isInfoEnabled() )
             {
-                log ("initDataGroups() returning " + dataGroups.size() + " group sets:");
+                log.info("initDataGroups() returning " + dataGroups.size() + " group sets:");
 
                 for ( Map.Entry<CategoryOptionGroupSet,Set<CategoryOptionGroup>> entry : dataGroups.entrySet() )
                 {
@@ -424,7 +426,7 @@ class DataApprovalSelection
                             s += ": " + group.getName();
                         }
 
-                        log( "Group set " + entry.getKey().getName() + " (" + + entry.getValue().size() + ")" + s );
+                        log.info( "Group set " + entry.getKey().getName() + " (" + + entry.getValue().size() + ")" + s );
                     }
                 }
             }
@@ -438,7 +440,7 @@ class DataApprovalSelection
     {
         //TODO: Should we replace this exhaustive search with a Hibernate query?
 
-        if (LOG)
+        if ( log.isInfoEnabled() )
         {
             String s = "";
 
@@ -447,14 +449,14 @@ class DataApprovalSelection
                 s += (s.isEmpty() ? "" : ", ") + option.getName();
             }
 
-            log( "addDataGroups() looking for options " + s );
+            log.info( "addDataGroups() looking for options " + s );
         }
 
         Collection<CategoryOptionGroup> allGroups = categoryService.getAllCategoryOptionGroups();
 
         for ( CategoryOptionGroup group : allGroups )
         {
-            if (LOG)
+            if ( log.isInfoEnabled() )
             {
                 String s = "";
 
@@ -463,17 +465,17 @@ class DataApprovalSelection
                     s += (s.isEmpty() ? "" : ", ") + option.getName();
                 }
 
-                log( "addDataGroups() looking in group " + group.getName() + ", options " + s );
+                log.info( "addDataGroups() looking in group " + group.getName() + ", options " + s );
             }
 
             if ( group.getGroupSet() != null && CollectionUtils.containsAny( group.getMembers(), dataElementCategoryOptions ) )
             {
                 addDataGroup( group.getGroupSet(), group );
 
-                if (LOG) log( "addDataGroups(): Adding " + group.getGroupSet().getName() + ", " + group.getName() );
+                log.info( "addDataGroups(): Adding " + group.getGroupSet().getName() + ", " + group.getName() );
             }
 
-            else if (LOG) log( "addDataGroups(): Not adding " + group.getName() + " (group set "
+            else log.info( "addDataGroups(): Not adding " + group.getName() + " (group set "
                     + ( group.getGroupSet() == null ? "null" : group.getGroupSet().getName() ) + ")" );
         }
     }
@@ -506,11 +508,11 @@ class DataApprovalSelection
      */
     private void findThisLevel()
     {
-        if (LOG) log( "findThisLevel() - matchingApprovalLevels.size() = " + matchingApprovalLevels.size() );
+        log.info( "findThisLevel() - matchingApprovalLevels.size() = " + matchingApprovalLevels.size() );
 
         for ( int i = matchingApprovalLevels.size() - 1; i >= 0; i-- )
         {
-            if (LOG) log( "findThisLevel() - testing index " + i
+            log.info( "findThisLevel() - testing index " + i
                     + " org level " + organisationUnit.getLevel()
                     + " approval level " + matchingApprovalLevels.get( i ).getOrganisationUnitLevel().getLevel() );
 
@@ -522,7 +524,7 @@ class DataApprovalSelection
                 higherIndex = i - 1;
                 lowerIndex = i + 1;
 
-                if (LOG) log( "findThisLevel() - approvable at " + thisIndex );
+                log.info( "findThisLevel() - approvable at " + thisIndex );
 
                 return;
             }
@@ -534,7 +536,7 @@ class DataApprovalSelection
                 higherIndex = i;
                 lowerIndex = i+1;
 
-                if (LOG) log( "findThisLevel() - org lower than level, higher=" + higherIndex + ", lower=" + lowerIndex );
+                log.info( "findThisLevel() - org lower than level, higher=" + higherIndex + ", lower=" + lowerIndex );
 
                 return;
             }
@@ -546,7 +548,7 @@ class DataApprovalSelection
         higherIndex = -1;
         lowerIndex = 0;
 
-        if (LOG) log( "findThisLevel() - org higher than all levels, higher=" + higherIndex + ", lower=" + lowerIndex );
+        log.info( "findThisLevel() - org higher than all levels, higher=" + higherIndex + ", lower=" + lowerIndex );
     }
 
     /**
@@ -564,7 +566,7 @@ class DataApprovalSelection
 
             while ( orgLevel > matchingApprovalLevels.get( i ).getOrganisationUnitLevel().getLevel() )
             {
-                if (LOG) log( "isApprovedAtHigherLevel() moving up from " + orgUnit.getName() + " " + orgLevel
+                log.info( "isApprovedAtHigherLevel() moving up from " + orgUnit.getName() + " " + orgLevel
                         + " to " + orgUnit.getParent().getName() + " " + ( orgLevel - 1 ) + " towards "
                         + matchingApprovalLevels.get( i ).getOrganisationUnitLevel().getLevel() );
 
@@ -577,13 +579,13 @@ class DataApprovalSelection
 
             if ( dataApproval != null )
             {
-                if (LOG) log( "isApprovedAtHigherLevel() returning true" );
+                log.info( "isApprovedAtHigherLevel() returning true" );
 
                 return true;
             }
         }
 
-        if (LOG) log( "isApprovedAtHigherLevel() returning false" );
+        log.info( "isApprovedAtHigherLevel() returning false" );
 
         return false;
     }
@@ -604,7 +606,7 @@ class DataApprovalSelection
         {
             DataApproval d = dataApprovalStore.getDataApproval( dataSet, period, orgUnit, null );
 
-            if (LOG) log("getDataApproval( " + orgUnit.getName() + " ) = " + ( d != null ) + " (no groups)" );
+            log.info("getDataApproval( " + orgUnit.getName() + " ) = " + ( d != null ) + " (no groups)" );
 
             return d;
         }
@@ -613,7 +615,7 @@ class DataApprovalSelection
         {
             DataApproval d = dataApprovalStore.getDataApproval( dataSet, period, orgUnit, group );
 
-            if (LOG) log("getDataApproval( " + orgUnit.getName() + " ) = " + ( d != null ) + " (group: " + group.getName() + ")" );
+            log.info("getDataApproval( " + orgUnit.getName() + " ) = " + ( d != null ) + " (group: " + group.getName() + ")" );
 
             if ( d != null )
             {
@@ -621,7 +623,7 @@ class DataApprovalSelection
             }
         }
 
-        if (LOG) log("getDataApproval( " + orgUnit.getName() + " ) = false (none of " + groups.size() + " groups matched)" );
+        log.info("getDataApproval( " + orgUnit.getName() + " ) = false (none of " + groups.size() + " groups matched)" );
 
         return null;
     }
@@ -644,7 +646,7 @@ class DataApprovalSelection
      */
     private boolean isUnapprovedBelow ( OrganisationUnit orgUnit )
     {
-        if (LOG) log( "isUnapprovedBelow( " + orgUnit.getName() + " )" );
+        log.info( "isUnapprovedBelow( " + orgUnit.getName() + " )" );
 
         if ( dataSetAssignedAtOrBelowLevel == false && orgUnit.getAllDataSets().contains( dataSet ) )
         {
@@ -655,42 +657,42 @@ class DataApprovalSelection
         {
             if ( orgUnit.getLevel() == matchingApprovalLevels.get( lowerIndex ).getLevel() )
             {
-                if (LOG) log( "isUnapprovedBelow() orgUnit level " + orgUnit.getLevel() + " matches approval level." );
+                log.info( "isUnapprovedBelow() orgUnit level " + orgUnit.getLevel() + " matches approval level." );
 
                 DataApproval d = getDataApproval( lowerIndex, orgUnit );
 
-                if (LOG) log( "isUnapprovedBelow() returns " + ( d == null ) + " after looking for approval for this orgUnit." );
+                log.info( "isUnapprovedBelow() returns " + ( d == null ) + " after looking for approval for this orgUnit." );
 
                 return ( d == null );
             }
         }
         else if ( dataSetAssignedAtOrBelowLevel )
         {
-            if (LOG) log( "isUnapprovedBelow() returns false with data set assigned at or below level." );
+            log.info( "isUnapprovedBelow() returns false with data set assigned at or below level." );
 
             return false;
         }
 
         if ( orgUnit.getChildren() == null || orgUnit.getChildren().size() == 0 )
         {
-            if (LOG) log( "isUnapprovedBelow() returns false with no more children." );
+            log.info( "isUnapprovedBelow() returns false with no more children." );
 
             return false;
         }
 
-        if (LOG) log( "+++ isUnapprovedBelow( " + orgUnit.getName() + " ) is recursing..." );
+        log.info( "+++ isUnapprovedBelow( " + orgUnit.getName() + " ) is recursing..." );
 
         for ( OrganisationUnit child : orgUnit.getChildren() )
         {
             if ( isUnapprovedBelow( child ) )
             {
-                if (LOG) log( "--- isUnapprovedBelow( " + orgUnit.getName() + " ) returns true because unapproved from below." );
+                log.info( "--- isUnapprovedBelow( " + orgUnit.getName() + " ) returns true because unapproved from below." );
 
                 return true;
             }
         }
 
-        if (LOG) log( "--- isUnapprovedBelow( " + orgUnit.getName() + " ) returns false after recursing" );
+        log.info( "--- isUnapprovedBelow( " + orgUnit.getName() + " ) returns false after recursing" );
 
         return false;
     }

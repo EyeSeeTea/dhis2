@@ -305,8 +305,6 @@ public class DataApprovalServiceTest
     {
         Collection<CategoryOptionGroup> allGroups;
 
-        allGroups = categoryService.getAllCategoryOptionGroups();
-
         optionA = new DataElementCategoryOption( "CategoryOptionA" );
         optionB = new DataElementCategoryOption( "CategoryOptionB" );
         optionC = new DataElementCategoryOption( "CategoryOptionC" );
@@ -315,14 +313,7 @@ public class DataApprovalServiceTest
         optionF = new DataElementCategoryOption( "CategoryOptionF" );
         optionG = new DataElementCategoryOption( "CategoryOptionG" );
         optionH = new DataElementCategoryOption( "CategoryOptionH" );
-/*
-        optionA.setGroups( new HashSet<CategoryOptionGroup>() );
-        optionB.setGroups( new HashSet<CategoryOptionGroup>() );
-        optionC.setGroups( new HashSet<CategoryOptionGroup>() );
-        optionD.setGroups( new HashSet<CategoryOptionGroup>() );
-        optionE.setGroups( new HashSet<CategoryOptionGroup>() );
-        optionF.setGroups( new HashSet<CategoryOptionGroup>() );
-*/
+
         categoryService.addDataElementCategoryOption( optionA );
         categoryService.addDataElementCategoryOption( optionB );
         categoryService.addDataElementCategoryOption( optionC );
@@ -332,52 +323,13 @@ public class DataApprovalServiceTest
         categoryService.addDataElementCategoryOption( optionG );
         categoryService.addDataElementCategoryOption( optionH );
 
-        allGroups = categoryService.getAllCategoryOptionGroups();
-
-        categoryA = createDataElementCategory( 'A' );
-        categoryB = createDataElementCategory( 'B' );
-
-        categoryA.setDimensionType( "attribute" );
-        categoryB.setDimensionType( "attribute" );
+        categoryA = createDataElementCategory( 'A', optionA, optionB, optionC, optionD );
+        categoryB = createDataElementCategory( 'B', optionE, optionF, optionG, optionH );
 
         categoryService.addDataElementCategory( categoryA );
         categoryService.addDataElementCategory( categoryB );
 
-        categoryA.addDataElementCategoryOption( optionA );
-        categoryA.addDataElementCategoryOption( optionB );
-        categoryA.addDataElementCategoryOption( optionC );
-        categoryA.addDataElementCategoryOption( optionD );
-
-        categoryB.addDataElementCategoryOption( optionE );
-        categoryB.addDataElementCategoryOption( optionF );
-        categoryB.addDataElementCategoryOption( optionG );
-        categoryB.addDataElementCategoryOption( optionH );
-
-        allGroups = categoryService.getAllCategoryOptionGroups();
-
-/*
-        categoryA = createDataElementCategory( 'A', optionA, optionB, optionC, optionD );
-        categoryB = createDataElementCategory( 'B', optionE, optionF, optionG, optionH );
-*/
-
-        categoryService.updateDataElementCategoryOption( optionA );
-        categoryService.updateDataElementCategoryOption( optionB );
-        categoryService.updateDataElementCategoryOption( optionC );
-        categoryService.updateDataElementCategoryOption( optionD );
-        categoryService.updateDataElementCategoryOption( optionE );
-        categoryService.updateDataElementCategoryOption( optionF );
-        categoryService.updateDataElementCategoryOption( optionG );
-        categoryService.updateDataElementCategoryOption( optionH );
-
-        categoryService.updateDataElementCategory( categoryA );
-        categoryService.updateDataElementCategory( categoryB );
-
-        allGroups = categoryService.getAllCategoryOptionGroups();
-
         categoryComboA = createCategoryCombo( 'A', categoryA, categoryB );
-
-        categoryService.updateDataElementCategory( categoryA );
-        categoryService.updateDataElementCategory( categoryB );
 
         categoryService.addDataElementCategoryCombo( categoryComboA );
 
@@ -398,8 +350,6 @@ public class DataApprovalServiceTest
         optionComboO = createCategoryOptionCombo( 'O', categoryComboA, optionD, optionG );
         optionComboP = createCategoryOptionCombo( 'P', categoryComboA, optionD, optionH );
 
-        System.out.println( categoryService.getAllCategoryOptionGroups().size() + " CategoryOption Groups (1)" );
-
         categoryService.addDataElementCategoryOptionCombo( optionComboA );
         categoryService.addDataElementCategoryOptionCombo( optionComboB );
         categoryService.addDataElementCategoryOptionCombo( optionComboC );
@@ -417,133 +367,21 @@ public class DataApprovalServiceTest
         categoryService.addDataElementCategoryOptionCombo( optionComboO );
         categoryService.addDataElementCategoryOptionCombo( optionComboP );
 
-        groupA = new CategoryOptionGroup( "A" );
-        groupB = new CategoryOptionGroup( "B" );
-        groupC = new CategoryOptionGroup( "C" );
-        groupD = new CategoryOptionGroup( "D" );
-
-        groupA.getMembers().add( optionA );
-        groupA.getMembers().add( optionB );
-        groupB.getMembers().add( optionC );
-        groupB.getMembers().add( optionD );
-        groupC.getMembers().add( optionE );
-        groupC.getMembers().add( optionF );
-        groupD.getMembers().add( optionG );
-        groupD.getMembers().add( optionH );
-
-/*
         groupA = createCategoryOptionGroup( 'A', optionA, optionB );
         groupB = createCategoryOptionGroup( 'B', optionC, optionD );
         groupC = createCategoryOptionGroup( 'C', optionE, optionF );
         groupD = createCategoryOptionGroup( 'D', optionG, optionH );
-*/
+
         categoryService.saveCategoryOptionGroup( groupA );
         categoryService.saveCategoryOptionGroup( groupB );
         categoryService.saveCategoryOptionGroup( groupC );
         categoryService.saveCategoryOptionGroup( groupD );
 
-        System.out.println( categoryService.getAllCategoryOptionGroups().size() + " CategoryOption Groups (1a)" );
-/*
-        groupA.addCategoryOption( optionA );
-        groupA.addCategoryOption( optionB );
-        groupB.addCategoryOption( optionC );
-        groupB.addCategoryOption( optionD );
-        groupC.addCategoryOption( optionE );
-        groupC.addCategoryOption( optionF );
-        groupD.addCategoryOption( optionG );
-        groupD.addCategoryOption( optionH );
-
-        categoryService.updateDataElementCategoryOption( optionA );
-        categoryService.updateDataElementCategoryOption( optionB );
-        categoryService.updateDataElementCategoryOption( optionC );
-        categoryService.updateDataElementCategoryOption( optionD );
-        categoryService.updateDataElementCategoryOption( optionE );
-        categoryService.updateDataElementCategoryOption( optionF );
-        categoryService.updateDataElementCategoryOption( optionG );
-        categoryService.updateDataElementCategoryOption( optionH );
-
-        categoryService.updateCategoryOptionGroup( groupA );
-        categoryService.updateCategoryOptionGroup( groupB );
-        categoryService.updateCategoryOptionGroup( groupC );
-        categoryService.updateCategoryOptionGroup( groupD );
-*/
-        System.out.println( categoryService.getAllCategoryOptionGroups().size() + " CategoryOption Groups (2)" );
-/*
-        categoryService.updateDataElementCategoryOption( optionA );
-        categoryService.updateDataElementCategoryOption( optionB );
-        categoryService.updateDataElementCategoryOption( optionC );
-        categoryService.updateDataElementCategoryOption( optionD );
-        categoryService.updateDataElementCategoryOption( optionE );
-        categoryService.updateDataElementCategoryOption( optionF );
-        categoryService.updateDataElementCategoryOption( optionG );
-        categoryService.updateDataElementCategoryOption( optionH );
-
-        System.out.println( categoryService.getAllCategoryOptionGroups().size() + " CategoryOption Groups (3)" );
-
         groupSetA = createCategoryOptionGroupSet( 'A', groupA, groupB );
         groupSetB = createCategoryOptionGroupSet( 'B', groupC, groupD );
-*/
-        groupSetA = new CategoryOptionGroupSet( "A" );
-        groupSetB = new CategoryOptionGroupSet( "B" );
-
-        groupSetA.getMembers().add( groupA );
-        groupSetA.getMembers().add( groupB );
-        groupSetB.getMembers().add( groupC );
-        groupSetB.getMembers().add( groupD );
 
         categoryService.saveCategoryOptionGroupSet( groupSetA );
         categoryService.saveCategoryOptionGroupSet( groupSetB );
-
-        groupA.setGroupSet( groupSetA );
-        groupB.setGroupSet( groupSetA );
-        groupC.setGroupSet( groupSetB );
-        groupD.setGroupSet( groupSetB );
-
-        categoryService.updateCategoryOptionGroup( groupA );
-        categoryService.updateCategoryOptionGroup( groupB );
-        categoryService.updateCategoryOptionGroup( groupC );
-        categoryService.updateCategoryOptionGroup( groupD );
-
-        System.out.println( categoryService.getAllCategoryOptionGroups().size() + " CategoryOption Groups (4)" );
-/*
-        groupSetA.setMembers( new ArrayList<CategoryOptionGroup>() );
-        groupSetB.setMembers( new ArrayList<CategoryOptionGroup>() );
-
-        groupSetA.addCategoryOptionGroup( groupA );
-        groupSetA.addCategoryOptionGroup( groupB );
-        groupSetB.addCategoryOptionGroup( groupC );
-        groupSetB.addCategoryOptionGroup( groupD );
-
-        groupA.setGroupSet( groupSetA );
-        groupB.setGroupSet( groupSetA );
-        groupC.setGroupSet( groupSetB );
-        groupD.setGroupSet( groupSetB );
-
-        categoryService.updateCategoryOptionGroup(groupA  );
-        categoryService.updateCategoryOptionGroup(groupB  );
-        categoryService.updateCategoryOptionGroup(groupC  );
-        categoryService.updateCategoryOptionGroup(groupD  );
-
-        categoryService.updateCategoryOptionGroupSet( groupSetA );
-        categoryService.updateCategoryOptionGroupSet( groupSetB );
-
-        categoryService.updateCategoryOptionGroup( groupA );
-        categoryService.updateCategoryOptionGroup( groupB );
-        categoryService.updateCategoryOptionGroup( groupC );
-        categoryService.updateCategoryOptionGroup( groupD );
-
-        System.out.println( categoryService.getAllCategoryOptionGroups().size() + " CategoryOption Groups (5)" );
-
-        categoryService.updateDataElementCategoryOption( optionA );
-        categoryService.updateDataElementCategoryOption( optionB );
-        categoryService.updateDataElementCategoryOption( optionC );
-        categoryService.updateDataElementCategoryOption( optionD );
-        categoryService.updateDataElementCategoryOption( optionE );
-        categoryService.updateDataElementCategoryOption( optionF );
-        categoryService.updateDataElementCategoryOption( optionG );
-        categoryService.updateDataElementCategoryOption( optionH );
-*/
-        System.out.println ( categoryService.getAllCategoryOptionGroups().size() + " CategoryOption Groups (6)" );
 
         dataApprovalLevel1A = new DataApprovalLevel( orgUnitLevel1, groupSetA );
         dataApprovalLevel1B = new DataApprovalLevel( orgUnitLevel1, groupSetB );
@@ -558,7 +396,7 @@ public class DataApprovalServiceTest
     // -------------------------------------------------------------------------
     // Basic DataApproval
     // -------------------------------------------------------------------------
-/*
+
     @Test
     public void testAddAndGetDataApproval() throws Exception
     {
@@ -1055,7 +893,7 @@ public class DataApprovalServiceTest
         assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalC ) );
         assertEquals( false, dataApprovalService.mayUnapprove( dataApprovalD ) );
     }
-*/
+
     @Test
     public void testMayUnapproveNoAuthority() throws Exception
     {
@@ -1084,7 +922,7 @@ public class DataApprovalServiceTest
     // Test with Categories
     // ---------------------------------------------------------------------
 
-    //@Test
+    @Test
     public void testAddAndGetDataApprovalWithCategories() throws Exception
     {
         setUpCategories();
@@ -1098,13 +936,29 @@ public class DataApprovalServiceTest
         Date date = new Date();
 
         //
-        // Group set A -> Groups A,B -> Options A,B,C,D
-        // Group set B -> Groups C,D -> Options E,F,G,H
+        // Group set A -> Groups A,B
+        // Group set B -> Groups C,D
+        //
+        // Group A -> Options A,B
+        // Group B -> Options C,D
+        // Group C -> Options E,F
+        // Group D -> Options G,H
         //
         // Category A -> Options A,B,C,D
         // Category B -> Options E,F,G,H
         //
-/*
+        // Option combo A -> Options A,E -> Groups A,C
+        // Option combo B -> Options A,F -> Groups A,C
+        // Option combo C -> Options A,G -> Groups A,D
+        // Option combo D -> Options A,H -> Groups A,D
+        // Option combo E -> Options B,E -> Groups B,C
+        // Option combo F -> Options B,F -> Groups B,C
+        // Option combo G -> Options B,G -> Groups B,D
+        // Option combo H -> Options B,H -> Groups B,D
+        // Option combo I -> Options C,E -> Groups B,D
+        // Option combo J -> Options C,F -> Groups B,D
+        // Option combo K -> Options C,G -> Groups B,D
+
         assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitA, groupA ).getDataApprovalState() );
         assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, groupA ).getDataApprovalState() );
         assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitC, groupA ).getDataApprovalState() );
@@ -1112,25 +966,33 @@ public class DataApprovalServiceTest
         assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitA, optionComboA ).getDataApprovalState() );
         assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, optionComboA ).getDataApprovalState() );
         assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitC, optionComboA ).getDataApprovalState() );
-*/
+
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel2A );
-/*
+
         assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitA, groupA ).getDataApprovalState() );
         assertEquals( DataApprovalState.UNAPPROVED_READY, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, groupA ).getDataApprovalState() );
         assertEquals( DataApprovalState.UNAPPROVED_ELSEWHERE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitC, groupA ).getDataApprovalState() );
 
         assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitA, optionComboA ).getDataApprovalState() );
-*/        assertEquals( DataApprovalState.UNAPPROVED_READY, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, optionComboB ).getDataApprovalState() );
-/*        assertEquals( DataApprovalState.UNAPPROVED_ELSEWHERE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitC, optionComboC ).getDataApprovalState() );
+        assertEquals( DataApprovalState.UNAPPROVED_READY, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, optionComboB ).getDataApprovalState() );
+        assertEquals( DataApprovalState.UNAPPROVED_ELSEWHERE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitC, optionComboC ).getDataApprovalState() );
 
-        assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitA, optionComboE ).getDataApprovalState() );
-        assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, optionComboF ).getDataApprovalState() );
-        assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitC, optionComboG ).getDataApprovalState() );
+        assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitA, optionComboI ).getDataApprovalState() );
+        assertEquals( DataApprovalState.UNAPPROVED_READY, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, optionComboJ ).getDataApprovalState() );
+        assertEquals( DataApprovalState.UNAPPROVED_ELSEWHERE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitC, optionComboK ).getDataApprovalState() );
 
         dataApprovalService.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitB, groupA, date, userA ) );
 
         assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitA, groupA ).getDataApprovalState() );
         assertEquals( DataApprovalState.APPROVED_HERE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, groupA ).getDataApprovalState() );
         assertEquals( DataApprovalState.APPROVED_ELSEWHERE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitC, groupA ).getDataApprovalState() );
-*/    }
+
+        assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitA, optionComboA ).getDataApprovalState() );
+        assertEquals( DataApprovalState.APPROVED_ELSEWHERE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, optionComboB ).getDataApprovalState() );
+        assertEquals( DataApprovalState.APPROVED_ELSEWHERE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitC, optionComboC ).getDataApprovalState() );
+
+        assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitA, optionComboI ).getDataApprovalState() );
+        assertEquals( DataApprovalState.UNAPPROVED_READY, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, optionComboJ ).getDataApprovalState() );
+        assertEquals( DataApprovalState.UNAPPROVED_ELSEWHERE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitC, optionComboK ).getDataApprovalState() );
+    }
 }
