@@ -2501,8 +2501,8 @@ Ext.onReady( function() {
             organisationUnitGroupStore,
 
         // cache
-            stageStorage = {},
-            itemStorage = {},
+            dataElementStorage = {},
+            attributeStorage = {},
 
 		// components
 			program,
@@ -2669,21 +2669,40 @@ Ext.onReady( function() {
 			dataElementsByStageStore.removeAll();
 			dataElementSelected.removeAll();
 
-			stagesByProgramStore.proxy.url = ns.core.init.contextPath + '/api/programs/' + programId + '.json?viewClass=withoutOrganisationUnits&links=false&paging=false';
-			stagesByProgramStore.load({
-				callback: function(records) {
-					stage.enable();
-					stage.clearValue();
-					stage.queryMode = 'local';
+            Ext.Ajax.request({
+                url: 'api/programs/filtered?filter=id:eq:' + programId + '&include=programStages[id,name],attributes&paging=false',
+                success: function(r) {
+                    var objects = Ext.decode(r.responseText).objects,
+                        stages,
+                        attributes;
 
-					if (records.length === 1) {
-						stage.setValue(records[0].data.id);
+                    if (!(Ext.isArray(objects) && objects.length)) {
+                        return;
+                    }
 
-						onStageSelect(records[0].data.id);
-					}
+                    stages = objects[0].programStages;
+                    attributes = objects[0].attributes;
+
+                    // attribute cache
+                    if (Ext.isArray(attributes) && attributes.length) {
+                        attributeStorage[programId] = attributes;
+                    }
+
+                    if (Ext.isArray(stages) && stages.length) {
+                        stage.enable();
+                        stage.clearValue();
+
+                        stagesByProgramStore.removeAll();
+                        stagesByProgramStore.loadData(stages);
+
+                        if (stages.length === 1) {
+                            stage.setValue(stages[0].id);
+
+                            onStageSelect(stages[0].id);
+                        }
+                    }
 				}
 			});
-
 		};
 
 		stage = Ext.create('Ext.form.field.ComboBox', {
@@ -2729,9 +2748,9 @@ Ext.onReady( function() {
 
 			programId = programId || program.getValue() || null;
 
-			load = function(attributes, dataElements) {
-				var data = Ext.Array.clean([].concat(attributes || [], dataElements || []));
-				dataElementsByStageStore.loadData(data);
+			load = function(items) {
+				//var data = Ext.Array.clean([].concat(attributes || [], dataElements || []));
+				dataElementsByStageStore.loadData(items);
 			};
 
 			fn = function(attributes) {
@@ -2751,28 +2770,26 @@ Ext.onReady( function() {
 				}
 			};
 
-			// attributes
-			if (programId) {
-				if (program.storage[programId]) {
-					fn(program.storage[programId]);
-				}
-				else {
-					Ext.Ajax.request({
-						url: ns.core.init.contextPath + '/api/programs/' + programId + '.json?viewClass=withoutOrganisationUnits&links=false',
-						success: function(r) {
-							var attributes = Ext.decode(r.responseText).attributes;
+            if (itemStorage.hasOwnProperty(programId)) {
+                load(itemStorage[programId]);
+            }
+            else {
+                Ext.Ajax.request({
+                    url: ns.core.init.contextPath + '/api/programs/' + programId + '.json?viewClass=withoutOrganisationUnits&links=false',
+                    success: function(r) {
+                        var attributes = Ext.decode(r.responseText).attributes;
 
-							if (attributes) {
-								for (var i = 0; i < attributes.length; i++) {
-									attributes[i].type = attributes[i].valueType;
-								}
+                        if (attributes) {
+                            for (var i = 0; i < attributes.length; i++) {
+                                attributes[i].type = attributes[i].valueType;
+                            }
 
-								program.storage[programId] = attributes;
-							}
+                            program.storage[programId] = attributes;
+                        }
 
-							fn(attributes);
-						}
-					});
+                        fn(attributes);
+                    }
+                });
 				}
 			}
 		};
