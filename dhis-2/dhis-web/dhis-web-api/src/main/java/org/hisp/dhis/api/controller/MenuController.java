@@ -1,4 +1,4 @@
-package org.hisp.dhis.webportal.menu.action;
+package org.hisp.dhis.api.controller;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,36 +28,44 @@ package org.hisp.dhis.webportal.menu.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
-import org.hisp.dhis.webportal.module.Module;
-import org.hisp.dhis.webportal.module.ModuleManager;
+import org.hisp.dhis.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.io.InputStream;
 import java.util.List;
 
-/**
- * @author Lars Helge Overland
- */
-public class SetModulesAction
-    implements Action
+@Controller
+@RequestMapping( value = MenuController.RESOURCE_PATH )
+public class MenuController
 {
-    @Autowired
-    private ModuleManager manager;
+    public static final String RESOURCE_PATH = "/menu";
 
     @Autowired
     private CurrentUserService currentUserService;
-    
-    @Override
-    public String execute()
-        throws Exception
-    {
 
-        
-        return SUCCESS;
+    @Autowired
+    private UserService userService;
+
+    @RequestMapping( method = RequestMethod.POST, consumes = "application/json" )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    public void saveMenuOrder(InputStream input) throws Exception
+    {
+        List<String> apps = JacksonUtils.fromJson(input, List.class);
+
+        User user = currentUserService.getCurrentUser();
+
+        user.getApps().clear();
+        user.getApps().addAll(apps);
+
+        userService.updateUser(user);
+
     }
 }

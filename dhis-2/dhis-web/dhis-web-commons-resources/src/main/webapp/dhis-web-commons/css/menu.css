@@ -108,6 +108,7 @@
 
 /**
  * IE8 hack to display all items after the 9th item differently
+ * TODO: When support for IE8 is dropped this can be changed to a nth style selector
  */
 .app-menu li + li + li + li + li + li + li + li + li + li a.app-menu-item .fa.fa-bookmark {
     display: none;

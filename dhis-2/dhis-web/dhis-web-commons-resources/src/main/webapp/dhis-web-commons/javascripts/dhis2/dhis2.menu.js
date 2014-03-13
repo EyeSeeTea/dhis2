@@ -32,6 +32,10 @@
  */
 (function (dhis2, undefined) {
     var MAX_FAVORITES = 9,
+        /**
+         * Object that represents the list of menu items
+         * and managers the order of the items to be saved.
+         */
         menuItemsList = (function () {
             var menuOrder = [],
                 menuItems = {},
@@ -124,6 +128,10 @@
          * Public methods
          **********************************************************************/
 
+        that.getMenuItems = function () {
+            return menuItems;
+        }
+
         /**
          * Get the max number of favorites
          */
@@ -139,6 +147,9 @@
          */
         that.orderMenuItemsByList = function (orderedIdList) {
             menuItems.setOrder(orderedIdList);
+
+            executeCallBacks();
+
             return that;
         };
 
@@ -170,6 +181,8 @@
             }
 
             menuItems.setOrder(newOrder);
+
+            executeCallBacks();
 
             return that;
         }
@@ -287,6 +300,12 @@
         });
     }
 
+    function saveOrder() {
+        console.log('Save the new order');
+        console.log(dhis2.menu.getMenuItems().getOrder());
+        localStorage.setItem('dhis2.menuItemOrder',  dhis2.menu.getMenuItems().getOrder());
+    }
+
     /**
      * Render the menumanager and the dropdown meny and attach the update handler
      */
@@ -383,6 +402,7 @@
     }
 
     menu.subscribe(renderMenu);
+    menu.subscribe(saveOrder);
 
     /**
      * jQuery events that communicate with the web api
@@ -393,10 +413,16 @@
             if (typeof data.modules === 'object') {
                 menu.addMenuItems(data.modules);
             }
+            if (localStorage.getItem('dhis2.menuItemOrder')) {
+                menu.getMenuItems().setOrder(localStorage.getItem('dhis2.menuItemOrder'));
+            }
         }).error(function () {
-                alert('Can not load apps from server.');
+            alert('Can not load apps from server.');
         });
 
+        /**
+         * Event handler for the sort order box
+         */
         $('#menuOrderBy').change(function (event) {
             var orderBy = $(event.target).val();
 

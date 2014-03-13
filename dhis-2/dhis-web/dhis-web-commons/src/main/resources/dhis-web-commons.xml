@@ -300,13 +300,6 @@
       <param name="onExceptionReturn">plainTextError</param>
     </action>
 
-    <action name="setModules" class="org.hisp.dhis.webportal.menu.action.SetModulesAction">
-        <result name="success" type="httpheader">
-            <param name="status">204</param>
-        </result>
-        <param name="onExceptionReturn">plainTextError</param>
-    </action>
-
   </package>
 
   <!-- i18n -->
