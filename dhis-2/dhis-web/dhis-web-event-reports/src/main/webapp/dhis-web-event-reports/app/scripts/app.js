@@ -2500,6 +2500,10 @@ Ext.onReady( function() {
             dataElementsByStageStore,
             organisationUnitGroupStore,
 
+        // cache
+            stageStorage = {},
+            itemStorage = {},
+
 		// components
 			program,
             onProgramSelect,
@@ -2627,7 +2631,7 @@ Ext.onReady( function() {
 			}
 		});
 
-		// components
+        // components
 
             // data element
 		program = Ext.create('Ext.form.field.ComboBox', {

@@ -28,41 +28,55 @@ package org.hisp.dhis.api.utils.ops;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public abstract class Op
 {
-    private String left;
+    private String value;
 
-    public boolean wantLeft()
+    private static SimpleDateFormat[] simpleDateFormats = new SimpleDateFormat[]{
+        new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ssZ" ),
+        new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss" ),
+        new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm" ),
+        new SimpleDateFormat( "yyyy-MM-dd'T'HH" ),
+        new SimpleDateFormat( "yyyyMMdd" ),
+        new SimpleDateFormat( "yyyyMM" ),
+        new SimpleDateFormat( "yyyy" )
+    };
+
+    public boolean wantValue()
     {
         return true;
     }
 
-    public void setLeft( String left )
+    public void setValue( String value )
     {
-        this.left = left;
+        this.value = value;
     }
 
-    public String getLeft()
+    public String getValue()
     {
-        return left;
+        return value;
     }
 
     @SuppressWarnings( "unchecked" )
-    public <T> T getLeft( Class<?> klass )
+    public <T> T getValue( Class<?> klass )
     {
-        if ( klass.isInstance( left ) )
+        if ( klass.isInstance( value ) )
         {
-            return (T) left;
+            return (T) value;
         }
 
         if ( Boolean.class.isAssignableFrom( klass ) )
         {
             try
             {
-                return (T) Boolean.valueOf( left );
+                return (T) Boolean.valueOf( value );
             }
             catch ( Exception ignored )
             {
@@ -72,7 +86,7 @@ public abstract class Op
         {
             try
             {
-                return (T) Integer.valueOf( left );
+                return (T) Integer.valueOf( value );
             }
             catch ( Exception ignored )
             {
@@ -82,15 +96,28 @@ public abstract class Op
         {
             try
             {
-                return (T) Float.valueOf( left );
+                return (T) Float.valueOf( value );
             }
             catch ( Exception ignored )
             {
+            }
+        }
+        else if ( Date.class.isAssignableFrom( klass ) )
+        {
+            for ( SimpleDateFormat simpleDateFormat : simpleDateFormats )
+            {
+                try
+                {
+                    return (T) simpleDateFormat.parse( value );
+                }
+                catch ( ParseException ignored )
+                {
+                }
             }
         }
 
         return null;
     }
 
-    public abstract OpStatus evaluate( Object right );
+    public abstract OpStatus evaluate( Object object );
 }

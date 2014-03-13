@@ -28,42 +28,40 @@ package org.hisp.dhis.api.utils.ops;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.api.utils.ops.Op;
-import org.hisp.dhis.api.utils.ops.OpStatus;
-
 import java.util.Collection;
+import java.util.Date;
 
 /**
-* @author Morten Olav Hansen <mortenoh@gmail.com>
-*/
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
 public class GteOp extends Op
 {
     @Override
-    public OpStatus evaluate( Object right )
+    public OpStatus evaluate( Object object )
     {
-        if ( getLeft() == null || right == null )
+        if ( getValue() == null || object == null )
         {
             return OpStatus.IGNORE;
         }
 
-        if ( Integer.class.isInstance( right ) )
+        if ( Integer.class.isInstance( object ) )
         {
-            Integer s1 = getLeft( Integer.class );
-            Integer s2 = (Integer) right;
+            Integer s1 = getValue( Integer.class );
+            Integer s2 = (Integer) object;
 
             return (s1 != null && s2 >= s1) ? OpStatus.INCLUDE : OpStatus.EXCLUDE;
         }
-        else if ( Float.class.isInstance( right ) )
+        else if ( Float.class.isInstance( object ) )
         {
-            Float s1 = getLeft( Float.class );
-            Float s2 = (Float) right;
+            Float s1 = getValue( Float.class );
+            Float s2 = (Float) object;
 
             return (s1 != null && s2 >= s1) ? OpStatus.INCLUDE : OpStatus.EXCLUDE;
         }
-        else if ( Collection.class.isInstance( right ) )
+        else if ( Collection.class.isInstance( object ) )
         {
-            Collection<?> collection = (Collection<?>) right;
-            Integer size = getLeft( Integer.class );
+            Collection<?> collection = (Collection<?>) object;
+            Integer size = getValue( Integer.class );
 
             if ( size != null && collection.size() >= size )
             {
@@ -73,6 +71,13 @@ public class GteOp extends Op
             {
                 return OpStatus.EXCLUDE;
             }
+        }
+        else if ( Date.class.isInstance( object ) )
+        {
+            Date s1 = getValue( Date.class );
+            Date s2 = (Date) object;
+
+            return (s1 != null && (s2.after( s1 ) || s2.equals( s1 ))) ? OpStatus.INCLUDE : OpStatus.EXCLUDE;
         }
 
         return OpStatus.IGNORE;

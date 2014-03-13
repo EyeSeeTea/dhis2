@@ -69,7 +69,7 @@
 															 #end
 													 </select>
 											 #elseif( $attribute.valueType == "phoneNumber" ) 
-													 <input type='text' value='$value' id="attr$attribute.id" name="attr$attribute.id" inherit="$!attribute.inherit" class="{validate:{phone:true,required:$attribute.mandatory}}}"/>
+													 <input type='text' value='$value' id="attr$attribute.id" name="attr$attribute.id" inherit="$!attribute.inherit" class="{validate:{phone:true,required:$attribute.mandatory}}"/>
 											 #elseif( $attribute.valueType == "trackerAssociate" ) 
 													 <input type="checkbox" value='true' id="attr$attribute.id" name="attr$attribute.id" 
 															 inherit="$!attribute.inherit" #if($value=='true') checked #end
@@ -86,9 +86,9 @@
 	 #end
 #end
 
-	<!-- ATTRIBUTES -->
-	#set($attributes = $attributesMap.get(""))
-	#if ($!attributes.size() > 0) 
+	<!-- OTHER ATTRIBUTES -->
+	#if ($!attributesMap.get("") && $!attributesMap.get("").size() > 0) 
+		#set($attributes = $!attributesMap.get(""))
 		<tr><th colspan="2" class="heading-column">$i18n.getString( "other_details" )</th></tr>
 		#foreach($attribute in $attributes )
 			#set( $attributeValue = "" )

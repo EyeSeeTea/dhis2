@@ -7040,7 +7040,7 @@ Ext.onReady( function() {
 			valueField: 'id',
 			displayField: 'name',
 			queryMode: 'local',
-			value: 2,
+			value: 3,
 			width: 135,
 			store: Ext.create('Ext.data.ArrayStore', {
 				fields: ['id', 'name'],
