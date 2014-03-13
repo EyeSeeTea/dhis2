@@ -152,6 +152,7 @@ Ext.onReady( function() {
 					{id: 'BiMonthly', name: NS.i18n.bimonthly},
 					{id: 'Quarterly', name: NS.i18n.quarterly},
 					{id: 'SixMonthly', name: NS.i18n.sixmonthly},
+					{id: 'SixMonthlyApril', name: NS.i18n.sixmonthly_april},
 					{id: 'Yearly', name: NS.i18n.yearly},
 					{id: 'FinancialOct', name: NS.i18n.financial_oct},
 					{id: 'FinancialJuly', name: NS.i18n.financial_july},
@@ -240,7 +241,7 @@ Ext.onReady( function() {
 						return;
 					}
 
-					config.id = config.id.replace('.', '-');
+					config.id = config.id.replace('.', '#');
 
 					return config;
 				}();
@@ -528,7 +529,7 @@ Ext.onReady( function() {
 					}
 
 					// analytical2layout
-					config = analytical2layout(config);
+					//config = analytical2layout(config);
 
                     // layout
                     layout.type = Ext.isString(config.type) ? config.type.toLowerCase() : conf.finals.chart.column;
@@ -1191,11 +1192,15 @@ Ext.onReady( function() {
 				return null;
 			};
 
-			service.layout.layout2plugin = function(layout) {
+			service.layout.layout2plugin = function(layout, el) {
 				var layout = Ext.clone(layout),
 					dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || []));
 
 				layout.url = init.contextPath;
+
+				if (el) {
+					layout.el = el;
+				}
 				
 				if (Ext.isString(layout.id)) {
 					return {id: layout.id};
@@ -1281,6 +1286,75 @@ Ext.onReady( function() {
 				return layout;
 			};
 
+			service.layout.analytical2layout = function(analytical) {
+				var layoutConfig = Ext.clone(analytical),
+					co = dimConf.category.objectName;
+
+				analytical = Ext.clone(analytical);
+
+				layoutConfig.columns = [];
+				layoutConfig.rows = [];
+				layoutConfig.filters = layoutConfig.filters || [];
+
+				// Series
+				if (Ext.isArray(analytical.columns) && analytical.columns.length) {
+					analytical.columns.reverse();
+
+					for (var i = 0, dim; i < analytical.columns.length; i++) {
+						dim = analytical.columns[i];
+
+						if (dim.dimension === co) {
+							continue;
+						}
+
+						if (!layoutConfig.columns.length) {
+							layoutConfig.columns.push(dim);
+						}
+						else {
+
+							// indicators cannot be set as filter
+							if (dim.dimension === dimConf.indicator.objectName) {
+								layoutConfig.filters.push(layoutConfig.columns.pop());
+								layoutConfig.columns = [dim];
+							}
+							else {
+								layoutConfig.filters.push(dim);
+							}
+						}
+					}
+				}
+
+				// Rows
+				if (Ext.isArray(analytical.rows) && analytical.rows.length) {
+					analytical.rows.reverse();
+
+					for (var i = 0, dim; i < analytical.rows.length; i++) {
+						dim = analytical.rows[i];
+
+						if (dim.dimension === co) {
+							continue;
+						}
+
+						if (!layoutConfig.rows.length) {
+							layoutConfig.rows.push(dim);
+						}
+						else {
+
+							// indicators cannot be set as filter
+							if (dim.dimension === dimConf.indicator.objectName) {
+								layoutConfig.filters.push(layoutConfig.rows.pop());
+								layoutConfig.rows = [dim];
+							}
+							else {
+								layoutConfig.filters.push(dim);
+							}
+						}
+					}
+				}
+
+				return layoutConfig;
+			};
+
 			// response
 			service.response = {};
 
@@ -1326,8 +1400,8 @@ Ext.onReady( function() {
 					for (var i = 0, id, splitId ; i < ids.length; i++) {
 						id = ids[i];
 
-						if (id.indexOf('-') !== -1) {
-							splitId = id.split('-');
+						if (id.indexOf('#') !== -1) {
+							splitId = id.split('#');
 							response.metaData.names[id] = response.metaData.names[splitId[0]] + ' ' + response.metaData.names[splitId[1]];
 						}
 					}
@@ -1526,7 +1600,7 @@ Ext.onReady( function() {
 
                     if (dimName === dx) {
                         for (var j = 0, index; j < items.length; j++) {
-                            index = items[j].indexOf('-');
+                            index = items[j].indexOf('#');
 
                             if (index > 0) {
                                 addCategoryDimension = true;
@@ -1626,7 +1700,7 @@ Ext.onReady( function() {
 
                         obj[conf.finals.data.domain] = xResponse.metaData.names[category];
                         for (var j = 0, id; j < columnIds.length; j++) {
-                            id = support.prototype.str.replaceAll(columnIds[j], '-', '') + support.prototype.str.replaceAll(rowIds[i], '-', '');
+                            id = support.prototype.str.replaceAll(columnIds[j], '#', '') + support.prototype.str.replaceAll(rowIds[i], '#', '');
 
                             obj[columnIds[j]] = parseFloat(xResponse.idValueMap[id]) || 0;
                         }
@@ -1967,8 +2041,8 @@ Ext.onReady( function() {
                         numberOfItems = store.rangeFields.length;
 
                         for (var i = 0, name, ids; i < store.rangeFields.length; i++) {
-                            if (store.rangeFields[i].indexOf('-') !== -1) {
-                                ids = store.rangeFields[i].split('-');
+                            if (store.rangeFields[i].indexOf('#') !== -1) {
+                                ids = store.rangeFields[i].split('#');
                                 name = xResponse.metaData.names[ids[0]] + ' ' + xResponse.metaData.names[ids[1]];
                             }
                             else {

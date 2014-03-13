@@ -17,9 +17,6 @@
 
     <property name="name" column="name" not-null="true" unique="true" length="230" />
 
-    <many-to-one name="concept" class="org.hisp.dhis.concept.Concept" column="conceptid"
-      foreign-key="fk_dataelementcategory_conceptid" />
-
     <set name="categoryOptionCombos" table="categoryoptioncombos_categoryoptions" inverse="true">
       <cache usage="read-write" />
       <key column="categoryoptionid" foreign-key="fk_categoryoptioncombos_categoryoptions_categoryoptionid" />
@@ -31,6 +28,23 @@
       <cache usage="read-write" />
       <key column="categoryoptionid" />
       <many-to-many class="org.hisp.dhis.dataelement.DataElementCategory" column="categoryid" />
+    </set>
+
+    <set name="groups" table="categoryoptiongroupmembers" inverse="true">
+      <cache usage="read-write" />
+      <key column="categoryoptionid" />
+      <many-to-many class="org.hisp.dhis.dataelement.CategoryOptionGroup" column="categoryoptiongroupid" />
+    </set>
+
+    <!-- Access properties -->
+    <many-to-one name="user" class="org.hisp.dhis.user.User" column="userid" foreign-key="fk_dataelementcategoryoption_userid" />
+
+    <property name="publicAccess" length="8" />
+
+    <set name="userGroupAccesses" table="dataelementcategoryoptionusergroupaccesses">
+      <cache usage="read-write" />
+      <key column="categoryoptionid" />
+      <many-to-many class="org.hisp.dhis.user.UserGroupAccess" column="usergroupaccessid" unique="true" />
     </set>
 
   </class>

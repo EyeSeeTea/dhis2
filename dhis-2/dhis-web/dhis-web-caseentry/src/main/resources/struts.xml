@@ -34,28 +34,28 @@
 		<action name="searchAllFacilities" class="org.hisp.dhis.caseentry.action.NoAction">
 			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm
 			</result>
-			<param name="requiredAuthorities">F_SEARCH_PATIENT_IN_ALL_FACILITIES</param>
+			<param name="requiredAuthorities">F_SEARCH_TRACKED_ENTITY_INSTANCE_IN_ALL_FACILITIES</param>
 		</action>
 
 		<action name="searchInOtherOrgunits" class="org.hisp.dhis.caseentry.action.NoAction">
 			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm
 			</result>
-			<param name="requiredAuthorities">F_SEARCH_PATIENT_IN_OTHER_ORGUNITS</param>
+			<param name="requiredAuthorities">F_SEARCH_TRACKED_ENTITY_INSTANCE_IN_OTHER_ORGUNITS</param>
 		</action>
 
-		<action name="searchPatient"
-			class="org.hisp.dhis.caseentry.action.patient.SearchPatientAction">
+		<action name="searchTrackedEntityInstance"
+			class="org.hisp.dhis.caseentry.action.trackedentity.SearchTrackedEntityInstanceAction">
 			<result name="success" type="velocity">/content.vm</result>
-			<param name="page">/dhis-web-caseentry/listPatient.vm</param>
-			<param name="requiredAuthorities">F_PATIENT_SEARCH</param>
+			<param name="page">/dhis-web-caseentry/listTrackedEntityInstance.vm</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_INSTANCE_SEARCH</param>
 		</action>
 
-		<action name="listAllPatients"
-			class="org.hisp.dhis.caseentry.action.patient.SearchPatientAction">
+		<action name="listAllTrackedEntityInstances"
+			class="org.hisp.dhis.caseentry.action.trackedentity.SearchTrackedEntityInstanceAction">
 			<result name="success" type="velocity">/content.vm</result>
 			<param name="listAll">true</param>
-			<param name="page">/dhis-web-caseentry/listPatient.vm</param>
-			<param name="requiredAuthorities">F_PATIENT_LIST</param>
+			<param name="page">/dhis-web-caseentry/listTrackedEntityInstance.vm</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_INSTANCE_LIST</param>
 		</action>
 
 		<action name="selectDataRecording"
@@ -63,7 +63,7 @@
 			<result name="success" type="velocity">/content.vm</result>
 			<param name="page">/dhis-web-caseentry/dataRecordingSelect.vm</param>
 			<param name="stylesheets">style/style.css</param>
-			<param name="requiredAuthorities">F_PATIENT_DATAVALUE_ADD,F_PATIENT_DATAVALUE_DELETE</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_DATAVALUE_ADD,F_TRACKED_ENTITY_DATAVALUE_DELETE</param>
 		</action>
 
 		<action name="loadProgramStageInstances"
@@ -82,7 +82,7 @@
 		<action name="editDataEntryForm" class="org.hisp.dhis.caseentry.action.NoAction">
 			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm
 			</result>
-			<param name="requiredAuthorities">F_PATIENT_DATAVALUE_ADD,F_PATIENT_DATAVALUE_DELETE</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_DATAVALUE_ADD,F_TRACKED_ENTITY_DATAVALUE_DELETE</param>
 		</action>
 
 		<action name="dataentryform"
@@ -98,7 +98,7 @@
 			</result>
 			<result name="programcompleted" type="velocity-json">/dhis-web-caseentry/jsonResponseProgramCompleted.vm
 			</result>
-			<param name="requiredAuthorities">F_PATIENT_DATAVALUE_ADD,F_PATIENT_DATAVALUE_DELETE</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_DATAVALUE_ADD,F_TRACKED_ENTITY_DATAVALUE_DELETE</param>
 		</action>
 
 		<action name="uncompleteDataEntry"
@@ -106,7 +106,7 @@
 			<result name="success" type="velocity-json">
 				/dhis-web-commons/ajax/jsonResponseSuccess.vm
 			</result>
-			<param name="requiredAuthorities">F_PATIENT_DATAVALUE_ADD,F_PATIENT_DATAVALUE_DELETE</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_DATAVALUE_ADD,F_TRACKED_ENTITY_DATAVALUE_DELETE</param>
 		</action>
 
 		<action name="saveExecutionDate"
@@ -118,14 +118,14 @@
 				/dhis-web-commons/ajax/jsonResponseInput.vm
 			</result>
 			<param name="onExceptionReturn">plainTextError</param>
-			<param name="requiredAuthorities">F_PATIENT_DATAVALUE_ADD,F_PATIENT_DATAVALUE_DELETE</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_DATAVALUE_ADD,F_TRACKED_ENTITY_DATAVALUE_DELETE</param>
 		</action>
 
 		<action name="registerIrregularEncounter"
 			class="org.hisp.dhis.caseentry.action.caseentry.RegisterIrregularEncounterAction">
 			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm
 			</result>
-			<param name="requiredAuthorities">F_PATIENT_DATAVALUE_ADD,F_PATIENT_DATAVALUE_DELETE</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_DATAVALUE_ADD,F_TRACKED_ENTITY_DATAVALUE_DELETE</param>
 		</action>
 
     	<action name="cacheManifest" class="org.hisp.dhis.appcache.AppCacheAction">
@@ -169,7 +169,7 @@
 			<result name="input" type="velocity-json">
 				/dhis-web-commons/ajax/jsonResponseInput.vm
 			</result>
-			<param name="requiredAuthorities">F_PATIENT_DATAVALUE_ADD,F_PATIENT_DATAVALUE_DELETE</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_DATAVALUE_ADD,F_TRACKED_ENTITY_DATAVALUE_DELETE</param>
 		</action>
 
 		<action name="loadAnonymousPrograms"
@@ -258,7 +258,7 @@
 			<result name="success" type="velocity-json">
 				/dhis-web-commons/ajax/jsonResponseSuccess.vm
 			</result>
-			<param name="requiredAuthorities">F_PATIENT_DATAVALUE_ADD,F_PATIENT_DATAVALUE_DELETE</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_DATAVALUE_ADD,F_TRACKED_ENTITY_DATAVALUE_DELETE</param>
 		</action>
 
 		<action name="saveProgramInstanceComment"
@@ -266,7 +266,7 @@
 			<result name="success" type="velocity-json">
 				/dhis-web-commons/ajax/jsonResponseSuccess.vm
 			</result>
-			<param name="requiredAuthorities">F_PATIENT_DATAVALUE_ADD,F_PATIENT_DATAVALUE_DELETE</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_DATAVALUE_ADD,F_TRACKED_ENTITY_DATAVALUE_DELETE</param>
 		</action>
 
 		<!-- save value -->
@@ -277,7 +277,7 @@
 			<result name="input" type="velocity-xml">/dhis-web-caseentry/responseInput.vm
 			</result>
 			<param name="onExceptionReturn">plainTextError</param>
-			<param name="requiredAuthorities">F_PATIENT_DATAVALUE_ADD,F_PATIENT_DATAVALUE_DELETE</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_DATAVALUE_ADD,F_TRACKED_ENTITY_DATAVALUE_DELETE</param>
 		</action>
 
 		<action name="saveCoordinatesEvent"
@@ -285,7 +285,7 @@
 			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm
 			</result>
 			<param name="onExceptionReturn">plainTextError</param>
-			<param name="requiredAuthorities">F_PATIENT_DATAVALUE_ADD,F_PATIENT_DATAVALUE_DELETE</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_DATAVALUE_ADD,F_TRACKED_ENTITY_DATAVALUE_DELETE</param>
 		</action>
 
 		<!-- save providing-facility -->
@@ -295,7 +295,7 @@
 			<result name="success" type="velocity">status.vm</result>
 			<result name="input" type="velocity">status.vm</result>
 			<param name="onExceptionReturn">plainTextError</param>
-			<param name="requiredAuthorities">F_PATIENT_DATAVALUE_ADD,F_PATIENT_DATAVALUE_DELETE</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_DATAVALUE_ADD,F_TRACKED_ENTITY_DATAVALUE_DELETE</param>
 		</action>
 
 		<!-- Multi DataEntry -->
@@ -310,9 +310,9 @@
 			<param name="javascripts">
 				../dhis-web-commons/ouwt/ouwt.js,
 				javascript/commons.js,
-				javascript/patient.js,
+				javascript/trackedEntityInstance.js,
 				javascript/entry.js,
-				javascript/relationshipPatient.js,
+				javascript/relationshipTrackedEntityInstance.js,
 				javascript/multiDataEntry.js
 			</param>
 			<param name="requiredAuthorities">F_NAME_BASED_DATA_ENTRY</param>
@@ -349,7 +349,7 @@
 			<result name="success" type="velocity">/content.vm</result>
 			<param name="page">/dhis-web-caseentry/dataEntryForm.vm</param>
 			<param name="javascripts">../dhis-web-commons/javascripts/date.js</param>
-			<param name="requiredAuthorities">F_PATIENT_DATAVALUE_ADD,F_PATIENT_DATAVALUE_DELETE</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_DATAVALUE_ADD,F_TRACKED_ENTITY_DATAVALUE_DELETE</param>
 		</action>
 
 		<action name="completeProgramStageDataEntry"
@@ -357,7 +357,7 @@
 			<result name="success" type="redirect">
 				getDataRecords.action?programId=${programId}
 			</result>
-			<param name="requiredAuthorities">F_PATIENT_DATAVALUE_ADD,F_PATIENT_DATAVALUE_DELETE</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_DATAVALUE_ADD,F_TRACKED_ENTITY_DATAVALUE_DELETE</param>
 		</action>
 
 		<!-- Single-event DataEntry -->
@@ -390,13 +390,13 @@
 			<result name="success" type="velocity">/content.vm</result>
 			<param name="page">/dhis-web-caseentry/addSingleEventRegistration.vm</param>
 			<param name="stylesheets">style/style.css</param>
-			<param name="requiredAuthorities">F_PATIENT_ADD,F_PATIENT_DATAVALUE_ADD,F_PATIENT_DATAVALUE_DELETE</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_INSTANCE_ADD,F_TRACKED_ENTITY_DATAVALUE_ADD,F_TRACKED_ENTITY_DATAVALUE_DELETE</param>
 		</action>
 
 		<action name="saveValues"
 			class="org.hisp.dhis.caseentry.action.caseentry.SaveValuesAction">
 			<result name="success" type="velocity-xml">status.vm</result>
-			<param name="requiredAuthorities">F_PATIENT_ADD,F_PATIENT_DATAVALUE_ADD,F_PATIENT_DATAVALUE_DELETE</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_INSTANCE_ADD,F_TRACKED_ENTITY_DATAVALUE_ADD,F_TRACKED_ENTITY_DATAVALUE_DELETE</param>
 		</action>
 
 		<!-- Report -->
@@ -462,7 +462,7 @@
 			<param name="menu">/dhis-web-caseentry/caseAggregationMenu.vm</param>
 			<param name="javascripts">javascript/caseagg.js,javascript/caseAggregationForm.js</param>
 			<param name="stylesheets">style/style.css</param>
-			<param name="requiredAuthorities">F_PATIENT_AGGREGATION</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_AGGREGATION</param>
 		</action>
 
 		<action name="validateCaseAggregation"
@@ -483,7 +483,7 @@
 			<result name="success" type="velocity">/content.vm</result>
 			<param name="page">/dhis-web-caseentry/caseAggregationResult.vm</param>
 			<param name="menu">/dhis-web-caseentry/caseAggregationMenu.vm</param>
-			<param name="requiredAuthorities">F_PATIENT_AGGREGATION</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_AGGREGATION</param>
 		</action>
 
 		<action name="saveAggregateDataValue"
@@ -500,34 +500,34 @@
 			<param name="page">/dhis-web-caseentry/caseAggregationResultDetails.vm</param>
 		</action>
 
-		<!-- Patient -->
+		<!-- TrackedEntityInstance -->
 
-		<action name="patient"
-			class="org.hisp.dhis.caseentry.action.patient.SelectAction">
+		<action name="trackedEntityInstance"
+			class="org.hisp.dhis.caseentry.action.trackedentity.SelectAction">
 			<interceptor-ref name="organisationUnitTreeStack" />
 			<result name="success" type="velocity">/main.vm</result>
-			<param name="page">/dhis-web-caseentry/selectPatient.vm</param>
+			<param name="page">/dhis-web-caseentry/selectTrackedEntityInstance.vm</param>
 			<param name="menu">/dhis-web-caseentry/registrationMenu.vm</param>
 			<param name="javascripts">
 				../dhis-web-commons/ouwt/ouwt.js
 				,javascript/commons.js
-				,javascript/patient.js
+				,javascript/trackedEntityInstance.js
 				,javascript/entry.js
-				,javascript/relationshipPatient.js
+				,javascript/relationshipTrackedEntityInstance.js
 			</param>
 			<param name="stylesheets">style/style.css</param>
-			<param name="requiredAuthorities">F_PATIENT_MANAGEMENT</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_INSTANCE_MANAGEMENT</param>
 		</action>
 
-		<action name="searchRegistrationPatient"
-			class="org.hisp.dhis.caseentry.action.patient.SearchPatientAction">
+		<action name="searchRegistrationTrackedEntityInstance"
+			class="org.hisp.dhis.caseentry.action.trackedentity.SearchTrackedEntityInstanceAction">
 			<result name="success" type="velocity">/content.vm</result>
-			<param name="page">/dhis-web-caseentry/patientRegistrationList.vm</param>
-			<param name="requiredAuthorities">F_PATIENT_SEARCH</param>
+			<param name="page">/dhis-web-caseentry/trackedEntityInstanceRegistrationList.vm</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_INSTANCE_SEARCH</param>
 		</action>
 
-		<action name="removePatient"
-			class="org.hisp.dhis.caseentry.action.patient.RemovePatientAction">
+		<action name="removeTrackedEntityInstance"
+			class="org.hisp.dhis.caseentry.action.trackedentity.RemoveTrackedEntityInstanceAction">
 			<result name="success" type="velocity-json">
 				/dhis-web-commons/ajax/jsonResponseSuccess.vm
 			</result>
@@ -535,46 +535,46 @@
 				/dhis-web-commons/ajax/jsonResponseError.vm
 			</result>
 			<param name="onExceptionReturn">plainTextError</param>
-			<param name="requiredAuthorities">F_PATIENT_DELETE</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_DELETE</param>
 		</action>
 
-		<action name="addPatient"
-			class="org.hisp.dhis.caseentry.action.patient.AddPatientAction">
+		<action name="addTrackedEntityInstance"
+			class="org.hisp.dhis.caseentry.action.trackedentity.AddTrackedEntityInstanceAction">
 			<result name="success" type="velocity-json">
 				/dhis-web-commons/ajax/jsonResponseSuccess.vm
 			</result>
-			<param name="requiredAuthorities">F_PATIENT_ADD</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_INSTANCE_ADD</param>
 		</action>
 
-		<action name="showAddPatientForm"
-			class="org.hisp.dhis.caseentry.action.patient.ShowAddPatientFormAction">
+		<action name="showAddTrackedEntityInstanceForm"
+			class="org.hisp.dhis.caseentry.action.trackedentity.ShowAddTrackedEntityInstanceFormAction">
 			<result name="success" type="velocity">/content.vm</result>
-			<param name="page">/dhis-web-caseentry/addPatientForm.vm</param>
-			<param name="requiredAuthorities">F_PATIENT_ADD</param>
+			<param name="page">/dhis-web-caseentry/addTrackedEntityInstanceForm.vm</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_INSTANCE_ADD</param>
 		</action>
 
-		<action name="showUpdatePatientForm"
-			class="org.hisp.dhis.caseentry.action.patient.GetPatientAction">
+		<action name="showUpdateTrackedEntityInstanceForm"
+			class="org.hisp.dhis.caseentry.action.trackedentity.GetTrackedEntityInstanceAction">
 			<result name="success" type="velocity">/content.vm</result>
 			<param name="page">
-				/dhis-web-caseentry/updatePatientForm.vm
+				/dhis-web-caseentry/updateTrackedEntityInstanceForm.vm
 			</param>
 			<param name="javascripts">
 				../dhis-web-commons/javascripts/jQuery/jquery-barcode.min.js
 			</param>
-			<param name="requiredAuthorities">F_PATIENT_ADD</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_INSTANCE_ADD</param>
 		</action>
 
-		<action name="updatePatient"
-			class="org.hisp.dhis.caseentry.action.patient.UpdatePatientAction">
+		<action name="updateTrackedEntityInstance"
+			class="org.hisp.dhis.caseentry.action.trackedentity.UpdateTrackedEntityInstanceAction">
 			<result name="success" type="velocity-json">
 				/dhis-web-commons/ajax/jsonResponseSuccess.vm
 			</result>
-			<param name="anyAuthorities">F_ALLOW_EDIT_PATIENT_PROPERTIES, F_ALLOW_EDIT_PATIENT_ATTRIBUTES, F_ALLOW_EDIT_PATIENT_IDENTIFIERS</param>
+			<param name="anyAuthorities">F_ALLOW_EDIT_TRACKED_ENTITY_PROPERTIES, F_ALLOW_EDIT_TRACKED_ENTITY_ATTRIBUTES, F_ALLOW_EDIT_TRACKED_ENTITY_IDENTIFIERS</param>
 		</action>
 
-		<action name="validatePatient"
-			class="org.hisp.dhis.caseentry.action.patient.ValidatePatientAction">
+		<action name="validateTrackedEntityInstance"
+			class="org.hisp.dhis.caseentry.action.trackedentity.ValidateTrackedEntityInstanceAction">
 			<result name="success" type="velocity-json">
 				/dhis-web-commons/ajax/jsonResponseSuccess.vm
 			</result>
@@ -582,79 +582,79 @@
 		</action>
 
 		<action name="showAddRepresentative"
-			class="org.hisp.dhis.caseentry.action.patient.ShowAddRepresentativeAction">
+			class="org.hisp.dhis.caseentry.action.trackedentity.ShowAddRepresentativeAction">
 			<result name="success" type="velocity">/content.vm</result>
 			<param name="page">/dhis-web-caseentry/underAgeForm.vm</param>
 			<param name="javascripts">javascript/underage.js,
 				../dhis-web-commons/javascripts/date.js
 			</param>
 			<param name="stylesheets">style/style.css</param>
-			<param name="requiredAuthorities">F_PATIENT_ADD</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_INSTANCE_ADD</param>
 		</action>
 
 		<action name="searchPerson"
-			class="org.hisp.dhis.caseentry.action.patient.SearchPersonAction">
-			<result name="success" type="velocity-xml">responsePatients.vm
+			class="org.hisp.dhis.caseentry.action.trackedentity.SearchPersonAction">
+			<result name="success" type="velocity-xml">responseTrackedEntityInstances.vm
 			</result>
-			<param name="requiredAuthorities">F_PATIENT_SEARCH</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_INSTANCE_SEARCH</param>
 		</action>
 
 		<action name="addRepresentative"
-			class="org.hisp.dhis.caseentry.action.patient.AddRepresentativeAction">
+			class="org.hisp.dhis.caseentry.action.trackedentity.AddRepresentativeAction">
 			<result name="success" type="velocity-xml">responseRepresentative.vm
 			</result>
-			<param name="requiredAuthorities">F_PATIENT_ADD</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_INSTANCE_ADD</param>
 		</action>
 
-		<action name="getPatientHistory"
-			class="org.hisp.dhis.caseentry.action.patient.GetPatientHistoryAction">
+		<action name="getTrackedEntityInstanceHistory"
+			class="org.hisp.dhis.caseentry.action.trackedentity.GetTrackedEntityInstanceHistoryAction">
 			<result name="success" type="velocity">/content.vm</result>
 			<result name="xls" type="gridXlsResult" />
 			<result name="pdf" type="gridPdfResult" />
-			<param name="page">/dhis-web-caseentry/patientHistory.vm</param>
-			<param name="requiredAuthorities">F_PATIENT_HISTORY</param>
+			<param name="page">/dhis-web-caseentry/trackedEntityInstanceHistory.vm</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_INSTANCE_HISTORY</param>
 		</action>
 
 		<action name="getProgramReportHistory"
-			class="org.hisp.dhis.caseentry.action.patient.GetProgramInstanceHistoryAction">
+			class="org.hisp.dhis.caseentry.action.trackedentity.GetProgramInstanceHistoryAction">
 			<result name="success" type="velocity">/content.vm</result>
 			<result name="xls" type="gridXlsResult" />
 			<result name="pdf" type="gridPdfResult" />
 			<param name="page">/dhis-web-caseentry/programInstanceHistory.vm</param>
 		</action>
 
-		<action name="getPatientLocation"
-			class="org.hisp.dhis.caseentry.action.patient.GetPatientLocationAction">
+		<action name="getTrackedEntityInstanceLocation"
+			class="org.hisp.dhis.caseentry.action.trackedentity.GetTrackedEntityInstanceLocationAction">
 			<result name="success" type="velocity">/content.vm</result>
-			<param name="page">/dhis-web-caseentry/patientLocation.vm</param>
-			<param name="requiredAuthorities">F_PATIENT_CHANGE_LOCATION</param>
+			<param name="page">/dhis-web-caseentry/trackedEntityInstanceLocation.vm</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_INSTANCE_CHANGE_LOCATION</param>
 		</action>
 
-		<action name="registerPatientLocation"
-			class="org.hisp.dhis.caseentry.action.patient.RegisterPatientLocationAction">
+		<action name="registerTrackedEntityInstanceLocation"
+			class="org.hisp.dhis.caseentry.action.trackedentity.RegisterTrackedEntityInstanceLocationAction">
 			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm
 			</result>
-			<param name="requiredAuthorities">F_PATIENT_CHANGE_LOCATION</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_INSTANCE_CHANGE_LOCATION</param>
 		</action>
 
-		<!-- Patient-Program Enrollment -->
+		<!-- Program Enrollment -->
 
 		<action name="showProgramEnrollmentForm"
-			class="org.hisp.dhis.caseentry.action.patient.ProgramEnrollmentSelectAction">
+			class="org.hisp.dhis.caseentry.action.trackedentity.ProgramEnrollmentSelectAction">
 			<result name="success" type="velocity">/content.vm</result>
 			<param name="page">/dhis-web-caseentry/programEnrollmentSelectForm.vm</param>
 			<param name="requiredAuthorities">F_PROGRAM_ENROLLMENT</param>
 		</action>
 
 		<action name="enrollmentform"
-			class="org.hisp.dhis.caseentry.action.patient.ProgramEnrollmentAction">
+			class="org.hisp.dhis.caseentry.action.trackedentity.ProgramEnrollmentAction">
 			<result name="success" type="velocity">/content.vm</result>
 			<param name="page">/dhis-web-caseentry/programEnrollmentForm.vm</param>
 			<param name="requiredAuthorities">F_PROGRAM_INSTANCE_MANAGEMENT</param>
 		</action>
 
-		<action name="validatePatientProgramEnrollment"
-			class="org.hisp.dhis.caseentry.action.patient.ValidatePatientProgramEnrollmentAction">
+		<action name="validateProgramEnrollment"
+			class="org.hisp.dhis.caseentry.action.trackedentity.ValidateProgramEnrollmentAction">
 			<result name="success" type="velocity-json">
 				/dhis-web-commons/ajax/jsonResponseSuccess.vm
 			</result>
@@ -667,7 +667,7 @@
 		</action>
 
 		<action name="saveProgramEnrollment"
-			class="org.hisp.dhis.caseentry.action.patient.SaveProgramEnrollmentAction">
+			class="org.hisp.dhis.caseentry.action.trackedentity.SaveProgramEnrollmentAction">
 			<result name="success" type="velocity-json">
 				/dhis-web-caseentry/jsonProgramEnrollment.vm
 			</result>
@@ -675,54 +675,54 @@
 		</action>
 
 		<action name="getProgramInstance"
-			class="org.hisp.dhis.caseentry.action.patient.GetProgramInstanceAction">
+			class="org.hisp.dhis.caseentry.action.trackedentity.GetProgramInstanceAction">
 			<result name="success" type="velocity-json">
 				/dhis-web-caseentry/responseProgramInstance.vm
 			</result>
 		</action>
 
 		<action name="getEventMessages"
-			class="org.hisp.dhis.caseentry.action.patient.GetProgramInstanceAction">
+			class="org.hisp.dhis.caseentry.action.trackedentity.GetProgramInstanceAction">
 			<result name="success" type="velocity">/content.vm</result>
 			<param name="page">/dhis-web-caseentry/eventMessage.vm</param>
 			<param name="requiredAuthorities">F_PROGRAM_STAGE_INSTANCE_REMINDER</param>
 		</action>
 
 		<action name="saveDueDate"
-			class="org.hisp.dhis.caseentry.action.patient.SaveDueDateAction">
+			class="org.hisp.dhis.caseentry.action.trackedentity.SaveDueDateAction">
 			<result name="success" type="velocity">status.vm</result>
 			<param name="onExceptionReturn">plainTextError</param>
 			<param name="requiredAuthorities">F_PROGRAM_ENROLLMENT</param>
 		</action>
 
-		<action name="savePatientIdentifierAndAttribute"
-			class="org.hisp.dhis.caseentry.action.patient.SaveIdentifierAndAttributeAction">
+		<action name="saveAttribute"
+			class="org.hisp.dhis.caseentry.action.trackedentity.SaveAttributeAction">
 			<result name="success" type="velocity-xml">status.vm</result>
-			<param name="requiredAuthorities">F_PATIENT_ADD, F_PROGRAM_ENROLLMENT</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_INSTANCE_ADD, F_PROGRAM_ENROLLMENT</param>
 		</action>
 
 		<action name="setProgramInstanceStatus"
-			class="org.hisp.dhis.caseentry.action.patient.SetProgramInstanceStatusAction">
+			class="org.hisp.dhis.caseentry.action.trackedentity.SetProgramInstanceStatusAction">
 			<result name="success" type="velocity-xml">status.vm</result>
 			<param name="requiredAuthorities">F_PROGRAM_UNENROLLMENT</param>
 		</action>
 
-		<action name="getPatientIdentifierAndAttribute"
-			class="org.hisp.dhis.caseentry.action.patient.GetProgramAction">
+		<action name="getAttribute"
+			class="org.hisp.dhis.caseentry.action.trackedentity.GetAttributesByProgramAction">
 			<result name="success" type="velocity">/content.vm</result>
-			<param name="page">/dhis-web-caseentry/identifierAndAttributeForm.vm</param>
-			<param name="requiredAuthorities">F_PATIENT_ADD</param>
+			<param name="page">/dhis-web-caseentry/attributeFormDiv.vm</param>
+			<param name="requiredAuthorities">F_TRACKED_ENTITY_INSTANCE_ADD</param>
 		</action>
 
 		<action name="getAttributesByProgram"
-			class="org.hisp.dhis.caseentry.action.patient.GetAttributesByProgramAction">
+			class="org.hisp.dhis.caseentry.action.trackedentity.GetAttributesByProgramAction">
 			<result name="success" type="velocity-json">
 				/dhis-web-caseentry/jsonProgramAttributes.vm
 			</result>
 		</action>
 		
 		<action name="getVisitSchedule"
-			class="org.hisp.dhis.caseentry.action.patient.GetProgramInstanceAction">
+			class="org.hisp.dhis.caseentry.action.trackedentity.GetProgramInstanceAction">
 			<result name="success" type="velocity">/content.vm</result>
 			<param name="page">/dhis-web-caseentry/visitSchedule.vm</param>
 			<param name="requiredAuthorities">F_PROGRAM_ENROLLMENT</param>
@@ -731,30 +731,30 @@
 		<!-- Relationship -->
 
 		<action name="getPartner"
-			class="org.hisp.dhis.caseentry.action.patient.GetPartnerAction">
+			class="org.hisp.dhis.caseentry.action.trackedentity.GetPartnerAction">
 			<result name="success" type="velocity-xml">/content.vm</result>
 			<param name="page">/dhis-web-caseentry/detailsPartner.vm</param>
 		</action>
 
 		<action name="showRelationshipList"
-			class="org.hisp.dhis.caseentry.action.patient.ShowRelationshipListAction">
+			class="org.hisp.dhis.caseentry.action.trackedentity.ShowRelationshipListAction">
 			<result name="success" type="velocity">/content.vm</result>
 			<param name="page">/dhis-web-caseentry/relationshipList.vm</param>
 			<param name="javascripts">
-				../dhis-web-commons/javascripts/jQuery/jquery-barcode.min.js
+				javascript/relationship.js
 			</param>
 			<param name="requiredAuthorities">F_RELATIONSHIP_MANAGEMENT</param>
 		</action>
 
 		<action name="showAddRelationshipForm"
-			class="org.hisp.dhis.caseentry.action.patient.ShowAddRelationshipFormAction">
+			class="org.hisp.dhis.caseentry.action.trackedentity.ShowAddRelationshipFormAction">
 			<result name="success" type="velocity">/content.vm</result>
 			<param name="page">/dhis-web-caseentry/addRelationshipForm.vm</param>
-			<param name="requiredAuthorities">F_RELATIONSHIP_ADD, F_PATIENT_ADD</param>
+			<param name="requiredAuthorities">F_RELATIONSHIP_ADD, F_TRACKED_ENTITY_INSTANCE_ADD</param>
 		</action>
 
 		<action name="validateSearchRelationship"
-			class="org.hisp.dhis.caseentry.action.patient.ValidateSearchRelationshipAction">
+			class="org.hisp.dhis.caseentry.action.trackedentity.ValidateSearchRelationshipAction">
 			<result name="success" type="velocity-xml">
 				/dhis-web-commons/ajax/xmlResponseSuccess.vm
 			</result>
@@ -767,15 +767,15 @@
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 
-		<action name="searchRelationshipPatient"
-			class="org.hisp.dhis.caseentry.action.patient.SearchRelationshipPatientAction">
+		<action name="searchRelationshipTrackedEntityInstance"
+			class="org.hisp.dhis.caseentry.action.trackedentity.SearchRelationshipEntityInstanceAction">
 			<result name="success" type="velocity">/content.vm</result>
-			<param name="page">/dhis-web-caseentry/relationshipPatients.vm</param>
+			<param name="page">/dhis-web-caseentry/relationshipTrackedEntityInstances.vm</param>
 			<param name="requiredAuthorities">F_RELATIONSHIP_ADD</param>
 		</action>
 
 		<action name="saveRelationship"
-			class="org.hisp.dhis.caseentry.action.patient.SaveRelationshipAction">
+			class="org.hisp.dhis.caseentry.action.trackedentity.SaveRelationshipAction">
 			<result name="success" type="velocity-xml">
 				/dhis-web-commons/ajax/xmlResponseSuccess.vm
 			</result>
@@ -790,7 +790,7 @@
 		</action>
 
 		<action name="removeRelationship"
-			class="org.hisp.dhis.caseentry.action.patient.RemoveRelationshipAction">
+			class="org.hisp.dhis.caseentry.action.trackedentity.RemoveRelationshipAction">
 			<result name="success" type="velocity-json">
 				/dhis-web-commons/ajax/jsonResponseSuccess.vm
 			</result>
@@ -798,7 +798,7 @@
 		</action>
 
 		<action name="saveRepresentative"
-			class="org.hisp.dhis.caseentry.action.patient.SaveRepresentativeAction">
+			class="org.hisp.dhis.caseentry.action.trackedentity.SaveRepresentativeAction">
 			<result name="success" type="velocity-xml">
 				/dhis-web-commons/ajax/xmlResponseSuccess.vm
 			</result>
@@ -813,7 +813,7 @@
 		</action>
 
 		<action name="removeRepresentative"
-			class="org.hisp.dhis.caseentry.action.patient.RemoveRepresentativeAction">
+			class="org.hisp.dhis.caseentry.action.trackedentity.RemoveRepresentativeAction">
 			<result name="success" type="velocity-xml">
 				/dhis-web-commons/ajax/xmlResponseSuccess.vm
 			</result>
@@ -827,11 +827,11 @@
 			<param name="requiredAuthorities">F_RELATIONSHIP_DELETE</param>
 		</action>
 
-		<action name="showAddRelationshipPatient"
-			class="org.hisp.dhis.caseentry.action.patient.GetPatientAction">
+		<action name="showAddRelationshipTrackedEntityInstance"
+			class="org.hisp.dhis.caseentry.action.trackedentity.GetTrackedEntityInstanceAction">
 			<result name="success" type="velocity">/content.vm</result>
-			<param name="page">/dhis-web-caseentry/addRelationshipPatientForm.vm</param>
-			<param name="requiredAuthorities">F_RELATIONSHIP_ADD, F_PATIENT_ADD</param>
+			<param name="page">/dhis-web-caseentry/addRelationshipTrackedEntityInstanceForm.vm</param>
+			<param name="requiredAuthorities">F_RELATIONSHIP_ADD, F_TRACKED_ENTITY_INSTANCE_ADD</param>
 		</action>
 
 		<!-- Tabular report -->
@@ -891,123 +891,11 @@
 			<param name="requiredAuthorities">F_GENERATE_BENEFICIARY_TABULAR_REPORT</param>
 		</action>
 
-		<action name="validateTabularReport"
-			class="org.hisp.dhis.caseentry.action.report.ValidateTabularReportAction">
-			<result name="success" type="velocity-json">
-				/dhis-web-commons/ajax/jsonResponseSuccess.vm
-			</result>
-			<result name="input" type="velocity-json">
-				/dhis-web-commons/ajax/jsonResponseInput.vm
-			</result>
-			<param name="requiredAuthorities">F_GENERATE_BENEFICIARY_TABULAR_REPORT</param>
-		</action>
-
-		<action name="saveTabularReport"
-			class="org.hisp.dhis.caseentry.action.report.SaveTabularReportAction">
-			<result name="success" type="velocity-json">
-				/dhis-web-commons/ajax/jsonResponseSuccess.vm
-			</result>
-			<param name="anyAuthorities">F_PATIENT_TABULAR_REPORT_PUBLIC_ADD,F_PATIENT_TABULAR_REPORT_PRIVATE_ADD</param>
-		</action>
-
-		<action name="getTabularReports"
-			class="org.hisp.dhis.caseentry.action.report.GetTabularReportsAction">
-			<result name="success" type="velocity-json">
-				/dhis-web-caseentry/jsonTabularReportList.vm
-			</result>
-			<param name="requiredAuthorities">F_GENERATE_BENEFICIARY_TABULAR_REPORT</param>
-		</action>
-
-		<action name="getTabularReport"
-			class="org.hisp.dhis.caseentry.action.report.GetTabularReportAction">
-			<result name="success" type="velocity-json">
-				/dhis-web-caseentry/jsonTabularReport.vm
-			</result>
-			<param name="requiredAuthorities">F_GENERATE_BENEFICIARY_TABULAR_REPORT</param>
-		</action>
-
-		<action name="updateTabularReportName"
-			class="org.hisp.dhis.caseentry.action.report.UpdateTabularReportNameAction">
-			<result name="success" type="velocity-json">
-				/dhis-web-commons/ajax/jsonResponseSuccess.vm
-			</result>
-			<param name="requiredAuthorities">F_GENERATE_BENEFICIARY_TABULAR_REPORT</param>
-		</action>
-
-		<action name="deleteTabularReport"
-			class="org.hisp.dhis.caseentry.action.report.DeleteTabularReportAction">
-			<result name="success" type="velocity-json">
-				/dhis-web-commons/ajax/jsonResponseSuccess.vm
-			</result>
-			<param name="requiredAuthorities">F_GENERATE_BENEFICIARY_TABULAR_REPORT</param>
-		</action>
-
-		<!-- Aggregate Report -->
-
-		<action name="getAggregateReportList"
-			class="org.hisp.dhis.caseentry.action.report.GetAggregateReportListAction">
-			<result name="success" type="velocity-json">
-				/dhis-web-caseentry/jsonTabularReportList.vm
-			</result>
-			<param name="requiredAuthorities">F_GENERATE_BENEFICIARY_TABULAR_REPORT</param>
-		</action>
-
-		<action name="saveAggregateReport"
-			class="org.hisp.dhis.caseentry.action.report.SaveAggregateReportAction">
-			<result name="success" type="velocity-json">
-				/dhis-web-commons/ajax/jsonResponseSuccess.vm
-			</result>
-			<param name="anyAuthorities">F_PATIENT_AGGREGATE_REPORT_PUBLIC_ADD,F_PATIENT_AGGREGATE_REPORT_PRIVATE_ADD</param>
-		</action>
-
-		<action name="getAggregateReports"
-			class="org.hisp.dhis.caseentry.action.report.GetAggregateReportsAction">
-			<result name="success" type="velocity-json">
-				/dhis-web-caseentry/jsonTabularReportList.vm
-			</result>
-			<param name="requiredAuthorities">F_GENERATE_BENEFICIARY_TABULAR_REPORT</param>
-		</action>
-
-		<action name="getAggregateReport"
-			class="org.hisp.dhis.caseentry.action.report.GetAggregateReportAction">
-			<result name="success" type="velocity-json">
-				/dhis-web-caseentry/jsonTabularAggregateReport.vm
-			</result>
-			<param name="requiredAuthorities">F_GENERATE_BENEFICIARY_TABULAR_REPORT</param>
-		</action>
-
-		<action name="updateAggregateReportName"
-			class="org.hisp.dhis.caseentry.action.report.UpdateAggregateReportNameAction">
-			<result name="success" type="velocity-json">
-				/dhis-web-commons/ajax/jsonResponseSuccess.vm
-			</result>
-			<param name="requiredAuthorities">F_GENERATE_BENEFICIARY_TABULAR_REPORT</param>
-		</action>
-
-		<action name="deleteAggregateReport"
-			class="org.hisp.dhis.caseentry.action.report.DeleteAggregateReportAction">
-			<result name="success" type="velocity-json">
-				/dhis-web-commons/ajax/jsonResponseSuccess.vm
-			</result>
-			<param name="requiredAuthorities">F_GENERATE_BENEFICIARY_TABULAR_REPORT</param>
-		</action>
-
 		<action name="getOrganisationUnitPathsByGroup"
 			class="org.hisp.dhis.caseentry.action.report.GetOrganisationUnitsByGroupAction">
 			<result name="success" type="velocity-json">
 				/dhis-web-caseentry/jsonminOrganisationUnitPaths.vm
 			</result>
-		</action>
-
-		<action name="validateAggregateReport"
-			class="org.hisp.dhis.caseentry.action.report.ValidateAggregateReportAction">
-			<result name="success" type="velocity-json">
-				/dhis-web-commons/ajax/jsonResponseSuccess.vm
-			</result>
-			<result name="input" type="velocity-json">
-				/dhis-web-commons/ajax/jsonResponseInput.vm
-			</result>
-			<param name="requiredAuthorities">F_GENERATE_BENEFICIARY_TABULAR_REPORT</param>
 		</action>
 
 		<!-- SMS Reminder -->
@@ -1022,15 +910,15 @@
 			<param name="javascripts">
 				../dhis-web-commons/ouwt/ouwt.js,
 				javascript/commons.js,
-				javascript/patient.js,
-				javascript/relationshipPatient.js,
+				javascript/trackedEntityInstance.js,
+				javascript/relationshipTrackedEntityInstance.js,
 				javascript/entry.js,
 				javascript/smsReminder.js
 			</param>
 			<param name="requiredAuthorities">F_PROGRAM_TRACKING_MANAGEMENT</param>
 		</action>
 
-		<action name="getSMSPatientRecords"
+		<action name="getSMSTrackedEntityInstanceRecords"
 			class="org.hisp.dhis.caseentry.action.caseentry.GetDataRecordsAction">
 			<result name="success" type="velocity">/content.vm</result>
 			<param name="page">/dhis-web-caseentry/programTrackingRecords.vm</param>
@@ -1086,10 +974,10 @@
 
 		<!-- Dashboard -->
 
-		<action name="patientDashboard"
-			class="org.hisp.dhis.caseentry.action.patient.PatientDashboardAction">
+		<action name="trackedEntityInstanceDashboard"
+			class="org.hisp.dhis.caseentry.action.trackedentity.TrackedEntityInstanceDashboardAction">
 			<result name="success" type="velocity">/content.vm</result>
-			<param name="page">/dhis-web-caseentry/patientDashboard.vm</param>
+			<param name="page">/dhis-web-caseentry/trackedEntityInstanceDashboard.vm</param>
 			<param name="stylesheets">style/style.css</param>
 			<param name="requiredAuthorities">F_PATIENT_DASHBOARD</param>
 		</action>
@@ -1107,15 +995,15 @@
 
 		<!-- Comment && Message -->
 
-		<action name="savePatientComment"
-			class="org.hisp.dhis.caseentry.action.reminder.SavePatientCommentAction">
+		<action name="saveTrackedEntityInstanceComment"
+			class="org.hisp.dhis.caseentry.action.reminder.SaveTrackedEntityCommentAction">
 			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm
 			</result>
 			<param name="requiredAuthorities">F_PATIENT_COMMENT_ADD</param>
 		</action>
 
-		<action name="removePatientComment"
-			class="org.hisp.dhis.caseentry.action.reminder.RemovePatientCommentAction">
+		<action name="removeTrackedEntityInstanceComment"
+			class="org.hisp.dhis.caseentry.action.reminder.RemoveTrackedEntityInstanceCommentAction">
 			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm
 			</result>
 			<param name="requiredAuthorities">F_PATIENT_COMMENT_DELETE</param>
@@ -1131,7 +1019,7 @@
 		<!-- Activity plan -->
 
 		<action name="activityPlanSelect"
-			class="org.hisp.dhis.caseentry.action.patient.ShowActivityPlanFormAction">
+			class="org.hisp.dhis.caseentry.action.trackedentity.ShowActivityPlanFormAction">
 			<interceptor-ref name="organisationUnitTreeStack" />
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-caseentry/activityPlanSelect.vm</param>
@@ -1140,9 +1028,9 @@
 			<param name="javascripts">
 				../dhis-web-commons/ouwt/ouwt.js,
 				javascript/commons.js,
-				javascript/patient.js,
+				javascript/trackedEntityInstance.js,
 				javascript/entry.js,
-				javascript/relationshipPatient.js,
+				javascript/relationshipTrackedEntityInstance.js,
 				javascript/activityPlan.js
 			</param>
 			<param name="requiredAuthorities">F_ACTIVITY_PLAN</param>
@@ -1157,30 +1045,17 @@
 			<result name="pdf" type="gridPdfResult" />
 		</action>
 
-		<action name="accessPatientAttributes" class="org.hisp.dhis.caseentry.action.NoAction">
+		<action name="accessAttributes" class="org.hisp.dhis.caseentry.action.NoAction">
 			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm
 			</result>
 			<param name="requiredAuthorities">F_ACCESS_PATIENT_ATTRIBUTES</param>
 		</action>
 
-		<action name="allowEditPatientFixedAttributes" class="org.hisp.dhis.caseentry.action.NoAction">
-			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm
-			</result>
-			<param name="requiredAuthorities">F_ALLOW_EDIT_PATIENT_PROPERTIES</param>
-		</action>
-
-		<action name="allowEditPatientAttributes" class="org.hisp.dhis.caseentry.action.NoAction">
+		<action name="allowEditAttributes" class="org.hisp.dhis.caseentry.action.NoAction">
 			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm
 			</result>
 			<param name="requiredAuthorities">F_ALLOW_EDIT_PATIENT_ATTRIBUTES</param>
 		</action>
-
-		<action name="allowEditPatientIdentifier" class="org.hisp.dhis.caseentry.action.NoAction">
-			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm
-			</result>
-			<param name="requiredAuthorities">F_ALLOW_EDIT_PATIENT_IDENTIFIERS</param>
-		</action>
-
 
 		<!-- Program-stage-completeness -->
 

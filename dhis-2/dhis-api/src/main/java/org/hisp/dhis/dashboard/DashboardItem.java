@@ -39,7 +39,6 @@ import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.document.Document;
 import org.hisp.dhis.mapping.Map;
-import org.hisp.dhis.patientreport.PatientTabularReport;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.user.User;
@@ -70,7 +69,6 @@ public class DashboardItem
     public static final String TYPE_REPORT_TABLES = "reportTables";
     public static final String TYPE_REPORTS = "reports";
     public static final String TYPE_RESOURCES = "resources";
-    public static final String TYPE_PATIENT_TABULAR_REPORTS = "patientTabularReports";
     public static final String TYPE_MESSAGES = "messages";
 
     private Chart chart;
@@ -86,8 +84,6 @@ public class DashboardItem
     private List<Report> reports = new ArrayList<Report>();
 
     private List<Document> resources = new ArrayList<Document>();
-
-    private List<PatientTabularReport> patientTabularReports = new ArrayList<PatientTabularReport>();
 
     private Boolean messages;
     
@@ -141,10 +137,6 @@ public class DashboardItem
         {
             return TYPE_RESOURCES;
         }
-        else if ( !patientTabularReports.isEmpty() )
-        {
-            return TYPE_PATIENT_TABULAR_REPORTS;
-        }
         else if ( messages != null )
         {
             return TYPE_MESSAGES;
@@ -197,10 +189,6 @@ public class DashboardItem
         {
             return resources;
         }
-        else if ( !patientTabularReports.isEmpty() )
-        {
-            return patientTabularReports;
-        }
         
         return null;
     }
@@ -217,7 +205,6 @@ public class DashboardItem
         count += reportTables.size();
         count += reports.size();
         count += resources.size();
-        count += patientTabularReports.size();
         count += messages != null ? 1 : 0;
         return count;
     }
@@ -243,13 +230,9 @@ public class DashboardItem
         {
             return removeContent( uid, reports );
         }
-        else if ( !resources.isEmpty() )
-        {
-            return removeContent( uid, resources );
-        }
         else
         {
-            return removeContent( uid, patientTabularReports );
+            return removeContent( uid, resources );
         }
     }
 
@@ -375,21 +358,6 @@ public class DashboardItem
         this.resources = resources;
     }
 
-    @JsonProperty( value = "patientTabularReports" )
-    @JsonView( { DetailedView.class } )
-    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JacksonXmlElementWrapper( localName = "patientTabularReports", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "patientTabularReport", namespace = DxfNamespaces.DXF_2_0 )
-    public List<PatientTabularReport> getPatientTabularReports()
-    {
-        return patientTabularReports;
-    }
-
-    public void setPatientTabularReports( List<PatientTabularReport> patientTabularReports )
-    {
-        this.patientTabularReports = patientTabularReports;
-    }
-
     @JsonProperty
     @JsonView( { DetailedView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
@@ -423,7 +391,6 @@ public class DashboardItem
             reportTables = item.getReportTables() == null ? reportTables : item.getReportTables();
             reports = item.getReports() == null ? reports : item.getReports();
             resources = item.getResources() == null ? resources : item.getResources();
-            patientTabularReports = item.getPatientTabularReports() == null ? patientTabularReports : item.getPatientTabularReports();
             messages = item.getMessages() == null ? messages : item.getMessages();
         }
     }

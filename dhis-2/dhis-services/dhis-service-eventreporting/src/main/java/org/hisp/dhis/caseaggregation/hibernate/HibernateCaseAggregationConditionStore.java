@@ -29,8 +29,8 @@ package org.hisp.dhis.caseaggregation.hibernate;
  */
 
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_ORGUNIT_COMPLETE_PROGRAM_STAGE;
-import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PATIENT_ATTRIBUTE;
-import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PATIENT_PROGRAM_STAGE_PROPERTY;
+import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_TRACKED_ENTITY_ATTRIBUTE;
+import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_TRACKED_ENTITY_PROGRAM_STAGE_PROPERTY;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PROGRAM;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PROGRAM_PROPERTY;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PROGRAM_STAGE;
@@ -89,11 +89,15 @@ public class HibernateCaseAggregationConditionStore
     implements CaseAggregationConditionStore
 {
     private static final String IS_NULL = "is null";
+
     private static final String IN_CONDITION_GET_ALL = "*";
+
     private static final String IN_CONDITION_START_SIGN = "@";
+
     private static final String IN_CONDITION_END_SIGN = "#";
+
     private static final String IN_CONDITION_COUNT_X_TIMES = "COUNT";
-    
+
     public static final String STORED_BY_DHIS_SYSTEM = "DHIS-System";
 
     // -------------------------------------------------------------------------
@@ -260,12 +264,13 @@ public class HibernateCaseAggregationConditionStore
         Collection<Integer> orgunitIds, Period period )
     {
         String sql = "SELECT '" + aggregateDeId + "' as dataelementid, '" + optionComboId
-            + "' as categoryoptioncomboid, ou.organisationunitid as sourceid, '" + period.getId() + "' as periodid,'"
+            + "' as categoryoptioncomboid, '" + optionComboId
+            + "' as attributeoptioncomboid, ou.organisationunitid as sourceid, '" + period.getId() + "' as periodid,'"
             + CaseAggregationCondition.AUTO_STORED_BY + "' as comment, ";
 
         if ( isInsert )
         {
-            sql = "INSERT INTO datavalue (dataelementid, categoryoptioncomboid, sourceid, periodid, comment, value) "
+            sql = "INSERT INTO datavalue (dataelementid, categoryoptioncomboid, attributeoptioncomboid, sourceid, periodid, comment, value) "
                 + sql;
         }
         else
@@ -287,27 +292,27 @@ public class HibernateCaseAggregationConditionStore
             {
                 if ( operator.equals( CaseAggregationCondition.AGGRERATION_COUNT ) )
                 {
-                    sql += " count (distinct(pi.patientid) ) as value ";
+                    sql += " count(distinct(pi.trackedentityinstanceid)) as value ";
                 }
                 else
                 {
-                    sql += " count (psi.programinstanceid ) as value ";
+                    sql += " count(psi.programinstanceid) as value ";
                 }
 
                 sql += "FROM ";
                 boolean hasDataelement = hasDataelementCriteria( caseExpression );
-                boolean hasPatient = hasPatientCriteria( caseExpression );
-                
-                if ( hasPatient && hasDataelement )
+                boolean hasEntityInstance = hasEntityInstanceCriteria( caseExpression );
+
+                if ( hasEntityInstance && hasDataelement )
                 {
                     sql += " programinstance as pi ";
-                    sql += " INNER JOIN patient p on p.patientid=pi.patientid ";
+                    sql += " INNER JOIN trackedentityinstance p on p.trackedentityinstanceid=pi.trackedentityinstanceid ";
                     sql += " INNER JOIN programstageinstance psi ON pi.programinstanceid=psi.programinstanceid ";
                     sql += " INNER JOIN organisationunit ou ON ou.organisationunitid=psi.organisationunitid ";
                 }
-                else if ( hasPatient )
+                else if ( hasEntityInstance )
                 {
-                    sql += " programinstance as pi INNER JOIN patient p on p.patientid=pi.patientid ";
+                    sql += " programinstance as pi INNER JOIN trackedentityinstance p on p.trackedentityinstanceid=pi.trackedentityinstanceid ";
                     sql += " INNER JOIN organisationunit ou ON ou.organisationunitid=p.organisationunitid ";
                 }
                 else
@@ -328,7 +333,7 @@ public class HibernateCaseAggregationConditionStore
         else
         {
             sql += " " + operator + "( cast( pdv.value as DOUBLE PRECISION ) ) ";
-            sql += "FROM patientdatavalue pdv ";
+            sql += "FROM trackedentitydatavalue pdv ";
             sql += "    INNER JOIN programstageinstance psi  ";
             sql += "            ON psi.programstageinstanceid = pdv.programstageinstanceid ";
             sql += "    INNER JOIN organisationunit ou ";
@@ -350,7 +355,7 @@ public class HibernateCaseAggregationConditionStore
         }
 
         sql = sql.replaceAll( "COMBINE", "" );
-        
+
         return sql;
     }
 
@@ -497,14 +502,14 @@ public class HibernateCaseAggregationConditionStore
             match = match.replaceAll( "[\\[\\]]", "" );
 
             String[] info = match.split( SEPARATOR_OBJECT );
-            if ( info[0].equalsIgnoreCase( OBJECT_PATIENT_ATTRIBUTE ) )
+            if ( info[0].equalsIgnoreCase( OBJECT_TRACKED_ENTITY_ATTRIBUTE ) )
             {
                 String attributeId = info[1];
 
                 String compareValue = expression[index].replace( "[" + match + "]", "" ).trim();
 
                 boolean isExist = compareValue.equals( IS_NULL ) ? false : true;
-                condition = getConditionForPatientAttribute( attributeId, orgunitIds, isExist );
+                condition = getConditionForTrackedEntityAttribute( attributeId, orgunitIds, isExist );
             }
             else if ( info[0].equalsIgnoreCase( OBJECT_PROGRAM_STAGE_DATAELEMENT ) )
             {
@@ -550,9 +555,9 @@ public class HibernateCaseAggregationConditionStore
             {
                 condition = getConditionForProgramStageProperty( info[1], operator, orgunitIds, startDate, endDate );
             }
-            else if ( info[0].equalsIgnoreCase( OBJECT_PATIENT_PROGRAM_STAGE_PROPERTY ) )
+            else if ( info[0].equalsIgnoreCase( OBJECT_TRACKED_ENTITY_PROGRAM_STAGE_PROPERTY ) )
             {
-                condition = getConditionForPatientProgramStageProperty( info[1], operator, startDate, endDate );
+                condition = getConditionForTrackedEntityProgramStageProperty( info[1], operator, startDate, endDate );
             }
             else if ( info[0].equalsIgnoreCase( OBJECT_ORGUNIT_COMPLETE_PROGRAM_STAGE ) )
             {
@@ -605,7 +610,7 @@ public class HibernateCaseAggregationConditionStore
         String keyExist = (isExist == true) ? "EXISTS" : "NOT EXISTS";
 
         String sql = " " + keyExist + " ( SELECT * "
-            + "FROM patientdatavalue _pdv inner join programstageinstance _psi "
+            + "FROM trackedentitydatavalue _pdv inner join programstageinstance _psi "
             + "ON _pdv.programstageinstanceid=_psi.programstageinstanceid JOIN programinstance _pi "
             + "ON _pi.programinstanceid=_psi.programinstanceid "
             + "WHERE psi.programstageinstanceid=_pdv.programstageinstanceid AND _pdv.dataelementid=" + dataElementId
@@ -635,26 +640,33 @@ public class HibernateCaseAggregationConditionStore
     }
 
     /**
-     * Return standard SQL of a dynamic patient-attribute expression. E.g [CA:1]
-     * OR [CA:1.age]
+     * Return standard SQL of a dynamic tracked-entity-attribute expression. E.g
+     * [CA:1] OR [CA:1.age]
      * 
      */
-    private String getConditionForPatientAttribute( String attributeId, Collection<Integer> orgunitIds, boolean isExist )
+    private String getConditionForTrackedEntityAttribute( String attributeId, Collection<Integer> orgunitIds,
+        boolean isExist )
     {
-        String sql = " EXISTS ( SELECT * FROM patientattributevalue _pav " + " WHERE _pav.patientid=pi.patientid ";
+        String sql = "  SELECT * FROM trackedentityattributevalue _pav "
+            + " WHERE _pav.trackedentityinstanceid=pi.trackedentityinstanceid ";
 
         if ( attributeId.split( SEPARATOR_ID ).length == 2 )
         {
-            sql += " AND _pav.patientattributeid=" + attributeId.split( "\\." )[0]
-                + " AND DATE(now) - DATE( _pav.value ) ";
-        }
-        if ( isExist )
-        {
-            sql += " AND _pav.patientattributeid=" + attributeId + " AND _pav.value ";
+            attributeId = attributeId.split( SEPARATOR_ID )[0];
+            sql += " AND _pav.trackedentityattributeid=" + attributeId + " AND DATE(now()) - DATE( _pav.value ) ";
         }
         else
         {
-            sql = " NOT " + sql;
+            sql += " AND _pav.trackedentityattributeid=" + attributeId + " AND _pav.value ";
+        }
+
+        if ( isExist )
+        {
+            sql = " EXISTS ( " + sql;
+        }
+        else
+        {
+            sql = " NOT ( " + sql;
         }
 
         return sql;
@@ -665,8 +677,8 @@ public class HibernateCaseAggregationConditionStore
      * [PC:executionDate]
      * 
      */
-    private String getConditionForPatientProgramStageProperty( String propertyName, String operator, String startDate,
-        String endDate )
+    private String getConditionForTrackedEntityProgramStageProperty( String propertyName, String operator,
+        String startDate, String endDate )
     {
         String sql = " EXISTS ( SELECT _psi.programstageinstanceid from programstageinstance _psi "
             + "WHERE _psi.programstageinstanceid=psi.programstageinstanceid AND ( _psi.executionDate BETWEEN '"
@@ -703,14 +715,12 @@ public class HibernateCaseAggregationConditionStore
     private String getConditionForProgram( String programId, String operator, Collection<Integer> orgunitIds,
         String startDate, String endDate )
     {
-        String sql = " EXISTS ( SELECT * FROM programinstance as _pi inner join patient _p on _p.patientid=_pi.patientid "
-            + "WHERE _pi.patientid=pi.patientid AND _pi.programid="
+        String sql = " EXISTS ( SELECT * FROM programinstance as _pi inner join trackedentityinstance _p on _p.trackedentityinstanceid=_pi.trackedentityinstanceid "
+            + "WHERE _pi.trackedentityinstanceid=pi.trackedentityinstanceid AND _pi.programid="
             + programId
             + " AND _p.organisationunitid in ("
             + TextUtils.getCommaDelimitedString( orgunitIds )
-            + ") AND _pi.enrollmentdate >= '"
-            + startDate
-            + "' AND _pi.enrollmentdate <= '" + endDate + "' ";
+            + ") AND _pi.enrollmentdate >= '" + startDate + "' AND _pi.enrollmentdate <= '" + endDate + "' ";
 
         return sql;
     }
@@ -795,7 +805,7 @@ public class HibernateCaseAggregationConditionStore
     private String getConditionForMinusDataElement( Collection<Integer> orgunitIds, Integer programStageId,
         Integer dataElementId, String compareSide, String startDate, String endDate )
     {
-        return " EXISTS ( SELECT _pdv.value FROM patientdatavalue _pdv inner join programstageinstance _psi "
+        return " EXISTS ( SELECT _pdv.value FROM trackedentitydatavalue _pdv inner join programstageinstance _psi "
             + "                         ON _pdv.programstageinstanceid=_psi.programstageinstanceid "
             + "                 JOIN programinstance _pi ON _pi.programinstanceid=_psi.programinstanceid "
             + "           WHERE psi.programstageinstanceid=_pdv.programstageinstanceid "
@@ -810,7 +820,7 @@ public class HibernateCaseAggregationConditionStore
         String dataElementId1, String programStageId2, String dataElementId2, String compareSide, String startDate,
         String endDate )
     {
-        return " EXISTS ( SELECT * FROM ( SELECT _pdv.value FROM patientdatavalue _pdv "
+        return " EXISTS ( SELECT * FROM ( SELECT _pdv.value FROM trackedentitydatavalue _pdv "
             + "                 INNER JOIN programstageinstance _psi ON _pdv.programstageinstanceid=_psi.programstageinstanceid "
             + "                 JOIN programinstance _pi ON _pi.programinstanceid=_psi.programinstanceid "
             + "           WHERE psi.programstageinstanceid=_pdv.programstageinstanceid AND _pdv.dataelementid= "
@@ -826,7 +836,7 @@ public class HibernateCaseAggregationConditionStore
             + "                 AND _psi.executionDate <= '"
             + endDate
             + "' ) AS d1 cross join "
-            + "         (  SELECT _pdv.value FROM patientdatavalue _pdv INNER JOIN programstageinstance _psi "
+            + "         (  SELECT _pdv.value FROM trackedentitydatavalue _pdv INNER JOIN programstageinstance _psi "
             + "                        ON _pdv.programstageinstanceid=_psi.programstageinstanceid "
             + "                  JOIN programinstance _pi ON _pi.programinstanceid=_psi.programinstanceid "
             + "           WHERE psi.programstageinstanceid=_pdv.programstageinstanceid and _pdv.dataelementid= "
@@ -845,13 +855,13 @@ public class HibernateCaseAggregationConditionStore
     }
 
     /**
-     * Return the Ids of organisation units which patients registered or events
-     * happened.
+     * Return the Ids of organisation units which entity instances registered or
+     * events happened.
      * 
      */
     private Collection<Integer> getServiceOrgunit()
     {
-        String sql = "(select distinct organisationunitid from patient)";
+        String sql = "(select distinct organisationunitid from trackedentityinstance)";
         sql += " UNION ";
         sql += "(select distinct organisationunitid from programstageinstance where organisationunitid is not null)";
 
@@ -872,7 +882,7 @@ public class HibernateCaseAggregationConditionStore
     {
         String sql = "SELECT ";
 
-        boolean hasPatients = hasPatientCriteria( caseExpression );
+        boolean hasEntityInstances = hasEntityInstanceCriteria( caseExpression );
         boolean hasDataelement = hasDataelementCriteria( caseExpression );
 
         Collection<Integer> orgunitIds = new HashSet<Integer>();
@@ -887,7 +897,7 @@ public class HibernateCaseAggregationConditionStore
         }
         else
         {
-            if ( hasPatients || operator.equals( CaseAggregationCondition.AGGRERATION_COUNT ) )
+            if ( hasEntityInstances || operator.equals( CaseAggregationCondition.AGGRERATION_COUNT ) )
             {
                 sql += "p.name,";
             }
@@ -903,16 +913,16 @@ public class HibernateCaseAggregationConditionStore
 
         if ( hasDataelement )
         {
-            sql += " programinstance as pi INNER JOIN patient p on p.patientid=pi.patientid";
+            sql += " programinstance as pi INNER JOIN trackedentityinstance p on p.trackedentityinstanceid=pi.trackedentityinstanceid";
             sql += " INNER JOIN programstageinstance psi ON pi.programinstanceid=psi.programinstanceid ";
             sql += " INNER JOIN organisationunit ou ON ou.organisationunitid=psi.organisationunitid ";
-            sql += " INNER JOIN patientdatavalue pdv ON pdv.programstageinstanceid=psi.programstageinstanceid ";
+            sql += " INNER JOIN trackedentitydatavalue pdv ON pdv.programstageinstanceid=psi.programstageinstanceid ";
             sql += " INNER JOIN program pg ON pg.programid=pi.programid ";
             sql += " INNER JOIN programstage pgs ON pgs.programid=pg.programid ";
         }
         else
         {
-            sql += " programinstance as pi INNER JOIN patient p on p.patientid=pi.patientid";
+            sql += " programinstance as pi INNER JOIN trackedentityinstance p on p.trackedentityinstanceid=pi.trackedentityinstanceid";
             sql += " INNER JOIN organisationunit ou ON ou.organisationunitid=p.organisationunitid ";
         }
 
@@ -930,7 +940,7 @@ public class HibernateCaseAggregationConditionStore
     {
         try
         {
-            List<Integer> patientIds = jdbcTemplate.query( sql, new RowMapper<Integer>()
+            List<Integer> entityInstanceIds = jdbcTemplate.query( sql, new RowMapper<Integer>()
             {
                 public Integer mapRow( ResultSet rs, int rowNum )
                     throws SQLException
@@ -939,7 +949,7 @@ public class HibernateCaseAggregationConditionStore
                 }
             } );
 
-            return patientIds;
+            return entityInstanceIds;
         }
         catch ( Exception ex )
         {
@@ -1034,7 +1044,7 @@ public class HibernateCaseAggregationConditionStore
         return false;
     }
 
-    private boolean hasPatientCriteria( String expresstion )
+    private boolean hasEntityInstanceCriteria( String expresstion )
     {
         Pattern pattern = Pattern.compile( CaseAggregationCondition.regExp );
         Matcher matcher = pattern.matcher( expresstion );
@@ -1046,7 +1056,7 @@ public class HibernateCaseAggregationConditionStore
 
             String[] info = match.split( SEPARATOR_OBJECT );
 
-            if ( info[0].equalsIgnoreCase( CaseAggregationCondition.OBJECT_PATIENT_ATTRIBUTE ) )
+            if ( info[0].equalsIgnoreCase( CaseAggregationCondition.OBJECT_TRACKED_ENTITY_ATTRIBUTE ) )
             {
                 return true;
             }
@@ -1069,7 +1079,7 @@ public class HibernateCaseAggregationConditionStore
             if ( info[0].equalsIgnoreCase( CaseAggregationCondition.OBJECT_PROGRAM_STAGE_DATAELEMENT )
                 || info[0].equalsIgnoreCase( CaseAggregationCondition.OBJECT_PROGRAM_STAGE )
                 || info[0].equalsIgnoreCase( CaseAggregationCondition.OBJECT_PROGRAM_STAGE_PROPERTY )
-                || info[0].equalsIgnoreCase( CaseAggregationCondition.OBJECT_PATIENT_PROGRAM_STAGE_PROPERTY )
+                || info[0].equalsIgnoreCase( CaseAggregationCondition.OBJECT_TRACKED_ENTITY_PROGRAM_STAGE_PROPERTY )
                 || info[0].equalsIgnoreCase( CaseAggregationCondition.OBJECT_ORGUNIT_COMPLETE_PROGRAM_STAGE ) )
             {
                 return true;

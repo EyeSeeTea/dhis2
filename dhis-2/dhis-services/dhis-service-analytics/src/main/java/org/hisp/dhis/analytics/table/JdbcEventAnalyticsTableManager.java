@@ -41,13 +41,14 @@ import java.util.concurrent.Future;
 import org.hisp.dhis.analytics.AnalyticsTable;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
-import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.MathUtils;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
@@ -96,7 +97,7 @@ public class JdbcEventAnalyticsTableManager
 
     public boolean validState()
     {
-        return jdbcTemplate.queryForRowSet( "select dataelementid from patientdatavalue limit 1" ).next();
+        return jdbcTemplate.queryForRowSet( "select dataelementid from trackedentitydatavalue limit 1" ).next();
     }
 
     public String getTableName()
@@ -164,7 +165,7 @@ public class JdbcEventAnalyticsTableManager
                 + "left join programinstance pi on psi.programinstanceid=pi.programinstanceid "
                 + "left join programstage ps on psi.programstageid=ps.programstageid "
                 + "left join program pr on pi.programid=pr.programid "
-                + "left join patient pa on pi.patientid=pa.patientid "
+                + "left join trackedentityinstance pa on pi.trackedentityinstanceid=pa.trackedentityinstanceid "
                 + "left join organisationunit ou on psi.organisationunitid=ou.organisationunitid "
                 + "left join _orgunitstructure ous on psi.organisationunitid=ous.organisationunitid "
                 + "left join _dateperiodstructure dps on psi.executiondate=dps.dateperiod "
@@ -204,7 +205,7 @@ public class JdbcEventAnalyticsTableManager
         for ( PeriodType periodType : periodTypes )
         {
             String column = quote( periodType.getName().toLowerCase() );
-            String[] col = { column, "character varying(10)", "dps." + column };
+            String[] col = { column, "character varying(15)", "dps." + column };
             columns.add( col );
         }
 
@@ -214,7 +215,7 @@ public class JdbcEventAnalyticsTableManager
             String dataClause = dataElement.isNumericType() ? numericClause : "";
             String select = dataElement.isNumericType() ? doubleSelect : "value";
 
-            String sql = "(select " + select + " from patientdatavalue where programstageinstanceid="
+            String sql = "(select " + select + " from trackedentitydatavalue where programstageinstanceid="
                 + "psi.programstageinstanceid and dataelementid=" + dataElement.getId() + dataClause + ") as "
                 + quote( dataElement.getUid() );
 
@@ -222,27 +223,28 @@ public class JdbcEventAnalyticsTableManager
             columns.add( col );
         }
 
-        for ( PatientAttribute attribute : table.getProgram().getAttributes() )
+        for ( ProgramTrackedEntityAttribute programAttribute : table.getProgram().getAttributes() )
         {
+            TrackedEntityAttribute attribute = programAttribute.getAttribute();
             String dataType = attribute.isNumericType() ? dbl : text;
             String dataClause = attribute.isNumericType() ? numericClause : "";
             String select = attribute.isNumericType() ? doubleSelect : "value";
 
-            String sql = "(select " + select + " from patientattributevalue where patientid=pi.patientid and "
-                + "patientattributeid=" + attribute.getId() + dataClause + ") as " + quote( attribute.getUid() );
+            String sql = "(select " + select + " from trackedentityattributevalue where trackedentityinstanceid=pi.trackedentityinstanceid and "
+                + "trackedentityattributeid=" + attribute.getId() + dataClause + ") as " + quote( attribute.getUid() );
 
             String[] col = { quote( attribute.getUid() ), dataType, sql };
             columns.add( col );
         }
 
-        String[] psi = { "psi", "character(11) not null", "psi.uid" };
-        String[] ps = { "ps", "character(11) not null", "ps.uid" };
-        String[] ed = { "executiondate", "timestamp", "psi.executiondate" };
-        String[] longitude = { "longitude", dbl, "psi.longitude" };
-        String[] latitude = { "latitude", dbl, "psi.latitude" };
-        String[] ou = { "ou", "character(11) not null", "ou.uid" };
-        String[] oun = { "ouname", "character varying(230) not null", "ou.name" };
-        String[] ouc = { "oucode", "character varying(50)", "ou.code" };
+        String[] psi = { quote( "psi" ), "character(11) not null", "psi.uid" };
+        String[] ps = { quote( "ps" ), "character(11) not null", "ps.uid" };
+        String[] ed = { quote( "executiondate" ), "timestamp", "psi.executiondate" };
+        String[] longitude = { quote( "longitude" ), dbl, "psi.longitude" };
+        String[] latitude = { quote( "latitude" ), dbl, "psi.latitude" };
+        String[] ou = { quote( "ou" ), "character(11) not null", "ou.uid" };
+        String[] oun = { quote( "ouname" ), "character varying(230) not null", "ou.name" };
+        String[] ouc = { quote( "oucode" ), "character varying(50)", "ou.code" };
 
         columns.addAll( Arrays.asList( psi, ps, ed, longitude, latitude, ou, oun, ouc ) );
 

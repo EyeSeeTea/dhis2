@@ -31,5 +31,6 @@
       <key column="categoryoptioncomboid" />
       <many-to-one name="categoryCombo" column="categorycomboid" />
     </join>
+
   </class>
 </hibernate-mapping>

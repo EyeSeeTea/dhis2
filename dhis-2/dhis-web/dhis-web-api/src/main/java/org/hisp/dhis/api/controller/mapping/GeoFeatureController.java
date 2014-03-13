@@ -32,6 +32,9 @@ import static org.hisp.dhis.util.ContextUtils.clearIfNotModified;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -44,11 +47,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.analytics.AnalyticsService;
 import org.hisp.dhis.analytics.DataQueryParams;
+import org.hisp.dhis.api.controller.WebOptions;
 import org.hisp.dhis.api.webdomain.GeoFeature;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.NameableObjectUtils;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.system.filter.OrganisationUnitWithValidCoordinatesFilter;
 import org.hisp.dhis.system.util.FilterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,10 +83,16 @@ public class GeoFeatureController
     @Autowired
     private AnalyticsService analyticsService;
     
+    @Autowired
+    private OrganisationUnitGroupService organisationUnitGroupService;
+    
     @RequestMapping( method = RequestMethod.GET, produces = "application/json" )
-    public void getGeoFeatures( @RequestParam String ou, 
+    public void getGeoFeatures( @RequestParam String ou, @RequestParam Map<String, String> parameters,
         HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
+        WebOptions options = new WebOptions( parameters );
+        boolean includeGroupSets = "detailed".equals( options.getViewClass() );
+        
         Set<String> set = new HashSet<String>();
         set.add( ou );
         
@@ -98,6 +111,8 @@ public class GeoFeatureController
             return;
         }
 
+        Collection<OrganisationUnitGroupSet> groupSets = includeGroupSets ? organisationUnitGroupService.getAllOrganisationUnitGroupSets() : null;
+        
         List<GeoFeature> features = new ArrayList<GeoFeature>();
         
         for ( OrganisationUnit unit : organisationUnits )
@@ -114,9 +129,36 @@ public class GeoFeatureController
             feature.setTy( FEATURE_TYPE_MAP.get( unit.getFeatureType() ) );
             feature.setCo( unit.getCoordinates() );
             
+            if ( includeGroupSets )
+            {
+                for ( OrganisationUnitGroupSet groupSet : groupSets )
+                {
+                    OrganisationUnitGroup group = unit.getGroupInGroupSet( groupSet );
+                    
+                    if ( group != null )
+                    {
+                        feature.getDimensions().put( groupSet.getUid(), group.getUid() );
+                    }
+                }
+            }
+            
             features.add( feature );
         }
         
+        Collections.sort( features, GeoFeatureTypeComparator.INSTANCE );
+        
         JacksonUtils.toJson( response.getOutputStream(), features );
+    }
+    
+    static class GeoFeatureTypeComparator
+        implements Comparator<GeoFeature>
+    {
+        public static final GeoFeatureTypeComparator INSTANCE = new GeoFeatureTypeComparator();
+        
+        @Override
+        public int compare( GeoFeature o1, GeoFeature o2 )
+        {
+            return Integer.valueOf( o1.getTy() ).compareTo( Integer.valueOf( o2.getTy() ) );
+        }        
     }
 }

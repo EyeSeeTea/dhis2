@@ -62,17 +62,6 @@
 
     <property name="zeroIsSignificant" not-null="true" />
 
-    <!-- Access properties -->
-    <many-to-one name="user" class="org.hisp.dhis.user.User" column="userid" foreign-key="fk_indicator_userid" />
-
-    <property name="publicAccess" length="8" />
-
-    <set name="userGroupAccesses" table="dataelementusergroupaccesses">
-      <cache usage="read-write" />
-      <key column="dataelementid" />
-      <many-to-many class="org.hisp.dhis.user.UserGroupAccess" column="usergroupaccessid" unique="true" />
-    </set>
-
     <!-- Dynamic attribute values -->
 
     <set name="attributeValues" table="dataelementattributevalues">
@@ -85,10 +74,21 @@
       foreign-key="fk_dataelement_optionsetid" />
 
     <many-to-one name="commentOptionSet" class="org.hisp.dhis.option.OptionSet" column="commentoptionsetid"
-      foreign-key="fk_dataelement_optionsetid" />
+      foreign-key="fk_dataelement_commentoptionsetid" />
 
     <many-to-one name="legendSet" class="org.hisp.dhis.mapping.MapLegendSet" column="legendsetid"
       foreign-key="fk_dataelement_legendset" />
+
+    <!-- Access properties -->
+    <many-to-one name="user" class="org.hisp.dhis.user.User" column="userid" foreign-key="fk_indicator_userid" />
+
+    <property name="publicAccess" length="8" />
+
+    <set name="userGroupAccesses" table="dataelementusergroupaccesses">
+      <cache usage="read-write" />
+      <key column="dataelementid" />
+      <many-to-many class="org.hisp.dhis.user.UserGroupAccess" column="usergroupaccessid" unique="true" />
+    </set>
 
   </class>
 </hibernate-mapping>

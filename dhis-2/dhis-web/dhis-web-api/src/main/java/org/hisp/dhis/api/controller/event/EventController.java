@@ -73,6 +73,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementService;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -104,6 +106,9 @@ public class EventController
 
     @Autowired
     private OrganisationUnitService organisationUnitService;
+    
+    @Autowired
+    private DataElementService dataElementService;
 
     // -------------------------------------------------------------------------
     // READ
@@ -115,7 +120,7 @@ public class EventController
         @RequestParam( value = "program", required = false ) String programUid,
         @RequestParam( value = "programStage", required = false ) String programStageUid,
         @RequestParam( value = "person", required = false ) String personUid,
-        @RequestParam( value = "orgUnit" ) String orgUnitUid,
+        @RequestParam( value = "orgUnit", required = false ) String orgUnitUid,
         @RequestParam( value = "includeChildren", required = false, defaultValue = "false" ) boolean includeChildren,
         @RequestParam( value = "includeDescendants", required = false, defaultValue = "false" ) boolean includeDescendants,
         @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date startDate,
@@ -150,6 +155,16 @@ public class EventController
             catch ( NumberFormatException ignored )
             {
             }
+        }
+
+        if ( rootOrganisationUnit == null && person != null )
+        {
+            Events events = eventService.getEvents( Arrays.asList( program ), Arrays.asList( programStage ), null, person, startDate, endDate );
+
+            model.addAttribute( "model", events );
+            model.addAttribute( "viewClass", options.getViewClass( "detailed" ) );
+
+            return "events";
         }
 
         if ( rootOrganisationUnit == null )
@@ -326,7 +341,7 @@ public class EventController
         Event updatedEvent = JacksonUtils.fromXml( request.getInputStream(), Event.class );
         updatedEvent.setEvent( uid );
 
-        eventService.updateEvent( updatedEvent );
+        eventService.updateEvent( updatedEvent, false );
         ContextUtils.okResponse( response, "Event updated: " + uid );
     }
 
@@ -345,8 +360,36 @@ public class EventController
         Event updatedEvent = JacksonUtils.fromJson( request.getInputStream(), Event.class );
         updatedEvent.setEvent( uid );
 
-        eventService.updateEvent( updatedEvent );
+        eventService.updateEvent( updatedEvent, false );
         ContextUtils.okResponse( response, "Event updated: " + uid );
+    }
+    
+    @RequestMapping( value = "/{uid}/{dataElementUid}", method = RequestMethod.PUT, consumes = "application/json" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_PATIENT_DATAVALUE_ADD')" )
+    public void putJsonEventSingleValue( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, @PathVariable( "dataElementUid" ) String dataElementUid ) throws IOException
+    {
+        Event event = eventService.getEvent( uid );
+
+        if ( event == null )
+        {
+            ContextUtils.notFoundResponse( response, "Event not found for uid: " + uid );
+            return;
+        }
+        
+        DataElement dataElement = dataElementService.getDataElement( dataElementUid );
+        
+        if( dataElement == null )
+        {
+            ContextUtils.notFoundResponse( response, "DataElement not found for uid: " + dataElementUid );
+            return;
+        }
+
+        Event updatedEvent = JacksonUtils.fromJson( request.getInputStream(), Event.class );
+        updatedEvent.setEvent( uid );
+
+        eventService.updateEvent( updatedEvent, true );
+        ContextUtils.okResponse( response, "Event updated: " + uid );        
+        
     }
 
     // -------------------------------------------------------------------------

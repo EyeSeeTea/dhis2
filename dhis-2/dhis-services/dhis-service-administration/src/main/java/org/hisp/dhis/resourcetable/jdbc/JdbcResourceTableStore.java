@@ -33,6 +33,7 @@ import java.util.List;
 import org.amplecode.quick.Statement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
@@ -40,6 +41,7 @@ import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.resourcetable.ResourceTableStore;
+import org.hisp.dhis.resourcetable.statement.CreateCategoryOptionGroupSetTableStatement;
 import org.hisp.dhis.resourcetable.statement.CreateCategoryTableStatement;
 import org.hisp.dhis.resourcetable.statement.CreateDataElementGroupSetTableStatement;
 import org.hisp.dhis.resourcetable.statement.CreateIndicatorGroupSetTableStatement;
@@ -152,6 +154,26 @@ public class JdbcResourceTableStore
         log.info( "Create category option combo name table SQL: " + sql );
         
         jdbcTemplate.execute( sql );
+    }
+
+    // -------------------------------------------------------------------------
+    // CategoryOptionGroupSetTable
+    // -------------------------------------------------------------------------
+
+    public void createCategoryOptionGroupSetStructure( List<CategoryOptionGroupSet> groupSets )
+    {
+        try
+        {
+            jdbcTemplate.execute( "DROP TABLE IF EXISTS " + CreateCategoryOptionGroupSetTableStatement.TABLE_NAME );
+        }
+        catch ( BadSqlGrammarException ex )
+        {
+            // Do nothing, table does not exist
+        }
+        
+        Statement statement = new CreateCategoryOptionGroupSetTableStatement( groupSets, statementBuilder.getColumnQuote() );
+        
+        jdbcTemplate.execute( statement.getStatement() );
     }
     
     // -------------------------------------------------------------------------
@@ -278,7 +300,7 @@ public class JdbcResourceTableStore
         
         for ( PeriodType periodType : PeriodType.PERIOD_TYPES )
         {
-            sql += ", " + quote + periodType.getName().toLowerCase() + quote + " VARCHAR(10)";
+            sql += ", " + quote + periodType.getName().toLowerCase() + quote + " VARCHAR(15)";
         }
         
         sql += ")";
@@ -301,11 +323,11 @@ public class JdbcResourceTableStore
 
         String quote = statementBuilder.getColumnQuote();
         
-        String sql = "CREATE TABLE " + TABLE_NAME_PERIOD_STRUCTURE + " (periodid INTEGER NOT NULL PRIMARY KEY, iso VARCHAR(10) NOT NULL, daysno INTEGER NOT NULL";
+        String sql = "CREATE TABLE " + TABLE_NAME_PERIOD_STRUCTURE + " (periodid INTEGER NOT NULL PRIMARY KEY, iso VARCHAR(15) NOT NULL, daysno INTEGER NOT NULL";
         
         for ( PeriodType periodType : PeriodType.PERIOD_TYPES )
         {
-            sql += ", " + quote + periodType.getName().toLowerCase() + quote + " VARCHAR(10)";
+            sql += ", " + quote + periodType.getName().toLowerCase() + quote + " VARCHAR(15)";
         }
         
         sql += ")";

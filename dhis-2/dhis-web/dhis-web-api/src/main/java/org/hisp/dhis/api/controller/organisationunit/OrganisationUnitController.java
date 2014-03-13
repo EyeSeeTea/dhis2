@@ -54,6 +54,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitByLevelComparator;
 import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -115,6 +116,23 @@ public class OrganisationUnitController
         if ( "true".equals( options.getOptions().get( "userOnly" ) ) )
         {
             entityList = new ArrayList<OrganisationUnit>( currentUserService.getCurrentUser().getOrganisationUnits() );
+        }
+        else if ( "true".equals( options.getOptions().get( "userDataViewOnly" ) ) )
+        {
+            entityList = new ArrayList<OrganisationUnit>( currentUserService.getCurrentUser().getDataViewOrganisationUnits() );
+        }
+        else if ( "true".equals( options.getOptions().get( "userDataViewFallback" ) ) )
+        {
+            User user = currentUserService.getCurrentUser();
+            
+            if ( user != null && user.hasDataViewOrganisationUnit() )
+            {
+                entityList = new ArrayList<OrganisationUnit>( user.getDataViewOrganisationUnits() );
+            }
+            else
+            {
+                entityList = new ArrayList<OrganisationUnit>( organisationUnitService.getOrganisationUnitsAtLevel( 1 ) );
+            }
         }
         else if ( lastUpdated != null )
         {
@@ -254,7 +272,6 @@ public class OrganisationUnitController
 
         return StringUtils.uncapitalize( getEntitySimpleName() );
     }
-    
     
     @RequestMapping(value = "/withinRange", method = RequestMethod.GET, produces = { "*/*", "application/json" })
     public void getEntitiesWithinRange( @RequestParam Double longitude, @RequestParam Double latitude, 

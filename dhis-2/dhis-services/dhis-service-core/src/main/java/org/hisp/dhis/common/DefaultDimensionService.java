@@ -29,6 +29,7 @@ package org.hisp.dhis.common;
  */
 
 import static org.hisp.dhis.common.DimensionType.CATEGORY;
+import static org.hisp.dhis.common.DimensionType.CATEGORYOPTION_GROUPSET;
 import static org.hisp.dhis.common.DimensionType.DATAELEMENT;
 import static org.hisp.dhis.common.DimensionType.DATAELEMENT_GROUPSET;
 import static org.hisp.dhis.common.DimensionType.DATAELEMENT_OPERAND;
@@ -50,6 +51,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
+import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryDimension;
@@ -128,8 +131,39 @@ public class DefaultDimensionService
         {
             return ougs;
         }
+
+        CategoryOptionGroupSet cogs = identifiableObjectManager.get( CategoryOptionGroupSet.class, uid );
+        
+        if ( cogs != null )
+        {
+            return cogs;
+        }
         
         return null;
+    }
+    
+    public List<NameableObject> getCanReadDimensionItems( String uid )
+    {
+        DimensionalObject dimension = getDimension( uid );
+        
+        List<NameableObject> items = new ArrayList<NameableObject>();
+        
+        if ( dimension != null && dimension.getItems() != null )
+        {
+            User user = currentUserService.getCurrentUser();
+            
+            for ( NameableObject item : dimension.getItems() )
+            {
+                boolean canRead = SharingUtils.canRead( user, item );
+                
+                if ( canRead )
+                {
+                    items.add( item );
+                }
+            }
+        }
+        
+        return items;
     }
     
     public DimensionType getDimensionType( String uid )
@@ -139,7 +173,7 @@ public class DefaultDimensionService
         if ( cat != null )
         {
             return DimensionType.CATEGORY;
-        }
+        }        
 
         DataElementGroupSet degs = identifiableObjectManager.get( DataElementGroupSet.class, uid );
         
@@ -153,6 +187,13 @@ public class DefaultDimensionService
         if ( ougs != null )
         {
             return DimensionType.ORGANISATIONUNIT_GROUPSET;
+        }
+
+        CategoryOptionGroupSet cogs = identifiableObjectManager.get( CategoryOptionGroupSet.class, uid );
+        
+        if ( cogs != null )
+        {
+            return DimensionType.CATEGORYOPTION_GROUPSET;
         }
         
         final Map<String, DimensionType> dimObjectTypeMap = new HashMap<String, DimensionType>();
@@ -172,12 +213,14 @@ public class DefaultDimensionService
     public List<DimensionalObject> getAllDimensions()
     {
         Collection<DataElementCategory> dcs = categoryService.getDataDimensionDataElementCategories();
+        Collection<CategoryOptionGroupSet> cogs = categoryService.getDataDimensionCategoryOptionGroupSets();
         Collection<DataElementGroupSet> degs = dataElementService.getDataDimensionDataElementGroupSets();
         Collection<OrganisationUnitGroupSet> ougs = organisationUnitGroupService.getDataDimensionOrganisationUnitGroupSets();
 
         final List<DimensionalObject> dimensions = new ArrayList<DimensionalObject>();
 
         dimensions.addAll( dcs );
+        dimensions.addAll( cogs );
         dimensions.addAll( degs );
         dimensions.addAll( ougs );
         
@@ -344,6 +387,10 @@ public class DefaultDimensionService
                 else if ( ORGANISATIONUNIT_GROUPSET.equals( type ) )
                 {
                     object.getOrganisationUnitGroups().addAll( identifiableObjectManager.getByUid( OrganisationUnitGroup.class, uids ) );
+                }
+                else if ( CATEGORYOPTION_GROUPSET.equals( type ) )
+                {
+                    object.getCategoryOptionGroups().addAll( identifiableObjectManager.getByUid( CategoryOptionGroup.class, uids ) );
                 }
             }
         }

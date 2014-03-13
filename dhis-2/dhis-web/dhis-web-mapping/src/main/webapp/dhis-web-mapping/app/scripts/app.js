@@ -1,7 +1,7 @@
 Ext.onReady( function() {
 	var createViewport,
-		initialize;
-		//gis;
+		initialize,
+		gis;
 
 	// set app config
 	(function() {
@@ -2521,8 +2521,8 @@ Ext.onReady( function() {
 								for (var k = 0, item; k < view.columns[j].items.length; k++) {
 									item = view.columns[j].items[k];
 
-									if (item.id.indexOf('-') !== -1) {
-										item.id = item.id.replace('-', '.');
+									if (item.id.indexOf('#') !== -1) {
+										item.id = item.id.replace('#', '.');
 									}
 								}
 							}
@@ -6538,7 +6538,7 @@ Ext.onReady( function() {
 							scope: this,
 							callback: function() {
 								this.each(function(r) {
-                                    r.set('id', r.data.id.split('.').join('-'));
+                                    r.set('id', r.data.id.split('#').join('.'));
 								});
 
 								this.sortStore();
@@ -6814,7 +6814,7 @@ Ext.onReady( function() {
 			listeners: {
 				select: function() {
 					var id = this.getValue(),
-						index = id.indexOf('-');
+						index = id.indexOf('#');
 
 					if (index !== -1) {
 						id = id.substr(0, index);
@@ -8520,7 +8520,8 @@ Ext.onReady( function() {
 			callbacks = 0,
 			init = {
 				user: {},
-				systemSettings: {}
+				systemSettings: {},
+				extensions: {}
 			},
 			fn;
 
@@ -8569,9 +8570,9 @@ Ext.onReady( function() {
 
 								// root nodes
 								requests.push({
-									url: init.contextPath + '/api/organisationUnits.json?level=1&paging=false&links=false&viewClass=detailed',
+									url: init.contextPath + '/api/organisationUnits/filtered.json?userDataViewFallback=true&include=id,name,children[id,name]',
 									success: function(r) {
-										init.rootNodes = Ext.decode(r.responseText).organisationUnits || [];
+										init.rootNodes = Ext.decode(r.responseText).objects || [];
 										fn();
 									}
 								});

@@ -120,6 +120,10 @@ public class TableAlteror
         executeSql( "DROP TABLE maplegendsetindicator" );
         executeSql( "DROP TABLE maplegendsetdataelement" );
         executeSql( "DROP TABLE loginfailure" );
+        executeSql( "DROP TABLE dashboarditem_trackedentitytabularreports" );
+        executeSql( "DROP TABLE categoryoptioncombousergroupaccesses" );
+        executeSql( "ALTER TABLE categoryoptioncombo drop column userid" );
+        executeSql( "ALTER TABLE categoryoptioncombo drop column publicaccess" );
         executeSql( "ALTER TABLE dataelementcategoryoption drop column categoryid" );
         executeSql( "ALTER TABLE reporttable DROP column paramleafparentorganisationunit" );
         executeSql( "ALTER TABLE reporttable DROP column dimension_type" );
@@ -133,6 +137,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE section DROP COLUMN label" );
         executeSql( "ALTER TABLE section DROP COLUMN title" );
         executeSql( "ALTER TABLE organisationunit DROP COLUMN polygoncoordinates" );
+        executeSql( "ALTER TABLE organisationunit DROP COLUMN geocode" );
         executeSql( "ALTER TABLE indicator DROP COLUMN extendeddataelementid" );
         executeSql( "ALTER TABLE indicator DROP COLUMN numeratoraggregationtype" );
         executeSql( "ALTER TABLE indicator DROP COLUMN denominatoraggregationtype" );
@@ -577,7 +582,6 @@ public class TableAlteror
         executeSql( "DELETE FROM userroleauthorities WHERE authority='F_ORGUNITGROUPSET_UPDATE'" );
         executeSql( "DELETE FROM userroleauthorities WHERE authority='F_USERROLE_UPDATE'" );
         executeSql( "DELETE FROM userroleauthorities WHERE authority='F_USERGROUP_UPDATE'" );
-        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_USER_UPDATE'" );
         executeSql( "DELETE FROM userroleauthorities WHERE authority='F_VALIDATIONRULE_UPDATE'" );
         executeSql( "DELETE FROM userroleauthorities WHERE authority='F_VALIDATIONRULEGROUP_UPDATE'" );
         executeSql( "DELETE FROM userroleauthorities WHERE authority='F_REPORT_UPDATE'" );
@@ -628,6 +632,9 @@ public class TableAlteror
         executeSql( "UPDATE dataelementgroupset SET userid=NULL WHERE userid IS NOT NULL" );
         executeSql( "UPDATE dataelementgroupset SET publicaccess=NULL WHERE userid IS NOT NULL" );
 
+        executeSql( "ALTER TABLE dataelementcategory DROP COLUMN conceptid" );
+        executeSql( "ALTER TABLE dataelementcategoryoption DROP COLUMN conceptid" );
+        
         // upgrade system charts/maps to public read-only sharing
         executeSql( "UPDATE chart SET publicaccess='r-------' WHERE user IS NULL AND publicaccess IS NULL;" );
         executeSql( "UPDATE map SET publicaccess='r-------' WHERE user IS NULL AND publicaccess IS NULL;" );

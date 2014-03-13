@@ -65,18 +65,6 @@
       <name>UK Central</name>
       <url>http://uk.maven.org/maven2</url>
     </repository>
-    <!-- 
-    <repository>
-      <id>org.springframework.maven.release</id>
-      <name>Spring Maven Repository</name>
-      <url>http://maven.springframework.org/release</url>
-    </repository>
-    <repository>
-      <id>org.springframework.maven.milestone</id>
-      <name>Spring Maven Milestone Repository</name>
-      <url>http://maven.springframework.org/milestone</url>
-    </repository>
-    -->
     <repository>
       <id>amplecode_maven2_repo</id>
       <name>AmpleCode Maven 2 repository</name>
@@ -88,26 +76,15 @@
       <url>http://download.osgeo.org/webdav/geotools/</url>
     </repository>
     <repository>
+      <id>freehep</id>
+      <name>FreeHEP</name>
+      <url>http://java.freehep.org/maven2</url>
+    </repository>
+    <repository>
       <id>dhis.uio.no</id>
       <name>Dhis2 External Dependencies Repository</name>
       <url>http://dhis.uio.no/maven/external</url>
     </repository>
-    <!--
-    <repository>
-      <id>jboss-public-repository-group</id>
-      <name>JBoss Public Repository Group</name>
-      <url>http://repository.jboss.org/nexus/content/groups/public/</url>
-      <layout>default</layout>
-      <releases>
-      <enabled>true</enabled>
-      <updatePolicy>never</updatePolicy>
-      </releases>
-      <snapshots>
-      <enabled>true</enabled>
-      <updatePolicy>never</updatePolicy>
-      </snapshots>
-    </repository>
-    -->
   </repositories>
 
   <issueManagement>
@@ -322,7 +299,7 @@
       </dependency>
       <dependency>
         <groupId>org.hisp.dhis</groupId>
-        <artifactId>dhis-service-patient</artifactId>
+        <artifactId>dhis-service-tracker</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -512,12 +489,19 @@
         <artifactId>spring-security-config</artifactId>
         <version>${spring.security.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-openid</artifactId>
+        <version>${spring.security.version}</version>
+      </dependency>
+
       <!-- Spring Mobile -->
       <dependency>
         <groupId>org.springframework.mobile</groupId>
         <artifactId>spring-mobile-device</artifactId>
         <version>1.0.2.RELEASE</version>
       </dependency>
+
       <!--Other -->
       <dependency>
         <groupId>org.apache.struts</groupId>
@@ -566,9 +550,9 @@
         <version>1.4.3</version>
       </dependency>
       <dependency>
-        <groupId>jep</groupId>
+        <groupId>org.nfunk</groupId>
         <artifactId>jep</artifactId>
-        <version>2.24</version>
+        <version>2.4.0</version>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
@@ -970,7 +954,13 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>14.0.1</version>
+        <version>16.0.1</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.openid4java</groupId>
+          <artifactId>openid4java</artifactId>
+          <version>0.9.7</version>
       </dependency>
 
     </dependencies>

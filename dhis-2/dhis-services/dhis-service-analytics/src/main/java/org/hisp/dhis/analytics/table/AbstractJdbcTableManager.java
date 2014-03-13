@@ -41,6 +41,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.AnalyticsIndex;
 import org.hisp.dhis.analytics.AnalyticsTable;
 import org.hisp.dhis.analytics.AnalyticsTableManager;
+import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.jdbc.StatementBuilder;
@@ -94,7 +95,7 @@ public abstract class AbstractJdbcTableManager
      * third column holds a table alias and name. Column names are quoted.
      * 
      * <ul>
-     * <li>0 = database column name</li>
+     * <li>0 = database column name (quoted)</li>
      * <li>1 = database column data type</li>
      * <li>2 = column alias and name</li>
      * </ul>
@@ -154,7 +155,7 @@ public abstract class AbstractJdbcTableManager
                 break taskLoop;
             }
             
-            final String indexName = quote( PREFIX_INDEX + removeQuote( inx.getColumn() ) + "_" + inx.getTable() );
+            final String indexName = getIndexName( inx );
             
             final String sql = "create index " + indexName + " on " + inx.getTable() + " (" + inx.getColumn() + ")";
             
@@ -248,6 +249,23 @@ public abstract class AbstractJdbcTableManager
     protected String removeQuote( String column )
     {
         return column != null ? column.replaceAll( statementBuilder.getColumnQuote(), StringUtils.EMPTY ) : null;
+    }
+    
+    /**
+     * Remove temp part of name from the given column name.
+     */
+    protected String removeTemp( String column )
+    {
+        return column != null ? column.replaceAll( TABLE_TEMP_SUFFIX, StringUtils.EMPTY ) : null;
+    }
+    
+    /**
+     * Returns index name for column. Purpose of code suffix is to avoid uniqueness
+     * collision between indexes for temp and real tables.
+     */
+    protected String getIndexName( AnalyticsIndex inx )
+    {
+        return quote( PREFIX_INDEX + removeQuote( removeTemp( inx.getColumn() ) ) + "_" + inx.getTable() + "_" + CodeGenerator.generateCode( 5 ) );        
     }
     
     /**

@@ -28,6 +28,12 @@ package org.hisp.dhis.mobile.service;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.hisp.dhis.api.mobile.IProgramService;
 import org.hisp.dhis.api.mobile.model.DataElement;
 import org.hisp.dhis.api.mobile.model.Model;
@@ -35,16 +41,12 @@ import org.hisp.dhis.api.mobile.model.ModelList;
 import org.hisp.dhis.api.mobile.model.Program;
 import org.hisp.dhis.api.mobile.model.ProgramStage;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramStageDataElement;
 import org.hisp.dhis.program.ProgramStageSection;
+import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.hisp.dhis.trackedentity.TrackedEntityAttributeOption;
 import org.springframework.beans.factory.annotation.Required;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class DefaultProgramService
     implements IProgramService
@@ -75,7 +77,8 @@ public class DefaultProgramService
     {
         Collection<org.hisp.dhis.program.Program> programByUnit = programService.getPrograms( unit );
 
-        Collection<org.hisp.dhis.program.Program> programByCurrentUser = new HashSet<org.hisp.dhis.program.Program>( programService.getProgramsByCurrentUser() );
+        Collection<org.hisp.dhis.program.Program> programByCurrentUser = new HashSet<org.hisp.dhis.program.Program>(
+            programService.getProgramsByCurrentUser() );
 
         programByCurrentUser.retainAll( programByUnit );
 
@@ -85,6 +88,9 @@ public class DefaultProgramService
         {
             programs.add( getProgramLWUIT( program.getId() ) );
         }
+        
+        System.out.println("Program by unit size: " + programByUnit.size());
+        System.out.println("Program size: " + programs.size());
 
         return programs;
     }
@@ -127,7 +133,7 @@ public class DefaultProgramService
     {
         org.hisp.dhis.program.Program program = programService.getProgram( programId );
 
-        //program = i18n( i18nService, locale, program );
+        // program = i18n( i18nService, locale, program );
 
         Program pr = new Program();
 
@@ -139,7 +145,7 @@ public class DefaultProgramService
 
         for ( org.hisp.dhis.program.ProgramStage programStage : program.getProgramStages() )
         {
-            //programStage = i18n( i18nService, locale, programStage );
+            // programStage = i18n( i18nService, locale, programStage );
 
             ProgramStage prStg = new ProgramStage();
 
@@ -153,8 +159,6 @@ public class DefaultProgramService
 
             for ( ProgramStageDataElement programStagedataElement : programStageDataElements )
             {
-                //programStagedataElement = i18n( i18nService, locale, programStagedataElement );
-
                 org.hisp.dhis.dataelement.DataElement dataElement = programStagedataElement.getDataElement();
 
                 DataElement de = ModelMapping.getDataElement( dataElement );
@@ -179,24 +183,26 @@ public class DefaultProgramService
     {
         org.hisp.dhis.program.Program program = programService.getProgram( programId );
 
-        //program = i18n( i18nService, locale, program );
+        // program = i18n( i18nService, locale, program );
 
         org.hisp.dhis.api.mobile.model.LWUITmodel.Program pr = new org.hisp.dhis.api.mobile.model.LWUITmodel.Program();
 
         pr.setId( program.getId() );
         pr.setName( program.getName() );
+        pr.setType( program.getType() );
         pr.setVersion( program.getVersion() );
-        pr.setStatus( ProgramInstance.STATUS_ACTIVE );
+        pr.setDateOfEnrollmentDescription( program.getDateOfEnrollmentDescription() );
+        pr.setDateOfIncidentDescription( program.getDateOfIncidentDescription() );
 
         List<org.hisp.dhis.api.mobile.model.LWUITmodel.ProgramStage> prStgs = new ArrayList<org.hisp.dhis.api.mobile.model.LWUITmodel.ProgramStage>();
 
         for ( org.hisp.dhis.program.ProgramStage programStage : program.getProgramStages() )
         {
-            //programStage = i18n( i18nService, locale, programStage );
+            // programStage = i18n( i18nService, locale, programStage );
 
             org.hisp.dhis.api.mobile.model.LWUITmodel.ProgramStage prStg = new org.hisp.dhis.api.mobile.model.LWUITmodel.ProgramStage();
 
-            //add report date
+            // add report date
 
             prStg.setReportDate( "" );
 
@@ -227,11 +233,10 @@ public class DefaultProgramService
 
             for ( ProgramStageDataElement programStageDataElement : programStageDataElements )
             {
-                //programStagedataElement = i18n( i18nService, locale, programStagedataElement );
-
                 org.hisp.dhis.dataelement.DataElement dataElement = programStageDataElement.getDataElement();
 
-                org.hisp.dhis.api.mobile.model.LWUITmodel.ProgramStageDataElement de = ModelMapping.getDataElementLWUIT( dataElement );
+                org.hisp.dhis.api.mobile.model.LWUITmodel.ProgramStageDataElement de = ModelMapping
+                    .getDataElementLWUIT( dataElement );
 
                 de.setCompulsory( programStageDataElement.isCompulsory() );
 
@@ -271,7 +276,44 @@ public class DefaultProgramService
 
         pr.setProgramStages( prStgs );
 
+        List<ProgramTrackedEntityAttribute> programPatientAttributes = new ArrayList<ProgramTrackedEntityAttribute>(
+            program.getAttributes() );
+
+        for ( int i = 0; i < programPatientAttributes.size(); i++ )
+        {
+            ProgramTrackedEntityAttribute ppa = programPatientAttributes.get( i );
+            pr.getProgramAttributes().add( this.getPatientAttributeForMobile( ppa ) );
+        }
+
         return pr;
+    }
+
+    private org.hisp.dhis.api.mobile.model.PatientAttribute getPatientAttributeForMobile( ProgramTrackedEntityAttribute ppa )
+    {
+        TrackedEntityAttribute pa = ppa.getAttribute();
+        List<String> optionList = new ArrayList<String>();
+        if ( pa.getAttributeOptions() != null )
+        {
+            for ( TrackedEntityAttributeOption pao : pa.getAttributeOptions() )
+            {
+                optionList.add( pao.getName() );
+            }
+        }
+        org.hisp.dhis.api.mobile.model.PatientAttribute mobileAttribute = new org.hisp.dhis.api.mobile.model.PatientAttribute();
+        mobileAttribute.setName( pa.getName() );
+        mobileAttribute.setMandatory( pa.isMandatory() );
+        mobileAttribute.setType( pa.getValueType() );
+        mobileAttribute.setValue( "" );
+        mobileAttribute.setPredefinedValues( optionList );
+        if ( ppa.getDisplayedInList() )
+        {
+            mobileAttribute.setDisplayedInList( true );
+        }
+        else
+        {
+            mobileAttribute.setDisplayedInList( false );
+        }
+        return mobileAttribute;
     }
 
     @Required

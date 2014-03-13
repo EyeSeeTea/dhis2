@@ -442,7 +442,7 @@ Ext.onReady( function() {
 				for (var i = 0; i < dimensions.length; i++) {
 					if (dimensions[i].dimension === ns.core.conf.finals.dimension.operand.objectName) {
 						for (var j = 0; j < dimensions[i].items.length; j++) {
-							dimensions[i].items[j].id = dimensions[i].items[j].id.replace('-', '.');
+							dimensions[i].items[j].id = dimensions[i].items[j].id.replace('#', '.');
 						}
 					}
 				}
@@ -1850,7 +1850,8 @@ Ext.onReady( function() {
             organisationUnit,
 			dimensionIdAvailableStoreMap = {},
 			dimensionIdSelectedStoreMap = {},
-			getGroupSetPanels,
+			getDimensionPanel,
+			getDimensionPanels,
 			update,
 
 			accordionBody,
@@ -2425,7 +2426,7 @@ Ext.onReady( function() {
                             pager = response.pager;
 
 						for (var i = 0; i < data.length; i++) {
-							data[i].id = data[i].id.split('.').join('-');
+							data[i].id = data[i].id.split('.').join('#');
 						}
 
                         store.loadStore(data, pager, append);
@@ -3400,7 +3401,7 @@ Ext.onReady( function() {
 						{
 							xtype: 'panel',
 							columnWidth: 0.34,
-							bodyStyle: 'border-style:none; padding:5px 0 0 10px',
+							bodyStyle: 'border-style:none; padding:5px 0 0 8px',
 							defaults: {
 								labelSeparator: '',
 								style: 'margin-bottom:2px',
@@ -3536,7 +3537,7 @@ Ext.onReady( function() {
 						{
 							xtype: 'panel',
 							columnWidth: 0.35,
-							bodyStyle: 'border-style:none; padding:5px 0 0 10px',
+							bodyStyle: 'border-style:none; padding:5px 0 0 8px',
 							defaults: {
 								labelSeparator: '',
 								style: 'margin-bottom:2px',
@@ -4268,228 +4269,243 @@ Ext.onReady( function() {
 
 		// dimensions
 
-		getDimensionPanels = function(dimensions, iconCls) {
-			var	getAvailableStore,
-				getSelectedStore,
+		getDimensionPanel = function(dimension, iconCls) {
+			var	availableStore,
+				selectedStore,
+				available,
+				selected,
+				panel,
 
 				createPanel,
 				getPanels;
 
-			getAvailableStore = function(dimension) {
-				return Ext.create('Ext.data.Store', {
-					fields: ['id', 'name'],
-					proxy: {
-						type: 'ajax',
-						url: ns.core.init.contextPath + '/api/dimensions/' + dimension.id + '.json',
-						reader: {
-							type: 'json',
-							root: 'items'
+			availableStore = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name'],
+				lastPage: null,
+				nextPage: 1,
+				isPending: false,
+				isLoaded: false,
+				reset: function() {
+					this.removeAll();
+					this.lastPage = null;
+					this.nextPage = 1;
+					this.isPending = false;
+					//indicatorSearch.hideFilter();
+				},
+				loadPage: function(filter, append) {
+					var store = this,
+						filterPath = filter ? '/query/' + filter : '',
+						path;
+
+					filter = filter || indicatorFilter.getValue() || null;
+
+					if (!append) {
+						this.lastPage = null;
+						this.nextPage = 1;
+					}
+
+					if (store.nextPage === store.lastPage) {
+						return;
+					}
+
+					path = '/dimensions/' + dimension.id + '/items' + filterPath + '.json';
+
+					store.isPending = true;
+
+					Ext.Ajax.request({
+						url: ns.core.init.contextPath + '/api' + path,
+						params: {
+							page: store.nextPage,
+							pageSize: 50
+						},
+						failure: function() {
+							store.isPending = false;
+						},
+						success: function(r) {
+							var response = Ext.decode(r.responseText),
+								data = response.items || [],
+								pager = response.pager;
+
+							store.loadStore(data, pager, append);
+						}
+					});
+				},
+				loadStore: function(data, pager, append) {
+					this.loadData(data, append);
+					this.lastPage = this.nextPage;
+
+					if (pager.pageCount > this.nextPage) {
+						this.nextPage++;
+					}
+
+					this.isPending = false;
+					ns.core.web.multiSelect.filterAvailable({store: availableStore}, {store: selectedStore});
+				}
+			});
+
+			selectedStore = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name'],
+				data: []
+			});
+
+			available = Ext.create('Ext.ux.form.MultiSelect', {
+				cls: 'ns-toolbar-multiselect-left',
+				width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
+				valueField: 'id',
+				displayField: 'name',
+				store: availableStore,
+				tbar: [
+					{
+						xtype: 'label',
+						text: NS.i18n.available,
+						cls: 'ns-toolbar-multiselect-left-label'
+					},
+					'->',
+					{
+						xtype: 'button',
+						icon: 'images/arrowright.png',
+						width: 22,
+						handler: function() {
+							ns.core.web.multiSelect.select(available, selected);
 						}
 					},
-					isLoaded: false,
-					storage: {},
-					sortStore: function() {
-						this.sort('name', 'ASC');
-					},
-					reset: function() {
-						if (this.isLoaded) {
-							this.removeAll();
-							ns.core.web.storage.internal.load(this);
-							this.sortStore();
-						}
-					},
-					listeners: {
-						load: function(s) {
-							s.isLoaded = true;
-							ns.core.web.storage.internal.add(s);
+					{
+						xtype: 'button',
+						icon: 'images/arrowrightdouble.png',
+						width: 22,
+						handler: function() {
+							ns.core.web.multiSelect.selectAll(available, selected);
 						}
 					}
-				});
-			};
+				],
+				listeners: {
+					render: function(ms) {
+						var el = Ext.get(ms.boundList.getEl().id + '-listEl').dom;
 
-			getSelectedStore = function() {
-				return Ext.create('Ext.data.Store', {
-					fields: ['id', 'name'],
-					data: []
-				});
-			};
-
-			createPanel = function(dimension) {
-				var getAvailable,
-					getSelected,
-
-					availableStore,
-					selectedStore,
-					available,
-					selected,
-
-					panel;
-
-				getAvailable = function(availableStore) {
-					return Ext.create('Ext.ux.form.MultiSelect', {
-						cls: 'ns-toolbar-multiselect-left',
-						width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
-						valueField: 'id',
-						displayField: 'name',
-						store: availableStore,
-						tbar: [
-							{
-								xtype: 'label',
-								text: NS.i18n.available,
-								cls: 'ns-toolbar-multiselect-left-label'
-							},
-							'->',
-							{
-								xtype: 'button',
-								icon: 'images/arrowright.png',
-								width: 22,
-								handler: function() {
-									ns.core.web.multiSelect.select(available, selected);
-								}
-							},
-							{
-								xtype: 'button',
-								icon: 'images/arrowrightdouble.png',
-								width: 22,
-								handler: function() {
-									ns.core.web.multiSelect.selectAll(available, selected);
-								}
+						el.addEventListener('scroll', function(e) {
+							if (isScrolled(e) && !availableStore.isPending) {
+								availableStore.loadPage(null, true);
 							}
-						],
-						listeners: {
-							afterrender: function() {
-								this.boundList.on('itemdblclick', function() {
-									ns.core.web.multiSelect.select(available, selected);
-								}, this);
-							}
-						}
-					});
-				};
-
-				getSelected = function(selectedStore) {
-					return Ext.create('Ext.ux.form.MultiSelect', {
-						cls: 'ns-toolbar-multiselect-right',
-						width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
-						valueField: 'id',
-						displayField: 'name',
-						ddReorder: true,
-						store: selectedStore,
-						tbar: [
-							{
-								xtype: 'button',
-								icon: 'images/arrowleftdouble.png',
-								width: 22,
-								handler: function() {
-									ns.core.web.multiSelect.unselectAll(available, selected);
-								}
-							},
-							{
-								xtype: 'button',
-								icon: 'images/arrowleft.png',
-								width: 22,
-								handler: function() {
-									ns.core.web.multiSelect.unselect(available, selected);
-								}
-							},
-							'->',
-							{
-								xtype: 'label',
-								text: NS.i18n.selected,
-								cls: 'ns-toolbar-multiselect-right-label'
-							}
-						],
-						listeners: {
-							afterrender: function() {
-								this.boundList.on('itemdblclick', function() {
-									ns.core.web.multiSelect.unselect(available, selected);
-								}, this);
-							}
-						}
-					});
-				};
-
-				availableStore = getAvailableStore(dimension);
-				selectedStore = getSelectedStore();
-
-				dimensionIdAvailableStoreMap[dimension.id] = availableStore;
-				dimensionIdSelectedStoreMap[dimension.id] = selectedStore;
-
-				available = getAvailable(availableStore);
-				selected = getSelected(selectedStore);
-
-				availableStore.on('load', function() {
-					ns.core.web.multiSelect.filterAvailable(available, selected);
-				});
-
-				panel = {
-					xtype: 'panel',
-					title: '<div class="' + iconCls + '">' + dimension.name + '</div>',
-					hideCollapseTool: true,
-					availableStore: availableStore,
-					selectedStore: selectedStore,
-					getDimension: function() {
-						var config = {
-							dimension: dimension.id,
-							items: []
-						};
-
-						selectedStore.each( function(r) {
-							config.items.push({id: r.data.id});
 						});
 
-						return config.items.length ? config : null;
-					},
-					onExpand: function() {
-						if (!availableStore.isLoaded) {
-							availableStore.load();
-						}
-
-						var h = ns.app.westRegion.hasScrollbar ?
-							ns.core.conf.layout.west_scrollbarheight_accordion_group : ns.core.conf.layout.west_maxheight_accordion_group;
-						accordion.setThisHeight(h);
-						ns.core.web.multiSelect.setHeight(
-							[available, selected],
-							this,
-							ns.core.conf.layout.west_fill_accordion_dataset
-						);
-					},
-					items: [
-						{
-							xtype: 'panel',
-							layout: 'column',
-							bodyStyle: 'border-style:none',
-							items: [
-								available,
-								selected
-							]
-						}
-					],
-					listeners: {
-						added: function() {
-							accordionPanels.push(this);
-						},
-						expand: function(p) {
-							p.onExpand();
-						}
+						ms.boundList.on('itemdblclick', function() {
+							ns.core.web.multiSelect.select(available, selected);
+						}, ms);
 					}
-				};
-
-				return panel;
-			};
-
-			getPanels = function() {
-				var panels = [];
-
-				for (var i = 0, panel; i < dimensions.length; i++) {
-					panel = createPanel(dimensions[i]);
-
-					panels.push(panel);
 				}
+			});
 
-				return panels;
+			selected = Ext.create('Ext.ux.form.MultiSelect', {
+				cls: 'ns-toolbar-multiselect-right',
+				width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
+				valueField: 'id',
+				displayField: 'name',
+				ddReorder: true,
+				store: selectedStore,
+				tbar: [
+					{
+						xtype: 'button',
+						icon: 'images/arrowleftdouble.png',
+						width: 22,
+						handler: function() {
+							ns.core.web.multiSelect.unselectAll(available, selected);
+						}
+					},
+					{
+						xtype: 'button',
+						icon: 'images/arrowleft.png',
+						width: 22,
+						handler: function() {
+							ns.core.web.multiSelect.unselect(available, selected);
+						}
+					},
+					'->',
+					{
+						xtype: 'label',
+						text: NS.i18n.selected,
+						cls: 'ns-toolbar-multiselect-right-label'
+					}
+				],
+				listeners: {
+					afterrender: function() {
+						this.boundList.on('itemdblclick', function() {
+							ns.core.web.multiSelect.unselect(available, selected);
+						}, this);
+					}
+				}
+			});
+
+			dimensionIdAvailableStoreMap[dimension.id] = availableStore;
+			dimensionIdSelectedStoreMap[dimension.id] = selectedStore;
+
+			//availableStore.on('load', function() {
+				//ns.core.web.multiSelect.filterAvailable(available, selected);
+			//});
+
+			panel = {
+				xtype: 'panel',
+				title: '<div class="' + iconCls + '">' + dimension.name + '</div>',
+				hideCollapseTool: true,
+				availableStore: availableStore,
+				selectedStore: selectedStore,
+				getDimension: function() {
+					var config = {
+						dimension: dimension.id,
+						items: []
+					};
+
+					selectedStore.each( function(r) {
+						config.items.push({id: r.data.id});
+					});
+
+					return config.items.length ? config : null;
+				},
+				onExpand: function() {
+					if (!availableStore.isLoaded) {
+						availableStore.loadPage();
+					}
+
+					var h = ns.app.westRegion.hasScrollbar ?
+						ns.core.conf.layout.west_scrollbarheight_accordion_group : ns.core.conf.layout.west_maxheight_accordion_group;
+					accordion.setThisHeight(h);
+					ns.core.web.multiSelect.setHeight(
+						[available, selected],
+						this,
+						ns.core.conf.layout.west_fill_accordion_dataset
+					);
+				},
+				items: [
+					{
+						xtype: 'panel',
+						layout: 'column',
+						bodyStyle: 'border-style:none',
+						items: [
+							available,
+							selected
+						]
+					}
+				],
+				listeners: {
+					added: function() {
+						accordionPanels.push(this);
+					},
+					expand: function(p) {
+						p.onExpand();
+					}
+				}
 			};
 
-			return getPanels();
+			return panel;
+		};
+
+		getDimensionPanels = function(dimensions, iconCls) {
+			var panels = [];
+
+			for (var i = 0, panel; i < dimensions.length; i++) {
+				panels.push(getDimensionPanel(dimensions[i], iconCls));
+			}
+
+			return panels;
 		};
 
 		// viewport
@@ -4765,7 +4781,7 @@ Ext.onReady( function() {
 				text += '<script src="http://dhis2-cdn.org/v214/ext/ext-all.js"></script>\n';
 				text += '<script src="http://dhis2-cdn.org/v214/plugin/chart.js"></script>\n';
 				text += '</head>\n\n<body>\n';
-				text += '<div id="chart1"></div>\n\n';
+				text += '<div id="chart1" style="width:700px; height:400px"></div>\n\n';
 				text += '<script>\n\n';
 				text += 'DHIS.getChart(' + JSON.stringify(ns.core.service.layout.layout2plugin(ns.app.layout, 'chart1'), null, 2) + ');\n\n';
 				text += '</script>\n\n';
@@ -5253,7 +5269,7 @@ Ext.onReady( function() {
 						ns.core.web.chart.loadChart(id);
 					}
 					else if (Ext.isString(session) && NS.isSessionStorage && Ext.isObject(JSON.parse(sessionStorage.getItem('dhis2'))) && session in JSON.parse(sessionStorage.getItem('dhis2'))) {
-						layout = ns.core.api.layout.Layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]);
+						layout = ns.core.api.layout.Layout(ns.core.service.layout.analytical2layout(JSON.parse(sessionStorage.getItem('dhis2'))[session]));
 
 						if (layout) {
 							ns.core.web.chart.getData(layout, true);
@@ -5342,9 +5358,9 @@ Ext.onReady( function() {
 
 								// root nodes
 								requests.push({
-									url: init.contextPath + '/api/organisationUnits.json?level=1&paging=false&links=false&viewClass=detailed',
+									url: init.contextPath + '/api/organisationUnits/filtered.json?userDataViewFallback=true&include=id,name,children[id,name]',
 									success: function(r) {
-										init.rootNodes = Ext.decode(r.responseText).organisationUnits || [];
+										init.rootNodes = Ext.decode(r.responseText).objects || [];
 										fn();
 									}
 								});

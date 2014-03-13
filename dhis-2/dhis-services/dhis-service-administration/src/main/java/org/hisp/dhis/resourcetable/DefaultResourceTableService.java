@@ -45,6 +45,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
+import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -68,6 +70,7 @@ import org.hisp.dhis.period.DailyPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.resourcetable.statement.CreateCategoryOptionGroupSetTableStatement;
 import org.hisp.dhis.resourcetable.statement.CreateCategoryTableStatement;
 import org.hisp.dhis.resourcetable.statement.CreateDataElementGroupSetTableStatement;
 import org.hisp.dhis.resourcetable.statement.CreateIndicatorGroupSetTableStatement;
@@ -228,6 +231,50 @@ public class DefaultResourceTableService
         log.info( "Category option combo name table generated" );
     }
 
+    @Transactional
+    public void generateCategoryOptionGroupSetTable()
+    {
+        // ---------------------------------------------------------------------
+        // Create table
+        // ---------------------------------------------------------------------
+
+        List<DataElementCategoryOptionCombo> categoryOptionCombos = 
+            new ArrayList<DataElementCategoryOptionCombo>( categoryService.getAllDataElementCategoryOptionCombos() );
+        
+        List<CategoryOptionGroupSet> groupSets = new ArrayList<CategoryOptionGroupSet>( categoryService.getAllCategoryOptionGroupSets() );
+        
+        Collections.sort( groupSets, IdentifiableObjectNameComparator.INSTANCE );
+
+        resourceTableStore.createCategoryOptionGroupSetStructure( groupSets );
+
+        // ---------------------------------------------------------------------
+        // Populate table
+        // ---------------------------------------------------------------------
+
+        List<Object[]> batchArgs = new ArrayList<Object[]>();
+        
+        for ( DataElementCategoryOptionCombo categoryOptionCombo : categoryOptionCombos )
+        {
+            List<Object> values = new ArrayList<Object>();
+
+            values.add( categoryOptionCombo.getId() );
+            
+            for ( CategoryOptionGroupSet groupSet : groupSets )
+            {
+                CategoryOptionGroup group = groupSet.getGroup( categoryOptionCombo );
+                
+                values.add( group != null ? group.getName() : null );
+                values.add( group != null ? group.getUid() : null );
+            }
+            
+            batchArgs.add( values.toArray() );
+        }
+        
+        resourceTableStore.batchUpdate( ( groupSets.size() * 2 ) + 1, CreateCategoryOptionGroupSetTableStatement.TABLE_NAME, batchArgs );
+        
+        log.info( "Category option group set table generated" );
+    }
+    
     // -------------------------------------------------------------------------
     // DataElementGroupSetTable
     // -------------------------------------------------------------------------

@@ -70,11 +70,11 @@ public class ImportMetaDataTask
     @Override
     public void run()
     {
-        MetaData metaData;
+        MetaData metaData = null;
 
         try
         {
-            // TODO should probably sniff if its xml or json, but this works for now
+            // TODO sniff if its xml or json, but this works for now
             metaData = JacksonUtils.fromXml( inputStream, MetaData.class );
         }
         catch ( IOException ignored )

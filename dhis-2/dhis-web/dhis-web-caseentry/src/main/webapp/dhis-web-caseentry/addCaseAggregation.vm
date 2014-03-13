@@ -79,7 +79,7 @@
 			<label for="programStage">$i18n.getString( "program_stage" )</label>
 		</td>
 		<td>
-			<select id="programStageId" name="programStageId" onChange="getPatientDataElements();"></select>
+			<select id="programStageId" name="programStageId" onChange="getEntityInstanceDataElements();"></select>
 		</td>
 	</tr>
 	
@@ -99,7 +99,7 @@
     </tbody>
 </table>
 
-#parse( "/dhis-web-maintenance-patient/caseAggregationForm.vm" )
+#parse( "/dhis-web-maintenance-program/caseAggregationForm.vm" )
 
 <p>	
 	<input type="submit" value="$i18n.getString( 'add' )" />

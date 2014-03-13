@@ -28,18 +28,22 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.collect.Lists;
 import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.dashboard.Dashboard;
 import org.hisp.dhis.datadictionary.DataDictionary;
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
+import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -51,6 +55,7 @@ import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.Section;
 import org.hisp.dhis.document.Document;
+import org.hisp.dhis.dxf2.schema.Schema;
 import org.hisp.dhis.filter.MetaDataFilter;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
@@ -68,24 +73,23 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeGroup;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.sqlview.SqlView;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.hisp.dhis.trackedentity.TrackedEntityAttributeGroup;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleGroup;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -95,7 +99,9 @@ public class MetaData
 {
     private Date created;
 
-    private List<Attribute> attributeTypes = new ArrayList<Attribute>();
+    private List<Schema> schemas = Lists.newArrayList();
+
+    private List<Attribute> attributes = new ArrayList<Attribute>();
 
     private List<Document> documents = new ArrayList<Document>();
 
@@ -123,6 +129,10 @@ public class MetaData
 
     private List<DataElementCategoryOptionCombo> categoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>();
 
+    private List<CategoryOptionGroup> categoryOptionGroups = new ArrayList<CategoryOptionGroup>();
+
+    private List<CategoryOptionGroupSet> categoryOptionGroupSets = new ArrayList<CategoryOptionGroupSet>();
+
     private List<DataElementOperand> dataElementOperands = new ArrayList<DataElementOperand>();
 
     private List<Dashboard> dashboards = new ArrayList<Dashboard>();
@@ -142,6 +152,8 @@ public class MetaData
     private List<IndicatorGroupSet> indicatorGroupSets = new ArrayList<IndicatorGroupSet>();
 
     private List<IndicatorType> indicatorTypes = new ArrayList<IndicatorType>();
+
+    private List<NameableObject> items = new ArrayList<NameableObject>();
 
     private List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>();
 
@@ -187,9 +199,9 @@ public class MetaData
 
     private List<MetaDataFilter> metaDataFilters = new ArrayList<MetaDataFilter>();
 
-    private List<PatientAttribute> personAttributeTypes = new ArrayList<PatientAttribute>();
+    private List<TrackedEntityAttribute> personAttributeTypes = new ArrayList<TrackedEntityAttribute>();
 
-    private List<PatientAttributeGroup> personAttributeGroups = new ArrayList<PatientAttributeGroup>();
+    private List<TrackedEntityAttributeGroup> personAttributeGroups = new ArrayList<TrackedEntityAttributeGroup>();
 
     public MetaData()
     {
@@ -208,16 +220,29 @@ public class MetaData
     }
 
     @JsonProperty
-    @JacksonXmlElementWrapper(localName = "attributeTypes", namespace = DxfNamespaces.DXF_2_0)
-    @JacksonXmlProperty(localName = "attributeType", namespace = DxfNamespaces.DXF_2_0)
-    public List<Attribute> getAttributeTypes()
+    @JacksonXmlElementWrapper( localName = "schemas", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "schema", namespace = DxfNamespaces.DXF_2_0 )
+    public List<Schema> getSchemas()
     {
-        return attributeTypes;
+        return schemas;
     }
 
-    public void setAttributeTypes( List<Attribute> attributeTypes )
+    public void setSchemas( List<Schema> schemas )
     {
-        this.attributeTypes = attributeTypes;
+        this.schemas = schemas;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper(localName = "attributes", namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty(localName = "attribute", namespace = DxfNamespaces.DXF_2_0)
+    public List<Attribute> getAttributes()
+    {
+        return attributes;
+    }
+
+    public void setAttributes( List<Attribute> attributes )
+    {
+        this.attributes = attributes;
     }
 
     @JsonProperty
@@ -403,6 +428,32 @@ public class MetaData
     }
 
     @JsonProperty
+    @JacksonXmlElementWrapper(localName = "categoryOptionGroups", namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty(localName = "categoryOptionGroup", namespace = DxfNamespaces.DXF_2_0)
+    public List<CategoryOptionGroup> getCategoryOptionGroups()
+    {
+        return categoryOptionGroups;
+    }
+
+    public void setCategoryOptionGroups( List<CategoryOptionGroup> categoryOptionGroups )
+    {
+        this.categoryOptionGroups = categoryOptionGroups;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper(localName = "categoryOptionGroupSets", namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty(localName = "categoryOptionGroupSet", namespace = DxfNamespaces.DXF_2_0)
+    public List<CategoryOptionGroupSet> getCategoryOptionGroupSets()
+    {
+        return categoryOptionGroupSets;
+    }
+
+    public void setCategoryOptionGroupSets( List<CategoryOptionGroupSet> categoryOptionGroupSets )
+    {
+        this.categoryOptionGroupSets = categoryOptionGroupSets;
+    }
+
+    @JsonProperty
     @JacksonXmlElementWrapper(localName = "dataElementOperands", namespace = DxfNamespaces.DXF_2_0)
     @JacksonXmlProperty(localName = "dataElementOperand", namespace = DxfNamespaces.DXF_2_0)
     public List<DataElementOperand> getDataElementOperands()
@@ -465,6 +516,19 @@ public class MetaData
     public void setIndicatorTypes( List<IndicatorType> indicatorTypes )
     {
         this.indicatorTypes = indicatorTypes;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper(localName = "items", namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty(localName = "item", namespace = DxfNamespaces.DXF_2_0)
+    public List<NameableObject> getItems()
+    {
+        return items;
+    }
+
+    public void setItems( List<NameableObject> items )
+    {
+        this.items = items;
     }
 
     @JsonProperty
@@ -782,12 +846,12 @@ public class MetaData
     @JsonProperty
     @JacksonXmlElementWrapper(localName = "personAttributeTypes", namespace = DxfNamespaces.DXF_2_0)
     @JacksonXmlProperty(localName = "personAttributeType", namespace = DxfNamespaces.DXF_2_0)
-    public List<PatientAttribute> getPersonAttributeTypes()
+    public List<TrackedEntityAttribute> getPersonAttributeTypes()
     {
         return personAttributeTypes;
     }
 
-    public void setPersonAttributeTypes( List<PatientAttribute> personAttributeTypes )
+    public void setPersonAttributeTypes( List<TrackedEntityAttribute> personAttributeTypes )
     {
         this.personAttributeTypes = personAttributeTypes;
     }
@@ -795,12 +859,12 @@ public class MetaData
     @JsonProperty
     @JacksonXmlElementWrapper(localName = "personAttributeGroups", namespace = DxfNamespaces.DXF_2_0)
     @JacksonXmlProperty(localName = "personAttributeGroup", namespace = DxfNamespaces.DXF_2_0)
-    public List<PatientAttributeGroup> getPersonAttributeGroups()
+    public List<TrackedEntityAttributeGroup> getPersonAttributeGroups()
     {
         return personAttributeGroups;
     }
 
-    public void setPersonAttributeGroups( List<PatientAttributeGroup> personAttributeGroups )
+    public void setPersonAttributeGroups( List<TrackedEntityAttributeGroup> personAttributeGroups )
     {
         this.personAttributeGroups = personAttributeGroups;
     }
@@ -836,7 +900,7 @@ public class MetaData
     {
         return "MetaData{" +
             "created=" + created +
-            ", attributeTypes=" + attributeTypes +
+            ", attributes=" + attributes +
             ", documents=" + documents +
             ", constants=" + constants +
             ", concepts=" + concepts +

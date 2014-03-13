@@ -261,6 +261,24 @@ public interface PeriodService
      * @return a Period.
      */
     Period reloadPeriod( Period period );
+
+    /**
+     * Retrieves the period with the given ISO period identifier. Reloads the 
+     * period in the session if found.
+     * 
+     * @param isoPeriod the ISO period identifier.
+     * @return a Period.
+     */
+    Period reloadIsoPeriod( String isoPeriod );
+    
+    /**
+     * Retrieves the period with the given ISO period identifiers. Reloads the 
+     * periods in the session if found.
+     * 
+     * @param isoPeriods the list of ISO period identifiers.
+     * @return a list of Periods.
+     */
+    List<Period> reloadIsoPeriods( List<String> isoPeriods );
     
     /**
      * Returns a PeriodHierarchy instance.

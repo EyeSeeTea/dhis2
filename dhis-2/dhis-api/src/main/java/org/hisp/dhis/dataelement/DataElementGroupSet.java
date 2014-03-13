@@ -66,8 +66,6 @@ public class DataElementGroupSet
      */
     private static final long serialVersionUID = -2118690320625221749L;
 
-    private String description;
-
     private Boolean compulsory = false;
 
     @Scanned
@@ -117,12 +115,18 @@ public class DataElementGroupSet
         members.add( dataElementGroup );
         dataElementGroup.setGroupSet( this );
     }
+    
+    public void removeDataElementGroup( DataElementGroup dataElementGroup )
+    {
+        members.remove( dataElementGroup );
+        dataElementGroup.setGroupSet( null );
+    }
 
     public void removeAllDataElementGroups()
     {
         for ( DataElementGroup dataElementGroup : members )
         {
-            if ( dataElementGroup.getGroupSet() == this )
+            if ( dataElementGroup.getGroupSet().equals( this ) )
             {
                 dataElementGroup.setGroupSet( null );
             }
@@ -214,19 +218,6 @@ public class DataElementGroupSet
         {
             return getName().substring( 0, 49 );
         }
-    }
-
-    @JsonProperty
-    @JsonView({ DetailedView.class, ExportView.class })
-    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
-    public String getDescription()
-    {
-        return description;
-    }
-
-    public void setDescription( String description )
-    {
-        this.description = description;
     }
 
     @JsonProperty

@@ -28,10 +28,22 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.dashboard.Dashboard;
 import org.hisp.dhis.datadictionary.DataDictionary;
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
+import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategory;
+import org.hisp.dhis.dataelement.DataElementCategoryCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.document.Document;
 import org.hisp.dhis.indicator.Indicator;
@@ -39,8 +51,6 @@ import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
 import org.hisp.dhis.interpretation.Interpretation;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.patientreport.PatientAggregateReport;
-import org.hisp.dhis.patientreport.PatientTabularReport;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
@@ -49,13 +59,6 @@ import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupAccess;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -102,15 +105,18 @@ public final class SharingUtils
         addType( DataSet.class, "dataSet", null, "F_DATASET_PUBLIC_ADD", "F_DATASET_PRIVATE_ADD" );
         addType( DataDictionary.class, "dataDictionary", null, "F_DATADICTIONARY_PUBLIC_ADD", "F_DATADICTIONARY_PRIVATE_ADD" );
         addType( DataElement.class, "dataElement", null, "F_DATAELEMENT_PUBLIC_ADD", "F_DATAELEMENT_PRIVATE_ADD" );
+        addType( DataElementCategory.class, "category", null, "F_CATEGORY_PUBLIC_ADD", "F_CATEGORY_PRIVATE_ADD" );
+        addType( DataElementCategoryOption.class, "categoryOption", null, "F_CATEGORY_OPTION_PUBLIC_ADD", "F_CATEGORY_OPTION_PRIVATE_ADD" );
+        addType( CategoryOptionGroup.class, "categoryOptionGroup", null, "F_CATEGORY_OPTION_GROUP_PUBLIC_ADD", "F_CATEGORY_OPTION_GROUP_PRIVATE_ADD" );
+        addType( CategoryOptionGroupSet.class, "categoryOptionGroupSet", null, "F_CATEGORY_OPTION_GROUP_SET_PUBLIC_ADD", "F_CATEGORY_OPTION_GROUP_SET_PRIVATE_ADD" );
+        addType( DataElementCategoryCombo.class, "categoryCombo", null, "F_CATEGORY_COMBO_PUBLIC_ADD", "F_CATEGORY_COMBO_PRIVATE_ADD" );
         addType( OrganisationUnitGroup.class, "organisationUnitGroup", null, "F_ORGUNITGROUP_PUBLIC_ADD", "F_ORGUNITGROUP_PRIVATE_ADD" );
         addType( Indicator.class, "indicator", null, "F_INDICATOR_PUBLIC_ADD", "F_INDICATOR_PRIVATE_ADD" );
         addType( IndicatorGroup.class, "indicatorGroup", null, "F_INDICATORGROUP_PUBLIC_ADD", "F_INDICATORGROUP_PRIVATE_ADD" );
         addType( IndicatorGroupSet.class, "indicatorGroupSet", null, "F_INDICATORGROUPSET_PUBLIC_ADD", "F_INDICATORGROUPSET_PRIVATE_ADD" );
         addType( Program.class, "program", null, "F_PROGRAM_PUBLIC_ADD", "F_PROGRAM_PRIVATE_ADD" );
         addType( UserGroup.class, "userGroup", null, "F_USERGROUP_PUBLIC_ADD", null );
-        addType( PatientTabularReport.class, "patientTabularReport", null, "F_PATIENT_TABULAR_REPORT_PUBLIC_ADD", null );
-        addType( PatientAggregateReport.class, "patientAggregateReport", null, "F_PATIENT_TABULAR_REPORT_PUBLIC_ADD", null );
-
+        
         addType( org.hisp.dhis.mapping.Map.class, "map", "F_MAP_EXTERNAL", "F_MAP_PUBLIC_ADD", null );
         addType( Chart.class, "chart", "F_CHART_EXTERNAL", "F_CHART_PUBLIC_ADD", null );
         addType( ReportTable.class, "reportTable", "F_REPORTTABLE_EXTERNAL", "F_REPORTTABLE_PUBLIC_ADD", null );

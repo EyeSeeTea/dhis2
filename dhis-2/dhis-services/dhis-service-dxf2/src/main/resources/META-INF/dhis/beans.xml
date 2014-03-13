@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation=
+    "http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
+
+  <context:component-scan base-package="org.hisp.dhis.dxf2.schema.descriptors" />
+
+  <bean id="org.hisp.dhis.dxf2.schema.SchemaService" class="org.hisp.dhis.dxf2.schema.DefaultSchemaService" />
+
+  <bean id="org.hisp.dhis.dxf2.schema.PropertyScannerService" class="org.hisp.dhis.dxf2.schema.DefaultPropertyScannerService" />
 
   <bean id="org.hisp.dhis.dxf2.metadata.ExportService" class="org.hisp.dhis.dxf2.metadata.DefaultExportService" scope="prototype" />
 
@@ -38,24 +46,23 @@
   </bean>
 
   <bean id="categoryImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
-    <constructor-arg name="importerClass" type="java.lang.Class"
-      value="org.hisp.dhis.dataelement.DataElementCategory" />
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.dataelement.DataElementCategory" />
   </bean>
 
   <bean id="categoryComboImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
-    <constructor-arg name="importerClass" type="java.lang.Class"
-      value="org.hisp.dhis.dataelement.DataElementCategoryCombo" />
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.dataelement.DataElementCategoryCombo" />
   </bean>
 
   <bean id="categoryOptionImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
-    <constructor-arg name="importerClass" type="java.lang.Class"
-      value="org.hisp.dhis.dataelement.DataElementCategoryOption" />
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.dataelement.DataElementCategoryOption" />
   </bean>
 
-  <bean id="categoryOptionComboImporter"
-    class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
-    <constructor-arg name="importerClass" type="java.lang.Class"
-      value="org.hisp.dhis.dataelement.DataElementCategoryOptionCombo" />
+  <bean id="categoryOptionGroupImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.dataelement.CategoryOptionGroup" />
+  </bean>
+
+  <bean id="categoryOptionComboImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.dataelement.DataElementCategoryOptionCombo" />
   </bean>
 
   <bean id="dataElementImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
@@ -66,8 +73,7 @@
     <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.dataelement.DataElementGroup" />
   </bean>
 
-  <bean id="dataElementGroupSetImporter"
-    class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
+  <bean id="dataElementGroupSetImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
     <constructor-arg name="importerClass" type="java.lang.Class"
       value="org.hisp.dhis.dataelement.DataElementGroupSet" />
   </bean>
@@ -132,32 +138,27 @@
     <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.mapping.MapLayer" />
   </bean>
 
-  <bean id="messageConversationImporter"
-    class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
+  <bean id="messageConversationImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
     <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.message.MessageConversation" />
   </bean>
 
   <bean id="organisationUnitImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
-    <constructor-arg name="importerClass" type="java.lang.Class"
-      value="org.hisp.dhis.organisationunit.OrganisationUnit" />
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.organisationunit.OrganisationUnit" />
   </bean>
 
-  <bean id="organisationUnitLevelImporter"
-    class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
-    <constructor-arg name="importerClass" type="java.lang.Class"
-      value="org.hisp.dhis.organisationunit.OrganisationUnitLevel" />
+  <bean id="organisationUnitLevelImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter"
+    scope="prototype">
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.organisationunit.OrganisationUnitLevel" />
   </bean>
 
-  <bean id="organisationUnitGroupImporter"
-    class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
-    <constructor-arg name="importerClass" type="java.lang.Class"
-      value="org.hisp.dhis.organisationunit.OrganisationUnitGroup" />
+  <bean id="organisationUnitGroupImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter"
+    scope="prototype">
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.organisationunit.OrganisationUnitGroup" />
   </bean>
 
-  <bean id="organisationUnitGroupSetImporter"
-    class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
-    <constructor-arg name="importerClass" type="java.lang.Class"
-      value="org.hisp.dhis.organisationunit.OrganisationUnitGroupSet" />
+  <bean id="organisationUnitGroupSetImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter"
+    scope="prototype">
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.organisationunit.OrganisationUnitGroupSet" />
   </bean>
 
   <bean id="reportImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
@@ -188,20 +189,18 @@
     <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.validation.ValidationRule" />
   </bean>
 
-  <bean id="validationRuleGroupImporter"
-    class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
+  <bean id="validationRuleGroupImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
     <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.validation.ValidationRuleGroup" />
   </bean>
 
-  <bean id="dataDictionaryImporter"
-    class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
+  <bean id="dataDictionaryImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
     <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.datadictionary.DataDictionary" />
   </bean>
 
   <bean id="pdfDataEntryFormService" class="org.hisp.dhis.dxf2.pdfform.DefaultPdfDataEntryFormService" scope="prototype">
   </bean>
 
-  <!--@author Ovidiu Rosu <rosu.ovi@gmail.com>-->
-  <bean id="org.hisp.dhis.dxf2.metadata.MetaDataDependencyService" class="org.hisp.dhis.dxf2.metadata.DefaultMetaDataDependencyService" scope="prototype" />
+  <bean id="org.hisp.dhis.dxf2.metadata.MetaDataDependencyService" class="org.hisp.dhis.dxf2.metadata.DefaultMetaDataDependencyService"
+    scope="prototype" />
 
 </beans>

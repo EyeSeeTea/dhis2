@@ -881,7 +881,7 @@ Ext.onReady( function() {
 											for (var k = 0, item; k < dim.items.length; k++) {
 												item = dim.items[k];
 
-												item.id = item.id.replace('.', '-');
+												item.id = item.id.replace('#', '.');
 											}
 										}
 									}
@@ -1842,7 +1842,7 @@ Ext.onReady( function() {
 			paramString += '&dimension=dx:';
 
 			for (var i = 0; i < dxItems.length; i++) {
-				paramString += isOperand ? dxItems[i].id.split('-')[0] : dxItems[i].id;
+				paramString += isOperand ? dxItems[i].id.split('.')[0] : dxItems[i].id;
 				paramString += i < dxItems.length - 1 ? ';' : '';
 			}
 
@@ -1960,8 +1960,8 @@ Ext.onReady( function() {
 					for (var j = 0, item; j < dimension.items.length; j++) {
 						item = dimension.items[j];
 
-						if (item.id.indexOf('-') !== -1) {
-							var ids = item.id.split('-');
+						if (item.id.indexOf('.') !== -1) {
+							var ids = item.id.split('.');
 							item.name = metaData.names[ids[0]] + ' ' + metaData.names[ids[1]];
 						}
 						else {
@@ -2241,6 +2241,7 @@ Ext.onReady( function() {
 					{id: 'BiMonthly', name: GIS.i18n.bimonthly},
 					{id: 'Quarterly', name: GIS.i18n.quarterly},
 					{id: 'SixMonthly', name: GIS.i18n.sixmonthly},
+                    {id: 'SixMonthlyApril', name: GIS.i18n.sixmonthly_april},
 					{id: 'Yearly', name: GIS.i18n.yearly},
 					{id: 'FinancialOct', name: GIS.i18n.financial_oct},
 					{id: 'FinancialJuly', name: GIS.i18n.financial_july},
@@ -2379,9 +2380,9 @@ Ext.onReady( function() {
 					cmpArray[i].queryMode = mode;
 				}
 			};
-			
+
 			util.object = {};
-			
+
 			util.object.getLength = function(object) {
 				var size = 0;
 
@@ -2465,7 +2466,7 @@ Ext.onReady( function() {
 						return;
 					}
 
-					record.id = config.id.replace('.', '-');
+					record.id = config.id.replace('#', '.');
 
 					if (Ext.isString(config.name)) {
 						record.name = config.name;

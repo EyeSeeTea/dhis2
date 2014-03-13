@@ -264,6 +264,30 @@ public class DefaultPeriodService
         return periodStore.reloadForceAddPeriod( period );
     }
     
+    public Period reloadIsoPeriod( String isoPeriod )
+    {
+        Period period = PeriodType.getPeriodFromIsoString( isoPeriod );
+        
+        return period != null ? reloadPeriod( period ) : null;
+    }
+    
+    public List<Period> reloadIsoPeriods( List<String> isoPeriods )
+    {
+        List<Period> periods = new ArrayList<Period>();
+        
+        for ( String iso : isoPeriods )
+        {
+            Period period = reloadIsoPeriod( iso );
+            
+            if ( period != null )
+            {
+                periods.add( period );
+            }
+        }
+        
+        return periods;
+    }
+    
     public PeriodHierarchy getPeriodHierarchy( Collection<Period> periods )
     {
         PeriodHierarchy hierarchy = new PeriodHierarchy();

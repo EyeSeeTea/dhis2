@@ -428,6 +428,12 @@ public class DefaultUserService
         return userCredentialsStore.getUserCredentialsByUsername( username );
     }
 
+    @Override
+    public UserCredentials getUserCredentialsByOpenID( String openId )
+    {
+        return userCredentialsStore.getUserCredentialsByOpenID( openId );
+    }
+
     public Collection<UserCredentials> getUsersBetween( int first, int max )
     {
         return userCredentialsStore.getUsersBetween( first, max );
@@ -458,9 +464,14 @@ public class DefaultUserService
         return userCredentialsStore.getUsersWithoutOrganisationUnitBetweenByName( username, first, max );
     }
 
-    public Collection<UserCredentials> searchUsersByName( String username )
+    public Collection<UserCredentials> searchUsersByName( String name )
     {
-        return userCredentialsStore.searchUsersByName( username );
+        return userCredentialsStore.searchUsersByName( name );
+    }
+
+    public Collection<UserCredentials> searchUsersByName( String name, int first, int max )
+    {
+        return userCredentialsStore.searchUsersByName( name, first, max );
     }
 
     public void setLastLogin( String username )

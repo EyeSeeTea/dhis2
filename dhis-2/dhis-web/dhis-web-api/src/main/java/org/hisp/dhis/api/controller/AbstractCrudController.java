@@ -28,6 +28,7 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Maps;
 import org.hisp.dhis.api.controller.exception.NotFoundException;
 import org.hisp.dhis.api.controller.exception.NotFoundForQueryException;
 import org.hisp.dhis.api.utils.WebUtils;
@@ -57,7 +58,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -84,10 +84,59 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     // GET
     //--------------------------------------------------------------------------
 
-    @RequestMapping( value = "/map", method = RequestMethod.GET )
-    public void getJacksonClassMap( OutputStream outputStream ) throws IOException
+    @RequestMapping( value = "/filtered", method = RequestMethod.GET )
+    public void getJacksonClassMap(
+        @RequestParam( required = false ) String include,
+        @RequestParam( required = false ) String exclude,
+        @RequestParam( value = "filter", required = false ) List<String> filters,
+        @RequestParam Map<String, String> parameters, HttpServletResponse response ) throws IOException
     {
-        JacksonUtils.toJson( outputStream, ReflectionUtils.getJacksonClassMap( getEntityClass() ).keySet() );
+        WebOptions options = new WebOptions( parameters );
+        WebMetaData metaData = new WebMetaData();
+        options.getOptions().put( "links", "false" );
+
+        boolean hasPaging = false;
+
+        // get full list if we are using filters
+        if ( filters != null && !filters.isEmpty() )
+        {
+            if ( options.hasPaging() )
+            {
+                hasPaging = true;
+                options.getOptions().put( "paging", "false" );
+            }
+        }
+
+        List<T> entityList = getEntityList( metaData, options );
+
+        handleLinksAndAccess( options, metaData, entityList, true );
+
+        postProcessEntities( entityList );
+        postProcessEntities( entityList, options, parameters );
+
+        if ( filters != null && !filters.isEmpty() )
+        {
+            entityList = WebUtils.filterObjects( entityList, filters );
+
+            if ( hasPaging )
+            {
+                Pager pager = new Pager( options.getPage(), entityList.size(), options.getPageSize() );
+                metaData.setPager( pager );
+                entityList = PagerUtils.pageCollection( entityList, pager );
+            }
+        }
+
+        List<Object> objects = WebUtils.filterFields( entityList, include, exclude );
+        Map<String, Object> output = Maps.newLinkedHashMap();
+
+        if ( hasPaging )
+        {
+            output.put( "pager", metaData.getPager() );
+        }
+
+        output.put( "objects", objects );
+
+        JacksonUtils.toJson( response.getOutputStream(), output );
     }
 
     @RequestMapping( method = RequestMethod.GET )

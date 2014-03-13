@@ -108,13 +108,16 @@ public class User
      */
     @Scanned
     private Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
+    
+    @Scanned
+    private Set<OrganisationUnit> dataViewOrganisationUnits = new HashSet<OrganisationUnit>();
 
     /**
      * Set of the dynamic attributes values that belong to this User.
      */
     private Set<AttributeValue> attributeValues = new HashSet<AttributeValue>();
 
-    private List<String> apps = new ArrayList<String>(); //TODO not yet in use
+    private List<String> apps = new ArrayList<String>();
     
     // -------------------------------------------------------------------------
     // Logic
@@ -192,6 +195,11 @@ public class User
     public boolean hasOrganisationUnit()
     {
         return !CollectionUtils.isEmpty( organisationUnits );
+    }
+    
+    public boolean hasDataViewOrganisationUnit()
+    {
+        return !CollectionUtils.isEmpty( dataViewOrganisationUnits );
     }
 
     public String getOrganisationUnitsName()
@@ -437,6 +445,21 @@ public class User
     public void setOrganisationUnits( Set<OrganisationUnit> organisationUnits )
     {
         this.organisationUnits = organisationUnits;
+    }
+
+    @JsonProperty
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlElementWrapper( localName = "dataViewOrganisationUnits", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "dataViewOrganisationUnit", namespace = DxfNamespaces.DXF_2_0 )
+    public Set<OrganisationUnit> getDataViewOrganisationUnits()
+    {
+        return dataViewOrganisationUnits;
+    }
+
+    public void setDataViewOrganisationUnits( Set<OrganisationUnit> dataViewOrganisationUnits )
+    {
+        this.dataViewOrganisationUnits = dataViewOrganisationUnits;
     }
 
     @JsonProperty( value = "attributeValues" )

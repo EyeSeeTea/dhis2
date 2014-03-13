@@ -32,7 +32,6 @@ import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 import static org.hisp.dhis.dashboard.DashboardItem.TYPE_CHART;
 import static org.hisp.dhis.dashboard.DashboardItem.TYPE_MAP;
 import static org.hisp.dhis.dashboard.DashboardItem.TYPE_MESSAGES;
-import static org.hisp.dhis.dashboard.DashboardItem.TYPE_PATIENT_TABULAR_REPORTS;
 import static org.hisp.dhis.dashboard.DashboardItem.TYPE_REPORTS;
 import static org.hisp.dhis.dashboard.DashboardItem.TYPE_REPORT_TABLE;
 import static org.hisp.dhis.dashboard.DashboardItem.TYPE_REPORT_TABLES;
@@ -53,7 +52,6 @@ import org.hisp.dhis.dashboard.DashboardSearchResult;
 import org.hisp.dhis.dashboard.DashboardService;
 import org.hisp.dhis.document.Document;
 import org.hisp.dhis.mapping.Map;
-import org.hisp.dhis.patientreport.PatientTabularReport;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.user.User;
@@ -110,7 +108,6 @@ public class DefaultDashboardService
         result.setReportTables( objectManager.getBetweenByName( ReportTable.class, query, 0, getMax( TYPE_REPORT_TABLE, maxTypes ) ) );
         result.setReports( objectManager.getBetweenByName( Report.class, query, 0, getMax( TYPE_REPORTS, maxTypes ) ) );
         result.setResources( objectManager.getBetweenByName( Document.class, query, 0, getMax( TYPE_RESOURCES, maxTypes ) ) );
-        result.setPatientTabularReports( objectManager.getBetweenByName( PatientTabularReport.class, query, 0, getMax( TYPE_PATIENT_TABULAR_REPORTS, maxTypes ) ) );
 
         return result;
     }
@@ -171,11 +168,7 @@ public class DefaultDashboardService
             {
                 item.getResources().add( objectManager.get( Document.class, contentUid ) );
             }
-            else if ( TYPE_PATIENT_TABULAR_REPORTS.equals( type ) )
-            {
-                item.getPatientTabularReports().add( objectManager.get( PatientTabularReport.class, contentUid ) );
-            }
-
+            
             if ( availableItem == null )
             {
                 dashboard.getItems().add( 0, item );

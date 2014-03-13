@@ -27,10 +27,6 @@
 
 package org.hisp.dhis.caseentry.action.caseentry;
 
-import static org.hisp.dhis.patientreport.PatientTabularReport.PREFIX_DATA_ELEMENT;
-import static org.hisp.dhis.patientreport.PatientTabularReport.PREFIX_NUMBER_DATA_ELEMENT;
-import static org.hisp.dhis.patientreport.PatientTabularReport.VALUE_TYPE_OPTION_SET;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -49,7 +45,6 @@ import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.paging.ActionPagingSupport;
-import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
@@ -57,6 +52,7 @@ import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.program.TabularEventColumn;
 import org.hisp.dhis.system.util.ConversionUtils;
 import org.hisp.dhis.system.util.TextUtils;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.user.CurrentUserService;
 
 /**
@@ -109,11 +105,11 @@ public class SearchEventsAction
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private List<PatientAttribute> patientAttributes = new ArrayList<PatientAttribute>();
+    private List<TrackedEntityAttribute> attributes = new ArrayList<TrackedEntityAttribute>();
 
-    public List<PatientAttribute> getPatientAttributes()
+    public List<TrackedEntityAttribute> getAttributes()
     {
-        return patientAttributes;
+        return attributes;
     }
 
     private Collection<String> orgunitIds = new HashSet<String>();
@@ -401,17 +397,17 @@ public class SearchEventsAction
                 column.setOperator( values.length > 3 ? TextUtils.lower( values[3] ) : TextUtils.EMPTY );
                 column.setQuery( values.length > 4 ? TextUtils.lower( values[4] ) : TextUtils.EMPTY );
 
-                if ( PREFIX_DATA_ELEMENT.equals( prefix ) )
+                if ( "de".equals( prefix ) )
                 {
                     int objectId = Integer.parseInt( values[1] );
                     DataElement dataElement = dataElementService.getDataElement( objectId );
                     if ( dataElement.getType().equals( DataElement.VALUE_TYPE_INT ) )
                     {
-                        column.setPrefix( PREFIX_NUMBER_DATA_ELEMENT );
+                        column.setPrefix( "numberDe" );
                     }
                     dataElements.add( dataElement );
 
-                    String valueType = dataElement.getOptionSet() != null ? VALUE_TYPE_OPTION_SET : dataElement
+                    String valueType = dataElement.getOptionSet() != null ? "optionSet" : dataElement
                         .getType();
                     valueTypes.add( valueType );
                     mapSuggestedValues.put( index, getSuggestedDataElementValues( dataElement ) );

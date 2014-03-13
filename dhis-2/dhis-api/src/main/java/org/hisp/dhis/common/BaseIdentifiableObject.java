@@ -28,20 +28,6 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.lang.Validate;
-import org.hisp.dhis.common.view.SharingBasicView;
-import org.hisp.dhis.common.view.SharingDetailedView;
-import org.hisp.dhis.common.view.SharingExportView;
-import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserGroupAccess;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -49,6 +35,20 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.apache.commons.lang.Validate;
+import org.hisp.dhis.common.annotation.Description;
+import org.hisp.dhis.common.view.SharingBasicView;
+import org.hisp.dhis.common.view.SharingDetailedView;
+import org.hisp.dhis.common.view.SharingExportView;
+import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserGroupAccess;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Bob Jolliffe
@@ -181,6 +181,7 @@ public class BaseIdentifiableObject
 
     @JsonProperty( value = "id" )
     @JacksonXmlProperty( localName = "id", isAttribute = true )
+    @Description( "The Unique Identifier for this Object." )
     public String getUid()
     {
         return uid;
@@ -193,6 +194,7 @@ public class BaseIdentifiableObject
 
     @JsonProperty
     @JacksonXmlProperty( isAttribute = true )
+    @Description( "The unique code for this Object." )
     public String getCode()
     {
         return code;
@@ -205,6 +207,7 @@ public class BaseIdentifiableObject
 
     @JsonProperty
     @JacksonXmlProperty( isAttribute = true )
+    @Description( "The name of this Object. Required and unique." )
     public String getName()
     {
         return name;
@@ -229,6 +232,7 @@ public class BaseIdentifiableObject
 
     @JsonProperty
     @JacksonXmlProperty( isAttribute = true )
+    @Description( "The date this object was created." )
     public Date getCreated()
     {
         return created;
@@ -241,6 +245,7 @@ public class BaseIdentifiableObject
 
     @JsonProperty
     @JacksonXmlProperty( isAttribute = true )
+    @Description( "The date this object was last updated." )
     public Date getLastUpdated()
     {
         return lastUpdated;
@@ -347,7 +352,7 @@ public class BaseIdentifiableObject
     /**
      * Class check uses isAssignableFrom and get-methods to handle proxied objects.
      */
-    @Override   
+    @Override
     public boolean equals( Object o )
     {
         if ( this == o )
@@ -359,7 +364,7 @@ public class BaseIdentifiableObject
         {
             return false;
         }
-        
+
         if ( !getClass().isAssignableFrom( o.getClass() ) )
         {
             return false;

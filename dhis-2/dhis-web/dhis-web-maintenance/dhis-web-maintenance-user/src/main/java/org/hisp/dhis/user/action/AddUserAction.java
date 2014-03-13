@@ -42,7 +42,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.security.PasswordManager;
-import org.hisp.dhis.security.RestoreType;
+import org.hisp.dhis.security.RestoreOptions;
 import org.hisp.dhis.security.SecurityService;
 import org.hisp.dhis.system.util.AttributeUtils;
 import org.hisp.dhis.system.util.LocaleUtils;
@@ -55,6 +55,7 @@ import org.hisp.dhis.user.UserSetting;
 import org.hisp.dhis.user.UserSettingService;
 
 import com.opensymphony.xwork2.Action;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -135,6 +136,13 @@ public class AddUserAction
         this.username = username;
     }
 
+    private String inviteUsername;
+
+    public void setInviteUsername( String inviteUsername )
+    {
+        this.inviteUsername = inviteUsername;
+    }
+
     private String rawPassword;
 
     public void setRawPassword( String rawPassword )
@@ -161,6 +169,13 @@ public class AddUserAction
     public void setEmail( String email )
     {
         this.email = email;
+    }
+
+    private String openId;
+
+    public void setOpenId( String openId )
+    {
+        this.openId = openId;
     }
 
     private String inviteEmail;
@@ -237,6 +252,7 @@ public class AddUserAction
         }
 
         username = username.trim();
+        inviteUsername = inviteUsername.trim();
         inviteEmail = inviteEmail.trim();
 
         // ---------------------------------------------------------------------
@@ -251,8 +267,16 @@ public class AddUserAction
         userCredentials.setUser( user );
         user.setUserCredentials( userCredentials );
 
+        userCredentials.setUsername( username );
+
+        if ( !StringUtils.isEmpty( openId ) )
+        {
+            userCredentials.setOpenId( openId );
+        }
+
         if ( ACCOUNT_ACTION_INVITE.equals( accountAction ) )
         {
+            userCredentials.setUsername( inviteUsername );
             user.setEmail( inviteEmail );
 
             securityService.prepareUserForInvite ( userCredentials );
@@ -264,7 +288,6 @@ public class AddUserAction
             user.setEmail( email );
             user.setPhoneNumber( phoneNumber );
 
-            userCredentials.setUsername( username );
             userCredentials.setPassword( passwordManager.encodePassword( username, rawPassword ) );
         }
 
@@ -299,7 +322,9 @@ public class AddUserAction
 
         if ( ACCOUNT_ACTION_INVITE.equals( accountAction ) )
         {
-            securityService.sendRestoreMessage( userCredentials, getRootPath(), RestoreType.INVITE );
+            RestoreOptions restoreOptions = inviteUsername.isEmpty() ? RestoreOptions.INVITE_WITH_USERNAME_CHOICE : RestoreOptions.INVITE_WITH_DEFINED_USERNAME;
+
+            securityService.sendRestoreMessage( userCredentials, getRootPath(), restoreOptions );
         }
 
         return SUCCESS;

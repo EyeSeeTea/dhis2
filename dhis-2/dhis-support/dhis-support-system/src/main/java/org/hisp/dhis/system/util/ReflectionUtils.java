@@ -29,8 +29,11 @@ package org.hisp.dhis.system.util;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.google.common.collect.Maps;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.annotation.Description;
 import org.hisp.dhis.system.util.functional.Function1;
 import org.hisp.dhis.system.util.functional.Predicate;
 import org.springframework.util.StringUtils;
@@ -401,7 +404,7 @@ public class ReflectionUtils
         return methods;
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public static <T> T invokeMethod( Object target, Method method, Object... args )
     {
         try
@@ -418,7 +421,7 @@ public class ReflectionUtils
         }
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public static <T> T getFieldObject( Field field, T target )
     {
         return (T) invokeGetterMethod( field.getName(), target );
@@ -523,17 +526,156 @@ public class ReflectionUtils
         return fieldName;
     }
 
-    private static Map<Class<?>, Map<String, Method>> classMapCache = Maps.newHashMap();
+    private static Map<Class<?>, Map<String, PropertyDescriptor>> classMapCache = Maps.newHashMap();
 
-    public static Map<String, Method> getJacksonClassMap( Class<?> clazz )
+    public static class PropertyDescriptor
+    {
+        private String name;
+
+        private String description;
+
+        private String xmlName;
+
+        private boolean xmlAttribute;
+
+        private String xmlCollectionName;
+
+        private Class<?> clazz;
+
+        private Method method;
+
+        private boolean collection;
+
+        private boolean identifiableObject;
+
+        private PropertyDescriptor( Method method )
+        {
+            this.method = method;
+        }
+
+        @JsonProperty
+        public String getName()
+        {
+            return name;
+        }
+
+        public void setName( String name )
+        {
+            this.name = name;
+        }
+
+        @JsonProperty
+        public String getDescription()
+        {
+            return description;
+        }
+
+        public void setDescription( String description )
+        {
+            this.description = description;
+        }
+
+        @JsonProperty
+        public String getXmlName()
+        {
+            return xmlName;
+        }
+
+        public void setXmlName( String xmlName )
+        {
+            this.xmlName = xmlName;
+        }
+
+        @JsonProperty
+        public boolean isXmlAttribute()
+        {
+            return xmlAttribute;
+        }
+
+        public void setXmlAttribute( boolean xmlAttribute )
+        {
+            this.xmlAttribute = xmlAttribute;
+        }
+
+        @JsonProperty
+        public String getXmlCollectionName()
+        {
+            return xmlCollectionName;
+        }
+
+        public void setXmlCollectionName( String xmlCollectionName )
+        {
+            this.xmlCollectionName = xmlCollectionName;
+        }
+
+        @JsonProperty
+        public Class<?> getClazz()
+        {
+            return clazz;
+        }
+
+        public void setClazz( Class<?> clazz )
+        {
+            this.clazz = clazz;
+        }
+
+        public Method getMethod()
+        {
+            return method;
+        }
+
+        public void setMethod( Method method )
+        {
+            this.method = method;
+        }
+
+        @JsonProperty
+        public boolean isCollection()
+        {
+            return collection;
+        }
+
+        public void setCollection( boolean collection )
+        {
+            this.collection = collection;
+        }
+
+        @JsonProperty
+        public boolean isIdentifiableObject()
+        {
+            return identifiableObject;
+        }
+
+        public void setIdentifiableObject( boolean identifiableObject )
+        {
+            this.identifiableObject = identifiableObject;
+        }
+
+        @Override
+        public String toString()
+        {
+            return "PropertyDescriptor{" +
+                "name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", xmlName='" + xmlName + '\'' +
+                ", xmlAttribute=" + xmlAttribute +
+                ", xmlCollectionName='" + xmlCollectionName + '\'' +
+                ", clazz=" + clazz +
+                ", method=" + method +
+                ", collection=" + collection +
+                ", identifiableObject=" + identifiableObject +
+                '}';
+        }
+    }
+
+    public static Map<String, PropertyDescriptor> getJacksonClassMap( Class<?> clazz )
     {
         if ( classMapCache.containsKey( clazz ) )
         {
             return classMapCache.get( clazz );
         }
 
-        Map<String, Method> output = Maps.newLinkedHashMap();
-
+        Map<String, PropertyDescriptor> output = Maps.newLinkedHashMap();
         List<Method> allMethods = getAllMethods( clazz );
 
         for ( Method method : allMethods )
@@ -541,14 +683,17 @@ public class ReflectionUtils
             if ( method.isAnnotationPresent( JsonProperty.class ) )
             {
                 JsonProperty jsonProperty = method.getAnnotation( JsonProperty.class );
+                PropertyDescriptor descriptor = new PropertyDescriptor( method );
 
-                if ( StringUtils.isEmpty( jsonProperty.value() ) )
+                String name = jsonProperty.value();
+
+                if ( StringUtils.isEmpty( name ) )
                 {
                     String[] getters = new String[]{
                         "is", "has", "get"
                     };
 
-                    String name = method.getName();
+                    name = method.getName();
 
                     for ( String getter : getters )
                     {
@@ -558,11 +703,63 @@ public class ReflectionUtils
                         }
                     }
 
-                    output.put( StringUtils.uncapitalize( name ), method );
+                    name = StringUtils.uncapitalize( name );
                 }
-                else
+
+                if ( method.isAnnotationPresent( Description.class ) )
                 {
-                    output.put( jsonProperty.value(), method );
+                    Description description = method.getAnnotation( Description.class );
+                    descriptor.setDescription( description.value() );
+                }
+
+                if ( method.isAnnotationPresent( JacksonXmlProperty.class ) )
+                {
+                    JacksonXmlProperty jacksonXmlProperty = method.getAnnotation( JacksonXmlProperty.class );
+
+                    if ( jacksonXmlProperty.localName().isEmpty() )
+                    {
+                        descriptor.setXmlName( name );
+                    }
+                    else
+                    {
+                        descriptor.setXmlName( jacksonXmlProperty.localName() );
+                    }
+
+                    descriptor.setXmlAttribute( jacksonXmlProperty.isAttribute() );
+                }
+
+                if ( method.isAnnotationPresent( JacksonXmlElementWrapper.class ) )
+                {
+                    JacksonXmlElementWrapper jacksonXmlElementWrapper = method.getAnnotation( JacksonXmlElementWrapper.class );
+                    descriptor.setXmlCollectionName( jacksonXmlElementWrapper.localName() );
+                }
+
+                descriptor.setName( name );
+                output.put( name, descriptor );
+
+                Class<?> returnType = method.getReturnType();
+                descriptor.setClazz( returnType );
+
+                if ( IdentifiableObject.class.isAssignableFrom( returnType ) )
+                {
+                    descriptor.setIdentifiableObject( true );
+                }
+                else if ( Collection.class.isAssignableFrom( returnType ) )
+                {
+                    descriptor.setCollection( true );
+
+                    Type type = method.getGenericReturnType();
+
+                    if ( ParameterizedType.class.isInstance( type ) )
+                    {
+                        ParameterizedType parameterizedType = (ParameterizedType) type;
+                        Class<?> klass = (Class<?>) parameterizedType.getActualTypeArguments()[0];
+
+                        if ( IdentifiableObject.class.isAssignableFrom( klass ) )
+                        {
+                            descriptor.setIdentifiableObject( true );
+                        }
+                    }
                 }
             }
         }
