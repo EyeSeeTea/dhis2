@@ -2671,7 +2671,7 @@ Ext.onReady( function() {
 			dataElementSelected.removeAll();
 
             Ext.Ajax.request({
-                url: ns.core.init.contextPath + '/api/programs/filtered?filter=id:eq:' + programId + '&include=programStages[id,name],attributes&paging=false',
+                url: ns.core.init.contextPath + '/api/programs/filtered.json?filter=id:eq:' + programId + '&include=programStages[id,name],attributes&paging=false',
                 success: function(r) {
                     var objects = Ext.decode(r.responseText).objects,
                         stages,
@@ -2744,10 +2744,9 @@ Ext.onReady( function() {
 			loadDataElements(stageId, favorite);
 		};
 
-		loadDataElements = function(item, favorite) {
-			var dataElements,
-				load,
-                programId = program.getValue() || null;
+		loadDataElements = function(stageId, favorite) {
+			var programId = program.getValue() || null,
+                load;
 
 			load = function(dataElements) {
                 var attributes = attributeStorage[programId],
@@ -2763,30 +2762,25 @@ Ext.onReady( function() {
             }
 
             // data elements
-            if (Ext.isString(item)) {
-                if (dataElementStorage.hasOwnProperty(item)) {
-                    load(attributes, dataElementStorage[item]);
-                }
-                else {
-                    Ext.Ajax.request({
-                        url: ns.core.init.contextPath + '/api/programStages/filtered?filter=id:eq:' + item + '&include=programStageDataElements[dataElement[id,name]]',
-                        success: function(r) {
-                            var objects = Ext.decode(r.responseText).objects,
-                                dataElements;
-
-                            if (!Ext.isArray(objects) && objects.length) {
-                                load(attributes);
-                                return;
-                            }
-
-                            dataElements = Ext.Array.pluck(objects[0].programStageDataElements, 'dataElement');
-                            load(dataElements);
-                        }
-                    });
-                }
+            if (dataElementStorage.hasOwnProperty(stageId)) {
+                load(dataElementStorage[stageId]);
             }
-            else if (Ext.isArray(item)) {
-                load(item);
+            else {
+                Ext.Ajax.request({
+                    url: ns.core.init.contextPath + '/api/programStages/filtered.json?filter=id:eq:' + stageId + '&include=programStageDataElements[dataElement[id,name]]',
+                    success: function(r) {
+                        var objects = Ext.decode(r.responseText).objects,
+                            dataElements;
+
+                        if (!Ext.isArray(objects) && objects.length) {
+                            load();
+                            return;
+                        }
+
+                        dataElements = Ext.Array.pluck(objects[0].programStageDataElements, 'dataElement');
+                        load(dataElements);
+                    }
+                });
             }
 		};
 
