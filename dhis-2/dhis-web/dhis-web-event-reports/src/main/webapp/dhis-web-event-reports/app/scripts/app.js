@@ -2663,18 +2663,20 @@ Ext.onReady( function() {
 			}
 		});
 
-		onProgramSelect = function(programId) {
+		onProgramSelect = function(programId, favorite) {
+            programId = favorite ? favorite.program.id : programId;
 			stage.clearValue();
 
 			dataElementsByStageStore.removeAll();
 			dataElementSelected.removeAll();
 
             Ext.Ajax.request({
-                url: 'api/programs/filtered?filter=id:eq:' + programId + '&include=programStages[id,name],attributes&paging=false',
+                url: ns.core.init.contextPath + '/api/programs/filtered?filter=id:eq:' + programId + '&include=programStages[id,name],attributes&paging=false',
                 success: function(r) {
                     var objects = Ext.decode(r.responseText).objects,
                         stages,
-                        attributes;
+                        attributes,
+                        stageId;
 
                     if (!(Ext.isArray(objects) && objects.length)) {
                         return;
@@ -2695,10 +2697,11 @@ Ext.onReady( function() {
                         stagesByProgramStore.removeAll();
                         stagesByProgramStore.loadData(stages);
 
-                        if (stages.length === 1) {
-                            stage.setValue(stages[0].id);
+                        stageId = (favorite ? favorite.programStage.id : null) || (stages.length === 1 ? stages[0].id : null);
 
-                            onStageSelect(stages[0].id);
+                        if (stageId) {
+                            stage.setValue(stageId);
+                            onStageSelect(stageId, favorite);
                         }
                     }
 				}
@@ -2748,49 +2751,65 @@ Ext.onReady( function() {
 
 			programId = programId || program.getValue() || null;
 
-			load = function(items) {
-				//var data = Ext.Array.clean([].concat(attributes || [], dataElements || []));
-				dataElementsByStageStore.loadData(items);
+			load = function(attributes, dataElements) {
+				var data = Ext.Array.clean([].concat(attributes || [], dataElements || []));
+				dataElementsByStageStore.loadData(data);
 			};
 
+            // data elements
 			fn = function(attributes) {
-
-				// data elements
 				if (Ext.isString(item)) {
-					Ext.Ajax.request({
-						url: ns.core.init.contextPath + '/api/programStages/' + item + '.json?links=false&paging=false',
-						success: function(r) {
-							var dataElements = Ext.Array.pluck(Ext.decode(r.responseText).programStageDataElements, 'dataElement');
-							load(attributes, dataElements);
-						}
-					});
+                    if (dataElementStorage.hasOwnProperty(item)) {
+                        load(attributes, dataElementStorage[item]);
+                    }
+                    else {
+                        Ext.Ajax.request({
+                            url: ns.core.init.contextPath + '/api/programStages/filtered?filter=id:eq:' + item + '&include=programStageDataElements[dataElement[id,name]]',
+                            success: function(r) {
+                                var objects = Ext.decode(r.responseText).objects,
+                                    dataElements;
+
+                                if (!Ext.isArray(objects) && objects.length) {
+                                    load(attributes);
+                                    return;
+                                }
+
+                                dataElements = Ext.Array.pluck(objects[0].programStageDataElements, 'dataElement');
+                                load(attributes, dataElements);
+                            }
+                        });
+                    }
 				}
 				else if (Ext.isArray(item)) {
 					load(attributes, item);
 				}
 			};
 
-            if (itemStorage.hasOwnProperty(programId)) {
-                load(itemStorage[programId]);
+            // attributes
+            if (attributeStorage.hasOwnProperty(programId)) {
+                fn(attributeStorage[programId]);
             }
             else {
                 Ext.Ajax.request({
-                    url: ns.core.init.contextPath + '/api/programs/' + programId + '.json?viewClass=withoutOrganisationUnits&links=false',
+                    url: ns.core.init.contextPath + '/api/programs/filtered?filter=id:eq:' + programId + '&include=programStages[id,name],attributes&paging=false',
                     success: function(r) {
-                        var attributes = Ext.decode(r.responseText).attributes;
+                        var objects = Ext.decode(r.responseText).objects,
+                            attributes;
 
-                        if (attributes) {
-                            for (var i = 0; i < attributes.length; i++) {
-                                attributes[i].type = attributes[i].valueType;
-                            }
+                        if (!(Ext.isArray(objects) && objects.length)) {
+                            fn();
+                            return;
+                        }
 
-                            program.storage[programId] = attributes;
+                        attributes = objects[0].attributes;
+
+                        if (!(Ext.isArray(attributes) && attributes.length)) {
+                            attributeStorage[programId] = attributes;
                         }
 
                         fn(attributes);
                     }
                 });
-				}
 			}
 		};
 
