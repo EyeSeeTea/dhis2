@@ -2738,79 +2738,56 @@ Ext.onReady( function() {
 			}
 		});
 
-		onStageSelect = function(stageId) {
+		onStageSelect = function(stageId, favorite) {
 			dataElementSelected.removeAll();
 
-			loadDataElements(stageId);
+			loadDataElements(stageId, favorite);
 		};
 
-		loadDataElements = function(item, programId) {
+		loadDataElements = function(item, favorite) {
 			var dataElements,
 				load,
-				fn;
+                programId = program.getValue() || null;
 
-			programId = programId || program.getValue() || null;
+			load = function(dataElements) {
+                var attributes = attributeStorage[programId],
+                    data = Ext.Array.clean([].concat(attributes || [], dataElements || []));
 
-			load = function(attributes, dataElements) {
-				var data = Ext.Array.clean([].concat(attributes || [], dataElements || []));
 				dataElementsByStageStore.loadData(data);
 			};
 
-            // data elements
-			fn = function(attributes) {
-				if (Ext.isString(item)) {
-                    if (dataElementStorage.hasOwnProperty(item)) {
-                        load(attributes, dataElementStorage[item]);
-                    }
-                    else {
-                        Ext.Ajax.request({
-                            url: ns.core.init.contextPath + '/api/programStages/filtered?filter=id:eq:' + item + '&include=programStageDataElements[dataElement[id,name]]',
-                            success: function(r) {
-                                var objects = Ext.decode(r.responseText).objects,
-                                    dataElements;
-
-                                if (!Ext.isArray(objects) && objects.length) {
-                                    load(attributes);
-                                    return;
-                                }
-
-                                dataElements = Ext.Array.pluck(objects[0].programStageDataElements, 'dataElement');
-                                load(attributes, dataElements);
-                            }
-                        });
-                    }
-				}
-				else if (Ext.isArray(item)) {
-					load(attributes, item);
-				}
-			};
-
-            // attributes
-            if (attributeStorage.hasOwnProperty(programId)) {
-                fn(attributeStorage[programId]);
+            // favorite
+            if (favorite) {
+                dataElementsByStageStore.loadData(favorite.data); //todo
+                return;
             }
-            else {
-                Ext.Ajax.request({
-                    url: ns.core.init.contextPath + '/api/programs/filtered?filter=id:eq:' + programId + '&include=programStages[id,name],attributes&paging=false',
-                    success: function(r) {
-                        var objects = Ext.decode(r.responseText).objects,
-                            attributes;
 
-                        if (!(Ext.isArray(objects) && objects.length)) {
-                            fn();
-                            return;
+            // data elements
+            if (Ext.isString(item)) {
+                if (dataElementStorage.hasOwnProperty(item)) {
+                    load(attributes, dataElementStorage[item]);
+                }
+                else {
+                    Ext.Ajax.request({
+                        url: ns.core.init.contextPath + '/api/programStages/filtered?filter=id:eq:' + item + '&include=programStageDataElements[dataElement[id,name]]',
+                        success: function(r) {
+                            var objects = Ext.decode(r.responseText).objects,
+                                dataElements;
+
+                            if (!Ext.isArray(objects) && objects.length) {
+                                load(attributes);
+                                return;
+                            }
+
+                            dataElements = Ext.Array.pluck(objects[0].programStageDataElements, 'dataElement');
+                            load(dataElements);
                         }
-
-                        attributes = objects[0].attributes;
-
-                        if (!(Ext.isArray(attributes) && attributes.length)) {
-                            attributeStorage[programId] = attributes;
-                        }
-
-                        fn(attributes);
-                    }
-                });
-			}
+                    });
+                }
+            }
+            else if (Ext.isArray(item)) {
+                load(item);
+            }
 		};
 
 		dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
