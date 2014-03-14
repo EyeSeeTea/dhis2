@@ -403,6 +403,7 @@ public class MapView
             opacity = mapView.getOpacity() == null ? opacity : mapView.getOpacity();
             organisationUnitGroupSet = mapView.getOrganisationUnitGroupSet() == null ? organisationUnitGroupSet : mapView.getOrganisationUnitGroupSet();
             areaRadius = mapView.getAreaRadius() == null ? areaRadius : mapView.getAreaRadius();
+            hidden = mapView.getHidden() == null ? hidden : mapView.getHidden();
         }
     }
 }

@@ -2512,7 +2512,7 @@ Ext.onReady( function() {
 
 					for (var i = 0; i < layers.length; i++) {
 						layer = layers[i];
-						//view = layer.widget.getView();
+
 						view = Ext.clone(layer.core.view);
 
                         view.hidden = !layer.visibility;
@@ -2758,7 +2758,7 @@ Ext.onReady( function() {
 									message;
 
 								if (record.data.access.update) {
-									layers = gis.util.map.getVisibleVectorLayers();
+									layers = gis.util.map.getRenderedVectorLayers();
 									message = 'Overwrite favorite?\n\n' + record.data.name;
 
 									if (layers.length) {
@@ -2772,6 +2772,7 @@ Ext.onReady( function() {
 
 												// add
 												view.layer = layer.id;
+                                                view.hidden = !layer.visibility;
 
 												// remove
 												delete view.periodType;
