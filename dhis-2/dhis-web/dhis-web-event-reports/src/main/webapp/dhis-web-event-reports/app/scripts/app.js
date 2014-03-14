@@ -2678,7 +2678,7 @@ Ext.onReady( function() {
                         attributes,
                         stageId;
 
-                    if (!(Ext.isArray(objects) && objects.length)) {
+                    if (!objects.length) {
                         return;
                     }
 
