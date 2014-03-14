@@ -100,6 +100,8 @@ public class MapView
     private OrganisationUnitGroupSet organisationUnitGroupSet;
 
     private Integer areaRadius;
+    
+    private Boolean hidden;
 
     // -------------------------------------------------------------------------
     // Transient properties
@@ -340,6 +342,19 @@ public class MapView
     public void setAreaRadius( Integer areaRadius )
     {
         this.areaRadius = areaRadius;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public Boolean getHidden()
+    {
+        return hidden;
+    }
+
+    public void setHidden( Boolean hidden )
+    {
+        this.hidden = hidden;
     }
 
     @JsonProperty

@@ -2305,6 +2305,18 @@ Ext.onReady( function() {
 				return layers;
 			};
 
+			util.map.getRenderedVectorLayers = function() {
+				var layers = [];
+
+				for (var i = 0, layer; i < gis.olmap.layers.length; i++) {
+					layer = gis.olmap.layers[i];
+					if (layer.layerType === conf.finals.layer.type_vector && layer.features.length) {
+						layers.push(layer);
+					}
+				}
+				return layers;
+			};
+
 			util.map.getExtendedBounds = function(layers) {
 				var bounds = null;
 				if (layers.length) {
@@ -2555,6 +2567,10 @@ Ext.onReady( function() {
 
 				// legendSet: object
 
+                // areaRadius: integer
+
+                // hidden: boolean (false)
+
 				getValidatedDimensionArray = function(dimensionArray) {
 					var dimensions = [];
 
@@ -2693,6 +2709,8 @@ Ext.onReady( function() {
 					layout.radiusLow = Ext.isNumber(config.radiusLow) && !Ext.isEmpty(config.radiusLow) ? config.radiusLow : 5;
 					layout.radiusHigh = Ext.isNumber(config.radiusHigh) && !Ext.isEmpty(config.radiusHigh) ? config.radiusHigh : 15;
 					layout.opacity = Ext.isNumber(config.opacity) && !Ext.isEmpty(config.opacity) ? config.opacity : 1;
+					layout.areaRadius = config.areaRadius;
+                    layout.hidden = !!config.hidden;
 
 					layout.userOrganisationUnit = isOu;
 					layout.userOrganisationUnitChildren = isOuc;
@@ -2703,7 +2721,6 @@ Ext.onReady( function() {
 					layout.legendSet = config.legendSet;
 
 					layout.organisationUnitGroupSet = config.organisationUnitGroupSet;
-					layout.areaRadius = config.areaRadius;
 
 					return layout;
 				}();

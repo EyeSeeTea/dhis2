@@ -2493,7 +2493,7 @@ Ext.onReady( function() {
 				text: GIS.i18n.create,
 				handler: function() {
 					var name = nameTextfield.getValue(),
-						layers = gis.util.map.getVisibleVectorLayers(),
+						layers = gis.util.map.getRenderedVectorLayers(),
 						layer,
 						lonlat = gis.olmap.getCenter(),
 						views = [],
@@ -2514,6 +2514,8 @@ Ext.onReady( function() {
 						layer = layers[i];
 						//view = layer.widget.getView();
 						view = Ext.clone(layer.core.view);
+
+                        view.hidden = !layer.visibility;
 
 						// Operand
 						if (Ext.isArray(view.columns) && view.columns.length) {
@@ -4943,7 +4945,7 @@ Ext.onReady( function() {
 			setLayerGui = function() {
 
 				// Layer item
-				layer.item.setValue(true, view.opacity);
+				layer.item.setValue(!view.hidden, view.opacity);
 
 				// Layer menu
 				layer.menu.enableItems();
@@ -5606,7 +5608,7 @@ Ext.onReady( function() {
 			setLayerGui = function() {
 
 				// Layer item
-				layer.item.setValue(true, view.opacity);
+				layer.item.setValue(!view.hidden, view.opacity);
 
 				// Layer menu
 				layer.menu.enableItems();
@@ -6280,7 +6282,7 @@ Ext.onReady( function() {
 			setLayerGui = function() {
 
 				// Layer item
-				layer.item.setValue(true, view.opacity);
+				layer.item.setValue(!view.hidden, view.opacity);
 
 				// Layer menu
 				layer.menu.enableItems();
@@ -7736,7 +7738,7 @@ Ext.onReady( function() {
 			setLayerGui = function() {
 
 				// Layer item
-				layer.item.setValue(true, view.opacity);
+				layer.item.setValue(!view.hidden, view.opacity);
 
 				// Layer menu
 				layer.menu.enableItems();
