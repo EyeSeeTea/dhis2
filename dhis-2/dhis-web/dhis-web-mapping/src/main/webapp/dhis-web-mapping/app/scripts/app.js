@@ -176,7 +176,7 @@ Ext.onReady( function() {
 						}
 					}
 
-					if (layout.opacity === 0.8) {
+					if (layout.opacity === 1) {
 						delete layout.opacity;
 					}
 
@@ -692,7 +692,7 @@ Ext.onReady( function() {
 			text: null,
 			height: 22,
 			value: false,
-			opacity: 0.8,
+			opacity: 1,
 			getValue: function() {
 				return this.checkbox.getValue();
 			},
