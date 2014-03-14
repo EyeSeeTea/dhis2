@@ -5058,7 +5058,7 @@ Ext.onReady( function() {
 
 		treePanel = Ext.create('Ext.tree.Panel', {
 			cls: 'gis-tree',
-			height: 300,
+			height: 200,
 			style: 'border-top: 1px solid #ddd; padding-top: 1px',
 			displayField: 'name',
 			width: gis.conf.layout.widget.item_width,
@@ -5758,7 +5758,7 @@ Ext.onReady( function() {
 
 		treePanel = Ext.create('Ext.tree.Panel', {
 			cls: 'gis-tree',
-			height: 300,
+			height: 200,
 			style: 'border-top: 1px solid #ddd; padding-top: 1px',
 			displayField: 'name',
 			width: gis.conf.layout.widget.item_width,
@@ -7081,7 +7081,7 @@ Ext.onReady( function() {
 
 		treePanel = Ext.create('Ext.tree.Panel', {
 			cls: 'gis-tree',
-			height: 300,
+			height: 200,
 			style: 'border-top: 1px solid #ddd; padding-top: 1px',
 			displayField: 'name',
 			width: gis.conf.layout.widget.item_width,
