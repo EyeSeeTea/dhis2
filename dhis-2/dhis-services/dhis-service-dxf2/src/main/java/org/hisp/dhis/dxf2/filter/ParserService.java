@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.schema.descriptors;
+package org.hisp.dhis.dxf2.filter;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,20 +28,15 @@ package org.hisp.dhis.dxf2.schema.descriptors;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
-import org.hisp.dhis.dxf2.schema.Schema;
-import org.hisp.dhis.dxf2.schema.SchemaDescriptor;
-import org.springframework.stereotype.Component;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Component
-public class CategoryOptionGroupSetSchemaDescriptor implements SchemaDescriptor
+public interface ParserService
 {
-    @Override
-    public Schema getSchema()
-    {
-        return new Schema( CategoryOptionGroupSet.class, "categoryOptionGroupSet", "categoryOptionGroupSets", false, false, true );
-    }
+    Filters parserObjectFilter( List<String> filters );
+
+    Map<String,Map> parsePropertyFilter( String filter );
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.common.ops;
+package org.hisp.dhis.dxf2.filter;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,10 +28,16 @@ package org.hisp.dhis.dxf2.common.ops;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.common.IdentifiableObject;
+
+import java.util.List;
+
 /**
-* @author Morten Olav Hansen <mortenoh@gmail.com>
-*/
-public enum OpStatus
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
+public interface FilterService
 {
-    INCLUDE, EXCLUDE, IGNORE
+    <T extends IdentifiableObject> List<T> filterObjects( List<T> objects, List<String> filters );
+
+    <T extends IdentifiableObject> List<Object> filterProperties( List<T> objects, String include, String exclude );
 }

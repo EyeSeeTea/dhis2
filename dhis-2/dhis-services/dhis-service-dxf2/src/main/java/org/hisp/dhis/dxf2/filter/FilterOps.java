@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.common.ops;
+package org.hisp.dhis.dxf2.filter;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,27 +28,47 @@ package org.hisp.dhis.dxf2.common.ops;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import org.hisp.dhis.dxf2.filter.ops.Op;
+
+import java.util.List;
+import java.util.Map;
+
 /**
 * @author Morten Olav Hansen <mortenoh@gmail.com>
 */
-public class LikeOp extends Op
+public class FilterOps
 {
-    @Override
-    public OpStatus evaluate( Object object )
+    private Map<String, List<Op>> filters = Maps.newHashMap();
+
+    FilterOps()
     {
-        if ( getValue() == null || object == null )
+    }
+
+    public void addFilter( String opStr, Op op )
+    {
+        if ( !filters.containsKey( opStr ) )
         {
-            return OpStatus.IGNORE;
+            filters.put( opStr, Lists.<Op>newArrayList() );
         }
 
-        if ( String.class.isInstance( object ) )
-        {
-            String s1 = getValue( String.class );
-            String s2 = (String) object;
+        filters.get( opStr ).add( op );
+    }
 
-            return (s1 != null && s2.toLowerCase().contains( s1.toLowerCase() )) ? OpStatus.INCLUDE : OpStatus.EXCLUDE;
-        }
+    public Map<String, List<Op>> getFilters()
+    {
+        return filters;
+    }
 
-        return OpStatus.IGNORE;
+    public void setFilters( Map<String, List<Op>> filters )
+    {
+        this.filters = filters;
+    }
+
+    @Override
+    public String toString()
+    {
+        return filters.toString();
     }
 }

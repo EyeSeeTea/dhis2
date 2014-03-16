@@ -39,6 +39,7 @@ import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.common.PagerUtils;
 import org.hisp.dhis.common.SharingUtils;
+import org.hisp.dhis.dxf2.filter.FilterService;
 import org.hisp.dhis.dxf2.metadata.ExchangeClasses;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.system.util.ReflectionUtils;
@@ -80,12 +81,15 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     @Autowired
     protected CurrentUserService currentUserService;
 
+    @Autowired
+    protected FilterService filterService;
+
     //--------------------------------------------------------------------------
     // GET
     //--------------------------------------------------------------------------
 
     @RequestMapping( value = "/filtered", method = RequestMethod.GET )
-    public void getJacksonClassMap(
+    public void getObjectListFiltered(
         @RequestParam( required = false ) String include,
         @RequestParam( required = false ) String exclude,
         @RequestParam( value = "filter", required = false ) List<String> filters,
@@ -95,7 +99,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         WebMetaData metaData = new WebMetaData();
         options.getOptions().put( "links", "false" );
 
-        boolean hasPaging = false;
+        boolean hasPaging = options.hasPaging();
 
         // get full list if we are using filters
         if ( filters != null && !filters.isEmpty() )
@@ -116,7 +120,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         if ( filters != null && !filters.isEmpty() )
         {
-            entityList = WebUtils.filterObjects( entityList, filters );
+            entityList = filterService.filterObjects( entityList, filters );
 
             if ( hasPaging )
             {
@@ -126,7 +130,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             }
         }
 
-        List<Object> objects = WebUtils.filterFields( entityList, include, exclude );
+        List<Object> objects = filterService.filterProperties( entityList, include, exclude );
         Map<String, Object> output = Maps.newLinkedHashMap();
 
         if ( hasPaging )
