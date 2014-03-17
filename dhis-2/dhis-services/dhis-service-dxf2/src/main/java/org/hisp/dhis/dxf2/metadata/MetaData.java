@@ -32,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.collect.Lists;
 import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.DimensionalObject;
@@ -54,6 +55,7 @@ import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.Section;
 import org.hisp.dhis.document.Document;
+import org.hisp.dhis.dxf2.schema.Schema;
 import org.hisp.dhis.filter.MetaDataFilter;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
@@ -97,7 +99,9 @@ public class MetaData
 {
     private Date created;
 
-    private List<Attribute> attributeTypes = new ArrayList<Attribute>();
+    private List<Schema> schemas = Lists.newArrayList();
+
+    private List<Attribute> attributes = new ArrayList<Attribute>();
 
     private List<Document> documents = new ArrayList<Document>();
 
@@ -148,7 +152,7 @@ public class MetaData
     private List<IndicatorGroupSet> indicatorGroupSets = new ArrayList<IndicatorGroupSet>();
 
     private List<IndicatorType> indicatorTypes = new ArrayList<IndicatorType>();
-    
+
     private List<NameableObject> items = new ArrayList<NameableObject>();
 
     private List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>();
@@ -216,16 +220,29 @@ public class MetaData
     }
 
     @JsonProperty
-    @JacksonXmlElementWrapper(localName = "attributeTypes", namespace = DxfNamespaces.DXF_2_0)
-    @JacksonXmlProperty(localName = "attributeType", namespace = DxfNamespaces.DXF_2_0)
-    public List<Attribute> getAttributeTypes()
+    @JacksonXmlElementWrapper( localName = "schemas", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "schema", namespace = DxfNamespaces.DXF_2_0 )
+    public List<Schema> getSchemas()
     {
-        return attributeTypes;
+        return schemas;
     }
 
-    public void setAttributeTypes( List<Attribute> attributeTypes )
+    public void setSchemas( List<Schema> schemas )
     {
-        this.attributeTypes = attributeTypes;
+        this.schemas = schemas;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper(localName = "attributes", namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty(localName = "attribute", namespace = DxfNamespaces.DXF_2_0)
+    public List<Attribute> getAttributes()
+    {
+        return attributes;
+    }
+
+    public void setAttributes( List<Attribute> attributes )
+    {
+        this.attributes = attributes;
     }
 
     @JsonProperty
@@ -883,7 +900,7 @@ public class MetaData
     {
         return "MetaData{" +
             "created=" + created +
-            ", attributeTypes=" + attributeTypes +
+            ", attributes=" + attributes +
             ", documents=" + documents +
             ", constants=" + constants +
             ", concepts=" + concepts +

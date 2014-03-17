@@ -31,12 +31,11 @@ package org.hisp.dhis.dxf2.events.event;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.hisp.dhis.dxf2.events.person.Person;
+import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.system.util.TextUtils;
-import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -81,11 +80,11 @@ public class DefaultEventStore
     }
 
     @Override
-    public List<Event> getAll( Program program, OrganisationUnit organisationUnit, Person person, Date startDate,
+    public List<Event> getAll( Program program, OrganisationUnit organisationUnit, TrackedEntityInstance trackedEntityInstance, Date startDate,
         Date endDate )
     {
         return getAll( Arrays.asList( program ), new ArrayList<ProgramStage>(), Arrays.asList( organisationUnit ),
-            person, startDate, endDate );
+            trackedEntityInstance, startDate, endDate );
     }
 
     @Override
@@ -104,11 +103,11 @@ public class DefaultEventStore
     }
 
     @Override
-    public List<Event> getAll( ProgramStage programStage, OrganisationUnit organisationUnit, Person person,
+    public List<Event> getAll( ProgramStage programStage, OrganisationUnit organisationUnit, TrackedEntityInstance trackedEntityInstance,
         Date startDate, Date endDate )
     {
         return getAll( new ArrayList<Program>(), Arrays.asList( programStage ), Arrays.asList( organisationUnit ),
-            person, startDate, endDate );
+            trackedEntityInstance, startDate, endDate );
     }
 
     @Override
@@ -120,10 +119,10 @@ public class DefaultEventStore
 
     @Override
     public List<Event> getAll( Program program, ProgramStage programStage, OrganisationUnit organisationUnit,
-        Person person )
+        TrackedEntityInstance trackedEntityInstance )
     {
         return getAll( Arrays.asList( program ), Arrays.asList( programStage ), Arrays.asList( organisationUnit ),
-            person, null, null );
+            trackedEntityInstance, null, null );
     }
 
     @Override
@@ -136,10 +135,10 @@ public class DefaultEventStore
 
     @Override
     public List<Event> getAll( Program program, ProgramStage programStage, OrganisationUnit organisationUnit,
-        Person person, Date startDate, Date endDate )
+        TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate )
     {
         return getAll( Arrays.asList( program ), Arrays.asList( programStage ), Arrays.asList( organisationUnit ),
-            person, startDate, endDate );
+            trackedEntityInstance, startDate, endDate );
     }
 
     @Override
@@ -165,24 +164,24 @@ public class DefaultEventStore
 
     @Override
     public List<Event> getAll( List<Program> programs, List<ProgramStage> programStages,
-        List<OrganisationUnit> organisationUnits, Person person, Date startDate, Date endDate )
+        List<OrganisationUnit> organisationUnits, TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate )
     {
         List<Event> events = new ArrayList<Event>();
 
-        Integer personId = null;
+        Integer trackedEntityInstanceId = null;
 
-        if ( person != null )
+        if ( trackedEntityInstance != null )
         {
-            TrackedEntityInstance entityInstance = entityInstanceService.getTrackedEntityInstance( person.getPerson() );
+            org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance = entityInstanceService.getTrackedEntityInstance( trackedEntityInstance.getTrackedEntityInstance() );
 
             if ( entityInstance != null )
             {
-                personId = entityInstance.getId();
+                trackedEntityInstanceId = entityInstance.getId();
             }
         }
 
         String sql = buildSql( getIdList( programs ), getIdList( programStages ), getIdList( organisationUnits ),
-            personId, startDate, endDate );
+            trackedEntityInstanceId, startDate, endDate );
 
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet( sql );
 
@@ -196,7 +195,7 @@ public class DefaultEventStore
                 event = new Event();
 
                 event.setEvent( rowSet.getString( "psi_uid" ) );
-                event.setPerson( rowSet.getString( "pa_uid" ) );
+                event.setTrackedEntityInstance( rowSet.getString( "pa_uid" ) );
                 event.setStatus( EventStatus.fromInt( rowSet.getInt( "psi_status" ) ) );
                 event.setProgram( rowSet.getString( "p_uid" ) );
                 event.setProgramStage( rowSet.getString( "ps_uid" ) );
@@ -250,7 +249,7 @@ public class DefaultEventStore
     }
 
     private String buildSql( List<Integer> programIds, List<Integer> programStageIds, List<Integer> orgUnitIds,
-        Integer personId, Date startDate, Date endDate )
+        Integer trackedEntityInstanceId, Date startDate, Date endDate )
     {
         String sql = "select p.uid as p_uid, ps.uid as ps_uid, ps.capturecoordinates as ps_capturecoordinates, pa.uid as pa_uid, psi.uid as psi_uid, psi.status as psi_status, ou.uid as ou_uid, "
             + "psi.executiondate as psi_executiondate, psi.completeduser as psi_completeduser, psi.longitude as psi_longitude, psi.latitude as psi_latitude,"
@@ -266,15 +265,15 @@ public class DefaultEventStore
 
         boolean startedWhere = false;
 
-        if ( personId != null )
+        if ( trackedEntityInstanceId != null )
         {
             if ( startedWhere )
             {
-                sql += " and pa.trackedentityinstanceid=" + personId;
+                sql += " and pa.trackedentityinstanceid=" + trackedEntityInstanceId;
             }
             else
             {
-                sql += " where pa.trackedentityinstanceid=" + personId;
+                sql += " where pa.trackedentityinstanceid=" + trackedEntityInstanceId;
                 startedWhere = true;
             }
         }

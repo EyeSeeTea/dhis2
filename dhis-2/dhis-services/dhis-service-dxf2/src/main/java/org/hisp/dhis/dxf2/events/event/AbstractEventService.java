@@ -38,7 +38,7 @@ import java.util.Set;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.dxf2.events.person.Person;
+import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.importsummary.ImportConflict;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
@@ -57,7 +57,6 @@ import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.ValidationUtils;
-import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.trackedentitycomment.TrackedEntityComment;
 import org.hisp.dhis.trackedentitycomment.TrackedEntityCommentService;
@@ -165,17 +164,17 @@ public abstract class AbstractEventService
 
         if ( program.isRegistration() )
         {
-            if ( event.getPerson() == null )
+            if ( event.getTrackedEntityInstance() == null )
             {
                 return new ImportSummary( ImportStatus.ERROR,
-                    "No Event.person was provided for registration based program." );
+                    "No Event.trackedEntityInstance was provided for registration based program." );
             }
 
-            TrackedEntityInstance entityInstance = entityInstanceService.getTrackedEntityInstance( event.getPerson() );
+            org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance = entityInstanceService.getTrackedEntityInstance( event.getTrackedEntityInstance() );
 
             if ( entityInstance == null )
             {
-                return new ImportSummary( ImportStatus.ERROR, "Event.person does not point to a valid person." );
+                return new ImportSummary( ImportStatus.ERROR, "Event.trackedEntityInstance does not point to a valid trackedEntityInstance." );
             }
 
             List<ProgramInstance> programInstances = new ArrayList<ProgramInstance>(
@@ -183,12 +182,12 @@ public abstract class AbstractEventService
 
             if ( programInstances.isEmpty() )
             {
-                return new ImportSummary( ImportStatus.ERROR, "Person " + entityInstance.getUid()
+                return new ImportSummary( ImportStatus.ERROR, "TrackedEntityInstance " + entityInstance.getUid()
                     + " is not enrolled in program " + program.getUid() );
             }
             else if ( programInstances.size() > 1 )
             {
-                return new ImportSummary( ImportStatus.ERROR, "Person " + entityInstance.getUid()
+                return new ImportSummary( ImportStatus.ERROR, "TrackedEntityInstance " + entityInstance.getUid()
                     + " have multiple active enrollments into program " + program.getUid()
                     + " please check and correct your database." );
             }
@@ -202,12 +201,12 @@ public abstract class AbstractEventService
 
                 if ( programStageInstances.isEmpty() )
                 {
-                    return new ImportSummary( ImportStatus.ERROR, "Person " + entityInstance.getUid()
+                    return new ImportSummary( ImportStatus.ERROR, "TrackedEntityInstance " + entityInstance.getUid()
                         + " is not enrolled in programStage " + programStage.getUid() );
                 }
                 else if ( programStageInstances.size() > 1 )
                 {
-                    return new ImportSummary( ImportStatus.ERROR, "Person " + entityInstance.getUid()
+                    return new ImportSummary( ImportStatus.ERROR, "TrackedEntityInstance " + entityInstance.getUid()
                         + " have multiple active enrollments into programStage " + programStage.getUid()
                         + " please check and correct your database for multiple active stages." );
                 }
@@ -308,10 +307,10 @@ public abstract class AbstractEventService
     }
 
     @Override
-    public Events getEvents( Program program, OrganisationUnit organisationUnit, Person person, Date startDate,
+    public Events getEvents( Program program, OrganisationUnit organisationUnit, TrackedEntityInstance trackedEntityInstance, Date startDate,
         Date endDate )
     {
-        List<Event> eventList = eventStore.getAll( program, organisationUnit, person, startDate, endDate );
+        List<Event> eventList = eventStore.getAll( program, organisationUnit, trackedEntityInstance, startDate, endDate );
         Events events = new Events();
         events.setEvents( eventList );
 
@@ -339,10 +338,10 @@ public abstract class AbstractEventService
     }
 
     @Override
-    public Events getEvents( ProgramStage programStage, OrganisationUnit organisationUnit, Person person,
+    public Events getEvents( ProgramStage programStage, OrganisationUnit organisationUnit, TrackedEntityInstance trackedEntityInstance,
         Date startDate, Date endDate )
     {
-        List<Event> eventList = eventStore.getAll( programStage, organisationUnit, person, startDate, endDate );
+        List<Event> eventList = eventStore.getAll( programStage, organisationUnit, trackedEntityInstance, startDate, endDate );
         Events events = new Events();
         events.setEvents( eventList );
 
@@ -361,9 +360,9 @@ public abstract class AbstractEventService
 
     @Override
     public Events getEvents( Program program, ProgramStage programStage, OrganisationUnit organisationUnit,
-        Person person )
+        TrackedEntityInstance trackedEntityInstance )
     {
-        List<Event> eventList = eventStore.getAll( program, programStage, organisationUnit, person );
+        List<Event> eventList = eventStore.getAll( program, programStage, organisationUnit, trackedEntityInstance );
         Events events = new Events();
         events.setEvents( eventList );
 
@@ -383,9 +382,9 @@ public abstract class AbstractEventService
 
     @Override
     public Events getEvents( Program program, ProgramStage programStage, OrganisationUnit organisationUnit,
-        Person person, Date startDate, Date endDate )
+        TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate )
     {
-        List<Event> eventList = eventStore.getAll( program, programStage, organisationUnit, person, startDate, endDate );
+        List<Event> eventList = eventStore.getAll( program, programStage, organisationUnit, trackedEntityInstance, startDate, endDate );
         Events events = new Events();
         events.setEvents( eventList );
 
@@ -405,9 +404,9 @@ public abstract class AbstractEventService
 
     @Override
     public Events getEvents( List<Program> programs, List<ProgramStage> programStages,
-        List<OrganisationUnit> organisationUnits, Person person, Date startDate, Date endDate )
+        List<OrganisationUnit> organisationUnits, TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate )
     {
-        List<Event> eventList = eventStore.getAll( programs, programStages, organisationUnits, person, startDate,
+        List<Event> eventList = eventStore.getAll( programs, programStages, organisationUnits, trackedEntityInstance, startDate,
             endDate );
         Events events = new Events();
         events.setEvents( eventList );
@@ -562,7 +561,7 @@ public abstract class AbstractEventService
 
         if ( programStageInstance.getProgramInstance().getEntityInstance() != null )
         {
-            event.setPerson( programStageInstance.getProgramInstance().getEntityInstance().getUid() );
+            event.setTrackedEntityInstance( programStageInstance.getProgramInstance().getEntityInstance().getUid() );
         }
 
         event.setStatus( EventStatus.fromInt( programStageInstance.getStatus() ) );
@@ -574,7 +573,7 @@ public abstract class AbstractEventService
 
         if ( programStageInstance.getProgramInstance().getEntityInstance() != null )
         {
-            event.setPerson( programStageInstance.getProgramInstance().getEntityInstance().getUid() );
+            event.setTrackedEntityInstance( programStageInstance.getProgramInstance().getEntityInstance().getUid() );
         }
 
         if ( programStageInstance.getProgramStage().getCaptureCoordinates() )
