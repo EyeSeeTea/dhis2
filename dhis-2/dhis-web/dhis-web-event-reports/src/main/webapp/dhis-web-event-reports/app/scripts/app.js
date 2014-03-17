@@ -2501,8 +2501,9 @@ Ext.onReady( function() {
             organisationUnitGroupStore,
 
         // cache
-            dataElementStorage = {},
+            stageStorage = {},
             attributeStorage = {},
+            dataElementStorage = {},
 
 		// components
 			program,
@@ -2579,27 +2580,7 @@ Ext.onReady( function() {
 
 		stagesByProgramStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
-			proxy: {
-				type: 'ajax',
-				url: '',
-				reader: {
-					type: 'json',
-					root: 'programStages'
-				}
-			},
 			isLoaded: false,
-			loadFn: function(fn) {
-				if (Ext.isFunction(fn)) {
-					if (this.isLoaded) {
-						fn.call();
-					}
-					else {
-						this.load({
-							callback: fn
-						});
-					}
-				}
-			},
 			listeners: {
 				load: function() {
 					if (!this.isLoaded) {
@@ -2664,48 +2645,63 @@ Ext.onReady( function() {
 		});
 
 		onProgramSelect = function(programId, favorite) {
+            var load;
+
             programId = favorite ? favorite.program.id : programId;
 			stage.clearValue();
 
 			dataElementsByStageStore.removeAll();
 			dataElementSelected.removeAll();
 
-            Ext.Ajax.request({
-                url: ns.core.init.contextPath + '/api/programs/filtered.json?filter=id:eq:' + programId + '&include=programStages[id,name],attributes&paging=false',
-                success: function(r) {
-                    var objects = Ext.decode(r.responseText).objects,
-                        stages,
-                        attributes,
-                        stageId;
+            load = function(stages) {
+                stage.enable();
+                stage.clearValue();
 
-                    if (!objects.length) {
-                        return;
-                    }
+                stagesByProgramStore.removeAll();
+                stagesByProgramStore.loadData(stages);
 
-                    stages = objects[0].programStages;
-                    attributes = objects[0].attributes;
+                stageId = (favorite ? favorite.programStage.id : null) || (stages.length === 1 ? stages[0].id : null);
 
-                    // attribute cache
-                    if (Ext.isArray(attributes) && attributes.length) {
-                        attributeStorage[programId] = attributes;
-                    }
+                if (stageId) {
+                    stage.setValue(stageId);
+                    onStageSelect(stageId, favorite);
+                }
+            };
 
-                    if (Ext.isArray(stages) && stages.length) {
-                        stage.enable();
-                        stage.clearValue();
+            if (stageStorage.hasOwnProperty(programId)) {
+                load(stageStorage[programId]);
+            }
+            else {
+                Ext.Ajax.request({
+                    url: ns.core.init.contextPath + '/api/programs/filtered.json?filter=id:eq:' + programId + '&include=programStages[id,name],attributes&paging=false',
+                    success: function(r) {
+                        var objects = Ext.decode(r.responseText).objects,
+                            stages,
+                            attributes,
+                            stageId;
 
-                        stagesByProgramStore.removeAll();
-                        stagesByProgramStore.loadData(stages);
+                        if (!objects.length) {
+                            return;
+                        }
 
-                        stageId = (favorite ? favorite.programStage.id : null) || (stages.length === 1 ? stages[0].id : null);
+                        stages = objects[0].programStages;
+                        attributes = objects[0].attributes;
 
-                        if (stageId) {
-                            stage.setValue(stageId);
-                            onStageSelect(stageId, favorite);
+                        // attributes cache
+                        if (Ext.isArray(attributes) && attributes.length) {
+                            attributeStorage[programId] = attributes;
+                        }
+
+                        if (Ext.isArray(stages) && stages.length) {
+
+                            // stages cache
+                            stageStorage[programId] = stages;
+
+                            load(stages);
                         }
                     }
-				}
-			});
+                });
+            }
 		};
 
 		stage = Ext.create('Ext.form.field.ComboBox', {
@@ -2718,7 +2714,7 @@ Ext.onReady( function() {
 			labelCls: 'ns-form-item-label-top',
 			labelSeparator: '',
 			emptyText: 'Select stage',
-			queryMode: 'remote',
+			queryMode: 'local',
 			forceSelection: true,
 			columnWidth: 0.5,
 			style: 'margin:1px 0 2px 1px',
@@ -2778,6 +2774,10 @@ Ext.onReady( function() {
                         }
 
                         dataElements = Ext.Array.pluck(objects[0].programStageDataElements, 'dataElement');
+
+                        // data elements cache
+                        dataElementStorage[stageId] = dataElements;
+
                         load(dataElements);
                     }
                 });
