@@ -2772,7 +2772,7 @@ Ext.onReady( function() {
                         var objects = Ext.decode(r.responseText).objects,
                             dataElements;
 
-                        if (!Ext.isArray(objects) && objects.length) {
+                        if (!objects.length) {
                             load();
                             return;
                         }
