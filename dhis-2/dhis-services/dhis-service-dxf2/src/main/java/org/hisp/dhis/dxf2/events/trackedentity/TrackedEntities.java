@@ -1,4 +1,4 @@
-package org.hisp.dhis.analytics.event;
+package org.hisp.dhis.dxf2.events.trackedentity;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,26 +28,46 @@ package org.hisp.dhis.analytics.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.trackedentity.TrackedEntity;
+
+import java.util.ArrayList;
 import java.util.List;
 
-import org.hisp.dhis.common.IllegalQueryException;
-
 /**
- * @author Lars Helge Overland
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface EventQueryPlanner
+@JacksonXmlRootElement( localName = "trackedEntities", namespace = DxfNamespaces.DXF_2_0 )
+public class TrackedEntities
 {
-    final String TABLE_PREFIX = "analytics_event";
-    
-    void validate( EventQueryParams params )
-        throws IllegalQueryException;
-    
-    /**
-     * Plans the given params and returns a list of params.
-     * 
-     * @param params the query params.
-     * @param validPartitions the list of existing database partition names, only
-     *        required for aggregate queries.
-     */
-    List<EventQueryParams> planQuery( EventQueryParams params, List<String> validPartitions );
+    private List<TrackedEntity> trackedEntities = new ArrayList<TrackedEntity>();
+
+    public TrackedEntities()
+    {
+    }
+
+    @JsonProperty( "trackedEntityList" )
+    @JacksonXmlElementWrapper( localName = "trackedEntityList", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "trackedEntity", namespace = DxfNamespaces.DXF_2_0 )
+    public List<TrackedEntity> getTrackedEntities()
+    {
+        return trackedEntities;
+    }
+
+    public void setTrackedEntities( List<TrackedEntity> trackedEntities )
+    {
+        this.trackedEntities = trackedEntities;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "TrackedEntityInstances{" +
+            "trackedEntities=" + trackedEntities +
+            '}';
+    }
 }

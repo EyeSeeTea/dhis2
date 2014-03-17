@@ -29,7 +29,7 @@ package org.hisp.dhis.api.controller;
  */
 
 import static org.hisp.dhis.analytics.AnalyticsService.NAMES_META_KEY;
-import static org.hisp.dhis.analytics.DataQueryParams.getDimensionsFromParam;
+import static org.hisp.dhis.common.DimensionalObjectUtils.getDimensionsFromParam;
 
 import java.util.Map;
 import java.util.Set;
@@ -39,10 +39,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.analytics.AnalyticsService;
 import org.hisp.dhis.analytics.DataQueryParams;
-import org.hisp.dhis.analytics.IllegalQueryException;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.api.utils.ContextUtils.CacheStrategy;
 import org.hisp.dhis.common.Grid;
+import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.system.grid.GridUtils;
 import org.springframework.beans.factory.annotation.Autowired;
