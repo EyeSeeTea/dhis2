@@ -2763,7 +2763,7 @@ Ext.onReady( function() {
             }
             else {
                 Ext.Ajax.request({
-                    url: ns.core.init.contextPath + '/api/programStages/filtered.json?filter=id:eq:' + stageId + '&include=programStageDataElements[dataElement[id,name]]',
+                    url: ns.core.init.contextPath + '/api/programStages/filtered.json?filter=id:eq:' + stageId + '&include=programStageDataElements[dataElement[id,name,type,optionSet[id,name]]]',
                     success: function(r) {
                         var objects = Ext.decode(r.responseText).objects,
                             dataElements;
