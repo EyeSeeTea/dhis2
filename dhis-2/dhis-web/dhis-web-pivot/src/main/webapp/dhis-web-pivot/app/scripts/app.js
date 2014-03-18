@@ -2558,10 +2558,10 @@ Ext.onReady( function() {
 			fields: ['id', 'name', 'index'],
 			proxy: {
 				type: 'ajax',
-				url: ns.core.init.contextPath + '/api/indicatorGroups.json?paging=false&links=false',
+				url: ns.core.init.contextPath + '/api/indicatorGroups/filtered.json?include=id,name&paging=false',
 				reader: {
 					type: 'json',
-					root: 'indicatorGroups'
+					root: 'objects'
 				}
 			},
 			listeners: {
