@@ -824,6 +824,21 @@ Ext.onReady( function() {
             }
         };
 
+        hasDimension = function(id) {
+            var stores = [dimensionStore, colStore, rowStore, filterStore];
+
+            for (var i = 0, store, index; i < stores.length; i++) {
+                store = stores[i];
+                index = store.findExact('id', dataElementId);
+
+                if (index != -1) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+
 		window = Ext.create('Ext.window.Window', {
 			title: NS.i18n.table_layout,
 			bodyStyle: 'background-color:#fff; padding:2px',
@@ -838,6 +853,7 @@ Ext.onReady( function() {
 			filterStore: filterStore,
             addDimension: addDimension,
             removeDimension: removeDimension,
+            hasDimension: hasDimension,
 			hideOnBlur: true,
 			items: {
 				layout: 'column',
@@ -3105,178 +3121,181 @@ Ext.onReady( function() {
             layout: 'column',
             hidden: true,
             items: [
-                {
-                    xtype: 'container',
-                    cls: 'ns-container-default',
-                    items: [
-                        startDate,
-                        {
-                            xtype: 'container',
-                            cls: 'ns-container-default',
-                            layout: 'column',
-                            items: [
-                                {
-                                    xtype: 'container',
-                                    cls: 'ns-container-default',
-                                    columnWidth: 0.3,
-                                    layout: 'anchor',
-                                    items: [
-                                        getDateLink('+1 year', function() {
-                                            var date = startDate.getValue();
-                                            date.setFullYear(date.getFullYear() + 1);
-                                            startDate.setValue(date);
-                                        }),
-                                        getDateLink('-1 year', function() {
-                                            var date = startDate.getValue();
-                                            date.setFullYear(date.getFullYear() - 1);
-                                            startDate.setValue(date);
-                                        }),
-                                        getDateLink((new Date()).getFullYear() + '-01-01', function() {
-                                            startDate.setValue((new Date()).getFullYear() + '-01-01');
-                                        }, 'margin-top: 7px'),
-                                        getDateLink(((new Date()).getFullYear() - 1) + '-01-01', function() {
-                                            startDate.setValue(((new Date()).getFullYear() - 1) + '-01-01');
-                                        }),
-                                        getDateLink(((new Date()).getFullYear() - 2) + '-01-01', function() {
-                                            startDate.setValue(((new Date()).getFullYear() - 2) + '-01-01');
-                                        })
-                                    ]
-                                },
-                                {
-                                    xtype: 'container',
-                                    cls: 'ns-container-default',
-                                    columnWidth: 0.3,
-                                    items: [
-                                        getDateLink('+1 month', function() {
-                                            var date = startDate.getValue();
-                                            date.setMonth(date.getMonth() + 1);
-                                            startDate.setValue(date);
-                                        }),
-                                        getDateLink('-1 month', function() {
-                                            var date = startDate.getValue();
-                                            date.setMonth(date.getMonth() - 1);
-                                            startDate.setValue(date);
-                                        }),
-                                        getDateLink((new Date()).getFullYear() + '-07-01', function() {
-                                            startDate.setValue((new Date()).getFullYear() + '-07-01');
-                                        }, 'margin-top: 7px'),
-                                        getDateLink(((new Date()).getFullYear() - 1) + '-07-01', function() {
-                                            startDate.setValue(((new Date()).getFullYear() - 1) + '-07-01');
-                                        }),
-                                        getDateLink(((new Date()).getFullYear() - 2) + '-07-01', function() {
-                                            startDate.setValue(((new Date()).getFullYear() - 2) + '-07-01');
-                                        })
-                                    ]
-                                },
-                                {
-                                    xtype: 'container',
-                                    cls: 'ns-container-default',
-                                    columnWidth: 0.3,
-                                    items: [
-                                        getDateLink('+1 day', function() {
-                                            var date = startDate.getValue();
-                                            date.setDate(date.getDate() + 1);
-                                            startDate.setValue(date);
-                                        }),
-                                        getDateLink('-1 day', function() {
-                                            var date = startDate.getValue();
-                                            date.setDate(date.getDate() - 1);
-                                            startDate.setValue(date);
-                                        })
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    xtype: 'container',
-                    cls: 'ns-container-default',
-                    items: [
-                        endDate,
-                        {
-                            xtype: 'container',
-                            cls: 'ns-container-default',
-                            layout: 'column',
-                            items: [
-                                {
-                                    xtype: 'container',
-                                    cls: 'ns-container-default',
-                                    columnWidth: 0.3,
-                                    layout: 'anchor',
-                                    items: [
-                                        getDateLink('+1 year', function() {
-                                            var a = endDate.getRawValue().split('-'),
-                                                year = (parseInt(a[0]) + 1).toString();
+                startDate,
+                endDate
 
-                                            endDate.setValue((year.length === 1 ? '0' + year : year) + '-' + a[1] + '-' + a[2]);
-                                        }),
-                                        getDateLink('-1 year', function() {
-                                            var a = endDate.getRawValue().split('-'),
-                                                year = (parseInt(a[0]) - 1).toString();
+                //{
+                    //xtype: 'container',
+                    //cls: 'ns-container-default',
+                    //items: [
+                        //startDate,
+                        //{
+                            //xtype: 'container',
+                            //cls: 'ns-container-default',
+                            //layout: 'column',
+                            //items: [
+                                //{
+                                    //xtype: 'container',
+                                    //cls: 'ns-container-default',
+                                    //columnWidth: 0.3,
+                                    //layout: 'anchor',
+                                    //items: [
+                                        //getDateLink('+1 year', function() {
+                                            //var date = startDate.getValue();
+                                            //date.setFullYear(date.getFullYear() + 1);
+                                            //startDate.setValue(date);
+                                        //}),
+                                        //getDateLink('-1 year', function() {
+                                            //var date = startDate.getValue();
+                                            //date.setFullYear(date.getFullYear() - 1);
+                                            //startDate.setValue(date);
+                                        //}),
+                                        //getDateLink((new Date()).getFullYear() + '-01-01', function() {
+                                            //startDate.setValue((new Date()).getFullYear() + '-01-01');
+                                        //}, 'margin-top: 7px'),
+                                        //getDateLink(((new Date()).getFullYear() - 1) + '-01-01', function() {
+                                            //startDate.setValue(((new Date()).getFullYear() - 1) + '-01-01');
+                                        //}),
+                                        //getDateLink(((new Date()).getFullYear() - 2) + '-01-01', function() {
+                                            //startDate.setValue(((new Date()).getFullYear() - 2) + '-01-01');
+                                        //})
+                                    //]
+                                //},
+                                //{
+                                    //xtype: 'container',
+                                    //cls: 'ns-container-default',
+                                    //columnWidth: 0.3,
+                                    //items: [
+                                        //getDateLink('+1 month', function() {
+                                            //var date = startDate.getValue();
+                                            //date.setMonth(date.getMonth() + 1);
+                                            //startDate.setValue(date);
+                                        //}),
+                                        //getDateLink('-1 month', function() {
+                                            //var date = startDate.getValue();
+                                            //date.setMonth(date.getMonth() - 1);
+                                            //startDate.setValue(date);
+                                        //}),
+                                        //getDateLink((new Date()).getFullYear() + '-07-01', function() {
+                                            //startDate.setValue((new Date()).getFullYear() + '-07-01');
+                                        //}, 'margin-top: 7px'),
+                                        //getDateLink(((new Date()).getFullYear() - 1) + '-07-01', function() {
+                                            //startDate.setValue(((new Date()).getFullYear() - 1) + '-07-01');
+                                        //}),
+                                        //getDateLink(((new Date()).getFullYear() - 2) + '-07-01', function() {
+                                            //startDate.setValue(((new Date()).getFullYear() - 2) + '-07-01');
+                                        //})
+                                    //]
+                                //},
+                                //{
+                                    //xtype: 'container',
+                                    //cls: 'ns-container-default',
+                                    //columnWidth: 0.3,
+                                    //items: [
+                                        //getDateLink('+1 day', function() {
+                                            //var date = startDate.getValue();
+                                            //date.setDate(date.getDate() + 1);
+                                            //startDate.setValue(date);
+                                        //}),
+                                        //getDateLink('-1 day', function() {
+                                            //var date = startDate.getValue();
+                                            //date.setDate(date.getDate() - 1);
+                                            //startDate.setValue(date);
+                                        //})
+                                    //]
+                                //}
+                            //]
+                        //}
+                    //]
+                //},
+                //{
+                    //xtype: 'container',
+                    //cls: 'ns-container-default',
+                    //items: [
+                        //endDate,
+                        //{
+                            //xtype: 'container',
+                            //cls: 'ns-container-default',
+                            //layout: 'column',
+                            //items: [
+                                //{
+                                    //xtype: 'container',
+                                    //cls: 'ns-container-default',
+                                    //columnWidth: 0.3,
+                                    //layout: 'anchor',
+                                    //items: [
+                                        //getDateLink('+1 year', function() {
+                                            //var a = endDate.getRawValue().split('-'),
+                                                //year = (parseInt(a[0]) + 1).toString();
 
-                                            endDate.setValue((year.length === 1 ? '0' + year : year) + '-' + a[1] + '-' + a[2]);
-                                        }),
-                                        getDateLink((new Date()).getFullYear() + '-06-30', function() {
-                                            endDate.setValue((new Date()).getFullYear() + '-06-30');
-                                        }, 'margin-top: 7px'),
-                                        getDateLink(((new Date()).getFullYear() - 1) + '-06-30', function() {
-                                            endDate.setValue(((new Date()).getFullYear() - 1) + '-06-30');
-                                        }),
-                                        getDateLink(((new Date()).getFullYear() - 2) + '-06-30', function() {
-                                            endDate.setValue(((new Date()).getFullYear() - 2) + '-06-30');
-                                        })
-                                    ]
-                                },
-                                {
-                                    xtype: 'container',
-                                    cls: 'ns-container-default',
-                                    columnWidth: 0.3,
-                                    items: [
-                                        getDateLink('+1 month', function() {
-                                            var a = endDate.getRawValue().split('-'),
-                                                month = (parseInt(a[1]) + 1).toString();
+                                            //endDate.setValue((year.length === 1 ? '0' + year : year) + '-' + a[1] + '-' + a[2]);
+                                        //}),
+                                        //getDateLink('-1 year', function() {
+                                            //var a = endDate.getRawValue().split('-'),
+                                                //year = (parseInt(a[0]) - 1).toString();
 
-                                            endDate.setValue(a[0] + '-' + (month.length === 1 ? '0' + month : month) + '-' + a[2]);
-                                        }),
-                                        getDateLink('-1 month', function() {
-                                            var a = endDate.getRawValue().split('-'),
-                                                month = (parseInt(a[1]) - 1).toString();
+                                            //endDate.setValue((year.length === 1 ? '0' + year : year) + '-' + a[1] + '-' + a[2]);
+                                        //}),
+                                        //getDateLink((new Date()).getFullYear() + '-06-30', function() {
+                                            //endDate.setValue((new Date()).getFullYear() + '-06-30');
+                                        //}, 'margin-top: 7px'),
+                                        //getDateLink(((new Date()).getFullYear() - 1) + '-06-30', function() {
+                                            //endDate.setValue(((new Date()).getFullYear() - 1) + '-06-30');
+                                        //}),
+                                        //getDateLink(((new Date()).getFullYear() - 2) + '-06-30', function() {
+                                            //endDate.setValue(((new Date()).getFullYear() - 2) + '-06-30');
+                                        //})
+                                    //]
+                                //},
+                                //{
+                                    //xtype: 'container',
+                                    //cls: 'ns-container-default',
+                                    //columnWidth: 0.3,
+                                    //items: [
+                                        //getDateLink('+1 month', function() {
+                                            //var a = endDate.getRawValue().split('-'),
+                                                //month = (parseInt(a[1]) + 1).toString();
 
-                                            endDate.setValue(a[0] + '-' + (month.length === 1 ? '0' + month : month) + '-' + a[2]);
-                                        }),
-                                        getDateLink((new Date()).getFullYear() + '-12-31', function() {
-                                            endDate.setValue((new Date()).getFullYear() + '-12-31');
-                                        }, 'margin-top: 7px'),
-                                        getDateLink(((new Date()).getFullYear() - 1) + '-12-31', function() {
-                                            endDate.setValue(((new Date()).getFullYear() - 1) + '-12-31');
-                                        }),
-                                        getDateLink(((new Date()).getFullYear() - 2) + '-12-31', function() {
-                                            endDate.setValue(((new Date()).getFullYear() - 2) + '-12-31');
-                                        })
-                                    ]
-                                },
-                                {
-                                    xtype: 'container',
-                                    cls: 'ns-container-default',
-                                    columnWidth: 0.3,
-                                    items: [
-                                        getDateLink('+1 day', function() {
-                                            var date = endDate.getValue();
-                                            date.setDate(date.getDate() + 1);
-                                            endDate.setValue(date);
-                                        }),
-                                        getDateLink('-1 day', function() {
-                                            var date = endDate.getValue();
-                                            date.setDate(date.getDate() - 1);
-                                            endDate.setValue(date);
-                                        })
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }
+                                            //endDate.setValue(a[0] + '-' + (month.length === 1 ? '0' + month : month) + '-' + a[2]);
+                                        //}),
+                                        //getDateLink('-1 month', function() {
+                                            //var a = endDate.getRawValue().split('-'),
+                                                //month = (parseInt(a[1]) - 1).toString();
+
+                                            //endDate.setValue(a[0] + '-' + (month.length === 1 ? '0' + month : month) + '-' + a[2]);
+                                        //}),
+                                        //getDateLink((new Date()).getFullYear() + '-12-31', function() {
+                                            //endDate.setValue((new Date()).getFullYear() + '-12-31');
+                                        //}, 'margin-top: 7px'),
+                                        //getDateLink(((new Date()).getFullYear() - 1) + '-12-31', function() {
+                                            //endDate.setValue(((new Date()).getFullYear() - 1) + '-12-31');
+                                        //}),
+                                        //getDateLink(((new Date()).getFullYear() - 2) + '-12-31', function() {
+                                            //endDate.setValue(((new Date()).getFullYear() - 2) + '-12-31');
+                                        //})
+                                    //]
+                                //},
+                                //{
+                                    //xtype: 'container',
+                                    //cls: 'ns-container-default',
+                                    //columnWidth: 0.3,
+                                    //items: [
+                                        //getDateLink('+1 day', function() {
+                                            //var date = endDate.getValue();
+                                            //date.setDate(date.getDate() + 1);
+                                            //endDate.setValue(date);
+                                        //}),
+                                        //getDateLink('-1 day', function() {
+                                            //var date = endDate.getValue();
+                                            //date.setDate(date.getDate() - 1);
+                                            //endDate.setValue(date);
+                                        //})
+                                    //]
+                                //}
+                            //]
+                        //}
+                    //]
+                //}
             ]
         });
 
@@ -4913,7 +4932,7 @@ Ext.onReady( function() {
 				else {
 					layout.sorting = {
 						id: id,
-						direction: 'DESC'
+						direction: 'ASC'
 					};
 				}
 
